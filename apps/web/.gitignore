@@ -1,6 +1,2 @@
 public/*.js
 public/*.map
-
-# Cache files
-.jest-cache/
-tsconfig.tsbuildinfo

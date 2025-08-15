@@ -8,10 +8,6 @@ const createJestConfig = nextJest({
 const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 
-  // Performance optimizations
-  cache: true,
-  cacheDirectory: '<rootDir>/.jest-cache',
-
   moduleNameMapper: {
     // Handle module aliases (this will be automatically configured for you soon)
     '^@/(.*)$': '<rootDir>/src/$1',
