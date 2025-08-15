@@ -18,7 +18,10 @@ export const Positions = () => {
   const chainId = useChainId()
   const { safeAddress } = useSafeInfo()
   const currency = useAppSelector(selectCurrency)
-  const { currentData } = usePositionsGetPositionsV1Query({ chainId, safeAddress, fiatCode: currency })
+  const { currentData } = usePositionsGetPositionsV1Query(
+    { chainId, safeAddress, fiatCode: currency },
+    { skip: !safeAddress || !chainId || !currency },
+  )
 
   if (!currentData) return null
 

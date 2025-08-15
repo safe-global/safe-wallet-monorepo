@@ -22,7 +22,10 @@ const PositionsWidget = () => {
   const chainId = useChainId()
   const { safeAddress } = useSafeInfo()
   const currency = useAppSelector(selectCurrency)
-  const { currentData } = usePositionsGetPositionsV1Query({ chainId, safeAddress, fiatCode: currency })
+  const { currentData } = usePositionsGetPositionsV1Query(
+    { chainId, safeAddress, fiatCode: currency },
+    { skip: !safeAddress || !chainId || !currency },
+  )
   const fiatTotal = useFiatTotal()
 
   const viewAllUrl = useMemo(

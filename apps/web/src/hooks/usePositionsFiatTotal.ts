@@ -8,7 +8,10 @@ const usePositionsFiatTotal = () => {
   const chainId = useChainId()
   const { safeAddress } = useSafeInfo()
   const currency = useAppSelector(selectCurrency)
-  const { currentData: protocols } = usePositionsGetPositionsV1Query({ chainId, safeAddress, fiatCode: currency })
+  const { currentData: protocols } = usePositionsGetPositionsV1Query(
+    { chainId, safeAddress, fiatCode: currency },
+    { skip: !safeAddress || !chainId || !currency },
+  )
 
   if (!protocols) return 0
 
