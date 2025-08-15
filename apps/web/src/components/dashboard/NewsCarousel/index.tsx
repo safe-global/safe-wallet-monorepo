@@ -1,6 +1,6 @@
 import React, { createElement, type MouseEvent, useEffect, useMemo, useRef, useState } from 'react'
 import classnames from 'classnames'
-import { Box, IconButton, Stack } from '@mui/material'
+import { Box, Card, IconButton, Stack } from '@mui/material'
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeftRounded'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRightRounded'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
@@ -118,63 +118,65 @@ const NewsCarousel = ({ banners }: NewsCarouselProps) => {
   if (!items.length) return null
 
   return (
-    <Stack spacing={1} alignItems="center" mt={3} position="relative">
-      <div
-        className={classnames(css.slider, { [css.grabbing]: isDragging })}
-        ref={sliderRef}
-        onPointerDown={handleDragStart}
-        onPointerMove={handleDrag}
-        onPointerUp={handleDragEnd}
-        onPointerLeave={handleDragEnd}
-        onPointerCancel={handleDragEnd}
-      >
-        {items.map((item, index) => (
-          <>
-            <Box width={`${ITEM_WIDTH_PERCENT}%`} flexShrink={0} key={item.id}>
-              {createElement(item.element, {
-                onDismiss: () => dismissItem(item.id),
-              })}
-            </Box>
-
-            {activeIndex !== items.length - 1 && (
-              <Box id="carousel-overlay" className={css.overlay} onClick={() => goToSlide(index)} />
-            )}
-          </>
-        ))}
-      </div>
-
-      {items.length > 1 && (
-        <div className={css.dots}>
-          <IconButton
-            aria-label="previous banner"
-            onClick={() => scrollSlides('left')}
-            disabled={!canScrollLeft}
-            size="medium"
-          >
-            <KeyboardArrowLeftIcon fontSize="small" />
-          </IconButton>
-
+    <Card sx={{ border: 0, p: 3 }} component="section">
+      <Stack spacing={1} alignItems="center" position="relative">
+        <div
+          className={classnames(css.slider, { [css.grabbing]: isDragging })}
+          ref={sliderRef}
+          onPointerDown={handleDragStart}
+          onPointerMove={handleDrag}
+          onPointerUp={handleDragEnd}
+          onPointerLeave={handleDragEnd}
+          onPointerCancel={handleDragEnd}
+        >
           {items.map((item, index) => (
-            <button
-              key={item.id}
-              type="button"
-              className={classnames(css.dot, { [css.active]: index === activeIndex })}
-              aria-label={`Go to slide ${index + 1}`}
-              onClick={() => goToSlide(index)}
-            />
-          ))}
+            <>
+              <Box width={`${ITEM_WIDTH_PERCENT}%`} flexShrink={0} key={item.id}>
+                {createElement(item.element, {
+                  onDismiss: () => dismissItem(item.id),
+                })}
+              </Box>
 
-          <IconButton
-            aria-label="next banner"
-            onClick={() => scrollSlides('right')}
-            disabled={!canScrollRight}
-            size="medium"
-          >
-            <KeyboardArrowRightIcon fontSize="small" />
-          </IconButton>
+              {activeIndex !== items.length - 1 && (
+                <Box id="carousel-overlay" className={css.overlay} onClick={() => goToSlide(index)} />
+              )}
+            </>
+          ))}
         </div>
-      )}
-    </Stack>
+
+        {items.length > 1 && (
+          <div className={css.dots}>
+            <IconButton
+              aria-label="previous banner"
+              onClick={() => scrollSlides('left')}
+              disabled={!canScrollLeft}
+              size="medium"
+            >
+              <KeyboardArrowLeftIcon fontSize="small" />
+            </IconButton>
+
+            {items.map((item, index) => (
+              <button
+                key={item.id}
+                type="button"
+                className={classnames(css.dot, { [css.active]: index === activeIndex })}
+                aria-label={`Go to slide ${index + 1}`}
+                onClick={() => goToSlide(index)}
+              />
+            ))}
+
+            <IconButton
+              aria-label="next banner"
+              onClick={() => scrollSlides('right')}
+              disabled={!canScrollRight}
+              size="medium"
+            >
+              <KeyboardArrowRightIcon fontSize="small" />
+            </IconButton>
+          </div>
+        )}
+      </Stack>
+    </Card>
   )
 }
 

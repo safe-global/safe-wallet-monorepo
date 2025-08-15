@@ -1,17 +1,49 @@
-.container td:last-of-type button {
-  opacity: 0;
-  transition: opacity 0.2s;
+.container td:last-of-type,
+.container th:last-of-type {
+  width: 0 !important;
+  display: block;
+  padding: 0 !important;
 }
 
-.container tr:hover td:last-of-type button,
-.container td:last-of-type button:focus-visible {
+.container td:last-of-type > * {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transition: opacity 0.2s;
+  height: 100% !important;
+  display: flex;
+  align-items: center;
+}
+
+
+.container tr:hover td:last-of-type > * {
   opacity: 1;
+}
+
+.container tr {
+  position: relative;
+}
+
+.container tr:last-of-type {
+  border-bottom: 1px solid transparent;
 }
 
 .token {
   display: flex;
   align-items: center;
   gap: var(--space-1);
+}
+
+.walletImage {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-background-main);
+  color: var(--color-border-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @media (max-width: 599.95px) {
