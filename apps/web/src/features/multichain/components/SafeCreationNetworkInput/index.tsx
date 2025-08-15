@@ -1,27 +1,24 @@
-import useChains, { useCurrentChain } from '@/hooks/useChains'
+import { useCurrentChain } from '@/hooks/useChains'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useCallback, useEffect, type ReactElement } from 'react'
-import { Checkbox, Autocomplete, TextField, Chip, Box } from '@mui/material'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import ChainIndicator from '../ChainIndicator'
-import css from './styles.module.css'
 import { Controller, useFormContext, useWatch } from 'react-hook-form'
 import { useRouter } from 'next/router'
-import { getNetworkLink } from '.'
+import { getNetworkLink } from '@/components/common/NetworkSelector'
 import { SetNameStepFields } from '@/components/new-safe/create/steps/SetNameStep'
 import { getSafeSingletonDeployments, getSafeToL2SetupDeployments } from '@safe-global/safe-deployments'
 import { hasCanonicalDeployment } from '@safe-global/utils/services/contracts/deployments'
 import { hasMultiChainCreationFeatures } from '@/features/multichain/utils/utils'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 
-const NetworkMultiSelector = ({
+const SafeCreationNetworkInput = ({
   name,
   isAdvancedFlow = false,
 }: {
   name: string
   isAdvancedFlow?: boolean
 }): ReactElement => {
-  const { configs } = useChains()
   const router = useRouter()
   const safeAddress = useSafeAddress()
   const currentChain = useCurrentChain()
@@ -29,8 +26,6 @@ const NetworkMultiSelector = ({
   const {
     formState: { errors },
     control,
-    getValues,
-    setValue,
   } = useFormContext()
 
   const selectedNetworks: ChainInfo[] = useWatch({ control, name: SetNameStepFields.networks })
@@ -43,16 +38,6 @@ const NetworkMultiSelector = ({
       router.replace(networkLink)
     },
     [router, safeAddress],
-  )
-
-  const handleDelete = useCallback(
-    (deletedChainId: string) => {
-      const currentValues: ChainInfo[] = getValues(name) || []
-      const updatedValues = currentValues.filter((chain) => chain.chainId !== deletedChainId)
-      updateCurrentNetwork(updatedValues)
-      setValue(name, updatedValues, { shouldValidate: true })
-    },
-    [getValues, name, setValue, updateCurrentNetwork],
   )
 
   const isOptionDisabled = useCallback(
@@ -114,63 +99,23 @@ const NetworkMultiSelector = ({
   }, [selectedNetworks, currentChain, updateCurrentNetwork])
 
   return (
-    <>
-      <Controller
-        name={name}
-        control={control}
-        defaultValue={[]}
-        render={({ field }) => (
-          <Autocomplete
-            {...field}
-            multiple
-            value={field.value || []}
-            disableCloseOnSelect
-            options={configs}
-            renderTags={(selectedOptions) =>
-              selectedOptions.map((chain) => (
-                <Chip
-                  variant="outlined"
-                  key={chain.chainId}
-                  avatar={<ChainIndicator chainId={chain.chainId} onlyLogo inline />}
-                  label={chain.chainName}
-                  onDelete={() => handleDelete(chain.chainId)}
-                  className={css.multiChainChip}
-                ></Chip>
-              ))
-            }
-            renderOption={(props, chain, { selected }) => {
-              const { key, ...rest } = props
-
-              return (
-                <Box component="li" key={key} {...rest}>
-                  <Checkbox data-testid="network-checkbox" size="small" checked={selected} />
-                  <ChainIndicator chainId={chain.chainId} inline />
-                </Box>
-              )
-            }}
-            getOptionLabel={(option) => option.chainName}
-            getOptionDisabled={isOptionDisabled}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                error={!!errors.networks}
-                helperText={errors.networks ? 'Select at least one network' : ''}
-              />
-            )}
-            filterOptions={(options, { inputValue }) =>
-              options.filter((option) => option.chainName.toLowerCase().includes(inputValue.toLowerCase()))
-            }
-            isOptionEqualToValue={(option, value) => option.chainId === value.chainId}
-            onChange={(_, data) => {
-              updateCurrentNetwork(data)
-              return field.onChange(data)
-            }}
-          />
-        )}
-        rules={{ required: true }}
-      />
-    </>
+    <Controller
+      name={name}
+      control={control}
+      defaultValue={[]}
+      render={({ field }) => (
+        <NetworkMultiSelectorInput
+          value={field.value || []}
+          name={name}
+          onNetworkChange={updateCurrentNetwork}
+          isOptionDisabled={isOptionDisabled}
+          error={!!errors.networks}
+          helperText={errors.networks ? 'Select at least one network' : ''}
+        />
+      )}
+      rules={{ required: true }}
+    />
   )
 }
 
-export default NetworkMultiSelector
+export default SafeCreationNetworkInput

@@ -1,7 +1,7 @@
 import * as useChains from '@/hooks/useChains'
 import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { FormProvider, useForm } from 'react-hook-form'
-import NetworkMultiSelector from '../NetworkMultiSelector'
+import SafeCreationNetworkInput from '.'
 import { chainBuilder } from '@/tests/builders/chains'
 import { render, waitFor } from '@/tests/test-utils'
 import { act } from 'react'
@@ -20,12 +20,13 @@ const TestForm = ({ isAdvancedFlow = false }: { isAdvancedFlow?: boolean }) => {
   return (
     <FormProvider {...formMethods}>
       <form>
-        <NetworkMultiSelector name="networks" isAdvancedFlow={isAdvancedFlow} />
+        <SafeCreationNetworkInput name="networks" isAdvancedFlow={isAdvancedFlow} />
       </form>
     </FormProvider>
   )
 }
 
+// TODO: Some of these tests are flaky and sometimes time out
 describe('NetworkMultiSelector', () => {
   const mockChains = [
     chainBuilder()
