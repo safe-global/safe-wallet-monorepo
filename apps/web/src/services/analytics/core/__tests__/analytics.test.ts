@@ -4,12 +4,18 @@
 
 import { Analytics } from '../analytics'
 import type { BaseProvider, MiddlewareFunction, SafeEventMap, AnalyticsEvent } from '../types'
+import type { ProviderId } from '../../providers/constants'
+import { PROVIDER } from '../../providers/constants'
 
-// Mock providers
+// Mock providers following established patterns from builder.test.ts
 class MockProvider implements BaseProvider {
-  readonly id = 'mock'
+  readonly id: ProviderId
   private enabled = true
   public trackCalls: AnalyticsEvent[] = []
+
+  constructor(id: ProviderId = PROVIDER.Mock) {
+    this.id = id
+  }
 
   isEnabled(): boolean {
     return this.enabled
@@ -36,6 +42,10 @@ class MockProvider implements BaseProvider {
 class MockIdentifyProvider extends MockProvider {
   public identifyCalls: Array<{ userId: string; traits?: Record<string, unknown> }> = []
 
+  constructor(id: ProviderId = PROVIDER.Custom) {
+    super(id)
+  }
+
   identify(userId: string, traits?: Record<string, unknown>): void {
     this.identifyCalls.push({ userId, traits })
   }
@@ -43,6 +53,10 @@ class MockIdentifyProvider extends MockProvider {
 
 class MockPageProvider extends MockProvider {
   public pageCalls: any[] = []
+
+  constructor(id: ProviderId = PROVIDER.GA) {
+    super(id)
+  }
 
   page(context?: any): void {
     this.pageCalls.push(context)
@@ -79,9 +93,9 @@ describe('Analytics', () => {
   describe('Initialization', () => {
     it('should create Analytics instance with providers', () => {
       expect(analytics.providers).toHaveLength(3)
-      expect(analytics.providers[0].id).toBe('mock')
-      expect(analytics.providers[1].id).toBe('mock')
-      expect(analytics.providers[2].id).toBe('mock')
+      expect(analytics.providers[0].id).toBe(PROVIDER.Mock)
+      expect(analytics.providers[1].id).toBe(PROVIDER.Custom)
+      expect(analytics.providers[2].id).toBe(PROVIDER.GA)
     })
 
     it('should create Analytics instance without providers', () => {
@@ -189,18 +203,19 @@ describe('Analytics', () => {
       expect(mockProvider3.trackCalls).toHaveLength(1)
     })
 
-    it('should handle provider tracking errors gracefully', () => {
-      const errorProvider = {
-        ...mockProvider1,
-        track: jest.fn().mockImplementation(() => {
-          throw new Error('Tracking failed')
-        }),
-      } as any
+    it('should handle provider tracking errors gracefully', async () => {
+      const errorProvider = new MockProvider(PROVIDER.Mixpanel)
+      errorProvider.track = jest.fn().mockImplementation(() => {
+        throw new Error('Tracking failed')
+      })
 
       const analytics = new Analytics({
         providers: [errorProvider, mockProvider2],
         defaultContext: { userId: 'test-user' },
+        consent: { analytics: true },
       })
+
+      await analytics.init()
 
       const event: AnalyticsEvent<'Test Event', TestEvents['Test Event']> = {
         name: 'Test Event',
@@ -246,17 +261,18 @@ describe('Analytics', () => {
       expect(mockProvider2.identifyCalls).toHaveLength(1)
     })
 
-    it('should handle identify errors gracefully', () => {
-      const errorProvider = {
-        ...mockProvider2,
-        identify: jest.fn().mockImplementation(() => {
-          throw new Error('Identify failed')
-        }),
-      } as any
+    it('should handle identify errors gracefully', async () => {
+      const errorProvider = new MockIdentifyProvider(PROVIDER.Mock)
+      errorProvider.identify = jest.fn().mockImplementation(() => {
+        throw new Error('Identify failed')
+      })
 
       const analytics = new Analytics({
         providers: [errorProvider],
+        consent: { analytics: true },
       })
+
+      await analytics.init()
 
       // Should not throw
       expect(() => analytics.identify('user-123')).not.toThrow()
@@ -292,17 +308,18 @@ describe('Analytics', () => {
       expect(mockProvider3.pageCalls).toHaveLength(1)
     })
 
-    it('should handle page tracking errors gracefully', () => {
-      const errorProvider = {
-        ...mockProvider3,
-        page: jest.fn().mockImplementation(() => {
-          throw new Error('Page tracking failed')
-        }),
-      } as any
+    it('should handle page tracking errors gracefully', async () => {
+      const errorProvider = new MockPageProvider(PROVIDER.Custom)
+      errorProvider.page = jest.fn().mockImplementation(() => {
+        throw new Error('Page tracking failed')
+      })
 
       const analytics = new Analytics({
         providers: [errorProvider],
+        consent: { analytics: true },
       })
+
+      await analytics.init()
 
       // Should not throw
       expect(() => analytics.page({ path: '/test' })).not.toThrow()
@@ -321,6 +338,7 @@ describe('Analytics', () => {
         providers: [mockProvider1],
         middleware: [middleware],
         defaultContext: { userId: 'test' },
+        consent: { analytics: true },
       })
 
       await analytics.init()
@@ -357,6 +375,7 @@ describe('Analytics', () => {
       const analytics = new Analytics<TestEvents>({
         providers: [mockProvider1],
         middleware: [middleware1, middleware2],
+        consent: { analytics: true },
       })
 
       await analytics.init()
@@ -383,6 +402,7 @@ describe('Analytics', () => {
       const analytics = new Analytics<TestEvents>({
         providers: [mockProvider1],
         middleware: [errorMiddleware],
+        consent: { analytics: true },
       })
 
       await analytics.init()
@@ -470,10 +490,8 @@ describe('Analytics', () => {
     })
 
     it('should handle flush errors gracefully', async () => {
-      const errorProvider = {
-        ...mockProvider1,
-        flush: jest.fn().mockRejectedValue(new Error('Flush failed')),
-      } as any
+      const errorProvider = new MockProvider(PROVIDER.Mixpanel)
+      errorProvider.flush = jest.fn().mockRejectedValue(new Error('Flush failed'))
 
       const analytics = new Analytics({
         providers: [errorProvider, mockProvider2],
@@ -496,10 +514,8 @@ describe('Analytics', () => {
     })
 
     it('should handle shutdown errors gracefully', async () => {
-      const errorProvider = {
-        ...mockProvider1,
-        shutdown: jest.fn().mockRejectedValue(new Error('Shutdown failed')),
-      } as any
+      const errorProvider = new MockProvider(PROVIDER.GA)
+      errorProvider.shutdown = jest.fn().mockRejectedValue(new Error('Shutdown failed'))
 
       const analytics = new Analytics({
         providers: [errorProvider, mockProvider2],

@@ -156,12 +156,13 @@ describe('ConsentManager', () => {
     it('should get all consent settings', () => {
       const consent = consentManager.getAllConsents()
 
-      expect(consent).toEqual({
+      expect(consent).toMatchObject({
         analytics: true,
         marketing: false,
         functional: true,
         necessary: true,
       })
+      expect(consent.updatedAt).toBeDefined()
     })
 
     it('should return copy of consent settings (not reference)', () => {

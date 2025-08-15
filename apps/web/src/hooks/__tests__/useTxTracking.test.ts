@@ -6,8 +6,12 @@ import { getTransactionDetails, type TransactionDetails } from '@safe-global/saf
 import { faker } from '@faker-js/faker'
 
 jest.mock('@/services/analytics', () => ({
-  ...jest.requireActual('@/services/analytics'),
   trackEvent: jest.fn(),
+  WALLET_EVENTS: {
+    SAFE_CREATED: 'SAFE_CREATED',
+    CHANGE_THRESHOLD: 'CHANGE_THRESHOLD',
+    OWNERS: 'OWNERS',
+  },
 }))
 
 jest.mock('@safe-global/safe-gateway-typescript-sdk', () => ({

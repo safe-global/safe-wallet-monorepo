@@ -348,7 +348,11 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
     const entries = Array.from(this.providerMap.values())
     for (const entry of entries) {
       if (entry.provider.flush) {
-        promises.push(Promise.resolve(entry.provider.flush()))
+        promises.push(
+          Promise.resolve(entry.provider.flush()).catch((error) => {
+            this.onError?.(error)
+          }),
+        )
       }
     }
 
@@ -377,7 +381,11 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
     const entries = Array.from(this.providerMap.values())
     for (const entry of entries) {
       if (entry.provider.shutdown) {
-        promises.push(Promise.resolve(entry.provider.shutdown()))
+        promises.push(
+          Promise.resolve(entry.provider.shutdown()).catch((error) => {
+            this.onError?.(error)
+          }),
+        )
       }
     }
     await Promise.all(promises)
