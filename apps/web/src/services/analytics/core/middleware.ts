@@ -107,3 +107,27 @@ export const createLoggingMiddleware = (options?: {
     return event
   }
 }
+
+/**
+ * Middleware for basic event filtering (simpler version)
+ */
+export const createEventFilterMiddleware = (options?: {
+  allowedEvents?: Set<string>
+  blockedEvents?: Set<string>
+}): MiddlewareFunction => {
+  const { allowedEvents, blockedEvents } = options || {}
+
+  return (event) => {
+    // Block explicitly blocked events
+    if (blockedEvents?.has(event.name)) {
+      return null
+    }
+
+    // If allowlist exists, only allow whitelisted events
+    if (allowedEvents && !allowedEvents.has(event.name)) {
+      return null
+    }
+
+    return event
+  }
+}

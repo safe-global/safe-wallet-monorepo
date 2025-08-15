@@ -54,10 +54,22 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
     this.providerMap.set(provider.id as ProviderId, { provider, enabled: true })
 
     // Initialize provider with current consent and context
-    provider.init?.({
-      consent: this.consent.get(),
-      defaultContext: this.defaultContext,
-    })
+    try {
+      const initResult = provider.init?.({
+        consent: this.consent.get(),
+        defaultContext: this.defaultContext,
+      })
+      
+      // Handle async initialization errors
+      const isPromise = initResult && typeof initResult.catch === 'function'
+      if (isPromise) {
+        initResult.catch((error: any) => {
+          this.onError?.(error)
+        })
+      }
+    } catch (error) {
+      this.onError?.(error)
+    }
 
     return this
   }

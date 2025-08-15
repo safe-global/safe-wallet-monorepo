@@ -12,30 +12,30 @@ graph TD
         Hook[useAnalytics Hook]
         Components[React Components]
     end
-    
+
     subgraph "Business Logic Layer"
         Core[Analytics Core]
         Builder[Analytics Builder]
         Router[Event Router]
     end
-    
+
     subgraph "Processing Layer"
         Middleware[Middleware Chain]
         Consent[Consent Manager]
     end
-    
+
     subgraph "Provider Layer"
         GA[Google Analytics Adapter]
         MP[Mixpanel Adapter]
         Custom[Custom Provider]
     end
-    
+
     subgraph "External Services"
         GASDK[Google Analytics SDK]
         MPSDK[Mixpanel SDK]
         CustomSDK[Custom Analytics SDK]
     end
-    
+
     Components --> Hook
     Hook --> Core
     Builder --> Core
@@ -48,13 +48,13 @@ graph TD
     GA --> GASDK
     MP --> MPSDK
     Custom --> CustomSDK
-    
+
     classDef presentation fill:#e1f5fe
     classDef business fill:#f3e5f5
     classDef processing fill:#fff3e0
     classDef provider fill:#e8f5e8
     classDef external fill:#ffebee
-    
+
     class Hook,Components presentation
     class Core,Builder,Router business
     class Middleware,Consent processing
@@ -65,6 +65,7 @@ graph TD
 ### Core Components
 
 #### 1. Analytics Core (`analytics.ts`)
+
 **Design Patterns:** Composite + Mediator + Command
 
 Central orchestrator managing providers, middleware, and event flow:
@@ -76,35 +77,35 @@ class Analytics<EventMap> {
   private consent: ConsentManager
   private router: EventRouter
   private defaultContext: EventContext
-  
+
   // Core API Methods
   track(event: TypedEvent, options?: RouteOptions): void {
     enrichedEvent = enrichWithContext(event, defaultContext)
-    
+
     processedEvent = middlewares.execute(enrichedEvent)
     if (!processedEvent) return // filtered out
-    
+
     if (!consent.allowsAnalytics() || !isOnline()) {
       dropEvent(processedEvent) // no queue in current impl
       return
     }
-    
+
     routingDecision = router.resolve(processedEvent, options)
     targetProviders = filterProviders(providers, routingDecision)
-    
+
     dispatchToProviders(processedEvent, targetProviders)
   }
-  
+
   identify(userId: string, traits?: object): void {
-    executeOnCapableProviders(hasIdentifyCapability, 
+    executeOnCapableProviders(hasIdentifyCapability,
       provider => provider.identify(userId, traits))
   }
-  
+
   page(context?: PageContext): void {
     executeOnCapableProviders(hasPageCapability,
       provider => provider.page(context))
   }
-  
+
   group(groupId: string, traits?: object): void {
     executeOnCapableProviders(hasGroupCapability,
       provider => provider.group(groupId, traits))
@@ -115,15 +116,16 @@ class Analytics<EventMap> {
 **Key Optimizations:**
 
 - **Consent Caching**: Avoids redundant permission checks
-- **Provider Filtering**: Pre-filters enabled providers once per operation  
+- **Provider Filtering**: Pre-filters enabled providers once per operation
 - **Async Error Isolation**: Provider failures don't affect other providers
 - **Context Merging**: Efficient shallow merge of default + event context
 
 **Capability-Based Execution Pattern:**
+
 ```pseudocode
 executeOnCapableProviders(capabilityCheck, operation) {
   enabledProviders = getEnabledProviders()
-  
+
   for provider in enabledProviders {
     if capabilityCheck(provider) {
       try {
@@ -144,22 +146,22 @@ executeOnCapableProviders(capabilityCheck, operation) {
 ```pseudocode
 class AnalyticsBuilder<EventMap> {
   static create(options?: AnalyticsOptions): AnalyticsBuilder
-  
+
   // Provider configuration
   addProvider(provider: BaseProvider): this
   addProviders(providers: BaseProvider[]): this
-  
-  // System configuration  
+
+  // System configuration
   withDefaultContext(context: EventContext): this
   withConsent(consent: ConsentState): this
   withRouter(router: EventRouter): this
   withErrorHandler(handler: ErrorHandler): this
-  
+
   // Middleware pipeline
   use(middleware: Middleware): this
   addMiddleware(middleware: Middleware): this
   addMiddlewares(middlewares: Middleware[]): this
-  
+
   // Build final instance
   build(): Analytics<EventMap>
 }
@@ -183,15 +185,15 @@ class GoogleAnalyticsProvider implements BaseProvider, IdentifyCapable, PageCapa
   id = 'ga'
   private gtag: GtagFunction
   private measurementId: string
-  
+
   init() {
     gtag('config', measurementId, { send_page_view: false })
   }
-  
+
   identify(userId: string) {
     gtag('config', measurementId, { user_id: userId, send_page_view: false })
   }
-  
+
   page(context?: PageContext) {
     gtag('event', 'page_view', {
       page_title: context.title,
@@ -199,7 +201,7 @@ class GoogleAnalyticsProvider implements BaseProvider, IdentifyCapable, PageCapa
       page_path: context.path
     })
   }
-  
+
   track(event: AnalyticsEvent) {
     eventName = normalizeForGA4(event.name) // snake_case, ≤40 chars
     gtag('event', eventName, {
@@ -212,8 +214,9 @@ class GoogleAnalyticsProvider implements BaseProvider, IdentifyCapable, PageCapa
 ```
 
 **GA4 Constraints:**
+
 - Event names: snake_case, letters/numbers/underscores only, ≤40 characters
-- ≤25 parameters per event  
+- ≤25 parameters per event
 - No PII in payloads
 
 ### Mixpanel Provider
@@ -224,24 +227,24 @@ class GoogleAnalyticsProvider implements BaseProvider, IdentifyCapable, PageCapa
 class MixpanelProvider implements BaseProvider, IdentifyCapable, GroupCapable, PageCapable {
   id = 'mixpanel'
   private mixpanel: MixpanelSDK
-  
+
   init() {
     mixpanel.init(token, {
       batch_requests: true,
       api_host: 'https://api-eu.mixpanel.com' // EU compliance
     })
   }
-  
+
   identify(userId: string, traits?: object) {
     mixpanel.identify(userId)
     if (traits) mixpanel.people.set(traits)
   }
-  
+
   group(groupId: string, traits?: object) {
     mixpanel.set_group('company', groupId)
     if (traits) mixpanel.get_group('company', groupId).set(traits)
   }
-  
+
   page(context?: PageContext) {
     mixpanel.track_pageview({
       title: context.title,
@@ -249,7 +252,7 @@ class MixpanelProvider implements BaseProvider, IdentifyCapable, GroupCapable, P
       path: context.path
     })
   }
-  
+
   track(event: AnalyticsEvent) {
     mixpanel.track(event.name, {
       ...event.payload,
@@ -260,8 +263,9 @@ class MixpanelProvider implements BaseProvider, IdentifyCapable, GroupCapable, P
 ```
 
 **Mixpanel Considerations:**
+
 - Supports rich event properties and user profiles
-- Group analytics for B2B use cases  
+- Group analytics for B2B use cases
 - Avoid reserved prefixes: `$`, `mp_`
 - EU data residency via api_host configuration
 
@@ -307,7 +311,7 @@ hasPageCapability(provider: BaseProvider): boolean {
 }
 
 hasGroupCapability(provider: BaseProvider): boolean {
-  return 'group' in provider && typeof provider.group === 'function'  
+  return 'group' in provider && typeof provider.group === 'function'
 }
 ```
 
@@ -341,19 +345,19 @@ graph LR
 ```pseudocode
 class MiddlewareChain {
   private middlewares: Middleware[]
-  
+
   use(middleware: Middleware): this {
     middlewares.push(middleware)
   }
-  
+
   process(event: Event, context?: EventContext) {
     processedEvent = event
-    
+
     for middleware in middlewares {
       processedEvent = middleware.execute(processedEvent, context)
       if (!processedEvent) break // filtered out
     }
-    
+
     return processedEvent
   }
 }
@@ -393,17 +397,17 @@ stateDiagram-v2
 ```pseudocode
 class ConsentManager {
   private state: ConsentState
-  
+
   update(consentPatch: ConsentState) {
     state = merge(state, consentPatch)
     state.updatedAt = now()
     notifyObservers(state)
   }
-  
+
   allowsAnalytics(): boolean {
     return state.analytics === true // default-deny for GDPR
   }
-  
+
   get(): ConsentState {
     return state
   }
@@ -468,7 +472,7 @@ graph LR
         D --> E[Provider Routing]
         E --> F[Provider Dispatch]
     end
-    
+
     subgraph "Middleware Examples"
         C --> M1[Logging]
         C --> M2[Validation]
@@ -490,7 +494,7 @@ class GoogleAnalyticsAdapter {
 // Chain of Responsibility: Middleware
 class MiddlewareChain {
   private middlewares: Middleware[]
-  
+
   execute(event: Event, terminal: Function) {
     // Chain execution with next() pattern
     middlewares.forEach(mw => mw.process(event, next))
@@ -498,7 +502,7 @@ class MiddlewareChain {
 }
 
 // Common middleware types:
-// - LoggingMiddleware: Debug event flow  
+// - LoggingMiddleware: Debug event flow
 // - ValidationMiddleware: Runtime schema checking
 // - EnrichmentMiddleware: Add computed fields
 // - FilterMiddleware: Block test/internal events
@@ -522,7 +526,7 @@ loggingMiddleware(options: { enabled: boolean, prefix: string }) {
   }
 }
 
-// Event Renaming Middleware  
+// Event Renaming Middleware
 renameEventMiddleware(mappings: Record<string, string>) {
   return (event, next) => {
     newName = mappings[event.name] || event.name
@@ -554,7 +558,7 @@ enrichmentMiddleware(enricher: (event) => object) {
 ### Complete Implementation Example
 
 ```pseudocode
-// 1. Define your event catalog  
+// 1. Define your event catalog
 interface SafeEvents extends SafeEventMap {
   'Transaction Created': {
     amount: number
@@ -591,7 +595,7 @@ analytics = AnalyticsBuilder
 // 3. Use in React components via useAnalytics hook
 function TransactionFlow() {
   { track, identify, page } = useAnalytics<SafeEvents>()
-  
+
   handleTransaction = (txData) => {
     track({
       name: 'Transaction Created',
@@ -649,7 +653,7 @@ sequenceDiagram
 ### Why This Architecture Excels
 
 1. **🔒 Privacy-First**: Consent gating ensures GDPR compliance
-2. **🚀 Performance**: Optimized with consent caching, provider filtering, and async processing  
+2. **🚀 Performance**: Optimized with consent caching, provider filtering, and async processing
 3. **🛠️ Maintainable**: SOLID principles make it easy to add/modify providers
 4. **📊 Flexible**: Routing allows different events to go to different providers
 5. **🧪 Testable**: Dependency injection makes unit testing straightforward
@@ -671,31 +675,31 @@ sequenceDiagram
 class NewProvider implements BaseProvider, IdentifyCapable, PageCapable {
   id = 'newprovider'
   private enabled = true
-  
+
   constructor(options: { apiKey: string }) {
     // Store configuration
   }
-  
+
   init() {
     // Load SDK or configure service
   }
-  
+
   isEnabled(): boolean {
     return enabled
   }
-  
+
   setEnabled(enabled: boolean) {
     this.enabled = enabled
   }
-  
+
   identify(userId: string, traits?: object) {
     // Map to provider's identify method
   }
-  
+
   page(context?: PageContext) {
     // Map to provider's page tracking
   }
-  
+
   track(event: AnalyticsEvent) {
     // Map event.name/payload/context to provider format
   }
@@ -711,19 +715,23 @@ class NewProvider implements BaseProvider, IdentifyCapable, PageCapable {
 ### SOLID Compliance
 
 - **S (Single Responsibility)**: Each component has one job
+
   - Providers: Adapt to specific analytics services
   - Middleware: Transform/filter events
   - Core: Orchestrate event flow
 
 - **O (Open/Closed)**: Extensible without modification
+
   - Add new providers via interface implementation
   - Add middleware via plugin system
 
 - **L (Liskov Substitution)**: Interface compatibility
+
   - All providers implement BaseProvider
   - Providers are interchangeable
 
 - **I (Interface Segregation)**: Optional capabilities
+
   - IdentifyCapable, PageCapable, GroupCapable
   - Providers implement only what they support
 
@@ -733,11 +741,11 @@ class NewProvider implements BaseProvider, IdentifyCapable, PageCapable {
 
 ### Design Pattern Summary
 
-| Pattern | Component | Purpose |
-|---------|-----------|---------|
-| **Adapter** | Providers | Adapt events to service-specific formats |
-| **Strategy** | Router | Runtime provider selection |
-| **Composite** | Core | Manage multiple providers as one |
-| **Mediator** | Core | Coordinate between components |
-| **Chain of Responsibility** | Middleware | Transform events through pipeline |
-| **Builder** | AnalyticsBuilder | Fluent configuration API |
+| Pattern                     | Component        | Purpose                                  |
+| --------------------------- | ---------------- | ---------------------------------------- |
+| **Adapter**                 | Providers        | Adapt events to service-specific formats |
+| **Strategy**                | Router           | Runtime provider selection               |
+| **Composite**               | Core             | Manage multiple providers as one         |
+| **Mediator**                | Core             | Coordinate between components            |
+| **Chain of Responsibility** | Middleware       | Transform events through pipeline        |
+| **Builder**                 | AnalyticsBuilder | Fluent configuration API                 |
