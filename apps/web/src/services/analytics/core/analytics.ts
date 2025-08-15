@@ -59,7 +59,7 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
         consent: this.consent.get(),
         defaultContext: this.defaultContext,
       })
-      
+
       // Handle async initialization errors
       const isPromise = initResult && typeof initResult.catch === 'function'
       if (isPromise) {
