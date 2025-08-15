@@ -1,5 +1,4 @@
 import BuyCryptoButton from '@/components/common/BuyCryptoButton'
-import TokenAmount from '@/components/common/TokenAmount'
 import Track from '@/components/common/Track'
 import QrCodeButton from '@/components/sidebar/QrCodeButton'
 import { TxModalContext } from '@/components/tx-flow'
