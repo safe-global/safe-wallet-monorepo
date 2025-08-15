@@ -14,12 +14,19 @@
 import { gtmTrack, gtmTrackSafeApp } from './gtm'
 import { mixpanelTrack, safeAppToMixPanelEventProperties } from './mixpanel'
 
+// Legacy exports for backward compatibility
 export const trackEvent = gtmTrack
 export const trackSafeAppEvent = gtmTrackSafeApp
-
 export const trackMixPanelEvent = mixpanelTrack
 export { safeAppToMixPanelEventProperties }
 
+// New analytics abstraction exports
+export { Analytics, AnalyticsBuilder } from './core'
+export { useAnalytics } from '@/hooks/useAnalytics'
+export { EVENT, EventSchemas, createEvent, event } from './events/catalog'
+export type { EventMap, EventUnion, EventName } from './events/catalog'
+
+// Legacy exports
 export * from './types'
 export * from './events'
 export * from './mixpanel-events'
