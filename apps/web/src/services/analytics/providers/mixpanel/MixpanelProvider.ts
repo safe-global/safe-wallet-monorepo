@@ -1,6 +1,6 @@
 import mixpanel from 'mixpanel-browser'
 import { IS_PRODUCTION } from '@/config/constants'
-import type { AnalyticsProvider, AnalyticsEvent } from '../../core/types'
+import type { AnalyticsProvider, AnalyticsEvent, MixpanelProviderConfig } from '../../core/types'
 import packageJson from '../../../../../package.json'
 
 export interface MixpanelConfig {
@@ -9,12 +9,14 @@ export interface MixpanelConfig {
   enabled?: boolean
   persistence?: 'localStorage' | 'cookie'
   optOutByDefault?: boolean
+  eventConfigurations?: Record<string, MixpanelProviderConfig>
 }
 
 export class MixpanelProvider implements AnalyticsProvider {
   public readonly name = 'mixpanel'
 
   private config: MixpanelConfig
+  private eventConfigurations: Record<string, MixpanelProviderConfig>
   private isInitialized = false
   private globalProperties: Record<string, any> = {}
   private userProperties: Record<string, any> = {}
@@ -27,6 +29,7 @@ export class MixpanelProvider implements AnalyticsProvider {
       optOutByDefault: true,
       ...config,
     }
+    this.eventConfigurations = config.eventConfigurations || {}
 
     this.setDefaultGlobalProperties()
   }
@@ -73,19 +76,48 @@ export class MixpanelProvider implements AnalyticsProvider {
       return
     }
 
+    // Check if this provider should handle this event
+    const eventConfig = this.eventConfigurations[event.name]
+    if (!eventConfig?.enabled) {
+      // Silently ignore events this provider doesn't handle
+      return
+    }
+
     try {
-      const allProperties = {
+      let properties = {
         ...this.globalProperties,
         ...event.properties,
         event_timestamp: event.metadata?.timestamp || Date.now(),
         event_source: event.metadata?.source || 'unknown',
       }
-      const cleanedProperties = this.cleanProperties(allProperties)
 
-      mixpanel.track(event.name, cleanedProperties)
+      // Apply Mixpanel-specific enrichProperties if provided
+      if (eventConfig.enrichProperties) {
+        const enrichedProps = eventConfig.enrichProperties(properties)
+        properties = {
+          ...properties,
+          ...enrichedProps,
+        }
+      }
+
+      // Apply Mixpanel-specific transformation if provided
+      if (eventConfig.transform) {
+        const transformedProps = eventConfig.transform(properties)
+        properties = {
+          ...properties,
+          ...transformedProps,
+        }
+      }
+
+      const cleanedProperties = this.cleanProperties(properties)
+
+      // Use Mixpanel-specific event name if provided, otherwise use the event name
+      const eventName = eventConfig.eventName || event.name
+
+      mixpanel.track(eventName, cleanedProperties)
 
       if (this.config.debug) {
-        console.group(`[MixpanelProvider] Event: ${event.name}`)
+        console.group(`[MixpanelProvider] Event: ${eventName}`)
         console.log('Properties sent:', cleanedProperties)
         console.log('Total properties:', Object.keys(cleanedProperties).length)
         console.groupEnd()

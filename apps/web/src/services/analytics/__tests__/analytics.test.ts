@@ -101,6 +101,12 @@ describe('New Analytics System', () => {
         trackingId: 'GA-TEST-12345',
         debug: true,
         enabled: true,
+        eventConfigurations: {
+          test_event: {
+            enabled: true,
+            eventName: 'test_event',
+          },
+        },
       })
       provider.initialize()
     })
@@ -165,6 +171,12 @@ describe('New Analytics System', () => {
         token: 'test-mixpanel-token',
         debug: true,
         enabled: true,
+        eventConfigurations: {
+          'Test Event': {
+            enabled: true,
+            eventName: 'Test Event',
+          },
+        },
       })
       provider.initialize()
     })
@@ -231,26 +243,6 @@ describe('New Analytics System', () => {
           ga: { enabled: true, trackingId: 'GA-TEST' },
           mixpanel: { enabled: true, token: 'test-token' },
         },
-        events: {
-          TEST_EVENT: {
-            name: 'test_event',
-            providers: {
-              ga: {
-                enabled: true,
-                eventName: 'test_event_ga',
-                registeredParams: ['chain_id', 'safe_address'],
-              },
-              mixpanel: {
-                enabled: true,
-                eventName: 'Test Event Mixpanel',
-                enrichProperties: (props: any) => ({
-                  ...props,
-                  enriched_timestamp: Date.now(),
-                }),
-              },
-            },
-          },
-        },
       }
 
       manager = new AnalyticsManager(config)
@@ -258,11 +250,28 @@ describe('New Analytics System', () => {
       gaProvider = new GoogleAnalyticsProvider({
         trackingId: 'GA-TEST',
         enabled: true,
+        eventConfigurations: {
+          TEST_EVENT: {
+            enabled: true,
+            eventName: 'test_event_ga',
+            registeredParams: ['chain_id', 'safe_address'],
+          },
+        },
       })
 
       mixpanelProvider = new MixpanelProvider({
         token: 'test-token',
         enabled: true,
+        eventConfigurations: {
+          TEST_EVENT: {
+            enabled: true,
+            eventName: 'Test Event Mixpanel',
+            enrichProperties: (props: any) => ({
+              ...props,
+              enriched_timestamp: Date.now(),
+            }),
+          },
+        },
       })
 
       manager.addProvider(gaProvider)
@@ -294,24 +303,27 @@ describe('New Analytics System', () => {
         extra_property: 'test',
       })
 
-      // GA should get filtered properties
+      // GA should receive just the event (configuration is owned by provider)
       expect(gaTrackSpy).toHaveBeenCalledWith({
-        name: 'test_event_ga',
-        properties: expect.objectContaining({
-          chain_id: '1',
-          safe_address: '0x123',
-          // extra_property should be filtered out by the provider
-        }),
-      })
-
-      // Mixpanel should get all properties + enrichments
-      expect(mixpanelTrackSpy).toHaveBeenCalledWith({
-        name: 'Test Event Mixpanel',
+        name: 'TEST_EVENT',
         properties: expect.objectContaining({
           chain_id: '1',
           safe_address: '0x123',
           extra_property: 'test',
-          enriched_timestamp: expect.any(Number),
+          event_key: 'TEST_EVENT',
+          timestamp: expect.any(Number),
+        }),
+      })
+
+      // Mixpanel should receive just the event (configuration is owned by provider)
+      expect(mixpanelTrackSpy).toHaveBeenCalledWith({
+        name: 'TEST_EVENT',
+        properties: expect.objectContaining({
+          chain_id: '1',
+          safe_address: '0x123',
+          extra_property: 'test',
+          event_key: 'TEST_EVENT',
+          timestamp: expect.any(Number),
         }),
       })
     })

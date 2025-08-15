@@ -1,6 +1,6 @@
 import { sendGAEvent } from '@next/third-parties/google'
 import { IS_PRODUCTION } from '@/config/constants'
-import type { AnalyticsProvider, AnalyticsEvent } from '../../core/types'
+import type { AnalyticsProvider, AnalyticsEvent, GAProviderConfig } from '../../core/types'
 import { GAParameterRegistry } from './GAParameterRegistry'
 import { DeviceType } from '../../types'
 import packageJson from '../../../../../package.json'
@@ -9,6 +9,7 @@ export interface GAConfig {
   trackingId: string
   debug?: boolean
   enabled?: boolean
+  eventConfigurations?: Record<string, GAProviderConfig>
 }
 
 export class GoogleAnalyticsProvider implements AnalyticsProvider {
@@ -16,6 +17,7 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
 
   private parameterRegistry: GAParameterRegistry
   private config: GAConfig
+  private eventConfigurations: Record<string, GAProviderConfig>
   private isInitialized = false
   private globalProperties: Record<string, any> = {}
   private userProperties: Record<string, any> = {}
@@ -27,6 +29,7 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
       ...config,
     }
     this.parameterRegistry = new GAParameterRegistry()
+    this.eventConfigurations = config.eventConfigurations || {}
 
     this.setDefaultGlobalProperties()
   }
@@ -52,22 +55,37 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
       return
     }
 
+    // Check if this provider should handle this event
+    const eventConfig = this.eventConfigurations[event.name]
+    if (!eventConfig?.enabled) {
+      // Silently ignore events this provider doesn't handle
+      return
+    }
+
     try {
-      const allProperties = {
+      let properties = {
         ...this.globalProperties,
         ...event.properties,
       }
 
-      const filteredProperties = this.parameterRegistry.filterParameters(allProperties)
+      // Apply GA-specific transformation if provided
+      if (eventConfig.transform) {
+        properties = eventConfig.transform(properties)
+      }
 
-      sendGAEvent('event', event.name, {
+      const filteredProperties = this.parameterRegistry.filterParameters(properties)
+
+      // Use GA-specific event name if provided, otherwise use the event name
+      const eventName = eventConfig.eventName || event.name
+
+      sendGAEvent('event', eventName, {
         send_to: this.config.trackingId,
         ...filteredProperties,
       })
 
       if (this.config.debug) {
-        const paramInfo = this.parameterRegistry.getParameterInfo(allProperties)
-        console.group(`[GoogleAnalyticsProvider] Event: ${event.name}`)
+        const paramInfo = this.parameterRegistry.getParameterInfo(properties)
+        console.group(`[GoogleAnalyticsProvider] Event: ${eventName}`)
         console.log('Registered properties sent:', paramInfo.registered)
         if (paramInfo.unregistered.length > 0) {
           console.warn('Unregistered properties filtered:', paramInfo.unregistered)

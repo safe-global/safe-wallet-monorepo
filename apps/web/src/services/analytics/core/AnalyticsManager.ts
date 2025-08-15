@@ -1,15 +1,7 @@
-import type {
-  AnalyticsProvider,
-  AnalyticsEvent,
-  EventConfiguration,
-  TrackingResult,
-  ProviderResult,
-  AnalyticsConfig,
-} from './types'
+import type { AnalyticsProvider, AnalyticsEvent, TrackingResult, ProviderResult, AnalyticsConfig } from './types'
 
 export class AnalyticsManager {
   private providers: Map<string, AnalyticsProvider> = new Map()
-  private eventConfigurations: Map<string, EventConfiguration> = new Map()
   private config: AnalyticsConfig
   private isInitialized = false
 
@@ -32,8 +24,6 @@ export class AnalyticsManager {
         console.error(`[AnalyticsManager] Failed to initialize provider ${provider.name}:`, error)
       }
     })
-
-    this.loadEventConfigurations()
 
     this.isInitialized = true
 
@@ -70,56 +60,33 @@ export class AnalyticsManager {
       return { success: false, results: {} }
     }
 
-    const eventConfig = this.eventConfigurations.get(eventKey)
-    if (!eventConfig) {
-      if (this.config.debug) {
-        console.warn(`[AnalyticsManager] Unknown event: ${eventKey}`)
-      }
-      return { success: false, results: {} }
-    }
-
-    const results: Record<string, ProviderResult> = {}
-    let overallSuccess = true
-
     const enhancedProperties = {
       ...properties,
       event_key: eventKey,
       timestamp: Date.now(),
     }
 
-    if (eventConfig.providers.ga?.enabled) {
-      const gaProvider = this.providers.get('ga')
-      if (gaProvider) {
-        try {
-          const result = this.sendToGA(gaProvider, eventConfig, enhancedProperties)
-          results.ga = result
-          if (!result.success) overallSuccess = false
-        } catch (error) {
-          results.ga = {
-            success: false,
-            error: error instanceof Error ? error.message : 'Unknown error',
-          }
-          overallSuccess = false
-        }
-      }
+    const event: AnalyticsEvent = {
+      name: eventKey,
+      properties: enhancedProperties,
     }
 
-    if (eventConfig.providers.mixpanel?.enabled) {
-      const mixpanelProvider = this.providers.get('mixpanel')
-      if (mixpanelProvider) {
-        try {
-          const result = this.sendToMixpanel(mixpanelProvider, eventConfig, enhancedProperties)
-          results.mixpanel = result
-          if (!result.success) overallSuccess = false
-        } catch (error) {
-          results.mixpanel = {
-            success: false,
-            error: error instanceof Error ? error.message : 'Unknown error',
-          }
-          overallSuccess = false
+    const results: Record<string, ProviderResult> = {}
+    let overallSuccess = true
+
+    // Simple event broadcasting to all providers
+    this.providers.forEach((provider, providerName) => {
+      try {
+        provider.track(event)
+        results[providerName] = { success: true }
+      } catch (error) {
+        results[providerName] = {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
         }
+        overallSuccess = false
       }
-    }
+    })
 
     if (this.config.debug) {
       console.group(`[AnalyticsManager] Event tracked: ${eventKey}`)
@@ -191,104 +158,5 @@ export class AnalyticsManager {
     })
 
     return statuses
-  }
-
-  getEventConfiguration(eventKey: string): EventConfiguration | undefined {
-    return this.eventConfigurations.get(eventKey)
-  }
-
-  getAvailableEvents(): string[] {
-    return Array.from(this.eventConfigurations.keys())
-  }
-
-  private sendToGA(
-    provider: AnalyticsProvider,
-    eventConfig: EventConfiguration,
-    properties: Record<string, any>,
-  ): ProviderResult {
-    const gaConfig = eventConfig.providers.ga!
-
-    if (!gaConfig.eventName) {
-      return {
-        success: false,
-        error: 'No GA event name configured',
-      }
-    }
-
-    let transformedProperties = properties
-    if (gaConfig.transform) {
-      transformedProperties = gaConfig.transform(properties)
-    }
-
-    const event: AnalyticsEvent = {
-      name: gaConfig.eventName,
-      properties: transformedProperties,
-    }
-
-    try {
-      provider.track(event)
-      return {
-        success: true,
-        sentProperties: transformedProperties,
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      }
-    }
-  }
-
-  private sendToMixpanel(
-    provider: AnalyticsProvider,
-    eventConfig: EventConfiguration,
-    properties: Record<string, any>,
-  ): ProviderResult {
-    const mixpanelConfig = eventConfig.providers.mixpanel!
-
-    if (!mixpanelConfig.eventName) {
-      return {
-        success: false,
-        error: 'No Mixpanel event name configured',
-      }
-    }
-
-    let enrichedProperties = properties
-
-    if (mixpanelConfig.enrichProperties) {
-      enrichedProperties = mixpanelConfig.enrichProperties(properties)
-    }
-
-    if (mixpanelConfig.transform) {
-      enrichedProperties = mixpanelConfig.transform(enrichedProperties)
-    }
-
-    const event: AnalyticsEvent = {
-      name: mixpanelConfig.eventName,
-      properties: enrichedProperties,
-    }
-
-    try {
-      provider.track(event)
-      return {
-        success: true,
-        sentProperties: enrichedProperties,
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      }
-    }
-  }
-
-  private loadEventConfigurations(): void {
-    Object.entries(this.config.events).forEach(([eventKey, config]) => {
-      this.eventConfigurations.set(eventKey, config)
-    })
-
-    if (this.config.debug) {
-      console.info('[AnalyticsManager] Loaded event configurations:', this.eventConfigurations.size)
-    }
   }
 }

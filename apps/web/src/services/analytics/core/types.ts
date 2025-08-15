@@ -128,9 +128,6 @@ export interface AnalyticsConfig {
       token: string
     }
   }
-
-  /** Event configurations */
-  events: Record<string, EventConfiguration>
 }
 
 /**

@@ -4,7 +4,7 @@ import { GoogleAnalyticsProvider } from './providers/ga/GoogleAnalyticsProvider'
 import { MixpanelProvider } from './providers/mixpanel/MixpanelProvider'
 import { ANALYTICS_EVENTS } from './config/events.config'
 import { analyticsDevTools } from './utils/DevTools'
-import type { AnalyticsConfig, TrackingResult } from './core/types'
+import type { AnalyticsConfig, TrackingResult, GAProviderConfig, MixpanelProviderConfig } from './core/types'
 
 const analyticsConfig: AnalyticsConfig = {
   enabled: true,
@@ -19,7 +19,27 @@ const analyticsConfig: AnalyticsConfig = {
       token: MIXPANEL_TOKEN || '',
     },
   },
-  events: ANALYTICS_EVENTS,
+}
+
+// Extract provider-specific configurations from centralized config
+function extractGAConfigurations() {
+  const gaConfigs: Record<string, GAProviderConfig> = {}
+  Object.entries(ANALYTICS_EVENTS).forEach(([eventKey, config]) => {
+    if (config.providers.ga) {
+      gaConfigs[eventKey] = config.providers.ga
+    }
+  })
+  return gaConfigs
+}
+
+function extractMixpanelConfigurations() {
+  const mixpanelConfigs: Record<string, MixpanelProviderConfig> = {}
+  Object.entries(ANALYTICS_EVENTS).forEach(([eventKey, config]) => {
+    if (config.providers.mixpanel) {
+      mixpanelConfigs[eventKey] = config.providers.mixpanel
+    }
+  })
+  return mixpanelConfigs
 }
 
 const manager = new AnalyticsManager(analyticsConfig)
@@ -29,6 +49,7 @@ if (GA_TRACKING_ID) {
     trackingId: GA_TRACKING_ID,
     debug: !IS_PRODUCTION,
     enabled: true,
+    eventConfigurations: extractGAConfigurations(),
   })
   manager.addProvider(gaProvider)
 }
@@ -38,6 +59,7 @@ if (MIXPANEL_TOKEN) {
     token: MIXPANEL_TOKEN,
     debug: !IS_PRODUCTION,
     enabled: true,
+    eventConfigurations: extractMixpanelConfigurations(),
   })
   manager.addProvider(mixpanelProvider)
 }

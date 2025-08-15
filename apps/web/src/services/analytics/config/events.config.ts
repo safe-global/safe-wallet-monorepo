@@ -103,13 +103,6 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
       mixpanel: {
         enabled: true,
         eventName: MixPanelEvent.WALLET_CONNECTED,
-        enrichProperties: (properties) => ({
-          ...properties,
-          connection_timestamp: Date.now(),
-          connection_method: properties.connection_method || 'unknown',
-          wallet_version: properties.wallet_version,
-          is_first_connection: properties.is_first_connection || false,
-        }),
       },
     },
   },
