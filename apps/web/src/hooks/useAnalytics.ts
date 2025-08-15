@@ -56,6 +56,135 @@ const createDeviceInfo = () => {
 }
 
 /**
+ * Determines device type based on Material-UI breakpoints
+ */
+const useDeviceType = () => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'))
+
+  return useMemo(() => {
+    return isMobile ? DeviceType.MOBILE : isTablet ? DeviceType.TABLET : DeviceType.DESKTOP
+  }, [isMobile, isTablet])
+}
+
+/**
+ * Creates and configures analytics providers based on feature flags
+ */
+const createAnalyticsProviders = <E extends SafeEventMap>(
+  isMixpanelEnabled: boolean,
+  debugMode = false,
+): AnalyticsBuilder<E> => {
+  const builder = AnalyticsBuilder.create<E>()
+
+  // Add main Google Analytics provider
+  const gaProvider = new GoogleAnalyticsProvider({
+    debugMode,
+    providerId: PROVIDER.GA,
+  })
+  builder.addProvider(gaProvider)
+
+  // Add Safe Apps Google Analytics provider for ecosystem tracking
+  const gaSafeAppsProvider = new GoogleAnalyticsProvider({
+    measurementId: SAFE_APPS_GA_TRACKING_ID,
+    debugMode,
+    providerId: PROVIDER.GA_SAFE_APPS,
+  })
+  builder.addProvider(gaSafeAppsProvider)
+
+  // Add Mixpanel provider if feature is enabled
+  if (isMixpanelEnabled) {
+    const mixpanelProvider = new MixpanelProvider({
+      debugMode,
+    })
+    builder.addProvider(mixpanelProvider)
+  }
+
+  return builder
+}
+
+/**
+ * Handles provider-specific consent changes
+ */
+const handleConsentChanges = (
+  analytics: Analytics<any> | null,
+  isAnalyticsEnabled: boolean,
+  isMixpanelEnabled: boolean,
+) => {
+  if (!analytics) return
+
+  const consentManager = analytics.getConsentManager()
+  if (!consentManager) return
+
+  // Update core consent state (provider-agnostic)
+  if (isAnalyticsEnabled) {
+    consentManager.enableAnalytics()
+  } else {
+    consentManager.disableAnalytics()
+  }
+
+  // Handle provider-specific consent logic
+  const consentState = consentManager.get()
+
+  // Google Analytics consent handling (GA consent API + cookies + page reload)
+  GoogleAnalyticsConsentHandler.handleConsentChange(consentState)
+
+  // Mixpanel consent handling (opt-in/opt-out tracking)
+  if (isMixpanelEnabled) {
+    MixpanelConsentHandler.handleConsentChange(consentState)
+  }
+}
+
+/**
+ * Creates the default analytics context from hook data
+ */
+const createDefaultContext = (
+  chainId: string | undefined,
+  safeAddress: string | undefined,
+  configContext?: Partial<EventContext>,
+): EventContext => {
+  return {
+    chainId: chainId || undefined,
+    safeAddress: safeAddress || undefined,
+    userId: safeAddress || undefined,
+    source: 'web' as const,
+    locale: isNavigatorAvailable ? navigator.language : undefined,
+    device: createDeviceInfo(),
+    ...configContext,
+  }
+}
+
+/**
+ * Identifies user with wallet traits when wallet changes
+ */
+const identifyUserWithWallet = (
+  analytics: Analytics<any> | null,
+  wallet: any,
+  walletChain: any,
+  safeAddress: string | undefined,
+) => {
+  if (!analytics || !wallet) return
+
+  const traits: Record<string, unknown> = {}
+
+  if (wallet.label) {
+    traits.walletLabel = wallet.label
+  }
+  if (wallet.address) {
+    traits.walletAddress = wallet.address
+  }
+  if (walletChain) {
+    traits.walletNetwork = walletChain.chainName
+  }
+
+  // Use safe address as primary user ID, fallback to wallet address
+  const userId = safeAddress || wallet.address
+  if (userId) {
+    analytics.identify(userId, Object.keys(traits).length > 0 ? traits : undefined)
+  }
+}
+
+/**
  * Analytics hook configuration
  */
 export interface UseAnalyticsConfig {
@@ -103,25 +232,13 @@ export const useAnalytics = <E extends SafeEventMap = SafeEventMap>(
   const walletChain = useChain(wallet?.chainId || '')
 
   // Device detection
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'))
-  const deviceType = useMemo(() => {
-    return isMobile ? DeviceType.MOBILE : isTablet ? DeviceType.TABLET : DeviceType.DESKTOP
-  }, [isMobile, isTablet])
+  const deviceType = useDeviceType()
 
   // Build default context
-  const defaultContext = useMemo((): EventContext => {
-    return {
-      chainId: chainId || undefined,
-      safeAddress: safeAddress || undefined,
-      userId: safeAddress || undefined, // Use safe address as user ID
-      source: 'web' as const,
-      locale: isNavigatorAvailable ? navigator.language : undefined,
-      device: createDeviceInfo(),
-      ...config.defaultContext,
-    }
-  }, [chainId, safeAddress, config.defaultContext])
+  const defaultContext = useMemo(
+    () => createDefaultContext(chainId, safeAddress, config.defaultContext),
+    [chainId, safeAddress, config.defaultContext],
+  )
 
   // Initialize analytics system
   useEffect(() => {
@@ -130,31 +247,7 @@ export const useAnalytics = <E extends SafeEventMap = SafeEventMap>(
       return
     }
 
-    const builder = AnalyticsBuilder.create<E>()
-
-    // Add main Google Analytics provider
-    const gaProvider = new GoogleAnalyticsProvider({
-      debugMode: config.debugMode,
-      providerId: PROVIDER.GA,
-      // Uses default GA_TRACKING_ID from constants
-    })
-    builder.addProvider(gaProvider)
-
-    // Add Safe Apps Google Analytics provider for ecosystem tracking
-    const gaSafeAppsProvider = new GoogleAnalyticsProvider({
-      measurementId: SAFE_APPS_GA_TRACKING_ID,
-      debugMode: config.debugMode,
-      providerId: PROVIDER.GA_SAFE_APPS,
-    })
-    builder.addProvider(gaSafeAppsProvider)
-
-    // Add Mixpanel provider if feature is enabled
-    if (isMixpanelEnabled) {
-      const mixpanelProvider = new MixpanelProvider({
-        debugMode: config.debugMode,
-      })
-      builder.addProvider(mixpanelProvider)
-    }
+    const builder = createAnalyticsProviders<E>(isMixpanelEnabled ?? false, config.debugMode ?? false)
 
     // Build analytics instance with proper consent mapping
     const analytics = builder
@@ -180,28 +273,7 @@ export const useAnalytics = <E extends SafeEventMap = SafeEventMap>(
 
   // Handle provider-specific consent changes
   useEffect(() => {
-    if (!analyticsRef.current) return
-
-    const consentManager = analyticsRef.current.getConsentManager()
-    if (!consentManager) return
-
-    // Update core consent state (provider-agnostic)
-    if (isAnalyticsEnabled) {
-      consentManager.enableAnalytics()
-    } else {
-      consentManager.disableAnalytics()
-    }
-
-    // Handle provider-specific consent logic
-    const consentState = consentManager.get()
-
-    // Google Analytics consent handling (GA consent API + cookies + page reload)
-    GoogleAnalyticsConsentHandler.handleConsentChange(consentState)
-
-    // Mixpanel consent handling (opt-in/opt-out tracking)
-    if (isMixpanelEnabled) {
-      MixpanelConsentHandler.handleConsentChange(consentState)
-    }
+    handleConsentChanges(analyticsRef.current, isAnalyticsEnabled, isMixpanelEnabled ?? false)
   }, [isAnalyticsEnabled, isMixpanelEnabled])
 
   // Update context when relevant values change
@@ -219,25 +291,7 @@ export const useAnalytics = <E extends SafeEventMap = SafeEventMap>(
 
   // Identify user when wallet changes
   useEffect(() => {
-    if (!analyticsRef.current || !wallet) return
-
-    const traits: Record<string, unknown> = {}
-
-    if (wallet.label) {
-      traits.walletLabel = wallet.label
-    }
-    if (wallet.address) {
-      traits.walletAddress = wallet.address
-    }
-    if (walletChain) {
-      traits.walletNetwork = walletChain.chainName
-    }
-
-    // Use safe address as primary user ID, fallback to wallet address
-    const userId = safeAddress || wallet.address
-    if (userId) {
-      analyticsRef.current.identify(userId, Object.keys(traits).length > 0 ? traits : undefined)
-    }
+    identifyUserWithWallet(analyticsRef.current, wallet, walletChain, safeAddress)
   }, [wallet, walletChain, safeAddress])
 
   // Track meta events on app load (pass analytics instance to avoid circular dependency)
