@@ -19,7 +19,6 @@
     "test:ci": "yarn test --ci --silent --coverage --json --watchAll=false --testLocationInResults --outputFile=report.json",
     "test:coverage": "yarn test --coverage --watchAll=false",
     "test:changed": "yarn test --onlyChanged",
-    "test:staged": "yarn test --findRelatedTests $(git diff --cached --name-only --diff-filter=ACM | grep -E '\\.(ts|tsx)$' | tr '\\n' ' ')",
     "cmp": "./scripts/cmp.sh",
     "routes": "node scripts/generate-routes.js > src/config/routes.ts && prettier -w src/config/routes.ts && cat src/config/routes.ts",
     "css-vars": "npx -y tsx ./scripts/css-vars.ts > ./src/styles/vars.css && prettier -w src/styles/vars.css",
