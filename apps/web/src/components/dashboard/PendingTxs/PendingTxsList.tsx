@@ -23,6 +23,16 @@ const PendingRecoveryListItem = dynamic(() => import('./PendingRecoveryListItem'
 
 const MAX_TXS = 4
 
+const PendingTxsSkeleton = () => (
+  <Card sx={{ px: 1.5, py: 2.5, height: 1 }} component="section">
+    <Stack direction="row" sx={{ px: 1.5, mb: 1 }}>
+      <Typography fontWeight={700}>Pending transactions</Typography>
+    </Stack>
+
+    <Skeleton height={66} variant="rounded" />
+  </Card>
+)
+
 const EmptyState = () => {
   return (
     <Paper elevation={0} sx={{ p: 5, textAlign: 'center' }}>
@@ -99,7 +109,7 @@ const PendingTxsList = (): ReactElement | null => {
     [router.query.safe],
   )
 
-  if (loading) return <Skeleton variant="rounded" height={338} />
+  if (loading) return <PendingTxsSkeleton />
 
   return (
     <Card data-testid="pending-tx-widget" sx={{ px: 1.5, py: 2.5, height: 1 }} component="section">
