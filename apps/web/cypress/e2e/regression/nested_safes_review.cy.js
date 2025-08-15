@@ -34,6 +34,6 @@ describe('Nested safes review step tests', () => {
     nsafes.clickOnAddNextBtn()
     nsafes.clickOnAdvancedDetails()
     nsafes.actionsExist(nsafes.nonfundAssetsActions)
-    createTx.verifytxAccordionDetails(createTx.SafeProxy)
+    createTx.verifytxAccordionDetailsScroll(createTx.SafeProxy)
   })
 })
