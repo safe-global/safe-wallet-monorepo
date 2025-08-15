@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { Paper, ThemeProvider } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import BatchTransactions from './index'
-import { mockedDarftBatch } from './mockData'
+import { mockedDraftBatch } from './mockData'
 import createSafeTheme from '@/components/theme/safeTheme'
 
 const meta = {
@@ -18,7 +18,7 @@ const meta = {
             chains: { data: [{ chainId: '11155111' }] },
             batch: {
               '11155111': {
-                '': [mockedDarftBatch[0], mockedDarftBatch[0]],
+                '': [mockedDraftBatch[0], mockedDraftBatch[0]],
               },
             },
           }}
