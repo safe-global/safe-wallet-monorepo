@@ -537,7 +537,11 @@ export function expandAdvancedDetails(data) {
 export function verifytxAccordionDetails(data) {
   main.checkTextsExistWithinElement(txAccordionDetails, data)
 }
-// Function to check elements inside Transaction details/DecodedDataRoot
+//Search in the element with the scroll
+export function verifytxAccordionDetailsScroll(data) {
+  main.checkTextsExistWithinElementScroll(txAccordionDetails, data)
+}
+
 export function checkDataDecodingRoot(data) {
   main.checkTextsExistWithinElement(decodedDataTop, data)
 }
