@@ -354,7 +354,6 @@ describe('New Analytics System', () => {
       // This would be verified by checking if subsequent events include these properties
       expect(true).toBe(true) // Placeholder - actual verification would check provider calls
     })
-
   })
 
   describe('Event Configuration Validation', () => {

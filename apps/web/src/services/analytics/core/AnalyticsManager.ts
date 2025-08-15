@@ -6,7 +6,6 @@ import type {
   ProviderResult,
   AnalyticsConfig,
 } from './types'
-import { StandardEvents } from './types'
 
 export class AnalyticsManager {
   private providers: Map<string, AnalyticsProvider> = new Map()
@@ -132,24 +131,6 @@ export class AnalyticsManager {
     return {
       success: overallSuccess,
       results,
-    }
-  }
-
-  identify(userId: string, traits?: Record<string, any>): void {
-    if (!this.isInitialized) {
-      return
-    }
-
-    this.providers.forEach((provider, name) => {
-      try {
-        provider.identify(userId, traits)
-      } catch (error) {
-        console.error(`[AnalyticsManager] Failed to identify user in ${name}:`, error)
-      }
-    })
-
-    if (this.config.debug) {
-      console.info('[AnalyticsManager] User identified across all providers:', userId, traits)
     }
   }
 
@@ -309,35 +290,5 @@ export class AnalyticsManager {
     if (this.config.debug) {
       console.info('[AnalyticsManager] Loaded event configurations:', this.eventConfigurations.size)
     }
-  }
-
-  page(path: string, properties?: Record<string, any>): TrackingResult {
-    return this.track(StandardEvents.PAGE_VIEW, {
-      page_path: path,
-      page_url: typeof window !== 'undefined' ? window.location.href : '',
-      ...properties,
-    })
-  }
-
-  click(buttonName: string, properties?: Record<string, any>): TrackingResult {
-    return this.track(StandardEvents.BUTTON_CLICK, {
-      button_name: buttonName,
-      ...properties,
-    })
-  }
-
-  error(errorMessage: string, properties?: Record<string, any>): TrackingResult {
-    return this.track(StandardEvents.ERROR_OCCURRED, {
-      error_message: errorMessage,
-      error_timestamp: new Date().toISOString(),
-      ...properties,
-    })
-  }
-
-  feature(featureName: string, properties?: Record<string, any>): TrackingResult {
-    return this.track(StandardEvents.FEATURE_USED, {
-      feature_name: featureName,
-      ...properties,
-    })
   }
 }

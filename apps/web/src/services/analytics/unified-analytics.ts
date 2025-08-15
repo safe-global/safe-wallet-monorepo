@@ -53,26 +53,6 @@ export const analytics = {
     return manager.track(eventKey, properties)
   },
 
-  page: (path: string, properties?: Record<string, any>): TrackingResult => {
-    return manager.page(path, properties)
-  },
-
-  click: (buttonName: string, properties?: Record<string, any>): TrackingResult => {
-    return manager.click(buttonName, properties)
-  },
-
-  error: (errorMessage: string, properties?: Record<string, any>): TrackingResult => {
-    return manager.error(errorMessage, properties)
-  },
-
-  feature: (featureName: string, properties?: Record<string, any>): TrackingResult => {
-    return manager.feature(featureName, properties)
-  },
-
-  identify: (userId: string, traits?: Record<string, any>): void => {
-    manager.identify(userId, traits)
-  },
-
   setUserProperty: (key: string, value: any): void => {
     manager.setUserProperty(key, value)
   },
@@ -94,16 +74,6 @@ export const analytics = {
   },
 
   getManager: () => manager,
-
-  trackToProvider: (providerName: string, eventKey: string, properties?: Record<string, any>) => {
-    const provider = manager.getProvider(providerName)
-    if (provider) {
-      provider.track({
-        name: eventKey,
-        properties,
-      })
-    }
-  },
 }
 
 export const safeAnalytics = {
