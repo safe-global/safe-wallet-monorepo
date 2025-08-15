@@ -14,13 +14,15 @@ import type {
 } from '../core'
 import { sendGAEvent } from '@next/third-parties/google'
 import { GA_TRACKING_ID, IS_PRODUCTION } from '@/config/constants'
-import { PROVIDER } from './constants'
+import { PROVIDER, type ProviderId } from './constants'
 import { EventNormalization, GA4Transform, ValidationUtils } from './utils'
+import { getAbTest } from '@/services/tracking/abTesting'
 import packageJson from '../../../../package.json'
 
 export type GoogleAnalyticsOptions = {
   measurementId?: string
   debugMode?: boolean
+  providerId?: ProviderId // Allow custom provider ID for routing
   gtag?: (...args: any[]) => void // For dependency injection in tests
 }
 
@@ -31,13 +33,14 @@ export type GoogleAnalyticsOptions = {
 export class GoogleAnalyticsProvider<E extends SafeEventMap = SafeEventMap>
   implements BaseProvider<E>, IdentifyCapable, PageCapable
 {
-  readonly id = PROVIDER.GA
+  readonly id: ProviderId
   private enabled = true
   private gtag?: (...args: any[]) => void
   private measurementId: string
   private debugMode: boolean
 
   constructor(options: GoogleAnalyticsOptions = {}) {
+    this.id = options.providerId || PROVIDER.GA
     this.measurementId = options.measurementId || GA_TRACKING_ID
     this.debugMode = options.debugMode ?? !IS_PRODUCTION
     this.gtag = options.gtag || (typeof window !== 'undefined' ? window.gtag : undefined)
@@ -156,13 +159,21 @@ export class GoogleAnalyticsProvider<E extends SafeEventMap = SafeEventMap>
       // Extract context parameters
       const contextParams = GA4Transform.extractContextParams(event.context)
 
+      // Get A/B test data (matches legacy gtmTrack behavior)
+      const abTest = getAbTest()
+
       // Combine all event data
-      const eventData = {
+      const eventData: Record<string, unknown> = {
         ...transformedPayload,
         ...contextParams,
         // Standard GA4 parameters
         app_version: packageJson.version,
         send_to: this.measurementId,
+      }
+
+      // Add A/B test data if available (same field name as legacy)
+      if (abTest) {
+        eventData.abTest = abTest
       }
 
       // Send to GA4

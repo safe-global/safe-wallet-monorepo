@@ -187,11 +187,11 @@ class GoogleAnalyticsProvider implements BaseProvider, IdentifyCapable, PageCapa
   private measurementId: string
 
   init(opts?: ProviderInitOptions) {
-    gtag('config', measurementId, { 
+    gtag('config', measurementId, {
       send_page_view: false,
-      debug_mode: debugMode 
+      debug_mode: debugMode
     })
-    
+
     // Set initial user context if provided
     if (opts?.defaultContext?.userId) {
       this.identify(opts.defaultContext.userId)
@@ -200,11 +200,11 @@ class GoogleAnalyticsProvider implements BaseProvider, IdentifyCapable, PageCapa
 
   identify(userId: string, traits?: Record<string, unknown>) {
     // Set user ID through config
-    gtag('config', measurementId, { 
+    gtag('config', measurementId, {
       user_id: ValidationUtils.sanitizeValue(userId),
-      send_page_view: false 
+      send_page_view: false
     })
-    
+
     // Set user properties if provided
     if (traits && ValidationUtils.isValidPayload(traits)) {
       const transformedTraits = GA4Transform.transformPayload(traits)
@@ -228,18 +228,18 @@ class GoogleAnalyticsProvider implements BaseProvider, IdentifyCapable, PageCapa
   track(event: AnalyticsEvent) {
     // Normalize event name for GA4 (snake_case, ≤40 chars)
     const normalizedEventName = EventNormalization.toSnakeCase(event.name)
-    
+
     // Transform payload and context to GA4 format
     const transformedPayload = GA4Transform.transformPayload(event.payload)
     const contextParams = GA4Transform.extractContextParams(event.context)
-    
+
     const eventData = {
       ...transformedPayload,
       ...contextParams,
       app_version: packageJson.version,
       send_to: measurementId
     }
-    
+
     // Send to GA4 using Next.js third-party integration
     sendGAEvent('event', normalizedEventName, eventData)
   }
@@ -267,11 +267,11 @@ class MixpanelProvider implements BaseProvider, IdentifyCapable {
 
   init(opts?: ProviderInitOptions) {
     if (this.initialized) return
-    
+
     // Initialize Mixpanel SDK
     mixpanelInit()
     this.initialized = true
-    
+
     // Set initial user context if provided
     if (opts?.defaultContext?.userId) {
       this.identify(opts.defaultContext.userId)
@@ -280,10 +280,10 @@ class MixpanelProvider implements BaseProvider, IdentifyCapable {
 
   identify(userId: string, traits?: Record<string, unknown>) {
     if (!this.enabled || !this.initialized) return
-    
+
     // Identify user with sanitized ID
     mixpanelIdentify(ValidationUtils.sanitizeValue(userId) as string)
-    
+
     // Set user properties if provided
     if (traits && ValidationUtils.isValidPayload(traits)) {
       const userProperties = MixpanelTransform.transformUserTraits(traits)
@@ -293,28 +293,28 @@ class MixpanelProvider implements BaseProvider, IdentifyCapable {
 
   track(event: AnalyticsEvent) {
     if (!this.enabled || !this.initialized) return
-    
+
     // Validate event name
     if (!ValidationUtils.isValidEventName(event.name)) {
       console.warn('[Mixpanel Provider] Invalid event name:', event.name)
       return
     }
-    
+
     // Normalize event name for Mixpanel (PascalCase/Title Case)
     const normalizedEventName = EventNormalization.toPascalCase(event.name)
-    
+
     // Transform payload to Mixpanel format (Title Case properties)
     const transformedPayload = MixpanelTransform.transformPayload(event.payload)
-    
+
     // Extract context properties
     const contextProperties = MixpanelTransform.extractContextProperties(event.context)
-    
+
     // Combine all properties
     const allProperties = {
       ...transformedPayload,
       ...contextProperties
     }
-    
+
     // Track the event (no hardcoded whitelist - routing controlled by analytics core)
     mixpanelTrack(normalizedEventName, Object.keys(allProperties).length > 0 ? allProperties : undefined)
   }
@@ -325,7 +325,7 @@ class MixpanelProvider implements BaseProvider, IdentifyCapable {
 
 - **Flexible Event Routing**: No hardcoded whitelist - all events accepted, routing controlled by analytics core
 - **Event Names**: PascalCase/Title Case via `EventNormalization.toPascalCase()`
-- **Properties**: Title Case keys via `MixpanelTransform.transformPayload()` 
+- **Properties**: Title Case keys via `MixpanelTransform.transformPayload()`
 - **Context Extraction**: Automatic context property mapping via `MixpanelTransform.extractContextProperties()`
 - **User Traits**: Title Case transformation via `MixpanelTransform.transformUserTraits()`
 - **PII Sanitization**: Automatic sanitization via `ValidationUtils.sanitizeValue()`
@@ -350,7 +350,7 @@ const EventNormalization = {
       .toLowerCase()
       .substring(0, 40)                       // GA4 40-char limit
   },
-  
+
   // Convert to PascalCase for Mixpanel naming conventions
   toPascalCase: (eventName: string): string => {
     return eventName
@@ -360,7 +360,7 @@ const EventNormalization = {
       .replace(/\s+/g, ' ')                   // normalize multiple spaces
       .trim()
   },
-  
+
   // Convert property names to Title Case for Mixpanel
   toTitleCase: (propertyName: string): string => {
     return propertyName
@@ -378,14 +378,14 @@ const GA4Transform = {
       if (value !== undefined && value !== null) {
         const normalizedKey = EventNormalization.toSnakeCase(key)
         // Apply GA4 constraints (100 char string limit, etc.)
-        transformed[normalizedKey] = typeof value === 'string' 
-          ? value.substring(0, 100) 
+        transformed[normalizedKey] = typeof value === 'string'
+          ? value.substring(0, 100)
           : value
       }
     }
     return transformed
   },
-  
+
   extractContextParams: (context?: any): Record<string, unknown> => {
     const params = {}
     if (context?.chainId) params.chain_id = context.chainId
@@ -407,7 +407,7 @@ const MixpanelTransform = {
     }
     return transformed
   },
-  
+
   extractContextProperties: (context?: any): Record<string, unknown> => {
     const properties = {}
     if (context?.chainId) properties['Chain ID'] = context.chainId
@@ -416,7 +416,7 @@ const MixpanelTransform = {
     if (context?.device?.userAgent) properties['User Agent'] = context.device.userAgent
     return properties
   },
-  
+
   transformUserTraits: (traits: Record<string, unknown>): Record<string, unknown> => {
     const transformed = {}
     for (const [key, value] of Object.entries(traits)) {
@@ -432,11 +432,11 @@ const ValidationUtils = {
   isValidEventName: (name: unknown): name is string => {
     return typeof name === 'string' && name.length > 0 && name.length <= 100
   },
-  
+
   isValidPayload: (payload: unknown): payload is Record<string, unknown> => {
     return payload !== null && typeof payload === 'object' && !Array.isArray(payload)
   },
-  
+
   sanitizeValue: (value: unknown): unknown => {
     if (typeof value === 'string') {
       return value
@@ -780,12 +780,12 @@ interface SafeEvents extends SafeEventMap {
 // 2. Configure analytics with providers and middleware
 analytics = AnalyticsBuilder
   .create(defaultContext: { source: 'web', version: '1.0.0' })
-  .addProvider(new GoogleAnalyticsProvider({ 
+  .addProvider(new GoogleAnalyticsProvider({
     measurementId: 'G-XXXXXXXXXX',
-    debugMode: isDevelopment 
+    debugMode: isDevelopment
   }))
-  .addProvider(new MixpanelProvider({ 
-    debugMode: isDevelopment 
+  .addProvider(new MixpanelProvider({
+    debugMode: isDevelopment
   }))
   .use(loggingMiddleware(enabled: isDevelopment))
   .withRouter((event) => {
@@ -853,16 +853,16 @@ sequenceDiagram
 
     alt Consent granted
         Consent->>Analytics: ✅ Allowed
-        
+
         Note over Analytics: Step 4: Provider-Specific Event Normalization
         Analytics->>GA: Normalize to snake_case → transaction_created
         Analytics->>GA: Transform payload → GA4Transform.transformPayload()
         Analytics->>GA: sendGAEvent('event', 'transaction_created', eventData)
-        
-        Analytics->>MP: Normalize to PascalCase → Transaction Created  
+
+        Analytics->>MP: Normalize to PascalCase → Transaction Created
         Analytics->>MP: Transform payload → MixpanelTransform.transformPayload()
         Analytics->>MP: mixpanelTrack('Transaction Created', properties)
-        
+
         GA-->>Analytics: ✅ Success
         MP-->>Analytics: ❌ Network error
         Analytics->>Analytics: ❌ Log failed event (no retry in current impl)

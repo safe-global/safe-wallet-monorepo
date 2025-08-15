@@ -59,6 +59,27 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
 jest.mock('@/hooks/useIsSpaceRoute', () => ({
   useIsSpaceRoute: jest.fn(),
 }))
+
+jest.mock('../analytics/useMetaEvents', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
+
+jest.mock('@/services/analytics/providers/GoogleAnalyticsConsentHandler', () => ({
+  GoogleAnalyticsConsentHandler: {
+    handleConsentChange: jest.fn(),
+    enableAnalytics: jest.fn(),
+    disableAnalytics: jest.fn(),
+  },
+}))
+
+jest.mock('@/services/analytics/providers/MixpanelConsentHandler', () => ({
+  MixpanelConsentHandler: {
+    handleConsentChange: jest.fn(),
+    enableAnalytics: jest.fn(),
+    disableAnalytics: jest.fn(),
+  },
+}))
 jest.mock('@/hooks/useSafeInfo', () => ({
   __esModule: true,
   default: jest.fn(),
@@ -107,6 +128,13 @@ const mockAnalyticsBuilder = AnalyticsBuilder.create as jest.MockedFunction<type
 const mockGoogleAnalyticsProvider = GoogleAnalyticsProvider as jest.MockedClass<typeof GoogleAnalyticsProvider>
 const mockMixpanelProvider = MixpanelProvider as jest.MockedClass<typeof MixpanelProvider>
 
+// Mock consent manager
+const mockConsentManager = {
+  get: jest.fn().mockReturnValue({ analytics: true, necessary: true, updatedAt: Date.now() }),
+  enableAnalytics: jest.fn(),
+  disableAnalytics: jest.fn(),
+}
+
 // Mock analytics instance
 const mockAnalyticsInstance = {
   providers: [],
@@ -116,7 +144,8 @@ const mockAnalyticsInstance = {
   identify: jest.fn(),
   page: jest.fn(),
   setDefaultContext: jest.fn(),
-  getProviders: jest.fn().mockReturnValue(['ga', 'mixpanel']),
+  getProviders: jest.fn().mockReturnValue(['ga', 'ga_safe_apps', 'mixpanel']),
+  getConsentManager: jest.fn().mockReturnValue(mockConsentManager),
 }
 
 const mockBuilder = {
@@ -150,7 +179,10 @@ describe('useAnalytics', () => {
     // Default mock implementations
     mockUseMediaQuery.mockReturnValue(false) // Desktop by default
     mockUseAppSelector.mockImplementation((selector) =>
-      selector({ cookies_terms: { analytics: true, termsVersion: 'v1' } } as any),
+      selector({
+        cookies_terms: { analytics: true, termsVersion: 'v1' },
+        txQueue: { data: { results: [] } }, // Mock empty transaction queue for meta events
+      } as any),
     )
     mockHasConsentFor.mockReturnValue(true)
     mockUseHasFeature.mockReturnValue(true)
@@ -173,9 +205,14 @@ describe('useAnalytics', () => {
     } as any)
 
     mockAnalyticsBuilder.mockReturnValue(mockBuilder as any)
-    mockGoogleAnalyticsProvider.mockImplementation(() => ({ id: 'ga' }) as any)
+    mockGoogleAnalyticsProvider.mockImplementation(
+      (config: any) =>
+        ({
+          id: config?.providerId || 'ga', // Use provided ID or default to 'ga'
+        }) as any,
+    )
     mockMixpanelProvider.mockImplementation(() => ({ id: 'mixpanel' }) as any)
-    mockAnalyticsInstance.providers = [{ id: 'ga' }, { id: 'mixpanel' }] as any
+    mockAnalyticsInstance.providers = [{ id: 'ga' }, { id: 'ga_safe_apps' }, { id: 'mixpanel' }] as any
   })
 
   describe('Initialization', () => {
@@ -185,6 +222,7 @@ describe('useAnalytics', () => {
       await waitFor(() => {
         expect(mockAnalyticsBuilder).toHaveBeenCalled()
         expect(mockBuilder.addProvider).toHaveBeenCalledWith(expect.objectContaining({ id: 'ga' }))
+        expect(mockBuilder.addProvider).toHaveBeenCalledWith(expect.objectContaining({ id: 'ga_safe_apps' }))
         expect(mockBuilder.addProvider).toHaveBeenCalledWith(expect.objectContaining({ id: 'mixpanel' }))
         expect(mockBuilder.withDefaultContext).toHaveBeenCalled()
         expect(mockBuilder.withConsent).toHaveBeenCalled()
@@ -207,8 +245,9 @@ describe('useAnalytics', () => {
       renderHook(() => useAnalytics())
 
       await waitFor(() => {
-        expect(mockBuilder.addProvider).toHaveBeenCalledTimes(1)
+        expect(mockBuilder.addProvider).toHaveBeenCalledTimes(2) // Main GA + Safe Apps GA
         expect(mockBuilder.addProvider).toHaveBeenCalledWith(expect.objectContaining({ id: 'ga' }))
+        expect(mockBuilder.addProvider).toHaveBeenCalledWith(expect.objectContaining({ id: 'ga_safe_apps' }))
       })
     })
 
@@ -216,7 +255,7 @@ describe('useAnalytics', () => {
       renderHook(() => useAnalytics({ debugMode: true }))
 
       await waitFor(() => {
-        expect(mockGoogleAnalyticsProvider).toHaveBeenCalledWith({ debugMode: true })
+        expect(mockGoogleAnalyticsProvider).toHaveBeenCalledWith(expect.objectContaining({ debugMode: true }))
         expect(mockMixpanelProvider).toHaveBeenCalledWith({ debugMode: true })
       })
     })

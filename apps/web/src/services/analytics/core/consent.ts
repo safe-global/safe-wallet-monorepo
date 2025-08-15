@@ -1,21 +1,55 @@
 /**
  * Consent management for analytics tracking.
- * Integrates with the existing Safe wallet consent system.
+ * Provider-agnostic consent state management.
  */
 
 import type { ConsentState, ConsentCategories } from './types'
+
+type ConsentChangeListener = (state: ConsentState) => void
 
 /**
  * Manages user consent for analytics tracking
  */
 export class ConsentManager {
   private state: ConsentState
+  private listeners: ConsentChangeListener[] = []
 
   constructor(initialState?: ConsentState) {
     this.state = {
       updatedAt: Date.now(),
       ...initialState,
     }
+  }
+
+  /**
+   * Add a listener for consent state changes
+   */
+  addListener(listener: ConsentChangeListener): void {
+    this.listeners.push(listener)
+  }
+
+  /**
+   * Remove a listener
+   */
+  removeListener(listener: ConsentChangeListener): void {
+    const index = this.listeners.indexOf(listener)
+    if (index >= 0) {
+      this.listeners.splice(index, 1)
+    }
+  }
+
+  /**
+   * Notify all listeners of consent state changes
+   */
+  private notifyListeners(): void {
+    const currentState = this.get()
+    this.listeners.forEach((listener) => {
+      try {
+        listener(currentState)
+      } catch (error) {
+        console.error('[ConsentManager] Listener error:', error)
+      }
+    })
   }
 
   /**
@@ -27,6 +61,7 @@ export class ConsentManager {
       ...patch,
       updatedAt: Date.now(),
     }
+    this.notifyListeners()
   }
 
   /**
@@ -121,5 +156,21 @@ export class ConsentManager {
       if (c in all) result[c] = all[c]
     })
     return result
+  }
+
+  /**
+   * Enable analytics tracking
+   * Provider-agnostic method for consent state management
+   */
+  enableAnalytics(): void {
+    this.grant('analytics')
+  }
+
+  /**
+   * Disable analytics tracking
+   * Provider-agnostic method for consent state management
+   */
+  disableAnalytics(): void {
+    this.revoke('analytics')
   }
 }

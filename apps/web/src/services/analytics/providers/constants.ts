@@ -9,6 +9,7 @@ import type { EventUnion } from '../events/catalog'
  */
 export const PROVIDER = {
   GA: 'ga',
+  GA_SAFE_APPS: 'ga_safe_apps', // Safe Apps ecosystem GA property
   Mixpanel: 'mixpanel',
   Custom: 'custom',
   Mock: 'mock', // For testing

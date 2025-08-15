@@ -10,6 +10,7 @@ import { useAppSelector } from '@/store'
 import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { SAFE_APPS_GA_TRACKING_ID } from '@/config/constants'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -21,8 +22,12 @@ import type { Analytics } from '@/services/analytics/core'
 import { AnalyticsBuilder } from '@/services/analytics/core'
 import { GoogleAnalyticsProvider } from '@/services/analytics/providers/GoogleAnalyticsProvider'
 import { MixpanelProvider } from '@/services/analytics/providers/MixpanelProvider'
+import { GoogleAnalyticsConsentHandler } from '@/services/analytics/providers/GoogleAnalyticsConsentHandler'
+import { MixpanelConsentHandler } from '@/services/analytics/providers/MixpanelConsentHandler'
+import { PROVIDER } from '@/services/analytics/providers/constants'
 import type { SafeEventMap, AnalyticsEvent, EventContext } from '@/services/analytics/core'
 import { DeviceType } from '@/services/analytics/types'
+import useMetaEvents from './analytics/useMetaEvents'
 
 // Browser environment detection
 const isBrowserEnvironment = typeof window !== 'undefined'
@@ -73,7 +78,7 @@ export interface UseAnalyticsResult<E extends SafeEventMap = SafeEventMap> {
   /** Check if analytics is enabled and has consent */
   isEnabled: boolean
   /** Check if specific provider is enabled */
-  isProviderEnabled: (providerId: 'ga' | 'mixpanel') => boolean
+  isProviderEnabled: (providerId: 'ga' | 'ga_safe_apps' | 'mixpanel') => boolean
 }
 
 /**
@@ -127,11 +132,21 @@ export const useAnalytics = <E extends SafeEventMap = SafeEventMap>(
 
     const builder = AnalyticsBuilder.create<E>()
 
-    // Always add Google Analytics provider
+    // Add main Google Analytics provider
     const gaProvider = new GoogleAnalyticsProvider({
       debugMode: config.debugMode,
+      providerId: PROVIDER.GA,
+      // Uses default GA_TRACKING_ID from constants
     })
     builder.addProvider(gaProvider)
+
+    // Add Safe Apps Google Analytics provider for ecosystem tracking
+    const gaSafeAppsProvider = new GoogleAnalyticsProvider({
+      measurementId: SAFE_APPS_GA_TRACKING_ID,
+      debugMode: config.debugMode,
+      providerId: PROVIDER.GA_SAFE_APPS,
+    })
+    builder.addProvider(gaSafeAppsProvider)
 
     // Add Mixpanel provider if feature is enabled
     if (isMixpanelEnabled) {
@@ -162,6 +177,32 @@ export const useAnalytics = <E extends SafeEventMap = SafeEventMap>(
       analyticsRef.current = null
     }
   }, [isAnalyticsEnabled, isMixpanelEnabled, config.debugMode, defaultContext])
+
+  // Handle provider-specific consent changes
+  useEffect(() => {
+    if (!analyticsRef.current) return
+
+    const consentManager = analyticsRef.current.getConsentManager()
+    if (!consentManager) return
+
+    // Update core consent state (provider-agnostic)
+    if (isAnalyticsEnabled) {
+      consentManager.enableAnalytics()
+    } else {
+      consentManager.disableAnalytics()
+    }
+
+    // Handle provider-specific consent logic
+    const consentState = consentManager.get()
+
+    // Google Analytics consent handling (GA consent API + cookies + page reload)
+    GoogleAnalyticsConsentHandler.handleConsentChange(consentState)
+
+    // Mixpanel consent handling (opt-in/opt-out tracking)
+    if (isMixpanelEnabled) {
+      MixpanelConsentHandler.handleConsentChange(consentState)
+    }
+  }, [isAnalyticsEnabled, isMixpanelEnabled])
 
   // Update context when relevant values change
   useEffect(() => {
@@ -199,6 +240,10 @@ export const useAnalytics = <E extends SafeEventMap = SafeEventMap>(
     }
   }, [wallet, walletChain, safeAddress])
 
+  // Track meta events on app load (pass analytics instance to avoid circular dependency)
+  // Only enable meta events when analytics is fully initialized and enabled
+  useMetaEvents(isAnalyticsEnabled ? analyticsRef.current : null)
+
   // Analytics methods
   const track = useCallback(
     <K extends Extract<keyof E, string>>(event: AnalyticsEvent<K, E[K]>) => {
@@ -232,7 +277,7 @@ export const useAnalytics = <E extends SafeEventMap = SafeEventMap>(
   )
 
   const isProviderEnabled = useCallback(
-    (providerId: 'ga' | 'mixpanel'): boolean => {
+    (providerId: 'ga' | 'ga_safe_apps' | 'mixpanel'): boolean => {
       if (!isAnalyticsEnabled || !analyticsRef.current) return false
 
       if (providerId === 'mixpanel' && !isMixpanelEnabled) return false

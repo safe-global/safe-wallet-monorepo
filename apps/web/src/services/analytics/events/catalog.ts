@@ -161,6 +161,25 @@ export const EventSchemas = {
     value: z.union([z.string(), z.number()]).optional(),
   }),
 
+  // Meta Events (App Load Analytics)
+  queued_transactions: z.object({
+    count: z.number(),
+    safe_address: z.string().optional(),
+    chain_id: z.string().optional(),
+  }),
+
+  token_count: z.object({
+    total: z.number(),
+    safe_address: z.string().optional(),
+    chain_id: z.string().optional(),
+  }),
+
+  hidden_tokens: z.object({
+    count: z.number(),
+    safe_address: z.string().optional(),
+    chain_id: z.string().optional(),
+  }),
+
   // Error Events
   error_shown: z.object({
     error_code: z.string(),
@@ -206,6 +225,11 @@ export const EVENT = {
 
   // Features
   FeatureUsed: 'feature_used',
+
+  // Meta Events
+  QueuedTransactions: 'queued_transactions',
+  TokenCount: 'token_count',
+  HiddenTokens: 'hidden_tokens',
 
   // Errors
   ErrorShown: 'error_shown',

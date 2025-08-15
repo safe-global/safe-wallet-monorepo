@@ -392,6 +392,14 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
   }
 
   /**
+   * Get the consent manager instance for external consent integration
+   * Used by hooks to bridge Redux consent with analytics consent
+   */
+  getConsentManager(): ConsentManager {
+    return this.consent
+  }
+
+  /**
    * Public providers list for tests and consumers
    */
   get providers(): BaseProvider<E>[] {
