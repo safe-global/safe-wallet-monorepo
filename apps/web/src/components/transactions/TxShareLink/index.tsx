@@ -20,7 +20,9 @@ function TxShareAccordion({ noExpand = false }: { noExpand: boolean }) {
   return (
     <Accordion className={css.accordion} onChange={onExpand} disabled={noExpand}>
       <AccordionSummary expandIcon={noExpand ? null : <ExpandMoreIcon />} className={css.summary}>
-        <Typography className={css.header}>Share link{!noExpand && ' with other signers'}</Typography>
+        <Typography data-testid="share-block-header" className={css.header}>
+          Share link{!noExpand && ' with other signers'}
+        </Typography>
       </AccordionSummary>
 
       <AccordionDetails data-testid="share-block-details" className={css.details}>
