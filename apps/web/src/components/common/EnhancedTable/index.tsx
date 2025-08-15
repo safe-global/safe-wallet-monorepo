@@ -150,10 +150,19 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact }: EnhancedTabl
 
   const orderedRows = orderBy ? rows.slice().sort(getComparator(order, orderBy)) : rows
   const pagedRows = orderedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+  const showPagination = rows.length > pageSizes[0] || rowsPerPage !== pageSizes[1]
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <TableContainer data-testid="table-container" component={Paper} sx={{ width: '100%', mb: 2 }}>
+    <Box sx={{ width: '100%', mb: 2 }}>
+      <TableContainer
+        data-testid="table-container"
+        component={Paper}
+        sx={{
+          width: '100%',
+          borderBottomLeftRadius: showPagination ? 0 : '6px',
+          borderBottomRightRadius: showPagination ? 0 : '6px',
+        }}
+      >
         <Table
           aria-labelledby="tableTitle"
           className={classNames({ [css.mobileColumn]: mobileVariant, [css.compactTable]: compact })}
@@ -194,16 +203,20 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact }: EnhancedTabl
         </Table>
       </TableContainer>
 
-      {(rows.length > pageSizes[0] || rowsPerPage !== pageSizes[1]) && (
+      {showPagination && (
         <TablePagination
           data-testid="table-pagination"
           rowsPerPageOptions={pageSizes}
-          component="div"
+          component={Paper}
           count={rows.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
+          sx={{
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
+          }}
         />
       )}
     </Box>

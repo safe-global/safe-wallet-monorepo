@@ -1,6 +1,6 @@
 import CheckBalance from '@/features/counterfactual/CheckBalance'
-import { type ReactElement } from 'react'
-import { Box, Checkbox, IconButton, Skeleton, Tooltip, Typography } from '@mui/material'
+import React, { type ReactElement } from 'react'
+import { Box, Card, Checkbox, Chip, IconButton, Skeleton, Stack, SvgIcon, Tooltip, Typography } from '@mui/material'
 import css from './styles.module.css'
 import TokenAmount from '@/components/common/TokenAmount'
 import TokenIcon from '@/components/common/TokenIcon'
@@ -20,7 +20,6 @@ import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabl
 import useIsStakingFeatureEnabled from '@/features/stake/hooks/useIsStakingFeatureEnabled'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import StakeButton from '@/features/stake/components/StakeButton'
-import { FiatBalance } from './FiatBalance'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { FiatChange } from './FiatChange'
@@ -29,6 +28,10 @@ import EarnButton from '@/features/earn/components/EarnButton'
 import { EARN_LABELS } from '@/services/analytics/events/earn'
 import { isEligibleEarnToken } from '@/features/earn/utils'
 import useChainId from '@/hooks/useChainId'
+import AccountsIcon from '@/public/images/sidebar/wallet.svg'
+import FiatValue from '@/components/common/FiatValue'
+import { formatPercentage } from '@safe-global/utils/utils/formatters'
+import useFiatTotal from '@/hooks/useFiatTotal'
 
 const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   asset: {
@@ -42,6 +45,14 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
       </div>
     ),
   },
+  price: {
+    rawValue: '0',
+    content: (
+      <Typography>
+        <Skeleton width="32px" />
+      </Typography>
+    ),
+  },
   balance: {
     rawValue: '0',
     content: (
@@ -51,14 +62,6 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
     ),
   },
   value: {
-    rawValue: '0',
-    content: (
-      <Typography>
-        <Skeleton width="32px" />
-      </Typography>
-    ),
-  },
-  change: {
     rawValue: '0',
     content: (
       <Typography>
@@ -86,6 +89,12 @@ const headCells = [
     width: '44%',
   },
   {
+    id: 'price',
+    label: 'Price',
+    width: '14%',
+    align: 'left',
+  },
+  {
     id: 'balance',
     label: 'Balance',
     width: '14%',
@@ -93,14 +102,8 @@ const headCells = [
   {
     id: 'value',
     label: 'Value',
-    width: '14%',
+    width: 'auto',
     align: 'right',
-  },
-  {
-    id: 'change',
-    label: '24h change',
-    width: '14%',
-    align: 'left',
   },
   {
     id: 'actions',
@@ -138,6 +141,7 @@ const AssetsTable = ({
     ? skeletonRows
     : (visibleAssets || []).map((item) => {
         const rawFiatValue = parseFloat(item.fiatBalance)
+        const rawPriceValue = parseFloat(item.fiatConversion)
         const isNative = isNativeToken(item.tokenInfo)
         const isSelected = isAssetSelected(item.tokenInfo.address)
 
@@ -167,34 +171,50 @@ const AssetsTable = ({
                 </div>
               ),
             },
+            price: {
+              rawValue: rawPriceValue,
+              content: (
+                <Typography>
+                  <FiatValue value={item.fiatConversion} />
+                </Typography>
+              ),
+            },
             balance: {
               rawValue: Number(item.balance) / 10 ** (item.tokenInfo.decimals ?? 0),
               collapsed: item.tokenInfo.address === hidingAsset,
               content: (
-                <TokenAmount
-                  value={item.balance}
-                  decimals={item.tokenInfo.decimals}
-                  tokenSymbol={item.tokenInfo.symbol}
-                />
+                <Typography sx={{ '& b': { fontWeight: '400' } }}>
+                  <TokenAmount
+                    value={item.balance}
+                    decimals={item.tokenInfo.decimals}
+                    tokenSymbol={item.tokenInfo.symbol}
+                  />
+                </Typography>
               ),
             },
             value: {
               rawValue: rawFiatValue,
               collapsed: item.tokenInfo.address === hidingAsset,
-              content: <FiatBalance balanceItem={item} />,
-            },
-            change: {
-              rawValue: item.fiatBalance24hChange ? Number(item.fiatBalance24hChange) : null,
-              collapsed: item.tokenInfo.address === hidingAsset,
-              content: <FiatChange balanceItem={item} />,
+              content: (
+                <Box textAlign="right">
+                  <Typography>
+                    <FiatValue value={item.fiatBalance} />
+                  </Typography>
+                  {item.fiatBalance24hChange && (
+                    <Typography variant="caption">
+                      <FiatChange balanceItem={item} inline />
+                    </Typography>
+                  )}
+                </Box>
+              ),
             },
             actions: {
               rawValue: Number(item.fiatBalance24hChange),
               sticky: true,
               collapsed: item.tokenInfo.address === hidingAsset,
               content: (
-                <Box display="flex" flexDirection="row" gap={1} alignItems="center">
-                  <>
+                <Stack direction="row" gap={1} alignItems="center" justifyContent="flex-end">
+                  <Stack direction="row" gap={1} alignItems="center" bgcolor="background.paper" p={1}>
                     <SendButton tokenInfo={item.tokenInfo} />
 
                     {isSwapFeatureEnabled && (
@@ -216,13 +236,16 @@ const AssetsTable = ({
                         </Tooltip>
                       </Track>
                     )}
-                  </>
-                </Box>
+                  </Stack>
+                </Stack>
               ),
             },
           },
         }
       })
+
+  const fiatTotal = useFiatTotal()
+  const shareOfFiatTotal = fiatTotal ? formatPercentage(Number(balances.fiatTotal) / fiatTotal) : null
 
   return (
     <>
@@ -237,9 +260,24 @@ const AssetsTable = ({
       {hasNoAssets ? (
         <AddFundsCTA />
       ) : (
-        <div className={css.container}>
-          <EnhancedTable rows={rows} headCells={headCells} />
-        </div>
+        <Card sx={{ px: 2, pt: 2, mb: 2 }}>
+          <Stack direction="row" alignItems="center" gap={1}>
+            <div className={css.walletImage}>
+              <SvgIcon component={AccountsIcon} inheritViewBox fontSize="small" />
+            </div>
+
+            <Typography fontWeight="bold">Wallet</Typography>
+
+            {shareOfFiatTotal && <Chip variant="filled" size="tiny" label={shareOfFiatTotal} />}
+
+            <Typography fontWeight="bold" mr={1} ml="auto" justifySelf="flex-end">
+              <FiatValue value={balances.fiatTotal} maxLength={20} precise />
+            </Typography>
+          </Stack>
+          <div className={css.container}>
+            <EnhancedTable rows={rows} headCells={headCells} compact />
+          </div>
+        </Card>
       )}
 
       <CheckBalance />
