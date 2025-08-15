@@ -135,10 +135,6 @@ export class AnalyticsManager {
     }
   }
 
-  trackBatch(events: Array<{ eventKey: string; properties?: Record<string, any> }>): TrackingResult[] {
-    return events.map(({ eventKey, properties }) => this.track(eventKey, properties))
-  }
-
   identify(userId: string, traits?: Record<string, any>): void {
     if (!this.isInitialized) {
       return

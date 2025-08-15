@@ -355,17 +355,6 @@ describe('New Analytics System', () => {
       expect(true).toBe(true) // Placeholder - actual verification would check provider calls
     })
 
-    it('should handle batch tracking', () => {
-      const events = [
-        { eventKey: 'SAFE_CREATED', properties: { chain_id: '1' } },
-        { eventKey: 'WALLET_CONNECTED', properties: { wallet_type: 'MetaMask' } },
-      ]
-
-      const results = analytics.trackBatch(events)
-
-      expect(results).toHaveLength(2)
-      expect(results.every((result) => result.success)).toBe(true)
-    })
   })
 
   describe('Event Configuration Validation', () => {

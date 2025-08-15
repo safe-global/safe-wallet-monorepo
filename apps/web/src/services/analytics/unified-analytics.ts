@@ -53,10 +53,6 @@ export const analytics = {
     return manager.track(eventKey, properties)
   },
 
-  trackBatch: (events: Array<{ eventKey: string; properties?: Record<string, any> }>): TrackingResult[] => {
-    return manager.trackBatch(events)
-  },
-
   page: (path: string, properties?: Record<string, any>): TrackingResult => {
     return manager.page(path, properties)
   },
