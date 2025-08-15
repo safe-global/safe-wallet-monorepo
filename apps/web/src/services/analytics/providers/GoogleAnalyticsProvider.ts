@@ -1,6 +1,6 @@
 /**
  * Google Analytics provider adapter for the analytics abstraction layer.
- * Wraps the existing GTM implementation while conforming to provider interface.
+ * Direct GA4 integration with event name normalization and payload transformation.
  */
 
 import type {
@@ -12,11 +12,10 @@ import type {
   ProviderInitOptions,
   PageContext,
 } from '../core'
-import { gtmSetChainId, gtmSetDeviceType, gtmSetSafeAddress, gtmSetUserProperty, gtmTrackPageview } from '../gtm'
 import { sendGAEvent } from '@next/third-parties/google'
 import { GA_TRACKING_ID, IS_PRODUCTION } from '@/config/constants'
-import type { EventType, DeviceType, AnalyticsEvent as LegacyAnalyticsEvent } from '../types'
-import { DeviceType as LegacyDeviceType } from '../types'
+import { PROVIDER } from './constants'
+import { EventNormalization, GA4Transform, ValidationUtils } from './utils'
 import packageJson from '../../../../package.json'
 
 export type GoogleAnalyticsOptions = {
@@ -27,12 +26,12 @@ export type GoogleAnalyticsOptions = {
 
 /**
  * Google Analytics provider implementation
- * Adapts existing GTM functionality to the new provider interface
+ * Direct GA4 integration without legacy wrapper dependencies
  */
 export class GoogleAnalyticsProvider<E extends SafeEventMap = SafeEventMap>
   implements BaseProvider<E>, IdentifyCapable, PageCapable
 {
-  readonly id = 'ga'
+  readonly id = PROVIDER.GA
   private enabled = true
   private gtag?: (...args: any[]) => void
   private measurementId: string
@@ -78,21 +77,25 @@ export class GoogleAnalyticsProvider<E extends SafeEventMap = SafeEventMap>
 
   /**
    * Set user ID for cross-session tracking
-   * Uses GTM config to ensure ID applies to all subsequent events
+   * Direct GA4 configuration without legacy wrapper
    */
   identify(userId: string, traits?: Record<string, unknown>): void {
     if (!this.enabled || !this.gtag) return
 
     // Set user ID through config to ensure it applies to all events
     this.gtag('config', this.measurementId, {
-      user_id: userId,
+      user_id: ValidationUtils.sanitizeValue(userId),
       send_page_view: false, // Prevent automatic page view
     })
 
     // Set user properties if provided
-    if (traits) {
-      for (const [key, value] of Object.entries(traits)) {
-        gtmSetUserProperty(key, String(value))
+    if (traits && ValidationUtils.isValidPayload(traits)) {
+      const transformedTraits = GA4Transform.transformPayload(traits)
+
+      for (const [key, value] of Object.entries(transformedTraits)) {
+        this.gtag('set', 'user_properties', {
+          [key]: ValidationUtils.sanitizeValue(value),
+        })
       }
     }
 
@@ -103,155 +106,74 @@ export class GoogleAnalyticsProvider<E extends SafeEventMap = SafeEventMap>
 
   /**
    * Track page views with context
+   * Direct GA4 page_view event without legacy wrapper
    */
   page(context?: PageContext): void {
     if (!this.enabled || !this.gtag) return
 
-    const pagePath = context?.path || location.pathname
-    const fullUrl = context?.url || location.href
+    const pagePath = context?.path || (typeof location !== 'undefined' ? location.pathname : '')
+    const pageUrl = context?.url || (typeof location !== 'undefined' ? location.href : '')
+    const pageTitle = context?.title || (typeof document !== 'undefined' ? document.title : '')
 
-    gtmTrackPageview(pagePath, fullUrl)
+    // Send GA4 page_view event
+    this.gtag('event', 'page_view', {
+      page_title: pageTitle,
+      page_location: pageUrl,
+      page_path: pagePath,
+      send_to: this.measurementId,
+    })
 
     if (this.debugMode) {
-      console.info('[GA Provider] Page view tracked:', { path: pagePath, url: fullUrl })
+      console.info('[GA Provider] Page view tracked:', {
+        title: pageTitle,
+        path: pagePath,
+        url: pageUrl,
+      })
     }
   }
 
   /**
-   * Convert new event format to legacy GA event format
-   */
-  private convertToLegacyEvent(event: AnalyticsEvent): LegacyAnalyticsEvent {
-    // Extract chainId from context or payload
-    const chainId = (event.context as any)?.chainId || (event.payload as any)?.chainId || ''
-
-    // Map common event types or use event name
-    const eventType = this.mapEventType(event.name)
-
-    return {
-      event: eventType,
-      category: this.extractCategory(event.name),
-      action: this.extractAction(event.name),
-      label: this.extractLabel(event.payload),
-      chainId,
-    }
-  }
-
-  /**
-   * Map event names to legacy EventType enum values
-   */
-  private mapEventType(eventName: string): EventType | undefined {
-    const lowercaseName = eventName.toLowerCase()
-
-    // Map common patterns to existing event types
-    if (lowercaseName.includes('safe_created') || lowercaseName.includes('safe created')) {
-      return 'safe_created' as EventType
-    }
-    if (lowercaseName.includes('safe_activated') || lowercaseName.includes('safe activated')) {
-      return 'safe_activated' as EventType
-    }
-    if (lowercaseName.includes('safe_opened') || lowercaseName.includes('safe opened')) {
-      return 'safe_opened' as EventType
-    }
-    if (lowercaseName.includes('wallet_connected') || lowercaseName.includes('wallet connected')) {
-      return 'wallet_connected' as EventType
-    }
-    if (lowercaseName.includes('tx_created') || lowercaseName.includes('transaction created')) {
-      return 'tx_created' as EventType
-    }
-    if (lowercaseName.includes('tx_confirmed') || lowercaseName.includes('transaction confirmed')) {
-      return 'tx_confirmed' as EventType
-    }
-    if (lowercaseName.includes('tx_executed') || lowercaseName.includes('transaction executed')) {
-      return 'tx_executed' as EventType
-    }
-    if (lowercaseName.includes('page') || lowercaseName.includes('pageview')) {
-      return 'pageview' as EventType
-    }
-    if (lowercaseName.includes('safe_app') || lowercaseName.includes('safeapp') || lowercaseName.includes('safe app')) {
-      return 'safeApp' as EventType
-    }
-
-    // Default to customClick for user interactions
-    return 'customClick' as EventType
-  }
-
-  /**
-   * Extract category from event name
-   */
-  private extractCategory(eventName: string): string {
-    const lowercaseName = eventName.toLowerCase()
-
-    if (lowercaseName.includes('safe') && lowercaseName.includes('app')) {
-      return 'safe'
-    }
-    if (lowercaseName.includes('wallet')) {
-      return 'wallet'
-    }
-    if (lowercaseName.includes('transaction') || lowercaseName.includes('tx')) {
-      return 'transaction'
-    }
-    if (lowercaseName.includes('safe')) {
-      return 'safe'
-    }
-
-    // Use first part of PascalCase or snake_case name as category
-    const parts = eventName.split(/[\s_]|(?=[A-Z])/)
-    return parts[0].toLowerCase() || 'general'
-  }
-
-  /**
-   * Extract action from event name and payload
-   */
-  private extractAction(eventName: string): string {
-    // Use the full event name as action, cleaned up
-    return eventName
-      .replace(/([a-z])([A-Z])/g, '$1 $2') // PascalCase to space-separated
-      .replace(/_/g, ' ') // underscores to spaces
-      .toLowerCase()
-  }
-
-  /**
-   * Extract label from payload
-   */
-  private extractLabel(payload: any): string | undefined {
-    if (!payload || typeof payload !== 'object') return undefined
-
-    // Look for common label fields
-    const labelFields = ['label', 'name', 'type', 'method', 'action', 'status']
-
-    for (const field of labelFields) {
-      if (payload[field] !== undefined) {
-        return String(payload[field])
-      }
-    }
-
-    return undefined
-  }
-
-  /**
-   * Track events through existing GTM infrastructure
+   * Track events with direct GA4 integration
+   * Simple, clean implementation without legacy wrapper dependencies
    */
   track(event: AnalyticsEvent): void {
     if (!this.enabled || !this.gtag) return
 
-    try {
-      // Convert to legacy event format
-      const legacyEvent = this.convertToLegacyEvent(event)
+    if (!ValidationUtils.isValidEventName(event.name)) {
+      console.warn('[GA Provider] Invalid event name:', event.name)
+      return
+    }
 
-      // Use existing gtmTrack logic but bypass the wrapper
+    try {
+      // Normalize event name for GA4 (snake_case, max 40 chars)
+      const normalizedEventName = EventNormalization.toSnakeCase(event.name)
+
+      // Transform payload to GA4 format
+      const transformedPayload = ValidationUtils.isValidPayload(event.payload)
+        ? GA4Transform.transformPayload(event.payload)
+        : {}
+
+      // Extract context parameters
+      const contextParams = GA4Transform.extractContextParams(event.context)
+
+      // Combine all event data
       const eventData = {
-        ...legacyEvent,
-        appVersion: packageJson.version,
-        deviceType: LegacyDeviceType.DESKTOP, // Will be overridden by device detection
-        safeAddress: (event.context as any)?.safeAddress?.replace(/^0x/, '') || '', // Remove 0x prefix
+        ...transformedPayload,
+        ...contextParams,
+        // Standard GA4 parameters
+        app_version: packageJson.version,
         send_to: this.measurementId,
       }
 
-      // Send to GA
-      sendGAEvent('event', legacyEvent.event || 'custom_event', eventData)
+      // Send to GA4
+      sendGAEvent('event', normalizedEventName, eventData)
 
       if (this.debugMode) {
-        console.info('[GA Provider] Event tracked:', { original: event, converted: eventData })
+        console.info('[GA Provider] Event tracked:', {
+          original: event.name,
+          normalized: normalizedEventName,
+          data: eventData,
+        })
       }
     } catch (error) {
       console.error('[GA Provider] Failed to track event:', error)
@@ -259,30 +181,13 @@ export class GoogleAnalyticsProvider<E extends SafeEventMap = SafeEventMap>
     }
   }
 
-  /**
-   * Update provider configuration with context changes
-   */
-  updateContext(context: { chainId?: string; deviceType?: DeviceType; safeAddress?: string }): void {
-    if (context.chainId) {
-      gtmSetChainId(context.chainId)
-    }
-
-    if (context.deviceType) {
-      gtmSetDeviceType(context.deviceType)
-    }
-
-    if (context.safeAddress) {
-      gtmSetSafeAddress(context.safeAddress)
-    }
-  }
-
   async flush(): Promise<void> {
-    // GA doesn't require explicit flushing, events are sent immediately
+    // GA4 doesn't require explicit flushing, events are sent immediately
     return Promise.resolve()
   }
 
   shutdown(): Promise<void> {
-    // No cleanup required for GA
+    // Clean shutdown
     this.enabled = false
     return Promise.resolve()
   }
