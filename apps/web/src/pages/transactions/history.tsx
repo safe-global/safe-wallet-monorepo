@@ -12,6 +12,7 @@ import TxFilterForm from '@/components/transactions/TxFilterForm'
 import TrustedToggle from '@/components/transactions/TrustedToggle'
 import { useTxFilter } from '@/utils/tx-history-filter'
 import { BRAND_NAME } from '@/config/constants'
+import CsvTxExportButton from '@/components/transactions/CsvTxExportButton'
 
 const History: NextPage = () => {
   const [filter] = useTxFilter()
@@ -35,6 +36,7 @@ const History: NextPage = () => {
         <Button variant="outlined" onClick={toggleFilter} size="small" endIcon={<ExpandIcon />}>
           {filter?.type ?? 'Filter'}
         </Button>
+        <CsvTxExportButton hasActiveFilter={!!filter} />
       </TxHeader>
 
       <main>
