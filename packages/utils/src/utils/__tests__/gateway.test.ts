@@ -25,7 +25,7 @@ describe('gateway', () => {
       const result = getHashedExplorerUrl(txHash, {
         address: 'https://etherscan.io/address/{{address}}',
         txHash: 'https://etherscan.io/tx/{{txHash}}',
-        api: 'https://api.etherscan.io/api?module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
+        api: 'https://api.etherscan.io/v2/api?chainid=1&module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
       })
 
       expect(result).toEqual(
@@ -38,7 +38,7 @@ describe('gateway', () => {
       const result = getHashedExplorerUrl(address, {
         address: 'https://etherscan.io/address/{{address}}',
         txHash: 'https://etherscan.io/tx/{{txHash}}',
-        api: 'https://api.etherscan.io/api?module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
+        api: 'https://api.etherscan.io/v2/api?chainid=1&module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
       })
 
       expect(result).toEqual('https://etherscan.io/address/0xabcdbc2ecb47642ee8cf52fd7b88fa42fbb69f98')
@@ -52,7 +52,7 @@ describe('gateway', () => {
       const { href, title } = getExplorerLink(address, {
         address: 'https://etherscan.io/address/{{address}}',
         txHash: 'https://etherscan.io/tx/{{txHash}}',
-        api: 'https://api.etherscan.io/api?module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
+        api: 'https://api.etherscan.io/v2/api?chainid=1&module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
       })
 
       expect(href).toEqual('https://etherscan.io/address/0xabcdbc2ecb47642ee8cf52fd7b88fa42fbb69f98')

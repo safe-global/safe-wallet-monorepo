@@ -30,7 +30,7 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     blockExplorerUriTemplate: {
       address: 'https://etherscan.io/address/{{address}}',
       txHash: 'https://etherscan.io/tx/{{txHash}}',
-      api: 'https://api.etherscan.io/api?module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
+      api: 'https://api.etherscan.io/v2/api?chainid=1&module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
     },
     nativeCurrency: {
       name: 'Ether',
@@ -43,7 +43,7 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     gasPrice: [
       {
         type: GAS_PRICE_TYPE.ORACLE,
-        uri: 'https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=JNFAU892RF9TJWBU3EV7DJCPIWZY8KEMY1',
+        uri: 'https://api.etherscan.io/v2/api?chainid=1&module=gastracker&action=gasoracle&apikey=JNFAU892RF9TJWBU3EV7DJCPIWZY8KEMY1',
         gasParameter: 'FastGasPrice',
         gweiFactor: '1000000000.000000000',
       },
@@ -471,7 +471,7 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     blockExplorerUriTemplate: {
       address: 'https://optimistic.etherscan.io/address/{{address}}',
       txHash: 'https://optimistic.etherscan.io/tx/{{txHash}}',
-      api: 'https://api-optimistic.etherscan.io/api?module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
+      api: 'https://api-optimistic.etherscan.io/v2/api?chainid=10&module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
     },
     nativeCurrency: {
       name: 'Ether',
@@ -522,7 +522,7 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     blockExplorerUriTemplate: {
       address: 'https://goerli.etherscan.io/address/{{address}}',
       txHash: 'https://goerli.etherscan.io/tx/{{txHash}}',
-      api: 'https://api-goerli.etherscan.io/api?module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
+      api: 'https://api-goerli.etherscan.io/v2/api?chainid=5&module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
     },
     nativeCurrency: {
       name: 'Görli Ether',
@@ -578,7 +578,7 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     blockExplorerUriTemplate: {
       address: 'https://rinkeby.etherscan.io/address/{{address}}',
       txHash: 'https://rinkeby.etherscan.io/tx/{{txHash}}',
-      api: 'https://api-rinkeby.etherscan.io/api?module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
+      api: 'https://api-rinkeby.etherscan.io/v2/api?chainid=4&module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
     },
     nativeCurrency: {
       name: 'Ether',
