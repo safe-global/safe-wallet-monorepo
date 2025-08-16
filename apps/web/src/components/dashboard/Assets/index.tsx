@@ -36,7 +36,7 @@ const NoAssets = () => (
       No assets yet
     </Typography>
 
-    <Typography color="primary.light">Onramp crypto or deposit from another wallet to get started.</Typography>
+    <Typography color="primary.light">Deposit from another wallet to get started.</Typography>
   </Paper>
 )
 
