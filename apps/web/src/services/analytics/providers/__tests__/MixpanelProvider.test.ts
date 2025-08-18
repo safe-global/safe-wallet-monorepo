@@ -12,6 +12,7 @@ jest.mock('../../mixpanel', () => ({
   mixpanelTrack: jest.fn(),
   mixpanelIdentify: jest.fn(),
   mixpanelSetUserProperties: jest.fn(),
+  mixpanelShutdown: jest.fn(),
 }))
 
 const mockMixpanel = {
@@ -21,6 +22,7 @@ const mockMixpanel = {
   mixpanelSetUserProperties: mixpanel.mixpanelSetUserProperties as jest.MockedFunction<
     typeof mixpanel.mixpanelSetUserProperties
   >,
+  mixpanelShutdown: mixpanel.mixpanelShutdown as jest.MockedFunction<typeof mixpanel.mixpanelShutdown>,
 }
 
 // Test event types

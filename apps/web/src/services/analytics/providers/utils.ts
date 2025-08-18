@@ -3,6 +3,9 @@
  * Removes string literals and provides consistent, reusable logic.
  */
 
+import type { SafeEventMap } from '../core/types'
+import type { EventUnion } from '../events/catalog'
+
 /**
  * Event name normalization strategies
  */
@@ -86,6 +89,7 @@ export const GA4Transform = {
 
     const params: Record<string, unknown> = {}
 
+    // Standard context properties with specific handling
     if (context.chainId) {
       params.chain_id = context.chainId
     }
@@ -94,10 +98,44 @@ export const GA4Transform = {
       params.safe_address = context.safeAddress.replace(/^0x/, '')
     }
     if (context.userId) {
-      params.user_id = context.userId
+      params.user_id = ValidationUtils.sanitizeValue(context.userId)
     }
     if (context.source) {
       params.source = context.source
+    }
+
+    // Include any additional custom properties from context
+    const knownContextProps = new Set([
+      'chainId',
+      'safeAddress',
+      'userId',
+      'source',
+      'page',
+      'device',
+      'locale',
+      'appVersion',
+      'test',
+      'anonymousId',
+      'sessionId',
+      'path',
+      'url',
+      'title',
+    ])
+
+    for (const [key, value] of Object.entries(context)) {
+      if (!knownContextProps.has(key) && value !== undefined && value !== null) {
+        // Convert custom property to snake_case for GA4
+        const normalizedKey = EventNormalization.toSnakeCase(key)
+
+        // Apply GA4 value constraints
+        if (typeof value === 'string') {
+          params[normalizedKey] = value.substring(0, 100)
+        } else if (typeof value === 'number' || typeof value === 'boolean') {
+          params[normalizedKey] = value
+        } else {
+          params[normalizedKey] = String(value).substring(0, 100)
+        }
+      }
     }
 
     return params
@@ -134,6 +172,7 @@ export const MixpanelTransform = {
 
     const properties: Record<string, unknown> = {}
 
+    // Standard context properties with specific handling
     if (context.chainId) {
       properties['Chain ID'] = context.chainId
     }
@@ -148,6 +187,29 @@ export const MixpanelTransform = {
     }
     if (context.device?.userAgent) {
       properties['User Agent'] = context.device.userAgent
+    }
+
+    // Include any additional custom properties from context
+    const knownContextProps = new Set([
+      'chainId',
+      'safeAddress',
+      'userId',
+      'source',
+      'page',
+      'device',
+      'locale',
+      'appVersion',
+      'test',
+      'anonymousId',
+      'sessionId',
+    ])
+
+    for (const [key, value] of Object.entries(context)) {
+      if (!knownContextProps.has(key) && value !== undefined && value !== null) {
+        // Convert custom property to Title Case for Mixpanel
+        const normalizedKey = EventNormalization.toTitleCase(key)
+        properties[normalizedKey] = value
+      }
     }
 
     return properties
@@ -187,15 +249,36 @@ export const ValidationUtils = {
   },
 
   /**
+   * Validate that an unknown value is a valid analytics event
+   */
+  isValidEvent: <T extends SafeEventMap>(event: unknown): event is EventUnion<T> => {
+    return (
+      typeof event === 'object' &&
+      event !== null &&
+      'name' in event &&
+      ValidationUtils.isValidEventName((event as { name: unknown }).name) &&
+      'properties' in event &&
+      ValidationUtils.isValidPayload((event as { properties: unknown }).properties)
+    )
+  },
+
+  /**
    * Sanitize a value for analytics (remove PII, truncate, etc.)
    */
   sanitizeValue: (value: unknown): unknown => {
     if (typeof value === 'string') {
       // Remove potential PII patterns
-      return value
+      let sanitized = value
         .replace(/\b[\w._%+-]+@[\w.-]+\.[A-Z]{2,}\b/gi, '[email]') // Email addresses
         .replace(/\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b/g, '[card]') // Credit card numbers
-        .substring(0, 1000) // Reasonable length limit
+
+      // For GA4 user IDs, convert to alphanumeric + underscores only
+      // This assumes the value is being used as a user ID based on context
+      if (sanitized.match(/^[a-zA-Z0-9\-_.@]+$/)) {
+        sanitized = sanitized.replace(/[-]/g, '_') // Convert dashes to underscores for GA4
+      }
+
+      return sanitized.substring(0, 1000) // Reasonable length limit
     }
     return value
   },

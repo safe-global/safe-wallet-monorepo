@@ -8,8 +8,10 @@ import type { EventUnion } from '../events/catalog'
 import type { ProviderId, TrackOptions, Router } from '../providers/constants'
 import type { BaseProvider } from './provider'
 import { hasIdentifyCapability, hasGroupCapability, hasPageCapability } from './provider'
+import type { IdentifyCapable, GroupCapable, PageCapable } from './provider'
 import { MiddlewareChain } from './middleware'
 import { ConsentManager } from './consent'
+import type { ConsentState } from './types'
 import { shallowMerge } from './types'
 
 type ProviderEntry<E extends SafeEventMap> = {
@@ -20,7 +22,7 @@ type ProviderEntry<E extends SafeEventMap> = {
 /**
  * Main analytics orchestrator class
  */
-export class Analytics<E extends Record<string, Record<string, unknown>> = Record<string, Record<string, unknown>>> {
+export class Analytics<E extends SafeEventMap = SafeEventMap> {
   private providerMap = new Map<ProviderId, ProviderEntry<E>>()
   private middlewares = new MiddlewareChain<E>()
   private consent: ConsentManager
@@ -39,6 +41,15 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
     this.consent = new ConsentManager(options?.consent)
     this.onError = options?.onError
     this.router = options?.router
+
+    // Listen for consent changes to invalidate cache and notify providers
+    this.consent.addListener((newConsentState) => {
+      // Invalidate consent cache since consent state changed
+      this.consentCache = null
+
+      // Notify all providers of consent change
+      this.notifyProvidersOfConsentChange(newConsentState)
+    })
 
     // Register initial providers
     options?.providers?.forEach((p) => this.addProvider(p))
@@ -61,9 +72,8 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
       })
 
       // Handle async initialization errors
-      const isPromise = initResult && typeof initResult.catch === 'function'
-      if (isPromise) {
-        initResult.catch((error: any) => {
+      if (this.isThenable(initResult)) {
+        initResult.catch((error: unknown) => {
           this.onError?.(error)
         })
       }
@@ -242,13 +252,24 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
   }
 
   /**
+   * Check if a value is a thenable (Promise-like object)
+   */
+  private isThenable(value: unknown): value is Promise<unknown> {
+    return (
+      value !== null &&
+      typeof value === 'object' &&
+      'then' in value &&
+      typeof (value as { then: unknown }).then === 'function'
+    )
+  }
+
+  /**
    * Handle execution result with async promise error handling
    */
-  private handleExecutionResult(result: any, errorContext?: any): void {
-    const isPromise = result && typeof result.then === 'function'
-    if (isPromise) {
-      result.catch((error: any) => {
-        this.onError?.(error, errorContext)
+  private handleExecutionResult(result: unknown, errorContext?: unknown): void {
+    if (this.isThenable(result)) {
+      result.catch((error: unknown) => {
+        this.onError?.(error, errorContext as EventUnion<E>)
       })
     }
   }
@@ -258,7 +279,7 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
    */
   private executeOnCapableProviders(
     capabilityCheck: (provider: BaseProvider<E>) => boolean,
-    operation: (provider: any) => void | Promise<void>,
+    operation: (provider: unknown) => void | Promise<void>,
   ): void {
     const enabledProviders = this.getEnabledProviders()
 
@@ -286,7 +307,7 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
 
     for (const provider of filteredProviders) {
       try {
-        const result = provider.track(event as any)
+        const result = provider.track(event as never)
         this.handleExecutionResult(result, event)
       } catch (error) {
         this.onError?.(error, event)
@@ -298,21 +319,37 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
    * Identify a user across providers
    */
   identify(userId: string, traits?: Record<string, unknown>): void {
-    this.executeOnCapableProviders(hasIdentifyCapability, (provider) => provider.identify(userId, traits))
+    this.executeOnCapableProviders(hasIdentifyCapability, (provider) => {
+      const identifyProvider = provider as BaseProvider<E> & IdentifyCapable
+      return identifyProvider.identify(userId, traits)
+    })
   }
 
   /**
    * Associate user with a group/organization
    */
   group(groupId: string, traits?: Record<string, unknown>): void {
-    this.executeOnCapableProviders(hasGroupCapability, (provider) => provider.group(groupId, traits))
+    this.executeOnCapableProviders(hasGroupCapability, (provider) => {
+      const groupProvider = provider as BaseProvider<E> & GroupCapable
+      return groupProvider.group(groupId, traits)
+    })
   }
 
   /**
    * Track page views
    */
   page(context?: PageContext): void {
-    this.executeOnCapableProviders(hasPageCapability, (provider) => provider.page(context))
+    if (!this.shouldProcessEvent()) {
+      return
+    }
+
+    // Merge page context with default context like track() does
+    const mergedContext = shallowMerge(this.defaultContext, context as Partial<EventContext>)
+
+    this.executeOnCapableProviders(hasPageCapability, (provider) => {
+      const pageProvider = provider as BaseProvider<E> & PageCapable
+      return pageProvider.page(mergedContext as PageContext)
+    })
   }
 
   /**
@@ -335,7 +372,7 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
     }
 
     // Run through middleware pipeline
-    const processed = this.middlewares.process(enriched as any, enriched.context)
+    const processed = this.middlewares.process(enriched as never, enriched.context)
     if (processed) dispatch(processed as EventUnion<E>)
   }
 
@@ -367,10 +404,52 @@ export class Analytics<E extends Record<string, Record<string, unknown>> = Recor
   }
 
   /**
+   * Notify all providers of consent state changes
+   */
+  private notifyProvidersOfConsentChange(consentState: ConsentState): void {
+    const entries = Array.from(this.providerMap.values())
+    for (const entry of entries) {
+      try {
+        entry.provider.init?.({
+          consent: consentState,
+          defaultContext: this.defaultContext,
+        })
+      } catch (error) {
+        this.onError?.(error)
+      }
+    }
+  }
+
+  /**
    * Initialize providers. Present for API compatibility in tests.
    */
   async init(): Promise<void> {
-    // Nothing to do eagerly; providers receive init on addProvider and consent changes
+    // Initialize all providers with current consent and context
+    await this.initializeAllProviders(this.consent.get())
+  }
+
+  /**
+   * Initialize all providers with async support
+   */
+  private async initializeAllProviders(consentState: ConsentState): Promise<void> {
+    const entries = Array.from(this.providerMap.values())
+    const promises: Promise<void>[] = []
+
+    for (const entry of entries) {
+      if (entry.provider.init) {
+        const initPromise = Promise.resolve(
+          entry.provider.init({
+            consent: consentState,
+            defaultContext: this.defaultContext,
+          }),
+        ).catch((error) => {
+          this.onError?.(error)
+        })
+        promises.push(initPromise)
+      }
+    }
+
+    await Promise.all(promises)
   }
 
   /**

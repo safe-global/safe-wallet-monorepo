@@ -57,16 +57,27 @@ export interface PageCapable {
 }
 
 /**
+ * Utility type for capability checking - extends BaseProvider to avoid casting issues
+ */
+type ProviderWithCapability<T, E extends Record<string, Record<string, unknown>>> = BaseProvider<E> & Partial<T>
+
+/**
  * Type guards for checking provider capabilities
  */
-export function hasIdentifyCapability(provider: any): provider is IdentifyCapable {
-  return provider && typeof provider.identify === 'function'
+export function hasIdentifyCapability<E extends Record<string, Record<string, unknown>>>(
+  provider: BaseProvider<E>,
+): provider is BaseProvider<E> & IdentifyCapable {
+  return typeof (provider as ProviderWithCapability<IdentifyCapable, E>).identify === 'function'
 }
 
-export function hasGroupCapability(provider: any): provider is GroupCapable {
-  return provider && typeof provider.group === 'function'
+export function hasGroupCapability<E extends Record<string, Record<string, unknown>>>(
+  provider: BaseProvider<E>,
+): provider is BaseProvider<E> & GroupCapable {
+  return typeof (provider as ProviderWithCapability<GroupCapable, E>).group === 'function'
 }
 
-export function hasPageCapability(provider: any): provider is PageCapable {
-  return provider && typeof provider.page === 'function'
+export function hasPageCapability<E extends Record<string, Record<string, unknown>>>(
+  provider: BaseProvider<E>,
+): provider is BaseProvider<E> & PageCapable {
+  return typeof (provider as ProviderWithCapability<PageCapable, E>).page === 'function'
 }

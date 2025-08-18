@@ -4,7 +4,7 @@
  */
 
 import type { BaseProvider, IdentifyCapable, SafeEventMap, AnalyticsEvent, ProviderInitOptions } from '../core'
-import { mixpanelInit, mixpanelTrack, mixpanelIdentify, mixpanelSetUserProperties } from '../mixpanel'
+import { mixpanelInit, mixpanelTrack, mixpanelIdentify, mixpanelSetUserProperties, mixpanelShutdown } from '../mixpanel'
 import { PROVIDER } from './constants'
 import { EventNormalization, MixpanelTransform, ValidationUtils } from './utils'
 
@@ -70,7 +70,7 @@ export class MixpanelProvider<E extends SafeEventMap = SafeEventMap> implements 
     if (!this.enabled || !this.initialized) return
 
     try {
-      mixpanelIdentify(ValidationUtils.sanitizeValue(userId) as string)
+      mixpanelIdentify(userId)
 
       // Set user properties if provided
       if (traits && ValidationUtils.isValidPayload(traits)) {
@@ -139,9 +139,10 @@ export class MixpanelProvider<E extends SafeEventMap = SafeEventMap> implements 
   }
 
   shutdown(): Promise<void> {
-    // Clean shutdown
+    // Clean shutdown - reset both provider and module state
     this.enabled = false
     this.initialized = false
+    mixpanelShutdown() // Reset module-level initialization flag
     return Promise.resolve()
   }
 }

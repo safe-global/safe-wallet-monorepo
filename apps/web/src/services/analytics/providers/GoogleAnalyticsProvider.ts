@@ -11,6 +11,7 @@ import type {
   AnalyticsEvent,
   ProviderInitOptions,
   PageContext,
+  EventContext,
 } from '../core'
 import { sendGAEvent } from '@next/third-parties/google'
 import { GA_TRACKING_ID, IS_PRODUCTION } from '@/config/constants'
@@ -109,28 +110,45 @@ export class GoogleAnalyticsProvider<E extends SafeEventMap = SafeEventMap>
 
   /**
    * Track page views with context
-   * Direct GA4 page_view event without legacy wrapper
+   * Direct GA4 page_view event using sendGAEvent for consistency
    */
-  page(context?: PageContext): void {
-    if (!this.enabled || !this.gtag) return
+  page(pageContext?: PageContext & EventContext): void {
+    if (!this.enabled) return
 
-    const pagePath = context?.path || (typeof location !== 'undefined' ? location.pathname : '')
-    const pageUrl = context?.url || (typeof location !== 'undefined' ? location.href : '')
-    const pageTitle = context?.title || (typeof document !== 'undefined' ? document.title : '')
+    const pagePath = pageContext?.path || (typeof location !== 'undefined' ? location.pathname : '')
+    const pageUrl = pageContext?.url || (typeof location !== 'undefined' ? location.href : '')
+    const pageTitle = pageContext?.title || (typeof document !== 'undefined' ? document.title : '')
 
-    // Send GA4 page_view event
-    this.gtag('event', 'page_view', {
+    // Extract context parameters for additional properties (excluding page props to avoid duplication)
+    const contextParams = GA4Transform.extractContextParams(pageContext)
+
+    // Get A/B test data
+    const abTest = getAbTest()
+
+    // Combine all event data with proper GA4 standard properties
+    const eventData: Record<string, unknown> = {
       page_title: pageTitle,
       page_location: pageUrl,
       page_path: pagePath,
+      ...contextParams,
+      app_version: packageJson.version,
       send_to: this.measurementId,
-    })
+    }
+
+    // Add A/B test data if available
+    if (abTest) {
+      eventData.abTest = abTest
+    }
+
+    // Send GA4 page_view event using sendGAEvent for consistency with track()
+    sendGAEvent('event', 'page_view', eventData)
 
     if (this.debugMode) {
       console.info('[GA Provider] Page view tracked:', {
         title: pageTitle,
         path: pagePath,
         url: pageUrl,
+        context: contextParams,
       })
     }
   }

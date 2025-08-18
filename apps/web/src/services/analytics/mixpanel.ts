@@ -131,3 +131,10 @@ export const mixpanelIdentify = (userId: string): void => {
     console.info('[MixPanel] - User identified:', userId)
   }
 }
+
+/**
+ * Reset Mixpanel initialization state for testing and provider shutdown
+ */
+export const mixpanelShutdown = (): void => {
+  isMixPanelInitialized = false
+}

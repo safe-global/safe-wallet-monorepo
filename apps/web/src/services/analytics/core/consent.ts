@@ -145,6 +145,24 @@ export class ConsentManager {
     this.update({ [category]: value } as ConsentState)
   }
 
+  /**
+   * Alias for update() for API compatibility with tests
+   */
+  set(consent: Partial<ConsentState>): void {
+    this.update(consent as ConsentState)
+  }
+
+  /**
+   * Check multiple consent categories with mode support
+   */
+  has(categories: ConsentCategories[], options?: { mode?: 'all' | 'any' }): boolean {
+    const mode = options?.mode || 'all'
+    if (mode === 'any') {
+      return this.hasAnyConsent(categories)
+    }
+    return this.hasAllConsents(categories)
+  }
+
   getAllConsents(): ConsentState {
     return this.get()
   }

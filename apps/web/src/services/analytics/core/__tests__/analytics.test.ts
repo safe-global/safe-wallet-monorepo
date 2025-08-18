@@ -3,7 +3,7 @@
  */
 
 import { Analytics } from '../analytics'
-import type { BaseProvider, MiddlewareFunction, SafeEventMap, AnalyticsEvent } from '../types'
+import type { BaseProvider, MiddlewareFunction, SafeEventMap, AnalyticsEvent, PageContext } from '../types'
 import type { ProviderId } from '../../providers/constants'
 import { PROVIDER } from '../../providers/constants'
 
@@ -52,13 +52,13 @@ class MockIdentifyProvider extends MockProvider {
 }
 
 class MockPageProvider extends MockProvider {
-  public pageCalls: any[] = []
+  public pageCalls: (PageContext | undefined)[] = []
 
   constructor(id: ProviderId = PROVIDER.GA) {
     super(id)
   }
 
-  page(context?: any): void {
+  page(context?: PageContext): void {
     this.pageCalls.push(context)
   }
 }
@@ -291,14 +291,24 @@ describe('Analytics', () => {
 
       // Only mockProvider3 supports page tracking
       expect(mockProvider3.pageCalls).toHaveLength(1)
-      expect(mockProvider3.pageCalls[0]).toEqual(pageContext)
+      // Page context should be merged with default context
+      expect(mockProvider3.pageCalls[0]).toEqual({
+        path: '/dashboard',
+        title: 'Dashboard',
+        userId: 'test-user',
+        source: 'web',
+      })
     })
 
     it('should track pages without context', () => {
       analytics.page()
 
       expect(mockProvider3.pageCalls).toHaveLength(1)
-      expect(mockProvider3.pageCalls[0]).toBeUndefined()
+      // Even without context, default context should be applied
+      expect(mockProvider3.pageCalls[0]).toEqual({
+        userId: 'test-user',
+        source: 'web',
+      })
     })
 
     it('should not track pages on providers without page capability', () => {

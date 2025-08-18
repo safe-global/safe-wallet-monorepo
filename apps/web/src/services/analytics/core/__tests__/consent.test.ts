@@ -294,15 +294,15 @@ describe('ConsentManager', () => {
       })
 
       // Should default to false for undefined/null values
-      expect(manager.hasConsent('analytics')).toBe(false)
-      expect(manager.hasConsent('marketing')).toBe(false)
+      expect(manager.has(['analytics'])).toBe(false)
+      expect(manager.has(['marketing'])).toBe(false)
     })
 
     it('should handle empty consent object', () => {
       const manager = new ConsentManager({})
 
-      expect(manager.hasConsent('analytics')).toBe(false)
-      expect(manager.hasConsent('marketing')).toBe(false)
+      expect(manager.has(['analytics'])).toBe(false)
+      expect(manager.has(['marketing'])).toBe(false)
     })
 
     it('should maintain immutability', () => {
@@ -316,7 +316,7 @@ describe('ConsentManager', () => {
       // Modifying original shouldn't affect manager
       originalConsent.analytics = false
 
-      expect(manager.hasConsent('analytics')).toBe(true)
+      expect(manager.has(['analytics'])).toBe(true)
     })
   })
 })
