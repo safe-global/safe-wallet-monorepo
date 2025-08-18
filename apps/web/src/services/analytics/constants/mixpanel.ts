@@ -33,9 +33,18 @@ export const MixpanelProperties = {
   NUM_OWNERS: 'Number of Owners',
   PAYMENT_METHOD: 'Payment Method',
 
+  // Creation-specific properties for Safe Created event
+  THRESHOLD_AT_CREATION: 'Threshold at Creation',
+  NUMBER_OF_SIGNERS_AT_CREATION: 'Number of Signers at Creation',
+
   // Wallet properties
   WALLET_TYPE: 'Wallet Type',
   WALLET_ADDRESS: 'Wallet Address',
+
+  // EOA Wallet properties for Safe Activated event
+  EOA_WALLET_ADDRESS: 'EOA Wallet Address',
+  EOA_WALLET_LABEL: 'EOA Wallet Label',
+  EOA_WALLET_NETWORK: 'EOA Wallet Network',
 
   // Transaction properties
   TRANSACTION_TYPE: 'Transaction Type',
@@ -61,7 +70,6 @@ export const MixpanelProperties = {
 
   // User experience
   USER_EXPERIENCE_FLOW: 'User Experience Flow',
-  CREATION_DURATION_MS: 'Creation Duration (ms)',
   EXECUTION_DURATION_MS: 'Execution Duration (ms)',
 
   // Network and costs

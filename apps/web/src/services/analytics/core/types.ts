@@ -174,6 +174,10 @@ export enum PropertyKeys {
   THRESHOLD = 'threshold',
   NUM_OWNERS = 'num_owners',
 
+  // Creation-specific properties for Safe Created event
+  THRESHOLD_AT_CREATION = 'threshold_at_creation',
+  NUMBER_OF_SIGNERS_AT_CREATION = 'number_of_signers_at_creation',
+
   // Transaction properties
   TX_HASH = 'tx_hash',
   TX_TYPE = 'tx_type',
@@ -184,6 +188,8 @@ export enum PropertyKeys {
   // Wallet properties
   WALLET_TYPE = 'wallet_type',
   WALLET_ADDRESS = 'wallet_address',
+  WALLET_LABEL = 'wallet_label',
+  WALLET_NETWORK = 'wallet_network',
 
   // App properties
   APP_VERSION = 'app_version',
@@ -194,6 +200,7 @@ export enum PropertyKeys {
   SAFE_APP_URL = 'safe_app_url',
   SAFE_APP_CATEGORY = 'safe_app_category',
   LAUNCH_LOCATION = 'launch_location',
+  ENTRY_POINT = 'entry_point',
 
   // Deployment properties
   DEPLOYMENT_TYPE = 'deployment_type',

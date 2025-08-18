@@ -153,6 +153,13 @@ export const safeAnalytics = {
     safe_address: string
     safe_version?: string
     deployment_type?: string
+    network_name: string
+    entry_point: string
+    num_owners?: number
+    payment_method?: string
+    wallet_address: string
+    wallet_label: string
+    wallet_network: string
     [key: string]: any
   }) => {
     return analytics.track('SAFE_ACTIVATED', properties)

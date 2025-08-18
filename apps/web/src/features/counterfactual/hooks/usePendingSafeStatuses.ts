@@ -23,6 +23,7 @@ import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/st
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { extractCounterfactualSafeSetup } from '@/features/counterfactual/utils'
 import { useCurrentChain } from '@/hooks/useChains'
+import useWallet from '@/hooks/wallets/useWallet'
 
 export const safeCreationPendingStatuses: Partial<Record<SafeCreationEvent, PendingSafeStatus | null>> = {
   [SafeCreationEvent.AWAITING_EXECUTION]: PendingSafeStatus.AWAITING_EXECUTION,
@@ -89,6 +90,7 @@ const usePendingSafeStatus = (): void => {
   const provider = useWeb3ReadOnly()
   const chain = useCurrentChain()
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
+  const wallet = useWallet()
 
   usePendingSafeMonitor()
 
@@ -148,12 +150,20 @@ const usePendingSafeStatus = (): void => {
                 entry_point: 'Counterfactual Activation',
                 payment_method: 'type' in detail && detail.type === PayMethod.PayLater ? 'sponsored' : 'self_paid',
                 network_name: chain?.chainName || '',
+                wallet_address: wallet?.address || '',
+                wallet_label: wallet?.label || '',
+                wallet_network: chain?.chainName || '',
               })
             } else {
               safeAnalytics.safeActivated({
                 chain_id: creationChainId,
                 safe_address: detail.safeAddress,
                 deployment_type: 'counterfactual',
+                entry_point: 'Counterfactual Activation',
+                network_name: chain?.chainName || '',
+                wallet_address: wallet?.address || '',
+                wallet_label: wallet?.label || '',
+                wallet_network: chain?.chainName || '',
               })
             }
           } else {
@@ -161,6 +171,11 @@ const usePendingSafeStatus = (): void => {
               chain_id: creationChainId,
               safe_address: detail.safeAddress,
               deployment_type: 'standard',
+              entry_point: 'Standard Activation',
+              network_name: chain?.chainName || '',
+              wallet_address: wallet?.address || '',
+              wallet_label: wallet?.label || '',
+              wallet_network: chain?.chainName || '',
             })
           }
 
@@ -213,7 +228,7 @@ const usePendingSafeStatus = (): void => {
     return () => {
       unsubFns.forEach((unsub) => unsub())
     }
-  }, [chainId, dispatch, provider, chain?.chainName, undeployedSafes])
+  }, [chainId, dispatch, provider, chain?.chainName, undeployedSafes, wallet?.address, wallet?.label])
 }
 
 export default usePendingSafeStatus

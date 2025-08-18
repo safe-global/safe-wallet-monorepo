@@ -1,7 +1,6 @@
 import type { EventConfiguration } from '../core/types'
 import { StandardEvents, PropertyKeys } from '../core/types'
 import { MixpanelEvents, MixpanelProperties } from '../constants/mixpanel'
-import packageJson from '../../../../package.json'
 
 /**
  * Event configurations mapping
@@ -34,15 +33,15 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
         enabled: true,
         eventName: MixpanelEvents.SAFE_CREATED,
         createProperties: (properties) => ({
-          [MixpanelProperties.CHAIN_ID]: properties[PropertyKeys.CHAIN_ID],
           [MixpanelProperties.SAFE_ADDRESS]: properties[PropertyKeys.SAFE_ADDRESS],
           [MixpanelProperties.DEPLOYMENT_TYPE]: properties[PropertyKeys.DEPLOYMENT_TYPE],
           [MixpanelProperties.PAYMENT_METHOD]: properties[PropertyKeys.PAYMENT_METHOD],
-          [MixpanelProperties.THRESHOLD]: properties[PropertyKeys.THRESHOLD],
-          [MixpanelProperties.NUM_OWNERS]: properties[PropertyKeys.NUM_OWNERS],
           [MixpanelProperties.SAFE_VERSION]: properties[PropertyKeys.SAFE_VERSION],
           [MixpanelProperties.NETWORK_NAME]: properties[PropertyKeys.NETWORK_NAME],
-          [MixpanelProperties.IS_COUNTERFACTUAL]: properties[PropertyKeys.DEPLOYMENT_TYPE] === 'counterfactual',
+          [MixpanelProperties.THRESHOLD_AT_CREATION]:
+            properties[PropertyKeys.THRESHOLD_AT_CREATION] || properties[PropertyKeys.THRESHOLD],
+          [MixpanelProperties.NUMBER_OF_SIGNERS_AT_CREATION]:
+            properties[PropertyKeys.NUMBER_OF_SIGNERS_AT_CREATION] || properties[PropertyKeys.NUM_OWNERS],
         }),
       },
     },
@@ -65,11 +64,15 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
         enabled: true,
         eventName: MixpanelEvents.SAFE_ACTIVATED,
         createProperties: (properties) => ({
-          [MixpanelProperties.CHAIN_ID]: properties[PropertyKeys.CHAIN_ID],
           [MixpanelProperties.SAFE_ADDRESS]: properties[PropertyKeys.SAFE_ADDRESS],
-          [MixpanelProperties.SAFE_VERSION]: properties[PropertyKeys.SAFE_VERSION],
+          [MixpanelProperties.NETWORK_NAME]: properties[PropertyKeys.NETWORK_NAME],
           [MixpanelProperties.DEPLOYMENT_TYPE]: properties[PropertyKeys.DEPLOYMENT_TYPE],
-          [MixpanelProperties.CREATION_DURATION_MS]: properties.time_to_activation_hours * 3600000, // Convert hours to ms
+          [MixpanelProperties.ENTRY_POINT]: properties[PropertyKeys.ENTRY_POINT],
+          [MixpanelProperties.EOA_WALLET_ADDRESS]: properties[PropertyKeys.WALLET_ADDRESS],
+          [MixpanelProperties.EOA_WALLET_LABEL]: properties[PropertyKeys.WALLET_LABEL],
+          [MixpanelProperties.EOA_WALLET_NETWORK]: properties[PropertyKeys.WALLET_NETWORK],
+          [MixpanelProperties.NUM_OWNERS]: properties[PropertyKeys.NUM_OWNERS],
+          [MixpanelProperties.PAYMENT_METHOD]: properties[PropertyKeys.PAYMENT_METHOD],
         }),
       },
     },
@@ -208,13 +211,10 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
         enabled: true,
         eventName: MixpanelEvents.SAFE_APP_LAUNCHED,
         createProperties: (properties) => ({
+          [MixpanelProperties.NETWORK_NAME]: properties[PropertyKeys.NETWORK_NAME],
           [MixpanelProperties.SAFE_APP_NAME]: properties[PropertyKeys.SAFE_APP_NAME],
-          [MixpanelProperties.SAFE_APP_URL]: properties[PropertyKeys.SAFE_APP_URL],
           [MixpanelProperties.SAFE_APP_CATEGORY]: properties[PropertyKeys.SAFE_APP_CATEGORY],
           [MixpanelProperties.ENTRY_POINT]: properties[PropertyKeys.LAUNCH_LOCATION],
-          [MixpanelProperties.NETWORK_NAME]: properties[PropertyKeys.NETWORK_NAME],
-          [MixpanelProperties.CHAIN_ID]: properties[PropertyKeys.CHAIN_ID],
-          [MixpanelProperties.APP_VERSION]: packageJson.version,
         }),
       },
     },
