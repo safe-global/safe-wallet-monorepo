@@ -55,7 +55,7 @@ export type ProviderInitOptions = {
   defaultContext?: EventContext
 }
 
-export type ConsentCategories = 'analytics' | 'marketing' | 'functional' | 'personalization' | 'necessary'
+export type ConsentCategories = 'analytics' | 'necessary'
 export type ConsentState = Partial<Record<ConsentCategories, boolean>> & { updatedAt?: number }
 
 // Backwards compatibility aliases for tests

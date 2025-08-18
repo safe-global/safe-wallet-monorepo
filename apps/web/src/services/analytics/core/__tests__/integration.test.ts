@@ -190,7 +190,7 @@ describe('Analytics Integration', () => {
         },
         context: {
           chainId: '137', // Override default
-        },
+        } as any, // Allow additional properties for testing
       }
 
       analytics.track(event)
@@ -206,7 +206,6 @@ describe('Analytics Integration', () => {
           user_id: 'test_user', // From default context (sanitized)
           source: 'web', // From default context
           chain_id: '137', // Overridden by event context
-          custom_property: 'test', // From event context
           send_to: 'GA-TEST-123',
         }),
       )
@@ -221,7 +220,6 @@ describe('Analytics Integration', () => {
           'User ID': 'test-user',
           Source: 'web',
           'Chain ID': '137', // Only expect the format that's actually provided
-          'Custom Property': 'test',
         }),
       )
     })

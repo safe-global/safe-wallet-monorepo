@@ -56,12 +56,43 @@ export class ConsentManager {
    * Update consent state with new preferences
    */
   update(patch: ConsentState): void {
+    // Validate and clean the patch
+    const validatedPatch = this.validateConsentPatch(patch)
+
     this.state = {
       ...this.state,
-      ...patch,
+      ...validatedPatch,
       updatedAt: Date.now(),
     }
     this.notifyListeners()
+  }
+
+  /**
+   * Validate consent patch to ensure necessary consent is always true
+   * and filter out invalid categories
+   */
+  private validateConsentPatch(patch: Partial<ConsentState>): Partial<ConsentState> {
+    const validatedPatch: Partial<ConsentState> = {}
+    const validCategories = ['analytics', 'necessary']
+
+    // Filter valid categories and ensure proper types
+    for (const [key, value] of Object.entries(patch)) {
+      if (key === 'updatedAt') {
+        // Skip updatedAt as it's handled automatically
+        continue
+      }
+
+      if (validCategories.includes(key) && typeof value === 'boolean') {
+        // Ensure 'necessary' consent is always true
+        if (key === 'necessary') {
+          validatedPatch[key as ConsentCategories] = true
+        } else {
+          validatedPatch[key as ConsentCategories] = value
+        }
+      }
+    }
+
+    return validatedPatch
   }
 
   /**
@@ -84,13 +115,6 @@ export class ConsentManager {
    */
   allowsAnalytics(): boolean {
     return this.allows('analytics')
-  }
-
-  /**
-   * Check if marketing tracking is allowed
-   */
-  allowsMarketing(): boolean {
-    return this.allows('marketing')
   }
 
   /**

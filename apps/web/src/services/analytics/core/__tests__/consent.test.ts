@@ -15,24 +15,18 @@ describe('ConsentManager', () => {
   describe('Initialization', () => {
     it('should create ConsentManager with default consent (all false)', () => {
       expect(consentManager.hasConsent('analytics')).toBe(false)
-      expect(consentManager.hasConsent('marketing')).toBe(false)
-      expect(consentManager.hasConsent('functional')).toBe(false)
       expect(consentManager.hasConsent('necessary')).toBe(false)
     })
 
     it('should create ConsentManager with initial consent settings', () => {
       const initialConsent: ConsentSettings = {
         analytics: true,
-        marketing: false,
-        functional: true,
         necessary: true,
       }
 
       const manager = new ConsentManager(initialConsent)
 
       expect(manager.hasConsent('analytics')).toBe(true)
-      expect(manager.hasConsent('marketing')).toBe(false)
-      expect(manager.hasConsent('functional')).toBe(true)
       expect(manager.hasConsent('necessary')).toBe(true)
     })
 
@@ -45,8 +39,6 @@ describe('ConsentManager', () => {
       const manager = new ConsentManager(partialConsent)
 
       expect(manager.hasConsent('analytics')).toBe(true)
-      expect(manager.hasConsent('marketing')).toBe(false) // Should default to false
-      expect(manager.hasConsent('functional')).toBe(false) // Should default to false
       expect(manager.hasConsent('necessary')).toBe(true)
     })
   })
@@ -55,29 +47,29 @@ describe('ConsentManager', () => {
     beforeEach(() => {
       consentManager.setConsent({
         analytics: true,
-        marketing: false,
-        functional: true,
         necessary: true,
       })
     })
 
     it('should check individual consent categories', () => {
       expect(consentManager.hasConsent('analytics')).toBe(true)
-      expect(consentManager.hasConsent('marketing')).toBe(false)
-      expect(consentManager.hasConsent('functional')).toBe(true)
       expect(consentManager.hasConsent('necessary')).toBe(true)
     })
 
     it('should check multiple consent categories (AND logic)', () => {
-      expect(consentManager.hasAllConsents(['analytics', 'functional'])).toBe(true)
-      expect(consentManager.hasAllConsents(['analytics', 'marketing'])).toBe(false)
-      expect(consentManager.hasAllConsents(['marketing', 'functional'])).toBe(false)
+      expect(consentManager.hasAllConsents(['analytics', 'necessary'])).toBe(true)
+
+      // Set analytics to false to test AND logic
+      consentManager.setConsent({ analytics: false })
+      expect(consentManager.hasAllConsents(['analytics', 'necessary'])).toBe(false)
     })
 
     it('should check multiple consent categories (OR logic)', () => {
-      expect(consentManager.hasAnyConsent(['analytics', 'functional'])).toBe(true)
-      expect(consentManager.hasAnyConsent(['analytics', 'marketing'])).toBe(true)
-      expect(consentManager.hasAnyConsent(['marketing'])).toBe(false)
+      expect(consentManager.hasAnyConsent(['analytics', 'necessary'])).toBe(true)
+
+      // Set analytics to false, necessary should still be true
+      consentManager.setConsent({ analytics: false })
+      expect(consentManager.hasAnyConsent(['analytics', 'necessary'])).toBe(true)
     })
 
     it('should handle empty arrays gracefully', () => {
@@ -94,7 +86,7 @@ describe('ConsentManager', () => {
     it('should set individual consent', () => {
       consentManager.setConsentForCategory('analytics', true)
       expect(consentManager.hasConsent('analytics')).toBe(true)
-      expect(consentManager.hasConsent('marketing')).toBe(false) // Others unchanged
+      expect(consentManager.hasConsent('necessary')).toBe(false) // Should default to false initially
     })
 
     it('should update individual consent', () => {
@@ -108,16 +100,12 @@ describe('ConsentManager', () => {
     it('should set multiple consent categories at once', () => {
       const newConsent: ConsentSettings = {
         analytics: true,
-        marketing: true,
-        functional: false,
         necessary: true,
       }
 
       consentManager.setConsent(newConsent)
 
       expect(consentManager.hasConsent('analytics')).toBe(true)
-      expect(consentManager.hasConsent('marketing')).toBe(true)
-      expect(consentManager.hasConsent('functional')).toBe(false)
       expect(consentManager.hasConsent('necessary')).toBe(true)
     })
 
@@ -125,20 +113,15 @@ describe('ConsentManager', () => {
       // Set initial consent
       consentManager.setConsent({
         analytics: true,
-        marketing: false,
-        functional: true,
         necessary: true,
       })
 
-      // Update only some categories
+      // Update analytics only
       consentManager.setConsent({
-        marketing: true,
-        functional: false,
+        analytics: false,
       })
 
-      expect(consentManager.hasConsent('analytics')).toBe(true) // Unchanged
-      expect(consentManager.hasConsent('marketing')).toBe(true) // Updated
-      expect(consentManager.hasConsent('functional')).toBe(false) // Updated
+      expect(consentManager.hasConsent('analytics')).toBe(false) // Updated
       expect(consentManager.hasConsent('necessary')).toBe(true) // Unchanged
     })
   })
@@ -147,8 +130,6 @@ describe('ConsentManager', () => {
     beforeEach(() => {
       consentManager.setConsent({
         analytics: true,
-        marketing: false,
-        functional: true,
         necessary: true,
       })
     })
@@ -158,8 +139,6 @@ describe('ConsentManager', () => {
 
       expect(consent).toMatchObject({
         analytics: true,
-        marketing: false,
-        functional: true,
         necessary: true,
       })
       expect(consent.updatedAt).toBeDefined()
@@ -178,11 +157,11 @@ describe('ConsentManager', () => {
     })
 
     it('should get consent for specific categories', () => {
-      const specificConsent = consentManager.getConsentFor(['analytics', 'marketing'])
+      const specificConsent = consentManager.getConsentFor(['analytics', 'necessary'])
 
       expect(specificConsent).toEqual({
         analytics: true,
-        marketing: false,
+        necessary: true,
       })
     })
 
@@ -194,13 +173,11 @@ describe('ConsentManager', () => {
 
   describe('Consent Validation', () => {
     it('should validate that necessary consent is always true', () => {
-      // In a real implementation, necessary consent might be enforced
-      // For this test, we'll just check the current behavior
+      // Necessary consent should be forced to true by validation
       consentManager.setConsentForCategory('necessary', false)
 
-      // This depends on implementation - necessary might be forced to true
-      // or allowed to be false. Testing current behavior:
-      expect(consentManager.hasConsent('necessary')).toBe(false)
+      // Necessary consent should be enforced to stay true
+      expect(consentManager.hasConsent('necessary')).toBe(true)
     })
 
     it('should handle string-based category names', () => {
@@ -224,21 +201,15 @@ describe('ConsentManager', () => {
     it('should work with multiple providers requiring different consent', () => {
       consentManager.setConsent({
         analytics: true,
-        marketing: false,
-        functional: true,
         necessary: true,
       })
 
-      // Google Analytics might require analytics consent
+      // Google Analytics requires analytics consent
       const canUseGA = consentManager.hasConsent('analytics')
       expect(canUseGA).toBe(true)
 
-      // Marketing provider might require marketing consent
-      const canUseMarketing = consentManager.hasConsent('marketing')
-      expect(canUseMarketing).toBe(false)
-
-      // Some provider might require both
-      const canUseCombined = consentManager.hasAllConsents(['analytics', 'functional'])
+      // Some provider might require both analytics and necessary
+      const canUseCombined = consentManager.hasAllConsents(['analytics', 'necessary'])
       expect(canUseCombined).toBe(true)
     })
   })
@@ -265,22 +236,18 @@ describe('ConsentManager', () => {
       // Grant all consent
       consentManager.setConsent({
         analytics: true,
-        marketing: true,
-        functional: true,
         necessary: true,
       })
 
-      expect(consentManager.hasAllConsents(['analytics', 'marketing', 'functional', 'necessary'])).toBe(true)
+      expect(consentManager.hasAllConsents(['analytics', 'necessary'])).toBe(true)
 
-      // Revoke all non-necessary consent
+      // Revoke analytics consent (necessary should remain true)
       consentManager.setConsent({
         analytics: false,
-        marketing: false,
-        functional: false,
-        necessary: true,
+        necessary: false, // This will be forced to true by validation
       })
 
-      expect(consentManager.hasAnyConsent(['analytics', 'marketing', 'functional'])).toBe(false)
+      expect(consentManager.hasConsent('analytics')).toBe(false)
       expect(consentManager.hasConsent('necessary')).toBe(true)
     })
   })
@@ -290,25 +257,25 @@ describe('ConsentManager', () => {
       // Testing with any type to simulate runtime scenarios
       const manager = new ConsentManager({
         analytics: undefined as any,
-        marketing: null as any,
+        necessary: null as any,
       })
 
-      // Should default to false for undefined/null values
+      // Should default to false for undefined/null values (filtered out by validation)
       expect(manager.has(['analytics'])).toBe(false)
-      expect(manager.has(['marketing'])).toBe(false)
+      expect(manager.has(['necessary'])).toBe(false) // null gets filtered out, defaults to false
     })
 
     it('should handle empty consent object', () => {
       const manager = new ConsentManager({})
 
       expect(manager.has(['analytics'])).toBe(false)
-      expect(manager.has(['marketing'])).toBe(false)
+      expect(manager.has(['necessary'])).toBe(false)
     })
 
     it('should maintain immutability', () => {
       const originalConsent = {
         analytics: true,
-        marketing: false,
+        necessary: true,
       }
 
       const manager = new ConsentManager(originalConsent)

@@ -13,6 +13,8 @@ import { MiddlewareChain } from './middleware'
 import { ConsentManager } from './consent'
 import type { ConsentState } from './types'
 import { shallowMerge } from './types'
+import { GoogleAnalyticsConsentHandler } from '../providers/GoogleAnalyticsConsentHandler'
+import { MixpanelConsentHandler } from '../providers/MixpanelConsentHandler'
 
 type ProviderEntry<E extends SafeEventMap> = {
   provider: BaseProvider<E>
@@ -319,6 +321,10 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
    * Identify a user across providers
    */
   identify(userId: string, traits?: Record<string, unknown>): void {
+    if (!this.shouldProcessEvent()) {
+      return
+    }
+
     this.executeOnCapableProviders(hasIdentifyCapability, (provider) => {
       const identifyProvider = provider as BaseProvider<E> & IdentifyCapable
       return identifyProvider.identify(userId, traits)
@@ -329,6 +335,10 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
    * Associate user with a group/organization
    */
   group(groupId: string, traits?: Record<string, unknown>): void {
+    if (!this.shouldProcessEvent()) {
+      return
+    }
+
     this.executeOnCapableProviders(hasGroupCapability, (provider) => {
       const groupProvider = provider as BaseProvider<E> & GroupCapable
       return groupProvider.group(groupId, traits)
@@ -407,6 +417,20 @@ export class Analytics<E extends SafeEventMap = SafeEventMap> {
    * Notify all providers of consent state changes
    */
   private notifyProvidersOfConsentChange(consentState: ConsentState): void {
+    // Call provider-specific consent handlers
+    try {
+      GoogleAnalyticsConsentHandler.handleConsentChange(consentState)
+    } catch (error) {
+      this.onError?.(error)
+    }
+
+    try {
+      MixpanelConsentHandler.handleConsentChange(consentState)
+    } catch (error) {
+      this.onError?.(error)
+    }
+
+    // Notify providers by re-initializing them with new consent state
     const entries = Array.from(this.providerMap.values())
     for (const entry of entries) {
       try {

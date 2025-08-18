@@ -122,7 +122,7 @@ describe('AnalyticsBuilder', () => {
     })
 
     it('should set consent', () => {
-      const consent = { analytics: true, marketing: false }
+      const consent = { analytics: true }
 
       const result = builder.withConsent(consent)
 
