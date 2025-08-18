@@ -1,5 +1,5 @@
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-import usePositionsFiatTotal from '@/hooks/usePositionsFiatTotal'
+import usePositionsFiatTotal from '@/features/positions/hooks/usePositionsFiatTotal'
 
 const useFiatTotal = () => {
   const { balances } = useVisibleBalances()

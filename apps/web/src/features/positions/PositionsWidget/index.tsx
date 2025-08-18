@@ -1,9 +1,4 @@
 import { useRouter } from 'next/router'
-import useChainId from '@/hooks/useChainId'
-import useSafeInfo from '@/hooks/useSafeInfo'
-import { useAppSelector } from '@/store'
-import { selectCurrency } from '@/store/settingsSlice'
-import { usePositionsGetPositionsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import useFiatTotal from '@/hooks/useFiatTotal'
 import { useMemo } from 'react'
 import { AppRoutes } from '@/config/routes'
@@ -13,19 +8,14 @@ import css from './styles.module.css'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import PositionsHeader from '@/features/positions/PositionsHeader'
 import Position from '@/features/positions/Position'
+import usePositions from '@/features/positions/hooks/usePositions'
 
 const MAX_PROTOCOLS = 4
 
 const PositionsWidget = () => {
   const router = useRouter()
   const { safe } = router.query
-  const chainId = useChainId()
-  const { safeAddress } = useSafeInfo()
-  const currency = useAppSelector(selectCurrency)
-  const { currentData } = usePositionsGetPositionsV1Query(
-    { chainId, safeAddress, fiatCode: currency },
-    { skip: !safeAddress || !chainId || !currency },
-  )
+  const currentData = usePositions()
   const fiatTotal = useFiatTotal()
 
   const viewAllUrl = useMemo(
@@ -43,7 +33,7 @@ const PositionsWidget = () => {
   return (
     <Card data-testid="positions-widget" sx={{ px: 1.5, py: 2.5 }}>
       <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
-        <Typography fontWeight={700}>Positions</Typography>
+        <Typography fontWeight={700}>Top positions</Typography>
 
         {protocols.length > 0 && <ViewAllLink url={viewAllUrl} text="View all" />}
       </Stack>

@@ -1,9 +1,4 @@
-import { usePositionsGetPositionsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
-import { useAppSelector } from '@/store'
-import { selectCurrency } from '@/store/settingsSlice'
 import { Box, Card, Stack, Typography } from '@mui/material'
-import useChainId from '@/hooks/useChainId'
-import useSafeInfo from '@/hooks/useSafeInfo'
 import PositionsHeader from '@/features/positions/PositionsHeader'
 import useFiatTotal from '@/hooks/useFiatTotal'
 import EnhancedTable from '@/components/common/EnhancedTable'
@@ -12,16 +7,11 @@ import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { getReadablePositionType } from '@/features/positions/utils'
 import IframeIcon from '@/components/common/IframeIcon'
 import { FiatChange } from '@/components/balances/AssetsTable/FiatChange'
+import usePositions from '@/features/positions/hooks/usePositions'
 
 export const Positions = () => {
   const fiatTotal = useFiatTotal()
-  const chainId = useChainId()
-  const { safeAddress } = useSafeInfo()
-  const currency = useAppSelector(selectCurrency)
-  const { currentData } = usePositionsGetPositionsV1Query(
-    { chainId, safeAddress, fiatCode: currency },
-    { skip: !safeAddress || !chainId || !currency },
-  )
+  const currentData = usePositions()
 
   if (!currentData) return null
 
