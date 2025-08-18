@@ -1,3 +1,6 @@
+import { useEffect } from 'react'
+import { useAppSelector } from '@/store'
+import { hasConsentFor, CookieAndTermType } from '@/store/cookiesAndTermsSlice'
 import { GA_TRACKING_ID, MIXPANEL_TOKEN, IS_PRODUCTION } from '@/config/constants'
 import { AnalyticsManager } from './core/AnalyticsManager'
 import { GoogleAnalyticsProvider } from './providers/ga/GoogleAnalyticsProvider'
@@ -169,6 +172,17 @@ export { analyticsDevTools }
 export { GoogleAnalyticsProvider, MixpanelProvider, AnalyticsManager }
 
 export const useAnalytics = () => {
+  const isAnalyticsEnabled = useAppSelector((state) => hasConsentFor(state, CookieAndTermType.ANALYTICS))
+
+  useEffect(() => {
+    // Set tracking enabled/disabled based on current consent state
+    analytics.setTrackingEnabled(isAnalyticsEnabled)
+
+    if (!IS_PRODUCTION) {
+      console.info('[Analytics] Tracking consent updated:', isAnalyticsEnabled)
+    }
+  }, [isAnalyticsEnabled])
+
   return null
 }
 
