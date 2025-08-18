@@ -13,7 +13,7 @@ export const Positions = () => {
   const fiatTotal = useFiatTotal()
   const currentData = usePositions()
 
-  if (!currentData) return null
+  if (!currentData || currentData.length === 0) return null
 
   return (
     <Stack gap={2}>

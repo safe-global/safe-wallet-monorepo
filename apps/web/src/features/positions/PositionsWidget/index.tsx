@@ -26,7 +26,7 @@ const PositionsWidget = () => {
     [safe],
   )
 
-  if (!currentData) return null
+  if (!currentData || currentData.length === 0) return null
 
   const protocols = currentData.slice(0, MAX_PROTOCOLS)
 

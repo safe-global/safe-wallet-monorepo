@@ -82,7 +82,7 @@ const Dashboard = (): ReactElement => {
                 <AssetsWidget />
               </Grid>
 
-              <Grid item width={1}>
+              <Grid item width={1} className={css.hideIfEmpty}>
                 <PositionsWidget />
               </Grid>
 
