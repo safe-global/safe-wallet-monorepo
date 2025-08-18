@@ -122,21 +122,6 @@ const usePendingSafeStatus = (): void => {
         if (event === SafeCreationEvent.SUCCESS) {
           gtmSetSafeAddress(detail.safeAddress)
 
-          // Not a counterfactual deployment
-          if ('type' in detail && detail.type === PayMethod.PayNow) {
-            const undeployedSafe = undeployedSafes[creationChainId]?.[detail.safeAddress]
-            const safeSetup = undeployedSafe ? extractCounterfactualSafeSetup(undeployedSafe, creationChainId) : null
-            safeAnalytics.safeCreated({
-              chain_id: creationChainId,
-              deployment_type: 'standard',
-              payment_method: 'wallet',
-              threshold: safeSetup?.threshold || 1,
-              num_owners: safeSetup?.owners.length || 1,
-              safe_address: detail.safeAddress,
-              network_name: chain?.chainName || '',
-            })
-          }
-
           const undeployedSafe = undeployedSafes[creationChainId]?.[detail.safeAddress]
           if (undeployedSafe) {
             const safeSetup = extractCounterfactualSafeSetup(undeployedSafe, creationChainId)
