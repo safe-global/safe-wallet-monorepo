@@ -9,8 +9,8 @@ import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GE
 import SpaceAddressBookActions from '@/features/spaces/components/SpaceAddressBook/SpaceAddressBookActions'
 
 const headCells = [
-  { id: 'contact', label: 'Contact' },
-  { id: 'networks', label: 'Networks' },
+  { id: 'contact', label: 'Contact', disableSort: true },
+  { id: 'networks', label: 'Networks', disableSort: true },
   { id: 'actions', label: '' },
 ]
 

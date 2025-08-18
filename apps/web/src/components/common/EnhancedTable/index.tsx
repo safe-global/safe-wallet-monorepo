@@ -36,6 +36,7 @@ type EnhancedHeadCell = {
   width?: string
   align?: string
   sticky?: boolean
+  disableSort?: boolean
 }
 
 function descendingComparator(a: string | number, b: string | number) {
@@ -91,7 +92,9 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
             }}
             className={classNames({ sticky: headCell.sticky })}
           >
-            {headCell.label && (
+            {headCell.disableSort ? (
+              headCell.label
+            ) : (
               <>
                 <TableSortLabel
                   active={orderBy === headCell.id}
