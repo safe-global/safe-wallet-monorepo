@@ -12,7 +12,6 @@
     "lint:parallel": "sh -c 'yarn tsc & yarn next lint & wait'",
     "lint:fix": "next lint --fix",
     "lint:changed": "node scripts/lint-changed.js",
-    "lint:staged": "node scripts/lint-staged.js",
     "prettier": "prettier -w \"{src,cypress,mocks,scripts}/**/*.{ts,tsx,css,js}\"",
     "fix": "yarn lint:fix && ts-prune && yarn prettier",
     "test": "cross-env TZ=CET DEBUG_PRINT_LIMIT=30000 jest",
