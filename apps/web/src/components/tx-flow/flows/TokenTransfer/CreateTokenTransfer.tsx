@@ -245,7 +245,7 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
               <Divider className={commonCss.nestedDivider} />
 
               <CardActions>
-                <Button variant="contained" type="submit">
+                <Button variant="contained" type="submit" disabled={!formState.isValid}>
                   Next
                 </Button>
               </CardActions>
