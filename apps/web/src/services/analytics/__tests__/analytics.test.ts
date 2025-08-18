@@ -169,6 +169,29 @@ describe('New Analytics System', () => {
         }),
       )
     })
+
+    it('should reset Google Analytics', () => {
+      const mockGtag = jest.fn()
+      window.gtag = mockGtag
+
+      provider.reset()
+
+      expect(mockGtag).toHaveBeenCalledWith('config', 'GA-TEST-12345', { user_id: null })
+    })
+
+    it('should handle reset errors gracefully', () => {
+      const mockGtag = jest.fn().mockImplementation(() => {
+        throw new Error('GA reset failed')
+      })
+      window.gtag = mockGtag
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation()
+
+      provider.reset()
+
+      expect(consoleSpy).toHaveBeenCalledWith('[GoogleAnalyticsProvider] Failed to reset:', expect.any(Error))
+
+      consoleSpy.mockRestore()
+    })
   })
 
   describe('MixpanelProvider', () => {
@@ -235,6 +258,37 @@ describe('New Analytics System', () => {
           'Custom Event Property': 'with spaces',
         }),
       )
+    })
+
+    it('should convert snake_case global properties to Title Case for known properties', () => {
+      provider.setGlobalProperty('wallet_type', 'MetaMask')
+      provider.setGlobalProperty('wallet_address', '0x123')
+      provider.setGlobalProperty('safe_address', '0x456')
+      provider.setGlobalProperty('chain_id', '1')
+      provider.setGlobalProperty('safe_version', '1.4.1')
+
+      expect(mockMixpanel.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          'Wallet Type': 'MetaMask',
+          'Wallet Address': '0x123',
+          'Safe Address': '0x456',
+          'Chain ID': '1',
+          'Safe Version': '1.4.1',
+        }),
+      )
+    })
+
+    it('should identify users in Mixpanel', () => {
+      provider.identify('0x123456789abcdef', { 'Safe Version': '1.4.1' })
+
+      expect(mockMixpanel.identify).toHaveBeenCalledWith('0x123456789abcdef')
+      expect(mockMixpanel.people.set).toHaveBeenCalledWith({ 'Safe Version': '1.4.1' })
+    })
+
+    it('should reset Mixpanel analytics', () => {
+      provider.reset()
+
+      expect(mockMixpanel.reset).toHaveBeenCalled()
     })
   })
 
@@ -335,6 +389,64 @@ describe('New Analytics System', () => {
           timestamp: expect.any(Number),
         }),
       })
+    })
+
+    it('should identify users across all providers', () => {
+      const gaIdentifySpy = jest.spyOn(gaProvider, 'identify')
+      const mixpanelIdentifySpy = jest.spyOn(mixpanelProvider, 'identify')
+
+      manager.identify('0x123456789abcdef', { safe_version: '1.4.1' })
+
+      expect(gaIdentifySpy).toHaveBeenCalledWith('0x123456789abcdef', { safe_version: '1.4.1' })
+      expect(mixpanelIdentifySpy).toHaveBeenCalledWith('0x123456789abcdef', { safe_version: '1.4.1' })
+    })
+
+    it('should reset all providers', () => {
+      const gaResetSpy = jest.spyOn(gaProvider, 'reset')
+      const mixpanelResetSpy = jest.spyOn(mixpanelProvider, 'reset')
+
+      manager.reset()
+
+      expect(gaResetSpy).toHaveBeenCalled()
+      expect(mixpanelResetSpy).toHaveBeenCalled()
+    })
+
+    it('should handle provider errors gracefully during identify', () => {
+      const gaIdentifySpy = jest.spyOn(gaProvider, 'identify').mockImplementation(() => {
+        throw new Error('GA identify failed')
+      })
+      const mixpanelIdentifySpy = jest.spyOn(mixpanelProvider, 'identify')
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation()
+
+      manager.identify('0x123456789abcdef')
+
+      expect(gaIdentifySpy).toHaveBeenCalled()
+      expect(mixpanelIdentifySpy).toHaveBeenCalled()
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[AnalyticsManager] Failed to identify user in ga:'),
+        expect.any(Error),
+      )
+
+      consoleSpy.mockRestore()
+    })
+
+    it('should handle provider errors gracefully during reset', () => {
+      const gaResetSpy = jest.spyOn(gaProvider, 'reset').mockImplementation(() => {
+        throw new Error('GA reset failed')
+      })
+      const mixpanelResetSpy = jest.spyOn(mixpanelProvider, 'reset')
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation()
+
+      manager.reset()
+
+      expect(gaResetSpy).toHaveBeenCalled()
+      expect(mixpanelResetSpy).toHaveBeenCalled()
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[AnalyticsManager] Failed to reset provider ga:'),
+        expect.any(Error),
+      )
+
+      consoleSpy.mockRestore()
     })
   })
 
