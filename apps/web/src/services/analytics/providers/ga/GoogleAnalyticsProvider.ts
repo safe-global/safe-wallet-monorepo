@@ -274,4 +274,23 @@ export class GoogleAnalyticsProvider implements AnalyticsProvider {
       this.setGlobalProperty('wallet_address', walletAddress.toLowerCase())
     }
   }
+
+  reset(): void {
+    if (!this.isInitialized) {
+      return
+    }
+
+    try {
+      // For GA, reset means clearing user identification
+      window.gtag?.('config', this.config.trackingId, {
+        user_id: null,
+      })
+
+      if (this.config.debug) {
+        console.info('[GoogleAnalyticsProvider] Reset completed')
+      }
+    } catch (error) {
+      console.error('[GoogleAnalyticsProvider] Failed to reset:', error)
+    }
+  }
 }

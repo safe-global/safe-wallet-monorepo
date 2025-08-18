@@ -42,7 +42,6 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
           [MixpanelProperties.NUM_OWNERS]: properties[PropertyKeys.NUM_OWNERS],
           [MixpanelProperties.SAFE_VERSION]: properties[PropertyKeys.SAFE_VERSION],
           [MixpanelProperties.NETWORK_NAME]: properties[PropertyKeys.NETWORK_NAME],
-          [MixpanelProperties.CREATION_TIMESTAMP]: Date.now(),
           [MixpanelProperties.IS_COUNTERFACTUAL]: properties[PropertyKeys.DEPLOYMENT_TYPE] === 'counterfactual',
         }),
       },
@@ -70,7 +69,6 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
           [MixpanelProperties.SAFE_ADDRESS]: properties[PropertyKeys.SAFE_ADDRESS],
           [MixpanelProperties.SAFE_VERSION]: properties[PropertyKeys.SAFE_VERSION],
           [MixpanelProperties.DEPLOYMENT_TYPE]: properties[PropertyKeys.DEPLOYMENT_TYPE],
-          [MixpanelProperties.CREATION_TIMESTAMP]: Date.now(),
           [MixpanelProperties.CREATION_DURATION_MS]: properties.time_to_activation_hours * 3600000, // Convert hours to ms
         }),
       },
@@ -187,7 +185,6 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
         createProperties: (properties) => ({
           [MixpanelProperties.TRANSACTION_TYPE]: properties[PropertyKeys.TX_TYPE],
           [MixpanelProperties.CHAIN_ID]: properties[PropertyKeys.CHAIN_ID],
-          [MixpanelProperties.CREATION_TIMESTAMP]: Date.now(),
         }),
       },
     },
@@ -200,7 +197,12 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
       ga: {
         enabled: true,
         eventName: 'safe_app_opened',
-        registeredParams: [PropertyKeys.SAFE_APP_NAME, PropertyKeys.LAUNCH_LOCATION, PropertyKeys.CHAIN_ID, PropertyKeys.NETWORK_NAME],
+        registeredParams: [
+          PropertyKeys.SAFE_APP_NAME,
+          PropertyKeys.LAUNCH_LOCATION,
+          PropertyKeys.CHAIN_ID,
+          PropertyKeys.NETWORK_NAME,
+        ],
       },
       mixpanel: {
         enabled: true,
@@ -212,7 +214,6 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
           [MixpanelProperties.ENTRY_POINT]: properties[PropertyKeys.LAUNCH_LOCATION],
           [MixpanelProperties.NETWORK_NAME]: properties[PropertyKeys.NETWORK_NAME],
           [MixpanelProperties.CHAIN_ID]: properties[PropertyKeys.CHAIN_ID],
-          [MixpanelProperties.CREATION_TIMESTAMP]: Date.now(),
           [MixpanelProperties.APP_VERSION]: packageJson.version,
         }),
       },
@@ -234,7 +235,6 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
           [MixpanelProperties.SAFE_APP_NAME]: properties[PropertyKeys.SAFE_APP_NAME],
           [MixpanelProperties.TRANSACTION_TYPE]: properties[PropertyKeys.TX_TYPE],
           [MixpanelProperties.CHAIN_ID]: properties[PropertyKeys.CHAIN_ID],
-          [MixpanelProperties.CREATION_TIMESTAMP]: Date.now(),
         }),
       },
     },
@@ -303,7 +303,6 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
         createProperties: (properties) => ({
           [MixpanelProperties.CHAIN_ID]: properties[PropertyKeys.CHAIN_ID],
           [MixpanelProperties.SAFE_ADDRESS]: properties[PropertyKeys.SAFE_ADDRESS],
-          [MixpanelProperties.CREATION_TIMESTAMP]: Date.now(),
         }),
       },
     },
@@ -327,7 +326,6 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
         eventName: 'Error Occurred',
         createProperties: (properties) => ({
           [MixpanelProperties.CHAIN_ID]: properties[PropertyKeys.CHAIN_ID],
-          [MixpanelProperties.CREATION_TIMESTAMP]: Date.now(),
         }),
       },
     },

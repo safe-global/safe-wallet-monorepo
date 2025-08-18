@@ -51,7 +51,6 @@ export const MixpanelProperties = {
   ENTRY_POINT: 'Entry Point',
 
   // Timestamps
-  CREATION_TIMESTAMP: 'Creation Timestamp',
   EXECUTION_TIMESTAMP: 'Execution Timestamp',
 
   // App metadata
