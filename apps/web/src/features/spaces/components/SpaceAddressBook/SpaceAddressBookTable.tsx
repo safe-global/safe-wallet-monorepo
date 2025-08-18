@@ -7,6 +7,7 @@ import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceAddressBookActions from '@/features/spaces/components/SpaceAddressBook/SpaceAddressBookActions'
+import { ContactSource } from '@/hooks/useAllAddressBooks'
 
 const headCells = [
   { id: 'contact', label: 'Contact' },
@@ -27,7 +28,17 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
           <Stack direction="row" spacing={1} alignItems="center">
             <Identicon address={entry.address} size={32} />
             <Stack direction="column" spacing={0.5}>
-              <EthHashInfo showAvatar={false} address={entry.address} shortAddress={false} hasExplorer showCopyButton />
+              <EthHashInfo
+                showAvatar={false}
+                address={entry.address}
+                name={entry.name}
+                shortAddress={false}
+                showPrefix={false}
+                isAddressBookName={true}
+                addressBookNameSource={ContactSource.space}
+                hasExplorer
+                showCopyButton
+              />
             </Stack>
           </Stack>
         ),
