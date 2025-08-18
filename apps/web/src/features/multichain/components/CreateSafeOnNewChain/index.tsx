@@ -5,6 +5,7 @@ import ErrorMessage from '@/components/tx/ErrorMessage'
 import useAddressBook from '@/hooks/useAddressBook'
 import { CREATE_SAFE_CATEGORY, OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import { safeAnalytics } from '@/services/analytics/unified-analytics'
+import { analytics } from '@/services/analytics'
 import { gtmSetChainId } from '@/services/analytics/gtm'
 import { showNotification } from '@/store/notificationsSlice'
 import { Box, Button, CircularProgress, DialogActions, DialogContent, Stack, Typography } from '@mui/material'
@@ -112,6 +113,8 @@ const ReplaySafeDialog = ({
         dispatch,
         PayMethod.PayLater,
       )
+
+      analytics.identify(safeAddress)
 
       trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
       safeAnalytics.safeCreated({

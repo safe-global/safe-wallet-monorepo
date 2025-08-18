@@ -35,6 +35,7 @@ import {
   safeAnalytics,
 } from '@/services/analytics'
 import { gtmSetChainId, gtmSetSafeAddress } from '@/services/analytics/gtm'
+import { analytics } from '@/services/analytics'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { hasRemainingRelays } from '@/utils/relaying'
@@ -312,6 +313,8 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
         replayCounterfactualSafeDeployment(chain.chainId, safeAddress, props, data.name, dispatch, payMethod)
 
+        analytics.identify(safeAddress)
+
         safeAnalytics.safeCreated({
           chain_id: chain.chainId,
           safe_address: safeAddress,
@@ -352,6 +355,8 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
         trackEvent(CREATE_SAFE_EVENTS.SUBMIT_CREATE_SAFE)
         trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'deployment', category: CREATE_SAFE_CATEGORY })
+
+        analytics.identify(safeAddress)
 
         safeAnalytics.safeCreated({
           chain_id: chain.chainId,
