@@ -6,7 +6,6 @@ import { AnalyticsManager } from './core/AnalyticsManager'
 import { GoogleAnalyticsProvider } from './providers/ga/GoogleAnalyticsProvider'
 import { MixpanelProvider } from './providers/mixpanel/MixpanelProvider'
 import { ANALYTICS_EVENTS } from './config/events.config'
-import { analyticsDevTools } from './utils/DevTools'
 import type { AnalyticsConfig, TrackingResult, GAProviderConfig, MixpanelProviderConfig } from './core/types'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import { useSafeIdentification } from '@/hooks/useSafeIdentification'
@@ -71,10 +70,6 @@ if (MIXPANEL_TOKEN) {
 }
 
 manager.initialize()
-
-if (analyticsDevTools) {
-  analyticsDevTools.setManager(manager)
-}
 
 export const analytics = {
   track: (eventKey: string, properties?: Record<string, any>): TrackingResult => {
@@ -222,9 +217,6 @@ export const safeAnalytics = {
 
 export type { TrackingResult, AnalyticsConfig } from './core/types'
 export { StandardEvents, PropertyKeys } from './core/types'
-
-export { analyticsDevTools }
-
 export { GoogleAnalyticsProvider, MixpanelProvider, AnalyticsManager }
 
 const useAnalyticsConsent = () => {

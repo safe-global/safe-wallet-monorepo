@@ -58,7 +58,7 @@ export const trackSafeAppEvent = (
 export { safeAppToMixPanelEventProperties }
 
 // Export the new analytics system as the primary interface
-export { analytics, safeAnalytics, analyticsDevTools, useAnalytics } from './unified-analytics'
+export { analytics, safeAnalytics, useAnalytics } from './unified-analytics'
 
 export * from './types'
 export * from './events'
