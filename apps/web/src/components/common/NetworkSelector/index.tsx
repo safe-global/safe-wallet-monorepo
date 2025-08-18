@@ -80,6 +80,7 @@ export const getNetworkLink = (router: NextRouter, safeAddress: string, networkS
     safe?: string
     chain?: string
     safeViewRedirectURL?: string
+    appUrl?: string
   }
 
   const route = {
@@ -87,8 +88,12 @@ export const getNetworkLink = (router: NextRouter, safeAddress: string, networkS
     query,
   }
 
-  if (router.query?.safeViewRedirectURL) {
-    route.query.safeViewRedirectURL = router.query?.safeViewRedirectURL.toString()
+  const queryParams = ['safeViewRedirectURL', 'appUrl'] as const
+
+  for (const key of queryParams) {
+    if (router.query?.[key]) {
+      route.query[key] = router.query?.[key].toString()
+    }
   }
 
   return route
