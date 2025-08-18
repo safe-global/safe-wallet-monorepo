@@ -155,7 +155,6 @@ export class AnalyticsManager {
       return
     }
 
-    // Always lowercase userId since it's always an address
     const normalizedUserId = userId.toLowerCase()
     const normalizedTraits = traits ? this.normalizeAddressProperties(traits) : traits
 
@@ -213,10 +212,8 @@ export class AnalyticsManager {
     Object.entries(properties).forEach(([key, value]) => {
       if (this.isAddressProperty(key)) {
         if (Array.isArray(value)) {
-          // Handle arrays of addresses (signers, owners)
           normalized[key] = value.map((item) => (typeof item === 'string' ? item.toLowerCase() : item))
         } else if (typeof value === 'string') {
-          // Handle single address properties
           normalized[key] = value.toLowerCase()
         } else {
           normalized[key] = value
