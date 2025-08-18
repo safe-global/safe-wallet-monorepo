@@ -60,8 +60,9 @@ export class AnalyticsManager {
       return { success: false, results: {} }
     }
 
+    const normalizedProperties = this.normalizeAddressProperties(properties)
     const enhancedProperties = {
-      ...properties,
+      ...normalizedProperties,
       event_key: eventKey,
       timestamp: Date.now(),
     }
@@ -120,9 +121,15 @@ export class AnalyticsManager {
       return
     }
 
+    const normalizedValue = this.isAddressProperty(key)
+      ? typeof value === 'string'
+        ? value.toLowerCase()
+        : value
+      : value
+
     this.providers.forEach((provider, name) => {
       try {
-        provider.setGlobalProperty(key, value)
+        provider.setGlobalProperty(key, normalizedValue)
       } catch (error) {
         console.error(`[AnalyticsManager] Failed to set global property in ${name}:`, error)
       }
@@ -148,16 +155,20 @@ export class AnalyticsManager {
       return
     }
 
+    // Always lowercase userId since it's always an address
+    const normalizedUserId = userId.toLowerCase()
+    const normalizedTraits = traits ? this.normalizeAddressProperties(traits) : traits
+
     this.providers.forEach((provider, name) => {
       try {
-        provider.identify(userId, traits)
+        provider.identify(normalizedUserId, normalizedTraits)
       } catch (error) {
         console.error(`[AnalyticsManager] Failed to identify user in ${name}:`, error)
       }
     })
 
     if (this.config.debug) {
-      console.info('[AnalyticsManager] User identified across all providers:', userId, traits)
+      console.info('[AnalyticsManager] User identified across all providers:', normalizedUserId, normalizedTraits)
     }
   }
 
@@ -194,5 +205,32 @@ export class AnalyticsManager {
     })
 
     return statuses
+  }
+
+  private normalizeAddressProperties(properties: Record<string, any>): Record<string, any> {
+    const normalized: Record<string, any> = {}
+
+    Object.entries(properties).forEach(([key, value]) => {
+      if (this.isAddressProperty(key)) {
+        if (Array.isArray(value)) {
+          // Handle arrays of addresses (signers, owners)
+          normalized[key] = value.map((item) => (typeof item === 'string' ? item.toLowerCase() : item))
+        } else if (typeof value === 'string') {
+          // Handle single address properties
+          normalized[key] = value.toLowerCase()
+        } else {
+          normalized[key] = value
+        }
+      } else {
+        normalized[key] = value
+      }
+    })
+
+    return normalized
+  }
+
+  private isAddressProperty(key: string): boolean {
+    const addressProperties = ['safe_address', 'wallet_address', 'signers', 'owners']
+    return addressProperties.includes(key)
   }
 }
