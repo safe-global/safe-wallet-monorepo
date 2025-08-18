@@ -8,6 +8,9 @@ import { MixpanelProvider } from './providers/mixpanel/MixpanelProvider'
 import { ANALYTICS_EVENTS } from './config/events.config'
 import { analyticsDevTools } from './utils/DevTools'
 import type { AnalyticsConfig, TrackingResult, GAProviderConfig, MixpanelProviderConfig } from './core/types'
+import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
+import { useSafeIdentification } from '@/hooks/useSafeIdentification'
+import { useSafeUserProperties } from '@/hooks/useSafeUserProperties'
 
 const analyticsConfig: AnalyticsConfig = {
   enabled: true,
@@ -98,7 +101,38 @@ export const analytics = {
     return manager.getProviderStatuses()
   },
 
+  identify: (userId: string, traits?: Record<string, any>): void => {
+    manager.identify(userId, traits)
+  },
+
+  reset: (): void => {
+    manager.reset()
+  },
+
   getManager: () => manager,
+}
+
+const setSafeContext = (safeAddress: string, chainId: string, safeVersion?: string) => {
+  analytics.setGlobalProperty('safe_address', safeAddress)
+  analytics.setGlobalProperty('chain_id', chainId)
+  if (safeVersion) {
+    analytics.setGlobalProperty('safe_version', safeVersion)
+  }
+  const gaProvider = manager.getProvider('ga') as GoogleAnalyticsProvider
+  if (gaProvider && typeof gaProvider.setSafeContext === 'function') {
+    gaProvider.setSafeContext(safeAddress, chainId, safeVersion)
+  }
+}
+
+const setWalletContext = (walletType: string, walletAddress?: string) => {
+  analytics.setGlobalProperty('wallet_type', walletType)
+  if (walletAddress) {
+    analytics.setGlobalProperty('wallet_address', walletAddress)
+  }
+  const gaProvider = manager.getProvider('ga') as GoogleAnalyticsProvider
+  if (gaProvider && typeof gaProvider.setWalletContext === 'function') {
+    gaProvider.setWalletContext(walletType, walletAddress)
+  }
 }
 
 export const safeAnalytics = {
@@ -138,29 +172,42 @@ export const safeAnalytics = {
     return analytics.track('SAFE_APP_LAUNCHED', properties)
   },
 
-  setSafeContext: (safeAddress: string, chainId: string, safeVersion?: string) => {
-    analytics.setGlobalProperty('safe_address', safeAddress)
-    analytics.setGlobalProperty('chain_id', chainId)
-    if (safeVersion) {
-      analytics.setGlobalProperty('safe_version', safeVersion)
-    }
+  setSafeContext,
+  setWalletContext,
 
-    const gaProvider = manager.getProvider('ga') as GoogleAnalyticsProvider
-    if (gaProvider && typeof gaProvider.setSafeContext === 'function') {
-      gaProvider.setSafeContext(safeAddress, chainId, safeVersion)
+  // User Properties for Mixpanel cohort analysis
+  setSafeUserProperties: (safeAddress: string, safeInfo: ExtendedSafeInfo, chainName: string, networks: string[]) => {
+    // Global properties (no chain prefix)
+    analytics.setUserProperty('Safe Address', safeAddress)
+    if (safeInfo.version) {
+      analytics.setUserProperty('Safe Version', safeInfo.version)
     }
+    analytics.setUserProperty('Blockchain Networks', networks)
+
+    // Chain-specific properties
+    analytics.setUserProperty(`Number of Signers on ${chainName}`, safeInfo.owners?.length || 0)
+    analytics.setUserProperty(`Threshold on ${chainName}`, safeInfo.threshold || 0)
+    analytics.setUserProperty(`Total Transaction Count on ${chainName}`, safeInfo.nonce || 0)
   },
 
-  setWalletContext: (walletType: string, walletAddress?: string) => {
-    analytics.setGlobalProperty('wallet_type', walletType)
-    if (walletAddress) {
-      analytics.setGlobalProperty('wallet_address', walletAddress)
-    }
+  updateSafeTransactionCount: (nonce: number, chainName: string) => {
+    analytics.setUserProperty(`Total Transaction Count on ${chainName}`, nonce)
+  },
 
-    const gaProvider = manager.getProvider('ga') as GoogleAnalyticsProvider
-    if (gaProvider && typeof gaProvider.setWalletContext === 'function') {
-      gaProvider.setWalletContext(walletType, walletAddress)
-    }
+  updateSafeThreshold: (threshold: number, chainName: string) => {
+    analytics.setUserProperty(`Threshold on ${chainName}`, threshold)
+  },
+
+  updateSafeSigners: (signerCount: number, chainName: string) => {
+    analytics.setUserProperty(`Number of Signers on ${chainName}`, signerCount)
+  },
+
+  setSafeCreationDate: (creationDate: Date, chainName: string) => {
+    analytics.setUserProperty(`Created at on ${chainName}`, creationDate.toISOString())
+  },
+
+  addSafeNetwork: (networks: string[]) => {
+    analytics.setUserProperty('Blockchain Networks', networks)
   },
 }
 
@@ -171,7 +218,7 @@ export { analyticsDevTools }
 
 export { GoogleAnalyticsProvider, MixpanelProvider, AnalyticsManager }
 
-export const useAnalytics = () => {
+const useAnalyticsConsent = () => {
   const isAnalyticsEnabled = useAppSelector((state) => hasConsentFor(state, CookieAndTermType.ANALYTICS))
 
   useEffect(() => {
@@ -182,6 +229,12 @@ export const useAnalytics = () => {
       console.info('[Analytics] Tracking consent updated:', isAnalyticsEnabled)
     }
   }, [isAnalyticsEnabled])
+}
+
+export const useAnalytics = () => {
+  useAnalyticsConsent()
+  useSafeIdentification()
+  useSafeUserProperties()
 
   return null
 }

@@ -1,6 +1,7 @@
 import mixpanel from 'mixpanel-browser'
 import { IS_PRODUCTION } from '@/config/constants'
 import type { AnalyticsProvider, AnalyticsEvent, MixpanelProviderConfig } from '../../core/types'
+import { MixpanelProperties } from '../../constants/mixpanel'
 import packageJson from '../../../../../package.json'
 
 export interface MixpanelConfig {
@@ -152,11 +153,12 @@ export class MixpanelProvider implements AnalyticsProvider {
 
     try {
       const cleanedValue = this.cleanValue(value)
-      this.userProperties[key] = cleanedValue
-      mixpanel.people.set({ [key]: cleanedValue })
+      const titleCaseKey = this.convertToTitleCase(key)
+      this.userProperties[titleCaseKey] = cleanedValue
+      mixpanel.people.set({ [titleCaseKey]: cleanedValue })
 
       if (this.config.debug) {
-        console.info('[MixpanelProvider] User property set:', key, '=', cleanedValue)
+        console.info('[MixpanelProvider] User property set:', titleCaseKey, '=', cleanedValue)
       }
     } catch (error) {
       console.error('[MixpanelProvider] Failed to set user property:', error)
@@ -165,18 +167,19 @@ export class MixpanelProvider implements AnalyticsProvider {
 
   setGlobalProperty(key: string, value: any): void {
     const cleanedValue = this.cleanValue(value)
-    this.globalProperties[key] = cleanedValue
+    const titleCaseKey = this.convertToTitleCase(key)
+    this.globalProperties[titleCaseKey] = cleanedValue
 
     if (this.isInitialized) {
       try {
-        mixpanel.register({ [key]: cleanedValue })
+        mixpanel.register({ [titleCaseKey]: cleanedValue })
       } catch (error) {
         console.error('[MixpanelProvider] Failed to register global property:', error)
       }
     }
 
     if (this.config.debug) {
-      console.info('[MixpanelProvider] Global property set:', key, '=', cleanedValue)
+      console.info('[MixpanelProvider] Global property set:', titleCaseKey, '=', cleanedValue)
     }
   }
 
@@ -291,6 +294,18 @@ export class MixpanelProvider implements AnalyticsProvider {
     } catch (error) {
       console.error('[MixpanelProvider] Failed to reset:', error)
     }
+  }
+
+  private convertToTitleCase(key: string): string {
+    const propertyMap: Record<string, string> = {
+      wallet_type: MixpanelProperties.WALLET_TYPE,
+      wallet_address: MixpanelProperties.WALLET_ADDRESS,
+      safe_address: MixpanelProperties.SAFE_ADDRESS,
+      chain_id: MixpanelProperties.CHAIN_ID,
+      safe_version: MixpanelProperties.SAFE_VERSION,
+    }
+
+    return propertyMap[key] || key
   }
 
   private setDefaultGlobalProperties(): void {

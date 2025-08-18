@@ -13,6 +13,7 @@ import { AnalyticsManager } from '../core/AnalyticsManager'
 import { GoogleAnalyticsProvider } from '../providers/ga/GoogleAnalyticsProvider'
 import { MixpanelProvider } from '../providers/mixpanel/MixpanelProvider'
 import { GAParameterRegistry } from '../providers/ga/GAParameterRegistry'
+import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 
 // Mock external dependencies
 jest.mock('@/config/constants', () => ({
@@ -45,8 +46,15 @@ const mockMixpanel = jest.requireMock('mixpanel-browser')
 const mockSendGAEvent = jest.requireMock('@next/third-parties/google').sendGAEvent
 
 describe('New Analytics System', () => {
+  let setUserPropertySpy: jest.SpyInstance
+
   beforeEach(() => {
     jest.clearAllMocks()
+    setUserPropertySpy = jest.spyOn(analytics, 'setUserProperty').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    setUserPropertySpy.mockRestore()
   })
 
   describe('GAParameterRegistry', () => {
@@ -369,6 +377,67 @@ describe('New Analytics System', () => {
       // Context should be set on global properties
       // This would be verified by checking if subsequent events include these properties
       expect(true).toBe(true) // Placeholder - actual verification would check provider calls
+    })
+
+    it('should set Safe user properties for Mixpanel cohort analysis', () => {
+      const mockSafeInfo: ExtendedSafeInfo = {
+        address: { value: '0x123' },
+        chainId: '1',
+        owners: [{ value: '0x456' }, { value: '0x789' }],
+        threshold: 2,
+        nonce: 47,
+        version: '1.4.1',
+        implementation: { value: '0xfA0BDe12345' },
+        implementationVersionState: 'UP_TO_DATE',
+        deployed: true,
+      }
+
+      const mockNetworks = ['Ethereum', 'Polygon']
+      const chainName = 'Ethereum'
+
+      safeAnalytics.setSafeUserProperties('0x123', mockSafeInfo, chainName, mockNetworks)
+
+      // Verify global properties are set
+      expect(analytics.setUserProperty).toHaveBeenCalledWith('Safe Address', '0x123')
+      expect(analytics.setUserProperty).toHaveBeenCalledWith('Safe Version', '1.4.1')
+      expect(analytics.setUserProperty).toHaveBeenCalledWith('Blockchain Networks', mockNetworks)
+
+      // Verify chain-specific properties are set
+      expect(analytics.setUserProperty).toHaveBeenCalledWith('Number of Signers on Ethereum', 2)
+      expect(analytics.setUserProperty).toHaveBeenCalledWith('Threshold on Ethereum', 2)
+      expect(analytics.setUserProperty).toHaveBeenCalledWith('Total Transaction Count on Ethereum', 47)
+    })
+
+    it('should update transaction count for specific chain', () => {
+      safeAnalytics.updateSafeTransactionCount(50, 'Polygon')
+
+      expect(analytics.setUserProperty).toHaveBeenCalledWith('Total Transaction Count on Polygon', 50)
+    })
+
+    it('should update threshold for specific chain', () => {
+      safeAnalytics.updateSafeThreshold(3, 'Optimism')
+
+      expect(analytics.setUserProperty).toHaveBeenCalledWith('Threshold on Optimism', 3)
+    })
+
+    it('should update signer count for specific chain', () => {
+      safeAnalytics.updateSafeSigners(5, 'Arbitrum')
+
+      expect(analytics.setUserProperty).toHaveBeenCalledWith('Number of Signers on Arbitrum', 5)
+    })
+
+    it('should set Safe creation date for specific chain', () => {
+      const creationDate = new Date('2024-01-15T10:30:00Z')
+      safeAnalytics.setSafeCreationDate(creationDate, 'Ethereum')
+
+      expect(analytics.setUserProperty).toHaveBeenCalledWith('Created at on Ethereum', '2024-01-15T10:30:00.000Z')
+    })
+
+    it('should add Safe networks', () => {
+      const networks = ['Ethereum', 'Polygon', 'Optimism']
+      safeAnalytics.addSafeNetwork(networks)
+
+      expect(analytics.setUserProperty).toHaveBeenCalledWith('Blockchain Networks', networks)
     })
   })
 

@@ -50,6 +50,9 @@ export interface AnalyticsProvider {
 
   /** Check if provider is initialized and ready */
   isReady(): boolean
+
+  /** Reset the provider (clear user identity and context) */
+  reset(): void
 }
 
 /**

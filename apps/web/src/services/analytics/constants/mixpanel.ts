@@ -21,7 +21,7 @@ export const MixpanelEvents = {
 } as const
 
 /**
- * Mixpanel property names in Title Case for clean UI presentation
+ * Mixpanel property names are expected in Title Case
  */
 export const MixpanelProperties = {
   // Safe properties
@@ -70,6 +70,33 @@ export const MixpanelProperties = {
   IS_COUNTERFACTUAL: 'Is Counterfactual',
 } as const
 
+/**
+ * Mixpanel user properties for Safe-specific user profiling and cohort analysis
+ */
+export const MixpanelUserProperties = {
+  // Global Safe properties (no chain suffix)
+  SAFE_ADDRESS: 'Safe Address',
+  SAFE_VERSION: 'Safe Version',
+  BLOCKCHAIN_NETWORKS: 'Blockchain Networks',
+
+  // Chain-specific base properties (use with createChainProperty helper)
+  CREATED_AT: 'Created at',
+  NUMBER_OF_SIGNERS: 'Number of Signers',
+  THRESHOLD: 'Threshold',
+  TOTAL_TRANSACTION_COUNT: 'Total Transaction Count',
+} as const
+
+/**
+ * Helper function to create chain-specific user property names
+ * @param baseProperty - Base property name from MixpanelUserProperties
+ * @param chainName - Chain name (e.g., "Ethereum", "Polygon")
+ * @returns Chain-specific property name (e.g., "Created at on Ethereum")
+ */
+export const createChainProperty = (baseProperty: string, chainName: string): string => {
+  return `${baseProperty} on ${chainName}`
+}
+
 // Type helpers for TypeScript
 export type MixpanelEvent = (typeof MixpanelEvents)[keyof typeof MixpanelEvents]
 export type MixpanelProperty = (typeof MixpanelProperties)[keyof typeof MixpanelProperties]
+export type MixpanelUserProperty = (typeof MixpanelUserProperties)[keyof typeof MixpanelUserProperties]

@@ -143,6 +143,42 @@ export class AnalyticsManager {
     }
   }
 
+  identify(userId: string, traits?: Record<string, any>): void {
+    if (!this.isInitialized) {
+      return
+    }
+
+    this.providers.forEach((provider, name) => {
+      try {
+        provider.identify(userId, traits)
+      } catch (error) {
+        console.error(`[AnalyticsManager] Failed to identify user in ${name}:`, error)
+      }
+    })
+
+    if (this.config.debug) {
+      console.info('[AnalyticsManager] User identified across all providers:', userId, traits)
+    }
+  }
+
+  reset(): void {
+    if (!this.isInitialized) {
+      return
+    }
+
+    this.providers.forEach((provider, name) => {
+      try {
+        provider.reset()
+      } catch (error) {
+        console.error(`[AnalyticsManager] Failed to reset provider ${name}:`, error)
+      }
+    })
+
+    if (this.config.debug) {
+      console.info('[AnalyticsManager] Reset completed across all providers')
+    }
+  }
+
   areAllProvidersReady(): boolean {
     return Array.from(this.providers.values()).every((provider) => provider.isReady())
   }
