@@ -164,7 +164,9 @@ export const safeAnalytics = {
 
   safeAppLaunched: (properties: {
     safe_app_name: string
+    safe_app_category: string
     launch_location: string
+    network_name: string
     chain_id: string
     safe_app_url?: string
     [key: string]: any

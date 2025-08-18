@@ -192,6 +192,7 @@ export enum PropertyKeys {
   // Safe App properties
   SAFE_APP_NAME = 'safe_app_name',
   SAFE_APP_URL = 'safe_app_url',
+  SAFE_APP_CATEGORY = 'safe_app_category',
   LAUNCH_LOCATION = 'launch_location',
 
   // Deployment properties

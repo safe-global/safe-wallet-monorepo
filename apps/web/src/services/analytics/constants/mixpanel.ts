@@ -46,7 +46,9 @@ export const MixpanelProperties = {
   // Safe App properties
   SAFE_APP_NAME: 'Safe App Name',
   SAFE_APP_URL: 'Safe App URL',
+  SAFE_APP_CATEGORY: 'Safe App Category',
   LAUNCH_LOCATION: 'Launch Location',
+  ENTRY_POINT: 'Entry Point',
 
   // Timestamps
   CREATION_TIMESTAMP: 'Creation Timestamp',

@@ -66,9 +66,10 @@ const SafeAppList = ({
         trackSafeAppEvent({ ...SAFE_APPS_EVENTS.OPEN_APP, label: eventLabel }, safeApp.name)
         safeAnalytics.safeAppLaunched({
           safe_app_name: safeApp.name,
+          safe_app_category: safeApp.tags?.[0] || 'Unknown',
           launch_location: SafeAppLaunchLocation.SAFE_APPS_LIST,
+          network_name: currentChain?.chainName || 'Unknown',
           chain_id: currentChain?.chainId || '',
-          chain_name: currentChain?.chainName || '',
           safe_app_url: safeApp.url,
           ...safeAppToMixPanelEventProperties(safeApp, {
             launchLocation: SafeAppLaunchLocation.SAFE_APPS_LIST,

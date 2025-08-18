@@ -200,7 +200,7 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
       ga: {
         enabled: true,
         eventName: 'safe_app_opened',
-        registeredParams: [PropertyKeys.SAFE_APP_NAME, PropertyKeys.LAUNCH_LOCATION, PropertyKeys.CHAIN_ID],
+        registeredParams: [PropertyKeys.SAFE_APP_NAME, PropertyKeys.LAUNCH_LOCATION, PropertyKeys.CHAIN_ID, PropertyKeys.NETWORK_NAME],
       },
       mixpanel: {
         enabled: true,
@@ -208,7 +208,9 @@ export const ANALYTICS_EVENTS: Record<string, EventConfiguration> = {
         createProperties: (properties) => ({
           [MixpanelProperties.SAFE_APP_NAME]: properties[PropertyKeys.SAFE_APP_NAME],
           [MixpanelProperties.SAFE_APP_URL]: properties[PropertyKeys.SAFE_APP_URL],
-          [MixpanelProperties.LAUNCH_LOCATION]: properties[PropertyKeys.LAUNCH_LOCATION],
+          [MixpanelProperties.SAFE_APP_CATEGORY]: properties[PropertyKeys.SAFE_APP_CATEGORY],
+          [MixpanelProperties.ENTRY_POINT]: properties[PropertyKeys.LAUNCH_LOCATION],
+          [MixpanelProperties.NETWORK_NAME]: properties[PropertyKeys.NETWORK_NAME],
           [MixpanelProperties.CHAIN_ID]: properties[PropertyKeys.CHAIN_ID],
           [MixpanelProperties.CREATION_TIMESTAMP]: Date.now(),
           [MixpanelProperties.APP_VERSION]: packageJson.version,

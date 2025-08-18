@@ -48,9 +48,10 @@ const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookma
       trackSafeAppEvent({ ...SAFE_APPS_EVENTS.OPEN_APP, label: SAFE_APPS_LABELS.apps_sidebar }, safeApp.name)
       safeAnalytics.safeAppLaunched({
         safe_app_name: safeApp.name,
+        safe_app_category: safeApp.tags?.[0] || 'Unknown',
         launch_location: SafeAppLaunchLocation.PREVIEW_DRAWER,
+        network_name: currentChain?.chainName || 'Unknown',
         chain_id: currentChain?.chainId || '',
-        chain_name: currentChain?.chainName || '',
         safe_app_url: safeApp.url,
         ...safeAppToMixPanelEventProperties(safeApp, {
           launchLocation: SafeAppLaunchLocation.PREVIEW_DRAWER,
