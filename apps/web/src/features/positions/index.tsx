@@ -1,5 +1,5 @@
 import { Box, Card, Stack, Typography } from '@mui/material'
-import PositionsHeader from '@/features/positions/PositionsHeader'
+import PositionsHeader from '@/features/positions/components/PositionsHeader'
 import useFiatTotal from '@/hooks/useFiatTotal'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import FiatValue from '@/components/common/FiatValue'
