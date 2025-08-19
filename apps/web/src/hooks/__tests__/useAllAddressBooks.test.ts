@@ -7,11 +7,11 @@ import {
 } from '@/hooks/useAllAddressBooks'
 import * as spacesQueries from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import * as currentSpaceIdHook from '@/features/spaces/hooks/useCurrentSpaceId'
+import type { AddressBook } from '@/store/addressBookSlice'
 
 let signedIn = false
 let currentSpaceId = '123'
-let chainId = '1'
-let localAddressBook: Record<string, string> = {}
+let localAddressBook: Record<string, AddressBook> = {}
 let remoteContacts: ExtendedContact[] = []
 
 jest.mock('@/store', () => ({
@@ -25,10 +25,6 @@ jest.mock('@/store/authSlice', () => ({
 jest.mock('@/store/addressBookSlice', () => ({
   selectAllAddressBooks: jest.fn(() => localAddressBook),
 }))
-
-jest.mock('@/hooks/useAddressBook', () => () => localAddressBook)
-
-jest.mock('@/hooks/useChainId', () => () => chainId)
 
 describe('useAllAddressBooks', () => {
   describe('useAllMergedAddressBooks', () => {
@@ -53,8 +49,10 @@ describe('useAllAddressBooks', () => {
     it('returns ONLY local contacts when the user is NOT signed in', () => {
       signedIn = false
       localAddressBook = {
-        '0xA': 'Alice',
-        '0xB': 'Bob',
+        '1': {
+          '0xA': 'Alice',
+          '0xB': 'Bob',
+        },
       }
 
       const { result } = renderHook(() => useAllMergedAddressBooks())
@@ -67,8 +65,10 @@ describe('useAllAddressBooks', () => {
     it('merges space & local contacts, filtering duplicates by address', () => {
       signedIn = true
       localAddressBook = {
-        '0xA': 'Alice (local)',
-        '0xB': 'Bob',
+        '1': {
+          '0xA': 'Alice (local)',
+          '0xB': 'Bob',
+        },
       }
 
       remoteContacts = [
@@ -132,7 +132,11 @@ describe('useAllAddressBooks', () => {
     })
 
     it('returns undefined when no chainId is provided', () => {
-      localAddressBook = { '0xB': 'Bob' }
+      localAddressBook = {
+        '1': {
+          '0xB': 'Bob',
+        },
+      }
 
       const { result } = renderHook(() => useAddressBookItem('0xB', undefined))
 
