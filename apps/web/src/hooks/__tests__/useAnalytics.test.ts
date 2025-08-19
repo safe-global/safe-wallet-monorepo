@@ -5,6 +5,7 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { useAnalytics } from '../useAnalytics'
 import type { SafeEventMap, AnalyticsEvent } from '@/services/analytics/core/types'
+import type { TrackOptions } from '@/services/analytics/providers/constants'
 
 // Mock dependencies
 jest.mock('@mui/material/styles', () => ({
@@ -140,7 +141,7 @@ const mockAnalyticsInstance = {
   providers: [],
   init: jest.fn().mockResolvedValue(undefined),
   shutdown: jest.fn().mockResolvedValue(undefined),
-  track: jest.fn(),
+  track: jest.fn() as jest.MockedFunction<(event: any, options?: any) => void>,
   identify: jest.fn(),
   page: jest.fn(),
   setDefaultContext: jest.fn(),
@@ -349,7 +350,27 @@ describe('useAnalytics', () => {
 
       result.current.track(testEvent)
 
-      expect(mockAnalyticsInstance.track).toHaveBeenCalledWith(testEvent)
+      expect(mockAnalyticsInstance.track).toHaveBeenCalledWith(testEvent, undefined)
+    })
+
+    it('should pass TrackOptions to analytics instance when provided', async () => {
+      mockHasConsentFor.mockReturnValue(true)
+
+      const { result } = renderHook(() => useAnalytics<TestEvents>())
+
+      await waitFor(() => {
+        expect(result.current.isEnabled).toBe(true)
+      })
+
+      const testEvent: AnalyticsEvent<'Test Event', TestEvents['Test Event']> = {
+        name: 'Test Event',
+        payload: { testProperty: 'test', value: 123 },
+      }
+
+      const trackOptions: TrackOptions = { excludeProviders: ['mixpanel' as const] }
+      ;(result.current.track as any)(testEvent, trackOptions)
+
+      expect(mockAnalyticsInstance.track).toHaveBeenCalledWith(testEvent, trackOptions)
     })
 
     it('should not track events when disabled', async () => {

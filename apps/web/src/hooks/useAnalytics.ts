@@ -24,7 +24,7 @@ import { GoogleAnalyticsProvider } from '@/services/analytics/providers/GoogleAn
 import { MixpanelProvider } from '@/services/analytics/providers/MixpanelProvider'
 import { GoogleAnalyticsConsentHandler } from '@/services/analytics/providers/GoogleAnalyticsConsentHandler'
 import { MixpanelConsentHandler } from '@/services/analytics/providers/MixpanelConsentHandler'
-import { PROVIDER, type ProviderId } from '@/services/analytics/providers/constants'
+import { PROVIDER, type ProviderId, type TrackOptions } from '@/services/analytics/providers/constants'
 import type { SafeEventMap, AnalyticsEvent, EventContext } from '@/services/analytics/core'
 import { DeviceType } from '@/services/analytics/types'
 import useMetaEvents from './analytics/useMetaEvents'
@@ -300,10 +300,10 @@ export const useAnalytics = <E extends SafeEventMap = SafeEventMap>(
 
   // Analytics methods
   const track = useCallback(
-    <K extends Extract<keyof E, string>>(event: AnalyticsEvent<K, E[K]>) => {
+    <K extends Extract<keyof E, string>>(event: AnalyticsEvent<K, E[K]>, options?: TrackOptions) => {
       if (!analyticsRef.current || !isAnalyticsEnabled) return
 
-      analyticsRef.current.track(event)
+      analyticsRef.current.track(event, options)
     },
     [isAnalyticsEnabled],
   )

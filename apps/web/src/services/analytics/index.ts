@@ -25,6 +25,8 @@ export { Analytics, AnalyticsBuilder } from './core'
 export { useAnalytics } from '@/hooks/useAnalytics'
 export { EVENT, EventSchemas, createEvent, event } from './events/catalog'
 export type { EventMap, EventUnion, EventName } from './events/catalog'
+export { PROVIDER } from './providers/constants'
+export type { TrackOptions } from './providers/constants'
 
 // Legacy exports
 export * from './types'
