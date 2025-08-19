@@ -99,8 +99,8 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
       [MultiTransfersFields.type]: disableSpendingLimit
         ? TokenTransferType.multiSig
         : canCreateSpendingLimitTx && !canCreateStandardTx
-          ? TokenTransferType.spendingLimit
-          : data?.type,
+        ? TokenTransferType.spendingLimit
+        : data?.type,
       recipients:
         data?.recipients.map(({ tokenAddress, ...rest }) => ({
           ...rest,
@@ -245,7 +245,7 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
               <Divider className={commonCss.nestedDivider} />
 
               <CardActions>
-                <Button variant="contained" type="submit">
+                <Button variant="contained" type="submit" disabled={!formState.isValid}>
                   Next
                 </Button>
               </CardActions>

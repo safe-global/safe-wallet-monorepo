@@ -1,4 +1,3 @@
-import { BuyCryptoOptions } from '@/components/common/BuyCryptoButton'
 import CheckWallet from '@/components/common/CheckWallet'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ExternalLink from '@/components/common/ExternalLink'
@@ -18,7 +17,7 @@ import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import classnames from 'classnames'
 import { type ReactNode, useState } from 'react'
 import { Card, WidgetBody, WidgetContainer } from '@/components/dashboard/styled'
-import { Box, Button, CircularProgress, Divider, FormControlLabel, Grid, Switch, Typography } from '@mui/material'
+import { Box, Button, CircularProgress, FormControlLabel, Grid, Switch, Typography } from '@mui/material'
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded'
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded'
@@ -228,8 +227,7 @@ const AddFundsWidget = ({ completed }: { completed: boolean }) => {
                       mb: 2,
                     }}
                   >
-                    Add funds directly from your bank account or copy your address to send tokens from a different
-                    account.
+                    Copy your address to send tokens from a different account.
                   </Typography>
 
                   <Box
@@ -253,26 +251,6 @@ const AddFundsWidget = ({ completed }: { completed: boolean }) => {
                   </Box>
                 </Grid>
               </Grid>
-
-              <Box
-                sx={{
-                  mb: 4,
-                  position: 'relative',
-                  textAlign: 'center',
-                }}
-              >
-                <Typography className={css.orDivider}>or</Typography>
-                <Divider />
-              </Box>
-
-              <Typography
-                sx={{
-                  mb: 2,
-                }}
-              >
-                Buy crypto with fiat:
-              </Typography>
-              <BuyCryptoOptions />
             </Box>
           </ModalDialog>
         </>

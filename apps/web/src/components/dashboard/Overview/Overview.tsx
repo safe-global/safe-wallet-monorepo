@@ -1,4 +1,3 @@
-import BuyCryptoButton from '@/components/common/BuyCryptoButton'
 import Track from '@/components/common/Track'
 import QrCodeButton from '@/components/sidebar/QrCodeButton'
 import { TxModalContext } from '@/components/tx-flow'
@@ -96,10 +95,6 @@ const Overview = (): ReactElement => {
                   </Track>
                 </Box>
               )}
-
-              <Box flexShrink="0" width={{ xs: 1, md: 'auto' }}>
-                <BuyCryptoButton />
-              </Box>
 
               <Box flex={1}>
                 <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">

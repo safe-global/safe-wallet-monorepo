@@ -71,6 +71,7 @@ export const altImgSwaps = 'svg[alt="Swap order"]'
 export const altImgLimitOrder = 'svg[alt="Limit order"]'
 export const altImgTwapOrder = 'svg[alt="Twap Order"]'
 export const txShareBlock = '[data-testid="share-block"]'
+export const txShareBlockHeader = '[data-testid="share-block-header"]'
 export const txShareBlockDetails = '[data-testid="share-block-details"]'
 const copyLinkBtn = '[data-testid="copy-link-btn"]'
 export const noteTextField = '[data-testid="tx-note-textfield"]'
@@ -303,7 +304,7 @@ export function verifyCopiedURL() {
 }
 
 export function expandTxShareBlock() {
-  cy.get(txShareBlock).click()
+  cy.get(txShareBlockHeader).click()
   cy.get(txShareBlockDetails).should('be.visible')
 }
 
@@ -536,7 +537,11 @@ export function expandAdvancedDetails(data) {
 export function verifytxAccordionDetails(data) {
   main.checkTextsExistWithinElement(txAccordionDetails, data)
 }
-// Function to check elements inside Transaction details/DecodedDataRoot
+//Search in the element with the scroll
+export function verifytxAccordionDetailsScroll(data) {
+  main.checkTextsExistWithinElementScroll(txAccordionDetails, data)
+}
+
 export function checkDataDecodingRoot(data) {
   main.checkTextsExistWithinElement(decodedDataTop, data)
 }
