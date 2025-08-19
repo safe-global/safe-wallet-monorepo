@@ -16,7 +16,6 @@ import { useRecoveryQueue } from '@/features/recovery/hooks/useRecoveryQueue'
 import type { Transaction } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
-import NoTxsIcon from '@/public/images/common/no-txs.svg'
 import { SidebarListItemCounter } from '@/components/sidebar/SidebarList'
 
 const PendingRecoveryListItem = dynamic(() => import('./PendingRecoveryListItem'))
@@ -26,14 +25,12 @@ const MAX_TXS = 4
 const EmptyState = () => {
   return (
     <Paper elevation={0} sx={{ p: 5, textAlign: 'center' }}>
-      <NoTxsIcon data-testid="no-tx-icon" />
-
       <Typography mb={0.5} mt={3}>
         No transactions to sign
       </Typography>
 
       <Typography data-testid="no-tx-text" variant="body1" color="primary.light">
-        Once you create pending transactions, they will appear here
+        Nice! Your transaction queue is clear.
       </Typography>
     </Paper>
   )

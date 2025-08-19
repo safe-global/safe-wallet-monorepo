@@ -50,14 +50,14 @@ const Dashboard = (): ReactElement => {
 
   return (
     <>
-      <Grid container spacing={3} pt={3}>
+      <Grid container spacing={3} mb={3}>
         {supportsRecovery && <RecoveryHeader />}
 
         <Grid item xs={12} className={css.hideIfEmpty} sx={{ '& > div': { m: 0 } }}>
           <InconsistentSignerSetupWarning />
         </Grid>
 
-        <Grid item xs={12} className={css.hideIfEmpty}>
+        <Grid item xs={12} className={css.hideIfEmpty} sx={{ '& > div': { m: 0 } }}>
           <UnsupportedMastercopyWarning />
         </Grid>
       </Grid>
