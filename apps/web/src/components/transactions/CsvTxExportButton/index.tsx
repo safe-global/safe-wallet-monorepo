@@ -106,7 +106,7 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
     const url = (exportStatus?.returnValue as CsvExportReturnValue)?.downloadUrl
     if (url) {
       successNotification()
-      triggerDownload('https://drive.google.com/file/d/1JH9Fs8bKjUNLsJ-CxcycYGuUehgTADZo/view?usp=drive_link')
+      triggerDownload(url)
       setExportJobId(null)
       return
     }
