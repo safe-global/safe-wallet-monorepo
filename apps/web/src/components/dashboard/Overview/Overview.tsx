@@ -16,6 +16,7 @@ import { type ReactElement, useContext, useMemo } from 'react'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
+import CheckWallet from '@/components/common/CheckWallet'
 
 const Overview = (): ReactElement => {
   const { safe, safeLoading, safeLoaded } = useSafeInfo()
@@ -61,38 +62,58 @@ const Overview = (): ReactElement => {
             >
               {!noAssets && (
                 <Box flex={1}>
-                  <Button
-                    onClick={handleOnSend}
-                    size="compact"
-                    variant="contained"
-                    disableElevation
-                    startIcon={<ArrowIconNW fontSize="small" />}
-                    sx={{ height: '42px' }}
-                    fullWidth
-                  >
-                    Send
-                  </Button>
+                  <CheckWallet>
+                    {(isOk) => (
+                      <Button
+                        onClick={handleOnSend}
+                        size="compact"
+                        variant="contained"
+                        disableElevation
+                        startIcon={<ArrowIconNW fontSize="small" />}
+                        sx={{ height: '42px' }}
+                        fullWidth
+                        disabled={!isOk}
+                      >
+                        Send
+                      </Button>
+                    )}
+                  </CheckWallet>
                 </Box>
               )}
 
               {isSwapFeatureEnabled && !noAssets && (
                 <Box flex={1}>
-                  <Track {...SWAP_EVENTS.OPEN_SWAPS} label={SWAP_LABELS.dashboard}>
-                    <Link href={{ pathname: AppRoutes.swap, query: router.query }} passHref type="button">
-                      <Button
-                        data-testid="overview-swap-btn"
-                        size="compact"
-                        variant="contained"
-                        color="background"
-                        disableElevation
-                        startIcon={<SwapIcon fontSize="small" />}
-                        sx={{ height: '42px' }}
-                        fullWidth
-                      >
-                        Swap
-                      </Button>
-                    </Link>
-                  </Track>
+                  <CheckWallet>
+                    {(isOk) => {
+                      const btn = (
+                        <Button
+                          data-testid="overview-swap-btn"
+                          size="compact"
+                          variant="contained"
+                          color="background"
+                          disableElevation
+                          startIcon={<SwapIcon fontSize="small" />}
+                          sx={{ height: '42px' }}
+                          fullWidth
+                          disabled={!isOk}
+                        >
+                          Swap
+                        </Button>
+                      )
+
+                      return (
+                        <Track {...SWAP_EVENTS.OPEN_SWAPS} label={SWAP_LABELS.dashboard}>
+                          {isOk ? (
+                            <Link href={{ pathname: AppRoutes.swap, query: router.query }} passHref type="button">
+                              {btn}
+                            </Link>
+                          ) : (
+                            btn
+                          )}
+                        </Track>
+                      )
+                    }}
+                  </CheckWallet>
                 </Box>
               )}
 
