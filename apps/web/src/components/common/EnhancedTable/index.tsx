@@ -15,12 +15,13 @@ import { visuallyHidden } from '@mui/utils'
 import classNames from 'classnames'
 
 import css from './styles.module.css'
-import { Collapse } from '@mui/material'
+import { Collapse, Typography } from '@mui/material'
 
 type EnhancedCell = {
   content: ReactNode
   rawValue: string | number | null
   sticky?: boolean
+  mobileLabel?: string
 }
 
 type EnhancedRow = {
@@ -174,6 +175,12 @@ function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
                       })}
                     >
                       <Collapse key={index} in={!row.collapsed} enter={false}>
+                        {cell.mobileLabel ? (
+                          <Typography variant="body2" color="text.secondary" className={css.mobileLabel}>
+                            {cell.mobileLabel}
+                          </Typography>
+                        ) : null}
+
                         {cell.content}
                       </Collapse>
                     </TableCell>

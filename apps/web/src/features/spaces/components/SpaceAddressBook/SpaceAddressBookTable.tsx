@@ -24,6 +24,7 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
     cells: {
       contact: {
         rawValue: entry.address,
+        mobileLabel: 'Contact',
         content: (
           <Stack direction="row" spacing={1} alignItems="center">
             <Identicon address={entry.address} size={32} />
@@ -45,6 +46,7 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
       },
       networks: {
         rawValue: entry.chainIds.length,
+        mobileLabel: 'Networks',
         content: (
           <>
             <Tooltip

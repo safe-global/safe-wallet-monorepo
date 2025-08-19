@@ -74,12 +74,14 @@ const ContactsList = ({ contactItems }: { contactItems: ContactItem[] }) => {
                       <ListItemText
                         primary={
                           <Box className={css.safeRow}>
-                            <EthHashInfo
-                              address={contactItem.address}
-                              chainId={contactItem.chainId}
-                              name={contactItem.name}
-                              copyAddress={false}
-                            />
+                            <Box overflow="auto">
+                              <EthHashInfo
+                                address={contactItem.address}
+                                chainId={contactItem.chainId}
+                                name={contactItem.name}
+                                copyAddress={false}
+                              />
+                            </Box>
                             <ChainIndicator chainId={contactItem.chainId} responsive onlyLogo />
                           </Box>
                         }
