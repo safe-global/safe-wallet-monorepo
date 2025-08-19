@@ -62,47 +62,35 @@ const Dashboard = (): ReactElement => {
         </Grid>
       </Grid>
 
-      <Grid container spacing={3} alignItems="flex-start">
-        <Grid item container xs={12} lg={8} spacing={3}>
-          <Grid item width={1}>
-            <Overview />
-          </Grid>
+      <div className={css.dashboardGrid}>
+        <div className={css.leftCol}>
+          <Overview />
 
-          <Grid item width={1}>
-            {noAssets ? <AddFundsToGetStarted /> : <NewsCarousel banners={banners} />}
-          </Grid>
+          {noAssets ? <AddFundsToGetStarted /> : <NewsCarousel banners={banners} />}
 
-          <Grid item width={1} className={css.hideIfEmpty}>
+          <div className={css.hideIfEmpty}>
             <FirstSteps />
-          </Grid>
+          </div>
 
           {safe.deployed && (
             <>
-              <Grid item width={1}>
-                <AssetsWidget />
-              </Grid>
+              <AssetsWidget />
 
-              <Grid item width={1} className={css.hideIfEmpty}>
+              <div className={css.hideIfEmpty}>
                 <PositionsWidget />
-              </Grid>
+              </div>
 
-              {showSafeApps && (
-                <Grid item width={1}>
-                  <SafeAppsDashboardSection />
-                </Grid>
-              )}
+              {showSafeApps && <SafeAppsDashboardSection />}
 
-              <Grid item width={1}>
-                <NewsDisclaimers />
-              </Grid>
+              <NewsDisclaimers />
             </>
           )}
-        </Grid>
+        </div>
 
-        <Grid item container xs={12} lg={4}>
+        <div className={css.rightCol}>
           <PendingTxsList />
-        </Grid>
-      </Grid>
+        </div>
+      </div>
     </>
   )
 }
