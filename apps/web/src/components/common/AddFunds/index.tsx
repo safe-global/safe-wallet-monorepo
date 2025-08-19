@@ -67,9 +67,7 @@ const AddFundsCTA = () => {
             Add funds to get started
           </Typography>
 
-          <Typography>
-            Add funds directly from your bank account or copy your address to send tokens from a different account.
-          </Typography>
+          <Typography>Copy your address to send tokens from a different account.</Typography>
 
           <Box
             sx={{

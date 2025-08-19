@@ -227,8 +227,7 @@ const AddFundsWidget = ({ completed }: { completed: boolean }) => {
                       mb: 2,
                     }}
                   >
-                    Add funds directly from your bank account or copy your address to send tokens from a different
-                    account.
+                    Copy your address to send tokens from a different account.
                   </Typography>
 
                   <Box
