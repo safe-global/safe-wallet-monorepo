@@ -65,7 +65,7 @@ const PositionsWidget = () => {
   const protocols = currentData.slice(0, MAX_PROTOCOLS)
 
   return (
-    <Card data-testid="positions-widget" sx={{ px: 1.5, py: 2.5 }}>
+    <Card data-testid="positions-widget" sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5 }}>
       <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
         <Typography fontWeight={700}>Top positions</Typography>
 

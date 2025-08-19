@@ -99,7 +99,11 @@ const PendingTxsList = (): ReactElement | null => {
   if (loading) return <Skeleton variant="rounded" height={338} />
 
   return (
-    <Card data-testid="pending-tx-widget" sx={{ px: 1.5, py: 2.5, height: 1, width: 1 }} component="section">
+    <Card
+      data-testid="pending-tx-widget"
+      sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5, height: 1, width: 1 }}
+      component="section"
+    >
       <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
         <Typography fontWeight={700} className={css.pendingTxHeader}>
           Pending transactions <SidebarListItemCounter count={queueSize} />

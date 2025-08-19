@@ -42,7 +42,7 @@ const Overview = (): ReactElement => {
   if (isLoading) return <Skeleton height={269} variant="rounded" />
 
   return (
-    <Card sx={{ border: 0, p: 3 }} component="section">
+    <Card sx={{ border: 0, px: 3, pt: 2.5, pb: 1.5 }} component="section">
       <Box>
         <Stack
           direction={{ xs: 'column', md: 'row' }}

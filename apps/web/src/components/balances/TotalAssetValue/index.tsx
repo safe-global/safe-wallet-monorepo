@@ -12,10 +12,10 @@ const TotalAssetValue = () => {
 
   return (
     <Box>
-      <Typography color="primary.light" fontWeight="bold" mb={1}>
+      <Typography fontWeight="700" mb={0.5}>
         Total asset value
       </Typography>
-      <Typography component="div" variant="h1" fontSize="44px" lineHeight="40px">
+      <Typography component="div" variant="h1" fontSize="44px" lineHeight="1.2" letterSpacing="-0.5px">
         {safe.deployed ? (
           fiatTotal ? (
             <FiatValue value={fiatTotal} />

@@ -138,7 +138,7 @@ const AssetsWidget = () => {
   if (loading) return <Skeleton height={338} variant="rounded" />
 
   return (
-    <Card data-testid="assets-widget" sx={{ px: 1.5, py: 2.5 }}>
+    <Card data-testid="assets-widget" sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5 }}>
       <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
         <Typography fontWeight={700}>Top assets</Typography>
 
