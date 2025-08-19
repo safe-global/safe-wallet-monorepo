@@ -71,6 +71,7 @@ export const altImgSwaps = 'svg[alt="Swap order"]'
 export const altImgLimitOrder = 'svg[alt="Limit order"]'
 export const altImgTwapOrder = 'svg[alt="Twap Order"]'
 export const txShareBlock = '[data-testid="share-block"]'
+export const txShareBlockHeader = '[data-testid="share-block-header"]'
 export const txShareBlockDetails = '[data-testid="share-block-details"]'
 const copyLinkBtn = '[data-testid="copy-link-btn"]'
 export const noteTextField = '[data-testid="tx-note-textfield"]'
@@ -256,12 +257,15 @@ export function verifyDeleteChoiceBtnStatus(option) {
 }
 
 export function typeNoteText(text) {
-  cy.get(noteTextField).find('input').clear().type(text)
+  const input = cy.get(noteTextField).find('input')
+  input.clear()
+  input.type(text)
 }
 
 export function checkMaxNoteLength() {
   typeNoteText(main.generateRandomString(61))
-  cy.get(noteTextField).should('exist').contains('60/60').should('be.visible')
+  cy.get(noteTextField).should('exist')
+  cy.get(noteTextField).contains('60/60').should('be.visible')
 }
 
 export function checkNoteWarningMsg() {
@@ -300,7 +304,7 @@ export function verifyCopiedURL() {
 }
 
 export function expandTxShareBlock() {
-  cy.get(txShareBlock).click()
+  cy.get(txShareBlockHeader).click()
   cy.get(txShareBlockDetails).should('be.visible')
 }
 
@@ -533,7 +537,11 @@ export function expandAdvancedDetails(data) {
 export function verifytxAccordionDetails(data) {
   main.checkTextsExistWithinElement(txAccordionDetails, data)
 }
-// Function to check elements inside Transaction details/DecodedDataRoot
+//Search in the element with the scroll
+export function verifytxAccordionDetailsScroll(data) {
+  main.checkTextsExistWithinElementScroll(txAccordionDetails, data)
+}
+
 export function checkDataDecodingRoot(data) {
   main.checkTextsExistWithinElement(decodedDataTop, data)
 }

@@ -5,7 +5,6 @@ import { useCurrentChain } from '@/hooks/useChains'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setQrShortName } from '@/store/settingsSlice'
-import BuyCryptoButton from '@/components/common/BuyCryptoButton'
 
 const AddFundsCTA = () => {
   const safeAddress = useSafeAddress()
@@ -68,9 +67,7 @@ const AddFundsCTA = () => {
             Add funds to get started
           </Typography>
 
-          <Typography>
-            Add funds directly from your bank account or copy your address to send tokens from a different account.
-          </Typography>
+          <Typography>Copy your address to send tokens from a different account.</Typography>
 
           <Box
             sx={{
@@ -82,14 +79,6 @@ const AddFundsCTA = () => {
             }}
           >
             <EthHashInfo address={safeAddress} shortAddress={false} showCopyButton hasExplorer avatarSize={24} />
-          </Box>
-
-          <Box
-            sx={{
-              alignSelf: 'flex-start',
-            }}
-          >
-            <BuyCryptoButton />
           </Box>
         </Grid>
       </Grid>
