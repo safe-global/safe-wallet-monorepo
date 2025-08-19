@@ -10,10 +10,3 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [WALLET_EVENTS.CONNECT.action]: MixPanelEvent.WALLET_CONNECTED,
   [SAFE_APPS_EVENTS.OPEN_APP.action]: MixPanelEvent.SAFE_APP_LAUNCHED,
 }
-
-export const ENABLED_MIXPANEL_EVENTS = [
-  MixPanelEvent.SAFE_CREATED,
-  MixPanelEvent.SAFE_ACTIVATED,
-  MixPanelEvent.WALLET_CONNECTED,
-  MixPanelEvent.SAFE_APP_LAUNCHED,
-]

@@ -14,7 +14,7 @@
 import type { AnalyticsEvent } from './types'
 import { gtmTrack, gtmTrackSafeApp } from './gtm'
 import { mixpanelTrack, safeAppToMixPanelEventProperties } from './mixpanel'
-import { GA_TO_MIXPANEL_MAPPING, ENABLED_MIXPANEL_EVENTS } from './ga-mixpanel-mapping'
+import { GA_TO_MIXPANEL_MAPPING } from './ga-mixpanel-mapping'
 
 export const trackEvent = (eventData: AnalyticsEvent, additionalParameters?: Record<string, any>): void => {
   gtmTrack(eventData)
@@ -38,7 +38,7 @@ export const trackSafeAppEvent = (
   const mixpanelEventName =
     GA_TO_MIXPANEL_MAPPING[eventData.action] || (eventData.event ? GA_TO_MIXPANEL_MAPPING[eventData.event] : undefined)
 
-  if (mixpanelEventName && ENABLED_MIXPANEL_EVENTS.includes(mixpanelEventName as any) && safeApp) {
+  if (mixpanelEventName && safeApp) {
     const mixpanelProperties = safeAppToMixPanelEventProperties(safeApp, options)
     mixpanelTrack(mixpanelEventName, mixpanelProperties)
   }
