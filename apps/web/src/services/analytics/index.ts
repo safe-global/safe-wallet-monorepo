@@ -14,31 +14,7 @@
 import type { AnalyticsEvent } from './types'
 import { gtmTrack, gtmTrackSafeApp } from './gtm'
 import { mixpanelTrack, safeAppToMixPanelEventProperties } from './mixpanel'
-import { MixPanelEventParams } from './mixpanel-events'
 import { GA_TO_MIXPANEL_MAPPING, ENABLED_MIXPANEL_EVENTS } from './ga-mixpanel-mapping'
-
-const convertGAToMixpanelProperties = (
-  eventData: AnalyticsEvent,
-  additionalParameters?: Record<string, any>,
-): Record<string, any> => {
-  const baseProperties: Record<string, any> = {
-    category: eventData.category,
-    action: eventData.action,
-  }
-
-  if (eventData.label !== undefined) {
-    baseProperties.label = eventData.label
-  }
-
-  if (eventData.chainId) {
-    baseProperties[MixPanelEventParams.BLOCKCHAIN_NETWORK] = eventData.chainId
-  }
-
-  return {
-    ...baseProperties,
-    ...additionalParameters,
-  }
-}
 
 export const trackEvent = (eventData: AnalyticsEvent, additionalParameters?: Record<string, any>): void => {
   gtmTrack(eventData)
@@ -46,9 +22,8 @@ export const trackEvent = (eventData: AnalyticsEvent, additionalParameters?: Rec
   const mixpanelEventName =
     GA_TO_MIXPANEL_MAPPING[eventData.action] || (eventData.event ? GA_TO_MIXPANEL_MAPPING[eventData.event] : undefined)
 
-  if (mixpanelEventName && ENABLED_MIXPANEL_EVENTS.includes(mixpanelEventName as any)) {
-    const mixpanelProperties = convertGAToMixpanelProperties(eventData, additionalParameters)
-    mixpanelTrack(mixpanelEventName, mixpanelProperties)
+  if (mixpanelEventName) {
+    mixpanelTrack(mixpanelEventName, additionalParameters)
   }
 }
 

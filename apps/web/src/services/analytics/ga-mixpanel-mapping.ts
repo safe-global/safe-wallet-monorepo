@@ -1,13 +1,14 @@
 import { MixPanelEvent } from './mixpanel-events'
+import { CREATE_SAFE_EVENTS } from './events/createLoadSafe'
+import { WALLET_EVENTS } from './events/wallet'
+import { SAFE_APPS_EVENTS } from './events/safeApps'
 
+// If an event is mapped here, it will be tracked in Mixpanel
 export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
-  safe_created: MixPanelEvent.SAFE_CREATED,
-  'Created Safe': MixPanelEvent.SAFE_CREATED,
-  safe_activated: MixPanelEvent.SAFE_ACTIVATED,
-  'Activated Safe': MixPanelEvent.SAFE_ACTIVATED,
-  wallet_connected: MixPanelEvent.WALLET_CONNECTED,
-  'Connect wallet': MixPanelEvent.WALLET_CONNECTED,
-  'Open Safe App': MixPanelEvent.SAFE_APP_LAUNCHED,
+  [CREATE_SAFE_EVENTS.CREATED_SAFE.action]: MixPanelEvent.SAFE_CREATED,
+  [CREATE_SAFE_EVENTS.ACTIVATED_SAFE.action]: MixPanelEvent.SAFE_ACTIVATED,
+  [WALLET_EVENTS.CONNECT.action]: MixPanelEvent.WALLET_CONNECTED,
+  [SAFE_APPS_EVENTS.OPEN_APP.action]: MixPanelEvent.SAFE_APP_LAUNCHED,
 }
 
 export const ENABLED_MIXPANEL_EVENTS = [
