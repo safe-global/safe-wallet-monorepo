@@ -130,7 +130,7 @@ const usePendingSafeStatus = (): void => {
             const safeSetup = extractCounterfactualSafeSetup(undeployedSafe, creationChainId)
             if (safeSetup) {
               trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE, {
-                [MixPanelEventParams.SAFE_ADDRESS]: detail.safeAddress,
+                [MixPanelEventParams.SAFE_ADDRESS]: detail.safeAddress.toLowerCase(),
                 [MixPanelEventParams.BLOCKCHAIN_NETWORK]: chain?.chainName || '',
                 [MixPanelEventParams.NUMBER_OF_OWNERS]: safeSetup.owners.length,
                 [MixPanelEventParams.THRESHOLD]: safeSetup.threshold,

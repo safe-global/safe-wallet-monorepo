@@ -97,7 +97,7 @@ export const trackWalletType = (wallet: ConnectedWallet, configs: ChainInfo[]) =
     { ...WALLET_EVENTS.CONNECT, label: wallet.label },
     {
       [MixPanelEventParams.EOA_WALLET_LABEL]: wallet.label,
-      [MixPanelEventParams.EOA_WALLET_ADDRESS]: wallet.address,
+      [MixPanelEventParams.EOA_WALLET_ADDRESS]: wallet.address.toLowerCase(),
       [MixPanelEventParams.EOA_WALLET_NETWORK]: networkName,
     },
   )

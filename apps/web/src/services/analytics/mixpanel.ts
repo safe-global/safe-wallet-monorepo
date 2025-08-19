@@ -76,7 +76,7 @@ export const mixpanelSetDeviceType = (type: DeviceType): void => {
 }
 
 export const mixpanelSetSafeAddress = (safeAddress: string): void => {
-  safeMixPanelRegister({ [MixPanelEventParams.SAFE_ADDRESS]: safeAddress })
+  safeMixPanelRegister({ [MixPanelEventParams.SAFE_ADDRESS]: safeAddress.toLowerCase() })
 }
 
 export const mixpanelSetUserProperties = (properties: Record<string, any>): void => {
@@ -92,7 +92,7 @@ export const mixpanelSetEOAWalletLabel = (label: string): void => {
 }
 
 export const mixpanelSetEOAWalletAddress = (address: string): void => {
-  safeMixPanelRegister({ [MixPanelEventParams.EOA_WALLET_ADDRESS]: address })
+  safeMixPanelRegister({ [MixPanelEventParams.EOA_WALLET_ADDRESS]: address.toLowerCase() })
 }
 
 export const mixpanelSetEOAWalletNetwork = (network: string): void => {
@@ -136,7 +136,7 @@ export const mixpanelIdentify = (userId: string): void => {
 export const mixpanelTrackWalletConnected = (wallet: ConnectedWallet, networkName: string): void => {
   const eventProperties = {
     [MixPanelEventParams.EOA_WALLET_LABEL]: wallet.label,
-    [MixPanelEventParams.EOA_WALLET_ADDRESS]: wallet.address,
+    [MixPanelEventParams.EOA_WALLET_ADDRESS]: wallet.address.toLowerCase(),
     [MixPanelEventParams.EOA_WALLET_NETWORK]: networkName,
   }
 
