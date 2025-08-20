@@ -103,6 +103,24 @@ describe('useAllAddressBooks', () => {
         '0xB': ContactSource.local,
       })
     })
+
+    it('Uses the name from the correct network if chainId is passed in props', () => {
+      const mockChainId = '11155111'
+      signedIn = false
+      localAddressBook = {
+        '1': {
+          '0xA': 'Alice (mainnet)',
+          '0xB': 'Bob',
+        },
+        '11155111': {
+          '0xA': 'Alice (sepolia)',
+        },
+      }
+
+      const { result } = renderHook(() => useAllMergedAddressBooks(mockChainId))
+      expect(result.current).toHaveLength(2)
+      expect(result.current.map((c) => c.name)).toEqual(['Alice (sepolia)', 'Bob'])
+    })
   })
 
   describe('useAddressBookItem', () => {

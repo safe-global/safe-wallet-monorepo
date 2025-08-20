@@ -15,11 +15,11 @@ export enum ContactSource {
 }
 export type ExtendedContact = SpaceAddressBookItemDto & { source: ContactSource }
 
-const mapAllLocalAddressBooks = (allAddressBooks: AddressBookState): ExtendedContact[] => {
+const mapAllLocalAddressBooks = (allAddressBooks: AddressBookState, chainId?: string): ExtendedContact[] => {
   // There can be duplicates with different names across networks so we need a strategy to select only one
   const itemsByAddress: Record<string, SpaceAddressBookItemDto> = {}
 
-  for (const [chainId, addressBook] of Object.entries(allAddressBooks ?? {})) {
+  for (const [addressBookChainId, addressBook] of Object.entries(allAddressBooks ?? {})) {
     for (const [address, name] of Object.entries(addressBook ?? {})) {
       const key = address.toLowerCase()
 
@@ -27,15 +27,15 @@ const mapAllLocalAddressBooks = (allAddressBooks: AddressBookState): ExtendedCon
         itemsByAddress[key] = {
           address,
           name,
-          chainIds: [chainId],
+          chainIds: [addressBookChainId],
           createdBy: '',
           lastUpdatedBy: '',
         }
       } else {
         const existingItem = itemsByAddress[key]
-        // If names differ, prefer the first non-empty we saw (simple, stable rule)
-        if (!existingItem.name && name) existingItem.name = name
-        if (!existingItem.chainIds.includes(chainId)) existingItem.chainIds.push(chainId)
+        // If names differ, prefer the first non-empty we saw or the current network one
+        if ((!existingItem.name && name) || chainId === addressBookChainId) existingItem.name = name
+        if (!existingItem.chainIds.includes(addressBookChainId)) existingItem.chainIds.push(addressBookChainId)
       }
     }
   }
@@ -50,13 +50,17 @@ const mapAllLocalAddressBooks = (allAddressBooks: AddressBookState): ExtendedCon
  * Returns all local address books in the same structure as the Space address book
  * If there are naming conflicts it defaults to the first name it encounters
  */
-const useAllLocalAddressBooks = () => {
+const useAllLocalAddressBooks = (chainId?: string) => {
   const allAddressBooks = useAllAddressBooks()
 
-  return useMemo(() => mapAllLocalAddressBooks(allAddressBooks), [allAddressBooks])
+  return useMemo(() => mapAllLocalAddressBooks(allAddressBooks, chainId), [allAddressBooks, chainId])
 }
 
-export const useAllMergedAddressBooks = (): ExtendedContact[] => {
+/**
+ * Optional chainId in case an address exists on multiple networks locally to decide which name to use
+ * @param chainId
+ */
+export const useAllMergedAddressBooks = (chainId?: string): ExtendedContact[] => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: addressBook } = useAddressBooksGetAddressBookItemsV1Query(
@@ -73,7 +77,7 @@ export const useAllMergedAddressBooks = (): ExtendedContact[] => {
     }))
   }, [addressBook])
 
-  const localContacts = useAllLocalAddressBooks()
+  const localContacts = useAllLocalAddressBooks(chainId)
 
   // Only include local contacts if they don't already exist in the space address book
   return useMemo<ExtendedContact[]>(() => {
@@ -94,7 +98,7 @@ export const useAllMergedAddressBooks = (): ExtendedContact[] => {
  * @param chainId
  */
 export const useAddressBookItem = (address: string, chainId: string | undefined) => {
-  const allAddressBooks = useAllMergedAddressBooks()
+  const allAddressBooks = useAllMergedAddressBooks(chainId)
 
   return chainId
     ? allAddressBooks.find((entry) => sameAddress(entry.address, address) && entry.chainIds.includes(chainId))
