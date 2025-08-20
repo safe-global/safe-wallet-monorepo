@@ -283,6 +283,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
               <EthHashInfo
                 address={address}
                 name={multiSafeAccountItem.name}
+                showName={isSpaceSafe ? !!multiSafeAccountItem.name : true}
                 shortAddress
                 showPrefix={false}
                 showAvatar={false}

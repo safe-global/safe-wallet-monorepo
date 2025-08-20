@@ -7,11 +7,11 @@ import {
 } from '@/hooks/useAllAddressBooks'
 import * as spacesQueries from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import * as currentSpaceIdHook from '@/features/spaces/hooks/useCurrentSpaceId'
-import type { AddressBook } from '@/store/addressBookSlice'
 
 let signedIn = false
+let chainId = '1'
 let currentSpaceId = '123'
-let localAddressBook: Record<string, AddressBook> = {}
+let localAddressBook: Record<string, string> = {}
 let remoteContacts: ExtendedContact[] = []
 
 jest.mock('@/store', () => ({
@@ -25,6 +25,10 @@ jest.mock('@/store/authSlice', () => ({
 jest.mock('@/store/addressBookSlice', () => ({
   selectAllAddressBooks: jest.fn(() => localAddressBook),
 }))
+
+jest.mock('@/hooks/useAddressBook', () => () => localAddressBook)
+
+jest.mock('@/hooks/useChainId', () => () => chainId)
 
 describe('useAllAddressBooks', () => {
   describe('useAllMergedAddressBooks', () => {
@@ -47,28 +51,34 @@ describe('useAllAddressBooks', () => {
     })
 
     it('returns ONLY local contacts when the user is NOT signed in', () => {
+      const mockChainId = '1'
       signedIn = false
       localAddressBook = {
-        '1': {
-          '0xA': 'Alice',
-          '0xB': 'Bob',
-        },
+        '0xA': 'Alice',
+        '0xB': 'Bob',
       }
 
-      const { result } = renderHook(() => useAllMergedAddressBooks())
+      const { result } = renderHook(() => useAllMergedAddressBooks(mockChainId))
 
       expect(result.current).toHaveLength(2)
       expect(result.current.map((c) => c.address)).toEqual(['0xA', '0xB'])
       result.current.forEach((c) => expect(c.source).toBe(ContactSource.local))
     })
 
+    it('returns undefined when no chainId is provided', () => {
+      localAddressBook = { '0xB': 'Bob' }
+
+      const { result } = renderHook(() => useAddressBookItem('0xB', undefined))
+
+      expect(result.current).toBeUndefined()
+    })
+
     it('merges space & local contacts, filtering duplicates by address', () => {
+      const mockChainId = '1'
       signedIn = true
       localAddressBook = {
-        '1': {
-          '0xA': 'Alice (local)',
-          '0xB': 'Bob',
-        },
+        '0xA': 'Alice (local)',
+        '0xB': 'Bob',
       }
 
       remoteContacts = [
@@ -90,7 +100,7 @@ describe('useAllAddressBooks', () => {
         },
       ]
 
-      const { result } = renderHook(() => useAllMergedAddressBooks())
+      const { result } = renderHook(() => useAllMergedAddressBooks(mockChainId))
 
       expect(result.current).toHaveLength(3)
       expect(result.current.map((c) => c.address)).toEqual(['0xA', '0xC', '0xB'])
@@ -102,24 +112,6 @@ describe('useAllAddressBooks', () => {
         '0xC': ContactSource.space,
         '0xB': ContactSource.local,
       })
-    })
-
-    it('Uses the name from the correct network if chainId is passed in props', () => {
-      const mockChainId = '11155111'
-      signedIn = false
-      localAddressBook = {
-        '1': {
-          '0xA': 'Alice (mainnet)',
-          '0xB': 'Bob',
-        },
-        '11155111': {
-          '0xA': 'Alice (sepolia)',
-        },
-      }
-
-      const { result } = renderHook(() => useAllMergedAddressBooks(mockChainId))
-      expect(result.current).toHaveLength(2)
-      expect(result.current.map((c) => c.name)).toEqual(['Alice (sepolia)', 'Bob'])
     })
   })
 
@@ -151,9 +143,7 @@ describe('useAllAddressBooks', () => {
 
     it('returns undefined when no chainId is provided', () => {
       localAddressBook = {
-        '1': {
-          '0xB': 'Bob',
-        },
+        '0xB': 'Bob',
       }
 
       const { result } = renderHook(() => useAddressBookItem('0xB', undefined))
