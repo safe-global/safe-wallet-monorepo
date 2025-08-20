@@ -61,7 +61,7 @@ export type TransactionExportDto = {
   executionDateLte?: string
   /** Maximum number of transactions to export */
   limit?: number
-  /** Number of transactions to skip */
+  /** Number of transactions to start from */
   offset?: number
 }
 export type JobStatusErrorDto = {

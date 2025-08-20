@@ -1283,7 +1283,7 @@
           }
         ],
         "requestBody": {
-          "required": true,
+          "required": false,
           "description": "Transaction export request",
           "content": {
             "application/json": {
@@ -4728,7 +4728,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "",
+    "version": "main",
     "contact": {}
   },
   "tags": [],
@@ -6130,7 +6130,7 @@
           },
           "offset": {
             "type": "number",
-            "description": "Number of transactions to skip"
+            "description": "Number of transactions to start from"
           }
         }
       },
