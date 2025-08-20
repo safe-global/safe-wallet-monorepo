@@ -12,7 +12,7 @@ import {
 } from '@/components/sidebar/SidebarList'
 import { type NavItem, navItems } from './config'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { AppRoutes } from '@/config/routes'
+import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
 import { useQueuedTxsLength } from '@/hooks/useTxQueue'
 import { useCurrentChain } from '@/hooks/useChains'
 import { isRouteEnabled } from '@/utils/chains'
@@ -30,14 +30,6 @@ const getSubdirectory = (pathname: string): string => {
 }
 
 const geoBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, AppRoutes.earn]
-
-const undeployedSafeBlockedRoutes = [
-  AppRoutes.bridge,
-  AppRoutes.swap,
-  AppRoutes.stake,
-  AppRoutes.apps.index,
-  AppRoutes.earn,
-]
 
 const customSidebarEvents: { [key: string]: { event: any; label: string } } = {
   [AppRoutes.bridge]: { event: BRIDGE_EVENTS.OPEN_BRIDGE, label: BRIDGE_LABELS.sidebar },
@@ -67,7 +59,7 @@ const Navigation = (): ReactElement => {
   const enabledNavItems = useMemo(() => {
     return safe.deployed
       ? visibleNavItems
-      : visibleNavItems.filter((item) => !undeployedSafeBlockedRoutes.includes(item.href))
+      : visibleNavItems.filter((item) => !UNDEPLOYED_SAFE_BLOCKED_ROUTES.includes(item.href))
   }, [safe.deployed, visibleNavItems])
 
   const getBadge = (item: NavItem) => {
