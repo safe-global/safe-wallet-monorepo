@@ -1,7 +1,7 @@
 import { Box, Button, CircularProgress, SvgIcon, Typography } from '@mui/material'
 import { useCsvExportGetExportStatusV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/csv-export'
 import type { ReactElement } from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ExportIcon from '@/public/images/common/export.svg'
 import CsvTxExportModal from '../CsvTxExportModal'
 import { useAppDispatch } from '@/store'
@@ -31,7 +31,7 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
 
   const [openExportModal, setOpenExportModal] = useState(false)
   const [exportJobId, setExportJobId] = useState<string | null>(null)
-  const [exportTimeout, setExportTimeout] = useState<NodeJS.Timeout | null>(null)
+  const exportTimeout = useRef<NodeJS.Timeout | null>(null)
 
   const { data: exportStatus, error } = useCsvExportGetExportStatusV1Query(
     { jobId: exportJobId as string },
@@ -43,7 +43,7 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
     : { backgroundColor: 'secondary.main', color: 'static.main' }
 
   useEffect(() => {
-    if (exportJobId && !exportTimeout) {
+    if (exportJobId && !exportTimeout.current) {
       // Set a timeout to stop polling after 15 minutes
       const timeout = setTimeout(
         () => {
@@ -51,19 +51,19 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
         },
         15 * 60 * 1000,
       )
-      setExportTimeout(timeout)
+      exportTimeout.current = timeout
     }
-    if (!exportJobId && exportTimeout) {
-      clearTimeout(exportTimeout)
-      setExportTimeout(null)
+    if (!exportJobId && exportTimeout.current) {
+      clearTimeout(exportTimeout.current)
+      exportTimeout.current = null
     }
     // Cleanup
     return () => {
-      if (exportTimeout) {
-        clearTimeout(exportTimeout)
+      if (exportTimeout.current) {
+        clearTimeout(exportTimeout.current)
       }
     }
-  }, [exportJobId, exportTimeout])
+  }, [exportJobId])
 
   useEffect(() => {
     const triggerDownload = (url: string) => {
@@ -136,6 +136,7 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
           variant="contained"
           onClick={() => setOpenExportModal(true)}
           size="small"
+          sx={{ height: 38 }}
           endIcon={
             exportJobId ? (
               <CircularProgress size={16} />
