@@ -87,8 +87,8 @@ type CsvTxExportForm = {
 
 type CsvTxExportModalProps = {
   onClose: () => void
-  onExport?: (job: JobStatusDto) => void
-  hasActiveFilter?: boolean
+  onExport: (job: JobStatusDto) => void
+  hasActiveFilter: boolean
 }
 
 const CsvTxExportModal = ({ onClose, onExport, hasActiveFilter }: CsvTxExportModalProps): ReactElement => {
@@ -152,7 +152,8 @@ const CsvTxExportModal = ({ onClose, onExport, hasActiveFilter }: CsvTxExportMod
   }, [selectedRange, from, to, errors.from, errors.to, isOverYear])
 
   const onSubmit = handleSubmit(async ({ range, from, to }) => {
-    const { executionDateGte, executionDateLte } = getExportDates(range as DateRangeOption, from, to)
+    if (!range) return
+    const { executionDateGte, executionDateLte } = getExportDates(range, from, to)
 
     try {
       const job = await launchExport({
@@ -160,7 +161,7 @@ const CsvTxExportModal = ({ onClose, onExport, hasActiveFilter }: CsvTxExportMod
         safeAddress,
         transactionExportDto: { executionDateGte, executionDateLte },
       }).unwrap()
-      onExport?.(job)
+      onExport(job)
       successNotification()
     } catch (e) {
       errorNotification()

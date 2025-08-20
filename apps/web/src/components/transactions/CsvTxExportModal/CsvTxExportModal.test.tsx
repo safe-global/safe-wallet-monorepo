@@ -3,10 +3,11 @@ import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
 import CsvTxExportModal from './index'
 
 const onClose = jest.fn()
+const onExport = jest.fn()
 
 describe('CsvTxExportModal', () => {
   const renderComponent = (hasActiveFilter: boolean = false) =>
-    render(<CsvTxExportModal onClose={onClose} hasActiveFilter={hasActiveFilter} />)
+    render(<CsvTxExportModal onClose={onClose} onExport={onExport} hasActiveFilter={hasActiveFilter} />)
 
   it('renders modal with message and disabled export button', () => {
     renderComponent()
@@ -50,7 +51,7 @@ describe('CsvTxExportModal', () => {
   })
 
   it('validates from/to date order', async () => {
-    render(<CsvTxExportModal onClose={onClose} />)
+    renderComponent()
 
     act(() => fireEvent.mouseDown(screen.getByLabelText('Date range')))
     act(() => fireEvent.click(screen.getByRole('option', { name: 'Custom' })))
