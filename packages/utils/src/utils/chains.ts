@@ -43,6 +43,7 @@ export enum FEATURES {
   SPACES = 'SPACES',
   EARN = 'EARN',
   MIXPANEL = 'MIXPANEL',
+  CSV_TX_EXPORT = 'CSV_TX_EXPORT',
 }
 
 const MIN_SAFE_VERSION = '1.3.0'

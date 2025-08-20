@@ -13,9 +13,12 @@ import TrustedToggle from '@/components/transactions/TrustedToggle'
 import { useTxFilter } from '@/utils/tx-history-filter'
 import { BRAND_NAME } from '@/config/constants'
 import CsvTxExportButton from '@/components/transactions/CsvTxExportButton'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const History: NextPage = () => {
   const [filter] = useTxFilter()
+  const isCsvExportEnabled = useHasFeature(FEATURES.CSV_TX_EXPORT)
 
   const [showFilter, setShowFilter] = useState(false)
 
@@ -36,7 +39,7 @@ const History: NextPage = () => {
         <Button variant="outlined" onClick={toggleFilter} size="small" endIcon={<ExpandIcon />}>
           {filter?.type ?? 'Filter'}
         </Button>
-        <CsvTxExportButton hasActiveFilter={!!filter} />
+        {isCsvExportEnabled && <CsvTxExportButton hasActiveFilter={!!filter} />}
       </TxHeader>
 
       <main>
