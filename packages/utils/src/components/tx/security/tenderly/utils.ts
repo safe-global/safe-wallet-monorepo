@@ -47,10 +47,7 @@ export const isTxSimulationEnabled = (chain?: Pick<Chain, 'features'>): boolean 
 export const getSimulation = async (
   tx: TenderlySimulatePayload,
   customTenderly: EnvState['tenderly'] | undefined,
-): Promise<TenderlySimulation> => {  
-  
-  
-
+): Promise<TenderlySimulation> => {
   const requestObject: RequestInit = {
     method: 'POST',
     body: JSON.stringify(tx),
