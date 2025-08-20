@@ -19,6 +19,26 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 
+const getSimulationIconProps = (isCallTraceError: boolean, isSuccess: boolean) => {
+  if (isCallTraceError) {
+    return { color: 'warning' as const, component: WarningIcon }
+  }
+  if (isSuccess) {
+    return { color: 'success' as const, component: CheckIcon }
+  }
+  return { color: 'error' as const, component: CloseIcon }
+}
+
+const getSimulationStatusText = (isCallTraceError: boolean, isSuccess: boolean) => {
+  if (isCallTraceError) {
+    return 'Can execute (with warnings)'
+  }
+  if (isSuccess) {
+    return 'Simulation successful'
+  }
+  return 'Simulation failed'
+}
+
 const CompactSimulationButton = ({
   label,
   iconComponent,
@@ -109,16 +129,11 @@ const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }
       <ExternalLink href={simulationLink}>
         <Stack direction="row" alignItems="center" gap={0.5}>
           <SvgIcon
-            color={status.isCallTraceError ? 'warning' : status.isSuccess ? 'success' : 'error'}
-            component={status.isCallTraceError ? WarningIcon : status.isSuccess ? CheckIcon : CloseIcon}
+            {...getSimulationIconProps(status.isCallTraceError, status.isSuccess)}
             inheritViewBox
             sx={{ height: '16px' }}
           />
-          {status.isCallTraceError
-            ? 'Can execute (with warnings)'
-            : status.isSuccess
-              ? 'Simulation successful'
-              : 'Simulation failed'}
+          {getSimulationStatusText(status.isCallTraceError, status.isSuccess)}
         </Stack>
       </ExternalLink>
     )

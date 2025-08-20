@@ -27,6 +27,43 @@ import { MODALS_EVENTS } from '@/services/analytics'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { getSafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
+const renderSimulationStatus = (isSuccess: boolean, isError: boolean, isCallTraceError: boolean) => {
+  if (!isSuccess || isError) {
+    return (
+      <Typography variant="body2" className={sharedCss.result} sx={{ color: 'error.main' }}>
+        <SvgIcon component={CloseIcon} inheritViewBox fontSize="small" sx={{ verticalAlign: 'middle', mr: 1 }} />
+        Error
+      </Typography>
+    )
+  }
+
+  if (isCallTraceError) {
+    return (
+      <Typography
+        data-testid="simulation-warning-msg"
+        variant="body2"
+        className={sharedCss.result}
+        sx={{ color: 'warning.main' }}
+      >
+        <SvgIcon component={WarningIcon} inheritViewBox fontSize="small" sx={{ verticalAlign: 'middle', mr: 1 }} />
+        Warning
+      </Typography>
+    )
+  }
+
+  return (
+    <Typography
+      data-testid="simulation-success-msg"
+      variant="body2"
+      className={sharedCss.result}
+      sx={{ color: 'success.main' }}
+    >
+      <SvgIcon component={CheckIcon} inheritViewBox fontSize="small" sx={{ verticalAlign: 'middle', mr: 1 }} />
+      Success
+    </Typography>
+  )
+}
+
 export type TxSimulationProps = {
   transactions?: SimulationTxParams['transactions']
   gasLimit?: number
@@ -137,57 +174,7 @@ const TxSimulationBlock = ({
               }}
             />
           ) : isFinished ? (
-            !isSuccess || isError ? (
-              <Typography
-                variant="body2"
-                className={sharedCss.result}
-                sx={{
-                  color: 'error.main',
-                }}
-              >
-                <SvgIcon
-                  component={CloseIcon}
-                  inheritViewBox
-                  fontSize="small"
-                  sx={{ verticalAlign: 'middle', mr: 1 }}
-                />
-                Error
-              </Typography>
-            ) : isCallTraceError ? (
-              <Typography
-                data-testid="simulation-warning-msg"
-                variant="body2"
-                className={sharedCss.result}
-                sx={{
-                  color: 'warning.main',
-                }}
-              >
-                <SvgIcon
-                  component={WarningIcon}
-                  inheritViewBox
-                  fontSize="small"
-                  sx={{ verticalAlign: 'middle', mr: 1 }}
-                />
-                Warning
-              </Typography>
-            ) : (
-              <Typography
-                data-testid="simulation-success-msg"
-                variant="body2"
-                className={sharedCss.result}
-                sx={{
-                  color: 'success.main',
-                }}
-              >
-                <SvgIcon
-                  component={CheckIcon}
-                  inheritViewBox
-                  fontSize="small"
-                  sx={{ verticalAlign: 'middle', mr: 1 }}
-                />
-                Success
-              </Typography>
-            )
+            renderSimulationStatus(isSuccess, isError, isCallTraceError)
           ) : (
             <Track {...MODALS_EVENTS.SIMULATE_TX}>
               <Button
@@ -218,17 +205,14 @@ export const TxSimulation = (props: TxSimulationProps): ReactElement | null => {
   return <TxSimulationBlock {...props} />
 }
 
-// TODO: Test this component
-export const TxSimulationMessage = ({ isNested = false }: { isNested?: boolean }) => {
-  const txInfo = useContext(TxInfoContext)
-
-  const { isFinished, isError, isSuccess, isCallTraceError } = isNested ? txInfo.nestedTx.status : txInfo.status
-  const { simulationLink, simulationData, requestError } = isNested ? txInfo.nestedTx.simulation : txInfo.simulation
-
-  if (!isFinished) {
-    return null
-  }
-
+const renderSimulationMessage = (
+  isSuccess: boolean,
+  isError: boolean,
+  isCallTraceError: boolean,
+  simulationLink: string | undefined,
+  simulationData: any,
+  requestError: string | undefined,
+) => {
   if (!isSuccess || isError) {
     return (
       <Alert severity="error" sx={{ border: 'unset' }}>
@@ -268,4 +252,18 @@ export const TxSimulationMessage = ({ isNested = false }: { isNested?: boolean }
       Full simulation report is available <ExternalLink href={simulationLink}>on Tenderly</ExternalLink>.
     </Alert>
   )
+}
+
+// TODO: Test this component
+export const TxSimulationMessage = ({ isNested = false }: { isNested?: boolean }) => {
+  const txInfo = useContext(TxInfoContext)
+
+  const { isFinished, isError, isSuccess, isCallTraceError } = isNested ? txInfo.nestedTx.status : txInfo.status
+  const { simulationLink, simulationData, requestError } = isNested ? txInfo.nestedTx.simulation : txInfo.simulation
+
+  if (!isFinished) {
+    return null
+  }
+
+  return renderSimulationMessage(isSuccess, isError, isCallTraceError, simulationLink, simulationData, requestError)
 }
