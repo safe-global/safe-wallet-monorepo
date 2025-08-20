@@ -2,12 +2,13 @@ import EnhancedTable from '@/components/common/EnhancedTable'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import Identicon from '@/components/common/Identicon'
-import { Box, Stack, Tooltip } from '@mui/material'
+import { Box, Chip, Stack, Tooltip } from '@mui/material'
 import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceAddressBookActions from '@/features/spaces/components/SpaceAddressBook/SpaceAddressBookActions'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
+import useChains from '@/hooks/useChains'
 
 const headCells = [
   { id: 'contact', label: 'Contact', disableSort: true },
@@ -20,6 +21,8 @@ type SpaceAddressBookTableProps = {
 }
 
 function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
+  const chains = useChains()
+
   const rows = entries.map((entry) => ({
     cells: {
       contact: {
@@ -62,7 +65,11 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
               arrow
             >
               <Box sx={{ display: 'inline-block' }}>
-                <NetworkLogosList networks={entry.chainIds.map((chainId) => ({ chainId }))} />
+                {chains.configs.length === entry.chainIds.length ? (
+                  <Chip label="All" size="small" />
+                ) : (
+                  <NetworkLogosList networks={entry.chainIds.map((chainId) => ({ chainId }))} />
+                )}
               </Box>
             </Tooltip>
           </>

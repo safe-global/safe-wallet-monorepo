@@ -177,6 +177,7 @@ const SingleAccountItem = ({
           <EthHashInfo
             address={address}
             name={name}
+            showName={isSpaceSafe ? !!safeItem.name : true}
             shortAddress
             chainId={chain?.chainId}
             showAvatar={false}
