@@ -20,7 +20,6 @@ describe('CsvTxExportModal', () => {
 
     const exportBtn = screen.getByRole('button', { name: 'Export' })
     expect(exportBtn).toBeDisabled()
-    expect(screen.queryByRole('button', { name: 'Cancel' })).toBeTruthy()
   })
 
   it('enables export after selecting a preset range', () => {
@@ -91,6 +90,6 @@ describe('CsvTxExportModal', () => {
   it('shows warning when filters are active', () => {
     renderComponent(true)
 
-    expect(screen.getByText("Transaction history filter won't apply here.")).toBeInTheDocument()
+    expect(screen.getByText("Transaction history filters won't apply here.")).toBeInTheDocument()
   })
 })

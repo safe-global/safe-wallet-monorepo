@@ -71,6 +71,7 @@ const Toast = ({
   link,
   onClose,
   id,
+  icon = false,
 }: {
   variant: AlertColor
   onClose: () => void
@@ -92,7 +93,7 @@ const Toast = ({
 
   return (
     <Snackbar open onClose={handleClose} sx={toastStyle} autoHideDuration={autoHideDuration}>
-      <Alert severity={variant} onClose={handleClose} elevation={3} sx={{ width: '340px' }}>
+      <Alert severity={variant} onClose={handleClose} elevation={3} sx={{ width: '340px' }} {...(icon && { icon })}>
         {title && (
           <Typography variant="body2" fontWeight="700">
             {title}

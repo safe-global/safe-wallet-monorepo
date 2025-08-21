@@ -2,11 +2,11 @@ import { useMemo, type ReactElement } from 'react'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useWallet from '@/hooks/wallets/useWallet'
 import useConnectWallet from '../ConnectWallet/useConnectWallet'
-import { Tooltip, TooltipProps } from '@mui/material'
+import { Tooltip, type TooltipProps } from '@mui/material'
 
 type CheckWalletProps = {
   children: (ok: boolean) => ReactElement
-  placement?: TooltipProps["placement"];
+  placement?: TooltipProps['placement']
 }
 
 enum Message {
