@@ -39,3 +39,9 @@ export enum SafeAppLaunchLocation {
   PREVIEW_DRAWER = 'Preview Drawer',
   SAFE_APPS_LIST = 'Safe Apps List',
 }
+
+export const ADDRESS_PROPERTIES = new Set([
+  MixPanelEventParams.SAFE_ADDRESS,
+  MixPanelEventParams.EOA_WALLET_ADDRESS,
+  MixPanelUserProperty.SAFE_ADDRESS,
+])

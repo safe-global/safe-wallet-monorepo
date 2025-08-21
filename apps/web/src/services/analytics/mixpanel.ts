@@ -2,26 +2,47 @@ import mixpanel from 'mixpanel-browser'
 import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
 import { IS_PRODUCTION, MIXPANEL_TOKEN } from '@/config/constants'
 import { DeviceType } from './types'
-import { MixPanelEventParams } from './mixpanel-events'
+import { MixPanelEventParams, ADDRESS_PROPERTIES, type MixPanelUserProperty } from './mixpanel-events'
 import packageJson from '../../../package.json'
 
 let isMixPanelInitialized = false
 
+const isAddress = (key: string): boolean => ADDRESS_PROPERTIES.has(key as MixPanelEventParams | MixPanelUserProperty)
+
+const lowercaseAddress = (value: any): any => {
+  if (Array.isArray(value)) {
+    return value.map((v) => (typeof v === 'string' ? v.toLowerCase() : v))
+  }
+  if (typeof value === 'string') {
+    return value.toLowerCase()
+  }
+  return value
+}
+
+const normalizeProperty = ([key, value]: [string, any]): [string, any] => [
+  key,
+  isAddress(key) ? lowercaseAddress(value) : value,
+]
+
+const normalizeProperties = (properties: Record<string, any>): Record<string, any> => {
+  return Object.fromEntries(Object.entries(properties).map(normalizeProperty))
+}
+
 const safeMixPanelRegister = (properties: Record<string, any>): void => {
   if (isMixPanelInitialized) {
-    mixpanel.register(properties)
+    mixpanel.register(normalizeProperties(properties))
   }
 }
 
 const safeMixPanelPeopleSet = (properties: Record<string, any>): void => {
   if (isMixPanelInitialized) {
-    mixpanel.people.set(properties)
+    mixpanel.people.set(normalizeProperties(properties))
   }
 }
 
 const safeMixPanelTrack = (eventName: string, properties?: Record<string, any>): void => {
   if (isMixPanelInitialized) {
-    mixpanel.track(eventName, properties)
+    mixpanel.track(eventName, properties ? normalizeProperties(properties) : undefined)
   }
 }
 
@@ -125,9 +146,10 @@ export const mixpanelTrack = (eventName: string, properties?: Record<string, any
 }
 
 export const mixpanelIdentify = (userId: string): void => {
-  safeMixPanelIdentify(userId)
+  const lowercaseUserId = userId.toLowerCase()
+  safeMixPanelIdentify(lowercaseUserId)
 
   if (!IS_PRODUCTION && isMixPanelInitialized) {
-    console.info('[MixPanel] - User identified:', userId)
+    console.info('[MixPanel] - User identified:', lowercaseUserId)
   }
 }
