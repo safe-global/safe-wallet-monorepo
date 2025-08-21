@@ -9,6 +9,7 @@ import { showNotification } from '@/store/notificationsSlice'
 import { OnboardingTooltip } from '@/components/common/OnboardingTooltip'
 import { Chip } from '@/components/common/Chip'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import OnlyOwner from '@/components/common/OnlyOwner'
 
 const getCsvExportFileName = () => {
   const today = new Date().toISOString().slice(0, 10)
@@ -119,36 +120,40 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
 
   return (
     <>
-      <OnboardingTooltip
-        widgetLocalStorageId={LS_CSVEXPORT_ONBOARDING}
-        iconShown={false}
-        titleProps={{ flexDirection: 'column', alignItems: 'flex-end' }}
-        text={
-          <Box mt={1}>
-            <Chip sx={{ borderRadius: 1, ...chipStyles }} />
-            <Typography mt={1} variant="body2">
-              Export your transaction history for financial reporting.
-            </Typography>
-          </Box>
-        }
-      >
-        <Button
-          variant="contained"
-          onClick={() => setOpenExportModal(true)}
-          size="small"
-          sx={{ height: 38 }}
-          endIcon={
-            exportJobId ? (
-              <CircularProgress size={16} />
-            ) : (
-              <SvgIcon component={ExportIcon} inheritViewBox fontSize="small" />
-            )
-          }
-          disabled={!!exportJobId}
-        >
-          {exportJobId ? 'Exporting' : 'Export CSV'}
-        </Button>
-      </OnboardingTooltip>
+      <OnlyOwner placement="top">
+        {(isOk) => (
+          <OnboardingTooltip
+            widgetLocalStorageId={LS_CSVEXPORT_ONBOARDING}
+            iconShown={false}
+            titleProps={{ flexDirection: 'column', alignItems: 'flex-end' }}
+            text={
+              <Box mt={1}>
+                <Chip sx={{ borderRadius: 1, ...chipStyles }} />
+                <Typography mt={1} variant="body2">
+                  Export your transaction history for financial reporting.
+                </Typography>
+              </Box>
+            }
+          >
+            <Button
+              variant="contained"
+              onClick={() => setOpenExportModal(true)}
+              size="small"
+              sx={{ height: 38 }}
+              endIcon={
+                exportJobId ? (
+                  <CircularProgress size={16} />
+                ) : (
+                  <SvgIcon component={ExportIcon} inheritViewBox fontSize="small" />
+                )
+              }
+              disabled={!isOk || !!exportJobId}
+            >
+              {exportJobId ? 'Exporting' : 'Export CSV'}
+            </Button>
+          </OnboardingTooltip>
+        )}
+      </OnlyOwner>
 
       {openExportModal && (
         <CsvTxExportModal
