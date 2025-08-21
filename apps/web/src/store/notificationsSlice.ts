@@ -2,6 +2,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { AlertColor } from '@mui/material'
 import type { AppThunk, RootState } from '@/store'
 import type { LinkProps } from 'next/link'
+import type { ReactNode } from 'react'
 
 export type Notification = {
   id: string
@@ -14,6 +15,7 @@ export type Notification = {
   isDismissed?: boolean
   isRead?: boolean
   link?: { href: LinkProps['href']; title: string } | { onClick: () => void; title: string }
+  icon?: ReactNode
   onClose?: () => void
 }
 

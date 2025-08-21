@@ -15,6 +15,7 @@ import {
 } from '@mui/material'
 import { subMonths, startOfYear, isBefore, isAfter, startOfDay, addMonths } from 'date-fns'
 import ExportIcon from '@/public/images/common/export.svg'
+import UpdateIcon from '@/public/images/notifications/update.svg'
 import ModalDialog from '@/components/common/ModalDialog'
 import DatePickerInput from '@/components/common/DatePickerInput'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -97,13 +98,14 @@ const CsvTxExportModal = ({ onClose, onExport, hasActiveFilter }: CsvTxExportMod
   const chainId = useChainId()
   const [launchExport] = useCsvExportLaunchExportV1Mutation()
 
-  const successNotification = () => {
+  const infoNotification = () => {
     dispatch(
       showNotification({
-        variant: 'success',
+        variant: 'info',
         groupKey: 'export-csv-started',
         title: 'Generating CSV export',
         message: 'This might take a few minutes.',
+        icon: <SvgIcon component={UpdateIcon} inheritViewBox fontSize="inherit" />,
       }),
     )
   }
@@ -162,7 +164,7 @@ const CsvTxExportModal = ({ onClose, onExport, hasActiveFilter }: CsvTxExportMod
         transactionExportDto: { executionDateGte, executionDateLte },
       }).unwrap()
       onExport(job)
-      successNotification()
+      infoNotification()
     } catch (e) {
       errorNotification()
     }
@@ -171,7 +173,18 @@ const CsvTxExportModal = ({ onClose, onExport, hasActiveFilter }: CsvTxExportMod
   })
 
   return (
-    <ModalDialog open onClose={onClose} dialogTitle="Export CSV" hideChainIndicator>
+    <ModalDialog
+      open
+      onClose={onClose}
+      dialogTitle={
+        <>
+          <SvgIcon component={ExportIcon} inheritViewBox sx={{ mr: 1 }} />
+          Export CSV
+        </>
+      }
+      hideChainIndicator
+      maxWidth="xs"
+    >
       <FormProvider {...methods}>
         <form onSubmit={onSubmit}>
           <DialogContent sx={{ p: '24px !important' }}>
@@ -181,7 +194,7 @@ const CsvTxExportModal = ({ onClose, onExport, hasActiveFilter }: CsvTxExportMod
 
             {hasActiveFilter && (
               <Alert severity="info" color="background" sx={{ mb: 3 }}>
-                Transaction history filter won&apos;t apply here.
+                Transaction history filters won&apos;t apply here.
               </Alert>
             )}
 
@@ -236,14 +249,12 @@ const CsvTxExportModal = ({ onClose, onExport, hasActiveFilter }: CsvTxExportMod
             )}
           </DialogContent>
 
-          <DialogActions>
-            <Button variant="text" size="small" onClick={onClose} disableElevation>
-              Cancel
-            </Button>
+          <DialogActions sx={{ justifyContent: 'flex-end', '&::after': { display: 'none' } }}>
             <Button
               type="submit"
               variant="contained"
               size="small"
+              sx={{ height: 36 }}
               disabled={isExportDisabled}
               disableElevation
               startIcon={<SvgIcon component={ExportIcon} inheritViewBox fontSize="small" />}

@@ -42,6 +42,11 @@ export const OnboardingTooltip = ({
       open
       placement={placement}
       arrow
+      slotProps={{
+        transition: {
+          timeout: { enter: 700 },
+        },
+      }}
       title={
         <Box display="flex" alignItems="center" gap={1} p={1} {...titleProps}>
           {iconShown && <SvgIcon component={InfoIcon} inheritViewBox fontSize="small" />}
