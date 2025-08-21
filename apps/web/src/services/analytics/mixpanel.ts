@@ -1,5 +1,4 @@
 import mixpanel from 'mixpanel-browser'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
 import { IS_PRODUCTION, MIXPANEL_TOKEN } from '@/config/constants'
 import { DeviceType } from './types'
 import { MixPanelEventParams, ADDRESS_PROPERTIES, type MixPanelUserProperty } from './mixpanel-events'
@@ -117,24 +116,6 @@ export const mixpanelSetEOAWalletAddress = (address: string): void => {
 
 export const mixpanelSetEOAWalletNetwork = (network: string): void => {
   safeMixPanelRegister({ [MixPanelEventParams.EOA_WALLET_NETWORK]: network })
-}
-
-export const safeAppToMixPanelEventProperties = (
-  safeApp: SafeAppData,
-  options?: {
-    launchLocation?: string
-  },
-): Record<string, any> => {
-  const properties: Record<string, any> = {
-    'Safe App Name': safeApp.name,
-    'Safe App Tags': safeApp.tags,
-  }
-
-  if (options?.launchLocation) {
-    properties['Launch Location'] = options.launchLocation
-  }
-
-  return properties
 }
 
 export const mixpanelTrack = (eventName: string, properties?: Record<string, any>): void => {
