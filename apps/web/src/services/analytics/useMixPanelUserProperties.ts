@@ -55,7 +55,7 @@ export const useMixPanelUserProperties = (): MixPanelUserPropertiesFormatted | n
     }
 
     const properties = {
-      [MixPanelUserProperty.SAFE_ADDRESS]: safe.address.value,
+      [MixPanelUserProperty.SAFE_ADDRESS]: safe.address.value.toLowerCase(),
       [MixPanelUserProperty.SAFE_VERSION]: safe.version || 'unknown',
       [MixPanelUserProperty.NUM_SIGNERS]: safe.owners.length,
       [MixPanelUserProperty.THRESHOLD]: safe.threshold,

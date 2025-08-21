@@ -125,9 +125,10 @@ export const mixpanelTrack = (eventName: string, properties?: Record<string, any
 }
 
 export const mixpanelIdentify = (userId: string): void => {
-  safeMixPanelIdentify(userId)
+  const lowercaseUserId = userId.toLowerCase()
+  safeMixPanelIdentify(lowercaseUserId)
 
   if (!IS_PRODUCTION && isMixPanelInitialized) {
-    console.info('[MixPanel] - User identified:', userId)
+    console.info('[MixPanel] - User identified:', lowercaseUserId)
   }
 }

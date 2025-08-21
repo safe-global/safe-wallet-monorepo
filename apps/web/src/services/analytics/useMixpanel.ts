@@ -92,7 +92,7 @@ const useMixpanel = () => {
         walletProperties[MixPanelUserProperty.WALLET_LABEL] = wallet.label
       }
       if (wallet.address) {
-        walletProperties[MixPanelUserProperty.WALLET_ADDRESS] = wallet.address
+        walletProperties[MixPanelUserProperty.WALLET_ADDRESS] = wallet.address.toLowerCase()
       }
 
       if (Object.keys(walletProperties).length > 0) {
