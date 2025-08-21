@@ -11,10 +11,22 @@
  * `import { trackEvent, ADDRESS_BOOK_EVENTS } from '@/services/analytics'`
  * `trackEvent(ADDRESS_BOOK_EVENTS.EXPORT)`
  */
+import type { AnalyticsEvent } from './types'
 import { gtmTrack, gtmTrackSafeApp } from './gtm'
 import { mixpanelTrack, safeAppToMixPanelEventProperties } from './mixpanel'
+import { GA_TO_MIXPANEL_MAPPING } from './ga-mixpanel-mapping'
 
-export const trackEvent = gtmTrack
+export const trackEvent = (eventData: AnalyticsEvent, additionalParameters?: Record<string, any>): void => {
+  gtmTrack(eventData)
+
+  const mixpanelEventName =
+    GA_TO_MIXPANEL_MAPPING[eventData.action] || (eventData.event ? GA_TO_MIXPANEL_MAPPING[eventData.event] : undefined)
+
+  if (mixpanelEventName) {
+    mixpanelTrack(mixpanelEventName, additionalParameters)
+  }
+}
+
 export const trackSafeAppEvent = gtmTrackSafeApp
 
 export const trackMixPanelEvent = mixpanelTrack
