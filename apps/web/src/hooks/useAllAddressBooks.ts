@@ -24,15 +24,15 @@ const mapAddressBook = (addressBook: AddressBook, chainId: string): ExtendedCont
   }))
 }
 
-const useLocalAddressBook = (chainId?: string) => {
-  const fallbackChainId = useChainId()
-  const actualChainId = chainId ?? fallbackChainId
-  const addressBook = useAddressBook(actualChainId)
+const useLocalAddressBook = (chainId: string) => {
+  const addressBook = useAddressBook(chainId)
 
-  return useMemo(() => mapAddressBook(addressBook, actualChainId), [addressBook, actualChainId])
+  return useMemo(() => mapAddressBook(addressBook, chainId), [addressBook, chainId])
 }
 
 export const useAllMergedAddressBooks = (chainId?: string): ExtendedContact[] => {
+  const fallbackChainId = useChainId()
+  const actualChainId = chainId ?? fallbackChainId
   const addressBook = useGetSpaceAddressBook()
 
   const spaceContacts = useMemo<ExtendedContact[]>(() => {
@@ -44,16 +44,20 @@ export const useAllMergedAddressBooks = (chainId?: string): ExtendedContact[] =>
     }))
   }, [addressBook])
 
-  const localContacts = useLocalAddressBook(chainId)
+  const localContacts = useLocalAddressBook(actualChainId)
 
   return useMemo<ExtendedContact[]>(() => {
     // Only include local contacts if they don't already exist in the space address book
     const filteredLocalContacts = localContacts.filter(
-      (localContact) => !spaceContacts.some((spaceContact) => sameAddress(spaceContact.address, localContact.address)),
+      (localContact) =>
+        !spaceContacts.some(
+          (spaceContact) =>
+            sameAddress(spaceContact.address, localContact.address) && spaceContact.chainIds.includes(actualChainId),
+        ),
     )
 
     return [...spaceContacts, ...filteredLocalContacts]
-  }, [spaceContacts, localContacts])
+  }, [localContacts, spaceContacts, actualChainId])
 }
 
 /**
