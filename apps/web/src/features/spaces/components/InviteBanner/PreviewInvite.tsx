@@ -18,7 +18,7 @@ const PreviewInvite = () => {
   const isDarkMode = useDarkMode()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const spaceId = useCurrentSpaceId()
-  const { currentData: currentUser } = useUsersGetWithWalletsV1Query()
+  const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const { currentData: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn || !spaceId })
   const invitedBy = space?.members.find((member) => member.user.id === currentUser?.id)?.invitedBy
 

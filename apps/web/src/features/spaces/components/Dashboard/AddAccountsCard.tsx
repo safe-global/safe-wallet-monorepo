@@ -20,7 +20,7 @@ const AddAccountsCard = () => {
             Add your Safe Accounts
           </Typography>
 
-          <Typography variant="body1" color="text.secondary" mb={2}>
+          <Typography variant="body1" color="primary.light" mb={2}>
             Start by adding Safe Accounts to your space. Any accounts that are linked to your connected wallet can be
             added to the space.
           </Typography>

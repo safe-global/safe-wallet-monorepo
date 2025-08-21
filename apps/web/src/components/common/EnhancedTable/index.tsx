@@ -15,12 +15,13 @@ import { visuallyHidden } from '@mui/utils'
 import classNames from 'classnames'
 
 import css from './styles.module.css'
-import { Collapse } from '@mui/material'
+import { Collapse, Typography } from '@mui/material'
 
 type EnhancedCell = {
   content: ReactNode
   rawValue: string | number | null
   sticky?: boolean
+  mobileLabel?: string
 }
 
 type EnhancedRow = {
@@ -36,6 +37,7 @@ type EnhancedHeadCell = {
   width?: string
   align?: string
   sticky?: boolean
+  disableSort?: boolean
 }
 
 function descendingComparator(a: string | number, b: string | number) {
@@ -91,7 +93,9 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
             }}
             className={classNames({ sticky: headCell.sticky })}
           >
-            {headCell.label && (
+            {headCell.disableSort ? (
+              headCell.label
+            ) : (
               <>
                 <TableSortLabel
                   active={orderBy === headCell.id}
@@ -171,6 +175,12 @@ function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
                       })}
                     >
                       <Collapse key={index} in={!row.collapsed} enter={false}>
+                        {cell.mobileLabel ? (
+                          <Typography variant="body2" color="text.secondary" className={css.mobileLabel}>
+                            {cell.mobileLabel}
+                          </Typography>
+                        ) : null}
+
                         {cell.content}
                       </Collapse>
                     </TableCell>

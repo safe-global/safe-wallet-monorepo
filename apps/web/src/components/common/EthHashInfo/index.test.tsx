@@ -7,6 +7,7 @@ import * as useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import * as useChainId from '@/hooks/useChainId'
 import * as store from '@/store'
 import EthHashInfo from '.'
+import { ContactSource } from '@/hooks/useAllAddressBooks'
 
 const originalClipboard = { ...global.navigator.clipboard }
 
@@ -24,6 +25,15 @@ describe('EthHashInfo', () => {
       [MOCK_CHAIN_ID]: {
         [MOCK_SAFE_ADDRESS]: 'Address book name',
       },
+    }))
+
+    jest.spyOn(useAllAddressBooks, 'useAddressBookItem').mockImplementation(() => ({
+      name: 'Address book name',
+      chainIds: [MOCK_CHAIN_ID],
+      address: MOCK_SAFE_ADDRESS,
+      createdBy: '0x123',
+      lastUpdatedBy: '0x123',
+      source: ContactSource.local,
     }))
 
     //@ts-ignore
@@ -146,15 +156,16 @@ describe('EthHashInfo', () => {
 
   describe('name', () => {
     it('renders a name by default', () => {
+      jest.spyOn(useAllAddressBooks, 'useAddressBookItem').mockReturnValue(undefined)
       const { queryByText } = render(<EthHashInfo address="0x1234" name="Test name" />)
 
       expect(queryByText('Test name')).toBeInTheDocument()
     })
 
-    it('renders a name from the address book even if a name is passed', () => {
+    it('renders the name that is passed instead of the address book', () => {
       const { queryByText } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} name="Fallback name" />)
 
-      expect(queryByText('Address book name')).toBeInTheDocument()
+      expect(queryByText('Fallback name')).toBeInTheDocument()
     })
 
     it('renders a name from the address book', () => {

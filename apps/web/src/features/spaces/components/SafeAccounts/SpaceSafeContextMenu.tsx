@@ -60,7 +60,7 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
   return (
     <>
       <IconButton edge="end" size="small" onClick={handleOpenContextMenu}>
-        <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
+        <MoreVertIcon sx={{ color: 'border.main' }} />
       </IconButton>
       <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>
         <MenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)}>
