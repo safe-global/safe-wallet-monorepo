@@ -30,6 +30,9 @@ export enum MixPanelEventParams {
   THRESHOLD = 'Threshold',
   DEPLOYMENT_TYPE = 'Deployment Type',
   PAYMENT_METHOD = 'Payment Method',
+  SAFE_APP_NAME = 'Safe App Name',
+  SAFE_APP_TAGS = 'Safe App Tags',
+  LAUNCH_LOCATION = 'Launch Location',
 }
 
 export enum SafeAppLaunchLocation {

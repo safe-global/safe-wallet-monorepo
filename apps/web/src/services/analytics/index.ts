@@ -13,8 +13,10 @@
  */
 import type { AnalyticsEvent } from './types'
 import { gtmTrack, gtmTrackSafeApp } from './gtm'
-import { mixpanelTrack, safeAppToMixPanelEventProperties } from './mixpanel'
+import { mixpanelTrack } from './mixpanel'
 import { GA_TO_MIXPANEL_MAPPING } from './ga-mixpanel-mapping'
+import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import { MixPanelEventParams } from './mixpanel-events'
 
 export const trackEvent = (eventData: AnalyticsEvent, additionalParameters?: Record<string, any>): void => {
   gtmTrack(eventData)
@@ -29,23 +31,40 @@ export const trackEvent = (eventData: AnalyticsEvent, additionalParameters?: Rec
 
 export const trackSafeAppEvent = (
   eventData: AnalyticsEvent,
-  safeApp?: any,
+  safeAppOrName?: SafeAppData | string,
   options?: { launchLocation?: string; sdkEventData?: any },
 ): void => {
-  const appName = safeApp?.name
+  // For backward compatibility: string for simple events, SafeAppData object for launch events with full properties
+  const appName = typeof safeAppOrName === 'string' ? safeAppOrName : safeAppOrName?.name
+
   gtmTrackSafeApp(eventData, appName, options?.sdkEventData)
 
   const mixpanelEventName =
     GA_TO_MIXPANEL_MAPPING[eventData.action] || (eventData.event ? GA_TO_MIXPANEL_MAPPING[eventData.event] : undefined)
 
-  if (mixpanelEventName && safeApp) {
-    const mixpanelProperties = safeAppToMixPanelEventProperties(safeApp, options)
+  if (mixpanelEventName && safeAppOrName) {
+    let mixpanelProperties: Record<string, any> = {}
+
+    if (typeof safeAppOrName === 'object') {
+      mixpanelProperties = {
+        [MixPanelEventParams.SAFE_APP_NAME]: safeAppOrName.name,
+        [MixPanelEventParams.SAFE_APP_TAGS]: safeAppOrName.tags,
+      }
+
+      if (options?.launchLocation) {
+        mixpanelProperties[MixPanelEventParams.LAUNCH_LOCATION] = options.launchLocation
+      }
+    } else {
+      mixpanelProperties = {
+        [MixPanelEventParams.SAFE_APP_NAME]: safeAppOrName,
+      }
+    }
+
     mixpanelTrack(mixpanelEventName, mixpanelProperties)
   }
 }
 
 export const trackMixPanelEvent = mixpanelTrack
-export { safeAppToMixPanelEventProperties }
 
 export * from './types'
 export * from './events'
