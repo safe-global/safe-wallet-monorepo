@@ -305,24 +305,28 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
     gtmSetChainId(chain.chainId)
 
+    trackEvent(CREATE_SAFE_EVENTS.CREATED_SAFE, {
+      [MixPanelEventParams.SAFE_ADDRESS]: safeAddress.toLowerCase(),
+      [MixPanelEventParams.BLOCKCHAIN_NETWORK]: chain.chainName,
+      [MixPanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
+      [MixPanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
+      [MixPanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
+      [MixPanelEventParams.DEPLOYMENT_TYPE]:
+        isCounterfactualEnabled && payMethod === PayMethod.PayLater ? 'Counterfactual' : 'Direct',
+      [MixPanelEventParams.PAYMENT_METHOD]:
+        isCounterfactualEnabled && payMethod === PayMethod.PayLater
+          ? 'Pay-later'
+          : willRelay
+            ? 'Sponsored'
+            : 'Self-paid',
+    })
+
     try {
       if (isCounterfactualEnabled && payMethod === PayMethod.PayLater) {
         gtmSetSafeAddress(safeAddress)
 
         trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
         replayCounterfactualSafeDeployment(chain.chainId, safeAddress, props, data.name, dispatch, payMethod)
-        trackEvent(
-          { ...CREATE_SAFE_EVENTS.CREATED_SAFE, label: 'counterfactual' },
-          {
-            [MixPanelEventParams.SAFE_ADDRESS]: safeAddress,
-            [MixPanelEventParams.BLOCKCHAIN_NETWORK]: chain.chainName,
-            [MixPanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
-            [MixPanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
-            [MixPanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
-            [MixPanelEventParams.DEPLOYMENT_TYPE]: 'Counterfactual',
-            [MixPanelEventParams.PAYMENT_METHOD]: 'Pay-later',
-          },
-        )
 
         return
       }
@@ -353,16 +357,6 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
         trackEvent(CREATE_SAFE_EVENTS.SUBMIT_CREATE_SAFE)
         trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'deployment', category: CREATE_SAFE_CATEGORY })
-
-        trackEvent(CREATE_SAFE_EVENTS.CREATED_SAFE, {
-          [MixPanelEventParams.SAFE_ADDRESS]: safeAddress,
-          [MixPanelEventParams.BLOCKCHAIN_NETWORK]: chain.chainName,
-          [MixPanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
-          [MixPanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
-          [MixPanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
-          [MixPanelEventParams.DEPLOYMENT_TYPE]: 'direct',
-          [MixPanelEventParams.PAYMENT_METHOD]: willRelay ? 'Sponsored' : 'Self-paid',
-        })
 
         onSubmit(data)
       }

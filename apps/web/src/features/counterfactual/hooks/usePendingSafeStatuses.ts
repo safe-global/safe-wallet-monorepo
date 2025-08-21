@@ -120,13 +120,13 @@ const usePendingSafeStatus = (): void => {
           gtmSetSafeAddress(detail.safeAddress)
 
           // TODO: Possible to add a label with_tx, without_tx?
-          // Not a counterfactual deployment
-          if ('type' in detail && detail.type === PayMethod.PayNow) {
-            trackEvent(CREATE_SAFE_EVENTS.CREATED_SAFE)
-          }
 
           const undeployedSafe = undeployedSafes[creationChainId]?.[detail.safeAddress]
-          if (undeployedSafe) {
+          const isCounterfactual = 'type' in detail && detail.type === PayMethod.PayLater
+          const isRelayed = undeployedSafe?.status.status === PendingSafeStatus.RELAYING
+
+          if (undeployedSafe && isCounterfactual) {
+            // Counterfactual deployment activation
             const safeSetup = extractCounterfactualSafeSetup(undeployedSafe, creationChainId)
             if (safeSetup) {
               trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE, {
@@ -136,13 +136,29 @@ const usePendingSafeStatus = (): void => {
                 [MixPanelEventParams.THRESHOLD]: safeSetup.threshold,
                 [MixPanelEventParams.ENTRY_POINT]: 'Counterfactual Activation',
                 [MixPanelEventParams.DEPLOYMENT_TYPE]: 'Counterfactual',
-                [MixPanelEventParams.PAYMENT_METHOD]:
-                  'type' in detail && detail.type === PayMethod.PayLater ? 'Sponsored' : 'Self-paid',
+                [MixPanelEventParams.PAYMENT_METHOD]: isRelayed ? 'Sponsored' : 'Self-paid',
+              })
+            } else {
+              trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE)
+            }
+          } else if (undeployedSafe && !isCounterfactual) {
+            // Direct deployment activation
+            const safeSetup = extractCounterfactualSafeSetup(undeployedSafe, creationChainId)
+            if (safeSetup) {
+              trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE, {
+                [MixPanelEventParams.SAFE_ADDRESS]: detail.safeAddress.toLowerCase(),
+                [MixPanelEventParams.BLOCKCHAIN_NETWORK]: chain?.chainName || '',
+                [MixPanelEventParams.NUMBER_OF_OWNERS]: safeSetup.owners.length,
+                [MixPanelEventParams.THRESHOLD]: safeSetup.threshold,
+                [MixPanelEventParams.ENTRY_POINT]: 'Direct',
+                [MixPanelEventParams.DEPLOYMENT_TYPE]: 'Direct',
+                [MixPanelEventParams.PAYMENT_METHOD]: isRelayed ? 'Sponsored' : 'Self-paid',
               })
             } else {
               trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE)
             }
           } else {
+            // Fallback for cases without undeployedSafe
             trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE)
           }
 
