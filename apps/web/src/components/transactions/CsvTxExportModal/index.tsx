@@ -170,7 +170,7 @@ const CsvTxExportModal = ({ onClose, onExport, hasActiveFilter }: CsvTxExportMod
       errorNotification()
     }
 
-    trackMixPanelEvent(MixPanelEvent.CSV_TX_EXPORT_SUBMITTED, { period: DATE_RANGE_LABELS[range as DateRangeOption] })
+    trackMixPanelEvent(MixPanelEvent.CSV_TX_EXPORT_SUBMITTED, { Period: DATE_RANGE_LABELS[range as DateRangeOption] })
     onClose()
   })
 
