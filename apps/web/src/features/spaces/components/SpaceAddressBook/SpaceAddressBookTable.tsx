@@ -38,7 +38,6 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
                 name={entry.name}
                 shortAddress={false}
                 showPrefix={false}
-                isAddressBookName={true}
                 addressBookNameSource={ContactSource.space}
                 hasExplorer
                 showCopyButton
