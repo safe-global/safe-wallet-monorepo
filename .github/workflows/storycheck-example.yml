@@ -16,10 +16,6 @@ jobs:
 
       - uses: ./.github/actions/yarn
 
-      - uses: ./.github/actions/build
-        with:
-          secrets: ${{ inputs.secrets }}
-
       - name: Run StoryCheck
         id: storycheck      
         uses: GuardianUI/storycheck@v0.1.3
