@@ -10,6 +10,7 @@ import { OnboardingTooltip } from '@/components/common/OnboardingTooltip'
 import { Chip } from '@/components/common/Chip'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import OnlyOwner from '@/components/common/OnlyOwner'
+import { MixPanelEvent, trackMixPanelEvent } from '@/services/analytics'
 
 const getCsvExportFileName = () => {
   const today = new Date().toISOString().slice(0, 10)
@@ -42,6 +43,11 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
   const chipStyles = isDarkMode
     ? { backgroundColor: 'primary.main', color: 'secondary.background' }
     : { backgroundColor: 'secondary.main', color: 'static.main' }
+
+  const onClick = () => {
+    setOpenExportModal(true)
+    trackMixPanelEvent(MixPanelEvent.CSV_TX_EXPORT_CLICKED, {})
+  }
 
   useEffect(() => {
     if (exportJobId && !exportTimeout.current) {
@@ -138,7 +144,7 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
             {(isOk) => (
               <Button
                 variant="contained"
-                onClick={() => setOpenExportModal(true)}
+                onClick={onClick}
                 size="small"
                 sx={{ height: 38 }}
                 endIcon={

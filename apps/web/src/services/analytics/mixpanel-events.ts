@@ -3,6 +3,8 @@ export enum MixPanelEvent {
   SAFE_CREATED = 'Safe Created',
   SAFE_ACTIVATED = 'Safe Activated',
   WALLET_CONNECTED = 'Wallet Connected',
+  CSV_TX_EXPORT_CLICKED = 'Export CSV Clicked',
+  CSV_TX_EXPORT_SUBMITTED = 'CSV Exported',
 }
 
 export enum MixPanelUserProperty {
