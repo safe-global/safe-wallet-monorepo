@@ -1,5 +1,8 @@
 export enum MixPanelEvent {
   SAFE_APP_LAUNCHED = 'Safe App Launched',
+  SAFE_CREATED = 'Safe Created',
+  SAFE_ACTIVATED = 'Safe Activated',
+  WALLET_CONNECTED = 'Wallet Connected',
 }
 
 export enum MixPanelUserProperty {
@@ -22,9 +25,23 @@ export enum MixPanelEventParams {
   EOA_WALLET_LABEL = 'EOA Wallet Label',
   EOA_WALLET_ADDRESS = 'EOA Wallet Address',
   EOA_WALLET_NETWORK = 'EOA Wallet Network',
+  ENTRY_POINT = 'Entry Point',
+  NUMBER_OF_OWNERS = 'Number of Owners',
+  THRESHOLD = 'Threshold',
+  DEPLOYMENT_TYPE = 'Deployment Type',
+  PAYMENT_METHOD = 'Payment Method',
+  SAFE_APP_NAME = 'Safe App Name',
+  SAFE_APP_TAGS = 'Safe App Tags',
+  LAUNCH_LOCATION = 'Launch Location',
 }
 
 export enum SafeAppLaunchLocation {
   PREVIEW_DRAWER = 'Preview Drawer',
   SAFE_APPS_LIST = 'Safe Apps List',
 }
+
+export const ADDRESS_PROPERTIES = new Set([
+  MixPanelEventParams.SAFE_ADDRESS,
+  MixPanelEventParams.EOA_WALLET_ADDRESS,
+  MixPanelUserProperty.SAFE_ADDRESS,
+])
