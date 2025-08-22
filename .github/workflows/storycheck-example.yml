@@ -18,7 +18,7 @@ jobs:
 
       - name: Run StoryCheck
         id: storycheck      
-        uses: GuardianUI/storycheck@v0.1.3
+        uses: GuardianUI/storycheck@v0.1.4
         env: 
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}        
         with:
