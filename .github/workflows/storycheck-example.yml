@@ -1,0 +1,36 @@
+# File: .github/workflows/storycheck-example.yml
+name: StoryCheck Simple Web3 App
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/yarn
+
+      - uses: ./.github/actions/build
+        with:
+          secrets: ${{ inputs.secrets }}
+
+      - uses: actions/checkout@v5
+
+      - name: Run StoryCheck
+        id: storycheck      
+        uses: GuardianUI/storycheck@v0.1.3
+        env: 
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}        
+        with:
+          storypath: 'user-stories/create-account'
+          start-command: yarn workspace @safe-global/web serve
+          wait-on: 'http://localhost:8080'
+          wait-on-timeout: '60'
+          app-working-directory: 'user-stories/create-account'
+      - name: Check if passed
+        if: ${{ steps.storycheck.outputs.passed != 'true' }}
+        run: echo "StoryCheck failed!" && exit 1
