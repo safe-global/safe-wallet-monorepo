@@ -41,7 +41,7 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
   )
 
   const chipStyles = isDarkMode
-    ? { backgroundColor: 'primary.main', color: 'secondary.background' }
+    ? { backgroundColor: 'secondary.background', color: 'secondary.main' }
     : { backgroundColor: 'secondary.main', color: 'static.main' }
 
   const onClick = () => {
@@ -129,10 +129,11 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
       <OnboardingTooltip
         widgetLocalStorageId={LS_CSVEXPORT_ONBOARDING}
         iconShown={false}
-        titleProps={{ flexDirection: 'column', alignItems: 'flex-end' }}
+        placement="bottom-end"
+        titleProps={{ flexDirection: 'column', alignItems: 'flex-end', maxWidth: 263 }}
         text={
           <Box mt={1}>
-            <Chip sx={{ borderRadius: 1, ...chipStyles }} />
+            <Chip sx={{ borderRadius: 1, ...chipStyles }} fontWeight="normal" />
             <Typography mt={1} variant="body2">
               Export your transaction history for financial reporting.
             </Typography>

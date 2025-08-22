@@ -3,7 +3,6 @@ import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import type { BoxProps, TooltipProps } from '@mui/material'
 import { Box, Button, SvgIcon, Tooltip } from '@mui/material'
 import InfoIcon from '@/public/images/notifications/info.svg'
-import { useDarkMode } from '@/hooks/useDarkMode'
 
 /**
  * The OnboardingTooltip renders a sticky Tooltip with an arrow pointing towards the wrapped component.
@@ -29,7 +28,6 @@ export const OnboardingTooltip = ({
   placement?: TooltipProps['placement']
 }): ReactElement => {
   const [widgetHidden = !initiallyShown, setWidgetHidden] = useLocalStorage<boolean>(widgetLocalStorageId)
-  const isDarkMode = useDarkMode()
 
   return widgetHidden || !text ? (
     children
@@ -53,12 +51,12 @@ export const OnboardingTooltip = ({
           <div style={{ minWidth: '150px' }}>{text}</div>
           <Button
             size="small"
-            color={isDarkMode ? 'background' : 'secondary'}
+            color="inherit"
             variant="text"
             sx={{ whiteSpace: 'nowrap' }}
             onClick={() => setWidgetHidden(true)}
           >
-            Got it!
+            Got it
           </Button>
         </Box>
       }
