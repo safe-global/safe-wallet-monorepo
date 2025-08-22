@@ -13,15 +13,22 @@ const useSafeInfo = (): {
   safeError?: string
 } => {
   const { data, error, loading } = useAppSelector(selectSafeInfo, isEqual)
+  console.log('useSafeInfo useAppSelector result:', { data, error, loading })
+
+  console.log('useSafeInfo dependencies:', [data, error, loading])
 
   return useMemo(
-    () => ({
-      safe: data || defaultSafeInfo,
-      safeAddress: data?.address.value || '',
-      safeLoaded: !!data,
-      safeError: error,
-      safeLoading: loading,
-    }),
+    () => {
+      const result = {
+        safe: data || defaultSafeInfo,
+        safeAddress: data?.address.value || '',
+        safeLoaded: !!data,
+        safeError: error,
+        safeLoading: loading,
+      }
+      console.log('useSafeInfo result:', result)
+      return result
+    },
     [data, error, loading],
   )
 }

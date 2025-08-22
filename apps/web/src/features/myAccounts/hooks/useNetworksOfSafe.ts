@@ -14,6 +14,8 @@ export const useNetworksOfSafe = (safeAddress: string): string[] => {
   const { allMultiChainSafes } = useAllSafesGrouped()
   const { configs: allChains } = useChains()
 
+  console.log('useNetworksOfSafe dependencies:', { safeAddress, allMultiChainSafes, allChains })
+
   const chainMap = useMemo(() => {
     return allChains.reduce(
       (acc, chain) => {
@@ -42,6 +44,7 @@ export const useNetworksOfSafe = (safeAddress: string): string[] => {
       return chainInfo?.chainName || 'unknown'
     })
 
+    console.log('useNetworksOfSafe result:', networkNames)
     return networkNames
   }, [safeAddress, allMultiChainSafes, chainMap])
 }

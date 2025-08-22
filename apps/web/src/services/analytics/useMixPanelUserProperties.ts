@@ -33,7 +33,10 @@ export const useMixPanelUserProperties = (): MixPanelUserPropertiesFormatted | n
   const { safe, safeLoaded } = useSafeInfo()
   const currentChain = useChain(safe?.chainId || '')
   const txHistory = useAppSelector(selectTxHistory)
+  console.log('useMixPanelUserProperties useAppSelector(selectTxHistory) result:', txHistory)
   const allNetworks = useNetworksOfSafe(safe?.address?.value || '')
+
+  console.log('useMixPanelUserProperties dependencies:', [safe, safeLoaded, currentChain, txHistory, allNetworks])
 
   return useMemo(() => {
     if (!safeLoaded || !safe || !currentChain) {
@@ -64,9 +67,13 @@ export const useMixPanelUserProperties = (): MixPanelUserPropertiesFormatted | n
       [MixPanelUserProperty.NETWORKS]: networks,
     }
 
-    return {
+    const result = {
       properties,
       networks,
     }
+    
+    console.log('useMixPanelUserProperties result:', result)
+    
+    return result
   }, [safe, safeLoaded, currentChain, txHistory, allNetworks])
 }

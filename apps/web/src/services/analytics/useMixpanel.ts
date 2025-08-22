@@ -116,8 +116,11 @@ const useMixpanel = () => {
   }, [wallet, walletChain])
 
   useEffect(() => {
+    console.log('useMixpanel userProperties dependency:', [userProperties])
+    
     if (!userProperties) return
 
+    console.log('Setting user properties:', userProperties.properties)
     mixpanelSetUserProperties(userProperties.properties)
   }, [userProperties])
 }
