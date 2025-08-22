@@ -12,13 +12,13 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
+
       - uses: ./.github/actions/yarn
 
       - uses: ./.github/actions/build
         with:
           secrets: ${{ inputs.secrets }}
-
-      - uses: actions/checkout@v5
 
       - name: Run StoryCheck
         id: storycheck      
