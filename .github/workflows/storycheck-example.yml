@@ -11,9 +11,15 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Check disk space (pre)
-        run: df -h
+      - name: Check disk space (initial)
+        run: |
+          echo "Disk usage before checkout:"
+          df -h
       - uses: actions/checkout@v5
+      - name: Check disk space (post-checkout)
+        run: |
+          echo "Disk usage after checkout:"
+          df -h
       - name: Cache Yarn dependencies
         uses: actions/cache@v4
         with:
@@ -23,28 +29,34 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: ${{ runner.os }}-yarn-
       - uses: ./.github/actions/yarn
+      - name: Check disk space (post-yarn)
+        run: |
+          echo "Disk usage after yarn install:"
+          df -h
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('requirements.txt') }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles('user-stories/create-account/requirements.txt') }}
           restore-keys: ${{ runner.os }}-playwright-
       - name: Cache Hugging Face model
         uses: actions/cache@v4
         with:
           path: ~/.cache/huggingface
-          key: ${{ runner.os }}-hf-cache-${{ hashFiles('requirements.txt') }}-${{ hashFiles('interpreter/ai/local_refexp.py') }}
+          key: ${{ runner.os }}-hf-cache-${{ hashFiles('user-stories/create-account/requirements.txt') }}-${{ hashFiles('interpreter/ai/local_refexp.py') }}
           restore-keys: ${{ runner.os }}-hf-cache-
-      - name: Check disk space (post)
-        if: always()
-        run: df -h
+      - name: Clean temporary files (pre-storycheck)
+        run: |
+          echo "Cleaning /tmp and pip cache before StoryCheck:"
+          rm -rf /tmp/* ~/.cache/pip || true
+          df -h
       - name: Run StoryCheck
         id: storycheck      
         uses: GuardianUI/storycheck@v0.1.4
         env: 
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}       
           NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }} 
-          STORYCHECK_DISABLE_VIDEOS: 'true'  # Disable video recordings in CI to save space
+          STORYCHECK_DISABLE_VIDEOS: 'true'  # Disable video recordings to save disk
         with:
           storypath: 'user-stories/create-account'
           start-command: 'yarn workspace @safe-global/web start'
@@ -54,11 +66,14 @@ jobs:
       - name: Check if passed
         if: ${{ steps.storycheck.outputs.passed != 'true' }}
         run: echo "StoryCheck failed!" && exit 1
-      - name: Clean temporary files
+      - name: Clean temporary files (post-storycheck)
         if: always()
         run: |
-          rm -rf /tmp/* ~/.cache/pip || true
+          echo "Cleaning /tmp, pip cache, and results after StoryCheck:"
+          rm -rf /tmp/* ~/.cache/pip results/* || true
           df -h
-      - name: Check disk space (post)
+      - name: Check disk space (final)
         if: always()
-        run: df -h
+        run: |
+          echo "Final disk usage:"
+          df -h
