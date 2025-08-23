@@ -7,28 +7,58 @@ on:
   pull_request:
     branches: [main, dev]
 
-
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
+      - name: Check disk space (pre)
+        run: df -h
       - uses: actions/checkout@v5
-
+      - name: Cache Yarn dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.yarn/cache
+            **/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
       - uses: ./.github/actions/yarn
-
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('requirements.txt') }}
+          restore-keys: ${{ runner.os }}-playwright-
+      - name: Cache Hugging Face model
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: ${{ runner.os }}-hf-cache-${{ hashFiles('requirements.txt') }}-${{ hashFiles('interpreter/ai/local_refexp.py') }}
+          restore-keys: ${{ runner.os }}-hf-cache-
+      - name: Check disk space (post)
+        if: always()
+        run: df -h
       - name: Run StoryCheck
         id: storycheck      
-        uses: GuardianUI/storycheck@v0.1.5
+        uses: GuardianUI/storycheck@v0.1.4
         env: 
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}       
           NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }} 
-
+          STORYCHECK_DISABLE_VIDEOS: 'true'  # Disable video recordings in CI to save space
         with:
           storypath: 'user-stories/create-account'
-          start-command: yarn workspace @safe-global/web start
+          start-command: 'yarn workspace @safe-global/web start'
           wait-on: 'http://localhost:3000'
           wait-on-timeout: '60'
           app-working-directory: 'user-stories/create-account'
       - name: Check if passed
         if: ${{ steps.storycheck.outputs.passed != 'true' }}
         run: echo "StoryCheck failed!" && exit 1
+      - name: Clean temporary files
+        if: always()
+        run: |
+          rm -rf /tmp/* ~/.cache/pip || true
+          df -h
+      - name: Check disk space (post)
+        if: always()
+        run: df -h
