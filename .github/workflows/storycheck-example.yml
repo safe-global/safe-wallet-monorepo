@@ -15,13 +15,6 @@ jobs:
         run: |
           echo "Current PATH:"
           echo $PATH
-      - name: Install Foundry (Fallback)
-        run: |
-          echo "Installing Foundry manually as fallback..."
-          curl -L https://foundry.paradigm.xyz | bash
-          source /home/runner/.bashrc
-          export PATH="$HOME/.foundry/bin:$PATH"
-          foundryup || { echo "Foundry installation failed"; exit 1; }
       - name: Check disk space (initial)
         run: |
           echo "Disk usage before any steps:"
@@ -56,16 +49,6 @@ jobs:
           path: ~/.cache/huggingface
           key: ${{ runner.os }}-hf-cache-${{ hashFiles('user-stories/create-account/requirements.txt') }}-${{ hashFiles('interpreter/ai/local_refexp.py') }}
           restore-keys: ${{ runner.os }}-hf-cache-
-      - name: Check for port conflicts
-        run: |
-          echo "Checking if port 8545 is in use:"
-          netstat -tuln | grep :8545 || echo "Port 8545 is free"
-      - name: Verify Foundry and Anvil installation
-        run: |
-          echo "Verifying Foundry installation:"
-          foundryup --version || { echo "Foundry not found or failed to run"; exit 1; }
-          echo "Verifying Anvil installation:"
-          anvil --version || { echo "Anvil not found or failed to run"; exit 1; }
       - name: Clean temporary files (pre-storycheck)
         run: |
           echo "Cleaning /tmp and pip cache before StoryCheck:"
@@ -77,7 +60,6 @@ jobs:
         env: 
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}       
           NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }} 
-          STORYCHECK_DISABLE_VIDEOS: 'true'  # Disable video recordings to save disk
         with:
           storypath: 'user-stories/create-account'
           start-command: 'yarn workspace @safe-global/web start'
