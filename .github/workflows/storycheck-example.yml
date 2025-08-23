@@ -11,6 +11,16 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug PATH
+        run: |
+          echo "Current PATH:"
+          echo $PATH
+      - name: Install Foundry (Fallback)
+        run: |
+          echo "Installing Foundry manually as fallback..."
+          curl -L https://foundry.paradigm.xyz | bash
+          export PATH="$HOME/.foundry/bin:$PATH"
+          foundryup || { echo "Foundry installation failed"; exit 1; }
       - name: Check disk space (initial)
         run: |
           echo "Disk usage before any steps:"
@@ -49,8 +59,10 @@ jobs:
         run: |
           echo "Checking if port 8545 is in use:"
           netstat -tuln | grep :8545 || echo "Port 8545 is free"
-      - name: Verify Anvil installation
+      - name: Verify Foundry and Anvil installation
         run: |
+          echo "Verifying Foundry installation:"
+          foundryup --version || { echo "Foundry not found or failed to run"; exit 1; }
           echo "Verifying Anvil installation:"
           anvil --version || { echo "Anvil not found or failed to run"; exit 1; }
       - name: Clean temporary files (pre-storycheck)
@@ -65,13 +77,11 @@ jobs:
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}       
           NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }} 
           STORYCHECK_DISABLE_VIDEOS: 'true'  # Disable video recordings to save disk
-          STORYCHECK_ANVIL_LOG: 'true'  # Enable Anvil logging for debugging
         with:
           storypath: 'user-stories/create-account'
           start-command: 'yarn workspace @safe-global/web start'
           wait-on: 'http://localhost:3000'
           wait-on-timeout: '60'
-          anvil-timeout: '60'  # Increase Anvil timeout to 60 seconds
           app-working-directory: 'user-stories/create-account'
       - name: Check if passed
         if: ${{ steps.storycheck.outputs.passed != 'true' }}
