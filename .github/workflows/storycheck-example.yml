@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Check disk space (initial)
         run: |
-          echo "Disk usage before checkout:"
+          echo "Disk usage before any steps:"
           df -h
       - uses: actions/checkout@v5
       - name: Check disk space (post-checkout)
@@ -45,6 +45,14 @@ jobs:
           path: ~/.cache/huggingface
           key: ${{ runner.os }}-hf-cache-${{ hashFiles('user-stories/create-account/requirements.txt') }}-${{ hashFiles('interpreter/ai/local_refexp.py') }}
           restore-keys: ${{ runner.os }}-hf-cache-
+      - name: Check for port conflicts
+        run: |
+          echo "Checking if port 8545 is in use:"
+          netstat -tuln | grep :8545 || echo "Port 8545 is free"
+      - name: Verify Anvil installation
+        run: |
+          echo "Verifying Anvil installation:"
+          anvil --version || { echo "Anvil not found or failed to run"; exit 1; }
       - name: Clean temporary files (pre-storycheck)
         run: |
           echo "Cleaning /tmp and pip cache before StoryCheck:"
@@ -57,11 +65,13 @@ jobs:
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}       
           NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }} 
           STORYCHECK_DISABLE_VIDEOS: 'true'  # Disable video recordings to save disk
+          STORYCHECK_ANVIL_LOG: 'true'  # Enable Anvil logging for debugging
         with:
           storypath: 'user-stories/create-account'
           start-command: 'yarn workspace @safe-global/web start'
           wait-on: 'http://localhost:3000'
           wait-on-timeout: '60'
+          anvil-timeout: '60'  # Increase Anvil timeout to 60 seconds
           app-working-directory: 'user-stories/create-account'
       - name: Check if passed
         if: ${{ steps.storycheck.outputs.passed != 'true' }}
