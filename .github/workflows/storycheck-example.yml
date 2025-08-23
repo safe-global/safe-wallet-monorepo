@@ -19,6 +19,7 @@ jobs:
         run: |
           echo "Installing Foundry manually as fallback..."
           curl -L https://foundry.paradigm.xyz | bash
+          source /home/runner/.bashrc
           export PATH="$HOME/.foundry/bin:$PATH"
           foundryup || { echo "Foundry installation failed"; exit 1; }
       - name: Check disk space (initial)
