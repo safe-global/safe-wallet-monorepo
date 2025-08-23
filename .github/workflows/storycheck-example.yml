@@ -20,11 +20,13 @@ jobs:
         id: storycheck      
         uses: GuardianUI/storycheck@v0.1.4
         env: 
-          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}        
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}       
+          NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }} 
+
         with:
           storypath: 'user-stories/create-account'
-          start-command: yarn workspace @safe-global/web serve
-          wait-on: 'http://localhost:8080'
+          start-command: yarn workspace @safe-global/web start
+          wait-on: 'http://localhost:3000'
           wait-on-timeout: '60'
           app-working-directory: 'user-stories/create-account'
       - name: Check if passed
