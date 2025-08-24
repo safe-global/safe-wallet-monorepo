@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Debug PATH
         run: |
+          echo "Initial memory usage:"
+          free -h
           echo "Current PATH:"
           echo $PATH
       - name: Check disk space (initial)
@@ -24,6 +26,8 @@ jobs:
         run: |
           echo "Disk usage after checkout:"
           df -h
+          echo "Memory after checkout:"
+          free -h
       - name: Cache Yarn dependencies
         uses: actions/cache@v4
         with:
@@ -37,6 +41,8 @@ jobs:
         run: |
           echo "Disk usage after yarn install:"
           df -h
+          echo "Memory after yarn install:"
+          free -h
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
@@ -53,6 +59,8 @@ jobs:
         run: |
           echo "Cleaning /tmp and pip cache before StoryCheck:"
           rm -rf /tmp/* ~/.cache/pip || true
+          echo "Memory before cleaning:"
+          free -h
           df -h
       - name: Run StoryCheck
         id: storycheck      
@@ -74,6 +82,8 @@ jobs:
         run: |
           echo "Cleaning /tmp, pip cache, and results after StoryCheck:"
           rm -rf /tmp/* ~/.cache/pip results/* || true
+          echo "Memory after cleaning:"
+          free -h
           df -h
       - name: Check disk space (final)
         if: always()
