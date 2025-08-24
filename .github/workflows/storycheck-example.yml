@@ -35,7 +35,7 @@ jobs:
         uses: GuardianUI/storycheck@v0.1.4
         env: 
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}       
-          HF_HOME: /mnt/hf_cache  # Redirect HF model downloads to /mnt (more space)
+          # HF_HOME: /mnt/hf_cache  # Redirect HF model downloads to /mnt (more space)
           NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }} 
         with:
           storypath: 'user-stories/create-account'
