@@ -1,7 +1,10 @@
 # File: .github/workflows/storycheck-example.yml
-name: StoryCheck Simple Web3 App
+name: StoryCheck SAFE Create Account Example
 
 on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * *'
   push:
     branches: [main, dev]
   pull_request:
@@ -9,45 +12,23 @@ on:
 
 jobs:
   check:
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'e2e-test')
+    name: Install and build
     runs-on: ubuntu-latest
     steps:
-      - name: Debug PATH
-        run: |
-          echo "Current PATH:"
-          echo $PATH
-      - uses: actions/checkout@v5
+      - name: Checkout code
+        uses: actions/checkout@v5
       - name: Check disk space (post-checkout)
         run: |
           echo "Disk usage after checkout:"
           df -h
-      - uses: ./.github/actions/yarn
-      - name: Check disk space (post-yarn)
-        run: |
-          echo "Disk usage after yarn install:"
-          df -h
-      # - name: Maximize disk space
-      #   uses: easimon/maximize-build-space@v10
-      #   with:
-      #     remove-dotnet: 'true'  # Remove large .NET SDK if present
-      #     overprovision-lvm: 'true'  # Expand root if possible
       - name: Run StoryCheck
         id: storycheck      
         uses: GuardianUI/storycheck@v0.1.4
         env: 
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}       
-          # HF_HOME: /mnt/hf_cache  # Redirect HF model downloads to /mnt (more space)
-          NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }} 
         with:
           storypath: 'user-stories/create-account'
-          start-command: 'yarn workspace @safe-global/web start'
-          wait-on: 'http://localhost:3000'
-          wait-on-timeout: '60'
-          app-working-directory: 'user-stories/create-account'
       - name: Check if passed
         if: ${{ steps.storycheck.outputs.passed != 'true' }}
         run: echo "StoryCheck failed!" && exit 1
-      - name: Check disk space (final)
-        if: always()
-        run: |
-          echo "Final disk usage:"
-          df -h
