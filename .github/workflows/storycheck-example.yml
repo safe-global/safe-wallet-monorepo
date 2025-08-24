@@ -15,51 +15,21 @@ jobs:
         run: |
           echo "Current PATH:"
           echo $PATH
-      - name: Check disk space (initial)
-        run: |
-          echo "Disk usage before any steps:"
-          df -h
       - uses: actions/checkout@v5
       - name: Check disk space (post-checkout)
         run: |
           echo "Disk usage after checkout:"
           df -h
-      - name: Cache Yarn dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.yarn/cache
-            **/node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: ${{ runner.os }}-yarn-
       - uses: ./.github/actions/yarn
       - name: Check disk space (post-yarn)
         run: |
           echo "Disk usage after yarn install:"
           df -h
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('user-stories/create-account/requirements.txt') }}
-          restore-keys: ${{ runner.os }}-playwright-
-      - name: Maximize disk space
-        uses: easimon/maximize-build-space@v10
-        with:
-          remove-dotnet: 'true'  # Remove large .NET SDK if present
-          overprovision-lvm: 'true'  # Expand root if possible
-      - name: Cache Hugging Face model
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/huggingface
-          key: ${{ runner.os }}-hf-cache-${{ hashFiles('user-stories/create-account/requirements.txt') }}-${{ hashFiles('interpreter/ai/local_refexp.py') }}
-          restore-keys: ${{ runner.os }}-hf-cache-
-      - name: Clean temporary files (pre-storycheck)
-        run: |
-          rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc || true  # Extra cleanup for common large dirs
-          echo "Cleaning /tmp and pip cache before StoryCheck:"
-          rm -rf /tmp/* ~/.cache/pip || true
-          df -h
+      # - name: Maximize disk space
+      #   uses: easimon/maximize-build-space@v10
+      #   with:
+      #     remove-dotnet: 'true'  # Remove large .NET SDK if present
+      #     overprovision-lvm: 'true'  # Expand root if possible
       - name: Run StoryCheck
         id: storycheck      
         uses: GuardianUI/storycheck@v0.1.4
@@ -76,13 +46,6 @@ jobs:
       - name: Check if passed
         if: ${{ steps.storycheck.outputs.passed != 'true' }}
         run: echo "StoryCheck failed!" && exit 1
-      - name: Clean temporary files (post-storycheck)
-        if: always()
-        run: |
-          echo "Cleaning /tmp, pip cache, and results after StoryCheck:"
-          rm -rf /tmp/* ~/.cache/pip results/* || true
-          rm -rf /mnt/hf_cache || true  # Clean relocated cache if needed
-          df -h
       - name: Check disk space (final)
         if: always()
         run: |
