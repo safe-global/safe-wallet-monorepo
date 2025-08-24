@@ -6,9 +6,9 @@ on:
   schedule:
     - cron: '0 6 * * *'
   push:
-    branches: [main, dev]
+    branches: [dev]
   pull_request:
-    branches: [main, dev]
+    branches: [dev]
 
 jobs:
   check:
@@ -18,10 +18,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
-      - name: Check disk space (post-checkout)
-        run: |
-          echo "Disk usage after checkout:"
-          df -h
       - name: Run StoryCheck
         id: storycheck      
         uses: GuardianUI/storycheck@v0.1.4
