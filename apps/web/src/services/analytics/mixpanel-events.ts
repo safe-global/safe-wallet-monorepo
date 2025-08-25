@@ -7,6 +7,7 @@ export enum MixPanelEvent {
   POSITIONS_VIEW_ALL_CLICKED = 'Positions View All Clicked',
   EMPTY_POSITIONS_EXPLORE_CLICKED = 'Empty Positions Explore Clicked',
   STAKE_VIEWED = 'Stake Viewed',
+  EARN_VIEWED = 'Earn Viewed',
 }
 
 export enum MixPanelUserProperty {

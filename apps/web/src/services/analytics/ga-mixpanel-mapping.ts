@@ -4,6 +4,7 @@ import { WALLET_EVENTS } from './events/wallet'
 import { SAFE_APPS_EVENTS } from './events/safeApps'
 import { POSITIONS_EVENTS } from './events/positions'
 import { STAKE_EVENTS } from './events/stake'
+import { EARN_EVENTS } from './events/earn'
 
 // If an event is mapped here, it will be tracked in Mixpanel
 export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
@@ -15,4 +16,5 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [POSITIONS_EVENTS.POSITIONS_VIEW_ALL_CLICKED.action]: MixPanelEvent.POSITIONS_VIEW_ALL_CLICKED,
   [POSITIONS_EVENTS.EMPTY_POSITIONS_EXPLORE_CLICKED.action]: MixPanelEvent.EMPTY_POSITIONS_EXPLORE_CLICKED,
   [STAKE_EVENTS.STAKE_VIEWED.action]: MixPanelEvent.STAKE_VIEWED,
+  [EARN_EVENTS.EARN_VIEWED.action]: MixPanelEvent.EARN_VIEWED,
 }
