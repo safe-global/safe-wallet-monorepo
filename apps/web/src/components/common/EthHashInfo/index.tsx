@@ -25,7 +25,6 @@ const EthHashInfo = ({
       copyPrefix={settings.shortName.copy}
       {...props}
       name={name}
-      isAddressBookName={props.isAddressBookName || !!addressBookItem}
       addressBookNameSource={props.addressBookNameSource || addressBookItem?.source}
       customAvatar={props.customAvatar}
       ExplorerButtonProps={{ title: link?.title || '', href: link?.href || '' }}
