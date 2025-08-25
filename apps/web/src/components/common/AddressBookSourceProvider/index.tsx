@@ -10,10 +10,10 @@ const AddressBookSourceContext = createContext<AddressBookSource>(DEFAULT_SOURCE
 export const useAddressBookSource = () => useContext(AddressBookSourceContext)
 
 const deriveSourceFromURL = (router: NextRouter) => {
-  const { safe } = router.query
-  const querySafe = Array.isArray(safe) ? safe[0] : safe
+  const { spaceId } = router.query
+  const querySpaceId = Array.isArray(spaceId) ? spaceId[0] : spaceId
 
-  return querySafe ? 'merged' : 'spaceOnly'
+  return querySpaceId ? 'spaceOnly' : 'merged'
 }
 
 /**
