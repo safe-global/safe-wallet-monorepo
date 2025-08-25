@@ -48,6 +48,23 @@
   justify-content: center;
 }
 
+.gradient {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.circleProgress {
+  color: var(--color-secondary-main);
+}
+
+.circleBg {
+  color: var(--color-border-light);
+  position: absolute;
+}
+
 @media (max-width: 599.95px) {
   .container td:last-of-type,
   .container th:last-of-type {

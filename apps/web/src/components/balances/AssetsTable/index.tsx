@@ -1,6 +1,6 @@
 import CheckBalance from '@/features/counterfactual/CheckBalance'
 import React, { type ReactElement } from 'react'
-import { Box, Card, Checkbox, Chip, IconButton, Skeleton, Stack, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Box, Card, Checkbox, CircularProgress, IconButton, Skeleton, Stack, Tooltip, Typography } from '@mui/material'
 import css from './styles.module.css'
 import TokenAmount from '@/components/common/TokenAmount'
 import TokenIcon from '@/components/common/TokenIcon'
@@ -28,10 +28,8 @@ import EarnButton from '@/features/earn/components/EarnButton'
 import { EARN_LABELS } from '@/services/analytics/events/earn'
 import { isEligibleEarnToken } from '@/features/earn/utils'
 import useChainId from '@/hooks/useChainId'
-import AccountsIcon from '@/public/images/sidebar/wallet.svg'
 import FiatValue from '@/components/common/FiatValue'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
-import useFiatTotal from '@/hooks/useFiatTotal'
 
 const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   asset: {
@@ -69,6 +67,14 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
       </Typography>
     ),
   },
+  weight: {
+    rawValue: '0',
+    content: (
+      <Typography>
+        <Skeleton width="32px" />
+      </Typography>
+    ),
+  },
   actions: {
     rawValue: '',
     sticky: true,
@@ -86,29 +92,35 @@ const headCells = [
   {
     id: 'asset',
     label: 'Asset',
-    width: '44%',
+    width: '40%',
   },
   {
     id: 'price',
     label: 'Price',
-    width: '14%',
+    width: '15%',
     align: 'left',
   },
   {
     id: 'balance',
     label: 'Balance',
-    width: '14%',
+    width: '15%',
   },
   {
     id: 'value',
     label: 'Value',
-    width: 'auto',
-    align: 'right',
+    width: '15%',
+    align: 'left',
+  },
+  {
+    id: 'weight',
+    label: 'Weight',
+    width: '15%',
+    align: 'left',
   },
   {
     id: 'actions',
     label: '',
-    width: '14%',
+    width: '15%',
     sticky: true,
   },
 ]
@@ -132,10 +144,10 @@ const AssetsTable = ({
 
   const visible = useVisibleAssets()
   const visibleAssets = showHiddenAssets ? balances.items : visible
-
   const hasNoAssets = !loading && balances.items.length === 1 && balances.items[0].balance === '0'
-
   const selectedAssetCount = visibleAssets?.filter((item) => isAssetSelected(item.tokenInfo.address)).length || 0
+
+  const fiatTotal = balances.fiatTotal ? Number(balances.fiatTotal) : null
 
   const rows = loading
     ? skeletonRows
@@ -144,6 +156,7 @@ const AssetsTable = ({
         const rawPriceValue = parseFloat(item.fiatConversion)
         const isNative = isNativeToken(item.tokenInfo)
         const isSelected = isAssetSelected(item.tokenInfo.address)
+        const itemShareOfFiatTotal = fiatTotal ? Number(item.fiatBalance) / fiatTotal : null
 
         return {
           key: item.tokenInfo.address,
@@ -196,7 +209,7 @@ const AssetsTable = ({
               rawValue: rawFiatValue,
               collapsed: item.tokenInfo.address === hidingAsset,
               content: (
-                <Box textAlign="right">
+                <Box textAlign="left">
                   <Typography>
                     <FiatValue value={item.fiatBalance} />
                   </Typography>
@@ -206,6 +219,46 @@ const AssetsTable = ({
                     </Typography>
                   )}
                 </Box>
+              ),
+            },
+            weight: {
+              rawValue: itemShareOfFiatTotal,
+              content: itemShareOfFiatTotal ? (
+                <Stack direction="row" alignItems="center" gap={1} position="relative">
+                  <svg className={css.gradient}>
+                    <defs>
+                      <linearGradient
+                        id="progress_gradient"
+                        x1="21.1648"
+                        y1="8.21591"
+                        x2="-9.95028"
+                        y2="22.621"
+                        gradientUnits="userSpaceOnUse"
+                      >
+                        <stop stopColor="#5FDDFF" />
+                        <stop offset="1" stopColor="#12FF80" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <CircularProgress
+                    variant="determinate"
+                    value={100}
+                    className={css.circleBg}
+                    size={16}
+                    thickness={6}
+                  />
+                  <CircularProgress
+                    variant="determinate"
+                    value={itemShareOfFiatTotal * 100}
+                    className={css.circleProgress}
+                    size={16}
+                    thickness={6}
+                    sx={{ 'svg circle': { stroke: 'url(#progress_gradient)', strokeLinecap: 'round' } }}
+                  />
+                  <Typography variant="body2">{formatPercentage(itemShareOfFiatTotal)}</Typography>
+                </Stack>
+              ) : (
+                <></>
               ),
             },
             actions: {
@@ -244,9 +297,6 @@ const AssetsTable = ({
         }
       })
 
-  const fiatTotal = useFiatTotal()
-  const shareOfFiatTotal = fiatTotal ? formatPercentage(Number(balances.fiatTotal) / fiatTotal) : null
-
   return (
     <>
       <TokenMenu
@@ -260,20 +310,7 @@ const AssetsTable = ({
       {hasNoAssets ? (
         <AddFundsCTA />
       ) : (
-        <Card sx={{ px: 2, pt: 2, mb: 2 }}>
-          <Stack direction="row" alignItems="center" gap={1}>
-            <div className={css.walletImage}>
-              <SvgIcon component={AccountsIcon} inheritViewBox fontSize="small" />
-            </div>
-
-            <Typography fontWeight="bold">Wallet</Typography>
-
-            {shareOfFiatTotal && <Chip variant="filled" size="tiny" label={shareOfFiatTotal} />}
-
-            <Typography fontWeight="bold" mr={1} ml="auto" justifySelf="flex-end">
-              <FiatValue value={balances.fiatTotal} maxLength={20} precise />
-            </Typography>
-          </Stack>
+        <Card sx={{ px: 2, mb: 2 }}>
           <div className={css.container}>
             <EnhancedTable rows={rows} headCells={headCells} compact />
           </div>
