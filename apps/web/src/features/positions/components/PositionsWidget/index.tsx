@@ -23,6 +23,7 @@ import usePositions from '@/features/positions/hooks/usePositions'
 import DefiImage from '@/public/images/balances/defi.png'
 import Image from 'next/image'
 import Link from 'next/link'
+import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { POSITIONS_EVENTS, POSITIONS_LABELS } from '@/services/analytics/events/positions'
 import { MixPanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -72,7 +73,17 @@ const PositionsWidget = () => {
       <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
         <Typography fontWeight={700}>Top positions</Typography>
 
-        {protocols.length > 0 && <ViewAllLink url={viewAllUrl} text="View all" />}
+        {protocols.length > 0 && (
+          <Track
+            {...POSITIONS_EVENTS.POSITIONS_VIEW_ALL_CLICKED}
+            mixpanelParams={{
+              [MixPanelEventParams.TOTAL_VALUE_OF_PORTFOLIO]: fiatTotal || 0,
+              [MixPanelEventParams.ENTRY_POINT]: 'Dashboard',
+            }}
+          >
+            <ViewAllLink url={viewAllUrl} text="View all" />
+          </Track>
+        )}
       </Stack>
 
       <Box>

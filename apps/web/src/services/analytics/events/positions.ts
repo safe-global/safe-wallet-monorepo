@@ -5,6 +5,10 @@ export const POSITIONS_EVENTS = {
     action: 'Position expanded',
     category: POSITIONS_CATEGORY,
   },
+  POSITIONS_VIEW_ALL_CLICKED: {
+    action: 'Positions view all clicked',
+    category: POSITIONS_CATEGORY,
+  },
 }
 
 export enum POSITIONS_LABELS {
