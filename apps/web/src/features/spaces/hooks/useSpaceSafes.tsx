@@ -6,20 +6,24 @@ import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { getComparator } from '@/features/myAccounts/utils/utils'
 import { useMemo } from 'react'
-import { selectAllAddressBooks } from '@/store/addressBookSlice'
 import { isAuthenticated } from '@/store/authSlice'
 import useAllOwnedSafes from '@/features/myAccounts/hooks/useAllOwnedSafes'
 import useWallet from '@/hooks/wallets/useWallet'
+import { mapSpaceContactsToAddressBookState } from '@/features/spaces/utils'
+import useGetSpaceAddressBook from '@/features/spaces/hooks/useGetSpaceAddressBook'
 
 export const useSpaceSafes = () => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData, isLoading } = useSpaceSafesGetV1Query({ spaceId: Number(spaceId) }, { skip: !isUserSignedIn })
+  const spaceContacts = useGetSpaceAddressBook()
 
-  const allSafeNames = useAppSelector(selectAllAddressBooks)
+  // We are doing this in order to reuse the _buildSafeItems function but only take space contacts into account
+  const addressBooks = mapSpaceContactsToAddressBookState(spaceContacts)
+
   const { address: walletAddress = '' } = useWallet() || {}
   const [allOwned = {}] = useAllOwnedSafes(walletAddress)
-  const safeItems = currentData ? _buildSafeItems(currentData.safes, allSafeNames, allOwned) : []
+  const safeItems = currentData ? _buildSafeItems(currentData.safes, addressBooks, allOwned) : []
   const safes = useAllSafesGrouped(safeItems)
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const sortComparator = getComparator(orderBy)

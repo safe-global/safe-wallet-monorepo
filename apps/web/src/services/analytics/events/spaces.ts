@@ -145,6 +145,38 @@ export const SPACE_EVENTS = {
     action: 'Hide spaces dashboard widget',
     category: SPACE_CATEGORY,
   },
+  ADD_ADDRESS: {
+    action: 'Open add address dialog',
+    category: SPACE_CATEGORY,
+  },
+  ADD_ADDRESS_SUBMIT: {
+    action: 'Submit add address',
+    category: SPACE_CATEGORY,
+  },
+  REMOVE_ADDRESS: {
+    action: 'Open remove address dialog',
+    category: SPACE_CATEGORY,
+  },
+  REMOVE_ADDRESS_SUBMIT: {
+    action: 'Submit remove address',
+    category: SPACE_CATEGORY,
+  },
+  IMPORT_ADDRESS_BOOK: {
+    action: 'Import address book',
+    category: SPACE_CATEGORY,
+  },
+  IMPORT_ADDRESS_BOOK_SUBMIT: {
+    action: 'Submit import address book',
+    category: SPACE_CATEGORY,
+  },
+  EDIT_ADDRESS: {
+    action: 'Open edit address',
+    category: SPACE_CATEGORY,
+  },
+  EDIT_ADDRESS_SUBMIT: {
+    action: 'Submit edit address',
+    category: SPACE_CATEGORY,
+  },
 }
 
 export enum SPACE_LABELS {

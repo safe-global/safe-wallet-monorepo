@@ -5,13 +5,7 @@ jest.mock('@/config/constants', () => ({
   IS_PRODUCTION: false,
 }))
 
-import {
-  trackEvent,
-  trackMixPanelEvent,
-  MixPanelEvent,
-  safeAppToMixPanelEventProperties,
-  SafeAppLaunchLocation,
-} from '../index'
+import { trackEvent, trackMixPanelEvent, MixPanelEvent } from '../index'
 import { mixpanelInit, mixpanelTrack, mixpanelSetSafeAddress } from '../mixpanel'
 import packageJson from '../../../../package.json'
 
@@ -146,81 +140,6 @@ describe('MixPanel Integration', () => {
 
       // Should NOT call GA track
       expect(mockGtm.gtmTrack).not.toHaveBeenCalled()
-    })
-
-    it('should convert SafeApp to MixPanel properties', () => {
-      const mockSafeApp = {
-        id: 123,
-        name: 'Test App',
-        url: 'https://test-app.com',
-        description: 'A test app',
-        iconUrl: 'https://test-app.com/icon.png',
-        developerWebsite: 'https://developer.com',
-        chainIds: ['1', '5'],
-        socialProfiles: [],
-        tags: ['defi', 'swap'],
-        accessControl: { type: 'NO_RESTRICTIONS' as const },
-        features: [],
-      }
-
-      const properties = safeAppToMixPanelEventProperties(mockSafeApp as any)
-
-      expect(properties).toEqual({
-        'Safe App Name': 'Test App',
-        'Safe App Tags': ['defi', 'swap'],
-      })
-    })
-
-    it('should convert SafeApp to MixPanel properties with launch location', () => {
-      const mockSafeApp = {
-        id: 123,
-        name: 'Test App',
-        url: 'https://test-app.com',
-        description: 'A test app',
-        iconUrl: 'https://test-app.com/icon.png',
-        developerWebsite: 'https://developer.com',
-        chainIds: ['1', '5'],
-        socialProfiles: [],
-        tags: ['defi', 'swap'],
-        accessControl: { type: 'NO_RESTRICTIONS' as const },
-        features: [],
-      }
-
-      const properties = safeAppToMixPanelEventProperties(mockSafeApp as any, {
-        launchLocation: SafeAppLaunchLocation.PREVIEW_DRAWER,
-      })
-
-      expect(properties).toEqual({
-        'Safe App Name': 'Test App',
-        'Safe App Tags': ['defi', 'swap'],
-        'Launch Location': 'Preview Drawer',
-      })
-    })
-
-    it('should convert SafeApp to MixPanel properties with Safe App List launch location', () => {
-      const mockSafeApp = {
-        id: 123,
-        name: 'Test App',
-        url: 'https://test-app.com',
-        description: 'A test app',
-        iconUrl: 'https://test-app.com/icon.png',
-        developerWebsite: 'https://developer.com',
-        chainIds: ['1', '5'],
-        socialProfiles: [],
-        tags: ['defi', 'swap'],
-        accessControl: { type: 'NO_RESTRICTIONS' as const },
-        features: [],
-      }
-
-      const properties = safeAppToMixPanelEventProperties(mockSafeApp as any, {
-        launchLocation: SafeAppLaunchLocation.SAFE_APPS_LIST,
-      })
-
-      expect(properties).toEqual({
-        'Safe App Name': 'Test App',
-        'Safe App Tags': ['defi', 'swap'],
-        'Launch Location': 'Safe Apps List',
-      })
     })
   })
 })
