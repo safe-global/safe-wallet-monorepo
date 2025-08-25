@@ -66,6 +66,7 @@ export enum SafeAppsTag {
 // Safe Apps names
 export enum SafeAppsName {
   CSV = 'CSV Airdrop',
+  TRANSACTION_BUILDER = 'Transaction Builder',
 }
 
 export const RECOVERY_FEEDBACK_FORM =
