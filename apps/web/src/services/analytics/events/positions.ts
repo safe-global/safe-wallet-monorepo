@@ -9,6 +9,10 @@ export const POSITIONS_EVENTS = {
     action: 'Positions view all clicked',
     category: POSITIONS_CATEGORY,
   },
+  EMPTY_POSITIONS_EXPLORE_CLICKED: {
+    action: 'Empty positions explore clicked',
+    category: POSITIONS_CATEGORY,
+  },
 }
 
 export enum POSITIONS_LABELS {

@@ -5,6 +5,7 @@ export enum MixPanelEvent {
   WALLET_CONNECTED = 'Wallet Connected',
   POSITION_EXPANDED = 'Position Expanded',
   POSITIONS_VIEW_ALL_CLICKED = 'Positions View All Clicked',
+  EMPTY_POSITIONS_EXPLORE_CLICKED = 'Empty Positions Explore Clicked',
 }
 
 export enum MixPanelUserProperty {

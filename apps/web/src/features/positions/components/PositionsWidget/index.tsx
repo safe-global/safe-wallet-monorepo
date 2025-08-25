@@ -42,9 +42,17 @@ const EmptyState = () => {
       </Typography>
 
       <Link href={AppRoutes.earn && { pathname: AppRoutes.earn, query: { safe: router.query.safe } }} passHref>
-        <Button size="small" sx={{ mt: 1 }}>
-          Explore Earn
-        </Button>
+        <Track
+          {...POSITIONS_EVENTS.EMPTY_POSITIONS_EXPLORE_CLICKED}
+          mixpanelParams={{
+            [MixPanelEventParams.TOTAL_VALUE_OF_PORTFOLIO]: 0,
+            [MixPanelEventParams.ENTRY_POINT]: 'Dashboard',
+          }}
+        >
+          <Button size="small" sx={{ mt: 1 }}>
+            Explore Earn
+          </Button>
+        </Track>
       </Link>
     </Paper>
   )
