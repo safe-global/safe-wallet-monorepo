@@ -23,6 +23,9 @@ import usePositions from '@/features/positions/hooks/usePositions'
 import DefiImage from '@/public/images/balances/defi.png'
 import Image from 'next/image'
 import Link from 'next/link'
+import { trackEvent } from '@/services/analytics'
+import { POSITIONS_EVENTS, POSITIONS_LABELS } from '@/services/analytics/events/positions'
+import { MixPanelEventParams } from '@/services/analytics/mixpanel-events'
 
 const MAX_PROTOCOLS = 4
 
@@ -77,8 +80,24 @@ const PositionsWidget = () => {
           <EmptyState />
         ) : (
           protocols.map((protocol) => {
+            const protocolValue = Number(protocol.fiatTotal) || 0
+
             return (
-              <Accordion key={protocol.protocol} disableGutters elevation={0} variant="elevation">
+              <Accordion
+                key={protocol.protocol}
+                disableGutters
+                elevation={0}
+                variant="elevation"
+                onChange={(_, expanded) => {
+                  if (expanded) {
+                    trackEvent(POSITIONS_EVENTS.POSITION_EXPANDED, {
+                      [MixPanelEventParams.PROTOCOL_NAME]: protocol.protocol,
+                      [MixPanelEventParams.LOCATION]: POSITIONS_LABELS.dashboard,
+                      [MixPanelEventParams.AMOUNT_USD]: protocolValue,
+                    })
+                  }
+                }}
+              >
                 <AccordionSummary
                   className={css.position}
                   expandIcon={<ExpandMoreIcon fontSize="small" />}
