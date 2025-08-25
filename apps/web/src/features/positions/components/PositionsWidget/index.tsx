@@ -54,7 +54,7 @@ const PositionsWidget = () => {
 
   const viewAllUrl = useMemo(
     () => ({
-      pathname: AppRoutes.balances.index,
+      pathname: AppRoutes.balances.positions,
       query: { safe },
     }),
     [safe],
