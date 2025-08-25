@@ -18,10 +18,12 @@ import { BRAND_NAME } from '@/config/constants'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 
 const Balances: NextPage = () => {
-  const { error } = useBalances()
+  const { balances, error } = useBalances()
   const [showHiddenAssets, setShowHiddenAssets] = useState(false)
   const toggleShowHiddenAssets = () => setShowHiddenAssets((prev) => !prev)
   const isStakingBannerEnabled = useIsStakingBannerEnabled()
+
+  const fiatTotal = balances.fiatTotal ? Number(balances.fiatTotal) : undefined
 
   return (
     <>
@@ -47,7 +49,7 @@ const Balances: NextPage = () => {
         ) : (
           <>
             <Box mb={2}>
-              <TotalAssetValue />
+              <TotalAssetValue fiatTotal={fiatTotal} />
             </Box>
             <AssetsTable setShowHiddenAssets={setShowHiddenAssets} showHiddenAssets={showHiddenAssets} />
           </>

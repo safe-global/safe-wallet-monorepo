@@ -1,14 +1,12 @@
 import { Box, Skeleton, Typography } from '@mui/material'
 import FiatValue from '@/components/common/FiatValue'
 import TokenAmount from '@/components/common/TokenAmount'
-import useFiatTotal from '@/hooks/useFiatTotal'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 
-const TotalAssetValue = () => {
+const TotalAssetValue = ({ fiatTotal }: { fiatTotal: number | undefined }) => {
   const { safe } = useSafeInfo()
   const { balances } = useVisibleBalances()
-  const fiatTotal = useFiatTotal()
 
   return (
     <Box>

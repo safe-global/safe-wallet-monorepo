@@ -10,10 +10,12 @@ import { BRAND_NAME } from '@/config/constants'
 import DefiPositions from '@/features/positions'
 import { Box } from '@mui/material'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
+import usePositionsFiatTotal from '@/features/positions/hooks/usePositionsFiatTotal'
 
 const Positions: NextPage = () => {
   const [showHiddenAssets, setShowHiddenAssets] = useState(false)
   const toggleShowHiddenAssets = () => setShowHiddenAssets((prev) => !prev)
+  const fiatTotal = usePositionsFiatTotal()
 
   return (
     <>
@@ -29,7 +31,7 @@ const Positions: NextPage = () => {
 
       <main>
         <Box mb={2}>
-          <TotalAssetValue />
+          <TotalAssetValue fiatTotal={fiatTotal} />
         </Box>
         <DefiPositions />
       </main>

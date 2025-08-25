@@ -17,6 +17,7 @@ import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import CheckWallet from '@/components/common/CheckWallet'
+import useFiatTotal from '@/hooks/useFiatTotal'
 
 const Overview = (): ReactElement => {
   const { safe, safeLoading, safeLoaded } = useSafeInfo()
@@ -24,6 +25,7 @@ const Overview = (): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)
   const router = useRouter()
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
+  const fiatTotal = useFiatTotal()
 
   const isInitialState = !safeLoaded && !safeLoading
   const isLoading = safeLoading || balancesLoading || isInitialState
@@ -49,7 +51,7 @@ const Overview = (): ReactElement => {
           alignItems={{ xs: 'flex-start', md: 'center' }}
           justifyContent="space-between"
         >
-          <TotalAssetValue />
+          <TotalAssetValue fiatTotal={fiatTotal} />
 
           {safe.deployed && (
             <Stack
