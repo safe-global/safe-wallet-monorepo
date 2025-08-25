@@ -122,7 +122,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
             <Typography mb={2}>Edit contact details. Anyone in the space can see it.</Typography>
             <Stack spacing={3}>
               <Box pt={1}>
-                <AddressInputReadOnly address={entry.address} />
+                <AddressInputReadOnly address={entry.address} chainId={entry.chainIds[0]} />
               </Box>
 
               <NameInput name="name" label="Name" required />
