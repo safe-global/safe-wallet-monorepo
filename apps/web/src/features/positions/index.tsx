@@ -1,6 +1,5 @@
 import { Box, Card, Stack, Typography } from '@mui/material'
 import PositionsHeader from '@/features/positions/components/PositionsHeader'
-import useFiatTotal from '@/hooks/useFiatTotal'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import FiatValue from '@/components/common/FiatValue'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
@@ -8,9 +7,10 @@ import { getReadablePositionType } from '@/features/positions/utils'
 import IframeIcon from '@/components/common/IframeIcon'
 import { FiatChange } from '@/components/balances/AssetsTable/FiatChange'
 import usePositions from '@/features/positions/hooks/usePositions'
+import usePositionsFiatTotal from '@/features/positions/hooks/usePositionsFiatTotal'
 
 export const Positions = () => {
-  const fiatTotal = useFiatTotal()
+  const fiatTotal = usePositionsFiatTotal()
   const currentData = usePositions()
 
   if (!currentData || currentData.length === 0) return null
