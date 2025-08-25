@@ -13,7 +13,7 @@ import {
   FormControl,
   Alert,
 } from '@mui/material'
-import { subMonths, startOfYear, isBefore, isAfter, startOfDay, addMonths } from 'date-fns'
+import { subMonths, startOfYear, isBefore, isAfter, startOfDay, addMonths, endOfDay } from 'date-fns'
 import ExportIcon from '@/public/images/common/export.svg'
 import UpdateIcon from '@/public/images/notifications/update.svg'
 import ModalDialog from '@/components/common/ModalDialog'
@@ -57,24 +57,24 @@ const getExportDates = (
   now = new Date(),
 ): { executionDateGte?: string; executionDateLte?: string } => {
   let executionDateGte: string | undefined
-  let executionDateLte: string | undefined = now.toISOString()
+  let executionDateLte: string | undefined = endOfDay(now).toISOString()
 
   switch (range) {
     case DateRangeOption.LAST_30_DAYS:
-      executionDateGte = subMonths(now, 1).toISOString()
+      executionDateGte = startOfDay(subMonths(now, 1)).toISOString()
       break
     case DateRangeOption.LAST_6_MONTHS:
-      executionDateGte = subMonths(now, 6).toISOString()
+      executionDateGte = startOfDay(subMonths(now, 6)).toISOString()
       break
     case DateRangeOption.LAST_12_MONTHS:
-      executionDateGte = subMonths(now, 12).toISOString()
+      executionDateGte = startOfDay(subMonths(now, 12)).toISOString()
       break
     case DateRangeOption.YTD:
       executionDateGte = startOfYear(now).toISOString()
       break
     case DateRangeOption.CUSTOM:
-      executionDateGte = from ? from.toISOString() : undefined
-      executionDateLte = to ? to.toISOString() : undefined
+      executionDateGte = from ? startOfDay(from).toISOString() : undefined
+      executionDateLte = to ? endOfDay(to).toISOString() : undefined
       break
   }
 
