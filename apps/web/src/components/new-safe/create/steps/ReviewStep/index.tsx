@@ -245,24 +245,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
       const provider = createWeb3ReadOnly(chain, customRpcUrl)
       if (!provider) return
 
-      let safeAddress: string
-
-      // FIXME a new check to indicate ZKsync chain will be added to the config service and available under ChainInfo
-      if (chain.chainId === chains['zksync'] || chain.chainId === chains['lens']) {
-        safeAddress = await computeNewSafeAddress(
-          customRpcUrl || getRpcServiceUrl(chain.rpcUri),
-          {
-            safeAccountConfig: replayedSafeWithNonce.safeAccountConfig,
-            safeDeploymentConfig: {
-              saltNonce: nextAvailableNonce,
-              safeVersion: replayedSafeWithNonce.safeVersion,
-            },
-          },
-          chain,
-        )
-      } else {
-        safeAddress = await predictAddressBasedOnReplayData(replayedSafeWithNonce, provider)
-      }
+      const safeAddress = await predictAddressBasedOnReplayData(replayedSafeWithNonce, provider)
 
       for (const network of data.networks) {
         await createSafe(network, replayedSafeWithNonce, safeAddress)
