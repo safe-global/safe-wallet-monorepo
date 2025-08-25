@@ -37,6 +37,7 @@ export enum MixPanelEventParams {
   SAFE_APP_TAGS = 'Safe App Tags',
   LAUNCH_LOCATION = 'Launch Location',
   APP_URL = 'App URL',
+  PERIOD = 'Period',
 }
 
 export enum SafeAppLaunchLocation {
