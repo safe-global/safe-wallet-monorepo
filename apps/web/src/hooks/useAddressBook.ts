@@ -1,20 +1,22 @@
 import { useMemo } from 'react'
-import { type AddressBook } from '@/store/addressBookSlice'
+import { type AddressBook, selectAddressBookByChain } from '@/store/addressBookSlice'
 import useChainId from './useChainId'
 import { ContactSource, useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
-import { useSearchParams } from 'next/navigation'
+import { useAppSelector } from '@/store'
+import { useAddressBookSource } from '@/components/common/AddressBookSourceProvider'
 
 /**
  * Returns an address book for a given chain adhering to the merge logic from spaces and local
  */
 const useAddressBook = (chainId?: string): AddressBook => {
   const fallbackChainId = useChainId()
-  const querySafe = useSearchParams().get('safe')
   const actualChainId = chainId || fallbackChainId
-  const source = querySafe ? 'merged' : 'spaceOnly'
+  const source = useAddressBookSource()
   const mergedAddressBook = useMergedAddressBooks(actualChainId)
 
-  return useMemo<AddressBook>(() => {
+  const localAddressBook = useAppSelector((state) => selectAddressBookByChain(state, actualChainId))
+
+  const merged = useMemo<AddressBook>(() => {
     const out: AddressBook = {}
 
     for (const contact of mergedAddressBook.list) {
@@ -29,6 +31,10 @@ const useAddressBook = (chainId?: string): AddressBook => {
 
     return out
   }, [mergedAddressBook, actualChainId, source])
+
+  if (source === 'localOnly') return localAddressBook
+
+  return merged
 }
 
 export default useAddressBook

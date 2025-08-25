@@ -5,7 +5,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'
 import useChainId from '@/hooks/useChainId'
 import useGetSpaceAddressBook from '@/features/spaces/hooks/useGetSpaceAddressBook'
-import { useSearchParams } from 'next/navigation'
+import { useAddressBookSource } from '@/components/common/AddressBookSourceProvider'
 
 export enum ContactSource {
   space = 'space',
@@ -39,6 +39,8 @@ const addressBookKey = (address: string, chainId: string) => `${chainId}:${addre
 export type MergedAddressBook = {
   list: ExtendedContact[]
   get: (address: string, chainId: string) => ExtendedContact | undefined
+  getFromSpace: (address: string, chainId: string) => ExtendedContact | undefined
+  getFromLocal: (address: string, chainId: string) => ExtendedContact | undefined
   has: (address: string, chainId: string) => boolean
 }
 
@@ -49,22 +51,28 @@ export const useMergedAddressBooks = (chainId?: string): MergedAddressBook => {
   const localAddressBook = useAppSelector((state) => selectAddressBookByChain(state, actualChainId))
 
   return useMemo<MergedAddressBook>(() => {
-    const byKey = new Map<string, ExtendedContact>()
+    const byKeyMerged = new Map<string, ExtendedContact>()
+    const byKeySpace = new Map<string, ExtendedContact>()
+    const byKeyLocal = new Map<string, ExtendedContact>()
 
     const spaceContacts = mapSpaceToContacts(spaceAddressBook)
     const localContacts = mapLocalToContacts(localAddressBook, actualChainId)
 
     for (const spaceContact of spaceContacts) {
       for (const chainId of spaceContact.chainIds) {
-        byKey.set(addressBookKey(spaceContact.address, chainId), { ...spaceContact, chainIds: [chainId] })
+        const key = addressBookKey(spaceContact.address, chainId)
+        byKeySpace.set(key, { ...spaceContact, chainIds: [chainId] })
+        byKeyMerged.set(key, { ...spaceContact, chainIds: [chainId] })
       }
     }
 
     for (const localContact of localContacts) {
       const key = addressBookKey(localContact.address, actualChainId)
 
-      if (!byKey.has(key)) {
-        byKey.set(key, localContact)
+      byKeyLocal.set(key, localContact)
+
+      if (!byKeyMerged.has(key)) {
+        byKeyMerged.set(key, localContact)
       }
     }
 
@@ -77,10 +85,12 @@ export const useMergedAddressBooks = (chainId?: string): MergedAddressBook => {
     )
 
     const list = [...spaceContacts, ...filteredLocal]
-    const get = (address: string, chainId: string) => byKey.get(addressBookKey(address, chainId))
-    const has = (address: string, chainId: string) => byKey.has(addressBookKey(address, chainId))
+    const get = (address: string, chainId: string) => byKeyMerged.get(addressBookKey(address, chainId))
+    const has = (address: string, chainId: string) => byKeyMerged.has(addressBookKey(address, chainId))
+    const getFromSpace = (address: string, cid: string) => byKeySpace.get(addressBookKey(address, cid))
+    const getFromLocal = (address: string, cid: string) => byKeyLocal.get(addressBookKey(address, cid))
 
-    return { list, get, has }
+    return { list, get, has, getFromSpace, getFromLocal }
   }, [actualChainId, localAddressBook, spaceAddressBook])
 }
 
@@ -91,13 +101,15 @@ export const useMergedAddressBooks = (chainId?: string): MergedAddressBook => {
  * @param chainId
  */
 export const useAddressBookItem = (address: string, chainId: string | undefined): ExtendedContact | undefined => {
-  const searchParams = useSearchParams()
-  const querySafe = searchParams.get('safe')
-  const { get } = useMergedAddressBooks(chainId)
-  const source = querySafe ? 'merged' : 'spaceOnly'
+  const { get, getFromLocal } = useMergedAddressBooks(chainId)
+  const source = useAddressBookSource()
 
   return useMemo<ExtendedContact | undefined>(() => {
     if (!chainId) return undefined
+
+    if (source === 'localOnly') {
+      return getFromLocal(address, chainId)
+    }
 
     if (source === 'merged') {
       return get(address, chainId)
@@ -109,7 +121,7 @@ export const useAddressBookItem = (address: string, chainId: string | undefined)
     }
 
     return undefined
-  }, [address, chainId, source, get])
+  }, [chainId, source, getFromLocal, address, get])
 }
 
 // Returns all local address books

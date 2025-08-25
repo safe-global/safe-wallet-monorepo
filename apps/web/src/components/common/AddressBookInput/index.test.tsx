@@ -10,11 +10,11 @@ import { FEATURES } from '@safe-global/safe-gateway-typescript-sdk'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { AddressBook } from '@/store/addressBookSlice'
 
-// We use Rinkeby and chainId 4 here as this is our default url chain (see jest.setup.js)
+// We use Sepolia and chainId 11155111 here as this is our default url chain (see jest.setup.js)
 const mockChain = chainBuilder()
   .with({ features: [FEATURES.DOMAIN_LOOKUP] })
-  .with({ chainId: '4' })
-  .with({ shortName: 'rin' })
+  .with({ chainId: '11155111' })
+  .with({ shortName: 'sep' })
   .build()
 
 // mock useNameResolver
