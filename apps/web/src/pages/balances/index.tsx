@@ -15,7 +15,6 @@ import StakingBanner from '@/components/dashboard/StakingBanner'
 import useIsStakingBannerEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
 import { Box } from '@mui/material'
 import { BRAND_NAME } from '@/config/constants'
-import Positions from '@/features/positions'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 
 const Balances: NextPage = () => {
@@ -51,7 +50,6 @@ const Balances: NextPage = () => {
               <TotalAssetValue />
             </Box>
             <AssetsTable setShowHiddenAssets={setShowHiddenAssets} showHiddenAssets={showHiddenAssets} />
-            <Positions />
           </>
         )}
       </main>

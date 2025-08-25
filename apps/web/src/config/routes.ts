@@ -24,6 +24,7 @@ export const AppRoutes = {
     bookmarked: '/apps/bookmarked',
   },
   balances: {
+    positions: '/balances/positions',
     nfts: '/balances/nfts',
     index: '/balances',
   },
