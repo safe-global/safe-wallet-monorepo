@@ -23,6 +23,7 @@ import SpacesBanner, { spacesBannerID } from '@/components/dashboard/NewsCarouse
 import StakeBanner, { stakeBannerID } from '@/components/dashboard/NewsCarousel/banners/StakeBanner'
 import AddFundsToGetStarted from '@/components/dashboard/AddFundsBanner'
 import PositionsWidget from '@/features/positions/components/PositionsWidget'
+import useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsPositionsFeatureEnabled'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 
@@ -39,6 +40,7 @@ const Dashboard = (): ReactElement => {
   const isEarnFeatureEnabled = useIsEarnFeatureEnabled()
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const isStakingBannerVisible = useIsStakingBannerVisible()
+  const isPositionsFeatureEnabled = useIsPositionsFeatureEnabled()
 
   const banners = [
     isEarnFeatureEnabled && { id: earnBannerID, element: EarnBanner },
@@ -76,9 +78,11 @@ const Dashboard = (): ReactElement => {
             <>
               <AssetsWidget />
 
-              <div className={css.hideIfEmpty}>
-                <PositionsWidget />
-              </div>
+              {isPositionsFeatureEnabled && (
+                <div className={css.hideIfEmpty}>
+                  <PositionsWidget />
+                </div>
+              )}
 
               {showSafeApps && <SafeAppsDashboardSection />}
 

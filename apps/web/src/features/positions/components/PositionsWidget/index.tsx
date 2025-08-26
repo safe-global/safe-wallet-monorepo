@@ -2,61 +2,20 @@ import { useRouter } from 'next/router'
 import useFiatTotal from '@/hooks/useFiatTotal'
 import React, { useMemo } from 'react'
 import { AppRoutes } from '@/config/routes'
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  Button,
-  Card,
-  Divider,
-  Paper,
-  Stack,
-  Typography,
-} from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Box, Card, Divider, Stack, Typography } from '@mui/material'
 import { ViewAllLink } from '@/components/dashboard/styled'
 import css from './styles.module.css'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import PositionsHeader from '@/features/positions/components/PositionsHeader'
 import Position from '@/features/positions/components/Position'
 import usePositions from '@/features/positions/hooks/usePositions'
-import DefiImage from '@/public/images/balances/defi.png'
-import Image from 'next/image'
-import Link from 'next/link'
+import PositionsEmpty from '@/features/positions/components/PositionsEmpty'
 import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { POSITIONS_EVENTS, POSITIONS_LABELS } from '@/services/analytics/events/positions'
 import { MixPanelEventParams } from '@/services/analytics/mixpanel-events'
 
 const MAX_PROTOCOLS = 4
-
-const EmptyState = () => {
-  const router = useRouter()
-
-  return (
-    <Paper elevation={0} sx={{ p: 3, textAlign: 'center' }}>
-      <Image src={DefiImage} alt="Defi illustration" width={100} height={100} />
-
-      <Typography data-testid="no-tx-text" variant="body1" color="primary.light">
-        You have no active DeFi positions yet
-      </Typography>
-
-      <Link href={AppRoutes.earn && { pathname: AppRoutes.earn, query: { safe: router.query.safe } }} passHref>
-        <Track
-          {...POSITIONS_EVENTS.EMPTY_POSITIONS_EXPLORE_CLICKED}
-          mixpanelParams={{
-            [MixPanelEventParams.TOTAL_VALUE_OF_PORTFOLIO]: 0,
-            [MixPanelEventParams.ENTRY_POINT]: 'Dashboard',
-          }}
-        >
-          <Button size="small" sx={{ mt: 1 }}>
-            Explore Earn
-          </Button>
-        </Track>
-      </Link>
-    </Paper>
-  )
-}
 
 const PositionsWidget = () => {
   const router = useRouter()
@@ -96,7 +55,7 @@ const PositionsWidget = () => {
 
       <Box>
         {protocols.length === 0 ? (
-          <EmptyState />
+          <PositionsEmpty />
         ) : (
           protocols.map((protocol) => {
             const protocolValue = Number(protocol.fiatTotal) || 0
