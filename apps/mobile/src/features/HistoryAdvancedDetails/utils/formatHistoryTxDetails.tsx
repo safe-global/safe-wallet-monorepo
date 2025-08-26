@@ -1,0 +1,224 @@
+import React from 'react'
+import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { ListTableItem } from '@/src/features/ConfirmTx/components/ListTable'
+import { Text, View } from 'tamagui'
+import { CopyButton } from '@/src/components/CopyButton'
+import { Address } from '@/src/types/address'
+import { isMultisigDetailedExecutionInfo } from '@/src/utils/transaction-guards'
+import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
+import { AddressDisplay } from '@/src/components/AddressDisplay'
+import { Badge } from '@/src/components/Badge'
+import { HexDataDisplay } from '@/src/components/HexDataDisplay'
+
+interface formatHistoryTxDetailsProps {
+  txDetails?: TransactionDetails
+}
+
+export interface HistoryTxDetailsSection {
+  title?: string
+  items: ListTableItem[]
+}
+
+const formatHistoryTxDetails = ({ txDetails }: formatHistoryTxDetailsProps): HistoryTxDetailsSection[] => {
+  const sections: HistoryTxDetailsSection[] = []
+
+  if (!txDetails) {
+    return sections
+  }
+
+  // Section 1: Basic Transaction Info (Nonce, safeTxHash)
+  const basicInfoItems: ListTableItem[] = []
+
+  if (isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)) {
+    const executionInfo = txDetails.detailedExecutionInfo
+
+    basicInfoItems.push({
+      label: 'Nonce',
+      render: () => <Text>{executionInfo.nonce}</Text>,
+    })
+
+    // Safe Tx Hash
+    if (executionInfo.safeTxHash) {
+      basicInfoItems.push({
+        label: 'safeTxHash',
+        render: () => (
+          <AddressDisplay
+            address={executionInfo.safeTxHash as Address}
+            copyProps={{ color: '$textSecondaryLight', size: 16 }}
+            showIdenticon={false}
+            showExternalLink={false}
+          />
+        ),
+      })
+    }
+  }
+
+  if (basicInfoItems.length > 0) {
+    sections.push({
+      items: basicInfoItems,
+    })
+  }
+
+  // Section 2: Parameters
+  const parametersItems: ListTableItem[] = []
+
+  // Call
+  if (txDetails.txData?.operation !== undefined) {
+    const operationText = txDetails.txData.operation === Operation.CALL ? 'transfer' : 'delegateCall'
+    parametersItems.push({
+      label: 'Call',
+      render: () => (
+        <Badge
+          circular={false}
+          content={operationText}
+          themeName="badge_background"
+          circleProps={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 5 }}
+        />
+      ),
+    })
+  }
+
+  // Contract (same as To in the screenshot)
+  if (txDetails.txData?.to?.value) {
+    parametersItems.push({
+      label: 'Contract',
+      render: () => (
+        <AddressDisplay
+          address={txDetails.txData?.to.value as Address}
+          copyProps={{ color: '$textSecondaryLight', size: 16 }}
+          externalLinkSize={16}
+        />
+      ),
+    })
+  }
+
+  // To (only show if different from Contract - in this case it's the same)
+  if (txDetails.txData?.to?.value) {
+    parametersItems.push({
+      label: 'To',
+      render: () => (
+        <AddressDisplay
+          address={txDetails.txData?.to.value as Address}
+          copyProps={{ color: '$textSecondaryLight', size: 16 }}
+          externalLinkSize={16}
+          showIdenticon={false}
+        />
+      ),
+    })
+  }
+
+  // Value
+  if (txDetails.txData?.value) {
+    parametersItems.push({
+      label: 'Value',
+      render: () => <Text>{txDetails.txData?.value}</Text>,
+    })
+  }
+
+  // Data
+  if (txDetails.txData?.hexData) {
+    parametersItems.push({
+      label: 'Data',
+      render: () => <HexDataDisplay data={txDetails.txData?.hexData} title="Hex Data" copyMessage="Data copied." />,
+    })
+  }
+
+  if (parametersItems.length > 0) {
+    sections.push({
+      title: 'Parameters',
+      items: parametersItems,
+    })
+  }
+
+  // Section 3: Decoded data
+  const decodedDataItems: ListTableItem[] = []
+
+  if (isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)) {
+    const executionInfo = txDetails.detailedExecutionInfo
+
+    // Operation
+    if (txDetails.txData?.operation !== undefined) {
+      const operationText = txDetails.txData.operation === Operation.CALL ? '0(call)' : '1(delegateCall)'
+      decodedDataItems.push({
+        label: 'Operation',
+        render: () => <Text>{operationText}</Text>,
+      })
+    }
+
+    // Call
+    decodedDataItems.push({
+      label: 'Call',
+      render: () => <Text>0</Text>,
+    })
+
+    // SafeTxGas
+    decodedDataItems.push({
+      label: 'safeTxGas',
+      render: () => <Text>{executionInfo.safeTxGas}</Text>,
+    })
+
+    // BaseGas
+    decodedDataItems.push({
+      label: 'baseGas',
+      render: () => <Text>{executionInfo.baseGas}</Text>,
+    })
+
+    // GasPrice
+    decodedDataItems.push({
+      label: 'gasPrice',
+      render: () => <Text>{executionInfo.gasPrice}</Text>,
+    })
+
+    // GasToken
+    decodedDataItems.push({
+      label: 'gasToken',
+      render: () => <Text>{executionInfo.gasToken}</Text>,
+    })
+
+    // RefundReceiver
+    decodedDataItems.push({
+      label: 'refundReceiver',
+      render: () => <Text>{executionInfo.refundReceiver.value}</Text>,
+    })
+
+    // Signatures
+    if (executionInfo.confirmations && executionInfo.confirmations.length > 0) {
+      executionInfo.confirmations.forEach((confirmation, index) => {
+        if (confirmation.signature) {
+          decodedDataItems.push({
+            label: `Signature ${index + 1}`,
+            render: () => (
+              <View flexDirection="row" alignItems="center" gap="$1">
+                <Text>{confirmation.signature ? `${confirmation.signature.length / 2 - 1} bytes` : '0 bytes'}</Text>
+                {confirmation.signature && (
+                  <CopyButton value={confirmation.signature} color={'$textSecondaryLight'} text="Signature copied." />
+                )}
+              </View>
+            ),
+          })
+        }
+      })
+    }
+
+    // Raw data
+    if (txDetails.txData?.hexData) {
+      decodedDataItems.push({
+        label: 'Raw data',
+        render: () => (
+          <HexDataDisplay data={txDetails.txData?.hexData} title="Raw Data" copyMessage="Raw data copied." />
+        ),
+      })
+    }
+  }
+
+  if (decodedDataItems.length > 0) {
+    sections.push({
+      title: 'Decoded data',
+      items: decodedDataItems,
+    })
+  }
+
+  return sections
+}
+
+export { formatHistoryTxDetails }
