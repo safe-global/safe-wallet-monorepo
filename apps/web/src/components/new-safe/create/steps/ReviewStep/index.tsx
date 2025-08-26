@@ -6,7 +6,6 @@ import { getTotalFeeFormatted } from '@/hooks/useGasPrice'
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NewSafeFormData } from '@/components/new-safe/create'
 import {
-  computeNewSafeAddress,
   createNewSafe,
   createNewUndeployedSafeWithoutSalt,
   relaySafeCreation,
@@ -53,9 +52,8 @@ import { selectRpc } from '@/store/settingsSlice'
 import { AppRoutes } from '@/config/routes'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
-import { createWeb3ReadOnly, getRpcServiceUrl } from '@/hooks/wallets/web3'
+import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { updateAddressBook } from '../../logic/address-book'
-import chains from '@/config/chains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { type TransactionOptions } from '@safe-global/types-kit'
