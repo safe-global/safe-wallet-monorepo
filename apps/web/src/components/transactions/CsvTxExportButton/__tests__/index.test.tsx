@@ -2,21 +2,11 @@ import { fireEvent, render, screen } from '@/tests/test-utils'
 import { trackEvent } from '@/services/analytics'
 import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import CsvTxExportButton from '../index'
+import * as csvExportQueries from '@safe-global/store/gateway/AUTO_GENERATED/csv-export'
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
-
-jest.mock(
-  '@safe-global/store/gateway/AUTO_GENERATED/csv-export',
-  () => ({
-    useCsvExportGetExportStatusV1Query: jest.fn(() => ({
-      data: null,
-      error: null,
-    })),
-  }),
-  { virtual: true },
-)
 
 jest.mock('@/components/common/OnlyOwner', () => {
   return function MockOnlyOwner({ children }: { children: (isOk: boolean) => React.ReactNode }) {
@@ -29,6 +19,11 @@ const mockTrackEvent = trackEvent as jest.MockedFunction<typeof trackEvent>
 describe('CsvTxExportButton', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+
+    jest.spyOn(csvExportQueries, 'useCsvExportGetExportStatusV1Query').mockImplementation(() => ({
+      data: undefined,
+      refetch: jest.fn(),
+    }))
   })
 
   it('should track CSV_EXPORT_CLICKED event when export button is clicked', () => {

@@ -4,6 +4,7 @@ import { trackEvent } from '@/services/analytics'
 import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import { MixPanelEventParams } from '@/services/analytics/mixpanel-events'
 import CsvTxExportModal from './index'
+import * as csvExportQueries from '@safe-global/store/gateway/AUTO_GENERATED/csv-export'
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
@@ -12,15 +13,9 @@ jest.mock('@/services/analytics', () => ({
   },
 }))
 
-const mockLaunchExport = jest.fn()
-jest.mock(
-  '@safe-global/store/gateway/AUTO_GENERATED/csv-export',
-  () => ({
-    useCsvExportLaunchExportV1Mutation: () => [mockLaunchExport],
-  }),
-  { virtual: true },
-)
-
+const mockLaunchFunction = jest.fn().mockImplementation(() => ({
+  unwrap: jest.fn().mockResolvedValue({ id: 'test-job-id', status: 'SUBMITTED' }),
+}))
 const mockTrackEvent = trackEvent as jest.MockedFunction<typeof trackEvent>
 const onClose = jest.fn()
 const onExport = jest.fn()
@@ -31,9 +26,14 @@ describe('CsvTxExportModal', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockLaunchExport.mockImplementation(() => ({
-      unwrap: () => Promise.resolve({ id: 'test-job-id', status: 'SUBMITTED' }),
-    }))
+
+    jest.spyOn(csvExportQueries, 'useCsvExportLaunchExportV1Mutation').mockReturnValue([
+      mockLaunchFunction,
+      {
+        isLoading: false,
+        reset: jest.fn(),
+      },
+    ])
   })
 
   it('renders modal with message and disabled export button', () => {
@@ -129,11 +129,10 @@ describe('CsvTxExportModal', () => {
     const exportBtn = screen.getByRole('button', { name: 'Export' })
     await act(async () => fireEvent.click(exportBtn))
 
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 100))
-    })
-    expect(mockTrackEvent).toHaveBeenCalledWith(TX_LIST_EVENTS.CSV_EXPORT_SUBMITTED, {
-      [MixPanelEventParams.DATE_RANGE]: 'Last 30 days',
+    await waitFor(() => {
+      expect(mockTrackEvent).toHaveBeenCalledWith(TX_LIST_EVENTS.CSV_EXPORT_SUBMITTED, {
+        [MixPanelEventParams.DATE_RANGE]: 'Last 30 days',
+      })
     })
   })
 })
