@@ -369,8 +369,7 @@ const NetworkSelector = ({
   const safeAddress = useSafeAddress()
   const currentChain = useCurrentChain()
   const chains = useAppSelector(selectChains)
-  const { allSafeApps, currentSafeApp } = useSafeApps()
-  console.log('🚀 ~ NetworkSelector ~ allSafeApps:', allSafeApps)
+  const { currentSafeApp } = useSafeApps()
 
   const isSafeOpened = safeAddress !== ''
 
