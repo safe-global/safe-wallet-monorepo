@@ -11,6 +11,8 @@ import { formatWithSchema } from '@/src/utils/date'
 import { isDateLabel } from '@/src/utils/transaction-guards'
 import { groupBulkTxs } from '@/src/utils/transactions'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useRouter } from 'expo-router'
+import { TxCardPress } from '@/src/components/TxInfo/types'
 
 interface TxHistoryList {
   transactions?: HistoryTransactionItems[]
@@ -23,55 +25,59 @@ interface TxHistoryList {
 
 const TAB_BAR_HEIGHT = 34
 
-const renderItem = ({
-  item,
-  target,
-}: {
-  item: HistoryTransactionItems | HistoryTransactionItems[]
-  target?: string
-}) => {
-  if (Array.isArray(item)) {
-    // Render grouped transactions - filter to only TransactionItems for TxGroupedCard
-    const transactionItems = item.filter((tx) => tx.type === 'TRANSACTION')
-    if (transactionItems.length > 0) {
+const createRenderItem = (onHistoryTransactionPress: (transaction: TxCardPress) => void) => {
+  const RenderItem = ({
+    item,
+    target,
+  }: {
+    item: HistoryTransactionItems | HistoryTransactionItems[]
+    target?: string
+  }) => {
+    if (Array.isArray(item)) {
+      // Render grouped transactions - filter to only TransactionItems for TxGroupedCard
+      const transactionItems = item.filter((tx) => tx.type === 'TRANSACTION')
+      if (transactionItems.length > 0) {
+        return (
+          <View marginTop="$4">
+            <TxGroupedCard transactions={transactionItems} onPress={onHistoryTransactionPress} />
+          </View>
+        )
+      }
+      return null
+    }
+
+    if (isDateLabel(item)) {
+      const dateTitle = formatWithSchema(item.timestamp, 'MMM d, yyyy')
+      const isSticky = target === 'StickyHeader'
+
       return (
-        <View marginTop="$4">
-          <TxGroupedCard transactions={transactionItems} />
+        <View
+          marginTop={isSticky ? '$0' : '$2'}
+          backgroundColor={'$background'}
+          paddingTop={'$2'}
+          paddingBottom={isSticky ? '$2' : '0'}
+          paddingHorizontal={isSticky ? '$4' : '0'}
+          transform={Platform.OS === 'ios' ? [{ translateY: isSticky ? TAB_BAR_HEIGHT : 0 }] : undefined}
+        >
+          <Text fontWeight={500} color="$colorSecondary">
+            {dateTitle}
+          </Text>
         </View>
       )
     }
+
+    if (item.type === 'TRANSACTION') {
+      return (
+        <View marginTop="$4">
+          <TxInfo tx={item.transaction} onPress={onHistoryTransactionPress} />
+        </View>
+      )
+    }
+
     return null
   }
 
-  if (isDateLabel(item)) {
-    const dateTitle = formatWithSchema(item.timestamp, 'MMM d, yyyy')
-    const isSticky = target === 'StickyHeader'
-
-    return (
-      <View
-        marginTop={isSticky ? '$0' : '$2'}
-        backgroundColor={'$background'}
-        paddingTop={'$2'}
-        paddingBottom={isSticky ? '$2' : '0'}
-        paddingHorizontal={isSticky ? '$4' : '0'}
-        transform={Platform.OS === 'ios' ? [{ translateY: isSticky ? TAB_BAR_HEIGHT : 0 }] : undefined}
-      >
-        <Text fontWeight={500} color="$colorSecondary">
-          {dateTitle}
-        </Text>
-      </View>
-    )
-  }
-
-  if (item.type === 'TRANSACTION') {
-    return (
-      <View marginTop="$4">
-        <TxInfo tx={item.transaction} />
-      </View>
-    )
-  }
-
-  return null
+  return RenderItem
 }
 
 const keyExtractor = (item: HistoryTransactionItems | HistoryTransactionItems[]) => {
@@ -150,6 +156,22 @@ export function TxHistoryList({
   onRefresh,
 }: TxHistoryList) {
   const { bottom } = useSafeAreaInsets()
+  const router = useRouter()
+
+  const onHistoryTransactionPress = useCallback(
+    (transaction: TxCardPress) => {
+      router.push({
+        pathname: '/history-transaction-details',
+        params: {
+          txId: transaction.tx.id,
+        },
+      })
+    },
+    [router],
+  )
+
+  const renderItem = useMemo(() => createRenderItem(onHistoryTransactionPress), [onHistoryTransactionPress])
+
   const flatList: (HistoryTransactionItems | HistoryTransactionItems[])[] = useMemo(() => {
     return groupBulkTxs(transactions || [])
   }, [transactions])
