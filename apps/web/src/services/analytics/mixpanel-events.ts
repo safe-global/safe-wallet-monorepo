@@ -4,6 +4,8 @@ export enum MixPanelEvent {
   SAFE_ACTIVATED = 'Safe Activated',
   WALLET_CONNECTED = 'Wallet Connected',
   WC_CONNECTED = 'WC Connected',
+  CSV_TX_EXPORT_CLICKED = 'Export CSV Clicked',
+  CSV_TX_EXPORT_SUBMITTED = 'CSV Exported',
 }
 
 export enum MixPanelUserProperty {
@@ -35,6 +37,7 @@ export enum MixPanelEventParams {
   SAFE_APP_TAGS = 'Safe App Tags',
   LAUNCH_LOCATION = 'Launch Location',
   APP_URL = 'App URL',
+  PERIOD = 'Period',
 }
 
 export enum SafeAppLaunchLocation {
