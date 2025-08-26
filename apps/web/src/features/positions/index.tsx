@@ -8,16 +8,21 @@ import IframeIcon from '@/components/common/IframeIcon'
 import { FiatChange } from '@/components/balances/AssetsTable/FiatChange'
 import usePositions from '@/features/positions/hooks/usePositions'
 import usePositionsFiatTotal from '@/features/positions/hooks/usePositionsFiatTotal'
+import PositionsEmpty from '@/features/positions/components/PositionsEmpty'
 
 export const Positions = () => {
   const fiatTotal = usePositionsFiatTotal()
-  const currentData = usePositions()
+  const protocols = usePositions()
 
-  if (!currentData || currentData.length === 0) return null
+  if (!protocols) return null
+
+  if (protocols.length === 0) {
+    return <PositionsEmpty />
+  }
 
   return (
     <Stack gap={2}>
-      {currentData.map((protocol) => {
+      {protocols.map((protocol) => {
         return (
           <Card key={protocol.protocol} sx={{ p: 2 }}>
             <PositionsHeader protocol={protocol} fiatTotal={fiatTotal} />

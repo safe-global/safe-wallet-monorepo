@@ -2,49 +2,16 @@ import { useRouter } from 'next/router'
 import useFiatTotal from '@/hooks/useFiatTotal'
 import React, { useMemo } from 'react'
 import { AppRoutes } from '@/config/routes'
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  Button,
-  Card,
-  Divider,
-  Paper,
-  Stack,
-  Typography,
-} from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Box, Card, Divider, Stack, Typography } from '@mui/material'
 import { ViewAllLink } from '@/components/dashboard/styled'
 import css from './styles.module.css'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import PositionsHeader from '@/features/positions/components/PositionsHeader'
 import Position from '@/features/positions/components/Position'
 import usePositions from '@/features/positions/hooks/usePositions'
-import DefiImage from '@/public/images/balances/defi.png'
-import Image from 'next/image'
-import Link from 'next/link'
+import PositionsEmpty from '@/features/positions/components/PositionsEmpty'
 
 const MAX_PROTOCOLS = 4
-
-const EmptyState = () => {
-  const router = useRouter()
-
-  return (
-    <Paper elevation={0} sx={{ p: 3, textAlign: 'center' }}>
-      <Image src={DefiImage} alt="Defi illustration" width={100} height={100} />
-
-      <Typography data-testid="no-tx-text" variant="body1" color="primary.light">
-        You have no active DeFi positions yet
-      </Typography>
-
-      <Link href={AppRoutes.earn && { pathname: AppRoutes.earn, query: { safe: router.query.safe } }} passHref>
-        <Button size="small" sx={{ mt: 1 }}>
-          Explore Earn
-        </Button>
-      </Link>
-    </Paper>
-  )
-}
 
 const PositionsWidget = () => {
   const router = useRouter()
@@ -74,7 +41,7 @@ const PositionsWidget = () => {
 
       <Box>
         {protocols.length === 0 ? (
-          <EmptyState />
+          <PositionsEmpty />
         ) : (
           protocols.map((protocol) => {
             return (
