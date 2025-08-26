@@ -17,20 +17,17 @@ const useSafeInfo = (): {
 
   console.log('useSafeInfo dependencies:', [data, error, loading])
 
-  return useMemo(
-    () => {
-      const result = {
-        safe: data || defaultSafeInfo,
-        safeAddress: data?.address.value || '',
-        safeLoaded: !!data,
-        safeError: error,
-        safeLoading: loading,
-      }
-      console.log('useSafeInfo result:', result)
-      return result
-    },
-    [data, error, loading],
-  )
+  return useMemo(() => {
+    const result = {
+      safe: data || defaultSafeInfo,
+      safeAddress: data?.address.value || '',
+      safeLoaded: !!data,
+      safeError: error,
+      safeLoading: loading,
+    }
+    console.log('useSafeInfo result:', result)
+    return result
+  }, [data, error, loading])
 }
 
 export default useSafeInfo

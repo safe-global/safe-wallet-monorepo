@@ -71,9 +71,9 @@ export const useMixPanelUserProperties = (): MixPanelUserPropertiesFormatted | n
       properties,
       networks,
     }
-    
+
     console.log('useMixPanelUserProperties result:', result)
-    
+
     return result
   }, [safe, safeLoaded, currentChain, txHistory, allNetworks])
 }

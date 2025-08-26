@@ -117,7 +117,7 @@ const useMixpanel = () => {
 
   useEffect(() => {
     console.log('useMixpanel userProperties dependency:', [userProperties])
-    
+
     if (!userProperties) return
 
     console.log('Setting user properties:', userProperties.properties)
