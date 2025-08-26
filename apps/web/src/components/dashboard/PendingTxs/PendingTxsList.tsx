@@ -84,7 +84,7 @@ export function _getTransactionsToDisplay({
 const PendingTxsList = (): ReactElement | null => {
   const router = useRouter()
   const { page, loading } = useTxQueue()
-  const { safe } = useSafeInfo()
+  const { safe, safeLoaded, safeLoading } = useSafeInfo()
   const wallet = useWallet()
   const queuedTxns = useMemo(() => getLatestTransactions(page?.results), [page?.results])
   const recoveryQueue = useRecoveryQueue()
@@ -101,6 +101,9 @@ const PendingTxsList = (): ReactElement | null => {
 
   const totalTxs = recoveryTxs.length + queuedTxs.length
 
+  const isInitialState = !safeLoaded && !safeLoading
+  const isLoading = loading || safeLoading || isInitialState
+
   const queueUrl = useMemo(
     () => ({
       pathname: AppRoutes.transactions.queue,
@@ -109,7 +112,7 @@ const PendingTxsList = (): ReactElement | null => {
     [router.query.safe],
   )
 
-  if (loading) return <PendingTxsSkeleton />
+  if (isLoading) return <PendingTxsSkeleton />
 
   return (
     <Card data-testid="pending-tx-widget" sx={{ px: 1.5, py: 2.5, height: 1 }} component="section">
