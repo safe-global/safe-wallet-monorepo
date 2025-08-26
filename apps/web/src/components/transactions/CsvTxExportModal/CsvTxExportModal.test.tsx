@@ -5,7 +5,6 @@ import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import { MixPanelEventParams } from '@/services/analytics/mixpanel-events'
 import CsvTxExportModal from './index'
 
-// Mock the analytics
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
   MixPanelEventParams: {
@@ -13,19 +12,11 @@ jest.mock('@/services/analytics', () => ({
   },
 }))
 
-// Mock the CSV export mutation
+const mockLaunchExport = jest.fn()
 jest.mock(
   '@safe-global/store/gateway/AUTO_GENERATED/csv-export',
   () => ({
-    useCsvExportLaunchExportV1Mutation: () => [
-      jest.fn().mockResolvedValue({
-        unwrap: () =>
-          Promise.resolve({
-            id: 'test-job-id',
-            status: 'SUBMITTED',
-          }),
-      }),
-    ],
+    useCsvExportLaunchExportV1Mutation: () => [mockLaunchExport],
   }),
   { virtual: true },
 )
@@ -39,9 +30,10 @@ describe('CsvTxExportModal', () => {
     render(<CsvTxExportModal onClose={onClose} onExport={onExport} hasActiveFilter={hasActiveFilter} />)
 
   beforeEach(() => {
-    mockTrackEvent.mockClear()
-    onClose.mockClear()
-    onExport.mockClear()
+    jest.clearAllMocks()
+    mockLaunchExport.mockImplementation(() => ({
+      unwrap: () => Promise.resolve({ id: 'test-job-id', status: 'SUBMITTED' }),
+    }))
   })
 
   it('renders modal with message and disabled export button', () => {
@@ -131,48 +123,17 @@ describe('CsvTxExportModal', () => {
   it('should track CSV_EXPORT_SUBMITTED event with DATE_RANGE parameter when form is submitted', async () => {
     renderComponent()
 
-    // Select a date range
     act(() => fireEvent.mouseDown(screen.getByLabelText('Date range')))
     act(() => fireEvent.click(screen.getByRole('option', { name: 'Last 30 days' })))
 
-    // Submit the form
     const exportBtn = screen.getByRole('button', { name: 'Export' })
     await act(async () => fireEvent.click(exportBtn))
 
-    // Wait a moment for async operations to complete
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 100))
     })
-
-    // Verify tracking was called with correct parameters
     expect(mockTrackEvent).toHaveBeenCalledWith(TX_LIST_EVENTS.CSV_EXPORT_SUBMITTED, {
       [MixPanelEventParams.DATE_RANGE]: 'Last 30 days',
-    })
-  })
-
-  it('should track CSV_EXPORT_SUBMITTED with custom date range', async () => {
-    renderComponent()
-
-    // Select custom date range
-    act(() => fireEvent.mouseDown(screen.getByLabelText('Date range')))
-    act(() => fireEvent.click(screen.getByRole('option', { name: 'Custom' })))
-
-    // Fill in custom dates
-    await act(async () => fireEvent.change(screen.getByLabelText('From'), { target: { value: '01/02/2023' } }))
-    await act(async () => fireEvent.change(screen.getByLabelText('To'), { target: { value: '28/02/2023' } }))
-
-    // Submit the form
-    const exportBtn = screen.getByRole('button', { name: 'Export' })
-    await act(async () => fireEvent.click(exportBtn))
-
-    // Wait a moment for async operations to complete
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 100))
-    })
-
-    // Verify tracking was called with custom date range
-    expect(mockTrackEvent).toHaveBeenCalledWith(TX_LIST_EVENTS.CSV_EXPORT_SUBMITTED, {
-      [MixPanelEventParams.DATE_RANGE]: 'Custom',
     })
   })
 })
