@@ -4,6 +4,7 @@ import { WALLET_EVENTS } from './events/wallet'
 import { SAFE_APPS_EVENTS } from './events/safeApps'
 import { WALLETCONNECT_EVENTS } from './events/walletconnect'
 import { TX_LIST_EVENTS } from './events/txList'
+import { SWAP_EVENTS } from './events/swaps'
 
 // If an event is mapped here, it will be tracked in Mixpanel
 export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
@@ -14,4 +15,15 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [WALLETCONNECT_EVENTS.CONNECTED.action]: MixPanelEvent.WC_CONNECTED,
   [TX_LIST_EVENTS.CSV_EXPORT_CLICKED.action]: MixPanelEvent.CSV_TX_EXPORT_CLICKED,
   [TX_LIST_EVENTS.CSV_EXPORT_SUBMITTED.action]: MixPanelEvent.CSV_TX_EXPORT_SUBMITTED,
+  [SWAP_EVENTS.OPEN_SWAPS.action]: MixPanelEvent.NATIVE_SWAP_VIEWED,
+}
+
+// Maps GA labels (lowercase) to MixPanel properties (Title Case)
+export const GA_LABEL_TO_MIXPANEL_PROPERTY: Record<string, string> = {
+  home: 'Home',
+  assets: 'Assets',
+  asset: 'Assets',
+  dashboard_assets: 'Home',
+  sidebar: 'Sidebar',
+  newTransaction: 'New Transaction',
 }
