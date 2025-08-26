@@ -24,7 +24,8 @@ import useChainId from '@/hooks/useChainId'
 import type { JobStatusDto } from '@safe-global/store/gateway/AUTO_GENERATED/csv-export'
 import { useCsvExportLaunchExportV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/csv-export'
 import { showNotification } from '@/store/notificationsSlice'
-import { MixPanelEvent, MixPanelEventParams, trackMixPanelEvent } from '@/services/analytics'
+import { trackEvent, MixPanelEventParams } from '@/services/analytics'
+import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 
 enum DateRangeOption {
   LAST_30_DAYS = '30d',
@@ -170,8 +171,8 @@ const CsvTxExportModal = ({ onClose, onExport, hasActiveFilter }: CsvTxExportMod
       errorNotification()
     }
 
-    trackMixPanelEvent(MixPanelEvent.CSV_TX_EXPORT_SUBMITTED, {
-      [MixPanelEventParams.PERIOD]: DATE_RANGE_LABELS[range as DateRangeOption],
+    trackEvent(TX_LIST_EVENTS.CSV_EXPORT_SUBMITTED, {
+      [MixPanelEventParams.DATE_RANGE]: DATE_RANGE_LABELS[range as DateRangeOption],
     })
     onClose()
   })
