@@ -4,8 +4,15 @@ import Link from 'next/link'
 import { Button, Paper, Typography } from '@mui/material'
 import DefiImage from '@/public/images/balances/defi.png'
 import { AppRoutes } from '@/config/routes'
+import Track from '@/components/common/Track'
+import { POSITIONS_EVENTS } from '@/services/analytics/events/positions'
+import { MixPanelEventParams } from '@/services/analytics/mixpanel-events'
 
-const PositionsEmpty = () => {
+type PositionsEmptyProps = {
+  entryPoint?: string
+}
+
+const PositionsEmpty = ({ entryPoint = 'Dashboard' }: PositionsEmptyProps) => {
   const router = useRouter()
 
   return (
@@ -16,11 +23,18 @@ const PositionsEmpty = () => {
         You have no active DeFi positions yet
       </Typography>
 
-      <Link href={AppRoutes.earn && { pathname: AppRoutes.earn, query: { safe: router.query.safe } }} passHref>
-        <Button size="small" sx={{ mt: 1 }}>
-          Explore Earn
-        </Button>
-      </Link>
+      <Track
+        {...POSITIONS_EVENTS.EMPTY_POSITIONS_EXPLORE_CLICKED}
+        mixpanelParams={{
+          [MixPanelEventParams.ENTRY_POINT]: entryPoint,
+        }}
+      >
+        <Link href={AppRoutes.earn && { pathname: AppRoutes.earn, query: { safe: router.query.safe } }} passHref>
+          <Button size="small" sx={{ mt: 1 }}>
+            Explore Earn
+          </Button>
+        </Link>
+      </Track>
     </Paper>
   )
 }

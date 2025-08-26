@@ -55,7 +55,7 @@ const PositionsWidget = () => {
 
       <Box>
         {protocols.length === 0 ? (
-          <PositionsEmpty />
+          <PositionsEmpty entryPoint="Dashboard" />
         ) : (
           protocols.map((protocol) => {
             const protocolValue = Number(protocol.fiatTotal) || 0

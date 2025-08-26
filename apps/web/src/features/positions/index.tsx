@@ -17,7 +17,7 @@ export const Positions = () => {
   if (!protocols) return null
 
   if (protocols.length === 0) {
-    return <PositionsEmpty />
+    return <PositionsEmpty entryPoint="Positions" />
   }
 
   return (
