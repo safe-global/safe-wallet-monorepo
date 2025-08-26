@@ -3,6 +3,11 @@ export enum MixPanelEvent {
   SAFE_CREATED = 'Safe Created',
   SAFE_ACTIVATED = 'Safe Activated',
   WALLET_CONNECTED = 'Wallet Connected',
+  POSITION_EXPANDED = 'Position Expanded',
+  POSITIONS_VIEW_ALL_CLICKED = 'Positions View All Clicked',
+  EMPTY_POSITIONS_EXPLORE_CLICKED = 'Empty Positions Explore Clicked',
+  STAKE_VIEWED = 'Stake Viewed',
+  EARN_VIEWED = 'Earn Viewed',
 }
 
 export enum MixPanelUserProperty {
@@ -33,6 +38,10 @@ export enum MixPanelEventParams {
   SAFE_APP_NAME = 'Safe App Name',
   SAFE_APP_TAGS = 'Safe App Tags',
   LAUNCH_LOCATION = 'Launch Location',
+  PROTOCOL_NAME = 'Protocol Name',
+  LOCATION = 'Location',
+  AMOUNT_USD = 'Amount USD',
+  TOTAL_VALUE_OF_PORTFOLIO = 'Total Value of Portfolio',
 }
 
 export enum SafeAppLaunchLocation {

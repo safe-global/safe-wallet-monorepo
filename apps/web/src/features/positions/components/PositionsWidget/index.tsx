@@ -23,6 +23,10 @@ import usePositions from '@/features/positions/hooks/usePositions'
 import DefiImage from '@/public/images/balances/defi.png'
 import Image from 'next/image'
 import Link from 'next/link'
+import Track from '@/components/common/Track'
+import { trackEvent } from '@/services/analytics'
+import { POSITIONS_EVENTS, POSITIONS_LABELS } from '@/services/analytics/events/positions'
+import { MixPanelEventParams } from '@/services/analytics/mixpanel-events'
 
 const MAX_PROTOCOLS = 4
 
@@ -38,9 +42,17 @@ const EmptyState = () => {
       </Typography>
 
       <Link href={AppRoutes.earn && { pathname: AppRoutes.earn, query: { safe: router.query.safe } }} passHref>
-        <Button size="small" sx={{ mt: 1 }}>
-          Explore Earn
-        </Button>
+        <Track
+          {...POSITIONS_EVENTS.EMPTY_POSITIONS_EXPLORE_CLICKED}
+          mixpanelParams={{
+            [MixPanelEventParams.TOTAL_VALUE_OF_PORTFOLIO]: 0,
+            [MixPanelEventParams.ENTRY_POINT]: 'Dashboard',
+          }}
+        >
+          <Button size="small" sx={{ mt: 1 }}>
+            Explore Earn
+          </Button>
+        </Track>
       </Link>
     </Paper>
   )
@@ -69,7 +81,17 @@ const PositionsWidget = () => {
       <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
         <Typography fontWeight={700}>Top positions</Typography>
 
-        {protocols.length > 0 && <ViewAllLink url={viewAllUrl} text="View all" />}
+        {protocols.length > 0 && (
+          <Track
+            {...POSITIONS_EVENTS.POSITIONS_VIEW_ALL_CLICKED}
+            mixpanelParams={{
+              [MixPanelEventParams.TOTAL_VALUE_OF_PORTFOLIO]: fiatTotal || 0,
+              [MixPanelEventParams.ENTRY_POINT]: 'Dashboard',
+            }}
+          >
+            <ViewAllLink url={viewAllUrl} text="View all" />
+          </Track>
+        )}
       </Stack>
 
       <Box>
@@ -77,8 +99,24 @@ const PositionsWidget = () => {
           <EmptyState />
         ) : (
           protocols.map((protocol) => {
+            const protocolValue = Number(protocol.fiatTotal) || 0
+
             return (
-              <Accordion key={protocol.protocol} disableGutters elevation={0} variant="elevation">
+              <Accordion
+                key={protocol.protocol}
+                disableGutters
+                elevation={0}
+                variant="elevation"
+                onChange={(_, expanded) => {
+                  if (expanded) {
+                    trackEvent(POSITIONS_EVENTS.POSITION_EXPANDED, {
+                      [MixPanelEventParams.PROTOCOL_NAME]: protocol.protocol,
+                      [MixPanelEventParams.LOCATION]: POSITIONS_LABELS.dashboard,
+                      [MixPanelEventParams.AMOUNT_USD]: protocolValue,
+                    })
+                  }
+                }}
+              >
                 <AccordionSummary
                   className={css.position}
                   expandIcon={<ExpandMoreIcon fontSize="small" />}
