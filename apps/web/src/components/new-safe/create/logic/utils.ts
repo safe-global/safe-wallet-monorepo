@@ -4,8 +4,6 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { createWeb3ReadOnly, getRpcServiceUrl } from '@/hooks/wallets/web3'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
-import chains from '@/config/chains'
-import { computeNewSafeAddress } from '.'
 
 export const getAvailableSaltNonce = async (
   customRpcs: {
@@ -35,24 +33,8 @@ export const getAvailableSaltNonce = async (
     if (!web3ReadOnly) {
       throw new Error('Could not initiate RPC')
     }
-    let safeAddress: string
-    // FIXME a new check to indicate ZKsync chain will be added to the config service and available under ChainInfo
-    if (chain.chainId === chains['zksync'] || chain.chainId === chains['lens']) {
-      // ZK-sync is using a different create2 method which is supported by the SDK
-      safeAddress = await computeNewSafeAddress(
-        rpcUrl,
-        {
-          safeAccountConfig: replayedSafe.safeAccountConfig,
-          safeDeploymentConfig: {
-            saltNonce: replayedSafe.saltNonce,
-            safeVersion: replayedSafe.safeVersion,
-          },
-        },
-        chain,
-      )
-    } else {
-      safeAddress = await predictAddressBasedOnReplayData(replayedSafe, web3ReadOnly)
-    }
+    const safeAddress = await predictAddressBasedOnReplayData(replayedSafe, web3ReadOnly)
+
     const isKnown = knownSafeAddresses.some((knownAddress) => sameAddress(knownAddress, safeAddress))
     if (isKnown || (await isSmartContract(safeAddress, web3ReadOnly))) {
       // We found a chain where the nonce is used up
