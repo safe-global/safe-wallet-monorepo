@@ -6,7 +6,6 @@ import { getTotalFeeFormatted } from '@/hooks/useGasPrice'
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NewSafeFormData } from '@/components/new-safe/create'
 import {
-  computeNewSafeAddress,
   createNewSafe,
   createNewUndeployedSafeWithoutSalt,
   relaySafeCreation,
@@ -53,9 +52,8 @@ import { selectRpc } from '@/store/settingsSlice'
 import { AppRoutes } from '@/config/routes'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
-import { createWeb3ReadOnly, getRpcServiceUrl } from '@/hooks/wallets/web3'
+import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { updateAddressBook } from '../../logic/address-book'
-import chains from '@/config/chains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { type TransactionOptions } from '@safe-global/types-kit'
@@ -245,24 +243,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
       const provider = createWeb3ReadOnly(chain, customRpcUrl)
       if (!provider) return
 
-      let safeAddress: string
-
-      // FIXME a new check to indicate ZKsync chain will be added to the config service and available under ChainInfo
-      if (chain.chainId === chains['zksync'] || chain.chainId === chains['lens']) {
-        safeAddress = await computeNewSafeAddress(
-          customRpcUrl || getRpcServiceUrl(chain.rpcUri),
-          {
-            safeAccountConfig: replayedSafeWithNonce.safeAccountConfig,
-            safeDeploymentConfig: {
-              saltNonce: nextAvailableNonce,
-              safeVersion: replayedSafeWithNonce.safeVersion,
-            },
-          },
-          chain,
-        )
-      } else {
-        safeAddress = await predictAddressBasedOnReplayData(replayedSafeWithNonce, provider)
-      }
+      const safeAddress = await predictAddressBasedOnReplayData(replayedSafeWithNonce, provider)
 
       for (const network of data.networks) {
         await createSafe(network, replayedSafeWithNonce, safeAddress)
