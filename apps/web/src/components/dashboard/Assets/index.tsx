@@ -130,7 +130,7 @@ export const isNonZeroBalance = (item: Balances['items'][number]) => item.balanc
 const AssetsWidget = () => {
   const router = useRouter()
   const { safe } = router.query
-  const { loading } = useBalances()
+  const { loading, balances } = useBalances()
   const visibleAssets = useVisibleAssets()
 
   const items = useMemo(() => {
@@ -145,7 +145,9 @@ const AssetsWidget = () => {
     [safe],
   )
 
-  if (loading) return <AssetsSkeleton />
+  const isLoading = loading || !balances.fiatTotal
+
+  if (isLoading) return <AssetsSkeleton />
 
   return (
     <Card data-testid="assets-widget" sx={{ px: 1.5, py: 2.5 }}>
