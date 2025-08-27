@@ -209,7 +209,7 @@ export const mockTransferWithInfo = ({
     isCancellation,
     direction,
     humanDescription: 'a simple incoming transaction',
-  }) as Transaction['txInfo']
+  } as Transaction['txInfo'])
 
 export const mockTransactionSummary: Transaction = {
   id: 'id',

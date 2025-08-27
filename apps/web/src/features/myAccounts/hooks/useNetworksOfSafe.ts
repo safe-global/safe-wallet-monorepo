@@ -15,13 +15,10 @@ export const useNetworksOfSafe = (safeAddress: string): string[] => {
   const { configs: allChains } = useChains()
 
   const chainMap = useMemo(() => {
-    return allChains.reduce(
-      (acc, chain) => {
-        acc[chain.chainId] = chain
-        return acc
-      },
-      {} as Record<string, ChainInfo>,
-    )
+    return allChains.reduce((acc, chain) => {
+      acc[chain.chainId] = chain
+      return acc
+    }, {} as Record<string, ChainInfo>)
   }, [allChains])
 
   return useMemo(() => {

@@ -1,6 +1,7 @@
-import { Meta } from "@storybook/blocks";
+import { Meta } from '@storybook/blocks'
 
-export const RightArrow = () => <svg
+export const RightArrow = () => (
+  <svg
     viewBox="0 0 14 14"
     width="8px"
     height="14px"
@@ -10,11 +11,12 @@ export const RightArrow = () => <svg
       shapeRendering: 'inherit',
       verticalAlign: 'middle',
       fill: 'currentColor',
-      'path fill': 'currentColor'
+      'path fill': 'currentColor',
     }}
->
-  <path d="m11.1 7.35-5.5 5.5a.5.5 0 0 1-.7-.7L10.04 7 4.9 1.85a.5.5 0 1 1 .7-.7l5.5 5.5c.2.2.2.5 0 .7Z" />
-</svg>
+  >
+    <path d="m11.1 7.35-5.5 5.5a.5.5 0 0 1-.7-.7L10.04 7 4.9 1.85a.5.5 0 1 1 .7-.7l5.5 5.5c.2.2.2.5 0 .7Z" />
+  </svg>
+)
 
 <Meta title="Documentation" />
 
@@ -31,8 +33,8 @@ export const RightArrow = () => <svg
     ```
 
     This will start the Storybook server and open the browser to the Storybook UI (by default http://localhost:6006).
-  </div>
 
+  </div>
 
 </div>
 

@@ -24,16 +24,13 @@ export const useSignersGroupService = () => {
 
 export const groupSigners = (owners: AddressInfo[] | undefined, appSigners: Record<string, AddressInfo>) => {
   return (
-    owners?.reduce<typeof groupedSigners>(
-      (acc, owner) => {
-        if (appSigners[owner.value]) {
-          acc.imported.data.push(owner)
-        } else {
-          acc.notImported.data.push(owner)
-        }
-        return acc
-      },
-      JSON.parse(JSON.stringify(groupedSigners)),
-    ) || {}
+    owners?.reduce<typeof groupedSigners>((acc, owner) => {
+      if (appSigners[owner.value]) {
+        acc.imported.data.push(owner)
+      } else {
+        acc.notImported.data.push(owner)
+      }
+      return acc
+    }, JSON.parse(JSON.stringify(groupedSigners))) || {}
   )
 }

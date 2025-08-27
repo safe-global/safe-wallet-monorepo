@@ -35,13 +35,12 @@ jest.mock('@/src/store/utils/singletonStore', () => ({
 // Mock SiweMessage
 jest.mock('siwe', () => {
   return {
-    SiweMessage: jest.fn().mockImplementation(function (
-      this: { prepareMessage: () => string },
-      params: Record<string, unknown>,
-    ) {
-      this.prepareMessage = () => 'prepared-siwe-message'
-      Object.assign(this, params)
-    }),
+    SiweMessage: jest
+      .fn()
+      .mockImplementation(function (this: { prepareMessage: () => string }, params: Record<string, unknown>) {
+        this.prepareMessage = () => 'prepared-siwe-message'
+        Object.assign(this, params)
+      }),
   }
 })
 

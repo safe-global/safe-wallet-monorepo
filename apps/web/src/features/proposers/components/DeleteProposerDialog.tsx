@@ -112,8 +112,8 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
                 isOk && canDelete
                   ? 'Delete proposer'
                   : isOk && !canDelete
-                    ? 'Only the owner of this proposer or the proposer itself can delete them'
-                    : undefined
+                  ? 'Only the owner of this proposer or the proposer itself can delete them'
+                  : undefined
               }
             >
               <span>

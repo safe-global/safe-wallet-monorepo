@@ -12,22 +12,25 @@ h1 {
   font-weight: normal;
 }
 small {
-  font-size: .66666667em;
+  font-size: 0.66666667em;
 }
 a {
   color: #e74c3c;
   text-decoration: none;
 }
-a:hover, a:focus {
+a:hover,
+a:focus {
   box-shadow: 0 1px #e74c3c;
 }
-.bshadow0, input {
+.bshadow0,
+input {
   box-shadow: inset 0 -2px #e7e7e7;
 }
 input:hover {
   box-shadow: inset 0 -2px #ccc;
 }
-input, fieldset {
+input,
+fieldset {
   font-family: sans-serif;
   font-size: 1em;
   margin: 0;
@@ -38,7 +41,7 @@ input {
   color: inherit;
   line-height: 1.5;
   height: 1.5em;
-  padding: .25em 0;
+  padding: 0.25em 0;
 }
 input:focus {
   outline: none;
@@ -77,19 +80,22 @@ p {
   margin-bottom: 1em;
 }
 .mvm {
-  margin-top: .75em;
-  margin-bottom: .75em;
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
 }
 .mtn {
   margin-top: 0;
 }
-.mtl, .mal {
+.mtl,
+.mal {
   margin-top: 1.5em;
 }
-.mbl, .mal {
+.mbl,
+.mal {
   margin-bottom: 1.5em;
 }
-.mal, .mhl {
+.mal,
+.mhl {
   margin-left: 1.5em;
   margin-right: 1.5em;
 }
@@ -98,16 +104,18 @@ p {
   margin-right: 1em;
 }
 .mls {
-  margin-left: .25em;
+  margin-left: 0.25em;
 }
 .ptl {
   padding-top: 1.5em;
 }
-.pbs, .pvs {
-  padding-bottom: .25em;
+.pbs,
+.pvs {
+  padding-bottom: 0.25em;
 }
-.pvs, .pts {
-  padding-top: .25em;
+.pvs,
+.pts {
+  padding-top: 0.25em;
 }
 .unit {
   float: left;
@@ -121,8 +129,9 @@ p {
 .size1of1 {
   width: 100%;
 }
-.clearfix:before, .clearfix:after {
-  content: " ";
+.clearfix:before,
+.clearfix:after {
+  content: ' ';
   display: table;
 }
 .clearfix:after {
@@ -134,7 +143,7 @@ p {
 .textbox0 {
   width: 3em;
   background: #f1f1f1;
-  padding: .25em .5em;
+  padding: 0.25em 0.5em;
   line-height: 1.5;
   height: 1.5em;
 }
@@ -149,4 +158,3 @@ p {
 .fs1 {
   font-size: 32px;
 }
-

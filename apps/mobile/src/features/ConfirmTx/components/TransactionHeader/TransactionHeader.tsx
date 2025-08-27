@@ -38,14 +38,14 @@ export function TransactionHeader({
       {isIdenticon ? (
         <Identicon address={logo as Address} size={44} />
       ) : (
-        (customLogo ?? (
+        customLogo ?? (
           <Logo
             logoUri={logo}
             size="$10"
             badgeContent={<SafeFontIcon name={badgeIcon} color={badgeColor} size={12} />}
             badgeThemeName={badgeThemeName}
           />
-        ))
+        )
       )}
 
       <View alignItems="center" gap="$2">

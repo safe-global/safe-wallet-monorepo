@@ -322,7 +322,7 @@ export const extractCounterfactualSafeSetup = (
   }
   const { owners, threshold, fallbackHandler } = undeployedSafe.props.safeAccountConfig
   const { safeVersion, saltNonce } = isPredictedSafeProps(undeployedSafe.props)
-    ? (undeployedSafe.props.safeDeploymentConfig ?? {})
+    ? undeployedSafe.props.safeDeploymentConfig ?? {}
     : undeployedSafe.props
 
   return {

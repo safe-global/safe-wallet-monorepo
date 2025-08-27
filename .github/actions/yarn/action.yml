@@ -30,7 +30,7 @@ runs:
     - name: Yarn after-install to generate contracts types
       if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true'
       shell: bash
-      run: |        
+      run: |
         yarn workspace @safe-global/web after-install
 
     - name: Save Yarn Cache & Types

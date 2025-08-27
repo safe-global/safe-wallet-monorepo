@@ -10,20 +10,20 @@ type Flatten<
 > = [Depth] extends [never]
   ? object
   : T extends object
-    ? {
-        [K in keyof T as T[K] extends object
-          ? never
-          : Prefix extends ''
-            ? `${K & string}${Suffix}`
-            : `${Prefix}${Capitalize<K & string>}${Suffix}`]: T[K]
-      } & UnionToIntersection<
-        {
-          [K in keyof T]: T[K] extends object
-            ? Flatten<T[K], Prefix extends '' ? K & string : `${Prefix}${Capitalize<K & string>}`, Suffix, Prev[Depth]>
-            : object
-        }[keyof T]
-      >
-    : object
+  ? {
+      [K in keyof T as T[K] extends object
+        ? never
+        : Prefix extends ''
+        ? `${K & string}${Suffix}`
+        : `${Prefix}${Capitalize<K & string>}${Suffix}`]: T[K]
+    } & UnionToIntersection<
+      {
+        [K in keyof T]: T[K] extends object
+          ? Flatten<T[K], Prefix extends '' ? K & string : `${Prefix}${Capitalize<K & string>}`, Suffix, Prev[Depth]>
+          : object
+      }[keyof T]
+    >
+  : object
 
 type Prev = [never, 0, 1, 2, 3, 4, 5]
 
