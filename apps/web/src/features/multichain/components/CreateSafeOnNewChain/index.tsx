@@ -26,6 +26,7 @@ import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/ho
 import { MULTICHAIN_HELP_ARTICLE } from '@/config/constants'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
 
 type CreateSafeOnNewChainForm = {
   chainId: string
@@ -116,6 +117,7 @@ const ReplaySafeDialog = ({
       trackEvent({ ...CREATE_SAFE_EVENTS.CREATED_SAFE, label: 'counterfactual' })
 
       router.push({
+        pathname: UNDEPLOYED_SAFE_BLOCKED_ROUTES.includes(router.pathname) ? AppRoutes.home : router.pathname,
         query: {
           safe: `${selectedChain.shortName}:${safeAddress}`,
         },

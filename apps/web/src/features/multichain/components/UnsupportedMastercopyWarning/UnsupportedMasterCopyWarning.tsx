@@ -24,7 +24,7 @@ export const UnsupportedMastercopyWarning = () => {
           Your Safe Account&apos;s base contract is not supported. You should migrate it to a compatible version.
         </Typography>
         <div>
-          <Button variant="contained" onClick={openUpgradeModal}>
+          <Button variant="contained" style={{ textDecoration: 'none' }} onClick={openUpgradeModal}>
             Migrate
           </Button>
         </div>

@@ -3,9 +3,10 @@ import { Typography, Chip as MuiChip, type ChipProps } from '@mui/material'
 type Props = {
   label?: string
   sx?: ChipProps['sx']
+  fontWeight?: string
 }
 
-export function Chip({ sx, label = 'New' }: Props) {
+export function Chip({ sx, label = 'New', fontWeight = 'bold' }: Props) {
   return (
     <MuiChip
       size="small"
@@ -17,7 +18,7 @@ export function Chip({ sx, label = 'New' }: Props) {
       label={
         <Typography
           variant="caption"
-          fontWeight="bold"
+          fontWeight={fontWeight}
           display="flex"
           alignItems="center"
           gap={1}

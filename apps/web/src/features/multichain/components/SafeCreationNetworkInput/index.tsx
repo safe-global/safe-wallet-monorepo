@@ -11,6 +11,7 @@ import { hasCanonicalDeployment } from '@safe-global/utils/services/contracts/de
 import { hasMultiChainCreationFeatures } from '@/features/multichain/utils/utils'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
+import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
 
 const SafeCreationNetworkInput = ({
   name,
@@ -22,6 +23,7 @@ const SafeCreationNetworkInput = ({
   const router = useRouter()
   const safeAddress = useSafeAddress()
   const currentChain = useCurrentChain()
+  const { currentSafeApp } = useSafeApps()
 
   const {
     formState: { errors },
@@ -33,11 +35,10 @@ const SafeCreationNetworkInput = ({
   const updateCurrentNetwork = useCallback(
     (chains: ChainInfo[]) => {
       if (chains.length !== 1) return
-      const shortName = chains[0].shortName
-      const networkLink = getNetworkLink(router, safeAddress, shortName)
+      const networkLink = getNetworkLink(router, safeAddress, chains[0], currentSafeApp)
       router.replace(networkLink)
     },
-    [router, safeAddress],
+    [router, safeAddress, currentSafeApp],
   )
 
   const isOptionDisabled = useCallback(

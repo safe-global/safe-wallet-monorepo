@@ -75,6 +75,16 @@ export const TX_LIST_EVENTS = {
     event: EventType.CLICK,
     // label: 'hide' | 'show',
   },
+  CSV_EXPORT_CLICKED: {
+    action: 'CSV Export Clicked',
+    category: TX_LIST_CATEGORY,
+    event: EventType.CLICK,
+  },
+  CSV_EXPORT_SUBMITTED: {
+    action: 'CSV Export Submitted',
+    category: TX_LIST_CATEGORY,
+    event: EventType.CLICK,
+  },
 }
 
 export const MESSAGE_EVENTS = {

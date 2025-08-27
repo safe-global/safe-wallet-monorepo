@@ -320,4 +320,103 @@ describe('NetworkMultiSelector', () => {
       allOptions.forEach((option) => expect(option).toHaveAttribute('aria-disabled', 'false'))
     })
   })
+
+  it.each([
+    { key: 'appUrl', value: 'https://example.com' },
+    { key: 'safeViewRedirectURL', value: 'https://redirect.example.com' },
+  ])('should keep the $key query param when switching chains', async ({ key, value }) => {
+    const mockRouterReplace = jest.fn()
+    jest.spyOn(router, 'useRouter').mockReturnValue({
+      replace: mockRouterReplace,
+      query: { chain: 'eth', [key]: value },
+      pathname: '/new-safe/create',
+    } as unknown as router.NextRouter)
+
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockChains[0])
+    const { getByRole, getByText, getAllByRole, queryByText } = render(<TestForm />, {
+      initialReduxState: {
+        chains: {
+          data: mockChains,
+          loading: false,
+        },
+      },
+    })
+    const input = getByRole('combobox')
+
+    act(() => {
+      userEvent.click(input)
+    })
+
+    // All options are visible and enabled initially
+    await waitFor(() => {
+      const allOptions = getAllByRole('option')
+      expect(allOptions).toHaveLength(5)
+      allOptions.forEach((option) => expect(option).toHaveAttribute('aria-disabled', 'false'))
+      expect(queryByText('Optimism')).toBeVisible()
+    })
+
+    // Select Optimism to trigger a chain switch
+    act(() => {
+      userEvent.click(getByText('Optimism'))
+    })
+
+    await waitFor(() => {
+      expect(mockRouterReplace).toHaveBeenCalledWith({
+        pathname: '/new-safe/create',
+        query: {
+          chain: 'oeth',
+          [key]: value,
+        },
+      })
+    })
+  })
+  it.each([
+    { key: 'appUrl', value: 'https://example.com' },
+    { key: 'safeViewRedirectURL', value: 'https://redirect.example.com' },
+  ])('should keep the $key query param when switching chains', async ({ key, value }) => {
+    const mockRouterReplace = jest.fn()
+    jest.spyOn(router, 'useRouter').mockReturnValue({
+      replace: mockRouterReplace,
+      query: { chain: 'eth', [key]: value },
+      pathname: '/new-safe/create',
+    } as unknown as router.NextRouter)
+
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockChains[0])
+    const { getByRole, getByText, getAllByRole, queryByText } = render(<TestForm />, {
+      initialReduxState: {
+        chains: {
+          data: mockChains,
+          loading: false,
+        },
+      },
+    })
+    const input = getByRole('combobox')
+
+    act(() => {
+      userEvent.click(input)
+    })
+
+    // All options are visible and enabled initially
+    await waitFor(() => {
+      const allOptions = getAllByRole('option')
+      expect(allOptions).toHaveLength(5)
+      allOptions.forEach((option) => expect(option).toHaveAttribute('aria-disabled', 'false'))
+      expect(queryByText('Optimism')).toBeVisible()
+    })
+
+    // Select Optimism to trigger a chain switch
+    act(() => {
+      userEvent.click(getByText('Optimism'))
+    })
+
+    await waitFor(() => {
+      expect(mockRouterReplace).toHaveBeenCalledWith({
+        pathname: '/new-safe/create',
+        query: {
+          chain: 'oeth',
+          [key]: value,
+        },
+      })
+    })
+  })
 })

@@ -1,10 +1,6 @@
 import type { OnTradeParamsPayload } from '@cowprotocol/events'
 import { stableCoinAddresses } from '@/features/swap/helpers/data/stablecoins'
 
-// TODO: remove after experiment is evaluated
-// We test this fee on base only, so we store the Base Chain Id here
-export const BASE_CHAIN_ID = '8453'
-
 const FEE_PERCENTAGE_BPS = {
   REGULAR: {
     TIER_1: 35,
@@ -16,12 +12,12 @@ const FEE_PERCENTAGE_BPS = {
     TIER_2: 7,
     TIER_3: 5,
   },
-  BASE_REGULAR: {
+  V2_REGULAR: {
     TIER_1: 70,
     TIER_2: 20,
     TIER_3: 10,
   },
-  BASE_STABLE: {
+  V2_STABLE: {
     TIER_1: 20,
     TIER_2: 7,
     TIER_3: 5,
@@ -51,18 +47,18 @@ const getLowerCaseStableCoinAddresses = () => {
  * @param orderParams
  * @param chainId
  */
-export const calculateFeePercentageInBps = (orderParams: OnTradeParamsPayload, chainId?: string) => {
+export const calculateFeePercentageInBps = (
+  orderParams: OnTradeParamsPayload,
+  nativeCowSwapFeeV2Enabled: boolean = false,
+) => {
   const { sellToken, buyToken, buyTokenFiatAmount, sellTokenFiatAmount, orderKind } = orderParams
   const stableCoins = getLowerCaseStableCoinAddresses()
   const isStableCoin = stableCoins[sellToken?.address?.toLowerCase()] && stableCoins[buyToken?.address.toLowerCase()]
 
   const fiatAmount = Number(orderKind == 'sell' ? sellTokenFiatAmount : buyTokenFiatAmount) || 0
 
-  // Determine which fee structure to use based on chain
-  // We increase swap fees on Base as an experimental feature
-  const isBaseNetwork = chainId === BASE_CHAIN_ID
-  const regularFees = isBaseNetwork ? FEE_PERCENTAGE_BPS.BASE_REGULAR : FEE_PERCENTAGE_BPS.REGULAR
-  const stableFees = isBaseNetwork ? FEE_PERCENTAGE_BPS.BASE_STABLE : FEE_PERCENTAGE_BPS.STABLE
+  const regularFees = nativeCowSwapFeeV2Enabled ? FEE_PERCENTAGE_BPS.V2_REGULAR : FEE_PERCENTAGE_BPS.REGULAR
+  const stableFees = nativeCowSwapFeeV2Enabled ? FEE_PERCENTAGE_BPS.V2_STABLE : FEE_PERCENTAGE_BPS.STABLE
 
   if (fiatAmount < FEE_TIERS.TIER_1) {
     return isStableCoin ? stableFees.TIER_1 : regularFees.TIER_1

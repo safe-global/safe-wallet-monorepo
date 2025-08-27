@@ -31,6 +31,24 @@ export const hasCanonicalDeployment = (deployment: SingletonDeploymentV2 | undef
 }
 
 /**
+ * Returns the canonical address for a deployment on a given network if available and present,
+ * otherwise returns the first network-specific address. Undefined if no deployment.
+ */
+export const getCanonicalOrFirstAddress = (
+  deployment: SingletonDeploymentV2 | undefined,
+  chainId: string,
+): string | undefined => {
+  if (!deployment) return undefined
+
+  if (hasCanonicalDeployment(deployment, chainId)) {
+    return deployment.deployments.canonical?.address
+  }
+
+  const addresses = toNetworkAddressList(deployment.networkAddresses[chainId] ?? [])
+  return addresses[0]
+}
+
+/**
  * Checks if any of the deployments returned by the `getDeployments` function for the given `network` and `versions` contain a deployment for the `contractAddress`
  *
  * @param getDeployments function to get the contract deployments

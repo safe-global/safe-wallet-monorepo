@@ -132,7 +132,7 @@ export const batchData = {
                 name: null,
                 logoUri: null,
               },
-              value: '1000000000000000',
+              value: '2000000000000000',
               operation: 0,
               trustedDelegateCallTarget: null,
               addressInfoIndex: null,
