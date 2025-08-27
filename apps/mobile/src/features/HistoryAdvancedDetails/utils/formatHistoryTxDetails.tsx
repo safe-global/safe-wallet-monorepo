@@ -63,15 +63,14 @@ const formatHistoryTxDetails = ({ txDetails }: formatHistoryTxDetailsProps): His
   // Section 2: Parameters
   const parametersItems: ListTableItem[] = []
 
-  // Call
-  if (txDetails.txData?.operation !== undefined) {
-    const operationText = txDetails.txData.operation === Operation.CALL ? 'transfer' : 'delegateCall'
+  if (txDetails.txData?.operation !== undefined && txDetails.txData.dataDecoded?.method) {
+    const methodCalled = txDetails.txData.dataDecoded?.method
     parametersItems.push({
-      label: 'Call',
+      label: txDetails.txData.operation === Operation.CALL ? 'Call' : 'Delegate Call',
       render: () => (
         <Badge
           circular={false}
-          content={operationText}
+          content={methodCalled}
           themeName="badge_background"
           circleProps={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 5 }}
         />
@@ -79,21 +78,6 @@ const formatHistoryTxDetails = ({ txDetails }: formatHistoryTxDetailsProps): His
     })
   }
 
-  // Contract (same as To in the screenshot)
-  if (txDetails.txData?.to?.value) {
-    parametersItems.push({
-      label: 'Contract',
-      render: () => (
-        <AddressDisplay
-          address={txDetails.txData?.to.value as Address}
-          copyProps={{ color: '$textSecondaryLight', size: 16 }}
-          externalLinkSize={16}
-        />
-      ),
-    })
-  }
-
-  // To (only show if different from Contract - in this case it's the same)
   if (txDetails.txData?.to?.value) {
     parametersItems.push({
       label: 'To',
@@ -107,7 +91,6 @@ const formatHistoryTxDetails = ({ txDetails }: formatHistoryTxDetailsProps): His
     })
   }
 
-  // Value
   if (txDetails.txData?.value) {
     parametersItems.push({
       label: 'Value',
@@ -115,7 +98,6 @@ const formatHistoryTxDetails = ({ txDetails }: formatHistoryTxDetailsProps): His
     })
   }
 
-  // Data
   if (txDetails.txData?.hexData) {
     parametersItems.push({
       label: 'Data',
@@ -136,52 +118,39 @@ const formatHistoryTxDetails = ({ txDetails }: formatHistoryTxDetailsProps): His
   if (isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)) {
     const executionInfo = txDetails.detailedExecutionInfo
 
-    // Operation
     if (txDetails.txData?.operation !== undefined) {
-      const operationText = txDetails.txData.operation === Operation.CALL ? '0(call)' : '1(delegateCall)'
+      const operationText = txDetails.txData.operation === Operation.CALL ? '0 (call)' : '1 (delegateCall)'
       decodedDataItems.push({
         label: 'Operation',
         render: () => <Text>{operationText}</Text>,
       })
     }
 
-    // Call
-    decodedDataItems.push({
-      label: 'Call',
-      render: () => <Text>0</Text>,
-    })
-
-    // SafeTxGas
     decodedDataItems.push({
       label: 'safeTxGas',
       render: () => <Text>{executionInfo.safeTxGas}</Text>,
     })
 
-    // BaseGas
     decodedDataItems.push({
       label: 'baseGas',
       render: () => <Text>{executionInfo.baseGas}</Text>,
     })
 
-    // GasPrice
     decodedDataItems.push({
       label: 'gasPrice',
       render: () => <Text>{executionInfo.gasPrice}</Text>,
     })
 
-    // GasToken
     decodedDataItems.push({
       label: 'gasToken',
       render: () => <Text>{executionInfo.gasToken}</Text>,
     })
 
-    // RefundReceiver
     decodedDataItems.push({
       label: 'refundReceiver',
       render: () => <Text>{executionInfo.refundReceiver.value}</Text>,
     })
 
-    // Signatures
     if (executionInfo.confirmations && executionInfo.confirmations.length > 0) {
       executionInfo.confirmations.forEach((confirmation, index) => {
         if (confirmation.signature) {
@@ -200,7 +169,6 @@ const formatHistoryTxDetails = ({ txDetails }: formatHistoryTxDetailsProps): His
       })
     }
 
-    // Raw data
     if (txDetails.txData?.hexData) {
       decodedDataItems.push({
         label: 'Raw data',
