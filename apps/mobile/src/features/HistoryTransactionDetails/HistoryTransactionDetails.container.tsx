@@ -32,16 +32,16 @@ function HistoryTransactionDetailsContainer() {
     id: txId,
   })
 
-  if (isLoading || !txDetails) {
-    return <LoadingTx />
-  }
-
   if (isError) {
     return (
       <View margin="$4">
         <Alert type="error" message="Error fetching transaction details" />
       </View>
     )
+  }
+
+  if (isLoading || !txDetails) {
+    return <LoadingTx />
   }
 
   return (
