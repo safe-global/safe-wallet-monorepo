@@ -82,10 +82,11 @@ export const Positions = () => {
                       {positionGroup.name}
                     </Typography>
                   ),
+                  width: '40%',
                   disableSort: true,
                 },
-                { id: 'balance', label: 'Balance', disableSort: true },
-                { id: 'value', label: 'Value', align: 'right', disableSort: true },
+                { id: 'balance', label: 'Balance', width: '40%', disableSort: true },
+                { id: 'value', label: 'Value', width: '20%', align: 'right', disableSort: true },
               ]
 
               return (
