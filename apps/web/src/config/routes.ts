@@ -71,3 +71,11 @@ export const AppRoutes = {
     accounts: '/welcome/accounts',
   },
 }
+
+export const UNDEPLOYED_SAFE_BLOCKED_ROUTES = [
+  AppRoutes.bridge,
+  AppRoutes.swap,
+  AppRoutes.stake,
+  AppRoutes.earn,
+  ...Object.values(AppRoutes.apps),
+]

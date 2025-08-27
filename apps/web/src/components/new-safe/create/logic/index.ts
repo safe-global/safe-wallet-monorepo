@@ -14,15 +14,20 @@ import { backOff } from 'exponential-backoff'
 import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import {
   getCompatibilityFallbackHandlerDeployment,
+  getCompatibilityFallbackHandlerDeployments,
   getProxyFactoryDeployment,
-  getSafeL2SingletonDeployment,
-  getSafeSingletonDeployment,
-  getSafeToL2SetupDeployment,
+  getProxyFactoryDeployments,
+  getSafeL2SingletonDeployments,
+  getSafeSingletonDeployments,
+  getSafeToL2SetupDeployments,
 } from '@safe-global/safe-deployments'
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
 import type { ReplayedSafeProps, UndeployedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { activateReplayedSafe, isPredictedSafeProps } from '@/features/counterfactual/utils'
-import { getSafeContractDeployment } from '@safe-global/utils/services/contracts/deployments'
+import {
+  getSafeContractDeployment,
+  getCanonicalOrFirstAddress,
+} from '@safe-global/utils/services/contracts/deployments'
 import {
   Safe__factory,
   Safe_proxy_factory__factory,
@@ -207,26 +212,26 @@ export const createNewUndeployedSafeWithoutSalt = (
   chain: ChainInfo,
 ): UndeployedSafeWithoutSalt => {
   // Create universal deployment Data across chains:
-  const fallbackHandlerDeployment = getCompatibilityFallbackHandlerDeployment({
+  const fallbackHandlerDeployments = getCompatibilityFallbackHandlerDeployments({
     version: safeVersion,
     network: chain.chainId,
   })
-  const fallbackHandlerAddress = fallbackHandlerDeployment?.networkAddresses[chain.chainId]
-  const safeL2Deployment = getSafeL2SingletonDeployment({ version: safeVersion, network: chain.chainId })
-  const safeL2Address = safeL2Deployment?.networkAddresses[chain.chainId]
+  const fallbackHandlerAddress = getCanonicalOrFirstAddress(fallbackHandlerDeployments, chain.chainId)
+  const safeL2Deployments = getSafeL2SingletonDeployments({ version: safeVersion, network: chain.chainId })
+  const safeL2Address = getCanonicalOrFirstAddress(safeL2Deployments, chain.chainId)
 
-  const safeL1Deployment = getSafeSingletonDeployment({ version: safeVersion, network: chain.chainId })
-  const safeL1Address = safeL1Deployment?.networkAddresses[chain.chainId]
+  const safeL1Deployments = getSafeSingletonDeployments({ version: safeVersion, network: chain.chainId })
+  const safeL1Address = getCanonicalOrFirstAddress(safeL1Deployments, chain.chainId)
 
-  const safeFactoryDeployment = getProxyFactoryDeployment({ version: safeVersion, network: chain.chainId })
-  const safeFactoryAddress = safeFactoryDeployment?.networkAddresses[chain.chainId]
+  const safeFactoryDeployments = getProxyFactoryDeployments({ version: safeVersion, network: chain.chainId })
+  const safeFactoryAddress = getCanonicalOrFirstAddress(safeFactoryDeployments, chain.chainId)
 
   if (!safeL2Address || !safeL1Address || !safeFactoryAddress || !fallbackHandlerAddress) {
     throw new Error('No Safe deployment found')
   }
 
-  const safeToL2SetupDeployment = getSafeToL2SetupDeployment({ version: '1.4.1', network: chain.chainId })
-  const safeToL2SetupAddress = safeToL2SetupDeployment?.networkAddresses[chain.chainId]
+  const safeToL2SetupDeployments = getSafeToL2SetupDeployments({ version: '1.4.1', network: chain.chainId })
+  const safeToL2SetupAddress = getCanonicalOrFirstAddress(safeToL2SetupDeployments, chain.chainId)
   const safeToL2SetupInterface = Safe_to_l2_setup__factory.createInterface()
 
   // Only do migration if the chain supports multiChain deployments and has a SafeToL2Setup deployment

@@ -76,6 +76,12 @@ declare module '@mui/material/Chip' {
   }
 }
 
+declare module '@mui/material/Alert' {
+  export interface AlertPropsColorOverrides {
+    background: true
+  }
+}
+
 const createSafeTheme = (mode: PaletteMode): Theme => {
   const isDarkMode = mode === 'dark'
   const colors = isDarkMode ? darkPalette : palette
@@ -366,6 +372,15 @@ const createSafeTheme = (mode: PaletteMode): Theme => {
             },
             '&.MuiPaper-root': {
               backgroundColor: theme.palette.warning.background,
+            },
+          }),
+          // @ts-ignore
+          standardBackground: ({ theme }) => ({
+            '& .MuiAlert-icon': {
+              color: theme.palette.text.primary,
+            },
+            '&.MuiPaper-root': {
+              backgroundColor: theme.palette.background.main,
             },
           }),
           root: ({ theme }) => ({

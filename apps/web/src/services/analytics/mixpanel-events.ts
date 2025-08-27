@@ -8,6 +8,9 @@ export enum MixPanelEvent {
   EMPTY_POSITIONS_EXPLORE_CLICKED = 'Empty Positions Explore Clicked',
   STAKE_VIEWED = 'Stake Viewed',
   EARN_VIEWED = 'Earn Viewed',
+  WC_CONNECTED = 'WC Connected',
+  CSV_TX_EXPORT_CLICKED = 'Export CSV Clicked',
+  CSV_TX_EXPORT_SUBMITTED = 'CSV Exported',
 }
 
 export enum MixPanelUserProperty {
@@ -42,6 +45,8 @@ export enum MixPanelEventParams {
   LOCATION = 'Location',
   AMOUNT_USD = 'Amount USD',
   TOTAL_VALUE_OF_PORTFOLIO = 'Total Value of Portfolio',
+  APP_URL = 'App URL',
+  DATE_RANGE = 'Date Range',
 }
 
 export enum SafeAppLaunchLocation {

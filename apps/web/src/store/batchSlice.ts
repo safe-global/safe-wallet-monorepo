@@ -1,15 +1,20 @@
 import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import type { RootState } from '.'
 import { selectChainIdAndSafeAddress } from '@/store/common'
+import type { MetaTransactionData, OperationType } from '@safe-global/types-kit'
+import { type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+
+export type CallOnlyTxData = MetaTransactionData & { operation: OperationType.Call }
 
 export type DraftBatchItem = {
   id: string
   timestamp: number
-  txDetails: TransactionDetails
+  // For Backwards compatibility we handle txDetails as well
+  txDetails?: TransactionDetails
+  txData: CallOnlyTxData
 }
 
-type BatchTxsState = {
+export type BatchTxsState = {
   [chainId: string]: {
     [safeAddress: string]: DraftBatchItem[]
   }
@@ -27,17 +32,16 @@ export const batchSlice = createSlice({
       action: PayloadAction<{
         chainId: string
         safeAddress: string
-        txDetails: TransactionDetails
+        txData: CallOnlyTxData
       }>,
     ) => {
-      const { chainId, safeAddress, txDetails } = action.payload
+      const { chainId, safeAddress, txData } = action.payload
       state[chainId] = state[chainId] || {}
       state[chainId][safeAddress] = state[chainId][safeAddress] || []
-      // @ts-expect-error
       state[chainId][safeAddress].push({
         id: Math.random().toString(36).slice(2),
         timestamp: Date.now(),
-        txDetails,
+        txData,
       })
     },
 

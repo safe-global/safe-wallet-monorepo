@@ -40,6 +40,9 @@ const config: ConfigFile = {
     '../src/gateway/AUTO_GENERATED/estimations.ts': {
       filterEndpoints: [/^estimations/],
     },
+    '../src/gateway/AUTO_GENERATED/csv-export.ts': {
+      filterEndpoints: [/^csvExport/],
+    },
     '../src/gateway/AUTO_GENERATED/messages.ts': {
       filterEndpoints: [/^messages/],
     },
