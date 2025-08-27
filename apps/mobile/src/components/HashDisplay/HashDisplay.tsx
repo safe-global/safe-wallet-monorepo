@@ -1,15 +1,17 @@
 import React from 'react'
-import { View } from 'tamagui'
+import { View, Text } from 'tamagui'
 import { TouchableOpacity } from 'react-native'
 import { Identicon } from '@/src/components/Identicon'
 import { EthAddress } from '@/src/components/EthAddress'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
 import { Address } from '@/src/types/address'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { CopyButton } from '@/src/components/CopyButton'
 import type { TextProps } from 'tamagui'
 
-export interface AddressDisplayProps {
-  address: Address
+export interface HashDisplayProps {
+  value: string | Address
   showIdenticon?: boolean
   showCopy?: boolean
   showExternalLink?: boolean
@@ -25,10 +27,12 @@ export interface AddressDisplayProps {
   /** Gap between elements */
   gap?: string
   onExternalLinkPress?: () => void
+  /** Whether to treat the value as an address (shows identicon) or generic hash */
+  isAddress?: boolean
 }
 
-export function AddressDisplay({
-  address,
+export function HashDisplay({
+  value,
   showIdenticon = true,
   showCopy = true,
   showExternalLink = true,
@@ -40,24 +44,34 @@ export function AddressDisplay({
   externalLinkColor = '$textSecondaryLight',
   gap = '$2',
   onExternalLinkPress,
-}: AddressDisplayProps) {
-  const defaultViewOnExplorer = useOpenExplorer(address)
+  isAddress = true, // Default to true for backward compatibility
+}: HashDisplayProps) {
+  const defaultViewOnExplorer = useOpenExplorer(value)
   const handleExternalLinkPress = onExternalLinkPress || defaultViewOnExplorer
 
   return (
     <View flexDirection="row" alignItems="center" gap={gap}>
-      {showIdenticon && <Identicon address={address} size={identiconSize} />}
+      {showIdenticon && isAddress && <Identicon address={value as Address} size={identiconSize} />}
 
-      <EthAddress
-        address={address}
-        copy={showCopy}
-        textProps={textProps}
-        copyProps={{
-          color: '$textSecondaryLight',
-          size: copyIconSize,
-          ...copyProps,
-        }}
-      />
+      {isAddress ? (
+        <EthAddress
+          address={value as Address}
+          copy={showCopy}
+          textProps={textProps}
+          copyProps={{
+            color: '$textSecondaryLight',
+            size: copyIconSize,
+            ...copyProps,
+          }}
+        />
+      ) : (
+        <View flexDirection="row" alignItems="center" gap="$1">
+          <Text {...textProps}>{shortenAddress(value)}</Text>
+          {showCopy && (
+            <CopyButton value={value} size={copyIconSize} color={copyProps?.color || '$textSecondaryLight'} />
+          )}
+        </View>
+      )}
 
       {showExternalLink && (
         <TouchableOpacity onPress={handleExternalLinkPress}>

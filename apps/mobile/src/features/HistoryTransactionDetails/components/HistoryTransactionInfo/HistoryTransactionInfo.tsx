@@ -4,12 +4,11 @@ import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/tr
 
 import { formatWithSchema } from '@/src/utils/date'
 import { Badge } from '@/src/components/Badge'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+
 import { isMultisigDetailedExecutionInfo } from '@/src/utils/transaction-guards'
 import { HistoryConfirmationsInfo } from '../HistoryConfirmationsInfo/HistoryConfirmationsInfo'
 import { Container } from '@/src/components/Container'
-import { CopyButton } from '@/src/components/CopyButton'
-import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
+import { HashDisplay } from '@/src/components/HashDisplay'
 
 interface HistoryTransactionInfoProps {
   txId: string
@@ -18,7 +17,6 @@ interface HistoryTransactionInfoProps {
 
 export function HistoryTransactionInfo({ txId, txDetails }: HistoryTransactionInfoProps) {
   const { detailedExecutionInfo, executedAt, txHash } = txDetails
-  const viewOnExplorer = useOpenExplorer(txHash || '')
 
   return (
     <YStack paddingHorizontal="$4" gap="$4" marginTop="$4">
@@ -35,13 +33,14 @@ export function HistoryTransactionInfo({ txId, txDetails }: HistoryTransactionIn
         {txHash && (
           <View alignItems="center" flexDirection="row" justifyContent="space-between">
             <Text color="$textSecondaryLight">Transaction hash</Text>
-            <View flexDirection="row" alignItems="center" gap="$2">
-              <Text fontSize="$4" color="$textPrimary">
-                {txHash.slice(0, 8)}...{txHash.slice(-6)}
-              </Text>
-              <CopyButton value={txHash} size={16} color="$textSecondaryLight" />
-              <SafeFontIcon name="external-link" size={16} color="$textSecondaryLight" onPress={viewOnExplorer} />
-            </View>
+            <HashDisplay
+              value={txHash}
+              showIdenticon={false}
+              isAddress={false}
+              copyIconSize={16}
+              externalLinkSize={16}
+              textProps={{ fontSize: '$4', color: '$textPrimary' }}
+            />
           </View>
         )}
 

@@ -6,7 +6,7 @@ import { CopyButton } from '@/src/components/CopyButton'
 import { Address } from '@/src/types/address'
 import { isMultisigDetailedExecutionInfo } from '@/src/utils/transaction-guards'
 import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
-import { AddressDisplay } from '@/src/components/AddressDisplay'
+import { HashDisplay } from '@/src/components/HashDisplay'
 import { Badge } from '@/src/components/Badge'
 import { HexDataDisplay } from '@/src/components/HexDataDisplay'
 
@@ -42,11 +42,12 @@ const formatHistoryTxDetails = ({ txDetails }: formatHistoryTxDetailsProps): His
       basicInfoItems.push({
         label: 'safeTxHash',
         render: () => (
-          <AddressDisplay
-            address={executionInfo.safeTxHash as Address}
+          <HashDisplay
+            value={executionInfo.safeTxHash as Address}
             copyProps={{ color: '$textSecondaryLight', size: 16 }}
             showIdenticon={false}
             showExternalLink={false}
+            isAddress={false}
           />
         ),
       })
@@ -97,11 +98,10 @@ const formatHistoryTxDetails = ({ txDetails }: formatHistoryTxDetailsProps): His
     parametersItems.push({
       label: 'To',
       render: () => (
-        <AddressDisplay
-          address={txDetails.txData?.to.value as Address}
+        <HashDisplay
+          value={txDetails.txData?.to.value as Address}
           copyProps={{ color: '$textSecondaryLight', size: 16 }}
           externalLinkSize={16}
-          showIdenticon={false}
         />
       ),
     })

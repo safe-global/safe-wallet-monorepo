@@ -15,7 +15,7 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { Address } from '@/src/types/address'
 import { HistoryAdvancedDetailsButton } from '@/src/features/HistoryTransactionDetails/components/HistoryAdvancedDetailsButton'
 import { useTransactionType } from '@/src/hooks/useTransactionType'
-import { AddressDisplay } from '@/src/components/AddressDisplay'
+import { HashDisplay } from '@/src/components/HashDisplay'
 
 interface HistoryGenericViewProps {
   txId: string
@@ -60,7 +60,7 @@ export function HistoryGenericView({ txId, txInfo, txData, executedAt }: History
               <View alignItems="center" flexDirection="row" justifyContent="space-between">
                 <Text color="$textSecondaryLight">To</Text>
 
-                <AddressDisplay address={recipientAddress} />
+                <HashDisplay value={recipientAddress} />
               </View>
             )}
 

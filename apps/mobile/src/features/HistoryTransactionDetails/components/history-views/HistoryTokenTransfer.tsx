@@ -13,7 +13,7 @@ import { Address } from '@/src/types/address'
 import { TokenAmount } from '@/src/components/TokenAmount'
 
 import { HistoryAdvancedDetailsButton } from '@/src/features/HistoryTransactionDetails/components/HistoryAdvancedDetailsButton'
-import { AddressDisplay } from '@/src/components/AddressDisplay'
+import { HashDisplay } from '@/src/components/HashDisplay'
 
 interface HistoryTokenTransferProps {
   txId: string
@@ -63,7 +63,7 @@ export function HistoryTokenTransfer({ txId, txInfo, executedAt }: HistoryTokenT
             <View alignItems="center" flexDirection="row" justifyContent="space-between">
               <Text color="$textSecondaryLight">{fieldLabel}</Text>
 
-              <AddressDisplay address={address as Address} />
+              <HashDisplay value={address as Address} />
             </View>
 
             <View alignItems="center" flexDirection="row" justifyContent="space-between">
