@@ -19,7 +19,7 @@ export function HistoryConfirmationsInfo({ detailedExecutionInfo, txId }: Histor
   const importedSigners = useAppSelector(selectSigners)
 
   // Check if any of the imported signers (users on this device) have signed this transaction
-  const isUserSigned = detailedExecutionInfo?.confirmations?.some((confirmation) =>
+  const hasUserSigned = detailedExecutionInfo?.confirmations?.some((confirmation) =>
     Object.keys(importedSigners).includes(confirmation.signer.value as Address),
   )
 
@@ -36,7 +36,7 @@ export function HistoryConfirmationsInfo({ detailedExecutionInfo, txId }: Histor
       onPress={onConfirmationsPress}
       rightNode={
         <View alignItems="center" flexDirection="row" gap="$2">
-          {isUserSigned && (
+          {hasUserSigned && (
             <Badge
               circleProps={{
                 paddingHorizontal: 8,

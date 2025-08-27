@@ -88,7 +88,7 @@ export const ConfirmationsSheetContainer = () => {
                     {(isHistoryTransaction || hasSigned) && <SafeFontIcon size={12} name="check" />}
 
                     <Text fontWeight={600} color={'$color'}>
-                      {isHistoryTransaction ? 'Signed' : hasSigned ? 'Signed' : 'Pending'}
+                      {isHistoryTransaction || hasSigned ? 'Signed' : 'Pending'}
                     </Text>
                   </View>
                 }
