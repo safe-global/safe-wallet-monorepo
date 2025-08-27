@@ -7,10 +7,12 @@ import { isSwapTransferOrderTxInfo } from '@/src/utils/transaction-guards'
 import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { TransactionQueuedItem, TransactionItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Container } from '@/src/components/Container'
+import { TxCardPress } from '@/src/components/TxInfo/types'
 
 interface TxGroupedCard {
   transactions: (TransactionItem | TransactionQueuedItem)[]
   inQueue?: boolean
+  onPress?: (tx: TxCardPress) => void
 }
 
 const orderClassTitles: Record<string, string> = {
@@ -25,7 +27,7 @@ const getSettlementOrderTitle = (order: OrderTransactionInfo): string => {
   return orderClassTitles[orderClass] || orderClassTitles['market']
 }
 
-function TxGroupedCardComponent({ transactions, inQueue }: TxGroupedCard) {
+function TxGroupedCardComponent({ transactions, inQueue, onPress }: TxGroupedCard) {
   const firstTxInfo = transactions[0].transaction.txInfo
   const isSwapTransfer = isSwapTransferOrderTxInfo(firstTxInfo)
   const label = isSwapTransfer ? getSettlementOrderTitle(firstTxInfo) : 'Bulk transactions'
@@ -53,7 +55,7 @@ function TxGroupedCardComponent({ transactions, inQueue }: TxGroupedCard) {
       <View>
         {transactions.map((item, index) => (
           <View testID="tx-group-info" key={`${item.transaction.id}-${index}`} marginTop={12}>
-            <TxInfo inQueue={inQueue} bordered tx={item.transaction} />
+            <TxInfo inQueue={inQueue} bordered tx={item.transaction} onPress={onPress} />
           </View>
         ))}
       </View>
