@@ -82,12 +82,13 @@ const PositionsWidget = () => {
                   sx={{
                     justifyContent: 'center',
                     overflowX: 'auto',
+                    px: '12px',
                   }}
                 >
                   <PositionsHeader protocol={protocol} fiatTotal={fiatTotal} />
                 </AccordionSummary>
 
-                <AccordionDetails>
+                <AccordionDetails sx={{ px: 1.5 }}>
                   {protocol.items.map((position, idx) => {
                     return (
                       <Box key={position.name}>
