@@ -59,14 +59,10 @@ const AssetRow = ({
         <TokenIcon tokenSymbol={item.tokenInfo.symbol} logoUri={item.tokenInfo.logoUri ?? undefined} size={32} />
         <Box>
           <Typography fontWeight="600">{item.tokenInfo.name}</Typography>
-          <Typography variant="body2">{item.tokenInfo.symbol}</Typography>
+          <Typography variant="body2" className={css.tokenAmount}>
+            <TokenAmount value={item.balance} decimals={item.tokenInfo.decimals} tokenSymbol={item.tokenInfo.symbol} />
+          </Typography>
         </Box>
-      </Stack>
-
-      <Stack display={['none', 'flex']} direction="row" alignItems="center" gap={1}>
-        <Typography className={css.tokenAmount}>
-          <TokenAmount value={item.balance} decimals={item.tokenInfo.decimals} tokenSymbol={item.tokenInfo.symbol} />
-        </Typography>
       </Stack>
 
       <Box flex={1} display="block" textAlign="right" height="44px">
