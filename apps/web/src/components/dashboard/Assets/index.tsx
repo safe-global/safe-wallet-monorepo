@@ -145,9 +145,7 @@ const AssetsWidget = () => {
     [safe],
   )
 
-  // Only show content when data has been fetched (either has items or fiatTotal is set)
-  const hasDataLoaded = visibleAssets.length > 0 || balances.fiatTotal !== ''
-  const isLoading = loading || !hasDataLoaded
+  const isLoading = loading || !balances.fiatTotal
 
   if (isLoading) return <AssetsSkeleton />
 
