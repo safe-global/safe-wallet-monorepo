@@ -6,9 +6,7 @@ import { TransactionHeader } from '@/src/features/ConfirmTx/components/Transacti
 import { TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useTokenDetails } from '@/src/hooks/useTokenDetails'
 import { useAppSelector } from '@/src/store/hooks'
-import { selectChainById } from '@/src/store/chains'
-import { RootState } from '@/src/store'
-import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { selectActiveChain } from '@/src/store/chains'
 import { Address } from '@/src/types/address'
 import { TokenAmount } from '@/src/components/TokenAmount'
 
@@ -22,8 +20,7 @@ interface HistoryTokenTransferProps {
 }
 
 export function HistoryTokenTransfer({ txId, txInfo, executedAt }: HistoryTokenTransferProps) {
-  const activeSafe = useDefinedActiveSafe()
-  const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
+  const activeChain = useAppSelector(selectActiveChain)
   const { value, tokenSymbol, logoUri, decimals } = useTokenDetails(txInfo)
 
   const isOutgoing = txInfo.direction === 'OUTGOING'
