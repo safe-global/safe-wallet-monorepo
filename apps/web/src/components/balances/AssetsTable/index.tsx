@@ -92,7 +92,7 @@ const headCells = [
   {
     id: 'asset',
     label: 'Asset',
-    width: '20%',
+    width: '30%',
   },
   {
     id: 'price',
