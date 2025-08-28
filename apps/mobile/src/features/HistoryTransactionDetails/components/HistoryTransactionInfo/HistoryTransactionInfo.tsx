@@ -9,6 +9,7 @@ import { isMultisigDetailedExecutionInfo } from '@/src/utils/transaction-guards'
 import { HistoryConfirmationsInfo } from '../HistoryConfirmationsInfo/HistoryConfirmationsInfo'
 import { Container } from '@/src/components/Container'
 import { HashDisplay } from '@/src/components/HashDisplay'
+import { ActionsRow } from '@/src/components/ActionsRow'
 
 interface HistoryTransactionInfoProps {
   txId: string
@@ -55,6 +56,16 @@ export function HistoryTransactionInfo({ txId, txDetails }: HistoryTransactionIn
           />
         </View>
       </Container>
+
+      <ActionsRow
+        txId={txId}
+        decodedData={txDetails.txData?.dataDecoded}
+        actionCount={
+          'actionCount' in txDetails.txInfo && txDetails.txInfo.actionCount !== null
+            ? txDetails.txInfo.actionCount
+            : null
+        }
+      />
 
       {isMultisigDetailedExecutionInfo(detailedExecutionInfo) && (
         <HistoryConfirmationsInfo detailedExecutionInfo={detailedExecutionInfo} txId={txId} />

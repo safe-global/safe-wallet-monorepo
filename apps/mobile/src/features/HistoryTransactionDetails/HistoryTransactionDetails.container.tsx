@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { ScrollView, View } from 'tamagui'
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native'
+import { RouteProp, useRoute } from '@react-navigation/native'
 import { Stack } from 'expo-router'
 
 import { LoadingTx } from '@/src/features/ConfirmTx/components/LoadingTx'
@@ -15,13 +15,6 @@ import { getHeaderTitle } from '@/src/features/HistoryTransactionDetails/utils/h
 function HistoryTransactionDetailsContainer() {
   const txId = useRoute<RouteProp<{ params: { txId: string } }>>().params.txId
   const activeSafe = useDefinedActiveSafe()
-  const navigation = useNavigation()
-
-  useEffect(() => {
-    navigation.setOptions({
-      title: 'Transaction details',
-    })
-  }, [navigation])
 
   const {
     data: txDetails,

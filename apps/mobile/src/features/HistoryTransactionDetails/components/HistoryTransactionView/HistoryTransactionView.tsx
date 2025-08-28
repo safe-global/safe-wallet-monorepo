@@ -3,8 +3,11 @@ import {
   TransactionData,
   TransactionDetails,
   TransferTransactionInfo,
+  TwapOrderTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { HistoryTokenTransfer } from '../history-views/HistoryTokenTransfer'
+import { HistorySwapOrder } from '../history-views/HistorySwapOrder'
 import { ETxType } from '@/src/types/txType'
 import { getTransactionType } from '@/src/utils/transactions'
 
@@ -25,6 +28,15 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
           txId={txDetails.txId}
           executedAt={txDetails.executedAt as number} // in the history there is no way this is undefined
           txInfo={txDetails.txInfo as TransferTransactionInfo}
+        />
+      )
+
+    case ETxType.SWAP_ORDER:
+      return (
+        <HistorySwapOrder
+          txId={txDetails.txId}
+          executedAt={txDetails.executedAt as number} // in the history there is no way this is undefined
+          txInfo={txDetails.txInfo as OrderTransactionInfo | TwapOrderTransactionInfo}
         />
       )
 
