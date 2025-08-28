@@ -52,9 +52,12 @@ export const Positions = () => {
                   },
                   balance: {
                     content: (
-                      <Typography>
-                        {formatVisualAmount(position.balance, position.tokenInfo.decimals)} {position.tokenInfo.symbol}
-                      </Typography>
+                      <Box textAlign="right">
+                        <Typography>
+                          {formatVisualAmount(position.balance, position.tokenInfo.decimals)}{' '}
+                          {position.tokenInfo.symbol}
+                        </Typography>
+                      </Box>
                     ),
                     rawValue: position.balance,
                   },
@@ -82,11 +85,11 @@ export const Positions = () => {
                       {positionGroup.name}
                     </Typography>
                   ),
-                  width: '40%',
+                  width: '25%',
                   disableSort: true,
                 },
-                { id: 'balance', label: 'Balance', width: '40%', disableSort: true },
-                { id: 'value', label: 'Value', width: '20%', align: 'right', disableSort: true },
+                { id: 'balance', label: 'Balance', width: '35%', align: 'right', disableSort: true },
+                { id: 'value', label: 'Value', width: '40%', align: 'right', disableSort: true },
               ]
 
               return (
