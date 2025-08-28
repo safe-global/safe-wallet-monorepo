@@ -1,6 +1,6 @@
 .container {
   width: 100%;
-  padding: 11px 16px;
+  padding: 12px;
   background-color: var(--color-background-paper);
   border-radius: 8px;
   flex-wrap: nowrap;
@@ -37,7 +37,7 @@
 
 .assetButtons {
   position: absolute;
-  right: 16px;
+  right: 12px;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.2s;
