@@ -28,10 +28,6 @@ const EmptyState = () => {
       <Typography mb={0.5} mt={3}>
         No transactions to sign
       </Typography>
-
-      <Typography data-testid="no-tx-text" variant="body1" color="primary.light">
-        Nice! Your transaction queue is clear.
-      </Typography>
     </Paper>
   )
 }
