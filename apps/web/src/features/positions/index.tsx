@@ -52,12 +52,9 @@ export const Positions = () => {
                   },
                   balance: {
                     content: (
-                      <Box textAlign="right">
-                        <Typography>
-                          {formatVisualAmount(position.balance, position.tokenInfo.decimals)}{' '}
-                          {position.tokenInfo.symbol}
-                        </Typography>
-                      </Box>
+                      <Typography textAlign="right">
+                        {formatVisualAmount(position.balance, position.tokenInfo.decimals)} {position.tokenInfo.symbol}
+                      </Typography>
                     ),
                     rawValue: position.balance,
                   },

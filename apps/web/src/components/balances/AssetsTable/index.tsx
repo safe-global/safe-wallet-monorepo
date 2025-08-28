@@ -188,26 +188,22 @@ const AssetsTable = ({
             price: {
               rawValue: rawPriceValue,
               content: (
-                <Box textAlign="right">
-                  <Typography>
-                    <FiatValue value={item.fiatConversion} />
-                  </Typography>
-                </Box>
+                <Typography textAlign="right">
+                  <FiatValue value={item.fiatConversion} />
+                </Typography>
               ),
             },
             balance: {
               rawValue: Number(item.balance) / 10 ** (item.tokenInfo.decimals ?? 0),
               collapsed: item.tokenInfo.address === hidingAsset,
               content: (
-                <Box textAlign="right">
-                  <Typography sx={{ '& b': { fontWeight: '400' } }}>
-                    <TokenAmount
-                      value={item.balance}
-                      decimals={item.tokenInfo.decimals}
-                      tokenSymbol={item.tokenInfo.symbol}
-                    />
-                  </Typography>
-                </Box>
+                <Typography sx={{ '& b': { fontWeight: '400' } }} textAlign="right">
+                  <TokenAmount
+                    value={item.balance}
+                    decimals={item.tokenInfo.decimals}
+                    tokenSymbol={item.tokenInfo.symbol}
+                  />
+                </Typography>
               ),
             },
             value: {
