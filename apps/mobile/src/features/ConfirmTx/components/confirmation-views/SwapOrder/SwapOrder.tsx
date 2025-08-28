@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { SwapOrderHeader } from './SwapOrderHeader'
 import { YStack } from 'tamagui'
-import { formatSwapOrderItems, formatTwapOrderItems } from './utils'
+import { formatSwapOrderItemsForConfirmation, formatTwapOrderItemsForConfirmation } from '@/src/utils/swapOrderUtils'
 import { ListTable } from '../../ListTable'
 import { DataDecoded, MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
@@ -30,10 +30,10 @@ export function SwapOrder({ executionInfo, txInfo, decodedData, txId }: SwapOrde
   const activeSafe = useDefinedActiveSafe()
   const chain = useAppSelector((state) => selectChainById(state, activeSafe.chainId))
 
-  const swapItems = useMemo(() => formatSwapOrderItems(txInfo, chain), [txInfo, chain])
+  const swapItems = useMemo(() => formatSwapOrderItemsForConfirmation(txInfo, chain), [txInfo, chain])
 
   const twapItems = useMemo(() => {
-    return isTwapOrder ? formatTwapOrderItems(order) : []
+    return isTwapOrder ? formatTwapOrderItemsForConfirmation(order) : []
   }, [order, chain])
 
   const isChangingFallbackHandler = decodedData && isSettingTwapFallbackHandler(decodedData)
