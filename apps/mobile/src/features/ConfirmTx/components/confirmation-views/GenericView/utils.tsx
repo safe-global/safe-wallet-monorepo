@@ -8,8 +8,8 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import {
   MultisigExecutionDetails,
-  SettingsChangeTransaction,
   TransactionData,
+  TransactionDetails,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Identicon } from '@/src/components/Identicon'
 import { Address } from '@/src/types/address'
@@ -25,7 +25,7 @@ export const formatGenericViewItems = ({
   executionInfo,
   viewOnExplorer,
 }: {
-  txInfo: SettingsChangeTransaction
+  txInfo: TransactionDetails['txInfo']
   txData: TransactionData
   chain: Chain
   executionInfo: MultisigExecutionDetails
@@ -67,9 +67,10 @@ export const formatGenericViewItems = ({
     },
   ]
 
-  if (txInfo.settingsInfo?.type === 'CHANGE_THRESHOLD') {
+  // Only show settings-specific UI for SettingsChangeTransaction
+  if ('settingsInfo' in txInfo && txInfo.settingsInfo?.type === 'CHANGE_THRESHOLD') {
     items.push({
-      label: 'Token',
+      label: 'Threshold',
       render: () => (
         <View flexDirection="row" alignItems="center" gap="$2">
           {txInfo.settingsInfo && 'threshold' in txInfo.settingsInfo && (

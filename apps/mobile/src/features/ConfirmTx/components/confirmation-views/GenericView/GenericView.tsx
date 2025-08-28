@@ -2,9 +2,9 @@ import React, { useMemo } from 'react'
 import { YStack } from 'tamagui'
 import { formatGenericViewItems } from './utils'
 import {
-  SettingsChangeTransaction,
   MultisigExecutionDetails,
   TransactionData,
+  TransactionDetails,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { RootState } from '@/src/store'
