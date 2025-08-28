@@ -64,7 +64,7 @@ export const Positions = () => {
                       },
                       balance: {
                         content: (
-                          <Typography>
+                          <Typography textAlign="right">
                             {formatVisualAmount(position.balance, position.tokenInfo.decimals)}{' '}
                             {position.tokenInfo.symbol}
                           </Typography>
@@ -95,10 +95,11 @@ export const Positions = () => {
                           {positionGroup.name}
                         </Typography>
                       ),
+                      width: '25%',
                       disableSort: true,
                     },
-                    { id: 'balance', label: 'Balance', disableSort: true },
-                    { id: 'value', label: 'Value', align: 'right', disableSort: true },
+                    { id: 'balance', label: 'Balance', width: '35%', align: 'right', disableSort: true },
+                    { id: 'value', label: 'Value', width: '40%', align: 'right', disableSort: true },
                   ]
 
                   return (

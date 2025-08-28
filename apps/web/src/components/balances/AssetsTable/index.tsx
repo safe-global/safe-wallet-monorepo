@@ -92,30 +92,31 @@ const headCells = [
   {
     id: 'asset',
     label: 'Asset',
-    width: '40%',
+    width: '30%',
   },
   {
     id: 'price',
     label: 'Price',
-    width: '15%',
-    align: 'left',
+    width: '20%',
+    align: 'right',
   },
   {
     id: 'balance',
     label: 'Balance',
-    width: '15%',
+    width: '20%',
+    align: 'right',
   },
   {
     id: 'value',
     label: 'Value',
-    width: '15%',
-    align: 'left',
+    width: '20%',
+    align: 'right',
   },
   {
     id: 'weight',
     label: 'Weight',
-    width: '15%',
-    align: 'left',
+    width: '20%',
+    align: 'right',
   },
   {
     id: 'actions',
@@ -193,7 +194,7 @@ const AssetsTable = ({
             price: {
               rawValue: rawPriceValue,
               content: (
-                <Typography>
+                <Typography textAlign="right">
                   <FiatValue value={item.fiatConversion} />
                 </Typography>
               ),
@@ -202,7 +203,7 @@ const AssetsTable = ({
               rawValue: Number(item.balance) / 10 ** (item.tokenInfo.decimals ?? 0),
               collapsed: item.tokenInfo.address === hidingAsset,
               content: (
-                <Typography sx={{ '& b': { fontWeight: '400' } }}>
+                <Typography sx={{ '& b': { fontWeight: '400' } }} textAlign="right">
                   <TokenAmount
                     value={item.balance}
                     decimals={item.tokenInfo.decimals}
@@ -215,9 +216,9 @@ const AssetsTable = ({
               rawValue: rawFiatValue,
               collapsed: item.tokenInfo.address === hidingAsset,
               content: (
-                <Box textAlign="left">
+                <Box textAlign="right">
                   <Typography>
-                    <FiatValue value={item.fiatBalance} />
+                    <FiatValue value={item.fiatBalance} precise uniformColor />
                   </Typography>
                   {item.fiatBalance24hChange && (
                     <Typography variant="caption">
@@ -230,39 +231,43 @@ const AssetsTable = ({
             weight: {
               rawValue: itemShareOfFiatTotal,
               content: itemShareOfFiatTotal ? (
-                <Stack direction="row" alignItems="center" gap={1} position="relative">
-                  <svg className={css.gradient}>
-                    <defs>
-                      <linearGradient
-                        id="progress_gradient"
-                        x1="21.1648"
-                        y1="8.21591"
-                        x2="-9.95028"
-                        y2="22.621"
-                        gradientUnits="userSpaceOnUse"
-                      >
-                        <stop stopColor="#5FDDFF" />
-                        <stop offset="1" stopColor="#12FF80" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                  <CircularProgress
-                    variant="determinate"
-                    value={100}
-                    className={css.circleBg}
-                    size={16}
-                    thickness={6}
-                  />
-                  <CircularProgress
-                    variant="determinate"
-                    value={itemShareOfFiatTotal * 100}
-                    className={css.circleProgress}
-                    size={16}
-                    thickness={6}
-                    sx={{ 'svg circle': { stroke: 'url(#progress_gradient)', strokeLinecap: 'round' } }}
-                  />
-                  <Typography variant="body2">{formatPercentage(itemShareOfFiatTotal)}</Typography>
-                </Stack>
+                <Box textAlign="right">
+                  <Stack direction="row" alignItems="center" gap={0.5} position="relative" display="inline-flex">
+                    <svg className={css.gradient}>
+                      <defs>
+                        <linearGradient
+                          id="progress_gradient"
+                          x1="21.1648"
+                          y1="8.21591"
+                          x2="-9.95028"
+                          y2="22.621"
+                          gradientUnits="userSpaceOnUse"
+                        >
+                          <stop stopColor="#5FDDFF" />
+                          <stop offset="1" stopColor="#12FF80" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                    <CircularProgress
+                      variant="determinate"
+                      value={100}
+                      className={css.circleBg}
+                      size={16}
+                      thickness={6}
+                    />
+                    <CircularProgress
+                      variant="determinate"
+                      value={itemShareOfFiatTotal * 100}
+                      className={css.circleProgress}
+                      size={16}
+                      thickness={6}
+                      sx={{ 'svg circle': { stroke: 'url(#progress_gradient)', strokeLinecap: 'round' } }}
+                    />
+                    <Typography variant="body2" sx={{ minWidth: '52px', textAlign: 'right' }}>
+                      {formatPercentage(itemShareOfFiatTotal)}
+                    </Typography>
+                  </Stack>
+                </Box>
               ) : (
                 <></>
               ),

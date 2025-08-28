@@ -6,7 +6,7 @@ import staticSafes from '../../fixtures/safes/static.json'
 
 const transactionQueueStr = 'Pending transactions'
 const noTransactionStr = 'This Safe has no queued transactions'
-const overviewStr = 'Total asset value'
+const overviewStr = 'Total'
 const sendStr = 'Send'
 const receiveStr = 'Receive'
 const viewAllStr = 'View all'
