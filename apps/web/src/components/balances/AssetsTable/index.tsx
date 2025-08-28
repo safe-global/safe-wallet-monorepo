@@ -30,6 +30,7 @@ import { isEligibleEarnToken } from '@/features/earn/utils'
 import useChainId from '@/hooks/useChainId'
 import FiatValue from '@/components/common/FiatValue'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
+import useFiatTotal from '@/hooks/useFiatTotal'
 
 const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   asset: {
@@ -113,7 +114,13 @@ const headCells = [
   },
   {
     id: 'weight',
-    label: 'Weight',
+    label: (
+      <Tooltip title="Based on total portfolio value">
+        <Typography variant="caption" letterSpacing="normal" color="primary.light">
+          Weight
+        </Typography>
+      </Tooltip>
+    ),
     width: '15%',
     align: 'left',
   },
@@ -133,6 +140,7 @@ const AssetsTable = ({
   setShowHiddenAssets: (hidden: boolean) => void
 }): ReactElement => {
   const { balances, loading } = useBalances()
+  const fiatTotal = useFiatTotal()
   const chainId = useChainId()
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
   const isStakingFeatureEnabled = useIsStakingFeatureEnabled()
@@ -146,8 +154,6 @@ const AssetsTable = ({
   const visibleAssets = showHiddenAssets ? balances.items : visible
   const hasNoAssets = !loading && balances.items.length === 1 && balances.items[0].balance === '0'
   const selectedAssetCount = visibleAssets?.filter((item) => isAssetSelected(item.tokenInfo.address)).length || 0
-
-  const fiatTotal = balances.fiatTotal ? Number(balances.fiatTotal) : null
 
   const rows = loading
     ? skeletonRows

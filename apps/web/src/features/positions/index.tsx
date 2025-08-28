@@ -7,11 +7,11 @@ import { getReadablePositionType } from '@/features/positions/utils'
 import IframeIcon from '@/components/common/IframeIcon'
 import { FiatChange } from '@/components/balances/AssetsTable/FiatChange'
 import usePositions from '@/features/positions/hooks/usePositions'
-import usePositionsFiatTotal from '@/features/positions/hooks/usePositionsFiatTotal'
 import PositionsEmpty from '@/features/positions/components/PositionsEmpty'
+import useFiatTotal from '@/hooks/useFiatTotal'
 
 export const Positions = () => {
-  const fiatTotal = usePositionsFiatTotal()
+  const fiatTotal = useFiatTotal()
   const protocols = usePositions()
 
   if (!protocols) return null
