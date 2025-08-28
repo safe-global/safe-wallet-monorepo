@@ -1,4 +1,4 @@
-import { Chip, Stack, Typography } from '@mui/material'
+import { Chip, Stack, Tooltip, Typography } from '@mui/material'
 import IframeIcon from '@/components/common/IframeIcon'
 import FiatValue from '@/components/common/FiatValue'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
@@ -24,7 +24,11 @@ const PositionsHeader = ({ protocol, fiatTotal }: { protocol: Protocol; fiatTota
           {protocol.protocol_metadata.name}
         </Typography>
 
-        {shareOfFiatTotal && <Chip variant="filled" size="tiny" label={shareOfFiatTotal} />}
+        {shareOfFiatTotal && (
+          <Tooltip title="Based on total portfolio value">
+            <Chip variant="filled" size="tiny" label={shareOfFiatTotal} />
+          </Tooltip>
+        )}
 
         <Typography fontWeight="bold" mr={1} ml="auto" justifySelf="flex-end">
           <FiatValue value={protocol.fiatTotal} maxLength={20} precise uniformColor />
