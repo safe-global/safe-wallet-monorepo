@@ -21,7 +21,20 @@ const PositionsHeader = ({ protocol, fiatTotal }: { protocol: Protocol; fiatTota
           {protocol.protocol_metadata.name}
         </Typography>
 
-        {shareOfFiatTotal && <Chip variant="filled" size="tiny" label={shareOfFiatTotal} />}
+        {shareOfFiatTotal && (
+          <Chip
+            variant="filled"
+            size="tiny"
+            label={shareOfFiatTotal}
+            sx={{
+              backgroundColor: '#dddee0',
+              color: '#121312',
+              '& .MuiChip-label': {
+                letterSpacing: '1px',
+              },
+            }}
+          />
+        )}
 
         <Typography fontWeight="bold" mr={1} ml="auto" justifySelf="flex-end">
           <FiatValue value={protocol.fiatTotal} maxLength={20} precise uniformColor />
