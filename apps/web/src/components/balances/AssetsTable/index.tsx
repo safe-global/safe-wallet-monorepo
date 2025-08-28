@@ -171,7 +171,15 @@ const AssetsTable = ({
                 <div className={css.token}>
                   <TokenIcon logoUri={item.tokenInfo.logoUri} tokenSymbol={item.tokenInfo.symbol} />
 
-                  <Typography>{item.tokenInfo.name}</Typography>
+                  <Stack>
+                    <Typography fontWeight="bold">
+                      {item.tokenInfo.name}
+                      {!isNative && <TokenExplorerLink address={item.tokenInfo.address} />}
+                    </Typography>
+                    <Typography variant="body2" color="primary.light">
+                      {item.tokenInfo.symbol}
+                    </Typography>
+                  </Stack>
 
                   {isStakingFeatureEnabled && item.tokenInfo.type === TokenType.NATIVE_TOKEN && (
                     <StakeButton tokenInfo={item.tokenInfo} trackingLabel={STAKE_LABELS.asset} />
@@ -180,8 +188,6 @@ const AssetsTable = ({
                   {isEarnFeatureEnabled && isEligibleEarnToken(chainId, item.tokenInfo.address) && (
                     <EarnButton tokenInfo={item.tokenInfo} trackingLabel={EARN_LABELS.asset} />
                   )}
-
-                  {!isNative && <TokenExplorerLink address={item.tokenInfo.address} />}
                 </div>
               ),
             },
