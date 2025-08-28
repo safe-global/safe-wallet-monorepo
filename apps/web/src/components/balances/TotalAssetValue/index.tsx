@@ -16,7 +16,7 @@ const TotalAssetValue = ({ fiatTotal }: { fiatTotal: number | undefined }) => {
       <Typography component="div" variant="h1" fontSize="44px" lineHeight="1.2" letterSpacing="-0.5px">
         {safe.deployed ? (
           fiatTotal !== undefined ? (
-            <FiatValue value={fiatTotal} />
+            <FiatValue value={fiatTotal} precise />
           ) : (
             <Skeleton variant="text" width={60} />
           )
