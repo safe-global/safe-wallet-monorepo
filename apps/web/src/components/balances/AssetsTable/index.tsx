@@ -211,7 +211,7 @@ const AssetsTable = ({
               content: (
                 <Box textAlign="left">
                   <Typography>
-                    <FiatValue value={item.fiatBalance} />
+                    <FiatValue value={item.fiatBalance} precise uniformColor />
                   </Typography>
                   {item.fiatBalance24hChange && (
                     <Typography variant="caption">

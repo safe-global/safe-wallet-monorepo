@@ -24,7 +24,7 @@ const PositionsHeader = ({ protocol, fiatTotal }: { protocol: Protocol; fiatTota
         {shareOfFiatTotal && <Chip variant="filled" size="tiny" label={shareOfFiatTotal} />}
 
         <Typography fontWeight="bold" mr={1} ml="auto" justifySelf="flex-end">
-          <FiatValue value={protocol.fiatTotal} maxLength={20} precise />
+          <FiatValue value={protocol.fiatTotal} maxLength={20} precise uniformColor />
         </Typography>
       </Stack>
     </>
