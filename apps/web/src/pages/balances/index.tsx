@@ -3,7 +3,7 @@ import Head from 'next/head'
 
 import AssetsTable from '@/components/balances/AssetsTable'
 import AssetsHeader from '@/components/balances/AssetsHeader'
-import useBalances from '@/hooks/useBalances'
+import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { useState } from 'react'
 
 import PagePlaceholder from '@/components/common/PagePlaceholder'
@@ -18,7 +18,7 @@ import { BRAND_NAME } from '@/config/constants'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 
 const Balances: NextPage = () => {
-  const { balances, error } = useBalances()
+  const { balances, error } = useVisibleBalances()
   const [showHiddenAssets, setShowHiddenAssets] = useState(false)
   const toggleShowHiddenAssets = () => setShowHiddenAssets((prev) => !prev)
   const isStakingBannerEnabled = useIsStakingBannerEnabled()
