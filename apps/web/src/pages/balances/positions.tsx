@@ -28,7 +28,7 @@ const Positions: NextPage = () => {
           <Typography variant="h4" fontWeight={700}>
             Positions
           </Typography>
-          <Tooltip title="Experimental. Data may be missing or outdated.">
+          <Tooltip title="Experimental. Data may be missing or outdated." placement="top" arrow>
             <Chip
               label="BETA"
               size="small"
