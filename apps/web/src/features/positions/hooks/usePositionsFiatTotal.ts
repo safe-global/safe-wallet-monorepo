@@ -1,7 +1,7 @@
 import usePositions from '@/features/positions/hooks/usePositions'
 
 const usePositionsFiatTotal = () => {
-  const protocols = usePositions()
+  const { data: protocols } = usePositions()
 
   if (!protocols) return 0
 
