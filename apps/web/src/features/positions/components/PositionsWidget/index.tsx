@@ -124,7 +124,20 @@ const PositionsWidget = () => {
       <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5 }}>
         <Stack direction="row" alignItems="center" gap={1}>
           <Typography fontWeight={700}>Top positions</Typography>
-          <Tooltip title="Experimental. Data may be missing or outdated." placement="top" arrow>
+          <Tooltip
+            title="Experimental. Data may be missing or outdated."
+            placement="top"
+            arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  maxWidth: { xs: '250px', sm: 'none' },
+                  overflow: { xs: 'hidden' },
+                  textOverflow: { xs: 'ellipsis' },
+                },
+              },
+            }}
+          >
             <Chip
               label="BETA"
               size="small"

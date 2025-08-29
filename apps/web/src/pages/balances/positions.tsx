@@ -33,7 +33,6 @@ const Positions: NextPage = () => {
               label="BETA"
               size="small"
               sx={{
-                backgroundColor: '#f4f4f4',
                 color: '#121312',
                 letterSpacing: '0.4px',
               }}
