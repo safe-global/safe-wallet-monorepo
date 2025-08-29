@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import useFiatTotal from '@/hooks/useFiatTotal'
+import usePositionsFiatTotal from '@/features/positions/hooks/usePositionsFiatTotal'
 import React, { useMemo } from 'react'
 import { AppRoutes } from '@/config/routes'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Card, Divider, Stack, Typography } from '@mui/material'
@@ -21,7 +21,7 @@ const PositionsWidget = () => {
   const router = useRouter()
   const { safe } = router.query
   const currentData = usePositions()
-  const fiatTotal = useFiatTotal()
+  const positionsFiatTotal = usePositionsFiatTotal()
 
   const viewAllUrl = useMemo(
     () => ({
@@ -44,7 +44,7 @@ const PositionsWidget = () => {
           <Track
             {...POSITIONS_EVENTS.POSITIONS_VIEW_ALL_CLICKED}
             mixpanelParams={{
-              [MixPanelEventParams.TOTAL_VALUE_OF_PORTFOLIO]: fiatTotal || 0,
+              [MixPanelEventParams.TOTAL_VALUE_OF_PORTFOLIO]: positionsFiatTotal || 0,
               [MixPanelEventParams.ENTRY_POINT]: 'Dashboard',
             }}
           >
@@ -85,7 +85,7 @@ const PositionsWidget = () => {
                     px: '12px',
                   }}
                 >
-                  <PositionsHeader protocol={protocol} fiatTotal={fiatTotal} />
+                  <PositionsHeader protocol={protocol} fiatTotal={positionsFiatTotal} />
                 </AccordionSummary>
 
                 <AccordionDetails sx={{ px: 1.5 }}>
