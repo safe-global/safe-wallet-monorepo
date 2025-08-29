@@ -2,7 +2,17 @@ import { useRouter } from 'next/router'
 import useFiatTotal from '@/hooks/useFiatTotal'
 import React, { useMemo } from 'react'
 import { AppRoutes } from '@/config/routes'
-import { Accordion, AccordionDetails, AccordionSummary, Box, Card, Divider, Stack, Typography } from '@mui/material'
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Card,
+  Divider,
+  Stack,
+  Typography,
+  Skeleton,
+} from '@mui/material'
 import { ViewAllLink } from '@/components/dashboard/styled'
 import css from './styles.module.css'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -20,7 +30,7 @@ const MAX_PROTOCOLS = 4
 const PositionsWidget = () => {
   const router = useRouter()
   const { safe } = router.query
-  const { data, error } = usePositions()
+  const { data, error, isLoading } = usePositions()
   const fiatTotal = useFiatTotal()
 
   const viewAllUrl = useMemo(
@@ -30,6 +40,78 @@ const PositionsWidget = () => {
     }),
     [safe],
   )
+
+  if (isLoading) {
+    return (
+      <Card data-testid="positions-widget" sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5 }}>
+        <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
+          <Typography fontWeight={700}>Top positions</Typography>
+        </Stack>
+
+        <Box>
+          {Array(2)
+            .fill(0)
+            .map((_, index) => (
+              <Accordion key={index} disableGutters elevation={0} variant="elevation">
+                <AccordionSummary
+                  className={css.position}
+                  expandIcon={<ExpandMoreIcon fontSize="small" />}
+                  sx={{
+                    justifyContent: 'center',
+                    overflowX: 'auto',
+                    px: '12px',
+                  }}
+                >
+                  <Stack direction="row" alignItems="center" gap={2} width="100%">
+                    <Skeleton variant="rounded" width="40px" height="40px" />
+                    <Box flex={1}>
+                      <Typography>
+                        <Skeleton width="100px" />
+                      </Typography>
+                      <Typography variant="body2">
+                        <Skeleton width="60px" />
+                      </Typography>
+                    </Box>
+                    <Typography>
+                      <Skeleton width="50px" />
+                    </Typography>
+                  </Stack>
+                </AccordionSummary>
+
+                <AccordionDetails sx={{ px: 1.5 }}>
+                  {Array(2)
+                    .fill(0)
+                    .map((_, posIndex) => (
+                      <Box key={posIndex}>
+                        <Typography variant="body2" color="primary.light" mb={1} mt={posIndex !== 0 ? 2 : 0}>
+                          <Skeleton width="80px" />
+                        </Typography>
+
+                        <Divider />
+
+                        <Stack direction="row" alignItems="center" gap={2} py={1}>
+                          <Skeleton variant="rounded" width="24px" height="24px" />
+                          <Box flex={1}>
+                            <Typography>
+                              <Skeleton width="60px" />
+                            </Typography>
+                            <Typography variant="body2">
+                              <Skeleton width="40px" />
+                            </Typography>
+                          </Box>
+                          <Typography textAlign="right">
+                            <Skeleton width="40px" />
+                          </Typography>
+                        </Stack>
+                      </Box>
+                    ))}
+                </AccordionDetails>
+              </Accordion>
+            ))}
+        </Box>
+      </Card>
+    )
+  }
 
   if (error || !data) return null
 
