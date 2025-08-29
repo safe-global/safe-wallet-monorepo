@@ -169,18 +169,18 @@ export type SimulationStatus = {
   isError: boolean
 }
 
-export const getSimulationStatus = (simulation: UseSimulationReturn): SimulationStatus => {
-  const isLoading = simulation._simulationRequestStatus === FETCH_STATUS.LOADING
+export const getSimulationStatus = (simulationResult: UseSimulationReturn): SimulationStatus => {
+  const isLoading = simulationResult._simulationRequestStatus === FETCH_STATUS.LOADING
 
   const isFinished =
-    simulation._simulationRequestStatus === FETCH_STATUS.SUCCESS ||
-    simulation._simulationRequestStatus === FETCH_STATUS.ERROR
+    simulationResult._simulationRequestStatus === FETCH_STATUS.SUCCESS ||
+    simulationResult._simulationRequestStatus === FETCH_STATUS.ERROR
 
-  const isSuccess = simulation.simulation?.simulation.status || false
+  const isSuccess = simulationResult.simulationData?.simulation.status || false
 
   // Safe can emit failure event even though Tenderly simulation succeeds
-  const isCallTraceError = isSuccess && getCallTraceErrors(simulation.simulation).length > 0
-  const isError = simulation._simulationRequestStatus === FETCH_STATUS.ERROR
+  const isCallTraceError = isSuccess && getCallTraceErrors(simulationResult.simulationData).length > 0
+  const isError = simulationResult._simulationRequestStatus === FETCH_STATUS.ERROR
 
   return {
     isLoading,
