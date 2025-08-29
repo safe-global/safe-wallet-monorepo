@@ -124,7 +124,7 @@ const PositionsWidget = () => {
       <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5 }}>
         <Stack direction="row" alignItems="center" gap={1}>
           <Typography fontWeight={700}>Top positions</Typography>
-          <Tooltip title="Experimental. Data may be missing or outdated.">
+          <Tooltip title="Experimental. Data may be missing or outdated." placement="top" arrow>
             <Chip
               label="BETA"
               size="small"
