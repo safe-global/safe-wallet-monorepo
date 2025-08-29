@@ -25,8 +25,19 @@ const PositionsHeader = ({ protocol, fiatTotal }: { protocol: Protocol; fiatTota
         </Typography>
 
         {shareOfFiatTotal && (
-          <Tooltip title="Based on total portfolio value">
-            <Chip variant="filled" size="tiny" label={shareOfFiatTotal} />
+          <Tooltip title="Based on total positions value">
+            <Chip
+              variant="filled"
+              size="tiny"
+              label={shareOfFiatTotal}
+              sx={{
+                backgroundColor: '#dddee0',
+                color: '#121312',
+                '& .MuiChip-label': {
+                  letterSpacing: '1px',
+                },
+              }}
+            />
           </Tooltip>
         )}
 
