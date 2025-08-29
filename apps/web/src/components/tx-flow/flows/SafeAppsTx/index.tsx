@@ -52,6 +52,7 @@ const SafeAppsTxFlow = ({
 
   return (
     <TxFlow
+      initialData={data}
       onSubmit={handleSubmit}
       subtitle={<AppTitle name={data.app?.name} logoUri={data.app?.iconUrl} txs={data.txs} />}
       ReviewTransactionComponent={ReviewTransactionComponent}

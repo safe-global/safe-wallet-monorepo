@@ -1,26 +1,23 @@
 import React, { useMemo } from 'react'
-import { View, YStack } from 'tamagui'
+import { YStack } from 'tamagui'
 import { formatGenericViewItems } from './utils'
 import {
-  SettingsChangeTransaction,
   MultisigExecutionDetails,
   TransactionData,
+  TransactionDetails,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { RootState } from '@/src/store'
 import { selectChainById } from '@/src/store/chains'
 import { useAppSelector } from '@/src/store/hooks'
-import { SafeListItem } from '@/src/components/SafeListItem'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { Badge } from '@/src/components/Badge'
-
 import { ListTable } from '../../ListTable'
 import { TransactionHeader } from '../../TransactionHeader'
 import { ParametersButton } from '../../ParametersButton'
-import { router } from 'expo-router'
 import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
+import { ActionsRow } from '@/src/components/ActionsRow'
+
 interface GenericViewProps {
-  txInfo: SettingsChangeTransaction
+  txInfo: TransactionDetails['txInfo']
   executionInfo: MultisigExecutionDetails
   txData: TransactionData
   txId: string
@@ -34,13 +31,6 @@ export function GenericView({ txInfo, txData, executionInfo, txId }: GenericView
     () => formatGenericViewItems({ txInfo, txData, chain, executionInfo, viewOnExplorer }),
     [txInfo, executionInfo, txData, chain, viewOnExplorer],
   )
-
-  const handleViewActions = () => {
-    router.push({
-      pathname: '/transaction-actions',
-      params: { txId },
-    })
-  }
 
   return (
     <YStack gap="$4">
@@ -57,19 +47,11 @@ export function GenericView({ txInfo, txData, executionInfo, txId }: GenericView
         <ParametersButton txId={txId} />
       </ListTable>
 
-      {'actionCount' in txInfo && (
-        <SafeListItem
-          label="Actions"
-          onPress={handleViewActions}
-          rightNode={
-            <View flexDirection="row" alignItems="center" gap="$2">
-              <Badge themeName="badge_background_inverted" content={txInfo.actionCount as string} circleSize="$6" />
-
-              <SafeFontIcon name={'chevron-right'} />
-            </View>
-          }
-        />
-      )}
+      <ActionsRow
+        txId={txId}
+        actionCount={'actionCount' in txInfo && txInfo.actionCount !== null ? txInfo.actionCount : undefined}
+        decodedData={txData.dataDecoded}
+      />
     </YStack>
   )
 }

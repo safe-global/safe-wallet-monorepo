@@ -10,7 +10,7 @@ import css from './styles.module.css'
 import inputCss from '@/styles/inputs.module.css'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { useAllMergedAddressBooks } from '@/hooks/useAllAddressBooks'
+import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 
 const abFilterOptions = createFilterOptions({
   stringify: (option: { label: string; name: string }) => option.name + ' ' + option.label,
@@ -22,14 +22,14 @@ const abFilterOptions = createFilterOptions({
 const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canAdd?: boolean }): ReactElement => {
   const [open, setOpen] = useState(false)
   const [openAddressBook, setOpenAddressBook] = useState<boolean>(false)
-  const mergedAddressBook = useAllMergedAddressBooks()
+  const mergedAddressBook = useMergedAddressBooks()
 
   const { setValue, control } = useFormContext()
   const addressValue = useWatch({ name, control })
 
   const allAddressBookEntries = useMemo(
     () =>
-      mergedAddressBook.map((entry) => ({
+      mergedAddressBook.list.map((entry) => ({
         label: entry.address,
         name: entry.name,
       })),

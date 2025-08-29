@@ -162,10 +162,10 @@ describe('EthHashInfo', () => {
       expect(queryByText('Test name')).toBeInTheDocument()
     })
 
-    it('renders the name that is passed instead of the address book', () => {
+    it('renders a name from the address book even if a name is passed', () => {
       const { queryByText } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} name="Fallback name" />)
 
-      expect(queryByText('Fallback name')).toBeInTheDocument()
+      expect(queryByText('Address book name')).toBeInTheDocument()
     })
 
     it('renders a name from the address book', () => {

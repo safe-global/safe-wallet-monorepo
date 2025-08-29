@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react'
 import {
-  useAllMergedAddressBooks,
+  useMergedAddressBooks,
   useAddressBookItem,
   ContactSource,
   type ExtendedContact,
@@ -24,6 +24,7 @@ jest.mock('@/store/authSlice', () => ({
 
 jest.mock('@/store/addressBookSlice', () => ({
   selectAllAddressBooks: jest.fn(() => localAddressBook),
+  selectAddressBookByChain: jest.fn(() => localAddressBook),
 }))
 
 jest.mock('@/hooks/useAddressBook', () => () => localAddressBook)
@@ -58,11 +59,11 @@ describe('useAllAddressBooks', () => {
         '0xB': 'Bob',
       }
 
-      const { result } = renderHook(() => useAllMergedAddressBooks(mockChainId))
+      const { result } = renderHook(() => useMergedAddressBooks(mockChainId))
 
-      expect(result.current).toHaveLength(2)
-      expect(result.current.map((c) => c.address)).toEqual(['0xA', '0xB'])
-      result.current.forEach((c) => expect(c.source).toBe(ContactSource.local))
+      expect(result.current.list).toHaveLength(2)
+      expect(result.current.list.map((c) => c.address)).toEqual(['0xA', '0xB'])
+      result.current.list.forEach((c) => expect(c.source).toBe(ContactSource.local))
     })
 
     it('returns undefined when no chainId is provided', () => {
@@ -100,12 +101,12 @@ describe('useAllAddressBooks', () => {
         },
       ]
 
-      const { result } = renderHook(() => useAllMergedAddressBooks(mockChainId))
+      const { result } = renderHook(() => useMergedAddressBooks(mockChainId))
 
-      expect(result.current).toHaveLength(3)
-      expect(result.current.map((c) => c.address)).toEqual(['0xA', '0xC', '0xB'])
+      expect(result.current.list).toHaveLength(3)
+      expect(result.current.list.map((c) => c.address)).toEqual(['0xA', '0xC', '0xB'])
 
-      const addressToSource = Object.fromEntries(result.current.map((c) => [c.address, c.source]))
+      const addressToSource = Object.fromEntries(result.current.list.map((c) => [c.address, c.source]))
 
       expect(addressToSource).toEqual({
         '0xA': ContactSource.space,
@@ -129,7 +130,7 @@ describe('useAllAddressBooks', () => {
         {
           name: 'Alice',
           address: '0xA',
-          chainIds: ['1', '5'],
+          chainIds: ['1'],
           createdBy: '',
           lastUpdatedBy: '',
           source: ContactSource.space,
