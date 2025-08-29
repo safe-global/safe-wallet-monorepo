@@ -14,9 +14,12 @@ export const useInfiniteScroll = <T, J>({ refetch, setPageUrl, data }: TUseInfin
   const activeSafe = useSelector(selectActiveSafe)
   const [list, setList] = useState<T & TUseInfiniteScrollData<J>>()
 
+  // Reset list when activeSafe changes to prevent memory leaks
   useEffect(() => {
     setList(undefined)
-  }, [activeSafe])
+    // Also reset the page URL to ensure we start fresh
+    setPageUrl(undefined)
+  }, [activeSafe, setPageUrl])
 
   useEffect(() => {
     if (!data?.results) {

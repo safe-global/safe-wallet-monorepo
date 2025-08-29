@@ -57,7 +57,10 @@ export const proposeTx = async ({ activeSafe, txId, privateKey, txDetails, chain
 
   const { protocolKit } = await createConnectedWallet(privateKey, activeSafe, chain)
 
-  const safeTx = await protocolKit.createTransaction({ transactions: [txParams] }).catch(console.log)
+  const safeTx = await protocolKit.createTransaction({ transactions: [txParams] }).catch((error) => {
+    console.error('Failed to create transaction:', error)
+    throw new Error(`Failed to create transaction: ${error instanceof Error ? error.message : 'Unknown error'}`)
+  })
 
   return { safeTx, signatures }
 }
