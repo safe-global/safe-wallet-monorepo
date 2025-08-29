@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { YStack, Text, XStack, View } from 'tamagui'
+import { YStack, Text, XStack } from 'tamagui'
 import {
   DataDecoded,
   MultisigExecutionDetails,
@@ -13,11 +13,7 @@ import { ParametersButton } from '../../ParametersButton'
 import { vaultTypeToLabel, formatVaultDepositItems } from './utils'
 import { Container } from '@/src/components/Container'
 import { Image } from 'expo-image'
-import { isMultiSendData } from '@/src/utils/transaction-guards'
-import { SafeListItem } from '@/src/components/SafeListItem'
-import { Badge } from '@/src/components/Badge'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { useRouter } from 'expo-router'
+import { ActionsRow } from '@/src/components/ActionsRow'
 
 const AdditionalRewards = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) => {
   const reward = txInfo.additionalRewards[0]
@@ -69,16 +65,8 @@ interface VaultDepositProps {
 }
 
 export function VaultDeposit({ txInfo, executionInfo, txId, decodedData }: VaultDepositProps) {
-  const router = useRouter()
   const totalNrr = (txInfo.baseNrr + txInfo.additionalRewardsNrr) / 100
   const items = useMemo(() => formatVaultDepositItems(txInfo), [txInfo])
-
-  const handleViewActions = () => {
-    router.push({
-      pathname: '/transaction-actions',
-      params: { txId },
-    })
-  }
 
   return (
     <YStack gap="$4">
@@ -107,28 +95,7 @@ export function VaultDeposit({ txInfo, executionInfo, txId, decodedData }: Vault
 
       <Text color="$textSecondaryLight">{txInfo.vaultInfo.description}</Text>
 
-      {decodedData && isMultiSendData(decodedData) && (
-        <SafeListItem
-          label="Actions"
-          rightNode={
-            <View flexDirection="row" alignItems="center" gap="$2">
-              {decodedData.parameters?.[0]?.valueDecoded && (
-                <Badge
-                  themeName="badge_background_inverted"
-                  content={
-                    Array.isArray(decodedData.parameters[0].valueDecoded)
-                      ? decodedData.parameters[0].valueDecoded.length.toString()
-                      : '1'
-                  }
-                />
-              )}
-
-              <SafeFontIcon name={'chevron-right'} />
-            </View>
-          }
-          onPress={handleViewActions}
-        />
-      )}
+      <ActionsRow txId={txId} decodedData={decodedData} />
     </YStack>
   )
 }

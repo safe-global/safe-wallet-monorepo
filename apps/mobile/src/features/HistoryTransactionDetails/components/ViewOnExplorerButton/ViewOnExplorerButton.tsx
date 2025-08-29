@@ -21,7 +21,7 @@ export function ViewOnExplorerButton({ txHash }: ViewOnExplorerButtonProps) {
         outlined
         borderWidth={0}
         onPress={viewOnExplorer}
-        icon={<SafeFontIcon name="external-link" size={16} />}
+        iconAfter={<SafeFontIcon name="external-link" size={16} />}
       >
         View on Explorer
       </SafeButton>
