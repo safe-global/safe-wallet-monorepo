@@ -10,12 +10,12 @@ const usePositions = () => {
   const chainId = useChainId()
   const { safeAddress } = useSafeInfo()
   const currency = useAppSelector(selectCurrency)
-  const { currentData } = usePositionsGetPositionsV1Query(
+  const { currentData, error, isLoading } = usePositionsGetPositionsV1Query(
     { chainId, safeAddress, fiatCode: currency },
     { skip: !safeAddress || !chainId || !currency, pollingInterval: POLLING_INTERVAL },
   )
 
-  return currentData
+  return { data: currentData, error, isLoading }
 }
 
 export default usePositions

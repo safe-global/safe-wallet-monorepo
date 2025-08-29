@@ -11,12 +11,13 @@ import PositionsEmpty from '@/features/positions/components/PositionsEmpty'
 import useFiatTotal from '@/hooks/useFiatTotal'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import React from 'react'
+import PositionsUnavailable from './components/PositionsUnavailable'
 
 export const Positions = () => {
   const fiatTotal = useFiatTotal()
-  const protocols = usePositions()
+  const { data: protocols, error } = usePositions()
 
-  if (!protocols) return null
+  if (error || !protocols) return <PositionsUnavailable />
 
   if (protocols.length === 0) {
     return <PositionsEmpty entryPoint="Positions" />

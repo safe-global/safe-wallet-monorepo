@@ -20,7 +20,7 @@ const MAX_PROTOCOLS = 4
 const PositionsWidget = () => {
   const router = useRouter()
   const { safe } = router.query
-  const currentData = usePositions()
+  const { data, error } = usePositions()
   const fiatTotal = useFiatTotal()
 
   const viewAllUrl = useMemo(
@@ -31,9 +31,9 @@ const PositionsWidget = () => {
     [safe],
   )
 
-  if (!currentData) return null
+  if (error || !data) return null
 
-  const protocols = currentData.slice(0, MAX_PROTOCOLS)
+  const protocols = data.slice(0, MAX_PROTOCOLS)
 
   return (
     <Card data-testid="positions-widget" sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5 }}>
