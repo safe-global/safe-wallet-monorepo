@@ -41,6 +41,8 @@ export const SwapTx = ({ info }: { info: Order }): ReactElement => {
       whiteSpace="nowrap"
       overflow="hidden"
       textOverflow="ellipsis"
+      flexWrap="wrap"
+      gap={0.5}
     >
       {from}
       <Typography component="span" mx={0.5}>

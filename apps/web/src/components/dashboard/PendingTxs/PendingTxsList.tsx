@@ -16,7 +16,6 @@ import { useRecoveryQueue } from '@/features/recovery/hooks/useRecoveryQueue'
 import type { Transaction } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
-import NoTxsIcon from '@/public/images/common/no-txs.svg'
 import { SidebarListItemCounter } from '@/components/sidebar/SidebarList'
 
 const PendingRecoveryListItem = dynamic(() => import('./PendingRecoveryListItem'))
@@ -26,14 +25,8 @@ const MAX_TXS = 4
 const EmptyState = () => {
   return (
     <Paper elevation={0} sx={{ p: 5, textAlign: 'center' }}>
-      <NoTxsIcon data-testid="no-tx-icon" />
-
       <Typography mb={0.5} mt={3}>
         No transactions to sign
-      </Typography>
-
-      <Typography data-testid="no-tx-text" variant="body1" color="primary.light">
-        Once you create pending transactions, they will appear here
       </Typography>
     </Paper>
   )
@@ -102,7 +95,11 @@ const PendingTxsList = (): ReactElement | null => {
   if (loading) return <Skeleton variant="rounded" height={338} />
 
   return (
-    <Card data-testid="pending-tx-widget" sx={{ px: 1.5, py: 2.5, height: 1 }} component="section">
+    <Card
+      data-testid="pending-tx-widget"
+      sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5, height: 1, width: 1 }}
+      component="section"
+    >
       <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
         <Typography fontWeight={700} className={css.pendingTxHeader}>
           Pending transactions <SidebarListItemCounter count={queueSize} />

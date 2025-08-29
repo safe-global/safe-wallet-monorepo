@@ -17,6 +17,10 @@ export const EARN_EVENTS = {
     action: 'Open earn learn more',
     category: EARN_CATEGORY,
   },
+  EARN_VIEWED: {
+    action: 'Earn viewed',
+    category: EARN_CATEGORY,
+  },
 }
 
 export enum EARN_LABELS {

@@ -8,7 +8,7 @@ export const FiatBalance = ({ balanceItem }: { balanceItem: Balance }) => {
 
   return (
     <Stack direction="row" spacing={0.5} alignItems="center" justifyContent="flex-end">
-      <FiatValue value={isMissingFiatConversion ? null : balanceItem.fiatBalance} />
+      <FiatValue value={isMissingFiatConversion ? null : balanceItem.fiatBalance} precise />
 
       {isMissingFiatConversion && (
         <Tooltip

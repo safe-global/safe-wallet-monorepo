@@ -1,0 +1,11 @@
+.position {
+  border-radius: 8px;
+}
+
+.position:hover {
+  background-color: var(--color-background-main) !important;
+}
+
+.position:global(.Mui-expanded) {
+  background-color: transparent;
+}

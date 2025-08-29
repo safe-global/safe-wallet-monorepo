@@ -2,7 +2,6 @@ import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
 import { useMemo } from 'react'
-import ChevronRight from '@mui/icons-material/ChevronRight'
 import type { TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
 import { Box, Stack, Typography } from '@mui/material'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
@@ -57,8 +56,6 @@ const PendingTx = ({ transaction }: PendingTxType): ReactElement => {
               requiredConfirmations={transaction.executionInfo.confirmationsRequired}
             />
           )}
-
-          <ChevronRight color="border" fontSize="small" />
         </Box>
       </Box>
     </NextLink>

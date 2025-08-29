@@ -5,6 +5,10 @@ export const STAKE_EVENTS = {
     action: 'Open stake',
     category: STAKE_CATEGORY,
   },
+  STAKE_VIEWED: {
+    action: 'Stake viewed',
+    category: STAKE_CATEGORY,
+  },
 }
 
 export enum STAKE_LABELS {

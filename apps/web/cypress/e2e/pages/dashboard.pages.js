@@ -6,7 +6,7 @@ import staticSafes from '../../fixtures/safes/static.json'
 
 const transactionQueueStr = 'Pending transactions'
 const noTransactionStr = 'This Safe has no queued transactions'
-const overviewStr = 'Total asset value'
+const overviewStr = 'Total'
 const sendStr = 'Send'
 const receiveStr = 'Receive'
 const viewAllStr = 'View all'
@@ -17,7 +17,6 @@ export const copiedAppUrl = 'share/safe-app?appUrl'
 const copyShareBtn = '[data-testid="copy-btn-icon"]'
 const exploreAppsBtn = '[data-testid="explore-apps-btn"]'
 const viewAllLink = '[data-testid="view-all-link"][href^="/transactions/queue"]'
-const noTxIcon = '[data-testid="no-tx-icon"]'
 const noTxText = '[data-testid="no-tx-text"]'
 export const pendingTxWidget = '[data-testid="pending-tx-widget"]'
 export const pendingTxItem = '[data-testid="tx-pending-item"]'
@@ -55,7 +54,7 @@ export function verifyTxItemInPendingTx(data) {
 }
 
 export function verifyEmptyTxSection() {
-  main.verifyElementsIsVisible([noTxIcon, noTxText])
+  main.verifyElementsIsVisible([noTxText])
 }
 
 export function clickOnViewAllBtn() {

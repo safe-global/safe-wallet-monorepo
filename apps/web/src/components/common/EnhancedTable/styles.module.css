@@ -18,6 +18,19 @@
   gap: var(--space-1);
 }
 
+.compactTable thead th {
+  font-size: 14px;
+  padding: var(--space-1) 0;
+}
+
+.compactTable tbody td {
+  padding: 12px 0 !important;
+}
+
+.compactTable tbody tr:hover {
+  background: none !important;
+}
+
 .mobileLabel {
   display: none;
 }
