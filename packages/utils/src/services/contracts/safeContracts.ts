@@ -26,12 +26,9 @@ export const _getValidatedGetContractProps = (
   }
 }
 export const isMigrationToL2Possible = (safe: SafeState): boolean => {
-  return (
-    safe.nonce === 0 &&
-    Boolean(
-      getSafeMigrationDeployment({ network: safe.chainId, version: SAFE_TO_L2_MIGRATION_VERSION })?.networkAddresses[
-        safe.chainId
-      ],
-    )
+  return Boolean(
+    getSafeMigrationDeployment({ network: safe.chainId, version: SAFE_TO_L2_MIGRATION_VERSION })?.networkAddresses[
+      safe.chainId
+    ],
   )
 }
