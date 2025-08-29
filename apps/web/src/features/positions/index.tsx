@@ -8,12 +8,12 @@ import IframeIcon from '@/components/common/IframeIcon'
 import { FiatChange } from '@/components/balances/AssetsTable/FiatChange'
 import usePositions from '@/features/positions/hooks/usePositions'
 import PositionsEmpty from '@/features/positions/components/PositionsEmpty'
-import useFiatTotal from '@/hooks/useFiatTotal'
+import usePositionsFiatTotal from '@/features/positions/hooks/usePositionsFiatTotal'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import React from 'react'
 
 export const Positions = () => {
-  const fiatTotal = useFiatTotal()
+  const positionsFiatTotal = usePositionsFiatTotal()
   const protocols = usePositions()
 
   if (!protocols) return null
@@ -36,7 +36,7 @@ export const Positions = () => {
                   backgroundColor: 'transparent !important',
                 }}
               >
-                <PositionsHeader protocol={protocol} fiatTotal={fiatTotal} />
+                <PositionsHeader protocol={protocol} fiatTotal={positionsFiatTotal} />
               </AccordionSummary>
               <AccordionDetails sx={{ pt: 0 }}>
                 {protocol.items.map((positionGroup) => {
