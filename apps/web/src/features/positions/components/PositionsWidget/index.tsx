@@ -8,8 +8,10 @@ import {
   AccordionSummary,
   Box,
   Card,
+  Chip,
   Divider,
   Stack,
+  Tooltip,
   Typography,
   Skeleton,
 } from '@mui/material'
@@ -119,8 +121,34 @@ const PositionsWidget = () => {
 
   return (
     <Card data-testid="positions-widget" sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5 }}>
-      <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
-        <Typography fontWeight={700}>Top positions</Typography>
+      <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5 }}>
+        <Stack direction="row" alignItems="center" gap={1}>
+          <Typography fontWeight={700}>Top positions</Typography>
+          <Tooltip
+            title="Experimental. Data may be missing or outdated."
+            placement="top"
+            arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  maxWidth: { xs: '250px', sm: 'none' },
+                  overflow: { xs: 'hidden' },
+                  textOverflow: { xs: 'ellipsis' },
+                },
+              },
+            }}
+          >
+            <Chip
+              label="BETA"
+              size="small"
+              sx={{
+                backgroundColor: '#f4f4f4',
+                color: '#121312',
+                letterSpacing: '0.4px',
+              }}
+            />
+          </Tooltip>
+        </Stack>
 
         {protocols.length > 0 && (
           <Track
@@ -134,6 +162,18 @@ const PositionsWidget = () => {
           </Track>
         )}
       </Stack>
+
+      <Box mb={1} sx={{ px: 1.5 }}>
+        <Typography
+          variant="caption"
+          sx={{
+            color: '#a1a3a7',
+            letterSpacing: '1px',
+          }}
+        >
+          Position balances are not included in the total asset value.
+        </Typography>
+      </Box>
 
       <Box>
         {protocols.length === 0 ? (

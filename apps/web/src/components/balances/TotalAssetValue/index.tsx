@@ -4,14 +4,20 @@ import TokenAmount from '@/components/common/TokenAmount'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 
-const TotalAssetValue = ({ fiatTotal }: { fiatTotal: number | undefined }) => {
+const TotalAssetValue = ({
+  fiatTotal,
+  title = 'Total asset value',
+}: {
+  fiatTotal: number | undefined
+  title?: string
+}) => {
   const { safe } = useSafeInfo()
   const { balances } = useVisibleBalances()
 
   return (
     <Box>
       <Typography fontWeight="700" mb={0.5}>
-        Total
+        {title}
       </Typography>
       <Typography component="div" variant="h1" fontSize="44px" lineHeight="1.2" letterSpacing="-0.5px">
         {safe.deployed ? (

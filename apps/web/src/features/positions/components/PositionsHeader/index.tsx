@@ -25,7 +25,7 @@ const PositionsHeader = ({ protocol, fiatTotal }: { protocol: Protocol; fiatTota
         </Typography>
 
         {shareOfFiatTotal && (
-          <Tooltip title="Based on total positions value">
+          <Tooltip title="Based on total positions value" placement="top" arrow>
             <Chip
               variant="filled"
               size="tiny"
