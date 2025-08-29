@@ -9,6 +9,7 @@ import { hasFeature } from '@safe-global/utils/utils/chains'
 
 const useChains = (): { configs: ChainInfo[]; error?: string; loading?: boolean } => {
   const state = useAppSelector(selectChains, isEqual)
+  console.log('useChains useAppSelector result:', state)
 
   return useMemo(
     () => ({
@@ -23,7 +24,9 @@ const useChains = (): { configs: ChainInfo[]; error?: string; loading?: boolean 
 export default useChains
 
 export const useChain = (chainId: string): ChainInfo | undefined => {
-  return useAppSelector((state) => selectChainById(state, chainId), isEqual)
+  const result = useAppSelector((state) => selectChainById(state, chainId), isEqual)
+  console.log('useChain useAppSelector result:', { chainId, result })
+  return result
 }
 
 export const useCurrentChain = (): ChainInfo | undefined => {
