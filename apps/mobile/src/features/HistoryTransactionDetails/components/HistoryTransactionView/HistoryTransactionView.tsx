@@ -12,6 +12,8 @@ import { ETxType } from '@/src/types/txType'
 import { getTransactionType } from '@/src/utils/transactions'
 
 import { HistoryGenericView } from '@/src/features/HistoryTransactionDetails/components/history-views/HistoryGenericView'
+import { CancelTx } from '@/src/features/HistoryTransactionDetails/components/history-views/CancelTx'
+import { CustomTransactionInfo, MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 interface HistoryTransactionViewProps {
   txDetails: TransactionDetails
@@ -37,6 +39,15 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
           txId={txDetails.txId}
           executedAt={txDetails.executedAt as number} // in the history there is no way this is undefined
           txInfo={txDetails.txInfo as OrderTransactionInfo | TwapOrderTransactionInfo}
+        />
+      )
+    case ETxType.CANCEL_TX:
+      return (
+        <CancelTx
+          txId={txDetails.txId}
+          txInfo={txDetails.txInfo as CustomTransactionInfo}
+          executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+          executedAt={txDetails.executedAt as number}
         />
       )
 
