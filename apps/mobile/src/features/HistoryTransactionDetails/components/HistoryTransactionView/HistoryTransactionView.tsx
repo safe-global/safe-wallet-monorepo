@@ -14,8 +14,9 @@ import { HistoryChangeThreshold } from '../history-views/HistoryChangeThreshold'
 import { ETxType } from '@/src/types/txType'
 import { getTransactionType } from '@/src/utils/transactions'
 import { HistoryGenericView } from '@/src/features/HistoryTransactionDetails/components/history-views/HistoryGenericView'
-import { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { NormalizedSettingsChangeTransaction } from '@/src/features/ConfirmTx/components/ConfirmationView/types'
+import { CancelTx } from '@/src/features/HistoryTransactionDetails/components/history-views/CancelTx'
+import { CustomTransactionInfo, MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 interface HistoryTransactionViewProps {
   txDetails: TransactionDetails
@@ -68,6 +69,15 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
           executedAt={txDetails.executedAt as number} // in the history there is no way this is undefined
           txInfo={txDetails.txInfo as NormalizedSettingsChangeTransaction}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+        />
+      )
+    case ETxType.CANCEL_TX:
+      return (
+        <CancelTx
+          txId={txDetails.txId}
+          txInfo={txDetails.txInfo as CustomTransactionInfo}
+          executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+          executedAt={txDetails.executedAt as number}
         />
       )
 
