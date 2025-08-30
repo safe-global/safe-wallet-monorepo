@@ -17,26 +17,36 @@ import { TxModalContext } from '@/components/tx-flow'
 import ReplaceOwnerIcon from '@/public/images/settings/setup/replace-owner.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import type { AddressBook } from '@/store/addressBookSlice'
-
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
+import useResolvedOwners from '@/hooks/useResolvedOwners'
 
 export const OwnerList = () => {
   const addressBook = useAddressBook()
   const { safe } = useSafeInfo()
   const { setTxFlow } = useContext(TxModalContext)
+  const owners = useResolvedOwners()
 
   const rows = useMemo(() => {
-    const showRemoveOwnerButton = safe.owners.length > 1
+    const showRemoveOwnerButton = owners.length > 1
 
-    return safe.owners.map((owner) => {
+    return owners.map((owner) => {
       const address = owner.value
-      const name = addressBook[address]
+      let name = addressBook[address] || owner.name || undefined
 
       return {
         cells: {
           owner: {
             rawValue: address,
-            content: <EthHashInfo address={address} showCopyButton shortAddress={false} showName={true} hasExplorer />,
+            content: (
+              <EthHashInfo
+                address={address}
+                showCopyButton
+                shortAddress={false}
+                showName={true}
+                name={name}
+                hasExplorer
+              />
+            ),
           },
           actions: {
             rawValue: '',
@@ -88,7 +98,7 @@ export const OwnerList = () => {
         },
       }
     })
-  }, [safe.owners, safe.chainId, addressBook, setTxFlow])
+  }, [owners, safe.chainId, addressBook, setTxFlow])
 
   return (
     <Box
