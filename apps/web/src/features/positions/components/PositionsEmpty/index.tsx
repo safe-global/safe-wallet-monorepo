@@ -1,8 +1,7 @@
 import { useRouter } from 'next/router'
-import Image from 'next/image'
 import Link from 'next/link'
 import { Button, Paper, Typography } from '@mui/material'
-import DefiImage from '@/public/images/balances/defi.png'
+import DefiIcon from '@/public/images/balances/defi.svg'
 import { AppRoutes } from '@/config/routes'
 import Track from '@/components/common/Track'
 import { POSITIONS_EVENTS } from '@/services/analytics/events/positions'
@@ -19,7 +18,7 @@ const PositionsEmpty = ({ entryPoint = 'Dashboard' }: PositionsEmptyProps) => {
 
   return (
     <Paper elevation={0} sx={{ p: 3, textAlign: 'center' }}>
-      <Image src={DefiImage} alt="Defi illustration" width={100} height={100} />
+      <DefiIcon />
 
       <Typography data-testid="no-tx-text" variant="body1" color="primary.light">
         You have no active DeFi positions yet
