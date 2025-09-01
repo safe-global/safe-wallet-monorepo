@@ -52,7 +52,7 @@ export const useSimulation = (): UseSimulationReturn => {
     simulateTransaction,
     // This is only used by the provider
     _simulationRequestStatus: simulationRequestStatus,
-    simulation,
+    simulationData: simulation,
     simulationLink,
     requestError,
     resetSimulation,
