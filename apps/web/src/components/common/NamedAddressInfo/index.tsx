@@ -23,7 +23,6 @@ export function useAddressName(address?: string, name?: string | null, customAva
     false,
   )
   const isUnverifiedContract = useIsUnverifiedContract(contract)
-  console.log('UNVERIFIED', isUnverifiedContract)
 
   return useMemo(
     () => ({
@@ -41,7 +40,6 @@ export function useAddressName(address?: string, name?: string | null, customAva
 
 const NamedAddressInfo = ({ address, name, customAvatar, ...props }: EthHashInfoProps) => {
   const { name: finalName, logoUri: finalAvatar } = useAddressName(address, name, customAvatar)
-  console.log('NAME', finalName)
 
   return <EthHashInfo address={address} name={finalName} customAvatar={finalAvatar} {...props} />
 }
