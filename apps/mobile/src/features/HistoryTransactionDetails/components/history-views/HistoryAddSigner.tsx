@@ -9,6 +9,7 @@ import { HistoryAdvancedDetailsButton } from '@/src/features/HistoryTransactionD
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveChain } from '@/src/store/chains'
 import { HashDisplay } from '@/src/components/HashDisplay'
+import { ThresholdChangeDisplay } from '../shared/ThresholdChangeDisplay'
 
 interface HistoryAddSignerProps {
   txId: string
@@ -19,8 +20,6 @@ interface HistoryAddSignerProps {
 
 export function HistoryAddSigner({ txId, txInfo, executionInfo, executedAt }: HistoryAddSignerProps) {
   const activeChain = useAppSelector(selectActiveChain)
-
-  const hasThresholdChanged = txInfo.settingsInfo?.threshold !== executionInfo.confirmationsRequired
 
   return (
     <>
@@ -43,19 +42,7 @@ export function HistoryAddSigner({ txId, txInfo, executionInfo, executedAt }: Hi
               </View>
             </View>
 
-            {hasThresholdChanged && (
-              <View alignItems="center" flexDirection="row" justifyContent="space-between">
-                <Text color="$textSecondaryLight">Threshold change</Text>
-                <View flexDirection="row" alignItems="center" gap="$2">
-                  <Text fontSize="$4">
-                    {txInfo.settingsInfo?.threshold}/{executionInfo.signers.length}
-                  </Text>
-                  <Text textDecorationLine="line-through" color="$textSecondaryLight" fontSize="$4">
-                    {executionInfo.confirmationsRequired}/{executionInfo.signers.length}
-                  </Text>
-                </View>
-              </View>
-            )}
+            <ThresholdChangeDisplay txInfo={txInfo} executionInfo={executionInfo} />
 
             <View alignItems="center" flexDirection="row" justifyContent="space-between">
               <Text color="$textSecondaryLight">Network</Text>
