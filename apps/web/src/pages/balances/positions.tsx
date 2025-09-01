@@ -41,7 +41,7 @@ const Positions: NextPage = () => {
             }}
           >
             <Chip
-              label="BETA"
+              label="Beta"
               size="small"
               sx={{ backgroundColor: 'background.main', color: 'text.primary', letterSpacing: '0.4px' }}
             />
