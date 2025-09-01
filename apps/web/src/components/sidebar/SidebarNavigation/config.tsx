@@ -97,6 +97,10 @@ export const balancesNavItems = [
     href: AppRoutes.balances.index,
   },
   {
+    label: 'Positions',
+    href: AppRoutes.balances.positions,
+  },
+  {
     label: 'NFTs',
     href: AppRoutes.balances.nfts,
   },
