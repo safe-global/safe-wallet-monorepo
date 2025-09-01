@@ -1,6 +1,6 @@
 import CheckBalance from '@/features/counterfactual/CheckBalance'
 import React, { type ReactElement } from 'react'
-import { Box, Card, Checkbox, CircularProgress, IconButton, Skeleton, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Card, Checkbox, IconButton, Skeleton, Stack, Tooltip, Typography } from '@mui/material'
 import css from './styles.module.css'
 import TokenAmount from '@/components/common/TokenAmount'
 import TokenIcon from '@/components/common/TokenIcon'
@@ -239,36 +239,16 @@ const AssetsTable = ({
               content: itemShareOfFiatTotal ? (
                 <Box textAlign="right">
                   <Stack direction="row" alignItems="center" gap={0.5} position="relative" display="inline-flex">
-                    <svg className={css.gradient}>
-                      <defs>
-                        <linearGradient
-                          id="progress_gradient"
-                          x1="21.1648"
-                          y1="8.21591"
-                          x2="-9.95028"
-                          y2="22.621"
-                          gradientUnits="userSpaceOnUse"
-                        >
-                          <stop stopColor="#5FDDFF" />
-                          <stop offset="1" stopColor="#12FF80" />
-                        </linearGradient>
-                      </defs>
-                    </svg>
-                    <CircularProgress
-                      variant="determinate"
-                      value={100}
-                      className={css.circleBg}
-                      size={16}
-                      thickness={6}
-                    />
-                    <CircularProgress
-                      variant="determinate"
-                      value={itemShareOfFiatTotal * 100}
-                      className={css.circleProgress}
-                      size={16}
-                      thickness={6}
-                      sx={{ 'svg circle': { stroke: 'url(#progress_gradient)', strokeLinecap: 'round' } }}
-                    />
+                    <div className={css.customProgress}>
+                      <div
+                        className={css.progressRing}
+                        style={
+                          {
+                            '--progress': `${(itemShareOfFiatTotal * 100).toFixed(1)}%`,
+                          } as React.CSSProperties & { '--progress': string }
+                        }
+                      />
+                    </div>
                     <Typography variant="body2" sx={{ minWidth: '52px', textAlign: 'right' }}>
                       {formatPercentage(itemShareOfFiatTotal)}
                     </Typography>
