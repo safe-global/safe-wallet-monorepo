@@ -132,8 +132,6 @@ const PositionsWidget = () => {
               tooltip: {
                 sx: {
                   maxWidth: { xs: '250px', sm: 'none' },
-                  overflow: { xs: 'hidden' },
-                  textOverflow: { xs: 'ellipsis' },
                 },
               },
             }}

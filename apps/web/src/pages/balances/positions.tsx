@@ -28,7 +28,18 @@ const Positions: NextPage = () => {
           <Typography variant="h4" fontWeight={700}>
             Positions
           </Typography>
-          <Tooltip title="Experimental. Data may be missing or outdated." placement="top" arrow>
+          <Tooltip
+            title="Experimental. Data may be missing or outdated."
+            placement="top"
+            arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  maxWidth: { xs: '250px', sm: 'none' },
+                },
+              },
+            }}
+          >
             <Chip
               label="BETA"
               size="small"
