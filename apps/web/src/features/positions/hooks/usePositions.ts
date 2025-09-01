@@ -12,7 +12,12 @@ const usePositions = () => {
   const currency = useAppSelector(selectCurrency)
   const { currentData, error, isLoading } = usePositionsGetPositionsV1Query(
     { chainId, safeAddress, fiatCode: currency },
-    { skip: !safeAddress || !chainId || !currency, pollingInterval: POLLING_INTERVAL },
+    {
+      skip: !safeAddress || !chainId || !currency,
+      pollingInterval: POLLING_INTERVAL,
+      skipPollingIfUnfocused: true,
+      refetchOnFocus: true,
+    },
   )
 
   return { data: currentData, error, isLoading }
