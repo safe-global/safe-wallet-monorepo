@@ -8,10 +8,12 @@ import {
 import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { HistoryTokenTransfer } from '../history-views/HistoryTokenTransfer'
 import { HistorySwapOrder } from '../history-views/HistorySwapOrder'
+import { HistoryAddSigner } from '../history-views/HistoryAddSigner'
 import { ETxType } from '@/src/types/txType'
 import { getTransactionType } from '@/src/utils/transactions'
-
 import { HistoryGenericView } from '@/src/features/HistoryTransactionDetails/components/history-views/HistoryGenericView'
+import { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { NormalizedSettingsChangeTransaction } from '@/src/features/ConfirmTx/components/ConfirmationView/types'
 
 interface HistoryTransactionViewProps {
   txDetails: TransactionDetails
@@ -37,6 +39,15 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
           txId={txDetails.txId}
           executedAt={txDetails.executedAt as number} // in the history there is no way this is undefined
           txInfo={txDetails.txInfo as OrderTransactionInfo | TwapOrderTransactionInfo}
+        />
+      )
+    case ETxType.ADD_SIGNER:
+      return (
+        <HistoryAddSigner
+          txId={txDetails.txId}
+          executedAt={txDetails.executedAt as number} // in the history there is no way this is undefined
+          txInfo={txDetails.txInfo as NormalizedSettingsChangeTransaction}
+          executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
         />
       )
 

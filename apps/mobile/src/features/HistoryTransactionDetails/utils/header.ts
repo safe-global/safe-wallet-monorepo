@@ -1,5 +1,10 @@
 import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { isSwapOrderTxInfo, isTransferTxInfo, isTwapOrderTxInfo } from '@/src/utils/transaction-guards'
+import {
+  isSwapOrderTxInfo,
+  isTransferTxInfo,
+  isTwapOrderTxInfo,
+  isAddSignerTxInfo,
+} from '@/src/utils/transaction-guards'
 
 export const getHeaderTitle = (txDetails: TransactionDetails) => {
   if (isTransferTxInfo(txDetails.txInfo)) {
@@ -11,6 +16,9 @@ export const getHeaderTitle = (txDetails: TransactionDetails) => {
   }
   if (isTwapOrderTxInfo(txDetails.txInfo)) {
     return 'Twap order'
+  }
+  if (isAddSignerTxInfo(txDetails.txInfo)) {
+    return 'Add signer'
   }
 
   return 'Transaction details'
