@@ -61,7 +61,7 @@ const PositionsWidget = () => {
                   sx={{
                     justifyContent: 'center',
                     overflowX: 'auto',
-                    px: '12px',
+                    px: 1.5,
                   }}
                 >
                   <Stack direction="row" alignItems="center" gap={2} width="100%">
@@ -167,7 +167,7 @@ const PositionsWidget = () => {
         <Typography
           variant="caption"
           sx={{
-            color: '#a1a3a7',
+            color: 'text.secondary',
             letterSpacing: '1px',
           }}
         >
@@ -204,7 +204,7 @@ const PositionsWidget = () => {
                   sx={{
                     justifyContent: 'center',
                     overflowX: 'auto',
-                    px: '12px',
+                    px: 1.5,
                   }}
                 >
                   <PositionsHeader protocol={protocol} fiatTotal={positionsFiatTotal} />

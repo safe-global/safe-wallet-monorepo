@@ -41,7 +41,7 @@ const Positions: NextPage = () => {
           <Typography
             variant="caption"
             sx={{
-              color: '#a1a3a7',
+              color: 'text.secondary',
               letterSpacing: '1px',
             }}
           >
