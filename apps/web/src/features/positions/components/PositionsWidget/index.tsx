@@ -139,11 +139,11 @@ const PositionsWidget = () => {
             }}
           >
             <Chip
-              label="BETA"
+              label="Beta"
               size="small"
               sx={{
-                backgroundColor: '#f4f4f4',
-                color: '#121312',
+                backgroundColor: 'background.main',
+                color: 'text.primary',
                 letterSpacing: '0.4px',
               }}
             />
