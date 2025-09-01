@@ -62,6 +62,7 @@ export const Badge = ({
         gap="$1"
         borderRadius={50}
         backgroundColor={'$background'}
+        borderColor={'$borderColor'}
         {...circleProps}
       >
         {contentToRender}

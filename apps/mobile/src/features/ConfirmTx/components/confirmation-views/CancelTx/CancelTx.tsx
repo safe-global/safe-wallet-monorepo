@@ -8,11 +8,9 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { RootState } from '@/src/store'
 import { selectChainById } from '@/src/store/chains'
 import { useAppSelector } from '@/src/store/hooks'
-import { SafeListItem } from '@/src/components/SafeListItem'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { Badge } from '@/src/components/Badge'
 import { ParametersButton } from '../../ParametersButton'
-import { router } from 'expo-router'
+import { ActionsRow } from '@/src/components/ActionsRow'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 
 interface CancelTxProps {
   txInfo: CustomTransactionInfo
@@ -25,13 +23,6 @@ export function CancelTx({ txInfo, executionInfo, txId }: CancelTxProps) {
   const chain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
 
   const items = useMemo(() => formatCancelTxItems(chain), [chain])
-
-  const handleViewActions = () => {
-    router.push({
-      pathname: '/transaction-actions',
-      params: { txId },
-    })
-  }
 
   return (
     <YStack gap="$4">
@@ -56,19 +47,7 @@ export function CancelTx({ txInfo, executionInfo, txId }: CancelTxProps) {
         <ParametersButton txId={txId} />
       </ListTable>
 
-      {txInfo.actionCount && (
-        <SafeListItem
-          label="Actions"
-          rightNode={
-            <View flexDirection="row" alignItems="center" gap="$2">
-              <Badge themeName="badge_background_inverted" content={txInfo.actionCount.toString()} circleSize="$6" />
-
-              <SafeFontIcon name={'chevron-right'} />
-            </View>
-          }
-          onPress={handleViewActions}
-        />
-      )}
+      <ActionsRow txId={txId} actionCount={txInfo.actionCount} />
     </YStack>
   )
 }

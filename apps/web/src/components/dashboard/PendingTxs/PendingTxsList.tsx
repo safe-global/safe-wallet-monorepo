@@ -22,6 +22,16 @@ const PendingRecoveryListItem = dynamic(() => import('./PendingRecoveryListItem'
 
 const MAX_TXS = 4
 
+const PendingTxsSkeleton = () => (
+  <Card sx={{ px: 1.5, py: 2.5, height: 1 }} component="section">
+    <Stack direction="row" sx={{ px: 1.5, mb: 1 }}>
+      <Typography fontWeight={700}>Pending transactions</Typography>
+    </Stack>
+
+    <Skeleton height={66} variant="rounded" />
+  </Card>
+)
+
 const EmptyState = () => {
   return (
     <Paper elevation={0} sx={{ p: 5, textAlign: 'center' }}>
@@ -67,7 +77,7 @@ export function _getTransactionsToDisplay({
 const PendingTxsList = (): ReactElement | null => {
   const router = useRouter()
   const { page, loading } = useTxQueue()
-  const { safe } = useSafeInfo()
+  const { safe, safeLoaded, safeLoading } = useSafeInfo()
   const wallet = useWallet()
   const queuedTxns = useMemo(() => getLatestTransactions(page?.results), [page?.results])
   const recoveryQueue = useRecoveryQueue()
@@ -84,6 +94,9 @@ const PendingTxsList = (): ReactElement | null => {
 
   const totalTxs = recoveryTxs.length + queuedTxs.length
 
+  const isInitialState = !safeLoaded && !safeLoading
+  const isLoading = loading || safeLoading || isInitialState
+
   const queueUrl = useMemo(
     () => ({
       pathname: AppRoutes.transactions.queue,
@@ -92,7 +105,7 @@ const PendingTxsList = (): ReactElement | null => {
     [router.query.safe],
   )
 
-  if (loading) return <Skeleton variant="rounded" height={338} />
+  if (isLoading) return <PendingTxsSkeleton />
 
   return (
     <Card
