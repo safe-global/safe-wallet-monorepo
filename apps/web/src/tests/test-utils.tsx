@@ -13,6 +13,17 @@ import { faker } from '@faker-js/faker'
 import { userEvent } from '@testing-library/user-event'
 import { createMockWeb3Provider, type MockCallImplementation } from '@safe-global/utils/tests/web3Provider'
 
+export const getAppName = (): string => {
+  const isOfficialHost = process.env.NEXT_PUBLIC_IS_OFFICIAL_HOST === 'true'
+  return isOfficialHost ? 'Safe{Wallet}' : 'Wallet fork'
+}
+
+export const createAppNameRegex = (template: string): RegExp => {
+  const appName = getAppName()
+  const escapedAppName = appName.replace(/[{}]/g, '\\$&')
+  return new RegExp(template.replace('{APP_NAME}', escapedAppName))
+}
+
 const mockRouter = (props: Partial<NextRouter> = {}): NextRouter => ({
   asPath: '/',
   basePath: '/',

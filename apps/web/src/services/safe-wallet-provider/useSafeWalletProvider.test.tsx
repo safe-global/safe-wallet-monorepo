@@ -5,7 +5,7 @@ import * as router from 'next/router'
 
 import * as web3 from '@/hooks/wallets/web3'
 import * as notifications from './notifications'
-import { act, renderHook } from '@/tests/test-utils'
+import { act, renderHook, getAppName } from '@/tests/test-utils'
 import { TxModalContext } from '@/components/tx-flow'
 import useSafeWalletProvider, { useTxFlowApi } from './useSafeWalletProvider'
 import { SafeWalletProvider } from '.'
@@ -96,8 +96,10 @@ describe('useSafeWalletProvider', () => {
 
       const resp = result?.current?.signMessage('message', appInfo)
 
+      const appName = getAppName()
+
       expect(showNotificationSpy).toHaveBeenCalledWith('Signature request', {
-        body: 'test wants you to sign a message. Open the Safe{Wallet} to continue.',
+        body: `test wants you to sign a message. Open the ${appName} to continue.`,
       })
 
       expect(mockSetTxFlow.mock.calls[0][0].props).toStrictEqual({
@@ -148,8 +150,10 @@ describe('useSafeWalletProvider', () => {
 
       const resp2 = result?.current?.signMessage('message', appInfo)
 
+      const appName = getAppName()
+
       expect(showNotificationSpy).toHaveBeenCalledWith('Signature request', {
-        body: 'test wants you to sign a message. Open the Safe{Wallet} to continue.',
+        body: `test wants you to sign a message. Open the ${appName} to continue.`,
       })
 
       // SignMessageOnChainFlow props
@@ -219,8 +223,10 @@ describe('useSafeWalletProvider', () => {
 
       const resp = result?.current?.signTypedMessage(typedMessage, appInfo)
 
+      const appName = getAppName()
+
       expect(showNotificationSpy).toHaveBeenCalledWith('Signature request', {
-        body: 'test wants you to sign a message. Open the Safe{Wallet} to continue.',
+        body: `test wants you to sign a message. Open the ${appName} to continue.`,
       })
 
       expect(mockSetTxFlow.mock.calls[0][0].props).toStrictEqual({
@@ -269,8 +275,10 @@ describe('useSafeWalletProvider', () => {
         appInfo,
       )
 
+      const appName = getAppName()
+
       expect(showNotificationSpy).toHaveBeenCalledWith('Transaction request', {
-        body: 'test wants to submit a transaction. Open the Safe{Wallet} to continue.',
+        body: `test wants to submit a transaction. Open the ${appName} to continue.`,
       })
 
       expect(mockSetTxFlow.mock.calls[0][0].props).toStrictEqual({
