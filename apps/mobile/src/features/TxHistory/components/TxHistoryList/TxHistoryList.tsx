@@ -8,7 +8,7 @@ import { TxInfo } from '@/src/components/TxInfo'
 import { TransactionSkeleton, TransactionSkeletonItem } from '@/src/components/TransactionSkeleton'
 import { Platform, RefreshControl } from 'react-native'
 import { formatWithSchema } from '@/src/utils/date'
-import { isDateLabel } from '@/src/utils/transaction-guards'
+import { isDateLabel, isCreationTxInfo } from '@/src/utils/transaction-guards'
 import { groupBulkTxs } from '@/src/utils/transactions'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
@@ -160,6 +160,12 @@ export function TxHistoryList({
 
   const onHistoryTransactionPress = useCallback(
     (transaction: TxCardPress) => {
+      // TODO: Remove this once the endpoint is fixed (see issue https://linear.app/safe-global/issue/COR-547/cgw-cant-return-information-for-creation-txs)
+      if (isCreationTxInfo(transaction.tx.txInfo)) {
+        console.log('Creation transaction navigation disabled:', transaction.tx.id)
+        return
+      }
+
       router.push({
         pathname: '/history-transaction-details',
         params: {
