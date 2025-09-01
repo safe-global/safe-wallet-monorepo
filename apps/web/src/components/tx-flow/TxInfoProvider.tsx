@@ -15,7 +15,7 @@ type SimulationStatus = {
 
 const initialSimulation: UseSimulationReturn = {
   simulateTransaction: () => {},
-  simulation: undefined,
+  simulationData: undefined,
   _simulationRequestStatus: FETCH_STATUS.NOT_ASKED,
   simulationLink: '',
   requestError: undefined,
