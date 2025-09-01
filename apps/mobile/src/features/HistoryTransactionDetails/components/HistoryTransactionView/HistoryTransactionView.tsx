@@ -10,6 +10,7 @@ import { HistoryTokenTransfer } from '../history-views/HistoryTokenTransfer'
 import { HistorySwapOrder } from '../history-views/HistorySwapOrder'
 import { HistoryAddSigner } from '../history-views/HistoryAddSigner'
 import { HistoryRemoveSigner } from '../history-views/HistoryRemoveSigner'
+import { HistoryChangeThreshold } from '../history-views/HistoryChangeThreshold'
 import { ETxType } from '@/src/types/txType'
 import { getTransactionType } from '@/src/utils/transactions'
 import { HistoryGenericView } from '@/src/features/HistoryTransactionDetails/components/history-views/HistoryGenericView'
@@ -54,6 +55,15 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
     case ETxType.REMOVE_SIGNER:
       return (
         <HistoryRemoveSigner
+          txId={txDetails.txId}
+          executedAt={txDetails.executedAt as number} // in the history there is no way this is undefined
+          txInfo={txDetails.txInfo as NormalizedSettingsChangeTransaction}
+          executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+        />
+      )
+    case ETxType.CHANGE_THRESHOLD:
+      return (
+        <HistoryChangeThreshold
           txId={txDetails.txId}
           executedAt={txDetails.executedAt as number} // in the history there is no way this is undefined
           txInfo={txDetails.txInfo as NormalizedSettingsChangeTransaction}

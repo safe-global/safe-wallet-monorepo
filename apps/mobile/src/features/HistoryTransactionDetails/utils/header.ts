@@ -5,6 +5,7 @@ import {
   isTwapOrderTxInfo,
   isAddSignerTxInfo,
   isRemoveSignerTxInfo,
+  isChangeThresholdTxInfo,
 } from '@/src/utils/transaction-guards'
 
 export const getHeaderTitle = (txDetails: TransactionDetails) => {
@@ -23,6 +24,9 @@ export const getHeaderTitle = (txDetails: TransactionDetails) => {
   }
   if (isRemoveSignerTxInfo(txDetails.txInfo)) {
     return 'Remove signer'
+  }
+  if (isChangeThresholdTxInfo(txDetails.txInfo)) {
+    return 'Change threshold'
   }
 
   return 'Transaction details'
