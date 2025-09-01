@@ -26,10 +26,6 @@ export const ConfirmationsSheetContainer = () => {
   })
 
   const { confirmations, signers, proposer } = data?.detailedExecutionInfo as MultisigExecutionDetails
-
-  // Detect if this is a history transaction (executed) vs pending transaction
-  const isHistoryTransaction = Boolean(data?.executedAt)
-
   const confirmationsMapper = useMemo(() => {
     const mapper = confirmations.reduce((acc, confirmation) => {
       acc.set(confirmation.signer.value as Address, true)
@@ -40,21 +36,9 @@ export const ConfirmationsSheetContainer = () => {
     return mapper
   }, [confirmations])
 
-  // For history transactions, only show signers who have signed
-  // For pending transactions, show all signers
-  const displaySigners = useMemo(() => {
-    if (isHistoryTransaction) {
-      // Only show confirmed signers for history transactions
-      return confirmations.map((confirmation) => confirmation.signer)
-    } else {
-      // Show all signers for pending transactions
-      return Array.from(signers.values())
-    }
-  }, [isHistoryTransaction, confirmations, signers])
-
   const sortedSigners = useMemo(() => {
-    return displaySigners.sort((a, b) => a.value.toLowerCase().localeCompare(b.value.toLowerCase()))
-  }, [displaySigners])
+    return Array.from(signers.values()).sort((a, b) => a.value.toLowerCase().localeCompare(b.value.toLowerCase()))
+  }, [signers])
 
   const getSignerTag = useMemo(() => {
     return (signerAddress: Address): string | undefined => {
@@ -85,26 +69,26 @@ export const ConfirmationsSheetContainer = () => {
                 circular={false}
                 content={
                   <View alignItems="center" flexDirection="row" gap="$1">
-                    {(isHistoryTransaction || hasSigned) && <SafeFontIcon size={12} name="check" />}
+                    {hasSigned && <SafeFontIcon size={12} name="check" />}
 
                     <Text fontWeight={600} color={'$color'}>
-                      {isHistoryTransaction || hasSigned ? 'Signed' : 'Pending'}
+                      {hasSigned ? 'Signed' : 'Pending'}
                     </Text>
                   </View>
                 }
-                themeName={isHistoryTransaction || hasSigned ? 'badge_success_variant1' : 'badge_warning'}
+                themeName={hasSigned ? 'badge_success_variant1' : 'badge_warning'}
               />
             }
           />
         </View>
       )
     },
-    [confirmationsMapper, isHistoryTransaction, getSignerTag],
+    [confirmationsMapper],
   )
 
   return (
     <SafeBottomSheet
-      title={isHistoryTransaction ? 'Signed by' : 'Confirmations'}
+      title="Confirmations"
       loading={isLoading}
       items={sortedSigners}
       keyExtractor={({ item }) => item.value}

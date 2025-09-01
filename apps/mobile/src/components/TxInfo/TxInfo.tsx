@@ -38,7 +38,7 @@ import { TxLifiSwapCard } from '@/src/components/transactions-list/Card/TxLifiSw
 type TxInfoProps = {
   tx: Transaction
   onPress?: (tx: TxCardPress) => void
-} & Partial<Omit<SafeListItemProps, 'onPress'>>
+} & Partial<SafeListItemProps>
 
 function TxInfoComponent({ tx, onPress, ...rest }: TxInfoProps) {
   const txType = useTransactionType(tx)

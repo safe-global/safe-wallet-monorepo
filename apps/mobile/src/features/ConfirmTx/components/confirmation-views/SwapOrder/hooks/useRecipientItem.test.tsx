@@ -36,10 +36,6 @@ jest.mock('tamagui', () => ({
   View: 'View',
 }))
 
-jest.mock('@/src/components/HashDisplay', () => ({
-  HashDisplay: 'HashDisplay',
-}))
-
 const createMockOrder = (
   receiver?: string,
   owner = '0x1234567890123456789012345678901234567890',

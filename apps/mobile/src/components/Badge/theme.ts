@@ -69,12 +69,4 @@ export const badgeTheme = {
     color: tokens.color.logoBackgroundDark,
     background: tokens.color.textPrimaryDark,
   },
-  light_badge_outline: {
-    background: 'transparent',
-    borderColor: tokens.color.borderLightLight,
-  },
-  dark_badge_outline: {
-    background: 'transparent',
-    borderColor: tokens.color.borderLightDark,
-  },
 }

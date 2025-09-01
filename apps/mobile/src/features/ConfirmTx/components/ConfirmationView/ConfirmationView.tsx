@@ -2,6 +2,7 @@ import React from 'react'
 import {
   CustomTransactionInfo,
   MultisigExecutionDetails,
+  SettingsChangeTransaction,
   TransactionData,
   TransactionDetails,
   TransferTransactionInfo,
@@ -159,7 +160,7 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
         <GenericView
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txId={txDetails.txId}
-          txInfo={txDetails.txInfo}
+          txInfo={txDetails.txInfo as SettingsChangeTransaction}
           txData={txDetails.txData as TransactionData}
         />
       )

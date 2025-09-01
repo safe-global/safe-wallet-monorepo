@@ -10,7 +10,7 @@ import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import ArrowIconNW from '@/public/images/common/arrow-top-right.svg'
 import ArrowIconSE from '@/public/images/common/arrow-se.svg'
 import { AppRoutes } from '@/config/routes'
-import { Button, Card, Box, Stack } from '@mui/material'
+import { Button, Card, Box, Skeleton, Stack } from '@mui/material'
 import { useRouter } from 'next/router'
 import { type ReactElement, useContext, useMemo } from 'react'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
@@ -18,7 +18,6 @@ import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabl
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import CheckWallet from '@/components/common/CheckWallet'
 import useFiatTotal from '@/hooks/useFiatTotal'
-import OverviewSkeleton from './OverviewSkeleton'
 
 const Overview = (): ReactElement => {
   const { safe, safeLoading, safeLoaded } = useSafeInfo()
@@ -42,7 +41,7 @@ const Overview = (): ReactElement => {
 
   const noAssets = !balancesLoading && items.length === 0
 
-  if (isLoading) return <OverviewSkeleton />
+  if (isLoading) return <Skeleton height={269} variant="rounded" />
 
   return (
     <Card sx={{ border: 0, px: 3, pt: 2.5, pb: 1.5 }} component="section">

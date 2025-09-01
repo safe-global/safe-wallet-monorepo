@@ -24,7 +24,7 @@ const statusMap: Record<CustomOrderStatuses, StatusProps> = {
   },
   fulfilled: {
     label: 'Filled',
-    themeName: 'badge_success_variant1',
+    themeName: 'badge_success',
     icon: <SafeFontIcon name="check" size={14} color="$color" />,
   },
   open: {
@@ -44,7 +44,7 @@ const statusMap: Record<CustomOrderStatuses, StatusProps> = {
   },
   partiallyFilled: {
     label: 'Partially filled',
-    themeName: 'badge_success_variant1',
+    themeName: 'badge_success',
     icon: null,
   },
   unknown: {

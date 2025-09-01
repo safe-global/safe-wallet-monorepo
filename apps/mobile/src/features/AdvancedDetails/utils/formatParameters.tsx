@@ -1,11 +1,13 @@
 import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ListTableItem } from '@/src/features/ConfirmTx/components/ListTable'
 import { isArrayParameter } from '@/src/utils/transaction-guards'
-import { CircleProps } from 'tamagui'
-import { formatValueTemplate } from '../formatters/singleValue'
+import { shortenText } from '@safe-global/utils/utils/formatters'
+import { CircleProps, Text, View } from 'tamagui'
+import { CopyButton } from '@/src/components/CopyButton'
+import { characterDisplayLimit, formatValueTemplate } from '../formatters/singleValue'
 import { formatArrayValue } from '../formatters/arrayValue'
 import { Badge } from '@/src/components/Badge'
-import { HexDataDisplay } from '@/src/components/HexDataDisplay'
+import { InfoSheet } from '@/src/components/InfoSheet'
 import React from 'react'
 
 interface formatParametersProps {
@@ -54,9 +56,18 @@ const formatParameters = ({ txData }: formatParametersProps): ListTableItem[] =>
   }
 
   if (txData?.hexData) {
+    const hexData = txData.hexData
+
     items.push({
       label: 'Hex Data',
-      render: () => <HexDataDisplay data={txData?.hexData} title="Hex Data" copyMessage="Data copied." />,
+      render: () => (
+        <InfoSheet title="Hex Data" info={hexData}>
+          <View flexDirection="row" alignItems="center" gap="$1">
+            <Text>{shortenText(txData?.hexData || '', characterDisplayLimit)}</Text>
+            <CopyButton value={txData?.hexData || ''} color={'$textSecondaryLight'} text="Data copied." />
+          </View>
+        </InfoSheet>
+      ),
     })
   }
 

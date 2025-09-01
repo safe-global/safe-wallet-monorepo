@@ -3,7 +3,6 @@ import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transacti
 
 import { AppDispatch, RootState } from '.'
 import { setActiveSigner } from './activeSignerSlice'
-import { addContact } from './addressBookSlice'
 
 const initialState: Record<string, AddressInfo> = {}
 
@@ -26,19 +25,12 @@ const signersSlice = createSlice({
 export const addSignerWithEffects =
   (signerInfo: AddressInfo) => async (dispatch: AppDispatch, getState: () => RootState) => {
     const { activeSafe, activeSigner } = getState()
-    const signerNamePrefix = 'Signer-'
 
     dispatch(addSigner(signerInfo))
 
     if (activeSafe && !activeSigner[activeSafe.address]) {
       dispatch(setActiveSigner({ safeAddress: activeSafe.address, signer: signerInfo }))
     }
-
-    dispatch(addContact({
-      value: signerInfo.value,
-      name: signerNamePrefix + signerInfo.value.slice(-4),
-      chainIds: [],
-    }))
   }
 
 export const { addSigner, removeSigner } = signersSlice.actions

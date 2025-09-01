@@ -12,8 +12,12 @@ import { type ListTableItem } from '../../ListTable'
 import { BridgeRecipientWarnings } from './BridgeRecipientWarnings'
 import { ChainIndicator } from '@/src/components/ChainIndicator'
 import { ParametersButton } from '../../ParametersButton'
+import { useRouter } from 'expo-router'
+import { isMultiSendData } from '@/src/utils/transaction-guards'
+import { SafeListItem } from '@/src/components/SafeListItem'
+import { Badge } from '@/src/components/Badge'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
-import { ActionsRow } from '@/src/components/ActionsRow'
 
 interface BridgeTransactionProps {
   txId: string
@@ -24,6 +28,7 @@ interface BridgeTransactionProps {
 export function BridgeTransaction({ txId, txInfo, decodedData }: BridgeTransactionProps) {
   const activeSafe = useDefinedActiveSafe()
   const chain = useAppSelector((state) => selectChainById(state, activeSafe.chainId))
+  const router = useRouter()
 
   const bridgeItems = useMemo(() => {
     const items: ListTableItem[] = []
@@ -148,6 +153,13 @@ export function BridgeTransaction({ txId, txInfo, decodedData }: BridgeTransacti
     return items
   }, [txInfo, chain])
 
+  const handleViewActions = () => {
+    router.push({
+      pathname: '/transaction-actions',
+      params: { txId },
+    })
+  }
+
   return (
     <YStack gap="$4">
       <ListTable items={bridgeItems}>
@@ -156,7 +168,28 @@ export function BridgeTransaction({ txId, txInfo, decodedData }: BridgeTransacti
 
       <BridgeRecipientWarnings txInfo={txInfo} />
 
-      <ActionsRow txId={txId} decodedData={decodedData} />
+      {decodedData && isMultiSendData(decodedData) && (
+        <SafeListItem
+          label="Actions"
+          rightNode={
+            <View flexDirection="row" alignItems="center" gap="$2">
+              {decodedData.parameters?.[0]?.valueDecoded && (
+                <Badge
+                  themeName="badge_background_inverted"
+                  content={
+                    Array.isArray(decodedData.parameters[0].valueDecoded)
+                      ? decodedData.parameters[0].valueDecoded.length.toString()
+                      : '1'
+                  }
+                />
+              )}
+
+              <SafeFontIcon name={'chevron-right'} />
+            </View>
+          }
+          onPress={handleViewActions}
+        />
+      )}
     </YStack>
   )
 }
