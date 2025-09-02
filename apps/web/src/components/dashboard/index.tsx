@@ -28,7 +28,7 @@ import useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsPositi
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 
 const Dashboard = (): ReactElement => {
-  const { safe } = useSafeInfo()
+  const { safe, safeLoaded } = useSafeInfo()
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
   const supportsRecovery = useIsRecoverySupported()
 
@@ -74,7 +74,7 @@ const Dashboard = (): ReactElement => {
             <FirstSteps />
           </div>
 
-          {safe.deployed && (
+          {safeLoaded && safe.deployed && (
             <>
               <AssetsWidget />
 
@@ -91,7 +91,7 @@ const Dashboard = (): ReactElement => {
           )}
         </div>
 
-        <div className={css.rightCol}>{safe.deployed && <PendingTxsList />}</div>
+        <div className={css.rightCol}>{safeLoaded && safe.deployed && <PendingTxsList />}</div>
       </div>
     </>
   )

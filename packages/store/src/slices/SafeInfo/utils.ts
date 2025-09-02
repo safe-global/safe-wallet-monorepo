@@ -17,5 +17,5 @@ export const defaultSafeInfo: ExtendedSafeInfo = {
   txQueuedTag: '',
   txHistoryTag: '',
   messagesTag: '',
-  deployed: true,
+  deployed: false,
 }
