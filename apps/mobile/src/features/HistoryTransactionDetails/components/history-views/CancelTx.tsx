@@ -8,17 +8,15 @@ import { HistoryTransactionBase } from './HistoryTransactionBase'
 interface CancelTxProps {
   txInfo: CustomTransactionInfo
   executionInfo: MultisigExecutionDetails
-  executedAt: number
   txId: string
 }
 
-export function CancelTx({ txId, txInfo, executionInfo, executedAt }: CancelTxProps) {
+export function CancelTx({ txId, txInfo, executionInfo }: CancelTxProps) {
   const recipientAddress = txInfo?.to?.value as Address
 
   return (
     <HistoryTransactionBase
       txId={txId}
-      executedAt={executedAt}
       recipientAddress={recipientAddress}
       customLogo={
         <View borderRadius={100} padding="$2" backgroundColor="$errorDark">
@@ -27,7 +25,7 @@ export function CancelTx({ txId, txInfo, executionInfo, executedAt }: CancelTxPr
       }
       badgeIcon="transaction-contract"
       badgeColor="$textSecondaryLight"
-      title={txInfo.methodName ?? 'On-chain rejection'}
+      transactionType={txInfo.methodName ?? 'On-chain rejection'}
       description={`This is an on-chain rejection that didn't send any funds. This on-chain rejection replaced all transactions with nonce ${executionInfo.nonce}.`}
     />
   )
