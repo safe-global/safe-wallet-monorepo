@@ -632,6 +632,53 @@
         "tags": ["balances"]
       }
     },
+    "/v1/chains/{chainId}/safes/{safeAddress}/positions/{fiatCode}": {
+      "get": {
+        "operationId": "positionsGetPositionsV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fiatCode",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Protocol"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["positions"]
+      }
+    },
     "/v1/chains": {
       "get": {
         "operationId": "chainsGetChainsV1",
@@ -4891,6 +4938,112 @@
           }
         },
         "required": ["fiatTotal", "items"]
+<<<<<<< HEAD
+=======
+      },
+      "Position": {
+        "type": "object",
+        "properties": {
+          "balance": {
+            "type": "string"
+          },
+          "fiatBalance": {
+            "type": "string"
+          },
+          "fiatConversion": {
+            "type": "string"
+          },
+          "tokenInfo": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NativeToken"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20Token"
+              },
+              {
+                "$ref": "#/components/schemas/Erc721Token"
+              }
+            ]
+          },
+          "fiatBalance24hChange": {
+            "type": "string",
+            "nullable": true
+          },
+          "position_type": {
+            "type": "string",
+            "enum": ["deposit", "loan", "locked", "staked", "reward", "wallet", "airdrop", "margin", "unknown"],
+            "nullable": true
+          }
+        },
+        "required": ["balance", "fiatBalance", "fiatConversion", "tokenInfo", "fiatBalance24hChange", "position_type"]
+      },
+      "PositionGroup": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/Position"
+                }
+              ]
+            }
+          }
+        },
+        "required": ["name", "items"]
+      },
+      "ProtocolIcon": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["url"]
+      },
+      "ProtocolMetadata": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "icon": {
+            "$ref": "#/components/schemas/ProtocolIcon"
+          }
+        },
+        "required": ["name", "icon"]
+      },
+      "Protocol": {
+        "type": "object",
+        "properties": {
+          "protocol": {
+            "type": "string"
+          },
+          "protocol_metadata": {
+            "$ref": "#/components/schemas/ProtocolMetadata"
+          },
+          "fiatTotal": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/PositionGroup"
+                }
+              ]
+            }
+          }
+        },
+        "required": ["protocol", "protocol_metadata", "fiatTotal", "items"]
+>>>>>>> 62229d06d0b8fb4b90ab3026064618429cab6363
       },
       "GasPriceOracle": {
         "type": "object",

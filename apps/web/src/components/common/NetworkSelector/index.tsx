@@ -40,13 +40,13 @@ import useAddressBook from '@/hooks/useAddressBook'
 import { CreateSafeOnSpecificChain } from '@/features/multichain/components/CreateSafeOnNewChain'
 import { useGetSafeOverviewQuery } from '@/store/api/gateway'
 import useChainId from '@/hooks/useChainId'
-import useBalances from '@/hooks/useBalances'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { InfoOutlined } from '@mui/icons-material'
 import { selectUndeployedSafe } from '@/store/slices'
 import { hasMultiChainAddNetworkFeature } from '@/features/multichain/utils/utils'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
 import { AppRoutes } from '@/config/routes'
+import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 
 export const ChainIndicatorWithFiatBalance = ({
   isSelected,
@@ -61,7 +61,7 @@ export const ChainIndicatorWithFiatBalance = ({
   const currentChainId = useChainId()
   const isCurrentChain = currentChainId === chain.chainId
 
-  const { balances } = useBalances()
+  const { balances } = useVisibleBalances()
   const { data: safeOverview } = useGetSafeOverviewQuery(
     !isCurrentChain && !undeployedSafe ? { safeAddress, chainId: chain.chainId } : skipToken,
   )

@@ -52,7 +52,7 @@ const SafeAppsDashboardSection = () => {
   const showNav = canScrollLeft || canScrollRight
 
   return (
-    <Card sx={{ px: 3, py: 2.5 }} component="section">
+    <Card sx={{ px: 3, pt: 2.5, pb: 3 }} component="section">
       <Stack direction="row" justifyContent="space-between" mb={2}>
         <Typography fontWeight={700}>Featured Apps</Typography>
         {showNav && (
