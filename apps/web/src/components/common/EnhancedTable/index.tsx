@@ -160,7 +160,7 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact }: EnhancedTabl
         component={Paper}
         sx={{
           width: '100%',
-          overflowX: 'hidden',
+          overflowX: ['auto', 'hidden'],
           borderBottomLeftRadius: showPagination ? 0 : '6px',
           borderBottomRightRadius: showPagination ? 0 : '6px',
         }}
