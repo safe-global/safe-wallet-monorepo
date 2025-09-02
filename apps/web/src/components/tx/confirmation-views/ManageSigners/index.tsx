@@ -15,6 +15,7 @@ import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import type { ManageSignersForm } from '@/components/tx-flow/flows/ManagerSigners'
 import type { TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { checksumAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 
 export function ManageSigners({
   txInfo,
@@ -29,7 +30,9 @@ export function ManageSigners({
 
   const signerNames = useMemo(() => {
     return data
-      ? Object.fromEntries(data.owners.filter((owner) => owner.name).map((owner) => [owner.address, owner.name]))
+      ? Object.fromEntries(
+          data.owners.filter((owner) => owner.name).map((owner) => [checksumAddress(owner.address), owner.name]),
+        )
       : {}
   }, [data])
 
@@ -65,7 +68,7 @@ function Actions({ newOwners }: { newOwners: Array<AddressInfo> }): ReactElement
       name: addedOwner.name ?? undefined,
     }))
   const removedOwners = safe.owners
-    .filter((owner) => !newOwners.some((newOwner) => newOwner.value === owner.value))
+    .filter((owner) => !newOwners.some((newOwner) => sameAddress(newOwner.value, owner.value)))
     .map((removedOwner) => ({
       value: removedOwner.value,
       name: removedOwner.name ?? undefined,
