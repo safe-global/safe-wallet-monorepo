@@ -1,7 +1,7 @@
 import React from 'react'
 import { Container } from '@/src/components/Container'
-import { View, YStack, Text, H3 } from 'tamagui'
-import { TransactionHeader } from '@/src/features/ConfirmTx/components/TransactionHeader'
+import { View, YStack, Text } from 'tamagui'
+import { HistoryTransactionHeader } from '@/src/features/HistoryTransactionDetails/components/HistoryTransactionHeader'
 import { TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useTokenDetails } from '@/src/hooks/useTokenDetails'
 import { Address } from '@/src/types/address'
@@ -14,10 +14,9 @@ import { NetworkDisplay } from '../shared'
 interface HistoryTokenTransferProps {
   txId: string
   txInfo: TransferTransactionInfo
-  executedAt: number
 }
 
-export function HistoryTokenTransfer({ txId, txInfo, executedAt }: HistoryTokenTransferProps) {
+export function HistoryTokenTransfer({ txId, txInfo }: HistoryTokenTransferProps) {
   const { value, tokenSymbol, logoUri, decimals } = useTokenDetails(txInfo)
 
   const isOutgoing = txInfo.direction === 'OUTGOING'
@@ -29,27 +28,28 @@ export function HistoryTokenTransfer({ txId, txInfo, executedAt }: HistoryTokenT
   const badgeThemeName = isOutgoing ? 'badge_error' : 'badge_success'
 
   const fieldLabel = isOutgoing ? 'To' : 'From'
+  const transactionType = isOutgoing ? 'Sent' : 'Received'
 
   return (
     <>
-      <TransactionHeader
+      <HistoryTransactionHeader
         logo={logoUri}
         badgeIcon={badgeIcon}
         badgeThemeName={badgeThemeName}
         badgeColor={badgeColor}
-        title={
-          <H3 fontWeight={600}>
-            <TokenAmount
-              value={value}
-              decimals={decimals}
-              tokenSymbol={tokenSymbol}
-              direction={txInfo.direction}
-              preciseAmount
-            />
-          </H3>
-        }
-        submittedAt={executedAt}
-      />
+        transactionType={transactionType}
+      >
+        <View alignItems="center">
+          <TokenAmount
+            value={value}
+            decimals={decimals}
+            tokenSymbol={tokenSymbol}
+            direction={txInfo.direction}
+            textProps={{ fontSize: '$8' }}
+            preciseAmount
+          />
+        </View>
+      </HistoryTransactionHeader>
 
       <View>
         <YStack gap="$4" marginTop="$8">

@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, YStack, Text } from 'tamagui'
-import { TransactionHeader } from '@/src/features/ConfirmTx/components/TransactionHeader'
+import { HistoryTransactionHeader } from '@/src/features/HistoryTransactionDetails/components/HistoryTransactionHeader'
 import { Container } from '@/src/components/Container'
 import { Address } from '@/src/types/address'
 import { HashDisplay } from '@/src/components/HashDisplay'
@@ -11,7 +11,6 @@ import { NetworkDisplay } from '../shared'
 
 interface HistoryTransactionBaseProps {
   txId: string
-  executedAt: number
   recipientAddress?: Address
   // Header props
   logo?: string
@@ -19,8 +18,9 @@ interface HistoryTransactionBaseProps {
   badgeIcon: IconName
   badgeThemeName?: BadgeThemeTypes
   badgeColor: string
-  title: string | React.ReactNode
   isIdenticon?: boolean
+  // Transaction type to show below the icon
+  transactionType?: string | React.ReactNode
   // Optional description text between header and details
   description?: string | React.ReactNode
   // Optional additional content in the details container
@@ -29,29 +29,27 @@ interface HistoryTransactionBaseProps {
 
 export function HistoryTransactionBase({
   txId,
-  executedAt,
   recipientAddress,
   logo,
   customLogo,
   badgeIcon,
   badgeThemeName,
   badgeColor,
-  title,
   isIdenticon,
+  transactionType,
   description,
   children,
 }: HistoryTransactionBaseProps) {
   return (
     <YStack gap="$4">
-      <TransactionHeader
+      <HistoryTransactionHeader
         logo={logo}
         customLogo={customLogo}
         badgeIcon={badgeIcon}
         badgeThemeName={badgeThemeName}
         badgeColor={badgeColor}
-        title={title}
         isIdenticon={isIdenticon}
-        submittedAt={executedAt}
+        transactionType={transactionType}
       />
 
       {description && (typeof description === 'string' ? <Text fontSize="$4">{description}</Text> : description)}

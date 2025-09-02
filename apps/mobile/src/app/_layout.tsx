@@ -116,7 +116,7 @@ function RootLayout() {
                             <Stack.Screen name="action-details" options={{ headerShown: true, title: '' }} />
                             <Stack.Screen
                               name="history-transaction-details"
-                              options={{ headerShown: true, title: '' }}
+                              options={{ headerShown: true, title: 'Transaction details' }}
                             />
                             <Stack.Screen
                               name="history-advanced-details"
