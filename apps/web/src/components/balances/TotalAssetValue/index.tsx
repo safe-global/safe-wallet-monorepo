@@ -8,7 +8,7 @@ const TotalAssetValue = ({
   fiatTotal,
   title = 'Total asset value',
 }: {
-  fiatTotal: number | undefined
+  fiatTotal: string | number | undefined
   title?: string
 }) => {
   const { safe } = useSafeInfo()

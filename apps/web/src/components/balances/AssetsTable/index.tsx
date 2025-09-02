@@ -30,7 +30,7 @@ import { isEligibleEarnToken } from '@/features/earn/utils'
 import useChainId from '@/hooks/useChainId'
 import FiatValue from '@/components/common/FiatValue'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
-import useFiatTotal from '@/hooks/useFiatTotal'
+import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 
 const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   asset: {
@@ -141,7 +141,8 @@ const AssetsTable = ({
   setShowHiddenAssets: (hidden: boolean) => void
 }): ReactElement => {
   const { balances, loading } = useBalances()
-  const fiatTotal = useFiatTotal()
+  const { balances: visibleBalances } = useVisibleBalances()
+
   const chainId = useChainId()
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
   const isStakingFeatureEnabled = useIsStakingFeatureEnabled()
@@ -163,6 +164,7 @@ const AssetsTable = ({
         const rawPriceValue = parseFloat(item.fiatConversion)
         const isNative = isNativeToken(item.tokenInfo)
         const isSelected = isAssetSelected(item.tokenInfo.address)
+        const fiatTotal = visibleBalances.fiatTotal ? Number(visibleBalances.fiatTotal) : undefined
         const itemShareOfFiatTotal = fiatTotal ? Number(item.fiatBalance) / fiatTotal : null
 
         return {
