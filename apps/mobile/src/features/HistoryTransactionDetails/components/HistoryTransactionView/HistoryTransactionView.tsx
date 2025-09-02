@@ -4,6 +4,7 @@ import {
   TransactionDetails,
   TransferTransactionInfo,
   TwapOrderTransactionInfo,
+  NativeStakingDepositTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { HistoryTokenTransfer } from '../history-views/HistoryTokenTransfer'
@@ -11,6 +12,7 @@ import { HistorySwapOrder } from '../history-views/HistorySwapOrder'
 import { HistoryAddSigner } from '../history-views/HistoryAddSigner'
 import { HistoryRemoveSigner } from '../history-views/HistoryRemoveSigner'
 import { HistoryChangeThreshold } from '../history-views/HistoryChangeThreshold'
+import { HistoryStakeDeposit } from '../history-views/HistoryStakeDeposit'
 import { ETxType } from '@/src/types/txType'
 import { getTransactionType } from '@/src/utils/transactions'
 import { HistoryGenericView } from '@/src/features/HistoryTransactionDetails/components/history-views/HistoryGenericView'
@@ -80,6 +82,14 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
         />
       )
 
+    case ETxType.STAKE_DEPOSIT:
+      return (
+        <HistoryStakeDeposit
+          txId={txDetails.txId}
+          txInfo={txDetails.txInfo as NativeStakingDepositTransactionInfo}
+          txData={txDetails.txData as TransactionData}
+        />
+      )
     // For all other transaction types, use a generic view that can adapt
     default:
       return (
