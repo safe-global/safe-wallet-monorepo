@@ -4,6 +4,7 @@ import {
   NativeStakingDepositTransactionInfo,
   NativeStakingValidatorsExitTransactionInfo,
   VaultDepositTransactionInfo,
+  VaultRedeemTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 describe('getTransactionType', () => {
@@ -93,6 +94,36 @@ describe('getTransactionType', () => {
     const result = getTransactionType({ txInfo: vaultDepositTxInfo })
     expect(result).toBe(ETxType.VAULT_DEPOSIT)
   })
+
+  it('should return VAULT_REDEEM for VaultRedeem transactions', () => {
+    const vaultRedeemTxInfo: VaultRedeemTransactionInfo = {
+      type: 'VaultRedeem',
+      value: '1000000000000000000',
+      currentReward: '50000000000000000',
+      additionalRewardsNrr: 100,
+      baseNrr: 500,
+      fee: 0.1,
+      tokenInfo: {
+        address: '0x1234567890123456789012345678901234567890',
+        name: 'Ethereum',
+        symbol: 'ETH',
+        decimals: 18,
+        logoUri: 'https://example.com/eth-logo.png',
+        trusted: true,
+      },
+      vaultInfo: {
+        address: '0xvault1234567890123456789012345678901234567890',
+        name: 'Morpho Vault',
+        logoUri: 'https://example.com/morpho-logo.png',
+        description: 'A secure vault for earning yield on ETH',
+      },
+      additionalRewards: [],
+    }
+
+    const result = getTransactionType({ txInfo: vaultRedeemTxInfo })
+    expect(result).toBe(ETxType.VAULT_REDEEM)
+  })
+
   it('should return null for unknown transaction types', () => {
     const unknownTxInfo = {
       type: 'UnknownType',

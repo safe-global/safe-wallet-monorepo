@@ -5,6 +5,7 @@ import {
   TransferTransactionInfo,
   TwapOrderTransactionInfo,
   VaultDepositTransactionInfo,
+  VaultRedeemTransactionInfo,
   NativeStakingDepositTransactionInfo,
   NativeStakingValidatorsExitTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -15,6 +16,7 @@ import { HistoryAddSigner } from '../history-views/HistoryAddSigner'
 import { HistoryRemoveSigner } from '../history-views/HistoryRemoveSigner'
 import { HistoryChangeThreshold } from '../history-views/HistoryChangeThreshold'
 import { HistoryVaultDeposit } from '../history-views/HistoryVaultDeposit'
+import { HistoryVaultRedeem } from '../history-views/HistoryVaultRedeem'
 import { HistoryStakeDeposit } from '../history-views/HistoryStakeDeposit'
 import { HistoryStakeWithdrawRequest } from '../history-views/HistoryStakeWithdrawRequest'
 import { ETxType } from '@/src/types/txType'
@@ -106,6 +108,9 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
 
     case ETxType.VAULT_DEPOSIT:
       return <HistoryVaultDeposit txId={txDetails.txId} txInfo={txDetails.txInfo as VaultDepositTransactionInfo} />
+
+    case ETxType.VAULT_REDEEM:
+      return <HistoryVaultRedeem txId={txDetails.txId} txInfo={txDetails.txInfo as VaultRedeemTransactionInfo} />
 
     // For all other transaction types, use a generic view that can adapt
     default:
