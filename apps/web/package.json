@@ -82,7 +82,7 @@
     "js-cookie": "^3.0.1",
     "lodash": "^4.17.21",
     "mixpanel-browser": "^2.66.0",
-    "next": "patch:next@15.2.4#../../.yarn/patches/next-npm-15.2.4-06a6671f62.patch",
+    "next": "15.4.2",
     "papaparse": "^5.3.2",
     "qrcode.react": "^3.1.0",
     "react": "^19.0.0",
