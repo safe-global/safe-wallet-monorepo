@@ -44,9 +44,9 @@ import { skipToken } from '@reduxjs/toolkit/query'
 import { InfoOutlined } from '@mui/icons-material'
 import { selectUndeployedSafe } from '@/store/slices'
 import { hasMultiChainAddNetworkFeature } from '@/features/multichain/utils/utils'
-import useFiatTotal from '@/hooks/useFiatTotal'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
 import { AppRoutes } from '@/config/routes'
+import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 
 export const ChainIndicatorWithFiatBalance = ({
   isSelected,
@@ -61,11 +61,11 @@ export const ChainIndicatorWithFiatBalance = ({
   const currentChainId = useChainId()
   const isCurrentChain = currentChainId === chain.chainId
 
-  const fiatTotal = useFiatTotal()
+  const { balances } = useVisibleBalances()
   const { data: safeOverview } = useGetSafeOverviewQuery(
     !isCurrentChain && !undeployedSafe ? { safeAddress, chainId: chain.chainId } : skipToken,
   )
-  const fiatValue = isCurrentChain ? fiatTotal?.toString() : safeOverview?.fiatTotal
+  const fiatValue = isCurrentChain ? balances.fiatTotal : safeOverview?.fiatTotal
 
   return <ChainIndicator responsive={isSelected} chainId={chain.chainId} fiatValue={fiatValue} inline />
 }

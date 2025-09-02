@@ -33,11 +33,9 @@ import FiatValue from '@/components/common/FiatValue'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import { NestedSafesButton } from '@/components/sidebar/NestedSafesButton'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
-import useFiatTotal from '@/hooks/useFiatTotal'
 
 const SafeHeader = (): ReactElement => {
   const { balances } = useVisibleBalances()
-  const fiatTotal = useFiatTotal()
   const safeAddress = useSafeAddress()
   const { safe } = useSafeInfo()
   const { threshold, owners } = safe
@@ -73,8 +71,8 @@ const SafeHeader = (): ReactElement => {
 
             <Typography data-testid="currency-section" variant="body2" fontWeight={700}>
               {safe.deployed ? (
-                fiatTotal ? (
-                  <FiatValue value={fiatTotal} />
+                balances.fiatTotal ? (
+                  <FiatValue value={balances.fiatTotal} />
                 ) : (
                   <Skeleton variant="text" width={60} />
                 )
