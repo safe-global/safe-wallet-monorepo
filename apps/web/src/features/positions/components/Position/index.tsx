@@ -20,7 +20,7 @@ const Position = ({ item }: { item: Position }) => {
       </Box>
 
       <Box justifySelf="flex-end" ml="auto" textAlign="right">
-        <Typography variant="body2">
+        <Typography>
           <FiatValue value={item.fiatBalance} />
         </Typography>
         <Typography variant="caption">
