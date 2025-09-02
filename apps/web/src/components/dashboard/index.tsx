@@ -91,9 +91,7 @@ const Dashboard = (): ReactElement => {
           )}
         </div>
 
-        <div className={css.rightCol}>
-          <PendingTxsList />
-        </div>
+        <div className={css.rightCol}>{safe.deployed && <PendingTxsList />}</div>
       </div>
     </>
   )
