@@ -30,12 +30,11 @@ export function useIsSidebarRoute(pathname?: string): [boolean, boolean] {
   const router = useRouter()
   const clientPathname = usePathname()
   const isSpaceRoute = useIsSpaceRoute()
-  const [hasSafe, setHasSafe] = useState(false)
-
   const route = pathname || clientPathname || ''
   const sidebarQuery = router.query.sidebar === 'true'
   const noSidebar = NO_SIDEBAR_ROUTES.includes(route) && !sidebarQuery
   const toggledSidebar = TOGGLE_SIDEBAR_ROUTES.includes(route) && !sidebarQuery
+  const [hasSafe, setHasSafe] = useState(!noSidebar)
 
   useEffect(() => {
     if (!router.isReady) return
