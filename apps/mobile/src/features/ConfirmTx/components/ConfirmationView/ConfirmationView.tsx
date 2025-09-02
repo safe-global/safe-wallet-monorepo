@@ -103,6 +103,7 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
           txId={txDetails.txId}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as NativeStakingDepositTransactionInfo}
+          txData={txDetails.txData as TransactionData}
         />
       )
     case ETxType.VAULT_DEPOSIT:
