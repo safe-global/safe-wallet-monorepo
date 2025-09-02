@@ -5,6 +5,7 @@ import {
   TransferTransactionInfo,
   TwapOrderTransactionInfo,
   NativeStakingDepositTransactionInfo,
+  NativeStakingValidatorsExitTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { HistoryTokenTransfer } from '../history-views/HistoryTokenTransfer'
@@ -13,6 +14,7 @@ import { HistoryAddSigner } from '../history-views/HistoryAddSigner'
 import { HistoryRemoveSigner } from '../history-views/HistoryRemoveSigner'
 import { HistoryChangeThreshold } from '../history-views/HistoryChangeThreshold'
 import { HistoryStakeDeposit } from '../history-views/HistoryStakeDeposit'
+import { HistoryStakeWithdrawRequest } from '../history-views/HistoryStakeWithdrawRequest'
 import { ETxType } from '@/src/types/txType'
 import { getTransactionType } from '@/src/utils/transactions'
 import { HistoryGenericView } from '@/src/features/HistoryTransactionDetails/components/history-views/HistoryGenericView'
@@ -87,6 +89,15 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
         <HistoryStakeDeposit
           txId={txDetails.txId}
           txInfo={txDetails.txInfo as NativeStakingDepositTransactionInfo}
+          txData={txDetails.txData as TransactionData}
+        />
+      )
+
+    case ETxType.STAKE_WITHDRAW_REQUEST:
+      return (
+        <HistoryStakeWithdrawRequest
+          txId={txDetails.txId}
+          txInfo={txDetails.txInfo as NativeStakingValidatorsExitTransactionInfo}
           txData={txDetails.txData as TransactionData}
         />
       )

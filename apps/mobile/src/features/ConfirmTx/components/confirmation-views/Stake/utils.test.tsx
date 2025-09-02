@@ -66,7 +66,7 @@ describe('Staking Utils', () => {
 
       const items = formatStakingDepositItems(mockDepositTxInfo, minimalTxData)
 
-      expect(items).toHaveLength(6) // 4 original + contract + network
+      expect(items).toHaveLength(6)
 
       const rewardsRateItem = items[0] as { label: string; value: string }
       expect(rewardsRateItem.label).toBe('Rewards rate')
@@ -120,7 +120,7 @@ describe('Staking Utils', () => {
 
       const items = formatStakingDepositItems(mockDepositTxInfo, basicTxData)
 
-      expect(items).toHaveLength(6) // 4 original + contract + network
+      expect(items).toHaveLength(6)
 
       const contractItem = items[4] as { label: string; render?: () => React.ReactNode }
       expect(contractItem.label).toBe('Contract')
@@ -157,53 +157,97 @@ describe('Staking Utils', () => {
 
   describe('formatStakingWithdrawRequestItems', () => {
     it('formats withdraw request information correctly', () => {
-      const items = formatStakingWithdrawRequestItems(mockWithdrawRequestTxInfo)
+      const mockTxData = {
+        to: {
+          value: '0x1234567890123456789012345678901234567890',
+          name: 'Staking Contract',
+          logoUri: null,
+        },
+        operation: 0,
+      }
 
-      expect(items).toHaveLength(4)
+      const items = formatStakingWithdrawRequestItems(mockWithdrawRequestTxInfo, mockTxData)
 
-      const exitItem = items[0] as { label: string; value: string }
+      expect(items).toHaveLength(6)
+
+      const contractItem = items[0] as { label: string; render?: () => React.ReactNode }
+      expect(contractItem.label).toBe('Contract')
+      expect(contractItem.render).toBeDefined()
+
+      const networkItem = items[1] as { label: string; render?: () => React.ReactNode }
+      expect(networkItem.label).toBe('Network')
+      expect(networkItem.render).toBeDefined()
+
+      const exitItem = items[2] as { label: string; value: string }
       expect(exitItem.label).toBe('Exit')
       expect(exitItem.value).toBe('1 Validator')
 
-      const receiveItem = items[1] as { label: string }
+      const receiveItem = items[3] as { label: string }
       expect(receiveItem.label).toBe('Receive')
 
-      const withdrawInItem = items[2] as { label: string; value: string }
+      const withdrawInItem = items[4] as { label: string; value: string }
       expect(withdrawInItem.label).toBe('Withdraw in')
       expect(withdrawInItem.value).toMatch(/Up to.*day/)
 
-      const validatorStatusItem = items[3] as { label: string; render?: () => React.ReactNode }
+      const validatorStatusItem = items[5] as { label: string; render?: () => React.ReactNode }
       expect(validatorStatusItem.label).toBe('Validator status')
       expect(validatorStatusItem.render).toBeDefined()
     })
 
     it('handles multiple validators correctly', () => {
+      const mockTxData = {
+        to: {
+          value: '0x1234567890123456789012345678901234567890',
+          name: 'Staking Contract',
+          logoUri: null,
+        },
+        operation: 0,
+      }
+
       const multiValidatorInfo = {
         ...mockWithdrawRequestTxInfo,
         numValidators: 5,
       }
 
-      const items = formatStakingWithdrawRequestItems(multiValidatorInfo)
-      const exitItem = items[0] as { label: string; value: string }
+      const items = formatStakingWithdrawRequestItems(multiValidatorInfo, mockTxData)
+      const exitItem = items[2] as { label: string; value: string } // Exit is now at index 2
 
       expect(exitItem.value).toBe('5 Validators')
     })
 
     it('handles single validator correctly', () => {
+      const mockTxData = {
+        to: {
+          value: '0x1234567890123456789012345678901234567890',
+          name: 'Staking Contract',
+          logoUri: null,
+        },
+        operation: 0,
+      }
+
       const singleValidatorInfo = {
         ...mockWithdrawRequestTxInfo,
         numValidators: 1,
       }
 
-      const items = formatStakingWithdrawRequestItems(singleValidatorInfo)
-      const exitItem = items[0] as { label: string; value: string }
+      const items = formatStakingWithdrawRequestItems(singleValidatorInfo, mockTxData)
+      const exitItem = items[2] as { label: string; value: string } // Exit is now at index 2
 
       expect(exitItem.value).toBe('1 Validator')
     })
 
     it('renders receive token amount', () => {
-      const items = formatStakingWithdrawRequestItems(mockWithdrawRequestTxInfo)
-      const receiveItem = items.find((_item, index) => index === 1) as { label: string; render?: () => React.ReactNode }
+      const mockTxData = {
+        to: {
+          value: '0x1234567890123456789012345678901234567890',
+          name: 'Staking Contract',
+          logoUri: null,
+        },
+        operation: 0,
+      }
+
+      const items = formatStakingWithdrawRequestItems(mockWithdrawRequestTxInfo, mockTxData)
+      const receiveItem = items[3] as { label: string; render?: () => React.ReactNode }
 
       expect(receiveItem).toBeDefined()
       expect(receiveItem.label).toBe('Receive')

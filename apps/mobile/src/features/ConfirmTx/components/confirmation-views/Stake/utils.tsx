@@ -105,6 +105,7 @@ export const formatStakingValidatorItems = (txInfo: NativeStakingDepositTransact
 
 export const formatStakingWithdrawRequestItems = (
   txInfo: NativeStakingValidatorsExitTransactionInfo,
+  txData: TransactionData,
 ): ListTableItem[] => {
   const withdrawIn = formatDurationFromMilliseconds(txInfo.estimatedExitTime + txInfo.estimatedWithdrawalTime, [
     'days',
@@ -112,6 +113,14 @@ export const formatStakingWithdrawRequestItems = (
   ])
 
   return [
+    {
+      label: 'Contract',
+      render: () => <HashDisplay value={txData.to} />,
+    },
+    {
+      label: 'Network',
+      render: () => <NetworkRow />,
+    },
     {
       label: 'Exit',
       value: `${txInfo.numValidators} Validator${txInfo.numValidators !== 1 ? 's' : ''}`,

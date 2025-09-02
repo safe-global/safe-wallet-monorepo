@@ -129,6 +129,7 @@ export function ConfirmationView({ txDetails }: ConfirmationViewProps) {
           txId={txDetails.txId}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
           txInfo={txDetails.txInfo as NativeStakingValidatorsExitTransactionInfo}
+          txData={txDetails.txData as TransactionData}
         />
       )
     case ETxType.STAKE_EXIT:

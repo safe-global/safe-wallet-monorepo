@@ -1,6 +1,10 @@
 import { getTransactionType } from './transactions'
 import { ETxType } from '../types/txType'
 import { NativeStakingDepositTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import {
+  NativeStakingDepositTransactionInfo,
+  NativeStakingValidatorsExitTransactionInfo,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 describe('getTransactionType', () => {
   it('should return STAKE_DEPOSIT for NativeStakingDeposit transactions', () => {
@@ -35,6 +39,29 @@ describe('getTransactionType', () => {
     expect(result).toBe(ETxType.STAKE_DEPOSIT)
   })
 
+  it('should return STAKE_WITHDRAW_REQUEST for NativeStakingValidatorsExit transactions', () => {
+    const stakingWithdrawRequestTxInfo: NativeStakingValidatorsExitTransactionInfo = {
+      type: 'NativeStakingValidatorsExit',
+      humanDescription: 'Exit validators and request withdrawal',
+      status: 'ACTIVE',
+      value: '32000000000000000000', // 32 ETH
+      numValidators: 1,
+      estimatedExitTime: 30 * 86400000, // 30 days
+      estimatedWithdrawalTime: 2 * 86400000, // 2 days
+      tokenInfo: {
+        address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+        decimals: 18,
+        logoUri: 'https://safe-transaction-assets.safe.global/chains/1/chain_logo.png',
+        name: 'Ethereum',
+        symbol: 'ETH',
+        trusted: true,
+      },
+      validators: ['0x123...abc'],
+    }
+
+    const result = getTransactionType({ txInfo: stakingWithdrawRequestTxInfo })
+    expect(result).toBe(ETxType.STAKE_WITHDRAW_REQUEST)
+  })
   it('should return null for unknown transaction types', () => {
     const unknownTxInfo = {
       type: 'UnknownType',
