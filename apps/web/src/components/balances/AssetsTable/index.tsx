@@ -93,24 +93,24 @@ const headCells = [
   {
     id: 'asset',
     label: 'Asset',
-    width: '30%',
+    width: '28%',
   },
   {
     id: 'price',
     label: 'Price',
-    width: '20%',
+    width: '18%',
     align: 'right',
   },
   {
     id: 'balance',
     label: 'Balance',
-    width: '20%',
+    width: '18%',
     align: 'right',
   },
   {
     id: 'value',
     label: 'Value',
-    width: '20%',
+    width: '18%',
     align: 'right',
   },
   {
@@ -122,7 +122,7 @@ const headCells = [
         </Typography>
       </Tooltip>
     ),
-    width: '20%',
+    width: '18%',
     align: 'right',
   },
   {
