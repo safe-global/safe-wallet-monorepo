@@ -14,6 +14,7 @@ import { HistoryChangeThreshold } from '../history-views/HistoryChangeThreshold'
 import { ETxType } from '@/src/types/txType'
 import { getTransactionType } from '@/src/utils/transactions'
 import { HistoryGenericView } from '@/src/features/HistoryTransactionDetails/components/history-views/HistoryGenericView'
+import { HistoryContract } from '@/src/features/HistoryTransactionDetails/components/history-views/HistoryContract'
 import { NormalizedSettingsChangeTransaction } from '@/src/features/ConfirmTx/components/ConfirmationView/types'
 import { CancelTx } from '@/src/features/HistoryTransactionDetails/components/history-views/CancelTx'
 import { CustomTransactionInfo, MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -67,6 +68,15 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
           txId={txDetails.txId}
           txInfo={txDetails.txInfo as CustomTransactionInfo}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+        />
+      )
+
+    case ETxType.CONTRACT_INTERACTION:
+      return (
+        <HistoryContract
+          txId={txDetails.txId}
+          txInfo={txDetails.txInfo as CustomTransactionInfo}
+          _executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
         />
       )
 
