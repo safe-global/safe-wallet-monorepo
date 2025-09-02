@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import { YStack, View, Text, H3 } from 'tamagui'
 import { CustomTransactionInfo, MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
@@ -9,12 +9,7 @@ import { HistoryTransactionHeader } from '../HistoryTransactionHeader'
 import { Container } from '@/src/components/Container'
 import { Logo } from '@/src/components/Logo'
 import { Badge } from '@/src/components/Badge'
-import { ellipsis } from '@/src/utils/formatters'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { CopyButton } from '@/src/components/CopyButton'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { TouchableOpacity } from 'react-native'
-import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
+import { HashDisplay } from '@/src/components/HashDisplay'
 import { HistoryAdvancedDetailsButton } from '../HistoryAdvancedDetailsButton'
 import { CircleProps } from 'tamagui'
 
@@ -29,11 +24,6 @@ const methodBadgeProps: CircleProps = { borderRadius: '$2', paddingHorizontal: '
 export function HistoryContract({ txId, txInfo, _executionInfo }: HistoryContractProps) {
   const activeSafe = useDefinedActiveSafe()
   const chain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
-  const viewOnExplorer = useOpenExplorer(txInfo.to.value)
-
-  const contractName = useMemo(() => {
-    return txInfo.to.name ? ellipsis(txInfo.to.name, 18) : shortenAddress(txInfo.to.value)
-  }, [txInfo.to.name, txInfo.to.value])
 
   const methodName = txInfo.methodName ?? 'Contract interaction'
 
@@ -68,14 +58,7 @@ export function HistoryContract({ txId, txInfo, _executionInfo }: HistoryContrac
         {/* Contract Information */}
         <View alignItems="center" flexDirection="row" justifyContent="space-between">
           <Text color="$textSecondaryLight">Contract</Text>
-          <View flexDirection="row" alignItems="center" gap="$2">
-            <Logo logoUri={txInfo.to.logoUri} size="$6" />
-            <Text fontSize="$4">{contractName}</Text>
-            <CopyButton value={txInfo.to.value} color={'$textSecondaryLight'} />
-            <TouchableOpacity onPress={viewOnExplorer}>
-              <SafeFontIcon name="external-link" size={14} color="$textSecondaryLight" />
-            </TouchableOpacity>
-          </View>
+          <HashDisplay value={txInfo.to} />
         </View>
 
         {/* Network Information */}
