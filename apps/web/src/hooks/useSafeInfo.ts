@@ -12,17 +12,17 @@ const useSafeInfo = (): {
   safeLoading: boolean
   safeError?: string
 } => {
-  const { data, error, loading } = useAppSelector(selectSafeInfo, isEqual)
+  const { data, error, loaded, loading } = useAppSelector(selectSafeInfo, isEqual)
 
   return useMemo(
     () => ({
       safe: data || defaultSafeInfo,
       safeAddress: data?.address.value || '',
-      safeLoaded: !!data,
+      safeLoaded: loaded,
       safeError: error,
       safeLoading: loading,
     }),
-    [data, error, loading],
+    [data, error, loaded, loading],
   )
 }
 
