@@ -21,7 +21,7 @@ import OverviewSkeleton from './OverviewSkeleton'
 
 const Overview = (): ReactElement => {
   const { safe, safeLoading, safeLoaded } = useSafeInfo()
-  const { balances, loading: balancesLoading } = useVisibleBalances()
+  const { balances, loaded: balancesLoaded, loading: balancesLoading } = useVisibleBalances()
   const { setTxFlow } = useContext(TxModalContext)
   const router = useRouter()
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
@@ -38,7 +38,7 @@ const Overview = (): ReactElement => {
     return balances.items.filter((item) => item.balance !== '0')
   }, [balances.items])
 
-  const noAssets = !balancesLoading && items.length === 0
+  const noAssets = balancesLoaded && items.length === 0
 
   if (isLoading) return <OverviewSkeleton />
 

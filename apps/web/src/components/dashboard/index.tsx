@@ -32,7 +32,7 @@ const Dashboard = (): ReactElement => {
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
   const supportsRecovery = useIsRecoverySupported()
 
-  const { balances, loading: balancesLoading } = useVisibleBalances()
+  const { balances, loaded: balancesLoaded } = useVisibleBalances()
   const items = useMemo(() => {
     return balances.items.filter((item) => item.balance !== '0')
   }, [balances.items])
@@ -48,7 +48,7 @@ const Dashboard = (): ReactElement => {
     isStakingBannerVisible && { id: stakeBannerID, element: StakeBanner },
   ].filter(Boolean) as BannerItem[]
 
-  const noAssets = !balancesLoading && items.length === 0
+  const noAssets = balancesLoaded && items.length === 0
 
   return (
     <>

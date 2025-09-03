@@ -6,19 +6,21 @@ import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balance
 
 const useBalances = (): {
   balances: Balances
+  loaded: boolean
   loading: boolean
   error?: string
 } => {
   const state = useAppSelector(selectBalances, isEqual)
-  const { data, error, loading } = state
+  const { data, error, loaded, loading } = state
 
   return useMemo(
     () => ({
       balances: data,
       error,
+      loaded,
       loading,
     }),
-    [data, error, loading],
+    [data, error, loaded, loading],
   )
 }
 
