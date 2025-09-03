@@ -140,8 +140,7 @@ const PositionsWidget = () => {
               label="Beta"
               size="small"
               sx={{
-                backgroundColor: 'background.main',
-                color: 'text.primary',
+                backgroundColor: 'background.lightGrey',
                 letterSpacing: '0.4px',
               }}
             />

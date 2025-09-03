@@ -42,7 +42,7 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
   )
 
   const chipStyles = isDarkMode
-    ? { backgroundColor: 'secondary.background', color: 'secondary.main' }
+    ? { backgroundColor: 'static.main', color: 'secondary.main' }
     : { backgroundColor: 'secondary.main', color: 'static.main' }
 
   const onClick = () => {

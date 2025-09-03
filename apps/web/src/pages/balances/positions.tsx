@@ -40,11 +40,7 @@ const Positions: NextPage = () => {
               },
             }}
           >
-            <Chip
-              label="Beta"
-              size="small"
-              sx={{ backgroundColor: 'background.main', color: 'text.primary', letterSpacing: '0.4px' }}
-            />
+            <Chip label="Beta" size="small" sx={{ backgroundColor: 'background.lightGrey', letterSpacing: '0.4px' }} />
           </Tooltip>
         </Stack>
 
