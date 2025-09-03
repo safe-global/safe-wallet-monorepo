@@ -19,7 +19,7 @@ const EthHashInfo = ({
   const addressBookItem = useAddressBookItem(props.address, chain?.chainId)
   const { ens, avatar: ensAvatar } = useAddressResolver(props.address)
   const link = chain && props.hasExplorer ? getBlockExplorerLink(chain, props.address) : undefined
-  const name = showName ? props.name || addressBookItem?.name || ens : undefined
+  const name = showName ? addressBookItem?.name || props.name || ens : undefined
   const customAvatar = props.customAvatar || ensAvatar
 
   return (

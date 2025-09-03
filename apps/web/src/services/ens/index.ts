@@ -39,7 +39,8 @@ export const getAvatar = async (rpcProvider: Provider, address: string): Promise
     const ensName = await lookupAddress(rpcProvider, address)
     if (!ensName) return undefined
 
-    const resolver = await rpcProvider.getResolver(ensName)
+    // Type assertion needed for ENS resolver methods
+    const resolver = await (rpcProvider as any).getResolver(ensName)
     if (!resolver) return undefined
 
     return (await resolver.getAvatar()) || undefined

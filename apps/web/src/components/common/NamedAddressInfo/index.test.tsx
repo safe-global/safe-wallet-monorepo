@@ -8,6 +8,7 @@ import useSafeAddress from '@/hooks/useSafeAddress'
 const mockChainInfo = {
   chainId: '4',
   shortName: 'tst',
+  features: ['DOMAIN_LOOKUP'],
   blockExplorerUriTemplate: {
     address: 'https://test.scan.eth/{address}',
     api: 'https://test.scan.eth/',

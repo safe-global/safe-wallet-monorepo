@@ -9,7 +9,17 @@ import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import * as spacesRTK from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 jest.mock('@/hooks/useAllAddressBooks')
-jest.mock('@/hooks/useChains')
+jest.mock('@/hooks/useAddressBook', () => ({
+  __esModule: true,
+  default: () => ({}),
+}))
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: jest.fn(),
+  useChain: jest.fn(),
+  useHasFeature: () => true,
+}))
+
 const mockedUseAllAddressBooks = useAllAddressBooks as jest.MockedFunction<typeof useAllAddressBooks>
 const mockedUseChains = useChains as jest.MockedFunction<typeof useChains>
 const upsertionSpyFn = jest.fn()
@@ -20,6 +30,7 @@ const upsertionSpy = jest
 describe('ImportAddressBookDialog', () => {
   beforeEach(() => {
     mockedUseChains.mockReturnValue({ configs: [{ chainId: '1' } as ChainInfo, { chainId: '5' } as ChainInfo] })
+    mockedUseAllAddressBooks.mockReturnValue({ list: [] } as any)
   })
 
   afterAll(() => {
