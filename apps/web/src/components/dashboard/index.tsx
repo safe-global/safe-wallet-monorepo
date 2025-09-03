@@ -22,10 +22,10 @@ import EarnBanner, { earnBannerID } from '@/components/dashboard/NewsCarousel/ba
 import SpacesBanner, { spacesBannerID } from '@/components/dashboard/NewsCarousel/banners/SpacesBanner'
 import StakeBanner, { stakeBannerID } from '@/components/dashboard/NewsCarousel/banners/StakeBanner'
 import AddFundsToGetStarted from '@/components/dashboard/AddFundsBanner'
-import PositionsWidget from '@/features/positions/components/PositionsWidget'
 import useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsPositionsFeatureEnabled'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
+const PositionsWidget = dynamic(() => import('@/features/positions/components/PositionsWidget'))
 
 const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()
