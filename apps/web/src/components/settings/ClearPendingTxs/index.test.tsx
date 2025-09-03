@@ -33,6 +33,7 @@ describe('ClearPendingTxs', () => {
             .with({ chainId: '1' })
             .build(),
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -92,6 +93,7 @@ describe('ClearPendingTxs', () => {
             .with({ chainId: '1' })
             .build(),
           loading: false,
+          loaded: true,
         },
       },
     })

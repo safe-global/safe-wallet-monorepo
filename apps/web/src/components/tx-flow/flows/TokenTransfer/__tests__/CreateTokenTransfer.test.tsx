@@ -67,6 +67,7 @@ describe('CreateTokenTransfer', () => {
         initialReduxState: {
           balances: {
             loading: false,
+            loaded: true,
             data: {
               fiatTotal: '0',
               items: [

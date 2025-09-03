@@ -75,7 +75,7 @@ const setup = (
       addressBook: {
         [mockChain.chainId]: initialAddressBook,
       },
-      chains: { data: [mockChain], loading: false },
+      chains: { data: [mockChain], loading: false, loaded: true },
     },
   })
   const input = utils.getByLabelText('Recipient address', { exact: false })

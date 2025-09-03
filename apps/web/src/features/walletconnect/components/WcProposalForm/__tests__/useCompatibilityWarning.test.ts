@@ -132,6 +132,7 @@ describe('useCompatibilityWarning', () => {
         initialReduxState: {
           chains: {
             loading: false,
+            loaded: true,
             error: undefined,
             data: [
               {
@@ -142,6 +143,7 @@ describe('useCompatibilityWarning', () => {
           },
           safeInfo: {
             loading: false,
+            loaded: true,
             error: undefined,
             data: {
               ...extendedSafeInfoBuilder().build(),
