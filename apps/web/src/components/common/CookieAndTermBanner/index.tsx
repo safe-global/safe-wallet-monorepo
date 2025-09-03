@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, type ReactElement } from 'react'
 import classnames from 'classnames'
 import type { CheckboxProps } from '@mui/material'

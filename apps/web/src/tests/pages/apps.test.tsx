@@ -15,8 +15,8 @@ import {
   within,
   createAppNameRegex,
 } from '../test-utils'
-import AppsPage from '@/pages/apps'
-import CustomSafeAppsPage from '@/pages/apps/custom'
+import AppsPage from '@/legacy-pages/apps'
+import CustomSafeAppsPage from '@/legacy-pages/apps/custom'
 import * as safeAppsService from '@/services/safe-apps/manifest'
 import { LS_NAMESPACE } from '@/config/constants'
 import * as chainHooks from '@/hooks/useChains'

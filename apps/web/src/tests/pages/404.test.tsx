@@ -1,4 +1,4 @@
-import { _getRedirectUrl } from '../../pages/404'
+import { _getRedirectUrl } from '../../legacy-pages/404'
 
 describe('_getRedirectUrl', () => {
   it('moves a safe address from the path to the query', () => {

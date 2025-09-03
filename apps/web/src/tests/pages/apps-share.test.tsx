@@ -1,6 +1,6 @@
 import React from 'react'
 import { render, screen, waitFor } from '../test-utils'
-import ShareSafeApp from '@/pages/share/safe-app'
+import ShareSafeApp from '@/legacy-pages/share/safe-app'
 import { CONFIG_SERVICE_CHAINS } from '@/tests/mocks/chains'
 import * as useWalletHook from '@/hooks/wallets/useWallet'
 import * as useOwnedSafesHook from '@/hooks/useOwnedSafes'
@@ -89,6 +89,7 @@ describe('Share Safe App Page', () => {
           data: CONFIG_SERVICE_CHAINS,
           error: undefined,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -118,6 +119,7 @@ describe('Share Safe App Page', () => {
           data: CONFIG_SERVICE_CHAINS,
           error: undefined,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -143,6 +145,7 @@ describe('Share Safe App Page', () => {
           data: CONFIG_SERVICE_CHAINS,
           error: undefined,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -185,6 +188,7 @@ describe('Share Safe App Page', () => {
           data: CONFIG_SERVICE_CHAINS,
           error: undefined,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -230,6 +234,7 @@ describe('Share Safe App Page', () => {
           data: CONFIG_SERVICE_CHAINS,
           error: undefined,
           loading: false,
+          loaded: true,
         },
       },
     })
