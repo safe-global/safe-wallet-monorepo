@@ -25,6 +25,7 @@ describe('AppFrame', () => {
       initialReduxState: {
         safeInfo: {
           loading: true,
+          loaded: true,
           data: defaultSafeInfo,
         },
         txQueue: {
@@ -67,6 +68,7 @@ describe('AppFrame', () => {
               },
             ],
           },
+          loaded: true,
           loading: false,
           error: undefined,
         },
