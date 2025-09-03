@@ -23,13 +23,13 @@ export default defineConfig({
       // Set Cookie term version on the cypress env - this way we can access it in the tests
       config.env.CURRENT_COOKIE_TERMS_VERSION = version
 
-      configureVisualRegression(on),
+      ;(configureVisualRegression(on),
         on('task', {
           log(message) {
             console.log(message)
             return null
           },
-        })
+        }))
 
       on('after:spec', (spec, results) => {
         if (results && results.video) {
