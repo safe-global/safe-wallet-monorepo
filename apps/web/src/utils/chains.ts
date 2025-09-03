@@ -11,6 +11,7 @@ export const FeatureRoutes = {
   [AppRoutes.settings.notifications]: FEATURES.PUSH_NOTIFICATIONS,
   [AppRoutes.bridge]: FEATURES.BRIDGE,
   [AppRoutes.earn]: FEATURES.EARN,
+  [AppRoutes.balances.positions]: FEATURES.POSITIONS,
 }
 
 export const getBlockExplorerLink = (

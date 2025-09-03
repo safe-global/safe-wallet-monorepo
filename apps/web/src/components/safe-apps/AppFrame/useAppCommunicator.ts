@@ -98,9 +98,11 @@ const useAppCommunicator = (
             { ...SAFE_APPS_EVENTS.SAFE_APP_SDK_METHOD_CALL },
             isCustomApp ? app?.url : app?.name || '',
             {
-              method: msg.data.method,
-              ethMethod: (msg.data.params as any)?.call,
-              version: msg.data.env.sdkVersion,
+              sdkEventData: {
+                method: msg.data.method,
+                ethMethod: (msg.data.params as any)?.call,
+                version: msg.data.env.sdkVersion,
+              },
             },
           )
         },

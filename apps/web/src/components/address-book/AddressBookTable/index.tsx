@@ -90,9 +90,11 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
       name: {
         rawValue: name,
         content: name,
+        mobileLabel: 'Name',
       },
       address: {
         rawValue: address,
+        mobileLabel: 'Address',
         content: <EthHashInfo address={address} showName={false} shortAddress={false} hasExplorer showCopyButton />,
       },
       actions: {

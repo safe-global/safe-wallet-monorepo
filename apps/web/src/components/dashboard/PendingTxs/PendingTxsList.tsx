@@ -16,24 +16,27 @@ import { useRecoveryQueue } from '@/features/recovery/hooks/useRecoveryQueue'
 import type { Transaction } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
-import NoTxsIcon from '@/public/images/common/no-txs.svg'
 import { SidebarListItemCounter } from '@/components/sidebar/SidebarList'
 
 const PendingRecoveryListItem = dynamic(() => import('./PendingRecoveryListItem'))
 
 const MAX_TXS = 4
 
+const PendingTxsSkeleton = () => (
+  <Card sx={{ px: 1.5, py: 2.5, height: 1 }} component="section">
+    <Stack direction="row" sx={{ px: 1.5, mb: 1 }}>
+      <Typography fontWeight={700}>Pending transactions</Typography>
+    </Stack>
+
+    <Skeleton height={66} variant="rounded" />
+  </Card>
+)
+
 const EmptyState = () => {
   return (
     <Paper elevation={0} sx={{ p: 5, textAlign: 'center' }}>
-      <NoTxsIcon data-testid="no-tx-icon" />
-
       <Typography mb={0.5} mt={3}>
         No transactions to sign
-      </Typography>
-
-      <Typography data-testid="no-tx-text" variant="body1" color="primary.light">
-        Once you create pending transactions, they will appear here
       </Typography>
     </Paper>
   )
@@ -74,7 +77,7 @@ export function _getTransactionsToDisplay({
 const PendingTxsList = (): ReactElement | null => {
   const router = useRouter()
   const { page, loading } = useTxQueue()
-  const { safe } = useSafeInfo()
+  const { safe, safeLoaded, safeLoading } = useSafeInfo()
   const wallet = useWallet()
   const queuedTxns = useMemo(() => getLatestTransactions(page?.results), [page?.results])
   const recoveryQueue = useRecoveryQueue()
@@ -91,6 +94,9 @@ const PendingTxsList = (): ReactElement | null => {
 
   const totalTxs = recoveryTxs.length + queuedTxs.length
 
+  const isInitialState = !safeLoaded && !safeLoading
+  const isLoading = loading || safeLoading || isInitialState
+
   const queueUrl = useMemo(
     () => ({
       pathname: AppRoutes.transactions.queue,
@@ -99,10 +105,14 @@ const PendingTxsList = (): ReactElement | null => {
     [router.query.safe],
   )
 
-  if (loading) return <Skeleton variant="rounded" height={338} />
+  if (isLoading) return <PendingTxsSkeleton />
 
   return (
-    <Card data-testid="pending-tx-widget" sx={{ px: 1.5, py: 2.5, height: 1 }} component="section">
+    <Card
+      data-testid="pending-tx-widget"
+      sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5, height: 1, width: 1 }}
+      component="section"
+    >
       <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
         <Typography fontWeight={700} className={css.pendingTxHeader}>
           Pending transactions <SidebarListItemCounter count={queueSize} />

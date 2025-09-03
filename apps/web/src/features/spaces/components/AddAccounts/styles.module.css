@@ -1,6 +1,6 @@
 .safeRow {
   display: grid;
-  grid-template-columns: 8fr 3fr;
+  grid-template-columns: 8fr auto;
   align-items: center;
   width: 100%;
 }

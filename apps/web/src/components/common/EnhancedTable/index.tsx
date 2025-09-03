@@ -15,12 +15,13 @@ import { visuallyHidden } from '@mui/utils'
 import classNames from 'classnames'
 
 import css from './styles.module.css'
-import { Collapse } from '@mui/material'
+import { Collapse, Typography } from '@mui/material'
 
 type EnhancedCell = {
   content: ReactNode
   rawValue: string | number | null
   sticky?: boolean
+  mobileLabel?: string
 }
 
 type EnhancedRow = {
@@ -36,6 +37,7 @@ type EnhancedHeadCell = {
   width?: string
   align?: string
   sticky?: boolean
+  disableSort?: boolean
 }
 
 function descendingComparator(a: string | number, b: string | number) {
@@ -91,7 +93,9 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
             }}
             className={classNames({ sticky: headCell.sticky })}
           >
-            {headCell.label && (
+            {headCell.disableSort ? (
+              headCell.label
+            ) : (
               <>
                 <TableSortLabel
                   active={orderBy === headCell.id}
@@ -119,11 +123,12 @@ export type EnhancedTableProps = {
   rows: EnhancedRow[]
   headCells: EnhancedHeadCell[]
   mobileVariant?: boolean
+  compact?: boolean
 }
 
 const pageSizes = [10, 25, 100]
 
-function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
+function EnhancedTable({ rows, headCells, mobileVariant, compact }: EnhancedTableProps) {
   const [order, setOrder] = useState<'asc' | 'desc'>('asc')
   const [orderBy, setOrderBy] = useState<string>('')
   const [page, setPage] = useState<number>(0)
@@ -146,11 +151,24 @@ function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
 
   const orderedRows = orderBy ? rows.slice().sort(getComparator(order, orderBy)) : rows
   const pagedRows = orderedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+  const showPagination = rows.length > pageSizes[0] || rowsPerPage !== pageSizes[1]
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <TableContainer data-testid="table-container" component={Paper} sx={{ width: '100%', mb: 2 }}>
-        <Table aria-labelledby="tableTitle" className={mobileVariant ? css.mobileColumn : undefined}>
+    <Box sx={{ width: '100%', mb: 2 }}>
+      <TableContainer
+        data-testid="table-container"
+        component={Paper}
+        sx={{
+          width: '100%',
+          overflowX: ['auto', 'hidden'],
+          borderBottomLeftRadius: showPagination ? 0 : '6px',
+          borderBottomRightRadius: showPagination ? 0 : '6px',
+        }}
+      >
+        <Table
+          aria-labelledby="tableTitle"
+          className={classNames({ [css.mobileColumn]: mobileVariant, [css.compactTable]: compact })}
+        >
           <EnhancedTableHead headCells={headCells} order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
           <TableBody>
             {pagedRows.length > 0 ? (
@@ -171,6 +189,12 @@ function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
                       })}
                     >
                       <Collapse key={index} in={!row.collapsed} enter={false}>
+                        {cell.mobileLabel ? (
+                          <Typography variant="body2" color="text.secondary" className={css.mobileLabel}>
+                            {cell.mobileLabel}
+                          </Typography>
+                        ) : null}
+
                         {cell.content}
                       </Collapse>
                     </TableCell>
@@ -187,16 +211,20 @@ function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
         </Table>
       </TableContainer>
 
-      {(rows.length > pageSizes[0] || rowsPerPage !== pageSizes[1]) && (
+      {showPagination && (
         <TablePagination
           data-testid="table-pagination"
           rowsPerPageOptions={pageSizes}
-          component="div"
+          component={Paper}
           count={rows.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
+          sx={{
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
+          }}
         />
       )}
     </Box>

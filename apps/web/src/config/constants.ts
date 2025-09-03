@@ -52,14 +52,13 @@ export const SAFE_APPS_GA_TRACKING_ID = process.env.NEXT_PUBLIC_SAFE_APPS_GA_TRA
 export const GA_TRACKING_ID = IS_PRODUCTION ? PROD_GA_TRACKING_ID : TEST_GA_TRACKING_ID
 
 // MixPanel
-export const MIXPANEL_TOKEN = process.env.NEXT_PUBLIC_MIXPANEL_TOKEN || ''
+export const MIXPANEL_TOKEN = process.env.NEXT_PUBLIC_MIXPANEL_TOKEN || 'test-token'
 
 // Safe Apps tags
 export enum SafeAppsTag {
   NFT = 'nft',
   TX_BUILDER = 'transaction-builder',
   SAFE_GOVERNANCE_APP = 'safe-governance-app',
-  ONRAMP = 'onramp',
   RECOVERY_SYGNUM = 'recovery-sygnum',
   SWAP_FALLBACK = 'swap-fallback',
 }
@@ -67,6 +66,7 @@ export enum SafeAppsTag {
 // Safe Apps names
 export enum SafeAppsName {
   CSV = 'CSV Airdrop',
+  TRANSACTION_BUILDER = 'Transaction Builder',
 }
 
 export const RECOVERY_FEEDBACK_FORM =

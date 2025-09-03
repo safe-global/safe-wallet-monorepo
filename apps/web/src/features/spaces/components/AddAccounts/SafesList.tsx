@@ -75,8 +75,7 @@ const SafesList = ({ safes }: { safes: AllSafeItems }) => {
         display: 'flex',
         flexDirection: 'column',
         gap: 1,
-        maxHeight: 400,
-        minHeight: 400,
+        height: 400,
         overflow: 'auto',
       }}
     >
@@ -120,9 +119,9 @@ const SafesList = ({ safes }: { safes: AllSafeItems }) => {
                   sx={{ mr: 2 }}
                   disabled={alreadyAdded}
                 />
-                <Box className={css.safeRow}>
+                <Box className={css.safeRow} pr={4}>
                   <EthHashInfo address={safe.address} copyAddress={false} showPrefix={false} />
-                  <Box sx={{ justifySelf: 'flex-start' }}>
+                  <Box sx={{ justifySelf: 'flex-start', pl: 2 }}>
                     <MultichainIndicator safes={safe.safes} />
                   </Box>
                 </Box>

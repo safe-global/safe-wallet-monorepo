@@ -50,6 +50,7 @@ import OutreachPopup from '@/features/targetedOutreach/components/OutreachPopup'
 import { GATEWAY_URL } from '@/config/gateway'
 import { useDatadog } from '@/services/datadog'
 import useMixpanel from '@/services/analytics/useMixpanel'
+import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 
 const reduxStore = makeStore()
 
@@ -94,7 +95,9 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
           <SentryErrorBoundary showDialog fallback={ErrorBoundary}>
             <WalletProvider>
               <GeoblockingProvider>
-                <TxModalProvider>{children}</TxModalProvider>
+                <TxModalProvider>
+                  <AddressBookSourceProvider>{children}</AddressBookSourceProvider>
+                </TxModalProvider>
               </GeoblockingProvider>
             </WalletProvider>
           </SentryErrorBoundary>
