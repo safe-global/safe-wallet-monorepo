@@ -1,4 +1,14 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Card, Stack, Typography, Skeleton } from '@mui/material'
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Card,
+  Stack,
+  Typography,
+  Tooltip,
+  Chip,
+} from '@mui/material'
 import PositionsHeader from '@/features/positions/components/PositionsHeader'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import FiatValue from '@/components/common/FiatValue'
@@ -12,108 +22,63 @@ import usePositionsFiatTotal from '@/features/positions/hooks/usePositionsFiatTo
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import React from 'react'
 import PositionsUnavailable from './components/PositionsUnavailable'
-import { type EnhancedTableProps } from '@/components/common/EnhancedTable'
-
-const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
-  name: {
-    rawValue: '0x0',
-    content: (
-      <Stack direction="row" alignItems="center" gap={1}>
-        <Skeleton variant="rounded" width="32px" height="32px" />
-        <Box>
-          <Typography>
-            <Skeleton width="100px" />
-          </Typography>
-          <Typography variant="body2">
-            <Skeleton width="80px" />
-          </Typography>
-        </Box>
-      </Stack>
-    ),
-  },
-  balance: {
-    rawValue: '0',
-    content: (
-      <Typography textAlign="right">
-        <Skeleton width="60px" />
-      </Typography>
-    ),
-  },
-  value: {
-    rawValue: '0',
-    content: (
-      <Box textAlign="right">
-        <Typography>
-          <Skeleton width="50px" />
-        </Typography>
-        <Typography variant="caption">
-          <Skeleton width="40px" />
-        </Typography>
-      </Box>
-    ),
-  },
-}
-
-const skeletonRows: EnhancedTableProps['rows'] = Array(3).fill({ cells: skeletonCells })
+import TotalAssetValue from '@/components/balances/TotalAssetValue'
+import PositionsSkeleton from '@/features/positions/components/PositionsSkeleton'
 
 export const Positions = () => {
   const positionsFiatTotal = usePositionsFiatTotal()
   const { data: protocols, error, isLoading } = usePositions()
 
   if (isLoading || (!error && !protocols)) {
-    return (
-      <Stack gap={2}>
-        <Card sx={{ border: 0 }}>
-          <Accordion disableGutters elevation={0} variant="elevation" defaultExpanded>
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon fontSize="small" />}
-              sx={{
-                justifyContent: 'center',
-                overflowX: 'auto',
-                backgroundColor: 'transparent !important',
-              }}
-            >
-              <Stack direction="row" alignItems="center" gap={2} width="100%">
-                <Skeleton variant="rounded" width="40px" height="40px" />
-                <Box flex={1}>
-                  <Typography>
-                    <Skeleton width="120px" />
-                  </Typography>
-                  <Typography variant="body2">
-                    <Skeleton width="80px" />
-                  </Typography>
-                </Box>
-                <Typography>
-                  <Skeleton width="60px" />
-                </Typography>
-              </Stack>
-            </AccordionSummary>
-            <AccordionDetails sx={{ pt: 0 }}>
-              <Box>
-                <EnhancedTable
-                  rows={skeletonRows}
-                  headCells={[
-                    { id: 'name', label: 'Loading...', width: '25%', disableSort: true },
-                    { id: 'balance', label: 'Balance', width: '35%', align: 'right', disableSort: true },
-                    { id: 'value', label: 'Value', width: '40%', align: 'right', disableSort: true },
-                  ]}
-                  compact
-                />
-              </Box>
-            </AccordionDetails>
-          </Accordion>
-        </Card>
-      </Stack>
-    )
+    return <PositionsSkeleton />
   }
 
   if (error || !protocols) return <PositionsUnavailable />
+
   if (protocols.length === 0) {
     return <PositionsEmpty entryPoint="Positions" />
   }
 
   return (
     <Stack gap={2}>
+      <Box>
+        <Box mb={2}>
+          <TotalAssetValue fiatTotal={positionsFiatTotal} title="Total positions value" />
+        </Box>
+
+        <Stack direction="row" alignItems="center" gap={1}>
+          <Typography variant="h4" fontWeight={700}>
+            Positions
+          </Typography>
+          <Tooltip
+            title="Experimental. Data may be missing or outdated."
+            placement="top"
+            arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  maxWidth: { xs: '250px', sm: 'none' },
+                },
+              },
+            }}
+          >
+            <Chip label="Beta" size="small" sx={{ backgroundColor: 'background.lightGrey', letterSpacing: '0.4px' }} />
+          </Tooltip>
+        </Stack>
+
+        <Box mb={1}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'text.secondary',
+              letterSpacing: '1px',
+            }}
+          >
+            Position balances are not included in the total asset value.
+          </Typography>
+        </Box>
+      </Box>
+
       {protocols.map((protocol) => {
         return (
           <Card key={protocol.protocol} sx={{ border: 0 }}>
