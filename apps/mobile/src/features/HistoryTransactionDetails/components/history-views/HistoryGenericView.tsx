@@ -1,5 +1,4 @@
 import React from 'react'
-import { H3 } from 'tamagui'
 import {
   TransactionData,
   Transaction,
@@ -36,11 +35,10 @@ export function HistoryGenericView({ txId, txInfo, txData, executedAt }: History
   return (
     <HistoryTransactionBase
       txId={txId}
-      executedAt={executedAt}
       recipientAddress={recipientAddress}
       badgeIcon="transaction-contract"
       badgeColor="$textSecondaryLight"
-      title={<H3 fontWeight={600}>{transactionLabel}</H3>}
+      transactionType={transactionLabel}
     />
   )
 }

@@ -28,19 +28,12 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
   switch (transactionType) {
     case ETxType.TOKEN_TRANSFER:
     case ETxType.NFT_TRANSFER:
-      return (
-        <HistoryTokenTransfer
-          txId={txDetails.txId}
-          executedAt={txDetails.executedAt as number} // in the history there is no way this is undefined
-          txInfo={txDetails.txInfo as TransferTransactionInfo}
-        />
-      )
+      return <HistoryTokenTransfer txId={txDetails.txId} txInfo={txDetails.txInfo as TransferTransactionInfo} />
 
     case ETxType.SWAP_ORDER:
       return (
         <HistorySwapOrder
           txId={txDetails.txId}
-          executedAt={txDetails.executedAt as number} // in the history there is no way this is undefined
           txInfo={txDetails.txInfo as OrderTransactionInfo | TwapOrderTransactionInfo}
         />
       )
@@ -48,7 +41,6 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
       return (
         <HistoryAddSigner
           txId={txDetails.txId}
-          executedAt={txDetails.executedAt as number} // in the history there is no way this is undefined
           txInfo={txDetails.txInfo as NormalizedSettingsChangeTransaction}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
         />
@@ -57,7 +49,6 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
       return (
         <HistoryRemoveSigner
           txId={txDetails.txId}
-          executedAt={txDetails.executedAt as number} // in the history there is no way this is undefined
           txInfo={txDetails.txInfo as NormalizedSettingsChangeTransaction}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
         />
@@ -66,7 +57,6 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
       return (
         <HistoryChangeThreshold
           txId={txDetails.txId}
-          executedAt={txDetails.executedAt as number} // in the history there is no way this is undefined
           txInfo={txDetails.txInfo as NormalizedSettingsChangeTransaction}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
         />
@@ -77,7 +67,6 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
           txId={txDetails.txId}
           txInfo={txDetails.txInfo as CustomTransactionInfo}
           executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
-          executedAt={txDetails.executedAt as number}
         />
       )
 
