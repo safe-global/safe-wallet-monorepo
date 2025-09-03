@@ -1,6 +1,7 @@
 import { useChain } from '@/hooks/useChains'
 import { type ReactElement } from 'react'
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
+import { useAddressResolver } from '@/hooks/useAddressResolver'
 import useChainId from '@/hooks/useChainId'
 import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
@@ -16,8 +17,10 @@ const EthHashInfo = ({
   const currentChainId = useChainId()
   const chain = useChain(props.chainId || currentChainId)
   const addressBookItem = useAddressBookItem(props.address, chain?.chainId)
+  const { ens, avatar: ensAvatar } = useAddressResolver(props.address)
   const link = chain && props.hasExplorer ? getBlockExplorerLink(chain, props.address) : undefined
-  const name = showName ? addressBookItem?.name || props.name : undefined
+  const name = showName ? props.name || addressBookItem?.name || ens : undefined
+  const customAvatar = props.customAvatar || ensAvatar
 
   return (
     <SrcEthHashInfo
@@ -26,7 +29,7 @@ const EthHashInfo = ({
       {...props}
       name={name}
       addressBookNameSource={props.addressBookNameSource || addressBookItem?.source}
-      customAvatar={props.customAvatar}
+      customAvatar={customAvatar}
       ExplorerButtonProps={{ title: link?.title || '', href: link?.href || '' }}
       avatarSize={avatarSize}
     >
