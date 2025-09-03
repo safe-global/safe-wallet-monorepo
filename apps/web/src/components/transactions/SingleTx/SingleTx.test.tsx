@@ -1,6 +1,6 @@
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { fireEvent, render } from '@/tests/test-utils'
-import SingleTx from '@/pages/transactions/tx'
+import SingleTx from '@/legacy-pages/transactions/tx'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import * as gatewaySDK from '@safe-global/safe-gateway-typescript-sdk'
 import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
