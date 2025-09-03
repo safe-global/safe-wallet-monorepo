@@ -55,6 +55,7 @@ describe('MixPanel Integration', () => {
         batch_requests: true,
         ip: false,
         opt_out_tracking_by_default: true,
+        api_host: 'https://api-eu.mixpanel.com',
       })
 
       // Should register initial params
