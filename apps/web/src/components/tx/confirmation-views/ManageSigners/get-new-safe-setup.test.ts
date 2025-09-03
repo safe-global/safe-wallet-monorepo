@@ -64,7 +64,7 @@ describe('getNewSafeSetup', () => {
     })
 
     expect(result).toEqual({
-      newOwners: [{ value: prevOwner, name: undefined }],
+      newOwners: [{ value: checksumAddress(prevOwner), name: undefined }],
       newThreshold: thresholdToSet,
     })
   })
@@ -99,7 +99,7 @@ describe('getNewSafeSetup', () => {
 
     expect(result).toEqual({
       newOwners: [
-        { value: prevOwner, name: undefined },
+        { value: checksumAddress(prevOwner), name: undefined },
         { value: checksumAddress(ownerToAdd), name: undefined },
       ],
       newThreshold: safe.threshold,
@@ -179,7 +179,7 @@ describe('getNewSafeSetup', () => {
 
     expect(result).toEqual({
       newOwners: [
-        { value: prevOwner, name: undefined },
+        { value: checksumAddress(prevOwner), name: undefined },
         { value: checksumAddress(ownerToAdd), name: undefined },
       ],
       newThreshold: thresholdToSet,
