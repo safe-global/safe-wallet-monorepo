@@ -5,6 +5,7 @@ import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { fireEvent, render, waitFor } from '@/tests/test-utils'
 import * as useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import * as useChainId from '@/hooks/useChainId'
+import * as useAddressResolver from '@/hooks/useAddressResolver'
 import * as store from '@/store'
 import EthHashInfo from '.'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
@@ -16,6 +17,7 @@ const MOCK_CHAIN_ID = '4'
 
 jest.mock('@/hooks/useAllAddressBooks')
 jest.mock('@/hooks/useChainId')
+jest.mock('@/hooks/useAddressResolver')
 
 describe('EthHashInfo', () => {
   beforeEach(() => {
@@ -34,6 +36,13 @@ describe('EthHashInfo', () => {
       createdBy: '0x123',
       lastUpdatedBy: '0x123',
       source: ContactSource.local,
+    }))
+
+    jest.spyOn(useAddressResolver, 'useAddressResolver').mockImplementation(() => ({
+      ens: undefined,
+      name: 'Address book name',
+      avatar: undefined,
+      resolving: false,
     }))
 
     //@ts-ignore

@@ -1,6 +1,6 @@
 import useAddressBook from '@/hooks/useAddressBook'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { lookupAddress } from '@/services/ens'
+import { lookupAddress, getAvatar } from '@/services/ens'
 import { useMemo } from 'react'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useDebounce from './useDebounce'
@@ -17,17 +17,24 @@ export const useAddressResolver = (address: string) => {
 
   const [ens, _, isResolving] = useAsync<string | undefined>(() => {
     if (!shouldResolve) return
+
     return lookupAddress(ethersProvider, debouncedValue)
   }, [ethersProvider, debouncedValue, shouldResolve])
 
-  const resolving = shouldResolve && isResolving
+  const [avatar, __, isResolvingAvatar] = useAsync<string | undefined>(() => {
+    if (!shouldResolve) return
+    return getAvatar(ethersProvider, debouncedValue)
+  }, [ethersProvider, debouncedValue, shouldResolve])
+
+  const resolving = shouldResolve && (isResolving || isResolvingAvatar)
 
   return useMemo(
     () => ({
       ens,
       name: addressBookName,
+      avatar,
       resolving,
     }),
-    [ens, addressBookName, resolving],
+    [ens, addressBookName, avatar, resolving],
   )
 }

@@ -24,7 +24,25 @@ export const resolveName = async (rpcProvider: Provider, name: string): Promise<
 
 export const lookupAddress = async (rpcProvider: Provider, address: string): Promise<string | undefined> => {
   try {
-    return (await rpcProvider.lookupAddress(address)) || undefined
+    const result = await rpcProvider.lookupAddress(address)
+    const finalResult = result || undefined
+    return finalResult
+  } catch (e) {
+    const err = e as EthersError
+    console.log('[ENS Service] Error for address', address, ':', err)
+    logError(ErrorCodes._101, err.reason || err.message)
+  }
+}
+
+export const getAvatar = async (rpcProvider: Provider, address: string): Promise<string | undefined> => {
+  try {
+    const ensName = await lookupAddress(rpcProvider, address)
+    if (!ensName) return undefined
+
+    const resolver = await rpcProvider.getResolver(ensName)
+    if (!resolver) return undefined
+
+    return (await resolver.getAvatar()) || undefined
   } catch (e) {
     const err = e as EthersError
     logError(ErrorCodes._101, err.reason || err.message)
