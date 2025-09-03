@@ -9,6 +9,7 @@ COMPARE_BRANCH=${2:-dev}
 # Arrays for grouping
 features=()
 fixes=()
+mobile=()
 others=()
 
 # Process commits (short hash + subject)
@@ -27,6 +28,8 @@ while IFS="|" read -r hash subject; do
     features+=("| $DESC | $PR |")
   elif [[ $DESC =~ ^([Ff]ix) ]]; then
     fixes+=("| $DESC | $PR |")
+  elif [[ $DESC =~ ^([Mm]obile) ]]; then
+    mobile+=("| $DESC | $PR |")
   else
     others+=("| $DESC | $PR |")
   fi
@@ -52,4 +55,5 @@ print_table () {
 # Print grouped tables
 print_table "🚀 Features" "${features[@]}"
 print_table "🐛 Fixes" "${fixes[@]}"
+print_table "📱 Mobile" "${mobile[@]}"
 print_table "📦 Other" "${others[@]}"
