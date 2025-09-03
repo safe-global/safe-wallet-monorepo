@@ -186,6 +186,7 @@ describe('useRecoveryState', () => {
         dispatch(
           txHistorySlice.actions.set({
             loading: false,
+            loaded: true,
             data: {
               results: [
                 {

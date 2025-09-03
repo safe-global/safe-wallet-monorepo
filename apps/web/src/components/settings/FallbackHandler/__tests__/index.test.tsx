@@ -38,7 +38,7 @@ describe('FallbackHandler', () => {
     )
 
     const fbHandler = render(<FallbackHandler />, {
-      initialReduxState: { chains: { loading: false, data: [mockChain] } },
+      initialReduxState: { chains: { loading: false, loaded: true, data: [mockChain] } },
     })
 
     await waitFor(() => {
@@ -75,7 +75,7 @@ describe('FallbackHandler', () => {
     )
 
     const fbHandler = render(<FallbackHandler />, {
-      initialReduxState: { chains: { loading: false, data: [mockChain] } },
+      initialReduxState: { chains: { loading: false, loaded: true, data: [mockChain] } },
     })
 
     await waitFor(() => {
@@ -108,7 +108,7 @@ describe('FallbackHandler', () => {
     )
 
     const fbHandler = render(<FallbackHandler />, {
-      initialReduxState: { chains: { loading: false, data: [mockChain] } },
+      initialReduxState: { chains: { loading: false, loaded: true, data: [mockChain] } },
     })
 
     await waitFor(() => {

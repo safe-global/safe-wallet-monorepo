@@ -89,6 +89,7 @@ describe('Share Safe App Page', () => {
           data: CONFIG_SERVICE_CHAINS,
           error: undefined,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -118,6 +119,7 @@ describe('Share Safe App Page', () => {
           data: CONFIG_SERVICE_CHAINS,
           error: undefined,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -143,6 +145,7 @@ describe('Share Safe App Page', () => {
           data: CONFIG_SERVICE_CHAINS,
           error: undefined,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -185,6 +188,7 @@ describe('Share Safe App Page', () => {
           data: CONFIG_SERVICE_CHAINS,
           error: undefined,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -230,6 +234,7 @@ describe('Share Safe App Page', () => {
           data: CONFIG_SERVICE_CHAINS,
           error: undefined,
           loading: false,
+          loaded: true,
         },
       },
     })

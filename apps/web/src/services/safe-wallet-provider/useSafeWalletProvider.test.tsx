@@ -48,6 +48,7 @@ describe('useSafeWalletProvider', () => {
         initialReduxState: {
           safeInfo: {
             loading: false,
+            loaded: true,
             error: undefined,
             data: {
               chainId: '1',
@@ -332,6 +333,7 @@ describe('useSafeWalletProvider', () => {
         initialReduxState: {
           chains: {
             loading: false,
+            loaded: true,
             error: undefined,
             data: [{ chainId: '1', shortName: 'eth' } as gateway.ChainInfo],
           },
@@ -394,6 +396,7 @@ describe('useSafeWalletProvider', () => {
       initialReduxState: {
         safeInfo: {
           loading: false,
+          loaded: true,
           error: undefined,
           data: {
             chainId: '1',

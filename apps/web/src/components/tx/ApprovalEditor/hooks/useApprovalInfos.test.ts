@@ -308,9 +308,12 @@ describe('useApprovalInfos', () => {
       primaryType: 'Permit',
     } as const
 
-    jest
-      .spyOn(balances, 'default')
-      .mockReturnValue({ balances: { fiatTotal: '0', items: [mockBalanceItem] }, error: undefined, loading: false })
+    jest.spyOn(balances, 'default').mockReturnValue({
+      balances: { fiatTotal: '0', items: [mockBalanceItem] },
+      error: undefined,
+      loading: false,
+      loaded: true,
+    })
 
     const { result } = renderHook(() => useApprovalInfos({ safeMessage: mockMessage }))
 
@@ -543,9 +546,12 @@ describe('useApprovalInfos', () => {
       },
     }
 
-    jest
-      .spyOn(balances, 'default')
-      .mockReturnValue({ balances: { fiatTotal: '0', items: [mockBalanceItem] }, error: undefined, loading: false })
+    jest.spyOn(balances, 'default').mockReturnValue({
+      balances: { fiatTotal: '0', items: [mockBalanceItem] },
+      error: undefined,
+      loading: false,
+      loaded: true,
+    })
     const testInterface = new Interface(['function approve(address, uint256)'])
 
     const mockSafeTx = createMockSafeTransaction({

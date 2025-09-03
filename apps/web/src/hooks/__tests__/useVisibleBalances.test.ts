@@ -19,6 +19,7 @@ describe('useVisibleBalances', () => {
       balances: balance,
       error: undefined,
       loading: false,
+      loaded: true,
     }))
 
     jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
@@ -35,7 +36,7 @@ describe('useVisibleBalances', () => {
           },
           hiddenTokens: { ['4']: [hiddenTokenAddress] },
         },
-        chains: { data: [], error: undefined, loading: false },
+        chains: { data: [], error: undefined, loading: false, loaded: true },
       } as unknown as store.RootState),
     )
 
@@ -82,6 +83,7 @@ describe('useVisibleBalances', () => {
       balances: balance,
       error: undefined,
       loading: false,
+      loaded: true,
     }))
 
     jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
@@ -98,7 +100,7 @@ describe('useVisibleBalances', () => {
           },
           hiddenTokens: { ['4']: [hiddenTokenAddress] },
         },
-        chains: { data: [], error: undefined, loading: false },
+        chains: { data: [], error: undefined, loading: false, loaded: true },
       } as unknown as store.RootState),
     )
 
@@ -158,11 +160,12 @@ describe('useVisibleBalances', () => {
       balances: balance,
       error: undefined,
       loading: false,
+      loaded: true,
     }))
 
     jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
       selector({
-        balances: { data: balance, error: undefined, loading: false },
+        balances: { data: balance, error: undefined, loading: false, loaded: true },
         settings: {
           currency: 'USD',
           shortName: {
@@ -175,7 +178,7 @@ describe('useVisibleBalances', () => {
           },
           hiddenTokens: { ['4']: [hiddenTokenAddress] },
         },
-        chains: { data: [], error: undefined, loading: false },
+        chains: { data: [], error: undefined, loading: false, loaded: true },
       } as unknown as store.RootState),
     )
 
@@ -223,6 +226,7 @@ describe('useVisibleBalances', () => {
       balances: balance,
       error: undefined,
       loading: false,
+      loaded: true,
     }))
 
     jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
@@ -239,7 +243,7 @@ describe('useVisibleBalances', () => {
           },
           hiddenTokens: { ['4']: [hiddenTokenAddress] },
         },
-        chains: { data: [], error: undefined, loading: false },
+        chains: { data: [], error: undefined, loading: false, loaded: true },
       } as unknown as store.RootState),
     )
 

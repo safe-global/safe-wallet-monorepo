@@ -48,6 +48,7 @@ describe('NamedAddressInfo', () => {
         initialReduxState: {
           chains: {
             loading: false,
+            loaded: true,
             data: [mockChainInfo],
           },
         },
@@ -76,6 +77,7 @@ describe('NamedAddressInfo', () => {
       initialReduxState: {
         chains: {
           loading: false,
+          loaded: true,
           data: [mockChainInfo],
         },
       },
@@ -95,6 +97,7 @@ describe('NamedAddressInfo', () => {
       initialReduxState: {
         chains: {
           loading: false,
+          loaded: true,
           data: [mockChainInfo],
         },
       },
@@ -112,6 +115,7 @@ describe('NamedAddressInfo', () => {
       initialReduxState: {
         chains: {
           loading: false,
+          loaded: true,
           data: [mockChainInfo],
         },
       },
