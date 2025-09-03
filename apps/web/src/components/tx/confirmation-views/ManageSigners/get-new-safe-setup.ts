@@ -22,7 +22,7 @@ export function getNewSafeSetup({
   newOwners: Array<AddressInfo>
   newThreshold: number
 } {
-  let ownerAddresses = safe.owners.map((owner) => owner.value)
+  let ownerAddresses = safe.owners.map((owner) => checksumAddress(owner.value))
   let newThreshold = safe.threshold
 
   for (const data of _getTransactionsData(txInfo, txData)) {
