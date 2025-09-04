@@ -2,8 +2,9 @@ import React from 'react'
 import { useLocalSearchParams } from 'expo-router'
 import { Loader } from '@/src/components/Loader'
 import { Text, View } from 'tamagui'
-import { ReviewAndExecuteView } from './ReviewAndExecuteView'
 import { useTransactionData } from '@/src/features/ConfirmTx/hooks/useTransactionData'
+import { ReviewAndConfirmView } from '@/src/features/ConfirmTx/components/ReviewAndConfirm'
+import { ReviewExecuteFooter } from '@/src/features/ExecuteTx/components/ReviewAndExecute/ReviewExecuteFooter'
 
 export function ReviewAndExecuteContainer() {
   const { txId } = useLocalSearchParams<{ txId: string }>()
@@ -34,5 +35,9 @@ export function ReviewAndExecuteContainer() {
     )
   }
 
-  return <ReviewAndExecuteView txDetails={txDetails} txId={txId} />
+  return (
+    <ReviewAndConfirmView txDetails={txDetails}>
+      <ReviewExecuteFooter txId={txId} />
+    </ReviewAndConfirmView>
+  )
 }
