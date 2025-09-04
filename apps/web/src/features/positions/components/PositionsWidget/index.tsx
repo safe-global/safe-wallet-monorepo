@@ -25,7 +25,7 @@ import PositionsEmpty from '@/features/positions/components/PositionsEmpty'
 import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { POSITIONS_EVENTS, POSITIONS_LABELS } from '@/services/analytics/events/positions'
-import { MixPanelEventParams } from '@/services/analytics/mixpanel-events'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 
 const MAX_PROTOCOLS = 4
 
@@ -151,8 +151,8 @@ const PositionsWidget = () => {
           <Track
             {...POSITIONS_EVENTS.POSITIONS_VIEW_ALL_CLICKED}
             mixpanelParams={{
-              [MixPanelEventParams.TOTAL_VALUE_OF_PORTFOLIO]: positionsFiatTotal || 0,
-              [MixPanelEventParams.ENTRY_POINT]: 'Dashboard',
+              [MixpanelEventParams.TOTAL_VALUE_OF_PORTFOLIO]: positionsFiatTotal || 0,
+              [MixpanelEventParams.ENTRY_POINT]: 'Dashboard',
             }}
           >
             <ViewAllLink url={viewAllUrl} text="View all" />
@@ -188,9 +188,9 @@ const PositionsWidget = () => {
                 onChange={(_, expanded) => {
                   if (expanded) {
                     trackEvent(POSITIONS_EVENTS.POSITION_EXPANDED, {
-                      [MixPanelEventParams.PROTOCOL_NAME]: protocol.protocol,
-                      [MixPanelEventParams.LOCATION]: POSITIONS_LABELS.dashboard,
-                      [MixPanelEventParams.AMOUNT_USD]: protocolValue,
+                      [MixpanelEventParams.PROTOCOL_NAME]: protocol.protocol,
+                      [MixpanelEventParams.LOCATION]: POSITIONS_LABELS.dashboard,
+                      [MixpanelEventParams.AMOUNT_USD]: protocolValue,
                     })
                   }
                 }}

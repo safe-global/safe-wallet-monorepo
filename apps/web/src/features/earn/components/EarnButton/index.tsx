@@ -8,7 +8,7 @@ import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
 import EarnIcon from '@/public/images/common/earn.svg'
 import { EARN_EVENTS, type EARN_LABELS } from '@/services/analytics/events/earn'
-import { MixPanelEventParams } from '@/services/analytics/mixpanel-events'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useCurrentChain } from '@/hooks/useChains'
 import css from './styles.module.css'
 import classnames from 'classnames'
@@ -42,7 +42,7 @@ const EarnButton = ({
         <Track
           {...EARN_EVENTS.EARN_VIEWED}
           mixpanelParams={{
-            [MixPanelEventParams.ENTRY_POINT]: trackingLabel,
+            [MixpanelEventParams.ENTRY_POINT]: trackingLabel,
           }}
         >
           <Button

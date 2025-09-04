@@ -4,7 +4,7 @@ import WcConnectionForm from '../WcConnectionForm'
 import WcErrorMessage from '../WcErrorMessage'
 import { trackEvent } from '@/services/analytics'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
-import { MixPanelEventParams } from '@/services/analytics/mixpanel-events'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { splitError } from '@/features/walletconnect/services/utils'
 import WcProposalForm from '../WcProposalForm'
 
@@ -33,7 +33,7 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
     trackEvent(
       { ...WALLETCONNECT_EVENTS.CONNECTED, label },
       {
-        [MixPanelEventParams.APP_URL]: sessionProposal.params.proposer.metadata.url,
+        [MixpanelEventParams.APP_URL]: sessionProposal.params.proposer.metadata.url,
       },
     )
   }, [sessionProposal, approveSession, setError])
