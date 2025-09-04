@@ -7,6 +7,7 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { router } from 'expo-router'
 import { ContactDisplayNameContainer } from '@/src/features/AddressBook'
 import { Address } from '@/src/types/address'
+import { ActionType } from '@/src/features/ChangeSignerSheet/ChangeSignerSheet.container'
 
 type Props = {
   address: Address
@@ -16,7 +17,9 @@ type Props = {
 export function SelectExecutor({ address, txId }: Props) {
   return (
     <View
-      onPress={() => router.push({ pathname: '/change-executor-sheet', params: { txId } })}
+      onPress={() =>
+        router.push({ pathname: '/change-signer-sheet', params: { txId, actionType: ActionType.EXECUTE } })
+      }
       flexDirection="row"
       justifyContent="center"
       alignItems="center"
