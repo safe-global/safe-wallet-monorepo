@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 import { useLocalSearchParams } from 'expo-router'
 import SignError from './SignError'
 import SignSuccess from './SignSuccess'
-import { useSigningGuard } from './hooks/useSigningGuard'
+import { useTransactionGuard } from '@/src/hooks/useTransactionGuard'
 import { useTransactionSigning } from './hooks/useTransactionSigning'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveSigner } from '@/src/store/activeSignerSlice'
@@ -13,7 +13,7 @@ export function SignTransaction() {
   const { txId } = useLocalSearchParams<{ txId: string }>()
   const activeSafe = useDefinedActiveSafe()
   const activeSigner = useAppSelector((state) => selectActiveSigner(state, activeSafe.address))
-  const { canSign } = useSigningGuard()
+  const { guard: canSign } = useTransactionGuard('signing')
   const { status, executeSign, retry, isApiLoading, isApiError } = useTransactionSigning({
     txId: txId || '',
     signerAddress: activeSigner?.value || '',
