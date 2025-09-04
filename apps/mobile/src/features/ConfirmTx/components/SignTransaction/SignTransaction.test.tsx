@@ -2,7 +2,7 @@ import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react-native'
 import { useLocalSearchParams } from 'expo-router'
 import { SignTransaction } from './SignTransaction'
-import { useSigningGuard } from './hooks/useSigningGuard'
+import { useTransactionGuard } from '@/src/hooks/useTransactionGuard'
 import { useTransactionSigning } from './hooks/useTransactionSigning'
 
 // Mock the hooks
@@ -10,8 +10,8 @@ jest.mock('expo-router', () => ({
   useLocalSearchParams: jest.fn(),
 }))
 
-jest.mock('./hooks/useSigningGuard', () => ({
-  useSigningGuard: jest.fn(),
+jest.mock('@/src/hooks/useTransactionGuard', () => ({
+  useTransactionGuard: jest.fn(),
 }))
 
 jest.mock('./hooks/useTransactionSigning', () => ({
@@ -62,7 +62,7 @@ jest.mock('@/src/components/LoadingScreen', () => ({
 }))
 
 const mockUseLocalSearchParams = useLocalSearchParams as jest.MockedFunction<typeof useLocalSearchParams>
-const mockUseSigningGuard = useSigningGuard as jest.MockedFunction<typeof useSigningGuard>
+const mockUseTransactionGuard = useTransactionGuard as jest.MockedFunction<typeof useTransactionGuard>
 const mockUseTransactionSigning = useTransactionSigning as jest.MockedFunction<typeof useTransactionSigning>
 
 // Get the mocked Redux hooks
@@ -96,8 +96,8 @@ describe('SignTransaction', () => {
     mockUseDefinedActiveSafe.mockReturnValue(mockActiveSafe)
     mockUseAppSelector.mockReturnValue(mockActiveSigner)
 
-    mockUseSigningGuard.mockReturnValue({
-      canSign: true,
+    mockUseTransactionGuard.mockReturnValue({
+      guard: true,
     })
 
     mockUseTransactionSigning.mockReturnValue({
@@ -145,8 +145,8 @@ describe('SignTransaction', () => {
 
   describe('auto-signing logic', () => {
     it('should call executeSign when user can sign and status is idle', async () => {
-      mockUseSigningGuard.mockReturnValue({
-        canSign: true,
+      mockUseTransactionGuard.mockReturnValue({
+        guard: true,
       })
 
       mockUseTransactionSigning.mockReturnValue({
@@ -168,8 +168,8 @@ describe('SignTransaction', () => {
     })
 
     it('should not call executeSign when user cannot sign', () => {
-      mockUseSigningGuard.mockReturnValue({
-        canSign: false,
+      mockUseTransactionGuard.mockReturnValue({
+        guard: false,
       })
 
       render(<SignTransaction />)
@@ -328,8 +328,8 @@ describe('SignTransaction', () => {
     })
 
     it('should render preparation loading screen for idle authorized state', () => {
-      mockUseSigningGuard.mockReturnValue({
-        canSign: true,
+      mockUseTransactionGuard.mockReturnValue({
+        guard: true,
       })
 
       mockUseTransactionSigning.mockReturnValue({
@@ -361,10 +361,10 @@ describe('SignTransaction', () => {
       })
     })
 
-    it('should call useSigningGuard with no parameters', () => {
+    it('should call useTransactionGuard with signing parameter', () => {
       render(<SignTransaction />)
 
-      expect(mockUseSigningGuard).toHaveBeenCalledWith()
+      expect(mockUseTransactionGuard).toHaveBeenCalledWith('signing')
     })
 
     it('should call useDefinedActiveSafe with no parameters', () => {
