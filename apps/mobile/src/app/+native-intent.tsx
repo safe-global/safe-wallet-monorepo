@@ -3,6 +3,7 @@ import { createProtectedRouteAttemptEvent } from '@/src/services/analytics/event
 
 const protectedRoutes: string[] = [
   'sign-transaction',
+  'execute-transaction',
   'import-signers',
   'import-data',
   'app-settings',
