@@ -65,8 +65,6 @@ describe('SwapButton', () => {
 
   it('should map different tracking labels to correct entry points', () => {
     const testCases = [
-      { label: SWAP_LABELS.home, expected: 'Home' },
-      { label: SWAP_LABELS.assets, expected: 'Assets' },
       { label: SWAP_LABELS.asset, expected: 'Assets' },
       { label: SWAP_LABELS.dashboard_assets, expected: 'Home' },
       { label: SWAP_LABELS.sidebar, expected: 'Sidebar' },

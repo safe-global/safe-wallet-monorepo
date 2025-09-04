@@ -13,8 +13,6 @@ describe('GA-MixPanel Mapping', () => {
   })
 
   it('should map GA labels to MixPanel properties correctly', () => {
-    expect(GA_LABEL_TO_MIXPANEL_PROPERTY['home']).toBe('Home')
-    expect(GA_LABEL_TO_MIXPANEL_PROPERTY['assets']).toBe('Assets')
     expect(GA_LABEL_TO_MIXPANEL_PROPERTY['asset']).toBe('Assets')
     expect(GA_LABEL_TO_MIXPANEL_PROPERTY['dashboard_assets']).toBe('Home')
     expect(GA_LABEL_TO_MIXPANEL_PROPERTY['sidebar']).toBe('Sidebar')

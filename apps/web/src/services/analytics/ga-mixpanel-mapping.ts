@@ -28,8 +28,6 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
 
 // Maps GA labels (lowercase) to MixPanel properties (Title Case)
 export const GA_LABEL_TO_MIXPANEL_PROPERTY: Record<string, string> = {
-  home: 'Home',
-  assets: 'Assets',
   asset: 'Assets',
   dashboard_assets: 'Home',
   sidebar: 'Sidebar',
