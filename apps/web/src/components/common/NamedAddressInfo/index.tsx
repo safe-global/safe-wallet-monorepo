@@ -27,9 +27,9 @@ export function useAddressName(address?: string, name?: string | null, customAva
   )
 
   const [ensName] = useAsync(async () => {
-    if (contract?.displayName || !address || !isAddress(address) || !web3) return undefined
+    if (displayName || contract?.displayName || !address || !isAddress(address) || !web3) return undefined
     return lookupAddress(web3, address)
-  }, [address, web3, contract])
+  }, [address, web3, displayName, contract])
 
   const isUnverifiedContract = useIsUnverifiedContract(contract)
 
