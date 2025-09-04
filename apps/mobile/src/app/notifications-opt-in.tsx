@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { useColorScheme } from 'react-native'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 import { OptIn } from '@/src/components/OptIn'
 import { router } from 'expo-router'
 import { useNotificationManager } from '@/src/hooks/useNotificationManager'
@@ -13,7 +13,7 @@ function NotificationsOptIn() {
   const dispatch = useAppDispatch()
   const { isAppNotificationEnabled, enableNotification, isLoading } = useNotificationManager()
 
-  const colorScheme = useColorScheme()
+  const { colorScheme, isDark } = useTheme()
 
   useEffect(() => {
     if (isAppNotificationEnabled) {
@@ -26,10 +26,9 @@ function NotificationsOptIn() {
     router.back()
   }
 
-  const image =
-    colorScheme === 'dark'
-      ? require('@/assets/images/notifications-dark.png')
-      : require('@/assets/images/notifications-light.png')
+  const image = isDark
+    ? require('@/assets/images/notifications-dark.png')
+    : require('@/assets/images/notifications-light.png')
 
   return (
     <View style={{ flex: 1, paddingBottom: bottom }}>

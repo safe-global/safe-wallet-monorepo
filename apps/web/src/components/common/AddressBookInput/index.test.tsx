@@ -3,7 +3,7 @@ import { fireEvent, render, waitFor } from '@/tests/test-utils'
 import { FormProvider, useForm } from 'react-hook-form'
 import AddressBookInput from '.'
 import type { AddressInputProps } from '../AddressInput'
-import { useCurrentChain } from '@/hooks/useChains'
+import * as useChains from '@/hooks/useChains'
 import { faker } from '@faker-js/faker'
 import { chainBuilder } from '@/tests/builders/chains'
 import { FEATURES } from '@safe-global/safe-gateway-typescript-sdk'
@@ -16,13 +16,6 @@ const mockChain = chainBuilder()
   .with({ chainId: '4' })
   .with({ shortName: 'rin' })
   .build()
-
-// mock useCurrentChain
-jest.mock('@/hooks/useChains', () => ({
-  ...jest.requireActual('@/hooks/useChains'),
-  useCurrentChain: jest.fn(() => mockChain),
-  __esModule: true,
-}))
 
 // mock useNameResolver
 jest.mock('@/components/common/AddressInput/useNameResolver', () => ({
@@ -82,7 +75,7 @@ const setup = (
       addressBook: {
         [mockChain.chainId]: initialAddressBook,
       },
-      chains: { data: [mockChain], loading: false },
+      chains: { data: [mockChain], loading: false, loaded: true },
     },
   })
   const input = utils.getByLabelText('Recipient address', { exact: false })
@@ -104,7 +97,7 @@ describe('AddressBookInput', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(useCurrentChain as jest.Mock).mockImplementation(() => mockChain)
+    jest.spyOn(useChains, 'useCurrentChain').mockImplementation(() => mockChain)
   })
 
   it('should not open autocomplete without entries', () => {

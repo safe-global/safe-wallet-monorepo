@@ -1,6 +1,16 @@
 import { useMemo } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { TWAP_FALLBACK_HANDLER, TWAP_FALLBACK_HANDLER_NETWORKS } from '../helpers/utils'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+
+export const useTWAPFallbackHandlerAddress = () => {
+  const { safe } = useSafeInfo()
+
+  return useMemo(
+    () => (TWAP_FALLBACK_HANDLER_NETWORKS.includes(safe.chainId) ? TWAP_FALLBACK_HANDLER : undefined),
+    [safe.chainId],
+  )
+}
 
 /**
  * Hook to check if the Safe's fallback handler (or optionally a provided address) is the TWAP fallback handler.
@@ -9,11 +19,12 @@ import { TWAP_FALLBACK_HANDLER, TWAP_FALLBACK_HANDLER_NETWORKS } from '../helper
  */
 export const useIsTWAPFallbackHandler = (fallbackHandler?: string) => {
   const { safe } = useSafeInfo()
+  const twapFallbackHandler = useTWAPFallbackHandlerAddress()
 
   const fallbackHandlerAddress = fallbackHandler || safe.fallbackHandler?.value
 
   return useMemo(
-    () => fallbackHandlerAddress === TWAP_FALLBACK_HANDLER && TWAP_FALLBACK_HANDLER_NETWORKS.includes(safe.chainId),
-    [fallbackHandlerAddress, safe.chainId],
+    () => sameAddress(fallbackHandlerAddress, twapFallbackHandler),
+    [fallbackHandlerAddress, twapFallbackHandler],
   )
 }

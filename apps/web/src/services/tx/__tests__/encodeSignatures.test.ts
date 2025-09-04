@@ -1,4 +1,4 @@
-import type { SafeSignature, SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SafeSignature, SafeTransaction } from '@safe-global/types-kit'
 import { encodeSignatures } from '../encodeSignatures'
 
 const createSafeTx = (): SafeTransaction => {

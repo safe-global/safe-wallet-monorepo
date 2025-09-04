@@ -5,7 +5,7 @@ import Signature from '@/assets/images/signature.png'
 import { Identicon } from '@/src/components/Identicon'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { router } from 'expo-router'
-import { Contact } from '@/src/features/AddressBook'
+import { ContactDisplayNameContainer } from '@/src/features/AddressBook'
 import { Address } from '@/src/types/address'
 
 type Props = {
@@ -27,7 +27,7 @@ export function SelectSigner({ address, txId }: Props) {
 
       <Identicon address={address} size={24} />
 
-      <Contact address={address} />
+      <ContactDisplayNameContainer address={address} />
 
       <SafeFontIcon name="chevron-right" />
     </View>

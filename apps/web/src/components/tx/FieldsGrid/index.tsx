@@ -7,7 +7,15 @@ export const gridSx = {
   flexWrap: { xl: 'nowrap' },
 }
 
-const FieldsGrid = ({ title, children }: { title: string | ReactNode; children: ReactNode }) => {
+const FieldsGrid = ({
+  title,
+  children,
+  testId,
+}: {
+  title: string | ReactNode
+  children: ReactNode
+  testId?: string
+}) => {
   return (
     <Grid
       container
@@ -17,6 +25,7 @@ const FieldsGrid = ({ title, children }: { title: string | ReactNode; children: 
           flexWrap: gridSx.flexWrap,
         },
       ]}
+      data-testid={testId}
     >
       <Grid item data-testid="tx-row-title" style={{ wordBreak: 'break-word' }} sx={gridSx}>
         <Typography color="primary.light" variant="body2" component="span">

@@ -21,7 +21,7 @@ import { Button, CircularProgress } from '@mui/material'
 import CheckWallet from '@/components/common/CheckWallet'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 
-export type ReviewTransactionContentProps = PropsWithChildren<{ onSubmit: SubmitCallback }>
+export type ReviewTransactionContentProps = PropsWithChildren<{ onSubmit: SubmitCallback; withDecodedData?: boolean }>
 
 export const ReviewTransactionContent = ({
   safeTx,
@@ -30,6 +30,7 @@ export const ReviewTransactionContent = ({
   children,
   txDetails,
   txPreview,
+  withDecodedData = true,
 }: ReviewTransactionContentProps & {
   safeTx: ReturnType<typeof useSafeTx>
   safeTxError: ReturnType<typeof useSafeTxError>
@@ -61,6 +62,7 @@ export const ReviewTransactionContent = ({
           safeTx={safeTx}
           isBatch={isBatch}
           isApproval={isApproval}
+          withDecodedData={withDecodedData}
         >
           {!isRejection && (
             <ErrorBoundary fallback={<div>Error parsing data</div>}>

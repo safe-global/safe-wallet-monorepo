@@ -18,5 +18,9 @@ import '@formatjs/intl-pluralrules/polyfill-force'
 // https://github.com/formatjs/formatjs/blob/main/packages/intl-numberformat/polyfill-force.ts
 import '@formatjs/intl-numberformat/polyfill-force'
 
+// https://github.com/formatjs/formatjs/blob/main/packages/intl-displaynames/polyfill-force.ts
+import '@formatjs/intl-displaynames/polyfill-force'
+
 import '@formatjs/intl-pluralrules/locale-data/en'
 import '@formatjs/intl-numberformat/locale-data/en'
+import '@formatjs/intl-displaynames/locale-data/en'

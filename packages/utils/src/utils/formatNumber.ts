@@ -81,3 +81,23 @@ export const formatCurrencyPrecise = (number: string | number, currency: string)
   const result = getCurrencyFormatter(currency, false, 2, 2).format(Number(number))
   return result.replace(/^(\D+)/, '$1 ')
 }
+
+/**
+ * Safely compute the ratio `balance / total`.
+ *
+ * @param balance  The asset’s fiat balance
+ * @param total    The overall fiat total
+ * @returns A number between 0 and 1.  Returns 0 when the inputs are non-numeric, Infinity, or when total ≤ 0.
+ */
+export function percentageOfTotal(balance: number | string, total: number | string): number {
+  const totalNum = Number(total)
+  const balanceNum = Number(balance)
+
+  // invalid, zero or negative totals → return 0 to avoid division by 0/−n
+  if (!Number.isFinite(totalNum) || totalNum <= 0) return 0
+
+  // invalid balances → treat as 0 so the overall percentage still works
+  if (!Number.isFinite(balanceNum)) return 0
+
+  return balanceNum / totalNum
+}

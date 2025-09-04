@@ -5,10 +5,10 @@ import type {
   OwnershipChangeManagement,
   ProxyUpgradeManagement,
 } from '@safe-global/utils/services/security/modules/BlockaidModule/types'
-import { Alert } from '@/src/components/Alert'
 import { EthAddress } from '@/src/components/EthAddress'
 import { Address } from '@/src/types/address'
 import { CONTRACT_CHANGE_TITLES_MAPPING } from '@safe-global/utils/components/tx/security/blockaid/utils'
+import { Alert } from '@/src/components/Alert'
 
 const ProxyUpgradeSummary = ({ beforeAddress, afterAddress }: { beforeAddress: string; afterAddress: string }) => {
   return (

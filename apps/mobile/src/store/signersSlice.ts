@@ -3,6 +3,7 @@ import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transacti
 
 import { AppDispatch, RootState } from '.'
 import { setActiveSigner } from './activeSignerSlice'
+import { addContact } from './addressBookSlice'
 
 const initialState: Record<string, AddressInfo> = {}
 
@@ -15,22 +16,41 @@ const signersSlice = createSlice({
 
       return state
     },
+    removeSigner: (state, action: PayloadAction<string>) => {
+      const { [action.payload]: _, ...newState } = state
+      return newState
+    },
   },
 })
 
 export const addSignerWithEffects =
   (signerInfo: AddressInfo) => async (dispatch: AppDispatch, getState: () => RootState) => {
     const { activeSafe, activeSigner } = getState()
+    const signerNamePrefix = 'Signer-'
 
     dispatch(addSigner(signerInfo))
 
     if (activeSafe && !activeSigner[activeSafe.address]) {
       dispatch(setActiveSigner({ safeAddress: activeSafe.address, signer: signerInfo }))
     }
+
+    dispatch(addContact({
+      value: signerInfo.value,
+      name: signerNamePrefix + signerInfo.value.slice(-4),
+      chainIds: [],
+    }))
   }
 
-export const { addSigner } = signersSlice.actions
+export const { addSigner, removeSigner } = signersSlice.actions
 
 export const selectSigners = (state: RootState) => state.signers
+
+export const selectSignersByAddress = (state: RootState) => state.signers
+
+export const selectSignerHasPrivateKey = (address: string) => (state: RootState) => {
+  return !!state.signers[address]
+}
+
+export const selectTotalSignerCount = (state: RootState) => Object.keys(state.signers).length
 
 export default signersSlice.reducer

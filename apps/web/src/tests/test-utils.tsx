@@ -7,12 +7,22 @@ import { ThemeProvider } from '@mui/material/styles'
 import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import { type RootState, makeStore, useHydrateStore } from '@/store'
 import * as web3 from '@/hooks/wallets/web3'
-import { type JsonRpcProvider, AbiCoder } from 'ethers'
-import { id } from 'ethers'
 import { Provider } from 'react-redux'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { faker } from '@faker-js/faker'
 import { userEvent } from '@testing-library/user-event'
+import { createMockWeb3Provider, type MockCallImplementation } from '@safe-global/utils/tests/web3Provider'
+
+export const getAppName = (): string => {
+  const isOfficialHost = process.env.NEXT_PUBLIC_IS_OFFICIAL_HOST === 'true'
+  return isOfficialHost ? 'Safe{Wallet}' : 'Wallet fork'
+}
+
+export const createAppNameRegex = (template: string): RegExp => {
+  const appName = getAppName()
+  const escapedAppName = appName.replace(/[{}]/g, '\\$&')
+  return new RegExp(template.replace('{APP_NAME}', escapedAppName))
+}
 
 const mockRouter = (props: Partial<NextRouter> = {}): NextRouter => ({
   asPath: '/',
@@ -86,57 +96,6 @@ function customRenderHook<Result, Props>(
   return renderHook(render, { wrapper, ...options })
 }
 
-type MockCallImplementation = {
-  signature: string
-  returnType: string
-  returnValue: unknown
-}
-
-/**
- * Creates a getWeb3 spy which returns a Web3Provider with a mocked `call` and `resolveName` function.
- *
- * @param callImplementations list of supported function calls and the mocked return value. i.e.
- * ```
- * [{
- *   signature: "balanceOf(address)",
- *   returnType: "uint256",
- *   returnValue: "200"
- * }]
- * ```
- * @param resolveName mock ens resolveName implementation
- * @returns web3provider jest spy
- */
-const mockWeb3Provider = (
-  callImplementations: MockCallImplementation[],
-  resolveName?: (name: string) => string,
-): JsonRpcProvider => {
-  const mockWeb3ReadOnly = {
-    call: jest.fn((tx: { data: string; to: string }) => {
-      {
-        const matchedImplementation = callImplementations.find((implementation) => {
-          return tx.data.startsWith(id(implementation.signature).slice(0, 10))
-        })
-
-        if (!matchedImplementation) {
-          throw new Error(`No matcher for call data: ${tx.data}`)
-        }
-
-        return AbiCoder.defaultAbiCoder().encode(
-          [matchedImplementation.returnType],
-          [matchedImplementation.returnValue],
-        )
-      }
-    }),
-    estimateGas: jest.fn(() => {
-      return Promise.resolve(50_000n)
-    }),
-    _isProvider: true,
-    resolveName,
-  } as unknown as JsonRpcProvider
-  jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockWeb3ReadOnly)
-  return mockWeb3ReadOnly
-}
-
 export const fakerChecksummedAddress = () => checksumAddress(faker.finance.ethereumAddress())
 
 // https://testing-library.com/docs/user-event/intro#writing-tests-with-userevent
@@ -153,10 +112,19 @@ export const renderWithUserEvent = (
   }
 }
 
+export const mockWeb3Provider = (
+  callImplementations: MockCallImplementation[],
+  resolveName?: (name: string) => string,
+  chainId?: string,
+) => {
+  const web3Provider = createMockWeb3Provider(callImplementations, resolveName, chainId)
+  jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(web3Provider)
+  jest.spyOn(web3, 'getWeb3ReadOnly').mockReturnValue(web3Provider)
+  return web3Provider
+}
 // re-export everything
 export * from '@testing-library/react'
 
 // override render method
 export { customRender as render }
 export { customRenderHook as renderHook }
-export { mockWeb3Provider }

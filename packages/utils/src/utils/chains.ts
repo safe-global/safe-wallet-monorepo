@@ -1,5 +1,5 @@
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
+import type { SafeVersion } from '@safe-global/types-kit'
 import { getSafeSingletonDeployment } from '@safe-global/safe-deployments'
 import semverSatisfies from 'semver/functions/satisfies'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
@@ -41,6 +41,11 @@ export enum FEATURES {
   NESTED_SAFES = 'NESTED_SAFES',
   MASS_PAYOUTS = 'MASS_PAYOUTS',
   SPACES = 'SPACES',
+  EARN = 'EARN',
+  MIXPANEL = 'MIXPANEL',
+  POSITIONS = 'POSITIONS',
+  NATIVE_COW_SWAP_FEE_V2 = 'NATIVE_COW_SWAP_FEE_V2',
+  CSV_TX_EXPORT = 'CSV_TX_EXPORT',
 }
 
 const MIN_SAFE_VERSION = '1.3.0'

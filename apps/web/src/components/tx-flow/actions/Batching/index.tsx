@@ -14,6 +14,8 @@ import { BATCH_EVENTS, trackEvent } from '@/services/analytics'
 import { TxCardActions } from '../../common/TxCard'
 import { Box, Divider } from '@mui/material'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
+import { isMultiSendCalldata } from '@/utils/transaction-calldata'
+import { SafeAppsName } from '@/config/constants'
 
 const Batching = ({
   onSubmit,
@@ -80,10 +82,12 @@ const Batching = ({
 
 const useShouldRegisterSlot = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
-  const { isBatch, isProposing, willExecuteThroughRole, isCreation, isBatchable } = useContext(TxFlowContext)
+  const { isBatch, isProposing, willExecuteThroughRole, isCreation, isBatchable, data } = useContext(TxFlowContext)
   const isOwner = useIsSafeOwner()
   const { safeTx } = useContext(SafeTxContext)
   const isDelegateCall = safeTx ? checkIsDelegateCall(safeTx) : false
+  const isMultiSend = Boolean(safeTx && isMultiSendCalldata(safeTx?.data.data))
+  const isFromTxBuilder = data?.app?.name === SafeAppsName.TRANSACTION_BUILDER
 
   return (
     isOwner &&
@@ -92,7 +96,7 @@ const useShouldRegisterSlot = () => {
     !isCounterfactualSafe &&
     !willExecuteThroughRole &&
     !isProposing &&
-    !isDelegateCall &&
+    (!isDelegateCall || (isMultiSend && isFromTxBuilder)) &&
     isBatchable
   )
 }

@@ -19,12 +19,11 @@ import {
   isTransferTxInfo,
   isTxQueued,
 } from './transaction-guards'
-import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types/dist/src/types'
-import { OperationType } from '@safe-global/safe-core-sdk-types/dist/src/types'
 import { getReadOnlyGnosisSafeContract } from '@/services/contracts/safeContracts'
 import extractTxInfo from '@/services/tx/extractTxInfo'
 import type { AdvancedParameters } from '@/components/tx/AdvancedParams'
-import type { SafeTransaction, TransactionOptions } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction, TransactionOptions, MetaTransactionData } from '@safe-global/types-kit'
+import { OperationType } from '@safe-global/types-kit'
 import uniqBy from 'lodash/uniqBy'
 import { Errors, logError } from '@/services/exceptions'
 import { type BaseTransaction } from '@safe-global/safe-apps-sdk'

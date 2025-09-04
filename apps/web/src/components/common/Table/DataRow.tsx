@@ -3,7 +3,7 @@ import { Typography } from '@mui/material'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 
 type DataRowProps = {
-  datatestid?: String
+  datatestid?: string
   title: ReactNode
   children?: ReactNode
 }
@@ -12,8 +12,10 @@ export const DataRow = ({ datatestid, title, children }: DataRowProps): ReactEle
   if (children == undefined) return null
 
   return (
-    <FieldsGrid data-testid={datatestid} title={title}>
-      <Typography variant="body2">{children}</Typography>
+    <FieldsGrid testId={datatestid || ''} title={title}>
+      <Typography variant="body1" component="div">
+        {children}
+      </Typography>
     </FieldsGrid>
   )
 }

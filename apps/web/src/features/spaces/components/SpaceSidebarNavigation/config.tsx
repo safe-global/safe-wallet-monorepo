@@ -15,7 +15,7 @@ export type DynamicNavItem = {
   href: string
   tag?: ReactElement
   disabled?: boolean
-  adminOnly?: boolean
+  activeMemberOnly?: boolean
 }
 
 export const navItems: DynamicNavItem[] = [
@@ -44,14 +44,12 @@ export const navItems: DynamicNavItem[] = [
   {
     label: 'Address book',
     icon: <SvgIcon component={ABIcon} inheritViewBox />,
-    href: '', // TODO: Replace with empty page
-    disabled: true,
-    tag: <Chip label="Soon" sx={{ backgroundColor: 'background.main', color: 'primary.light' }} />,
+    href: AppRoutes.spaces.addressBook,
   },
   {
     label: 'Settings',
     icon: <SvgIcon component={SettingsIcon} inheritViewBox />,
     href: AppRoutes.spaces.settings,
-    adminOnly: true,
+    activeMemberOnly: true,
   },
 ]

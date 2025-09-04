@@ -11,6 +11,7 @@ export const AppRoutes = {
   index: '/',
   imprint: '/imprint',
   home: '/home',
+  earn: '/earn',
   cookie: '/cookie',
   bridge: '/bridge',
   addressBook: '/address-book',
@@ -23,6 +24,7 @@ export const AppRoutes = {
     bookmarked: '/apps/bookmarked',
   },
   balances: {
+    positions: '/balances/positions',
     nfts: '/balances/nfts',
     index: '/balances',
   },
@@ -53,6 +55,7 @@ export const AppRoutes = {
     safeAccounts: '/spaces/safe-accounts',
     members: '/spaces/members',
     index: '/spaces',
+    addressBook: '/spaces/address-book',
   },
   transactions: {
     tx: '/transactions/tx',
@@ -68,3 +71,11 @@ export const AppRoutes = {
     accounts: '/welcome/accounts',
   },
 }
+
+export const UNDEPLOYED_SAFE_BLOCKED_ROUTES = [
+  AppRoutes.bridge,
+  AppRoutes.swap,
+  AppRoutes.stake,
+  AppRoutes.earn,
+  ...Object.values(AppRoutes.apps),
+]

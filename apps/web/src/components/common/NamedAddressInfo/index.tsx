@@ -3,50 +3,42 @@ import useChainId from '@/hooks/useChainId'
 import { getContract } from '@safe-global/safe-gateway-typescript-sdk'
 import EthHashInfo from '../EthHashInfo'
 import type { EthHashInfoProps } from '../EthHashInfo/SrcEthHashInfo'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { memo, useMemo } from 'react'
+import { isAddress } from 'ethers'
 
-const useIsUnverifiedContract = (address?: string, error?: Error): boolean => {
-  const web3 = useWeb3ReadOnly()
-
-  const [isUnverifiedContract] = useAsync<boolean>(async () => {
-    if (!error || !address) return false // Only check via RPC if getContract returned an error
-    const code = await web3?.getCode(address)
-    return code !== '0x'
-  }, [address, web3, error])
-
-  return isUnverifiedContract ?? false
+const useIsUnverifiedContract = (contract?: { contractAbi?: object | null } | null): boolean => {
+  return !!contract && !contract.contractAbi
 }
 
 export function useAddressName(address?: string, name?: string | null, customAvatar?: string) {
   const chainId = useChainId()
+  const safeAddress = useSafeAddress()
+  const displayName = sameAddress(address, safeAddress) ? 'This Safe Account' : name
 
-  const [contract, error] = useAsync(
-    () => (!name && address ? getContract(chainId, address) : undefined),
-    [address, chainId, name],
+  const [contract] = useAsync(
+    () => (!displayName && address && isAddress(address) ? getContract(chainId, address) : undefined),
+    [address, chainId, displayName],
     false,
   )
-
-  const isUnverifiedContract = useIsUnverifiedContract(address, error)
+  const isUnverifiedContract = useIsUnverifiedContract(contract)
 
   return useMemo(
     () => ({
       name:
-        name || contract?.displayName || contract?.name || (isUnverifiedContract ? 'Unverified contract' : undefined),
+        displayName ||
+        contract?.displayName ||
+        contract?.name ||
+        (isUnverifiedContract ? 'Unverified contract' : undefined),
       logoUri: customAvatar || contract?.logoUri,
       isUnverifiedContract,
     }),
-    [name, contract, customAvatar, isUnverifiedContract],
+    [displayName, contract, customAvatar, isUnverifiedContract],
   )
 }
 
 const NamedAddressInfo = ({ address, name, customAvatar, ...props }: EthHashInfoProps) => {
-  const safeAddress = useSafeAddress()
-
-  name = sameAddress(address, safeAddress) ? 'This Safe Account' : name
-
   const { name: finalName, logoUri: finalAvatar } = useAddressName(address, name, customAvatar)
 
   return <EthHashInfo address={address} name={finalName} customAvatar={finalAvatar} {...props} />

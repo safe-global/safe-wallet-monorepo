@@ -59,16 +59,16 @@
       "txHashDAI": "0x7156...3e47",
       "nftHash": "0x3873...6d0b",
       "txHashEth": "0xdc6b...f250",
-      "executionDateDAI": "10/30/2023, 2:37:11 AM",
-      "executionDateNFT": "9/28/2023, 2:48:11 AM",
-      "executionDateEth": "8/19/2020, 8:51:31 AM"
+      "executionDateDAI": "10/30/2023",
+      "executionDateNFT": "9/28/2023",
+      "executionDateEth": "8/19/2020"
     },
     "send": {
       "title": "Sent",
       "summaryTxInfo": "-< 0.00001 ETH",
       "summaryTxInfo2": "-0.0001 ETH",
       "summaryTime": "11:02 AM",
-      "sentTo": "Sent 0.000000000001 ETH to:",
+      "sentTo": "Sent 0.000000000001 ETH to",
       "recipientAddress": "sep:0x06373d5e45AD31BD354CeBfA8dB4eD2c75B8708e",
       "transactionHash": "0x6a59...6a98",
       "altImage": "Sent",
@@ -94,11 +94,7 @@
       "contractTitle": "Safe: MultiSendCallOnly 1.3.0",
       "contractAddress": "sep:0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
       "transactionHash": "0xa5dd...b064",
-      "safeTxHash": "0x4dd0...b2b8",
-      "nativeTransfer": {
-        "title": "native transfer",
-        "description": "Interact with (and send < 0.00001 ETH to)"
-      }
+      "safeTxHash": "0x4dd0...b2b8"
     },
     "addOwner": {
       "title": "addOwnerWithThreshold",
@@ -166,8 +162,8 @@
       "token": "Token",
       "tokenName": "ETH",
       "tokenAlt": "ETH",
-      "baseGas": "baseGas",
-      "operation": "operation",
+      "baseGas": "BaseGas",
+      "operation": "Operation",
       "zero_call": "0 (call)"
     },
     "spendingLimits": {

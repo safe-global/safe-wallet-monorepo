@@ -632,6 +632,53 @@
         "tags": ["balances"]
       }
     },
+    "/v1/chains/{chainId}/safes/{safeAddress}/positions/{fiatCode}": {
+      "get": {
+        "operationId": "positionsGetPositionsV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fiatCode",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Protocol"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["positions"]
+      }
+    },
     "/v1/chains": {
       "get": {
         "operationId": "chainsGetChainsV1",
@@ -1183,6 +1230,91 @@
           }
         },
         "tags": ["contracts"]
+      }
+    },
+    "/v1/export/chains/{chainId}/{safeAddress}": {
+      "post": {
+        "operationId": "csvExportLaunchExportV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "description": "Transaction export request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionExportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobStatusDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["export"]
+      }
+    },
+    "/v1/export/{jobId}/status": {
+      "get": {
+        "operationId": "csvExportGetExportStatusV1",
+        "parameters": [
+          {
+            "name": "jobId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "CSV export status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobStatusDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "CSV export not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobStatusErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["export"]
       }
     },
     "/v1/chains/{chainId}/data-decoder": {
@@ -1750,6 +1882,33 @@
         "tags": ["notifications"]
       }
     },
+    "/v2/notifications/subscriptions": {
+      "delete": {
+        "description": "Delete all subscriptions of a Safe on a device. This will delete all subscriptions of a Safe on a device for all chains passed in the request body.",
+        "operationId": "notificationsDeleteAllSubscriptionsV2",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteAllSubscriptionsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "404": {
+            "description": "No subscription was found"
+          },
+          "422": {
+            "description": "The request body is invalid"
+          }
+        },
+        "summary": "Delete all subscriptions of a device",
+        "tags": ["notifications"]
+      }
+    },
     "/v2/chains/{chainId}/notifications/devices/{deviceUuid}": {
       "delete": {
         "operationId": "notificationsDeleteDeviceV2",
@@ -1937,6 +2096,7 @@
     },
     "/v1/register/notifications": {
       "post": {
+        "deprecated": true,
         "operationId": "notificationsRegisterDeviceV1",
         "parameters": [],
         "requestBody": {
@@ -1954,11 +2114,13 @@
             "description": ""
           }
         },
+        "summary": "",
         "tags": ["notifications"]
       }
     },
     "/v1/chains/{chainId}/notifications/devices/{uuid}": {
       "delete": {
+        "deprecated": true,
         "operationId": "notificationsUnregisterDeviceV1",
         "parameters": [
           {
@@ -1983,11 +2145,13 @@
             "description": ""
           }
         },
+        "summary": "",
         "tags": ["notifications"]
       }
     },
     "/v1/chains/{chainId}/notifications/devices/{uuid}/safes/{safeAddress}": {
       "delete": {
+        "deprecated": true,
         "operationId": "notificationsUnregisterSafeV1",
         "parameters": [
           {
@@ -2020,6 +2184,7 @@
             "description": ""
           }
         },
+        "summary": "",
         "tags": ["notifications"]
       }
     },
@@ -2226,6 +2391,9 @@
               }
             }
           },
+          "400": {
+            "description": "Address book items limit exceeded."
+          },
           "401": {
             "description": "Signer address not provided"
           },
@@ -2234,6 +2402,41 @@
           },
           "404": {
             "description": "User, member or space not found"
+          }
+        },
+        "tags": ["spaces"]
+      }
+    },
+    "/v1/spaces/{spaceId}/address-book/{address}": {
+      "delete": {
+        "operationId": "addressBooksDeleteByAddressV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Address book item deleted"
+          },
+          "403": {
+            "description": "Signer address not present or not authorized"
+          },
+          "404": {
+            "description": "User, member or Space not found"
           }
         },
         "tags": ["spaces"]
@@ -2707,6 +2910,39 @@
           }
         },
         "tags": ["spaces"]
+      },
+      "delete": {
+        "description": "Remove own membership from a space.",
+        "operationId": "membersSelfRemoveV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membership deleted"
+          },
+          "401": {
+            "description": "Signer address not provided"
+          },
+          "403": {
+            "description": "Signer not authorized"
+          },
+          "404": {
+            "description": "Signer or space not found"
+          },
+          "409": {
+            "description": "Cannot remove last admin"
+          }
+        },
+        "summary": "Leave a space",
+        "tags": ["spaces"]
       }
     },
     "/v1/spaces/{spaceId}/members/{userId}/role": {
@@ -2757,6 +2993,45 @@
             "description": "Cannot remove last admin"
           }
         },
+        "tags": ["spaces"]
+      }
+    },
+    "/v1/spaces/{spaceId}/members/alias": {
+      "patch": {
+        "description": "Update the alias of the authenticated member in a space. Users can only update their own alias.",
+        "operationId": "membersUpdateAliasV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMemberAliasDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Alias updated"
+          },
+          "403": {
+            "description": "Signer not authorized"
+          },
+          "404": {
+            "description": "Signer, space or member not found"
+          }
+        },
+        "summary": "Update member alias",
         "tags": ["spaces"]
       }
     },
@@ -2839,6 +3114,7 @@
     },
     "/v1/owners/{ownerAddress}/safes": {
       "get": {
+        "deprecated": true,
         "operationId": "ownersGetAllSafesByOwnerV1",
         "parameters": [
           {
@@ -2862,6 +3138,7 @@
             }
           }
         },
+        "summary": "Deprecated",
         "tags": ["owners"]
       }
     },
@@ -3352,6 +3629,7 @@
     },
     "/v1/chains/{chainId}/multisig-transactions/{safeTxHash}/raw": {
       "get": {
+        "deprecated": true,
         "operationId": "transactionsGetDomainMultisigTransactionBySafeTxHashV1",
         "parameters": [
           {
@@ -3383,11 +3661,13 @@
             }
           }
         },
+        "summary": "Deprecated",
         "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/multisig-transactions/raw": {
       "get": {
+        "deprecated": true,
         "operationId": "transactionsGetDomainMultisigTransactionsV1",
         "parameters": [
           {
@@ -3627,6 +3907,7 @@
             }
           }
         },
+        "summary": "Deprecated",
         "tags": ["transactions"]
       }
     },
@@ -4226,6 +4507,7 @@
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/creation/raw": {
       "get": {
+        "deprecated": true,
         "operationId": "transactionsGetDomainCreationTransactionV1",
         "parameters": [
           {
@@ -4257,6 +4539,7 @@
             }
           }
         },
+        "summary": "Deprecated",
         "tags": ["transactions"]
       }
     }
@@ -4655,6 +4938,112 @@
           }
         },
         "required": ["fiatTotal", "items"]
+<<<<<<< HEAD
+=======
+      },
+      "Position": {
+        "type": "object",
+        "properties": {
+          "balance": {
+            "type": "string"
+          },
+          "fiatBalance": {
+            "type": "string"
+          },
+          "fiatConversion": {
+            "type": "string"
+          },
+          "tokenInfo": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NativeToken"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20Token"
+              },
+              {
+                "$ref": "#/components/schemas/Erc721Token"
+              }
+            ]
+          },
+          "fiatBalance24hChange": {
+            "type": "string",
+            "nullable": true
+          },
+          "position_type": {
+            "type": "string",
+            "enum": ["deposit", "loan", "locked", "staked", "reward", "wallet", "airdrop", "margin", "unknown"],
+            "nullable": true
+          }
+        },
+        "required": ["balance", "fiatBalance", "fiatConversion", "tokenInfo", "fiatBalance24hChange", "position_type"]
+      },
+      "PositionGroup": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/Position"
+                }
+              ]
+            }
+          }
+        },
+        "required": ["name", "items"]
+      },
+      "ProtocolIcon": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["url"]
+      },
+      "ProtocolMetadata": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "icon": {
+            "$ref": "#/components/schemas/ProtocolIcon"
+          }
+        },
+        "required": ["name", "icon"]
+      },
+      "Protocol": {
+        "type": "object",
+        "properties": {
+          "protocol": {
+            "type": "string"
+          },
+          "protocol_metadata": {
+            "$ref": "#/components/schemas/ProtocolMetadata"
+          },
+          "fiatTotal": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/PositionGroup"
+                }
+              ]
+            }
+          }
+        },
+        "required": ["protocol", "protocol_metadata", "fiatTotal", "items"]
+>>>>>>> 62229d06d0b8fb4b90ab3026064618429cab6363
       },
       "GasPriceOracle": {
         "type": "object",
@@ -5442,6 +5831,109 @@
         },
         "required": ["address", "name", "displayName", "logoUri", "trustedForDelegateCall"]
       },
+      "TransactionExportDto": {
+        "type": "object",
+        "properties": {
+          "executionDateGte": {
+            "type": "string",
+            "description": "Execution date greater than or equal to (ISO date string)"
+          },
+          "executionDateLte": {
+            "type": "string",
+            "description": "Execution date less than or equal to (ISO date string)"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of transactions to export"
+          },
+          "offset": {
+            "type": "number",
+            "description": "Number of transactions to start from"
+          }
+        }
+      },
+      "JobStatusDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Job ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Job name"
+          },
+          "data": {
+            "type": "object",
+            "description": "Job data payload"
+          },
+          "timestamp": {
+            "type": "number",
+            "description": "Timestamp when the job was created"
+          },
+          "progress": {
+            "description": "Job progress",
+            "oneOf": [
+              {
+                "type": "number",
+                "example": 50
+              },
+              {
+                "type": "string",
+                "example": "50%"
+              },
+              {
+                "type": "boolean",
+                "example": false
+              },
+              {
+                "type": "object",
+                "example": {
+                  "current": 5,
+                  "total": 10
+                }
+              }
+            ]
+          },
+          "processedOn": {
+            "type": "number",
+            "description": "Timestamp when job processing started"
+          },
+          "finishedOn": {
+            "type": "number",
+            "description": "Timestamp when job finished"
+          },
+          "failedReason": {
+            "type": "string",
+            "description": "Reason for job failure"
+          },
+          "returnValue": {
+            "type": "object",
+            "description": "Job return value"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "data",
+          "timestamp",
+          "progress",
+          "processedOn",
+          "finishedOn",
+          "failedReason",
+          "returnValue"
+        ]
+      },
+      "JobStatusErrorDto": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message"
+          }
+        },
+        "required": ["error"]
+      },
       "TransactionDataDto": {
         "type": "object",
         "properties": {
@@ -5759,6 +6251,41 @@
           }
         },
         "required": ["cloudMessagingToken", "safes", "deviceType"]
+      },
+      "DeleteAllSubscriptionItemDto": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "deviceUuid": {
+            "type": "string"
+          },
+          "safeAddress": {
+            "type": "string"
+          },
+          "signerAddress": {
+            "type": "string",
+            "nullable": true,
+            "description": "Optional signer address filter:\n• Omitted (undefined): Deletes subscriptions regardless of signer address\n• null: Deletes only subscriptions with no signer address\n• Valid address: Deletes only subscriptions with that specific signer address",
+            "example": "0x1234567890123456789012345678901234567890"
+          }
+        },
+        "required": ["chainId", "deviceUuid", "safeAddress"]
+      },
+      "DeleteAllSubscriptionsDto": {
+        "type": "object",
+        "properties": {
+          "subscriptions": {
+            "minItems": 1,
+            "description": "At least one subscription is required",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeleteAllSubscriptionItemDto"
+            }
+          }
+        },
+        "required": ["subscriptions"]
       },
       "TypedDataParameter": {
         "type": "object",
@@ -6503,6 +7030,10 @@
           "name": {
             "type": "string"
           },
+          "alias": {
+            "type": "string",
+            "nullable": true
+          },
           "invitedBy": {
             "type": "string",
             "nullable": true
@@ -6542,6 +7073,16 @@
           }
         },
         "required": ["role"]
+      },
+      "UpdateMemberAliasDto": {
+        "type": "object",
+        "properties": {
+          "alias": {
+            "type": "string",
+            "description": "The new alias for the member"
+          }
+        },
+        "required": ["alias"]
       },
       "SafeList": {
         "type": "object",
@@ -6884,17 +7425,21 @@
           "type": {
             "type": "string",
             "enum": [
+              "Bridge",
               "Creation",
               "Custom",
               "NativeStakingDeposit",
               "NativeStakingValidatorsExit",
               "NativeStakingWithdraw",
               "SettingsChange",
+              "Swap",
+              "SwapAndBridge",
               "SwapOrder",
               "SwapTransfer",
               "Transfer",
               "TwapOrder",
-              "VaultDeposit"
+              "VaultDeposit",
+              "VaultRedeem"
             ]
           },
           "humanDescription": {
@@ -7319,6 +7864,21 @@
         },
         "required": ["type", "sender", "recipient", "direction", "transferInfo"]
       },
+      "BridgeFee": {
+        "type": "object",
+        "properties": {
+          "tokenAddress": {
+            "type": "string"
+          },
+          "integratorFee": {
+            "type": "string"
+          },
+          "lifiFee": {
+            "type": "string"
+          }
+        },
+        "required": ["tokenAddress", "integratorFee", "lifiFee"]
+      },
       "TokenInfo": {
         "type": "object",
         "properties": {
@@ -7349,6 +7909,94 @@
           }
         },
         "required": ["address", "decimals", "name", "symbol", "trusted"]
+      },
+      "BridgeAndSwapTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["SwapAndBridge"]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "fromToken": {
+            "$ref": "#/components/schemas/TokenInfo"
+          },
+          "recipient": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "explorerUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": ["NOT_FOUND", "INVALID", "PENDING", "DONE", "FAILED", "UNKNOWN", "AWAITING_EXECUTION"]
+          },
+          "substatus": {
+            "type": "string",
+            "enum": [
+              "WAIT_SOURCE_CONFIRMATIONS",
+              "WAIT_DESTINATION_TRANSACTION",
+              "BRIDGE_NOT_AVAILABLE",
+              "CHAIN_NOT_AVAILABLE",
+              "REFUND_IN_PROGRESS",
+              "UNKNOWN_ERROR",
+              "COMPLETED",
+              "PARTIAL",
+              "REFUNDED",
+              "INSUFFICIENT_ALLOWANCE",
+              "INSUFFICIENT_BALANCE",
+              "OUT_OF_GAS",
+              "EXPIRED",
+              "SLIPPAGE_EXCEEDED",
+              "UNKNOWN_FAILED_ERROR",
+              "UNKNOWN",
+              "AWAITING_EXECUTION"
+            ]
+          },
+          "fees": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BridgeFee"
+              }
+            ]
+          },
+          "fromAmount": {
+            "type": "string"
+          },
+          "toChain": {
+            "type": "string"
+          },
+          "toToken": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokenInfo"
+              }
+            ]
+          },
+          "toAmount": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "type",
+          "fromToken",
+          "recipient",
+          "explorerUrl",
+          "status",
+          "substatus",
+          "fees",
+          "fromAmount",
+          "toChain",
+          "toToken",
+          "toAmount"
+        ]
       },
       "SwapOrderTransactionInfo": {
         "type": "object",
@@ -7457,6 +8105,47 @@
           "executedFeeToken",
           "owner"
         ]
+      },
+      "SwapTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["Swap"]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "recipient": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "fees": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BridgeFee"
+              }
+            ]
+          },
+          "fromToken": {
+            "$ref": "#/components/schemas/TokenInfo"
+          },
+          "fromAmount": {
+            "type": "string"
+          },
+          "toToken": {
+            "$ref": "#/components/schemas/TokenInfo"
+          },
+          "toAmount": {
+            "type": "string"
+          },
+          "lifiExplorerUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["type", "recipient", "fees", "fromToken", "fromAmount", "toToken", "toAmount", "lifiExplorerUrl"]
       },
       "SwapTransferTransactionInfo": {
         "type": "object",
@@ -7967,17 +8656,45 @@
         },
         "required": ["type", "value", "tokenInfo", "validators"]
       },
-      "VaultDepositAdditionalRewards": {
+      "VaultInfo": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dashboardUri": {
+            "type": "string",
+            "nullable": true
+          },
+          "logoUri": {
+            "type": "string"
+          }
+        },
+        "required": ["address", "name", "description", "logoUri"]
+      },
+      "VaultExtraReward": {
         "type": "object",
         "properties": {
           "tokenInfo": {
             "$ref": "#/components/schemas/TokenInfo"
           },
-          "returnRate": {
+          "nrr": {
             "type": "number"
+          },
+          "claimable": {
+            "type": "string"
+          },
+          "claimableNext": {
+            "type": "string"
           }
         },
-        "required": ["tokenInfo", "returnRate"]
+        "required": ["tokenInfo", "nrr", "claimable", "claimableNext"]
       },
       "VaultDepositTransactionInfo": {
         "type": "object",
@@ -7990,64 +8707,103 @@
             "type": "string",
             "nullable": true
           },
-          "chainId": {
+          "value": {
             "type": "string"
           },
-          "expectedMonthlyReward": {
+          "baseNrr": {
             "type": "number"
           },
-          "expectedAnnualReward": {
+          "fee": {
             "type": "number"
           },
           "tokenInfo": {
             "$ref": "#/components/schemas/TokenInfo"
           },
-          "value": {
-            "type": "number"
+          "vaultInfo": {
+            "$ref": "#/components/schemas/VaultInfo"
           },
-          "returnRate": {
-            "type": "number"
-          },
-          "vaultAddress": {
+          "currentReward": {
             "type": "string"
           },
-          "vaultName": {
-            "type": "string"
-          },
-          "vaultDisplayName": {
-            "type": "string"
-          },
-          "vaultDescription": {
-            "type": "string"
-          },
-          "vaultDashboardURL": {
-            "type": "string",
-            "nullable": true
-          },
-          "vaultTVL": {
+          "additionalRewardsNrr": {
             "type": "number"
           },
           "additionalRewards": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/VaultDepositAdditionalRewards"
+              "$ref": "#/components/schemas/VaultExtraReward"
+            }
+          },
+          "expectedMonthlyReward": {
+            "type": "string"
+          },
+          "expectedAnnualReward": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "value",
+          "baseNrr",
+          "fee",
+          "tokenInfo",
+          "vaultInfo",
+          "currentReward",
+          "additionalRewardsNrr",
+          "additionalRewards",
+          "expectedMonthlyReward",
+          "expectedAnnualReward"
+        ]
+      },
+      "VaultRedeemTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["VaultRedeem"]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string"
+          },
+          "baseNrr": {
+            "type": "number"
+          },
+          "fee": {
+            "type": "number"
+          },
+          "tokenInfo": {
+            "$ref": "#/components/schemas/TokenInfo"
+          },
+          "vaultInfo": {
+            "$ref": "#/components/schemas/VaultInfo"
+          },
+          "currentReward": {
+            "type": "string"
+          },
+          "additionalRewardsNrr": {
+            "type": "number"
+          },
+          "additionalRewards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VaultExtraReward"
             }
           }
         },
         "required": [
           "type",
-          "chainId",
-          "expectedMonthlyReward",
-          "expectedAnnualReward",
-          "tokenInfo",
           "value",
-          "returnRate",
-          "vaultAddress",
-          "vaultName",
-          "vaultDisplayName",
-          "vaultDescription",
-          "vaultDashboardURL",
-          "vaultTVL"
+          "baseNrr",
+          "fee",
+          "tokenInfo",
+          "vaultInfo",
+          "currentReward",
+          "additionalRewardsNrr",
+          "additionalRewards"
         ]
       },
       "TransactionData": {
@@ -8283,6 +9039,12 @@
                 "$ref": "#/components/schemas/SwapOrderTransactionInfo"
               },
               {
+                "$ref": "#/components/schemas/BridgeAndSwapTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/SwapTransactionInfo"
+              },
+              {
                 "$ref": "#/components/schemas/SwapTransferTransactionInfo"
               },
               {
@@ -8299,6 +9061,9 @@
               },
               {
                 "$ref": "#/components/schemas/VaultDepositTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/VaultRedeemTransactionInfo"
               }
             ],
             "allOf": [
@@ -8372,9 +9137,6 @@
             "type": "string"
           },
           "data": {
-            "type": "object"
-          },
-          "dataDecoded": {
             "type": "object"
           },
           "operation": {
@@ -8462,7 +9224,6 @@
           "to",
           "value",
           "data",
-          "dataDecoded",
           "operation",
           "gasToken",
           "safeTxGas",
@@ -8575,6 +9336,12 @@
                 "$ref": "#/components/schemas/SwapOrderTransactionInfo"
               },
               {
+                "$ref": "#/components/schemas/BridgeAndSwapTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/SwapTransactionInfo"
+              },
+              {
                 "$ref": "#/components/schemas/SwapTransferTransactionInfo"
               },
               {
@@ -8591,6 +9358,9 @@
               },
               {
                 "$ref": "#/components/schemas/VaultDepositTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/VaultRedeemTransactionInfo"
               }
             ],
             "allOf": [
@@ -8816,6 +9586,12 @@
                 "$ref": "#/components/schemas/SwapOrderTransactionInfo"
               },
               {
+                "$ref": "#/components/schemas/BridgeAndSwapTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/SwapTransactionInfo"
+              },
+              {
                 "$ref": "#/components/schemas/SwapTransferTransactionInfo"
               },
               {
@@ -8832,6 +9608,9 @@
               },
               {
                 "$ref": "#/components/schemas/VaultDepositTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/VaultRedeemTransactionInfo"
               }
             ],
             "allOf": [
@@ -9097,21 +9876,9 @@
           },
           "saltNonce": {
             "type": "object"
-          },
-          "dataDecoded": {
-            "type": "object"
           }
         },
-        "required": [
-          "created",
-          "creator",
-          "transactionHash",
-          "factoryAddress",
-          "masterCopy",
-          "setupData",
-          "saltNonce",
-          "dataDecoded"
-        ]
+        "required": ["created", "creator", "transactionHash", "factoryAddress", "masterCopy", "setupData", "saltNonce"]
       }
     }
   }

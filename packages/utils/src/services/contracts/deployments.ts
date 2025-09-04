@@ -12,7 +12,7 @@ import {
 import type { SingletonDeployment, DeploymentFilter, SingletonDeploymentV2 } from '@safe-global/safe-deployments'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
+import { type SafeVersion } from '@safe-global/types-kit'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
@@ -28,6 +28,24 @@ export const hasCanonicalDeployment = (deployment: SingletonDeploymentV2 | undef
   const networkAddresses = toNetworkAddressList(deployment.networkAddresses[chainId])
 
   return networkAddresses.some((networkAddress) => sameAddress(canonicalAddress, networkAddress))
+}
+
+/**
+ * Returns the canonical address for a deployment on a given network if available and present,
+ * otherwise returns the first network-specific address. Undefined if no deployment.
+ */
+export const getCanonicalOrFirstAddress = (
+  deployment: SingletonDeploymentV2 | undefined,
+  chainId: string,
+): string | undefined => {
+  if (!deployment) return undefined
+
+  if (hasCanonicalDeployment(deployment, chainId)) {
+    return deployment.deployments.canonical?.address
+  }
+
+  const addresses = toNetworkAddressList(deployment.networkAddresses[chainId] ?? [])
+  return addresses[0]
 }
 
 /**

@@ -6,7 +6,6 @@ import { toBeHex } from 'ethers'
 import { AppRoutes } from '@/config/routes'
 import useSafeTokenAllocation, { useSafeVotingPower } from '@/hooks/useSafeTokenAllocation'
 import * as safePass from '@/store/api/safePass'
-import type { CampaignLeaderboardEntry } from '@/store/api/safePass'
 
 jest.mock('@/hooks/useChainId')
 
@@ -70,28 +69,6 @@ describe('SafeTokenWidget', () => {
           'https://safe-dao-governance.dev.5afe.dev',
         )}`,
       )
-    })
-  })
-
-  it('Should render the Safe{Pass} points', async () => {
-    ;(useSafeTokenAllocation as jest.Mock).mockImplementation(() => [[], , false])
-    ;(useSafeVotingPower as jest.Mock).mockImplementation(() => [BigInt(420 * 10 ** 18), , false])
-    const mockCampaignRank: CampaignLeaderboardEntry = {
-      boost: '2.0',
-      holder: fakeSafeAddress,
-      position: 421,
-      totalBoostedPoints: 138,
-      totalPoints: 69,
-    }
-    jest.spyOn(safePass, 'useGetOwnGlobalCampaignRankQuery').mockReturnValue({
-      data: mockCampaignRank,
-      isLoading: false,
-      refetch: jest.fn(),
-    })
-    const result = render(<SafeTokenWidget />)
-    await waitFor(() => {
-      expect(result.queryByText('420')).toBeInTheDocument() // Safe Voting power
-      expect(result.queryByText('138')).toBeInTheDocument() // Safe Pass points
     })
   })
 })

@@ -8,7 +8,6 @@ import { modalHeader } from '../pages/modals.page'
 import { moduleRemoveIcon } from '../pages/modules.page'
 
 export const setupRecoveryBtn = '[data-testid="setup-recovery-btn"]'
-export const setupRecoveryModalBtn = '[data-testid="setup-btn"]'
 const recoveryNextBtn = '[data-testid="next-btn"]'
 const warningSection = '[data-testid="warning-section"]'
 const termsCheckbox = 'input[type="checkbox"]'
@@ -27,7 +26,7 @@ const executeFormBtn = '[data-testid="execute-form-btn"]'
 const advancedBtn = '[data-testid="advanced-btn"]'
 const recoveryProposalModal = '[data-testid="recovery-proposal"]'
 const recoveryProposalHorizontal = '[data-testid="recovery-proposal-hr"]'
-const recoveryModalTitle = 'How does recovery work?'
+const recoveryModalTitle = 'How does recovery work'
 
 export const recoveryOptions = {
   customPeriod: 'Custom period',
@@ -109,10 +108,6 @@ export function getSetupRecoveryBtn() {
 
 export function clickOnSetupRecoveryBtn() {
   getSetupRecoveryBtn().click()
-}
-
-export function clickOnSetupRecoveryModalBtn() {
-  cy.get(setupRecoveryModalBtn).click()
 }
 
 export function clickOnNextBtn() {

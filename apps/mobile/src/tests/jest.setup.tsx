@@ -140,6 +140,11 @@ jest.mock('@notifee/react-native', () => {
       DEFAULT: 3,
       HIGH: 4,
     },
+    AndroidVisibility: {
+      SECRET: -1,
+      PRIVATE: 0,
+      PUBLIC: 1,
+    },
   }
 })
 
@@ -201,7 +206,94 @@ jest.mock('@react-native-clipboard/clipboard', () => ({
   getString: jest.fn(),
 }))
 
+jest.mock('react-native-quick-crypto', () => ({
+  default: {
+    randomBytes: jest.fn((size) => Buffer.alloc(size)),
+    createHash: jest.fn(() => ({
+      update: jest.fn().mockReturnThis(),
+      digest: jest.fn(() => Buffer.from('mockedHash')),
+    })),
+    pbkdf2Sync: jest.fn(() => Buffer.alloc(32)),
+    createCipheriv: jest.fn(() => ({
+      update: jest.fn(() => Buffer.from([])),
+      final: jest.fn(() => Buffer.from([])),
+      getAuthTag: jest.fn(() => Buffer.alloc(16)),
+      setAuthTag: jest.fn(),
+    })),
+    createDecipheriv: jest.fn(() => ({
+      update: jest.fn(() => Buffer.from([])),
+      final: jest.fn(() => Buffer.from([])),
+      setAuthTag: jest.fn(),
+    })),
+  },
+  randomBytes: jest.fn((size) => Buffer.alloc(size)),
+  createHash: jest.fn(() => ({
+    update: jest.fn().mockReturnThis(),
+    digest: jest.fn(() => Buffer.from('mockedHash')),
+  })),
+  pbkdf2Sync: jest.fn(() => Buffer.alloc(32)),
+  createCipheriv: jest.fn(() => ({
+    update: jest.fn(() => Buffer.from([])),
+    final: jest.fn(() => Buffer.from([])),
+    getAuthTag: jest.fn(() => Buffer.alloc(16)),
+    setAuthTag: jest.fn(),
+  })),
+  createDecipheriv: jest.fn(() => ({
+    update: jest.fn(() => Buffer.from([])),
+    final: jest.fn(() => Buffer.from([])),
+    setAuthTag: jest.fn(),
+  })),
+}))
+
 jest.mock('react-native-safe-area-context', () => mockSafeAreaContext)
+
+jest.mock('@react-native-firebase/analytics', () => {
+  const mockAnalytics = {
+    logEvent: jest.fn(() => Promise.resolve()),
+    setAnalyticsCollectionEnabled: jest.fn(() => Promise.resolve()),
+    setUserId: jest.fn(() => Promise.resolve()),
+    setUserProperty: jest.fn(() => Promise.resolve()),
+    setUserProperties: jest.fn(() => Promise.resolve()),
+    resetAnalyticsData: jest.fn(() => Promise.resolve()),
+    setDefaultEventParameters: jest.fn(() => Promise.resolve()),
+    setSessionTimeoutDuration: jest.fn(() => Promise.resolve()),
+  }
+
+  return {
+    __esModule: true,
+    default: () => mockAnalytics,
+    getAnalytics: jest.fn(() => mockAnalytics),
+    firebase: {
+      analytics: jest.fn(() => mockAnalytics),
+    },
+  }
+})
+
+jest.mock('@react-native-firebase/crashlytics', () => {
+  const mockCrashlytics = {
+    crash: jest.fn(() => Promise.resolve()),
+    log: jest.fn(() => Promise.resolve()),
+    recordError: jest.fn(() => Promise.resolve()),
+    setAttribute: jest.fn(() => Promise.resolve()),
+    setAttributes: jest.fn(() => Promise.resolve()),
+    setUserId: jest.fn(() => Promise.resolve()),
+    setCrashlyticsCollectionEnabled: jest.fn(() => Promise.resolve()),
+    checkForUnsentReports: jest.fn(() => Promise.resolve(false)),
+    deleteUnsentReports: jest.fn(() => Promise.resolve()),
+    didCrashOnPreviousExecution: jest.fn(() => Promise.resolve(false)),
+    sendUnsentReports: jest.fn(() => Promise.resolve()),
+    setCustomKey: jest.fn(() => Promise.resolve()),
+  }
+
+  return {
+    __esModule: true,
+    default: () => mockCrashlytics,
+    getCrashlytics: jest.fn(() => mockCrashlytics),
+    firebase: {
+      crashlytics: jest.fn(() => mockCrashlytics),
+    },
+  }
+})
 
 beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())

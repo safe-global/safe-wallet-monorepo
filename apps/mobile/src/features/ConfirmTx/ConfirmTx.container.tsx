@@ -3,38 +3,30 @@ import { ScrollView, View } from 'tamagui'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import { NavBarTitle } from '@/src/components/Title'
 import { TransactionInfo } from './components/TransactionInfo'
-import {
-  MultisigExecutionDetails,
-  useTransactionsGetTransactionByIdV1Query,
-} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import { ConfirmationView } from './components/ConfirmationView'
 import { LoadingTx } from './components/LoadingTx'
-import { useTxSigner } from './hooks/useTxSigner'
 import { Alert } from '@/src/components/Alert'
 import { ConfirmTxForm } from './components/ConfirmTxForm'
+import { useTransactionSigner } from './hooks/useTransactionSigner'
+import { useTxSignerAutoSelection } from './hooks/useTxSignerAutoSelection'
 
 function ConfirmTxContainer() {
-  const activeSafe = useDefinedActiveSafe()
   const txId = useRoute<RouteProp<{ params: { txId: string } }>>().params.txId
+
+  const { txDetails, detailedExecutionInfo, isLoading, isError } = useTransactionSigner(txId)
+
+  useTxSignerAutoSelection(detailedExecutionInfo)
 
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle paddingRight={5}>Confirm transaction</NavBarTitle>,
     alwaysVisible: true,
   })
 
-  const { data, isFetching, isError } = useTransactionsGetTransactionByIdV1Query({
-    chainId: activeSafe.chainId,
-    id: txId,
-  })
-
-  const detailedExecutionInfo = data?.detailedExecutionInfo as MultisigExecutionDetails
-  const { activeSigner, hasSigned, canSign } = useTxSigner(detailedExecutionInfo)
   const hasEnoughConfirmations =
     detailedExecutionInfo?.confirmationsRequired <= detailedExecutionInfo?.confirmations?.length
 
-  if (isFetching || !data) {
+  if (isLoading || !txDetails) {
     return <LoadingTx />
   }
 
@@ -46,26 +38,19 @@ function ConfirmTxContainer() {
     )
   }
 
-  const isExpired = 'status' in data.txInfo && data.txInfo.status === 'expired'
+  const isExpired = 'status' in txDetails.txInfo && txDetails.txInfo.status === 'expired'
 
   return (
     <View flex={1}>
       <ScrollView onScroll={handleScroll}>
         <View paddingHorizontal="$4">
-          <ConfirmationView txDetails={data} />
+          <ConfirmationView txDetails={txDetails} />
         </View>
-        <TransactionInfo txId={txId} detailedExecutionInfo={detailedExecutionInfo} />
+        <TransactionInfo txId={txId} detailedExecutionInfo={detailedExecutionInfo} txDetails={txDetails} />
       </ScrollView>
 
       <View paddingTop="$1">
-        <ConfirmTxForm
-          hasSigned={Boolean(hasSigned)}
-          hasEnoughConfirmations={hasEnoughConfirmations}
-          activeSigner={activeSigner}
-          canSign={canSign}
-          isExpired={isExpired}
-          txId={txId}
-        />
+        <ConfirmTxForm hasEnoughConfirmations={hasEnoughConfirmations} isExpired={isExpired} txId={txId} />
       </View>
     </View>
   )

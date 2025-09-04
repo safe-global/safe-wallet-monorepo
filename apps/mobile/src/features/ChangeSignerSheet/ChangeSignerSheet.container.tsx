@@ -1,13 +1,13 @@
 import { SafeBottomSheet } from '@/src/components/SafeBottomSheet'
 import React, { useMemo } from 'react'
-import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
+import { useAppSelector } from '@/src/store/hooks'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { RootState } from '@/src/store'
 import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard'
 import { Text, View } from 'tamagui'
 import { Address } from 'blo'
 import { SignerInfo } from '@/src/types/address'
-import { selectActiveSigner, setActiveSigner } from '@/src/store/activeSignerSlice'
+import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { selectSigners } from '@/src/store/signersSlice'
 import { useGetBalancesQuery } from '@/src/store/signersBalance'
 import { selectChainById } from '@/src/store/chains'
@@ -17,10 +17,11 @@ import { formatValue } from '@/src/utils/formatters'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import { extractAppSigners } from '../ConfirmTx/utils'
-import { ContactContainer } from '../AddressBook/Contact.container'
+import { ContactDisplayNameContainer } from '../AddressBook'
+import { useTxSignerActions } from '../ConfirmTx/hooks/useTxSignerActions'
 
 export const ChangeSignerSheetContainer = () => {
-  const dispatch = useAppDispatch()
+  const { setTxSigner } = useTxSignerActions()
   const activeSafe = useDefinedActiveSafe()
   const signers = useAppSelector(selectSigners)
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
@@ -58,7 +59,7 @@ export const ChangeSignerSheetContainer = () => {
 
   const onSignerPress = (signer: SignerInfo, onClose: () => void) => () => {
     if (activeSigner.value !== signer.value) {
-      dispatch(setActiveSigner({ safeAddress: activeSafe.address, signer }))
+      setTxSigner(signer)
     }
 
     onClose()
@@ -79,7 +80,7 @@ export const ChangeSignerSheetContainer = () => {
           <SignersCard
             transparent
             onPress={onSignerPress(item, onClose)}
-            name={<ContactContainer address={item.value as Address} />}
+            name={<ContactDisplayNameContainer address={item.value as Address} />}
             address={item.value as Address}
             rightNode={
               <Text>

@@ -1,7 +1,8 @@
 import { Camera, useCodeScanner, useCameraDevice, Code, CameraPermissionStatus } from 'react-native-vision-camera'
 import { View, Theme, H3, getTokenValue } from 'tamagui'
-import { Dimensions, Linking, Pressable, StyleSheet, useColorScheme, useWindowDimensions } from 'react-native'
-import React, { useCallback, useEffect } from 'react'
+import { Dimensions, Linking, Pressable, StyleSheet, useWindowDimensions } from 'react-native'
+import { useTheme } from '@/src/theme/hooks/useTheme'
+import React, { useCallback } from 'react'
 import { useRouter } from 'expo-router'
 
 const { width } = Dimensions.get('window')
@@ -63,13 +64,9 @@ function CameraLens({
   onActivateCamera: () => void
   isCameraActive: boolean
 }) {
-  const colorScheme = useColorScheme()
+  const { isDark } = useTheme()
 
-  let color = getTokenValue('$color.textPrimaryDark')
-
-  if (colorScheme === 'light') {
-    color = getTokenValue('$color.textPrimaryLight')
-  }
+  const color = isDark ? getTokenValue('$color.textPrimaryDark') : getTokenValue('$color.textPrimaryLight')
 
   const handleGrantOrActivatePress = useCallback(async () => {
     if (!hasPermission) {
@@ -124,29 +121,21 @@ export const QrCamera = ({
   const { height } = useWindowDimensions()
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
-    onCodeScanned: (codes) => {
-      onScan(codes)
-    },
+    onCodeScanned: onScan,
   })
 
   const openSettings = useCallback(async () => {
     await Linking.openSettings()
   }, [])
 
-  // Effect to automatically activate camera once permission is granted
-  useEffect(() => {
-    if (permission === 'granted' && hasPermission && !isCameraActive) {
-      onActivateCamera()
-    }
-  }, [permission, hasPermission, isCameraActive, onActivateCamera])
-
   const denied = permission === 'denied'
+  const granted = permission === 'granted'
 
   return (
     <Theme name={'dark'}>
       <View style={styles.container}>
-        {/* Only render Camera when active and device is available */}
-        {isCameraActive && device && (
+        {/* Only render Camera device is available */}
+        {device && granted && (
           <Camera style={StyleSheet.absoluteFill} device={device} isActive={isCameraActive} codeScanner={codeScanner} />
         )}
 
@@ -238,7 +227,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: CORNER_SIZE,
     height: CORNER_SIZE,
-    borderColor: '#00FF00',
   },
   topLeft: {
     top: 0,

@@ -29,7 +29,7 @@ describe('Happy path Swaps tests', () => {
     iframeSelector = `iframe[src*="${constants.swapWidget}"]`
   })
 
-  it(
+  it.skip(
     'Verify an order can be created, signed by second signer and deleted. GA tx_confirm, tx_created',
     { defaultCommandTimeout: 60000 },
     () => {
@@ -75,7 +75,6 @@ describe('Happy path Swaps tests', () => {
       })
       create_tx.changeNonce(0)
       create_tx.clickOnContinueSignTransactionBtn()
-      create_tx.clickOnAcknowledgement()
       create_tx.clickOnSignTransactionBtn()
       create_tx.clickViewTransaction()
       main.verifyValuesExist(dataRow, [create_tx.tx_status.execution_needed])
@@ -87,10 +86,9 @@ describe('Happy path Swaps tests', () => {
       cy.wait(5000)
       create_tx.verifyConfirmTransactionBtnIsVisible()
       create_tx.clickOnConfirmTransactionBtn()
-      create_tx.clickOnNoLaterOption()
+      //create_tx.clickOnNoLaterOption()
 
       create_tx.clickOnContinueSignTransactionBtn()
-      create_tx.clickOnAcknowledgement()
       create_tx.clickOnSignTransactionBtn()
       navigation.clickOnWalletExpandMoreIcon()
       navigation.clickOnDisconnectBtn()

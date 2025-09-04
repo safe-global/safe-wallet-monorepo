@@ -2,7 +2,7 @@ import { safeSignatureBuilder, safeTxBuilder } from '@/tests/builders/safeTx'
 import { act, fireEvent, getAllByTitle, render, waitFor } from '@/tests/test-utils'
 import ApprovalEditor from '.'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
-import { OperationType } from '@safe-global/safe-core-sdk-types'
+import { OperationType } from '@safe-global/types-kit'
 import * as approvalInfos from '@/components/tx/ApprovalEditor/hooks/useApprovalInfos'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { faker } from '@faker-js/faker'
@@ -188,6 +188,7 @@ describe('ApprovalEditor', () => {
         balances: {
           data: mockBalances,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -298,6 +299,7 @@ describe('ApprovalEditor', () => {
         balances: {
           data: mockBalances,
           loading: false,
+          loaded: true,
         },
       },
     })

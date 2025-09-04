@@ -10,12 +10,22 @@
   border: 1px solid var(--color-secondary-light);
 }
 
+.compactContainer {
+  transition: none;
+  border: 1px solid var(--color-border-light);
+}
+
+.compactContainer:hover {
+  background-color: var(--color-background-main);
+  border: 1px solid var(--color-border-light);
+}
+
 .safeAppHeader {
   padding: var(--space-3) var(--space-2) 0 var(--space-2);
 }
 
 .safeAppContent {
-  padding: var(--space-2);
+  padding: var(--space-2) !important;
 }
 
 .safeAppIconContainer {

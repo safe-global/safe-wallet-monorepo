@@ -4,5 +4,5 @@
   "trailingComma": "all",
   "singleQuote": true,
   "semi": false,
-  "endOfLine": "auto"
+  "endOfLine": "lf"
 }

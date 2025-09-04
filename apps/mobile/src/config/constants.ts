@@ -17,6 +17,10 @@ export const GATEWAY_URL_PRODUCTION =
 export const GATEWAY_URL_STAGING = process.env.EXPO_PUBLIC_GATEWAY_URL_STAGING || 'https://safe-client.staging.5afe.dev'
 export const GATEWAY_URL = isProduction ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
 
+export const SECURITY_CERTIFICATE_HASH_BASE64 = process.env.EXPO_PUBLIC_SECURITY_SERTIFICATE_HASH_BASE64
+export const SECURITY_WATCHER_MAIL = process.env.EXPO_PUBLIC_SECURITY_WATCHER_MAIL
+export const SECURITY_RASP_ENABLED = process.env.EXPO_PUBLIC_SECURITY_RASP_ENABLED === 'true'
+
 /**
  * The version of the onboarding flow.
  * If we change it and need all users to see it again, we can bump the version here.
@@ -27,3 +31,8 @@ export const SAFE_WEB_URL = 'https://app.safe.global'
 export const SAFE_WEB_TRANSACTIONS_URL = `${SAFE_WEB_URL}/transactions/tx?safe=:safeAddressWithChainPrefix&id=:txId`
 export const SAFE_WEB_FEEDBACK_URL =
   'https://docs.google.com/forms/d/e/1FAIpQLSfJXkNNsZqVtg3w3dwk-YrTNutQ00n3MMfLtH-dN8zSHaJu5Q/viewform?usp=dialog'
+
+export const PRIVACY_POLICY_URL =
+  'https://s3.eu-central-1.amazonaws.com/mobile.app.safe.global/SafeLabsGmbHPrivacyPolicy_v1.0.html'
+export const TERMS_OF_USE_URL =
+  'https://s3.eu-central-1.amazonaws.com/mobile.app.safe.global/MobileTermsAndConditions_v1.0.html'

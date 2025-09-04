@@ -50,7 +50,7 @@ describe('Incoming tx history details tests', () => {
       typeReceive.altTokenNFT,
     )
     createTx.verifyExpandedDetails([
-      typeReceive.Proxy,
+      //typeReceive.Proxy, - the check for contract name is hidden for
       typeReceive.ProxyAddress,
       typeReceive.nftHash,
       typeReceive.executionDateNFT,
@@ -79,6 +79,7 @@ describe('Incoming tx history details tests', () => {
     address_book.typeInName(senderName)
     address_book.clickOnSaveEntryBtn()
     cy.visit(constants.addressBookUrl + safe)
+    cy.get('body').should('be.visible')
     cy.contains(senderName)
   })
 })

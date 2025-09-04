@@ -3,6 +3,7 @@ import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
 import SpaceDashboard from '@/features/spaces/components/Dashboard'
 import AuthState from '@/features/spaces/components/AuthState'
+import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 
 export default function SpacePage() {
   const router = useRouter()
@@ -18,7 +19,9 @@ export default function SpacePage() {
 
       <main>
         <AuthState spaceId={spaceId}>
-          <SpaceDashboard />
+          <AddressBookSourceProvider source="spaceOnly">
+            <SpaceDashboard />
+          </AddressBookSourceProvider>
         </AuthState>
       </main>
     </>

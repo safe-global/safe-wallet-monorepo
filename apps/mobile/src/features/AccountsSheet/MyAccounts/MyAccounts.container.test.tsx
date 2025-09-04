@@ -17,21 +17,25 @@ jest.mock('expo-router', () => ({
 }))
 
 // Mock the safe item data
+const mockSafeAddress = faker.finance.ethereumAddress() as `0x${string}`
 const mockSafeItem = {
-  SafeInfo: {
-    address: { value: faker.finance.ethereumAddress() as `0x${string}`, name: 'Test Safe' },
-    threshold: 1,
-    owners: [{ value: '0x456' as `0x${string}` }],
-    fiatTotal: '1000',
-    chainId: '1',
-    queued: 0,
+  address: mockSafeAddress,
+  info: {
+    '1': {
+      address: { value: mockSafeAddress, name: 'Test Safe' },
+      threshold: 1,
+      owners: [{ value: '0x456' as `0x${string}` }],
+      fiatTotal: '1000',
+      chainId: '1',
+      queued: 0,
+    },
   },
-  chains: ['1'],
 }
 
 // Create a constant object for the selector result
 const mockActiveSafe = { address: faker.finance.ethereumAddress() as `0x${string}`, chainId: '1' }
 const mockChainIds = ['1'] as const
+const mockDelegates = {}
 
 // Mock Redux selectors
 jest.mock('@/src/store/activeSafeSlice', () => ({
@@ -45,10 +49,31 @@ jest.mock('@/src/store/activeSafeSlice', () => ({
 jest.mock('@/src/store/chains', () => ({
   getChainsByIds: () => mockedChains,
   selectAllChainsIds: () => mockChainIds,
+  selectAllChains: () => mockedChains,
 }))
 
 jest.mock('@/src/store/myAccountsSlice', () => ({
   selectMyAccountsMode: () => false,
+}))
+
+jest.mock('@/src/store/delegatesSlice', () => ({
+  selectDelegates: () => mockDelegates,
+  addDelegate: {
+    type: 'delegates/addDelegate',
+    match: jest.fn(),
+  },
+}))
+
+jest.mock('@/src/hooks/useNotificationCleanup', () => ({
+  useNotificationCleanup: () => ({
+    cleanupNotificationsForDelegate: jest.fn(),
+  }),
+}))
+
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/delegates', () => ({
+  cgwApi: {
+    useDelegatesDeleteDelegateV2Mutation: () => [jest.fn(), { isLoading: false }],
+  },
 }))
 
 describe('MyAccountsContainer', () => {
@@ -79,7 +104,7 @@ describe('MyAccountsContainer', () => {
   it('renders account item with correct data but no contact exists in address book', () => {
     render(<MyAccountsContainer item={mockSafeItem} onClose={mockOnClose} />)
 
-    expect(screen.getByText(shortenAddress(mockSafeItem.SafeInfo.address.value))).toBeTruthy()
+    expect(screen.getByText(shortenAddress(mockSafeItem.address))).toBeTruthy()
     expect(screen.getByText('1/1')).toBeTruthy()
     expect(screen.getByText('$ 1,000.00')).toBeTruthy()
   })
@@ -89,7 +114,7 @@ describe('MyAccountsContainer', () => {
       initialStore: {
         addressBook: {
           contacts: {
-            [mockSafeItem.SafeInfo.address.value]: { name: 'Test Safe', value: mockSafeItem.SafeInfo.address.value },
+            [mockSafeItem.address]: { name: 'Test Safe', value: mockSafeItem.address, chainIds: [] },
           },
           selectedContact: null,
         },

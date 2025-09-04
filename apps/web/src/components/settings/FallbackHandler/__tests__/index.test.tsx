@@ -1,6 +1,6 @@
 import { TWAP_FALLBACK_HANDLER } from '@/features/swap/helpers/utils'
 import { chainBuilder } from '@/tests/builders/chains'
-import { render, waitFor } from '@/tests/test-utils'
+import { render, waitFor, createAppNameRegex } from '@/tests/test-utils'
 
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import * as useChains from '@/hooks/useChains'
@@ -38,7 +38,7 @@ describe('FallbackHandler', () => {
     )
 
     const fbHandler = render(<FallbackHandler />, {
-      initialReduxState: { chains: { loading: false, data: [mockChain] } },
+      initialReduxState: { chains: { loading: false, loaded: true, data: [mockChain] } },
     })
 
     await waitFor(() => {
@@ -75,7 +75,7 @@ describe('FallbackHandler', () => {
     )
 
     const fbHandler = render(<FallbackHandler />, {
-      initialReduxState: { chains: { loading: false, data: [mockChain] } },
+      initialReduxState: { chains: { loading: false, loaded: true, data: [mockChain] } },
     })
 
     await waitFor(() => {
@@ -108,7 +108,7 @@ describe('FallbackHandler', () => {
     )
 
     const fbHandler = render(<FallbackHandler />, {
-      initialReduxState: { chains: { loading: false, data: [mockChain] } },
+      initialReduxState: { chains: { loading: false, loaded: true, data: [mockChain] } },
     })
 
     await waitFor(() => {
@@ -133,7 +133,7 @@ describe('FallbackHandler', () => {
       await waitFor(() => {
         expect(
           fbHandler.queryByText(
-            new RegExp('The Safe{Wallet} may not work correctly as no fallback handler is currently set.'),
+            createAppNameRegex(`The {APP_NAME} may not work correctly as no fallback handler is currently set.`),
           ),
         ).toBeInTheDocument()
         expect(fbHandler.queryByText('Transaction Builder')).toBeInTheDocument()
@@ -158,7 +158,7 @@ describe('FallbackHandler', () => {
       await waitFor(() => {
         expect(
           fbHandler.queryByText(
-            new RegExp('The Safe{Wallet} may not work correctly as no fallback handler is currently set.'),
+            createAppNameRegex(`The {APP_NAME} may not work correctly as no fallback handler is currently set.`),
           ),
         ).toBeInTheDocument()
         expect(fbHandler.queryByText('Transaction Builder')).not.toBeInTheDocument()

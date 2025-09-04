@@ -108,7 +108,7 @@ const ColorCodedTxAccordion = ({ txInfo, txData, children, defaultExpanded }: De
         className={accordionCss.accordion}
       >
         <Stack direction="row" justifyContent="space-between" alignItems="center" width="100%">
-          <Typography variant="subtitle2" fontWeight={700}>
+          <Typography variant="subtitle2" fontWeight={700} data-testid="tx-advanced-details">
             Transaction details
             <HelpTooltip />
           </Typography>

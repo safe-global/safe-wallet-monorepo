@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { H2, ScrollView, Text, Theme, View, XStack, YStack } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { Skeleton } from 'moti/skeleton'
-import { Pressable, useColorScheme } from 'react-native'
+import { Pressable, TouchableOpacity } from 'react-native'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 import { EthAddress } from '@/src/components/EthAddress'
 import { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { Address } from '@/src/types/address'
@@ -12,6 +13,10 @@ import { IdenticonWithBadge } from '@/src/features/Settings/components/Identicon
 
 import { Navbar } from '@/src/features/Settings/components/Navbar/Navbar'
 import { type Contact } from '@/src/store/addressBookSlice'
+import { Alert } from '@/src/components/Alert'
+
+import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 
 interface SettingsProps {
   data: SafeState
@@ -21,6 +26,7 @@ interface SettingsProps {
   contact: Contact | null
   isLatestVersion: boolean
   latestSafeVersion: string
+  isUnsupportedMasterCopy: boolean
 }
 
 export const Settings = ({
@@ -31,9 +37,17 @@ export const Settings = ({
   contact,
   isLatestVersion,
   latestSafeVersion,
+  isUnsupportedMasterCopy,
 }: SettingsProps) => {
+  const activeSafe = useDefinedActiveSafe()
+  const copy = useCopyAndDispatchToast()
   const { owners = [], threshold, implementation } = data
-  const colorScheme = useColorScheme()
+  const { colorScheme } = useTheme()
+
+  const onPressAddressCopy = useCallback(() => {
+    copy(activeSafe.address)
+  }, [activeSafe.address])
+
   return (
     <>
       <Theme name={'settings'}>
@@ -47,7 +61,7 @@ export const Settings = ({
             marginTop: -15,
           }}
         >
-          <YStack flex={1} padding="$2" paddingTop={'$10'}>
+          <YStack flex={1} paddingTop={'$10'}>
             <Skeleton.Group show={!owners.length}>
               <YStack alignItems="center" space="$3" marginBottom="$6">
                 <IdenticonWithBadge
@@ -58,13 +72,15 @@ export const Settings = ({
                   {contact?.name || 'Unnamed Safe'}
                 </H2>
                 <View>
-                  <EthAddress
-                    address={address as Address}
-                    copy
-                    textProps={{
-                      color: '$colorSecondary',
-                    }}
-                  />
+                  <TouchableOpacity onPress={onPressAddressCopy}>
+                    <EthAddress
+                      address={address as Address}
+                      copy
+                      textProps={{
+                        color: '$colorSecondary',
+                      }}
+                    />
+                  </TouchableOpacity>
                 </View>
               </YStack>
 
@@ -79,7 +95,7 @@ export const Settings = ({
                   marginRight={'$2'}
                 >
                   <View width={30}>
-                    <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'}>
+                    <Skeleton colorMode={colorScheme}>
                       <Text fontWeight="bold" textAlign="center" fontSize={'$4'}>
                         {owners.length}
                       </Text>
@@ -99,7 +115,7 @@ export const Settings = ({
                   width={80}
                 >
                   <View width={30}>
-                    <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'}>
+                    <Skeleton colorMode={colorScheme}>
                       <Text fontWeight="bold" textAlign="center" fontSize={'$4'}>
                         {threshold}/{owners.length}
                       </Text>
@@ -111,7 +127,7 @@ export const Settings = ({
                 </YStack>
               </XStack>
 
-              <YStack space="$4">
+              <YStack>
                 <View padding="$4" borderRadius="$3" gap={'$2'}>
                   <Text color="$colorSecondary" fontWeight={500}>
                     Members
@@ -127,7 +143,7 @@ export const Settings = ({
                       leftNode={<SafeFontIcon name={'owners'} color={'$colorSecondary'} />}
                       rightNode={
                         <View flexDirection={'row'} alignItems={'center'} justifyContent={'center'}>
-                          <Skeleton colorMode={colorScheme === 'dark' ? 'dark' : 'light'} height={17}>
+                          <Skeleton colorMode={colorScheme} height={17}>
                             <Text minWidth={15} marginRight={'$3'} color={'$colorSecondary'}>
                               {owners.length}
                             </Text>
@@ -197,6 +213,17 @@ export const Settings = ({
                 {implementation?.name} {isLatestVersion ? `(Latest version)` : `(Latest version: ${latestSafeVersion})`}
               </Text>
             </Pressable>
+
+            {isUnsupportedMasterCopy && (
+              <View flex={1} padding="$5">
+                <Alert
+                  type="warning"
+                  info="Your Safe Account's base contract is not supported. You should migrate it to a compatible
+              version. Use the web app for this."
+                  message="Base contract is not supported"
+                />
+              </View>
+            )}
           </YStack>
         </ScrollView>
       </Theme>

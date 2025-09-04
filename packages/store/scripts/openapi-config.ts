@@ -13,9 +13,6 @@ const config: ConfigFile = {
     '../src/gateway/AUTO_GENERATED/about.ts': {
       filterEndpoints: [/^about/],
     },
-    '../src/gateway/AUTO_GENERATED/accounts.ts': {
-      filterEndpoints: [/^accounts/],
-    },
     '../src/gateway/AUTO_GENERATED/auth.ts': {
       filterEndpoints: [/^auth/],
     },
@@ -42,6 +39,9 @@ const config: ConfigFile = {
     },
     '../src/gateway/AUTO_GENERATED/estimations.ts': {
       filterEndpoints: [/^estimations/],
+    },
+    '../src/gateway/AUTO_GENERATED/csv-export.ts': {
+      filterEndpoints: [/^csvExport/],
     },
     '../src/gateway/AUTO_GENERATED/messages.ts': {
       filterEndpoints: [/^messages/],
@@ -71,7 +71,10 @@ const config: ConfigFile = {
       filterEndpoints: [/^users/],
     },
     '../src/gateway/AUTO_GENERATED/spaces.ts': {
-      filterEndpoints: [/^(spaces|members|spaceSafes)/],
+      filterEndpoints: [/^(spaces|members|spaceSafes|addressBooks)/],
+    },
+    '../src/gateway/AUTO_GENERATED/positions.ts': {
+      filterEndpoints: [/^positions/],
     },
   },
 }

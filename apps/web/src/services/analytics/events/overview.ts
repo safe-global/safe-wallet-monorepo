@@ -157,10 +157,6 @@ export const OVERVIEW_EVENTS = {
     action: 'Safe viewed',
     category: OVERVIEW_CATEGORY,
   },
-  BUY_CRYPTO_BUTTON: {
-    action: 'Buy crypto button',
-    category: OVERVIEW_CATEGORY,
-  },
   SHOW_MORE_SAFES: {
     action: 'Show more Safes',
     category: OVERVIEW_CATEGORY,
@@ -184,6 +180,14 @@ export const OVERVIEW_EVENTS = {
   },
   OPEN_LEARN_MORE_STAKING_BANNER: {
     action: 'Staking banner learn more',
+    category: OVERVIEW_CATEGORY,
+  },
+  OPEN_EARN_WIDGET: {
+    action: 'Open earn widget from banner',
+    category: OVERVIEW_CATEGORY,
+  },
+  HIDE_EARN_BANNER: {
+    action: 'Hide earn banner',
     category: OVERVIEW_CATEGORY,
   },
 }

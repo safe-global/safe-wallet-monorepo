@@ -4,7 +4,7 @@ import { getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import extractTxInfo from '@/src/services/tx/extractTx'
 import { createConnectedWallet } from '../../web3'
 import { SafeInfo } from '@/src/types/address'
-import type { SafeTransaction, SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction, SafeTransactionDataPartial } from '@safe-global/types-kit'
 import { getSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
 import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 interface CreateTxParams {

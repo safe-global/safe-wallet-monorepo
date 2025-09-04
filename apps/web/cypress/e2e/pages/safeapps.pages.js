@@ -70,9 +70,9 @@ export const testBooleanValue3 = '3 testBooleanValue'
 export const transfer2AssetsStr = 'Transfer 2 assets'
 
 export const testTransfer1 = '1 transfer'
-export const testTransfer2 = '2 MetaMultiSigWallet: transfer'
-export const nativeTransfer2 = '2 native transfer'
-export const nativeTransfer1 = '1 native transfer'
+export const testTransfer2 = '2 transfer'
+export const nativeTransfer2 = /2 Send.*ETH to.*/
+export const nativeTransfer1 = /1 Send.*ETH to.*/
 
 export const testNativeTransfer = 'native transfer'
 

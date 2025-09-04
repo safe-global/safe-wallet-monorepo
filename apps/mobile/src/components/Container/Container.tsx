@@ -4,7 +4,7 @@ const StyledYStack = styled(YStack, {
   variants: {
     bordered: {
       true: {
-        borderColor: '#303033',
+        borderColor: '$borderLight',
         borderWidth: 1,
       },
       false: {

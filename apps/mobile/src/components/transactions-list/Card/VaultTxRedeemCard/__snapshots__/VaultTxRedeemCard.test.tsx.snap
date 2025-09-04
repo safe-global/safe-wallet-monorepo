@@ -1,0 +1,189 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`VaultTxRedeemCard renders correctly 1`] = `
+<View>
+  <View
+    style={
+      {
+        "alignItems": "flex-start",
+        "backgroundColor": "#FFFFFF",
+        "borderBottomLeftRadius": 7,
+        "borderBottomRightRadius": 7,
+        "borderTopLeftRadius": 7,
+        "borderTopRightRadius": 7,
+        "flexDirection": "column",
+        "flexWrap": "wrap",
+        "gap": 12,
+        "justifyContent": "flex-start",
+        "paddingBottom": 16,
+        "paddingLeft": 16,
+        "paddingRight": 16,
+        "paddingTop": 16,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+          "width": "100%",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "gap": 12,
+            "maxWidth": "55%",
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "width": 32,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "position": "absolute",
+                "right": -10,
+                "top": -10,
+                "zIndex": 1,
+              }
+            }
+          />
+          <View
+            style={
+              {
+                "backgroundColor": "#EEEFF0",
+                "borderBottomLeftRadius": "50%",
+                "borderBottomRightRadius": "50%",
+                "borderTopLeftRadius": "50%",
+                "borderTopRightRadius": "50%",
+                "height": 32,
+                "width": 32,
+              }
+            }
+          >
+            <ViewManagerAdapter_ExpoImage
+              accessibilityLabel="USDC"
+              borderRadius={50}
+              containerViewRef={"[React.ref]"}
+              contentFit="cover"
+              contentPosition={
+                {
+                  "left": "50%",
+                  "top": "50%",
+                }
+              }
+              flex={1}
+              nativeViewRef={"[React.ref]"}
+              onError={[Function]}
+              onLoad={[Function]}
+              onLoadStart={[Function]}
+              onProgress={[Function]}
+              placeholder={[]}
+              source={
+                [
+                  {
+                    "uri": "https://example.com/eth-logo.png",
+                  },
+                ]
+              }
+              style={
+                {
+                  "borderRadius": 50,
+                  "flex": 1,
+                }
+              }
+              testID="logo-image"
+              transition={null}
+            />
+          </View>
+        </View>
+        <View>
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "gap": 4,
+              }
+            }
+          >
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "#A1A3A7",
+                    "fontSize": 10,
+                  },
+                  undefined,
+                  {
+                    "fontFamily": "SafeIcons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+              testID="safe-list-transaction-earn-icon"
+            >
+              
+            </Text>
+            <Text
+              style={
+                {
+                  "color": "#A1A3A7",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 12,
+                  "lineHeight": 20,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              Earn
+            </Text>
+          </View>
+          <Text
+            style={
+              {
+                "color": "#121312",
+                "fontFamily": "DMSans-SemiBold",
+                "fontSize": 14,
+                "letterSpacing": -0.01,
+                "lineHeight": 20,
+              }
+            }
+            suppressHighlighting={true}
+          >
+            Withdraw
+          </Text>
+        </View>
+      </View>
+      <Text
+        style={
+          {
+            "color": "#121312",
+            "fontFamily": "DMSans-Bold",
+          }
+        }
+        suppressHighlighting={true}
+      >
+        1
+         
+        USDC
+      </Text>
+    </View>
+  </View>
+</View>
+`;

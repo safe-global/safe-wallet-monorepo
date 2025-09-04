@@ -18,11 +18,11 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: ./.github/actions/yarn
 
-      - uses: CatChen/eslint-suggestion-action@v4.1.12
+      - uses: CatChen/eslint-suggestion-action@v4.1.18
         with:
           request-changes: true # optional
           fail-check: true # optional

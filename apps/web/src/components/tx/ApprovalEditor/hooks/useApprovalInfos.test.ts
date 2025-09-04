@@ -4,7 +4,7 @@ import { Interface, zeroPadValue } from 'ethers'
 import { type ApprovalInfo, useApprovalInfos } from '@/components/tx/ApprovalEditor/hooks/useApprovalInfos'
 import { waitFor } from '@testing-library/react'
 import { createMockSafeTransaction } from '@/tests/transactions'
-import { OperationType } from '@safe-global/safe-core-sdk-types'
+import { OperationType } from '@safe-global/types-kit'
 import { ERC20__factory, Multi_send__factory } from '@safe-global/utils/types/contracts'
 import * as balances from '@/hooks/useBalances'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
@@ -308,9 +308,12 @@ describe('useApprovalInfos', () => {
       primaryType: 'Permit',
     } as const
 
-    jest
-      .spyOn(balances, 'default')
-      .mockReturnValue({ balances: { fiatTotal: '0', items: [mockBalanceItem] }, error: undefined, loading: false })
+    jest.spyOn(balances, 'default').mockReturnValue({
+      balances: { fiatTotal: '0', items: [mockBalanceItem] },
+      error: undefined,
+      loading: false,
+      loaded: true,
+    })
 
     const { result } = renderHook(() => useApprovalInfos({ safeMessage: mockMessage }))
 
@@ -543,9 +546,12 @@ describe('useApprovalInfos', () => {
       },
     }
 
-    jest
-      .spyOn(balances, 'default')
-      .mockReturnValue({ balances: { fiatTotal: '0', items: [mockBalanceItem] }, error: undefined, loading: false })
+    jest.spyOn(balances, 'default').mockReturnValue({
+      balances: { fiatTotal: '0', items: [mockBalanceItem] },
+      error: undefined,
+      loading: false,
+      loaded: true,
+    })
     const testInterface = new Interface(['function approve(address, uint256)'])
 
     const mockSafeTx = createMockSafeTransaction({
@@ -580,7 +586,7 @@ describe('useApprovalInfos', () => {
     }
     const fetchMock = jest
       .spyOn(getTokenInfo, 'getERC20TokenInfoOnChain')
-      .mockReturnValue(Promise.resolve(mockTokenInfo))
+      .mockReturnValue(Promise.resolve([mockTokenInfo]))
     const testInterface = new Interface(['function approve(address, uint256)'])
 
     const mockSafeTx = createMockSafeTransaction({

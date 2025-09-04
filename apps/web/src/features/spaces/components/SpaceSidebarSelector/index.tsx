@@ -86,7 +86,6 @@ const SpaceSidebarSelector = () => {
 
         <Menu
           data-testid="space-selector-menu"
-          id="space-selector-menu"
           anchorEl={anchorEl}
           open={open}
           onClose={handleClose}

@@ -1,0 +1,1 @@
+export { useContactNetworkData } from './useContactNetworkData'

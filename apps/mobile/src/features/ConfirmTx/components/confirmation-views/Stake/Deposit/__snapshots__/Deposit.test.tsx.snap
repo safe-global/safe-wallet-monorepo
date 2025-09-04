@@ -1,0 +1,632 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StakingDeposit matches snapshot 1`] = `
+<View>
+  <View
+    style={
+      {
+        "flexDirection": "column",
+        "gap": 16,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "column",
+          "gap": 8,
+          "marginTop": 16,
+          "position": "relative",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "width": 40,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "position": "absolute",
+              "right": -10,
+              "top": -10,
+              "zIndex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#DDDEE0",
+                "borderBottomColor": "#EEEFF0",
+                "borderBottomLeftRadius": 100000,
+                "borderBottomRightRadius": 100000,
+                "borderBottomWidth": 1,
+                "borderLeftColor": "#EEEFF0",
+                "borderLeftWidth": 1,
+                "borderRightColor": "#EEEFF0",
+                "borderRightWidth": 1,
+                "borderStyle": "solid",
+                "borderTopColor": "#EEEFF0",
+                "borderTopLeftRadius": 100000,
+                "borderTopRightRadius": 100000,
+                "borderTopWidth": 1,
+                "flexDirection": "column",
+                "height": 24,
+                "justifyContent": "center",
+                "maxHeight": 24,
+                "maxWidth": 24,
+                "minHeight": 24,
+                "minWidth": 24,
+                "paddingBottom": 0,
+                "paddingLeft": 0,
+                "paddingRight": 0,
+                "paddingTop": 0,
+                "width": 24,
+              }
+            }
+          >
+            <Text
+              allowFontScaling={false}
+              selectable={false}
+              style={
+                [
+                  {
+                    "color": "#A1A3A7",
+                    "fontSize": 12,
+                  },
+                  undefined,
+                  {
+                    "fontFamily": "SafeIcons",
+                    "fontStyle": "normal",
+                    "fontWeight": "normal",
+                  },
+                  {},
+                ]
+              }
+            >
+              
+            </Text>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "backgroundColor": "#EEEFF0",
+              "borderBottomLeftRadius": "50%",
+              "borderBottomRightRadius": "50%",
+              "borderTopLeftRadius": "50%",
+              "borderTopRightRadius": "50%",
+              "height": 40,
+              "width": 40,
+            }
+          }
+        >
+          <ViewManagerAdapter_ExpoImage
+            borderRadius={50}
+            containerViewRef={"[React.ref]"}
+            contentFit="cover"
+            contentPosition={
+              {
+                "left": "50%",
+                "top": "50%",
+              }
+            }
+            flex={1}
+            nativeViewRef={"[React.ref]"}
+            onError={[Function]}
+            onLoad={[Function]}
+            onLoadStart={[Function]}
+            onProgress={[Function]}
+            placeholder={[]}
+            source={
+              [
+                {
+                  "uri": "https://safe-transaction-assets.safe.global/chains/1/chain_logo.png",
+                },
+              ]
+            }
+            style={
+              {
+                "borderRadius": 50,
+                "flex": 1,
+              }
+            }
+            testID="logo-image"
+            transition={null}
+          />
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "gap": 8,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "gap": 4,
+            }
+          }
+        >
+          <Text
+            style={
+              {
+                "color": "#121312",
+                "fontFamily": "DMSans-Bold",
+              }
+            }
+            suppressHighlighting={true}
+          >
+            32
+             
+            ETH
+          </Text>
+        </View>
+        <Text
+          style={
+            {
+              "color": "#A1A3A7",
+              "fontFamily": "DM Sans",
+              "fontSize": 12,
+              "lineHeight": 16,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          15 Jan 1970
+          , 
+          06:56 AM
+        </Text>
+      </View>
+    </View>
+    <View
+      style={
+        {
+          "backgroundColor": "#FFFFFF",
+          "borderBottomLeftRadius": 7,
+          "borderBottomRightRadius": 7,
+          "borderTopLeftRadius": 7,
+          "borderTopRightRadius": 7,
+          "flexDirection": "column",
+          "gap": 20,
+          "paddingBottom": 16,
+          "paddingLeft": 16,
+          "paddingRight": 16,
+          "paddingTop": 16,
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "justifyContent": "space-between",
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#A1A3A7",
+              "flex": 1,
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Rewards rate
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#121312",
+              "flex": 2,
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+              "textAlign": "right",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          50.400%
+        </Text>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "justifyContent": "space-between",
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#A1A3A7",
+              "flex": 1,
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Net annual rewards
+        </Text>
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "gap": 4,
+            }
+          }
+        >
+          <Text
+            style={
+              {
+                "color": "#121312",
+                "fontFamily": "DM Sans",
+              }
+            }
+            suppressHighlighting={true}
+          >
+            1.6128
+             
+            ETH
+          </Text>
+          <Text
+            style={
+              {
+                "color": "#A1A3A7",
+                "fontFamily": "DM Sans",
+              }
+            }
+            suppressHighlighting={true}
+          >
+            (
+            $ 4,838
+            )
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "justifyContent": "space-between",
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#A1A3A7",
+              "flex": 1,
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Net monthly rewards
+        </Text>
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "gap": 4,
+            }
+          }
+        >
+          <Text
+            style={
+              {
+                "color": "#121312",
+                "fontFamily": "DM Sans",
+              }
+            }
+            suppressHighlighting={true}
+          >
+            0.1344
+             
+            ETH
+          </Text>
+          <Text
+            style={
+              {
+                "color": "#A1A3A7",
+                "fontFamily": "DM Sans",
+              }
+            }
+            suppressHighlighting={true}
+          >
+            (
+            $ 403
+            )
+          </Text>
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "justifyContent": "space-between",
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#A1A3A7",
+              "flex": 1,
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Widget fee
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#121312",
+              "flex": 2,
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+              "textAlign": "right",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          5.00%
+        </Text>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "height": 40,
+          }
+        }
+      >
+        <View
+          focusVisibleStyle={{}}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          role="button"
+          style={
+            {
+              "alignItems": "center",
+              "backgroundColor": "#DCDEE0",
+              "borderBottomColor": "transparent",
+              "borderBottomLeftRadius": 8,
+              "borderBottomRightRadius": 8,
+              "borderBottomWidth": 0,
+              "borderLeftColor": "transparent",
+              "borderLeftWidth": 0,
+              "borderRightColor": "transparent",
+              "borderRightWidth": 0,
+              "borderStyle": "solid",
+              "borderTopColor": "transparent",
+              "borderTopLeftRadius": 8,
+              "borderTopRightRadius": 8,
+              "borderTopWidth": 0,
+              "bottom": 0,
+              "flexDirection": "row",
+              "flexWrap": "nowrap",
+              "fontWeight": "700",
+              "height": 36,
+              "justifyContent": "center",
+              "left": 0,
+              "paddingLeft": 8,
+              "paddingRight": 8,
+              "position": "absolute",
+              "right": 0,
+              "top": 0,
+            }
+          }
+        >
+          <Text
+            lineBreakMode="clip"
+            numberOfLines={1}
+            style={
+              {
+                "color": "#121312",
+                "flexGrow": 0,
+                "flexShrink": 1,
+                "fontFamily": "DMSans-Bold",
+                "fontSize": 14,
+                "letterSpacing": 0,
+                "lineHeight": 15.400000000000002,
+                "userSelect": "none",
+              }
+            }
+            suppressHighlighting={true}
+          >
+            Transaction details
+          </Text>
+        </View>
+      </View>
+    </View>
+    <View
+      style={
+        {
+          "backgroundColor": "#FFFFFF",
+          "borderBottomLeftRadius": 7,
+          "borderBottomRightRadius": 7,
+          "borderTopLeftRadius": 7,
+          "borderTopRightRadius": 7,
+          "flexDirection": "column",
+          "gap": 20,
+          "paddingBottom": 16,
+          "paddingLeft": 16,
+          "paddingRight": 16,
+          "paddingTop": 16,
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "justifyContent": "space-between",
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#A1A3A7",
+              "flex": 1,
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Validator
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#121312",
+              "flex": 2,
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+              "textAlign": "right",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          1
+        </Text>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "justifyContent": "space-between",
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#A1A3A7",
+              "flex": 1,
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Activation time
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#121312",
+              "flex": 2,
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+              "textAlign": "right",
+            }
+          }
+          suppressHighlighting={true}
+        />
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": 8,
+            "justifyContent": "space-between",
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#A1A3A7",
+              "flex": 1,
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Rewards
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#121312",
+              "flex": 2,
+              "fontFamily": "DM Sans",
+              "fontSize": 14,
+              "textAlign": "right",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Approx. every 5 days after activation
+        </Text>
+      </View>
+      <Text
+        style={
+          {
+            "color": "#A1A3A7",
+            "fontFamily": "DM Sans",
+            "fontSize": 13,
+            "marginTop": 8,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Earn ETH rewards with dedicated validators. Rewards must be withdrawn manually, and you can request a withdrawal at any time.
+      </Text>
+    </View>
+  </View>
+</View>
+`;

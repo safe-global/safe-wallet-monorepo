@@ -1,43 +1,33 @@
 import React from 'react'
-import { Avatar, Text, View } from 'tamagui'
+import { Text } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import type { MultiSend } from '@safe-global/store/gateway/types'
-import type { SafeAppInfo, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { SafeAppInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { SafeListItemProps } from '@/src/components/SafeListItem/SafeListItem'
+import { Logo } from '@/src/components/Logo'
 
-interface TxSafeAppCardProps {
+type TxSafeAppCardProps = {
   safeAppInfo: SafeAppInfo
   txInfo: MultiSend
-  bordered?: boolean
-  inQueue?: boolean
-  executionInfo?: Transaction['executionInfo']
-  onPress: () => void
-}
+} & Partial<SafeListItemProps>
 
-export function TxSafeAppCard({ onPress, safeAppInfo, executionInfo, txInfo, inQueue, bordered }: TxSafeAppCardProps) {
+export function TxSafeAppCard({ safeAppInfo, txInfo, ...rest }: TxSafeAppCardProps) {
   return (
     <SafeListItem
       label={safeAppInfo.name}
-      inQueue={inQueue}
-      onPress={onPress}
       icon="transaction-contract"
       type="Safe app"
-      bordered={bordered}
-      executionInfo={executionInfo}
       leftNode={
-        <Avatar circular size="$10">
-          {safeAppInfo.logoUri && (
-            <Avatar.Image testID="safe-app-image" accessibilityLabel={safeAppInfo.name} src={safeAppInfo.logoUri} />
-          )}
-
-          <Avatar.Fallback backgroundColor="$borderLight">
-            <View backgroundColor="$borderLightDark" padding="$2" borderRadius={100}>
-              <SafeFontIcon testID="safe-app-fallback" name="code-blocks" color="$color" />
-            </View>
-          </Avatar.Fallback>
-        </Avatar>
+        <Logo
+          logoUri={safeAppInfo.logoUri}
+          size="$8"
+          fallbackIcon="code-blocks"
+          imageBackground="$background"
+          accessibilityLabel={safeAppInfo.name}
+        />
       }
       rightNode={<Text>{txInfo.methodName}</Text>}
+      {...rest}
     />
   )
 }

@@ -33,7 +33,7 @@ export const _buildMultiChainSafeItem = (address: string, safes: SafeItems): Mul
 }
 
 export function _buildSafeItems(
-  safes: Record<string, string[]>,
+  safes: Record<string, string[] | null>,
   allSafeNames: AddressBookState,
   allOwned?: AllOwnedSafes,
 ): SafeItem[] {
@@ -42,7 +42,7 @@ export function _buildSafeItems(
   for (const chainId in safes) {
     const addresses = safes[chainId]
 
-    addresses.forEach((address) => {
+    addresses?.forEach((address) => {
       const isReadOnly = !!allOwned && !(allOwned[chainId] || []).includes(address)
       const name = allSafeNames[chainId]?.[address]
 

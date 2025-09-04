@@ -1,6 +1,6 @@
 import React, { useContext, useMemo, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
-import { ListItemButton } from '@mui/material'
+import { Divider, ListItemButton } from '@mui/material'
 import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
 
 import {
@@ -12,7 +12,7 @@ import {
 } from '@/components/sidebar/SidebarList'
 import { type NavItem, navItems } from './config'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { AppRoutes } from '@/config/routes'
+import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
 import { useQueuedTxsLength } from '@/hooks/useTxQueue'
 import { useCurrentChain } from '@/hooks/useChains'
 import { isRouteEnabled } from '@/utils/chains'
@@ -22,20 +22,20 @@ import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import { STAKE_EVENTS, STAKE_LABELS } from '@/services/analytics/events/stake'
 import { Tooltip } from '@mui/material'
 import { BRIDGE_EVENTS, BRIDGE_LABELS } from '@/services/analytics/events/bridge'
+import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
 import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
 
 const getSubdirectory = (pathname: string): string => {
   return pathname.split('/')[1]
 }
 
-const geoBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake]
-
-const undeployedSafeBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, AppRoutes.apps.index]
+const geoBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, AppRoutes.earn]
 
 const customSidebarEvents: { [key: string]: { event: any; label: string } } = {
   [AppRoutes.bridge]: { event: BRIDGE_EVENTS.OPEN_BRIDGE, label: BRIDGE_LABELS.sidebar },
   [AppRoutes.swap]: { event: SWAP_EVENTS.OPEN_SWAPS, label: SWAP_LABELS.sidebar },
   [AppRoutes.stake]: { event: STAKE_EVENTS.OPEN_STAKE, label: STAKE_LABELS.sidebar },
+  [AppRoutes.earn]: { event: EARN_EVENTS.OPEN_EARN_PAGE, label: EARN_LABELS.sidebar },
 }
 
 const Navigation = (): ReactElement => {
@@ -59,7 +59,7 @@ const Navigation = (): ReactElement => {
   const enabledNavItems = useMemo(() => {
     return safe.deployed
       ? visibleNavItems
-      : visibleNavItems.filter((item) => !undeployedSafeBlockedRoutes.includes(item.href))
+      : visibleNavItems.filter((item) => !UNDEPLOYED_SAFE_BLOCKED_ROUTES.includes(item.href))
   }, [safe.deployed, visibleNavItems])
 
   const getBadge = (item: NavItem) => {
@@ -102,6 +102,8 @@ const Navigation = (): ReactElement => {
           ItemTag = queueSize ? <SidebarListItemCounter count={queueSize} /> : null
         }
 
+        const isSettingsItem = item.href === AppRoutes.settings.setup
+
         return (
           <Tooltip
             title={isDisabled ? 'You need to activate your Safe first.' : ''}
@@ -137,6 +139,8 @@ const Navigation = (): ReactElement => {
                   </SidebarListItemText>
                 </SidebarListItemButton>
               </ListItemButton>
+
+              {isSettingsItem && <Divider sx={{ mt: 1, mb: 0.5 }} />}
             </div>
           </Tooltip>
         )

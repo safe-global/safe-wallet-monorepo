@@ -7,17 +7,17 @@ import SingleAccountItem from '@/features/myAccounts/components/AccountItems/Sin
 import type { SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
 import { useCallback, useMemo, useState } from 'react'
 import {
-  ListItemButton,
-  Box,
-  Typography,
-  Skeleton,
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Box,
   Divider,
-  Tooltip,
-  SvgIcon,
   IconButton,
+  ListItemButton,
+  Skeleton,
+  SvgIcon,
+  Tooltip,
+  Typography,
   useMediaQuery,
 } from '@mui/material'
 import SafeIcon from '@/components/common/SafeIcon'
@@ -51,6 +51,7 @@ import { getComparator } from '@/features/myAccounts/utils/utils'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { useTheme } from '@mui/material/styles'
+import { ContactSource } from '@/hooks/useAllAddressBooks'
 
 export const MultichainIndicator = ({ safes }: { safes: SafeItem[] }) => {
   return (
@@ -279,10 +280,12 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
               <SafeIcon address={address} owners={sharedSetup?.owners.length} threshold={sharedSetup?.threshold} />
             </Box>
 
-            <Typography variant="body2" component="div" className={css.safeAddress}>
+            <Typography variant="body2" component="div" data-testid="group-address" className={css.safeAddress}>
               <EthHashInfo
                 address={address}
                 name={multiSafeAccountItem.name}
+                addressBookNameSource={isSpaceSafe ? ContactSource.space : ContactSource.local}
+                showName={isSpaceSafe ? !!multiSafeAccountItem.name : true}
                 shortAddress
                 showPrefix={false}
                 showAvatar={false}

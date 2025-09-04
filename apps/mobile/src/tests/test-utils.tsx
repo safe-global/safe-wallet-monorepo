@@ -1,39 +1,58 @@
 import { render as nativeRender, renderHook } from '@testing-library/react-native'
 import { SafeThemeProvider } from '@/src/theme/provider/safeTheme'
 import { Provider } from 'react-redux'
-import { makeStore, rootReducer } from '../store'
-import { PortalProvider } from 'tamagui'
+import { rootReducer } from '../store'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { configureStore } from '@reduxjs/toolkit'
 import { FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE } from 'redux-persist'
 import { cgwClient } from '@safe-global/store/gateway/cgwClient'
 import { web3API } from '@/src/store/signersBalance'
+import type { SettingsState } from '@/src/store/settingsSlice'
 
 export type RootState = ReturnType<typeof rootReducer>
 type getProvidersArgs = (initialStoreState?: Partial<RootState>) => React.FC<{ children: React.ReactNode }>
 
+const defaultSettings: SettingsState = {
+  onboardingVersionSeen: '',
+  themePreference: 'light',
+  currency: 'usd',
+  env: {
+    rpc: {},
+    tenderly: {
+      url: '',
+      accessToken: '',
+    },
+  },
+}
+
 const getProviders: getProvidersArgs = (initialStoreState) =>
   function ProviderComponent({ children }: { children: React.ReactNode }) {
-    const store = initialStoreState
-      ? configureStore({
-          reducer: rootReducer,
-          middleware: (getDefaultMiddleware) =>
-            getDefaultMiddleware({
-              serializableCheck: {
-                ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-              },
-            }).concat(cgwClient.middleware, web3API.middleware),
-          preloadedState: initialStoreState,
-        })
-      : makeStore()
+    // Always inject default settings to ensure themes work properly
+    const storeWithDefaults = {
+      ...initialStoreState,
+      settings: {
+        ...defaultSettings,
+        ...(initialStoreState?.settings || {}),
+      },
+    } as Partial<RootState>
+
+    // Always use configured store with defaults to ensure consistent test environment
+    const store = configureStore({
+      reducer: rootReducer,
+      middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+          serializableCheck: {
+            ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+          },
+        }).concat(cgwClient.middleware, web3API.middleware),
+      preloadedState: storeWithDefaults,
+    })
 
     return (
       <BottomSheetModalProvider>
-        <PortalProvider shouldAddRootHost>
-          <Provider store={store}>
-            <SafeThemeProvider>{children}</SafeThemeProvider>
-          </Provider>
-        </PortalProvider>
+        <Provider store={store}>
+          <SafeThemeProvider>{children}</SafeThemeProvider>
+        </Provider>
       </BottomSheetModalProvider>
     )
   }
@@ -57,8 +76,8 @@ const customRender = (
   return nativeRender(ui, { wrapper: WrapperWithCustom })
 }
 
-function customRenderHook<Result, Props>(render: (initialProps: Props) => Result) {
-  const wrapper = getProviders()
+function customRenderHook<Result, Props>(render: (initialProps: Props) => Result, initialStore?: Partial<RootState>) {
+  const wrapper = getProviders(initialStore)
 
   return renderHook(render, { wrapper })
 }

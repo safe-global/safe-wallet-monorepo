@@ -1,27 +1,26 @@
 import { SignerView } from '@/src/features/Signer/components/SignerView'
-import { useLocalSearchParams } from 'expo-router'
-import { useNavigation } from '@react-navigation/native'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress, upsertContact } from '@/src/store/addressBookSlice'
-import React, { useCallback, useEffect, useState } from 'react'
-import { Alert, Linking, TouchableOpacity } from 'react-native'
+import { selectSignerHasPrivateKey } from '@/src/store/signersSlice'
+import React, { useCallback, useState } from 'react'
+import { Alert, Linking } from 'react-native'
 import { selectActiveChain } from '@/src/store/chains'
 import { getHashedExplorerUrl } from '@safe-global/utils/utils/gateway'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { usePreventLeaveScreen } from '@/src/hooks/usePreventLeaveScreen'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FormValues } from '@/src/features/Signer/types'
 import { formSchema } from '@/src/features/Signer/schema'
-import { COMING_SOON_MESSAGE, COMING_SOON_TITLE } from '@/src/config/constants'
 
 export const SignerContainer = () => {
-  const navigation = useNavigation()
   const { address } = useLocalSearchParams<{ address: string }>()
+  const router = useRouter()
   const dispatch = useAppDispatch()
   const activeChain = useAppSelector(selectActiveChain)
   const local = useLocalSearchParams<{ editMode: string }>()
   const contact = useAppSelector(selectContactByAddress(address))
+  const hasPrivateKey = useAppSelector(selectSignerHasPrivateKey(address))
   const [editMode, setEditMode] = useState(Boolean(local.editMode))
 
   usePreventLeaveScreen(editMode)
@@ -34,9 +33,9 @@ export const SignerContainer = () => {
     Linking.openURL(url)
   }, [address, activeChain])
 
-  const onPressDelete = useCallback(() => {
-    Alert.alert(COMING_SOON_TITLE, COMING_SOON_MESSAGE)
-  }, [])
+  const onPressViewPrivateKey = useCallback(() => {
+    router.push(`/signers/${address}/private-key`)
+  }, [address, router])
 
   // Initialize the form with React Hook Form and Zod schema resolver
   const {
@@ -55,7 +54,7 @@ export const SignerContainer = () => {
   })
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    dispatch(upsertContact({ ...contact, value: address, name: data.name }))
+    dispatch(upsertContact({ ...contact, value: address, name: data.name, chainIds: contact?.chainIds || [] }))
 
     clearErrors()
     reset(data, { keepValues: true })
@@ -86,26 +85,16 @@ export const SignerContainer = () => {
     setEditMode(() => !editMode)
   }, [editMode, handleSubmit, onSubmit, isValid])
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => {
-        return (
-          <TouchableOpacity onPress={onPressEdit} hitSlop={100}>
-            <SafeFontIcon name={editMode ? 'check' : 'edit'} size={20} />
-          </TouchableOpacity>
-        )
-      },
-    })
-  }, [onPressEdit, editMode])
-
   const formName = watch('name')
 
   return (
     <SignerView
       signerAddress={address}
-      onPressDelete={onPressDelete}
       onPressExplorer={onPressExplorer}
+      onPressEdit={onPressEdit}
+      onPressViewPrivateKey={hasPrivateKey ? onPressViewPrivateKey : undefined}
       editMode={editMode}
+      hasPrivateKey={hasPrivateKey}
       control={control}
       dirtyFields={dirtyFields}
       errors={errors}

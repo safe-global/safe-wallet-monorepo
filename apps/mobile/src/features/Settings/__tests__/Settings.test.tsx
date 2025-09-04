@@ -22,6 +22,7 @@ jest.mock('expo-router', () => ({
     dispatch: jest.fn(),
   }),
   useSegments: () => ['test'],
+  usePathname: () => '/test-path',
 }))
 
 const mockSafeState: SafeState = {
@@ -50,6 +51,7 @@ const mockProps = {
   contact: null,
   isLatestVersion: false,
   latestSafeVersion: '1.4.0',
+  isUnsupportedMasterCopy: false,
 }
 
 const initialStore: Partial<RootState> = {
@@ -106,6 +108,34 @@ describe('Settings', () => {
 
       const checkIcon = queryByTestId('check-icon')
       expect(checkIcon).toBeNull()
+    })
+  })
+
+  describe('Unsupported Master Copy Warning', () => {
+    it('should display warning when master copy is unsupported', () => {
+      const { getByText } = render(<Settings {...mockProps} isUnsupportedMasterCopy={true} />, {
+        initialStore,
+        wrapper,
+      })
+
+      const warningTitle = getByText('Base contract is not supported')
+      const warningMessage = getByText(/Your Safe Account's base contract is not supported/)
+
+      expect(warningTitle).toBeTruthy()
+      expect(warningMessage).toBeTruthy()
+    })
+
+    it('should not display warning when master copy is supported', () => {
+      const { queryByText } = render(<Settings {...mockProps} isUnsupportedMasterCopy={false} />, {
+        initialStore,
+        wrapper,
+      })
+
+      const warningTitle = queryByText('Base contract is not supported')
+      const warningMessage = queryByText(/Your Safe Account's base contract is not supported/)
+
+      expect(warningTitle).toBeNull()
+      expect(warningMessage).toBeNull()
     })
   })
 })

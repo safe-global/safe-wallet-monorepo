@@ -27,7 +27,6 @@ describe('Recovery happy path tests 4', () => {
     owner.waitForConnectionStatus()
     recovery.clearRecoverers()
     recovery.clickOnSetupRecoveryBtn()
-    recovery.clickOnSetupRecoveryModalBtn()
     recovery.clickOnNextBtn()
     recovery.enterRecovererAddress(constants.SEPOLIA_OWNER_2)
     recovery.agreeToTerms()

@@ -53,9 +53,10 @@ export default function SplitMenuButton({
 
     if (index !== selectedIndex) {
       setSelectedIndex(index)
-      setOpen(false)
       onChange?.(options[index])
     }
+
+    setOpen(false)
   }
 
   const handleToggle = () => {
@@ -98,6 +99,7 @@ export default function SplitMenuButton({
             aria-haspopup="menu"
             onClick={handleToggle}
             disabled={loading}
+            data-testid="combo-submit-dropdown"
             sx={{ minWidth: '0 !important', maxWidth: 48, px: 1.5 }}
           >
             <ArrowDropDownIcon />
@@ -117,6 +119,7 @@ export default function SplitMenuButton({
         slotProps={{
           root: { slotProps: { backdrop: { sx: { backgroundColor: 'transparent' } } } },
         }}
+        data-testid="combo-submit-popover"
       >
         <MenuList autoFocusItem>
           {options.map((option, index) => (

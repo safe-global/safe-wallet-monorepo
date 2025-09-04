@@ -10,6 +10,7 @@ import useNameResolver from '@/components/common/AddressInput/useNameResolver'
 import { chainBuilder } from '@/tests/builders/chains'
 import { FEATURES } from '@safe-global/safe-gateway-typescript-sdk'
 import userEvent from '@testing-library/user-event'
+import { ContactSource } from '@/hooks/useAllAddressBooks'
 
 const mockChain = chainBuilder()
   .with({ features: [FEATURES.DOMAIN_LOOKUP] })
@@ -100,6 +101,7 @@ describe('AddressInput tests', () => {
     expect(input.value).toBe(`eth:${TEST_ADDRESS_A}`)
   })
 
+  // TODO: This test is flaky and regularly times out after 5000ms
   it('should validate the address on input', async () => {
     const { input, utils } = setup('')
 
@@ -149,6 +151,7 @@ describe('AddressInput tests', () => {
     await waitFor(() => expect(utils.getByLabelText(`${TEST_ADDRESS_B} is wrong`, { exact: false })).toBeDefined())
   })
 
+  // TODO: This test is flaky and regularly times out after 5000ms
   it('should show a spinner when validation is in progress', async () => {
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -293,9 +296,17 @@ describe('AddressInput tests', () => {
     const mockChainId = '11155111'
     const mockSafeName = 'Test Safe'
     const mockAB = { [TEST_ADDRESS_A]: mockSafeName }
+    const mockContact = {
+      name: mockSafeName,
+      address: TEST_ADDRESS_A,
+      chainIds: [mockChainId],
+      createdBy: '',
+      lastUpdatedBy: '',
+      source: ContactSource.local,
+    }
 
     jest.spyOn(urlChainId, 'default').mockImplementation(() => mockChainId)
-    jest.spyOn(allAddressBooks, 'default').mockReturnValue({ [mockChainId]: mockAB })
+    jest.spyOn(allAddressBooks, 'useAddressBookItem').mockReturnValue(mockContact)
     jest.spyOn(addressBook, 'default').mockImplementation(() => mockAB)
 
     const { input, utils } = setup(TEST_ADDRESS_A)
@@ -311,9 +322,17 @@ describe('AddressInput tests', () => {
     const mockChainId = '11155111'
     const mockSafeName = 'Test Safe'
     const mockAB = { [TEST_ADDRESS_A]: mockSafeName }
+    const mockContact = {
+      name: mockSafeName,
+      address: TEST_ADDRESS_A,
+      chainIds: [mockChainId],
+      createdBy: '',
+      lastUpdatedBy: '',
+      source: ContactSource.local,
+    }
 
     jest.spyOn(urlChainId, 'default').mockImplementation(() => mockChainId)
-    jest.spyOn(allAddressBooks, 'default').mockReturnValue({ [mockChainId]: mockAB })
+    jest.spyOn(allAddressBooks, 'useAddressBookItem').mockReturnValue(mockContact)
     jest.spyOn(addressBook, 'default').mockImplementation(() => mockAB)
 
     const { input, utils } = setup(TEST_ADDRESS_A)
@@ -338,9 +357,17 @@ describe('AddressInput tests', () => {
     const mockChainId = '11155111'
     const mockSafeName = 'Test Safe'
     const mockAB = { [TEST_ADDRESS_A]: mockSafeName }
+    const mockContact = {
+      name: mockSafeName,
+      address: TEST_ADDRESS_A,
+      chainIds: [mockChainId],
+      createdBy: '',
+      lastUpdatedBy: '',
+      source: ContactSource.local,
+    }
 
     jest.spyOn(urlChainId, 'default').mockImplementation(() => mockChainId)
-    jest.spyOn(allAddressBooks, 'default').mockReturnValue({ [mockChainId]: mockAB })
+    jest.spyOn(allAddressBooks, 'useAddressBookItem').mockReturnValue(mockContact)
     jest.spyOn(addressBook, 'default').mockImplementation(() => mockAB)
 
     const { input, utils } = setup(TEST_ADDRESS_A, undefined, true)
