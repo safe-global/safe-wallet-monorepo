@@ -8,6 +8,7 @@ import useSafeAddress from '@/hooks/useSafeAddress'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { memo, useMemo } from 'react'
 import { isAddress } from 'ethers'
+import { lookupAddress } from '@/services/ens'
 
 const useIsUnverifiedContract = (address?: string, error?: Error): boolean => {
   const web3 = useWeb3ReadOnly()
@@ -24,6 +25,7 @@ const useIsUnverifiedContract = (address?: string, error?: Error): boolean => {
 export function useAddressName(address?: string, name?: string | null, customAvatar?: string) {
   const chainId = useChainId()
   const safeAddress = useSafeAddress()
+  const web3 = useWeb3ReadOnly()
   const displayName = sameAddress(address, safeAddress) ? 'This Safe Account' : name
 
   const [contract, error] = useAsync(
@@ -31,6 +33,11 @@ export function useAddressName(address?: string, name?: string | null, customAva
     [address, chainId, displayName],
     false,
   )
+
+  const [ensName] = useAsync(async () => {
+    if (!error || !address || !isAddress(address) || !web3) return undefined
+    return lookupAddress(web3, address)
+  }, [address, web3, error])
 
   const isUnverifiedContract = useIsUnverifiedContract(address, error)
 
@@ -40,11 +47,12 @@ export function useAddressName(address?: string, name?: string | null, customAva
         displayName ||
         contract?.displayName ||
         contract?.name ||
+        ensName ||
         (isUnverifiedContract ? 'Unverified contract' : undefined),
       logoUri: customAvatar || contract?.logoUri,
       isUnverifiedContract,
     }),
-    [displayName, contract, customAvatar, isUnverifiedContract],
+    [displayName, contract, customAvatar, isUnverifiedContract, ensName],
   )
 }
 
