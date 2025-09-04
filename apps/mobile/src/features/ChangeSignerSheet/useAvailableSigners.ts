@@ -10,7 +10,6 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { extractAppSigners } from '@/src/features/ConfirmTx/utils'
 import { useGetBalancesQuery } from '@/src/store/signersBalance'
-import { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { ActionType } from '@/src/features/ChangeSignerSheet/ChangeSignerSheet.container'
 
 const useAvailableSigners = (txId: string, actionType: ActionType) => {
@@ -29,7 +28,7 @@ const useAvailableSigners = (txId: string, actionType: ActionType) => {
 
   const { data, isLoading } = useGetBalancesQuery({
     addresses: storedSigners?.map((item) => item.value) || [],
-    chain: activeChain as ChainInfo,
+    chain: activeChain,
   })
 
   const items = useMemo(() => {
