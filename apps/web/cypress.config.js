@@ -22,7 +22,6 @@ export default defineConfig({
     setupNodeEvents(on, config) {
       // Set Cookie term version on the cypress env - this way we can access it in the tests
       config.env.CURRENT_COOKIE_TERMS_VERSION = version
-
       ;(configureVisualRegression(on),
         on('task', {
           log(message) {
