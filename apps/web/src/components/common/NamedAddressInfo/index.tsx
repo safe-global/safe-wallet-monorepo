@@ -8,6 +8,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { memo, useMemo } from 'react'
 import { isAddress } from 'ethers'
 import { lookupAddress } from '@/services/ens'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 
 const useIsUnverifiedContract = (contract?: { contractAbi?: object | null } | null): boolean => {
   return !!contract && !contract.contractAbi
@@ -26,7 +27,7 @@ export function useAddressName(address?: string, name?: string | null, customAva
   )
 
   const [ensName] = useAsync(async () => {
-    if (contract.displayName || !address || !isAddress(address) || !web3) return undefined
+    if (contract?.displayName || !address || !isAddress(address) || !web3) return undefined
     return lookupAddress(web3, address)
   }, [address, web3, contract])
 
