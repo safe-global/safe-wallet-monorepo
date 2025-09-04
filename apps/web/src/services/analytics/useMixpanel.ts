@@ -59,7 +59,11 @@ const useMixpanel = () => {
         console.info('[MixPanel] - User opted in')
       }
     } else {
-      mixpanel.opt_out_tracking()
+      try {
+        mixpanel.opt_out_tracking()
+      } catch (e) {
+        // do nothing, opt_out_tracking throws an error if tracking was never enabled
+      }
       if (!IS_PRODUCTION) {
         console.info('[MixPanel] - User opted out')
       }

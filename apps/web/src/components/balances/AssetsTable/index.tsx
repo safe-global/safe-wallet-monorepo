@@ -93,7 +93,7 @@ const headCells = [
   {
     id: 'asset',
     label: 'Asset',
-    width: '28%',
+    width: '23%',
   },
   {
     id: 'price',
@@ -122,7 +122,7 @@ const headCells = [
         </Typography>
       </Tooltip>
     ),
-    width: '18%',
+    width: '23%',
     align: 'right',
   },
   {
@@ -226,7 +226,7 @@ const AssetsTable = ({
               content: (
                 <Box textAlign="right">
                   <Typography>
-                    <FiatValue value={item.fiatBalance} precise uniformColor />
+                    <FiatValue value={item.fiatBalance} />
                   </Typography>
                   {item.fiatBalance24hChange && (
                     <Typography variant="caption">
@@ -265,7 +265,7 @@ const AssetsTable = ({
               sticky: true,
               collapsed: item.tokenInfo.address === hidingAsset,
               content: (
-                <Stack direction="row" gap={1} alignItems="center" justifyContent="flex-end">
+                <Stack direction="row" gap={1} alignItems="center" justifyContent="flex-end" mr={-1}>
                   <Stack direction="row" gap={1} alignItems="center" bgcolor="background.paper" p={1}>
                     <SendButton tokenInfo={item.tokenInfo} />
 
