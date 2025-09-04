@@ -10,11 +10,13 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { HistoryTransactionView } from '@/src/features/HistoryTransactionDetails/components/HistoryTransactionView'
 import { HistoryTransactionInfo } from '@/src/features/HistoryTransactionDetails/components/HistoryTransactionInfo'
 import { ViewOnExplorerButton } from '@/src/features/HistoryTransactionDetails/components/ViewOnExplorerButton'
-import { getHeaderTitle } from '@/src/features/HistoryTransactionDetails/utils/header'
+import { ShareButton } from '@/src/components/ShareButton'
+import { useShareTransaction } from '@/src/hooks/useShareTransaction'
 
 function HistoryTransactionDetailsContainer() {
   const txId = useRoute<RouteProp<{ params: { txId: string } }>>().params.txId
   const activeSafe = useDefinedActiveSafe()
+  const shareTransaction = useShareTransaction(txId)
 
   const {
     data: txDetails,
@@ -39,7 +41,12 @@ function HistoryTransactionDetailsContainer() {
 
   return (
     <>
-      <Stack.Screen options={{ headerTitle: getHeaderTitle(txDetails) }} />
+      <Stack.Screen
+        options={{
+          title: 'Transaction details',
+          headerRight: () => <ShareButton onPress={shareTransaction} testID="share-transaction-button" />,
+        }}
+      />
       <View flex={1}>
         <ScrollView>
           <View paddingHorizontal="$4">

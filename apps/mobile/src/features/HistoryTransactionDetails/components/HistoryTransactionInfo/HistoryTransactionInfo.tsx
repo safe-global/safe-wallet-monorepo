@@ -34,14 +34,7 @@ export function HistoryTransactionInfo({ txId, txDetails }: HistoryTransactionIn
         {txHash && (
           <View alignItems="center" flexDirection="row" justifyContent="space-between">
             <Text color="$textSecondaryLight">Transaction hash</Text>
-            <HashDisplay
-              value={txHash}
-              showIdenticon={false}
-              isAddress={false}
-              copyIconSize={16}
-              externalLinkSize={16}
-              textProps={{ fontSize: '$4', color: '$textPrimary' }}
-            />
+            <HashDisplay value={txHash} showVisualIdentifier={false} />
           </View>
         )}
 

@@ -6,6 +6,7 @@ import { TransactionHeader } from '../../../TransactionHeader'
 import {
   MultisigExecutionDetails,
   NativeStakingDepositTransactionInfo,
+  TransactionData,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TokenAmount } from '@/src/components/TokenAmount'
 import { ParametersButton } from '../../../ParametersButton'
@@ -14,10 +15,11 @@ interface StakingDepositProps {
   txInfo: NativeStakingDepositTransactionInfo
   executionInfo: MultisigExecutionDetails
   txId: string
+  txData: TransactionData
 }
 
-export function StakingDeposit({ txInfo, executionInfo, txId }: StakingDepositProps) {
-  const items = useMemo(() => formatStakingDepositItems(txInfo), [txInfo])
+export function StakingDeposit({ txInfo, executionInfo, txId, txData }: StakingDepositProps) {
+  const items = useMemo(() => formatStakingDepositItems(txInfo, txData), [txInfo, txData])
   const validatorItems = useMemo(() => formatStakingValidatorItems(txInfo), [txInfo])
 
   return (

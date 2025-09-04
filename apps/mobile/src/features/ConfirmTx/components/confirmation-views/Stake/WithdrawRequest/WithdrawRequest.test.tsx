@@ -44,15 +44,32 @@ const mockExecutionInfo: MultisigExecutionDetails = {
   trusted: true,
 }
 
+const mockTxData = {
+  to: {
+    value: '0x1234567890123456789012345678901234567890',
+    name: 'Staking Contract',
+    logoUri: null,
+  },
+  operation: 0,
+}
+
 const mockProps = {
   txInfo: mockWithdrawRequestTxInfo,
   executionInfo: mockExecutionInfo,
   txId: 'test-tx-id',
+  txData: mockTxData,
 }
 
 describe('StakingWithdrawRequest', () => {
   it('renders correctly with withdraw request information', () => {
-    const { getByText, getAllByText } = render(<StakingWithdrawRequest {...mockProps} />)
+    const { getByText, getAllByText } = render(<StakingWithdrawRequest {...mockProps} />, {
+      initialStore: {
+        activeSafe: {
+          address: '0x1234567890123456789012345678901234567890',
+          chainId: '1',
+        },
+      },
+    })
 
     expect(getAllByText(/32.*ETH/)).toHaveLength(2) // TokenAmount in header and receive row
     expect(getByText('Exit')).toBeTruthy() // Exit label
@@ -73,14 +90,28 @@ describe('StakingWithdrawRequest', () => {
       },
     }
 
-    const { getByText } = render(<StakingWithdrawRequest {...multiValidatorProps} />)
+    const { getByText } = render(<StakingWithdrawRequest {...multiValidatorProps} />, {
+      initialStore: {
+        activeSafe: {
+          address: '0x1234567890123456789012345678901234567890',
+          chainId: '1',
+        },
+      },
+    })
 
     expect(getByText('Exit')).toBeTruthy()
     expect(getByText('3 Validators')).toBeTruthy() // Multiple validators with plural form
   })
 
   it('matches snapshot', () => {
-    const component = render(<StakingWithdrawRequest {...mockProps} />)
+    const component = render(<StakingWithdrawRequest {...mockProps} />, {
+      initialStore: {
+        activeSafe: {
+          address: '0x1234567890123456789012345678901234567890',
+          chainId: '1',
+        },
+      },
+    })
     expect(component).toMatchSnapshot()
   })
 })

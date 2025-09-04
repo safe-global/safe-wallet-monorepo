@@ -1,7 +1,9 @@
 // Mock constants before any imports
 jest.mock('@/config/constants', () => ({
   ...jest.requireActual('@/config/constants'),
-  MIXPANEL_TOKEN: 'test-token',
+  PROD_MIXPANEL_TOKEN: 'prod-token',
+  STAGING_MIXPANEL_TOKEN: 'staging-token',
+  MIXPANEL_TOKEN: 'staging-token',
   IS_PRODUCTION: false,
 }))
 
@@ -46,13 +48,14 @@ describe('MixPanel Integration', () => {
     it('should initialize MixPanel with correct configuration', () => {
       mixpanelInit()
 
-      expect(mockMixpanel.init).toHaveBeenCalledWith('test-token', {
+      expect(mockMixpanel.init).toHaveBeenCalledWith('staging-token', {
         debug: true, // IS_PRODUCTION is false in tests
         persistence: 'localStorage',
         autocapture: false,
         batch_requests: true,
         ip: false,
         opt_out_tracking_by_default: true,
+        api_host: 'https://api-eu.mixpanel.com',
       })
 
       // Should register initial params

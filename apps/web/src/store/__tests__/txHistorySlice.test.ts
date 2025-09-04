@@ -56,6 +56,7 @@ describe('txHistorySlice', () => {
 
       const action = txHistorySlice.actions.set({
         loading: false,
+        loaded: true,
         data: {
           results: [transaction],
         },
@@ -84,6 +85,7 @@ describe('txHistorySlice', () => {
 
       const action = txHistorySlice.actions.set({
         loading: false,
+        loaded: true,
         data: undefined, // Cleared
       })
 
@@ -121,6 +123,7 @@ describe('txHistorySlice', () => {
 
       const action = txHistorySlice.actions.set({
         loading: false,
+        loaded: true,
         data: {
           results: [dateLabel, label, conflictHeader],
         },
@@ -160,6 +163,7 @@ describe('txHistorySlice', () => {
 
       const action = txHistorySlice.actions.set({
         loading: false,
+        loaded: true,
         data: {
           results: [transaction],
         },
@@ -206,6 +210,7 @@ describe('txHistorySlice', () => {
 
       const action = txHistorySlice.actions.set({
         loading: false,
+        loaded: true,
         data: {
           results: [transaction],
         },

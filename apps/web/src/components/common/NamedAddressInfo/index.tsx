@@ -3,23 +3,14 @@ import useChainId from '@/hooks/useChainId'
 import { getContract } from '@safe-global/safe-gateway-typescript-sdk'
 import EthHashInfo from '../EthHashInfo'
 import type { EthHashInfoProps } from '../EthHashInfo/SrcEthHashInfo'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { memo, useMemo } from 'react'
 import { isAddress } from 'ethers'
 import { lookupAddress } from '@/services/ens'
 
-const useIsUnverifiedContract = (address?: string, error?: Error): boolean => {
-  const web3 = useWeb3ReadOnly()
-
-  const [isUnverifiedContract] = useAsync<boolean>(async () => {
-    if (!error || !address) return false // Only check via RPC if getContract returned an error
-    const code = await web3?.getCode(address)
-    return code !== '0x'
-  }, [address, web3, error])
-
-  return isUnverifiedContract ?? false
+const useIsUnverifiedContract = (contract?: { contractAbi?: object | null } | null): boolean => {
+  return !!contract && !contract.contractAbi
 }
 
 export function useAddressName(address?: string, name?: string | null, customAvatar?: string) {
@@ -28,18 +19,18 @@ export function useAddressName(address?: string, name?: string | null, customAva
   const web3 = useWeb3ReadOnly()
   const displayName = sameAddress(address, safeAddress) ? 'This Safe Account' : name
 
-  const [contract, error] = useAsync(
+  const [contract] = useAsync(
     () => (!displayName && address && isAddress(address) ? getContract(chainId, address) : undefined),
     [address, chainId, displayName],
     false,
   )
 
   const [ensName] = useAsync(async () => {
-    if (!error || !address || !isAddress(address) || !web3) return undefined
+    if (contract.displayName || !address || !isAddress(address) || !web3) return undefined
     return lookupAddress(web3, address)
-  }, [address, web3, error])
+  }, [address, web3, contract])
 
-  const isUnverifiedContract = useIsUnverifiedContract(address, error)
+  const isUnverifiedContract = useIsUnverifiedContract(contract)
 
   return useMemo(
     () => ({

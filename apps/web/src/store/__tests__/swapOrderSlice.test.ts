@@ -44,6 +44,7 @@ describe('swapOrderSlice', () => {
 
       const action = txHistorySlice.actions.set({
         loading: false,
+        loaded: true,
         data: {
           results: [nonSwapTransaction],
         },
@@ -70,6 +71,7 @@ describe('swapOrderSlice', () => {
 
       const action = txHistorySlice.actions.set({
         loading: false,
+        loaded: true,
         data: {
           results: [swapTransaction],
         },
@@ -106,6 +108,7 @@ describe('swapOrderSlice', () => {
 
       const action = txHistorySlice.actions.set({
         loading: false,
+        loaded: true,
         data: {
           results: [swapTransaction],
         },
@@ -148,6 +151,7 @@ describe('swapOrderSlice', () => {
 
       const action = txHistorySlice.actions.set({
         loading: false,
+        loaded: true,
         data: {
           results: [swapTransaction],
         },

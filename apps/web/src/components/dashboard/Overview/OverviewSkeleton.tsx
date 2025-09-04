@@ -3,7 +3,7 @@ import { type ReactElement } from 'react'
 
 const OverviewSkeleton = (): ReactElement => {
   return (
-    <Card sx={{ border: 0, p: 3 }} component="section">
+    <Card sx={{ border: 0, px: 3, pt: 2.5, pb: 1.5 }} component="section">
       <Box>
         <Stack
           direction={{ xs: 'column', md: 'row' }}
@@ -11,10 +11,18 @@ const OverviewSkeleton = (): ReactElement => {
           justifyContent="space-between"
         >
           <Box>
-            <Typography color="primary.light" fontWeight="bold" mb={1}>
+            <Typography fontWeight="700" mb={0.5}>
               Total asset value
             </Typography>
-            <Skeleton variant="text" />
+
+            <Skeleton
+              variant="text"
+              sx={{
+                width: 'inherit',
+                fontSize: '44px',
+                lineHeight: '1.2',
+              }}
+            />
           </Box>
 
           <Stack

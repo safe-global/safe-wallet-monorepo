@@ -3,7 +3,6 @@ import NamedAddressInfo, { useAddressName } from '.'
 import { faker } from '@faker-js/faker'
 import { getContract, type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import useSafeAddress from '@/hooks/useSafeAddress'
 
 const mockChainInfo = {
@@ -22,16 +21,11 @@ jest.mock('@safe-global/safe-gateway-typescript-sdk', () => ({
   __esModule: true,
 }))
 
-jest.mock('@/hooks/wallets/web3', () => ({
-  useWeb3ReadOnly: jest.fn(),
-}))
-
 jest.mock('@/hooks/useSafeAddress', () => ({
   __esModule: true,
   default: jest.fn(),
 }))
 
-const mockWeb3ReadOnly = useWeb3ReadOnly as jest.Mock
 const getContractMock = getContract as jest.Mock
 const useSafeAddressMock = useSafeAddress as jest.Mock
 
@@ -54,6 +48,7 @@ describe('NamedAddressInfo', () => {
         initialReduxState: {
           chains: {
             loading: false,
+            loaded: true,
             data: [mockChainInfo],
           },
         },
@@ -82,6 +77,7 @@ describe('NamedAddressInfo', () => {
       initialReduxState: {
         chains: {
           loading: false,
+          loaded: true,
           data: [mockChainInfo],
         },
       },
@@ -101,6 +97,7 @@ describe('NamedAddressInfo', () => {
       initialReduxState: {
         chains: {
           loading: false,
+          loaded: true,
           data: [mockChainInfo],
         },
       },
@@ -118,6 +115,7 @@ describe('NamedAddressInfo', () => {
       initialReduxState: {
         chains: {
           loading: false,
+          loaded: true,
           data: [mockChainInfo],
         },
       },
@@ -132,9 +130,6 @@ describe('useAddressName', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockWeb3ReadOnly.mockReturnValue({
-      getCode: jest.fn().mockResolvedValue('0x'),
-    })
     useSafeAddressMock.mockReturnValue(safeAddress)
   })
 
@@ -154,6 +149,7 @@ describe('useAddressName', () => {
       displayName: 'Contract Display Name',
       name: 'ContractName',
       logoUri: 'contract-logo.png',
+      contractAbi: {},
     })
 
     const { result } = renderHook(() => useAddressName(address))
@@ -169,28 +165,27 @@ describe('useAddressName', () => {
     expect(getContractMock).toHaveBeenCalledWith('4', address)
   })
 
-  it('should handle unverified contracts', async () => {
-    getContractMock.mockRejectedValue(new Error('Contract not found'))
-    mockWeb3ReadOnly.mockReturnValue({
-      getCode: jest.fn().mockResolvedValue('0x123'), // Non-empty bytecode indicates a contract
+  it('should mark contract without ABI as unverified', async () => {
+    getContractMock.mockResolvedValue({
+      displayName: 'Contract Display Name',
+      name: 'ContractName',
+      logoUri: 'contract-logo.png',
+      contractAbi: null,
     })
 
     const { result } = renderHook(() => useAddressName(address))
 
     await waitFor(() => {
       expect(result.current).toEqual({
-        name: 'Unverified contract',
-        logoUri: undefined,
+        name: 'Contract Display Name',
+        logoUri: 'contract-logo.png',
         isUnverifiedContract: true,
       })
     })
   })
 
-  it('should handle EOA addresses (not contracts)', async () => {
+  it('should treat contract lookup errors as verified (not indexed)', async () => {
     getContractMock.mockRejectedValue(new Error('Contract not found'))
-    mockWeb3ReadOnly.mockReturnValue({
-      getCode: jest.fn().mockResolvedValue('0x'), // Empty bytecode indicates EOA
-    })
 
     const { result } = renderHook(() => useAddressName(address))
 

@@ -1,4 +1,6 @@
 import { TokenAmount } from '@/src/components/TokenAmount'
+import { HashDisplay } from '@/src/components/HashDisplay'
+import { NetworkRow } from '@/src/components/NetworkRow'
 
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatters'
@@ -6,8 +8,10 @@ import { Text, View } from 'tamagui'
 import {
   NativeStakingDepositTransactionInfo,
   NativeStakingValidatorsExitTransactionInfo,
+  TransactionData,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ListTableItem } from '../../ListTable'
+import { ValidatorStatus } from '@/src/components/ValidatorStatus'
 
 const CURRENCY = 'USD'
 
@@ -17,11 +21,14 @@ export const stakingTypeToLabel = {
   NativeStakingWithdraw: 'Claim',
 } as const
 
-export const formatStakingDepositItems = (txInfo: NativeStakingDepositTransactionInfo): ListTableItem[] => {
+export const formatStakingDepositItems = (
+  txInfo: NativeStakingDepositTransactionInfo,
+  txData: TransactionData,
+): ListTableItem[] => {
   // Fee is returned in decimal format, multiply by 100 for percentage
   const fee = (txInfo.fee * 100).toFixed(2)
 
-  return [
+  const items: ListTableItem[] = [
     {
       label: 'Rewards rate',
       value: `${txInfo.annualNrr.toFixed(3)}%`,
@@ -59,6 +66,18 @@ export const formatStakingDepositItems = (txInfo: NativeStakingDepositTransactio
       value: `${fee}%`,
     },
   ]
+
+  items.push({
+    label: 'Contract',
+    render: () => <HashDisplay value={txData.to} />,
+  })
+
+  items.push({
+    label: 'Network',
+    render: () => <NetworkRow />,
+  })
+
+  return items
 }
 
 export const formatStakingValidatorItems = (txInfo: NativeStakingDepositTransactionInfo): ListTableItem[] => {
@@ -75,11 +94,18 @@ export const formatStakingValidatorItems = (txInfo: NativeStakingDepositTransact
       label: 'Rewards',
       value: 'Approx. every 5 days after activation',
     },
+    {
+      label: 'Validator status',
+      render: () => {
+        return <ValidatorStatus status={txInfo.status} />
+      },
+    },
   ]
 }
 
 export const formatStakingWithdrawRequestItems = (
   txInfo: NativeStakingValidatorsExitTransactionInfo,
+  txData: TransactionData,
 ): ListTableItem[] => {
   const withdrawIn = formatDurationFromMilliseconds(txInfo.estimatedExitTime + txInfo.estimatedWithdrawalTime, [
     'days',
@@ -87,6 +113,14 @@ export const formatStakingWithdrawRequestItems = (
   ])
 
   return [
+    {
+      label: 'Contract',
+      render: () => <HashDisplay value={txData.to} />,
+    },
+    {
+      label: 'Network',
+      render: () => <NetworkRow />,
+    },
     {
       label: 'Exit',
       value: `${txInfo.numValidators} Validator${txInfo.numValidators !== 1 ? 's' : ''}`,
@@ -105,6 +139,12 @@ export const formatStakingWithdrawRequestItems = (
     {
       label: 'Withdraw in',
       value: `Up to ${withdrawIn}`,
+    },
+    {
+      label: 'Validator status',
+      render: () => {
+        return <ValidatorStatus status={txInfo.status} />
+      },
     },
   ]
 }

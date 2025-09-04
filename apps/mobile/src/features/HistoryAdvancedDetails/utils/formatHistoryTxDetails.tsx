@@ -44,10 +44,8 @@ const formatHistoryTxDetails = ({ txDetails }: formatHistoryTxDetailsProps): His
         render: () => (
           <HashDisplay
             value={executionInfo.safeTxHash as Address}
-            copyProps={{ color: '$textSecondaryLight', size: 16 }}
-            showIdenticon={false}
+            showVisualIdentifier={false}
             showExternalLink={false}
-            isAddress={false}
           />
         ),
       })
@@ -81,13 +79,7 @@ const formatHistoryTxDetails = ({ txDetails }: formatHistoryTxDetailsProps): His
   if (txDetails.txData?.to?.value) {
     parametersItems.push({
       label: 'To',
-      render: () => (
-        <HashDisplay
-          value={txDetails.txData?.to.value as Address}
-          copyProps={{ color: '$textSecondaryLight', size: 16 }}
-          externalLinkSize={16}
-        />
-      ),
+      render: () => <HashDisplay value={txDetails.txData?.to.value as Address} />,
     })
   }
 
@@ -98,12 +90,16 @@ const formatHistoryTxDetails = ({ txDetails }: formatHistoryTxDetailsProps): His
     })
   }
 
-  if (txDetails.txData?.hexData) {
-    parametersItems.push({
-      label: 'Data',
-      render: () => <HexDataDisplay data={txDetails.txData?.hexData} title="Hex Data" copyMessage="Data copied." />,
-    })
-  }
+  parametersItems.push({
+    label: 'Data',
+    render: () => {
+      if (!txDetails.txData?.hexData) {
+        return <Text fontWeight={600}>0x</Text>
+      }
+
+      return <HexDataDisplay data={txDetails.txData?.hexData || '0x'} title="Hex Data" copyMessage="Data copied." />
+    },
+  })
 
   if (parametersItems.length > 0) {
     sections.push({

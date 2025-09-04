@@ -17,7 +17,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/src/hooks/useHasFeature'
 
 export const TransactionChecksContainer = () => {
-  const { simulation, simulateTransaction, simulationLink, _simulationRequestStatus } = useSimulation()
+  const { simulationData, simulateTransaction, simulationLink, _simulationRequestStatus } = useSimulation()
   const { scanTransaction, blockaidPayload, error: blockaidError, loading: blockaidLoading } = useBlockaid()
   const activeSafe = useDefinedActiveSafe()
   const safeInfo = useSafeInfo()
@@ -64,7 +64,12 @@ export const TransactionChecksContainer = () => {
 
   return (
     <TransactionChecksView
-      tenderly={{ enabled: simulationEnabled, fetchStatus: _simulationRequestStatus, simulationLink, simulation }}
+      tenderly={{
+        enabled: simulationEnabled,
+        fetchStatus: _simulationRequestStatus,
+        simulationLink,
+        simulation: simulationData,
+      }}
       blockaid={{ enabled: blockaidEnabled, loading: blockaidLoading, error: blockaidError, payload: blockaidPayload }}
     />
   )
