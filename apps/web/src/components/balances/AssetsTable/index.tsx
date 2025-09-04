@@ -261,7 +261,7 @@ const AssetsTable = ({
               ),
             },
             actions: {
-              rawValue: Number(item.fiatBalance24hChange),
+              rawValue: '',
               sticky: true,
               collapsed: item.tokenInfo.address === hidingAsset,
               content: (
