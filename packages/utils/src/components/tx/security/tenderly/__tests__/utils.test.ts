@@ -224,10 +224,7 @@ describe('getSimulationStatus', () => {
       simulationData: {
         simulation: { status: true },
         transaction: {
-          call_trace: [
-            { error: undefined },
-            { error: 'Execution reverted' },
-          ],
+          call_trace: [{ error: undefined }, { error: 'Execution reverted' }],
         },
       } as any,
     } as any
