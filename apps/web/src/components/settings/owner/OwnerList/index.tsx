@@ -1,6 +1,6 @@
 import { jsonToCSV } from 'react-papaparse'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import EthHashInfo from '@/components/common/EthHashInfo'
+// import EthHashInfo from '@/components/common/EthHashInfo'
 import { ReplaceOwnerFlow, RemoveOwnerFlow } from '@/components/tx-flow/flows'
 import useAddressBook from '@/hooks/useAddressBook'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -18,35 +18,25 @@ import ReplaceOwnerIcon from '@/public/images/settings/setup/replace-owner.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import type { AddressBook } from '@/store/addressBookSlice'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
-import useResolvedOwners from '@/hooks/useResolvedOwners'
+import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 
 export const OwnerList = () => {
   const addressBook = useAddressBook()
   const { safe } = useSafeInfo()
   const { setTxFlow } = useContext(TxModalContext)
-  const owners = useResolvedOwners()
 
   const rows = useMemo(() => {
-    const showRemoveOwnerButton = owners.length > 1
+    const showRemoveOwnerButton = safe.owners.length > 1
 
-    return owners.map((owner) => {
+    return safe.owners.map((owner) => {
       const address = owner.value
-      let name = addressBook[address] || owner.name || undefined
+      const name = addressBook[address]
 
       return {
         cells: {
           owner: {
             rawValue: address,
-            content: (
-              <EthHashInfo
-                address={address}
-                showCopyButton
-                shortAddress={false}
-                showName={true}
-                name={name}
-                hasExplorer
-              />
-            ),
+            content: <NamedAddressInfo address={address} showCopyButton shortAddress={false} name={name} hasExplorer />,
           },
           actions: {
             rawValue: '',
@@ -98,7 +88,7 @@ export const OwnerList = () => {
         },
       }
     })
-  }, [owners, safe.chainId, addressBook, setTxFlow])
+  }, [safe.owners, safe.chainId, addressBook, setTxFlow])
 
   return (
     <Box
