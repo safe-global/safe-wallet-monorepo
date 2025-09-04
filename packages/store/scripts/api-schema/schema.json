@@ -4938,8 +4938,6 @@
           }
         },
         "required": ["fiatTotal", "items"]
-<<<<<<< HEAD
-=======
       },
       "Position": {
         "type": "object",
@@ -5043,7 +5041,6 @@
           }
         },
         "required": ["protocol", "protocol_metadata", "fiatTotal", "items"]
->>>>>>> 62229d06d0b8fb4b90ab3026064618429cab6363
       },
       "GasPriceOracle": {
         "type": "object",
