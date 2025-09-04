@@ -13,8 +13,12 @@ import { AbsoluteLinearGradient } from '@/src/components/LinearGradient'
 export function ExecuteSuccess() {
   const dispatch = useDispatch()
   const { bottom } = useSafeAreaInsets()
+
   const handleDonePress = () => {
     dispatch(cgwApi.util.invalidateTags(['transactions']))
+
+    // Go back to pending transactions
+    router.back()
     router.back()
     router.back()
   }

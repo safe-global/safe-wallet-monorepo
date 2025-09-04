@@ -1,7 +1,7 @@
 import { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeInfo } from '@/src/types/address'
-import { createConnectedWallet } from '../../web3'
 import { proposeTx } from '@/src/services/tx/tx-sender/create'
+import { createConnectedWallet } from '@/src/services/web3'
 
 interface ExecuteTxParams {
   chain: ChainInfo

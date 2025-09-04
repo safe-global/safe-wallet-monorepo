@@ -22,6 +22,7 @@ export function useTransactionExecution({ txId, signerAddress }: UseTransactionE
 
   const execute = useCallback(async () => {
     setStatus('loading')
+
     try {
       const privateKey = await getPrivateKey(signerAddress)
 
