@@ -172,6 +172,14 @@ function RootLayout() {
                               }}
                             />
                             <Stack.Screen
+                              name="change-executor-sheet"
+                              options={{
+                                headerShown: false,
+                                presentation: 'transparentModal',
+                                animation: 'fade',
+                              }}
+                            />
+                            <Stack.Screen
                               name="notifications-opt-in"
                               options={{
                                 headerShown: false,
