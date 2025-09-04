@@ -3,16 +3,16 @@ import { Alert } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useGuard } from '@/src/context/GuardProvider'
 
-export function useSigningGuard() {
+export function useTransactionGuard(type: string) {
   const { getGuard } = useGuard()
   const router = useRouter()
   const hasShownAlert = useRef(false)
   const hasEverBeenAuthorized = useRef(false)
-  const canSign = getGuard('signing')
+  const guard = getGuard(type)
 
   useLayoutEffect(() => {
     // Track if we've ever been authorized
-    if (canSign) {
+    if (guard) {
       hasEverBeenAuthorized.current = true
     }
 
@@ -20,7 +20,7 @@ export function useSigningGuard() {
     // 1. User cannot sign AND
     // 2. We haven't shown alert before AND
     // 3. We've never been authorized (prevents alert after successful signing)
-    if (!canSign && !hasShownAlert.current && !hasEverBeenAuthorized.current) {
+    if (!guard && !hasShownAlert.current && !hasEverBeenAuthorized.current) {
       Alert.alert(
         'Something is fishy!',
         'You somehow got here, but you did not look at the transaction details. Go Back, inspect the transaction details and try again.',
@@ -33,7 +33,7 @@ export function useSigningGuard() {
       )
       hasShownAlert.current = true
     }
-  }, [canSign, router])
+  }, [guard, router])
 
-  return { canSign }
+  return { guard }
 }

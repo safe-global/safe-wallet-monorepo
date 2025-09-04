@@ -7,21 +7,23 @@ import { useTransactionExecution } from '../hooks/useTransactionExecution'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { useTransactionGuard } from '@/src/hooks/useTransactionGuard'
 
 export function ExecuteTransaction() {
   const { txId } = useLocalSearchParams<{ txId: string }>()
   const activeSafe = useDefinedActiveSafe()
   const activeSigner = useAppSelector((state) => selectActiveSigner(state, activeSafe.address))
+  const { guard: canExecute } = useTransactionGuard('executing')
   const { status, executeTx, retry } = useTransactionExecution({
     txId: txId || '',
     signerAddress: activeSigner?.value || '',
   })
 
   useEffect(() => {
-    if (status === 'idle' && txId && activeSigner) {
+    if (canExecute && status === 'idle' && txId && activeSigner) {
       executeTx()
     }
-  }, [status, executeTx, txId, activeSigner])
+  }, [canExecute, status, executeTx, txId, activeSigner])
 
   if (!txId) {
     const handleRetry = () => {
