@@ -3,7 +3,6 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectChainById } from '@/src/store/chains'
 import type { RootState } from '@/src/store'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { getPrivateKey } from '@/src/hooks/useSign/useSign'
 import { executeTx } from '@/src/services/tx/tx-sender/execute'
 import logger from '@/src/utils/logger'
@@ -32,7 +31,7 @@ export function useTransactionExecution({ txId, signerAddress }: UseTransactionE
       }
 
       await executeTx({
-        chain: activeChain as ChainInfo,
+        chain: activeChain,
         activeSafe,
         txId,
         privateKey,

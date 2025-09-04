@@ -3,7 +3,6 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectChainById } from '@/src/store/chains'
 import { RootState } from '@/src/store'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { getPrivateKey } from '@/src/hooks/useSign/useSign'
 import { signTx } from '@/src/services/tx/tx-sender/sign'
 import { useTransactionsAddConfirmationV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -44,7 +43,7 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
       }
 
       const signedTx = await signTx({
-        chain: activeChain as ChainInfo,
+        chain: activeChain,
         activeSafe,
         txId,
         privateKey,

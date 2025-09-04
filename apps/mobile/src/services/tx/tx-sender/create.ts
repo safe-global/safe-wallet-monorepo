@@ -1,5 +1,4 @@
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
-
+import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import extractTxInfo from '@/src/services/tx/extractTx'
 import { createConnectedWallet } from '../../web3'
@@ -12,7 +11,7 @@ interface CreateTxParams {
   txId: string
   privateKey: string
   txDetails?: TransactionDetails
-  chain: ChainInfo
+  chain: Chain
 }
 
 export const createTx = async (txParams: SafeTransactionDataPartial, nonce?: number): Promise<SafeTransaction> => {
