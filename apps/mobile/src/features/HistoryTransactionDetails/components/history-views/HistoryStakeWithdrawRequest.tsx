@@ -23,7 +23,6 @@ interface HistoryStakeWithdrawRequestProps {
 export function HistoryStakeWithdrawRequest({ txId, txInfo, txData }: HistoryStakeWithdrawRequestProps) {
   const withdrawRequestItems = useMemo(() => formatStakingWithdrawRequestItems(txInfo, txData), [txInfo, txData])
 
-  console.log('txInfo.type', txInfo.type)
   return (
     <YStack gap="$4">
       <HistoryTransactionHeader
