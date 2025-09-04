@@ -105,6 +105,7 @@ function RootLayout() {
                               options={{ headerShown: false, presentation: 'modal' }}
                             />
                             <Stack.Screen name="sign-transaction" options={{ headerShown: false }} />
+                            <Stack.Screen name="execute-transaction" options={{ headerShown: false }} />
                             <Stack.Screen name="pending-transactions" options={{ headerShown: true, title: '' }} />
                             <Stack.Screen name="notifications-center" options={{ headerShown: true, title: '' }} />
                             <Stack.Screen name="notifications-settings" options={{ headerShown: true, title: '' }} />

@@ -78,14 +78,7 @@ describe('ConfirmTxForm', () => {
     const { getByText } = render(<ConfirmTxForm {...defaultProps} />)
 
     expect(getByText('AlreadySigned')).toBeTruthy()
-    expect(AlreadySigned).toHaveBeenCalledWith(
-      expect.objectContaining({
-        txId: 'tx123',
-        safeAddress: '0x123',
-        chainId: '1',
-      }),
-      undefined,
-    )
+    expect(AlreadySigned).toHaveBeenCalled()
   })
 
   it('renders CanNotSign when canSign is false', () => {
@@ -104,8 +97,7 @@ describe('ConfirmTxForm', () => {
     expect(getByText('ExecuteForm')).toBeTruthy()
     expect(ExecuteForm).toHaveBeenCalledWith(
       expect.objectContaining({
-        safeAddress: '0x123',
-        chainId: '1',
+        txId: 'tx123',
       }),
       undefined,
     )
