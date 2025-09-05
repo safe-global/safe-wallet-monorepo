@@ -1,4 +1,4 @@
-export enum MixPanelEvent {
+export enum MixpanelEvent {
   SAFE_APP_LAUNCHED = 'Safe App Launched',
   SAFE_CREATED = 'Safe Created',
   SAFE_ACTIVATED = 'Safe Activated',
@@ -13,7 +13,7 @@ export enum MixPanelEvent {
   CSV_TX_EXPORT_SUBMITTED = 'CSV Exported',
 }
 
-export enum MixPanelUserProperty {
+export enum MixpanelUserProperty {
   WALLET_LABEL = 'Wallet Label',
   WALLET_ADDRESS = 'Wallet Address',
   SAFE_ADDRESS = 'Safe Address',
@@ -25,7 +25,7 @@ export enum MixPanelUserProperty {
   LAST_TX_AT = 'Last Transaction at',
 }
 
-export enum MixPanelEventParams {
+export enum MixpanelEventParams {
   APP_VERSION = 'App Version',
   BLOCKCHAIN_NETWORK = 'Blockchain Network',
   DEVICE_TYPE = 'Device Type',
@@ -55,7 +55,7 @@ export enum SafeAppLaunchLocation {
 }
 
 export const ADDRESS_PROPERTIES = new Set([
-  MixPanelEventParams.SAFE_ADDRESS,
-  MixPanelEventParams.EOA_WALLET_ADDRESS,
-  MixPanelUserProperty.SAFE_ADDRESS,
+  MixpanelEventParams.SAFE_ADDRESS,
+  MixpanelEventParams.EOA_WALLET_ADDRESS,
+  MixpanelUserProperty.SAFE_ADDRESS,
 ])

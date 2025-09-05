@@ -10,7 +10,7 @@ import { isTwapOrderTxInfo } from '@/src/utils/transaction-guards'
 import { TwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { formatSwapOrderItemsForHistory, formatTwapOrderItemsForHistory } from '@/src/utils/swapOrderUtils'
-import { HistoryAdvancedDetailsButton } from '../HistoryAdvancedDetailsButton'
+import { HistoryAdvancedDetailsButton } from '@/src/features/HistoryTransactionDetails/components/HistoryAdvancedDetailsButton'
 
 interface HistorySwapOrderProps {
   txId: string

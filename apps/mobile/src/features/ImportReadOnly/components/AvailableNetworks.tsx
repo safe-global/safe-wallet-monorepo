@@ -8,7 +8,9 @@ export const AvailableNetworks = ({ networks }: { networks: SafeOverview[] }) =>
     <YStack marginTop={'$4'} gap={'$1'}>
       <Text fontWeight={'600'}>Available on networks:</Text>
       <XStack marginTop={'$3'} flexWrap={'wrap'} columnGap={'$1'} rowGap={'$2'}>
-        {networks?.map((safe) => <NetworkBadgeContainer key={safe.chainId} chainId={safe.chainId} />)}
+        {networks?.map((safe) => (
+          <NetworkBadgeContainer key={safe.chainId} chainId={safe.chainId} />
+        ))}
       </XStack>
     </YStack>
   )

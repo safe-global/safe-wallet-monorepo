@@ -13,7 +13,8 @@ const mockChainInfo = {
     api: 'https://test.scan.eth/',
     txHash: 'https://test.scan.eth/{txHash}',
   },
-} as ChainInfo
+  features: [],
+} as unknown as ChainInfo
 
 jest.mock('@safe-global/safe-gateway-typescript-sdk', () => ({
   ...jest.requireActual('@safe-global/safe-gateway-typescript-sdk'),

@@ -7,20 +7,20 @@ import useDebounce from './useDebounce'
 import { useHasFeature } from './useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
-export const useAddressResolver = (address: string) => {
+export const useAddressResolver = (address?: string) => {
   const addressBook = useAddressBook()
   const ethersProvider = useWeb3ReadOnly()
   const debouncedValue = useDebounce(address, 200)
-  const addressBookName = addressBook[address]
+  const addressBookName = address && addressBook[address]
   const isDomainLookupEnabled = useHasFeature(FEATURES.DOMAIN_LOOKUP)
-  const shouldResolve = !addressBookName && isDomainLookupEnabled && !!ethersProvider && !!debouncedValue
+  const shouldResolve = address && !addressBookName && isDomainLookupEnabled && !!ethersProvider && !!debouncedValue
 
   const [ens, _, isResolving] = useAsync<string | undefined>(() => {
     if (!shouldResolve) return
     return lookupAddress(ethersProvider, debouncedValue)
   }, [ethersProvider, debouncedValue, shouldResolve])
 
-  const resolving = shouldResolve && isResolving
+  const resolving = (shouldResolve && isResolving) || false
 
   return useMemo(
     () => ({

@@ -19,8 +19,9 @@ When it's time to make a release, we "freeze" the code by creating a release bra
   > ```bash
   > git log origin/main..origin/dev --pretty=format:'* %s'
   > ```
-  > 
+  >
   > To generate a more structured table layout:
+  >
   > ```
   > bash ./scripts/release-notes.sh <target branch> <source branch>
   > ```

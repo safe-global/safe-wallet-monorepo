@@ -18,7 +18,7 @@ import useChainId from '@/hooks/useChainId'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { CREATE_SAFE_EVENTS, trackEvent, MixPanelEventParams } from '@/services/analytics'
+import { CREATE_SAFE_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { useEffect, useRef } from 'react'
 import { isSmartContract } from '@/utils/wallets'
@@ -133,13 +133,13 @@ const usePendingSafeStatus = (): void => {
             const safeSetup = extractCounterfactualSafeSetup(undeployedSafe, creationChainId)
             if (safeSetup) {
               trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE, {
-                [MixPanelEventParams.SAFE_ADDRESS]: detail.safeAddress,
-                [MixPanelEventParams.BLOCKCHAIN_NETWORK]: chain?.chainName || '',
-                [MixPanelEventParams.NUMBER_OF_OWNERS]: safeSetup.owners.length,
-                [MixPanelEventParams.THRESHOLD]: safeSetup.threshold,
-                [MixPanelEventParams.ENTRY_POINT]: 'Counterfactual Activation',
-                [MixPanelEventParams.DEPLOYMENT_TYPE]: 'Counterfactual',
-                [MixPanelEventParams.PAYMENT_METHOD]: isRelayed ? 'Sponsored' : 'Self-paid',
+                [MixpanelEventParams.SAFE_ADDRESS]: detail.safeAddress,
+                [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chain?.chainName || '',
+                [MixpanelEventParams.NUMBER_OF_OWNERS]: safeSetup.owners.length,
+                [MixpanelEventParams.THRESHOLD]: safeSetup.threshold,
+                [MixpanelEventParams.ENTRY_POINT]: 'Counterfactual Activation',
+                [MixpanelEventParams.DEPLOYMENT_TYPE]: 'Counterfactual',
+                [MixpanelEventParams.PAYMENT_METHOD]: isRelayed ? 'Sponsored' : 'Self-paid',
               })
             } else {
               trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE)
@@ -149,13 +149,13 @@ const usePendingSafeStatus = (): void => {
             const safeSetup = extractCounterfactualSafeSetup(undeployedSafe, creationChainId)
             if (safeSetup) {
               trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE, {
-                [MixPanelEventParams.SAFE_ADDRESS]: detail.safeAddress,
-                [MixPanelEventParams.BLOCKCHAIN_NETWORK]: chain?.chainName || '',
-                [MixPanelEventParams.NUMBER_OF_OWNERS]: safeSetup.owners.length,
-                [MixPanelEventParams.THRESHOLD]: safeSetup.threshold,
-                [MixPanelEventParams.ENTRY_POINT]: 'Direct',
-                [MixPanelEventParams.DEPLOYMENT_TYPE]: 'Direct',
-                [MixPanelEventParams.PAYMENT_METHOD]: isRelayed ? 'Sponsored' : 'Self-paid',
+                [MixpanelEventParams.SAFE_ADDRESS]: detail.safeAddress,
+                [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chain?.chainName || '',
+                [MixpanelEventParams.NUMBER_OF_OWNERS]: safeSetup.owners.length,
+                [MixpanelEventParams.THRESHOLD]: safeSetup.threshold,
+                [MixpanelEventParams.ENTRY_POINT]: 'Direct',
+                [MixpanelEventParams.DEPLOYMENT_TYPE]: 'Direct',
+                [MixpanelEventParams.PAYMENT_METHOD]: isRelayed ? 'Sponsored' : 'Self-paid',
               })
             } else {
               trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE)
