@@ -88,8 +88,7 @@ const Footer = (): ReactElement | null => {
             <>
               {' '}
               (
-              <ExternalLink href={`${packageJson.homepage}/commit/${COMMIT_HASH}`} noIcon>
-                {COMMIT_HASH}
+                {COMMIT_HASH.slice(0, 7)}
               </ExternalLink>
               )
             </>
