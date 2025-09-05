@@ -13,9 +13,29 @@ import { ChangeSignerSetupWarning } from '@/features/multichain/components/Signe
 import { OwnerList } from '@/components/tx-flow/common/OwnerList'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import type { ManageSignersForm } from '@/components/tx-flow/flows/ManagerSigners'
+import type { AddOwnerFlowProps } from '@/components/tx-flow/flows/AddOwner'
+import type { ReplaceOwnerFlowProps } from '@/components/tx-flow/flows/ReplaceOwner'
 import type { TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { checksumAddress, sameAddress } from '@safe-global/utils/utils/addresses'
+
+type FlowData = ManageSignersForm | AddOwnerFlowProps | ReplaceOwnerFlowProps
+function extractSignerNames(data?: FlowData): Record<string, string> {
+  if (!data) return {}
+
+  // ManageSigners flow
+  if ('owners' in data) {
+    return Object.fromEntries(
+      data.owners.filter((owner) => owner.name).map((owner) => [checksumAddress(owner.address), owner.name]),
+    )
+  }
+  // AddOwner/ReplaceOwner flows
+  if ('newOwner' in data && data.newOwner.name) {
+    return { [checksumAddress(data.newOwner.address)]: data.newOwner.name }
+  }
+
+  return {}
+}
 
 export function ManageSigners({
   txInfo,
@@ -25,16 +45,9 @@ export function ManageSigners({
   txData: TransactionDetails['txData']
 }): ReactElement {
   const { safe } = useSafeInfo()
-  // Extract signer names from context
-  const { data } = useContext<TxFlowContextType<ManageSignersForm>>(TxFlowContext)
 
-  const signerNames = useMemo(() => {
-    return data
-      ? Object.fromEntries(
-          data.owners.filter((owner) => owner.name).map((owner) => [checksumAddress(owner.address), owner.name]),
-        )
-      : {}
-  }, [data])
+  const { data } = useContext<TxFlowContextType<FlowData>>(TxFlowContext)
+  const signerNames = useMemo(() => extractSignerNames(data), [data])
 
   const { newOwners, newThreshold } = useMemo(() => {
     return getNewSafeSetup({
