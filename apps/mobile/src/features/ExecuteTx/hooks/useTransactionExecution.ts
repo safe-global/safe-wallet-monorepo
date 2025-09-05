@@ -8,10 +8,10 @@ import { executeTx } from '@/src/services/tx/tx-sender/execute'
 import logger from '@/src/utils/logger'
 
 export enum ExecutionStatus {
-  IDLE = 'IDLE',
-  LOADING = 'LOADING',
-  SUCCESS = 'SUCCESS',
-  ERROR = 'ERROR',
+  IDLE = 'idle',
+  LOADING = 'loading',
+  SUCCESS = 'success',
+  ERROR = 'error',
 }
 
 interface UseTransactionExecutionProps {
