@@ -35,10 +35,10 @@ const items = [
   {
     name: 'hardwareSigner',
     title: 'Import hardware signer',
-    tag: <Tag>Coming soon</Tag>,
     description: 'Use your Ledger or Keystone device.',
     icon: <SafeFontIcon name="hardware" size={16} />,
     Image: Wallet,
+    onPress: () => router.push('/import-signers/hardware-devices'),
   },
 ]
 

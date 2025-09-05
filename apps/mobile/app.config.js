@@ -73,6 +73,14 @@ const config = {
     favicon: './assets/images/favicon.png',
   },
   plugins: [
+    [
+      'react-native-ble-plx',
+      {
+        isBackgroundEnabled: true,
+        modes: ['peripheral', 'central'],
+        bluetoothAlwaysPermission: 'Allow $(PRODUCT_NAME) to connect to bluetooth devices',
+      },
+    ],
     ['./expo-plugins/withNotificationIcons.js'],
     [
       './expo-plugins/ssl-pinning/withSSLPinning.js',
