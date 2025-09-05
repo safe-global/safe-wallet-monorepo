@@ -11,7 +11,7 @@ import { formatRemoveSignerItems } from './utils'
 import { TransactionHeader } from '../../TransactionHeader'
 import { ListTable } from '../../ListTable'
 import { getSignerName } from '../AddSigner/utils'
-import { ParametersButton } from '../../ParametersButton'
+import { ParametersButton } from '@/src/components/ParametersButton'
 import { NormalizedSettingsChangeTransaction } from '../../ConfirmationView/types'
 import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
 

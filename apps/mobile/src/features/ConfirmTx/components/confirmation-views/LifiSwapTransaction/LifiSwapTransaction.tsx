@@ -6,7 +6,7 @@ import { formatUnits } from 'ethers'
 import { EthAddress } from '@/src/components/EthAddress'
 import { type ListTableItem } from '../../ListTable'
 import { LifiSwapHeader } from './LifiSwapHeader'
-import { ParametersButton } from '../../ParametersButton'
+import { ParametersButton } from '@/src/components/ParametersButton'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 
 interface LifiSwapTransactionProps {

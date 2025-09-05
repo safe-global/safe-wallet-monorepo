@@ -12,7 +12,7 @@ import { selectChainById } from '@/src/store/chains'
 import { useAppSelector } from '@/src/store/hooks'
 import { ListTable } from '../../ListTable'
 import { TransactionHeader } from '../../TransactionHeader'
-import { ParametersButton } from '../../ParametersButton'
+import { ParametersButton } from '@/src/components/ParametersButton'
 import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
 import { ActionsRow } from '@/src/components/ActionsRow'
 

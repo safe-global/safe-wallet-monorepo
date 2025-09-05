@@ -12,7 +12,7 @@ import {
   stakingTypeToLabel,
   formatStakingWithdrawRequestItems,
 } from '@/src/features/ConfirmTx/components/confirmation-views/Stake/utils'
-import { HistoryAdvancedDetailsButton } from '../HistoryAdvancedDetailsButton'
+import { HistoryAdvancedDetailsButton } from '@/src/features/HistoryTransactionDetails/components/HistoryAdvancedDetailsButton'
 
 interface HistoryStakeWithdrawRequestProps {
   txId: string

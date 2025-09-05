@@ -1,4 +1,4 @@
-import { MixPanelEvent } from './mixpanel-events'
+import { MixpanelEvent } from './mixpanel-events'
 import { CREATE_SAFE_EVENTS } from './events/createLoadSafe'
 import { WALLET_EVENTS } from './events/wallet'
 import { SAFE_APPS_EVENTS } from './events/safeApps'

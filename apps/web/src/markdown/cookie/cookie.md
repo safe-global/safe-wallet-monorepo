@@ -87,9 +87,9 @@ As stated above, cookie-related information is not used to identify you personal
 By using this website, you consent to the processing of data about you by Google in the manner and for the purposes set out above. Google Analytics, its purpose and function is further explained on the [Google Analytics website](https://www.google.com/analytics/).  
 For more information about Google Analytics cookies, please see Google's help pages and privacy policy: [Google's Privacy Policy](http://www.google.com/intl/en/policies/privacy/) and [Google Analytics Help pages](https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage). For further information about the use of these cookies by Google [click here](https://support.google.com/analytics/answer/6004245).
 
-## Product analytics via MixPanel
+## Product analytics via Mixpanel
 
-We also use Mixpanel to help us understand how users interact with our product, such as which features are adopted, and how users navigate through the platform. MixPanel **does not** collect IP addresses or other directly identifying information.
+We also use Mixpanel to help us understand how users interact with our product, such as which features are adopted, and how users navigate through the platform. Mixpanel **does not** collect IP addresses or other directly identifying information.
 
 The data we process for this purpose includes:
 
@@ -101,7 +101,7 @@ The data we process for this purpose includes:
 
 Additionally, all analytics data collected via Mixpanel is hosted entirely within the EU.
 
-MixPanel will only be processing personal data on behalf of Core Contributors for the purpose of analytics. For more details about the specific data points and subprocessors involved in this processing, please refer to MixPanel’s [Data Processing Agreement (DPA)](https://mixpanel.com/legal/dpa/).
+Mixpanel will only be processing personal data on behalf of Core Contributors for the purpose of analytics. For more details about the specific data points and subprocessors involved in this processing, please refer to Mixpanel’s [Data Processing Agreement (DPA)](https://mixpanel.com/legal/dpa/).
 
 ## What if you don’t agree with us monitoring your use of our website (even if we don't collect your personal data)?
 

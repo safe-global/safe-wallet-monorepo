@@ -9,7 +9,7 @@ import {
   TransactionData,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TokenAmount } from '@/src/components/TokenAmount'
-import { ParametersButton } from '../../../ParametersButton'
+import { ParametersButton } from '@/src/components/ParametersButton'
 import { Alert } from '@/src/components/Alert'
 
 interface StakingWithdrawRequestProps {

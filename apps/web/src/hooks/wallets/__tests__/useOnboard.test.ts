@@ -15,7 +15,7 @@ jest.mock('@/services/analytics', () => ({
     CONNECT: { action: 'connect_wallet' },
     WALLET_CONNECT: { action: 'wallet_connect' },
   },
-  MixPanelEventParams: {
+  MixpanelEventParams: {
     EOA_WALLET_LABEL: 'EOA Wallet Label',
     EOA_WALLET_ADDRESS: 'EOA Wallet Address',
     EOA_WALLET_NETWORK: 'EOA Wallet Network',
@@ -153,7 +153,7 @@ describe('useOnboard', () => {
       trackEvent.mockClear()
     })
 
-    it('should track wallet connection with proper MixPanel parameters', () => {
+    it('should track wallet connection with proper Mixpanel parameters', () => {
       const wallet = {
         label: 'MetaMask',
         chainId: '1',

@@ -10,7 +10,7 @@ import { Container } from '@/src/components/Container'
 import { Logo } from '@/src/components/Logo'
 import { Badge } from '@/src/components/Badge'
 import { HashDisplay } from '@/src/components/HashDisplay'
-import { HistoryAdvancedDetailsButton } from '../HistoryAdvancedDetailsButton'
+import { HistoryAdvancedDetailsButton } from '@/src/features/HistoryTransactionDetails/components/HistoryAdvancedDetailsButton'
 import { CircleProps } from 'tamagui'
 
 interface HistoryContractProps {

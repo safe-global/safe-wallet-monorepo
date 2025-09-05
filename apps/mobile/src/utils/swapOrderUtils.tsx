@@ -14,6 +14,7 @@ import {
   getSlippageInPercent,
   getOrderClass,
   getOrderFeeBps,
+  isOrderPartiallyFilled,
 } from '@safe-global/utils/features/swap/helpers/utils'
 import StatusLabel from '@/src/features/ConfirmTx/components/confirmation-views/SwapOrder/StatusLabel'
 import { TouchableOpacity, Linking } from 'react-native'
@@ -39,10 +40,10 @@ export const priceRow = (order: OrderTransactionInfo) => {
 
 export const statusRow = (order: OrderTransactionInfo) => {
   const { status } = order
-
+  const isPartiallyFilled = isOrderPartiallyFilled(order)
   return {
     label: 'Status',
-    render: () => <StatusLabel status={status} />,
+    render: () => <StatusLabel status={isPartiallyFilled ? 'partiallyFilled' : status} />,
   }
 }
 

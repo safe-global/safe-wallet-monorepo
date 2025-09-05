@@ -11,7 +11,7 @@ import { useAppSelector } from '@/src/store/hooks'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { selectChainById } from '@/src/store/chains'
 import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
-import { ParametersButton } from '../../ParametersButton'
+import { ParametersButton } from '@/src/components/ParametersButton'
 
 interface SendNFTProps {
   txId: string

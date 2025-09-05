@@ -6,7 +6,7 @@ import { getAddress } from 'ethers'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { logError, Errors } from '@/services/exceptions'
-import { trackEvent, WALLET_EVENTS, MixPanelEventParams } from '@/services/analytics'
+import { trackEvent, WALLET_EVENTS, MixpanelEventParams } from '@/services/analytics'
 import { useAppSelector, useAppDispatch } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
@@ -96,9 +96,9 @@ export const trackWalletType = (wallet: ConnectedWallet, configs: ChainInfo[]) =
   trackEvent(
     { ...WALLET_EVENTS.CONNECT, label: wallet.label },
     {
-      [MixPanelEventParams.EOA_WALLET_LABEL]: wallet.label,
-      [MixPanelEventParams.EOA_WALLET_ADDRESS]: wallet.address,
-      [MixPanelEventParams.EOA_WALLET_NETWORK]: networkName,
+      [MixpanelEventParams.EOA_WALLET_LABEL]: wallet.label,
+      [MixpanelEventParams.EOA_WALLET_ADDRESS]: wallet.address,
+      [MixpanelEventParams.EOA_WALLET_NETWORK]: networkName,
     },
   )
 

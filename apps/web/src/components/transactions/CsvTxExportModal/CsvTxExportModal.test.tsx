@@ -2,13 +2,13 @@ import React, { act } from 'react'
 import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
 import { trackEvent } from '@/services/analytics'
 import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
-import { MixPanelEventParams } from '@/services/analytics/mixpanel-events'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import CsvTxExportModal from './index'
 import * as csvExportQueries from '@safe-global/store/gateway/AUTO_GENERATED/csv-export'
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
-  MixPanelEventParams: {
+  MixpanelEventParams: {
     DATE_RANGE: 'Date Range',
   },
 }))
@@ -131,7 +131,7 @@ describe('CsvTxExportModal', () => {
 
     await waitFor(() => {
       expect(mockTrackEvent).toHaveBeenCalledWith(TX_LIST_EVENTS.CSV_EXPORT_SUBMITTED, {
-        [MixPanelEventParams.DATE_RANGE]: 'Last 30 days',
+        [MixpanelEventParams.DATE_RANGE]: 'Last 30 days',
       })
     })
   })

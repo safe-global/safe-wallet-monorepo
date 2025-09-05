@@ -3,7 +3,7 @@ import WcSessionManager from '../index'
 import { WalletConnectContext } from '@/features/walletconnect/WalletConnectContext'
 import { trackEvent } from '@/services/analytics'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
-import { MixPanelEventParams } from '@/services/analytics/mixpanel-events'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import type { WalletKitTypes } from '@reown/walletkit'
 
 // Mock analytics
@@ -123,7 +123,7 @@ describe('WcSessionManager tracking', () => {
           label: 'https://test-dapp.com',
         },
         {
-          [MixPanelEventParams.APP_URL]: 'https://test-dapp.com',
+          [MixpanelEventParams.APP_URL]: 'https://test-dapp.com',
         },
       )
     })
@@ -155,7 +155,7 @@ describe('WcSessionManager tracking', () => {
         label: 'https://test-dapp.com',
       },
       {
-        [MixPanelEventParams.APP_URL]: 'https://test-dapp.com',
+        [MixpanelEventParams.APP_URL]: 'https://test-dapp.com',
       },
     )
   })
@@ -204,7 +204,7 @@ describe('WcSessionManager tracking', () => {
           label: 'https://custom-dapp.example.com',
         },
         {
-          [MixPanelEventParams.APP_URL]: 'https://custom-dapp.example.com',
+          [MixpanelEventParams.APP_URL]: 'https://custom-dapp.example.com',
         },
       )
     })

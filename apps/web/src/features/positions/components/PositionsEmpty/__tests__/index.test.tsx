@@ -1,12 +1,12 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import { trackEvent } from '@/services/analytics'
 import { POSITIONS_EVENTS } from '@/services/analytics/events/positions'
-import { MixPanelEventParams } from '@/services/analytics/mixpanel-events'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import PositionsEmpty from '../index'
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
-  MixPanelEventParams: {
+  MixpanelEventParams: {
     ENTRY_POINT: 'Entry Point',
   },
 }))
@@ -45,7 +45,7 @@ describe('PositionsEmpty', () => {
       fireEvent.click(exploreButton)
 
       expect(mockTrackEvent).toHaveBeenCalledWith(POSITIONS_EVENTS.EMPTY_POSITIONS_EXPLORE_CLICKED, {
-        [MixPanelEventParams.ENTRY_POINT]: 'Dashboard',
+        [MixpanelEventParams.ENTRY_POINT]: 'Dashboard',
       })
     })
 
@@ -56,7 +56,7 @@ describe('PositionsEmpty', () => {
       fireEvent.click(exploreButton)
 
       expect(mockTrackEvent).toHaveBeenCalledWith(POSITIONS_EVENTS.EMPTY_POSITIONS_EXPLORE_CLICKED, {
-        [MixPanelEventParams.ENTRY_POINT]: 'Positions',
+        [MixpanelEventParams.ENTRY_POINT]: 'Positions',
       })
     })
 
@@ -67,7 +67,7 @@ describe('PositionsEmpty', () => {
       fireEvent.click(exploreButton)
 
       expect(mockTrackEvent).toHaveBeenCalledWith(POSITIONS_EVENTS.EMPTY_POSITIONS_EXPLORE_CLICKED, {
-        [MixPanelEventParams.ENTRY_POINT]: 'Dashboard',
+        [MixpanelEventParams.ENTRY_POINT]: 'Dashboard',
       })
     })
   })

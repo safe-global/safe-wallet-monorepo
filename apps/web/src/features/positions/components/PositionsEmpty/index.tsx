@@ -5,7 +5,7 @@ import DefiIcon from '@/public/images/balances/defi.svg'
 import { AppRoutes } from '@/config/routes'
 import Track from '@/components/common/Track'
 import { POSITIONS_EVENTS } from '@/services/analytics/events/positions'
-import { MixPanelEventParams } from '@/services/analytics/mixpanel-events'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import useIsEarnFeatureEnabled from '@/features/earn/hooks/useIsEarnFeatureEnabled'
 
 type PositionsEmptyProps = {
@@ -28,7 +28,7 @@ const PositionsEmpty = ({ entryPoint = 'Dashboard' }: PositionsEmptyProps) => {
         <Track
           {...POSITIONS_EVENTS.EMPTY_POSITIONS_EXPLORE_CLICKED}
           mixpanelParams={{
-            [MixPanelEventParams.ENTRY_POINT]: entryPoint,
+            [MixpanelEventParams.ENTRY_POINT]: entryPoint,
           }}
         >
           <Link href={{ pathname: AppRoutes.earn, query: { safe: router.query.safe } }} passHref>
