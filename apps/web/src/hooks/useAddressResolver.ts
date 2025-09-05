@@ -20,7 +20,7 @@ export const useAddressResolver = (address?: string) => {
     return lookupAddress(ethersProvider, debouncedValue)
   }, [ethersProvider, debouncedValue, shouldResolve])
 
-  const resolving = shouldResolve && isResolving
+  const resolving = (shouldResolve && isResolving) || false
 
   return useMemo(
     () => ({

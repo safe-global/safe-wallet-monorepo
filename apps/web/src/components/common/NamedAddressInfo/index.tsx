@@ -24,22 +24,22 @@ export function useAddressName(address?: string, name?: string | null, customAva
     false,
   )
 
-  const { ens: ensName } = useAddressResolver(displayName || contract?.displayName ? undefined : address)
+  const nonEnsName = displayName || contract?.displayName || contract?.name
+
+  const { ens: ensName } = useAddressResolver(nonEnsName ? undefined : address)
 
   const isUnverifiedContract = useIsUnverifiedContract(contract)
 
   return useMemo(
     () => ({
       name:
-        displayName ||
-        contract?.displayName ||
-        contract?.name ||
+        nonEnsName ||
         ensName ||
         (isUnverifiedContract ? 'Unverified contract' : undefined),
       logoUri: customAvatar || contract?.logoUri,
       isUnverifiedContract,
     }),
-    [displayName, contract, customAvatar, isUnverifiedContract, ensName],
+    [nonEnsName, customAvatar, contract?.logoUri, isUnverifiedContract, ensName],
   )
 }
 
