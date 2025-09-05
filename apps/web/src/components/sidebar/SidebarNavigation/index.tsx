@@ -17,12 +17,14 @@ import { useQueuedTxsLength } from '@/hooks/useTxQueue'
 import { useCurrentChain } from '@/hooks/useChains'
 import { isRouteEnabled } from '@/utils/chains'
 import { trackEvent } from '@/services/analytics'
+import { GA_LABEL_TO_MIXPANEL_PROPERTY } from '@/services/analytics/ga-mixpanel-mapping'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
-import { STAKE_EVENTS, STAKE_LABELS } from '@/services/analytics/events/stake'
+import { STAKE_EVENTS } from '@/services/analytics/events/stake'
 import { Tooltip } from '@mui/material'
-import { BRIDGE_EVENTS, BRIDGE_LABELS } from '@/services/analytics/events/bridge'
-import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
+import { BRIDGE_EVENTS } from '@/services/analytics/events/bridge'
+import { EARN_EVENTS } from '@/services/analytics/events/earn'
 import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
 
 const getSubdirectory = (pathname: string): string => {
@@ -30,13 +32,6 @@ const getSubdirectory = (pathname: string): string => {
 }
 
 const geoBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, AppRoutes.earn]
-
-const customSidebarEvents: { [key: string]: { event: any; label: string } } = {
-  [AppRoutes.bridge]: { event: BRIDGE_EVENTS.OPEN_BRIDGE, label: BRIDGE_LABELS.sidebar },
-  [AppRoutes.swap]: { event: SWAP_EVENTS.OPEN_SWAPS, label: SWAP_LABELS.sidebar },
-  [AppRoutes.stake]: { event: STAKE_EVENTS.OPEN_STAKE, label: STAKE_LABELS.sidebar },
-  [AppRoutes.earn]: { event: EARN_EVENTS.OPEN_EARN_PAGE, label: EARN_LABELS.sidebar },
-}
 
 const Navigation = (): ReactElement => {
   const chain = useCurrentChain()
@@ -80,10 +75,19 @@ const Navigation = (): ReactElement => {
   }
 
   const handleNavigationClick = (href: string) => {
-    const eventInfo = customSidebarEvents[href]
-    if (eventInfo) {
-      trackEvent({ ...eventInfo.event, label: eventInfo.label })
-    }
+    const event = {
+      [AppRoutes.bridge]: BRIDGE_EVENTS.OPEN_BRIDGE,
+      [AppRoutes.swap]: SWAP_EVENTS.OPEN_SWAPS,
+      [AppRoutes.stake]: STAKE_EVENTS.OPEN_STAKE,
+      [AppRoutes.earn]: EARN_EVENTS.OPEN_EARN_PAGE,
+    }[href]
+
+    if (!event) return
+
+    trackEvent(
+      { ...event, label: SWAP_LABELS.sidebar },
+      { [MixpanelEventParams.ENTRY_POINT]: GA_LABEL_TO_MIXPANEL_PROPERTY[SWAP_LABELS.sidebar] },
+    )
   }
 
   return (
@@ -93,10 +97,7 @@ const Navigation = (): ReactElement => {
         const isDisabled = item.disabled || !enabledNavItems.includes(item)
         let ItemTag = item.tag ? item.tag : null
         const spaceId = router.query.spaceId
-        const query = {
-          safe: router.query.safe,
-          ...(spaceId && { spaceId }),
-        }
+        const query = { safe: router.query.safe, ...(spaceId && { spaceId }) }
 
         if (item.href === AppRoutes.transactions.history) {
           ItemTag = queueSize ? <SidebarListItemCounter count={queueSize} /> : null
@@ -122,12 +123,7 @@ const Navigation = (): ReactElement => {
               >
                 <SidebarListItemButton
                   selected={isSelected}
-                  href={
-                    item.href && {
-                      pathname: getRoute(item.href),
-                      query,
-                    }
-                  }
+                  href={item.href && { pathname: getRoute(item.href), query }}
                   disabled={isDisabled}
                 >
                   {item.icon && <SidebarListItemIcon badge={getBadge(item)}>{item.icon}</SidebarListItemIcon>}
