@@ -4,6 +4,8 @@ import { AppRoutes } from '@/config/routes'
 import useSpendingLimit from '@/hooks/useSpendingLimit'
 import type { SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { SWAP_EVENTS } from '@/services/analytics/events/swaps'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { GA_LABEL_TO_MIXPANEL_PROPERTY } from '@/services/analytics/ga-mixpanel-mapping'
 import { Button } from '@mui/material'
 import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { useRouter } from 'next/router'
@@ -27,7 +29,11 @@ const SwapButton = ({
   return (
     <CheckWallet allowSpendingLimit={!!spendingLimit}>
       {(isOk) => (
-        <Track {...SWAP_EVENTS.OPEN_SWAPS} label={trackingLabel}>
+        <Track
+          {...SWAP_EVENTS.OPEN_SWAPS}
+          label={trackingLabel}
+          mixpanelParams={{ [MixpanelEventParams.ENTRY_POINT]: GA_LABEL_TO_MIXPANEL_PROPERTY[trackingLabel] || 'Home' }}
+        >
           <Button
             data-testid="swap-btn"
             variant="contained"
