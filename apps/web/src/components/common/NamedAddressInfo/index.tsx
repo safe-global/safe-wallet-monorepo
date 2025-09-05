@@ -7,8 +7,7 @@ import useSafeAddress from '@/hooks/useSafeAddress'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { memo, useMemo } from 'react'
 import { isAddress } from 'ethers'
-import { lookupAddress } from '@/services/ens'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useAddressResolver } from '@/hooks/useAddressResolver'
 
 const useIsUnverifiedContract = (contract?: { contractAbi?: object | null } | null): boolean => {
   return !!contract && !contract.contractAbi
@@ -17,7 +16,6 @@ const useIsUnverifiedContract = (contract?: { contractAbi?: object | null } | nu
 export function useAddressName(address?: string, name?: string | null, customAvatar?: string) {
   const chainId = useChainId()
   const safeAddress = useSafeAddress()
-  const web3 = useWeb3ReadOnly()
   const displayName = sameAddress(address, safeAddress) ? 'This Safe Account' : name
 
   const [contract] = useAsync(
@@ -26,25 +24,19 @@ export function useAddressName(address?: string, name?: string | null, customAva
     false,
   )
 
-  const [ensName] = useAsync(async () => {
-    if (displayName || contract?.displayName || !address || !isAddress(address) || !web3) return undefined
-    return lookupAddress(web3, address)
-  }, [address, web3, displayName, contract])
+  const nonEnsName = displayName || contract?.displayName || contract?.name
+
+  const { ens: ensName } = useAddressResolver(nonEnsName ? undefined : address)
 
   const isUnverifiedContract = useIsUnverifiedContract(contract)
 
   return useMemo(
     () => ({
-      name:
-        displayName ||
-        contract?.displayName ||
-        contract?.name ||
-        ensName ||
-        (isUnverifiedContract ? 'Unverified contract' : undefined),
+      name: nonEnsName || ensName || (isUnverifiedContract ? 'Unverified contract' : undefined),
       logoUri: customAvatar || contract?.logoUri,
       isUnverifiedContract,
     }),
-    [displayName, contract, customAvatar, isUnverifiedContract, ensName],
+    [nonEnsName, customAvatar, contract?.logoUri, isUnverifiedContract, ensName],
   )
 }
 
