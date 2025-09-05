@@ -4,10 +4,10 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppSelector } from '@/store'
 import { selectTxHistory } from '@/store/txHistorySlice'
 import { isTransactionListItem } from '@/utils/transaction-guards'
-import { MixPanelUserProperty } from '@/services/analytics/mixpanel-events'
+import { MixpanelUserProperty } from '@/services/analytics/mixpanel-events'
 import { useNetworksOfSafe } from '@/features/myAccounts/hooks/useNetworksOfSafe'
 
-export interface MixPanelUserProperties {
+export interface MixpanelUserProperties {
   safe_address: string
   safe_version: string
   num_signers: number
@@ -17,19 +17,19 @@ export interface MixPanelUserProperties {
   last_tx_at: Date | null
 }
 
-export interface MixPanelUserPropertiesFormatted {
+export interface MixpanelUserPropertiesFormatted {
   properties: Record<string, any>
   networks: string[]
 }
 
 /**
- * Hook to get formatted user properties for MixPanel tracking
+ * Hook to get formatted user properties for Mixpanel tracking
  *
  * This hook collects Safe-related user properties that can be used for
- * MixPanel user attribute tracking and cohort analysis.
- * Returns both regular properties and networks separately for different MixPanel operations.
+ * Mixpanel user attribute tracking and cohort analysis.
+ * Returns both regular properties and networks separately for different Mixpanel operations.
  */
-export const useMixPanelUserProperties = (): MixPanelUserPropertiesFormatted | null => {
+export const useMixpanelUserProperties = (): MixpanelUserPropertiesFormatted | null => {
   const { safe, safeLoaded } = useSafeInfo()
   const currentChain = useChain(safe?.chainId || '')
   const txHistory = useAppSelector(selectTxHistory)
@@ -55,13 +55,13 @@ export const useMixPanelUserProperties = (): MixPanelUserPropertiesFormatted | n
     }
 
     const properties = {
-      [MixPanelUserProperty.SAFE_ADDRESS]: safe.address.value,
-      [MixPanelUserProperty.SAFE_VERSION]: safe.version || 'unknown',
-      [MixPanelUserProperty.NUM_SIGNERS]: safe.owners.length,
-      [MixPanelUserProperty.THRESHOLD]: safe.threshold,
-      [MixPanelUserProperty.TOTAL_TX_COUNT]: totalTxCount,
-      [MixPanelUserProperty.LAST_TX_AT]: lastTxAt?.toISOString() || null,
-      [MixPanelUserProperty.NETWORKS]: networks,
+      [MixpanelUserProperty.SAFE_ADDRESS]: safe.address.value,
+      [MixpanelUserProperty.SAFE_VERSION]: safe.version || 'unknown',
+      [MixpanelUserProperty.NUM_SIGNERS]: safe.owners.length,
+      [MixpanelUserProperty.THRESHOLD]: safe.threshold,
+      [MixpanelUserProperty.TOTAL_TX_COUNT]: totalTxCount,
+      [MixpanelUserProperty.LAST_TX_AT]: lastTxAt?.toISOString() || null,
+      [MixpanelUserProperty.NETWORKS]: networks,
     }
 
     return {

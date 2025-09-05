@@ -10,7 +10,7 @@ import type { ReactElement } from 'react'
 import StakeIcon from '@/public/images/common/stake.svg'
 import type { STAKE_LABELS } from '@/services/analytics/events/stake'
 import { STAKE_EVENTS } from '@/services/analytics/events/stake'
-import { MixPanelEventParams } from '@/services/analytics/mixpanel-events'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useCurrentChain } from '@/hooks/useChains'
 import css from './styles.module.css'
 import classnames from 'classnames'
@@ -34,7 +34,7 @@ const StakeButton = ({
         <Track
           {...STAKE_EVENTS.STAKE_VIEWED}
           mixpanelParams={{
-            [MixPanelEventParams.ENTRY_POINT]: trackingLabel,
+            [MixpanelEventParams.ENTRY_POINT]: trackingLabel,
           }}
         >
           <Button

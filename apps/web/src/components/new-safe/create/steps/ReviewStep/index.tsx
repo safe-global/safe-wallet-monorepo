@@ -31,7 +31,7 @@ import {
   CREATE_SAFE_EVENTS,
   OVERVIEW_EVENTS,
   trackEvent,
-  MixPanelEventParams,
+  MixpanelEventParams,
 } from '@/services/analytics'
 import { gtmSetChainId, gtmSetSafeAddress } from '@/services/analytics/gtm'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
@@ -287,14 +287,14 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
     gtmSetChainId(chain.chainId)
 
     trackEvent(CREATE_SAFE_EVENTS.CREATED_SAFE, {
-      [MixPanelEventParams.SAFE_ADDRESS]: safeAddress,
-      [MixPanelEventParams.BLOCKCHAIN_NETWORK]: chain.chainName,
-      [MixPanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
-      [MixPanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
-      [MixPanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
-      [MixPanelEventParams.DEPLOYMENT_TYPE]:
+      [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+      [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chain.chainName,
+      [MixpanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
+      [MixpanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
+      [MixpanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
+      [MixpanelEventParams.DEPLOYMENT_TYPE]:
         isCounterfactualEnabled && payMethod === PayMethod.PayLater ? 'Counterfactual' : 'Direct',
-      [MixPanelEventParams.PAYMENT_METHOD]:
+      [MixpanelEventParams.PAYMENT_METHOD]:
         isCounterfactualEnabled && payMethod === PayMethod.PayLater
           ? 'Pay-later'
           : willRelay
