@@ -3,14 +3,18 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectChainById } from '@/src/store/chains'
 import { RootState } from '@/src/store'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { getPrivateKey } from '@/src/hooks/useSign/useSign'
 import { signTx } from '@/src/services/tx/tx-sender/sign'
 import { useTransactionsAddConfirmationV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import logger from '@/src/utils/logger'
 import { useGuard } from '@/src/context/GuardProvider'
 
-export type SigningStatus = 'idle' | 'loading' | 'success' | 'error'
+export enum SigningStatus {
+  IDLE = 'idle',
+  LOADING = 'loading',
+  SUCCESS = 'success',
+  ERROR = 'error',
+}
 
 interface UseTransactionSigningProps {
   txId: string
@@ -18,7 +22,7 @@ interface UseTransactionSigningProps {
 }
 
 export function useTransactionSigning({ txId, signerAddress }: UseTransactionSigningProps) {
-  const [status, setStatus] = useState<SigningStatus>('idle')
+  const [status, setStatus] = useState<SigningStatus>(SigningStatus.IDLE)
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const { resetGuard } = useGuard()
@@ -32,19 +36,25 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
       return
     }
 
-    setStatus('loading')
+    setStatus(SigningStatus.LOADING)
     hasTriggeredAutoSign.current = true
 
+    let privateKey
     try {
-      const privateKey = await getPrivateKey(signerAddress)
+      privateKey = await getPrivateKey(signerAddress)
+    } catch (error) {
+      logger.error('Error loading private key:', error)
+      setStatus(SigningStatus.ERROR)
+    }
 
+    try {
       if (!privateKey) {
-        setStatus('error')
+        setStatus(SigningStatus.ERROR)
         return
       }
 
       const signedTx = await signTx({
-        chain: activeChain as ChainInfo,
+        chain: activeChain,
         activeSafe,
         txId,
         privateKey,
@@ -62,10 +72,10 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
 
       // CRITICAL: Reset guard immediately after successful signing
       resetGuard('signing')
-      setStatus('success')
+      setStatus(SigningStatus.SUCCESS)
     } catch (error) {
       logger.error('Error signing transaction:', error)
-      setStatus('error')
+      setStatus(SigningStatus.ERROR)
     }
   }, [activeChain, activeSafe, txId, signerAddress, addConfirmation, resetGuard])
 
@@ -75,7 +85,7 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
   }, [executeSign])
 
   const reset = useCallback(() => {
-    setStatus('idle')
+    setStatus(SigningStatus.IDLE)
     hasTriggeredAutoSign.current = false
   }, [])
 

@@ -1,6 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
 import { createWeb3ReadOnly } from '../services/web3'
-import { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 const noopBaseQuery = async () => ({ data: null })
 
@@ -12,7 +12,7 @@ export const web3API = createApi({
   reducerPath: 'web3API',
   baseQuery: noopBaseQuery,
   endpoints: (builder) => ({
-    getBalances: builder.query<Record<string, string>, { addresses: string[]; chain: ChainInfo }>({
+    getBalances: builder.query<Record<string, string>, { addresses: string[]; chain: Chain }>({
       async queryFn({ addresses, chain }) {
         try {
           const provider = createWeb3ReadOnly(chain)
