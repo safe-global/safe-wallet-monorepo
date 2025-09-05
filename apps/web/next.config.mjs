@@ -8,6 +8,7 @@ import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 import { readFile } from 'fs/promises'
 import { fileURLToPath } from 'url'
+import { execSync } from 'child_process'
 
 const SERVICE_WORKERS_PATH = './src/service-workers'
 
@@ -15,6 +16,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const pkgPath = path.join(__dirname, 'package.json')
 const data = await readFile(pkgPath, 'utf-8')
 const pkg = JSON.parse(data)
+
+let commitHash = process.env.NEXT_PUBLIC_COMMIT_HASH
+if (!commitHash) {
+  try {
+    commitHash = execSync('git rev-parse --short HEAD').toString().trim()
+  } catch {
+    commitHash = ''
+  }
+}
 
 const withPWA = withPWAInit({
   dest: 'public',
@@ -52,6 +62,10 @@ const nextConfig = {
   transpilePackages: ['@safe-global/store'],
   images: {
     unoptimized: true,
+  },
+
+  env: {
+    NEXT_PUBLIC_COMMIT_HASH: commitHash,
   },
 
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
