@@ -32,10 +32,7 @@ export function useAddressName(address?: string, name?: string | null, customAva
 
   return useMemo(
     () => ({
-      name:
-        nonEnsName ||
-        ensName ||
-        (isUnverifiedContract ? 'Unverified contract' : undefined),
+      name: nonEnsName || ensName || (isUnverifiedContract ? 'Unverified contract' : undefined),
       logoUri: customAvatar || contract?.logoUri,
       isUnverifiedContract,
     }),
