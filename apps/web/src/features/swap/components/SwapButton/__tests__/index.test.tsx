@@ -1,15 +1,13 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import { trackEvent } from '@/services/analytics'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
-import { MixPanelEventParams } from '@/services/analytics/mixpanel-events'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import SwapButton from '../index'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
-  MixPanelEventParams: {
-    ENTRY_POINT: 'Entry Point',
-  },
+  MixpanelEventParams: { ENTRY_POINT: 'Entry Point' },
 }))
 
 jest.mock('@/components/common/CheckWallet', () => {
@@ -43,9 +41,7 @@ describe('SwapButton', () => {
 
     expect(mockTrackEvent).toHaveBeenCalledWith(
       { ...SWAP_EVENTS.OPEN_SWAPS, label: SWAP_LABELS.asset },
-      {
-        [MixPanelEventParams.ENTRY_POINT]: 'Assets',
-      },
+      { [MixpanelEventParams.ENTRY_POINT]: 'Assets' },
     )
   })
 
@@ -57,9 +53,7 @@ describe('SwapButton', () => {
 
     expect(mockTrackEvent).toHaveBeenCalledWith(
       { ...SWAP_EVENTS.OPEN_SWAPS, label: SWAP_LABELS.dashboard_assets },
-      {
-        [MixPanelEventParams.ENTRY_POINT]: 'Home',
-      },
+      { [MixpanelEventParams.ENTRY_POINT]: 'Home' },
     )
   })
 
@@ -79,9 +73,7 @@ describe('SwapButton', () => {
 
       expect(mockTrackEvent).toHaveBeenCalledWith(
         { ...SWAP_EVENTS.OPEN_SWAPS, label },
-        {
-          [MixPanelEventParams.ENTRY_POINT]: expected,
-        },
+        { [MixpanelEventParams.ENTRY_POINT]: expected },
       )
 
       mockTrackEvent.mockClear()

@@ -19,7 +19,7 @@ import { isRouteEnabled } from '@/utils/chains'
 import { trackEvent } from '@/services/analytics'
 import { GA_LABEL_TO_MIXPANEL_PROPERTY } from '@/services/analytics/ga-mixpanel-mapping'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
-import { MixPanelEventParams } from '@/services/analytics/mixpanel-events'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import { STAKE_EVENTS } from '@/services/analytics/events/stake'
 import { Tooltip } from '@mui/material'
@@ -86,7 +86,7 @@ const Navigation = (): ReactElement => {
 
     trackEvent(
       { ...event, label: SWAP_LABELS.sidebar },
-      { [MixPanelEventParams.ENTRY_POINT]: GA_LABEL_TO_MIXPANEL_PROPERTY[SWAP_LABELS.sidebar] },
+      { [MixpanelEventParams.ENTRY_POINT]: GA_LABEL_TO_MIXPANEL_PROPERTY[SWAP_LABELS.sidebar] },
     )
   }
 
@@ -97,10 +97,7 @@ const Navigation = (): ReactElement => {
         const isDisabled = item.disabled || !enabledNavItems.includes(item)
         let ItemTag = item.tag ? item.tag : null
         const spaceId = router.query.spaceId
-        const query = {
-          safe: router.query.safe,
-          ...(spaceId && { spaceId }),
-        }
+        const query = { safe: router.query.safe, ...(spaceId && { spaceId }) }
 
         if (item.href === AppRoutes.transactions.history) {
           ItemTag = queueSize ? <SidebarListItemCounter count={queueSize} /> : null
@@ -126,12 +123,7 @@ const Navigation = (): ReactElement => {
               >
                 <SidebarListItemButton
                   selected={isSelected}
-                  href={
-                    item.href && {
-                      pathname: getRoute(item.href),
-                      query,
-                    }
-                  }
+                  href={item.href && { pathname: getRoute(item.href), query }}
                   disabled={isDisabled}
                 >
                   {item.icon && <SidebarListItemIcon badge={getBadge(item)}>{item.icon}</SidebarListItemIcon>}
