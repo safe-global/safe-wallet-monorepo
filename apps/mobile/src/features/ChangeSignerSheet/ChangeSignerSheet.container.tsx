@@ -14,11 +14,7 @@ import { ContactDisplayNameContainer } from '../AddressBook'
 import { useTxSignerActions } from '../ConfirmTx/hooks/useTxSignerActions'
 import useAvailableSigners from '@/src/features/ChangeSignerSheet/useAvailableSigners'
 import { RouteProp, useRoute } from '@react-navigation/native'
-
-export enum ActionType {
-  SIGN = 'SIGN',
-  EXECUTE = 'EXECUTE',
-}
+import { ActionType } from '@/src/features/ChangeSignerSheet/utils'
 
 export const ChangeSignerSheetContainer = () => {
   const routeParams = useRoute<RouteProp<{ params: { txId: string; actionType: ActionType } }>>().params

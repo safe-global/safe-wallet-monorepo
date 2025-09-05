@@ -3,22 +3,14 @@ import React from 'react'
 import { View, Text, YStack } from 'tamagui'
 import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native'
-import { useTransactionData } from '@/src/features/ConfirmTx/hooks/useTransactionData'
-import { isMultisigDetailedExecutionInfo } from '@/src/utils/transaction-guards'
-import useSafeInfo from '@/src/hooks/useSafeInfo'
+import useIsNextTx from '@/src/hooks/useIsNextTx'
 
 interface ExecuteFormProps {
   txId: string
 }
 
 export function ExecuteForm({ txId }: ExecuteFormProps) {
-  const { data: txData } = useTransactionData(txId)
-  const { safe } = useSafeInfo()
-  const txNonce = isMultisigDetailedExecutionInfo(txData?.detailedExecutionInfo)
-    ? txData?.detailedExecutionInfo.nonce
-    : undefined
-
-  const isNext = txNonce !== undefined && txNonce === safe.nonce
+  const isNext = useIsNextTx(txId)
 
   const onExecutePress = () => {
     router.push({
