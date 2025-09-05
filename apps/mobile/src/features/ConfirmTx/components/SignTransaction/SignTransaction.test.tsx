@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react-native'
 import { useLocalSearchParams } from 'expo-router'
 import { SignTransaction } from './SignTransaction'
 import { useTransactionGuard } from '@/src/hooks/useTransactionGuard'
-import { useTransactionSigning } from './hooks/useTransactionSigning'
+import { SigningStatus, useTransactionSigning } from './hooks/useTransactionSigning'
 
 // Mock the hooks
 jest.mock('expo-router', () => ({
@@ -15,6 +15,7 @@ jest.mock('@/src/hooks/useTransactionGuard', () => ({
 }))
 
 jest.mock('./hooks/useTransactionSigning', () => ({
+  ...jest.requireActual('./hooks/useTransactionSigning'),
   useTransactionSigning: jest.fn(),
 }))
 
@@ -101,7 +102,7 @@ describe('SignTransaction', () => {
     })
 
     mockUseTransactionSigning.mockReturnValue({
-      status: 'idle',
+      status: SigningStatus.IDLE,
       executeSign: mockExecuteSign,
       retry: mockRetry,
       reset: jest.fn(),
@@ -150,7 +151,7 @@ describe('SignTransaction', () => {
       })
 
       mockUseTransactionSigning.mockReturnValue({
-        status: 'idle',
+        status: SigningStatus.IDLE,
         executeSign: mockExecuteSign,
         retry: mockRetry,
         reset: jest.fn(),
@@ -179,7 +180,7 @@ describe('SignTransaction', () => {
 
     it('should not call executeSign when status is not idle', () => {
       mockUseTransactionSigning.mockReturnValue({
-        status: 'loading',
+        status: SigningStatus.LOADING,
         executeSign: mockExecuteSign,
         retry: mockRetry,
         reset: jest.fn(),
@@ -214,7 +215,7 @@ describe('SignTransaction', () => {
   describe('error handling', () => {
     it('should render SignError for API errors', () => {
       mockUseTransactionSigning.mockReturnValue({
-        status: 'idle',
+        status: SigningStatus.IDLE,
         executeSign: mockExecuteSign,
         retry: mockRetry,
         reset: jest.fn(),
@@ -232,7 +233,7 @@ describe('SignTransaction', () => {
 
     it('should render SignError for signing errors', () => {
       mockUseTransactionSigning.mockReturnValue({
-        status: 'error',
+        status: SigningStatus.ERROR,
         executeSign: mockExecuteSign,
         retry: mockRetry,
         reset: jest.fn(),
@@ -250,7 +251,7 @@ describe('SignTransaction', () => {
 
     it('should call retry when retry button is pressed', () => {
       mockUseTransactionSigning.mockReturnValue({
-        status: 'error',
+        status: SigningStatus.ERROR,
         executeSign: mockExecuteSign,
         retry: mockRetry,
         reset: jest.fn(),
@@ -272,7 +273,7 @@ describe('SignTransaction', () => {
   describe('success state', () => {
     it('should render SignSuccess when signing is successful', () => {
       mockUseTransactionSigning.mockReturnValue({
-        status: 'success',
+        status: SigningStatus.SUCCESS,
         executeSign: mockExecuteSign,
         retry: mockRetry,
         reset: jest.fn(),
@@ -292,7 +293,7 @@ describe('SignTransaction', () => {
   describe('loading states', () => {
     it('should render LoadingScreen when signing is in progress', () => {
       mockUseTransactionSigning.mockReturnValue({
-        status: 'loading',
+        status: SigningStatus.LOADING,
         executeSign: mockExecuteSign,
         retry: mockRetry,
         reset: jest.fn(),
@@ -311,7 +312,7 @@ describe('SignTransaction', () => {
 
     it('should render LoadingScreen when API is loading', () => {
       mockUseTransactionSigning.mockReturnValue({
-        status: 'idle',
+        status: SigningStatus.IDLE,
         executeSign: mockExecuteSign,
         retry: mockRetry,
         reset: jest.fn(),
@@ -333,7 +334,7 @@ describe('SignTransaction', () => {
       })
 
       mockUseTransactionSigning.mockReturnValue({
-        status: 'idle',
+        status: SigningStatus.IDLE,
         executeSign: mockExecuteSign,
         retry: mockRetry,
         reset: jest.fn(),

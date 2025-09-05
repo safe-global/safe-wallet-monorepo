@@ -10,10 +10,10 @@ import logger from '@/src/utils/logger'
 import { useGuard } from '@/src/context/GuardProvider'
 
 export enum SigningStatus {
-  IDLE = 'IDLE',
-  LOADING = 'LOADING',
-  SUCCESS = 'SUCCESS',
-  ERROR = 'ERROR',
+  IDLE = 'idle',
+  LOADING = 'loading',
+  SUCCESS = 'success',
+  ERROR = 'error',
 }
 
 interface UseTransactionSigningProps {
