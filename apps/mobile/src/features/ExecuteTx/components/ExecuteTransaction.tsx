@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 import { useLocalSearchParams } from 'expo-router'
 import { ExecuteError } from './ExecuteError'
 import { ExecuteSuccess } from './ExecuteSuccess'
-import { useTransactionExecution } from '../hooks/useTransactionExecution'
+import { ExecutionStatus, useTransactionExecution } from '../hooks/useTransactionExecution'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
@@ -20,7 +20,7 @@ export function ExecuteTransaction() {
   })
 
   useEffect(() => {
-    if (canExecute && status === 'idle' && txId && activeSigner) {
+    if (canExecute && status === ExecutionStatus.IDLE && txId && activeSigner) {
       executeTx()
     }
   }, [canExecute, status, executeTx, txId, activeSigner])
@@ -39,11 +39,11 @@ export function ExecuteTransaction() {
     return <ExecuteError description="No signer selected" onRetryPress={handleRetry} />
   }
 
-  if (status === 'error') {
+  if (status === ExecutionStatus.ERROR) {
     return <ExecuteError onRetryPress={retry} description="There was an error executing the transaction." />
   }
 
-  if (status === 'success') {
+  if (status === ExecutionStatus.SUCCESS) {
     return <ExecuteSuccess />
   }
 

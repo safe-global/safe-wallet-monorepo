@@ -7,7 +7,12 @@ import { getPrivateKey } from '@/src/hooks/useSign/useSign'
 import { executeTx } from '@/src/services/tx/tx-sender/execute'
 import logger from '@/src/utils/logger'
 
-export type ExecutionStatus = 'idle' | 'loading' | 'success' | 'error'
+export enum ExecutionStatus {
+  IDLE = 'IDLE',
+  LOADING = 'LOADING',
+  SUCCESS = 'SUCCESS',
+  ERROR = 'ERROR',
+}
 
 interface UseTransactionExecutionProps {
   txId: string
@@ -15,18 +20,24 @@ interface UseTransactionExecutionProps {
 }
 
 export function useTransactionExecution({ txId, signerAddress }: UseTransactionExecutionProps) {
-  const [status, setStatus] = useState<ExecutionStatus>('idle')
+  const [status, setStatus] = useState<ExecutionStatus>(ExecutionStatus.IDLE)
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
 
   const execute = useCallback(async () => {
-    setStatus('loading')
+    setStatus(ExecutionStatus.LOADING)
+
+    let privateKey
+    try {
+      privateKey = await getPrivateKey(signerAddress)
+    } catch (error) {
+      logger.error('Error loading private key:', error)
+      setStatus(ExecutionStatus.ERROR)
+    }
 
     try {
-      const privateKey = await getPrivateKey(signerAddress)
-
       if (!privateKey) {
-        setStatus('error')
+        setStatus(ExecutionStatus.ERROR)
         return
       }
 
@@ -36,10 +47,10 @@ export function useTransactionExecution({ txId, signerAddress }: UseTransactionE
         txId,
         privateKey,
       })
-      setStatus('success')
+      setStatus(ExecutionStatus.SUCCESS)
     } catch (error) {
       logger.error('Error executing transaction:', error)
-      setStatus('error')
+      setStatus(ExecutionStatus.ERROR)
     }
   }, [activeChain, activeSafe, txId, signerAddress])
 
