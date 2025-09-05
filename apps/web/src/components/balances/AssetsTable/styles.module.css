@@ -7,8 +7,8 @@
 
 .container td:last-of-type > * {
   position: absolute;
-  left: 0;
-  width: 100%;
+  right: 0;
+  width: 15%;
   opacity: 0;
   transition: opacity 0.2s;
   height: 100% !important;

@@ -184,7 +184,6 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact }: EnhancedTabl
                     <TableCell
                       key={key}
                       className={classNames({
-                        sticky: cell.sticky,
                         [css.collapsedCell]: row.collapsed,
                       })}
                     >
