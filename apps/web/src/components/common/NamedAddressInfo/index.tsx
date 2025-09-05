@@ -24,7 +24,7 @@ export function useAddressName(address?: string, name?: string | null, customAva
     false,
   )
 
-  const { ens: ensName } = useAddressResolver((displayName || contract?.displayName) ? undefined : address)
+  const { ens: ensName } = useAddressResolver(displayName || contract?.displayName ? undefined : address)
 
   const isUnverifiedContract = useIsUnverifiedContract(contract)
 
