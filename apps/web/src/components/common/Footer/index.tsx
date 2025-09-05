@@ -84,16 +84,15 @@ const Footer = (): ReactElement | null => {
           <ExternalLink href={`${packageJson.homepage}/releases/tag/v${packageJson.version}`} noIcon>
             <SvgIcon component={GitHubIcon} inheritViewBox fontSize="inherit" sx={{ mr: 0.5 }} /> v{packageJson.version}
           </ExternalLink>
-          {!IS_PRODUCTION && COMMIT_HASH && (
-            <>
-              {' '}
-              (
-                {COMMIT_HASH.slice(0, 7)}
-              </ExternalLink>
-              )
-            </>
-          )}
         </li>
+
+        {!IS_PRODUCTION && COMMIT_HASH && (
+          <li>
+            <ExternalLink href={`${packageJson.homepage}/commit/${COMMIT_HASH}`} noIcon>
+              {COMMIT_HASH.slice(0, 7)}
+            </ExternalLink>
+          </li>
+        )}
       </ul>
     </footer>
   )
