@@ -27,7 +27,10 @@ describe('getNewSafeSetup', () => {
     })
 
     expect(result).toEqual({
-      newOwners: [...safe.owners.map((owner) => owner.value), checksumAddress(ownerToAdd)],
+      newOwners: [
+        ...safe.owners.map((owner) => ({ value: owner.value, name: undefined })),
+        { value: checksumAddress(ownerToAdd), name: undefined },
+      ],
       newThreshold: thresholdToSet,
     })
   })
@@ -61,7 +64,7 @@ describe('getNewSafeSetup', () => {
     })
 
     expect(result).toEqual({
-      newOwners: [prevOwner],
+      newOwners: [{ value: checksumAddress(prevOwner), name: undefined }],
       newThreshold: thresholdToSet,
     })
   })
@@ -95,7 +98,10 @@ describe('getNewSafeSetup', () => {
     })
 
     expect(result).toEqual({
-      newOwners: [prevOwner, checksumAddress(ownerToAdd)],
+      newOwners: [
+        { value: checksumAddress(prevOwner), name: undefined },
+        { value: checksumAddress(ownerToAdd), name: undefined },
+      ],
       newThreshold: safe.threshold,
     })
   })
@@ -115,7 +121,7 @@ describe('getNewSafeSetup', () => {
     })
 
     expect(result).toEqual({
-      newOwners: safe.owners.map((owner) => owner.value),
+      newOwners: safe.owners.map((owner) => ({ value: owner.value, name: undefined })),
       newThreshold: thresholdToSet,
     })
   })
@@ -172,9 +178,40 @@ describe('getNewSafeSetup', () => {
     })
 
     expect(result).toEqual({
-      newOwners: [prevOwner, checksumAddress(ownerToAdd)],
+      newOwners: [
+        { value: checksumAddress(prevOwner), name: undefined },
+        { value: checksumAddress(ownerToAdd), name: undefined },
+      ],
       newThreshold: thresholdToSet,
     })
+  })
+
+  it('should include signer names when provided', () => {
+    const ownerToAdd = faker.finance.ethereumAddress()
+    const signerName = faker.person.fullName()
+    const thresholdToSet = faker.number.int({ min: 1, max: 10 })
+    const safe = extendedSafeInfoBuilder().build()
+    const txInfo = txInfoBuilder().build()
+    const txData = {
+      hexData: safeInterface.encodeFunctionData('addOwnerWithThreshold', [ownerToAdd, thresholdToSet]),
+    } as TransactionDetails['txData']
+
+    const signerNames = {
+      [checksumAddress(ownerToAdd)]: signerName,
+    }
+
+    const result = getNewSafeSetup({
+      txInfo,
+      txData,
+      safe,
+      signerNames,
+    })
+
+    expect(result.newOwners).toEqual([
+      ...safe.owners.map((owner) => ({ value: owner.value, name: undefined })),
+      { value: checksumAddress(ownerToAdd), name: signerName },
+    ])
+    expect(result.newThreshold).toBe(thresholdToSet)
   })
 })
 
