@@ -7,7 +7,7 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { router } from 'expo-router'
 import { ContactDisplayNameContainer } from '@/src/features/AddressBook'
 import { Address } from '@/src/types/address'
-import { ActionType } from '@/src/features/ChangeSignerSheet/ChangeSignerSheet.container'
+import { ActionType } from '@/src/features/ChangeSignerSheet/utils'
 
 type Props = {
   address: Address

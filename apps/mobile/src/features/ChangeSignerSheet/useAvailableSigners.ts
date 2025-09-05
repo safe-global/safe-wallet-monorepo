@@ -10,7 +10,7 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { extractAppSigners } from '@/src/features/ConfirmTx/utils'
 import { useGetBalancesQuery } from '@/src/store/signersBalance'
-import { ActionType } from '@/src/features/ChangeSignerSheet/ChangeSignerSheet.container'
+import { ActionType } from '@/src/features/ChangeSignerSheet/utils'
 
 const useAvailableSigners = (txId: string, actionType: ActionType) => {
   const activeSafe = useDefinedActiveSafe()
