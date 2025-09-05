@@ -4,9 +4,10 @@ import { Button, View } from 'tamagui'
 
 interface ParametersButtonProps {
   txId: string
+  title?: string
 }
 
-export function ParametersButton({ txId }: ParametersButtonProps) {
+export function ParametersButton({ txId, title = 'Transaction details' }: ParametersButtonProps) {
   const goToAdvancedDetails = () => {
     router.push({
       pathname: '/transaction-parameters',
@@ -27,7 +28,7 @@ export function ParametersButton({ txId }: ParametersButtonProps) {
         fullscreen
         onPress={goToAdvancedDetails}
       >
-        Transaction details
+        {title}
       </Button>
     </View>
   )
