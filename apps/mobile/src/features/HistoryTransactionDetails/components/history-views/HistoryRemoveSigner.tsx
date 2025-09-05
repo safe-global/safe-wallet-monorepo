@@ -1,7 +1,7 @@
 import React from 'react'
 import { Container } from '@/src/components/Container'
-import { View, YStack, Text, H3 } from 'tamagui'
-import { TransactionHeader } from '@/src/features/ConfirmTx/components/TransactionHeader'
+import { View, YStack, Text } from 'tamagui'
+import { HistoryTransactionHeader } from '@/src/features/HistoryTransactionDetails/components/HistoryTransactionHeader'
 import { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { NormalizedSettingsChangeTransaction } from '@/src/features/ConfirmTx/components/ConfirmationView/types'
 import { HistoryAdvancedDetailsButton } from '@/src/features/HistoryTransactionDetails/components/HistoryAdvancedDetailsButton'
@@ -12,19 +12,17 @@ interface HistoryRemoveSignerProps {
   txId: string
   txInfo: NormalizedSettingsChangeTransaction
   executionInfo: MultisigExecutionDetails
-  executedAt: number
 }
 
-export function HistoryRemoveSigner({ txId, txInfo, executionInfo, executedAt }: HistoryRemoveSignerProps) {
+export function HistoryRemoveSigner({ txId, txInfo, executionInfo }: HistoryRemoveSignerProps) {
   return (
     <>
-      <TransactionHeader
+      <HistoryTransactionHeader
         logo={txInfo.settingsInfo?.owner?.value}
         isIdenticon
         badgeIcon="transaction-contract"
         badgeColor="$textSecondaryLight"
-        title={<H3 fontWeight={600}>Remove signer</H3>}
-        submittedAt={executedAt}
+        transactionType="Remove signer"
       />
 
       <View>

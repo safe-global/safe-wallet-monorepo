@@ -85,6 +85,7 @@ describe('AssetsTable', () => {
         balances: {
           data: mockBalances,
           loading: false,
+          loaded: true,
         },
         settings: {
           currency: 'usd',
@@ -190,6 +191,7 @@ describe('AssetsTable', () => {
         balances: {
           data: mockBalances,
           loading: false,
+          loaded: true,
         },
         settings: {
           currency: 'usd',
@@ -291,6 +293,7 @@ describe('AssetsTable', () => {
         balances: {
           data: mockBalances,
           loading: false,
+          loaded: true,
         },
         settings: {
           currency: 'usd',
@@ -389,6 +392,7 @@ describe('AssetsTable', () => {
         balances: {
           data: mockBalances,
           loading: false,
+          loaded: true,
         },
         settings: {
           currency: 'usd',

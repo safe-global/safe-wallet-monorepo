@@ -13,7 +13,7 @@ import { isSettingTwapFallbackHandler } from '@safe-global/utils/features/swap/h
 import { TwapFallbackHandlerWarning } from '@/src/features/ConfirmTx/components/confirmation-views/SwapOrder/TwapFallbackHandlerWarning'
 import { Alert } from '@/src/components/Alert'
 import { useRecipientItem } from './hooks'
-import { ParametersButton } from '@/src/features/ConfirmTx/components/ParametersButton'
+import { ParametersButton } from '@/src/components/ParametersButton'
 import { ActionsRow } from '@/src/components/ActionsRow'
 
 interface SwapOrderProps {

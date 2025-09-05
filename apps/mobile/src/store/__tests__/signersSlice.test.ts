@@ -205,16 +205,16 @@ describe('signersSlice', () => {
 
     it('should add a contact to address book when adding a signer', async () => {
       const store = createTestStore()
-      const mockSigner = generateAddressInfo({ 
+      const mockSigner = generateAddressInfo({
         value: generateEthereumAddress(),
-        name: 'Test Signer' 
+        name: 'Test Signer',
       })
 
       // @ts-ignore: Allow thunk dispatch in test
       await store.dispatch(addSignerWithEffects(mockSigner))
 
       const state = store.getState()
-      
+
       // Check that signer was added
       const signers = selectSigners(state)
       expect(signers[mockSigner.value]).toEqual(mockSigner)
@@ -231,9 +231,9 @@ describe('signersSlice', () => {
       const store = createTestStore()
       const testAddress = generateEthereumAddress()
       const testAddressLast4Chars = testAddress.slice(-4)
-      const mockSigner = generateAddressInfo({ 
+      const mockSigner = generateAddressInfo({
         value: testAddress,
-        name: 'Test Signer' 
+        name: 'Test Signer',
       })
 
       // @ts-ignore: Allow thunk dispatch in test
@@ -241,7 +241,7 @@ describe('signersSlice', () => {
 
       const state = store.getState()
       const contact = selectContactByAddress(mockSigner.value)(state)
-      
+
       expect(contact?.name).toBe(`Signer-${testAddressLast4Chars}`) // Last 4 characters of the address
     })
 
@@ -261,10 +261,10 @@ describe('signersSlice', () => {
 
       const state = store.getState()
       const allContacts = selectAllContacts(state)
-      
+
       // Should have 3 contacts
       expect(allContacts).toHaveLength(3)
-      
+
       // Check each contact exists and has correct properties
       const contact1 = selectContactByAddress(signer1.value)(state)
       const contact2 = selectContactByAddress(signer2.value)(state)
@@ -299,7 +299,7 @@ describe('signersSlice', () => {
       await store.dispatch(addSignerWithEffects(mockSigner))
 
       const state = store.getState()
-      
+
       // Check that signer was added
       const signers = selectSigners(state)
       expect(signers[mockSigner.value]).toEqual(mockSigner)

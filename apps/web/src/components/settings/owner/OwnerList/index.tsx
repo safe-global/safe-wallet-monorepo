@@ -1,6 +1,6 @@
 import { jsonToCSV } from 'react-papaparse'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import EthHashInfo from '@/components/common/EthHashInfo'
+// import EthHashInfo from '@/components/common/EthHashInfo'
 import { ReplaceOwnerFlow, RemoveOwnerFlow } from '@/components/tx-flow/flows'
 import useAddressBook from '@/hooks/useAddressBook'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -17,8 +17,8 @@ import { TxModalContext } from '@/components/tx-flow'
 import ReplaceOwnerIcon from '@/public/images/settings/setup/replace-owner.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import type { AddressBook } from '@/store/addressBookSlice'
-
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
+import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 
 export const OwnerList = () => {
   const addressBook = useAddressBook()
@@ -36,7 +36,7 @@ export const OwnerList = () => {
         cells: {
           owner: {
             rawValue: address,
-            content: <EthHashInfo address={address} showCopyButton shortAddress={false} showName={true} hasExplorer />,
+            content: <NamedAddressInfo address={address} showCopyButton shortAddress={false} name={name} hasExplorer />,
           },
           actions: {
             rawValue: '',

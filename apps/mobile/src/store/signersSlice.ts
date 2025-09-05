@@ -34,11 +34,13 @@ export const addSignerWithEffects =
       dispatch(setActiveSigner({ safeAddress: activeSafe.address, signer: signerInfo }))
     }
 
-    dispatch(addContact({
-      value: signerInfo.value,
-      name: signerNamePrefix + signerInfo.value.slice(-4),
-      chainIds: [],
-    }))
+    dispatch(
+      addContact({
+        value: signerInfo.value,
+        name: signerNamePrefix + signerInfo.value.slice(-4),
+        chainIds: [],
+      }),
+    )
   }
 
 export const { addSigner, removeSigner } = signersSlice.actions

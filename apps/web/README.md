@@ -71,6 +71,8 @@ Here's the list of all the environment variables:
 | `NEXT_PUBLIC_FIREBASE_OPTIONS_STAGING`       | FCM `initializeApp` options on staging                                                                                                                                                        |
 | `NEXT_PUBLIC_FIREBASE_VAPID_KEY_STAGING`     | FCM vapid key on staging                                                                                                                                                                      |
 | `NEXT_PUBLIC_SPINDL_SDK_KEY`                 | [Spindl](http://spindl.xyz) SDK key                                                                                                                                                           |
+| `NEXT_PUBLIC_PROD_MIXPANEL_TOKEN`            | [Mixpanel](https://mixpanel.com) token for production analytics tracking                                                                                                                      |
+| `NEXT_PUBLIC_STAGING_MIXPANEL_TOKEN`         | [Mixpanel](https://mixpanel.com) token for staging analytics tracking                                                                                                                         |
 
 If you don't provide some of the variables, the corresponding features will be disabled in the UI.
 

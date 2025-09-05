@@ -18,10 +18,22 @@ interface HistoryTransactionInfoProps {
 
 export function HistoryTransactionInfo({ txId, txDetails }: HistoryTransactionInfoProps) {
   const { detailedExecutionInfo, executedAt, txHash } = txDetails
+  let createdAt = null
+  if (isMultisigDetailedExecutionInfo(detailedExecutionInfo)) {
+    createdAt = detailedExecutionInfo.submittedAt
+  }
 
   return (
     <YStack paddingHorizontal="$4" gap="$4" marginTop="$4">
       <Container padding="$4" gap="$4" borderRadius="$3">
+        {createdAt && (
+          <View alignItems="center" flexDirection="row" justifyContent="space-between">
+            <Text color="$textSecondaryLight">Created</Text>
+            <Text fontSize="$4" color="$textPrimary">
+              {formatWithSchema(createdAt, 'd MMM yyyy, HH:mm a')}
+            </Text>
+          </View>
+        )}
         {executedAt && (
           <View alignItems="center" flexDirection="row" justifyContent="space-between">
             <Text color="$textSecondaryLight">Executed</Text>
@@ -34,14 +46,7 @@ export function HistoryTransactionInfo({ txId, txDetails }: HistoryTransactionIn
         {txHash && (
           <View alignItems="center" flexDirection="row" justifyContent="space-between">
             <Text color="$textSecondaryLight">Transaction hash</Text>
-            <HashDisplay
-              value={txHash}
-              showIdenticon={false}
-              isAddress={false}
-              copyIconSize={16}
-              externalLinkSize={16}
-              textProps={{ fontSize: '$4', color: '$textPrimary' }}
-            />
+            <HashDisplay value={txHash} showVisualIdentifier={false} />
           </View>
         )}
 

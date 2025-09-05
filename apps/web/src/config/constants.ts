@@ -51,8 +51,10 @@ export const TEST_GA_TRACKING_ID = process.env.NEXT_PUBLIC_TEST_GA_TRACKING_ID |
 export const SAFE_APPS_GA_TRACKING_ID = process.env.NEXT_PUBLIC_SAFE_APPS_GA_TRACKING_ID || ''
 export const GA_TRACKING_ID = IS_PRODUCTION ? PROD_GA_TRACKING_ID : TEST_GA_TRACKING_ID
 
-// MixPanel
-export const MIXPANEL_TOKEN = process.env.NEXT_PUBLIC_MIXPANEL_TOKEN || 'test-token'
+// Mixpanel
+const PROD_MIXPANEL_TOKEN = process.env.NEXT_PUBLIC_PROD_MIXPANEL_TOKEN || ''
+const STAGING_MIXPANEL_TOKEN = process.env.NEXT_PUBLIC_STAGING_MIXPANEL_TOKEN || ''
+export const MIXPANEL_TOKEN = IS_PRODUCTION ? PROD_MIXPANEL_TOKEN : STAGING_MIXPANEL_TOKEN
 
 // Safe Apps tags
 export enum SafeAppsTag {
@@ -75,7 +77,7 @@ export const RECOVERY_FEEDBACK_FORM =
 // Legal
 export const IS_OFFICIAL_HOST = process.env.NEXT_PUBLIC_IS_OFFICIAL_HOST === 'true'
 export const OFFICIAL_HOSTS = /app\.safe\.global|.+\.5afe\.dev|localhost:3000/
-export const IPFS_HOSTS = /\.ipfs\.dweb\.link|\.ipfs\.w3s\.link|\.ipfs\.inbrowser\.link/
+export const IPFS_HOSTS = /app\.safe\.eth\.limo|app\.5afedev\.eth\.limo/
 export const BRAND_NAME = process.env.NEXT_PUBLIC_BRAND_NAME || (IS_OFFICIAL_HOST ? 'Safe{Wallet}' : 'Wallet fork')
 export const BRAND_LOGO = process.env.NEXT_PUBLIC_BRAND_LOGO || ''
 

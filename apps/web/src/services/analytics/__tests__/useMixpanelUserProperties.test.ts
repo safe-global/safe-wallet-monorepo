@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react'
 import { faker } from '@faker-js/faker'
-import { useMixPanelUserProperties } from '../useMixPanelUserProperties'
-import { MixPanelUserProperty } from '@/services/analytics/mixpanel-events'
+import { useMixpanelUserProperties } from '../useMixpanelUserProperties'
+import { MixpanelUserProperty } from '@/services/analytics/mixpanel-events'
 
 // Mock dependencies
 jest.mock('@/hooks/useChains', () => ({
@@ -50,7 +50,7 @@ jest.mock('@/features/myAccounts/hooks/useNetworksOfSafe', () => ({
   useNetworksOfSafe: jest.fn(() => ['ethereum', 'polygon']),
 }))
 
-describe('useMixPanelUserProperties', () => {
+describe('useMixpanelUserProperties', () => {
   // Generate test addresses
   const safeAddress = faker.finance.ethereumAddress()
   const owner1Address = faker.finance.ethereumAddress()
@@ -73,17 +73,17 @@ describe('useMixPanelUserProperties', () => {
   })
 
   it('should return correct user properties', () => {
-    const { result } = renderHook(() => useMixPanelUserProperties())
+    const { result } = renderHook(() => useMixpanelUserProperties())
 
     expect(result.current).toEqual({
       properties: {
-        [MixPanelUserProperty.SAFE_ADDRESS]: safeAddress,
-        [MixPanelUserProperty.SAFE_VERSION]: '1.3.0',
-        [MixPanelUserProperty.NUM_SIGNERS]: 2,
-        [MixPanelUserProperty.THRESHOLD]: 2,
-        [MixPanelUserProperty.TOTAL_TX_COUNT]: 42,
-        [MixPanelUserProperty.LAST_TX_AT]: new Date(1672531200000).toISOString(),
-        [MixPanelUserProperty.NETWORKS]: ['ethereum', 'polygon'],
+        [MixpanelUserProperty.SAFE_ADDRESS]: safeAddress,
+        [MixpanelUserProperty.SAFE_VERSION]: '1.3.0',
+        [MixpanelUserProperty.NUM_SIGNERS]: 2,
+        [MixpanelUserProperty.THRESHOLD]: 2,
+        [MixpanelUserProperty.TOTAL_TX_COUNT]: 42,
+        [MixpanelUserProperty.LAST_TX_AT]: new Date(1672531200000).toISOString(),
+        [MixpanelUserProperty.NETWORKS]: ['ethereum', 'polygon'],
       },
       networks: ['ethereum', 'polygon'],
     })
@@ -96,7 +96,7 @@ describe('useMixPanelUserProperties', () => {
       safeLoaded: false,
     })
 
-    const { result } = renderHook(() => useMixPanelUserProperties())
+    const { result } = renderHook(() => useMixpanelUserProperties())
 
     expect(result.current).toBeNull()
   })
@@ -115,9 +115,9 @@ describe('useMixPanelUserProperties', () => {
       safeLoaded: true,
     })
 
-    const { result } = renderHook(() => useMixPanelUserProperties())
+    const { result } = renderHook(() => useMixpanelUserProperties())
 
-    expect(result.current?.properties[MixPanelUserProperty.SAFE_VERSION]).toBe('unknown')
+    expect(result.current?.properties[MixpanelUserProperty.SAFE_VERSION]).toBe('unknown')
   })
 
   it('should handle empty transaction history', () => {
@@ -141,17 +141,17 @@ describe('useMixPanelUserProperties', () => {
       },
     })
 
-    const { result } = renderHook(() => useMixPanelUserProperties())
+    const { result } = renderHook(() => useMixpanelUserProperties())
 
-    expect(result.current?.properties[MixPanelUserProperty.TOTAL_TX_COUNT]).toBe(10) // from nonce
-    expect(result.current?.properties[MixPanelUserProperty.LAST_TX_AT]).toBeNull() // from empty tx history
+    expect(result.current?.properties[MixpanelUserProperty.TOTAL_TX_COUNT]).toBe(10) // from nonce
+    expect(result.current?.properties[MixpanelUserProperty.LAST_TX_AT]).toBeNull() // from empty tx history
   })
 
   it('should fallback to current chain when useNetworksOfSafe returns empty array', () => {
     const { useNetworksOfSafe } = require('@/features/myAccounts/hooks/useNetworksOfSafe')
     useNetworksOfSafe.mockReturnValueOnce([])
 
-    const { result } = renderHook(() => useMixPanelUserProperties())
+    const { result } = renderHook(() => useMixpanelUserProperties())
 
     expect(result.current?.networks).toEqual(['Ethereum'])
   })

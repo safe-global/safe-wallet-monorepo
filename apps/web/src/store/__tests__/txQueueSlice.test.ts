@@ -62,6 +62,7 @@ describe('txQueueSlice', () => {
 
     const action = txQueueSlice.actions.set({
       loading: false,
+      loaded: true,
       data: {
         results: [transaction],
       },
@@ -104,6 +105,7 @@ describe('txQueueSlice', () => {
 
     const action = txQueueSlice.actions.set({
       loading: false,
+      loaded: true,
       data: {
         results: [transaction],
       },
@@ -134,6 +136,7 @@ describe('txQueueSlice', () => {
 
     const action = txQueueSlice.actions.set({
       loading: false,
+      loaded: true,
       data: undefined, // Cleared
     })
 
@@ -177,6 +180,7 @@ describe('txQueueSlice', () => {
 
     const action = txQueueSlice.actions.set({
       loading: false,
+      loaded: true,
       data: {
         results: [dateLabel, label, conflictHeader],
       },
@@ -214,6 +218,7 @@ describe('txQueueSlice', () => {
 
     const action = txQueueSlice.actions.set({
       loading: false,
+      loaded: true,
       data: {
         results: [transaction],
       },
@@ -253,6 +258,7 @@ describe('txQueueSlice', () => {
 
     const action = txQueueSlice.actions.set({
       loading: false,
+      loaded: true,
       data: payload,
     })
 

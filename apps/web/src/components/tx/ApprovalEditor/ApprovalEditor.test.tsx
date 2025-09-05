@@ -188,6 +188,7 @@ describe('ApprovalEditor', () => {
         balances: {
           data: mockBalances,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -298,6 +299,7 @@ describe('ApprovalEditor', () => {
         balances: {
           data: mockBalances,
           loading: false,
+          loaded: true,
         },
       },
     })

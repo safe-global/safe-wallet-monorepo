@@ -56,6 +56,7 @@ const mockSafeInfo = {
     chainId: '5',
   },
   loading: false,
+  loaded: true,
 }
 
 const mockBalanceDefaultList = { ...mockBalanceUSD, fiatTotal: '1003' }
@@ -117,6 +118,7 @@ describe('useLoadBalances', () => {
         safeInfo: {
           data: undefined,
           loading: false,
+          loaded: true,
         },
         settings: {
           currency: 'USD',

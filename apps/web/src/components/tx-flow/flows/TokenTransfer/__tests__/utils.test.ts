@@ -96,6 +96,7 @@ describe('TokenTransfer utils', () => {
       jest.spyOn(visibleBalances, 'useVisibleBalances').mockReturnValue({
         balances: balance,
         loading: false,
+        loaded: true,
       })
 
       const { result } = renderHook(() => useVisibleTokens())
@@ -150,12 +151,13 @@ describe('TokenTransfer utils', () => {
       jest.spyOn(visibleBalances, 'useVisibleBalances').mockReturnValue({
         balances: balance,
         loading: false,
+        loaded: true,
       })
 
       jest.spyOn(wallet, 'default').mockReturnValue(connectedWalletBuilder().with({ address: '0x3' }).build())
 
       const { result } = renderHook(() => useVisibleTokens(), {
-        initialReduxState: { spendingLimits: { data: [mockSpendingLimitToken], loading: false } },
+        initialReduxState: { spendingLimits: { data: [mockSpendingLimitToken], loading: false, loaded: true } },
       })
 
       expect(result.current).toStrictEqual([mockToken])

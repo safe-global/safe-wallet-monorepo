@@ -1,7 +1,7 @@
 import React from 'react'
 import { Container } from '@/src/components/Container'
-import { View, YStack, H3 } from 'tamagui'
-import { TransactionHeader } from '@/src/features/ConfirmTx/components/TransactionHeader'
+import { View, YStack } from 'tamagui'
+import { HistoryTransactionHeader } from '@/src/features/HistoryTransactionDetails/components/HistoryTransactionHeader'
 import { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { NormalizedSettingsChangeTransaction } from '@/src/features/ConfirmTx/components/ConfirmationView/types'
 import { HistoryAdvancedDetailsButton } from '@/src/features/HistoryTransactionDetails/components/HistoryAdvancedDetailsButton'
@@ -12,13 +12,12 @@ interface HistoryChangeThresholdProps {
   txId: string
   txInfo: NormalizedSettingsChangeTransaction
   executionInfo: MultisigExecutionDetails
-  executedAt: number
 }
 
-export function HistoryChangeThreshold({ txId, txInfo, executionInfo, executedAt }: HistoryChangeThresholdProps) {
+export function HistoryChangeThreshold({ txId, txInfo, executionInfo }: HistoryChangeThresholdProps) {
   return (
     <>
-      <TransactionHeader
+      <HistoryTransactionHeader
         customLogo={
           <View borderRadius={100} padding="$2" backgroundColor="$backgroundSecondary">
             <SafeFontIcon color="$primary" name="owners" />
@@ -26,8 +25,7 @@ export function HistoryChangeThreshold({ txId, txInfo, executionInfo, executedAt
         }
         badgeIcon="transaction-contract"
         badgeColor="$textSecondaryLight"
-        title={<H3 fontWeight={600}>Threshold change</H3>}
-        submittedAt={executedAt}
+        transactionType="Threshold change"
       />
 
       <View>

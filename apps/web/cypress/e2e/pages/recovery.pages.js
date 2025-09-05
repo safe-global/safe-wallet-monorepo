@@ -8,7 +8,6 @@ import { modalHeader } from '../pages/modals.page'
 import { moduleRemoveIcon } from '../pages/modules.page'
 
 export const setupRecoveryBtn = '[data-testid="setup-recovery-btn"]'
-export const setupRecoveryModalBtn = '[data-testid="setup-btn"]'
 const recoveryNextBtn = '[data-testid="next-btn"]'
 const warningSection = '[data-testid="warning-section"]'
 const termsCheckbox = 'input[type="checkbox"]'
@@ -109,10 +108,6 @@ export function getSetupRecoveryBtn() {
 
 export function clickOnSetupRecoveryBtn() {
   getSetupRecoveryBtn().click()
-}
-
-export function clickOnSetupRecoveryModalBtn() {
-  cy.get(setupRecoveryModalBtn).click()
 }
 
 export function clickOnNextBtn() {

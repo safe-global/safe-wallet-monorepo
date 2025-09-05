@@ -11,7 +11,7 @@ import { EthAddress } from '@/src/components/EthAddress'
 import { type ListTableItem } from '../../ListTable'
 import { BridgeRecipientWarnings } from './BridgeRecipientWarnings'
 import { ChainIndicator } from '@/src/components/ChainIndicator'
-import { ParametersButton } from '../../ParametersButton'
+import { ParametersButton } from '@/src/components/ParametersButton'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { ActionsRow } from '@/src/components/ActionsRow'
 
