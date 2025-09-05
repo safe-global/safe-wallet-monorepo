@@ -17,10 +17,7 @@ export function ExecuteSuccess() {
   const handleDonePress = () => {
     dispatch(cgwApi.util.invalidateTags(['transactions']))
 
-    // Go back to pending transactions
-    router.back()
-    router.back()
-    router.back()
+    router.navigate('/transactions')
   }
 
   return (
