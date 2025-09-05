@@ -18,6 +18,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { Tooltip } from '@mui/material'
+import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 
 const headCells = [
   {
@@ -51,7 +52,7 @@ const ProposersList = () => {
           proposer: {
             rawValue: proposer.delegate,
             content: (
-              <EthHashInfo
+              <NamedAddressInfo
                 address={proposer.delegate}
                 showCopyButton
                 hasExplorer
