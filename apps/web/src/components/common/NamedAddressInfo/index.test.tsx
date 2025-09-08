@@ -7,6 +7,10 @@ import * as contractsApi from '@safe-global/store/gateway/AUTO_GENERATED/contrac
 
 const useGetContractQueryMock = jest.spyOn(contractsApi, 'useContractsGetContractV1Query')
 
+type UseGetContractQueryResult = ReturnType<typeof contractsApi.useContractsGetContractV1Query>
+const mockQueryResult = (result: Partial<UseGetContractQueryResult> = {}): UseGetContractQueryResult =>
+  result as unknown as UseGetContractQueryResult
+
 const mockChainInfo = {
   chainId: '4',
   shortName: 'tst',
@@ -29,7 +33,7 @@ describe('NamedAddressInfo', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     useSafeAddressMock.mockReturnValue(safeAddress)
-    useGetContractQueryMock.mockReturnValue({})
+    useGetContractQueryMock.mockReturnValue(mockQueryResult())
   })
 
   it('should not fetch contract info if name / logo is given', async () => {
@@ -63,13 +67,15 @@ describe('NamedAddressInfo', () => {
 
   it('should fetch contract info if name / logo is not given', async () => {
     const address = faker.finance.ethereumAddress()
-    useGetContractQueryMock.mockReturnValue({
-      data: {
-        displayName: 'Resolved Test Name',
-        name: 'ResolvedTestName',
-        logoUri: 'https://img-resolved.test.safe.global',
-      },
-    })
+    useGetContractQueryMock.mockReturnValue(
+      mockQueryResult({
+        data: {
+          displayName: 'Resolved Test Name',
+          name: 'ResolvedTestName',
+          logoUri: 'https://img-resolved.test.safe.global',
+        },
+      }),
+    )
     const result = render(<NamedAddressInfo address={address} />, {
       initialReduxState: {
         chains: {
@@ -128,7 +134,7 @@ describe('useAddressName', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     useSafeAddressMock.mockReturnValue(safeAddress)
-    useGetContractQueryMock.mockReturnValue({})
+    useGetContractQueryMock.mockReturnValue(mockQueryResult())
   })
 
   it('should return name and logo from props if provided', async () => {
@@ -143,14 +149,16 @@ describe('useAddressName', () => {
   })
 
   it('should fetch and return contract info if no name provided', async () => {
-    useGetContractQueryMock.mockReturnValue({
-      data: {
-        displayName: 'Contract Display Name',
-        name: 'ContractName',
-        logoUri: 'contract-logo.png',
-        contractAbi: {},
-      },
-    })
+    useGetContractQueryMock.mockReturnValue(
+      mockQueryResult({
+        data: {
+          displayName: 'Contract Display Name',
+          name: 'ContractName',
+          logoUri: 'contract-logo.png',
+          contractAbi: {},
+        },
+      }),
+    )
 
     const { result } = renderHook(() => useAddressName(address))
 
@@ -166,14 +174,16 @@ describe('useAddressName', () => {
   })
 
   it('should mark contract without ABI as unverified', async () => {
-    useGetContractQueryMock.mockReturnValue({
-      data: {
-        displayName: 'Contract Display Name',
-        name: 'ContractName',
-        logoUri: 'contract-logo.png',
-        contractAbi: null,
-      },
-    })
+    useGetContractQueryMock.mockReturnValue(
+      mockQueryResult({
+        data: {
+          displayName: 'Contract Display Name',
+          name: 'ContractName',
+          logoUri: 'contract-logo.png',
+          contractAbi: null,
+        },
+      }),
+    )
 
     const { result } = renderHook(() => useAddressName(address))
 
@@ -187,7 +197,9 @@ describe('useAddressName', () => {
   })
 
   it('should treat contract lookup errors as verified (not indexed)', async () => {
-    useGetContractQueryMock.mockReturnValue({ error: new Error('Contract not found') })
+    useGetContractQueryMock.mockReturnValue(
+      mockQueryResult({ error: new Error('Contract not found') }),
+    )
 
     const { result } = renderHook(() => useAddressName(address))
 
@@ -212,13 +224,15 @@ describe('useAddressName', () => {
   })
 
   it('should prioritize display name over contract name', async () => {
-    useGetContractQueryMock.mockReturnValue({
-      data: {
-        displayName: 'Display Name',
-        name: 'Contract Name',
-        logoUri: 'logo.png',
-      },
-    })
+    useGetContractQueryMock.mockReturnValue(
+      mockQueryResult({
+        data: {
+          displayName: 'Display Name',
+          name: 'Contract Name',
+          logoUri: 'logo.png',
+        },
+      }),
+    )
 
     const { result } = renderHook(() => useAddressName(address))
 
@@ -228,12 +242,14 @@ describe('useAddressName', () => {
   })
 
   it('should fallback to contract name if display name is not available', async () => {
-    useGetContractQueryMock.mockReturnValue({
-      data: {
-        name: 'Contract Name',
-        logoUri: 'logo.png',
-      },
-    })
+    useGetContractQueryMock.mockReturnValue(
+      mockQueryResult({
+        data: {
+          name: 'Contract Name',
+          logoUri: 'logo.png',
+        },
+      }),
+    )
 
     const { result } = renderHook(() => useAddressName(address))
 
