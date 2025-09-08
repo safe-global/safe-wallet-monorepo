@@ -1,8 +1,6 @@
 import { useMemo, useContext } from 'react'
 import type { ReactElement } from 'react'
-
 import MinusIcon from '@/public/images/common/minus.svg'
-import EthHashInfo from '@/components/common/EthHashInfo'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { Stack, Box } from '@mui/material'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
@@ -18,6 +16,7 @@ import type { ReplaceOwnerFlowProps } from '@/components/tx-flow/flows/ReplaceOw
 import type { TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { checksumAddress, sameAddress } from '@safe-global/utils/utils/addresses'
+import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 
 type FlowData = ManageSignersForm | AddOwnerFlowProps | ReplaceOwnerFlowProps
 function extractSignerNames(data?: FlowData): Record<string, string> {
@@ -112,10 +111,9 @@ function Signers({ owners }: { owners: Array<AddressInfo> }): ReactElement {
     <FieldsGrid title="Signers">
       <Box display="flex" flexDirection="column" gap={2} padding="var(--space-2)" fontSize="14px">
         {owners.map(({ value, name }) => (
-          <EthHashInfo
+          <NamedAddressInfo
             avatarSize={32}
             key={value}
-            showName
             address={value}
             shortAddress={false}
             showCopyButton
