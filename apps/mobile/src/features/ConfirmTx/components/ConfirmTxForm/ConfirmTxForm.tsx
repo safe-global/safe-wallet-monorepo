@@ -4,6 +4,7 @@ import { ExecuteForm } from '../ExecuteForm'
 import { AlreadySigned } from '../confirmation-views/AlreadySigned'
 import { CanNotSign } from '../CanNotSign'
 import { useTransactionSigner } from '../../hooks/useTransactionSigner'
+import { CanNotExecute } from '@/src/features/ExecuteTx/components/CanNotExecute'
 
 interface ConfirmTxFormProps {
   hasEnoughConfirmations: boolean
@@ -14,6 +15,10 @@ interface ConfirmTxFormProps {
 export function ConfirmTxForm({ hasEnoughConfirmations, isExpired, txId }: ConfirmTxFormProps) {
   const { signerState } = useTransactionSigner(txId)
   const { activeSigner, hasSigned, canSign } = signerState
+
+  if (!activeSigner) {
+    return <CanNotExecute />
+  }
 
   if (hasEnoughConfirmations) {
     return <ExecuteForm txId={txId} />

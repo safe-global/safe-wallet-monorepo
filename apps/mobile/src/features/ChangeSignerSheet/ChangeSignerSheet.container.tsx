@@ -27,7 +27,7 @@ export const ChangeSignerSheetContainer = () => {
   const { items, loading } = useAvailableSigners(txId, actionType)
 
   const onSignerPress = (signer: SignerInfo, onClose: () => void) => () => {
-    if (activeSigner.value !== signer.value) {
+    if (activeSigner?.value !== signer.value) {
       setTxSigner(signer)
     }
 
