@@ -19,7 +19,9 @@ This repository uses a Yarn-based monorepo structure. Follow these rules when pr
 2. **Formatting**: run `yarn prettier:fix` before committing.
 3. **Linting and tests**: when you change any source code under `apps/` or `packages/`, execute:
    ```bash
+   yarn type-check
    yarn lint
+   yarn prettier
    yarn test
    ```
    Skip these steps only if your changes are limited to comments or documentation.
