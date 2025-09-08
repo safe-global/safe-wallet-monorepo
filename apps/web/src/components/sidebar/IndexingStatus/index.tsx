@@ -58,9 +58,10 @@ const IndexingStatus = () => {
     return null
   }
 
-  const status = getStatus(data.synced, data.lastSync)
+  const lastSyncMs = data.lastSync * 1000
+  const status = getStatus(data.synced, lastSyncMs)
 
-  const time = formatDistanceToNow(data.lastSync, { addSuffix: true })
+  const time = formatDistanceToNow(lastSyncMs, { addSuffix: true })
 
   return (
     <Tooltip title={`Last synced with the blockchain ${time}`} placement="right" arrow>
