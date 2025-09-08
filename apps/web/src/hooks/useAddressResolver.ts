@@ -21,7 +21,7 @@ export const useAddressResolver = (address?: string) => {
 
   const [ens, _, isResolving] = useAsync<string | undefined>(() => {
     if (!shouldResolve) return
-    if (chainId && debouncedValue && cache[chainId][debouncedValue]) {
+    if (chainId && debouncedValue && cache[chainId]?.[debouncedValue]) {
       return Promise.resolve(cache[chainId][debouncedValue])
     }
     return lookupAddress(ethersProvider, debouncedValue)
