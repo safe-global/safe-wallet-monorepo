@@ -1,15 +1,9 @@
 name: Web Deploy to dev/staging
 
 on:
-  pull_request:
-
-  push:
-    branches:
-      - dev
-      - main
-    paths:
-      - apps/web/**
-      - packages/**
+  workflow_run:
+    workflows: ['Web Build']
+    types: [completed]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -17,19 +11,23 @@ concurrency:
 
 jobs:
   deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'release' }}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
       id-token: write
+      actions: read
+      contents: read
 
     name: Deploy to dev/staging
 
     steps:
       # Post a PR comment before deploying
       - name: Post a comment while building
-        if: github.event.number
+        if: github.event.workflow_run.event == 'pull_request'
         uses: mshick/add-pr-comment@v2
         with:
+          pr: ${{ github.event.workflow_run.pull_requests[0].number }}
           message-id: praul
           message: |
             ## Branch preview
@@ -41,10 +39,12 @@ jobs:
 
       - uses: ./.github/actions/yarn
 
-      - uses: ./.github/actions/build
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
         with:
-          secrets: ${{ toJSON(secrets) }}
-          # if: startsWith(github.ref, 'refs/heads/main')
+          name: web-build
+          path: apps/web
+          run-id: ${{ github.event.workflow_run.id }}
 
       #- uses: ./.github/workflows/build-storybook
 
@@ -78,15 +78,18 @@ jobs:
 
       # Extract branch name
       - name: Extract branch name
+        if: github.event.workflow_run.event == 'pull_request'
         shell: bash
-        ## Cut off "refs/heads/", only allow alphanumeric characters and convert to lower case,
-        ## e.g. "refs/heads/features/hello-1.2.0" -> "features_hello_1_2_0"
-        run: echo "branch=$(echo $GITHUB_HEAD_REF | sed 's/refs\/heads\///' | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')" >> $GITHUB_OUTPUT
+        env:
+          PR_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        ## Only allow alphanumeric characters and convert to lower case,
+        ## e.g. "features/hello-1.2.0" -> "features_hello_1_2_0"
+        run: echo "branch=$(echo $PR_BRANCH | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')" >>$GITHUB_OUTPUT
         id: extract_branch
 
       # Deploy to S3
       - name: Deploy PR branch
-        if: github.event.number
+        if: github.event.workflow_run.event == 'pull_request'
         env:
           BUCKET: s3://${{ secrets.AWS_REVIEW_BUCKET_NAME }}/walletweb/${{ steps.extract_branch.outputs.branch }}
         working-directory: apps/web
@@ -94,9 +97,10 @@ jobs:
 
       # Comment
       - name: Post a deployment link in the PR
-        if: always() && github.event.number
+        if: always() && github.event.workflow_run.event == 'pull_request'
         uses: mshick/add-pr-comment@v2
         with:
+          pr: ${{ github.event.workflow_run.pull_requests[0].number }}
           message-id: praul
           message: |
             ## Branch preview
@@ -110,3 +114,5 @@ jobs:
           message-failure: |
             ## Branch preview
             ❌  Deploy failed!
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token-user-login: 'github-actions[bot]'

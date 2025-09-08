@@ -1,0 +1,37 @@
+name: Web Build
+
+on:
+  pull_request:
+    paths:
+      - apps/web/**
+      - packages/**
+  push:
+    branches:
+      - dev
+      - main
+    paths:
+      - apps/web/**
+      - packages/**
+  release:
+    types: [published]
+
+jobs:
+  build:
+    permissions:
+      contents: read
+      actions: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/yarn
+      - uses: ./.github/actions/build
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          prod: ${{ github.event_name == 'release' }}
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: |
+            apps/web/out
+            apps/web/.next

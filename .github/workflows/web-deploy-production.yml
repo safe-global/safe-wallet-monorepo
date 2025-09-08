@@ -1,32 +1,47 @@
 name: Web Release
 
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: ['Web Build']
+    types: [completed]
 
 jobs:
   release:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'release' }}
     permissions:
       attestations: write
       contents: write
       id-token: write
+      actions: read
 
     runs-on: ubuntu-latest
 
     name: Deploy release
 
     env:
-      ARCHIVE_NAME: ${{ github.event.repository.name }}-${{ github.event.release.tag_name }}
+      ARCHIVE_NAME: ${{ github.event.repository.name }}-${{ github.event.workflow_run.head_branch }}
 
     steps:
       - uses: actions/checkout@v5
 
       - uses: ./.github/actions/yarn
 
-      - uses: ./.github/actions/build
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
         with:
-          secrets: ${{ toJSON(secrets) }}
-          prod: ${{ true }}
+          name: web-build
+          path: apps/web
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Fetch release info
+        id: release
+        run: |
+          curl -sL \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            ${{ github.api_url }}/repos/${{ github.repository }}/releases/tags/${{ github.event.workflow_run.head_branch }} \
+            > release.json
+          echo "upload_url=$(jq -r .upload_url release.json)" >> $GITHUB_ENV
 
       - name: Add SRI to scripts
         run: node ./scripts/integrity-hashes.cjs
@@ -48,13 +63,13 @@ jobs:
       - name: Upload archive as release asset
         uses: shogo82148/actions-upload-release-asset@v1
         with:
-          upload_url: ${{ github.event.release.upload_url }}
+          upload_url: ${{ env.upload_url }}
           asset_path: apps/web/${{ env.ARCHIVE_NAME }}.tar.gz
 
       - name: Upload archive as release asset
         uses: shogo82148/actions-upload-release-asset@v1
         with:
-          upload_url: ${{ github.event.release.upload_url }}
+          upload_url: ${{ env.upload_url }}
           asset_path: apps/web/${{ env.ARCHIVE_NAME }}-sha256-checksum.txt
 
       - name: Configure AWS credentials
@@ -66,7 +81,7 @@ jobs:
       # Script to upload release files
       - name: Upload release build files for production
         env:
-          BUCKET: s3://${{ secrets.AWS_STAGING_BUCKET_NAME }}/releases/${{ github.event.release.tag_name }}
+          BUCKET: s3://${{ secrets.AWS_STAGING_BUCKET_NAME }}/releases/${{ github.event.workflow_run.head_branch }}
           CHECKSUM_FILE: ${{ env.ARCHIVE_NAME }}-sha256-checksum.txt
         run: bash ./scripts/github/s3_upload.sh
         working-directory: apps/web
@@ -78,4 +93,4 @@ jobs:
         env:
           PROD_DEPLOYMENT_HOOK_TOKEN: ${{ secrets.PROD_DEPLOYMENT_HOOK_TOKEN }}
           PROD_DEPLOYMENT_HOOK_URL: ${{ secrets.PROD_DEPLOYMENT_HOOK_URL }}
-          VERSION_TAG: ${{ github.event.release.tag_name }}
+          VERSION_TAG: ${{ github.event.workflow_run.head_branch }}

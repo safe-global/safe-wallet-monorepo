@@ -1,6 +1,9 @@
 name: Web Production health check tests
 
 on:
+  workflow_run:
+    workflows: ['Web Build']
+    types: [completed]
   workflow_dispatch:
 
 concurrency:
@@ -9,6 +12,7 @@ concurrency:
 
 jobs:
   e2e:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     name: Cypress production health check tests
     strategy:
@@ -18,6 +22,14 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Download build artifact
+        if: github.event_name == 'workflow_run'
+        uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: apps/web
+          run-id: ${{ github.event.workflow_run.id }}
+
       - uses: ./.github/actions/cypress
         with:
           secrets: ${{ toJSON(secrets) }}
@@ -25,6 +37,7 @@ jobs:
             cypress/e2e/prodhealthcheck/*.cy.js
           group: 'Production health check tests'
           tag: 'production'
+          skip-build: ${{ github.event_name == 'workflow_run' }}
 
       - name: Python setup
         if: always()
