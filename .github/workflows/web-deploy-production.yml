@@ -18,11 +18,18 @@ jobs:
 
     name: Deploy release
 
-    env:
-      ARCHIVE_NAME: ${{ github.event.repository.name }}-${{ github.event.workflow_run.head_branch }}
-
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+
+      - name: Determine release tag
+        run: |
+          git fetch --tags
+          TAG_NAME=$(git tag --points-at HEAD)
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+          echo "ARCHIVE_NAME=${{ github.event.repository.name }}-$TAG_NAME" >> $GITHUB_ENV
 
       - uses: ./.github/actions/yarn
 
@@ -39,7 +46,7 @@ jobs:
           curl -sL \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
-            ${{ github.api_url }}/repos/${{ github.repository }}/releases/tags/${{ github.event.workflow_run.head_branch }} \
+            ${{ github.api_url }}/repos/${{ github.repository }}/releases/tags/${TAG_NAME} \
             > release.json
           echo "upload_url=$(jq -r .upload_url release.json)" >> $GITHUB_ENV
 
@@ -81,7 +88,7 @@ jobs:
       # Script to upload release files
       - name: Upload release build files for production
         env:
-          BUCKET: s3://${{ secrets.AWS_STAGING_BUCKET_NAME }}/releases/${{ github.event.workflow_run.head_branch }}
+          BUCKET: s3://${{ secrets.AWS_STAGING_BUCKET_NAME }}/releases/${{ env.TAG_NAME }}
           CHECKSUM_FILE: ${{ env.ARCHIVE_NAME }}-sha256-checksum.txt
         run: bash ./scripts/github/s3_upload.sh
         working-directory: apps/web
@@ -93,4 +100,4 @@ jobs:
         env:
           PROD_DEPLOYMENT_HOOK_TOKEN: ${{ secrets.PROD_DEPLOYMENT_HOOK_TOKEN }}
           PROD_DEPLOYMENT_HOOK_URL: ${{ secrets.PROD_DEPLOYMENT_HOOK_URL }}
-          VERSION_TAG: ${{ github.event.workflow_run.head_branch }}
+          VERSION_TAG: ${{ env.TAG_NAME }}
