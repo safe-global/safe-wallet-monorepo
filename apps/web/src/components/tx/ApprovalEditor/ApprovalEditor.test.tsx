@@ -18,10 +18,13 @@ jest.mock('@/services/tx/tx-sender/sdk', () => ({
   }),
 }))
 
-jest.mock('@safe-global/safe-gateway-typescript-sdk', () => ({
-  ...jest.requireActual('@safe-global/safe-gateway-typescript-sdk'),
-  getContract: jest.fn(() => undefined),
-  __esModule: true,
+jest.mock('@/store/api/gateway', () => ({
+  useGetContractQuery: jest.fn(() => ({ data: undefined })),
+  gatewayApi: {
+    reducerPath: 'gatewayApi',
+    reducer: () => ({}),
+    middleware: () => (next: any) => (action: any) => next(action),
+  },
 }))
 
 const ERC20_INTERFACE = ERC20__factory.createInterface()

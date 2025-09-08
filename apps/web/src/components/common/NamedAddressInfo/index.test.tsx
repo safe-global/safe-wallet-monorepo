@@ -1,9 +1,10 @@
 import { render, waitFor, renderHook } from '@/tests/test-utils'
 import NamedAddressInfo, { useAddressName } from '.'
 import { faker } from '@faker-js/faker'
-import { getContract, type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import useSafeAddress from '@/hooks/useSafeAddress'
+import { useGetContractQuery } from '@/store/api/gateway'
 
 const mockChainInfo = {
   chainId: '4',
@@ -16,10 +17,13 @@ const mockChainInfo = {
   features: [],
 } as unknown as ChainInfo
 
-jest.mock('@safe-global/safe-gateway-typescript-sdk', () => ({
-  ...jest.requireActual('@safe-global/safe-gateway-typescript-sdk'),
-  getContract: jest.fn(),
-  __esModule: true,
+jest.mock('@/store/api/gateway', () => ({
+  useGetContractQuery: jest.fn(),
+  gatewayApi: {
+    reducerPath: 'gatewayApi',
+    reducer: () => ({}),
+    middleware: () => (next: any) => (action: any) => next(action),
+  },
 }))
 
 jest.mock('@/hooks/useSafeAddress', () => ({
@@ -27,7 +31,7 @@ jest.mock('@/hooks/useSafeAddress', () => ({
   default: jest.fn(),
 }))
 
-const getContractMock = getContract as jest.Mock
+const useGetContractQueryMock = useGetContractQuery as jest.Mock
 const useSafeAddressMock = useSafeAddress as jest.Mock
 
 const safeAddress = faker.finance.ethereumAddress()
@@ -36,6 +40,7 @@ describe('NamedAddressInfo', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     useSafeAddressMock.mockReturnValue(safeAddress)
+    useGetContractQueryMock.mockReturnValue({})
   })
 
   it('should not fetch contract info if name / logo is given', async () => {
@@ -57,22 +62,24 @@ describe('NamedAddressInfo', () => {
     )
 
     expect(result.getByText('TestAddressName')).toBeVisible()
-    expect(getContractMock).not.toHaveBeenCalled()
+    expect(useGetContractQueryMock.mock.calls.every(([, opts]: any) => opts.skip)).toBe(true)
   })
 
   it('should not fetch contract info if the address is not a valid address', async () => {
     const address = faker.string.hexadecimal({ length: 64 })
     const result = render(<NamedAddressInfo address={address} />)
     expect(result.getByText(shortenAddress(address))).toBeVisible()
-    expect(getContractMock).not.toHaveBeenCalled()
+    expect(useGetContractQueryMock.mock.calls.every(([, opts]: any) => opts.skip)).toBe(true)
   })
 
   it('should fetch contract info if name / logo is not given', async () => {
     const address = faker.finance.ethereumAddress()
-    getContractMock.mockResolvedValue({
-      displayName: 'Resolved Test Name',
-      name: 'ResolvedTestName',
-      logoUri: 'https://img-resolved.test.safe.global',
+    useGetContractQueryMock.mockReturnValue({
+      data: {
+        displayName: 'Resolved Test Name',
+        name: 'ResolvedTestName',
+        logoUri: 'https://img-resolved.test.safe.global',
+      },
     })
     const result = render(<NamedAddressInfo address={address} />, {
       initialReduxState: {
@@ -88,7 +95,7 @@ describe('NamedAddressInfo', () => {
       expect(result.getByText('Resolved Test Name')).toBeVisible()
     })
 
-    expect(getContractMock).toHaveBeenCalledWith('4', address)
+    expect(useGetContractQueryMock).toHaveBeenCalledWith({ chainId: '4', contractAddress: address }, { skip: false })
   })
 
   it('should show "This Safe Account" when address matches Safe address', async () => {
@@ -105,7 +112,7 @@ describe('NamedAddressInfo', () => {
     })
 
     expect(result.getByText('This Safe Account')).toBeVisible()
-    expect(getContractMock).not.toHaveBeenCalled()
+    expect(useGetContractQueryMock.mock.calls.every(([, opts]: any) => opts.skip)).toBe(true)
   })
 
   it('should not show "This Safe Account" for different addresses', async () => {
@@ -132,6 +139,7 @@ describe('useAddressName', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     useSafeAddressMock.mockReturnValue(safeAddress)
+    useGetContractQueryMock.mockReturnValue({})
   })
 
   it('should return name and logo from props if provided', async () => {
@@ -142,15 +150,17 @@ describe('useAddressName', () => {
       logoUri: 'custom-avatar.png',
       isUnverifiedContract: false,
     })
-    expect(getContractMock).not.toHaveBeenCalled()
+    expect(useGetContractQueryMock.mock.calls.every(([, opts]: any) => opts.skip)).toBe(true)
   })
 
   it('should fetch and return contract info if no name provided', async () => {
-    getContractMock.mockResolvedValue({
-      displayName: 'Contract Display Name',
-      name: 'ContractName',
-      logoUri: 'contract-logo.png',
-      contractAbi: {},
+    useGetContractQueryMock.mockReturnValue({
+      data: {
+        displayName: 'Contract Display Name',
+        name: 'ContractName',
+        logoUri: 'contract-logo.png',
+        contractAbi: {},
+      },
     })
 
     const { result } = renderHook(() => useAddressName(address))
@@ -163,15 +173,18 @@ describe('useAddressName', () => {
       })
     })
 
-    expect(getContractMock).toHaveBeenCalledWith('4', address)
+    expect(useGetContractQueryMock).toHaveBeenCalledWith({ chainId: '4', contractAddress: address }, { skip: false })
   })
 
   it('should mark contract without ABI as unverified', async () => {
-    getContractMock.mockResolvedValue({
-      displayName: 'Contract Display Name',
-      name: 'ContractName',
-      logoUri: 'contract-logo.png',
-      contractAbi: null,
+    useGetContractQueryMock.mockReturnValue({
+      data: {
+        displayName: 'Contract Display Name',
+        name: 'ContractName',
+        logoUri: 'contract-logo.png',
+        // @ts-expect-error null contractAbi for testing unverified contract
+        contractAbi: null,
+      },
     })
 
     const { result } = renderHook(() => useAddressName(address))
@@ -186,7 +199,7 @@ describe('useAddressName', () => {
   })
 
   it('should treat contract lookup errors as verified (not indexed)', async () => {
-    getContractMock.mockRejectedValue(new Error('Contract not found'))
+    useGetContractQueryMock.mockReturnValue({ error: new Error('Contract not found') })
 
     const { result } = renderHook(() => useAddressName(address))
 
@@ -207,14 +220,16 @@ describe('useAddressName', () => {
       logoUri: undefined,
       isUnverifiedContract: false,
     })
-    expect(getContractMock).not.toHaveBeenCalled()
+    expect(useGetContractQueryMock.mock.calls.every(([, opts]: any) => opts.skip)).toBe(true)
   })
 
   it('should prioritize display name over contract name', async () => {
-    getContractMock.mockResolvedValue({
-      displayName: 'Display Name',
-      name: 'Contract Name',
-      logoUri: 'logo.png',
+    useGetContractQueryMock.mockReturnValue({
+      data: {
+        displayName: 'Display Name',
+        name: 'Contract Name',
+        logoUri: 'logo.png',
+      },
     })
 
     const { result } = renderHook(() => useAddressName(address))
@@ -225,9 +240,11 @@ describe('useAddressName', () => {
   })
 
   it('should fallback to contract name if display name is not available', async () => {
-    getContractMock.mockResolvedValue({
-      name: 'Contract Name',
-      logoUri: 'logo.png',
+    useGetContractQueryMock.mockReturnValue({
+      data: {
+        name: 'Contract Name',
+        logoUri: 'logo.png',
+      },
     })
 
     const { result } = renderHook(() => useAddressName(address))

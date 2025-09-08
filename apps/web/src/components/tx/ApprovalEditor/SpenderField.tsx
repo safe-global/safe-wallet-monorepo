@@ -2,13 +2,16 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import { Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 
 import css from './styles.module.css'
-import useAsync from '@safe-global/utils/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
-import { getContract } from '@safe-global/safe-gateway-typescript-sdk'
+import { useGetContractQuery } from '@/store/api/gateway'
+import { isAddress } from 'ethers'
 
 export const SpenderField = ({ address }: { address: string }) => {
   const chainId = useChainId()
-  const [spendingContract] = useAsync(() => getContract(chainId, address), [chainId, address])
+  const { data: spendingContract } = useGetContractQuery(
+    { chainId, contractAddress: address },
+    { skip: !address || !isAddress(address) },
+  )
   const { breakpoints } = useTheme()
   const isSmallScreen = useMediaQuery(breakpoints.down('md'))
 

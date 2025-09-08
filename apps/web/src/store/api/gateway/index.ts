@@ -9,6 +9,7 @@ import {
 } from '@safe-global/safe-gateway-typescript-sdk'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { safeOverviewEndpoints } from './safeOverviews'
+import { contractEndpoints } from './contracts'
 import { createSubmission, getSafe, getSafesByOwner, getSubmission } from '@safe-global/safe-client-gateway-sdk'
 
 export async function buildQueryFn<T>(fn: () => Promise<T>) {
@@ -85,6 +86,7 @@ export const gatewayApi = createApi({
     }),
     ...proposerEndpoints(builder),
     ...safeOverviewEndpoints(builder),
+    ...contractEndpoints(builder),
   }),
 })
 
@@ -102,4 +104,5 @@ export const {
   useGetMultipleSafeOverviewsQuery,
   useGetAllOwnedSafesQuery,
   useGetOwnedSafesQuery,
+  useGetContractQuery,
 } = gatewayApi

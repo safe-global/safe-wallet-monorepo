@@ -1,6 +1,4 @@
-import useAsync from '@safe-global/utils/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
-import { getContract } from '@safe-global/safe-gateway-typescript-sdk'
 import EthHashInfo from '../EthHashInfo'
 import type { EthHashInfoProps } from '../EthHashInfo/SrcEthHashInfo'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -8,6 +6,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { memo, useMemo } from 'react'
 import { isAddress } from 'ethers'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
+import { useGetContractQuery } from '@/store/api/gateway'
 
 const useIsUnverifiedContract = (contract?: { contractAbi?: object | null } | null): boolean => {
   return !!contract && !contract.contractAbi
@@ -18,10 +17,9 @@ export function useAddressName(address?: string, name?: string | null, customAva
   const safeAddress = useSafeAddress()
   const displayName = sameAddress(address, safeAddress) ? 'This Safe Account' : name
 
-  const [contract] = useAsync(
-    () => (!displayName && address && isAddress(address) ? getContract(chainId, address) : undefined),
-    [address, chainId, displayName],
-    false,
+  const { data: contract } = useGetContractQuery(
+    { chainId, contractAddress: address },
+    { skip: !!displayName || !address || !isAddress(address) },
   )
 
   const nonEnsName = displayName || contract?.displayName || contract?.name
