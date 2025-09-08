@@ -1,40 +1,45 @@
 import { SafeButton } from '@/src/components/SafeButton'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { selectChainById } from '@/src/store/chains'
-import { useAppSelector } from '@/src/store/hooks'
-import { formatPrefixedAddress } from '@safe-global/utils/utils/addresses'
 import React from 'react'
-import { Anchor, Text, View, YStack } from 'tamagui'
+import { View, Text, YStack } from 'tamagui'
+import { router } from 'expo-router'
+import { SafeAreaView } from 'react-native'
+import useIsNextTx from '@/src/hooks/useIsNextTx'
+
 interface ExecuteFormProps {
-  safeAddress: string
-  chainId: string
+  txId: string
 }
 
-export function ExecuteForm({ safeAddress, chainId }: ExecuteFormProps) {
-  const chain = useAppSelector((state) => selectChainById(state, chainId))
+export function ExecuteForm({ txId }: ExecuteFormProps) {
+  const isNext = useIsNextTx(txId)
+
+  const onExecutePress = () => {
+    router.push({
+      pathname: '/review-and-execute',
+      params: { txId },
+    })
+  }
 
   return (
-    <YStack justifyContent="center" gap="$4" alignItems="center" paddingHorizontal={'$4'}>
-      <Text fontSize="$4" fontWeight={400} width="70%" textAlign="center" color="$textSecondaryLight">
-        Transactions can be executed only in the web app at the moment.
-      </Text>
-
-      <View display="flex" flexDirection="row" alignItems="center" justifyContent="center" gap="$2">
-        <Anchor
-          href={`https://app.safe.global/home?safe=${formatPrefixedAddress(safeAddress, chain?.shortName)}`}
-          target={'_blank'}
-        >
-          Go to web app
-        </Anchor>
-
-        <SafeFontIcon name="external-link" size={14} />
+    <SafeAreaView style={{ gap: 24 }}>
+      <View paddingHorizontal={'$3'} gap="$2" flexDirection="row">
+        <YStack justifyContent="center" gap="$2" width="100%">
+          {!isNext && (
+            <Text
+              fontSize="$4"
+              fontWeight={400}
+              width="70%"
+              alignSelf="center"
+              textAlign="center"
+              color="$textSecondaryLight"
+            >
+              You must execute the transaction with the lowest nonce first.
+            </Text>
+          )}
+          <SafeButton onPress={onExecutePress} disabled={!isNext}>
+            Continue
+          </SafeButton>
+        </YStack>
       </View>
-
-      <View height={50} width="100%">
-        <SafeButton height="100%" rounded fullscreen fontWeight={600} disabled>
-          Confirm
-        </SafeButton>
-      </View>
-    </YStack>
+    </SafeAreaView>
   )
 }

@@ -1,0 +1,62 @@
+name: Web Checks
+
+on:
+  pull_request:
+    paths:
+      - apps/web/**
+      - packages/**
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - apps/web/**
+      - packages/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    permissions:
+      checks: write
+      pull-requests: read
+      statuses: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/yarn
+      - uses: CatChen/eslint-suggestion-action@v4.1.18
+        with:
+          request-changes: true
+          fail-check: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          directory: './'
+          targets: '/apps/web/src'
+          config-path: './apps/web/eslint.config.mjs'
+
+  prettier:
+    permissions:
+      checks: write
+      pull-requests: read
+      statuses: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/yarn
+      - name: Run Prettier check
+        run: yarn workspace @safe-global/web prettier
+
+  type-check:
+    permissions:
+      checks: write
+      pull-requests: read
+      statuses: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/yarn
+      - name: Type check
+        run: yarn type-check
+        working-directory: apps/web

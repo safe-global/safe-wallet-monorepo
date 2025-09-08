@@ -11,6 +11,7 @@ export enum MixpanelEvent {
   WC_CONNECTED = 'WC Connected',
   CSV_TX_EXPORT_CLICKED = 'Export CSV Clicked',
   CSV_TX_EXPORT_SUBMITTED = 'CSV Exported',
+  NATIVE_SWAP_VIEWED = 'Native Swap Viewed',
 }
 
 export enum MixpanelUserProperty {
