@@ -1,9 +1,7 @@
 import { Box, Tooltip, Button, SvgIcon } from '@mui/material'
 import { formatDistanceToNow } from 'date-fns'
-import { getIndexingStatus } from '@safe-global/safe-gateway-typescript-sdk'
-import useAsync from '@safe-global/utils/hooks/useAsync'
+import { useGetIndexingStatusQuery } from '@safe-global/store/gateway'
 import useChainId from '@/hooks/useChainId'
-import useIntervalCounter from '@/hooks/useIntervalCounter'
 import { OpenInNewRounded } from '@mui/icons-material'
 
 const STATUS_PAGE = 'https://status.safe.global'
@@ -12,15 +10,13 @@ const POLL_INTERVAL = 1000 * 60 // 1 minute
 
 const useIndexingStatus = () => {
   const chainId = useChainId()
-  const [count] = useIntervalCounter(POLL_INTERVAL)
 
-  return useAsync(
-    () => {
-      if (count === undefined) return
-      return getIndexingStatus(chainId)
+  return useGetIndexingStatusQuery(
+    { chainId },
+    {
+      pollingInterval: POLL_INTERVAL,
+      skipPollingIfUnfocused: true,
     },
-    [chainId, count],
-    false,
   )
 }
 
@@ -52,9 +48,9 @@ const getStatus = (synced: boolean, lastSync: number) => {
 }
 
 const IndexingStatus = () => {
-  const [data] = useIndexingStatus()
+  const { data, isLoading, isError } = useIndexingStatus()
 
-  if (!data) {
+  if (isLoading || isError || !data) {
     return null
   }
 
