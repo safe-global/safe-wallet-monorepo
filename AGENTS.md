@@ -16,20 +16,25 @@ This repository uses a Yarn-based monorepo structure. Follow these rules when pr
 ## Workflow
 
 1. **Install dependencies**: `yarn install` (from the repository root).
-2. **Formatting**: run `yarn prettier:fix` before committing.
-3. **Linting and tests**: when you change any source code under `apps/` or `packages/`, execute:
+2. **Formatting**: run `yarn workspace @safe-global/web prettier:fix` before committing.
+3. **Linting and tests**: when you change any source code under `apps/` or `packages/`, execute, for web:
    ```bash
-   yarn type-check
-   yarn lint
-   yarn prettier
-   yarn test
+   yarn workspace @safe-global/web type-check
+   yarn workspace @safe-global/web lint
+   yarn workspace @safe-global/web prettier
+   yarn workspace @safe-global/web test
    ```
-   Skip these steps only if your changes are limited to comments or documentation.
-4. **Commit messages**: use [semantic commit messages](https://www.conventionalcommits.org/en/v1.0.0/) as described in `CONTRIBUTING.md`.
-5. **Code style**: follow the guidelines in:
+   For mobile:
+   ```bash
+   yarn workspace @safe-global/mobile lint
+   yarn workspace @safe-global/mobile prettier
+   yarn workspace @safe-global/mobile test
+   ```
+5. **Commit messages**: use [semantic commit messages](https://www.conventionalcommits.org/en/v1.0.0/) as described in `CONTRIBUTING.md`.
+6. **Code style**: follow the guidelines in:
    - `apps/web/docs/code-style.md` for the web app.
    - `apps/mobile/docs/code-style.md` for the mobile app.
-6. **Pull requests**: fill out the PR template and ensure all checks pass.
+7. **Pull requests**: fill out the PR template and ensure all checks pass.
 
 Use Yarn 4 (managed via `corepack`) for all scripts. Refer to the workspace READMEs for environment details.
 
