@@ -25,7 +25,7 @@ jobs:
         run: corepack enable
 
       # Set up Node.js
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '22.11.0' # jod
           cache: 'yarn'
