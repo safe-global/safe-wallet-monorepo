@@ -18,7 +18,7 @@ export function useAddressName(address?: string, name?: string | null, customAva
   const displayName = sameAddress(address, safeAddress) ? 'This Safe Account' : name
 
   const { data: contract } = useGetContractQuery(
-    { chainId, contractAddress: address },
+    { chainId, contractAddress: address as string },
     { skip: !!displayName || !address || !isAddress(address) },
   )
 

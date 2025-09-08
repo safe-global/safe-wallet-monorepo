@@ -182,7 +182,6 @@ describe('useAddressName', () => {
         displayName: 'Contract Display Name',
         name: 'ContractName',
         logoUri: 'contract-logo.png',
-        // @ts-expect-error null contractAbi for testing unverified contract
         contractAbi: null,
       },
     })
