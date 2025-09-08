@@ -1,15 +1,10 @@
 name: Web Deploy to dev/staging
 
 on:
-  pull_request:
-
-  push:
-    branches:
-      - dev
-      - main
-    paths:
-      - apps/web/**
-      - packages/**
+  workflow_run:
+    workflows: ['Web Checks']
+    types:
+      - completed
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -17,6 +12,9 @@ concurrency:
 
 jobs:
   deploy:
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      (github.event.workflow_run.event == 'pull_request' || github.event.workflow_run.head_branch == 'dev' || github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write

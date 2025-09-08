@@ -4,15 +4,10 @@
 name: 'Web Next.js Bundle Analysis'
 
 on:
-  pull_request:
-    paths:
-      - apps/web/**
-  push:
-    branches:
-      - dev
-    paths:
-      - apps/web/**
-      - packages/**
+  workflow_run:
+    workflows: ['Web Checks']
+    types:
+      - completed
 permissions:
   contents: read # for checkout repository
   actions: read # for fetching base branch bundle stats
@@ -20,6 +15,9 @@ permissions:
 
 jobs:
   analyze:
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      (github.event.workflow_run.event == 'pull_request' || github.event.workflow_run.head_branch == 'dev')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

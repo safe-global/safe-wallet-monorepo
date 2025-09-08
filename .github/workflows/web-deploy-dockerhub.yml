@@ -3,28 +3,26 @@
 name: Web Deploy to Dockerhub
 
 on:
-  pull_request:
-    branches:
-      - docker
-    paths:
-      - apps/web/**
-      - packages/**
-
-  push:
-    branches:
-      - main
-      - dev
-    paths:
-      - apps/web/**
-      - packages/**
-
+  workflow_run:
+    workflows: ['Web Checks']
+    types:
+      - completed
   release:
     types: [released]
 
 jobs:
   dockerhub-push:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' || (github.event_name == 'release' && github.event.action == 'released')
+    if: |
+      (github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        (
+          (github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.head_branch == 'docker') ||
+          github.event.workflow_run.head_branch == 'main' ||
+          github.event.workflow_run.head_branch == 'dev'
+        )
+      ) ||
+      github.event_name == 'release'
     steps:
       - uses: actions/checkout@v5
       - uses: docker/setup-qemu-action@v3

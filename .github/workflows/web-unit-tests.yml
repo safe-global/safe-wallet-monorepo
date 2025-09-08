@@ -1,32 +1,25 @@
 name: Web Unit tests
 on:
-  pull_request:
-    paths:
-      - apps/web/**
-
-  push:
-    branches:
-      - main
-    paths:
-      - apps/web/**
-      - packages/**
+  workflow_run:
+    workflows: ['Web Checks']
+    types:
+      - completed
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   test:
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      (github.event.workflow_run.event == 'pull_request' || github.event.workflow_run.head_branch == 'main')
     permissions:
       contents: read
       checks: write
       pull-requests: write
-
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-
       - uses: ./.github/actions/yarn
-
       - name: Annotations and coverage report
         uses: ArtiomTr/jest-coverage-report-action@v2.3.1
         with:
