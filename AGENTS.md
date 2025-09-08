@@ -16,7 +16,7 @@ This repository uses a Yarn-based monorepo structure. Follow these rules when pr
 ## Workflow
 
 1. **Install dependencies**: `yarn install` (from the repository root).
-2. **Formatting**: run `yarn workspace @safe-global/web prettier:fix` before committing.
+2. **Formatting**: run `yarn prettier:fix` before committing.
 3. **Linting and tests**: when you change any source code under `apps/` or `packages/`, execute, for web:
    ```bash
    yarn workspace @safe-global/web type-check
