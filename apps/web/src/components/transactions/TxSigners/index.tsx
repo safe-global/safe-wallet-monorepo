@@ -20,7 +20,7 @@ import type {
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsPending from '@/hooks/useIsPending'
 import { isCancellationTxInfo, isExecutable, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
-import EthHashInfo from '@/components/common/EthHashInfo'
+import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 
 import css from './styles.module.css'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -167,7 +167,7 @@ export const TxSigners = ({
               <Dot />
             </StyledListItemIcon>
             <ListItemText data-testid="signer">
-              <EthHashInfo address={proposer} hasExplorer showCopyButton />
+              <NamedAddressInfo address={proposer} hasExplorer showCopyButton />
             </ListItemText>
           </ListItem>
         )}
@@ -191,7 +191,7 @@ export const TxSigners = ({
                 <Dot />
               </StyledListItemIcon>
               <ListItemText data-testid="signer">
-                <EthHashInfo address={signer.value} name={signer.name} hasExplorer showCopyButton />
+                <NamedAddressInfo address={signer.value} name={signer.name} hasExplorer showCopyButton />
               </ListItemText>
             </ListItem>
           ))}
@@ -235,7 +235,7 @@ export const TxSigners = ({
       </List>
       {executor ? (
         <Box data-testid="executor" className={css.listFooter}>
-          <EthHashInfo
+          <NamedAddressInfo
             address={executor.value}
             name={executor.name}
             customAvatar={executor.logoUri}
