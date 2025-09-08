@@ -3,8 +3,8 @@ import React, { useEffect } from 'react'
 import { useLocalSearchParams } from 'expo-router'
 import SignError from './SignError'
 import SignSuccess from './SignSuccess'
-import { useSigningGuard } from './hooks/useSigningGuard'
-import { useTransactionSigning } from './hooks/useTransactionSigning'
+import { useTransactionGuard } from '@/src/hooks/useTransactionGuard'
+import { SigningStatus, useTransactionSigning } from './hooks/useTransactionSigning'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
@@ -13,7 +13,7 @@ export function SignTransaction() {
   const { txId } = useLocalSearchParams<{ txId: string }>()
   const activeSafe = useDefinedActiveSafe()
   const activeSigner = useAppSelector((state) => selectActiveSigner(state, activeSafe.address))
-  const { canSign } = useSigningGuard()
+  const { guard: canSign } = useTransactionGuard('signing')
   const { status, executeSign, retry, isApiLoading, isApiError } = useTransactionSigning({
     txId: txId || '',
     signerAddress: activeSigner?.value || '',
@@ -21,7 +21,7 @@ export function SignTransaction() {
 
   // Auto-sign when component mounts if user can sign
   useEffect(() => {
-    if (canSign && status === 'idle' && txId && activeSigner) {
+    if (canSign && status === SigningStatus.IDLE && txId && activeSigner) {
       executeSign()
     }
   }, [canSign, status, executeSign, txId, activeSigner])
@@ -47,17 +47,17 @@ export function SignTransaction() {
   }
 
   // Handle signing errors
-  if (status === 'error') {
+  if (status === SigningStatus.ERROR) {
     return <SignError onRetryPress={retry} description="There was an error signing the transaction." />
   }
 
   // Handle success
-  if (status === 'success') {
+  if (status === SigningStatus.SUCCESS) {
     return <SignSuccess />
   }
 
   // Show loading state
-  if (status === 'loading' || isApiLoading) {
+  if (status === SigningStatus.LOADING || isApiLoading) {
     return <LoadingScreen title="Signing transaction..." description="It may take a few seconds..." />
   }
 

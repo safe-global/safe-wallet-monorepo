@@ -14,17 +14,19 @@ type Props = {
   txId: string
 }
 
-export function SelectSigner({ address, txId }: Props) {
+export function SelectExecutor({ address, txId }: Props) {
   return (
     <View
-      onPress={() => router.push({ pathname: '/change-signer-sheet', params: { txId, actionType: ActionType.SIGN } })}
+      onPress={() =>
+        router.push({ pathname: '/change-signer-sheet', params: { txId, actionType: ActionType.EXECUTE } })
+      }
       flexDirection="row"
       justifyContent="center"
       alignItems="center"
       gap={'$2'}
     >
       <Image testID="signature-button-image" width={16} height={16} source={Signature} />
-      <Text fontWeight={700}>Sign with</Text>
+      <Text fontWeight={700}>Execute with</Text>
 
       <Identicon address={address} size={24} />
 
