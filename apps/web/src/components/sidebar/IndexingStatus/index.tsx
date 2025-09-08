@@ -1,6 +1,6 @@
 import { Box, Tooltip, Button, SvgIcon } from '@mui/material'
 import { formatDistanceToNow } from 'date-fns'
-import { useGetIndexingStatusQuery } from '@safe-global/store/gateway'
+import { useChainsGetIndexingStatusV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useChainId from '@/hooks/useChainId'
 import { OpenInNewRounded } from '@mui/icons-material'
 
@@ -11,7 +11,7 @@ const POLL_INTERVAL = 1000 * 60 // 1 minute
 const useIndexingStatus = () => {
   const chainId = useChainId()
 
-  return useGetIndexingStatusQuery(
+  return useChainsGetIndexingStatusV1Query(
     { chainId },
     {
       pollingInterval: POLL_INTERVAL,
