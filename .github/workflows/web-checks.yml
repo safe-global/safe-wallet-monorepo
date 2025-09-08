@@ -18,19 +18,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Warm up cache
-  prepare:
-    permissions:
-      checks: write
-      pull-requests: read
-      statuses: write
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: ./.github/actions/yarn
-
   lint:
-    needs: prepare
     permissions:
       checks: write
       pull-requests: read
@@ -49,7 +37,6 @@ jobs:
           config-path: './apps/web/eslint.config.mjs'
 
   prettier:
-    needs: prepare
     permissions:
       checks: write
       pull-requests: read
@@ -62,7 +49,6 @@ jobs:
         run: yarn workspace @safe-global/web prettier
 
   type-check:
-    needs: prepare
     permissions:
       checks: write
       pull-requests: read
