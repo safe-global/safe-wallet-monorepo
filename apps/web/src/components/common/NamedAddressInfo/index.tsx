@@ -6,7 +6,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { memo, useMemo } from 'react'
 import { isAddress } from 'ethers'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
-import { useGetContractQuery } from '@/store/api/gateway'
+import { useContractsGetContractV1Query as useGetContractQuery } from '@safe-global/store/gateway/AUTO_GENERATED/contracts'
 
 const useIsUnverifiedContract = (contract?: { contractAbi?: object | null } | null): boolean => {
   return !!contract && !contract.contractAbi

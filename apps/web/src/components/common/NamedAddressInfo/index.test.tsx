@@ -1,10 +1,11 @@
 import { render, waitFor, renderHook } from '@/tests/test-utils'
 import NamedAddressInfo, { useAddressName } from '.'
 import { faker } from '@faker-js/faker'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import useSafeAddress from '@/hooks/useSafeAddress'
-import { useGetContractQuery } from '@/store/api/gateway'
+import * as contractsApi from '@safe-global/store/gateway/AUTO_GENERATED/contracts'
+
+const useGetContractQueryMock = jest.spyOn(contractsApi, 'useContractsGetContractV1Query')
 
 const mockChainInfo = {
   chainId: '4',
@@ -15,23 +16,11 @@ const mockChainInfo = {
     txHash: 'https://test.scan.eth/{txHash}',
   },
   features: [],
-} as unknown as ChainInfo
-
-jest.mock('@/store/api/gateway', () => ({
-  useGetContractQuery: jest.fn(),
-  gatewayApi: {
-    reducerPath: 'gatewayApi',
-    reducer: () => ({}),
-    middleware: () => (next: any) => (action: any) => next(action),
-  },
-}))
-
+} as any
 jest.mock('@/hooks/useSafeAddress', () => ({
   __esModule: true,
   default: jest.fn(),
 }))
-
-const useGetContractQueryMock = useGetContractQuery as jest.Mock
 const useSafeAddressMock = useSafeAddress as jest.Mock
 
 const safeAddress = faker.finance.ethereumAddress()

@@ -1,7 +1,7 @@
 import { safeSignatureBuilder, safeTxBuilder } from '@/tests/builders/safeTx'
 import { act, fireEvent, getAllByTitle, render, waitFor } from '@/tests/test-utils'
 import ApprovalEditor from '.'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { TransactionTokenType as TokenType } from '@safe-global/store/gateway/types'
 import { OperationType } from '@safe-global/types-kit'
 import * as approvalInfos from '@/components/tx/ApprovalEditor/hooks/useApprovalInfos'
 import { createMockSafeTransaction } from '@/tests/transactions'
@@ -18,14 +18,13 @@ jest.mock('@/services/tx/tx-sender/sdk', () => ({
   }),
 }))
 
-jest.mock('@/store/api/gateway', () => ({
-  useGetContractQuery: jest.fn(() => ({ data: undefined })),
-  gatewayApi: {
-    reducerPath: 'gatewayApi',
-    reducer: () => ({}),
-    middleware: () => (next: any) => (action: any) => next(action),
-  },
-}))
+jest.mock(
+  '@safe-global/store/gateway/AUTO_GENERATED/contracts',
+  () => ({
+    useContractsGetContractV1Query: jest.fn(() => ({ data: undefined })),
+  }),
+  { virtual: true },
+)
 
 const ERC20_INTERFACE = ERC20__factory.createInterface()
 const MULTISEND_INTERFACE = Multi_send__factory.createInterface()

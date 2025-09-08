@@ -3,7 +3,7 @@ import { Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 
 import css from './styles.module.css'
 import useChainId from '@/hooks/useChainId'
-import { useGetContractQuery } from '@/store/api/gateway'
+import { useContractsGetContractV1Query as useGetContractQuery } from '@safe-global/store/gateway/AUTO_GENERATED/contracts'
 import { isAddress } from 'ethers'
 
 export const SpenderField = ({ address }: { address: string }) => {
