@@ -40,6 +40,13 @@ runs:
         restore-keys: |
           ${{ runner.os }}-web-core-modules-
 
+    - name: Set composite outputs yarn
+      if: ${{ inputs.mode == 'restore-yarn' }}
+      shell: bash
+      run: |
+        echo "cache-hit-yarn=${{ steps.restore.outputs.cache-hit }}" >> $GITHUB_OUTPUT
+        echo "computed-cache-key-yarn=${{ steps.restore.outputs.cache-primary-key }}" >> $GITHUB_OUTPUT
+
     - name: Save Yarn Cache
       if: ${{ inputs.mode == 'save-yarn' }}
       uses: actions/cache/save@v4
