@@ -210,6 +210,42 @@ describe('useAddressName', () => {
     })
   })
 
+  it('should reset contract info when address becomes invalid', async () => {
+    useGetContractQueryMock.mockReturnValue(
+      mockQueryResult({
+        data: {
+          displayName: 'Contract Display Name',
+          name: 'ContractName',
+          logoUri: 'contract-logo.png',
+          contractAbi: {},
+        },
+      }),
+    )
+
+    const { result, rerender } = renderHook(({ addr }: { addr?: string }) => useAddressName(addr), {
+      initialProps: { addr: address as string | undefined },
+    })
+
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        name: 'Contract Display Name',
+        logoUri: 'contract-logo.png',
+        isUnverifiedContract: false,
+      })
+    })
+
+    useGetContractQueryMock.mockReturnValue(mockQueryResult())
+
+    rerender({ addr: undefined })
+
+    expect(result.current).toEqual({
+      name: undefined,
+      logoUri: undefined,
+      isUnverifiedContract: false,
+    })
+    expect((useGetContractQueryMock.mock.calls.at(-1) as any)[1].skip).toBe(true)
+  })
+
   it('should handle undefined address', () => {
     const { result } = renderHook(() => useAddressName(undefined))
 

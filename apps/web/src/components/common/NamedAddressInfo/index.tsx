@@ -17,24 +17,23 @@ export function useAddressName(address?: string, name?: string | null, customAva
   const safeAddress = useSafeAddress()
   const displayName = sameAddress(address, safeAddress) ? 'This Safe Account' : name
 
-  const { data: contract } = useGetContractQuery(
-    { chainId, contractAddress: address as string },
-    { skip: !!displayName || !address || !isAddress(address) },
-  )
+  const shouldSkip = !!displayName || !address || !isAddress(address)
+  const { data: contract } = useGetContractQuery({ chainId, contractAddress: address as string }, { skip: shouldSkip })
 
-  const nonEnsName = displayName || contract?.displayName || contract?.name
+  const contractData = shouldSkip ? undefined : contract
+  const nonEnsName = displayName || contractData?.displayName || contractData?.name
 
   const { ens: ensName } = useAddressResolver(nonEnsName ? undefined : address)
 
-  const isUnverifiedContract = useIsUnverifiedContract(contract)
+  const isUnverifiedContract = useIsUnverifiedContract(contractData)
 
   return useMemo(
     () => ({
       name: nonEnsName || ensName || (isUnverifiedContract ? 'Unverified contract' : undefined),
-      logoUri: customAvatar || contract?.logoUri,
+      logoUri: customAvatar || contractData?.logoUri,
       isUnverifiedContract,
     }),
-    [nonEnsName, customAvatar, contract?.logoUri, isUnverifiedContract, ensName],
+    [nonEnsName, customAvatar, contractData?.logoUri, isUnverifiedContract, ensName],
   )
 }
 

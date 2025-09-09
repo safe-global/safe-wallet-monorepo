@@ -8,10 +8,9 @@ import { isAddress } from 'ethers'
 
 export const SpenderField = ({ address }: { address: string }) => {
   const chainId = useChainId()
-  const { data: spendingContract } = useGetContractQuery(
-    { chainId, contractAddress: address },
-    { skip: !address || !isAddress(address) },
-  )
+  const shouldSkip = !address || !isAddress(address)
+  const { data: spendingContract } = useGetContractQuery({ chainId, contractAddress: address }, { skip: shouldSkip })
+  const contractData = shouldSkip ? undefined : spendingContract
   const { breakpoints } = useTheme()
   const isSmallScreen = useMediaQuery(breakpoints.down('md'))
 
@@ -37,8 +36,8 @@ export const SpenderField = ({ address }: { address: string }) => {
         <EthHashInfo
           avatarSize={24}
           address={address}
-          name={spendingContract?.displayName || spendingContract?.name}
-          customAvatar={spendingContract?.logoUri}
+          name={contractData?.displayName || contractData?.name}
+          customAvatar={contractData?.logoUri}
           shortAddress={isSmallScreen}
           hasExplorer
         />
