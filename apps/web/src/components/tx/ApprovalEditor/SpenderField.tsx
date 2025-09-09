@@ -3,14 +3,26 @@ import { Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 
 import css from './styles.module.css'
 import useChainId from '@/hooks/useChainId'
-import { useContractsGetContractV1Query as useGetContractQuery } from '@safe-global/store/gateway/AUTO_GENERATED/contracts'
+import {
+  useContractsGetContractV1Query as useGetContractQuery,
+  type Contract,
+} from '@safe-global/store/gateway/AUTO_GENERATED/contracts'
 import { isAddress } from 'ethers'
+import { useEffect, useState } from 'react'
 
 export const SpenderField = ({ address }: { address: string }) => {
   const chainId = useChainId()
   const shouldSkip = !address || !isAddress(address)
-  const { data: spendingContract } = useGetContractQuery({ chainId, contractAddress: address }, { skip: shouldSkip })
-  const contractData = shouldSkip ? undefined : spendingContract
+  const { data: contract } = useGetContractQuery({ chainId, contractAddress: address }, { skip: shouldSkip })
+  const [spendingContract, setSpendingContract] = useState<Contract>()
+
+  useEffect(() => {
+    if (shouldSkip) {
+      setSpendingContract(undefined)
+    } else {
+      setSpendingContract(contract)
+    }
+  }, [contract, shouldSkip])
   const { breakpoints } = useTheme()
   const isSmallScreen = useMediaQuery(breakpoints.down('md'))
 
@@ -36,8 +48,8 @@ export const SpenderField = ({ address }: { address: string }) => {
         <EthHashInfo
           avatarSize={24}
           address={address}
-          name={contractData?.displayName || contractData?.name}
-          customAvatar={contractData?.logoUri}
+          name={spendingContract?.displayName || spendingContract?.name}
+          customAvatar={spendingContract?.logoUri}
           shortAddress={isSmallScreen}
           hasExplorer
         />
