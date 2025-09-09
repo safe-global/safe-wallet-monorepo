@@ -71,6 +71,18 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
             justifyContent: 'center',
           }}
         >
+          {/* Status Widget */}
+          {!isReplacement && statusVisible && (
+            <Grid item xs={12} md={4}>
+              <TxStatusWidget
+                isLastStep={step === childrenArray.length - 1}
+                txSummary={txSummary}
+                handleClose={() => setStatusVisible(false)}
+                isBatch={isBatch}
+                isMessage={isMessage}
+              />
+            </Grid>
+          )}
           {/* Main content */}
           <Grid item xs={12} md={7}>
             <div className={css.titleWrapper}>
@@ -119,16 +131,6 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
           {/* Sidebar */}
           {!isReplacement && (
             <Grid item xs={12} md={4} className={classnames(css.widget, { [css.active]: statusVisible })}>
-              {statusVisible && (
-                <TxStatusWidget
-                  isLastStep={step === childrenArray.length - 1}
-                  txSummary={txSummary}
-                  handleClose={() => setStatusVisible(false)}
-                  isBatch={isBatch}
-                  isMessage={isMessage}
-                />
-              )}
-
               <Slot name={SlotName.Sidebar} />
 
               <Box className={css.sticky}>

@@ -46,8 +46,8 @@ const TxStatusWidget = ({
   const canSign = txSummary ? isSignableBy(txSummary, wallet?.address || '') : !isProposing
 
   return (
-    <Paper>
-      <div className={css.header}>
+    <Paper sx={{ backgroundColor: 'transparent' }}>
+      {/* <div className={css.header}>
         <Typography fontWeight="700" display="flex" alignItems="center" gap={1}>
           <SafeLogo width={16} height={16} className={css.logo} />
           {isMessage ? 'Message' : 'Transaction'} status
@@ -58,7 +58,7 @@ const TxStatusWidget = ({
         </IconButton>
       </div>
 
-      <Divider />
+      <Divider /> */}
 
       <div className={css.content}>
         <List className={css.status}>
@@ -67,9 +67,7 @@ const TxStatusWidget = ({
               <CreatedIcon />
             </ListItemIcon>
 
-            <ListItemText primaryTypographyProps={{ fontWeight: 700 }}>
-              {isBatch ? 'Queue transactions' : 'Create'}
-            </ListItemText>
+            <ListItemText sx={{ letterSpacing: 1 }}>{isBatch ? 'Queue transactions' : 'Create'}</ListItemText>
           </ListItem>
 
           <ListItem className={classnames({ [css.incomplete]: !canConfirm && !isBatch })}>
@@ -77,7 +75,7 @@ const TxStatusWidget = ({
               <SignedIcon />
             </ListItemIcon>
 
-            <ListItemText primaryTypographyProps={{ fontWeight: 700 }}>
+            <ListItemText sx={{ letterSpacing: 1 }}>
               {isBatch ? (
                 'Create batch'
               ) : !nonceNeeded ? (
@@ -102,7 +100,7 @@ const TxStatusWidget = ({
               <SignedIcon />
             </ListItemIcon>
 
-            <ListItemText primaryTypographyProps={{ fontWeight: 700 }}>{isMessage ? 'Done' : 'Execute'}</ListItemText>
+            <ListItemText sx={{ letterSpacing: 1 }}>{isMessage ? 'Done' : 'Execute'}</ListItemText>
           </ListItem>
         </List>
       </div>
