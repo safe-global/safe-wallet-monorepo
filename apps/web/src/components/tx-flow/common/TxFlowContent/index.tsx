@@ -44,7 +44,6 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
 
   const theme = useTheme()
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('lg'))
-  const isDesktop = useMediaQuery(theme.breakpoints.down('lg'))
 
   useEffect(() => {
     setStatusVisible(!isSmallScreen)
@@ -110,7 +109,7 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
                 {onPrev && step > 0 && (
                   <Button
                     data-testid="modal-back-btn"
-                    variant={isDesktop ? 'text' : 'outlined'}
+                    variant={isSmallScreen ? 'text' : 'outlined'}
                     onClick={onPrev}
                     className={css.backButton}
                     startIcon={<ArrowBackIcon fontSize="small" />}

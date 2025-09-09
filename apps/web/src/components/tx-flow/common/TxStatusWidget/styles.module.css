@@ -1,5 +1,5 @@
 .content {
-  padding: var(--space-4);
+  padding: var(--space-4) var(--space-3);
   padding-left: 0;
 }
 
