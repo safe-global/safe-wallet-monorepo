@@ -1,5 +1,6 @@
 .content {
   padding: var(--space-4);
+  padding-left: 0;
 }
 
 .status {

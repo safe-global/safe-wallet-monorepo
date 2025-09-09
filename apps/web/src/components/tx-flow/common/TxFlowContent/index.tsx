@@ -43,7 +43,7 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
   const [statusVisible, setStatusVisible] = useState<boolean>(true)
 
   const theme = useTheme()
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'))
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('lg'))
   const isDesktop = useMediaQuery(theme.breakpoints.down('lg'))
 
   useEffect(() => {
@@ -63,17 +63,11 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
         </IconButton>
       )}
 
-      <Container className={css.container}>
-        <Grid
-          container
-          sx={{
-            gap: 3,
-            justifyContent: 'center',
-          }}
-        >
+      <Container className={css.container} sx={{ xl: { backgroundColor: 'red' } }}>
+        <Grid container>
           {/* Status Widget */}
           {!isReplacement && statusVisible && (
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} lg={3}>
               <TxStatusWidget
                 isLastStep={step === childrenArray.length - 1}
                 txSummary={txSummary}
@@ -82,61 +76,62 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
               />
             </Grid>
           )}
-          {/* Main content */}
-          <Grid item xs={12} md={7}>
-            <div className={css.titleWrapper}>
-              <Typography
-                data-testid="modal-title"
-                variant="h3"
-                component="div"
-                className={css.title}
-                sx={{
-                  fontWeight: '700',
-                }}
-              >
-                {title}
-              </Typography>
 
-              <ChainIndicator inline />
-            </div>
-
-            <Paper data-testid="modal-header" className={css.header}>
-              {!hideProgress && (
-                <Box className={css.progressBar}>
-                  <ProgressBar value={progress} />
-                </Box>
-              )}
-
-              <TxLayoutHeader subtitle={subtitle} icon={icon} hideNonce={hideNonce} fixedNonce={fixedNonce} />
-            </Paper>
-
-            <div className={css.step}>
-              {childrenArray[step]}
-
-              {onPrev && step > 0 && (
-                <Button
-                  data-testid="modal-back-btn"
-                  variant={isDesktop ? 'text' : 'outlined'}
-                  onClick={onPrev}
-                  className={css.backButton}
-                  startIcon={<ArrowBackIcon fontSize="small" />}
+          <Grid container item xs={12} lg={9} spacing={3} sx={{ justifyContent: 'center' }}>
+            {/* Main content */}
+            <Grid item xs={12} md={8}>
+              <div className={css.titleWrapper}>
+                <Typography
+                  data-testid="modal-title"
+                  variant="h3"
+                  component="div"
+                  className={css.title}
+                  sx={{ fontWeight: '700' }}
                 >
-                  Back
-                </Button>
-              )}
-            </div>
-          </Grid>
+                  {title}
+                </Typography>
 
-          {/* Sidebar */}
-          {!isReplacement && (
-            <Grid item xs={12} md={4} className={classnames(css.widget, { [css.active]: statusVisible })}>
-              <Slot name={SlotName.Sidebar} />
+                <ChainIndicator inline />
+              </div>
 
-              <Box className={css.sticky}>
-                <SecurityWarnings />
-              </Box>
+              <Paper data-testid="modal-header" className={css.header}>
+                {!hideProgress && (
+                  <Box className={css.progressBar}>
+                    <ProgressBar value={progress} />
+                  </Box>
+                )}
+
+                <TxLayoutHeader subtitle={subtitle} icon={icon} hideNonce={hideNonce} fixedNonce={fixedNonce} />
+              </Paper>
+
+              <div className={css.step}>
+                {childrenArray[step]}
+
+                {onPrev && step > 0 && (
+                  <Button
+                    data-testid="modal-back-btn"
+                    variant={isDesktop ? 'text' : 'outlined'}
+                    onClick={onPrev}
+                    className={css.backButton}
+                    startIcon={<ArrowBackIcon fontSize="small" />}
+                  >
+                    Back
+                  </Button>
+                )}
+              </div>
             </Grid>
-          )}
+
+            {/* Sidebar */}
+            {!isReplacement && (
+              <Grid item xs={12} md={4} className={classnames(css.widget, { [css.active]: statusVisible })}>
+                <Slot name={SlotName.Sidebar} />
+
+                <Box className={css.sticky}>
+                  <SecurityWarnings />
+                </Box>
+              </Grid>
+            )}
+          </Grid>
         </Grid>
       </Container>
     </>
