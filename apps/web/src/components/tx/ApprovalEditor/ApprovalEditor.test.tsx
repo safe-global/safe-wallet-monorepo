@@ -18,14 +18,6 @@ jest.mock('@/services/tx/tx-sender/sdk', () => ({
   }),
 }))
 
-jest.mock(
-  '@safe-global/store/gateway/AUTO_GENERATED/contracts',
-  () => ({
-    useContractsGetContractV1Query: jest.fn(() => ({ data: undefined })),
-  }),
-  { virtual: true },
-)
-
 const ERC20_INTERFACE = ERC20__factory.createInterface()
 const MULTISEND_INTERFACE = Multi_send__factory.createInterface()
 
