@@ -1,6 +1,4 @@
-import useAsync from '@safe-global/utils/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
-import { getContract } from '@safe-global/safe-gateway-typescript-sdk'
 import EthHashInfo from '../EthHashInfo'
 import type { EthHashInfoProps } from '../EthHashInfo/SrcEthHashInfo'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -8,6 +6,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { memo, useMemo } from 'react'
 import { isAddress } from 'ethers'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
+import { useContractsGetContractV1Query as useGetContractQuery } from '@safe-global/store/gateway/AUTO_GENERATED/contracts'
 
 const useIsUnverifiedContract = (contract?: { contractAbi?: object | null } | null): boolean => {
   return !!contract && !contract.contractAbi
@@ -18,25 +17,23 @@ export function useAddressName(address?: string, name?: string | null, customAva
   const safeAddress = useSafeAddress()
   const displayName = sameAddress(address, safeAddress) ? 'This Safe Account' : name
 
-  const [contract] = useAsync(
-    () => (!displayName && address && isAddress(address) ? getContract(chainId, address) : undefined),
-    [address, chainId, displayName],
-    false,
-  )
+  const shouldSkip = !!displayName || !address || !isAddress(address)
+  const { data: contract } = useGetContractQuery({ chainId, contractAddress: address as string }, { skip: shouldSkip })
 
-  const nonEnsName = displayName || contract?.displayName || contract?.name
+  const contractData = shouldSkip ? undefined : contract
+  const nonEnsName = displayName || contractData?.displayName || contractData?.name
 
   const { ens: ensName } = useAddressResolver(nonEnsName ? undefined : address)
 
-  const isUnverifiedContract = useIsUnverifiedContract(contract)
+  const isUnverifiedContract = useIsUnverifiedContract(contractData)
 
   return useMemo(
     () => ({
       name: nonEnsName || ensName || (isUnverifiedContract ? 'Unverified contract' : undefined),
-      logoUri: customAvatar || contract?.logoUri,
+      logoUri: customAvatar || contractData?.logoUri,
       isUnverifiedContract,
     }),
-    [nonEnsName, customAvatar, contract?.logoUri, isUnverifiedContract, ensName],
+    [nonEnsName, customAvatar, contractData?.logoUri, isUnverifiedContract, ensName],
   )
 }
 
