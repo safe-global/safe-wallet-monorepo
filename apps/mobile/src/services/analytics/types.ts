@@ -28,6 +28,7 @@ export enum EventType {
   TX_CREATED = 'tx_created',
   TX_CONFIRMED = 'tx_confirmed',
   TX_EXECUTED = 'tx_executed',
+  STAKE_VIEWED = 'stake_viewed',
 }
 
 export type EventLabel = string | number | boolean | null

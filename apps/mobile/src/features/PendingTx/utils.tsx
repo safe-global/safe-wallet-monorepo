@@ -18,6 +18,9 @@ import React, { useCallback } from 'react'
 import { GroupedPendingTxsWithTitle } from './components/PendingTxList/PendingTxList.container'
 import { TxCardPress } from '@/src/components/TxInfo/types'
 import { useRouter } from 'expo-router'
+import { isStakingTransaction } from '@/src/utils/transaction-guards'
+import { trackEvent } from '@/src/services/analytics/firebaseAnalytics'
+import { createStakeViewedEvent } from '@/src/services/analytics/events/transactions'
 
 type GroupedTxs = (PendingTransactionItems | TransactionQueuedItem[])[]
 
@@ -92,8 +95,8 @@ export const groupConflictingTxs = (list: PendingTransactionItems[]): GroupedTxs
     .map((item) => {
       return Array.isArray(item)
         ? item.sort((a, b) => {
-            return b.transaction.timestamp - a.transaction.timestamp
-          })
+          return b.transaction.timestamp - a.transaction.timestamp
+        })
         : item
     })
 
@@ -109,6 +112,16 @@ export const renderItem = ({
   const onPress = useCallback(
     async (transaction?: TxCardPress) => {
       if (transaction) {
+        // Track Stake Viewed event if it's a staking transaction
+        if (isStakingTransaction(transaction.tx.txInfo)) {
+          try {
+            const event = createStakeViewedEvent('Assets')
+            await trackEvent(event)
+          } catch (error) {
+            console.error('Error tracking stake viewed event:', error)
+          }
+        }
+
         router.push({
           pathname: '/confirm-transaction',
           params: {

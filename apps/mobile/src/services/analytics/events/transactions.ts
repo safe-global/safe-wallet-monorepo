@@ -21,6 +21,11 @@ export const TRANSACTIONS_EVENTS = {
     eventAction: 'Execute transaction',
     // eventLabel can be set when tracking the event using AnalyticsLabel
   },
+  STAKE_VIEWED: {
+    eventName: EventType.STAKE_VIEWED,
+    eventCategory: TRANSACTIONS_CATEGORY,
+    eventAction: 'Stake viewed',
+  },
 }
 
 // Helper function to create a transaction confirm event with a specific label
@@ -39,4 +44,10 @@ export const createTxCreateEvent = (label: AnalyticsLabel) => ({
 export const createTxExecuteEvent = (label: AnalyticsLabel) => ({
   ...TRANSACTIONS_EVENTS.EXECUTE,
   eventLabel: label,
+})
+
+// Helper function to create a stake viewed event with entry point
+export const createStakeViewedEvent = (entryPoint: 'Assets' | 'Transactions' | 'Sidebar') => ({
+  ...TRANSACTIONS_EVENTS.STAKE_VIEWED,
+  eventLabel: entryPoint,
 })

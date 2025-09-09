@@ -13,6 +13,9 @@ import { groupBulkTxs } from '@/src/utils/transactions'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { TxCardPress } from '@/src/components/TxInfo/types'
+import { isStakingTransaction } from '@/src/utils/transaction-guards'
+import { trackEvent } from '@/src/services/analytics/firebaseAnalytics'
+import { createStakeViewedEvent } from '@/src/services/analytics/events/transactions'
 
 interface TxHistoryList {
   transactions?: HistoryTransactionItems[]
@@ -159,11 +162,21 @@ export function TxHistoryList({
   const router = useRouter()
 
   const onHistoryTransactionPress = useCallback(
-    (transaction: TxCardPress) => {
+    async (transaction: TxCardPress) => {
       // TODO: Remove this once the endpoint is fixed (see issue https://linear.app/safe-global/issue/COR-547/cgw-cant-return-information-for-creation-txs)
       if (isCreationTxInfo(transaction.tx.txInfo)) {
         console.log('Creation transaction navigation disabled:', transaction.tx.id)
         return
+      }
+
+      // Track Stake Viewed event if it's a staking transaction
+      if (isStakingTransaction(transaction.tx.txInfo)) {
+        try {
+          const event = createStakeViewedEvent('Transactions')
+          await trackEvent(event)
+        } catch (error) {
+          console.error('Error tracking stake viewed event:', error)
+        }
       }
 
       router.push({

@@ -158,6 +158,10 @@ export const isStakingTxWithdrawInfo = (
   return value.type === TransactionInfoType.NATIVE_STAKING_WITHDRAW
 }
 
+export const isStakingTransaction = (value: Transaction['txInfo']): boolean => {
+  return isStakingTxDepositInfo(value) || isStakingTxExitInfo(value) || isStakingTxWithdrawInfo(value)
+}
+
 export const isTransactionListItem = (
   value: HistoryTransactionItems | PendingTransactionItems,
 ): value is TransactionQueuedItem => {
