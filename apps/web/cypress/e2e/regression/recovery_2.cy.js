@@ -51,7 +51,6 @@ describe('Recovery regression tests 2', { defaultCommandTimeout: 50000 }, () => 
     wallet.connectSigner(signer)
     main.acceptCookies()
     recovery.clickOnSetupRecoveryBtn()
-    recovery.clickOnSetupRecoveryModalBtn()
     recovery.verifyRecoveryModalDisplayed()
   })
 
@@ -61,7 +60,6 @@ describe('Recovery regression tests 2', { defaultCommandTimeout: 50000 }, () => 
     wallet.connectSigner(signer)
     main.acceptCookies()
     recovery.clickOnSetupRecoveryBtn()
-    recovery.clickOnSetupRecoveryModalBtn()
     recovery.clickOnNextBtn()
 
     recovery.enterRecovererAddress(main.generateRandomString(10), 1)

@@ -1,0 +1,42 @@
+name: Mobile Prettier
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - apps/mobile/**
+      - packages/**
+  pull_request:
+    paths:
+      - apps/mobile/**
+      - packages/**
+
+jobs:
+  prettier:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      # Set up Node.js
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22.11.0' # jod
+          cache: 'yarn'
+
+      # Install dependencies
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      # Run prettier check
+      - name: Run Prettier check
+        run: |
+          yarn workspace @safe-global/mobile run prettier

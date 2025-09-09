@@ -73,6 +73,7 @@ describe('NetworkMultiSelector', () => {
         chains: {
           data: mockChains,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -176,6 +177,7 @@ describe('NetworkMultiSelector', () => {
         chains: {
           data: mockChains,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -228,6 +230,7 @@ describe('NetworkMultiSelector', () => {
         chains: {
           data: mockChains,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -273,6 +276,7 @@ describe('NetworkMultiSelector', () => {
         chains: {
           data: mockChains,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -338,6 +342,7 @@ describe('NetworkMultiSelector', () => {
         chains: {
           data: mockChains,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -387,6 +392,7 @@ describe('NetworkMultiSelector', () => {
         chains: {
           data: mockChains,
           loading: false,
+          loaded: true,
         },
       },
     })

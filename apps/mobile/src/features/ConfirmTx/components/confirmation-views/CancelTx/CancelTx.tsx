@@ -8,7 +8,7 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { RootState } from '@/src/store'
 import { selectChainById } from '@/src/store/chains'
 import { useAppSelector } from '@/src/store/hooks'
-import { ParametersButton } from '../../ParametersButton'
+import { ParametersButton } from '@/src/components/ParametersButton'
 import { ActionsRow } from '@/src/components/ActionsRow'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 

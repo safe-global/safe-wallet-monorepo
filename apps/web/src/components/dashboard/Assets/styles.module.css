@@ -1,11 +1,11 @@
 .container {
   width: 100%;
-  padding: 11px 16px;
+  padding: 12px;
   background-color: var(--color-background-paper);
   border-radius: 8px;
   flex-wrap: nowrap;
   display: grid;
-  grid-template-columns: 200px 1fr 1fr;
+  grid-template-columns: 200px 1fr;
   align-items: center;
   gap: var(--space-2);
   min-height: 50px;
@@ -25,18 +25,19 @@
 
 .tokenAmount * {
   font-weight: normal;
+  color: var(--color-primary-light);
 }
 
 .barPercentage {
   display: block;
   border-radius: 4px;
   height: 100%;
-  background: linear-gradient(225deg, #5FDDFF 12.5%, #12FF80 88.07%);
+  background: linear-gradient(225deg, #5fddff 12.5%, #12ff80 88.07%);
 }
 
 .assetButtons {
   position: absolute;
-  right: 16px;
+  right: 12px;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.2s;

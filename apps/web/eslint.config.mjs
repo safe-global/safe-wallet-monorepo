@@ -19,7 +19,7 @@ export default [
   {
     ignores: ['**/node_modules/', '**/.next/', '**/.github/', '**/cypress/', '**/src/types/contracts/'],
   },
-  ...compat.extends('next', 'prettier', 'plugin:prettier/recommended', 'plugin:storybook/recommended'),
+  ...compat.extends('next', 'prettier', 'plugin:storybook/recommended'),
   {
     plugins: {
       'unused-imports': unusedImports,

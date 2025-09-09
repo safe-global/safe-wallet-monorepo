@@ -1,14 +1,20 @@
-export enum MixPanelEvent {
+export enum MixpanelEvent {
   SAFE_APP_LAUNCHED = 'Safe App Launched',
   SAFE_CREATED = 'Safe Created',
   SAFE_ACTIVATED = 'Safe Activated',
   WALLET_CONNECTED = 'Wallet Connected',
+  POSITION_EXPANDED = 'Position Expanded',
+  POSITIONS_VIEW_ALL_CLICKED = 'Positions View All Clicked',
+  EMPTY_POSITIONS_EXPLORE_CLICKED = 'Empty Positions Explore Clicked',
+  STAKE_VIEWED = 'Stake Viewed',
+  EARN_VIEWED = 'Earn Viewed',
   WC_CONNECTED = 'WC Connected',
   CSV_TX_EXPORT_CLICKED = 'Export CSV Clicked',
   CSV_TX_EXPORT_SUBMITTED = 'CSV Exported',
+  NATIVE_SWAP_VIEWED = 'Native Swap Viewed',
 }
 
-export enum MixPanelUserProperty {
+export enum MixpanelUserProperty {
   WALLET_LABEL = 'Wallet Label',
   WALLET_ADDRESS = 'Wallet Address',
   SAFE_ADDRESS = 'Safe Address',
@@ -20,7 +26,7 @@ export enum MixPanelUserProperty {
   LAST_TX_AT = 'Last Transaction at',
 }
 
-export enum MixPanelEventParams {
+export enum MixpanelEventParams {
   APP_VERSION = 'App Version',
   BLOCKCHAIN_NETWORK = 'Blockchain Network',
   DEVICE_TYPE = 'Device Type',
@@ -36,6 +42,10 @@ export enum MixPanelEventParams {
   SAFE_APP_NAME = 'Safe App Name',
   SAFE_APP_TAGS = 'Safe App Tags',
   LAUNCH_LOCATION = 'Launch Location',
+  PROTOCOL_NAME = 'Protocol Name',
+  LOCATION = 'Location',
+  AMOUNT_USD = 'Amount USD',
+  TOTAL_VALUE_OF_PORTFOLIO = 'Total Value of Portfolio',
   APP_URL = 'App URL',
   DATE_RANGE = 'Date Range',
 }
@@ -46,7 +56,7 @@ export enum SafeAppLaunchLocation {
 }
 
 export const ADDRESS_PROPERTIES = new Set([
-  MixPanelEventParams.SAFE_ADDRESS,
-  MixPanelEventParams.EOA_WALLET_ADDRESS,
-  MixPanelUserProperty.SAFE_ADDRESS,
+  MixpanelEventParams.SAFE_ADDRESS,
+  MixpanelEventParams.EOA_WALLET_ADDRESS,
+  MixpanelUserProperty.SAFE_ADDRESS,
 ])

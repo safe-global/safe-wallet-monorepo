@@ -10,6 +10,7 @@ import ExternalLink from '../ExternalLink'
 import MUILink from '@mui/material/Link'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
+import { IS_PRODUCTION, COMMIT_HASH } from '@/config/constants'
 
 const footerPages = [
   AppRoutes.welcome.index,
@@ -84,6 +85,14 @@ const Footer = (): ReactElement | null => {
             <SvgIcon component={GitHubIcon} inheritViewBox fontSize="inherit" sx={{ mr: 0.5 }} /> v{packageJson.version}
           </ExternalLink>
         </li>
+
+        {!IS_PRODUCTION && COMMIT_HASH && (
+          <li>
+            <ExternalLink href={`${packageJson.homepage}/commit/${COMMIT_HASH}`} noIcon>
+              {COMMIT_HASH.slice(0, 7)}
+            </ExternalLink>
+          </li>
+        )}
       </ul>
     </footer>
   )

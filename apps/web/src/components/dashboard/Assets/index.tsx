@@ -40,6 +40,16 @@ const NoAssets = () => (
   </Paper>
 )
 
+const AssetsSkeleton = () => (
+  <Card sx={{ px: 1.5, py: 2.5 }} component="section">
+    <Stack direction="row" sx={{ px: 1.5, mb: 1 }}>
+      <Typography fontWeight={700}>Top assets</Typography>
+    </Stack>
+
+    <Skeleton height={66} variant="rounded" />
+  </Card>
+)
+
 const AssetRow = ({
   item,
   chainId,
@@ -59,14 +69,10 @@ const AssetRow = ({
         <TokenIcon tokenSymbol={item.tokenInfo.symbol} logoUri={item.tokenInfo.logoUri ?? undefined} size={32} />
         <Box>
           <Typography fontWeight="600">{item.tokenInfo.name}</Typography>
-          <Typography variant="body2">{item.tokenInfo.symbol}</Typography>
+          <Typography variant="body2" className={css.tokenAmount}>
+            <TokenAmount value={item.balance} decimals={item.tokenInfo.decimals} tokenSymbol={item.tokenInfo.symbol} />
+          </Typography>
         </Box>
-      </Stack>
-
-      <Stack display={['none', 'flex']} direction="row" alignItems="center" gap={1}>
-        <Typography className={css.tokenAmount}>
-          <TokenAmount value={item.balance} decimals={item.tokenInfo.decimals} tokenSymbol={item.tokenInfo.symbol} />
-        </Typography>
       </Stack>
 
       <Box flex={1} display="block" textAlign="right" height="44px">
@@ -120,7 +126,7 @@ export const isNonZeroBalance = (item: Balances['items'][number]) => item.balanc
 const AssetsWidget = () => {
   const router = useRouter()
   const { safe } = router.query
-  const { loading } = useBalances()
+  const { loading, balances } = useBalances()
   const visibleAssets = useVisibleAssets()
 
   const items = useMemo(() => {
@@ -135,10 +141,12 @@ const AssetsWidget = () => {
     [safe],
   )
 
-  if (loading) return <Skeleton height={338} variant="rounded" />
+  const isLoading = loading || !balances.fiatTotal
+
+  if (isLoading) return <AssetsSkeleton />
 
   return (
-    <Card data-testid="assets-widget" sx={{ px: 1.5, py: 2.5 }}>
+    <Card data-testid="assets-widget" sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5 }}>
       <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
         <Typography fontWeight={700}>Top assets</Typography>
 

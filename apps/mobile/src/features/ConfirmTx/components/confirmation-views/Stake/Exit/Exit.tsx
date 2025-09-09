@@ -7,7 +7,7 @@ import {
   NativeStakingWithdrawTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TokenAmount } from '@/src/components/TokenAmount'
-import { ParametersButton } from '../../../ParametersButton'
+import { ParametersButton } from '@/src/components/ParametersButton'
 
 interface StakingExitProps {
   txInfo: NativeStakingWithdrawTransactionInfo

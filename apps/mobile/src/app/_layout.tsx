@@ -105,6 +105,7 @@ function RootLayout() {
                               options={{ headerShown: false, presentation: 'modal' }}
                             />
                             <Stack.Screen name="sign-transaction" options={{ headerShown: false }} />
+                            <Stack.Screen name="execute-transaction" options={{ headerShown: false }} />
                             <Stack.Screen name="pending-transactions" options={{ headerShown: true, title: '' }} />
                             <Stack.Screen name="notifications-center" options={{ headerShown: true, title: '' }} />
                             <Stack.Screen name="notifications-settings" options={{ headerShown: true, title: '' }} />
@@ -116,11 +117,7 @@ function RootLayout() {
                             <Stack.Screen name="action-details" options={{ headerShown: true, title: '' }} />
                             <Stack.Screen
                               name="history-transaction-details"
-                              options={{ headerShown: true, title: '' }}
-                            />
-                            <Stack.Screen
-                              name="history-advanced-details"
-                              options={{ headerShown: true, title: 'Advanced Details' }}
+                              options={{ headerShown: true, title: 'Transaction details' }}
                             />
                             <Stack.Screen name="address-book" options={{ headerShown: true, title: '' }} />
                             <Stack.Screen name="contact" options={{ headerShown: true, title: '' }} />
@@ -201,6 +198,13 @@ function RootLayout() {
                               name="review-and-confirm"
                               options={{
                                 title: 'Review and confirm',
+                                headerRight: () => <View width={16} />,
+                              }}
+                            />
+                            <Stack.Screen
+                              name="review-and-execute"
+                              options={{
+                                title: 'Review and execute',
                                 headerRight: () => <View width={16} />,
                               }}
                             />

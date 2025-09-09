@@ -13,6 +13,7 @@ import {
   getByText,
   waitForElementToBeRemoved,
   within,
+  createAppNameRegex,
 } from '../test-utils'
 import AppsPage from '@/pages/apps'
 import CustomSafeAppsPage from '@/pages/apps/custom'
@@ -342,7 +343,7 @@ describe('AppsPage', () => {
       await userEvent.type(appURLInput, APP_URL)
 
       const riskCheckbox = await screen.findByText(
-        /This Safe App is not part of Safe{Wallet} and I agree to use it at my own risk\./,
+        createAppNameRegex(`This Safe App is not part of {APP_NAME} and I agree to use it at my own risk\\.`),
       )
 
       await userEvent.click(riskCheckbox)

@@ -18,7 +18,7 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { Address } from '@/src/types/address'
 import { TokenAmount } from '@/src/components/TokenAmount'
 import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
-import { ParametersButton } from '../../ParametersButton'
+import { ParametersButton } from '@/src/components/ParametersButton'
 
 interface TokenTransferProps {
   txId: string

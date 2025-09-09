@@ -8,6 +8,7 @@ type Props = {
   category: string
   action: string
   label?: EventLabel
+  mixpanelParams?: Record<string, any>
 }
 
 const shouldTrack = (el: HTMLDivElement) => {
@@ -15,7 +16,7 @@ const shouldTrack = (el: HTMLDivElement) => {
   return disabledChildren.length === 0
 }
 
-const Track = ({ children, as: Wrapper = 'span', ...trackData }: Props): typeof children => {
+const Track = ({ children, as: Wrapper = 'span', mixpanelParams, ...trackData }: Props): typeof children => {
   const el = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -27,7 +28,7 @@ const Track = ({ children, as: Wrapper = 'span', ...trackData }: Props): typeof 
 
     const handleClick = () => {
       if (shouldTrack(trackEl)) {
-        trackEvent(trackData)
+        trackEvent(trackData, mixpanelParams)
       }
     }
 
@@ -36,7 +37,7 @@ const Track = ({ children, as: Wrapper = 'span', ...trackData }: Props): typeof 
     return () => {
       trackEl.removeEventListener('click', handleClick)
     }
-  }, [el, trackData])
+  }, [el, trackData, mixpanelParams])
 
   if (children.type === Fragment) {
     throw new Error('Fragments cannot be tracked.')

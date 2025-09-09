@@ -1,6 +1,7 @@
 import signersReducer, { addSigner, addSignerWithEffects, selectSigners, selectTotalSignerCount } from '../signersSlice'
 import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { selectActiveSigner } from '../activeSignerSlice'
+import { selectAllContacts, selectContactByAddress } from '../addressBookSlice'
 import { configureStore } from '@reduxjs/toolkit'
 import { rootReducer } from '../index'
 import type { RootState } from '../index'
@@ -200,6 +201,115 @@ describe('signersSlice', () => {
       expect(selectSigners(state)[signer2.value]).toEqual(signer2)
       expect(selectActiveSigner(state, safeAddress1)).toEqual(signer1) // Still the first signer
       expect(selectActiveSigner(state, safeAddress2)).toBeUndefined() // No active signer for safe 2
+    })
+
+    it('should add a contact to address book when adding a signer', async () => {
+      const store = createTestStore()
+      const mockSigner = generateAddressInfo({
+        value: generateEthereumAddress(),
+        name: 'Test Signer',
+      })
+
+      // @ts-ignore: Allow thunk dispatch in test
+      await store.dispatch(addSignerWithEffects(mockSigner))
+
+      const state = store.getState()
+
+      // Check that signer was added
+      const signers = selectSigners(state)
+      expect(signers[mockSigner.value]).toEqual(mockSigner)
+
+      // Check that contact was added to address book
+      const contact = selectContactByAddress(mockSigner.value)(state)
+      expect(contact).toBeDefined()
+      expect(contact?.value).toBe(mockSigner.value)
+      expect(contact?.name).toBe(`Signer-${mockSigner.value.slice(-4)}`)
+      expect(contact?.chainIds).toEqual([])
+    })
+
+    it('should create contact with correct name format using last 4 characters of address', async () => {
+      const store = createTestStore()
+      const testAddress = generateEthereumAddress()
+      const testAddressLast4Chars = testAddress.slice(-4)
+      const mockSigner = generateAddressInfo({
+        value: testAddress,
+        name: 'Test Signer',
+      })
+
+      // @ts-ignore: Allow thunk dispatch in test
+      await store.dispatch(addSignerWithEffects(mockSigner))
+
+      const state = store.getState()
+      const contact = selectContactByAddress(mockSigner.value)(state)
+
+      expect(contact?.name).toBe(`Signer-${testAddressLast4Chars}`) // Last 4 characters of the address
+    })
+
+    it('should create multiple contacts when adding multiple signers', async () => {
+      const store = createTestStore()
+      const signer1 = generateAddressInfo({ name: 'Signer 1' })
+      const signer2 = generateAddressInfo({ name: 'Signer 2' })
+      const signer3 = generateAddressInfo({ name: 'Signer 3' })
+
+      // Add multiple signers
+      // @ts-ignore: Allow thunk dispatch in test
+      await store.dispatch(addSignerWithEffects(signer1))
+      // @ts-ignore: Allow thunk dispatch in test
+      await store.dispatch(addSignerWithEffects(signer2))
+      // @ts-ignore: Allow thunk dispatch in test
+      await store.dispatch(addSignerWithEffects(signer3))
+
+      const state = store.getState()
+      const allContacts = selectAllContacts(state)
+
+      // Should have 3 contacts
+      expect(allContacts).toHaveLength(3)
+
+      // Check each contact exists and has correct properties
+      const contact1 = selectContactByAddress(signer1.value)(state)
+      const contact2 = selectContactByAddress(signer2.value)(state)
+      const contact3 = selectContactByAddress(signer3.value)(state)
+
+      expect(contact1).toBeDefined()
+      expect(contact1?.value).toBe(signer1.value)
+      expect(contact1?.name).toBe(`Signer-${signer1.value.slice(-4)}`)
+      expect(contact1?.chainIds).toEqual([])
+
+      expect(contact2).toBeDefined()
+      expect(contact2?.value).toBe(signer2.value)
+      expect(contact2?.name).toBe(`Signer-${signer2.value.slice(-4)}`)
+      expect(contact2?.chainIds).toEqual([])
+
+      expect(contact3).toBeDefined()
+      expect(contact3?.value).toBe(signer3.value)
+      expect(contact3?.name).toBe(`Signer-${signer3.value.slice(-4)}`)
+      expect(contact3?.chainIds).toEqual([])
+    })
+
+    it('should add contact even when no active safe is present', async () => {
+      const initialState: Partial<RootState> = {
+        activeSafe: null,
+        activeSigner: {},
+      }
+
+      const store = createTestStore(initialState)
+      const mockSigner = generateAddressInfo({ name: 'Test Signer' })
+
+      // @ts-ignore: Allow thunk dispatch in test
+      await store.dispatch(addSignerWithEffects(mockSigner))
+
+      const state = store.getState()
+
+      // Check that signer was added
+      const signers = selectSigners(state)
+      expect(signers[mockSigner.value]).toEqual(mockSigner)
+
+      // Check that contact was still added despite no active safe
+      const contact = selectContactByAddress(mockSigner.value)(state)
+      expect(contact).toBeDefined()
+      expect(contact?.value).toBe(mockSigner.value)
+      expect(contact?.name).toBe(`Signer-${mockSigner.value.slice(-4)}`)
+      expect(contact?.chainIds).toEqual([])
     })
   })
 

@@ -19,8 +19,7 @@ export const useRecipientItem = (order: OrderTransactionInfo): ListTableItem[] =
           <HashDisplay
             value={order.receiver as Address}
             textProps={{ fontSize: '$4' }}
-            copyProps={{ size: 14 }}
-            externalLinkSize={14}
+            size="sm"
             onExternalLinkPress={viewRecipientOnExplorer}
           />
         ),

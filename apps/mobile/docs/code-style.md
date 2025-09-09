@@ -58,7 +58,6 @@ For a feature called **Assets**, the file structure might look like this:
 ### Presentation vs. Container Components
 
 - **Presentation Components**:
-
   - Responsible only for rendering the UI.
   - Receive data and callbacks via props.
   - Avoid direct manipulation of business logic.

@@ -52,15 +52,32 @@ const mockExecutionInfo: MultisigExecutionDetails = {
   trusted: true,
 }
 
+const mockTxData = {
+  to: {
+    value: '0x1234567890123456789012345678901234567890',
+    name: 'Staking Contract',
+    logoUri: null,
+  },
+  operation: 0,
+}
+
 const mockProps = {
   txInfo: mockTxInfo,
   executionInfo: mockExecutionInfo,
   txId: 'test-tx-id',
+  txData: mockTxData,
 }
 
 describe('StakingDeposit', () => {
   it('renders correctly with deposit information', () => {
-    const { getByText } = render(<StakingDeposit {...mockProps} />)
+    const { getByText } = render(<StakingDeposit {...mockProps} />, {
+      initialStore: {
+        activeSafe: {
+          address: '0x1234567890123456789012345678901234567890',
+          chainId: '1',
+        },
+      },
+    })
 
     expect(getByText(/32.*ETH/)).toBeTruthy()
     expect(getByText('Rewards rate')).toBeTruthy()
@@ -75,7 +92,14 @@ describe('StakingDeposit', () => {
   })
 
   it('matches snapshot', () => {
-    const component = render(<StakingDeposit {...mockProps} />)
+    const component = render(<StakingDeposit {...mockProps} />, {
+      initialStore: {
+        activeSafe: {
+          address: '0x1234567890123456789012345678901234567890',
+          chainId: '1',
+        },
+      },
+    })
     expect(component).toMatchSnapshot()
   })
 })

@@ -18,6 +18,8 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { isRouteEnabled } from '@/utils/chains'
 import { trackEvent } from '@/services/analytics'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { GA_LABEL_TO_MIXPANEL_PROPERTY } from '@/services/analytics/ga-mixpanel-mapping'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import { STAKE_EVENTS, STAKE_LABELS } from '@/services/analytics/events/stake'
 import { Tooltip } from '@mui/material'
@@ -82,7 +84,14 @@ const Navigation = (): ReactElement => {
   const handleNavigationClick = (href: string) => {
     const eventInfo = customSidebarEvents[href]
     if (eventInfo) {
-      trackEvent({ ...eventInfo.event, label: eventInfo.label })
+      if (href === AppRoutes.swap) {
+        trackEvent(
+          { ...eventInfo.event, label: eventInfo.label },
+          { [MixpanelEventParams.ENTRY_POINT]: GA_LABEL_TO_MIXPANEL_PROPERTY[SWAP_LABELS.sidebar] },
+        )
+      } else {
+        trackEvent({ ...eventInfo.event, label: eventInfo.label })
+      }
     }
   }
 

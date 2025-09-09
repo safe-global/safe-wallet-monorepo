@@ -20,10 +20,14 @@ describe('getSlidePosition', () => {
   })
 
   it('respects a custom ratio', () => {
-    expect(getSlidePosition(0, 26, itemWidth, 0.25)).toBe(100)
+    expect(getSlidePosition(0, 26, itemWidth, undefined, 0.25)).toBe(100)
   })
 
   it('falls back to the start value when swipe width cannot be measured', () => {
     expect(getSlidePosition(0, 40, undefined)).toBe(0)
+  })
+
+  it('respects the gap', () => {
+    expect(getSlidePosition(0, 100, itemWidth, 16)).toBe(116)
   })
 })

@@ -1,5 +1,5 @@
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import { renderHook } from '@/tests/test-utils'
+import { renderHook, getAppName } from '@/tests/test-utils'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { WalletKitTypes } from '@reown/walletkit'
 import { useCompatibilityWarning } from '../useCompatibilityWarning'
@@ -17,9 +17,10 @@ describe('useCompatibilityWarning', () => {
 
       const { result } = renderHook(() => useCompatibilityWarning(proposal, false))
 
+      const appName = getAppName()
+
       expect(result.current).toEqual({
-        message:
-          'Fake Bridge is a bridge that is incompatible with Safe{Wallet} — the bridged funds will be lost. Consider using a different bridge.',
+        message: `Fake Bridge is a bridge that is incompatible with ${appName} — the bridged funds will be lost. Consider using a different bridge.`,
         severity: 'error',
       })
     })
@@ -34,9 +35,10 @@ describe('useCompatibilityWarning', () => {
 
       const { result } = renderHook(() => useCompatibilityWarning(proposal, false))
 
+      const appName = getAppName()
+
       expect(result.current).toEqual({
-        message:
-          'This dApp is a bridge that is incompatible with Safe{Wallet} — the bridged funds will be lost. Consider using a different bridge.',
+        message: `This dApp is a bridge that is incompatible with ${appName} — the bridged funds will be lost. Consider using a different bridge.`,
         severity: 'error',
       })
     })
@@ -130,6 +132,7 @@ describe('useCompatibilityWarning', () => {
         initialReduxState: {
           chains: {
             loading: false,
+            loaded: true,
             error: undefined,
             data: [
               {
@@ -140,6 +143,7 @@ describe('useCompatibilityWarning', () => {
           },
           safeInfo: {
             loading: false,
+            loaded: true,
             error: undefined,
             data: {
               ...extendedSafeInfoBuilder().build(),

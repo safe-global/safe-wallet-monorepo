@@ -38,6 +38,7 @@ describe('safeMessagesSlice', () => {
 
       const action = safeMessagesSlice.actions.set({
         loading: false,
+        loaded: true,
         data: {
           results: [message],
         },
@@ -64,6 +65,7 @@ describe('safeMessagesSlice', () => {
 
       const action = safeMessagesSlice.actions.set({
         loading: false,
+        loaded: true,
         data: undefined, // Cleared
       })
 
@@ -91,6 +93,7 @@ describe('safeMessagesSlice', () => {
 
       const action = safeMessagesSlice.actions.set({
         loading: false,
+        loaded: true,
         data: {
           results: [dateLabel],
         },
@@ -120,6 +123,7 @@ describe('safeMessagesSlice', () => {
 
       const action = safeMessagesSlice.actions.set({
         loading: false,
+        loaded: true,
         data: {
           results: [message],
         },

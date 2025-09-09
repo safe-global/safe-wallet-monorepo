@@ -16,7 +16,7 @@ import { gtmTrack, gtmTrackSafeApp } from './gtm'
 import { mixpanelTrack } from './mixpanel'
 import { GA_TO_MIXPANEL_MAPPING } from './ga-mixpanel-mapping'
 import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
-import { MixPanelEventParams } from './mixpanel-events'
+import { MixpanelEventParams } from './mixpanel-events'
 
 export const trackEvent = (eventData: AnalyticsEvent, additionalParameters?: Record<string, any>): void => {
   gtmTrack(eventData)
@@ -47,16 +47,16 @@ export const trackSafeAppEvent = (
 
     if (typeof safeAppOrName === 'object') {
       mixpanelProperties = {
-        [MixPanelEventParams.SAFE_APP_NAME]: safeAppOrName.name,
-        [MixPanelEventParams.SAFE_APP_TAGS]: safeAppOrName.tags,
+        [MixpanelEventParams.SAFE_APP_NAME]: safeAppOrName.name,
+        [MixpanelEventParams.SAFE_APP_TAGS]: safeAppOrName.tags,
       }
 
       if (options?.launchLocation) {
-        mixpanelProperties[MixPanelEventParams.LAUNCH_LOCATION] = options.launchLocation
+        mixpanelProperties[MixpanelEventParams.LAUNCH_LOCATION] = options.launchLocation
       }
     } else {
       mixpanelProperties = {
-        [MixPanelEventParams.SAFE_APP_NAME]: safeAppOrName,
+        [MixpanelEventParams.SAFE_APP_NAME]: safeAppOrName,
       }
     }
 
@@ -64,7 +64,7 @@ export const trackSafeAppEvent = (
   }
 }
 
-export const trackMixPanelEvent = mixpanelTrack
+export const trackMixpanelEvent = mixpanelTrack
 
 export * from './types'
 export * from './events'

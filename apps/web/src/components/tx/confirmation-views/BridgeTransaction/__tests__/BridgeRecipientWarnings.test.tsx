@@ -55,6 +55,7 @@ describe('BridgeRecipientWarnings', () => {
       configs: [mockSourceChain, mockDestinationChain],
       error: undefined,
       loading: false,
+      loaded: true,
     }))
 
     jest

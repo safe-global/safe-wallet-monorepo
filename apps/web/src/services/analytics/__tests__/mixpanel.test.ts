@@ -1,11 +1,13 @@
 // Mock constants before any imports
 jest.mock('@/config/constants', () => ({
   ...jest.requireActual('@/config/constants'),
-  MIXPANEL_TOKEN: 'test-token',
+  PROD_MIXPANEL_TOKEN: 'prod-token',
+  STAGING_MIXPANEL_TOKEN: 'staging-token',
+  MIXPANEL_TOKEN: 'staging-token',
   IS_PRODUCTION: false,
 }))
 
-import { trackEvent, trackMixPanelEvent, MixPanelEvent } from '../index'
+import { trackEvent, trackMixpanelEvent, MixpanelEvent } from '../index'
 import { mixpanelInit, mixpanelTrack, mixpanelSetSafeAddress } from '../mixpanel'
 import packageJson from '../../../../package.json'
 
@@ -37,22 +39,23 @@ jest.mock('mixpanel-browser', () => ({
 const mockMixpanel = jest.requireMock('mixpanel-browser')
 const mockGtm = jest.requireMock('../gtm')
 
-describe('MixPanel Integration', () => {
+describe('Mixpanel Integration', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  describe('MixPanel initialization', () => {
-    it('should initialize MixPanel with correct configuration', () => {
+  describe('Mixpanel initialization', () => {
+    it('should initialize Mixpanel with correct configuration', () => {
       mixpanelInit()
 
-      expect(mockMixpanel.init).toHaveBeenCalledWith('test-token', {
+      expect(mockMixpanel.init).toHaveBeenCalledWith('staging-token', {
         debug: true, // IS_PRODUCTION is false in tests
         persistence: 'localStorage',
         autocapture: false,
         batch_requests: true,
         ip: false,
         opt_out_tracking_by_default: true,
+        api_host: 'https://api-eu.mixpanel.com',
       })
 
       // Should register initial params
@@ -64,10 +67,10 @@ describe('MixPanel Integration', () => {
   })
 
   describe('Event tracking', () => {
-    it('should track events with MixPanel when initialized', () => {
+    it('should track events with Mixpanel when initialized', () => {
       mixpanelInit()
 
-      mixpanelTrack(MixPanelEvent.SAFE_APP_LAUNCHED, {
+      mixpanelTrack(MixpanelEvent.SAFE_APP_LAUNCHED, {
         'Safe App Name': 'Test App',
         'Custom Property': 'value',
       })
@@ -117,19 +120,19 @@ describe('MixPanel Integration', () => {
 
       trackEvent(eventData)
 
-      // Should NOT call MixPanel track (only GA)
+      // Should NOT call Mixpanel track (only GA)
       expect(mockMixpanel.track).not.toHaveBeenCalled()
     })
 
-    it('should track with MixPanel only when using trackMixPanelEvent', () => {
+    it('should track with Mixpanel only when using trackMixpanelEvent', () => {
       mixpanelInit()
 
-      trackMixPanelEvent(MixPanelEvent.SAFE_APP_LAUNCHED, {
+      trackMixpanelEvent(MixpanelEvent.SAFE_APP_LAUNCHED, {
         'Safe App Name': 'Test App',
         'Safe App Version': '1.0.0',
       })
 
-      // Should call MixPanel track
+      // Should call Mixpanel track
       expect(mockMixpanel.track).toHaveBeenCalledWith(
         'Safe App Launched',
         expect.objectContaining({

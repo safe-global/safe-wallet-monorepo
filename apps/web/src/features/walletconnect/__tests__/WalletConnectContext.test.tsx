@@ -53,6 +53,7 @@ describe('WalletConnectProvider', () => {
         initialReduxState: {
           safeInfo: {
             loading: false,
+            loaded: true,
             data: extendedSafeInfo,
           },
         },
@@ -78,6 +79,7 @@ describe('WalletConnectProvider', () => {
         initialReduxState: {
           safeInfo: {
             loading: false,
+            loaded: true,
             data: extendedSafeInfo,
           },
         },
@@ -106,6 +108,7 @@ describe('WalletConnectProvider', () => {
           dispatch(
             safeInfoSlice.actions.set({
               loading: false,
+              loaded: true,
               data: { ...extendedSafeInfo, ...safeInfo },
             }),
           )
@@ -133,6 +136,7 @@ describe('WalletConnectProvider', () => {
           initialReduxState: {
             safeInfo: {
               loading: false,
+              loaded: true,
               data: extendedSafeInfo,
             },
           },
@@ -169,6 +173,7 @@ describe('WalletConnectProvider', () => {
           initialReduxState: {
             safeInfo: {
               loading: false,
+              loaded: true,
               data: {
                 ...extendedSafeInfo,
                 address: {
@@ -207,6 +212,7 @@ describe('WalletConnectProvider', () => {
           initialReduxState: {
             safeInfo: {
               loading: false,
+              loaded: true,
               data: {
                 ...extendedSafeInfo,
                 address: {
@@ -258,6 +264,7 @@ describe('WalletConnectProvider', () => {
           initialReduxState: {
             safeInfo: {
               loading: false,
+              loaded: true,
               data: extendedSafeInfo,
             },
           },
@@ -317,6 +324,7 @@ describe('WalletConnectProvider', () => {
           initialReduxState: {
             safeInfo: {
               loading: false,
+              loaded: true,
               data: extendedSafeInfo,
             },
           },
@@ -384,6 +392,7 @@ describe('WalletConnectProvider', () => {
           initialReduxState: {
             safeInfo: {
               loading: false,
+              loaded: true,
               data: extendedSafeInfo,
             },
           },
@@ -458,6 +467,7 @@ describe('WalletConnectProvider', () => {
           initialReduxState: {
             safeInfo: {
               loading: false,
+              loaded: true,
               data: extendedSafeInfo,
             },
           },

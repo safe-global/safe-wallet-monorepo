@@ -19,11 +19,11 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { IS_PRODUCTION } from '@/config/constants'
 import { useMediaQuery } from '@mui/material'
 import { DeviceType } from './types'
-import { MixPanelUserProperty } from './mixpanel-events'
+import { MixpanelUserProperty } from './mixpanel-events'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
-import { useMixPanelUserProperties } from './useMixPanelUserProperties'
+import { useMixpanelUserProperties } from './useMixpanelUserProperties'
 import { useChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 
@@ -39,7 +39,7 @@ const useMixpanel = () => {
   const safeAddress = useSafeAddress()
   const wallet = useWallet()
   const isSpaceRoute = useIsSpaceRoute()
-  const userProperties = useMixPanelUserProperties()
+  const userProperties = useMixpanelUserProperties()
   const { safe } = useSafeInfo()
   const currentChain = useChain(safe?.chainId || '')
   const walletChain = useChain(wallet?.chainId || '')
@@ -56,12 +56,16 @@ const useMixpanel = () => {
     if (isAnalyticsEnabled) {
       mixpanel.opt_in_tracking()
       if (!IS_PRODUCTION) {
-        console.info('[MixPanel] - User opted in')
+        console.info('[Mixpanel] - User opted in')
       }
     } else {
-      mixpanel.opt_out_tracking()
+      try {
+        mixpanel.opt_out_tracking()
+      } catch {
+        // do nothing, opt_out_tracking throws an error if tracking was never enabled
+      }
       if (!IS_PRODUCTION) {
-        console.info('[MixPanel] - User opted out')
+        console.info('[Mixpanel] - User opted out')
       }
     }
   }, [isMixpanelEnabled, isAnalyticsEnabled])
@@ -89,10 +93,10 @@ const useMixpanel = () => {
       const walletProperties: Record<string, any> = {}
 
       if (wallet.label) {
-        walletProperties[MixPanelUserProperty.WALLET_LABEL] = wallet.label
+        walletProperties[MixpanelUserProperty.WALLET_LABEL] = wallet.label
       }
       if (wallet.address) {
-        walletProperties[MixPanelUserProperty.WALLET_ADDRESS] = wallet.address
+        walletProperties[MixpanelUserProperty.WALLET_ADDRESS] = wallet.address
       }
 
       if (Object.keys(walletProperties).length > 0) {

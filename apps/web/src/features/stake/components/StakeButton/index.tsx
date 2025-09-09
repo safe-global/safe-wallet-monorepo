@@ -10,6 +10,7 @@ import type { ReactElement } from 'react'
 import StakeIcon from '@/public/images/common/stake.svg'
 import type { STAKE_LABELS } from '@/services/analytics/events/stake'
 import { STAKE_EVENTS } from '@/services/analytics/events/stake'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useCurrentChain } from '@/hooks/useChains'
 import css from './styles.module.css'
 import classnames from 'classnames'
@@ -30,7 +31,12 @@ const StakeButton = ({
   return (
     <CheckWallet allowSpendingLimit={!!spendingLimit}>
       {(isOk) => (
-        <Track {...STAKE_EVENTS.OPEN_STAKE} label={trackingLabel}>
+        <Track
+          {...STAKE_EVENTS.STAKE_VIEWED}
+          mixpanelParams={{
+            [MixpanelEventParams.ENTRY_POINT]: trackingLabel,
+          }}
+        >
           <Button
             className={classnames({ [css.button]: compact, [css.buttonDisabled]: !isOk })}
             data-testid="stake-btn"

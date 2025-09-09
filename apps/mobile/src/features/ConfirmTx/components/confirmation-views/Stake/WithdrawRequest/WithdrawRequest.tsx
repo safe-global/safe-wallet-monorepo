@@ -6,19 +6,21 @@ import { TransactionHeader } from '../../../TransactionHeader'
 import {
   MultisigExecutionDetails,
   NativeStakingValidatorsExitTransactionInfo,
+  TransactionData,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TokenAmount } from '@/src/components/TokenAmount'
-import { ParametersButton } from '../../../ParametersButton'
+import { ParametersButton } from '@/src/components/ParametersButton'
 import { Alert } from '@/src/components/Alert'
 
 interface StakingWithdrawRequestProps {
   txInfo: NativeStakingValidatorsExitTransactionInfo
   executionInfo: MultisigExecutionDetails
   txId: string
+  txData: TransactionData
 }
 
-export function StakingWithdrawRequest({ txInfo, executionInfo, txId }: StakingWithdrawRequestProps) {
-  const withdrawRequestItems = useMemo(() => formatStakingWithdrawRequestItems(txInfo), [txInfo])
+export function StakingWithdrawRequest({ txInfo, executionInfo, txId, txData }: StakingWithdrawRequestProps) {
+  const withdrawRequestItems = useMemo(() => formatStakingWithdrawRequestItems(txInfo, txData), [txInfo, txData])
 
   return (
     <YStack gap="$4">

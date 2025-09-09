@@ -8,6 +8,7 @@ import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDet
 import { dateString } from '@safe-global/utils/utils/formatters'
 import { isCreationTxInfo } from '@/utils/transaction-guards'
 import { NOT_AVAILABLE } from '@/components/transactions/TxDetails'
+import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 
 type SafeCreationTxProps = {
   txSummary: TransactionSummary
@@ -23,7 +24,13 @@ const SafeCreationTx = ({ txSummary }: SafeCreationTxProps) => {
     <>
       <Box className={css.txCreation}>
         <InfoDetails title="Creator:">
-          <EthHashInfo address={creator.value} shortAddress={false} showCopyButton hasExplorer />
+          <NamedAddressInfo
+            address={creator.value}
+            name={creator.name}
+            shortAddress={false}
+            showCopyButton
+            hasExplorer
+          />
         </InfoDetails>
         <InfoDetails title="Factory:">
           {factory ? (

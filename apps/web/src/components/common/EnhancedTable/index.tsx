@@ -123,11 +123,12 @@ export type EnhancedTableProps = {
   rows: EnhancedRow[]
   headCells: EnhancedHeadCell[]
   mobileVariant?: boolean
+  compact?: boolean
 }
 
 const pageSizes = [10, 25, 100]
 
-function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
+function EnhancedTable({ rows, headCells, mobileVariant, compact }: EnhancedTableProps) {
   const [order, setOrder] = useState<'asc' | 'desc'>('asc')
   const [orderBy, setOrderBy] = useState<string>('')
   const [page, setPage] = useState<number>(0)
@@ -150,11 +151,24 @@ function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
 
   const orderedRows = orderBy ? rows.slice().sort(getComparator(order, orderBy)) : rows
   const pagedRows = orderedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+  const showPagination = rows.length > pageSizes[0] || rowsPerPage !== pageSizes[1]
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <TableContainer data-testid="table-container" component={Paper} sx={{ width: '100%', mb: 2 }}>
-        <Table aria-labelledby="tableTitle" className={mobileVariant ? css.mobileColumn : undefined}>
+    <Box sx={{ width: '100%', mb: 2 }}>
+      <TableContainer
+        data-testid="table-container"
+        component={Paper}
+        sx={{
+          width: '100%',
+          overflowX: ['auto', 'hidden'],
+          borderBottomLeftRadius: showPagination ? 0 : '6px',
+          borderBottomRightRadius: showPagination ? 0 : '6px',
+        }}
+      >
+        <Table
+          aria-labelledby="tableTitle"
+          className={classNames({ [css.mobileColumn]: mobileVariant, [css.compactTable]: compact })}
+        >
           <EnhancedTableHead headCells={headCells} order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
           <TableBody>
             {pagedRows.length > 0 ? (
@@ -170,7 +184,6 @@ function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
                     <TableCell
                       key={key}
                       className={classNames({
-                        sticky: cell.sticky,
                         [css.collapsedCell]: row.collapsed,
                       })}
                     >
@@ -197,16 +210,20 @@ function EnhancedTable({ rows, headCells, mobileVariant }: EnhancedTableProps) {
         </Table>
       </TableContainer>
 
-      {(rows.length > pageSizes[0] || rowsPerPage !== pageSizes[1]) && (
+      {showPagination && (
         <TablePagination
           data-testid="table-pagination"
           rowsPerPageOptions={pageSizes}
-          component="div"
+          component={Paper}
           count={rows.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
+          sx={{
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
+          }}
         />
       )}
     </Box>

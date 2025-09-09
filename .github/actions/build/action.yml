@@ -62,7 +62,8 @@ runs:
         NEXT_PUBLIC_FIREBASE_VAPID_KEY_STAGING: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_FIREBASE_VAPID_KEY_STAGING }}
         NEXT_PUBLIC_SPINDL_SDK_KEY: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SPINDL_SDK_KEY }}
         NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS }}
-        NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_MIXPANEL_TOKEN }}
+        NEXT_PUBLIC_PROD_MIXPANEL_TOKEN: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_PROD_MIXPANEL_TOKEN }}
+        NEXT_PUBLIC_STAGING_MIXPANEL_TOKEN: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_STAGING_MIXPANEL_TOKEN }}
 
     - name: Save Next.js Build Cache & Cypress cache
       if: steps.restore-nc.outputs.cache-hit-nc != 'true'

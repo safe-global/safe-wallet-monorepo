@@ -45,6 +45,7 @@ export const ViewAllLink = ({ url, text }: { url: LinkProps['href']; text?: stri
         gap: '4px',
         color: 'primary.light',
         fontSize: '14px',
+        marginRight: '-4px', // Make up for 4px space at ChevronIcon
         '&:hover': { color: 'primary.main' },
       }}
     >
