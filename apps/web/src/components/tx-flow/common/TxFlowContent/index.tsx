@@ -77,7 +77,6 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
               <TxStatusWidget
                 isLastStep={step === childrenArray.length - 1}
                 txSummary={txSummary}
-                handleClose={() => setStatusVisible(false)}
                 isBatch={isBatch}
                 isMessage={isMessage}
               />

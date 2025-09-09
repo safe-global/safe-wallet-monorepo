@@ -191,7 +191,6 @@ const TxLayout = ({
                       <TxStatusWidget
                         isLastStep={step === steps.length - 1}
                         txSummary={txSummary}
-                        handleClose={() => setStatusVisible(false)}
                         isBatch={isBatch}
                         isMessage={isMessage}
                       />
