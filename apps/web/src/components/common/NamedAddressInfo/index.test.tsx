@@ -197,9 +197,7 @@ describe('useAddressName', () => {
   })
 
   it('should treat contract lookup errors as verified (not indexed)', async () => {
-    useGetContractQueryMock.mockReturnValue(
-      mockQueryResult({ error: new Error('Contract not found') }),
-    )
+    useGetContractQueryMock.mockReturnValue(mockQueryResult({ error: new Error('Contract not found') }))
 
     const { result } = renderHook(() => useAddressName(address))
 
