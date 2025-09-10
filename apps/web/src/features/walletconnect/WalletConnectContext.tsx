@@ -258,6 +258,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
 
     try {
       await walletConnect.approveSession(sessionProposal, chainId, safeAddress, {
+        atomic: JSON.stringify({ status: 'supported' }),
         capabilities: JSON.stringify({
           [safeAddress]: {
             [`0x${Number(chainId).toString(16)}`]: {
