@@ -108,7 +108,7 @@ export const Positions = () => {
                             />
 
                             <Box>
-                              <Typography fontWeight="bold">{position.tokenInfo.name}</Typography>
+                              <Typography variant="body2" fontWeight="bold">{position.tokenInfo.name}</Typography>
                               <Typography variant="body2" color="primary.light">
                                 {position.tokenInfo.symbol} •&nbsp; {getReadablePositionType(position.position_type)}
                               </Typography>
