@@ -1,7 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { useContext } from 'react'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { WalletKitTypes } from '@reown/walletkit'
 import type { SessionTypes } from '@walletconnect/types'
 import { act, fireEvent, render, waitFor } from '@/tests/test-utils'
@@ -13,6 +12,7 @@ import { useAppDispatch } from '@/store'
 import * as useSafeWalletProvider from '@/services/safe-wallet-provider/useSafeWalletProvider'
 import * as useLocalStorageHook from '@/services/local-storage/useLocalStorage'
 import { wcPopupStore } from '@/features/walletconnect/components'
+import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 
 jest.mock('@reown/walletkit', () => jest.fn())
 
@@ -196,7 +196,7 @@ describe('WalletConnectProvider', () => {
   describe('updateSessions', () => {
     const extendedSafeInfo = { ...extendedSafeInfoBuilder().build(), address: { value: testSafeAddress }, chainId: '5' }
 
-    const getUpdateSafeInfoComponent = (safeInfo: SafeInfo) => {
+    const getUpdateSafeInfoComponent = (safeInfo: ExtendedSafeInfo) => {
       // eslint-disable-next-line react/display-name
       return () => {
         const dispatch = useAppDispatch()
@@ -214,7 +214,11 @@ describe('WalletConnectProvider', () => {
       jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
       jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
 
-      const ChainUpdater = getUpdateSafeInfoComponent({ address: { value: testSafeAddress }, chainId: '1' } as SafeInfo)
+      const ChainUpdater = getUpdateSafeInfoComponent({
+        ...extendedSafeInfoBuilder().build(),
+        address: { value: testSafeAddress },
+        chainId: '1',
+      })
 
       const { getByText } = render(
         <WalletConnectProvider>
@@ -242,9 +246,10 @@ describe('WalletConnectProvider', () => {
       jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
 
       const AddressUpdater = getUpdateSafeInfoComponent({
+        ...extendedSafeInfoBuilder().build(),
         address: { value: newSafeAddress },
         chainId: '5',
-      } as SafeInfo)
+      })
 
       const { getByText } = render(
         <WalletConnectProvider>
