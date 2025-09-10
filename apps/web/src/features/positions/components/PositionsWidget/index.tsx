@@ -89,7 +89,7 @@ const PositionsWidget = () => {
                           <Skeleton width="80px" />
                         </Typography>
 
-                        <Divider />
+                        <Divider sx={{ opacity: 0.5 }} />
 
                         <Stack direction="row" alignItems="center" gap={2} py={1}>
                           <Skeleton variant="rounded" width="24px" height="24px" />
@@ -176,8 +176,9 @@ const PositionsWidget = () => {
         {protocols.length === 0 ? (
           <PositionsEmpty entryPoint="Dashboard" />
         ) : (
-          protocols.map((protocol) => {
+          protocols.map((protocol, protocolIndex) => {
             const protocolValue = Number(protocol.fiatTotal) || 0
+            const isLast = protocolIndex === protocols.length - 1
 
             return (
               <Accordion
@@ -185,6 +186,9 @@ const PositionsWidget = () => {
                 disableGutters
                 elevation={0}
                 variant="elevation"
+                sx={{
+                  borderBottom: 'none !important'
+                }}
                 onChange={(_, expanded) => {
                   if (expanded) {
                     trackEvent(POSITIONS_EVENTS.POSITION_EXPANDED, {
@@ -202,6 +206,19 @@ const PositionsWidget = () => {
                     justifyContent: 'center',
                     overflowX: 'auto',
                     px: 1.5,
+                    position: 'relative',
+                    ...(!isLast && {
+                      '&:not(.Mui-expanded)::after': {
+                        content: '""',
+                        position: 'absolute',
+                        bottom: 0,
+                        left: '56px',
+                        right: 0,
+                        height: '1px',
+                        backgroundColor: 'rgba(0, 0, 0, 0.12)',
+                        opacity: 0.5,
+                      },
+                    }),
                   }}
                 >
                   <PositionsHeader protocol={protocol} fiatTotal={positionsFiatTotal} />
@@ -215,10 +232,14 @@ const PositionsWidget = () => {
                           {position.name}
                         </Typography>
 
-                        <Divider />
+                        <Divider sx={{ opacity: 0.5 }} />
 
                         {position.items.map((item) => {
-                          return <Position item={item} key={`${item.tokenInfo.name}-${item.position_type}`} />
+                          return (
+                            <Box sx={{ marginLeft: '4px' }} key={`${item.tokenInfo.name}-${item.position_type}`}>
+                              <Position item={item} />
+                            </Box>
+                          )
                         })}
                       </Box>
                     )
