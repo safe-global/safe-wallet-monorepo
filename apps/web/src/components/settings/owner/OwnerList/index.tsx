@@ -30,7 +30,7 @@ export const OwnerList = () => {
 
     return safe.owners.map((owner) => {
       const address = owner.value
-      const name = addressBook[address]
+      const name = addressBook[address] ?? owner.name
 
       return {
         cells: {
