@@ -11,7 +11,7 @@ import BridgeIcon from '@/public/images/common/bridge.svg'
 import SwapIcon from '@/public/images/common/swap.svg'
 import StakeIcon from '@/public/images/common/stake.svg'
 import EarnIcon from '@/public/images/common/earn.svg'
-import { SvgIcon } from '@mui/material'
+import { SvgIcon, Tooltip } from '@mui/material'
 import { Chip } from '@/components/common/Chip'
 
 export type NavItem = {
@@ -99,6 +99,17 @@ export const balancesNavItems = [
   {
     label: 'Positions',
     href: AppRoutes.balances.positions,
+    tag: (
+      <Chip
+        label="Beta"
+        size="small"
+        sx={{
+          backgroundColor: 'background.lightGrey',
+          letterSpacing: '0.4px',
+          borderRadius: '4px',
+        }}
+      />
+    ),
   },
   {
     label: 'NFTs',

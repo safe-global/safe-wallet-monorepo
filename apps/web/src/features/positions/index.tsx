@@ -46,23 +46,9 @@ export const Positions = () => {
           <TotalAssetValue fiatTotal={positionsFiatTotal} title="Total positions value" />
         </Box>
 
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Typography variant="h4" fontWeight={700}>
-            Positions
-          </Typography>
-          <Tooltip
-            title="Experimental. Data may be missing or outdated."
-            placement="top"
-            arrow
-            slotProps={{ tooltip: { sx: { maxWidth: { xs: '250px', sm: 'none' } } } }}
-          >
-            <Chip
-              label="Beta"
-              size="small"
-              sx={{ backgroundColor: 'background.lightGrey', borderRadius: '4px', letterSpacing: '0.4px' }}
-            />
-          </Tooltip>
-        </Stack>
+        <Typography variant="h4" fontWeight={700}>
+          Positions
+        </Typography>
 
         <Box mb={1}>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
