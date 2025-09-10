@@ -37,7 +37,13 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
   switch (transactionType) {
     case ETxType.TOKEN_TRANSFER:
     case ETxType.NFT_TRANSFER:
-      return <HistoryTokenTransfer txId={txDetails.txId} txInfo={txDetails.txInfo as TransferTransactionInfo} />
+      return (
+        <HistoryTokenTransfer
+          txId={txDetails.txId}
+          txInfo={txDetails.txInfo as TransferTransactionInfo}
+          txData={txDetails.txData as TransactionData}
+        />
+      )
 
     case ETxType.SWAP_ORDER:
       return (
