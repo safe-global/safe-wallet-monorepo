@@ -54,26 +54,14 @@ export const Positions = () => {
             title="Experimental. Data may be missing or outdated."
             placement="top"
             arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  maxWidth: { xs: '250px', sm: 'none' },
-                },
-              },
-            }}
+            slotProps={{ tooltip: { sx: { maxWidth: { xs: '250px', sm: 'none' } } } }}
           >
             <Chip label="Beta" size="small" sx={{ backgroundColor: 'background.lightGrey', letterSpacing: '0.4px' }} />
           </Tooltip>
         </Stack>
 
         <Box mb={1}>
-          <Typography
-            variant="caption"
-            sx={{
-              color: 'text.secondary',
-              letterSpacing: '1px',
-            }}
-          >
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             Position balances are not included in the total asset value.
           </Typography>
         </Box>
@@ -85,11 +73,7 @@ export const Positions = () => {
             <Accordion disableGutters elevation={0} variant="elevation" defaultExpanded>
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon fontSize="small" />}
-                sx={{
-                  justifyContent: 'center',
-                  overflowX: 'auto',
-                  backgroundColor: 'transparent !important',
-                }}
+                sx={{ justifyContent: 'center', overflowX: 'auto', backgroundColor: 'transparent !important' }}
               >
                 <PositionsHeader protocol={protocol} fiatTotal={positionsFiatTotal} />
               </AccordionSummary>
@@ -108,7 +92,9 @@ export const Positions = () => {
                             />
 
                             <Box>
-                              <Typography variant="body2" fontWeight="bold">{position.tokenInfo.name}</Typography>
+                              <Typography variant="body2" fontWeight="bold">
+                                {position.tokenInfo.name}
+                              </Typography>
                               <Typography variant="body2" color="primary.light">
                                 {position.tokenInfo.symbol} •&nbsp; {getReadablePositionType(position.position_type)}
                               </Typography>
