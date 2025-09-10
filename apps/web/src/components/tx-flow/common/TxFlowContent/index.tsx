@@ -50,11 +50,11 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
 
   return (
     <>
-      <Container className={css.container} sx={{ xl: { backgroundColor: 'red' } }}>
+      <Container className={css.container}>
         <Grid container>
           {/* Status Widget */}
           {!isReplacement && statusVisible && (
-            <Grid item xs={12} lg={3}>
+            <Grid item xs={12} md={3}>
               <TxStatusWidget
                 isLastStep={step === childrenArray.length - 1}
                 txSummary={txSummary}

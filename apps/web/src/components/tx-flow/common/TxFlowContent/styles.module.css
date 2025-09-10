@@ -102,7 +102,7 @@
 
   .step :global(.MuiCardActions-root) {
     margin-bottom: var(--space-8);
-  }  
+  }
 }
 
 @media (max-width: 899.95px) {
@@ -154,5 +154,4 @@
   .header {
     border-radius: 0;
   }
-
 }
