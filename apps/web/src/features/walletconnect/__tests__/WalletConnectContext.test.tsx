@@ -911,14 +911,12 @@ describe('WalletConnectProvider', () => {
     it('sets wrong chain error when session exists but chain is wrong', async () => {
       jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
       jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
-      jest
-        .spyOn(WalletConnectWallet.prototype, 'getActiveSessions')
-        .mockImplementation(() => [
-          {
-            topic: requestTopic,
-            peer: { metadata: { url: requestUrl, name: requestAppName } },
-          } as unknown as SessionTypes.Struct,
-        ])
+      jest.spyOn(WalletConnectWallet.prototype, 'getActiveSessions').mockImplementation(() => [
+        {
+          topic: requestTopic,
+          peer: { metadata: { url: requestUrl, name: requestAppName } },
+        } as unknown as SessionTypes.Struct,
+      ])
 
       const onRequestSpy = jest.spyOn(WalletConnectWallet.prototype, 'onRequest')
 
@@ -966,21 +964,19 @@ describe('WalletConnectProvider', () => {
 
       jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
       jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
-      jest
-        .spyOn(WalletConnectWallet.prototype, 'getActiveSessions')
-        .mockImplementation(() => [
-          {
-            topic: requestTopic,
-            peer: {
-              metadata: {
-                name: requestAppName,
-                description: peerDescription,
-                url: 'https://apps-portal.safe.global/wallet-connect',
-                icons: [peerIcon],
-              },
+      jest.spyOn(WalletConnectWallet.prototype, 'getActiveSessions').mockImplementation(() => [
+        {
+          topic: requestTopic,
+          peer: {
+            metadata: {
+              name: requestAppName,
+              description: peerDescription,
+              url: 'https://apps-portal.safe.global/wallet-connect',
+              icons: [peerIcon],
             },
-          } as unknown as SessionTypes.Struct,
-        ])
+          },
+        } as unknown as SessionTypes.Struct,
+      ])
 
       const onRequestSpy = jest.spyOn(WalletConnectWallet.prototype, 'onRequest')
       const sendSessionResponseSpy = jest.spyOn(WalletConnectWallet.prototype, 'sendSessionResponse')
@@ -1088,21 +1084,19 @@ describe('WalletConnectProvider', () => {
     it('sets the error state if there is an error requesting', async () => {
       jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
       jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
-      jest
-        .spyOn(WalletConnectWallet.prototype, 'getActiveSessions')
-        .mockImplementation(() => [
-          {
-            topic: requestTopic,
-            peer: {
-              metadata: {
-                name: requestAppName,
-                description: faker.lorem.sentence(),
-                url: 'https://apps-portal.safe.global/wallet-connect',
-                icons: [faker.image.url()],
-              },
+      jest.spyOn(WalletConnectWallet.prototype, 'getActiveSessions').mockImplementation(() => [
+        {
+          topic: requestTopic,
+          peer: {
+            metadata: {
+              name: requestAppName,
+              description: faker.lorem.sentence(),
+              url: 'https://apps-portal.safe.global/wallet-connect',
+              icons: [faker.image.url()],
             },
-          } as unknown as SessionTypes.Struct,
-        ])
+          },
+        } as unknown as SessionTypes.Struct,
+      ])
 
       jest
         .spyOn(useSafeWalletProvider, 'default')
