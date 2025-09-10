@@ -1,12 +1,11 @@
 import { TxFlowContext } from '../../TxFlowProvider'
 import { type ReactNode, useContext, useEffect, useState } from 'react'
-import { Box, Container, Grid, Typography, Button, Paper, IconButton, useMediaQuery } from '@mui/material'
+import { Box, Container, Grid, Typography, Button, Paper, useMediaQuery } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useTheme } from '@mui/material/styles'
 import classnames from 'classnames'
 import { ProgressBar } from '@/components/common/ProgressBar'
 import css from './styles.module.css'
-import SafeLogo from '@/public/images/logo-no-text.svg'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import SecurityWarnings from '@/components/tx/security/SecurityWarnings'
 import TxStatusWidget from '@/components/tx-flow/common/TxStatusWidget'
@@ -49,19 +48,8 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
     setStatusVisible(!isSmallScreen)
   }, [isSmallScreen])
 
-  const toggleStatus = () => {
-    setStatusVisible((prev) => !prev)
-  }
-
   return (
     <>
-      {/* Header status button */}
-      {!isReplacement && (
-        <IconButton className={css.statusButton} aria-label="Transaction status" size="large" onClick={toggleStatus}>
-          <SafeLogo width={16} height={16} />
-        </IconButton>
-      )}
-
       <Container className={css.container} sx={{ xl: { backgroundColor: 'red' } }}>
         <Grid container>
           {/* Status Widget */}

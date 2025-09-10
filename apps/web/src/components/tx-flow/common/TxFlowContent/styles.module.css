@@ -73,21 +73,6 @@
   margin-left: var(--space-2);
 }
 
-.statusButton {
-  position: absolute;
-  top: 0;
-  right: 57px;
-  color: var(--color-text-primary);
-  padding: var(--space-2);
-  border-left: 1px solid var(--color-border-light);
-  border-right: 1px solid var(--color-border-light);
-  border-radius: 0;
-  width: 24px;
-  height: 24px;
-  box-sizing: content-box;
-  display: none;
-}
-
 .sticky {
   display: flex;
   flex-direction: column;
@@ -117,7 +102,7 @@
 
   .step :global(.MuiCardActions-root) {
     margin-bottom: var(--space-8);
-  }
+  }  
 }
 
 @media (max-width: 899.95px) {
@@ -144,7 +129,7 @@
     top: 16px;
     left: var(--space-2);
     margin-bottom: 0;
-    width: calc(100% - 145px);
+    width: calc(100% - 70px);
   }
 
   .title {
@@ -157,7 +142,12 @@
   }
 
   .progressBar {
-    display: none;
+    display: block;
+    position: absolute;
+    top: 56px;
+    left: 0;
+    right: 0;
+    z-index: 2;
   }
 
   .step :global(.MuiCard-root),
@@ -165,7 +155,4 @@
     border-radius: 0;
   }
 
-  .statusButton {
-    display: inline-flex;
-  }
 }
