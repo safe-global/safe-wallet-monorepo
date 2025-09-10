@@ -56,7 +56,11 @@ export const Positions = () => {
             arrow
             slotProps={{ tooltip: { sx: { maxWidth: { xs: '250px', sm: 'none' } } } }}
           >
-            <Chip label="Beta" size="small" sx={{ backgroundColor: 'background.lightGrey', letterSpacing: '0.4px' }} />
+            <Chip
+              label="Beta"
+              size="small"
+              sx={{ backgroundColor: 'background.lightGrey', borderRadius: '4px', letterSpacing: '0.4px' }}
+            />
           </Tooltip>
         </Stack>
 

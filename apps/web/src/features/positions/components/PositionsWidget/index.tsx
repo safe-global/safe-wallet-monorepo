@@ -142,6 +142,7 @@ const PositionsWidget = () => {
               sx={{
                 backgroundColor: 'background.lightGrey',
                 letterSpacing: '0.4px',
+                borderRadius: '4px',
               }}
             />
           </Tooltip>
@@ -187,7 +188,7 @@ const PositionsWidget = () => {
                 elevation={0}
                 variant="elevation"
                 sx={{
-                  borderBottom: 'none !important'
+                  borderBottom: 'none !important',
                 }}
                 onChange={(_, expanded) => {
                   if (expanded) {
