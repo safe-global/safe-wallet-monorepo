@@ -122,7 +122,7 @@ export const Positions = () => {
                     {
                       id: 'name',
                       label: (
-                        <Typography variant="caption" letterSpacing="0px" fontWeight="bold" color="text.primary">
+                        <Typography variant="body2" fontWeight="bold" color="text.primary">
                           {positionGroup.name}
                         </Typography>
                       ),

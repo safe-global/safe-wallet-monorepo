@@ -229,7 +229,7 @@ const PositionsWidget = () => {
                   {protocol.items.map((position, idx) => {
                     return (
                       <Box key={position.name}>
-                        <Typography variant="body2" color="primary.light" mb={1} mt={idx !== 0 ? 2 : 0}>
+                        <Typography variant="body2" fontWeight="bold" mb={1} mt={idx !== 0 ? 2 : 0}>
                           {position.name}
                         </Typography>
 
