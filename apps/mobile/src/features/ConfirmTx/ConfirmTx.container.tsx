@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { ScrollView, View } from 'tamagui'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import { NavBarTitle } from '@/src/components/Title'
@@ -10,16 +10,39 @@ import { Alert } from '@/src/components/Alert'
 import { ConfirmTxForm } from './components/ConfirmTxForm'
 import { useTransactionSigner } from './hooks/useTransactionSigner'
 import { useTxSignerAutoSelection } from './hooks/useTxSignerAutoSelection'
+import { useAppSelector } from '@/src/store/hooks'
+import { PendingStatus, selectPendingTxById } from '@/src/store/pendingTxsSlice'
+import { useFocusEffect, useRouter } from 'expo-router'
 
 function ConfirmTxContainer() {
   const txId = useRoute<RouteProp<{ params: { txId: string } }>>().params.txId
+  const router = useRouter()
+  const pendingTx = useAppSelector((state) => selectPendingTxById(state, txId))
 
   const { txDetails, detailedExecutionInfo, isLoading, isError } = useTransactionSigner(txId)
 
   useTxSignerAutoSelection(detailedExecutionInfo)
 
+  const handleHistoryNavigation = useCallback(() => {
+    if (
+      pendingTx?.status === PendingStatus.SUCCESS ||
+      txDetails?.txStatus === 'SUCCESS' ||
+      txDetails?.txStatus === 'FAILED'
+    ) {
+      router.dismissAll()
+      router.push({
+        pathname: '/history-transaction-details',
+        params: {
+          txId,
+        },
+      })
+    }
+  }, [pendingTx?.status])
+
+  useFocusEffect(handleHistoryNavigation)
+
   const { handleScroll } = useScrollableHeader({
-    children: <NavBarTitle paddingRight={5}>Confirm transaction</NavBarTitle>,
+    children: <NavBarTitle paddingRight={5}>{pendingTx ? 'Executing...' : 'Confirm transaction'}</NavBarTitle>,
     alwaysVisible: true,
   })
 
@@ -46,11 +69,22 @@ function ConfirmTxContainer() {
         <View paddingHorizontal="$4">
           <ConfirmationView txDetails={txDetails} />
         </View>
-        <TransactionInfo txId={txId} detailedExecutionInfo={detailedExecutionInfo} txDetails={txDetails} />
+
+        <TransactionInfo
+          txId={txId}
+          detailedExecutionInfo={detailedExecutionInfo}
+          txDetails={txDetails}
+          pendingTx={pendingTx}
+        />
       </ScrollView>
 
       <View paddingTop="$1">
-        <ConfirmTxForm hasEnoughConfirmations={hasEnoughConfirmations} isExpired={isExpired} txId={txId} />
+        <ConfirmTxForm
+          hasEnoughConfirmations={hasEnoughConfirmations}
+          isExpired={isExpired}
+          isPending={pendingTx?.status === PendingStatus.PROCESSING}
+          txId={txId}
+        />
       </View>
     </View>
   )

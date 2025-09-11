@@ -2,7 +2,7 @@ import { LoadingScreen } from '@/src/components/LoadingScreen'
 import React, { useEffect } from 'react'
 import { useLocalSearchParams } from 'expo-router'
 import { ExecuteError } from './ExecuteError'
-import { ExecuteSuccess } from './ExecuteSuccess'
+import { ExecuteProcessing } from '@/src/features/ExecuteTx/components/ExecuteProcessing'
 import { ExecutionStatus, useTransactionExecution } from '../hooks/useTransactionExecution'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveSigner } from '@/src/store/activeSignerSlice'
@@ -43,8 +43,8 @@ export function ExecuteTransaction() {
     return <ExecuteError onRetryPress={retry} description="There was an error executing the transaction." />
   }
 
-  if (status === ExecutionStatus.SUCCESS) {
-    return <ExecuteSuccess />
+  if (status === ExecutionStatus.PROCESSING) {
+    return <ExecuteProcessing txId={txId} />
   }
 
   return <LoadingScreen title="Executing transaction..." description="It may take a few seconds..." />
