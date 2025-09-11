@@ -236,11 +236,7 @@ const PositionsWidget = () => {
                         <Divider sx={{ opacity: 0.5 }} />
 
                         {position.items.map((item) => {
-                          return (
-                            <Box sx={{ marginLeft: '4px' }} key={`${item.tokenInfo.name}-${item.position_type}`}>
-                              <Position item={item} />
-                            </Box>
-                          )
+                          return <Position item={item} key={`${item.tokenInfo.name}-${item.position_type}`} />
                         })}
                       </Box>
                     )
