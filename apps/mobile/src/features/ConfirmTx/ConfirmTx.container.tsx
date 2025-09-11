@@ -29,7 +29,8 @@ function ConfirmTxContainer() {
       txDetails?.txStatus === 'SUCCESS' ||
       txDetails?.txStatus === 'FAILED'
     ) {
-      router.replace({
+      router.dismissAll()
+      router.push({
         pathname: '/history-transaction-details',
         params: {
           txId,

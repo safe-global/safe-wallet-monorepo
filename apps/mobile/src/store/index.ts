@@ -1,4 +1,10 @@
-import { combineReducers, configureStore, createListenerMiddleware } from '@reduxjs/toolkit'
+import {
+  combineReducers,
+  configureStore,
+  createListenerMiddleware,
+  ListenerEffectAPI,
+  TypedStartListening,
+} from '@reduxjs/toolkit'
 import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist'
 import { reduxStorage } from './storage'
 import txHistory from './txHistorySlice'
@@ -43,7 +49,7 @@ const persistConfig = {
   key: 'root',
   version: 1,
   storage: reduxStorage,
-  blacklist: [web3API.reducerPath, 'myAccounts'],
+  blacklist: [web3API.reducerPath, cgwClient.reducerPath, 'myAccounts'],
   transforms: [cgwClientFilter],
 }
 
@@ -71,7 +77,11 @@ export type RootReducerState = ReturnType<typeof rootReducer>
 // Use the persistReducer with the correct types
 const persistedReducer = persistReducer<RootReducerState>(persistConfig, rootReducer)
 
+export type AppStartListening = TypedStartListening<RootState, AppDispatch>
+export type AppListenerEffectAPI = ListenerEffectAPI<RootState, AppDispatch>
 export const listenerMiddlewareInstance = createListenerMiddleware<RootState>()
+export const startAppListening = listenerMiddlewareInstance.startListening as AppStartListening
+
 const listeners = [pendingTxsListeners]
 
 export const makeStore = () =>
@@ -79,7 +89,7 @@ export const makeStore = () =>
     reducer: persistedReducer,
     devTools: false,
     middleware: (getDefaultMiddleware) => {
-      listeners.forEach((listener) => listener(listenerMiddlewareInstance))
+      listeners.forEach((listener) => listener(startAppListening))
 
       return getDefaultMiddleware({
         serializableCheck: {

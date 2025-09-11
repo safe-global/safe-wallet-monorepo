@@ -1,27 +1,34 @@
 import { Action } from '@reduxjs/toolkit'
-import { listenerMiddlewareInstance, RootState } from '..'
+import { AppListenerEffectAPI, AppStartListening, RootState } from '..'
 import { setPendingTxStatus, PendingStatus, PendingTxsState, pendingTxsSlice, clearPendingTx } from '../pendingTxsSlice'
 import { selectChainById } from '../chains'
 import { createWeb3ReadOnly } from '@/src/services/web3'
 import { SimpleTxWatcher } from '@safe-global/utils/services/SimpleTxWatcher'
 import { REHYDRATE } from 'redux-persist'
 import { delay } from '@safe-global/utils/utils/helpers'
-import { MiddlewareAPI } from 'redux'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SafeTxWatcher } from '@safe-global/utils/services/SafeTxWatcher'
+import { TransactionStatus } from '@safe-global/store/gateway/types'
 
-const startIndexingWatcher = (listenerApi: MiddlewareAPI, txId: string, chainId: string) => {
+const startIndexingWatcher = (listenerApi: AppListenerEffectAPI, txId: string, chainId: string) => {
+  const queryUntilSuccess = async () => {
+    const thunk = cgwApi.endpoints.transactionsGetTransactionByIdV1.initiate(
+      { chainId, id: txId },
+      { forceRefetch: true },
+    )
+    const result = await listenerApi.dispatch(thunk).unwrap()
+
+    if (result.txStatus === TransactionStatus.SUCCESS || result.txStatus === TransactionStatus.FAILED) {
+      return
+    }
+
+    throw new Error('fetching safe tx again')
+  }
+
   SafeTxWatcher.getInstance()
-    .watchTx(txId, () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (listenerApi.dispatch as any)(
-        cgwApi.endpoints.transactionsGetTransactionByIdV1.initiate({ chainId, id: txId }, { forceRefetch: true }),
-      ).unwrap()
-    })
-    .then(() => {
-      // TODO: Check that transaction has txStatus SUCCESS before updating state
-      listenerApi.dispatch(setPendingTxStatus({ txId, chainId, status: PendingStatus.SUCCESS }))
-    })
+    .watchTx(txId, queryUntilSuccess)
+    .then(() => listenerApi.dispatch(setPendingTxStatus({ txId, chainId, status: PendingStatus.SUCCESS })))
+    .catch((err) => console.log(err))
 }
 
 function isHydrateAction(action: Action): action is Action<typeof REHYDRATE> & {
@@ -33,7 +40,7 @@ function isHydrateAction(action: Action): action is Action<typeof REHYDRATE> & {
 }
 
 const runWatcher = (
-  listenerApi: MiddlewareAPI,
+  listenerApi: AppListenerEffectAPI,
   txHash: string,
   chainId: string,
   walletAddress: string,
@@ -55,14 +62,14 @@ const runWatcher = (
   }
 }
 
-const runWatchers = async (listenerApi: MiddlewareAPI, pendingTxs: PendingTxsState) => {
+const runWatchers = async (listenerApi: AppListenerEffectAPI, pendingTxs: PendingTxsState) => {
   for (const [txId, pendingTx] of Object.entries(pendingTxs)) {
     const { walletAddress, walletNonce, txHash, chainId, status } = pendingTx
 
     await delay(100)
 
     if (status === PendingStatus.INDEXING) {
-      await startIndexingWatcher(listenerApi, txId, chainId)
+      startIndexingWatcher(listenerApi, txId, chainId)
       continue
     }
 
@@ -70,8 +77,8 @@ const runWatchers = async (listenerApi: MiddlewareAPI, pendingTxs: PendingTxsSta
   }
 }
 
-export const pendingTxsListeners = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
-  listenerMiddleware.startListening({
+export const pendingTxsListeners = (startListening: AppStartListening) => {
+  startListening({
     actionCreator: pendingTxsSlice.actions.addPendingTx,
     effect: (action, listenerApi) => {
       const { chainId, txHash, txId, walletAddress, walletNonce } = action.payload
@@ -80,14 +87,14 @@ export const pendingTxsListeners = (listenerMiddleware: typeof listenerMiddlewar
     },
   })
 
-  listenerMiddleware.startListening({
+  startListening({
     predicate: (action) => isHydrateAction(action),
     effect: (action, listenerApi) => {
       runWatchers(listenerApi, action.payload.pendingTxs)
     },
   })
 
-  listenerMiddleware.startListening({
+  startListening({
     actionCreator: pendingTxsSlice.actions.setPendingTxStatus,
     effect: async (action, listenerApi) => {
       const { status, txId, chainId } = action.payload
