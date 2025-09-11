@@ -22,7 +22,7 @@ const TotalAssetValue = ({
       <Typography component="div" variant="h1" fontSize="24px" lineHeight="1.2" letterSpacing="-0.5px">
         {safe.deployed ? (
           fiatTotal !== undefined ? (
-            <FiatValue value={fiatTotal} precise uniformColor />
+            <FiatValue value={fiatTotal} precise />
           ) : (
             <Skeleton variant="text" width={60} />
           )

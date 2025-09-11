@@ -11,12 +11,10 @@ const FiatValue = ({
   value,
   maxLength,
   precise,
-  uniformColor,
 }: {
   value: string | number | null
   maxLength?: number
   precise?: boolean
-  uniformColor?: boolean
 }): ReactElement => {
   const currency = useAppSelector(selectCurrency)
 
@@ -50,7 +48,7 @@ const FiatValue = ({
             {decimals && (
               <Typography
                 component="span"
-                color={uniformColor ? 'inherit' : 'text.secondary'}
+                color="text.secondary"
                 fontSize="inherit"
                 fontWeight="inherit"
               >
