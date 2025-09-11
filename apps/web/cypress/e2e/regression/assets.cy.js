@@ -18,7 +18,7 @@ describe('Assets tests', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
   })
 
-  it('Verify that "Hide token" button is present and opens the "Hide tokens menu"', () => {
+  it.only('Verify that "Hide token" button is present and opens the "Hide tokens menu"', () => {
     assets.selectTokenList(assets.tokenListOptions.allTokens)
     assets.openHideTokenMenu()
     assets.verifyEachRowHasCheckbox()

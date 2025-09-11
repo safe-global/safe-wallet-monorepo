@@ -48,6 +48,11 @@ const pageCountString1to25 = '1–25 of'
 const pageCountString1to10 = '1–10 of'
 const pageCountString10to20 = '11–20 of'
 
+const PRICE_COLUMN = 1
+const TOKEN_AMOUNT_COLUMN = 2
+const FIAT_AMOUNT_COLUMN = 3
+const ACTION_COLUMN = 5
+
 export const fiatRegex = new RegExp(`\\$?(([0-9]{1,3},)*[0-9]{1,3}(\\.[0-9]{2})?|0)`)
 
 export const tokenListOptions = {
@@ -241,7 +246,8 @@ export function verifyTokenNamesOrder(option = 'ascending') {
 export function verifyTokenBalanceOrder(option = 'ascending') {
   const balances = []
 
-  main.extractDigitsToArray('tr td:nth-child(2) span', balances)
+  // Have to add 1 to index as css nth child indizes are 1 based.
+  main.extractDigitsToArray(`tr td:nth-child(${TOKEN_AMOUNT_COLUMN + 1}) span`, balances)
 
   cy.wrap(balances).then((arr) => {
     let sortedBalance = [...arr].sort()
@@ -287,10 +293,10 @@ export function verifyEachRowHasCheckbox(state) {
     cy.get('tbody').within(() => {
       cy.get('tr').each(($row) => {
         if (state) {
-          cy.wrap($row).find('td').eq(4).find(hiddenTokenCheckbox).should('exist').should(state)
+          cy.wrap($row).find('td').eq(ACTION_COLUMN).find(hiddenTokenCheckbox).should('exist').should(state)
           return
         }
-        cy.wrap($row).find('td').eq(4).find(hiddenTokenCheckbox).should('exist')
+        cy.wrap($row).find('td').eq(ACTION_COLUMN).find(hiddenTokenCheckbox).should('exist')
       })
     })
   })
@@ -342,26 +348,26 @@ export function verifyAssetExplorerLinkNotAvailable(currency, columnName) {
     })
 }
 
-export function verifyBalance(currency, tokenAmountColumn, alttext) {
-  cy.get(tokenListTable).contains(currency).parents('tr').find('td').eq(tokenAmountColumn).contains(alttext)
+export function verifyBalance(currency, alttext) {
+  cy.get(tokenListTable).contains(currency).parents('tr').find('td').eq(TOKEN_AMOUNT_COLUMN).contains(alttext)
 }
 
-export function verifyTokenBalanceFormat(currency, formatString, tokenAmountColumn, fiatAmountColumn, fiatRegex) {
+export function verifyTokenBalanceFormat(currency, formatString, fiatRegex) {
   cy.get(tokenListTable)
     .contains(currency)
     .parents('tr')
     .within(() => {
-      cy.get('td').eq(tokenAmountColumn).contains(formatString)
-      cy.get('td').eq(fiatAmountColumn).contains(fiatRegex)
+      cy.get('td').eq(TOKEN_AMOUNT_COLUMN).contains(formatString)
+      cy.get('td').eq(FIAT_AMOUNT_COLUMN).contains(fiatRegex)
     })
 }
 
-export function verifyFirstRowDoesNotContainCurrency(currency, fiatAmountColumn) {
-  cy.get(balanceSingleRow).first().find('td').eq(fiatAmountColumn).should('not.contain', currency)
+export function verifyFirstRowDoesNotContainCurrency(currency) {
+  cy.get(balanceSingleRow).first().find('td').eq(FIAT_AMOUNT_COLUMN).should('not.contain', currency)
 }
 
-export function verifyFirstRowContainsCurrency(currency, fiatAmountColumn) {
-  cy.get(balanceSingleRow).first().find('td').eq(fiatAmountColumn).contains(currency)
+export function verifyFirstRowContainsCurrency(currency) {
+  cy.get(balanceSingleRow).first().find('td').eq(FIAT_AMOUNT_COLUMN).contains(currency)
 }
 
 export function clickOnCurrencyDropdown() {
