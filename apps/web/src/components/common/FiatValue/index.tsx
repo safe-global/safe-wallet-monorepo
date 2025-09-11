@@ -46,12 +46,7 @@ const FiatValue = ({
           <>
             {whole}
             {decimals && (
-              <Typography
-                component="span"
-                color="text.secondary"
-                fontSize="inherit"
-                fontWeight="inherit"
-              >
+              <Typography component="span" color="text.secondary" fontSize="inherit" fontWeight="inherit">
                 {decimals}
               </Typography>
             )}

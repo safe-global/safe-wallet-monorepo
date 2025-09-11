@@ -11,7 +11,7 @@ import BridgeIcon from '@/public/images/common/bridge.svg'
 import SwapIcon from '@/public/images/common/swap.svg'
 import StakeIcon from '@/public/images/common/stake.svg'
 import EarnIcon from '@/public/images/common/earn.svg'
-import { SvgIcon, Tooltip } from '@mui/material'
+import { SvgIcon } from '@mui/material'
 import { Chip } from '@/components/common/Chip'
 
 export type NavItem = {

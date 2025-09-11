@@ -12,9 +12,7 @@ const Position = ({ item }: { item: Position }) => {
       <IframeIcon src={item.tokenInfo.logoUri || ''} alt={item.tokenInfo.name + ' icon'} width={32} height={32} />
 
       <Box>
-        <Typography fontWeight="bold">
-          {item.tokenInfo.name}
-        </Typography>
+        <Typography fontWeight="bold">{item.tokenInfo.name}</Typography>
         <Typography variant="body2" color="primary.light">
           {formatVisualAmount(item.balance, item.tokenInfo.decimals)} {item.tokenInfo.symbol} •&nbsp;
           {getReadablePositionType(item.position_type)}
