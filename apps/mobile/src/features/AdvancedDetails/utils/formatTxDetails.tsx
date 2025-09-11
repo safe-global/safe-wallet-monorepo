@@ -31,33 +31,35 @@ const formatTxDetails = ({ txDetails, viewOnExplorer }: formatTxDetailsProps): L
   }
 
   // Basic transaction info
-  items.push({
-    label: 'To',
-    render: () => (
-      <>
-        <View width="100%">
-          <Receiver txData={txDetails.txData} />
-        </View>
-        <View width="100%" flexDirection="row" alignItems="center" gap="$2">
-          <Identicon address={txDetails.txData?.to.value as Address} size={24} />
+  if (txDetails.txData?.to.value) {
+    items.push({
+      label: 'To',
+      render: () => (
+        <>
+          <View width="100%">
+            <Receiver txData={txDetails.txData} />
+          </View>
+          <View width="100%" flexDirection="row" alignItems="center" gap="$2">
+            <Identicon address={txDetails.txData?.to.value as Address} size={24} />
 
-          <View flexDirection="row" justifyContent="space-between" alignItems="center">
-            <Text flexWrap="wrap" width="77%">
-              {txDetails.txData?.to.value}
-            </Text>
+            <View flexDirection="row" justifyContent="space-between" alignItems="center">
+              <Text flexWrap="wrap" width="77%">
+                {txDetails.txData?.to.value}
+              </Text>
 
-            <View flexDirection="row" alignItems="center" gap="$3">
-              <CopyButton value={txDetails.txData?.to.value || ''} size={16} color={'$textSecondaryLight'} />
+              <View flexDirection="row" alignItems="center" gap="$3">
+                <CopyButton value={txDetails.txData?.to.value || ''} size={16} color={'$textSecondaryLight'} />
 
-              <TouchableOpacity onPress={viewOnExplorer}>
-                <SafeFontIcon name="external-link" size={16} color="$textSecondaryLight" />
-              </TouchableOpacity>
+                <TouchableOpacity onPress={viewOnExplorer}>
+                  <SafeFontIcon name="external-link" size={16} color="$textSecondaryLight" />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </>
-    ),
-  })
+        </>
+      ),
+    })
+  }
 
   // Value
   if (txDetails.txData?.value) {

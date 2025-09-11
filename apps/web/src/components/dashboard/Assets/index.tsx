@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Box, Skeleton, Typography, Paper, Card, Stack } from '@mui/material'
+import { Box, Skeleton, Typography, Paper, Card, Stack, Divider } from '@mui/material'
 import useBalances from '@/hooks/useBalances'
 import TokenAmount from '@/components/common/TokenAmount'
 import SwapButton from '@/features/swap/components/SwapButton'
@@ -107,15 +107,17 @@ const AssetList = ({ items }: { items: Balances['items'] }) => {
 
   return (
     <Box display="flex" flexDirection="column">
-      {items.map((item) => (
-        <AssetRow
-          item={item}
-          key={item.tokenInfo.address}
-          chainId={chainId}
-          showSwap={isSwapFeatureEnabled}
-          showEarn={isEarnFeatureEnabled}
-          showStake={isStakingFeatureEnabled}
-        />
+      {items.map((item, index) => (
+        <Box key={item.tokenInfo.address}>
+          {index > 0 && <Divider sx={{ opacity: 0.5, marginLeft: '56px' }} />}
+          <AssetRow
+            item={item}
+            chainId={chainId}
+            showSwap={isSwapFeatureEnabled}
+            showEarn={isEarnFeatureEnabled}
+            showStake={isStakingFeatureEnabled}
+          />
+        </Box>
       ))}
     </Box>
   )
