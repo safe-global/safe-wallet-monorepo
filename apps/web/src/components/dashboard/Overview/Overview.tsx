@@ -1,18 +1,18 @@
+import { type ReactElement, useContext, useMemo, useCallback } from 'react'
+import { Button, Card, Box, Stack } from '@mui/material'
+import { useRouter } from 'next/router'
+import Link from 'next/link'
 import Track from '@/components/common/Track'
 import QrCodeButton from '@/components/sidebar/QrCodeButton'
 import { TxModalContext } from '@/components/tx-flow'
 import { NewTxFlow } from '@/components/tx-flow/flows'
 import SwapIcon from '@/public/images/common/swap.svg'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
-import Link from 'next/link'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import ArrowIconNW from '@/public/images/common/arrow-top-right.svg'
 import ArrowIconSE from '@/public/images/common/arrow-se.svg'
 import { AppRoutes } from '@/config/routes'
-import { Button, Card, Box, Stack } from '@mui/material'
-import { useRouter } from 'next/router'
-import { type ReactElement, useContext, useMemo } from 'react'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
@@ -29,10 +29,10 @@ const Overview = (): ReactElement => {
   const isInitialState = !safeLoaded && !safeLoading
   const isLoading = safeLoading || balancesLoading || isInitialState
 
-  const handleOnSend = () => {
+  const handleOnSend = useCallback(() => {
     setTxFlow(<NewTxFlow />, undefined, false)
     trackEvent(OVERVIEW_EVENTS.NEW_TRANSACTION)
-  }
+  }, [setTxFlow])
 
   const items = useMemo(() => {
     return balances.items.filter((item) => item.balance !== '0')

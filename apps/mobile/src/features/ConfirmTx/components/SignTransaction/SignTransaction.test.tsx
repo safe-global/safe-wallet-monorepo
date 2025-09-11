@@ -2,19 +2,20 @@ import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react-native'
 import { useLocalSearchParams } from 'expo-router'
 import { SignTransaction } from './SignTransaction'
-import { useSigningGuard } from './hooks/useSigningGuard'
-import { useTransactionSigning } from './hooks/useTransactionSigning'
+import { useTransactionGuard } from '@/src/hooks/useTransactionGuard'
+import { SigningStatus, useTransactionSigning } from './hooks/useTransactionSigning'
 
 // Mock the hooks
 jest.mock('expo-router', () => ({
   useLocalSearchParams: jest.fn(),
 }))
 
-jest.mock('./hooks/useSigningGuard', () => ({
-  useSigningGuard: jest.fn(),
+jest.mock('@/src/hooks/useTransactionGuard', () => ({
+  useTransactionGuard: jest.fn(),
 }))
 
 jest.mock('./hooks/useTransactionSigning', () => ({
+  ...jest.requireActual('./hooks/useTransactionSigning'),
   useTransactionSigning: jest.fn(),
 }))
 
@@ -62,7 +63,7 @@ jest.mock('@/src/components/LoadingScreen', () => ({
 }))
 
 const mockUseLocalSearchParams = useLocalSearchParams as jest.MockedFunction<typeof useLocalSearchParams>
-const mockUseSigningGuard = useSigningGuard as jest.MockedFunction<typeof useSigningGuard>
+const mockUseTransactionGuard = useTransactionGuard as jest.MockedFunction<typeof useTransactionGuard>
 const mockUseTransactionSigning = useTransactionSigning as jest.MockedFunction<typeof useTransactionSigning>
 
 // Get the mocked Redux hooks
@@ -96,12 +97,12 @@ describe('SignTransaction', () => {
     mockUseDefinedActiveSafe.mockReturnValue(mockActiveSafe)
     mockUseAppSelector.mockReturnValue(mockActiveSigner)
 
-    mockUseSigningGuard.mockReturnValue({
-      canSign: true,
+    mockUseTransactionGuard.mockReturnValue({
+      guard: true,
     })
 
     mockUseTransactionSigning.mockReturnValue({
-      status: 'idle',
+      status: SigningStatus.IDLE,
       executeSign: mockExecuteSign,
       retry: mockRetry,
       reset: jest.fn(),
@@ -145,12 +146,12 @@ describe('SignTransaction', () => {
 
   describe('auto-signing logic', () => {
     it('should call executeSign when user can sign and status is idle', async () => {
-      mockUseSigningGuard.mockReturnValue({
-        canSign: true,
+      mockUseTransactionGuard.mockReturnValue({
+        guard: true,
       })
 
       mockUseTransactionSigning.mockReturnValue({
-        status: 'idle',
+        status: SigningStatus.IDLE,
         executeSign: mockExecuteSign,
         retry: mockRetry,
         reset: jest.fn(),
@@ -168,8 +169,8 @@ describe('SignTransaction', () => {
     })
 
     it('should not call executeSign when user cannot sign', () => {
-      mockUseSigningGuard.mockReturnValue({
-        canSign: false,
+      mockUseTransactionGuard.mockReturnValue({
+        guard: false,
       })
 
       render(<SignTransaction />)
@@ -179,7 +180,7 @@ describe('SignTransaction', () => {
 
     it('should not call executeSign when status is not idle', () => {
       mockUseTransactionSigning.mockReturnValue({
-        status: 'loading',
+        status: SigningStatus.LOADING,
         executeSign: mockExecuteSign,
         retry: mockRetry,
         reset: jest.fn(),
@@ -214,7 +215,7 @@ describe('SignTransaction', () => {
   describe('error handling', () => {
     it('should render SignError for API errors', () => {
       mockUseTransactionSigning.mockReturnValue({
-        status: 'idle',
+        status: SigningStatus.IDLE,
         executeSign: mockExecuteSign,
         retry: mockRetry,
         reset: jest.fn(),
@@ -232,7 +233,7 @@ describe('SignTransaction', () => {
 
     it('should render SignError for signing errors', () => {
       mockUseTransactionSigning.mockReturnValue({
-        status: 'error',
+        status: SigningStatus.ERROR,
         executeSign: mockExecuteSign,
         retry: mockRetry,
         reset: jest.fn(),
@@ -250,7 +251,7 @@ describe('SignTransaction', () => {
 
     it('should call retry when retry button is pressed', () => {
       mockUseTransactionSigning.mockReturnValue({
-        status: 'error',
+        status: SigningStatus.ERROR,
         executeSign: mockExecuteSign,
         retry: mockRetry,
         reset: jest.fn(),
@@ -272,7 +273,7 @@ describe('SignTransaction', () => {
   describe('success state', () => {
     it('should render SignSuccess when signing is successful', () => {
       mockUseTransactionSigning.mockReturnValue({
-        status: 'success',
+        status: SigningStatus.SUCCESS,
         executeSign: mockExecuteSign,
         retry: mockRetry,
         reset: jest.fn(),
@@ -292,7 +293,7 @@ describe('SignTransaction', () => {
   describe('loading states', () => {
     it('should render LoadingScreen when signing is in progress', () => {
       mockUseTransactionSigning.mockReturnValue({
-        status: 'loading',
+        status: SigningStatus.LOADING,
         executeSign: mockExecuteSign,
         retry: mockRetry,
         reset: jest.fn(),
@@ -311,7 +312,7 @@ describe('SignTransaction', () => {
 
     it('should render LoadingScreen when API is loading', () => {
       mockUseTransactionSigning.mockReturnValue({
-        status: 'idle',
+        status: SigningStatus.IDLE,
         executeSign: mockExecuteSign,
         retry: mockRetry,
         reset: jest.fn(),
@@ -328,12 +329,12 @@ describe('SignTransaction', () => {
     })
 
     it('should render preparation loading screen for idle authorized state', () => {
-      mockUseSigningGuard.mockReturnValue({
-        canSign: true,
+      mockUseTransactionGuard.mockReturnValue({
+        guard: true,
       })
 
       mockUseTransactionSigning.mockReturnValue({
-        status: 'idle',
+        status: SigningStatus.IDLE,
         executeSign: mockExecuteSign,
         retry: mockRetry,
         reset: jest.fn(),
@@ -361,10 +362,10 @@ describe('SignTransaction', () => {
       })
     })
 
-    it('should call useSigningGuard with no parameters', () => {
+    it('should call useTransactionGuard with signing parameter', () => {
       render(<SignTransaction />)
 
-      expect(mockUseSigningGuard).toHaveBeenCalledWith()
+      expect(mockUseTransactionGuard).toHaveBeenCalledWith('signing')
     })
 
     it('should call useDefinedActiveSafe with no parameters', () => {

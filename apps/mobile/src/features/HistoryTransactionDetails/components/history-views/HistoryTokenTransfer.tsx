@@ -2,9 +2,8 @@ import React from 'react'
 import { Container } from '@/src/components/Container'
 import { View, YStack, Text } from 'tamagui'
 import { HistoryTransactionHeader } from '@/src/features/HistoryTransactionDetails/components/HistoryTransactionHeader'
-import { TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { TransactionData, TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useTokenDetails } from '@/src/hooks/useTokenDetails'
-import { Address } from '@/src/types/address'
 import { TokenAmount } from '@/src/components/TokenAmount'
 
 import { HistoryAdvancedDetailsButton } from '@/src/features/HistoryTransactionDetails/components/HistoryAdvancedDetailsButton'
@@ -14,13 +13,14 @@ import { NetworkDisplay } from '../shared'
 interface HistoryTokenTransferProps {
   txId: string
   txInfo: TransferTransactionInfo
+  txData: TransactionData
 }
 
-export function HistoryTokenTransfer({ txId, txInfo }: HistoryTokenTransferProps) {
+export function HistoryTokenTransfer({ txId, txInfo, txData }: HistoryTokenTransferProps) {
   const { value, tokenSymbol, logoUri, decimals } = useTokenDetails(txInfo)
 
   const isOutgoing = txInfo.direction === 'OUTGOING'
-  const address = isOutgoing ? txInfo.recipient.value : txInfo.sender.value
+  const address = isOutgoing ? txInfo.recipient : txInfo.sender
 
   // Determine badge icon based on direction
   const badgeIcon = isOutgoing ? 'transaction-outgoing' : 'transaction-incoming'
@@ -57,12 +57,12 @@ export function HistoryTokenTransfer({ txId, txInfo }: HistoryTokenTransferProps
             <View alignItems="center" flexDirection="row" justifyContent="space-between">
               <Text color="$textSecondaryLight">{fieldLabel}</Text>
 
-              <HashDisplay value={address as Address} />
+              <HashDisplay value={address} />
             </View>
 
             <NetworkDisplay />
 
-            {isOutgoing && <HistoryAdvancedDetailsButton txId={txId} />}
+            {isOutgoing && txData !== null && <HistoryAdvancedDetailsButton txId={txId} />}
           </Container>
         </YStack>
       </View>

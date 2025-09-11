@@ -6,6 +6,9 @@ import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { AppRoutes } from '@/config/routes'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
+import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { GA_LABEL_TO_MIXPANEL_PROPERTY } from '@/services/analytics/ga-mixpanel-mapping'
 import { useContext } from 'react'
 import { TxModalContext } from '..'
 import SwapIcon from '@/public/images/common/swap.svg'
@@ -71,7 +74,13 @@ export const MakeASwapButton = () => {
   const onClick = isSwapPage ? () => setTxFlow(undefined) : undefined
 
   return (
-    <Track {...MODALS_EVENTS.SWAP}>
+    <Track
+      {...SWAP_EVENTS.OPEN_SWAPS}
+      label={SWAP_LABELS.newTransaction}
+      mixpanelParams={{
+        [MixpanelEventParams.ENTRY_POINT]: GA_LABEL_TO_MIXPANEL_PROPERTY[SWAP_LABELS.newTransaction],
+      }}
+    >
       <Link href={{ pathname: AppRoutes.swap, query: { safe: router.query.safe } }} passHref legacyBehavior>
         <Button variant="contained" sx={buttonSx} fullWidth onClick={onClick} startIcon={<SwapIcon width={20} />}>
           Swap tokens

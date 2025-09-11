@@ -77,6 +77,15 @@ describe('formatTxDetails', () => {
     expect(result).toEqual([])
   })
 
+  it('should return empty array when txData is undefined', () => {
+    const txDetails = createMockTxDetails({
+      txData: undefined,
+    } as unknown as TransactionDetails)
+
+    const result = formatTxDetails({ txDetails, viewOnExplorer })
+    expect(result).toEqual([])
+  })
+
   it('should format basic transaction details with To field', () => {
     const mockAddress = faker.finance.ethereumAddress()
     const txDetails = createMockTxDetails({

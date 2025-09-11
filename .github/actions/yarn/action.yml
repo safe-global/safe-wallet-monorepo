@@ -24,14 +24,12 @@ runs:
     - name: Yarn install
       if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true'
       shell: bash
-      run: |
-        yarn install --immutable
+      run: yarn install --immutable
 
     - name: Yarn after-install to generate contracts types
       if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true'
       shell: bash
-      run: |        
-        yarn workspace @safe-global/web after-install
+      run: yarn workspace @safe-global/web after-install
 
     - name: Save Yarn Cache & Types
       if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true'

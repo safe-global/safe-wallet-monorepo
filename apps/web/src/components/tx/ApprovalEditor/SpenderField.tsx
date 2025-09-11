@@ -2,13 +2,27 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import { Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 
 import css from './styles.module.css'
-import useAsync from '@safe-global/utils/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
-import { getContract } from '@safe-global/safe-gateway-typescript-sdk'
+import {
+  useContractsGetContractV1Query as useGetContractQuery,
+  type Contract,
+} from '@safe-global/store/gateway/AUTO_GENERATED/contracts'
+import { isAddress } from 'ethers'
+import { useEffect, useState } from 'react'
 
 export const SpenderField = ({ address }: { address: string }) => {
   const chainId = useChainId()
-  const [spendingContract] = useAsync(() => getContract(chainId, address), [chainId, address])
+  const shouldSkip = !address || !isAddress(address)
+  const { data: contract } = useGetContractQuery({ chainId, contractAddress: address }, { skip: shouldSkip })
+  const [spendingContract, setSpendingContract] = useState<Contract>()
+
+  useEffect(() => {
+    if (shouldSkip) {
+      setSpendingContract(undefined)
+    } else {
+      setSpendingContract(contract)
+    }
+  }, [contract, shouldSkip])
   const { breakpoints } = useTheme()
   const isSmallScreen = useMediaQuery(breakpoints.down('md'))
 

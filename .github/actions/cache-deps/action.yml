@@ -2,7 +2,7 @@ name: "Cache Yarn Dependencies"
 description: "Restore or save yarn dependencies"
 inputs:
   mode:
-    description: "restore-yarn | save-yarn | restore-nc | safe-nc"
+    description: "restore-yarn | save-yarn | restore-nc | save-nc"
     required: true
   key:
     description: "The cache key to use to safe. Attention! Make sure to use the correct computed cache key depending on the mode"
@@ -33,6 +33,7 @@ runs:
         path: |
           **/node_modules
           /home/runner/.cache/Cypress
+          ~/.yarn/berry/cache
           ${{ github.workspace }}/.yarn/install-state.gz
           ${{ github.workspace }}/packages/utils/src/types
         key: ${{ runner.os }}-web-core-modules-${{ hashFiles('**/package.json','**/yarn.lock') }}
@@ -42,7 +43,7 @@ runs:
     - name: Set composite outputs yarn
       if: ${{ inputs.mode == 'restore-yarn' }}
       shell: bash
-      run: | 
+      run: |
         echo "cache-hit-yarn=${{ steps.restore.outputs.cache-hit }}" >> $GITHUB_OUTPUT
         echo "computed-cache-key-yarn=${{ steps.restore.outputs.cache-primary-key }}" >> $GITHUB_OUTPUT
 
@@ -53,6 +54,7 @@ runs:
         path: |
           **/node_modules
           /home/runner/.cache/Cypress
+          ~/.yarn/berry/cache
           ${{ github.workspace }}/.yarn/install-state.gz
           ${{ github.workspace }}/packages/utils/src/types
         key: ${{inputs.key}}

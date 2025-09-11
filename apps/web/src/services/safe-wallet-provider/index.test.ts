@@ -656,6 +656,7 @@ describe('SafeWalletProvider', () => {
           id: 1,
           jsonrpc: '2.0',
           result: {
+            atomic: true,
             id: params[0],
             chainId: '0x1',
             receipts: [
@@ -669,7 +670,7 @@ describe('SafeWalletProvider', () => {
               },
             ],
             status: 200,
-            version: '1.0',
+            version: '2.0.0',
           },
         })
       })
@@ -710,6 +711,7 @@ describe('SafeWalletProvider', () => {
           id: 1,
           jsonrpc: '2.0',
           result: {
+            atomic: true,
             chainId: '0x1',
             id: params[0],
             receipts: [
@@ -723,7 +725,7 @@ describe('SafeWalletProvider', () => {
               },
             ],
             status: 200,
-            version: '1.0',
+            version: '2.0.0',
           },
         })
       })
@@ -752,10 +754,11 @@ describe('SafeWalletProvider', () => {
           id: 1,
           jsonrpc: '2.0',
           result: {
+            atomic: true,
             chainId: '0x1',
             id: params[0],
             status: 100,
-            version: '1.0',
+            version: '2.0.0',
           },
         })
       })
@@ -790,10 +793,11 @@ describe('SafeWalletProvider', () => {
           id: 1,
           jsonrpc: '2.0',
           result: {
+            atomic: true,
             chainId: '0x1',
             id: params[0],
             status: 100,
-            version: '1.0',
+            version: '2.0.0',
           },
         })
       })
@@ -832,6 +836,9 @@ describe('SafeWalletProvider', () => {
             ['0x1']: {
               atomicBatch: {
                 supported: true,
+              },
+              atomic: {
+                status: 'supported',
               },
             },
           },
