@@ -27,6 +27,10 @@ jest.mock('@/hooks/useSafeAddress', () => ({
 }))
 const useSafeAddressMock = useSafeAddress as jest.Mock
 
+jest.mock('@/utils/wallets', () => ({
+  isSmartContract: jest.fn().mockResolvedValue(true),
+}))
+
 const safeAddress = faker.finance.ethereumAddress()
 
 describe('NamedAddressInfo', () => {
