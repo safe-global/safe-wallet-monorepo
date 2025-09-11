@@ -30,6 +30,7 @@ import type {
 } from '@safe-global/utils/features/counterfactual/store/types'
 import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
 import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
+import { delay } from '@safe-global/utils/utils/helpers'
 
 export const getUndeployedSafeInfo = (undeployedSafe: UndeployedSafe, address: string, chain: ChainInfo) => {
   const safeSetup = extractCounterfactualSafeSetup(undeployedSafe, chain.chainId)
@@ -160,8 +161,6 @@ export const replayCounterfactualSafeDeployment = (
 
   dispatch(addUndeployedSafe(undeployedSafe))
 }
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 /**
  * Calling getTransaction too fast sometimes fails because the txHash hasn't been
@@ -322,7 +321,7 @@ export const extractCounterfactualSafeSetup = (
   }
   const { owners, threshold, fallbackHandler } = undeployedSafe.props.safeAccountConfig
   const { safeVersion, saltNonce } = isPredictedSafeProps(undeployedSafe.props)
-    ? (undeployedSafe.props.safeDeploymentConfig ?? {})
+    ? undeployedSafe.props.safeDeploymentConfig ?? {}
     : undeployedSafe.props
 
   return {

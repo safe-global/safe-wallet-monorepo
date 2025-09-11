@@ -75,6 +75,7 @@ describe('ConfirmTxForm', () => {
     hasEnoughConfirmations: false,
     isExpired: false,
     txId: 'tx123',
+    isPending: false,
   }
 
   it('renders AlreadySigned when hasSigned is true', () => {

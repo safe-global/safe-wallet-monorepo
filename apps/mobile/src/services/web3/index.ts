@@ -62,3 +62,17 @@ export const createConnectedWallet = async (
 
   return { wallet, protocolKit }
 }
+
+export const getUserNonce = async (chain: Chain, userAddress: string) => {
+  const web3 = createWeb3ReadOnly(chain)
+
+  if (!web3) {
+    return -1
+  }
+
+  try {
+    return await web3.getTransactionCount(userAddress, 'pending')
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}

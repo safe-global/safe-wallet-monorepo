@@ -8,7 +8,7 @@ interface LoaderProps {
   props?: CircleSnailPropTypes
 }
 
-export function Loader({ size = 64, color = '#12FF80', ...props }: LoaderProps) {
+export function Loader({ size = 64, color = '#12FF80', props }: LoaderProps) {
   return (
     <View justifyContent="center" alignItems="center">
       <CircleSnail size={size} color={color} {...props} />

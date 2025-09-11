@@ -5,16 +5,22 @@ import { AlreadySigned } from '../confirmation-views/AlreadySigned'
 import { CanNotSign } from '../CanNotSign'
 import { useTransactionSigner } from '../../hooks/useTransactionSigner'
 import { CanNotExecute } from '@/src/features/ExecuteTx/components/CanNotExecute'
+import { PendingTx } from '@/src/features/ConfirmTx/components/PendingTx'
 
 interface ConfirmTxFormProps {
   hasEnoughConfirmations: boolean
   isExpired: boolean
+  isPending: boolean
   txId: string
 }
 
-export function ConfirmTxForm({ hasEnoughConfirmations, isExpired, txId }: ConfirmTxFormProps) {
+export function ConfirmTxForm({ hasEnoughConfirmations, isExpired, isPending, txId }: ConfirmTxFormProps) {
   const { signerState } = useTransactionSigner(txId)
   const { activeSigner, hasSigned, canSign } = signerState
+
+  if (isPending) {
+    return <PendingTx />
+  }
 
   if (!activeSigner) {
     return <CanNotExecute />
