@@ -17,9 +17,6 @@
     "prepare": "husky"
   },
   "resolutions": {
-    "@safe-global/safe-core-sdk-types/ethers": "6.14.3",
-    "@safe-global/protocol-kit/ethers": "6.14.3",
-    "@safe-global/api-kit/ethers": "6.14.3",
     "@ledgerhq/context-module/ethers": "6.14.3",
     "@gnosis.pm/zodiac/ethers": "6.14.3",
     "@ledgerhq/device-signer-kit-ethereum/ethers": "6.14.3",
