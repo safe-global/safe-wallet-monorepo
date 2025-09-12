@@ -16,6 +16,7 @@ export function ExecuteProcessing({ txId }: { txId: string }) {
   const color = isDark ? getTokenValue('$color.backgroundLightDark') : getTokenValue('$color.backgroundLightLight')
 
   const handleTxPress = () => {
+    router.dismissAll() // Otherwise going back on the confirm screen takes the user back here which is confusing
     router.navigate({
       pathname: '/confirm-transaction',
       params: {
