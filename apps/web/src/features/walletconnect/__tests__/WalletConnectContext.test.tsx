@@ -1,7 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { useContext } from 'react'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { WalletKitTypes } from '@reown/walletkit'
 import type { SessionTypes } from '@walletconnect/types'
 import { act, fireEvent, render, waitFor } from '@/tests/test-utils'
@@ -13,17 +12,13 @@ import { useAppDispatch } from '@/store'
 import * as useSafeWalletProvider from '@/services/safe-wallet-provider/useSafeWalletProvider'
 import * as useLocalStorageHook from '@/services/local-storage/useLocalStorage'
 import { wcPopupStore } from '@/features/walletconnect/components'
+import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 
 jest.mock('@reown/walletkit', () => jest.fn())
 
 jest.mock('@/services/safe-wallet-provider/useSafeWalletProvider')
 
-jest.mock('@/features/walletconnect/components', () => ({
-  wcPopupStore: {
-    useStore: jest.fn(),
-    setStore: jest.fn(),
-  },
-}))
+jest.mock('@/features/walletconnect/components', () => ({ wcPopupStore: { useStore: jest.fn(), setStore: jest.fn() } }))
 
 const TestComponent = () => {
   const { walletConnect, error, loading, sessions, sessionProposal, open } = useContext(WalletConnectContext)
@@ -72,13 +67,7 @@ const ContextControlComponent = () => {
 describe('WalletConnectProvider', () => {
   const testSafeAddress = faker.finance.ethereumAddress()
 
-  const extendedSafeInfo = {
-    ...extendedSafeInfoBuilder().build(),
-    address: {
-      value: testSafeAddress,
-    },
-    chainId: '5',
-  }
+  const extendedSafeInfo = { ...extendedSafeInfoBuilder().build(), address: { value: testSafeAddress }, chainId: '5' }
 
   beforeEach(() => {
     jest.resetAllMocks()
@@ -96,15 +85,7 @@ describe('WalletConnectProvider', () => {
       <WalletConnectProvider>
         <TestComponent />
       </WalletConnectProvider>,
-      {
-        initialReduxState: {
-          safeInfo: {
-            loading: false,
-            loaded: true,
-            data: extendedSafeInfo,
-          },
-        },
-      },
+      { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
     )
 
     await waitFor(() => {
@@ -122,15 +103,7 @@ describe('WalletConnectProvider', () => {
       <WalletConnectProvider>
         <TestComponent />
       </WalletConnectProvider>,
-      {
-        initialReduxState: {
-          safeInfo: {
-            loading: false,
-            loaded: true,
-            data: extendedSafeInfo,
-          },
-        },
-      },
+      { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
     )
 
     await waitFor(() => {
@@ -148,17 +121,7 @@ describe('WalletConnectProvider', () => {
       <WalletConnectProvider>
         <TestComponent />
       </WalletConnectProvider>,
-      {
-        initialReduxState: {
-          safeInfo: {
-            loading: false,
-            data: {
-              ...extendedSafeInfo,
-              chainId: '',
-            },
-          },
-        },
-      },
+      { initialReduxState: { safeInfo: { loading: false, loaded: true, data: { ...extendedSafeInfo, chainId: '' } } } },
     )
 
     await waitFor(() => {
@@ -176,14 +139,7 @@ describe('WalletConnectProvider', () => {
         <TestComponent />
         <ContextControlComponent />
       </WalletConnectProvider>,
-      {
-        initialReduxState: {
-          safeInfo: {
-            loading: false,
-            data: extendedSafeInfo,
-          },
-        },
-      },
+      { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
     )
 
     await waitFor(() => {
@@ -200,14 +156,7 @@ describe('WalletConnectProvider', () => {
         <TestComponent />
         <ContextControlComponent />
       </WalletConnectProvider>,
-      {
-        initialReduxState: {
-          safeInfo: {
-            loading: false,
-            data: extendedSafeInfo,
-          },
-        },
-      },
+      { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
     )
 
     await waitFor(() => {
@@ -230,14 +179,7 @@ describe('WalletConnectProvider', () => {
         <TestComponent />
         <ContextControlComponent />
       </WalletConnectProvider>,
-      {
-        initialReduxState: {
-          safeInfo: {
-            loading: false,
-            data: extendedSafeInfo,
-          },
-        },
-      },
+      { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
     )
 
     await waitFor(() => {
@@ -252,23 +194,15 @@ describe('WalletConnectProvider', () => {
   })
 
   describe('updateSessions', () => {
-    const extendedSafeInfo = {
-      ...extendedSafeInfoBuilder().build(),
-      address: { value: testSafeAddress },
-      chainId: '5',
-    }
+    const extendedSafeInfo = { ...extendedSafeInfoBuilder().build(), address: { value: testSafeAddress }, chainId: '5' }
 
-    const getUpdateSafeInfoComponent = (safeInfo: SafeInfo) => {
+    const getUpdateSafeInfoComponent = (safeInfo: ExtendedSafeInfo) => {
       // eslint-disable-next-line react/display-name
       return () => {
         const dispatch = useAppDispatch()
         const updateSafeInfo = () => {
           dispatch(
-            safeInfoSlice.actions.set({
-              loading: false,
-              loaded: true,
-              data: { ...extendedSafeInfo, ...safeInfo },
-            }),
+            safeInfoSlice.actions.set({ loading: false, loaded: true, data: { ...extendedSafeInfo, ...safeInfo } }),
           )
         }
 
@@ -281,24 +215,17 @@ describe('WalletConnectProvider', () => {
       jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
 
       const ChainUpdater = getUpdateSafeInfoComponent({
+        ...extendedSafeInfoBuilder().build(),
         address: { value: testSafeAddress },
         chainId: '1',
-      } as SafeInfo)
+      })
 
       const { getByText } = render(
         <WalletConnectProvider>
           <TestComponent />
           <ChainUpdater />
         </WalletConnectProvider>,
-        {
-          initialReduxState: {
-            safeInfo: {
-              loading: false,
-              loaded: true,
-              data: extendedSafeInfo,
-            },
-          },
-        },
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
       )
 
       await waitFor(() => {
@@ -319,9 +246,10 @@ describe('WalletConnectProvider', () => {
       jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
 
       const AddressUpdater = getUpdateSafeInfoComponent({
+        ...extendedSafeInfoBuilder().build(),
         address: { value: newSafeAddress },
         chainId: '5',
-      } as SafeInfo)
+      })
 
       const { getByText } = render(
         <WalletConnectProvider>
@@ -333,11 +261,7 @@ describe('WalletConnectProvider', () => {
             safeInfo: {
               loading: false,
               loaded: true,
-              data: {
-                ...extendedSafeInfo,
-                address: { value: testSafeAddress },
-                chainId: '5',
-              },
+              data: { ...extendedSafeInfo, address: { value: testSafeAddress }, chainId: '5' },
             },
           },
         },
@@ -370,11 +294,7 @@ describe('WalletConnectProvider', () => {
             safeInfo: {
               loading: false,
               loaded: true,
-              data: {
-                ...extendedSafeInfo,
-                address: { value: testSafeAddress },
-                chainId: '5',
-              },
+              data: { ...extendedSafeInfo, address: { value: testSafeAddress }, chainId: '5' },
             },
           },
         },
@@ -407,14 +327,7 @@ describe('WalletConnectProvider', () => {
         <WalletConnectProvider>
           <TestComponent />
         </WalletConnectProvider>,
-        {
-          initialReduxState: {
-            safeInfo: {
-              loading: false,
-              data: extendedSafeInfo,
-            },
-          },
-        },
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
       )
 
       await waitFor(() => {
@@ -434,14 +347,7 @@ describe('WalletConnectProvider', () => {
         <WalletConnectProvider>
           <TestComponent />
         </WalletConnectProvider>,
-        {
-          initialReduxState: {
-            safeInfo: {
-              loading: false,
-              data: extendedSafeInfo,
-            },
-          },
-        },
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
       )
 
       await waitFor(() => {
@@ -458,13 +364,7 @@ describe('WalletConnectProvider', () => {
 
     const mockSessionProposal = {
       id: proposalId,
-      verifyContext: {
-        verified: {
-          validation: 'VALID',
-          origin: proposalOrigin,
-          isScam: false,
-        },
-      },
+      verifyContext: { verified: { validation: 'VALID', origin: proposalOrigin, isScam: false } },
     } as WalletKitTypes.SessionProposal
 
     const mockSession = { topic: sessionTopic, peer: { metadata: { url: sessionUrl } } } as SessionTypes.Struct
@@ -485,14 +385,7 @@ describe('WalletConnectProvider', () => {
         <WalletConnectProvider>
           <TestComponent />
         </WalletConnectProvider>,
-        {
-          initialReduxState: {
-            safeInfo: {
-              loading: false,
-              data: extendedSafeInfo,
-            },
-          },
-        },
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
       )
 
       await waitFor(() => {
@@ -521,14 +414,7 @@ describe('WalletConnectProvider', () => {
           <TestComponent />
           <ContextControlComponent />
         </WalletConnectProvider>,
-        {
-          initialReduxState: {
-            safeInfo: {
-              loading: false,
-              data: extendedSafeInfo,
-            },
-          },
-        },
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
       )
 
       await waitFor(() => {
@@ -541,11 +427,7 @@ describe('WalletConnectProvider', () => {
         expect(approveSessionSpy).toHaveBeenCalledWith(mockSessionProposal, '5', testSafeAddress, {
           atomic: JSON.stringify({ status: 'supported' }),
           capabilities: JSON.stringify({
-            [testSafeAddress]: {
-              [`0x${Number(5).toString(16)}`]: {
-                atomicBatch: { supported: true },
-              },
-            },
+            [testSafeAddress]: { [`0x${Number(5).toString(16)}`]: { atomicBatch: { supported: true } } },
           }),
         })
       })
@@ -568,14 +450,7 @@ describe('WalletConnectProvider', () => {
           <TestComponent />
           <ContextControlComponent />
         </WalletConnectProvider>,
-        {
-          initialReduxState: {
-            safeInfo: {
-              loading: false,
-              data: extendedSafeInfo,
-            },
-          },
-        },
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
       )
 
       await waitFor(() => {
@@ -606,14 +481,7 @@ describe('WalletConnectProvider', () => {
           <TestComponent />
           <ContextControlComponent />
         </WalletConnectProvider>,
-        {
-          initialReduxState: {
-            safeInfo: {
-              loading: false,
-              data: extendedSafeInfo,
-            },
-          },
-        },
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
       )
 
       await waitFor(() => {
@@ -645,14 +513,7 @@ describe('WalletConnectProvider', () => {
           <TestComponent />
           <ContextControlComponent />
         </WalletConnectProvider>,
-        {
-          initialReduxState: {
-            safeInfo: {
-              loading: false,
-              data: extendedSafeInfo,
-            },
-          },
-        },
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
       )
 
       await waitFor(() => {
@@ -679,14 +540,7 @@ describe('WalletConnectProvider', () => {
           <TestComponent />
           <ContextControlComponent />
         </WalletConnectProvider>,
-        {
-          initialReduxState: {
-            safeInfo: {
-              loading: false,
-              data: extendedSafeInfo,
-            },
-          },
-        },
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
       )
 
       await waitFor(() => {
@@ -716,13 +570,7 @@ describe('WalletConnectProvider', () => {
     const mockAuthEvent = {
       id: authId,
       topic: authTopic,
-      verifyContext: {
-        verified: {
-          validation: 'VALID' as const,
-          origin: authOrigin,
-          isScam: false,
-        },
-      },
+      verifyContext: { verified: { validation: 'VALID' as const, origin: authOrigin, isScam: false } },
       params: {
         expiryTimestamp: Math.floor(Date.now() / 1000) + 3600,
         authPayload: {
@@ -733,14 +581,7 @@ describe('WalletConnectProvider', () => {
           nonce: authNonce,
           iat: new Date().toISOString(),
         },
-        requester: {
-          metadata: {
-            name: appName,
-            description: appDescription,
-            url: appUrl,
-            icons: [appIcon],
-          },
-        },
+        requester: { metadata: { name: appName, description: appDescription, url: appUrl, icons: [appIcon] } },
       },
     } as WalletKitTypes.SessionAuthenticate
 
@@ -762,12 +603,11 @@ describe('WalletConnectProvider', () => {
         })
 
       const mockRequest = jest.fn().mockResolvedValue({ result: mockSignature })
-      jest.spyOn(useSafeWalletProvider, 'default').mockImplementation(
-        () =>
-          ({
-            request: mockRequest,
-          }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
-      )
+      jest
+        .spyOn(useSafeWalletProvider, 'default')
+        .mockImplementation(
+          () => ({ request: mockRequest }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
+        )
 
       jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
       jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
@@ -776,14 +616,7 @@ describe('WalletConnectProvider', () => {
         <WalletConnectProvider>
           <TestComponent />
         </WalletConnectProvider>,
-        {
-          initialReduxState: {
-            safeInfo: {
-              loading: false,
-              data: extendedSafeInfo,
-            },
-          },
-        },
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
       )
 
       await waitFor(() => {
@@ -794,14 +627,8 @@ describe('WalletConnectProvider', () => {
         expect(formatAuthMessageSpy).toHaveBeenCalledWith(mockAuthEvent.params.authPayload, '5', testSafeAddress)
         expect(mockRequest).toHaveBeenCalledWith(
           authId,
-          {
-            method: 'personal_sign',
-            params: [siweMessage, testSafeAddress],
-          },
-          expect.objectContaining({
-            name: appName,
-            url: 'https://apps-portal.safe.global/wallet-connect',
-          }),
+          { method: 'personal_sign', params: [siweMessage, testSafeAddress] },
+          expect.objectContaining({ name: appName, url: 'https://apps-portal.safe.global/wallet-connect' }),
         )
         expect(approveSessionAuthSpy).toHaveBeenCalledWith(
           authId,
@@ -844,14 +671,7 @@ describe('WalletConnectProvider', () => {
         <WalletConnectProvider>
           <TestComponent />
         </WalletConnectProvider>,
-        {
-          initialReduxState: {
-            safeInfo: {
-              loading: false,
-              data: extendedSafeInfo,
-            },
-          },
-        },
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
       )
 
       await waitFor(() => {
@@ -884,12 +704,11 @@ describe('WalletConnectProvider', () => {
         })
 
       const mockRequest = jest.fn().mockRejectedValue(new Error(signatureError))
-      jest.spyOn(useSafeWalletProvider, 'default').mockImplementation(
-        () =>
-          ({
-            request: mockRequest,
-          }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
-      )
+      jest
+        .spyOn(useSafeWalletProvider, 'default')
+        .mockImplementation(
+          () => ({ request: mockRequest }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
+        )
 
       jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
       jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
@@ -899,14 +718,7 @@ describe('WalletConnectProvider', () => {
         <WalletConnectProvider>
           <TestComponent />
         </WalletConnectProvider>,
-        {
-          initialReduxState: {
-            safeInfo: {
-              loading: false,
-              data: extendedSafeInfo,
-            },
-          },
-        },
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
       )
 
       await waitFor(() => {
@@ -934,12 +746,11 @@ describe('WalletConnectProvider', () => {
         })
 
       const mockRequest = jest.fn().mockResolvedValue({ error: { message: userRejectionError } })
-      jest.spyOn(useSafeWalletProvider, 'default').mockImplementation(
-        () =>
-          ({
-            request: mockRequest,
-          }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
-      )
+      jest
+        .spyOn(useSafeWalletProvider, 'default')
+        .mockImplementation(
+          () => ({ request: mockRequest }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
+        )
 
       jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
       jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
@@ -949,14 +760,7 @@ describe('WalletConnectProvider', () => {
         <WalletConnectProvider>
           <TestComponent />
         </WalletConnectProvider>,
-        {
-          initialReduxState: {
-            safeInfo: {
-              loading: false,
-              data: extendedSafeInfo,
-            },
-          },
-        },
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
       )
 
       await waitFor(() => {
@@ -983,6 +787,7 @@ describe('WalletConnectProvider', () => {
           initialReduxState: {
             safeInfo: {
               loading: false,
+              loaded: true,
               data: {
                 ...extendedSafeInfo,
                 chainId: '', // Missing chainId
@@ -1003,11 +808,7 @@ describe('WalletConnectProvider', () => {
     const requestUrl = faker.internet.url()
     const requestAppName = faker.company.name()
 
-    const extendedSafeInfo = {
-      ...extendedSafeInfoBuilder().build(),
-      address: { value: testSafeAddress },
-      chainId: '5',
-    }
+    const extendedSafeInfo = { ...extendedSafeInfoBuilder().build(), address: { value: testSafeAddress }, chainId: '5' }
 
     it('does not continue with the request if there is no matching topic', async () => {
       jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
@@ -1018,26 +819,17 @@ describe('WalletConnectProvider', () => {
       const sendSessionResponseSpy = jest.spyOn(WalletConnectWallet.prototype, 'sendSessionResponse')
 
       const mockRequest = jest.fn()
-      jest.spyOn(useSafeWalletProvider, 'default').mockImplementation(
-        () =>
-          ({
-            request: mockRequest,
-          }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
-      )
+      jest
+        .spyOn(useSafeWalletProvider, 'default')
+        .mockImplementation(
+          () => ({ request: mockRequest }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
+        )
 
       render(
         <WalletConnectProvider>
           <TestComponent />
         </WalletConnectProvider>,
-        {
-          initialReduxState: {
-            safeInfo: {
-              loading: false,
-              loaded: true,
-              data: extendedSafeInfo,
-            },
-          },
-        },
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
       )
 
       await waitFor(() => {
@@ -1078,26 +870,17 @@ describe('WalletConnectProvider', () => {
       const sendSessionResponseSpy = jest.spyOn(WalletConnectWallet.prototype, 'sendSessionResponse')
 
       const mockRequest = jest.fn()
-      jest.spyOn(useSafeWalletProvider, 'default').mockImplementation(
-        () =>
-          ({
-            request: mockRequest,
-          }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
-      )
+      jest
+        .spyOn(useSafeWalletProvider, 'default')
+        .mockImplementation(
+          () => ({ request: mockRequest }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
+        )
 
       render(
         <WalletConnectProvider>
           <TestComponent />
         </WalletConnectProvider>,
-        {
-          initialReduxState: {
-            safeInfo: {
-              loading: false,
-              loaded: true,
-              data: extendedSafeInfo,
-            },
-          },
-        },
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
       )
 
       await waitFor(() => {
@@ -1131,37 +914,24 @@ describe('WalletConnectProvider', () => {
       jest.spyOn(WalletConnectWallet.prototype, 'getActiveSessions').mockImplementation(() => [
         {
           topic: requestTopic,
-          peer: {
-            metadata: {
-              url: requestUrl,
-              name: requestAppName,
-            },
-          },
+          peer: { metadata: { url: requestUrl, name: requestAppName } },
         } as unknown as SessionTypes.Struct,
       ])
 
       const onRequestSpy = jest.spyOn(WalletConnectWallet.prototype, 'onRequest')
 
       const mockRequest = jest.fn()
-      jest.spyOn(useSafeWalletProvider, 'default').mockImplementation(
-        () =>
-          ({
-            request: mockRequest,
-          }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
-      )
+      jest
+        .spyOn(useSafeWalletProvider, 'default')
+        .mockImplementation(
+          () => ({ request: mockRequest }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
+        )
 
       const { getByText } = render(
         <WalletConnectProvider>
           <TestComponent />
         </WalletConnectProvider>,
-        {
-          initialReduxState: {
-            safeInfo: {
-              loading: false,
-              data: extendedSafeInfo,
-            },
-          },
-        },
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
       )
 
       await waitFor(() => {
@@ -1212,26 +982,17 @@ describe('WalletConnectProvider', () => {
       const sendSessionResponseSpy = jest.spyOn(WalletConnectWallet.prototype, 'sendSessionResponse')
 
       const mockRequest = jest.fn().mockImplementation(() => Promise.resolve({}))
-      jest.spyOn(useSafeWalletProvider, 'default').mockImplementation(
-        () =>
-          ({
-            request: mockRequest,
-          }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
-      )
+      jest
+        .spyOn(useSafeWalletProvider, 'default')
+        .mockImplementation(
+          () => ({ request: mockRequest }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
+        )
 
       render(
         <WalletConnectProvider>
           <TestComponent />
         </WalletConnectProvider>,
-        {
-          initialReduxState: {
-            safeInfo: {
-              loading: false,
-              loaded: true,
-              data: extendedSafeInfo,
-            },
-          },
-        },
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
       )
 
       await act(() => Promise.resolve())
@@ -1286,25 +1047,17 @@ describe('WalletConnectProvider', () => {
       const onRequestSpy = jest.spyOn(WalletConnectWallet.prototype, 'onRequest')
 
       const mockRequest = jest.fn().mockImplementation(() => Promise.resolve({}))
-      jest.spyOn(useSafeWalletProvider, 'default').mockImplementation(
-        () =>
-          ({
-            request: mockRequest,
-          }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
-      )
+      jest
+        .spyOn(useSafeWalletProvider, 'default')
+        .mockImplementation(
+          () => ({ request: mockRequest }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
+        )
 
       render(
         <WalletConnectProvider>
           <TestComponent />
         </WalletConnectProvider>,
-        {
-          initialReduxState: {
-            safeInfo: {
-              loading: false,
-              data: extendedSafeInfo,
-            },
-          },
-        },
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
       )
 
       await waitFor(() => {
@@ -1316,10 +1069,7 @@ describe('WalletConnectProvider', () => {
       onRequestHandler({
         id: 1,
         topic: requestTopic,
-        params: {
-          request: { method: 'fake', params: [] },
-          chainId: 'eip155:5',
-        },
+        params: { request: { method: 'fake', params: [] }, chainId: 'eip155:5' },
       } as unknown as WalletKitTypes.SessionRequest)
 
       expect(mockRequest).toHaveBeenCalledWith(
@@ -1348,12 +1098,14 @@ describe('WalletConnectProvider', () => {
         } as unknown as SessionTypes.Struct,
       ])
 
-      jest.spyOn(useSafeWalletProvider, 'default').mockImplementation(
-        () =>
-          ({
-            request: () => Promise.reject(new Error('Test request failed')),
-          }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
-      )
+      jest
+        .spyOn(useSafeWalletProvider, 'default')
+        .mockImplementation(
+          () =>
+            ({ request: () => Promise.reject(new Error('Test request failed')) }) as unknown as ReturnType<
+              typeof useSafeWalletProvider.default
+            >,
+        )
 
       const onRequestSpy = jest.spyOn(WalletConnectWallet.prototype, 'onRequest')
       const sendSessionResponseSpy = jest.spyOn(WalletConnectWallet.prototype, 'sendSessionResponse')
@@ -1362,15 +1114,7 @@ describe('WalletConnectProvider', () => {
         <WalletConnectProvider>
           <TestComponent />
         </WalletConnectProvider>,
-        {
-          initialReduxState: {
-            safeInfo: {
-              loading: false,
-              loaded: true,
-              data: extendedSafeInfo,
-            },
-          },
-        },
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
       )
 
       await waitFor(() => {
@@ -1411,6 +1155,7 @@ describe('WalletConnectProvider', () => {
           initialReduxState: {
             safeInfo: {
               loading: false,
+              loaded: true,
               data: {
                 ...extendedSafeInfo,
                 chainId: '', // Missing chainId

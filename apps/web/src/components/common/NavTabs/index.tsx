@@ -1,6 +1,6 @@
 import React from 'react'
 import NextLink from 'next/link'
-import { Tab, Tabs, Typography } from '@mui/material'
+import { Tab, Tabs, Typography, Stack } from '@mui/material'
 import { useRouter } from 'next/router'
 import type { NavItem } from '@/components/sidebar/SidebarNavigation/config'
 import css from './styles.module.css'
@@ -20,14 +20,17 @@ const NavTabs = ({ tabs }: { tabs: NavItem[] }) => {
           tabIndex={0}
           className={css.tab}
           label={
-            <Typography
-              variant="body2"
-              fontWeight={700}
-              color={activeTab === idx ? 'primary' : 'primary.light'}
-              className={css.label}
-            >
-              {tab.label}
-            </Typography>
+            <Stack direction="row" alignItems="center" gap={1}>
+              <Typography
+                variant="body2"
+                fontWeight={700}
+                color={activeTab === idx ? 'primary' : 'primary.light'}
+                className={css.label}
+              >
+                {tab.label}
+              </Typography>
+              {tab.tag}
+            </Stack>
           }
         />
       ))}
