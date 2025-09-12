@@ -14,7 +14,7 @@ export const useTransactionSigner = (txId: string) => {
     txDetails,
     detailedExecutionInfo,
     signerState,
-    isLoading,
+    isLoading: !!isLoading,
     isError,
     error,
   }

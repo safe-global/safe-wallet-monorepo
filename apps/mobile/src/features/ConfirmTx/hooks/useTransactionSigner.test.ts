@@ -215,7 +215,25 @@ describe('useTransactionSigner', () => {
   })
 
   describe('loading states', () => {
-    it('should show loading state when transaction data is fetching', () => {
+    it('should show loading state when transaction data is loading', () => {
+      mockUseTransactionData.mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        isError: false,
+        error: undefined,
+      })
+
+      mockUseTxSignerState.mockReturnValue(mockSignerState)
+
+      const { result } = renderHook(() => useTransactionSigner(mockTxId))
+
+      expect(result.current.isLoading).toBe(true)
+      expect(result.current.txDetails).toBeUndefined()
+      expect(result.current.detailedExecutionInfo).toBeUndefined()
+      expect(result.current.isError).toBe(false)
+    })
+
+    it('should not show loading state when transaction data is fetching', () => {
       mockUseTransactionData.mockReturnValue({
         data: undefined,
         isFetching: true,
@@ -227,7 +245,7 @@ describe('useTransactionSigner', () => {
 
       const { result } = renderHook(() => useTransactionSigner(mockTxId))
 
-      expect(result.current.isLoading).toBe(true)
+      expect(result.current.isLoading).toBe(false)
       expect(result.current.txDetails).toBeUndefined()
       expect(result.current.detailedExecutionInfo).toBeUndefined()
       expect(result.current.isError).toBe(false)
