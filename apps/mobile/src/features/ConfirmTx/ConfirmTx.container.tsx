@@ -23,12 +23,10 @@ function ConfirmTxContainer() {
 
   useTxSignerAutoSelection(detailedExecutionInfo)
 
+  const isFinalizedTx = txDetails?.txStatus === 'SUCCESS' || txDetails?.txStatus === 'FAILED'
+
   const handleHistoryNavigation = useCallback(() => {
-    if (
-      pendingTx?.status === PendingStatus.SUCCESS ||
-      txDetails?.txStatus === 'SUCCESS' ||
-      txDetails?.txStatus === 'FAILED'
-    ) {
+    if (pendingTx?.status === PendingStatus.SUCCESS || isFinalizedTx) {
       router.dismissAll()
       router.push({
         pathname: '/history-transaction-details',
@@ -37,7 +35,7 @@ function ConfirmTxContainer() {
         },
       })
     }
-  }, [pendingTx?.status])
+  }, [pendingTx?.status, isFinalizedTx])
 
   useFocusEffect(handleHistoryNavigation)
 
@@ -82,7 +80,7 @@ function ConfirmTxContainer() {
         <ConfirmTxForm
           hasEnoughConfirmations={hasEnoughConfirmations}
           isExpired={isExpired}
-          isPending={pendingTx?.status === PendingStatus.PROCESSING}
+          isPending={!!pendingTx}
           txId={txId}
         />
       </View>

@@ -45,6 +45,8 @@ export function useTransactionExecution({ txId, signerAddress }: UseTransactionE
         return
       }
 
+      const walletNonce = await getUserNonce(activeChain, signerAddress)
+
       const { hash } = await executeTx({
         chain: activeChain,
         activeSafe,
@@ -59,7 +61,7 @@ export function useTransactionExecution({ txId, signerAddress }: UseTransactionE
           safeAddress: activeSafe.address,
           txHash: hash,
           walletAddress: signerAddress,
-          walletNonce: await getUserNonce(activeChain, signerAddress),
+          walletNonce,
         }),
       )
 
