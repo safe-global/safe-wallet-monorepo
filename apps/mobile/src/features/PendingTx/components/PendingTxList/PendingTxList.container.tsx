@@ -108,7 +108,7 @@ export function PendingTxListContainer({
     <View flexDirection={'row'} alignItems={'flex-start'} paddingTop={'$3'}>
       <LargeHeaderTitle marginRight={5}>Pending transactions</LargeHeaderTitle>
       {isLoading && !refreshing ? (
-        <Loader size={24} color="$warning1ContrastTextDark" />
+        <Loader size={24} color={getTokenValue('$color.warning1ContrastTextDark')} />
       ) : (
         <Badge content={`${amount}${hasMore ? '+' : ''}`} themeName="badge_warning_variant2" />
       )}

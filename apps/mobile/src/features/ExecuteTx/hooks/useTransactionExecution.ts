@@ -1,15 +1,18 @@
 import { useCallback, useState } from 'react'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
-import { useAppSelector } from '@/src/store/hooks'
+import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectChainById } from '@/src/store/chains'
 import type { RootState } from '@/src/store'
 import { getPrivateKey } from '@/src/hooks/useSign/useSign'
 import { executeTx } from '@/src/services/tx/tx-sender/execute'
 import logger from '@/src/utils/logger'
+import { addPendingTx } from '@/src/store/pendingTxsSlice'
+import { getUserNonce } from '@/src/services/web3'
 
 export enum ExecutionStatus {
   IDLE = 'idle',
   LOADING = 'loading',
+  PROCESSING = 'processing',
   SUCCESS = 'success',
   ERROR = 'error',
 }
@@ -21,6 +24,7 @@ interface UseTransactionExecutionProps {
 
 export function useTransactionExecution({ txId, signerAddress }: UseTransactionExecutionProps) {
   const [status, setStatus] = useState<ExecutionStatus>(ExecutionStatus.IDLE)
+  const dispatch = useAppDispatch()
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
 
@@ -41,13 +45,27 @@ export function useTransactionExecution({ txId, signerAddress }: UseTransactionE
         return
       }
 
-      await executeTx({
+      const walletNonce = await getUserNonce(activeChain, signerAddress)
+
+      const { hash } = await executeTx({
         chain: activeChain,
         activeSafe,
         txId,
         privateKey,
       })
-      setStatus(ExecutionStatus.SUCCESS)
+
+      dispatch(
+        addPendingTx({
+          txId,
+          chainId: activeChain.chainId,
+          safeAddress: activeSafe.address,
+          txHash: hash,
+          walletAddress: signerAddress,
+          walletNonce,
+        }),
+      )
+
+      setStatus(ExecutionStatus.PROCESSING)
     } catch (error) {
       logger.error('Error executing transaction:', error)
       setStatus(ExecutionStatus.ERROR)

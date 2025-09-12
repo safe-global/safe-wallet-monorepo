@@ -19,9 +19,9 @@ function HistoryTransactionDetailsContainer() {
   const shareTransaction = useShareTransaction(txId)
 
   const {
-    data: txDetails,
-    isFetching: isLoading,
+    currentData: txDetails,
     isError,
+    isLoading,
   } = useTransactionsGetTransactionByIdV1Query({
     chainId: activeSafe.chainId,
     id: txId,
