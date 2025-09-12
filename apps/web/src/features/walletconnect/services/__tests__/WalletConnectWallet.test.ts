@@ -229,6 +229,62 @@ describe('WalletConnectWallet', () => {
       })
     })
 
+    it('should include Safe-compatible methods from optional namespaces', async () => {
+      const approveSessionSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'approveSession')
+      approveSessionSpy.mockResolvedValue({
+        namespaces: {
+          eip155: {},
+        },
+      } as unknown as SessionTypes.Struct)
+
+      const proposal = {
+        id: 123,
+        params: {
+          id: 456,
+          pairingTopic: 'pairingTopic',
+          expiry: 789,
+          requiredNamespaces: {
+            eip155: {
+              chains: ['eip155:1'],
+              methods: ['eth_sendTransaction'],
+              events: ['chainChanged'],
+            },
+          },
+          optionalNamespaces: {
+            eip155: {
+              chains: ['eip155:137'],
+              methods: ['personal_sign', 'unsupported_method', 'eth_sign'],
+              events: ['accountsChanged', 'unsupported_event'],
+            },
+          },
+        },
+      } as unknown as WalletKitTypes.SessionProposal
+
+      await wallet.approveSession(proposal, '1', toBeHex('0x123', 20))
+
+      const expectedNamespaces = {
+        eip155: {
+          chains: ['eip155:1'],
+          methods: ['eth_sendTransaction', 'personal_sign', 'eth_sign', 'eth_accounts', 'net_version', 'eth_chainId', 'eth_signTypedData', 'eth_signTypedData_v4', 'eth_blockNumber', 'eth_getBalance', 'eth_getCode', 'eth_getTransactionCount', 'eth_getStorageAt', 'eth_getBlockByNumber', 'eth_getBlockByHash', 'eth_getTransactionByHash', 'eth_getTransactionReceipt', 'eth_estimateGas', 'eth_call', 'eth_getLogs', 'eth_gasPrice', 'wallet_switchEthereumChain', 'wallet_sendCalls', 'wallet_getCallsStatus', 'wallet_showCallsStatus', 'wallet_getCapabilities', 'safe_setSettings'],
+          events: ['chainChanged', 'accountsChanged'],
+          accounts: [`eip155:1:${toBeHex('0x123', 20)}`],
+        },
+      }
+
+      expect(approveSessionSpy).toHaveBeenCalledWith({
+        id: 123,
+        namespaces: expectedNamespaces,
+      })
+
+      // Verify that Safe-compatible methods from optional namespaces are included
+      const calledNamespaces = approveSessionSpy.mock.calls[0][0].namespaces
+      expect(calledNamespaces.eip155.methods).toContain('personal_sign')
+      expect(calledNamespaces.eip155.methods).toContain('eth_sign')
+      expect(calledNamespaces.eip155.methods).not.toContain('unsupported_method')
+      expect(calledNamespaces.eip155.events).toContain('accountsChanged')
+      expect(calledNamespaces.eip155.events).not.toContain('unsupported_event')
+    })
+
     it('should call updateSession with the correct parameters', async () => {
       const emitSessionEventSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'emitSessionEvent')
       jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'approveSession').mockResolvedValue({

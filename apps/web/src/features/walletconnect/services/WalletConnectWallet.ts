@@ -89,9 +89,21 @@ class WalletConnectWallet {
     const eip155ChainIds = supportedChainIds.map(getEip155ChainId)
     const eip155Accounts = eip155ChainIds.map((eip155ChainId) => `${eip155ChainId}:${safeAddress}`)
 
-    // Don't include optionalNamespaces methods/events
-    const methods = uniq((proposal.params.requiredNamespaces[EIP155]?.methods || []).concat(SAFE_COMPATIBLE_METHODS))
-    const events = uniq((proposal.params.requiredNamespaces[EIP155]?.events || []).concat(SAFE_COMPATIBLE_EVENTS))
+    // Include Safe-compatible methods/events from both required and optional namespaces
+    const requiredMethods = proposal.params.requiredNamespaces[EIP155]?.methods || []
+    const optionalMethods = proposal.params.optionalNamespaces?.[EIP155]?.methods?.filter(method => 
+      SAFE_COMPATIBLE_METHODS.includes(method)
+    ) || []
+
+    const methods = uniq(requiredMethods.concat(optionalMethods).concat(SAFE_COMPATIBLE_METHODS))
+
+    // Include Safe-compatible events from both required and optional namespaces  
+    const requiredEvents = proposal.params.requiredNamespaces[EIP155]?.events || []
+    const optionalEvents = proposal.params.optionalNamespaces?.[EIP155]?.events?.filter(event =>
+      SAFE_COMPATIBLE_EVENTS.includes(event)
+    ) || []
+
+    const events = uniq(requiredEvents.concat(optionalEvents).concat(SAFE_COMPATIBLE_EVENTS))
 
     return buildApprovedNamespaces({
       proposal: proposal.params,
