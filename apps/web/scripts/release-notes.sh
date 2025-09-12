@@ -24,12 +24,12 @@ while IFS="|" read -r hash subject; do
   fi
 
   # Group by prefix
-  if [[ $DESC =~ ^([Ff]eat) ]]; then
+  if [[ $DESC =~ ^[a-zA-Z]+\([Mm]obile\): ]]; then
+    mobile+=("| $DESC | $PR |")
+  elif [[ $DESC =~ ^([Ff]eat) ]]; then
     features+=("| $DESC | $PR |")
   elif [[ $DESC =~ ^([Ff]ix) ]]; then
     fixes+=("| $DESC | $PR |")
-  elif [[ $DESC =~ ^([Mm]obile) ]]; then
-    mobile+=("| $DESC | $PR |")
   else
     others+=("| $DESC | $PR |")
   fi
