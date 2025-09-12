@@ -7,7 +7,7 @@ import { SimpleTxWatcher } from '@safe-global/utils/services/SimpleTxWatcher'
 import { REHYDRATE } from 'redux-persist'
 import { delay } from '@safe-global/utils/utils/helpers'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { SafeTxWatcher } from '@safe-global/utils/services/SafeTxWatcher'
+import { SimplePoller } from '@safe-global/utils/services/SimplePoller'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
 
 const startIndexingWatcher = (listenerApi: AppListenerEffectAPI, txId: string, chainId: string) => {
@@ -25,8 +25,8 @@ const startIndexingWatcher = (listenerApi: AppListenerEffectAPI, txId: string, c
     throw new Error('fetching safe tx again')
   }
 
-  SafeTxWatcher.getInstance()
-    .watchTx(txId, queryUntilSuccess)
+  SimplePoller.getInstance()
+    .watch(txId, queryUntilSuccess)
     .then(() => listenerApi.dispatch(setPendingTxStatus({ txId, chainId, status: PendingStatus.SUCCESS })))
     .catch((err) => console.log(err))
 }
