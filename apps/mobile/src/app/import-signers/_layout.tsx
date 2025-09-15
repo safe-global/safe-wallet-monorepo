@@ -34,6 +34,7 @@ export default function ImportSignersLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen name="hardware-devices" options={{ headerShown: true, title: '' }} />
     </Stack>
   )
 }
