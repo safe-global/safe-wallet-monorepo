@@ -36,6 +36,7 @@ export default function ImportSignersLayout() {
       />
       <Stack.Screen name="hardware-devices" options={{ headerShown: true, title: '' }} />
       <Stack.Screen name="ledger-connect" options={{ headerShown: true, title: '' }} />
+      <Stack.Screen name="ledger-addresses" options={{ headerShown: true, title: '' }} />
     </Stack>
   )
 }
