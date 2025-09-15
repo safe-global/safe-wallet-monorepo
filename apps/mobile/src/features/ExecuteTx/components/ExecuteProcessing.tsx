@@ -9,19 +9,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AbsoluteLinearGradient } from '@/src/components/LinearGradient'
 import { useTheme } from '@/src/theme/hooks/useTheme'
 
-export function ExecuteProcessing({ txId }: { txId: string }) {
+export function ExecuteProcessing() {
   const { bottom } = useSafeAreaInsets()
   const { isDark } = useTheme()
 
   const color = isDark ? getTokenValue('$color.backgroundLightDark') : getTokenValue('$color.backgroundLightLight')
 
   const handleTxPress = () => {
-    router.navigate({
-      pathname: '/confirm-transaction',
-      params: {
-        txId,
-      },
-    })
+    // Go back to pending transactions
+    router.back()
+    router.back()
   }
 
   const handleHomePress = () => {

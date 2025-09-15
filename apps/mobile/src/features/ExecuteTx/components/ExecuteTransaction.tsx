@@ -44,7 +44,7 @@ export function ExecuteTransaction() {
   }
 
   if (status === ExecutionStatus.PROCESSING) {
-    return <ExecuteProcessing txId={txId} />
+    return <ExecuteProcessing />
   }
 
   return <LoadingScreen title="Executing transaction..." description="It may take a few seconds..." />
