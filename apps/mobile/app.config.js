@@ -14,8 +14,10 @@ const sslPinningDomains = {
   ],
 }
 
+const name = IS_DEV ? 'Dev-Safe{Mobile}' : 'Safe{Mobile}'
+
 const config = {
-  name: IS_DEV ? 'Dev-Safe{Mobile}' : 'Safe{Mobile}',
+  name: name,
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
   version: '1.0.2',
@@ -73,6 +75,14 @@ const config = {
     favicon: './assets/images/favicon.png',
   },
   plugins: [
+    [
+      'react-native-ble-plx',
+      {
+        isBackgroundEnabled: false,
+        modes: ['central'],
+        bluetoothAlwaysPermission: `Allow ${name} to connect to bluetooth devices`,
+      },
+    ],
     ['./expo-plugins/withNotificationIcons.js'],
     [
       './expo-plugins/ssl-pinning/withSSLPinning.js',
