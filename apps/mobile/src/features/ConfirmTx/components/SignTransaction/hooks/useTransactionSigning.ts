@@ -8,7 +8,9 @@ import { signTx } from '@/src/services/tx/tx-sender/sign'
 import { useTransactionsAddConfirmationV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import logger from '@/src/utils/logger'
 import { useGuard } from '@/src/context/GuardProvider'
-
+import { selectSignerByAddress } from '@/src/store/signersSlice'
+import { ledgerSafeSigningService } from '@/src/services/ledger/ledger-safe-signing.service'
+import { Chain as ChainInfo } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 export enum SigningStatus {
   IDLE = 'idle',
   LOADING = 'loading',
@@ -27,6 +29,7 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const { resetGuard } = useGuard()
   const hasTriggeredAutoSign = useRef(false)
+  const signer = useAppSelector((state: RootState) => selectSignerByAddress(state, signerAddress))
 
   const [addConfirmation, { isLoading: isApiLoading, data: apiData, isError: isApiError }] =
     useTransactionsAddConfirmationV1Mutation()
@@ -39,26 +42,42 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
     setStatus(SigningStatus.LOADING)
     hasTriggeredAutoSign.current = true
 
-    let privateKey
     try {
-      privateKey = await getPrivateKey(signerAddress)
-    } catch (error) {
-      logger.error('Error loading private key:', error)
-      setStatus(SigningStatus.ERROR)
-    }
+      let signedTx: { signature: string; safeTransactionHash: string }
 
-    try {
-      if (!privateKey) {
-        setStatus(SigningStatus.ERROR)
-        return
+      // Check if this is a Ledger signer
+      if (signer.type === 'ledger') {
+        // Handle Ledger signing
+        if (!signer.derivationPath) {
+          throw new Error('Ledger signer missing derivation path')
+        }
+
+        // Ensure Ledger device is connected
+        await ledgerSafeSigningService.ensureLedgerConnection()
+
+        signedTx = await ledgerSafeSigningService.signSafeTransaction({
+          chain: activeChain as ChainInfo,
+          activeSafe,
+          txId,
+          signerAddress,
+          derivationPath: signer.derivationPath,
+        })
+      } else {
+        // Handle private key signing (existing flow)
+        const privateKey = await getPrivateKey(signerAddress)
+
+        if (!privateKey) {
+          setStatus(SigningStatus.ERROR)
+          return
+        }
+
+        signedTx = await signTx({
+          chain: activeChain as ChainInfo,
+          activeSafe,
+          txId,
+          privateKey,
+        })
       }
-
-      const signedTx = await signTx({
-        chain: activeChain,
-        activeSafe,
-        txId,
-        privateKey,
-      })
 
       await addConfirmation({
         chainId: activeSafe.chainId,
@@ -77,7 +96,7 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
       logger.error('Error signing transaction:', error)
       setStatus(SigningStatus.ERROR)
     }
-  }, [activeChain, activeSafe, txId, signerAddress, addConfirmation, resetGuard])
+  }, [activeChain, activeSafe, txId, signerAddress, addConfirmation, resetGuard, signer])
 
   const retry = useCallback(() => {
     hasTriggeredAutoSign.current = false
@@ -98,5 +117,6 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
     apiData,
     isApiError,
     hasTriggeredAutoSign: hasTriggeredAutoSign.current,
+    signer,
   }
 }

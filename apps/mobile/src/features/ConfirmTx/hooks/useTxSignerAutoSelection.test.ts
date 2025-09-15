@@ -12,8 +12,8 @@ const mockUseTxSignerActions = useTxSignerActions as jest.MockedFunction<typeof 
 describe('useTxSignerAutoSelection', () => {
   const mockSetTxSigner = jest.fn()
 
-  const mockSignerA = { value: '0x123', type: 'EOA' as const }
-  const mockSignerB = { value: '0x456', type: 'EOA' as const }
+  const mockSignerA = { value: '0x123', type: 'private-key' as const }
+  const mockSignerB = { value: '0x456', type: 'private-key' as const }
 
   beforeEach(() => {
     jest.clearAllMocks()

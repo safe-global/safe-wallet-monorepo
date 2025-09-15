@@ -1,14 +1,14 @@
 import { render, screen } from '@/src/tests/test-utils'
 import { ReadOnlyContainer } from './ReadOnly.container'
 import { RootState } from '@/src/store'
-import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { SignerInfo } from '@/src/types/address'
 
 describe('ReadOnlyContainer', () => {
   const mockSafeAddress = '0x123'
-  const mockSigners: Record<string, AddressInfo> = {
-    '0x456': { value: '0x456', name: 'Signer 1' },
-    '0x789': { value: '0x789', name: 'Signer 2' },
+  const mockSigners: Record<string, SignerInfo> = {
+    '0x456': { value: '0x456', name: 'Signer 1', type: 'private-key' as const },
+    '0x789': { value: '0x789', name: 'Signer 2', type: 'private-key' as const },
   }
 
   const mockSafeInfo: SafeOverview = {
@@ -20,7 +20,7 @@ describe('ReadOnlyContainer', () => {
     queued: 0,
   }
 
-  const createInitialState = (signers: Record<string, AddressInfo>, safeInfo: SafeOverview): Partial<RootState> => ({
+  const createInitialState = (signers: Record<string, SignerInfo>, safeInfo: SafeOverview): Partial<RootState> => ({
     safes: {
       [mockSafeAddress]: {
         '1': safeInfo,
