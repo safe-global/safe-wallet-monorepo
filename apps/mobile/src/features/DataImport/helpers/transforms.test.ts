@@ -268,7 +268,9 @@ describe('Data import helpers', () => {
 
       // Should import the owner key
       expect(storePrivateKey).toHaveBeenCalledWith('0x2', '0xabcd')
-      expect(mockDispatch).toHaveBeenCalledWith(addSignerWithEffects({ value: '0x2', name: 'Owner 1' }))
+      expect(mockDispatch).toHaveBeenCalledWith(
+        addSignerWithEffects({ value: '0x2', name: 'Owner 1', type: 'private-key' }),
+      )
       expect(mockCreateDelegate).toHaveBeenCalledWith('0xabcd', null)
 
       // Should not import the non-owner key
