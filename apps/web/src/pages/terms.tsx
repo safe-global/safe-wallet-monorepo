@@ -1,25 +1,40 @@
-import CustomLink from '@/components/common/CustomLink'
+import { TERMS_LINK } from '@/config/constants'
+import { Typography } from '@mui/material'
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import SafeTerms from '@/markdown/terms/terms.md'
-import type { MDXComponents } from 'mdx/types'
-import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
-import { BRAND_NAME } from '@/config/constants'
+import { useEffect, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
 
-const overrideComponents: MDXComponents = {
-  a: CustomLink,
+const SafeTerms = () => {
+  const [content, setContent] = useState<string>('')
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const response = await fetch(TERMS_LINK)
+        const text = await response.text()
+        setContent(text)
+      } catch (error) {
+        console.error('Error fetching terms:', error)
+      }
+    }
+
+    fetchContent()
+  }, [])
+
+  return <main>{content ? <ReactMarkdown>{content}</ReactMarkdown> : <Typography>Loading terms...</Typography>}</main>
 }
 
 const Terms: NextPage = () => {
-  const isOfficialHost = useIsOfficialHost()
-
   return (
     <>
       <Head>
-        <title>{`${BRAND_NAME} – Terms`}</title>
+        <title>Terms and Conditions</title>
       </Head>
 
-      <main>{isOfficialHost && <SafeTerms components={overrideComponents} />}</main>
+      <main>
+        <SafeTerms />
+      </main>
     </>
   )
 }

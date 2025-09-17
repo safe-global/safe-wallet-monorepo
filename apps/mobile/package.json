@@ -59,7 +59,7 @@
     "@react-navigation/material-top-tabs": "^7.2.10",
     "@react-navigation/native": "^7.1.6",
     "@reduxjs/toolkit": "^2.8.2",
-    "@safe-global/protocol-kit": "^5.2.12",
+    "@safe-global/protocol-kit": "patch:@safe-global/protocol-kit@npm%3A5.2.8#~/.yarn/patches/@safe-global-protocol-kit-npm-5.2.8-adfcb41eda.patch",
     "@safe-global/store": "workspace:^",
     "@safe-global/utils": "workspace:^",
     "@shopify/flash-list": "1.7.6",

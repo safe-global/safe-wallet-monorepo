@@ -1,12 +1,11 @@
 import chains from './chains'
-import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 
 export const IS_PRODUCTION = process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true'
 export const IS_DEV = process.env.NODE_ENV === 'development'
 
 // default chain ID's as provided to the environment
-export const DEFAULT_TESTNET_CHAIN_ID = +(process.env.NEXT_PUBLIC_DEFAULT_TESTNET_CHAIN_ID ?? chains.sep)
-export const DEFAULT_MAINNET_CHAIN_ID = +(process.env.NEXT_PUBLIC_DEFAULT_MAINNET_CHAIN_ID ?? chains.eth)
+export const DEFAULT_TESTNET_CHAIN_ID = +(process.env.NEXT_PUBLIC_DEFAULT_TESTNET_CHAIN_ID ?? chains['flow-testnet'])
+export const DEFAULT_MAINNET_CHAIN_ID = +(process.env.NEXT_PUBLIC_DEFAULT_MAINNET_CHAIN_ID ?? chains['flow-mainnet'])
 
 // default chain ID used in the application
 export const DEFAULT_CHAIN_ID = IS_PRODUCTION ? DEFAULT_MAINNET_CHAIN_ID : DEFAULT_TESTNET_CHAIN_ID
@@ -64,7 +63,33 @@ export enum SafeAppsTag {
   SWAP_FALLBACK = 'swap-fallback',
 }
 
-// Safe Apps names
+// Help Center
+export const HELP_CENTER_URL = 'https://safe-support.protofire.io'
+export const HELP_CENTER_URL_SAFE = 'https://help.safe.global'
+export const HelpCenterArticle = {
+  ADDRESS_BOOK_DATA: `${HELP_CENTER_URL_SAFE}/en/articles/40811-address-book-export-and-import`,
+  ADVANCED_PARAMS: `${HELP_CENTER_URL_SAFE}/en/articles/40837-advanced-transaction-parameters`,
+  CANCELLING_TRANSACTIONS: `${HELP_CENTER_URL_SAFE}/en/articles/40836-why-do-i-need-to-pay-for-cancelling-a-transaction`,
+  COOKIES: `${HELP_CENTER_URL_SAFE}/en/articles/40797-why-do-i-need-to-enable-third-party-cookies-for-safe-apps`,
+  CONFLICTING_TRANSACTIONS: `${HELP_CENTER_URL_SAFE}/en/articles/40839-why-are-transactions-with-the-same-nonce-conflicting-with-each-other`,
+  FALLBACK_HANDLER: `${HELP_CENTER_URL_SAFE}/en/articles/40838-what-is-a-fallback-handler-and-how-does-it-relate-to-safe`,
+  MOBILE_SAFE: `${HELP_CENTER_URL_SAFE}/en/articles/40801-connect-to-web-with-mobile-safe`,
+  RECOVERY: `${HELP_CENTER_URL_SAFE}/en/articles/110656-account-recovery-in-safe-wallet`,
+  RELAYING: `${HELP_CENTER_URL_SAFE}/en/articles/59203-what-is-gas-fee-sponsoring`,
+  SAFE_SETUP: `${HELP_CENTER_URL_SAFE}/en/articles/40835-what-safe-setup-should-i-use`,
+  SIGNED_MESSAGES: `${HELP_CENTER_URL_SAFE}/en/articles/40783-what-are-signed-messages`,
+  SPAM_TOKENS: `${HELP_CENTER_URL_SAFE}/en/articles/40784-default-token-list-local-hiding-of-spam-tokens`,
+  SPENDING_LIMITS: `${HELP_CENTER_URL_SAFE}/en/articles/40842-set-up-and-use-spending-limits`,
+  TRANSACTION_GUARD: `${HELP_CENTER_URL_SAFE}/en/articles/40809-what-is-a-transaction-guard`,
+  UNEXPECTED_DELEGATE_CALL: `${HELP_CENTER_URL_SAFE}/en/articles/40794-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction`,
+  PROPOSERS: `${HELP_CENTER_URL_SAFE}/en/articles/235770-proposers`,
+  PUSH_NOTIFICATIONS: `${HELP_CENTER_URL_SAFE}/en/articles/99197-how-to-start-receiving-web-push-notifications-in-the-web-wallet`,
+  SWAP_WIDGET_FEES: `${HELP_CENTER_URL_SAFE}/en/articles/178530-how-does-the-widget-fee-work-for-native-swaps`,
+} as const
+export const HelperCenterArticleTitles = {
+  RECOVERY: 'Learn more about the Account recovery process',
+  // Safe Apps names
+}
 export enum SafeAppsName {
   CSV = 'CSV Airdrop',
 }
@@ -72,8 +97,12 @@ export enum SafeAppsName {
 export const RECOVERY_FEEDBACK_FORM =
   'https://noteforms.com/forms/safe-feedback-form-hk16ds?notionforms=1&utm_source=notionforms'
 
+// Social
+export const DISCORD_URL = ' https://discord.com/invite/J6fFnh2xx6'
+export const TWITTER_URL = 'https://x.com/flow_blockchain'
+
 // Legal
-export const IS_OFFICIAL_HOST = process.env.NEXT_PUBLIC_IS_OFFICIAL_HOST === 'true'
+export const IS_OFFICIAL_HOST = 'true'
 export const OFFICIAL_HOSTS = /app\.safe\.global|.+\.5afe\.dev|localhost:3000/
 export const IPFS_HOSTS = /\.ipfs\.dweb\.link|\.ipfs\.w3s\.link|\.ipfs\.inbrowser\.link/
 export const BRAND_NAME = process.env.NEXT_PUBLIC_BRAND_NAME || (IS_OFFICIAL_HOST ? 'Safe{Wallet}' : 'Wallet fork')
@@ -87,3 +116,9 @@ export const SAFE_PASS_URL = 'community.safe.global'
 export const ECOSYSTEM_ID_ADDRESS =
   process.env.NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS || '0x0000000000000000000000000000000000000000'
 export const MULTICHAIN_HELP_ARTICLE = `${HELP_CENTER_URL}/en/articles/222612-multi-chain-safe`
+
+export const TERMS_LINK =
+  process.env.NEXT_PUBLIC_TERMS_LINK ||
+  'https://raw.githubusercontent.com/protofire/safe-legal/refs/heads/main/terms.md'
+export const COOKIE_LINK = 'https://raw.githubusercontent.com/protofire/safe-legal/refs/heads/main/cookie.md'
+export const IMPRINT_LINK = 'https://raw.githubusercontent.com/protofire/safe-legal/refs/heads/main/imprint.md'
