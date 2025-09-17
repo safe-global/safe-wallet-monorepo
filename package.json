@@ -43,6 +43,7 @@
   },
   "packageManager": "yarn@4.6.0",
   "dependencies": {
-    "@yarnpkg/types": "^4.0.1"
+    "@yarnpkg/types": "^4.0.1",
+    "react-markdown": "9.0.1"
   }
 }
