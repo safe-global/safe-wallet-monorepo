@@ -116,6 +116,7 @@ export const SAFE_PASS_URL = 'community.safe.global'
 export const ECOSYSTEM_ID_ADDRESS =
   process.env.NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS || '0x0000000000000000000000000000000000000000'
 export const MULTICHAIN_HELP_ARTICLE = `${HELP_CENTER_URL}/en/articles/222612-multi-chain-safe`
+export const NEW_SUGGESTION_FORM = 'https://safe-feature-request.protofire.io'
 
 export const TERMS_LINK =
   process.env.NEXT_PUBLIC_TERMS_LINK ||
