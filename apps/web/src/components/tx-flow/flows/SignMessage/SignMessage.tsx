@@ -56,7 +56,7 @@ import LinkIcon from '@/public/images/messages/link.svg'
 import { Blockaid } from '@/components/tx/security/blockaid'
 import CheckWallet from '@/components/common/CheckWallet'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
-import { getDomainHash, getSafeMessageMessageHash } from '@/utils/safe-hashes'
+import { getDomainHash, getSafeMessageMessageHash } from '@safe-global/utils/utils/safe-hashes'
 import type { SafeVersion } from '@safe-global/types-kit'
 
 const createSkeletonMessage = (confirmationsRequired: number): MessageItem => {
@@ -136,12 +136,12 @@ const MessageDialogError = ({ isOwner, submitError }: { isOwner: boolean; submit
     !wallet || !onboard
       ? 'No wallet is connected.'
       : !isOwner
-        ? "You are currently not a signer of this Safe Account and won't be able to confirm this message."
-        : submitError && isWalletRejection(submitError)
-          ? 'User rejected signing.'
-          : submitError
-            ? 'Error confirming the message. Please try again.'
-            : null
+      ? "You are currently not a signer of this Safe Account and won't be able to confirm this message."
+      : submitError && isWalletRejection(submitError)
+      ? 'User rejected signing.'
+      : submitError
+      ? 'Error confirming the message. Please try again.'
+      : null
 
   if (errorMessage) {
     return <ErrorMessage>{errorMessage}</ErrorMessage>
