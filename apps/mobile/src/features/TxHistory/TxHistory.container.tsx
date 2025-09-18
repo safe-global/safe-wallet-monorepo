@@ -8,9 +8,11 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppDispatch } from '@/src/store/hooks'
 import { useLocalSearchParams } from 'expo-router'
 import Logger from '@/src/utils/logger'
+import useSafeInfo from '@/src/hooks/useSafeInfo'
 
 export function TxHistoryContainer() {
   const activeSafe = useDefinedActiveSafe()
+  const { safe } = useSafeInfo()
   const dispatch = useAppDispatch()
   const [isRefreshing, setIsRefreshing] = React.useState(false)
   const { fromNotification } = useLocalSearchParams<{ fromNotification?: string }>()
@@ -18,6 +20,7 @@ export function TxHistoryContainer() {
   const queryArgs = {
     chainId: activeSafe.chainId,
     safeAddress: activeSafe.address,
+    reloadTag: safe.txHistoryTag,
   }
 
   const {

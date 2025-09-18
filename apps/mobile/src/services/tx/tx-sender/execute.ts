@@ -10,7 +10,7 @@ interface ExecuteTxParams {
   privateKey: string
 }
 
-export const executeTx = async ({ chain, activeSafe, txId, privateKey }: ExecuteTxParams): Promise<string> => {
+export const executeTx = async ({ chain, activeSafe, txId, privateKey }: ExecuteTxParams) => {
   if (!chain) {
     throw new Error('Active chain not found')
   }
@@ -41,7 +41,5 @@ export const executeTx = async ({ chain, activeSafe, txId, privateKey }: Execute
     })
   })
 
-  const { hash } = await protocolKit.executeTransaction(safeTx)
-
-  return hash
+  return protocolKit.executeTransaction(safeTx)
 }

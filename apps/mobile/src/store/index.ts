@@ -1,4 +1,10 @@
-import { combineReducers, configureStore } from '@reduxjs/toolkit'
+import {
+  combineReducers,
+  configureStore,
+  createListenerMiddleware,
+  ListenerEffectAPI,
+  TypedStartListening,
+} from '@reduxjs/toolkit'
 import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist'
 import { reduxStorage } from './storage'
 import txHistory from './txHistorySlice'
@@ -13,6 +19,7 @@ import settings from './settingsSlice'
 import safes from './safesSlice'
 import safeSubscriptions from './safeSubscriptionsSlice'
 import biometrics from './biometricsSlice'
+import pendingTxs from './pendingTxsSlice'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import devToolsEnhancer from 'redux-devtools-expo-dev-plugin'
 import { GATEWAY_URL, isTestingEnv } from '../config/constants'
@@ -24,6 +31,7 @@ import notificationsMiddleware from './middleware/notifications'
 import analyticsMiddleware from './middleware/analytics'
 import notificationSyncMiddleware from './middleware/notificationSync'
 import { setBackendStore } from '@/src/store/utils/singletonStore'
+import pendingTxsListeners from '@/src/store/middleware/pendingTxs'
 
 setSDKBaseURL(GATEWAY_URL)
 setBaseUrl(GATEWAY_URL)
@@ -41,7 +49,7 @@ const persistConfig = {
   key: 'root',
   version: 1,
   storage: reduxStorage,
-  blacklist: [web3API.reducerPath, 'myAccounts'],
+  blacklist: [web3API.reducerPath, cgwClient.reducerPath, 'myAccounts'],
   transforms: [cgwClientFilter],
 }
 
@@ -58,6 +66,7 @@ export const rootReducer = combineReducers({
   settings,
   safeSubscriptions,
   biometrics,
+  pendingTxs,
   [web3API.reducerPath]: web3API.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
 })
@@ -68,12 +77,21 @@ export type RootReducerState = ReturnType<typeof rootReducer>
 // Use the persistReducer with the correct types
 const persistedReducer = persistReducer<RootReducerState>(persistConfig, rootReducer)
 
+export type AppStartListening = TypedStartListening<RootState, AppDispatch>
+export type AppListenerEffectAPI = ListenerEffectAPI<RootState, AppDispatch>
+export const listenerMiddlewareInstance = createListenerMiddleware<RootState>()
+export const startAppListening = listenerMiddlewareInstance.startListening as AppStartListening
+
+const listeners = [pendingTxsListeners]
+
 export const makeStore = () =>
   configureStore({
     reducer: persistedReducer,
     devTools: false,
-    middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware({
+    middleware: (getDefaultMiddleware) => {
+      listeners.forEach((listener) => listener(startAppListening))
+
+      return getDefaultMiddleware({
         serializableCheck: {
           ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
         },
@@ -83,13 +101,16 @@ export const makeStore = () =>
         notificationsMiddleware,
         analyticsMiddleware,
         notificationSyncMiddleware,
-      ),
+        listenerMiddlewareInstance.middleware,
+      )
+    },
+
     enhancers: (getDefaultEnhancers) => {
       if (isTestingEnv) {
         return getDefaultEnhancers()
       }
 
-      return getDefaultEnhancers().concat(devToolsEnhancer())
+      return getDefaultEnhancers().concat(devToolsEnhancer({ maxAge: 200 }))
     },
   })
 
