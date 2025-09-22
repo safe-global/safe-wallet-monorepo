@@ -72,15 +72,19 @@ export const MakeASwapButton = () => {
 
   const isSwapPage = router.pathname === AppRoutes.swap
 
-  const onClick = async () => {
-    trackEvent(SWAP_EVENTS.OPEN_SWAPS, {
-      [MixpanelEventParams.ENTRY_POINT]: GA_LABEL_TO_MIXPANEL_PROPERTY[SWAP_LABELS.newTransaction],
-    })
+  const onClick = () => {
+    trackEvent(
+      { ...SWAP_EVENTS.OPEN_SWAPS, label: SWAP_LABELS.newTransaction },
+      {
+        [MixpanelEventParams.ENTRY_POINT]: GA_LABEL_TO_MIXPANEL_PROPERTY[SWAP_LABELS.newTransaction],
+      },
+    )
 
     if (isSwapPage) {
       setTxFlow(undefined)
     } else {
-      await router.push({
+      setTxFlow(undefined)
+      router.push({
         pathname: AppRoutes.swap,
         query: { safe: router.query.safe },
       })
