@@ -265,7 +265,14 @@ const AssetsTable = ({
               sticky: true,
               collapsed: item.tokenInfo.address === hidingAsset,
               content: (
-                <Stack direction="row" gap={1} alignItems="center" justifyContent="flex-end" mr={-1}>
+                <Stack
+                  direction="row"
+                  gap={1}
+                  alignItems="center"
+                  justifyContent="flex-end"
+                  mr={-1}
+                  className={css.sticky}
+                >
                   <Stack direction="row" gap={1} alignItems="center" bgcolor="background.paper" p={1}>
                     <SendButton tokenInfo={item.tokenInfo} />
 
