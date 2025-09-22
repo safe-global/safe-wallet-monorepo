@@ -172,34 +172,38 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact }: EnhancedTabl
           <EnhancedTableHead headCells={headCells} order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
           <TableBody>
             {pagedRows.length > 0 ? (
-              pagedRows.map((row, index) => (
-                <TableRow
-                  data-testid="table-row"
-                  tabIndex={-1}
-                  key={row.key ?? index}
-                  selected={row.selected}
-                  className={row.collapsed ? css.collapsedRow : undefined}
-                >
-                  {Object.entries(row.cells).map(([key, cell]) => (
-                    <TableCell
-                      key={key}
-                      className={classNames({
-                        [css.collapsedCell]: row.collapsed,
-                      })}
-                    >
-                      <Collapse key={index} in={!row.collapsed} enter={false}>
-                        {cell.mobileLabel ? (
-                          <Typography variant="body2" color="text.secondary" className={css.mobileLabel}>
-                            {cell.mobileLabel}
-                          </Typography>
-                        ) : null}
+              pagedRows.map((row, index) => {
+                const rowKey = row.key ?? index
 
-                        {cell.content}
-                      </Collapse>
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+                return (
+                  <TableRow
+                    data-testid="table-row"
+                    tabIndex={-1}
+                    key={rowKey}
+                    selected={row.selected}
+                    className={row.collapsed ? css.collapsedRow : undefined}
+                  >
+                    {Object.entries(row.cells).map(([key, cell]) => (
+                      <TableCell
+                        key={key}
+                        className={classNames({
+                          [css.collapsedCell]: row.collapsed,
+                        })}
+                      >
+                        <Collapse in={!row.collapsed} enter={false}>
+                          {cell.mobileLabel ? (
+                            <Typography variant="body2" color="text.secondary" className={css.mobileLabel}>
+                              {cell.mobileLabel}
+                            </Typography>
+                          ) : null}
+
+                          {cell.content}
+                        </Collapse>
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                )
+              })
             ) : (
               // Prevent no `tbody` rows hydration error
               <TableRow>
