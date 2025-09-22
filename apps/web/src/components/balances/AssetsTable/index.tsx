@@ -24,6 +24,7 @@ import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { FiatChange } from './FiatChange'
 import useIsEarnFeatureEnabled from '@/features/earn/hooks/useIsEarnFeatureEnabled'
+import { FiatBalance } from './FiatBalance'
 import EarnButton from '@/features/earn/components/EarnButton'
 import { EARN_LABELS } from '@/services/analytics/events/earn'
 import { isEligibleEarnToken } from '@/features/earn/utils'
@@ -203,7 +204,7 @@ const AssetsTable = ({
               rawValue: rawPriceValue,
               content: (
                 <Typography textAlign="right">
-                  <FiatValue value={item.fiatConversion} />
+                  <FiatValue value={item.fiatConversion == '0' ? null : item.fiatConversion} />
                 </Typography>
               ),
             },
@@ -226,7 +227,7 @@ const AssetsTable = ({
               content: (
                 <Box textAlign="right">
                   <Typography>
-                    <FiatValue value={item.fiatBalance} />
+                    <FiatBalance balanceItem={item} />
                   </Typography>
                   {item.fiatBalance24hChange && (
                     <Typography variant="caption">
