@@ -14,12 +14,13 @@ jest.mock('@/services/analytics', () => ({
 jest.mock('@/features/earn/hooks/useIsEarnFeatureEnabled', () => ({
   __esModule: true,
   default: jest.fn(),
+  useIsEarnPromoEnabled: jest.fn(() => true),
 }))
 
-import useIsEarnFeatureEnabled from '@/features/earn/hooks/useIsEarnFeatureEnabled'
+import { useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEnabled'
 
 const mockTrackEvent = trackEvent as jest.MockedFunction<typeof trackEvent>
-const mockUseIsEarnFeatureEnabled = useIsEarnFeatureEnabled as jest.MockedFunction<typeof useIsEarnFeatureEnabled>
+const mockUseIsEarnFeatureEnabled = useIsEarnPromoEnabled as jest.MockedFunction<typeof useIsEarnPromoEnabled>
 
 describe('PositionsEmpty', () => {
   beforeEach(() => {
