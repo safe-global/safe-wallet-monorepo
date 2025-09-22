@@ -74,18 +74,18 @@ export const MakeASwapButton = () => {
   const onClick = isSwapPage ? () => setTxFlow(undefined) : undefined
 
   return (
-    <Track
-      {...SWAP_EVENTS.OPEN_SWAPS}
-      label={SWAP_LABELS.newTransaction}
-      mixpanelParams={{
-        [MixpanelEventParams.ENTRY_POINT]: GA_LABEL_TO_MIXPANEL_PROPERTY[SWAP_LABELS.newTransaction],
-      }}
-    >
-      <Link href={{ pathname: AppRoutes.swap, query: { safe: router.query.safe } }} passHref legacyBehavior>
+    <Link href={{ pathname: AppRoutes.swap, query: { safe: router.query.safe } }} passHref legacyBehavior>
+      <Track
+        {...SWAP_EVENTS.OPEN_SWAPS}
+        label={SWAP_LABELS.newTransaction}
+        mixpanelParams={{
+          [MixpanelEventParams.ENTRY_POINT]: GA_LABEL_TO_MIXPANEL_PROPERTY[SWAP_LABELS.newTransaction],
+        }}
+      >
         <Button variant="contained" sx={buttonSx} fullWidth onClick={onClick} startIcon={<SwapIcon width={20} />}>
           Swap tokens
         </Button>
-      </Link>
-    </Track>
+      </Track>
+    </Link>
   )
 }
