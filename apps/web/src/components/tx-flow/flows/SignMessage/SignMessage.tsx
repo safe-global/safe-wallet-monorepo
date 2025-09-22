@@ -136,12 +136,12 @@ const MessageDialogError = ({ isOwner, submitError }: { isOwner: boolean; submit
     !wallet || !onboard
       ? 'No wallet is connected.'
       : !isOwner
-      ? "You are currently not a signer of this Safe Account and won't be able to confirm this message."
-      : submitError && isWalletRejection(submitError)
-      ? 'User rejected signing.'
-      : submitError
-      ? 'Error confirming the message. Please try again.'
-      : null
+        ? "You are currently not a signer of this Safe Account and won't be able to confirm this message."
+        : submitError && isWalletRejection(submitError)
+          ? 'User rejected signing.'
+          : submitError
+            ? 'Error confirming the message. Please try again.'
+            : null
 
   if (errorMessage) {
     return <ErrorMessage>{errorMessage}</ErrorMessage>
