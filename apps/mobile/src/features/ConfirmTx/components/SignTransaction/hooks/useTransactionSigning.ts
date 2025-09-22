@@ -9,7 +9,7 @@ import { useTransactionsAddConfirmationV1Mutation } from '@safe-global/store/gat
 import logger from '@/src/utils/logger'
 import { useGuard } from '@/src/context/GuardProvider'
 import { selectSignerByAddress } from '@/src/store/signersSlice'
-import { ledgerSafeSigningService } from '@/src/services/ledger/ledger-safe-signing.service'
+import { LedgerSafeSigningResponse, ledgerSafeSigningService } from '@/src/services/ledger/ledger-safe-signing.service'
 import { Chain as ChainInfo } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 export enum SigningStatus {
   IDLE = 'idle',
@@ -43,7 +43,7 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
     hasTriggeredAutoSign.current = true
 
     try {
-      let signedTx: { signature: string; safeTransactionHash: string }
+      let signedTx: LedgerSafeSigningResponse
 
       // Check if this is a Ledger signer
       if (signer.type === 'ledger') {

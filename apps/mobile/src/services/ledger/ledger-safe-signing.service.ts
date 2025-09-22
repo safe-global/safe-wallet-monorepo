@@ -20,6 +20,11 @@ export interface LedgerSafeSigningParams {
   derivationPath: string
 }
 
+export interface LedgerSafeSigningResponse {
+  signature: string
+  safeTransactionHash: string
+}
+
 export class LedgerSafeSigningService {
   private static instance: LedgerSafeSigningService
 
@@ -45,7 +50,6 @@ export class LedgerSafeSigningService {
   }> {
     const { chain, activeSafe, txId, signerAddress, derivationPath } = params
 
-    console.log('signSafeTransaction', params)
     try {
       // Get current Ledger session
       const session = ledgerDMKService.getCurrentSession()
@@ -56,23 +60,18 @@ export class LedgerSafeSigningService {
       // Get the Safe transaction without requiring a private key (like web app does)
       const safeTx = await this.createSafeTransactionForLedger(activeSafe, txId)
 
-      console.log('safeTx', safeTx)
       if (!safeTx) {
         throw new Error('Safe transaction not found')
       }
 
       // Create EIP-712 structured data for the Safe transaction
       const typedData = this.createSafeTransactionTypedData(safeTx, activeSafe, chain.chainId)
-      console.log('Created typedData:', JSON.stringify(typedData, null, 2))
 
       // Get the transaction hash that will be signed
       const safeTransactionHash = await this.getSafeTransactionHash(safeTx, typedData)
-      console.log('Safe transaction hash:', safeTransactionHash)
 
       // Sign the EIP-712 structured data with Ledger device
-      console.log('Attempting to sign with Ledger, derivationPath:', derivationPath)
       const signature = await ledgerEthereumService.signTypedData(session, derivationPath, typedData)
-      console.log('Received signature:', signature)
 
       logger.info('Successfully signed transaction with Ledger', {
         signerAddress,
