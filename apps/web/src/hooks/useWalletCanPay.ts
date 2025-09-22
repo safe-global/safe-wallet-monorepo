@@ -1,4 +1,4 @@
-import { getTotalFee } from '@/hooks/useGasPrice'
+import { getTotalFee } from '@safe-global/utils/utils/gasPrice'
 import useWalletBalance from '@/hooks/wallets/useWalletBalance'
 
 const useWalletCanPay = ({ gasLimit, maxFeePerGas }: { gasLimit?: bigint; maxFeePerGas?: bigint | null }) => {

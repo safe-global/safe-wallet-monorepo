@@ -1,5 +1,6 @@
 import { act, renderHook, waitFor } from '@/tests/test-utils'
-import useGasPrice, { getTotalFee } from '@/hooks/useGasPrice'
+import useGasPrice from '@/hooks/useGasPrice'
+import { getTotalFee } from '@safe-global/utils/utils/gasPrice'
 import { useCurrentChain } from '../useChains'
 
 // mock useWeb3Readonly

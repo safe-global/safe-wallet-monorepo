@@ -1,4 +1,4 @@
-import { getTotalFee } from '@/hooks/useGasPrice'
+import { getTotalFee } from '@safe-global/utils/utils/gasPrice'
 import type { ReactElement, SyntheticEvent } from 'react'
 import { Accordion, AccordionDetails, AccordionSummary, Skeleton, Typography, Link, Grid, SvgIcon } from '@mui/material'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'

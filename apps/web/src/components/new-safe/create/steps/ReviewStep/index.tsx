@@ -2,7 +2,7 @@ import type { NamedAddress } from '@/components/new-safe/create/types'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { safeCreationDispatch, SafeCreationEvent } from '@/features/counterfactual/services/safeCreationEvents'
 import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
-import { getTotalFeeFormatted } from '@/hooks/useGasPrice'
+import { getTotalFeeFormatted } from '@safe-global/utils/utils/gasPrice'
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NewSafeFormData } from '@/components/new-safe/create'
 import {

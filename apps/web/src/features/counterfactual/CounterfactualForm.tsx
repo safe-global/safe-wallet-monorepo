@@ -1,7 +1,7 @@
 import { TxModalContext } from '@/components/tx-flow'
 import useDeployGasLimit from '@/features/counterfactual/hooks/useDeployGasLimit'
 import { deploySafeAndExecuteTx } from '@/features/counterfactual/utils'
-import { getTotalFeeFormatted } from '@/hooks/useGasPrice'
+import { getTotalFeeFormatted } from '@safe-global/utils/utils/gasPrice'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import useWallet from '@/hooks/wallets/useWallet'

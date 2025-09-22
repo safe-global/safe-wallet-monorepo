@@ -1,5 +1,5 @@
 import type { SafeSignature, SafeTransaction } from '@safe-global/types-kit'
-import { encodeSignatures } from '../encodeSignatures'
+import { encodeSignatures } from '@safe-global/utils/services/tx/encodeSignatures'
 
 const createSafeTx = (): SafeTransaction => {
   return {
