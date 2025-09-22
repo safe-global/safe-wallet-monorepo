@@ -2,6 +2,7 @@ import Cookies from 'js-cookie'
 
 import { BEAMER_ID } from '@/config/constants'
 import local from '@/services/local-storage/local'
+import packageJson from '../../../package.json'
 
 export const BEAMER_SELECTOR = 'whats-new-button'
 
@@ -17,7 +18,7 @@ const isBeamerLoaded = (): boolean => !!scriptRef
 export const loadBeamer = async (shortName: string): Promise<void> => {
   if (isBeamerLoaded()) return
 
-  const BEAMER_URL = '/beamer-embed.js'
+  const BEAMER_URL = '/beamer-embed.js?v=' + packageJson.version
 
   if (!BEAMER_ID) {
     console.warn('[Beamer] In order to use Beamer you need to add a `product_id`')
