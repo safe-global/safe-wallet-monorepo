@@ -1,5 +1,5 @@
 import React from 'react'
-import { Stack } from 'tamagui'
+import { Stack, View } from 'tamagui'
 import { router } from 'expo-router'
 import { SafeButton } from '@/src/components/SafeButton'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
@@ -43,20 +43,13 @@ export function ReviewExecuteFooter({ txId }: ReviewFooterProps) {
   }
 
   return (
-    <Stack
-      backgroundColor="$background"
-      paddingHorizontal="$4"
-      paddingVertical="$3"
-      borderTopWidth={1}
-      borderTopColor="$borderLight"
-      space="$3"
-      paddingBottom={insets.bottom ? insets.bottom : '$4'}
-    >
+    <View>
       <SelectExecutor address={activeSigner?.value as Address} txId={txId} />
-
-      <SafeButton onPress={handleConfirmPress} width="100%">
-        Execute transaction
-      </SafeButton>
-    </Stack>
+      <Stack paddingHorizontal="$4" space="$3" paddingBottom={insets.bottom ? insets.bottom : '$4'}>
+        <SafeButton onPress={handleConfirmPress} width="100%">
+          Execute transaction
+        </SafeButton>
+      </Stack>
+    </View>
   )
 }

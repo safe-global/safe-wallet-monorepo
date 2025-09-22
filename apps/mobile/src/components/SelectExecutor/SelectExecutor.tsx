@@ -1,6 +1,5 @@
 import React from 'react'
-import { Text, View, Image } from 'tamagui'
-import Signature from '@/assets/images/signature.png'
+import { Text, View, Stack, YStack, XStack } from 'tamagui'
 
 import { Identicon } from '@/src/components/Identicon'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -8,6 +7,7 @@ import { router } from 'expo-router'
 import { ContactDisplayNameContainer } from '@/src/features/AddressBook'
 import { Address } from '@/src/types/address'
 import { ActionType } from '@/src/features/ChangeSignerSheet/utils'
+import { Tag } from '@/src/components/Tag'
 
 type Props = {
   address: Address
@@ -15,24 +15,37 @@ type Props = {
 }
 
 export function SelectExecutor({ address, txId }: Props) {
+  // TODO: Use this for gas estimation
+  //const gasLimit = useGasLimit(txId)
+
   return (
-    <View
+    <Stack
       onPress={() =>
         router.push({ pathname: '/change-signer-sheet', params: { txId, actionType: ActionType.EXECUTE } })
       }
-      flexDirection="row"
-      justifyContent="center"
-      alignItems="center"
-      gap={'$2'}
+      backgroundColor="$background"
+      paddingHorizontal="$4"
+      paddingVertical="$3"
+      marginHorizontal="$4"
+      marginBottom="$2"
+      borderRadius={8}
+      space="$3"
     >
-      <Image testID="signature-button-image" width={16} height={16} source={Signature} />
-      <Text fontWeight={700}>Execute with</Text>
+      <View flexDirection="row" justifyContent="space-between" alignItems="center" gap={'$2'}>
+        <YStack>
+          <Text fontWeight={700}>Execution method</Text>
+          <Text>Est. fee</Text>
+        </YStack>
 
-      <Identicon address={address} size={24} />
+        <XStack alignItems="center">
+          <Tag grey>
+            <Identicon address={address} size={16} />
+            <ContactDisplayNameContainer address={address} />
+          </Tag>
 
-      <ContactDisplayNameContainer address={address} />
-
-      <SafeFontIcon name="chevron-right" />
-    </View>
+          <SafeFontIcon name="chevron-right" />
+        </XStack>
+      </View>
+    </Stack>
   )
 }

@@ -28,6 +28,12 @@ export const Tag = styled(Text, {
         color: '$error',
       },
     },
+    grey: {
+      true: {
+        backgroundColor: '$backgroundLight',
+        color: '$color',
+      },
+    },
     outlined: {
       true: {
         backgroundColor: 'transparent',
