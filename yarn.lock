@@ -7280,9 +7280,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/context-module@npm:^1.6.0":
-  version: 1.6.0
-  resolution: "@ledgerhq/context-module@npm:1.6.0"
+"@ledgerhq/context-module@npm:^1.7.0":
+  version: 1.7.0
+  resolution: "@ledgerhq/context-module@npm:1.7.0"
   dependencies:
     axios: "npm:1.8.2"
     crypto-js: "npm:^4.2.0"
@@ -7291,8 +7291,8 @@ __metadata:
     purify-ts: "npm:2.1.0"
     reflect-metadata: "npm:0.2.2"
   peerDependencies:
-    "@ledgerhq/device-management-kit": 0.8.0
-  checksum: 10/6e30440ea2149a2789457c3d33d76e664bd3665dc974890bdb389af4f9f6445e9051ec2ee25749f3efad71a05d32cb49c236577156e5a0d4126bf92d26545d4e
+    "@ledgerhq/device-management-kit": 0.9.0
+  checksum: 10/f9f4a854e896db7f36b34c5898071149ae11a5d541bc2bf3b8280eeb94e7311c1bc6e85aac5402148c27fad5ae3054ee101a1141ec639a0423c8ad44080768c0
   languageName: node
   linkType: hard
 
@@ -7318,9 +7318,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/device-management-kit@npm:^0.8.0":
-  version: 0.8.0
-  resolution: "@ledgerhq/device-management-kit@npm:0.8.0"
+"@ledgerhq/device-management-kit@npm:^0.9.0":
+  version: 0.9.0
+  resolution: "@ledgerhq/device-management-kit@npm:0.9.0"
   dependencies:
     "@sentry/minimal": "npm:6.19.7"
     axios: "npm:1.8.2"
@@ -7328,14 +7328,14 @@ __metadata:
     isomorphic-ws: "npm:^5.0.0"
     purify-ts: "npm:2.1.0"
     reflect-metadata: "npm:0.2.2"
-    semver: "npm:7.7.0"
+    semver: "npm:7.7.2"
     url: "npm:^0.11.4"
     uuid: "npm:11.0.3"
     ws: "npm:^8.18.0"
     xstate: "npm:5.19.2"
   peerDependencies:
-    rxjs: ^7.8.2
-  checksum: 10/591b510602fbb2fec13f9888244410440121c69c9bb321f158e8d327a864515405fadedbd8f194372596db9206a429abd94391a8c48acddb0d8493eb35205ea7
+    rxjs: 7.8.2
+  checksum: 10/1803f12d566d30963fed2efff8d612e13150b142daec77cd65c5b9924dfdb02fad999c79f8f05d6795282ba569156d777dd38870c6a8bf4723cca5b4466787dc
   languageName: node
   linkType: hard
 
@@ -7358,21 +7358,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/device-signer-kit-ethereum@npm:^1.6.0":
-  version: 1.6.0
-  resolution: "@ledgerhq/device-signer-kit-ethereum@npm:1.6.0"
+"@ledgerhq/device-signer-kit-ethereum@npm:^1.7.0":
+  version: 1.7.0
+  resolution: "@ledgerhq/device-signer-kit-ethereum@npm:1.7.0"
   dependencies:
-    "@ledgerhq/signer-utils": "npm:1.0.6"
+    "@ledgerhq/signer-utils": "npm:1.1.0"
     ethers: "npm:6.14.1"
     inversify: "npm:7.5.1"
     purify-ts: "npm:2.1.0"
     reflect-metadata: "npm:0.2.2"
-    semver: "npm:7.7.0"
+    semver: "npm:7.7.2"
     xstate: "npm:5.19.2"
   peerDependencies:
-    "@ledgerhq/context-module": 1.6.0
-    "@ledgerhq/device-management-kit": 0.8.0
-  checksum: 10/a779ef097985616fbd777c2874c129c956442060832ddc01c9932947ac40edf55b233acf8da8a237632516da4955f0b93e8a6aea8e14dd436cc0922057e6cfca
+    "@ledgerhq/context-module": 1.7.0
+    "@ledgerhq/device-management-kit": 0.9.0
+  checksum: 10/65f704c0331d1038ea39dd1b0f6dba1c7125cec072d17b87021b099051e16aa91541d1ce685651f4955dbb2906bb0383ae163926aabb0149ba4af2eaf9ddcded
   languageName: node
   linkType: hard
 
@@ -7407,12 +7407,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/signer-utils@npm:1.0.6":
-  version: 1.0.6
-  resolution: "@ledgerhq/signer-utils@npm:1.0.6"
+"@ledgerhq/signer-utils@npm:1.1.0":
+  version: 1.1.0
+  resolution: "@ledgerhq/signer-utils@npm:1.1.0"
   peerDependencies:
-    "@ledgerhq/device-management-kit": 0.8.0
-  checksum: 10/c4ff06d8f962d07fd38660e5f0a809dac65721e127b214060abacaad87dac6d2b83a3ae3fb32a4ff38e5c92c67e4660be8fa6cdd43f100d09c98af212d3891df
+    "@ledgerhq/device-management-kit": 0.9.0
+  checksum: 10/17da5dc033ef84de2a3e6d7cb632bece22d238ae0540c570048ba489f49dbd138047e93572c603051e5b32ffe6988171e0adfa55e84484fc80003bd9753075c9
   languageName: node
   linkType: hard
 
@@ -9452,9 +9452,9 @@ __metadata:
     "@formatjs/intl-pluralrules": "npm:^5.4.3"
     "@gorhom/bottom-sheet": "npm:^5.1.8"
     "@hookform/resolvers": "npm:^4.1.3"
-    "@ledgerhq/context-module": "npm:^1.6.0"
-    "@ledgerhq/device-management-kit": "npm:^0.8.0"
-    "@ledgerhq/device-signer-kit-ethereum": "npm:^1.6.0"
+    "@ledgerhq/context-module": "npm:^1.7.0"
+    "@ledgerhq/device-management-kit": "npm:^0.9.0"
+    "@ledgerhq/device-signer-kit-ethereum": "npm:^1.7.0"
     "@ledgerhq/device-transport-kit-react-native-ble": "npm:^1.1.0"
     "@notifee/react-native": "npm:^9.1.8"
     "@react-native-async-storage/async-storage": "npm:2.1.2"
@@ -31669,16 +31669,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:7.7.0":
-  version: 7.7.0
-  resolution: "semver@npm:7.7.0"
-  bin:
-    semver: bin/semver.js
-  checksum: 10/5d615860a54ff563955c451e467bff3aaf74c8d060489f936f25551d5ca05f5ac683eb46c9ed7ade082e1e53b313f205ed9c5df0b25ebb3517ec25c79e1f0d9c
-  languageName: node
-  linkType: hard
-
-"semver@npm:7.x, semver@npm:^7.7.2":
+"semver@npm:7.7.2, semver@npm:7.x, semver@npm:^7.7.2":
   version: 7.7.2
   resolution: "semver@npm:7.7.2"
   bin:
