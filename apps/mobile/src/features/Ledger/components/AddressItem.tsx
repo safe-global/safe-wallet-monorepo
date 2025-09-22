@@ -23,15 +23,17 @@ interface AddressItemProps {
 export const AddressItem = ({ item, onSelect, isFirst = false, isLast = false }: AddressItemProps) => {
   const { isDark } = useTheme()
 
+  const topRadius = isFirst ? '$4' : undefined
+  const bottomRadius = isLast ? '$4' : undefined
   return (
     <View position="relative">
       <TouchableOpacity onPress={() => onSelect(item)} testID={`address-item-${item.index}`}>
         <View
           backgroundColor={isDark ? '$backgroundPaper' : '$background'}
-          borderTopRightRadius={isFirst ? '$4' : undefined}
-          borderTopLeftRadius={isFirst ? '$4' : undefined}
-          borderBottomRightRadius={isLast ? '$4' : undefined}
-          borderBottomLeftRadius={isLast ? '$4' : undefined}
+          borderTopRightRadius={topRadius}
+          borderTopLeftRadius={topRadius}
+          borderBottomRightRadius={bottomRadius}
+          borderBottomLeftRadius={bottomRadius}
           paddingVertical="$4"
           paddingHorizontal="$4"
         >
