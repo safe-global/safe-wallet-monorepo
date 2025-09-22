@@ -17,7 +17,7 @@ const isBeamerLoaded = (): boolean => !!scriptRef
 export const loadBeamer = async (shortName: string): Promise<void> => {
   if (isBeamerLoaded()) return
 
-  const BEAMER_URL = 'https://app.getbeamer.com/js/beamer-embed.js'
+  const BEAMER_URL = '/beamer-embed.js'
 
   if (!BEAMER_ID) {
     console.warn('[Beamer] In order to use Beamer you need to add a `product_id`')
