@@ -38,7 +38,6 @@ export const navItems: NavItem[] = [
     label: 'Earn',
     icon: <SvgIcon component={EarnIcon} inheritViewBox />,
     href: AppRoutes.earn,
-    tag: <Chip label="New" sx={{ backgroundColor: 'secondary.light', color: 'static.main' }} />,
   },
 ]
 
