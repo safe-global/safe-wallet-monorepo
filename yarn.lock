@@ -7393,20 +7393,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/device-transport-kit-web-ble@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@ledgerhq/device-transport-kit-web-ble@npm:1.1.0"
-  dependencies:
-    "@sentry/minimal": "npm:^6.19.7"
-    purify-ts: "npm:^2.1.0"
-    uuid: "npm:^11.0.3"
-  peerDependencies:
-    "@ledgerhq/device-management-kit": 0.6.2
-    rxjs: ^7.8.2
-  checksum: 10/fdb3d648ee1a8ed006086b435aedf08fb863d629dc96aa368bcc96dfa8729db3c987e2ba0b5e68b13edda34afe4213d95eaf0c3be9ea645ce348966a811c955e
-  languageName: node
-  linkType: hard
-
 "@ledgerhq/device-transport-kit-web-hid@npm:^1.1.0":
   version: 1.1.0
   resolution: "@ledgerhq/device-transport-kit-web-hid@npm:1.1.0"
@@ -9470,7 +9456,6 @@ __metadata:
     "@ledgerhq/device-management-kit": "npm:^0.8.0"
     "@ledgerhq/device-signer-kit-ethereum": "npm:^1.6.0"
     "@ledgerhq/device-transport-kit-react-native-ble": "npm:^1.1.0"
-    "@ledgerhq/device-transport-kit-web-ble": "npm:^1.1.0"
     "@notifee/react-native": "npm:^9.1.8"
     "@react-native-async-storage/async-storage": "npm:2.1.2"
     "@react-native-clipboard/clipboard": "npm:^1.15.0"

@@ -52,7 +52,6 @@
     "@ledgerhq/device-management-kit": "^0.8.0",
     "@ledgerhq/device-signer-kit-ethereum": "^1.6.0",
     "@ledgerhq/device-transport-kit-react-native-ble": "^1.1.0",
-    "@ledgerhq/device-transport-kit-web-ble": "^1.1.0",
     "@notifee/react-native": "^9.1.8",
     "@react-native-clipboard/clipboard": "^1.15.0",
     "@react-native-community/blur": "^4.4.1",
