@@ -1,5 +1,5 @@
 import React from 'react'
-import { TouchableOpacity } from 'react-native-gesture-handler'
+import { TouchableOpacity } from 'react-native'
 import { View, Text } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Identicon } from '@/src/components/Identicon'

@@ -1,5 +1,5 @@
 import React from 'react'
-import { ScrollView } from 'react-native-gesture-handler'
+import { ScrollView } from 'react-native'
 import { View, Text, Button } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ToastViewport } from '@tamagui/toast'

@@ -1,6 +1,6 @@
 import { SignerEthBuilder } from '@ledgerhq/device-signer-kit-ethereum'
-import type { DeviceSessionId } from '@ledgerhq/device-management-kit'
-import type { TypedData } from '@ledgerhq/device-signer-kit-ethereum'
+import type { DeviceSessionId, ExecuteDeviceActionReturnType } from '@ledgerhq/device-management-kit'
+import type { TypedData, Signature } from '@ledgerhq/device-signer-kit-ethereum'
 import { ledgerDMKService } from './ledger-dmk.service'
 
 export interface EthereumAddress {
@@ -14,6 +14,54 @@ export class LedgerEthereumService {
 
   private constructor() {
     // Private constructor for singleton pattern
+  }
+
+  /**
+   * Create a SignerEth instance for the given session
+   * @param session The device session
+   * @returns The SignerEth instance
+   */
+  private createSigner(session: DeviceSessionId) {
+    return new SignerEthBuilder({
+      dmk: ledgerDMKService['dmk'], // Access private dmk instance
+      sessionId: session,
+      originToken: 'safe.global',
+    }).build()
+  }
+
+  /**
+   * Execute any device action and return a promise with proper typing
+   * @param deviceAction The device action return type from Ledger SDK
+   * @returns Promise that resolves with the action output
+   */
+  private executeDeviceAction<T, E, I>(deviceAction: ExecuteDeviceActionReturnType<T, E, I>): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      deviceAction.observable.subscribe({
+        next: (state) => {
+          if (state.status === 'completed' && state.output) {
+            resolve(state.output)
+          } else if (state.status === 'error') {
+            reject(state.error || new Error('Device action failed'))
+          }
+          // For pending states, we just wait
+        },
+        error: (error) => {
+          reject(error instanceof Error ? error : new Error('Device action failed'))
+        },
+      })
+    })
+  }
+
+  /**
+   * Format signature components into a hex string
+   * @param signature The signature components from Ledger SDK
+   * @returns Formatted signature string
+   */
+  private formatSignature(signature: Signature): string {
+    const r = signature.r.startsWith('0x') ? signature.r.slice(2) : signature.r
+    const s = signature.s.startsWith('0x') ? signature.s.slice(2) : signature.s
+    const v = signature.v.toString(16).padStart(2, '0')
+    return `0x${r}${s}${v}`
   }
 
   public static getInstance(): LedgerEthereumService {
@@ -31,45 +79,16 @@ export class LedgerEthereumService {
    * @returns Array of Ethereum addresses with their derivation paths
    */
   public async getEthereumAddresses(session: DeviceSessionId, count = 10, startIndex = 0): Promise<EthereumAddress[]> {
-    // try {
-    // Create the Ethereum signer using the session
-    const signerEth = new SignerEthBuilder({
-      dmk: ledgerDMKService['dmk'], // Access private dmk instance
-      sessionId: session,
-      originToken: 'safe.global',
-    }).build()
-
+    const signerEth = this.createSigner(session)
     const addresses: EthereumAddress[] = []
 
     // Derive addresses using the standard Ethereum derivation path
     for (let i = startIndex; i < startIndex + count; i++) {
-      console.log('i', i)
       const path = `44'/60'/0'/0/${i}` // Standard Ethereum derivation path
 
       try {
-        // The getAddress method returns an Observable-based device action
-        const addressResult = await new Promise<{ address: string; publicKey: string }>((resolve, reject) => {
-          const { observable } = signerEth.getAddress(path)
-
-          console.log('observable', observable)
-          observable.subscribe({
-            next: (state) => {
-              console.log(`Address ${i} state:`, state)
-              // Handle different states of the device action
-              if (state.status === 'completed') {
-                resolve(state.output)
-              } else if (state.status === 'error') {
-                reject(state.error)
-              }
-              // For pending states, we just wait
-            },
-            error: (error) => {
-              reject(error)
-            },
-          })
-        })
-
-        console.log(`Address result for ${i}:`, addressResult)
+        const deviceAction = signerEth.getAddress(path)
+        const addressResult = await this.executeDeviceAction(deviceAction)
 
         if (addressResult && addressResult.address) {
           addresses.push({
@@ -86,11 +105,6 @@ export class LedgerEthereumService {
     }
 
     return addresses
-    // } catch (error) {
-    //   throw new Error(
-    //     `Failed to retrieve Ethereum addresses: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    //   )
-    // }
   }
 
   /**
@@ -116,38 +130,11 @@ export class LedgerEthereumService {
    */
   public async signTransaction(session: DeviceSessionId, path: string, transaction: Uint8Array): Promise<string> {
     try {
-      const signerEth = new SignerEthBuilder({
-        dmk: ledgerDMKService['dmk'], // Access private dmk instance
-        sessionId: session,
-        originToken: 'safe.global',
-      }).build()
+      const signerEth = this.createSigner(session)
+      const deviceAction = signerEth.signTransaction(path, transaction)
+      const signatureResult = await this.executeDeviceAction(deviceAction)
 
-      // The signTransaction method returns an Observable-based device action
-      const signatureResult = await new Promise<{ r: string; s: string; v: number }>((resolve, reject) => {
-        const { observable } = signerEth.signTransaction(path, transaction)
-
-        observable.subscribe({
-          next: (state) => {
-            console.log('Sign transaction state:', state)
-            // Handle different states of the device action
-            if (state.status === 'completed') {
-              resolve(state.output)
-            } else if (state.status === 'error') {
-              reject(state.error)
-            }
-            // For pending states, we just wait
-          },
-          error: (error) => {
-            reject(error)
-          },
-        })
-      })
-
-      // Convert signature to proper format (remove 0x prefixes from components)
-      const r = signatureResult.r.startsWith('0x') ? signatureResult.r.slice(2) : signatureResult.r
-      const s = signatureResult.s.startsWith('0x') ? signatureResult.s.slice(2) : signatureResult.s
-      const v = signatureResult.v.toString(16).padStart(2, '0')
-      return `0x${r}${s}${v}`
+      return this.formatSignature(signatureResult)
     } catch (error) {
       throw new Error(`Failed to sign transaction: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
@@ -162,38 +149,11 @@ export class LedgerEthereumService {
    */
   public async signTypedData(session: DeviceSessionId, path: string, typedData: TypedData): Promise<string> {
     try {
-      const signerEth = new SignerEthBuilder({
-        dmk: ledgerDMKService['dmk'], // Access private dmk instance
-        sessionId: session,
-        originToken: 'safe.global',
-      }).build()
+      const signerEth = this.createSigner(session)
+      const deviceAction = signerEth.signTypedData(path, typedData)
+      const signatureResult = await this.executeDeviceAction(deviceAction)
 
-      // The signTypedData method returns an Observable-based device action
-      const signatureResult = await new Promise<{ r: string; s: string; v: number }>((resolve, reject) => {
-        const { observable } = signerEth.signTypedData(path, typedData)
-
-        observable.subscribe({
-          next: (state) => {
-            console.log('Sign typed data state:', state)
-            // Handle different states of the device action
-            if (state.status === 'completed') {
-              resolve(state.output)
-            } else if (state.status === 'error') {
-              reject(state.error)
-            }
-            // For pending states, we just wait
-          },
-          error: (error) => {
-            reject(error)
-          },
-        })
-      })
-
-      // Convert signature to proper format (remove 0x prefixes from components)
-      const r = signatureResult.r.startsWith('0x') ? signatureResult.r.slice(2) : signatureResult.r
-      const s = signatureResult.s.startsWith('0x') ? signatureResult.s.slice(2) : signatureResult.s
-      const v = signatureResult.v.toString(16).padStart(2, '0')
-      return `0x${r}${s}${v}`
+      return this.formatSignature(signatureResult)
     } catch (error) {
       throw new Error(`Failed to sign typed data: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }

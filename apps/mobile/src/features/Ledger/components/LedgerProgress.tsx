@@ -1,6 +1,6 @@
 import { View, Text, H4, getTokenValue } from 'tamagui'
 import { LedgerIcon } from '@/src/features/Ledger/icons'
-import { Loader } from '@/src/components/Loader/Loader'
+import { Loader } from '@/src/components/Loader'
 
 interface LedgerProgressProps {
   title: string

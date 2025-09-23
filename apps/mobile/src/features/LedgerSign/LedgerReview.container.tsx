@@ -65,12 +65,17 @@ export const LedgerReviewSignContainer = () => {
       if (!chain) {
         throw new Error('Missing chain information')
       }
+      if (!safe.version) {
+        throw new Error('Safe version not available for Ledger signing')
+      }
+
       const { signature, safeTransactionHash } = await ledgerSafeSigningService.signSafeTransaction({
         chain,
         activeSafe,
         txId,
         signerAddress: activeSigner.value,
         derivationPath: activeSigner.derivationPath,
+        safeVersion: safe.version as SafeVersion,
       })
 
       await addConfirmation({

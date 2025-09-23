@@ -9,8 +9,10 @@ import { useTransactionsAddConfirmationV1Mutation } from '@safe-global/store/gat
 import logger from '@/src/utils/logger'
 import { useGuard } from '@/src/context/GuardProvider'
 import { selectSignerByAddress } from '@/src/store/signersSlice'
-import { LedgerSafeSigningResponse, ledgerSafeSigningService } from '@/src/services/ledger/ledger-safe-signing.service'
+import { SigningResponse, ledgerSafeSigningService } from '@/src/services/ledger/ledger-safe-signing.service'
 import { Chain as ChainInfo } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { SafeVersion } from '@safe-global/types-kit'
+import useSafeInfo from '@/src/hooks/useSafeInfo'
 export enum SigningStatus {
   IDLE = 'idle',
   LOADING = 'loading',
@@ -30,6 +32,7 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
   const { resetGuard } = useGuard()
   const hasTriggeredAutoSign = useRef(false)
   const signer = useAppSelector((state: RootState) => selectSignerByAddress(state, signerAddress))
+  const { safe } = useSafeInfo()
 
   const [addConfirmation, { isLoading: isApiLoading, data: apiData, isError: isApiError }] =
     useTransactionsAddConfirmationV1Mutation()
@@ -43,13 +46,17 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
     hasTriggeredAutoSign.current = true
 
     try {
-      let signedTx: LedgerSafeSigningResponse
+      let signedTx: SigningResponse
 
       // Check if this is a Ledger signer
       if (signer.type === 'ledger') {
         // Handle Ledger signing
         if (!signer.derivationPath) {
           throw new Error('Ledger signer missing derivation path')
+        }
+
+        if (!safe.version) {
+          throw new Error('Safe version not available for Ledger signing')
         }
 
         // Ensure Ledger device is connected
@@ -61,6 +68,7 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
           txId,
           signerAddress,
           derivationPath: signer.derivationPath,
+          safeVersion: safe.version as SafeVersion,
         })
       } else {
         // Handle private key signing (existing flow)
@@ -96,7 +104,7 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
       logger.error('Error signing transaction:', error)
       setStatus(SigningStatus.ERROR)
     }
-  }, [activeChain, activeSafe, txId, signerAddress, addConfirmation, resetGuard, signer])
+  }, [activeChain, activeSafe, txId, signerAddress, addConfirmation, resetGuard, signer, safe.version])
 
   const retry = useCallback(() => {
     hasTriggeredAutoSign.current = false
