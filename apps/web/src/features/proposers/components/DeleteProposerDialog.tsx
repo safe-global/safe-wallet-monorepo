@@ -6,11 +6,14 @@ import useWallet from '@/hooks/wallets/useWallet'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
 import { useAppDispatch } from '@/store'
-import { useDeleteProposerMutation } from '@/store/api/gateway'
 import { showNotification } from '@/store/notificationsSlice'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { isEthSignWallet } from '@/utils/wallets'
-import type { Delegate } from '@safe-global/safe-gateway-typescript-sdk/dist/types/delegates'
+import {
+  useDelegatesDeleteDelegateV1Mutation,
+  useDelegatesDeleteDelegateV2Mutation,
+  type Delegate,
+} from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import React, { useState } from 'react'
 import {
   Dialog,
@@ -44,18 +47,19 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
   const [open, setOpen] = useState<boolean>(false)
   const [error, setError] = useState<Error>()
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [deleteProposer] = useDeleteProposerMutation()
+  const [deleteDelegateV1] = useDelegatesDeleteDelegateV1Mutation()
+  const [deleteDelegateV2] = useDelegatesDeleteDelegateV2Mutation()
   const dispatch = useAppDispatch()
 
   const onConfirm = async () => {
     setError(undefined)
-    setIsLoading(true)
 
     if (!wallet?.provider || !safeAddress || !chainId) {
-      setIsLoading(false)
       setError(new Error('Please connect your wallet first'))
       return
     }
+
+    setIsLoading(true)
 
     try {
       const shouldEthSign = isEthSignWallet(wallet)
@@ -64,14 +68,27 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
         ? await signProposerData(proposer.delegate, signer)
         : await signProposerTypedData(chainId, proposer.delegate, signer)
 
-      await deleteProposer({
-        chainId,
-        delegateAddress: proposer.delegate,
-        delegator: proposer.delegator,
-        safeAddress,
-        signature,
-        shouldEthSign,
-      })
+      if (shouldEthSign) {
+        await deleteDelegateV1({
+          chainId,
+          delegateAddress: proposer.delegate,
+          deleteDelegateDto: {
+            delegate: proposer.delegate,
+            delegator: proposer.delegator,
+            signature,
+          },
+        }).unwrap()
+      } else {
+        await deleteDelegateV2({
+          chainId,
+          delegateAddress: proposer.delegate,
+          deleteDelegateV2Dto: {
+            delegator: proposer.delegator,
+            safe: safeAddress,
+            signature,
+          },
+        }).unwrap()
+      }
 
       trackEvent(SETTINGS_EVENTS.PROPOSERS.SUBMIT_REMOVE_PROPOSER)
 
@@ -83,14 +100,13 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
           message: `${shortenAddress(proposer.delegate)} can not suggest transactions anymore.`,
         }),
       )
+      setOpen(false)
     } catch (error) {
-      setIsLoading(false)
       setError(error as Error)
       return
+    } finally {
+      setIsLoading(false)
     }
-
-    setIsLoading(false)
-    setOpen(false)
   }
 
   const onCancel = () => {
