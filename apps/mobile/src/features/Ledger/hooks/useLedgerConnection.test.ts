@@ -111,7 +111,10 @@ describe('useLedgerConnection', () => {
       const { result } = renderHook(() => useLedgerConnection())
 
       // Start connection
-      const connectPromise = result.current.connectToDevice(mockDevice)
+      let connectPromise: Promise<DeviceSessionId | null>
+      await act(async () => {
+        connectPromise = result.current.connectToDevice(mockDevice)
+      })
 
       // Check loading state
       await waitFor(() => {

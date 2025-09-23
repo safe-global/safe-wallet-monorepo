@@ -76,12 +76,31 @@ export class LedgerDMKService {
 
   /**
    * Connect to a specific Ledger device
+   * - Reuses existing session if connecting to the same device
+   * - Disconnects and reconnects if connecting to a different device
+   * - Handles stale sessions gracefully
    */
   public async connectToDevice(device: DiscoveredDevice): Promise<DeviceSessionId> {
     try {
       // Stop scanning before connecting to prevent APDU conflicts
       this.stopScanning()
 
+      // Check if we already have an active session
+      if (this.currentSession) {
+        try {
+          const connectedDevice = this.dmk.getConnectedDevice({ sessionId: this.currentSession })
+
+          if (connectedDevice.id === device.id) {
+            return this.currentSession
+          }
+        } catch (error) {
+          console.warn('Failed to get connected device, session might be stale:', error)
+        }
+
+        await this.disconnect()
+      }
+
+      // Connect to the new device
       const session = await this.dmk.connect({ device })
       this.currentSession = session
       return session
