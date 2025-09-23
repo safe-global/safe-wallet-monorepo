@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { View, Text } from 'tamagui'
+import { View, Text, ScrollView, getTokenValue } from 'tamagui'
 import { useLocalSearchParams, router } from 'expo-router'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector } from '@/src/store/hooks'
@@ -17,8 +17,10 @@ import useSafeInfo from '@/src/hooks/useSafeInfo'
 import extractTxInfo from '@/src/services/tx/extractTx'
 import { getSafeTxMessageHash } from '@safe-global/utils/utils/safe-hashes'
 import type { SafeVersion } from '@safe-global/types-kit'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export const LedgerReviewSignContainer = () => {
+  const { bottom } = useSafeAreaInsets()
   const { txId, sessionId } = useLocalSearchParams<{ txId: string; sessionId: string }>()
   const activeSafe = useDefinedActiveSafe()
   const chain = useAppSelector((s) => selectChainById(s, activeSafe.chainId))
@@ -50,16 +52,6 @@ export const LedgerReviewSignContainer = () => {
       setError('No Ledger session. Please reconnect.')
     }
   }, [sessionId])
-
-  // Ensure we clean up the Ledger session when leaving this screen to stop background pings
-  useEffect(() => {
-    return () => {
-      // Best-effort disconnect; ignores if no active session
-      ledgerDMKService.disconnect().catch((err) => {
-        logger.info('Ledger disconnect on unmount failed', err)
-      })
-    }
-  }, [])
 
   const handleSign = async () => {
     if (!txId || !activeSigner?.derivationPath || !activeSigner?.value) {
@@ -112,40 +104,41 @@ export const LedgerReviewSignContainer = () => {
   }
 
   return (
-    <View flex={1} padding="$4" gap="$4">
-      <Text fontSize="$9" fontWeight="600" color="$color">
-        Review and confirm transaction on Ledger
-      </Text>
+    <View flex={1} padding="$4" gap="$4" paddingBottom={Math.max(bottom, getTokenValue('$4'))}>
+      <ScrollView>
+        <Text fontSize="$9" fontWeight="600" color="$color" numberOfLines={2}>
+          Review and confirm transaction on Ledger
+        </Text>
 
-      <View backgroundColor="$backgroundPaper" borderRadius="$4" padding="$4" gap="$4">
-        <View>
-          <Text fontSize="$3" color="$colorSecondary">
-            chainId
-          </Text>
-          <Text fontSize="$5" color="$color">
-            {chain?.chainId}
-          </Text>
+        <View backgroundColor="$backgroundPaper" borderRadius="$4" padding="$4" gap="$4">
+          <View>
+            <Text fontSize="$3" color="$colorSecondary">
+              chainId
+            </Text>
+            <Text fontSize="$5" color="$color">
+              {chain?.chainId}
+            </Text>
+          </View>
+          <View>
+            <Text fontSize="$3" color="$colorSecondary">
+              verifyingContract
+            </Text>
+            <Text fontSize="$5" color="$color">
+              {activeSafe.address}
+            </Text>
+          </View>
+          <View>
+            <Text fontSize="$3" color="$colorSecondary">
+              messageHash
+            </Text>
+            <Text fontSize="$5" color="$color">
+              {messageHash || '—'}
+            </Text>
+          </View>
         </View>
-        <View>
-          <Text fontSize="$3" color="$colorSecondary">
-            verifyingContract
-          </Text>
-          <Text fontSize="$5" color="$color">
-            {activeSafe.address}
-          </Text>
-        </View>
-        <View>
-          <Text fontSize="$3" color="$colorSecondary">
-            messageHash
-          </Text>
-          <Text fontSize="$5" color="$color">
-            {messageHash || '—'}
-          </Text>
-        </View>
-      </View>
 
-      {error ? <Text color="$error">{error}</Text> : null}
-
+        {error ? <Text color="$error">{error}</Text> : null}
+      </ScrollView>
       <SafeButton
         onPress={handleSign}
         disabled={isSigning}
