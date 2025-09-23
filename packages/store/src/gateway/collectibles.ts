@@ -7,9 +7,9 @@ export type CollectiblesInfiniteQueryArg = Omit<CollectiblesGetCollectiblesV2Api
 
 export const collectiblesApi = api.injectEndpoints({
   endpoints: (build) => ({
-    getCollectiblesInfinite: build.infiniteQuery<CollectiblePage, CollectiblesInfiniteQueryArg, string | null>({
+    getCollectiblesInfinite: build.infiniteQuery<CollectiblePage, CollectiblesInfiniteQueryArg, string | undefined>({
       infiniteQueryOptions: {
-        initialPageParam: null,
+        initialPageParam: undefined,
         getNextPageParam,
       },
       query: ({ queryArg, pageParam }) => ({
@@ -17,7 +17,7 @@ export const collectiblesApi = api.injectEndpoints({
         params: {
           trusted: queryArg.trusted,
           exclude_spam: queryArg.excludeSpam,
-          cursor: pageParam,
+          cursor: pageParam ?? undefined,
         },
       }),
     }),
