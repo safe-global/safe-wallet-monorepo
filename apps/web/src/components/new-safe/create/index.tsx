@@ -95,7 +95,7 @@ const staticHints: Record<
     steps: [
       {
         title: 'Connect your Safe Account',
-        text: 'In our Safe Apps section you can connect your Safe Account to over 70 dApps directly or via Wallet Connect to interact with any application.',
+        text: 'In our Safe Apps section you can connect your Safe Account to over dApps directly or via Wallet Connect to interact with any application.',
       },
     ],
   },

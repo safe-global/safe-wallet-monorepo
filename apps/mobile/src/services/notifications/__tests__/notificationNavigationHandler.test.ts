@@ -108,7 +108,6 @@ describe('NotificationNavigationHandler', () => {
     NotificationNavigationHandler = require('../notificationNavigationHandler').NotificationNavigationHandler
   })
 
-
   describe('switchToSafe', () => {
     it('should switch to the correct safe successfully', async () => {
       await NotificationNavigationHandler.switchToSafe(mockAddress, mockChainId)

@@ -113,7 +113,7 @@ const UsefulHintsWidget = () => {
         </Typography>
       }
       title="Explore over 70+ dApps"
-      content="In our Safe App section you can connect your Safe to over 70 dApps directly or via Wallet Connect to interact with any application."
+      content="In our Safe App section you can connect your Safe to over dapps directly or via Wallet Connect to interact with any application."
       completed={false}
     />
   )
