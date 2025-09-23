@@ -26,7 +26,11 @@ type SafesGetOverviewForManyQueryResult = ReturnType<
   ReturnType<typeof additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate>
 >
 
-const createFetchSafeOverviews = (dispatch: (action: unknown) => unknown): SafeOverviewQueryFn => {
+type SafesGetOverviewForManyDispatch = (
+  action: ReturnType<typeof additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate>,
+) => SafesGetOverviewForManyQueryResult
+
+const createFetchSafeOverviews = (dispatch: SafesGetOverviewForManyDispatch): SafeOverviewQueryFn => {
   return async ({ safes, currency, walletAddress }) => {
     const queryAction = additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate(
       {
@@ -39,7 +43,7 @@ const createFetchSafeOverviews = (dispatch: (action: unknown) => unknown): SafeO
       { subscribe: false },
     )
 
-    const queryResult = dispatch(queryAction) as SafesGetOverviewForManyQueryResult
+    const queryResult: SafesGetOverviewForManyQueryResult = dispatch(queryAction)
 
     try {
       return await queryResult.unwrap()
