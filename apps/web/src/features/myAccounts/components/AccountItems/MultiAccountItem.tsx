@@ -4,7 +4,7 @@ import type { SafeListProps } from '@/features/myAccounts/components/SafesList'
 import SpaceSafeContextMenu from '@/features/spaces/components/SafeAccounts/SpaceSafeContextMenu'
 import { showNotification } from '@/store/notificationsSlice'
 import SingleAccountItem from '@/features/myAccounts/components/AccountItems/SingleAccountItem'
-import type { SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useCallback, useMemo, useState } from 'react'
 import {
   Accordion,

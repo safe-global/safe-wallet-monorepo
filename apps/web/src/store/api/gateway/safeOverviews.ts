@@ -1,6 +1,7 @@
 import { type EndpointBuilder } from '@reduxjs/toolkit/query/react'
 
-import { type SafeOverview, getSafeOverviews } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeOverview, SafesGetSafeOverviewV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { RootState } from '../..'
 import { selectCurrency } from '../../settingsSlice'
@@ -8,107 +9,45 @@ import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { makeSafeTag } from '.'
 
-type SafeOverviewQueueItem = {
-  safeAddress: string
-  walletAddress?: string
-  chainId: string
+const SAFE_OVERVIEW_QUERY_OPTIONS = {
+  trusted: false,
+  excludeSpam: true,
+}
+
+type SafeOverviewQueryArgs = {
+  safes: string[]
   currency: string
-  callback: (result: { data: SafeOverview | undefined; error?: never } | { data?: never; error: string }) => void
+  walletAddress?: string
 }
 
-const _BATCH_SIZE = 10
-const _FETCH_TIMEOUT = 300
+type SafeOverviewQueryFn = (args: SafeOverviewQueryArgs) => Promise<SafesGetSafeOverviewV1ApiResponse>
 
-class SafeOverviewFetcher {
-  private requestQueue: SafeOverviewQueueItem[] = []
+type SafesGetOverviewForManyQueryResult = ReturnType<
+  ReturnType<typeof additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate>
+>
 
-  private fetchTimeout: NodeJS.Timeout | null = null
+const createFetchSafeOverviews = (dispatch: (action: unknown) => unknown): SafeOverviewQueryFn => {
+  return async ({ safes, currency, walletAddress }) => {
+    const queryAction = additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate(
+      {
+        safes,
+        currency,
+        walletAddress,
+        trusted: SAFE_OVERVIEW_QUERY_OPTIONS.trusted,
+        excludeSpam: SAFE_OVERVIEW_QUERY_OPTIONS.excludeSpam,
+      },
+      { subscribe: false },
+    )
 
-  private async fetchSafeOverviews({
-    safeIds,
-    walletAddress,
-    currency,
-  }: {
-    safeIds: `${number}:0x${string}`[]
-    walletAddress?: string
-    currency: string
-  }) {
-    return await getSafeOverviews(safeIds, {
-      /**
-       * This flag can only be set once for all cross chain `safeIds`.
-       * If we set `trusted` to `true` we will get 0 as `fiatTotal` for all Safes on networks without Default tokenlists.
-       */
-      trusted: false,
-      exclude_spam: true,
-      currency,
-      wallet_address: walletAddress,
-    })
-  }
+    const queryResult = dispatch(queryAction) as SafesGetOverviewForManyQueryResult
 
-  private async processQueuedItems() {
-    // Dequeue the first BATCH_SIZE items
-    const nextBatch = this.requestQueue.slice(0, _BATCH_SIZE)
-    this.requestQueue = this.requestQueue.slice(_BATCH_SIZE)
-
-    let overviews: SafeOverview[]
     try {
-      this.fetchTimeout && clearTimeout(this.fetchTimeout)
-      this.fetchTimeout = null
-
-      if (nextBatch.length === 0) {
-        // Nothing to process
-        return
-      }
-
-      const safeIds = nextBatch.map((request) => makeSafeTag(request.chainId, request.safeAddress))
-      const { walletAddress, currency } = nextBatch[0]
-      overviews = await this.fetchSafeOverviews({ safeIds, currency, walletAddress })
-    } catch (err) {
-      // Overviews could not be fetched
-      nextBatch.forEach((item) => item.callback({ error: 'Could not fetch Safe overview' }))
-      return
+      return await queryResult.unwrap()
+    } finally {
+      queryResult.unsubscribe()
     }
-
-    nextBatch.forEach((item) => {
-      const overview = overviews.find(
-        (entry) => sameAddress(entry.address.value, item.safeAddress) && entry.chainId === item.chainId,
-      )
-
-      item.callback({ data: overview })
-    })
-  }
-
-  private enqueueRequest(item: SafeOverviewQueueItem) {
-    this.requestQueue.push(item)
-
-    if (this.requestQueue.length >= _BATCH_SIZE) {
-      this.processQueuedItems()
-    }
-
-    // If no timer is running start a timer
-    if (this.fetchTimeout === null) {
-      this.fetchTimeout = setTimeout(() => {
-        this.processQueuedItems()
-      }, _FETCH_TIMEOUT)
-    }
-  }
-
-  async getOverview(item: Omit<SafeOverviewQueueItem, 'callback'>) {
-    return new Promise<SafeOverview | undefined>((resolve, reject) => {
-      this.enqueueRequest({
-        ...item,
-        callback: (result) => {
-          if ('data' in result) {
-            resolve(result.data)
-          }
-          reject(result.error)
-        },
-      })
-    })
   }
 }
-
-const batchedFetcher = new SafeOverviewFetcher()
 
 type MultiOverviewQueryParams = {
   currency: string
@@ -119,7 +58,7 @@ type MultiOverviewQueryParams = {
 export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'OwnedSafes' | 'Submissions', 'gatewayApi'>) => ({
   getSafeOverview: builder.query<SafeOverview | null, { safeAddress: string; walletAddress?: string; chainId: string }>(
     {
-      async queryFn({ safeAddress, walletAddress, chainId }, { getState }) {
+      async queryFn({ safeAddress, walletAddress, chainId }, { getState, dispatch }) {
         const state = getState() as RootState
         const currency = selectCurrency(state)
 
@@ -128,7 +67,13 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'OwnedSafes'
         }
 
         try {
-          const safeOverview = await batchedFetcher.getOverview({ chainId, currency, walletAddress, safeAddress })
+          const fetchSafeOverviews = createFetchSafeOverviews(dispatch)
+          const safes = [makeSafeTag(chainId, safeAddress)]
+          const overviews = await fetchSafeOverviews({ safes, currency, walletAddress })
+          const safeOverview = overviews.find(
+            (entry) => entry.chainId === chainId && sameAddress(entry.address.value, safeAddress),
+          )
+
           return { data: safeOverview ?? null }
         } catch (error) {
           return { error: { status: 'CUSTOM_ERROR', error: asError(error).message } }
@@ -137,20 +82,23 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'OwnedSafes'
     },
   ),
   getMultipleSafeOverviews: builder.query<SafeOverview[], MultiOverviewQueryParams>({
-    async queryFn(params) {
+    async queryFn(params, { dispatch }) {
       const { safes, walletAddress, currency } = params
 
       try {
-        const promisedSafeOverviews = safes.map((safe) =>
-          batchedFetcher.getOverview({
-            chainId: safe.chainId,
-            safeAddress: safe.address,
-            currency,
-            walletAddress,
-          }),
+        if (!safes.length) {
+          return { data: [] }
+        }
+
+        const fetchSafeOverviews = createFetchSafeOverviews(dispatch)
+        const safeTags = safes.map((safe) => makeSafeTag(safe.chainId, safe.address))
+        const overviews = await fetchSafeOverviews({ safes: safeTags, currency, walletAddress })
+
+        const matchingOverviews = overviews.filter((overview) =>
+          safes.some((safe) => safe.chainId === overview.chainId && sameAddress(safe.address, overview.address.value)),
         )
-        const safeOverviews = await Promise.all(promisedSafeOverviews)
-        return { data: safeOverviews.filter(Boolean) as SafeOverview[] }
+
+        return { data: matchingOverviews }
       } catch (error) {
         return { error: { status: 'CUSTOM_ERROR', error: (error as Error).message } }
       }
