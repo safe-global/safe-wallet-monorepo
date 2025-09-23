@@ -104,7 +104,21 @@ const NftGrid = ({
   // Filter string
   const [filter, setFilter] = useState<string>('')
 
-  const selectedKeys = useMemo(() => new Set(selectedNfts.map(getNftKey)), [selectedNfts])
+  const selectedKeySignature = useMemo(() => {
+    if (!selectedNfts.length) {
+      return ''
+    }
+
+    return selectedNfts.map(getNftKey).sort().join('|')
+  }, [selectedNfts])
+
+  const selectedKeys = useMemo(() => {
+    if (!selectedKeySignature) {
+      return new Set<string>()
+    }
+
+    return new Set(selectedKeySignature.split('|'))
+  }, [selectedKeySignature])
 
   const onFilterChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
