@@ -13,6 +13,7 @@ export class LedgerDMKService {
   private dmk: DeviceManagementKit
   private currentSession: DeviceSessionId | null = null
   private scanningSubscription: { unsubscribe: () => void } | null = null
+  private connectionLock: Promise<DeviceSessionId> | null = null
 
   private constructor() {
     this.dmk = new DeviceManagementKitBuilder()
@@ -80,8 +81,37 @@ export class LedgerDMKService {
    * - Reuses existing session if connecting to the same device
    * - Disconnects and reconnects if connecting to a different device
    * - Handles stale sessions gracefully
+   * - Prevents race conditions with connection locking
    */
   public async connectToDevice(device: DiscoveredDevice): Promise<DeviceSessionId> {
+    // If there's already a connection in progress, wait for it and reuse if same device
+    if (this.connectionLock) {
+      const existingSession = await this.connectionLock
+      try {
+        const connectedDevice = this.dmk.getConnectedDevice({ sessionId: existingSession })
+        if (connectedDevice.id === device.id) {
+          return existingSession
+        }
+      } catch (error) {
+        logger.warn('Existing connection session is stale:', error)
+      }
+      // Fall through to create new connection for different device
+    }
+
+    // Create new connection attempt
+    this.connectionLock = this.performConnection(device)
+
+    try {
+      return await this.connectionLock
+    } finally {
+      this.connectionLock = null
+    }
+  }
+
+  /**
+   * Internal method to perform the actual connection logic
+   */
+  private async performConnection(device: DiscoveredDevice): Promise<DeviceSessionId> {
     try {
       // Stop scanning before connecting to prevent APDU conflicts
       this.stopScanning()
@@ -143,6 +173,9 @@ export class LedgerDMKService {
    * Clean up resources
    */
   public dispose(): void {
+    // Clear any pending connection lock
+    this.connectionLock = null
+
     if (this.currentSession) {
       this.disconnect().catch((error) => logger.error('Error during cleanup disconnect:', error))
     }
