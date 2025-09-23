@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { View } from 'tamagui'
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router'
 import type { DiscoveredDevice } from '@ledgerhq/device-management-kit'
@@ -13,6 +13,7 @@ interface LedgerDevice {
 }
 
 export const LedgerConnectSignContainer = () => {
+  const [refresh, setRefresh] = useState(false)
   const params = useLocalSearchParams<{ txId?: string }>()
   const { isScanning, discoveredDevices, startScanning, stopScanning, bluetoothEnabled } = useLedgerDeviceScanning()
   const hasScanStarted = useRef(false)
@@ -39,9 +40,11 @@ export const LedgerConnectSignContainer = () => {
   }
 
   const handleRefresh = () => {
+    setRefresh(true)
     if (!isScanning) {
       startScanning()
     }
+    setRefresh(false)
   }
 
   if (discoveredDevices.length === 0) {
@@ -60,7 +63,7 @@ export const LedgerConnectSignContainer = () => {
         devices={discoveredDevices}
         onDevicePress={handleDeviceConnect}
         onRefresh={handleRefresh}
-        isRefreshing={isScanning}
+        isRefreshing={refresh}
       />
     </View>
   )
