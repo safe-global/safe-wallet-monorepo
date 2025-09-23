@@ -61,7 +61,7 @@ describe('useLedgerDeviceScanning', () => {
       name: faker.commerce.productName(),
       deviceModel: { id: 'nanoS', productName: 'Ledger Nano S' },
       ...overrides,
-    } as DiscoveredDevice)
+    }) as DiscoveredDevice
 
   describe('initial state', () => {
     it('should initialize with correct default values', () => {
