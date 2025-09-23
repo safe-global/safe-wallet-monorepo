@@ -3,6 +3,7 @@ import { useLedgerAddresses } from './useLedgerAddresses'
 import { ledgerDMKService } from '@/src/services/ledger/ledger-dmk.service'
 import { ledgerEthereumService, type EthereumAddress } from '@/src/services/ledger/ledger-ethereum.service'
 import { faker } from '@faker-js/faker'
+import logger from '@/src/utils/logger'
 
 // Mock the ledger services
 jest.mock('@/src/services/ledger/ledger-dmk.service', () => ({
@@ -23,10 +24,6 @@ const mockLedgerEthereumService = ledgerEthereumService as jest.Mocked<typeof le
 describe('useLedgerAddresses', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    // Clear console.error mock calls
-    jest.spyOn(console, 'error').mockImplementation(() => {
-      /* noop */
-    })
   })
 
   afterEach(() => {
@@ -208,7 +205,7 @@ describe('useLedgerAddresses', () => {
       })
       expect(result.current.isLoading).toBe(false)
       expect(result.current.addresses).toEqual([])
-      expect(console.error).toHaveBeenCalledWith('Error loading addresses:', mockError)
+      expect(logger.error).toHaveBeenCalledWith('Error loading addresses:', mockError)
     })
 
     it('should handle session becoming unavailable during fetch', async () => {

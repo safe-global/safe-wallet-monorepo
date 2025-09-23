@@ -247,6 +247,26 @@ jest.mock('react-native-quick-crypto', () => ({
 
 jest.mock('react-native-safe-area-context', () => mockSafeAreaContext)
 
+// Mock the logger globally for all tests
+jest.mock('@/src/utils/logger', () => ({
+  __esModule: true,
+  default: {
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    trace: jest.fn(),
+    setLevel: jest.fn(),
+    shouldLog: jest.fn(),
+    setShouldLogErrorToSentry: jest.fn(),
+  },
+  LogLevel: {
+    TRACE: 0,
+    INFO: 1,
+    WARN: 2,
+    ERROR: 3,
+  },
+}))
+
 jest.mock('@react-native-firebase/analytics', () => {
   const mockAnalytics = {
     logEvent: jest.fn(() => Promise.resolve()),

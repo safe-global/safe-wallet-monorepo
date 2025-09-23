@@ -4,6 +4,7 @@ import { ledgerDMKService } from '@/src/services/ledger/ledger-dmk.service'
 import { useBluetoothStatus } from '@/src/features/Ledger/hooks/useBluetoothStatus'
 import { faker } from '@faker-js/faker'
 import type { DiscoveredDevice } from '@ledgerhq/device-management-kit'
+import logger from '@/src/utils/logger'
 
 // Mock the dependencies
 jest.mock('@/src/services/ledger/ledger-dmk.service', () => ({
@@ -61,7 +62,7 @@ describe('useLedgerDeviceScanning', () => {
       name: faker.commerce.productName(),
       deviceModel: { id: 'nanoS', productName: 'Ledger Nano S' },
       ...overrides,
-    }) as DiscoveredDevice
+    } as DiscoveredDevice)
 
   describe('initial state', () => {
     it('should initialize with correct default values', () => {
@@ -355,7 +356,6 @@ describe('useLedgerDeviceScanning', () => {
 
   describe('error handling', () => {
     it('should handle scanning errors and stop scanning', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation()
       const { result } = renderHook(() => useLedgerDeviceScanning())
 
       await act(async () => {
@@ -370,9 +370,7 @@ describe('useLedgerDeviceScanning', () => {
       })
 
       expect(result.current.isScanning).toBe(false)
-      expect(consoleSpy).toHaveBeenCalledWith('Scanning error:', mockError)
-
-      consoleSpy.mockRestore()
+      expect(logger.error).toHaveBeenCalledWith('Scanning error:', mockError)
     })
   })
 

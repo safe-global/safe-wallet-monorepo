@@ -66,7 +66,7 @@ export const selectSignersByAddress = (state: RootState) => state.signers
 export const selectSignerByAddress = (state: RootState, address: string) => state.signers[address]
 
 export const selectSignerHasPrivateKey = (address: string) => (state: RootState) => {
-  return !!state.signers[address]
+  return state.signers[address] && state.signers[address].type === 'private-key'
 }
 
 export const selectTotalSignerCount = (state: RootState) => Object.keys(state.signers).length

@@ -1,6 +1,7 @@
 import { renderHook, waitFor, act } from '@/src/tests/test-utils'
 import { useBluetoothStatus } from './useBluetoothStatus'
 import { bluetoothService } from '@/src/services/bluetooth/bluetooth.service'
+import logger from '@/src/utils/logger'
 
 // Mock the bluetooth service
 jest.mock('@/src/services/bluetooth/bluetooth.service', () => ({
@@ -14,10 +15,6 @@ const mockBluetoothService = bluetoothService as jest.Mocked<typeof bluetoothSer
 describe('useBluetoothStatus', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    // Clear console.error mock calls
-    jest.spyOn(console, 'error').mockImplementation(() => {
-      /* noop */
-    })
   })
 
   afterEach(() => {
@@ -71,7 +68,7 @@ describe('useBluetoothStatus', () => {
       })
 
       expect(mockBluetoothService.isBluetoothEnabled).toHaveBeenCalledTimes(1)
-      expect(console.error).toHaveBeenCalledWith('Error checking Bluetooth status:', mockError)
+      expect(logger.error).toHaveBeenCalledWith('Error checking Bluetooth status:', mockError)
     })
 
     it('should handle bluetooth service rejection and log error', async () => {
@@ -84,7 +81,7 @@ describe('useBluetoothStatus', () => {
         expect(result.current.bluetoothEnabled).toBe(false)
       })
 
-      expect(console.error).toHaveBeenCalledWith('Error checking Bluetooth status:', mockError)
+      expect(logger.error).toHaveBeenCalledWith('Error checking Bluetooth status:', mockError)
     })
   })
 
@@ -137,7 +134,7 @@ describe('useBluetoothStatus', () => {
 
       expect(manualCheckResult).toBe(false)
       expect(result.current.bluetoothEnabled).toBe(false)
-      expect(console.error).toHaveBeenCalledWith('Error checking Bluetooth status:', mockError)
+      expect(logger.error).toHaveBeenCalledWith('Error checking Bluetooth status:', mockError)
     })
 
     it('should maintain stable checkBluetoothStatus function reference', async () => {
