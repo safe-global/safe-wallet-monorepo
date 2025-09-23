@@ -4,11 +4,9 @@ import DefiIcon from '@/public/images/balances/defi.svg'
 // This component is displayed when the positions feature flag is enabled,
 // but the API does not return data from CGW (Client Gateway), or errors out.
 const PositionsUnavailable = ({ hasError = false }: { hasError?: boolean }) => {
-  const title = hasError ? 'There was an error loading your positions' : 'Positions are not available on this network'
+  const title = hasError ? "Couldn't load your positions" : 'Positions are not available on this network'
 
-  const subtitle = hasError
-    ? 'Please try again later or contact support if the problem persists'
-    : 'Positions feature is still in beta and will be available soon'
+  const subtitle = hasError ? 'Try again later' : 'Positions feature is still in beta and will be available soon'
 
   return (
     <Paper elevation={0} sx={{ p: 3, textAlign: 'center' }}>
