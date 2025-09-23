@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import { useAppDispatch } from '@/src/store/hooks'
 import { addSignerWithEffects } from '@/src/store/signersSlice'
 import { ledgerDMKService } from '@/src/services/ledger/ledger-dmk.service'
+import logger from '@/src/utils/logger'
 
 type ImportError = {
   code: 'VALIDATION' | 'IMPORT'
@@ -62,7 +63,7 @@ export const useImportLedgerAddress = () => {
           selected: { address, path, index },
         }
       } catch (error) {
-        console.error('Error importing address:', error)
+        logger.error('Error importing address:', error)
         setError({
           code: 'IMPORT',
           message: 'Failed to import the selected address. Please try again.',

@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import type { DiscoveredDevice } from '@ledgerhq/device-management-kit'
 import { ledgerDMKService } from '@/src/services/ledger/ledger-dmk.service'
 import { useBluetoothStatus } from '@/src/features/Ledger/hooks/useBluetoothStatus'
+import logger from '@/src/utils/logger'
 
 interface LedgerDevice {
   id: string
@@ -42,7 +43,7 @@ export const useLedgerDeviceScanning = () => {
   }, [])
 
   const handleScanError = useCallback((error: Error) => {
-    console.error('Scanning error:', error)
+    logger.error('Scanning error:', error)
     setIsScanning(false)
   }, [])
 

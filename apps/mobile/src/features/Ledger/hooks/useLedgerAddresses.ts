@@ -2,6 +2,7 @@ import { useEffect, useCallback, useReducer, useRef } from 'react'
 
 import { ledgerDMKService } from '@/src/services/ledger/ledger-dmk.service'
 import { ledgerEthereumService } from '@/src/services/ledger/ledger-ethereum.service'
+import logger from '@/src/utils/logger'
 
 interface UseLedgerAddressesParams {
   sessionId?: string
@@ -99,7 +100,7 @@ export const useLedgerAddresses = ({ sessionId }: UseLedgerAddressesParams) => {
         const base = addresses.map((a) => ({ address: a.address, path: a.path, index: a.index }))
         dispatchLocal({ type: 'LOAD_SUCCESS', payload: base })
       } catch (error) {
-        console.error('Error loading addresses:', error)
+        logger.error('Error loading addresses:', error)
         dispatchLocal({ type: 'LOAD_FAILURE', payload: { code: 'LOAD', message: 'Failed to load addresses' } })
       }
     },

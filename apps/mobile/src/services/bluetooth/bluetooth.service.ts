@@ -1,4 +1,5 @@
 import { BleManager } from 'react-native-ble-plx'
+import logger from '@/src/utils/logger'
 
 export class BluetoothService {
   private static instance: BluetoothService
@@ -23,7 +24,7 @@ export class BluetoothService {
       const state = await this.bleManager.state()
       return state === 'PoweredOn'
     } catch (error) {
-      console.error('Error checking Bluetooth state:', error)
+      logger.error('Error checking Bluetooth state:', error)
       return false
     }
   }
@@ -39,7 +40,7 @@ export class BluetoothService {
       }
       return true
     } catch (error) {
-      console.error('Error requesting Bluetooth permissions:', error)
+      logger.error('Error requesting Bluetooth permissions:', error)
       return false
     }
   }

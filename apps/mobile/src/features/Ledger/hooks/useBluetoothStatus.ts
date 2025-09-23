@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { bluetoothService } from '@/src/services/bluetooth/bluetooth.service'
+import logger from '@/src/utils/logger'
 
 export const useBluetoothStatus = () => {
   const [bluetoothEnabled, setBluetoothEnabled] = useState<boolean | null>(null)
@@ -10,7 +11,7 @@ export const useBluetoothStatus = () => {
       setBluetoothEnabled(isEnabled)
       return isEnabled
     } catch (error) {
-      console.error('Error checking Bluetooth status:', error)
+      logger.error('Error checking Bluetooth status:', error)
       setBluetoothEnabled(false)
       return false
     }

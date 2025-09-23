@@ -4,6 +4,7 @@ import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transacti
 import { AppDispatch, RootState } from '.'
 import { setActiveSigner } from './activeSignerSlice'
 import { addContact } from './addressBookSlice'
+import logger from '@/src/utils/logger'
 
 export type Signer = AddressInfo &
   (
@@ -24,7 +25,7 @@ const signersSlice = createSlice({
   initialState,
   reducers: {
     addSigner: (state, action: PayloadAction<Signer>) => {
-      console.log('addSigner', action.payload)
+      logger.info('Adding signer:', action.payload)
       state[action.payload.value] = action.payload
 
       return state

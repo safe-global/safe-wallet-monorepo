@@ -2,6 +2,7 @@ import { SignerEthBuilder } from '@ledgerhq/device-signer-kit-ethereum'
 import type { DeviceSessionId, ExecuteDeviceActionReturnType } from '@ledgerhq/device-management-kit'
 import type { TypedData, Signature } from '@ledgerhq/device-signer-kit-ethereum'
 import { ledgerDMKService } from './ledger-dmk.service'
+import logger from '@/src/utils/logger'
 
 export interface EthereumAddress {
   address: string
@@ -98,7 +99,7 @@ export class LedgerEthereumService {
           })
         }
       } catch (error) {
-        console.error(`Failed to get address at index ${i}:`, error)
+        logger.error(`Failed to get address at index ${i}:`, error)
         // Continue with next address instead of failing completely
         continue
       }

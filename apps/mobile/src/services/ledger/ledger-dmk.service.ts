@@ -6,6 +6,7 @@ import {
   type DiscoveredDevice,
 } from '@ledgerhq/device-management-kit'
 import { RNBleTransportFactory } from '@ledgerhq/device-transport-kit-react-native-ble'
+import logger from '@/src/utils/logger'
 
 export class LedgerDMKService {
   private static instance: LedgerDMKService
@@ -43,7 +44,7 @@ export class LedgerDMKService {
           })
         },
         error: (error: Error) => {
-          console.log('error', error)
+          logger.error('Ledger device scanning error:', error)
           this.scanningSubscription = null
           onError(error)
         },
@@ -94,7 +95,7 @@ export class LedgerDMKService {
             return this.currentSession
           }
         } catch (error) {
-          console.warn('Failed to get connected device, session might be stale:', error)
+          logger.warn('Failed to get connected device, session might be stale:', error)
         }
 
         await this.disconnect()
@@ -125,7 +126,7 @@ export class LedgerDMKService {
         await this.dmk.disconnect({ sessionId: this.currentSession })
         this.currentSession = null
       } catch (error) {
-        console.error('Error disconnecting:', error)
+        logger.error('Error disconnecting:', error)
         throw error
       }
     }
@@ -143,7 +144,7 @@ export class LedgerDMKService {
    */
   public dispose(): void {
     if (this.currentSession) {
-      this.disconnect().catch(console.error)
+      this.disconnect().catch((error) => logger.error('Error during cleanup disconnect:', error))
     }
   }
 }
