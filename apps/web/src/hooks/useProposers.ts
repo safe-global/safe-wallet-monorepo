@@ -13,11 +13,11 @@ const useProposers = () => {
 
   const shouldFetch = Boolean(chainId && safeAddress)
 
-  const queryArg: DelegatesGetDelegatesV2ApiArg = shouldFetch
-    ? { chainId: chainId!, safe: safeAddress! }
-    : { chainId: '', safe: '' }
+  const queryArg: DelegatesGetDelegatesV2ApiArg | undefined = shouldFetch ? { chainId, safe: safeAddress } : undefined
 
-  return useDelegatesGetDelegatesV2Query(queryArg, { skip: !shouldFetch })
+  return useDelegatesGetDelegatesV2Query(queryArg as DelegatesGetDelegatesV2ApiArg, {
+    skip: !shouldFetch,
+  })
 }
 
 export const useIsWalletProposer = () => {
