@@ -134,7 +134,7 @@ const NftGrid = ({
       const key = getNftKey(item)
       setSelectedNfts((prev) => {
         if (checked) {
-          if (prev.some((el) => getNftKey(el) === key)) {
+          if (selectedKeys.has(key)) {
             return prev
           }
 
@@ -144,7 +144,7 @@ const NftGrid = ({
         return prev.filter((el) => getNftKey(el) !== key)
       })
     },
-    [setSelectedNfts],
+    [selectedKeys, setSelectedNfts],
   )
 
   // Filter by collection name or token address
