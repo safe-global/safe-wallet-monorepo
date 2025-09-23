@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { View } from 'tamagui'
 import { router, useFocusEffect } from 'expo-router'
 import type { DiscoveredDevice } from '@ledgerhq/device-management-kit'
@@ -15,6 +15,7 @@ interface LedgerDevice {
 export const LedgerConnectContainer = () => {
   const { isScanning, discoveredDevices, startScanning, stopScanning, bluetoothEnabled } = useLedgerDeviceScanning()
   const hasScanStarted = useRef(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   // Auto-start scanning when screen comes into focus (only once)
   useFocusEffect(
@@ -38,9 +39,11 @@ export const LedgerConnectContainer = () => {
   }
 
   const handleRefresh = () => {
+    setIsRefreshing(true)
     if (!isScanning) {
       startScanning()
     }
+    setIsRefreshing(false)
   }
 
   // Show scanning screen when no devices found
@@ -61,7 +64,7 @@ export const LedgerConnectContainer = () => {
         devices={discoveredDevices}
         onDevicePress={handleDeviceConnect}
         onRefresh={handleRefresh}
-        isRefreshing={isScanning}
+        isRefreshing={isRefreshing}
       />
     </View>
   )
