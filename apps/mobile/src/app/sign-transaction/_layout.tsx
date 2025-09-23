@@ -9,6 +9,9 @@ export default function SignTransactionLayout() {
       })}
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="ledger-connect" options={{ headerShown: true, title: '' }} />
+      <Stack.Screen name="ledger-pairing" options={{ headerShown: true, title: '' }} />
+      <Stack.Screen name="ledger-review" options={{ headerShown: true, title: '' }} />
     </Stack>
   )
 }
