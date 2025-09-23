@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import type { DiscoveredDevice } from '@ledgerhq/device-management-kit'
 import { ledgerDMKService } from '@/src/services/ledger/ledger-dmk.service'
 import { useBluetoothStatus } from '@/src/features/Ledger/hooks/useBluetoothStatus'
@@ -14,7 +14,7 @@ const CONTINUE_SCAN_AFTER_FIRST_DEVICE_MS = 10000
 export const useLedgerDeviceScanning = () => {
   const [isScanning, setIsScanning] = useState(false)
   const [discoveredDevices, setDiscoveredDevices] = useState<LedgerDevice[]>([])
-  const [scanCleanup, setScanCleanup] = useState<(() => void) | null>(null)
+  const scanCleanupRef = useRef<(() => void) | null>(null)
   const [firstDeviceFoundAt, setFirstDeviceFoundAt] = useState<number | null>(null)
 
   const { bluetoothEnabled, checkBluetoothStatus } = useBluetoothStatus()
@@ -56,18 +56,18 @@ export const useLedgerDeviceScanning = () => {
     setFirstDeviceFoundAt(null)
 
     const cleanup = ledgerDMKService.startScanning(addDevice, handleScanError)
-    setScanCleanup(() => cleanup)
+    scanCleanupRef.current = cleanup
 
     // No timeout - scan indefinitely until first device is found
   }, [bluetoothEnabled, addDevice, handleScanError])
 
   const stopScanning = useCallback(() => {
-    if (scanCleanup) {
-      scanCleanup()
-      setScanCleanup(null)
+    if (scanCleanupRef.current) {
+      scanCleanupRef.current()
+      scanCleanupRef.current = null
     }
     setIsScanning(false)
-  }, [scanCleanup])
+  }, [])
 
   // Auto-stop scanning 10 seconds after finding first device
   useEffect(() => {
@@ -85,11 +85,11 @@ export const useLedgerDeviceScanning = () => {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (scanCleanup) {
-        scanCleanup()
+      if (scanCleanupRef.current) {
+        scanCleanupRef.current()
       }
     }
-  }, [scanCleanup])
+  }, [])
 
   return {
     isScanning,
