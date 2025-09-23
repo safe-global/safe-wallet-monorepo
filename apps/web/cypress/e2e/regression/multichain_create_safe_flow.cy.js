@@ -19,6 +19,7 @@ describe('Multichain safe creation flow tests', () => {
     createwallet.clickOnContinueWithWalletBtn()
     createwallet.clickOnCreateNewSafeBtn()
     createwallet.selectMultiNetwork(1, constants.networks.polygon.toLowerCase())
+    createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
     createwallet.clickOnNextBtn()
     main.verifyElementsExist([
@@ -37,6 +38,7 @@ describe('Multichain safe creation flow tests', () => {
     createwallet.clickOnContinueWithWalletBtn()
     createwallet.clickOnCreateNewSafeBtn()
     createwallet.selectMultiNetwork(1, constants.networks.polygon.toLowerCase())
+    createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
     createwallet.clickOnNextBtn()
     createwallet.checkNetworkLogoInReviewStep([constants.networkKeys.polygon, constants.networkKeys.sepolia])
@@ -46,6 +48,7 @@ describe('Multichain safe creation flow tests', () => {
     createwallet.clickOnContinueWithWalletBtn()
     createwallet.clickOnCreateNewSafeBtn()
     createwallet.selectMultiNetwork(1, constants.networks.polygon.toLowerCase())
+    createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
     owner.clickOnAddSignerBtn()
     owner.typeOwnerAddressCreateSafeStep(1, getMockAddress())
