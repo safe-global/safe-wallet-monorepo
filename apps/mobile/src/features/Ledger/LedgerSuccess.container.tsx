@@ -15,8 +15,7 @@ export const LedgerSuccessContainer = () => {
 
   const handleDone = () => {
     // Navigate back to the main signers screen
-    router.dismissAll()
-    router.navigate('/signers')
+    router.dismissTo('/signers')
   }
 
   const handleCopyAddress = () => {
