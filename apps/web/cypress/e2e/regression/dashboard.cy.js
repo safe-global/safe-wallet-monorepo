@@ -32,7 +32,7 @@ describe('Dashboard tests', { defaultCommandTimeout: 20000 }, () => {
   })
 
   it('Verify there is empty tx string and image when there are no tx queued', () => {
-    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_13)
+    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_14)
     dashboard.verifyEmptyTxSection()
   })
 
