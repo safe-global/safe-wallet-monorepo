@@ -3,10 +3,6 @@
   "name": "@safe-global/store",
   "version": "1.0.0",
   "main": "./src/index.ts",
-  "exports": {
-    "./package.json": "./package.json",
-    "./*": "./src/*"
-  },
   "scripts": {
     "test": "jest",
     "fetch-schema": "ts-node ./scripts/fetch-schema.ts > scripts/api-schema/schema.json",
