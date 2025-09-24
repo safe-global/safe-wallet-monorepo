@@ -123,6 +123,7 @@ const config = {
       {
         ios: {
           useFrameworks: 'static',
+          forceStaticLinking: ['RNFBApp'],
         },
         android: {
           extraMavenRepos: ['../../../../node_modules/@notifee/react-native/android/libs'],
