@@ -118,6 +118,7 @@
     "react-native-keychain": "^10.0.0",
     "react-native-mmkv": "^3.2.0",
     "react-native-pager-view": "6.7.1",
+    "react-native-permissions": "^5.4.2",
     "react-native-progress": "^5.0.1",
     "react-native-qrcode-styled": "patch:react-native-qrcode-styled@npm%3A0.3.3#~/.yarn/patches/react-native-qrcode-styled-npm-0.3.3-b5336fc77c.patch",
     "react-native-quick-crypto": "^0.7.11",

@@ -1,7 +1,6 @@
 import { renderHook, act } from '@/src/tests/test-utils'
 import { useLedgerDeviceScanning } from './useLedgerDeviceScanning'
 import { ledgerDMKService } from '@/src/services/ledger/ledger-dmk.service'
-import { useBluetoothStatus } from '@/src/features/Ledger/hooks/useBluetoothStatus'
 import { faker } from '@faker-js/faker'
 import type { DiscoveredDevice } from '@ledgerhq/device-management-kit'
 import logger from '@/src/utils/logger'
@@ -13,16 +12,16 @@ jest.mock('@/src/services/ledger/ledger-dmk.service', () => ({
   },
 }))
 
-jest.mock('@/src/features/Ledger/hooks/useBluetoothStatus', () => ({
-  useBluetoothStatus: jest.fn(),
+jest.mock('@/src/utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
 }))
 
 const mockLedgerDMKService = ledgerDMKService as jest.Mocked<typeof ledgerDMKService>
-const mockUseBluetoothStatus = useBluetoothStatus as jest.MockedFunction<typeof useBluetoothStatus>
+const mockLogger = logger as jest.Mocked<typeof logger>
 
 describe('useLedgerDeviceScanning', () => {
   let mockCleanupFunction: jest.Mock
-  let mockCheckBluetoothStatus: jest.Mock
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -30,15 +29,8 @@ describe('useLedgerDeviceScanning', () => {
     jest.useFakeTimers()
 
     mockCleanupFunction = jest.fn()
-    mockCheckBluetoothStatus = jest.fn()
 
-    // Default mock for useBluetoothStatus
-    mockUseBluetoothStatus.mockReturnValue({
-      bluetoothEnabled: true,
-      checkBluetoothStatus: mockCheckBluetoothStatus,
-    })
-
-    // Default mock for startScanning - return a fresh mock function each time
+    // Default mock for startScanning - return a cleanup function
     mockLedgerDMKService.startScanning.mockImplementation(() => {
       const cleanup = jest.fn()
       // Copy the calls to the global mock for tracking
@@ -62,7 +54,7 @@ describe('useLedgerDeviceScanning', () => {
       name: faker.commerce.productName(),
       deviceModel: { id: 'nanoS', productName: 'Ledger Nano S' },
       ...overrides,
-    } as DiscoveredDevice)
+    }) as DiscoveredDevice
 
   describe('initial state', () => {
     it('should initialize with correct default values', () => {
@@ -70,31 +62,17 @@ describe('useLedgerDeviceScanning', () => {
 
       expect(result.current.isScanning).toBe(false)
       expect(result.current.discoveredDevices).toEqual([])
-      expect(result.current.bluetoothEnabled).toBe(true)
       expect(typeof result.current.startScanning).toBe('function')
       expect(typeof result.current.stopScanning).toBe('function')
-      expect(typeof result.current.checkBluetoothStatus).toBe('function')
-    })
-
-    it('should reflect bluetooth status from useBluetoothStatus', () => {
-      mockUseBluetoothStatus.mockReturnValue({
-        bluetoothEnabled: false,
-        checkBluetoothStatus: mockCheckBluetoothStatus,
-      })
-
-      const { result } = renderHook(() => useLedgerDeviceScanning())
-
-      expect(result.current.bluetoothEnabled).toBe(false)
-      expect(result.current.checkBluetoothStatus).toBe(mockCheckBluetoothStatus)
     })
   })
 
   describe('scanning lifecycle', () => {
-    it('should start scanning when bluetooth is enabled', async () => {
+    it('should start scanning when startScanning is called', async () => {
       const { result } = renderHook(() => useLedgerDeviceScanning())
 
-      await act(async () => {
-        await result.current.startScanning()
+      act(() => {
+        result.current.startScanning()
       })
 
       expect(result.current.isScanning).toBe(true)
@@ -104,22 +82,7 @@ describe('useLedgerDeviceScanning', () => {
         expect.any(Function), // addDevice callback
         expect.any(Function), // handleScanError callback
       )
-    })
-
-    it('should not start scanning when bluetooth is disabled', async () => {
-      mockUseBluetoothStatus.mockReturnValue({
-        bluetoothEnabled: false,
-        checkBluetoothStatus: mockCheckBluetoothStatus,
-      })
-
-      const { result } = renderHook(() => useLedgerDeviceScanning())
-
-      await act(async () => {
-        await result.current.startScanning()
-      })
-
-      expect(result.current.isScanning).toBe(false)
-      expect(mockLedgerDMKService.startScanning).not.toHaveBeenCalled()
+      expect(mockLogger.info).toHaveBeenCalledWith('Starting Ledger device scanning')
     })
 
     it('should stop scanning and call cleanup function', async () => {
@@ -407,30 +370,24 @@ describe('useLedgerDeviceScanning', () => {
 
       const firstStartScanning = result.current.startScanning
       const firstStopScanning = result.current.stopScanning
-      const firstCheckBluetoothStatus = result.current.checkBluetoothStatus
 
       rerender({})
 
       expect(result.current.startScanning).toBe(firstStartScanning)
       expect(result.current.stopScanning).toBe(firstStopScanning)
-      expect(result.current.checkBluetoothStatus).toBe(firstCheckBluetoothStatus)
     })
 
-    it('should update startScanning when bluetooth status changes', () => {
+    it('should maintain stable function references on rerenders', () => {
       const { result, rerender } = renderHook(() => useLedgerDeviceScanning())
 
       const firstStartScanning = result.current.startScanning
-
-      // Change bluetooth status
-      mockUseBluetoothStatus.mockReturnValue({
-        bluetoothEnabled: false,
-        checkBluetoothStatus: mockCheckBluetoothStatus,
-      })
+      const firstStopScanning = result.current.stopScanning
 
       rerender({})
 
-      // startScanning should have new reference due to bluetoothEnabled dependency
-      expect(result.current.startScanning).not.toBe(firstStartScanning)
+      // Functions should maintain same reference since they're wrapped in useCallback
+      expect(result.current.startScanning).toBe(firstStartScanning)
+      expect(result.current.stopScanning).toBe(firstStopScanning)
     })
   })
 
@@ -488,29 +445,6 @@ describe('useLedgerDeviceScanning', () => {
       expect(mockLedgerDMKService.startScanning).toHaveBeenCalledTimes(3)
     })
 
-    it('should handle bluetooth status changing during scanning', async () => {
-      const { result, rerender } = renderHook(() => useLedgerDeviceScanning())
-
-      // Start scanning with bluetooth enabled
-      await act(async () => {
-        await result.current.startScanning()
-      })
-
-      expect(result.current.isScanning).toBe(true)
-
-      // Change bluetooth status to disabled
-      mockUseBluetoothStatus.mockReturnValue({
-        bluetoothEnabled: false,
-        checkBluetoothStatus: mockCheckBluetoothStatus,
-      })
-
-      rerender({})
-
-      expect(result.current.bluetoothEnabled).toBe(false)
-      // Scanning state should remain as it was started before bluetooth was disabled
-      expect(result.current.isScanning).toBe(true)
-    })
-
     it('should handle device discovery after scanning stopped', async () => {
       const { result } = renderHook(() => useLedgerDeviceScanning())
 
@@ -535,22 +469,6 @@ describe('useLedgerDeviceScanning', () => {
 
       expect(result.current.discoveredDevices).toHaveLength(1) // Device is still added via callback
       expect(result.current.isScanning).toBe(false)
-    })
-  })
-
-  describe('bluetooth status integration', () => {
-    it('should pass through bluetooth status and check function', () => {
-      const mockCustomCheckFunction = jest.fn()
-
-      mockUseBluetoothStatus.mockReturnValue({
-        bluetoothEnabled: null,
-        checkBluetoothStatus: mockCustomCheckFunction,
-      })
-
-      const { result } = renderHook(() => useLedgerDeviceScanning())
-
-      expect(result.current.bluetoothEnabled).toBeNull()
-      expect(result.current.checkBluetoothStatus).toBe(mockCustomCheckFunction)
     })
   })
 })

@@ -8,6 +8,8 @@ import { server } from './server'
 
 jest.useFakeTimers()
 
+jest.mock('react-native-permissions', () => require('react-native-permissions/mock'))
+
 /**
  *  This mock is necessary because useFonts is async and we get an error
  *  Warning: An update to FontProvider inside a test was not wrapped in act(...)

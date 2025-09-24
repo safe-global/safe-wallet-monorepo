@@ -9555,6 +9555,7 @@ __metadata:
     react-native-keychain: "npm:^10.0.0"
     react-native-mmkv: "npm:^3.2.0"
     react-native-pager-view: "npm:6.7.1"
+    react-native-permissions: "npm:^5.4.2"
     react-native-progress: "npm:^5.0.1"
     react-native-qrcode-styled: "patch:react-native-qrcode-styled@npm%3A0.3.3#~/.yarn/patches/react-native-qrcode-styled-npm-0.3.3-b5336fc77c.patch"
     react-native-quick-crypto: "npm:^0.7.11"
@@ -30055,6 +30056,20 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10/22cc95dcf5085cab2b88272610b836375044cc9ab22f8e81f586e9ecb5c75880dc2c649321cbd173b48c6c7025c9914ab4b67ed0207f623a84ea26025257a4e0
+  languageName: node
+  linkType: hard
+
+"react-native-permissions@npm:^5.4.2":
+  version: 5.4.2
+  resolution: "react-native-permissions@npm:5.4.2"
+  peerDependencies:
+    react: ">=18.1.0"
+    react-native: ">=0.70.0"
+    react-native-windows: ">=0.70.0"
+  peerDependenciesMeta:
+    react-native-windows:
+      optional: true
+  checksum: 10/b58250476b4fc3affe08f7c28454fe42267ceef8097499c96da773b5c8e2cb8e18940ca586f28194615342890bf30ae298e9cf647682b30478cc9b867d2e0d90
   languageName: node
   linkType: hard
 

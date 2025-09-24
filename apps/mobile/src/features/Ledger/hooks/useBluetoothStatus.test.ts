@@ -1,12 +1,15 @@
-import { renderHook, waitFor, act } from '@/src/tests/test-utils'
+import { renderHook, act } from '@/src/tests/test-utils'
 import { useBluetoothStatus } from './useBluetoothStatus'
 import { bluetoothService } from '@/src/services/bluetooth/bluetooth.service'
+import { RESULTS } from 'react-native-permissions'
 import logger from '@/src/utils/logger'
 
 // Mock the bluetooth service
 jest.mock('@/src/services/bluetooth/bluetooth.service', () => ({
   bluetoothService: {
-    isBluetoothEnabled: jest.fn(),
+    checkBluetoothPermission: jest.fn(),
+    requestBluetoothPermissions: jest.fn(),
+    openDeviceSettings: jest.fn(),
   },
 }))
 
@@ -21,204 +24,304 @@ describe('useBluetoothStatus', () => {
     jest.restoreAllMocks()
   })
 
-  describe('initial state and bluetooth check', () => {
-    it('should initialize with null bluetoothEnabled state', () => {
-      mockBluetoothService.isBluetoothEnabled.mockResolvedValue(true)
+  describe('initial state', () => {
+    it('should initialize with null states', () => {
+      mockBluetoothService.checkBluetoothPermission.mockResolvedValue(RESULTS.GRANTED)
 
       const { result } = renderHook(() => useBluetoothStatus())
 
-      expect(result.current.bluetoothEnabled).toBeNull()
-      expect(typeof result.current.checkBluetoothStatus).toBe('function')
+      expect(result.current.permissionGranted).toBeNull()
+      expect(result.current.permissionStatus).toBeNull()
+      expect(result.current.error).toBeNull()
+      expect(typeof result.current.checkBluetoothPermission).toBe('function')
+      expect(typeof result.current.requestBluetoothPermissions).toBe('function')
+      expect(typeof result.current.openDeviceSettings).toBe('function')
     })
 
-    it('should check bluetooth status on mount and set enabled to true', async () => {
-      mockBluetoothService.isBluetoothEnabled.mockResolvedValue(true)
+    it('should NOT check permission on mount (lazy initialization)', async () => {
+      mockBluetoothService.checkBluetoothPermission.mockResolvedValue(RESULTS.GRANTED)
 
       const { result } = renderHook(() => useBluetoothStatus())
 
-      await waitFor(() => {
-        expect(result.current.bluetoothEnabled).toBe(true)
-      })
-
-      expect(mockBluetoothService.isBluetoothEnabled).toHaveBeenCalledTimes(1)
-    })
-
-    it('should check bluetooth status on mount and set enabled to false', async () => {
-      mockBluetoothService.isBluetoothEnabled.mockResolvedValue(false)
-
-      const { result } = renderHook(() => useBluetoothStatus())
-
-      await waitFor(() => {
-        expect(result.current.bluetoothEnabled).toBe(false)
-      })
-
-      expect(mockBluetoothService.isBluetoothEnabled).toHaveBeenCalledTimes(1)
+      // Should not auto-check on mount to prevent early permission prompts
+      expect(result.current.permissionGranted).toBeNull()
+      expect(mockBluetoothService.checkBluetoothPermission).not.toHaveBeenCalled()
     })
   })
 
-  describe('error handling', () => {
-    it('should handle bluetooth service errors and set enabled to false', async () => {
-      const mockError = new Error('Bluetooth service error')
-      mockBluetoothService.isBluetoothEnabled.mockRejectedValue(mockError)
+  describe('permission checking', () => {
+    it('should check bluetooth permission when requested - GRANTED', async () => {
+      mockBluetoothService.checkBluetoothPermission.mockResolvedValue(RESULTS.GRANTED)
 
       const { result } = renderHook(() => useBluetoothStatus())
 
-      await waitFor(() => {
-        expect(result.current.bluetoothEnabled).toBe(false)
+      await act(async () => {
+        const isGranted = await result.current.checkBluetoothPermission()
+        expect(isGranted).toBe(true)
       })
 
-      expect(mockBluetoothService.isBluetoothEnabled).toHaveBeenCalledTimes(1)
-      expect(logger.error).toHaveBeenCalledWith('Error checking Bluetooth status:', mockError)
+      expect(result.current.permissionGranted).toBe(true)
+      expect(result.current.permissionStatus).toBe(RESULTS.GRANTED)
+      expect(result.current.error).toBeNull()
+      expect(mockBluetoothService.checkBluetoothPermission).toHaveBeenCalledTimes(1)
     })
 
-    it('should handle bluetooth service rejection and log error', async () => {
-      const mockError = new Error('Permission denied')
-      mockBluetoothService.isBluetoothEnabled.mockRejectedValue(mockError)
+    it('should check bluetooth permission when requested - LIMITED', async () => {
+      mockBluetoothService.checkBluetoothPermission.mockResolvedValue(RESULTS.LIMITED)
 
       const { result } = renderHook(() => useBluetoothStatus())
 
-      await waitFor(() => {
-        expect(result.current.bluetoothEnabled).toBe(false)
+      await act(async () => {
+        const isGranted = await result.current.checkBluetoothPermission()
+        expect(isGranted).toBe(true)
       })
 
-      expect(logger.error).toHaveBeenCalledWith('Error checking Bluetooth status:', mockError)
+      expect(result.current.permissionGranted).toBe(true)
+      expect(result.current.permissionStatus).toBe(RESULTS.LIMITED)
+      expect(result.current.error).toBeNull()
+    })
+
+    it('should check bluetooth permission when requested - DENIED', async () => {
+      mockBluetoothService.checkBluetoothPermission.mockResolvedValue(RESULTS.DENIED)
+
+      const { result } = renderHook(() => useBluetoothStatus())
+
+      await act(async () => {
+        const isGranted = await result.current.checkBluetoothPermission()
+        expect(isGranted).toBe(false)
+      })
+
+      expect(result.current.permissionGranted).toBe(false)
+      expect(result.current.permissionStatus).toBe(RESULTS.DENIED)
+      expect(result.current.error).toBeNull()
+    })
+
+    it('should check bluetooth permission when requested - BLOCKED', async () => {
+      mockBluetoothService.checkBluetoothPermission.mockResolvedValue(RESULTS.BLOCKED)
+
+      const { result } = renderHook(() => useBluetoothStatus())
+
+      await act(async () => {
+        const isGranted = await result.current.checkBluetoothPermission()
+        expect(isGranted).toBe(false)
+      })
+
+      expect(result.current.permissionGranted).toBe(false)
+      expect(result.current.permissionStatus).toBe(RESULTS.BLOCKED)
+      expect(result.current.error).toBeNull()
+    })
+
+    it('should handle permission check errors', async () => {
+      const mockError = new Error('Permission check error')
+      mockBluetoothService.checkBluetoothPermission.mockRejectedValue(mockError)
+
+      const { result } = renderHook(() => useBluetoothStatus())
+
+      await act(async () => {
+        const isGranted = await result.current.checkBluetoothPermission()
+        expect(isGranted).toBe(false)
+      })
+
+      expect(result.current.permissionGranted).toBe(false)
+      expect(result.current.permissionStatus).toBeNull()
+      expect(result.current.error).toBe('Permission check error')
+      expect(logger.error).toHaveBeenCalledWith('Error checking Bluetooth permission:', mockError)
     })
   })
 
-  describe('manual bluetooth status check', () => {
-    it('should allow manual bluetooth status check and return true', async () => {
-      mockBluetoothService.isBluetoothEnabled.mockResolvedValue(true)
+  describe('permission requests', () => {
+    it('should request bluetooth permissions successfully', async () => {
+      const mockResult = { granted: true }
+      mockBluetoothService.requestBluetoothPermissions.mockResolvedValue(mockResult)
+      mockBluetoothService.checkBluetoothPermission.mockResolvedValue(RESULTS.GRANTED)
 
       const { result } = renderHook(() => useBluetoothStatus())
 
-      // Wait for initial check to complete
-      await waitFor(() => {
-        expect(result.current.bluetoothEnabled).toBe(true)
-      })
-
-      // Clear previous calls
-      mockBluetoothService.isBluetoothEnabled.mockClear()
-
-      // Mock return false for manual check
-      mockBluetoothService.isBluetoothEnabled.mockResolvedValue(false)
-
-      let manualCheckResult: boolean | undefined
       await act(async () => {
-        manualCheckResult = await result.current.checkBluetoothStatus()
+        const permissionResult = await result.current.requestBluetoothPermissions()
+        expect(permissionResult).toEqual(mockResult)
       })
 
-      expect(manualCheckResult).toBe(false)
-      expect(result.current.bluetoothEnabled).toBe(false)
-      expect(mockBluetoothService.isBluetoothEnabled).toHaveBeenCalledTimes(1)
+      expect(result.current.permissionGranted).toBe(true)
+      expect(result.current.permissionStatus).toBe(RESULTS.GRANTED)
+      expect(result.current.error).toBeNull()
+      expect(mockBluetoothService.requestBluetoothPermissions).toHaveBeenCalledTimes(1)
+      expect(mockBluetoothService.checkBluetoothPermission).toHaveBeenCalledTimes(1)
     })
 
-    it('should allow manual bluetooth status check and return false on error', async () => {
-      mockBluetoothService.isBluetoothEnabled.mockResolvedValue(true)
+    it('should handle permission denied', async () => {
+      const mockResult = {
+        granted: false,
+        error: 'User denied permissions',
+      }
+      mockBluetoothService.requestBluetoothPermissions.mockResolvedValue(mockResult)
+      mockBluetoothService.checkBluetoothPermission.mockResolvedValue(RESULTS.DENIED)
 
       const { result } = renderHook(() => useBluetoothStatus())
 
-      // Wait for initial check to complete
-      await waitFor(() => {
-        expect(result.current.bluetoothEnabled).toBe(true)
-      })
-
-      // Clear previous calls and mock error for manual check
-      mockBluetoothService.isBluetoothEnabled.mockClear()
-      const mockError = new Error('Manual check error')
-      mockBluetoothService.isBluetoothEnabled.mockRejectedValue(mockError)
-
-      let manualCheckResult: boolean | undefined
       await act(async () => {
-        manualCheckResult = await result.current.checkBluetoothStatus()
+        const permissionResult = await result.current.requestBluetoothPermissions()
+        expect(permissionResult).toEqual(mockResult)
       })
 
-      expect(manualCheckResult).toBe(false)
-      expect(result.current.bluetoothEnabled).toBe(false)
-      expect(logger.error).toHaveBeenCalledWith('Error checking Bluetooth status:', mockError)
+      expect(result.current.permissionGranted).toBe(false)
+      expect(result.current.permissionStatus).toBe(RESULTS.DENIED)
+      expect(result.current.error).toBe('User denied permissions')
     })
 
-    it('should maintain stable checkBluetoothStatus function reference', async () => {
-      mockBluetoothService.isBluetoothEnabled.mockResolvedValue(true)
+    it('should handle permission blocked', async () => {
+      const mockResult = {
+        granted: false,
+        error: 'Bluetooth permission is blocked. Please enable it in your device settings.',
+      }
+      mockBluetoothService.requestBluetoothPermissions.mockResolvedValue(mockResult)
+      mockBluetoothService.checkBluetoothPermission.mockResolvedValue(RESULTS.BLOCKED)
 
-      const { result, rerender } = renderHook(() => useBluetoothStatus())
+      const { result } = renderHook(() => useBluetoothStatus())
 
-      const firstCheckFunction = result.current.checkBluetoothStatus
-
-      // Wait for initial check
-      await waitFor(() => {
-        expect(result.current.bluetoothEnabled).toBe(true)
+      await act(async () => {
+        const permissionResult = await result.current.requestBluetoothPermissions()
+        expect(permissionResult).toEqual(mockResult)
       })
 
-      // Rerender and check function reference stability
-      rerender({})
+      expect(result.current.permissionGranted).toBe(false)
+      expect(result.current.permissionStatus).toBe(RESULTS.BLOCKED)
+      expect(result.current.error).toBe('Bluetooth permission is blocked. Please enable it in your device settings.')
+    })
 
-      expect(result.current.checkBluetoothStatus).toBe(firstCheckFunction)
+    it('should handle request permission errors', async () => {
+      const mockError = new Error('Permission request failed')
+      mockBluetoothService.requestBluetoothPermissions.mockRejectedValue(mockError)
+
+      const { result } = renderHook(() => useBluetoothStatus())
+
+      await act(async () => {
+        const permissionResult = await result.current.requestBluetoothPermissions()
+        expect(permissionResult).toEqual({
+          granted: false,
+          error: 'Permission request failed',
+        })
+      })
+
+      expect(result.current.permissionGranted).toBe(false)
+      expect(result.current.permissionStatus).toBeNull()
+      expect(result.current.error).toBe('Permission request failed')
+      expect(logger.error).toHaveBeenCalledWith('Error requesting Bluetooth permissions:', mockError)
+    })
+
+    it('should open device settings', async () => {
+      mockBluetoothService.openDeviceSettings.mockResolvedValue()
+
+      const { result } = renderHook(() => useBluetoothStatus())
+
+      await act(async () => {
+        await result.current.openDeviceSettings()
+      })
+
+      expect(mockBluetoothService.openDeviceSettings).toHaveBeenCalledTimes(1)
     })
   })
 
   describe('state updates', () => {
-    it('should update state when bluetooth status changes from enabled to disabled', async () => {
-      // Start with bluetooth enabled
-      mockBluetoothService.isBluetoothEnabled.mockResolvedValue(true)
+    it('should update permission status when it changes from granted to denied', async () => {
+      // Start with permission granted
+      mockBluetoothService.checkBluetoothPermission.mockResolvedValue(RESULTS.GRANTED)
 
       const { result } = renderHook(() => useBluetoothStatus())
 
-      // Wait for initial state
-      await waitFor(() => {
-        expect(result.current.bluetoothEnabled).toBe(true)
-      })
-
-      // Change bluetooth status to disabled
-      mockBluetoothService.isBluetoothEnabled.mockResolvedValue(false)
-
-      // Manually check status
+      // Check initial status
       await act(async () => {
-        await result.current.checkBluetoothStatus()
+        await result.current.checkBluetoothPermission()
       })
 
-      expect(result.current.bluetoothEnabled).toBe(false)
+      expect(result.current.permissionGranted).toBe(true)
+      expect(result.current.permissionStatus).toBe(RESULTS.GRANTED)
+
+      // Change permission status to denied
+      mockBluetoothService.checkBluetoothPermission.mockResolvedValue(RESULTS.DENIED)
+
+      // Check status again
+      await act(async () => {
+        await result.current.checkBluetoothPermission()
+      })
+
+      expect(result.current.permissionGranted).toBe(false)
+      expect(result.current.permissionStatus).toBe(RESULTS.DENIED)
     })
 
-    it('should update state when bluetooth status changes from disabled to enabled', async () => {
-      // Start with bluetooth disabled
-      mockBluetoothService.isBluetoothEnabled.mockResolvedValue(false)
+    it('should update permission status when it changes from denied to granted', async () => {
+      // Start with permission denied
+      mockBluetoothService.checkBluetoothPermission.mockResolvedValue(RESULTS.DENIED)
 
       const { result } = renderHook(() => useBluetoothStatus())
 
-      // Wait for initial state
-      await waitFor(() => {
-        expect(result.current.bluetoothEnabled).toBe(false)
-      })
-
-      // Change bluetooth status to enabled
-      mockBluetoothService.isBluetoothEnabled.mockResolvedValue(true)
-
-      // Manually check status
+      // Check initial status
       await act(async () => {
-        await result.current.checkBluetoothStatus()
+        await result.current.checkBluetoothPermission()
       })
 
-      expect(result.current.bluetoothEnabled).toBe(true)
+      expect(result.current.permissionGranted).toBe(false)
+      expect(result.current.permissionStatus).toBe(RESULTS.DENIED)
+
+      // Change permission status to granted
+      mockBluetoothService.checkBluetoothPermission.mockResolvedValue(RESULTS.GRANTED)
+
+      // Check status again
+      await act(async () => {
+        await result.current.checkBluetoothPermission()
+      })
+
+      expect(result.current.permissionGranted).toBe(true)
+      expect(result.current.permissionStatus).toBe(RESULTS.GRANTED)
     })
   })
 
-  describe('useEffect dependency', () => {
-    it('should only call bluetooth check once on mount', async () => {
-      mockBluetoothService.isBluetoothEnabled.mockResolvedValue(true)
+  describe('function reference stability', () => {
+    it('should maintain stable function references', async () => {
+      mockBluetoothService.checkBluetoothPermission.mockResolvedValue(RESULTS.GRANTED)
 
-      const { rerender } = renderHook(() => useBluetoothStatus())
+      const { result, rerender } = renderHook(() => useBluetoothStatus())
 
-      // Wait for initial check
-      await waitFor(() => {
-        expect(mockBluetoothService.isBluetoothEnabled).toHaveBeenCalledTimes(1)
+      const firstCheckFunction = result.current.checkBluetoothPermission
+      const firstRequestFunction = result.current.requestBluetoothPermissions
+      const firstOpenSettingsFunction = result.current.openDeviceSettings
+
+      // Rerender and check function reference stability
+      rerender({})
+
+      expect(result.current.checkBluetoothPermission).toBe(firstCheckFunction)
+      expect(result.current.requestBluetoothPermissions).toBe(firstRequestFunction)
+      expect(result.current.openDeviceSettings).toBe(firstOpenSettingsFunction)
+    })
+  })
+
+  describe('complex permission flow', () => {
+    it('should handle complete permission flow: check -> request -> check again', async () => {
+      // Initially permission is not granted
+      mockBluetoothService.checkBluetoothPermission.mockResolvedValueOnce(RESULTS.DENIED)
+
+      const { result } = renderHook(() => useBluetoothStatus())
+
+      // Check initial permission
+      await act(async () => {
+        const isGranted = await result.current.checkBluetoothPermission()
+        expect(isGranted).toBe(false)
       })
 
-      // Rerender should not trigger additional checks
-      rerender({})
-      rerender({})
+      expect(result.current.permissionStatus).toBe(RESULTS.DENIED)
 
-      // Should still only be called once
-      expect(mockBluetoothService.isBluetoothEnabled).toHaveBeenCalledTimes(1)
+      // Request permission (user grants it)
+      mockBluetoothService.requestBluetoothPermissions.mockResolvedValue({ granted: true })
+      mockBluetoothService.checkBluetoothPermission.mockResolvedValue(RESULTS.GRANTED)
+
+      await act(async () => {
+        const permissionResult = await result.current.requestBluetoothPermissions()
+        expect(permissionResult.granted).toBe(true)
+      })
+
+      expect(result.current.permissionGranted).toBe(true)
+      expect(result.current.permissionStatus).toBe(RESULTS.GRANTED)
+      expect(result.current.error).toBeNull()
     })
   })
 })

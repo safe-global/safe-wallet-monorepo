@@ -39,6 +39,7 @@ const config = {
     infoPlist: {
       NSFaceIDUsageDescription: 'Enabling Face ID allows you to create/access secure keys.',
       UIBackgroundModes: ['remote-notification'],
+      NSBluetoothPeripheralUsageDescription: 'Allow Bluetooth access to connect to Ledger devices.',
       AppGroup: IS_DEV ? 'group.global.safe.mobileapp.ios.dev' : 'group.global.safe.mobileapp.ios',
     },
     supportsTablet: false,
@@ -154,6 +155,12 @@ const config = {
       'react-native-capture-protection',
       {
         captureType: 'restrictedCapture',
+      },
+    ],
+    [
+      'react-native-permissions',
+      {
+        iosPermissions: ['Bluetooth'],
       },
     ],
   ],
