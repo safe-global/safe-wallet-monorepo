@@ -1,4 +1,3 @@
-import { proposerEndpoints } from '@/store/api/gateway/proposers'
 import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import {
@@ -83,7 +82,6 @@ export const gatewayApi = createApi({
       },
       invalidatesTags: ['Submissions'],
     }),
-    ...proposerEndpoints(builder),
     ...safeOverviewEndpoints(builder),
   }),
 })
@@ -92,9 +90,6 @@ export const {
   useGetTransactionDetailsQuery,
   useGetMultipleTransactionDetailsQuery,
   useLazyGetTransactionDetailsQuery,
-  useGetProposersQuery,
-  useDeleteProposerMutation,
-  useAddProposerMutation,
   useGetSubmissionQuery,
   useCreateSubmissionMutation,
   useGetSafeQuery,
