@@ -54,7 +54,6 @@ export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
                   data={safeAddress}
                   style={styles.svg}
                   padding={22}
-                  pieceSize={6}
                   pieceCornerType={'rounded'}
                   pieceBorderRadius={3}
                   isPiecesGlued

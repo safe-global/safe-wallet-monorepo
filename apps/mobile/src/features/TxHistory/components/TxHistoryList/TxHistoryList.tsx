@@ -213,14 +213,12 @@ export function TxHistoryList({
         keyExtractor={keyExtractor}
         getItemType={getItemType}
         stickyHeaderIndices={stickyHeaderIndices}
-        estimatedItemSize={100}
-        estimatedFirstItemOffset={Platform.OS === 'ios' ? TAB_BAR_HEIGHT : 0}
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.5}
         refreshControl={<RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} />}
         contentContainerStyle={{
           paddingHorizontal: 16,
-          paddingTop: 8,
+          paddingTop: 0,
           paddingBottom: bottom + getTokenValue('$4'),
         }}
         ListEmptyComponent={renderEmptyComponent}
