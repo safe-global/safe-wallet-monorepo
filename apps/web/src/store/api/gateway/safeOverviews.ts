@@ -53,6 +53,152 @@ const createFetchSafeOverviews = (dispatch: SafesGetOverviewForManyDispatch): Sa
   }
 }
 
+type SafeOverviewQueueItem = {
+  safeAddress: string
+  walletAddress?: string
+  chainId: string
+  currency: string
+  dispatch: SafesGetOverviewForManyDispatch
+  callback: (result: { data: SafeOverview | undefined; error?: never } | { data?: never; error: string }) => void
+}
+
+type SafeOverviewQueueState = {
+  items: SafeOverviewQueueItem[]
+  timeout: NodeJS.Timeout | null
+  processing: boolean
+}
+
+const BATCH_SIZE = 10
+const FETCH_DELAY_MS = 300
+
+class SafeOverviewFetcher {
+  private queues = new Map<SafesGetOverviewForManyDispatch, Map<string, SafeOverviewQueueState>>()
+
+  private getQueueKey(currency: string, walletAddress?: string) {
+    return `${currency}|${walletAddress ?? ''}`
+  }
+
+  private ensureQueueState(
+    dispatch: SafesGetOverviewForManyDispatch,
+    currency: string,
+    walletAddress?: string,
+  ): { queueState: SafeOverviewQueueState; key: string } {
+    let queueMap = this.queues.get(dispatch)
+
+    if (!queueMap) {
+      queueMap = new Map<string, SafeOverviewQueueState>()
+      this.queues.set(dispatch, queueMap)
+    }
+
+    const key = this.getQueueKey(currency, walletAddress)
+
+    let queueState = queueMap.get(key)
+
+    if (!queueState) {
+      queueState = {
+        items: [],
+        timeout: null,
+        processing: false,
+      }
+
+      queueMap.set(key, queueState)
+    }
+
+    return { queueState, key }
+  }
+
+  private enqueueRequest(item: SafeOverviewQueueItem) {
+    const { queueState, key } = this.ensureQueueState(item.dispatch, item.currency, item.walletAddress)
+
+    queueState.items.push(item)
+
+    if (queueState.items.length >= BATCH_SIZE) {
+      void this.processQueue(item.dispatch, key)
+      return
+    }
+
+    if (!queueState.processing && queueState.timeout === null) {
+      queueState.timeout = setTimeout(() => {
+        queueState.timeout = null
+        void this.processQueue(item.dispatch, key)
+      }, FETCH_DELAY_MS)
+    }
+  }
+
+  private async processQueue(dispatch: SafesGetOverviewForManyDispatch, key: string) {
+    const queueMap = this.queues.get(dispatch)
+    const queueState = queueMap?.get(key)
+
+    if (!queueState || queueState.processing) {
+      return
+    }
+
+    queueState.processing = true
+
+    if (queueState.timeout) {
+      clearTimeout(queueState.timeout)
+      queueState.timeout = null
+    }
+
+    while (queueState.items.length > 0) {
+      const nextBatch = queueState.items.splice(0, BATCH_SIZE)
+
+      if (nextBatch.length === 0) {
+        continue
+      }
+
+      try {
+        const { currency, walletAddress } = nextBatch[0]
+        const fetchSafeOverviews = createFetchSafeOverviews(dispatch)
+        const safeTags = nextBatch.map((request) => makeSafeTag(request.chainId, request.safeAddress))
+        const overviews = await fetchSafeOverviews({ safes: safeTags, currency, walletAddress })
+
+        nextBatch.forEach((request) => {
+          const overview = overviews.find(
+            (entry) => entry.chainId === request.chainId && sameAddress(entry.address.value, request.safeAddress),
+          )
+
+          request.callback({ data: overview })
+        })
+      } catch (error) {
+        nextBatch.forEach((request) => request.callback({ error: 'Could not fetch Safe overview' }))
+      }
+    }
+
+    queueState.processing = false
+
+    if (queueState.items.length > 0) {
+      void this.processQueue(dispatch, key)
+      return
+    }
+
+    const queueMapForDispatch = this.queues.get(dispatch)
+
+    queueMapForDispatch?.delete(key)
+
+    if (queueMapForDispatch && queueMapForDispatch.size === 0) {
+      this.queues.delete(dispatch)
+    }
+  }
+
+  async getOverview(item: Omit<SafeOverviewQueueItem, 'callback'>) {
+    return await new Promise<SafeOverview | undefined>((resolve, reject) => {
+      this.enqueueRequest({
+        ...item,
+        callback: (result) => {
+          if ('data' in result) {
+            resolve(result.data)
+          } else {
+            reject(new Error(result.error))
+          }
+        },
+      })
+    })
+  }
+}
+
+const batchedFetcher = new SafeOverviewFetcher()
+
 type MultiOverviewQueryParams = {
   currency: string
   walletAddress?: string
@@ -71,12 +217,13 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'OwnedSafes'
         }
 
         try {
-          const fetchSafeOverviews = createFetchSafeOverviews(dispatch)
-          const safes = [makeSafeTag(chainId, safeAddress)]
-          const overviews = await fetchSafeOverviews({ safes, currency, walletAddress })
-          const safeOverview = overviews.find(
-            (entry) => entry.chainId === chainId && sameAddress(entry.address.value, safeAddress),
-          )
+          const safeOverview = await batchedFetcher.getOverview({
+            chainId,
+            currency,
+            walletAddress,
+            safeAddress,
+            dispatch,
+          })
 
           return { data: safeOverview ?? null }
         } catch (error) {
@@ -94,15 +241,18 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'OwnedSafes'
           return { data: [] }
         }
 
-        const fetchSafeOverviews = createFetchSafeOverviews(dispatch)
-        const safeTags = safes.map((safe) => makeSafeTag(safe.chainId, safe.address))
-        const overviews = await fetchSafeOverviews({ safes: safeTags, currency, walletAddress })
-
-        const matchingOverviews = overviews.filter((overview) =>
-          safes.some((safe) => safe.chainId === overview.chainId && sameAddress(safe.address, overview.address.value)),
+        const promisedSafeOverviews = safes.map((safe) =>
+          batchedFetcher.getOverview({
+            chainId: safe.chainId,
+            safeAddress: safe.address,
+            currency,
+            walletAddress,
+            dispatch,
+          }),
         )
+        const safeOverviews = await Promise.all(promisedSafeOverviews)
 
-        return { data: matchingOverviews }
+        return { data: safeOverviews.filter(Boolean) as SafeOverview[] }
       } catch (error) {
         return { error: { status: 'CUSTOM_ERROR', error: (error as Error).message } }
       }
