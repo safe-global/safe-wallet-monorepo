@@ -14,8 +14,10 @@ const sslPinningDomains = {
   ],
 }
 
+const name = IS_DEV ? 'Dev-Safe{Mobile}' : 'Safe{Mobile}'
+
 const config = {
-  name: IS_DEV ? 'Dev-Safe{Mobile}' : 'Safe{Mobile}',
+  name: name,
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
   version: '1.0.2',
@@ -37,6 +39,7 @@ const config = {
     infoPlist: {
       NSFaceIDUsageDescription: 'Enabling Face ID allows you to create/access secure keys.',
       UIBackgroundModes: ['remote-notification'],
+      NSBluetoothPeripheralUsageDescription: 'Allow Bluetooth access to connect to Ledger devices.',
       AppGroup: IS_DEV ? 'group.global.safe.mobileapp.ios.dev' : 'group.global.safe.mobileapp.ios',
     },
     supportsTablet: false,
@@ -73,6 +76,14 @@ const config = {
     favicon: './assets/images/favicon.png',
   },
   plugins: [
+    [
+      'react-native-ble-plx',
+      {
+        isBackgroundEnabled: false,
+        modes: ['central'],
+        bluetoothAlwaysPermission: `Allow ${name} to connect to bluetooth devices`,
+      },
+    ],
     ['./expo-plugins/withNotificationIcons.js'],
     [
       './expo-plugins/ssl-pinning/withSSLPinning.js',
@@ -144,6 +155,12 @@ const config = {
       'react-native-capture-protection',
       {
         captureType: 'restrictedCapture',
+      },
+    ],
+    [
+      'react-native-permissions',
+      {
+        iosPermissions: ['Bluetooth'],
       },
     ],
   ],
