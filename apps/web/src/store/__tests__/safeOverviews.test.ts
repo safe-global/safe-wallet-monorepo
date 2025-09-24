@@ -1,15 +1,53 @@
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { useGetMultipleSafeOverviewsQuery, useGetSafeOverviewQuery } from '../api/gateway'
 import { faker } from '@faker-js/faker'
-import { getSafeOverviews } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
 
-jest.mock('@safe-global/safe-gateway-typescript-sdk')
+jest.mock('@safe-global/store/gateway/safes', () => {
+  const initiate = jest.fn()
+
+  return {
+    __esModule: true,
+    additionalSafesRtkApi: {
+      endpoints: {
+        safesGetOverviewForMany: {
+          initiate,
+        },
+      },
+    },
+  }
+})
+
+const mockedInitiate = additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate as jest.MockedFunction<
+  typeof additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate
+>
+
+type SafesInitiateThunk = ReturnType<typeof additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate>
+type SafesQueryActionResult = SafesInitiateThunk extends (...args: any[]) => infer Result ? Result : never
+
+const mockQueryAction = ({ data = [], error }: { data?: SafeOverview[]; error?: unknown }) => {
+  const queryResult = {
+    unwrap: error ? jest.fn().mockRejectedValue(error) : jest.fn().mockResolvedValue(data),
+    unsubscribe: jest.fn(),
+  } as unknown as SafesQueryActionResult
+
+  mockedInitiate.mockImplementationOnce((...args) => {
+    void args
+    const thunk = ((...thunkArgs: Parameters<SafesInitiateThunk>) => {
+      void thunkArgs
+      return queryResult
+    }) as SafesInitiateThunk
+    return thunk
+  })
+
+  return queryResult
+}
 
 describe('safeOverviews', () => {
-  const mockedGetSafeOverviews = getSafeOverviews as jest.MockedFunction<typeof getSafeOverviews>
-
   beforeEach(() => {
     jest.resetAllMocks()
+    mockedInitiate.mockReset()
   })
 
   describe('useGetSafeOverviewQuery', () => {
@@ -26,12 +64,12 @@ describe('safeOverviews', () => {
         expect(result.current.data).toBeNull()
       })
 
-      expect(mockedGetSafeOverviews).not.toHaveBeenCalled()
+      expect(mockedInitiate).not.toHaveBeenCalled()
     })
 
     it('should return an error if fetching fails', async () => {
       const request = { chainId: '1', safeAddress: faker.finance.ethereumAddress() }
-      mockedGetSafeOverviews.mockRejectedValueOnce('Service unavailable')
+      mockQueryAction({ error: new Error('Service unavailable') })
 
       const { result } = renderHook(() => useGetSafeOverviewQuery(request))
 
@@ -47,7 +85,7 @@ describe('safeOverviews', () => {
 
     it('should return null if safeOverview is not found for a given Safe', async () => {
       const request = { chainId: '1', safeAddress: faker.finance.ethereumAddress() }
-      mockedGetSafeOverviews.mockResolvedValueOnce([])
+      mockQueryAction({ data: [] })
 
       const { result } = renderHook(() => useGetSafeOverviewQuery(request))
 
@@ -57,7 +95,7 @@ describe('safeOverviews', () => {
       await Promise.resolve()
 
       await waitFor(() => {
-        expect(mockedGetSafeOverviews).toHaveBeenCalled()
+        expect(mockedInitiate).toHaveBeenCalled()
         expect(result.current.isLoading).toBeFalsy()
         expect(result.current.error).toBeUndefined()
         expect(result.current.data).toEqual(null)
@@ -76,7 +114,7 @@ describe('safeOverviews', () => {
         threshold: 1,
         queued: 0,
       }
-      mockedGetSafeOverviews.mockResolvedValueOnce([mockOverview])
+      mockQueryAction({ data: [mockOverview] })
 
       const { result } = renderHook(() => useGetSafeOverviewQuery(request))
 
@@ -86,7 +124,7 @@ describe('safeOverviews', () => {
       await Promise.resolve()
 
       await waitFor(() => {
-        expect(mockedGetSafeOverviews).toHaveBeenCalled()
+        expect(mockedInitiate).toHaveBeenCalled()
         expect(result.current.isLoading).toBeFalsy()
         expect(result.current.error).toBeUndefined()
         expect(result.current.data).toEqual(mockOverview)
@@ -118,7 +156,7 @@ describe('safeOverviews', () => {
         queued: 0,
       }))
 
-      mockedGetSafeOverviews.mockResolvedValueOnce(mockOverviews)
+      mockQueryAction({ data: mockOverviews })
 
       const { result: result0 } = renderHook(() => useGetSafeOverviewQuery(requests[0]))
       const { result: result1 } = renderHook(() => useGetSafeOverviewQuery(requests[1]))
@@ -141,7 +179,7 @@ describe('safeOverviews', () => {
       expect(result7.current.isLoading).toBeTruthy()
       expect(result8.current.isLoading).toBeTruthy()
 
-      expect(mockedGetSafeOverviews).not.toHaveBeenCalled()
+      expect(mockedInitiate).not.toHaveBeenCalled()
 
       // Trigger the 10th hook - causing all values to load
       const { result: result9 } = renderHook(() => useGetSafeOverviewQuery(requests[9]))
@@ -160,8 +198,8 @@ describe('safeOverviews', () => {
         expect(result9.current.isLoading).toBeFalsy()
 
         // One request that batched all requests together should have happened
-        expect(mockedGetSafeOverviews).toHaveBeenCalledWith(
-          [
+        expect(mockedInitiate).toHaveBeenCalledWith({
+          safes: [
             `1:${fakeSafeAddress}`,
             `2:${fakeSafeAddress}`,
             `3:${fakeSafeAddress}`,
@@ -173,12 +211,11 @@ describe('safeOverviews', () => {
             `9:${fakeSafeAddress}`,
             `10:${fakeSafeAddress}`,
           ],
-          {
-            currency: 'usd',
-            trusted: false,
-            exclude_spam: true,
-          },
-        )
+          currency: 'usd',
+          trusted: false,
+          excludeSpam: true,
+          walletAddress: undefined,
+        })
 
         expect(result0.current.data).toEqual(mockOverviews[0])
         expect(result1.current.data).toEqual(mockOverviews[1])
@@ -259,7 +296,7 @@ describe('safeOverviews', () => {
         queued: 4,
       }
 
-      mockedGetSafeOverviews.mockResolvedValueOnce([mockOverview1, mockOverview2])
+      mockQueryAction({ data: [mockOverview1, mockOverview2] })
 
       const { result } = renderHook(() => useGetMultipleSafeOverviewsQuery(request))
 
@@ -296,7 +333,7 @@ describe('safeOverviews', () => {
         ],
       }
 
-      mockedGetSafeOverviews.mockRejectedValueOnce('Not available')
+      mockQueryAction({ error: new Error('Not available') })
 
       const { result } = renderHook(() => useGetMultipleSafeOverviewsQuery(request))
 
@@ -460,7 +497,8 @@ describe('safeOverviews', () => {
       }))
 
       // Mock two fetch requests for the 2 batches
-      mockedGetSafeOverviews.mockResolvedValueOnce(firstBatchOverviews).mockResolvedValueOnce(secondBatchOverviews)
+      mockQueryAction({ data: firstBatchOverviews })
+      mockQueryAction({ data: secondBatchOverviews })
 
       const { result } = renderHook(() => useGetMultipleSafeOverviewsQuery(request))
 
@@ -474,16 +512,22 @@ describe('safeOverviews', () => {
       })
 
       // Expect that the correct requests were sent
-      expect(mockedGetSafeOverviews).toHaveBeenCalledTimes(2)
-      expect(mockedGetSafeOverviews).toHaveBeenCalledWith(
-        request.safes.slice(0, 10).map((safe) => `1:${safe.address}`),
-        { currency: 'usd', exclude_spam: true, trusted: false },
-      )
+      expect(mockedInitiate).toHaveBeenCalledTimes(2)
+      expect(mockedInitiate).toHaveBeenNthCalledWith(1, {
+        safes: request.safes.slice(0, 10).map((safe) => `1:${safe.address}`),
+        currency: 'usd',
+        trusted: false,
+        excludeSpam: true,
+        walletAddress: undefined,
+      })
 
-      expect(mockedGetSafeOverviews).toHaveBeenCalledWith(
-        request.safes.slice(10).map((safe) => `1:${safe.address}`),
-        { currency: 'usd', exclude_spam: true, trusted: false },
-      )
+      expect(mockedInitiate).toHaveBeenNthCalledWith(2, {
+        safes: request.safes.slice(10).map((safe) => `1:${safe.address}`),
+        currency: 'usd',
+        trusted: false,
+        excludeSpam: true,
+        walletAddress: undefined,
+      })
     })
   })
 })
