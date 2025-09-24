@@ -14,6 +14,9 @@ const SAFE_OVERVIEW_QUERY_OPTIONS = {
   excludeSpam: true,
 }
 
+const _BATCH_SIZE = 10
+const _FETCH_TIMEOUT = 300
+
 type SafeOverviewQueryArgs = {
   safes: string[]
   currency: string
@@ -43,7 +46,7 @@ const createFetchSafeOverviews = (dispatch: SafesGetOverviewForManyDispatch): Sa
       { subscribe: false },
     )
 
-    const queryResult: SafesGetOverviewForManyQueryResult = dispatch(queryAction)
+    const queryResult = dispatch(queryAction)
 
     try {
       return await queryResult.unwrap()
@@ -67,7 +70,7 @@ type PendingSafeOverviewRequest = {
 type SafeOverviewBatchState = {
   pending: Map<string, PendingSafeOverviewRequest>
   inFlight: Map<string, PendingSafeOverviewRequest> | null
-  scheduled: boolean
+  timer: NodeJS.Timeout | null
   currency: string
   walletAddress?: string
 }
@@ -99,7 +102,7 @@ class SafeOverviewFetcher {
       queueState = {
         pending: new Map<string, PendingSafeOverviewRequest>(),
         inFlight: null,
-        scheduled: false,
+        timer: null,
         currency,
         walletAddress,
       }
@@ -123,7 +126,7 @@ class SafeOverviewFetcher {
       return
     }
 
-    if (queueState.pending.size === 0 && queueState.inFlight === null && !queueState.scheduled) {
+    if (queueState.pending.size === 0 && queueState.inFlight === null && !queueState.timer) {
       queueMap.delete(key)
 
       if (queueMap.size === 0) {
@@ -132,17 +135,28 @@ class SafeOverviewFetcher {
     }
   }
 
-  private scheduleBatch(dispatch: SafesGetOverviewForManyDispatch, key: string, queueState: SafeOverviewBatchState) {
-    if (queueState.inFlight || queueState.scheduled || queueState.pending.size === 0) {
+  private startTimer(dispatch: SafesGetOverviewForManyDispatch, key: string, queueState: SafeOverviewBatchState) {
+    if (queueState.timer || queueState.pending.size === 0) {
       return
     }
 
-    queueState.scheduled = true
-
-    Promise.resolve().then(() => {
-      queueState.scheduled = false
+    queueState.timer = setTimeout(() => {
+      queueState.timer = null
       void this.runBatch(dispatch, key)
-    })
+    }, _FETCH_TIMEOUT)
+  }
+
+  private scheduleBatch(dispatch: SafesGetOverviewForManyDispatch, key: string, queueState: SafeOverviewBatchState) {
+    if (queueState.inFlight || queueState.pending.size === 0) {
+      return
+    }
+
+    if (queueState.pending.size >= _BATCH_SIZE) {
+      void this.runBatch(dispatch, key)
+      return
+    }
+
+    this.startTimer(dispatch, key, queueState)
   }
 
   private async runBatch(dispatch: SafesGetOverviewForManyDispatch, key: string) {
@@ -154,12 +168,28 @@ class SafeOverviewFetcher {
       return
     }
 
-    const batch = new Map(queueState.pending)
-    queueState.pending.clear()
+    if (queueState.timer) {
+      clearTimeout(queueState.timer)
+      queueState.timer = null
+    }
+
+    const pendingEntries = Array.from(queueState.pending.entries())
+    const batchEntries = pendingEntries.slice(0, _BATCH_SIZE)
+    const batch = new Map(batchEntries)
+
+    for (const [safeTag] of batchEntries) {
+      queueState.pending.delete(safeTag)
+    }
+
+    if (batch.size === 0) {
+      this.cleanupIfIdle(dispatch, key)
+      return
+    }
+
     queueState.inFlight = batch
 
     const fetchSafeOverviews = createFetchSafeOverviews(dispatch)
-    const safeTags = Array.from(batch.values()).map((request) => makeSafeTag(request.chainId, request.safeAddress))
+    const safeTags = Array.from(batch.keys())
 
     try {
       const overviews = await fetchSafeOverviews({
@@ -178,9 +208,8 @@ class SafeOverviewFetcher {
         })
       }
     } catch (error) {
-      const rejectionError = new Error('Could not fetch Safe overview')
-
-      const rejection = error instanceof Error ? error : rejectionError
+      const fallbackError = new Error('Could not fetch Safe overview')
+      const rejection = error instanceof Error ? error : fallbackError
 
       for (const request of batch.values()) {
         request.resolvers.forEach((resolver) => {
@@ -195,7 +224,11 @@ class SafeOverviewFetcher {
       queueState.inFlight = null
 
       if (queueState.pending.size > 0) {
-        this.scheduleBatch(dispatch, key, queueState)
+        if (queueState.pending.size >= _BATCH_SIZE) {
+          void this.runBatch(dispatch, key)
+        } else {
+          this.startTimer(dispatch, key, queueState)
+        }
       } else {
         this.cleanupIfIdle(dispatch, key)
       }
@@ -270,7 +303,7 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'OwnedSafes'
             currency,
             walletAddress,
             safeAddress,
-            dispatch,
+            dispatch: dispatch as SafesGetOverviewForManyDispatch,
           })
 
           return { data: safeOverview ?? null }
@@ -295,7 +328,7 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'OwnedSafes'
             safeAddress: safe.address,
             currency,
             walletAddress,
-            dispatch,
+            dispatch: dispatch as SafesGetOverviewForManyDispatch,
           }),
         )
         const safeOverviews = await Promise.all(promisedSafeOverviews)
