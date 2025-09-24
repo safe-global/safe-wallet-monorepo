@@ -12,7 +12,7 @@ import HiddenTokenButton from '@/components/balances/HiddenTokenButton'
 import CurrencySelect from '@/components/balances/CurrencySelect'
 import TokenListSelect from '@/components/balances/TokenListSelect'
 import StakingBanner from '@/components/dashboard/StakingBanner'
-import useIsStakingBannerEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
+import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useIsStakingBannerVisible'
 import { Box } from '@mui/material'
 import { BRAND_NAME } from '@/config/constants'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
@@ -21,7 +21,7 @@ const Balances: NextPage = () => {
   const { balances, error } = useVisibleBalances()
   const [showHiddenAssets, setShowHiddenAssets] = useState(false)
   const toggleShowHiddenAssets = () => setShowHiddenAssets((prev) => !prev)
-  const isStakingBannerEnabled = useIsStakingBannerEnabled()
+  const isStakingBannerVisible = useIsStakingBannerVisible()
 
   const fiatTotal = balances.fiatTotal ? Number(balances.fiatTotal) : undefined
 
@@ -38,7 +38,7 @@ const Balances: NextPage = () => {
       </AssetsHeader>
 
       <main>
-        {isStakingBannerEnabled && (
+        {isStakingBannerVisible && (
           <Box mb={2} sx={{ ':empty': { display: 'none' } }}>
             <StakingBanner />
           </Box>

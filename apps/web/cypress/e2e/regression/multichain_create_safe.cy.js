@@ -1,7 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as wallet from '../../support/utils/wallet.js'
-import * as createwallet from '../pages/create_wallet.pages'
+import * as createwallet from '../pages/create_wallet.pages.js'
 import * as createtx from '../pages/create_tx.pages.js'
 import * as tx from '../pages/transactions.page.js'
 import * as owner from '../pages/owners.pages'
@@ -21,6 +21,7 @@ describe('Multichain safe creation tests', () => {
     createwallet.clickOnContinueWithWalletBtn()
     createwallet.clickOnCreateNewSafeBtn()
     createwallet.selectMultiNetwork(1, constants.networks.polygon.toLowerCase())
+    createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
     createwallet.clickOnNextBtn()
     main.verifyElementsCount(createtx.payNowExecMethod, 0)
@@ -32,6 +33,7 @@ describe('Multichain safe creation tests', () => {
     createwallet.clearNetworkInput(1)
     createwallet.enterNetwork(1, constants.networks.polygon)
     createwallet.clickOnNetwrokCheckbox()
+    createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
     createwallet.clickOnNextBtn()
     main.verifyElementsCount(createtx.payNowExecMethod, 1)
@@ -43,6 +45,7 @@ describe('Multichain safe creation tests', () => {
     createwallet.clearNetworkInput(1)
     createwallet.enterNetwork(1, constants.networks.polygon)
     createwallet.clickOnNetwrokCheckbox()
+    createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
     createwallet.clickOnNextBtn()
     tx.selectRelayOtion()
@@ -53,6 +56,7 @@ describe('Multichain safe creation tests', () => {
     createwallet.clickOnContinueWithWalletBtn()
     createwallet.clickOnCreateNewSafeBtn()
     createwallet.selectMultiNetwork(1, constants.networks.polygon.toLowerCase())
+    createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
     owner.clickOnAddSignerBtn()
     owner.typeOwnerAddressCreateSafeStep(1, getMockAddress())
@@ -71,6 +75,7 @@ describe('Multichain safe creation tests', () => {
     createwallet.clickOnContinueWithWalletBtn()
     createwallet.clickOnCreateNewSafeBtn()
     createwallet.selectMultiNetwork(1, constants.networks.polygon.toLowerCase())
+    createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
     owner.clickOnAddSignerBtn()
     owner.typeOwnerAddressCreateSafeStep(1, getMockAddress())
