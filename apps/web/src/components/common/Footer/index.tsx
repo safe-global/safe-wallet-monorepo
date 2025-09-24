@@ -7,7 +7,9 @@ import css from './styles.module.css'
 import { AppRoutes } from '@/config/routes'
 import packageJson from '../../../../package.json'
 import ExternalLink from '../ExternalLink'
+import ProtofireLogo from '@/public/images/protofire-logo.svg'
 import MUILink from '@mui/material/Link'
+import darkPalette from '@/components/theme/darkPalette'
 //import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 
@@ -75,6 +77,23 @@ const Footer = (): ReactElement | null => {
           <ExternalLink href={`${packageJson.homepage}/releases/tag/v${packageJson.version}`} noIcon>
             <SvgIcon component={GitHubIcon} inheritViewBox fontSize="inherit" sx={{ mr: 0.5 }} /> v{packageJson.version}
           </ExternalLink>
+        </li>
+        <li>
+          <Typography variant="caption">
+            Supported by{' '}
+            <SvgIcon
+              component={ProtofireLogo}
+              inheritViewBox
+              fontSize="small"
+              sx={{ verticalAlign: 'middle', mx: 0.5 }}
+            />
+            <MUILink
+              href="https://protofire.io/services/solution/safe-deployment"
+              sx={{ color: darkPalette.primary.main, textDecoration: 'none' }}
+            >
+              Protofire
+            </MUILink>
+          </Typography>
         </li>
       </ul>
     </footer>
