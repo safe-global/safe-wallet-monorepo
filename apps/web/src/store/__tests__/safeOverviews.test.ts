@@ -4,24 +4,9 @@ import { faker } from '@faker-js/faker'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
 
-jest.mock('@safe-global/store/gateway/safes', () => {
-  const initiate = jest.fn()
+const mockedInitiate = jest.spyOn(additionalSafesRtkApi.endpoints.safesGetOverviewForMany, 'initiate')
 
-  return {
-    __esModule: true,
-    additionalSafesRtkApi: {
-      endpoints: {
-        safesGetOverviewForMany: {
-          initiate,
-        },
-      },
-    },
-  }
-})
-
-const mockedInitiate = additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate as jest.MockedFunction<
-  typeof additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate
->
+mockedInitiate.mockImplementation(jest.fn())
 
 type SafesInitiateThunk = ReturnType<typeof additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate>
 type SafesQueryActionResult = ReturnType<SafesInitiateThunk>
