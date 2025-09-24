@@ -2,7 +2,7 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { getMultiSendContractDeployment } from '@safe-global/utils/services/contracts/deployments'
+import { getMultiSendCallOnlyContractDeployment } from '@safe-global/utils/services/contracts/deployments'
 import { createTx } from '@/services/tx/tx-sender/create'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
 import { type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
@@ -36,7 +36,7 @@ export const MigrationToL2TxData = ({
     // Search for a Safe Tx to MultiSend contract
     const safeInterface = Safe__factory.createInterface()
     const execTransactionSelector = safeInterface.getFunction('execTransaction').selector.slice(2, 10)
-    const multiSendDeployment = getMultiSendContractDeployment(chain, safe.version)
+    const multiSendDeployment = getMultiSendCallOnlyContractDeployment(chain, safe.version)
     const multiSendAddress = multiSendDeployment?.networkAddresses[chain.chainId]
     if (!multiSendAddress) {
       return undefined
