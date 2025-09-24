@@ -69,6 +69,7 @@ export const sendTokensStr = 'Send tokens'
 const noWalletConnectedMsg = 'No wallet connected'
 export const deployWalletStr = 'about to deploy this Safe Account'
 const showAllNetworksStr = 'Show all networks'
+export const yourSafeAccountPreviewStr = 'Your Safe Account preview'
 
 export function waitForConnectionMsgDisappear() {
   cy.contains(noWalletConnectedMsg).should('not.exist')
@@ -248,6 +249,10 @@ export function clickOnNetwrokRemoveIcon() {
 
 export function clickOnNextBtn() {
   cy.get(nextBtn).should('be.enabled').click()
+}
+
+export function clickOnYourSafeAccountPreview() {
+  cy.contains(yourSafeAccountPreviewStr).click()
 }
 
 export function verifyOwnerName(name, index) {
