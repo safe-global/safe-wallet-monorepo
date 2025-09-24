@@ -104,21 +104,7 @@ const NftGrid = ({
   // Filter string
   const [filter, setFilter] = useState<string>('')
 
-  const selectedKeySignature = useMemo(() => {
-    if (!selectedNfts.length) {
-      return ''
-    }
-
-    return selectedNfts.map(getNftKey).sort().join('|')
-  }, [selectedNfts])
-
-  const selectedKeys = useMemo(() => {
-    if (!selectedKeySignature) {
-      return new Set<string>()
-    }
-
-    return new Set(selectedKeySignature.split('|'))
-  }, [selectedKeySignature])
+  const selectedKeys = useMemo(() => new Set(selectedNfts.map(getNftKey)), [selectedNfts])
 
   const onFilterChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,7 +120,9 @@ const NftGrid = ({
       const key = getNftKey(item)
       setSelectedNfts((prev) => {
         if (checked) {
-          if (selectedKeys.has(key)) {
+          const prevKeys = new Set(prev.map(getNftKey))
+
+          if (prevKeys.has(key)) {
             return prev
           }
 
@@ -144,7 +132,7 @@ const NftGrid = ({
         return prev.filter((el) => getNftKey(el) !== key)
       })
     },
-    [selectedKeys, setSelectedNfts],
+    [setSelectedNfts],
   )
 
   // Filter by collection name or token address
