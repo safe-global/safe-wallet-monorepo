@@ -24,7 +24,7 @@ const mockedInitiate = additionalSafesRtkApi.endpoints.safesGetOverviewForMany.i
 >
 
 type SafesInitiateThunk = ReturnType<typeof additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate>
-type SafesQueryActionResult = SafesInitiateThunk extends (...args: any[]) => infer Result ? Result : never
+type SafesQueryActionResult = ReturnType<SafesInitiateThunk>
 
 const mockQueryAction = ({ data = [], error }: { data?: SafeOverview[]; error?: unknown }) => {
   const queryResult = {
@@ -32,12 +32,8 @@ const mockQueryAction = ({ data = [], error }: { data?: SafeOverview[]; error?: 
     unsubscribe: jest.fn(),
   } as unknown as SafesQueryActionResult
 
-  mockedInitiate.mockImplementationOnce((...args) => {
-    void args
-    const thunk = ((...thunkArgs: Parameters<SafesInitiateThunk>) => {
-      void thunkArgs
-      return queryResult
-    }) as SafesInitiateThunk
+  mockedInitiate.mockImplementationOnce(() => {
+    const thunk = (() => queryResult) as SafesInitiateThunk
     return thunk
   })
 

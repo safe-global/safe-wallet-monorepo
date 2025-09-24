@@ -10,7 +10,7 @@ import { makeSafeTag } from '.'
 import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
 
 type SafesInitiateThunk = ReturnType<typeof additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate>
-type SafesQueryActionResult = SafesInitiateThunk extends (...args: any[]) => infer Result ? Result : never
+type SafesQueryActionResult = ReturnType<SafesInitiateThunk>
 type SafesDispatch = (action: SafesInitiateThunk) => SafesQueryActionResult
 
 type SafeOverviewQueueItem = {
@@ -41,15 +41,14 @@ class SafeOverviewFetcher {
     currency: string
     dispatch: SafesDispatch
   }) {
-    const queryAction = dispatch(
-      additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate({
-        safes: safeIds,
-        currency,
-        walletAddress,
-        trusted: false,
-        excludeSpam: true,
-      }),
-    )
+    const queryThunk = additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate({
+      safes: safeIds,
+      currency,
+      walletAddress,
+      trusted: false,
+      excludeSpam: true,
+    })
+    const queryAction: SafesQueryActionResult = dispatch(queryThunk)
 
     try {
       return await queryAction.unwrap()
@@ -135,6 +134,7 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'OwnedSafes'
       async queryFn({ safeAddress, walletAddress, chainId }, { getState, dispatch }) {
         const state = getState() as RootState
         const currency = selectCurrency(state)
+        const dispatchSafeOverview: SafesDispatch = (action) => dispatch(action)
 
         if (!safeAddress) {
           return { data: null }
@@ -146,7 +146,7 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'OwnedSafes'
             currency,
             walletAddress,
             safeAddress,
-            dispatch: dispatch as SafesDispatch,
+            dispatch: dispatchSafeOverview,
           })
           return { data: safeOverview ?? null }
         } catch (error) {
@@ -158,6 +158,7 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'OwnedSafes'
   getMultipleSafeOverviews: builder.query<SafeOverview[], MultiOverviewQueryParams>({
     async queryFn(params, { dispatch }) {
       const { safes, walletAddress, currency } = params
+      const dispatchSafeOverview: SafesDispatch = (action) => dispatch(action)
 
       try {
         const promisedSafeOverviews = safes.map((safe) =>
@@ -166,7 +167,7 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'OwnedSafes'
             safeAddress: safe.address,
             currency,
             walletAddress,
-            dispatch: dispatch as SafesDispatch,
+            dispatch: dispatchSafeOverview,
           }),
         )
         const safeOverviews = await Promise.all(promisedSafeOverviews)
