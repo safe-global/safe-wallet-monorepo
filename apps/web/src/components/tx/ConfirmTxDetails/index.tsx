@@ -39,13 +39,7 @@ const InfoSteps = [
   {
     label: 'Verify with external tools',
     description: (
-      <Typography>
-        You can additionally cross-verify your transaction data in a third-party tool like{' '}
-        <Track {...MODALS_EVENTS.OPEN_SAFE_UTILS}>
-          <ExternalLink href="https://safeutils.openzeppelin.com/">Safe Utils</ExternalLink>
-        </Track>
-        .
-      </Typography>
+      <Typography>You can additionally cross-verify your transaction data in a third-party tools.</Typography>
     ),
   },
 ]
