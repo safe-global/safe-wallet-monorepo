@@ -10063,7 +10063,7 @@ __metadata:
   resolution: "@safe-global/notification-service-ios@workspace:expo-plugins/notification-service-ios"
   dependencies:
     expo-module-scripts: "npm:^4.1.7"
-    typescript: "npm:5.8.3"
+    typescript: "npm:~5.9.2"
   languageName: unknown
   linkType: soft
 
@@ -10365,8 +10365,8 @@ __metadata:
     papaparse: "npm:^5.3.2"
     prettier: "npm:^3.6.2"
     qrcode.react: "npm:^3.1.0"
-    react: "npm:^19.0.0"
-    react-dom: "npm:^19.0.0"
+    react: "npm:19.1.0"
+    react-dom: "npm:19.1.0"
     react-dropzone: "npm:^14.2.3"
     react-hook-form: "npm:7.41.1"
     react-papaparse: "npm:^4.0.2"
@@ -10379,7 +10379,7 @@ __metadata:
     storybook: "npm:^8.3.4"
     ts-prune: "npm:^0.10.3"
     typechain: "npm:^8.3.2"
-    typescript: "npm:5.8.3"
+    typescript: "npm:~5.9.2"
     typescript-plugin-css-modules: "npm:^4.2.2"
     zodiac-roles-deployments: "npm:^2.3.4"
   languageName: unknown
@@ -14065,7 +14065,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:~19.1.10":
+"@types/react@npm:^19.1.0, @types/react@npm:~19.1.10":
   version: 19.1.13
   resolution: "@types/react@npm:19.1.13"
   dependencies:
@@ -30503,17 +30503,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:^19.0.0":
-  version: 19.0.0
-  resolution: "react-dom@npm:19.0.0"
-  dependencies:
-    scheduler: "npm:^0.25.0"
-  peerDependencies:
-    react: ^19.0.0
-  checksum: 10/aa64a2f1991042f516260e8b0eca0ae777b6c8f1aa2b5ae096e80bbb6ac9b005aef2bca697969841d34f7e1819556263476bdfea36c35092e8d9aefde3de2d9a
-  languageName: node
-  linkType: hard
-
 "react-dropzone@npm:^14.2.3":
   version: 14.3.5
   resolution: "react-dropzone@npm:14.3.5"
@@ -31259,10 +31248,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^19.0.0":
-  version: 19.0.0
-  resolution: "react@npm:19.0.0"
-  checksum: 10/2490969c503f644703c88990d20e4011fa6119ddeca451e9de48f6d7ab058d670d2852a5fcd3aa3cd90a923ab2815d532637bd4a814add402ae5c0d4f129ee71
+"react@npm:^19.1.0":
+  version: 19.1.1
+  resolution: "react@npm:19.1.1"
+  checksum: 10/9801530fdc939e1a7a499422e930515b2400809cb39c2872984e99f832d233f61659a693871183dac3155c2f9b2c9dcf4440a56bd18983277ae92860e38c3a61
   languageName: node
   linkType: hard
 
@@ -35044,16 +35033,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:5.8.3, typescript@npm:^5.8.2, typescript@npm:^5.8.3":
-  version: 5.8.3
-  resolution: "typescript@npm:5.8.3"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 10/65c40944c51b513b0172c6710ee62e951b70af6f75d5a5da745cb7fab132c09ae27ffdf7838996e3ed603bb015dadd099006658046941bd0ba30340cc563ae92
-  languageName: node
-  linkType: hard
-
 "typescript@npm:^5.4.5, typescript@npm:^5.5.4":
   version: 5.7.2
   resolution: "typescript@npm:5.7.2"
@@ -35061,6 +35040,16 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 10/4caa3904df69db9d4a8bedc31bafc1e19ffb7b24fbde2997a1633ae1398d0de5bdbf8daf602ccf3b23faddf1aeeb9b795223a2ed9c9a4fdcaf07bfde114a401a
+  languageName: node
+  linkType: hard
+
+"typescript@npm:^5.8.2, typescript@npm:^5.8.3":
+  version: 5.8.3
+  resolution: "typescript@npm:5.8.3"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10/65c40944c51b513b0172c6710ee62e951b70af6f75d5a5da745cb7fab132c09ae27ffdf7838996e3ed603bb015dadd099006658046941bd0ba30340cc563ae92
   languageName: node
   linkType: hard
 
@@ -35074,16 +35063,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A5.8.3#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.8.2#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.8.3#optional!builtin<compat/typescript>":
-  version: 5.8.3
-  resolution: "typescript@patch:typescript@npm%3A5.8.3#optional!builtin<compat/typescript>::version=5.8.3&hash=5786d5"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 10/b9b1e73dabac5dc730c041325dbd9c99467c1b0d239f1b74ec3b90d831384af3e2ba973946232df670519147eb51a2c20f6f96163cea2b359f03de1e2091cc4f
-  languageName: node
-  linkType: hard
-
 "typescript@patch:typescript@npm%3A^5.4.5#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.5.4#optional!builtin<compat/typescript>":
   version: 5.7.2
   resolution: "typescript@patch:typescript@npm%3A5.7.2#optional!builtin<compat/typescript>::version=5.7.2&hash=5786d5"
@@ -35091,6 +35070,16 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 10/d75ca10141afc64fd3474b41a8b082b640555bed388d237558aed64e5827ddadb48f90932c7f4205883f18f5bcab8b6a739a2cfac95855604b0dfeb34bc2f3eb
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@npm%3A^5.8.2#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.8.3#optional!builtin<compat/typescript>":
+  version: 5.8.3
+  resolution: "typescript@patch:typescript@npm%3A5.8.3#optional!builtin<compat/typescript>::version=5.8.3&hash=5786d5"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10/b9b1e73dabac5dc730c041325dbd9c99467c1b0d239f1b74ec3b90d831384af3e2ba973946232df670519147eb51a2c20f6f96163cea2b359f03de1e2091cc4f
   languageName: node
   linkType: hard
 

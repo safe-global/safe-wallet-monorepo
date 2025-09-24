@@ -87,8 +87,8 @@
     "next": "patch:next@15.2.4#../../.yarn/patches/next-npm-15.2.4-06a6671f62.patch",
     "papaparse": "^5.3.2",
     "qrcode.react": "^3.1.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
     "react-dropzone": "^14.2.3",
     "react-hook-form": "7.41.1",
     "react-papaparse": "^4.0.2",
@@ -162,7 +162,7 @@
     "storybook": "^8.3.4",
     "ts-prune": "^0.10.3",
     "typechain": "^8.3.2",
-    "typescript": "5.8.3",
+    "typescript": "~5.9.2",
     "typescript-plugin-css-modules": "^4.2.2"
   },
   "nextBundleAnalysis": {
