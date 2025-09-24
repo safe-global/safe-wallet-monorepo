@@ -53,26 +53,27 @@ const createFetchSafeOverviews = (dispatch: SafesGetOverviewForManyDispatch): Sa
   }
 }
 
-type SafeOverviewQueueItem = {
-  safeAddress: string
-  walletAddress?: string
+type SafeOverviewResolver = {
+  resolve: (overview: SafeOverview | undefined) => void
+  reject: (error: Error) => void
+}
+
+type PendingSafeOverviewRequest = {
   chainId: string
+  safeAddress: string
+  resolvers: SafeOverviewResolver[]
+}
+
+type SafeOverviewBatchState = {
+  pending: Map<string, PendingSafeOverviewRequest>
+  inFlight: Map<string, PendingSafeOverviewRequest> | null
+  scheduled: boolean
   currency: string
-  dispatch: SafesGetOverviewForManyDispatch
-  callback: (result: { data: SafeOverview | undefined; error?: never } | { data?: never; error: string }) => void
+  walletAddress?: string
 }
-
-type SafeOverviewQueueState = {
-  items: SafeOverviewQueueItem[]
-  timeout: NodeJS.Timeout | null
-  processing: boolean
-}
-
-const BATCH_SIZE = 10
-const FETCH_DELAY_MS = 300
 
 class SafeOverviewFetcher {
-  private queues = new Map<SafesGetOverviewForManyDispatch, Map<string, SafeOverviewQueueState>>()
+  private queues = new Map<SafesGetOverviewForManyDispatch, Map<string, SafeOverviewBatchState>>()
 
   private getQueueKey(currency: string, walletAddress?: string) {
     return `${currency}|${walletAddress ?? ''}`
@@ -82,11 +83,11 @@ class SafeOverviewFetcher {
     dispatch: SafesGetOverviewForManyDispatch,
     currency: string,
     walletAddress?: string,
-  ): { queueState: SafeOverviewQueueState; key: string } {
+  ): { queueState: SafeOverviewBatchState; key: string } {
     let queueMap = this.queues.get(dispatch)
 
     if (!queueMap) {
-      queueMap = new Map<string, SafeOverviewQueueState>()
+      queueMap = new Map<string, SafeOverviewBatchState>()
       this.queues.set(dispatch, queueMap)
     }
 
@@ -96,9 +97,11 @@ class SafeOverviewFetcher {
 
     if (!queueState) {
       queueState = {
-        items: [],
-        timeout: null,
-        processing: false,
+        pending: new Map<string, PendingSafeOverviewRequest>(),
+        inFlight: null,
+        scheduled: false,
+        currency,
+        walletAddress,
       }
 
       queueMap.set(key, queueState)
@@ -107,94 +110,139 @@ class SafeOverviewFetcher {
     return { queueState, key }
   }
 
-  private enqueueRequest(item: SafeOverviewQueueItem) {
-    const { queueState, key } = this.ensureQueueState(item.dispatch, item.currency, item.walletAddress)
+  private cleanupIfIdle(dispatch: SafesGetOverviewForManyDispatch, key: string) {
+    const queueMap = this.queues.get(dispatch)
 
-    queueState.items.push(item)
-
-    if (queueState.items.length >= BATCH_SIZE) {
-      void this.processQueue(item.dispatch, key)
+    if (!queueMap) {
       return
     }
 
-    if (!queueState.processing && queueState.timeout === null) {
-      queueState.timeout = setTimeout(() => {
-        queueState.timeout = null
-        void this.processQueue(item.dispatch, key)
-      }, FETCH_DELAY_MS)
+    const queueState = queueMap.get(key)
+
+    if (!queueState) {
+      return
+    }
+
+    if (queueState.pending.size === 0 && queueState.inFlight === null && !queueState.scheduled) {
+      queueMap.delete(key)
+
+      if (queueMap.size === 0) {
+        this.queues.delete(dispatch)
+      }
     }
   }
 
-  private async processQueue(dispatch: SafesGetOverviewForManyDispatch, key: string) {
+  private scheduleBatch(dispatch: SafesGetOverviewForManyDispatch, key: string, queueState: SafeOverviewBatchState) {
+    if (queueState.inFlight || queueState.scheduled || queueState.pending.size === 0) {
+      return
+    }
+
+    queueState.scheduled = true
+
+    Promise.resolve().then(() => {
+      queueState.scheduled = false
+      void this.runBatch(dispatch, key)
+    })
+  }
+
+  private async runBatch(dispatch: SafesGetOverviewForManyDispatch, key: string) {
     const queueMap = this.queues.get(dispatch)
     const queueState = queueMap?.get(key)
 
-    if (!queueState || queueState.processing) {
+    if (!queueState || queueState.inFlight || queueState.pending.size === 0) {
+      this.cleanupIfIdle(dispatch, key)
       return
     }
 
-    queueState.processing = true
+    const batch = new Map(queueState.pending)
+    queueState.pending.clear()
+    queueState.inFlight = batch
 
-    if (queueState.timeout) {
-      clearTimeout(queueState.timeout)
-      queueState.timeout = null
-    }
+    const fetchSafeOverviews = createFetchSafeOverviews(dispatch)
+    const safeTags = Array.from(batch.values()).map((request) => makeSafeTag(request.chainId, request.safeAddress))
 
-    while (queueState.items.length > 0) {
-      const nextBatch = queueState.items.splice(0, BATCH_SIZE)
+    try {
+      const overviews = await fetchSafeOverviews({
+        safes: safeTags,
+        currency: queueState.currency,
+        walletAddress: queueState.walletAddress,
+      })
 
-      if (nextBatch.length === 0) {
-        continue
-      }
+      for (const request of batch.values()) {
+        const overview = overviews.find(
+          (entry) => entry.chainId === request.chainId && sameAddress(entry.address.value, request.safeAddress),
+        )
 
-      try {
-        const { currency, walletAddress } = nextBatch[0]
-        const fetchSafeOverviews = createFetchSafeOverviews(dispatch)
-        const safeTags = nextBatch.map((request) => makeSafeTag(request.chainId, request.safeAddress))
-        const overviews = await fetchSafeOverviews({ safes: safeTags, currency, walletAddress })
-
-        nextBatch.forEach((request) => {
-          const overview = overviews.find(
-            (entry) => entry.chainId === request.chainId && sameAddress(entry.address.value, request.safeAddress),
-          )
-
-          request.callback({ data: overview })
+        request.resolvers.forEach((resolver) => {
+          resolver.resolve(overview)
         })
-      } catch (error) {
-        nextBatch.forEach((request) => request.callback({ error: 'Could not fetch Safe overview' }))
       }
-    }
+    } catch (error) {
+      const rejectionError = new Error('Could not fetch Safe overview')
 
-    queueState.processing = false
+      const rejection = error instanceof Error ? error : rejectionError
 
-    if (queueState.items.length > 0) {
-      void this.processQueue(dispatch, key)
-      return
-    }
+      for (const request of batch.values()) {
+        request.resolvers.forEach((resolver) => {
+          resolver.reject(rejection)
+        })
+      }
+    } finally {
+      for (const request of batch.values()) {
+        request.resolvers.length = 0
+      }
 
-    const queueMapForDispatch = this.queues.get(dispatch)
+      queueState.inFlight = null
 
-    queueMapForDispatch?.delete(key)
-
-    if (queueMapForDispatch && queueMapForDispatch.size === 0) {
-      this.queues.delete(dispatch)
+      if (queueState.pending.size > 0) {
+        this.scheduleBatch(dispatch, key, queueState)
+      } else {
+        this.cleanupIfIdle(dispatch, key)
+      }
     }
   }
 
-  async getOverview(item: Omit<SafeOverviewQueueItem, 'callback'>) {
+  async getOverview({
+    chainId,
+    safeAddress,
+    currency,
+    walletAddress,
+    dispatch,
+  }: SafeOverviewQueueItem & { dispatch: SafesGetOverviewForManyDispatch }) {
     return await new Promise<SafeOverview | undefined>((resolve, reject) => {
-      this.enqueueRequest({
-        ...item,
-        callback: (result) => {
-          if ('data' in result) {
-            resolve(result.data)
-          } else {
-            reject(new Error(result.error))
-          }
-        },
-      })
+      const { queueState, key } = this.ensureQueueState(dispatch, currency, walletAddress)
+      const safeTag = makeSafeTag(chainId, safeAddress)
+      const resolver: SafeOverviewResolver = { resolve, reject }
+
+      if (queueState.inFlight?.has(safeTag)) {
+        queueState.inFlight.get(safeTag)?.resolvers.push(resolver)
+        return
+      }
+
+      let pendingRequest = queueState.pending.get(safeTag)
+
+      if (!pendingRequest) {
+        pendingRequest = {
+          chainId,
+          safeAddress,
+          resolvers: [],
+        }
+
+        queueState.pending.set(safeTag, pendingRequest)
+      }
+
+      pendingRequest.resolvers.push(resolver)
+
+      this.scheduleBatch(dispatch, key, queueState)
     })
   }
+}
+
+type SafeOverviewQueueItem = {
+  safeAddress: string
+  walletAddress?: string
+  chainId: string
+  currency: string
 }
 
 const batchedFetcher = new SafeOverviewFetcher()

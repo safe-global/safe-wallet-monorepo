@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from '@/tests/test-utils'
+import { renderHook, waitFor } from '@/tests/test-utils'
 import { useGetMultipleSafeOverviewsQuery, useGetSafeOverviewQuery } from '../api/gateway'
 import { faker } from '@faker-js/faker'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
@@ -123,59 +123,49 @@ describe('safeOverviews queries', () => {
     })
 
     it('batches concurrent overview requests with matching currency and wallet', async () => {
-      jest.useFakeTimers()
+      const walletAddress = faker.finance.ethereumAddress()
+      const safeAddressOne = faker.finance.ethereumAddress()
+      const safeAddressTwo = faker.finance.ethereumAddress()
 
-      try {
-        const walletAddress = faker.finance.ethereumAddress()
-        const safeAddressOne = faker.finance.ethereumAddress()
-        const safeAddressTwo = faker.finance.ethereumAddress()
-
-        const overviewOne: SafeOverview = {
-          address: { value: safeAddressOne },
-          chainId: '1',
-          awaitingConfirmation: null,
-          fiatTotal: '25',
-          owners: [{ value: faker.finance.ethereumAddress() }],
-          threshold: 1,
-          queued: 0,
-        }
-
-        const overviewTwo: SafeOverview = {
-          address: { value: safeAddressTwo },
-          chainId: '1',
-          awaitingConfirmation: null,
-          fiatTotal: '75',
-          owners: [{ value: faker.finance.ethereumAddress() }],
-          threshold: 1,
-          queued: 0,
-        }
-
-        const mockResponse = mockInitiateOnce({ data: [overviewOne, overviewTwo] })
-
-        const useCombinedOverviews = () => {
-          const first = useGetSafeOverviewQuery({ chainId: '1', safeAddress: safeAddressOne, walletAddress })
-          const second = useGetSafeOverviewQuery({ chainId: '1', safeAddress: safeAddressTwo, walletAddress })
-
-          return [first, second] as const
-        }
-
-        const { result } = renderHook(() => useCombinedOverviews())
-
-        act(() => {
-          jest.runOnlyPendingTimers()
-        })
-
-        await waitFor(() => {
-          const [first, second] = result.current
-          expect(first.data).toEqual(overviewOne)
-          expect(second.data).toEqual(overviewTwo)
-        })
-
-        expect(initiateSpy).toHaveBeenCalledTimes(1)
-        expect(mockResponse.unsubscribe).toHaveBeenCalled()
-      } finally {
-        jest.useRealTimers()
+      const overviewOne: SafeOverview = {
+        address: { value: safeAddressOne },
+        chainId: '1',
+        awaitingConfirmation: null,
+        fiatTotal: '25',
+        owners: [{ value: faker.finance.ethereumAddress() }],
+        threshold: 1,
+        queued: 0,
       }
+
+      const overviewTwo: SafeOverview = {
+        address: { value: safeAddressTwo },
+        chainId: '1',
+        awaitingConfirmation: null,
+        fiatTotal: '75',
+        owners: [{ value: faker.finance.ethereumAddress() }],
+        threshold: 1,
+        queued: 0,
+      }
+
+      const mockResponse = mockInitiateOnce({ data: [overviewOne, overviewTwo] })
+
+      const useCombinedOverviews = () => {
+        const first = useGetSafeOverviewQuery({ chainId: '1', safeAddress: safeAddressOne, walletAddress })
+        const second = useGetSafeOverviewQuery({ chainId: '1', safeAddress: safeAddressTwo, walletAddress })
+
+        return [first, second] as const
+      }
+
+      const { result } = renderHook(() => useCombinedOverviews())
+
+      await waitFor(() => {
+        const [first, second] = result.current
+        expect(first.data).toEqual(overviewOne)
+        expect(second.data).toEqual(overviewTwo)
+      })
+
+      expect(initiateSpy).toHaveBeenCalledTimes(1)
+      expect(mockResponse.unsubscribe).toHaveBeenCalled()
     })
   })
 
