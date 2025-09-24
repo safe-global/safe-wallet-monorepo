@@ -114,7 +114,7 @@ export function LoadingImport() {
     const owner = Object.values(extractSignersFromSafes(data)).find((owner) => owner.value === address)
 
     if (owner) {
-      dispatch(addSignerWithEffects(owner))
+      dispatch(addSignerWithEffects({ ...owner, type: 'private-key' }))
 
       router.replace({
         pathname: '/import-signers/private-key-success',

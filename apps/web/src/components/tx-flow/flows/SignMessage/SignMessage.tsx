@@ -56,7 +56,7 @@ import LinkIcon from '@/public/images/messages/link.svg'
 import { Blockaid } from '@/components/tx/security/blockaid'
 import CheckWallet from '@/components/common/CheckWallet'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
-import { getDomainHash, getSafeMessageMessageHash } from '@/utils/safe-hashes'
+import { getDomainHash, getSafeMessageMessageHash } from '@safe-global/utils/utils/safe-hashes'
 import type { SafeVersion } from '@safe-global/types-kit'
 
 const createSkeletonMessage = (confirmationsRequired: number): MessageItem => {

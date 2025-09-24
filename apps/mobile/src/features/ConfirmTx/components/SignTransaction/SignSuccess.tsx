@@ -16,9 +16,7 @@ export default function SignSuccess() {
   const handleDonePress = () => {
     dispatch(cgwApi.util.invalidateTags(['transactions']))
 
-    // Go back twice to the confirm transaction screen
-    router.back()
-    router.back()
+    router.dismissTo('/confirm-transaction')
   }
 
   return (

@@ -5,7 +5,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import EditIcon from '@/public/images/common/edit.svg'
 import { SETTINGS_EVENTS } from '@/services/analytics'
 import { IconButton, SvgIcon, Tooltip } from '@mui/material'
-import type { Delegate } from '@safe-global/safe-gateway-typescript-sdk/dist/types/delegates'
+import type { Delegate } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import React, { useState } from 'react'
 
 const EditProposerDialog = ({ proposer }: { proposer: Delegate }) => {
