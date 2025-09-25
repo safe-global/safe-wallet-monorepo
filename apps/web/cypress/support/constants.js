@@ -102,7 +102,7 @@ export const transactionHistoryEndpoint = '**/history**'
 export const safeListEndpoint = '**/safes'
 export const queuedEndpoint = '**/queued'
 export const messagesEndpoint = '**/messages'
-export const collectiblesEndpoint = '**/collectibles'
+export const collectiblesEndpoint = '**/collectibles*'
 
 export const indexStatusUrl = 'https://status.safe.global'
 
