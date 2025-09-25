@@ -77,9 +77,49 @@ const customRender = (
 }
 
 function customRenderHook<Result, Props>(render: (initialProps: Props) => Result, initialStore?: Partial<RootState>) {
-  const wrapper = getProviders(initialStore)
+  let storeInstance: ReturnType<typeof configureStore> | null = null
 
-  return renderHook(render, { wrapper })
+  const wrapper = ({ children }: { children: React.ReactNode }) => {
+    // Always inject default settings to ensure themes work properly
+    const storeWithDefaults = {
+      ...initialStore,
+      settings: {
+        ...defaultSettings,
+        ...(initialStore?.settings || {}),
+      },
+    } as Partial<RootState>
+
+    // Create store instance for this specific test
+    storeInstance = configureStore({
+      reducer: rootReducer,
+      middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+          serializableCheck: {
+            ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+          },
+        }).concat(cgwClient.middleware, web3API.middleware),
+      preloadedState: storeWithDefaults,
+    })
+
+    return (
+      <BottomSheetModalProvider>
+        <Provider store={storeInstance}>
+          <SafeThemeProvider>{children}</SafeThemeProvider>
+        </Provider>
+      </BottomSheetModalProvider>
+    )
+  }
+
+  const result = renderHook(render, { wrapper })
+
+  if (!storeInstance) {
+    throw new Error('Store was not initialized properly')
+  }
+
+  return {
+    ...result,
+    store: storeInstance,
+  }
 }
 
 // re-export everything

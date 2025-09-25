@@ -268,7 +268,7 @@ export function verifyThreshold(number) {
 }
 
 export function clickOnSignerAddressInput(index) {
-  cy.get(getOwnerAddressInput(index)).clear()
+  cy.get(getOwnerAddressInput(index)).click().clear()
 }
 
 export function selectSignerOnAutocomplete(index) {

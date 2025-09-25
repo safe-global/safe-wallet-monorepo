@@ -34,7 +34,7 @@ const PendingTxsSkeleton = () => (
 
 const EmptyState = () => {
   return (
-    <Paper elevation={0} sx={{ p: 5, textAlign: 'center' }}>
+    <Paper elevation={0} data-testid="no-tx-text" sx={{ p: 5, textAlign: 'center' }}>
       <Typography mb={0.5} mt={3}>
         No transactions to sign
       </Typography>

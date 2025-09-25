@@ -4,7 +4,7 @@ import { TxDataRow, generateDataRowValue } from '../TxDataRow'
 import { type SafeTransactionData, type SafeVersion } from '@safe-global/types-kit'
 import { calculateSafeTransactionHash } from '@safe-global/protocol-kit/dist/src/utils'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { getDomainHash, getSafeTxMessageHash } from '@/utils/safe-hashes'
+import { getDomainHash, getSafeTxMessageHash } from '@safe-global/utils/utils/safe-hashes'
 
 export const SafeTxHashDataRow = ({
   safeTxData,

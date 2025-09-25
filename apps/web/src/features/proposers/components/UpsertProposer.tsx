@@ -11,7 +11,6 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
 import { getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import { useAppDispatch } from '@/store'
-import { useAddProposerMutation } from '@/store/api/gateway'
 import { showNotification } from '@/store/notificationsSlice'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { addressIsNotCurrentSafe, addressIsNotOwner } from '@safe-global/utils/utils/validation'
@@ -30,7 +29,12 @@ import {
   IconButton,
   Typography,
 } from '@mui/material'
-import type { Delegate } from '@safe-global/safe-gateway-typescript-sdk/dist/types/delegates'
+import {
+  useDelegatesPostDelegateV1Mutation,
+  useDelegatesPostDelegateV2Mutation,
+  type CreateDelegateDto,
+  type Delegate,
+} from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { type BaseSyntheticEvent, useCallback, useMemo, useState } from 'react'
 import { FormProvider, useForm, type Validate } from 'react-hook-form'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -54,7 +58,8 @@ type ProposerEntry = {
 const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) => {
   const [error, setError] = useState<Error>()
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [addProposer] = useAddProposerMutation()
+  const [addDelegateV1] = useDelegatesPostDelegateV1Mutation()
+  const [addDelegateV2] = useDelegatesPostDelegateV2Mutation()
   const dispatch = useAppDispatch()
 
   const chainId = useChainId()
@@ -94,15 +99,19 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
         ? await signProposerData(data.address, signer)
         : await signProposerTypedData(chainId, data.address, signer)
 
-      await addProposer({
-        chainId,
-        delegator: wallet.address,
-        signature,
-        label: data.name,
+      const createDelegateDto: CreateDelegateDto = {
         delegate: data.address,
-        safeAddress,
-        shouldEthSign,
-      })
+        delegator: wallet.address,
+        label: data.name,
+        signature,
+        safe: safeAddress,
+      }
+
+      if (shouldEthSign) {
+        await addDelegateV1({ chainId, createDelegateDto }).unwrap()
+      } else {
+        await addDelegateV2({ chainId, createDelegateDto }).unwrap()
+      }
 
       trackEvent(
         isEditing ? SETTINGS_EVENTS.PROPOSERS.SUBMIT_EDIT_PROPOSER : SETTINGS_EVENTS.PROPOSERS.SUBMIT_ADD_PROPOSER,
@@ -116,14 +125,14 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
           message: `${shortenAddress(data.address)} can now suggest transactions for this account.`,
         }),
       )
+
+      onSuccess()
     } catch (error) {
-      setIsLoading(false)
       setError(error as Error)
       return
+    } finally {
+      setIsLoading(false)
     }
-
-    setIsLoading(false)
-    onSuccess()
   })
 
   const onSubmit = (e: BaseSyntheticEvent) => {
