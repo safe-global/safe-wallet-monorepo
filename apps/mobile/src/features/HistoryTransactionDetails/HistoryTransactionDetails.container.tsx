@@ -1,7 +1,6 @@
 import React from 'react'
 import { ScrollView, View } from 'tamagui'
-import { RouteProp, useRoute } from '@react-navigation/native'
-import { Stack } from 'expo-router'
+import { Stack, useLocalSearchParams } from 'expo-router'
 
 import { LoadingTx } from '@/src/features/ConfirmTx/components/LoadingTx'
 import { Alert } from '@/src/components/Alert'
@@ -14,7 +13,7 @@ import { ShareButton } from '@/src/components/ShareButton'
 import { useShareTransaction } from '@/src/hooks/useShareTransaction'
 
 function HistoryTransactionDetailsContainer() {
-  const txId = useRoute<RouteProp<{ params: { txId: string } }>>().params.txId
+  const { txId } = useLocalSearchParams<{ txId: string }>()
   const activeSafe = useDefinedActiveSafe()
   const shareTransaction = useShareTransaction(txId)
 

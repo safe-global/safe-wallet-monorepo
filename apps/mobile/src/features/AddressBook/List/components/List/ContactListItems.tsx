@@ -45,7 +45,6 @@ export const ContactListItems: React.FC<ContactListItemsProps> = ({
     <FlashList
       data={contacts}
       renderItem={renderContact}
-      estimatedItemSize={200}
       keyExtractor={keyExtractor}
       contentContainerStyle={{ paddingHorizontal: getTokenValue('$2') }}
     />
