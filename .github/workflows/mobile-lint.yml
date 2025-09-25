@@ -16,6 +16,7 @@ jobs:
   lint:
     permissions:
       checks: write
+      contents: read
       pull-requests: read
       statuses: write
 
