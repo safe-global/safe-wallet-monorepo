@@ -1,10 +1,10 @@
 import chains from '@/config/chains'
-import type { SafeCollectibleResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 
 type NftPlatform = {
   title: string
   logo: string
-  getUrl: (nft: SafeCollectibleResponse) => string
+  getUrl: (nft: Collectible) => string
 }
 
 export const nftPlatforms: Record<keyof typeof chains, Array<NftPlatform>> = {

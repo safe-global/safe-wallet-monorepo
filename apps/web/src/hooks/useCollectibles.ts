@@ -1,27 +1,101 @@
-import { useEffect } from 'react'
-import { getCollectiblesPage, type SafeCollectiblesPage } from '@safe-global/safe-gateway-typescript-sdk'
-import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import { useCallback, useEffect, useMemo } from 'react'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
+import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
+import {
+  useGetCollectiblesInfiniteQuery,
+  type CollectiblesInfiniteQueryArg,
+} from '@safe-global/store/gateway/collectibles'
 import { Errors, logError } from '@/services/exceptions'
 import useSafeInfo from './useSafeInfo'
 
-export const useCollectibles = (pageUrl?: string): AsyncResult<SafeCollectiblesPage> => {
-  const { safe, safeAddress } = useSafeInfo()
+type UseCollectiblesResult = {
+  nfts: Collectible[]
+  error?: Error
+  isInitialLoading: boolean
+  isFetchingNextPage: boolean
+  hasNextPage: boolean
+  loadMore: () => void
+}
 
-  const [data, error, loading] = useAsync<SafeCollectiblesPage>(() => {
-    if (!safeAddress) return
-    if (!safe.deployed) return Promise.resolve({ results: [] })
+const getErrorMessage = (error?: FetchBaseQueryError | SerializedError) => {
+  if (!error) {
+    return undefined
+  }
 
-    return getCollectiblesPage(safe.chainId, safeAddress, undefined, pageUrl)
-  }, [safeAddress, safe.chainId, pageUrl, safe.deployed])
-
-  // Log errors
-  useEffect(() => {
-    if (error) {
-      logError(Errors._604, error.message)
+  if ('status' in error) {
+    if ('error' in error && error.error) {
+      return error.error
     }
-  }, [error])
 
-  return [data, error, loading || !safeAddress]
+    if (typeof error.data === 'string') {
+      return error.data
+    }
+
+    try {
+      return error.data ? JSON.stringify(error.data) : 'Unknown error'
+    } catch {
+      return 'Unknown error'
+    }
+  }
+
+  return error.message
+}
+
+export const useCollectibles = (): UseCollectiblesResult => {
+  const { safe, safeAddress } = useSafeInfo()
+  const isSafeAddressReady = Boolean(safeAddress)
+  const shouldSkip = !isSafeAddressReady || !safe.deployed
+
+  const queryArgs: CollectiblesInfiniteQueryArg = {
+    chainId: safe.chainId,
+    safeAddress,
+  }
+
+  const {
+    data,
+    error: queryError,
+    isLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useGetCollectiblesInfiniteQuery(queryArgs, {
+    skip: shouldSkip,
+  })
+
+  const errorMessage = getErrorMessage(queryError)
+  const error = useMemo(() => (errorMessage ? new Error(errorMessage) : undefined), [errorMessage])
+
+  useEffect(() => {
+    if (errorMessage) {
+      logError(Errors._604, errorMessage)
+    }
+  }, [errorMessage])
+
+  const nfts = useMemo<Collectible[]>(() => {
+    if (shouldSkip) {
+      return []
+    }
+
+    const pages = data?.pages ?? []
+
+    return pages.flatMap((page) => page?.results ?? [])
+  }, [data, shouldSkip])
+
+  const loadMore = useCallback(() => {
+    if (!shouldSkip && hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage()
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, shouldSkip])
+
+  return {
+    nfts,
+    error,
+    isInitialLoading: !isSafeAddressReady || isLoading,
+    isFetchingNextPage,
+    hasNextPage: Boolean(hasNextPage),
+    loadMore,
+  }
 }
 
 export default useCollectibles
