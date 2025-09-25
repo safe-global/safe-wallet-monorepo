@@ -53,7 +53,7 @@ export const useCollectibles = (): UseCollectiblesResult => {
   }
 
   const {
-    data,
+    currentData,
     error: queryError,
     isLoading,
     isFetchingNextPage,
@@ -77,10 +77,10 @@ export const useCollectibles = (): UseCollectiblesResult => {
       return []
     }
 
-    const pages = data?.pages ?? []
+    const pages = currentData?.pages ?? []
 
     return pages.flatMap((page) => page?.results ?? [])
-  }, [data, shouldSkip])
+  }, [currentData, shouldSkip])
 
   const loadMore = useCallback(() => {
     if (!shouldSkip && hasNextPage && !isFetchingNextPage) {
