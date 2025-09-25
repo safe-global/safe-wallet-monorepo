@@ -16,6 +16,11 @@ on:
 
 jobs:
   prettier:
+    permissions:
+      checks: write
+      pull-requests: read
+      statuses: write
+
     runs-on: ubuntu-latest
 
     steps:
