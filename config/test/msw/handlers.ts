@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw'
-import type { FiatCurrencies } from '@safe-global/store/src/gateway/types'
+import type { FiatCurrencies } from '@safe-global/store/gateway/types'
 import { Balances } from '@safe-global/store/src/gateway/AUTO_GENERATED/balances'
 import { CollectiblePage } from '@safe-global/store/src/gateway/AUTO_GENERATED/collectibles'
 
