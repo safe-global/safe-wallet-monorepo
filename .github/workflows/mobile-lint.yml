@@ -11,6 +11,7 @@ on:
     paths:
       - apps/mobile/**
       - packages/**
+      - .github/workflows/mobile-lint.yml
 
 jobs:
   lint:

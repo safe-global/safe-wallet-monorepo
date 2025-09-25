@@ -11,6 +11,8 @@ on:
     paths:
       - apps/mobile/**
       - packages/**
+      - .github/workflows/mobile-unit-tests.yml
+
 jobs:
   test-and-coverage:
     permissions:
