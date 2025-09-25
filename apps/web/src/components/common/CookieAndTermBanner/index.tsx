@@ -98,7 +98,6 @@ export const CookieAndTermBanner = ({
             >
               By browsing this page, you accept our{' '}
               <ExternalLink href={AppRoutes.terms}>Terms & Conditions</ExternalLink> and the use of necessary cookies.
-              <br /> By clicking you additionally agree to the use cookies as listed below.{' '}
               <ExternalLink href={AppRoutes.cookie}>Cookie policy</ExternalLink>
             </Typography>
 
