@@ -17,13 +17,13 @@ import SwapButton from '@/features/swap/components/SwapButton'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
 import SendButton from './SendButton'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
-import useIsStakingFeatureEnabled from '@/features/stake/hooks/useIsStakingFeatureEnabled'
+import { useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEnabled'
+import useIsStakingPromoEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import StakeButton from '@/features/stake/components/StakeButton'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { FiatChange } from './FiatChange'
-import useIsEarnFeatureEnabled from '@/features/earn/hooks/useIsEarnFeatureEnabled'
 import { FiatBalance } from './FiatBalance'
 import EarnButton from '@/features/earn/components/EarnButton'
 import { EARN_LABELS } from '@/services/analytics/events/earn'
@@ -146,8 +146,8 @@ const AssetsTable = ({
 
   const chainId = useChainId()
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
-  const isStakingFeatureEnabled = useIsStakingFeatureEnabled()
-  const isEarnFeatureEnabled = useIsEarnFeatureEnabled()
+  const isStakingPromoEnabled = useIsStakingPromoEnabled()
+  const isEarnPromoEnabled = useIsEarnPromoEnabled()
 
   const { isAssetSelected, toggleAsset, hidingAsset, hideAsset, cancel, deselectAll, saveChanges } = useHideAssets(() =>
     setShowHiddenAssets(false),
@@ -190,11 +190,11 @@ const AssetsTable = ({
                     </Typography>
                   </Stack>
 
-                  {isStakingFeatureEnabled && item.tokenInfo.type === TokenType.NATIVE_TOKEN && (
+                  {isStakingPromoEnabled && item.tokenInfo.type === TokenType.NATIVE_TOKEN && (
                     <StakeButton tokenInfo={item.tokenInfo} trackingLabel={STAKE_LABELS.asset} />
                   )}
 
-                  {isEarnFeatureEnabled && isEligibleEarnToken(chainId, item.tokenInfo.address) && (
+                  {isEarnPromoEnabled && isEligibleEarnToken(chainId, item.tokenInfo.address) && (
                     <EarnButton tokenInfo={item.tokenInfo} trackingLabel={EARN_LABELS.asset} />
                   )}
                 </div>
@@ -266,7 +266,14 @@ const AssetsTable = ({
               sticky: true,
               collapsed: item.tokenInfo.address === hidingAsset,
               content: (
-                <Stack direction="row" gap={1} alignItems="center" justifyContent="flex-end" mr={-1}>
+                <Stack
+                  direction="row"
+                  gap={1}
+                  alignItems="center"
+                  justifyContent="flex-end"
+                  mr={-1}
+                  className={css.sticky}
+                >
                   <Stack direction="row" gap={1} alignItems="center" bgcolor="background.paper" p={1}>
                     <SendButton tokenInfo={item.tokenInfo} />
 

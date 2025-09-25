@@ -1,4 +1,4 @@
-import type { SafeCollectibleResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import NftIcon from '@/public/images/common/nft.svg'
 import SendNftBatch from './SendNftBatch'
 import ReviewNftBatch from './ReviewNftBatch'
@@ -8,7 +8,7 @@ import { TxFlowStep } from '../../TxFlowStep'
 
 export type NftTransferParams = {
   recipient: string
-  tokens: SafeCollectibleResponse[]
+  tokens: Collectible[]
 }
 
 type NftTransferFlowProps = Partial<NftTransferParams>

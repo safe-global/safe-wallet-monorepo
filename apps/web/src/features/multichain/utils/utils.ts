@@ -1,4 +1,5 @@
-import type { DecodedDataResponse, ChainInfo, SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
+import type { DecodedDataResponse, ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import semverSatisfies from 'semver/functions/satisfies'
 import memoize from 'lodash/memoize'
 import { keccak256, ethers, solidityPacked, getCreate2Address, type Provider } from 'ethers'

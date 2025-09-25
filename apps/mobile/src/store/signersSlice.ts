@@ -4,14 +4,28 @@ import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transacti
 import { AppDispatch, RootState } from '.'
 import { setActiveSigner } from './activeSignerSlice'
 import { addContact } from './addressBookSlice'
+import logger from '@/src/utils/logger'
 
-const initialState: Record<string, AddressInfo> = {}
+export type Signer = AddressInfo &
+  (
+    | {
+        type: 'private-key'
+        derivationPath?: never
+      }
+    | {
+        type: 'ledger'
+        derivationPath: string
+      }
+  )
+
+const initialState: Record<string, Signer> = {}
 
 const signersSlice = createSlice({
   name: 'signers',
   initialState,
   reducers: {
-    addSigner: (state, action: PayloadAction<AddressInfo>) => {
+    addSigner: (state, action: PayloadAction<Signer>) => {
+      logger.info('Adding signer:', action.payload)
       state[action.payload.value] = action.payload
 
       return state
@@ -24,7 +38,7 @@ const signersSlice = createSlice({
 })
 
 export const addSignerWithEffects =
-  (signerInfo: AddressInfo) => async (dispatch: AppDispatch, getState: () => RootState) => {
+  (signerInfo: Signer) => async (dispatch: AppDispatch, getState: () => RootState) => {
     const { activeSafe, activeSigner } = getState()
     const signerNamePrefix = 'Signer-'
 
@@ -49,8 +63,10 @@ export const selectSigners = (state: RootState) => state.signers
 
 export const selectSignersByAddress = (state: RootState) => state.signers
 
+export const selectSignerByAddress = (state: RootState, address: string) => state.signers[address]
+
 export const selectSignerHasPrivateKey = (address: string) => (state: RootState) => {
-  return !!state.signers[address]
+  return state.signers[address] && state.signers[address].type === 'private-key'
 }
 
 export const selectTotalSignerCount = (state: RootState) => Object.keys(state.signers).length

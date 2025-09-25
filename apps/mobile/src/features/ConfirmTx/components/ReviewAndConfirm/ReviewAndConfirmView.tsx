@@ -5,6 +5,7 @@ import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/tr
 import { ReviewHeader } from './ReviewHeader'
 import { DataTab } from './tabs/DataTab'
 import { JSONTab } from './tabs/JSONTab'
+import { HashesTab } from './tabs/HashesTab'
 import { useTheme as useCurrentTheme } from '@/src/theme/hooks/useTheme'
 
 interface ReviewAndConfirmViewProps {
@@ -26,7 +27,7 @@ export function ReviewAndConfirmView({ txDetails, children }: ReviewAndConfirmVi
       labelStyle={{ color: theme.color.get(), fontSize: 16, fontWeight: '600' }}
       activeColor={theme.color.get()}
       inactiveColor={theme.colorSecondary.get()}
-      width={200}
+      width={300}
     />
   )
 
@@ -45,6 +46,9 @@ export function ReviewAndConfirmView({ txDetails, children }: ReviewAndConfirmVi
       >
         <Tabs.Tab name="Data" label="Data">
           <DataTab />
+        </Tabs.Tab>
+        <Tabs.Tab name="Hashes" label="Hashes">
+          <HashesTab txDetails={txDetails} />
         </Tabs.Tab>
         <Tabs.Tab name="JSON" label="JSON">
           <JSONTab txDetails={txDetails} />

@@ -6,7 +6,7 @@ import { AppRoutes } from '@/config/routes'
 import Track from '@/components/common/Track'
 import { POSITIONS_EVENTS } from '@/services/analytics/events/positions'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import useIsEarnFeatureEnabled from '@/features/earn/hooks/useIsEarnFeatureEnabled'
+import { useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEnabled'
 
 type PositionsEmptyProps = {
   entryPoint?: string
@@ -14,7 +14,7 @@ type PositionsEmptyProps = {
 
 const PositionsEmpty = ({ entryPoint = 'Dashboard' }: PositionsEmptyProps) => {
   const router = useRouter()
-  const isEarnFeatureEnabled = useIsEarnFeatureEnabled()
+  const isEarnFeatureEnabled = useIsEarnPromoEnabled()
 
   return (
     <Paper elevation={0} sx={{ p: 3, textAlign: 'center' }}>
