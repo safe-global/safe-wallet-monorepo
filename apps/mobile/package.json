@@ -64,7 +64,6 @@
     "@react-native-firebase/messaging": "^23.3.1",
     "@react-native-masked-view/masked-view": "0.3.2",
     "@react-native-menu/menu": "^2.0.0",
-    "@react-navigation/material-top-tabs": "^7.2.10",
     "@react-navigation/native": "^7.1.17",
     "@reduxjs/toolkit": "^2.8.2",
     "@safe-global/protocol-kit": "^5.2.17",

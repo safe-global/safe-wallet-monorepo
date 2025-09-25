@@ -41,6 +41,8 @@ const config = {
       UIBackgroundModes: ['remote-notification'],
       NSBluetoothPeripheralUsageDescription: 'Allow Bluetooth access to connect to Ledger devices.',
       AppGroup: IS_DEV ? 'group.global.safe.mobileapp.ios.dev' : 'group.global.safe.mobileapp.ios',
+      // https://github.com/expo/expo/issues/39739
+      UIDesignRequiresCompatibility: true,
     },
     supportsTablet: false,
     appleTeamId: appleDevTeamId,

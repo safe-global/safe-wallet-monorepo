@@ -9565,24 +9565,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/elements@npm:^2.3.8":
-  version: 2.3.8
-  resolution: "@react-navigation/elements@npm:2.3.8"
-  dependencies:
-    color: "npm:^4.2.3"
-  peerDependencies:
-    "@react-native-masked-view/masked-view": ">= 0.2.0"
-    "@react-navigation/native": ^7.1.6
-    react: ">= 18.2.0"
-    react-native: "*"
-    react-native-safe-area-context: ">= 4.0.0"
-  peerDependenciesMeta:
-    "@react-native-masked-view/masked-view":
-      optional: true
-  checksum: 10/5893f44e540b2cf25ddbed98bc97a7828420cd4e7bfebb8f67383db760abdbacce1a7112de0b82e1f1efc5d8916e7f62d907b4ca4eb0861773efae45bad933db
-  languageName: node
-  linkType: hard
-
 "@react-navigation/elements@npm:^2.6.4":
   version: 2.6.4
   resolution: "@react-navigation/elements@npm:2.6.4"
@@ -9600,23 +9582,6 @@ __metadata:
     "@react-native-masked-view/masked-view":
       optional: true
   checksum: 10/ea8a261d327e0b8867ebd5f05bb6b08a1a8f5eaa028403d0961ed4cb5fd3a0c197ab8cd56b8f1340d16eda71209014e06b0fd6c8c156fe4335776494bc86289e
-  languageName: node
-  linkType: hard
-
-"@react-navigation/material-top-tabs@npm:^7.2.10":
-  version: 7.2.10
-  resolution: "@react-navigation/material-top-tabs@npm:7.2.10"
-  dependencies:
-    "@react-navigation/elements": "npm:^2.3.8"
-    color: "npm:^4.2.3"
-    react-native-tab-view: "npm:^4.0.10"
-  peerDependencies:
-    "@react-navigation/native": ^7.1.6
-    react: ">= 18.2.0"
-    react-native: "*"
-    react-native-pager-view: ">= 6.0.0"
-    react-native-safe-area-context: ">= 4.0.0"
-  checksum: 10/89bf68e5edffd1ece80a6dad79b8fc6d2cff47e0f30af311f58a2f11da99161f5e424de9d1bfd535ab1d44befb5f0b8114e4b02ddbeeb40e00a93b3806000bb3
   languageName: node
   linkType: hard
 
@@ -9942,7 +9907,6 @@ __metadata:
     "@react-native-firebase/messaging": "npm:^23.3.1"
     "@react-native-masked-view/masked-view": "npm:0.3.2"
     "@react-native-menu/menu": "npm:^2.0.0"
-    "@react-navigation/material-top-tabs": "npm:^7.2.10"
     "@react-navigation/native": "npm:^7.1.17"
     "@reduxjs/toolkit": "npm:^2.8.2"
     "@rtk-query/codegen-openapi": "npm:^2.0.0"
@@ -30881,19 +30845,6 @@ __metadata:
   version: 1.0.5
   resolution: "react-native-swipe-gestures@npm:1.0.5"
   checksum: 10/d637bc40baa50fa0ce3b6cf2b494efeceaea03cc3875cb7cf7d76922914a21d5e6b098d4a084fb291ce61bfbb0a241c03cff24b15bebf0cfae1c146f4ad10d92
-  languageName: node
-  linkType: hard
-
-"react-native-tab-view@npm:^4.0.10":
-  version: 4.0.10
-  resolution: "react-native-tab-view@npm:4.0.10"
-  dependencies:
-    use-latest-callback: "npm:^0.2.1"
-  peerDependencies:
-    react: ">= 18.2.0"
-    react-native: "*"
-    react-native-pager-view: ">= 6.0.0"
-  checksum: 10/c568fc4dc9b9dedceb12052f740eaffdea0cad4d6610f438d947e2595637932760170a8155a69e415cce36a1e15a72e5ec48cff532d0e7b4386c7961bf2bb197
   languageName: node
   linkType: hard
 
