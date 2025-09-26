@@ -2,7 +2,9 @@ import React from 'react'
 import { View, Pressable } from 'react-native'
 import { Theme, XStack, getTokenValue } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { IdenticonWithBadge } from '@/src/features/Settings/components/IdenticonWithBadge'
+import { Identicon } from '@/src/components/Identicon'
+import { BadgeWrapper } from '@/src/components/BadgeWrapper'
+import { ThresholdBadge } from '@/src/components/ThresholdBadge'
 
 import { shortenAddress } from '@/src/utils/formatters'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -52,15 +54,21 @@ export const Navbar = () => {
           label={contact ? contact.name : shortenAddress(activeSafe.address)}
           labelProps={dropdownLabelProps}
           leftNode={
-            <IdenticonWithBadge
-              testID="threshold-info-badge"
-              variant="sm"
-              size={30}
-              badgeSize={18}
-              fontSize={8}
-              address={activeSafe.address}
-              badgeContent={`${chainSafe?.threshold}/${chainSafe?.owners.length}`}
-            />
+            <BadgeWrapper
+              badge={
+                <ThresholdBadge
+                  threshold={chainSafe?.threshold ?? 0}
+                  ownersCount={chainSafe?.owners.length ?? 0}
+                  size={18}
+                  fontSize={8}
+                  isLoading={!chainSafe}
+                  testID="threshold-info-badge"
+                />
+              }
+              testID="threshold-info-badge-wrapper"
+            >
+              <Identicon address={activeSafe.address} size={30} />
+            </BadgeWrapper>
           }
           onPress={() => {
             router.push('/accounts-sheet')

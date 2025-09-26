@@ -9,7 +9,9 @@ import { EthAddress } from '@/src/components/EthAddress'
 import { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { Address } from '@/src/types/address'
 import { router } from 'expo-router'
-import { IdenticonWithBadge } from '@/src/features/Settings/components/IdenticonWithBadge'
+import { Identicon } from '@/src/components/Identicon'
+import { BadgeWrapper } from '@/src/components/BadgeWrapper'
+import { ThresholdBadge } from '@/src/components/ThresholdBadge'
 
 import { Navbar } from '@/src/features/Settings/components/Navbar/Navbar'
 import { type Contact } from '@/src/store/addressBookSlice'
@@ -64,10 +66,13 @@ export const Settings = ({
           <YStack flex={1} paddingTop={'$10'}>
             <Skeleton.Group show={!owners.length}>
               <YStack alignItems="center" space="$3" marginBottom="$6">
-                <IdenticonWithBadge
-                  address={address}
-                  badgeContent={owners.length ? `${threshold}/${owners.length}` : ''}
-                />
+                <BadgeWrapper
+                  badge={
+                    <ThresholdBadge threshold={threshold} ownersCount={owners.length} isLoading={!owners.length} />
+                  }
+                >
+                  <Identicon address={address} size={56} />
+                </BadgeWrapper>
                 <H2 color="$foreground" fontWeight={600} numberOfLines={1}>
                   {contact?.name || 'Unnamed Safe'}
                 </H2>
