@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'safe-icons';
   src:
-    url('fonts/safe-icons.ttf?xdidsf') format('truetype'),
-    url('fonts/safe-icons.woff?xdidsf') format('woff'),
-    url('fonts/safe-icons.svg?xdidsf#safe-icons') format('svg');
+    url('fonts/safe-icons.ttf?vcxqcb') format('truetype'),
+    url('fonts/safe-icons.woff?vcxqcb') format('woff'),
+    url('fonts/safe-icons.svg?vcxqcb#safe-icons') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -24,6 +24,9 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-transaction-earn:before {
+  content: "\e910";
+}
 .icon-add-owner:before {
   content: "\e900";
 }

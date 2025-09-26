@@ -1,4 +1,5 @@
 export type IconName =
+  | 'transaction-earn'
   | 'add-owner'
   | 'address-book-empty-list'
   | 'address-book'
@@ -116,6 +117,7 @@ export type IconName =
   | 'what-is-new'
 
 export const iconNames: IconName[] = [
+  'transaction-earn',
   'add-owner',
   'address-book-empty-list',
   'address-book',
