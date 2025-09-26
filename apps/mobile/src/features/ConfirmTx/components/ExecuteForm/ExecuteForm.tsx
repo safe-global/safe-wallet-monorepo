@@ -1,15 +1,16 @@
 import { SafeButton } from '@/src/components/SafeButton'
 import React from 'react'
-import { View, Text, YStack } from 'tamagui'
+import { View, Text, YStack, getTokenValue } from 'tamagui'
 import { router } from 'expo-router'
-import { SafeAreaView } from 'react-native'
 import useIsNextTx from '@/src/hooks/useIsNextTx'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface ExecuteFormProps {
   txId: string
 }
 
 export function ExecuteForm({ txId }: ExecuteFormProps) {
+  const { bottom } = useSafeAreaInsets()
   const isNext = useIsNextTx(txId)
 
   const onExecutePress = () => {
@@ -20,7 +21,7 @@ export function ExecuteForm({ txId }: ExecuteFormProps) {
   }
 
   return (
-    <SafeAreaView style={{ gap: 24 }}>
+    <View gap="$4" paddingBottom={Math.max(bottom, getTokenValue('$4'))}>
       <View paddingHorizontal={'$3'} gap="$2" flexDirection="row">
         <YStack justifyContent="center" gap="$2" width="100%">
           {!isNext && (
@@ -40,6 +41,6 @@ export function ExecuteForm({ txId }: ExecuteFormProps) {
           </SafeButton>
         </YStack>
       </View>
-    </SafeAreaView>
+    </View>
   )
 }
