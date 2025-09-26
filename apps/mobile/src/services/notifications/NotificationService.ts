@@ -13,7 +13,12 @@ import { Linking, Platform, Alert as NativeAlert } from 'react-native'
 import { updatePromptAttempts, updateLastTimePromptAttempted } from '@/src/store/notificationsSlice'
 import { toggleAppNotifications, toggleDeviceNotifications } from '@/src/store/notificationsSlice'
 import { HandleNotificationCallback, LAUNCH_ACTIVITY, PressActionId } from '@/src/store/constants'
-import { getMessaging } from '@react-native-firebase/messaging'
+import {
+  getMessaging,
+  onMessage,
+  onNotificationOpenedApp,
+  getInitialNotification,
+} from '@react-native-firebase/messaging'
 import { NotificationNavigationHandler } from './notificationNavigationHandler'
 
 import { ChannelId, notificationChannels, withTimeout } from '@/src/utils/notifications'
@@ -355,7 +360,8 @@ class NotificationsService {
   }
 
   private listenForMessagesForeground = (): UnsubscribeFunc => {
-    return getMessaging().onMessage(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+    const messaging = getMessaging()
+    return onMessage(messaging, async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
       const parsed = parseNotification(remoteMessage.data)
       this.displayNotification({
         channelId: ChannelId.DEFAULT_NOTIFICATION_CHANNEL_ID,
@@ -371,8 +377,10 @@ class NotificationsService {
    * Registers Firebase messaging handlers for when app is opened from notification
    */
   private registerFirebaseNotificationOpenedHandler(): void {
+    const messaging = getMessaging()
+
     // Handle notification opened app when app is in background
-    getMessaging().onNotificationOpenedApp(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+    onNotificationOpenedApp(messaging, async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
       Logger.info('Notification caused app to open from background state:', remoteMessage)
 
       await this.clearAllBadges()
@@ -383,21 +391,19 @@ class NotificationsService {
     })
 
     // Handle notification opened app when app was quit
-    getMessaging()
-      .getInitialNotification()
-      .then(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage | null) => {
-        if (remoteMessage) {
-          Logger.info('Notification caused app to open from quit state:', remoteMessage)
-          if (remoteMessage.data) {
-            // Add extra delay for app startup from killed state
-            setTimeout(async () => {
-              // Clear badge when app is opened from notification
-              await this.clearAllBadges()
-              await NotificationNavigationHandler.handleNotificationPress(remoteMessage.data)
-            }, 1000) // Wait 1 second for app to fully initialize
-          }
+    getInitialNotification(messaging).then(async (remoteMessage: FirebaseMessagingTypes.RemoteMessage | null) => {
+      if (remoteMessage) {
+        Logger.info('Notification caused app to open from quit state:', remoteMessage)
+        if (remoteMessage.data) {
+          // Add extra delay for app startup from killed state
+          setTimeout(async () => {
+            // Clear badge when app is opened from notification
+            await this.clearAllBadges()
+            await NotificationNavigationHandler.handleNotificationPress(remoteMessage.data)
+          }, 1000) // Wait 1 second for app to fully initialize
         }
-      })
+      }
+    })
   }
 }
 

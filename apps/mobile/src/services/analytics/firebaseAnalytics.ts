@@ -6,7 +6,12 @@
  *
  */
 
-import { getAnalytics } from '@react-native-firebase/analytics'
+import {
+  getAnalytics,
+  logEvent,
+  logScreenView,
+  setAnalyticsCollectionEnabled as setAnalyticsCollectionEnabledFirebase,
+} from '@react-native-firebase/analytics'
 import type { AnalyticsEvent } from './types'
 import { AnalyticsUserProperties } from './types'
 import { nativeApplicationVersion, nativeBuildVersion } from 'expo-application'
@@ -84,7 +89,7 @@ export const trackEvent = async (eventData: AnalyticsEvent): Promise<void> => {
     }
 
     // Log the event
-    await analytics.logEvent(eventData.eventName, eventParams)
+    await logEvent(analytics, eventData.eventName, eventParams)
 
     if (__DEV__) {
       console.info('[Firebase Analytics] - Event tracked:', {
@@ -112,7 +117,7 @@ export const trackScreenView = async (screenName: string, screenClass?: string):
   try {
     const analytics = getAnalytics()
 
-    await analytics.logScreenView({
+    await logScreenView(analytics, {
       screen_name: screenName,
       screen_class: screenClass || screenName,
       ...commonEventParams,
@@ -131,7 +136,7 @@ export const trackScreenView = async (screenName: string, screenClass?: string):
  */
 export const setAnalyticsCollectionEnabled = async (enabled: boolean): Promise<void> => {
   try {
-    await getAnalytics().setAnalyticsCollectionEnabled(enabled)
+    await setAnalyticsCollectionEnabledFirebase(getAnalytics(), enabled)
 
     if (__DEV__) {
       console.info('[Firebase Analytics] - Analytics collection enabled:', enabled)
