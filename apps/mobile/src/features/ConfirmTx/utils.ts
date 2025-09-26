@@ -11,6 +11,5 @@ export const extractAppSigners = (
 
   const { signers: signersList } = detailedExecutionInfo
 
-  // TODO: remove this casting once we fix the cgw type problem
-  return signersList.filter((signer) => signers[signer.value]) as unknown as SignerInfo[]
+  return signersList.filter((signer) => signers[signer.value]).map((signer) => signers[signer.value])
 }
