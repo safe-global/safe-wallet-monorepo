@@ -49,7 +49,7 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
       let signedTx: SigningResponse
 
       // Check if this is a Ledger signer
-      if (signer.type === 'ledger') {
+      if (signer?.type === 'ledger') {
         // Handle Ledger signing
         if (!signer.derivationPath) {
           throw new Error('Ledger signer missing derivation path')
