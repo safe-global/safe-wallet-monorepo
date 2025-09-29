@@ -237,12 +237,42 @@ export class SafeWalletProvider {
         result: await this.makeRequest(request, appInfo),
       }
     } catch (e) {
+      const getErrorCode = () => {
+        if (e instanceof RpcError) {
+          return e.code
+        }
+
+        if (typeof e === 'object' && e && 'code' in e) {
+          const { code } = e as { code?: number }
+          if (typeof code === 'number') {
+            return code
+          }
+        }
+
+        return -32000
+      }
+
+      const getErrorMessage = () => {
+        if (e instanceof Error) {
+          return e.message
+        }
+
+        if (typeof e === 'object' && e && 'message' in e) {
+          const { message } = e as { message?: unknown }
+          if (typeof message === 'string') {
+            return message
+          }
+        }
+
+        return 'Unknown error'
+      }
+
       return {
         jsonrpc: '2.0',
         id,
         error: {
-          code: -32000,
-          message: (e as Error).message,
+          code: getErrorCode(),
+          message: getErrorMessage(),
         },
       }
     }

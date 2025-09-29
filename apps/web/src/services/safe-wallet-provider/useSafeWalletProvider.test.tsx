@@ -397,6 +397,7 @@ describe('useSafeWalletProvider', () => {
       })
 
       await expect(promise).resolves.toBeNull()
+      expect(mockSetTxFlow).toHaveBeenNthCalledWith(2, undefined)
       expect(mockPush).toHaveBeenCalledWith({
         pathname: '/',
         query: { safe: 'gor:0x1234567890000000000000000000000000000000' },
@@ -463,7 +464,72 @@ describe('useSafeWalletProvider', () => {
         code: RpcErrorCode.USER_REJECTED,
         message: 'User rejected chain switch',
       })
+      expect(mockSetTxFlow).toHaveBeenNthCalledWith(2, undefined)
       expect(mockPush).not.toHaveBeenCalled()
+    })
+
+    it('should ignore cancellation once the chain switch promise is settled', async () => {
+      const mockPush = jest.fn().mockResolvedValue(true)
+      const mockSetTxFlow = jest.fn()
+
+      const safeItem = {
+        chainId: '5',
+        address: '0x1234567890000000000000000000000000000000',
+        isPinned: false,
+        isReadOnly: false,
+        lastVisited: 0,
+        name: 'Test Safe',
+      }
+
+      mockedUseAllSafes.mockReturnValue([safeItem])
+
+      jest.spyOn(router, 'useRouter').mockReturnValue({
+        push: mockPush,
+        pathname: '/',
+        query: {},
+      } as unknown as router.NextRouter)
+
+      const store = makeStore(
+        {
+          chains: {
+            data: [
+              { chainId: '1', shortName: 'eth', chainName: 'Ethereum' } as gateway.ChainInfo,
+              { chainId: '5', shortName: 'gor', chainName: 'Goerli' } as gateway.ChainInfo,
+            ],
+            loading: false,
+            loaded: true,
+            error: undefined,
+          },
+        } as Partial<RootState>,
+        { skipBroadcast: true },
+      )
+
+      const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
+        wrapper: ({ children }) => (
+          <Provider store={store}>
+            <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
+          </Provider>
+        ),
+      })
+
+      const promise = result.current?.switchChain('0x5', appInfo)
+
+      const modal = mockSetTxFlow.mock.calls[0][0]
+
+      await act(async () => {
+        await modal.props.onSelectSafe(safeItem)
+      })
+
+      await expect(promise).resolves.toBeNull()
+      expect(mockSetTxFlow).toHaveBeenCalledTimes(2)
+
+      modal.props.onCancel()
+
+      expect(mockSetTxFlow).toHaveBeenCalledTimes(2)
+      expect(mockPush).toHaveBeenCalledWith({
+        pathname: '/',
+        query: { safe: 'gor:0x1234567890000000000000000000000000000000' },
+      })
     })
 
     it('should proxy RPC calls', async () => {

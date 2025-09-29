@@ -181,9 +181,15 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
         return await new Promise<null>((resolve, reject) => {
           let settled = false
 
-          const rejectSwitch = () => {
-            if (settled) return
+          const closeModalIfActive = () => {
+            if (settled) return false
             settled = true
+            setTxFlow(undefined)
+            return true
+          }
+
+          const rejectSwitch = () => {
+            if (!closeModalIfActive()) return
 
             reject({
               code: RpcErrorCode.USER_REJECTED,
@@ -192,10 +198,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
           }
 
           const handleSafeSelection = async (safeItem: SafeItem) => {
-            if (settled) return
-            settled = true
-
-            setTxFlow(undefined)
+            if (!closeModalIfActive()) return
 
             try {
               await router.push(getHref(targetChain, safeItem.address))
@@ -211,10 +214,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
               chain={targetChain}
               safes={safesOnTargetChain}
               onSelectSafe={handleSafeSelection}
-              onCancel={() => {
-                setTxFlow(undefined)
-                rejectSwitch()
-              }}
+              onCancel={rejectSwitch}
             />,
             rejectSwitch,
             false,
