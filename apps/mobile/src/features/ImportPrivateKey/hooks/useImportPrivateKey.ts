@@ -11,7 +11,7 @@ export const useImportPrivateKey = () => {
   const [privateKey, setPrivateKey] = useState('')
   const [wallet, setWallet] = useState<ethers.Wallet>()
   const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string }>()
-  const [error, setError] = useState<string>()
+  const [error, setError] = useState<string | undefined>(undefined)
   const router = useRouter()
   const { createDelegate } = useDelegate()
 
@@ -27,7 +27,8 @@ export const useImportPrivateKey = () => {
   }
 
   const handleImport = async () => {
-    if (!wallet) {
+    setError(undefined)
+    if (!wallet || !privateKey) {
       return setError(ERROR_MESSAGE)
     }
 

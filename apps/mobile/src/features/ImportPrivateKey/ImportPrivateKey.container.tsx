@@ -68,7 +68,12 @@ export function ImportPrivateKey() {
         </YStack>
       </ScrollView>
 
-      <SafeButton onPress={handleImport} testID={'import-signer-button'}>
+      <SafeButton
+        onPress={handleImport}
+        testID={'import-signer-button'}
+        disabled={!!error}
+        opacity={!error && privateKey ? 1 : 0.5}
+      >
         Import signer
       </SafeButton>
     </KeyboardAvoidingView>
