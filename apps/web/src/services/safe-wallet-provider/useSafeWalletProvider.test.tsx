@@ -19,6 +19,8 @@ import * as chainHooks from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
 import useAllSafes from '@/features/myAccounts/hooks/useAllSafes'
 import { useGetHref } from '@/features/myAccounts/hooks/useGetHref'
+import { wcPopupStore } from '@/features/walletconnect/components'
+import { wcChainSwitchStore } from '@/features/walletconnect/components/WcChainSwitchModal/store'
 
 jest.mock('@/features/myAccounts/hooks/useAllSafes', () => ({
   __esModule: true,
@@ -60,6 +62,9 @@ describe('useSafeWalletProvider', () => {
       pathname: '/',
       query: { safe: `${chain.shortName}:${address}` },
     }))
+
+    wcPopupStore.setStore(false)
+    wcChainSwitchStore.setStore(undefined)
   })
 
   describe('useSafeWalletProvider', () => {
@@ -343,8 +348,6 @@ describe('useSafeWalletProvider', () => {
 
     it('should request a Safe selection when switching chains', async () => {
       const mockPush = jest.fn().mockResolvedValue(true)
-      const mockSetTxFlow = jest.fn()
-
       const safeItem = {
         chainId: '5',
         address: '0x1234567890000000000000000000000000000000',
@@ -377,27 +380,32 @@ describe('useSafeWalletProvider', () => {
         { skipBroadcast: true },
       )
 
+      wcPopupStore.setStore(true)
+
       const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
         wrapper: ({ children }) => (
           <Provider store={store}>
-            <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider value={{ setTxFlow: jest.fn() } as any}>{children}</TxModalContext.Provider>
           </Provider>
         ),
       })
 
       const promise = result.current?.switchChain('0x5', appInfo)
 
-      expect(mockSetTxFlow).toHaveBeenCalled()
-      const modal = mockSetTxFlow.mock.calls[0][0]
-      expect(modal.props.safes).toEqual([safeItem])
-      expect(modal.props.chain.chainId).toBe('5')
+      expect(promise).toBeInstanceOf(Promise)
+
+      const request = wcChainSwitchStore.getStore()
+      expect(request).toBeDefined()
+      expect(request?.safes).toEqual([safeItem])
+      expect(request?.chain.chainId).toBe('5')
 
       await act(async () => {
-        await modal.props.onSelectSafe(safeItem)
+        await request?.onSelectSafe(safeItem)
       })
 
       await expect(promise).resolves.toBeNull()
-      expect(mockSetTxFlow).toHaveBeenNthCalledWith(2, undefined)
+      expect(wcChainSwitchStore.getStore()).toBeUndefined()
+      expect(wcPopupStore.getStore()).toBe(true)
       expect(mockPush).toHaveBeenCalledWith({
         pathname: '/',
         query: { safe: 'gor:0x1234567890000000000000000000000000000000' },
@@ -406,8 +414,6 @@ describe('useSafeWalletProvider', () => {
 
     it('should reject switching chains when the user cancels the modal', async () => {
       const mockPush = jest.fn().mockResolvedValue(true)
-      const mockSetTxFlow = jest.fn()
-
       const safeItem = {
         chainId: '5',
         address: '0x1234567890000000000000000000000000000000',
@@ -443,7 +449,7 @@ describe('useSafeWalletProvider', () => {
       const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
         wrapper: ({ children }) => (
           <Provider store={store}>
-            <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider value={{ setTxFlow: jest.fn() } as any}>{children}</TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -451,12 +457,16 @@ describe('useSafeWalletProvider', () => {
       const promise = result.current?.switchChain('0x5', appInfo)
 
       expect(promise).toBeInstanceOf(Promise)
-      expect(mockSetTxFlow).toHaveBeenCalled()
-      const modal = mockSetTxFlow.mock.calls[0][0]
+      expect(wcPopupStore.getStore()).toBe(true)
+
+      const request = wcChainSwitchStore.getStore()
+      expect(request).toBeDefined()
+      expect(request?.chain.chainId).toBe('5')
+      expect(request?.safes).toEqual([safeItem])
 
       let error: unknown
       await act(async () => {
-        modal.props.onCancel()
+        request?.onCancel()
         error = await (promise as Promise<never>).catch((err) => err)
       })
 
@@ -464,13 +474,13 @@ describe('useSafeWalletProvider', () => {
         code: RpcErrorCode.USER_REJECTED,
         message: 'User rejected chain switch',
       })
-      expect(mockSetTxFlow).toHaveBeenNthCalledWith(2, undefined)
+      expect(wcChainSwitchStore.getStore()).toBeUndefined()
+      expect(wcPopupStore.getStore()).toBe(false)
       expect(mockPush).not.toHaveBeenCalled()
     })
 
     it('should ignore cancellation once the chain switch promise is settled', async () => {
       const mockPush = jest.fn().mockResolvedValue(true)
-      const mockSetTxFlow = jest.fn()
 
       const safeItem = {
         chainId: '5',
@@ -507,25 +517,27 @@ describe('useSafeWalletProvider', () => {
       const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
         wrapper: ({ children }) => (
           <Provider store={store}>
-            <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider value={{ setTxFlow: jest.fn() } as any}>{children}</TxModalContext.Provider>
           </Provider>
         ),
       })
 
       const promise = result.current?.switchChain('0x5', appInfo)
 
-      const modal = mockSetTxFlow.mock.calls[0][0]
+      const request = wcChainSwitchStore.getStore()
+      expect(request).toBeDefined()
 
       await act(async () => {
-        await modal.props.onSelectSafe(safeItem)
+        await request?.onSelectSafe(safeItem)
       })
 
       await expect(promise).resolves.toBeNull()
-      expect(mockSetTxFlow).toHaveBeenCalledTimes(2)
+      expect(wcChainSwitchStore.getStore()).toBeUndefined()
+      expect(wcPopupStore.getStore()).toBe(false)
 
-      modal.props.onCancel()
+      request?.onCancel()
 
-      expect(mockSetTxFlow).toHaveBeenCalledTimes(2)
+      expect(wcChainSwitchStore.getStore()).toBeUndefined()
       expect(mockPush).toHaveBeenCalledWith({
         pathname: '/',
         query: { safe: 'gor:0x1234567890000000000000000000000000000000' },

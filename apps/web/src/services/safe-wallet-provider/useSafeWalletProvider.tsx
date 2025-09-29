@@ -26,7 +26,8 @@ import { isOffchainEIP1271Supported } from '@safe-global/utils/utils/safe-messag
 import { getCreateCallContractDeployment } from '@safe-global/utils/services/contracts/deployments'
 import useAllSafes, { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import { useGetHref } from '@/features/myAccounts/hooks/useGetHref'
-import WcChainSwitchModal from '@/features/walletconnect/components/WcChainSwitchModal'
+import { wcPopupStore } from '@/features/walletconnect/components'
+import { wcChainSwitchStore } from '@/features/walletconnect/components/WcChainSwitchModal/store'
 
 export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | undefined => {
   const { safe } = useSafeInfo()
@@ -180,16 +181,18 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
 
         return await new Promise<null>((resolve, reject) => {
           let settled = false
+          const previousPopupOpen = wcPopupStore.getStore() ?? false
 
-          const closeModalIfActive = () => {
+          const closeRequestIfActive = () => {
             if (settled) return false
             settled = true
-            setTxFlow(undefined)
+            wcChainSwitchStore.setStore(undefined)
+            wcPopupStore.setStore(previousPopupOpen)
             return true
           }
 
           const rejectSwitch = () => {
-            if (!closeModalIfActive()) return
+            if (!closeRequestIfActive()) return
 
             reject({
               code: RpcErrorCode.USER_REJECTED,
@@ -198,7 +201,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
           }
 
           const handleSafeSelection = async (safeItem: SafeItem) => {
-            if (!closeModalIfActive()) return
+            if (!closeRequestIfActive()) return
 
             try {
               await router.push(getHref(targetChain, safeItem.address))
@@ -208,17 +211,14 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
             }
           }
 
-          setTxFlow(
-            <WcChainSwitchModal
-              appInfo={appInfo}
-              chain={targetChain}
-              safes={safesOnTargetChain}
-              onSelectSafe={handleSafeSelection}
-              onCancel={rejectSwitch}
-            />,
-            rejectSwitch,
-            false,
-          )
+          wcPopupStore.setStore(true)
+          wcChainSwitchStore.setStore({
+            appInfo,
+            chain: targetChain,
+            safes: safesOnTargetChain,
+            onSelectSafe: handleSafeSelection,
+            onCancel: rejectSwitch,
+          })
         })
       },
 
