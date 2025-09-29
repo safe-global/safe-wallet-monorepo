@@ -97,7 +97,7 @@ export const LedgerAddressesContainer = () => {
         })
         break
     }
-  }, [error, clearError, fetchAddresses, params.deviceName, addresses.length, router, selectedIndex, addresses])
+  }, [error, clearError, fetchAddresses, params.deviceName, router, selectedIndex, addresses])
 
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle paddingRight={5}>{TITLE}</NavBarTitle>,
