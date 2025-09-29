@@ -8,7 +8,7 @@ export type WcChainSwitchRequest = {
   appInfo: AppInfo
   chain: ChainInfo
   safes: SafeItem[]
-  onSelectSafe: (safe: SafeItem) => void
+  onSelectSafe: (safe: SafeItem) => Promise<void>
   onCancel: () => void
 }
 

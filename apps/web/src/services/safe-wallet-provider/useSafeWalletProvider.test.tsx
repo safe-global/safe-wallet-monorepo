@@ -400,7 +400,11 @@ describe('useSafeWalletProvider', () => {
       expect(request?.chain.chainId).toBe('5')
 
       await act(async () => {
-        await request?.onSelectSafe(safeItem)
+        if (!request) {
+          throw new Error('Expected WalletConnect chain switch request')
+        }
+
+        await request.onSelectSafe(safeItem)
       })
 
       await expect(promise).resolves.toBeNull()
@@ -528,7 +532,11 @@ describe('useSafeWalletProvider', () => {
       expect(request).toBeDefined()
 
       await act(async () => {
-        await request?.onSelectSafe(safeItem)
+        if (!request) {
+          throw new Error('Expected WalletConnect chain switch request')
+        }
+
+        await request.onSelectSafe(safeItem)
       })
 
       await expect(promise).resolves.toBeNull()
