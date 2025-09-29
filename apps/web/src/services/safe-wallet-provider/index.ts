@@ -254,6 +254,10 @@ export class SafeWalletProvider {
     try {
       await this.sdk.switchChain(chainId, appInfo)
     } catch (e) {
+      if (typeof e === 'object' && e && 'code' in e && (e as { code?: number }).code === RpcErrorCode.USER_REJECTED) {
+        throw new RpcError(RpcErrorCode.USER_REJECTED, 'User rejected chain switch')
+      }
+
       throw new RpcError(RpcErrorCode.UNSUPPORTED_CHAIN, 'Unsupported chain')
     }
     return null

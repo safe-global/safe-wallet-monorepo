@@ -8,7 +8,7 @@ import * as notifications from './notifications'
 import { act, renderHook, getAppName } from '@/tests/test-utils'
 import { TxModalContext } from '@/components/tx-flow'
 import useSafeWalletProvider, { useTxFlowApi } from './useSafeWalletProvider'
-import { SafeWalletProvider } from '.'
+import { RpcErrorCode, SafeWalletProvider } from '.'
 import type { RootState } from '@/store'
 import { makeStore } from '@/store'
 import * as messages from '@safe-global/utils/utils/safe-messages'
@@ -17,6 +17,20 @@ import { Interface } from 'ethers'
 import { getCreateCallDeployment } from '@safe-global/safe-deployments'
 import * as chainHooks from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
+import useAllSafes from '@/features/myAccounts/hooks/useAllSafes'
+import { useGetHref } from '@/features/myAccounts/hooks/useGetHref'
+
+jest.mock('@/features/myAccounts/hooks/useAllSafes', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
+
+jest.mock('@/features/myAccounts/hooks/useGetHref', () => ({
+  useGetHref: jest.fn(),
+}))
+
+const mockedUseAllSafes = useAllSafes as jest.MockedFunction<typeof useAllSafes>
+const mockedUseGetHref = useGetHref as jest.MockedFunction<typeof useGetHref>
 
 const appInfo = {
   id: 1,
@@ -40,6 +54,12 @@ describe('useSafeWalletProvider', () => {
     jest.spyOn(chainHooks, 'useCurrentChain').mockImplementation(() => {
       return chainBuilder().with({ chainId: '1', recommendedMasterCopyVersion: '1.4.1' }).build()
     })
+
+    mockedUseAllSafes.mockReturnValue([])
+    mockedUseGetHref.mockImplementation(() => (chain, address: string) => ({
+      pathname: '/',
+      query: { safe: `${chain.shortName}:${address}` },
+    }))
   })
 
   describe('useSafeWalletProvider', () => {
@@ -321,33 +341,129 @@ describe('useSafeWalletProvider', () => {
       expect(resp).toEqual({ hash: '0x123' })
     })
 
-    it('should switch chain', () => {
-      const mockPush = jest.fn()
+    it('should request a Safe selection when switching chains', async () => {
+      const mockPush = jest.fn().mockResolvedValue(true)
+      const mockSetTxFlow = jest.fn()
+
+      const safeItem = {
+        chainId: '5',
+        address: '0x1234567890000000000000000000000000000000',
+        isPinned: false,
+        isReadOnly: false,
+        lastVisited: 0,
+        name: 'Test Safe',
+      }
+
+      mockedUseAllSafes.mockReturnValue([safeItem])
+
       jest.spyOn(router, 'useRouter').mockReturnValue({
         push: mockPush,
+        pathname: '/',
+        query: {},
       } as unknown as router.NextRouter)
 
-      jest.spyOn(window, 'confirm').mockReturnValue(true)
-
-      const { result } = renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000'), {
-        initialReduxState: {
+      const store = makeStore(
+        {
           chains: {
+            data: [
+              { chainId: '1', shortName: 'eth', chainName: 'Ethereum' } as gateway.ChainInfo,
+              { chainId: '5', shortName: 'gor', chainName: 'Goerli' } as gateway.ChainInfo,
+            ],
             loading: false,
             loaded: true,
             error: undefined,
-            data: [{ chainId: '1', shortName: 'eth' } as gateway.ChainInfo],
           },
-        },
+        } as Partial<RootState>,
+        { skipBroadcast: true },
+      )
+
+      const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
+        wrapper: ({ children }) => (
+          <Provider store={store}>
+            <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
+          </Provider>
+        ),
       })
 
-      result.current?.switchChain('0x5', appInfo)
+      const promise = result.current?.switchChain('0x5', appInfo)
 
+      expect(mockSetTxFlow).toHaveBeenCalled()
+      const modal = mockSetTxFlow.mock.calls[0][0]
+      expect(modal.props.safes).toEqual([safeItem])
+      expect(modal.props.chain.chainId).toBe('5')
+
+      await act(async () => {
+        await modal.props.onSelectSafe(safeItem)
+      })
+
+      await expect(promise).resolves.toBeNull()
       expect(mockPush).toHaveBeenCalledWith({
         pathname: '/',
-        query: {
-          chain: 'eth',
-        },
+        query: { safe: 'gor:0x1234567890000000000000000000000000000000' },
       })
+    })
+
+    it('should reject switching chains when the user cancels the modal', async () => {
+      const mockPush = jest.fn().mockResolvedValue(true)
+      const mockSetTxFlow = jest.fn()
+
+      const safeItem = {
+        chainId: '5',
+        address: '0x1234567890000000000000000000000000000000',
+        isPinned: false,
+        isReadOnly: false,
+        lastVisited: 0,
+        name: 'Test Safe',
+      }
+
+      mockedUseAllSafes.mockReturnValue([safeItem])
+
+      jest.spyOn(router, 'useRouter').mockReturnValue({
+        push: mockPush,
+        pathname: '/',
+        query: {},
+      } as unknown as router.NextRouter)
+
+      const store = makeStore(
+        {
+          chains: {
+            data: [
+              { chainId: '1', shortName: 'eth', chainName: 'Ethereum' } as gateway.ChainInfo,
+              { chainId: '5', shortName: 'gor', chainName: 'Goerli' } as gateway.ChainInfo,
+            ],
+            loading: false,
+            loaded: true,
+            error: undefined,
+          },
+        } as Partial<RootState>,
+        { skipBroadcast: true },
+      )
+
+      const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
+        wrapper: ({ children }) => (
+          <Provider store={store}>
+            <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
+          </Provider>
+        ),
+      })
+
+      const promise = result.current?.switchChain('0x5', appInfo)
+
+      expect(promise).toBeInstanceOf(Promise)
+      expect(mockSetTxFlow).toHaveBeenCalled()
+      const modal = mockSetTxFlow.mock.calls[0][0]
+
+      let error: unknown
+      await act(async () => {
+        modal.props.onCancel()
+        error = await (promise as Promise<never>).catch((err) => err)
+      })
+
+      expect(error).toEqual({
+        code: RpcErrorCode.USER_REJECTED,
+        message: 'User rejected chain switch',
+      })
+      expect(mockPush).not.toHaveBeenCalled()
     })
 
     it('should proxy RPC calls', async () => {

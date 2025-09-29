@@ -24,6 +24,9 @@ import { useAppSelector } from '@/store'
 import { selectOnChainSigning } from '@/store/settingsSlice'
 import { isOffchainEIP1271Supported } from '@safe-global/utils/utils/safe-messages'
 import { getCreateCallContractDeployment } from '@safe-global/utils/services/contracts/deployments'
+import useAllSafes, { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
+import { useGetHref } from '@/features/myAccounts/hooks/useGetHref'
+import WcChainSwitchModal from '@/features/walletconnect/components/WcChainSwitchModal'
 
 export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | undefined => {
   const { safe } = useSafeInfo()
@@ -32,6 +35,8 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
   const web3ReadOnly = useWeb3ReadOnly()
   const router = useRouter()
   const { configs } = useChains()
+  const allSafes = useAllSafes()
+  const getHref = useGetHref(router)
   const pendingTxs = useRef<Record<string, string>>({})
 
   const onChainSigning = useAppSelector(selectOnChainSigning)
@@ -166,21 +171,55 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
           return null
         }
 
-        const cfg = configs.find((c) => c.chainId === chainId)
-        if (!cfg) {
-          throw new Error(`Chain ${chainId} not supported`)
+        const targetChain = configs.find((c) => c.chainId === decimalChainId)
+        if (!targetChain) {
+          throw new Error(`Chain ${decimalChainId} not supported`)
         }
 
-        if (confirm(`${appInfo.name} wants to switch to ${cfg.shortName}. Do you want to continue?`)) {
-          router.push({
-            pathname: AppRoutes.index,
-            query: {
-              chain: cfg.shortName,
-            },
-          })
-        }
+        const safesOnTargetChain = (allSafes ?? []).filter((safeItem) => safeItem.chainId === decimalChainId)
 
-        return null
+        return await new Promise<null>((resolve, reject) => {
+          let settled = false
+
+          const rejectSwitch = () => {
+            if (settled) return
+            settled = true
+
+            reject({
+              code: RpcErrorCode.USER_REJECTED,
+              message: 'User rejected chain switch',
+            })
+          }
+
+          const handleSafeSelection = async (safeItem: SafeItem) => {
+            if (settled) return
+            settled = true
+
+            setTxFlow(undefined)
+
+            try {
+              await router.push(getHref(targetChain, safeItem.address))
+              resolve(null)
+            } catch (error) {
+              reject(error as Error)
+            }
+          }
+
+          setTxFlow(
+            <WcChainSwitchModal
+              appInfo={appInfo}
+              chain={targetChain}
+              safes={safesOnTargetChain}
+              onSelectSafe={handleSafeSelection}
+              onCancel={() => {
+                setTxFlow(undefined)
+                rejectSwitch()
+              }}
+            />,
+            rejectSwitch,
+            false,
+          )
+        })
       },
 
       async showTxStatus(safeTxHash) {
@@ -227,7 +266,20 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
         }
       },
     }
-  }, [chainId, safeAddress, safe, currentChain, onChainSigning, settings, setTxFlow, configs, router, web3ReadOnly])
+  }, [
+    chainId,
+    safeAddress,
+    safe,
+    currentChain,
+    onChainSigning,
+    settings,
+    setTxFlow,
+    configs,
+    router,
+    web3ReadOnly,
+    allSafes,
+    getHref,
+  ])
 }
 
 const useSafeWalletProvider = (): SafeWalletProvider | undefined => {
