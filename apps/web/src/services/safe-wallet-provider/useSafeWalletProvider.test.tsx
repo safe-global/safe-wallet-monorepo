@@ -416,6 +416,65 @@ describe('useSafeWalletProvider', () => {
       })
     })
 
+    it('should automatically switch to a Safe with the same address on the target chain', async () => {
+      const mockPush = jest.fn().mockResolvedValue(true)
+      const currentSafeAddress = '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'
+      const safeItem = {
+        chainId: '5',
+        address: currentSafeAddress,
+        isPinned: false,
+        isReadOnly: false,
+        lastVisited: 0,
+        name: 'Matching Safe',
+      }
+
+      mockedUseAllSafes.mockReturnValue([safeItem])
+
+      jest.spyOn(router, 'useRouter').mockReturnValue({
+        push: mockPush,
+        pathname: '/',
+        query: {},
+      } as unknown as router.NextRouter)
+
+      const store = makeStore(
+        {
+          chains: {
+            data: [
+              { chainId: '1', shortName: 'eth', chainName: 'Ethereum' } as gateway.ChainInfo,
+              { chainId: '5', shortName: 'gor', chainName: 'Goerli' } as gateway.ChainInfo,
+            ],
+            loading: false,
+            loaded: true,
+            error: undefined,
+          },
+        } as Partial<RootState>,
+        { skipBroadcast: true },
+      )
+
+      const { result } = renderHook(() => useTxFlowApi('1', currentSafeAddress), {
+        wrapper: ({ children }) => (
+          <Provider store={store}>
+            <TxModalContext.Provider value={{ setTxFlow: jest.fn() } as any}>{children}</TxModalContext.Provider>
+          </Provider>
+        ),
+      })
+
+      const promise = result.current?.switchChain('0x5', appInfo)
+
+      expect(promise).toBeInstanceOf(Promise)
+      expect(wcChainSwitchStore.getStore()).toBeUndefined()
+      expect(wcPopupStore.getStore()).toBe(false)
+
+      await act(async () => {
+        await expect(promise).resolves.toBeNull()
+      })
+
+      expect(mockPush).toHaveBeenCalledWith({
+        pathname: '/',
+        query: { safe: 'gor:0xabcdefabcdefabcdefabcdefabcdefabcdefabcd' },
+      })
+    })
+
     it('should reject switching chains when the user cancels the modal', async () => {
       const mockPush = jest.fn().mockResolvedValue(true)
       const safeItem = {

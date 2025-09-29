@@ -39,7 +39,7 @@ const WcChainSwitchModal = ({ appInfo, chain, safes, onSelectSafe, onCancel }: W
       <Typography variant="body2" color="text.secondary">
         {hasSafes
           ? `Select one of your Safes on ${chain.chainName} to continue.`
-          : `You don't have any Safes on ${chain.chainName}.`}
+          : `Connected dapp wants to switch to chain ${chain.chainName} but you don't have Safe Accounts deployed on that chain.`}
       </Typography>
 
       <List disablePadding sx={{ borderRadius: 2, border: '1px solid var(--color-border-light)' }}>

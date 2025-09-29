@@ -16,6 +16,7 @@ import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messag
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { Interface, getAddress } from 'ethers'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { AppRoutes } from '@/config/routes'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
 import { NotificationMessages, showNotification } from './notifications'
@@ -178,6 +179,13 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
         }
 
         const safesOnTargetChain = (allSafes ?? []).filter((safeItem) => safeItem.chainId === decimalChainId)
+
+        const matchingSafe = safesOnTargetChain.find((safeItem) => sameAddress(safeItem.address, safeAddress))
+
+        if (matchingSafe) {
+          await router.push(getHref(targetChain, matchingSafe.address))
+          return null
+        }
 
         return await new Promise<null>((resolve, reject) => {
           let settled = false
