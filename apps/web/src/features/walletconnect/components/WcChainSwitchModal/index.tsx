@@ -55,7 +55,7 @@ const WcChainSwitchModal = ({ appInfo, chain, safes, onSelectSafe, onCancel }: W
                   shortAddress
                   showCopyButton={false}
                   showAvatar={false}
-                  chainId={Number(chain.chainId)}
+                  chainId={chain.chainId}
                 />
               </ListItemButton>
             </Box>
