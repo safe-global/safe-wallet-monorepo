@@ -58,7 +58,8 @@ function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSa
   )
 }
 
-const SAFE_ACCOUNTS_LIMIT = 10
+const safeAccountsLimitRaw = Number.parseInt(process.env.SPACES_SAFE_ACCOUNTS_LIMIT ?? '', 10)
+const SAFE_ACCOUNTS_LIMIT = !Number.isNaN(safeAccountsLimitRaw) ? safeAccountsLimitRaw : 40
 
 const AddAccounts = () => {
   const isAdmin = useIsAdmin()
