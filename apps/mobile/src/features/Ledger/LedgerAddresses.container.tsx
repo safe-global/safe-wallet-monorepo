@@ -87,8 +87,17 @@ export const LedgerAddressesContainer = () => {
       case 'IMPORT':
         Alert.alert('Import Failed', error.message, [{ text: 'OK', onPress: reset }])
         break
+      case 'OWNER_VALIDATION':
+        clearError()
+        router.push({
+          pathname: '/import-signers/ledger-error',
+          params: {
+            address: addresses[selectedIndex]?.address || '',
+          },
+        })
+        break
     }
-  }, [error, clearError, fetchAddresses, params.deviceName, addresses.length])
+  }, [error, clearError, fetchAddresses, params.deviceName, addresses.length, router, selectedIndex, addresses])
 
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle paddingRight={5}>{TITLE}</NavBarTitle>,

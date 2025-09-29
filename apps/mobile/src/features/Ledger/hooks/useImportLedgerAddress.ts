@@ -2,10 +2,11 @@ import { useCallback, useState } from 'react'
 import { useAppDispatch } from '@/src/store/hooks'
 import { addSignerWithEffects } from '@/src/store/signersSlice'
 import { ledgerDMKService } from '@/src/services/ledger/ledger-dmk.service'
+import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipValidation'
 import logger from '@/src/utils/logger'
 
 type ImportError = {
-  code: 'VALIDATION' | 'IMPORT'
+  code: 'VALIDATION' | 'IMPORT' | 'OWNER_VALIDATION'
   message: string
 }
 
@@ -26,6 +27,7 @@ export const useImportLedgerAddress = () => {
   const dispatch = useAppDispatch()
   const [isImporting, setIsImporting] = useState(false)
   const [error, setError] = useState<ImportError | null>(null)
+  const { validateAddressOwnership } = useAddressOwnershipValidation()
 
   const clearError = useCallback(() => {
     setError(null)
@@ -45,11 +47,22 @@ export const useImportLedgerAddress = () => {
       setError(null)
 
       try {
+        // Validate address ownership
+        const validationResult = await validateAddressOwnership(address)
+        if (!validationResult.isOwner) {
+          setError({
+            code: 'OWNER_VALIDATION',
+            message: 'This address is not an owner of the Safe Account',
+          })
+          setIsImporting(false)
+          return { success: false }
+        }
+
         await dispatch(
           addSignerWithEffects({
             value: address,
-            name: null,
-            logoUri: null,
+            name: validationResult.ownerInfo?.name || null,
+            logoUri: validationResult.ownerInfo?.logoUri || null,
             type: 'ledger',
             derivationPath: path,
           }),
@@ -72,7 +85,7 @@ export const useImportLedgerAddress = () => {
         return { success: false }
       }
     },
-    [dispatch],
+    [dispatch, validateAddressOwnership],
   )
 
   return {
