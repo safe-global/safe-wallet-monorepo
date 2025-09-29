@@ -6,7 +6,7 @@ import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard
 import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SignerSection } from './SignersList'
 import { View } from 'tamagui'
-import { TouchableOpacity } from 'react-native-gesture-handler'
+import { TouchableOpacity } from 'react-native'
 import { useTheme } from '@/src/theme/hooks/useTheme'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'

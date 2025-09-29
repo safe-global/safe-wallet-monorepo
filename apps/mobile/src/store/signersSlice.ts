@@ -63,7 +63,7 @@ export const selectSigners = (state: RootState) => state.signers
 
 export const selectSignersByAddress = (state: RootState) => state.signers
 
-export const selectSignerByAddress = (state: RootState, address: string) => state.signers[address]
+export const selectSignerByAddress = (state: RootState, address: string): Signer | undefined => state.signers[address]
 
 export const selectSignerHasPrivateKey = (address: string) => (state: RootState) => {
   return state.signers[address] && state.signers[address].type === 'private-key'
