@@ -4,6 +4,7 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { Badge } from '@/src/components/Badge'
 import { Loader } from '@/src/components/Loader'
 import { Alert } from '../../Alert'
+import { getTokenValue } from 'tamagui'
 
 interface Props {
   number: string
@@ -14,9 +15,14 @@ interface Props {
 
 export const PendingTransactions = ({ number, isLoading, fullWidth, onPress }: Props) => {
   const startIcon = isLoading ? (
-    <Loader size={24} color="$warning1ContrastTextDark" />
+    <Loader size={24} color={getTokenValue('$color.warning1ContrastTextDark')} />
   ) : (
-    <Badge content={number} themeName="badge_warning_variant2" />
+    <Badge
+      content={number.length > 3 ? '99+' : number}
+      themeName="badge_warning_variant2"
+      circleSize="$6"
+      textContentProps={{ fontWeight: 600, fontSize: number.length > 2 ? 12 : 14 }}
+    />
   )
   const endIcon = <SafeFontIcon name="chevron-right" size={20} />
 

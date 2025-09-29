@@ -67,7 +67,7 @@ const ReviewSignMessageOnChain = ({ message, method, children, ...props }: SignM
   useEffect(() => {
     let txData
 
-    if (!readOnlySignMessageLibContract) return
+    if (!readOnlySignMessageLibContract || !signMessageAddress) return
 
     if (isTextMessage) {
       txData = readOnlySignMessageLibContract.encode('signMessage', [

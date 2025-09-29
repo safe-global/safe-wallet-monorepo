@@ -1,34 +1,49 @@
 import { type SyntheticEvent, useMemo, useCallback } from 'react'
-import { Accordion, AccordionDetails, AccordionSummary, Box, ButtonBase, ListItem, SvgIcon } from '@mui/material'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { ButtonBase, ListItem, Skeleton, SvgIcon } from '@mui/material'
 import css from './styles.module.css'
 import { type DraftBatchItem } from '@/store/batchSlice'
-import TxType from '@/components/transactions/TxType'
-import TxInfo from '@/components/transactions/TxInfo'
+
 import DeleteIcon from '@/public/images/common/delete.svg'
-import TxData from '@/components/transactions/TxDetails/TxData'
-import { MethodDetails } from '@/components/transactions/TxDetails/TxData/DecodedData/MethodDetails'
-import { TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
-import { dateString } from '@safe-global/utils/utils/formatters'
 import { BATCH_EVENTS, trackEvent } from '@/services/analytics'
+import SingleTxDecoded from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded'
+import {
+  type AddressEx,
+  Operation,
+  type TransactionData,
+  type InternalTransaction,
+} from '@safe-global/safe-gateway-typescript-sdk'
+import { type TokenInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 type BatchTxItemProps = DraftBatchItem & {
   id: string
   count: number
   onDelete?: (id: string) => void
+  txDecoded?: InternalTransaction
+  addressInfoIndex: Record<string, AddressEx>
+  tokenInfoIndex: Record<string, TokenInfo>
 }
 
-const BatchTxItem = ({ id, count, timestamp, txDetails, onDelete }: BatchTxItemProps) => {
-  const txSummary = useMemo(
+const BatchTxItem = ({
+  id,
+  count,
+  txData,
+  txDecoded,
+  onDelete,
+  addressInfoIndex,
+  tokenInfoIndex,
+}: BatchTxItemProps) => {
+  const transactionDetails: TransactionData = useMemo(
     () => ({
-      timestamp,
-      id: txDetails.txId,
-      txInfo: txDetails.txInfo,
-      txStatus: txDetails.txStatus,
-      safeAppInfo: txDetails.safeAppInfo,
-      txHash: txDetails.txHash || null,
+      operation: Operation.CALL,
+      to: { value: txData.to },
+      value: txData.value,
+      hexData: txData.data,
+      trustedDelegateCallTarget: false,
+      dataDecoded: txDecoded?.dataDecoded,
+      addressInfoIndex,
+      tokenInfoIndex,
     }),
-    [timestamp, txDetails],
+    [addressInfoIndex, tokenInfoIndex, txData.data, txData.to, txData.value, txDecoded?.dataDecoded],
   )
 
   const handleDelete = useCallback(
@@ -42,63 +57,27 @@ const BatchTxItem = ({ id, count, timestamp, txDetails, onDelete }: BatchTxItemP
     [onDelete, id],
   )
 
-  const handleExpand = () => {
-    trackEvent(BATCH_EVENTS.BATCH_EXPAND_TX)
-  }
-
   return (
     <ListItem disablePadding sx={{ gap: 2, alignItems: 'flex-start' }}>
       <div className={css.number}>{count}</div>
-      <Accordion elevation={0} sx={{ flex: 1 }} onChange={handleExpand}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} className={css.accordion}>
-          <Box
-            sx={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 2,
-              py: 0.4,
-              width: '100%',
-            }}
-          >
-            <TxType tx={txSummary} />
-
-            <Box flex={1}>
-              <TxInfo info={txDetails.txInfo} />
-            </Box>
-
-            {onDelete && (
-              <>
-                <Box className={css.separator} />
-
+      {txDecoded ? (
+        <div className={css.accordion}>
+          <SingleTxDecoded
+            actionTitle=""
+            tx={txDecoded}
+            txData={transactionDetails}
+            actions={
+              onDelete ? (
                 <ButtonBase onClick={handleDelete} title="Delete transaction" sx={{ p: 0.5 }}>
                   <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" />
                 </ButtonBase>
-
-                <Box className={css.separator} mr={2} />
-              </>
-            )}
-          </Box>
-        </AccordionSummary>
-
-        <AccordionDetails>
-          <div className={css.details}>
-            <TxData
-              txInfo={txDetails.txInfo}
-              txData={txDetails.txData}
-              txDetails={txDetails}
-              trusted
-              imitation={false}
-            />
-
-            <TxDataRow title="Created:">{timestamp ? dateString(timestamp) : null}</TxDataRow>
-
-            {txDetails.txData?.dataDecoded && (
-              <MethodDetails data={txDetails.txData.dataDecoded} addressInfoIndex={txDetails.txData.addressInfoIndex} />
-            )}
-          </div>
-        </AccordionDetails>
-      </Accordion>
+              ) : undefined
+            }
+          />
+        </div>
+      ) : (
+        <Skeleton width="100%" height="56px" />
+      )}
     </ListItem>
   )
 }

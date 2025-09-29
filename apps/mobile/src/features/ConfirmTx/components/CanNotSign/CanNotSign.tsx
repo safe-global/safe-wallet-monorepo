@@ -1,18 +1,10 @@
 import React from 'react'
 import { Text, YStack } from 'tamagui'
-import { SelectSigner } from '@/src/components/SelectSigner'
-import { Address } from '@/src/types/address'
 
-interface CanNotSignProps {
-  address: Address | undefined
-  txId: string
-}
-
-export function CanNotSign({ address, txId }: CanNotSignProps) {
+export function CanNotSign() {
   return (
-    <YStack gap="$4" padding="$2" alignItems="center" justifyContent="center" testID="can-not-sign-container">
-      {address && <SelectSigner address={address} txId={txId} />}
-      <Text fontSize="$4" fontWeight={400} width="70%" textAlign="center" color="$textSecondaryLight">
+    <YStack gap="$4" padding="$8" alignItems="center" justifyContent="center" testID="can-not-sign-container">
+      <Text fontSize="$4" fontWeight={400} width="100%" textAlign="center" color="$textSecondaryLight">
         Only signers of this safe can sign this transaction
       </Text>
     </YStack>

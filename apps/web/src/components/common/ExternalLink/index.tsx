@@ -21,7 +21,7 @@ const ExternalLink = ({
       sx={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: 0.2,
+        gap: 0.5,
         cursor: 'pointer',
       }}
     >

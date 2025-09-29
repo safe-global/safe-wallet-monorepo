@@ -8,10 +8,13 @@ import { DataTable } from '@/components/common/Table/DataTable'
 import { DataRow } from '@/components/common/Table/DataRow'
 import IframeIcon from '@/components/common/IframeIcon'
 
+// TODO: Check if additional rewards can actually appear for a withdraw/redeem
 const AdditionalRewards = ({ txInfo }: { txInfo: VaultRedeemTransactionInfo }) => {
+  if (!txInfo.additionalRewards[0]) return null
+
   const additionalRewardsClaimable = Number(txInfo.additionalRewards[0].claimable) > 0
 
-  if (!additionalRewardsClaimable || !txInfo.additionalRewards[0]) return null
+  if (!additionalRewardsClaimable) return null
 
   return (
     <Stack sx={{ border: '1px solid #ddd', borderRadius: '6px', padding: '12px', mt: 1 }}>
@@ -25,7 +28,7 @@ const AdditionalRewards = ({ txInfo }: { txInfo: VaultRedeemTransactionInfo }) =
             </Typography>
           </DataRow>,
 
-          <DataRow key="Reward rate" title="Reward rate">
+          <DataRow key="Earn" title="Earn">
             {formatPercentage(txInfo.additionalRewardsNrr / 100)}
           </DataRow>,
 
@@ -125,13 +128,24 @@ const VaultRedeemConfirmation = ({
   txInfo: VaultRedeemTransactionInfo
   isTxDetails?: boolean
 }) => {
-  const totalNrr = (txInfo.baseNrr + txInfo.additionalRewardsNrr) / 100
-
   return (
     <>
       <DataTable
         rows={[
           <>{!isTxDetails && <ConfirmationHeader txInfo={txInfo} />}</>,
+
+          <>
+            {isTxDetails && (
+              <DataRow key="Current reward" title="Current reward">
+                <TokenAmount
+                  value={txInfo.currentReward}
+                  tokenSymbol={txInfo.tokenInfo.symbol}
+                  decimals={txInfo.tokenInfo.decimals}
+                  logoUri={txInfo.tokenInfo.logoUri ?? undefined}
+                />
+              </DataRow>
+            )}
+          </>,
 
           <DataRow key="Withdraw from" title="Withdraw from">
             <Stack direction="row" alignItems="center">
@@ -140,10 +154,6 @@ const VaultRedeemConfirmation = ({
                 {txInfo.vaultInfo.name}
               </Typography>
             </Stack>
-          </DataRow>,
-
-          <DataRow key="Reward rate" title="Reward rate">
-            {formatPercentage(totalNrr)}
           </DataRow>,
 
           <AdditionalRewards key="Additional rewards" txInfo={txInfo} />,

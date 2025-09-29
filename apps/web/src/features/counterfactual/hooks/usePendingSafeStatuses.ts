@@ -9,11 +9,16 @@ import {
   selectUndeployedSafes,
   updateUndeployedSafeStatus,
 } from '@/features/counterfactual/store/undeployedSafesSlice'
-import { checkSafeActionViaRelay, checkSafeActivation } from '@/features/counterfactual/utils'
+import {
+  checkSafeActionViaRelay,
+  checkSafeActivation,
+  extractCounterfactualSafeSetup,
+} from '@/features/counterfactual/utils'
 import useChainId from '@/hooks/useChainId'
+import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
+import { CREATE_SAFE_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { useEffect, useRef } from 'react'
 import { isSmartContract } from '@/utils/wallets'
@@ -84,6 +89,8 @@ const usePendingSafeStatus = (): void => {
   const { safe, safeAddress } = useSafeInfo()
   const chainId = useChainId()
   const provider = useWeb3ReadOnly()
+  const chain = useCurrentChain()
+  const undeployedSafes = useAppSelector(selectUndeployedSafes)
 
   usePendingSafeMonitor()
 
@@ -116,11 +123,46 @@ const usePendingSafeStatus = (): void => {
           gtmSetSafeAddress(detail.safeAddress)
 
           // TODO: Possible to add a label with_tx, without_tx?
-          trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE)
 
-          // Not a counterfactual deployment
-          if ('type' in detail && detail.type === PayMethod.PayNow) {
-            trackEvent(CREATE_SAFE_EVENTS.CREATED_SAFE)
+          const undeployedSafe = undeployedSafes[creationChainId]?.[detail.safeAddress]
+          const isCounterfactual = 'type' in detail && detail.type === PayMethod.PayLater
+          const isRelayed = undeployedSafe?.status.status === PendingSafeStatus.RELAYING
+
+          if (undeployedSafe && isCounterfactual) {
+            // Counterfactual deployment activation
+            const safeSetup = extractCounterfactualSafeSetup(undeployedSafe, creationChainId)
+            if (safeSetup) {
+              trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE, {
+                [MixpanelEventParams.SAFE_ADDRESS]: detail.safeAddress,
+                [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chain?.chainName || '',
+                [MixpanelEventParams.NUMBER_OF_OWNERS]: safeSetup.owners.length,
+                [MixpanelEventParams.THRESHOLD]: safeSetup.threshold,
+                [MixpanelEventParams.ENTRY_POINT]: 'Counterfactual Activation',
+                [MixpanelEventParams.DEPLOYMENT_TYPE]: 'Counterfactual',
+                [MixpanelEventParams.PAYMENT_METHOD]: isRelayed ? 'Sponsored' : 'Self-paid',
+              })
+            } else {
+              trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE)
+            }
+          } else if (undeployedSafe && !isCounterfactual) {
+            // Direct deployment activation
+            const safeSetup = extractCounterfactualSafeSetup(undeployedSafe, creationChainId)
+            if (safeSetup) {
+              trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE, {
+                [MixpanelEventParams.SAFE_ADDRESS]: detail.safeAddress,
+                [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chain?.chainName || '',
+                [MixpanelEventParams.NUMBER_OF_OWNERS]: safeSetup.owners.length,
+                [MixpanelEventParams.THRESHOLD]: safeSetup.threshold,
+                [MixpanelEventParams.ENTRY_POINT]: 'Direct',
+                [MixpanelEventParams.DEPLOYMENT_TYPE]: 'Direct',
+                [MixpanelEventParams.PAYMENT_METHOD]: isRelayed ? 'Sponsored' : 'Self-paid',
+              })
+            } else {
+              trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE)
+            }
+          } else {
+            // Fallback for cases without undeployedSafe
+            trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE)
           }
 
           pollSafeInfo(creationChainId, detail.safeAddress).finally(() => {
@@ -172,7 +214,7 @@ const usePendingSafeStatus = (): void => {
     return () => {
       unsubFns.forEach((unsub) => unsub())
     }
-  }, [chainId, dispatch, provider])
+  }, [chainId, dispatch, provider, chain?.chainName, undeployedSafes])
 }
 
 export default usePendingSafeStatus

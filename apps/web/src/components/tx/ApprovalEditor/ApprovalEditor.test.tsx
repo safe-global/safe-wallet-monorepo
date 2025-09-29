@@ -1,7 +1,7 @@
 import { safeSignatureBuilder, safeTxBuilder } from '@/tests/builders/safeTx'
 import { act, fireEvent, getAllByTitle, render, waitFor } from '@/tests/test-utils'
 import ApprovalEditor from '.'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { TransactionTokenType as TokenType } from '@safe-global/store/gateway/types'
 import { OperationType } from '@safe-global/types-kit'
 import * as approvalInfos from '@/components/tx/ApprovalEditor/hooks/useApprovalInfos'
 import { createMockSafeTransaction } from '@/tests/transactions'
@@ -16,12 +16,6 @@ jest.mock('@/services/tx/tx-sender/sdk', () => ({
   getAndValidateSafeSDK: jest.fn().mockReturnValue({
     createTransaction: jest.fn(),
   }),
-}))
-
-jest.mock('@safe-global/safe-gateway-typescript-sdk', () => ({
-  ...jest.requireActual('@safe-global/safe-gateway-typescript-sdk'),
-  getContract: jest.fn(() => undefined),
-  __esModule: true,
 }))
 
 const ERC20_INTERFACE = ERC20__factory.createInterface()
@@ -188,6 +182,7 @@ describe('ApprovalEditor', () => {
         balances: {
           data: mockBalances,
           loading: false,
+          loaded: true,
         },
       },
     })
@@ -298,6 +293,7 @@ describe('ApprovalEditor', () => {
         balances: {
           data: mockBalances,
           loading: false,
+          loaded: true,
         },
       },
     })

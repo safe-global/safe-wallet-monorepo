@@ -11,10 +11,9 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
 import { getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import { useAppDispatch } from '@/store'
-import { useAddProposerMutation } from '@/store/api/gateway'
 import { showNotification } from '@/store/notificationsSlice'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { addressIsNotCurrentSafe } from '@safe-global/utils/utils/validation'
+import { addressIsNotCurrentSafe, addressIsNotOwner } from '@safe-global/utils/utils/validation'
 import { isEthSignWallet } from '@/utils/wallets'
 import { Close } from '@mui/icons-material'
 import {
@@ -30,9 +29,15 @@ import {
   IconButton,
   Typography,
 } from '@mui/material'
-import type { Delegate } from '@safe-global/safe-gateway-typescript-sdk/dist/types/delegates'
-import { type BaseSyntheticEvent, useState } from 'react'
-import { FormProvider, useForm } from 'react-hook-form'
+import {
+  useDelegatesPostDelegateV1Mutation,
+  useDelegatesPostDelegateV2Mutation,
+  type CreateDelegateDto,
+  type Delegate,
+} from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
+import { type BaseSyntheticEvent, useCallback, useMemo, useState } from 'react'
+import { FormProvider, useForm, type Validate } from 'react-hook-form'
+import useSafeInfo from '@/hooks/useSafeInfo'
 
 type UpsertProposerProps = {
   onClose: () => void
@@ -53,12 +58,14 @@ type ProposerEntry = {
 const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) => {
   const [error, setError] = useState<Error>()
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [addProposer] = useAddProposerMutation()
+  const [addDelegateV1] = useDelegatesPostDelegateV1Mutation()
+  const [addDelegateV2] = useDelegatesPostDelegateV2Mutation()
   const dispatch = useAppDispatch()
 
   const chainId = useChainId()
   const wallet = useWallet()
   const safeAddress = useSafeAddress()
+  const { safe } = useSafeInfo()
 
   const methods = useForm<ProposerEntry>({
     defaultValues: {
@@ -68,7 +75,14 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
     mode: 'onChange',
   })
 
-  const notCurrentSafe = addressIsNotCurrentSafe(safeAddress, 'Cannot add Safe Account itself as proposer')
+  const safeOwnerAddresses = useMemo(() => safe.owners.map((owner) => owner.value), [safe.owners])
+
+  const validateAddress = useCallback<Validate<string>>(
+    (value) =>
+      addressIsNotCurrentSafe(safeAddress, 'Cannot add Safe Account itself as proposer')(value) ??
+      addressIsNotOwner(safeOwnerAddresses, 'Cannot add Safe Owner as proposer')(value),
+    [safeAddress, safeOwnerAddresses],
+  )
 
   const { handleSubmit, formState } = methods
 
@@ -85,15 +99,19 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
         ? await signProposerData(data.address, signer)
         : await signProposerTypedData(chainId, data.address, signer)
 
-      await addProposer({
-        chainId,
-        delegator: wallet.address,
-        signature,
-        label: data.name,
+      const createDelegateDto: CreateDelegateDto = {
         delegate: data.address,
-        safeAddress,
-        shouldEthSign,
-      })
+        delegator: wallet.address,
+        label: data.name,
+        signature,
+        safe: safeAddress,
+      }
+
+      if (shouldEthSign) {
+        await addDelegateV1({ chainId, createDelegateDto }).unwrap()
+      } else {
+        await addDelegateV2({ chainId, createDelegateDto }).unwrap()
+      }
 
       trackEvent(
         isEditing ? SETTINGS_EVENTS.PROPOSERS.SUBMIT_EDIT_PROPOSER : SETTINGS_EVENTS.PROPOSERS.SUBMIT_ADD_PROPOSER,
@@ -107,14 +125,14 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
           message: `${shortenAddress(data.address)} can now suggest transactions for this account.`,
         }),
       )
+
+      onSuccess()
     } catch (error) {
-      setIsLoading(false)
       setError(error as Error)
       return
+    } finally {
+      setIsLoading(false)
     }
-
-    setIsLoading(false)
-    onSuccess()
   })
 
   const onSubmit = (e: BaseSyntheticEvent) => {
@@ -171,7 +189,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
                 <AddressBookInput
                   name="address"
                   label="Address"
-                  validate={notCurrentSafe}
+                  validate={validateAddress}
                   variant="outlined"
                   fullWidth
                   required

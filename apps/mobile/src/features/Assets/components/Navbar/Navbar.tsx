@@ -2,7 +2,9 @@ import React from 'react'
 import { View, Pressable } from 'react-native'
 import { Theme, XStack, getTokenValue } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { IdenticonWithBadge } from '@/src/features/Settings/components/IdenticonWithBadge'
+import { Identicon } from '@/src/components/Identicon'
+import { BadgeWrapper } from '@/src/components/BadgeWrapper'
+import { ThresholdBadge } from '@/src/components/ThresholdBadge'
 
 import { shortenAddress } from '@/src/utils/formatters'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -52,34 +54,41 @@ export const Navbar = () => {
           label={contact ? contact.name : shortenAddress(activeSafe.address)}
           labelProps={dropdownLabelProps}
           leftNode={
-            <IdenticonWithBadge
-              testID="threshold-info-badge"
-              variant="sm"
-              size={40}
-              fontSize={10}
-              address={activeSafe.address}
-              badgeContent={`${chainSafe?.threshold}/${chainSafe?.owners.length}`}
-            />
+            <BadgeWrapper
+              badge={
+                <ThresholdBadge
+                  threshold={chainSafe?.threshold ?? 0}
+                  ownersCount={chainSafe?.owners.length ?? 0}
+                  size={18}
+                  fontSize={8}
+                  isLoading={!chainSafe}
+                  testID="threshold-info-badge"
+                />
+              }
+              testID="threshold-info-badge-wrapper"
+            >
+              <Identicon address={activeSafe.address} size={30} />
+            </BadgeWrapper>
           }
-          // leftNode={<Identicon address={activeSafe.address} size={30} />}
           onPress={() => {
             router.push('/accounts-sheet')
           }}
+          hitSlop={4}
         />
         <View
           style={{
             flexDirection: 'row',
-            gap: 12,
+            gap: 18,
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
           <Link href={'/share'} asChild>
-            <Pressable hitSlop={{ top: 20, bottom: 20, left: 20 }}>
+            <Pressable hitSlop={10}>
               <SafeFontIcon name="qr-code-1" size={16} />
             </Pressable>
           </Link>
-          <Pressable onPressIn={handleNotificationAccess} hitSlop={{ top: 20, bottom: 20, right: 20 }}>
+          <Pressable onPressIn={handleNotificationAccess} hitSlop={8}>
             <SafeFontIcon name="bell" size={20} />
           </Pressable>
         </View>

@@ -32,10 +32,10 @@ export function ImportSuccess() {
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <View flex={1} flexGrow={1} alignItems="center" justifyContent="center" paddingHorizontal="$3">
             <Badge
-              circleProps={{ backgroundColor: '$success' }}
+              circleProps={{ backgroundColor: '$backgroundLightLight' }}
               themeName="badge_success"
               circleSize={64}
-              content={<SafeFontIcon size={32} color="$primary" name="check-filled" />}
+              content={<SafeFontIcon size={32} color="$success" name="check-filled" />}
             />
 
             <View margin="$10" width="100%" alignItems="center" gap="$4">

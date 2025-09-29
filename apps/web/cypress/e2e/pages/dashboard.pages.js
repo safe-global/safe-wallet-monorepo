@@ -6,18 +6,17 @@ import staticSafes from '../../fixtures/safes/static.json'
 
 const transactionQueueStr = 'Pending transactions'
 const noTransactionStr = 'This Safe has no queued transactions'
-const overviewStr = 'Total asset value'
+const overviewStr = 'Total'
 const sendStr = 'Send'
 const receiveStr = 'Receive'
 const viewAllStr = 'View all'
-const safeAppStr = 'Safe Apps'
-const exploreSafeApps = 'Explore Safe Apps'
+const safeAppStr = 'Featured Apps'
+const oneInchSafeApp = '1inch Network'
 export const copiedAppUrl = 'share/safe-app?appUrl'
 
 const copyShareBtn = '[data-testid="copy-btn-icon"]'
 const exploreAppsBtn = '[data-testid="explore-apps-btn"]'
 const viewAllLink = '[data-testid="view-all-link"][href^="/transactions/queue"]'
-const noTxIcon = '[data-testid="no-tx-icon"]'
 const noTxText = '[data-testid="no-tx-text"]'
 export const pendingTxWidget = '[data-testid="pending-tx-widget"]'
 export const pendingTxItem = '[data-testid="tx-pending-item"]'
@@ -55,7 +54,7 @@ export function verifyTxItemInPendingTx(data) {
 }
 
 export function verifyEmptyTxSection() {
-  main.verifyElementsIsVisible([noTxIcon, noTxText])
+  main.verifyElementsIsVisible([noTxText])
 }
 
 export function clickOnViewAllBtn() {
@@ -117,7 +116,7 @@ export function verifyOverviewWidgetData() {
 
 export function verifyTxQueueWidget() {
   // Alias for the Transaction queue section
-  cy.contains('h2', transactionQueueStr).parents('section').as('txQueueSection')
+  cy.contains('p', transactionQueueStr).parents('section').as('txQueueSection')
 
   cy.get('@txQueueSection').within(() => {
     // There should be queued transactions
@@ -126,8 +125,10 @@ export function verifyTxQueueWidget() {
     // Queued txns
     cy.contains(
       `a[href^="/transactions/tx?id=multisig_0x"]`,
-      '14' + 'Send' + `-0.00002 ${constants.tokenAbbreviation.sep}` + '1 out of 1',
+      'Send' + `-0.00002 ${constants.tokenAbbreviation.sep}`,
     ).should('exist')
+
+    cy.contains(`a[href^="/transactions/tx?id=multisig_0x"]`, '1 out of 1').should('exist')
 
     cy.contains(
       `a[href="${constants.transactionQueueUrl}${encodeURIComponent(staticSafes.SEP_STATIC_SAFE_2)}"]`,
@@ -137,6 +138,6 @@ export function verifyTxQueueWidget() {
 }
 
 export function verifySafeAppsSection() {
-  cy.contains('h2', safeAppStr).parents('section').as('safeAppsSection')
-  cy.get('@safeAppsSection').contains(exploreSafeApps)
+  cy.contains('p', safeAppStr).parents('section').as('safeAppsSection')
+  cy.get('@safeAppsSection').contains(oneInchSafeApp)
 }

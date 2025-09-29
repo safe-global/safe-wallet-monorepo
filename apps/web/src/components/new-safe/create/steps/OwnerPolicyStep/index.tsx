@@ -110,7 +110,7 @@ const OwnerPolicyStep = ({
             />
           ))}
           <Button
-            data-testid="add-owner-btn"
+            data-testid="add-new-signer"
             variant="text"
             onClick={() => appendOwner({ name: '', address: '' }, { shouldFocus: true })}
             startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}

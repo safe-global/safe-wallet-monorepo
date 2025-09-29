@@ -91,11 +91,18 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
 
   const urlEnd = typeof args === 'string' ? args : args.url
   const adjustedUrl = `${resolvedBaseUrl}${urlEnd}`
-  const shouldIncludeCredentials = isCredentialRoute(urlEnd)
+
+  // Check for credential override in extraOptions (this is where RTK Query passes the options)
+  const forceOmitCredentials =
+    extraOptions && typeof extraOptions === 'object' && 'forceOmitCredentials' in extraOptions
+      ? (extraOptions as any).forceOmitCredentials
+      : false
+
+  const shouldIncludeCredentials = !forceOmitCredentials && isCredentialRoute(urlEnd)
+
   const adjustedArgs = {
     ...(typeof args === 'string' ? { method: 'GET' } : args),
     url: adjustedUrl,
-    // Conditionally set credentials based on your pattern, e.g. if URL starts with /auth
     credentials: shouldIncludeCredentials ? ('include' as RequestCredentials) : ('omit' as RequestCredentials),
   }
 

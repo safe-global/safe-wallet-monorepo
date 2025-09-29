@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { View, YStack } from 'tamagui'
+import { YStack } from 'tamagui'
 import { TransactionHeader } from '../../TransactionHeader'
 import { ListTable } from '../../ListTable'
 import { formatContractItems } from './utils'
@@ -8,12 +8,9 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { RootState } from '@/src/store'
 import { selectChainById } from '@/src/store/chains'
 import { useAppSelector } from '@/src/store/hooks'
-import { SafeListItem } from '@/src/components/SafeListItem'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { Badge } from '@/src/components/Badge'
-import { ParametersButton } from '../../ParametersButton'
-import { router } from 'expo-router'
+import { ParametersButton } from '@/src/components/ParametersButton'
 import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
+import { ActionsRow } from '@/src/components/ActionsRow'
 
 interface ContractProps {
   txInfo: CustomTransactionInfo
@@ -27,13 +24,6 @@ export function Contract({ txInfo, executionInfo, txId }: ContractProps) {
   const viewOnExplorer = useOpenExplorer(txInfo.to.value)
 
   const items = useMemo(() => formatContractItems(txInfo, chain, viewOnExplorer), [txInfo, chain, viewOnExplorer])
-
-  const handleViewActions = () => {
-    router.push({
-      pathname: '/transaction-actions',
-      params: { txId },
-    })
-  }
 
   return (
     <YStack gap="$4">
@@ -50,19 +40,7 @@ export function Contract({ txInfo, executionInfo, txId }: ContractProps) {
         <ParametersButton txId={txId} />
       </ListTable>
 
-      {txInfo.actionCount && (
-        <SafeListItem
-          label="Actions"
-          rightNode={
-            <View flexDirection="row" alignItems="center" gap="$2">
-              <Badge themeName="badge_background_inverted" content={txInfo.actionCount.toString()} />
-
-              <SafeFontIcon name={'chevron-right'} />
-            </View>
-          }
-          onPress={handleViewActions}
-        />
-      )}
+      <ActionsRow txId={txId} actionCount={txInfo.actionCount} />
     </YStack>
   )
 }

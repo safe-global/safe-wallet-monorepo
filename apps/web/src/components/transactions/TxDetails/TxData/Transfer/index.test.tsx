@@ -15,8 +15,10 @@ jest.mock('@/hooks/useChains', () => ({
   useChainId: () => '1',
   useChain: () => chainBuilder().with({ chainId: '1' }).build(),
   useCurrentChain: () => chainBuilder().with({ chainId: '1' }).build(),
+  useHasFeature: () => false,
   default: () => ({
     loading: false,
+    loaded: true,
     error: undefined,
     configs: [chainBuilder().with({ chainId: '1' }).build()],
   }),

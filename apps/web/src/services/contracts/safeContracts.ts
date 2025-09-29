@@ -13,8 +13,6 @@ import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { getSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import semver from 'semver'
-import { getSafeMigrationDeployment } from '@safe-global/safe-deployments'
-import { SAFE_TO_L2_MIGRATION_VERSION } from '@/utils/safe-migrations'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import { _getValidatedGetContractProps } from '@safe-global/utils/services/contracts/safeContracts'
 
@@ -122,15 +120,4 @@ export const getReadOnlySignMessageLibContract = async (safeVersion: SafeState['
   const safeProvider = safeSDK.getSafeProvider()
 
   return getSignMessageLibContractInstance(_getValidatedGetContractProps(safeVersion).safeVersion, safeProvider)
-}
-
-export const isMigrationToL2Possible = (safe: SafeState): boolean => {
-  return (
-    safe.nonce === 0 &&
-    Boolean(
-      getSafeMigrationDeployment({ network: safe.chainId, version: SAFE_TO_L2_MIGRATION_VERSION })?.networkAddresses[
-        safe.chainId
-      ],
-    )
-  )
 }

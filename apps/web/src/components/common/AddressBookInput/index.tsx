@@ -2,7 +2,6 @@ import { type ReactElement, useState, useMemo } from 'react'
 import { Controller, useFormContext, useWatch } from 'react-hook-form'
 import { SvgIcon, Typography } from '@mui/material'
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete'
-import useAddressBook from '@/hooks/useAddressBook'
 import AddressInput, { type AddressInputProps } from '../AddressInput'
 import EthHashInfo from '../EthHashInfo'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -11,6 +10,7 @@ import css from './styles.module.css'
 import inputCss from '@/styles/inputs.module.css'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 
 const abFilterOptions = createFilterOptions({
   stringify: (option: { label: string; name: string }) => option.name + ' ' + option.label,
@@ -20,25 +20,30 @@ const abFilterOptions = createFilterOptions({
  *  Temporary component until revamped safe components are done
  */
 const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canAdd?: boolean }): ReactElement => {
-  const addressBook = useAddressBook()
-  const { setValue, control } = useFormContext()
-  const addressValue = useWatch({ name, control })
   const [open, setOpen] = useState(false)
   const [openAddressBook, setOpenAddressBook] = useState<boolean>(false)
+  const mergedAddressBook = useMergedAddressBooks()
 
-  const addressBookEntries = Object.entries(addressBook).map(([address, name]) => ({
-    label: address,
-    name,
-  }))
+  const { setValue, control } = useFormContext()
+  const addressValue = useWatch({ name, control })
+
+  const allAddressBookEntries = useMemo(
+    () =>
+      mergedAddressBook.list.map((entry) => ({
+        label: entry.address,
+        name: entry.name,
+      })),
+    [mergedAddressBook],
+  )
 
   const hasVisibleOptions = useMemo(
-    () => !!addressBookEntries.filter((entry) => entry.label.includes(addressValue)).length,
-    [addressBookEntries, addressValue],
+    () => !!allAddressBookEntries.filter((entry) => entry.label.includes(addressValue)).length,
+    [allAddressBookEntries, addressValue],
   )
 
   const isInAddressBook = useMemo(
-    () => addressBookEntries.some((entry) => sameAddress(entry.label, addressValue)),
-    [addressBookEntries, addressValue],
+    () => allAddressBookEntries.some((entry) => sameAddress(entry.label, addressValue)),
+    [allAddressBookEntries, addressValue],
   )
 
   const customFilterOptions = (options: any, state: any) => {
@@ -71,7 +76,7 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
             disabled={props.disabled}
             readOnly={props.InputProps?.readOnly}
             freeSolo
-            options={addressBookEntries}
+            options={allAddressBookEntries}
             onChange={(_, value) => (typeof value === 'string' ? field.onChange(value) : field.onChange(value.label))}
             onInputChange={(_, value) => setValue(name, value)}
             filterOptions={customFilterOptions}

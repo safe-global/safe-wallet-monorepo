@@ -28,6 +28,7 @@ declare module '@mui/material/styles' {
   export interface TypeBackground {
     main: string
     light: string
+    lightGrey: string
   }
 
   // Custom color properties
@@ -54,6 +55,8 @@ declare module '@mui/material/Button' {
 
   export interface ButtonPropsColorOverrides {
     background: true
+    static: true
+    'background.paper': true
   }
 
   export interface ButtonPropsVariantOverrides {
@@ -64,6 +67,18 @@ declare module '@mui/material/Button' {
 declare module '@mui/material/IconButton' {
   export interface IconButtonPropsColorOverrides {
     border: true
+  }
+}
+
+declare module '@mui/material/Chip' {
+  export interface ChipPropsSizeOverrides {
+    tiny: true
+  }
+}
+
+declare module '@mui/material/Alert' {
+  export interface AlertPropsColorOverrides {
+    background: true
   }
 }
 
@@ -104,7 +119,7 @@ const createSafeTheme = (mode: PaletteMode): Theme => {
           {
             props: { size: 'compact' },
             style: {
-              padding: '8px 12px',
+              padding: '8px 16px',
             },
           },
           {
@@ -112,6 +127,27 @@ const createSafeTheme = (mode: PaletteMode): Theme => {
             style: {
               padding: '12px 48px',
             },
+          },
+          {
+            props: { color: 'background.paper' },
+            style: ({ theme }) => ({
+              backgroundColor: theme.palette.background.paper,
+              color: theme.palette.text.primary,
+              '&:hover': {
+                backgroundColor: theme.palette.background.main,
+              },
+            }),
+          },
+
+          {
+            props: { color: 'background' },
+            style: ({ theme }) => ({
+              backgroundColor: theme.palette.background.main,
+              color: theme.palette.text.primary,
+              '&:hover': {
+                backgroundColor: theme.palette.background.lightGrey,
+              },
+            }),
           },
           {
             props: { variant: 'danger' },
@@ -292,6 +328,16 @@ const createSafeTheme = (mode: PaletteMode): Theme => {
             backgroundColor: theme.palette.secondary.light,
             height: '24px',
           }),
+          //@ts-ignore this is not detected even though it is declared above
+          sizeTiny: {
+            fontSize: '11px',
+            height: 'auto',
+            lineHeight: '16px',
+
+            '& .MuiChip-label': {
+              padding: '2px 4px',
+            },
+          },
         },
       },
       MuiAlert: {
@@ -326,6 +372,15 @@ const createSafeTheme = (mode: PaletteMode): Theme => {
             },
             '&.MuiPaper-root': {
               backgroundColor: theme.palette.warning.background,
+            },
+          }),
+          // @ts-ignore
+          standardBackground: ({ theme }) => ({
+            '& .MuiAlert-icon': {
+              color: theme.palette.text.primary,
+            },
+            '&.MuiPaper-root': {
+              backgroundColor: theme.palette.background.main,
             },
           }),
           root: ({ theme }) => ({

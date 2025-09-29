@@ -1,10 +1,10 @@
-import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { Signer } from '@/src/store/signersSlice'
 
 export interface SafeInfo {
   address: Address
   chainId: string
 }
 
-export type SignerInfo = AddressInfo
+export type SignerInfo = Signer
 
 export type Address = `0x${string}`

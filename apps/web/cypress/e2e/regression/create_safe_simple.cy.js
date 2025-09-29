@@ -125,6 +125,7 @@ describe('Safe creation tests', () => {
         cy.reload()
         createwallet.waitForConnectionMsgDisappear()
         createwallet.selectMultiNetwork(1, constants.networks.sepolia.toLowerCase())
+        createwallet.clickOnYourSafeAccountPreview()
         createwallet.clickOnNextBtn()
         createwallet.clickOnAddNewOwnerBtn()
         createwallet.clickOnSignerAddressInput(1)

@@ -65,7 +65,7 @@ export const currentSafeSection = '[data-testid="current-safe-section"]'
 const readOnlyChip = '[data-testid="read-only-chip"]'
 const addSafeBtn = '[data-testid="add-safe-button"]'
 const indexStatusSection = '[data-testid="index-status"]'
-const needHelpBtn = '[data-testid="need-help-btn"]'
+const needHelpBtn = '[data-testid="list-item-need-help"]'
 const openNestedSafeListBtn = '[data-track="nested-safes: Open nested Safe list"]'
 const nestedSafeListPopover = '[data-testid="nested-safe-list"]'
 const breadcrumpContainer = '[data-testid="safe-breadcrumb-container"]'
@@ -176,7 +176,7 @@ export function checkSearchResults(number) {
 }
 
 export function checkNeedHelpBtnLink() {
-  cy.get(needHelpBtn).find('a').should('have.attr', 'href', needHelpLink)
+  cy.get(needHelpBtn).should('have.attr', 'href', needHelpLink)
 }
 
 export const multichainSafes = {
@@ -234,9 +234,7 @@ export function verifyCurrentSafeReadOnly(number) {
 }
 
 export function verifyIndexStatusPresent() {
-  cy.get(indexStatusSection).within(() => {
-    cy.get('a').should('have.attr', 'href', constants.indexStatusUrl)
-  })
+  cy.get(indexStatusSection).should('have.attr', 'href', constants.indexStatusUrl)
 }
 
 export function clickOnAddSafeBtn() {

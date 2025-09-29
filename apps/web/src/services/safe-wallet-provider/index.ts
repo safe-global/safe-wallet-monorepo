@@ -18,10 +18,11 @@ type Capability = {
 }
 
 type SendCallsParams = {
-  version: '1.0'
+  version: string
   id?: string
   from?: `0x${string}`
   chainId: `0x${string}`
+  atomicRequired: boolean
   calls: Array<{
     to?: `0x${string}`
     data?: `0x${string}`
@@ -43,6 +44,7 @@ type GetCallsResult = {
   id: `0x${string}`
   chainId: `0x${string}`
   status: number // See "Status Codes"
+  atomic: boolean
   receipts?: Array<{
     logs: TransactionReceipt['logs']
     status: `0x${string}` // Hex 1 or 0 for success or failure, respectively
@@ -412,10 +414,11 @@ export class SafeWalletProvider {
     }
 
     const result: GetCallsResult = {
-      version: '1.0',
+      version: '2.0.0',
       id: safeTxHash,
       chainId: numberToHex(this.safe.chainId),
       status: BundleTxStatuses[tx.txStatus],
+      atomic: true,
     }
 
     if (!tx.txHash) {
@@ -457,6 +460,9 @@ export class SafeWalletProvider {
         [`0x${this.safe.chainId.toString(16)}`]: {
           atomicBatch: {
             supported: true,
+          },
+          atomic: {
+            status: 'supported',
           },
         },
       }

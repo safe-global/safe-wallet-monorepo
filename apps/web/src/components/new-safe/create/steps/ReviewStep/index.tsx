@@ -6,7 +6,6 @@ import { getTotalFeeFormatted } from '@/hooks/useGasPrice'
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NewSafeFormData } from '@/components/new-safe/create'
 import {
-  computeNewSafeAddress,
   createNewSafe,
   createNewUndeployedSafeWithoutSalt,
   relaySafeCreation,
@@ -27,7 +26,13 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useLeastRemainingRelays } from '@/hooks/useRemainingRelays'
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import useWallet from '@/hooks/wallets/useWallet'
-import { CREATE_SAFE_CATEGORY, CREATE_SAFE_EVENTS, OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
+import {
+  CREATE_SAFE_CATEGORY,
+  CREATE_SAFE_EVENTS,
+  OVERVIEW_EVENTS,
+  trackEvent,
+  MixpanelEventParams,
+} from '@/services/analytics'
 import { gtmSetChainId, gtmSetSafeAddress } from '@/services/analytics/gtm'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -47,9 +52,8 @@ import { selectRpc } from '@/store/settingsSlice'
 import { AppRoutes } from '@/config/routes'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
-import { createWeb3ReadOnly, getRpcServiceUrl } from '@/hooks/wallets/web3'
+import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { updateAddressBook } from '../../logic/address-book'
-import chains from '@/config/chains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { type TransactionOptions } from '@safe-global/types-kit'
@@ -239,24 +243,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
       const provider = createWeb3ReadOnly(chain, customRpcUrl)
       if (!provider) return
 
-      let safeAddress: string
-
-      // FIXME a new check to indicate ZKsync chain will be added to the config service and available under ChainInfo
-      if (chain.chainId === chains['zksync'] || chain.chainId === chains['lens']) {
-        safeAddress = await computeNewSafeAddress(
-          customRpcUrl || getRpcServiceUrl(chain.rpcUri),
-          {
-            safeAccountConfig: replayedSafeWithNonce.safeAccountConfig,
-            safeDeploymentConfig: {
-              saltNonce: nextAvailableNonce,
-              safeVersion: replayedSafeWithNonce.safeVersion,
-            },
-          },
-          chain,
-        )
-      } else {
-        safeAddress = await predictAddressBasedOnReplayData(replayedSafeWithNonce, provider)
-      }
+      const safeAddress = await predictAddressBasedOnReplayData(replayedSafeWithNonce, provider)
 
       for (const network of data.networks) {
         await createSafe(network, replayedSafeWithNonce, safeAddress)
@@ -299,13 +286,29 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
     gtmSetChainId(chain.chainId)
 
+    trackEvent(CREATE_SAFE_EVENTS.CREATED_SAFE, {
+      [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+      [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chain.chainName,
+      [MixpanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
+      [MixpanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
+      [MixpanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
+      [MixpanelEventParams.DEPLOYMENT_TYPE]:
+        isCounterfactualEnabled && payMethod === PayMethod.PayLater ? 'Counterfactual' : 'Direct',
+      [MixpanelEventParams.PAYMENT_METHOD]:
+        isCounterfactualEnabled && payMethod === PayMethod.PayLater
+          ? 'Pay-later'
+          : willRelay
+            ? 'Sponsored'
+            : 'Self-paid',
+    })
+
     try {
       if (isCounterfactualEnabled && payMethod === PayMethod.PayLater) {
         gtmSetSafeAddress(safeAddress)
 
         trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
         replayCounterfactualSafeDeployment(chain.chainId, safeAddress, props, data.name, dispatch, payMethod)
-        trackEvent({ ...CREATE_SAFE_EVENTS.CREATED_SAFE, label: 'counterfactual' })
+
         return
       }
 

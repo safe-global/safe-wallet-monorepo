@@ -1,7 +1,7 @@
 import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
 import type { SafeListProps } from '@/features/myAccounts/components/SafesList'
 import SpaceSafeContextMenu from '@/features/spaces/components/SafeAccounts/SpaceSafeContextMenu'
-import { type SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useMemo, useRef } from 'react'
 import { ListItemButton, Box, Typography, IconButton, SvgIcon, Skeleton, useTheme, useMediaQuery } from '@mui/material'
 import Link from 'next/link'
@@ -177,6 +177,7 @@ const SingleAccountItem = ({
           <EthHashInfo
             address={address}
             name={name}
+            showName={isSpaceSafe ? !!safeItem.name : true}
             shortAddress
             chainId={chain?.chainId}
             showAvatar={false}

@@ -1,18 +1,31 @@
-import type { VaultDepositTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { VaultDepositTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TokenAmount } from '@/src/components/TokenAmount'
 import { SafeListItem } from '@/src/components/SafeListItem'
-import { Logo } from '@/src/components/Logo'
+import { TokenIcon } from '@/src/components/TokenIcon'
+import { SafeListItemProps } from '@/src/components/SafeListItem/SafeListItem'
 
-export const VaultTxDepositCard = ({ info }: { info: VaultDepositTransactionInfo }) => {
+type VaultTxDepositCardProps = {
+  info: VaultDepositTransactionInfo
+} & Partial<SafeListItemProps>
+
+export const VaultTxDepositCard = ({ info, ...rest }: VaultTxDepositCardProps) => {
   return (
     <SafeListItem
       label={'Deposit'}
-      icon="transaction-stake"
+      icon="transaction-earn"
       type={'Earn'}
       rightNode={
         <TokenAmount value={info.value} tokenSymbol={info.tokenInfo.symbol} decimals={info.tokenInfo.decimals} />
       }
-      leftNode={<Logo logoUri={info.tokenInfo.logoUri} accessibilityLabel={info.tokenInfo.symbol} />}
+      leftNode={
+        <TokenIcon
+          logoUri={info.tokenInfo.logoUri}
+          accessibilityLabel={info.tokenInfo.symbol}
+          size="$8"
+          imageBackground="$background"
+        />
+      }
+      {...rest}
     />
   )
 }

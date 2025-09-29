@@ -72,7 +72,7 @@ function EntryDialog({
             <Box>
               <AddressInput
                 name="address"
-                label="Contact"
+                label="Address"
                 variant="outlined"
                 fullWidth
                 required

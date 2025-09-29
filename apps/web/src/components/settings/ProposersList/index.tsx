@@ -16,6 +16,9 @@ import ExternalLink from '@/components/common/ExternalLink'
 import React, { useMemo, useState } from 'react'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import { Tooltip } from '@mui/material'
+import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 
 const headCells = [
   {
@@ -31,11 +34,14 @@ const headCells = [
     label: '',
   },
 ]
+const SafeNotActivated = 'You need to activate the Safe before transacting'
 
 const ProposersList = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState<boolean>()
   const proposers = useProposers()
   const isEnabled = useHasFeature(FEATURES.PROPOSERS)
+  const { safe } = useSafeInfo()
+  const isUndeployedSafe = !safe.deployed
 
   const rows = useMemo(() => {
     if (!proposers.data) return []
@@ -46,7 +52,7 @@ const ProposersList = () => {
           proposer: {
             rawValue: proposer.delegate,
             content: (
-              <EthHashInfo
+              <NamedAddressInfo
                 address={proposer.delegate}
                 showCopyButton
                 hasExplorer
@@ -99,16 +105,20 @@ const ProposersList = () => {
                 <OnlyOwner>
                   {(isOk) => (
                     <Track {...SETTINGS_EVENTS.PROPOSERS.ADD_PROPOSER}>
-                      <Button
-                        data-testid="add-proposer-btn"
-                        onClick={onAdd}
-                        variant="text"
-                        startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
-                        disabled={!isOk}
-                        size="compact"
-                      >
-                        Add proposer
-                      </Button>
+                      <Tooltip title={isUndeployedSafe ? SafeNotActivated : ''}>
+                        <span>
+                          <Button
+                            data-testid="add-proposer-btn"
+                            onClick={onAdd}
+                            variant="text"
+                            startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
+                            disabled={!isOk || isUndeployedSafe}
+                            size="compact"
+                          >
+                            Add proposer
+                          </Button>
+                        </span>
+                      </Tooltip>
                     </Track>
                   )}
                 </OnlyOwner>

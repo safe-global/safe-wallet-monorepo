@@ -3,6 +3,7 @@ import type { RootState } from '@/store/index'
 
 export type Loadable<T> = {
   data: T
+  loaded: boolean
   loading: boolean
   error?: string
 }
@@ -12,6 +13,7 @@ export const makeLoadableSlice = <N extends string, T>(name: N, data: T) => {
 
   const initialState: SliceState = {
     data,
+    loaded: false,
     loading: false,
   }
 
@@ -22,6 +24,7 @@ export const makeLoadableSlice = <N extends string, T>(name: N, data: T) => {
       set: (_, { payload }: PayloadAction<Loadable<T | undefined>>): SliceState => ({
         ...payload,
         data: payload.data ?? initialState.data, // fallback to initialState.data
+        loaded: payload.data !== undefined,
       }),
     },
   })

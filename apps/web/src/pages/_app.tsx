@@ -49,6 +49,8 @@ import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
 import OutreachPopup from '@/features/targetedOutreach/components/OutreachPopup'
 import { GATEWAY_URL } from '@/config/gateway'
 import { useDatadog } from '@/services/datadog'
+import useMixpanel from '@/services/analytics/useMixpanel'
+import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 
 const reduxStore = makeStore()
 
@@ -59,6 +61,7 @@ const InitApp = (): null => {
   useAdjustUrl()
   useDatadog()
   useGtm()
+  useMixpanel()
   useNotificationTracking()
   useInitSession()
   useLoadableStores()
@@ -81,9 +84,12 @@ const InitApp = (): null => {
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache()
 
+const THEME_DARK = 'dark'
+const THEME_LIGHT = 'light'
+
 export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }) => {
   const isDarkMode = useDarkMode()
-  const themeMode = isDarkMode ? 'dark' : 'light'
+  const themeMode = isDarkMode ? THEME_DARK : THEME_LIGHT
 
   return (
     <SafeThemeProvider mode={themeMode}>
@@ -92,7 +98,9 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
           <SentryErrorBoundary showDialog fallback={ErrorBoundary}>
             <WalletProvider>
               <GeoblockingProvider>
-                <TxModalProvider>{children}</TxModalProvider>
+                <TxModalProvider>
+                  <AddressBookSourceProvider>{children}</AddressBookSourceProvider>
+                </TxModalProvider>
               </GeoblockingProvider>
             </WalletProvider>
           </SentryErrorBoundary>

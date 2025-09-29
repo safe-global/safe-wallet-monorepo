@@ -1,11 +1,29 @@
 import { faker } from '@faker-js/faker'
 import type { EIP1193Provider, OnboardAPI, WalletState } from '@web3-onboard/core'
-import { getConnectedWallet, switchWallet } from '../useOnboard'
+import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { getConnectedWallet, switchWallet, trackWalletType } from '../useOnboard'
 
 // mock wallets
 jest.mock('@/hooks/wallets/wallets', () => ({
   getDefaultWallets: jest.fn(() => []),
 }))
+
+// mock analytics
+jest.mock('@/services/analytics', () => ({
+  trackEvent: jest.fn(),
+  WALLET_EVENTS: {
+    CONNECT: { action: 'connect_wallet' },
+    WALLET_CONNECT: { action: 'wallet_connect' },
+  },
+  MixpanelEventParams: {
+    EOA_WALLET_LABEL: 'EOA Wallet Label',
+    EOA_WALLET_ADDRESS: 'EOA Wallet Address',
+    EOA_WALLET_NETWORK: 'EOA Wallet Network',
+  },
+}))
+
+// Import the mocked trackEvent
+const { trackEvent } = require('@/services/analytics')
 
 describe('useOnboard', () => {
   describe('getConnectedWallet', () => {
@@ -127,6 +145,100 @@ describe('useOnboard', () => {
 
       expect(mockOnboard.connectWallet).toBeCalled()
       expect(mockOnboard.disconnectWallet).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('trackWalletType', () => {
+    beforeEach(() => {
+      trackEvent.mockClear()
+    })
+
+    it('should track wallet connection with proper Mixpanel parameters', () => {
+      const wallet = {
+        label: 'MetaMask',
+        chainId: '1',
+        address: '0x1234567890123456789012345678901234567890',
+        provider: {} as any,
+      }
+
+      const configs = [
+        {
+          chainId: '1',
+          chainName: 'Ethereum',
+        },
+      ] as ChainInfo[]
+
+      trackWalletType(wallet, configs)
+
+      expect(trackEvent).toHaveBeenCalledWith(
+        { action: 'connect_wallet', label: 'MetaMask' },
+        {
+          'EOA Wallet Label': 'MetaMask',
+          'EOA Wallet Address': '0x1234567890123456789012345678901234567890',
+          'EOA Wallet Network': 'Ethereum',
+        },
+      )
+    })
+
+    it('should use fallback network name when chain not found', () => {
+      const wallet = {
+        label: 'MetaMask',
+        chainId: '999',
+        address: '0x1234567890123456789012345678901234567890',
+        provider: {} as any,
+      }
+
+      const configs = [
+        {
+          chainId: '1',
+          chainName: 'Ethereum',
+        },
+      ] as ChainInfo[]
+
+      trackWalletType(wallet, configs)
+
+      expect(trackEvent).toHaveBeenCalledWith(
+        { action: 'connect_wallet', label: 'MetaMask' },
+        {
+          'EOA Wallet Label': 'MetaMask',
+          'EOA Wallet Address': '0x1234567890123456789012345678901234567890',
+          'EOA Wallet Network': 'Chain 999',
+        },
+      )
+    })
+
+    it('should track additional WalletConnect event for WC wallets', () => {
+      const wallet = {
+        label: 'WalletConnect',
+        chainId: '1',
+        address: '0x1234567890123456789012345678901234567890',
+        provider: {
+          connector: {
+            session: {
+              peer: {
+                metadata: {
+                  name: 'Trust Wallet',
+                },
+              },
+            },
+          },
+        } as any,
+      }
+
+      const configs = [
+        {
+          chainId: '1',
+          chainName: 'Ethereum',
+        },
+      ] as ChainInfo[]
+
+      trackWalletType(wallet, configs)
+
+      expect(trackEvent).toHaveBeenCalledTimes(2)
+      expect(trackEvent).toHaveBeenNthCalledWith(2, {
+        action: 'wallet_connect',
+        label: 'Trust Wallet',
+      })
     })
   })
 })

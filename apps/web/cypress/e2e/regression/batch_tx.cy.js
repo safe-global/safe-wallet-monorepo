@@ -72,6 +72,7 @@ describe('Batch transaction tests', { defaultCommandTimeout: 30000 }, () => {
   it('Verify a batched tx can be expanded and collapsed', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__batch, ls.batchData.entry0)
     cy.reload()
+    cy.wait(4000)
     batch.clickOnBatchCounter()
     cy.contains(funds_first_tx).parents('ul').as('TransactionList')
     cy.get('@TransactionList').find('li').eq(0).contains(funds_first_tx).click()

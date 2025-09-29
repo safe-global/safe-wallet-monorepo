@@ -1,50 +1,45 @@
-import { Address, SignerInfo } from '@/src/types/address'
 import { SignForm } from '../SignForm'
 import React from 'react'
 import { ExecuteForm } from '../ExecuteForm'
-import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { AlreadySigned } from '../confirmation-views/AlreadySigned'
 import { CanNotSign } from '../CanNotSign'
+import { useTransactionSigner } from '../../hooks/useTransactionSigner'
+import { CanNotExecute } from '@/src/features/ExecuteTx/components/CanNotExecute'
+import { PendingTx } from '@/src/features/ConfirmTx/components/PendingTx'
+
 interface ConfirmTxFormProps {
   hasEnoughConfirmations: boolean
-  activeSigner?: SignerInfo | undefined
   isExpired: boolean
+  isPending: boolean
   txId: string
-  hasSigned: boolean
-  canSign: boolean
 }
 
-export function ConfirmTxForm({
-  hasEnoughConfirmations,
-  activeSigner,
-  isExpired,
-  txId,
-  hasSigned,
-  canSign,
-}: ConfirmTxFormProps) {
-  const activeSafe = useDefinedActiveSafe()
+export function ConfirmTxForm({ hasEnoughConfirmations, isExpired, isPending, txId }: ConfirmTxFormProps) {
+  const { signerState } = useTransactionSigner(txId)
+  const { activeSigner, hasSigned, canSign } = signerState
 
-  if (hasSigned) {
-    return (
-      <AlreadySigned
-        hasEnoughConfirmations={hasEnoughConfirmations}
-        txId={txId}
-        safeAddress={activeSafe.address}
-        chainId={activeSafe.chainId}
-      />
-    )
+  if (isPending) {
+    return <PendingTx />
   }
 
-  if (!canSign) {
-    return <CanNotSign address={activeSigner?.value as Address | undefined} txId={txId} />
+  if (!activeSigner) {
+    return <CanNotExecute />
   }
 
   if (hasEnoughConfirmations) {
-    return <ExecuteForm safeAddress={activeSafe.address} chainId={activeSafe.chainId} />
+    return <ExecuteForm txId={txId} />
+  }
+
+  if (hasSigned) {
+    return <AlreadySigned />
+  }
+
+  if (!canSign) {
+    return <CanNotSign />
   }
 
   if (activeSigner && !isExpired) {
-    return <SignForm txId={txId} address={activeSigner?.value as Address} />
+    return <SignForm txId={txId} />
   }
 
   return null

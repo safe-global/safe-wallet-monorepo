@@ -17,9 +17,8 @@ const useGetWidgetUrl = (asset?: string) => {
   const isDarkMode = useDarkMode()
 
   params.append('theme', isDarkMode ? 'dark' : 'light')
-  if (asset) params.append('asset', asset)
+  if (asset) params.append('asset_id', asset)
 
-  // TODO: Change this to the prod URL
   return url + '?' + params.toString()
 }
 

@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw'
-import type { FiatCurrencies } from '@safe-global/store/src/gateway/types'
+import type { FiatCurrencies } from '@safe-global/store/gateway/types'
 import { Balances } from '@safe-global/store/src/gateway/AUTO_GENERATED/balances'
 import { CollectiblePage } from '@safe-global/store/src/gateway/AUTO_GENERATED/collectibles'
 
@@ -66,5 +66,19 @@ export const handlers = (GATEWAY_URL: string) => [
   }),
   http.get<never, never, FiatCurrencies>(`${GATEWAY_URL}/v1/balances/supported-fiat-codes`, () => {
     return HttpResponse.json(iso4217Currencies)
+  }),
+
+  http.get(`${GATEWAY_URL}/v1/chains/:chainId/safes/:safeAddress`, () => {
+    return HttpResponse.json({
+      address: '0x123',
+      nonce: 0,
+      threshold: 1,
+      owners: ['0x1234567890123456789012345678901234567890'],
+      masterCopy: '0x',
+      modules: [],
+      fallbackHandler: '0x',
+      guard: '0x',
+      version: '1.3.0',
+    })
   }),
 ]

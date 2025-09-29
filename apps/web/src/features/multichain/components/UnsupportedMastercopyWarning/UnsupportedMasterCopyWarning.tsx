@@ -2,10 +2,9 @@ import { TxModalContext } from '@/components/tx-flow'
 import { MigrateSafeL2Flow } from '@/components/tx-flow/flows'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { isMigrationToL2Possible } from '@/services/contracts/safeContracts'
 import { Button, Stack, Typography } from '@mui/material'
 import { useCallback, useContext } from 'react'
-import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeContracts'
+import { isMigrationToL2Possible, isValidMasterCopy } from '@safe-global/utils/services/contracts/safeContracts'
 
 export const UnsupportedMastercopyWarning = () => {
   const { safe } = useSafeInfo()
@@ -25,7 +24,7 @@ export const UnsupportedMastercopyWarning = () => {
           Your Safe Account&apos;s base contract is not supported. You should migrate it to a compatible version.
         </Typography>
         <div>
-          <Button variant="contained" onClick={openUpgradeModal}>
+          <Button variant="contained" style={{ textDecoration: 'none' }} onClick={openUpgradeModal}>
             Migrate
           </Button>
         </div>

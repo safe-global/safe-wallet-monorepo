@@ -11,6 +11,7 @@ import React, { useCallback } from 'react'
 import { useSelector } from 'react-redux'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
+import { selectCurrency } from '@/src/store/settingsSlice'
 
 export function BalanceContainer() {
   const chains = useAppSelector(selectAllChains)
@@ -18,10 +19,11 @@ export function BalanceContainer() {
   const chainsIds = useAppSelector((state: RootState) => selectSafeChains(state, activeSafe.address))
   const activeSafeChains = useAppSelector((state: RootState) => getChainsByIds(state, chainsIds))
   const copy = useCopyAndDispatchToast()
+  const currency = useAppSelector(selectCurrency)
   const { data, isLoading } = useSafesGetOverviewForManyQuery<SafeOverviewResult>(
     {
       safes: [makeSafeId(activeSafe.chainId, activeSafe.address)],
-      currency: 'usd',
+      currency,
       trusted: true,
       excludeSpam: true,
     },

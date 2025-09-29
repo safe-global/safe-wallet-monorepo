@@ -1,5 +1,6 @@
 import { setPrepareHeadersHook, setHandleResponseHook, isCredentialRoute } from '@safe-global/store/gateway/cgwClient'
-
+import { GATEWAY_URL } from '@/src/config/constants'
+import { isIpOrLocalhostUrl, isHttpsUrl } from '@/src/utils/url'
 // Store for parsed cookies
 export let cookies: Record<string, string> = {}
 
@@ -77,6 +78,16 @@ export const handleCookieResponse = (
  * This ensures cookies are properly stored and forwarded for credential routes.
  */
 export const setupMobileCookieHandling = () => {
+  // When working locally, we sometimes run CGW and connect to it.
+  // This connection is not done over https and because of this
+  // we need to manually forward the cookie to our local server.
+  // In production, we don't need to do this because the connection is over https
+  // and the cookie is automatically attached to the request.
+  //
+  if (!isIpOrLocalhostUrl(GATEWAY_URL) || isHttpsUrl(GATEWAY_URL)) {
+    return
+  }
+
   // Reset cookies object
   cookies = {}
 

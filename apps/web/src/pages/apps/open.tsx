@@ -23,10 +23,8 @@ const SafeApps: NextPage = () => {
   const chainId = useChainId()
   const router = useRouter()
   const appUrl = useSafeAppUrl()
-  const appHostname = getOrigin(appUrl)
-  const { allSafeApps, remoteSafeAppsLoading } = useSafeApps()
-  const safeAppData =
-    allSafeApps.find((app) => app.url === appUrl) || allSafeApps.find((app) => getOrigin(app.url) === appHostname)
+  const { remoteSafeAppsLoading, getSafeAppByUrl } = useSafeApps()
+  const safeAppData = appUrl ? getSafeAppByUrl(appUrl) : undefined
   const { safeApp, isLoading } = useSafeAppFromManifest(appUrl || '', chainId, safeAppData)
   const isSafeAppsEnabled = useHasFeature(FEATURES.SAFE_APPS)
 

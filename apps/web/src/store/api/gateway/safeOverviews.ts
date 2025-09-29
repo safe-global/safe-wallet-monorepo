@@ -1,18 +1,24 @@
 import { type EndpointBuilder } from '@reduxjs/toolkit/query/react'
 
-import { type SafeOverview, getSafeOverviews } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { RootState } from '../..'
 import { selectCurrency } from '../../settingsSlice'
 import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { makeSafeTag } from '.'
+import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
+
+type SafesInitiateThunk = ReturnType<typeof additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate>
+type SafesQueryActionResult = ReturnType<SafesInitiateThunk>
+type SafesDispatch = (action: SafesInitiateThunk) => SafesQueryActionResult
 
 type SafeOverviewQueueItem = {
   safeAddress: string
   walletAddress?: string
   chainId: string
   currency: string
+  dispatch: SafesDispatch
   callback: (result: { data: SafeOverview | undefined; error?: never } | { data?: never; error: string }) => void
 }
 
@@ -28,21 +34,27 @@ class SafeOverviewFetcher {
     safeIds,
     walletAddress,
     currency,
+    dispatch,
   }: {
     safeIds: `${number}:0x${string}`[]
     walletAddress?: string
     currency: string
+    dispatch: SafesDispatch
   }) {
-    return await getSafeOverviews(safeIds, {
-      /**
-       * This flag can only be set once for all cross chain `safeIds`.
-       * If we set `trusted` to `true` we will get 0 as `fiatTotal` for all Safes on networks without Default tokenlists.
-       */
-      trusted: false,
-      exclude_spam: true,
+    const queryThunk = additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate({
+      safes: safeIds,
       currency,
-      wallet_address: walletAddress,
+      walletAddress,
+      trusted: false,
+      excludeSpam: true,
     })
+    const queryAction: SafesQueryActionResult = dispatch(queryThunk)
+
+    try {
+      return await queryAction.unwrap()
+    } finally {
+      queryAction.unsubscribe()
+    }
   }
 
   private async processQueuedItems() {
@@ -61,8 +73,8 @@ class SafeOverviewFetcher {
       }
 
       const safeIds = nextBatch.map((request) => makeSafeTag(request.chainId, request.safeAddress))
-      const { walletAddress, currency } = nextBatch[0]
-      overviews = await this.fetchSafeOverviews({ safeIds, currency, walletAddress })
+      const { walletAddress, currency, dispatch } = nextBatch[0]
+      overviews = await this.fetchSafeOverviews({ safeIds, currency, walletAddress, dispatch })
     } catch (err) {
       // Overviews could not be fetched
       nextBatch.forEach((item) => item.callback({ error: 'Could not fetch Safe overview' }))
@@ -119,16 +131,23 @@ type MultiOverviewQueryParams = {
 export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'OwnedSafes' | 'Submissions', 'gatewayApi'>) => ({
   getSafeOverview: builder.query<SafeOverview | null, { safeAddress: string; walletAddress?: string; chainId: string }>(
     {
-      async queryFn({ safeAddress, walletAddress, chainId }, { getState }) {
+      async queryFn({ safeAddress, walletAddress, chainId }, { getState, dispatch }) {
         const state = getState() as RootState
         const currency = selectCurrency(state)
+        const dispatchSafeOverview: SafesDispatch = (action) => dispatch(action)
 
         if (!safeAddress) {
           return { data: null }
         }
 
         try {
-          const safeOverview = await batchedFetcher.getOverview({ chainId, currency, walletAddress, safeAddress })
+          const safeOverview = await batchedFetcher.getOverview({
+            chainId,
+            currency,
+            walletAddress,
+            safeAddress,
+            dispatch: dispatchSafeOverview,
+          })
           return { data: safeOverview ?? null }
         } catch (error) {
           return { error: { status: 'CUSTOM_ERROR', error: asError(error).message } }
@@ -137,8 +156,9 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'OwnedSafes'
     },
   ),
   getMultipleSafeOverviews: builder.query<SafeOverview[], MultiOverviewQueryParams>({
-    async queryFn(params) {
+    async queryFn(params, { dispatch }) {
       const { safes, walletAddress, currency } = params
+      const dispatchSafeOverview: SafesDispatch = (action) => dispatch(action)
 
       try {
         const promisedSafeOverviews = safes.map((safe) =>
@@ -147,6 +167,7 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'OwnedSafes'
             safeAddress: safe.address,
             currency,
             walletAddress,
+            dispatch: dispatchSafeOverview,
           }),
         )
         const safeOverviews = await Promise.all(promisedSafeOverviews)

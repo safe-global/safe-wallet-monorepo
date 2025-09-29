@@ -12,6 +12,7 @@ import { useBiometrics } from '@/src/hooks/useBiometrics'
 import { useNotificationManager } from '@/src/hooks/useNotificationManager'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectAppNotificationStatus } from '@/src/store/notificationsSlice'
+import { selectCurrency } from '@/src/store/settingsSlice'
 import { capitalize } from '@/src/utils/formatters'
 import { SAFE_WEB_FEEDBACK_URL } from '@/src/config/constants'
 
@@ -19,6 +20,7 @@ export const AppSettingsContainer = () => {
   const { toggleBiometrics, isBiometricsEnabled, isLoading: isBiometricsLoading, getBiometricsUIInfo } = useBiometrics()
   const { enableNotification, disableNotification, isLoading: isNotificationsLoading } = useNotificationManager()
   const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
+  const currency = useAppSelector(selectCurrency)
   const { themePreference, setThemePreference } = useTheme()
 
   const handleToggleNotifications = () => {
@@ -36,9 +38,14 @@ export const AppSettingsContainer = () => {
         {
           label: 'Currency',
           leftIcon: 'token',
-          onPress: () => console.log('currency'),
-          disabled: true,
-          tag: 'Coming soon',
+          onPress: () => router.push('/currency'),
+          disabled: false,
+          rightNode: (
+            <View flexDirection="row" alignItems="center" gap={4}>
+              <Text color="$colorSecondary">{currency.toUpperCase()}</Text>
+              <Icon name={'chevron-right'} />
+            </View>
+          ),
         },
         {
           label: 'Appearance',

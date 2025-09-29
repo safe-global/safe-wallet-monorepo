@@ -87,6 +87,7 @@ const SwapWidget = ({ sell }: Params) => {
   const wallet = useWallet()
   const { isConsentAccepted, onAccept } = useSwapConsent()
   const feeEnabled = useHasFeature(FEATURES.NATIVE_SWAPS_FEE_ENABLED)
+  const nativeCowSwapFeeV2Enabled = useHasFeature(FEATURES.NATIVE_COW_SWAP_FEE_V2)
   const useStagingCowServer = useHasFeature(FEATURES.NATIVE_SWAPS_USE_COW_STAGING_SERVER)
 
   const { data: isSafeAddressBlocked } = useGetIsSanctionedQuery(safeAddress || skipToken)
@@ -226,7 +227,7 @@ const SwapWidget = ({ sell }: Params) => {
         handler: (newTradeParams: OnTradeParamsPayload) => {
           const { orderType: tradeType, recipient, sellToken, buyToken } = newTradeParams
 
-          const newFeeBps = feeEnabled ? calculateFeePercentageInBps(newTradeParams) : 0
+          const newFeeBps = feeEnabled ? calculateFeePercentageInBps(newTradeParams, nativeCowSwapFeeV2Enabled) : 0
 
           setParams((params) => ({
             ...params,
@@ -251,7 +252,7 @@ const SwapWidget = ({ sell }: Params) => {
         },
       },
     ]
-  }, [dispatch, feeEnabled])
+  }, [dispatch, feeEnabled, nativeCowSwapFeeV2Enabled])
 
   useEffect(() => {
     setParams((params) => ({

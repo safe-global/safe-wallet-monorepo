@@ -1,4 +1,4 @@
-import type { AllOwnedSafes, ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
 import {
   _mergeNotifiableSafes,
@@ -17,6 +17,7 @@ import {
 } from '../GlobalPushNotifications'
 import type { AddedSafesState } from '@/store/addedSafesSlice'
 import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
+import type { OwnersGetAllSafesByOwnerV2ApiResponse as AllOwnedSafes } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 
 describe('GlobalPushNotifications', () => {
   describe('transformAddedSafes', () => {
@@ -93,6 +94,38 @@ describe('GlobalPushNotifications', () => {
       }
 
       expect(_mergeNotifiableSafes(ownedSafes, addedSafes)).toEqual(expectedNotifiableSafes)
+    })
+
+    it('should display an empty array of safes for a chain with unowned safes = null ', () => {
+      const currentSubscriptions = {
+        '1': ['0x111', '0x222'],
+        '4': ['0x111'],
+      }
+
+      const addedSafes = {
+        '1': {
+          '0x111': {},
+          '0x333': {},
+        },
+        '4': {
+          '0x222': {},
+          '0x333': {},
+        },
+      } as unknown as AddedSafesState
+
+      const ownedSafes = {
+        '1': ['0x111', '0x444'],
+        '3': null,
+        '4': null,
+      } as unknown as AllOwnedSafes
+
+      const expectedNotifiableSafes = {
+        '1': ['0x111', '0x222', '0x444'],
+        '3': [],
+        '4': ['0x111'],
+      }
+
+      expect(_mergeNotifiableSafes(ownedSafes, addedSafes, currentSubscriptions)).toEqual(expectedNotifiableSafes)
     })
   })
 

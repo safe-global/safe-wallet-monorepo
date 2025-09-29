@@ -18,8 +18,11 @@ jest.mock('react-native-vision-camera', () => ({
   useCodeScanner: jest.fn(),
 }))
 
-// Mock React Navigation
-jest.mock('@react-navigation/native', () => ({
+// Mock expo-router
+jest.mock('expo-router', () => ({
+  useRouter: () => ({
+    push: mockPush,
+  }),
   useFocusEffect: jest.fn((callback: () => (() => void) | void) => {
     mockFocusCallback = callback
     // Don't call the callback immediately - only store it for manual testing
@@ -40,11 +43,6 @@ jest.mock('@safe-global/utils/utils/validation', () => ({
 }))
 
 const mockPush = jest.fn()
-jest.mock('expo-router', () => ({
-  useRouter: () => ({
-    push: mockPush,
-  }),
-}))
 
 // Mock Toast
 const mockShow = jest.fn()

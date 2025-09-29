@@ -20,8 +20,6 @@ import {
   TokenType,
 } from '@safe-global/safe-gateway-typescript-sdk'
 import type { BrowserProvider, Eip1193Provider, Provider, TransactionResponse } from 'ethers'
-import { getSafeL2SingletonDeployments, getSafeSingletonDeployments } from '@safe-global/safe-deployments'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 import { encodeSafeCreationTx } from '@/components/new-safe/create/logic'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
@@ -32,6 +30,7 @@ import type {
 } from '@safe-global/utils/features/counterfactual/store/types'
 import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
 import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
+import { delay } from '@safe-global/utils/utils/helpers'
 
 export const getUndeployedSafeInfo = (undeployedSafe: UndeployedSafe, address: string, chain: ChainInfo) => {
   const safeSetup = extractCounterfactualSafeSetup(undeployedSafe, chain.chainId)
@@ -162,8 +161,6 @@ export const replayCounterfactualSafeDeployment = (
 
   dispatch(addUndeployedSafe(undeployedSafe))
 }
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 /**
  * Calling getTransaction too fast sometimes fails because the txHash hasn't been
@@ -306,31 +303,6 @@ export const isReplayedSafeProps = (props: UndeployedSafeProps): props is Replay
 
 export const isPredictedSafeProps = (props: UndeployedSafeProps): props is PredictedSafeProps =>
   'safeAccountConfig' in props && !('masterCopy' in props)
-
-export const determineMasterCopyVersion = (masterCopy: string, chainId: string): SafeVersion | undefined => {
-  const SAFE_VERSIONS: SafeVersion[] = ['1.4.1', '1.3.0', '1.2.0', '1.1.1', '1.0.0']
-  return SAFE_VERSIONS.find((version) => {
-    const isL1Singleton = () => {
-      const deployments = getSafeSingletonDeployments({ version })?.networkAddresses[chainId]
-
-      if (Array.isArray(deployments)) {
-        return deployments.some((deployment) => sameAddress(masterCopy, deployment))
-      }
-      return sameAddress(masterCopy, deployments)
-    }
-
-    const isL2Singleton = () => {
-      const deployments = getSafeL2SingletonDeployments({ version })?.networkAddresses[chainId]
-
-      if (Array.isArray(deployments)) {
-        return deployments.some((deployment) => sameAddress(masterCopy, deployment))
-      }
-      return sameAddress(masterCopy, deployments)
-    }
-
-    return isL1Singleton() || isL2Singleton()
-  })
-}
 
 export const extractCounterfactualSafeSetup = (
   undeployedSafe: UndeployedSafe | undefined,

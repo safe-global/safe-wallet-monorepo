@@ -74,7 +74,11 @@ thumbs.db
 # web
 apps/web/.next/*
 apps/web/out/*
-apps/web/public/*.js
+apps/web/public/work*.js
+apps/web/public/sw.js
+apps/web/public/firebase*.js
+apps/web/public/fallback*.js
+
 apps/web/src/types/
 apps/web/tsconfig.tsbuildinfo
 node_modules/*
@@ -85,3 +89,6 @@ apps/web/node_modules/*
 apps/web/public/fallback-development.js
 apps/web/.env
 apps/web/src/types/contracts/*
+
+# expo-plugins/notifications-service-ios
+/expo-plugins/notification-service-ios/dist/*

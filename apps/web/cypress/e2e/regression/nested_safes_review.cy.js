@@ -30,11 +30,10 @@ describe('Nested safes review step tests', () => {
     createTx.verifytxAccordionDetails(createTx.MultisendData)
   })
 
-  it('Verify review step without Fund new assets in create nestedsafe tx flow', () => {
+  it('Verify middle step without Fund new assets in create nestedsafe tx flow', () => {
     nsafes.clickOnAddNextBtn()
     nsafes.clickOnAdvancedDetails()
-    createTx.clickOnNoLaterOption()
     nsafes.actionsExist(nsafes.nonfundAssetsActions)
-    //nsafes.checkAddTobatchBtnStatus(constants.enabledStates.enabled) - The button is commented out until we have a final decision about its position.
+    createTx.verifytxAccordionDetailsScroll(createTx.SafeProxy)
   })
 })

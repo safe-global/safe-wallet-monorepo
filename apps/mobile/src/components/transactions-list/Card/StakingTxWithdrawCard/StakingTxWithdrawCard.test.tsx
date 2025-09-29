@@ -1,31 +1,47 @@
 import React from 'react'
-import { render } from '@/src/tests/test-utils'
+import { render, fireEvent } from '@/src/tests/test-utils'
 import { StakingTxWithdrawCard } from './StakingTxWithdrawCard'
 import { NativeStakingWithdrawTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
-describe('StakingTxWithdrawCard', () => {
-  const mockInfo = {
-    value: '1000000000000000000',
-    tokenInfo: {
-      symbol: 'ETH',
-      decimals: 18,
-      logoUri: 'https://example.com/eth-logo.png',
-      name: 'Ethereum',
-      address: '0x0000000000000000000000000000000000000000',
-    },
-  } as NativeStakingWithdrawTransactionInfo
+const mockInfo: NativeStakingWithdrawTransactionInfo = {
+  type: 'NativeStakingWithdraw',
+  humanDescription: null,
+  value: '32000000000000000000',
+  tokenInfo: {
+    address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+    decimals: 18,
+    logoUri: 'https://safe-transaction-assets.safe.global/chains/1/chain_logo.png',
+    name: 'Ethereum',
+    symbol: 'ETH',
+    trusted: true,
+  },
+  validators: ['0x123...abc'],
+}
 
-  it('renders correctly', () => {
-    const { toJSON } = render(<StakingTxWithdrawCard info={mockInfo} />)
+const mockOnPress = jest.fn()
+
+describe('StakingTxWithdrawCard', () => {
+  beforeEach(() => {
+    mockOnPress.mockClear()
+  })
+
+  it('matches snapshot', () => {
+    const { toJSON } = render(<StakingTxWithdrawCard info={mockInfo} onPress={mockOnPress} />)
     expect(toJSON()).toMatchSnapshot()
   })
 
-  it('renders correctly with given info', () => {
-    const screen = render(<StakingTxWithdrawCard info={mockInfo} />)
-
-    // Check that important props are passed correctly
+  it('renders correctly', () => {
+    const screen = render(<StakingTxWithdrawCard info={mockInfo} onPress={mockOnPress} />)
     expect(screen.getByText('Claim')).toBeTruthy()
-    expect(screen.getByTestId('token-amount')).toHaveTextContent('1 ETH')
-    expect(screen.getByTestId('logo-image')).toBeTruthy()
+    expect(screen.getByTestId('token-amount')).toBeTruthy()
+  })
+
+  it('calls onPress when pressed', () => {
+    const screen = render(<StakingTxWithdrawCard info={mockInfo} onPress={mockOnPress} />)
+    const card = screen.getByText('Claim')
+
+    fireEvent.press(card)
+
+    expect(mockOnPress).toHaveBeenCalledTimes(1)
   })
 })

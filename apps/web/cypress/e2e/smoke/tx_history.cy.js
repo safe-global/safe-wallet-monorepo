@@ -13,6 +13,7 @@ const typeDeleteAllowance = data.type.deleteSpendingLimit
 const typeGeneral = data.type.general
 const typeUntrustedToken = data.type.untrustedReceivedToken
 
+// TODO: Replace this test with jest (EN-141)
 describe('[SMOKE] Tx history tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)

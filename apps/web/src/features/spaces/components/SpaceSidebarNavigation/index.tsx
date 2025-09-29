@@ -9,18 +9,18 @@ import {
   SidebarListItemText,
 } from '@/components/sidebar/SidebarList'
 import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
-import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { useIsActiceMember } from '@/features/spaces/hooks/useSpaceMembers'
 import { navItems } from './config'
 
 const Navigation = (): ReactElement => {
   const router = useRouter()
   const spaceId = useCurrentSpaceId()
-  const isAdmin = useIsAdmin()
+  const isActiveMember = useIsActiceMember()
 
   return (
     <SidebarList>
       {navItems.map((item) => {
-        const hideItem = item.adminOnly && !isAdmin
+        const hideItem = item.activeMemberOnly && !isActiveMember
         const isSelected = router.pathname === item.href
 
         if (hideItem) return null

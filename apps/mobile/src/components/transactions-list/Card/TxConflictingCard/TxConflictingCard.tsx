@@ -5,6 +5,8 @@ import { Alert } from '@/src/components/Alert'
 import { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TxCardPress } from '@/src/components/TxInfo/types'
 import { TouchableOpacity } from 'react-native'
+import { useTheme } from '@/src/theme/hooks/useTheme'
+
 interface TxConflictingCard {
   transactions: TransactionQueuedItem[]
   inQueue?: boolean
@@ -12,6 +14,8 @@ interface TxConflictingCard {
 }
 
 function TxConflictingComponent({ transactions, inQueue, onPress }: TxConflictingCard) {
+  const { isDark } = useTheme()
+
   const handleConflictTxPress = useCallback(
     (transaction?: TransactionQueuedItem) => {
       if (transaction) {
@@ -24,17 +28,28 @@ function TxConflictingComponent({ transactions, inQueue, onPress }: TxConflictin
   )
 
   return (
-    <View>
+    <View
+      backgroundColor={isDark ? '$backgroundPaper' : '$background'}
+      borderColor={'$warning'}
+      borderWidth={2}
+      padding="$2"
+      borderRadius={8}
+    >
       <TouchableOpacity onPress={() => onPress()}>
-        <View marginTop={12}>
+        <View>
           <Alert type="warning" message="Conflicting transactions" />
         </View>
       </TouchableOpacity>
 
       <Theme name="warning">
         {transactions.map((item, index) => (
-          <View backgroundColor="$background" width="100%" key={`${item.transaction.id}-${index}`} marginTop={12}>
-            <TxInfo inQueue={inQueue} tx={item.transaction} onPress={() => handleConflictTxPress(item)} bordered />
+          <View backgroundColor="$background" width="100%" key={`${item.transaction.id}-${index}`} borderRadius={8}>
+            <TxInfo
+              inQueue={inQueue}
+              tx={item.transaction}
+              onPress={() => handleConflictTxPress(item)}
+              bordered={false}
+            />
           </View>
         ))}
       </Theme>

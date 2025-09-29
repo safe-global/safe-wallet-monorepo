@@ -1,7 +1,7 @@
 // useScrollableHeader.ts
 import { useEffect } from 'react'
 import { NativeSyntheticEvent, NativeScrollEvent } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation } from 'expo-router'
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated'
 
 interface UseScrollableHeaderProps {
@@ -28,7 +28,12 @@ export const useScrollableHeader = ({ children, alwaysVisible, scrollYThreshold 
   useEffect(() => {
     navigation.setOptions({
       headerTitle: () => (
-        <Animated.View style={[{ flexDirection: 'row', alignItems: 'center' }, animatedHeaderStyle]}>
+        <Animated.View
+          style={[
+            { flex: 1, justifyContent: 'center', flexDirection: 'row', alignItems: 'center' },
+            animatedHeaderStyle,
+          ]}
+        >
           {children}
         </Animated.View>
       ),

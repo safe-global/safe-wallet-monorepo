@@ -1,11 +1,11 @@
 import { SigningMethod } from '@safe-global/protocol-kit'
-import { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { createConnectedWallet } from '@/src/services/web3'
 import { proposeTx } from '@/src/services/tx/tx-sender'
 import { SafeInfo } from '@/src/types/address'
 
 export type signTxParams = {
-  chain: ChainInfo
+  chain: Chain
   activeSafe: SafeInfo
   txId: string
   privateKey?: string

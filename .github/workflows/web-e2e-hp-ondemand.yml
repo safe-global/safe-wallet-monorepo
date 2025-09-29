@@ -19,7 +19,7 @@ jobs:
       matrix:
         containers: [1, 2, 3]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: ./.github/actions/cypress
         with:
@@ -31,7 +31,7 @@ jobs:
 
       - name: Python setup
         if: always()
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.x'
 

@@ -18,7 +18,7 @@ const VaultDepositTxDetails = ({ info }: { info: VaultDepositTransactionInfo }) 
           decimals={info.tokenInfo.decimals}
         />
       </FieldsGrid>
-      <FieldsGrid title="Reward rate">{formatPercentage(totalNrr)}</FieldsGrid>
+      <FieldsGrid title="Earn (after fees)">{formatPercentage(totalNrr)}</FieldsGrid>
       <VaultDepositConfirmation txInfo={info} isTxDetails />
     </Box>
   )

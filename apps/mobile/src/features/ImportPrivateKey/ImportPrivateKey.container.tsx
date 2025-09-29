@@ -1,5 +1,5 @@
-import React from 'react'
-import { KeyboardAvoidingView, StyleSheet } from 'react-native'
+import React, { useState } from 'react'
+import { KeyboardAvoidingView, StyleSheet, TouchableOpacity } from 'react-native'
 import { Button, View, YStack, ScrollView } from 'tamagui'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import { NavBarTitle } from '@/src/components/Title'
@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 const CUSTOM_VERTICAL_OFFSET = 70
 
 export function ImportPrivateKey() {
+  const [isMasked, setIsMasked] = useState(true)
   const { top } = useSafeAreaInsets()
   const { handlePrivateKeyChange, handleImport, onPrivateKeyPaste, wallet, privateKey, error } = useImportPrivateKey()
   const { handleScroll } = useScrollableHeader({
@@ -38,10 +39,15 @@ export function ImportPrivateKey() {
               value={privateKey}
               onChangeText={handlePrivateKeyChange}
               placeholder="Paste here or type..."
-              multiline
+              secureTextEntry={isMasked}
               success={!!wallet}
               textAlign="center"
               error={error}
+              right={
+                <TouchableOpacity onPress={() => setIsMasked((prev) => !prev)} hitSlop={12}>
+                  <SafeFontIcon name={isMasked ? 'eye-on' : 'eye-off'} size={16} color={'$color'} />
+                </TouchableOpacity>
+              }
             />
           </View>
 

@@ -12,6 +12,16 @@ const FEE_PERCENTAGE_BPS = {
     TIER_2: 7,
     TIER_3: 5,
   },
+  V2_REGULAR: {
+    TIER_1: 70,
+    TIER_2: 20,
+    TIER_3: 10,
+  },
+  V2_STABLE: {
+    TIER_1: 20,
+    TIER_2: 7,
+    TIER_3: 5,
+  },
 }
 
 const FEE_TIERS = {
@@ -35,21 +45,28 @@ const getLowerCaseStableCoinAddresses = () => {
  * The fee % should be applied based on the fiat value of the buy or sell token.
  *
  * @param orderParams
+ * @param chainId
  */
-export const calculateFeePercentageInBps = (orderParams: OnTradeParamsPayload) => {
+export const calculateFeePercentageInBps = (
+  orderParams: OnTradeParamsPayload,
+  nativeCowSwapFeeV2Enabled: boolean = false,
+) => {
   const { sellToken, buyToken, buyTokenFiatAmount, sellTokenFiatAmount, orderKind } = orderParams
   const stableCoins = getLowerCaseStableCoinAddresses()
   const isStableCoin = stableCoins[sellToken?.address?.toLowerCase()] && stableCoins[buyToken?.address.toLowerCase()]
 
   const fiatAmount = Number(orderKind == 'sell' ? sellTokenFiatAmount : buyTokenFiatAmount) || 0
 
+  const regularFees = nativeCowSwapFeeV2Enabled ? FEE_PERCENTAGE_BPS.V2_REGULAR : FEE_PERCENTAGE_BPS.REGULAR
+  const stableFees = nativeCowSwapFeeV2Enabled ? FEE_PERCENTAGE_BPS.V2_STABLE : FEE_PERCENTAGE_BPS.STABLE
+
   if (fiatAmount < FEE_TIERS.TIER_1) {
-    return isStableCoin ? FEE_PERCENTAGE_BPS.STABLE.TIER_1 : FEE_PERCENTAGE_BPS.REGULAR.TIER_1
+    return isStableCoin ? stableFees.TIER_1 : regularFees.TIER_1
   }
 
   if (fiatAmount < FEE_TIERS.TIER_2) {
-    return isStableCoin ? FEE_PERCENTAGE_BPS.STABLE.TIER_2 : FEE_PERCENTAGE_BPS.REGULAR.TIER_2
+    return isStableCoin ? stableFees.TIER_2 : regularFees.TIER_2
   }
 
-  return isStableCoin ? FEE_PERCENTAGE_BPS.STABLE.TIER_3 : FEE_PERCENTAGE_BPS.REGULAR.TIER_3
+  return isStableCoin ? stableFees.TIER_3 : regularFees.TIER_3
 }

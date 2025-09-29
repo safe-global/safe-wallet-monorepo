@@ -9,6 +9,32 @@ type TxTypeProps = {
   tx: TransactionSummary
 }
 
+export const TxTypeIcon = ({ tx }: TxTypeProps) => {
+  const type = useTransactionType(tx)
+
+  return (
+    <Box className={css.txType}>
+      {isValidElement(type.icon) ? (
+        type.icon
+      ) : typeof type.icon == 'string' ? (
+        <SafeAppIconCard
+          src={type.icon}
+          alt={type.text}
+          width={16}
+          height={16}
+          fallback="/images/transactions/custom.svg"
+        />
+      ) : null}
+    </Box>
+  )
+}
+
+export const TxTypeText = ({ tx }: TxTypeProps) => {
+  const type = useTransactionType(tx)
+
+  return type.text
+}
+
 const TxType = ({ tx }: TxTypeProps) => {
   const type = useTransactionType(tx)
 

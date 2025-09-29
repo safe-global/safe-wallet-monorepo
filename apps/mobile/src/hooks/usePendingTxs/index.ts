@@ -1,50 +1,50 @@
-import { useGetPendingTxsQuery } from '@safe-global/store/gateway'
-import { useMemo, useState } from 'react'
-import {
-  ConflictHeaderQueuedItem,
-  LabelQueuedItem,
-  QueuedItemPage,
-  TransactionQueuedItem,
-} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { useGetPendingTxsInfiniteQuery } from '@safe-global/store/gateway'
+import { useMemo } from 'react'
+import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { groupPendingTxs } from '@/src/features/PendingTx/utils'
-import { safelyDecodeURIComponent } from 'expo-router/build/fork/getStateFromPath-forks'
-import { useInfiniteScroll } from '../useInfiniteScroll'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 
 const usePendingTxs = () => {
   const activeSafe = useDefinedActiveSafe()
-  const [pageUrl, setPageUrl] = useState<string>()
 
-  const { data, isLoading, isFetching, refetch, isUninitialized } = useGetPendingTxsQuery(
-    {
-      chainId: activeSafe.chainId,
-      safeAddress: activeSafe.address,
-      cursor: pageUrl && safelyDecodeURIComponent(pageUrl?.split('cursor=')[1]),
-    },
-    {
-      skip: !activeSafe.chainId,
-      pollingInterval: 10000,
-    },
-  )
+  const { currentData, fetchNextPage, hasNextPage, isFetching, isLoading, isUninitialized, refetch } =
+    useGetPendingTxsInfiniteQuery(
+      {
+        chainId: activeSafe.chainId,
+        safeAddress: activeSafe.address,
+      },
+      {
+        skip: !activeSafe.chainId,
+        pollingInterval: 10000,
+      },
+    )
 
-  const { list, onEndReached: fetchMoreTx } = useInfiniteScroll<
-    QueuedItemPage,
-    ConflictHeaderQueuedItem | LabelQueuedItem | TransactionQueuedItem
-  >({
-    refetch,
-    setPageUrl,
-    data,
-  })
+  // Flatten all pages into a single transactions array
+  const allPendingItems = useMemo(() => {
+    if (!currentData?.pages) {
+      return []
+    }
 
-  const pendingTxs = useMemo(() => groupPendingTxs(list?.results || []), [list])
+    // Combine results from all pages
+    return currentData.pages.flatMap((page: QueuedItemPage) => page.results || [])
+  }, [currentData?.pages])
+
+  const pendingTxs = useMemo(() => groupPendingTxs(allPendingItems), [allPendingItems])
+
+  const fetchMoreTx = () => {
+    if (hasNextPage && !isFetching) {
+      fetchNextPage()
+    }
+  }
 
   return {
-    hasMore: Boolean(data?.next),
+    hasMore: hasNextPage,
     amount: pendingTxs.amount,
     data: pendingTxs.sections,
     fetchMoreTx,
     isLoading: isLoading || isUninitialized,
     isFetching: isFetching,
+    refetch,
   }
 }
 

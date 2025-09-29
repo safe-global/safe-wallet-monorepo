@@ -7,7 +7,7 @@ import AddIcon from '@/public/images/common/add.svg'
 import EditIcon from '@/public/images/common/edit.svg'
 import CheckWallet from '@/components/common/CheckWallet'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { CreateNestedSafe } from '@/components/tx-flow/flows/CreateNestedSafe'
+import { CreateNestedSafeFlow } from '@/components/tx-flow/flows'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import { TxModalContext } from '@/components/tx-flow'
 import EnhancedTable from '@/components/common/EnhancedTable'
@@ -96,7 +96,7 @@ export function NestedSafesList(): ReactElement | null {
               <CheckWallet>
                 {(isOk) => (
                   <Button
-                    onClick={() => setTxFlow(<CreateNestedSafe />)}
+                    onClick={() => setTxFlow(<CreateNestedSafeFlow />)}
                     variant="text"
                     startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
                     disabled={!isOk}

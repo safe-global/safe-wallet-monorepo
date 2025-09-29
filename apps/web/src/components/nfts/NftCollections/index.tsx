@@ -1,5 +1,5 @@
-import { type SyntheticEvent, type ReactElement, useCallback, useEffect, useState, useContext } from 'react'
-import { type SafeCollectibleResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SyntheticEvent, type ReactElement, useCallback, useEffect, useMemo, useState, useContext } from 'react'
+import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import PagePlaceholder from '@/components/common/PagePlaceholder'
 import NftIcon from '@/public/images/common/nft.svg'
@@ -14,21 +14,14 @@ import { TxModalContext } from '@/components/tx-flow'
 import { NftTransferFlow } from '@/components/tx-flow/flows'
 
 const NftCollections = (): ReactElement => {
-  // Track the current NFT page url
-  const [pageUrl, setPageUrl] = useState<string>()
-  // Load NFTs from the backend
-  const [nftPage, error, loading] = useCollectibles(pageUrl)
-  // Keep all loaded NFTs in one big array
-  const [allNfts, setAllNfts] = useState<SafeCollectibleResponse[]>([])
-  // Selected NFTs
-  const [selectedNfts, setSelectedNfts] = useState<SafeCollectibleResponse[]>([])
-  // Preview
-  const [previewNft, setPreviewNft] = useState<SafeCollectibleResponse>()
+  const { nfts, error, isInitialLoading, isFetchingNextPage, hasNextPage, loadMore } = useCollectibles()
+  const [selectedNfts, setSelectedNfts] = useState<Collectible[]>([])
+  const [previewNft, setPreviewNft] = useState<Collectible>()
   // Tx modal
   const { setTxFlow } = useContext(TxModalContext)
 
   // On NFT preview click
-  const onPreview = useCallback((token: SafeCollectibleResponse) => {
+  const onPreview = useCallback((token: Collectible) => {
     setPreviewNft(token)
     trackEvent(NFT_EVENTS.PREVIEW)
   }, [])
@@ -48,15 +41,14 @@ const NftCollections = (): ReactElement => {
     [selectedNfts, setTxFlow],
   )
 
-  // Add new NFTs to the accumulated list
+  const nftKeys = useMemo(() => new Set(nfts.map((item) => `${item.address}-${item.id}`)), [nfts])
+
   useEffect(() => {
-    if (nftPage) {
-      setAllNfts((prev) => prev.concat(nftPage.results))
-    }
-  }, [nftPage])
+    setSelectedNfts((prevSelected) => prevSelected.filter((item) => nftKeys.has(`${item.address}-${item.id}`)))
+  }, [nftKeys])
 
   // No NFTs to display
-  if (nftPage && !nftPage.results.length) {
+  if (!isInitialLoading && nfts.length === 0) {
     return <PagePlaceholder img={<NftIcon />} text="No NFTs available or none detected" />
   }
 
@@ -73,14 +65,14 @@ const NftCollections = (): ReactElement => {
 
           {/* NFTs table */}
           <NftGrid
-            nfts={allNfts}
+            nfts={nfts}
             selectedNfts={selectedNfts}
             setSelectedNfts={setSelectedNfts}
             onPreview={onPreview}
-            isLoading={loading || !nftPage || !!nftPage?.next}
+            isLoading={isInitialLoading || isFetchingNextPage}
           >
             {/* Infinite scroll at the bottom of the table */}
-            {nftPage?.next ? <InfiniteScroll onLoadMore={() => setPageUrl(nftPage.next)} /> : null}
+            {hasNextPage ? <InfiniteScroll onLoadMore={loadMore} /> : null}
           </NftGrid>
         </form>
       )}

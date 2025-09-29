@@ -35,6 +35,7 @@ const mockSafeItem = {
 // Create a constant object for the selector result
 const mockActiveSafe = { address: faker.finance.ethereumAddress() as `0x${string}`, chainId: '1' }
 const mockChainIds = ['1'] as const
+const mockDelegates = {}
 
 // Mock Redux selectors
 jest.mock('@/src/store/activeSafeSlice', () => ({
@@ -48,10 +49,31 @@ jest.mock('@/src/store/activeSafeSlice', () => ({
 jest.mock('@/src/store/chains', () => ({
   getChainsByIds: () => mockedChains,
   selectAllChainsIds: () => mockChainIds,
+  selectAllChains: () => mockedChains,
 }))
 
 jest.mock('@/src/store/myAccountsSlice', () => ({
   selectMyAccountsMode: () => false,
+}))
+
+jest.mock('@/src/store/delegatesSlice', () => ({
+  selectDelegates: () => mockDelegates,
+  addDelegate: {
+    type: 'delegates/addDelegate',
+    match: jest.fn(),
+  },
+}))
+
+jest.mock('@/src/hooks/useNotificationCleanup', () => ({
+  useNotificationCleanup: () => ({
+    cleanupNotificationsForDelegate: jest.fn(),
+  }),
+}))
+
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/delegates', () => ({
+  cgwApi: {
+    useDelegatesDeleteDelegateV2Mutation: () => [jest.fn(), { isLoading: false }],
+  },
 }))
 
 describe('MyAccountsContainer', () => {
@@ -92,7 +114,7 @@ describe('MyAccountsContainer', () => {
       initialStore: {
         addressBook: {
           contacts: {
-            [mockSafeItem.address]: { name: 'Test Safe', value: mockSafeItem.address },
+            [mockSafeItem.address]: { name: 'Test Safe', value: mockSafeItem.address, chainIds: [] },
           },
           selectedContact: null,
         },

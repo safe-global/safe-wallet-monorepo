@@ -14,44 +14,43 @@
 
 import createTransformer from './transform'
 export const importMapping = {
-    // Messages
-    SafeMessageListItemType: { module: '@safe-global/store/gateway/types', newName: 'SafeMessageListItemType' },
-    SafeMessageDateLabel: { module: '@safe-global/store/gateway/AUTO_GENERATED/messages', newName: 'DateLabel' },
-    SafeMessageStatus: { module: '@safe-global/store/gateway/types', newName: 'SafeMessageStatus' },
-    TypedDataDomain: { module: '@safe-global/store/gateway/AUTO_GENERATED/messages', newName: 'TypedDataDomain' },
-    TypedDataTypes: { module: '@safe-global/store/gateway/AUTO_GENERATED/messages', newName: 'TypedDataParameter' },
-    TypedMessageTypes: { module: '@safe-global/store/gateway/types', newName: 'TypedMessageTypes' },
-    EIP712TypedData: { module: '@safe-global/store/gateway/AUTO_GENERATED/messages', newName: 'TypedData' },
-    SafeMessage: { module: '@safe-global/store/gateway/AUTO_GENERATED/messages', newName: 'MessageItem' },
-    SafeMessageListItem: { module: '@safe-global/store/gateway/types', newName: 'SafeMessageListItem' },
-    SafeMessageListPage: { module: '@safe-global/store/gateway/AUTO_GENERATED/messages', newName: 'MessagePage' },
-    ProposeSafeMessageRequest: {
-      module: '@safe-global/store/gateway/AUTO_GENERATED/messages',
-      newName: 'CreateMessageDto',
-    },
-    ConfirmSafeMessageRequest: {
-      module: '@safe-global/store/gateway/AUTO_GENERATED/messages',
-      newName: 'UpdateMessageSignatureDto',
-    },
-  }
-  
-  export const enumLiteralMappings = {
-    SafeMessageStatus: {
-      NEEDS_CONFIRMATION: 'NEEDS_CONFIRMATION',
-      CONFIRMED: 'CONFIRMED',
-    },
-  
-    SafeMessageListItemType: {
-      DATE_LABEL: 'DATE_LABEL',
-      MESSAGE: 'MESSAGE',
-    },
-  }
+  // Messages
+  SafeMessageListItemType: { module: '@safe-global/store/gateway/types', newName: 'SafeMessageListItemType' },
+  SafeMessageDateLabel: { module: '@safe-global/store/gateway/AUTO_GENERATED/messages', newName: 'DateLabel' },
+  SafeMessageStatus: { module: '@safe-global/store/gateway/types', newName: 'SafeMessageStatus' },
+  TypedDataDomain: { module: '@safe-global/store/gateway/AUTO_GENERATED/messages', newName: 'TypedDataDomain' },
+  TypedDataTypes: { module: '@safe-global/store/gateway/AUTO_GENERATED/messages', newName: 'TypedDataParameter' },
+  TypedMessageTypes: { module: '@safe-global/store/gateway/types', newName: 'TypedMessageTypes' },
+  EIP712TypedData: { module: '@safe-global/store/gateway/AUTO_GENERATED/messages', newName: 'TypedData' },
+  SafeMessage: { module: '@safe-global/store/gateway/AUTO_GENERATED/messages', newName: 'MessageItem' },
+  SafeMessageListItem: { module: '@safe-global/store/gateway/types', newName: 'SafeMessageListItem' },
+  SafeMessageListPage: { module: '@safe-global/store/gateway/AUTO_GENERATED/messages', newName: 'MessagePage' },
+  ProposeSafeMessageRequest: {
+    module: '@safe-global/store/gateway/AUTO_GENERATED/messages',
+    newName: 'CreateMessageDto',
+  },
+  ConfirmSafeMessageRequest: {
+    module: '@safe-global/store/gateway/AUTO_GENERATED/messages',
+    newName: 'UpdateMessageSignatureDto',
+  },
+}
 
-  export const sourcePackage = '@safe-global/safe-gateway-typescript-sdk' 
+export const enumLiteralMappings = {
+  SafeMessageStatus: {
+    NEEDS_CONFIRMATION: 'NEEDS_CONFIRMATION',
+    CONFIRMED: 'CONFIRMED',
+  },
+
+  SafeMessageListItemType: {
+    DATE_LABEL: 'DATE_LABEL',
+    MESSAGE: 'MESSAGE',
+  },
+}
+
+export const sourcePackage = '@safe-global/safe-gateway-typescript-sdk'
 
 export default createTransformer({
-    importMapping,
-    enumLiteralMappings,
-    sourcePackage
+  importMapping,
+  enumLiteralMappings,
+  sourcePackage,
 })
-  

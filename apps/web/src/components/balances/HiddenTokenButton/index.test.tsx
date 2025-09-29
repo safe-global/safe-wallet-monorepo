@@ -60,6 +60,7 @@ describe('HiddenTokenToggle', () => {
         ],
       },
       loading: false,
+      loaded: true,
       error: undefined,
     }
 

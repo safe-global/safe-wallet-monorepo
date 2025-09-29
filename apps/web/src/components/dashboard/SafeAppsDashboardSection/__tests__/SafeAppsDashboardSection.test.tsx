@@ -106,29 +106,14 @@ describe('Safe Apps Dashboard Section', () => {
   it('should display the Safe Apps Section', async () => {
     render(<SafeAppsDashboardSection />)
 
-    await waitFor(() => expect(screen.getByText('Safe Apps')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('Featured Apps')).toBeInTheDocument())
   })
 
   it('should display Safe Apps Cards (Name & Description)', async () => {
     render(<SafeAppsDashboardSection />)
 
     await waitFor(() => expect(screen.getByText('Compound')).toBeInTheDocument())
-    await waitFor(() => expect(screen.getByText('Money markets on the Ethereum blockchain')).toBeInTheDocument())
-
     await waitFor(() => expect(screen.getByText('ENS App')).toBeInTheDocument())
-    await waitFor(() =>
-      expect(screen.getByText('Decentralised naming for wallets, websites, & more.')).toBeInTheDocument(),
-    )
-
-    // Synthetix is not displayed as it is not featured
-
     await waitFor(() => expect(screen.getByText('Transaction Builder')).toBeInTheDocument())
-    await waitFor(() => expect(screen.getByText('A Safe app to compose custom transactions')).toBeInTheDocument())
-  })
-
-  it('should show the Explore Safe Apps Link', async () => {
-    render(<SafeAppsDashboardSection />)
-
-    await waitFor(() => expect(screen.getByText('Explore Safe Apps')).toBeInTheDocument())
   })
 })

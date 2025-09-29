@@ -8,6 +8,48 @@
   margin-top: calc(var(--space-3) * -1);
 }
 
+.dashboardGrid {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: 1fr;
+  grid-auto-flow: row;
+  align-items: start;
+}
+
+.leftCol {
+  display: contents;
+  min-width: 0;
+}
+
+.rightCol {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+@media (min-width: 1200px) {
+  .dashboardGrid {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+
+  .leftCol {
+    display: flex;
+    flex-direction: column;
+    grid-column: 1 / 2;
+    gap: var(--space-3);
+  }
+
+  .rightCol {
+    grid-column: 2 / 3;
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 1199.98px) {
+  .rightCol {
+    grid-row: 4;
+  }
+}
+
 @media (max-width: 599.95px) {
   .topBanner {
     margin-left: calc(var(--space-2) * -1);

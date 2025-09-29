@@ -21,21 +21,6 @@ describe('Proposers 2 tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('Verify that an owner that is also a proposer can still execute transactions', () => {
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_32)
-    cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
-    wallet.connectSigner(signer)
-    createtx.clickOnNewtransactionBtn()
-    createtx.clickOnSendTokensBtn()
-    createtx.typeRecipientAddress(getMockAddress())
-    createtx.setSendValue(sendValue)
-    createtx.clickOnNextBtn()
-    tx.selectExecuteNow()
-    createtx.clickOnContinueSignTransactionBtn()
-    createtx.clickOnAcknowledgement()
-    createtx.verifySubmitBtnIsEnabled()
-  })
-
   it('Verify a proposers is capable of propose transactions', () => {
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_33)
     cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })

@@ -99,14 +99,13 @@ export const Alert = ({
             flexDirection="row"
             justifyContent={contentAlignment}
             backgroundColor="$background"
-            paddingLeft="$4"
-            paddingRight="$4"
-            paddingVertical="$3"
+            paddingVertical="$2"
+            paddingHorizontal="$4"
             borderRadius={'$2'}
           >
             {startIcon ? <View testID="alert-start-icon">{startIcon}</View> : Icon}
 
-            <View gap={'$1'} flex={orientation !== 'center' ? 1 : undefined}>
+            <View gap={'$1'} flexShrink={1} paddingVertical={info ? '$2' : undefined}>
               {typeof message === 'string' ? <AlertTitleStyled message={message} /> : message}
               {info && typeof info === 'string' ? (
                 <Text fontSize={'$3'} fontFamily={'$body'}>

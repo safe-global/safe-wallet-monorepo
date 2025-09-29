@@ -39,7 +39,7 @@ describe('ImportPrivateKey', () => {
     act(() => fireEvent.changeText(input, 'test-private-key'))
 
     await waitFor(() => {
-      expect(screen.getByTestId('safe-input').children[0].props.value).toBe('test-private-key')
+      expect(screen.getByDisplayValue('test-private-key')).toBeTruthy()
     })
   })
 })

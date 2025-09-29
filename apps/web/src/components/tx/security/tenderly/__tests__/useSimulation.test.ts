@@ -26,9 +26,9 @@ describe('useSimulation()', () => {
 
   it('should have the correct initial values', () => {
     const { result } = renderHook(() => useSimulation())
-    const { simulation, simulationLink, requestError: simulationError, _simulationRequestStatus } = result.current
+    const { simulationData, simulationLink, requestError: simulationError, _simulationRequestStatus } = result.current
 
-    expect(simulation).toBeUndefined()
+    expect(simulationData).toBeUndefined()
     expect(simulationLink).not.toBeUndefined()
     expect(simulationError).toBeUndefined()
     expect(_simulationRequestStatus).toEqual(FETCH_STATUS.NOT_ASKED)
@@ -149,10 +149,10 @@ describe('useSimulation()', () => {
     )
 
     await waitFor(() => {
-      const { _simulationRequestStatus, simulation } = result.current
+      const { _simulationRequestStatus, simulationData } = result.current
       expect(_simulationRequestStatus).toEqual(FETCH_STATUS.SUCCESS)
-      expect(simulation?.simulation.status).toBeTruthy()
-      expect(simulation?.simulation.id).toEqual('123')
+      expect(simulationData?.simulation.status).toBeTruthy()
+      expect(simulationData?.simulation.id).toEqual('123')
     })
 
     expect(mockFetch).toHaveBeenCalledTimes(1)
@@ -162,7 +162,7 @@ describe('useSimulation()', () => {
     })
 
     expect(result.current._simulationRequestStatus).toEqual(FETCH_STATUS.NOT_ASKED)
-    expect(result.current.simulation).toBeUndefined()
+    expect(result.current.simulationData).toBeUndefined()
   })
 
   it('should set simulation for not-executable transaction on success', async () => {
@@ -219,10 +219,10 @@ describe('useSimulation()', () => {
     )
 
     await waitFor(() => {
-      const { _simulationRequestStatus, simulation } = result.current
+      const { _simulationRequestStatus, simulationData } = result.current
       expect(_simulationRequestStatus).toEqual(FETCH_STATUS.SUCCESS)
-      expect(simulation?.simulation.status).toBeTruthy()
-      expect(simulation?.simulation.id).toEqual('123')
+      expect(simulationData?.simulation.status).toBeTruthy()
+      expect(simulationData?.simulation.id).toEqual('123')
     })
 
     expect(mockFetch).toHaveBeenCalledTimes(1)

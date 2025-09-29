@@ -42,6 +42,7 @@ const getVisibleFiatTotal = (balances: SafeBalanceResponse, hiddenAssets: string
 
 export const useVisibleBalances = (): {
   balances: SafeBalanceResponse
+  loaded: boolean
   loading: boolean
   error?: string
 } => {

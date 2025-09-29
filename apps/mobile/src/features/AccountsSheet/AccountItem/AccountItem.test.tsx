@@ -82,7 +82,7 @@ describe('AccountItem', () => {
         initialStore: {
           addressBook: {
             contacts: {
-              [mockAccount.address.value]: { name: 'Test Safe', value: mockAccount.address.value },
+              [mockAccount.address.value]: { name: 'Test Safe', value: mockAccount.address.value, chainIds: [] },
             },
             selectedContact: null,
           },

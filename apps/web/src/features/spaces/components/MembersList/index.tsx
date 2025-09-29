@@ -7,11 +7,12 @@ import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import MemberName from './MemberName'
 import RemoveMemberDialog from './RemoveMemberDialog'
 import { useState } from 'react'
-import { MemberRole, useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import EditMemberDialog from '@/features/spaces/components/MembersList/EditMemberDialog'
-import { MemberStatus } from '../../hooks/useSpaceMembers'
+import { isAdmin as checkIsAdmin, isActiveAdmin, MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
+import { useAdminCount } from '@/features/spaces/hooks/useIsLastActiveAdmin'
 
 const headCells = [
   {
@@ -91,10 +92,10 @@ export const RemoveMemberButton = ({
 
 const MembersList = ({ members }: { members: Member[] }) => {
   const isAdmin = useIsAdmin()
-  const adminCount = members.filter((member) => member.role === MemberRole.ADMIN).length
+  const adminCount = useAdminCount(members)
 
   const rows = members.map((member) => {
-    const isLastAdmin = adminCount === 1 && member.role === MemberRole.ADMIN
+    const isLastAdmin = adminCount === 1 && isActiveAdmin(member)
     const isInvite = member.status === MemberStatus.INVITED || member.status === MemberStatus.DECLINED
     const isDeclined = member.status === MemberStatus.DECLINED
     const isDisabled = isAdmin && isLastAdmin && !isInvite
@@ -121,7 +122,7 @@ const MembersList = ({ members }: { members: Member[] }) => {
           content: (
             <Chip
               size="small"
-              label={member.role === MemberRole.ADMIN ? 'Admin' : 'Member'}
+              label={checkIsAdmin(member) ? 'Admin' : 'Member'}
               sx={{ backgroundColor: 'background.lightgrey', borderRadius: 0.5 }}
             />
           ),

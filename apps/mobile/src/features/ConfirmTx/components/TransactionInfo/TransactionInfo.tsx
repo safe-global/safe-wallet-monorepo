@@ -1,70 +1,35 @@
 import React from 'react'
-import { Text, View, YStack } from 'tamagui'
-import { Badge } from '@/src/components/Badge'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { SafeListItem } from '@/src/components/SafeListItem'
-import { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { useRouter } from 'expo-router'
+import { YStack } from 'tamagui'
+import { MultisigExecutionDetails, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { TransactionChecks } from '../TransactionChecks'
+import { ConfirmationsInfo } from '../ConfirmationsInfo'
+import { isMultisigDetailedExecutionInfo } from '@/src/utils/transaction-guards'
+import { PendingTx } from '@/src/store/pendingTxsSlice'
+import { PendingTxInfo } from '@/src/features/ConfirmTx/components/PendingTxInfo'
 
 export function TransactionInfo({
   detailedExecutionInfo,
   txId,
+  txDetails,
+  pendingTx,
 }: {
   detailedExecutionInfo: MultisigExecutionDetails
   txId: string
+  txDetails?: TransactionDetails
+  pendingTx?: PendingTx
 }) {
-  const hasEnoughConfirmations =
-    detailedExecutionInfo?.confirmationsRequired === detailedExecutionInfo?.confirmations?.length
-
-  const router = useRouter()
-
-  const onConfirmationsPress = () => {
-    router.push({
-      pathname: '/confirmations-sheet',
-      params: { txId },
-    })
-  }
-
-  const onTransactionChecksPress = () => {
-    router.push({
-      pathname: '/transaction-checks',
-      params: { txId },
-    })
+  let createdAt = null
+  if (isMultisigDetailedExecutionInfo(detailedExecutionInfo)) {
+    createdAt = detailedExecutionInfo.submittedAt
   }
 
   return (
     <YStack paddingHorizontal="$4" gap="$4" marginTop="$4">
-      <SafeListItem
-        onPress={onTransactionChecksPress}
-        leftNode={<SafeFontIcon name="shield" />}
-        label="Transaction checks"
-        rightNode={<SafeFontIcon name={'chevron-right'} />}
-      />
+      {pendingTx && <PendingTxInfo createdAt={createdAt} pendingTx={pendingTx} />}
 
-      <SafeListItem
-        label="Confirmations"
-        onPress={onConfirmationsPress}
-        rightNode={
-          <View alignItems="center" flexDirection="row">
-            <Badge
-              circular={false}
-              content={
-                <View alignItems="center" flexDirection="row" gap="$1">
-                  <SafeFontIcon size={12} name="owners" />
+      {!pendingTx && <TransactionChecks txId={txId} txDetails={txDetails} />}
 
-                  <Text fontWeight={600} color={'$color'}>
-                    {detailedExecutionInfo?.confirmations?.length}/{detailedExecutionInfo?.confirmationsRequired}
-                  </Text>
-                </View>
-              }
-              // TODO: Add logic to check if confirmations are enough
-              themeName={hasEnoughConfirmations ? 'badge_success_variant1' : 'badge_warning_variant1'}
-            />
-
-            <SafeFontIcon name="chevron-right" />
-          </View>
-        }
-      />
+      <ConfirmationsInfo detailedExecutionInfo={detailedExecutionInfo} txId={txId} />
     </YStack>
   )
 }

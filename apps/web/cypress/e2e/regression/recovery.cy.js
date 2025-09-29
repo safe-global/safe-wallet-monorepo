@@ -144,7 +144,6 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     wallet.connectSigner(signer)
     main.acceptCookies()
     recovery.clickOnSetupRecoveryBtn()
-    recovery.clickOnSetupRecoveryModalBtn()
     recovery.clickOnNextBtn()
     recovery.enterRecovererAddress(getMockAddress())
     recovery.agreeToTerms()

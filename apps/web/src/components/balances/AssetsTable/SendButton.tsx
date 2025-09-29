@@ -9,7 +9,7 @@ import { ASSETS_EVENTS } from '@/services/analytics/events/assets'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { TxModalContext } from '@/components/tx-flow'
 
-const SendButton = ({ tokenInfo, isOutlined }: { tokenInfo: TokenInfo; isOutlined?: boolean }) => {
+const SendButton = ({ tokenInfo, light }: { tokenInfo: TokenInfo; light?: boolean }) => {
   const spendingLimit = useSpendingLimit(tokenInfo)
   const { setTxFlow } = useContext(TxModalContext)
 
@@ -23,13 +23,13 @@ const SendButton = ({ tokenInfo, isOutlined }: { tokenInfo: TokenInfo; isOutline
         <Track {...ASSETS_EVENTS.SEND}>
           <Button
             data-testid="send-button"
-            variant={isOutlined ? 'outlined' : 'contained'}
-            color="primary"
-            size="small"
+            variant="contained"
+            color={light ? 'background.paper' : 'primary'}
+            size="compact"
             startIcon={<ArrowIconNW />}
             onClick={onSendClick}
             disabled={!isOk}
-            sx={{ height: '37.5px' }}
+            sx={{ height: 32, px: 2 }}
           >
             Send
           </Button>
