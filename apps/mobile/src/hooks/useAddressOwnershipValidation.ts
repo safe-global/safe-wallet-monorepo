@@ -2,11 +2,8 @@ import { useCallback } from 'react'
 import { useAppSelector } from '@/src/store/hooks'
 import { useGlobalSearchParams } from 'expo-router'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { useLazySafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
-import { selectAllChainsIds } from '@/src/store/chains'
+import { useLazyOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
-import { selectCurrency } from '@/src/store/settingsSlice'
-import { makeSafeId } from '@/src/utils/formatters'
 import { extractSignersFromSafes } from '@/src/features/ImportReadOnly/helpers/safes'
 import logger from '@/src/utils/logger'
 import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
@@ -23,12 +20,10 @@ export interface AddressValidationResult {
  */
 export const useAddressOwnershipValidation = () => {
   const glob = useGlobalSearchParams<{ safeAddress?: string; chainId?: string; import_safe?: string }>()
-  const chainIds = useAppSelector(selectAllChainsIds)
   const activeSafe = useAppSelector(selectActiveSafe)
-  const currency = useAppSelector(selectCurrency)
 
   const [singleSafeTrigger] = useLazySafesGetSafeV1Query({})
-  const [manySafesTrigger] = useLazySafesGetOverviewForManyQuery()
+  const [ownerSafesTrigger] = useLazyOwnersGetAllSafesByOwnerV2Query()
 
   const validateAddressOwnership = useCallback(
     async (address: string): Promise<AddressValidationResult> => {
@@ -47,43 +42,54 @@ export const useAddressOwnershipValidation = () => {
       }
 
       try {
-        let safesData: { owners: { value: string }[] }[] = []
-
         if (glob?.import_safe) {
-          // Multi-chain validation
-          const result = await manySafesTrigger({
-            safes: chainIds.map((chainId: string) => makeSafeId(chainId, safeAddress as string)),
-            currency,
-            trusted: true,
-            excludeSpam: true,
+          // Multi-chain validation - check if address owns the specified safe on any chain
+          const ownedSafesResult = await ownerSafesTrigger({
+            ownerAddress: address,
           }).unwrap()
-          safesData = result || []
+
+          // Check if the specified safe address is owned by this address on any chain
+          const isOwnerOfSafe = Object.entries(ownedSafesResult || {}).some(([_chainId, safeAddresses]) =>
+            safeAddresses.some((addr) => addr.toLowerCase() === safeAddress?.toLowerCase()),
+          )
+
+          if (isOwnerOfSafe) {
+            // If the address owns the safe, we can return early with a simple confirmation
+            // We don't have the full owner info from this endpoint, but we know they're an owner
+            return {
+              isOwner: true,
+              ownerInfo: { value: address } as AddressInfo,
+            }
+          } else {
+            return { isOwner: false }
+          }
         } else if (safeAddress && chainId) {
           // Single safe validation
           const result = await singleSafeTrigger({
             safeAddress,
             chainId,
           }).unwrap()
-          safesData = result ? [result] : []
+
+          if (!result) {
+            return { isOwner: false }
+          }
+
+          const owners = extractSignersFromSafes([result])
+          const ownerInfo = Object.values(owners).find((owner) => owner.value.toLowerCase() === address.toLowerCase())
+
+          return {
+            isOwner: !!ownerInfo,
+            ownerInfo,
+          }
         }
 
-        if (safesData.length === 0) {
-          return { isOwner: false }
-        }
-
-        const owners = extractSignersFromSafes(safesData)
-        const ownerInfo = Object.values(owners).find((owner) => owner.value.toLowerCase() === address.toLowerCase())
-
-        return {
-          isOwner: !!ownerInfo,
-          ownerInfo,
-        }
+        return { isOwner: false }
       } catch (error) {
         logger.error('Error validating address ownership:', error)
         return { isOwner: false }
       }
     },
-    [glob, activeSafe, chainIds, currency, manySafesTrigger, singleSafeTrigger],
+    [glob, activeSafe, ownerSafesTrigger, singleSafeTrigger],
   )
 
   return {

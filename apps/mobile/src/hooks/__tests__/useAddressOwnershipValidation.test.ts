@@ -1,13 +1,10 @@
-import { renderHook, renderHookWithStore, createTestStore } from '../../tests/test-utils'
+import { renderHook } from '../../tests/test-utils'
 import { useAddressOwnershipValidation } from '../useAddressOwnershipValidation'
 import { server } from '../../tests/server'
 import { http, HttpResponse } from 'msw'
 import { faker } from '@faker-js/faker'
 import { GATEWAY_URL } from '@/src/config/constants'
-import { makeSafeId } from '@/src/utils/formatters'
-import { extractSignersFromSafes } from '@/src/features/ImportReadOnly/helpers/safes'
 import { act } from '@testing-library/react-native'
-import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 
 jest.mock('expo-router', () => ({
   useGlobalSearchParams: jest.fn(() => ({})),
@@ -118,63 +115,60 @@ describe('useAddressOwnershipValidation', () => {
     })
   })
 
-  it('validates multiple safes when import_safe present', async () => {
+  it('validates multiple safes when import_safe present and address is owner', async () => {
     mockUseGlobalSearchParams.mockReturnValue({ import_safe: 'true', safeAddress: mockSafeAddress })
 
-    const mockChainIds = ['1', '137', '42161']
-    const mockSafes = mockChainIds.map((id) => makeSafeId(id, mockSafeAddress))
-    const mockSafesData = [
-      {
-        address: { value: mockSafeAddress },
-        chainId: '1',
-        threshold: 1,
-        owners: mockOwners,
-        fiatTotal: '0',
-        queued: 0,
-        awaitingConfirmation: 0,
-      },
-      {
-        address: { value: mockSafeAddress },
-        chainId: '137',
-        threshold: 1,
-        owners: [mockOwners[1]],
-        fiatTotal: '0',
-        queued: 0,
-        awaitingConfirmation: 0,
-      },
-    ]
+    // Mock the new v2 owners endpoint response
+    const mockOwnedSafesResponse = {
+      '1': [mockSafeAddress, faker.finance.ethereumAddress()],
+      '137': [faker.finance.ethereumAddress()],
+      '42161': [mockSafeAddress],
+    }
 
     server.use(
-      http.get(`${GATEWAY_URL}/v1/safes`, ({ request }) => {
-        const url = new URL(request.url)
-        expect(url.searchParams.get('safes')).toBe(mockSafes.join(','))
-        expect(url.searchParams.get('currency')).toBe(mockCurrency)
-        expect(url.searchParams.get('trusted')).toBe('true')
-        expect(url.searchParams.get('exclude_spam')).toBe('true')
-
-        return HttpResponse.json(mockSafesData)
+      http.get(`${GATEWAY_URL}/v2/owners/${mockAddress}/safes`, () => {
+        return HttpResponse.json(mockOwnedSafesResponse)
       }),
     )
 
-    const store = createTestStore({ settings: { currency: mockCurrency } })
-
-    await act(async () => {
-      await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
-    })
-
-    const { result } = renderHookWithStore(() => useAddressOwnershipValidation(), store)
+    const { result } = renderHook(() => useAddressOwnershipValidation())
 
     let validationResult
     await act(async () => {
       validationResult = await result.current.validateAddressOwnership(mockAddress)
     })
 
-    const expectedOwners = extractSignersFromSafes(mockSafesData)
-    const expectedInfo = Object.values(expectedOwners).find((o) => o.value.toLowerCase() === mockAddress.toLowerCase())
-
     expect(validationResult).toEqual({
       isOwner: true,
-      ownerInfo: expectedInfo,
+      ownerInfo: { value: mockAddress },
+    })
+  })
+
+  it('returns false for multiple safes when import_safe present but address is not owner', async () => {
+    mockUseGlobalSearchParams.mockReturnValue({ import_safe: 'true', safeAddress: mockSafeAddress })
+
+    // Mock the new v2 owners endpoint response without the target safe
+    const mockOwnedSafesResponse = {
+      '1': [faker.finance.ethereumAddress()],
+      '137': [faker.finance.ethereumAddress()],
+      '42161': [faker.finance.ethereumAddress()],
+    }
+
+    server.use(
+      http.get(`${GATEWAY_URL}/v2/owners/${mockAddress}/safes`, () => {
+        return HttpResponse.json(mockOwnedSafesResponse)
+      }),
+    )
+
+    const { result } = renderHook(() => useAddressOwnershipValidation())
+
+    let validationResult
+    await act(async () => {
+      validationResult = await result.current.validateAddressOwnership(mockAddress)
+    })
+
+    expect(validationResult).toEqual({
+      isOwner: false,
     })
   })
 
