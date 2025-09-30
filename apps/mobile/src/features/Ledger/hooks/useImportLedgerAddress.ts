@@ -34,7 +34,7 @@ export const useImportLedgerAddress = () => {
   }, [])
 
   const importAddress = useCallback(
-    async (address: string, path: string, index: number): Promise<ImportResult | ImportFailure> => {
+    async (address: string, path: string, index: number, name: string): Promise<ImportResult | ImportFailure> => {
       if (!address || !path) {
         setError({
           code: 'VALIDATION',
@@ -58,10 +58,14 @@ export const useImportLedgerAddress = () => {
           return { success: false }
         }
 
+        let ownerName = validationResult.ownerInfo?.name || null
+        if (!ownerName) {
+          ownerName = `${name}-${address.slice(-4)}`
+        }
         await dispatch(
           addSignerWithEffects({
             value: address,
-            name: validationResult.ownerInfo?.name || null,
+            name: ownerName,
             logoUri: validationResult.ownerInfo?.logoUri || null,
             type: 'ledger',
             derivationPath: path,
