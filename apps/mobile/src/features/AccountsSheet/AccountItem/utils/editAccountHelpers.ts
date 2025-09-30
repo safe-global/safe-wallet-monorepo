@@ -14,13 +14,12 @@ interface SafesCollection extends Record<string, SafesSliceItem> {}
 
 interface SignersCollection extends Record<string, unknown> {}
 
-export interface SafeNavigationConfig {
+export interface SafeDeletionContext {
   navigation: {
     dispatch: (action: ReturnType<typeof CommonActions.reset>) => void
   }
   activeSafe: { address: Address; chainId: string } | null
   safes: SafesCollection
-  dispatch: AppDispatch
 }
 
 export const isOwnerInOtherSafes = (
@@ -164,14 +163,16 @@ export const createDeletionMessage = (ownersWithPrivateKeys: Address[], ownersTo
 
 export const proceedWithSafeDeletion = (
   address: Address,
-  { navigation, activeSafe, safes, dispatch }: SafeNavigationConfig,
+  deletionContext: SafeDeletionContext,
+  reduxDispatch: AppDispatch,
 ): void => {
+  const { navigation, activeSafe, safes } = deletionContext
   if (activeSafe?.address === address) {
     const [nextAddress, nextInfo] = Object.entries(safes).find(([addr]) => addr !== address) || [null, null]
 
     if (nextAddress && nextInfo) {
       const firstChain = Object.keys(nextInfo)[0]
-      dispatch(
+      reduxDispatch(
         setActiveSafe({
           address: nextAddress as Address,
           chainId: firstChain,
@@ -187,12 +188,12 @@ export const proceedWithSafeDeletion = (
         }),
       )
 
-      dispatch(setEditMode(false))
-      dispatch(setActiveSafe(null))
+      reduxDispatch(setEditMode(false))
+      reduxDispatch(setActiveSafe(null))
     }
   }
 
-  dispatch(removeSafe(address))
+  reduxDispatch(removeSafe(address))
 }
 
 interface HandleConfirmedDeletionParams {
@@ -202,25 +203,23 @@ interface HandleConfirmedDeletionParams {
     ownerAddress: Address,
     ownerPrivateKey: string,
   ) => Promise<StandardErrorResult<{ processedCount: number }>>
-  navigationConfig: SafeNavigationConfig
+  deletionContext: SafeDeletionContext
+  reduxDispatch: AppDispatch
   resolve: () => void
   reject: (error: Error) => void
 }
 
 const handleConfirmedDeletion = async (params: HandleConfirmedDeletionParams) => {
-  const { address, ownersToDelete, removeAllDelegatesForOwner, navigationConfig, resolve, reject } = params
+  const { address, ownersToDelete, removeAllDelegatesForOwner, deletionContext, reduxDispatch, resolve, reject } =
+    params
   try {
     if (ownersToDelete.length === 0) {
-      proceedWithSafeDeletion(address, navigationConfig)
+      proceedWithSafeDeletion(address, deletionContext, reduxDispatch)
       resolve()
       return
     }
 
-    const cleanupResult = await cleanupPrivateKeysForOwners(
-      ownersToDelete,
-      removeAllDelegatesForOwner,
-      navigationConfig.dispatch,
-    )
+    const cleanupResult = await cleanupPrivateKeysForOwners(ownersToDelete, removeAllDelegatesForOwner, reduxDispatch)
 
     if (!cleanupResult.success) {
       Logger.error('Failed to clean up private keys during safe deletion:', cleanupResult.error)
@@ -229,7 +228,7 @@ const handleConfirmedDeletion = async (params: HandleConfirmedDeletionParams) =>
       return
     }
 
-    proceedWithSafeDeletion(address, navigationConfig)
+    proceedWithSafeDeletion(address, deletionContext, reduxDispatch)
     resolve()
   } catch (error) {
     Logger.error('Failed to clean up private keys during safe deletion:', error)
@@ -246,16 +245,17 @@ interface HandleSafeDeletionParams {
     ownerAddress: Address,
     ownerPrivateKey: string,
   ) => Promise<StandardErrorResult<{ processedCount: number }>>
-  navigationConfig: SafeNavigationConfig
+  deletionContext: SafeDeletionContext
+  reduxDispatch: AppDispatch
 }
 
 export const handleSafeDeletion = async (params: HandleSafeDeletionParams): Promise<void> => {
-  const { address, allSafesInfo, allSigners, removeAllDelegatesForOwner, navigationConfig } = params
+  const { address, allSafesInfo, allSigners, removeAllDelegatesForOwner, deletionContext, reduxDispatch } = params
   const ownersWithPrivateKeys = getSafeOwnersWithPrivateKeys(address, allSafesInfo, allSigners)
   const ownersToDelete = getOwnersToDelete(address, allSafesInfo, allSigners)
 
   if (ownersWithPrivateKeys.length === 0) {
-    proceedWithSafeDeletion(address, navigationConfig)
+    proceedWithSafeDeletion(address, deletionContext, reduxDispatch)
     return
   }
 
@@ -277,7 +277,8 @@ export const handleSafeDeletion = async (params: HandleSafeDeletionParams): Prom
             address,
             ownersToDelete,
             removeAllDelegatesForOwner,
-            navigationConfig,
+            deletionContext,
+            reduxDispatch,
             resolve,
             reject,
           }),
