@@ -58,7 +58,7 @@ function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSa
   )
 }
 
-const safeAccountsLimitRaw = Number.parseInt(process.env.SPACES_SAFE_ACCOUNTS_LIMIT ?? '', 10)
+const safeAccountsLimitRaw = Number.parseInt(process.env.NEXT_PUBLIC_SPACES_SAFE_ACCOUNTS_LIMIT ?? '', 10)
 const SAFE_ACCOUNTS_LIMIT = !Number.isNaN(safeAccountsLimitRaw) ? safeAccountsLimitRaw : 40
 
 const AddAccounts = () => {
