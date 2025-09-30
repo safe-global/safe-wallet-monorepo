@@ -170,9 +170,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
 
       async switchChain(hexChainId, appInfo) {
         const decimalChainId = parseInt(hexChainId, 16).toString()
-        if (decimalChainId === chainId) {
-          return null
-        }
+        const isSameChain = decimalChainId === chainId
 
         const targetChain = configs.find((c) => c.chainId === decimalChainId)
         if (!targetChain) {
@@ -181,7 +179,9 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
 
         const safesOnTargetChain = (allSafes ?? []).filter((safeItem) => safeItem.chainId === decimalChainId)
 
-        const matchingSafe = safesOnTargetChain.find((safeItem) => sameAddress(safeItem.address, safeAddress))
+        const matchingSafe = !isSameChain
+          ? safesOnTargetChain.find((safeItem) => sameAddress(safeItem.address, safeAddress))
+          : undefined
 
         if (matchingSafe) {
           await walletConnectInstance.updateSessions(targetChain.chainId, matchingSafe.address)

@@ -632,6 +632,104 @@ describe('useSafeWalletProvider', () => {
       })
     })
 
+    it('should handle consecutive chain switch requests on the same chain', async () => {
+      const mockPush = jest.fn().mockResolvedValue(true)
+
+      const safes = [
+        {
+          chainId: '5',
+          address: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+          isPinned: false,
+          isReadOnly: false,
+          lastVisited: 0,
+          name: 'Safe Alpha',
+        },
+        {
+          chainId: '5',
+          address: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+          isPinned: false,
+          isReadOnly: false,
+          lastVisited: 0,
+          name: 'Safe Beta',
+        },
+      ]
+
+      mockedUseAllSafes.mockReturnValue(safes)
+
+      jest.spyOn(router, 'useRouter').mockReturnValue({
+        push: mockPush,
+        pathname: '/',
+        query: {},
+      } as unknown as router.NextRouter)
+
+      const store = makeStore(
+        {
+          chains: {
+            data: [
+              { chainId: '5', shortName: 'gor', chainName: 'Goerli' } as gateway.ChainInfo,
+            ],
+            loading: false,
+            loaded: true,
+            error: undefined,
+          },
+        } as Partial<RootState>,
+        { skipBroadcast: true },
+      )
+
+      const { result } = renderHook(() => useTxFlowApi('5', safes[0].address), {
+        wrapper: ({ children }) => (
+          <Provider store={store}>
+            <TxModalContext.Provider value={{ setTxFlow: jest.fn() } as any}>{children}</TxModalContext.Provider>
+          </Provider>
+        ),
+      })
+
+      const firstPromise = result.current?.switchChain('0x5', appInfo)
+      expect(firstPromise).toBeInstanceOf(Promise)
+
+      const firstRequest = wcChainSwitchStore.getStore()
+      expect(firstRequest?.safes).toEqual(safes)
+
+      await act(async () => {
+        if (!firstRequest) {
+          throw new Error('Expected WalletConnect chain switch request')
+        }
+
+        await firstRequest.onSelectSafe(safes[1])
+      })
+
+      await expect(firstPromise).resolves.toBeNull()
+      expect(updateSessionsMock).toHaveBeenCalledWith('5', safes[1].address)
+      expect(mockPush).toHaveBeenCalledWith({
+        pathname: '/',
+        query: { safe: 'gor:0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' },
+      })
+
+      updateSessionsMock.mockClear()
+      mockPush.mockClear()
+
+      const secondPromise = result.current?.switchChain('0x5', appInfo)
+      expect(secondPromise).toBeInstanceOf(Promise)
+
+      const secondRequest = wcChainSwitchStore.getStore()
+      expect(secondRequest?.safes).toEqual(safes)
+
+      await act(async () => {
+        if (!secondRequest) {
+          throw new Error('Expected WalletConnect chain switch request')
+        }
+
+        await secondRequest.onSelectSafe(safes[0])
+      })
+
+      await expect(secondPromise).resolves.toBeNull()
+      expect(updateSessionsMock).toHaveBeenCalledWith('5', safes[0].address)
+      expect(mockPush).toHaveBeenCalledWith({
+        pathname: '/',
+        query: { safe: 'gor:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
+      })
+    })
+
     it('should proxy RPC calls', async () => {
       const mockSend = jest.fn(() => Promise.resolve({ result: '0x' }))
 
