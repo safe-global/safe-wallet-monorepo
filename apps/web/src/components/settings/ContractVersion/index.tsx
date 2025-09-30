@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo } from 'react'
+import { useContext, useMemo } from 'react'
 import { SvgIcon, Typography, Alert, AlertTitle, Skeleton, Button } from '@mui/material'
 import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -8,14 +8,12 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { TxModalContext } from '@/components/tx-flow'
-import { MigrateSafeL2Flow, UpdateSafeFlow } from '@/components/tx-flow/flows'
+import { UpdateSafeFlow } from '@/components/tx-flow/flows'
 import ExternalLink from '@/components/common/ExternalLink'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useCurrentChain } from '@/hooks/useChains'
 import { UnsupportedMastercopyWarning } from '@/features/multichain/components/UnsupportedMastercopyWarning/UnsupportedMasterCopyWarning'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
-import useIsUpgradeableMasterCopy from '@/hooks/useIsUpgradeableMasterCopy'
-import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeContracts'
 
 export const ContractVersion = () => {
   const { setTxFlow } = useContext(TxModalContext)
@@ -33,12 +31,6 @@ export const ContractVersion = () => {
   const isLatestVersion = safe.version && !showUpdateDialog
 
   const latestSafeVersion = getLatestSafeVersion(currentChain)
-  const isUpgradeableMasterCopy = useIsUpgradeableMasterCopy()
-  const isUnsupportedMasterCopy = !isValidMasterCopy(safe.implementationVersionState)
-  const showUnsupportedUpgradeDialog = safeLoaded && isUnsupportedMasterCopy && isUpgradeableMasterCopy === true
-
-  const openUpdateFlow = useCallback(() => setTxFlow(<UpdateSafeFlow />), [setTxFlow])
-  const openMigrationFlow = useCallback(() => setTxFlow(<MigrateSafeL2Flow />), [setTxFlow])
 
   return (
     <>
@@ -78,35 +70,7 @@ export const ContractVersion = () => {
 
           <CheckWallet>
             {(isOk) => (
-              <Button onClick={openUpdateFlow} variant="contained" disabled={!isOk}>
-                Update
-              </Button>
-            )}
-          </CheckWallet>
-        </Alert>
-      ) : showUnsupportedUpgradeDialog ? (
-        <Alert
-          sx={{ mt: 2, borderRadius: '2px', borderColor: '#B0FFC9' }}
-          icon={<SvgIcon component={InfoIcon} inheritViewBox color="secondary" />}
-        >
-          <AlertTitle sx={{ fontWeight: 700 }}>
-            New version is available: {latestSafeVersion}
-            {safeMasterCopy?.deployerRepoUrl && (
-              <>
-                {' ('}
-                <ExternalLink href={safeMasterCopy.deployerRepoUrl}>changelog</ExternalLink>)
-              </>
-            )}
-          </AlertTitle>
-
-          <Typography mb={2}>
-            Update now to take advantage of new features and the highest security standards available. You will need to
-            confirm this update just like any other transaction.
-          </Typography>
-
-          <CheckWallet>
-            {(isOk) => (
-              <Button onClick={openMigrationFlow} variant="contained" disabled={!isOk}>
+              <Button onClick={() => setTxFlow(<UpdateSafeFlow />)} variant="contained" disabled={!isOk}>
                 Update
               </Button>
             )}
