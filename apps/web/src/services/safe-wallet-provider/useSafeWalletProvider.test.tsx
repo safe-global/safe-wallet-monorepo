@@ -665,9 +665,7 @@ describe('useSafeWalletProvider', () => {
       const store = makeStore(
         {
           chains: {
-            data: [
-              { chainId: '5', shortName: 'gor', chainName: 'Goerli' } as gateway.ChainInfo,
-            ],
+            data: [{ chainId: '5', shortName: 'gor', chainName: 'Goerli' } as gateway.ChainInfo],
             loading: false,
             loaded: true,
             error: undefined,

@@ -1,19 +1,15 @@
-import { Avatar, Box, Button, Divider, List, ListItemButton, Stack, Typography } from '@mui/material'
+import { Avatar, Box, Button, Stack, Typography } from '@mui/material'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import EthHashInfo from '@/components/common/EthHashInfo'
 import type { AppInfo } from '@/services/safe-wallet-provider'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-
-const getSafeDisplayName = (safe: SafeItem) => {
-  return safe.name || safe.address
-}
+import SingleAccountItem from '@/features/myAccounts/components/AccountItems/SingleAccountItem'
 
 type WcChainSwitchModalProps = {
   appInfo: AppInfo
   chain: ChainInfo
   safes: SafeItem[]
-  onSelectSafe: (safe: SafeItem) => void
+  onSelectSafe: (safe: SafeItem) => Promise<void>
   onCancel: () => void
 }
 
@@ -42,30 +38,20 @@ const WcChainSwitchModal = ({ appInfo, chain, safes, onSelectSafe, onCancel }: W
           : `Connected dapp wants to switch to chain ${chain.chainName} but you don't have Safe Accounts deployed on that chain.`}
       </Typography>
 
-      <List disablePadding sx={{ borderRadius: 2, border: '1px solid var(--color-border-light)' }}>
-        {hasSafes ? (
-          safes.map((safe, index) => (
-            <Box key={safe.address}>
-              {index > 0 ? <Divider /> : null}
-              <ListItemButton onClick={() => onSelectSafe(safe)}>
-                <EthHashInfo
-                  address={safe.address}
-                  name={getSafeDisplayName(safe)}
-                  showName
-                  shortAddress
-                  showCopyButton={false}
-                  showAvatar={false}
-                  chainId={chain.chainId}
-                />
-              </ListItemButton>
-            </Box>
-          ))
-        ) : (
-          <Box p={2}>
-            <Typography variant="body2">You can load or create a Safe on this network to continue.</Typography>
-          </Box>
-        )}
-      </List>
+      {hasSafes ? (
+        safes.map((safe) => (
+          <SingleAccountItem
+            key={`${safe.chainId}-${safe.address}`}
+            safeItem={safe}
+            onSelectSafe={() => onSelectSafe(safe)}
+            showActions={false}
+          />
+        ))
+      ) : (
+        <Box p={2} sx={{ borderRadius: 2, border: '1px solid var(--color-border-light)' }}>
+          <Typography variant="body2">You can load or create a Safe on this network to continue.</Typography>
+        </Box>
+      )}
 
       <Button variant="outlined" onClick={onCancel} sx={{ alignSelf: 'flex-start' }}>
         Cancel
