@@ -1,6 +1,7 @@
 import { renderHook } from '@/tests//test-utils'
 import useSafeNotifications from '../../hooks/useSafeNotifications'
 import useSafeInfo from '../../hooks/useSafeInfo'
+import useIsUpgradeableMasterCopy from '../../hooks/useIsUpgradeableMasterCopy'
 import { showNotification } from '@/store/notificationsSlice'
 
 // mock showNotification
@@ -14,6 +15,9 @@ jest.mock('@/store/notificationsSlice', () => {
 
 // mock useSafeInfo
 jest.mock('../../hooks/useSafeInfo')
+
+// mock useIsUpgradeableMasterCopy
+jest.mock('../../hooks/useIsUpgradeableMasterCopy')
 
 // mock useIsSafeOwner
 jest.mock('../../hooks/useIsSafeOwner', () => ({
@@ -31,6 +35,7 @@ jest.mock('next/router', () => ({
 describe('useSafeNotifications', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue(undefined)
   })
 
   describe('Safe upgrade', () => {
@@ -116,6 +121,7 @@ describe('useSafeNotifications', () => {
 
   describe('Invalid mastercopy', () => {
     it('should show a notification when the mastercopy is invalid', () => {
+      ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue(false)
       ;(useSafeInfo as jest.Mock).mockReturnValue({
         safe: {
           implementation: { value: '0x234' },
@@ -132,9 +138,8 @@ describe('useSafeNotifications', () => {
       expect(result.current).toBeUndefined()
       expect(showNotification).toHaveBeenCalledWith({
         variant: 'warning',
-        message: `This Safe Account was created with an unsupported base contract.
-           The web interface might not work correctly.
-           We recommend using the command line interface instead.`,
+        message:
+          'This Safe Account was created with an unsupported base contract. The web interface might not work correctly. We recommend using the command line interface instead.',
         groupKey: 'invalid-mastercopy',
         link: {
           href: 'https://github.com/5afe/safe-cli',
@@ -161,6 +166,7 @@ describe('useSafeNotifications', () => {
     })
 
     it('should show a notification when the mastercopy is invalid but can be migrated', () => {
+      ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue(true)
       ;(useSafeInfo as jest.Mock).mockReturnValue({
         safe: {
           implementation: { value: '0x123' },
@@ -180,11 +186,16 @@ describe('useSafeNotifications', () => {
       // check that the notification was shown
       expect(result.current).toBeUndefined()
       expect(showNotification).toHaveBeenCalledWith({
-        variant: 'info',
-        message: `This Safe Account was created with an unsupported base contract.
-           It is possible to migrate it to a compatible base contract. You can migrate it to a compatible contract on the Home screen.`,
+        variant: 'warning',
+        message: 'Please upgrade your Safe Account to an officially supported contract.',
         groupKey: 'invalid-mastercopy',
-        link: undefined,
+        link: {
+          href: {
+            pathname: '/settings/setup',
+            query: { safe: 'eth:0x123' },
+          },
+          title: 'Upgrade Safe Account',
+        },
       })
     })
   })

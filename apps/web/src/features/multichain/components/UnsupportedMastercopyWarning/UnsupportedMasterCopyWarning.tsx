@@ -2,20 +2,22 @@ import { TxModalContext } from '@/components/tx-flow'
 import { MigrateSafeL2Flow } from '@/components/tx-flow/flows'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import useIsUpgradeableMasterCopy from '@/hooks/useIsUpgradeableMasterCopy'
 import { Button, Stack, Typography } from '@mui/material'
 import { useCallback, useContext } from 'react'
-import { isMigrationToL2Possible, isValidMasterCopy } from '@safe-global/utils/services/contracts/safeContracts'
+import { isMigrationToL2Possible } from '@safe-global/utils/services/contracts/safeContracts'
 
 export const UnsupportedMastercopyWarning = () => {
   const { safe } = useSafeInfo()
+  const isUpgradeableMasterCopy = useIsUpgradeableMasterCopy()
 
-  const showWarning = !isValidMasterCopy(safe.implementationVersionState) && isMigrationToL2Possible(safe)
+  const showWarning = Boolean(isUpgradeableMasterCopy) && isMigrationToL2Possible(safe)
 
   const { setTxFlow } = useContext(TxModalContext)
 
   const openUpgradeModal = useCallback(() => setTxFlow(<MigrateSafeL2Flow />), [setTxFlow])
 
-  if (!showWarning) return
+  if (!showWarning) return null
 
   return (
     <ErrorMessage level="warning" title="Base contract is not supported">

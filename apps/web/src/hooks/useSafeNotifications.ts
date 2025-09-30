@@ -11,6 +11,7 @@ import useSafeAddress from '@/hooks/useSafeAddress'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { isValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
 import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
+import useIsUpgradeableMasterCopy from './useIsUpgradeableMasterCopy'
 
 const CLI_LINK = {
   href: 'https://github.com/5afe/safe-cli',
@@ -25,6 +26,14 @@ type DismissedUpdateNotifications = {
 
 const DISMISS_NOTIFICATION_KEY = 'dismissUpdateSafe'
 const OUTDATED_VERSION_KEY = 'safe-outdated-version'
+
+const UNSUPPORTED_MASTER_COPY_MESSAGE = [
+  'This Safe Account was created with an unsupported base contract.',
+  'The web interface might not work correctly.',
+  'We recommend using the command line interface instead.',
+].join(' ')
+
+const UPGRADE_MASTER_COPY_MESSAGE = 'Please upgrade your Safe Account to an officially supported contract.'
 
 const isUpdateSafeNotification = (groupKey: string) => {
   return groupKey === OUTDATED_VERSION_KEY
@@ -42,6 +51,9 @@ const useSafeNotifications = (): void => {
   const { chainId, version, implementationVersionState } = safe
   const isOwner = useIsSafeOwner()
   const urlSafeAddress = useSafeAddress()
+  const isUpgradeableMasterCopy = useIsUpgradeableMasterCopy()
+  const isUnsupportedMasterCopy = !isValidMasterCopy(safe.implementationVersionState)
+  const isMigrationPossible = isMigrationToL2Possible(safe)
 
   const dismissUpdateNotification = useCallback(
     (groupKey: string) => {
@@ -134,30 +146,32 @@ const useSafeNotifications = (): void => {
    * Show a notification when the Safe master copy is not supported
    */
   useEffect(() => {
-    if (isValidMasterCopy(safe.implementationVersionState)) return
+    if (!isUnsupportedMasterCopy) return
+    if (isMigrationPossible && isUpgradeableMasterCopy === undefined) return
 
-    const isMigrationPossible = isMigrationToL2Possible(safe)
-
-    const message = isMigrationPossible
-      ? `This Safe Account was created with an unsupported base contract.
-           It is possible to migrate it to a compatible base contract. You can migrate it to a compatible contract on the Home screen.`
-      : `This Safe Account was created with an unsupported base contract.
-           The web interface might not work correctly.
-           We recommend using the command line interface instead.`
+    const shouldPromptUpgrade = isMigrationPossible && Boolean(isUpgradeableMasterCopy)
 
     const id = dispatch(
       showNotification({
-        variant: isMigrationPossible ? 'info' : 'warning',
-        message,
+        variant: 'warning',
+        message: shouldPromptUpgrade ? UPGRADE_MASTER_COPY_MESSAGE : UNSUPPORTED_MASTER_COPY_MESSAGE,
         groupKey: 'invalid-mastercopy',
-        link: isMigrationPossible ? undefined : CLI_LINK,
+        link: shouldPromptUpgrade
+          ? {
+              href: {
+                pathname: AppRoutes.settings.setup,
+                query: { safe: query.safe },
+              },
+              title: 'Upgrade Safe Account',
+            }
+          : CLI_LINK,
       }),
     )
 
     return () => {
       dispatch(closeNotification({ id }))
     }
-  }, [dispatch, safe, safe.implementationVersionState])
+  }, [dispatch, isMigrationPossible, isUnsupportedMasterCopy, isUpgradeableMasterCopy, query.safe])
 }
 
 export default useSafeNotifications
