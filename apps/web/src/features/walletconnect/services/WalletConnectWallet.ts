@@ -151,12 +151,8 @@ class WalletConnectWallet {
       const namespaces: SessionTypes.Namespaces = {
         [EIP155]: {
           ...session.namespaces[EIP155],
-          chains: isUnsupportedChain
-            ? [newEip155ChainId, ...currentEip155ChainIds]
-            : currentEip155ChainIds,
-          accounts: isNewSessionSafe
-            ? [newEip155Account, ...currentEip155Accounts]
-            : currentEip155Accounts,
+          chains: isUnsupportedChain ? [newEip155ChainId, ...currentEip155ChainIds] : currentEip155ChainIds,
+          accounts: isNewSessionSafe ? [newEip155Account, ...currentEip155Accounts] : currentEip155Accounts,
         },
       }
 

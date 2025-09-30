@@ -29,6 +29,7 @@ import useAllSafes, { type SafeItem } from '@/features/myAccounts/hooks/useAllSa
 import { useGetHref } from '@/features/myAccounts/hooks/useGetHref'
 import { wcPopupStore } from '@/features/walletconnect/components'
 import { wcChainSwitchStore } from '@/features/walletconnect/components/WcChainSwitchModal/store'
+import walletConnectInstance from '@/features/walletconnect/services/walletConnectInstance'
 
 export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | undefined => {
   const { safe } = useSafeInfo()
@@ -183,6 +184,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
         const matchingSafe = safesOnTargetChain.find((safeItem) => sameAddress(safeItem.address, safeAddress))
 
         if (matchingSafe) {
+          await walletConnectInstance.updateSessions(targetChain.chainId, matchingSafe.address)
           await router.push(getHref(targetChain, matchingSafe.address))
           return null
         }
@@ -209,6 +211,16 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
           }
 
           const handleSafeSelection = async (safeItem: SafeItem) => {
+            if (settled) return
+
+            try {
+              await walletConnectInstance.updateSessions(targetChain.chainId, safeItem.address)
+            } catch (error) {
+              closeRequestIfActive()
+              reject(error as Error)
+              return
+            }
+
             if (!closeRequestIfActive()) return
 
             try {

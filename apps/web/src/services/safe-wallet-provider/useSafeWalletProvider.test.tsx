@@ -21,6 +21,21 @@ import useAllSafes from '@/features/myAccounts/hooks/useAllSafes'
 import { useGetHref } from '@/features/myAccounts/hooks/useGetHref'
 import { wcPopupStore } from '@/features/walletconnect/components'
 import { wcChainSwitchStore } from '@/features/walletconnect/components/WcChainSwitchModal/store'
+import walletConnectInstance from '@/features/walletconnect/services/walletConnectInstance'
+
+jest.mock('@/features/walletconnect/services/walletConnectInstance', () => ({
+  __esModule: true,
+  default: {
+    init: jest.fn(),
+    updateSessions: jest.fn(),
+  },
+}))
+
+const updateSessionsMock = walletConnectInstance.updateSessions as jest.MockedFunction<
+  (typeof walletConnectInstance)['updateSessions']
+>
+
+updateSessionsMock.mockResolvedValue()
 
 jest.mock('@/features/myAccounts/hooks/useAllSafes', () => ({
   __esModule: true,
@@ -52,6 +67,7 @@ jest.mock('./notifications', () => {
 describe('useSafeWalletProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    updateSessionsMock.mockClear()
 
     jest.spyOn(chainHooks, 'useCurrentChain').mockImplementation(() => {
       return chainBuilder().with({ chainId: '1', recommendedMasterCopyVersion: '1.4.1' }).build()
@@ -410,6 +426,7 @@ describe('useSafeWalletProvider', () => {
       await expect(promise).resolves.toBeNull()
       expect(wcChainSwitchStore.getStore()).toBeUndefined()
       expect(wcPopupStore.getStore()).toBe(true)
+      expect(updateSessionsMock).toHaveBeenCalledWith('5', safeItem.address)
       expect(mockPush).toHaveBeenCalledWith({
         pathname: '/',
         query: { safe: 'gor:0x1234567890000000000000000000000000000000' },
@@ -469,6 +486,7 @@ describe('useSafeWalletProvider', () => {
         await expect(promise).resolves.toBeNull()
       })
 
+      expect(updateSessionsMock).toHaveBeenCalledWith('5', currentSafeAddress)
       expect(mockPush).toHaveBeenCalledWith({
         pathname: '/',
         query: { safe: 'gor:0xabcdefabcdefabcdefabcdefabcdefabcdefabcd' },
@@ -539,6 +557,7 @@ describe('useSafeWalletProvider', () => {
       })
       expect(wcChainSwitchStore.getStore()).toBeUndefined()
       expect(wcPopupStore.getStore()).toBe(false)
+      expect(updateSessionsMock).not.toHaveBeenCalled()
       expect(mockPush).not.toHaveBeenCalled()
     })
 
@@ -601,6 +620,8 @@ describe('useSafeWalletProvider', () => {
       await expect(promise).resolves.toBeNull()
       expect(wcChainSwitchStore.getStore()).toBeUndefined()
       expect(wcPopupStore.getStore()).toBe(false)
+
+      expect(updateSessionsMock).toHaveBeenCalledWith('5', safeItem.address)
 
       request?.onCancel()
 
