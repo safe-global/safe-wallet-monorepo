@@ -5,19 +5,32 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsUpgradeableMasterCopy from '@/hooks/useIsUpgradeableMasterCopy'
 import { Button, Stack, Typography } from '@mui/material'
 import { useCallback, useContext } from 'react'
-import { isMigrationToL2Possible } from '@safe-global/utils/services/contracts/safeContracts'
+import CheckWallet from '@/components/common/CheckWallet'
+import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeContracts'
 
 export const UnsupportedMastercopyWarning = () => {
   const { safe } = useSafeInfo()
   const isUpgradeableMasterCopy = useIsUpgradeableMasterCopy()
-
-  const showWarning = Boolean(isUpgradeableMasterCopy) && isMigrationToL2Possible(safe)
+  const isUnsupportedMasterCopy = !isValidMasterCopy(safe.implementationVersionState)
 
   const { setTxFlow } = useContext(TxModalContext)
 
   const openUpgradeModal = useCallback(() => setTxFlow(<MigrateSafeL2Flow />), [setTxFlow])
 
-  if (!showWarning) return null
+  if (!isUnsupportedMasterCopy || isUpgradeableMasterCopy === undefined) {
+    return null
+  }
+
+  if (!isUpgradeableMasterCopy) {
+    return (
+      <ErrorMessage level="warning" title="Base contract is not supported">
+        <Typography>
+          Your Safe Account&apos;s base contract is not supported. Interacting with it from the web interface may not
+          work correctly. We recommend using the Safe CLI instead.
+        </Typography>
+      </ErrorMessage>
+    )
+  }
 
   return (
     <ErrorMessage level="warning" title="Base contract is not supported">
@@ -25,11 +38,13 @@ export const UnsupportedMastercopyWarning = () => {
         <Typography display="inline" mr={1}>
           Your Safe Account&apos;s base contract is not supported. You should migrate it to a compatible version.
         </Typography>
-        <div>
-          <Button variant="contained" style={{ textDecoration: 'none' }} onClick={openUpgradeModal}>
-            Migrate
-          </Button>
-        </div>
+        <CheckWallet>
+          {(isOk) => (
+            <Button variant="contained" style={{ textDecoration: 'none' }} onClick={openUpgradeModal} disabled={!isOk}>
+              Migrate
+            </Button>
+          )}
+        </CheckWallet>
       </Stack>
     </ErrorMessage>
   )

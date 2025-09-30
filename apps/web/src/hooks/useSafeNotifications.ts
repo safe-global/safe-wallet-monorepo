@@ -4,7 +4,7 @@ import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript
 import useSafeInfo from './useSafeInfo'
 import { useAppDispatch } from '@/store'
 import { AppRoutes } from '@/config/routes'
-import { isMigrationToL2Possible, isValidMasterCopy } from '@safe-global/utils/services/contracts/safeContracts'
+import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeContracts'
 import { useRouter } from 'next/router'
 import useIsSafeOwner from './useIsSafeOwner'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -53,7 +53,6 @@ const useSafeNotifications = (): void => {
   const urlSafeAddress = useSafeAddress()
   const isUpgradeableMasterCopy = useIsUpgradeableMasterCopy()
   const isUnsupportedMasterCopy = !isValidMasterCopy(safe.implementationVersionState)
-  const isMigrationPossible = isMigrationToL2Possible(safe)
 
   const dismissUpdateNotification = useCallback(
     (groupKey: string) => {
@@ -147,9 +146,9 @@ const useSafeNotifications = (): void => {
    */
   useEffect(() => {
     if (!isUnsupportedMasterCopy) return
-    if (isMigrationPossible && isUpgradeableMasterCopy === undefined) return
+    if (isUpgradeableMasterCopy === undefined) return
 
-    const shouldPromptUpgrade = isMigrationPossible && Boolean(isUpgradeableMasterCopy)
+    const shouldPromptUpgrade = Boolean(isUpgradeableMasterCopy)
 
     const id = dispatch(
       showNotification({
@@ -171,7 +170,7 @@ const useSafeNotifications = (): void => {
     return () => {
       dispatch(closeNotification({ id }))
     }
-  }, [dispatch, isMigrationPossible, isUnsupportedMasterCopy, isUpgradeableMasterCopy, query.safe])
+  }, [dispatch, isUnsupportedMasterCopy, isUpgradeableMasterCopy, query.safe])
 }
 
 export default useSafeNotifications

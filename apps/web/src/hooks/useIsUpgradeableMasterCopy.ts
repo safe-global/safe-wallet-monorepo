@@ -4,12 +4,20 @@ import useSafeInfo from './useSafeInfo'
 import { useWeb3ReadOnly } from './wallets/web3'
 import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeContracts'
 import { isL2MasterCopyCodeHash } from '@safe-global/utils/services/contracts/deployments'
+import { getSafeMigrationDeployment } from '@safe-global/safe-deployments'
+import { SAFE_TO_L2_MIGRATION_VERSION } from '@safe-global/utils/config/constants'
 
 const useIsUpgradeableMasterCopy = (): boolean | undefined => {
   const { safe, safeLoaded } = useSafeInfo()
   const provider = useWeb3ReadOnly()
 
   const shouldCheck = safeLoaded && !isValidMasterCopy(safe.implementationVersionState)
+  const supportsL2Migration = Boolean(
+    getSafeMigrationDeployment({
+      version: SAFE_TO_L2_MIGRATION_VERSION,
+      network: safe.chainId,
+    })?.networkAddresses[safe.chainId],
+  )
   const masterCopyAddress = safe.implementation.value
 
   const [isUpgradeable, setIsUpgradeable] = useState<boolean | undefined>(undefined)
@@ -42,7 +50,7 @@ const useIsUpgradeableMasterCopy = (): boolean | undefined => {
         }
 
         const codeHash = keccak256(code)
-        setIsUpgradeable(isL2MasterCopyCodeHash(codeHash))
+        setIsUpgradeable(isL2MasterCopyCodeHash(codeHash) && supportsL2Migration)
       } catch (error) {
         console.error('Failed to determine Safe master copy code hash', error)
 
@@ -57,7 +65,7 @@ const useIsUpgradeableMasterCopy = (): boolean | undefined => {
     return () => {
       cancelled = true
     }
-  }, [shouldCheck, provider, masterCopyAddress])
+  }, [shouldCheck, provider, masterCopyAddress, supportsL2Migration])
 
   return isUpgradeable
 }
