@@ -114,7 +114,7 @@ describe('useImportLedgerAddress', () => {
 
       let importResult
       await act(async () => {
-        importResult = await result.current.importAddress('', createMockPath(), createMockIndex())
+        importResult = await result.current.importAddress('', createMockPath(), createMockIndex(), 'Ledger Device')
       })
 
       expect(importResult).toEqual({ success: false })
@@ -130,7 +130,7 @@ describe('useImportLedgerAddress', () => {
 
       let importResult
       await act(async () => {
-        importResult = await result.current.importAddress(createMockAddress(), '', createMockIndex())
+        importResult = await result.current.importAddress(createMockAddress(), '', createMockIndex(), 'Ledger Device')
       })
 
       expect(importResult).toEqual({ success: false })
@@ -146,7 +146,7 @@ describe('useImportLedgerAddress', () => {
 
       let importResult
       await act(async () => {
-        importResult = await result.current.importAddress('', '', createMockIndex())
+        importResult = await result.current.importAddress('', '', createMockIndex(), 'Ledger Device')
       })
 
       expect(importResult).toEqual({ success: false })
@@ -164,7 +164,12 @@ describe('useImportLedgerAddress', () => {
 
       let importResult
       await act(async () => {
-        importResult = await result.current.importAddress(createMockAddress(), createMockPath(), createMockIndex())
+        importResult = await result.current.importAddress(
+          createMockAddress(),
+          createMockPath(),
+          createMockIndex(),
+          'Ledger Device',
+        )
       })
 
       expect(importResult).toEqual({ success: false })
@@ -198,7 +203,7 @@ describe('useImportLedgerAddress', () => {
 
       let importResult
       await act(async () => {
-        importResult = await result.current.importAddress(mockAddress, mockPath, mockIndex)
+        importResult = await result.current.importAddress(mockAddress, mockPath, mockIndex, 'Ledger Device')
       })
 
       // Check import result
@@ -222,7 +227,7 @@ describe('useImportLedgerAddress', () => {
       const signers = selectSigners(state)
       expect(signers[mockAddress]).toEqual({
         value: mockAddress,
-        name: null,
+        name: `Ledger Device-${mockAddress.slice(-4)}`,
         logoUri: null,
         type: 'ledger',
         derivationPath: mockPath,
@@ -232,7 +237,7 @@ describe('useImportLedgerAddress', () => {
       const contact = selectContactByAddress(mockAddress)(state)
       expect(contact).toEqual({
         value: mockAddress,
-        name: `Signer-${mockAddress.slice(-4)}`,
+        name: `Ledger Device-${mockAddress.slice(-4)}`,
         chainIds: [],
       })
 
@@ -257,7 +262,7 @@ describe('useImportLedgerAddress', () => {
       const { result } = renderHook(() => useImportLedgerAddress())
 
       // Start the import process
-      const importPromise = result.current.importAddress(mockAddress, mockPath, mockIndex)
+      const importPromise = result.current.importAddress(mockAddress, mockPath, mockIndex, 'Ledger Device')
 
       // Check that isImporting is true during the process
       await waitFor(() => {
@@ -290,7 +295,7 @@ describe('useImportLedgerAddress', () => {
 
       let importResult
       await act(async () => {
-        importResult = await result.current.importAddress(mockAddress, mockPath, mockIndex)
+        importResult = await result.current.importAddress(mockAddress, mockPath, mockIndex, 'Ledger Device')
       })
 
       // Should fail when disconnect fails since it's in the try-catch
@@ -310,7 +315,7 @@ describe('useImportLedgerAddress', () => {
 
       // First, create an error
       await act(async () => {
-        await result.current.importAddress('', '', createMockIndex())
+        await result.current.importAddress('', '', createMockIndex(), 'Ledger Device')
       })
 
       expect(result.current.error).not.toBeNull()
@@ -331,7 +336,7 @@ describe('useImportLedgerAddress', () => {
 
       // First, create a validation error
       await act(async () => {
-        await result.current.importAddress('', '', createMockIndex())
+        await result.current.importAddress('', '', createMockIndex(), 'Ledger Device')
       })
 
       expect(result.current.error).toEqual({
@@ -347,7 +352,7 @@ describe('useImportLedgerAddress', () => {
       setupSuccessfulOwnershipValidation(mockAddress, mockSafeAddress, mockChainId)
 
       await act(async () => {
-        await result.current.importAddress(mockAddress, mockPath, mockIndex)
+        await result.current.importAddress(mockAddress, mockPath, mockIndex, 'Ledger Device')
       })
 
       expect(result.current.error).toBeNull()
@@ -397,7 +402,7 @@ describe('useImportLedgerAddress', () => {
       const store = hookResult.store as { getState: () => RootState }
 
       await act(async () => {
-        await result.current.importAddress(newAddress, newPath, newIndex)
+        await result.current.importAddress(newAddress, newPath, newIndex, 'Ledger Device')
       })
 
       // Check the Redux state through the returned store
@@ -408,7 +413,7 @@ describe('useImportLedgerAddress', () => {
       expect(signers[existingAddress]).toEqual(existingSigner)
       expect(signers[newAddress]).toEqual({
         value: newAddress,
-        name: null,
+        name: `Ledger Device-${newAddress.slice(-4)}`,
         logoUri: null,
         type: 'ledger',
         derivationPath: newPath,
@@ -440,7 +445,7 @@ describe('useImportLedgerAddress', () => {
       const store = hookResult.store as { getState: () => RootState }
 
       await act(async () => {
-        await result.current.importAddress(mockAddress, mockPath, mockIndex)
+        await result.current.importAddress(mockAddress, mockPath, mockIndex, 'Ledger Device')
       })
 
       // Check the Redux state through the returned store
@@ -450,7 +455,7 @@ describe('useImportLedgerAddress', () => {
       const activeSigner = selectActiveSigner(state, safeAddress)
       expect(activeSigner).toEqual({
         value: mockAddress,
-        name: null,
+        name: `Ledger Device-${mockAddress.slice(-4)}`,
         logoUri: null,
         type: 'ledger',
         derivationPath: mockPath,
