@@ -9,6 +9,7 @@ const injectedRtkApi = api
       positionsGetPositionsV1: build.query<PositionsGetPositionsV1ApiResponse, PositionsGetPositionsV1ApiArg>({
         query: (queryArg) => ({
           url: `/v1/chains/${queryArg.chainId}/safes/${queryArg.safeAddress}/positions/${queryArg.fiatCode}`,
+          params: queryArg.refresh ? { refresh: true } : {},
         }),
         providesTags: ['positions'],
       }),
@@ -21,6 +22,7 @@ export type PositionsGetPositionsV1ApiArg = {
   chainId: string
   safeAddress: string
   fiatCode: string
+  refresh?: boolean
 }
 export type ProtocolIcon = {
   url: string | null

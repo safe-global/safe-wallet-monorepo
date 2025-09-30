@@ -26,6 +26,7 @@ import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { POSITIONS_EVENTS, POSITIONS_LABELS } from '@/services/analytics/events/positions'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import RefreshPositionsButton from '@/features/positions/components/RefreshPositionsButton'
 
 const MAX_PROTOCOLS = 4
 
@@ -146,6 +147,7 @@ const PositionsWidget = () => {
               }}
             />
           </Tooltip>
+          <RefreshPositionsButton entryPoint="Dashboard" />
         </Stack>
 
         {protocols.length > 0 && (

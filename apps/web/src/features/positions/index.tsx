@@ -14,6 +14,7 @@ import React from 'react'
 import PositionsUnavailable from './components/PositionsUnavailable'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import PositionsSkeleton from '@/features/positions/components/PositionsSkeleton'
+import RefreshPositionsButton from '@/features/positions/components/RefreshPositionsButton'
 
 export const Positions = () => {
   const positionsFiatTotal = usePositionsFiatTotal()
@@ -36,9 +37,12 @@ export const Positions = () => {
           <TotalAssetValue fiatTotal={positionsFiatTotal} title="Total positions value" />
         </Box>
 
-        <Typography variant="h4" fontWeight={700}>
-          Positions
-        </Typography>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+          <Typography variant="h4" fontWeight={700}>
+            Positions
+          </Typography>
+          <RefreshPositionsButton entryPoint="Positions" />
+        </Stack>
 
         <Box mb={1}>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
