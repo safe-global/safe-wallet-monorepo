@@ -293,7 +293,10 @@ const SingleAccountItem = ({
       ref={elementRef}
       data-testid="safe-list-item"
       selected={isCurrentSafe}
-      className={classnames(css.listItem, { [css.currentListItem]: isCurrentSafe })}
+      className={classnames(css.listItem, {
+        [css.currentListItem]: isCurrentSafe,
+        [css.noActions]: !showActions,
+      })}
       onClick={onSelectSafe ? handleSelect : undefined}
     >
       <Track {...OVERVIEW_EVENTS.OPEN_SAFE} label={trackingLabel}>
