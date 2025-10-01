@@ -22,7 +22,7 @@ export const LedgerAddressesContainer = () => {
   const { bottom } = useSafeAreaInsets()
 
   const [selectedIndex, setSelectedIndex] = useState<number>(0)
-
+  const deviceLabel = params.deviceName || 'Ledger device'
   const {
     addresses,
     isLoading,
@@ -52,7 +52,6 @@ export const LedgerAddressesContainer = () => {
       return
     }
 
-    const deviceLabel = params.deviceName || 'Ledger device'
     const reset = () => clearError()
 
     switch (error.code) {
@@ -87,8 +86,17 @@ export const LedgerAddressesContainer = () => {
       case 'IMPORT':
         Alert.alert('Import Failed', error.message, [{ text: 'OK', onPress: reset }])
         break
+      case 'OWNER_VALIDATION':
+        clearError()
+        router.push({
+          pathname: '/import-signers/ledger-error',
+          params: {
+            address: addresses[selectedIndex]?.address || '',
+          },
+        })
+        break
     }
-  }, [error, clearError, fetchAddresses, params.deviceName, addresses.length])
+  }, [error, clearError, fetchAddresses, deviceLabel, addresses, router, selectedIndex])
 
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle paddingRight={5}>{TITLE}</NavBarTitle>,
@@ -99,10 +107,7 @@ export const LedgerAddressesContainer = () => {
   if (isInitialLoading) {
     return (
       <View flex={1} justifyContent="center" alignItems="center" marginBottom={'$10'}>
-        <LedgerProgress
-          title="Loading addresses..."
-          description={`Retrieving addresses from your ${params.deviceName || 'Ledger device'}`}
-        />
+        <LedgerProgress title="Loading addresses..." description={`Retrieving addresses from your ${deviceLabel}`} />
       </View>
     )
   }
@@ -113,15 +118,14 @@ export const LedgerAddressesContainer = () => {
     }
 
     const selected = addresses[selectedIndex]
-    const res = await importAddress(selected.address, selected.path, selected.index)
+    const res = await importAddress(selected.address, selected.path, selected.index, deviceLabel)
 
     if (res && 'success' in res && res.success && 'selected' in res && res.selected) {
-      const name = `Ledger ${params.deviceName || 'Device'}`
       router.push({
         pathname: '/import-signers/ledger-success',
         params: {
           address: res.selected.address,
-          name,
+          name: deviceLabel,
           path: res.selected.path,
         },
       })
@@ -142,9 +146,7 @@ export const LedgerAddressesContainer = () => {
       <SectionTitle
         title={TITLE}
         paddingHorizontal={'$0'}
-        description={`Select one or more addresses derived from your ${
-          params.deviceName || 'Ledger device'
-        }. Make sure they are signers of the selected Safe Account.`}
+        description={`Select one or more addresses derived from your ${deviceLabel}. Make sure they are signers of the selected Safe Account.`}
       />
 
       {addresses[0] && (

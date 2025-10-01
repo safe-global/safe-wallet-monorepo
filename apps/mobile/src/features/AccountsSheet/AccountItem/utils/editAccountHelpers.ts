@@ -9,18 +9,18 @@ import Logger from '@/src/utils/logger'
 import { CommonActions } from '@react-navigation/native'
 import { Alert } from 'react-native'
 import { StandardErrorResult, ErrorType, createErrorResult, createSuccessResult } from '@/src/utils/errors'
+import { Signer } from '@/src/store/signersSlice'
 
 interface SafesCollection extends Record<string, SafesSliceItem> {}
 
-interface SignersCollection extends Record<string, unknown> {}
+interface SignersCollection extends Record<string, Signer> {}
 
-export interface SafeNavigationConfig {
+export interface SafeDeletionContext {
   navigation: {
     dispatch: (action: ReturnType<typeof CommonActions.reset>) => void
   }
   activeSafe: { address: Address; chainId: string } | null
   safes: SafesCollection
-  dispatch: AppDispatch
 }
 
 export const isOwnerInOtherSafes = (
@@ -69,6 +69,48 @@ export const getOwnersToDelete = (
   const ownersWithPrivateKeys = getSafeOwnersWithPrivateKeys(safeAddress, allSafesInfo, allSigners)
 
   return ownersWithPrivateKeys.filter((ownerAddress) => !isOwnerInOtherSafes(ownerAddress, safeAddress, allSafesInfo))
+}
+
+export interface CategorizedOwners {
+  privateKeyOwners: Address[]
+  ledgerOwners: Address[]
+}
+
+export const categorizeOwnersToDelete = (
+  safeAddress: Address,
+  allSafesInfo: SafesCollection,
+  allSigners: SignersCollection,
+): CategorizedOwners => {
+  const safeInfo = allSafesInfo[safeAddress]
+  if (!safeInfo) {
+    return { privateKeyOwners: [], ledgerOwners: [] }
+  }
+
+  const privateKeyOwners: Address[] = []
+  const ledgerOwners: Address[] = []
+
+  Object.values(safeInfo).forEach((deployment) => {
+    deployment.owners.forEach((owner) => {
+      const signer = allSigners[owner.value]
+      if (!signer) {
+        return
+      }
+
+      const isUsedInOtherSafes = isOwnerInOtherSafes(owner.value as Address, safeAddress, allSafesInfo)
+      if (isUsedInOtherSafes) {
+        return
+      }
+
+      const ownerAddress = owner.value as Address
+      if (signer.type === 'private-key' && !privateKeyOwners.includes(ownerAddress)) {
+        privateKeyOwners.push(ownerAddress)
+      } else if (signer.type === 'ledger' && !ledgerOwners.includes(ownerAddress)) {
+        ledgerOwners.push(ownerAddress)
+      }
+    })
+  })
+
+  return { privateKeyOwners, ledgerOwners }
 }
 
 export const cleanupSinglePrivateKey = async (
@@ -146,16 +188,39 @@ export const cleanupPrivateKeysForOwners = async (
   return createSuccessResult({ processedCount, failures })
 }
 
-export const createDeletionMessage = (ownersWithPrivateKeys: Address[], ownersToDelete: Address[]): string => {
-  let message = `This account has ${ownersWithPrivateKeys.length} owner(s) with private keys stored on this device.`
+export const cleanupLedgerSigners = (
+  ledgerAddresses: Address[],
+  dispatch: AppDispatch,
+): StandardErrorResult<{ processedCount: number }> => {
+  try {
+    ledgerAddresses.forEach((address) => {
+      dispatch(removeSigner(address))
+    })
 
-  if (ownersToDelete.length > 0) {
-    message += ` ${ownersToDelete.length} of these private key(s) will be deleted because they are not used in other safes.`
+    return createSuccessResult({ processedCount: ledgerAddresses.length })
+  } catch (error) {
+    return createErrorResult(ErrorType.SYSTEM_ERROR, 'Failed to remove Ledger signers from store', error, {
+      ledgerAddresses,
+    })
+  }
+}
+
+export const createDeletionMessage = (categorizedOwners: CategorizedOwners): string => {
+  const { privateKeyOwners, ledgerOwners } = categorizedOwners
+  const totalSigners = privateKeyOwners.length + ledgerOwners.length
+
+  if (totalSigners === 0) {
+    return 'This account will be deleted. This action cannot be undone.'
   }
 
-  if (ownersToDelete.length < ownersWithPrivateKeys.length) {
-    const keysToKeep = ownersWithPrivateKeys.length - ownersToDelete.length
-    message += ` ${keysToKeep} private key(s) will be kept because they are used as signers in other safes.`
+  let message = 'This account has signers that will be affected:'
+
+  if (privateKeyOwners.length > 0) {
+    message += ` ${privateKeyOwners.length} private key(s) will be deleted from this device.`
+  }
+
+  if (ledgerOwners.length > 0) {
+    message += ` ${ledgerOwners.length} Ledger signer(s) will be removed from the app.`
   }
 
   message += ' This action cannot be undone.'
@@ -164,14 +229,16 @@ export const createDeletionMessage = (ownersWithPrivateKeys: Address[], ownersTo
 
 export const proceedWithSafeDeletion = (
   address: Address,
-  { navigation, activeSafe, safes, dispatch }: SafeNavigationConfig,
+  deletionContext: SafeDeletionContext,
+  reduxDispatch: AppDispatch,
 ): void => {
+  const { navigation, activeSafe, safes } = deletionContext
   if (activeSafe?.address === address) {
     const [nextAddress, nextInfo] = Object.entries(safes).find(([addr]) => addr !== address) || [null, null]
 
     if (nextAddress && nextInfo) {
       const firstChain = Object.keys(nextInfo)[0]
-      dispatch(
+      reduxDispatch(
         setActiveSafe({
           address: nextAddress as Address,
           chainId: firstChain,
@@ -187,53 +254,76 @@ export const proceedWithSafeDeletion = (
         }),
       )
 
-      dispatch(setEditMode(false))
-      dispatch(setActiveSafe(null))
+      reduxDispatch(setEditMode(false))
+      reduxDispatch(setActiveSafe(null))
     }
   }
 
-  dispatch(removeSafe(address))
+  reduxDispatch(removeSafe(address))
 }
 
 interface HandleConfirmedDeletionParams {
   address: Address
-  ownersToDelete: Address[]
+  categorizedOwners: CategorizedOwners
   removeAllDelegatesForOwner: (
     ownerAddress: Address,
     ownerPrivateKey: string,
   ) => Promise<StandardErrorResult<{ processedCount: number }>>
-  navigationConfig: SafeNavigationConfig
+  deletionContext: SafeDeletionContext
+  reduxDispatch: AppDispatch
   resolve: () => void
   reject: (error: Error) => void
 }
 
 const handleConfirmedDeletion = async (params: HandleConfirmedDeletionParams) => {
-  const { address, ownersToDelete, removeAllDelegatesForOwner, navigationConfig, resolve, reject } = params
+  const { address, categorizedOwners, removeAllDelegatesForOwner, deletionContext, reduxDispatch, resolve, reject } =
+    params
   try {
-    if (ownersToDelete.length === 0) {
-      proceedWithSafeDeletion(address, navigationConfig)
+    const { privateKeyOwners, ledgerOwners } = categorizedOwners
+    const hasSignersToDelete = privateKeyOwners.length > 0 || ledgerOwners.length > 0
+
+    if (!hasSignersToDelete) {
+      proceedWithSafeDeletion(address, deletionContext, reduxDispatch)
       resolve()
       return
     }
 
-    const cleanupResult = await cleanupPrivateKeysForOwners(
-      ownersToDelete,
-      removeAllDelegatesForOwner,
-      navigationConfig.dispatch,
-    )
+    // Clean up private key signers (with delegate cleanup)
+    if (privateKeyOwners.length > 0) {
+      const privateKeyCleanupResult = await cleanupPrivateKeysForOwners(
+        privateKeyOwners,
+        removeAllDelegatesForOwner,
+        reduxDispatch,
+      )
 
-    if (!cleanupResult.success) {
-      Logger.error('Failed to clean up private keys during safe deletion:', cleanupResult.error)
-      Alert.alert('Error', cleanupResult.error?.message || 'Failed to delete private keys. Please try again.')
-      reject(new Error(cleanupResult.error?.message || 'Failed to delete private keys'))
-      return
+      if (!privateKeyCleanupResult.success) {
+        Logger.error('Failed to clean up private keys during safe deletion:', privateKeyCleanupResult.error)
+        Alert.alert(
+          'Error',
+          privateKeyCleanupResult.error?.message || 'Failed to delete private keys. Please try again.',
+        )
+        reject(new Error(privateKeyCleanupResult.error?.message || 'Failed to delete private keys'))
+        return
+      }
     }
 
-    proceedWithSafeDeletion(address, navigationConfig)
+    // Clean up Ledger signers (only Redux store removal)
+    if (ledgerOwners.length > 0) {
+      const ledgerCleanupResult = cleanupLedgerSigners(ledgerOwners, reduxDispatch)
+
+      if (!ledgerCleanupResult.success) {
+        Logger.error('Failed to clean up Ledger signers during safe deletion:', ledgerCleanupResult.error)
+        Alert.alert('Error', ledgerCleanupResult.error?.message || 'Failed to remove Ledger signers. Please try again.')
+        reject(new Error(ledgerCleanupResult.error?.message || 'Failed to remove Ledger signers'))
+        return
+      }
+    }
+
+    proceedWithSafeDeletion(address, deletionContext, reduxDispatch)
     resolve()
   } catch (error) {
-    Logger.error('Failed to clean up private keys during safe deletion:', error)
-    Alert.alert('Error', 'Failed to delete private keys. Please try again.')
+    Logger.error('Failed to clean up signers during safe deletion:', error)
+    Alert.alert('Error', 'Failed to delete signers. Please try again.')
     reject(error as Error)
   }
 }
@@ -246,21 +336,23 @@ interface HandleSafeDeletionParams {
     ownerAddress: Address,
     ownerPrivateKey: string,
   ) => Promise<StandardErrorResult<{ processedCount: number }>>
-  navigationConfig: SafeNavigationConfig
+  deletionContext: SafeDeletionContext
+  reduxDispatch: AppDispatch
 }
 
 export const handleSafeDeletion = async (params: HandleSafeDeletionParams): Promise<void> => {
-  const { address, allSafesInfo, allSigners, removeAllDelegatesForOwner, navigationConfig } = params
-  const ownersWithPrivateKeys = getSafeOwnersWithPrivateKeys(address, allSafesInfo, allSigners)
-  const ownersToDelete = getOwnersToDelete(address, allSafesInfo, allSigners)
+  const { address, allSafesInfo, allSigners, removeAllDelegatesForOwner, deletionContext, reduxDispatch } = params
+  const categorizedOwners = categorizeOwnersToDelete(address, allSafesInfo, allSigners)
+  const { privateKeyOwners, ledgerOwners } = categorizedOwners
+  const totalSignersToDelete = privateKeyOwners.length + ledgerOwners.length
 
-  if (ownersWithPrivateKeys.length === 0) {
-    proceedWithSafeDeletion(address, navigationConfig)
+  if (totalSignersToDelete === 0) {
+    proceedWithSafeDeletion(address, deletionContext, reduxDispatch)
     return
   }
 
-  const message = createDeletionMessage(ownersWithPrivateKeys, ownersToDelete)
-  const buttonTitle = ownersToDelete.length > 0 ? 'Delete account and private keys' : 'Delete account'
+  const message = createDeletionMessage(categorizedOwners)
+  const buttonTitle = totalSignersToDelete > 0 ? 'Delete account and signers' : 'Delete account'
 
   return new Promise((resolve, reject) => {
     Alert.alert('Delete account', message, [
@@ -275,9 +367,10 @@ export const handleSafeDeletion = async (params: HandleSafeDeletionParams): Prom
         onPress: () =>
           handleConfirmedDeletion({
             address,
-            ownersToDelete,
+            categorizedOwners,
             removeAllDelegatesForOwner,
-            navigationConfig,
+            deletionContext,
+            reduxDispatch,
             resolve,
             reject,
           }),

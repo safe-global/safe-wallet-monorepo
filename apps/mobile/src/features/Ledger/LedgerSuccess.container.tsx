@@ -4,6 +4,7 @@ import { useToastController } from '@tamagui/toast'
 import Clipboard from '@react-native-clipboard/clipboard'
 
 import { LedgerSuccess } from './components/LedgerSuccess'
+import Logger from '@/src/utils/logger'
 
 export const LedgerSuccessContainer = () => {
   const params = useLocalSearchParams<{
@@ -14,8 +15,12 @@ export const LedgerSuccessContainer = () => {
   const toast = useToastController()
 
   const handleDone = () => {
-    // Navigate back to the main signers screen
-    router.dismissTo('/signers')
+    try {
+      router.dismissAll()
+      router.back()
+    } catch (error) {
+      Logger.error('Navigation error:', error)
+    }
   }
 
   const handleCopyAddress = () => {
