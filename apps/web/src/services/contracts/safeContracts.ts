@@ -18,12 +18,18 @@ import { _getValidatedGetContractProps } from '@safe-global/utils/services/contr
 
 // GnosisSafe
 
+export const _resolveAndValidateSafeVersion = (safeVersion?: SafeState['version']) => {
+  const resolvedVersion = safeVersion ?? getSafeSDK()?.getContractVersion()
+
+  if (!resolvedVersion) {
+    throw new Error('Safe version could not be determined')
+  }
+
+  return _getValidatedGetContractProps(resolvedVersion).safeVersion
+}
+
 const getGnosisSafeContract = async (safe: SafeState, safeProvider: SafeProvider) => {
-  return getSafeContractInstance(
-    _getValidatedGetContractProps(safe.version).safeVersion,
-    safeProvider,
-    safe.address.value,
-  )
+  return getSafeContractInstance(_resolveAndValidateSafeVersion(safe.version), safeProvider, safe.address.value)
 }
 
 export const getReadOnlyCurrentGnosisSafeContract = async (safe: SafeState): Promise<SafeBaseContract<any>> => {
@@ -52,15 +58,10 @@ export const getReadOnlyGnosisSafeContract = async (
 
   const safeProvider = getSafeProvider()
 
-  const isL1SafeSingleton = isL1 ?? !_isL2(chain, _getValidatedGetContractProps(version).safeVersion)
+  const validatedVersion = _resolveAndValidateSafeVersion(version)
+  const isL1SafeSingleton = isL1 ?? !_isL2(chain, validatedVersion)
 
-  return getSafeContractInstance(
-    _getValidatedGetContractProps(version).safeVersion,
-    safeProvider,
-    undefined,
-    undefined,
-    isL1SafeSingleton,
-  )
+  return getSafeContractInstance(validatedVersion, safeProvider, undefined, undefined, isL1SafeSingleton)
 }
 
 // MultiSend
@@ -83,7 +84,7 @@ export const getReadOnlyMultiSendCallOnlyContract = async (safeVersion: SafeStat
 
   const safeProvider = safeSDK.getSafeProvider()
 
-  return getMultiSendCallOnlyContractInstance(_getValidatedGetContractProps(safeVersion).safeVersion, safeProvider)
+  return getMultiSendCallOnlyContractInstance(_resolveAndValidateSafeVersion(safeVersion), safeProvider)
 }
 
 // GnosisSafeProxyFactory
@@ -91,11 +92,7 @@ export const getReadOnlyMultiSendCallOnlyContract = async (safeVersion: SafeStat
 export const getReadOnlyProxyFactoryContract = async (safeVersion: SafeState['version'], contractAddress?: string) => {
   const safeProvider = getSafeProvider()
 
-  return getSafeProxyFactoryContractInstance(
-    _getValidatedGetContractProps(safeVersion).safeVersion,
-    safeProvider,
-    contractAddress,
-  )
+  return getSafeProxyFactoryContractInstance(_resolveAndValidateSafeVersion(safeVersion), safeProvider, contractAddress)
 }
 
 // Fallback handler
@@ -103,10 +100,7 @@ export const getReadOnlyProxyFactoryContract = async (safeVersion: SafeState['ve
 export const getReadOnlyFallbackHandlerContract = async (safeVersion: SafeState['version']) => {
   const safeProvider = getSafeProvider()
 
-  return getCompatibilityFallbackHandlerContractInstance(
-    _getValidatedGetContractProps(safeVersion).safeVersion,
-    safeProvider,
-  )
+  return getCompatibilityFallbackHandlerContractInstance(_resolveAndValidateSafeVersion(safeVersion), safeProvider)
 }
 
 // Sign messages deployment
@@ -119,5 +113,5 @@ export const getReadOnlySignMessageLibContract = async (safeVersion: SafeState['
 
   const safeProvider = safeSDK.getSafeProvider()
 
-  return getSignMessageLibContractInstance(_getValidatedGetContractProps(safeVersion).safeVersion, safeProvider)
+  return getSignMessageLibContractInstance(_resolveAndValidateSafeVersion(safeVersion), safeProvider)
 }

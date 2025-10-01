@@ -1,13 +1,42 @@
 import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
-import { _getMinimumMultiSendCallOnlyVersion } from '../safeContracts'
+import { _getMinimumMultiSendCallOnlyVersion, _resolveAndValidateSafeVersion } from '../safeContracts'
 import {
   isValidMasterCopy,
   _getValidatedGetContractProps,
   isMigrationToL2Possible,
 } from '@safe-global/utils/services/contracts/safeContracts'
 import { safeInfoBuilder } from '@/tests/builders/safe'
+import { getSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
+
+jest.mock('@/hooks/coreSDK/safeCoreSDK', () => ({
+  getSafeSDK: jest.fn(),
+}))
+
+const getSafeSDKMock = getSafeSDK as jest.MockedFunction<typeof getSafeSDK>
 
 describe('safeContracts', () => {
+  describe('_resolveAndValidateSafeVersion', () => {
+    afterEach(() => {
+      getSafeSDKMock.mockReset()
+    })
+
+    it('returns the normalized Safe version when provided', () => {
+      expect(_resolveAndValidateSafeVersion('1.3.0+L2')).toBe('1.3.0')
+    })
+
+    it('falls back to the Safe SDK contract version when unavailable', () => {
+      getSafeSDKMock.mockReturnValue({
+        getContractVersion: () => '1.3.0',
+      } as any)
+
+      expect(_resolveAndValidateSafeVersion()).toBe('1.3.0')
+    })
+
+    it('throws when the Safe version cannot be determined', () => {
+      expect(() => _resolveAndValidateSafeVersion()).toThrow('Safe version could not be determined')
+    })
+  })
+
   describe('isValidMasterCopy', () => {
     it('returns false if the implementation is unknown', async () => {
       const isValid = isValidMasterCopy(ImplementationVersionState.UNKNOWN)
