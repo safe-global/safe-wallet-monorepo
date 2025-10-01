@@ -12,8 +12,9 @@ import { UpdateSafeFlow } from '@/components/tx-flow/flows'
 import ExternalLink from '@/components/common/ExternalLink'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useCurrentChain } from '@/hooks/useChains'
-import { UnsupportedMastercopyWarning } from '@/features/multichain/components/UnsupportedMastercopyWarning/UnsupportedMasterCopyWarning'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeContracts'
+import UnsupportedBaseContract from './UnsupportedBaseContract'
 
 export const ContractVersion = () => {
   const { setTxFlow } = useContext(TxModalContext)
@@ -29,6 +30,8 @@ export const ContractVersion = () => {
   const needsUpdate = safe.implementationVersionState === ImplementationVersionState.OUTDATED
   const showUpdateDialog = safeMasterCopy?.deployer === MasterCopyDeployer.GNOSIS && needsUpdate
   const isLatestVersion = safe.version && !showUpdateDialog
+  const isUnsupportedMasterCopy = !isValidMasterCopy(safe.implementationVersionState)
+  const showUnsupportedBaseContract = safeLoaded && isUnsupportedMasterCopy && !showUpdateDialog
 
   const latestSafeVersion = getLatestSafeVersion(currentChain)
 
@@ -76,9 +79,9 @@ export const ContractVersion = () => {
             )}
           </CheckWallet>
         </Alert>
-      ) : (
-        <UnsupportedMastercopyWarning />
-      )}
+      ) : null}
+
+      {showUnsupportedBaseContract && <UnsupportedBaseContract />}
     </>
   )
 }
