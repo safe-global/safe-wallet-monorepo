@@ -8,6 +8,7 @@ import {
 import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
 import { initSafeSDK } from '../safeCoreSDK'
 import { isValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
+import { isL2MasterCopyCodeHash } from '@safe-global/utils/services/contracts/deployments'
 
 jest.mock('@/services/contracts/safeContracts', () => {
   return {
@@ -17,6 +18,11 @@ jest.mock('@/services/contracts/safeContracts', () => {
 })
 
 jest.mock('@safe-global/protocol-kit/dist/src/contracts/safeDeploymentContracts')
+
+jest.mock('@safe-global/utils/services/contracts/deployments', () => ({
+  ...jest.requireActual('@safe-global/utils/services/contracts/deployments'),
+  isL2MasterCopyCodeHash: jest.fn(),
+}))
 
 jest.mock('@safe-global/utils/types/contracts', () => {
   return {
@@ -40,12 +46,17 @@ jest.mock('@safe-global/utils/types/contracts', () => {
     ...jest.requireActual('@safe-global/utils/types/contracts'),
     _esModule: true,
     Gnosis_safe__factory: {
-      connect: jest.fn().mockReturnValue({ VERSION: jest.fn() }),
+      connect: jest.fn().mockReturnValue({ VERSION: jest.fn().mockResolvedValue('1.3.0') }),
     },
   }
 })
 
 describe('safeCoreSDK', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(isL2MasterCopyCodeHash as jest.Mock).mockReturnValue(false)
+  })
+
   describe('isValidSafeVersion', () => {
     it('should return true for valid versions', () => {
       expect(isValidSafeVersion('1.3.0')).toBe(true)
@@ -265,6 +276,7 @@ describe('safeCoreSDK', () => {
 
         const mockProvider = new JsonRpcProvider()
         mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
+        mockProvider.getCode = jest.fn().mockResolvedValue('0x1234')
 
         const sdk = await initSafeSDK({
           provider: mockProvider,
@@ -276,6 +288,36 @@ describe('safeCoreSDK', () => {
         })
 
         expect(sdk).toBeUndefined()
+      })
+
+      it('should allow initializing upgradeable L2 mastercopies with custom contracts', async () => {
+        const chainId = '137'
+        const masterCopy = '0x1234'
+
+        const mockProvider = new JsonRpcProvider()
+        mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
+        mockProvider.getCode = jest.fn().mockResolvedValue('0x6000')
+        ;(isL2MasterCopyCodeHash as jest.Mock).mockReturnValue(true)
+
+        await initSafeSDK({
+          provider: mockProvider,
+          chainId,
+          address: toBeHex('0x1', 20),
+          version: '1.3.0',
+          implementation: masterCopy,
+          implementationVersionState: ImplementationVersionState.UNKNOWN,
+        })
+
+        expect(Safe.init).toHaveBeenCalledWith({
+          isL1SafeSingleton: false,
+          provider: expect.anything(),
+          safeAddress: expect.anything(),
+          contractNetworks: {
+            [chainId]: {
+              safeSingletonAddress: masterCopy,
+            },
+          },
+        })
       })
     })
 

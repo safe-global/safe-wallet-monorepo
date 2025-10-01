@@ -2,12 +2,14 @@ import chains from '@safe-global/utils/config/chains'
 import { getSafeL2SingletonDeployments, getSafeSingletonDeployments } from '@safe-global/safe-deployments'
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { Gnosis_safe__factory } from '@safe-global/utils/types/contracts'
-import Safe from '@safe-global/protocol-kit'
+import Safe, { type ContractNetworksConfig } from '@safe-global/protocol-kit'
 import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeContracts'
 import { isPredictedSafeProps, isReplayedSafeProps } from '@/features/counterfactual/utils'
 import { isLegacyVersion } from '@safe-global/utils/services/contracts/utils'
 import { isInDeployments } from '@safe-global/utils/hooks/coreSDK/utils'
 import type { SafeCoreSDKProps } from '@safe-global/utils/hooks/coreSDK/types'
+import { keccak256 } from 'ethers'
+import { isL2MasterCopyCodeHash } from '@safe-global/utils/services/contracts/deployments'
 
 // Safe Core SDK
 export const initSafeSDK = async ({
@@ -24,6 +26,7 @@ export const initSafeSDK = async ({
 
   const safeVersion = version ?? (await Gnosis_safe__factory.connect(address, provider).VERSION())
   let isL1SafeSingleton = chainId === chains.eth
+  let contractNetworks: ContractNetworksConfig | undefined
 
   // If it is an official deployment we should still initiate the safeSDK
   if (!isValidMasterCopy(implementationVersionState)) {
@@ -35,9 +38,35 @@ export const initSafeSDK = async ({
     isL1SafeSingleton = isInDeployments(masterCopy, safeL1Deployment?.networkAddresses[chainId])
     const isL2SafeMasterCopy = isInDeployments(masterCopy, safeL2Deployment?.networkAddresses[chainId])
 
-    // Unknown deployment, which we do not want to support
     if (!isL1SafeSingleton && !isL2SafeMasterCopy) {
-      return Promise.resolve(undefined)
+      try {
+        const code = await provider.getCode(masterCopy)
+
+        if (!code || code === '0x') {
+          return Promise.resolve(undefined)
+        }
+
+        const codeHash = keccak256(code)
+        const isUpgradeableL2MasterCopy = isL2MasterCopyCodeHash(codeHash)
+
+        if (!isUpgradeableL2MasterCopy) {
+          return Promise.resolve(undefined)
+        }
+
+        contractNetworks = {
+          [chainId]: {
+            safeSingletonAddress: masterCopy,
+          },
+        }
+        isL1SafeSingleton = false
+      } catch (error) {
+        console.error('Failed to inspect Safe master copy bytecode', error)
+        return Promise.resolve(undefined)
+      }
+    }
+
+    if (isL2SafeMasterCopy) {
+      isL1SafeSingleton = false
     }
   }
   // Legacy Safe contracts
@@ -50,16 +79,22 @@ export const initSafeSDK = async ({
       return Safe.init({
         provider: provider._getConnection().url,
         isL1SafeSingleton,
+        ...(contractNetworks ? { contractNetworks } : {}),
         predictedSafe: undeployedSafe.props,
       })
     }
     // We cannot initialize a Core SDK for replayed Safes yet.
     return
   }
-  return Safe.init({
+  const baseConfig = {
     provider: provider._getConnection().url,
-    safeAddress: address,
     isL1SafeSingleton,
+    ...(contractNetworks ? { contractNetworks } : {}),
+  }
+
+  return Safe.init({
+    ...baseConfig,
+    safeAddress: address,
   })
 }
 
