@@ -61,8 +61,31 @@ export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: A
         },
       }}
       renderInput={(params) => {
+        // Extract Autocomplete's ref from params
+        const autocompleteRef = params.inputProps.ref
+
+        // Create combined ref that applies both Autocomplete's and react-hook-form's refs
+        const combinedRef = (node: HTMLInputElement | null) => {
+          // Apply Autocomplete's ref
+          if (typeof autocompleteRef === 'function') {
+            autocompleteRef(node)
+          } else if (autocompleteRef && typeof autocompleteRef === 'object' && 'current' in autocompleteRef) {
+            ;(autocompleteRef as React.RefObject<HTMLInputElement | null>).current = node
+          }
+          // Apply react-hook-form's ref
+          if (typeof ref === 'function') {
+            ref(node)
+          } else if (ref && typeof ref === 'object' && 'current' in ref) {
+            ;(ref as React.RefObject<HTMLInputElement | null>).current = node
+          }
+        }
+
+        // Remove ref from inputProps since we'll pass it via NumberField's forwardRef
+        const { ref: _, ...inputPropsWithoutRef } = params.inputProps
+
         return (
           <NumberField
+            ref={combinedRef}
             {...params}
             label={label}
             name={name}
@@ -78,7 +101,6 @@ export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: A
             error={!!fieldState.error}
             size="small"
             onBlur={onBlur}
-            inputRef={ref}
             InputProps={{
               ...params.InputProps,
               sx: {
@@ -93,7 +115,7 @@ export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: A
               },
             }}
             inputProps={{
-              ...params.inputProps,
+              ...inputPropsWithoutRef,
               className: css.approvalAmount,
             }}
             InputLabelProps={{
