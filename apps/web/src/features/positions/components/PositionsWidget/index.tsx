@@ -147,7 +147,7 @@ const PositionsWidget = () => {
               }}
             />
           </Tooltip>
-          <RefreshPositionsButton entryPoint="Dashboard" />
+          <RefreshPositionsButton entryPoint="Dashboard" label="Refresh" />
         </Stack>
 
         {protocols.length > 0 && (
