@@ -35,7 +35,7 @@ jest.mock('next/router', () => ({
 describe('useSafeNotifications', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue(undefined)
+    ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue({ isUpgradeable: undefined })
   })
 
   describe('Safe upgrade', () => {
@@ -121,7 +121,7 @@ describe('useSafeNotifications', () => {
 
   describe('Invalid mastercopy', () => {
     it('should show a notification when the mastercopy is invalid', () => {
-      ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue(false)
+      ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue({ isUpgradeable: false })
       ;(useSafeInfo as jest.Mock).mockReturnValue({
         safe: {
           implementation: { value: '0x234' },
@@ -166,7 +166,7 @@ describe('useSafeNotifications', () => {
     })
 
     it('should show a notification when the mastercopy is invalid but can be migrated', () => {
-      ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue(true)
+      ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue({ isUpgradeable: true })
       ;(useSafeInfo as jest.Mock).mockReturnValue({
         safe: {
           implementation: { value: '0x123' },

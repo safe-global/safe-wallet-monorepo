@@ -36,6 +36,26 @@ export const isL2MasterCopyCodeHash = (codeHash: string | undefined): boolean =>
   return SAFE_L2_CODE_HASHES.has(codeHash.toLowerCase())
 }
 
+export const getL2MasterCopyVersionByCodeHash = (codeHash: string | undefined): string | undefined => {
+  if (!codeHash) {
+    return
+  }
+
+  const normalizedCodeHash = codeHash.toLowerCase()
+
+  const matchingDeployment = (_SAFE_L2_DEPLOYMENTS as SingletonDeploymentJSON[]).find((deployment) =>
+    Object.values(deployment.deployments as DeploymentRecord).some(
+      ({ codeHash }) => codeHash.toLowerCase() === normalizedCodeHash,
+    ),
+  )
+
+  if (!matchingDeployment) {
+    return
+  }
+
+  return `${matchingDeployment.version}+L2`
+}
+
 export const hasCanonicalDeployment = (deployment: SingletonDeploymentV2 | undefined, chainId: string) => {
   const canonicalAddress = deployment?.deployments.canonical?.address
 

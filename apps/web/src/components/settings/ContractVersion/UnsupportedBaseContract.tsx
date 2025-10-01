@@ -7,7 +7,7 @@ import useIsUpgradeableMasterCopy from '@/hooks/useIsUpgradeableMasterCopy'
 
 const UnsupportedBaseContract = (): ReactElement | null => {
   const { setTxFlow } = useContext(TxModalContext)
-  const isUpgradeableMasterCopy = useIsUpgradeableMasterCopy()
+  const { isUpgradeable: isUpgradeableMasterCopy } = useIsUpgradeableMasterCopy()
 
   const openUpgradeModal = useCallback(() => {
     setTxFlow(<MigrateSafeL2Flow />)

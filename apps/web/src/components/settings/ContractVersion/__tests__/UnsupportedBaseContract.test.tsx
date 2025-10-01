@@ -30,7 +30,7 @@ const renderComponent = (setTxFlow = jest.fn()) =>
 describe('UnsupportedBaseContract', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue(undefined)
+    ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue({ isUpgradeable: undefined })
   })
 
   it('renders nothing while the upgradeability is loading', () => {
@@ -40,7 +40,7 @@ describe('UnsupportedBaseContract', () => {
   })
 
   it('renders a CLI warning when the mastercopy cannot be upgraded', () => {
-    ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue(false)
+    ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue({ isUpgradeable: false })
 
     renderComponent()
 
@@ -54,7 +54,7 @@ describe('UnsupportedBaseContract', () => {
 
   it('enables the migrate action when the mastercopy can be upgraded', () => {
     const setTxFlow = jest.fn()
-    ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue(true)
+    ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue({ isUpgradeable: true })
 
     renderComponent(setTxFlow)
 

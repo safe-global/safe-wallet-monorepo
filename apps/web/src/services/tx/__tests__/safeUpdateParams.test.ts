@@ -12,6 +12,8 @@ import { createUpdateSafeTxs } from '../safeUpdateParams'
 import * as web3 from '@/hooks/wallets/web3'
 import { chainBuilder } from '@/tests/builders/chains'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import { getSafeMigrationDeployment } from '@safe-global/safe-deployments'
+import { OperationType } from '@safe-global/types-kit'
 
 const MOCK_SAFE_ADDRESS = '0x0000000000000000000000000000000000005AFE'
 
@@ -137,6 +139,30 @@ describe('safeUpgradeParams', () => {
         getFallbackHandlerDeployment({ version: '1.4.1', network: '100' })?.defaultAddress,
       ),
     ).toBeTruthy()
+  })
+
+  it('should migrate using a fallback version when the Safe version is null', async () => {
+    jest.spyOn(sdkHelpers, 'getSafeProvider').mockImplementation(() => getMockSafeProviderForChain(100))
+
+    const mockSafe = {
+      address: {
+        value: MOCK_SAFE_ADDRESS,
+      },
+      version: null,
+      fallbackHandler: { value: undefined },
+    } as unknown as SafeInfo
+
+    const mockChainInfo = chainBuilder()
+      .with({ chainId: '100', l2: true, recommendedMasterCopyVersion: '1.4.1' })
+      .build()
+
+    const txs = await createUpdateSafeTxs(mockSafe, mockChainInfo, { fallbackSafeVersion: '1.3.0+L2' })
+
+    expect(txs).toHaveLength(1)
+    expect(txs[0].operation).toBe(OperationType.DelegateCall)
+    expect(
+      sameAddress(txs[0].to, getSafeMigrationDeployment({ version: '1.4.1', network: '100' })?.defaultAddress ?? ''),
+    ).toBe(true)
   })
 })
 

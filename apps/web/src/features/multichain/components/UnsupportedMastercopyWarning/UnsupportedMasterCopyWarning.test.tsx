@@ -30,7 +30,7 @@ describe('UnsupportedMastercopyWarning', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(useSafeInfo as jest.Mock).mockReturnValue({ safe: baseSafe })
-    ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue(undefined)
+    ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue({ isUpgradeable: undefined })
   })
 
   it('renders nothing when the mastercopy is supported', () => {
@@ -40,7 +40,7 @@ describe('UnsupportedMastercopyWarning', () => {
         implementationVersionState: 'UP_TO_DATE',
       },
     })
-    ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue(false)
+    ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue({ isUpgradeable: false })
 
     const { container } = renderWithContext()
 
@@ -48,7 +48,7 @@ describe('UnsupportedMastercopyWarning', () => {
   })
 
   it('shows a CLI warning when the mastercopy cannot be upgraded', () => {
-    ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue(false)
+    ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue({ isUpgradeable: false })
 
     renderWithContext()
 
@@ -62,7 +62,7 @@ describe('UnsupportedMastercopyWarning', () => {
 
   it('enables the migrate flow when the mastercopy can be upgraded', () => {
     const setTxFlow = jest.fn()
-    ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue(true)
+    ;(useIsUpgradeableMasterCopy as jest.Mock).mockReturnValue({ isUpgradeable: true })
 
     renderWithContext(setTxFlow)
 

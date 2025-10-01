@@ -10,7 +10,7 @@ import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeCon
 
 export const UnsupportedMastercopyWarning = () => {
   const { safe } = useSafeInfo()
-  const isUpgradeableMasterCopy = useIsUpgradeableMasterCopy()
+  const { isUpgradeable: isUpgradeableMasterCopy } = useIsUpgradeableMasterCopy()
   const isUnsupportedMasterCopy = !isValidMasterCopy(safe.implementationVersionState)
 
   const { setTxFlow } = useContext(TxModalContext)

@@ -51,7 +51,7 @@ const useSafeNotifications = (): void => {
   const { chainId, version, implementationVersionState } = safe
   const isOwner = useIsSafeOwner()
   const urlSafeAddress = useSafeAddress()
-  const isUpgradeableMasterCopy = useIsUpgradeableMasterCopy()
+  const { isUpgradeable: isUpgradeableMasterCopy } = useIsUpgradeableMasterCopy()
   const isUnsupportedMasterCopy = !isValidMasterCopy(safe.implementationVersionState)
 
   const dismissUpdateNotification = useCallback(
