@@ -37,18 +37,16 @@ export const Positions = () => {
           <TotalAssetValue fiatTotal={positionsFiatTotal} title="Total positions value" />
         </Box>
 
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
-          <Typography variant="h4" fontWeight={700}>
-            Positions
-          </Typography>
-          <RefreshPositionsButton entryPoint="Positions" />
-        </Stack>
+        <Typography variant="h4" fontWeight={700} mb={1}>
+          Positions
+        </Typography>
 
-        <Box mb={1}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             Position balances are not included in the total asset value.
           </Typography>
-        </Box>
+          <RefreshPositionsButton entryPoint="Positions" label="Refresh positions" />
+        </Stack>
       </Box>
 
       {protocols.map((protocol) => {
