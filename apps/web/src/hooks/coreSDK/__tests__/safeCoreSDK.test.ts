@@ -8,7 +8,10 @@ import {
 import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
 import { initSafeSDK } from '../safeCoreSDK'
 import { isValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
-import { isL2MasterCopyCodeHash } from '@safe-global/utils/services/contracts/deployments'
+import {
+  getL2MasterCopyVersionByCodeHash,
+  isL2MasterCopyCodeHash,
+} from '@safe-global/utils/services/contracts/deployments'
 
 jest.mock('@/services/contracts/safeContracts', () => {
   return {
@@ -22,6 +25,7 @@ jest.mock('@safe-global/protocol-kit/dist/src/contracts/safeDeploymentContracts'
 jest.mock('@safe-global/utils/services/contracts/deployments', () => ({
   ...jest.requireActual('@safe-global/utils/services/contracts/deployments'),
   isL2MasterCopyCodeHash: jest.fn(),
+  getL2MasterCopyVersionByCodeHash: jest.fn(),
 }))
 
 jest.mock('@safe-global/utils/types/contracts', () => {
@@ -55,6 +59,7 @@ describe('safeCoreSDK', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(isL2MasterCopyCodeHash as jest.Mock).mockReturnValue(false)
+    ;(getL2MasterCopyVersionByCodeHash as jest.Mock).mockReturnValue(undefined)
   })
 
   describe('isValidSafeVersion', () => {
@@ -298,6 +303,7 @@ describe('safeCoreSDK', () => {
         mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
         mockProvider.getCode = jest.fn().mockResolvedValue('0x6000')
         ;(isL2MasterCopyCodeHash as jest.Mock).mockReturnValue(true)
+        ;(getL2MasterCopyVersionByCodeHash as jest.Mock).mockReturnValue('1.3.0+L2')
 
         await initSafeSDK({
           provider: mockProvider,
@@ -313,9 +319,11 @@ describe('safeCoreSDK', () => {
           provider: expect.anything(),
           safeAddress: expect.anything(),
           contractNetworks: {
-            [chainId]: {
+            [chainId]: expect.objectContaining({
               safeSingletonAddress: masterCopy,
-            },
+              safeProxyFactoryAddress: expect.any(String),
+              multiSendAddress: expect.any(String),
+            }),
           },
         })
       })

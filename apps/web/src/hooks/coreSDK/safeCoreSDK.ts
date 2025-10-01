@@ -1,5 +1,14 @@
 import chains from '@safe-global/utils/config/chains'
-import { getSafeL2SingletonDeployments, getSafeSingletonDeployments } from '@safe-global/safe-deployments'
+import {
+  getCreateCallDeployment,
+  getFallbackHandlerDeployment,
+  getMultiSendCallOnlyDeployment,
+  getMultiSendDeployment,
+  getProxyFactoryDeployment,
+  getSafeL2SingletonDeployments,
+  getSafeSingletonDeployments,
+  getSignMessageLibDeployment,
+} from '@safe-global/safe-deployments'
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { Gnosis_safe__factory } from '@safe-global/utils/types/contracts'
 import Safe, { type ContractNetworksConfig } from '@safe-global/protocol-kit'
@@ -9,7 +18,18 @@ import { isLegacyVersion } from '@safe-global/utils/services/contracts/utils'
 import { isInDeployments } from '@safe-global/utils/hooks/coreSDK/utils'
 import type { SafeCoreSDKProps } from '@safe-global/utils/hooks/coreSDK/types'
 import { keccak256 } from 'ethers'
-import { isL2MasterCopyCodeHash } from '@safe-global/utils/services/contracts/deployments'
+import {
+  getL2MasterCopyVersionByCodeHash,
+  isL2MasterCopyCodeHash,
+} from '@safe-global/utils/services/contracts/deployments'
+
+const toAddress = (value: string | string[] | undefined): string | undefined => {
+  if (!value) {
+    return undefined
+  }
+
+  return Array.isArray(value) ? value[0] : value
+}
 
 // Safe Core SDK
 export const initSafeSDK = async ({
@@ -24,7 +44,7 @@ export const initSafeSDK = async ({
   const providerNetwork = (await provider.getNetwork()).chainId
   if (providerNetwork !== BigInt(chainId)) return
 
-  const safeVersion = version ?? (await Gnosis_safe__factory.connect(address, provider).VERSION())
+  let safeVersion = version ?? (await Gnosis_safe__factory.connect(address, provider).VERSION())
   let isL1SafeSingleton = chainId === chains.eth
   let contractNetworks: ContractNetworksConfig | undefined
 
@@ -53,11 +73,68 @@ export const initSafeSDK = async ({
           return Promise.resolve(undefined)
         }
 
+        const upgradeableVersion = getL2MasterCopyVersionByCodeHash(codeHash)
+
+        if (!upgradeableVersion) {
+          return Promise.resolve(undefined)
+        }
+
+        const resolvedSafeDeployment = getSafeL2SingletonDeployments({
+          version: upgradeableVersion,
+          network: chainId,
+        })
+        const proxyFactoryDeployment = getProxyFactoryDeployment({
+          version: upgradeableVersion,
+          network: chainId,
+        })
+        const multiSendDeployment = getMultiSendDeployment({
+          version: upgradeableVersion,
+          network: chainId,
+        })
+        const multiSendCallOnlyDeployment = getMultiSendCallOnlyDeployment({
+          version: upgradeableVersion,
+          network: chainId,
+        })
+        const fallbackHandlerDeployment = getFallbackHandlerDeployment({
+          version: upgradeableVersion,
+          network: chainId,
+        })
+        const signMessageLibDeployment = getSignMessageLibDeployment({
+          version: upgradeableVersion,
+          network: chainId,
+        })
+        const createCallDeployment = getCreateCallDeployment({
+          version: upgradeableVersion,
+          network: chainId,
+        })
+
+        const proxyFactoryAddress = toAddress(proxyFactoryDeployment?.networkAddresses?.[chainId])
+        const multiSendAddress = toAddress(multiSendDeployment?.networkAddresses?.[chainId])
+        const multiSendCallOnlyAddress = toAddress(multiSendCallOnlyDeployment?.networkAddresses?.[chainId])
+        const fallbackHandlerAddress = toAddress(fallbackHandlerDeployment?.networkAddresses?.[chainId])
+        const signMessageLibAddress = toAddress(signMessageLibDeployment?.networkAddresses?.[chainId])
+        const createCallAddress = toAddress(createCallDeployment?.networkAddresses?.[chainId])
+
         contractNetworks = {
           [chainId]: {
             safeSingletonAddress: masterCopy,
+            ...(resolvedSafeDeployment?.abi ? { safeSingletonAbi: resolvedSafeDeployment.abi } : {}),
+            ...(proxyFactoryDeployment?.abi ? { safeProxyFactoryAbi: proxyFactoryDeployment.abi } : {}),
+            ...(multiSendDeployment?.abi ? { multiSendAbi: multiSendDeployment.abi } : {}),
+            ...(multiSendCallOnlyDeployment?.abi ? { multiSendCallOnlyAbi: multiSendCallOnlyDeployment.abi } : {}),
+            ...(fallbackHandlerDeployment?.abi ? { fallbackHandlerAbi: fallbackHandlerDeployment.abi } : {}),
+            ...(signMessageLibDeployment?.abi ? { signMessageLibAbi: signMessageLibDeployment.abi } : {}),
+            ...(createCallDeployment?.abi ? { createCallAbi: createCallDeployment.abi } : {}),
+            ...(proxyFactoryAddress ? { safeProxyFactoryAddress: proxyFactoryAddress } : {}),
+            ...(multiSendAddress ? { multiSendAddress } : {}),
+            ...(multiSendCallOnlyAddress ? { multiSendCallOnlyAddress } : {}),
+            ...(fallbackHandlerAddress ? { fallbackHandlerAddress } : {}),
+            ...(signMessageLibAddress ? { signMessageLibAddress } : {}),
+            ...(createCallAddress ? { createCallAddress } : {}),
           },
         }
+
+        safeVersion = upgradeableVersion
         isL1SafeSingleton = false
       } catch (error) {
         console.error('Failed to inspect Safe master copy bytecode', error)
