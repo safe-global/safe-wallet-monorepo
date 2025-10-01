@@ -4,6 +4,7 @@ import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded'
 import { trackEvent } from '@/services/analytics'
 import { POSITIONS_EVENTS } from '@/services/analytics/events/positions'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { logError, Errors } from '@/services/exceptions'
 import usePositions from '@/features/positions/hooks/usePositions'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -65,7 +66,7 @@ const RefreshPositionsButton = ({
     try {
       await triggerRefresh({ chainId, safeAddress, fiatCode: currency, refresh: true }).unwrap()
     } catch (error) {
-      console.error('Failed to refresh positions:', error)
+      logError(Errors._605, error)
     }
   }
 
