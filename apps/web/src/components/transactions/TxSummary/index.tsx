@@ -1,7 +1,7 @@
 import TxProposalChip from '@/features/proposers/components/TxProposalChip'
 import StatusLabel from '@/features/swap/components/StatusLabel'
 import useIsExpiredSwap from '@/features/swap/hooks/useIsExpiredSwap'
-import { Box } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import type { ReactElement } from 'react'
 import { type Transaction } from '@safe-global/safe-gateway-typescript-sdk'
 
@@ -19,6 +19,7 @@ import TxConfirmations from '../TxConfirmations'
 import { useHasFeature } from '@/hooks/useChains'
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { ellipsis } from '@safe-global/utils/utils/formatters'
 
 type TxSummaryProps = {
   isConflictGroup?: boolean
@@ -37,6 +38,8 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
   const isPending = useIsPending(tx.id)
   const executionInfo = isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo : undefined
   const expiredSwap = useIsExpiredSwap(tx.txInfo)
+  // @ts-ignore
+  const note = isMultisigExecutionInfo(tx.executionInfo) ? tx.note : undefined
 
   return (
     <Box
@@ -63,6 +66,12 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
 
       <Box data-testid="tx-type" gridArea="type">
         <TxType tx={tx} />
+
+        {note && (
+          <Typography variant="body2" component="span" color="text.secondary">
+            {ellipsis(note, 40)}
+          </Typography>
+        )}
       </Box>
 
       <Box data-testid="tx-info" gridArea="info">
