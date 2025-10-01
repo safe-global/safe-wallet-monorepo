@@ -17,6 +17,10 @@ export const UpdateSafeReview = (props: ReviewTransactionProps) => {
   useAsync(async () => {
     if (!chain || !safeLoaded) return
 
+    const resolvedVersion = safe.version ?? upgradeableMasterCopyVersion
+
+    if (!resolvedVersion) return
+
     const txs = await createUpdateSafeTxs(safe, chain, {
       fallbackSafeVersion: upgradeableMasterCopyVersion,
     })
