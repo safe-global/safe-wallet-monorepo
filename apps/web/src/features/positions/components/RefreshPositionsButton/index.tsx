@@ -6,11 +6,6 @@ import { POSITIONS_EVENTS } from '@/services/analytics/events/positions'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { logError, Errors } from '@/services/exceptions'
 import usePositions from '@/features/positions/hooks/usePositions'
-import useChainId from '@/hooks/useChainId'
-import useSafeInfo from '@/hooks/useSafeInfo'
-import { useAppSelector } from '@/store'
-import { selectCurrency } from '@/store/settingsSlice'
-import { useLazyPositionsGetPositionsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 
 const RefreshIcon = (props: SvgIconProps & { isLoading?: boolean }) => {
   const { isLoading, ...iconProps } = props
@@ -21,7 +16,7 @@ const RefreshIcon = (props: SvgIconProps & { isLoading?: boolean }) => {
       sx={{
         ...iconProps.sx,
         ...(isLoading && {
-          animation: 'spin 1s linear infinite',
+          animation: 'spin 1s linear',
           '@keyframes spin': {
             '0%': {
               transform: 'rotate(0deg)',
@@ -52,28 +47,21 @@ const RefreshPositionsButton = ({
   label,
   ...iconButtonProps
 }: RefreshPositionsButtonProps) => {
-  const chainId = useChainId()
-  const { safeAddress } = useSafeInfo()
-  const currency = useAppSelector(selectCurrency)
-  const { isLoading } = usePositions()
-  const [triggerRefresh, { isLoading: isRefreshLoading }] = useLazyPositionsGetPositionsV1Query()
+  const { refetch, isLoading } = usePositions()
 
   const handleRefresh = async () => {
-    if (!safeAddress || !chainId || !currency) return
-
     trackEvent(POSITIONS_EVENTS.POSITIONS_REFRESH_CLICKED, {
       [MixpanelEventParams.ENTRY_POINT]: entryPoint,
     })
 
     try {
-      await triggerRefresh({ chainId, safeAddress, fiatCode: currency, refresh: true }).unwrap()
+      await refetch()
     } catch (error) {
       logError(Errors._605, error)
     }
   }
 
-  const isButtonLoading = isLoading || isRefreshLoading
-  const isDisabled = disabled || isButtonLoading
+  const isDisabled = disabled || isLoading
 
   if (label) {
     const button = (
@@ -81,11 +69,11 @@ const RefreshPositionsButton = ({
         onClick={handleRefresh}
         disabled={isDisabled}
         size={size}
-        startIcon={<RefreshIcon isLoading={isButtonLoading} fontSize={size === 'small' ? 'small' : 'medium'} />}
+        startIcon={<RefreshIcon isLoading={isLoading} fontSize={size === 'small' ? 'small' : 'medium'} />}
         sx={{
           ...iconButtonProps.sx,
           textTransform: 'none',
-          ...(isButtonLoading && {
+          ...(isLoading && {
             color: 'action.disabled',
           }),
         }}
@@ -95,7 +83,7 @@ const RefreshPositionsButton = ({
     )
 
     return tooltip ? (
-      <Tooltip title={isDisabled ? (isButtonLoading ? 'Refreshing...' : tooltip) : tooltip} arrow>
+      <Tooltip title={isDisabled ? (isLoading ? 'Refreshing...' : tooltip) : tooltip} arrow>
         {isDisabled ? <span>{button}</span> : button}
       </Tooltip>
     ) : (
@@ -111,17 +99,17 @@ const RefreshPositionsButton = ({
       {...iconButtonProps}
       sx={{
         ...iconButtonProps.sx,
-        ...(isButtonLoading && {
+        ...(isLoading && {
           color: 'action.disabled',
         }),
       }}
     >
-      <RefreshIcon isLoading={isButtonLoading} fontSize={size === 'small' ? 'small' : 'medium'} />
+      <RefreshIcon isLoading={isLoading} fontSize={size === 'small' ? 'small' : 'medium'} />
     </IconButton>
   )
 
   return tooltip ? (
-    <Tooltip title={isDisabled ? (isButtonLoading ? 'Refreshing...' : tooltip) : tooltip} arrow>
+    <Tooltip title={isDisabled ? (isLoading ? 'Refreshing...' : tooltip) : tooltip} arrow>
       {isDisabled ? <span>{button}</span> : button}
     </Tooltip>
   ) : (

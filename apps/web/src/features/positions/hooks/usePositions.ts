@@ -12,21 +12,22 @@ const usePositions = () => {
   const chainId = useChainId()
   const { safeAddress } = useSafeInfo()
   const currency = useAppSelector(selectCurrency)
-  const [triggerRefresh] = useLazyPositionsGetPositionsV1Query()
 
-  const { currentData, error, isLoading } = usePositionsGetPositionsV1Query(
+  const { data, error, isLoading, isFetching } = usePositionsGetPositionsV1Query(
     { chainId, safeAddress, fiatCode: currency },
     {
       skip: !safeAddress || !chainId || !currency,
     },
   )
 
+  const [triggerRefresh, { isFetching: isRefreshFetching }] = useLazyPositionsGetPositionsV1Query()
+
   const refetch = useCallback(() => {
     if (!safeAddress || !chainId || !currency) return Promise.resolve()
     return triggerRefresh({ chainId, safeAddress, fiatCode: currency, refresh: true }).unwrap()
   }, [safeAddress, chainId, currency, triggerRefresh])
 
-  return { data: currentData, error, isLoading, refetch }
+  return { data, error, isLoading: isLoading || isFetching || isRefreshFetching, refetch }
 }
 
 export default usePositions
