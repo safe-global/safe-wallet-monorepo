@@ -92,6 +92,17 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
     const { chainId, safeAddress, walletAddress } = request
     const message = BlockaidModule.prepareMessage(request)
 
+    // Parse origin if it's a JSON string containing url and name
+    let domain: string | undefined
+    if (request.origin) {
+      try {
+        const parsed = JSON.parse(request.origin)
+        domain = parsed.url || request.origin
+      } catch {
+        domain = request.origin
+      }
+    }
+
     const payload: BlockaidPayload = {
       chain: numberToHex(chainId),
       account_address: walletAddress,
@@ -100,9 +111,9 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
         params: [safeAddress, message],
       },
       options: ['simulation', 'validation'],
-      metadata: request.origin
+      metadata: domain
         ? {
-            domain: request.origin,
+            domain,
           }
         : {
             non_dapp: true,
