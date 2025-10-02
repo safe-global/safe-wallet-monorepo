@@ -26,11 +26,7 @@ const getGnosisSafeContract = async (safe: SafeState, safeProvider: SafeProvider
     version = safeSDK?.getContractVersion() ?? null
   }
 
-  return getSafeContractInstance(
-    _getValidatedGetContractProps(version).safeVersion,
-    safeProvider,
-    safe.address.value,
-  )
+  return getSafeContractInstance(_getValidatedGetContractProps(version).safeVersion, safeProvider, safe.address.value)
 }
 
 export const getReadOnlyCurrentGnosisSafeContract = async (safe: SafeState): Promise<SafeBaseContract<any>> => {

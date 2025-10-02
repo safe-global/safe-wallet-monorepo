@@ -2,6 +2,7 @@ import { renderHook } from '@/tests//test-utils'
 import useSafeNotifications from '../../hooks/useSafeNotifications'
 import useSafeInfo from '../../hooks/useSafeInfo'
 import { showNotification } from '@/store/notificationsSlice'
+import { useBytecodeComparison } from '../useBytecodeComparison'
 
 // mock showNotification
 jest.mock('@/store/notificationsSlice', () => {
@@ -25,6 +26,14 @@ jest.mock('../../hooks/useIsSafeOwner', () => ({
 jest.mock('next/router', () => ({
   useRouter: jest.fn(() => ({
     query: { safe: 'eth:0x123' },
+  })),
+}))
+
+// mock useBytecodeComparison
+jest.mock('../useBytecodeComparison', () => ({
+  useBytecodeComparison: jest.fn(() => ({
+    result: undefined,
+    isLoading: false,
   })),
 }))
 
@@ -174,17 +183,28 @@ describe('useSafeNotifications', () => {
         },
       })
 
+      // Mock bytecode comparison to indicate a match for migration
+      ;(useBytecodeComparison as jest.Mock).mockReturnValue({
+        result: { isMatch: true, matchedVersion: '1.3.0' },
+        isLoading: false,
+      })
+
       // render the hook
       const { result } = renderHook(() => useSafeNotifications())
 
       // check that the notification was shown
       expect(result.current).toBeUndefined()
       expect(showNotification).toHaveBeenCalledWith({
-        variant: 'info',
-        message: `This Safe Account was created with an unsupported base contract.
-           It is possible to migrate it to a compatible base contract. You can migrate it to a compatible contract on the Home screen.`,
+        variant: 'warning',
+        message: 'Please migrate your Safe to a supported base contract.',
         groupKey: 'invalid-mastercopy',
-        link: undefined,
+        link: {
+          href: {
+            pathname: '/settings/setup',
+            query: { safe: 'eth:0x123' },
+          },
+          title: 'Migrate',
+        },
       })
     })
   })

@@ -9,7 +9,10 @@ import { isLegacyVersion } from '@safe-global/utils/services/contracts/utils'
 import { isInDeployments } from '@safe-global/utils/hooks/coreSDK/utils'
 import type { SafeCoreSDKProps } from '@safe-global/utils/hooks/coreSDK/types'
 import { keccak256 } from 'ethers'
-import { getL2MasterCopyVersionByCodeHash, isL2MasterCopyCodeHash } from '@safe-global/utils/services/contracts/deployments'
+import {
+  getL2MasterCopyVersionByCodeHash,
+  isL2MasterCopyCodeHash,
+} from '@safe-global/utils/services/contracts/deployments'
 
 // Safe Core SDK
 export const initSafeSDK = async ({

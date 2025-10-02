@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useWeb3ReadOnly } from './wallets/web3'
 import useSafeInfo from './useSafeInfo'
-import { compareWithSupportedL2Contracts, isSupportedL2Version } from '@safe-global/utils/services/contracts/bytecodeComparison'
+import {
+  compareWithSupportedL2Contracts,
+  isSupportedL2Version,
+} from '@safe-global/utils/services/contracts/bytecodeComparison'
 import type { BytecodeComparisonResult } from '@safe-global/utils/services/contracts/bytecodeComparison'
 import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeContracts'
 import { Gnosis_safe__factory } from '@safe-global/utils/types/contracts'
@@ -75,6 +78,13 @@ export const useBytecodeComparison = (): BytecodeComparisonState => {
           return
         }
 
+        if (!safe.implementation?.value) {
+          console.log('[useBytecodeComparison] No implementation address, skipping')
+          setComparisonResult(undefined)
+          setIsLoading(false)
+          return
+        }
+
         const implementationAddress = safe.implementation.value
         console.log('[useBytecodeComparison] Fetching bytecode for', implementationAddress, 'on chain', safe.chainId)
         const bytecode = await web3ReadOnly.getCode(implementationAddress)
@@ -93,7 +103,14 @@ export const useBytecodeComparison = (): BytecodeComparisonState => {
     }
 
     fetchAndCompare()
-  }, [safe.implementationVersionState, safe.implementation.value, safe.chainId, safe.version, safe.address.value, web3ReadOnly])
+  }, [
+    safe.implementationVersionState,
+    safe.implementation?.value,
+    safe.chainId,
+    safe.version,
+    safe.address.value,
+    web3ReadOnly,
+  ])
 
   return { result: comparisonResult, isLoading }
 }

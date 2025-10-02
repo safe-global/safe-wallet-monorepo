@@ -145,8 +145,7 @@ const useSafeNotifications = (): void => {
 
     console.log('[useSafeNotifications] Bytecode comparison result:', bytecodeComparison.result)
 
-    const canMigrate =
-      canMigrateUnsupportedMastercopy(safe, bytecodeComparison.result) || isMigrationToL2Possible(safe)
+    const canMigrate = canMigrateUnsupportedMastercopy(safe, bytecodeComparison.result) || isMigrationToL2Possible(safe)
 
     console.log('[useSafeNotifications] Can migrate:', canMigrate)
 
