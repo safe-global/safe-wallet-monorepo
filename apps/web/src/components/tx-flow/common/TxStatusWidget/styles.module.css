@@ -1,12 +1,6 @@
-.header {
-  padding: var(--space-4) var(--space-3);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
 .content {
-  padding: var(--space-2);
+  padding: var(--space-4) var(--space-3);
+  padding-left: 0;
 }
 
 .status {
@@ -36,11 +30,11 @@
   justify-content: center;
   min-width: 32px;
   padding: var(--space-1);
-  background-color: var(--color-background-paper);
+  background-color: var(--color-background-main);
 }
 
 [data-theme='light'] .status :global .MuiListItemIcon-root {
-  color: var(--color-secondary-dark);
+  color: var(--color-primary-main);
 }
 
 .incomplete > * {
@@ -65,8 +59,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-secondary-main);
-  color: var(--color-text-primary);
+  background-color: var(--color-text-primary);
+  color: var(--color-logo-background);
 }
 
 [data-theme='dark'] .badge {
