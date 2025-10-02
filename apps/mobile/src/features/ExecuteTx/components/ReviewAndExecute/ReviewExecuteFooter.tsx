@@ -8,12 +8,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTransactionSigner } from '@/src/features/ConfirmTx/hooks/useTransactionSigner'
 import { Address } from '@/src/types/address'
 import { SelectExecutor } from '@/src/components/SelectExecutor'
+import { EstimatedNetworkFee } from '../EstimatedNetworkFee'
+import { Container } from '@/src/components/Container'
+import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 interface ReviewFooterProps {
   txId: string
+  txDetails: TransactionDetails
 }
 
-export function ReviewExecuteFooter({ txId }: ReviewFooterProps) {
+export function ReviewExecuteFooter({ txId, txDetails }: ReviewFooterProps) {
   const { signerState } = useTransactionSigner(txId)
   const { activeSigner } = signerState
   const { isBiometricsEnabled } = useBiometrics()
@@ -44,15 +48,15 @@ export function ReviewExecuteFooter({ txId }: ReviewFooterProps) {
 
   return (
     <Stack
-      backgroundColor="$background"
       paddingHorizontal="$4"
-      paddingVertical="$3"
-      borderTopWidth={1}
-      borderTopColor="$borderLight"
       space="$3"
       paddingBottom={insets.bottom ? insets.bottom : '$4'}
     >
-      <SelectExecutor address={activeSigner?.value as Address} txId={txId} />
+      <Container backgroundColor="transparent" gap={'$2'} borderWidth={1} paddingVertical={'$3'} borderColor="$borderLight">
+        <SelectExecutor address={activeSigner?.value as Address} txId={txId} />
+
+        <EstimatedNetworkFee txDetails={txDetails} />
+      </Container>
 
       <SafeButton onPress={handleConfirmPress} width="100%">
         Execute transaction

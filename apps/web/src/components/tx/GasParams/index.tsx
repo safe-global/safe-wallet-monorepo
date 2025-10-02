@@ -56,7 +56,7 @@ export const _GasParams = ({
   const totalFee = !isLoading
     ? formatVisualAmount(getTotalFee(maxFeePerGas, gasLimit), chain?.nativeCurrency.decimals)
     : '> 0.001'
-
+  console.log('totalFee', maxFeePerGas, gasLimit)
   // Individual gas params
   const gasLimitString = gasLimit?.toString() || ''
   const maxFeePerGasGwei = maxFeePerGas ? formatVisualAmount(maxFeePerGas) : ''
