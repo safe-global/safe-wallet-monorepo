@@ -43,7 +43,7 @@ const RefreshPositionsButton = ({
   disabled = false,
   ...buttonProps
 }: RefreshPositionsButtonProps) => {
-  const { refetch, isLoading } = usePositions()
+  const { refetch, isFetching } = usePositions()
 
   const handleRefresh = async () => {
     trackEvent(POSITIONS_EVENTS.POSITIONS_REFRESH_CLICKED, {
@@ -57,19 +57,19 @@ const RefreshPositionsButton = ({
     }
   }
 
-  const isDisabled = disabled || isLoading
+  const isDisabled = disabled || isFetching
 
   const button = (
     <Button
       onClick={handleRefresh}
       disabled={isDisabled}
       size={size}
-      startIcon={<RefreshIcon isLoading={isLoading} fontSize={size === 'small' ? 'small' : 'medium'} />}
+      startIcon={<RefreshIcon isLoading={isFetching} fontSize={size === 'small' ? 'small' : 'medium'} />}
       {...buttonProps}
       sx={{
         ...buttonProps.sx,
         textTransform: 'none',
-        ...(isLoading && {
+        ...(isFetching && {
           color: 'action.disabled',
         }),
       }}
@@ -79,7 +79,7 @@ const RefreshPositionsButton = ({
   )
 
   return tooltip ? (
-    <Tooltip title={isDisabled ? (isLoading ? 'Refreshing...' : tooltip) : tooltip} arrow>
+    <Tooltip title={isDisabled ? (isFetching ? 'Refreshing...' : tooltip) : tooltip} arrow>
       {isDisabled ? <span>{button}</span> : button}
     </Tooltip>
   ) : (
