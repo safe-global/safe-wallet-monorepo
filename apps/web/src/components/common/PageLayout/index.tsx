@@ -15,11 +15,14 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const [isSidebarRoute, isAnimated] = useIsSidebarRoute(pathname)
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(true)
   const [isBatchOpen, setBatchOpen] = useState<boolean>(false)
-  const { setFullWidth } = useContext(TxModalContext)
+  const { txFlow, setFullWidth } = useContext(TxModalContext)
+
+  // Hide sidebar when transaction flow is open
+  const isSidebarVisible = isSidebarOpen && !txFlow
 
   useEffect(() => {
-    setFullWidth(!isSidebarOpen)
-  }, [isSidebarOpen, setFullWidth])
+    setFullWidth(!isSidebarVisible)
+  }, [isSidebarVisible, setFullWidth])
 
   return (
     <>
@@ -27,11 +30,11 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
         <Header onMenuToggle={isSidebarRoute ? setSidebarOpen : undefined} onBatchToggle={setBatchOpen} />
       </header>
 
-      {isSidebarRoute ? <SideDrawer isOpen={isSidebarOpen} onToggle={setSidebarOpen} /> : null}
+      {isSidebarRoute ? <SideDrawer isOpen={isSidebarVisible} onToggle={setSidebarOpen} /> : null}
 
       <div
         className={classnames(css.main, {
-          [css.mainNoSidebar]: !isSidebarOpen || !isSidebarRoute,
+          [css.mainNoSidebar]: !isSidebarVisible || !isSidebarRoute,
           [css.mainAnimated]: isSidebarRoute && isAnimated,
         })}
       >

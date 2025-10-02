@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, Paper, Typography } from '@mui/material'
+import { List, ListItem, ListItemIcon, ListItemText, Paper, Typography } from '@mui/material'
 import CreatedIcon from '@/public/images/messages/created.svg'
 import SignedIcon from '@/public/images/messages/signed.svg'
 import { TransactionStatus, type TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
@@ -7,22 +7,18 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { isMultisigExecutionInfo, isSignableBy, isConfirmableBy } from '@/utils/transaction-guards'
 import classnames from 'classnames'
 import css from './styles.module.css'
-import CloseIcon from '@mui/icons-material/Close'
 import useWallet from '@/hooks/wallets/useWallet'
-import SafeLogo from '@/public/images/logo-no-text.svg'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 
 const TxStatusWidget = ({
   txSummary,
-  handleClose,
   isBatch = false,
   isMessage = false,
   isLastStep = false,
 }: {
   txSummary?: TransactionSummary
-  handleClose: () => void
   isBatch?: boolean
   isMessage?: boolean
   isLastStep?: boolean
@@ -46,20 +42,7 @@ const TxStatusWidget = ({
   const canSign = txSummary ? isSignableBy(txSummary, wallet?.address || '') : !isProposing
 
   return (
-    <Paper>
-      <div className={css.header}>
-        <Typography fontWeight="700" display="flex" alignItems="center" gap={1}>
-          <SafeLogo width={16} height={16} className={css.logo} />
-          {isMessage ? 'Message' : 'Transaction'} status
-        </Typography>
-
-        <IconButton className={css.close} aria-label="close" onClick={handleClose} size="small">
-          <CloseIcon />
-        </IconButton>
-      </div>
-
-      <Divider />
-
+    <Paper sx={{ backgroundColor: 'transparent' }}>
       <div className={css.content}>
         <List className={css.status}>
           <ListItem>
@@ -67,9 +50,7 @@ const TxStatusWidget = ({
               <CreatedIcon />
             </ListItemIcon>
 
-            <ListItemText primaryTypographyProps={{ fontWeight: 700 }}>
-              {isBatch ? 'Queue transactions' : 'Create'}
-            </ListItemText>
+            <ListItemText sx={{ letterSpacing: 1 }}>{isBatch ? 'Queue transactions' : 'Create'}</ListItemText>
           </ListItem>
 
           <ListItem className={classnames({ [css.incomplete]: !canConfirm && !isBatch })}>
@@ -77,7 +58,7 @@ const TxStatusWidget = ({
               <SignedIcon />
             </ListItemIcon>
 
-            <ListItemText primaryTypographyProps={{ fontWeight: 700 }}>
+            <ListItemText sx={{ letterSpacing: 1 }}>
               {isBatch ? (
                 'Create batch'
               ) : !nonceNeeded ? (
@@ -102,7 +83,7 @@ const TxStatusWidget = ({
               <SignedIcon />
             </ListItemIcon>
 
-            <ListItemText primaryTypographyProps={{ fontWeight: 700 }}>{isMessage ? 'Done' : 'Execute'}</ListItemText>
+            <ListItemText sx={{ letterSpacing: 1 }}>{isMessage ? 'Done' : 'Execute'}</ListItemText>
           </ListItem>
         </List>
       </div>
