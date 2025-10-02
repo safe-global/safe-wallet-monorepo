@@ -33,18 +33,22 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type UsersGetWithWalletsV1ApiResponse = /** status 200  */ UserWithWallets
+export type UsersGetWithWalletsV1ApiResponse =
+  /** status 200 User information with associated wallets retrieved successfully */ UserWithWallets
 export type UsersGetWithWalletsV1ApiArg = void
 export type UsersDeleteV1ApiResponse = unknown
 export type UsersDeleteV1ApiArg = void
-export type UsersCreateWithWalletV1ApiResponse = /** status 200  */ CreatedUserWithWallet
+export type UsersCreateWithWalletV1ApiResponse =
+  /** status 201 User created successfully with wallet association */ CreatedUserWithWallet
 export type UsersCreateWithWalletV1ApiArg = void
-export type UsersAddWalletToUserV1ApiResponse = /** status 200  */ WalletAddedToUser
+export type UsersAddWalletToUserV1ApiResponse = /** status 200 Wallet added to user successfully */ WalletAddedToUser
 export type UsersAddWalletToUserV1ApiArg = {
+  /** Sign-In with Ethereum message and signature for the wallet to add */
   siweDto: SiweDto
 }
 export type UsersDeleteWalletFromUserV1ApiResponse = unknown
 export type UsersDeleteWalletFromUserV1ApiArg = {
+  /** Wallet address to remove (0x prefixed hex string) */
   walletAddress: string
 }
 export type UserWallet = {

@@ -21,9 +21,12 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type DataDecodedGetDataDecodedV1ApiResponse = /** status 200  */ DataDecoded
+export type DataDecodedGetDataDecodedV1ApiResponse =
+  /** status 200 Transaction data decoded successfully with method name, parameters, and values */ DataDecoded
 export type DataDecodedGetDataDecodedV1ApiArg = {
+  /** Chain ID where the transaction will be executed */
   chainId: string
+  /** Transaction data to decode, including contract address and data payload */
   transactionDataDto: TransactionDataDto
 }
 export type BaseDataDecoded = {
