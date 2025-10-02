@@ -23,7 +23,7 @@ const AccountListFilters = ({ setSearchQuery }: { setSearchQuery: Dispatch<SetSt
       <Box display="flex" justifyContent="space-between" width="100%" gap={1}>
         <TextField
           id="search-by-name"
-          placeholder="Search by name, ENS, address, or chain"
+          placeholder="Search by name, ENS, UD, address, or chain"
           aria-label="Search Safe list by name"
           variant="filled"
           hiddenLabel

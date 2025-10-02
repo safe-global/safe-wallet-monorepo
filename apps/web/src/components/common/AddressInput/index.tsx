@@ -68,14 +68,14 @@ const AddressInput = ({
 
   const addressBook = useAddressBook()
 
-  // Fetch an ENS resolution for the current address
+  // Fetch domain resolution for the current address
   const isDomainLookupEnabled = !!currentChain && hasFeature(currentChain, FEATURES.DOMAIN_LOOKUP)
   const { address, resolverError, resolving } = useNameResolver(isDomainLookupEnabled ? watchedValue : '')
 
   // errors[name] doesn't work with nested field names like 'safe.address', need to use the lodash get
   const fieldError = resolverError || get(errors, name)
 
-  // Debounce the field error unless there's no error or it's resolving a domain
+  // Debounce the field error unless there's no error or it's resolving a domain name
   let error = useDebounce(fieldError, 500)
   if (resolverError) error = resolverError
   if (!fieldError || resolving) error = undefined
@@ -106,7 +106,7 @@ const AddressInput = ({
     [setValue, name],
   )
 
-  // On ENS resolution, update the input value
+  // On domain name resolution, update the input value
   useEffect(() => {
     if (address) {
       setAddressValue(`${currentShortName}:${address}`)
@@ -163,7 +163,7 @@ const AddressInput = ({
         className={inputCss.input}
         autoComplete="off"
         autoFocus={props.focused}
-        label={<>{error?.message || props.label || `Recipient address${isDomainLookupEnabled ? ' or ENS' : ''}`}</>}
+        label={<>{error?.message || props.label || `Recipient address${isDomainLookupEnabled ? ' or domain name' : ''}`}</>}
         error={!!error}
         fullWidth
         onClick={resetName}

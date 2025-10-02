@@ -27,8 +27,13 @@ jest.mock('@/hooks/useChains', () => ({
 jest.mock('@/components/common/AddressInput/useNameResolver', () => ({
   __esModule: true,
   default: jest.fn((val: string) => ({
-    address: val === 'zero.eth' ? '0x0000000000000000000000000000000000000000' : undefined,
-    resolverError: val === 'bogus.eth' ? new Error('Failed to resolve') : undefined,
+    address:
+      val === 'zero.eth'
+        ? '0x0000000000000000000000000000000000000000'
+        : val === 'brad.crypto'
+          ? '0x1111111111111111111111111111111111111111'
+          : undefined,
+    resolverError: val === 'bogus.eth' || val === 'bogus.crypto' ? new Error('Failed to resolve') : undefined,
     resolving: false,
   })),
 }))
@@ -87,7 +92,7 @@ describe('AddressInput tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(useCurrentChain as jest.Mock).mockImplementation(() => mockChain)
+      ; (useCurrentChain as jest.Mock).mockImplementation(() => mockChain)
     jest.spyOn(addressBook, 'default').mockReturnValue({})
   })
 
@@ -190,6 +195,69 @@ describe('AddressInput tests', () => {
     })
   })
 
+  it('should resolve Unstoppable Domains names', async () => {
+    const { input } = setup('')
+
+    act(() => {
+      fireEvent.change(input, { target: { value: 'brad.crypto' } })
+    })
+
+    await waitFor(() => {
+      expect(input.value).toBe('0x1111111111111111111111111111111111111111')
+      expect(useNameResolver).toHaveBeenCalledWith('brad.crypto')
+    })
+  })
+
+  it('should show an error if UD resolution has failed', async () => {
+    const { input, utils } = setup('')
+
+    act(() => {
+      fireEvent.change(input, { target: { value: 'bogus.crypto' } })
+      jest.advanceTimersByTime(1000)
+    })
+
+    expect(useNameResolver).toHaveBeenCalledWith('bogus.crypto')
+    await waitFor(() => expect(utils.getByLabelText(`Failed to resolve`, { exact: false })).toBeDefined())
+  })
+
+  it('should not resolve UD names if this feature is disabled', async () => {
+    ; (useCurrentChain as jest.Mock).mockImplementation(() => ({
+      shortName: 'gor',
+      chainId: '5',
+      chainName: 'Goerli',
+      features: [],
+    }))
+
+    const { input, utils } = setup('')
+
+    act(() => {
+      fireEvent.change(input, { target: { value: 'brad.crypto' } })
+      jest.advanceTimersByTime(1000)
+    })
+
+    expect(useNameResolver).toHaveBeenCalledWith('')
+    await waitFor(() => expect(input.value).toBe('brad.crypto'))
+    await waitFor(() => expect(utils.getByLabelText('Invalid address format', { exact: false })).toBeDefined())
+  })
+
+  it('should show a spinner when UD resolution is in progress', async () => {
+    ; (useNameResolver as jest.Mock).mockImplementation((val: string) => ({
+      address: undefined,
+      resolverError: undefined,
+      resolving: val === 'loading.crypto',
+    }))
+
+    const { input, utils } = setup('')
+
+    act(() => {
+      fireEvent.change(input, { target: { value: 'loading.crypto' } })
+    })
+
+    await waitFor(() => {
+      expect(utils.getByRole('progressbar')).toBeDefined()
+    })
+  })
+
   it('should show an error if ENS resolution has failed', async () => {
     const { input, utils } = setup('')
 
@@ -203,7 +271,7 @@ describe('AddressInput tests', () => {
   })
 
   it('should not resolve ENS names if this feature is disabled', async () => {
-    ;(useCurrentChain as jest.Mock).mockImplementation(() => ({
+    ; (useCurrentChain as jest.Mock).mockImplementation(() => ({
       shortName: 'gor',
       chainId: '5',
       chainName: 'Goerli',
@@ -233,7 +301,7 @@ describe('AddressInput tests', () => {
   // TODO: Fix this test
   it.skip('should not show the adornment prefix when the value contains correct prefix', async () => {
     const mockChain = chainBuilder().with({ features: [] }).build()
-    ;(useCurrentChain as jest.Mock).mockImplementation(() => mockChain)
+      ; (useCurrentChain as jest.Mock).mockImplementation(() => mockChain)
 
     const { input } = setup(`${mockChain.shortName}:${TEST_ADDRESS_A}`)
 
@@ -276,7 +344,7 @@ describe('AddressInput tests', () => {
   })
 
   it('should clean up the input value if it contains a valid address', async () => {
-    ;(useCurrentChain as jest.Mock).mockImplementation(() => ({
+    ; (useCurrentChain as jest.Mock).mockImplementation(() => ({
       shortName: 'gor',
       chainId: '5',
       chainName: 'Goerli',
