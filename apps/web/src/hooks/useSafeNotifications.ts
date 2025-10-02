@@ -143,11 +143,7 @@ const useSafeNotifications = (): void => {
   useEffect(() => {
     if (isValidMasterCopy(safe.implementationVersionState)) return
 
-    console.log('[useSafeNotifications] Bytecode comparison result:', bytecodeComparison.result)
-
     const canMigrate = canMigrateUnsupportedMastercopy(safe, bytecodeComparison.result) || isMigrationToL2Possible(safe)
-
-    console.log('[useSafeNotifications] Can migrate:', canMigrate)
 
     const message = canMigrate
       ? 'Please migrate your Safe to a supported base contract.'
