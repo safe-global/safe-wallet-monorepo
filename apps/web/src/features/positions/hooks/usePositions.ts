@@ -14,7 +14,7 @@ const usePositions = () => {
     error,
     isLoading,
     isFetching,
-    refetch: rtqRefetch,
+    refetch,
   } = usePositionsGetPositionsV1Query(
     { chainId, safeAddress, fiatCode: currency, refresh: true },
     {
@@ -22,7 +22,7 @@ const usePositions = () => {
     },
   )
 
-  return { data, error, isLoading, isFetching, refetch: rtqRefetch }
+  return { data, error, isLoading, isFetching, refetch }
 }
 
 export default usePositions
