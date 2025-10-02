@@ -1,10 +1,9 @@
-import { describe, expect, it, vi } from 'vitest'
 import { compareWithSupportedL2Contracts, isSupportedL2Version } from '../bytecodeComparison'
 import * as safeDeployments from '@safe-global/safe-deployments'
 import { keccak256 } from 'ethers'
 
-vi.mock('@safe-global/safe-deployments', () => ({
-  getSafeL2SingletonDeployments: vi.fn(),
+jest.mock('@safe-global/safe-deployments', () => ({
+  getSafeL2SingletonDeployments: jest.fn(),
 }))
 
 describe('bytecodeComparison', () => {
@@ -49,7 +48,7 @@ describe('bytecodeComparison', () => {
     it('should return isMatch: true when bytecode matches canonical deployment', async () => {
       const chainId = '1'
 
-      vi.mocked(safeDeployments.getSafeL2SingletonDeployments).mockReturnValue({
+      jest.mocked(safeDeployments.getSafeL2SingletonDeployments).mockReturnValue({
         released: true,
         contractName: 'GnosisSafeL2',
         version: '1.3.0',
@@ -73,24 +72,30 @@ describe('bytecodeComparison', () => {
     it('should return isMatch: true when bytecode matches eip155 deployment', async () => {
       const chainId = '10'
 
-      vi.mocked(safeDeployments.getSafeL2SingletonDeployments).mockReturnValue({
-        released: true,
-        contractName: 'GnosisSafeL2',
-        version: '1.4.1',
-        deployments: {
-          canonical: {
-            address: '0x3E5c63644E683549055b9Be8653de26E0B4CD36E',
-            codeHash: '0xdifferenthash',
-          },
-          eip155: {
-            address: '0xfb1bffC9d739B8D520DaF37dF666da4C687191EA',
-            codeHash: mockBytecodeHash,
-          },
-        },
-        networkAddresses: {
-          '10': ['0xfb1bffC9d739B8D520DaF37dF666da4C687191EA'],
-        },
-      } as any)
+      jest.mocked(safeDeployments.getSafeL2SingletonDeployments).mockImplementation((filter) => {
+        const version = filter?.version
+        if (version === '1.4.1') {
+          return {
+            released: true,
+            contractName: 'GnosisSafeL2',
+            version: '1.4.1',
+            deployments: {
+              canonical: {
+                address: '0x3E5c63644E683549055b9Be8653de26E0B4CD36E',
+                codeHash: '0xdifferenthash',
+              },
+              eip155: {
+                address: '0xfb1bffC9d739B8D520DaF37dF666da4C687191EA',
+                codeHash: mockBytecodeHash,
+              },
+            },
+            networkAddresses: {
+              '10': ['0xfb1bffC9d739B8D520DaF37dF666da4C687191EA'],
+            },
+          } as any
+        }
+        return undefined as any
+      })
 
       const result = await compareWithSupportedL2Contracts(mockBytecode, chainId)
 
@@ -102,7 +107,7 @@ describe('bytecodeComparison', () => {
       const chainId = '1'
       const differentHash = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
 
-      vi.mocked(safeDeployments.getSafeL2SingletonDeployments).mockReturnValue({
+      jest.mocked(safeDeployments.getSafeL2SingletonDeployments).mockReturnValue({
         released: true,
         contractName: 'GnosisSafeL2',
         version: '1.3.0',
@@ -126,7 +131,7 @@ describe('bytecodeComparison', () => {
     it('should return isMatch: false when chain does not have the deployment', async () => {
       const chainId = '999'
 
-      vi.mocked(safeDeployments.getSafeL2SingletonDeployments).mockReturnValue({
+      jest.mocked(safeDeployments.getSafeL2SingletonDeployments).mockReturnValue({
         released: true,
         contractName: 'GnosisSafeL2',
         version: '1.3.0',
@@ -150,7 +155,7 @@ describe('bytecodeComparison', () => {
     it('should return isMatch: false when deployment is not found', async () => {
       const chainId = '1'
 
-      vi.mocked(safeDeployments.getSafeL2SingletonDeployments).mockReturnValue(undefined as any)
+      jest.mocked(safeDeployments.getSafeL2SingletonDeployments).mockReturnValue(undefined as any)
 
       const result = await compareWithSupportedL2Contracts(mockBytecode, chainId)
 
@@ -160,22 +165,28 @@ describe('bytecodeComparison', () => {
 
     it('should check both 1.3.0 and 1.4.1 versions', async () => {
       const chainId = '1'
-      const getSpy = vi.mocked(safeDeployments.getSafeL2SingletonDeployments)
+      const getSpy = jest.mocked(safeDeployments.getSafeL2SingletonDeployments)
 
-      getSpy.mockReturnValue({
-        released: true,
-        contractName: 'GnosisSafeL2',
-        version: '1.4.1',
-        deployments: {
-          canonical: {
-            address: '0x3E5c63644E683549055b9Be8653de26E0B4CD36E',
-            codeHash: mockBytecodeHash,
-          },
-        },
-        networkAddresses: {
-          '1': ['0x3E5c63644E683549055b9Be8653de26E0B4CD36E'],
-        },
-      } as any)
+      getSpy.mockImplementation((filter) => {
+        const version = filter?.version
+        if (version === '1.4.1') {
+          return {
+            released: true,
+            contractName: 'GnosisSafeL2',
+            version: '1.4.1',
+            deployments: {
+              canonical: {
+                address: '0x3E5c63644E683549055b9Be8653de26E0B4CD36E',
+                codeHash: mockBytecodeHash,
+              },
+            },
+            networkAddresses: {
+              '1': ['0x3E5c63644E683549055b9Be8653de26E0B4CD36E'],
+            },
+          } as any
+        }
+        return undefined as any
+      })
 
       const result = await compareWithSupportedL2Contracts(mockBytecode, chainId)
 
