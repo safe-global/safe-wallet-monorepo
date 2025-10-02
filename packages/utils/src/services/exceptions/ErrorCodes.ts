@@ -27,6 +27,7 @@ enum ErrorCodes {
   _602 = '602: Error fetching history txs',
   _603 = '603: Error fetching queued txs',
   _604 = '604: Error fetching collectibles',
+  _605 = '605: Error fetching positions',
   _607 = '607: Error fetching available currencies',
   _608 = '608: Error fetching messages',
   _609 = '609: Failed to retrieve SpendingLimits module information',

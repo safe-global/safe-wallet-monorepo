@@ -12,6 +12,7 @@ export enum MixpanelEvent {
   CSV_TX_EXPORT_CLICKED = 'Export CSV Clicked',
   CSV_TX_EXPORT_SUBMITTED = 'CSV Exported',
   NATIVE_SWAP_VIEWED = 'Native Swap Viewed',
+  POSITIONS_REFRESH_CLICKED = 'Positions Refresh Clicked',
 }
 
 export enum MixpanelUserProperty {
