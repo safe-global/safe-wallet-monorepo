@@ -97,8 +97,13 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
     if (request.origin) {
       try {
         const parsed = JSON.parse(request.origin)
-        domain = parsed.url || request.origin
+        // Only use parsed.url if it's a non-empty string
+        if (typeof parsed.url === 'string' && parsed.url.length > 0) {
+          domain = parsed.url
+        }
+        // Otherwise leave domain undefined to fall back to non_dapp
       } catch {
+        // Not JSON - use the original string as-is
         domain = request.origin
       }
     }
