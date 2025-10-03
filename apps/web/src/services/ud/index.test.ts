@@ -134,4 +134,62 @@ describe('Unstoppable Domains', () => {
             })
         })
     })
+
+    describe('reverseResolveUnstoppable', () => {
+        it('should reverse resolve address to UD domain', async () => {
+            const mockReverse = jest.fn().mockResolvedValue('brad.crypto')
+                ; (Resolution as jest.MockedClass<typeof Resolution>).mockImplementation(() => ({
+                    reverse: mockReverse,
+                }) as any)
+
+            const { reverseResolveUnstoppable } = await import('.')
+
+            const domain = await reverseResolveUnstoppable('0x1111111111111111111111111111111111111111')
+
+            expect(domain).toBe('brad.crypto')
+            expect(mockReverse).toHaveBeenCalledWith('0x1111111111111111111111111111111111111111')
+        })
+
+        it('should return undefined if no reverse record found', async () => {
+            const mockReverse = jest.fn().mockRejectedValue(new Error('ReverseResolutionNotSpecified'))
+                ; (Resolution as jest.MockedClass<typeof Resolution>).mockImplementation(() => ({
+                    reverse: mockReverse,
+                }) as any)
+
+            const { reverseResolveUnstoppable } = await import('.')
+
+            const domain = await reverseResolveUnstoppable('0x2222222222222222222222222222222222222222')
+
+            expect(domain).toBe(undefined)
+            expect(logError).not.toHaveBeenCalled()
+        })
+
+        it('should return undefined if domain not registered', async () => {
+            const mockReverse = jest.fn().mockRejectedValue(new Error('UnregisteredDomain'))
+                ; (Resolution as jest.MockedClass<typeof Resolution>).mockImplementation(() => ({
+                    reverse: mockReverse,
+                }) as any)
+
+            const { reverseResolveUnstoppable } = await import('.')
+
+            const domain = await reverseResolveUnstoppable('0x3333333333333333333333333333333333333333')
+
+            expect(domain).toBe(undefined)
+            expect(logError).not.toHaveBeenCalled()
+        })
+
+        it('should log error for unexpected SDK errors', async () => {
+            const mockReverse = jest.fn().mockRejectedValue(new Error('Network error'))
+                ; (Resolution as jest.MockedClass<typeof Resolution>).mockImplementation(() => ({
+                    reverse: mockReverse,
+                }) as any)
+
+            const { reverseResolveUnstoppable } = await import('.')
+
+            const domain = await reverseResolveUnstoppable('0x4444444444444444444444444444444444444444')
+
+            expect(domain).toBe(undefined)
+            expect(logError).toHaveBeenCalledWith('101: Failed to resolve the address', 'UD reverse resolution error: Network error')
+        })
+    })
 })

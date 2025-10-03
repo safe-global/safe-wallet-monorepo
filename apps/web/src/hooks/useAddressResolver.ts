@@ -1,6 +1,7 @@
 import useAddressBook from '@/hooks/useAddressBook'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { lookupAddress } from '@/services/ens'
+import { reverseResolveUnstoppable } from '@/services/ud'
 import { useEffect, useMemo } from 'react'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useDebounce from './useDebounce'
@@ -16,33 +17,46 @@ export const useAddressResolver = (address?: string) => {
   const debouncedValue = useDebounce(address, 200)
   const addressBookName = address && addressBook[address]
   const isDomainLookupEnabled = useHasFeature(FEATURES.DOMAIN_LOOKUP)
-  const shouldResolve = address && !addressBookName && isDomainLookupEnabled && !!ethersProvider && !!debouncedValue
+  const shouldResolve = address && !addressBookName && isDomainLookupEnabled && !!debouncedValue
   const chainId = useChainId()
 
-  const [ens, _, isResolving] = useAsync<string | undefined>(() => {
+  const [domainName, _, isResolving] = useAsync<string | undefined>(async () => {
     if (!shouldResolve) return
     if (chainId && debouncedValue && cache[chainId]?.[debouncedValue]) {
       return Promise.resolve(cache[chainId][debouncedValue])
     }
-    return lookupAddress(ethersProvider, debouncedValue)
+
+    // Try ENS first if provider available
+    if (ethersProvider) {
+      try {
+        const ensName = await lookupAddress(ethersProvider, debouncedValue)
+        if (ensName) return ensName
+      } catch (_) {
+        // Continue to UD
+      }
+    }
+
+    // Try UD reverse resolution
+    const udName = await reverseResolveUnstoppable(debouncedValue)
+    return udName
   }, [chainId, ethersProvider, debouncedValue, shouldResolve])
 
   const resolving = (shouldResolve && isResolving) || false
 
-  // Cache resolved ENS names per chain
+  // Cache resolved domain names (ENS or UD) per chain
   useEffect(() => {
-    if (chainId && ens && debouncedValue) {
+    if (chainId && domainName && debouncedValue) {
       cache[chainId] = cache[chainId] || {}
-      cache[chainId][debouncedValue] = ens
+      cache[chainId][debouncedValue] = domainName
     }
-  }, [chainId, debouncedValue, ens])
+  }, [chainId, debouncedValue, domainName])
 
   return useMemo(
     () => ({
-      ens,
+      ens: domainName,
       name: addressBookName,
       resolving,
     }),
-    [ens, addressBookName, resolving],
+    [domainName, addressBookName, resolving],
   )
 }
