@@ -92,7 +92,7 @@ describe('AddressInput tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-      ; (useCurrentChain as jest.Mock).mockImplementation(() => mockChain)
+    ;(useCurrentChain as jest.Mock).mockImplementation(() => mockChain)
     jest.spyOn(addressBook, 'default').mockReturnValue({})
   })
 
@@ -221,7 +221,7 @@ describe('AddressInput tests', () => {
   })
 
   it('should not resolve UD names if this feature is disabled', async () => {
-    ; (useCurrentChain as jest.Mock).mockImplementation(() => ({
+    ;(useCurrentChain as jest.Mock).mockImplementation(() => ({
       shortName: 'gor',
       chainId: '5',
       chainName: 'Goerli',
@@ -241,7 +241,7 @@ describe('AddressInput tests', () => {
   })
 
   it('should show a spinner when UD resolution is in progress', async () => {
-    ; (useNameResolver as jest.Mock).mockImplementation((val: string) => ({
+    ;(useNameResolver as jest.Mock).mockImplementation((val: string) => ({
       address: undefined,
       resolverError: undefined,
       resolving: val === 'loading.crypto',
@@ -271,7 +271,7 @@ describe('AddressInput tests', () => {
   })
 
   it('should not resolve ENS names if this feature is disabled', async () => {
-    ; (useCurrentChain as jest.Mock).mockImplementation(() => ({
+    ;(useCurrentChain as jest.Mock).mockImplementation(() => ({
       shortName: 'gor',
       chainId: '5',
       chainName: 'Goerli',
@@ -301,7 +301,7 @@ describe('AddressInput tests', () => {
   // TODO: Fix this test
   it.skip('should not show the adornment prefix when the value contains correct prefix', async () => {
     const mockChain = chainBuilder().with({ features: [] }).build()
-      ; (useCurrentChain as jest.Mock).mockImplementation(() => mockChain)
+    ;(useCurrentChain as jest.Mock).mockImplementation(() => mockChain)
 
     const { input } = setup(`${mockChain.shortName}:${TEST_ADDRESS_A}`)
 
@@ -344,7 +344,7 @@ describe('AddressInput tests', () => {
   })
 
   it('should clean up the input value if it contains a valid address', async () => {
-    ; (useCurrentChain as jest.Mock).mockImplementation(() => ({
+    ;(useCurrentChain as jest.Mock).mockImplementation(() => ({
       shortName: 'gor',
       chainId: '5',
       chainName: 'Goerli',

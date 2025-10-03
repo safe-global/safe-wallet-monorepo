@@ -163,7 +163,9 @@ const AddressInput = ({
         className={inputCss.input}
         autoComplete="off"
         autoFocus={props.focused}
-        label={<>{error?.message || props.label || `Recipient address${isDomainLookupEnabled ? ' or domain name' : ''}`}</>}
+        label={
+          <>{error?.message || props.label || `Recipient address${isDomainLookupEnabled ? ' or domain name' : ''}`}</>
+        }
         error={!!error}
         fullWidth
         onClick={resetName}

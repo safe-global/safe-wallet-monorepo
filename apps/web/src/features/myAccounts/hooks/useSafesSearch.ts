@@ -41,9 +41,9 @@ const useSafesSearch = (safes: AllSafeItems, query: string): AllSafeItems => {
     () =>
       query
         ? fuse.search(query).map((result) => {
-          const { chainNames: _chainNames, names: _names, ...safe } = result.item
-          return safe
-        })
+            const { chainNames: _chainNames, names: _names, ...safe } = result.item
+            return safe
+          })
         : [],
     [fuse, query],
   )
