@@ -5,7 +5,7 @@ import ImportAddressBookDialog from '../ImportAddressBookDialog'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import { render } from '@/tests/test-utils'
 import useChains from '@/hooks/useChains'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import * as spacesRTK from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 jest.mock('@/hooks/useAllAddressBooks')
@@ -19,7 +19,7 @@ const upsertionSpy = jest
 
 describe('ImportAddressBookDialog', () => {
   beforeEach(() => {
-    mockedUseChains.mockReturnValue({ configs: [{ chainId: '1' } as ChainInfo, { chainId: '5' } as ChainInfo] })
+    mockedUseChains.mockReturnValue({ configs: [{ chainId: '1' } as Chain, { chainId: '5' } as Chain] })
   })
 
   afterAll(() => {

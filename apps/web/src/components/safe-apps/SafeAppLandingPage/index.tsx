@@ -11,11 +11,11 @@ import { AppRoutes } from '@/config/routes'
 import { SAFE_APPS_DEMO_SAFE_MAINNET } from '@/config/constants'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { Errors, logError } from '@/services/exceptions'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 type Props = {
   appUrl: string
-  chain: ChainInfo
+  chain: Chain
 }
 
 const CHAIN_ID_WITH_A_DEMO = '1'

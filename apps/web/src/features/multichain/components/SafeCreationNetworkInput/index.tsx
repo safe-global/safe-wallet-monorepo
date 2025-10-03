@@ -1,7 +1,7 @@
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useCallback, useEffect, type ReactElement } from 'react'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { Controller, useFormContext, useWatch } from 'react-hook-form'
 import { useRouter } from 'next/router'
 import { getNetworkLink } from '@/components/common/NetworkSelector'
@@ -30,10 +30,10 @@ const SafeCreationNetworkInput = ({
     control,
   } = useFormContext()
 
-  const selectedNetworks: ChainInfo[] = useWatch({ control, name: SetNameStepFields.networks })
+  const selectedNetworks: Chain[] = useWatch({ control, name: SetNameStepFields.networks })
 
   const updateCurrentNetwork = useCallback(
-    (chains: ChainInfo[]) => {
+    (chains: Chain[]) => {
       if (chains.length !== 1) return
       const networkLink = getNetworkLink(router, safeAddress, chains[0], currentSafeApp)
       router.replace(networkLink)
@@ -42,7 +42,7 @@ const SafeCreationNetworkInput = ({
   )
 
   const isOptionDisabled = useCallback(
-    (optionNetwork: ChainInfo) => {
+    (optionNetwork: Chain) => {
       // Initially all networks are always available
       if (selectedNetworks.length === 0) {
         return false

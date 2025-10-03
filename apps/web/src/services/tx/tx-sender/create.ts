@@ -1,6 +1,7 @@
 import { getReadOnlyGnosisSafeContract } from '@/services/contracts/safeContracts'
 import { SENTINEL_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import type { ChainInfo, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import type { AddOwnerTxParams, RemoveOwnerTxParams, SwapOwnerTxParams } from '@safe-global/protocol-kit'
 import type { MetaTransactionData, SafeTransaction, SafeTransactionDataPartial } from '@safe-global/types-kit'
@@ -31,7 +32,7 @@ export const createRemoveOwnerTx = async (txParams: RemoveOwnerTxParams): Promis
 }
 
 export const createAddOwnerTx = async (
-  chain: ChainInfo,
+  chain: Chain,
   isDeployed: boolean,
   txParams: AddOwnerTxParams,
 ): Promise<SafeTransaction> => {
@@ -56,7 +57,7 @@ export const createAddOwnerTx = async (
 }
 
 export const createSwapOwnerTx = async (
-  chain: ChainInfo,
+  chain: Chain,
   isDeployed: boolean,
   txParams: SwapOwnerTxParams,
 ): Promise<SafeTransaction> => {

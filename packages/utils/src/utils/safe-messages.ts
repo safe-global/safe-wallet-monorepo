@@ -5,7 +5,7 @@ import { adjustVInSignature } from '@safe-global/protocol-kit/dist/src/utils/sig
 
 import { hashTypedData } from '@safe-global/utils/utils/web3'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
@@ -78,7 +78,7 @@ export const generateSafeMessageHash = (safe: SafeState, message: MessageItem['m
 
 export const isOffchainEIP1271Supported = (
   { version, fallbackHandler }: SafeState,
-  chain: ChainInfo | undefined,
+  chain: Chain | undefined,
   sdkVersion?: string,
 ): boolean => {
   if (!version) {

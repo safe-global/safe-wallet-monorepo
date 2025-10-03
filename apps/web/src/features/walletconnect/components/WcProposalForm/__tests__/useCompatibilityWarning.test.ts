@@ -1,6 +1,6 @@
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { renderHook, getAppName } from '@/tests/test-utils'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { WalletKitTypes } from '@reown/walletkit'
 import { useCompatibilityWarning } from '../useCompatibilityWarning'
 import * as wcUtils from '@/features/walletconnect/services/utils'
@@ -139,7 +139,7 @@ describe('useCompatibilityWarning', () => {
                 chainId: '1',
                 chainName: 'Ethereum',
               },
-            ] as unknown as Array<ChainInfo>,
+            ] as unknown as Array<Chain>,
           },
           safeInfo: {
             loading: false,

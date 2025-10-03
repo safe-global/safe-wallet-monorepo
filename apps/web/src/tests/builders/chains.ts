@@ -1,16 +1,14 @@
 import { faker } from '@faker-js/faker'
-import { RPC_AUTHENTICATION, GAS_PRICE_TYPE } from '@safe-global/safe-gateway-typescript-sdk'
 import type {
   BlockExplorerUriTemplate,
-  ChainInfo,
   GasPriceFixed,
-  GasPriceFixedEIP1559,
+  GasPriceFixedEip1559,
   GasPriceOracle,
-  GasPriceUnknown,
   NativeCurrency,
   RpcUri,
   Theme,
-} from '@safe-global/safe-gateway-typescript-sdk'
+  Chain,
+} from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import { Builder } from '@/tests/Builder'
 import { generateRandomArray } from './utils'
@@ -20,7 +18,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const rpcUriBuilder = (): IBuilder<RpcUri> => {
   return Builder.new<RpcUri>().with({
-    authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION,
+    authentication: 'NO_AUTHENTICATION' as const,
     value: faker.internet.url({ appendSlash: false }),
   })
 }
@@ -51,14 +49,14 @@ const themeBuilder = (): IBuilder<Theme> => {
 
 const gasPriceFixedBuilder = (): IBuilder<GasPriceFixed> => {
   return Builder.new<GasPriceFixed>().with({
-    type: GAS_PRICE_TYPE.FIXED,
+    type: 'fixed' as const,
     weiValue: faker.string.numeric(),
   })
 }
 
-const gasPriceFixedEIP1559Builder = (): IBuilder<GasPriceFixedEIP1559> => {
-  return Builder.new<GasPriceFixedEIP1559>().with({
-    type: GAS_PRICE_TYPE.FIXED_1559,
+const gasPriceFixedEIP1559Builder = (): IBuilder<GasPriceFixedEip1559> => {
+  return Builder.new<GasPriceFixedEip1559>().with({
+    type: 'fixed1559' as const,
     maxFeePerGas: faker.string.numeric(),
     maxPriorityFeePerGas: faker.string.numeric(),
   })
@@ -66,33 +64,22 @@ const gasPriceFixedEIP1559Builder = (): IBuilder<GasPriceFixedEIP1559> => {
 
 const gasPriceOracleBuilder = (): IBuilder<GasPriceOracle> => {
   return Builder.new<GasPriceOracle>().with({
-    type: GAS_PRICE_TYPE.ORACLE,
+    type: 'oracle' as const,
     uri: faker.internet.url({ appendSlash: false }),
     gasParameter: faker.word.sample(),
     gweiFactor: faker.string.numeric(),
   })
 }
 
-const gasPriceOracleUnknownBuilder = (): IBuilder<GasPriceUnknown> => {
-  return Builder.new<GasPriceUnknown>().with({
-    type: GAS_PRICE_TYPE.UNKNOWN,
-  })
-}
-
 const getRandomGasPriceBuilder = () => {
-  const gasPriceBuilders = [
-    gasPriceFixedBuilder(),
-    gasPriceFixedEIP1559Builder(),
-    gasPriceOracleBuilder(),
-    gasPriceOracleUnknownBuilder(),
-  ]
+  const gasPriceBuilders = [gasPriceFixedBuilder(), gasPriceFixedEIP1559Builder(), gasPriceOracleBuilder()]
 
   const randomIndex = Math.floor(Math.random() * gasPriceBuilders.length)
   return gasPriceBuilders[randomIndex]
 }
 
-export const chainBuilder = (): IBuilder<ChainInfo> => {
-  return Builder.new<ChainInfo>().with({
+export const chainBuilder = (): IBuilder<Chain> => {
+  return Builder.new<Chain>().with({
     chainId: faker.string.numeric(),
     chainName: faker.word.sample(),
     description: faker.word.words(),
@@ -108,7 +95,6 @@ export const chainBuilder = (): IBuilder<ChainInfo> => {
     gasPrice: generateRandomArray(() => getRandomGasPriceBuilder().build(), { min: 1, max: 4 }),
     ensRegistryAddress: faker.finance.ethereumAddress(),
     disabledWallets: generateRandomArray(() => faker.word.sample(), { min: 1, max: 10 }),
-    // @ts-expect-error - we are using a local FEATURES enum
     features: generateRandomArray(() => faker.helpers.enumValue(FEATURES), { min: 1, max: 10 }),
     recommendedMasterCopyVersion: faker.system.semver(),
   })

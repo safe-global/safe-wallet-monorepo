@@ -2,7 +2,8 @@ import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import { isEthSignWallet, isSmartContractWallet } from '@/utils/wallets'
 import type { MultiSendCallOnlyContractImplementationType } from '@safe-global/protocol-kit'
-import { type ChainInfo, relayTransaction, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import { relayTransaction, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 import type {
@@ -511,7 +512,7 @@ export const dispatchTxRelay = async (
   safeTx: SafeTransaction,
   safe: SafeState,
   txId: string,
-  chain: ChainInfo,
+  chain: Chain,
   gasLimit?: string | number | bigint,
 ) => {
   const readOnlySafeContract = await getReadOnlyCurrentGnosisSafeContract(safe)

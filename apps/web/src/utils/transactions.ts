@@ -1,5 +1,4 @@
 import type {
-  ChainInfo,
   ExecutionInfo,
   MultisigExecutionDetails,
   MultisigExecutionInfo,
@@ -9,6 +8,7 @@ import type {
   TransactionListPage,
   TransactionSummary,
 } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { ConflictType, getTransactionDetails, TransactionListItemType } from '@safe-global/safe-gateway-typescript-sdk'
 import {
   isERC20Transfer,
@@ -109,7 +109,7 @@ const getSignatures = (confirmations: Record<string, string>) => {
 
 export const getMultiSendTxs = async (
   txs: TransactionDetails[],
-  chain: ChainInfo,
+  chain: Chain,
   safeAddress: string,
   safeVersion: string,
 ): Promise<MetaTransactionData[]> => {
@@ -146,7 +146,7 @@ export const getMultiSendTxs = async (
     .filter(Boolean) as MetaTransactionData[]
 }
 
-export const getTxOptions = (params: AdvancedParameters, currentChain: ChainInfo | undefined): TransactionOptions => {
+export const getTxOptions = (params: AdvancedParameters, currentChain: Chain | undefined): TransactionOptions => {
   const txOptions: TransactionOptions = {
     gasLimit: params.gasLimit?.toString(),
     maxFeePerGas: params.maxFeePerGas?.toString(),

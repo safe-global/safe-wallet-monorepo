@@ -161,7 +161,7 @@ const useGasLimit = (
     )
 
     // if we are dealing with zksync and the walletAddress is a Safe, we have to do some magic
-    // FIXME a new check to indicate ZKsync chain will be added to the config service and available under ChainInfo
+    // FIXME a new check to indicate ZKsync chain will be added to the config service and available under Chain
     if (
       (safe.chainId === chains.zksync || safe.chainId === chains.lens) &&
       (await web3ReadOnly.getCode(walletAddress)) !== '0x'

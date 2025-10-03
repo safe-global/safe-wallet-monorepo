@@ -40,7 +40,7 @@ import { hasRemainingRelays } from '@/utils/relaying'
 import { isWalletRejection } from '@/utils/wallets'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { Box, Button, CircularProgress, Divider, Grid, Tooltip, Typography } from '@mui/material'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import classnames from 'classnames'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
@@ -65,7 +65,7 @@ export const NetworkFee = ({
   inline = false,
 }: {
   totalFee: string
-  chain: ChainInfo | undefined
+  chain: Chain | undefined
   isWaived: boolean
   inline?: boolean
 }) => {
@@ -89,7 +89,7 @@ export const SafeSetupOverview = ({
   name?: string
   owners: NamedAddress[]
   threshold: number
-  networks: ChainInfo[]
+  networks: Chain[]
 }) => {
   return (
     <Grid container spacing={3}>
@@ -281,7 +281,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
     }
   }
 
-  const createSafe = async (chain: ChainInfo, props: ReplayedSafeProps, safeAddress: string) => {
+  const createSafe = async (chain: Chain, props: ReplayedSafeProps, safeAddress: string) => {
     if (!wallet) return
 
     gtmSetChainId(chain.chainId)
