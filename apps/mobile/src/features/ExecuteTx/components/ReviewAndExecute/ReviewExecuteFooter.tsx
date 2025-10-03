@@ -11,6 +11,7 @@ import { SelectExecutor } from '@/src/components/SelectExecutor'
 import { EstimatedNetworkFee } from '../EstimatedNetworkFee'
 import { Container } from '@/src/components/Container'
 import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import useGasFee from '../../hooks/useGasFee'
 
 interface ReviewFooterProps {
   txId: string
@@ -23,6 +24,7 @@ export function ReviewExecuteFooter({ txId, txDetails }: ReviewFooterProps) {
   const { isBiometricsEnabled } = useBiometrics()
   const { setGuard } = useGuard()
   const insets = useSafeAreaInsets()
+  const totalFee = useGasFee(txDetails)
 
   const handleConfirmPress = async () => {
     try {
@@ -55,7 +57,7 @@ export function ReviewExecuteFooter({ txId, txDetails }: ReviewFooterProps) {
       <Container backgroundColor="transparent" gap={'$2'} borderWidth={1} paddingVertical={'$3'} borderColor="$borderLight">
         <SelectExecutor address={activeSigner?.value as Address} txId={txId} />
 
-        <EstimatedNetworkFee txDetails={txDetails} />
+        <EstimatedNetworkFee txId={txId} totalFee={totalFee} />
       </Container>
 
       <SafeButton onPress={handleConfirmPress} width="100%">

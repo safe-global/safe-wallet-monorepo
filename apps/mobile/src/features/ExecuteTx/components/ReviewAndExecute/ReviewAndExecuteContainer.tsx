@@ -5,8 +5,6 @@ import { Text, View } from 'tamagui'
 import { useTransactionData } from '@/src/features/ConfirmTx/hooks/useTransactionData'
 import { ReviewAndConfirmView } from '@/src/features/ConfirmTx/components/ReviewAndConfirm'
 import { ReviewExecuteFooter } from '@/src/features/ExecuteTx/components/ReviewAndExecute/ReviewExecuteFooter'
-import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
-import extractTxInfo from '@/src/services/tx/extractTx'
 
 export function ReviewAndExecuteContainer() {
   const { txId } = useLocalSearchParams<{ txId: string }>()
