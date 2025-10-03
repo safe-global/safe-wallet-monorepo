@@ -29,8 +29,8 @@ const useNameResolver = (
       }
     }
 
-    // Try UD resolution (handles all UD TLDs and gracefully returns undefined for unsupported domains)
-    const token = currentChain?.nativeCurrency?.symbol || 'ETH'
+    // Try UD resolution (handles all UD TLDs and gracefully returns undefined on errors)
+    const token = currentChain?.nativeCurrency?.symbol
     const network = currentChain?.shortName?.toUpperCase()
     const udAddress = await resolveUnstoppableAddress(debouncedValue, { token, network })
     if (!udAddress) throw Error('Failed to resolve the address')

@@ -124,6 +124,27 @@ describe('Unstoppable Domains', () => {
       expect(logError).not.toHaveBeenCalled()
     })
 
+    it('should return undefined when token is not provided', async () => {
+      const address = await resolveUnstoppableAddress('brad.crypto', { network: 'ETH' })
+
+      expect(address).toBe(undefined)
+      expect(logError).not.toHaveBeenCalled()
+    })
+
+    it('should return undefined when network is not provided', async () => {
+      const address = await resolveUnstoppableAddress('brad.crypto', { token: 'ETH' })
+
+      expect(address).toBe(undefined)
+      expect(logError).not.toHaveBeenCalled()
+    })
+
+    it('should return undefined when no options are provided', async () => {
+      const address = await resolveUnstoppableAddress('brad.crypto')
+
+      expect(address).toBe(undefined)
+      expect(logError).not.toHaveBeenCalled()
+    })
+
     it('should log error for unexpected SDK errors', async () => {
       const mockGetAddress = jest.fn().mockRejectedValue(new Error('Network error'))
       const MockedResolution = Resolution as jest.MockedClass<typeof Resolution>
@@ -134,7 +155,7 @@ describe('Unstoppable Domains', () => {
           }) as any,
       )
 
-      const address = await resolveUnstoppableAddress('brad.crypto')
+      const address = await resolveUnstoppableAddress('brad.crypto', { token: 'ETH', network: 'ETH' })
 
       expect(address).toBe(undefined)
       expect(logError).toHaveBeenCalledWith('101: Failed to resolve the address', 'UD resolution error: Network error')

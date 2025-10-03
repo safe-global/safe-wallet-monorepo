@@ -14,7 +14,7 @@ const getResolution = (): Resolution | null => {
   if (resolutionInstance) return resolutionInstance
 
   const apiKey = process.env.NEXT_PUBLIC_UNSTOPPABLE_API_KEY
-  if (!apiKey) {
+  if (!apiKey || apiKey.trim() === '') {
     logError(ErrorCodes._101, 'NEXT_PUBLIC_UNSTOPPABLE_API_KEY not configured for UD resolution')
     return null
   }
@@ -38,6 +38,11 @@ export const __resetResolutionForTesting = () => {
 
 /**
  * Resolve an Unstoppable Domain to an address (forward resolution)
+ *
+ * @param domain - The domain name to resolve (e.g., 'brad.crypto')
+ * @param options - Optional token and network for multi-chain resolution
+ * @returns The resolved address, or undefined if resolution fails
+ *
  */
 export const resolveUnstoppableAddress = async (
   domain: string,
@@ -47,9 +52,13 @@ export const resolveUnstoppableAddress = async (
   if (!resolution) return undefined
 
   try {
-    // Use the token/network if provided, otherwise default to empty string
-    const token = options?.token?.toUpperCase() || ''
-    const network = options?.network?.toUpperCase() || ''
+    // If token/network are not provided, we cannot resolve - return undefined
+    if (!options?.token || !options?.network) {
+      return undefined
+    }
+
+    const token = options.token.toUpperCase()
+    const network = options.network.toUpperCase()
 
     const address = await resolution.getAddress(domain, network, token)
     return address || undefined
@@ -71,6 +80,12 @@ export const resolveUnstoppableAddress = async (
 
 /**
  * Reverse resolve an address to an Unstoppable Domain name
+ *
+ * @param address - The Ethereum address to reverse resolve (e.g., '0x1234...')
+ * @returns The domain name associated with the address, or undefined
+ *
+ * Note: Reverse resolution requires the domain owner to have explicitly set up
+ * a reverse record pointing from their address to their domain.
  */
 export const reverseResolveUnstoppable = async (address: string): Promise<string | undefined> => {
   const resolution = getResolution()
