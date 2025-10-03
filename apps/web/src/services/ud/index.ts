@@ -31,6 +31,11 @@ const getResolution = (): Resolution | null => {
   }
 }
 
+// Export for testing only - allows resetting the singleton instance
+export const __resetResolutionForTesting = () => {
+  resolutionInstance = null
+}
+
 /**
  * Resolve an Unstoppable Domain to an address (forward resolution)
  */

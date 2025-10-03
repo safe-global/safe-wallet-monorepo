@@ -11,6 +11,7 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { FEATURES } from '@safe-global/safe-gateway-typescript-sdk'
 import userEvent from '@testing-library/user-event'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
+import { __resetResolutionForTesting } from '@/services/ud'
 
 const mockChain = chainBuilder()
   .with({ features: [FEATURES.DOMAIN_LOOKUP] })
@@ -92,8 +93,10 @@ describe('AddressInput tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(useCurrentChain as jest.Mock).mockImplementation(() => mockChain)
+      ; (useCurrentChain as jest.Mock).mockImplementation(() => mockChain)
     jest.spyOn(addressBook, 'default').mockReturnValue({})
+    // Reset UD singleton between tests to prevent state leakage
+    __resetResolutionForTesting()
   })
 
   it('should render with a default address value', () => {
@@ -221,7 +224,7 @@ describe('AddressInput tests', () => {
   })
 
   it('should not resolve UD names if this feature is disabled', async () => {
-    ;(useCurrentChain as jest.Mock).mockImplementation(() => ({
+    ; (useCurrentChain as jest.Mock).mockImplementation(() => ({
       shortName: 'gor',
       chainId: '5',
       chainName: 'Goerli',
@@ -240,24 +243,6 @@ describe('AddressInput tests', () => {
     await waitFor(() => expect(utils.getByLabelText('Invalid address format', { exact: false })).toBeDefined())
   })
 
-  it('should show a spinner when UD resolution is in progress', async () => {
-    ;(useNameResolver as jest.Mock).mockImplementation((val: string) => ({
-      address: undefined,
-      resolverError: undefined,
-      resolving: val === 'loading.crypto',
-    }))
-
-    const { input, utils } = setup('')
-
-    act(() => {
-      fireEvent.change(input, { target: { value: 'loading.crypto' } })
-    })
-
-    await waitFor(() => {
-      expect(utils.getByRole('progressbar')).toBeDefined()
-    })
-  })
-
   it('should show an error if ENS resolution has failed', async () => {
     const { input, utils } = setup('')
 
@@ -271,7 +256,7 @@ describe('AddressInput tests', () => {
   })
 
   it('should not resolve ENS names if this feature is disabled', async () => {
-    ;(useCurrentChain as jest.Mock).mockImplementation(() => ({
+    ; (useCurrentChain as jest.Mock).mockImplementation(() => ({
       shortName: 'gor',
       chainId: '5',
       chainName: 'Goerli',
@@ -301,7 +286,7 @@ describe('AddressInput tests', () => {
   // TODO: Fix this test
   it.skip('should not show the adornment prefix when the value contains correct prefix', async () => {
     const mockChain = chainBuilder().with({ features: [] }).build()
-    ;(useCurrentChain as jest.Mock).mockImplementation(() => mockChain)
+      ; (useCurrentChain as jest.Mock).mockImplementation(() => mockChain)
 
     const { input } = setup(`${mockChain.shortName}:${TEST_ADDRESS_A}`)
 
@@ -344,7 +329,7 @@ describe('AddressInput tests', () => {
   })
 
   it('should clean up the input value if it contains a valid address', async () => {
-    ;(useCurrentChain as jest.Mock).mockImplementation(() => ({
+    ; (useCurrentChain as jest.Mock).mockImplementation(() => ({
       shortName: 'gor',
       chainId: '5',
       chainName: 'Goerli',

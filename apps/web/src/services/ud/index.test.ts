@@ -1,4 +1,4 @@
-import { resolveUnstoppableAddress } from '.'
+import { resolveUnstoppableAddress, reverseResolveUnstoppable, __resetResolutionForTesting } from '.'
 import { logError } from '../exceptions'
 import Resolution from '@unstoppabledomains/resolution'
 
@@ -16,7 +16,11 @@ describe('Unstoppable Domains', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    // Reset environment
     process.env = { ...originalEnv, NEXT_PUBLIC_UNSTOPPABLE_API_KEY: mockApiKey }
+
+    // Reset the singleton instance
+    __resetResolutionForTesting()
   })
 
   afterEach(() => {
@@ -26,7 +30,8 @@ describe('Unstoppable Domains', () => {
   describe('resolveUnstoppableAddress', () => {
     it('should resolve UD names using the SDK', async () => {
       const mockGetAddress = jest.fn().mockResolvedValue('0x1111111111111111111111111111111111111111')
-      ;(Resolution as jest.MockedClass<typeof Resolution>).mockImplementation(
+      const MockedResolution = Resolution as jest.MockedClass<typeof Resolution>
+      MockedResolution.mockImplementation(
         () =>
           ({
             getAddress: mockGetAddress,
@@ -41,7 +46,8 @@ describe('Unstoppable Domains', () => {
 
     it('should handle different currencies and networks', async () => {
       const mockGetAddress = jest.fn().mockResolvedValue('0x3333333333333333333333333333333333333333')
-      ;(Resolution as jest.MockedClass<typeof Resolution>).mockImplementation(
+      const MockedResolution = Resolution as jest.MockedClass<typeof Resolution>
+      MockedResolution.mockImplementation(
         () =>
           ({
             getAddress: mockGetAddress,
@@ -56,7 +62,8 @@ describe('Unstoppable Domains', () => {
 
     it('should return undefined if domain not found', async () => {
       const mockGetAddress = jest.fn().mockRejectedValue(new Error('UnregisteredDomain'))
-      ;(Resolution as jest.MockedClass<typeof Resolution>).mockImplementation(
+      const MockedResolution = Resolution as jest.MockedClass<typeof Resolution>
+      MockedResolution.mockImplementation(
         () =>
           ({
             getAddress: mockGetAddress,
@@ -71,7 +78,8 @@ describe('Unstoppable Domains', () => {
 
     it('should return undefined if record not found', async () => {
       const mockGetAddress = jest.fn().mockRejectedValue(new Error('RecordNotFound'))
-      ;(Resolution as jest.MockedClass<typeof Resolution>).mockImplementation(
+      const MockedResolution = Resolution as jest.MockedClass<typeof Resolution>
+      MockedResolution.mockImplementation(
         () =>
           ({
             getAddress: mockGetAddress,
@@ -86,7 +94,8 @@ describe('Unstoppable Domains', () => {
 
     it('should return undefined for unsupported domains', async () => {
       const mockGetAddress = jest.fn().mockRejectedValue(new Error('UnsupportedDomain'))
-      ;(Resolution as jest.MockedClass<typeof Resolution>).mockImplementation(
+      const MockedResolution = Resolution as jest.MockedClass<typeof Resolution>
+      MockedResolution.mockImplementation(
         () =>
           ({
             getAddress: mockGetAddress,
@@ -101,7 +110,8 @@ describe('Unstoppable Domains', () => {
 
     it('should return undefined for unspecified resolver', async () => {
       const mockGetAddress = jest.fn().mockRejectedValue(new Error('UnspecifiedResolver'))
-      ;(Resolution as jest.MockedClass<typeof Resolution>).mockImplementation(
+      const MockedResolution = Resolution as jest.MockedClass<typeof Resolution>
+      MockedResolution.mockImplementation(
         () =>
           ({
             getAddress: mockGetAddress,
@@ -116,7 +126,8 @@ describe('Unstoppable Domains', () => {
 
     it('should log error for unexpected SDK errors', async () => {
       const mockGetAddress = jest.fn().mockRejectedValue(new Error('Network error'))
-      ;(Resolution as jest.MockedClass<typeof Resolution>).mockImplementation(
+      const MockedResolution = Resolution as jest.MockedClass<typeof Resolution>
+      MockedResolution.mockImplementation(
         () =>
           ({
             getAddress: mockGetAddress,
@@ -131,6 +142,7 @@ describe('Unstoppable Domains', () => {
 
     it('should return undefined if API key is not configured', async () => {
       process.env.NEXT_PUBLIC_UNSTOPPABLE_API_KEY = ''
+      __resetResolutionForTesting() // Reset after changing env
 
       const address = await resolveUnstoppableAddress('brad.crypto')
 
@@ -162,14 +174,13 @@ describe('Unstoppable Domains', () => {
   describe('reverseResolveUnstoppable', () => {
     it('should reverse resolve address to UD domain', async () => {
       const mockReverse = jest.fn().mockResolvedValue('brad.crypto')
-      ;(Resolution as jest.MockedClass<typeof Resolution>).mockImplementation(
+      const MockedResolution = Resolution as jest.MockedClass<typeof Resolution>
+      MockedResolution.mockImplementation(
         () =>
           ({
             reverse: mockReverse,
           }) as any,
       )
-
-      const { reverseResolveUnstoppable } = await import('.')
 
       const domain = await reverseResolveUnstoppable('0x1111111111111111111111111111111111111111')
 
@@ -179,14 +190,13 @@ describe('Unstoppable Domains', () => {
 
     it('should return undefined if no reverse record found', async () => {
       const mockReverse = jest.fn().mockRejectedValue(new Error('ReverseResolutionNotSpecified'))
-      ;(Resolution as jest.MockedClass<typeof Resolution>).mockImplementation(
+      const MockedResolution = Resolution as jest.MockedClass<typeof Resolution>
+      MockedResolution.mockImplementation(
         () =>
           ({
             reverse: mockReverse,
           }) as any,
       )
-
-      const { reverseResolveUnstoppable } = await import('.')
 
       const domain = await reverseResolveUnstoppable('0x2222222222222222222222222222222222222222')
 
@@ -196,14 +206,13 @@ describe('Unstoppable Domains', () => {
 
     it('should return undefined if domain not registered', async () => {
       const mockReverse = jest.fn().mockRejectedValue(new Error('UnregisteredDomain'))
-      ;(Resolution as jest.MockedClass<typeof Resolution>).mockImplementation(
+      const MockedResolution = Resolution as jest.MockedClass<typeof Resolution>
+      MockedResolution.mockImplementation(
         () =>
           ({
             reverse: mockReverse,
           }) as any,
       )
-
-      const { reverseResolveUnstoppable } = await import('.')
 
       const domain = await reverseResolveUnstoppable('0x3333333333333333333333333333333333333333')
 
@@ -213,14 +222,13 @@ describe('Unstoppable Domains', () => {
 
     it('should log error for unexpected SDK errors', async () => {
       const mockReverse = jest.fn().mockRejectedValue(new Error('Network error'))
-      ;(Resolution as jest.MockedClass<typeof Resolution>).mockImplementation(
+      const MockedResolution = Resolution as jest.MockedClass<typeof Resolution>
+      MockedResolution.mockImplementation(
         () =>
           ({
             reverse: mockReverse,
           }) as any,
       )
-
-      const { reverseResolveUnstoppable } = await import('.')
 
       const domain = await reverseResolveUnstoppable('0x4444444444444444444444444444444444444444')
 
