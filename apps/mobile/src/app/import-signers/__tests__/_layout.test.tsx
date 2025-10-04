@@ -18,7 +18,7 @@ jest.mock('expo-router', () => {
   }
 })
 
-jest.mock('@/src/features/ImportPrivateKey', () => {
+jest.mock('@/src/features/ImportSigner', () => {
   const { View } = require('react-native')
   return {
     ImportSigner: () => <View testID="import-signer" />,

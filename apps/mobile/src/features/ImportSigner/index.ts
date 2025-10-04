@@ -1,3 +1,4 @@
-import { ImportPrivateKey } from './ImportPrivateKey.container'
+import { ImportSigner } from './ImportSigner.container'
+import { SeedPhraseAddressesContainer } from './SeedPhraseAddresses.container'
 
-export { ImportPrivateKey }
+export { ImportSigner, SeedPhraseAddressesContainer }
