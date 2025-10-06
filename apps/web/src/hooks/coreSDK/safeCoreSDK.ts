@@ -78,7 +78,7 @@ export const initSafeSDK = async ({
         safeVersion = upgradeableVersion
         isL1SafeSingleton = false
       } catch (error) {
-        logError(Errors._808, `Failed to initialize SDK for mastercopy at ${masterCopy}`, error)
+        logError(Errors._808, error)
         return
       }
     }
