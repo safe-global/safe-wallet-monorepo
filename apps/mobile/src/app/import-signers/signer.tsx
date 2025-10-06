@@ -3,7 +3,7 @@ import { ImportSigner } from '@/src/features/ImportSigner'
 import { getTokenValue, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-function PrivateKeyImport() {
+function SignerImport() {
   const { bottom } = useSafeAreaInsets()
 
   return (
@@ -13,4 +13,4 @@ function PrivateKeyImport() {
   )
 }
 
-export default PrivateKeyImport
+export default SignerImport

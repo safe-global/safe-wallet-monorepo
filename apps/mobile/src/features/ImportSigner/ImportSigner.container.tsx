@@ -13,12 +13,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 const CUSTOM_VERTICAL_OFFSET = 70
 
-export function ImportPrivateKey() {
+export function ImportSigner() {
   const [isMasked, setIsMasked] = useState(true)
   const { top } = useSafeAreaInsets()
-  const { handlePrivateKeyChange, handleImport, onPrivateKeyPaste, wallet, privateKey, error } = useImportPrivateKey()
+  const { handleInputChange, handleImport, onInputPaste, input, inputType, wallet, error } = useImportPrivateKey()
   const { handleScroll } = useScrollableHeader({
-    children: <NavBarTitle paddingRight={5}>Import a private key</NavBarTitle>,
+    children: <NavBarTitle paddingRight={5}>Import a signer</NavBarTitle>,
   })
 
   return (
@@ -27,8 +27,8 @@ export function ImportPrivateKey() {
         <View marginTop="$2">
           <SectionTitle
             paddingHorizontal={0}
-            title="Import a private key"
-            description="Enter your private key below. Make sure to do so in a safe and private place."
+            title="Import a signer"
+            description="Enter your private key or seed phrase below. Make sure to do so in a safe and private place."
           />
         </View>
 
@@ -36,11 +36,11 @@ export function ImportPrivateKey() {
           <View>
             <SafeInput
               height={114}
-              value={privateKey}
-              onChangeText={handlePrivateKeyChange}
+              value={input}
+              onChangeText={handleInputChange}
               placeholder="Paste here or type..."
               secureTextEntry={isMasked}
-              success={!!wallet}
+              success={!!wallet || inputType === 'seed-phrase'}
               textAlign="center"
               error={error}
               right={
@@ -60,7 +60,7 @@ export function ImportPrivateKey() {
               icon={<SafeFontIcon name="paste" />}
               fontWeight="500"
               size="$5"
-              onPress={onPrivateKeyPaste}
+              onPress={onInputPaste}
             >
               Paste
             </Button>
@@ -72,7 +72,7 @@ export function ImportPrivateKey() {
         onPress={handleImport}
         testID={'import-signer-button'}
         disabled={!!error}
-        opacity={!error && privateKey ? 1 : 0.5}
+        opacity={!error && input && (inputType === 'private-key' || inputType === 'seed-phrase') ? 1 : 0.5}
       >
         Import signer
       </SafeButton>
