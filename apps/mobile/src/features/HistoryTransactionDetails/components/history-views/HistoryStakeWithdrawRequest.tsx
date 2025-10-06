@@ -47,8 +47,10 @@ export function HistoryStakeWithdrawRequest({ txId, txInfo, txData }: HistorySta
             return item.renderRow()
           }
           return (
-            <View key={index} alignItems="center" flexDirection="row" justifyContent="space-between">
-              <Text color="$textSecondaryLight">{item.label}</Text>
+            <View key={index} alignItems="center" flexDirection="row" justifyContent="space-between" gap="$2">
+              <Text color="$textSecondaryLight" flexShrink={0}>
+                {item.label}
+              </Text>
               {item.render ? item.render() : <Text fontSize="$4">{item.value}</Text>}
             </View>
           )
