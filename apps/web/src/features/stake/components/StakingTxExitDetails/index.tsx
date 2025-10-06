@@ -4,7 +4,7 @@ import { NativeStakingStatus } from '@safe-global/safe-gateway-typescript-sdk'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 import StakingStatus from '@/features/stake/components/StakingStatus'
 import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatters'
-import { BEACON_CHAIN_EXPLORERS } from '@/features/stake/constants'
+import { getBeaconChainLink } from '@safe-global/utils/features/stake/utils/beaconChain'
 import useChainId from '@/hooks/useChainId'
 
 const StakingTxExitDetails = ({ info }: { info: StakingTxExitInfo }) => {
@@ -37,13 +37,7 @@ const StakingTxExitDetails = ({ info }: { info: StakingTxExitInfo }) => {
 export const BeaconChainLink = ({ validator, name }: { validator: string; name: string }) => {
   const chainId = useChainId()
   return (
-    <Link
-      variant="body1"
-      target="_blank"
-      href={`${
-        BEACON_CHAIN_EXPLORERS[chainId as keyof typeof BEACON_CHAIN_EXPLORERS] ?? 'https://beaconcha.in'
-      }/validator/${validator}`}
-    >
+    <Link variant="body1" target="_blank" href={getBeaconChainLink(chainId, validator)}>
       {name}
     </Link>
   )
