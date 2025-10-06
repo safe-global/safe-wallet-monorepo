@@ -33,7 +33,6 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import uniq from 'lodash/uniq'
 import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
 import { useSafeCreationData } from '@/features/multichain/hooks/useSafeCreationData'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import PlusIcon from '@/public/images/common/plus.svg'
 import useAddressBook from '@/hooks/useAddressBook'
@@ -54,7 +53,7 @@ export const ChainIndicatorWithFiatBalance = ({
   safeAddress,
 }: {
   isSelected: boolean
-  chain: ChainInfo
+  chain: Pick<Chain, 'chainId'>
   safeAddress: string
 }) => {
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, chain.chainId, safeAddress))
@@ -73,7 +72,7 @@ export const ChainIndicatorWithFiatBalance = ({
 export const getNetworkLink = (
   router: NextRouter,
   safeAddress: string,
-  chainInfo: ChainInfo,
+  chainInfo: Pick<Chain, 'chainId' | 'shortName'>,
   currentSafeApp?: SafeAppData,
 ) => {
   const { shortName, chainId } = chainInfo
@@ -190,7 +189,7 @@ const UndeployedNetworks = ({
   closeNetworkSelect,
 }: {
   deployedChains: string[]
-  chains: ChainInfo[]
+  chains: Chain[]
   safeAddress: string
   closeNetworkSelect: () => void
 }) => {
@@ -207,13 +206,13 @@ const UndeployedNetworks = ({
   const safeCreationResult = useSafeCreationData(safeAddress, deployedChainInfos)
   const [safeCreationData, safeCreationDataError, safeCreationLoading] = safeCreationResult
 
-  const allCompatibleChains = useCompatibleNetworks(safeCreationData, configs as Chain[])
+  const allCompatibleChains = useCompatibleNetworks(safeCreationData, configs)
   const isUnsupportedSafeCreationVersion = Boolean(!allCompatibleChains?.length)
 
   const availableNetworks = useMemo(
     () =>
       allCompatibleChains?.filter(
-        (config) => !deployedChains.includes(config.chainId) && hasMultiChainAddNetworkFeature(config as ChainInfo),
+        (config) => !deployedChains.includes(config.chainId) && hasMultiChainAddNetworkFeature(config),
       ) || [],
     [allCompatibleChains, deployedChains],
   )
@@ -341,7 +340,7 @@ const UndeployedNetworks = ({
       </Collapse>
       {replayOnChain && safeCreationData && (
         <CreateSafeOnSpecificChain
-          chain={replayOnChain as ChainInfo}
+          chain={replayOnChain}
           safeAddress={safeAddress}
           open
           onClose={onFormClose}

@@ -20,10 +20,14 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type SafeAppsGetSafeAppsV1ApiResponse = /** status 200  */ SafeApp[]
+export type SafeAppsGetSafeAppsV1ApiResponse =
+  /** status 200 List of Safe Apps available for the specified chain */ SafeApp[]
 export type SafeAppsGetSafeAppsV1ApiArg = {
+  /** Chain ID to get Safe Apps for */
   chainId: string
+  /** Filter by client URL to get apps compatible with specific client */
   clientUrl?: string
+  /** Filter by specific Safe App URL */
   url?: string
 }
 export type SafeAppProvider = {

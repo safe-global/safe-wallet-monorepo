@@ -20,7 +20,7 @@ import pickBy from 'lodash/pickBy'
 import { Fragment, useEffect, useMemo, useState } from 'react'
 import type { ReactElement } from 'react'
 import type { AllOwnedSafes } from '@safe-global/safe-gateway-typescript-sdk'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -82,10 +82,7 @@ export const _transformCurrentSubscribedSafes = (
 }
 
 // Remove Safes that are not on a supported chain
-export const _sanitizeNotifiableSafes = (
-  chains: Array<ChainInfo>,
-  notifiableSafes: NotifiableSafes,
-): NotifiableSafes => {
+export const _sanitizeNotifiableSafes = (chains: Array<Chain>, notifiableSafes: NotifiableSafes): NotifiableSafes => {
   return Object.entries(notifiableSafes).reduce<NotifiableSafes>((acc, [chainId, safeAddresses]) => {
     const chain = chains.find((chain) => chain.chainId === chainId)
 

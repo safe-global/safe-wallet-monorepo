@@ -4,7 +4,7 @@ import { renderHook } from '@/tests/test-utils'
 import * as useWalletHook from '@/hooks/wallets/useWallet'
 import * as useChains from '@/hooks/useChains'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 // mock useRouter
 jest.mock('next/navigation', () => ({
@@ -88,7 +88,7 @@ describe('useChainId hook', () => {
     )
 
     jest.spyOn(useChains, 'default').mockImplementation(() => ({
-      configs: [{ chainId: '1337' } as ChainInfo],
+      configs: [{ chainId: '1337' } as Chain],
     }))
 
     const { result } = renderHook(() => useChainId())

@@ -1,5 +1,5 @@
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { FEATURES, GAS_PRICE_TYPE, RPC_AUTHENTICATION } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { FEATURES } from '@safe-global/safe-gateway-typescript-sdk'
 
 const contractAddresses = {
   createCallAddress: null,
@@ -13,7 +13,7 @@ const contractAddresses = {
   simulateTxAccessorAddress: null,
 }
 
-const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
+const CONFIG_SERVICE_CHAINS: Chain[] = [
   {
     transactionService: 'https://safe-transaction.mainnet.gnosis.io',
     contractAddresses,
@@ -23,10 +23,12 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     shortName: 'eth',
     l2: false,
     isTestnet: false,
+    zk: false,
+    beaconChainExplorerUriTemplate: {},
     description: 'The main Ethereum network',
-    rpcUri: { authentication: RPC_AUTHENTICATION.API_KEY_PATH, value: 'https://mainnet.infura.io/v3/' },
-    safeAppsRpcUri: { authentication: RPC_AUTHENTICATION.API_KEY_PATH, value: 'https://mainnet.infura.io/v3/' },
-    publicRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://cloudflare-eth.com' },
+    rpcUri: { authentication: 'API_KEY_PATH', value: 'https://mainnet.infura.io/v3/' },
+    safeAppsRpcUri: { authentication: 'API_KEY_PATH', value: 'https://mainnet.infura.io/v3/' },
+    publicRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://cloudflare-eth.com' },
     blockExplorerUriTemplate: {
       address: 'https://etherscan.io/address/{{address}}',
       txHash: 'https://etherscan.io/tx/{{txHash}}',
@@ -42,13 +44,13 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     ensRegistryAddress: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
     gasPrice: [
       {
-        type: GAS_PRICE_TYPE.ORACLE,
+        type: 'oracle' as const,
         uri: 'https://api.etherscan.io/v2/api?chainid=1&module=gastracker&action=gasoracle&apikey=JNFAU892RF9TJWBU3EV7DJCPIWZY8KEMY1',
         gasParameter: 'FastGasPrice',
         gweiFactor: '1000000000.000000000',
       },
       {
-        type: GAS_PRICE_TYPE.ORACLE,
+        type: 'oracle' as const,
         uri: 'https://ethgasstation.info/json/ethgasAPI.json?api-key=8bb8066b5c3ed1442190d0e30ad9126c7b8235314397efa76e6977791cb2',
         gasParameter: 'fast',
         gweiFactor: '100000000.000000000',
@@ -79,10 +81,12 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     shortName: 'gno',
     l2: true,
     isTestnet: false,
+    zk: false,
+    beaconChainExplorerUriTemplate: {},
     description: '',
-    rpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://rpc.gnosischain.com/' },
-    safeAppsRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://rpc.gnosischain.com/' },
-    publicRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://rpc.gnosischain.com/' },
+    rpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://rpc.gnosischain.com/' },
+    safeAppsRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://rpc.gnosischain.com/' },
+    publicRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://rpc.gnosischain.com/' },
     blockExplorerUriTemplate: {
       address: 'https://blockscout.com/xdai/mainnet/address/{{address}}/transactions',
       txHash: 'https://blockscout.com/xdai/mainnet/tx/{{txHash}}/',
@@ -95,7 +99,7 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
       logoUri: 'https://safe-transaction-assets.gnosis-safe.io/chains/100/currency_logo.png',
     },
     theme: { textColor: '#ffffff', backgroundColor: '#48A9A6' },
-    gasPrice: [{ type: GAS_PRICE_TYPE.FIXED, weiValue: '4000000000' }],
+    gasPrice: [{ type: 'fixed' as const, weiValue: '4000000000' }],
     disabledWallets: [
       'authereum',
       'fortmatic',
@@ -134,10 +138,12 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     shortName: 'matic',
     l2: true,
     isTestnet: false,
+    zk: false,
+    beaconChainExplorerUriTemplate: {},
     description: 'L2 chain (MATIC)',
-    rpcUri: { authentication: RPC_AUTHENTICATION.API_KEY_PATH, value: 'https://polygon-mainnet.infura.io/v3/' },
-    safeAppsRpcUri: { authentication: RPC_AUTHENTICATION.API_KEY_PATH, value: 'https://polygon-mainnet.infura.io/v3/' },
-    publicRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://polygon-rpc.com' },
+    rpcUri: { authentication: 'API_KEY_PATH', value: 'https://polygon-mainnet.infura.io/v3/' },
+    safeAppsRpcUri: { authentication: 'API_KEY_PATH', value: 'https://polygon-mainnet.infura.io/v3/' },
+    publicRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://polygon-rpc.com' },
     blockExplorerUriTemplate: {
       address: 'https://polygonscan.com/address/{{address}}',
       txHash: 'https://polygonscan.com/tx/{{txHash}}',
@@ -152,7 +158,7 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     theme: { textColor: '#ffffff', backgroundColor: '#8248E5' },
     gasPrice: [
       {
-        type: GAS_PRICE_TYPE.ORACLE,
+        type: 'oracle' as const,
         uri: 'https://gasstation-mainnet.matic.network/',
         gasParameter: 'standard',
         gweiFactor: '1000000000.000000000',
@@ -195,13 +201,15 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     shortName: 'bnb',
     l2: true,
     isTestnet: false,
+    zk: false,
+    beaconChainExplorerUriTemplate: {},
     description: '',
-    rpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://bsc-dataseed.binance.org/' },
+    rpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://bsc-dataseed.binance.org/' },
     safeAppsRpcUri: {
-      authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION,
+      authentication: 'NO_AUTHENTICATION',
       value: 'https://bsc-dataseed.binance.org/',
     },
-    publicRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://bsc-dataseed.binance.org/' },
+    publicRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://bsc-dataseed.binance.org/' },
     blockExplorerUriTemplate: {
       address: 'https://bscscan.com/address/{{address}}',
       txHash: 'https://bscscan.com/tx/{{txHash}}',
@@ -252,10 +260,12 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     shortName: 'ewt',
     l2: true,
     isTestnet: false,
+    zk: false,
+    beaconChainExplorerUriTemplate: {},
     description: '',
-    rpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://rpc.energyweb.org' },
-    safeAppsRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://rpc.energyweb.org' },
-    publicRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://rpc.energyweb.org' },
+    rpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://rpc.energyweb.org' },
+    safeAppsRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://rpc.energyweb.org' },
+    publicRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://rpc.energyweb.org' },
     blockExplorerUriTemplate: {
       address: 'https://explorer.energyweb.org/address/{{address}}/transactions',
       txHash: 'https://explorer.energyweb.org/tx/{{txHash}}/internal-transactions',
@@ -268,7 +278,7 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
       logoUri: 'https://safe-transaction-assets.gnosis-safe.io/chains/246/currency_logo.png',
     },
     theme: { textColor: '#ffffff', backgroundColor: '#A566FF' },
-    gasPrice: [{ type: GAS_PRICE_TYPE.FIXED, weiValue: '1000000' }],
+    gasPrice: [{ type: 'fixed' as const, weiValue: '1000000' }],
     disabledWallets: [
       'authereum',
       'coinbase',
@@ -307,10 +317,12 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     shortName: 'arb1',
     l2: true,
     isTestnet: false,
+    zk: false,
+    beaconChainExplorerUriTemplate: {},
     description: '',
-    rpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://arb1.arbitrum.io/rpc' },
-    safeAppsRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://arb1.arbitrum.io/rpc' },
-    publicRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://arb1.arbitrum.io/rpc' },
+    rpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://arb1.arbitrum.io/rpc' },
+    safeAppsRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://arb1.arbitrum.io/rpc' },
+    publicRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://arb1.arbitrum.io/rpc' },
     blockExplorerUriTemplate: {
       address: 'https://arbiscan.io/address/{{address}}',
       txHash: 'https://arbiscan.io/tx/{{txHash}}',
@@ -355,10 +367,12 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     shortName: 'aurora',
     l2: true,
     isTestnet: false,
+    zk: false,
+    beaconChainExplorerUriTemplate: {},
     description: '',
-    rpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://mainnet.aurora.dev' },
-    safeAppsRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://mainnet.aurora.dev' },
-    publicRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://mainnet.aurora.dev' },
+    rpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://mainnet.aurora.dev' },
+    safeAppsRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://mainnet.aurora.dev' },
+    publicRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://mainnet.aurora.dev' },
     blockExplorerUriTemplate: {
       address: 'https://explorer.mainnet.aurora.dev/address/{{address}}/transactions',
       txHash: 'https://explorer.mainnet.aurora.dev/tx/{{txHash}}/',
@@ -404,14 +418,16 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     shortName: 'avax',
     l2: true,
     isTestnet: false,
+    zk: false,
+    beaconChainExplorerUriTemplate: {},
     description: '',
-    rpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://api.avax.network/ext/bc/C/rpc' },
+    rpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://api.avax.network/ext/bc/C/rpc' },
     safeAppsRpcUri: {
-      authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION,
+      authentication: 'NO_AUTHENTICATION',
       value: 'https://api.avax.network/ext/bc/C/rpc',
     },
     publicRpcUri: {
-      authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION,
+      authentication: 'NO_AUTHENTICATION',
       value: 'https://api.avax.network/ext/bc/C/rpc',
     },
     blockExplorerUriTemplate: {
@@ -464,10 +480,12 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     shortName: 'oeth',
     l2: true,
     isTestnet: false,
+    zk: false,
+    beaconChainExplorerUriTemplate: {},
     description: '',
-    rpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://mainnet.optimism.io/' },
-    safeAppsRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://mainnet.optimism.io/' },
-    publicRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://mainnet.optimism.io/' },
+    rpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://mainnet.optimism.io/' },
+    safeAppsRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://mainnet.optimism.io/' },
+    publicRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://mainnet.optimism.io/' },
     blockExplorerUriTemplate: {
       address: 'https://optimistic.etherscan.io/address/{{address}}',
       txHash: 'https://optimistic.etherscan.io/tx/{{txHash}}',
@@ -512,11 +530,13 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     shortName: 'gor',
     l2: true,
     isTestnet: true,
+    zk: false,
+    beaconChainExplorerUriTemplate: {},
     description: 'Ethereum Testnet Görli',
-    rpcUri: { authentication: RPC_AUTHENTICATION.API_KEY_PATH, value: 'https://goerli.infura.io/v3/' },
-    safeAppsRpcUri: { authentication: RPC_AUTHENTICATION.API_KEY_PATH, value: 'https://goerli.infura.io/v3/' },
+    rpcUri: { authentication: 'API_KEY_PATH', value: 'https://goerli.infura.io/v3/' },
+    safeAppsRpcUri: { authentication: 'API_KEY_PATH', value: 'https://goerli.infura.io/v3/' },
     publicRpcUri: {
-      authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION,
+      authentication: 'NO_AUTHENTICATION',
       value: 'https://goerli-light.eth.linkpool.io',
     },
     blockExplorerUriTemplate: {
@@ -531,7 +551,7 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
       logoUri: 'https://safe-transaction-assets.gnosis-safe.io/chains/5/currency_logo.png',
     },
     theme: { textColor: '#ffffff', backgroundColor: '#FBC02D' },
-    gasPrice: [{ type: GAS_PRICE_TYPE.FIXED, weiValue: '24000000000' }],
+    gasPrice: [{ type: 'fixed' as const, weiValue: '24000000000' }],
     disabledWallets: [
       'authereum',
       'coinbase',
@@ -568,11 +588,13 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     shortName: 'rin',
     l2: false,
     isTestnet: true,
+    zk: false,
+    beaconChainExplorerUriTemplate: {},
     description: 'Ethereum testnet',
-    rpcUri: { authentication: RPC_AUTHENTICATION.API_KEY_PATH, value: 'https://rinkeby.infura.io/v3/' },
-    safeAppsRpcUri: { authentication: RPC_AUTHENTICATION.API_KEY_PATH, value: 'https://rinkeby.infura.io/v3/' },
+    rpcUri: { authentication: 'API_KEY_PATH', value: 'https://rinkeby.infura.io/v3/' },
+    safeAppsRpcUri: { authentication: 'API_KEY_PATH', value: 'https://rinkeby.infura.io/v3/' },
     publicRpcUri: {
-      authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION,
+      authentication: 'NO_AUTHENTICATION',
       value: 'https://rinkeby-light.eth.linkpool.io/',
     },
     blockExplorerUriTemplate: {
@@ -588,7 +610,7 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     },
     theme: { textColor: '#ffffff', backgroundColor: '#E8673C' },
     ensRegistryAddress: '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
-    gasPrice: [{ type: GAS_PRICE_TYPE.FIXED, weiValue: '24000000000' }],
+    gasPrice: [{ type: 'fixed' as const, weiValue: '24000000000' }],
     disabledWallets: ['fortmatic', 'lattice', 'tally'],
     features: [
       FEATURES.DOMAIN_LOOKUP,
@@ -614,10 +636,12 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
     shortName: 'vt',
     l2: true,
     isTestnet: false,
+    zk: false,
+    beaconChainExplorerUriTemplate: {},
     description: '',
-    rpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://volta-rpc.energyweb.org' },
-    safeAppsRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://volta-rpc.energyweb.org' },
-    publicRpcUri: { authentication: RPC_AUTHENTICATION.NO_AUTHENTICATION, value: 'https://volta-rpc.energyweb.org' },
+    rpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://volta-rpc.energyweb.org' },
+    safeAppsRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://volta-rpc.energyweb.org' },
+    publicRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://volta-rpc.energyweb.org' },
     blockExplorerUriTemplate: {
       address: 'https://volta-explorer.energyweb.org/address/{{address}}/transactions',
       txHash: 'https://volta-explorer.energyweb.org/tx/{{txHash}}/internal-transactions',
@@ -630,7 +654,7 @@ const CONFIG_SERVICE_CHAINS: ChainInfo[] = [
       logoUri: 'https://safe-transaction-assets.gnosis-safe.io/chains/73799/currency_logo.png',
     },
     theme: { textColor: '#ffffff', backgroundColor: '#514989' },
-    gasPrice: [{ type: GAS_PRICE_TYPE.FIXED, weiValue: '1000000' }],
+    gasPrice: [{ type: 'fixed' as const, weiValue: '1000000' }],
     disabledWallets: [
       'authereum',
       'coinbase',

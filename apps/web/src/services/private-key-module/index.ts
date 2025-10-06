@@ -1,5 +1,5 @@
 import { JsonRpcProvider, Wallet } from 'ethers'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type WalletInit, createEIP1193Provider } from '@web3-onboard/common'
 import { getRpcServiceUrl } from '@/hooks/wallets/web3'
 import pkPopupStore from './pk-popup-store'
@@ -27,9 +27,9 @@ async function getPrivateKey() {
 let currentChainId = ''
 let currentRpcUri = ''
 
-const PrivateKeyModule = (chainId: ChainInfo['chainId'], rpcUri: ChainInfo['rpcUri']): WalletInit => {
+const PrivateKeyModule = (chainId: Chain['chainId'], rpcUri: Chain['rpcUri']): WalletInit => {
   currentChainId = chainId
-  currentRpcUri = getRpcServiceUrl(rpcUri)
+  currentRpcUri = getRpcServiceUrl(rpcUri as any)
 
   return () => {
     return {

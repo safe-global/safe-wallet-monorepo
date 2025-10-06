@@ -1,7 +1,7 @@
 import { getTotalFee } from '@/hooks/useGasPrice'
 import type { ReactElement, SyntheticEvent } from 'react'
 import { Accordion, AccordionDetails, AccordionSummary, Skeleton, Typography, Link, Grid, SvgIcon } from '@mui/material'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -42,7 +42,7 @@ export const _GasParams = ({
   gasLimitError,
   willRelay,
   chain,
-}: GasParamsProps & { chain?: ChainInfo }): ReactElement => {
+}: GasParamsProps & { chain?: Chain }): ReactElement => {
   const { nonce, userNonce, safeTxGas, gasLimit, maxFeePerGas, maxPriorityFeePerGas } = params
 
   const onChangeExpand = (_: SyntheticEvent, expanded: boolean) => {

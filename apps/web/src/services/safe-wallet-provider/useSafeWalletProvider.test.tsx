@@ -335,7 +335,7 @@ describe('useSafeWalletProvider', () => {
             loading: false,
             loaded: true,
             error: undefined,
-            data: [{ chainId: '1', shortName: 'eth' } as gateway.ChainInfo],
+            data: [{ chainId: '1', shortName: 'eth' } as any],
           },
         },
       })
