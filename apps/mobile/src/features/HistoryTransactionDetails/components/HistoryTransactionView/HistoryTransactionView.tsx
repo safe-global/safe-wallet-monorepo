@@ -8,6 +8,7 @@ import {
   VaultRedeemTransactionInfo,
   NativeStakingDepositTransactionInfo,
   NativeStakingValidatorsExitTransactionInfo,
+  NativeStakingWithdrawTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { HistoryTokenTransfer } from '../history-views/HistoryTokenTransfer'
@@ -26,6 +27,7 @@ import { HistoryContract } from '@/src/features/HistoryTransactionDetails/compon
 import { NormalizedSettingsChangeTransaction } from '@/src/features/ConfirmTx/components/ConfirmationView/types'
 import { CancelTx } from '@/src/features/HistoryTransactionDetails/components/history-views/CancelTx'
 import { CustomTransactionInfo, MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { HistoryStakeWithdraw } from '../history-views/HistoryStakeWithdraw'
 
 interface HistoryTransactionViewProps {
   txDetails: TransactionDetails
@@ -111,6 +113,15 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
           txData={txDetails.txData as TransactionData}
         />
       )
+    case ETxType.STAKE_EXIT: {
+      return (
+        <HistoryStakeWithdraw
+          txId={txDetails.txId}
+          txInfo={txDetails.txInfo as NativeStakingWithdrawTransactionInfo}
+          txData={txDetails.txData as TransactionData}
+        />
+      )
+    }
 
     case ETxType.VAULT_DEPOSIT:
       return <HistoryVaultDeposit txId={txDetails.txId} txInfo={txDetails.txInfo as VaultDepositTransactionInfo} />
