@@ -1,52 +1,20 @@
-import React from 'react'
-
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveChain } from '@/src/store/chains'
-import {  useWeb3ReadOnly, } from '@/src/hooks/wallets/web3'
-import { getTotalFee, useDefaultGasPrice } from '@safe-global/utils/hooks/useDefaultGasPrice'
-import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { getTotalFee } from '@safe-global/utils/hooks/useDefaultGasPrice'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
-import { useSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
-import { useGasLimit } from '@safe-global/utils/hooks/useDefaultGasLimit'
 import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import useSafeTx from '@/src/hooks/useSafeTx'
-import { selectSafeInfo } from '@/src/store/safesSlice'
-import { selectActiveSigner } from '@/src/store/activeSignerSlice'
+import { EstimatedFeeValues } from '@/src/store/estimatedFeeSlice'
+import { useFeeParams } from '@/src/hooks/useFeeParams/useFeeParams'
 
-const useGasFee = (txDetails: TransactionDetails) => {
-    const chain = useAppSelector(selectActiveChain)
-    const activeSafe = useDefinedActiveSafe()
-    const activeSigner = useAppSelector((state) => selectActiveSigner(state, activeSafe.address))
-    const safeInfoMapper = useAppSelector((state) => selectSafeInfo(state, activeSafe.address))
-    const safeInfo = safeInfoMapper ? safeInfoMapper[activeSafe.chainId] : undefined
-    const provider = useWeb3ReadOnly()
-    const safeSDK = useSafeSDK()
-    const [gasPrice, _gasPriceError, isLoading] = useDefaultGasPrice(chain as Chain, provider)
-  
-    const safeTx = useSafeTx(txDetails)
-  
-    const { gasLimit, gasLimitLoading } = useGasLimit({
-      safeTx,
-      chainId: activeSafe.chainId,
-      safeAddress: activeSafe.address,
-      threshold: safeInfo?.threshold ?? 0,
-      walletAddress: activeSigner?.value ?? '',
-      safeSDK,
-      web3ReadOnly: provider,
-      isOwner: true,
-      logError: () => { },
-    })
-  
-    // const [userNonce] = useAsync<number>(() => {
-    //   return getUserNonce(activeSigner?.value ?? '')
-    // }, [activeSigner?.value])
-  
-    const totalFee = !isLoading && !gasLimitLoading
-      ? formatVisualAmount(getTotalFee(gasPrice?.maxFeePerGas ?? 0n, gasLimit ?? 0n), chain?.nativeCurrency.decimals)
-      : 'loading...'
+const useGasFee = (txDetails: TransactionDetails, manualParams: EstimatedFeeValues, pooling: boolean = true) => {
+  const chain = useAppSelector(selectActiveChain)
+  const estimatedFeeParams = useFeeParams(txDetails, manualParams, pooling)
 
-    return totalFee
+  const totalFee = estimatedFeeParams.isLoadingGasPrice || estimatedFeeParams.gasLimitLoading
+    ? 'loading...'
+    : formatVisualAmount(getTotalFee(estimatedFeeParams.maxFeePerGas ?? 0n, estimatedFeeParams.gasLimit ?? 0n), chain?.nativeCurrency.decimals)
+
+  return { totalFee, estimatedFeeParams }
 }
 
 export default useGasFee

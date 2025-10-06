@@ -1,6 +1,5 @@
 import React from 'react'
-import { Text, View, Image } from 'tamagui'
-import Signature from '@/assets/images/signature.png'
+import { Text, View, } from 'tamagui'
 
 import { Identicon } from '@/src/components/Identicon'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -8,7 +7,6 @@ import { router } from 'expo-router'
 import { ContactDisplayNameContainer } from '@/src/features/AddressBook'
 import { Address } from '@/src/types/address'
 import { ActionType } from '@/src/features/ChangeSignerSheet/utils'
-import { Badge } from '../Badge'
 import { Container } from '../Container'
 
 type Props = {

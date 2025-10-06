@@ -39,10 +39,10 @@ const useAvailableSigners = (txId: string, actionType: ActionType) => {
     const availableSigners =
       actionType === ActionType.SIGN
         ? storedSigners.filter((signer) => {
-            return !detailedExecutionInfo?.confirmations?.some(
-              (confirmation) => confirmation.signer.value === signer.value,
-            )
-          })
+          return !detailedExecutionInfo?.confirmations?.some(
+            (confirmation) => confirmation.signer.value === signer.value,
+          )
+        })
         : storedSigners
 
     return availableSigners.map((item) => ({

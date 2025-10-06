@@ -4,7 +4,6 @@ import { router } from 'expo-router'
 
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveChain } from '@/src/store/chains'
-import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 interface EstimatedNetworkFeeProps {
   totalFee: string

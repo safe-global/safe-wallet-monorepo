@@ -12,6 +12,8 @@ import { EstimatedNetworkFee } from '../EstimatedNetworkFee'
 import { Container } from '@/src/components/Container'
 import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import useGasFee from '../../hooks/useGasFee'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectEstimatedFee } from '@/src/store/estimatedFeeSlice'
 
 interface ReviewFooterProps {
   txId: string
@@ -19,18 +21,27 @@ interface ReviewFooterProps {
 }
 
 export function ReviewExecuteFooter({ txId, txDetails }: ReviewFooterProps) {
+  const manualParams = useAppSelector(selectEstimatedFee)
   const { signerState } = useTransactionSigner(txId)
   const { activeSigner } = signerState
   const { isBiometricsEnabled } = useBiometrics()
   const { setGuard } = useGuard()
   const insets = useSafeAreaInsets()
-  const totalFee = useGasFee(txDetails)
+  const { totalFee, estimatedFeeParams } = useGasFee(txDetails, manualParams)
 
   const handleConfirmPress = async () => {
     try {
       setGuard('executing', true)
 
-      const params = { txId }
+      const params = {
+        txId,
+        maxFeePerGas: estimatedFeeParams.maxFeePerGas?.toString(),
+        maxPriorityFeePerGas: estimatedFeeParams.maxPriorityFeePerGas?.toString(),
+        gasLimit: estimatedFeeParams.gasLimit?.toString(),
+        nonce: estimatedFeeParams.nonce?.toString()
+      }
+
+      console.log('params', params)
 
       if (isBiometricsEnabled) {
         router.push({

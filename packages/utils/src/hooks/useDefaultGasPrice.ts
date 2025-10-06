@@ -173,6 +173,7 @@ const SPEED_UP_GAS_PRICE_FACTOR = 150n
 
 type UseGasPriceSettings = {
   isSpeedUp: boolean,
+  withPooling: boolean,
   logError: (err: string) => void,
 }
 /**
@@ -185,11 +186,12 @@ type UseGasPriceSettings = {
  * @returns [gasPrice, error, loading]
  */
 export const useDefaultGasPrice = (chain: Chain | undefined, provider: JsonRpcProvider | undefined, settings?: UseGasPriceSettings): AsyncResult<GasFeeParams> => {
-  const { isSpeedUp, logError } = settings || { isSpeedUp: false }
+  const { isSpeedUp, logError, withPooling = true } = settings || { isSpeedUp: false, withPooling: true }
   const gasPriceConfigs = chain?.gasPrice
   // TODO: move this to the utils package as well
   const [counter] = useIntervalCounter(REFRESH_DELAY)
   const isEIP1559 = !!chain && hasFeature(chain, FEATURES.EIP1559)
+  const intervalCounter = withPooling ? counter : 0
 
   const [gasPrice, gasPriceError, gasPriceLoading] = useAsync(
     async () => {
@@ -225,7 +227,7 @@ export const useDefaultGasPrice = (chain: Chain | undefined, provider: JsonRpcPr
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [gasPriceConfigs, provider, counter, isEIP1559],
+    [gasPriceConfigs, provider, intervalCounter, isEIP1559],
     false,
   )
 

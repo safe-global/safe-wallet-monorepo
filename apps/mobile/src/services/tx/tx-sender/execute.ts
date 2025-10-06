@@ -2,15 +2,17 @@ import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeInfo } from '@/src/types/address'
 import { proposeTx } from '@/src/services/tx/tx-sender/create'
 import { createConnectedWallet } from '@/src/services/web3'
+import { EstimatedFeeValues } from '@/src/store/estimatedFeeSlice'
 
 interface ExecuteTxParams {
   chain: Chain
   activeSafe: SafeInfo
   txId: string
   privateKey: string
+  feeParams: EstimatedFeeValues
 }
 
-export const executeTx = async ({ chain, activeSafe, txId, privateKey }: ExecuteTxParams) => {
+export const executeTx = async ({ chain, activeSafe, txId, privateKey, feeParams }: ExecuteTxParams) => {
   if (!chain) {
     throw new Error('Active chain not found')
   }
@@ -41,5 +43,10 @@ export const executeTx = async ({ chain, activeSafe, txId, privateKey }: Execute
     })
   })
 
-  return protocolKit.executeTransaction(safeTx)
+  return protocolKit.executeTransaction(safeTx, {
+    gasLimit: feeParams.gasLimit?.toString(),
+    maxFeePerGas: feeParams.maxFeePerGas?.toString(),
+    maxPriorityFeePerGas: feeParams.maxPriorityFeePerGas?.toString(),
+    nonce: feeParams.nonce,
+  })
 }
