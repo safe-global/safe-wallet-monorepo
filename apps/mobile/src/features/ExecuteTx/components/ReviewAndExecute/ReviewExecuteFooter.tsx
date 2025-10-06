@@ -8,23 +8,40 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTransactionSigner } from '@/src/features/ConfirmTx/hooks/useTransactionSigner'
 import { Address } from '@/src/types/address'
 import { SelectExecutor } from '@/src/components/SelectExecutor'
+import { EstimatedNetworkFee } from '../EstimatedNetworkFee'
+import { Container } from '@/src/components/Container'
+import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import useGasFee from '../../hooks/useGasFee'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectEstimatedFee } from '@/src/store/estimatedFeeSlice'
 
 interface ReviewFooterProps {
   txId: string
+  txDetails: TransactionDetails
 }
 
-export function ReviewExecuteFooter({ txId }: ReviewFooterProps) {
+export function ReviewExecuteFooter({ txId, txDetails }: ReviewFooterProps) {
+  const manualParams = useAppSelector(selectEstimatedFee)
   const { signerState } = useTransactionSigner(txId)
   const { activeSigner } = signerState
   const { isBiometricsEnabled } = useBiometrics()
   const { setGuard } = useGuard()
   const insets = useSafeAreaInsets()
+  const { totalFee, estimatedFeeParams } = useGasFee(txDetails, manualParams)
 
   const handleConfirmPress = async () => {
     try {
       setGuard('executing', true)
 
-      const params = { txId }
+      const params = {
+        txId,
+        maxFeePerGas: estimatedFeeParams.maxFeePerGas?.toString(),
+        maxPriorityFeePerGas: estimatedFeeParams.maxPriorityFeePerGas?.toString(),
+        gasLimit: estimatedFeeParams.gasLimit?.toString(),
+        nonce: estimatedFeeParams.nonce?.toString()
+      }
+
+      console.log('params', params)
 
       if (isBiometricsEnabled) {
         router.push({
@@ -44,15 +61,15 @@ export function ReviewExecuteFooter({ txId }: ReviewFooterProps) {
 
   return (
     <Stack
-      backgroundColor="$background"
       paddingHorizontal="$4"
-      paddingVertical="$3"
-      borderTopWidth={1}
-      borderTopColor="$borderLight"
       space="$3"
       paddingBottom={insets.bottom ? insets.bottom : '$4'}
     >
-      <SelectExecutor address={activeSigner?.value as Address} txId={txId} />
+      <Container backgroundColor="transparent" gap={'$2'} borderWidth={1} paddingVertical={'$3'} borderColor="$borderLight">
+        <SelectExecutor address={activeSigner?.value as Address} txId={txId} />
+
+        <EstimatedNetworkFee txId={txId} totalFee={totalFee} />
+      </Container>
 
       <SafeButton onPress={handleConfirmPress} width="100%">
         Execute transaction

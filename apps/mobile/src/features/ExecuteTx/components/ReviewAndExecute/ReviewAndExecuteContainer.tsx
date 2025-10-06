@@ -37,7 +37,7 @@ export function ReviewAndExecuteContainer() {
 
   return (
     <ReviewAndConfirmView txDetails={txDetails}>
-      <ReviewExecuteFooter txId={txId} />
+      <ReviewExecuteFooter txDetails={txDetails} txId={txId} />
     </ReviewAndConfirmView>
   )
 }
