@@ -1,5 +1,5 @@
 import { LoadingScreen } from '@/src/components/LoadingScreen'
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { useLocalSearchParams } from 'expo-router'
 import { ExecuteError } from './ExecuteError'
 import { ExecuteProcessing } from '@/src/features/ExecuteTx/components/ExecuteProcessing'
@@ -10,20 +10,36 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useTransactionGuard } from '@/src/hooks/useTransactionGuard'
 
 export function ExecuteTransaction() {
-  const { txId } = useLocalSearchParams<{ txId: string }>()
+  const { txId, maxFeePerGas, maxPriorityFeePerGas, gasLimit, nonce } = useLocalSearchParams<{
+    txId: string,
+    maxFeePerGas: string,
+    maxPriorityFeePerGas: string,
+    gasLimit: string,
+    nonce: string,
+  }>()
+
+  // Convert string params to bigint/number
+  const feeParams = useMemo(() => ({
+    maxFeePerGas: maxFeePerGas ? BigInt(maxFeePerGas) : undefined,
+    maxPriorityFeePerGas: maxPriorityFeePerGas ? BigInt(maxPriorityFeePerGas) : undefined,
+    gasLimit: gasLimit ? BigInt(gasLimit) : undefined,
+    nonce: nonce ? parseInt(nonce, 10) : undefined,
+  }), [maxFeePerGas, maxPriorityFeePerGas, gasLimit, nonce])
+
   const activeSafe = useDefinedActiveSafe()
   const activeSigner = useAppSelector((state) => selectActiveSigner(state, activeSafe.address))
   const { guard: canExecute } = useTransactionGuard('executing')
   const { status, executeTx, retry } = useTransactionExecution({
     txId: txId || '',
     signerAddress: activeSigner?.value || '',
+    feeParams,
   })
 
   useEffect(() => {
     if (canExecute && status === ExecutionStatus.IDLE && txId && activeSigner) {
       executeTx()
     }
-  }, [canExecute, status, executeTx, txId, activeSigner])
+  }, [canExecute, status, feeParams, executeTx, txId, activeSigner])
 
   if (!txId) {
     const handleRetry = () => {
