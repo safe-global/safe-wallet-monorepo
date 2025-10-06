@@ -29,7 +29,7 @@ export const useFeeParams = (txDetails: TransactionDetails, manualParams: Estima
     const [gasPrice, gasPriceError, isLoadingGasPrice] = useDefaultGasPrice(chain as Chain, provider, {
         withPooling: pooling ?? true,
         isSpeedUp: false,
-        logError: () => { }
+        logError: (e) => { console.error(e) }
     })
     const activeSafe = useDefinedActiveSafe()
     const activeSigner = useAppSelector((state) => selectActiveSigner(state, activeSafe.address))
@@ -52,7 +52,7 @@ export const useFeeParams = (txDetails: TransactionDetails, manualParams: Estima
         safeSDK,
         web3ReadOnly: provider,
         isOwner: true,
-        logError: () => { },
+        logError: (e) => { console.error(e) }
     })
 
     return useMemo(() => {
