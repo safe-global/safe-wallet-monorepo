@@ -17,7 +17,7 @@ const WcChainSwitchModal = ({ appInfo, chain, safes, onSelectSafe, onCancel }: W
   const hasSafes = safes.length > 0
 
   return (
-    <Stack spacing={3} sx={{ minWidth: { xs: 'auto', sm: 420 } }}>
+    <Stack spacing={3} sx={{ minWidth: { xs: 'auto', sm: 390 } }}>
       <Stack direction="row" spacing={2} alignItems="center">
         {appInfo.iconUrl ? <Avatar src={appInfo.iconUrl} alt={appInfo.name} sx={{ width: 48, height: 48 }} /> : null}
         <Box>
@@ -39,14 +39,16 @@ const WcChainSwitchModal = ({ appInfo, chain, safes, onSelectSafe, onCancel }: W
       </Typography>
 
       {hasSafes ? (
-        safes.map((safe) => (
-          <SingleAccountItem
-            key={`${safe.chainId}-${safe.address}`}
-            safeItem={safe}
-            onSelectSafe={() => onSelectSafe(safe)}
-            showActions={false}
-          />
-        ))
+        <Box sx={{ maxHeight: 440, overflowY: 'auto' }}>
+          {safes.map((safe) => (
+            <SingleAccountItem
+              key={`${safe.chainId}-${safe.address}`}
+              safeItem={safe}
+              onSelectSafe={() => onSelectSafe(safe)}
+              showActions={false}
+            />
+          ))}
+        </Box>
       ) : (
         <Box p={2} sx={{ borderRadius: 2, border: '1px solid var(--color-border-light)' }}>
           <Typography variant="body2">You can load or create a Safe on this network to continue.</Typography>
