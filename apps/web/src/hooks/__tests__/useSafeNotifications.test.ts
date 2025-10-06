@@ -195,16 +195,11 @@ describe('useSafeNotifications', () => {
       // check that the notification was shown
       expect(result.current).toBeUndefined()
       expect(showNotification).toHaveBeenCalledWith({
-        variant: 'warning',
-        message: 'Please migrate your Safe to a supported base contract.',
+        variant: 'info',
+        message:
+          'This Safe Account was created with an unsupported base contract. It is possible to migrate it to a compatible base contract. You can migrate it to a compatible contract on the Home screen.',
         groupKey: 'invalid-mastercopy',
-        link: {
-          href: {
-            pathname: '/settings/setup',
-            query: { safe: 'eth:0x123' },
-          },
-          title: 'Migrate',
-        },
+        link: undefined,
       })
     })
   })

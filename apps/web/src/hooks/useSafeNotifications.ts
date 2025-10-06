@@ -146,25 +146,17 @@ const useSafeNotifications = (): void => {
     const canMigrate = canMigrateUnsupportedMastercopy(safe, bytecodeComparison.result) || isMigrationToL2Possible(safe)
 
     const message = canMigrate
-      ? 'Please migrate your Safe to a supported base contract.'
+      ? 'This Safe Account was created with an unsupported base contract. It is possible to migrate it to a compatible base contract. You can migrate it to a compatible contract on the Home screen.'
       : `This Safe Account was created with an unsupported base contract.
            The web interface might not work correctly.
            We recommend using the command line interface instead.`
 
     const id = dispatch(
       showNotification({
-        variant: canMigrate ? 'warning' : 'warning',
+        variant: canMigrate ? 'info' : 'warning',
         message,
         groupKey: 'invalid-mastercopy',
-        link: canMigrate
-          ? {
-              href: {
-                pathname: AppRoutes.settings.setup,
-                query: { safe: query.safe },
-              },
-              title: 'Migrate',
-            }
-          : CLI_LINK,
+        link: canMigrate ? undefined : CLI_LINK,
       }),
     )
 
