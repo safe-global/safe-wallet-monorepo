@@ -49,17 +49,19 @@ export const useImportPrivateKey = () => {
   const handleImport = async () => {
     setError(undefined)
 
+    const trimmedInput = input.trim()
+
     if (inputType === 'private-key' && wallet) {
       // Handle private key import (existing flow)
       try {
         // Store the private key
-        await storePrivateKey(wallet.address, input)
+        await storePrivateKey(wallet.address, trimmedInput)
 
         // Create a delegate for this owner
         try {
           // We don't want to fail the private key import if delegate creation fails
           // by passing null as the safe address, we are creating a delegate for the chain and not for the safe
-          const delegateResult = await createDelegate(input, null)
+          const delegateResult = await createDelegate(trimmedInput, null)
 
           if (!delegateResult.success) {
             Logger.error('Failed to create delegate during private key import', delegateResult.error)
@@ -87,7 +89,7 @@ export const useImportPrivateKey = () => {
       router.push({
         pathname: '/import-signers/seed-phrase-addresses',
         params: {
-          seedPhrase: input,
+          seedPhrase: trimmedInput,
           safeAddress: local.safeAddress,
           chainId: local.chainId,
           import_safe: local.import_safe,
