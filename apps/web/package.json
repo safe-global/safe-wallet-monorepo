@@ -65,6 +65,7 @@
     "@safe-global/safe-modules-deployments": "^2.2.16",
     "@safe-global/store": "workspace:^",
     "@sentry/react": "^7.91.0",
+    "@unstoppabledomains/resolution": "^9.3.3",
     "@walletconnect/core": "^2.21.9",
     "@walletconnect/utils": "^2.21.9",
     "@web3-onboard/coinbase": "^2.4.2",
