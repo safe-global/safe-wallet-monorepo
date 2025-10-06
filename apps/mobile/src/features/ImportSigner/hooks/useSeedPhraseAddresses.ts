@@ -3,12 +3,6 @@ import { ethers, HDNodeWallet, Mnemonic } from 'ethers'
 import Logger from '@/src/utils/logger'
 import { useAddresses, type BaseAddress } from '@/src/hooks/useAddresses'
 
-export interface SeedPhraseAddress extends BaseAddress {
-  address: string
-  path: string
-  index: number
-}
-
 interface UseSeedPhraseAddressesParams {
   seedPhrase: string
 }
@@ -26,10 +20,10 @@ export const useSeedPhraseAddresses = ({ seedPhrase }: UseSeedPhraseAddressesPar
   }, [seedPhrase])
 
   const deriveAddresses = useCallback(
-    async (count: number, startIndex: number): Promise<SeedPhraseAddress[]> => {
+    async (count: number, startIndex: number): Promise<BaseAddress[]> => {
       // Create mnemonic from seed phrase
       const mnemonic = Mnemonic.fromPhrase(seedPhrase)
-      const addresses: SeedPhraseAddress[] = []
+      const addresses: BaseAddress[] = []
 
       // Derive addresses using MetaMask-compatible derivation path
       for (let i = startIndex; i < startIndex + count; i++) {

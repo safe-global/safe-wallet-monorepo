@@ -34,7 +34,7 @@ export const useImportSeedPhraseAddress = () => {
   }, [])
 
   const importAddress = useCallback(
-    async (address: string, path: string, index: number, privateKey: string): Promise<ImportResult | ImportFailure> => {
+    async (address: string, path: string, index: number, privateKey: string): Promise<ImportResult> => {
       if (!address || !path || !privateKey) {
         setError({
           code: 'VALIDATION',
