@@ -9,6 +9,7 @@ import css from './styles.module.css'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import SecurityWarnings from '@/components/tx/security/SecurityWarnings'
 import TxStatusWidget from '@/components/tx-flow/common/TxStatusWidget'
+import SafeShieldWidget from '@/components/tx-flow/common/SafeShieldWidget'
 import { TxLayoutHeader } from '../TxLayout'
 import { Slot, SlotName } from '../../slots'
 
@@ -114,6 +115,7 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
                 <Slot name={SlotName.Sidebar} />
 
                 <Box className={css.sticky}>
+                  <SafeShieldWidget />
                   <SecurityWarnings />
                 </Box>
               </Grid>
