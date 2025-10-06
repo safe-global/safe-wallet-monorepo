@@ -190,7 +190,7 @@ export const SeedPhraseAddressesContainer = () => {
   const renderEmptyState = () => <AddressesEmptyState />
 
   return (
-    <View style={{ flex: 1 }}>
+    <View flex={1}>
       <View flex={1}>
         <FlatList
           onScroll={handleScroll}
