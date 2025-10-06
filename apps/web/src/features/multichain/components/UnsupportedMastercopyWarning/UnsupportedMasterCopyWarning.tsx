@@ -15,6 +15,11 @@ export const UnsupportedMastercopyWarning = () => {
   const { safe } = useSafeInfo()
   const bytecodeComparison = useBytecodeComparison()
 
+  // Don't show warning while still loading bytecode comparison
+  if (bytecodeComparison.isLoading) {
+    return null
+  }
+
   // Check if migration is possible based on bytecode comparison
   const canMigrate =
     canMigrateUnsupportedMastercopy(safe, bytecodeComparison.result) ||

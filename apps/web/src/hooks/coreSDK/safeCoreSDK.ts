@@ -13,6 +13,7 @@ import {
   getL2MasterCopyVersionByCodeHash,
   isL2MasterCopyCodeHash,
 } from '@safe-global/utils/services/contracts/deployments'
+import { logError, Errors } from '@/services/exceptions'
 
 // Safe Core SDK
 export const initSafeSDK = async ({
@@ -48,20 +49,23 @@ export const initSafeSDK = async ({
         const code = await provider.getCode(masterCopy)
 
         if (!code || code === '0x') {
-          return Promise.resolve(undefined)
+          console.warn(`[SafeSDK] No bytecode found for mastercopy at ${masterCopy}`)
+          return
         }
 
         const codeHash = keccak256(code)
         const isUpgradeableL2MasterCopy = isL2MasterCopyCodeHash(codeHash)
 
         if (!isUpgradeableL2MasterCopy) {
-          return Promise.resolve(undefined)
+          console.warn(`[SafeSDK] Mastercopy at ${masterCopy} is not a recognized L2 mastercopy`)
+          return
         }
 
         const upgradeableVersion = getL2MasterCopyVersionByCodeHash(codeHash)
 
         if (!upgradeableVersion) {
-          return Promise.resolve(undefined)
+          console.warn(`[SafeSDK] Could not determine version for L2 mastercopy at ${masterCopy}`)
+          return
         }
 
         // Use the custom mastercopy address with the SDK
@@ -74,7 +78,8 @@ export const initSafeSDK = async ({
         safeVersion = upgradeableVersion
         isL1SafeSingleton = false
       } catch (error) {
-        return Promise.resolve(undefined)
+        logError(Errors._808, `Failed to initialize SDK for mastercopy at ${masterCopy}`, error)
+        return
       }
     }
 
