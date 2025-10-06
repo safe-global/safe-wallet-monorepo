@@ -43,7 +43,7 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'))
 
   return (
-    <Stack direction="row" className={css.container}>
+    <Stack direction="row" gap={3} className={css.container}>
       {!isReplacement && !isSmallScreen && (
         <aside style={{ minWidth: 220, paddingTop: '46px' }}>
           <Stack gap={3} position="fixed">
