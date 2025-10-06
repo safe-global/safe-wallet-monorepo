@@ -8106,13 +8106,43 @@
           "methodName": {
             "type": "string",
             "nullable": true
-          },
-          "actionCount": {
-            "type": "number",
-            "nullable": true
           }
         },
         "required": ["type", "to", "dataSize", "isCancellation"]
+      },
+      "MultiSendTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["Custom"]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "to": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "dataSize": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "isCancellation": {
+            "type": "boolean"
+          },
+          "methodName": {
+            "type": "string",
+            "enum": ["multiSend"]
+          },
+          "actionCount": {
+            "type": "number"
+          }
+        },
+        "required": ["type", "to", "dataSize", "isCancellation", "methodName", "actionCount"]
       },
       "AddOwner": {
         "type": "object",
@@ -9625,6 +9655,9 @@
                 "$ref": "#/components/schemas/CustomTransactionInfo"
               },
               {
+                "$ref": "#/components/schemas/MultiSendTransactionInfo"
+              },
+              {
                 "$ref": "#/components/schemas/SettingsChangeTransaction"
               },
               {
@@ -9922,6 +9955,9 @@
                 "$ref": "#/components/schemas/CustomTransactionInfo"
               },
               {
+                "$ref": "#/components/schemas/MultiSendTransactionInfo"
+              },
+              {
                 "$ref": "#/components/schemas/SettingsChangeTransaction"
               },
               {
@@ -10174,6 +10210,9 @@
               },
               {
                 "$ref": "#/components/schemas/CustomTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/MultiSendTransactionInfo"
               },
               {
                 "$ref": "#/components/schemas/SettingsChangeTransaction"

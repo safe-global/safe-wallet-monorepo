@@ -1,14 +1,13 @@
 import React from 'react'
 import { Text } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
-import type { MultiSend } from '@safe-global/store/gateway/types'
-import type { SafeAppInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { SafeAppInfo, MultiSendTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SafeListItemProps } from '@/src/components/SafeListItem/SafeListItem'
 import { Logo } from '@/src/components/Logo'
 
 type TxSafeAppCardProps = {
   safeAppInfo: SafeAppInfo
-  txInfo: MultiSend
+  txInfo: MultiSendTransactionInfo
 } & Partial<SafeListItemProps>
 
 export function TxSafeAppCard({ safeAppInfo, txInfo, ...rest }: TxSafeAppCardProps) {

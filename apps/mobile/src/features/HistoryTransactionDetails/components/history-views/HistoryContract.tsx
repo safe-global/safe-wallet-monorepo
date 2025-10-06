@@ -12,6 +12,7 @@ import { Badge } from '@/src/components/Badge'
 import { HashDisplay } from '@/src/components/HashDisplay'
 import { HistoryAdvancedDetailsButton } from '@/src/features/HistoryTransactionDetails/components/HistoryAdvancedDetailsButton'
 import { CircleProps } from 'tamagui'
+import { isMultiSendTxInfo } from '@/src/utils/transaction-guards'
 
 interface HistoryContractProps {
   txId: string
@@ -26,7 +27,10 @@ export function HistoryContract({ txId, txInfo, _executionInfo }: HistoryContrac
   const chain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
 
   const methodName = txInfo.methodName ?? 'Contract interaction'
+  const isBatch = isMultiSendTxInfo(txInfo) && txInfo.actionCount
 
+  const actionCount = isBatch ? txInfo.actionCount : null
+  const title = actionCount ? `${actionCount} Actions` : methodName.charAt(0).toUpperCase() + methodName.slice(1)
   return (
     <YStack gap="$4">
       <HistoryTransactionHeader
@@ -34,10 +38,10 @@ export function HistoryContract({ txId, txInfo, _executionInfo }: HistoryContrac
         isIdenticon={!txInfo.to.logoUri}
         badgeIcon="transaction-contract"
         badgeColor="$textSecondaryLight"
-        transactionType={'Contract interaction'}
+        transactionType={isBatch ? 'Batch' : 'Contract interaction'}
       >
         <View alignItems="center">
-          <H3 fontWeight={600}>{methodName.charAt(0).toUpperCase() + methodName.slice(1)}</H3>
+          <H3 fontWeight={600}>{title}</H3>
         </View>
       </HistoryTransactionHeader>
 
