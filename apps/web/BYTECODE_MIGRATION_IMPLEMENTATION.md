@@ -42,6 +42,7 @@ Previously, Safe accounts with base contracts not in the list of officially supp
 ### 5. UI Updates
 
 #### UnsupportedMastercopyWarning Component (`apps/web/src/features/multichain/components/UnsupportedMastercopyWarning/UnsupportedMasterCopyWarning.tsx`)
+
 - Updated to use `useBytecodeComparison()` hook
 - Shows appropriate message when bytecode matches:
   - Indicates the contract is not in official list but bytecode matches
@@ -50,6 +51,7 @@ Previously, Safe accounts with base contracts not in the list of officially supp
 - Falls back to standard unsupported message when no match
 
 #### Safe Notifications (`apps/web/src/hooks/useSafeNotifications.ts`)
+
 - Updated notification for unsupported master copies
 - When migration is possible (bytecode match or standard L2 migration):
   - Message: "Please migrate your Safe to a supported base contract."
@@ -57,6 +59,7 @@ Previously, Safe accounts with base contracts not in the list of officially supp
 - Falls back to CLI recommendation when migration is not possible
 
 #### Unknown Contract Error (`apps/web/src/components/tx/SignOrExecuteForm/UnknownContractError.tsx`)
+
 - Updated to check for bytecode-matching contracts
 - Enables migration path for bytecode-matched unsupported contracts
 - Shows migration-possible message instead of error-only message
@@ -72,18 +75,21 @@ Previously, Safe accounts with base contracts not in the list of officially supp
 ## Testing
 
 Tests added for:
+
 - `bytecodeComparison.test.ts`: Tests for comparison logic
 - `safeContracts.test.ts`: Tests for migration eligibility logic
 
 ## Files Modified/Created
 
 ### Created:
+
 - `packages/utils/src/services/contracts/bytecodeComparison.ts`
 - `packages/utils/src/services/contracts/__tests__/bytecodeComparison.test.ts`
 - `packages/utils/src/services/contracts/__tests__/safeContracts.test.ts`
 - `apps/web/src/hooks/useBytecodeComparison.ts`
 
 ### Modified:
+
 - `packages/utils/src/services/contracts/safeContracts.ts`
 - `apps/web/src/hooks/coreSDK/safeCoreSDK.ts`
 - `apps/web/src/features/multichain/components/UnsupportedMastercopyWarning/UnsupportedMasterCopyWarning.tsx`

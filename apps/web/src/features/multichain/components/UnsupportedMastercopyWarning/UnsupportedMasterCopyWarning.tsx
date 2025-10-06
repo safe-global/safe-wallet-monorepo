@@ -14,6 +14,8 @@ import { useBytecodeComparison } from '@/hooks/useBytecodeComparison'
 export const UnsupportedMastercopyWarning = () => {
   const { safe } = useSafeInfo()
   const bytecodeComparison = useBytecodeComparison()
+  const { setTxFlow } = useContext(TxModalContext)
+  const openUpgradeModal = useCallback(() => setTxFlow(<MigrateSafeL2Flow />), [setTxFlow])
 
   // Don't show warning while still loading bytecode comparison
   if (bytecodeComparison.isLoading) {
@@ -26,10 +28,6 @@ export const UnsupportedMastercopyWarning = () => {
     (!isValidMasterCopy(safe.implementationVersionState) && isMigrationToL2Possible(safe))
 
   const showWarning = !isValidMasterCopy(safe.implementationVersionState) && canMigrate
-
-  const { setTxFlow } = useContext(TxModalContext)
-
-  const openUpgradeModal = useCallback(() => setTxFlow(<MigrateSafeL2Flow />), [setTxFlow])
 
   if (!showWarning) return
 
