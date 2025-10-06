@@ -1,9 +1,13 @@
 import { type ReactElement } from 'react'
 import { Box, Typography, Card, SvgIcon, Stack } from '@mui/material'
 import SafeShieldLogo from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
+import SafeShieldLogoDark from '@/public/images/safe-shield/safe-shield-logo-no-text-dark.svg'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
+import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
+import { useDarkMode } from '@/hooks/useDarkMode'
 
 const SafeShieldWidget = (): ReactElement => {
+  const isDarkMode = useDarkMode()
   return (
     <Stack gap={1}>
       <Card>
@@ -19,7 +23,11 @@ const SafeShieldWidget = (): ReactElement => {
           >
             <Stack direction="row" gap={1}>
               <Stack direction="row" alignItems="center">
-                <SvgIcon component={SafeShieldLogo} inheritViewBox sx={{ width: 14, height: 14 }} />
+                <SvgIcon
+                  component={isDarkMode ? SafeShieldLogoDark : SafeShieldLogo}
+                  inheritViewBox
+                  sx={{ width: 14, height: 14 }}
+                />
               </Stack>
             </Stack>
           </Stack>
@@ -39,7 +47,11 @@ const SafeShieldWidget = (): ReactElement => {
           Secured by
         </Typography>
 
-        <SvgIcon component={SafeShieldLogoFull} inheritViewBox sx={{ width: 100.83, height: 14.87 }} />
+        <SvgIcon
+          component={isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull}
+          inheritViewBox
+          sx={{ width: 100.83, height: 14.87 }}
+        />
       </Stack>
     </Stack>
   )
