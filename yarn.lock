@@ -7507,6 +7507,22 @@ __metadata:
   linkType: hard
 
 "@ledgerhq/context-module@npm:^1.3.1":
+  version: 1.3.1
+  resolution: "@ledgerhq/context-module@npm:1.3.1"
+  dependencies:
+    axios: "npm:^1.8.2"
+    crypto-js: "npm:^4.2.0"
+    ethers: "npm:6.13.4"
+    inversify: "npm:^6.2.2"
+    purify-ts: "npm:^2.1.0"
+    reflect-metadata: "npm:^0.2.2"
+  peerDependencies:
+    "@ledgerhq/device-management-kit": 0.6.5
+  checksum: 10/9e90cfd990fd6ae91b7e0b762f88024500b338a1f9abe0a062caaf30d2d007cf76597297f7f0b2b10008c3c19cae4cf019278d2c9a635c116f7439f43686a735
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/context-module@npm:^1.7.0":
   version: 1.8.0
   resolution: "@ledgerhq/context-module@npm:1.8.0"
   dependencies:
@@ -7519,22 +7535,6 @@ __metadata:
   peerDependencies:
     "@ledgerhq/device-management-kit": ^0.9.0
   checksum: 10/0b81522a7d821067375ab01edefc910882d25aaab2008d958006a872e4ac6360f702cc87d9c9e84fc24c7a75d24193d07071b838aa59129557bb718e5892afb7
-  languageName: node
-  linkType: hard
-
-"@ledgerhq/context-module@npm:^1.7.0":
-  version: 1.7.0
-  resolution: "@ledgerhq/context-module@npm:1.7.0"
-  dependencies:
-    axios: "npm:1.8.2"
-    crypto-js: "npm:^4.2.0"
-    ethers: "npm:6.14.1"
-    inversify: "npm:7.5.1"
-    purify-ts: "npm:2.1.0"
-    reflect-metadata: "npm:0.2.2"
-  peerDependencies:
-    "@ledgerhq/device-management-kit": 0.9.0
-  checksum: 10/f9f4a854e896db7f36b34c5898071149ae11a5d541bc2bf3b8280eeb94e7311c1bc6e85aac5402148c27fad5ae3054ee101a1141ec639a0423c8ad44080768c0
   languageName: node
   linkType: hard
 
@@ -7582,6 +7582,25 @@ __metadata:
   linkType: hard
 
 "@ledgerhq/device-signer-kit-ethereum@npm:^1.3.3":
+  version: 1.3.3
+  resolution: "@ledgerhq/device-signer-kit-ethereum@npm:1.3.3"
+  dependencies:
+    "@ledgerhq/signer-utils": "npm:^1.0.4"
+    ethers: "npm:6.13.4"
+    inversify: "npm:^6.2.2"
+    inversify-logger-middleware: "npm:^3.1.0"
+    purify-ts: "npm:^2.1.0"
+    reflect-metadata: "npm:^0.2.2"
+    semver: "npm:^7.6.3"
+    xstate: "npm:^5.19.2"
+  peerDependencies:
+    "@ledgerhq/context-module": ^1.3.1
+    "@ledgerhq/device-management-kit": ^0.6.5
+  checksum: 10/9856040a5132267ac67f06e74176e5d5ad7c8e96405b8bfcff0e23faa97197646d9f13bd7ce97ece6258d1193781f60c0601e19c20db01791d92e61672a50a5b
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/device-signer-kit-ethereum@npm:^1.7.0":
   version: 1.8.0
   resolution: "@ledgerhq/device-signer-kit-ethereum@npm:1.8.0"
   dependencies:
@@ -7599,56 +7618,47 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/device-signer-kit-ethereum@npm:^1.7.0":
-  version: 1.7.0
-  resolution: "@ledgerhq/device-signer-kit-ethereum@npm:1.7.0"
-  dependencies:
-    "@ledgerhq/signer-utils": "npm:1.1.0"
-    ethers: "npm:6.14.1"
-    inversify: "npm:7.5.1"
-    purify-ts: "npm:2.1.0"
-    reflect-metadata: "npm:0.2.2"
-    semver: "npm:7.7.2"
-    xstate: "npm:5.19.2"
-  peerDependencies:
-    "@ledgerhq/context-module": 1.7.0
-    "@ledgerhq/device-management-kit": 0.9.0
-  checksum: 10/65f704c0331d1038ea39dd1b0f6dba1c7125cec072d17b87021b099051e16aa91541d1ce685651f4955dbb2906bb0383ae163926aabb0149ba4af2eaf9ddcded
-  languageName: node
-  linkType: hard
-
 "@ledgerhq/device-transport-kit-react-native-ble@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@ledgerhq/device-transport-kit-react-native-ble@npm:1.1.0"
+  version: 1.1.1
+  resolution: "@ledgerhq/device-transport-kit-react-native-ble@npm:1.1.1"
   dependencies:
     "@sentry/minimal": "npm:6.19.7"
-    js-base64: "npm:^3.7.7"
+    js-base64: "npm:^3.7.8"
     purify-ts: "npm:2.1.0"
     uuid: "npm:11.0.3"
   peerDependencies:
-    "@ledgerhq/device-management-kit": 0.8.0
+    "@ledgerhq/device-management-kit": ^0.9.0
     react-native: ">0.74.1"
     react-native-ble-plx: 3.4.0
-    rxjs: ^7.8.2
-  checksum: 10/a6a9bed882bec0595b60612790e65469fa2edf510c6c0ca9a1691116611f9816330127e4f2af370f5481323c3ef0ef46ee0f4ea55dbbafb44ba8cfe89dec7e4e
+    rxjs: 7.8.2
+  checksum: 10/c656252546aa4751ae44a112fc83759d724ed9283ec1e6ff74abed0bf4b79782d6127f790b9e78e324244d3dba0db8945f16d4e36b37ded6b323f34e31a4d5b7
   languageName: node
   linkType: hard
 
 "@ledgerhq/device-transport-kit-web-hid@npm:^1.1.0":
-  version: 1.2.0
-  resolution: "@ledgerhq/device-transport-kit-web-hid@npm:1.2.0"
+  version: 1.1.0
+  resolution: "@ledgerhq/device-transport-kit-web-hid@npm:1.1.0"
   dependencies:
-    "@sentry/minimal": "npm:6.19.7"
-    purify-ts: "npm:2.1.0"
-    uuid: "npm:11.0.3"
+    "@sentry/minimal": "npm:^6.19.7"
+    purify-ts: "npm:^2.1.0"
+    uuid: "npm:^11.0.3"
   peerDependencies:
-    "@ledgerhq/device-management-kit": 0.8.0
+    "@ledgerhq/device-management-kit": ">=0.6.2"
     rxjs: ^7.8.2
-  checksum: 10/b53cfe337fc4b7c8b247252285a95d432fd7906973da246352906d5b38b8e17d27b4afb969c15c02a9870344268108e0c865cf2bf37447b3c2a8f61487bac381
+  checksum: 10/ec959c0d647c6ed6156171a9e708cd6d185f62cc3b2048fb5bae8cb317cd42f80b8a7166dc42ed928574257bdca63bf1331b4261f90281c81be2046d5bbf6414
   languageName: node
   linkType: hard
 
-"@ledgerhq/signer-utils@npm:1.1.0, @ledgerhq/signer-utils@npm:^1.1.0":
+"@ledgerhq/signer-utils@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "@ledgerhq/signer-utils@npm:1.0.4"
+  peerDependencies:
+    "@ledgerhq/device-management-kit": 0.6.2
+  checksum: 10/10357e9355f48ac33baa64202e996cce8fc1d73e9bfd754c49baab3fb34b7ab0d61bc9966ee6e3f42220236c779762f15419a754451ddb9fa8d22ca5b9de1e7d
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/signer-utils@npm:^1.1.0":
   version: 1.1.0
   resolution: "@ledgerhq/signer-utils@npm:1.1.0"
   peerDependencies:
@@ -25166,7 +25176,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-base64@npm:^3.7.7":
+"js-base64@npm:^3.7.8":
   version: 3.7.8
   resolution: "js-base64@npm:3.7.8"
   checksum: 10/4baa9a222bc094b072933e4894735653b59992477c731879784e3112f21862b08dd5c56b8b23b0b8e43bc5bb514d957621d1892a6c58950f29e12b731fe087b6
