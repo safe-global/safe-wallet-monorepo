@@ -234,7 +234,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
           wcPopupStore.setStore(true)
           wcChainSwitchStore.setStore({
             appInfo,
-            chain: targetChain,
+            chain: targetChain as any,
             safes: safesOnTargetChain,
             onSelectSafe: handleSafeSelection,
             onCancel: rejectSwitch,

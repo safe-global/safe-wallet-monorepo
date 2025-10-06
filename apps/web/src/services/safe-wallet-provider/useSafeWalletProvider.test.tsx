@@ -385,8 +385,20 @@ describe('useSafeWalletProvider', () => {
         {
           chains: {
             data: [
-              { chainId: '1', shortName: 'eth', chainName: 'Ethereum' } as gateway.ChainInfo,
-              { chainId: '5', shortName: 'gor', chainName: 'Goerli' } as gateway.ChainInfo,
+              {
+                chainId: '1',
+                shortName: 'eth',
+                chainName: 'Ethereum',
+                zk: false,
+                beaconChainExplorerUriTemplate: {},
+              } as any,
+              {
+                chainId: '5',
+                shortName: 'gor',
+                chainName: 'Goerli',
+                zk: false,
+                beaconChainExplorerUriTemplate: {},
+              } as any,
             ],
             loading: false,
             loaded: true,
@@ -457,13 +469,24 @@ describe('useSafeWalletProvider', () => {
         {
           chains: {
             data: [
-              { chainId: '1', shortName: 'eth', chainName: 'Ethereum' } as gateway.ChainInfo,
-              { chainId: '5', shortName: 'gor', chainName: 'Goerli' } as gateway.ChainInfo,
+              {
+                chainId: '1',
+                shortName: 'eth',
+                chainName: 'Ethereum',
+                zk: false,
+                beaconChainExplorerUriTemplate: {},
+              } as any,
+              {
+                chainId: '5',
+                shortName: 'gor',
+                chainName: 'Goerli',
+                zk: false,
+                beaconChainExplorerUriTemplate: {},
+              } as any,
             ],
             loading: false,
             loaded: true,
             error: undefined,
-            data: [{ chainId: '1', shortName: 'eth' } as any],
           },
         } as Partial<RootState>,
         { skipBroadcast: true },
@@ -517,8 +540,20 @@ describe('useSafeWalletProvider', () => {
         {
           chains: {
             data: [
-              { chainId: '1', shortName: 'eth', chainName: 'Ethereum' } as gateway.ChainInfo,
-              { chainId: '5', shortName: 'gor', chainName: 'Goerli' } as gateway.ChainInfo,
+              {
+                chainId: '1',
+                shortName: 'eth',
+                chainName: 'Ethereum',
+                zk: false,
+                beaconChainExplorerUriTemplate: {},
+              } as any,
+              {
+                chainId: '5',
+                shortName: 'gor',
+                chainName: 'Goerli',
+                zk: false,
+                beaconChainExplorerUriTemplate: {},
+              } as any,
             ],
             loading: false,
             loaded: true,
@@ -586,8 +621,20 @@ describe('useSafeWalletProvider', () => {
         {
           chains: {
             data: [
-              { chainId: '1', shortName: 'eth', chainName: 'Ethereum' } as gateway.ChainInfo,
-              { chainId: '5', shortName: 'gor', chainName: 'Goerli' } as gateway.ChainInfo,
+              {
+                chainId: '1',
+                shortName: 'eth',
+                chainName: 'Ethereum',
+                zk: false,
+                beaconChainExplorerUriTemplate: {},
+              } as any,
+              {
+                chainId: '5',
+                shortName: 'gor',
+                chainName: 'Goerli',
+                zk: false,
+                beaconChainExplorerUriTemplate: {},
+              } as any,
             ],
             loading: false,
             loaded: true,
@@ -666,7 +713,15 @@ describe('useSafeWalletProvider', () => {
       const store = makeStore(
         {
           chains: {
-            data: [{ chainId: '5', shortName: 'gor', chainName: 'Goerli' } as gateway.ChainInfo],
+            data: [
+              {
+                chainId: '5',
+                shortName: 'gor',
+                chainName: 'Goerli',
+                zk: false,
+                beaconChainExplorerUriTemplate: {},
+              } as any,
+            ],
             loading: false,
             loaded: true,
             error: undefined,
