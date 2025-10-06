@@ -40,7 +40,7 @@ const signersSlice = createSlice({
 export const addSignerWithEffects =
   (signerInfo: Signer) => async (dispatch: AppDispatch, getState: () => RootState) => {
     const { activeSafe, activeSigner } = getState()
-    const signerNamePrefix = 'Signer-'
+    const signerName = signerInfo.name || `Signer-${signerInfo.value.slice(-4)}`
 
     dispatch(addSigner(signerInfo))
 
@@ -51,7 +51,7 @@ export const addSignerWithEffects =
     dispatch(
       addContact({
         value: signerInfo.value,
-        name: signerNamePrefix + signerInfo.value.slice(-4),
+        name: signerName,
         chainIds: [],
       }),
     )

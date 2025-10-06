@@ -12,14 +12,18 @@ import { Controller, FieldNamesMarkedBoolean, type Control, type FieldErrors } f
 import { type FormValues } from '@/src/features/Signer/types'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SafeListItem } from '@/src/components/SafeListItem'
+import { BadgeWrapper } from '@/src/components/BadgeWrapper'
+import { SignerTypeBadge } from '@/src/components/SignerTypeBadge'
 type Props = {
   signerAddress: string
   onPressExplorer: () => void
   onPressEdit: () => void
   onPressViewPrivateKey?: () => void
+  onDeleteLedgerConnection?: () => void
   editMode: boolean
   name: string
   hasPrivateKey: boolean
+  isLedgerSigner: boolean
   control: Control<FormValues>
   errors: FieldErrors<FormValues>
   dirtyFields: FieldNamesMarkedBoolean<FormValues>
@@ -33,9 +37,11 @@ export const SignerView = ({
   onPressExplorer,
   onPressEdit,
   onPressViewPrivateKey,
+  onDeleteLedgerConnection,
   editMode,
   name,
   hasPrivateKey,
+  isLedgerSigner,
 }: Props) => {
   const { bottom, top } = useSafeAreaInsets()
 
@@ -43,7 +49,12 @@ export const SignerView = ({
     <YStack flex={1}>
       <ScrollView flex={1}>
         <View justifyContent={'center'} alignItems={'center'}>
-          <Identicon address={signerAddress as Address} size={56} />
+          <BadgeWrapper
+            badge={<SignerTypeBadge address={signerAddress as Address} theme="badge_background" bordered={true} />}
+            position="bottom-right"
+          >
+            <Identicon address={signerAddress as Address} size={56} />
+          </BadgeWrapper>
         </View>
         <View justifyContent={'center'} alignItems={'center'} marginTop={'$4'}>
           <H2 numberOfLines={1} maxWidth={300} marginTop={'$2'} textAlign={'center'}>
@@ -106,7 +117,13 @@ export const SignerView = ({
       </ScrollView>
       <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={top + bottom}>
         <View paddingHorizontal={'$4'} paddingTop={'$2'} paddingBottom={bottom ?? 60}>
-          {editMode ? <SafeButton onPress={onPressEdit}>Save</SafeButton> : null}
+          {editMode ? (
+            <SafeButton onPress={onPressEdit}>Save</SafeButton>
+          ) : isLedgerSigner ? (
+            <SafeButton danger={true} onPress={onDeleteLedgerConnection}>
+              Delete connection
+            </SafeButton>
+          ) : null}
         </View>
       </KeyboardAvoidingView>
     </YStack>

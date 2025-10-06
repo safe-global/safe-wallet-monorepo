@@ -1,4 +1,5 @@
-import { type ChainInfo, type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import { type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { OperationType } from '@safe-global/types-kit'
 import { Safe_migration__factory } from '@safe-global/utils/types/contracts'
 import { faker } from '@faker-js/faker'
@@ -56,13 +57,13 @@ describe('createUpdateMigration', () => {
     chainId: '1',
     l2: false,
     recommendedMasterCopyVersion: '1.4.1',
-  } as unknown as ChainInfo
+  } as unknown as Chain
 
   const mockChainOld = {
     chainId: '1',
     l2: false,
     recommendedMasterCopyVersion: '1.3.0',
-  } as unknown as ChainInfo
+  } as unknown as Chain
 
   it('should create a migration transaction for L1 chain', () => {
     const result = createUpdateMigration(mockChain, '1.3.0')

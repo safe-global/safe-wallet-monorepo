@@ -10,7 +10,7 @@ import {
   getCreateCallDeployment,
 } from '@safe-global/safe-deployments'
 import type { SingletonDeployment, DeploymentFilter, SingletonDeploymentV2 } from '@safe-global/safe-deployments'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type SafeVersion } from '@safe-global/types-kit'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
@@ -75,7 +75,7 @@ export const hasMatchingDeployment = (
 
 export const _tryDeploymentVersions = (
   getDeployment: (filter?: DeploymentFilter) => SingletonDeployment | undefined,
-  network: ChainInfo,
+  network: Chain,
   version: SafeState['version'],
 ): SingletonDeployment | undefined => {
   // Unsupported Safe version
@@ -99,7 +99,7 @@ export const _isLegacy = (safeVersion: SafeState['version']): boolean => {
   return !!safeVersion && semverSatisfies(safeVersion, LEGACY_VERSIONS)
 }
 
-export const _isL2 = (chain: ChainInfo, safeVersion: SafeState['version']): boolean => {
+export const _isL2 = (chain: Chain, safeVersion: SafeState['version']): boolean => {
   const L2_VERSIONS = '>=1.3.0'
 
   // Unsupported safe version
@@ -112,7 +112,7 @@ export const _isL2 = (chain: ChainInfo, safeVersion: SafeState['version']): bool
 }
 
 export const getSafeContractDeployment = (
-  chain: ChainInfo,
+  chain: Chain,
   safeVersion: SafeState['version'],
 ): SingletonDeployment | undefined => {
   // Check if prior to 1.0.0 to keep minimum compatibility
@@ -125,26 +125,26 @@ export const getSafeContractDeployment = (
   return _tryDeploymentVersions(getDeployment, chain, safeVersion)
 }
 
-export const getMultiSendCallOnlyContractDeployment = (chain: ChainInfo, safeVersion: SafeState['version']) => {
+export const getMultiSendCallOnlyContractDeployment = (chain: Chain, safeVersion: SafeState['version']) => {
   return _tryDeploymentVersions(getMultiSendCallOnlyDeployment, chain, safeVersion)
 }
 
-export const getMultiSendContractDeployment = (chain: ChainInfo, safeVersion: SafeState['version']) => {
+export const getMultiSendContractDeployment = (chain: Chain, safeVersion: SafeState['version']) => {
   return _tryDeploymentVersions(getMultiSendDeployment, chain, safeVersion)
 }
 
-export const getFallbackHandlerContractDeployment = (chain: ChainInfo, safeVersion: SafeState['version']) => {
+export const getFallbackHandlerContractDeployment = (chain: Chain, safeVersion: SafeState['version']) => {
   return _tryDeploymentVersions(getFallbackHandlerDeployment, chain, safeVersion)
 }
 
-export const getProxyFactoryContractDeployment = (chain: ChainInfo, safeVersion: SafeState['version']) => {
+export const getProxyFactoryContractDeployment = (chain: Chain, safeVersion: SafeState['version']) => {
   return _tryDeploymentVersions(getProxyFactoryDeployment, chain, safeVersion)
 }
 
-export const getSignMessageLibContractDeployment = (chain: ChainInfo, safeVersion: SafeState['version']) => {
+export const getSignMessageLibContractDeployment = (chain: Chain, safeVersion: SafeState['version']) => {
   return _tryDeploymentVersions(getSignMessageLibDeployment, chain, safeVersion)
 }
 
-export const getCreateCallContractDeployment = (chain: ChainInfo, safeVersion: SafeState['version']) => {
+export const getCreateCallContractDeployment = (chain: Chain, safeVersion: SafeState['version']) => {
   return _tryDeploymentVersions(getCreateCallDeployment, chain, safeVersion)
 }

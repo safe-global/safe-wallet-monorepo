@@ -5,7 +5,7 @@ import ModalDialog from '@/components/common/ModalDialog'
 import { useState } from 'react'
 import AddressInput from '@/components/common/AddressInput'
 import NameInput from '@/components/common/NameInput'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -18,7 +18,7 @@ import { useAppDispatch } from '@/store'
 export type ContactField = {
   name: string
   address: string
-  networks: ChainInfo[]
+  networks: Chain[]
 }
 
 const AddContact = () => {

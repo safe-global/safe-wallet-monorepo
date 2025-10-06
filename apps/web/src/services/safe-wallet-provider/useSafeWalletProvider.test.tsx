@@ -463,6 +463,7 @@ describe('useSafeWalletProvider', () => {
             loading: false,
             loaded: true,
             error: undefined,
+            data: [{ chainId: '1', shortName: 'eth' } as any],
           },
         } as Partial<RootState>,
         { skipBroadcast: true },

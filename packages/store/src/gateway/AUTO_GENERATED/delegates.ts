@@ -68,44 +68,68 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type DelegatesGetDelegatesV1ApiResponse = /** status 200  */ DelegatePage
+export type DelegatesGetDelegatesV1ApiResponse =
+  /** status 200 Paginated list of delegates retrieved successfully */ DelegatePage
 export type DelegatesGetDelegatesV1ApiArg = {
+  /** Chain ID where delegates are registered */
   chainId: string
+  /** Filter by Safe address */
   safe?: string
+  /** Filter by delegate address */
   delegate?: string
+  /** Filter by delegator address */
   delegator?: string
+  /** Filter by delegate label */
   label?: string
+  /** Pagination cursor for retrieving the next set of results */
   cursor?: string
 }
 export type DelegatesPostDelegateV1ApiResponse = unknown
 export type DelegatesPostDelegateV1ApiArg = {
+  /** Chain ID where the delegate will be registered */
   chainId: string
+  /** Delegate creation data including Safe address, delegate address, and signature */
   createDelegateDto: CreateDelegateDto
 }
 export type DelegatesDeleteDelegateV1ApiResponse = unknown
 export type DelegatesDeleteDelegateV1ApiArg = {
+  /** Chain ID where the delegate is registered */
   chainId: string
+  /** Delegate address to delete (0x prefixed hex string) */
   delegateAddress: string
+  /** Signature proving authorization to delete the delegate */
   deleteDelegateDto: DeleteDelegateDto
 }
-export type DelegatesGetDelegatesV2ApiResponse = /** status 200  */ DelegatePage
+export type DelegatesGetDelegatesV2ApiResponse =
+  /** status 200 Paginated list of delegates retrieved successfully */ DelegatePage
 export type DelegatesGetDelegatesV2ApiArg = {
+  /** Chain ID where delegates are registered */
   chainId: string
+  /** Filter by Safe address (0x prefixed hex string) */
   safe?: string
+  /** Filter by delegate address (0x prefixed hex string) */
   delegate?: string
+  /** Filter by delegator address (0x prefixed hex string) */
   delegator?: string
+  /** Filter by delegate label or name */
   label?: string
+  /** Pagination cursor for retrieving the next set of results */
   cursor?: string
 }
 export type DelegatesPostDelegateV2ApiResponse = unknown
 export type DelegatesPostDelegateV2ApiArg = {
+  /** Chain ID where the delegate will be registered */
   chainId: string
+  /** Delegate creation data including Safe address, delegate address, label, and authorization signature */
   createDelegateDto: CreateDelegateDto
 }
 export type DelegatesDeleteDelegateV2ApiResponse = unknown
 export type DelegatesDeleteDelegateV2ApiArg = {
+  /** Chain ID where the delegate is registered */
   chainId: string
+  /** Delegate address to remove (0x prefixed hex string) */
   delegateAddress: string
+  /** Signature and data proving authorization to delete the delegate */
   deleteDelegateV2Dto: DeleteDelegateV2Dto
 }
 export type Delegate = {

@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import type { EIP1193Provider, OnboardAPI, WalletState } from '@web3-onboard/core'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getConnectedWallet, switchWallet, trackWalletType } from '../useOnboard'
 
 // mock wallets
@@ -166,7 +166,7 @@ describe('useOnboard', () => {
           chainId: '1',
           chainName: 'Ethereum',
         },
-      ] as ChainInfo[]
+      ] as Chain[]
 
       trackWalletType(wallet, configs)
 
@@ -193,7 +193,7 @@ describe('useOnboard', () => {
           chainId: '1',
           chainName: 'Ethereum',
         },
-      ] as ChainInfo[]
+      ] as Chain[]
 
       trackWalletType(wallet, configs)
 
@@ -230,7 +230,7 @@ describe('useOnboard', () => {
           chainId: '1',
           chainName: 'Ethereum',
         },
-      ] as ChainInfo[]
+      ] as Chain[]
 
       trackWalletType(wallet, configs)
 

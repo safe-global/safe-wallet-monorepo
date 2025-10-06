@@ -5,7 +5,7 @@ import { useChain, useCurrentChain } from '@/hooks/useChains'
 import { useEffect, useState } from 'react'
 import { Box, Button, Dialog, DialogContent, Typography } from '@mui/material'
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import NetworkLogosList from '../multichain/components/NetworkLogosList'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 
@@ -16,7 +16,7 @@ const CounterfactualSuccessScreen = () => {
   const [event, setEvent] = useState<SafeCreationEvent>()
   const currentChain = useCurrentChain()
   const chain = useChain(chainId || currentChain?.chainId || '')
-  const [networks, setNetworks] = useState<ChainInfo[]>([])
+  const [networks, setNetworks] = useState<Chain[]>([])
   const addressBooks = useAllAddressBooks()
   const safeName = safeAddress && chain ? addressBooks?.[chain.chainId]?.[safeAddress] : ''
   const isCFCreation = event === SafeCreationEvent.AWAITING_EXECUTION

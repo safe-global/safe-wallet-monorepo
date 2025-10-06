@@ -14,11 +14,11 @@ import { type PredictedSafeProps } from '@safe-global/protocol-kit'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import type { SafeTransaction, SafeVersion, TransactionOptions } from '@safe-global/types-kit'
 import {
-  type ChainInfo,
   ImplementationVersionState,
   type SafeBalanceResponse,
   TokenType,
 } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { BrowserProvider, Eip1193Provider, Provider, TransactionResponse } from 'ethers'
 
 import { encodeSafeCreationTx } from '@/components/new-safe/create/logic'
@@ -32,7 +32,7 @@ import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/st
 import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { delay } from '@safe-global/utils/utils/helpers'
 
-export const getUndeployedSafeInfo = (undeployedSafe: UndeployedSafe, address: string, chain: ChainInfo) => {
+export const getUndeployedSafeInfo = (undeployedSafe: UndeployedSafe, address: string, chain: Chain) => {
   const safeSetup = extractCounterfactualSafeSetup(undeployedSafe, chain.chainId)
 
   if (!safeSetup) {
@@ -100,7 +100,7 @@ export const deploySafeAndExecuteTx = async (
   return dispatchTxExecutionAndDeploySafe(safeTx, txOptions, provider, safeAddress)
 }
 
-export const getCounterfactualBalance = async (safeAddress: string, provider?: BrowserProvider, chain?: ChainInfo) => {
+export const getCounterfactualBalance = async (safeAddress: string, provider?: BrowserProvider, chain?: Chain) => {
   let balance: bigint | undefined
 
   if (!chain) return undefined
@@ -334,7 +334,7 @@ export const extractCounterfactualSafeSetup = (
 }
 
 export const activateReplayedSafe = async (
-  chain: ChainInfo,
+  chain: Chain,
   props: ReplayedSafeProps,
   provider: BrowserProvider,
   options: TransactionOptions,

@@ -1,28 +1,10 @@
 import signersReducer, { addSigner, addSignerWithEffects, selectSigners, selectTotalSignerCount } from '../signersSlice'
 import { selectActiveSigner } from '../activeSignerSlice'
 import { selectAllContacts, selectContactByAddress } from '../addressBookSlice'
-import { configureStore } from '@reduxjs/toolkit'
-import { rootReducer } from '../index'
 import type { RootState } from '../index'
 import { faker } from '@faker-js/faker'
 import { SignerInfo } from '@/src/types/address'
-
-// Helper function to create a test store with proper typing for thunks
-const createTestStore = (initialState?: Partial<RootState>) => {
-  const store = configureStore({
-    reducer: rootReducer,
-    preloadedState: initialState,
-    middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware({
-        serializableCheck: false, // Disable for testing
-      }),
-  })
-
-  // Return store with proper dispatch typing
-  return store as typeof store & {
-    dispatch: typeof store.dispatch
-  }
-}
+import { createTestStore, type TestStoreState } from '@/src/tests/test-utils'
 
 // Helper function to generate a valid Ethereum address
 const generateEthereumAddress = (): `0x${string}` => {
@@ -71,7 +53,6 @@ describe('signersSlice', () => {
     it('should add signer to the store', async () => {
       const store = createTestStore()
 
-      // @ts-ignore: Allow thunk dispatch in test
       await store.dispatch(addSignerWithEffects(mockSigner))
 
       const state = store.getState()
@@ -87,14 +68,13 @@ describe('signersSlice', () => {
         chainId: faker.number.int({ min: 1, max: 100 }).toString(),
       }
 
-      const initialState: Partial<RootState> = {
+      const initialState: TestStoreState = {
         activeSafe: mockActiveSafe,
         activeSigner: {}, // No active signer for this safe
       }
 
       const store = createTestStore(initialState)
 
-      // @ts-ignore: Allow thunk dispatch in test
       await store.dispatch(addSignerWithEffects(mockSigner))
 
       const state = store.getState()
@@ -117,7 +97,7 @@ describe('signersSlice', () => {
 
       const existingActiveSigner = generateSignerInfo({ name: 'Existing Signer' })
 
-      const initialState: Partial<RootState> = {
+      const initialState: TestStoreState = {
         activeSafe: mockActiveSafe,
         activeSigner: {
           [safeAddress]: existingActiveSigner, // Already has an active signer
@@ -126,7 +106,6 @@ describe('signersSlice', () => {
 
       const store = createTestStore(initialState)
 
-      // @ts-ignore: Allow thunk dispatch in test
       await store.dispatch(addSignerWithEffects(mockSigner))
 
       const state = store.getState()
@@ -142,14 +121,13 @@ describe('signersSlice', () => {
     })
 
     it('should not set active signer when activeSafe is null', async () => {
-      const initialState: Partial<RootState> = {
+      const initialState: TestStoreState = {
         activeSafe: null,
         activeSigner: {},
       }
 
       const store = createTestStore(initialState)
 
-      // @ts-ignore: Allow thunk dispatch in test
       await store.dispatch(addSignerWithEffects(mockSigner))
 
       const state = store.getState()
@@ -163,14 +141,13 @@ describe('signersSlice', () => {
     })
 
     it('should not set active signer when activeSafe is undefined', async () => {
-      const initialState: Partial<RootState> = {
+      const initialState: TestStoreState = {
         activeSafe: undefined,
         activeSigner: {},
       }
 
       const store = createTestStore(initialState)
 
-      // @ts-ignore: Allow thunk dispatch in test
       await store.dispatch(addSignerWithEffects(mockSigner))
 
       const state = store.getState()
@@ -195,7 +172,7 @@ describe('signersSlice', () => {
       const signer1 = generateSignerInfo({ name: 'Signer 1' })
       const signer2 = generateSignerInfo({ name: 'Signer 2' })
 
-      const initialState: Partial<RootState> = {
+      const initialState: TestStoreState = {
         activeSafe: mockSafe1,
         activeSigner: {},
       }
@@ -203,7 +180,6 @@ describe('signersSlice', () => {
       const store = createTestStore(initialState)
 
       // Add first signer - should become active signer for safe 1
-      // @ts-ignore: Allow thunk dispatch in test
       await store.dispatch(addSignerWithEffects(signer1))
 
       let state = store.getState()
@@ -211,7 +187,6 @@ describe('signersSlice', () => {
       expect(selectActiveSigner(state, safeAddress1)).toEqual(signer1)
 
       // Add second signer - should NOT change active signer for safe 1
-      // @ts-ignore: Allow thunk dispatch in test
       await store.dispatch(addSignerWithEffects(signer2))
 
       state = store.getState()
@@ -224,10 +199,9 @@ describe('signersSlice', () => {
       const store = createTestStore()
       const mockSigner = generateSignerInfo({
         value: generateEthereumAddress(),
-        name: 'Test Signer',
+        name: null,
       })
 
-      // @ts-ignore: Allow thunk dispatch in test
       await store.dispatch(addSignerWithEffects(mockSigner))
 
       const state = store.getState()
@@ -244,16 +218,15 @@ describe('signersSlice', () => {
       expect(contact?.chainIds).toEqual([])
     })
 
-    it('should create contact with correct name format using last 4 characters of address', async () => {
+    it('should create contact with correct name format using last 4 characters of address when no name provided', async () => {
       const store = createTestStore()
       const testAddress = generateEthereumAddress()
       const testAddressLast4Chars = testAddress.slice(-4)
       const mockSigner = generateSignerInfo({
         value: testAddress,
-        name: 'Test Signer',
+        name: null, // No name provided
       })
 
-      // @ts-ignore: Allow thunk dispatch in test
       await store.dispatch(addSignerWithEffects(mockSigner))
 
       const state = store.getState()
@@ -269,11 +242,8 @@ describe('signersSlice', () => {
       const signer3 = generateSignerInfo({ name: 'Signer 3' })
 
       // Add multiple signers
-      // @ts-ignore: Allow thunk dispatch in test
       await store.dispatch(addSignerWithEffects(signer1))
-      // @ts-ignore: Allow thunk dispatch in test
       await store.dispatch(addSignerWithEffects(signer2))
-      // @ts-ignore: Allow thunk dispatch in test
       await store.dispatch(addSignerWithEffects(signer3))
 
       const state = store.getState()
@@ -289,22 +259,22 @@ describe('signersSlice', () => {
 
       expect(contact1).toBeDefined()
       expect(contact1?.value).toBe(signer1.value)
-      expect(contact1?.name).toBe(`Signer-${signer1.value.slice(-4)}`)
+      expect(contact1?.name).toBe('Signer 1') // Uses the provided name
       expect(contact1?.chainIds).toEqual([])
 
       expect(contact2).toBeDefined()
       expect(contact2?.value).toBe(signer2.value)
-      expect(contact2?.name).toBe(`Signer-${signer2.value.slice(-4)}`)
+      expect(contact2?.name).toBe('Signer 2') // Uses the provided name
       expect(contact2?.chainIds).toEqual([])
 
       expect(contact3).toBeDefined()
       expect(contact3?.value).toBe(signer3.value)
-      expect(contact3?.name).toBe(`Signer-${signer3.value.slice(-4)}`)
+      expect(contact3?.name).toBe('Signer 3') // Uses the provided name
       expect(contact3?.chainIds).toEqual([])
     })
 
     it('should add contact even when no active safe is present', async () => {
-      const initialState: Partial<RootState> = {
+      const initialState: TestStoreState = {
         activeSafe: null,
         activeSigner: {},
       }
@@ -312,7 +282,6 @@ describe('signersSlice', () => {
       const store = createTestStore(initialState)
       const mockSigner = generateSignerInfo({ name: 'Test Signer' })
 
-      // @ts-ignore: Allow thunk dispatch in test
       await store.dispatch(addSignerWithEffects(mockSigner))
 
       const state = store.getState()
@@ -325,7 +294,7 @@ describe('signersSlice', () => {
       const contact = selectContactByAddress(mockSigner.value)(state)
       expect(contact).toBeDefined()
       expect(contact?.value).toBe(mockSigner.value)
-      expect(contact?.name).toBe(`Signer-${mockSigner.value.slice(-4)}`)
+      expect(contact?.name).toBe('Test Signer') // Uses the provided name
       expect(contact?.chainIds).toEqual([])
     })
   })
