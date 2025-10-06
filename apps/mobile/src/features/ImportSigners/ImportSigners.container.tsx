@@ -15,12 +15,12 @@ import { View } from 'tamagui'
 const items = [
   {
     name: 'seed',
-    title: 'Import private key',
-    description: 'Enter a private key.',
+    title: 'Import signer',
+    description: 'Enter a private key or seed phrase.',
     icon: <SafeFontIcon name="wallet" size={16} />,
     Image: Seed,
     imageProps: { marginBottom: -31 },
-    onPress: () => router.push(`/import-signers/private-key`),
+    onPress: () => router.push(`/import-signers/signer`),
   },
   {
     name: 'hardwareSigner',

@@ -1,16 +1,16 @@
 import React from 'react'
-import { ImportSigner } from '@/src/features/ImportSigner'
+import { SeedPhraseAddressesContainer } from '@/src/features/ImportSigner/SeedPhraseAddresses.container'
 import { getTokenValue, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-function PrivateKeyImport() {
+function SeedPhraseAddresses() {
   const { bottom } = useSafeAreaInsets()
 
   return (
     <View paddingHorizontal={'$4'} flex={1} paddingBottom={Math.max(bottom, getTokenValue('$4'))}>
-      <ImportSigner />
+      <SeedPhraseAddressesContainer />
     </View>
   )
 }
 
-export default PrivateKeyImport
+export default SeedPhraseAddresses
