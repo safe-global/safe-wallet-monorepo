@@ -1,6 +1,6 @@
 import { TxFlowContext } from '../../TxFlowProvider'
-import { type ReactNode, useContext, useEffect, useState } from 'react'
-import { Box, Container, Grid, Typography, Button, Paper, useMediaQuery } from '@mui/material'
+import { type ReactNode, useContext } from 'react'
+import { Box, Container, Grid, Typography, Button, Paper, useMediaQuery, Card, Stack } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useTheme } from '@mui/material/styles'
 import classnames from 'classnames'
@@ -12,6 +12,7 @@ import TxStatusWidget from '@/components/tx-flow/common/TxStatusWidget'
 import SafeShieldWidget from '@/components/tx-flow/common/SafeShieldWidget'
 import { TxLayoutHeader } from '../TxLayout'
 import { Slot, SlotName } from '../../slots'
+import SafeHeaderInfo from '@/components/sidebar/SidebarHeader/SafeHeaderInfo'
 
 /**
  * TxFlowContent is a component that renders the main content of the transaction flow.
@@ -37,35 +38,41 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
     progress,
     onPrev,
   } = useContext(TxFlowContext)
-
   const childrenArray = Array.isArray(children) ? children : [children]
-
-  const [statusVisible, setStatusVisible] = useState<boolean>(true)
-
   const theme = useTheme()
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('lg'))
-
-  useEffect(() => {
-    setStatusVisible(!isSmallScreen)
-  }, [isSmallScreen])
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'))
 
   return (
-    <>
-      <Container className={css.container}>
-        <Grid container>
-          {/* Status Widget */}
-          {!isReplacement && statusVisible && (
-            <Grid item xs={12} md={3}>
-              <TxStatusWidget
-                isLastStep={step === childrenArray.length - 1}
-                txSummary={txSummary}
-                isBatch={isBatch}
-                isMessage={isMessage}
-              />
-            </Grid>
-          )}
+    <Stack direction="row" className={css.container}>
+      {!isReplacement && !isSmallScreen && (
+        <aside style={{ minWidth: 220, paddingTop: '46px' }}>
+          <Stack gap={3} position="fixed">
+            <Card
+              sx={{
+                p: '4px 8px 4px 4px',
+                maxWidth: 214,
+                mx: '-12px',
+                overflow: 'visible',
+                position: 'fixed',
+                top: 62,
+              }}
+            >
+              <SafeHeaderInfo />
+            </Card>
 
-          <Grid container item xs={12} lg={9} spacing={3} sx={{ justifyContent: 'center' }}>
+            <TxStatusWidget
+              isLastStep={step === childrenArray.length - 1}
+              txSummary={txSummary}
+              isBatch={isBatch}
+              isMessage={isMessage}
+            />
+          </Stack>
+        </aside>
+      )}
+
+      <Box width="fill-available" gap={3} mr={isSmallScreen ? 0 : 6}>
+        <Container className={css.contentContainer}>
+          <Grid container spacing={3} justifyContent="center">
             {/* Main content */}
             <Grid item xs={12} md={8}>
               <div className={css.titleWrapper}>
@@ -111,7 +118,7 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
 
             {/* Sidebar */}
             {!isReplacement && (
-              <Grid item xs={12} md={4} className={classnames(css.widget, { [css.active]: statusVisible })}>
+              <Grid item xs={12} md={4} className={classnames(css.widget)}>
                 <Slot name={SlotName.Sidebar} />
 
                 <Box className={css.sticky}>
@@ -121,8 +128,8 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
               </Grid>
             )}
           </Grid>
-        </Grid>
-      </Container>
-    </>
+        </Container>
+      </Box>
+    </Stack>
   )
 }

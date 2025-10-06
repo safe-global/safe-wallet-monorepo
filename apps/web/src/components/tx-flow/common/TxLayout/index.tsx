@@ -1,6 +1,6 @@
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { type ComponentType, type ReactElement, type ReactNode, useContext, useEffect, useState } from 'react'
-import { Box, Container, Grid, Typography, Button, Paper, SvgIcon, useMediaQuery } from '@mui/material'
+import { type ComponentType, type ReactElement, type ReactNode, useContext } from 'react'
+import { Box, Container, Grid, Typography, Button, Paper, SvgIcon, useMediaQuery, Card, Stack } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useTheme } from '@mui/material/styles'
 import type { TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
@@ -14,6 +14,8 @@ import css from './styles.module.css'
 import { TxSecurityProvider } from '@/components/tx/security/shared/TxSecurityContext'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import SecurityWarnings from '@/components/tx/security/SecurityWarnings'
+import SafeHeaderInfo from '@/components/sidebar/SidebarHeader/SafeHeaderInfo'
+import SafeShieldWidget from '../SafeShieldWidget'
 
 export const TxLayoutHeader = ({
   hideNonce,
@@ -96,38 +98,46 @@ const TxLayout = ({
   isReplacement = false,
   isMessage = false,
 }: TxLayoutProps): ReactElement => {
-  const [statusVisible, setStatusVisible] = useState<boolean>(true)
-
   const theme = useTheme()
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('lg'))
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'))
 
   const steps = Array.isArray(children) ? children : [children]
   const progress = Math.round(((step + 1) / steps.length) * 100)
-
-  useEffect(() => {
-    setStatusVisible(!isSmallScreen)
-  }, [isSmallScreen])
 
   return (
     <SafeTxProvider>
       <TxInfoProvider>
         <TxSecurityProvider>
-          <>
-            <Container className={css.container}>
-              <Grid container>
-                {/* Status Widget */}
-                {!isReplacement && statusVisible && (
-                  <Grid item xs={12} md={3}>
-                    <TxStatusWidget
-                      isLastStep={step === steps.length - 1}
-                      txSummary={txSummary}
-                      isBatch={isBatch}
-                      isMessage={isMessage}
-                    />
-                  </Grid>
-                )}
+          <Stack direction="row" className={css.container}>
+            {!isReplacement && !isSmallScreen && (
+              <aside style={{ minWidth: 220, paddingTop: '46px' }}>
+                <Stack gap={3} position="fixed">
+                  <Card
+                    sx={{
+                      p: '4px 8px 4px 4px',
+                      maxWidth: 214,
+                      mx: '-12px',
+                      overflow: 'visible',
+                      position: 'fixed',
+                      top: 62,
+                    }}
+                  >
+                    <SafeHeaderInfo />
+                  </Card>
 
-                <Grid container item xs={12} lg={9} spacing={3} sx={{ justifyContent: 'center' }}>
+                  <TxStatusWidget
+                    isLastStep={step === steps.length - 1}
+                    txSummary={txSummary}
+                    isBatch={isBatch}
+                    isMessage={isMessage}
+                  />
+                </Stack>
+              </aside>
+            )}
+
+            <Box width="fill-available" gap={3} mr={isSmallScreen ? 0 : 6}>
+              <Container className={css.contentContainer}>
+                <Grid container spacing={3} justifyContent="center">
                   {/* Main content */}
                   <Grid item xs={12} md={8}>
                     <div className={css.titleWrapper}>
@@ -136,9 +146,7 @@ const TxLayout = ({
                         variant="h3"
                         component="div"
                         className={css.title}
-                        sx={{
-                          fontWeight: '700',
-                        }}
+                        sx={{ fontWeight: '700' }}
                       >
                         {title}
                       </Typography>
@@ -175,16 +183,17 @@ const TxLayout = ({
 
                   {/* Sidebar */}
                   {!isReplacement && (
-                    <Grid item xs={12} md={4} className={classnames(css.widget, { [css.active]: statusVisible })}>
+                    <Grid item xs={12} md={4} className={classnames(css.widget)}>
                       <Box className={css.sticky}>
+                        <SafeShieldWidget />
                         <SecurityWarnings />
                       </Box>
                     </Grid>
                   )}
                 </Grid>
-              </Grid>
-            </Container>
-          </>
+              </Container>
+            </Box>
+          </Stack>
         </TxSecurityProvider>
       </TxInfoProvider>
     </SafeTxProvider>

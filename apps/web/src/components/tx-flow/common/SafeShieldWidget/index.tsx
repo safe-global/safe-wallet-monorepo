@@ -35,7 +35,7 @@ const SafeShieldWidget = (): ReactElement => {
 
       {/* Secured by Safe section */}
       <Stack direction="row" alignItems="center" alignSelf="flex-end">
-        <Typography variant="body2" color="text.secondary" fontSize={13} lineHeight={1.38}>
+        <Typography variant="body2" color="text.secondary" fontSize={13} lineHeight={1.38} whiteSpace="nowrap">
           Secured by
         </Typography>
 
