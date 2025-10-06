@@ -20,6 +20,7 @@ import safes from './safesSlice'
 import safeSubscriptions from './safeSubscriptionsSlice'
 import biometrics from './biometricsSlice'
 import pendingTxs from './pendingTxsSlice'
+import estimatedFee from './estimatedFeeSlice'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import devToolsEnhancer from 'redux-devtools-expo-dev-plugin'
 import { GATEWAY_URL, isTestingEnv } from '../config/constants'
@@ -49,7 +50,7 @@ const persistConfig = {
   key: 'root',
   version: 1,
   storage: reduxStorage,
-  blacklist: [web3API.reducerPath, cgwClient.reducerPath, 'myAccounts'],
+  blacklist: [web3API.reducerPath, cgwClient.reducerPath, 'myAccounts', 'estimatedFee'],
   transforms: [cgwClientFilter],
 }
 
@@ -67,6 +68,7 @@ export const rootReducer = combineReducers({
   safeSubscriptions,
   biometrics,
   pendingTxs,
+  estimatedFee,
   [web3API.reducerPath]: web3API.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
 })
@@ -94,6 +96,15 @@ export const makeStore = () =>
       return getDefaultMiddleware({
         serializableCheck: {
           ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+          ignoredPaths: ['estimatedFee'],
+          // this fixes the issue with non-serializable values in the app
+          ignoredActionPaths: [
+            'payload.maxFeePerGas',
+            'payload.maxPriorityFeePerGas',
+            'payload.gasLimit',
+            'meta.baseQueryMeta.request',
+            'meta.baseQueryMeta.response',
+          ],
         },
       }).concat(
         cgwClient.middleware,
