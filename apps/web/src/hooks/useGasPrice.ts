@@ -1,13 +1,11 @@
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { type FeeData } from 'ethers'
 import type {
-  ChainInfo,
-  GasPrice,
+  Chain,
   GasPriceFixed,
-  GasPriceFixedEIP1559,
+  GasPriceFixedEip1559,
   GasPriceOracle,
-} from '@safe-global/safe-gateway-typescript-sdk'
-import { GAS_PRICE_TYPE } from '@safe-global/safe-gateway-typescript-sdk'
+} from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useCurrentChain } from './useChains'
 import useIntervalCounter from './useIntervalCounter'
@@ -15,6 +13,8 @@ import { useWeb3ReadOnly } from '../hooks/wallets/web3'
 import { Errors, logError } from '@/services/exceptions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+
+type GasPrice = Chain['gasPrice']
 
 type EstimatedGasPrice =
   | {
@@ -83,17 +83,17 @@ const fetchGasOracle = async (gasPriceOracle: GasPriceOracle): Promise<Estimated
   return { gasPrice: BigInt(data[gasParameter] * Number(gweiFactor)) }
 }
 
-// These typeguards are necessary because the GAS_PRICE_TYPE enum uses uppercase while the config service uses lowercase values
+// These typeguards check the gas price type
 const isGasPriceFixed = (gasPriceConfig: GasPrice[number]): gasPriceConfig is GasPriceFixed => {
-  return gasPriceConfig.type.toUpperCase() == GAS_PRICE_TYPE.FIXED
+  return gasPriceConfig.type === 'fixed'
 }
 
-const isGasPriceFixed1559 = (gasPriceConfig: GasPrice[number]): gasPriceConfig is GasPriceFixedEIP1559 => {
-  return gasPriceConfig.type.toUpperCase() == GAS_PRICE_TYPE.FIXED_1559
+const isGasPriceFixed1559 = (gasPriceConfig: GasPrice[number]): gasPriceConfig is GasPriceFixedEip1559 => {
+  return gasPriceConfig.type === 'fixed1559'
 }
 
 const isGasPriceOracle = (gasPriceConfig: GasPrice[number]): gasPriceConfig is GasPriceOracle => {
-  return gasPriceConfig.type.toUpperCase() == GAS_PRICE_TYPE.ORACLE
+  return gasPriceConfig.type === 'oracle'
 }
 
 const getGasPrice = async (gasPriceConfigs: GasPrice): Promise<EstimatedGasPrice | undefined> => {
@@ -166,7 +166,7 @@ export const getTotalFee = (maxFeePerGas: bigint, gasLimit: bigint | string | nu
 export const getTotalFeeFormatted = (
   maxFeePerGas: bigint | null | undefined,
   gasLimit: bigint | undefined,
-  chain: ChainInfo | undefined,
+  chain: Chain | undefined,
 ) => {
   return gasLimit && maxFeePerGas
     ? formatVisualAmount(getTotalFee(maxFeePerGas, gasLimit), chain?.nativeCurrency.decimals)
