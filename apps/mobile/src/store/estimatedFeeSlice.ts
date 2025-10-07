@@ -2,23 +2,22 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '.'
 
 export interface EstimatedFeeValues {
-  maxFeePerGas?: bigint
-  maxPriorityFeePerGas?: bigint
-  gasLimit?: bigint
-  nonce?: number
+  maxFeePerGas: bigint
+  maxPriorityFeePerGas: bigint
+  gasLimit: bigint
+  nonce: number
 }
 
+export type EstimatedFeeState = EstimatedFeeValues | null
 
-export type EstimatedFeeState = EstimatedFeeValues
-
-const initialState: EstimatedFeeState = {}
+const initialState = null as EstimatedFeeState
 
 const estimatedFeeSlice = createSlice({
   name: 'estimatedFee',
   initialState,
   reducers: {
-    setEstimatedFeeValues: (state, action: PayloadAction<Partial<EstimatedFeeValues>>) => {
-      return { ...state, ...action.payload }
+    setEstimatedFeeValues: (_, action: PayloadAction<EstimatedFeeValues>) => {
+      return action.payload
     },
     clearEstimatedFeeValues: () => {
       return initialState
@@ -30,8 +29,4 @@ export const { setEstimatedFeeValues, clearEstimatedFeeValues } = estimatedFeeSl
 
 export const selectEstimatedFee = (state: RootState): EstimatedFeeState => state[estimatedFeeSlice.name]
 
-
 export default estimatedFeeSlice.reducer
-
-
-

@@ -21,7 +21,7 @@ export enum ExecutionStatus {
 interface UseTransactionExecutionProps {
   txId: string
   signerAddress: string
-  feeParams: EstimatedFeeValues
+  feeParams: EstimatedFeeValues | null
 }
 
 export function useTransactionExecution({ txId, signerAddress, feeParams }: UseTransactionExecutionProps) {
@@ -54,7 +54,7 @@ export function useTransactionExecution({ txId, signerAddress, feeParams }: UseT
         activeSafe,
         txId,
         privateKey,
-        feeParams
+        feeParams,
       })
 
       dispatch(

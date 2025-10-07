@@ -11,20 +11,25 @@ import { useTransactionGuard } from '@/src/hooks/useTransactionGuard'
 
 export function ExecuteTransaction() {
   const { txId, maxFeePerGas, maxPriorityFeePerGas, gasLimit, nonce } = useLocalSearchParams<{
-    txId: string,
-    maxFeePerGas: string,
-    maxPriorityFeePerGas: string,
-    gasLimit: string,
-    nonce: string,
+    txId: string
+    maxFeePerGas: string
+    maxPriorityFeePerGas: string
+    gasLimit: string
+    nonce: string
   }>()
 
   // Convert string params to bigint/number
-  const feeParams = useMemo(() => ({
-    maxFeePerGas: maxFeePerGas ? BigInt(maxFeePerGas) : undefined,
-    maxPriorityFeePerGas: maxPriorityFeePerGas ? BigInt(maxPriorityFeePerGas) : undefined,
-    gasLimit: gasLimit ? BigInt(gasLimit) : undefined,
-    nonce: nonce ? parseInt(nonce, 10) : undefined,
-  }), [maxFeePerGas, maxPriorityFeePerGas, gasLimit, nonce])
+  const feeParams = useMemo(() => {
+    if (maxFeePerGas && maxPriorityFeePerGas && gasLimit && nonce) {
+      return {
+        maxFeePerGas: BigInt(maxFeePerGas),
+        maxPriorityFeePerGas: BigInt(maxPriorityFeePerGas),
+        gasLimit: BigInt(gasLimit),
+        nonce: parseInt(nonce, 10),
+      }
+    }
+    return null
+  }, [maxFeePerGas, maxPriorityFeePerGas, gasLimit, nonce])
 
   const activeSafe = useDefinedActiveSafe()
   const activeSigner = useAppSelector((state) => selectActiveSigner(state, activeSafe.address))

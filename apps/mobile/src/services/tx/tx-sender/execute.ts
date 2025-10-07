@@ -9,7 +9,7 @@ interface ExecuteTxParams {
   activeSafe: SafeInfo
   txId: string
   privateKey: string
-  feeParams: EstimatedFeeValues
+  feeParams: EstimatedFeeValues | null
 }
 
 export const executeTx = async ({ chain, activeSafe, txId, privateKey, feeParams }: ExecuteTxParams) => {
@@ -43,10 +43,15 @@ export const executeTx = async ({ chain, activeSafe, txId, privateKey, feeParams
     })
   })
 
-  return protocolKit.executeTransaction(safeTx, {
-    gasLimit: feeParams.gasLimit?.toString(),
-    maxFeePerGas: feeParams.maxFeePerGas?.toString(),
-    maxPriorityFeePerGas: feeParams.maxPriorityFeePerGas?.toString(),
-    nonce: feeParams.nonce,
-  })
+  return protocolKit.executeTransaction(
+    safeTx,
+    feeParams
+      ? {
+          gasLimit: feeParams.gasLimit.toString(),
+          maxFeePerGas: feeParams.maxFeePerGas.toString(),
+          maxPriorityFeePerGas: feeParams.maxPriorityFeePerGas.toString(),
+          nonce: feeParams.nonce,
+        }
+      : undefined,
+  )
 }

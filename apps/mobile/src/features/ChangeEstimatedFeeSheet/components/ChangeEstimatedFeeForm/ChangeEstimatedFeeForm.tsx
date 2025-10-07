@@ -20,165 +20,160 @@ import { setEstimatedFeeValues } from '@/src/store/estimatedFeeSlice'
 import { FeeParams } from '@/src/hooks/useFeeParams/useFeeParams'
 
 interface ChangeEstimatedFeeFormProps {
-    estimatedFeeParams: FeeParams
-    txDetails: TransactionDetails
+  estimatedFeeParams: FeeParams
+  txDetails: TransactionDetails
 }
 
 export const ChangeEstimatedFeeForm = ({ estimatedFeeParams, txDetails }: ChangeEstimatedFeeFormProps) => {
-    const router = useRouter()
-    const insets = useSafeAreaInsets()
-    const activeSafe = useDefinedActiveSafe()
-    const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
-    const dispatch = useAppDispatch()
-    const nativeSymbol = activeChain?.nativeCurrency?.symbol || 'ETH'
+  const router = useRouter()
+  const insets = useSafeAreaInsets()
+  const activeSafe = useDefinedActiveSafe()
+  const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
+  const dispatch = useAppDispatch()
+  const nativeSymbol = activeChain?.nativeCurrency?.symbol || 'ETH'
 
-    const form = useForm<EstimatedFeeFormData>({
-        resolver: zodResolver(estimatedFeeFormSchema),
-        mode: 'onChange',
-        defaultValues: {
-            maxFeePerGas: safeFormatUnits(estimatedFeeParams.maxFeePerGas ?? 0n),
-            maxPriorityFeePerGas: safeFormatUnits(estimatedFeeParams.maxPriorityFeePerGas ?? 0n),
-            gasLimit: BigInt(estimatedFeeParams.gasLimit ?? 0n).toString(),
-            nonce: estimatedFeeParams.nonce?.toString(),
-        },
-    })
+  const form = useForm<EstimatedFeeFormData>({
+    resolver: zodResolver(estimatedFeeFormSchema),
+    mode: 'onChange',
+    defaultValues: {
+      maxFeePerGas: safeFormatUnits(estimatedFeeParams.maxFeePerGas ?? 0n),
+      maxPriorityFeePerGas: safeFormatUnits(estimatedFeeParams.maxPriorityFeePerGas ?? 0n),
+      gasLimit: BigInt(estimatedFeeParams.gasLimit ?? 0n).toString(),
+      nonce: estimatedFeeParams.nonce?.toString(),
+    },
+  })
 
-    const {
-        control,
-        handleSubmit,
-        watch,
-        formState: { errors, isValid },
-    } = form
+  const {
+    control,
+    handleSubmit,
+    watch,
+    formState: { errors, isValid },
+  } = form
 
-    const onSubmit = (data: EstimatedFeeFormData) => {
-        dispatch(setEstimatedFeeValues(parseFormValues(data)))
-        router.back()
-    }
+  const onSubmit = (data: EstimatedFeeFormData) => {
+    dispatch(setEstimatedFeeValues(parseFormValues(data)))
+    router.back()
+  }
 
-    const onCancel = () => router.back()
+  const onCancel = () => router.back()
 
-    // Watch individual field values for debugging or side effects
-    const maxFeePerGas = watch('maxFeePerGas')
-    const maxPriorityFeePerGas = watch('maxPriorityFeePerGas')
-    const gasLimit = watch('gasLimit')
-    const nonce = watch('nonce')
+  // Watch individual field values for debugging or side effects
+  const maxFeePerGas = watch('maxFeePerGas')
+  const maxPriorityFeePerGas = watch('maxPriorityFeePerGas')
+  const gasLimit = watch('gasLimit')
+  const nonce = watch('nonce')
 
-    const { totalFee } = useGasFee(txDetails, parseFormValues({ maxFeePerGas, maxPriorityFeePerGas, gasLimit, nonce }))
+  const { totalFee } = useGasFee(txDetails, parseFormValues({ maxFeePerGas, maxPriorityFeePerGas, gasLimit, nonce }))
 
-    return (
-        <FormProvider {...form}>
-            <View width="100%" gap="$3">
-                <View>
-                    <Text color="$colorSecondary" fontSize="$5" marginBottom="$3">
-                        Max. fee (gwei)
-                    </Text>
-                    <Controller
-                        control={control}
-                        name="maxFeePerGas"
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <SafeInput
-                                value={value}
-                                onBlur={onBlur}
-                                onChangeText={(text) => onChange(sanitizeDecimalInput(text))}
-                                keyboardType="decimal-pad"
-                                testID="input-max-fee-gwei"
-                                error={errors.maxFeePerGas?.message}
-                            />
-                        )}
-                    />
-                </View>
+  return (
+    <FormProvider {...form}>
+      <View width="100%" gap="$3">
+        <View>
+          <Text color="$colorSecondary" fontSize="$5" marginBottom="$3">
+            Max. fee (gwei)
+          </Text>
+          <Controller
+            control={control}
+            name="maxFeePerGas"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <SafeInput
+                value={value}
+                onBlur={onBlur}
+                onChangeText={(text) => onChange(sanitizeDecimalInput(text))}
+                keyboardType="decimal-pad"
+                testID="input-max-fee-gwei"
+                error={errors.maxFeePerGas?.message}
+              />
+            )}
+          />
+        </View>
 
-                <View>
-                    <Text color="$colorSecondary" fontSize="$5" marginBottom="$3">
-                        Max priority fee (gwei)
-                    </Text>
-                    <Controller
-                        control={control}
-                        name="maxPriorityFeePerGas"
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <SafeInput
-                                value={value}
-                                onBlur={onBlur}
-                                onChangeText={(text) => onChange(sanitizeDecimalInput(text))}
-                                keyboardType="decimal-pad"
-                                testID="input-max-priority-fee-gwei"
-                                error={errors.maxPriorityFeePerGas?.message}
-                            />
-                        )}
-                    />
-                </View>
+        <View>
+          <Text color="$colorSecondary" fontSize="$5" marginBottom="$3">
+            Max priority fee (gwei)
+          </Text>
+          <Controller
+            control={control}
+            name="maxPriorityFeePerGas"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <SafeInput
+                value={value}
+                onBlur={onBlur}
+                onChangeText={(text) => onChange(sanitizeDecimalInput(text))}
+                keyboardType="decimal-pad"
+                testID="input-max-priority-fee-gwei"
+                error={errors.maxPriorityFeePerGas?.message}
+              />
+            )}
+          />
+        </View>
 
-                <View>
-                    <Text color="$colorSecondary" fontSize="$5" marginBottom="$3">
-                        Gas limit
-                    </Text>
-                    <Controller
-                        control={control}
-                        name="gasLimit"
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <SafeInput
-                                value={value}
-                                onBlur={onBlur}
-                                onChangeText={(text) => onChange(sanitizeDecimalInput(text))}
-                                keyboardType="decimal-pad"
-                                testID="input-gas-limit"
-                                error={errors.gasLimit?.message}
-                            />
-                        )}
-                    />
-                </View>
+        <View>
+          <Text color="$colorSecondary" fontSize="$5" marginBottom="$3">
+            Gas limit
+          </Text>
+          <Controller
+            control={control}
+            name="gasLimit"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <SafeInput
+                value={value}
+                onBlur={onBlur}
+                onChangeText={(text) => onChange(sanitizeDecimalInput(text))}
+                keyboardType="decimal-pad"
+                testID="input-gas-limit"
+                error={errors.gasLimit?.message}
+              />
+            )}
+          />
+        </View>
 
-                <View>
-                    <Text color="$colorSecondary" fontSize="$5" marginBottom="$3">
-                        Nonce
-                    </Text>
-                    <Controller
-                        control={control}
-                        name="nonce"
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <SafeInput
-                                value={value}
-                                onBlur={onBlur}
-                                onChangeText={(text) => onChange(sanitizeIntegerInput(text))}
-                                keyboardType="number-pad"
-                                testID="input-nonce"
-                                error={errors.nonce?.message}
-                            />
-                        )}
-                    />
-                </View>
+        <View>
+          <Text color="$colorSecondary" fontSize="$5" marginBottom="$3">
+            Nonce
+          </Text>
+          <Controller
+            control={control}
+            name="nonce"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <SafeInput
+                value={value}
+                onBlur={onBlur}
+                onChangeText={(text) => onChange(sanitizeIntegerInput(text))}
+                keyboardType="number-pad"
+                testID="input-nonce"
+                error={errors.nonce?.message}
+              />
+            )}
+          />
+        </View>
 
-                <View
-                    marginTop="$1"
-                    backgroundColor="$background"
-                    borderRadius="$4"
-                    padding="$5"
-                    alignItems="center"
-                    justifyContent="space-between"
-                    flexDirection="row"
-                >
-                    <Text color="$colorSecondary" fontSize="$5">
-                        Est. network fee
-                    </Text>
-                    <Text fontWeight={700} fontSize="$5">
-                        {totalFee} {nativeSymbol}
-                    </Text>
-                </View>
+        <View
+          marginTop="$1"
+          backgroundColor="$background"
+          borderRadius="$4"
+          padding="$5"
+          alignItems="center"
+          justifyContent="space-between"
+          flexDirection="row"
+        >
+          <Text color="$colorSecondary" fontSize="$5">
+            Est. network fee
+          </Text>
+          <Text fontWeight={700} fontSize="$5">
+            {totalFee} {nativeSymbol}
+          </Text>
+        </View>
 
-                <View
-                    paddingTop="$3"
-                    paddingBottom={insets.bottom ? insets.bottom : '$2'}
-                    flexDirection="row"
-                    gap="$2"
-                >
-                    <SafeButton outlined flex={1} onPress={onCancel}>
-                        Cancel
-                    </SafeButton>
-                    <SafeButton flex={1} primary onPress={handleSubmit(onSubmit)} disabled={!isValid}>
-                        Confirm
-                    </SafeButton>
-                </View>
-            </View>
-        </FormProvider>
-    )
+        <View paddingTop="$3" paddingBottom={insets.bottom ? insets.bottom : '$2'} flexDirection="row" gap="$2">
+          <SafeButton outlined flex={1} onPress={onCancel}>
+            Cancel
+          </SafeButton>
+          <SafeButton flex={1} primary onPress={handleSubmit(onSubmit)} disabled={!isValid}>
+            Confirm
+          </SafeButton>
+        </View>
+      </View>
+    </FormProvider>
+  )
 }
