@@ -96,7 +96,6 @@ input[type='number'] {
   fill: var(--color-text-secondary);
 }
 
-
 /* Note: a fallback `stroke` property must be on the svg to work */
 .illustration-main-stroke {
   stroke: var(--color-primary-main);
