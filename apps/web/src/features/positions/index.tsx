@@ -57,7 +57,7 @@ export const Positions = () => {
               >
                 <PositionsHeader protocol={protocol} fiatTotal={positionsFiatTotal} />
               </AccordionSummary>
-              <AccordionDetails sx={{ pt: 0 }}>
+              <AccordionDetails sx={{ pt: 0, pb: 0 }}>
                 {protocol.items.map((positionGroup) => {
                   const rows = positionGroup.items.map((position) => ({
                     cells: {

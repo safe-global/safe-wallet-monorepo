@@ -1,7 +1,6 @@
 import React from 'react'
 import { View } from 'tamagui'
-
-import { CircleSnail, CircleSnailPropTypes } from 'react-native-progress'
+import { CircleSnail, type CircleSnailPropTypes } from 'react-native-progress'
 
 type LoaderProps = CircleSnailPropTypes & {
   size?: number

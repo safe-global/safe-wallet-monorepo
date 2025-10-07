@@ -84,9 +84,12 @@ const InitApp = (): null => {
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache()
 
+const THEME_DARK = 'dark'
+const THEME_LIGHT = 'light'
+
 export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }) => {
   const isDarkMode = useDarkMode()
-  const themeMode = isDarkMode ? 'dark' : 'light'
+  const themeMode = isDarkMode ? THEME_DARK : THEME_LIGHT
 
   return (
     <SafeThemeProvider mode={themeMode}>

@@ -1,14 +1,16 @@
 import React from 'react'
 
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { View } from 'tamagui'
 
 import { TxDataContainer } from '@/src/features/AdvancedDetails'
 
 function TransactionData() {
+  const { bottom } = useSafeAreaInsets()
   return (
-    <SafeAreaView edges={['bottom']} style={{ flex: 1, paddingHorizontal: 16, marginTop: 40 }}>
+    <View flex={1} paddingHorizontal={16} marginTop={40} paddingBottom={bottom}>
       <TxDataContainer />
-    </SafeAreaView>
+    </View>
   )
 }
 

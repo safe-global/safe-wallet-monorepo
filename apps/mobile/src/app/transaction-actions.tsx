@@ -1,14 +1,16 @@
 import React from 'react'
 
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { TransactionActionsContainer } from '@/src/features/TransactionActions'
+import { View } from 'tamagui'
 
 function TransactionActions() {
+  const { bottom } = useSafeAreaInsets()
   return (
-    <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
+    <View flex={1} paddingBottom={bottom}>
       <TransactionActionsContainer />
-    </SafeAreaView>
+    </View>
   )
 }
 

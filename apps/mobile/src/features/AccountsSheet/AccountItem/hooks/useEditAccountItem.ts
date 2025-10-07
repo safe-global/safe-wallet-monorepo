@@ -20,11 +20,10 @@ export const useEditAccountItem = () => {
 
   const deleteSafe = useCallback(
     async (address: Address) => {
-      const navigationConfig = {
+      const deletionContext = {
         navigation,
         activeSafe,
         safes,
-        dispatch,
       }
 
       await handleSafeDeletion({
@@ -32,7 +31,8 @@ export const useEditAccountItem = () => {
         allSafesInfo: safes,
         allSigners,
         removeAllDelegatesForOwner,
-        navigationConfig,
+        deletionContext,
+        reduxDispatch: dispatch,
       })
     },
     [navigation, activeSafe, safes, dispatch, allSigners, removeAllDelegatesForOwner],

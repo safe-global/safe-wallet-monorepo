@@ -8,6 +8,8 @@ import { server } from './server'
 
 jest.useFakeTimers()
 
+jest.mock('react-native-permissions', () => require('react-native-permissions/mock'))
+
 /**
  *  This mock is necessary because useFonts is async and we get an error
  *  Warning: An update to FontProvider inside a test was not wrapped in act(...)
@@ -246,6 +248,26 @@ jest.mock('react-native-quick-crypto', () => ({
 }))
 
 jest.mock('react-native-safe-area-context', () => mockSafeAreaContext)
+
+// Mock the logger globally for all tests
+jest.mock('@/src/utils/logger', () => ({
+  __esModule: true,
+  default: {
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    trace: jest.fn(),
+    setLevel: jest.fn(),
+    shouldLog: jest.fn(),
+    setShouldLogErrorToSentry: jest.fn(),
+  },
+  LogLevel: {
+    TRACE: 0,
+    INFO: 1,
+    WARN: 2,
+    ERROR: 3,
+  },
+}))
 
 jest.mock('@react-native-firebase/analytics', () => {
   const mockAnalytics = {

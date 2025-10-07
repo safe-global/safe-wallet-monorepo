@@ -2,6 +2,7 @@
   "private": true,
   "name": "@safe-global/store",
   "version": "1.0.0",
+  "main": "./src/index.ts",
   "scripts": {
     "test": "jest",
     "fetch-schema": "ts-node ./scripts/fetch-schema.ts > scripts/api-schema/schema.json",

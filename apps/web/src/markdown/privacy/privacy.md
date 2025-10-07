@@ -58,7 +58,7 @@ In this Policy, “processing” means any operation or set of operations which 
 
 [4.12 MoonPay](#4.12-moonpay)
 
-[4.13 Spindl](#4.13-spindl)
+[4.13 Fingerprint](#4.13-fingerprint)
 
 [5\. Sharing Your Personal Data](#5.-sharing-your-personal-data)
 
@@ -460,11 +460,7 @@ We use the following tools for internal communication.
 
 We use MoonPay to offer on-ramp and off-ramp services. For that purpose personal data is required for KYC/AML or other financial regulatory requirements. This data is encrypted by MoonPay.
 
-## 4.13 Spindl {#4.13-spindl}
-
-We use [Spindl](https://www.spindl.xyz/), a measurement and attribution solution for web3 that assists us in comprehending how users interact with different decentralized applications and our app and to enhance your experience with Safe{Wallet}. For enhanced privacy, data is stored for a period of 7 days after which it is securely deleted.
-
-## 4.14 Fingerprint
+## 4.13 Fingerprint {#4.13-fingerprint}
 
 This tool enables the processing in sections 3.5.8 and 3.5.9.
 
@@ -486,7 +482,6 @@ Service providers in the US:
 * Joincube Inc. (Beamer)
 * Functional software Inc. (Sentry)
 * Notion Labs Inc.
-* Spindl Inc.
 * ConsenSys Software Inc.
 
 Service providers in other countries outside of the EU:
