@@ -4,17 +4,22 @@ import { GAS_PRICE_TYPE } from '@safe-global/safe-gateway-typescript-sdk'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
-import { Chain, GasPriceFixed, GasPriceFixedEip1559, GasPriceOracle } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import {
+  Chain,
+  GasPriceFixed,
+  GasPriceFixedEip1559,
+  GasPriceOracle,
+} from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useIntervalCounter } from './useIntervalCounter'
 
 type EstimatedGasPrice =
   | {
-    gasPrice: bigint
-  }
+      gasPrice: bigint
+    }
   | {
-    maxFeePerGas: bigint
-    maxPriorityFeePerGas: bigint
-  }
+      maxFeePerGas: bigint
+      maxPriorityFeePerGas: bigint
+    }
 
 type GasFeeParams = {
   maxFeePerGas: bigint | null | undefined
@@ -87,7 +92,10 @@ const isGasPriceOracle = (gasPriceConfig: Chain['gasPrice'][number]): gasPriceCo
   return gasPriceConfig.type.toUpperCase() == GAS_PRICE_TYPE.ORACLE
 }
 
-const getGasPrice = async (gasPriceConfigs: Chain['gasPrice'], { logError }: { logError?: (err: string) => void }): Promise<EstimatedGasPrice | undefined> => {
+const getGasPrice = async (
+  gasPriceConfigs: Chain['gasPrice'],
+  { logError }: { logError?: (err: string) => void },
+): Promise<EstimatedGasPrice | undefined> => {
   let error: Error | undefined
   for (const config of gasPriceConfigs) {
     if (isGasPriceFixed(config)) {
@@ -170,11 +178,10 @@ const SPEED_UP_MAX_PRIO_FACTOR = 2n
 
 const SPEED_UP_GAS_PRICE_FACTOR = 150n
 
-
 type UseGasPriceSettings = {
-  isSpeedUp: boolean,
-  withPooling: boolean,
-  logError: (err: string) => void,
+  isSpeedUp: boolean
+  withPooling: boolean
+  logError: (err: string) => void
 }
 /**
  * Estimates the gas price through the configured methods:
@@ -185,7 +192,11 @@ type UseGasPriceSettings = {
  * @param isSpeedUp if true, increases the returned gas parameters
  * @returns [gasPrice, error, loading]
  */
-export const useDefaultGasPrice = (chain: Chain | undefined, provider: JsonRpcProvider | undefined, settings?: UseGasPriceSettings): AsyncResult<GasFeeParams> => {
+export const useDefaultGasPrice = (
+  chain: Chain | undefined,
+  provider: JsonRpcProvider | undefined,
+  settings?: UseGasPriceSettings,
+): AsyncResult<GasFeeParams> => {
   const { isSpeedUp, logError, withPooling = true } = settings || { isSpeedUp: false, withPooling: true }
   const gasPriceConfigs = chain?.gasPrice
   // TODO: move this to the utils package as well

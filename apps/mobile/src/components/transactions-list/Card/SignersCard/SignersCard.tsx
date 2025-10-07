@@ -28,7 +28,15 @@ const titleStyle: Partial<TextProps> = {
   fontWeight: 600,
 }
 
-export function SignersCard({ onPress, name, transparent = true, address, rightNode, getSignerTag, balance }: SignersCardProps) {
+export function SignersCard({
+  onPress,
+  name,
+  transparent = true,
+  address,
+  rightNode,
+  getSignerTag,
+  balance,
+}: SignersCardProps) {
   const textProps = useMemo(() => {
     return name ? descriptionStyle : titleStyle
   }, [name])
@@ -75,7 +83,10 @@ export function SignersCard({ onPress, name, transparent = true, address, rightN
               <Text fontSize="$4" fontWeight={400} color="$colorSecondary">
                 Balance:
               </Text>
-              <Text fontSize="$4" fontWeight={400}> {balance}</Text>
+              <Text fontSize="$4" fontWeight={400}>
+                {' '}
+                {balance}
+              </Text>
             </View>
           )}
         </View>

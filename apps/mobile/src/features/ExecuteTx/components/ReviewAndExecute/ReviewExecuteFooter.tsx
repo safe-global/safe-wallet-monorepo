@@ -38,7 +38,7 @@ export function ReviewExecuteFooter({ txId, txDetails }: ReviewFooterProps) {
         maxFeePerGas: estimatedFeeParams.maxFeePerGas?.toString(),
         maxPriorityFeePerGas: estimatedFeeParams.maxPriorityFeePerGas?.toString(),
         gasLimit: estimatedFeeParams.gasLimit?.toString(),
-        nonce: estimatedFeeParams.nonce?.toString()
+        nonce: estimatedFeeParams.nonce?.toString(),
       }
 
       console.log('params', params)
@@ -60,12 +60,14 @@ export function ReviewExecuteFooter({ txId, txDetails }: ReviewFooterProps) {
   }
 
   return (
-    <Stack
-      paddingHorizontal="$4"
-      space="$3"
-      paddingBottom={insets.bottom ? insets.bottom : '$4'}
-    >
-      <Container backgroundColor="transparent" gap={'$2'} borderWidth={1} paddingVertical={'$3'} borderColor="$borderLight">
+    <Stack paddingHorizontal="$4" space="$3" paddingBottom={insets.bottom ? insets.bottom : '$4'}>
+      <Container
+        backgroundColor="transparent"
+        gap={'$2'}
+        borderWidth={1}
+        paddingVertical={'$3'}
+        borderColor="$borderLight"
+      >
         <SelectExecutor address={activeSigner?.value as Address} txId={txId} />
 
         <EstimatedNetworkFee txId={txId} totalFee={totalFee} />

@@ -26,11 +26,7 @@ export const EstimatedNetworkFee = ({ totalFee, txId }: EstimatedNetworkFeeProps
 
       {/* TODO: get the gas fee from the tx */}
       <View flexDirection="row" alignItems="center" onPress={onPress}>
-        <View
-          borderStyle="dashed"
-          borderBottomWidth={1}
-          borderColor="$color"
-        >
+        <View borderStyle="dashed" borderBottomWidth={1} borderColor="$color">
           <Text fontWeight={700}>
             {totalFee} {chain?.nativeCurrency.symbol}
           </Text>

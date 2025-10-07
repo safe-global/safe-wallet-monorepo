@@ -1,4 +1,4 @@
-import { getTotalFee } from './useDefaultGasPrice';
+import { getTotalFee } from './useDefaultGasPrice'
 
 interface UseSignerCanPayProps {
   gasLimit?: bigint

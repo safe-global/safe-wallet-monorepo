@@ -12,7 +12,6 @@ import { type JsonRpcProvider } from 'ethers'
 import { encodeSignatures } from '../services/encodeSignatures'
 import chains from '../config/chains'
 
-
 const getEncodedSafeTx = (
   safeSDK: Safe,
   safeTx: SafeTransaction,
@@ -127,15 +126,15 @@ const getGasLimitForZkSync = async (
 }
 
 interface useGasLimitParams {
-  chainId: string,
-  safeSDK?: Safe,
-  web3ReadOnly?: JsonRpcProvider,
-  isOwner: boolean,
-  safeAddress: string,
+  chainId: string
+  safeSDK?: Safe
+  web3ReadOnly?: JsonRpcProvider
+  isOwner: boolean
+  safeAddress: string
   walletAddress: string
   logError: (err: string) => void
-  safeTx?: SafeTransaction,
-  threshold: number,
+  safeTx?: SafeTransaction
+  threshold: number
 }
 
 type useGasLimitResult = {
@@ -144,18 +143,17 @@ type useGasLimitResult = {
   gasLimitLoading: boolean
 }
 
-export const useGasLimit = (
-  {
-    chainId,
-    safeSDK,
-    web3ReadOnly,
-    isOwner,
-    safeAddress,
-    walletAddress,
-    logError,
-    safeTx,
-    threshold
-  }: useGasLimitParams ): useGasLimitResult => {
+export const useGasLimit = ({
+  chainId,
+  safeSDK,
+  web3ReadOnly,
+  isOwner,
+  safeAddress,
+  walletAddress,
+  logError,
+  safeTx,
+  threshold,
+}: useGasLimitParams): useGasLimitResult => {
   const hasSafeTxGas = !!safeTx?.data?.safeTxGas
 
   const [gasLimit, gasLimitError, gasLimitLoading] = useAsync<bigint | undefined>(async () => {
@@ -192,22 +190,12 @@ export const useGasLimit = (
 
         return gasLimit
       })
-  }, [
-    safeAddress,
-    walletAddress,
-    safeSDK,
-    web3ReadOnly,
-    safeTx,
-    isOwner,
-    hasSafeTxGas,
-    threshold,
-    chainId
-  ])
+  }, [safeAddress, walletAddress, safeSDK, web3ReadOnly, safeTx, isOwner, hasSafeTxGas, threshold, chainId])
 
   useEffect(() => {
     if (gasLimitError) {
-    //   logError(Errors._612, gasLimitError.message)
-    logError(gasLimitError.message)
+      //   logError(Errors._612, gasLimitError.message)
+      logError(gasLimitError.message)
     }
   }, [gasLimitError])
 

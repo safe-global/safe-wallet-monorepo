@@ -23,7 +23,11 @@ import { toBigInt } from 'ethers'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 
-const getActiveSignerRightNode = (totalFee: bigint, item: SignerInfo & { balance: string }, activeSigner?: SignerInfo) => {
+const getActiveSignerRightNode = (
+  totalFee: bigint,
+  item: SignerInfo & { balance: string },
+  activeSigner?: SignerInfo,
+) => {
   if (activeSigner?.value === item.value) {
     return <SafeFontIcon name="check" color="$color" />
   }
@@ -71,7 +75,9 @@ export const ChangeSignerSheetContainer = () => {
             onPress={onSignerPress(item, onClose)}
             name={<ContactDisplayNameContainer address={item.value as Address} />}
             address={item.value as Address}
-            balance={`${item.balance ? formatVisualAmount(item.balance, activeChain.nativeCurrency.decimals) : '0'} ${activeChain.nativeCurrency.symbol}`}
+            balance={`${item.balance ? formatVisualAmount(item.balance, activeChain.nativeCurrency.decimals) : '0'} ${
+              activeChain.nativeCurrency.symbol
+            }`}
             rightNode={getActiveSignerRightNode(totalFee, item, activeSigner)}
           />
         </View>
