@@ -16,8 +16,6 @@ export const useClearEstimatedFeeOnExit = () => {
 
   useFocusEffect(
     useCallback(() => {
-      console.log('useClearEstimatedFeeOnExit')
-      // Set up listener for when leaving the screen
       const unsubscribe = navigation.addListener('beforeRemove', (e) => {
         // Check if navigating to a screen where we should keep the state
         const targetRoute = (e.data.action as any)?.payload?.name
