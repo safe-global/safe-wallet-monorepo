@@ -3,7 +3,7 @@ import React, { useEffect, useMemo } from 'react'
 import { useLocalSearchParams } from 'expo-router'
 import { ExecuteError } from './ExecuteError'
 import { ExecuteProcessing } from '@/src/features/ExecuteTx/components/ExecuteProcessing'
-import { ExecutionStatus, useTransactionExecution } from '../hooks/useTransactionExecution'
+import { ExecutionStatus, useTransactionExecutionWithPK } from '../hooks/useTransactionExecutionWithPK'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
@@ -34,7 +34,7 @@ export function ExecuteTransaction() {
   const activeSafe = useDefinedActiveSafe()
   const activeSigner = useAppSelector((state) => selectActiveSigner(state, activeSafe.address))
   const { guard: canExecute } = useTransactionGuard('executing')
-  const { status, executeTx, retry } = useTransactionExecution({
+  const { status, executeTx, retry } = useTransactionExecutionWithPK({
     txId: txId || '',
     signerAddress: activeSigner?.value || '',
     feeParams,

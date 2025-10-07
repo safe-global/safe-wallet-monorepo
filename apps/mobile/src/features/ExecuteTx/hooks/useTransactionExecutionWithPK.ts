@@ -18,13 +18,13 @@ export enum ExecutionStatus {
   ERROR = 'error',
 }
 
-interface UseTransactionExecutionProps {
+interface UseTransactionExecutionWithPKProps {
   txId: string
   signerAddress: string
   feeParams: EstimatedFeeValues | null
 }
 
-export function useTransactionExecution({ txId, signerAddress, feeParams }: UseTransactionExecutionProps) {
+export function useTransactionExecutionWithPK({ txId, signerAddress, feeParams }: UseTransactionExecutionWithPKProps) {
   const [status, setStatus] = useState<ExecutionStatus>(ExecutionStatus.IDLE)
   const dispatch = useAppDispatch()
   const activeSafe = useDefinedActiveSafe()
@@ -73,7 +73,7 @@ export function useTransactionExecution({ txId, signerAddress, feeParams }: UseT
       logger.error('Error executing transaction:', error)
       setStatus(ExecutionStatus.ERROR)
     }
-  }, [activeChain, activeSafe, txId, signerAddress])
+  }, [activeChain, activeSafe, txId, signerAddress, dispatch])
 
   const retry = useCallback(() => {
     execute()

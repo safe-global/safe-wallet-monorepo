@@ -12,6 +12,11 @@ import {
 import { SafeOverview } from './AUTO_GENERATED/safes'
 import { MessageItem, MessagePage, TypedData } from './AUTO_GENERATED/messages'
 
+export declare enum Operation {
+  CALL = 0,
+  DELEGATE = 1,
+}
+
 export enum RPC_AUTHENTICATION {
   API_KEY_PATH = 'API_KEY_PATH',
   NO_AUTHENTICATION = 'NO_AUTHENTICATION',
