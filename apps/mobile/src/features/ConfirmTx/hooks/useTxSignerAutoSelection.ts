@@ -6,8 +6,9 @@ import { useTxSignerActions } from '@/src/features/ConfirmTx/hooks/useTxSignerAc
 export const useTxSignerAutoSelection = (detailedExecutionInfo?: MultisigExecutionDetails) => {
   const { activeTxSigner, appSigners, proposedSigner, hasSigned } = useTxSignerState(detailedExecutionInfo)
   const { setTxSigner } = useTxSignerActions()
-  const canExecute = detailedExecutionInfo && detailedExecutionInfo?.confirmationsRequired <= detailedExecutionInfo?.confirmations?.length
-
+  const canExecute =
+    detailedExecutionInfo &&
+    detailedExecutionInfo?.confirmationsRequired <= detailedExecutionInfo?.confirmations?.length
 
   useLayoutEffect(() => {
     if (proposedSigner && activeTxSigner?.value !== proposedSigner.value && hasSigned && !canExecute) {
