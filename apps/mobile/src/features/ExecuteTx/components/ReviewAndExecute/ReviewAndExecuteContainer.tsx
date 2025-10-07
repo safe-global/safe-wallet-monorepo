@@ -5,11 +5,15 @@ import { Text, View } from 'tamagui'
 import { useTransactionData } from '@/src/features/ConfirmTx/hooks/useTransactionData'
 import { ReviewAndConfirmView } from '@/src/features/ConfirmTx/components/ReviewAndConfirm'
 import { ReviewExecuteFooter } from '@/src/features/ExecuteTx/components/ReviewAndExecute/ReviewExecuteFooter'
+import { useClearEstimatedFeeOnMount } from '@/src/features/ExecuteTx/hooks/useClearEstimatedFeeOnMount'
 
 export function ReviewAndExecuteContainer() {
   const { txId } = useLocalSearchParams<{ txId: string }>()
 
   const { data: txDetails, isFetching: isLoading, isError } = useTransactionData(txId || '')
+
+  // Clear estimated fee values when screen is mounted
+  useClearEstimatedFeeOnMount()
 
   if (!txId) {
     return (
@@ -37,7 +41,7 @@ export function ReviewAndExecuteContainer() {
 
   return (
     <ReviewAndConfirmView txDetails={txDetails}>
-      <ReviewExecuteFooter txId={txId} />
+      <ReviewExecuteFooter txDetails={txDetails} txId={txId} />
     </ReviewAndConfirmView>
   )
 }

@@ -8,6 +8,7 @@ import { executeTx } from '@/src/services/tx/tx-sender/execute'
 import logger from '@/src/utils/logger'
 import { addPendingTx } from '@/src/store/pendingTxsSlice'
 import { getUserNonce } from '@/src/services/web3'
+import { EstimatedFeeValues } from '@/src/store/estimatedFeeSlice'
 
 export enum ExecutionStatus {
   IDLE = 'idle',
@@ -20,9 +21,10 @@ export enum ExecutionStatus {
 interface UseTransactionExecutionProps {
   txId: string
   signerAddress: string
+  feeParams: EstimatedFeeValues | null
 }
 
-export function useTransactionExecution({ txId, signerAddress }: UseTransactionExecutionProps) {
+export function useTransactionExecution({ txId, signerAddress, feeParams }: UseTransactionExecutionProps) {
   const [status, setStatus] = useState<ExecutionStatus>(ExecutionStatus.IDLE)
   const dispatch = useAppDispatch()
   const activeSafe = useDefinedActiveSafe()
@@ -52,6 +54,7 @@ export function useTransactionExecution({ txId, signerAddress }: UseTransactionE
         activeSafe,
         txId,
         privateKey,
+        feeParams,
       })
 
       dispatch(
