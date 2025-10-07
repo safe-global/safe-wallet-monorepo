@@ -181,7 +181,7 @@ const SPEED_UP_GAS_PRICE_FACTOR = 150n
 type UseGasPriceSettings = {
   isSpeedUp: boolean
   withPooling: boolean
-  logError: (err: string) => void
+  logError?: (err: string) => void
 }
 /**
  * Estimates the gas price through the configured methods:

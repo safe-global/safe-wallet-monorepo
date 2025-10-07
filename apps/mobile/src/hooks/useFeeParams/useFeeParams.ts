@@ -23,19 +23,22 @@ export type FeeParams = {
   gasLimitLoading: boolean
 }
 
+export interface UseFeeParamsSettings {
+  pooling?: boolean
+  logError?: (err: string) => void
+}
+
 export const useFeeParams = (
   txDetails: TransactionDetails,
   manualParams: EstimatedFeeValues | null,
-  pooling?: boolean,
+  settings?: UseFeeParamsSettings,
 ): FeeParams => {
   const chain = useAppSelector(selectActiveChain)
   const provider = useWeb3ReadOnly()
   const [gasPrice, gasPriceError, isLoadingGasPrice] = useDefaultGasPrice(chain as Chain, provider, {
-    withPooling: pooling ?? true,
+    withPooling: settings?.pooling ?? true,
     isSpeedUp: false,
-    logError: (e) => {
-      console.error(e)
-    },
+    logError: settings?.logError,
   })
   const activeSafe = useDefinedActiveSafe()
   const activeSigner = useAppSelector((state) => selectActiveSigner(state, activeSafe.address))
@@ -58,9 +61,7 @@ export const useFeeParams = (
     safeSDK,
     web3ReadOnly: provider,
     isOwner: true,
-    logError: (e) => {
-      console.error(e)
-    },
+    logError: settings?.logError,
   })
 
   return useMemo(() => {

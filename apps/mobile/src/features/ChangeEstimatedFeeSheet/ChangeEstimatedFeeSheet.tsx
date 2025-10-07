@@ -12,7 +12,10 @@ export const ChangeEstimatedFeeSheetContainer = () => {
   const { txId } = useLocalSearchParams<{ txId: string }>()
   const { data: txDetails, isLoading: isLoadingTxDetails } = useTransactionData(txId)
   const manualParams = useAppSelector(selectEstimatedFee)
-  const estimatedFeeParams = useFeeParams(txDetails as TransactionDetails, manualParams, false)
+  const estimatedFeeParams = useFeeParams(txDetails as TransactionDetails, manualParams, {
+    pooling: false,
+    logError: console.error,
+  })
   const isLoading = isLoadingTxDetails || estimatedFeeParams.isLoadingGasPrice || estimatedFeeParams.gasLimitLoading
 
   return (

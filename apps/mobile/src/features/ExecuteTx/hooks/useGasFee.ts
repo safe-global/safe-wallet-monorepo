@@ -4,11 +4,15 @@ import { getTotalFee } from '@safe-global/utils/hooks/useDefaultGasPrice'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { EstimatedFeeValues } from '@/src/store/estimatedFeeSlice'
-import { useFeeParams } from '@/src/hooks/useFeeParams/useFeeParams'
+import { useFeeParams, UseFeeParamsSettings } from '@/src/hooks/useFeeParams/useFeeParams'
 
-const useGasFee = (txDetails: TransactionDetails, manualParams: EstimatedFeeValues | null, pooling = true) => {
+const useGasFee = (
+  txDetails: TransactionDetails,
+  manualParams: EstimatedFeeValues | null,
+  settings?: UseFeeParamsSettings,
+) => {
   const chain = useAppSelector(selectActiveChain)
-  const estimatedFeeParams = useFeeParams(txDetails, manualParams, pooling)
+  const estimatedFeeParams = useFeeParams(txDetails, manualParams, settings)
 
   const totalFee =
     estimatedFeeParams.isLoadingGasPrice || estimatedFeeParams.gasLimitLoading

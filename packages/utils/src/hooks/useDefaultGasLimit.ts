@@ -132,7 +132,7 @@ interface useGasLimitParams {
   isOwner: boolean
   safeAddress: string
   walletAddress: string
-  logError: (err: string) => void
+  logError?: (err: string) => void
   safeTx?: SafeTransaction
   threshold: number
 }
@@ -193,8 +193,7 @@ export const useGasLimit = ({
   }, [safeAddress, walletAddress, safeSDK, web3ReadOnly, safeTx, isOwner, hasSafeTxGas, threshold, chainId])
 
   useEffect(() => {
-    if (gasLimitError) {
-      //   logError(Errors._612, gasLimitError.message)
+    if (gasLimitError && logError) {
       logError(gasLimitError.message)
     }
   }, [gasLimitError])
