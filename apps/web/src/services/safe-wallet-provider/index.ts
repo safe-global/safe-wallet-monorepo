@@ -237,15 +237,46 @@ export class SafeWalletProvider {
         result: await this.makeRequest(request, appInfo),
       }
     } catch (e) {
+      const { code, message } = this.parseRpcError(e)
+
       return {
         jsonrpc: '2.0',
         id,
         error: {
-          code: -32000,
-          message: (e as Error).message,
+          code,
+          message,
         },
       }
     }
+  }
+
+  private parseRpcError(error: unknown): { code: number; message: string } {
+    const defaultCode = -32000
+    const defaultMessage = 'Unknown error'
+
+    if (error instanceof RpcError) {
+      return { code: error.code, message: error.message }
+    }
+
+    if (typeof error === 'object' && error !== null) {
+      const { code, message } = error as { code?: unknown; message?: unknown }
+
+      const numericCode = typeof code === 'number' ? code : undefined
+      const stringMessage = typeof message === 'string' ? message : undefined
+
+      if (numericCode !== undefined || stringMessage !== undefined) {
+        return {
+          code: numericCode ?? defaultCode,
+          message: stringMessage ?? defaultMessage,
+        }
+      }
+    }
+
+    if (error instanceof Error) {
+      return { code: defaultCode, message: error.message }
+    }
+
+    return { code: defaultCode, message: defaultMessage }
   }
 
   // Actual RPC methods
@@ -254,6 +285,10 @@ export class SafeWalletProvider {
     try {
       await this.sdk.switchChain(chainId, appInfo)
     } catch (e) {
+      if (typeof e === 'object' && e && 'code' in e && (e as { code?: number }).code === RpcErrorCode.USER_REJECTED) {
+        throw new RpcError(RpcErrorCode.USER_REJECTED, 'User rejected chain switch')
+      }
+
       throw new RpcError(RpcErrorCode.UNSUPPORTED_CHAIN, 'Unsupported chain')
     }
     return null

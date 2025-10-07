@@ -2,7 +2,8 @@ import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployed
 import type { SafeListProps } from '@/features/myAccounts/components/SafesList'
 import SpaceSafeContextMenu from '@/features/spaces/components/SafeAccounts/SpaceSafeContextMenu'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { useMemo, useRef } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
+import type { MouseEvent } from 'react'
 import { ListItemButton, Box, Typography, IconButton, SvgIcon, Skeleton, useTheme, useMediaQuery } from '@mui/material'
 import Link from 'next/link'
 import Track from '@/components/common/Track'
@@ -44,6 +45,8 @@ type AccountItemProps = {
   onLinkClick?: SafeListProps['onLinkClick']
   isMultiChainItem?: boolean
   isSpaceSafe?: boolean
+  onSelectSafe?: (safeItem: SafeItem) => void | Promise<void>
+  showActions?: boolean
 }
 
 const SingleAccountItem = ({
@@ -51,6 +54,8 @@ const SingleAccountItem = ({
   safeItem,
   isMultiChainItem = false,
   isSpaceSafe = false,
+  onSelectSafe,
+  showActions = true,
 }: AccountItemProps) => {
   const { chainId, address, isReadOnly, isPinned } = safeItem
   const chain = useAppSelector((state) => selectChainById(state, chainId))
@@ -269,20 +274,38 @@ const SingleAccountItem = ({
     </>
   )
 
+  const handleSelect = useCallback(
+    (event: MouseEvent<HTMLElement>) => {
+      if (!onSelectSafe) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+
+      void onSelectSafe(safeItem)
+    },
+    [onSelectSafe, safeItem],
+  )
+
   return (
     <ListItemButton
       ref={elementRef}
       data-testid="safe-list-item"
       selected={isCurrentSafe}
-      className={classnames(css.listItem, { [css.currentListItem]: isCurrentSafe })}
+      className={classnames(css.listItem, {
+        [css.currentListItem]: isCurrentSafe,
+        [css.noActions]: !showActions,
+      })}
+      onClick={onSelectSafe ? handleSelect : undefined}
     >
       <Track {...OVERVIEW_EVENTS.OPEN_SAFE} label={trackingLabel}>
-        <Link onClick={onLinkClick} href={href} className={css.safeLink}>
+        <Link onClick={onSelectSafe ? handleSelect : onLinkClick} href={href} className={css.safeLink}>
           {content}
         </Link>
       </Track>
 
-      {actions}
+      {showActions ? actions : null}
     </ListItemButton>
   )
 }
