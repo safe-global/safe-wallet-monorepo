@@ -114,10 +114,6 @@ input[type='number'] {
   stroke: var(--color-logo-background);
 }
 
-.illustration-background-light-grey-fill {
-  fill: var(--color-background-lightGrey);
-}
-
 .illustration-text-secondary-stroke {
   stroke: var(--color-text-secondary);
 }
