@@ -145,18 +145,14 @@ class WalletConnectWallet {
     const isUnsupportedChain = !currentEip155ChainIds.includes(newEip155ChainId)
     const isNewSessionSafe = !currentEip155Accounts.includes(newEip155Account)
 
-    // Switching to unsupported chain
-    if (isUnsupportedChain) {
-      return this.disconnectSession(session)
-    }
+    const shouldUpdateNamespaces = isUnsupportedChain || isNewSessionSafe
 
-    // Add new Safe to the session namespace
-    if (isNewSessionSafe) {
+    if (shouldUpdateNamespaces) {
       const namespaces: SessionTypes.Namespaces = {
         [EIP155]: {
           ...session.namespaces[EIP155],
-          chains: currentEip155ChainIds,
-          accounts: [newEip155Account, ...currentEip155Accounts],
+          chains: isUnsupportedChain ? [newEip155ChainId, ...currentEip155ChainIds] : currentEip155ChainIds,
+          accounts: isNewSessionSafe ? [newEip155Account, ...currentEip155Accounts] : currentEip155Accounts,
         },
       }
 

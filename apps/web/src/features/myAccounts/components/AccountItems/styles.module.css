@@ -53,9 +53,13 @@
   width: 90%;
 }
 
+.listItem.noActions > :first-child {
+  width: 100%;
+}
+
 .safeLink {
   display: grid;
-  padding: var(--space-2) var(--space-1) var(--space-2) var(--space-2);
+  padding: var(--space-2);
   grid-template-columns: 60px 10fr 2fr 3fr;
   align-items: center;
 }
