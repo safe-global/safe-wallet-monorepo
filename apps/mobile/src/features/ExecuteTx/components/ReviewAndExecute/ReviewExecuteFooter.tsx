@@ -41,8 +41,6 @@ export function ReviewExecuteFooter({ txId, txDetails }: ReviewFooterProps) {
         nonce: estimatedFeeParams.nonce?.toString(),
       }
 
-      console.log('params', params)
-
       if (isBiometricsEnabled) {
         router.push({
           pathname: '/execute-transaction',
