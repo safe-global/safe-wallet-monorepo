@@ -24,7 +24,6 @@ export const EstimatedNetworkFee = ({ totalFee, txId }: EstimatedNetworkFeeProps
     <View flexDirection="row" justifyContent="space-between" gap="$2" alignItems="center">
       <Text color="$textSecondaryLight">Est. network fee</Text>
 
-      {/* TODO: get the gas fee from the tx */}
       <View flexDirection="row" alignItems="center" onPress={onPress}>
         <View borderStyle="dashed" borderBottomWidth={1} borderColor="$color">
           <Text fontWeight={700}>
