@@ -1,5 +1,5 @@
+import { useIntervalCounter } from '@safe-global/utils/hooks/useIntervalCounter'
 import { act, renderHook } from '@testing-library/react'
-import useIntervalCounter from '../useIntervalCounter'
 
 describe('useIntervalCounter', () => {
   beforeAll(() => {
