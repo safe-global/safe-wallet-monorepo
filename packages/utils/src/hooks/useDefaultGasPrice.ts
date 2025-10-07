@@ -21,7 +21,7 @@ type EstimatedGasPrice =
       maxPriorityFeePerGas: bigint
     }
 
-type GasFeeParams = {
+export type GasFeeParams = {
   maxFeePerGas: bigint | null | undefined
   maxPriorityFeePerGas: bigint | null | undefined
 }

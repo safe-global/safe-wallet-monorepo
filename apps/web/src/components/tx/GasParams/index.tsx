@@ -1,4 +1,3 @@
-import { getTotalFee } from '@/hooks/useGasPrice'
 import type { ReactElement, SyntheticEvent } from 'react'
 import { Accordion, AccordionDetails, AccordionSummary, Skeleton, Typography, Link, Grid, SvgIcon } from '@mui/material'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -12,6 +11,7 @@ import classnames from 'classnames'
 import css from './styles.module.css'
 import accordionCss from '@/styles/accordion.module.css'
 import madProps from '@/utils/mad-props'
+import { getTotalFee } from '@safe-global/utils/hooks/useDefaultGasPrice'
 
 const GasDetail = ({ name, value, isLoading }: { name: string; value: string; isLoading: boolean }): ReactElement => {
   const valueSkeleton = <Skeleton variant="text" sx={{ minWidth: '5em' }} />

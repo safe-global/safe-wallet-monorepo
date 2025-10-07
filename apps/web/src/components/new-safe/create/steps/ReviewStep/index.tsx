@@ -2,7 +2,7 @@ import type { NamedAddress } from '@/components/new-safe/create/types'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { safeCreationDispatch, SafeCreationEvent } from '@/features/counterfactual/services/safeCreationEvents'
 import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
-import { getTotalFeeFormatted } from '@/hooks/useGasPrice'
+
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NewSafeFormData } from '@/components/new-safe/create'
 import {
@@ -57,6 +57,7 @@ import { updateAddressBook } from '../../logic/address-book'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { type TransactionOptions } from '@safe-global/types-kit'
+import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
 
 export const NetworkFee = ({
   totalFee,
