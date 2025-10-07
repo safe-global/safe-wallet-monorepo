@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 export type AsyncResult<T> = [result: T | undefined, error: Error | undefined, loading: boolean]
 
