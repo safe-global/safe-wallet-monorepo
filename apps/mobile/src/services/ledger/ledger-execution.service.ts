@@ -198,6 +198,10 @@ export class LedgerExecutionService {
     // Remove 0x prefix if present
     const sig = signatureHex.startsWith('0x') ? signatureHex.slice(2) : signatureHex
 
+    if (sig.length !== 130) {
+      throw new Error(`Invalid signature length: expected 130 hex characters, got ${sig.length}`)
+    }
+
     // Extract r, s, v from signature
     const r = '0x' + sig.slice(0, 64)
     const s = '0x' + sig.slice(64, 128)
