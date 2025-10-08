@@ -1,6 +1,6 @@
 import { TxFlowContext } from '../../TxFlowProvider'
 import { type ReactNode, useContext } from 'react'
-import { Box, Container, Grid, Typography, Button, Paper, useMediaQuery, Card, Stack } from '@mui/material'
+import { Box, Container, Grid2 as Grid, Typography, Button, Paper, useMediaQuery, Card, Stack } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useTheme } from '@mui/material/styles'
 import classnames from 'classnames'
@@ -45,17 +45,10 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
   return (
     <Stack direction="row" gap={3} className={css.container}>
       {!isReplacement && !isSmallScreen && (
-        <aside style={{ minWidth: 220, paddingTop: '46px' }}>
+        <aside style={{ minWidth: 200, paddingTop: '46px' }}>
           <Stack gap={3} position="fixed">
             <Card
-              sx={{
-                p: '4px 8px 4px 4px',
-                maxWidth: 214,
-                mx: '-12px',
-                overflow: 'visible',
-                position: 'fixed',
-                top: 62,
-              }}
+              sx={{ p: '4px 8px 4px 4px', maxWidth: 214, mx: '-12px', overflow: 'visible', position: 'fixed', top: 62 }}
             >
               <SafeHeaderInfo />
             </Card>
@@ -74,7 +67,7 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
         <Container className={css.contentContainer}>
           <Grid container spacing={3} justifyContent="center">
             {/* Main content */}
-            <Grid item xs={12} md={8}>
+            <Grid size={{ xs: 12, md: 7.5, lg: 8.63 }}>
               <div className={css.titleWrapper}>
                 <Typography
                   data-testid="modal-title"
@@ -118,7 +111,7 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
 
             {/* Sidebar */}
             {!isReplacement && (
-              <Grid item xs={12} md={4} className={classnames(css.widget)}>
+              <Grid size={{ xs: 12, md: 4.5, lg: 3.37 }} className={classnames(css.widget)}>
                 <Slot name={SlotName.Sidebar} />
 
                 <Box className={css.sticky}>

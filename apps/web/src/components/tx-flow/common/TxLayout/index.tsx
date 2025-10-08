@@ -1,6 +1,17 @@
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { type ComponentType, type ReactElement, type ReactNode, useContext } from 'react'
-import { Box, Container, Grid, Typography, Button, Paper, SvgIcon, useMediaQuery, Card, Stack } from '@mui/material'
+import {
+  Box,
+  Container,
+  Grid2 as Grid,
+  Typography,
+  Button,
+  Paper,
+  SvgIcon,
+  useMediaQuery,
+  Card,
+  Stack,
+} from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useTheme } from '@mui/material/styles'
 import type { TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
@@ -35,25 +46,14 @@ export const TxLayoutHeader = ({
 
   return (
     <Box className={css.headerInner}>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-        }}
-      >
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
         {icon && (
           <div className={css.icon}>
             <SvgIcon component={icon} inheritViewBox />
           </div>
         )}
 
-        <Typography
-          variant="h4"
-          component="div"
-          sx={{
-            fontWeight: 'bold',
-          }}
-        >
+        <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
           {subtitle}
         </Typography>
       </Box>
@@ -62,10 +62,7 @@ export const TxLayoutHeader = ({
   )
 }
 
-export type TxStep = {
-  txLayoutProps: Omit<TxLayoutProps, 'children'>
-  content: ReactElement
-}
+export type TxStep = { txLayoutProps: Omit<TxLayoutProps, 'children'>; content: ReactElement }
 
 type TxLayoutProps = {
   title: ReactNode
@@ -110,7 +107,7 @@ const TxLayout = ({
         <TxSecurityProvider>
           <Stack direction="row" gap={3} className={css.container}>
             {!isReplacement && !isSmallScreen && (
-              <aside style={{ minWidth: 220, paddingTop: '46px' }}>
+              <aside style={{ minWidth: 200, paddingTop: '46px' }}>
                 <Stack gap={3} position="fixed">
                   <Card
                     sx={{
@@ -139,7 +136,7 @@ const TxLayout = ({
               <Container className={css.contentContainer}>
                 <Grid container spacing={3} justifyContent="center">
                   {/* Main content */}
-                  <Grid item xs={12} md={8}>
+                  <Grid size={{ xs: 12, md: 7.5, lg: 8.63 }}>
                     <div className={css.titleWrapper}>
                       <Typography
                         data-testid="modal-title"
@@ -183,7 +180,7 @@ const TxLayout = ({
 
                   {/* Sidebar */}
                   {!isReplacement && (
-                    <Grid item xs={12} md={4} className={classnames(css.widget)}>
+                    <Grid size={{ xs: 12, md: 4.5, lg: 3.37 }} className={classnames(css.widget)}>
                       <Box className={css.sticky}>
                         <SafeShieldWidget />
                         <SecurityWarnings />
