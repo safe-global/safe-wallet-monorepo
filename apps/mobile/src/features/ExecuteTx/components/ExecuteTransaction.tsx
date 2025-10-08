@@ -9,11 +9,13 @@ import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useTransactionGuard } from '@/src/hooks/useTransactionGuard'
 import { parseFeeParams } from '@/src/utils/feeParams'
+import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 
 export function ExecuteTransaction() {
-  const { txId, maxFeePerGas, maxPriorityFeePerGas, gasLimit, nonce } = useLocalSearchParams<{
+  const { txId, maxFeePerGas, executionMethod, maxPriorityFeePerGas, gasLimit, nonce } = useLocalSearchParams<{
     txId: string
     maxFeePerGas: string
+    executionMethod: ExecutionMethod
     maxPriorityFeePerGas: string
     gasLimit: string
     nonce: string
@@ -27,15 +29,20 @@ export function ExecuteTransaction() {
   const activeSafe = useDefinedActiveSafe()
   const activeSigner = useAppSelector((state) => selectActiveSigner(state, activeSafe.address))
   const { guard: canExecute } = useTransactionGuard('executing')
-  const { status, executeTx, retry } = useTransactionExecutionWithPK({
+  const { status, executeTx, retry, executeInRelay } = useTransactionExecutionWithPK({
     txId: txId || '',
+    executionMethod,
     signerAddress: activeSigner?.value || '',
     feeParams,
   })
 
   useEffect(() => {
-    if (canExecute && status === ExecutionStatus.IDLE && txId && activeSigner) {
-      executeTx()
+    if (canExecute && status === ExecutionStatus.IDLE && txId) {
+      if (executionMethod === ExecutionMethod.RELAYER) {
+        executeInRelay()
+      } else if (activeSigner) {
+        executeTx()
+      }
     }
   }, [canExecute, status, feeParams, executeTx, txId, activeSigner])
 

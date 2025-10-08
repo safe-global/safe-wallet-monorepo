@@ -180,6 +180,14 @@ function RootLayout() {
                               }}
                             />
                             <Stack.Screen
+                              name="how-to-execute-sheet"
+                              options={{
+                                headerShown: false,
+                                presentation: 'transparentModal',
+                                animation: 'fade',
+                              }}
+                            />
+                            <Stack.Screen
                               name="notifications-opt-in"
                               options={{
                                 headerShown: false,
