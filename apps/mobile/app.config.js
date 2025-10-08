@@ -43,6 +43,8 @@ const config = {
       AppGroup: IS_DEV ? 'group.global.safe.mobileapp.ios.dev' : 'group.global.safe.mobileapp.ios',
       // https://github.com/expo/expo/issues/39739
       UIDesignRequiresCompatibility: true,
+      // https://github.com/react-native-share/react-native-share/issues/1669
+      NSPhotoLibraryUsageDescription: 'Allow access to photo library to share images.',
     },
     supportsTablet: false,
     appleTeamId: appleDevTeamId,
@@ -138,8 +140,8 @@ const config = {
     [
       'react-native-share',
       {
-        ios: ['fb', 'instagram', 'twitter', 'tiktoksharesdk'],
-        android: ['com.facebook.katana', 'com.instagram.android', 'com.twitter.android', 'com.zhiliaoapp.musically'],
+        ios: ['fb', 'twitter', 'tiktoksharesdk'],
+        android: ['com.facebook.katana', 'com.twitter.android', 'com.zhiliaoapp.musically'],
         enableBase64ShareAndroid: true,
       },
     ],
