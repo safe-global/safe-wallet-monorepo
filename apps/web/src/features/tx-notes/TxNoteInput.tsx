@@ -1,8 +1,7 @@
 import { useCallback } from 'react'
-import { InputAdornment, Stack, TextField, Typography, SvgIcon, Box } from '@mui/material'
+import { InputAdornment, Stack, TextField, Typography } from '@mui/material'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useForm } from 'react-hook-form'
-import InfoOutlinedIcon from '@/public/images/notifications/info.svg'
 
 const MAX_NOTE_LENGTH = 60
 
