@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
@@ -35,45 +34,44 @@ export const useAddressBookCheck = (address: string | undefined): UseAddressBook
   const mergedAddressBooks = useMergedAddressBooks(chainId)
   const ownedSafes = useOwnedSafes(chainId)
 
-  const [result, error, loading] = useAsync<Omit<UseAddressBookCheckReturn, 'loading' | 'error'> | undefined>(
-    async () => {
-      if (!address) {
-        return undefined
-      }
+  const [result, error, loading] = useAsync<
+    Omit<UseAddressBookCheckReturn, 'loading' | 'error'> | undefined
+  >(async () => {
+    if (!address) {
+      return undefined
+    }
 
-      // Check if address is in merged address book (local or spaces)
-      const isAddressBookContact = mergedAddressBooks.has(address, chainId)
+    // Check if address is in merged address book (local or spaces)
+    const isAddressBookContact = mergedAddressBooks.has(address, chainId)
 
-      // Check if address is a Safe owned by the currently connected wallet
-      const currentChainSafes = ownedSafes[chainId] || []
-      const isOwnedSafe = currentChainSafes.some((safe) => safe.toLowerCase() === address.toLowerCase())
+    // Check if address is a Safe owned by the currently connected wallet
+    const currentChainSafes = ownedSafes[chainId] || []
+    const isOwnedSafe = currentChainSafes.some((safe) => safe.toLowerCase() === address.toLowerCase())
 
-      // Determine if address is known from any source
-      const isKnownAddress = isAddressBookContact || isOwnedSafe
+    // Determine if address is known from any source
+    const isKnownAddress = isAddressBookContact || isOwnedSafe
 
-      // Determine description based on checks (priority: address book > owned safe > unknown)
-      let description: AddressCheckDescription
-      if (isAddressBookContact) {
-        description = AddressCheckDescription.ADDRESS_BOOK
-      } else if (isOwnedSafe) {
-        description = AddressCheckDescription.OWNED_SAFE
-      } else {
-        description = AddressCheckDescription.UNKNOWN
-      }
+    // Determine description based on checks (priority: address book > owned safe > unknown)
+    let description: AddressCheckDescription
+    if (isAddressBookContact) {
+      description = AddressCheckDescription.ADDRESS_BOOK
+    } else if (isOwnedSafe) {
+      description = AddressCheckDescription.OWNED_SAFE
+    } else {
+      description = AddressCheckDescription.UNKNOWN
+    }
 
-      // Determine severity
-      const severity = isKnownAddress ? AddressCheckSeverity.OK : AddressCheckSeverity.INFO
+    // Determine severity
+    const severity = isKnownAddress ? AddressCheckSeverity.OK : AddressCheckSeverity.INFO
 
-      return {
-        isKnownAddress,
-        isAddressBookContact,
-        isOwnedSafe,
-        description,
-        severity,
-      }
-    },
-    [address, chainId, mergedAddressBooks, ownedSafes],
-  )
+    return {
+      isKnownAddress,
+      isAddressBookContact,
+      isOwnedSafe,
+      description,
+      severity,
+    }
+  }, [address, chainId, mergedAddressBooks, ownedSafes])
 
   return {
     isKnownAddress: result?.isKnownAddress ?? false,
