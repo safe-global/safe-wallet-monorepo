@@ -4,16 +4,20 @@ import {
   type DeviceManagementKit,
   type DeviceSessionId,
   type DiscoveredDevice,
+  DeviceStatus,
 } from '@ledgerhq/device-management-kit'
 import { RNBleTransportFactory } from '@ledgerhq/device-transport-kit-react-native-ble'
 import logger from '@/src/utils/logger'
+import type { Subscription } from 'rxjs'
 
 export class LedgerDMKService {
   private static instance: LedgerDMKService
   private dmk: DeviceManagementKit
   private currentSession: DeviceSessionId | null = null
+  private sessionStateSubscription: Subscription | null = null
   private scanningSubscription: { unsubscribe: () => void } | null = null
   private connectionLock: Promise<DeviceSessionId> | null = null
+  private isDiscovering = false
 
   private constructor() {
     this.dmk = new DeviceManagementKitBuilder()
@@ -37,6 +41,10 @@ export class LedgerDMKService {
     this.stopScanning()
 
     try {
+      // Start BLE discovery
+      this.dmk.startDiscovering({})
+      this.isDiscovering = true
+
       const subscription = this.dmk.listenToAvailableDevices({}).subscribe({
         next: (availableDevices: DiscoveredDevice[]) => {
           // Filter for Ledger devices and call onDeviceFound for each
@@ -47,6 +55,7 @@ export class LedgerDMKService {
         error: (error: Error) => {
           logger.error('Ledger device scanning error:', error)
           this.scanningSubscription = null
+          this.isDiscovering = false
           onError(error)
         },
       })
@@ -57,8 +66,14 @@ export class LedgerDMKService {
       return () => {
         subscription.unsubscribe()
         this.scanningSubscription = null
+        // Actually stop the BLE scan if it's running
+        if (this.isDiscovering) {
+          this.isDiscovering = false
+          this.dmk.stopDiscovering().catch((err) => logger.error('Error stopping discovery:', err))
+        }
       }
     } catch (error) {
+      this.isDiscovering = false
       onError(error instanceof Error ? error : new Error('Failed to start scanning'))
       return () => {
         // Cleanup function for error case
@@ -73,6 +88,11 @@ export class LedgerDMKService {
     if (this.scanningSubscription) {
       this.scanningSubscription.unsubscribe()
       this.scanningSubscription = null
+    }
+    // Stop the actual BLE discovery if it's running
+    if (this.isDiscovering) {
+      this.isDiscovering = false
+      this.dmk.stopDiscovering().catch((err) => logger.error('Error stopping discovery:', err))
     }
   }
 
@@ -118,22 +138,38 @@ export class LedgerDMKService {
 
       // Check if we already have an active session
       if (this.currentSession) {
-        try {
-          const connectedDevice = this.dmk.getConnectedDevice({ sessionId: this.currentSession })
+        // First check if the session is actually valid
+        const isValid = await this.isSessionValid(this.currentSession)
 
-          if (connectedDevice.id === device.id) {
-            return this.currentSession
+        if (isValid) {
+          try {
+            const connectedDevice = this.dmk.getConnectedDevice({ sessionId: this.currentSession })
+
+            if (connectedDevice.id === device.id) {
+              return this.currentSession
+            }
+
+            // Valid session but different device - properly disconnect
+            logger.info('Disconnecting from different device')
+            await this.disconnect()
+          } catch (error) {
+            logger.warn('Failed to get connected device, clearing stale session:', error)
+            this.clearSession()
           }
-        } catch (error) {
-          logger.warn('Failed to get connected device, session might be stale:', error)
+        } else {
+          // Session is stale/invalid - just clear it without attempting disconnect
+          logger.info('Clearing stale session before reconnecting')
+          this.clearSession()
         }
-
-        await this.disconnect()
       }
 
       // Connect to the new device
       const session = await this.dmk.connect({ device })
       this.currentSession = session
+
+      // Start monitoring the session state for disconnections
+      this.startMonitoringSession(session)
+
       return session
     } catch (error) {
       // Only expose safe error information to prevent leaking sensitive data
@@ -148,13 +184,94 @@ export class LedgerDMKService {
   }
 
   /**
+   * Check if a session is still valid by verifying device connection status
+   */
+  private async isSessionValid(sessionId: DeviceSessionId): Promise<boolean> {
+    try {
+      const state$ = this.dmk.getDeviceSessionState({ sessionId })
+
+      // Get the current state from the observable
+      // Note: We don't manually unsubscribe here. The observable should emit once
+      // and complete, and the subscription will be garbage collected after resolution.
+      return await new Promise<boolean>((resolve) => {
+        state$.subscribe({
+          next: (state) => {
+            resolve(state.deviceStatus !== DeviceStatus.NOT_CONNECTED)
+          },
+          error: () => {
+            resolve(false)
+          },
+          complete: () => {
+            resolve(false)
+          },
+        })
+      })
+    } catch (error) {
+      logger.warn('Failed to check session validity:', error)
+      return false
+    }
+  }
+
+  /**
+   * Start monitoring session state for disconnections
+   */
+  private startMonitoringSession(sessionId: DeviceSessionId): void {
+    // Clean up any existing subscription
+    this.stopMonitoringSession()
+
+    try {
+      this.sessionStateSubscription = this.dmk.getDeviceSessionState({ sessionId }).subscribe({
+        next: (state) => {
+          if (state.deviceStatus === DeviceStatus.NOT_CONNECTED) {
+            logger.info('Device disconnected, clearing session')
+            this.clearSession()
+          }
+        },
+        error: (error) => {
+          logger.warn('Session state error, clearing session:', error)
+          this.clearSession()
+        },
+        complete: () => {
+          logger.info('Session state observable completed, clearing session')
+          this.clearSession()
+        },
+      })
+    } catch (error) {
+      logger.error('Failed to start monitoring session:', error)
+    }
+  }
+
+  /**
+   * Stop monitoring session state
+   */
+  private stopMonitoringSession(): void {
+    if (this.sessionStateSubscription) {
+      this.sessionStateSubscription.unsubscribe()
+      this.sessionStateSubscription = null
+    }
+  }
+
+  /**
+   * Clear the current session without attempting to disconnect
+   * Use this when the device is already disconnected or session is stale
+   */
+  private clearSession(): void {
+    this.stopMonitoringSession()
+    this.currentSession = null
+  }
+
+  /**
    * Disconnect from the current device
    */
   public async disconnect(): Promise<void> {
     if (this.currentSession) {
+      const sessionToDisconnect = this.currentSession
+
+      // Clear session and stop monitoring first
+      this.clearSession()
+
       try {
-        await this.dmk.disconnect({ sessionId: this.currentSession })
-        this.currentSession = null
+        await this.dmk.disconnect({ sessionId: sessionToDisconnect })
       } catch (error) {
         logger.error('Error disconnecting:', error)
         throw error
@@ -175,6 +292,9 @@ export class LedgerDMKService {
   public dispose(): void {
     // Clear any pending connection lock
     this.connectionLock = null
+
+    // Stop monitoring
+    this.stopMonitoringSession()
 
     if (this.currentSession) {
       this.disconnect().catch((error) => logger.error('Error during cleanup disconnect:', error))
