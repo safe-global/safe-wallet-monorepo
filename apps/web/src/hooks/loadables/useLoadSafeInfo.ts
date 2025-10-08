@@ -6,12 +6,12 @@ import { getSafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useChainId } from '../useChainId'
-import useIntervalCounter from '../useIntervalCounter'
 import useSafeInfo from '../useSafeInfo'
 import { Errors, logError } from '@/services/exceptions'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { useCurrentChain } from '../useChains'
 import { useSafeAddressFromUrl } from '../useSafeAddressFromUrl'
+import { useIntervalCounter } from '@safe-global/utils/hooks/useIntervalCounter'
 
 export const useLoadSafeInfo = (): AsyncResult<SafeState> => {
   const address = useSafeAddressFromUrl()
