@@ -1,23 +1,23 @@
 import { useEffect } from 'react'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import useChainId from '@/hooks/useChainId'
 import { analyzeAddressActivity, type AddressActivityAssessment } from './addressActivityService'
 
 /**
  * React hook to analyze address activity
  * @param address - Ethereum address to analyze
- * @param chainId - Chain ID to analyze on (optional, for future multi-chain support)
  * @returns Object containing activity assessment, loading state, and error
  */
 export const useAddressActivity = (
   address: string | undefined,
-  chainId?: string,
 ): {
   assessment?: AddressActivityAssessment
   loading: boolean
   error?: Error
 } => {
   const web3ReadOnly = useWeb3ReadOnly()
+  const chainId = useChainId()
 
   const [assessment, error, loading] = useAsync<AddressActivityAssessment | undefined>(async () => {
     if (!address || !web3ReadOnly) {
