@@ -2,6 +2,7 @@ export { useAddressActivity } from './useAddressActivity'
 export {
   analyzeAddressActivity,
   isLowActivityAddress,
-  ACTIVITY_THRESHOLDS,
   type AddressActivityAssessment,
+  type ActivityLevel,
 } from './addressActivityService'
+export { ACTIVITY_THRESHOLDS, ActivityMessages } from './config'
