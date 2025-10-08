@@ -12,7 +12,7 @@ import {
 import { SafeOverview } from './AUTO_GENERATED/safes'
 import { MessageItem, MessagePage, TypedData } from './AUTO_GENERATED/messages'
 
-export declare enum Operation {
+export enum Operation {
   CALL = 0,
   DELEGATE = 1,
 }
