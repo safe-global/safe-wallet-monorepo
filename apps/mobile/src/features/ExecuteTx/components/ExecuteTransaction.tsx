@@ -39,22 +39,48 @@ export function ExecuteTransaction() {
     }
   }, [canExecute, status, feeParams, executeTx, txId, activeSigner])
 
+  const handleViewTransaction = () => {
+    router.dismissTo({
+      pathname: '/confirm-transaction',
+      params: {
+        txId,
+      },
+    })
+  }
   if (!txId) {
     const handleRetry = () => {
       console.error('Cannot retry: missing transaction ID')
     }
-    return <ExecuteError description="Missing transaction ID" onRetryPress={handleRetry} />
+    return (
+      <ExecuteError
+        description="Missing transaction ID"
+        onRetryPress={handleRetry}
+        onViewTransactionPress={handleViewTransaction}
+      />
+    )
   }
 
   if (!activeSigner) {
     const handleRetry = () => {
       console.error('Cannot retry: no active signer')
     }
-    return <ExecuteError description="No signer selected" onRetryPress={handleRetry} />
+    return (
+      <ExecuteError
+        description="No signer selected"
+        onRetryPress={handleRetry}
+        onViewTransactionPress={handleViewTransaction}
+      />
+    )
   }
 
   if (status === ExecutionStatus.ERROR) {
-    return <ExecuteError onRetryPress={retry} description="There was an error executing the transaction." />
+    return (
+      <ExecuteError
+        onRetryPress={retry}
+        description="There was an error executing the transaction."
+        onViewTransactionPress={handleViewTransaction}
+      />
+    )
   }
 
   if (status === ExecutionStatus.PROCESSING) {

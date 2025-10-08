@@ -14,15 +14,18 @@ const useGasFee = (
   const chain = useAppSelector(selectActiveChain)
   const estimatedFeeParams = useFeeParams(txDetails, manualParams, settings)
 
+  const totalFeeRaw = getTotalFee(estimatedFeeParams.maxFeePerGas ?? 0n, estimatedFeeParams.gasLimit ?? 0n)
   const totalFee =
     estimatedFeeParams.isLoadingGasPrice || estimatedFeeParams.gasLimitLoading
       ? 'loading...'
-      : formatVisualAmount(
-          getTotalFee(estimatedFeeParams.maxFeePerGas ?? 0n, estimatedFeeParams.gasLimit ?? 0n),
-          chain?.nativeCurrency.decimals,
-        )
+      : formatVisualAmount(totalFeeRaw, chain?.nativeCurrency.decimals)
 
-  return { totalFee, estimatedFeeParams }
+  return {
+    totalFee,
+    totalFeeRaw,
+    totalFeeEth: formatVisualAmount(totalFeeRaw, chain?.nativeCurrency.decimals, chain?.nativeCurrency.decimals),
+    estimatedFeeParams,
+  }
 }
 
 export default useGasFee

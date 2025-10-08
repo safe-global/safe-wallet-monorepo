@@ -1,8 +1,11 @@
 import React from 'react'
 import type { DiscoveredDevice } from '@ledgerhq/device-management-kit'
 import { LedgerPairing } from '@/src/features/Ledger/components/LedgerPairing'
+import { getTokenValue, View } from 'tamagui'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export const LedgerPairingExecuteContainer = () => {
+  const { bottom } = useSafeAreaInsets()
   const navigationConfig = {
     pathname: '/execute-transaction/ledger-review',
     getParams: (device: DiscoveredDevice, sessionId: string, searchParams?: Record<string, string>) => ({
@@ -12,5 +15,9 @@ export const LedgerPairingExecuteContainer = () => {
     }),
   }
 
-  return <LedgerPairing navigationConfig={navigationConfig} />
+  return (
+    <View flex={1} paddingBottom={Math.max(bottom, getTokenValue('$4'))}>
+      <LedgerPairing navigationConfig={navigationConfig} />
+    </View>
+  )
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { View, Text, ScrollView, getTokenValue } from 'tamagui'
-import { router, useLocalSearchParams, useGlobalSearchParams } from 'expo-router'
+import { View, Text, ScrollView, getTokenValue, YStack } from 'tamagui'
+import { router, useLocalSearchParams, useGlobalSearchParams, useNavigation } from 'expo-router'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector, useAppDispatch } from '@/src/store/hooks'
 import { selectChainById } from '@/src/store/chains'
@@ -20,8 +20,12 @@ import { addPendingTx } from '@/src/store/pendingTxsSlice'
 import { getUserNonce } from '@/src/services/web3'
 import { ExecuteProcessing } from '@/src/features/ExecuteTx/components/ExecuteProcessing'
 import { ExecuteError } from '@/src/features/ExecuteTx/components/ExecuteError'
-import { LoadingScreen } from '@/src/components/LoadingScreen'
 import { parseFeeParams } from '@/src/utils/feeParams'
+import { Container } from '@/src/components/Container'
+import useGasFee from '../ExecuteTx/hooks/useGasFee'
+import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { LargeHeaderTitle, NavBarTitle } from '@/src/components/Title'
+import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 
 enum ExecutionState {
   REVIEW = 'review',
@@ -47,8 +51,18 @@ export const LedgerReviewExecuteContainer = () => {
   const [executionState, setExecutionState] = useState<ExecutionState>(ExecutionState.REVIEW)
   const [error, setError] = useState<string | null>(null)
   const dispatch = useAppDispatch()
-
+  const { handleScroll } = useScrollableHeader({
+    children: (
+      <>
+        <NavBarTitle numberOfLines={1}>Review and execute transaction on Ledger</NavBarTitle>
+      </>
+    ),
+  })
+  const navigation = useNavigation()
   const feeParams = useMemo(() => parseFeeParams(globalParams), [globalParams])
+  // We are so deep in the stack and have already called useTransactionData multiple time
+  // so chances that txDetails here is undefined are really slim
+  const { totalFeeEth } = useGasFee(txDetails || ({} as TransactionDetails), feeParams)
 
   const messageHash = useMemo(() => {
     try {
@@ -124,6 +138,13 @@ export const LedgerReviewExecuteContainer = () => {
     }
   }
 
+  useEffect(() => {
+    if ([ExecutionState.ERROR, ExecutionState.PROCESSING].includes(executionState)) {
+      navigation.setOptions({ headerShown: false })
+    }
+    return () => navigation.setOptions({ headerShown: true })
+  }, [executionState])
+
   const handleRetry = () => {
     setExecutionState(ExecutionState.REVIEW)
     setError(null)
@@ -139,7 +160,20 @@ export const LedgerReviewExecuteContainer = () => {
 
   // Show error state
   if (executionState === ExecutionState.ERROR) {
-    return <ExecuteError onRetryPress={handleRetry} description={error || 'Failed to execute with Ledger'} />
+    return (
+      <ExecuteError
+        onRetryPress={handleRetry}
+        onViewTransactionPress={() => {
+          router.dismissTo({
+            pathname: '/confirm-transaction',
+            params: {
+              txId,
+            },
+          })
+        }}
+        description={error || 'Failed to execute with Ledger'}
+      />
+    )
   }
 
   // Show processing state (transaction submitted successfully)
@@ -155,47 +189,62 @@ export const LedgerReviewExecuteContainer = () => {
     )
   }
 
-  // Show executing state (waiting for Ledger device)
-  if (executionState === ExecutionState.EXECUTING) {
-    return <LoadingScreen title="Executing on Ledger..." description="Please confirm on your device" />
-  }
-
   // Show review state (default)
   return (
     <View flex={1} padding="$4" gap="$4" paddingBottom={Math.max(bottom, getTokenValue('$4'))}>
-      <ScrollView>
-        <Text fontSize="$9" fontWeight="600" color="$color" numberOfLines={2}>
-          Review and execute transaction on Ledger
-        </Text>
+      <ScrollView onScroll={handleScroll}>
+        <LargeHeaderTitle marginRight={5}>Review and execute transaction on Ledger</LargeHeaderTitle>
 
-        <View backgroundColor="$backgroundPaper" borderRadius="$4" padding="$4" gap="$4">
-          <View>
+        <Container borderRadius="$4" padding="$4" gap="$4" marginTop="$4">
+          <YStack gap="$2">
             <Text fontSize="$3" color="$colorSecondary">
-              chainId
+              From
             </Text>
             <Text fontSize="$5" color="$color">
-              {chain?.chainId}
+              {activeSigner?.value}
             </Text>
-          </View>
-          <View>
+          </YStack>
+          <YStack gap="$2">
             <Text fontSize="$3" color="$colorSecondary">
-              verifyingContract
+              To
             </Text>
             <Text fontSize="$5" color="$color">
               {activeSafe.address}
             </Text>
-          </View>
-          <View>
+          </YStack>
+          <YStack gap="$2">
             <Text fontSize="$3" color="$colorSecondary">
-              messageHash
+              Max fees
+            </Text>
+            <Text fontSize="$5" color="$color">
+              {totalFeeEth}
+            </Text>
+          </YStack>
+          <YStack gap="$2">
+            <Text fontSize="$3" color="$colorSecondary">
+              Network
+            </Text>
+            <Text fontSize="$5" color="$color">
+              {chain?.chainName}
+            </Text>
+          </YStack>
+          <YStack gap="$2">
+            <Text fontSize="$3" color="$colorSecondary">
+              MessageHash
             </Text>
             <Text fontSize="$5" color="$color">
               {messageHash || '—'}
             </Text>
-          </View>
-        </View>
+          </YStack>
+        </Container>
       </ScrollView>
-      <SafeButton onPress={handleExecute}>Continue on Ledger</SafeButton>
+      <SafeButton
+        onPress={handleExecute}
+        icon={executionState === ExecutionState.EXECUTING ? <Loader size={18} thickness={2} /> : null}
+        disabled={executionState === ExecutionState.EXECUTING}
+      >
+        {executionState === ExecutionState.EXECUTING ? 'Execute on Ledger...' : 'Continue on Ledger'}
+      </SafeButton>
     </View>
   )
 }
