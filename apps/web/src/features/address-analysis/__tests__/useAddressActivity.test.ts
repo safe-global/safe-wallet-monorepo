@@ -1,11 +1,11 @@
 import { faker } from '@faker-js/faker'
 import { renderHook, waitFor } from '@testing-library/react'
 import type { JsonRpcProvider } from 'ethers'
-import { useAddressActivity } from '../useAddressActivity'
+import { useAddressActivityCheck } from '../useAddressActivity'
 import * as web3 from '@/hooks/wallets/web3'
 import { ActivityMessages } from '../config'
 
-describe('useAddressActivity', () => {
+describe('useAddressActivityCheck', () => {
   const mockProvider = (txCount: number) =>
     ({
       getTransactionCount: jest.fn().mockResolvedValue(txCount),
@@ -18,7 +18,7 @@ describe('useAddressActivity', () => {
   it('should return undefined when address is not provided', async () => {
     jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockProvider(0))
 
-    const { result } = renderHook(() => useAddressActivity(undefined))
+    const { result } = renderHook(() => useAddressActivityCheck(undefined))
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
@@ -27,13 +27,14 @@ describe('useAddressActivity', () => {
     expect(result.current.assessment).toBeUndefined()
     expect(result.current.title).toBeUndefined()
     expect(result.current.description).toBeUndefined()
+    expect(result.current.severity).toBeUndefined()
   })
 
   it('should return undefined when provider is not available', async () => {
     jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(undefined as unknown as JsonRpcProvider)
 
     const address = faker.finance.ethereumAddress()
-    const { result } = renderHook(() => useAddressActivity(address))
+    const { result } = renderHook(() => useAddressActivityCheck(address))
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
@@ -46,7 +47,7 @@ describe('useAddressActivity', () => {
     const address = faker.finance.ethereumAddress()
     jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockProvider(0))
 
-    const { result } = renderHook(() => useAddressActivity(address))
+    const { result } = renderHook(() => useAddressActivityCheck(address))
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
@@ -58,6 +59,7 @@ describe('useAddressActivity', () => {
     })
     expect(result.current.title).toBe(ActivityMessages.NO_ACTIVITY.title)
     expect(result.current.description).toBe(ActivityMessages.NO_ACTIVITY.description)
+    expect(result.current.severity).toBe('INFO')
     expect(result.current.error).toBeUndefined()
   })
 
@@ -65,7 +67,7 @@ describe('useAddressActivity', () => {
     const address = faker.finance.ethereumAddress()
     jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockProvider(3))
 
-    const { result } = renderHook(() => useAddressActivity(address))
+    const { result } = renderHook(() => useAddressActivityCheck(address))
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
@@ -77,13 +79,14 @@ describe('useAddressActivity', () => {
     })
     expect(result.current.title).toBe(ActivityMessages.VERY_LOW_ACTIVITY.title)
     expect(result.current.description).toBe(ActivityMessages.VERY_LOW_ACTIVITY.description)
+    expect(result.current.severity).toBe('WARN')
   })
 
   it('should return LOW_ACTIVITY assessment with corresponding title and description', async () => {
     const address = faker.finance.ethereumAddress()
     jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockProvider(10))
 
-    const { result } = renderHook(() => useAddressActivity(address))
+    const { result } = renderHook(() => useAddressActivityCheck(address))
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
@@ -95,13 +98,14 @@ describe('useAddressActivity', () => {
     })
     expect(result.current.title).toBe(ActivityMessages.LOW_ACTIVITY.title)
     expect(result.current.description).toBe(ActivityMessages.LOW_ACTIVITY.description)
+    expect(result.current.severity).toBe('WARN')
   })
 
   it('should return MODERATE_ACTIVITY assessment with corresponding title and description', async () => {
     const address = faker.finance.ethereumAddress()
     jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockProvider(50))
 
-    const { result } = renderHook(() => useAddressActivity(address))
+    const { result } = renderHook(() => useAddressActivityCheck(address))
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
@@ -113,13 +117,14 @@ describe('useAddressActivity', () => {
     })
     expect(result.current.title).toBe(ActivityMessages.MODERATE_ACTIVITY.title)
     expect(result.current.description).toBe(ActivityMessages.MODERATE_ACTIVITY.description)
+    expect(result.current.severity).toBe('INFO')
   })
 
   it('should return HIGH_ACTIVITY assessment with corresponding title and description', async () => {
     const address = faker.finance.ethereumAddress()
     jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockProvider(250))
 
-    const { result } = renderHook(() => useAddressActivity(address))
+    const { result } = renderHook(() => useAddressActivityCheck(address))
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
@@ -131,6 +136,7 @@ describe('useAddressActivity', () => {
     })
     expect(result.current.title).toBe(ActivityMessages.HIGH_ACTIVITY.title)
     expect(result.current.description).toBe(ActivityMessages.HIGH_ACTIVITY.description)
+    expect(result.current.severity).toBe('INFO')
   })
 
   it('should handle errors gracefully', async () => {
@@ -143,7 +149,7 @@ describe('useAddressActivity', () => {
     jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(provider)
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
 
-    const { result } = renderHook(() => useAddressActivity(address))
+    const { result } = renderHook(() => useAddressActivityCheck(address))
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
@@ -167,7 +173,7 @@ describe('useAddressActivity', () => {
 
     jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(provider)
 
-    const { result, rerender } = renderHook(({ addr }) => useAddressActivity(addr), {
+    const { result, rerender } = renderHook(({ addr }) => useAddressActivityCheck(addr), {
       initialProps: { addr: address1 },
     })
 
@@ -177,6 +183,7 @@ describe('useAddressActivity', () => {
 
     expect(result.current.assessment?.txCount).toBe(5)
     expect(result.current.assessment?.activityLevel).toBe('LOW_ACTIVITY')
+    expect(result.current.severity).toBe('WARN')
 
     rerender({ addr: address2 })
 
@@ -185,6 +192,7 @@ describe('useAddressActivity', () => {
     })
 
     expect(result.current.assessment?.activityLevel).toBe('HIGH_ACTIVITY')
+    expect(result.current.severity).toBe('INFO')
     expect(mockGetTransactionCount).toHaveBeenCalledTimes(2)
   })
 
@@ -195,13 +203,14 @@ describe('useAddressActivity', () => {
 
     const useWeb3ReadOnlySpy = jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(provider1)
 
-    const { result, rerender } = renderHook(() => useAddressActivity(address))
+    const { result, rerender } = renderHook(() => useAddressActivityCheck(address))
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
     })
 
     expect(result.current.assessment?.txCount).toBe(10)
+    expect(result.current.severity).toBe('WARN')
 
     useWeb3ReadOnlySpy.mockReturnValue(provider2)
     rerender()
@@ -209,5 +218,7 @@ describe('useAddressActivity', () => {
     await waitFor(() => {
       expect(result.current.assessment?.txCount).toBe(50)
     })
+
+    expect(result.current.severity).toBe('INFO')
   })
 })
