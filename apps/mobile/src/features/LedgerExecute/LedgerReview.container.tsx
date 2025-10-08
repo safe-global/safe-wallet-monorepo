@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { View, Text, ScrollView, getTokenValue } from 'tamagui'
-import { useLocalSearchParams } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector, useAppDispatch } from '@/src/store/hooks'
 import { selectChainById } from '@/src/store/chains'
@@ -134,7 +134,15 @@ export const LedgerReviewExecuteContainer = () => {
 
   // Show processing state (transaction submitted successfully)
   if (executionState === ExecutionState.PROCESSING) {
-    return <ExecuteProcessing />
+    return (
+      <ExecuteProcessing
+        handleHomePress={() => {
+          // We create several router contexts and we need to dismiss once the ledger navigation & then the execute navigation
+          router.dismissAll()
+          router.dismissAll()
+        }}
+      />
+    )
   }
 
   // Show executing state (waiting for Ledger device)

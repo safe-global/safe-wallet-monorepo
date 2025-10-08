@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AbsoluteLinearGradient } from '@/src/components/LinearGradient'
 import { useTheme } from '@/src/theme/hooks/useTheme'
 
-export function ExecuteProcessing() {
+export function ExecuteProcessing({ handleHomePress }: { handleHomePress: () => void }) {
   const { txId } = useLocalSearchParams<{ txId: string }>()
   const { bottom } = useSafeAreaInsets()
   const { isDark } = useTheme()
@@ -23,10 +23,6 @@ export function ExecuteProcessing() {
         txId,
       },
     })
-  }
-
-  const handleHomePress = () => {
-    router.dismissAll()
   }
 
   return (

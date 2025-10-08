@@ -1,6 +1,6 @@
 import { LoadingScreen } from '@/src/components/LoadingScreen'
 import React, { useEffect, useMemo } from 'react'
-import { useLocalSearchParams } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import { ExecuteError } from './ExecuteError'
 import { ExecuteProcessing } from '@/src/features/ExecuteTx/components/ExecuteProcessing'
 import { ExecutionStatus, useTransactionExecutionWithPK } from '../hooks/useTransactionExecutionWithPK'
@@ -65,7 +65,13 @@ export function ExecuteTransaction() {
   }
 
   if (status === ExecutionStatus.PROCESSING) {
-    return <ExecuteProcessing />
+    return (
+      <ExecuteProcessing
+        handleHomePress={() => {
+          router.dismissAll()
+        }}
+      />
+    )
   }
 
   return <LoadingScreen title="Executing transaction..." description="It may take a few seconds..." />
