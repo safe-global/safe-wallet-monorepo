@@ -3,7 +3,6 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { JsonRpcProvider } from 'ethers'
 import { useAddressActivity } from '../useAddressActivity'
 import * as web3 from '@/hooks/wallets/web3'
-import * as useChainIdHook from '@/hooks/useChainId'
 import { ActivityMessages } from '../config'
 
 describe('useAddressActivity', () => {
@@ -14,7 +13,6 @@ describe('useAddressActivity', () => {
 
   beforeEach(() => {
     jest.resetAllMocks()
-    jest.spyOn(useChainIdHook, 'default').mockReturnValue('1')
   })
 
   it('should return undefined when address is not provided', async () => {
@@ -190,15 +188,12 @@ describe('useAddressActivity', () => {
     expect(mockGetTransactionCount).toHaveBeenCalledTimes(2)
   })
 
-  it('should re-fetch when chainId changes', async () => {
+  it('should re-fetch when web3ReadOnly changes', async () => {
     const address = faker.finance.ethereumAddress()
-    const mockGetTransactionCount = jest.fn().mockResolvedValueOnce(10).mockResolvedValueOnce(50)
-    const provider = {
-      getTransactionCount: mockGetTransactionCount,
-    } as unknown as JsonRpcProvider
+    const provider1 = mockProvider(10)
+    const provider2 = mockProvider(50)
 
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(provider)
-    const useChainIdSpy = jest.spyOn(useChainIdHook, 'default').mockReturnValue('1')
+    const useWeb3ReadOnlySpy = jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(provider1)
 
     const { result, rerender } = renderHook(() => useAddressActivity(address))
 
@@ -208,13 +203,11 @@ describe('useAddressActivity', () => {
 
     expect(result.current.assessment?.txCount).toBe(10)
 
-    useChainIdSpy.mockReturnValue('137')
+    useWeb3ReadOnlySpy.mockReturnValue(provider2)
     rerender()
 
     await waitFor(() => {
       expect(result.current.assessment?.txCount).toBe(50)
     })
-
-    expect(mockGetTransactionCount).toHaveBeenCalledTimes(2)
   })
 })

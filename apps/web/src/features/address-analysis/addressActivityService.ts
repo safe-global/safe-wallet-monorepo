@@ -62,7 +62,9 @@ export const analyzeAddressActivity = async (
  * @returns True if the address has suspiciously low activity
  */
 export const isLowActivityAddress = (assessment: AddressActivityAssessment): boolean => {
-  return assessment.activityLevel === 'NO_ACTIVITY' ||
-         assessment.activityLevel === 'VERY_LOW_ACTIVITY' ||
-         assessment.activityLevel === 'LOW_ACTIVITY'
+  return (
+    assessment.activityLevel === 'NO_ACTIVITY' ||
+    assessment.activityLevel === 'VERY_LOW_ACTIVITY' ||
+    assessment.activityLevel === 'LOW_ACTIVITY'
+  )
 }

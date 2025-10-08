@@ -1,7 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import useChainId from '@/hooks/useChainId'
 import { analyzeAddressActivity, type AddressActivityAssessment, type ActivityLevel } from './addressActivityService'
 import { ActivityMessages } from './config'
 
@@ -29,7 +28,6 @@ export const useAddressActivity = (
   description?: string
 } => {
   const web3ReadOnly = useWeb3ReadOnly()
-  const chainId = useChainId()
 
   const [assessment, error, loading] = useAsync<AddressActivityAssessment | undefined>(async () => {
     if (!address || !web3ReadOnly) {
@@ -37,7 +35,7 @@ export const useAddressActivity = (
     }
 
     return analyzeAddressActivity(address, web3ReadOnly)
-  }, [address, web3ReadOnly, chainId])
+  }, [address, web3ReadOnly])
 
   const message = useMemo(() => {
     if (!assessment) return undefined
