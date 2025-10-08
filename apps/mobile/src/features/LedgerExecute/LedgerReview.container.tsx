@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { View, Text, ScrollView, getTokenValue } from 'tamagui'
-import { router, useLocalSearchParams } from 'expo-router'
+import { router, useLocalSearchParams, useGlobalSearchParams } from 'expo-router'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector, useAppDispatch } from '@/src/store/hooks'
 import { selectChainById } from '@/src/store/chains'
@@ -21,6 +21,7 @@ import { getUserNonce } from '@/src/services/web3'
 import { ExecuteProcessing } from '@/src/features/ExecuteTx/components/ExecuteProcessing'
 import { ExecuteError } from '@/src/features/ExecuteTx/components/ExecuteError'
 import { LoadingScreen } from '@/src/components/LoadingScreen'
+import { parseFeeParams } from '@/src/utils/feeParams'
 
 enum ExecutionState {
   REVIEW = 'review',
@@ -32,6 +33,12 @@ enum ExecutionState {
 export const LedgerReviewExecuteContainer = () => {
   const { bottom } = useSafeAreaInsets()
   const { txId, sessionId } = useLocalSearchParams<{ txId: string; sessionId: string }>()
+  const globalParams = useGlobalSearchParams<{
+    maxFeePerGas?: string
+    maxPriorityFeePerGas?: string
+    gasLimit?: string
+    nonce?: string
+  }>()
   const activeSafe = useDefinedActiveSafe()
   const chain = useAppSelector((s) => selectChainById(s, activeSafe.chainId))
   const { safe } = useSafeInfo()
@@ -40,6 +47,8 @@ export const LedgerReviewExecuteContainer = () => {
   const [executionState, setExecutionState] = useState<ExecutionState>(ExecutionState.REVIEW)
   const [error, setError] = useState<string | null>(null)
   const dispatch = useAppDispatch()
+
+  const feeParams = useMemo(() => parseFeeParams(globalParams), [globalParams])
 
   const messageHash = useMemo(() => {
     try {
@@ -85,6 +94,7 @@ export const LedgerReviewExecuteContainer = () => {
         txId,
         signerAddress: activeSigner.value,
         derivationPath: activeSigner.derivationPath,
+        feeParams,
       })
 
       // Get wallet nonce for tracking

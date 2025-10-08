@@ -10,6 +10,7 @@ import extractTxInfo from '@/src/services/tx/extractTx'
 import { fetchTransactionDetails } from '../tx/fetchTransactionDetails'
 import { createExistingTx } from '../tx/tx-sender/create'
 import { getSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
+import { EstimatedFeeValues } from '@/src/store/estimatedFeeSlice'
 
 export interface LedgerExecutionParams {
   chain: Chain
@@ -17,6 +18,7 @@ export interface LedgerExecutionParams {
   txId: string
   signerAddress: string
   derivationPath: string
+  feeParams?: EstimatedFeeValues | null
 }
 
 export interface LedgerExecutionResult {
@@ -54,7 +56,7 @@ export class LedgerExecutionService {
    * TODO: refactor to helper functions in the utils package
    */
   public async executeTransaction(params: LedgerExecutionParams): Promise<LedgerExecutionResult> {
-    const { chain, activeSafe, txId, signerAddress, derivationPath } = params
+    const { chain, activeSafe, txId, signerAddress, derivationPath, feeParams } = params
 
     try {
       // Get current Ledger session
@@ -115,14 +117,30 @@ export class LedgerExecutionService {
       // Get encoded transaction data
       const encodedTx = await sdk.getEncodedTransaction(safeTx)
 
-      // Prepare the transaction to sign
-      const nonce = await provider.getTransactionCount(signerAddress, 'pending')
-      const feeData = await provider.getFeeData()
-      const gasLimit = await provider.estimateGas({
-        from: signerAddress,
-        to: activeSafe.address,
-        data: encodedTx,
-      })
+      // Prepare the transaction to sign - use provided fee params or fetch from provider
+      let nonce: number
+      let gasLimit: bigint
+      let maxFeePerGas: bigint | undefined
+      let maxPriorityFeePerGas: bigint | undefined
+
+      if (feeParams) {
+        // Use user-configured fee parameters
+        nonce = feeParams.nonce
+        gasLimit = feeParams.gasLimit
+        maxFeePerGas = feeParams.maxFeePerGas
+        maxPriorityFeePerGas = feeParams.maxPriorityFeePerGas
+      } else {
+        // Fall back to fetching from provider
+        nonce = await provider.getTransactionCount(signerAddress, 'pending')
+        const feeData = await provider.getFeeData()
+        gasLimit = await provider.estimateGas({
+          from: signerAddress,
+          to: activeSafe.address,
+          data: encodedTx,
+        })
+        maxFeePerGas = feeData.maxFeePerGas ?? undefined
+        maxPriorityFeePerGas = feeData.maxPriorityFeePerGas ?? undefined
+      }
 
       // Create transaction object
       const txData = {
@@ -131,8 +149,8 @@ export class LedgerExecutionService {
         data: encodedTx,
         nonce,
         gasLimit,
-        maxFeePerGas: feeData.maxFeePerGas ?? undefined,
-        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas ?? undefined,
+        maxFeePerGas,
+        maxPriorityFeePerGas,
         value: 0n,
       }
 

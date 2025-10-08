@@ -8,6 +8,7 @@ import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useTransactionGuard } from '@/src/hooks/useTransactionGuard'
+import { parseFeeParams } from '@/src/utils/feeParams'
 
 export function ExecuteTransaction() {
   const { txId, maxFeePerGas, maxPriorityFeePerGas, gasLimit, nonce } = useLocalSearchParams<{
@@ -18,18 +19,10 @@ export function ExecuteTransaction() {
     nonce: string
   }>()
 
-  // Convert string params to bigint/number
-  const feeParams = useMemo(() => {
-    if (maxFeePerGas && maxPriorityFeePerGas && gasLimit && nonce) {
-      return {
-        maxFeePerGas: BigInt(maxFeePerGas),
-        maxPriorityFeePerGas: BigInt(maxPriorityFeePerGas),
-        gasLimit: BigInt(gasLimit),
-        nonce: parseInt(nonce, 10),
-      }
-    }
-    return null
-  }, [maxFeePerGas, maxPriorityFeePerGas, gasLimit, nonce])
+  const feeParams = useMemo(
+    () => parseFeeParams({ maxFeePerGas, maxPriorityFeePerGas, gasLimit, nonce }),
+    [maxFeePerGas, maxPriorityFeePerGas, gasLimit, nonce],
+  )
 
   const activeSafe = useDefinedActiveSafe()
   const activeSigner = useAppSelector((state) => selectActiveSigner(state, activeSafe.address))
