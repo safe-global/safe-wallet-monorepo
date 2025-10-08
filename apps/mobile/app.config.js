@@ -44,7 +44,8 @@ const config = {
       // https://github.com/expo/expo/issues/39739
       UIDesignRequiresCompatibility: true,
       // https://github.com/react-native-share/react-native-share/issues/1669
-      NSPhotoLibraryUsageDescription: 'Allow access to photo library to share images.',
+      NSPhotoLibraryUsageDescription:
+        'This permission is required by third party libraries, but not used in the app. If you ever get prompted for it, deny it & contact support.',
     },
     supportsTablet: false,
     appleTeamId: appleDevTeamId,
