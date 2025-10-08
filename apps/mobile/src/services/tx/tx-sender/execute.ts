@@ -1,6 +1,6 @@
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeInfo } from '@/src/types/address'
-import { proposeTx } from '@/src/services/tx/tx-sender/create'
+import { proposeTx, addSignaturesToTx } from '@/src/services/tx/tx-sender/create'
 import { createConnectedWallet } from '@/src/services/web3'
 import { EstimatedFeeValues } from '@/src/store/estimatedFeeSlice'
 
@@ -33,15 +33,7 @@ export const executeTx = async ({ chain, activeSafe, txId, privateKey, feeParams
     throw new Error('Safe transaction not found')
   }
 
-  Object.entries(signatures).forEach(([signer, data]) => {
-    safeTx.addSignature({
-      signer,
-      data,
-      staticPart: () => data,
-      dynamicPart: () => '',
-      isContractSignature: false,
-    })
-  })
+  addSignaturesToTx(safeTx, signatures)
 
   return protocolKit.executeTransaction(
     safeTx,

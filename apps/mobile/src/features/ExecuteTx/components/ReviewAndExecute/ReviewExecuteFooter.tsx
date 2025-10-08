@@ -41,6 +41,15 @@ export function ReviewExecuteFooter({ txId, txDetails }: ReviewFooterProps) {
         nonce: estimatedFeeParams.nonce?.toString(),
       }
 
+      // If active signer is a Ledger device, start the Ledger-specific execution flow
+      if (activeSigner?.type === 'ledger') {
+        router.push({
+          pathname: '/execute-transaction/ledger-connect',
+          params,
+        })
+        return
+      }
+
       if (isBiometricsEnabled) {
         router.push({
           pathname: '/execute-transaction',
