@@ -37,14 +37,14 @@ export const TxNoteInput = ({ onChange }: { onChange: (note: string) => void }) 
   }, [isDirty, note])
 
   return (
-    <>
+    <Stack gap={1}>
       <Stack direction="row" alignItems="flex-end" gap={1}>
-        <Typography variant="h5">Add transaction note</Typography>
+        <Typography variant="h5">Note</Typography>
       </Stack>
 
       <TextField
         data-testid="tx-note-textfield"
-        label="Note (optional)"
+        label="Optional"
         fullWidth
         slotProps={{
           htmlInput: { maxLength: MAX_NOTE_LENGTH },
@@ -64,15 +64,9 @@ export const TxNoteInput = ({ onChange }: { onChange: (note: string) => void }) 
         onFocus={onFocus}
       />
 
-      <Stack data-testid="tx-note-alert" direction="row" gap={1} color="text.secondary">
-        <SvgIcon component={InfoOutlinedIcon} sx={{ width: '20px', height: '20px', rotate: '180deg' }} inheritViewBox />
-        <Box>
-          <Typography variant="body2" fontWeight="700">
-            Notes are publicly visible.
-          </Typography>
-          <Typography variant="body2">Do not share any private or sensitive details.</Typography>
-        </Box>
-      </Stack>
-    </>
+      <Typography data-testid="tx-note-alert" variant="body2" color="text.secondary">
+        Notes are publicly visible. Do not share any private or sensitive details.
+      </Typography>
+    </Stack>
   )
 }
