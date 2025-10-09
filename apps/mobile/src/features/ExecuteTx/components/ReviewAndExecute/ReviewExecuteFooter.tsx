@@ -15,13 +15,36 @@ import useGasFee from '../../hooks/useGasFee'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectEstimatedFee } from '@/src/store/estimatedFeeSlice'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
+import { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 
 interface ReviewFooterProps {
   txId: string
   txDetails: TransactionDetails
+  relaysRemaining?: RelaysRemaining
 }
 
-export function ReviewExecuteFooter({ txId, txDetails }: ReviewFooterProps) {
+/**
+ * Determines the execution method based on user selection and relay availability
+ */
+const getExecutionMethod = (
+  requestedMethod: ExecutionMethod | undefined,
+  isRelayAvailable: boolean,
+): ExecutionMethod => {
+  // If user explicitly requested relay but none are available, fallback to signer
+  if (requestedMethod === ExecutionMethod.RELAYER && !isRelayAvailable) {
+    return ExecutionMethod.SIGNER
+  }
+
+  // If user selected a method, use it
+  if (requestedMethod) {
+    return requestedMethod
+  }
+
+  // Default: use relay if available, otherwise use signer
+  return isRelayAvailable ? ExecutionMethod.RELAYER : ExecutionMethod.SIGNER
+}
+
+export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: ReviewFooterProps) {
   const manualParams = useAppSelector(selectEstimatedFee)
   const { signerState } = useTransactionSigner(txId)
   const { activeSigner } = signerState
@@ -30,7 +53,11 @@ export function ReviewExecuteFooter({ txId, txDetails }: ReviewFooterProps) {
   const insets = useSafeAreaInsets()
   const { totalFee, estimatedFeeParams, totalFeeRaw } = useGasFee(txDetails, manualParams)
   const isLoadingFees = estimatedFeeParams.isLoadingGasPrice || estimatedFeeParams.gasLimitLoading
-  const { executionMethod = ExecutionMethod.RELAYER } = useLocalSearchParams<{ executionMethod: ExecutionMethod }>()
+
+  // checks the executionMethod
+  const isRelayAvailable = Boolean(relaysRemaining?.remaining && relaysRemaining.remaining > 0)
+  const { executionMethod: executionMethodParam } = useLocalSearchParams<{ executionMethod: ExecutionMethod }>()
+  const executionMethod = getExecutionMethod(executionMethodParam, isRelayAvailable)
 
   const handleConfirmPress = async () => {
     try {
