@@ -230,6 +230,10 @@ function RootLayout() {
                                 presentation: 'modal',
                               }}
                             />
+                            <Stack.Screen
+                              name="manage-tokens-sheet"
+                              options={{ headerShown: false, presentation: 'transparentModal', animation: 'fade' }}
+                            />
                             <Stack.Screen name="+not-found" />
                           </Stack>
                           <SafeStatusBar />

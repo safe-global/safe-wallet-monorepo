@@ -16,10 +16,15 @@ import { shouldDisplayPreciseBalance } from '@/src/utils/balance'
 import { NoFunds } from '@/src/features/Assets/components/NoFunds'
 import { AssetError } from '@/src/features/Assets/Assets.error'
 import { useAppSelector } from '@/src/store/hooks'
-import { selectCurrency } from '@/src/store/settingsSlice'
+import { selectCurrency, selectTokenList, TOKEN_LISTS } from '@/src/store/settingsSlice'
+
 export function TokensContainer() {
   const activeSafe = useSelector(selectActiveSafe)
   const currency = useAppSelector(selectCurrency)
+  const tokenList = useAppSelector(selectTokenList)
+
+  const trusted = tokenList === TOKEN_LISTS.TRUSTED
+
   const { data, isFetching, error, isLoading, refetch } = useBalancesGetBalancesV1Query(
     !activeSafe
       ? skipToken
@@ -27,7 +32,7 @@ export function TokensContainer() {
           chainId: activeSafe.chainId,
           fiatCode: currency,
           safeAddress: activeSafe.address,
-          trusted: true,
+          trusted,
         },
     {
       pollingInterval: POLLING_INTERVAL,

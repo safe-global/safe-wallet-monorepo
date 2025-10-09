@@ -8,6 +8,7 @@ import { FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE } from 'redux-persist
 import { cgwClient } from '@safe-global/store/gateway/cgwClient'
 import { web3API } from '@/src/store/signersBalance'
 import type { SettingsState } from '@/src/store/settingsSlice'
+import { TOKEN_LISTS } from '@/src/store/settingsSlice'
 import type { RootState, AppDispatch } from '../store'
 
 export type TestStore = EnhancedStore<RootState> & {
@@ -22,6 +23,7 @@ const defaultSettings: SettingsState = {
   onboardingVersionSeen: '',
   themePreference: 'light',
   currency: 'usd',
+  tokenList: TOKEN_LISTS.TRUSTED,
   env: {
     rpc: {},
     tenderly: {

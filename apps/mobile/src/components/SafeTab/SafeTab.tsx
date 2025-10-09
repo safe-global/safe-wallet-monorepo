@@ -12,6 +12,7 @@ interface SafeTabProps<T> {
   containerProps?: T
   containerStyle?: StyleProp<ViewStyle>
   onIndexChange?: (index: number) => void
+  rightNode?: (activeTabLabel: string) => React.ReactNode
 }
 
 export function SafeTab<T extends object>({
@@ -21,6 +22,7 @@ export function SafeTab<T extends object>({
   containerProps,
   containerStyle,
   onIndexChange,
+  rightNode,
 }: SafeTabProps<T>) {
   const [activeTab, setActiveTab] = useState(items[0].label)
 
@@ -31,7 +33,9 @@ export function SafeTab<T extends object>({
         renderHeader={renderHeader}
         headerContainerStyle={headerContainerStyle}
         headerHeight={headerHeight}
-        renderTabBar={(props) => <SafeTabBar activeTab={activeTab} setActiveTab={setActiveTab} {...props} />}
+        renderTabBar={(props) => (
+          <SafeTabBar activeTab={activeTab} setActiveTab={setActiveTab} rightNode={rightNode?.(activeTab)} {...props} />
+        )}
         onTabChange={(event) => setActiveTab(event.tabName)}
         onIndexChange={onIndexChange}
         initialTabName={items[0].label}
