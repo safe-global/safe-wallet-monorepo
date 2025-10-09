@@ -29,7 +29,7 @@ export const EstimatedNetworkFee = ({ totalFee, txId, totalFeeRaw }: EstimatedNe
         <View borderStyle="dashed" borderBottomWidth={totalFeeRaw ? 1 : 0} borderColor="$color">
           {totalFeeRaw ? (
             <Text fontWeight={700}>
-              {totalFeeRaw ? `${totalFeeRaw} ${chain?.nativeCurrency.symbol}` : 'Can not estimate'}
+              {totalFeeRaw ? `${totalFee} ${chain?.nativeCurrency.symbol}` : 'Can not estimate'}
             </Text>
           ) : (
             <Text color="$error" fontWeight={700}>
