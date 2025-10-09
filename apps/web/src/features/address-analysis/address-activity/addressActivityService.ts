@@ -1,6 +1,6 @@
 import type { JsonRpcProvider } from 'ethers'
 import { isAddress } from 'ethers'
-import { ACTIVITY_THRESHOLDS } from './config'
+import { ACTIVITY_THRESHOLDS } from '../config'
 
 export type ActivityLevel = 'NO_ACTIVITY' | 'VERY_LOW_ACTIVITY' | 'LOW_ACTIVITY' | 'MODERATE_ACTIVITY' | 'HIGH_ACTIVITY'
 

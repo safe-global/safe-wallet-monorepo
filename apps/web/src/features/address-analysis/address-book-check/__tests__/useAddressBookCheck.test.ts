@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { renderHook, waitFor } from '@testing-library/react'
-import { useAddressBookCheck, AddressCheckDescription, AddressCheckSeverity } from '../useAddressBookCheck'
+import { useAddressBookCheck } from '../useAddressBookCheck'
+import { AddressCheckMessages, AnalysisSeverity } from '../../config'
 import * as useChainIdHook from '@/hooks/useChainId'
 import * as useAllAddressBooksHook from '@/hooks/useAllAddressBooks'
 import * as useOwnedSafesHook from '@/hooks/useOwnedSafes'
@@ -40,8 +41,9 @@ describe('useAddressBookCheck', () => {
     expect(result.current.isKnownAddress).toBe(false)
     expect(result.current.isAddressBookContact).toBe(false)
     expect(result.current.isOwnedSafe).toBe(false)
-    expect(result.current.description).toBe(AddressCheckDescription.UNKNOWN)
-    expect(result.current.severity).toBe(AddressCheckSeverity.INFO)
+    expect(result.current.checkType).toBe('UNKNOWN')
+    expect(result.current.description).toBe(AddressCheckMessages.UNKNOWN.description)
+    expect(result.current.severity).toBe(AnalysisSeverity.INFO)
     expect(result.current.error).toBeUndefined()
   })
 
@@ -58,8 +60,9 @@ describe('useAddressBookCheck', () => {
     expect(result.current.isKnownAddress).toBe(true)
     expect(result.current.isAddressBookContact).toBe(true)
     expect(result.current.isOwnedSafe).toBe(false)
-    expect(result.current.description).toBe(AddressCheckDescription.ADDRESS_BOOK)
-    expect(result.current.severity).toBe(AddressCheckSeverity.OK)
+    expect(result.current.checkType).toBe('ADDRESS_BOOK')
+    expect(result.current.description).toBe(AddressCheckMessages.ADDRESS_BOOK.description)
+    expect(result.current.severity).toBe(AnalysisSeverity.OK)
   })
 
   it('should return true for isOwnedSafe when address is in owned safes', async () => {
@@ -75,8 +78,9 @@ describe('useAddressBookCheck', () => {
     expect(result.current.isKnownAddress).toBe(true)
     expect(result.current.isAddressBookContact).toBe(false)
     expect(result.current.isOwnedSafe).toBe(true)
-    expect(result.current.description).toBe(AddressCheckDescription.OWNED_SAFE)
-    expect(result.current.severity).toBe(AddressCheckSeverity.OK)
+    expect(result.current.checkType).toBe('OWNED_SAFE')
+    expect(result.current.description).toBe(AddressCheckMessages.OWNED_SAFE.description)
+    expect(result.current.severity).toBe(AnalysisSeverity.OK)
   })
 
   it('should handle case-insensitive address matching for owned safes', async () => {
@@ -107,8 +111,9 @@ describe('useAddressBookCheck', () => {
     expect(result.current.isKnownAddress).toBe(true)
     expect(result.current.isAddressBookContact).toBe(true)
     expect(result.current.isOwnedSafe).toBe(true)
-    expect(result.current.description).toBe(AddressCheckDescription.ADDRESS_BOOK)
-    expect(result.current.severity).toBe(AddressCheckSeverity.OK)
+    expect(result.current.checkType).toBe('ADDRESS_BOOK')
+    expect(result.current.description).toBe(AddressCheckMessages.ADDRESS_BOOK.description)
+    expect(result.current.severity).toBe(AnalysisSeverity.OK)
   })
 
   it('should return false for all checks when address is not in any source', async () => {
@@ -124,8 +129,9 @@ describe('useAddressBookCheck', () => {
     expect(result.current.isKnownAddress).toBe(false)
     expect(result.current.isAddressBookContact).toBe(false)
     expect(result.current.isOwnedSafe).toBe(false)
-    expect(result.current.description).toBe(AddressCheckDescription.UNKNOWN)
-    expect(result.current.severity).toBe(AddressCheckSeverity.INFO)
+    expect(result.current.checkType).toBe('UNKNOWN')
+    expect(result.current.description).toBe(AddressCheckMessages.UNKNOWN.description)
+    expect(result.current.severity).toBe(AnalysisSeverity.INFO)
   })
 
   it('should handle empty owned safes array for the chain', async () => {
