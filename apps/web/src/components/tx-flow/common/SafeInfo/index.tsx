@@ -35,11 +35,17 @@ const SafeInfo = (): ReactElement => {
         )}
       </Box>
 
-      <Box>
+      <Box overflow="hidden">
         {safeAddress ? (
           <>
             {name && (
-              <Typography variant="body2" fontWeight={700}>
+              <Typography
+                variant="body2"
+                fontWeight={700}
+                overflow="hidden"
+                textOverflow="ellipsis"
+                whiteSpace="nowrap"
+              >
                 {name}
               </Typography>
             )}
