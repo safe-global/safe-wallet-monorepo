@@ -139,7 +139,7 @@ export const settingsStr = 'Settings'
 export const assetsStr = 'Assets'
 export const topAssetsStr = 'Top assets'
 export const getStartedStr = 'Get started'
-export const txNoteWarningMessage = 'Notes are publicly visible.Do not share any private or sensitive details'
+export const txNoteWarningMessage = 'Notes are publicly visible. Do not share any private or sensitive details.'
 export const recordedTxNote = 'Tx note one'
 
 const comboButton = '[data-testid="combo-submit-dropdown"]'

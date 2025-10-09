@@ -1,8 +1,3 @@
-.content {
-  padding: var(--space-4) var(--space-3);
-  padding-left: 0;
-}
-
 .status {
   padding: 0;
 }
@@ -11,7 +6,7 @@
   content: '';
   position: absolute;
   border-left: 2px solid var(--color-border-light);
-  left: 15px;
+  left: 7px;
   top: 20px;
   height: calc(100% - 40px);
 }
@@ -28,8 +23,9 @@
 .status :global .MuiListItemIcon-root {
   color: var(--color-primary-main);
   justify-content: center;
-  min-width: 32px;
+  min-width: auto;
   padding: var(--space-1);
+  padding-left: 0;
   background-color: var(--color-background-main);
 }
 
@@ -54,8 +50,8 @@
   margin-left: var(--space-1);
   padding-right: 2px;
   border-radius: 50%;
-  width: var(--space-3);
-  height: var(--space-3);
+  width: 20px;
+  height: 20px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -82,9 +78,5 @@
 
   .close {
     display: flex;
-  }
-
-  .content {
-    padding: var(--space-3);
   }
 }
