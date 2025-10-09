@@ -460,10 +460,10 @@ Beamer.show = function (a) {
   'undefined' === typeof Beamer.config.changelogEnabled || Beamer.config.changelogEnabled
     ? Beamer.showFeed(a, 'news')
     : 'undefined' !== typeof Beamer.config.ideasEnabled && Beamer.config.ideasEnabled
-    ? Beamer.showFeed(a, 'ideas')
-    : 'undefined' !== typeof Beamer.config.roadmapEnabled && Beamer.config.roadmapEnabled
-    ? Beamer.showFeed(a, 'roadmap')
-    : console.warn('No features enabled to show.')
+      ? Beamer.showFeed(a, 'ideas')
+      : 'undefined' !== typeof Beamer.config.roadmapEnabled && Beamer.config.roadmapEnabled
+        ? Beamer.showFeed(a, 'roadmap')
+        : console.warn('No features enabled to show.')
 }
 Beamer.showChangelog = function (a) {
   Beamer.enabled && ((window._BEAMER_CHANGELOG_POST_ID = a), Beamer.show())
@@ -488,9 +488,9 @@ Beamer.showFeed = function (a, b) {
       if (!1 === c()) return
     } else Beamer.defaultOnOpen()
     if ('undefined' !== typeof beamer_config.standalone && beamer_config.standalone)
-      window.open(Beamer.buildStandaloneUrl(), '_blank'),
+      (window.open(Beamer.buildStandaloneUrl(), '_blank'),
         Beamer.setDateCookie(new Date().toISOString(), 300),
-        Beamer.clearAlert()
+        Beamer.clearAlert())
     else {
       _BEAMER_IS_OPEN = !0
       var d = ''
@@ -512,7 +512,7 @@ Beamer.showFeed = function (a, b) {
           ('undefined' !== typeof Beamer.displayedFeedType && Beamer.displayedFeedType !== b) ||
           (window._BEAMER_CHANGELOG_POST_ID && 'news' === b)
         )
-          (Beamer.displayedFeedType = b), (document.getElementById('beamerNews').src = Beamer.buildFeedUrl(b))
+          ((Beamer.displayedFeedType = b), (document.getElementById('beamerNews').src = Beamer.buildFeedUrl(b)))
         if (Beamer.isInApp())
           if ('undefined' !== typeof a && a.target && Beamer.isElementVisible(a.target)) {
             var k = null
@@ -540,7 +540,7 @@ Beamer.showFeed = function (a, b) {
           Beamer.sendMessageToIframe('setRefUrl:' + JSON.stringify({ url: window.location.href }))
         }, 100)
       } else
-        (function (l) {
+        ((function (l) {
           if (!Beamer.initialized) {
             Beamer.displayedFeedType = b
             var n = Beamer.buildFeedUrl(b),
@@ -612,7 +612,7 @@ Beamer.showFeed = function (a, b) {
             Beamer.addClass(h, 'beamer_hideable')
           }, c + 250),
           Beamer.setDateCookie(new Date().toISOString(), 300),
-          Beamer.clearAlert()
+          Beamer.clearAlert())
       Beamer.isEmbedMode() ||
         (Beamer.isInApp()
           ? (Beamer.isMobile() && Beamer.addClassBody('beamer_noscroll'),
@@ -802,8 +802,8 @@ Beamer.removeEventListener = function (a, b, c) {
   a.removeEventListener
     ? a.removeEventListener(b, c, !1)
     : a.detachEvent
-    ? a.detachEvent('on' + b, c)
-    : (a['on' + b] = null)
+      ? a.detachEvent('on' + b, c)
+      : (a['on' + b] = null)
 }
 Beamer.removeAllEventListeners = function () {
   for (; 0 < Beamer.eventListeners.length; ) {
@@ -1134,16 +1134,16 @@ Beamer.showNotificationPrompt = function (a) {
                   Beamer.config.pushPrimaryButtonTextColor +
                   ' !important;">'
                 : null != Beamer.config.pushPrimaryButtonBackgroundColor &&
-                  null == Beamer.config.pushPrimaryButtonTextColor
-                ? '<a id="pushConfirmation" class="pushButton" href="javascript:void(0)" role="button" style="background-color:' +
-                  Beamer.config.pushPrimaryButtonBackgroundColor +
-                  ' !important;">'
-                : null == Beamer.config.pushPrimaryButtonBackgroundColor &&
-                  null != Beamer.config.pushPrimaryButtonTextColor
-                ? '<a id="pushConfirmation" class="pushButton" href="javascript:void(0)" role="button" style="color:' +
-                  Beamer.config.pushPrimaryButtonTextColor +
-                  ' !important;">'
-                : '<a id="pushConfirmation" class="pushButton" href="javascript:void(0)" role="button">'
+                    null == Beamer.config.pushPrimaryButtonTextColor
+                  ? '<a id="pushConfirmation" class="pushButton" href="javascript:void(0)" role="button" style="background-color:' +
+                    Beamer.config.pushPrimaryButtonBackgroundColor +
+                    ' !important;">'
+                  : null == Beamer.config.pushPrimaryButtonBackgroundColor &&
+                      null != Beamer.config.pushPrimaryButtonTextColor
+                    ? '<a id="pushConfirmation" class="pushButton" href="javascript:void(0)" role="button" style="color:' +
+                      Beamer.config.pushPrimaryButtonTextColor +
+                      ' !important;">'
+                    : '<a id="pushConfirmation" class="pushButton" href="javascript:void(0)" role="button">'
             h =
               null != Beamer.config.pushSecondaryButtonTextColor
                 ? '<a id="pushActionRefuse" href="javascript:void(0)" role="button" style="color:' +
@@ -1226,8 +1226,8 @@ Beamer.openNotificationPopup = function () {
       ((window.innerHeight
         ? window.innerHeight
         : document.documentElement.clientHeight
-        ? document.documentElement.clientHeight
-        : screen.height) /
+          ? document.documentElement.clientHeight
+          : screen.height) /
         2 -
         300 +
         (void 0 != window.screenTop ? window.screenTop : window.screenY)) +
@@ -1235,8 +1235,8 @@ Beamer.openNotificationPopup = function () {
       ((window.innerWidth
         ? window.innerWidth
         : document.documentElement.clientWidth
-        ? document.documentElement.clientWidth
-        : screen.width) /
+          ? document.documentElement.clientWidth
+          : screen.width) /
         2 -
         400 +
         (void 0 != window.screenLeft ? window.screenLeft : window.screenX)),
@@ -1336,20 +1336,20 @@ Beamer.appendAlert = function (a, b) {
           Beamer.isHashOpen && !a
             ? ((Beamer.notificationNumber = 0), (Beamer.notificationActive = !1))
             : 0 < f.number
-            ? ((h = f.number > Beamer.notificationNumber),
-              (Beamer.notificationNumber = f.number),
-              (Beamer.notificationActive = !0))
-            : null == d || '' == d || ('undefined' !== typeof f.forceDeviceSync && f.forceDeviceSync)
-            ? 'undefined' !== typeof beamer_config.first_visit_unread
-              ? 0 < beamer_config.first_visit_unread
-                ? ((Beamer.notificationNumber = beamer_config.first_visit_unread), (Beamer.notificationActive = !0))
-                : ((Beamer.notificationNumber = 0),
-                  (Beamer.notificationActive = !1),
-                  setTimeout(function () {
-                    Beamer.setDateCookie(new Date().toISOString(), 300)
-                  }, 500))
-              : ((Beamer.notificationNumber = 0), (Beamer.notificationActive = !0))
-            : ((Beamer.notificationNumber = 0), (Beamer.notificationActive = !1))
+              ? ((h = f.number > Beamer.notificationNumber),
+                (Beamer.notificationNumber = f.number),
+                (Beamer.notificationActive = !0))
+              : null == d || '' == d || ('undefined' !== typeof f.forceDeviceSync && f.forceDeviceSync)
+                ? 'undefined' !== typeof beamer_config.first_visit_unread
+                  ? 0 < beamer_config.first_visit_unread
+                    ? ((Beamer.notificationNumber = beamer_config.first_visit_unread), (Beamer.notificationActive = !0))
+                    : ((Beamer.notificationNumber = 0),
+                      (Beamer.notificationActive = !1),
+                      setTimeout(function () {
+                        Beamer.setDateCookie(new Date().toISOString(), 300)
+                      }, 500))
+                  : ((Beamer.notificationNumber = 0), (Beamer.notificationActive = !0))
+                : ((Beamer.notificationNumber = 0), (Beamer.notificationActive = !1))
           ;('undefined' == typeof beamer_config.alert ||
             beamer_config.alert ||
             ('undefined' !== typeof beamer_config.counter && beamer_config.counter)) &&
@@ -1415,8 +1415,8 @@ Beamer.appendAlert = function (a, b) {
             k
           ) {
             if (h || ('undefined' !== typeof b && b))
-              _BEAMER_IS_OPEN ? (Beamer.removeOnHide = !0) : Beamer.removeIframe(),
-                Beamer.setCookie(_BEAMER_LAST_UPDATE + '_' + beamer_config.product_id, new Date().getTime(), 300)
+              (_BEAMER_IS_OPEN ? (Beamer.removeOnHide = !0) : Beamer.removeIframe(),
+                Beamer.setCookie(_BEAMER_LAST_UPDATE + '_' + beamer_config.product_id, new Date().getTime(), 300))
             h = Beamer.getConfigParameter(f, 'autoRefreshTimeout')
             'undefined' !== typeof h
               ? (Beamer.autoRefreshTimeout = h)
@@ -1470,12 +1470,12 @@ Beamer.appendDefaultIdeasButton = function () {
       'undefined' !== typeof Beamer.config.feedbackButtonColor ||
       'undefined' !== typeof Beamer.config.feedbackButtonTextColor
     )
-      (c = ' style="'),
+      ((c = ' style="'),
         'undefined' !== typeof Beamer.config.feedbackButtonColor &&
           (c += 'background-color: ' + Beamer.escapeHtml(Beamer.config.feedbackButtonColor) + ';'),
         'undefined' !== typeof Beamer.config.feedbackButtonTextColor &&
           (c += 'color: ' + Beamer.escapeHtml(Beamer.config.feedbackButtonTextColor) + ';'),
-        (c += '"')
+        (c += '"'))
     a =
       '<div class="beamer_ideasFormButton"' +
       c +
@@ -1605,7 +1605,7 @@ Beamer.buildFeedUrl = function (a, b, c) {
       else if ('in-app' === beamer_config.display || 'compact' === beamer_config.display)
         d += '&theme=' + c + '&in_app=true'
   } else
-    (a = encodeURIComponent(window.location.host)),
+    ((a = encodeURIComponent(window.location.host)),
       (d += '&url=' + a),
       'undefined' != typeof beamer_config.user_token &&
         'user_token' != beamer_config.user_token &&
@@ -1624,7 +1624,7 @@ Beamer.buildFeedUrl = function (a, b, c) {
           (d += '&firstname=' + encodeURIComponent(beamer_config.user_firstname)),
         'undefined' != typeof beamer_config.user_email &&
           'email' != beamer_config.user_email &&
-          (d += '&email=' + encodeURIComponent(beamer_config.user_email)))
+          (d += '&email=' + encodeURIComponent(beamer_config.user_email))))
   'undefined' !== typeof beamer_config.theme &&
     ('undefined' === typeof beamer_config.display ||
       ('popup' !== beamer_config.display &&
@@ -2095,9 +2095,12 @@ Beamer.ajax = function (a, b, c, d, e) {
       if (200 == h.status) 'undefined' !== typeof b && b && b(h.responseText)
       else if (400 > h.status || 403 < h.status)
         5 > e
-          ? setTimeout(function () {
-              Beamer.ajax(a, b, c, d, e)
-            }, e * (36e4 * Math.random() + 36e4 * (e + 1)))
+          ? setTimeout(
+              function () {
+                Beamer.ajax(a, b, c, d, e)
+              },
+              e * (36e4 * Math.random() + 36e4 * (e + 1)),
+            )
           : 'undefined' !== typeof c && c && c(h.responseText)
   }
   try {
@@ -2333,7 +2336,7 @@ Beamer.buildStandaloneUrl = function () {
       ? (a += '?role=' + encodeURIComponent(beamer_config.role))
       : 'undefined' != typeof beamer_config.filter && (a += '?role=' + encodeURIComponent(beamer_config.filter))
   } else
-    (a = _BEAMER_URL + 'standalone?'),
+    ((a = _BEAMER_URL + 'standalone?'),
       (a =
         'undefined' != typeof beamer_config.product_id
           ? a + ('app_id=' + beamer_config.product_id)
@@ -2341,7 +2344,7 @@ Beamer.buildStandaloneUrl = function () {
       'undefined' != typeof beamer_config.role
         ? (a += '&role=' + encodeURIComponent(beamer_config.role))
         : 'undefined' != typeof beamer_config.filter && (a += '&role=' + encodeURIComponent(beamer_config.filter)),
-      beamer_config.language && (a += '&language=' + beamer_config.language)
+      beamer_config.language && (a += '&language=' + beamer_config.language))
   return a
 }
 Beamer.sendMessageToIframe = function (a, b) {
@@ -2406,14 +2409,14 @@ Beamer.hasOpenHash = function () {
 Beamer.initDomObserver = function () {
   if (!Beamer.observing && 'MutationObserver' in window)
     try {
-      ;(Beamer.domMutated = !1),
+      ;((Beamer.domMutated = !1),
         (Beamer.domObserver = new MutationObserver(function () {
           Beamer.domMutated = !0
           Beamer.pauseDomObserver()
         })),
         Beamer.startDomObserver(),
         (Beamer.observing = !0),
-        (Beamer.domMutationsProcessInterval = setInterval(Beamer.processDomMutations, 2e3))
+        (Beamer.domMutationsProcessInterval = setInterval(Beamer.processDomMutations, 2e3)))
     } catch (a) {}
 }
 Beamer.startDomObserver = function () {
@@ -2485,7 +2488,7 @@ Beamer.playSound = function () {
         var b = _BEAMER_SOUND_PLAYED + '_' + beamer_config.product_id,
           c = Beamer.getCookie(b)
         if (void 0 === c || null === c || 'true' != c)
-          'Audio' in window &&
+          ('Audio' in window &&
             ('undefined' == typeof Beamer.soundNotification &&
               ((Beamer.soundNotification = new Audio(_BEAMER_URL + 'audio/notification.mp3')),
               (Beamer.soundNotification.volume = 0.2)),
@@ -2494,7 +2497,7 @@ Beamer.playSound = function () {
                 console.log('Sound blocked by browser')
               } catch (e) {}
             })),
-            Beamer.setCookie(b, !0, 7)
+            Beamer.setCookie(b, !0, 7))
       }
     }
   } catch (d) {
@@ -2553,26 +2556,26 @@ Beamer.initPopper = function (a, b, c) {
     ('top-right' === beamer_config.display_position
       ? (d.placement = 'top-end')
       : 'right-top' === beamer_config.display_position
-      ? (d.placement = 'right-start')
-      : 'right' === beamer_config.display_position
-      ? (d.placement = 'right')
-      : 'right-bottom' === beamer_config.display_position
-      ? (d.placement = 'right-end')
-      : 'bottom-right' === beamer_config.display_position
-      ? (d.placement = 'bottom-end')
-      : 'bottom' === beamer_config.display_position
-      ? (d.placement = 'bottom')
-      : 'bottom-left' === beamer_config.display_position
-      ? (d.placement = 'bottom-start')
-      : 'left-bottom' === beamer_config.display_position
-      ? (d.placement = 'left-end')
-      : 'left' === beamer_config.display_position
-      ? (d.placement = 'left')
-      : 'left-top' === beamer_config.display_position
-      ? (d.placement = 'left-start')
-      : 'top-left' === beamer_config.display_position
-      ? (d.placement = 'top-start')
-      : 'top' === beamer_config.display_position && (d.placement = 'top'),
+        ? (d.placement = 'right-start')
+        : 'right' === beamer_config.display_position
+          ? (d.placement = 'right')
+          : 'right-bottom' === beamer_config.display_position
+            ? (d.placement = 'right-end')
+            : 'bottom-right' === beamer_config.display_position
+              ? (d.placement = 'bottom-end')
+              : 'bottom' === beamer_config.display_position
+                ? (d.placement = 'bottom')
+                : 'bottom-left' === beamer_config.display_position
+                  ? (d.placement = 'bottom-start')
+                  : 'left-bottom' === beamer_config.display_position
+                    ? (d.placement = 'left-end')
+                    : 'left' === beamer_config.display_position
+                      ? (d.placement = 'left')
+                      : 'left-top' === beamer_config.display_position
+                        ? (d.placement = 'left-start')
+                        : 'top-left' === beamer_config.display_position
+                          ? (d.placement = 'top-start')
+                          : 'top' === beamer_config.display_position && (d.placement = 'top'),
     ('undefined' !== typeof c && c) || (d.modifiers.preventOverflow.enabled = !1),
     (d.modifiers.flip.enabled = !1))
   d = new Popper(b, a, d)
@@ -2604,7 +2607,7 @@ Beamer.setPopperPosition = function (a, b) {
 }
 Beamer.showLastPost = function (a) {
   if ('undefined' === typeof Beamer.lastDisplayedPostId || Beamer.lastDisplayedPostId !== a.lastPostId)
-    (Beamer.lastDisplayedPostId = a.lastPostId),
+    ((Beamer.lastDisplayedPostId = a.lastPostId),
       'undefined' !== typeof a.lastPostBoostedAnnouncementType
         ? 4 === a.lastPostBoostedAnnouncementType
           ? Beamer.showLastPostTitle(
@@ -2627,7 +2630,7 @@ Beamer.showLastPost = function (a) {
             a.lastPostCategory,
             a.lastPostCategoryColor,
             a.lastPostRtl,
-          )
+          ))
 }
 Beamer.showBoostedAnnouncement = function (a) {
   Beamer.appendBoostedAnnouncementStyles()
@@ -2695,8 +2698,8 @@ Beamer.showLastPostTitle = function (a, b, c, d, e, g, f, h, k, l, n) {
               ? (Beamer.closeLastPostTitle(p),
                 'undefined' !== typeof g ? window.open(g, '_blank', 'noopener,noreferrer') : BeamerPreview.show())
               : 'undefined' !== typeof g && '' !== g.trim()
-              ? (Beamer.openCta(g, f, a, b, 'boosted-tooltip'), Beamer.closeLastPostTitle(p))
-              : Beamer.show())
+                ? (Beamer.openCta(g, f, a, b, 'boosted-tooltip'), Beamer.closeLastPostTitle(p))
+                : Beamer.show())
         }
         var q = ''
         'undefined' !== typeof c &&
@@ -2836,10 +2839,10 @@ Beamer.bindWindowEvents = function () {
       if ('hide' == d) Beamer.hide()
       else if ('hidePreview' == d) BeamerPreview.hide()
       else if ('loaded' == d)
-        Beamer.hideLoader(),
+        (Beamer.hideLoader(),
           (a = 'setRefUrl:' + JSON.stringify({ url: window.location.href })),
           Beamer.sendMessageToIframe(a),
-          Beamer.sendMessageToIframe(a, 'beamerAnnouncementPopup')
+          Beamer.sendMessageToIframe(a, 'beamerAnnouncementPopup'))
       else if ('showPicture' == d) Beamer.showPicture(e.url)
       else if ('hidePicture' == d) Beamer.hidePicture()
       else if ('openUrl' == d) Beamer.openUrl(e.url, e.openInNewWindow, e.postTitle)
@@ -2858,16 +2861,19 @@ Beamer.bindWindowEvents = function () {
         'requestUserData' == d
           ? Beamer.sendUserData(e.id)
           : 'updatesAvailable' == d
-          ? ('undefined' !== typeof Beamer.updateTimeout && clearTimeout(Beamer.updateTimeout),
-            'undefined' !== typeof e && 'undefined' !== typeof e.immediate && e.immediate
-              ? (Beamer.appendAlert(!0), delete Beamer.updateTimeout)
-              : (Beamer.updateTimeout = setTimeout(function () {
-                  Beamer.appendAlert(!0)
-                  delete Beamer.updateTimeout
-                }, Math.max(100, Math.ceil(Math.random() * Beamer.updatesMaxDelay)))))
-          : 'prepareAutoRefresh' == d
-          ? Beamer.prepareAutoRefresh()
-          : 'switchIframe' == d && Beamer.switchIframe(e.url)
+            ? ('undefined' !== typeof Beamer.updateTimeout && clearTimeout(Beamer.updateTimeout),
+              'undefined' !== typeof e && 'undefined' !== typeof e.immediate && e.immediate
+                ? (Beamer.appendAlert(!0), delete Beamer.updateTimeout)
+                : (Beamer.updateTimeout = setTimeout(
+                    function () {
+                      Beamer.appendAlert(!0)
+                      delete Beamer.updateTimeout
+                    },
+                    Math.max(100, Math.ceil(Math.random() * Beamer.updatesMaxDelay)),
+                  )))
+            : 'prepareAutoRefresh' == d
+              ? Beamer.prepareAutoRefresh()
+              : 'switchIframe' == d && Beamer.switchIframe(e.url)
       if ('undefined' !== typeof Beamer.windowEventCallbacks && 'undefined' !== typeof Beamer.windowEventCallbacks[d])
         for (a = 0; a < Beamer.windowEventCallbacks[d].length; a++) Beamer.windowEventCallbacks[d][a](e)
     }
@@ -3033,7 +3039,7 @@ Beamer.checkUrlAllowed = function (a) {
         b()
       })
     } catch (h) {
-      return Beamer.logError(h), Promise.resolve(!1)
+      return (Beamer.logError(h), Promise.resolve(!1))
     }
   })
 }
@@ -3061,10 +3067,10 @@ Beamer.matchesUrlPart = function (a, b, c, d, e) {
       ? 'undefined' !== typeof c && c && 0 < a.length
         ? Beamer.matchesUrlParts(a, b, !0, d)
         : 0 < b.length && '*' === b[0]
-        ? 1 < e.length
-          ? Beamer.matchesUrlPart(a, b, c, d, e.slice(0, -1))
-          : Beamer.matchesUrlParts(a, b, !0, d)
-        : !1
+          ? 1 < e.length
+            ? Beamer.matchesUrlPart(a, b, c, d, e.slice(0, -1))
+            : Beamer.matchesUrlParts(a, b, !0, d)
+          : !1
       : Beamer.matchesUrlParts(a, b)
   })
 }
