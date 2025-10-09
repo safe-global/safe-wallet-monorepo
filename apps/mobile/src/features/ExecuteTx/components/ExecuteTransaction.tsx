@@ -3,7 +3,7 @@ import React, { useEffect, useMemo } from 'react'
 import { router, useLocalSearchParams } from 'expo-router'
 import { ExecuteError } from './ExecuteError'
 import { ExecuteProcessing } from '@/src/features/ExecuteTx/components/ExecuteProcessing'
-import { ExecutionStatus, useTransactionExecutionWithPK } from '../hooks/useTransactionExecutionWithPK'
+import { ExecutionStatus, useTransactionExecution } from '../hooks/useTransactionExecution'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
@@ -29,7 +29,7 @@ export function ExecuteTransaction() {
   const activeSafe = useDefinedActiveSafe()
   const activeSigner = useAppSelector((state) => selectActiveSigner(state, activeSafe.address))
   const { guard: canExecute } = useTransactionGuard('executing')
-  const { status, executeTx, retry, executeInRelay } = useTransactionExecutionWithPK({
+  const { status, execute, retry } = useTransactionExecution({
     txId: txId || '',
     executionMethod,
     signerAddress: activeSigner?.value || '',
@@ -37,14 +37,10 @@ export function ExecuteTransaction() {
   })
 
   useEffect(() => {
-    if (canExecute && status === ExecutionStatus.IDLE && txId) {
-      if (executionMethod === ExecutionMethod.RELAYER) {
-        executeInRelay()
-      } else if (activeSigner) {
-        executeTx()
-      }
+    if (canExecute && status === ExecutionStatus.IDLE && txId && activeSigner) {
+      execute()
     }
-  }, [canExecute, status, feeParams, executeTx, txId, activeSigner])
+  }, [canExecute, status, feeParams, execute, txId, activeSigner])
 
   const handleViewTransaction = () => {
     router.dismissTo({
