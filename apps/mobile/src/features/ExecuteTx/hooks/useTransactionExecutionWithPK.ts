@@ -8,6 +8,7 @@ import { executeTx } from '@/src/services/tx/tx-sender/execute'
 import logger from '@/src/utils/logger'
 import { addPendingTx } from '@/src/store/pendingTxsSlice'
 import { getUserNonce } from '@/src/services/web3'
+import { EstimatedFeeValues } from '@/src/store/estimatedFeeSlice'
 
 export enum ExecutionStatus {
   IDLE = 'idle',
@@ -17,12 +18,13 @@ export enum ExecutionStatus {
   ERROR = 'error',
 }
 
-interface UseTransactionExecutionProps {
+interface UseTransactionExecutionWithPKProps {
   txId: string
   signerAddress: string
+  feeParams: EstimatedFeeValues | null
 }
 
-export function useTransactionExecution({ txId, signerAddress }: UseTransactionExecutionProps) {
+export function useTransactionExecutionWithPK({ txId, signerAddress, feeParams }: UseTransactionExecutionWithPKProps) {
   const [status, setStatus] = useState<ExecutionStatus>(ExecutionStatus.IDLE)
   const dispatch = useAppDispatch()
   const activeSafe = useDefinedActiveSafe()
@@ -52,6 +54,7 @@ export function useTransactionExecution({ txId, signerAddress }: UseTransactionE
         activeSafe,
         txId,
         privateKey,
+        feeParams,
       })
 
       dispatch(
@@ -70,7 +73,7 @@ export function useTransactionExecution({ txId, signerAddress }: UseTransactionE
       logger.error('Error executing transaction:', error)
       setStatus(ExecutionStatus.ERROR)
     }
-  }, [activeChain, activeSafe, txId, signerAddress])
+  }, [activeChain, activeSafe, txId, signerAddress, dispatch])
 
   const retry = useCallback(() => {
     execute()

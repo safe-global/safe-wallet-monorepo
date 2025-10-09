@@ -1,6 +1,6 @@
 // Unit tests for the SafeWalletProvider class
 import { faker } from '@faker-js/faker'
-import { SafeWalletProvider } from '.'
+import { RpcErrorCode, SafeWalletProvider } from '.'
 import { ERC20__factory } from '@safe-global/utils/types/contracts'
 import { numberToHex } from '@/utils/hex'
 import type { TransactionReceipt } from 'ethers'
@@ -56,8 +56,32 @@ describe('SafeWalletProvider', () => {
         id: 1,
         jsonrpc: '2.0',
         error: {
-          code: -32000,
+          code: RpcErrorCode.UNSUPPORTED_CHAIN,
           message: 'Unsupported chain',
+        },
+      })
+    })
+
+    it('should surface user rejections when the chain switch is cancelled', async () => {
+      const sdk = {
+        switchChain: jest
+          .fn()
+          .mockRejectedValue({ code: RpcErrorCode.USER_REJECTED, message: 'User rejected chain switch' }),
+      }
+      const safeWalletProvider = new SafeWalletProvider(safe, sdk as any)
+
+      await expect(
+        safeWalletProvider.request(
+          1,
+          { method: 'wallet_switchEthereumChain', params: [{ chainId: '0x1' }] } as any,
+          {} as any,
+        ),
+      ).resolves.toEqual({
+        id: 1,
+        jsonrpc: '2.0',
+        error: {
+          code: RpcErrorCode.USER_REJECTED,
+          message: 'User rejected chain switch',
         },
       })
     })
@@ -108,7 +132,7 @@ describe('SafeWalletProvider', () => {
         id: 1,
         jsonrpc: '2.0',
         error: {
-          code: -32000,
+          code: RpcErrorCode.INVALID_PARAMS,
           message: 'The address or message hash is invalid',
         },
       })
@@ -126,7 +150,7 @@ describe('SafeWalletProvider', () => {
         id: 1,
         jsonrpc: '2.0',
         error: {
-          code: -32000,
+          code: RpcErrorCode.INVALID_PARAMS,
           message: 'The address or message hash is invalid',
         },
       })
@@ -185,7 +209,7 @@ describe('SafeWalletProvider', () => {
         id: 1,
         jsonrpc: '2.0',
         error: {
-          code: -32000,
+          code: RpcErrorCode.INVALID_PARAMS,
           message: 'The address or message hash is invalid',
         },
       })
@@ -204,7 +228,7 @@ describe('SafeWalletProvider', () => {
         id: 1,
         jsonrpc: '2.0',
         error: {
-          code: -32000,
+          code: RpcErrorCode.INVALID_PARAMS,
           message: 'The address or message hash is invalid',
         },
       })
@@ -277,7 +301,7 @@ describe('SafeWalletProvider', () => {
           id: 1,
           jsonrpc: '2.0',
           error: {
-            code: -32000,
+            code: RpcErrorCode.INVALID_PARAMS,
             message: 'The address is invalid',
           },
         })

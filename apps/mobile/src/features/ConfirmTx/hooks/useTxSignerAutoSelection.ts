@@ -6,9 +6,12 @@ import { useTxSignerActions } from '@/src/features/ConfirmTx/hooks/useTxSignerAc
 export const useTxSignerAutoSelection = (detailedExecutionInfo?: MultisigExecutionDetails) => {
   const { activeTxSigner, appSigners, proposedSigner, hasSigned } = useTxSignerState(detailedExecutionInfo)
   const { setTxSigner } = useTxSignerActions()
+  const canExecute =
+    detailedExecutionInfo &&
+    detailedExecutionInfo?.confirmationsRequired <= detailedExecutionInfo?.confirmations?.length
 
   useLayoutEffect(() => {
-    if (proposedSigner && activeTxSigner?.value !== proposedSigner.value && hasSigned) {
+    if (proposedSigner && activeTxSigner?.value !== proposedSigner.value && hasSigned && !canExecute) {
       console.log('use layout effectproposedSigner', proposedSigner)
       setTxSigner(proposedSigner)
       return
@@ -18,5 +21,5 @@ export const useTxSignerAutoSelection = (detailedExecutionInfo?: MultisigExecuti
       setTxSigner(appSigners[0])
       return
     }
-  }, [proposedSigner, activeTxSigner, hasSigned, appSigners, setTxSigner])
+  }, [proposedSigner, activeTxSigner, hasSigned, appSigners, setTxSigner, canExecute])
 }

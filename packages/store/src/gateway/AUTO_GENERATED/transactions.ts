@@ -412,7 +412,16 @@ export type CustomTransactionInfo = {
   value?: string | null
   isCancellation: boolean
   methodName?: string | null
-  actionCount?: number | null
+}
+export type MultiSendTransactionInfo = {
+  type: 'Custom'
+  humanDescription?: string | null
+  to: AddressInfo
+  dataSize: string
+  value?: string | null
+  isCancellation: boolean
+  methodName: 'multiSend'
+  actionCount: number
 }
 export type BaseDataDecoded = {
   method: string
@@ -887,6 +896,7 @@ export type TransactionDetails = {
   txInfo:
     | CreationTransactionInfo
     | CustomTransactionInfo
+    | MultiSendTransactionInfo
     | SettingsChangeTransaction
     | TransferTransactionInfo
     | SwapOrderTransactionInfo
@@ -962,6 +972,7 @@ export type Transaction = {
   txInfo:
     | CreationTransactionInfo
     | CustomTransactionInfo
+    | MultiSendTransactionInfo
     | SettingsChangeTransaction
     | TransferTransactionInfo
     | SwapOrderTransactionInfo
@@ -1025,6 +1036,7 @@ export type TransactionPreview = {
   txInfo:
     | CreationTransactionInfo
     | CustomTransactionInfo
+    | MultiSendTransactionInfo
     | SettingsChangeTransaction
     | TransferTransactionInfo
     | SwapOrderTransactionInfo

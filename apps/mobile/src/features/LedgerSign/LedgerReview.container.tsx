@@ -18,6 +18,9 @@ import extractTxInfo from '@/src/services/tx/extractTx'
 import { getSafeTxMessageHash } from '@safe-global/utils/utils/safe-hashes'
 import type { SafeVersion } from '@safe-global/types-kit'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
+import { LargeHeaderTitle, NavBarTitle } from '@/src/components/Title'
+import { Container } from '@/src/components/Container'
 
 export const LedgerReviewSignContainer = () => {
   const { bottom } = useSafeAreaInsets()
@@ -31,6 +34,13 @@ export const LedgerReviewSignContainer = () => {
   const [isSigning, setIsSigning] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [addConfirmation] = useTransactionsAddConfirmationV1Mutation()
+  const { handleScroll } = useScrollableHeader({
+    children: (
+      <>
+        <NavBarTitle numberOfLines={1}>Review and confirm transaction on Ledger</NavBarTitle>
+      </>
+    ),
+  })
   const messageHash = useMemo(() => {
     try {
       if (!txId || !chain || !txDetails || !safe.version) {
@@ -110,15 +120,13 @@ export const LedgerReviewSignContainer = () => {
 
   return (
     <View flex={1} padding="$4" gap="$4" paddingBottom={Math.max(bottom, getTokenValue('$4'))}>
-      <ScrollView>
-        <Text fontSize="$9" fontWeight="600" color="$color" numberOfLines={2}>
-          Review and confirm transaction on Ledger
-        </Text>
+      <ScrollView onScroll={handleScroll}>
+        <LargeHeaderTitle>Review and confirm transaction on Ledger</LargeHeaderTitle>
 
-        <View backgroundColor="$backgroundPaper" borderRadius="$4" padding="$4" gap="$4">
+        <Container borderRadius="$4" padding="$4" gap="$4" marginTop="$4">
           <View>
             <Text fontSize="$3" color="$colorSecondary">
-              chainId
+              Chain ID
             </Text>
             <Text fontSize="$5" color="$color">
               {chain?.chainId}
@@ -126,7 +134,7 @@ export const LedgerReviewSignContainer = () => {
           </View>
           <View>
             <Text fontSize="$3" color="$colorSecondary">
-              verifyingContract
+              Verifying contract
             </Text>
             <Text fontSize="$5" color="$color">
               {activeSafe.address}
@@ -134,13 +142,13 @@ export const LedgerReviewSignContainer = () => {
           </View>
           <View>
             <Text fontSize="$3" color="$colorSecondary">
-              messageHash
+              MessageHash
             </Text>
             <Text fontSize="$5" color="$color">
               {messageHash || '—'}
             </Text>
           </View>
-        </View>
+        </Container>
 
         {error ? <Text color="$error">{error}</Text> : null}
       </ScrollView>

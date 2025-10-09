@@ -9,6 +9,7 @@ import {
   NativeStakingDepositTransactionInfo,
   NativeStakingValidatorsExitTransactionInfo,
   NativeStakingWithdrawTransactionInfo,
+  MultiSendTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { HistoryTokenTransfer } from '../history-views/HistoryTokenTransfer'
@@ -91,8 +92,7 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
       return (
         <HistoryContract
           txId={txDetails.txId}
-          txInfo={txDetails.txInfo as CustomTransactionInfo}
-          _executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+          txInfo={txDetails.txInfo as CustomTransactionInfo | MultiSendTransactionInfo}
         />
       )
 
