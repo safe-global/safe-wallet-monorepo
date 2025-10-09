@@ -10,6 +10,8 @@ import {
   getCreateCallDeployment,
 } from '@safe-global/safe-deployments'
 import type { SingletonDeployment, DeploymentFilter, SingletonDeploymentV2 } from '@safe-global/safe-deployments'
+import { _SAFE_L2_DEPLOYMENTS } from '@safe-global/safe-deployments/dist/deployments'
+import type { SingletonDeploymentJSON } from '@safe-global/safe-deployments/dist/types'
 import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type SafeVersion } from '@safe-global/types-kit'
@@ -17,6 +19,42 @@ import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 const toNetworkAddressList = (addresses: string | string[]) => (Array.isArray(addresses) ? addresses : [addresses])
+
+type DeploymentRecord = Record<string, { address: string; codeHash: string }>
+
+const SAFE_L2_CODE_HASHES = new Set<string>(
+  (_SAFE_L2_DEPLOYMENTS as SingletonDeploymentJSON[]).flatMap((deployment) =>
+    Object.values(deployment.deployments as DeploymentRecord).map(({ codeHash }) => codeHash.toLowerCase()),
+  ),
+)
+
+export const isL2MasterCopyCodeHash = (codeHash: string | undefined): boolean => {
+  if (!codeHash) {
+    return false
+  }
+
+  return SAFE_L2_CODE_HASHES.has(codeHash.toLowerCase())
+}
+
+export const getL2MasterCopyVersionByCodeHash = (codeHash: string | undefined): string | undefined => {
+  if (!codeHash) {
+    return
+  }
+
+  const normalizedCodeHash = codeHash.toLowerCase()
+
+  const matchingDeployment = (_SAFE_L2_DEPLOYMENTS as SingletonDeploymentJSON[]).find((deployment) =>
+    Object.values(deployment.deployments as DeploymentRecord).some(
+      ({ codeHash }) => codeHash.toLowerCase() === normalizedCodeHash,
+    ),
+  )
+
+  if (!matchingDeployment) {
+    return
+  }
+
+  return `${matchingDeployment.version}+L2`
+}
 
 export const hasCanonicalDeployment = (deployment: SingletonDeploymentV2 | undefined, chainId: string) => {
   const canonicalAddress = deployment?.deployments.canonical?.address
