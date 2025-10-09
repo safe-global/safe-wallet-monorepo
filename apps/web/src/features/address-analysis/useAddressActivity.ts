@@ -1,7 +1,12 @@
 import { useEffect, useMemo } from 'react'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { analyzeAddressActivity, type AddressActivityAssessment, type ActivityLevel } from './addressActivityService'
+import {
+  analyzeAddressActivity,
+  isLowActivityAddress,
+  type AddressActivityAssessment,
+  type ActivityLevel,
+} from './addressActivityService'
 import { ActivityMessages } from './config'
 
 type ActivityMessage = {
@@ -16,7 +21,7 @@ const getActivityMessage = (activityLevel: ActivityLevel): ActivityMessage => {
 /**
  * React hook to analyze address activity
  * @param address - Ethereum address to analyze
- * @returns Object containing activity assessment, loading state, error, title and description
+ * @returns Object containing activity assessment, loading state, error, title, description and severity
  */
 export const useAddressActivity = (
   address: string | undefined,
@@ -26,6 +31,7 @@ export const useAddressActivity = (
   error?: Error
   title?: string
   description?: string
+  severity?: 'WARN' | 'INFO'
 } => {
   const web3ReadOnly = useWeb3ReadOnly()
 
@@ -42,6 +48,11 @@ export const useAddressActivity = (
     return getActivityMessage(assessment.activityLevel)
   }, [assessment])
 
+  const severity = useMemo(() => {
+    if (!assessment) return undefined
+    return isLowActivityAddress(assessment) ? 'WARN' : 'INFO'
+  }, [assessment])
+
   useEffect(() => {
     if (error) {
       console.error('Address activity analysis error:', error)
@@ -54,5 +65,6 @@ export const useAddressActivity = (
     error,
     title: message?.title,
     description: message?.description,
+    severity,
   }
 }
