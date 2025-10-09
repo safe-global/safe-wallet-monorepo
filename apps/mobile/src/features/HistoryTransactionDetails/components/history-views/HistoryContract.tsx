@@ -1,6 +1,6 @@
 import React from 'react'
 import { YStack, View, Text, H3 } from 'tamagui'
-import { CustomTransactionInfo, MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { CustomTransactionInfo, MultiSendTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { RootState } from '@/src/store'
 import { selectChainById } from '@/src/store/chains'
@@ -16,18 +16,17 @@ import { isMultiSendTxInfo } from '@/src/utils/transaction-guards'
 
 interface HistoryContractProps {
   txId: string
-  txInfo: CustomTransactionInfo
-  _executionInfo?: MultisigExecutionDetails
+  txInfo: CustomTransactionInfo | MultiSendTransactionInfo
 }
 
 const methodBadgeProps: CircleProps = { borderRadius: '$2', paddingHorizontal: '$2', paddingVertical: '$1' }
 
-export function HistoryContract({ txId, txInfo, _executionInfo }: HistoryContractProps) {
+export function HistoryContract({ txId, txInfo }: HistoryContractProps) {
   const activeSafe = useDefinedActiveSafe()
   const chain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
 
   const methodName = txInfo.methodName ?? 'Contract interaction'
-  const isBatch = isMultiSendTxInfo(txInfo) && txInfo.actionCount
+  const isBatch = isMultiSendTxInfo(txInfo)
 
   const actionCount = isBatch ? txInfo.actionCount : null
   const title = actionCount ? `${actionCount} Actions` : methodName.charAt(0).toUpperCase() + methodName.slice(1)
