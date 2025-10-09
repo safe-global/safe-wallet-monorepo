@@ -7,7 +7,7 @@ import {
   type AddressActivityAssessment,
   type ActivityLevel,
 } from './addressActivityService'
-import { ActivityMessages } from './config'
+import { ActivityMessages } from '../config'
 
 type ActivityMessage = {
   title: string

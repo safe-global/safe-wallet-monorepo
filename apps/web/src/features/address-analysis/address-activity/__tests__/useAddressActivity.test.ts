@@ -3,13 +3,13 @@ import { renderHook, waitFor } from '@testing-library/react'
 import type { JsonRpcProvider } from 'ethers'
 import { useAddressActivity } from '../useAddressActivity'
 import * as web3 from '@/hooks/wallets/web3'
-import { ActivityMessages } from '../config'
+import { ActivityMessages } from '../../config'
 
 describe('useAddressActivity', () => {
   const mockProvider = (txCount: number) =>
     ({
       getTransactionCount: jest.fn().mockResolvedValue(txCount),
-    }) as unknown as JsonRpcProvider
+    } as unknown as JsonRpcProvider)
 
   beforeEach(() => {
     jest.resetAllMocks()
