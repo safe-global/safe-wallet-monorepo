@@ -164,7 +164,14 @@ const useSafeNotifications = (): void => {
     return () => {
       dispatch(closeNotification({ id }))
     }
-  }, [dispatch, safe, safe.implementationVersionState, bytecodeComparison.result, bytecodeComparison.isLoading, query.safe])
+  }, [
+    dispatch,
+    safe,
+    safe.implementationVersionState,
+    bytecodeComparison.result,
+    bytecodeComparison.isLoading,
+    query.safe,
+  ])
 }
 
 export default useSafeNotifications
