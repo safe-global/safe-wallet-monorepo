@@ -16,9 +16,9 @@ const getActivityMessage = (activityLevel: ActivityLevel): ActivityMessage => {
 /**
  * React hook to analyze address activity
  * @param address - Ethereum address to analyze
- * @returns Object containing activity assessment, loading state, error, title, description and severity
+ * @returns Object containing activity assessment, loading state, error, title and description
  */
-export const useAddressActivityCheck = (
+export const useAddressActivity = (
   address: string | undefined,
 ): {
   assessment?: AddressActivityAssessment
@@ -26,7 +26,6 @@ export const useAddressActivityCheck = (
   error?: Error
   title?: string
   description?: string
-  severity?: 'WARN' | 'INFO'
 } => {
   const web3ReadOnly = useWeb3ReadOnly()
 
@@ -43,13 +42,6 @@ export const useAddressActivityCheck = (
     return getActivityMessage(assessment.activityLevel)
   }, [assessment])
 
-  const severity = useMemo(() => {
-    if (!assessment) return undefined
-    return assessment.activityLevel === 'LOW_ACTIVITY' || assessment.activityLevel === 'VERY_LOW_ACTIVITY'
-      ? 'WARN'
-      : 'INFO'
-  }, [assessment])
-
   useEffect(() => {
     if (error) {
       console.error('Address activity analysis error:', error)
@@ -62,6 +54,5 @@ export const useAddressActivityCheck = (
     error,
     title: message?.title,
     description: message?.description,
-    severity,
   }
 }

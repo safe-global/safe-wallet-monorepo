@@ -1,4 +1,5 @@
-export { useAddressActivityCheck } from './useAddressActivity'
+export { useAddressActivity } from './useAddressActivity'
+export { useAddressBookCheck, AddressCheckDescription, AddressCheckSeverity } from './useAddressBookCheck'
 export {
   analyzeAddressActivity,
   isLowActivityAddress,
