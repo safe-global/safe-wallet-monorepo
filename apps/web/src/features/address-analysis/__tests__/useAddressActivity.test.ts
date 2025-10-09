@@ -27,6 +27,7 @@ describe('useAddressActivity', () => {
     expect(result.current.assessment).toBeUndefined()
     expect(result.current.title).toBeUndefined()
     expect(result.current.description).toBeUndefined()
+    expect(result.current.severity).toBeUndefined()
   })
 
   it('should return undefined when provider is not available', async () => {
@@ -58,6 +59,7 @@ describe('useAddressActivity', () => {
     })
     expect(result.current.title).toBe(ActivityMessages.NO_ACTIVITY.title)
     expect(result.current.description).toBe(ActivityMessages.NO_ACTIVITY.description)
+    expect(result.current.severity).toBe('WARN')
     expect(result.current.error).toBeUndefined()
   })
 
@@ -77,6 +79,7 @@ describe('useAddressActivity', () => {
     })
     expect(result.current.title).toBe(ActivityMessages.VERY_LOW_ACTIVITY.title)
     expect(result.current.description).toBe(ActivityMessages.VERY_LOW_ACTIVITY.description)
+    expect(result.current.severity).toBe('WARN')
   })
 
   it('should return LOW_ACTIVITY assessment with corresponding title and description', async () => {
@@ -95,6 +98,7 @@ describe('useAddressActivity', () => {
     })
     expect(result.current.title).toBe(ActivityMessages.LOW_ACTIVITY.title)
     expect(result.current.description).toBe(ActivityMessages.LOW_ACTIVITY.description)
+    expect(result.current.severity).toBe('WARN')
   })
 
   it('should return MODERATE_ACTIVITY assessment with corresponding title and description', async () => {
@@ -113,6 +117,7 @@ describe('useAddressActivity', () => {
     })
     expect(result.current.title).toBe(ActivityMessages.MODERATE_ACTIVITY.title)
     expect(result.current.description).toBe(ActivityMessages.MODERATE_ACTIVITY.description)
+    expect(result.current.severity).toBe('INFO')
   })
 
   it('should return HIGH_ACTIVITY assessment with corresponding title and description', async () => {
@@ -131,6 +136,7 @@ describe('useAddressActivity', () => {
     })
     expect(result.current.title).toBe(ActivityMessages.HIGH_ACTIVITY.title)
     expect(result.current.description).toBe(ActivityMessages.HIGH_ACTIVITY.description)
+    expect(result.current.severity).toBe('INFO')
   })
 
   it('should handle errors gracefully', async () => {
@@ -177,6 +183,7 @@ describe('useAddressActivity', () => {
 
     expect(result.current.assessment?.txCount).toBe(5)
     expect(result.current.assessment?.activityLevel).toBe('LOW_ACTIVITY')
+    expect(result.current.severity).toBe('WARN')
 
     rerender({ addr: address2 })
 
@@ -185,6 +192,7 @@ describe('useAddressActivity', () => {
     })
 
     expect(result.current.assessment?.activityLevel).toBe('HIGH_ACTIVITY')
+    expect(result.current.severity).toBe('INFO')
     expect(mockGetTransactionCount).toHaveBeenCalledTimes(2)
   })
 
@@ -202,6 +210,7 @@ describe('useAddressActivity', () => {
     })
 
     expect(result.current.assessment?.txCount).toBe(10)
+    expect(result.current.severity).toBe('WARN')
 
     useWeb3ReadOnlySpy.mockReturnValue(provider2)
     rerender()
@@ -209,5 +218,7 @@ describe('useAddressActivity', () => {
     await waitFor(() => {
       expect(result.current.assessment?.txCount).toBe(50)
     })
+
+    expect(result.current.severity).toBe('INFO')
   })
 })
