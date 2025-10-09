@@ -46,7 +46,7 @@ export const EstimatedNetworkFee = ({
       <Text color="$textSecondaryLight">Est. network fee</Text>
 
       <View flexDirection="row" alignItems="center" onPress={onPress}>
-        {executionMethod === ExecutionMethod.RELAYER ? (
+        {executionMethod === ExecutionMethod.WITH_RELAY ? (
           <View alignItems="flex-end" flexDirection="row" justifyContent="center" gap="$2">
             <View width="$8">
               <GradientText colors={[getTokenValue('$color.infoMainDark'), getTokenValue('$color.primaryMainDark')]}>

@@ -32,7 +32,7 @@ export const RelayAvailable = ({ isLoadingRelays, relaysRemaining, executionMeth
           )}
         </View>
       </View>
-      {executionMethod === ExecutionMethod.RELAYER && (
+      {executionMethod === ExecutionMethod.WITH_RELAY && (
         <View marginLeft="$2">
           <SafeFontIcon name="check" size={20} color="$color" />
         </View>

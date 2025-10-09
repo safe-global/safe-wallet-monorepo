@@ -1,4 +1,4 @@
 export enum ExecutionMethod {
-  RELAYER = 'relayer',
-  SIGNER = 'signer',
+  WITH_RELAY = 'with_relay',
+  WITH_PK = 'with_pk',
 }

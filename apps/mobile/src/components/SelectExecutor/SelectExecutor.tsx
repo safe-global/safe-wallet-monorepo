@@ -36,7 +36,7 @@ export function SelectExecutor({ address, txId, executionMethod }: Props) {
           alignItems="center"
           gap={'$1'}
         >
-          {executionMethod === ExecutionMethod.RELAYER ? (
+          {executionMethod === ExecutionMethod.WITH_RELAY ? (
             <Text fontWeight={600}>Sponsored by Safe</Text>
           ) : (
             <>

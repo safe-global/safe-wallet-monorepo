@@ -34,7 +34,7 @@ const getActiveSignerRightNode = (
   executionMethod: ExecutionMethod,
   activeSigner?: SignerInfo,
 ) => {
-  if (activeSigner?.value === item.value && executionMethod !== ExecutionMethod.RELAYER) {
+  if (activeSigner?.value === item.value && executionMethod !== ExecutionMethod.WITH_RELAY) {
     return <SafeFontIcon name="check" color="$color" />
   }
 
@@ -43,7 +43,7 @@ const getActiveSignerRightNode = (
 
 export const HowToExecuteSheetContainer = () => {
   const router = useRouter()
-  const { txId, executionMethod = ExecutionMethod.SIGNER } = useLocalSearchParams<{
+  const { txId, executionMethod = ExecutionMethod.WITH_PK } = useLocalSearchParams<{
     executionMethod: ExecutionMethod
     txId: string
   }>()
@@ -85,13 +85,13 @@ export const HowToExecuteSheetContainer = () => {
           {/* Relayer Option */}
           <Container
             spaced={false}
-            backgroundColor={executionMethod === ExecutionMethod.RELAYER ? '$backgroundSecondary' : 'transparent'}
-            borderWidth={executionMethod === ExecutionMethod.RELAYER ? 0 : 1}
-            borderColor={executionMethod !== ExecutionMethod.RELAYER ? '$borderLight' : undefined}
+            backgroundColor={executionMethod === ExecutionMethod.WITH_RELAY ? '$backgroundSecondary' : 'transparent'}
+            borderWidth={executionMethod === ExecutionMethod.WITH_RELAY ? 0 : 1}
+            borderColor={executionMethod !== ExecutionMethod.WITH_RELAY ? '$borderLight' : undefined}
             paddingVertical="$3"
             paddingHorizontal="$4"
             gap="$1"
-            onPress={() => isRelayAvailable && handleExecutionMethodSelect(ExecutionMethod.RELAYER)}
+            onPress={() => isRelayAvailable && handleExecutionMethodSelect(ExecutionMethod.WITH_RELAY)}
           >
             {isRelayAvailable ? (
               <RelayAvailable
@@ -118,14 +118,14 @@ export const HowToExecuteSheetContainer = () => {
                   width="100%"
                   borderRadius={'$4'}
                   backgroundColor={
-                    executionMethod === ExecutionMethod.SIGNER && activeSigner?.value === item.value
+                    executionMethod === ExecutionMethod.WITH_PK && activeSigner?.value === item.value
                       ? '$backgroundSecondary'
                       : 'transparent'
                   }
                 >
                   <SignersCard
                     transparent
-                    onPress={() => handleExecutionMethodSelect(ExecutionMethod.SIGNER, item)}
+                    onPress={() => handleExecutionMethodSelect(ExecutionMethod.WITH_PK, item)}
                     name={<ContactDisplayNameContainer address={item.value as Address} />}
                     address={item.value as Address}
                     balance={`${item.balance ? formatVisualAmount(item.balance, activeChain.nativeCurrency.decimals) : '0'} ${

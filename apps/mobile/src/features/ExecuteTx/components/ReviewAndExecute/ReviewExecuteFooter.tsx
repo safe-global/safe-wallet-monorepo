@@ -31,8 +31,8 @@ const getExecutionMethod = (
   isRelayAvailable: boolean,
 ): ExecutionMethod => {
   // If user explicitly requested relay but none are available, fallback to signer
-  if (requestedMethod === ExecutionMethod.RELAYER && !isRelayAvailable) {
-    return ExecutionMethod.SIGNER
+  if (requestedMethod === ExecutionMethod.WITH_RELAY && !isRelayAvailable) {
+    return ExecutionMethod.WITH_PK
   }
 
   // If user selected a method, use it
@@ -41,7 +41,7 @@ const getExecutionMethod = (
   }
 
   // Default: use relay if available, otherwise use signer
-  return isRelayAvailable ? ExecutionMethod.RELAYER : ExecutionMethod.SIGNER
+  return isRelayAvailable ? ExecutionMethod.WITH_RELAY : ExecutionMethod.WITH_PK
 }
 
 export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: ReviewFooterProps) {

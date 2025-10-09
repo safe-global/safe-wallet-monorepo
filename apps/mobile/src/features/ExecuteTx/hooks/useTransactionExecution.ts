@@ -9,8 +9,8 @@ import { EstimatedFeeValues } from '@/src/store/estimatedFeeSlice'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import { useRelayRelayV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import useSafeInfo from '@/src/hooks/useSafeInfo'
-import { executeSingleTx } from '@/src/services/tx-execution/single'
-import { executeRelayTx } from '@/src/services/tx-execution/relay'
+import { executeSingleTx } from '@/src/services/tx-execution/privateKeyExecutor'
+import { executeRelayTx } from '@/src/services/tx-execution/relayExecutor'
 
 export enum ExecutionStatus {
   IDLE = 'idle',
@@ -42,7 +42,7 @@ export function useTransactionExecution({
 
   // Hashmap of execution methods to their executor functions
   const executors = {
-    [ExecutionMethod.SIGNER]: async () => {
+    [ExecutionMethod.WITH_PK]: async () => {
       return await executeSingleTx({
         chain: activeChain,
         activeSafe,
@@ -51,7 +51,7 @@ export function useTransactionExecution({
         feeParams,
       })
     },
-    [ExecutionMethod.RELAYER]: async () => {
+    [ExecutionMethod.WITH_RELAY]: async () => {
       return await executeRelayTx({
         chain: activeChain,
         activeSafe,
