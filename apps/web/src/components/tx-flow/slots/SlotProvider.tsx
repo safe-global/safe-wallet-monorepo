@@ -9,6 +9,7 @@ import React, {
 import type { SubmitCallback } from '../TxFlow'
 
 export enum SlotName {
+  Main = 'main',
   Submit = 'submit',
   ComboSubmit = 'combo-submit',
   Feature = 'feature',

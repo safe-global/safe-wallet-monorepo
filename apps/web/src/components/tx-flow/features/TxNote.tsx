@@ -27,7 +27,7 @@ const useShouldRegisterSlot = () => {
 
 const TxNoteSlot = withSlot({
   Component: TxNote,
-  slotName: SlotName.Sidebar,
+  slotName: SlotName.Main,
   id: 'txNote',
   useSlotCondition: useShouldRegisterSlot,
 })
