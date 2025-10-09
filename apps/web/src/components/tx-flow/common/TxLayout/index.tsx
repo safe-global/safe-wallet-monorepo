@@ -25,7 +25,7 @@ import css from './styles.module.css'
 import { TxSecurityProvider } from '@/components/tx/security/shared/TxSecurityContext'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import SecurityWarnings from '@/components/tx/security/SecurityWarnings'
-import SafeHeaderInfo from '@/components/sidebar/SidebarHeader/SafeHeaderInfo'
+import SafeInfo from '@/components/tx-flow/common/SafeInfo'
 import SafeShieldWidget from '../SafeShieldWidget'
 
 export const TxLayoutHeader = ({
@@ -119,7 +119,7 @@ const TxLayout = ({
                       top: 62,
                     }}
                   >
-                    <SafeHeaderInfo />
+                    <SafeInfo />
                   </Card>
 
                   <TxStatusWidget
