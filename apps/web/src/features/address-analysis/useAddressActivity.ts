@@ -45,7 +45,9 @@ export const useAddressActivityCheck = (
 
   const severity = useMemo(() => {
     if (!assessment) return undefined
-    return assessment.activityLevel === 'LOW_ACTIVITY' || assessment.activityLevel === 'VERY_LOW_ACTIVITY' ? 'WARN' : 'INFO'
+    return assessment.activityLevel === 'LOW_ACTIVITY' || assessment.activityLevel === 'VERY_LOW_ACTIVITY'
+      ? 'WARN'
+      : 'INFO'
   }, [assessment])
 
   useEffect(() => {
