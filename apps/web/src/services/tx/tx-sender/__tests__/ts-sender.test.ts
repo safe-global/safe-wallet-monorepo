@@ -14,6 +14,7 @@ import {
   dispatchTxProposal,
   dispatchTxSigning,
   dispatchBatchExecutionRelay,
+  createRemoveModuleTx,
 } from '..'
 import {
   BrowserProvider,
@@ -69,6 +70,10 @@ jest.mock('../../proposeTransaction', () => ({
 }))
 
 // Mock Safe SDK
+// Stable contract manager mock so `encode` spy is consistent across calls
+const safeContractMock = { encode: jest.fn(() => '0xdeadbeef') }
+const contractManagerMock = { safeContract: safeContractMock }
+
 const mockSafeSDK = {
   createTransaction: jest.fn(() => ({
     signatures: new Map(),
@@ -94,9 +99,12 @@ const mockSafeSDK = {
   getAddress: jest.fn(() => '0x0000000000000000000000000000000000000123'),
   getTransactionHash: jest.fn(() => Promise.resolve('0x1234567890')),
   getContractVersion: jest.fn(() => Promise.resolve('1.1.1')),
+  getModules: jest.fn(() => Promise.resolve([])),
   getEthAdapter: jest.fn(() => ({
     getSignerAddress: jest.fn(() => Promise.resolve(SIGNER_ADDRESS)),
   })),
+  getContractManager: jest.fn(() => contractManagerMock),
+  createDisableModuleTx: jest.fn(() => Promise.resolve({})),
 } as unknown as Safe
 
 describe('txSender', () => {
@@ -181,6 +189,64 @@ describe('txSender', () => {
       expect(mockSafeSDK.createRejectionTransaction).toHaveBeenCalledWith(1)
       expect(tx).toBeDefined()
       expect(tx.addSignature).toBeDefined()
+    })
+  })
+
+  describe('createRemoveModuleTx', () => {
+    it('uses workaround for v1.3.0 and encodes disableModule with prev correctly (middle element)', async () => {
+      ;(mockSafeSDK.getContractVersion as jest.Mock).mockResolvedValueOnce('1.3.0')
+      ;(mockSafeSDK.getModules as jest.Mock).mockResolvedValueOnce([
+        '0x000000000000000000000000000000000000000A',
+        '0x000000000000000000000000000000000000000B',
+        '0x000000000000000000000000000000000000000C',
+      ])
+      ;(mockSafeSDK.getAddress as jest.Mock).mockReturnValue('0x0000000000000000000000000000000000000123')
+
+      const encodedSpy = (mockSafeSDK.getContractManager() as any).safeContract.encode as jest.Mock
+
+      await createRemoveModuleTx('0x000000000000000000000000000000000000000B')
+
+      expect(encodedSpy).toHaveBeenCalledWith('disableModule', [
+        '0x000000000000000000000000000000000000000A',
+        '0x000000000000000000000000000000000000000B',
+      ])
+      expect(mockSafeSDK.createTransaction).toHaveBeenCalled()
+    })
+
+    it('uses SENTINEL_ADDRESS as prev when removing the first module', async () => {
+      ;(mockSafeSDK.getContractVersion as jest.Mock).mockResolvedValueOnce('1.3.0')
+      ;(mockSafeSDK.getModules as jest.Mock).mockResolvedValueOnce([
+        '0x000000000000000000000000000000000000000B',
+        '0x000000000000000000000000000000000000000C',
+      ])
+
+      const encodedSpy = (mockSafeSDK.getContractManager() as any).safeContract.encode as jest.Mock
+
+      await createRemoveModuleTx('0x000000000000000000000000000000000000000B')
+
+      expect(encodedSpy).toHaveBeenCalledWith('disableModule', [
+        '0x0000000000000000000000000000000000000001',
+        '0x000000000000000000000000000000000000000B',
+      ])
+      expect(mockSafeSDK.createTransaction).toHaveBeenCalled()
+    })
+
+    it('throws when module is not enabled on v1.3.0', async () => {
+      ;(mockSafeSDK.getContractVersion as jest.Mock).mockResolvedValueOnce('1.3.0')
+      ;(mockSafeSDK.getModules as jest.Mock).mockResolvedValueOnce(['0x000000000000000000000000000000000000000A'])
+
+      await expect(createRemoveModuleTx('0x000000000000000000000000000000000000000B')).rejects.toThrow(
+        'Module provided is not enabled yet',
+      )
+    })
+
+    it('delegates to SDK on >= v1.4.1', async () => {
+      ;(mockSafeSDK.getContractVersion as jest.Mock).mockResolvedValueOnce('1.4.1')
+
+      await createRemoveModuleTx('0x000000000000000000000000000000000000000B')
+
+      expect(mockSafeSDK.createDisableModuleTx).toHaveBeenCalledWith('0x000000000000000000000000000000000000000B')
+      expect(mockSafeSDK.createTransaction).not.toHaveBeenCalled()
     })
   })
 

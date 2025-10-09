@@ -87,6 +87,38 @@ export const createUpdateThresholdTx = async (threshold: number): Promise<SafeTr
 
 export const createRemoveModuleTx = async (moduleAddress: string): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
+  const safeVersion = await safeSDK.getContractVersion()
+
+  // Workaround for Safe v1.1.1, v1.2.0 and v1.3.0: getModulesPaginated can miss the last element of a page
+  // Use full list from getModules() to validate and compute the previous module in the linked list
+  if (safeVersion === '1.1.1' || safeVersion === '1.2.0' || safeVersion === '1.3.0') {
+    const modules = await safeSDK.getModules()
+    const index = modules.indexOf(moduleAddress)
+
+    if (index === -1) {
+      throw new Error('Module provided is not enabled yet')
+    }
+
+    const prev = index === 0 ? SENTINEL_ADDRESS : modules[index - 1]
+
+    const safeContract = safeSDK.getContractManager().safeContract
+    if (!safeContract) {
+      throw new Error('Safe is not deployed')
+    }
+
+    // @ts-ignore encode is available on Safe contract wrappers used in this project
+    const data = safeContract.encode('disableModule', [prev, moduleAddress])
+
+    const tx = {
+      to: await safeSDK.getAddress(),
+      value: '0',
+      data,
+    }
+
+    return safeSDK.createTransaction({ transactions: [tx] })
+  }
+
+  // For v1.0.0 and >= v1.4.1, the SDK/contract handles this correctly
   return safeSDK.createDisableModuleTx(moduleAddress)
 }
 
