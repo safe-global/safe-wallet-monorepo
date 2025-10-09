@@ -2,24 +2,16 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useOwnedSafes from '@/hooks/useOwnedSafes'
-
-export enum AddressCheckDescription {
-  ADDRESS_BOOK = 'Recipient is in the address book',
-  OWNED_SAFE = 'Recipient is an owned Safe',
-  UNKNOWN = 'Recipient is not in the address book and not an owned Safe',
-}
-
-export enum AddressCheckSeverity {
-  OK = 'OK',
-  INFO = 'INFO',
-}
+import { AddressCheckMessages, AnalysisSeverity, type AddressCheckType } from '../config'
 
 type UseAddressBookCheckReturn = {
   isKnownAddress: boolean
   isAddressBookContact: boolean
   isOwnedSafe: boolean
-  description: AddressCheckDescription
-  severity: AddressCheckSeverity
+  checkType: AddressCheckType
+  title: string
+  description: string
+  severity: AnalysisSeverity
   loading: boolean
   error?: Error
 }
@@ -51,34 +43,43 @@ export const useAddressBookCheck = (address: string | undefined): UseAddressBook
     // Determine if address is known from any source
     const isKnownAddress = isAddressBookContact || isOwnedSafe
 
-    // Determine description based on checks (priority: address book > owned safe > unknown)
-    let description: AddressCheckDescription
+    // Determine check type based on checks (priority: address book > owned safe > unknown)
+    let checkType: AddressCheckType
     if (isAddressBookContact) {
-      description = AddressCheckDescription.ADDRESS_BOOK
+      checkType = 'ADDRESS_BOOK'
     } else if (isOwnedSafe) {
-      description = AddressCheckDescription.OWNED_SAFE
+      checkType = 'OWNED_SAFE'
     } else {
-      description = AddressCheckDescription.UNKNOWN
+      checkType = 'UNKNOWN'
     }
 
+    // Get message for this check type
+    const message = AddressCheckMessages[checkType]
+
     // Determine severity
-    const severity = isKnownAddress ? AddressCheckSeverity.OK : AddressCheckSeverity.INFO
+    const severity = isKnownAddress ? AnalysisSeverity.OK : AnalysisSeverity.INFO
 
     return {
       isKnownAddress,
       isAddressBookContact,
       isOwnedSafe,
-      description,
+      checkType,
+      title: message.title,
+      description: message.description,
       severity,
     }
   }, [address, chainId, mergedAddressBooks, ownedSafes])
+
+  const defaultMessage = AddressCheckMessages.UNKNOWN
 
   return {
     isKnownAddress: result?.isKnownAddress ?? false,
     isAddressBookContact: result?.isAddressBookContact ?? false,
     isOwnedSafe: result?.isOwnedSafe ?? false,
-    description: result?.description ?? AddressCheckDescription.UNKNOWN,
-    severity: result?.severity ?? AddressCheckSeverity.INFO,
+    checkType: result?.checkType ?? 'UNKNOWN',
+    title: result?.title ?? defaultMessage.title,
+    description: result?.description ?? defaultMessage.description,
+    severity: result?.severity ?? AnalysisSeverity.INFO,
     loading,
     error,
   }
