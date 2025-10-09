@@ -7,7 +7,7 @@ import {
   type AddressActivityAssessment,
   type ActivityLevel,
 } from './addressActivityService'
-import { ActivityMessages } from './config'
+import { ActivityMessages, AnalysisSeverity } from '../config'
 
 type ActivityMessage = {
   title: string
@@ -31,7 +31,7 @@ export const useAddressActivity = (
   error?: Error
   title?: string
   description?: string
-  severity?: 'WARN' | 'INFO'
+  severity?: AnalysisSeverity
 } => {
   const web3ReadOnly = useWeb3ReadOnly()
 
@@ -50,7 +50,7 @@ export const useAddressActivity = (
 
   const severity = useMemo(() => {
     if (!assessment) return undefined
-    return isLowActivityAddress(assessment) ? 'WARN' : 'INFO'
+    return isLowActivityAddress(assessment) ? AnalysisSeverity.WARN : AnalysisSeverity.INFO
   }, [assessment])
 
   useEffect(() => {

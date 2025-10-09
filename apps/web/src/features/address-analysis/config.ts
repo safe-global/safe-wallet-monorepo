@@ -1,3 +1,28 @@
+// Shared severity levels for all address analysis hooks
+export enum AnalysisSeverity {
+  OK = 'OK',
+  INFO = 'INFO',
+  WARN = 'WARN',
+}
+
+// Address check messages
+export const AddressCheckMessages = {
+  ADDRESS_BOOK: {
+    title: '',
+    description: 'Recipient is in the address book',
+  },
+  OWNED_SAFE: {
+    title: '',
+    description: 'Recipient is an owned Safe',
+  },
+  UNKNOWN: {
+    title: '',
+    description: 'Recipient is not in the address book and not an owned Safe',
+  },
+} as const
+
+export type AddressCheckType = keyof typeof AddressCheckMessages
+
 // Activity thresholds for scoring
 export const ACTIVITY_THRESHOLDS = {
   VERY_LOW: 1,
