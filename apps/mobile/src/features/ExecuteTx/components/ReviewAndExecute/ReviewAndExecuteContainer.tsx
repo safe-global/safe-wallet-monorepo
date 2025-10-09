@@ -18,7 +18,7 @@ export function ReviewAndExecuteContainer() {
   const activeSafe = useDefinedActiveSafe()
 
   // Check relay availability
-  const { data: relaysRemaining, isLoading: isLoadingRelays } = useRelayGetRelaysRemainingV1Query({
+  const { currentData: relaysRemaining, isLoading: isLoadingRelays } = useRelayGetRelaysRemainingV1Query({
     chainId: activeSafe.chainId,
     safeAddress: activeSafe.address,
   })

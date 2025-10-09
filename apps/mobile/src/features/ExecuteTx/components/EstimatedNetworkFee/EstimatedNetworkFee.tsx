@@ -29,7 +29,7 @@ export const EstimatedNetworkFee = ({
   const { colorScheme } = useTheme()
   const activeSafe = useDefinedActiveSafe()
 
-  const { data: relaysRemaining, isLoading: isLoadingRelays } = useRelayGetRelaysRemainingV1Query({
+  const { currentData: relaysRemaining, isLoading: isLoadingRelays } = useRelayGetRelaysRemainingV1Query({
     chainId: activeSafe.chainId,
     safeAddress: activeSafe.address,
   })
