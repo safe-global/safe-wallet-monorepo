@@ -1,6 +1,6 @@
 import React from 'react'
 import { YStack, View, Text, H3 } from 'tamagui'
-import { CustomTransactionInfo, MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { CustomTransactionInfo, MultiSendTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { RootState } from '@/src/store'
 import { selectChainById } from '@/src/store/chains'
@@ -12,21 +12,24 @@ import { Badge } from '@/src/components/Badge'
 import { HashDisplay } from '@/src/components/HashDisplay'
 import { HistoryAdvancedDetailsButton } from '@/src/features/HistoryTransactionDetails/components/HistoryAdvancedDetailsButton'
 import { CircleProps } from 'tamagui'
+import { isMultiSendTxInfo } from '@/src/utils/transaction-guards'
 
 interface HistoryContractProps {
   txId: string
-  txInfo: CustomTransactionInfo
-  _executionInfo?: MultisigExecutionDetails
+  txInfo: CustomTransactionInfo | MultiSendTransactionInfo
 }
 
 const methodBadgeProps: CircleProps = { borderRadius: '$2', paddingHorizontal: '$2', paddingVertical: '$1' }
 
-export function HistoryContract({ txId, txInfo, _executionInfo }: HistoryContractProps) {
+export function HistoryContract({ txId, txInfo }: HistoryContractProps) {
   const activeSafe = useDefinedActiveSafe()
   const chain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
 
   const methodName = txInfo.methodName ?? 'Contract interaction'
+  const isBatch = isMultiSendTxInfo(txInfo)
 
+  const actionCount = isBatch ? txInfo.actionCount : null
+  const title = actionCount ? `${actionCount} Actions` : methodName.charAt(0).toUpperCase() + methodName.slice(1)
   return (
     <YStack gap="$4">
       <HistoryTransactionHeader
@@ -34,10 +37,10 @@ export function HistoryContract({ txId, txInfo, _executionInfo }: HistoryContrac
         isIdenticon={!txInfo.to.logoUri}
         badgeIcon="transaction-contract"
         badgeColor="$textSecondaryLight"
-        transactionType={'Contract interaction'}
+        transactionType={isBatch ? 'Batch' : 'Contract interaction'}
       >
         <View alignItems="center">
-          <H3 fontWeight={600}>{methodName.charAt(0).toUpperCase() + methodName.slice(1)}</H3>
+          <H3 fontWeight={600}>{title}</H3>
         </View>
       </HistoryTransactionHeader>
 
