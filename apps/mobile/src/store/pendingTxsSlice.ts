@@ -25,6 +25,7 @@ export type PendingSingleTx = {
 export type PendingRelayTx = {
   type: PendingTxType.RELAY
   taskId: string
+  txHash?: string
   chainId: string
   safeAddress: string
   status: PendingStatus
@@ -80,7 +81,7 @@ export const pendingTxsSlice = createSlice({
         state[txId] = {
           ...tx,
           txHash,
-        } as PendingTx
+        }
       }
     },
     clearPendingTx: (state, action: PayloadAction<{ txId: string }>) => {
