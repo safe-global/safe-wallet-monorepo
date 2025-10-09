@@ -72,6 +72,8 @@ export const ReviewTransactionContent = ({
         </ConfirmationView>
 
         {!isCounterfactualSafe && !isRejection && <BlockaidBalanceChanges />}
+
+        <Slot name={SlotName.Main} />
       </TxCard>
 
       <Slot name={SlotName.Feature} />
@@ -122,7 +124,4 @@ export const ReviewTransactionContent = ({
 const useSafeTx = () => useContext(SafeTxContext).safeTx
 const useSafeTxError = () => useContext(SafeTxContext).safeTxError
 
-export default madProps(ReviewTransactionContent, {
-  safeTx: useSafeTx,
-  safeTxError: useSafeTxError,
-})
+export default madProps(ReviewTransactionContent, { safeTx: useSafeTx, safeTxError: useSafeTxError })
