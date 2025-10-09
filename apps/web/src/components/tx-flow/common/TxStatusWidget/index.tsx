@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { List, ListItem, ListItemIcon, ListItemText, Paper, Typography } from '@mui/material'
+import { List, ListItem, ListItemIcon, Paper, Typography } from '@mui/material'
 import CreatedIcon from '@/public/images/messages/created.svg'
 import SignedIcon from '@/public/images/messages/signed.svg'
 import { TransactionStatus, type TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
@@ -43,50 +43,52 @@ const TxStatusWidget = ({
 
   return (
     <Paper sx={{ backgroundColor: 'transparent' }}>
-      <div className={css.content}>
-        <List className={css.status}>
-          <ListItem>
-            <ListItemIcon>
-              <CreatedIcon />
-            </ListItemIcon>
+      <List className={css.status}>
+        <ListItem>
+          <ListItemIcon>
+            <CreatedIcon />
+          </ListItemIcon>
 
-            <ListItemText sx={{ letterSpacing: 1 }}>{isBatch ? 'Queue transactions' : 'Create'}</ListItemText>
-          </ListItem>
+          <Typography variant="caption" sx={{ letterSpacing: 1 }}>
+            {isBatch ? 'Queue transactions' : 'Create'}
+          </Typography>
+        </ListItem>
 
-          <ListItem className={classnames({ [css.incomplete]: !canConfirm && !isBatch })}>
-            <ListItemIcon>
-              <SignedIcon />
-            </ListItemIcon>
+        <ListItem className={classnames({ [css.incomplete]: !canConfirm && !isBatch })}>
+          <ListItemIcon>
+            <SignedIcon />
+          </ListItemIcon>
 
-            <ListItemText sx={{ letterSpacing: 1 }}>
-              {isBatch ? (
-                'Create batch'
-              ) : !nonceNeeded ? (
-                'Confirmed'
-              ) : isMessage ? (
-                'Collect signatures'
-              ) : (
-                <>
-                  Confirmed ({confirmationsSubmitted} of {threshold})
-                  {canSign && (
-                    <Typography variant="body2" component="span" className={css.badge}>
-                      +1
-                    </Typography>
-                  )}
-                </>
-              )}
-            </ListItemText>
-          </ListItem>
+          <Typography variant="caption" sx={{ letterSpacing: 1 }}>
+            {isBatch ? (
+              'Create batch'
+            ) : !nonceNeeded ? (
+              'Confirmed'
+            ) : isMessage ? (
+              'Collect signatures'
+            ) : (
+              <>
+                Confirmed ({confirmationsSubmitted} of {threshold})
+                {canSign && (
+                  <Typography variant="caption" component="span" className={css.badge}>
+                    +1
+                  </Typography>
+                )}
+              </>
+            )}
+          </Typography>
+        </ListItem>
 
-          <ListItem className={classnames({ [css.incomplete]: !(isAwaitingExecution && isLastStep) })}>
-            <ListItemIcon>
-              <SignedIcon />
-            </ListItemIcon>
+        <ListItem className={classnames({ [css.incomplete]: !(isAwaitingExecution && isLastStep) })}>
+          <ListItemIcon>
+            <SignedIcon />
+          </ListItemIcon>
 
-            <ListItemText sx={{ letterSpacing: 1 }}>{isMessage ? 'Done' : 'Execute'}</ListItemText>
-          </ListItem>
-        </List>
-      </div>
+          <Typography variant="caption" sx={{ letterSpacing: 1 }}>
+            {isMessage ? 'Done' : 'Execute'}
+          </Typography>
+        </ListItem>
+      </List>
     </Paper>
   )
 }
