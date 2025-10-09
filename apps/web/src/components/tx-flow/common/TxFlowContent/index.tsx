@@ -12,7 +12,7 @@ import TxStatusWidget from '@/components/tx-flow/common/TxStatusWidget'
 import SafeShieldWidget from '@/components/tx-flow/common/SafeShieldWidget'
 import { TxLayoutHeader } from '../TxLayout'
 import { Slot, SlotName } from '../../slots'
-import SafeHeaderInfo from '@/components/sidebar/SidebarHeader/SafeHeaderInfo'
+import SafeInfo from '@/components/tx-flow/common/SafeInfo'
 
 /**
  * TxFlowContent is a component that renders the main content of the transaction flow.
@@ -50,7 +50,7 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
             <Card
               sx={{ p: '4px 8px 4px 4px', maxWidth: 214, mx: '-12px', overflow: 'visible', position: 'fixed', top: 62 }}
             >
-              <SafeHeaderInfo />
+              <SafeInfo />
             </Card>
 
             <TxStatusWidget
