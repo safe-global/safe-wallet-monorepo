@@ -9,7 +9,7 @@ describe('useAddressActivity', () => {
   const mockProvider = (txCount: number) =>
     ({
       getTransactionCount: jest.fn().mockResolvedValue(txCount),
-    } as unknown as JsonRpcProvider)
+    }) as unknown as JsonRpcProvider
 
   beforeEach(() => {
     jest.resetAllMocks()
