@@ -1,4 +1,4 @@
-import { getMessaging } from '@react-native-firebase/messaging'
+import { getMessaging, getToken } from '@react-native-firebase/messaging'
 import Logger from '@/src/utils/logger'
 import { savePushToken } from '@/src/store/notificationsSlice'
 import { getStore } from '@/src/store/utils/singletonStore'
@@ -15,7 +15,8 @@ class FCMService {
 
   async saveFCMToken(): Promise<void> {
     try {
-      const fcmToken = await getMessaging().getToken()
+      const messaging = getMessaging()
+      const fcmToken = await getToken(messaging)
       Logger.info('FCMService :: fcmToken', fcmToken)
       if (fcmToken) {
         getStore().dispatch(savePushToken(fcmToken))

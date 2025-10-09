@@ -2,7 +2,7 @@ import { SignerView } from '@/src/features/Signer/components/SignerView'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress, upsertContact } from '@/src/store/addressBookSlice'
-import { selectSignerHasPrivateKey } from '@/src/store/signersSlice'
+import { selectSignerHasPrivateKey, selectSignerByAddress, removeSigner } from '@/src/store/signersSlice'
 import React, { useCallback, useState } from 'react'
 import { Alert, Linking } from 'react-native'
 import { selectActiveChain } from '@/src/store/chains'
@@ -21,6 +21,8 @@ export const SignerContainer = () => {
   const local = useLocalSearchParams<{ editMode: string }>()
   const contact = useAppSelector(selectContactByAddress(address))
   const hasPrivateKey = useAppSelector(selectSignerHasPrivateKey(address))
+  const signer = useAppSelector((state) => selectSignerByAddress(state, address))
+  const isLedgerSigner = signer?.type === 'ledger'
   const [editMode, setEditMode] = useState(Boolean(local.editMode))
 
   usePreventLeaveScreen(editMode)
@@ -36,6 +38,25 @@ export const SignerContainer = () => {
   const onPressViewPrivateKey = useCallback(() => {
     router.push(`/signers/${address}/private-key`)
   }, [address, router])
+
+  const onDeleteLedgerConnection = useCallback(() => {
+    Alert.alert(
+      'Delete Ledger connection',
+      'This will remove the Ledger connection from your device. You can always reconnect your Ledger device later. Do you want to proceed?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Yes, delete',
+          style: 'destructive',
+          onPress: () => {
+            dispatch(removeSigner(address))
+            router.back()
+            Alert.alert('Success', 'Ledger connection has been removed successfully')
+          },
+        },
+      ],
+    )
+  }, [address, dispatch, router])
 
   // Initialize the form with React Hook Form and Zod schema resolver
   const {
@@ -93,8 +114,10 @@ export const SignerContainer = () => {
       onPressExplorer={onPressExplorer}
       onPressEdit={onPressEdit}
       onPressViewPrivateKey={hasPrivateKey ? onPressViewPrivateKey : undefined}
+      onDeleteLedgerConnection={isLedgerSigner ? onDeleteLedgerConnection : undefined}
       editMode={editMode}
       hasPrivateKey={hasPrivateKey}
+      isLedgerSigner={isLedgerSigner}
       control={control}
       dirtyFields={dirtyFields}
       errors={errors}

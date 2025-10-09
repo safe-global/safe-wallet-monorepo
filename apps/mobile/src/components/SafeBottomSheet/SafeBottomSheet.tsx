@@ -116,8 +116,6 @@ export function SafeBottomSheet<T>({
     },
     [FooterComponent, setFooterHeight],
   )
-
-  console.log('insets.bottom', insets.bottom)
   return (
     <BottomSheet
       ref={ref}

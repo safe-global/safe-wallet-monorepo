@@ -5,20 +5,24 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { SafeButton } from '@/src/components/SafeButton'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
-import { router } from 'expo-router'
+import { router, useGlobalSearchParams } from 'expo-router'
 import { useDispatch } from 'react-redux'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AbsoluteLinearGradient } from '@/src/components/LinearGradient'
 
 export default function SignSuccess() {
+  const { txId } = useGlobalSearchParams<{ txId: string }>()
   const dispatch = useDispatch()
   const { bottom } = useSafeAreaInsets()
   const handleDonePress = () => {
     dispatch(cgwApi.util.invalidateTags(['transactions']))
 
-    // Go back twice to the confirm transaction screen
-    router.back()
-    router.back()
+    router.dismissTo({
+      pathname: '/confirm-transaction',
+      params: {
+        txId,
+      },
+    })
   }
 
   return (

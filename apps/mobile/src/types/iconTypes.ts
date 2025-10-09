@@ -1,14 +1,13 @@
 export type IconName =
-  | 'arrow-left-1'
+  | 'transaction-earn'
   | 'add-owner'
-  | 'address-book'
   | 'address-book-empty-list'
-  | 'alert'
+  | 'address-book'
   | 'alert-triangle'
+  | 'alert'
   | 'appearance'
   | 'apps'
   | 'arrow-down'
-  | 'arrow-down-1'
   | 'arrow-left'
   | 'arrow-right'
   | 'arrow-sort'
@@ -16,24 +15,24 @@ export type IconName =
   | 'batch'
   | 'bell'
   | 'block'
-  | 'blocks'
   | 'blocks-1'
-  | 'bookmark'
+  | 'blocks'
   | 'bookmark-filled'
+  | 'bookmark'
   | 'camera'
   | 'chat'
-  | 'check'
   | 'check-filled'
   | 'check-notifications'
   | 'check-oulined'
+  | 'check'
   | 'chevron-down'
   | 'chevron-left'
   | 'chevron-right'
   | 'chevron-up'
   | 'clock'
-  | 'close'
   | 'close-filled'
   | 'close-outlined'
+  | 'close'
   | 'code-blocks'
   | 'copy'
   | 'dapp-logo'
@@ -43,8 +42,8 @@ export type IconName =
   | 'double-arrow'
   | 'download'
   | 'dropdown-arrow-small'
-  | 'edit'
   | 'edit-owner'
+  | 'edit'
   | 'element-drag'
   | 'experimental'
   | 'export'
@@ -72,28 +71,28 @@ export type IconName =
   | 'options-vertical'
   | 'owners'
   | 'paste'
-  | 'plus'
   | 'plus-filled'
   | 'plus-outlined'
+  | 'plus'
   | 'points'
-  | 'qr-code'
   | 'qr-code-1'
+  | 'qr-code'
   | 'question'
   | 'repeat'
   | 'replace-owner'
-  | 'rows'
   | 'rows-1'
   | 'rows-2'
+  | 'rows'
   | 'safe'
-  | 'scan'
   | 'scan-1'
+  | 'scan'
   | 'search'
   | 'seed'
   | 'send-to'
   | 'settings'
   | 'share'
-  | 'shield'
   | 'shield-crossed'
+  | 'shield'
   | 'sign'
   | 'signature'
   | 'star'
@@ -102,7 +101,6 @@ export type IconName =
   | 'transaction-batch'
   | 'transaction-change-settings'
   | 'transaction-contract'
-  | 'transaction-earn'
   | 'transaction-execute'
   | 'transaction-incoming'
   | 'transaction-outgoing'
@@ -119,16 +117,15 @@ export type IconName =
   | 'what-is-new'
 
 export const iconNames: IconName[] = [
-  'arrow-left-1',
+  'transaction-earn',
   'add-owner',
-  'address-book',
   'address-book-empty-list',
-  'alert',
+  'address-book',
   'alert-triangle',
+  'alert',
   'appearance',
   'apps',
   'arrow-down',
-  'arrow-down-1',
   'arrow-left',
   'arrow-right',
   'arrow-sort',
@@ -136,24 +133,24 @@ export const iconNames: IconName[] = [
   'batch',
   'bell',
   'block',
-  'blocks',
   'blocks-1',
-  'bookmark',
+  'blocks',
   'bookmark-filled',
+  'bookmark',
   'camera',
   'chat',
-  'check',
   'check-filled',
   'check-notifications',
   'check-oulined',
+  'check',
   'chevron-down',
   'chevron-left',
   'chevron-right',
   'chevron-up',
   'clock',
-  'close',
   'close-filled',
   'close-outlined',
+  'close',
   'code-blocks',
   'copy',
   'dapp-logo',
@@ -163,8 +160,8 @@ export const iconNames: IconName[] = [
   'double-arrow',
   'download',
   'dropdown-arrow-small',
-  'edit',
   'edit-owner',
+  'edit',
   'element-drag',
   'experimental',
   'export',
@@ -192,28 +189,28 @@ export const iconNames: IconName[] = [
   'options-vertical',
   'owners',
   'paste',
-  'plus',
   'plus-filled',
   'plus-outlined',
+  'plus',
   'points',
-  'qr-code',
   'qr-code-1',
+  'qr-code',
   'question',
   'repeat',
   'replace-owner',
-  'rows',
   'rows-1',
   'rows-2',
+  'rows',
   'safe',
-  'scan',
   'scan-1',
+  'scan',
   'search',
   'seed',
   'send-to',
   'settings',
   'share',
-  'shield',
   'shield-crossed',
+  'shield',
   'sign',
   'signature',
   'star',
@@ -222,7 +219,6 @@ export const iconNames: IconName[] = [
   'transaction-batch',
   'transaction-change-settings',
   'transaction-contract',
-  'transaction-earn',
   'transaction-execute',
   'transaction-incoming',
   'transaction-outgoing',

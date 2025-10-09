@@ -3,7 +3,11 @@ import { View, YStack, Text } from 'tamagui'
 import { TransactionHeader } from '../../TransactionHeader'
 import { ListTable } from '../../ListTable'
 import { formatCancelTxItems } from './utils'
-import { CustomTransactionInfo, MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import {
+  CustomTransactionInfo,
+  MultiSendTransactionInfo,
+  MultisigExecutionDetails,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { RootState } from '@/src/store'
 import { selectChainById } from '@/src/store/chains'
@@ -11,9 +15,10 @@ import { useAppSelector } from '@/src/store/hooks'
 import { ParametersButton } from '@/src/components/ParametersButton'
 import { ActionsRow } from '@/src/components/ActionsRow'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { isMultiSendTxInfo } from '@/src/utils/transaction-guards'
 
 interface CancelTxProps {
-  txInfo: CustomTransactionInfo
+  txInfo: CustomTransactionInfo | MultiSendTransactionInfo
   executionInfo: MultisigExecutionDetails
   txId: string
 }
@@ -47,7 +52,7 @@ export function CancelTx({ txInfo, executionInfo, txId }: CancelTxProps) {
         <ParametersButton txId={txId} />
       </ListTable>
 
-      <ActionsRow txId={txId} actionCount={txInfo.actionCount} />
+      <ActionsRow txId={txId} actionCount={isMultiSendTxInfo(txInfo) ? txInfo.actionCount : null} />
     </YStack>
   )
 }

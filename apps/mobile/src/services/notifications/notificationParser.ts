@@ -1,5 +1,5 @@
 import { formatUnits } from 'ethers'
-import { NotificationType } from '@safe-global/store/gateway/AUTO_GENERATED/notifications'
+import { NotificationTypeEnum } from '@safe-global/store/gateway/AUTO_GENERATED/notifications'
 import { selectChainById } from '@/src/store/chains'
 import { shortenAddress } from '@/src/utils/formatters'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'
@@ -66,7 +66,7 @@ export const parseNotification = (data?: Record<string, unknown>): ParsedNotific
 
   const strData = data as Record<string, string>
 
-  const type = strData.type as NotificationType
+  const type = strData.type as NotificationTypeEnum
   const chainId = strData.chainId
   const address = strData.address
 

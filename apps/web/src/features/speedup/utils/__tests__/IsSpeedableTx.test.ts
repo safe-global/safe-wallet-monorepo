@@ -1,13 +1,16 @@
-import { PendingStatus, type PendingTx, PendingTxType } from '@/store/pendingTxsSlice'
+import { PendingStatus, PendingTxType, type PendingProcessingTx } from '@/store/pendingTxsSlice'
 import { pendingTxBuilder } from '@/tests/builders/pendingTx'
 import { isSpeedableTx } from '../IsSpeedableTx'
 
 describe('isSpeedableTx', () => {
   it('returns true when all conditions are met', () => {
-    const pendingTx: PendingTx = {
+    const pendingTx: PendingProcessingTx = {
       ...pendingTxBuilder().with({ status: PendingStatus.PROCESSING }).build(),
       txHash: '0x123',
+      submittedAt: Date.now(),
+      signerNonce: 1,
       signerAddress: '0xabc',
+      status: PendingStatus.PROCESSING,
       txType: PendingTxType.SAFE_TX,
     }
 
@@ -20,10 +23,13 @@ describe('isSpeedableTx', () => {
   })
 
   it('returns false when one of the conditions is not met', () => {
-    const pendingTx: PendingTx = {
+    const pendingTx: PendingProcessingTx = {
       ...pendingTxBuilder().with({ status: PendingStatus.PROCESSING }).build(),
       txHash: '0x123',
+      submittedAt: Date.now(),
+      signerNonce: 1,
       signerAddress: '0xabc',
+      status: PendingStatus.PROCESSING,
       txType: PendingTxType.SAFE_TX,
     }
 

@@ -2,7 +2,9 @@ import React from 'react'
 import { Text, View } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { ellipsis } from '@/src/utils/formatters'
-import { IdenticonWithBadge } from '@/src/features/Settings/components/IdenticonWithBadge'
+import { Identicon } from '@/src/components/Identicon'
+import { BadgeWrapper } from '@/src/components/BadgeWrapper'
+import { ThresholdBadge } from '@/src/components/ThresholdBadge'
 import { Address } from '@/src/types/address'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { ChainsDisplay } from '@/src/components/ChainsDisplay'
@@ -55,14 +57,19 @@ export function AccountCard({
       leftNode={
         <View marginRight="$2" flexDirection="row" gap="$2" justifyContent="center" alignItems="center">
           {leftNode}
-          <IdenticonWithBadge
-            testID="threshold-info-badge"
-            size={40}
-            badgeSize={24}
-            fontSize={owners > 9 ? 9 : 12}
-            address={address}
-            badgeContent={`${threshold}/${owners}`}
-          />
+          <BadgeWrapper
+            badge={
+              <ThresholdBadge
+                threshold={threshold}
+                ownersCount={owners}
+                size={24}
+                fontSize={owners > 9 ? 9 : 12}
+                testID="threshold-info-badge"
+              />
+            }
+          >
+            <Identicon address={address} size={40} />
+          </BadgeWrapper>
         </View>
       }
       rightNode={

@@ -71,7 +71,7 @@ export const _parseServiceWorkerWebhookPushNotification = async (
     .catch(() => undefined)
 
   // Can be safely casted as `data.type` is a mapped type of `NotificationsMap`
-  const notification = await Notifications[data.type](data as any, chain)
+  const notification = await Notifications[data.type](data as any, chain as any)
 
   if (notification) {
     return {

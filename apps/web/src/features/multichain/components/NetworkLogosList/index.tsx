@@ -1,13 +1,13 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { Box } from '@mui/material'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import css from './styles.module.css'
 
 const NetworkLogosList = ({
   networks,
   showHasMore = false,
 }: {
-  networks: Pick<ChainInfo, 'chainId'>[]
+  networks: Pick<Chain, 'chainId'>[]
   showHasMore?: boolean
 }) => {
   const MAX_NUM_VISIBLE_CHAINS = 4

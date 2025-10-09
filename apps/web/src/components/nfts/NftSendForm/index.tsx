@@ -1,13 +1,13 @@
 import type { ReactElement } from 'react'
 import { Box, Button, Grid, SvgIcon, Typography } from '@mui/material'
 import ArrowIcon from '@/public/images/common/arrow-nw.svg'
-import type { SafeCollectibleResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import { Sticky } from '@/components/common/Sticky'
 import CheckWallet from '@/components/common/CheckWallet'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 type NftSendFormProps = {
-  selectedNfts: SafeCollectibleResponse[]
+  selectedNfts: Collectible[]
 }
 
 const NftSendForm = ({ selectedNfts }: NftSendFormProps): ReactElement => {

@@ -12,10 +12,11 @@ jest.mock('@/src/store/hooks/activeSafe', () => ({
 
 const mockUseDefinedActiveSafe = require('@/src/store/hooks/activeSafe').useDefinedActiveSafe
 
-const createMockSigner = (overrides: Partial<SignerInfo> = {}): SignerInfo => ({
+const createMockSigner = (overrides: Partial<Omit<SignerInfo, 'type' | 'derivationPath'>> = {}): SignerInfo => ({
   value: faker.finance.ethereumAddress() as `0x${string}`,
   name: faker.person.fullName(),
   logoUri: faker.image.avatar(),
+  type: 'private-key' as const,
   ...overrides,
 })
 
@@ -143,6 +144,7 @@ describe('useTxSignerActions', () => {
         value: faker.finance.ethereumAddress() as `0x${string}`,
         name: null,
         logoUri: null,
+        type: 'private-key' as const,
       }
 
       const { result } = renderHook(() => useTxSignerActions())
@@ -166,6 +168,7 @@ describe('useTxSignerActions', () => {
         value: faker.finance.ethereumAddress() as `0x${string}`,
         name: faker.person.fullName(),
         logoUri: faker.image.avatar(),
+        type: 'private-key' as const,
       }
 
       const { result } = renderHook(() => useTxSignerActions())

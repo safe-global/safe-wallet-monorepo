@@ -64,7 +64,7 @@ const TxActionItem = ({ action, index, addressInfoIndex, txData }: TxActionItemP
                 Send {formatVisualAmount(transferTokenInfo.transferValue, transferTokenInfo?.tokenInfo?.decimals, 6)}{' '}
                 {transferTokenInfo.tokenInfo.symbol} to
               </Text>
-              <Identicon address={tx.to as `0x${string}`} size={20} />{' '}
+              <Identicon address={tx.to as `0x${string}`} size={20} />
               <Text fontSize="$4" numberOfLines={1} ellipsizeMode="tail" flexShrink={1}>
                 {shortenAddress(tx.to)}
               </Text>

@@ -1,14 +1,4 @@
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  Card,
-  Stack,
-  Typography,
-  Tooltip,
-  Chip,
-} from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Box, Card, Stack, Typography } from '@mui/material'
 import PositionsHeader from '@/features/positions/components/PositionsHeader'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import FiatValue from '@/components/common/FiatValue'
@@ -33,7 +23,7 @@ export const Positions = () => {
     return <PositionsSkeleton />
   }
 
-  if (error || !protocols) return <PositionsUnavailable />
+  if (error || !protocols) return <PositionsUnavailable hasError={!!error} />
 
   if (protocols.length === 0) {
     return <PositionsEmpty entryPoint="Positions" />
@@ -46,34 +36,12 @@ export const Positions = () => {
           <TotalAssetValue fiatTotal={positionsFiatTotal} title="Total positions value" />
         </Box>
 
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Typography variant="h4" fontWeight={700}>
-            Positions
-          </Typography>
-          <Tooltip
-            title="Experimental. Data may be missing or outdated."
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  maxWidth: { xs: '250px', sm: 'none' },
-                },
-              },
-            }}
-          >
-            <Chip label="Beta" size="small" sx={{ backgroundColor: 'background.lightGrey', letterSpacing: '0.4px' }} />
-          </Tooltip>
-        </Stack>
+        <Typography variant="h4" fontWeight={700}>
+          Positions
+        </Typography>
 
         <Box mb={1}>
-          <Typography
-            variant="caption"
-            sx={{
-              color: 'text.secondary',
-              letterSpacing: '1px',
-            }}
-          >
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             Position balances are not included in the total asset value.
           </Typography>
         </Box>
@@ -85,15 +53,11 @@ export const Positions = () => {
             <Accordion disableGutters elevation={0} variant="elevation" defaultExpanded>
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon fontSize="small" />}
-                sx={{
-                  justifyContent: 'center',
-                  overflowX: 'auto',
-                  backgroundColor: 'transparent !important',
-                }}
+                sx={{ justifyContent: 'center', overflowX: 'auto', backgroundColor: 'transparent !important' }}
               >
                 <PositionsHeader protocol={protocol} fiatTotal={positionsFiatTotal} />
               </AccordionSummary>
-              <AccordionDetails sx={{ pt: 0 }}>
+              <AccordionDetails sx={{ pt: 0, pb: 0 }}>
                 {protocol.items.map((positionGroup) => {
                   const rows = positionGroup.items.map((position) => ({
                     cells: {
@@ -108,7 +72,9 @@ export const Positions = () => {
                             />
 
                             <Box>
-                              <Typography fontWeight="bold">{position.tokenInfo.name}</Typography>
+                              <Typography variant="body2" fontWeight="bold">
+                                {position.tokenInfo.name}
+                              </Typography>
                               <Typography variant="body2" color="primary.light">
                                 {position.tokenInfo.symbol} •&nbsp; {getReadablePositionType(position.position_type)}
                               </Typography>
@@ -146,7 +112,7 @@ export const Positions = () => {
                     {
                       id: 'name',
                       label: (
-                        <Typography variant="caption" letterSpacing="0px" fontWeight="bold" color="text.primary">
+                        <Typography variant="body2" fontWeight="bold" color="text.primary">
                           {positionGroup.name}
                         </Typography>
                       ),

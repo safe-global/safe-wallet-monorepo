@@ -83,7 +83,14 @@ describe('SignTransaction', () => {
   }
   const mockActiveSigner = {
     value: '0x456',
-    type: 'EOA' as const,
+    type: 'private-key' as const,
+    name: 'Test Signer',
+  }
+
+  const mockSigner = {
+    value: '0x456',
+    name: 'Test Signer',
+    type: 'private-key' as const,
   }
 
   beforeEach(() => {
@@ -110,6 +117,7 @@ describe('SignTransaction', () => {
       apiData: undefined,
       isApiError: false,
       hasTriggeredAutoSign: false,
+      signer: mockSigner,
     })
   })
 
@@ -159,6 +167,7 @@ describe('SignTransaction', () => {
         apiData: undefined,
         isApiError: false,
         hasTriggeredAutoSign: false,
+        signer: mockSigner,
       })
 
       render(<SignTransaction />)
@@ -188,6 +197,7 @@ describe('SignTransaction', () => {
         apiData: undefined,
         isApiError: false,
         hasTriggeredAutoSign: false,
+        signer: mockSigner,
       })
 
       render(<SignTransaction />)
@@ -223,6 +233,7 @@ describe('SignTransaction', () => {
         apiData: undefined,
         isApiError: true,
         hasTriggeredAutoSign: false,
+        signer: mockSigner,
       })
 
       render(<SignTransaction />)
@@ -241,6 +252,7 @@ describe('SignTransaction', () => {
         apiData: undefined,
         isApiError: false,
         hasTriggeredAutoSign: false,
+        signer: mockSigner,
       })
 
       render(<SignTransaction />)
@@ -259,6 +271,7 @@ describe('SignTransaction', () => {
         apiData: undefined,
         isApiError: false,
         hasTriggeredAutoSign: false,
+        signer: mockSigner,
       })
 
       render(<SignTransaction />)
@@ -281,6 +294,7 @@ describe('SignTransaction', () => {
         apiData: undefined,
         isApiError: false,
         hasTriggeredAutoSign: false,
+        signer: mockSigner,
       })
 
       render(<SignTransaction />)
@@ -301,6 +315,7 @@ describe('SignTransaction', () => {
         apiData: undefined,
         isApiError: false,
         hasTriggeredAutoSign: false,
+        signer: mockSigner,
       })
 
       render(<SignTransaction />)
@@ -320,6 +335,7 @@ describe('SignTransaction', () => {
         apiData: undefined,
         isApiError: false,
         hasTriggeredAutoSign: false,
+        signer: mockSigner,
       })
 
       render(<SignTransaction />)
@@ -342,6 +358,7 @@ describe('SignTransaction', () => {
         apiData: undefined,
         isApiError: false,
         hasTriggeredAutoSign: false,
+        signer: mockSigner,
       })
 
       render(<SignTransaction />)

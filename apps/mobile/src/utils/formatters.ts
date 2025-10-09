@@ -41,6 +41,24 @@ export const getLimitPrice = (
   return ratio
 }
 
+// Sanitize input to allow only numbers and decimal point
+export const sanitizeDecimalInput = (value: string) => {
+  // Remove all characters except digits and decimal point
+  let sanitized = value.replace(/[^\d.]/g, '')
+  // Ensure only one decimal point
+  const parts = sanitized.split('.')
+  if (parts.length > 2) {
+    sanitized = parts[0] + '.' + parts.slice(1).join('')
+  }
+  return sanitized
+}
+
+// Sanitize input to allow only integers (no decimal point)
+export const sanitizeIntegerInput = (value: string) => {
+  // Remove all characters except digits
+  return value.replace(/\D/g, '')
+}
+
 const calculateRatio = (a: Quantity, b: Quantity) => {
   if (BigInt(b.amount) === 0n) {
     return 0

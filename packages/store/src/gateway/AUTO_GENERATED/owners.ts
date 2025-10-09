@@ -22,19 +22,25 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type OwnersGetSafesByOwnerV1ApiResponse = /** status 200  */ SafeList
+export type OwnersGetSafesByOwnerV1ApiResponse = /** status 200 List of Safes owned by the specified address */ SafeList
 export type OwnersGetSafesByOwnerV1ApiArg = {
+  /** Chain ID to search for Safes */
   chainId: string
+  /** Owner address to search Safes for (0x prefixed hex string) */
   ownerAddress: string
 }
-export type OwnersGetAllSafesByOwnerV1ApiResponse = /** status 200  */ SafeList
+export type OwnersGetAllSafesByOwnerV1ApiResponse =
+  /** status 200 Map of chain IDs to arrays of Safe addresses */ SafeList
 export type OwnersGetAllSafesByOwnerV1ApiArg = {
+  /** Owner address to search Safes for (0x prefixed hex string) */
   ownerAddress: string
 }
-export type OwnersGetAllSafesByOwnerV2ApiResponse = /** status 200  */ {
-  [key: string]: string[]
-}
+export type OwnersGetAllSafesByOwnerV2ApiResponse =
+  /** status 200 Map of chain IDs to arrays of Safe addresses owned by the address */ {
+    [key: string]: string[]
+  }
 export type OwnersGetAllSafesByOwnerV2ApiArg = {
+  /** Owner address to search Safes for (0x prefixed hex string) */
   ownerAddress: string
 }
 export type SafeList = {

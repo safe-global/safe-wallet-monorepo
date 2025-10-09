@@ -25,6 +25,15 @@ export function ReviewFooter({ txId }: ReviewFooterProps) {
 
       const params = { txId }
 
+      // If active signer is a Ledger device, start the Ledger-specific signing flow
+      if (activeSigner?.type === 'ledger') {
+        router.push({
+          pathname: '/sign-transaction/ledger-connect',
+          params,
+        })
+        return
+      }
+
       if (isBiometricsEnabled) {
         router.push({
           pathname: '/sign-transaction',

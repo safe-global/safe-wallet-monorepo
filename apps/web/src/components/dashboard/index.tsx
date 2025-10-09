@@ -16,7 +16,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import NewsDisclaimers from '@/components/dashboard/NewsCarousel/NewsDisclaimers'
 import NewsCarousel, { type BannerItem } from '@/components/dashboard/NewsCarousel'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-import useIsEarnFeatureEnabled from '@/features/earn/hooks/useIsEarnFeatureEnabled'
+import { useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEnabled'
 import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useIsStakingBannerVisible'
 import EarnBanner, { earnBannerID } from '@/components/dashboard/NewsCarousel/banners/EarnBanner'
 import SpacesBanner, { spacesBannerID } from '@/components/dashboard/NewsCarousel/banners/SpacesBanner'
@@ -37,13 +37,13 @@ const Dashboard = (): ReactElement => {
     return balances.items.filter((item) => item.balance !== '0')
   }, [balances.items])
 
-  const isEarnFeatureEnabled = useIsEarnFeatureEnabled()
+  const isEarnPromoEnabled = useIsEarnPromoEnabled()
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const isStakingBannerVisible = useIsStakingBannerVisible()
   const isPositionsFeatureEnabled = useIsPositionsFeatureEnabled()
 
   const banners = [
-    isEarnFeatureEnabled && { id: earnBannerID, element: EarnBanner },
+    isEarnPromoEnabled && { id: earnBannerID, element: EarnBanner },
     isSpacesFeatureEnabled && { id: spacesBannerID, element: SpacesBanner },
     isStakingBannerVisible && { id: stakeBannerID, element: StakeBanner },
   ].filter(Boolean) as BannerItem[]

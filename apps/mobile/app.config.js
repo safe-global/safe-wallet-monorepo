@@ -14,8 +14,10 @@ const sslPinningDomains = {
   ],
 }
 
+const name = IS_DEV ? 'Dev-Safe{Mobile}' : 'Safe{Mobile}'
+
 const config = {
-  name: IS_DEV ? 'Dev-Safe{Mobile}' : 'Safe{Mobile}',
+  name: name,
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
   version: '1.0.2',
@@ -37,7 +39,13 @@ const config = {
     infoPlist: {
       NSFaceIDUsageDescription: 'Enabling Face ID allows you to create/access secure keys.',
       UIBackgroundModes: ['remote-notification'],
+      NSBluetoothPeripheralUsageDescription: 'Allow Bluetooth access to connect to Ledger devices.',
       AppGroup: IS_DEV ? 'group.global.safe.mobileapp.ios.dev' : 'group.global.safe.mobileapp.ios',
+      // https://github.com/expo/expo/issues/39739
+      UIDesignRequiresCompatibility: true,
+      // https://github.com/react-native-share/react-native-share/issues/1669
+      NSPhotoLibraryUsageDescription:
+        'This permission is required by third party libraries, but not used in the app. If you ever get prompted for it, deny it & contact support.',
     },
     supportsTablet: false,
     appleTeamId: appleDevTeamId,
@@ -73,6 +81,14 @@ const config = {
     favicon: './assets/images/favicon.png',
   },
   plugins: [
+    [
+      'react-native-ble-plx',
+      {
+        isBackgroundEnabled: false,
+        modes: ['central'],
+        bluetoothAlwaysPermission: `Allow ${name} to connect to bluetooth devices`,
+      },
+    ],
     ['./expo-plugins/withNotificationIcons.js'],
     [
       './expo-plugins/ssl-pinning/withSSLPinning.js',
@@ -112,6 +128,7 @@ const config = {
       {
         ios: {
           useFrameworks: 'static',
+          forceStaticLinking: ['RNFBApp'],
         },
         android: {
           extraMavenRepos: ['../../../../node_modules/@notifee/react-native/android/libs'],
@@ -124,8 +141,8 @@ const config = {
     [
       'react-native-share',
       {
-        ios: ['fb', 'instagram', 'twitter', 'tiktoksharesdk'],
-        android: ['com.facebook.katana', 'com.instagram.android', 'com.twitter.android', 'com.zhiliaoapp.musically'],
+        ios: ['fb', 'twitter', 'tiktoksharesdk'],
+        android: ['com.facebook.katana', 'com.twitter.android', 'com.zhiliaoapp.musically'],
         enableBase64ShareAndroid: true,
       },
     ],
@@ -144,6 +161,12 @@ const config = {
       'react-native-capture-protection',
       {
         captureType: 'restrictedCapture',
+      },
+    ],
+    [
+      'react-native-permissions',
+      {
+        iosPermissions: ['Bluetooth'],
       },
     ],
   ],

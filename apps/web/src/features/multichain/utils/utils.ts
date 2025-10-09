@@ -1,4 +1,6 @@
-import type { DecodedDataResponse, ChainInfo, SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
+import type { DecodedDataResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import semverSatisfies from 'semver/functions/satisfies'
 import memoize from 'lodash/memoize'
 import { keccak256, ethers, solidityPacked, getCreate2Address, type Provider } from 'ethers'
@@ -136,16 +138,16 @@ export const predictAddressBasedOnReplayData = async (safeCreationData: Replayed
   )
 }
 
-const canMultichain = (chain: ChainInfo) => {
+const canMultichain = (chain: Chain) => {
   const MIN_SAFE_VERSION = '1.4.1'
   return hasFeature(chain, FEATURES.COUNTERFACTUAL) && semverSatisfies(LATEST_SAFE_VERSION, `>=${MIN_SAFE_VERSION}`)
 }
 
-export const hasMultiChainCreationFeatures = (chain: ChainInfo): boolean => {
+export const hasMultiChainCreationFeatures = (chain: Chain): boolean => {
   return hasFeature(chain, FEATURES.MULTI_CHAIN_SAFE_CREATION) && canMultichain(chain)
 }
 
-export const hasMultiChainAddNetworkFeature = (chain: ChainInfo | undefined): boolean => {
+export const hasMultiChainAddNetworkFeature = (chain: Chain | undefined): boolean => {
   if (!chain) return false
   return hasFeature(chain, FEATURES.MULTI_CHAIN_SAFE_ADD_NETWORK) && canMultichain(chain)
 }

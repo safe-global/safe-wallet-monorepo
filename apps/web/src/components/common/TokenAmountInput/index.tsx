@@ -130,6 +130,13 @@ const TokenAmountInput = ({
           placeholder="0"
           {...register(amountField, {
             required: true,
+            setValueAs: (value: string): string => {
+              if (typeof value !== 'string') {
+                return value
+              }
+
+              return value.replace(/,/g, '.')
+            },
             validate: validate ?? validateAmount,
             deps,
           })}

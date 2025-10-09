@@ -11,8 +11,15 @@ on:
     paths:
       - apps/mobile/**
       - packages/**
+      - .github/workflows/mobile-unit-tests.yml
+
 jobs:
   test-and-coverage:
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
     runs-on: ubuntu-latest
 
     steps:

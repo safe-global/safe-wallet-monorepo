@@ -7,6 +7,7 @@ import type {
 } from './types'
 import type { AnalyticsLabel, TransactionInfoType } from './types'
 import { ANALYTICS_LABELS } from './constants'
+import { isMultiSendTxInfo } from '@/src/utils/transaction-guards'
 
 export const getTransactionAnalyticsLabel = (txInfo: Transaction['txInfo']): AnalyticsLabel => {
   const baseType = txInfo.type as TransactionInfoType
@@ -34,7 +35,7 @@ export const getTransactionAnalyticsLabel = (txInfo: Transaction['txInfo']): Ana
         return ANALYTICS_LABELS.ENHANCED.rejection
       }
 
-      if (customTx.actionCount && customTx.actionCount > 1) {
+      if (isMultiSendTxInfo(customTx) && customTx.actionCount && customTx.actionCount > 1) {
         return ANALYTICS_LABELS.ENHANCED.batch
       }
 

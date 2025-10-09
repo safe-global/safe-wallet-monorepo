@@ -1,16 +1,18 @@
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeInfo } from '@/src/types/address'
-import { proposeTx } from '@/src/services/tx/tx-sender/create'
+import { proposeTx, addSignaturesToTx } from '@/src/services/tx/tx-sender/create'
 import { createConnectedWallet } from '@/src/services/web3'
+import { EstimatedFeeValues } from '@/src/store/estimatedFeeSlice'
 
 interface ExecuteTxParams {
   chain: Chain
   activeSafe: SafeInfo
   txId: string
   privateKey: string
+  feeParams: EstimatedFeeValues | null
 }
 
-export const executeTx = async ({ chain, activeSafe, txId, privateKey }: ExecuteTxParams): Promise<string> => {
+export const executeTx = async ({ chain, activeSafe, txId, privateKey, feeParams }: ExecuteTxParams) => {
   if (!chain) {
     throw new Error('Active chain not found')
   }
@@ -31,17 +33,17 @@ export const executeTx = async ({ chain, activeSafe, txId, privateKey }: Execute
     throw new Error('Safe transaction not found')
   }
 
-  Object.entries(signatures).forEach(([signer, data]) => {
-    safeTx.addSignature({
-      signer,
-      data,
-      staticPart: () => data,
-      dynamicPart: () => '',
-      isContractSignature: false,
-    })
-  })
+  addSignaturesToTx(safeTx, signatures)
 
-  const { hash } = await protocolKit.executeTransaction(safeTx)
-
-  return hash
+  return protocolKit.executeTransaction(
+    safeTx,
+    feeParams
+      ? {
+          gasLimit: feeParams.gasLimit.toString(),
+          maxFeePerGas: feeParams.maxFeePerGas.toString(),
+          maxPriorityFeePerGas: feeParams.maxPriorityFeePerGas.toString(),
+          nonce: feeParams.nonce,
+        }
+      : undefined,
+  )
 }

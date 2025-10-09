@@ -24,10 +24,11 @@ interface MockActiveSafe {
   owners: string[]
 }
 
-const createMockSigner = (overrides: Partial<SignerInfo> = {}): SignerInfo => ({
+const createMockSigner = (overrides: Partial<Omit<SignerInfo, 'type' | 'derivationPath'>> = {}): SignerInfo => ({
   value: faker.finance.ethereumAddress(),
   name: faker.person.fullName(),
   logoUri: faker.image.avatar(),
+  type: 'private-key' as const,
   ...overrides,
 })
 

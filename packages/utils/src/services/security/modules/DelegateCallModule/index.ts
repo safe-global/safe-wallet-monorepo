@@ -1,14 +1,14 @@
 import { OperationType } from '@safe-global/types-kit'
 import { getMultiSendCallOnlyContractDeployment } from '@safe-global/utils/services/contracts/deployments'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type SafeState as SafeInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 import { SecuritySeverity } from '../types'
 import type { SecurityModule, SecurityResponse } from '../types'
 
 type DelegateCallModuleRequest = {
-  chain: ChainInfo
+  chain: Chain
   safeVersion: SafeInfo['version']
   safeTransaction: SafeTransaction
 }

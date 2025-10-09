@@ -141,11 +141,11 @@ describe('SwapOrderHeader', () => {
       expect(getByTestId('token-icon-USDC')).toBeTruthy()
     })
 
-    it('should render chevron icon', () => {
+    it('should render arrow-right icon', () => {
       const sellOrderTxInfo = createMockTxInfo('sell')
       const { getByTestId } = render(<SwapOrderHeader txInfo={sellOrderTxInfo} executionInfo={mockExecutionInfo} />)
 
-      expect(getByTestId('safe-font-icon-chevron-right')).toBeTruthy()
+      expect(getByTestId('safe-font-icon-arrow-right')).toBeTruthy()
     })
   })
 

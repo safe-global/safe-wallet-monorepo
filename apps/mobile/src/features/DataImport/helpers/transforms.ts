@@ -298,7 +298,7 @@ export const storeKeysWithValidation = async (
       const { address, privateKey, signerInfo } = transformKeyData(key)
 
       await storePrivateKey(address, privateKey)
-      dispatch(addSignerWithEffects(signerInfo))
+      dispatch(addSignerWithEffects({ ...signerInfo, type: 'private-key' }))
 
       // Create delegate for this owner
       try {

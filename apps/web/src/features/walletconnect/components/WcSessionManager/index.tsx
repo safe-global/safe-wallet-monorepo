@@ -7,6 +7,8 @@ import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { splitError } from '@/features/walletconnect/services/utils'
 import WcProposalForm from '../WcProposalForm'
+import WcChainSwitchModal from '../WcChainSwitchModal'
+import { wcChainSwitchStore } from '../WcChainSwitchModal/store'
 
 type WcSessionManagerProps = {
   uri: string
@@ -15,6 +17,13 @@ type WcSessionManagerProps = {
 const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
   const { sessions, sessionProposal, error, setError, open, approveSession, rejectSession } =
     useContext(WalletConnectContext)
+  const chainSwitchRequest = wcChainSwitchStore.useStore()
+
+  useEffect(() => {
+    if (!open && chainSwitchRequest) {
+      chainSwitchRequest.onCancel()
+    }
+  }, [open, chainSwitchRequest])
 
   // On session approve
   const onApprove = useCallback(async () => {
@@ -67,7 +76,19 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
   }, [error])
 
   // Nothing to show
-  if (!open) return null
+  if (!open && !chainSwitchRequest) return null
+
+  if (chainSwitchRequest) {
+    return (
+      <WcChainSwitchModal
+        appInfo={chainSwitchRequest.appInfo}
+        chain={chainSwitchRequest.chain}
+        safes={chainSwitchRequest.safes}
+        onSelectSafe={chainSwitchRequest.onSelectSafe}
+        onCancel={chainSwitchRequest.onCancel}
+      />
+    )
+  }
 
   // Error
   if (error) {

@@ -337,7 +337,7 @@ async function getLedgerSdk() {
   const dmk = new DeviceManagementKitBuilder().addTransport(webHidTransportFactory).build()
   const device = await lastValueFrom(dmk.startDiscovering({ transport: webHidIdentifier }))
   const sessionId = await dmk.connect({ device })
-  const signer = new SignerEthBuilder({ dmk, sessionId }).build()
+  const signer = new SignerEthBuilder({ dmk, sessionId, originToken: 'your-origin-token' }).build()
 
   return {
     disconnect: async (): Promise<void> => {

@@ -42,7 +42,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": "#DDDEE0",
+                "backgroundColor": "#F4F4F4",
                 "borderBottomColor": "#EEEFF0",
                 "borderBottomLeftRadius": 100000,
                 "borderBottomRightRadius": 100000,
@@ -90,7 +90,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                 ]
               }
             >
-              
+              
             </Text>
           </View>
         </View>
@@ -513,6 +513,99 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
         >
           Network
         </Text>
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "gap": 8,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "width": 24,
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "position": "absolute",
+                  "right": -10,
+                  "top": -10,
+                  "zIndex": 1,
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "backgroundColor": "#EEEFF0",
+                  "borderBottomLeftRadius": "50%",
+                  "borderBottomRightRadius": "50%",
+                  "borderTopLeftRadius": "50%",
+                  "borderTopRightRadius": "50%",
+                  "height": 24,
+                  "width": 24,
+                }
+              }
+            >
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#EEEFF0",
+                    "borderBottomLeftRadius": "50%",
+                    "borderBottomRightRadius": "50%",
+                    "borderTopLeftRadius": "50%",
+                    "borderTopRightRadius": "50%",
+                    "display": "flex",
+                    "height": 24,
+                    "justifyContent": "center",
+                    "width": 24,
+                  }
+                }
+              >
+                <Text
+                  allowFontScaling={false}
+                  selectable={false}
+                  style={
+                    [
+                      {
+                        "color": "#A1A3A7",
+                        "fontSize": 16,
+                      },
+                      undefined,
+                      {
+                        "fontFamily": "SafeIcons",
+                        "fontStyle": "normal",
+                        "fontWeight": "normal",
+                      },
+                      {},
+                    ]
+                  }
+                  testID="logo-fallback-icon"
+                >
+                  
+                </Text>
+              </View>
+            </View>
+          </View>
+          <Text
+            style={
+              {
+                "color": "#121312",
+                "fontFamily": "DM Sans",
+                "fontSize": 14,
+              }
+            }
+            suppressHighlighting={true}
+          >
+            Ethereum
+          </Text>
+        </View>
       </View>
       <View
         style={
@@ -538,20 +631,49 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
         >
           Exit
         </Text>
-        <Text
+        <View
           style={
             {
-              "color": "#121312",
-              "flex": 2,
-              "fontFamily": "DM Sans",
-              "fontSize": 14,
-              "textAlign": "right",
+              "flex": 1,
+              "flexDirection": "row",
+              "flexShrink": 1,
+              "flexWrap": "wrap",
+              "gap": 4,
+              "justifyContent": "flex-end",
             }
           }
-          suppressHighlighting={true}
         >
-          1 Validator
-        </Text>
+          <Text
+            href="https://beaconcha.in/validator/0x123...abc"
+            onPress={[Function]}
+            role="link"
+          >
+            <Text
+              style={
+                {
+                  "color": "#121312",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 14,
+                  "textDecorationLine": "underline",
+                }
+              }
+              suppressHighlighting={true}
+            >
+              Validator 
+              1
+            </Text>
+            <Text
+              style={
+                {
+                  "color": "#121312",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 14,
+                }
+              }
+              suppressHighlighting={true}
+            />
+          </Text>
+        </View>
       </View>
       <View
         style={
@@ -699,7 +821,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                 ]
               }
             >
-              
+              
             </Text>
             <Text
               style={

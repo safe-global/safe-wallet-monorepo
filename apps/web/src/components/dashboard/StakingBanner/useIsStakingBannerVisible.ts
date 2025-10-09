@@ -1,5 +1,5 @@
 import useBalances from '@/hooks/useBalances'
-import useIsStakingBannerEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
+import useIsStakingPromoEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
 import { useSanctionedAddress } from '@/hooks/useSanctionedAddress'
 import { useMemo } from 'react'
 import { formatUnits } from 'ethers'
@@ -9,7 +9,7 @@ const MIN_NATIVE_TOKEN_BALANCE = 32
 
 const useIsStakingBannerVisible = () => {
   const { balances } = useBalances()
-  const isStakingBannerEnabled = useIsStakingBannerEnabled()
+  const isStakingBannerEnabled = useIsStakingPromoEnabled()
   const sanctionedAddress = useSanctionedAddress(isStakingBannerEnabled)
 
   const nativeTokenBalance = useMemo(
