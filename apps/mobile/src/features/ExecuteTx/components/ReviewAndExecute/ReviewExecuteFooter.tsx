@@ -27,7 +27,7 @@ export function ReviewExecuteFooter({ txId, txDetails }: ReviewFooterProps) {
   const { isBiometricsEnabled } = useBiometrics()
   const { setGuard } = useGuard()
   const insets = useSafeAreaInsets()
-  const { totalFee, estimatedFeeParams } = useGasFee(txDetails, manualParams)
+  const { totalFee, estimatedFeeParams, totalFeeRaw } = useGasFee(txDetails, manualParams)
 
   const handleConfirmPress = async () => {
     try {
@@ -77,7 +77,7 @@ export function ReviewExecuteFooter({ txId, txDetails }: ReviewFooterProps) {
       >
         <SelectExecutor address={activeSigner?.value as Address} txId={txId} />
 
-        <EstimatedNetworkFee txId={txId} totalFee={totalFee} />
+        <EstimatedNetworkFee txId={txId} totalFee={totalFee} totalFeeRaw={totalFeeRaw} />
       </Container>
 
       <SafeButton onPress={handleConfirmPress} width="100%">
