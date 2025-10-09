@@ -1,6 +1,10 @@
 .container {
   margin-top: 10px;
-  max-width: 1600px;
+}
+
+.contentContainer {
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .header {
@@ -114,10 +118,6 @@
     height: 100%;
     z-index: -1;
     margin-top: unset;
-  }
-
-  .widget.active {
-    z-index: 1;
   }
 
   .widget :global .MuiPaper-root {
