@@ -16,7 +16,7 @@ import extractTxInfo from '@/src/services/tx/extractTx'
 import { getSafeTxMessageHash } from '@safe-global/utils/utils/safe-hashes'
 import type { SafeVersion } from '@safe-global/types-kit'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { addPendingTx } from '@/src/store/pendingTxsSlice'
+import { addPendingTx, PendingTxType } from '@/src/store/pendingTxsSlice'
 import { getUserNonce } from '@/src/services/web3'
 import { ExecuteProcessing } from '@/src/features/ExecuteTx/components/ExecuteProcessing'
 import { ExecuteError } from '@/src/features/ExecuteTx/components/ExecuteError'
@@ -118,6 +118,7 @@ export const LedgerReviewExecuteContainer = () => {
       dispatch(
         addPendingTx({
           txId,
+          type: PendingTxType.SINGLE,
           chainId: activeSafe.chainId,
           safeAddress: activeSafe.address,
           txHash: hash,
