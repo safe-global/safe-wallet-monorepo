@@ -72,7 +72,7 @@ export function SwapHeader({
               alignItems: 'center',
               justifyContent: 'center',
             }}
-            content={<SafeFontIcon name="chevron-right" />}
+            content={<SafeFontIcon name="arrow-right" size={16} />}
             themeName="badge_background"
           />
         </View>

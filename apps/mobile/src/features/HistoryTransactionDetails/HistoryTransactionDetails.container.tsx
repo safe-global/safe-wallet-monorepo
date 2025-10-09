@@ -1,7 +1,6 @@
 import React from 'react'
-import { ScrollView, View } from 'tamagui'
-import { RouteProp, useRoute } from '@react-navigation/native'
-import { Stack } from 'expo-router'
+import { getTokenValue, ScrollView, View } from 'tamagui'
+import { Stack, useLocalSearchParams } from 'expo-router'
 
 import { LoadingTx } from '@/src/features/ConfirmTx/components/LoadingTx'
 import { Alert } from '@/src/components/Alert'
@@ -12,16 +11,17 @@ import { HistoryTransactionInfo } from '@/src/features/HistoryTransactionDetails
 import { ViewOnExplorerButton } from '@/src/features/HistoryTransactionDetails/components/ViewOnExplorerButton'
 import { ShareButton } from '@/src/components/ShareButton'
 import { useShareTransaction } from '@/src/hooks/useShareTransaction'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 function HistoryTransactionDetailsContainer() {
-  const txId = useRoute<RouteProp<{ params: { txId: string } }>>().params.txId
+  const { txId } = useLocalSearchParams<{ txId: string }>()
   const activeSafe = useDefinedActiveSafe()
   const shareTransaction = useShareTransaction(txId)
-
+  const { bottom } = useSafeAreaInsets()
   const {
-    data: txDetails,
-    isFetching: isLoading,
+    currentData: txDetails,
     isError,
+    isLoading,
   } = useTransactionsGetTransactionByIdV1Query({
     chainId: activeSafe.chainId,
     id: txId,
@@ -48,16 +48,16 @@ function HistoryTransactionDetailsContainer() {
         }}
       />
       <View flex={1}>
-        <ScrollView>
+        <ScrollView contentContainerStyle={{ paddingBottom: Math.max(bottom, getTokenValue('$4')) }}>
           <View paddingHorizontal="$4">
             <HistoryTransactionView txDetails={txDetails} />
           </View>
           <HistoryTransactionInfo txId={txId} txDetails={txDetails} />
-        </ScrollView>
 
-        <View paddingTop="$1">
-          <ViewOnExplorerButton txHash={txDetails.txHash} />
-        </View>
+          <View paddingTop="$1">
+            <ViewOnExplorerButton txHash={txDetails.txHash} />
+          </View>
+        </ScrollView>
       </View>
     </>
   )

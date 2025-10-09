@@ -33,6 +33,7 @@ export const OwnerList = () => {
       const name = addressBook[address]
 
       return {
+        key: address,
         cells: {
           owner: {
             rawValue: address,

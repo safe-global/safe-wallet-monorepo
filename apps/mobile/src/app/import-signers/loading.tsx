@@ -1,4 +1,4 @@
-import { LoadingImport } from '@/src/features/ImportPrivateKey/components/LoadingImport'
+import { LoadingImport } from '@/src/features/ImportSigner/components/LoadingImport'
 import React from 'react'
 
 function LoadingImportPage() {

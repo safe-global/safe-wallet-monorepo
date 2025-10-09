@@ -6,7 +6,7 @@ import TokenAmount from '@/components/common/TokenAmount'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
 import { Stack, Typography } from '@mui/material'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type BridgeAndSwapTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { formatUnits } from 'ethers'
@@ -82,7 +82,7 @@ function failedBridgeTransactionRows(txInfo: BridgeAndSwapTransactionInfo & { st
 function successfulBridgeTransactionRows(
   txInfo: BridgeAndSwapTransactionInfo & { status: 'DONE' },
   chainId: string,
-  chainConfigs: ChainInfo[],
+  chainConfigs: Chain[],
 ) {
   const actualFromAmount =
     BigInt(txInfo.fromAmount) + BigInt(txInfo.fees?.integratorFee ?? 0n) + BigInt(txInfo.fees?.lifiFee ?? 0n)

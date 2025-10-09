@@ -1,7 +1,7 @@
 // `assert` does not work with arrow functions
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { OnboardAPI } from '@web3-onboard/core'
 import type { Eip1193Provider } from 'ethers'
 import { invariant } from '@safe-global/utils/utils/helpers'
@@ -18,7 +18,7 @@ export function assertOnboard(onboard: OnboardAPI | undefined): asserts onboard 
   return invariant(onboard, 'Onboard not connected')
 }
 
-export function assertChainInfo(chainInfo: ChainInfo | undefined): asserts chainInfo {
+export function assertChainInfo(chainInfo: Chain | undefined): asserts chainInfo {
   return invariant(chainInfo, 'No chain config available')
 }
 

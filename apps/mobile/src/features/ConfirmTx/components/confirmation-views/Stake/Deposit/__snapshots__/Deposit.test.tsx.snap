@@ -42,7 +42,7 @@ exports[`StakingDeposit matches snapshot 1`] = `
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": "#DDDEE0",
+                "backgroundColor": "#F4F4F4",
                 "borderBottomColor": "#EEEFF0",
                 "borderBottomLeftRadius": 100000,
                 "borderBottomRightRadius": 100000,
@@ -90,7 +90,7 @@ exports[`StakingDeposit matches snapshot 1`] = `
                 ]
               }
             >
-              
+              
             </Text>
           </View>
         </View>
@@ -979,7 +979,7 @@ exports[`StakingDeposit matches snapshot 1`] = `
                 ]
               }
             >
-              
+              
             </Text>
             <Text
               style={

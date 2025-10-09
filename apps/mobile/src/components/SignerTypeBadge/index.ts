@@ -1,0 +1,1 @@
+export { SignerTypeBadge } from './SignerTypeBadge'

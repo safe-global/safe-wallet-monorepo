@@ -22,19 +22,19 @@ import {
 } from '@mui/material'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
 import NftIcon from '@/public/images/common/nft.svg'
-import type { SafeCollectibleResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import ExternalLink from '@/components/common/ExternalLink'
 import useChainId from '@/hooks/useChainId'
 import { nftPlatforms } from '../config'
 import EthHashInfo from '@/components/common/EthHashInfo'
 
 interface NftsTableProps {
-  nfts: SafeCollectibleResponse[]
-  selectedNfts: SafeCollectibleResponse[]
-  setSelectedNfts: Dispatch<SetStateAction<SafeCollectibleResponse[]>>
+  nfts: Collectible[]
+  selectedNfts: Collectible[]
+  setSelectedNfts: Dispatch<SetStateAction<Collectible[]>>
   isLoading: boolean
   children?: ReactNode
-  onPreview: (item: SafeCollectibleResponse) => void
+  onPreview: (item: Collectible) => void
 }
 
 const PAGE_SIZE = 10
@@ -89,6 +89,8 @@ const inactiveNftIcon = (
   </Tooltip>
 )
 
+const getNftKey = (nft: Collectible) => `${nft.address}-${nft.id}`
+
 const NftGrid = ({
   nfts,
   selectedNfts,
@@ -102,6 +104,22 @@ const NftGrid = ({
   // Filter string
   const [filter, setFilter] = useState<string>('')
 
+  const selectedKeySignature = useMemo(() => {
+    if (!selectedNfts.length) {
+      return ''
+    }
+
+    return selectedNfts.map(getNftKey).sort().join('|')
+  }, [selectedNfts])
+
+  const selectedKeys = useMemo(() => {
+    if (!selectedKeySignature) {
+      return new Set<string>()
+    }
+
+    return new Set(selectedKeySignature.split('|'))
+  }, [selectedKeySignature])
+
   const onFilterChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setFilter(e.target.value.toLowerCase())
@@ -110,12 +128,23 @@ const NftGrid = ({
   )
 
   const onCheckboxClick = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>, item: SafeCollectibleResponse) => {
+    (e: React.ChangeEvent<HTMLInputElement>, item: Collectible) => {
       e.stopPropagation()
       const { checked } = e.target
-      setSelectedNfts((prev) => (checked ? prev.concat(item) : prev.filter((el) => el !== item)))
+      const key = getNftKey(item)
+      setSelectedNfts((prev) => {
+        if (checked) {
+          if (selectedKeys.has(key)) {
+            return prev
+          }
+
+          return prev.concat(item)
+        }
+
+        return prev.filter((el) => getNftKey(el) !== key)
+      })
     },
-    [setSelectedNfts],
+    [selectedKeys, setSelectedNfts],
   )
 
   // Filter by collection name or token address
@@ -243,7 +272,7 @@ const NftGrid = ({
                   <TableCell align="right">
                     <Checkbox
                       data-testid={`nft-checkbox-${index + 1}`}
-                      checked={selectedNfts.includes(item)}
+                      checked={selectedKeys.has(getNftKey(item))}
                       onChange={(e) => onCheckboxClick(e, item)}
                     />
 

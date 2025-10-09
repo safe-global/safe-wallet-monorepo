@@ -1,5 +1,5 @@
 import EventBus from '@/services/EventBus'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 
 export enum SafeCreationEvent {
@@ -16,7 +16,7 @@ export interface SafeCreationEvents {
   [SafeCreationEvent.AWAITING_EXECUTION]: {
     groupKey: string
     safeAddress: string
-    networks: ChainInfo[]
+    networks: Chain[]
   }
   [SafeCreationEvent.PROCESSING]: {
     groupKey: string

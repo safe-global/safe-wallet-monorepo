@@ -1,7 +1,7 @@
 import { Code, useCameraPermission } from 'react-native-vision-camera'
 import { useCallback, useRef, useState } from 'react'
 import { useRouter } from 'expo-router'
-import { useFocusEffect } from '@react-navigation/native'
+import { useFocusEffect } from 'expo-router'
 
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import { isValidAddress } from '@safe-global/utils/utils/validation'

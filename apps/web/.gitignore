@@ -1,3 +1,6 @@
-# Auto-generated service workers
-public/*.js
+# Ignore auto-generated service workers but allow public/beamer-embed.js
+public/work*.js
+public/sw.js
+public/firebase*.js
+public/fallback*.js
 public/*.map

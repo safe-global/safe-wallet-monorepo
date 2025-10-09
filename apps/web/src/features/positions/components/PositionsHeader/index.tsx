@@ -31,8 +31,9 @@ const PositionsHeader = ({ protocol, fiatTotal }: { protocol: Protocol; fiatTota
               size="tiny"
               label={shareOfFiatTotal}
               sx={{
-                backgroundColor: 'border.light',
+                backgroundColor: 'background.lightGrey',
                 color: 'text.primary',
+                borderRadius: 'var(--15-x, 6px)',
                 '& .MuiChip-label': {
                   letterSpacing: '1px',
                 },

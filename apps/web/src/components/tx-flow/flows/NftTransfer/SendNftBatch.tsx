@@ -1,5 +1,5 @@
 import { Box, Button, CardActions, Divider, FormControl, Stack, SvgIcon, Typography } from '@mui/material'
-import { type SafeCollectibleResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import { FormProvider, useForm } from 'react-hook-form'
 import NftIcon from '@/public/images/common/nft.svg'
 import AddressBookInput from '@/components/common/AddressBookInput'
@@ -56,7 +56,7 @@ const NftItem = ({ image, name, description }: { image: string; name: string; de
   </Stack>
 )
 
-export const NftItems = ({ tokens }: { tokens: SafeCollectibleResponse[] }) => {
+export const NftItems = ({ tokens }: { tokens: Collectible[] }) => {
   return (
     <Stack
       data-testid="nft-item-list"

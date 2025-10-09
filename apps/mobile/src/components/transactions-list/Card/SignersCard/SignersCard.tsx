@@ -1,15 +1,18 @@
 import React, { useMemo } from 'react'
 import { Text, View, type TextProps } from 'tamagui'
 import { Identicon } from '@/src/components/Identicon'
+import { BadgeWrapper } from '@/src/components/BadgeWrapper'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { EthAddress } from '@/src/components/EthAddress'
 import { Address } from '@/src/types/address'
+import { SignerTypeBadge } from '@/src/components/SignerTypeBadge'
 
 type SignersCardProps = {
   name?: string | React.ReactNode
   address: `0x${string}`
   rightNode?: React.ReactNode
   transparent?: boolean
+  balance?: string
   onPress?: () => void
   getSignerTag?: (address: Address) => string | undefined
 }
@@ -25,7 +28,15 @@ const titleStyle: Partial<TextProps> = {
   fontWeight: 600,
 }
 
-export function SignersCard({ onPress, name, transparent = true, address, rightNode, getSignerTag }: SignersCardProps) {
+export function SignersCard({
+  onPress,
+  name,
+  transparent = true,
+  address,
+  rightNode,
+  getSignerTag,
+  balance,
+}: SignersCardProps) {
   const textProps = useMemo(() => {
     return name ? descriptionStyle : titleStyle
   }, [name])
@@ -67,11 +78,24 @@ export function SignersCard({ onPress, name, transparent = true, address, rightN
           )}
 
           <EthAddress address={address} textProps={textProps} />
+          {balance && (
+            <View flexDirection="row" alignItems="center">
+              <Text fontSize="$4" fontWeight={400} color="$colorSecondary">
+                Balance:
+              </Text>
+              <Text fontSize="$4" fontWeight={400}>
+                {' '}
+                {balance}
+              </Text>
+            </View>
+          )}
         </View>
       }
       leftNode={
         <View width="$10">
-          <Identicon address={address} size={40} />
+          <BadgeWrapper badge={<SignerTypeBadge address={address} theme="badge_background" />} position="bottom-right">
+            <Identicon address={address} size={40} />
+          </BadgeWrapper>
         </View>
       }
       rightNode={rightNode}

@@ -1,6 +1,5 @@
 import React from 'react'
-import { Text, View, Image } from 'tamagui'
-import Signature from '@/assets/images/signature.png'
+import { Text, View } from 'tamagui'
 
 import { Identicon } from '@/src/components/Identicon'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -8,6 +7,7 @@ import { router } from 'expo-router'
 import { ContactDisplayNameContainer } from '@/src/features/AddressBook'
 import { Address } from '@/src/types/address'
 import { ActionType } from '@/src/features/ChangeSignerSheet/utils'
+import { Container } from '../Container'
 
 type Props = {
   address: Address
@@ -21,18 +21,29 @@ export function SelectExecutor({ address, txId }: Props) {
         router.push({ pathname: '/change-signer-sheet', params: { txId, actionType: ActionType.EXECUTE } })
       }
       flexDirection="row"
-      justifyContent="center"
+      justifyContent="space-between"
       alignItems="center"
       gap={'$2'}
     >
-      <Image testID="signature-button-image" width={16} height={16} source={Signature} />
-      <Text fontWeight={700}>Execute with</Text>
+      <Text color="$colorSecondary">Execute with</Text>
 
-      <Identicon address={address} size={24} />
+      <View flexDirection="row" justifyContent="center" alignItems="center" gap={'$2'}>
+        <Container
+          paddingVertical={'$2'}
+          backgroundColor="$backgroundSecondary"
+          paddingHorizontal={'$2'}
+          flexDirection="row"
+          justifyContent="center"
+          alignItems="center"
+          gap={'$1'}
+        >
+          <Identicon address={address} size={16} />
 
-      <ContactDisplayNameContainer address={address} />
+          <ContactDisplayNameContainer textProps={{ fontWeight: 600 }} address={address} />
+        </Container>
 
-      <SafeFontIcon name="chevron-right" />
+        <SafeFontIcon name="chevron-right" />
+      </View>
     </View>
   )
 }

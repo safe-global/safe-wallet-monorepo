@@ -9,3 +9,8 @@ const useIsEarnFeatureEnabled = () => {
 }
 
 export default useIsEarnFeatureEnabled
+
+export const useIsEarnPromoEnabled = () => {
+  const featureEnabled = useIsEarnFeatureEnabled()
+  return useHasFeature(FEATURES.EARN_PROMO) && featureEnabled
+}

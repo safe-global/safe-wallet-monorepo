@@ -18,14 +18,19 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type RelayRelayV1ApiResponse = /** status 200  */ Relay
+export type RelayRelayV1ApiResponse = /** status 200 Transaction relayed successfully with transaction hash */ Relay
 export type RelayRelayV1ApiArg = {
+  /** Chain ID where the Safe transaction will be executed */
   chainId: string
+  /** Transaction data to relay including Safe address, transaction details, and signatures */
   relayDto: RelayDto
 }
-export type RelayGetRelaysRemainingV1ApiResponse = /** status 200  */ RelaysRemaining
+export type RelayGetRelaysRemainingV1ApiResponse =
+  /** status 200 Remaining relay quota retrieved successfully */ RelaysRemaining
 export type RelayGetRelaysRemainingV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
   chainId: string
+  /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
 }
 export type Relay = {

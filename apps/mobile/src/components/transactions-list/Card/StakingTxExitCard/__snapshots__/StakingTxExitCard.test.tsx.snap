@@ -147,7 +147,7 @@ exports[`StakingTxExitCard matches snapshot 1`] = `
               }
               testID="safe-list-transaction-stake-icon"
             >
-              
+              
             </Text>
             <Text
               style={

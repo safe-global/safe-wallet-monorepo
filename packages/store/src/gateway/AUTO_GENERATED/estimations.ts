@@ -21,10 +21,14 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type EstimationsGetEstimationV2ApiResponse = /** status 200  */ EstimationResponse
+export type EstimationsGetEstimationV2ApiResponse =
+  /** status 200 Gas estimation calculated successfully with recommended values */ EstimationResponse
 export type EstimationsGetEstimationV2ApiArg = {
+  /** Chain ID where the Safe is deployed */
   chainId: string
+  /** Safe contract address (0x prefixed hex string) */
   address: string
+  /** Transaction details for gas estimation including recipient, value, and data */
   getEstimationDto: GetEstimationDto
 }
 export type EstimationResponse = {
