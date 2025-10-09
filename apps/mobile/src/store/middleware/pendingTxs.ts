@@ -1,14 +1,47 @@
 import { Action } from '@reduxjs/toolkit'
 import { AppListenerEffectAPI, AppStartListening, RootState } from '..'
-import { setPendingTxStatus, PendingStatus, PendingTxsState, pendingTxsSlice, clearPendingTx } from '../pendingTxsSlice'
+import {
+  setPendingTxStatus,
+  PendingStatus,
+  PendingTxsState,
+  pendingTxsSlice,
+  clearPendingTx,
+  setRelayTxHash,
+  PendingTxType,
+} from '../pendingTxsSlice'
 import { selectChainById } from '../chains'
 import { createWeb3ReadOnly } from '@/src/services/web3'
 import { SimpleTxWatcher } from '@safe-global/utils/services/SimpleTxWatcher'
+import { RelayTxWatcher } from '@safe-global/utils/services/RelayTxWatcher'
 import { REHYDRATE } from 'redux-persist'
 import { delay } from '@safe-global/utils/utils/helpers'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SimplePoller } from '@safe-global/utils/services/SimplePoller'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
+import logger from '@/src/utils/logger'
+
+const startRelayWatcher = (listenerApi: AppListenerEffectAPI, txId: string, taskId: string, chainId: string) => {
+  RelayTxWatcher.getInstance()
+    .watchTaskId(taskId, (task) => {
+      // Update callback - called on each status update
+      logger.info('Relay status update', { txId, taskId, taskState: task.taskState, txHash: task.transactionHash })
+
+      // If we have a transaction hash, update the pending tx with it
+      if (task.transactionHash && task.transactionHash !== '') {
+        listenerApi.dispatch(setRelayTxHash({ txId, txHash: task.transactionHash }))
+      }
+    })
+    .then((task) => {
+      // Transaction executed successfully, move to indexing
+      logger.info('Relay transaction completed', { txId, taskId, txHash: task.transactionHash })
+      if (task.transactionHash) {
+        listenerApi.dispatch(setPendingTxStatus({ txId, chainId, status: PendingStatus.INDEXING }))
+      }
+    })
+    .catch((err) => {
+      logger.error('Relay watcher error', { txId, taskId, error: err })
+    })
+}
 
 const startIndexingWatcher = (listenerApi: AppListenerEffectAPI, txId: string, chainId: string) => {
   const queryUntilSuccess = async () => {
@@ -64,16 +97,26 @@ const runWatcher = (
 
 const runWatchers = async (listenerApi: AppListenerEffectAPI, pendingTxs: PendingTxsState) => {
   for (const [txId, pendingTx] of Object.entries(pendingTxs)) {
-    const { walletAddress, walletNonce, txHash, chainId, status } = pendingTx
-
     await delay(100)
+
+    const { chainId, status } = pendingTx
 
     if (status === PendingStatus.INDEXING) {
       startIndexingWatcher(listenerApi, txId, chainId)
       continue
     }
 
-    await runWatcher(listenerApi, txHash, chainId, walletAddress, walletNonce, txId)
+    // Handle relay transactions
+    if (pendingTx.type === PendingTxType.RELAY) {
+      startRelayWatcher(listenerApi, txId, pendingTx.taskId, chainId)
+      continue
+    }
+
+    // Handle single transactions
+    if (pendingTx.type === PendingTxType.SINGLE) {
+      const { walletAddress, walletNonce, txHash } = pendingTx
+      await runWatcher(listenerApi, txHash, chainId, walletAddress, walletNonce, txId)
+    }
   }
 }
 
@@ -81,9 +124,14 @@ export const pendingTxsListeners = (startListening: AppStartListening) => {
   startListening({
     actionCreator: pendingTxsSlice.actions.addPendingTx,
     effect: (action, listenerApi) => {
-      const { chainId, txHash, txId, walletAddress, walletNonce } = action.payload
+      const { txId, chainId } = action.payload
 
-      runWatcher(listenerApi, txHash, chainId, walletAddress, walletNonce, txId)
+      if (action.payload.type === PendingTxType.RELAY) {
+        startRelayWatcher(listenerApi, txId, action.payload.taskId, chainId)
+      } else if (action.payload.type === PendingTxType.SINGLE) {
+        const { txHash, walletAddress, walletNonce } = action.payload
+        runWatcher(listenerApi, txHash, chainId, walletAddress, walletNonce, txId)
+      }
     },
   })
 
