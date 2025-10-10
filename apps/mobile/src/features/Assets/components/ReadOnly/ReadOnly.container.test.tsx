@@ -20,7 +20,11 @@ describe('ReadOnlyContainer', () => {
     queued: 0,
   }
 
-  const createInitialState = (signers: Record<string, SignerInfo>, safeInfo: SafeOverview): Partial<RootState> => ({
+  const createInitialState = (
+    signers: Record<string, SignerInfo>,
+    safeInfo: SafeOverview,
+    warningDismissed = false,
+  ): Partial<RootState> => ({
     safes: {
       [mockSafeAddress]: {
         '1': safeInfo,
@@ -31,6 +35,15 @@ describe('ReadOnlyContainer', () => {
       address: mockSafeAddress,
       chainId: '1',
     },
+    safesSettings: warningDismissed
+      ? {
+          [mockSafeAddress]: {
+            global: {
+              readOnlyWarningDismissed: true,
+            },
+          },
+        }
+      : {},
   })
 
   it('should render read-only message when there are no signers', () => {
@@ -42,7 +55,7 @@ describe('ReadOnlyContainer', () => {
     )
     render(<ReadOnlyContainer />, { initialStore: initialState })
 
-    expect(screen.getByText('This is a read-only account')).toBeTruthy()
+    expect(screen.getByText('Read-only mode')).toBeTruthy()
   })
 
   it("should render read-only message when signers don't match owners", () => {
@@ -52,13 +65,26 @@ describe('ReadOnlyContainer', () => {
     })
     render(<ReadOnlyContainer />, { initialStore: initialState })
 
-    expect(screen.getByText('This is a read-only account')).toBeTruthy()
+    expect(screen.getByText('Read-only mode')).toBeTruthy()
   })
 
   it('should not render read-only message when there are signers', () => {
     const initialState = createInitialState(mockSigners, mockSafeInfo)
     render(<ReadOnlyContainer />, { initialStore: initialState })
 
-    expect(screen.queryByText('This is a read-only account')).toBeNull()
+    expect(screen.queryByText('Read-only mode')).toBeNull()
+  })
+
+  it('should not render read-only message when warning is dismissed', () => {
+    const initialState = createInitialState(
+      {},
+      {
+        ...mockSafeInfo,
+      },
+      true,
+    )
+    render(<ReadOnlyContainer />, { initialStore: initialState })
+
+    expect(screen.queryByText('Read-only mode')).toBeNull()
   })
 })

@@ -153,7 +153,7 @@ jest.mock('@notifee/react-native', () => {
 jest.mock('@gorhom/bottom-sheet', () => {
   const reactNative = jest.requireActual('react-native')
   const { useState, forwardRef, useImperativeHandle } = jest.requireActual('react')
-  const { View } = reactNative
+  const { View, ScrollView, TouchableOpacity: RNTouchableOpacity } = reactNative
   const MockBottomSheetComponent = forwardRef(
     (
       {
@@ -195,6 +195,8 @@ jest.mock('@gorhom/bottom-sheet', () => {
     BottomSheetModal: MockBottomSheetComponent,
     BottomSheetModalProvider: View,
     BottomSheetView: View,
+    BottomSheetScrollView: ScrollView,
+    TouchableOpacity: RNTouchableOpacity,
     useBottomSheetModal: () => ({
       dismiss: () => {
         return null
