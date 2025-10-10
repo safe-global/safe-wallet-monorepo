@@ -63,6 +63,7 @@ yarn-error.log*
 # yalc
 .yalc
 yalc.lock
+yarn.lock
 
 certificates
 *storybook.log
