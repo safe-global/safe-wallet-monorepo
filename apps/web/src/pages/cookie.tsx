@@ -34,7 +34,9 @@ const CookiePolicy: NextPage = () => {
         <title>{`${BRAND_NAME} – Cookie policy`}</title>
       </Head>
 
-      <main style={{ lineHeight: '1.5' }}>{isOfficialHost && <SafeCookiePolicy components={overrideComponents} />}</main>
+      <main style={{ lineHeight: '1.5' }}>
+        {isOfficialHost && <SafeCookiePolicy components={overrideComponents} />}
+      </main>
     </>
   )
 }

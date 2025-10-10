@@ -7,6 +7,7 @@ import { View, Text, useTheme } from 'tamagui'
 interface SafeTabBarProps {
   setActiveTab: (name: string) => void
   activeTab: string
+  rightNode?: React.ReactNode
 }
 
 export const SafeTabBar = ({
@@ -14,6 +15,7 @@ export const SafeTabBar = ({
   onTabPress,
   activeTab,
   setActiveTab,
+  rightNode,
 }: TabBarProps<TabName> & SafeTabBarProps) => {
   const theme = useTheme()
 
@@ -40,14 +42,19 @@ export const SafeTabBar = ({
       flexDirection="row"
       borderBottomColor={'$borderLight'}
       borderBottomWidth={1}
+      alignItems="center"
+      justifyContent="space-between"
     >
-      {tabNames.map((name) => (
-        <TouchableOpacity style={isActiveTab(name) && activeButtonStyle} onPress={handleTabPressed(name)} key={name}>
-          <Text color={isActiveTab(name) ? '$color' : '$colorSecondary'} fontSize="$6" fontWeight={700}>
-            {name}
-          </Text>
-        </TouchableOpacity>
-      ))}
+      <View flexDirection="row" gap="$6">
+        {tabNames.map((name) => (
+          <TouchableOpacity style={isActiveTab(name) && activeButtonStyle} onPress={handleTabPressed(name)} key={name}>
+            <Text color={isActiveTab(name) ? '$color' : '$colorSecondary'} fontSize="$6" fontWeight={700}>
+              {name}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      {rightNode && <View paddingBottom="$2">{rightNode}</View>}
     </View>
   )
 }

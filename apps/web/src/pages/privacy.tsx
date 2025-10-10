@@ -19,7 +19,9 @@ const PrivacyPolicy: NextPage = () => {
         <title>{`${BRAND_NAME} – Privacy policy`}</title>
       </Head>
 
-      <main style={{ lineHeight: '1.5' }}>{isOfficialHost && <SafePrivacyPolicy components={overrideComponents} />}</main>
+      <main style={{ lineHeight: '1.5' }}>
+        {isOfficialHost && <SafePrivacyPolicy components={overrideComponents} />}
+      </main>
     </>
   )
 }

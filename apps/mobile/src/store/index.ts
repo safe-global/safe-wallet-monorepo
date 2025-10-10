@@ -18,6 +18,7 @@ import addressBook from './addressBookSlice'
 import settings from './settingsSlice'
 import safes from './safesSlice'
 import safeSubscriptions from './safeSubscriptionsSlice'
+import safesSettings from './safesSettingsSlice'
 import biometrics from './biometricsSlice'
 import pendingTxs from './pendingTxsSlice'
 import estimatedFee from './estimatedFeeSlice'
@@ -65,6 +66,7 @@ export const rootReducer = combineReducers({
   signers,
   delegates,
   settings,
+  safesSettings,
   safeSubscriptions,
   biometrics,
   pendingTxs,
