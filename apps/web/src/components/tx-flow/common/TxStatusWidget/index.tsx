@@ -1,7 +1,7 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
 import { useContext } from 'react'
-import { List, ListItem, ListItemIcon, Paper, Typography } from '@mui/material'
+import { List, ListItem, ListItemIcon, Paper, styled, Typography } from '@mui/material'
 import CreatedIcon from '@/public/images/messages/created.svg'
 import SignedIcon from '@/public/images/messages/signed.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -12,6 +12,14 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
+
+const StatusLabel = styled(Typography)(({ theme }) => ({
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  letterSpacing: 1,
+  ...theme.typography.caption,
+}))
 
 const TxStatusWidget = ({
   txSummary,
@@ -50,9 +58,7 @@ const TxStatusWidget = ({
             <CreatedIcon />
           </ListItemIcon>
 
-          <Typography variant="caption" sx={{ letterSpacing: 1 }}>
-            {isBatch ? 'Queue transactions' : 'Create'}
-          </Typography>
+          <StatusLabel>{isBatch ? 'Queue transactions' : 'Create'}</StatusLabel>
         </ListItem>
 
         <ListItem className={classnames({ [css.incomplete]: !canConfirm && !isBatch })}>
@@ -60,7 +66,7 @@ const TxStatusWidget = ({
             <SignedIcon />
           </ListItemIcon>
 
-          <Typography variant="caption" sx={{ letterSpacing: 1 }}>
+          <StatusLabel>
             {isBatch ? (
               'Create batch'
             ) : !nonceNeeded ? (
@@ -77,7 +83,7 @@ const TxStatusWidget = ({
                 )}
               </>
             )}
-          </Typography>
+          </StatusLabel>
         </ListItem>
 
         <ListItem className={classnames({ [css.incomplete]: !(isAwaitingExecution && isLastStep) })}>
@@ -85,9 +91,7 @@ const TxStatusWidget = ({
             <SignedIcon />
           </ListItemIcon>
 
-          <Typography variant="caption" sx={{ letterSpacing: 1 }}>
-            {isMessage ? 'Done' : 'Execute'}
-          </Typography>
+          <StatusLabel>{isMessage ? 'Done' : 'Execute'}</StatusLabel>
         </ListItem>
       </List>
     </Paper>
