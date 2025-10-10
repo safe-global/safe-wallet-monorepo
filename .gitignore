@@ -3,7 +3,7 @@
 **/node_modules/*
 /.pnp
 .pnp.js
-
+package.json.lock
 # testing
 /coverage
 /packages/utils/coverage
