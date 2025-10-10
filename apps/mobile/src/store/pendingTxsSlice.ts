@@ -73,7 +73,6 @@ export const pendingTxsSlice = createSlice({
       const tx = state[txId]
 
       if (tx && tx.type === ExecutionMethod.WITH_RELAY) {
-        // Convert relay tx to single tx once we have the hash
         state[txId] = {
           ...tx,
           txHash,
