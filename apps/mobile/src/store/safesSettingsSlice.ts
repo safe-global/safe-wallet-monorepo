@@ -87,9 +87,6 @@ const safesSettingsSlice = createSlice({
       }
 
       const safeData = state[safeAddress]
-      if (!safeData) {
-        return
-      }
 
       if (!safeData.chains) {
         safeData.chains = {}
