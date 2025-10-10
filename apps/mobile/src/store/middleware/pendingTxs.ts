@@ -22,19 +22,13 @@ import logger from '@/src/utils/logger'
 
 const startRelayWatcher = (listenerApi: AppListenerEffectAPI, txId: string, taskId: string, chainId: string) => {
   RelayTxWatcher.getInstance()
-    .watchTaskId(taskId, (task) => {
-      // Update callback - called on each status update
-      logger.info('Relay status update', { txId, taskId, taskState: task.taskState, txHash: task.transactionHash })
-
-      // If we have a transaction hash, update the pending tx with it
-      if (task.transactionHash && task.transactionHash !== '') {
-        listenerApi.dispatch(setRelayTxHash({ txId, txHash: task.transactionHash }))
-      }
-    })
+    .watchTaskId(taskId)
     .then((task) => {
       // Transaction executed successfully, move to indexing
       logger.info('Relay transaction completed', { txId, taskId, txHash: task.transactionHash })
-      if (task.transactionHash) {
+
+      if (task.transactionHash && task.transactionHash !== '') {
+        listenerApi.dispatch(setRelayTxHash({ txId, txHash: task.transactionHash }))
         listenerApi.dispatch(setPendingTxStatus({ txId, chainId, status: PendingStatus.INDEXING }))
       }
     })
