@@ -1,6 +1,6 @@
 # Cookie Policy
 
-Last updated: July 2025
+Last updated: October 2025
 
 As described in our Privacy Policy, For general web-browsing of this website, your personal data is not revealed to us, although certain statistical information is available to us via our internet service provider as well as through the use of special tracking technologies. Such information tells us about the pages you are clicking on or the hardware you are using, but not your name, age, address or anything we can use to identify you personally. We exclusively process your personal data in pseudonymised form.
 

@@ -24,7 +24,7 @@ export const RelayFee = ({ isLoadingRelays, relaysRemaining }: RelayFeeProps) =>
       {isLoadingRelays ? (
         <Skeleton colorMode={colorScheme} height={16} width={80} />
       ) : (
-        relaysRemaining && <Text fontWeight={700}>{relaysRemaining.remaining} left / per day</Text>
+        relaysRemaining && <Text fontWeight={700}>{relaysRemaining.remaining} left / day</Text>
       )}
     </View>
   )
