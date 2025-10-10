@@ -3,7 +3,7 @@ import { NEWS_BANNER_STORAGE_KEY } from '@/components/dashboard/NewsCarousel/uti
 import { useMemo } from 'react'
 import { Typography } from '@mui/material'
 import { earnBannerDisclaimer, earnBannerID } from '@/components/dashboard/NewsCarousel/banners/EarnBanner'
-import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 
 const disclaimers = [
   {
@@ -14,10 +14,10 @@ const disclaimers = [
 
 const NewsDisclaimers = () => {
   const [dismissed = []] = useLocalStorage<string[]>(NEWS_BANNER_STORAGE_KEY)
-  const { balances, loading: balancesLoading } = useVisibleBalances()
+  const { visibleTokenBalances, isLoading: balancesLoading } = usePortfolio()
   const nonZeroBalances = useMemo(() => {
-    return balances.items.filter((item) => item.balance !== '0')
-  }, [balances.items])
+    return visibleTokenBalances.filter((item) => item.balance !== '0')
+  }, [visibleTokenBalances])
 
   const noAssets = !balancesLoading && nonZeroBalances.length === 0
 

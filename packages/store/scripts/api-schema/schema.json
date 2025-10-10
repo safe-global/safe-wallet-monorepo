@@ -696,6 +696,109 @@
         "tags": ["balances"]
       }
     },
+    "/v1/portfolios/{address}": {
+      "get": {
+        "description": "Retrieves the complete portfolio for an address including token balances and app positions across all supported chains.",
+        "operationId": "portfolioGetPortfolioV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "description": "Wallet address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fiatCode",
+            "required": false,
+            "in": "query",
+            "description": "Fiat currency code for balance conversion (e.g., USD, EUR)",
+            "schema": {
+              "example": "USD",
+              "type": "string"
+            }
+          },
+          {
+            "name": "chainIds",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated list of chain IDs to filter by",
+            "schema": {
+              "example": "1,137,42161",
+              "type": "string"
+            }
+          },
+          {
+            "name": "trusted",
+            "required": false,
+            "in": "query",
+            "description": "If true, only returns trusted tokens",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "excludeDust",
+            "required": false,
+            "in": "query",
+            "description": "If true, filters out dust positions (balance < $1 USD)",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "provider",
+            "required": false,
+            "in": "query",
+            "description": "Portfolio data provider (zerion or zapper)",
+            "schema": {
+              "example": "zerion",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Portfolio"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get portfolio",
+        "tags": ["portfolio"]
+      },
+      "delete": {
+        "description": "Clears the cached portfolio data for a specific address",
+        "operationId": "portfolioClearPortfolioV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "description": "Wallet address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "summary": "Clear portfolio cache",
+        "tags": ["portfolio"]
+      }
+    },
     "/v1/chains/{chainId}/safes/{safeAddress}/positions/{fiatCode}": {
       "get": {
         "operationId": "positionsGetPositionsV1",
@@ -5622,6 +5725,254 @@
           }
         },
         "required": ["fiatTotal", "items"]
+      },
+      "TokenBalanceTokenInfo": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Token contract address (0x0000000000000000000000000000000000000000 for native tokens)",
+            "example": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+          },
+          "decimals": {
+            "type": "number",
+            "description": "Token decimals",
+            "example": 6
+          },
+          "symbol": {
+            "type": "string",
+            "description": "Token symbol",
+            "example": "USDC"
+          },
+          "name": {
+            "type": "string",
+            "description": "Token name",
+            "example": "USD Coin"
+          },
+          "logoUrl": {
+            "type": "object",
+            "description": "Token logo URL",
+            "example": "https://example.com/logo.png",
+            "nullable": true
+          },
+          "chainId": {
+            "type": "string",
+            "description": "Chain ID where token is deployed",
+            "example": "1"
+          }
+        },
+        "required": ["address", "decimals", "symbol", "name", "chainId"]
+      },
+      "TokenBalance": {
+        "type": "object",
+        "properties": {
+          "tokenInfo": {
+            "description": "Token information",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokenBalanceTokenInfo"
+              }
+            ]
+          },
+          "balance": {
+            "type": "string",
+            "description": "Token balance (as string to avoid precision loss)",
+            "example": "1000000000"
+          },
+          "balanceFiat": {
+            "type": "object",
+            "description": "Balance in requested fiat currency",
+            "example": "1000.50",
+            "nullable": true
+          },
+          "price": {
+            "type": "object",
+            "description": "Token price in requested fiat currency",
+            "example": "4370.50",
+            "nullable": true
+          },
+          "priceChangePercentage1d": {
+            "type": "object",
+            "description": "Price change percentage in the last 24 hours",
+            "example": "-4.31",
+            "nullable": true
+          }
+        },
+        "required": ["tokenInfo", "balance"]
+      },
+      "AppBalanceAppInfo": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Application name",
+            "example": "Aave V3"
+          },
+          "logoUrl": {
+            "type": "object",
+            "description": "Application logo URL",
+            "example": "https://example.com/aave-logo.png",
+            "nullable": true
+          },
+          "url": {
+            "type": "object",
+            "description": "Application URL",
+            "example": "https://aave.com",
+            "nullable": true
+          }
+        },
+        "required": ["name"]
+      },
+      "AppPositionTokenInfo": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Token contract address (0x0000000000000000000000000000000000000000 for native tokens)",
+            "example": "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84"
+          },
+          "decimals": {
+            "type": "number",
+            "description": "Token decimals",
+            "example": 18
+          },
+          "symbol": {
+            "type": "string",
+            "description": "Token symbol",
+            "example": "stETH"
+          },
+          "name": {
+            "type": "string",
+            "description": "Token name",
+            "example": "Staked Ether"
+          },
+          "logoUrl": {
+            "type": "object",
+            "description": "Token logo URL",
+            "example": "https://example.com/logo.png",
+            "nullable": true
+          },
+          "chainId": {
+            "type": "string",
+            "description": "Chain ID where token is deployed",
+            "example": "1"
+          }
+        },
+        "required": ["address", "decimals", "symbol", "name", "chainId"]
+      },
+      "AppPosition": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Unique position key",
+            "example": "aave-v3-ethereum-steth"
+          },
+          "type": {
+            "type": "string",
+            "description": "Position type (e.g., staked, lending, liquidity)",
+            "example": "staked"
+          },
+          "name": {
+            "type": "string",
+            "description": "Position name",
+            "example": "Morpho Yield: cbBTC Pool (Gauntlet cbBTC Core)"
+          },
+          "tokenInfo": {
+            "description": "Token information",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AppPositionTokenInfo"
+              }
+            ]
+          },
+          "balance": {
+            "type": "string",
+            "description": "Position balance",
+            "example": "5000000000000000000"
+          },
+          "balanceFiat": {
+            "type": "object",
+            "description": "Balance in requested fiat currency",
+            "example": "10000.00",
+            "nullable": true
+          },
+          "priceChangePercentage1d": {
+            "type": "object",
+            "description": "Price change percentage in the last 24 hours",
+            "example": "-4.31",
+            "nullable": true
+          }
+        },
+        "required": ["key", "type", "name", "tokenInfo", "balance"]
+      },
+      "AppBalance": {
+        "type": "object",
+        "properties": {
+          "appInfo": {
+            "description": "Application information",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AppBalanceAppInfo"
+              }
+            ]
+          },
+          "balanceFiat": {
+            "type": "object",
+            "description": "Total balance in fiat currency across all positions",
+            "example": "15000.00",
+            "nullable": true
+          },
+          "positions": {
+            "description": "List of positions in this app",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppPosition"
+            }
+          }
+        },
+        "required": ["appInfo", "positions"]
+      },
+      "Portfolio": {
+        "type": "object",
+        "properties": {
+          "totalBalanceFiat": {
+            "type": "string",
+            "description": "Total balance in fiat currency across all tokens and positions",
+            "example": "50000.00"
+          },
+          "totalTokenBalanceFiat": {
+            "type": "string",
+            "description": "Total balance in fiat currency for all token holdings",
+            "example": "30000.00"
+          },
+          "totalPositionsBalanceFiat": {
+            "type": "string",
+            "description": "Total balance in fiat currency for all app positions",
+            "example": "20000.00"
+          },
+          "tokenBalances": {
+            "description": "List of token balances",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TokenBalance"
+            }
+          },
+          "positionBalances": {
+            "description": "List of app balances",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppBalance"
+            }
+          }
+        },
+        "required": [
+          "totalBalanceFiat",
+          "totalTokenBalanceFiat",
+          "totalPositionsBalanceFiat",
+          "tokenBalances",
+          "positionBalances"
+        ]
       },
       "Position": {
         "type": "object",

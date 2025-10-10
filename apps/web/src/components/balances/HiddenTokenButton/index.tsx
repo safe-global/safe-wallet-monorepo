@@ -2,7 +2,7 @@ import { type ReactElement } from 'react'
 import { Typography, Button } from '@mui/material'
 import { ASSETS_EVENTS } from '@/services/analytics'
 import useHiddenTokens from '@/hooks/useHiddenTokens'
-import useBalances from '@/hooks/useBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined'
 import Track from '@/components/common/Track'
 
@@ -16,11 +16,11 @@ const HiddenTokenButton = ({
   toggleShowHiddenAssets?: () => void
   showHiddenAssets?: boolean
 }): ReactElement | null => {
-  const { balances } = useBalances()
+  const { tokenBalances } = usePortfolio()
   const currentHiddenAssets = useHiddenTokens()
 
   const hiddenAssetCount =
-    balances.items?.filter((item) => currentHiddenAssets.includes(item.tokenInfo.address)).length || 0
+    tokenBalances?.filter((item) => currentHiddenAssets.includes(item.tokenInfo.address)).length || 0
 
   return (
     <div className={css.hiddenTokenButton}>

@@ -28,7 +28,7 @@ import { txSubscribe, TxEvent } from '@/services/tx/txEvents'
 import type { Chain as WebCoreChainInfo } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useChainId from '@/hooks/useChainId'
 import type AppCommunicator from '@/services/safe-apps/AppCommunicator'
-import useBalances from '@/hooks/useBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { useLazyBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
@@ -59,7 +59,7 @@ export const useCustomAppCommunicator = (
   }
   const tokenlist = useAppSelector(selectTokenList)
   const chainId = useChainId()
-  const { balances } = useBalances()
+  const { tokenBalances } = usePortfolio()
   const [getBalances] = useLazyBalancesGetBalancesV1Query()
 
   const communicator = useAppCommunicator(iframeRef, appData, chain, {
@@ -128,8 +128,8 @@ export const useCustomAppCommunicator = (
             fiatCode: currency,
             excludeSpam: true,
             trusted: isDefaultTokenlistSupported && TOKEN_LISTS.TRUSTED === tokenlist,
-          }).then((res) => res.data ?? balances)
-        : Promise.resolve(balances)
+          }).then((res) => res.data ?? { fiatTotal: '0', items: tokenBalances })
+        : Promise.resolve({ fiatTotal: '0', items: tokenBalances })
     },
     onGetChainInfo: () => {
       if (!chain) return

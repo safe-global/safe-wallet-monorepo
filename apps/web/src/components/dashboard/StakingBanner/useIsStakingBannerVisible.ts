@@ -1,4 +1,4 @@
-import useBalances from '@/hooks/useBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import useIsStakingPromoEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
 import { useSanctionedAddress } from '@/hooks/useSanctionedAddress'
 import { useMemo } from 'react'
@@ -8,13 +8,13 @@ import { TokenType } from '@safe-global/store/gateway/types'
 const MIN_NATIVE_TOKEN_BALANCE = 32
 
 const useIsStakingBannerVisible = () => {
-  const { balances } = useBalances()
+  const { tokenBalances } = usePortfolio()
   const isStakingBannerEnabled = useIsStakingPromoEnabled()
   const sanctionedAddress = useSanctionedAddress(isStakingBannerEnabled)
 
   const nativeTokenBalance = useMemo(
-    () => balances.items.find((balance) => balance.tokenInfo.type === TokenType.NATIVE_TOKEN),
-    [balances.items],
+    () => tokenBalances.find((balance) => balance.tokenInfo.type === TokenType.NATIVE_TOKEN),
+    [tokenBalances],
   )
 
   const hasSufficientFunds =

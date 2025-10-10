@@ -6,7 +6,7 @@ import QRCode from '@/components/common/QRCode'
 import Track from '@/components/common/Track'
 import FirstTxFlow from '@/features/counterfactual/FirstTxFlow'
 import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
-import useBalances from '@/hooks/useBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { OVERVIEW_EVENTS } from '@/services/analytics'
@@ -354,7 +354,7 @@ const AccountReadyWidget = () => {
 }
 
 const FirstSteps = () => {
-  const { balances } = useBalances()
+  const { tokenBalances } = usePortfolio()
   const { safe, safeAddress } = useSafeInfo()
   const outgoingTransactions = useAppSelector(selectOutgoingTransactions)
   const chain = useCurrentChain()
@@ -363,7 +363,7 @@ const FirstSteps = () => {
   const isMultiSig = safe.threshold > 1
   const isReplayedSafe = undeployedSafe && isReplayedSafeProps(undeployedSafe?.props)
 
-  const hasNonZeroBalance = balances && (balances.items.length > 1 || BigInt(balances.items[0]?.balance || 0) > 0)
+  const hasNonZeroBalance = tokenBalances && (tokenBalances.length > 1 || BigInt(tokenBalances[0]?.balance || 0) > 0)
   const hasOutgoingTransactions = !!outgoingTransactions && outgoingTransactions.length > 0
   const completedItems = [hasNonZeroBalance, hasOutgoingTransactions]
 

@@ -1,5 +1,4 @@
 import { useRouter } from 'next/router'
-import usePositionsFiatTotal from '@/features/positions/hooks/usePositionsFiatTotal'
 import React, { useMemo } from 'react'
 import { AppRoutes } from '@/config/routes'
 import {
@@ -20,20 +19,20 @@ import css from './styles.module.css'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import PositionsHeader from '@/features/positions/components/PositionsHeader'
 import Position from '@/features/positions/components/Position'
-import usePositions from '@/features/positions/hooks/usePositions'
 import PositionsEmpty from '@/features/positions/components/PositionsEmpty'
 import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { POSITIONS_EVENTS, POSITIONS_LABELS } from '@/services/analytics/events/positions'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import usePortfolio from '@/hooks/usePortfolio'
 
 const MAX_PROTOCOLS = 4
 
 const PositionsWidget = () => {
   const router = useRouter()
   const { safe } = router.query
-  const { data, error, isLoading } = usePositions()
-  const positionsFiatTotal = usePositionsFiatTotal()
+  const { positionBalances, totalPositionsBalance, error, isLoading } = usePortfolio()
+  const data = positionBalances
 
   const viewAllUrl = useMemo(
     () => ({
@@ -152,7 +151,7 @@ const PositionsWidget = () => {
           <Track
             {...POSITIONS_EVENTS.POSITIONS_VIEW_ALL_CLICKED}
             mixpanelParams={{
-              [MixpanelEventParams.TOTAL_VALUE_OF_PORTFOLIO]: positionsFiatTotal || 0,
+              [MixpanelEventParams.TOTAL_VALUE_OF_PORTFOLIO]: totalPositionsBalance || 0,
               [MixpanelEventParams.ENTRY_POINT]: 'Dashboard',
             }}
           >
@@ -222,7 +221,7 @@ const PositionsWidget = () => {
                     }),
                   }}
                 >
-                  <PositionsHeader protocol={protocol} fiatTotal={positionsFiatTotal} />
+                  <PositionsHeader protocol={protocol} fiatTotal={totalPositionsBalance} />
                 </AccordionSummary>
 
                 <AccordionDetails sx={{ px: 1.5 }}>

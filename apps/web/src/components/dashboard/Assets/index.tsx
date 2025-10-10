@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Box, Skeleton, Typography, Paper, Card, Stack, Divider } from '@mui/material'
-import useBalances from '@/hooks/useBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import TokenAmount from '@/components/common/TokenAmount'
 import SwapButton from '@/features/swap/components/SwapButton'
 import { AppRoutes } from '@/config/routes'
@@ -8,7 +8,6 @@ import { ViewAllLink } from '../styled'
 import css from './styles.module.css'
 import { useRouter } from 'next/router'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
-import { useVisibleAssets } from '@/components/balances/AssetsTable/useHideAssets'
 import SendButton from '@/components/balances/AssetsTable/SendButton'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 import { FiatBalance } from '@/components/balances/AssetsTable/FiatBalance'
@@ -128,12 +127,11 @@ export const isNonZeroBalance = (item: Balances['items'][number]) => item.balanc
 const AssetsWidget = () => {
   const router = useRouter()
   const { safe } = router.query
-  const { loading, balances } = useBalances()
-  const visibleAssets = useVisibleAssets()
+  const { isLoading, visibleTokenBalances } = usePortfolio()
 
   const items = useMemo(() => {
-    return visibleAssets.filter(isNonZeroBalance).slice(0, MAX_ASSETS)
-  }, [visibleAssets])
+    return visibleTokenBalances.filter(isNonZeroBalance).slice(0, MAX_ASSETS)
+  }, [visibleTokenBalances])
 
   const viewAllUrl = useMemo(
     () => ({
@@ -142,8 +140,6 @@ const AssetsWidget = () => {
     }),
     [safe],
   )
-
-  const isLoading = loading || !balances.fiatTotal
 
   if (isLoading) return <AssetsSkeleton />
 

@@ -6,18 +6,17 @@ import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { getReadablePositionType } from '@/features/positions/utils'
 import IframeIcon from '@/components/common/IframeIcon'
 import { FiatChange } from '@/components/balances/AssetsTable/FiatChange'
-import usePositions from '@/features/positions/hooks/usePositions'
-import PositionsEmpty from '@/features/positions/components/PositionsEmpty'
-import usePositionsFiatTotal from '@/features/positions/hooks/usePositionsFiatTotal'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import React from 'react'
 import PositionsUnavailable from './components/PositionsUnavailable'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import PositionsSkeleton from '@/features/positions/components/PositionsSkeleton'
+import usePortfolio from '@/hooks/usePortfolio'
+import PositionsEmpty from '@/features/positions/components/PositionsEmpty'
 
 export const Positions = () => {
-  const positionsFiatTotal = usePositionsFiatTotal()
-  const { data: protocols, error, isLoading } = usePositions()
+  const { positionBalances, totalPositionsBalance, isLoading, error } = usePortfolio()
+  const protocols = positionBalances
 
   if (isLoading || (!error && !protocols)) {
     return <PositionsSkeleton />
@@ -33,7 +32,7 @@ export const Positions = () => {
     <Stack gap={2}>
       <Box>
         <Box mb={2}>
-          <TotalAssetValue fiatTotal={positionsFiatTotal} title="Total positions value" />
+          <TotalAssetValue fiatTotal={totalPositionsBalance} title="Total positions value" />
         </Box>
 
         <Typography variant="h4" fontWeight={700}>
@@ -55,7 +54,7 @@ export const Positions = () => {
                 expandIcon={<ExpandMoreIcon fontSize="small" />}
                 sx={{ justifyContent: 'center', overflowX: 'auto', backgroundColor: 'transparent !important' }}
               >
-                <PositionsHeader protocol={protocol} fiatTotal={positionsFiatTotal} />
+                <PositionsHeader protocol={protocol} fiatTotal={totalPositionsBalance} />
               </AccordionSummary>
               <AccordionDetails sx={{ pt: 0, pb: 0 }}>
                 {protocol.items.map((positionGroup) => {

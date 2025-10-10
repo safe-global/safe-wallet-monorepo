@@ -9,7 +9,7 @@ import { NewTxFlow } from '@/components/tx-flow/flows'
 import SwapIcon from '@/public/images/common/swap.svg'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import ArrowIconNW from '@/public/images/common/arrow-top-right.svg'
 import ArrowIconSE from '@/public/images/common/arrow-se.svg'
 import { AppRoutes } from '@/config/routes'
@@ -21,13 +21,13 @@ import OverviewSkeleton from './OverviewSkeleton'
 
 const Overview = (): ReactElement => {
   const { safe, safeLoading, safeLoaded } = useSafeInfo()
-  const { balances, loaded: balancesLoaded, loading: balancesLoading } = useVisibleBalances()
+  const portfolio = usePortfolio()
   const { setTxFlow } = useContext(TxModalContext)
   const router = useRouter()
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
 
   const isInitialState = !safeLoaded && !safeLoading
-  const isLoading = safeLoading || balancesLoading || isInitialState
+  const isLoading = safeLoading || portfolio.isLoading || isInitialState
 
   const handleOnSend = useCallback(() => {
     setTxFlow(<NewTxFlow />, undefined, false)
@@ -35,10 +35,10 @@ const Overview = (): ReactElement => {
   }, [setTxFlow])
 
   const items = useMemo(() => {
-    return balances.items.filter((item) => item.balance !== '0')
-  }, [balances.items])
+    return portfolio.visibleTokenBalances.filter((item) => item.balance !== '0')
+  }, [portfolio.visibleTokenBalances])
 
-  const noAssets = balancesLoaded && items.length === 0
+  const noAssets = portfolio.isLoaded && items.length === 0
 
   if (isLoading) return <OverviewSkeleton />
 
@@ -50,7 +50,7 @@ const Overview = (): ReactElement => {
           alignItems={{ xs: 'flex-start', md: 'center' }}
           justifyContent="space-between"
         >
-          <TotalAssetValue fiatTotal={balances.fiatTotal} size="lg" />
+          <TotalAssetValue fiatTotal={portfolio.visibleTotalBalance} />
 
           {safe.deployed && (
             <Stack
