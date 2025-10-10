@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '.'
+import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 
 export enum PendingStatus {
   PROCESSING = 'PROCESSING',
@@ -7,7 +8,8 @@ export enum PendingStatus {
   SUCCESS = 'SUCCESS',
 }
 
-export type PendingTx = {
+export type PendingSingleTx = {
+  type: ExecutionMethod.WITH_PK
   chainId: string
   safeAddress: string
   txHash: string
@@ -15,6 +17,17 @@ export type PendingTx = {
   walletNonce: number
   status: PendingStatus
 }
+
+export type PendingRelayTx = {
+  type: ExecutionMethod.WITH_RELAY
+  taskId: string
+  txHash?: string
+  chainId: string
+  safeAddress: string
+  status: PendingStatus
+}
+
+export type PendingTx = PendingSingleTx | PendingRelayTx
 
 export type PendingTxsState = Record<string, PendingTx>
 
@@ -26,14 +39,24 @@ export const pendingTxsSlice = createSlice({
   reducers: {
     addPendingTx: (
       state,
-      action: PayloadAction<{
-        txId: string
-        chainId: string
-        safeAddress: string
-        txHash: string
-        walletAddress: string
-        walletNonce: number
-      }>,
+      action: PayloadAction<
+        | {
+            txId: string
+            type: ExecutionMethod.WITH_PK
+            chainId: string
+            safeAddress: string
+            txHash: string
+            walletAddress: string
+            walletNonce: number
+          }
+        | {
+            txId: string
+            type: ExecutionMethod.WITH_RELAY
+            taskId: string
+            chainId: string
+            safeAddress: string
+          }
+      >,
     ) => {
       const { txId, ...tx } = action.payload
       state[txId] = { ...tx, status: PendingStatus.PROCESSING }
@@ -45,6 +68,17 @@ export const pendingTxsSlice = createSlice({
         state[txId].status = status
       }
     },
+    setRelayTxHash: (state, action: PayloadAction<{ txId: string; txHash: string }>) => {
+      const { txId, txHash } = action.payload
+      const tx = state[txId]
+
+      if (tx && tx.type === ExecutionMethod.WITH_RELAY) {
+        state[txId] = {
+          ...tx,
+          txHash,
+        }
+      }
+    },
     clearPendingTx: (state, action: PayloadAction<{ txId: string }>) => {
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete state[action.payload.txId]
@@ -52,7 +86,7 @@ export const pendingTxsSlice = createSlice({
   },
 })
 
-export const { addPendingTx, setPendingTxStatus, clearPendingTx } = pendingTxsSlice.actions
+export const { addPendingTx, setPendingTxStatus, setRelayTxHash, clearPendingTx } = pendingTxsSlice.actions
 
 export const selectPendingTxs = (state: RootState): PendingTxsState => state[pendingTxsSlice.name]
 

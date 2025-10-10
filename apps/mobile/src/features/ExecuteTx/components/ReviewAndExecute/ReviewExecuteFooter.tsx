@@ -1,6 +1,6 @@
 import React from 'react'
 import { Stack } from 'tamagui'
-import { router } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import { SafeButton } from '@/src/components/SafeButton'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
 import { useGuard } from '@/src/context/GuardProvider'
@@ -14,13 +14,37 @@ import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/tr
 import useGasFee from '../../hooks/useGasFee'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectEstimatedFee } from '@/src/store/estimatedFeeSlice'
+import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
+import { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 
 interface ReviewFooterProps {
   txId: string
   txDetails: TransactionDetails
+  relaysRemaining?: RelaysRemaining
 }
 
-export function ReviewExecuteFooter({ txId, txDetails }: ReviewFooterProps) {
+/**
+ * Determines the execution method based on user selection and relay availability
+ */
+const getExecutionMethod = (
+  requestedMethod: ExecutionMethod | undefined,
+  isRelayAvailable: boolean,
+): ExecutionMethod => {
+  // If user explicitly requested relay but none are available, fallback to signer
+  if (requestedMethod === ExecutionMethod.WITH_RELAY && !isRelayAvailable) {
+    return ExecutionMethod.WITH_PK
+  }
+
+  // If user selected a method, use it
+  if (requestedMethod) {
+    return requestedMethod
+  }
+
+  // Default: use relay if available, otherwise use signer
+  return isRelayAvailable ? ExecutionMethod.WITH_RELAY : ExecutionMethod.WITH_PK
+}
+
+export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: ReviewFooterProps) {
   const manualParams = useAppSelector(selectEstimatedFee)
   const { signerState } = useTransactionSigner(txId)
   const { activeSigner } = signerState
@@ -30,12 +54,18 @@ export function ReviewExecuteFooter({ txId, txDetails }: ReviewFooterProps) {
   const { totalFee, estimatedFeeParams, totalFeeRaw } = useGasFee(txDetails, manualParams)
   const isLoadingFees = estimatedFeeParams.isLoadingGasPrice || estimatedFeeParams.gasLimitLoading
 
+  // checks the executionMethod
+  const isRelayAvailable = Boolean(relaysRemaining?.remaining && relaysRemaining.remaining > 0)
+  const { executionMethod: executionMethodParam } = useLocalSearchParams<{ executionMethod: ExecutionMethod }>()
+  const executionMethod = getExecutionMethod(executionMethodParam, isRelayAvailable)
+
   const handleConfirmPress = async () => {
     try {
       setGuard('executing', true)
 
       const params = {
         txId,
+        executionMethod,
         maxFeePerGas: estimatedFeeParams.maxFeePerGas?.toString(),
         maxPriorityFeePerGas: estimatedFeeParams.maxPriorityFeePerGas?.toString(),
         gasLimit: estimatedFeeParams.gasLimit?.toString(),
@@ -76,9 +106,15 @@ export function ReviewExecuteFooter({ txId, txDetails }: ReviewFooterProps) {
         paddingVertical={'$3'}
         borderColor="$borderLight"
       >
-        <SelectExecutor address={activeSigner?.value as Address} txId={txId} />
+        <SelectExecutor executionMethod={executionMethod} address={activeSigner?.value as Address} txId={txId} />
 
-        <EstimatedNetworkFee isLoadingFees={isLoadingFees} txId={txId} totalFee={totalFee} totalFeeRaw={totalFeeRaw} />
+        <EstimatedNetworkFee
+          executionMethod={executionMethod}
+          isLoadingFees={isLoadingFees}
+          txId={txId}
+          totalFee={totalFee}
+          totalFeeRaw={totalFeeRaw}
+        />
       </Container>
 
       <SafeButton onPress={handleConfirmPress} width="100%">

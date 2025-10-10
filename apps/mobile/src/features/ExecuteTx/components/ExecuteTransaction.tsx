@@ -3,17 +3,19 @@ import React, { useEffect, useMemo } from 'react'
 import { router, useLocalSearchParams } from 'expo-router'
 import { ExecuteError } from './ExecuteError'
 import { ExecuteProcessing } from '@/src/features/ExecuteTx/components/ExecuteProcessing'
-import { ExecutionStatus, useTransactionExecutionWithPK } from '../hooks/useTransactionExecutionWithPK'
+import { ExecutionStatus, useTransactionExecution } from '../hooks/useTransactionExecution'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useTransactionGuard } from '@/src/hooks/useTransactionGuard'
 import { parseFeeParams } from '@/src/utils/feeParams'
+import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 
 export function ExecuteTransaction() {
-  const { txId, maxFeePerGas, maxPriorityFeePerGas, gasLimit, nonce } = useLocalSearchParams<{
+  const { txId, maxFeePerGas, executionMethod, maxPriorityFeePerGas, gasLimit, nonce } = useLocalSearchParams<{
     txId: string
     maxFeePerGas: string
+    executionMethod: ExecutionMethod
     maxPriorityFeePerGas: string
     gasLimit: string
     nonce: string
@@ -27,17 +29,18 @@ export function ExecuteTransaction() {
   const activeSafe = useDefinedActiveSafe()
   const activeSigner = useAppSelector((state) => selectActiveSigner(state, activeSafe.address))
   const { guard: canExecute } = useTransactionGuard('executing')
-  const { status, executeTx, retry } = useTransactionExecutionWithPK({
+  const { status, execute, retry } = useTransactionExecution({
     txId: txId || '',
+    executionMethod,
     signerAddress: activeSigner?.value || '',
     feeParams,
   })
 
   useEffect(() => {
     if (canExecute && status === ExecutionStatus.IDLE && txId && activeSigner) {
-      executeTx()
+      execute()
     }
-  }, [canExecute, status, feeParams, executeTx, txId, activeSigner])
+  }, [canExecute, status, feeParams, execute, txId, activeSigner])
 
   const handleViewTransaction = () => {
     router.dismissTo({
