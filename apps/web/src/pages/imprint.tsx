@@ -15,25 +15,26 @@ const SafeImprint = () => (
       Information in accordance with section 5 of the Telemedia Act (TMG, Germany):
     </Typography>
     <Typography mb={2}>
-      Core Contributors GmbH
+      Safe Labs GmbH
       <br />
-      c/o WeWork
+      Unter den Linden 10
       <br />
-      Dircksenstr. 3
+      10117 Berlin, Germany
       <br />
-      10179 Berlin, Germany
     </Typography>
     <Typography mb={4}>
-      Managing director: Tobias Schubotz
+      Managing director: Rahul Rumalla
+      <br />
+      Responsible for content: Rahul Rumalla
       <br />
       Contact:{' '}
-      <Link href="mailto:info@cc0x.dev" passHref legacyBehavior>
-        <MUILink>info@cc0x.dev</MUILink>
+      <Link href="mailto:info@safe.global" passHref legacyBehavior>
+        <MUILink>Email address: info@safe.global</MUILink>
       </Link>
       <br />
-      District Court: Berlin Charlottenburg
+      Commercial register maintained by: Amtsgericht Charlottenburg (Berlin) - Local Court
       <br />
-      Register Number: HRB 240421 B
+      Register Number: HRB 270980
     </Typography>
     <Typography variant="h3" mb={2}>
       Disclaimer

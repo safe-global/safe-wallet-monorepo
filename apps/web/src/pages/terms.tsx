@@ -19,7 +19,7 @@ const Terms: NextPage = () => {
         <title>{`${BRAND_NAME} – Terms`}</title>
       </Head>
 
-      <main>{isOfficialHost && <SafeTerms components={overrideComponents} />}</main>
+      <main style={{ lineHeight: '1.5' }}>{isOfficialHost && <SafeTerms components={overrideComponents} />}</main>
     </>
   )
 }
