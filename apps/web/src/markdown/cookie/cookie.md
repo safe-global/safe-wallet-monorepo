@@ -6,7 +6,7 @@ As described in our Privacy Policy, For general web-browsing of this website, yo
 
 This Cookie Policy applies to our website at [https://app.safe.global](https://app.safe.global) and sets out some further detail on how and why we use these technologies on our website.
 
-In this policy, "we", "us" and "our" refers to Core Contributors GmbH a company incorporated in Germany with its registered address at Gontardstraße 11, 10178 Berlin, Germany. The terms “you” and “your” includes our clients, business partners and users of this website.
+In this policy, "we", "us" and "our" refers to Safe Labs GmbH a company incorporated in Germany with its registered address at Unter den Linden 10, 10117 Berlin, Germany. The terms “you” and “your” includes our clients, business partners and users of this website.
 
 By using our website, you consent to storage and access to cookies and other technologies on your device, in accordance with this Cookie Policy.
 
@@ -101,7 +101,7 @@ The data we process for this purpose includes:
 
 Additionally, all analytics data collected via Mixpanel is hosted entirely within the EU.
 
-Mixpanel will only be processing personal data on behalf of Core Contributors for the purpose of analytics. For more details about the specific data points and subprocessors involved in this processing, please refer to Mixpanel’s [Data Processing Agreement (DPA)](https://mixpanel.com/legal/dpa/).
+Mixpanel will only be processing personal data on behalf of Safe Labs for the purpose of analytics. For more details about the specific data points and subprocessors involved in this processing, please refer to Mixpanel’s [Data Processing Agreement (DPA)](https://mixpanel.com/legal/dpa/).
 
 ## What if you don’t agree with us monitoring your use of our website (even if we don't collect your personal data)?
 
