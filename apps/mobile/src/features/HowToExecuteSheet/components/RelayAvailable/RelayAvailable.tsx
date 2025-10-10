@@ -28,7 +28,7 @@ export const RelayAvailable = ({ isLoadingRelays, relaysRemaining, executionMeth
           {isLoadingRelays ? (
             <Skeleton colorMode={colorScheme} height={16} width={80} />
           ) : (
-            relaysRemaining && <Text fontSize="$4">{relaysRemaining.remaining} left / per day</Text>
+            relaysRemaining && <Text fontSize="$4">{relaysRemaining.remaining} left / day</Text>
           )}
         </View>
       </View>
