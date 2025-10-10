@@ -209,4 +209,192 @@ describe('safe-labs-terms security', () => {
       })
     })
   })
+
+  describe('Advanced Security - Multiple URL Encoding', () => {
+    it('should block double-encoded protocol-relative URLs', () => {
+      // %252F%252F decodes to %2F%2F which decodes to //
+      expect(isSafeRedirectUrl('%252F%252Fattacker.com')).toBe(false)
+    })
+
+    it('should block triple-encoded malicious URLs', () => {
+      // Multiple layers of encoding
+      expect(isSafeRedirectUrl('%25252F%25252Fattacker.com')).toBe(false)
+    })
+
+    it('should block encoded javascript protocol', () => {
+      // %6A%61%76%61%73%63%72%69%70%74%3A = javascript:
+      expect(isSafeRedirectUrl('%6A%61%76%61%73%63%72%69%70%74%3Aalert(1)')).toBe(false)
+      expect(isSafeRedirectUrl('/%6A%61%76%61%73%63%72%69%70%74%3Aalert(1)')).toBe(false)
+    })
+
+    it('should allow properly encoded safe paths', () => {
+      expect(isSafeRedirectUrl('%2Fwelcome')).toBe(true) // /welcome
+      expect(isSafeRedirectUrl('%2Fhome%3Fsafe%3Dsep%3A0x123')).toBe(true) // /home?safe=sep:0x123
+    })
+  })
+
+  describe('Advanced Security - Whitespace Bypass', () => {
+    it('should block URLs with tabs and newlines', () => {
+      expect(isSafeRedirectUrl('//\tattacker.com')).toBe(false)
+      expect(isSafeRedirectUrl('//\nattacker.com')).toBe(false)
+      expect(isSafeRedirectUrl('//\rattacker.com')).toBe(false)
+      expect(isSafeRedirectUrl('/\t/attacker.com')).toBe(false)
+    })
+
+    it('should handle whitespace in legitimate URLs', () => {
+      expect(isSafeRedirectUrl('/welcome\n')).toBe(true)
+      expect(isSafeRedirectUrl('\t/home')).toBe(true)
+    })
+  })
+
+  describe('Advanced Security - Backslash and Special Characters', () => {
+    it('should block backslashes', () => {
+      expect(isSafeRedirectUrl('/\\attacker.com')).toBe(false)
+      expect(isSafeRedirectUrl('/path\\to\\file')).toBe(false)
+    })
+
+    it('should block null bytes', () => {
+      expect(isSafeRedirectUrl('/welcome\0')).toBe(false)
+      expect(isSafeRedirectUrl('/welcome%00')).toBe(false)
+    })
+
+    it('should block @ symbol (used in open redirects)', () => {
+      expect(isSafeRedirectUrl('/path@attacker.com')).toBe(false)
+      expect(isSafeRedirectUrl('/@attacker.com')).toBe(false)
+    })
+  })
+
+  describe('Advanced Security - Additional Protocols', () => {
+    it('should block file: protocol', () => {
+      expect(isSafeRedirectUrl('file:///etc/passwd')).toBe(false)
+      expect(isSafeRedirectUrl('/file:///etc/passwd')).toBe(false)
+    })
+
+    it('should block blob: protocol', () => {
+      expect(isSafeRedirectUrl('blob:https://example.com/123')).toBe(false)
+      expect(isSafeRedirectUrl('/blob:data')).toBe(false)
+    })
+
+    it('should block about: protocol', () => {
+      expect(isSafeRedirectUrl('about:blank')).toBe(false)
+      expect(isSafeRedirectUrl('/about:blank')).toBe(false)
+    })
+  })
+
+  describe('Advanced Security - Query Parameter Sanitization', () => {
+    it('should filter out double-encoded dangerous query values', () => {
+      const result = parseRedirectUrl('/home?redirect=%252F%252Fattacker.com')
+      expect(result?.query.redirect).toBeUndefined()
+    })
+
+    it('should filter out backslashes in query values', () => {
+      const result = parseRedirectUrl('/home?path=C:\\Windows\\System32')
+      expect(result?.query.path).toBeUndefined()
+    })
+
+    it('should filter out null bytes in query values', () => {
+      const result = parseRedirectUrl('/home?param=value%00extra')
+      expect(result?.query.param).toBeUndefined()
+    })
+
+    it('should filter out protocol-relative URLs in query values', () => {
+      const result = parseRedirectUrl('/home?url=//attacker.com')
+      expect(result?.query.url).toBeUndefined()
+    })
+
+    it('should allow safe query parameters', () => {
+      const result = parseRedirectUrl('/home?safe=sep:0x123&chain=ethereum')
+      expect(result?.query.safe).toBe('sep:0x123')
+      expect(result?.query.chain).toBe('ethereum')
+    })
+  })
+
+  describe('Edge Cases and Boundary Conditions', () => {
+    it('should handle very long URLs gracefully', () => {
+      const longPath = '/path' + 'a'.repeat(10000)
+      const result = isSafeRedirectUrl(longPath)
+      expect(typeof result).toBe('boolean')
+    })
+
+    it('should handle malformed encoding gracefully', () => {
+      expect(isSafeRedirectUrl('%')).toBe(false)
+      expect(isSafeRedirectUrl('%%')).toBe(false)
+      expect(isSafeRedirectUrl('%G%H')).toBe(false)
+    })
+
+    it('should handle empty query strings', () => {
+      const result = parseRedirectUrl('/home?')
+      expect(result).toEqual({
+        pathname: '/home',
+        query: {},
+      })
+    })
+
+    it('should handle fragments (hash) in URLs', () => {
+      const result = parseRedirectUrl('/home#section')
+      expect(result?.pathname).toBe('/home')
+    })
+  })
+
+  describe('Same-Domain Enforcement', () => {
+    it('should ONLY allow same-domain relative paths', () => {
+      // Valid: relative paths within the same domain
+      expect(isSafeRedirectUrl('/home')).toBe(true)
+      expect(isSafeRedirectUrl('/welcome/accounts')).toBe(true)
+      expect(isSafeRedirectUrl('/settings?tab=security')).toBe(true)
+
+      // These should ALL be blocked
+      const crossDomainAttempts = [
+        'https://evil.com',
+        'http://evil.com',
+        '//evil.com',
+        '///evil.com',
+        'https://safe.global', // Even legitimate domains are blocked
+        'http://localhost:3000',
+        '//trusted-site.com/path',
+        'https://app.safe.global/welcome', // Absolute URLs are never allowed
+      ]
+
+      crossDomainAttempts.forEach((url) => {
+        expect(isSafeRedirectUrl(url)).toBe(false)
+      })
+    })
+
+    it('should ensure getSafeRedirectUrl never produces cross-domain redirects', () => {
+      const maliciousUrls = [
+        'https://evil.com/steal-data',
+        '//evil.com/phishing',
+        'http://attacker.com',
+        'https://safe.global', // Even legitimate external domains
+      ]
+
+      maliciousUrls.forEach((url) => {
+        const result = getSafeRedirectUrl(url)
+        // Should fallback to default safe route, never use the malicious URL
+        expect(result.pathname).toBe(AppRoutes.welcome.accounts)
+        expect(result.pathname).not.toContain('evil.com')
+        expect(result.pathname).not.toContain('attacker.com')
+      })
+    })
+
+    it('should document that domain changes are impossible', () => {
+      // This test serves as documentation:
+      // The security model ONLY accepts relative paths starting with /
+      // This means the browser will ALWAYS resolve these as same-origin
+      // Examples:
+      // - Current URL: https://app.safe.global/old-page
+      // - Redirect: /new-page
+      // - Result: https://app.safe.global/new-page (same domain!)
+
+      const validPaths = ['/home', '/settings', '/welcome/accounts']
+      validPaths.forEach((path) => {
+        const result = getSafeRedirectUrl(path)
+        expect(result.pathname).toBe(path)
+        // The pathname will ALWAYS be relative (starting with /)
+        // Therefore, domain cannot change
+        expect(result.pathname.startsWith('/')).toBe(true)
+        expect(result.pathname.includes('://')).toBe(false)
+      })
+    })
+  })
 })

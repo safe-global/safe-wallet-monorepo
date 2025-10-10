@@ -35,6 +35,9 @@ const FooterLink = ({ children, href }: { children: ReactNode; href: string }): 
 const Footer = (): ReactElement | null => {
   const router = useRouter()
   const isOfficialHost = useIsOfficialHost()
+  const initialYear = 2025
+  const currentYear = new Date().getFullYear()
+  const copyrightYear = initialYear === currentYear ? initialYear : `${initialYear}–${currentYear}`
 
   if (!footerPages.some((path) => router.pathname.startsWith(path))) {
     return null
@@ -50,7 +53,7 @@ const Footer = (): ReactElement | null => {
         {isOfficialHost ? (
           <>
             <li>
-              <Typography variant="caption">&copy;2022–{new Date().getFullYear()} Core Contributors GmbH</Typography>
+              <Typography variant="caption">&copy;{copyrightYear} Safe Labs GmbH</Typography>
             </li>
             <li>
               <FooterLink href={getHref(AppRoutes.terms)}>Terms</FooterLink>
