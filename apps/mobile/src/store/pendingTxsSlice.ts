@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '.'
+import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 
 export enum PendingStatus {
   PROCESSING = 'PROCESSING',
@@ -7,13 +8,8 @@ export enum PendingStatus {
   SUCCESS = 'SUCCESS',
 }
 
-export enum PendingTxType {
-  SINGLE = 'single',
-  RELAY = 'relay',
-}
-
 export type PendingSingleTx = {
-  type: PendingTxType.SINGLE
+  type: ExecutionMethod.WITH_PK
   chainId: string
   safeAddress: string
   txHash: string
@@ -23,7 +19,7 @@ export type PendingSingleTx = {
 }
 
 export type PendingRelayTx = {
-  type: PendingTxType.RELAY
+  type: ExecutionMethod.WITH_RELAY
   taskId: string
   txHash?: string
   chainId: string
@@ -46,7 +42,7 @@ export const pendingTxsSlice = createSlice({
       action: PayloadAction<
         | {
             txId: string
-            type: PendingTxType.SINGLE
+            type: ExecutionMethod.WITH_PK
             chainId: string
             safeAddress: string
             txHash: string
@@ -55,7 +51,7 @@ export const pendingTxsSlice = createSlice({
           }
         | {
             txId: string
-            type: PendingTxType.RELAY
+            type: ExecutionMethod.WITH_RELAY
             taskId: string
             chainId: string
             safeAddress: string
@@ -76,7 +72,7 @@ export const pendingTxsSlice = createSlice({
       const { txId, txHash } = action.payload
       const tx = state[txId]
 
-      if (tx && tx.type === PendingTxType.RELAY) {
+      if (tx && tx.type === ExecutionMethod.WITH_RELAY) {
         // Convert relay tx to single tx once we have the hash
         state[txId] = {
           ...tx,

@@ -3,7 +3,7 @@ import { getReadOnlyCurrentGnosisSafeContract } from '@/src/services/contracts/s
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import extractTxInfo from '@/src/services/tx/extractTx'
 import { fetchTransactionDetails } from '@/src/services/tx/fetchTransactionDetails'
-import { PendingTxType } from '@/src/store/pendingTxsSlice'
+import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { SafeInfo } from '@/src/types/address'
@@ -24,7 +24,7 @@ interface ExecuteRelayTxParams {
 }
 
 interface ExecuteRelayTxResult {
-  type: PendingTxType.RELAY
+  type: ExecutionMethod.WITH_RELAY
   txId: string
   taskId: string
   chainId: string
@@ -93,7 +93,7 @@ export const executeRelayTx = async ({
   }
 
   return {
-    type: PendingTxType.RELAY,
+    type: ExecutionMethod.WITH_RELAY,
     txId,
     taskId,
     chainId: chain.chainId,

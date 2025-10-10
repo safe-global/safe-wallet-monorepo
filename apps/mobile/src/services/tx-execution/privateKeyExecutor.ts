@@ -1,7 +1,7 @@
 import { executeTx } from '@/src/services/tx/tx-sender/execute'
 import { getUserNonce } from '@/src/services/web3'
 import { getPrivateKey } from '@/src/hooks/useSign/useSign'
-import { PendingTxType } from '@/src/store/pendingTxsSlice'
+import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import logger from '@/src/utils/logger'
 import type { EstimatedFeeValues } from '@/src/store/estimatedFeeSlice'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -16,7 +16,7 @@ interface ExecuteSingleTxParams {
 }
 
 interface ExecuteSingleTxResult {
-  type: PendingTxType.SINGLE
+  type: ExecutionMethod.WITH_PK
   txId: string
   chainId: string
   safeAddress: string
@@ -55,7 +55,7 @@ export const executeSingleTx = async ({
   })
 
   return {
-    type: PendingTxType.SINGLE,
+    type: ExecutionMethod.WITH_PK,
     txId,
     chainId: chain.chainId,
     safeAddress: activeSafe.address,

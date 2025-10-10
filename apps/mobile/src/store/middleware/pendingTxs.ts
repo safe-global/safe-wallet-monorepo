@@ -7,8 +7,8 @@ import {
   pendingTxsSlice,
   clearPendingTx,
   setRelayTxHash,
-  PendingTxType,
 } from '../pendingTxsSlice'
+import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import { selectChainById } from '../chains'
 import { createWeb3ReadOnly } from '@/src/services/web3'
 import { SimpleTxWatcher } from '@safe-global/utils/services/SimpleTxWatcher'
@@ -107,13 +107,13 @@ const runWatchers = async (listenerApi: AppListenerEffectAPI, pendingTxs: Pendin
     }
 
     // Handle relay transactions
-    if (pendingTx.type === PendingTxType.RELAY) {
+    if (pendingTx.type === ExecutionMethod.WITH_RELAY) {
       startRelayWatcher(listenerApi, txId, pendingTx.taskId, chainId)
       continue
     }
 
     // Handle single transactions
-    if (pendingTx.type === PendingTxType.SINGLE) {
+    if (pendingTx.type === ExecutionMethod.WITH_PK) {
       const { walletAddress, walletNonce, txHash } = pendingTx
       await runWatcher(listenerApi, txHash, chainId, walletAddress, walletNonce, txId)
     }
@@ -126,9 +126,9 @@ export const pendingTxsListeners = (startListening: AppStartListening) => {
     effect: (action, listenerApi) => {
       const { txId, chainId } = action.payload
 
-      if (action.payload.type === PendingTxType.RELAY) {
+      if (action.payload.type === ExecutionMethod.WITH_RELAY) {
         startRelayWatcher(listenerApi, txId, action.payload.taskId, chainId)
-      } else if (action.payload.type === PendingTxType.SINGLE) {
+      } else if (action.payload.type === ExecutionMethod.WITH_PK) {
         const { txHash, walletAddress, walletNonce } = action.payload
         runWatcher(listenerApi, txHash, chainId, walletAddress, walletNonce, txId)
       }
