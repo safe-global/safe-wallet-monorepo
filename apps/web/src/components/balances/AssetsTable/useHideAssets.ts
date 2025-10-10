@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import useBalances from '@/hooks/useBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import useChainId from '@/hooks/useChainId'
 import useHiddenTokens from '@/hooks/useHiddenTokens'
 import { useAppDispatch } from '@/store'
@@ -11,7 +11,7 @@ export const COLLAPSE_TIMEOUT_MS = 300
 export const useHideAssets = (closeDialog: () => void) => {
   const dispatch = useAppDispatch()
   const chainId = useChainId()
-  const { balances } = useBalances()
+  const { tokenBalances } = usePortfolio()
 
   const [assetsToHide, setAssetsToHide] = useState<string[]>([])
   const [assetsToUnhide, setAssetsToUnhide] = useState<string[]>([])
@@ -46,9 +46,9 @@ export const useHideAssets = (closeDialog: () => void) => {
   const deselectAll = useCallback(() => {
     setAssetsToHide([])
     setAssetsToUnhide([
-      ...hiddenAssets.filter((asset) => balances.items.some((item) => item.tokenInfo.address === asset)),
+      ...hiddenAssets.filter((asset) => tokenBalances.some((item) => item.tokenInfo.address === asset)),
     ])
-  }, [hiddenAssets, balances])
+  }, [hiddenAssets, tokenBalances])
 
   // Assets are selected if they are either hidden or marked for hiding
   const isAssetSelected = useCallback(
@@ -94,9 +94,9 @@ export const useHideAssets = (closeDialog: () => void) => {
 
 export const useVisibleAssets = () => {
   const hiddenAssets = useHiddenTokens()
-  const { balances } = useBalances()
+  const { tokenBalances } = usePortfolio()
   return useMemo(
-    () => balances.items?.filter((item) => !hiddenAssets.includes(item.tokenInfo.address)),
-    [hiddenAssets, balances.items],
+    () => tokenBalances?.filter((item) => !hiddenAssets.includes(item.tokenInfo.address)),
+    [hiddenAssets, tokenBalances],
   )
 }

@@ -7,7 +7,7 @@ import StarIcon from '@/public/images/common/star.svg'
 import EyeIcon from '@/public/images/common/eye.svg'
 import FiatIcon from '@/public/images/common/fiat.svg'
 import Track from '@/components/common/Track'
-import useBalances from '@/hooks/useBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import { EligibleEarnTokens, VaultAPYs } from '@/features/earn/constants'
 import useChainId from '@/hooks/useChainId'
 import TokenIcon from '@/components/common/TokenIcon'
@@ -82,11 +82,11 @@ export const EarnBannerCopy = () => {
 }
 
 const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
-  const { balances } = useBalances()
+  const { tokenBalances } = usePortfolio()
   const chainId = useChainId()
   const router = useRouter()
 
-  const eligibleAssets = balances.items.filter((token) => EligibleEarnTokens[chainId].includes(token.tokenInfo.address))
+  const eligibleAssets = tokenBalances.filter((token) => EligibleEarnTokens[chainId].includes(token.tokenInfo.address))
 
   return (
     <Box m={3}>

@@ -24,7 +24,7 @@ import QrCodeButton from '../QrCodeButton'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { SvgIcon } from '@mui/material'
-import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import ExplorerButton from '@/components/common/ExplorerButton'
@@ -35,7 +35,7 @@ import { NestedSafesButton } from '@/components/sidebar/NestedSafesButton'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 
 const SafeHeader = (): ReactElement => {
-  const { balances } = useVisibleBalances()
+  const { visibleTotalTokenBalance, visibleTokenBalances } = usePortfolio()
   const safeAddress = useSafeAddress()
   const { safe } = useSafeInfo()
   const { threshold, owners } = safe
@@ -71,16 +71,16 @@ const SafeHeader = (): ReactElement => {
 
             <Typography data-testid="currency-section" variant="body2" fontWeight={700}>
               {safe.deployed ? (
-                balances.fiatTotal ? (
-                  <FiatValue value={balances.fiatTotal} />
+                visibleTotalTokenBalance ? (
+                  <FiatValue value={visibleTotalTokenBalance} />
                 ) : (
                   <Skeleton variant="text" width={60} />
                 )
               ) : (
                 <TokenAmount
-                  value={balances.items[0]?.balance}
-                  decimals={balances.items[0]?.tokenInfo.decimals}
-                  tokenSymbol={balances.items[0]?.tokenInfo.symbol}
+                  value={visibleTokenBalances[0]?.balance}
+                  decimals={visibleTokenBalances[0]?.tokenInfo.decimals}
+                  tokenSymbol={visibleTokenBalances[0]?.tokenInfo.symbol}
                 />
               )}
             </Typography>

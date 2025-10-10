@@ -6,7 +6,7 @@ import { Button, CardActions, Typography } from '@mui/material'
 import SendToBlock from '@/components/tx/SendToBlock'
 import { type TokenTransferParams } from '@/components/tx-flow/flows/TokenTransfer/index'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
-import useBalances from '@/hooks/useBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import useSpendingLimit from '@/hooks/useSpendingLimit'
 import useSpendingLimitGas from '@/hooks/useSpendingLimitGas'
 import AdvancedParams, { useAdvancedParams } from '@/components/tx/AdvancedParams'
@@ -56,8 +56,8 @@ const ReviewSpendingLimitTx = ({
   const onboard = useOnboard()
   const wallet = useWallet()
   const { safe, safeAddress } = useSafeInfo()
-  const { balances } = useBalances()
-  const token = balances.items.find((item) => item.tokenInfo.address === params.tokenAddress)
+  const { tokenBalances } = usePortfolio()
+  const token = tokenBalances.find((item) => item.tokenInfo.address === params.tokenAddress)
   const spendingLimit = useSpendingLimit(token?.tokenInfo)
 
   const amountInWei = useMemo(

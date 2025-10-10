@@ -1,5 +1,5 @@
 import { type PropsWithChildren, useContext, useEffect, useMemo } from 'react'
-import useBalances from '@/hooks/useBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
 import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender'
 import type { MultiTokenTransferParams } from '.'
@@ -21,7 +21,7 @@ const ReviewTokenTransfer = ({
   txNonce?: number
 }>) => {
   const { setSafeTx, setSafeTxError, setNonce, setIsMassPayout } = useContext(SafeTxContext)
-  const { balances } = useBalances()
+  const { tokenBalances } = usePortfolio()
 
   const recipients = useMemo(() => params?.recipients || [], [params?.recipients])
 
@@ -36,7 +36,7 @@ const ReviewTokenTransfer = ({
 
     const calls = recipients
       .map((recipient) => {
-        const token = balances.items.find((item) => sameAddress(item.tokenInfo.address, recipient.tokenAddress))
+        const token = tokenBalances.find((item) => sameAddress(item.tokenInfo.address, recipient.tokenAddress))
 
         if (!token) return
 
@@ -50,7 +50,7 @@ const ReviewTokenTransfer = ({
       .filter((transfer): transfer is MetaTransactionData => !!transfer)
 
     createMultiSendCallOnlyTx(calls).then(setSafeTx).catch(setSafeTxError)
-  }, [recipients, txNonce, setNonce, balances, setSafeTx, setSafeTxError])
+  }, [recipients, txNonce, setNonce, tokenBalances, setSafeTx, setSafeTxError])
 
   return (
     <ReviewTransaction onSubmit={onSubmit}>

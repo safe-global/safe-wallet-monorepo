@@ -10,8 +10,8 @@ import Track from '@/components/common/Track'
 import { ASSETS_EVENTS } from '@/services/analytics/events/assets'
 import { VisibilityOutlined } from '@mui/icons-material'
 import TokenMenu from '../TokenMenu'
-import useBalances from '@/hooks/useBalances'
-import { useHideAssets, useVisibleAssets } from './useHideAssets'
+import usePortfolio from '@/hooks/usePortfolio'
+import { useHideAssets } from './useHideAssets'
 import AddFundsCTA from '@/components/common/AddFunds'
 import SwapButton from '@/features/swap/components/SwapButton'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
@@ -31,8 +31,6 @@ import { isEligibleEarnToken } from '@/features/earn/utils'
 import useChainId from '@/hooks/useChainId'
 import FiatValue from '@/components/common/FiatValue'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
-import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-
 const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   asset: {
     rawValue: '0x0',
@@ -135,14 +133,15 @@ const headCells = [
 ]
 
 const AssetsTable = ({
+  balances,
   showHiddenAssets,
   setShowHiddenAssets,
 }: {
+  balances: Balance[]
   showHiddenAssets: boolean
   setShowHiddenAssets: (hidden: boolean) => void
 }): ReactElement => {
-  const { balances, loading } = useBalances()
-  const { balances: visibleBalances } = useVisibleBalances()
+  const portfolio = usePortfolio()
 
   const chainId = useChainId()
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
@@ -153,19 +152,19 @@ const AssetsTable = ({
     setShowHiddenAssets(false),
   )
 
-  const visible = useVisibleAssets()
-  const visibleAssets = showHiddenAssets ? balances.items : visible
-  const hasNoAssets = !loading && balances.items.length === 1 && balances.items[0].balance === '0'
-  const selectedAssetCount = visibleAssets?.filter((item) => isAssetSelected(item.tokenInfo.address)).length || 0
+  const hasNoAssets = !portfolio.isLoading && balances.length === 1 && balances[0].balance === '0'
+  const selectedAssetCount = balances?.filter((item) => isAssetSelected(item.tokenInfo.address)).length || 0
 
-  const rows = loading
+  const rows = portfolio.isLoading
     ? skeletonRows
-    : (visibleAssets || []).map((item) => {
+    : (balances || []).map((item) => {
         const rawFiatValue = parseFloat(item.fiatBalance)
         const rawPriceValue = parseFloat(item.fiatConversion)
         const isNative = isNativeToken(item.tokenInfo)
         const isSelected = isAssetSelected(item.tokenInfo.address)
-        const fiatTotal = visibleBalances.fiatTotal ? Number(visibleBalances.fiatTotal) : undefined
+        const fiatTotal = showHiddenAssets
+          ? Number(portfolio.totalTokenBalance)
+          : Number(portfolio.visibleTotalTokenBalance)
         const itemShareOfFiatTotal = fiatTotal ? Number(item.fiatBalance) / fiatTotal : null
 
         return {

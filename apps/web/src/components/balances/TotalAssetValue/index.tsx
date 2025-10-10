@@ -2,7 +2,7 @@ import { Box, Skeleton, Typography } from '@mui/material'
 import FiatValue from '@/components/common/FiatValue'
 import TokenAmount from '@/components/common/TokenAmount'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 
 const TotalAssetValue = ({
   fiatTotal,
@@ -12,7 +12,7 @@ const TotalAssetValue = ({
   title?: string
 }) => {
   const { safe } = useSafeInfo()
-  const { balances } = useVisibleBalances()
+  const { visibleTokenBalances } = usePortfolio()
 
   return (
     <Box>
@@ -28,9 +28,9 @@ const TotalAssetValue = ({
           )
         ) : (
           <TokenAmount
-            value={balances.items[0]?.balance}
-            decimals={balances.items[0]?.tokenInfo.decimals}
-            tokenSymbol={balances.items[0]?.tokenInfo.symbol}
+            value={visibleTokenBalances[0]?.balance}
+            decimals={visibleTokenBalances[0]?.tokenInfo.decimals}
+            tokenSymbol={visibleTokenBalances[0]?.tokenInfo.symbol}
           />
         )}
       </Typography>

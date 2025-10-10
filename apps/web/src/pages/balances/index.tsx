@@ -3,7 +3,7 @@ import Head from 'next/head'
 
 import AssetsTable from '@/components/balances/AssetsTable'
 import AssetsHeader from '@/components/balances/AssetsHeader'
-import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import { useState } from 'react'
 
 import PagePlaceholder from '@/components/common/PagePlaceholder'
@@ -18,12 +18,14 @@ import { BRAND_NAME } from '@/config/constants'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 
 const Balances: NextPage = () => {
-  const { balances, error } = useVisibleBalances()
+  const portfolio = usePortfolio()
   const [showHiddenAssets, setShowHiddenAssets] = useState(false)
   const toggleShowHiddenAssets = () => setShowHiddenAssets((prev) => !prev)
   const isStakingBannerVisible = useIsStakingBannerVisible()
 
-  const fiatTotal = balances.fiatTotal ? Number(balances.fiatTotal) : undefined
+  // Choose which tokens to display
+  const displayedTokens = showHiddenAssets ? portfolio.tokenBalances : portfolio.visibleTokenBalances
+  const displayedTotal = showHiddenAssets ? portfolio.totalTokenBalance : portfolio.visibleTotalTokenBalance
 
   return (
     <>
@@ -44,14 +46,18 @@ const Balances: NextPage = () => {
           </Box>
         )}
 
-        {error ? (
+        {portfolio.error ? (
           <PagePlaceholder img={<NoAssetsIcon />} text="There was an error loading your assets" />
         ) : (
           <>
             <Box mb={2}>
-              <TotalAssetValue fiatTotal={fiatTotal} />
+              <TotalAssetValue fiatTotal={displayedTotal} />
             </Box>
-            <AssetsTable setShowHiddenAssets={setShowHiddenAssets} showHiddenAssets={showHiddenAssets} />
+            <AssetsTable
+              balances={displayedTokens}
+              setShowHiddenAssets={setShowHiddenAssets}
+              showHiddenAssets={showHiddenAssets}
+            />
           </>
         )}
       </main>

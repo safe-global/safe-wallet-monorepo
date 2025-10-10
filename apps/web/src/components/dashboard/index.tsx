@@ -15,7 +15,7 @@ import { UnsupportedMastercopyWarning } from '@/features/multichain/components/U
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import NewsDisclaimers from '@/components/dashboard/NewsCarousel/NewsDisclaimers'
 import NewsCarousel, { type BannerItem } from '@/components/dashboard/NewsCarousel'
-import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import { useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEnabled'
 import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useIsStakingBannerVisible'
 import EarnBanner, { earnBannerID } from '@/components/dashboard/NewsCarousel/banners/EarnBanner'
@@ -32,10 +32,10 @@ const Dashboard = (): ReactElement => {
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
   const supportsRecovery = useIsRecoverySupported()
 
-  const { balances, loaded: balancesLoaded } = useVisibleBalances()
+  const { visibleTokenBalances, isLoaded } = usePortfolio()
   const items = useMemo(() => {
-    return balances.items.filter((item) => item.balance !== '0')
-  }, [balances.items])
+    return visibleTokenBalances.filter((item) => item.balance !== '0')
+  }, [visibleTokenBalances])
 
   const isEarnPromoEnabled = useIsEarnPromoEnabled()
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
@@ -48,7 +48,7 @@ const Dashboard = (): ReactElement => {
     isStakingBannerVisible && { id: stakeBannerID, element: StakeBanner },
   ].filter(Boolean) as BannerItem[]
 
-  const noAssets = balancesLoaded && items.length === 0
+  const noAssets = isLoaded && items.length === 0
 
   return (
     <>

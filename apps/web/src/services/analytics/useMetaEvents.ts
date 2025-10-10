@@ -4,7 +4,7 @@ import { TX_LIST_EVENTS, ASSETS_EVENTS } from './events'
 import { selectQueuedTransactions } from '@/store/txQueueSlice'
 import { useAppSelector } from '@/store'
 import useChainId from '@/hooks/useChainId'
-import useBalances from '@/hooks/useBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useHiddenTokens from '@/hooks/useHiddenTokens'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
@@ -29,8 +29,8 @@ const useMetaEvents = () => {
   }, [safeQueue, isSpaceRoute])
 
   // Tokens
-  const { balances } = useBalances()
-  const totalTokens = balances?.items.length ?? 0
+  const { tokenBalances } = usePortfolio()
+  const totalTokens = tokenBalances?.length ?? 0
   useEffect(() => {
     if (!safeAddress || totalTokens <= 0 || isSpaceRoute) return
 
@@ -40,7 +40,7 @@ const useMetaEvents = () => {
   // Manually hidden tokens
   const hiddenTokens = useHiddenTokens()
   const totalHiddenFromBalance =
-    balances?.items.filter((item) => hiddenTokens.includes(item.tokenInfo.address)).length ?? 0
+    tokenBalances?.filter((item) => hiddenTokens.includes(item.tokenInfo.address)).length ?? 0
 
   useEffect(() => {
     if (!safeAddress || totalTokens <= 0 || isSpaceRoute) return
