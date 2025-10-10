@@ -39,7 +39,7 @@ const getOverallStatus = (analysisData?: LiveAnalysisResponse | null): { severit
   }
 
   const primaryResult = getPrimaryResult(allResults)
-  
+
   if (!primaryResult) {
     return { severity: 'OK' as Severity, title: 'Checks passed' }
   }
