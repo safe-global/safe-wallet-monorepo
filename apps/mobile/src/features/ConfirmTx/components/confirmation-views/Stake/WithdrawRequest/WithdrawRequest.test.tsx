@@ -4,6 +4,7 @@ import { StakingWithdrawRequest } from './WithdrawRequest'
 import {
   NativeStakingValidatorsExitTransactionInfo,
   MultisigExecutionDetails,
+  Operation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 
@@ -51,7 +52,7 @@ const mockTxData = {
     name: 'Staking Contract',
     logoUri: null,
   },
-  operation: 0,
+  operation: 0 as Operation,
 }
 
 const mockProps = {

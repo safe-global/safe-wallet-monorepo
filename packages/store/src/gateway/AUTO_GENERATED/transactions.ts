@@ -427,8 +427,10 @@ export type BaseDataDecoded = {
   method: string
   parameters?: DataDecodedParameter[]
 }
+export type Operation = 0 | 1
 export type MultiSend = {
-  operation: 0 | 1
+  /** Operation type: 0 for CALL, 1 for DELEGATE */
+  operation: Operation
   value: string
   dataDecoded?: BaseDataDecoded
   to: string
@@ -849,7 +851,8 @@ export type TransactionData = {
   dataDecoded?: DataDecoded | null
   to: AddressInfo
   value?: string | null
-  operation: number
+  /** Operation type: 0 for CALL, 1 for DELEGATE */
+  operation: Operation
   trustedDelegateCallTarget?: boolean | null
   addressInfoIndex?: {
     [key: string]: AddressInfo
@@ -924,7 +927,8 @@ export type TxsMultisigTransaction = {
   to: string
   value: string
   data: object
-  operation: number
+  /** Operation type: 0 for CALL, 1 for DELEGATE */
+  operation: Operation
   gasToken: object
   safeTxGas: object
   baseGas: object
@@ -1055,7 +1059,8 @@ export type PreviewTransactionDto = {
   to: string
   data?: string | null
   value: string
-  operation: number
+  /** Operation type: 0 for CALL, 1 for DELEGATE */
+  operation: Operation
 }
 export type ConflictHeaderQueuedItem = {
   type: 'CONFLICT_HEADER'
@@ -1096,7 +1101,8 @@ export type ProposeTransactionDto = {
   value: string
   data?: string | null
   nonce: string
-  operation: number
+  /** Operation type: 0 for CALL, 1 for DELEGATE */
+  operation: Operation
   safeTxGas: string
   baseGas: string
   gasPrice: string
