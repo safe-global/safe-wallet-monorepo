@@ -37,7 +37,7 @@ const WelcomeLogin = () => {
   }, [redirect, shouldRedirect])
 
   return (
-    <Paper className={css.loginCard} data-testid="welcome-login" style={{background: '#fff'}}>
+    <Paper className={css.loginCard} data-testid="welcome-login" style={{ background: '#fff' }}>
       <Box className={css.loginContent}>
         <Typography variant="h2" mt={6} fontWeight={700}>
           Get started
@@ -70,7 +70,7 @@ const WelcomeLogin = () => {
               </Link>
             ) : (
               <Link href={AppRoutes.newSafe.load}>
-                <Button disableElevation size="small" style={{color: '#000'}}>
+                <Button disableElevation size="small" style={{ color: '#000' }}>
                   Watch any account
                 </Button>
               </Link>

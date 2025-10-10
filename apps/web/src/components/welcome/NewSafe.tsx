@@ -3,7 +3,8 @@ import { Typography } from '@mui/material'
 import css from './styles.module.css'
 import WelcomeLogin from './WelcomeLogin'
 import SafeLabsLogo from '@/public/images/logo-safe-labs.svg'
-import WelcomeFooter from './WelcomeFooter'
+import footerCss from './welcomeFooter.module.css'
+import Footer from '../common/Footer'
 
 const NewSafe = () => {
   return (
@@ -15,7 +16,7 @@ const NewSafe = () => {
         <div className={css.loginContainer}>
           <WelcomeLogin />
         </div>
-        <WelcomeFooter />
+        <Footer forceShow versionIcon={false} helpCenter={false} preferences={false} className={footerCss.footer} />
       </div>
 
       <div className={css.mockupBackground}>

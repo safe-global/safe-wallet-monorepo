@@ -42,7 +42,14 @@ const WalletLogin = ({
   }
 
   return (
-    <Button onClick={onConnectWallet} sx={{ minHeight: '42px' }} variant="contained" size="small" disableElevation fullWidth={fullWidth}>
+    <Button
+      onClick={onConnectWallet}
+      sx={{ minHeight: '42px' }}
+      variant="contained"
+      size="small"
+      disableElevation
+      fullWidth={fullWidth}
+    >
       Connect wallet
     </Button>
   )
