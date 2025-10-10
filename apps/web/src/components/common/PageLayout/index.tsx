@@ -10,12 +10,14 @@ import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { TxModalContext } from '@/components/tx-flow'
 import BatchSidebar from '@/components/batch/BatchSidebar'
 import Breadcrumbs from '@/components/common/Breadcrumbs'
+import { AppRoutes } from '@/config/routes'
 
 const PageLayout = ({ pathname, children }: { pathname: string; children: ReactElement }): ReactElement => {
   const [isSidebarRoute, isAnimated] = useIsSidebarRoute(pathname)
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(true)
   const [isBatchOpen, setBatchOpen] = useState<boolean>(false)
   const { setFullWidth } = useContext(TxModalContext)
+  const isWelcomePage = pathname === AppRoutes.welcome.index
 
   useEffect(() => {
     setFullWidth(!isSidebarOpen)
@@ -23,9 +25,11 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
   return (
     <>
-      <header className={css.header}>
-        <Header onMenuToggle={isSidebarRoute ? setSidebarOpen : undefined} onBatchToggle={setBatchOpen} />
-      </header>
+      {!isWelcomePage && (
+        <header className={css.header}>
+          <Header onMenuToggle={isSidebarRoute ? setSidebarOpen : undefined} onBatchToggle={setBatchOpen} />
+        </header>
+      )}
 
       {isSidebarRoute ? <SideDrawer isOpen={isSidebarOpen} onToggle={setSidebarOpen} /> : null}
 
@@ -33,11 +37,12 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
         className={classnames(css.main, {
           [css.mainNoSidebar]: !isSidebarOpen || !isSidebarRoute,
           [css.mainAnimated]: isSidebarRoute && isAnimated,
+          [css.mainNoHeader]: isWelcomePage,
         })}
       >
         <div className={css.content}>
           <SafeLoadingError>
-            <Breadcrumbs />
+            {!isWelcomePage && <Breadcrumbs />}
             {children}
           </SafeLoadingError>
         </div>

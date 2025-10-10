@@ -10,10 +10,14 @@
 
 .loginContent {
   display: flex;
-  height: 100%;
   width: 320px;
   gap: var(--space-1);
+  color: #000;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.fullWidth {
+  width: 100%;
 }
