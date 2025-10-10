@@ -8,10 +8,12 @@ const WalletLogin = ({
   onLogin,
   onContinue,
   buttonText,
+  fullWidth,
 }: {
   onLogin: () => void
   onContinue: () => void
   buttonText?: string
+  fullWidth?: boolean
 }) => {
   const wallet = useWallet()
   const connectWallet = useConnectWallet()
@@ -23,7 +25,7 @@ const WalletLogin = ({
 
   if (wallet !== null) {
     return (
-      <Button variant="contained" sx={{ padding: '8px 16px' }} onClick={onContinue}>
+      <Button variant="contained" sx={{ padding: '8px 16px' }} onClick={onContinue} fullWidth={fullWidth}>
         <Box justifyContent="space-between" display="flex" flexDirection="row" alignItems="center" gap={1}>
           <Box display="flex" flexDirection="column" alignItems="flex-start">
             <Typography variant="subtitle2" fontWeight={700}>
@@ -40,7 +42,7 @@ const WalletLogin = ({
   }
 
   return (
-    <Button onClick={onConnectWallet} sx={{ minHeight: '42px' }} variant="contained" size="small" disableElevation>
+    <Button onClick={onConnectWallet} sx={{ minHeight: '42px' }} variant="contained" size="small" disableElevation fullWidth={fullWidth}>
       Connect wallet
     </Button>
   )

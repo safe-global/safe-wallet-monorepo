@@ -1,6 +1,5 @@
 import { AppRoutes } from '@/config/routes'
-import { Paper, SvgIcon, Typography, Divider, Box, Button, Link } from '@mui/material'
-import SafeLogo from '@/public/images/logo-text.svg'
+import { Paper, Typography, Divider, Box, Link, Button } from '@mui/material'
 import css from './styles.module.css'
 import { useRouter } from 'next/router'
 import { CREATE_SAFE_EVENTS } from '@/services/analytics/events/createLoadSafe'
@@ -38,23 +37,23 @@ const WelcomeLogin = () => {
   }, [redirect, shouldRedirect])
 
   return (
-    <Paper className={css.loginCard} data-testid="welcome-login">
+    <Paper className={css.loginCard} data-testid="welcome-login" style={{background: '#fff'}}>
       <Box className={css.loginContent}>
-        <SvgIcon component={SafeLogo} inheritViewBox sx={{ height: '24px', width: '80px', ml: '-8px' }} />
-
-        <Typography variant="h6" mt={6} fontWeight={700}>
+        <Typography variant="h2" mt={6} fontWeight={700}>
           Get started
         </Typography>
 
         <Typography mb={2} textAlign="center">
           {wallet
             ? 'Open your existing Safe Accounts or create a new one'
-            : 'Connect your wallet to create a new Safe Account or open an existing one'}
+            : 'Connect your wallet to create a Safe Account or watch an existing one'}
         </Typography>
 
-        <Track {...OVERVIEW_EVENTS.OPEN_ONBOARD} label={OVERVIEW_LABELS.welcome_page}>
-          <WalletLogin onLogin={onLogin} onContinue={redirect} />
-        </Track>
+        <Box className={css.fullWidth}>
+          <Track {...OVERVIEW_EVENTS.OPEN_ONBOARD} label={OVERVIEW_LABELS.welcome_page}>
+            <WalletLogin onLogin={onLogin} onContinue={redirect} fullWidth />
+          </Track>
+        </Box>
 
         {!wallet && (
           <>
@@ -71,7 +70,7 @@ const WelcomeLogin = () => {
               </Link>
             ) : (
               <Link href={AppRoutes.newSafe.load}>
-                <Button disableElevation size="small">
+                <Button disableElevation size="small" style={{color: '#000'}}>
                   Watch any account
                 </Button>
               </Link>
