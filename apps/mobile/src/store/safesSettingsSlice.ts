@@ -39,9 +39,6 @@ const safesSettingsSlice = createSlice({
       }
 
       const safeData = state[safeAddress]
-      if (!safeData) {
-        return
-      }
 
       if (!safeData.global) {
         safeData.global = {}
