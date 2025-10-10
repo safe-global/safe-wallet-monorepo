@@ -7,7 +7,7 @@ import type { EstimatedFeeValues } from '@/src/store/estimatedFeeSlice'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeInfo } from '@/src/types/address'
 
-interface ExecuteSingleTxParams {
+interface ExecutePrivateKeyTxParams {
   chain: Chain
   activeSafe: SafeInfo
   txId: string
@@ -15,7 +15,7 @@ interface ExecuteSingleTxParams {
   feeParams: EstimatedFeeValues | null
 }
 
-interface ExecuteSingleTxResult {
+interface ExecutePrivateKeyTxResult {
   type: ExecutionMethod.WITH_PK
   txId: string
   chainId: string
@@ -25,13 +25,13 @@ interface ExecuteSingleTxResult {
   walletNonce: number
 }
 
-export const executeSingleTx = async ({
+export const executePrivateKeyTx = async ({
   chain,
   activeSafe,
   txId,
   signerAddress,
   feeParams,
-}: ExecuteSingleTxParams): Promise<ExecuteSingleTxResult> => {
+}: ExecutePrivateKeyTxParams): Promise<ExecutePrivateKeyTxResult> => {
   let privateKey
   try {
     privateKey = await getPrivateKey(signerAddress)

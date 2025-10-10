@@ -9,7 +9,7 @@ import { EstimatedFeeValues } from '@/src/store/estimatedFeeSlice'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import { useRelayRelayV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import useSafeInfo from '@/src/hooks/useSafeInfo'
-import { executeSingleTx } from '@/src/services/tx-execution/privateKeyExecutor'
+import { executePrivateKeyTx } from '@/src/services/tx-execution/privateKeyExecutor'
 import { executeRelayTx } from '@/src/services/tx-execution/relayExecutor'
 
 export enum ExecutionStatus {
@@ -43,7 +43,7 @@ export function useTransactionExecution({
   // Hashmap of execution methods to their executor functions
   const executors = {
     [ExecutionMethod.WITH_PK]: async () => {
-      return await executeSingleTx({
+      return await executePrivateKeyTx({
         chain: activeChain,
         activeSafe,
         txId,

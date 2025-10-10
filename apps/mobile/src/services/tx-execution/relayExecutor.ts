@@ -1,4 +1,4 @@
-import { createTx } from '@/src/services/tx/tx-sender/create'
+import { createTx, addSignaturesToTx } from '@/src/services/tx/tx-sender/create'
 import { getReadOnlyCurrentGnosisSafeContract } from '@/src/services/contracts/safeContracts'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import extractTxInfo from '@/src/services/tx/extractTx'
@@ -49,15 +49,7 @@ export const executeRelayTx = async ({
   }
 
   // Add all signatures to the transaction
-  Object.entries(signatures).forEach(([signer, data]) => {
-    safeTx.addSignature({
-      signer,
-      data,
-      staticPart: () => data,
-      dynamicPart: () => '',
-      isContractSignature: false,
-    })
-  })
+  addSignaturesToTx(safeTx, signatures)
 
   // Get readonly safe contract to encode the transaction
   const readOnlySafeContract = await getReadOnlyCurrentGnosisSafeContract(safe)
