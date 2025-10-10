@@ -147,11 +147,14 @@ export function SafeBottomSheet<T>({
         </BottomSheetView>
       ) : (
         <BottomSheetScrollView
-          style={{
-            marginBottom:
-              (!sortable && FooterComponent ? footerHeight : 0) + getTokenValue(Platform.OS === 'ios' ? '$4' : '$8'),
-          }}
-          contentContainerStyle={[styles.scrollInnerContainer]}
+          contentContainerStyle={[
+            styles.scrollInnerContainer,
+            {
+              paddingBottom:
+                (!sortable && FooterComponent ? footerHeight : insets.bottom) +
+                getTokenValue(Platform.OS === 'ios' ? '$4' : '$8'),
+            },
+          ]}
           stickyHeaderIndices={[0]}
         >
           {title && <TitleHeader />}
