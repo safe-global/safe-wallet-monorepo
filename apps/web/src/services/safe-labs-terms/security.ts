@@ -1,6 +1,32 @@
 import { AppRoutes } from '@/config/routes'
 
 /**
+ * Fully decodes a URL to prevent multiple encoding bypass attacks
+ *
+ * @param {string} url - The URL to decode
+ * @param {number} maxIterations - Maximum number of decode iterations to prevent infinite loops
+ *
+ * @returns {string} The fully decoded URL
+ */
+const fullyDecodeUrl = (url: string, maxIterations = 10): string => {
+  let decoded = url
+  let previousDecoded = ''
+  let iterations = 0
+
+  while (decoded !== previousDecoded && iterations < maxIterations) {
+    previousDecoded = decoded
+    try {
+      decoded = decodeURIComponent(decoded)
+    } catch {
+      break
+    }
+    iterations++
+  }
+
+  return decoded
+}
+
+/**
  * Validates that a redirect URL is safe and belongs to the application
  * Prevents open redirect vulnerabilities and XSS attacks
  *
@@ -14,21 +40,38 @@ export const isSafeRedirectUrl = (url: string | undefined): boolean => {
   }
 
   try {
-    const decodedUrl = decodeURIComponent(url)
+    const trimmedUrl = url.replace(/[\s\r\n\t]/g, '')
 
-    if (decodedUrl.startsWith('/')) {
-      if (decodedUrl.match(/^\/\//)) {
-        return false
-      }
+    const normalizedUrl = trimmedUrl.normalize('NFKC')
 
-      if (decodedUrl.toLowerCase().match(/^\/?(javascript|data|vbscript):/)) {
-        return false
-      }
+    const decodedUrl = fullyDecodeUrl(normalizedUrl)
 
-      return true
+    if (decodedUrl.includes('\\')) {
+      return false
     }
 
-    return false
+    if (decodedUrl.includes('\0') || decodedUrl.includes('%00')) {
+      return false
+    }
+
+    if (!decodedUrl.startsWith('/') || decodedUrl.startsWith('//')) {
+      return false
+    }
+
+    const dangerousProtocols = /^\/?(javascript|data|vbscript|file|about|blob):/i
+    if (dangerousProtocols.test(decodedUrl)) {
+      return false
+    }
+
+    if (decodedUrl.match(/^\/+\//)) {
+      return false
+    }
+
+    if (decodedUrl.includes('@')) {
+      return false
+    }
+
+    return true
   } catch {
     return false
   }
@@ -46,9 +89,26 @@ const parseQueryString = (queryString: string): Record<string, string> => {
   if (queryString) {
     const params = new URLSearchParams(queryString)
     params.forEach((value, key) => {
-      // Only include safe parameter values (no scripts, no data URIs)
-      if (!value.toLowerCase().match(/(javascript|data|vbscript):/)) {
+      try {
+        const decodedValue = fullyDecodeUrl(value)
+        const normalizedValue = decodedValue.normalize('NFKC')
+
+        const dangerousProtocols = /(javascript|data|vbscript|file|about|blob):/i
+        if (dangerousProtocols.test(normalizedValue)) {
+          return
+        }
+
+        if (normalizedValue.includes('\\') || normalizedValue.includes('\0')) {
+          return
+        }
+
+        if (normalizedValue.match(/^\/\//)) {
+          return
+        }
+
         query[key] = value
+      } catch {
+        return
       }
     })
   }
@@ -71,7 +131,13 @@ export const parseRedirectUrl = (
   }
 
   try {
-    const urlString = url!
+    let urlString = url!
+
+    const hashIndex = urlString.indexOf('#')
+    if (hashIndex !== -1) {
+      urlString = urlString.substring(0, hashIndex)
+    }
+
     const [pathname, queryString] = urlString.split('?')
 
     if (!pathname.startsWith('/')) {

@@ -3,6 +3,8 @@ import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
 import * as safeLabsTermsService from '@/services/safe-labs-terms'
 import { useRouter } from 'next/router'
 import useOnboard from '@/hooks/wallets/useOnboard'
+import { useHasFeature } from '@/hooks/useChains'
+import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 
 // Mock dependencies
 jest.mock('next/router', () => ({
@@ -14,6 +16,14 @@ jest.mock('@/services/safe-labs-terms', () => ({
 }))
 
 jest.mock('@/hooks/wallets/useOnboard')
+
+jest.mock('@/hooks/useChains', () => ({
+  useHasFeature: jest.fn(),
+}))
+
+jest.mock('@/hooks/useIsOfficialHost', () => ({
+  useIsOfficialHost: jest.fn(),
+}))
 
 const mockRouter = {
   pathname: '/home',
@@ -37,8 +47,15 @@ describe('useSafeLabsTerms', () => {
     jest.clearAllMocks()
     ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
     ;(useOnboard as jest.Mock).mockReturnValue(mockOnboard)
+    ;(useHasFeature as jest.Mock).mockReturnValue(false)
+    ;(useIsOfficialHost as jest.Mock).mockReturnValue(true)
 
-    // Mock subscription
+    Object.defineProperty(window, 'Cypress', {
+      value: undefined,
+      writable: true,
+      configurable: true,
+    })
+
     mockOnboard.state.select.mockReturnValue({
       subscribe: jest.fn(() => ({
         unsubscribe: jest.fn(),
@@ -372,7 +389,7 @@ describe('useSafeLabsTerms', () => {
     it('Should handle all exception pages correctly', async () => {
       jest.spyOn(safeLabsTermsService, 'hasAcceptedSafeLabsTerms').mockReturnValue(false)
 
-      const exceptionPages = ['/safe-labs-terms', '/privacy', '/terms']
+      const exceptionPages = ['/safe-labs-terms', '/privacy', '/terms', '/imprint']
 
       for (const pathname of exceptionPages) {
         const router = { ...mockRouter, pathname }

@@ -17,9 +17,10 @@ import SafeLabsLogo from '@/public/images/logo-safe-labs.svg'
 import css from './styles.module.css'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
-import { setSafeLabsTermsAccepted } from '@/services/safe-labs-terms'
+import { setSafeLabsTermsAccepted, clearUserData } from '@/services/safe-labs-terms'
 import { getSafeRedirectUrl, isValidAutoConnectParam } from '@/services/safe-labs-terms/security'
 import { getLogoLink } from '../common/Header'
+import NextLink from 'next/link'
 
 const SafeLabsTerms = () => {
   const router = useRouter()
@@ -27,32 +28,47 @@ const SafeLabsTerms = () => {
   const [acknowledgeLiability, setAcknowledgeLiability] = useState(false)
   const [requestDataTransfer, setRequestDataTransfer] = useState(false)
 
-  const canAccept = acceptTerms && acknowledgeLiability && requestDataTransfer
+  const canAccept = acceptTerms && acknowledgeLiability
 
   const logoHref = getLogoLink(router)
 
   const handleAcceptAndContinue = () => {
-    setSafeLabsTermsAccepted()
-
     const { pathname, query } = getSafeRedirectUrl(router.query.redirect as string | undefined)
     const autoConnect = router.query.autoConnect
     const isValidAutoConnect = isValidAutoConnectParam(autoConnect)
 
-    router.push({
-      pathname,
-      query: {
+    if (!requestDataTransfer) {
+      clearUserData()
+      setSafeLabsTermsAccepted()
+
+      const queryParams = {
         ...query,
         ...(isValidAutoConnect && autoConnect === 'true' ? { autoConnect: 'true' } : {}),
-      },
-    })
+      }
+
+      const queryString = new URLSearchParams(queryParams as Record<string, string>).toString()
+      const redirectUrl = queryString ? `${pathname}?${queryString}` : pathname
+
+      window.location.href = redirectUrl
+    } else {
+      setSafeLabsTermsAccepted()
+
+      router.push({
+        pathname,
+        query: {
+          ...query,
+          ...(isValidAutoConnect && autoConnect === 'true' ? { autoConnect: 'true' } : {}),
+        },
+      })
+    }
   }
 
   return (
     <>
       <div className={css.headerContainer}>
-        <Link href={logoHref} passHref>
+        <NextLink href={logoHref}>
           <SafeLabsLogo alt="Safe logo" style={{ height: '24px', width: 'auto', cursor: 'pointer' }} />
-        </Link>
+        </NextLink>
       </div>
 
       <div className={css.container}>
@@ -165,7 +181,7 @@ const SafeLabsTerms = () => {
 
                 <Typography variant="body2">
                   To ensure a seamless user experience, but only upon your voluntary request, we can arrange the
-                  transfer of your interface account data, including personal data (e.g. your address book ), from Core
+                  transfer of your interface account data, including personal data (e.g. your address book), from Core
                   Contributors GmbH to Safe Labs GmbH so it is available in your new Safe{'{Wallet}'} by Safe Labs GmbH.
                 </Typography>
 

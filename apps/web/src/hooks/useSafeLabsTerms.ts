@@ -5,6 +5,7 @@ import { hasAcceptedSafeLabsTerms } from '@/services/safe-labs-terms'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { AppRoutes } from '@/config/routes'
+import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import type { OnboardAPI, WalletState } from '@web3-onboard/core'
 
 const TERMS_REDIRECT_EXCEPTIONS = [AppRoutes.safeLabsTerms, AppRoutes.privacy, AppRoutes.terms, AppRoutes.imprint]
@@ -18,10 +19,13 @@ interface UseSafeLabsTermsReturnType {
 
 export const useSafeLabsTerms = (): UseSafeLabsTermsReturnType => {
   const isFeatureDisabled = useHasFeature(FEATURES.SAFE_LABS_TERMS_DISABLED) ?? false
+  const isOfficialHost = useIsOfficialHost()
   const onboard = useOnboard()
   const router = useRouter()
   const hasRedirected = useRef(false)
   const [shouldShowContent, setShouldShowContent] = useState(false)
+
+  const isCypressTest = typeof window !== 'undefined' && window.Cypress !== undefined
 
   async function disconnectWalletsEIP2255(wallet: WalletState): Promise<void> {
     try {
@@ -72,7 +76,13 @@ export const useSafeLabsTerms = (): UseSafeLabsTermsReturnType => {
   useEffect(() => {
     const termsAccepted = hasAcceptedSafeLabsTerms()
 
-    if (isFeatureDisabled || termsAccepted || TERMS_REDIRECT_EXCEPTIONS.includes(router.pathname)) {
+    if (
+      !isOfficialHost ||
+      isFeatureDisabled ||
+      isCypressTest ||
+      termsAccepted ||
+      TERMS_REDIRECT_EXCEPTIONS.includes(router.pathname)
+    ) {
       setShouldShowContent(true)
       hasRedirected.current = false
       return
@@ -87,11 +97,11 @@ export const useSafeLabsTerms = (): UseSafeLabsTermsReturnType => {
         },
       })
     }
-  }, [isFeatureDisabled, router, router.pathname])
+  }, [isOfficialHost, isFeatureDisabled, isCypressTest, router, router.pathname])
 
   useEffect(() => {
     const termsAccepted = hasAcceptedSafeLabsTerms()
-    if (!onboard || isFeatureDisabled || termsAccepted) {
+    if (!isOfficialHost || !onboard || isFeatureDisabled || isCypressTest || termsAccepted) {
       return
     }
 
@@ -109,14 +119,14 @@ export const useSafeLabsTerms = (): UseSafeLabsTermsReturnType => {
     return () => {
       walletSubscription.unsubscribe()
     }
-  }, [isFeatureDisabled, onboard, router.pathname, disconnectWallets])
+  }, [isOfficialHost, isFeatureDisabled, isCypressTest, onboard, router.pathname, disconnectWallets])
 
   const termsAccepted = hasAcceptedSafeLabsTerms()
 
   return {
     isFeatureDisabled,
     hasAccepted: termsAccepted,
-    shouldBypassTermsCheck: isFeatureDisabled || termsAccepted,
+    shouldBypassTermsCheck: !isOfficialHost || isFeatureDisabled || isCypressTest || termsAccepted,
     shouldShowContent,
   }
 }
