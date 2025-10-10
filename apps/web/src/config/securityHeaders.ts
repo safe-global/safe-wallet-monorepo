@@ -9,6 +9,8 @@ const isCypress = Boolean(typeof window !== 'undefined' && window.Cypress)
  * style-src unsafe-inline for our styled components
  * script-src unsafe-eval is needed by next.js in dev mode, otherwise only self
  * frame-ancestors can not be set via meta tag
+ *
+ * Fonts URLs are needed for WalletConnect
  */
 export const ContentSecurityPolicy = `
  default-src 'self';
@@ -20,7 +22,7 @@ export const ContentSecurityPolicy = `
  };
  frame-src http: https:;
  style-src 'self' 'unsafe-inline' https://*.getbeamer.com https://*.googleapis.com;
- font-src 'self' data:;
+ font-src 'self' data: https://fonts.gstatic.com https://fonts.reown.com;
  worker-src 'self' blob:;
  img-src * data:;
 `
