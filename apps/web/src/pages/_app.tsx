@@ -51,6 +51,7 @@ import { GATEWAY_URL } from '@/config/gateway'
 import { useDatadog } from '@/services/datadog'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
+import LedgerHashComparison from '@/components/common/LedgerHashComparison'
 
 const reduxStore = makeStore()
 
@@ -144,6 +145,8 @@ const SafeWalletApp = ({
           <OutreachPopup />
 
           <Notifications />
+
+          <LedgerHashComparison />
 
           <Recovery />
 

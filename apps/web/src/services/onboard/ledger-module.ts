@@ -159,10 +159,23 @@ export function ledgerModule(): WalletInit {
                 value: txParams.value ? BigInt(txParams.value) : null,
               })
 
-              transaction.signature = await ledgerSdk.signTransaction(
+              // Calculate hash before signing
+              const { keccak256 } = await import('ethers')
+              const txHash = keccak256(transaction.unsignedSerialized)
+
+              // Start the signing process (sends tx to Ledger, doesn't wait for confirmation yet)
+              const signingPromise = ledgerSdk.signTransaction(
                 getAssertedDerivationPath(),
                 hexaStringToBuffer(transaction.unsignedSerialized)!,
               )
+
+              // Show non-blocking notification immediately after sending to Ledger
+              // Import the function dynamically to avoid circular dependencies
+              const { showLedgerHashComparison } = await import('@/components/common/LedgerHashComparison')
+              showLedgerHashComparison(txHash)
+
+              // Now wait for user to confirm on Ledger
+              transaction.signature = await signingPromise
 
               return transaction.serialized
             },
