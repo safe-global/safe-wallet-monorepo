@@ -9,6 +9,7 @@ import {
   Box,
   IconButton,
   Alert,
+  Stack,
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
@@ -53,15 +54,18 @@ const LedgerHashComparison = () => {
         </Box>
       </DialogTitle>
       <DialogContent>
-        <Alert severity="info" sx={{ mb: 2 }}>
+        <Alert severity="info" sx={{ mb: 3 }}>
           Compare this hash with the one displayed on your Ledger device before confirming the transaction.
         </Alert>
-        <Box sx={{ maxWidth: '550px' }}>
-          <HexEncodedData hexData={hash || ''} title="Transaction hash" highlightFirstBytes={false} limit={9999} />
-        </Box>
+
+        <Stack justifyContent="center" alignItems="center" direction="row">
+          <Box sx={{ maxWidth: '180px' }}>
+            <HexEncodedData hexData={hash || ''} highlightFirstBytes={false} limit={9999} />
+          </Box>
+        </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} variant="contained" sx={{ m: 2 }}>
+        <Button onClick={handleClose} variant="contained" sx={{ m: 2, mt: 0 }}>
           Close
         </Button>
       </DialogActions>
