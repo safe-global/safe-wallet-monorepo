@@ -52,7 +52,7 @@ const LedgerHashComparison = () => {
         <Typography variant="body2" color="text.secondary" gutterBottom>
           Transaction hash:
         </Typography>
-        <EthHashInfo address={hash} showCopyButton shortAddress={false} showAvatar={false} />
+        <EthHashInfo address={hash || ''} showCopyButton shortAddress={false} showAvatar={false} />
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} variant="contained" sx={{ m: 2 }}>
