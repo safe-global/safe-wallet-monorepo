@@ -65,7 +65,7 @@ const LedgerHashComparison = () => {
         <EthHashInfo address={hash} showCopyButton shortAddress={false} showAvatar={false} />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} variant="contained" sx={{ mr: 2 }}>
+        <Button onClick={handleClose} variant="contained" sx={{ m: 2 }}>
           Close
         </Button>
       </DialogActions>
