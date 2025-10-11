@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -12,37 +12,27 @@ import {
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import EthHashInfo from '@/components/common/EthHashInfo'
+import ExternalStore from '@safe-global/utils/services/ExternalStore'
 
-// Custom event for Ledger hash comparison
-export const LEDGER_HASH_EVENT = 'ledger-hash-comparison'
-
-export type LedgerHashEvent = CustomEvent<{ hash: string }>
+// External store for Ledger hash comparison
+const ledgerHashStore = new ExternalStore<string | undefined>(undefined)
 
 export const showLedgerHashComparison = (hash: string) => {
-  const event = new CustomEvent(LEDGER_HASH_EVENT, { detail: { hash } })
-  window.dispatchEvent(event)
+  ledgerHashStore.setStore(hash)
 }
 
 const LedgerHashComparison = () => {
+  const hash = ledgerHashStore.useStore()
   const [open, setOpen] = useState(false)
-  const [hash, setHash] = useState('')
 
-  useEffect(() => {
-    const handleLedgerHash = (event: Event) => {
-      const { hash } = (event as LedgerHashEvent).detail
-      setHash(hash)
-      setOpen(true)
-    }
-
-    window.addEventListener(LEDGER_HASH_EVENT, handleLedgerHash)
-
-    return () => {
-      window.removeEventListener(LEDGER_HASH_EVENT, handleLedgerHash)
-    }
-  }, [])
+  // Open dialog when hash is set
+  if (hash && !open) {
+    setOpen(true)
+  }
 
   const handleClose = () => {
     setOpen(false)
+    ledgerHashStore.setStore(undefined)
   }
 
   return (
