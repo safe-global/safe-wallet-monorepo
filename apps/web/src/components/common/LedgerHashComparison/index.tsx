@@ -50,7 +50,7 @@ const LedgerHashComparison = () => {
           Compare this hash with the one displayed on your Ledger device before confirming the transaction.
         </Alert>
         <Typography variant="body2" color="text.secondary" gutterBottom>
-          Transaction Hash:
+          Transaction hash:
         </Typography>
         <EthHashInfo address={hash} showCopyButton shortAddress={false} showAvatar={false} />
       </DialogContent>
