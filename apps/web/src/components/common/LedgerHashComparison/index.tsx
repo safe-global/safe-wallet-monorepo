@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -11,7 +11,7 @@ import {
   Alert,
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
-import EthHashInfo from '@/components/common/EthHashInfo'
+import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
 
 // External store for Ledger hash comparison
@@ -21,17 +21,24 @@ export const showLedgerHashComparison = (hash: string) => {
   ledgerHashStore.setStore(hash)
 }
 
+export const hideLedgerHashComparison = () => {
+  ledgerHashStore.setStore(undefined)
+}
+
 const LedgerHashComparison = () => {
   const hash = ledgerHashStore.useStore()
   const [open, setOpen] = useState(false)
 
-  // Open dialog when hash is set
-  if (hash && !open) {
-    setOpen(true)
-  }
+  // Open dialog when hash is set, close when cleared
+  useEffect(() => {
+    if (hash) {
+      setOpen(true)
+    } else {
+      setOpen(false)
+    }
+  }, [hash])
 
   const handleClose = () => {
-    setOpen(false)
     ledgerHashStore.setStore(undefined)
   }
 
@@ -49,10 +56,9 @@ const LedgerHashComparison = () => {
         <Alert severity="info" sx={{ mb: 2 }}>
           Compare this hash with the one displayed on your Ledger device before confirming the transaction.
         </Alert>
-        <Typography variant="body2" color="text.secondary" gutterBottom>
-          Transaction hash:
-        </Typography>
-        <EthHashInfo address={hash || ''} showCopyButton shortAddress={false} showAvatar={false} />
+        <Box sx={{ maxWidth: '550px' }}>
+          <HexEncodedData hexData={hash || ''} title="Transaction hash" highlightFirstBytes={false} limit={9999} />
+        </Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} variant="contained" sx={{ m: 2 }}>

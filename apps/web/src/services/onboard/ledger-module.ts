@@ -163,16 +163,27 @@ export function ledgerModule(): WalletInit {
               const { keccak256 } = await import('ethers')
               const txHash = keccak256(transaction.unsignedSerialized)
 
-              const { showLedgerHashComparison } = await import('@/components/common/LedgerHashComparison')
+              const { showLedgerHashComparison, hideLedgerHashComparison } = await import(
+                '@/components/common/LedgerHashComparison'
+              )
               showLedgerHashComparison(txHash)
 
-              // Sign transaction on Ledger device
-              transaction.signature = await ledgerSdk.signTransaction(
-                getAssertedDerivationPath(),
-                hexaStringToBuffer(transaction.unsignedSerialized)!,
-              )
+              try {
+                // Sign transaction on Ledger device
+                transaction.signature = await ledgerSdk.signTransaction(
+                  getAssertedDerivationPath(),
+                  hexaStringToBuffer(transaction.unsignedSerialized)!,
+                )
 
-              return transaction.serialized
+                // Hide dialog after successful signing
+                hideLedgerHashComparison()
+
+                return transaction.serialized
+              } catch (error) {
+                // Hide dialog on error (rejection or failure)
+                hideLedgerHashComparison()
+                throw error
+              }
             },
             eth_sendTransaction: async (args) => {
               const signedTransaction = await eip1193Provider.request({
