@@ -43,7 +43,7 @@ const WelcomeLogin = () => {
           Get started
         </Typography>
 
-        <Typography mb={2} textAlign="center">
+        <Typography mb={2} textAlign="center" className={css.loginDescription}>
           {wallet
             ? 'Open your existing Safe Accounts or create a new one'
             : 'Connect your wallet to create a Safe Account or watch an existing one'}
@@ -57,7 +57,7 @@ const WelcomeLogin = () => {
 
         {!wallet && (
           <>
-            <Divider sx={{ mt: 2, mb: 2, width: '100%' }}>
+            <Divider sx={{ mt: 2, mb: 2, width: '100%' }} className={css.orDivider}>
               <Typography color="text.secondary" fontWeight={700} variant="overline">
                 or
               </Typography>

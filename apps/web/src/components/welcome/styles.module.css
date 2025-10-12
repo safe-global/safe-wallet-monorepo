@@ -1,230 +1,102 @@
-.bulletList {
-  list-style: none;
-  margin-bottom: auto;
-  padding: 0;
-}
-
-.bulletList li {
-  display: flex;
-  flex-direction: row;
-  gap: var(--space-1);
-  align-items: center;
-  margin-bottom: var(--space-2);
-}
-
-.numberList {
-  margin: var(--space-5) 0;
-  padding: 0;
-  list-style: none;
-}
-
-.numberList li {
-  display: flex;
-  flex-direction: row;
-  gap: var(--space-1);
-  align-items: center;
-  margin-bottom: var(--space-2);
-  counter-increment: item;
-}
-
-.numberList li:before {
-  margin-right: var(--space-1);
-  content: counter(item);
-  background: var(--color-static-main);
-  border-radius: 100%;
-  color: white;
-  width: 32px;
-  height: 32px;
-  line-height: 32px;
-  font-size: 18px;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.marquee {
-  display: flex;
-  overflow: hidden;
-  user-select: none;
-  gap: var(--space-6);
-  background-color: var(--color-border-light);
-  border-radius: var(--space-1);
-}
-
-.marqueeContent {
-  flex-shrink: 0;
-  display: flex;
-  justify-content: space-around;
-  gap: var(--space-6);
-  min-width: 100%;
-  animation: scroll 30s linear infinite;
-  padding: var(--space-4);
-}
-
-@keyframes scroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-100%);
-  }
-}
-
-.marqueeImage {
-  height: 56px;
-}
-
-.loginCard {
-  display: flex;
-  flex-direction: column;
-  max-width: 320px;
-  width: 100%;
-}
-
-/* Login Page Styles - Figma Design */
 .loginPage {
   display: flex;
   width: 100%;
-  height: 100vh;
-  /* overflow: hidden; */
+  min-height: 100vh;
 }
 
-/* Left Side - Login Form (White) */
-.leftSide {
+.loginContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+
+.rightSide {
   width: 50%;
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  overflow: hidden;
+  background: #121312;
+}
+
+.leftSide {
   position: relative;
-  border-right: 1px solid #dcdee0;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
   background-color: #fff;
 }
 
 .logoContainer {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  width: 245px;
-  height: 20px;
+  padding: var(--space-2);
 }
 
 .logo {
   color: #000;
 }
 
-.loginContainer {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Right Side - Dark Background */
-.rightSide {
-  width: 50%;
-  background: #121312;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-
 .rightContent {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  padding-top: var(--space-8);
-}
-
-.heroContent {
-  position: relative;
-  max-width: 496px;
+  margin: auto;
   text-align: center;
-  background: #121312;
+  margin: var(--space-8) auto;
+  max-width: 350px;
 }
 
 .label {
-  font-family: 'DM Sans', sans-serif;
   font-size: 12px;
-  font-weight: 400;
-  line-height: 16px;
+  font-weight: 700;
   letter-spacing: 1px;
-  color: #ffffff;
-  opacity: 0.5;
-  text-transform: uppercase;
-  text-align: center;
-  margin-bottom: 16px;
+  color: #7f7f7f;
 }
 
 .mainTitle {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 27px;
+  font-size: 32px;
   font-weight: 700;
-  line-height: 1.235;
-  letter-spacing: 0.25px;
+  line-height: 117%;
   color: #ffffff;
-  margin: 0;
-  padding: var(--space-3) var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.mockupImageContainer {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
 }
 
 .mockupImage {
-  height: auto;
-  object-fit: contain;
-  width: 100%;
+  max-width: 50vw;
 }
 
-.mockupBackground {
-  width: 50%;
-  height: 100%;
-  background: #121212;
-  min-height: 450px;
-  background-image: url(/images/welcome/safe-mockup.png);
-  background-size: 95%;
-  background-repeat: no-repeat;
-  background-position: right 100%;
-  pointer-events: none;
-}
-
-/* Responsive Design */
 @media (max-width: 1199.95px) {
   .loginPage {
     flex-direction: column;
     min-height: 100vh;
   }
 
+  .rightSide {
+    width: 100%;
+  }
+
   .leftSide {
     width: 100%;
-    border-right: none;
-    border-bottom: 1px solid #dcdee0;
-    padding: var(--space-12) 0;
+    position: unset;
+    padding-bottom: var(--space-12);
   }
 
-  .heroContent {
-    padding-top: var(--space-2);
-  }
-
-  .mockupBackground {
-    width: 100%;
-    background-position: right calc(100% - 60px);
-    background-size: 90% 70%;
-    min-height: 1000px;
+  .mockupImage {
+    max-width: 100vw;
+    margin-bottom: 59px;
   }
 }
 
 @media (max-width: 599.95px) {
-  .mockupBackground {
-    background-position: right calc(100% - 80px);
-    background-size: 90% 50%;
-    min-height: 700px;
-  }
-}
-
-@media (max-width: 350px) {
-  .mockupBackground {
-    min-height: 800px;
+  .mockupImage {
+    max-width: 100vw;
+    margin-bottom: 79px;
   }
 }

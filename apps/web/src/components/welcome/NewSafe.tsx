@@ -19,12 +19,13 @@ const NewSafe = () => {
         <Footer forceShow versionIcon={false} helpCenter={false} preferences={false} className={footerCss.footer} />
       </div>
 
-      <div className={css.mockupBackground}>
+      <div className={css.rightSide}>
         <div className={css.rightContent}>
-          <div className={css.heroContent}>
-            <Typography className={css.label}>FOR TEAMS AND POWER USERS</Typography>
-            <Typography className={css.mainTitle}>Manage and secure treasury and developer on-chain assets</Typography>
-          </div>
+          <Typography className={css.label}>FOR TEAMS AND POWER USERS</Typography>
+          <Typography className={css.mainTitle}>Own your assets onchain securely</Typography>
+        </div>
+        <div className={css.mockupImageContainer}>
+          <img src="/images/welcome/safe-mockup.png" alt="Safe interface mockup" className={css.mockupImage} />
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@
   justify-content: center;
   align-items: center;
   padding: var(--space-2);
+  background: #fff;
 }
 
 .loginContent {
@@ -18,6 +19,28 @@
   justify-content: center;
 }
 
+.loginDescription {
+  color: var(--color-backdrop-main);
+}
+
 .fullWidth {
   width: 100%;
+}
+
+.watchViewAccountLink button {
+  color: #000;
+}
+
+.watchViewAccountLink button:hover {
+  --variant-containedBg: #3c3c3c;
+  --variant-textBg: rgba(18, 19, 18, 0.04);
+  --variant-outlinedBorder: #121312;
+  --variant-outlinedBg: rgba(18, 19, 18, 0.04);
+}
+
+.orDivider::after {
+  background-color: #dcdee0;
+}
+.orDivider::before {
+  background-color: #dcdee0;
 }

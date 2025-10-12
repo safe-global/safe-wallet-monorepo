@@ -10106,7 +10106,7 @@ __metadata:
     react-dom: "npm:19.1.0"
     react-hook-form: "npm:^7.54.2"
     react-native: "npm:0.81.4"
-    react-native-ble-plx: "npm:^3.5.0"
+    react-native-ble-plx: "patch:react-native-ble-plx@npm%3A3.5.0#~/.yarn/patches/react-native-ble-plx+3.5.0.patch"
     react-native-capture-protection: "npm:^2.3.1"
     react-native-collapsible-tab-view: "npm:v9.0.0-rc.0"
     react-native-device-crypto: "patch:react-native-device-crypto@npm%3A0.1.7#~/.yarn/patches/react-native-device-crypto-npm-0.1.7-dbd2698fc4.patch"
@@ -30610,13 +30610,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-ble-plx@npm:^3.5.0":
+"react-native-ble-plx@npm:3.5.0":
   version: 3.5.0
   resolution: "react-native-ble-plx@npm:3.5.0"
   peerDependencies:
     react: "*"
     react-native: "*"
   checksum: 10/f807e82d45220eeb5ba3aacaf13fddd9e11395337b8b2b99fe468cc154fefdce501efefcb1421b6bcf0f0e602e82ce535ff8dc3b1d1e57aca85fd6507bc7ea2e
+  languageName: node
+  linkType: hard
+
+"react-native-ble-plx@patch:react-native-ble-plx@npm%3A3.5.0#~/.yarn/patches/react-native-ble-plx+3.5.0.patch":
+  version: 3.5.0
+  resolution: "react-native-ble-plx@patch:react-native-ble-plx@npm%3A3.5.0#~/.yarn/patches/react-native-ble-plx+3.5.0.patch::version=3.5.0&hash=10d9c7"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10/12d4389f691480e5f76bd345ca566fc39831082ed74d10bfae621dfd9e2575048f016be9ea26431c28986010f141236d99802ab3aa34a458691de151ec3a7e2f
   languageName: node
   linkType: hard
 

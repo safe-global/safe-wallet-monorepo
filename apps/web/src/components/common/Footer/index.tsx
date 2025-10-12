@@ -14,7 +14,6 @@ import { IS_PRODUCTION, COMMIT_HASH } from '@/config/constants'
 import type { FooterProps } from './footer.type'
 
 const footerPages = [
-  AppRoutes.welcome.index,
   AppRoutes.settings.index,
   AppRoutes.imprint,
   AppRoutes.privacy,
