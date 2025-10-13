@@ -16,6 +16,10 @@ import { useAppSelector } from '@/src/store/hooks'
 import { selectEstimatedFee } from '@/src/store/estimatedFeeSlice'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
+import { useExecutionFunds } from '../../hooks/useExecutionFunds'
+import { selectActiveChain } from '@/src/store/chains'
+import { Skeleton } from 'moti/skeleton'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 
 interface ReviewFooterProps {
   txId: string
@@ -53,11 +57,21 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
   const insets = useSafeAreaInsets()
   const { totalFee, estimatedFeeParams, totalFeeRaw } = useGasFee(txDetails, manualParams)
   const isLoadingFees = estimatedFeeParams.isLoadingGasPrice || estimatedFeeParams.gasLimitLoading
+  const { colorScheme } = useTheme()
 
   // checks the executionMethod
   const isRelayAvailable = Boolean(relaysRemaining?.remaining && relaysRemaining.remaining > 0)
   const { executionMethod: executionMethodParam } = useLocalSearchParams<{ executionMethod: ExecutionMethod }>()
   const executionMethod = getExecutionMethod(executionMethodParam, isRelayAvailable)
+
+  // Check if signer has sufficient funds
+  const chain = useAppSelector(selectActiveChain)
+  const { hasSufficientFunds, isCheckingFunds } = useExecutionFunds({
+    signerAddress: activeSigner?.value,
+    totalFeeRaw,
+    executionMethod,
+    chain: chain ?? undefined,
+  })
 
   const handleConfirmPress = async () => {
     try {
@@ -97,6 +111,9 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
     }
   }
 
+  const isButtonDisabled = !hasSufficientFunds
+  const buttonText = !hasSufficientFunds ? 'Insufficient funds' : 'Execute transaction'
+
   return (
     <Stack paddingHorizontal="$4" space="$3" paddingBottom={insets.bottom ? insets.bottom : '$4'}>
       <Container
@@ -117,9 +134,15 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
         />
       </Container>
 
-      <SafeButton onPress={handleConfirmPress} width="100%">
-        Execute transaction
-      </SafeButton>
+      {isCheckingFunds ? (
+        <Skeleton.Group show={true}>
+          <Skeleton colorMode={colorScheme} height={48} width="100%" radius={12} />
+        </Skeleton.Group>
+      ) : (
+        <SafeButton onPress={handleConfirmPress} width="100%" disabled={isButtonDisabled}>
+          {buttonText}
+        </SafeButton>
+      )}
     </Stack>
   )
 }
