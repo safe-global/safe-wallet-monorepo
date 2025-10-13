@@ -111,7 +111,8 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
     }
   }
 
-  const isButtonDisabled = !hasSufficientFunds
+  const willFail = Boolean(estimatedFeeParams.gasLimitError) && executionMethod === ExecutionMethod.WITH_PK
+  const isButtonDisabled = !hasSufficientFunds || willFail
   const buttonText = !hasSufficientFunds ? 'Insufficient funds' : 'Execute transaction'
 
   return (
@@ -129,8 +130,8 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
           executionMethod={executionMethod}
           isLoadingFees={isLoadingFees}
           txId={txId}
+          willFail={willFail}
           totalFee={totalFee}
-          totalFeeRaw={totalFeeRaw}
         />
       </Container>
 
