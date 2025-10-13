@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { analyzeAddressActivity, isLowActivityAddress } from './addressActivityService'
@@ -21,7 +21,17 @@ export const useAddressActivity = (addresses: string[]): AsyncResult<AddressActi
   const web3ReadOnly = useWeb3ReadOnly()
 
   const previousRecipientsRef = useRef<Set<string>>(new Set())
+  const previousProviderRef = useRef<typeof web3ReadOnly>(web3ReadOnly)
   const [results, setResults] = useState<AddressActivityResult>({})
+
+  // Clear cache and results when web3ReadOnly provider changes
+  useEffect(() => {
+    if (previousProviderRef.current !== web3ReadOnly) {
+      previousRecipientsRef.current.clear()
+      setResults({})
+      previousProviderRef.current = web3ReadOnly
+    }
+  }, [web3ReadOnly])
 
   // Determine which addresses changed and need fetching
   const addressesToFetch = useMemo(() => {

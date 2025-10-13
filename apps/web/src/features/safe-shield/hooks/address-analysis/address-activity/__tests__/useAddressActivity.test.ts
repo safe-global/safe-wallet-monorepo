@@ -287,4 +287,45 @@ describe('useAddressActivity', () => {
       { timeout: 3000 },
     )
   })
+
+  it('should clear cache and re-fetch when provider changes', async () => {
+    const address = faker.finance.ethereumAddress()
+    const provider1 = mockProvider(5)
+    const provider2 = mockProvider(100)
+
+    const useWeb3ReadOnlySpy = jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(provider1)
+
+    const { result, rerender } = renderHook(() => {
+      const addresses = useMemo(() => [address], [])
+      return useAddressActivity(addresses)
+    })
+
+    await waitFor(
+      () => {
+        const [results] = result.current
+        expect(results?.[address]).toBeDefined()
+      },
+      { timeout: 3000 },
+    )
+
+    const [results1] = result.current
+    expect(results1?.[address]?.type).toBe('LOW_ACTIVITY')
+    expect(provider1.getTransactionCount).toHaveBeenCalledTimes(1)
+
+    // Change provider
+    useWeb3ReadOnlySpy.mockReturnValue(provider2)
+    rerender()
+
+    await waitFor(
+      () => {
+        const [results] = result.current
+        expect(results?.[address]?.type).toBe('HIGH_ACTIVITY')
+      },
+      { timeout: 3000 },
+    )
+
+    const [results2] = result.current
+    expect(results2?.[address]?.type).toBe('HIGH_ACTIVITY')
+    expect(provider2.getTransactionCount).toHaveBeenCalledTimes(1)
+  })
 })
