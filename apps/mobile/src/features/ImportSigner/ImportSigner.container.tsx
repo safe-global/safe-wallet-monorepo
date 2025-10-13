@@ -43,6 +43,8 @@ export function ImportSigner() {
               success={!!wallet || inputType === 'seed-phrase'}
               textAlign="center"
               error={error}
+              numberOfLines={isMasked ? 1 : 3}
+              multiline={isMasked ? false : true}
               right={
                 <TouchableOpacity onPress={() => setIsMasked((prev) => !prev)} hitSlop={12}>
                   <SafeFontIcon name={isMasked ? 'eye-on' : 'eye-off'} size={16} color={'$color'} />
