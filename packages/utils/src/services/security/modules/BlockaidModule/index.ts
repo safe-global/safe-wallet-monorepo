@@ -60,7 +60,11 @@ type BlockaidPayload = {
     params: [string, string]
   }
   options: ['simulation', 'validation']
+  state_override?: Record<string, { state?: Record<string, string> }>
 }
+
+// Safe Smart Account Storage Slot for Guard
+const GUARD_STORAGE_POSITION = '0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8'
 
 export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, BlockaidModuleResponse> {
   static prepareMessage(request: BlockaidModuleRequest): string {
@@ -123,6 +127,16 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
         : {
             non_dapp: true,
           },
+      state_override: {
+        [safeAddress]: {
+          state: {
+            // Safe Smart Account Storage Slot for Guard
+            GUARD_STORAGE_POSITION:
+              // Set to zero address to disable guard
+              '0x0000000000000000000000000000000000000000000000000000000000000000',
+          },
+        },
+      },
     }
     const res = await fetch(`${BLOCKAID_API}/v0/evm/json-rpc/scan`, {
       method: 'POST',
