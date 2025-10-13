@@ -60,7 +60,7 @@ type BlockaidPayload = {
     params: [string, string]
   }
   options: ['simulation', 'validation']
-  state_override?: Record<string, { state?: Record<string, string> }>
+  state_override?: Record<string, { stateDiff?: Record<string, string> }>
 }
 
 // Safe Smart Account Storage Slot for Guard
@@ -129,11 +129,9 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
           },
       state_override: {
         [safeAddress]: {
-          state: {
-            // Safe Smart Account Storage Slot for Guard
-            [GUARD_STORAGE_POSITION]:
-              // Set to zero address to disable guard
-              '0x0000000000000000000000000000000000000000000000000000000000000000',
+          stateDiff: {
+            // Set the Guard storage slot to zero address to disable guard
+            [GUARD_STORAGE_POSITION]: '0x0000000000000000000000000000000000000000000000000000000000000000',
           },
         },
       },
