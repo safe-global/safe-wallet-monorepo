@@ -20,6 +20,8 @@ import { useExecutionFunds } from '../../hooks/useExecutionFunds'
 import { selectActiveChain } from '@/src/store/chains'
 import { Skeleton } from 'moti/skeleton'
 import { useTheme } from '@/src/theme/hooks/useTheme'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 interface ReviewFooterProps {
   txId: string
@@ -33,9 +35,13 @@ interface ReviewFooterProps {
 const getExecutionMethod = (
   requestedMethod: ExecutionMethod | undefined,
   isRelayAvailable: boolean,
+  chain?: Chain,
 ): ExecutionMethod => {
+  const canNotUseRelayOption = requestedMethod === ExecutionMethod.WITH_RELAY && !isRelayAvailable
+  const isRelayEnabled = chain && hasFeature(chain, FEATURES.RELAYING)
+
   // If user explicitly requested relay but none are available, fallback to signer
-  if (requestedMethod === ExecutionMethod.WITH_RELAY && !isRelayAvailable) {
+  if (canNotUseRelayOption || !isRelayEnabled) {
     return ExecutionMethod.WITH_PK
   }
 
@@ -58,14 +64,14 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
   const { totalFee, estimatedFeeParams, totalFeeRaw } = useGasFee(txDetails, manualParams)
   const isLoadingFees = estimatedFeeParams.isLoadingGasPrice || estimatedFeeParams.gasLimitLoading
   const { colorScheme } = useTheme()
+  const chain = useAppSelector(selectActiveChain)
 
   // checks the executionMethod
   const isRelayAvailable = Boolean(relaysRemaining?.remaining && relaysRemaining.remaining > 0)
   const { executionMethod: executionMethodParam } = useLocalSearchParams<{ executionMethod: ExecutionMethod }>()
-  const executionMethod = getExecutionMethod(executionMethodParam, isRelayAvailable)
+  const executionMethod = getExecutionMethod(executionMethodParam, isRelayAvailable, chain)
 
   // Check if signer has sufficient funds
-  const chain = useAppSelector(selectActiveChain)
   const { hasSufficientFunds, isCheckingFunds } = useExecutionFunds({
     signerAddress: activeSigner?.value,
     totalFeeRaw,
