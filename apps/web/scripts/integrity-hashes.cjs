@@ -1,11 +1,36 @@
+const readline = require('readline')
 const fs = require('fs')
 const path = require('path')
 const crypto = require('crypto')
 const cheerio = require('cheerio')
+const secp = require('@noble/secp256k1')
+const { keccak_256 } = require('@noble/hashes/sha3.js')
+const { sha256 } = require('@noble/hashes/sha2.js')
+const { hmac } = require('@noble/hashes/hmac.js')
+secp.hashes.hmacSha256 = (key, msg) => hmac(sha256, key, msg)
+secp.hashes.sha256 = sha256
 
 const OUT_DIR = 'out'
 const CHUNKS_DIR = path.join(OUT_DIR, '_next', 'static', 'chunks')
 const MANIFEST_JS_FILENAME = 'chunks-sri-manifest.js'
+const SIGN_ADDR = '0x0d5b81e9bd4d6ab0a0487ea9fe161a4152b11625'
+
+function recoverPersonalSign(msgHash, signature) {
+  if (signature.startsWith('0x')) {
+    signature = signature.slice(2)
+  }
+  // Signature
+  const sigBytes = secp.etc.hexToBytes(signature)
+  // Message Hash
+  const prefix = '\x19Ethereum Signed Message:\n'
+  const messageHash = keccak_256(
+    secp.etc.concatBytes(new TextEncoder('utf-8').encode(prefix + msgHash.length), msgHash),
+  )
+  const compressedPubKey = secp.recoverPublicKey(sigBytes, messageHash, { prehash: false })
+  const point = secp.Point.fromBytes(compressedPubKey)
+  const keccak = keccak_256(point.toBytes(false).slice(1))
+  return '0x' + secp.etc.bytesToHex(keccak.slice(-20))
+}
 
 /**
  * Recursively find all JS files in `out/_next/static/chunks`
@@ -128,7 +153,7 @@ function processHtmlFile(htmlFilePath) {
       const integrityVal = computeSriHash(scriptFilePath)
       $(scriptEl).attr('integrity', integrityVal)
 
-      console.log('Added integrity hash', integrityVal, scriptSrc)
+      console.log('Added integrity hash', integrityVal, scriptSrc, htmlFilePath)
     }
   })
 
@@ -154,6 +179,98 @@ function addSRIToAllHtmlFiles(dirPath) {
 }
 
 /**
+ * Verifies the signature of the manifest data and saves it to a JSON file.
+ * The function checks if the recovered signer matches the expected SIGN_ADDR.
+ * If verification passes, saves the manifest data and signature to 'integrity-manifest.json'.
+ */
+function checkSigAndSaveDappfenceManifest(sig, manifestData, msgHash) {
+  sig = sig.trim().toLowerCase()
+  if (sig.startsWith('0x')) {
+    sig = sig.slice(2)
+  }
+  if (sig.length === 64) {
+    // Message Hash
+    const prefix = '\x19Ethereum Signed Message:\n'
+    const messageHash = keccak_256(
+      secp.etc.concatBytes(new TextEncoder('utf-8').encode(prefix + msgHash.length), msgHash),
+    )
+    sig = secp.etc.bytesToHex(
+      secp.sign(messageHash, secp.etc.hexToBytes(sig), {
+        format: 'recovered',
+        prehash: false,
+        lowS: true,
+      }),
+    )
+  }
+  const recovered = recoverPersonalSign(msgHash, sig)
+  console.log('recovered', recovered)
+  if (recovered.toLowerCase() !== SIGN_ADDR.toLowerCase()) {
+    throw new Error(`invalid signature 0x${sig.startsWith('0x') ? sig.slice(2) : sig}, ${SIGN_ADDR} != ${recovered}`)
+  }
+  const manifest = {
+    pay: manifestData,
+    sig,
+  }
+  const manifestJsPath = path.join(OUT_DIR, 'integrity-manifest.json')
+  const manifestText = JSON.stringify(manifest, null, 2)
+  fs.writeFileSync(manifestJsPath, manifestText, 'utf8')
+}
+
+/**
+ * Write the manifest file in `/integrity-manifest.json`.
+ * This is just a temproray hack, we will write a webpack pluging to make it cleaner!!!
+ */
+function writeDappfenceManifest() {
+  const extensions = ['.js', '.html', '.json', '.css', '.svg']
+  const files = {}
+  function recurse(dirPath) {
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true })
+
+    for (const entry of entries) {
+      const entryPath = path.join(dirPath, entry.name)
+      if (entry.isDirectory()) {
+        recurse(entryPath)
+      } else if (entry.isFile()) {
+        if (extensions.some((x) => entry.name.endsWith(x))) {
+          // filePath is absolute, e.g. /path/to/out/_next/static/chunks/foo.js
+          // We want to create a key like "/_next/static/chunks/foo.js"
+          const relPath = path.relative(OUT_DIR, entryPath).replace(/\\/g, '/')
+          // On Windows, ensure forward slashes
+          const publicPath = `/${relPath}`
+          const content = fs.readFileSync(entryPath)
+          const hash = crypto.createHash('sha256').update(content).digest('base64')
+          files[publicPath] = `sha256-${hash}`
+        }
+      }
+    }
+  }
+  recurse(OUT_DIR)
+  const manifestData = {
+    files: files,
+    metadata: {
+      extensions,
+      contentTypes: ['text/javascript', 'text/html', 'application/json'],
+      buildTime: '2025-10-21T14:04:56.924Z', // new Date().toISOString(),
+      version: '1.0.0', // TODO
+      target: 'safe-app', // TODO
+    },
+  }
+  const msg = new TextEncoder('utf-8').encode(JSON.stringify(manifestData, null, 2))
+  const msgHash = keccak_256(msg)
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  })
+  rl.question(
+    `sign it with your wallet ${SIGN_ADDR} the following hash 0x${secp.etc.bytesToHex(msgHash).toLowerCase()}\n`,
+    (answer) => {
+      checkSigAndSaveDappfenceManifest(answer.toLowerCase(), manifestData, msgHash)
+      rl.close() // Important: Close the interface to end the program
+    },
+  )
+}
+
+/**
  * Main
  */
 function main() {
@@ -166,6 +283,11 @@ function main() {
   addSRIToAllHtmlFiles(OUT_DIR)
 
   console.log(`Added SRI manifest script to all .html files.`)
+
+  // This is just a temproray hack, we will write a webpack pluging to make it cleaner!!!
+  // Must be executed after we modify files in addSRIToAllHtmlFiles
+  writeDappfenceManifest(sriManifest)
+  console.log(`Added integrity-manifest.json`)
 }
 
 main()

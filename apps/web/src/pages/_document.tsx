@@ -4,6 +4,7 @@
  */
 import type { DocumentContext } from 'next/document'
 import Document, { Html, Head, Main, NextScript } from 'next/document'
+import Script from 'next/script'
 import createEmotionServer from '@emotion/server/create-instance'
 import createEmotionCache from '@/utils/createEmotionCache'
 
@@ -18,6 +19,16 @@ export default class WebCoreDocument extends Document {
         <body>
           <Main />
           <NextScript />
+          {/*add integrity attribute to the script*/}
+          <Script
+            defer={false}
+            src="/dappfence.js"
+            strategy="beforeInteractive"
+            data-manifest-signature-identity="0x0d5b81e9bd4d6ab0a0487ea9fe161a4152b11625"
+            data-manifest-signature-type="personal-sign-alt"
+            data-manifest="/integrity-manifest.json"
+            data-mode="manifest"
+          />
         </body>
       </Html>
     )

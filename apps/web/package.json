@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "next dev",
     "start": "next dev",
-    "build": "next build",
+    "build": "next build; node scripts/integrity-hashes.cjs",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit",
@@ -105,6 +105,8 @@
     "@mdx-js/react": "^3.0.1",
     "@next/bundle-analyzer": "^15.0.4",
     "@next/mdx": "^15.0.4",
+    "@noble/hashes": "^2.0.1",
+    "@noble/secp256k1": "^3.0.0",
     "@openzeppelin/contracts": "^4.9.6",
     "@safe-global/test": "workspace:^",
     "@safe-global/types-kit": "^1.0.5",

@@ -9,6 +9,7 @@
     "packages/*"
   ],
   "scripts": {
+    "vercel-build": "yarn workspace @safe-global/web build",
     "lint": "yarn workspaces foreach --all -pt run lint",
     "test": "yarn workspaces foreach --all -pt run test",
     "eslint": "yarn workspaces foreach --all -pt run eslint",
