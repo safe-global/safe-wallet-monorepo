@@ -4,6 +4,7 @@ import { useFetchRecipientAnalysis } from '../useFetchRecipientAnalysis'
 import * as useChainIdHook from '@/hooks/useChainId'
 import * as useSafeAddressHook from '@/hooks/useSafeAddress'
 import { useMemo } from 'react'
+import { GATEWAY_URL } from '@/config/gateway'
 
 describe('useFetchRecipientAnalysis', () => {
   const mockChainId = '1'
@@ -83,7 +84,7 @@ describe('useFetchRecipientAnalysis', () => {
     expect(results?.[mockRecipient1]).toBeDefined()
     expect(error).toBeUndefined()
     expect(fetchSpy).toHaveBeenCalledWith(
-      `http://localhost:3000/v1/chains/${mockChainId}/security/${mockSafeAddress}/recipient/${mockRecipient1}`,
+      `${GATEWAY_URL}/v1/chains/${mockChainId}/security/${mockSafeAddress}/recipient/${mockRecipient1}`,
     )
   })
 
@@ -160,7 +161,7 @@ describe('useFetchRecipientAnalysis', () => {
 
     expect(fetchSpy).toHaveBeenCalledTimes(1)
     expect(fetchSpy).toHaveBeenCalledWith(
-      `http://localhost:3000/v1/chains/1/security/${mockSafeAddress}/recipient/${mockRecipient1}`,
+      `${GATEWAY_URL}/v1/chains/1/security/${mockSafeAddress}/recipient/${mockRecipient1}`,
     )
 
     // Change chainId
@@ -178,7 +179,7 @@ describe('useFetchRecipientAnalysis', () => {
     // Should fetch again with new chainId
     expect(fetchSpy).toHaveBeenCalledTimes(2)
     expect(fetchSpy).toHaveBeenLastCalledWith(
-      `http://localhost:3000/v1/chains/137/security/${mockSafeAddress}/recipient/${mockRecipient1}`,
+      `${GATEWAY_URL}/v1/chains/137/security/${mockSafeAddress}/recipient/${mockRecipient1}`,
     )
   })
 
@@ -201,7 +202,7 @@ describe('useFetchRecipientAnalysis', () => {
 
     expect(fetchSpy).toHaveBeenCalledTimes(1)
     expect(fetchSpy).toHaveBeenCalledWith(
-      `http://localhost:3000/v1/chains/${mockChainId}/security/${mockSafeAddress}/recipient/${mockRecipient1}`,
+      `${GATEWAY_URL}/v1/chains/${mockChainId}/security/${mockSafeAddress}/recipient/${mockRecipient1}`,
     )
 
     // Change safeAddress
@@ -219,7 +220,7 @@ describe('useFetchRecipientAnalysis', () => {
     // Should fetch again with new safeAddress
     expect(fetchSpy).toHaveBeenCalledTimes(2)
     expect(fetchSpy).toHaveBeenLastCalledWith(
-      `http://localhost:3000/v1/chains/${mockChainId}/security/${newSafeAddress}/recipient/${mockRecipient1}`,
+      `${GATEWAY_URL}/v1/chains/${mockChainId}/security/${newSafeAddress}/recipient/${mockRecipient1}`,
     )
   })
 
