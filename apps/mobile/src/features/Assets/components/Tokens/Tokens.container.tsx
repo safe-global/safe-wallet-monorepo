@@ -1,10 +1,11 @@
 import React from 'react'
 import { ListRenderItem } from 'react-native'
 import { useSelector } from 'react-redux'
-import { getTokenValue, Text } from 'tamagui'
+import { getTokenValue, Text, View } from 'tamagui'
 
 import { SafeTab } from '@/src/components/SafeTab'
 import { AssetsCard } from '@/src/components/transactions-list/Card/AssetsCard'
+import { FiatChange } from '@/src/components/FiatChange'
 import { POLLING_INTERVAL } from '@/src/config/constants'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { Balance, useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
@@ -50,11 +51,16 @@ export function TokensContainer() {
             item.tokenInfo.symbol
           }`}
           rightNode={
-            <Text fontSize="$4" fontWeight={600} color="$color">
-              {shouldDisplayPreciseBalance(fiatBalance, 7)
-                ? formatCurrencyPrecise(fiatBalance, currency)
-                : formatCurrency(fiatBalance, currency)}
-            </Text>
+            <View alignItems="flex-end">
+              <Text fontSize="$4" fontWeight={600} color="$color">
+                {shouldDisplayPreciseBalance(fiatBalance, 7)
+                  ? formatCurrencyPrecise(fiatBalance, currency)
+                  : formatCurrency(fiatBalance, currency)}
+              </Text>
+              <View marginTop="$1">
+                <FiatChange balanceItem={item} />
+              </View>
+            </View>
           }
         />
       )
