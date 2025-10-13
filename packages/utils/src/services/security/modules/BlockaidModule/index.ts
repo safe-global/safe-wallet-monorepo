@@ -131,7 +131,7 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
         [safeAddress]: {
           state: {
             // Safe Smart Account Storage Slot for Guard
-            GUARD_STORAGE_POSITION:
+            [GUARD_STORAGE_POSITION]:
               // Set to zero address to disable guard
               '0x0000000000000000000000000000000000000000000000000000000000000000',
           },
