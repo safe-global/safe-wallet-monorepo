@@ -69,7 +69,7 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
   // checks the executionMethod
   const isRelayAvailable = Boolean(relaysRemaining?.remaining && relaysRemaining.remaining > 0)
   const { executionMethod: executionMethodParam } = useLocalSearchParams<{ executionMethod: ExecutionMethod }>()
-  const executionMethod = getExecutionMethod(executionMethodParam, isRelayAvailable, chain)
+  const executionMethod = getExecutionMethod(executionMethodParam, isRelayAvailable, chain ?? undefined)
 
   // Check if signer has sufficient funds
   const { hasSufficientFunds, isCheckingFunds } = useExecutionFunds({
