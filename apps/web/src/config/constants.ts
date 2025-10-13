@@ -1,8 +1,14 @@
 import chains from './chains'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 
+type Environment = 'development' | 'production' | 'test' | 'cypress'
+
+export const APP_ENV = process.env.NODE_ENV as Environment
 export const IS_PRODUCTION = process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true'
-export const IS_DEV = process.env.NODE_ENV === 'development'
+export const IS_DEV = APP_ENV === 'development'
+export const IS_TEST_UNIT = APP_ENV === 'test'
+export const IS_TEST_E2E = APP_ENV === 'cypress'
+export const IS_TEST = IS_TEST_UNIT || IS_TEST_E2E
 export const COMMIT_HASH = process.env.NEXT_PUBLIC_COMMIT_HASH || ''
 
 // default chain ID's as provided to the environment

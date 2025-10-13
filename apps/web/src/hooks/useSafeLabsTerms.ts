@@ -7,6 +7,7 @@ import useOnboard from '@/hooks/wallets/useOnboard'
 import { AppRoutes } from '@/config/routes'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import type { OnboardAPI, WalletState } from '@web3-onboard/core'
+import { IS_TEST_E2E } from '@/config/constants'
 
 const TERMS_REDIRECT_EXCEPTIONS = [AppRoutes.safeLabsTerms, AppRoutes.privacy, AppRoutes.terms, AppRoutes.imprint]
 
@@ -24,8 +25,6 @@ export const useSafeLabsTerms = (): UseSafeLabsTermsReturnType => {
   const router = useRouter()
   const hasRedirected = useRef(false)
   const [shouldShowContent, setShouldShowContent] = useState(false)
-
-  const isCypressTest = typeof window !== 'undefined' && window.Cypress !== undefined
 
   async function disconnectWalletsEIP2255(wallet: WalletState): Promise<void> {
     try {
@@ -79,7 +78,7 @@ export const useSafeLabsTerms = (): UseSafeLabsTermsReturnType => {
     if (
       !isOfficialHost ||
       isFeatureDisabled ||
-      isCypressTest ||
+      IS_TEST_E2E ||
       termsAccepted ||
       TERMS_REDIRECT_EXCEPTIONS.includes(router.pathname)
     ) {
@@ -97,11 +96,11 @@ export const useSafeLabsTerms = (): UseSafeLabsTermsReturnType => {
         },
       })
     }
-  }, [isOfficialHost, isFeatureDisabled, isCypressTest, router, router.pathname])
+  }, [isOfficialHost, isFeatureDisabled, router, router.pathname])
 
   useEffect(() => {
     const termsAccepted = hasAcceptedSafeLabsTerms()
-    if (!isOfficialHost || !onboard || isFeatureDisabled || isCypressTest || termsAccepted) {
+    if (!isOfficialHost || !onboard || isFeatureDisabled || IS_TEST_E2E || termsAccepted) {
       return
     }
 
@@ -119,14 +118,14 @@ export const useSafeLabsTerms = (): UseSafeLabsTermsReturnType => {
     return () => {
       walletSubscription.unsubscribe()
     }
-  }, [isOfficialHost, isFeatureDisabled, isCypressTest, onboard, router.pathname, disconnectWallets])
+  }, [isOfficialHost, isFeatureDisabled, onboard, router.pathname, disconnectWallets])
 
   const termsAccepted = hasAcceptedSafeLabsTerms()
 
   return {
     isFeatureDisabled,
     hasAccepted: termsAccepted,
-    shouldBypassTermsCheck: !isOfficialHost || isFeatureDisabled || isCypressTest || termsAccepted,
+    shouldBypassTermsCheck: !isOfficialHost || isFeatureDisabled || IS_TEST_E2E || termsAccepted,
     shouldShowContent,
   }
 }
