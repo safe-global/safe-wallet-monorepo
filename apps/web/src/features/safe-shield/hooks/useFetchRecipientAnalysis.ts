@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import type { AddressAnalysisResults, RecipientAnalysisResults } from '../types'
@@ -49,7 +49,18 @@ export function useFetchRecipientAnalysis(recipients: string[]): AsyncResult<Rec
   const safeAddress = useSafeAddress()
   const chainId = useChainId()
   const previousRecipientsRef = useRef<Set<string>>(new Set())
+  const previousContextRef = useRef<{ chainId: string; safeAddress: string }>({ chainId: '', safeAddress: '' })
   const [results, setResults] = useState<RecipientAnalysisResults>({})
+
+  // Clear cache and results when chainId or safeAddress changes
+  useEffect(() => {
+    const previousContext = previousContextRef.current
+    if (previousContext.chainId !== chainId || previousContext.safeAddress !== safeAddress) {
+      previousRecipientsRef.current.clear()
+      setResults({})
+      previousContextRef.current = { chainId, safeAddress }
+    }
+  }, [chainId, safeAddress])
 
   // Determine which addresses changed and need fetching
   const recipientsToFetch = useMemo(() => {
