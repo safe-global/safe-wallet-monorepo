@@ -38,7 +38,13 @@ const getActiveSignerRightNode = (
     return <SafeFontIcon name="check" color="$color" />
   }
 
-  return toBigInt(item.balance) < totalFee && <Text>Insufficient balance</Text>
+  return (
+    toBigInt(item.balance) < totalFee && (
+      <Container backgroundColor="$backgroundSecondary" paddingVertical="$1" paddingHorizontal="$3">
+        <Text color="$colorSecondary">Not enough gas</Text>
+      </Container>
+    )
+  )
 }
 
 export const HowToExecuteSheetContainer = () => {
