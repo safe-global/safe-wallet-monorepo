@@ -12,6 +12,11 @@
   flex: 1;
 }
 
+.container,
+.captionText {
+  letter-spacing: 0.17px;
+}
+
 .header {
   padding: var(--space-3);
   background: linear-gradient(90deg, #b0ffc9 0%, #d7f6ff 99.5%);
@@ -135,12 +140,8 @@
 }
 
 .formControlLabel {
-  align-items: flex-start;
+  align-items: center;
   margin: 0;
-}
-
-.formControlLabel :global(.MuiCheckbox-root) {
-  padding-top: 0;
 }
 
 .linkBold {
