@@ -8,7 +8,8 @@ import {
 } from '../address-analysis/address-book-check/useAddressBookCheck'
 import { useAddressActivity, type AddressActivityResult } from '../address-analysis/address-activity/useAddressActivity'
 import { useMemo } from 'react'
-import { Severity, RecipientStatus, StatusGroup, type AnalysisResult } from '../../types'
+import { StatusGroup } from '../../types'
+import { RecipientAnalysisResultBuilder } from '../../builders'
 
 // Mock dependencies
 jest.mock('../useFetchRecipientAnalysis')
@@ -103,25 +104,11 @@ describe('useRecipientAnalysis', () => {
 
   it('should merge backend results with address book check', async () => {
     const backendResults = {
-      [mockAddress1]: {
-        [StatusGroup.RECIPIENT_INTERACTION]: [
-          {
-            type: RecipientStatus.NEW_RECIPIENT,
-            severity: Severity.INFO,
-            title: 'New Recipient',
-            description: 'First interaction',
-          },
-        ],
-      },
+      [mockAddress1]: { [StatusGroup.RECIPIENT_INTERACTION]: [RecipientAnalysisResultBuilder.newRecipient().build()] },
     }
 
     const addressBookResults: AddressBookCheckResult = {
-      [mockAddress1]: {
-        type: RecipientStatus.KNOWN_RECIPIENT,
-        severity: Severity.OK,
-        title: 'Known Recipient',
-        description: 'In address book',
-      } as AnalysisResult<RecipientStatus.KNOWN_RECIPIENT>,
+      [mockAddress1]: RecipientAnalysisResultBuilder.knownRecipient().build(),
     }
 
     mockUseFetchRecipientAnalysis.mockReturnValue([backendResults, undefined, false])
@@ -146,25 +133,11 @@ describe('useRecipientAnalysis', () => {
 
   it('should merge backend results with activity check', async () => {
     const backendResults = {
-      [mockAddress1]: {
-        [StatusGroup.RECIPIENT_INTERACTION]: [
-          {
-            type: RecipientStatus.NEW_RECIPIENT,
-            severity: Severity.INFO,
-            title: 'New Recipient',
-            description: 'First interaction',
-          },
-        ],
-      },
+      [mockAddress1]: { [StatusGroup.RECIPIENT_INTERACTION]: [RecipientAnalysisResultBuilder.newRecipient().build()] },
     }
 
     const activityResults: AddressActivityResult = {
-      [mockAddress1]: {
-        type: RecipientStatus.HIGH_ACTIVITY,
-        severity: Severity.OK,
-        title: 'High Activity',
-        description: 'Many transactions',
-      } as AnalysisResult<RecipientStatus.HIGH_ACTIVITY>,
+      [mockAddress1]: RecipientAnalysisResultBuilder.highActivity().build(),
     }
 
     mockUseFetchRecipientAnalysis.mockReturnValue([backendResults, undefined, false])
@@ -189,34 +162,15 @@ describe('useRecipientAnalysis', () => {
 
   it('should merge all three types of checks', async () => {
     const backendResults = {
-      [mockAddress1]: {
-        [StatusGroup.RECIPIENT_INTERACTION]: [
-          {
-            type: RecipientStatus.NEW_RECIPIENT,
-            severity: Severity.INFO,
-            title: 'New Recipient',
-            description: 'First interaction',
-          },
-        ],
-      },
+      [mockAddress1]: { [StatusGroup.RECIPIENT_INTERACTION]: [RecipientAnalysisResultBuilder.newRecipient().build()] },
     }
 
     const addressBookResults: AddressBookCheckResult = {
-      [mockAddress1]: {
-        type: RecipientStatus.KNOWN_RECIPIENT,
-        severity: Severity.OK,
-        title: 'Known Recipient',
-        description: 'In address book',
-      } as AnalysisResult<RecipientStatus.KNOWN_RECIPIENT>,
+      [mockAddress1]: RecipientAnalysisResultBuilder.knownRecipient().build(),
     }
 
     const activityResults: AddressActivityResult = {
-      [mockAddress1]: {
-        type: RecipientStatus.HIGH_ACTIVITY,
-        severity: Severity.OK,
-        title: 'High Activity',
-        description: 'Many transactions',
-      } as AnalysisResult<RecipientStatus.HIGH_ACTIVITY>,
+      [mockAddress1]: RecipientAnalysisResultBuilder.highActivity().build(),
     }
 
     mockUseFetchRecipientAnalysis.mockReturnValue([backendResults, undefined, false])
@@ -243,18 +197,8 @@ describe('useRecipientAnalysis', () => {
 
   it('should handle multiple recipients', async () => {
     const addressBookResults: AddressBookCheckResult = {
-      [mockAddress1]: {
-        type: RecipientStatus.KNOWN_RECIPIENT,
-        severity: Severity.OK,
-        title: 'Known Recipient',
-        description: 'In address book',
-      } as AnalysisResult<RecipientStatus.KNOWN_RECIPIENT>,
-      [mockAddress2]: {
-        type: RecipientStatus.UNKNOWN_RECIPIENT,
-        severity: Severity.INFO,
-        title: 'Unknown Recipient',
-        description: 'Not in address book',
-      } as AnalysisResult<RecipientStatus.UNKNOWN_RECIPIENT>,
+      [mockAddress1]: RecipientAnalysisResultBuilder.knownRecipient().build(),
+      [mockAddress2]: RecipientAnalysisResultBuilder.unknownRecipient().build(),
     }
 
     mockUseAddressBookCheck.mockReturnValue(addressBookResults)
