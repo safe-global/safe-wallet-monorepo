@@ -29,7 +29,7 @@ describe('useExecutionFunds', () => {
     store = makeStore()
   })
 
-  const wrapper = ({ children }: { children: React.ReactNode }) => React.createElement(Provider, { store }, children)
+  const wrapper = ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>
 
   describe('WITH_RELAY execution method', () => {
     it('should return hasSufficientFunds as true when using relay', () => {
@@ -129,6 +129,7 @@ describe('useExecutionFunds', () => {
     })
 
     it('should set isCheckingFunds to true while loading', () => {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       mockGetBalance.mockImplementation(() => new Promise(() => {})) // Never resolves
 
       const { result } = renderHook(

@@ -31,14 +31,13 @@ export const useExecutionFunds = ({
   const shouldCheckBalance = executionMethod !== ExecutionMethod.WITH_RELAY && Boolean(signerAddress && chain)
 
   const { data: balances, isLoading } = useGetBalancesQuery(
-    shouldCheckBalance
-      ? {
-          addresses: [signerAddress!],
-          chain: chain!,
-        }
-      : { addresses: [], chain: chain! },
     {
-      skip: !shouldCheckBalance,
+      addresses: signerAddress ? [signerAddress] : [],
+      // Cast is safe because query is skipped when chain is undefined
+      chain: (chain ?? {}) as Chain,
+    },
+    {
+      skip: !shouldCheckBalance || !signerAddress || !chain,
     },
   )
 
