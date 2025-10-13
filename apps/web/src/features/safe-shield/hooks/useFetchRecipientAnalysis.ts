@@ -1,9 +1,9 @@
 import { useMemo, useRef, useState } from 'react'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
-import { AddressAnalysisResults, RecipientAnalysisResults } from '../types'
+import type { AddressAnalysisResults, RecipientAnalysisResults } from '../types'
 import { GATEWAY_URL } from '@/config/gateway'
-import { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useEffectDeepCompare } from './util-hooks/useEffectDeepCompare'
 import { useAsyncDeepCompare } from './util-hooks/useAsyncDeepCompare'
 

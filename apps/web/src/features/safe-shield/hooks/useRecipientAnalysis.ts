@@ -2,11 +2,14 @@ import { useMemo } from 'react'
 import { isAddress } from 'ethers'
 import uniq from 'lodash/uniq'
 import useDebounce from '@/hooks/useDebounce'
-import { AddressBookCheckResult, useAddressBookCheck } from './address-analysis/address-book-check/useAddressBookCheck'
-import { AddressActivityResult, useAddressActivity } from './address-analysis/address-activity/useAddressActivity'
-import { RecipientAnalysisResults, StatusGroup } from '../types'
+import {
+  type AddressBookCheckResult,
+  useAddressBookCheck,
+} from './address-analysis/address-book-check/useAddressBookCheck'
+import { type AddressActivityResult, useAddressActivity } from './address-analysis/address-activity/useAddressActivity'
+import { type RecipientAnalysisResults, StatusGroup } from '../types'
 import { useFetchRecipientAnalysis } from './useFetchRecipientAnalysis'
-import { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useMemoDeepCompare } from './util-hooks/useMemoDeepCompare'
 
 const DEBOUNCE_DELAY = 500

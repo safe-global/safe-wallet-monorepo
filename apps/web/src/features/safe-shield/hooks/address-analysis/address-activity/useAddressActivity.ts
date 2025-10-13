@@ -1,9 +1,9 @@
 import { useMemo, useRef, useState } from 'react'
-import { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { analyzeAddressActivity, isLowActivityAddress } from './addressActivityService'
 import { ActivityMessages } from '../config'
-import { AnalysisResult, RecipientStatus, Severity } from '../../../types'
+import { type AnalysisResult, RecipientStatus, Severity } from '../../../types'
 import { useEffectDeepCompare } from '../../util-hooks/useEffectDeepCompare'
 import { useAsyncDeepCompare } from '../../util-hooks/useAsyncDeepCompare'
 
@@ -69,7 +69,7 @@ export const useAddressActivity = (addresses: string[]): AsyncResult<AddressActi
     )
 
     return activityResults
-  }, [addressesToFetch, web3ReadOnly])
+  }, [addressesToFetch, web3ReadOnly, addresses])
 
   // Update results to only include addresses that are in the given addresses array
   useEffectDeepCompare(() => {
