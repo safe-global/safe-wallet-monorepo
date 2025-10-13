@@ -58,12 +58,12 @@ export const ConfirmationsSheetContainer = () => {
 
   const getSignerTag = useMemo(() => {
     return (signerAddress: Address): string | undefined => {
-      if (importedSigners[signerAddress]?.value) {
-        return 'You'
-      }
-
       if (proposer?.value === signerAddress) {
         return 'Creator'
+      }
+
+      if (importedSigners[signerAddress]?.value) {
+        return 'You'
       }
 
       return undefined
