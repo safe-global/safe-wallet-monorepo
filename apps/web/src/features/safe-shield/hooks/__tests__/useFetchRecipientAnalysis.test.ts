@@ -18,16 +18,14 @@ describe('useFetchRecipientAnalysis', () => {
     jest.spyOn(useChainIdHook, 'default').mockReturnValue(mockChainId)
     jest.spyOn(useSafeAddressHook, 'default').mockReturnValue(mockSafeAddress)
 
-    fetchSpy = jest
-      .spyOn(global, 'fetch')
-      .mockResolvedValue({
-        ok: true,
-        json: async () => ({
-          RECIPIENT_INTERACTION: [
-            { type: 'NEW_RECIPIENT', severity: 'INFO', title: 'New Recipient', description: 'First interaction' },
-          ],
-        }),
-      } as Response)
+    fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        RECIPIENT_INTERACTION: [
+          { type: 'NEW_RECIPIENT', severity: 'INFO', title: 'New Recipient', description: 'First interaction' },
+        ],
+      }),
+    } as Response)
   })
 
   afterEach(() => {
