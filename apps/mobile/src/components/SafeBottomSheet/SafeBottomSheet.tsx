@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useRef } from 'react'
 import BottomSheet, {
   BottomSheetFooterProps,
   BottomSheetModalProps,
-  BottomSheetView,
   BottomSheetScrollView,
   BottomSheetFooter,
 } from '@gorhom/bottom-sheet'
@@ -129,22 +128,18 @@ export function SafeBottomSheet<T>({
       backdropComponent={() => <BackdropComponent />}
       footerComponent={isSortable ? undefined : renderFooter}
       topInset={insets.top}
-      // bottomInset={Platform.OS === 'android' ? insets.bottom : 0}
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
     >
       {isSortable ? (
-        <BottomSheetView style={[styles.contentContainer]}>
-          {title && <TitleHeader />}
-          <DraggableFlatList<T>
-            data={items}
-            style={{ marginBottom: insets.bottom }}
-            containerStyle={{ height: '100%' }}
-            contentContainerStyle={{ paddingBottom: 50 }}
-            onDragEnd={onDragEnd}
-            keyExtractor={(item, index) => (keyExtractor ? keyExtractor({ item, index }) : index.toString())}
-            renderItem={renderItem}
-          />
-        </BottomSheetView>
+        <DraggableFlatList<T>
+          data={items}
+          contentContainerStyle={{ paddingBottom: insets.bottom }}
+          ListHeaderComponent={title ? <TitleHeader /> : undefined}
+          stickyHeaderIndices={title ? [0] : undefined}
+          onDragEnd={onDragEnd}
+          keyExtractor={(item, index) => (keyExtractor ? keyExtractor({ item, index }) : index.toString())}
+          renderItem={renderItem}
+        />
       ) : (
         <BottomSheetScrollView
           contentContainerStyle={[
