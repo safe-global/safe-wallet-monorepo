@@ -21,7 +21,7 @@ const NewSafe = () => {
 
       <div className={css.rightSide}>
         <div className={css.rightContent}>
-          <Typography className={css.label}>FOR TEAMS AND POWER USERS</Typography>
+          <Typography className={css.label}>FOR ORGANIZATIONS AND POWER USERS</Typography>
           <Typography className={css.mainTitle}>Own your assets onchain securely</Typography>
         </div>
         <div className={css.mockupImageContainer}>
