@@ -1,4 +1,4 @@
-import { DependencyList, EffectCallback, useEffect, useRef } from 'react'
+import { type DependencyList, type EffectCallback, useEffect, useRef } from 'react'
 import isEqual from 'lodash/isEqual'
 
 /**
@@ -13,5 +13,6 @@ export function useEffectDeepCompare(effect: EffectCallback, deps: DependencyLis
     prevDepsRef.current = deps
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   return useEffect(effect, [prevDepsRef.current])
 }

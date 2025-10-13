@@ -1,4 +1,4 @@
-import { DependencyList, useMemo, useRef } from 'react'
+import { type DependencyList, useMemo, useRef } from 'react'
 import isEqual from 'lodash/isEqual'
 
 /**
@@ -14,5 +14,6 @@ export function useMemoDeepCompare<T>(memoFn: () => T, deps: DependencyList): T 
     prevDepsRef.current = deps
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   return useMemo(memoFn, [prevDepsRef.current])
 }
