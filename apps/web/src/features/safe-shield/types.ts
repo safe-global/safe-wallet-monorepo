@@ -66,6 +66,8 @@ export type AddressAnalysisResults = {
   [_group in StatusGroup]?: AnalysisResult<RecipientStatus | BridgeStatus | ContractStatus>[]
 }
 
+export type RecipientAnalysisResults = { [address: string]: AddressAnalysisResults }
+
 export type LiveAnalysisResponse = {
   recipient?: {
     [address: string]: AddressAnalysisResults
