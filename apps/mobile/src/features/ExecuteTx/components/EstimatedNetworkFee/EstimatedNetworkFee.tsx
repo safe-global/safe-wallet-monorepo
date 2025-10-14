@@ -14,7 +14,7 @@ import { SignerFee } from '../SignerFee'
 interface EstimatedNetworkFeeProps {
   totalFee: string
   txId: string
-  totalFeeRaw: bigint
+  willFail?: boolean
   executionMethod: ExecutionMethod
   isLoadingFees: boolean
 }
@@ -22,9 +22,9 @@ interface EstimatedNetworkFeeProps {
 export const EstimatedNetworkFee = ({
   totalFee,
   txId,
-  totalFeeRaw,
   executionMethod,
   isLoadingFees,
+  willFail,
 }: EstimatedNetworkFeeProps) => {
   const chain = useAppSelector(selectActiveChain)
   const { colorScheme } = useTheme()
@@ -53,7 +53,7 @@ export const EstimatedNetworkFee = ({
       ) : (
         <SignerFee
           totalFee={totalFee}
-          totalFeeRaw={totalFeeRaw}
+          willFail={willFail}
           currencySymbol={chain?.nativeCurrency.symbol}
           onPress={onPress}
         />
