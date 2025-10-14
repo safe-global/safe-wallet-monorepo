@@ -1,43 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
-import type { AddressAnalysisResults, RecipientAnalysisResults } from '../types'
-import { GATEWAY_URL } from '@/config/gateway'
+import type { RecipientAnalysisResults } from '../types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useEffectDeepCompare } from './util-hooks/useEffectDeepCompare'
-import { useAsyncDeepCompare } from './util-hooks/useAsyncDeepCompare'
-
-/**
- * Fetches recipient analysis from backend
- * Returns RECIPIENT_INTERACTION results only
- * ADDRESS_BOOK and RECIPIENT_ACTIVITY are performed client-side
- */
-async function fetchRecipientAnalysis(
-  chainId: string,
-  safeAddress: string,
-  recipientAddress: string,
-): Promise<AddressAnalysisResults | undefined> {
-  const url = `${GATEWAY_URL}/v1/chains/${chainId}/security/${safeAddress}/recipient/${recipientAddress}`
-
-  try {
-    const response = await fetch(url)
-
-    if (!response.ok) {
-      if (response.status === 422) {
-        throw new Error('Invalid Safe or recipient address')
-      }
-      if (response.status === 503) {
-        throw new Error('Service unavailable')
-      }
-      throw new Error(`Failed to fetch recipient analysis: ${response.statusText}`)
-    }
-
-    return response.json()
-  } catch (error) {
-    console.error('Backend recipient analysis failed:', error)
-    throw error
-  }
-}
+import { useFetchMultiRecipientAnalysis } from './useFetchMultiRecipientAnalysis'
 
 /**
  * Hook to fetch recipient analysis from backend API
@@ -82,26 +49,7 @@ export function useFetchRecipientAnalysis(recipients: string[]): AsyncResult<Rec
     previousRecipientsRef.current = new Set(recipients)
   }, [recipients])
 
-  // Fetch backend analysis for each new recipient
-  const [fetchedResults, error, loading] = useAsyncDeepCompare<RecipientAnalysisResults | undefined>(async () => {
-    if (!safeAddress || recipientsToFetch.length === 0) {
-      return
-    }
-
-    return Promise.all(
-      recipientsToFetch.map(async (recipientAddress) => {
-        const result = await fetchRecipientAnalysis(chainId, safeAddress, recipientAddress)
-        return [recipientAddress, result] as const
-      }),
-    )
-      .then((results) => {
-        return results.reduce((acc, [address, result]) => ({ ...acc, [address]: result }), {})
-      })
-      .catch((err) => {
-        console.error(`Failed to fetch recipient analysis`, err)
-        throw err
-      })
-  }, [recipientsToFetch, chainId, safeAddress])
+  const [fetchedResults, error, loading] = useFetchMultiRecipientAnalysis(safeAddress, chainId, recipientsToFetch)
 
   // Update results to only include recipients that are in the given recipients array
   useEffectDeepCompare(() => {

@@ -3,8 +3,8 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { useFetchRecipientAnalysis } from '../useFetchRecipientAnalysis'
 import * as useChainIdHook from '@/hooks/useChainId'
 import * as useSafeAddressHook from '@/hooks/useSafeAddress'
+import * as useFetchMultiRecipientAnalysisModule from '../useFetchMultiRecipientAnalysis'
 import { useMemo } from 'react'
-import { GATEWAY_URL } from '@/config/gateway'
 
 describe('useFetchRecipientAnalysis', () => {
   const mockChainId = '1'
@@ -12,25 +12,22 @@ describe('useFetchRecipientAnalysis', () => {
   const mockRecipient1 = faker.finance.ethereumAddress()
   const mockRecipient2 = faker.finance.ethereumAddress()
 
-  let fetchSpy: jest.SpyInstance
+  const mockAnalysisResult = {
+    RECIPIENT_INTERACTION: [
+      { type: 'NEW_RECIPIENT', severity: 'INFO', title: 'New Recipient', description: 'First interaction' },
+    ],
+  }
+
+  let useFetchMultiRecipientAnalysisSpy: jest.SpyInstance
 
   beforeEach(() => {
     jest.resetAllMocks()
     jest.spyOn(useChainIdHook, 'default').mockReturnValue(mockChainId)
     jest.spyOn(useSafeAddressHook, 'default').mockReturnValue(mockSafeAddress)
 
-    fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        RECIPIENT_INTERACTION: [
-          { type: 'NEW_RECIPIENT', severity: 'INFO', title: 'New Recipient', description: 'First interaction' },
-        ],
-      }),
-    } as Response)
-  })
-
-  afterEach(() => {
-    fetchSpy.mockRestore()
+    useFetchMultiRecipientAnalysisSpy = jest
+      .spyOn(useFetchMultiRecipientAnalysisModule, 'useFetchMultiRecipientAnalysis')
+      .mockReturnValue([{}, undefined, false])
   })
 
   it('should return empty results when no recipients are provided', async () => {
@@ -47,6 +44,7 @@ describe('useFetchRecipientAnalysis', () => {
     const [results, error] = result.current
     expect(results).toEqual({})
     expect(error).toBeUndefined()
+    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith(mockSafeAddress, mockChainId, [])
   })
 
   it('should return empty results when safeAddress is not available', async () => {
@@ -64,9 +62,12 @@ describe('useFetchRecipientAnalysis', () => {
 
     const [results] = result.current
     expect(results).toEqual({})
+    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith('', mockChainId, [mockRecipient1])
   })
 
   it('should fetch recipient analysis for a single recipient', async () => {
+    useFetchMultiRecipientAnalysisSpy.mockReturnValue([{ [mockRecipient1]: mockAnalysisResult }, undefined, false])
+
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockRecipient1], [])
       return useFetchRecipientAnalysis(recipients)
@@ -83,12 +84,16 @@ describe('useFetchRecipientAnalysis', () => {
     const [results, error] = result.current
     expect(results?.[mockRecipient1]).toBeDefined()
     expect(error).toBeUndefined()
-    expect(fetchSpy).toHaveBeenCalledWith(
-      `${GATEWAY_URL}/v1/chains/${mockChainId}/security/${mockSafeAddress}/recipient/${mockRecipient1}`,
-    )
+    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith(mockSafeAddress, mockChainId, [mockRecipient1])
   })
 
   it('should fetch recipient analysis for multiple recipients', async () => {
+    useFetchMultiRecipientAnalysisSpy.mockReturnValue([
+      { [mockRecipient1]: mockAnalysisResult, [mockRecipient2]: mockAnalysisResult },
+      undefined,
+      false,
+    ])
+
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockRecipient1, mockRecipient2], [])
       return useFetchRecipientAnalysis(recipients)
@@ -106,10 +111,22 @@ describe('useFetchRecipientAnalysis', () => {
     const [results] = result.current
     expect(results?.[mockRecipient1]).toBeDefined()
     expect(results?.[mockRecipient2]).toBeDefined()
-    expect(fetchSpy).toHaveBeenCalledTimes(2)
+    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith(mockSafeAddress, mockChainId, [
+      mockRecipient1,
+      mockRecipient2,
+    ])
   })
 
   it('should only fetch new recipients when recipients list changes', async () => {
+    let callCount = 0
+    useFetchMultiRecipientAnalysisSpy.mockImplementation(() => {
+      callCount++
+      if (callCount === 1) {
+        return [{ [mockRecipient1]: mockAnalysisResult }, undefined, false]
+      }
+      return [{ [mockRecipient2]: mockAnalysisResult }, undefined, false]
+    })
+
     const { result, rerender } = renderHook(
       ({ recipients }) => {
         const memoizedRecipients = useMemo(() => recipients, [recipients])
@@ -126,7 +143,7 @@ describe('useFetchRecipientAnalysis', () => {
       { timeout: 3000 },
     )
 
-    expect(fetchSpy).toHaveBeenCalledTimes(1)
+    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith(mockSafeAddress, mockChainId, [mockRecipient1])
 
     // Add a second recipient
     rerender({ recipients: [mockRecipient1, mockRecipient2] })
@@ -139,12 +156,16 @@ describe('useFetchRecipientAnalysis', () => {
       { timeout: 3000 },
     )
 
-    // Should only fetch the new recipient
-    expect(fetchSpy).toHaveBeenCalledTimes(2)
+    // Should only fetch the new recipient (not mockRecipient1 again)
+    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenLastCalledWith(mockSafeAddress, mockChainId, [mockRecipient2])
   })
 
   it('should clear cache and re-fetch when chainId changes', async () => {
     const useChainIdSpy = jest.spyOn(useChainIdHook, 'default').mockReturnValue('1')
+
+    useFetchMultiRecipientAnalysisSpy
+      .mockReturnValueOnce([{ [mockRecipient1]: mockAnalysisResult }, undefined, false])
+      .mockReturnValueOnce([{ [mockRecipient1]: mockAnalysisResult }, undefined, false])
 
     const { result, rerender } = renderHook(() => {
       const recipients = useMemo(() => [mockRecipient1], [])
@@ -159,10 +180,7 @@ describe('useFetchRecipientAnalysis', () => {
       { timeout: 3000 },
     )
 
-    expect(fetchSpy).toHaveBeenCalledTimes(1)
-    expect(fetchSpy).toHaveBeenCalledWith(
-      `${GATEWAY_URL}/v1/chains/1/security/${mockSafeAddress}/recipient/${mockRecipient1}`,
-    )
+    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith(mockSafeAddress, '1', [mockRecipient1])
 
     // Change chainId
     useChainIdSpy.mockReturnValue('137')
@@ -177,15 +195,16 @@ describe('useFetchRecipientAnalysis', () => {
     )
 
     // Should fetch again with new chainId
-    expect(fetchSpy).toHaveBeenCalledTimes(2)
-    expect(fetchSpy).toHaveBeenLastCalledWith(
-      `${GATEWAY_URL}/v1/chains/137/security/${mockSafeAddress}/recipient/${mockRecipient1}`,
-    )
+    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenLastCalledWith(mockSafeAddress, '137', [mockRecipient1])
   })
 
   it('should clear cache and re-fetch when safeAddress changes', async () => {
     const newSafeAddress = faker.finance.ethereumAddress()
     const useSafeAddressSpy = jest.spyOn(useSafeAddressHook, 'default').mockReturnValue(mockSafeAddress)
+
+    useFetchMultiRecipientAnalysisSpy
+      .mockReturnValueOnce([{ [mockRecipient1]: mockAnalysisResult }, undefined, false])
+      .mockReturnValueOnce([{ [mockRecipient1]: mockAnalysisResult }, undefined, false])
 
     const { result, rerender } = renderHook(() => {
       const recipients = useMemo(() => [mockRecipient1], [])
@@ -200,10 +219,7 @@ describe('useFetchRecipientAnalysis', () => {
       { timeout: 3000 },
     )
 
-    expect(fetchSpy).toHaveBeenCalledTimes(1)
-    expect(fetchSpy).toHaveBeenCalledWith(
-      `${GATEWAY_URL}/v1/chains/${mockChainId}/security/${mockSafeAddress}/recipient/${mockRecipient1}`,
-    )
+    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith(mockSafeAddress, mockChainId, [mockRecipient1])
 
     // Change safeAddress
     useSafeAddressSpy.mockReturnValue(newSafeAddress)
@@ -218,17 +234,12 @@ describe('useFetchRecipientAnalysis', () => {
     )
 
     // Should fetch again with new safeAddress
-    expect(fetchSpy).toHaveBeenCalledTimes(2)
-    expect(fetchSpy).toHaveBeenLastCalledWith(
-      `${GATEWAY_URL}/v1/chains/${mockChainId}/security/${newSafeAddress}/recipient/${mockRecipient1}`,
-    )
+    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenLastCalledWith(newSafeAddress, mockChainId, [mockRecipient1])
   })
 
   it('should handle fetch errors gracefully', async () => {
     const errorMessage = 'Network error'
-    fetchSpy.mockRejectedValueOnce(new Error(errorMessage))
-
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
+    useFetchMultiRecipientAnalysisSpy.mockReturnValue([undefined, new Error(errorMessage), false])
 
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockRecipient1], [])
@@ -242,50 +253,61 @@ describe('useFetchRecipientAnalysis', () => {
 
     const [, error] = result.current
     expect(error).toBeInstanceOf(Error)
-    expect(consoleErrorSpy).toHaveBeenCalled()
-
-    consoleErrorSpy.mockRestore()
+    expect(error?.message).toBe(errorMessage)
   })
 
-  it('should handle 422 status code', async () => {
-    fetchSpy.mockResolvedValueOnce({ ok: false, status: 422, statusText: 'Unprocessable Entity' } as Response)
-
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
+  it('should handle loading state', async () => {
+    useFetchMultiRecipientAnalysisSpy.mockReturnValue([undefined, undefined, true])
 
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockRecipient1], [])
       return useFetchRecipientAnalysis(recipients)
     })
 
-    await waitFor(() => {
-      const [, error] = result.current
-      expect(error).toBeDefined()
-    })
-
-    const [, error] = result.current
-    expect(error?.message).toBe('Invalid Safe or recipient address')
-
-    consoleErrorSpy.mockRestore()
+    const [, , loading] = result.current
+    expect(loading).toBe(true)
   })
 
-  it('should handle 503 status code', async () => {
-    fetchSpy.mockResolvedValueOnce({ ok: false, status: 503, statusText: 'Service Unavailable' } as Response)
-
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
-
-    const { result } = renderHook(() => {
-      const recipients = useMemo(() => [mockRecipient1], [])
-      return useFetchRecipientAnalysis(recipients)
+  it('should merge fetched results with cached results', async () => {
+    let callCount = 0
+    useFetchMultiRecipientAnalysisSpy.mockImplementation(() => {
+      callCount++
+      if (callCount === 1) {
+        return [{ [mockRecipient1]: mockAnalysisResult }, undefined, false]
+      }
+      return [{ [mockRecipient2]: mockAnalysisResult }, undefined, false]
     })
 
-    await waitFor(() => {
-      const [, error] = result.current
-      expect(error).toBeDefined()
-    })
+    const { result, rerender } = renderHook(
+      ({ recipients }) => {
+        const memoizedRecipients = useMemo(() => recipients, [recipients])
+        return useFetchRecipientAnalysis(memoizedRecipients)
+      },
+      { initialProps: { recipients: [mockRecipient1] } },
+    )
 
-    const [, error] = result.current
-    expect(error?.message).toBe('Service unavailable')
+    await waitFor(
+      () => {
+        const [results] = result.current
+        expect(results?.[mockRecipient1]).toBeDefined()
+      },
+      { timeout: 3000 },
+    )
 
-    consoleErrorSpy.mockRestore()
+    // Add second recipient
+    rerender({ recipients: [mockRecipient1, mockRecipient2] })
+
+    await waitFor(
+      () => {
+        const [results] = result.current
+        expect(results?.[mockRecipient1]).toBeDefined()
+        expect(results?.[mockRecipient2]).toBeDefined()
+      },
+      { timeout: 3000 },
+    )
+
+    const [results] = result.current
+    expect(results?.[mockRecipient1]).toEqual(mockAnalysisResult)
+    expect(results?.[mockRecipient2]).toEqual(mockAnalysisResult)
   })
 })
