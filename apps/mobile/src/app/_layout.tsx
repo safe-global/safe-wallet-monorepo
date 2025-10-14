@@ -33,6 +33,7 @@ import { useFreeRasp } from 'freerasp-react-native'
 import { SafeStatusBar } from '@/src/theme/SafeStatusBar'
 import { GuardProvider } from '@/src/context/GuardProvider'
 import { useNotificationHandler } from '@/src/hooks/useNotificationHandler'
+import { usePendingTxsMonitor } from '../hooks/usePendingTxsMonitor'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 // Initialize all notification handlers
@@ -48,6 +49,7 @@ const HooksInitializer = () => {
   useInitSafeCoreSDK()
   useAnalytics() // Tracks activeSafe changes, but only once analytics is enabled in GetStarted screen
   useNotificationHandler()
+  usePendingTxsMonitor()
   return null
 }
 
