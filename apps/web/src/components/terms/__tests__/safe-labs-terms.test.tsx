@@ -4,6 +4,8 @@ import SafeLabsTerms from '../safe-labs-terms'
 import * as safeLabsTermsService from '@/services/safe-labs-terms'
 import * as securityService from '@/services/safe-labs-terms/security'
 import * as headerModule from '@/components/common/Header'
+import * as analytics from '@/services/analytics'
+import { TERMS_EVENTS } from '@/services/analytics'
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
@@ -22,6 +24,12 @@ jest.mock('@/services/safe-labs-terms/security', () => ({
 
 jest.mock('@/components/common/Header', () => ({
   getLogoLink: jest.fn(),
+}))
+
+// Mock analytics
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
 }))
 
 // Mock Next.js Link component
@@ -280,6 +288,90 @@ describe('SafeLabsTerms', () => {
           },
         })
       })
+    })
+  })
+
+  describe('Analytics Tracking', () => {
+    it('should track analytics event when accepting terms without data transfer', async () => {
+      const { getByText, getByRole } = render(<SafeLabsTerms />)
+
+      // Check the required checkboxes (but NOT requestDataTransfer)
+      const termsCheckbox = getByRole('checkbox', { name: /I want to use Safe.*Terms & Conditions/i })
+      const liabilityCheckbox = getByRole('checkbox', {
+        name: /I acknowledge that Safe Labs GmbH does not assume any liabilities/i,
+      })
+
+      fireEvent.click(termsCheckbox)
+      fireEvent.click(liabilityCheckbox)
+
+      // Click the accept button
+      const acceptButton = getByText(/Accept terms & Continue/i)
+      fireEvent.click(acceptButton)
+
+      // Verify trackEvent was called with correct parameters
+      await waitFor(() => {
+        expect(analytics.trackEvent).toHaveBeenCalledTimes(1)
+        expect(analytics.trackEvent).toHaveBeenCalledWith(
+          { ...TERMS_EVENTS.ACCEPT_SAFE_LABS_TERMS, label: false },
+          { requestDataTransfer: false },
+        )
+      })
+    })
+
+    it('should track analytics event when accepting terms with data transfer', async () => {
+      const { getByText, getByRole } = render(<SafeLabsTerms />)
+
+      // Check all checkboxes including requestDataTransfer
+      const termsCheckbox = getByRole('checkbox', { name: /I want to use Safe.*Terms & Conditions/i })
+      const liabilityCheckbox = getByRole('checkbox', {
+        name: /I acknowledge that Safe Labs GmbH does not assume any liabilities/i,
+      })
+      const dataTransferCheckbox = getByRole('checkbox', {
+        name: /I request to transfer my personal data/i,
+      })
+
+      fireEvent.click(termsCheckbox)
+      fireEvent.click(liabilityCheckbox)
+      fireEvent.click(dataTransferCheckbox)
+
+      // Click the accept button
+      const acceptButton = getByText(/Accept terms & Continue/i)
+      fireEvent.click(acceptButton)
+
+      // Verify trackEvent was called with correct parameters
+      await waitFor(() => {
+        expect(analytics.trackEvent).toHaveBeenCalledTimes(1)
+        expect(analytics.trackEvent).toHaveBeenCalledWith(
+          { ...TERMS_EVENTS.ACCEPT_SAFE_LABS_TERMS, label: true },
+          { requestDataTransfer: true },
+        )
+      })
+    })
+
+    it('should track analytics event before redirecting', async () => {
+      const { getByText, getByRole } = render(<SafeLabsTerms />)
+
+      const termsCheckbox = getByRole('checkbox', { name: /I want to use Safe.*Terms & Conditions/i })
+      const liabilityCheckbox = getByRole('checkbox', {
+        name: /I acknowledge that Safe Labs GmbH does not assume any liabilities/i,
+      })
+
+      fireEvent.click(termsCheckbox)
+      fireEvent.click(liabilityCheckbox)
+
+      const acceptButton = getByText(/Accept terms & Continue/i)
+      fireEvent.click(acceptButton)
+
+      await waitFor(() => {
+        // trackEvent should be called before router.push
+        expect(analytics.trackEvent).toHaveBeenCalled()
+      })
+
+      // Ensure the call order is correct
+      const trackEventCallOrder = (analytics.trackEvent as jest.Mock).mock.invocationCallOrder[0]
+      const pushCallOrder = mockPush.mock.invocationCallOrder[0]
+
+      expect(trackEventCallOrder).toBeLessThan(pushCallOrder)
     })
   })
 })
