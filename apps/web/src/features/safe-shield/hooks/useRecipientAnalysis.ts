@@ -1,4 +1,4 @@
-import { type RecipientAnalysisResults } from '../types'
+import { type RecipientAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { useChainId } from '@/hooks/useChainId'

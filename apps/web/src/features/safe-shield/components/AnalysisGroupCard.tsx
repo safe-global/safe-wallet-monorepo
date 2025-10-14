@@ -1,7 +1,7 @@
 import { type ReactElement, useMemo, useState } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse, SvgIcon } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import type { AnalysisResult, Severity, AddressAnalysisResults } from '../types'
+import type { AnalysisResult, Severity, AddressAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import { sortBySeverity } from '../utils'
 import AlertIcon from '@/public/images/common/alert.svg'
 import CheckIcon from '@/public/images/common/check.svg'
