@@ -13,7 +13,7 @@ import NetworkSelector from '@/components/common/NetworkSelector'
 import SafeTokenWidget from '@/components/common/SafeTokenWidget'
 import NotificationCenter from '@/components/notification-center/NotificationCenter'
 import { AppRoutes } from '@/config/routes'
-import SafeLogo from '@/public/images/logo.svg'
+import SafeLabsLogo from '@/public/images/logo-safe-labs.svg'
 import SafeLogoMobile from '@/public/images/logo-no-text.svg'
 import Link from 'next/link'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -32,7 +32,7 @@ type HeaderProps = {
   onBatchToggle?: Dispatch<SetStateAction<boolean>>
 }
 
-function getLogoLink(router: ReturnType<typeof useRouter>): Url {
+export function getLogoLink(router: ReturnType<typeof useRouter>): Url {
   return router.pathname === AppRoutes.home || !router.query.safe
     ? router.pathname === AppRoutes.welcome.accounts
       ? AppRoutes.welcome.index
@@ -86,7 +86,7 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
 
       <div className={classnames(css.element, css.hideMobile, css.logo)}>
         <Link href={logoHref} passHref>
-          {isOfficialHost ? <SafeLogo alt={BRAND_NAME} /> : BRAND_LOGO && <img src={BRAND_LOGO} alt={BRAND_NAME} />}
+          {isOfficialHost ? <SafeLabsLogo alt={BRAND_NAME} /> : BRAND_LOGO && <img src={BRAND_LOGO} alt={BRAND_NAME} />}
         </Link>
       </div>
 
