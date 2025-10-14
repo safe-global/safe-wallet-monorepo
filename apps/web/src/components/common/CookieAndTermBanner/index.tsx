@@ -18,6 +18,7 @@ import { selectCookieBanner, openCookieBanner, closeCookieBanner } from '@/store
 import css from './styles.module.css'
 import { AppRoutes } from '@/config/routes'
 import ExternalLink from '../ExternalLink'
+import { useRouter } from 'next/router'
 
 const COOKIE_AND_TERM_WARNING: Record<CookieAndTermType, string> = {
   [CookieAndTermType.TERMS]: '',
@@ -186,9 +187,11 @@ export const CookieAndTermBanner = ({
 const CookieBannerPopup = (): ReactElement | null => {
   const cookiePopup = useAppSelector(selectCookieBanner)
   const dispatch = useAppDispatch()
+  const router = useRouter()
+  const exceptionPages = [AppRoutes.welcome.index]
 
   const hasAccepted = useAppSelector(hasAcceptedTerms)
-  const shouldOpen = !hasAccepted
+  const shouldOpen = !hasAccepted && exceptionPages.includes(router.pathname)
 
   useEffect(() => {
     if (shouldOpen) {
