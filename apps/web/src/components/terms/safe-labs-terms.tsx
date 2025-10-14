@@ -17,7 +17,7 @@ import SafeLabsLogo from '@/public/images/logo-safe-labs.svg'
 import css from './styles.module.css'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
-import { setSafeLabsTermsAccepted, clearUserData } from '@/services/safe-labs-terms'
+import { setSafeLabsTermsAccepted } from '@/services/safe-labs-terms'
 import { getSafeRedirectUrl, isValidAutoConnectParam } from '@/services/safe-labs-terms/security'
 import { getLogoLink } from '../common/Header'
 import NextLink from 'next/link'
@@ -36,31 +36,15 @@ const SafeLabsTerms = () => {
     const { pathname, query } = getSafeRedirectUrl(router.query.redirect as string | undefined)
     const autoConnect = router.query.autoConnect
     const isValidAutoConnect = isValidAutoConnectParam(autoConnect)
+    setSafeLabsTermsAccepted()
 
-    if (!requestDataTransfer) {
-      clearUserData()
-      setSafeLabsTermsAccepted()
-
-      const queryParams = {
+    router.push({
+      pathname,
+      query: {
         ...query,
         ...(isValidAutoConnect && autoConnect === 'true' ? { autoConnect: 'true' } : {}),
-      }
-
-      const queryString = new URLSearchParams(queryParams as Record<string, string>).toString()
-      const redirectUrl = queryString ? `${pathname}?${queryString}` : pathname
-
-      window.location.href = redirectUrl
-    } else {
-      setSafeLabsTermsAccepted()
-
-      router.push({
-        pathname,
-        query: {
-          ...query,
-          ...(isValidAutoConnect && autoConnect === 'true' ? { autoConnect: 'true' } : {}),
-        },
-      })
-    }
+      },
+    })
   }
 
   return (

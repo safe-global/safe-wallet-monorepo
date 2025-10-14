@@ -4,7 +4,6 @@ import SafeLabsTerms from '../safe-labs-terms'
 import * as safeLabsTermsService from '@/services/safe-labs-terms'
 import * as securityService from '@/services/safe-labs-terms/security'
 import * as headerModule from '@/components/common/Header'
-import { LS_NAMESPACE } from '@/config/constants'
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
@@ -14,7 +13,6 @@ jest.mock('next/router', () => ({
 // Mock the services
 jest.mock('@/services/safe-labs-terms', () => ({
   setSafeLabsTermsAccepted: jest.fn(),
-  clearUserData: jest.fn(),
 }))
 
 jest.mock('@/services/safe-labs-terms/security', () => ({
@@ -72,13 +70,8 @@ describe('SafeLabsTerms', () => {
     window.localStorage.clear()
   })
 
-  describe('Data Transfer Not Requested', () => {
-    it('should clear localStorage when user does NOT check requestDataTransfer', async () => {
-      // Setup - Add some data to localStorage
-      window.localStorage.setItem(`${LS_NAMESPACE}addressBook`, JSON.stringify({ test: 'data1' }))
-      window.localStorage.setItem(`${LS_NAMESPACE}addedSafes`, JSON.stringify({ test: 'data2' }))
-      window.localStorage.setItem(`${LS_NAMESPACE}settings`, JSON.stringify({ test: 'data3' }))
-
+  describe('Accepting Terms', () => {
+    it('should call setSafeLabsTermsAccepted when accepting terms', async () => {
       const { getByText, getByRole } = render(<SafeLabsTerms />)
 
       // Check the required checkboxes (but NOT requestDataTransfer)
@@ -94,25 +87,13 @@ describe('SafeLabsTerms', () => {
       const acceptButton = getByText(/Accept terms & Continue/i)
       fireEvent.click(acceptButton)
 
-      // Verify clearUserData was called
-      await waitFor(() => {
-        expect(safeLabsTermsService.clearUserData).toHaveBeenCalledTimes(1)
-      })
-
       // Verify setSafeLabsTermsAccepted was called
-      expect(safeLabsTermsService.setSafeLabsTermsAccepted).toHaveBeenCalledTimes(1)
+      await waitFor(() => {
+        expect(safeLabsTermsService.setSafeLabsTermsAccepted).toHaveBeenCalledTimes(1)
+      })
     })
 
-    it('should call clearUserData before setSafeLabsTermsAccepted', async () => {
-      const callOrder: string[] = []
-
-      ;(safeLabsTermsService.clearUserData as jest.Mock).mockImplementation(() => {
-        callOrder.push('clearUserData')
-      })
-      ;(safeLabsTermsService.setSafeLabsTermsAccepted as jest.Mock).mockImplementation(() => {
-        callOrder.push('setSafeLabsTermsAccepted')
-      })
-
+    it('should use router.push to redirect after accepting terms', async () => {
       const { getByText, getByRole } = render(<SafeLabsTerms />)
 
       // Check the required checkboxes
@@ -129,65 +110,30 @@ describe('SafeLabsTerms', () => {
       fireEvent.click(acceptButton)
 
       await waitFor(() => {
-        expect(callOrder).toEqual(['clearUserData', 'setSafeLabsTermsAccepted'])
+        expect(mockPush).toHaveBeenCalledWith({
+          pathname: '/home',
+          query: {},
+        })
       })
-    })
-
-    it('should redirect with window.location.href when data transfer is not requested', async () => {
-      const { getByText, getByRole } = render(<SafeLabsTerms />)
-
-      // Check the required checkboxes
-      const termsCheckbox = getByRole('checkbox', { name: /I want to use Safe.*Terms & Conditions/i })
-      const liabilityCheckbox = getByRole('checkbox', {
-        name: /I acknowledge that Safe Labs GmbH does not assume any liabilities/i,
-      })
-
-      fireEvent.click(termsCheckbox)
-      fireEvent.click(liabilityCheckbox)
-
-      // Click the accept button
-      const acceptButton = getByText(/Accept terms & Continue/i)
-      fireEvent.click(acceptButton)
-
-      await waitFor(() => {
-        expect(window.location.href).toBe('/home')
-      })
-
-      expect(mockPush).not.toHaveBeenCalled()
     })
   })
 
-  describe('Data Transfer Requested', () => {
-    it('should NOT clear localStorage when user checks requestDataTransfer', async () => {
-      window.localStorage.setItem(`${LS_NAMESPACE}addressBook`, JSON.stringify({ test: 'data1' }))
-      window.localStorage.setItem(`${LS_NAMESPACE}addedSafes`, JSON.stringify({ test: 'data2' }))
-      window.localStorage.setItem(`${LS_NAMESPACE}settings`, JSON.stringify({ test: 'data3' }))
+  describe('Data Transfer Checkbox', () => {
+    it('should allow checking the data transfer checkbox', async () => {
+      const { getByRole } = render(<SafeLabsTerms />)
 
-      const { getByText, getByRole } = render(<SafeLabsTerms />)
-
-      const termsCheckbox = getByRole('checkbox', { name: /I want to use Safe.*Terms & Conditions/i })
-      const liabilityCheckbox = getByRole('checkbox', {
-        name: /I acknowledge that Safe Labs GmbH does not assume any liabilities/i,
-      })
       const dataTransferCheckbox = getByRole('checkbox', {
         name: /I request to transfer my personal data/i,
-      })
+      }) as HTMLInputElement
 
-      fireEvent.click(termsCheckbox)
-      fireEvent.click(liabilityCheckbox)
+      expect(dataTransferCheckbox.checked).toBe(false)
+
       fireEvent.click(dataTransferCheckbox)
 
-      const acceptButton = getByText(/Accept terms & Continue/i)
-      fireEvent.click(acceptButton)
-
-      await waitFor(() => {
-        expect(safeLabsTermsService.clearUserData).not.toHaveBeenCalled()
-      })
-
-      expect(safeLabsTermsService.setSafeLabsTermsAccepted).toHaveBeenCalledTimes(1)
+      expect(dataTransferCheckbox.checked).toBe(true)
     })
 
-    it('should use router.push when data transfer is requested', async () => {
+    it('should still redirect after accepting with data transfer checkbox checked', async () => {
       const { getByText, getByRole } = render(<SafeLabsTerms />)
 
       const termsCheckbox = getByRole('checkbox', { name: /I want to use Safe.*Terms & Conditions/i })
@@ -212,42 +158,7 @@ describe('SafeLabsTerms', () => {
         })
       })
 
-      expect(window.location.href).toBe('')
-    })
-
-    it('should preserve localStorage data when data transfer is requested', async () => {
-      const addressBookData = JSON.stringify({ test: 'data1' })
-      const addedSafesData = JSON.stringify({ test: 'data2' })
-      const settingsData = JSON.stringify({ test: 'data3' })
-
-      window.localStorage.setItem(`${LS_NAMESPACE}addressBook`, addressBookData)
-      window.localStorage.setItem(`${LS_NAMESPACE}addedSafes`, addedSafesData)
-      window.localStorage.setItem(`${LS_NAMESPACE}settings`, settingsData)
-
-      const { getByText, getByRole } = render(<SafeLabsTerms />)
-
-      const termsCheckbox = getByRole('checkbox', { name: /I want to use Safe.*Terms & Conditions/i })
-      const liabilityCheckbox = getByRole('checkbox', {
-        name: /I acknowledge that Safe Labs GmbH does not assume any liabilities/i,
-      })
-      const dataTransferCheckbox = getByRole('checkbox', {
-        name: /I request to transfer my personal data/i,
-      })
-
-      fireEvent.click(termsCheckbox)
-      fireEvent.click(liabilityCheckbox)
-      fireEvent.click(dataTransferCheckbox)
-
-      const acceptButton = getByText(/Accept terms & Continue/i)
-      fireEvent.click(acceptButton)
-
-      await waitFor(() => {
-        expect(mockPush).toHaveBeenCalled()
-      })
-
-      expect(window.localStorage.getItem(`${LS_NAMESPACE}addressBook`)).toBe(addressBookData)
-      expect(window.localStorage.getItem(`${LS_NAMESPACE}addedSafes`)).toBe(addedSafesData)
-      expect(window.localStorage.getItem(`${LS_NAMESPACE}settings`)).toBe(settingsData)
+      expect(safeLabsTermsService.setSafeLabsTermsAccepted).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -300,11 +211,14 @@ describe('SafeLabsTerms', () => {
       fireEvent.click(acceptButton)
 
       await waitFor(() => {
-        expect(window.location.href).toBe('/balances')
+        expect(mockPush).toHaveBeenCalledWith({
+          pathname: '/balances',
+          query: {},
+        })
       })
     })
 
-    it('should handle autoConnect parameter when data transfer is not requested', async () => {
+    it('should handle autoConnect parameter', async () => {
       ;(useRouter as jest.Mock).mockReturnValue({
         ...mockRouter,
         query: { autoConnect: 'true' },
@@ -320,35 +234,6 @@ describe('SafeLabsTerms', () => {
 
       fireEvent.click(termsCheckbox)
       fireEvent.click(liabilityCheckbox)
-
-      const acceptButton = getByText(/Accept terms & Continue/i)
-      fireEvent.click(acceptButton)
-
-      await waitFor(() => {
-        expect(window.location.href).toBe('/home?autoConnect=true')
-      })
-    })
-
-    it('should handle autoConnect parameter when data transfer is requested', async () => {
-      ;(useRouter as jest.Mock).mockReturnValue({
-        ...mockRouter,
-        query: { autoConnect: 'true' },
-      })
-      ;(securityService.isValidAutoConnectParam as jest.Mock).mockReturnValue(true)
-
-      const { getByText, getByRole } = render(<SafeLabsTerms />)
-
-      const termsCheckbox = getByRole('checkbox', { name: /I want to use Safe.*Terms & Conditions/i })
-      const liabilityCheckbox = getByRole('checkbox', {
-        name: /I acknowledge that Safe Labs GmbH does not assume any liabilities/i,
-      })
-      const dataTransferCheckbox = getByRole('checkbox', {
-        name: /I request to transfer my personal data/i,
-      })
-
-      fireEvent.click(termsCheckbox)
-      fireEvent.click(liabilityCheckbox)
-      fireEvent.click(dataTransferCheckbox)
 
       const acceptButton = getByText(/Accept terms & Continue/i)
       fireEvent.click(acceptButton)
@@ -356,6 +241,40 @@ describe('SafeLabsTerms', () => {
       await waitFor(() => {
         expect(mockPush).toHaveBeenCalledWith({
           pathname: '/home',
+          query: {
+            autoConnect: 'true',
+          },
+        })
+      })
+    })
+
+    it('should handle both redirect and autoConnect parameters', async () => {
+      ;(useRouter as jest.Mock).mockReturnValue({
+        ...mockRouter,
+        query: { redirect: '/balances', autoConnect: 'true' },
+      })
+      ;(securityService.getSafeRedirectUrl as jest.Mock).mockReturnValue({
+        pathname: '/balances',
+        query: {},
+      })
+      ;(securityService.isValidAutoConnectParam as jest.Mock).mockReturnValue(true)
+
+      const { getByText, getByRole } = render(<SafeLabsTerms />)
+
+      const termsCheckbox = getByRole('checkbox', { name: /I want to use Safe.*Terms & Conditions/i })
+      const liabilityCheckbox = getByRole('checkbox', {
+        name: /I acknowledge that Safe Labs GmbH does not assume any liabilities/i,
+      })
+
+      fireEvent.click(termsCheckbox)
+      fireEvent.click(liabilityCheckbox)
+
+      const acceptButton = getByText(/Accept terms & Continue/i)
+      fireEvent.click(acceptButton)
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith({
+          pathname: '/balances',
           query: {
             autoConnect: 'true',
           },
