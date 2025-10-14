@@ -1,4 +1,6 @@
 import { Text, View } from 'tamagui'
+import { CanNotEstimate } from '../CanNotEstimate'
+import { TouchableOpacity } from 'react-native'
 
 interface SignerFeeProps {
   totalFee: string
@@ -9,18 +11,18 @@ interface SignerFeeProps {
 
 export const SignerFee = ({ totalFee, currencySymbol, onPress, willFail }: SignerFeeProps) => {
   return (
-    <View flexDirection="row" alignItems="center" onPress={onPress}>
-      <View borderStyle="dashed" borderBottomWidth={willFail ? 0 : 1} borderColor="$color">
-        {willFail ? (
-          <Text color="$error" fontWeight={700}>
-            Can not estimate
-          </Text>
-        ) : (
-          <Text fontWeight={700}>
-            {totalFee} {currencySymbol}
-          </Text>
-        )}
+    <TouchableOpacity onPress={onPress}>
+      <View flexDirection="row" alignItems="center">
+        <View borderStyle="dashed" borderBottomWidth={willFail ? 0 : 1} borderColor="$color">
+          {willFail ? (
+            <CanNotEstimate />
+          ) : (
+            <Text fontWeight={700}>
+              {totalFee} {currencySymbol}
+            </Text>
+          )}
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   )
 }
