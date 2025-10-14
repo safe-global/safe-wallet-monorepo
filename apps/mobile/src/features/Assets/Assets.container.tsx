@@ -8,6 +8,8 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { TokensContainer } from '@/src/features/Assets/components/Tokens'
 import { NFTsContainer } from '@/src/features/Assets/components/NFTs'
 import { AssetsHeaderContainer } from '@/src/features/Assets/components/AssetsHeader'
+import { useHasFeature } from '@/src/hooks/useHasFeature'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const tabItems = [
   {
@@ -22,13 +24,14 @@ const tabItems = [
 
 export function AssetsContainer() {
   const router = useRouter()
+  const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
 
   const handleOpenManageTokens = () => {
     router.push('/manage-tokens-sheet')
   }
 
   const renderRightNode = (activeTabLabel: string) => {
-    if (activeTabLabel !== 'Tokens') {
+    if (activeTabLabel !== 'Tokens' || !hasDefaultTokenlist) {
       return null
     }
 
