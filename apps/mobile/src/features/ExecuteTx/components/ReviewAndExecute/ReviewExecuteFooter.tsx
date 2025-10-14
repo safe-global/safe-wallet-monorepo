@@ -35,7 +35,7 @@ interface ReviewFooterProps {
 const getExecutionMethod = (
   requestedMethod: ExecutionMethod | undefined,
   isRelayAvailable: boolean,
-  chain?: Chain,
+  chain: Chain,
 ): ExecutionMethod => {
   const canNotUseRelayOption = requestedMethod === ExecutionMethod.WITH_RELAY && !isRelayAvailable
   const isRelayEnabled = chain && hasFeature(chain, FEATURES.RELAYING)
@@ -69,7 +69,9 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
   // checks the executionMethod
   const isRelayAvailable = Boolean(relaysRemaining?.remaining && relaysRemaining.remaining > 0)
   const { executionMethod: executionMethodParam } = useLocalSearchParams<{ executionMethod: ExecutionMethod }>()
-  const executionMethod = getExecutionMethod(executionMethodParam, isRelayAvailable, chain ?? undefined)
+  const executionMethod = chain
+    ? getExecutionMethod(executionMethodParam, isRelayAvailable, chain)
+    : ExecutionMethod.WITH_PK
 
   // Check if signer has sufficient funds
   const { hasSufficientFunds, isCheckingFunds } = useExecutionFunds({
@@ -78,6 +80,10 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
     executionMethod,
     chain: chain ?? undefined,
   })
+
+  const willFail = Boolean(estimatedFeeParams.gasLimitError) && executionMethod === ExecutionMethod.WITH_PK
+  const isButtonDisabled = !hasSufficientFunds || willFail
+  const buttonText = !hasSufficientFunds ? 'Insufficient funds' : 'Execute transaction'
 
   const handleConfirmPress = async () => {
     try {
@@ -116,10 +122,6 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
       console.error('Error executing transaction:', error)
     }
   }
-
-  const willFail = Boolean(estimatedFeeParams.gasLimitError) && executionMethod === ExecutionMethod.WITH_PK
-  const isButtonDisabled = !hasSufficientFunds || willFail
-  const buttonText = !hasSufficientFunds ? 'Insufficient funds' : 'Execute transaction'
 
   return (
     <Stack paddingHorizontal="$4" space="$3" paddingBottom={insets.bottom ? insets.bottom : '$4'}>
