@@ -132,7 +132,11 @@ const SafeLabsTerms = () => {
                       <Stack spacing={1}>
                         <FormControlLabel
                           control={
-                            <Checkbox checked={acceptTerms} onChange={(e) => setAcceptTerms(e.target.checked)} />
+                            <Checkbox
+                              sx={{ px: 2, py: 0 }}
+                              checked={acceptTerms}
+                              onChange={(e) => setAcceptTerms(e.target.checked)}
+                            />
                           }
                           label={
                             <Typography variant="body2">
@@ -149,6 +153,7 @@ const SafeLabsTerms = () => {
                         <FormControlLabel
                           control={
                             <Checkbox
+                              sx={{ px: 2, py: 0 }}
                               checked={acknowledgeLiability}
                               onChange={(e) => setAcknowledgeLiability(e.target.checked)}
                             />
@@ -188,6 +193,7 @@ const SafeLabsTerms = () => {
                       <FormControlLabel
                         control={
                           <Checkbox
+                            sx={{ px: 2, py: 0 }}
                             checked={requestDataTransfer}
                             onChange={(e) => setRequestDataTransfer(e.target.checked)}
                           />

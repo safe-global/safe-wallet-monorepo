@@ -3,13 +3,13 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-top: var(--header-height);
 }
 
 .contentWrapper {
   padding-top: var(--space-5);
   padding-bottom: var(--space-5);
   flex: 1;
+  max-width: 602px;
 }
 
 .container,
@@ -140,7 +140,7 @@
 }
 
 .formControlLabel {
-  align-items: center;
+  align-items: flex-start;
   margin: 0;
 }
 
