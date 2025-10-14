@@ -20,8 +20,6 @@ import { useExecutionFunds } from '../../hooks/useExecutionFunds'
 import { selectActiveChain } from '@/src/store/chains'
 import { Skeleton } from 'moti/skeleton'
 import { useTheme } from '@/src/theme/hooks/useTheme'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
-import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getExecutionMethod, getSubmitButtonText } from './helpers'
 
 interface ReviewFooterProps {
