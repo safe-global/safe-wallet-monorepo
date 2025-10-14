@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { JsonRpcProvider } from 'ethers'
 import { analyzeAddressActivity, isLowActivityAddress } from './addressActivityService'
 import { ActivityMessages } from '../config'
 import { type AnalysisResult, RecipientStatus, Severity } from '../../../types'
-import { useEffectDeepCompare } from '../../util-hooks/useEffectDeepCompare'
-import { useAsyncDeepCompare } from '../../util-hooks/useAsyncDeepCompare'
+import { useEffectDeepCompare, useAsyncDeepCompare } from '../../util-hooks'
 
 export type AddressActivityResult = Record<
   string,
@@ -17,21 +16,12 @@ export type AddressActivityResult = Record<
  * @param addresses - Array of Ethereum addresses to analyze
  * @returns Object containing activity results for each address, loading state, and error
  */
-export const useAddressActivity = (addresses: string[]): AsyncResult<AddressActivityResult> => {
-  const web3ReadOnly = useWeb3ReadOnly()
-
+export const useAddressActivity = (
+  addresses: string[],
+  web3ReadOnly?: JsonRpcProvider,
+): AsyncResult<AddressActivityResult> => {
   const previousRecipientsRef = useRef<Set<string>>(new Set())
-  const previousProviderRef = useRef<typeof web3ReadOnly>(web3ReadOnly)
   const [results, setResults] = useState<AddressActivityResult>({})
-
-  // Clear cache and results when web3ReadOnly provider changes
-  useEffect(() => {
-    if (previousProviderRef.current !== web3ReadOnly) {
-      previousRecipientsRef.current.clear()
-      setResults({})
-      previousProviderRef.current = web3ReadOnly
-    }
-  }, [web3ReadOnly])
 
   // Determine which addresses changed and need fetching
   const addressesToFetch = useMemo(() => {

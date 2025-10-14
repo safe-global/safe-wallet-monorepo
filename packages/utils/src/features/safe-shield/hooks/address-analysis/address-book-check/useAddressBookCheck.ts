@@ -1,7 +1,4 @@
 import { useMemo } from 'react'
-import useChainId from '@/hooks/useChainId'
-import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
-import useOwnedSafes from '@/hooks/useOwnedSafes'
 import { AddressCheckMessages, type AddressCheckType } from '../config'
 import { RecipientStatus, Severity, type AnalysisResult } from '../../../types'
 
@@ -15,11 +12,12 @@ export type AddressBookCheckResult = Record<
  * @param addresses - Array of Ethereum addresses to check
  * @returns Object containing check results for each address
  */
-export const useAddressBookCheck = (addresses: string[]): AddressBookCheckResult => {
-  const chainId = useChainId()
-  const mergedAddressBooks = useMergedAddressBooks(chainId)
-  const ownedSafes = useOwnedSafes(chainId)
-
+export const useAddressBookCheck = (
+  chainId: string,
+  addresses: string[],
+  isInAddressBook: (address: string, chainId: string) => boolean,
+  ownedSafes: string[] = [],
+): AddressBookCheckResult => {
   const results = useMemo(() => {
     const checkResults: AddressBookCheckResult = {}
 
@@ -29,11 +27,10 @@ export const useAddressBookCheck = (addresses: string[]): AddressBookCheckResult
       }
 
       // Check if address is in merged address book (local or spaces)
-      const isAddressBookContact = mergedAddressBooks.has(address, chainId)
+      const isAddressBookContact = isInAddressBook(address, chainId)
 
       // Check if address is a Safe owned by the currently connected wallet
-      const currentChainSafes = ownedSafes[chainId] || []
-      const isOwnedSafe = currentChainSafes.some((safe) => safe.toLowerCase() === address.toLowerCase())
+      const isOwnedSafe = ownedSafes.some((safe) => safe.toLowerCase() === address.toLowerCase())
 
       // Determine if address is known from any source
       const isKnownAddress = isAddressBookContact || isOwnedSafe
@@ -59,7 +56,7 @@ export const useAddressBookCheck = (addresses: string[]): AddressBookCheckResult
     })
 
     return checkResults
-  }, [addresses, chainId, mergedAddressBooks, ownedSafes])
+  }, [addresses, chainId, isInAddressBook, ownedSafes])
 
   return results
 }

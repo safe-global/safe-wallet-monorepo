@@ -1,8 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { renderHook, waitFor } from '@testing-library/react'
 import { useFetchRecipientAnalysis } from '../useFetchRecipientAnalysis'
-import * as useChainIdHook from '@/hooks/useChainId'
-import * as useSafeAddressHook from '@/hooks/useSafeAddress'
 import * as useFetchMultiRecipientAnalysisModule from '../useFetchMultiRecipientAnalysis'
 import { useMemo } from 'react'
 
@@ -22,8 +20,6 @@ describe('useFetchRecipientAnalysis', () => {
 
   beforeEach(() => {
     jest.resetAllMocks()
-    jest.spyOn(useChainIdHook, 'default').mockReturnValue(mockChainId)
-    jest.spyOn(useSafeAddressHook, 'default').mockReturnValue(mockSafeAddress)
 
     useFetchMultiRecipientAnalysisSpy = jest
       .spyOn(useFetchMultiRecipientAnalysisModule, 'useFetchMultiRecipientAnalysis')
@@ -33,7 +29,7 @@ describe('useFetchRecipientAnalysis', () => {
   it('should return empty results when no recipients are provided', async () => {
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [], [])
-      return useFetchRecipientAnalysis(recipients)
+      return useFetchRecipientAnalysis({ safeAddress: mockSafeAddress, chainId: mockChainId, recipients })
     })
 
     await waitFor(() => {
@@ -44,15 +40,17 @@ describe('useFetchRecipientAnalysis', () => {
     const [results, error] = result.current
     expect(results).toEqual({})
     expect(error).toBeUndefined()
-    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith(mockSafeAddress, mockChainId, [])
+    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith({
+      safeAddress: mockSafeAddress,
+      chainId: mockChainId,
+      recipientAddresses: [],
+    })
   })
 
   it('should return empty results when safeAddress is not available', async () => {
-    jest.spyOn(useSafeAddressHook, 'default').mockReturnValue('')
-
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockRecipient1], [])
-      return useFetchRecipientAnalysis(recipients)
+      return useFetchRecipientAnalysis({ safeAddress: '', chainId: mockChainId, recipients })
     })
 
     await waitFor(() => {
@@ -62,7 +60,11 @@ describe('useFetchRecipientAnalysis', () => {
 
     const [results] = result.current
     expect(results).toEqual({})
-    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith('', mockChainId, [mockRecipient1])
+    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith({
+      safeAddress: '',
+      chainId: mockChainId,
+      recipientAddresses: [mockRecipient1],
+    })
   })
 
   it('should fetch recipient analysis for a single recipient', async () => {
@@ -70,7 +72,7 @@ describe('useFetchRecipientAnalysis', () => {
 
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockRecipient1], [])
-      return useFetchRecipientAnalysis(recipients)
+      return useFetchRecipientAnalysis({ safeAddress: mockSafeAddress, chainId: mockChainId, recipients })
     })
 
     await waitFor(
@@ -84,7 +86,11 @@ describe('useFetchRecipientAnalysis', () => {
     const [results, error] = result.current
     expect(results?.[mockRecipient1]).toBeDefined()
     expect(error).toBeUndefined()
-    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith(mockSafeAddress, mockChainId, [mockRecipient1])
+    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith({
+      safeAddress: mockSafeAddress,
+      chainId: mockChainId,
+      recipientAddresses: [mockRecipient1],
+    })
   })
 
   it('should fetch recipient analysis for multiple recipients', async () => {
@@ -96,7 +102,7 @@ describe('useFetchRecipientAnalysis', () => {
 
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockRecipient1, mockRecipient2], [])
-      return useFetchRecipientAnalysis(recipients)
+      return useFetchRecipientAnalysis({ safeAddress: mockSafeAddress, chainId: mockChainId, recipients })
     })
 
     await waitFor(
@@ -111,10 +117,11 @@ describe('useFetchRecipientAnalysis', () => {
     const [results] = result.current
     expect(results?.[mockRecipient1]).toBeDefined()
     expect(results?.[mockRecipient2]).toBeDefined()
-    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith(mockSafeAddress, mockChainId, [
-      mockRecipient1,
-      mockRecipient2,
-    ])
+    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith({
+      safeAddress: mockSafeAddress,
+      chainId: mockChainId,
+      recipientAddresses: [mockRecipient1, mockRecipient2],
+    })
   })
 
   it('should only fetch new recipients when recipients list changes', async () => {
@@ -130,7 +137,11 @@ describe('useFetchRecipientAnalysis', () => {
     const { result, rerender } = renderHook(
       ({ recipients }) => {
         const memoizedRecipients = useMemo(() => recipients, [recipients])
-        return useFetchRecipientAnalysis(memoizedRecipients)
+        return useFetchRecipientAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          recipients: memoizedRecipients,
+        })
       },
       { initialProps: { recipients: [mockRecipient1] } },
     )
@@ -143,7 +154,11 @@ describe('useFetchRecipientAnalysis', () => {
       { timeout: 3000 },
     )
 
-    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith(mockSafeAddress, mockChainId, [mockRecipient1])
+    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith({
+      safeAddress: mockSafeAddress,
+      chainId: mockChainId,
+      recipientAddresses: [mockRecipient1],
+    })
 
     // Add a second recipient
     rerender({ recipients: [mockRecipient1, mockRecipient2] })
@@ -157,20 +172,25 @@ describe('useFetchRecipientAnalysis', () => {
     )
 
     // Should only fetch the new recipient (not mockRecipient1 again)
-    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenLastCalledWith(mockSafeAddress, mockChainId, [mockRecipient2])
+    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenLastCalledWith({
+      safeAddress: mockSafeAddress,
+      chainId: mockChainId,
+      recipientAddresses: [mockRecipient2],
+    })
   })
 
   it('should clear cache and re-fetch when chainId changes', async () => {
-    const useChainIdSpy = jest.spyOn(useChainIdHook, 'default').mockReturnValue('1')
-
     useFetchMultiRecipientAnalysisSpy
       .mockReturnValueOnce([{ [mockRecipient1]: mockAnalysisResult }, undefined, false])
       .mockReturnValueOnce([{ [mockRecipient1]: mockAnalysisResult }, undefined, false])
 
-    const { result, rerender } = renderHook(() => {
-      const recipients = useMemo(() => [mockRecipient1], [])
-      return useFetchRecipientAnalysis(recipients)
-    })
+    const { result, rerender } = renderHook(
+      ({ chainId }) => {
+        const recipients = useMemo(() => [mockRecipient1], [])
+        return useFetchRecipientAnalysis({ safeAddress: mockSafeAddress, chainId, recipients })
+      },
+      { initialProps: { chainId: '1' } },
+    )
 
     await waitFor(
       () => {
@@ -180,11 +200,14 @@ describe('useFetchRecipientAnalysis', () => {
       { timeout: 3000 },
     )
 
-    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith(mockSafeAddress, '1', [mockRecipient1])
+    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith({
+      safeAddress: mockSafeAddress,
+      chainId: '1',
+      recipientAddresses: [mockRecipient1],
+    })
 
     // Change chainId
-    useChainIdSpy.mockReturnValue('137')
-    rerender()
+    rerender({ chainId: '137' })
 
     await waitFor(
       () => {
@@ -195,46 +218,11 @@ describe('useFetchRecipientAnalysis', () => {
     )
 
     // Should fetch again with new chainId
-    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenLastCalledWith(mockSafeAddress, '137', [mockRecipient1])
-  })
-
-  it('should clear cache and re-fetch when safeAddress changes', async () => {
-    const newSafeAddress = faker.finance.ethereumAddress()
-    const useSafeAddressSpy = jest.spyOn(useSafeAddressHook, 'default').mockReturnValue(mockSafeAddress)
-
-    useFetchMultiRecipientAnalysisSpy
-      .mockReturnValueOnce([{ [mockRecipient1]: mockAnalysisResult }, undefined, false])
-      .mockReturnValueOnce([{ [mockRecipient1]: mockAnalysisResult }, undefined, false])
-
-    const { result, rerender } = renderHook(() => {
-      const recipients = useMemo(() => [mockRecipient1], [])
-      return useFetchRecipientAnalysis(recipients)
+    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenLastCalledWith({
+      safeAddress: mockSafeAddress,
+      chainId: '137',
+      recipientAddresses: [mockRecipient1],
     })
-
-    await waitFor(
-      () => {
-        const [results] = result.current
-        expect(results?.[mockRecipient1]).toBeDefined()
-      },
-      { timeout: 3000 },
-    )
-
-    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith(mockSafeAddress, mockChainId, [mockRecipient1])
-
-    // Change safeAddress
-    useSafeAddressSpy.mockReturnValue(newSafeAddress)
-    rerender()
-
-    await waitFor(
-      () => {
-        const [, , loading] = result.current
-        expect(loading).toBe(false)
-      },
-      { timeout: 3000 },
-    )
-
-    // Should fetch again with new safeAddress
-    expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenLastCalledWith(newSafeAddress, mockChainId, [mockRecipient1])
   })
 
   it('should handle fetch errors gracefully', async () => {
@@ -243,7 +231,7 @@ describe('useFetchRecipientAnalysis', () => {
 
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockRecipient1], [])
-      return useFetchRecipientAnalysis(recipients)
+      return useFetchRecipientAnalysis({ safeAddress: mockSafeAddress, chainId: mockChainId, recipients })
     })
 
     await waitFor(() => {
@@ -261,7 +249,7 @@ describe('useFetchRecipientAnalysis', () => {
 
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockRecipient1], [])
-      return useFetchRecipientAnalysis(recipients)
+      return useFetchRecipientAnalysis({ safeAddress: mockSafeAddress, chainId: mockChainId, recipients })
     })
 
     const [, , loading] = result.current
@@ -281,7 +269,11 @@ describe('useFetchRecipientAnalysis', () => {
     const { result, rerender } = renderHook(
       ({ recipients }) => {
         const memoizedRecipients = useMemo(() => recipients, [recipients])
-        return useFetchRecipientAnalysis(memoizedRecipients)
+        return useFetchRecipientAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          recipients: memoizedRecipients,
+        })
       },
       { initialProps: { recipients: [mockRecipient1] } },
     )

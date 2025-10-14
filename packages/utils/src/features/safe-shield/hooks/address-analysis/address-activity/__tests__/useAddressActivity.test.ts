@@ -2,7 +2,6 @@ import { faker } from '@faker-js/faker'
 import { renderHook, waitFor } from '@testing-library/react'
 import type { JsonRpcProvider } from 'ethers'
 import { useAddressActivity } from '../useAddressActivity'
-import * as web3 from '@/hooks/wallets/web3'
 import { ActivityMessages } from '../../config'
 import { useMemo } from 'react'
 
@@ -15,11 +14,10 @@ describe('useAddressActivity', () => {
   })
 
   it('should return empty results when no addresses are provided', async () => {
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockProvider(0))
-
     const { result } = renderHook(() => {
       const addresses = useMemo(() => [], [])
-      return useAddressActivity(addresses)
+      const provider = mockProvider(0)
+      return useAddressActivity(addresses, provider)
     })
 
     await waitFor(() => {
@@ -32,9 +30,7 @@ describe('useAddressActivity', () => {
     expect(error).toBeUndefined()
   })
 
-  it('should return empty results when provider is not available', async () => {
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(undefined as unknown as JsonRpcProvider)
-
+  it('should return empty results when provider is not provided', async () => {
     const address = faker.finance.ethereumAddress()
     const { result } = renderHook(() => {
       const addresses = useMemo(() => [address], [])
@@ -52,11 +48,11 @@ describe('useAddressActivity', () => {
 
   it('should return NO_ACTIVITY assessment with corresponding title and description', async () => {
     const address = faker.finance.ethereumAddress()
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockProvider(0))
 
     const { result } = renderHook(() => {
       const addresses = useMemo(() => [address], [])
-      return useAddressActivity(addresses)
+      const provider = mockProvider(0)
+      return useAddressActivity(addresses, provider)
     })
 
     await waitFor(
@@ -79,11 +75,11 @@ describe('useAddressActivity', () => {
 
   it('should return VERY_LOW_ACTIVITY assessment with corresponding title and description', async () => {
     const address = faker.finance.ethereumAddress()
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockProvider(3))
 
     const { result } = renderHook(() => {
       const addresses = useMemo(() => [address], [])
-      return useAddressActivity(addresses)
+      const provider = mockProvider(3)
+      return useAddressActivity(addresses, provider)
     })
 
     await waitFor(
@@ -105,11 +101,11 @@ describe('useAddressActivity', () => {
 
   it('should return LOW_ACTIVITY assessment with corresponding title and description', async () => {
     const address = faker.finance.ethereumAddress()
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockProvider(10))
 
     const { result } = renderHook(() => {
       const addresses = useMemo(() => [address], [])
-      return useAddressActivity(addresses)
+      const provider = mockProvider(10)
+      return useAddressActivity(addresses, provider)
     })
 
     await waitFor(
@@ -131,11 +127,11 @@ describe('useAddressActivity', () => {
 
   it('should return MODERATE_ACTIVITY assessment with corresponding title and description', async () => {
     const address = faker.finance.ethereumAddress()
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockProvider(50))
 
     const { result } = renderHook(() => {
       const addresses = useMemo(() => [address], [])
-      return useAddressActivity(addresses)
+      const provider = mockProvider(50)
+      return useAddressActivity(addresses, provider)
     })
 
     await waitFor(
@@ -157,11 +153,11 @@ describe('useAddressActivity', () => {
 
   it('should return HIGH_ACTIVITY assessment with corresponding title and description', async () => {
     const address = faker.finance.ethereumAddress()
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockProvider(250))
 
     const { result } = renderHook(() => {
       const addresses = useMemo(() => [address], [])
-      return useAddressActivity(addresses)
+      const provider = mockProvider(250)
+      return useAddressActivity(addresses, provider)
     })
 
     await waitFor(
@@ -188,12 +184,11 @@ describe('useAddressActivity', () => {
       getTransactionCount: jest.fn().mockRejectedValue(new Error(errorMessage)),
     } as unknown as JsonRpcProvider
 
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(provider)
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
 
     const { result } = renderHook(() => {
       const addresses = useMemo(() => [address], [])
-      return useAddressActivity(addresses)
+      return useAddressActivity(addresses, provider)
     })
 
     await waitFor(() => {
@@ -219,11 +214,9 @@ describe('useAddressActivity', () => {
 
     const provider = { getTransactionCount: mockGetTransactionCount } as unknown as JsonRpcProvider
 
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(provider)
-
     const { result } = renderHook(() => {
       const addresses = useMemo(() => [address1, address2], [])
-      return useAddressActivity(addresses)
+      return useAddressActivity(addresses, provider)
     })
 
     await waitFor(
@@ -256,12 +249,10 @@ describe('useAddressActivity', () => {
 
     const provider = { getTransactionCount: mockGetTransactionCount } as unknown as JsonRpcProvider
 
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(provider)
-
     const { result, rerender } = renderHook(
       ({ addrs }) => {
         const addresses = useMemo(() => addrs, [addrs])
-        return useAddressActivity(addresses)
+        return useAddressActivity(addresses, provider)
       },
       { initialProps: { addrs: [address1] } },
     )
@@ -293,12 +284,13 @@ describe('useAddressActivity', () => {
     const provider1 = mockProvider(5)
     const provider2 = mockProvider(100)
 
-    const useWeb3ReadOnlySpy = jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(provider1)
-
-    const { result, rerender } = renderHook(() => {
-      const addresses = useMemo(() => [address], [])
-      return useAddressActivity(addresses)
-    })
+    const { result, rerender } = renderHook(
+      ({ prov }) => {
+        const addresses = useMemo(() => [address], [])
+        return useAddressActivity(addresses, prov)
+      },
+      { initialProps: { prov: provider1 } },
+    )
 
     await waitFor(
       () => {
@@ -313,8 +305,7 @@ describe('useAddressActivity', () => {
     expect(provider1.getTransactionCount).toHaveBeenCalledTimes(1)
 
     // Change provider
-    useWeb3ReadOnlySpy.mockReturnValue(provider2)
-    rerender()
+    rerender({ prov: provider2 })
 
     await waitFor(
       () => {

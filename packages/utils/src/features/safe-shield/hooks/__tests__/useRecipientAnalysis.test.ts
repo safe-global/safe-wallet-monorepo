@@ -15,7 +15,7 @@ import { RecipientAnalysisResultBuilder } from '../../builders'
 jest.mock('../useFetchRecipientAnalysis')
 jest.mock('../address-analysis/address-book-check/useAddressBookCheck')
 jest.mock('../address-analysis/address-activity/useAddressActivity')
-jest.mock('@/hooks/useDebounce', () => ({ __esModule: true, default: jest.fn((value) => value) }))
+jest.mock('@safe-global/utils/hooks/useDebounce', () => ({ __esModule: true, default: jest.fn((value) => value) }))
 
 const mockUseFetchRecipientAnalysis = useFetchRecipientAnalysis as jest.MockedFunction<typeof useFetchRecipientAnalysis>
 const mockUseAddressBookCheck = useAddressBookCheck as jest.MockedFunction<typeof useAddressBookCheck>
@@ -24,6 +24,10 @@ const mockUseAddressActivity = useAddressActivity as jest.MockedFunction<typeof 
 describe('useRecipientAnalysis', () => {
   const mockAddress1 = faker.finance.ethereumAddress()
   const mockAddress2 = faker.finance.ethereumAddress()
+  const mockSafeAddress = faker.finance.ethereumAddress()
+  const mockChainId = '1'
+  const mockIsInAddressBook = jest.fn(() => false)
+  const mockOwnedSafes: string[] = []
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -32,12 +36,19 @@ describe('useRecipientAnalysis', () => {
     mockUseFetchRecipientAnalysis.mockReturnValue([{}, undefined, false])
     mockUseAddressBookCheck.mockReturnValue({})
     mockUseAddressActivity.mockReturnValue([{}, undefined, false])
+    mockIsInAddressBook.mockReturnValue(false)
   })
 
   it('should return empty results when no recipients are provided', async () => {
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [], [])
-      return useRecipientAnalysis(recipients)
+      return useRecipientAnalysis({
+        safeAddress: mockSafeAddress,
+        chainId: mockChainId,
+        recipients,
+        isInAddressBook: mockIsInAddressBook,
+        ownedSafes: mockOwnedSafes,
+      })
     })
 
     await waitFor(() => {
@@ -55,7 +66,13 @@ describe('useRecipientAnalysis', () => {
 
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockAddress1, invalidAddress], [])
-      return useRecipientAnalysis(recipients)
+      return useRecipientAnalysis({
+        safeAddress: mockSafeAddress,
+        chainId: mockChainId,
+        recipients,
+        isInAddressBook: mockIsInAddressBook,
+        ownedSafes: mockOwnedSafes,
+      })
     })
 
     await waitFor(() => {
@@ -64,9 +81,18 @@ describe('useRecipientAnalysis', () => {
     })
 
     // Should only process the valid address
-    expect(mockUseFetchRecipientAnalysis).toHaveBeenCalledWith([mockAddress1.toLowerCase()])
-    expect(mockUseAddressBookCheck).toHaveBeenCalledWith([mockAddress1.toLowerCase()])
-    expect(mockUseAddressActivity).toHaveBeenCalledWith([mockAddress1.toLowerCase()])
+    expect(mockUseFetchRecipientAnalysis).toHaveBeenCalledWith({
+      safeAddress: mockSafeAddress,
+      chainId: mockChainId,
+      recipients: [mockAddress1.toLowerCase()],
+    })
+    expect(mockUseAddressBookCheck).toHaveBeenCalledWith(
+      mockChainId,
+      [mockAddress1.toLowerCase()],
+      mockIsInAddressBook,
+      mockOwnedSafes,
+    )
+    expect(mockUseAddressActivity).toHaveBeenCalledWith([mockAddress1.toLowerCase()], undefined)
   })
 
   it('should normalize addresses to lowercase', async () => {
@@ -75,7 +101,13 @@ describe('useRecipientAnalysis', () => {
 
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mixedCaseAddress], [])
-      return useRecipientAnalysis(recipients)
+      return useRecipientAnalysis({
+        safeAddress: mockSafeAddress,
+        chainId: mockChainId,
+        recipients,
+        isInAddressBook: mockIsInAddressBook,
+        ownedSafes: mockOwnedSafes,
+      })
     })
 
     await waitFor(() => {
@@ -83,14 +115,24 @@ describe('useRecipientAnalysis', () => {
       expect(loading).toBe(false)
     })
 
-    expect(mockUseFetchRecipientAnalysis).toHaveBeenCalledWith([mixedCaseAddress.toLowerCase()])
+    expect(mockUseFetchRecipientAnalysis).toHaveBeenCalledWith({
+      safeAddress: mockSafeAddress,
+      chainId: mockChainId,
+      recipients: [mixedCaseAddress.toLowerCase()],
+    })
   })
 
   it('should remove duplicate addresses', async () => {
     const address = '0xABCDEF1234567890ABCDEF1234567890ABCDEF12'
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [address, address, address.toLowerCase()], [])
-      return useRecipientAnalysis(recipients)
+      return useRecipientAnalysis({
+        safeAddress: mockSafeAddress,
+        chainId: mockChainId,
+        recipients,
+        isInAddressBook: mockIsInAddressBook,
+        ownedSafes: mockOwnedSafes,
+      })
     })
 
     await waitFor(() => {
@@ -99,7 +141,11 @@ describe('useRecipientAnalysis', () => {
     })
 
     // Should only process unique address once
-    expect(mockUseFetchRecipientAnalysis).toHaveBeenCalledWith([address.toLowerCase()])
+    expect(mockUseFetchRecipientAnalysis).toHaveBeenCalledWith({
+      safeAddress: mockSafeAddress,
+      chainId: mockChainId,
+      recipients: [address.toLowerCase()],
+    })
   })
 
   it('should merge backend results with address book check', async () => {
@@ -116,7 +162,13 @@ describe('useRecipientAnalysis', () => {
 
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockAddress1], [])
-      return useRecipientAnalysis(recipients)
+      return useRecipientAnalysis({
+        safeAddress: mockSafeAddress,
+        chainId: mockChainId,
+        recipients,
+        isInAddressBook: mockIsInAddressBook,
+        ownedSafes: mockOwnedSafes,
+      })
     })
 
     await waitFor(() => {
@@ -145,7 +197,13 @@ describe('useRecipientAnalysis', () => {
 
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockAddress1], [])
-      return useRecipientAnalysis(recipients)
+      return useRecipientAnalysis({
+        safeAddress: mockSafeAddress,
+        chainId: mockChainId,
+        recipients,
+        isInAddressBook: mockIsInAddressBook,
+        ownedSafes: mockOwnedSafes,
+      })
     })
 
     await waitFor(() => {
@@ -179,7 +237,13 @@ describe('useRecipientAnalysis', () => {
 
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockAddress1], [])
-      return useRecipientAnalysis(recipients)
+      return useRecipientAnalysis({
+        safeAddress: mockSafeAddress,
+        chainId: mockChainId,
+        recipients,
+        isInAddressBook: mockIsInAddressBook,
+        ownedSafes: mockOwnedSafes,
+      })
     })
 
     await waitFor(() => {
@@ -205,7 +269,13 @@ describe('useRecipientAnalysis', () => {
 
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockAddress1, mockAddress2], [])
-      return useRecipientAnalysis(recipients)
+      return useRecipientAnalysis({
+        safeAddress: mockSafeAddress,
+        chainId: mockChainId,
+        recipients,
+        isInAddressBook: mockIsInAddressBook,
+        ownedSafes: mockOwnedSafes,
+      })
     })
 
     await waitFor(() => {
@@ -225,7 +295,13 @@ describe('useRecipientAnalysis', () => {
 
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockAddress1], [])
-      return useRecipientAnalysis(recipients)
+      return useRecipientAnalysis({
+        safeAddress: mockSafeAddress,
+        chainId: mockChainId,
+        recipients,
+        isInAddressBook: mockIsInAddressBook,
+        ownedSafes: mockOwnedSafes,
+      })
     })
 
     const [, , loading] = result.current
@@ -237,7 +313,13 @@ describe('useRecipientAnalysis', () => {
 
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockAddress1], [])
-      return useRecipientAnalysis(recipients)
+      return useRecipientAnalysis({
+        safeAddress: mockSafeAddress,
+        chainId: mockChainId,
+        recipients,
+        isInAddressBook: mockIsInAddressBook,
+        ownedSafes: mockOwnedSafes,
+      })
     })
 
     const [, , loading] = result.current
@@ -250,7 +332,13 @@ describe('useRecipientAnalysis', () => {
 
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockAddress1], [])
-      return useRecipientAnalysis(recipients)
+      return useRecipientAnalysis({
+        safeAddress: mockSafeAddress,
+        chainId: mockChainId,
+        recipients,
+        isInAddressBook: mockIsInAddressBook,
+        ownedSafes: mockOwnedSafes,
+      })
     })
 
     await waitFor(() => {
@@ -268,7 +356,13 @@ describe('useRecipientAnalysis', () => {
 
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockAddress1], [])
-      return useRecipientAnalysis(recipients)
+      return useRecipientAnalysis({
+        safeAddress: mockSafeAddress,
+        chainId: mockChainId,
+        recipients,
+        isInAddressBook: mockIsInAddressBook,
+        ownedSafes: mockOwnedSafes,
+      })
     })
 
     await waitFor(() => {
@@ -289,7 +383,13 @@ describe('useRecipientAnalysis', () => {
 
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockAddress1], [])
-      return useRecipientAnalysis(recipients)
+      return useRecipientAnalysis({
+        safeAddress: mockSafeAddress,
+        chainId: mockChainId,
+        recipients,
+        isInAddressBook: mockIsInAddressBook,
+        ownedSafes: mockOwnedSafes,
+      })
     })
 
     await waitFor(() => {

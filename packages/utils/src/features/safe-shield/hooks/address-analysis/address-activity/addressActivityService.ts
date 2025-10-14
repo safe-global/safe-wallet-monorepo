@@ -4,10 +4,7 @@ import { ACTIVITY_THRESHOLDS } from '../config'
 
 export type ActivityLevel = 'NO_ACTIVITY' | 'VERY_LOW_ACTIVITY' | 'LOW_ACTIVITY' | 'MODERATE_ACTIVITY' | 'HIGH_ACTIVITY'
 
-export type AddressActivityAssessment = {
-  txCount: number
-  activityLevel: ActivityLevel
-}
+export type AddressActivityAssessment = { txCount: number; activityLevel: ActivityLevel }
 
 /**
  * Determine activity level based on transaction count
@@ -47,10 +44,7 @@ export const analyzeAddressActivity = async (
     // Determine activity level
     const activityLevel = getActivityLevel(txCount)
 
-    return {
-      txCount,
-      activityLevel,
-    }
+    return { txCount, activityLevel }
   } catch (error) {
     throw new Error(`Failed to analyze address activity: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
