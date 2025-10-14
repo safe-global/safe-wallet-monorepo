@@ -18,13 +18,16 @@ import { NoFunds } from '@/src/features/Assets/components/NoFunds'
 import { AssetError } from '@/src/features/Assets/Assets.error'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectCurrency, selectTokenList, TOKEN_LISTS } from '@/src/store/settingsSlice'
+import { useHasFeature } from '@/src/hooks/useHasFeature'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 export function TokensContainer() {
   const activeSafe = useSelector(selectActiveSafe)
   const currency = useAppSelector(selectCurrency)
   const tokenList = useAppSelector(selectTokenList)
+  const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
 
-  const trusted = tokenList === TOKEN_LISTS.TRUSTED
+  const trusted = hasDefaultTokenlist ? tokenList === TOKEN_LISTS.TRUSTED : true
 
   const { data, isFetching, error, isLoading, refetch } = useBalancesGetBalancesV1Query(
     !activeSafe
