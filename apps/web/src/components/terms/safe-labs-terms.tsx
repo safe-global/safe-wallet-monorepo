@@ -165,8 +165,9 @@ const SafeLabsTerms = () => {
 
                 <Typography variant="body2">
                   To ensure a seamless user experience, but only upon your voluntary request, we can arrange the
-                  transfer of your interface account data, including personal data (e.g. your address book), from Core
-                  Contributors GmbH to Safe Labs GmbH so it is available in your new Safe{'{Wallet}'} by Safe Labs GmbH.
+                  transfer of your interface account data, including personal data (e.g. your Spaces address book), from
+                  Core Contributors GmbH to Safe Labs GmbH so it is available in your new Safe{'{Wallet}'} by Safe Labs
+                  GmbH.
                 </Typography>
 
                 <Typography variant="body2">
