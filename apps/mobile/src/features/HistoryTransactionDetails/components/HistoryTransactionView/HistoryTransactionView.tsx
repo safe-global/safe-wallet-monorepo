@@ -21,6 +21,7 @@ import { HistoryVaultDeposit } from '../history-views/HistoryVaultDeposit'
 import { HistoryVaultRedeem } from '../history-views/HistoryVaultRedeem'
 import { HistoryStakeDeposit } from '../history-views/HistoryStakeDeposit'
 import { HistoryStakeWithdrawRequest } from '../history-views/HistoryStakeWithdrawRequest'
+import { HistorySwapSigner } from '../history-views/HistorySwapSigner'
 import { ETxType } from '@/src/types/txType'
 import { getTransactionType } from '@/src/utils/transactions'
 import { HistoryGenericView } from '@/src/features/HistoryTransactionDetails/components/history-views/HistoryGenericView'
@@ -29,6 +30,7 @@ import { NormalizedSettingsChangeTransaction } from '@/src/features/ConfirmTx/co
 import { CancelTx } from '@/src/features/HistoryTransactionDetails/components/history-views/CancelTx'
 import { CustomTransactionInfo, MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { HistoryStakeWithdraw } from '../history-views/HistoryStakeWithdraw'
+import { SettingsChagneSwapOwner } from '@/src/utils/transaction-guards'
 
 interface HistoryTransactionViewProps {
   txDetails: TransactionDetails
@@ -128,6 +130,9 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
 
     case ETxType.VAULT_REDEEM:
       return <HistoryVaultRedeem txId={txDetails.txId} txInfo={txDetails.txInfo as VaultRedeemTransactionInfo} />
+
+    case ETxType.SWAP_OWNER:
+      return <HistorySwapSigner txId={txDetails.txId} txInfo={txDetails.txInfo as SettingsChagneSwapOwner} />
 
     // For all other transaction types, use a generic view that can adapt
     default:
