@@ -9,7 +9,7 @@ import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import type { OnboardAPI, WalletState } from '@web3-onboard/core'
 import { IS_TEST_E2E } from '@/config/constants'
 
-const TERMS_REDIRECT_EXCEPTIONS = [AppRoutes.safeLabsTerms, AppRoutes.privacy, AppRoutes.terms, AppRoutes.imprint]
+const TERMS_REDIRECT_EXCEPTIONS = [AppRoutes.safeLabsTerms, AppRoutes.privacy, AppRoutes.terms, AppRoutes.imprint, AppRoutes.cookie, AppRoutes.licenses]
 
 interface UseSafeLabsTermsReturnType {
   isFeatureDisabled: boolean
