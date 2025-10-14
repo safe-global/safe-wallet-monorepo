@@ -3902,6 +3902,58 @@
         "tags": ["safes"]
       }
     },
+    "/v1/chains/{chainId}/security/{safeAddress}/recipient/{recipientAddress}": {
+      "get": {
+        "description": "Performs real-time security analysis of a recipient address for a specific Safe. Returns analysis results grouped by status group, sorted by severity (CRITICAL first).",
+        "operationId": "safeShieldAnalyzeRecipientV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recipientAddress",
+            "required": true,
+            "in": "path",
+            "description": "Recipient address to analyze",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recipient interaction analysis results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipientInteractionAnalysisDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Analyze recipient address",
+        "tags": [
+          "safe-shield"
+        ]
+      }
+    },
     "/v1/targeted-messaging/outreaches/{outreachId}/chains/{chainId}/safes/{safeAddress}": {
       "get": {
         "operationId": "targetedMessagingGetTargetedSafeV1",
