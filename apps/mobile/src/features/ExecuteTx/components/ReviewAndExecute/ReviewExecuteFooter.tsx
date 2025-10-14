@@ -22,36 +22,12 @@ import { Skeleton } from 'moti/skeleton'
 import { useTheme } from '@/src/theme/hooks/useTheme'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { getExecutionMethod, getSubmitButtonText } from './helpers'
 
 interface ReviewFooterProps {
   txId: string
   txDetails: TransactionDetails
   relaysRemaining?: RelaysRemaining
-}
-
-/**
- * Determines the execution method based on user selection and relay availability
- */
-const getExecutionMethod = (
-  requestedMethod: ExecutionMethod | undefined,
-  isRelayAvailable: boolean,
-  chain: Chain,
-): ExecutionMethod => {
-  const canNotUseRelayOption = requestedMethod === ExecutionMethod.WITH_RELAY && !isRelayAvailable
-  const isRelayEnabled = chain && hasFeature(chain, FEATURES.RELAYING)
-
-  // If user explicitly requested relay but none are available, fallback to signer
-  if (canNotUseRelayOption || !isRelayEnabled) {
-    return ExecutionMethod.WITH_PK
-  }
-
-  // If user selected a method, use it
-  if (requestedMethod) {
-    return requestedMethod
-  }
-
-  // Default: use relay if available, otherwise use signer
-  return isRelayAvailable ? ExecutionMethod.WITH_RELAY : ExecutionMethod.WITH_PK
 }
 
 export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: ReviewFooterProps) {
@@ -80,10 +56,6 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
     executionMethod,
     chain: chain ?? undefined,
   })
-
-  const willFail = Boolean(estimatedFeeParams.gasLimitError) && executionMethod === ExecutionMethod.WITH_PK
-  const isButtonDisabled = !hasSufficientFunds || willFail
-  const buttonText = !hasSufficientFunds ? 'Insufficient funds' : 'Execute transaction'
 
   const handleConfirmPress = async () => {
     try {
@@ -123,6 +95,11 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
     }
   }
 
+  const willFail = Boolean(estimatedFeeParams.gasLimitError)
+  const isButtonDisabled = !hasSufficientFunds || willFail
+  const buttonText = getSubmitButtonText(hasSufficientFunds, willFail)
+  const isLoading = isCheckingFunds || isLoadingFees
+
   return (
     <Stack paddingHorizontal="$4" space="$3" paddingBottom={insets.bottom ? insets.bottom : '$4'}>
       <Container
@@ -143,9 +120,9 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
         />
       </Container>
 
-      {isCheckingFunds ? (
-        <Skeleton.Group show={true}>
-          <Skeleton colorMode={colorScheme} height={48} width="100%" radius={12} />
+      {isLoading ? (
+        <Skeleton.Group show>
+          <Skeleton colorMode={colorScheme} height={44} width="100%" radius={12} />
         </Skeleton.Group>
       ) : (
         <SafeButton onPress={handleConfirmPress} width="100%" disabled={isButtonDisabled}>

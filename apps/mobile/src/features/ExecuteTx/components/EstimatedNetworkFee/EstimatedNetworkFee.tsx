@@ -46,10 +46,15 @@ export const EstimatedNetworkFee = ({
     <View flexDirection="row" justifyContent="space-between" gap="$2" alignItems="center">
       <Text color="$textSecondaryLight">Est. network fee</Text>
 
-      {executionMethod === ExecutionMethod.WITH_RELAY ? (
-        <RelayFee isLoadingRelays={isLoadingRelays} relaysRemaining={relaysRemaining} />
-      ) : isLoadingFees ? (
+      {isLoadingFees || isLoadingRelays ? (
         <Skeleton colorMode={colorScheme} height={16} width={100} />
+      ) : executionMethod === ExecutionMethod.WITH_RELAY ? (
+        <RelayFee
+          willFail={willFail}
+          onFailTextPress={onPress}
+          isLoadingRelays={isLoadingRelays}
+          relaysRemaining={relaysRemaining}
+        />
       ) : (
         <SignerFee
           totalFee={totalFee}
