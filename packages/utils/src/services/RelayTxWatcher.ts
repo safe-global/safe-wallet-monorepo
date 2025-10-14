@@ -28,6 +28,7 @@ export type RelayResponse = {
 const TASK_STATUS_URL = 'https://relay.gelato.digital/tasks/status'
 const WAIT_FOR_RELAY_TIMEOUT = 3 * 60_000 // 3 minutes
 const POLL_INTERVAL = 5_000 // 5 seconds
+export const TIMEOUT_ERROR_CODE = 'TIMEOUT'
 
 const getTaskTrackingUrl = (taskId: string) => `${TASK_STATUS_URL}/${taskId}`
 
@@ -89,7 +90,7 @@ export class RelayTxWatcher {
    */
   watchTaskId(
     taskId: string,
-    onUpdate?: (response: TransactionStatusResponse) => void,
+    { onUpdate, onNextPoll }: { onUpdate?: (response: TransactionStatusResponse) => void; onNextPoll?: () => void },
   ): Promise<TransactionStatusResponse> {
     return new Promise((resolve, reject) => {
       this.startTimes[taskId] = Date.now()
@@ -98,7 +99,11 @@ export class RelayTxWatcher {
         // Check for timeout
         if (Date.now() - this.startTimes[taskId] > WAIT_FOR_RELAY_TIMEOUT) {
           this.stopWatchingTaskId(taskId)
-          reject(new Error('Relay transaction timeout'))
+          reject(
+            new Error('Relay transaction timeout', {
+              cause: TIMEOUT_ERROR_CODE,
+            }),
+          )
           return
         }
 
@@ -106,13 +111,16 @@ export class RelayTxWatcher {
 
         if (!response) {
           // Retry on error
+          // Call update callback if provided
+
           this.timers[taskId] = setTimeout(poll, POLL_INTERVAL)
+
+          onNextPoll?.()
+
           return
         }
 
         const { task } = response
-
-        // Call update callback if provided
         onUpdate?.(task)
 
         // Check if the task is in a terminal state
