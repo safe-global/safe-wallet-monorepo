@@ -14,7 +14,7 @@ import { SignerFee } from '../SignerFee'
 interface EstimatedNetworkFeeProps {
   totalFee: string
   txId: string
-  totalFeeRaw: bigint
+  willFail?: boolean
   executionMethod: ExecutionMethod
   isLoadingFees: boolean
 }
@@ -22,9 +22,9 @@ interface EstimatedNetworkFeeProps {
 export const EstimatedNetworkFee = ({
   totalFee,
   txId,
-  totalFeeRaw,
   executionMethod,
   isLoadingFees,
+  willFail,
 }: EstimatedNetworkFeeProps) => {
   const chain = useAppSelector(selectActiveChain)
   const { colorScheme } = useTheme()
@@ -46,14 +46,19 @@ export const EstimatedNetworkFee = ({
     <View flexDirection="row" justifyContent="space-between" gap="$2" alignItems="center">
       <Text color="$textSecondaryLight">Est. network fee</Text>
 
-      {executionMethod === ExecutionMethod.WITH_RELAY ? (
-        <RelayFee isLoadingRelays={isLoadingRelays} relaysRemaining={relaysRemaining} />
-      ) : isLoadingFees ? (
+      {isLoadingFees || isLoadingRelays ? (
         <Skeleton colorMode={colorScheme} height={16} width={100} />
+      ) : executionMethod === ExecutionMethod.WITH_RELAY ? (
+        <RelayFee
+          willFail={willFail}
+          onFailTextPress={onPress}
+          isLoadingRelays={isLoadingRelays}
+          relaysRemaining={relaysRemaining}
+        />
       ) : (
         <SignerFee
           totalFee={totalFee}
-          totalFeeRaw={totalFeeRaw}
+          willFail={willFail}
           currencySymbol={chain?.nativeCurrency.symbol}
           onPress={onPress}
         />

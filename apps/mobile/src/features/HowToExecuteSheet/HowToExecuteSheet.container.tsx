@@ -27,6 +27,8 @@ import { ExecutionMethod } from './types'
 import { useRelayGetRelaysRemainingV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import { RelayAvailable } from './components/RelayAvailable/RelayAvailable'
 import { RelayUnavailable } from './components/RelayUnavailable/RelayUnavailable'
+import { hasFeature } from '@safe-global/utils/utils/chains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const getActiveSignerRightNode = (
   totalFee: bigint,
@@ -83,37 +85,44 @@ export const HowToExecuteSheetContainer = () => {
   }
 
   const isRelayAvailable = relaysRemaining?.remaining && relaysRemaining.remaining > 0
+  const isRelayEnabled = hasFeature(activeChain, FEATURES.RELAYING)
 
   return (
     <SafeBottomSheet title="Choose how to execute" snapPoints={['90%']} loading={loading || isLoadingTxDetails}>
       <ScrollView>
         <View gap="$3" paddingHorizontal="$1">
           {/* Relayer Option */}
-          <Container
-            spaced={false}
-            backgroundColor={executionMethod === ExecutionMethod.WITH_RELAY ? '$backgroundSecondary' : 'transparent'}
-            borderWidth={executionMethod === ExecutionMethod.WITH_RELAY ? 0 : 1}
-            borderColor={executionMethod !== ExecutionMethod.WITH_RELAY ? '$borderLight' : undefined}
-            paddingVertical="$3"
-            paddingHorizontal="$4"
-            gap="$1"
-            onPress={() => isRelayAvailable && handleExecutionMethodSelect(ExecutionMethod.WITH_RELAY)}
-          >
-            {isRelayAvailable ? (
-              <RelayAvailable
-                isLoadingRelays={isLoadingRelays}
-                relaysRemaining={relaysRemaining}
-                executionMethod={executionMethod}
-              />
-            ) : (
-              <RelayUnavailable />
-            )}
-          </Container>
+          {isRelayEnabled && (
+            <>
+              <Container
+                spaced={false}
+                backgroundColor={
+                  executionMethod === ExecutionMethod.WITH_RELAY ? '$backgroundSecondary' : 'transparent'
+                }
+                borderWidth={executionMethod === ExecutionMethod.WITH_RELAY ? 0 : 1}
+                borderColor={executionMethod !== ExecutionMethod.WITH_RELAY ? '$borderLight' : undefined}
+                paddingVertical="$3"
+                paddingHorizontal="$4"
+                gap="$1"
+                onPress={() => isRelayAvailable && handleExecutionMethodSelect(ExecutionMethod.WITH_RELAY)}
+              >
+                {isRelayAvailable ? (
+                  <RelayAvailable
+                    isLoadingRelays={isLoadingRelays}
+                    relaysRemaining={relaysRemaining}
+                    executionMethod={executionMethod}
+                  />
+                ) : (
+                  <RelayUnavailable />
+                )}
+              </Container>
 
-          {/* Divider Text */}
-          <Text fontWeight="600" fontSize="$4" paddingHorizontal="$1" marginTop="$2">
-            Or use your signer:
-          </Text>
+              {/* Divider Text */}
+              <Text fontWeight="600" fontSize="$4" paddingHorizontal="$1" marginTop="$2">
+                Or use your signer:
+              </Text>
+            </>
+          )}
 
           {/* Signers List */}
           <View gap="$2">

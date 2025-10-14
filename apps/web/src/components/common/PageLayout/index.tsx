@@ -18,7 +18,8 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const [isBatchOpen, setBatchOpen] = useState<boolean>(false)
   const { setFullWidth } = useContext(TxModalContext)
   const isSafeLabsTermsPage = pathname === AppRoutes.safeLabsTerms
-  const hideHeader = isSafeLabsTermsPage
+  const isWelcomePage = pathname === AppRoutes.welcome.index
+  const hideHeader = isSafeLabsTermsPage || isWelcomePage
 
   useEffect(() => {
     setFullWidth(!isSidebarOpen)

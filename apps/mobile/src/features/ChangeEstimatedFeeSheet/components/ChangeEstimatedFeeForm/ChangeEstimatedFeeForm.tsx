@@ -160,9 +160,16 @@ export const ChangeEstimatedFeeForm = ({ estimatedFeeParams, txDetails }: Change
           <Text color="$colorSecondary" fontSize="$5">
             Est. network fee
           </Text>
-          <Text fontWeight={700} fontSize="$5">
-            {totalFee} {nativeSymbol}
-          </Text>
+
+          {estimatedFeeParams.gasLimitError ? (
+            <Text fontWeight={700} fontSize="$5" color="$error">
+              Can not estimate
+            </Text>
+          ) : (
+            <Text fontWeight={700} fontSize="$5">
+              {totalFee} {nativeSymbol}
+            </Text>
+          )}
         </View>
 
         <View paddingTop="$3" paddingBottom={insets.bottom ? insets.bottom : '$2'} flexDirection="row" gap="$2">
