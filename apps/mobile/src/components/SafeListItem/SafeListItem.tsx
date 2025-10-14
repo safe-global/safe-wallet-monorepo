@@ -84,8 +84,15 @@ export function SafeListItem({
             )}
 
             {typeof label === 'string' ? (
-              <Text fontSize="$4" lineHeight={20} fontWeight={600} letterSpacing={-0.01}>
-                {ellipsis(label, rightNode || inQueue ? 21 : 30)}
+              <Text
+                fontSize="$4"
+                lineHeight={20}
+                ellipsizeMode="tail"
+                numberOfLines={1}
+                fontWeight={600}
+                letterSpacing={-0.01}
+              >
+                {label}
               </Text>
             ) : (
               label

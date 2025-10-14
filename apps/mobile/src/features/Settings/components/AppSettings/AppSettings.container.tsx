@@ -1,5 +1,5 @@
 import React from 'react'
-import { Linking } from 'react-native'
+import { Alert, Linking } from 'react-native'
 import { router } from 'expo-router'
 
 import { Text, View } from 'tamagui'
@@ -10,13 +10,15 @@ import { FloatingMenu } from '../FloatingMenu'
 import { LoadableSwitch } from '@/src/components/LoadableSwitch'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
 import { useNotificationManager } from '@/src/hooks/useNotificationManager'
-import { useAppSelector } from '@/src/store/hooks'
+import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectAppNotificationStatus } from '@/src/store/notificationsSlice'
 import { selectCurrency } from '@/src/store/settingsSlice'
 import { capitalize } from '@/src/utils/formatters'
 import { SAFE_WEB_FEEDBACK_URL } from '@/src/config/constants'
+import { clearAllPendingTxs } from '@/src/store/pendingTxsSlice'
 
 export const AppSettingsContainer = () => {
+  const dispatch = useAppDispatch()
   const { toggleBiometrics, isBiometricsEnabled, isLoading: isBiometricsLoading, getBiometricsUIInfo } = useBiometrics()
   const { enableNotification, disableNotification, isLoading: isNotificationsLoading } = useNotificationManager()
   const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
@@ -29,6 +31,27 @@ export const AppSettingsContainer = () => {
     } else {
       enableNotification()
     }
+  }
+
+  const handleClearPendingTxs = () => {
+    Alert.alert(
+      'Clear pending transactions',
+      'This will cleanup all your pending transactions. This action cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            dispatch(clearAllPendingTxs())
+          },
+        },
+      ],
+      { cancelable: true },
+    )
   }
 
   const settingsSections = [
@@ -133,6 +156,13 @@ export const AppSettingsContainer = () => {
               trackColor={{ true: '$primary' }}
             />
           ),
+          disabled: false,
+        },
+        {
+          label: 'Clear pending transactions',
+          leftIcon: 'delete',
+          type: 'menu',
+          onPress: handleClearPendingTxs,
           disabled: false,
         },
       ],
