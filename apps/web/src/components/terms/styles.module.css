@@ -6,7 +6,7 @@
 }
 
 .contentWrapper {
-  padding-top: var(--space-5);
+  padding-top: calc(var(--header-height) + var(--space-5));
   padding-bottom: var(--space-5);
   flex: 1;
   max-width: 602px;
@@ -136,6 +136,7 @@
 
 .checkboxCardInner {
   padding: var(--space-2);
+  padding-left: 0;
   border-radius: 6px;
 }
 
