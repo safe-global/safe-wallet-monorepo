@@ -255,7 +255,7 @@ const SafeLabsTerms = () => {
                 </a>
 
                 <a
-                  href="https://safe.global/ecosystem"
+                  href="https://safefoundation.org/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={css.externalLink}
