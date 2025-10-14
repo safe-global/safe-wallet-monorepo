@@ -3,6 +3,9 @@ import { render, userEvent } from '@/src/tests/test-utils'
 import { TransactionChecks } from '../TransactionChecks'
 import { useTransactionSecurity } from '../hooks/useTransactionSecurity'
 import { useRouter } from 'expo-router'
+import { useHasFeature } from '@/src/hooks/useHasFeature'
+import { isTxSimulationEnabled } from '@safe-global/utils/components/tx/security/tenderly/utils'
+import { selectActiveChain } from '@/src/store/chains'
 
 type SecurityHookReturn = ReturnType<typeof useTransactionSecurity>
 
@@ -25,6 +28,12 @@ interface MockTransactionChecksBottomContentProps {
 // Mock the dependencies
 jest.mock('../hooks/useTransactionSecurity')
 jest.mock('expo-router')
+jest.mock('@/src/hooks/useHasFeature')
+jest.mock('@safe-global/utils/components/tx/security/tenderly/utils')
+jest.mock('@/src/store/hooks', () => ({
+  useAppSelector: jest.fn(),
+  useAppDispatch: jest.fn(),
+}))
 jest.mock('@/src/components/SafeListItem', () => {
   const React = require('react')
   const { Pressable, View, Text } = require('react-native')
@@ -64,9 +73,17 @@ jest.mock('../components/TransactionChecksBottomContent', () => {
 
 const mockUseTransactionSecurity = jest.mocked(useTransactionSecurity)
 const mockUseRouter = jest.mocked(useRouter)
+const mockUseHasFeature = jest.mocked(useHasFeature)
+const mockIsTxSimulationEnabled = jest.mocked(isTxSimulationEnabled)
+
+// Import useAppSelector after mocking
+const { useAppSelector, useAppDispatch } = require('@/src/store/hooks')
+const mockUseAppSelector = jest.mocked(useAppSelector)
+const mockUseAppDispatch = jest.mocked(useAppDispatch)
 
 describe('TransactionChecks', () => {
   const mockPush = jest.fn()
+  const mockChain = { chainId: '1', chainName: 'Ethereum' }
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -74,6 +91,16 @@ describe('TransactionChecks', () => {
       push: mockPush,
     }
     mockUseRouter.mockReturnValue(mockRouter as never)
+    mockUseAppDispatch.mockReturnValue(jest.fn() as never)
+    mockUseAppSelector.mockImplementation((selector: typeof selectActiveChain) => {
+      if (selector === selectActiveChain) {
+        return mockChain
+      }
+      return undefined
+    })
+    // Default: enable both features
+    mockUseHasFeature.mockReturnValue(true)
+    mockIsTxSimulationEnabled.mockReturnValue(true)
   })
 
   const createSecurityState = (overrides: Partial<SecurityHookReturn> = {}): SecurityHookReturn => ({
@@ -196,5 +223,49 @@ describe('TransactionChecks', () => {
 
     const bottomContent = queryByTestId('transaction-checks-bottom-content')
     expect(bottomContent).toBeNull()
+  })
+
+  it('should return null when both tenderly and blockaid are disabled', () => {
+    mockIsTxSimulationEnabled.mockReturnValue(false)
+    mockUseHasFeature.mockReturnValue(false)
+    const security = createSecurityState()
+    mockUseTransactionSecurity.mockReturnValue(security)
+
+    const { queryByTestId } = render(<TransactionChecks txId="test-tx-id" />)
+
+    expect(queryByTestId('safe-list-item')).toBeNull()
+  })
+
+  it('should render when only blockaid is enabled', () => {
+    mockIsTxSimulationEnabled.mockReturnValue(false)
+    mockUseHasFeature.mockReturnValue(true)
+    const security = createSecurityState()
+    mockUseTransactionSecurity.mockReturnValue(security)
+
+    const { getByTestId } = render(<TransactionChecks txId="test-tx-id" />)
+
+    expect(getByTestId('safe-list-item')).toBeTruthy()
+  })
+
+  it('should render when only tenderly is enabled', () => {
+    mockIsTxSimulationEnabled.mockReturnValue(true)
+    mockUseHasFeature.mockReturnValue(false)
+    const security = createSecurityState()
+    mockUseTransactionSecurity.mockReturnValue(security)
+
+    const { getByTestId } = render(<TransactionChecks txId="test-tx-id" />)
+
+    expect(getByTestId('safe-list-item')).toBeTruthy()
+  })
+
+  it('should render when both tenderly and blockaid are enabled', () => {
+    mockIsTxSimulationEnabled.mockReturnValue(true)
+    mockUseHasFeature.mockReturnValue(true)
+    const security = createSecurityState()
+    mockUseTransactionSecurity.mockReturnValue(security)
+
+    const { getByTestId } = render(<TransactionChecks txId="test-tx-id" />)
+
+    expect(getByTestId('safe-list-item')).toBeTruthy()
   })
 })
