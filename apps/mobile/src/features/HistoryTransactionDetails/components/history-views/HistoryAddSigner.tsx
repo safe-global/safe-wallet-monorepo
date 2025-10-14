@@ -7,8 +7,6 @@ import { NormalizedSettingsChangeTransaction } from '@/src/features/ConfirmTx/co
 import { HistoryAdvancedDetailsButton } from '@/src/features/HistoryTransactionDetails/components/HistoryAdvancedDetailsButton'
 import { HashDisplay } from '@/src/components/HashDisplay'
 import { ThresholdChangeDisplay, NetworkDisplay } from '../shared'
-import { InfoSheet } from '@/src/components/InfoSheet'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 
 interface HistoryAddSignerProps {
   txId: string
@@ -33,17 +31,6 @@ export function HistoryAddSigner({ txId, txInfo, executionInfo }: HistoryAddSign
             <Text color="$textSecondaryLight">New signer</Text>
             <XStack alignItems="center" gap="$2">
               <HashDisplay value={txInfo.settingsInfo?.owner?.value} />
-            </XStack>
-          </XStack>
-          <XStack alignItems="center" justifyContent="space-between">
-            <InfoSheet info="Confirmations required for new transactions">
-              <XStack alignItems="center" gap="$1">
-                <Text color="$textSecondaryLight">Confirmations</Text>
-                <SafeFontIcon name="info" size={16} color="$textSecondaryLight" />
-              </XStack>
-            </InfoSheet>
-            <XStack alignItems="center" gap="$2">
-              <Text fontSize="$4">{txInfo.settingsInfo?.threshold}</Text>
             </XStack>
           </XStack>
 
