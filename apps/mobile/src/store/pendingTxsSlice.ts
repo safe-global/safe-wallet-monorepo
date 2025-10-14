@@ -114,10 +114,14 @@ export const pendingTxsSlice = createSlice({
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete state[action.payload.txId]
     },
+    clearAllPendingTxs: () => {
+      return initialState
+    },
   },
 })
 
-export const { addPendingTx, setPendingTxStatus, setRelayTxHash, clearPendingTx } = pendingTxsSlice.actions
+export const { addPendingTx, setPendingTxStatus, setRelayTxHash, clearPendingTx, clearAllPendingTxs } =
+  pendingTxsSlice.actions
 
 export const selectPendingTxs = (state: RootState): PendingTxsState => state[pendingTxsSlice.name]
 
