@@ -188,10 +188,10 @@ const CookieBannerPopup = (): ReactElement | null => {
   const cookiePopup = useAppSelector(selectCookieBanner)
   const dispatch = useAppDispatch()
   const router = useRouter()
-  const exceptionPages = [AppRoutes.welcome.index]
+  const exceptionPages = [AppRoutes.safeLabsTerms]
 
   const hasAccepted = useAppSelector(hasAcceptedTerms)
-  const shouldOpen = !hasAccepted && exceptionPages.includes(router.pathname)
+  const shouldOpen = !hasAccepted && !exceptionPages.includes(router.pathname)
 
   useEffect(() => {
     if (shouldOpen) {
