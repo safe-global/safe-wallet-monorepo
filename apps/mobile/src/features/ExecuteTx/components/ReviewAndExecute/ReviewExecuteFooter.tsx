@@ -129,7 +129,7 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
         {willFail && (
           <Alert
             gap="$1"
-            startIcon={<SafeFontIcon name="alert-triangle" color="$error" size={22} />}
+            startIcon={<SafeFontIcon name="alert-triangle" color="$error" size={20} />}
             type="error"
             message={<Text>This transaction will most likely fail</Text>}
           />
