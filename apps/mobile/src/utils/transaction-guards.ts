@@ -44,7 +44,7 @@ import type {
 import { HistoryTransactionItems, PendingTransactionItems } from '@safe-global/store/gateway/types'
 
 type TransactionInfo = Transaction['txInfo']
-export type SettingsChagneSwapOwner = SettingsChangeTransaction & { settingsInfo: SwapOwner }
+export type SettingsChangeSwapOwner = SettingsChangeTransaction & { settingsInfo: SwapOwner }
 
 const TransactionStatus = {
   AWAITING_CONFIRMATIONS: 'AWAITING_CONFIRMATIONS',
