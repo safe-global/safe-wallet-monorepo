@@ -1,7 +1,7 @@
 import { act, renderHook } from '@/src/tests/test-utils'
 import { useLegacyImport } from '../hooks/useLegacyImport'
 import * as DocumentPicker from 'expo-document-picker'
-import * as FileSystem from 'expo-file-system'
+import { File } from 'expo-file-system'
 import {
   decodeLegacyData,
   LegacyDataPasswordError,
@@ -10,7 +10,9 @@ import {
 } from '@/src/utils/legacyData'
 
 jest.mock('expo-document-picker')
-jest.mock('expo-file-system')
+jest.mock('expo-file-system', () => ({
+  File: jest.fn(),
+}))
 jest.mock('@/src/utils/legacyData', () => ({
   decodeLegacyData: jest.fn(),
   LegacyDataPasswordError: class LegacyDataPasswordError extends Error {
@@ -33,9 +35,17 @@ jest.mock('@/src/utils/legacyData', () => ({
   },
 }))
 
+const mockFileText = jest.fn()
+
 describe('useLegacyImport', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.mocked(File).mockImplementation(
+      () =>
+        ({
+          text: mockFileText,
+        }) as unknown as File,
+    )
   })
 
   it('imports a valid file', async () => {
@@ -45,7 +55,7 @@ describe('useLegacyImport', () => {
     } as unknown as DocumentPicker.DocumentPickerResult)
 
     const fileContent = JSON.stringify({ version: '1.0', data: { hello: 'world' } })
-    jest.mocked(FileSystem.readAsStringAsync).mockResolvedValue(fileContent)
+    mockFileText.mockResolvedValue(fileContent)
     jest.mocked(decodeLegacyData).mockReturnValue({
       version: '1.0',
       data: { hello: 'world' },
@@ -76,7 +86,7 @@ describe('useLegacyImport', () => {
       canceled: false,
       assets: [{ uri: 'uri', name: 'file.json' }],
     } as unknown as DocumentPicker.DocumentPickerResult)
-    jest.mocked(FileSystem.readAsStringAsync).mockResolvedValue('not json')
+    mockFileText.mockResolvedValue('not json')
 
     const { result } = renderHook(() => useLegacyImport())
 
@@ -100,7 +110,7 @@ describe('useLegacyImport', () => {
       canceled: false,
       assets: [{ uri: 'uri', name: 'file.json' }],
     } as unknown as DocumentPicker.DocumentPickerResult)
-    jest.mocked(FileSystem.readAsStringAsync).mockResolvedValue('{}')
+    mockFileText.mockResolvedValue('{}')
     jest.mocked(decodeLegacyData).mockImplementation(() => {
       throw new LegacyDataPasswordError()
     })
@@ -127,7 +137,7 @@ describe('useLegacyImport', () => {
       canceled: false,
       assets: [{ uri: 'uri', name: 'file.json' }],
     } as unknown as DocumentPicker.DocumentPickerResult)
-    jest.mocked(FileSystem.readAsStringAsync).mockResolvedValue('{}')
+    mockFileText.mockResolvedValue('{}')
     jest.mocked(decodeLegacyData).mockImplementation(() => {
       throw new LegacyDataFormatError()
     })
@@ -154,7 +164,7 @@ describe('useLegacyImport', () => {
       canceled: false,
       assets: [{ uri: 'uri', name: 'file.json' }],
     } as unknown as DocumentPicker.DocumentPickerResult)
-    jest.mocked(FileSystem.readAsStringAsync).mockResolvedValue('{}')
+    mockFileText.mockResolvedValue('{}')
     jest.mocked(decodeLegacyData).mockImplementation(() => {
       throw new LegacyDataCorruptedError()
     })
@@ -181,7 +191,7 @@ describe('useLegacyImport', () => {
       canceled: false,
       assets: [{ uri: 'uri', name: 'file.json' }],
     } as unknown as DocumentPicker.DocumentPickerResult)
-    jest.mocked(FileSystem.readAsStringAsync).mockResolvedValue('{}')
+    mockFileText.mockResolvedValue('{}')
     jest.mocked(decodeLegacyData).mockImplementation(() => {
       throw new Error('Unknown error')
     })
