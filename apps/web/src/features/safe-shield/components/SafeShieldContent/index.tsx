@@ -1,42 +1,48 @@
 import { type ReactElement } from 'react'
 import { Box } from '@mui/material'
-import type { LiveAnalysisResponse } from '@safe-global/utils/features/safe-shield/types'
+import type { ContractAnalysisResults, RecipientAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
 import { SafeShieldAnalysisError } from './SafeShieldAnalysisError'
 import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import isEmpty from 'lodash/isEmpty'
 
 export const SafeShieldContent = ({
-  analysisData,
-  error,
-  loading,
+  recipient,
+  contract,
 }: {
-  analysisData?: LiveAnalysisResponse | null
-  error?: Error | null
-  loading?: boolean
-}): ReactElement => (
-  <Box padding="0px 4px 4px">
-    <Box
-      sx={{
-        border: '1px solid',
-        borderColor: 'background.main',
-        borderTop: 'none',
-        borderRadius: '0px 0px 6px 6px',
-      }}
-    >
-      {loading ? (
-        <SafeShieldAnalysisLoading />
-      ) : error ? (
-        <SafeShieldAnalysisError error={error} />
-      ) : analysisData ? (
-        <>
-          {analysisData.contract && Object.keys(analysisData.contract).length > 0 && (
-            <AnalysisGroupCard data={analysisData.contract} />
+  recipient?: AsyncResult<RecipientAnalysisResults>
+  contract?: AsyncResult<ContractAnalysisResults>
+}): ReactElement => {
+  const [recipientResults, recipientError, recipientLoading = false] = recipient || []
+  const [contractResults, contractError, contractLoading = false] = contract || []
+
+  const loading = recipientLoading || contractLoading
+  const error = recipientError || contractError
+  const empty = isEmpty(recipientResults) && isEmpty(contractResults)
+
+  return (
+    <Box padding="0px 4px 4px">
+      <Box
+        sx={{ border: '1px solid', borderColor: 'background.main', borderTop: 'none', borderRadius: '0px 0px 6px 6px' }}
+      >
+        {loading ? (
+          <SafeShieldAnalysisLoading />
+        ) : error ? (
+          <SafeShieldAnalysisError error={error} />
+        ) : empty ? (
+          <SafeShieldAnalysisEmpty />
+        ) : null}
+
+        <Box display={loading ? 'none' : 'block'}>
+          {recipientResults && Object.keys(recipientResults).length > 0 && (
+            <AnalysisGroupCard data={recipientResults} />
           )}
-        </>
-      ) : (
-        <SafeShieldAnalysisEmpty />
-      )}
+
+          {contractResults && Object.keys(contractResults).length > 0 && <AnalysisGroupCard data={contractResults} />}
+        </Box>
+      </Box>
     </Box>
-  </Box>
-)
+  )
+}

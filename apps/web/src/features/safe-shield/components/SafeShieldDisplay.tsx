@@ -1,25 +1,24 @@
 import { type ReactElement } from 'react'
 import { Typography, Card, SvgIcon, Stack } from '@mui/material'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
-import type { LiveAnalysisResponse } from '@safe-global/utils/features/safe-shield/types'
+import type { ContractAnalysisResults, RecipientAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldHeader } from './SafeShieldHeader'
 import { SafeShieldContent } from './SafeShieldContent'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 
 export const SafeShieldDisplay = ({
-  data,
-  error,
-  loading,
+  recipient,
+  contract,
 }: {
-  data?: LiveAnalysisResponse | null
-  error?: Error | null
-  loading?: boolean
+  recipient?: AsyncResult<RecipientAnalysisResults>
+  contract?: AsyncResult<ContractAnalysisResults>
 }): ReactElement => {
   return (
     <Stack gap={1}>
       <Card sx={{ borderRadius: '6px', overflow: 'hidden' }}>
-        <SafeShieldHeader data={data} error={error} loading={loading} />
+        <SafeShieldHeader recipient={recipient} contract={contract} />
 
-        <SafeShieldContent analysisData={data} error={error} loading={loading} />
+        <SafeShieldContent recipient={recipient} contract={contract} />
       </Card>
 
       <Stack direction="row" alignItems="center" alignSelf="flex-end">
