@@ -132,7 +132,7 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
       return <HistoryVaultRedeem txId={txDetails.txId} txInfo={txDetails.txInfo as VaultRedeemTransactionInfo} />
 
     case ETxType.SWAP_OWNER:
-      return <HistorySwapSigner txId={txDetails.txId} txInfo={txDetails.txInfo as SettingsChagneSwapOwner} />
+      return <HistorySwapSigner txId={txDetails.txId} txInfo={txDetails.txInfo as SettingsChangeSwapOwner} />
 
     // For all other transaction types, use a generic view that can adapt
     default:

@@ -226,6 +226,6 @@ export const isLifiSwapTxInfo = (value: Transaction['txInfo']): value is SwapTra
   return value.type === 'Swap'
 }
 
-export const isSwapOwnerTxInfo = (value: Transaction['txInfo']): value is SettingsChagneSwapOwner => {
+export const isSwapOwnerTxInfo = (value: Transaction['txInfo']): value is SettingsChangeSwapOwner => {
   return value.type === TransactionInfoType.SETTINGS_CHANGE && value.settingsInfo?.type === 'SWAP_OWNER'
 }
