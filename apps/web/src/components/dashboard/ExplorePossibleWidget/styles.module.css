@@ -1,0 +1,81 @@
+.carouselNav {
+  display: flex;
+  gap: 4px;
+}
+
+.carouselContainer {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.carouselContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.cardLink {
+  text-decoration: none;
+  display: block;
+  height: 100%;
+}
+
+.card {
+  /* background-color removed - will be set via MUI sx prop for theme support */
+  border-radius: 16px;
+  padding: 24px;
+  width: 180px;
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  position: relative;
+  transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.tag {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  height: 20px;
+  border-radius: 6px;
+  display: flex;
+  padding: 2px 2px;
+  align-items: center;
+  gap: var(--space-1, 4px);
+}
+
+.iconContainer {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.title {
+  width: 100%;
+  text-align: left;
+  align-self: flex-start;
+}
+
+.gradientFade {
+  position: absolute;
+  right: 0;
+  top: 40px;
+  bottom: 0;
+  width: 64px;
+  /* gradient removed - will be set via inline style for theme support */
+  pointer-events: none;
+  z-index: 1;
+}
