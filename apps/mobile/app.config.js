@@ -20,7 +20,7 @@ const config = {
   name: name,
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
-  version: '1.0.2',
+  version: '1.0.3',
   extra: {
     storybookEnabled: process.env.STORYBOOK_ENABLED,
     eas: {
