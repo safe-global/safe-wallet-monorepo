@@ -106,7 +106,6 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
   const willFail = Boolean(estimatedFeeParams.gasLimitError)
   const isButtonDisabled = !hasSufficientFunds
   const buttonText = getSubmitButtonText(hasSufficientFunds)
-  const isLoading = isCheckingFunds
 
   return (
     <Stack paddingHorizontal="$4" space="$3" paddingBottom={insets.bottom ? insets.bottom : '$4'}>
@@ -137,7 +136,7 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
         )}
       </Container>
 
-      {isLoading ? (
+      {isCheckingFunds ? (
         <Skeleton.Group show>
           <Skeleton colorMode={colorScheme} height={44} width="100%" radius={12} />
         </Skeleton.Group>
