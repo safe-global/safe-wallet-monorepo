@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { View, Text, ScrollView, getTokenValue, YStack } from 'tamagui'
+import { View, Text, Stack, YStack } from 'tamagui'
 import { router, useLocalSearchParams, useGlobalSearchParams, useNavigation } from 'expo-router'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector, useAppDispatch } from '@/src/store/hooks'
@@ -10,11 +10,6 @@ import { Loader } from '@/src/components/Loader'
 import { SafeButton } from '@/src/components/SafeButton'
 import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { ledgerDMKService } from '@/src/services/ledger/ledger-dmk.service'
-import logger from '@/src/utils/logger'
-import useSafeInfo from '@/src/hooks/useSafeInfo'
-import extractTxInfo from '@/src/services/tx/extractTx'
-import { getSafeTxMessageHash } from '@safe-global/utils/utils/safe-hashes'
-import type { SafeVersion } from '@safe-global/types-kit'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { addPendingTx } from '@/src/store/pendingTxsSlice'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
@@ -22,11 +17,8 @@ import { getUserNonce } from '@/src/services/web3'
 import { ExecuteProcessing } from '@/src/features/ExecuteTx/components/ExecuteProcessing'
 import { ExecuteError } from '@/src/features/ExecuteTx/components/ExecuteError'
 import { parseFeeParams } from '@/src/utils/feeParams'
-import { Container } from '@/src/components/Container'
-import useGasFee from '../ExecuteTx/hooks/useGasFee'
-import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { LargeHeaderTitle, NavBarTitle } from '@/src/components/Title'
-import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
+import { ReviewAndConfirmView } from '@/src/features/ConfirmTx/components/ReviewAndConfirm/ReviewAndConfirmView'
+import { LargeHeaderTitle } from '@/src/components/Title'
 
 enum ExecutionState {
   REVIEW = 'review',
@@ -46,40 +38,13 @@ export const LedgerReviewExecuteContainer = () => {
   }>()
   const activeSafe = useDefinedActiveSafe()
   const chain = useAppSelector((s) => selectChainById(s, activeSafe.chainId))
-  const { safe } = useSafeInfo()
   const activeSigner = useAppSelector((s) => selectActiveSigner(s, activeSafe.address))
   const { data: txDetails, isFetching } = useTransactionData(txId || '')
   const [executionState, setExecutionState] = useState<ExecutionState>(ExecutionState.REVIEW)
   const [error, setError] = useState<string | null>(null)
   const dispatch = useAppDispatch()
-  const { handleScroll } = useScrollableHeader({
-    children: (
-      <>
-        <NavBarTitle numberOfLines={1}>Review and execute transaction on Ledger</NavBarTitle>
-      </>
-    ),
-  })
   const navigation = useNavigation()
   const feeParams = useMemo(() => parseFeeParams(globalParams), [globalParams])
-  // We are so deep in the stack and have already called useTransactionData multiple time
-  // so chances that txDetails here is undefined are really slim
-  const { totalFeeEth } = useGasFee(txDetails || ({} as TransactionDetails), feeParams)
-
-  const messageHash = useMemo(() => {
-    try {
-      if (!txId || !chain || !txDetails || !safe.version) {
-        return null
-      }
-      const { txParams } = extractTxInfo(txDetails, activeSafe.address)
-      return getSafeTxMessageHash({
-        safeVersion: safe.version as SafeVersion,
-        safeTxData: txParams,
-      })
-    } catch (e) {
-      logger.info('Failed to pre-compute message hash', e)
-      return null
-    }
-  }, [txId, chain, txDetails, safe.version, activeSafe.address])
 
   useEffect(() => {
     if (!sessionId) {
@@ -193,60 +158,36 @@ export const LedgerReviewExecuteContainer = () => {
 
   // Show review state (default)
   return (
-    <View flex={1} padding="$4" gap="$4" paddingBottom={Math.max(bottom, getTokenValue('$4'))}>
-      <ScrollView onScroll={handleScroll}>
-        <LargeHeaderTitle marginRight={5}>Review and execute transaction on Ledger</LargeHeaderTitle>
-
-        <Container borderRadius="$4" padding="$4" gap="$4" marginTop="$4">
-          <YStack gap="$2">
-            <Text fontSize="$3" color="$colorSecondary">
-              From
-            </Text>
-            <Text fontSize="$5" color="$color">
-              {activeSigner?.value}
-            </Text>
-          </YStack>
-          <YStack gap="$2">
-            <Text fontSize="$3" color="$colorSecondary">
-              To
-            </Text>
-            <Text fontSize="$5" color="$color">
-              {activeSafe.address}
-            </Text>
-          </YStack>
-          <YStack gap="$2">
-            <Text fontSize="$3" color="$colorSecondary">
-              Max fees
-            </Text>
-            <Text fontSize="$5" color="$color">
-              {totalFeeEth}
-            </Text>
-          </YStack>
-          <YStack gap="$2">
-            <Text fontSize="$3" color="$colorSecondary">
-              Network
-            </Text>
-            <Text fontSize="$5" color="$color">
-              {chain?.chainName}
-            </Text>
-          </YStack>
-          <YStack gap="$2">
-            <Text fontSize="$3" color="$colorSecondary">
-              MessageHash
-            </Text>
-            <Text fontSize="$5" color="$color">
-              {messageHash || '—'}
-            </Text>
-          </YStack>
-        </Container>
-      </ScrollView>
-      <SafeButton
-        onPress={handleExecute}
-        icon={executionState === ExecutionState.EXECUTING ? <Loader size={18} thickness={2} /> : null}
-        disabled={executionState === ExecutionState.EXECUTING}
+    <ReviewAndConfirmView
+      txDetails={txDetails}
+      header={
+        <YStack space="$4" paddingTop="$4">
+          <LargeHeaderTitle>Review and execute on your device</LargeHeaderTitle>
+        </YStack>
+      }
+    >
+      <Stack
+        backgroundColor="$background"
+        paddingHorizontal="$4"
+        paddingVertical="$3"
+        borderTopWidth={1}
+        borderTopColor="$borderLight"
+        space="$3"
+        paddingBottom={bottom || '$4'}
       >
-        {executionState === ExecutionState.EXECUTING ? 'Execute on Ledger...' : 'Continue on Ledger'}
-      </SafeButton>
-    </View>
+        {error && (
+          <Text color="$error" textAlign="center">
+            {error}
+          </Text>
+        )}
+        <SafeButton
+          onPress={handleExecute}
+          icon={executionState === ExecutionState.EXECUTING ? <Loader size={18} thickness={2} /> : null}
+          disabled={executionState === ExecutionState.EXECUTING}
+        >
+          {executionState === ExecutionState.EXECUTING ? 'Execute on Ledger...' : 'Continue on Ledger'}
+        </SafeButton>
+      </Stack>
+    </ReviewAndConfirmView>
   )
 }

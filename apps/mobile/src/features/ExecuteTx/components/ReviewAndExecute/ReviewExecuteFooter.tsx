@@ -68,6 +68,14 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
         nonce: estimatedFeeParams.nonce?.toString(),
       }
 
+      if (executionMethod === ExecutionMethod.WITH_RELAY) {
+        router.push({
+          pathname: '/execute-transaction',
+          params,
+        })
+        return
+      }
+
       // If active signer is a Ledger device, start the Ledger-specific execution flow
       if (activeSigner?.type === 'ledger') {
         router.push({
