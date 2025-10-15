@@ -1,5 +1,5 @@
 import React from 'react'
-import { Stack } from 'tamagui'
+import { Stack, Text } from 'tamagui'
 import { router, useLocalSearchParams } from 'expo-router'
 import { SafeButton } from '@/src/components/SafeButton'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
@@ -21,6 +21,8 @@ import { selectActiveChain } from '@/src/store/chains'
 import { Skeleton } from 'moti/skeleton'
 import { useTheme } from '@/src/theme/hooks/useTheme'
 import { getExecutionMethod, getSubmitButtonText } from './helpers'
+import { Alert } from '@/src/components/Alert'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 
 interface ReviewFooterProps {
   txId: string
@@ -104,7 +106,7 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
   const willFail = Boolean(estimatedFeeParams.gasLimitError)
   const isButtonDisabled = !hasSufficientFunds
   const buttonText = getSubmitButtonText(hasSufficientFunds)
-  const isLoading = isCheckingFunds || isLoadingFees
+  const isLoading = isCheckingFunds
 
   return (
     <Stack paddingHorizontal="$4" space="$3" paddingBottom={insets.bottom ? insets.bottom : '$4'}>
@@ -124,6 +126,15 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
           willFail={willFail}
           totalFee={totalFee}
         />
+
+        {willFail && (
+          <Alert
+            gap="$1"
+            startIcon={<SafeFontIcon name="alert-triangle" color="$error" size={22} />}
+            type="error"
+            message={<Text>This transaction will most likely fail</Text>}
+          />
+        )}
       </Container>
 
       {isLoading ? (
