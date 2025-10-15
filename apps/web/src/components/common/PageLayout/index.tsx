@@ -17,7 +17,9 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(true)
   const [isBatchOpen, setBatchOpen] = useState<boolean>(false)
   const { setFullWidth } = useContext(TxModalContext)
+  const isSafeLabsTermsPage = pathname === AppRoutes.safeLabsTerms
   const isWelcomePage = pathname === AppRoutes.welcome.index
+  const hideHeader = isSafeLabsTermsPage || isWelcomePage
 
   useEffect(() => {
     setFullWidth(!isSidebarOpen)
@@ -25,7 +27,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
   return (
     <>
-      {!isWelcomePage && (
+      {!hideHeader && (
         <header className={css.header}>
           <Header onMenuToggle={isSidebarRoute ? setSidebarOpen : undefined} onBatchToggle={setBatchOpen} />
         </header>
@@ -37,19 +39,19 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
         className={classnames(css.main, {
           [css.mainNoSidebar]: !isSidebarOpen || !isSidebarRoute,
           [css.mainAnimated]: isSidebarRoute && isAnimated,
-          [css.mainNoHeader]: isWelcomePage,
+          [css.mainNoHeader]: hideHeader,
         })}
       >
         <div className={css.content}>
           <SafeLoadingError>
-            {!isWelcomePage && <Breadcrumbs />}
+            {!hideHeader && <Breadcrumbs />}
             {children}
           </SafeLoadingError>
         </div>
 
         <BatchSidebar isOpen={isBatchOpen} onToggle={setBatchOpen} />
 
-        <Footer />
+        {!isSafeLabsTermsPage && <Footer />}
       </div>
     </>
   )
