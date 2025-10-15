@@ -3,7 +3,7 @@ import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
 import { Box, CardActions, Divider, Tooltip } from '@mui/material'
 import classNames from 'classnames'
-import LedgerHashComparison from '@/components/common/LedgerHashComparison'
+import LedgerHashComparison from '@/features/ledger'
 
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'

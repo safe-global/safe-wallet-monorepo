@@ -13,18 +13,7 @@ import {
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
-import ExternalStore from '@safe-global/utils/services/ExternalStore'
-
-// External store for Ledger hash comparison
-const ledgerHashStore = new ExternalStore<string | undefined>(undefined)
-
-export const showLedgerHashComparison = (hash: string) => {
-  ledgerHashStore.setStore(hash)
-}
-
-export const hideLedgerHashComparison = () => {
-  ledgerHashStore.setStore(undefined)
-}
+import ledgerHashStore from './store'
 
 const LedgerHashComparison = () => {
   const hash = ledgerHashStore.useStore()
