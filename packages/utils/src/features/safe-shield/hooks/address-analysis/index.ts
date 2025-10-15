@@ -6,10 +6,4 @@ export {
   type AddressActivityAssessment,
   type ActivityLevel,
 } from './address-activity/addressActivityService'
-export {
-  ACTIVITY_THRESHOLDS,
-  ActivityMessages,
-  AddressCheckMessages,
-  AnalysisSeverity,
-  type AddressCheckType,
-} from './config'
+export { ACTIVITY_THRESHOLDS, ActivityMessages, AddressCheckMessages, type AddressCheckType } from './config'

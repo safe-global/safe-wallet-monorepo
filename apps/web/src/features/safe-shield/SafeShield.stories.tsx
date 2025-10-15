@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { Box, Paper } from '@mui/material'
 import { SafeShieldDisplay } from './components/SafeShieldDisplay'
-import { LiveAnalysisResponseBuilder, ContractAnalysisBuilder } from './builders'
+import { LiveAnalysisResponseBuilder, ContractAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
 import { faker } from '@faker-js/faker'
 
 const meta = {

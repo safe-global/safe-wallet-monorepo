@@ -1,7 +1,7 @@
 import { type ReactElement } from 'react'
 import { Box, Typography, Stack, SvgIcon } from '@mui/material'
 import SafeShieldLogo from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
-import type { AnalysisResult, LiveAnalysisResponse, Severity } from '../types'
+import type { AnalysisResult, LiveAnalysisResponse, Severity } from '@safe-global/utils/features/safe-shield/types'
 import { getPrimaryResult } from '../utils'
 
 const SEVERITY_TO_LABEL: Record<Severity, string> = {

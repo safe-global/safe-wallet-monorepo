@@ -1,6 +1,6 @@
 import { sortBySeverity, getPrimaryResult } from '../analysisUtils'
-import { Severity, ContractStatus } from '../../types'
-import type { AnalysisResult } from '../../types'
+import { Severity, ContractStatus } from '@safe-global/utils/features/safe-shield/types'
+import type { AnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 
 describe('analysisUtils', () => {
   describe('sortBySeverity', () => {

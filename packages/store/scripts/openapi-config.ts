@@ -76,6 +76,9 @@ const config: ConfigFile = {
     '../src/gateway/AUTO_GENERATED/positions.ts': {
       filterEndpoints: [/^positions/],
     },
+    '../src/gateway/AUTO_GENERATED/safe-shield.ts': {
+      filterEndpoints: [/^safeShield/],
+    },
   },
 }
 
