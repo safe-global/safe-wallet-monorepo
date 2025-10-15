@@ -1,4 +1,4 @@
-import type { AnalysisResult, Severity } from '../types'
+import type { AnalysisResult, Severity } from '@safe-global/utils/features/safe-shield/types'
 
 /**
  * Severity priority mapping for sorting analysis results
