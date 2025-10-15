@@ -14,6 +14,7 @@ export enum MixpanelEvent {
   NATIVE_SWAP_VIEWED = 'Native Swap Viewed',
   SAFE_LABS_TERMS_ACCEPTED = 'Safe Labs Terms Accepted',
   SIDEBAR_CLICKED = 'Sidebar Clicked',
+  EXPLORE_POSSIBLE_CLICKED = 'Explore Possible Clicked',
 }
 
 export enum MixpanelUserProperty {
