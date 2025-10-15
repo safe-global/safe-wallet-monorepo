@@ -51,6 +51,7 @@ import { GATEWAY_URL } from '@/config/gateway'
 import { useDatadog } from '@/services/datadog'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
+import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
 
 const reduxStore = makeStore()
 
@@ -77,6 +78,7 @@ const InitApp = (): null => {
   useSafeMsgTracking()
   useBeamer()
   useVisitedSafes()
+  useSafeLabsTerms() // Automatically disconnect wallets if terms not accepted and feature is enabled
 
   return null
 }
@@ -114,6 +116,16 @@ interface SafeWalletAppProps extends AppProps {
   emotionCache?: EmotionCache
 }
 
+const TermsGate = ({ children }: { children: ReactNode }) => {
+  const { shouldShowContent } = useSafeLabsTerms()
+
+  if (!shouldShowContent) {
+    return null
+  }
+
+  return <>{children}</>
+}
+
 const SafeWalletApp = ({
   Component,
   pageProps,
@@ -135,23 +147,25 @@ const SafeWalletApp = ({
 
           <InitApp />
 
-          <PageLayout pathname={router.pathname}>
-            <Component {...pageProps} key={safeKey} />
-          </PageLayout>
+          <TermsGate>
+            <PageLayout pathname={router.pathname}>
+              <Component {...pageProps} key={safeKey} />
+            </PageLayout>
 
-          <CookieAndTermBanner />
+            <CookieAndTermBanner />
 
-          <OutreachPopup />
+            <OutreachPopup />
 
-          <Notifications />
+            <Notifications />
 
-          <Recovery />
+            <Recovery />
 
-          <CounterfactualHooks />
+            <CounterfactualHooks />
 
-          <Analytics />
+            <Analytics />
 
-          <PkModulePopup />
+            <PkModulePopup />
+          </TermsGate>
         </AppProviders>
       </CacheProvider>
     </Provider>
