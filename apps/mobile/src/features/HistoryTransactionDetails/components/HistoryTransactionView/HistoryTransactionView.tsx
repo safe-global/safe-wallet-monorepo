@@ -30,7 +30,7 @@ import { NormalizedSettingsChangeTransaction } from '@/src/features/ConfirmTx/co
 import { CancelTx } from '@/src/features/HistoryTransactionDetails/components/history-views/CancelTx'
 import { CustomTransactionInfo, MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { HistoryStakeWithdraw } from '../history-views/HistoryStakeWithdraw'
-import { SettingsChagneSwapOwner } from '@/src/utils/transaction-guards'
+import { SettingsChangeSwapOwner } from '@/src/utils/transaction-guards'
 
 interface HistoryTransactionViewProps {
   txDetails: TransactionDetails
