@@ -65,6 +65,8 @@ export type AddressAnalysisResults = {
 }
 
 export type RecipientAnalysisResults = { [address: string]: AddressAnalysisResults }
+export type ContractAnalysisResults = { [address: string]: AddressAnalysisResults }
+export type ThreatAnalysisResult = AnalysisResult<ThreatStatus>
 
 export type LiveAnalysisResponse = {
   recipient?: {
