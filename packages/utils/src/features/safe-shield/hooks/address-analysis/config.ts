@@ -1,35 +1,14 @@
-// Shared severity levels for all address analysis hooks
-export enum AnalysisSeverity {
-  OK = 'OK',
-  INFO = 'INFO',
-  WARN = 'WARN',
-}
-
 // Address check messages
 export const AddressCheckMessages = {
-  ADDRESS_BOOK: {
-    title: '',
-    description: 'Recipient is in the address book',
-  },
-  OWNED_SAFE: {
-    title: '',
-    description: 'Recipient is an owned Safe',
-  },
-  UNKNOWN: {
-    title: '',
-    description: 'Recipient is not in the address book and not an owned Safe',
-  },
+  ADDRESS_BOOK: { title: 'Known recipient', description: 'Recipient is in the address book.' },
+  OWNED_SAFE: { title: 'Known recipient', description: 'Recipient is an owned Safe.' },
+  UNKNOWN: { title: 'Unknown recipient', description: 'Recipient is not in the address book and not an owned Safe.' },
 } as const
 
 export type AddressCheckType = keyof typeof AddressCheckMessages
 
 // Activity thresholds for scoring
-export const ACTIVITY_THRESHOLDS = {
-  VERY_LOW: 1,
-  LOW: 5,
-  MODERATE: 20,
-  HIGH: 100,
-} as const
+export const ACTIVITY_THRESHOLDS = { VERY_LOW: 1, LOW: 5, MODERATE: 20, HIGH: 100 } as const
 
 // Activity messages for user-facing text
 export const ActivityMessages = {
@@ -49,8 +28,5 @@ export const ActivityMessages = {
     title: 'Moderate activity recipient',
     description: 'This address has moderate transaction activity.',
   },
-  HIGH_ACTIVITY: {
-    title: 'Active recipient',
-    description: 'This address has high transaction activity.',
-  },
+  HIGH_ACTIVITY: { title: 'Active recipient', description: 'This address has high transaction activity.' },
 } as const
