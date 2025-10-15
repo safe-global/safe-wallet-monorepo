@@ -56,12 +56,9 @@ export enum ThreatStatus {
   UNOFFICIAL_FALLBACK_HANDLER = 'UNOFFICIAL_FALLBACK_HANDLER', // 9H
 }
 
-export type AnalysisResult<T extends RecipientStatus | BridgeStatus | ContractStatus | ThreatStatus> = {
-  severity: Severity
-  type: T
-  title: string
-  description: string
-}
+export type AnyStatus = RecipientStatus | BridgeStatus | ContractStatus | ThreatStatus
+
+export type AnalysisResult<T extends AnyStatus> = { severity: Severity; type: T; title: string; description: string }
 
 export type AddressAnalysisResults = {
   [_group in StatusGroup]?: AnalysisResult<RecipientStatus | BridgeStatus | ContractStatus>[]
