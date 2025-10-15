@@ -26,11 +26,7 @@ export const getExecutionMethod = (
   return isRelayAvailable ? ExecutionMethod.WITH_RELAY : ExecutionMethod.WITH_PK
 }
 
-export const getSubmitButtonText = (hasSufficientFunds: boolean, willFail: boolean) => {
-  if (willFail) {
-    return 'This transaction will most likely fail'
-  }
-
+export const getSubmitButtonText = (hasSufficientFunds: boolean) => {
   if (!hasSufficientFunds) {
     return 'Insufficient funds'
   }

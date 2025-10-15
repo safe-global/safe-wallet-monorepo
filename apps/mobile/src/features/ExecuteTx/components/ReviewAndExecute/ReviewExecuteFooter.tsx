@@ -102,8 +102,8 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
   }
 
   const willFail = Boolean(estimatedFeeParams.gasLimitError)
-  const isButtonDisabled = !hasSufficientFunds || willFail
-  const buttonText = getSubmitButtonText(hasSufficientFunds, willFail)
+  const isButtonDisabled = !hasSufficientFunds
+  const buttonText = getSubmitButtonText(hasSufficientFunds)
   const isLoading = isCheckingFunds || isLoadingFees
 
   return (
