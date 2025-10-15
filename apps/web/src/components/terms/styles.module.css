@@ -1,0 +1,208 @@
+.container {
+  background-color: var(--color-background-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.contentWrapper {
+  padding-top: calc(var(--header-height) + var(--space-5));
+  padding-bottom: var(--space-5);
+  flex: 1;
+  max-width: 602px;
+}
+
+.container,
+.captionText {
+  letter-spacing: 0.17px;
+}
+
+.header {
+  padding: var(--space-3);
+  background: linear-gradient(90deg, #b0ffc9 0%, #d7f6ff 99.5%);
+  border-radius: 8px 8px 0 0;
+  text-align: center;
+}
+.headerContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  background-color: var(--color-background-paper);
+  border-bottom: 1px solid;
+  border-color: var(--color-border-light);
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  padding: var(--space-3);
+}
+
+.headerTitle {
+  font-weight: 700;
+  font-size: 27px;
+  line-height: 1.235;
+  text-align: center;
+  color: #000;
+}
+
+.mainCard {
+  margin: 0;
+  border-radius: 0 0 8px 8px;
+  border: none;
+  overflow: visible;
+}
+
+.cardContent {
+  padding: var(--space-3);
+}
+
+.nestedCard {
+  border-radius: 6px;
+  border: 1px solid var(--color-border-light);
+}
+
+.nestedCardHeader {
+  background-color: var(--color-background-main);
+  padding: var(--space-1);
+  border-radius: 6px 6px 0 0;
+}
+
+.nestedCardHeaderInner {
+  padding: var(--space-2);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  height: 20px;
+  width: auto;
+}
+
+.nestedCardBody {
+  padding: var(--space-2);
+}
+
+.introText {
+  margin-bottom: var(--space-2);
+}
+
+.divider {
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.featureTitle {
+  margin-bottom: var(--space-1);
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.checkIcon {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--color-success-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.checkIconSvg {
+  width: 12px;
+  height: 12px;
+  color: var(--color-background-paper);
+}
+
+.checkIconSvg path:last-of-type {
+  fill: var(--color-background-paper);
+}
+
+.checkboxCard {
+  border: 1px solid var(--color-border-light);
+  border-radius: 6px;
+}
+
+.checkboxCardOuter {
+  background-color: var(--color-background-main);
+  padding: var(--space-1);
+}
+
+.checkboxCardInner {
+  padding: var(--space-2);
+  padding-left: 0;
+  border-radius: 6px;
+}
+
+.formControlLabel {
+  align-items: flex-start;
+  margin: 0;
+}
+
+.linkBold {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.captionText {
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.buttonWrapper {
+  padding: var(--space-3);
+  padding-top: var(--space-2);
+  display: flex;
+  justify-content: center;
+}
+
+.acceptButton {
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: none;
+  background-color: var(--color-primary-main);
+  color: var(--color-background-paper);
+}
+
+.acceptButton:disabled {
+  color: var(--color-text-secondary);
+}
+
+.learnMoreSection {
+  text-align: center;
+}
+
+.learnMoreLinks {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.externalLink {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  background-color: var(--color-background-light);
+  padding: var(--space-1) var(--space-2);
+  border-radius: 6px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.externalLinkText {
+  font-weight: 700;
+}
+
+.externalLinkIcon {
+  font-size: 16px;
+}
