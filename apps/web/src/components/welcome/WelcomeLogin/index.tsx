@@ -69,8 +69,8 @@ const WelcomeLogin = () => {
                 </Button>
               </Link>
             ) : (
-              <Link href={AppRoutes.newSafe.load}>
-                <Button disableElevation size="small" style={{ color: '#000' }}>
+              <Link href={AppRoutes.newSafe.load} className={css.watchViewAccountLink}>
+                <Button disableElevation size="small">
                   Watch any account
                 </Button>
               </Link>
