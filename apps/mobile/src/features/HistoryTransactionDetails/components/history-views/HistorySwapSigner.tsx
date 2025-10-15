@@ -5,13 +5,13 @@ import { HistoryAdvancedDetailsButton } from '@/src/features/HistoryTransactionD
 import { HashDisplay } from '@/src/components/HashDisplay'
 import { NetworkDisplay } from '../shared'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { SettingsChagneSwapOwner } from '@/src/utils/transaction-guards'
+import { SettingsChangeSwapOwner } from '@/src/utils/transaction-guards'
 import { Identicon } from '@/src/components/Identicon'
 import { type Address } from '@/src/types/address'
 
 interface HistorySwapSignerProps {
   txId: string
-  txInfo: SettingsChagneSwapOwner
+  txInfo: SettingsChangeSwapOwner
 }
 
 export function HistorySwapSigner({ txId, txInfo }: HistorySwapSignerProps) {
