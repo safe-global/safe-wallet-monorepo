@@ -130,7 +130,7 @@ describe('Data import helpers', () => {
       })
     })
 
-    it('transforms ledger key data correctly', () => {
+    it('transforms ledger key data correctly and strips m/ prefix', () => {
       const keyData = {
         address: '0xLedgerAddress',
         name: 'Ledger Key',
@@ -147,7 +147,28 @@ describe('Data import helpers', () => {
           name: 'Ledger Key',
         },
         type: 'ledger',
-        derivationPath: "m/44'/60'/0'/0/0",
+        derivationPath: "44'/60'/0'/0/0", // m/ prefix stripped for Ledger SDK compatibility
+      })
+    })
+
+    it('handles ledger key data already without m/ prefix', () => {
+      const keyData = {
+        address: '0xLedgerAddress',
+        name: 'Ledger Key',
+        type: 3, // Ledger type
+        path: "44'/60'/0'/0/1",
+      }
+
+      const result = transformKeyData(keyData)
+
+      expect(result).toEqual({
+        address: '0xLedgerAddress',
+        signerInfo: {
+          value: '0xLedgerAddress',
+          name: 'Ledger Key',
+        },
+        type: 'ledger',
+        derivationPath: "44'/60'/0'/0/1",
       })
     })
 
@@ -372,7 +393,7 @@ describe('Data import helpers', () => {
           value: '0x2',
           name: 'Ledger Owner',
           type: 'ledger',
-          derivationPath: "m/44'/60'/0'/0/0",
+          derivationPath: "44'/60'/0'/0/0", // m/ prefix stripped for Ledger SDK compatibility
         }),
       )
 
@@ -433,7 +454,7 @@ describe('Data import helpers', () => {
           value: '0x3',
           name: 'Ledger Owner',
           type: 'ledger',
-          derivationPath: "m/44'/60'/0'/0/0",
+          derivationPath: "44'/60'/0'/0/0", // m/ prefix stripped for Ledger SDK compatibility
         }),
       )
 

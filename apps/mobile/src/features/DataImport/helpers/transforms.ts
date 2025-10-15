@@ -84,11 +84,14 @@ export const transformKeyData = (
 
   // Ledger key type
   if (key.type === LEGACY_KEY_TYPE_LEDGER && key.path) {
+    // Strip "m/" prefix if present - Ledger SDK doesn't accept it
+    const derivationPath = key.path.startsWith('m/') ? key.path.slice(2) : key.path
+
     return {
       address: key.address,
       signerInfo,
       type: 'ledger',
-      derivationPath: key.path,
+      derivationPath,
     }
   }
 
