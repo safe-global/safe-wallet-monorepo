@@ -85,8 +85,8 @@ const SafeLabsTerms = () => {
                   <div className={css.nestedCardBody}>
                     <Typography variant="body2" className={css.introText}>
                       Our Safe{'{Wallet}'} is fully compatible with your previous use of Safe{'{Wallet}'} as formerly
-                      provided by Core Contributors GmbH: You can migrate your data to your new Safe{'{Wallet}'} by Safe Labs.
-                      Of course, you may also choose to start fresh with your new Safe{'{Wallet}'}.
+                      provided by Core Contributors GmbH: You can migrate your data to your new Safe{'{Wallet}'} by Safe
+                      Labs. Of course, you may also choose to start fresh with your new Safe{'{Wallet}'}.
                     </Typography>
 
                     <Divider className={css.divider} />
