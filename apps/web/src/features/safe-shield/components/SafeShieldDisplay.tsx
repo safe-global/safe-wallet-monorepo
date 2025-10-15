@@ -1,7 +1,7 @@
 import { type ReactElement } from 'react'
 import { Typography, Card, SvgIcon, Stack } from '@mui/material'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
-import type { LiveAnalysisResponse } from '../types'
+import type { LiveAnalysisResponse } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldHeader } from './SafeShieldHeader'
 import { SafeShieldContent } from './SafeShieldContent'
 

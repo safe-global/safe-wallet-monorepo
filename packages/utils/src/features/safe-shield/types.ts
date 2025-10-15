@@ -22,7 +22,8 @@ export enum StatusGroup {
 export enum RecipientStatus {
   KNOWN_RECIPIENT = 'KNOWN_RECIPIENT', // 1A
   UNKNOWN_RECIPIENT = 'UNKNOWN_RECIPIENT', // 1B
-  LOW_ACTIVITY = 'LOW_ACTIVITY', // 2
+  LOW_ACTIVITY = 'LOW_ACTIVITY', // 2A
+  HIGH_ACTIVITY = 'HIGH_ACTIVITY', // 2B
   NEW_RECIPIENT = 'NEW_RECIPIENT', // 3A
   RECURRING_RECIPIENT = 'RECURRING_RECIPIENT', // 3B
 }
@@ -65,6 +66,8 @@ export type AnalysisResult<T extends RecipientStatus | BridgeStatus | ContractSt
 export type AddressAnalysisResults = {
   [_group in StatusGroup]?: AnalysisResult<RecipientStatus | BridgeStatus | ContractStatus>[]
 }
+
+export type RecipientAnalysisResults = { [address: string]: AddressAnalysisResults }
 
 export type LiveAnalysisResponse = {
   recipient?: {

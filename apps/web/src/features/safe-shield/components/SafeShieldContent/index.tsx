@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react'
 import { Box } from '@mui/material'
-import type { LiveAnalysisResponse } from '../../types'
+import type { LiveAnalysisResponse } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
 import { SafeShieldAnalysisError } from './SafeShieldAnalysisError'
 import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
