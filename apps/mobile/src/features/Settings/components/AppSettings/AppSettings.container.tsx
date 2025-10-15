@@ -1,5 +1,5 @@
 import React from 'react'
-import { Alert, Linking } from 'react-native'
+import { Alert, Linking, Platform } from 'react-native'
 import { router } from 'expo-router'
 
 import { Text, View } from 'tamagui'
@@ -14,7 +14,7 @@ import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectAppNotificationStatus } from '@/src/store/notificationsSlice'
 import { selectCurrency } from '@/src/store/settingsSlice'
 import { capitalize } from '@/src/utils/formatters'
-import { SAFE_WEB_FEEDBACK_URL } from '@/src/config/constants'
+import { APP_STORE_URL, GOOGLE_PLAY_URL, SAFE_WEB_FEEDBACK_URL } from '@/src/config/constants'
 import { clearAllPendingTxs } from '@/src/store/pendingTxsSlice'
 
 export const AppSettingsContainer = () => {
@@ -173,10 +173,11 @@ export const AppSettingsContainer = () => {
         {
           label: 'Rate us',
           leftIcon: 'star',
-          onPress: () => console.log('rate us'),
-          disabled: true,
+          onPress: () => {
+            Linking.openURL(Platform.OS === 'ios' ? `${APP_STORE_URL}?action=write-review` : `${GOOGLE_PLAY_URL}`)
+          },
+          disabled: false,
           type: 'external-link',
-          tag: 'Coming soon',
         },
         {
           label: 'Follow us on X',
