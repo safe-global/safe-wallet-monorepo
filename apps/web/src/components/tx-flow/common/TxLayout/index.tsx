@@ -26,7 +26,8 @@ import { TxSecurityProvider } from '@/components/tx/security/shared/TxSecurityCo
 import ChainIndicator from '@/components/common/ChainIndicator'
 import SecurityWarnings from '@/components/tx/security/SecurityWarnings'
 import SafeInfo from '@/components/tx-flow/common/SafeInfo'
-import SafeShieldWidget from '../SafeShieldWidget'
+import SafeShieldWidget from '@/features/safe-shield'
+import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 
 export const TxLayoutHeader = ({
   hideNonce,
@@ -107,98 +108,100 @@ const TxLayout = ({
     <SafeTxProvider>
       <TxInfoProvider>
         <TxSecurityProvider>
-          <Grid container className={css.container}>
-            {!isReplacement && !isSmallScreen && (
-              <Grid sx={{ width: 200 }} pt={5}>
-                <aside>
-                  <Stack gap={3} position="fixed">
-                    <Card
-                      sx={{
-                        p: '4px 8px 4px 4px',
-                        maxWidth: 212,
-                        mx: '-12px',
-                        overflow: 'visible',
-                        position: 'fixed',
-                        top: 62,
-                      }}
-                    >
-                      <SafeInfo />
-                    </Card>
-
-                    <TxStatusWidget
-                      isLastStep={step === steps.length - 1}
-                      txSummary={txSummary}
-                      isBatch={isBatch}
-                      isMessage={isMessage}
-                    />
-                  </Stack>
-                </aside>
-              </Grid>
-            )}
-
-            <Grid size={{ xs: 12, [smallScreenBreakpoint]: 'grow' }} px={{ [smallScreenBreakpoint]: 5 }}>
-              <Container className={css.contentContainer}>
-                <Grid container spacing={3} justifyContent="center">
-                  {/* Main content */}
-                  <Grid size="grow" sx={{ maxWidth: { [smallScreenBreakpoint]: 672 } }}>
-                    <div className={css.titleWrapper}>
-                      <Typography
-                        data-testid="modal-title"
-                        variant="h3"
-                        component="div"
-                        className={css.title}
-                        sx={{ fontWeight: '700' }}
+          <SafeShieldProvider>
+            <Grid container className={css.container}>
+              {!isReplacement && !isSmallScreen && (
+                <Grid sx={{ width: 200 }} pt={5}>
+                  <aside>
+                    <Stack gap={3} position="fixed">
+                      <Card
+                        sx={{
+                          p: '4px 8px 4px 4px',
+                          maxWidth: 212,
+                          mx: '-12px',
+                          overflow: 'visible',
+                          position: 'fixed',
+                          top: 62,
+                        }}
                       >
-                        {title}
-                      </Typography>
+                        <SafeInfo />
+                      </Card>
 
-                      <ChainIndicator inline />
-                    </div>
-
-                    <Paper data-testid="modal-header" className={css.header}>
-                      {!hideProgress && (
-                        <Box className={css.progressBar}>
-                          <ProgressBar value={progress} />
-                        </Box>
-                      )}
-
-                      <TxLayoutHeader subtitle={subtitle} icon={icon} hideNonce={hideNonce} fixedNonce={fixedNonce} />
-                    </Paper>
-
-                    <div className={css.step}>
-                      {steps[step]}
-
-                      {onBack && step > 0 && (
-                        <Button
-                          data-testid="modal-back-btn"
-                          variant={isDesktop ? 'outlined' : 'text'}
-                          onClick={onBack}
-                          className={css.backButton}
-                          startIcon={<ArrowBackIcon fontSize="small" />}
-                        >
-                          Back
-                        </Button>
-                      )}
-                    </div>
-                  </Grid>
-
-                  {/* Sidebar */}
-                  {!isReplacement && (
-                    <Grid
-                      size={{ xs: 12, [smallScreenBreakpoint]: 4.5 }}
-                      sx={{ width: { lg: 320 } }}
-                      className={classnames(css.widget)}
-                    >
-                      <Box className={css.sticky}>
-                        <SafeShieldWidget />
-                        <SecurityWarnings />
-                      </Box>
-                    </Grid>
-                  )}
+                      <TxStatusWidget
+                        isLastStep={step === steps.length - 1}
+                        txSummary={txSummary}
+                        isBatch={isBatch}
+                        isMessage={isMessage}
+                      />
+                    </Stack>
+                  </aside>
                 </Grid>
-              </Container>
+              )}
+
+              <Grid size={{ xs: 12, [smallScreenBreakpoint]: 'grow' }} px={{ [smallScreenBreakpoint]: 5 }}>
+                <Container className={css.contentContainer}>
+                  <Grid container spacing={3} justifyContent="center">
+                    {/* Main content */}
+                    <Grid size="grow" sx={{ maxWidth: { [smallScreenBreakpoint]: 672 } }}>
+                      <div className={css.titleWrapper}>
+                        <Typography
+                          data-testid="modal-title"
+                          variant="h3"
+                          component="div"
+                          className={css.title}
+                          sx={{ fontWeight: '700' }}
+                        >
+                          {title}
+                        </Typography>
+
+                        <ChainIndicator inline />
+                      </div>
+
+                      <Paper data-testid="modal-header" className={css.header}>
+                        {!hideProgress && (
+                          <Box className={css.progressBar}>
+                            <ProgressBar value={progress} />
+                          </Box>
+                        )}
+
+                        <TxLayoutHeader subtitle={subtitle} icon={icon} hideNonce={hideNonce} fixedNonce={fixedNonce} />
+                      </Paper>
+
+                      <div className={css.step}>
+                        {steps[step]}
+
+                        {onBack && step > 0 && (
+                          <Button
+                            data-testid="modal-back-btn"
+                            variant={isDesktop ? 'outlined' : 'text'}
+                            onClick={onBack}
+                            className={css.backButton}
+                            startIcon={<ArrowBackIcon fontSize="small" />}
+                          >
+                            Back
+                          </Button>
+                        )}
+                      </div>
+                    </Grid>
+
+                    {/* Sidebar */}
+                    {!isReplacement && (
+                      <Grid
+                        size={{ xs: 12, [smallScreenBreakpoint]: 4.5 }}
+                        sx={{ width: { lg: 320 } }}
+                        className={classnames(css.widget)}
+                      >
+                        <Box className={css.sticky}>
+                          <SafeShieldWidget />
+                          <SecurityWarnings />
+                        </Box>
+                      </Grid>
+                    )}
+                  </Grid>
+                </Container>
+              </Grid>
             </Grid>
-          </Grid>
+          </SafeShieldProvider>
         </TxSecurityProvider>
       </TxInfoProvider>
     </SafeTxProvider>
