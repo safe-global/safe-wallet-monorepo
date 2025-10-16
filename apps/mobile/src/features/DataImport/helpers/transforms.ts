@@ -1,3 +1,6 @@
+// Legacy key types from old Safe mobile app
+const LEGACY_KEY_TYPE_LEDGER = 3
+
 export interface LegacyDataStructure {
   safes?: {
     address: string
@@ -14,7 +17,9 @@ export interface LegacyDataStructure {
   keys?: {
     address: string
     name: string
-    key: string
+    key?: string // Optional for ledger keys
+    type?: number // Key type: 3 = Ledger
+    path?: string // Derivation path for hardware wallets
   }[]
 }
 
@@ -56,19 +61,42 @@ export const transformSafeData = (safe: NonNullable<LegacyDataStructure['safes']
 
 export const transformKeyData = (
   key: NonNullable<LegacyDataStructure['keys']>[0],
-): { address: string; privateKey: string; signerInfo: AddressInfo } => {
-  const hexPrivateKey = `0x${Buffer.from(key.key, 'base64').toString('hex')}`
-
+):
+  | { address: string; privateKey: string; signerInfo: AddressInfo; type: 'private-key' }
+  | { address: string; signerInfo: AddressInfo; type: 'ledger'; derivationPath: string }
+  | null => {
   const signerInfo: AddressInfo = {
     value: key.address,
     name: key.name || null,
   }
 
-  return {
-    address: key.address,
-    privateKey: hexPrivateKey,
-    signerInfo,
+  // Private key type
+  if (key.key) {
+    const hexPrivateKey = `0x${Buffer.from(key.key, 'base64').toString('hex')}`
+
+    return {
+      address: key.address,
+      privateKey: hexPrivateKey,
+      signerInfo,
+      type: 'private-key',
+    }
   }
+
+  // Ledger key type
+  if (key.type === LEGACY_KEY_TYPE_LEDGER && key.path) {
+    // Strip "m/" prefix if present - Ledger SDK doesn't accept it
+    const derivationPath = key.path.startsWith('m/') ? key.path.slice(2) : key.path
+
+    return {
+      address: key.address,
+      signerInfo,
+      type: 'ledger',
+      derivationPath,
+    }
+  }
+
+  // Unsupported key type
+  return null
 }
 
 export const transformContactsData = (contacts: NonNullable<LegacyDataStructure['contacts']>): Contact[] => {
@@ -295,17 +323,42 @@ export const storeKeysWithValidation = async (
 
     // Key is an owner, proceed with import
     try {
-      const { address, privateKey, signerInfo } = transformKeyData(key)
+      const transformedKey = transformKeyData(key)
 
-      await storePrivateKey(address, privateKey)
-      dispatch(addSignerWithEffects({ ...signerInfo, type: 'private-key' }))
+      // Key type is not supported (e.g., missing required fields)
+      if (transformedKey === null) {
+        notImportedKeys.push({
+          address: key.address,
+          name: key.name || 'Unknown',
+          reason: 'Unsupported key type or missing required data',
+        })
+        Logger.info(`Key ${key.address} not imported - unsupported type or missing data`)
+        continue
+      }
+
+      if (transformedKey.type === 'private-key') {
+        await storePrivateKey(transformedKey.address, transformedKey.privateKey)
+        dispatch(addSignerWithEffects({ ...transformedKey.signerInfo, type: 'private-key' }))
+      } else if (transformedKey.type === 'ledger') {
+        // Ledger keys don't have private keys, just add the signer info
+        dispatch(
+          addSignerWithEffects({
+            ...transformedKey.signerInfo,
+            type: 'ledger',
+            derivationPath: transformedKey.derivationPath,
+          }),
+        )
+        importedCount++
+        Logger.info(`Ledger key ${key.address} successfully imported`)
+        continue // Skip delegate creation for ledger keys
+      }
 
       // Create delegate for this owner
       try {
         progressCallback?.(keyProgress, `Creating delegate for ${key.name || key.address}`)
 
         // Pass null as safe address to create a delegate for the chain, not for a specific safe
-        const delegateResult = await createDelegate(privateKey, null)
+        const delegateResult = await createDelegate(transformedKey.privateKey, null)
 
         if (!delegateResult.success) {
           Logger.error('Failed to create delegate during data import', {

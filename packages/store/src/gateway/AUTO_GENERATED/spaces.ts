@@ -191,73 +191,97 @@ export type AddressBooksDeleteAddressBookItemV1ApiArg = {
   addressBookItemId: number
 }
 export type AddressBooksGetAddressBookItemsV1ApiResponse =
-  /** status 200 Address Book Items found */ SpaceAddressBookDto
+  /** status 200 Address book items retrieved successfully */ SpaceAddressBookDto
 export type AddressBooksGetAddressBookItemsV1ApiArg = {
+  /** Space ID to get address book for */
   spaceId: number
 }
-export type AddressBooksUpsertAddressBookItemsV1ApiResponse = /** status 200 Address Book updated */ SpaceAddressBookDto
+export type AddressBooksUpsertAddressBookItemsV1ApiResponse =
+  /** status 200 Address book updated successfully */ SpaceAddressBookDto
 export type AddressBooksUpsertAddressBookItemsV1ApiArg = {
+  /** Space ID to update address book for */
   spaceId: number
+  /** Address book items to create or update, including addresses and their labels */
   upsertAddressBookItemsDto: UpsertAddressBookItemsDto
 }
 export type AddressBooksDeleteByAddressV1ApiResponse = unknown
 export type AddressBooksDeleteByAddressV1ApiArg = {
+  /** Space ID containing the address book */
   spaceId: number
+  /** Address to remove from the address book (0x prefixed hex string) */
   address: string
 }
-export type SpacesCreateV1ApiResponse = /** status 200 Space created */ CreateSpaceResponse
+export type SpacesCreateV1ApiResponse = /** status 200 Space created successfully */ CreateSpaceResponse
 export type SpacesCreateV1ApiArg = {
+  /** Space creation data including the name of the space */
   createSpaceDto: CreateSpaceDto
 }
-export type SpacesGetV1ApiResponse = /** status 200 Spaces found */ GetSpaceResponse[]
+export type SpacesGetV1ApiResponse = /** status 200 User spaces retrieved successfully */ GetSpaceResponse[]
 export type SpacesGetV1ApiArg = void
-export type SpacesCreateWithUserV1ApiResponse = /** status 200 Space created */ CreateSpaceResponse
+export type SpacesCreateWithUserV1ApiResponse =
+  /** status 200 Space and user created successfully */ CreateSpaceResponse
 export type SpacesCreateWithUserV1ApiArg = {
+  /** Space creation data including the name of the space */
   createSpaceDto: CreateSpaceDto
 }
-export type SpacesGetOneV1ApiResponse = /** status 200 Space found */ GetSpaceResponse
+export type SpacesGetOneV1ApiResponse = /** status 200 Space information retrieved successfully */ GetSpaceResponse
 export type SpacesGetOneV1ApiArg = {
+  /** Space ID */
   id: number
 }
-export type SpacesUpdateV1ApiResponse = /** status 200 Space updated */ UpdateSpaceResponse
+export type SpacesUpdateV1ApiResponse = /** status 200 Space updated successfully */ UpdateSpaceResponse
 export type SpacesUpdateV1ApiArg = {
+  /** Space ID to update */
   id: number
+  /** Space update data including new name or other properties */
   updateSpaceDto: UpdateSpaceDto
 }
 export type SpacesDeleteV1ApiResponse = unknown
 export type SpacesDeleteV1ApiArg = {
+  /** Space ID to delete */
   id: number
 }
 export type SpaceSafesCreateV1ApiResponse = unknown
 export type SpaceSafesCreateV1ApiArg = {
+  /** Space ID to add Safes to */
   spaceId: number
+  /** List of Safe addresses and their chain information to add to the space */
   createSpaceSafesDto: CreateSpaceSafesDto
 }
-export type SpaceSafesGetV1ApiResponse = /** status 200 Safes fetched successfully */ GetSpaceSafeResponse
+export type SpaceSafesGetV1ApiResponse = /** status 200 Space Safes retrieved successfully */ GetSpaceSafeResponse
 export type SpaceSafesGetV1ApiArg = {
+  /** Space ID to get Safes for */
   spaceId: number
 }
 export type SpaceSafesDeleteV1ApiResponse = unknown
 export type SpaceSafesDeleteV1ApiArg = {
+  /** Space ID to remove Safes from */
   spaceId: number
+  /** List of Safe addresses and their chain information to remove from the space */
   deleteSpaceSafesDto: DeleteSpaceSafesDto
 }
-export type MembersInviteUserV1ApiResponse = /** status 200 Users invited */ Invitation[]
+export type MembersInviteUserV1ApiResponse = /** status 200 Users invited successfully */ Invitation[]
 export type MembersInviteUserV1ApiArg = {
+  /** Space ID to invite users to */
   spaceId: number
+  /** List of wallet addresses to invite to the space */
   inviteUsersDto: InviteUsersDto
 }
 export type MembersAcceptInviteV1ApiResponse = unknown
 export type MembersAcceptInviteV1ApiArg = {
+  /** Space ID to accept invitation for */
   spaceId: number
+  /** Invitation acceptance data including any required confirmation */
   acceptInviteDto: AcceptInviteDto
 }
 export type MembersDeclineInviteV1ApiResponse = unknown
 export type MembersDeclineInviteV1ApiArg = {
+  /** Space ID to decline invitation for */
   spaceId: number
 }
-export type MembersGetUsersV1ApiResponse = /** status 200 Space and members list */ MembersDto
+export type MembersGetUsersV1ApiResponse = /** status 200 Space members retrieved successfully */ MembersDto
 export type MembersGetUsersV1ApiArg = {
+  /** Space ID to get members for */
   spaceId: number
 }
 export type MembersSelfRemoveV1ApiResponse = unknown
@@ -266,8 +290,11 @@ export type MembersSelfRemoveV1ApiArg = {
 }
 export type MembersUpdateRoleV1ApiResponse = unknown
 export type MembersUpdateRoleV1ApiArg = {
+  /** Space ID containing the member */
   spaceId: number
+  /** User ID of the member to update */
   userId: number
+  /** New role information for the member */
   updateRoleDto: UpdateRoleDto
 }
 export type MembersUpdateAliasV1ApiResponse = unknown
@@ -277,7 +304,9 @@ export type MembersUpdateAliasV1ApiArg = {
 }
 export type MembersRemoveUserV1ApiResponse = unknown
 export type MembersRemoveUserV1ApiArg = {
+  /** Space ID to remove member from */
   spaceId: number
+  /** User ID of the member to remove */
   userId: number
 }
 export type AddressBookItem = {

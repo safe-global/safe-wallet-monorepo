@@ -1,17 +1,17 @@
 import * as safeDeployments from '@safe-global/safe-deployments'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import * as deployments from '@safe-global/utils/services/contracts/deployments'
 import { chainBuilder } from '@/tests/builders/chains'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 const mainnetInfo = chainBuilder().with({ chainId: '1', l2: false, recommendedMasterCopyVersion: '1.4.1' }).build()
-const l2ChainInfo = chainBuilder().with({ chainId: '137', l2: true, recommendedMasterCopyVersion: '1.4.1' }).build()
-const unsupportedChainInfo = chainBuilder()
+const l2Chain = chainBuilder().with({ chainId: '137', l2: true, recommendedMasterCopyVersion: '1.4.1' }).build()
+const unsupportedChain = chainBuilder()
   .with({ chainId: '69420', l2: false, recommendedMasterCopyVersion: '1.3.0' })
   .build()
 
-const unsupportedL2ChainInfo = chainBuilder()
+const unsupportedL2Chain = chainBuilder()
   .with({ chainId: '69420', l2: true, recommendedMasterCopyVersion: '1.3.0' })
   .build()
 const latestSafeVersion = getLatestSafeVersion(mainnetInfo)
@@ -42,7 +42,7 @@ describe('deployments', () => {
     it('should call the deployment getter with a supported version/unsupported network', () => {
       deployments._tryDeploymentVersions(
         getSafeSpy as unknown as typeof safeDeployments.getSafeSingletonDeployment,
-        unsupportedChainInfo,
+        unsupportedChain,
         '1.1.1',
       )
 
@@ -57,7 +57,7 @@ describe('deployments', () => {
     it('should call the deployment getter with an unsupported version/unsupported', () => {
       deployments._tryDeploymentVersions(
         getSafeSpy as unknown as typeof safeDeployments.getSafeSingletonDeployment,
-        unsupportedChainInfo,
+        unsupportedChain,
         '1.2.3',
       )
 
@@ -120,21 +120,21 @@ describe('deployments', () => {
 
   describe('isL2', () => {
     it('should return true for L2 versions', () => {
-      expect(deployments._isL2({ l2: true } as ChainInfo, '1.3.0')).toBe(true)
-      expect(deployments._isL2({ l2: true } as ChainInfo, '1.3.0+L2')).toBe(true)
-      expect(deployments._isL2({ l2: true } as ChainInfo, '1.4.1+L2')).toBe(true)
+      expect(deployments._isL2({ l2: true } as Chain, '1.3.0')).toBe(true)
+      expect(deployments._isL2({ l2: true } as Chain, '1.3.0+L2')).toBe(true)
+      expect(deployments._isL2({ l2: true } as Chain, '1.4.1+L2')).toBe(true)
     })
 
     it('should return true for unsupported L2 versions', () => {
-      expect(deployments._isL2({ l2: true } as ChainInfo, null)).toBe(true)
+      expect(deployments._isL2({ l2: true } as Chain, null)).toBe(true)
     })
 
     it('should return false for non-L2 versions', () => {
-      expect(deployments._isL2({ l2: false } as ChainInfo, '1.0.0')).toBe(false)
-      expect(deployments._isL2({ l2: false } as ChainInfo, '1.1.1')).toBe(false)
-      expect(deployments._isL2({ l2: false } as ChainInfo, '1.2.0')).toBe(false)
-      expect(deployments._isL2({ l2: false } as ChainInfo, '1.3.0')).toBe(false)
-      expect(deployments._isL2({ l2: false } as ChainInfo, '1.4.1+L2')).toBe(false)
+      expect(deployments._isL2({ l2: false } as Chain, '1.0.0')).toBe(false)
+      expect(deployments._isL2({ l2: false } as Chain, '1.1.1')).toBe(false)
+      expect(deployments._isL2({ l2: false } as Chain, '1.2.0')).toBe(false)
+      expect(deployments._isL2({ l2: false } as Chain, '1.3.0')).toBe(false)
+      expect(deployments._isL2({ l2: false } as Chain, '1.4.1+L2')).toBe(false)
     })
   })
 
@@ -152,7 +152,7 @@ describe('deployments', () => {
       })
 
       it('should return undefined for supported version/unsupported chain', () => {
-        const deployment = deployments.getSafeContractDeployment(unsupportedChainInfo, '1.1.1')
+        const deployment = deployments.getSafeContractDeployment(unsupportedChain, '1.1.1')
         expect(deployment).toBe(undefined)
       })
 
@@ -172,12 +172,12 @@ describe('deployments', () => {
         })
 
         expect(expected).toBeDefined()
-        const deployment = deployments.getSafeContractDeployment(unsupportedChainInfo, '0.0.1')
+        const deployment = deployments.getSafeContractDeployment(unsupportedChain, '0.0.1')
         expect(deployment).toStrictEqual(expected)
       })
 
       it('should return undefined for unsupported version/chain', () => {
-        const deployment = deployments.getSafeContractDeployment(unsupportedChainInfo, '1.2.3')
+        const deployment = deployments.getSafeContractDeployment(unsupportedChain, '1.2.3')
         expect(deployment).toStrictEqual(undefined)
       })
 
@@ -193,7 +193,7 @@ describe('deployments', () => {
       })
 
       it('should return undefined for no version/unsupported chain', () => {
-        const deployment = deployments.getSafeContractDeployment(unsupportedChainInfo, null)
+        const deployment = deployments.getSafeContractDeployment(unsupportedChain, null)
         expect(deployment).toBe(undefined)
       })
     })
@@ -206,17 +206,17 @@ describe('deployments', () => {
         })
 
         expect(expected).toBeDefined()
-        const deployment = deployments.getSafeContractDeployment(l2ChainInfo, '1.3.0')
+        const deployment = deployments.getSafeContractDeployment(l2Chain, '1.3.0')
         expect(deployment).toStrictEqual(expected)
       })
 
       it('should return undefined for supported version/unsupported chain', () => {
-        const deployment = deployments.getSafeContractDeployment(unsupportedL2ChainInfo, '1.3.0')
+        const deployment = deployments.getSafeContractDeployment(unsupportedL2Chain, '1.3.0')
         expect(deployment).toBe(undefined)
       })
 
       it('should return undefined for unsupported version/chain', () => {
-        const deployment = deployments.getSafeContractDeployment(unsupportedL2ChainInfo, '1.2.3')
+        const deployment = deployments.getSafeContractDeployment(unsupportedL2Chain, '1.2.3')
         expect(deployment).toBe(undefined)
       })
 
@@ -227,12 +227,12 @@ describe('deployments', () => {
         })
 
         expect(expected).toBeDefined()
-        const deployment = deployments.getSafeContractDeployment(l2ChainInfo, null)
+        const deployment = deployments.getSafeContractDeployment(l2Chain, null)
         expect(deployment).toStrictEqual(expected)
       })
 
       it('should return undefined no version/unsupported chain', () => {
-        const deployment = deployments.getSafeContractDeployment(unsupportedL2ChainInfo, null)
+        const deployment = deployments.getSafeContractDeployment(unsupportedL2Chain, null)
         expect(deployment).toStrictEqual(undefined)
       })
     })
@@ -251,12 +251,12 @@ describe('deployments', () => {
     })
 
     it('should return undefined for supported version/unsupported chain', () => {
-      const deployment = deployments.getMultiSendCallOnlyContractDeployment(unsupportedChainInfo, '1.3.0')
+      const deployment = deployments.getMultiSendCallOnlyContractDeployment(unsupportedChain, '1.3.0')
       expect(deployment).toBe(undefined)
     })
 
     it('should return undefined for unsupported version/chain', () => {
-      const deployment = deployments.getMultiSendCallOnlyContractDeployment(unsupportedChainInfo, '1.2.3')
+      const deployment = deployments.getMultiSendCallOnlyContractDeployment(unsupportedChain, '1.2.3')
       expect(deployment).toBe(undefined)
     })
 
@@ -272,7 +272,7 @@ describe('deployments', () => {
     })
 
     it('should return undefined for no version/unsupported chain', () => {
-      const deployment = deployments.getMultiSendCallOnlyContractDeployment(unsupportedChainInfo, null)
+      const deployment = deployments.getMultiSendCallOnlyContractDeployment(unsupportedChain, null)
       expect(deployment).toBe(undefined)
     })
   })
@@ -290,12 +290,12 @@ describe('deployments', () => {
     })
 
     it('should return undefined for supported version/unsupported chain', () => {
-      const deployment = deployments.getFallbackHandlerContractDeployment(unsupportedChainInfo, '1.3.0')
+      const deployment = deployments.getFallbackHandlerContractDeployment(unsupportedChain, '1.3.0')
       expect(deployment).toBe(undefined)
     })
 
     it('should return undefined for unsupported version/chain', () => {
-      const deployment = deployments.getFallbackHandlerContractDeployment(unsupportedChainInfo, '1.2.3')
+      const deployment = deployments.getFallbackHandlerContractDeployment(unsupportedChain, '1.2.3')
       expect(deployment).toBe(undefined)
     })
 
@@ -311,7 +311,7 @@ describe('deployments', () => {
     })
 
     it('should return undefined for no version/unsupported chain', () => {
-      const deployment = deployments.getFallbackHandlerContractDeployment(unsupportedChainInfo, null)
+      const deployment = deployments.getFallbackHandlerContractDeployment(unsupportedChain, null)
       expect(deployment).toBe(undefined)
     })
   })
@@ -329,12 +329,12 @@ describe('deployments', () => {
     })
 
     it('should return undefined for supported version/unsupported chain', () => {
-      const deployment = deployments.getProxyFactoryContractDeployment(unsupportedChainInfo, '1.1.1')
+      const deployment = deployments.getProxyFactoryContractDeployment(unsupportedChain, '1.1.1')
       expect(deployment).toBe(undefined)
     })
 
     it('should return undefined for unsupported version/chain', () => {
-      const deployment = deployments.getProxyFactoryContractDeployment(unsupportedChainInfo, '1.2.3')
+      const deployment = deployments.getProxyFactoryContractDeployment(unsupportedChain, '1.2.3')
       expect(deployment).toBe(undefined)
     })
 
@@ -350,7 +350,7 @@ describe('deployments', () => {
     })
 
     it('should return undefined for no version/unsupported chain', () => {
-      const deployment = deployments.getProxyFactoryContractDeployment(unsupportedChainInfo, null)
+      const deployment = deployments.getProxyFactoryContractDeployment(unsupportedChain, null)
       expect(deployment).toBe(undefined)
     })
   })
@@ -368,12 +368,12 @@ describe('deployments', () => {
     })
 
     it('should return undefined for supported version/unsupported chain', () => {
-      const deployment = deployments.getSignMessageLibContractDeployment(unsupportedChainInfo, '1.3.0')
+      const deployment = deployments.getSignMessageLibContractDeployment(unsupportedChain, '1.3.0')
       expect(deployment).toBe(undefined)
     })
 
     it('should return undefined for unsupported version/chain', () => {
-      const deployment = deployments.getSignMessageLibContractDeployment(unsupportedChainInfo, '1.2.3')
+      const deployment = deployments.getSignMessageLibContractDeployment(unsupportedChain, '1.2.3')
       expect(deployment).toBe(undefined)
     })
 
@@ -389,7 +389,7 @@ describe('deployments', () => {
     })
 
     it('should return undefined for no version/unsupported chain', () => {
-      const deployment = deployments.getSignMessageLibContractDeployment(unsupportedChainInfo, null)
+      const deployment = deployments.getSignMessageLibContractDeployment(unsupportedChain, null)
       expect(deployment).toBe(undefined)
     })
   })

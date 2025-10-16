@@ -2,10 +2,10 @@ import { useEffect } from 'react'
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NewSafeFormData } from '@/components/new-safe/create/index'
 import useWallet from '@/hooks/wallets/useWallet'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useCurrentChain } from '@/hooks/useChains'
 
-const useSyncSafeCreationStep = (setStep: StepRenderProps<NewSafeFormData>['setStep'], networks: ChainInfo[]) => {
+const useSyncSafeCreationStep = (setStep: StepRenderProps<NewSafeFormData>['setStep'], networks: Chain[]) => {
   const wallet = useWallet()
   const currentChain = useCurrentChain()
 

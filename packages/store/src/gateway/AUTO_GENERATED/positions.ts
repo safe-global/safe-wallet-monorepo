@@ -9,6 +9,9 @@ const injectedRtkApi = api
       positionsGetPositionsV1: build.query<PositionsGetPositionsV1ApiResponse, PositionsGetPositionsV1ApiArg>({
         query: (queryArg) => ({
           url: `/v1/chains/${queryArg.chainId}/safes/${queryArg.safeAddress}/positions/${queryArg.fiatCode}`,
+          params: {
+            refresh: queryArg.refresh,
+          },
         }),
         providesTags: ['positions'],
       }),
@@ -21,6 +24,8 @@ export type PositionsGetPositionsV1ApiArg = {
   chainId: string
   safeAddress: string
   fiatCode: string
+  /** Cache busting parameter. Set to true to invalidate cache and fetch fresh data from Zerion */
+  refresh?: boolean
 }
 export type ProtocolIcon = {
   url: string | null

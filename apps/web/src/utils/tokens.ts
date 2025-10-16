@@ -1,7 +1,7 @@
 import { getWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { ERC20__factory, ERC721__factory } from '@safe-global/utils/types/contracts'
 import { parseBytes32String } from '@ethersproject/strings'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { TokenType } from '@safe-global/store/gateway/types'
 import { ERC721_IDENTIFIER } from '@safe-global/utils/utils/tokens'
 import { type Erc20Token } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { multicall } from '../../../../packages/utils/src/utils/multicall'

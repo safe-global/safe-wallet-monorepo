@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react'
 import { View, Text, H4, getTokenValue } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton/SafeButton'
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 interface LedgerErrorProps {
   /** The main error title */
   title: string
@@ -28,8 +28,9 @@ export const LedgerError = ({
   testID,
   icon,
 }: LedgerErrorProps) => {
+  const { bottom } = useSafeAreaInsets()
   return (
-    <View flex={1} justifyContent="space-between">
+    <View flex={1} justifyContent="space-between" paddingBottom={Math.max(bottom, getTokenValue('$4'))}>
       <View flex={1} justifyContent="center" alignItems="center">
         <View alignItems="center" gap="$6" paddingHorizontal="$4">
           {icon && (

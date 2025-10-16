@@ -1,7 +1,7 @@
 import { render } from '@/tests/test-utils'
 import { _GasParams as GasParams } from '@/components/tx/GasParams/index'
 import type { AdvancedParameters } from '@/components/tx/AdvancedParams'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 describe('GasParams', () => {
   it('Shows the estimated fee on execution', () => {
@@ -58,7 +58,7 @@ describe('GasParams', () => {
         symbol: 'SepoliaETH',
         decimals: 9,
       },
-    } as unknown as ChainInfo
+    } as unknown as Chain
 
     const { getByText } = render(
       <GasParams params={params} isExecution={true} isEIP1559={true} onEdit={jest.fn} chain={chainInfo} />,

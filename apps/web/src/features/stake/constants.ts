@@ -8,9 +8,3 @@ export const widgetAppData = {
   name: STAKE_TITLE,
   chainIds: ['17000', '11155111', '1', '42161', '137', '56', '8453', '10'],
 }
-
-// TODO: move this to the config service
-export const BEACON_CHAIN_EXPLORERS = {
-  '1': 'https://beaconcha.in',
-  '17000': 'https://holesky.beaconcha.in',
-}

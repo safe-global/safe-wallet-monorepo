@@ -36,7 +36,7 @@ const CurrentToast = () => {
       opacity={1}
       scale={1}
       animation="100ms"
-      backgroundColor={'$backgroundPaper'}
+      backgroundColor={currentToast.variant === 'error' ? '$backgroundError' : '$backgroundPaper'}
       viewportName={currentToast.viewportName}
     >
       <YStack style={{ alignItems: 'center', justifyContent: 'center' }}>

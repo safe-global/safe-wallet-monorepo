@@ -5,6 +5,7 @@ import { formatWithSchema } from '@/src/utils/date'
 import { HashDisplay } from '@/src/components/HashDisplay'
 import { Badge } from '@/src/components/Badge'
 import { PendingTx } from '@/src/store/pendingTxsSlice'
+import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 
 export const PendingTxInfo = ({ createdAt, pendingTx }: { createdAt: number | null; pendingTx: PendingTx }) => {
   return (
@@ -18,7 +19,7 @@ export const PendingTxInfo = ({ createdAt, pendingTx }: { createdAt: number | nu
         </View>
       )}
 
-      {pendingTx?.txHash && (
+      {pendingTx?.type === ExecutionMethod.WITH_PK && (
         <View alignItems="center" flexDirection="row" justifyContent="space-between">
           <Text color="$textSecondaryLight">Transaction hash</Text>
           <HashDisplay value={pendingTx.txHash} showVisualIdentifier={false} />

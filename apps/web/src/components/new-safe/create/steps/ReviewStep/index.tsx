@@ -2,7 +2,7 @@ import type { NamedAddress } from '@/components/new-safe/create/types'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { safeCreationDispatch, SafeCreationEvent } from '@/features/counterfactual/services/safeCreationEvents'
 import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
-import { getTotalFeeFormatted } from '@/hooks/useGasPrice'
+
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NewSafeFormData } from '@/components/new-safe/create'
 import {
@@ -40,7 +40,7 @@ import { hasRemainingRelays } from '@/utils/relaying'
 import { isWalletRejection } from '@/utils/wallets'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { Box, Button, CircularProgress, Divider, Grid, Tooltip, Typography } from '@mui/material'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import classnames from 'classnames'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
@@ -57,6 +57,7 @@ import { updateAddressBook } from '../../logic/address-book'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { type TransactionOptions } from '@safe-global/types-kit'
+import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
 
 export const NetworkFee = ({
   totalFee,
@@ -65,7 +66,7 @@ export const NetworkFee = ({
   inline = false,
 }: {
   totalFee: string
-  chain: ChainInfo | undefined
+  chain: Chain | undefined
   isWaived: boolean
   inline?: boolean
 }) => {
@@ -89,7 +90,7 @@ export const SafeSetupOverview = ({
   name?: string
   owners: NamedAddress[]
   threshold: number
-  networks: ChainInfo[]
+  networks: Chain[]
 }) => {
   return (
     <Grid container spacing={3}>
@@ -281,7 +282,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
     }
   }
 
-  const createSafe = async (chain: ChainInfo, props: ReplayedSafeProps, safeAddress: string) => {
+  const createSafe = async (chain: Chain, props: ReplayedSafeProps, safeAddress: string) => {
     if (!wallet) return
 
     gtmSetChainId(chain.chainId)

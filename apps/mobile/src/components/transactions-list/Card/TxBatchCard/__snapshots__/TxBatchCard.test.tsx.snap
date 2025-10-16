@@ -135,6 +135,8 @@ exports[`TxBatchCard should render the default markup 1`] = `
             </Text>
           </View>
           <Text
+            ellipsizeMode="tail"
+            numberOfLines={1}
             style={
               {
                 "color": "#121312",

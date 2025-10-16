@@ -16,7 +16,6 @@ import { useRoles } from '../hooks'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const mockChain = chainBuilder()
-  // @ts-expect-error - we are using a local FEATURES enum
   .with({ features: [FEATURES.ZODIAC_ROLES, FEATURES.EIP1559] })
   .with({ chainId: '1' })
   .with({ shortName: 'eth' })

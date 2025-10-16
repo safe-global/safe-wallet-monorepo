@@ -1,5 +1,5 @@
 import type { OperationType, SafeTransactionData } from '@safe-global/types-kit'
-import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
+import { Operation } from '@safe-global/store/gateway/types'
 import { isMultisigDetailedExecutionInfo, isNativeTokenTransfer } from '@/src/utils/transaction-guards'
 import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 

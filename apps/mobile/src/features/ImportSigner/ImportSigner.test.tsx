@@ -1,20 +1,20 @@
 import React from 'react'
 import { render, screen, fireEvent, act, waitFor } from '@/src/tests/test-utils'
-import { ImportPrivateKey } from './ImportPrivateKey.container'
+import { ImportSigner } from './ImportSigner.container'
 import { inputTheme } from '@/src/components/SafeInput/theme'
 
-describe('ImportPrivateKey', () => {
-  it('renders the import private key screen', () => {
-    render(<ImportPrivateKey />)
+describe('ImportSigner', () => {
+  it('renders the import signer screen', () => {
+    render(<ImportSigner />)
 
-    expect(screen.getByText('Import a private key')).toBeTruthy()
+    expect(screen.getByText('Import a signer')).toBeTruthy()
     expect(
-      screen.getByText('Enter your private key below. Make sure to do so in a safe and private place.'),
+      screen.getByText('Enter your private key or seed phrase below. Make sure to do so in a safe and private place.'),
     ).toBeTruthy()
   })
 
   it('enables import button when private key is entered', async () => {
-    render(<ImportPrivateKey />)
+    render(<ImportSigner />)
 
     const input = screen.getByPlaceholderText('Paste here or type...')
     const button = screen.getByText('Import signer')

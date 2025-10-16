@@ -1,6 +1,6 @@
 import { useContext, useMemo, useState } from 'react'
 import { Box } from '@mui/material'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import EnhancedTable from '@/components/common/EnhancedTable'
 import type { AddressEntry } from '@/components/address-book/EntryDialog'
@@ -49,7 +49,7 @@ const defaultOpen = {
 }
 
 type AddressBookTableProps = {
-  chain?: ChainInfo
+  chain?: Chain
   setTxFlow: TxModalContextType['setTxFlow']
 }
 

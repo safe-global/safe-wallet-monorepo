@@ -178,7 +178,7 @@ export const LedgerAddressesContainer = () => {
   const renderEmptyState = () => <AddressesEmptyState />
 
   return (
-    <View style={{ flex: 1 }} paddingBottom={bottom}>
+    <View style={{ flex: 1 }} paddingBottom={Math.max(bottom, getTokenValue('$4'))}>
       <View flex={1}>
         <FlatList
           onScroll={handleScroll}

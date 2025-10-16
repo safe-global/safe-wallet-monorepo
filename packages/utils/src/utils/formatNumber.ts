@@ -33,11 +33,11 @@ const getCurrencyFormatter = memoize(_getCurrencyFormatter, (...args: Parameters
 )
 
 export const getLocalDecimalSeparator = (): string => {
-  const sampleNumber = 1.1;
-  const numberWithSeparatorFormatted = new Intl.NumberFormat(locale).format(sampleNumber);
-  const separator = numberWithSeparatorFormatted.replace(/\p{Number}/gu, '')[0];
+  const sampleNumber = 1.1
+  const numberWithSeparatorFormatted = new Intl.NumberFormat(locale).format(sampleNumber)
+  const separator = numberWithSeparatorFormatted.replace(/\p{Number}/gu, '')[0]
 
-  return separator;
+  return separator
 }
 
 /**

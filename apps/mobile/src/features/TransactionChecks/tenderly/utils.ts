@@ -73,7 +73,7 @@ export const _getMultiSendCallOnlyPayload = async (
   }
 }
 
-const getLatestBlockGasLimit = async (): Promise<number> => {
+export const getLatestBlockGasLimit = async (): Promise<number> => {
   const web3ReadOnly = getWeb3ReadOnly()
   const latestBlock = await web3ReadOnly?.getBlock('latest')
   if (!latestBlock) {

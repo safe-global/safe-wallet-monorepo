@@ -1,7 +1,7 @@
 import * as useChainId from '@/hooks/useChainId'
 import { fireEvent, render } from '@/tests/test-utils'
 import { toBeHex } from 'ethers'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { TokenType } from '@safe-global/store/gateway/types'
 import { safeParseUnits } from '@safe-global/utils/utils/formatters'
 import HiddenTokenButton from '.'
 import { useState } from 'react'

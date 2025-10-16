@@ -1,4 +1,4 @@
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import {
   _mergeNotifiableSafes,
@@ -159,7 +159,7 @@ describe('GlobalPushNotifications', () => {
 
   describe('sanitizeNotifiableSafes', () => {
     it('should remove Safes that are not on a supported chain', () => {
-      const chains = [{ chainId: '1', name: 'Mainnet' }] as unknown as Array<ChainInfo>
+      const chains = [{ chainId: '1', name: 'Mainnet' }] as unknown as Array<Chain>
 
       const notifiableSafes = {
         '1': ['0x123', '0x456'],

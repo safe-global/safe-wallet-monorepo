@@ -5,7 +5,7 @@ import { type UndeployedSafe, type ReplayedSafeProps } from '@safe-global/utils/
 import { Safe_proxy_factory__factory } from '@safe-global/utils/types/contracts'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getCreationTransaction } from '@safe-global/safe-client-gateway-sdk'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useAppSelector } from '@/store'
 import { isPredictedSafeProps } from '@/features/counterfactual/utils'
 import { logError } from '@/services/exceptions'
@@ -38,7 +38,7 @@ const createProxySelector = proxyFactoryInterface.getFunction('createProxyWithNo
  * Checking the cheap cases not requiring RPC calls first.
  */
 const getCreationDataForChain = async (
-  chain: ChainInfo,
+  chain: Chain,
   undeployedSafe: UndeployedSafe,
   safeAddress: string,
   customRpc: { [chainId: string]: string },
@@ -121,7 +121,7 @@ const getCreationDataForChain = async (
  * Fetches the data with which the given Safe was originally created.
  * Useful to replay a Safe creation.
  */
-export const useSafeCreationData = (safeAddress: string, chains: ChainInfo[]): AsyncResult<ReplayedSafeProps> => {
+export const useSafeCreationData = (safeAddress: string, chains: Chain[]): AsyncResult<ReplayedSafeProps> => {
   const customRpc = useAppSelector(selectRpc)
 
   const undeployedSafes = useAppSelector(selectUndeployedSafes)

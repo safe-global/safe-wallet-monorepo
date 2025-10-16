@@ -215,7 +215,8 @@ export const Settings = ({
             >
               {isLatestVersion && <SafeFontIcon testID="check-icon" name={'check-filled'} color={'$success'} />}
               <Text marginLeft={'$2'} textAlign="center" color="$colorSecondary">
-                {implementation?.name} {isLatestVersion ? `(Latest version)` : `(Latest version: ${latestSafeVersion})`}
+                {implementation?.name}{' '}
+                {isLatestVersion ? `(Latest version)` : `(New version is available: ${latestSafeVersion})`}
               </Text>
             </Pressable>
 

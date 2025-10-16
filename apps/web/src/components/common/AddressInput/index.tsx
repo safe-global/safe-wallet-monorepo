@@ -1,6 +1,6 @@
 import AddressInputReadOnly from '@/components/common/AddressInputReadOnly'
 import useAddressBook from '@/hooks/useAddressBook'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ReactElement } from 'react'
 import { useEffect, useCallback, useRef, useMemo } from 'react'
 import {
@@ -35,7 +35,7 @@ export type AddressInputProps = TextFieldProps & {
   validate?: Validate<string>
   deps?: string | string[]
   onAddressBookClick?: () => void
-  chain?: ChainInfo
+  chain?: Chain
   showPrefix?: boolean
   onReset?: () => void
 }

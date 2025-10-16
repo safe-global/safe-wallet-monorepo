@@ -88,20 +88,32 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type NotificationsUpsertSubscriptionsV2ApiResponse = unknown
+export type NotificationsUpsertSubscriptionsV2ApiResponse =
+  /** status 201 Device registered successfully with returned device UUID */ {
+    /** Generated UUID for the registered device */
+    deviceUuid?: string
+  }
 export type NotificationsUpsertSubscriptionsV2ApiArg = {
+  /** Device and subscription data including device token, Safe addresses, and notification preferences */
   upsertSubscriptionsDto: UpsertSubscriptionsDto
 }
-export type NotificationsGetSafeSubscriptionV2ApiResponse = unknown
+export type NotificationsGetSafeSubscriptionV2ApiResponse =
+  /** status 200 List of notification types the device is subscribed to for this Safe */ NotificationTypeResponseDto[]
 export type NotificationsGetSafeSubscriptionV2ApiArg = {
+  /** Device UUID */
   deviceUuid: string
+  /** Chain ID where the Safe is deployed */
   chainId: string
+  /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
 }
 export type NotificationsDeleteSubscriptionV2ApiResponse = unknown
 export type NotificationsDeleteSubscriptionV2ApiArg = {
+  /** Device UUID */
   deviceUuid: string
+  /** Chain ID where the Safe is deployed */
   chainId: string
+  /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
 }
 export type NotificationsDeleteAllSubscriptionsV2ApiResponse = unknown
@@ -110,25 +122,33 @@ export type NotificationsDeleteAllSubscriptionsV2ApiArg = {
 }
 export type NotificationsDeleteDeviceV2ApiResponse = unknown
 export type NotificationsDeleteDeviceV2ApiArg = {
+  /** Chain ID (kept for backward compatibility) */
   chainId: string
+  /** Device UUID to delete */
   deviceUuid: string
 }
 export type NotificationsRegisterDeviceV1ApiResponse = unknown
 export type NotificationsRegisterDeviceV1ApiArg = {
+  /** Device registration data including device token, UUID, and Safe registrations with signatures */
   registerDeviceDto: RegisterDeviceDto
 }
 export type NotificationsUnregisterDeviceV1ApiResponse = unknown
 export type NotificationsUnregisterDeviceV1ApiArg = {
+  /** Chain ID (kept for backward compatibility) */
   chainId: string
+  /** Device UUID to unregister */
   uuid: string
 }
 export type NotificationsUnregisterSafeV1ApiResponse = unknown
 export type NotificationsUnregisterSafeV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
   chainId: string
+  /** Device UUID */
   uuid: string
+  /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
 }
-export type NotificationType =
+export type NotificationTypeEnum =
   | 'CONFIRMATION_REQUEST'
   | 'DELETED_MULTISIG_TRANSACTION'
   | 'EXECUTED_MULTISIG_TRANSACTION'
@@ -139,7 +159,7 @@ export type NotificationType =
 export type UpsertSubscriptionsSafesDto = {
   chainId: string
   address: string
-  notificationTypes: NotificationType[]
+  notificationTypes: NotificationTypeEnum[]
 }
 export type DeviceType = 'ANDROID' | 'IOS' | 'WEB'
 export type UpsertSubscriptionsDto = {
@@ -147,6 +167,10 @@ export type UpsertSubscriptionsDto = {
   safes: UpsertSubscriptionsSafesDto[]
   deviceType: DeviceType
   deviceUuid?: string | null
+}
+export type NotificationTypeResponseDto = {
+  /** The notification type name */
+  name: NotificationTypeEnum
 }
 export type DeleteAllSubscriptionItemDto = {
   chainId: string

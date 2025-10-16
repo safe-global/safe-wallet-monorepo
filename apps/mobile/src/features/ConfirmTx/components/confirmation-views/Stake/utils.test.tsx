@@ -1,10 +1,12 @@
 import React from 'react'
-import { render } from '@/src/tests/test-utils'
+import { renderWithStore, createTestStore } from '@/src/tests/test-utils'
 import { formatStakingDepositItems, formatStakingValidatorItems, formatStakingWithdrawRequestItems } from './utils'
 import {
   NativeStakingDepositTransactionInfo,
   NativeStakingValidatorsExitTransactionInfo,
+  Operation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 
 const mockDepositTxInfo: NativeStakingDepositTransactionInfo = {
   type: 'NativeStakingDeposit',
@@ -53,6 +55,18 @@ const mockWithdrawRequestTxInfo: NativeStakingValidatorsExitTransactionInfo = {
 }
 
 describe('Staking Utils', () => {
+  let store: ReturnType<typeof createTestStore>
+
+  beforeEach(async () => {
+    store = createTestStore({
+      activeSafe: {
+        address: '0x1234567890123456789012345678901234567890',
+        chainId: '1',
+      },
+    })
+
+    await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(undefined))
+  })
   describe('formatStakingDepositItems', () => {
     it('formats deposit information correctly with minimal txData', () => {
       const minimalTxData = {
@@ -61,7 +75,7 @@ describe('Staking Utils', () => {
           name: null,
           logoUri: null,
         },
-        operation: 0,
+        operation: 0 as Operation,
       }
 
       const items = formatStakingDepositItems(mockDepositTxInfo, minimalTxData)
@@ -92,7 +106,7 @@ describe('Staking Utils', () => {
           name: 'Staking Contract',
           logoUri: null,
         },
-        operation: 0,
+        operation: 0 as Operation,
       }
 
       const items = formatStakingDepositItems(mockDepositTxInfo, mockTxData)
@@ -115,7 +129,7 @@ describe('Staking Utils', () => {
           name: null,
           logoUri: null,
         },
-        operation: 0,
+        operation: 0 as Operation,
       }
 
       const items = formatStakingDepositItems(mockDepositTxInfo, basicTxData)
@@ -163,7 +177,7 @@ describe('Staking Utils', () => {
           name: 'Staking Contract',
           logoUri: null,
         },
-        operation: 0,
+        operation: 0 as Operation,
       }
 
       const items = formatStakingWithdrawRequestItems(mockWithdrawRequestTxInfo, mockTxData)
@@ -178,9 +192,9 @@ describe('Staking Utils', () => {
       expect(networkItem.label).toBe('Network')
       expect(networkItem.render).toBeDefined()
 
-      const exitItem = items[2] as { label: string; value: string }
+      const exitItem = items[2] as { label: string; render?: () => React.ReactNode }
       expect(exitItem.label).toBe('Exit')
-      expect(exitItem.value).toBe('1 Validator')
+      expect(exitItem.render).toBeDefined()
 
       const receiveItem = items[3] as { label: string }
       expect(receiveItem.label).toBe('Receive')
@@ -201,18 +215,25 @@ describe('Staking Utils', () => {
           name: 'Staking Contract',
           logoUri: null,
         },
-        operation: 0,
+        operation: 0 as Operation,
       }
 
       const multiValidatorInfo = {
         ...mockWithdrawRequestTxInfo,
         numValidators: 5,
+        validators: ['0x123...abc', '0x456...def', '0x789...ghi', '0xabc...jkl', '0xdef...mno'],
       }
 
       const items = formatStakingWithdrawRequestItems(multiValidatorInfo, mockTxData)
-      const exitItem = items[2] as { label: string; value: string } // Exit is now at index 2
+      const exitItem = items[2] as { label: string; render?: () => React.ReactNode }
 
-      expect(exitItem.value).toBe('5 Validators')
+      expect(exitItem.label).toBe('Exit')
+      expect(exitItem.render).toBeDefined()
+
+      if (exitItem.render) {
+        const { getByText } = renderWithStore(<>{exitItem.render()}</>, store)
+        expect(getByText('Validator 1')).toBeTruthy()
+      }
     })
 
     it('handles single validator correctly', () => {
@@ -222,18 +243,25 @@ describe('Staking Utils', () => {
           name: 'Staking Contract',
           logoUri: null,
         },
-        operation: 0,
+        operation: 0 as Operation,
       }
 
       const singleValidatorInfo = {
         ...mockWithdrawRequestTxInfo,
         numValidators: 1,
+        validators: ['0x123...abc'],
       }
 
       const items = formatStakingWithdrawRequestItems(singleValidatorInfo, mockTxData)
-      const exitItem = items[2] as { label: string; value: string } // Exit is now at index 2
+      const exitItem = items[2] as { label: string; render?: () => React.ReactNode }
 
-      expect(exitItem.value).toBe('1 Validator')
+      expect(exitItem.label).toBe('Exit')
+      expect(exitItem.render).toBeDefined()
+
+      if (exitItem.render) {
+        const { getByText } = renderWithStore(<>{exitItem.render()}</>, store)
+        expect(getByText('Validator 1')).toBeTruthy()
+      }
     })
 
     it('renders receive token amount', () => {
@@ -243,7 +271,7 @@ describe('Staking Utils', () => {
           name: 'Staking Contract',
           logoUri: null,
         },
-        operation: 0,
+        operation: 0 as Operation,
       }
 
       const items = formatStakingWithdrawRequestItems(mockWithdrawRequestTxInfo, mockTxData)
@@ -254,7 +282,7 @@ describe('Staking Utils', () => {
       expect(receiveItem.render).toBeDefined()
 
       if (receiveItem.render) {
-        const { getByText } = render(<>{receiveItem.render()}</>)
+        const { getByText } = renderWithStore(<>{receiveItem.render()}</>, store)
         expect(getByText(/32.*ETH/)).toBeTruthy()
       }
     })

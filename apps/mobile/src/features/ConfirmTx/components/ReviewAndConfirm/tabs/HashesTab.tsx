@@ -7,6 +7,7 @@ import { calculateSafeTransactionHash } from '@safe-global/protocol-kit/dist/src
 import useSafeInfo from '@/src/hooks/useSafeInfo'
 import extractTxInfo from '@/src/services/tx/extractTx'
 import { getDomainHash, getSafeTxMessageHash } from '@safe-global/utils/utils/safe-hashes'
+import { Container } from '@/src/components/Container'
 
 interface HashesTabProps {
   txDetails: TransactionDetails
@@ -39,33 +40,35 @@ export const HashesTab = ({ txDetails }: HashesTabProps) => {
   }, [safe.version, safe.chainId, safeAddress, txDetails])
 
   return (
-    <Tabs.ScrollView contentContainerStyle={{ padding: 16 }}>
-      <View gap="$3">
-        <View>
-          <Text fontSize="$3" color="$colorSecondary">
-            Domain hash
-          </Text>
-          <Text fontSize="$5" color="$color">
-            {domainHash ?? '—'}
-          </Text>
+    <Tabs.ScrollView contentContainerStyle={{ padding: 16, marginTop: 8 }}>
+      <Container>
+        <View gap="$3">
+          <View>
+            <Text fontSize="$3" color="$colorSecondary">
+              Domain hash
+            </Text>
+            <Text fontSize="$5" color="$color">
+              {domainHash ?? '—'}
+            </Text>
+          </View>
+          <View>
+            <Text fontSize="$3" color="$colorSecondary">
+              Message hash
+            </Text>
+            <Text fontSize="$5" color="$color">
+              {messageHash ?? '—'}
+            </Text>
+          </View>
+          <View>
+            <Text fontSize="$3" color="$colorSecondary">
+              safeTxHash
+            </Text>
+            <Text fontSize="$5" color="$color">
+              {safeTxHash ?? '—'}
+            </Text>
+          </View>
         </View>
-        <View>
-          <Text fontSize="$3" color="$colorSecondary">
-            Message hash
-          </Text>
-          <Text fontSize="$5" color="$color">
-            {messageHash ?? '—'}
-          </Text>
-        </View>
-        <View>
-          <Text fontSize="$3" color="$colorSecondary">
-            safeTxHash
-          </Text>
-          <Text fontSize="$5" color="$color">
-            {safeTxHash ?? '—'}
-          </Text>
-        </View>
-      </View>
+      </Container>
     </Tabs.ScrollView>
   )
 }

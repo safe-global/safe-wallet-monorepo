@@ -3,7 +3,7 @@ import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants
 import type { AllowanceModule } from '@safe-global/utils/types/contracts'
 import { AllowanceModule__factory } from '@safe-global/utils/types/contracts'
 import { getSpendingLimits, getTokenAllowances, getTokensForDelegates } from '../loadables/useLoadSpendingLimits'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { TokenType } from '@safe-global/store/gateway/types'
 import { mockWeb3Provider } from '@/tests/test-utils'
 import { createMockWeb3Provider } from '@safe-global/utils/tests/web3Provider'
 import { faker } from '@faker-js/faker'

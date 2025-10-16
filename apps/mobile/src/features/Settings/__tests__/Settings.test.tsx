@@ -76,7 +76,7 @@ describe('Settings', () => {
         wrapper,
       })
 
-      const versionText = getByText('Safe v1.3.0 (Latest version: 1.4.0)')
+      const versionText = getByText('Safe v1.3.0 (New version is available: 1.4.0)')
       expect(versionText).toBeTruthy()
     })
 

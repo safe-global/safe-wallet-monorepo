@@ -4,6 +4,7 @@ import { TokensContainer } from './Tokens.container'
 import { server } from '@/src/tests/server'
 import { http, HttpResponse } from 'msw'
 import { GATEWAY_URL } from '@/src/config/constants'
+import { TOKEN_LISTS } from '@/src/store/settingsSlice'
 
 // Mock active safe selector with memoized object
 const mockActiveSafe = { chainId: '1', address: '0x123' }
@@ -65,5 +66,33 @@ describe('TokensContainer', () => {
     render(<TokensContainer />)
 
     expect(await screen.findByTestId('fallback')).toBeTruthy()
+  })
+
+  it('renders tokens correctly when tokenList is set to TRUSTED', async () => {
+    render(<TokensContainer />, {
+      initialStore: {
+        settings: {
+          tokenList: TOKEN_LISTS.TRUSTED,
+        },
+      },
+    })
+
+    // Verify it renders the tokens
+    const ethText = await screen.findByText('Ethereum')
+    expect(ethText).toBeTruthy()
+  })
+
+  it('renders tokens correctly when tokenList is set to ALL', async () => {
+    render(<TokensContainer />, {
+      initialStore: {
+        settings: {
+          tokenList: TOKEN_LISTS.ALL,
+        },
+      },
+    })
+
+    // Verify it renders the tokens
+    const ethText = await screen.findByText('Ethereum')
+    expect(ethText).toBeTruthy()
   })
 })

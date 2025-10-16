@@ -7,7 +7,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import css from './styles.module.css'
 import { type ReactElement, useCallback, useMemo } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 const NetworkInput = ({
   name,
@@ -16,7 +16,7 @@ const NetworkInput = ({
 }: {
   name: string
   required?: boolean
-  chainConfigs: (ChainInfo & { available: boolean })[]
+  chainConfigs: (Chain & { available: boolean })[]
 }): ReactElement => {
   const isDarkMode = useDarkMode()
   const theme = useTheme()

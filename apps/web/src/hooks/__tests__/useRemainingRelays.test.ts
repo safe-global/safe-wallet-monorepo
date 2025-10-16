@@ -10,7 +10,6 @@ const SAFE_ADDRESS = '0x0000000000000000000000000000000000000001'
 
 describe('fetch remaining relays hooks', () => {
   const mockChain = chainBuilder()
-    // @ts-expect-error - using local FEATURES enum
     .with({ features: [FEATURES.RELAYING] })
     .build()
 

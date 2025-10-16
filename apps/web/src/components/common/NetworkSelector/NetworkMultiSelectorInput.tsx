@@ -1,22 +1,22 @@
 import { useCallback, type ReactElement } from 'react'
 import { Checkbox, Autocomplete, TextField, Chip, Box, Typography } from '@mui/material'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import ChainIndicator from '../ChainIndicator'
 import css from './styles.module.css'
 import { useFormContext } from 'react-hook-form'
 import useChains from '@/hooks/useChains'
 
 type NetworkMultiSelectorInputProps = {
-  value: ChainInfo[]
+  value: Chain[]
   name: string
-  onNetworkChange?: (networks: ChainInfo[]) => void
-  isOptionDisabled?: (network: ChainInfo) => boolean
+  onNetworkChange?: (networks: Chain[]) => void
+  isOptionDisabled?: (network: Chain) => boolean
   error?: boolean
   helperText?: string
   showSelectAll?: boolean
 }
 
-const SELECT_ALL_OPTION = { chainId: 'select-all', chainName: 'Select All' } as ChainInfo
+const SELECT_ALL_OPTION = { chainId: 'select-all', chainName: 'Select All' } as Chain
 
 const NetworkMultiSelectorInput = ({
   value,
@@ -33,7 +33,7 @@ const NetworkMultiSelectorInput = ({
   const getOptionDisabled = isOptionDisabled || (() => false)
 
   const handleChange = useCallback(
-    (newNetworks: ChainInfo[]) => {
+    (newNetworks: Chain[]) => {
       const filteredData = showSelectAll
         ? newNetworks.filter((item) => item.chainId !== SELECT_ALL_OPTION.chainId)
         : newNetworks
@@ -67,7 +67,7 @@ const NetworkMultiSelectorInput = ({
   const options = showSelectAll ? [SELECT_ALL_OPTION, ...configs] : configs
 
   const renderTags = useCallback(
-    (selectedOptions: (ChainInfo | typeof SELECT_ALL_OPTION)[]) => {
+    (selectedOptions: (Chain | typeof SELECT_ALL_OPTION)[]) => {
       if (showSelectAll && isAllSelected) {
         return (
           <Typography variant="body2">
@@ -96,7 +96,7 @@ const NetworkMultiSelectorInput = ({
   const renderOption = useCallback(
     (
       props: React.HTMLAttributes<HTMLLIElement> & { key: string },
-      chain: ChainInfo | typeof SELECT_ALL_OPTION,
+      chain: Chain | typeof SELECT_ALL_OPTION,
       { selected }: { selected: boolean },
     ) => {
       const { key, ...rest } = props

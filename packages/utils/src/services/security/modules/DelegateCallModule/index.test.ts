@@ -5,12 +5,12 @@ import { toBeHex } from 'ethers'
 import { DelegateCallModule } from './index'
 import { createMockSafeTransaction, getMockMultiSendCalldata } from '@safe-global/utils/tests/transactions'
 import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
-import { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 describe('DelegateCallModule', () => {
   const DelegateCallModuleInstance = new DelegateCallModule()
 
-  const chainInfo = chainBuilder().with({ chainId: '1', chainLogoUri: null }).build() as unknown as ChainInfo
+  const chainInfo = chainBuilder().with({ chainId: '1', chainLogoUri: null }).build() as unknown as Chain
 
   it('should not warn about Call operation transactions', async () => {
     const recipient = toBeHex('0x1', 20)

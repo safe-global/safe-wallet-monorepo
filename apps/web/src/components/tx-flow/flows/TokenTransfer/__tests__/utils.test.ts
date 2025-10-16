@@ -1,5 +1,6 @@
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
-import { type SafeBalanceResponse, type TokenInfo, TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeBalanceResponse, type TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { TokenType } from '@safe-global/store/gateway/types'
 import { useTokenAmount, useVisibleTokens } from '@/components/tx-flow/flows/TokenTransfer/utils'
 import { renderHook } from '@/tests/test-utils'
 import * as spendingLimit from '@/hooks/useSpendingLimit'

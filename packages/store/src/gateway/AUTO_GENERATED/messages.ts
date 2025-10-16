@@ -45,27 +45,39 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type MessagesGetMessageByHashV1ApiResponse = /** status 200  */ Message
+export type MessagesGetMessageByHashV1ApiResponse = /** status 200 Message retrieved successfully */ Message
 export type MessagesGetMessageByHashV1ApiArg = {
+  /** Chain ID where the message was created */
   chainId: string
+  /** Message hash (0x prefixed hex string) */
   messageHash: string
 }
-export type MessagesGetMessagesBySafeV1ApiResponse = /** status 200  */ MessagePage
+export type MessagesGetMessagesBySafeV1ApiResponse =
+  /** status 200 Paginated list of messages for the Safe */ MessagePage
 export type MessagesGetMessagesBySafeV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
   chainId: string
+  /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
+  /** Pagination cursor for retrieving the next set of results */
   cursor?: string
 }
 export type MessagesCreateMessageV1ApiResponse = unknown
 export type MessagesCreateMessageV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
   chainId: string
+  /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
+  /** Message data including content and signature */
   createMessageDto: CreateMessageDto
 }
 export type MessagesUpdateMessageSignatureV1ApiResponse = unknown
 export type MessagesUpdateMessageSignatureV1ApiArg = {
+  /** Chain ID where the message was created */
   chainId: string
+  /** Message hash (0x prefixed hex string) */
   messageHash: string
+  /** Signature data to add to the message */
   updateMessageSignatureDto: UpdateMessageSignatureDto
 }
 export type TypedDataDomain = {

@@ -3,7 +3,7 @@ import useIsStakingPromoEnabled from '@/features/stake/hooks/useIsStakingBannerE
 import { useSanctionedAddress } from '@/hooks/useSanctionedAddress'
 import { useMemo } from 'react'
 import { formatUnits } from 'ethers'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { TokenType } from '@safe-global/store/gateway/types'
 
 const MIN_NATIVE_TOKEN_BALANCE = 32
 

@@ -1,5 +1,5 @@
 import { AppRoutes } from '@/config/routes'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type NextRouter } from 'next/router'
 import { useCallback } from 'react'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
@@ -15,7 +15,7 @@ export const useGetHref = (router: NextRouter) => {
   const isSingleTxPage = router.pathname === AppRoutes.transactions.tx
 
   return useCallback(
-    (chain: ChainInfo, address: string) => {
+    (chain: Chain, address: string) => {
       return {
         pathname:
           isWelcomePage || isSpacePage

@@ -1,5 +1,6 @@
 import { toBeHex } from 'ethers'
 import * as sdk from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import { _parseServiceWorkerWebhookPushNotification } from '../notifications'
 import { WebhookType } from '../webhook-types'
@@ -25,7 +26,7 @@ Object.defineProperty(self, 'location', {
 })
 
 describe('parseWebhookPushNotification', () => {
-  let getChainsConfigSpy: jest.SpyInstance<Promise<sdk.ChainListResponse>>
+  let getChainsConfigSpy: jest.SpyInstance<Promise<any>>
   let getBalancesMockSpy: jest.SpyInstance<Promise<sdk.SafeBalanceResponse>>
 
   beforeEach(() => {
@@ -45,7 +46,7 @@ describe('parseWebhookPushNotification', () => {
     describe('successful transactions', () => {
       it('with chain info', async () => {
         getChainsConfigSpy.mockResolvedValue({
-          results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as sdk.ChainInfo],
+          results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
         })
 
         const notification = await _parseServiceWorkerWebhookPushNotification({
@@ -79,7 +80,7 @@ describe('parseWebhookPushNotification', () => {
     describe('failed transactions', () => {
       it('with chain info', async () => {
         getChainsConfigSpy.mockResolvedValue({
-          results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as sdk.ChainInfo],
+          results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
         })
 
         const notification = await _parseServiceWorkerWebhookPushNotification({
@@ -128,7 +129,7 @@ describe('parseWebhookPushNotification', () => {
             chainId: payload.chainId,
             shortName: 'matic',
             nativeCurrency: { name: 'Matic', symbol: 'MATIC', decimals: 18 },
-          } as sdk.ChainInfo,
+          } as Chain,
         ],
       })
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
@@ -169,7 +170,7 @@ describe('parseWebhookPushNotification', () => {
 
     it('with chain and token info', async () => {
       getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as sdk.ChainInfo],
+        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
       })
       getBalancesMockSpy.mockResolvedValue({
         items: [
@@ -193,7 +194,7 @@ describe('parseWebhookPushNotification', () => {
       })
 
       getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as sdk.ChainInfo],
+        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
       })
       getBalancesMockSpy.mockResolvedValue({
         items: [
@@ -265,7 +266,7 @@ describe('parseWebhookPushNotification', () => {
 
     it('without token info', async () => {
       getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as sdk.ChainInfo],
+        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
       })
       getBalancesMockSpy.mockImplementation(() => Promise.reject()) // tokens
 
@@ -278,7 +279,7 @@ describe('parseWebhookPushNotification', () => {
       })
 
       getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as sdk.ChainInfo],
+        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
       })
       getBalancesMockSpy.mockImplementation(() => Promise.reject()) // tokens
 
@@ -327,7 +328,7 @@ describe('parseWebhookPushNotification', () => {
 
     it('with chain info', async () => {
       getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: '1', shortName: 'eth' } as sdk.ChainInfo],
+        results: [{ chainName: 'Mainnet', chainId: '1', shortName: 'eth' } as Chain],
       })
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
@@ -362,7 +363,7 @@ describe('parseWebhookPushNotification', () => {
 
     it('with chain info', async () => {
       getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: '1', shortName: 'eth' } as sdk.ChainInfo],
+        results: [{ chainName: 'Mainnet', chainId: '1', shortName: 'eth' } as Chain],
       })
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
@@ -398,7 +399,7 @@ describe('parseWebhookPushNotification', () => {
     }
     it('with chain info', async () => {
       getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: '1', shortName: 'eth' } as sdk.ChainInfo],
+        results: [{ chainName: 'Mainnet', chainId: '1', shortName: 'eth' } as Chain],
       })
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
@@ -427,7 +428,7 @@ describe('parseWebhookPushNotification', () => {
 
     it('with chain info', async () => {
       getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as sdk.ChainInfo],
+        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
       })
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
@@ -455,7 +456,7 @@ describe('parseWebhookPushNotification', () => {
 
     it('with chain info', async () => {
       getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as sdk.ChainInfo],
+        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
       })
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
@@ -490,7 +491,7 @@ describe('parseWebhookPushNotification', () => {
             chainId: payload.chainId,
             shortName: 'matic',
             nativeCurrency: { name: 'Matic', symbol: 'MATIC', decimals: 18 },
-          } as sdk.ChainInfo,
+          } as Chain,
         ],
       })
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
@@ -524,7 +525,7 @@ describe('parseWebhookPushNotification', () => {
 
     it('with chain and token info', async () => {
       getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as sdk.ChainInfo],
+        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
       })
       getBalancesMockSpy.mockResolvedValue({
         items: [
@@ -544,7 +545,7 @@ describe('parseWebhookPushNotification', () => {
       expect(notification).toEqual(undefined)
 
       getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as sdk.ChainInfo],
+        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
       })
       getBalancesMockSpy.mockResolvedValue({
         items: [
@@ -566,7 +567,7 @@ describe('parseWebhookPushNotification', () => {
 
     it('with chain and empty token info', async () => {
       getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as sdk.ChainInfo],
+        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
       })
       getBalancesMockSpy.mockResolvedValue({
         items: [] as sdk.SafeBalanceResponse['items'], // Transaction sent all of the tokens
@@ -577,7 +578,7 @@ describe('parseWebhookPushNotification', () => {
       expect(notification).toEqual(undefined)
 
       getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as sdk.ChainInfo],
+        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
       })
       getBalancesMockSpy.mockResolvedValue({
         items: [
@@ -637,7 +638,7 @@ describe('parseWebhookPushNotification', () => {
 
     it('without token info', async () => {
       getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as sdk.ChainInfo],
+        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
       })
       getBalancesMockSpy.mockImplementation(() => Promise.reject()) // tokens
 
@@ -646,7 +647,7 @@ describe('parseWebhookPushNotification', () => {
       expect(notification).toEqual(undefined)
 
       getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as sdk.ChainInfo],
+        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
       })
       getBalancesMockSpy.mockImplementation(() => Promise.reject()) // tokens
 

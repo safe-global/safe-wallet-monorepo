@@ -13,7 +13,7 @@ import { OVERVIEW_EVENTS } from '@/services/analytics'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setQrShortName } from '@/store/settingsSlice'
 import { selectOutgoingTransactions } from '@/store/txHistorySlice'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import classnames from 'classnames'
 import { type ReactNode, useState } from 'react'
 import { Card, WidgetBody, WidgetContainer } from '@/components/dashboard/styled'
@@ -301,7 +301,7 @@ const FirstTransactionWidget = ({ completed }: { completed: boolean }) => {
   )
 }
 
-const ActivateSafeWidget = ({ chain }: { chain: ChainInfo | undefined }) => {
+const ActivateSafeWidget = ({ chain }: { chain: Chain | undefined }) => {
   const [open, setOpen] = useState<boolean>(false)
 
   const title = `Activate account ${chain ? 'on ' + chain.chainName : ''}`

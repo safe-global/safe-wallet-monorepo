@@ -6,7 +6,7 @@ import { getEmptySafeApp } from '@/components/safe-apps/utils'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import type { SafeAppDataWithPermissions } from '@/components/safe-apps/types'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 export const BRIDGE_WIDGET_URL = 'https://iframe.jumper.exchange/bridge'
@@ -36,7 +36,7 @@ export function BridgeWidget(): ReactElement | null {
   )
 }
 
-export function _getAppData(isDarkMode: boolean, chain: ChainInfo): SafeAppDataWithPermissions {
+export function _getAppData(isDarkMode: boolean, chain: Chain): SafeAppDataWithPermissions {
   const theme = isDarkMode ? 'dark' : 'light'
   const appUrl = new URL(BRIDGE_WIDGET_URL)
   appUrl.searchParams.set('fromChain', chain.chainId)

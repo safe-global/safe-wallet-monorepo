@@ -14,9 +14,11 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type ContractsGetContractV1ApiResponse = /** status 200  */ Contract
+export type ContractsGetContractV1ApiResponse = /** status 200 Contract information retrieved successfully */ Contract
 export type ContractsGetContractV1ApiArg = {
+  /** Chain ID where the contract is deployed */
   chainId: string
+  /** Contract address (0x prefixed hex string) */
   contractAddress: string
 }
 export type Contract = {

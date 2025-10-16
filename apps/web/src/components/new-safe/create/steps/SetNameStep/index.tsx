@@ -16,7 +16,7 @@ import NoWalletConnectedWarning from '../../NoWalletConnectedWarning'
 import { type SafeVersion } from '@safe-global/types-kit'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useEffect } from 'react'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useSafeSetupHints } from '../OwnerPolicyStep/useSafeSetupHints'
 import type { CreateSafeInfoItem } from '../../CreateSafeInfos'
 import SafeCreationNetworkInput from '@/features/multichain/components/SafeCreationNetworkInput'
@@ -27,7 +27,7 @@ import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 type SetNameStepForm = {
   name: string
-  networks: ChainInfo[]
+  networks: Chain[]
   safeVersion: SafeVersion
 }
 
@@ -48,7 +48,7 @@ function SetNameStep({
   isAdvancedFlow = false,
 }: StepRenderProps<NewSafeFormData> & {
   setSafeName: (name: string) => void
-  setOverviewNetworks: (networks: ChainInfo[]) => void
+  setOverviewNetworks: (networks: Chain[]) => void
   setDynamicHint: (hints: CreateSafeInfoItem | undefined) => void
   isAdvancedFlow?: boolean
 }) {
@@ -73,7 +73,7 @@ function SetNameStep({
     formState: { errors, isValid },
   } = formMethods
 
-  const networks: ChainInfo[] = useWatch({ control, name: SetNameStepFields.networks })
+  const networks: Chain[] = useWatch({ control, name: SetNameStepFields.networks })
   const isMultiChain = networks.length > 1
   const fallbackName = useMnemonicSafeName(isMultiChain)
   useSafeSetupHints(setDynamicHint, undefined, undefined, isMultiChain)

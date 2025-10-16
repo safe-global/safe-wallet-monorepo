@@ -1,5 +1,5 @@
 import { isSmartContract } from '@/utils/wallets'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { createWeb3ReadOnly, getRpcServiceUrl } from '@/hooks/wallets/web3'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
@@ -10,7 +10,7 @@ export const getAvailableSaltNonce = async (
     [chainId: string]: string
   },
   replayedSafe: ReplayedSafeProps,
-  chainInfos: ChainInfo[],
+  chainInfos: Chain[],
   // All addresses from the sidebar disregarding the chain. This is an optimization to reduce RPC calls
   knownSafeAddresses: string[],
 ): Promise<string> => {

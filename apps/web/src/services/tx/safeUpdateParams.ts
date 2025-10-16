@@ -1,7 +1,8 @@
 import type { SafeContractImplementationType } from '@safe-global/protocol-kit/dist/src/types/contracts'
 import type { MetaTransactionData, SafeVersion } from '@safe-global/types-kit'
 import { OperationType } from '@safe-global/types-kit'
-import type { ChainInfo, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import semverSatisfies from 'semver/functions/satisfies'
 import { getReadOnlyFallbackHandlerContract, getReadOnlyGnosisSafeContract } from '@/services/contracts/safeContracts'
@@ -20,7 +21,7 @@ import { SAFE_TO_L2_MIGRATION_VERSION } from '@safe-global/utils/config/constant
 
 const getChangeFallbackHandlerCallData = async (
   safeContractInstance: SafeContractImplementationType,
-  chain: ChainInfo,
+  chain: Chain,
 ): Promise<string> => {
   if (!hasSafeFeature(SAFE_FEATURES.SAFE_FALLBACK_HANDLER, getLatestSafeVersion(chain))) {
     return '0x'
@@ -38,7 +39,7 @@ const getChangeFallbackHandlerCallData = async (
  * - change the mastercopy address
  * - set the fallback handler address
  */
-export const createUpdateSafeTxs = async (safe: SafeState, chain: ChainInfo): Promise<MetaTransactionData[]> => {
+export const createUpdateSafeTxs = async (safe: SafeState, chain: Chain): Promise<MetaTransactionData[]> => {
   assertValidSafeVersion(safe.version)
 
   // 1.3.0 Safes are updated using a delegate call to a migration contract

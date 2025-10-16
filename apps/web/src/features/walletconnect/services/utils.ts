@@ -1,4 +1,4 @@
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ProposalTypes, SessionTypes } from '@walletconnect/types'
 import { EIP155, BlockedBridges, WarnedBridges, WarnedBridgeNames } from '@/features/walletconnect/constants'
 
@@ -25,7 +25,7 @@ export const getSupportedEip155ChainIds = (
 }
 
 export const getSupportedChainIds = (
-  configs: Array<ChainInfo>,
+  configs: Array<Chain>,
   { requiredNamespaces, optionalNamespaces }: ProposalTypes.Struct,
 ): Array<string> => {
   const supportedEip155ChainIds = getSupportedEip155ChainIds(requiredNamespaces, optionalNamespaces)

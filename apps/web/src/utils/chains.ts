@@ -1,5 +1,5 @@
 import { AppRoutes } from '@/config/routes'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
@@ -14,16 +14,13 @@ export const FeatureRoutes = {
   [AppRoutes.balances.positions]: FEATURES.POSITIONS,
 }
 
-export const getBlockExplorerLink = (
-  chain: ChainInfo,
-  address: string,
-): { href: string; title: string } | undefined => {
+export const getBlockExplorerLink = (chain: Chain, address: string): { href: string; title: string } | undefined => {
   if (chain.blockExplorerUriTemplate) {
     return getExplorerLink(address, chain.blockExplorerUriTemplate)
   }
 }
 
-export const isRouteEnabled = (route: string, chain?: ChainInfo) => {
+export const isRouteEnabled = (route: string, chain?: Chain) => {
   if (!chain) return false
   const featureRoute = FeatureRoutes[route]
   return !featureRoute || hasFeature(chain, featureRoute)

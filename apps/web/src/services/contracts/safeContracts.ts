@@ -10,7 +10,7 @@ import {
 } from '@safe-global/protocol-kit/dist/src/contracts/contractInstances'
 import type SafeBaseContract from '@safe-global/protocol-kit/dist/src/contracts/Safe/SafeBaseContract'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import semver from 'semver'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
@@ -47,7 +47,7 @@ export const getCurrentGnosisSafeContract = async (safe: SafeState, provider: st
 }
 
 export const getReadOnlyGnosisSafeContract = async (
-  chain: ChainInfo,
+  chain: Chain,
   safeVersion: SafeState['version'],
   isL1?: boolean,
 ) => {

@@ -2,7 +2,8 @@ import type { SafeVersion, TransactionOptions } from '@safe-global/types-kit'
 import { type TransactionResponse, type Eip1193Provider, type Provider } from 'ethers'
 import semverSatisfies from 'semver/functions/satisfies'
 
-import { getSafeInfo, type SafeInfo, type ChainInfo, relayTransaction } from '@safe-global/safe-gateway-typescript-sdk'
+import { getSafeInfo, type SafeInfo, relayTransaction } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getReadOnlyProxyFactoryContract } from '@/services/contracts/safeContracts'
 import type { UrlObject } from 'url'
 import { AppRoutes } from '@/config/routes'
@@ -49,7 +50,7 @@ export type SafeCreationProps = {
 export const createNewSafe = async (
   provider: Eip1193Provider,
   undeployedSafeProps: UndeployedSafeProps,
-  chain: ChainInfo,
+  chain: Chain,
   options: TransactionOptions,
   callback: (txHash: string) => void,
   isL1SafeSingleton?: boolean,
@@ -82,7 +83,7 @@ export const createNewSafe = async (
 export const computeNewSafeAddress = async (
   provider: Eip1193Provider | string,
   props: PredictedSafeProps,
-  chain: ChainInfo,
+  chain: Chain,
 ): Promise<string> => {
   const safeProvider = new SafeProvider({ provider })
 
@@ -111,7 +112,7 @@ export const encodeSafeSetupCall = (safeAccountConfig: ReplayedSafeProps['safeAc
  * Encode a Safe creation transaction NOT using the Core SDK because it doesn't support that
  * This is used for gas estimation.
  */
-export const encodeSafeCreationTx = (undeployedSafe: UndeployedSafeProps, chain: ChainInfo) => {
+export const encodeSafeCreationTx = (undeployedSafe: UndeployedSafeProps, chain: Chain) => {
   const replayedSafeProps = assertNewUndeployedSafeProps(undeployedSafe, chain)
 
   return Safe_proxy_factory__factory.createInterface().encodeFunctionData('createProxyWithNonce', [
@@ -122,7 +123,7 @@ export const encodeSafeCreationTx = (undeployedSafe: UndeployedSafeProps, chain:
 }
 
 export const estimateSafeCreationGas = async (
-  chain: ChainInfo,
+  chain: Chain,
   provider: Provider,
   from: string,
   undeployedSafe: UndeployedSafeProps,
@@ -182,7 +183,7 @@ export const getRedirect = (
   return redirectUrl + `${appendChar}safe=${address}`
 }
 
-export const relaySafeCreation = async (chain: ChainInfo, undeployedSafeProps: UndeployedSafeProps) => {
+export const relaySafeCreation = async (chain: Chain, undeployedSafeProps: UndeployedSafeProps) => {
   const replayedSafeProps = assertNewUndeployedSafeProps(undeployedSafeProps, chain)
   const encodedSafeCreationTx = encodeSafeCreationTx(replayedSafeProps, chain)
 
@@ -209,7 +210,7 @@ export const createNewUndeployedSafeWithoutSalt = (
   safeAccountConfig: Pick<ReplayedSafeProps['safeAccountConfig'], 'owners' | 'threshold'> & {
     paymentReceiver?: string
   },
-  chain: ChainInfo,
+  chain: Chain,
 ): UndeployedSafeWithoutSalt => {
   // Create universal deployment Data across chains:
   const fallbackHandlerDeployments = getCompatibilityFallbackHandlerDeployments({
@@ -263,7 +264,7 @@ export const createNewUndeployedSafeWithoutSalt = (
  * @param chain
  * @returns
  */
-export const migrateLegacySafeProps = (predictedSafeProps: PredictedSafeProps, chain: ChainInfo): ReplayedSafeProps => {
+export const migrateLegacySafeProps = (predictedSafeProps: PredictedSafeProps, chain: Chain): ReplayedSafeProps => {
   const safeVersion = predictedSafeProps.safeDeploymentConfig?.safeVersion
   const saltNonce = predictedSafeProps.safeDeploymentConfig?.saltNonce
   const { chainId } = chain
@@ -303,7 +304,7 @@ export const migrateLegacySafeProps = (predictedSafeProps: PredictedSafeProps, c
   }
 }
 
-export const assertNewUndeployedSafeProps = (props: UndeployedSafeProps, chain: ChainInfo): ReplayedSafeProps => {
+export const assertNewUndeployedSafeProps = (props: UndeployedSafeProps, chain: Chain): ReplayedSafeProps => {
   if (isPredictedSafeProps(props)) {
     return migrateLegacySafeProps(props, chain)
   }

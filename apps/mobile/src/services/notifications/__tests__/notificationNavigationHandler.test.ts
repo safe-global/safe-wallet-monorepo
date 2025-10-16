@@ -2,7 +2,7 @@
  * Unit tests for NotificationNavigationHandler
  * This test file is isolated and mocks all dependencies to avoid complex setup issues
  */
-import { NotificationType } from '@safe-global/store/gateway/AUTO_GENERATED/notifications'
+import { NotificationTypeEnum } from '@safe-global/store/gateway/AUTO_GENERATED/notifications'
 import { Address } from '@/src/types/address'
 
 // Define types for test data
@@ -15,7 +15,7 @@ interface MockActiveSafeAction {
 }
 
 interface TestNotificationData {
-  type: NotificationType | string
+  type: NotificationTypeEnum | string
   chainId: string
   address: string
   safeTxHash?: string
@@ -133,7 +133,7 @@ describe('NotificationNavigationHandler', () => {
 
     it('should handle missing required fields gracefully', async () => {
       const incompleteData = {
-        type: 'INCOMING_ETHER' as NotificationType,
+        type: 'INCOMING_ETHER' as NotificationTypeEnum,
         // Missing chainId and address
       }
 
@@ -196,7 +196,7 @@ describe('NotificationNavigationHandler', () => {
       NotificationNavigationHandler.navigateToTransactionHistory = navigateToTransactionHistoryMock
 
       const notificationData: TestNotificationData = {
-        type: 'INCOMING_ETHER' as NotificationType,
+        type: 'INCOMING_ETHER' as NotificationTypeEnum,
         chainId: mockChainId,
         address: mockAddress,
       }
@@ -216,7 +216,7 @@ describe('NotificationNavigationHandler', () => {
       NotificationNavigationHandler.navigateToConfirmTransaction = navigateToConfirmTransactionMock
 
       const notificationData: TestNotificationData = {
-        type: 'CONFIRMATION_REQUEST' as NotificationType,
+        type: 'CONFIRMATION_REQUEST' as NotificationTypeEnum,
         chainId: mockChainId,
         address: mockAddress,
         safeTxHash: mockSafeTxHash,
@@ -257,7 +257,7 @@ describe('NotificationNavigationHandler', () => {
       NotificationNavigationHandler.safeNavigate = safeNavigateMock
 
       const notificationData: TestNotificationData = {
-        type: 'INCOMING_ETHER' as NotificationType,
+        type: 'INCOMING_ETHER' as NotificationTypeEnum,
         chainId: mockChainId,
         address: mockAddress,
       }

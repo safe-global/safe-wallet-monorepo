@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
-const useIntervalCounter = (interval: number): [number, () => void] => {
+export const useIntervalCounter = (interval: number): [number, () => void] => {
   const [counter, setCounter] = useState<number>(0)
 
   const resetCounter = useCallback(() => {
@@ -25,5 +25,3 @@ const useIntervalCounter = (interval: number): [number, () => void] => {
 
   return [counter, resetCounter]
 }
-
-export default useIntervalCounter

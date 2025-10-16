@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import * as DocumentPicker from 'expo-document-picker'
-import * as FileSystem from 'expo-file-system'
+import { File } from 'expo-file-system'
 import Logger from '@/src/utils/logger'
 import {
   decodeLegacyData,
@@ -64,7 +64,8 @@ export function useLegacyImport() {
       setIsLoading(true)
       setError(undefined)
 
-      const content = await FileSystem.readAsStringAsync(fileUri)
+      const file = new File(fileUri)
+      const content = await file.text()
       const secured: SecuredDataFile = JSON.parse(content)
       Logger.trace('Legacy secured data loaded')
 

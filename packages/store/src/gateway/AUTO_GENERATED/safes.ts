@@ -31,22 +31,32 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type SafesGetSafeV1ApiResponse = /** status 200  */ SafeState
+export type SafesGetSafeV1ApiResponse = /** status 200 Safe information retrieved successfully */ SafeState
 export type SafesGetSafeV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
   chainId: string
+  /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
 }
-export type SafesGetNoncesV1ApiResponse = /** status 200  */ SafeNonces
+export type SafesGetNoncesV1ApiResponse = /** status 200 Safe nonces retrieved successfully */ SafeNonces
 export type SafesGetNoncesV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
   chainId: string
+  /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
 }
-export type SafesGetSafeOverviewV1ApiResponse = /** status 200  */ SafeOverview[]
+export type SafesGetSafeOverviewV1ApiResponse =
+  /** status 200 Array of Safe overviews with balances and metadata */ SafeOverview[]
 export type SafesGetSafeOverviewV1ApiArg = {
+  /** Fiat currency code for balance conversion (e.g., USD, EUR) */
   currency: string
+  /** Comma-separated list of Safe addresses in CAIP-10 format (chainId:address) */
   safes: string
+  /** If true, only includes trusted tokens in balance calculations */
   trusted?: boolean
+  /** If true, excludes spam tokens from balance calculations */
   excludeSpam?: boolean
+  /** Optional wallet address to filter Safes where this address is an owner */
   walletAddress?: string
 }
 export type AddressInfo = {

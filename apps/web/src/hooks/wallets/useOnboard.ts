@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { type WalletState, type OnboardAPI } from '@web3-onboard/core'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { Eip1193Provider } from 'ethers'
 import { getAddress } from 'ethers'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
@@ -29,8 +29,8 @@ export type ConnectedWallet = {
 const { getStore, setStore, useStore } = new ExternalStore<OnboardAPI>()
 
 export const initOnboard = async (
-  chainConfigs: ChainInfo[],
-  currentChain: ChainInfo,
+  chainConfigs: Chain[],
+  currentChain: Chain,
   rpcConfig: EnvState['rpc'] | undefined,
 ) => {
   const { createOnboard } = await import('@/services/onboard')
@@ -89,7 +89,7 @@ export const getWalletConnectLabel = (wallet: ConnectedWallet): string | undefin
   return peerWalletV2 || UNKNOWN_PEER
 }
 
-export const trackWalletType = (wallet: ConnectedWallet, configs: ChainInfo[]) => {
+export const trackWalletType = (wallet: ConnectedWallet, configs: Chain[]) => {
   const chainInfo = configs.find((config) => config.chainId === wallet.chainId)
   const networkName = chainInfo?.chainName || `Chain ${wallet.chainId}`
 

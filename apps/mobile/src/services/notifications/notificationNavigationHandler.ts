@@ -2,7 +2,7 @@ import { router } from 'expo-router'
 import { getStore } from '@/src/store/utils/singletonStore'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectAllSafes } from '@/src/store/safesSlice'
-import { NotificationType } from '@safe-global/store/gateway/AUTO_GENERATED/notifications'
+import { NotificationTypeEnum } from '@safe-global/store/gateway/AUTO_GENERATED/notifications'
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
 import { Address } from '@/src/types/address'
 import Logger from '@/src/utils/logger'
@@ -28,7 +28,7 @@ const waitForRouter = async (maxAttempts = 50, delayMs = 100): Promise<boolean> 
 }
 
 export interface NotificationNavigationData {
-  type: NotificationType
+  type: NotificationTypeEnum
   chainId: string
   address: string
   safeTxHash?: string

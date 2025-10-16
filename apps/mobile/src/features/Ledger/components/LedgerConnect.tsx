@@ -1,12 +1,14 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { View } from 'tamagui'
-import { router, useFocusEffect, useLocalSearchParams } from 'expo-router'
+import { useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import type { DiscoveredDevice } from '@ledgerhq/device-management-kit'
 import { useLedgerDeviceScanning } from '@/src/features/Ledger/hooks/useLedgerDeviceScanning'
 import { useBluetoothStatus } from '@/src/features/Ledger/hooks/useBluetoothStatus'
 import { ScanningProgress } from '@/src/features/Ledger/components/ScanningProgress'
 import { DeviceList } from '@/src/features/Ledger/components/DeviceList'
 import { BluetoothError } from '@/src/features/Ledger/components/BluetoothError'
+import { HeaderLeft } from '@/src/navigation/hooks/utils'
+import { NativeStackHeaderLeftProps } from '@react-navigation/native-stack'
 
 interface LedgerDevice {
   id: string
@@ -26,7 +28,8 @@ interface LedgerConnectProps {
 export const LedgerConnect: React.FC<LedgerConnectProps> = ({ navigationConfig }) => {
   const [isRefreshing, setIsRefreshing] = useState(false)
   const searchParams = useLocalSearchParams()
-
+  const router = useRouter()
+  const navigation = useNavigation()
   // Bluetooth permission management
   const {
     error: bluetoothError,
@@ -37,6 +40,24 @@ export const LedgerConnect: React.FC<LedgerConnectProps> = ({ navigationConfig }
 
   // Device scanning
   const { isScanning, discoveredDevices, startScanning, stopScanning } = useLedgerDeviceScanning()
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerLeft: (props: NativeStackHeaderLeftProps) => {
+        return (
+          <HeaderLeft
+            props={props}
+            goBack={() => {
+              console.log('goBack', stopScanning)
+              stopScanning()
+              router.back()
+            }}
+            icon="close"
+          />
+        )
+      },
+    })
+  }, [stopScanning])
 
   const hasScanStarted = useRef(false)
   const [permissionResult, setPermissionResult] = useState<{

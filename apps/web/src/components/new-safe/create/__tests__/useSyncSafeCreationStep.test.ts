@@ -7,7 +7,7 @@ import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import * as useIsWrongChain from '@/hooks/useIsWrongChain'
 import * as useRouter from 'next/router'
 import { type NextRouter } from 'next/router'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 describe('useSyncSafeCreationStep', () => {
   beforeEach(() => {
@@ -30,11 +30,11 @@ describe('useSyncSafeCreationStep', () => {
   it('should go to the first step if the wrong chain is connected', async () => {
     jest.spyOn(localStorage, 'default').mockReturnValue([{}, jest.fn()])
     jest.spyOn(wallet, 'default').mockReturnValue({ address: '0x1' } as ConnectedWallet)
-    jest.spyOn(currentChain, 'useCurrentChain').mockReturnValue({ chainId: '100' } as ChainInfo)
+    jest.spyOn(currentChain, 'useCurrentChain').mockReturnValue({ chainId: '100' } as Chain)
 
     const mockSetStep = jest.fn()
 
-    renderHook(() => useSyncSafeCreationStep(mockSetStep, [{ chainId: '4' } as ChainInfo]))
+    renderHook(() => useSyncSafeCreationStep(mockSetStep, [{ chainId: '4' } as Chain]))
 
     expect(mockSetStep).toHaveBeenCalledWith(0)
   })

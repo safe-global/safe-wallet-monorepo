@@ -1,4 +1,5 @@
-import type { ChainInfo, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { _UpdateSafe as UpdateSafe } from './index'
 import { render } from '@/tests/test-utils'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
@@ -9,7 +10,7 @@ import { faker } from '@faker-js/faker'
 
 const chain = {
   recommendedMasterCopyVersion: '1.4.1',
-} as ChainInfo
+} as Chain
 
 const Safe_111_interface = Gnosis_safe__factory.createInterface()
 

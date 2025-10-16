@@ -10,7 +10,8 @@ import css from './styles.module.css'
 import BalanceInfo from '@/components/tx/BalanceInfo'
 import madProps from '@/utils/mad-props'
 import { useCurrentChain } from '@/hooks/useChains'
-import type { ChainInfo, RelayCountResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import type { RelayCountResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 
 export const enum ExecutionMethod {
@@ -28,7 +29,7 @@ const _ExecutionMethodSelector = ({
   tooltip,
 }: {
   wallet: ConnectedWallet | null
-  chain?: ChainInfo
+  chain?: Chain
   executionMethod: ExecutionMethod
   setExecutionMethod: Dispatch<SetStateAction<ExecutionMethod>>
   relays?: RelayCountResponse

@@ -1,4 +1,4 @@
-import { ImportSuccess } from '@/src/features/ImportPrivateKey/components/ImportSuccess'
+import { ImportSuccess } from '@/src/features/ImportSigner/components/ImportSuccess'
 import React from 'react'
 import { getTokenValue, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'

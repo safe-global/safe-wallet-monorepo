@@ -49,14 +49,14 @@ const themeBuilder = (): IBuilder<Theme> => {
 
 const gasPriceFixedBuilder = (): IBuilder<GasPriceFixed> => {
   return Builder.new<GasPriceFixed>().with({
-    type: 'FIXED',
+    type: 'fixed',
     weiValue: faker.string.numeric(),
   })
 }
 
 const gasPriceFixedEIP1559Builder = (): IBuilder<GasPriceFixedEip1559> => {
   return Builder.new<GasPriceFixedEip1559>().with({
-    type: 'FIXED_1559',
+    type: 'fixed1559',
     maxFeePerGas: faker.string.numeric(),
     maxPriorityFeePerGas: faker.string.numeric(),
   })
@@ -64,7 +64,7 @@ const gasPriceFixedEIP1559Builder = (): IBuilder<GasPriceFixedEip1559> => {
 
 const gasPriceOracleBuilder = (): IBuilder<GasPriceOracle> => {
   return Builder.new<GasPriceOracle>().with({
-    type: 'ORACLE',
+    type: 'oracle',
     uri: faker.internet.url({ appendSlash: false }),
     gasParameter: faker.word.sample(),
     gweiFactor: faker.string.numeric(),

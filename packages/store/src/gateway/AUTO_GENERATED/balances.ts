@@ -27,15 +27,22 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type BalancesGetBalancesV1ApiResponse = /** status 200  */ Balances
+export type BalancesGetBalancesV1ApiResponse =
+  /** status 200 Safe balances retrieved successfully with fiat conversions */ Balances
 export type BalancesGetBalancesV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
   chainId: string
+  /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
+  /** Fiat currency code for balance conversion (e.g., USD, EUR) */
   fiatCode: string
+  /** If true, only returns balances for trusted tokens */
   trusted?: boolean
+  /** If true, excludes spam tokens from results */
   excludeSpam?: boolean
 }
-export type BalancesGetSupportedFiatCodesV1ApiResponse = /** status 200  */ string[]
+export type BalancesGetSupportedFiatCodesV1ApiResponse =
+  /** status 200 List of supported fiat currency codes (e.g., ["USD", "EUR", "GBP"]) */ string[]
 export type BalancesGetSupportedFiatCodesV1ApiArg = void
 export type NativeToken = {
   address: string

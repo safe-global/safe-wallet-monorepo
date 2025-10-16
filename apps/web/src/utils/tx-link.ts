@@ -1,10 +1,10 @@
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { LinkProps } from 'next/link'
 import { AppRoutes } from '@/config/routes'
 
 export const getTxLink = (
   txId: string,
-  chain: ChainInfo,
+  chain: Chain,
   safeAddress: string,
 ): { href: LinkProps['href']; title: string } => {
   return {

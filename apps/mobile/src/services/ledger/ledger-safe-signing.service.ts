@@ -1,8 +1,6 @@
 import type { Chain as ChainInfo } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeTransaction, SafeVersion } from '@safe-global/types-kit'
 import type { TypedData } from '@ledgerhq/device-signer-kit-ethereum'
-import { getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { generateTypedData } from '@safe-global/protocol-kit/dist/src/utils/eip-712'
 import { TypedDataEncoder } from 'ethers'
 import { ledgerDMKService } from './ledger-dmk.service'
@@ -11,6 +9,7 @@ import { createExistingTx } from '../tx/tx-sender/create'
 import extractTxInfo from '../tx/extractTx'
 import logger from '@/src/utils/logger'
 import { SafeInfo } from '@/src/types/address'
+import { fetchTransactionDetails } from '../tx/fetchTransactionDetails'
 
 export interface LedgerSafeSigningParams {
   chain: ChainInfo
@@ -104,8 +103,8 @@ export class LedgerSafeSigningService {
    * Create Safe transaction without requiring a private key (following web app pattern)
    */
   private async createSafeTransactionForLedger(activeSafe: SafeInfo, txId: string): Promise<SafeTransaction> {
-    // Get the tx details from the backend
-    const txDetails = (await getTransactionDetails(activeSafe.chainId, txId)) as TransactionDetails
+    // Get the tx details from the backend using RTK Query
+    const txDetails = await fetchTransactionDetails(activeSafe.chainId, txId)
 
     // Convert them to the Core SDK tx params
     const { txParams, signatures } = extractTxInfo(txDetails, activeSafe.address)

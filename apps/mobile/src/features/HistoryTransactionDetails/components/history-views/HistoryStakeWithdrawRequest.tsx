@@ -7,7 +7,6 @@ import {
 import { HistoryTransactionHeader } from '../HistoryTransactionHeader'
 import { Container } from '@/src/components/Container'
 import { TokenAmount } from '@/src/components/TokenAmount'
-import { Alert } from '@/src/components/Alert'
 import {
   stakingTypeToLabel,
   formatStakingWithdrawRequestItems,
@@ -48,8 +47,10 @@ export function HistoryStakeWithdrawRequest({ txId, txInfo, txData }: HistorySta
             return item.renderRow()
           }
           return (
-            <View key={index} alignItems="center" flexDirection="row" justifyContent="space-between">
-              <Text color="$textSecondaryLight">{item.label}</Text>
+            <View key={index} alignItems="center" flexDirection="row" justifyContent="space-between" gap="$2">
+              <Text color="$textSecondaryLight" flexShrink={0}>
+                {item.label}
+              </Text>
               {item.render ? item.render() : <Text fontSize="$4">{item.value}</Text>}
             </View>
           )
@@ -61,11 +62,6 @@ export function HistoryStakeWithdrawRequest({ txId, txInfo, txData }: HistorySta
 
         <HistoryAdvancedDetailsButton txId={txId} />
       </Container>
-
-      <Alert
-        type="warning"
-        message="This transaction is a withdrawal request. After it's executed, you'll need to complete a separate withdrawal transaction."
-      />
     </YStack>
   )
 }

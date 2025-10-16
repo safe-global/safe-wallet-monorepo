@@ -10,14 +10,14 @@ import type { AddedSafesState } from '@/store/addedSafesSlice'
 import type { AddressBookState } from '@/store/addressBookSlice'
 import type { SafeAppsState } from '@/store/safeAppsSlice'
 import type { SettingsState } from '@/store/settingsSlice'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import css from './styles.module.css'
 import type { VisitedSafesState } from '@/store/visitedSafesSlice'
 import type { UndeployedSafesState } from '@safe-global/utils/features/counterfactual/store/types'
 
 const getItemSecondaryText = (
-  chains: ChainInfo[],
+  chains: Chain[],
   data: AddedSafesState | AddressBookState = {},
   singular: string,
   plural: string,
@@ -62,7 +62,7 @@ type ListProps = Data & {
   showPreview?: boolean
 }
 
-type ItemProps = ListProps & { chains: ChainInfo[] }
+type ItemProps = ListProps & { chains: Chain[] }
 
 const getItems = ({
   addedSafes,

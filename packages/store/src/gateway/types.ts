@@ -12,6 +12,11 @@ import {
 import { SafeOverview } from './AUTO_GENERATED/safes'
 import { MessageItem, MessagePage, TypedData } from './AUTO_GENERATED/messages'
 
+export enum Operation {
+  CALL = 0,
+  DELEGATE = 1,
+}
+
 export enum RPC_AUTHENTICATION {
   API_KEY_PATH = 'API_KEY_PATH',
   NO_AUTHENTICATION = 'NO_AUTHENTICATION',
@@ -37,6 +42,12 @@ export enum TransferDirection {
   INCOMING = 'INCOMING',
   OUTGOING = 'OUTGOING',
   UNKNOWN = 'UNKNOWN',
+}
+
+export enum TokenType {
+  ERC20 = 'ERC20',
+  ERC721 = 'ERC721',
+  NATIVE_TOKEN = 'NATIVE_TOKEN',
 }
 
 export enum TransactionTokenType {

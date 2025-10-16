@@ -22,10 +22,11 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type AuthGetNonceV1ApiResponse = /** status 200  */ AuthNonce
+export type AuthGetNonceV1ApiResponse = /** status 200 Unique nonce generated for authentication */ AuthNonce
 export type AuthGetNonceV1ApiArg = void
 export type AuthVerifyV1ApiResponse = unknown
 export type AuthVerifyV1ApiArg = {
+  /** Sign-In with Ethereum message and signature for verification */
   siweDto: SiweDto
 }
 export type AuthLogoutV1ApiResponse = unknown

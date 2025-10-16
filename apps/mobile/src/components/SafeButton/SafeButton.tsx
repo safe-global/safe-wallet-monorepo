@@ -49,7 +49,7 @@ export const SafeButton = styled(Button, {
       true: {
         backgroundColor: 'transparent',
         borderWidth: 2,
-        borderColor: '$color',
+        borderColor: '$backgroundSecondary',
         color: '$color',
       },
     },

@@ -27,7 +27,8 @@ export const StyledInput = styled(Input, {
   borderWidth: 0,
 
   style: {
-    padding: 0,
     lineHeight: 20.5,
+    paddingTop: 0,
+    paddingBottom: 0,
   },
 })

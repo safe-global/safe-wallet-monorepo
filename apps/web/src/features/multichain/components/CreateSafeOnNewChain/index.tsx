@@ -20,12 +20,11 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useRouter } from 'next/router'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useMemo, useState } from 'react'
 import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
 import { MULTICHAIN_HELP_ARTICLE } from '@/config/constants'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
-import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
 
 type CreateSafeOnNewChainForm = {
@@ -36,7 +35,7 @@ type ReplaySafeDialogProps = {
   safeAddress: string
   safeCreationResult: ReturnType<typeof useSafeCreationData>
   replayableChains?: ReturnType<typeof useCompatibleNetworks>
-  chain?: ChainInfo
+  chain?: Chain
   currentName: string | undefined
   open: boolean
   onClose: () => void
@@ -87,7 +86,7 @@ const ReplaySafeDialog = ({
 
       // We need to create a readOnly provider of the deployed chain
       const customRpcUrl = selectedChain ? customRpc?.[selectedChain.chainId] : undefined
-      const provider = createWeb3ReadOnly(selectedChain as ChainInfo, customRpcUrl)
+      const provider = createWeb3ReadOnly(selectedChain, customRpcUrl)
       if (!provider) {
         return
       }
@@ -218,7 +217,7 @@ const ReplaySafeDialog = ({
                     <NetworkInput
                       required
                       name="chainId"
-                      chainConfigs={(replayableChains as (ChainInfo & { available: boolean })[]) ?? []}
+                      chainConfigs={(replayableChains as (Chain & { available: boolean })[]) ?? []}
                     />
                   )}
                 </>
@@ -280,12 +279,12 @@ export const CreateSafeOnNewChain = ({
   )
 
   const safeCreationResult = useSafeCreationData(safeAddress, deployedChains)
-  const allCompatibleChains = useCompatibleNetworks(safeCreationResult[0], configs as Chain[])
+  const allCompatibleChains = useCompatibleNetworks(safeCreationResult[0], configs)
   const isUnsupportedSafeCreationVersion = Boolean(!allCompatibleChains?.length)
   const replayableChains = useMemo(
     () =>
       allCompatibleChains?.filter(
-        (config) => !deployedChainIds.includes(config.chainId) && hasMultiChainAddNetworkFeature(config as ChainInfo),
+        (config) => !deployedChainIds.includes(config.chainId) && hasMultiChainAddNetworkFeature(config),
       ) || [],
     [allCompatibleChains, deployedChainIds],
   )
