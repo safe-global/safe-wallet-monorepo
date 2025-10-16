@@ -7,6 +7,18 @@ import CheckIcon from '@/public/images/common/check.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import ErrorIcon from '@/public/images/common/error.svg'
 
+const IconComponent = { CRITICAL: ErrorIcon, WARN: AlertIcon, OK: CheckIcon, INFO: InfoIcon }
+
+const getIconProps = (severity: Severity) => {
+  const color = SEVERITY_COLORS[severity].main
+  return {
+    CRITICAL: { path: { fill: color }, rect: { fill: color } },
+    WARN: { path: { fill: color } },
+    OK: { path: { fill: color, stroke: color } },
+    INFO: { path: { fill: color }, rect: { fill: color } },
+  }[severity]
+}
+
 export const SeverityIcon = ({
   severity,
   width = 16,
@@ -17,30 +29,11 @@ export const SeverityIcon = ({
   height?: number
 }): ReactElement => {
   const iconProps = { width, height }
-  const color = SEVERITY_COLORS[severity].main
-
-  switch (severity) {
-    case 'CRITICAL':
-      return (
-        <SvgIcon
-          sx={{ ...iconProps, path: { fill: color }, rect: { fill: color } }}
-          component={ErrorIcon}
-          inheritViewBox
-        />
-      )
-    case 'WARN':
-      return <SvgIcon sx={{ ...iconProps, path: { fill: color } }} component={AlertIcon} inheritViewBox />
-    case 'OK':
-      return (
-        <SvgIcon sx={{ ...iconProps, path: { fill: color, stroke: color } }} component={CheckIcon} inheritViewBox />
-      )
-    default:
-      return (
-        <SvgIcon
-          sx={{ ...iconProps, path: { fill: color }, rect: { fill: color } }}
-          component={InfoIcon}
-          inheritViewBox
-        />
-      )
+  const props = {
+    sx: { ...iconProps, ...getIconProps(severity) },
+    inheritViewBox: true,
+    component: IconComponent[severity],
   }
+
+  return <SvgIcon {...props} />
 }
