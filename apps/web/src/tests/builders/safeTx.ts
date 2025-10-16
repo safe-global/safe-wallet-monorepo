@@ -6,12 +6,12 @@ import {
   type Custom,
   DetailedExecutionInfoType,
   type MultisigExecutionInfo,
-  Operation,
   type TransactionInfo,
   TransactionInfoType,
   type TransactionSummary,
   type TransactionData,
 } from '@safe-global/safe-gateway-typescript-sdk'
+import { Operation } from '@safe-global/store/gateway/types'
 import { TransactionStatus } from '@safe-global/safe-apps-sdk'
 
 // TODO: Convert to builder

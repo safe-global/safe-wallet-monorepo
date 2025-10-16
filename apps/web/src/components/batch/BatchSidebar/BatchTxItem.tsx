@@ -8,10 +8,10 @@ import { BATCH_EVENTS, trackEvent } from '@/services/analytics'
 import SingleTxDecoded from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded'
 import {
   type AddressEx,
-  Operation,
   type TransactionData,
   type InternalTransaction,
 } from '@safe-global/safe-gateway-typescript-sdk'
+import { Operation } from '@safe-global/store/gateway/types'
 import { type TokenInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 type BatchTxItemProps = DraftBatchItem & {

@@ -1,4 +1,4 @@
-import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
+import { Operation } from '@safe-global/store/gateway/types'
 import type { TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import { useState, useEffect } from 'react'
 import type { Dispatch, ReactElement, SetStateAction } from 'react'
