@@ -9,13 +9,12 @@ import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useTransactionGuard } from '@/src/hooks/useTransactionGuard'
 import { parseFeeParams } from '@/src/utils/feeParams'
-import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
+import { selectExecutionMethod } from '@/src/store/executionMethodSlice'
 
 export function ExecuteTransaction() {
-  const { txId, maxFeePerGas, executionMethod, maxPriorityFeePerGas, gasLimit, nonce } = useLocalSearchParams<{
+  const { txId, maxFeePerGas, maxPriorityFeePerGas, gasLimit, nonce } = useLocalSearchParams<{
     txId: string
     maxFeePerGas: string
-    executionMethod: ExecutionMethod
     maxPriorityFeePerGas: string
     gasLimit: string
     nonce: string
@@ -28,6 +27,7 @@ export function ExecuteTransaction() {
 
   const activeSafe = useDefinedActiveSafe()
   const activeSigner = useAppSelector((state) => selectActiveSigner(state, activeSafe.address))
+  const executionMethod = useAppSelector(selectExecutionMethod)
   const { guard: canExecute } = useTransactionGuard('executing')
   const { status, execute, retry } = useTransactionExecution({
     txId: txId || '',
