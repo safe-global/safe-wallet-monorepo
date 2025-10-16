@@ -1,0 +1,216 @@
+diff --git a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/compatibility_fallback_handler.json b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/compatibility_fallback_handler.json
+index 15445d9..dec62a8 100644
+--- a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/compatibility_fallback_handler.json
++++ b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/compatibility_fallback_handler.json
+@@ -6,6 +6,7 @@
+     "networkAddresses": {
+         "1": "0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99",
+         "100": "0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99",
++        "957": "0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99",
+         "1442": "0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99",
+         "80001": "0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99"
+     },
+diff --git a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/create_call.json b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/create_call.json
+index 24a4a71..2a9f974 100644
+--- a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/create_call.json
++++ b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/create_call.json
+@@ -8,6 +8,7 @@
+         "5": "0x9b35Af71d77eaf8d7e40252370304687390A1A52",
+         "56": "0x9b35Af71d77eaf8d7e40252370304687390A1A52",
+         "100": "0x9b35Af71d77eaf8d7e40252370304687390A1A52",
++        "957": "0x9b35Af71d77eaf8d7e40252370304687390A1A52",
+         "80001": "0x9b35Af71d77eaf8d7e40252370304687390A1A52"
+     },
+     "abi": [
+diff --git a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/multi_send.json b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/multi_send.json
+index fe51727..a542028 100644
+--- a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/multi_send.json
++++ b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/multi_send.json
+@@ -8,6 +8,7 @@
+         "5": "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
+         "56": "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
+         "100": "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
++        "957": "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
+         "1442": "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
+         "80001": "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526"
+     },
+diff --git a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/multi_send_call_only.json b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/multi_send_call_only.json
+index f1c738e..fd7c6ae 100644
+--- a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/multi_send_call_only.json
++++ b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/multi_send_call_only.json
+@@ -8,6 +8,7 @@
+         "5": "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
+         "56": "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
+         "100": "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
++        "957": "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
+         "1442": "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
+         "80001": "0x9641d764fc13c8B624c04430C7356C1C7C8102e2"
+     },
+diff --git a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/safe.json b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/safe.json
+index b229c7f..17b30fa 100644
+--- a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/safe.json
++++ b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/safe.json
+@@ -6,6 +6,7 @@
+     "networkAddresses": {
+         "1": "0x41675C099F32341bf84BFc5382aF534df5C7461a",
+         "100": "0x41675C099F32341bf84BFc5382aF534df5C7461a",
++        "957": "0x41675C099F32341bf84BFc5382aF534df5C7461a",
+         "1442": "0x41675C099F32341bf84BFc5382aF534df5C7461a",
+         "80001": "0x41675C099F32341bf84BFc5382aF534df5C7461a"
+     },
+diff --git a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/safe_l2.json b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/safe_l2.json
+index c717d0c..b6e36f2 100644
+--- a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/safe_l2.json
++++ b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/safe_l2.json
+@@ -6,6 +6,7 @@
+     "networkAddresses": {
+         "1": "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762",
+         "100": "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762",
++        "957": "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762",
+         "1442": "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762",
+         "80001": "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762"
+     },
+diff --git a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/safe_proxy_factory.json b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/safe_proxy_factory.json
+index dbbffca..ff1717a 100644
+--- a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/safe_proxy_factory.json
++++ b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/safe_proxy_factory.json
+@@ -8,6 +8,7 @@
+         "5": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+         "56": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+         "100": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
++        "957": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+         "1442": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+         "80001": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67"
+     },
+diff --git a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/sign_message_lib.json b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/sign_message_lib.json
+index 5b1b50b..9d0bb10 100644
+--- a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/sign_message_lib.json
++++ b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/sign_message_lib.json
+@@ -6,6 +6,7 @@
+     "networkAddresses": {
+         "1": "0xd53cd0aB83D845Ac265BE939c57F53AD838012c9",
+         "100": "0xd53cd0aB83D845Ac265BE939c57F53AD838012c9",
++        "957": "0xd53cd0aB83D845Ac265BE939c57F53AD838012c9",
+         "1442": "0xd53cd0aB83D845Ac265BE939c57F53AD838012c9",
+         "80001": "0xd53cd0aB83D845Ac265BE939c57F53AD838012c9"
+     },
+diff --git a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/simulate_tx_accessor.json b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/simulate_tx_accessor.json
+index be5f531..8019bcb 100644
+--- a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/simulate_tx_accessor.json
++++ b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/dist/assets/v1.4.1/simulate_tx_accessor.json
+@@ -8,6 +8,7 @@
+         "5": "0x3d4BA2E0884aa488718476ca2FB8Efc291A46199",
+         "56": "0x3d4BA2E0884aa488718476ca2FB8Efc291A46199",
+         "100": "0x3d4BA2E0884aa488718476ca2FB8Efc291A46199",
++        "957": "0x3d4BA2E0884aa488718476ca2FB8Efc291A46199",
+         "1442": "0x3d4BA2E0884aa488718476ca2FB8Efc291A46199",
+         "80001": "0x3d4BA2E0884aa488718476ca2FB8Efc291A46199"
+     },
+diff --git a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/compatibility_fallback_handler.json b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/compatibility_fallback_handler.json
+index 4088dc7..8b942b4 100644
+--- a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/compatibility_fallback_handler.json
++++ b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/compatibility_fallback_handler.json
+@@ -6,6 +6,7 @@
+   "networkAddresses": {
+     "1": "0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99",
+     "100": "0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99",
++    "957": "0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99",
+     "1442": "0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99",
+     "80001": "0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99"
+   },
+diff --git a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/create_call.json b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/create_call.json
+index d0dcf1f..1703d88 100644
+--- a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/create_call.json
++++ b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/create_call.json
+@@ -8,6 +8,7 @@
+     "5": "0x9b35Af71d77eaf8d7e40252370304687390A1A52",
+     "56": "0x9b35Af71d77eaf8d7e40252370304687390A1A52",
+     "100": "0x9b35Af71d77eaf8d7e40252370304687390A1A52",
++    "957": "0x9b35Af71d77eaf8d7e40252370304687390A1A52",
+     "80001": "0x9b35Af71d77eaf8d7e40252370304687390A1A52"
+   },
+   "abi": [
+diff --git a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/multi_send.json b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/multi_send.json
+index 55dd78e..0951aca 100644
+--- a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/multi_send.json
++++ b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/multi_send.json
+@@ -8,6 +8,7 @@
+     "5": "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
+     "56": "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
+     "100": "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
++    "957": "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
+     "1442": "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
+     "80001": "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526"
+   },
+diff --git a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/multi_send_call_only.json b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/multi_send_call_only.json
+index 7864a8b..db86d32 100644
+--- a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/multi_send_call_only.json
++++ b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/multi_send_call_only.json
+@@ -8,6 +8,7 @@
+     "5": "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
+     "56": "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
+     "100": "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
++    "957": "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
+     "1442": "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
+     "80001": "0x9641d764fc13c8B624c04430C7356C1C7C8102e2"
+   },
+diff --git a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/safe.json b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/safe.json
+index 8074de8..2b1cc76 100644
+--- a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/safe.json
++++ b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/safe.json
+@@ -6,6 +6,7 @@
+   "networkAddresses": {
+     "1": "0x41675C099F32341bf84BFc5382aF534df5C7461a",
+     "100": "0x41675C099F32341bf84BFc5382aF534df5C7461a",
++    "957": "0x41675C099F32341bf84BFc5382aF534df5C7461a",
+     "1442": "0x41675C099F32341bf84BFc5382aF534df5C7461a",
+     "80001": "0x41675C099F32341bf84BFc5382aF534df5C7461a"
+   },
+diff --git a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/safe_l2.json b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/safe_l2.json
+index 619bfdd..b9cfe5d 100644
+--- a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/safe_l2.json
++++ b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/safe_l2.json
+@@ -6,6 +6,7 @@
+   "networkAddresses": {
+     "1": "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762",
+     "100": "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762",
++    "957": "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762",
+     "1442": "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762",
+     "80001": "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762"
+   },
+diff --git a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/safe_proxy_factory.json b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/safe_proxy_factory.json
+index a6dcdc1..2d8e8b6 100644
+--- a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/safe_proxy_factory.json
++++ b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/safe_proxy_factory.json
+@@ -8,6 +8,7 @@
+     "5": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+     "56": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+     "100": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
++    "957": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+     "1442": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+     "80001": "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67"
+   },
+diff --git a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/sign_message_lib.json b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/sign_message_lib.json
+index 4ebc190..8328274 100644
+--- a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/sign_message_lib.json
++++ b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/sign_message_lib.json
+@@ -6,6 +6,7 @@
+   "networkAddresses": {
+     "1": "0xd53cd0aB83D845Ac265BE939c57F53AD838012c9",
+     "100": "0xd53cd0aB83D845Ac265BE939c57F53AD838012c9",
++    "957": "0xd53cd0aB83D845Ac265BE939c57F53AD838012c9",
+     "1442": "0xd53cd0aB83D845Ac265BE939c57F53AD838012c9",
+     "80001": "0xd53cd0aB83D845Ac265BE939c57F53AD838012c9"
+   },
+diff --git a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/simulate_tx_accessor.json b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/simulate_tx_accessor.json
+index 7264a67..7acf545 100644
+--- a/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/simulate_tx_accessor.json
++++ b/node_modules/@safe-global/safe-core-sdk-types/node_modules/@safe-global/safe-deployments/src/assets/v1.4.1/simulate_tx_accessor.json
+@@ -8,6 +8,7 @@
+     "5": "0x3d4BA2E0884aa488718476ca2FB8Efc291A46199",
+     "56": "0x3d4BA2E0884aa488718476ca2FB8Efc291A46199",
+     "100": "0x3d4BA2E0884aa488718476ca2FB8Efc291A46199",
++    "957": "0x3d4BA2E0884aa488718476ca2FB8Efc291A46199",
+     "1442": "0x3d4BA2E0884aa488718476ca2FB8Efc291A46199",
+     "80001": "0x3d4BA2E0884aa488718476ca2FB8Efc291A46199"
+   },
