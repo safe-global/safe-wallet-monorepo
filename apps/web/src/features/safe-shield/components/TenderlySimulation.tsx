@@ -108,19 +108,6 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
   const handleRunSimulation = () => {
     if (!safeTx) return
 
-    if (nestedTxInfo && nestedSafeInfo && nestedSafeTx) {
-      const simulationParams = {
-        safe: nestedSafeInfo,
-        executionOwner: safeAddress,
-        transactions: nestedSafeTx,
-        gasLimit: undefined,
-      } as SimulationTxParams
-
-      nestedTx.simulation.simulateTransaction(simulationParams)
-      setSimulationExpanded(true)
-      return
-    }
-
     const executionOwner = isSafeOwner && signer?.address ? signer.address : safe.owners[0].value
 
     const simulationParams = {
@@ -131,15 +118,32 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
     } as SimulationTxParams
 
     simulation.simulateTransaction(simulationParams)
+
+    if (nestedTxInfo && nestedSafeInfo && nestedSafeTx) {
+      const nestedSimulationParams = {
+        safe: nestedSafeInfo,
+        executionOwner: safeAddress,
+        transactions: nestedSafeTx,
+        gasLimit: undefined,
+      } as SimulationTxParams
+
+      nestedTx.simulation.simulateTransaction(nestedSimulationParams)
+    }
+
     setSimulationExpanded(true)
   }
 
-  const isNested = !!nestedTxInfo
-  const currentStatus = isNested ? nestedTx.status : status
+  const isNested = !!nestedTxInfo && !!nestedSafeInfo && !!nestedSafeTx
 
-  const isSimulationFinished = currentStatus.isFinished
-  const isSimulationSuccess = currentStatus.isSuccess && !currentStatus.isError
-  const currentSimulationLink = isNested ? nestedTx.simulation.simulationLink : simulation.simulationLink
+  const mainIsFinished = status.isFinished
+  const nestedIsFinished = isNested ? nestedTx.status.isFinished : true
+  const isSimulationFinished = mainIsFinished && nestedIsFinished
+
+  const mainIsSuccess = status.isSuccess && !status.isError
+  const nestedIsSuccess = isNested ? nestedTx.status.isSuccess && !nestedTx.status.isError : true
+  const isSimulationSuccess = mainIsSuccess && nestedIsSuccess
+
+  const isLoading = status.isLoading || (isNested && nestedTx.status.isLoading)
 
   if (!showSimulation) {
     return null
@@ -147,7 +151,6 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
 
   return (
     <Box>
-      {/* Card header - always visible */}
       <Stack
         direction="row"
         justifyContent="space-between"
@@ -188,16 +191,16 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
           <Box
             component="button"
             onClick={handleRunSimulation}
-            disabled={currentStatus.isLoading}
+            disabled={isLoading}
             sx={{
               backgroundColor: 'background.lightGrey',
               border: 'none',
               borderRadius: '4px',
               px: 1,
               py: 0.25,
-              cursor: currentStatus.isLoading ? 'default' : 'pointer',
+              cursor: isLoading ? 'default' : 'pointer',
               '&:hover': {
-                backgroundColor: currentStatus.isLoading ? 'background.lightGrey' : 'border.light',
+                backgroundColor: isLoading ? 'background.lightGrey' : 'border.light',
               },
             }}
           >
@@ -209,7 +212,7 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
                 color: 'static.main',
               }}
             >
-              {currentStatus.isLoading ? 'Running...' : 'Run'}
+              {isLoading ? 'Running...' : 'Run'}
             </Typography>
           </Box>
         ) : (
@@ -228,47 +231,91 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
         )}
       </Stack>
 
-      {/* Expanded content */}
       <Collapse in={isSimulationFinished && simulationExpanded}>
         <Box sx={{ padding: '4px 12px 16px' }}>
-          <Box bgcolor="background.main" borderRadius="4px" overflow="hidden">
-            <Box
-              sx={{
-                borderLeft: `4px solid ${isSimulationSuccess ? 'var(--color-success-main)' : 'var(--color-error-main)'}`,
-                padding: '12px',
-              }}
-            >
-              <Typography variant="body2" color="primary.light" sx={{ mb: 1 }}>
-                {isSimulationSuccess
-                  ? isNested
-                    ? 'Nested transaction simulation successful.'
-                    : 'Simulation successful.'
-                  : isNested
-                    ? 'Nested transaction simulation failed.'
-                    : 'Simulation failed.'}
-              </Typography>
-              {currentSimulationLink && (
-                <ExternalLink
-                  noIcon
-                  href={currentSimulationLink}
-                  sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}
+          <Stack gap={2}>
+            <Box bgcolor="background.main" borderRadius="4px" overflow="hidden">
+              <Box
+                sx={{
+                  borderLeft: `4px solid ${mainIsSuccess ? 'var(--color-success-main)' : 'var(--color-error-main)'}`,
+                  padding: '12px',
+                }}
+              >
+                <Typography variant="body2" color="primary.light" sx={{ mb: 1 }}>
+                  {mainIsSuccess ? 'Transaction simulation successful.' : 'Transaction simulation failed.'}
+                </Typography>
+                {simulation.simulationLink && (
+                  <ExternalLink
+                    noIcon
+                    href={simulation.simulationLink}
+                    sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: '12px',
+                        lineHeight: '16px',
+                        letterSpacing: '1px',
+                        color: 'text.secondary',
+                        textDecoration: 'underline',
+                      }}
+                    >
+                      View
+                    </Typography>
+                    <LaunchIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                  </ExternalLink>
+                )}
+              </Box>
+            </Box>
+
+            {isNested && (
+              <Box bgcolor="background.main" borderRadius="4px" overflow="hidden">
+                <Box
+                  sx={{
+                    borderLeft: `4px solid ${nestedIsSuccess ? 'var(--color-success-main)' : 'var(--color-error-main)'}`,
+                    padding: '12px',
+                  }}
                 >
                   <Typography
+                    variant="overline"
                     sx={{
-                      fontSize: '12px',
+                      color: 'primary.light',
+                      mb: 1,
+                      display: 'block',
+                      fontSize: '11px',
+                      fontWeight: 700,
                       lineHeight: '16px',
                       letterSpacing: '1px',
-                      color: 'text.secondary',
-                      textDecoration: 'underline',
                     }}
                   >
-                    View
+                    Nested transaction
                   </Typography>
-                  <LaunchIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                </ExternalLink>
-              )}
-            </Box>
-          </Box>
+                  <Typography variant="body2" color="primary.light" sx={{ mb: 1 }}>
+                    {nestedIsSuccess ? 'Transaction simulation successful.' : 'Transaction simulation failed.'}
+                  </Typography>
+                  {nestedTx.simulation.simulationLink && (
+                    <ExternalLink
+                      noIcon
+                      href={nestedTx.simulation.simulationLink}
+                      sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}
+                    >
+                      <Typography
+                        sx={{
+                          fontSize: '12px',
+                          lineHeight: '16px',
+                          letterSpacing: '1px',
+                          color: 'text.secondary',
+                          textDecoration: 'underline',
+                        }}
+                      >
+                        View
+                      </Typography>
+                      <LaunchIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    </ExternalLink>
+                  )}
+                </Box>
+              </Box>
+            )}
+          </Stack>
         </Box>
       </Collapse>
     </Box>

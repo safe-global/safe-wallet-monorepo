@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react'
+import { type ReactElement, useContext } from 'react'
 import { Box } from '@mui/material'
 import type { ContractAnalysisResults, RecipientAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
@@ -7,18 +7,17 @@ import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import type { SafeTransaction } from '@safe-global/types-kit'
+import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import isEmpty from 'lodash/isEmpty'
 
 export const SafeShieldContent = ({
   recipient,
   contract,
-  safeTx,
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
-  safeTx?: SafeTransaction
 }): ReactElement => {
+  const { safeTx } = useContext(SafeTxContext)
   const [recipientResults, recipientError, recipientLoading = false] = recipient || []
   const [contractResults, contractError, contractLoading = false] = contract || []
 
