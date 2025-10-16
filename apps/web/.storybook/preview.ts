@@ -1,4 +1,5 @@
-import type { Preview } from '@storybook/nextjs'
+import type { Preview } from '@storybook/react'
+import type { ReactRenderer } from '@storybook/react'
 import React, { useEffect } from 'react'
 
 import { ThemeProvider, CssBaseline } from '@mui/material'
@@ -37,7 +38,7 @@ const preview: Preview = {
 
   decorators: [
     // First, apply the theme provider
-    withThemeFromJSXProvider({
+    withThemeFromJSXProvider<ReactRenderer>({
       GlobalStyles: CssBaseline,
       Provider: ThemeProvider,
       themes: {
@@ -46,7 +47,7 @@ const preview: Preview = {
       },
       defaultTheme: 'light',
     }),
-    // Then, sync the data-theme attribute for CSS variables
+    // Ensure data-theme attribute is set on the HTML element to override prefers-color-scheme
     DataThemeDecorator,
   ],
 }
