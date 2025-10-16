@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { AddressCheckMessages, type AddressCheckType } from '../config'
 import { RecipientStatus, Severity, type AnalysisResult } from '../../../types'
+import isEmpty from 'lodash/isEmpty'
 
 export type AddressBookCheckResult = Record<
   string,
@@ -17,7 +18,7 @@ export const useAddressBookCheck = (
   addresses: string[],
   isInAddressBook: (address: string, chainId: string) => boolean,
   ownedSafes: string[] = [],
-): AddressBookCheckResult => {
+): AddressBookCheckResult | undefined => {
   const results = useMemo(() => {
     const checkResults: AddressBookCheckResult = {}
 
@@ -55,7 +56,7 @@ export const useAddressBookCheck = (
       checkResults[address] = { severity, type, ...message }
     })
 
-    return checkResults
+    return isEmpty(checkResults) ? undefined : checkResults
   }, [addresses, chainId, isInAddressBook, ownedSafes])
 
   return results

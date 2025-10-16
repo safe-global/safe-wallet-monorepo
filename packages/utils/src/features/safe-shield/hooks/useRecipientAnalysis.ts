@@ -19,17 +19,19 @@ import useDebounce from '@safe-global/utils/hooks/useDebounce'
  */
 function mergeAnalysisResults(
   fetchedResults: RecipientAnalysisResults | undefined,
-  addressBookResult: AddressBookCheckResult,
+  addressBookResult: AddressBookCheckResult | undefined,
   activityResult: AddressActivityResult | undefined,
 ): RecipientAnalysisResults {
   const merged: RecipientAnalysisResults = fetchedResults ? { ...fetchedResults } : {}
 
-  for (const [address, result] of Object.entries(addressBookResult)) {
-    merged[address] = { ...(merged[address] || {}), [StatusGroup.ADDRESS_BOOK]: [result] }
+  if (addressBookResult) {
+    for (const [address, result] of Object.entries(addressBookResult || {})) {
+      merged[address] = { ...(merged[address] || {}), [StatusGroup.ADDRESS_BOOK]: [result] }
+    }
   }
 
   if (activityResult) {
-    for (const [address, result] of Object.entries(activityResult)) {
+    for (const [address, result] of Object.entries(activityResult || {})) {
       merged[address] = { ...(merged[address] || {}), [StatusGroup.RECIPIENT_ACTIVITY]: [result] }
     }
   }
@@ -86,10 +88,11 @@ export function useRecipientAnalysis({
   const [activityCheck, activityCheckError, activityCheckLoading] = useAddressActivity(validRecipients, web3ReadOnly)
 
   // Merge backend and local checks
-  const mergedResults = useMemo(
-    () => mergeAnalysisResults(fetchedResults, addressBookCheck, activityCheck),
-    [fetchedResults, addressBookCheck, activityCheck],
-  )
+  // Only merge address book results after fetched results are available
+  const mergedResults = useMemo(() => {
+    const addressBookToMerge = !!fetchedResults && !!addressBookCheck ? addressBookCheck : undefined
+    return mergeAnalysisResults(fetchedResults, addressBookToMerge, activityCheck)
+  }, [fetchedResults, addressBookCheck, activityCheck])
 
   return [mergedResults, fetchedResultsError || activityCheckError, fetchLoading || activityCheckLoading]
 }

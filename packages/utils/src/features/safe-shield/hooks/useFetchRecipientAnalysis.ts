@@ -3,6 +3,7 @@ import type { RecipientAnalysisResults } from '../types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useEffectDeepCompare } from './util-hooks/useEffectDeepCompare'
 import { useFetchMultiRecipientAnalysis } from './useFetchMultiRecipientAnalysis'
+import isEmpty from 'lodash/isEmpty'
 
 /**
  * Hook to fetch recipient analysis from backend API
@@ -18,9 +19,9 @@ export function useFetchRecipientAnalysis({
   safeAddress: string
   chainId: string
   recipients: string[]
-}): AsyncResult<RecipientAnalysisResults> {
+}): AsyncResult<RecipientAnalysisResults | undefined> {
   const previousRecipientsRef = useRef<Set<string>>(new Set())
-  const [results, setResults] = useState<RecipientAnalysisResults>({})
+  const [results, setResults] = useState<RecipientAnalysisResults | undefined>(undefined)
 
   // Determine which addresses changed and need fetching
   const recipientsToFetch = useMemo(() => {
@@ -51,11 +52,14 @@ export function useFetchRecipientAnalysis({
   // Update results to only include recipients that are in the given recipients array
   useEffectDeepCompare(() => {
     const newResults = recipients.reduce<RecipientAnalysisResults>((acc, address) => {
-      acc[address] = fetchedResults?.[address] || results[address]
+      const addressResults = fetchedResults?.[address] || results?.[address]
+      if (addressResults) {
+        acc[address] = addressResults
+      }
       return acc
     }, {})
 
-    setResults(newResults)
+    setResults(isEmpty(newResults) ? undefined : newResults)
   }, [recipients, fetchedResults, results])
 
   return [results, error, loading]
