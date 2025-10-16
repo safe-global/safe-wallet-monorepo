@@ -635,21 +635,6 @@ exports[`SignOrExecute should display a confirmation screen 1`] = `
       class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
       data-testid="card-content"
     >
-      <h5
-        class="MuiTypography-root MuiTypography-h5 css-1whrnku-MuiTypography-root"
-      >
-        Transaction checks
-      </h5>
-    </div>
-  </div>
-  <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1w4z6qv-MuiPaper-root-MuiCard-root"
-    style="--Paper-shadow: none;"
-  >
-    <div
-      class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
-      data-testid="card-content"
-    >
       <div
         class="wrapper"
       >
@@ -828,21 +813,6 @@ exports[`SignOrExecute should display an error screen 1`] = `
       class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
       data-testid="card-content"
     />
-  </div>
-  <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1w4z6qv-MuiPaper-root-MuiCard-root"
-    style="--Paper-shadow: none;"
-  >
-    <div
-      class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
-      data-testid="card-content"
-    >
-      <h5
-        class="MuiTypography-root MuiTypography-h5 css-1whrnku-MuiTypography-root"
-      >
-        Transaction checks
-      </h5>
-    </div>
   </div>
   <div
     class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1w4z6qv-MuiPaper-root-MuiCard-root"

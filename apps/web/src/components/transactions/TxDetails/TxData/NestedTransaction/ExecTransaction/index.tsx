@@ -1,5 +1,5 @@
 import { Safe__factory } from '@safe-global/utils/types/contracts'
-import { Box, Skeleton, Stack } from '@mui/material'
+import { Box, Skeleton } from '@mui/material'
 import { type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 
@@ -12,8 +12,6 @@ import ExternalLink from '@/components/common/ExternalLink'
 import { NestedTransaction } from '../NestedTransaction'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 import TxData from '../..'
-import { TxSimulation, TxSimulationMessage } from '@/components/tx/security/tenderly'
-import useSafeAddress from '@/hooks/useSafeAddress'
 
 const safeInterface = Safe__factory.createInterface()
 
@@ -51,7 +49,6 @@ export const ExecTransaction = ({
   isConfirmationView?: boolean
 }) => {
   const chain = useCurrentChain()
-  const safeAddress = useSafeAddress()
 
   const childSafeTx = useMemo<SafeTransaction | undefined>(
     () => (data?.hexData ? extractTransactionData(data.hexData) : undefined),
@@ -79,19 +76,6 @@ export const ExecTransaction = ({
       {decodedNestedTxDataBlock ? (
         <>
           {decodedNestedTxDataBlock}
-
-          {isConfirmationView && childSafeTx && data?.to.value && (
-            <Stack spacing={2}>
-              <TxSimulation
-                disabled={false}
-                transactions={childSafeTx}
-                title="Simulate nested transaction"
-                executionOwner={safeAddress}
-                nestedSafe={data?.to.value}
-              />
-              <TxSimulationMessage isNested />
-            </Stack>
-          )}
 
           {chain && data && (
             <Box>

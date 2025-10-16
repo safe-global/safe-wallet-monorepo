@@ -24,7 +24,6 @@ import TxStatusWidget from '../TxStatusWidget'
 import css from './styles.module.css'
 import { TxSecurityProvider } from '@/components/tx/security/shared/TxSecurityContext'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import SecurityWarnings from '@/components/tx/security/SecurityWarnings'
 import SafeInfo from '@/components/tx-flow/common/SafeInfo'
 import SafeShieldWidget from '../SafeShieldWidget'
 
@@ -191,7 +190,6 @@ const TxLayout = ({
                     >
                       <Box className={css.sticky}>
                         <SafeShieldWidget />
-                        <SecurityWarnings />
                       </Box>
                     </Grid>
                   )}
