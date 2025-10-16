@@ -1,4 +1,4 @@
-import { Card, Stack, Typography, Box, Chip, IconButton } from '@mui/material'
+import { Card, Chip, IconButton } from '@mui/material'
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeftRounded'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRightRounded'
 import Link from 'next/link'
@@ -23,8 +23,55 @@ export type ExplorePossibleApp = {
   }
 }
 
-const ITEM_WIDTH = 180
-const ITEM_GAP = 16
+const EXPLORE_POSSIBLE_CONFIG = [
+  {
+    id: 'swap',
+    title: 'Swap tokens instantly',
+    iconUrl: { light: '/images/explore-possible/swap-large.svg', dark: '/images/explore-possible/swap-large-dark.svg' },
+    getLink: (safeQuery: string | string[] | undefined) => ({
+      pathname: AppRoutes.swap,
+      query: { safe: safeQuery },
+    }),
+    tag: {
+      text: 'Popular',
+      color: '#12FF80',
+    },
+  },
+  {
+    id: 'spaces',
+    title: 'Manage multiple Safes',
+    iconUrl: {
+      light: '/images/explore-possible/spaces-large.svg',
+      dark: '/images/explore-possible/spaces-large-dark.svg',
+    },
+    getLink: () => 'https://app.safe.global/welcome/spaces',
+  },
+  {
+    id: 'transaction-builder',
+    title: 'Build custom transactions',
+    iconUrl: {
+      light: '/images/explore-possible/tx-builder-large.svg',
+      dark: '/images/explore-possible/tx-builder-large-dark.svg',
+    },
+    getLink: (safeQuery: string | string[] | undefined, txBuilderLink?: string | UrlObject) =>
+      txBuilderLink || {
+        pathname: AppRoutes.apps.index,
+        query: { safe: safeQuery },
+      },
+  },
+  {
+    id: 'walletconnect',
+    title: 'Connect to web3 apps',
+    iconUrl: {
+      light: '/images/explore-possible/apps-large.svg',
+      dark: '/images/explore-possible/apps-large-dark.svg',
+    },
+    getLink: (safeQuery: string | string[] | undefined) => ({
+      pathname: AppRoutes.apps.index,
+      query: { safe: safeQuery },
+    }),
+  },
+] as const
 
 const ExplorePossibleWidget = () => {
   const router = useRouter()
@@ -35,53 +82,14 @@ const ExplorePossibleWidget = () => {
   const scrollContainerRef = useRef<HTMLUListElement>(null)
 
   const EXPLORE_POSSIBLE_APPS: ExplorePossibleApp[] = useMemo(
-    () => [
-      {
-        id: 'swap',
-        title: 'Swap tokens instantly',
-        iconUrl: isDarkMode
-          ? '/images/explore-possible/swap-large-dark.svg'
-          : '/images/explore-possible/swap-large.svg',
-        link: {
-          pathname: AppRoutes.swap,
-          query: { safe: router.query.safe },
-        },
-        tag: {
-          text: 'Popular',
-          color: '#12FF80',
-        },
-      },
-      {
-        id: 'spaces',
-        title: 'Manage multiple Safes',
-        iconUrl: isDarkMode
-          ? '/images/explore-possible/spaces-large-dark.svg'
-          : '/images/explore-possible/spaces-large.svg',
-        link: 'https://app.safe.global/welcome/spaces',
-      },
-      {
-        id: 'transaction-builder',
-        title: 'Build custom transaction',
-        iconUrl: isDarkMode
-          ? '/images/explore-possible/tx-builder-large-dark.svg'
-          : '/images/explore-possible/tx-builder-large.svg',
-        link: txBuilderApp?.link || {
-          pathname: AppRoutes.apps.index,
-          query: { safe: router.query.safe },
-        },
-      },
-      {
-        id: 'walletconnect',
-        title: 'Connect to Web3 apps',
-        iconUrl: isDarkMode
-          ? '/images/explore-possible/apps-large-dark.svg'
-          : '/images/explore-possible/apps-large.svg',
-        link: {
-          pathname: AppRoutes.apps.index,
-          query: { safe: router.query.safe },
-        },
-      },
-    ],
+    () =>
+      EXPLORE_POSSIBLE_CONFIG.map((config) => ({
+        id: config.id,
+        title: config.title,
+        iconUrl: isDarkMode ? config.iconUrl.dark : config.iconUrl.light,
+        link: config.getLink(router.query.safe, txBuilderApp?.link),
+        ...('tag' in config && config.tag ? { tag: config.tag } : {}),
+      })),
     [router.query.safe, txBuilderApp, isDarkMode],
   )
 
@@ -106,12 +114,24 @@ const ExplorePossibleWidget = () => {
     const container = scrollContainerRef.current
     if (!container) return
 
-    const scrollAmount = ITEM_WIDTH + ITEM_GAP
-    const newScrollLeft =
-      direction === 'left' ? container.scrollLeft - scrollAmount : container.scrollLeft + scrollAmount
+    const items = container.querySelectorAll('li')
+    if (items.length === 0) return
+
+    const scrollPosition = container.scrollLeft
+    let targetIndex = 0
+
+    items.forEach((item, index) => {
+      const itemLeft = (item as HTMLElement).offsetLeft
+      if (Math.abs(itemLeft - scrollPosition) < 10) {
+        targetIndex = index
+      }
+    })
+
+    const newIndex = direction === 'left' ? Math.max(0, targetIndex - 1) : Math.min(items.length - 1, targetIndex + 1)
+    const targetItem = items[newIndex] as HTMLElement
 
     container.scrollTo({
-      left: newScrollLeft,
+      left: targetItem.offsetLeft,
       behavior: 'smooth',
     })
   }
@@ -122,24 +142,23 @@ const ExplorePossibleWidget = () => {
 
   return (
     <Card sx={{ px: 3, pt: 2.5, pb: 3 }} component="section">
-      <Box position="relative">
+      <div style={{ position: 'relative' }}>
         {/* Gradient fade on the right */}
-        <Box
+        <div
           className={css.gradientFade}
-          sx={{
-            background: (theme) => `linear-gradient(to left, ${theme.palette.background.paper}, transparent)`,
+          style={{
+            background: `linear-gradient(to left, var(--color-background-paper), transparent)`,
           }}
+          aria-hidden="true"
         />
 
         {/* Header with title and navigation */}
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography fontWeight={700} fontSize="16px" lineHeight="22px">
-            Explore what&apos;s possible
-          </Typography>
+        <div className={css.header}>
+          <h2 className={css.headerTitle}>Explore what&apos;s possible</h2>
           {(canScrollLeft || canScrollRight) && (
-            <div className={css.carouselNav}>
+            <nav className={css.carouselNav} aria-label="Carousel navigation">
               <IconButton
-                aria-label="previous apps"
+                aria-label="Scroll to previous apps"
                 onClick={() => scrollList('left')}
                 disabled={!canScrollLeft}
                 size="small"
@@ -147,92 +166,60 @@ const ExplorePossibleWidget = () => {
                 <KeyboardArrowLeftIcon fontSize="small" />
               </IconButton>
               <IconButton
-                aria-label="next apps"
+                aria-label="Scroll to next apps"
                 onClick={() => scrollList('right')}
                 disabled={!canScrollRight}
                 size="small"
               >
                 <KeyboardArrowRightIcon fontSize="small" />
               </IconButton>
-            </div>
+            </nav>
           )}
-        </Stack>
+        </div>
 
         {/* Scrollable container */}
         <ul
           ref={scrollContainerRef}
           onScroll={updateScrollState}
           className={css.carouselContainer}
-          style={{
-            display: 'flex',
-            gap: `${ITEM_GAP}px`,
-            overflowX: 'auto',
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            listStyle: 'none',
-            padding: '2px 0 0 0', // Top padding to prevent card from being cut off on hover
-            margin: 0,
-          }}
+          role="list"
+          aria-label="Explore possible features"
+          tabIndex={0}
         >
           {EXPLORE_POSSIBLE_APPS.map((app) => (
-            <li key={app.id} style={{ width: ITEM_WIDTH, flexShrink: 0 }}>
-              <Link href={app.link} className={css.cardLink} onClick={() => handleAppClick(app.id)}>
-                <Box
-                  className={css.card}
-                  sx={{
-                    backgroundColor: 'background.main',
-                    '&:hover': {
-                      backgroundColor: 'background.lightGrey',
-                    },
-                  }}
-                >
+            <li key={app.id} className={css.carouselItem}>
+              <Link
+                href={app.link}
+                className={css.cardLink}
+                onClick={() => handleAppClick(app.id)}
+                aria-label={`${app.title}${app.tag ? ` - ${app.tag.text}` : ''}`}
+              >
+                <div className={css.card}>
                   {/* Tag */}
                   {app.tag && (
                     <Chip
-                      label={
-                        <Typography
-                          component="span"
-                          fontSize="11px"
-                          lineHeight="16px"
-                          letterSpacing="1px"
-                          fontWeight={400}
-                          textTransform="uppercase"
-                        >
-                          {app.tag.text}
-                        </Typography>
-                      }
+                      label={<span className={css.tagText}>{app.tag.text}</span>}
                       size="small"
                       className={css.tag}
                       sx={{
                         backgroundColor: app.tag.color,
-                        color: 'static.main', // #121312 - stays dark in both light and dark mode
-                        height: '20px',
                       }}
                     />
                   )}
 
                   {/* Icon */}
-                  <Box className={css.iconContainer}>
-                    <img src={app.iconUrl} alt="" className={css.icon} />
-                  </Box>
+                  <div className={css.iconContainer}>
+                    <img src={app.iconUrl} alt={`${app.title} icon`} className={css.icon} />
+                  </div>
 
                   {/* Title */}
-                  <Typography
-                    fontWeight={700}
-                    fontSize="16px"
-                    lineHeight="22px"
-                    letterSpacing="0.15px"
-                    color="text.primary"
-                    className={css.title}
-                  >
-                    {app.title}
-                  </Typography>
-                </Box>
+                  <p className={css.title}>{app.title}</p>
+                </div>
               </Link>
             </li>
           ))}
         </ul>
-      </Box>
+      </div>
     </Card>
   )
 }

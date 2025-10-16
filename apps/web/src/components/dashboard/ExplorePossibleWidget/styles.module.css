@@ -4,22 +4,52 @@
 }
 
 .carouselContainer {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  scroll-snap-type: x mandatory;
+  scroll-padding: 0;
+  list-style: none;
+  padding: 2px 0 0 0; /* Top padding to prevent card from being cut off on hover */
+  margin: 0;
 }
 
 .carouselContainer::-webkit-scrollbar {
   display: none;
 }
 
+.carouselContainer:focus {
+  outline: 2px solid var(--color-primary-main);
+  outline-offset: 2px;
+}
+
+.carouselItem {
+  width: 180px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
 .cardLink {
   text-decoration: none;
   display: block;
   height: 100%;
+  border-radius: 16px;
+}
+
+.cardLink:focus {
+  outline: none;
+}
+
+.cardLink:focus-visible .card {
+  outline: 2px solid var(--color-primary-main);
+  outline-offset: 2px;
 }
 
 .card {
-  /* background-color removed - will be set via MUI sx prop for theme support */
+  background-color: var(--color-background-main);
   border-radius: 16px;
   padding: 24px;
   width: 180px;
@@ -29,23 +59,33 @@
   justify-content: space-between;
   align-items: flex-end;
   position: relative;
-  transition: transform 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
 }
 
 .card:hover {
   transform: translateY(-2px);
+  background-color: var(--color-background-lightGrey);
 }
 
 .tag {
   position: absolute;
   top: 24px;
   left: 24px;
-  height: 20px;
+  height: 20px !important; 
   border-radius: 6px;
   display: flex;
   padding: 2px 2px;
   align-items: center;
   gap: var(--space-1, 4px);
+}
+
+.tagText {
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 1px;
+  font-weight: 400;
+  text-transform: uppercase;
+  color: var(--color-static-main);
 }
 
 .iconContainer {
@@ -63,10 +103,29 @@
   object-fit: cover;
 }
 
+.header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.headerTitle {
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 22px;
+}
+
 .title {
   width: 100%;
   text-align: left;
   align-self: flex-start;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 22px;
+  letter-spacing: 0.15px;
+  margin: 0;
 }
 
 .gradientFade {
@@ -75,7 +134,6 @@
   top: 40px;
   bottom: 0;
   width: 64px;
-  /* gradient removed - will be set via inline style for theme support */
   pointer-events: none;
   z-index: 1;
 }
