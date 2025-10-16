@@ -3,7 +3,8 @@ import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
 import useSpendingLimit from '@/hooks/useSpendingLimit'
 import { Button } from '@mui/material'
-import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+
 import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
 import EarnIcon from '@/public/images/common/earn.svg'
@@ -18,7 +19,7 @@ const EarnButton = ({
   trackingLabel,
   compact = true,
 }: {
-  tokenInfo: TokenInfo
+  tokenInfo: Balance['tokenInfo']
   trackingLabel: EARN_LABELS
   compact?: boolean
 }): ReactElement => {
