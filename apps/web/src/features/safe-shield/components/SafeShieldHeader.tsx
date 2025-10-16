@@ -1,82 +1,33 @@
 import { type ReactElement } from 'react'
 import { Box, Typography, Stack, SvgIcon } from '@mui/material'
 import SafeShieldLogo from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
-import type { AnalysisResult, LiveAnalysisResponse, Severity } from '@safe-global/utils/features/safe-shield/types'
-import { getPrimaryResult } from '../utils'
-
-const SEVERITY_TO_LABEL: Record<Severity, string> = {
-  CRITICAL: 'Risk detected',
-  WARN: 'Issues found',
-  INFO: 'Review details',
-  OK: 'Checks passed',
-}
-
-// Helper to determine overall status
-const getOverallStatus = (analysisData?: LiveAnalysisResponse | null): { severity: Severity; title: string } | null => {
-  if (!analysisData) {
-    return null
-  }
-
-  // Flatten all AnalysisResult objects from contract, recipient, and threat into one array
-  const allResults: AnalysisResult<any>[] = []
-
-  // Add contract and recipient results
-  for (const data of [analysisData.contract, analysisData.recipient]) {
-    if (data) {
-      for (const addressResults of Object.values(data)) {
-        for (const groupResults of Object.values(addressResults)) {
-          if (groupResults) {
-            allResults.push(...groupResults)
-          }
-        }
-      }
-    }
-  }
-
-  // Add threat result
-  if (analysisData.threat) {
-    allResults.push(analysisData.threat)
-  }
-
-  const primaryResult = getPrimaryResult(allResults)
-
-  if (!primaryResult) {
-    return { severity: 'OK' as Severity, title: 'Checks passed' }
-  }
-
-  return { severity: primaryResult.severity, title: SEVERITY_TO_LABEL[primaryResult.severity] }
-}
+import type { ContractAnalysisResults, RecipientAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
+import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import { SEVERITY_COLORS } from '../constants'
 
 export const SafeShieldHeader = ({
-  data,
-  error,
-  loading,
+  recipient = [{}, undefined, false],
+  contract = [{}, undefined, false],
 }: {
-  data?: LiveAnalysisResponse | null
-  error?: Error | null
-  loading?: boolean
+  recipient?: AsyncResult<RecipientAnalysisResults>
+  contract?: AsyncResult<ContractAnalysisResults>
 }): ReactElement => {
-  const status = getOverallStatus(data)
-  // Header background color based on severity
+  const [recipientResults = {}, recipientError, recipientLoading = false] = recipient
+  const [contractResults = {}, contractError, contractLoading = false] = contract
+
+  const status = getOverallStatus(recipientResults, contractResults)
+
+  const loading = recipientLoading || contractLoading
+  const error = recipientError || contractError
+
   const headerBgColor =
-    !status || !status?.severity
-      ? 'background.default'
-      : {
-          OK: 'success.background',
-          INFO: 'info.background',
-          WARN: 'warning.background',
-          CRITICAL: 'error.background',
-        }[status.severity]
+    !status || !status?.severity || loading
+      ? 'var(--color-background-default)'
+      : SEVERITY_COLORS[status.severity].background
 
   const headerTextColor =
-    !status || !status?.severity
-      ? 'text.secondary'
-      : {
-          OK: 'success.main',
-          INFO: 'info.main',
-          WARN: 'warning.main',
-          CRITICAL: 'error.main',
-        }[status.severity]
+    !status || !status?.severity || loading ? 'text.secondary' : SEVERITY_COLORS[status.severity].main
 
   return (
     <Box padding="4px 4px 0px">

@@ -1,6 +1,6 @@
 import { sortBySeverity, getPrimaryResult } from '../analysisUtils'
-import { Severity, ContractStatus } from '@safe-global/utils/features/safe-shield/types'
-import type { AnalysisResult } from '@safe-global/utils/features/safe-shield/types'
+import { Severity, ContractStatus } from '../../types'
+import type { AnalysisResult } from '../../types'
 
 describe('analysisUtils', () => {
   describe('sortBySeverity', () => {
@@ -48,12 +48,7 @@ describe('analysisUtils', () => {
 
     it('should not mutate the original array', () => {
       const original: AnalysisResult<any>[] = [
-        {
-          severity: Severity.OK,
-          type: ContractStatus.VERIFIED,
-          title: 'OK result',
-          description: 'OK description',
-        },
+        { severity: Severity.OK, type: ContractStatus.VERIFIED, title: 'OK result', description: 'OK description' },
         {
           severity: Severity.CRITICAL,
           type: ContractStatus.NOT_VERIFIED,
@@ -95,12 +90,7 @@ describe('analysisUtils', () => {
   describe('getPrimaryResult', () => {
     it('should return the result with highest severity', () => {
       const results: AnalysisResult<any>[] = [
-        {
-          severity: Severity.OK,
-          type: ContractStatus.VERIFIED,
-          title: 'OK result',
-          description: 'OK description',
-        },
+        { severity: Severity.OK, type: ContractStatus.VERIFIED, title: 'OK result', description: 'OK description' },
         {
           severity: Severity.CRITICAL,
           type: ContractStatus.NOT_VERIFIED,
@@ -185,24 +175,14 @@ describe('analysisUtils', () => {
           title: 'Warning',
           description: 'Warning description',
         },
-        {
-          severity: Severity.INFO,
-          type: ContractStatus.VERIFIED,
-          title: 'Info',
-          description: 'Info description',
-        },
+        { severity: Severity.INFO, type: ContractStatus.VERIFIED, title: 'Info', description: 'Info description' },
         {
           severity: Severity.CRITICAL,
           type: ContractStatus.NOT_VERIFIED,
           title: 'Critical',
           description: 'Critical description',
         },
-        {
-          severity: Severity.OK,
-          type: ContractStatus.VERIFIED,
-          title: 'OK',
-          description: 'OK description',
-        },
+        { severity: Severity.OK, type: ContractStatus.VERIFIED, title: 'OK', description: 'OK description' },
       ]
 
       const primary = getPrimaryResult(results)
@@ -214,18 +194,8 @@ describe('analysisUtils', () => {
 
     it('should prioritize WARN over INFO and OK', () => {
       const results: AnalysisResult<any>[] = [
-        {
-          severity: Severity.OK,
-          type: ContractStatus.VERIFIED,
-          title: 'OK',
-          description: 'OK description',
-        },
-        {
-          severity: Severity.INFO,
-          type: ContractStatus.VERIFIED,
-          title: 'Info',
-          description: 'Info description',
-        },
+        { severity: Severity.OK, type: ContractStatus.VERIFIED, title: 'OK', description: 'OK description' },
+        { severity: Severity.INFO, type: ContractStatus.VERIFIED, title: 'Info', description: 'Info description' },
         {
           severity: Severity.WARN,
           type: ContractStatus.NEW_CONTRACT,
@@ -243,18 +213,8 @@ describe('analysisUtils', () => {
 
     it('should prioritize INFO over OK', () => {
       const results: AnalysisResult<any>[] = [
-        {
-          severity: Severity.OK,
-          type: ContractStatus.VERIFIED,
-          title: 'OK',
-          description: 'OK description',
-        },
-        {
-          severity: Severity.INFO,
-          type: ContractStatus.VERIFIED,
-          title: 'Info',
-          description: 'Info description',
-        },
+        { severity: Severity.OK, type: ContractStatus.VERIFIED, title: 'OK', description: 'OK description' },
+        { severity: Severity.INFO, type: ContractStatus.VERIFIED, title: 'Info', description: 'Info description' },
       ]
 
       const primary = getPrimaryResult(results)
