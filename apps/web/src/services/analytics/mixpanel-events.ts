@@ -13,6 +13,7 @@ export enum MixpanelEvent {
   CSV_TX_EXPORT_SUBMITTED = 'CSV Exported',
   NATIVE_SWAP_VIEWED = 'Native Swap Viewed',
   SAFE_LABS_TERMS_ACCEPTED = 'Safe Labs Terms Accepted',
+  SIDEBAR_CLICKED = 'Sidebar Clicked',
 }
 
 export enum MixpanelUserProperty {
@@ -49,6 +50,7 @@ export enum MixpanelEventParams {
   TOTAL_VALUE_OF_PORTFOLIO = 'Total Value of Portfolio',
   APP_URL = 'App URL',
   DATE_RANGE = 'Date Range',
+  SIDEBAR_ELEMENT = 'Sidebar Element',
 }
 
 export enum SafeAppLaunchLocation {

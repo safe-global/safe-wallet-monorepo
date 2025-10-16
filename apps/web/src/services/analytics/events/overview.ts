@@ -69,6 +69,10 @@ export const OVERVIEW_EVENTS = {
     action: 'Sidebar',
     category: OVERVIEW_CATEGORY,
   },
+  SIDEBAR_CLICKED: {
+    action: 'Sidebar clicked',
+    category: OVERVIEW_CATEGORY,
+  },
   WHATS_NEW: {
     action: "Open What's New",
     category: OVERVIEW_CATEGORY,

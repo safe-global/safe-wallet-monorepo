@@ -9,6 +9,7 @@ import { WALLETCONNECT_EVENTS } from './events/walletconnect'
 import { TX_LIST_EVENTS } from './events/txList'
 import { SWAP_EVENTS } from './events/swaps'
 import { TERMS_EVENTS } from './events/terms'
+import { OVERVIEW_EVENTS } from './events/overview'
 
 // If an event is mapped here, it will be tracked in Mixpanel
 export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
@@ -26,6 +27,7 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [TX_LIST_EVENTS.CSV_EXPORT_SUBMITTED.action]: MixpanelEvent.CSV_TX_EXPORT_SUBMITTED,
   [SWAP_EVENTS.OPEN_SWAPS.action]: MixpanelEvent.NATIVE_SWAP_VIEWED,
   [TERMS_EVENTS.ACCEPT_SAFE_LABS_TERMS.action]: MixpanelEvent.SAFE_LABS_TERMS_ACCEPTED,
+  [OVERVIEW_EVENTS.SIDEBAR_CLICKED.action]: MixpanelEvent.SIDEBAR_CLICKED,
 }
 
 // Maps GA labels (lowercase) to Mixpanel properties (Title Case)

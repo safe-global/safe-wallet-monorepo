@@ -16,7 +16,7 @@ import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
 import { useQueuedTxsLength } from '@/hooks/useTxQueue'
 import { useCurrentChain } from '@/hooks/useChains'
 import { isRouteEnabled } from '@/utils/chains'
-import { trackEvent } from '@/services/analytics'
+import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { GA_LABEL_TO_MIXPANEL_PROPERTY } from '@/services/analytics/ga-mixpanel-mapping'
@@ -81,10 +81,10 @@ const Navigation = (): ReactElement => {
     return href
   }
 
-  const handleNavigationClick = (href: string) => {
-    const eventInfo = customSidebarEvents[href]
+  const handleNavigationClick = (item: NavItem) => {
+    const eventInfo = customSidebarEvents[item.href]
     if (eventInfo) {
-      if (href === AppRoutes.swap) {
+      if (item.href === AppRoutes.swap) {
         trackEvent(
           { ...eventInfo.event, label: eventInfo.label },
           { [MixpanelEventParams.ENTRY_POINT]: GA_LABEL_TO_MIXPANEL_PROPERTY[SWAP_LABELS.sidebar] },
@@ -93,6 +93,9 @@ const Navigation = (): ReactElement => {
         trackEvent({ ...eventInfo.event, label: eventInfo.label })
       }
     }
+
+    // Track sidebar click for all navigation items
+    trackEvent({ ...OVERVIEW_EVENTS.SIDEBAR_CLICKED }, { [MixpanelEventParams.SIDEBAR_ELEMENT]: item.label })
   }
 
   return (
@@ -126,7 +129,7 @@ const Navigation = (): ReactElement => {
                 sx={{ padding: 0 }}
                 disabled={isDisabled}
                 selected={isSelected}
-                onClick={isDisabled ? undefined : () => handleNavigationClick(item.href)}
+                onClick={isDisabled ? undefined : () => handleNavigationClick(item)}
                 key={item.href}
               >
                 <SidebarListItemButton

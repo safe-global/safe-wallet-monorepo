@@ -2,7 +2,7 @@ import ActivateAccountButton from '@/features/counterfactual/ActivateAccountButt
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 import { type ReactElement, useContext } from 'react'
 import Button from '@mui/material/Button'
-import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
 import { NewTxFlow } from '@/components/tx-flow/flows'
@@ -13,7 +13,7 @@ const NewTxButton = (): ReactElement => {
 
   const onClick = () => {
     setTxFlow(<NewTxFlow />, undefined, false)
-    trackEvent({ ...OVERVIEW_EVENTS.NEW_TRANSACTION, label: 'sidebar' })
+    trackEvent({ ...OVERVIEW_EVENTS.SIDEBAR_CLICKED }, { [MixpanelEventParams.SIDEBAR_ELEMENT]: 'New Transaction' })
   }
 
   if (isCounterfactualSafe) {
