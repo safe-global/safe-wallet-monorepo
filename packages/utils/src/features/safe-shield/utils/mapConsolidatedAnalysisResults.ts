@@ -37,11 +37,12 @@ export const mapConsolidatedAnalysisResults = (
     for (const [type, typeResults] of Object.entries(groupResults)) {
       const numResults = typeResults.length
       if (numResults > 0) {
+        const pluraliseDescription = MULTI_RESULT_DESCRIPTION[type] || (() => typeResults[0].description)
         currentGroupResults.push({
           severity: typeResults[0].severity,
           title: typeResults[0].title,
           type: type as AnyStatus,
-          description: MULTI_RESULT_DESCRIPTION[type as RecipientStatus](numResults, addressResults.length),
+          description: pluraliseDescription(numResults, addressResults.length),
         })
       }
     }
