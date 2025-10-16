@@ -44,6 +44,12 @@ export enum TransferDirection {
   UNKNOWN = 'UNKNOWN',
 }
 
+export enum TokenType {
+  ERC20 = 'ERC20',
+  ERC721 = 'ERC721',
+  NATIVE_TOKEN = 'NATIVE_TOKEN',
+}
+
 export enum TransactionTokenType {
   ERC20 = 'ERC20',
   ERC721 = 'ERC721',
