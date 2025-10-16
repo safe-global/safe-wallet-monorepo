@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react'
 import { Tooltip } from '@mui/material'
-import { TransferDirection } from '@safe-global/safe-gateway-typescript-sdk'
+import { TransferDirection } from '@safe-global/store/gateway/types'
 import css from './styles.module.css'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import TokenIcon from '../TokenIcon'
