@@ -25,7 +25,7 @@ import css from './styles.module.css'
 import { TxSecurityProvider } from '@/components/tx/security/shared/TxSecurityContext'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import SafeInfo from '@/components/tx-flow/common/SafeInfo'
-import SafeShieldWidget from '../SafeShieldWidget'
+import { SafeShieldDisplay } from '@/features/safe-shield/components/SafeShieldDisplay'
 
 export const TxLayoutHeader = ({
   hideNonce,
@@ -189,7 +189,7 @@ const TxLayout = ({
                       className={classnames(css.widget)}
                     >
                       <Box className={css.sticky}>
-                        <SafeShieldWidget />
+                        <SafeShieldDisplay />
                       </Box>
                     </Grid>
                   )}

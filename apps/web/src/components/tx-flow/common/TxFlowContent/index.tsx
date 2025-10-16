@@ -8,7 +8,7 @@ import { ProgressBar } from '@/components/common/ProgressBar'
 import css from './styles.module.css'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import TxStatusWidget from '@/components/tx-flow/common/TxStatusWidget'
-import SafeShieldWidget from '@/components/tx-flow/common/SafeShieldWidget'
+import { SafeShieldDisplay } from '@/features/safe-shield/components/SafeShieldDisplay'
 import { TxLayoutHeader } from '../TxLayout'
 import { Slot, SlotName } from '../../slots'
 import SafeInfo from '@/components/tx-flow/common/SafeInfo'
@@ -130,7 +130,7 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
                 <Slot name={SlotName.Sidebar} />
 
                 <Box className={css.sticky}>
-                  <SafeShieldWidget />
+                  <SafeShieldDisplay />
                 </Box>
               </Grid>
             )}
