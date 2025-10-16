@@ -2,7 +2,8 @@ import React from 'react'
 import { render } from '@/src/tests/test-utils'
 import { SwapOrderHeader } from './SwapOrderHeader'
 import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
-import { MultisigExecutionDetails, TokenInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { TokenInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 // Mock the date utils
 jest.mock('@/src/utils/date', () => ({

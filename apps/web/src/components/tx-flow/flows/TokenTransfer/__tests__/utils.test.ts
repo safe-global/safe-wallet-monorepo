@@ -1,5 +1,5 @@
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
-import { type SafeBalanceResponse, type TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Balance, type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { useTokenAmount, useVisibleTokens } from '@/components/tx-flow/flows/TokenTransfer/utils'
 import { renderHook } from '@/tests/test-utils'
@@ -22,7 +22,7 @@ describe('TokenTransfer utils', () => {
 
     it('should return the totalAmount if there is a token', () => {
       const mockToken = {
-        tokenInfo: { address: '0x2', symbol: 'TST', decimals: 16 } as TokenInfo,
+        tokenInfo: { address: '0x2', symbol: 'TST', decimals: 16 } as Balance['tokenInfo'],
         balance: '100',
         fiatBalance: '100',
         fiatConversion: '1',
@@ -88,7 +88,7 @@ describe('TokenTransfer utils', () => {
           type: TokenType.ERC20,
         },
       }
-      const balance: SafeBalanceResponse = {
+      const balance: Balances = {
         fiatTotal: '200',
         items: [mockToken, mockToken1],
       }
@@ -143,7 +143,7 @@ describe('TokenTransfer utils', () => {
           type: TokenType.ERC20,
         },
       }
-      const balance: SafeBalanceResponse = {
+      const balance: Balances = {
         fiatTotal: '200',
         items: [mockToken, mockToken1],
       }
