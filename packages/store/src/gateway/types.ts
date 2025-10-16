@@ -8,6 +8,9 @@ import {
   ModuleExecutionInfo,
   MultisigExecutionInfo,
   AddressInfo,
+  NativeStakingDepositTransactionInfo,
+  NativeStakingValidatorsExitTransactionInfo,
+  NativeStakingWithdrawTransactionInfo,
 } from './AUTO_GENERATED/transactions'
 import { SafeOverview } from './AUTO_GENERATED/safes'
 import { MessageItem, MessagePage, TypedData } from './AUTO_GENERATED/messages'
@@ -142,3 +145,8 @@ export type ActionValueDecoded = {
 export type AddressInfoIndex = Record<string, AddressInfo>
 
 export type { BalancesGetSupportedFiatCodesV1ApiResponse as FiatCurrencies } from './AUTO_GENERATED/balances'
+
+export type StakingTxInfo =
+  | NativeStakingDepositTransactionInfo
+  | NativeStakingValidatorsExitTransactionInfo
+  | NativeStakingWithdrawTransactionInfo
