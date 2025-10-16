@@ -1,4 +1,4 @@
-import type { AnalysisResult, AnyStatus, AddressAnalysisResults, StatusGroup, RecipientStatus } from '../types'
+import type { AnalysisResult, AnyStatus, AddressAnalysisResults, StatusGroup } from '../types'
 import { MULTI_RESULT_DESCRIPTION } from '../constants'
 import { getPrimaryResult, sortBySeverity } from './analysisUtils'
 
@@ -37,7 +37,8 @@ export const mapConsolidatedAnalysisResults = (
     for (const [type, typeResults] of Object.entries(groupResults)) {
       const numResults = typeResults.length
       if (numResults > 0) {
-        const pluraliseDescription = MULTI_RESULT_DESCRIPTION[type] || (() => typeResults[0].description)
+        const pluraliseDescription =
+          MULTI_RESULT_DESCRIPTION[type as keyof typeof MULTI_RESULT_DESCRIPTION] || (() => typeResults[0].description)
         currentGroupResults.push({
           severity: typeResults[0].severity,
           title: typeResults[0].title,
