@@ -21,7 +21,7 @@ import { useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEna
 import useIsStakingPromoEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import StakeButton from '@/features/stake/components/StakeButton'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { TokenType } from '@safe-global/store/gateway/types'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { FiatChange } from './FiatChange'
 import { FiatBalance } from './FiatBalance'
