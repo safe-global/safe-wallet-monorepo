@@ -45,7 +45,10 @@ describe('SafeShieldWidget', () => {
     simulation: {
       simulateTransaction: jest.fn(),
       simulationData: undefined,
-      _simulationRequestStatus: FETCH_STATUS.NOT_ASKED,
+      _simulationRequestStatus: FETCH_STATUS.NOT_ASKED as
+        | FETCH_STATUS.NOT_ASKED
+        | FETCH_STATUS.LOADING
+        | FETCH_STATUS.ERROR,
       simulationLink: '',
       requestError: undefined,
       resetSimulation: jest.fn(),
@@ -61,7 +64,10 @@ describe('SafeShieldWidget', () => {
       simulation: {
         simulateTransaction: jest.fn(),
         simulationData: undefined,
-        _simulationRequestStatus: FETCH_STATUS.NOT_ASKED,
+        _simulationRequestStatus: FETCH_STATUS.NOT_ASKED as
+          | FETCH_STATUS.NOT_ASKED
+          | FETCH_STATUS.LOADING
+          | FETCH_STATUS.ERROR,
         simulationLink: '',
         requestError: undefined,
         resetSimulation: jest.fn(),
@@ -86,6 +92,21 @@ describe('SafeShieldWidget', () => {
       safeTxError: undefined,
       setSafeTx: jest.fn(),
       setSafeTxError: jest.fn(),
+      safeMessage: undefined,
+      setSafeMessage: jest.fn(),
+      nonce: undefined,
+      setNonce: jest.fn(),
+      nonceNeeded: true,
+      setNonceNeeded: jest.fn(),
+      safeTxGas: undefined,
+      setSafeTxGas: jest.fn(),
+      recommendedNonce: undefined,
+      txOrigin: undefined,
+      setTxOrigin: jest.fn(),
+      isReadOnly: false,
+      setIsReadOnly: jest.fn(),
+      isMassPayout: undefined,
+      setIsMassPayout: jest.fn(),
     }
 
     render(
@@ -109,6 +130,21 @@ describe('SafeShieldWidget', () => {
       safeTxError: undefined,
       setSafeTx: jest.fn(),
       setSafeTxError: jest.fn(),
+      safeMessage: undefined,
+      setSafeMessage: jest.fn(),
+      nonce: undefined,
+      setNonce: jest.fn(),
+      nonceNeeded: true,
+      setNonceNeeded: jest.fn(),
+      safeTxGas: undefined,
+      setSafeTxGas: jest.fn(),
+      recommendedNonce: undefined,
+      txOrigin: undefined,
+      setTxOrigin: jest.fn(),
+      isReadOnly: false,
+      setIsReadOnly: jest.fn(),
+      isMassPayout: undefined,
+      setIsMassPayout: jest.fn(),
     }
 
     render(
@@ -130,13 +166,45 @@ describe('SafeShieldWidget', () => {
       safeTxError: undefined,
       setSafeTx: jest.fn(),
       setSafeTxError: jest.fn(),
+      safeMessage: undefined,
+      setSafeMessage: jest.fn(),
+      nonce: undefined,
+      setNonce: jest.fn(),
+      nonceNeeded: true,
+      setNonceNeeded: jest.fn(),
+      safeTxGas: undefined,
+      setSafeTxGas: jest.fn(),
+      recommendedNonce: undefined,
+      txOrigin: undefined,
+      setTxOrigin: jest.fn(),
+      isReadOnly: false,
+      setIsReadOnly: jest.fn(),
+      isMassPayout: undefined,
+      setIsMassPayout: jest.fn(),
     }
 
     const loadingTxInfoContext = {
       ...mockTxInfoContext,
+      simulation: {
+        ...mockTxInfoContext.simulation,
+        _simulationRequestStatus: FETCH_STATUS.LOADING as
+          | FETCH_STATUS.LOADING
+          | FETCH_STATUS.NOT_ASKED
+          | FETCH_STATUS.ERROR,
+      },
       status: {
         ...mockTxInfoContext.status,
         isLoading: true,
+      },
+      nestedTx: {
+        ...mockTxInfoContext.nestedTx,
+        simulation: {
+          ...mockTxInfoContext.nestedTx.simulation,
+          _simulationRequestStatus: FETCH_STATUS.LOADING as
+            | FETCH_STATUS.LOADING
+            | FETCH_STATUS.NOT_ASKED
+            | FETCH_STATUS.ERROR,
+        },
       },
     }
 
@@ -158,6 +226,21 @@ describe('SafeShieldWidget', () => {
       safeTxError: undefined,
       setSafeTx: jest.fn(),
       setSafeTxError: jest.fn(),
+      safeMessage: undefined,
+      setSafeMessage: jest.fn(),
+      nonce: undefined,
+      setNonce: jest.fn(),
+      nonceNeeded: true,
+      setNonceNeeded: jest.fn(),
+      safeTxGas: undefined,
+      setSafeTxGas: jest.fn(),
+      recommendedNonce: undefined,
+      txOrigin: undefined,
+      setTxOrigin: jest.fn(),
+      isReadOnly: false,
+      setIsReadOnly: jest.fn(),
+      isMassPayout: undefined,
+      setIsMassPayout: jest.fn(),
     }
 
     const successTxInfoContext = {
@@ -165,11 +248,25 @@ describe('SafeShieldWidget', () => {
       simulation: {
         ...mockTxInfoContext.simulation,
         simulationLink: 'https://tenderly.co/simulation/123',
+        _simulationRequestStatus: FETCH_STATUS.NOT_ASKED as
+          | FETCH_STATUS.LOADING
+          | FETCH_STATUS.NOT_ASKED
+          | FETCH_STATUS.ERROR,
       },
       status: {
         ...mockTxInfoContext.status,
         isFinished: true,
         isSuccess: true,
+      },
+      nestedTx: {
+        ...mockTxInfoContext.nestedTx,
+        simulation: {
+          ...mockTxInfoContext.nestedTx.simulation,
+          _simulationRequestStatus: FETCH_STATUS.NOT_ASKED as
+            | FETCH_STATUS.LOADING
+            | FETCH_STATUS.NOT_ASKED
+            | FETCH_STATUS.ERROR,
+        },
       },
     }
 
@@ -196,6 +293,21 @@ describe('SafeShieldWidget', () => {
       safeTxError: undefined,
       setSafeTx: jest.fn(),
       setSafeTxError: jest.fn(),
+      safeMessage: undefined,
+      setSafeMessage: jest.fn(),
+      nonce: undefined,
+      setNonce: jest.fn(),
+      nonceNeeded: true,
+      setNonceNeeded: jest.fn(),
+      safeTxGas: undefined,
+      setSafeTxGas: jest.fn(),
+      recommendedNonce: undefined,
+      txOrigin: undefined,
+      setTxOrigin: jest.fn(),
+      isReadOnly: false,
+      setIsReadOnly: jest.fn(),
+      isMassPayout: undefined,
+      setIsMassPayout: jest.fn(),
     }
 
     const errorTxInfoContext = {
@@ -207,13 +319,35 @@ describe('SafeShieldWidget', () => {
         isSuccess: false,
       },
       simulation: {
-        ...mockTxInfoContext.simulation,
+        simulateTransaction: jest.fn(),
         simulationLink: 'https://tenderly.co/simulation/456',
         simulationData: {
           transaction: {
             error_message: 'Execution reverted',
-            error_info: { address: '0xabc' },
+            error_info: { error_message: 'Execution reverted', address: '0xabc' },
           },
+          simulation: { id: '456' },
+          contracts: [],
+          generated_access_list: [],
+        } as any,
+        _simulationRequestStatus: FETCH_STATUS.SUCCESS,
+        requestError: undefined,
+        resetSimulation: jest.fn(),
+      },
+      nestedTx: {
+        ...mockTxInfoContext.nestedTx,
+        simulation: {
+          simulateTransaction: jest.fn(),
+          simulationLink: '',
+          simulationData: {
+            transaction: {},
+            simulation: { id: '' },
+            contracts: [],
+            generated_access_list: [],
+          } as any,
+          _simulationRequestStatus: FETCH_STATUS.SUCCESS,
+          requestError: undefined,
+          resetSimulation: jest.fn(),
         },
       },
     }
