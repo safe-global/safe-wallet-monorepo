@@ -1,14 +1,14 @@
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { StatusGroup, type ContractStatus, type LiveAnalysisResponse, type AnalysisResult } from '../types'
+import { StatusGroup, type LiveAnalysisResponse, type AnalysisResult, StatusGroupType } from '../types'
 import { ContractAddressBuilder } from './contract-address.builder'
 import { ContractAnalysisResultBuilder } from './contract-analysis-result.builder'
 
 export class ContractAnalysisBuilder {
   private contract: {
     [address: string]: {
-      [StatusGroup.CONTRACT_VERIFICATION]?: AnalysisResult<ContractStatus>[]
-      [StatusGroup.CONTRACT_INTERACTION]?: AnalysisResult<ContractStatus>[]
-      [StatusGroup.DELEGATECALL]?: AnalysisResult<ContractStatus>[]
+      [StatusGroup.CONTRACT_VERIFICATION]?: AnalysisResult<StatusGroupType<StatusGroup.CONTRACT_VERIFICATION>>[]
+      [StatusGroup.CONTRACT_INTERACTION]?: AnalysisResult<StatusGroupType<StatusGroup.CONTRACT_INTERACTION>>[]
+      [StatusGroup.DELEGATECALL]?: AnalysisResult<StatusGroupType<StatusGroup.DELEGATECALL>>[]
     }
   } = {}
 
@@ -20,7 +20,7 @@ export class ContractAnalysisBuilder {
   }
 
   build(): LiveAnalysisResponse['contract'] {
-    return { ...this.contract }
+    return [{ ...this.contract }, undefined, false]
   }
 
   // Preset methods for common scenarios

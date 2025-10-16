@@ -1,4 +1,4 @@
-import { StatusGroup, type ContractStatus, type AnalysisResult } from '../types'
+import { StatusGroup, type AnalysisResult, type StatusGroupType } from '../types'
 import type { ContractAnalysisBuilder } from './contract-analysis.builder'
 
 export class ContractAddressBuilder {
@@ -7,7 +7,7 @@ export class ContractAddressBuilder {
     private address: string,
   ) {}
 
-  contractVerification(results: AnalysisResult<ContractStatus>[]): this {
+  contractVerification(results: AnalysisResult<StatusGroupType<StatusGroup.CONTRACT_VERIFICATION>>[]): this {
     if (!this.parent['contract'][this.address]) {
       this.parent['contract'][this.address] = {}
     }
@@ -15,7 +15,7 @@ export class ContractAddressBuilder {
     return this
   }
 
-  contractInteraction(results: AnalysisResult<ContractStatus>[]): this {
+  contractInteraction(results: AnalysisResult<StatusGroupType<StatusGroup.CONTRACT_INTERACTION>>[]): this {
     if (!this.parent['contract'][this.address]) {
       this.parent['contract'][this.address] = {}
     }
@@ -23,7 +23,7 @@ export class ContractAddressBuilder {
     return this
   }
 
-  delegatecall(results: AnalysisResult<ContractStatus>[]): this {
+  delegatecall(results: AnalysisResult<StatusGroupType<StatusGroup.DELEGATECALL>>[]): this {
     if (!this.parent['contract'][this.address]) {
       this.parent['contract'][this.address] = {}
     }

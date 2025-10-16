@@ -1,6 +1,7 @@
-import { Severity, RecipientStatus, type AnalysisResult } from '../types'
+import { faker } from '@faker-js/faker'
+import { Severity, RecipientStatus, BridgeStatus, type AnalysisResult } from '../types'
 
-export class RecipientAnalysisResultBuilder<T extends RecipientStatus> {
+export class RecipientAnalysisResultBuilder<T extends RecipientStatus | BridgeStatus> {
   private result: AnalysisResult<T>
 
   constructor() {
@@ -41,15 +42,15 @@ export class RecipientAnalysisResultBuilder<T extends RecipientStatus> {
     return new RecipientAnalysisResultBuilder<RecipientStatus.KNOWN_RECIPIENT>()
       .severity(Severity.OK)
       .type(RecipientStatus.KNOWN_RECIPIENT)
-      .title('Known Recipient')
-      .description('This recipient is in your address book or is an owned Safe.')
+      .title('Known recipient')
+      .description('This address is in your address book. ')
   }
 
   static unknownRecipient(): RecipientAnalysisResultBuilder<RecipientStatus.UNKNOWN_RECIPIENT> {
     return new RecipientAnalysisResultBuilder<RecipientStatus.UNKNOWN_RECIPIENT>()
       .severity(Severity.INFO)
       .type(RecipientStatus.UNKNOWN_RECIPIENT)
-      .title('Unknown Recipient')
+      .title('Unknown recipient')
       .description('This recipient is not in your address book and is not an owned Safe.')
   }
 
@@ -57,7 +58,7 @@ export class RecipientAnalysisResultBuilder<T extends RecipientStatus> {
     return new RecipientAnalysisResultBuilder<RecipientStatus.HIGH_ACTIVITY>()
       .severity(Severity.OK)
       .type(RecipientStatus.HIGH_ACTIVITY)
-      .title('High Activity')
+      .title('High activity')
       .description('This address has many transactions.')
   }
 
@@ -65,23 +66,33 @@ export class RecipientAnalysisResultBuilder<T extends RecipientStatus> {
     return new RecipientAnalysisResultBuilder<RecipientStatus.LOW_ACTIVITY>()
       .severity(Severity.WARN)
       .type(RecipientStatus.LOW_ACTIVITY)
-      .title('Low Activity')
-      .description('This address has few or no transactions.')
+      .title('Low activity')
+      .description('This address has low activity.')
   }
 
   static newRecipient(): RecipientAnalysisResultBuilder<RecipientStatus.NEW_RECIPIENT> {
     return new RecipientAnalysisResultBuilder<RecipientStatus.NEW_RECIPIENT>()
       .severity(Severity.INFO)
       .type(RecipientStatus.NEW_RECIPIENT)
-      .title('New Recipient')
-      .description('You are interacting with this recipient for the first time.')
+      .title('New recipient')
+      .description('You are interacting with this address for the first time.')
   }
 
   static recurringRecipient(): RecipientAnalysisResultBuilder<RecipientStatus.RECURRING_RECIPIENT> {
     return new RecipientAnalysisResultBuilder<RecipientStatus.RECURRING_RECIPIENT>()
       .severity(Severity.OK)
       .type(RecipientStatus.RECURRING_RECIPIENT)
-      .title('Recurring Recipient')
-      .description('You have interacted with this recipient before.')
+      .title('Recurring recipient')
+      .description(`You have interacted with this address ${faker.number.int({ min: 2, max: 100 })} times.`)
+  }
+
+  static incompatibleSafe(): RecipientAnalysisResultBuilder<BridgeStatus.INCOMPATIBLE_SAFE> {
+    return new RecipientAnalysisResultBuilder<BridgeStatus.INCOMPATIBLE_SAFE>()
+      .severity(Severity.CRITICAL)
+      .type(BridgeStatus.INCOMPATIBLE_SAFE)
+      .title('Incompatible Safe version')
+      .description(
+        'This Safe account cannot be created on the destination chain. You will not be able to claim ownership of the same address. Funds sent may be inaccessible.',
+      )
   }
 }
