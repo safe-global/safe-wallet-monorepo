@@ -20,7 +20,6 @@ import type {
   Order,
   AnyConfirmationView,
   AnySwapOrderConfirmationView,
-  SafeInfo,
   SettingsChange,
   SwapOrder,
   SwapOrderConfirmationView,
@@ -41,6 +40,7 @@ import type {
   StakingTxInfo,
   TransactionData,
 } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { Operation } from '@safe-global/store/gateway/types'
 import {
@@ -375,7 +375,7 @@ export const isConfirmableBy = (txSummary: TransactionSummary, walletAddress: st
 export const isExecutable = (
   txSummary: TransactionSummary,
   walletAddress: string,
-  safe: Pick<SafeInfo, 'nonce'>,
+  safe: Pick<SafeState, 'nonce'>,
 ): boolean => {
   if (
     !txSummary.executionInfo ||

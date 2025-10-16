@@ -8,7 +8,7 @@ import {
   getCallTraceErrors,
   getSimulationStatus,
 } from '../utils'
-import { ImplementationVersionState, type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeTransaction, SafeSignature } from '@safe-global/types-kit'
 import type { SingleTransactionSimulationParams } from '../utils'
 import { faker } from '@faker-js/faker'

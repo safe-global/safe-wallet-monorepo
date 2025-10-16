@@ -1,8 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { Interface } from 'ethers'
 import { SENTINEL_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
-
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { getRecoveryProposalTransactions } from '../transaction'
 
 describe('transaction', () => {
@@ -29,7 +28,7 @@ describe('transaction', () => {
               address: { value: safeAddresss },
               owners: [{ value: oldOwner1 }],
               threshold: oldThreshold,
-            } as SafeInfo
+            } as SafeState
 
             const newOwners = [{ value: newOwner1 }]
 
@@ -62,7 +61,7 @@ describe('transaction', () => {
               address: { value: safeAddresss },
               owners: [{ value: oldOwner1 }, { value: oldOwner2 }, { value: oldOwner3 }],
               threshold: oldThreshold,
-            } as SafeInfo
+            } as SafeState
 
             const newOwners = [{ value: newOwner1 }, { value: newOwner2 }, { value: newOwner3 }]
 
@@ -99,7 +98,7 @@ describe('transaction', () => {
             address: { value: safeAddresss },
             owners: [{ value: oldOwner1 }, { value: oldOwner2 }, { value: oldOwner3 }],
             threshold: oldThreshold,
-          } as SafeInfo
+          } as SafeState
 
           const newOwners = [{ value: newOwner1 }, { value: newOwner2 }, { value: newOwner3 }]
 
@@ -132,7 +131,7 @@ describe('transaction', () => {
               address: { value: safeAddresss },
               owners: [{ value: oldOwner1 }],
               threshold: oldThreshold,
-            } as SafeInfo
+            } as SafeState
 
             const newOwners = [{ value: oldOwner1 }]
 
@@ -160,7 +159,7 @@ describe('transaction', () => {
               address: { value: safeAddresss },
               owners: [{ value: oldOwner1 }, { value: oldOwner2 }, { value: oldOwner3 }],
               threshold: oldThreshold,
-            } as SafeInfo
+            } as SafeState
 
             const newOwners = [{ value: newOwner1 }, { value: newOwner2 }, { value: newOwner3 }]
 
@@ -195,7 +194,7 @@ describe('transaction', () => {
             address: { value: safeAddresss },
             owners: [{ value: oldOwner1 }, { value: oldOwner2 }, { value: oldOwner3 }],
             threshold: oldThreshold,
-          } as SafeInfo
+          } as SafeState
 
           const newOwners = [{ value: newOwner1 }, { value: newOwner2 }, { value: oldOwner3 }]
 
@@ -228,7 +227,7 @@ describe('transaction', () => {
           address: { value: safeAddresss },
           owners: [{ value: oldOwner1 }, { value: oldOwner2 }, { value: oldOwner3 }],
           threshold: oldThreshold,
-        } as SafeInfo
+        } as SafeState
 
         const newOwners = [{ value: oldOwner1 }, { value: oldOwner2 }, { value: oldOwner3 }]
 
@@ -259,7 +258,7 @@ describe('transaction', () => {
               address: { value: safeAddresss },
               owners: [{ value: oldOwner1 }],
               threshold: oldThreshold,
-            } as SafeInfo
+            } as SafeState
 
             const newOwners = [{ value: newOwner1 }, { value: newOwner2 }, { value: newOwner3 }]
 
@@ -293,7 +292,7 @@ describe('transaction', () => {
               address: { value: safeAddresss },
               owners: [{ value: oldOwner1 }, { value: oldOwner2 }],
               threshold: oldThreshold,
-            } as SafeInfo
+            } as SafeState
 
             const newOwners = [{ value: newOwner1 }, { value: newOwner2 }, { value: newOwner3 }]
 
@@ -329,7 +328,7 @@ describe('transaction', () => {
             address: { value: safeAddresss },
             owners: [{ value: oldOwner1 }, { value: oldOwner2 }],
             threshold: oldThreshold,
-          } as SafeInfo
+          } as SafeState
 
           const newOwners = [{ value: newOwner1 }, { value: newOwner2 }, { value: newOwner3 }]
 
@@ -363,7 +362,7 @@ describe('transaction', () => {
             address: { value: safeAddresss },
             owners: [{ value: oldOwner1 }],
             threshold: oldThreshold,
-          } as SafeInfo
+          } as SafeState
 
           const newOwners = [{ value: oldOwner1 }, { value: newOwner2 }, { value: newOwner3 }]
 
@@ -394,7 +393,7 @@ describe('transaction', () => {
             address: { value: safeAddresss },
             owners: [{ value: oldOwner1 }],
             threshold: oldThreshold,
-          } as SafeInfo
+          } as SafeState
 
           const newOwners = [
             { value: newOwner1 },
@@ -446,7 +445,7 @@ describe('transaction', () => {
             address: { value: safeAddresss },
             owners: [{ value: oldOwner1 }, { value: oldOwner2 }, { value: oldOwner3 }],
             threshold: oldThreshold,
-          } as SafeInfo
+          } as SafeState
 
           const newOwners = [{ value: newOwner1 }, { value: newOwner2 }]
 
@@ -485,7 +484,7 @@ describe('transaction', () => {
             address: { value: safeAddresss },
             owners: [{ value: oldOwner1 }, { value: oldOwner2 }, { value: oldOwner3 }],
             threshold: oldThreshold,
-          } as SafeInfo
+          } as SafeState
 
           const newOwners = [{ value: newOwner1 }, { value: newOwner2 }]
 
@@ -520,7 +519,7 @@ describe('transaction', () => {
             address: { value: safeAddresss },
             owners: [{ value: oldOwner1 }, { value: oldOwner2 }, { value: oldOwner3 }],
             threshold: oldThreshold,
-          } as SafeInfo
+          } as SafeState
 
           const newOwners = [{ value: oldOwner1 }, { value: newOwner1 }]
 
@@ -549,7 +548,7 @@ describe('transaction', () => {
             address: { value: safeAddresss },
             owners: [{ value: oldOwner1 }, { value: oldOwner2 }, { value: oldOwner3 }],
             threshold: oldThreshold,
-          } as SafeInfo
+          } as SafeState
 
           const newOwners = [{ value: oldOwner1 }, { value: newOwner1 }]
 

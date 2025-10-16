@@ -2,7 +2,8 @@ import type { SafeVersion, TransactionOptions } from '@safe-global/types-kit'
 import { type TransactionResponse, type Eip1193Provider, type Provider } from 'ethers'
 import semverSatisfies from 'semver/functions/satisfies'
 
-import { getSafeInfo, type SafeInfo, relayTransaction } from '@safe-global/safe-gateway-typescript-sdk'
+import { getSafeInfo, relayTransaction } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getReadOnlyProxyFactoryContract } from '@/services/contracts/safeContracts'
 import type { UrlObject } from 'url'
@@ -141,7 +142,7 @@ export const estimateSafeCreationGas = async (
   return gas
 }
 
-export const pollSafeInfo = async (chainId: string, safeAddress: string): Promise<SafeInfo> => {
+export const pollSafeInfo = async (chainId: string, safeAddress: string): Promise<SafeState> => {
   // exponential delay between attempts for around 4 min
   return backOff(() => getSafeInfo(chainId, safeAddress), {
     startingDelay: 750,

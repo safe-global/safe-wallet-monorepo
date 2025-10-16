@@ -3,7 +3,7 @@ import type { EthersError } from '@/utils/ethers-utils'
 
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import ContractErrorCodes from '@/services/contracts/ContractErrorCodes'
-import { type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { createWeb3, useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { type JsonRpcProvider } from 'ethers'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
@@ -23,7 +23,7 @@ const isContractError = (error: EthersError) => {
 // This is ONLY used to check the validity of a transaction in `useIsValidExecution`
 export const getPatchedSignerProvider = (
   wallet: ConnectedWallet | NestedWallet,
-  chainId: SafeInfo['chainId'],
+  chainId: SafeState['chainId'],
   readOnlyProvider: JsonRpcProvider,
 ) => {
   assertProvider(wallet.provider)

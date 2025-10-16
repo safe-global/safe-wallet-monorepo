@@ -1,10 +1,7 @@
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import { faker } from '@faker-js/faker'
 import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
-import {
-  type SafeState as SafeInfo,
-  type AddressInfo as AddressEx,
-} from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { type SafeState, type AddressInfo as AddressEx } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 import { Builder } from '../Builder'
 import { generateRandomArray } from './utils'
@@ -21,9 +18,9 @@ export function addressExBuilder(): IBuilder<AddressEx> {
   })
 }
 
-export function safeInfoBuilder(): IBuilder<SafeInfo> {
+export function safeInfoBuilder(): IBuilder<SafeState> {
   const chainId = faker.helpers.arrayElement(['1', '11155111', '100', '10', '137'])
-  return Builder.new<SafeInfo>().with({
+  return Builder.new<SafeState>().with({
     address: addressExBuilder().build(),
     chainId,
     nonce: faker.number.int(),

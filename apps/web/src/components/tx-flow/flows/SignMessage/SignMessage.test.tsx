@@ -3,7 +3,7 @@ import type Safe from '@safe-global/protocol-kit'
 import { act } from 'react'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { hexlify, zeroPadValue, toUtf8Bytes } from 'ethers'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import SignMessage from './SignMessage'
 
 import * as useIsWrongChainHook from '@/hooks/useIsWrongChain'
@@ -280,7 +280,7 @@ describe('SignMessage', () => {
           value: zeroPadValue('0x01', 20),
         },
         chainId: '5',
-      } as SafeInfo,
+      } as SafeState,
       messageText,
     )
     const msg = {
@@ -399,7 +399,7 @@ describe('SignMessage', () => {
       () =>
         ({
           address: zeroPadValue('0x07', 20),
-        }) as ConnectedWallet,
+        } as ConnectedWallet),
     )
     jest.spyOn(useIsSafeOwnerHook, 'default').mockImplementation(() => false)
     jest.spyOn(useSafeMessage, 'default').mockImplementation(() => [undefined, jest.fn(), undefined])
@@ -428,7 +428,7 @@ describe('SignMessage', () => {
       () =>
         ({
           address: zeroPadValue('0x02', 20),
-        }) as ConnectedWallet,
+        } as ConnectedWallet),
     )
     const messageText = 'Hello world!'
     const messageHash = generateSafeMessageHash(
@@ -438,7 +438,7 @@ describe('SignMessage', () => {
           value: zeroPadValue('0x01', 20),
         },
         chainId: '5',
-      } as SafeInfo,
+      } as SafeState,
       messageText,
     )
     const msg = {
@@ -474,7 +474,7 @@ describe('SignMessage', () => {
       () =>
         ({
           address: zeroPadValue('0x03', 20),
-        }) as ConnectedWallet,
+        } as ConnectedWallet),
     )
 
     jest.spyOn(useSafeMessage, 'default').mockReturnValue([undefined, jest.fn(), undefined])
@@ -516,7 +516,7 @@ describe('SignMessage', () => {
       () =>
         ({
           address: zeroPadValue('0x03', 20),
-        }) as ConnectedWallet,
+        } as ConnectedWallet),
     )
 
     const messageText = 'Hello world!'
@@ -527,7 +527,7 @@ describe('SignMessage', () => {
           value: zeroPadValue('0x01', 20),
         },
         chainId: '5',
-      } as SafeInfo,
+      } as SafeState,
       messageText,
     )
     const msg = {
@@ -580,7 +580,7 @@ describe('SignMessage', () => {
       () =>
         ({
           address: zeroPadValue('0x03', 20),
-        }) as ConnectedWallet,
+        } as ConnectedWallet),
     )
 
     const messageText = 'Hello world!'
@@ -591,7 +591,7 @@ describe('SignMessage', () => {
           value: zeroPadValue('0x01', 20),
         },
         chainId: '5',
-      } as SafeInfo,
+      } as SafeState,
       messageText,
     )
     const msg = {

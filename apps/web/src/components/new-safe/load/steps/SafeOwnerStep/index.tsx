@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
-import { getSafeInfo, type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { getSafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
 import { Box, Button, Divider } from '@mui/material'
 
@@ -41,7 +42,7 @@ const SafeOwnerStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeFormD
     name: Field.owners,
   })
 
-  const [safeInfo] = useAsync<SafeInfo>(() => {
+  const [safeInfo] = useAsync<SafeState>(() => {
     if (data.address) {
       return getSafeInfo(chainId, data.address)
     }
