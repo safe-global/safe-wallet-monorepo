@@ -7,21 +7,24 @@ import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import type { SafeTransaction } from '@safe-global/types-kit'
 import isEmpty from 'lodash/isEmpty'
 
 export const SafeShieldContent = ({
   recipient,
   contract,
+  safeTx,
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
+  safeTx?: SafeTransaction
 }): ReactElement => {
   const [recipientResults, recipientError, recipientLoading = false] = recipient || []
   const [contractResults, contractError, contractLoading = false] = contract || []
 
   const loading = recipientLoading || contractLoading
   const error = recipientError || contractError
-  const empty = isEmpty(recipientResults) && isEmpty(contractResults)
+  const empty = isEmpty(recipientResults) && isEmpty(contractResults) && !safeTx
 
   return (
     <Box padding="0px 4px 4px">
@@ -43,7 +46,7 @@ export const SafeShieldContent = ({
 
           {contractResults && Object.keys(contractResults).length > 0 && <AnalysisGroupCard data={contractResults} />}
 
-          <TenderlySimulation />
+          <TenderlySimulation safeTx={safeTx} />
         </Box>
       </Box>
     </Box>

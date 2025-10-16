@@ -6,7 +6,6 @@ import LaunchIcon from '@mui/icons-material/Launch'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import UpdateIcon from '@/public/images/safe-shield/update.svg'
 import AlertIcon from '@/public/images/safe-shield/alert.svg'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxInfoContext } from '@/components/tx-flow/TxInfoProvider'
 import { useCurrentChain } from '@/hooks/useChains'
 import {
@@ -28,8 +27,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 
 const safeInterface = Safe__factory.createInterface()
 
-export const TenderlySimulation = (): ReactElement | null => {
-  const { safeTx } = useContext(SafeTxContext)
+export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): ReactElement | null => {
   const { simulation, status, nestedTx } = useContext(TxInfoContext)
   const chain = useCurrentChain()
   const { safe } = useSafeInfo()
