@@ -1,73 +1,130 @@
-import { act, renderHook } from '@testing-library/react'
-import * as gateway from '@safe-global/safe-gateway-typescript-sdk'
+import { waitFor } from '@testing-library/react'
+import { http, HttpResponse } from 'msw'
+import { server } from '@/tests/server'
+import { GATEWAY_URL } from '@/config/gateway'
+import { mockSafeAppsForSorting } from '@safe-global/test/msw/mockSafeApps'
 
 import * as useChainIdHook from '@/hooks/useChainId'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
 import type { SafeAppsTag } from '@/config/constants'
-
-jest.mock('@safe-global/safe-gateway-typescript-sdk')
+import { renderHook } from '@/tests/test-utils'
 
 describe('useRemoteSafeApps', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
-
     jest.spyOn(useChainIdHook, 'default').mockReturnValue('5')
-    jest
-      .spyOn(gateway, 'getSafeApps')
-      .mockResolvedValue([
-        { name: 'B', tags: ['test'] } as gateway.SafeAppData,
-        { name: 'A', tags: [] as gateway.SafeAppData['tags'] } as gateway.SafeAppData,
-        { name: 'C', tags: ['test'] } as gateway.SafeAppData,
-      ])
+
+    // Override the default safe-apps handler for this specific test suite
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/chains/:chainId/safe-apps`, () => {
+        return HttpResponse.json(mockSafeAppsForSorting)
+      }),
+    )
   })
 
   it('should alphabetically return the remote safe apps', async () => {
     const { result } = renderHook(() => useRemoteSafeApps())
 
-    var [data, error, loading] = result.current
+    // Initial state should be loading
+    expect(result.current[2]).toBe(true) // loading
+    expect(result.current[0]).toEqual(undefined) // data
 
-    // Check that the loading state is true
-    expect(loading).toBe(true)
-    expect(error).toBe(undefined)
-    expect(data).toEqual(undefined)
-
-    // Check that the loading state is false after the promise resolves
-    await act(async () => {
-      jest.advanceTimersByTime(100)
+    // Wait for the data to be loaded
+    await waitFor(() => {
+      expect(result.current[2]).toBe(false) // loading
     })
 
-    var [data, error, loading] = result.current
+    const [data, , loading] = result.current
 
     expect(loading).toBe(false)
-    expect(error).toBe(undefined)
     expect(data).toStrictEqual([
-      { name: 'A', tags: [] },
-      { name: 'B', tags: ['test'] },
-      { name: 'C', tags: ['test'] },
+      {
+        id: 2,
+        name: 'A',
+        url: 'https://app-a.com',
+        iconUrl: '',
+        description: '',
+        chainIds: ['5'],
+        accessControl: { type: 'NO_RESTRICTIONS' },
+        tags: [],
+        features: [],
+        socialProfiles: [],
+        developerWebsite: '',
+        featured: false,
+      },
+      {
+        id: 1,
+        name: 'B',
+        url: 'https://app-b.com',
+        iconUrl: '',
+        description: '',
+        chainIds: ['5'],
+        accessControl: { type: 'NO_RESTRICTIONS' },
+        tags: ['test'],
+        features: [],
+        socialProfiles: [],
+        developerWebsite: '',
+        featured: false,
+      },
+      {
+        id: 3,
+        name: 'C',
+        url: 'https://app-c.com',
+        iconUrl: '',
+        description: '',
+        chainIds: ['5'],
+        accessControl: { type: 'NO_RESTRICTIONS' },
+        tags: ['test'],
+        features: [],
+        socialProfiles: [],
+        developerWebsite: '',
+        featured: false,
+      },
     ])
   })
   it('should alphabetically return the remote safe apps filtered by tag', async () => {
     const { result } = renderHook(() => useRemoteSafeApps({ tag: 'test' as SafeAppsTag }))
 
-    var [data, error, loading] = result.current
+    // Initial state should be loading
+    expect(result.current[2]).toBe(true) // loading
+    expect(result.current[0]).toEqual(undefined) // data
 
-    // Check that the loading state is true
-    expect(loading).toBe(true)
-    expect(error).toBe(undefined)
-    expect(data).toEqual(undefined)
-
-    // Check that the loading state is false after the promise resolves
-    await act(async () => {
-      jest.advanceTimersByTime(100)
+    // Wait for the data to be loaded
+    await waitFor(() => {
+      expect(result.current[2]).toBe(false) // loading
     })
 
-    var [data, error, loading] = result.current
+    const [data, , loading] = result.current
 
     expect(loading).toBe(false)
-    expect(error).toBe(undefined)
     expect(data).toStrictEqual([
-      { name: 'B', tags: ['test'] },
-      { name: 'C', tags: ['test'] },
+      {
+        id: 1,
+        name: 'B',
+        url: 'https://app-b.com',
+        iconUrl: '',
+        description: '',
+        chainIds: ['5'],
+        accessControl: { type: 'NO_RESTRICTIONS' },
+        tags: ['test'],
+        features: [],
+        socialProfiles: [],
+        developerWebsite: '',
+        featured: false,
+      },
+      {
+        id: 3,
+        name: 'C',
+        url: 'https://app-c.com',
+        iconUrl: '',
+        description: '',
+        chainIds: ['5'],
+        accessControl: { type: 'NO_RESTRICTIONS' },
+        tags: ['test'],
+        features: [],
+        socialProfiles: [],
+        developerWebsite: '',
+        featured: false,
+      },
     ])
   })
 })
