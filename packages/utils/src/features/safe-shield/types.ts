@@ -1,6 +1,8 @@
 // Safe Shield API Types based on official tech specs
 // Reference: https://www.notion.so/safe-global/Safe-Shield-Tech-specs-2618180fe5738018b809de16a7a4ab4b
 
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+
 export enum Severity {
   OK = 'OK', // No issues detected
   INFO = 'INFO', // Informational notice
@@ -18,6 +20,33 @@ export enum StatusGroup {
   DELEGATECALL = 'DELEGATECALL', // 7
   THREAT = 'THREAT', // 9
 }
+
+export type StatusGroupType<T extends StatusGroup> = {
+  [StatusGroup.ADDRESS_BOOK]: RecipientStatus.KNOWN_RECIPIENT | RecipientStatus.UNKNOWN_RECIPIENT
+  [StatusGroup.RECIPIENT_ACTIVITY]: RecipientStatus.LOW_ACTIVITY | RecipientStatus.HIGH_ACTIVITY
+  [StatusGroup.RECIPIENT_INTERACTION]: RecipientStatus.NEW_RECIPIENT | RecipientStatus.RECURRING_RECIPIENT
+  [StatusGroup.BRIDGE]:
+    | BridgeStatus.INCOMPATIBLE_SAFE
+    | BridgeStatus.MISSING_OWNERSHIP
+    | BridgeStatus.UNSUPPORTED_NETWORK
+    | BridgeStatus.DIFFERENT_SAFE_SETUP
+  [StatusGroup.CONTRACT_VERIFICATION]:
+    | ContractStatus.VERIFIED
+    | ContractStatus.NOT_VERIFIED
+    | ContractStatus.NOT_VERIFIED_BY_SAFE
+    | ContractStatus.VERIFICATION_UNAVAILABLE
+  [StatusGroup.CONTRACT_INTERACTION]: ContractStatus.KNOWN_CONTRACT | ContractStatus.NEW_CONTRACT
+  [StatusGroup.DELEGATECALL]: ContractStatus.UNEXPECTED_DELEGATECALL
+  [StatusGroup.THREAT]:
+    | ThreatStatus.MALICIOUS
+    | ThreatStatus.MODERATE
+    | ThreatStatus.NO_THREAT
+    | ThreatStatus.FAILED
+    | ThreatStatus.MASTER_COPY_CHANGE
+    | ThreatStatus.OWNERSHIP_CHANGE
+    | ThreatStatus.MODULE_CHANGE
+    | ThreatStatus.UNOFFICIAL_FALLBACK_HANDLER
+}[T]
 
 export enum RecipientStatus {
   KNOWN_RECIPIENT = 'KNOWN_RECIPIENT', // 1A
@@ -56,25 +85,20 @@ export enum ThreatStatus {
   UNOFFICIAL_FALLBACK_HANDLER = 'UNOFFICIAL_FALLBACK_HANDLER', // 9H
 }
 
-export type AnalysisResult<T extends RecipientStatus | BridgeStatus | ContractStatus | ThreatStatus> = {
-  severity: Severity
-  type: T
-  title: string
-  description: string
-}
+export type AnyStatus = RecipientStatus | BridgeStatus | ContractStatus | ThreatStatus
+
+export type AnalysisResult<T extends AnyStatus> = { severity: Severity; type: T; title: string; description: string }
 
 export type AddressAnalysisResults = {
   [_group in StatusGroup]?: AnalysisResult<RecipientStatus | BridgeStatus | ContractStatus>[]
 }
 
 export type RecipientAnalysisResults = { [address: string]: AddressAnalysisResults }
+export type ContractAnalysisResults = { [address: string]: AddressAnalysisResults }
+export type ThreatAnalysisResult = AnalysisResult<ThreatStatus>
 
 export type LiveAnalysisResponse = {
-  recipient?: {
-    [address: string]: AddressAnalysisResults
-  }
-  contract?: {
-    [address: string]: AddressAnalysisResults
-  }
-  threat?: AnalysisResult<ThreatStatus>
+  recipient?: AsyncResult<RecipientAnalysisResults>
+  contract?: AsyncResult<ContractAnalysisResults>
+  threat?: ThreatAnalysisResult
 }

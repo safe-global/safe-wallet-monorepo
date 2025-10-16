@@ -1,14 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { Box, Paper } from '@mui/material'
 import { SafeShieldDisplay } from './components/SafeShieldDisplay'
-import { LiveAnalysisResponseBuilder, ContractAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
+import {
+  LiveAnalysisResponseBuilder,
+  ContractAnalysisBuilder,
+  RecipientAnalysisBuilder,
+} from '@safe-global/utils/features/safe-shield/builders'
 import { faker } from '@faker-js/faker'
 
 const meta = {
   component: SafeShieldDisplay,
-  parameters: {
-    layout: 'centered',
-  },
+  parameters: { layout: 'centered' },
   decorators: [
     (Story) => (
       <Paper sx={{ padding: 2, backgroundColor: 'background.main' }}>
@@ -25,60 +27,47 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 const contractAddress = faker.finance.ethereumAddress()
+const recipientAddress = faker.finance.ethereumAddress()
 
-// Verified contract
-export const VerifiedContract: Story = {
+// Checks passed
+export const ChecksPassed: Story = {
   args: {
-    data: LiveAnalysisResponseBuilder.verifiedContract(contractAddress).build(),
+    ...LiveAnalysisResponseBuilder.verifiedContract(contractAddress)
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .build(),
   },
-  parameters: {
-    docs: {
-      description: {
-        story: 'SafeShieldWidget analyzing a verified contract with no security concerns',
-      },
-    },
-  },
+  parameters: { docs: { description: { story: 'SafeShieldWidget analyzing with no security concerns' } } },
 }
 
 // Unverified contract with warnings
 export const UnverifiedContract: Story = {
   args: {
-    data: LiveAnalysisResponseBuilder.unverifiedContract(contractAddress).build(),
+    ...LiveAnalysisResponseBuilder.unverifiedContract(contractAddress)
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .build(),
   },
-  parameters: {
-    docs: {
-      description: {
-        story: 'SafeShieldWidget analyzing an unverified contract',
-      },
-    },
-  },
+  parameters: { docs: { description: { story: 'SafeShieldWidget analyzing an unverified contract' } } },
 }
 
 // Unable to verify contract
 export const UnableToVerifyContract: Story = {
   args: {
-    data: LiveAnalysisResponseBuilder.verificationUnavailableContract(contractAddress).build(),
+    ...LiveAnalysisResponseBuilder.verificationUnavailableContract(contractAddress)
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .build(),
   },
   parameters: {
-    docs: {
-      description: {
-        story: 'SafeShieldWidget when unable to verify a contract due to verification failure',
-      },
-    },
+    docs: { description: { story: 'SafeShieldWidget when unable to verify a contract due to verification failure' } },
   },
 }
 
-// Loading state
+// Contract loading state
 export const Loading: Story = {
-  args: {
-    loading: true,
-    data: null,
-    error: null,
-  },
+  args: { recipient: [undefined, undefined, true], contract: [undefined, undefined, true] },
   parameters: {
     docs: {
       description: {
-        story: 'SafeShieldWidget in loading state while analyzing transaction security',
+        story: 'SafeShieldWidget in cotnract analysis loading state while analyzing transaction security',
       },
     },
   },
@@ -86,42 +75,26 @@ export const Loading: Story = {
 
 // Empty state
 export const Empty: Story = {
-  args: {
-    data: null,
-    loading: false,
-    error: null,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'SafeShieldWidget when no transaction is available to analyze',
-      },
-    },
-  },
+  args: { ...LiveAnalysisResponseBuilder.empty().build() },
+  parameters: { docs: { description: { story: 'SafeShieldWidget when no transaction is available to analyze' } } },
 }
 
-// Error state
+// Cotnract analysis error state
 export const ErrorState: Story = {
-  args: {
-    error: new Error('Service temporarily unavailable'),
-    loading: false,
-    data: null,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'SafeShieldWidget when the analysis service encounters an error',
-      },
-    },
-  },
+  args: { contract: [undefined, new Error('Service temporarily unavailable'), false] },
+  parameters: { docs: { description: { story: 'SafeShieldWidget when the contract analysis encounters an error' } } },
 }
 
 // Multiple results for the same contract with different severity
 export const MultipleIssues: Story = {
   args: {
-    data: LiveAnalysisResponseBuilder.delegatecallContract(contractAddress)
+    ...LiveAnalysisResponseBuilder.delegatecallContract(contractAddress)
       .contract(ContractAnalysisBuilder.unverifiedContract(contractAddress).build())
       .contract(ContractAnalysisBuilder.knownContract(contractAddress).build())
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .recipient(RecipientAnalysisBuilder.newRecipient(recipientAddress).build())
+      .recipient(RecipientAnalysisBuilder.lowActivity(recipientAddress).build())
+      .recipient(RecipientAnalysisBuilder.incompatibleSafe(recipientAddress).build())
       .build(),
   },
   parameters: {

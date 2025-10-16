@@ -2,4 +2,6 @@ export { ContractAnalysisResultBuilder } from './contract-analysis-result.builde
 export { ContractAddressBuilder } from './contract-address.builder'
 export { ContractAnalysisBuilder } from './contract-analysis.builder'
 export { LiveAnalysisResponseBuilder } from './live-analysis-response.builder'
+export { RecipientAnalysisBuilder } from './recipient-analysis.builder'
 export { RecipientAnalysisResultBuilder } from './recipient-analysis-result.builder'
+export { RecipientAddressBuilder } from './recipient-address.builder'
