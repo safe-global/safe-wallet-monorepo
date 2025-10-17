@@ -15,40 +15,36 @@ describe('useFetchMultiRecipientAnalysis', () => {
   beforeEach(() => {
     jest.resetAllMocks()
 
-    fetchRecipientAnalysisMock = jest
-      .fn()
-      .mockResolvedValue({
-        data: {
-          RECIPIENT_INTERACTION: [
-            { type: 'NEW_RECIPIENT', severity: 'INFO', title: 'New Recipient', description: 'First interaction' },
-          ],
-        },
-        isError: false,
-      })
+    fetchRecipientAnalysisMock = jest.fn().mockResolvedValue({
+      data: {
+        RECIPIENT_INTERACTION: [
+          { type: 'NEW_RECIPIENT', severity: 'INFO', title: 'New Recipient', description: 'First interaction' },
+        ],
+      },
+      isError: false,
+    })
 
-    jest
-      .spyOn(safeShieldModule, 'useLazySafeShieldAnalyzeRecipientV1Query')
-      .mockReturnValue([
-        fetchRecipientAnalysisMock,
-        {
-          data: undefined,
-          error: undefined,
-          isLoading: false,
-          isFetching: false,
-          isSuccess: false,
-          isError: false,
-          isUninitialized: true,
-          status: 'uninitialized',
-          endpointName: 'safeShieldAnalyzeRecipientV1',
-          requestId: '',
-          originalArgs: undefined,
-          fulfilledTimeStamp: undefined,
-          startedTimeStamp: undefined,
-          refetch: jest.fn(),
-          reset: jest.fn(),
-        },
-        { lastArg: { chainId: mockChainId, safeAddress: mockSafeAddress, recipientAddress: mockRecipient1 } },
-      ])
+    jest.spyOn(safeShieldModule, 'useLazySafeShieldAnalyzeRecipientV1Query').mockReturnValue([
+      fetchRecipientAnalysisMock,
+      {
+        data: undefined,
+        error: undefined,
+        isLoading: false,
+        isFetching: false,
+        isSuccess: false,
+        isError: false,
+        isUninitialized: true,
+        status: 'uninitialized',
+        endpointName: 'safeShieldAnalyzeRecipientV1',
+        requestId: '',
+        originalArgs: undefined,
+        fulfilledTimeStamp: undefined,
+        startedTimeStamp: undefined,
+        refetch: jest.fn(),
+        reset: jest.fn(),
+      },
+      { lastArg: { chainId: mockChainId, safeAddress: mockSafeAddress, recipientAddress: mockRecipient1 } },
+    ])
   })
 
   it('should return empty results when no recipients are provided', async () => {
