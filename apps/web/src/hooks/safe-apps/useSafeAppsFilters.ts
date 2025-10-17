@@ -1,7 +1,7 @@
 import useCategoryFilter from '@/hooks/safe-apps/useCategoryFilter'
 import { useEffect, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 import { useAppsFilterByCategory } from './useAppsFilterByCategory'
 import { useAppsSearch } from './useAppsSearch'

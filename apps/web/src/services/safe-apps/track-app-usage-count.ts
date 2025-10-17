@@ -1,5 +1,5 @@
 import local from '@/services/local-storage/local'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 export const APPS_DASHBOARD = 'SafeApps__dashboard'
 

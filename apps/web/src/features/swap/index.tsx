@@ -6,9 +6,9 @@ import { type MutableRefObject, useEffect, useMemo, useRef, useState } from 'rea
 import { Box, useTheme } from '@mui/material'
 import {
   SafeAppAccessPolicyTypes,
-  type SafeAppData,
   SafeAppFeatures,
 } from '@safe-global/safe-gateway-typescript-sdk/dist/types/safe-apps'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useCustomAppCommunicator } from '@/hooks/safe-apps/useCustomAppCommunicator'
@@ -166,6 +166,7 @@ const SwapWidget = ({ sell }: Params) => {
       tags: ['safe-apps'],
       features: [SafeAppFeatures.BATCHED_TRANSACTIONS],
       socialProfiles: [],
+      featured: false,
     }),
     [darkMode],
   )

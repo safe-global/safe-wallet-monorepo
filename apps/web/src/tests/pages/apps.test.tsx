@@ -1,8 +1,12 @@
 import { userEvent } from '@testing-library/user-event'
 import React, { act } from 'react'
-import * as safeAppsGatewaySDK from '@safe-global/safe-gateway-typescript-sdk'
-import { SafeAppFeatures } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import { SafeAppAccessPolicyTypes } from '@safe-global/store/gateway/types'
+import {
+  transactionBuilderSafeApp,
+  compoundSafeApp,
+  ensSafeApp,
+  synthetixSafeApp,
+} from '@safe-global/test/msw/mockSafeApps'
 
 import {
   render,
@@ -20,11 +24,6 @@ import CustomSafeAppsPage from '@/pages/apps/custom'
 import * as safeAppsService from '@/services/safe-apps/manifest'
 import { LS_NAMESPACE } from '@/config/constants'
 import * as chainHooks from '@/hooks/useChains'
-
-jest.mock('@safe-global/safe-gateway-typescript-sdk', () => ({
-  ...jest.requireActual('@safe-global/safe-gateway-typescript-sdk'),
-  getSafeApps: () => Promise.resolve(mockedSafeApps),
-}))
 
 jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
@@ -225,7 +224,7 @@ describe('AppsPage', () => {
         name: 'Custom test Safe app',
         description: 'Custom Safe app description',
         accessControl: {
-          type: safeAppsGatewaySDK.SafeAppAccessPolicyTypes.NoRestrictions,
+          type: SafeAppAccessPolicyTypes.NoRestrictions,
         },
         tags: [],
         features: [],
@@ -234,6 +233,7 @@ describe('AppsPage', () => {
         chainIds: ['1', '4', '137'],
         iconUrl: '',
         safeAppsPermissions: [],
+        featured: false,
       })
 
       render(<CustomSafeAppsPage />, {
@@ -313,7 +313,7 @@ describe('AppsPage', () => {
         name: 'Custom test Safe app',
         description: 'Custom Safe app description',
         accessControl: {
-          type: safeAppsGatewaySDK.SafeAppAccessPolicyTypes.NoRestrictions,
+          type: SafeAppAccessPolicyTypes.NoRestrictions,
         },
         tags: [],
         features: [],
@@ -322,6 +322,7 @@ describe('AppsPage', () => {
         chainIds: ['1', '4', '137'],
         iconUrl: '',
         safeAppsPermissions: [],
+        featured: false,
       })
 
       render(<CustomSafeAppsPage />, {
@@ -361,7 +362,7 @@ describe('AppsPage', () => {
         name: 'Custom test Safe app',
         description: 'Custom Safe app description',
         accessControl: {
-          type: safeAppsGatewaySDK.SafeAppAccessPolicyTypes.NoRestrictions,
+          type: SafeAppAccessPolicyTypes.NoRestrictions,
         },
         tags: [],
         features: [],
@@ -370,6 +371,7 @@ describe('AppsPage', () => {
         chainIds: ['1', '4', '137'],
         iconUrl: '',
         safeAppsPermissions: [],
+        featured: false,
       })
 
       render(<CustomSafeAppsPage />, {
@@ -744,77 +746,8 @@ describe('AppsPage', () => {
   })
 })
 
-const transactionBuilderSafeAppMock: SafeAppData = {
-  id: 24,
-  url: 'https://cloudflare-ipfs.com/ipfs/QmdVaZxDov4bVARScTLErQSRQoxgqtBad8anWuw3YPQHCs',
-  name: 'Transaction Builder',
-  iconUrl: 'https://cloudflare-ipfs.com/ipfs/QmdVaZxDov4bVARScTLErQSRQoxgqtBad8anWuw3YPQHCs/tx-builder.png',
-  description: 'A Safe app to compose custom transactions',
-  chainIds: ['1', '4', '56', '100', '137', '246', '73799'],
-  provider: undefined,
-  accessControl: {
-    type: safeAppsGatewaySDK.SafeAppAccessPolicyTypes.DomainAllowlist,
-    value: ['https://gnosis-safe.io'],
-  },
-  tags: [
-    'transaction-builder', // this internal category is not displayed in the UI
-    'Infrastructure',
-  ],
-  features: [SafeAppFeatures.BATCHED_TRANSACTIONS],
-  socialProfiles: [],
-  developerWebsite: '',
-}
-
-const compopundSafeAppMock: SafeAppData = {
-  id: 13,
-  url: 'https://cloudflare-ipfs.com/ipfs/QmX31xCdhFDmJzoVG33Y6kJtJ5Ujw8r5EJJBrsp8Fbjm7k',
-  name: 'Compound',
-  iconUrl: 'https://cloudflare-ipfs.com/ipfs/QmX31xCdhFDmJzoVG33Y6kJtJ5Ujw8r5EJJBrsp8Fbjm7k/Compound.png',
-  description: 'Money markets on the Ethereum blockchain',
-  chainIds: ['1', '4', '137'],
-  provider: undefined,
-  accessControl: {
-    type: safeAppsGatewaySDK.SafeAppAccessPolicyTypes.NoRestrictions,
-  },
-  tags: [],
-  features: [],
-  socialProfiles: [],
-  developerWebsite: '',
-}
-
-const ensSafeAppMock: SafeAppData = {
-  id: 3,
-  url: 'https://app.ens.domains',
-  name: 'ENS App',
-  iconUrl: 'https://app.ens.domains/android-chrome-144x144.png',
-  description: 'Decentralised naming for wallets, websites, & more.',
-  chainIds: ['1', '4', '137'],
-  provider: undefined,
-  accessControl: {
-    type: safeAppsGatewaySDK.SafeAppAccessPolicyTypes.DomainAllowlist,
-    value: ['https://gnosis-safe.io'],
-  },
-  tags: [],
-  features: [],
-  socialProfiles: [],
-  developerWebsite: '',
-}
-
-const synthetixSafeAppMock: SafeAppData = {
-  id: 14,
-  url: 'https://cloudflare-ipfs.com/ipfs/QmXLxxczMH4MBEYDeeN9zoiHDzVkeBmB5rBjA3UniPEFcA',
-  name: 'Synthetix',
-  iconUrl: 'https://cloudflare-ipfs.com/ipfs/QmXLxxczMH4MBEYDeeN9zoiHDzVkeBmB5rBjA3UniPEFcA/Synthetix.png',
-  description: 'Trade synthetic assets on Ethereum',
-  chainIds: ['1', '4', '137'],
-  provider: undefined,
-  accessControl: {
-    type: safeAppsGatewaySDK.SafeAppAccessPolicyTypes.NoRestrictions,
-  },
-  tags: [],
-  features: [],
-  socialProfiles: [],
-  developerWebsite: '',
-}
-
-const mockedSafeApps = [compopundSafeAppMock, ensSafeAppMock, synthetixSafeAppMock, transactionBuilderSafeAppMock]
+// Using centralized mock data from @safe-global/test/msw/mockSafeApps
+const transactionBuilderSafeAppMock = transactionBuilderSafeApp
+const compopundSafeAppMock = compoundSafeApp
+const _ensSafeAppMock = ensSafeApp
+const _synthetixSafeAppMock = synthetixSafeApp

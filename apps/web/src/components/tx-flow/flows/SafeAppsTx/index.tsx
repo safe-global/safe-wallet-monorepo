@@ -1,5 +1,5 @@
 import type { BaseTransaction, RequestId, SendTransactionRequestParams } from '@safe-global/safe-apps-sdk'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import ReviewSafeAppsTx from './ReviewSafeAppsTx'
 import { AppTitle } from '@/components/tx-flow/flows/SignMessage'
 import { useCallback } from 'react'

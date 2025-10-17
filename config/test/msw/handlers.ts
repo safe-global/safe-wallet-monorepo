@@ -2,6 +2,7 @@ import { http, HttpResponse } from 'msw'
 import type { FiatCurrencies } from '@safe-global/store/gateway/types'
 import { Balances } from '@safe-global/store/src/gateway/AUTO_GENERATED/balances'
 import { CollectiblePage } from '@safe-global/store/src/gateway/AUTO_GENERATED/collectibles'
+import { defaultMockSafeApps } from './mockSafeApps'
 
 const iso4217Currencies = ['USD', 'EUR', 'GBP']
 export const handlers = (GATEWAY_URL: string) => [
@@ -166,5 +167,22 @@ export const handlers = (GATEWAY_URL: string) => [
         },
       ],
     })
+  }),
+
+  // Safe Apps endpoint
+  http.get(`${GATEWAY_URL}/v1/chains/:chainId/safe-apps`, ({ request }) => {
+    const url = new URL(request.url)
+    const appUrl = url.searchParams.get('url')
+
+    // If filtering by URL, return matching apps (with trailing slash handling)
+    if (appUrl) {
+      const matchingApp = defaultMockSafeApps.find(
+        (app) => app.url === appUrl || app.url === appUrl.replace(/\/$/, '') || `${app.url}/` === appUrl,
+      )
+      return HttpResponse.json(matchingApp ? [matchingApp] : [])
+    }
+
+    // Return all apps by default
+    return HttpResponse.json(defaultMockSafeApps)
   }),
 ]

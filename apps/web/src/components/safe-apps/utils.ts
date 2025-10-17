@@ -1,7 +1,6 @@
 import { isHexString, toUtf8String } from 'ethers'
-import { SafeAppAccessPolicyTypes } from '@safe-global/safe-gateway-typescript-sdk'
-import { SafeAppFeatures } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import { SafeAppAccessPolicyTypes, SafeAppFeatures } from '@safe-global/store/gateway/types'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import type { BaseTransaction, ChainInfo } from '@safe-global/safe-apps-sdk'
 
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
@@ -78,6 +77,7 @@ export const getEmptySafeApp = (url = '', appData?: SafeAppData): SafeAppDataWit
     features: [],
     developerWebsite: '',
     socialProfiles: [],
+    featured: false,
     ...appData,
     safeAppsPermissions: [],
   }

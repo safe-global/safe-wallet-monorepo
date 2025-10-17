@@ -55,7 +55,7 @@ export const TxBuilderButton = () => {
           sx={buttonSx}
           fullWidth
           onClick={onClick}
-          startIcon={<img src={txBuilder.app.iconUrl} height={24} width="auto" alt={txBuilder.app.name} />}
+          startIcon={<img src={txBuilder.app.iconUrl || ''} height={24} width="auto" alt={txBuilder.app.name} />}
         >
           Transaction Builder
         </Button>

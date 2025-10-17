@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import type { UrlObject } from 'url'
 
 import { SafeAppsTag } from '@/config/constants'

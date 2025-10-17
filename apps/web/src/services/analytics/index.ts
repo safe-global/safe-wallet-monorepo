@@ -15,7 +15,7 @@ import type { AnalyticsEvent } from './types'
 import { gtmTrack, gtmTrackSafeApp } from './gtm'
 import { mixpanelTrack } from './mixpanel'
 import { GA_TO_MIXPANEL_MAPPING } from './ga-mixpanel-mapping'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { MixpanelEventParams } from './mixpanel-events'
 
 export const trackEvent = (eventData: AnalyticsEvent, additionalParameters?: Record<string, any>): void => {
