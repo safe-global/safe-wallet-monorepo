@@ -30,6 +30,71 @@ const contractAddress = faker.finance.ethereumAddress()
 const recipientAddress = faker.finance.ethereumAddress()
 
 // Checks passed
+export const NoThreat: Story = {
+  args: {
+    ...LiveAnalysisResponseBuilder.verifiedContract(contractAddress)
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(LiveAnalysisResponseBuilder.noThreat().build().threat)
+      .build(),
+  },
+  parameters: { docs: { description: { story: 'SafeShieldWidget analyzing with no security concerns' } } },
+}
+// Checks passed
+export const MaliciousThreat: Story = {
+  args: {
+    ...LiveAnalysisResponseBuilder.verifiedContract(contractAddress)
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(LiveAnalysisResponseBuilder.maliciousThreat().build().threat)
+      .build(),
+  },
+  parameters: { docs: { description: { story: 'SafeShieldWidget analyzing with malicious threat detected' } } },
+}
+
+// Moderate threat detected
+export const ModerateThreat: Story = {
+  args: {
+    ...LiveAnalysisResponseBuilder.verifiedContract(contractAddress)
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(LiveAnalysisResponseBuilder.moderateThreat().build().threat)
+      .build(),
+  },
+  parameters: { docs: { description: { story: 'SafeShieldWidget analyzing with moderate threat detected' } } },
+}
+
+// Failed threat analysis
+export const FailedThreatAnalysis: Story = {
+  args: {
+    ...LiveAnalysisResponseBuilder.verifiedContract(contractAddress)
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(LiveAnalysisResponseBuilder.failedThreat().build().threat)
+      .build(),
+  },
+  parameters: { docs: { description: { story: 'SafeShieldWidget when threat analysis fails' } } },
+}
+
+// Ownership change
+export const OwnershipChange: Story = {
+  args: {
+    ...LiveAnalysisResponseBuilder.verifiedContract(contractAddress)
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(LiveAnalysisResponseBuilder.ownershipChange().build().threat)
+      .build(),
+  },
+  parameters: { docs: { description: { story: 'SafeShieldWidget when transaction will change Safe ownership' } } },
+}
+
+// Modules change
+export const ModulesChange: Story = {
+  args: {
+    ...LiveAnalysisResponseBuilder.verifiedContract(contractAddress)
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(LiveAnalysisResponseBuilder.moduleChange().build().threat)
+      .build(),
+  },
+  parameters: { docs: { description: { story: 'SafeShieldWidget when transaction will change Safe modules' } } },
+}
+
+// Checks passed
 export const ChecksPassed: Story = {
   args: {
     ...LiveAnalysisResponseBuilder.verifiedContract(contractAddress)
