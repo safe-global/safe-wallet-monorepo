@@ -24,8 +24,7 @@ import InfoIcon from '@/public/images/notifications/info.svg'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
-import useAsync from '@safe-global/utils/hooks/useAsync'
-import { getSafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 const renderSimulationStatus = (isSuccess: boolean, isError: boolean, isCallTraceError: boolean) => {
   if (!isSuccess || isError) {
@@ -96,9 +95,9 @@ const TxSimulationBlock = ({
     nestedTx,
   } = useContext(TxInfoContext)
 
-  const [nestedSafeInfo] = useAsync(
-    () => (!!chain && !!nestedSafe ? getSafeInfo(chain.chainId, nestedSafe) : undefined),
-    [chain, nestedSafe],
+  const { currentData: nestedSafeInfo } = useSafesGetSafeV1Query(
+    { chainId: chain?.chainId || '', safeAddress: nestedSafe || '' },
+    { skip: !chain?.chainId || !nestedSafe },
   )
 
   const handleSimulation = async () => {

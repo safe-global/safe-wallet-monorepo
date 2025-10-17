@@ -1,11 +1,10 @@
 import React, { useEffect } from 'react'
-import { getSafeInfo, type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
 import { Box, Button, Divider } from '@mui/material'
 
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { LoadSafeFormData } from '@/components/new-safe/load'
-import useAsync from '@safe-global/utils/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import layoutCss from '@/components/new-safe/create/styles.module.css'
@@ -41,11 +40,10 @@ const SafeOwnerStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeFormD
     name: Field.owners,
   })
 
-  const [safeInfo] = useAsync<SafeInfo>(() => {
-    if (data.address) {
-      return getSafeInfo(chainId, data.address)
-    }
-  }, [chainId, data.address])
+  const { currentData: safeInfo } = useSafesGetSafeV1Query(
+    { chainId, safeAddress: data.address },
+    { skip: !data.address },
+  )
 
   useEffect(() => {
     if (!safeInfo) return

@@ -1,4 +1,4 @@
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { MetaTransactionData, SafeTransaction } from '@safe-global/types-kit'
 import {
@@ -22,13 +22,13 @@ export const getSimulationLink = (simulationId: string): string => {
 }
 
 export type SingleTransactionSimulationParams = {
-  safe: SafeInfo
+  safe: SafeState
   executionOwner: string
   transactions: SafeTransaction
   gasLimit?: number
 }
 export type MultiSendTransactionSimulationParams = {
-  safe: SafeInfo
+  safe: SafeState
   executionOwner: string
   transactions: MetaTransactionData[]
   gasLimit?: number

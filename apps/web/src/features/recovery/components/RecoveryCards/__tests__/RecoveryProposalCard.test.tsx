@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 import { fireEvent, render } from '@/tests/test-utils'
 import { InternalRecoveryProposalCard } from '../RecoveryProposalCard'
@@ -14,7 +14,7 @@ describe('RecoveryProposalCard', () => {
         <InternalRecoveryProposalCard
           orientation="vertical"
           onClose={mockClose}
-          safe={{ owners: [{ value: faker.finance.ethereumAddress() }] } as SafeInfo}
+          safe={{ owners: [{ value: faker.finance.ethereumAddress() }] } as SafeState}
           setTxFlow={mockSetTxFlow}
         />,
       )
@@ -43,7 +43,7 @@ describe('RecoveryProposalCard', () => {
     const { queryByText } = render(
       <InternalRecoveryProposalCard
         orientation="horizontal"
-        safe={{ owners: [{ value: faker.finance.ethereumAddress() }] } as SafeInfo}
+        safe={{ owners: [{ value: faker.finance.ethereumAddress() }] } as SafeState}
         setTxFlow={mockSetTxFlow}
       />,
     )
