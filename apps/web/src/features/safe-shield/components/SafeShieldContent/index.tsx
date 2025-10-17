@@ -1,11 +1,13 @@
-import { type ReactElement } from 'react'
+import { type ReactElement, useContext } from 'react'
 import { Box } from '@mui/material'
 import type { ContractAnalysisResults, RecipientAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
 import { SafeShieldAnalysisError } from './SafeShieldAnalysisError'
 import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
+import { TenderlySimulation } from '../TenderlySimulation'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import isEmpty from 'lodash/isEmpty'
 
 export const SafeShieldContent = ({
@@ -15,12 +17,13 @@ export const SafeShieldContent = ({
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
 }): ReactElement => {
+  const { safeTx } = useContext(SafeTxContext)
   const [recipientResults, recipientError, recipientLoading = false] = recipient || []
   const [contractResults, contractError, contractLoading = false] = contract || []
 
   const loading = recipientLoading || contractLoading
   const error = recipientError || contractError
-  const empty = isEmpty(recipientResults) && isEmpty(contractResults)
+  const empty = isEmpty(recipientResults) && isEmpty(contractResults) && !safeTx
 
   return (
     <Box padding="0px 4px 4px">
@@ -41,6 +44,8 @@ export const SafeShieldContent = ({
           )}
 
           {contractResults && Object.keys(contractResults).length > 0 && <AnalysisGroupCard data={contractResults} />}
+
+          <TenderlySimulation safeTx={safeTx} />
         </Box>
       </Box>
     </Box>
