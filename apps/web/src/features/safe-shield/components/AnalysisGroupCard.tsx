@@ -2,7 +2,7 @@ import { type ReactElement, useMemo, useState } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import { type AddressAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
-import { mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
+import { isAddressChange, mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
 import { SEVERITY_COLORS } from '../constants'
 import { SeverityIcon } from './SeverityIcon'
 import { AnalysisIssuesDisplay } from './AnalysisIssuesDisplay'
@@ -67,7 +67,7 @@ export const AnalysisGroupCard = ({
 
                     <AnalysisIssuesDisplay result={result} />
 
-                    <AddressChanges result={result} />
+                    {isAddressChange(result) && <AddressChanges result={result} />}
                   </Stack>
                 </Box>
               </Box>

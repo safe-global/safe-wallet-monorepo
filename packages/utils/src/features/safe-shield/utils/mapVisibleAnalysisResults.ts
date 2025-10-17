@@ -1,4 +1,10 @@
-import type { AnalysisResult, AnyStatus, AddressAnalysisResults } from '../types'
+import {
+  type AnalysisResult,
+  type AnyStatus,
+  type AddressAnalysisResults,
+  ThreatStatus,
+  MasterCopyChangeThreatAnalysisResult,
+} from '../types'
 import { getPrimaryResult, sortBySeverity } from './analysisUtils'
 import { mapConsolidatedAnalysisResults } from './mapConsolidatedAnalysisResults'
 
@@ -21,4 +27,8 @@ export const mapVisibleAnalysisResults = (addressResults: AddressAnalysisResults
   }
 
   return mapConsolidatedAnalysisResults(addressResults)
+}
+
+export const isAddressChange = (result: AnalysisResult<AnyStatus>): result is MasterCopyChangeThreatAnalysisResult => {
+  return result.type === ThreatStatus.MASTER_COPY_CHANGE
 }

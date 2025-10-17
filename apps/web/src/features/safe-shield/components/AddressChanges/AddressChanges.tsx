@@ -1,9 +1,5 @@
 import { Box, Typography } from '@mui/material'
-import {
-  AnalysisResult,
-  AnyStatus,
-  MasterCopyChangeThreatAnalysisResult,
-} from '@safe-global/utils/features/safe-shield/types'
+import type { MasterCopyChangeThreatAnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import React from 'react'
 
 interface AddressChangesProps {
@@ -11,7 +7,7 @@ interface AddressChangesProps {
 }
 
 export const AddressChanges = ({ result }: AddressChangesProps) => {
-  if (!('before' in result && 'after' in result)) {
+  if (!result.before || !result.after) {
     return null
   }
 
@@ -38,7 +34,7 @@ export const AddressChanges = ({ result }: AddressChangesProps) => {
       overflow="hidden"
     >
       <Typography letterSpacing="1px" fontSize="12px" color="text.secondary">
-        CURRENT MASTERCOPY:
+        {item.label}
       </Typography>
 
       <Typography variant="body2" sx={{ wordBreak: 'break-all', whiteSpace: 'pre-wrap' }}>

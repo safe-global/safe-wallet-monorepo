@@ -1,5 +1,5 @@
 import React from 'react'
-import {
+import type {
   AnalysisResult,
   AnyStatus,
   MaliciousOrModerateThreatAnalysisResult,
