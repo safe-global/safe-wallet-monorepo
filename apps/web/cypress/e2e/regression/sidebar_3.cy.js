@@ -31,11 +31,14 @@ describe('Sidebar tests 3', () => {
 
   it('Verify connected user is redirected from welcome page to accounts page', () => {
     cy.visit(constants.welcomeUrl + '?chain=sep')
+    cy.get(create_wallet.welcomeLoginScreen).should('be.visible')
+    cy.get(create_wallet.connectWalletBtn).should('be.visible').click()
     wallet.connectSigner(signer)
-
+    // cy.get(create_wallet.continueWithWalletBtnConnected).should('be.visible').click()
     cy.location().should((loc) => {
       expect(loc.pathname).to.eq('/welcome/accounts')
     })
+    cy.get(create_wallet.accountInfoHeader).should('be.visible')
   })
 
   it('Verify that the user see safes that he owns in the list', () => {
