@@ -777,6 +777,10 @@ export const cookies = {
   acceptedTokenListOnboarding: true,
 }
 
+export const safeLabsTerms = {
+  acceptedTerms: 'true',
+}
+
 export const undeployedSafe = {
   safe1: {
     11155111: {

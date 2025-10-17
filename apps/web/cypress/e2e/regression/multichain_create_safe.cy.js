@@ -12,14 +12,10 @@ const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 describe('Multichain safe creation tests', () => {
   beforeEach(() => {
-    cy.visit(constants.welcomeUrl + '?chain=sep')
-    cy.wait(2000)
-    wallet.connectSigner(signer)
+    createwallet.startCreateSafeFlow(signer)
   })
 
   it('Verify that Pay now is not available for the multichain safe creation', () => {
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     createwallet.selectMultiNetwork(1, constants.networks.polygon.toLowerCase())
     createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
@@ -28,8 +24,6 @@ describe('Multichain safe creation tests', () => {
   })
 
   it('Verify that Pay now is available for single safe creation', () => {
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     createwallet.clearNetworkInput(1)
     createwallet.enterNetwork(1, constants.networks.polygon)
     createwallet.clickOnNetwrokCheckbox()
@@ -40,8 +34,6 @@ describe('Multichain safe creation tests', () => {
   })
 
   it('Verify that Relay is available for one safe creation', () => {
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     createwallet.clearNetworkInput(1)
     createwallet.enterNetwork(1, constants.networks.polygon)
     createwallet.clickOnNetwrokCheckbox()
@@ -53,8 +45,6 @@ describe('Multichain safe creation tests', () => {
   })
 
   it('Verify that multichain safe creation is available with 2/2 setup', () => {
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     createwallet.selectMultiNetwork(1, constants.networks.polygon.toLowerCase())
     createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
@@ -72,8 +62,6 @@ describe('Multichain safe creation tests', () => {
   })
 
   it('Verify that multichain safe creation is available for 1/2 set up', () => {
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     createwallet.selectMultiNetwork(1, constants.networks.polygon.toLowerCase())
     createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()

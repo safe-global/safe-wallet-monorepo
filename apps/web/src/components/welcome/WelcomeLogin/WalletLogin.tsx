@@ -31,6 +31,7 @@ const WalletLogin = ({
         onClick={onContinue}
         fullWidth={fullWidth}
         style={{ color: '#fff', background: '#121312' }}
+        data-testid="continue-with-wallet-btn"
       >
         <Box justifyContent="space-between" display="flex" flexDirection="row" alignItems="center" gap={1}>
           <Box display="flex" flexDirection="column" alignItems="flex-start">
@@ -56,6 +57,7 @@ const WalletLogin = ({
       size="small"
       disableElevation
       fullWidth={fullWidth}
+      data-testid="connect-wallet-btn"
     >
       Connect wallet
     </Button>

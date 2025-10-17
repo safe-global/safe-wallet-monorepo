@@ -2,8 +2,10 @@ import * as main from '../pages/main.page'
 import { connectedWalletExecMethod, relayExecMethod, connectedWalletMethod } from '../pages/create_tx.pages'
 import * as sidebar from '../pages/sidebar.pages'
 import * as constants from '../../support/constants'
+import * as wallet from '../../support/utils/wallet'
+import * as owner from './owners.pages'
 
-const welcomeLoginScreen = '[data-testid="welcome-login"]'
+export const welcomeLoginScreen = '[data-testid="welcome-login"]'
 const expandMoreIcon = 'svg[data-testid="ExpandMoreIcon"]'
 const newtworkSelectorDiv = 'div[class*="networkSelector"]'
 const nameInput = 'input[name="name"]'
@@ -51,7 +53,8 @@ export const reviewStepThreshold = '[data-testid="review-step-threshold"]'
 export const cfSafeCreationSuccessMsg = '[data-testid="account-success-message"]'
 export const cfSafeActivationMsg = '[data-testid="safe-activation-message"]'
 export const cfSafeInfo = '[data-testid="safe-info"]'
-const connectWalletBtn = '[data-testid="connect-wallet-btn"]'
+export const connectWalletBtn = '[data-testid="connect-wallet-btn"]'
+export const continueWithWalletBtnConnected = '[data-testid="continue-with-wallet-btn"]'
 const networkSelectorItem = '[data-testid="network-selector-item"]'
 
 const sponsorStr = 'Your account is sponsored by Goerli'
@@ -397,4 +400,20 @@ export function checkNetworkLogoInSafeCreationModal(networks) {
       checkNetworkLogo(network)
     })
   })
+}
+
+export function visitWelcomeAccountPage(chain = 'sep') {
+  cy.visit(`${constants.welcomeAccountUrl}?chain=${chain}`)
+  cy.wait(2000)
+}
+
+export function connectWalletAndCreateSafe(signer) {
+  wallet.connectSigner(signer)
+  owner.waitForConnectionStatus()
+  clickOnCreateNewSafeBtn()
+}
+
+export function startCreateSafeFlow(signer, chain = 'sep') {
+  visitWelcomeAccountPage(chain)
+  connectWalletAndCreateSafe(signer)
 }
