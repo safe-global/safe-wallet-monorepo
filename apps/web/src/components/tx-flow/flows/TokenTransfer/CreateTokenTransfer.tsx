@@ -1,8 +1,8 @@
 import { useVisibleTokens } from '@/components/tx-flow/flows/TokenTransfer/utils'
 import { type ReactElement, useContext, useEffect, useMemo, useState } from 'react'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form'
 
-import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
 import {
   Alert,
   AlertTitle,
@@ -42,6 +42,8 @@ import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
+import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
+import uniq from 'lodash/uniq'
 
 export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balance: string }): ReactElement => (
   <Grid
@@ -164,6 +166,14 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
   )
 
   const canBatch = isMassPayoutsEnabled && type === TokenTransferType.multiSig
+
+  const recipientsWatched = useWatch({ control, name: MultiTokenTransferFields.recipients })
+  const recipientAddresses = useMemo(
+    () => uniq(recipientsWatched.map((recipient) => recipient.recipient).filter(Boolean)),
+    [recipientsWatched],
+  )
+
+  useSafeShieldForRecipients(recipientAddresses)
 
   return (
     <TxCard>
