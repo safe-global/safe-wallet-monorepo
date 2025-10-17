@@ -1,47 +1,14 @@
 import { useMemo } from 'react'
 import { isAddress, JsonRpcProvider } from 'ethers'
 import uniq from 'lodash/uniq'
-import {
-  type AddressBookCheckResult,
-  useAddressBookCheck,
-} from './address-analysis/address-book-check/useAddressBookCheck'
-import { type AddressActivityResult, useAddressActivity } from './address-analysis/address-activity/useAddressActivity'
-import { type RecipientAnalysisResults, StatusGroup } from '../types'
+import { useAddressBookCheck } from './address-analysis/address-book-check/useAddressBookCheck'
+import { useAddressActivity } from './address-analysis/address-activity/useAddressActivity'
+import { type RecipientAnalysisResults } from '../types'
 import { useFetchRecipientAnalysis } from './useFetchRecipientAnalysis'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useMemoDeepCompare } from './util-hooks/useMemoDeepCompare'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
-
-/**
- * Merges backend and local check results
- * Backend provides RECIPIENT_INTERACTION (group 3)
- * Local checks provide ADDRESS_BOOK (group 1) and RECIPIENT_ACTIVITY (group 2)
- */
-function mergeAnalysisResults(
-  fetchedResults: RecipientAnalysisResults | undefined,
-  addressBookResult: AddressBookCheckResult | undefined,
-  activityResult: AddressActivityResult | undefined,
-): RecipientAnalysisResults {
-  const merged: RecipientAnalysisResults = fetchedResults ? { ...fetchedResults } : {}
-
-  if (addressBookResult) {
-    const addressBookEntries = Object.entries(addressBookResult || {})
-
-    for (const [address, result] of addressBookEntries) {
-      merged[address] = { ...(merged[address] || {}), [StatusGroup.ADDRESS_BOOK]: [result] }
-    }
-  }
-
-  if (activityResult) {
-    const activityEntries = Object.entries(activityResult || {})
-
-    for (const [address, result] of activityEntries) {
-      merged[address] = { ...(merged[address] || {}), [StatusGroup.RECIPIENT_ACTIVITY]: [result] }
-    }
-  }
-
-  return merged
-}
+import { mergeAnalysisResults } from '../utils'
 
 /**
  * Hook for fetching and analyzing recipient addresses

@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { renderHook, waitFor } from '@testing-library/react'
+import { getAddress } from 'ethers'
 import { useRecipientAnalysis } from '../useRecipientAnalysis'
 import { useFetchRecipientAnalysis } from '../useFetchRecipientAnalysis'
 import {
@@ -177,7 +178,8 @@ describe('useRecipientAnalysis', () => {
     })
 
     const [results] = result.current
-    expect(results![mockAddress1]).toEqual({
+    const checksummedAddress = getAddress(mockAddress1)
+    expect(results![checksummedAddress]).toEqual({
       [StatusGroup.RECIPIENT_INTERACTION]: backendResults[mockAddress1][StatusGroup.RECIPIENT_INTERACTION],
       [StatusGroup.ADDRESS_BOOK]: [addressBookResults[mockAddress1]],
     })
@@ -212,7 +214,8 @@ describe('useRecipientAnalysis', () => {
     })
 
     const [results] = result.current
-    expect(results![mockAddress1]).toEqual({
+    const checksummedAddress = getAddress(mockAddress1)
+    expect(results![checksummedAddress]).toEqual({
       [StatusGroup.RECIPIENT_INTERACTION]: backendResults[mockAddress1][StatusGroup.RECIPIENT_INTERACTION],
       [StatusGroup.RECIPIENT_ACTIVITY]: [activityResults[mockAddress1]],
     })
@@ -252,7 +255,8 @@ describe('useRecipientAnalysis', () => {
     })
 
     const [results] = result.current
-    expect(results![mockAddress1]).toEqual({
+    const checksummedAddress = getAddress(mockAddress1)
+    expect(results![checksummedAddress]).toEqual({
       [StatusGroup.RECIPIENT_INTERACTION]: backendResults[mockAddress1][StatusGroup.RECIPIENT_INTERACTION],
       [StatusGroup.ADDRESS_BOOK]: [addressBookResults[mockAddress1]],
       [StatusGroup.RECIPIENT_ACTIVITY]: [activityResults[mockAddress1]],
@@ -284,10 +288,12 @@ describe('useRecipientAnalysis', () => {
     })
 
     const [results] = result.current
-    expect(results![mockAddress1]).toBeDefined()
-    expect(results![mockAddress2]).toBeDefined()
-    expect(results![mockAddress1][StatusGroup.ADDRESS_BOOK]).toEqual([addressBookResults[mockAddress1]])
-    expect(results![mockAddress2][StatusGroup.ADDRESS_BOOK]).toEqual([addressBookResults[mockAddress2]])
+    const checksummedAddress1 = getAddress(mockAddress1)
+    const checksummedAddress2 = getAddress(mockAddress2)
+    expect(results![checksummedAddress1]).toBeDefined()
+    expect(results![checksummedAddress2]).toBeDefined()
+    expect(results![checksummedAddress1][StatusGroup.ADDRESS_BOOK]).toEqual([addressBookResults[mockAddress1]])
+    expect(results![checksummedAddress2][StatusGroup.ADDRESS_BOOK]).toEqual([addressBookResults[mockAddress2]])
   })
 
   it('should propagate loading state from backend fetch', async () => {
