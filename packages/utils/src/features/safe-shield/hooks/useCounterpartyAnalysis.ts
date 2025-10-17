@@ -81,7 +81,7 @@ export function useCounterpartyAnalysis({
     }
     const addresses = Object.keys(counterpartyData.recipient)
       .filter((address) => address && isAddress(address))
-      .map((address) => address.toLowerCase())
+      .map(getAddress)
     return uniq(addresses)
   }, [counterpartyData])
 
