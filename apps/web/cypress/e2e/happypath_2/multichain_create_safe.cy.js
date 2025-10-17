@@ -19,12 +19,10 @@ describe('Happy path Multichain safe creation tests', { defaultCommandTimeout: 6
   })
 
   beforeEach(() => {
-    createwallet.visitWelcomeAccountPage()
-    wallet.connectSigner(signer)
+    createwallet.startCreateSafeFlow(signer)
   })
 
   it('Verify that L2 safe created during multichain safe creation has 1.4.1 L2 contract after deployment', () => {
-    createwallet.clickOnCreateNewSafeBtn()
     createwallet.clickOnNetwrokRemoveIcon()
     createwallet.selectMultiNetwork(1, constants.networks.ethereum.toLowerCase())
     createwallet.selectMultiNetwork(1, constants.networks.sepolia.toLowerCase())
