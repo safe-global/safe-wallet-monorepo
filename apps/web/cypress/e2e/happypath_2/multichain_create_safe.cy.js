@@ -19,8 +19,7 @@ describe('Happy path Multichain safe creation tests', { defaultCommandTimeout: 6
   })
 
   beforeEach(() => {
-    cy.visit(constants.welcomeAccountUrl + '?chain=sep')
-    cy.wait(2000)
+    createwallet.visitWelcomeAccountPage()
     wallet.connectSigner(signer)
   })
 

@@ -12,8 +12,7 @@ const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 describe('Multichain safe creation tests', () => {
   beforeEach(() => {
-    cy.visit(constants.welcomeAccountUrl + '?chain=sep')
-    cy.wait(2000)
+    createwallet.visitWelcomeAccountPage()
     wallet.connectSigner(signer)
   })
 

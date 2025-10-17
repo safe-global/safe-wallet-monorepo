@@ -403,6 +403,7 @@ export function checkNetworkLogoInSafeCreationModal(networks) {
 
 export function visitWelcomeAccountPage(chain = 'sep') {
   cy.visit(`${constants.welcomeAccountUrl}?chain=${chain}`)
+  cy.wait(2000)
 }
 
 export function connectWalletAndCreateSafe(signer) {
