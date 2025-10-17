@@ -1,5 +1,5 @@
 import { act } from 'react'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { useSimulation } from '@/components/tx/security/tenderly/useSimulation'
@@ -74,7 +74,7 @@ describe('useSimulation()', () => {
             value: safeAddress,
           },
           chainId,
-        } as SafeInfo,
+        } as SafeState,
         executionOwner: safeAddress,
       }),
     )
@@ -143,7 +143,7 @@ describe('useSimulation()', () => {
             value: safeAddress,
           },
           chainId,
-        } as SafeInfo,
+        } as SafeState,
         executionOwner: safeAddress,
       }),
     )
@@ -213,7 +213,7 @@ describe('useSimulation()', () => {
             value: safeAddress,
           },
           chainId,
-        } as SafeInfo,
+        } as SafeState,
         executionOwner: safeAddress,
       }),
     )
