@@ -192,3 +192,24 @@ export const MultipleCounterparties: Story = {
     },
   },
 }
+
+export const MultipleCounterparties: Story = {
+  args: {
+    ...LiveAnalysisResponseBuilder.verifiedContract(contractAddress)
+      .contract(ContractAnalysisBuilder.verifiedContract(faker.finance.ethereumAddress()).build())
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .recipient(RecipientAnalysisBuilder.knownRecipient(faker.finance.ethereumAddress()).build())
+      .recipient(RecipientAnalysisBuilder.newRecipient(recipientAddress).build())
+      .recipient(RecipientAnalysisBuilder.newRecipient(faker.finance.ethereumAddress()).build())
+      .recipient(RecipientAnalysisBuilder.lowActivity(recipientAddress).build())
+      .recipient(RecipientAnalysisBuilder.incompatibleSafe(recipientAddress).build())
+      .build(),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'SafeShieldWidget displaying multiple results for the same contract with different severity',
+      },
+    },
+  },
+}
