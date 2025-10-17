@@ -32,7 +32,6 @@ describe('Sidebar tests 3', () => {
   it('Verify connected user is redirected from welcome page to accounts page', () => {
     cy.visit(constants.welcomeUrl + '?chain=sep')
     wallet.connectSigner(signer)
-    create_wallet.clickOnContinueWithWalletBtn()
 
     cy.location().should((loc) => {
       expect(loc.pathname).to.eq('/welcome/accounts')

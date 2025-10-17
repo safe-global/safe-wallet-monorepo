@@ -11,7 +11,7 @@ const signer = walletCredentials.OWNER_2_PRIVATE_KEY
 
 describe('CF Safe creation happy path tests', () => {
   beforeEach(() => {
-    cy.visit(constants.welcomeUrl + '?chain=sep')
+    cy.visit(constants.welcomeAccountUrl + '?chain=sep')
     // Required for data layer
     cy.clearLocalStorage()
     main.acceptCookies()
@@ -21,7 +21,6 @@ describe('CF Safe creation happy path tests', () => {
   it('CF creation happy path. GA safe_created', () => {
     wallet.connectSigner(signer)
     owner.waitForConnectionStatus()
-    createwallet.clickOnContinueWithWalletBtn()
     createwallet.clickOnCreateNewSafeBtn()
     createwallet.clickOnNextBtn()
     createwallet.clickOnNextBtn()
