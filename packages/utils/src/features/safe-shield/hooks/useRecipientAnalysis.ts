@@ -25,13 +25,17 @@ function mergeAnalysisResults(
   const merged: RecipientAnalysisResults = fetchedResults ? { ...fetchedResults } : {}
 
   if (addressBookResult) {
-    for (const [address, result] of Object.entries(addressBookResult || {})) {
+    const addressBookEntries = Object.entries(addressBookResult || {})
+
+    for (const [address, result] of addressBookEntries) {
       merged[address] = { ...(merged[address] || {}), [StatusGroup.ADDRESS_BOOK]: [result] }
     }
   }
 
   if (activityResult) {
-    for (const [address, result] of Object.entries(activityResult || {})) {
+    const activityEntries = Object.entries(activityResult || {})
+
+    for (const [address, result] of activityEntries) {
       merged[address] = { ...(merged[address] || {}), [StatusGroup.RECIPIENT_ACTIVITY]: [result] }
     }
   }
