@@ -24,6 +24,7 @@ import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
 import { skipToken } from '@reduxjs/toolkit/query'
 import extractTxInfo from '@/services/tx/extractTxInfo'
 import type { SafeTransaction } from '@safe-global/types-kit'
+import { SEVERITY_COLORS } from '@/features/safe-shield/constants'
 
 const safeInterface = Safe__factory.createInterface()
 
@@ -161,9 +162,9 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
         <Stack direction="row" alignItems="center" gap={1}>
           {isSimulationFinished ? (
             isSimulationSuccess ? (
-              <CheckIcon sx={{ fontSize: 16, color: 'success.main' }} />
+              <CheckIcon sx={{ fontSize: 16, color: SEVERITY_COLORS.OK.main }} />
             ) : (
-              <SvgIcon component={AlertIcon} inheritViewBox sx={{ fontSize: 16 }} />
+              <SvgIcon component={AlertIcon} inheritViewBox sx={{ fontSize: 16, color: SEVERITY_COLORS.CRITICAL.main }} />
             )
           ) : (
             <SvgIcon component={UpdateIcon} inheritViewBox sx={{ fontSize: 16 }} />
@@ -171,20 +172,22 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
           <Typography variant="body2" color="primary.light">
             {isSimulationFinished ? 'Transaction simulations' : 'Transaction simulation'}
           </Typography>
-          <Tooltip
-            title="Run a simulation to see if the transaction will succeed and get a full report."
-            arrow
-            placement="top"
-          >
-            <SvgIcon
-              component={InfoIcon}
-              inheritViewBox
-              color="border"
-              sx={{
-                fontSize: 16,
-              }}
-            />
-          </Tooltip>
+          {!isSimulationFinished && !isLoading && (
+            <Tooltip
+              title="Run a simulation to see if the transaction will succeed and get a full report."
+              arrow
+              placement="top"
+            >
+              <SvgIcon
+                component={InfoIcon}
+                inheritViewBox
+                color="border"
+                sx={{
+                  fontSize: 16,
+                }}
+              />
+            </Tooltip>
+          )}
         </Stack>
 
         {!isSimulationFinished ? (
@@ -237,7 +240,7 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
             <Box bgcolor="background.main" borderRadius="4px" overflow="hidden">
               <Box
                 sx={{
-                  borderLeft: `4px solid ${mainIsSuccess ? 'var(--color-success-main)' : 'var(--color-error-main)'}`,
+                  borderLeft: `4px solid ${mainIsSuccess ? SEVERITY_COLORS.OK.main : SEVERITY_COLORS.CRITICAL.main}`,
                   padding: '12px',
                 }}
               >
@@ -271,7 +274,7 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
               <Box bgcolor="background.main" borderRadius="4px" overflow="hidden">
                 <Box
                   sx={{
-                    borderLeft: `4px solid ${nestedIsSuccess ? 'var(--color-success-main)' : 'var(--color-error-main)'}`,
+                    borderLeft: `4px solid ${nestedIsSuccess ? SEVERITY_COLORS.OK.main : SEVERITY_COLORS.CRITICAL.main}`,
                     padding: '12px',
                   }}
                 >
