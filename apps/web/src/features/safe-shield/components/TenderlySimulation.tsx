@@ -164,7 +164,11 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
             isSimulationSuccess ? (
               <CheckIcon sx={{ fontSize: 16, color: SEVERITY_COLORS.OK.main }} />
             ) : (
-              <SvgIcon component={AlertIcon} inheritViewBox sx={{ fontSize: 16, color: SEVERITY_COLORS.CRITICAL.main }} />
+              <SvgIcon
+                component={AlertIcon}
+                inheritViewBox
+                sx={{ fontSize: 16, color: SEVERITY_COLORS.CRITICAL.main }}
+              />
             )
           ) : (
             <SvgIcon component={UpdateIcon} inheritViewBox sx={{ fontSize: 16 }} />
