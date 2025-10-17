@@ -19,9 +19,7 @@ describe('CF Safe creation happy path tests', () => {
   })
 
   it('CF creation happy path. GA safe_created', () => {
-    wallet.connectSigner(signer)
-    owner.waitForConnectionStatus()
-    createwallet.clickOnCreateNewSafeBtn()
+    createwallet.startCreateSafeFlow(signer)
     createwallet.clickOnNextBtn()
     createwallet.clickOnNextBtn()
     createwallet.selectPayNowOption()

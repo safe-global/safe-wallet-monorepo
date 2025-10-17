@@ -2,6 +2,8 @@ import * as main from '../pages/main.page'
 import { connectedWalletExecMethod, relayExecMethod, connectedWalletMethod } from '../pages/create_tx.pages'
 import * as sidebar from '../pages/sidebar.pages'
 import * as constants from '../../support/constants'
+import * as wallet from '../../support/utils/wallet'
+import * as owner from './owners.pages'
 
 const welcomeLoginScreen = '[data-testid="welcome-login"]'
 const expandMoreIcon = 'svg[data-testid="ExpandMoreIcon"]'
@@ -397,4 +399,10 @@ export function checkNetworkLogoInSafeCreationModal(networks) {
       checkNetworkLogo(network)
     })
   })
+}
+
+export function startCreateSafeFlow(signer) {
+  wallet.connectSigner(signer)
+  owner.waitForConnectionStatus()
+  clickOnCreateNewSafeBtn()
 }
