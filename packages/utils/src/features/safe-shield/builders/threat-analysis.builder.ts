@@ -40,7 +40,8 @@ export class ThreatAnalysisBuilder {
       | AnalysisResult<ThreatStatus.NO_THREAT>
       | AnalysisResult<ThreatStatus.FAILED>
       | AnalysisResult<ThreatStatus.OWNERSHIP_CHANGE>
-      | AnalysisResult<ThreatStatus.MODULE_CHANGE>,
+      | AnalysisResult<ThreatStatus.MODULE_CHANGE>
+      | AnalysisResult<ThreatStatus.MASTER_COPY_CHANGE>,
   ) {
     this.threatAnalysis.THREAT = [threat]
     return this
@@ -53,7 +54,8 @@ export class ThreatAnalysisBuilder {
       | AnalysisResult<ThreatStatus.NO_THREAT>
       | AnalysisResult<ThreatStatus.FAILED>
       | AnalysisResult<ThreatStatus.OWNERSHIP_CHANGE>
-      | AnalysisResult<ThreatStatus.MODULE_CHANGE>,
+      | AnalysisResult<ThreatStatus.MODULE_CHANGE>
+      | AnalysisResult<ThreatStatus.MASTER_COPY_CHANGE>,
   ) {
     this.threatAnalysis.THREAT.push(threat)
     return this
@@ -86,5 +88,9 @@ export class ThreatAnalysisBuilder {
 
   static moduleChange() {
     return new ThreatAnalysisBuilder().createThreat(ThreatAnalysisResultBuilder.moduleChange().build()).build()
+  }
+
+  static masterCopyChange() {
+    return new ThreatAnalysisBuilder().createThreat(ThreatAnalysisResultBuilder.masterCopyChange().build()).build()
   }
 }

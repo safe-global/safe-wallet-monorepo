@@ -16,6 +16,8 @@ export class ThreatAnalysisResultBuilder<T extends ThreatStatus> {
       title: 'No threat detected',
       description: 'Threat analysis found no issues',
       issues: undefined,
+      before: undefined,
+      after: undefined,
     }
   }
 
@@ -42,6 +44,14 @@ export class ThreatAnalysisResultBuilder<T extends ThreatStatus> {
   issues(issues: Map<keyof typeof Severity, Array<string>>): this {
     if ('issues' in this.result) {
       this.result.issues = issues
+    }
+    return this
+  }
+
+  changes(before: string, after: string): this {
+    if ('before' in this.result && 'after' in this.result) {
+      this.result.before = before
+      this.result.after = after
     }
     return this
   }
@@ -102,5 +112,14 @@ export class ThreatAnalysisResultBuilder<T extends ThreatStatus> {
       .type(ThreatStatus.MODULE_CHANGE)
       .severity(Severity.WARN)
       .description('Verify this change before proceeding as it will change Safe modules.')
+  }
+
+  static masterCopyChange(): ThreatAnalysisResultBuilder<ThreatStatus.MASTER_COPY_CHANGE> {
+    return new ThreatAnalysisResultBuilder<ThreatStatus.MASTER_COPY_CHANGE>()
+      .title('Mastercopy change')
+      .type(ThreatStatus.MASTER_COPY_CHANGE)
+      .severity(Severity.WARN)
+      .description('Verify this change as it may overwrite account ownership.')
+      .changes('0x1234567890123456789012345678901234567890', '0x1234567890123456789012345678901234567891')
   }
 }

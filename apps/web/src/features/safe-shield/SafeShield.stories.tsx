@@ -94,6 +94,17 @@ export const ModulesChange: Story = {
   parameters: { docs: { description: { story: 'SafeShieldWidget when transaction will change Safe modules' } } },
 }
 
+// Mastercopy change
+export const MasterCopyChange: Story = {
+  args: {
+    ...LiveAnalysisResponseBuilder.verifiedContract(contractAddress)
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(LiveAnalysisResponseBuilder.masterCopyChange().build().threat)
+      .build(),
+  },
+  parameters: { docs: { description: { story: 'SafeShieldWidget when transaction will change Safe mastercopy' } } },
+}
+
 // Checks passed
 export const ChecksPassed: Story = {
   args: {

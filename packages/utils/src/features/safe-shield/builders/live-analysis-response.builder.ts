@@ -70,6 +70,10 @@ export class LiveAnalysisResponseBuilder {
     return new LiveAnalysisResponseBuilder().threat(ThreatAnalysisBuilder.moduleChange())
   }
 
+  static masterCopyChange(): LiveAnalysisResponseBuilder {
+    return new LiveAnalysisResponseBuilder().threat(ThreatAnalysisBuilder.masterCopyChange())
+  }
+
   static verifiedContract(address?: string): LiveAnalysisResponseBuilder {
     return new LiveAnalysisResponseBuilder().contract(ContractAnalysisBuilder.verifiedContract(address).build())
   }

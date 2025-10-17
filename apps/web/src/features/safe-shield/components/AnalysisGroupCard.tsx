@@ -1,29 +1,12 @@
 import { type ReactElement, useMemo, useState } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import {
-  type AddressAnalysisResults,
-  AnalysisResult,
-  AnyStatus,
-  MaliciousOrModerateThreatAnalysisResult,
-} from '@safe-global/utils/features/safe-shield/types'
+import { type AddressAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import { mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
 import { SEVERITY_COLORS } from '../constants'
 import { SeverityIcon } from './SeverityIcon'
-
-const AnalysisIssuesDisplay = ({ result }: { result: AnalysisResult<AnyStatus> }) => {
-  if (!('issues' in result)) {
-    return null
-  }
-
-  const issues = result.issues as MaliciousOrModerateThreatAnalysisResult['issues']
-
-  return Array.from(issues?.entries() || []).map(([severity, issues]) => (
-    <Typography key={severity} variant="body2" color="primary.light" mt="1rem" fontStyle="italic">
-      {issues.join(', ')}
-    </Typography>
-  ))
-}
+import { AnalysisIssuesDisplay } from './AnalysisIssuesDisplay'
+import { AddressChanges } from './AddressChanges'
 
 export const AnalysisGroupCard = ({
   data,
@@ -77,11 +60,15 @@ export const AnalysisGroupCard = ({
             {visibleResults.map((result, index) => (
               <Box key={index} bgcolor="background.main" borderRadius="4px" overflow="hidden">
                 <Box sx={{ borderLeft: `4px solid ${SEVERITY_COLORS[result.severity].main}`, padding: '12px' }}>
-                  <Typography variant="body2" color="primary.light">
-                    {result.description}
-                  </Typography>
+                  <Stack gap={2}>
+                    <Typography variant="body2" color="primary.light">
+                      {result.description}
+                    </Typography>
 
-                  <AnalysisIssuesDisplay result={result} />
+                    <AnalysisIssuesDisplay result={result} />
+
+                    <AddressChanges result={result} />
+                  </Stack>
                 </Box>
               </Box>
             ))}
