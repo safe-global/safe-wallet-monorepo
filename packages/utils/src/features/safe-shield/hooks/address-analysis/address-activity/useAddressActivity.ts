@@ -5,6 +5,7 @@ import { analyzeAddressActivity, isLowActivityAddress } from './addressActivityS
 import { ActivityMessages } from '../config'
 import { type AnalysisResult, RecipientStatus, Severity } from '../../../types'
 import { useEffectDeepCompare, useAsyncDeepCompare } from '../../util-hooks'
+import isEmpty from 'lodash/isEmpty'
 
 export type AddressActivityResult = Record<
   string,
@@ -19,9 +20,9 @@ export type AddressActivityResult = Record<
 export const useAddressActivity = (
   addresses: string[],
   web3ReadOnly?: JsonRpcProvider,
-): AsyncResult<AddressActivityResult> => {
+): AsyncResult<AddressActivityResult | undefined> => {
   const previousRecipientsRef = useRef<Set<string>>(new Set())
-  const [results, setResults] = useState<AddressActivityResult>({})
+  const [results, setResults] = useState<AddressActivityResult | undefined>(undefined)
 
   // Determine which addresses changed and need fetching
   const addressesToFetch = useMemo(() => {
@@ -74,16 +75,19 @@ export const useAddressActivity = (
   // Update results to only include addresses that are in the given addresses array
   useEffectDeepCompare(() => {
     if (!fetchedResults && addresses.length === 0) {
-      setResults({})
+      setResults(undefined)
       return
     }
 
     setResults((prevResults) => {
       const newResults = addresses.reduce<AddressActivityResult>((acc, address) => {
-        acc[address] = fetchedResults?.[address] || prevResults[address]
+        const addressResults = fetchedResults?.[address] || prevResults?.[address]
+        if (addressResults) {
+          acc[address] = addressResults
+        }
         return acc
       }, {})
-      return newResults
+      return isEmpty(newResults) ? undefined : newResults
     })
   }, [addresses, fetchedResults])
 
