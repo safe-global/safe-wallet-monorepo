@@ -94,7 +94,7 @@ export function useRecipientAnalysis({
   // Merge backend and local checks
   // Only merge address book results after fetched results are available
   const mergedResults = useMemo(() => {
-    const addressBookToMerge = !!fetchedResults && !!addressBookCheck ? addressBookCheck : undefined
+    const addressBookToMerge = fetchedResults && addressBookCheck ? addressBookCheck : undefined
     return mergeAnalysisResults(fetchedResults, addressBookToMerge, activityCheck)
   }, [fetchedResults, addressBookCheck, activityCheck])
 
