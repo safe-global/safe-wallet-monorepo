@@ -18,13 +18,13 @@ describe('useAddressBookCheck', () => {
     mockOwnedSafes[mockChainId] = []
   })
 
-  it('should return empty results when no addresses are provided', () => {
+  it('should return undefined when no addresses are provided', () => {
     const { result } = renderHook(() => {
       const addresses = useMemo(() => [], [])
       return useAddressBookCheck(mockChainId, addresses, mockIsInAddressBook, [])
     })
 
-    expect(result.current).toEqual({})
+    expect(result.current).toBeUndefined()
   })
 
   it('should return result for address in address book', () => {
@@ -35,7 +35,7 @@ describe('useAddressBookCheck', () => {
       return useAddressBookCheck(mockChainId, addresses, mockIsInAddressBook, [])
     })
 
-    expect(result.current[mockAddress]).toEqual({
+    expect(result.current![mockAddress]).toEqual({
       severity: Severity.OK,
       type: 'KNOWN_RECIPIENT',
       title: AddressCheckMessages.ADDRESS_BOOK.title,
@@ -49,7 +49,7 @@ describe('useAddressBookCheck', () => {
       return useAddressBookCheck(mockChainId, addresses, mockIsInAddressBook, [mockAddress])
     })
 
-    expect(result.current[mockAddress]).toEqual({
+    expect(result.current![mockAddress]).toEqual({
       severity: Severity.OK,
       type: 'KNOWN_RECIPIENT',
       title: AddressCheckMessages.OWNED_SAFE.title,
@@ -65,7 +65,7 @@ describe('useAddressBookCheck', () => {
       return useAddressBookCheck(mockChainId, addresses, mockIsInAddressBook, [upperCaseAddress])
     })
 
-    expect(result.current[mockAddress.toLowerCase()]).toEqual({
+    expect(result.current![mockAddress.toLowerCase()]).toEqual({
       severity: Severity.OK,
       type: 'KNOWN_RECIPIENT',
       title: AddressCheckMessages.OWNED_SAFE.title,
@@ -81,7 +81,7 @@ describe('useAddressBookCheck', () => {
       return useAddressBookCheck(mockChainId, addresses, mockIsInAddressBook, [mockAddress])
     })
 
-    expect(result.current[mockAddress]).toEqual({
+    expect(result.current![mockAddress]).toEqual({
       severity: Severity.OK,
       type: 'KNOWN_RECIPIENT',
       title: AddressCheckMessages.ADDRESS_BOOK.title,
@@ -95,7 +95,7 @@ describe('useAddressBookCheck', () => {
       return useAddressBookCheck(mockChainId, addresses, mockIsInAddressBook, [])
     })
 
-    expect(result.current[mockAddress]).toEqual({
+    expect(result.current![mockAddress]).toEqual({
       severity: Severity.INFO,
       type: 'UNKNOWN_RECIPIENT',
       title: AddressCheckMessages.UNKNOWN.title,
@@ -109,7 +109,7 @@ describe('useAddressBookCheck', () => {
       return useAddressBookCheck(mockChainId, addresses, mockIsInAddressBook, [])
     })
 
-    expect(result.current[mockAddress]).toEqual({
+    expect(result.current![mockAddress]).toEqual({
       severity: Severity.INFO,
       type: 'UNKNOWN_RECIPIENT',
       title: AddressCheckMessages.UNKNOWN.title,
@@ -128,14 +128,14 @@ describe('useAddressBookCheck', () => {
       return useAddressBookCheck(mockChainId, addresses, mockIsInAddressBook, [address2])
     })
 
-    expect(result.current[address1]).toEqual({
+    expect(result.current![address1]).toEqual({
       severity: Severity.OK,
       type: 'KNOWN_RECIPIENT',
       title: AddressCheckMessages.ADDRESS_BOOK.title,
       description: AddressCheckMessages.ADDRESS_BOOK.description,
     })
 
-    expect(result.current[address2]).toEqual({
+    expect(result.current![address2]).toEqual({
       severity: Severity.OK,
       type: 'KNOWN_RECIPIENT',
       title: AddressCheckMessages.OWNED_SAFE.title,
@@ -157,7 +157,7 @@ describe('useAddressBookCheck', () => {
       { initialProps: { addrs: [address1] } },
     )
 
-    expect(result.current[address1]).toEqual({
+    expect(result.current![address1]).toEqual({
       severity: Severity.OK,
       type: 'KNOWN_RECIPIENT',
       title: AddressCheckMessages.ADDRESS_BOOK.title,
@@ -166,12 +166,12 @@ describe('useAddressBookCheck', () => {
 
     rerender({ addrs: [address2] })
 
-    expect(result.current[address2]).toEqual({
+    expect(result.current![address2]).toEqual({
       severity: Severity.INFO,
       type: 'UNKNOWN_RECIPIENT',
       title: AddressCheckMessages.UNKNOWN.title,
       description: AddressCheckMessages.UNKNOWN.description,
     })
-    expect(result.current[address1]).toBeUndefined()
+    expect(result.current![address1]).toBeUndefined()
   })
 })

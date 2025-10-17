@@ -26,7 +26,7 @@ describe('useAddressActivity', () => {
     })
 
     const [results, error] = result.current
-    expect(results).toEqual({})
+    expect(results).toBeUndefined()
     expect(error).toBeUndefined()
   })
 
@@ -43,7 +43,7 @@ describe('useAddressActivity', () => {
     })
 
     const [results] = result.current
-    expect(results).toEqual({})
+    expect(results).toBeUndefined()
   })
 
   it('should return NO_ACTIVITY assessment with corresponding title and description', async () => {

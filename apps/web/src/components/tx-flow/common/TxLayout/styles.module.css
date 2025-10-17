@@ -21,6 +21,15 @@
   border-bottom: 1px solid var(--color-border-light);
 }
 
+.safeInfoCard {
+  padding: 4px 8px 4px 4px;
+  max-width: 212px;
+  margin-left: -12px;
+  overflow: visible;
+  position: fixed;
+  top: 62px;
+}
+
 .step {
   position: relative;
 }

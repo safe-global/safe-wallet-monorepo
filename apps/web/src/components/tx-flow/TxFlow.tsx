@@ -12,6 +12,7 @@ import { Batching, ComboSubmit, Counterfactual, Execute, ExecuteThroughRole, Pro
 import { SlotProvider } from './slots'
 import { useTrackTimeSpent } from '../tx/SignOrExecuteForm/tracking'
 import LedgerHashComparison from '@/features/ledger'
+import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 
 type SubmitCallbackProps = { txId?: string; isExecuted?: boolean }
 export type SubmitCallback = (args?: SubmitCallbackProps) => void
@@ -76,49 +77,50 @@ export const TxFlow = <T extends unknown>({
     <SafeTxProvider>
       <TxInfoProvider>
         <TxSecurityProvider>
-          <SlotProvider>
-            <TxFlowProvider
-              step={step}
-              data={data}
-              nextStep={nextStep}
-              prevStep={prevStep}
-              progress={progress}
-              txId={txId}
-              txNonce={txNonce}
-              txLayoutProps={txLayoutProps}
-              onlyExecute={onlyExecute}
-              isExecutable={isExecutable}
-              isRejection={isRejection}
-              isBatch={isBatch}
-              isBatchable={isBatchable}
-            >
-              <TxFlowContent>
-                {...childrenArray}
+          <SafeShieldProvider>
+            <SlotProvider>
+              <TxFlowProvider
+                step={step}
+                data={data}
+                nextStep={nextStep}
+                prevStep={prevStep}
+                progress={progress}
+                txId={txId}
+                txNonce={txNonce}
+                txLayoutProps={txLayoutProps}
+                onlyExecute={onlyExecute}
+                isExecutable={isExecutable}
+                isRejection={isRejection}
+                isBatch={isBatch}
+                isBatchable={isBatchable}
+              >
+                <TxFlowContent>
+                  {...childrenArray}
 
-                <ReviewTransactionComponent onSubmit={() => nextStep()}>
-                  <TxChecks />
-                  <TxNote />
-                  <SignerSelect />
-                  <Blockaid />
-                </ReviewTransactionComponent>
+                  <ReviewTransactionComponent onSubmit={() => nextStep()}>
+                    <TxChecks />
+                    <TxNote />
+                    <SignerSelect />
+                    <Blockaid />
+                  </ReviewTransactionComponent>
 
-                <ConfirmTxReceipt onSubmit={handleFlowSubmit}>
-                  <Counterfactual />
-                  <ExecuteThroughRole />
+                  <ConfirmTxReceipt onSubmit={handleFlowSubmit}>
+                    <Counterfactual />
+                    <ExecuteThroughRole />
 
-                  <ComboSubmit>
-                    <Sign />
-                    <Execute />
-                    <Batching />
-                  </ComboSubmit>
+                    <ComboSubmit>
+                      <Sign />
+                      <Execute />
+                      <Batching />
+                    </ComboSubmit>
 
-                  <Propose />
-                </ConfirmTxReceipt>
-              </TxFlowContent>
-
-              <LedgerHashComparison />
-            </TxFlowProvider>
-          </SlotProvider>
+                    <Propose />
+                  </ConfirmTxReceipt>
+                </TxFlowContent>
+                <LedgerHashComparison />
+              </TxFlowProvider>
+            </SlotProvider>
+          </SafeShieldProvider>
         </TxSecurityProvider>
       </TxInfoProvider>
     </SafeTxProvider>
