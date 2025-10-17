@@ -4,29 +4,34 @@ import { stableCoinAddresses } from '@/features/swap/helpers/data/stablecoins'
 const FEE_PERCENTAGE_BPS = {
   REGULAR: {
     TIER_1: 35,
-    TIER_2: 20,
-    TIER_3: 10,
+    TIER_2: 35,
+    TIER_3: 20,
+    TIER_4: 10,
   },
   STABLE: {
     TIER_1: 10,
-    TIER_2: 7,
-    TIER_3: 5,
+    TIER_2: 10,
+    TIER_3: 7,
+    TIER_4: 5,
   },
   V2_REGULAR: {
     TIER_1: 70,
-    TIER_2: 20,
-    TIER_3: 10,
+    TIER_2: 35,
+    TIER_3: 20,
+    TIER_4: 10,
   },
   V2_STABLE: {
-    TIER_1: 20,
-    TIER_2: 7,
-    TIER_3: 5,
+    TIER_1: 15,
+    TIER_2: 10,
+    TIER_3: 7,
+    TIER_4: 5,
   },
 }
 
 const FEE_TIERS = {
-  TIER_1: 100_000, // 0 - 100k
-  TIER_2: 1_000_000, // 100k - 1m
+  TIER_1: 50_000, // 0 - 50k
+  TIER_2: 100_000, // 50k - 100k
+  TIER_3: 1_000_000, // 100k - 1m
 }
 
 const getLowerCaseStableCoinAddresses = () => {
@@ -68,5 +73,9 @@ export const calculateFeePercentageInBps = (
     return isStableCoin ? stableFees.TIER_2 : regularFees.TIER_2
   }
 
-  return isStableCoin ? stableFees.TIER_3 : regularFees.TIER_3
+  if (fiatAmount < FEE_TIERS.TIER_3) {
+    return isStableCoin ? stableFees.TIER_3 : regularFees.TIER_3
+  }
+
+  return isStableCoin ? stableFees.TIER_4 : regularFees.TIER_4
 }
