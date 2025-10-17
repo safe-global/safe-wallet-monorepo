@@ -1,10 +1,29 @@
 import { type ReactElement, useMemo, useState } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import { type AddressAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
+import {
+  type AddressAnalysisResults,
+  AnalysisResult,
+  AnyStatus,
+  MaliciousOrModerateThreatAnalysisResult,
+} from '@safe-global/utils/features/safe-shield/types'
 import { mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
 import { SEVERITY_COLORS } from '../constants'
 import { SeverityIcon } from './SeverityIcon'
+
+const AnalysisIssuesDisplay = ({ result }: { result: AnalysisResult<AnyStatus> }) => {
+  if (!('issues' in result)) {
+    return null
+  }
+
+  const issues = result.issues as MaliciousOrModerateThreatAnalysisResult['issues']
+
+  return Array.from(issues?.entries() || []).map(([severity, issues]) => (
+    <Typography key={severity} variant="body2" color="primary.light" mt="1rem" fontStyle="italic">
+      {issues.join(', ')}
+    </Typography>
+  ))
+}
 
 export const AnalysisGroupCard = ({
   data,
@@ -61,6 +80,8 @@ export const AnalysisGroupCard = ({
                   <Typography variant="body2" color="primary.light">
                     {result.description}
                   </Typography>
+
+                  <AnalysisIssuesDisplay result={result} />
                 </Box>
               </Box>
             ))}
