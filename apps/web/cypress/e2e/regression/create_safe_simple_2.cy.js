@@ -95,10 +95,7 @@ describe('Safe creation tests 2', () => {
         main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sepoliaAddress1),
       )
       .then(() => {
-        cy.visit(constants.welcomeUrl + '?chain=sep')
-        wallet.connectSigner(signer)
-        owner.waitForConnectionStatus()
-        createwallet.clickOnCreateNewSafeBtn()
+        createwallet.startCreateSafeFlow(signer)
         safe.clickOnNextBtn()
         safe.inputOwnerAddress(0, constants.RECIPIENT_ADDRESS)
         safe.verifyOnwerName(0, owner1)
