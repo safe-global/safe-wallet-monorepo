@@ -14,7 +14,7 @@ import { CacheProvider, type EmotionCache } from '@emotion/react'
 import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import '@/styles/globals.css'
 import { BRAND_NAME } from '@/config/constants'
-import { makeStore, useHydrateStore } from '@/store'
+import { makeStore, setStoreInstance, useHydrateStore } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
 import useLoadableStores from '@/hooks/useLoadableStores'
 import { useInitOnboard } from '@/hooks/wallets/useOnboard'
@@ -54,6 +54,7 @@ import { AddressBookSourceProvider } from '@/components/common/AddressBookSource
 import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
 
 const reduxStore = makeStore()
+setStoreInstance(reduxStore)
 
 const InitApp = (): null => {
   setGatewayBaseUrl(GATEWAY_URL)

@@ -172,3 +172,18 @@ export const useAppDispatch = () => useDispatch<AppDispatch>()
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector
 
 export const useHydrateStore = hydrate.useHydrateStore
+
+// Store instance for imperative usage outside of React components
+// This is initialized in _app.tsx and should be used for non-component contexts
+let _store: ReturnType<typeof makeStore> | null = null
+
+export const setStoreInstance = (store: ReturnType<typeof makeStore>) => {
+  _store = store
+}
+
+export const getStoreInstance = () => {
+  if (!_store) {
+    throw new Error('Store not initialized. Ensure _app.tsx has called setStoreInstance.')
+  }
+  return _store
+}
