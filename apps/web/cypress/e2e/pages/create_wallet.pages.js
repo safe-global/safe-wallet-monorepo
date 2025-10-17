@@ -401,8 +401,17 @@ export function checkNetworkLogoInSafeCreationModal(networks) {
   })
 }
 
-export function startCreateSafeFlow(signer) {
+export function visitWelcomeAccountPage(chain = 'sep') {
+  cy.visit(`${constants.welcomeAccountUrl}?chain=${chain}`)
+}
+
+export function connectWalletAndCreateSafe(signer) {
   wallet.connectSigner(signer)
   owner.waitForConnectionStatus()
   clickOnCreateNewSafeBtn()
+}
+
+export function startCreateSafeFlow(signer, chain = 'sep') {
+  visitWelcomeAccountPage(chain)
+  connectWalletAndCreateSafe(signer)
 }
