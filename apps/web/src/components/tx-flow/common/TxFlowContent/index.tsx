@@ -51,16 +51,7 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
         <Grid sx={{ width: 200 }} pt={5}>
           <aside>
             <Stack gap={3} position="fixed">
-              <Card
-                sx={{
-                  p: '4px 8px 4px 4px',
-                  maxWidth: 212,
-                  mx: '-12px',
-                  overflow: 'visible',
-                  position: 'fixed',
-                  top: 62,
-                }}
-              >
+              <Card className={css.safeInfoCard}>
                 <SafeInfo />
               </Card>
 
