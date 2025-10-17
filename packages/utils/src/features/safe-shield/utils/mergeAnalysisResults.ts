@@ -13,11 +13,14 @@ export function mergeAnalysisResults(
   addressBookResult: AddressBookCheckResult | undefined,
   activityResult: AddressActivityResult | undefined,
 ): RecipientAnalysisResults {
-  const merged: RecipientAnalysisResults = Object.keys(fetchedResults || {}).reduce((acc, address) => {
-    const checksummedAddress = getAddress(address)
-    acc[checksummedAddress] = fetchedResults?.[address]
-    return acc
-  }, {}) as RecipientAnalysisResults
+  const merged: RecipientAnalysisResults = Object.keys(fetchedResults || {}).reduce<RecipientAnalysisResults>(
+    (acc, address) => {
+      const checksummedAddress = getAddress(address)
+      const addressResults = fetchedResults?.[address]
+      return addressResults ? { ...acc, [checksummedAddress]: addressResults } : acc
+    },
+    {},
+  )
 
   if (addressBookResult) {
     const addressBookEntries = Object.entries(addressBookResult || {})
