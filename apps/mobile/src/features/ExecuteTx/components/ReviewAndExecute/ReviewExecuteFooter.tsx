@@ -1,6 +1,6 @@
 import React from 'react'
 import { Stack, Text } from 'tamagui'
-import { router, useLocalSearchParams } from 'expo-router'
+import { router } from 'expo-router'
 import { SafeButton } from '@/src/components/SafeButton'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
 import { useGuard } from '@/src/context/GuardProvider'
@@ -14,6 +14,7 @@ import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/tr
 import useGasFee from '../../hooks/useGasFee'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectEstimatedFee } from '@/src/store/estimatedFeeSlice'
+import { selectExecutionMethod } from '@/src/store/executionMethodSlice'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import { useExecutionFunds } from '../../hooks/useExecutionFunds'
@@ -44,9 +45,9 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
 
   // checks the executionMethod
   const isRelayAvailable = Boolean(relaysRemaining?.remaining && relaysRemaining.remaining > 0)
-  const { executionMethod: executionMethodParam } = useLocalSearchParams<{ executionMethod: ExecutionMethod }>()
+  const storedExecutionMethod = useAppSelector(selectExecutionMethod)
   const executionMethod = chain
-    ? getExecutionMethod(executionMethodParam, isRelayAvailable, chain)
+    ? getExecutionMethod(storedExecutionMethod, isRelayAvailable, chain)
     : ExecutionMethod.WITH_PK
 
   // Check if signer has sufficient funds

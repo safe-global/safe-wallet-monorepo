@@ -18,7 +18,7 @@ type Props = {
 export function SelectExecutor({ address, txId, executionMethod }: Props) {
   return (
     <View
-      onPress={() => router.push({ pathname: '/how-to-execute-sheet', params: { txId, executionMethod } })}
+      onPress={() => router.push({ pathname: '/how-to-execute-sheet', params: { txId } })}
       flexDirection="row"
       justifyContent="space-between"
       alignItems="center"

@@ -22,6 +22,7 @@ import safesSettings from './safesSettingsSlice'
 import biometrics from './biometricsSlice'
 import pendingTxs from './pendingTxsSlice'
 import estimatedFee from './estimatedFeeSlice'
+import executionMethod from './executionMethodSlice'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import devToolsEnhancer from 'redux-devtools-expo-dev-plugin'
 import { GATEWAY_URL, isTestingEnv } from '../config/constants'
@@ -51,7 +52,7 @@ const persistConfig = {
   key: 'root',
   version: 1,
   storage: reduxStorage,
-  blacklist: [web3API.reducerPath, cgwClient.reducerPath, 'myAccounts', 'estimatedFee'],
+  blacklist: [web3API.reducerPath, cgwClient.reducerPath, 'myAccounts', 'estimatedFee', 'executionMethod'],
   transforms: [cgwClientFilter],
 }
 
@@ -71,6 +72,7 @@ export const rootReducer = combineReducers({
   biometrics,
   pendingTxs,
   estimatedFee,
+  executionMethod,
   [web3API.reducerPath]: web3API.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
 })
