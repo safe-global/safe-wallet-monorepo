@@ -29,12 +29,12 @@ export function useRecipientAnalysis({
 }: {
   safeAddress: string
   chainId: string
-  recipients: string[]
+  recipients: string[] | undefined
   isInAddressBook: (address: string, chainId: string) => boolean
   ownedSafes: string[]
   web3ReadOnly?: JsonRpcProvider
   debounceDelay?: number
-}): AsyncResult<RecipientAnalysisResults> {
+}): AsyncResult<RecipientAnalysisResults> | undefined {
   const recipientsMemo = useMemoDeepCompare(() => recipients, [recipients])
 
   // Debounce recipients to avoid excessive API calls during typing
@@ -42,6 +42,7 @@ export function useRecipientAnalysis({
 
   // Validate + normalize addresses and remove duplicates
   const validRecipients = useMemo(() => {
+    if (!debouncedRecipients) return []
     const filteredRecipients = debouncedRecipients
       .filter((address) => address && isAddress(address))
       .map((address) => address.toLowerCase())
@@ -64,6 +65,10 @@ export function useRecipientAnalysis({
     const addressBookToMerge = fetchedResults && addressBookCheck ? addressBookCheck : undefined
     return mergeAnalysisResults(fetchedResults, addressBookToMerge, activityCheck)
   }, [fetchedResults, addressBookCheck, activityCheck])
+
+  if (!recipientsMemo) {
+    return undefined
+  }
 
   return [mergedResults, fetchedResultsError || activityCheckError, fetchLoading || activityCheckLoading]
 }
