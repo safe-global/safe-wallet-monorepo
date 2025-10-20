@@ -150,3 +150,18 @@ export type StakingTxInfo =
   | NativeStakingDepositTransactionInfo
   | NativeStakingValidatorsExitTransactionInfo
   | NativeStakingWithdrawTransactionInfo
+
+export enum SafeAppAccessPolicyTypes {
+  NoRestrictions = 'NO_RESTRICTIONS',
+  DomainAllowlist = 'DOMAIN_ALLOWLIST',
+}
+export enum SafeAppSocialPlatforms {
+  TWITTER = 'TWITTER',
+  GITHUB = 'GITHUB',
+  DISCORD = 'DISCORD',
+  TELEGRAM = 'TELEGRAM',
+}
+
+export enum SafeAppFeatures {
+  BATCHED_TRANSACTIONS = 'BATCHED_TRANSACTIONS',
+}

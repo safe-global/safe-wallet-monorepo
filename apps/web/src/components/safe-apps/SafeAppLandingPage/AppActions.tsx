@@ -1,5 +1,5 @@
 import { Box, Button, MenuItem, Select, Typography, Grid, FormControl, InputLabel } from '@mui/material'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
