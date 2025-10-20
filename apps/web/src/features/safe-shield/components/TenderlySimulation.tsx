@@ -1,4 +1,4 @@
-import { type ReactElement, useContext, useState, useEffect } from 'react'
+import { type ReactElement, useContext, useState, useEffect, useRef } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse, Tooltip, SvgIcon } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import LaunchIcon from '@mui/icons-material/Launch'
@@ -33,10 +33,20 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
   const [simulationExpanded, setSimulationExpanded] = useState(false)
 
   // Reset simulation state when transaction changes
+  // Use useRef to track the previous transaction and only reset when it actually changes
+  const prevTxDataRef = useRef<string | null>(null)
+
   useEffect(() => {
-    simulation.resetSimulation()
-    nestedTx.simulation.resetSimulation()
-    setSimulationExpanded(false)
+    const currentTxData = safeTx?.data ? JSON.stringify(safeTx.data) : null
+
+    // Only reset if the transaction data actually changed
+    if (currentTxData !== prevTxDataRef.current) {
+      simulation.resetSimulation()
+      nestedTx.simulation.resetSimulation()
+      setSimulationExpanded(false)
+
+      prevTxDataRef.current = currentTxData
+    }
   }, [safeTx, simulation, nestedTx.simulation])
 
   const { nestedSafeInfo, nestedSafeTx, isNested } = useNestedTransaction(safeTx, chain)
@@ -89,6 +99,12 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
 
   const showExpandable = isNested && isSimulationFinished
 
+  const getSimulationHeaderText = () => {
+    if (!isSimulationFinished) return 'Transaction simulation'
+    if (isNested) return 'Transaction simulations'
+    return isSimulationSuccess ? 'Simulation successful' : 'Simulation failed'
+  }
+
   return (
     <Box>
       <Stack
@@ -100,16 +116,12 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
       >
         <Stack direction="row" alignItems="center" gap={1}>
           {isSimulationFinished ? (
-            <SeverityIcon
-              severity={isSimulationSuccess ? Severity.OK : Severity.CRITICAL}
-              width={16}
-              height={16}
-            />
+            <SeverityIcon severity={isSimulationSuccess ? Severity.OK : Severity.CRITICAL} width={16} height={16} />
           ) : (
             <SvgIcon component={UpdateIcon} inheritViewBox sx={{ fontSize: 16 }} />
           )}
           <Typography variant="body2" color="primary.light">
-            {isSimulationFinished ? 'Transaction simulations' : 'Transaction simulation'}
+            {getSimulationHeaderText()}
           </Typography>
           {!isSimulationFinished && !isLoading && (
             <Tooltip
@@ -126,6 +138,27 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
                 }}
               />
             </Tooltip>
+          )}
+          {/* Show inline link for single (non-nested) simulation */}
+          {isSimulationFinished && !isNested && simulation.simulationLink && (
+            <ExternalLink
+              noIcon
+              href={simulation.simulationLink}
+              sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}
+            >
+              <Typography
+                sx={{
+                  fontSize: '12px',
+                  lineHeight: '16px',
+                  letterSpacing: '1px',
+                  color: 'text.secondary',
+                  textDecoration: 'underline',
+                }}
+              >
+                View
+              </Typography>
+              <LaunchIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+            </ExternalLink>
           )}
         </Stack>
 
@@ -175,44 +208,44 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
         )}
       </Stack>
 
-      {/* Show inline when single simulation, expandable when nested */}
-      <Collapse in={showExpandable ? simulationExpanded : isSimulationFinished}>
-        <Box sx={{ padding: '4px 12px 16px' }}>
-          <Stack gap={2}>
-            <Box bgcolor="background.main" borderRadius="4px" overflow="hidden">
-              <Box
-                sx={{
-                  borderLeft: `4px solid ${mainIsSuccess ? SEVERITY_COLORS.OK.main : SEVERITY_COLORS.CRITICAL.main}`,
-                  padding: '12px',
-                }}
-              >
-                <Typography variant="body2" color="primary.light" sx={{ mb: 1 }}>
-                  {mainIsSuccess ? 'Transaction simulation successful.' : 'Transaction simulation failed.'}
-                </Typography>
-                {simulation.simulationLink && (
-                  <ExternalLink
-                    noIcon
-                    href={simulation.simulationLink}
-                    sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}
-                  >
-                    <Typography
-                      sx={{
-                        fontSize: '12px',
-                        lineHeight: '16px',
-                        letterSpacing: '1px',
-                        color: 'text.secondary',
-                        textDecoration: 'underline',
-                      }}
+      {/* Show expandable content only for nested simulations */}
+      {showExpandable && (
+        <Collapse in={simulationExpanded}>
+          <Box sx={{ padding: '4px 12px 16px' }}>
+            <Stack gap={2}>
+              <Box bgcolor="background.main" borderRadius="4px" overflow="hidden">
+                <Box
+                  sx={{
+                    borderLeft: `4px solid ${mainIsSuccess ? SEVERITY_COLORS.OK.main : SEVERITY_COLORS.CRITICAL.main}`,
+                    padding: '12px',
+                  }}
+                >
+                  <Typography variant="body2" color="primary.light" sx={{ mb: 1 }}>
+                    {mainIsSuccess ? 'Simulation successful.' : 'Simulation failed.'}
+                  </Typography>
+                  {simulation.simulationLink && (
+                    <ExternalLink
+                      noIcon
+                      href={simulation.simulationLink}
+                      sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}
                     >
-                      View
-                    </Typography>
-                    <LaunchIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                  </ExternalLink>
-                )}
+                      <Typography
+                        sx={{
+                          fontSize: '12px',
+                          lineHeight: '16px',
+                          letterSpacing: '1px',
+                          color: 'text.secondary',
+                          textDecoration: 'underline',
+                        }}
+                      >
+                        View
+                      </Typography>
+                      <LaunchIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    </ExternalLink>
+                  )}
+                </Box>
               </Box>
-            </Box>
 
-            {isNested && (
               <Box bgcolor="background.main" borderRadius="4px" overflow="hidden">
                 <Box
                   sx={{
@@ -221,7 +254,9 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
                   }}
                 >
                   <Typography variant="body2" color="primary.light" sx={{ mb: 1 }}>
-                    {nestedIsSuccess ? 'Transaction simulation successful.' : 'Transaction simulation failed.'}
+                    {nestedIsSuccess
+                      ? 'Nested transaction simulation successful.'
+                      : 'Nested transaction simulation failed.'}
                   </Typography>
                   {nestedTx.simulation.simulationLink && (
                     <ExternalLink
@@ -245,10 +280,10 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
                   )}
                 </Box>
               </Box>
-            )}
-          </Stack>
-        </Box>
-      </Collapse>
+            </Stack>
+          </Box>
+        </Collapse>
+      )}
     </Box>
   )
 }
