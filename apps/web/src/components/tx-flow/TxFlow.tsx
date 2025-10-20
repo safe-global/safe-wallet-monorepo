@@ -7,7 +7,7 @@ import TxFlowProvider, { type TxFlowProviderProps, type TxFlowContextType } from
 import { TxFlowContent } from './common/TxFlowContent'
 import ReviewTransaction from '../tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
-import { TxNote, SignerSelect, Blockaid, TxChecks } from './features'
+import { TxNote, SignerSelect, Blockaid } from './features'
 import { Batching, ComboSubmit, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
 import { SlotProvider } from './slots'
 import { useTrackTimeSpent } from '../tx/SignOrExecuteForm/tracking'
@@ -97,7 +97,6 @@ export const TxFlow = <T extends unknown>({
                   {...childrenArray}
 
                   <ReviewTransactionComponent onSubmit={() => nextStep()}>
-                    <TxChecks />
                     <TxNote />
                     <SignerSelect />
                     <Blockaid />
