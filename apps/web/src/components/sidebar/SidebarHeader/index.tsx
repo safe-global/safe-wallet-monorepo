@@ -23,6 +23,8 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import QrCodeButton from '../QrCodeButton'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import { SvgIcon } from '@mui/material'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
@@ -32,7 +34,6 @@ import CopyTooltip from '@/components/common/CopyTooltip'
 import FiatValue from '@/components/common/FiatValue'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import { NestedSafesButton } from '@/components/sidebar/NestedSafesButton'
-import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 
 const SafeHeader = (): ReactElement => {
   const { balances } = useVisibleBalances()
@@ -61,7 +62,9 @@ const SafeHeader = (): ReactElement => {
 
           <div className={css.address}>
             {safeAddress ? (
-              <EthHashInfo address={safeAddress} shortAddress showAvatar={false} name={ens} />
+              <Track {...OVERVIEW_EVENTS.COPY_ADDRESS} mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Copy Address' }}>
+                <EthHashInfo address={safeAddress} shortAddress showAvatar={false} name={ens} />
+              </Track>
             ) : (
               <Typography variant="body2">
                 <Skeleton variant="text" width={86} />
@@ -88,7 +91,7 @@ const SafeHeader = (): ReactElement => {
         </div>
 
         <div className={css.iconButtons}>
-          <Track {...OVERVIEW_EVENTS.SHOW_QR} label="sidebar">
+          <Track {...OVERVIEW_EVENTS.SHOW_QR} label="sidebar" mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'QR Code' }}>
             <QrCodeButton>
               <Tooltip title="Open QR code" placement="top">
                 <IconButton className={css.iconButton}>
@@ -98,7 +101,7 @@ const SafeHeader = (): ReactElement => {
             </QrCodeButton>
           </Track>
 
-          <Track {...OVERVIEW_EVENTS.COPY_ADDRESS}>
+          <Track {...OVERVIEW_EVENTS.COPY_ADDRESS} mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Copy Address' }}>
             <CopyTooltip text={addressCopyText}>
               <IconButton data-testid="copy-address-btn" className={css.iconButton}>
                 <SvgIcon component={CopyIconBold} inheritViewBox color="primary" fontSize="small" />
@@ -106,11 +109,11 @@ const SafeHeader = (): ReactElement => {
             </CopyTooltip>
           </Track>
 
-          <Track {...OVERVIEW_EVENTS.OPEN_EXPLORER}>
+          <Track {...OVERVIEW_EVENTS.OPEN_EXPLORER} mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Block Explorer' }}>
             <ExplorerButton {...blockExplorerLink} className={css.iconButton} icon={LinkIconBold} />
           </Track>
 
-          <Track {...NESTED_SAFE_EVENTS.OPEN_LIST} label={NESTED_SAFE_LABELS.header}>
+          <Track {...NESTED_SAFE_EVENTS.OPEN_LIST} label={NESTED_SAFE_LABELS.header} mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Nested Safes' }}>
             <NestedSafesButton chainId={safe.chainId} safeAddress={safe.address.value} />
           </Track>
 
