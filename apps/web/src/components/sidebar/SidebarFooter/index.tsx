@@ -49,14 +49,20 @@ const SidebarFooter = (): ReactElement => {
         <IndexingStatus />
 
         <Box ml="auto !important">
-          <Track {...OVERVIEW_EVENTS.WHATS_NEW} mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: "What's New" }}>
+          <Track
+            {...OVERVIEW_EVENTS.WHATS_NEW}
+            mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: "What's New" }}
+          >
             <IconButton onClick={handleBeamer} id={BEAMER_SELECTOR} data-testid="list-item-whats-new" color="primary">
               <SvgIcon component={BeamerIcon} inheritViewBox fontSize="small" />
             </IconButton>
           </Track>
         </Box>
 
-        <Track {...OVERVIEW_EVENTS.HELP_CENTER} mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Help Center' }}>
+        <Track
+          {...OVERVIEW_EVENTS.HELP_CENTER}
+          mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Help Center' }}
+        >
           <IconButton href={HELP_CENTER_URL} target="_blank" data-testid="list-item-need-help" color="primary">
             <SvgIcon component={HelpCenterIcon} inheritViewBox fontSize="small" />
           </IconButton>

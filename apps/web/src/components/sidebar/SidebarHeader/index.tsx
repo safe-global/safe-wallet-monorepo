@@ -62,7 +62,10 @@ const SafeHeader = (): ReactElement => {
 
           <div className={css.address}>
             {safeAddress ? (
-              <Track {...OVERVIEW_EVENTS.COPY_ADDRESS} mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Copy Address' }}>
+              <Track
+                {...OVERVIEW_EVENTS.COPY_ADDRESS}
+                mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Copy Address' }}
+              >
                 <EthHashInfo address={safeAddress} shortAddress showAvatar={false} name={ens} />
               </Track>
             ) : (
@@ -91,7 +94,11 @@ const SafeHeader = (): ReactElement => {
         </div>
 
         <div className={css.iconButtons}>
-          <Track {...OVERVIEW_EVENTS.SHOW_QR} label="sidebar" mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'QR Code' }}>
+          <Track
+            {...OVERVIEW_EVENTS.SHOW_QR}
+            label="sidebar"
+            mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'QR Code' }}
+          >
             <QrCodeButton>
               <Tooltip title="Open QR code" placement="top">
                 <IconButton className={css.iconButton}>
@@ -101,7 +108,10 @@ const SafeHeader = (): ReactElement => {
             </QrCodeButton>
           </Track>
 
-          <Track {...OVERVIEW_EVENTS.COPY_ADDRESS} mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Copy Address' }}>
+          <Track
+            {...OVERVIEW_EVENTS.COPY_ADDRESS}
+            mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Copy Address' }}
+          >
             <CopyTooltip text={addressCopyText}>
               <IconButton data-testid="copy-address-btn" className={css.iconButton}>
                 <SvgIcon component={CopyIconBold} inheritViewBox color="primary" fontSize="small" />
@@ -109,11 +119,18 @@ const SafeHeader = (): ReactElement => {
             </CopyTooltip>
           </Track>
 
-          <Track {...OVERVIEW_EVENTS.OPEN_EXPLORER} mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Block Explorer' }}>
+          <Track
+            {...OVERVIEW_EVENTS.OPEN_EXPLORER}
+            mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Block Explorer' }}
+          >
             <ExplorerButton {...blockExplorerLink} className={css.iconButton} icon={LinkIconBold} />
           </Track>
 
-          <Track {...NESTED_SAFE_EVENTS.OPEN_LIST} label={NESTED_SAFE_LABELS.header} mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Nested Safes' }}>
+          <Track
+            {...NESTED_SAFE_EVENTS.OPEN_LIST}
+            label={NESTED_SAFE_LABELS.header}
+            mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Nested Safes' }}
+          >
             <NestedSafesButton chainId={safe.chainId} safeAddress={safe.address.value} />
           </Track>
 
