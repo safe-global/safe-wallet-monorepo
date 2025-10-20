@@ -65,13 +65,6 @@ export interface UseNestedTransactionResult {
 /**
  * Hook to detect and fetch data for nested Safe transactions.
  *
- * A nested transaction occurs when a Safe executes a transaction on another Safe.
- * This hook:
- * 1. Detects if the transaction is nested (approveHash or execTransaction)
- * 2. Fetches transaction details if it's an approveHash call
- * 3. Fetches the nested Safe's information
- * 4. Constructs a SafeTransaction object for the nested transaction
- *
  * @param safeTx - The Safe transaction to analyze
  * @param chain - The current blockchain network information
  * @returns An object containing nested Safe info, nested transaction, and a boolean flag
@@ -111,9 +104,6 @@ export const useNestedTransaction = (
     if (!nestedTxInfo) return undefined
 
     if (nestedTxInfo.type === 'approveHash' && nestedTxDetails) {
-      // Construct a minimal SafeTransaction object for the nested transaction.
-      // The signature methods are no-ops because this is a read-only representation
-      // used only for simulation purposes, not for collecting signatures.
       return {
         addSignature: () => {},
         encodedSignatures: () => '',
