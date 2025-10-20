@@ -4,6 +4,7 @@ import {
   type AddressAnalysisResults,
   ThreatStatus,
   MasterCopyChangeThreatAnalysisResult,
+  ThreatAnalysisResult,
 } from '../types'
 import { getPrimaryResult, sortBySeverity } from './analysisUtils'
 import { mapConsolidatedAnalysisResults } from './mapConsolidatedAnalysisResults'
@@ -31,4 +32,12 @@ export const mapVisibleAnalysisResults = (addressResults: AddressAnalysisResults
 
 export const isAddressChange = (result: AnalysisResult<AnyStatus>): result is MasterCopyChangeThreatAnalysisResult => {
   return result.type === ThreatStatus.MASTER_COPY_CHANGE
+}
+
+export const isThreatAnalysisResult = (result: any): result is ThreatAnalysisResult => {
+  if (result && 'severity' in result && 'type' in result && 'title' in result && 'description' in result) {
+    return true
+  }
+
+  return false
 }
