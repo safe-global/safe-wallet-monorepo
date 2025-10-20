@@ -72,7 +72,16 @@ export class ThreatAnalysisResultBuilder<T extends ThreatStatus> {
       .description('The transaction {reason_phrase} {classification_phrase}')
       .issues(
         new Map<keyof typeof Severity, Array<string>>([
-          [Severity.CRITICAL, ['Bulleted list from validation.features, grouped by Malicious first, then Warnings.']],
+          [
+            Severity.CRITICAL,
+            [
+              'Bulleted list from validation.features, grouped by Malicious first, then Warnings.',
+              'Issue 2',
+              'Issue 3',
+            ],
+          ],
+          [Severity.WARN, ['Issue 4', 'Issue 5']],
+          [Severity.INFO, ['Issue 6', 'Issue 7']],
         ]),
       )
   }
