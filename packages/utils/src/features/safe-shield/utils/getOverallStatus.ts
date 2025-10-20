@@ -46,7 +46,6 @@ export const getOverallStatus = (
       for (const addressResults of Object.values(data)) {
         for (const groupResults of Object.values(addressResults)) {
           if (groupResults) {
-            console.log('groupResults', groupResults)
             allResults.push(...groupResults)
           }
         }
