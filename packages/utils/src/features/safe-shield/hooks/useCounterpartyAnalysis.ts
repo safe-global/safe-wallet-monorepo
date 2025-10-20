@@ -46,15 +46,16 @@ export function useCounterpartyAnalysis({
   const [hasTriggered, setHasTriggered] = useState(false)
 
   // Extract transaction data from SafeTransaction
-  const transactionData = useMemo(() => {
-    if (!safeTx) return undefined
-    return {
-      to: getAddress(safeTx.data.to),
-      value: safeTx.data.value,
-      data: safeTx.data.data,
-      operation: safeTx.data.operation as 0 | 1,
+  const transactionData = useMemoDeepCompare(() => {
+    if (safeTx?.data.to) {
+      return {
+        to: getAddress(safeTx.data.to),
+        value: safeTx.data.value,
+        data: safeTx.data.data,
+        operation: safeTx.data.operation as 0 | 1,
+      }
     }
-  }, [safeTx])
+  }, [safeTx?.data.to, safeTx?.data.value, safeTx?.data.data, safeTx?.data.operation])
 
   // Trigger the mutation when transaction data is available
   useEffect(() => {
@@ -69,10 +70,9 @@ export function useCounterpartyAnalysis({
   }, [transactionData, chainId, safeAddress, triggerAnalysis, hasTriggered])
 
   // Reset hasTriggered when transaction data changes
-  const transactionDataMemo = useMemoDeepCompare(() => transactionData, [transactionData])
   useEffect(() => {
     setHasTriggered(false)
-  }, [transactionDataMemo])
+  }, [transactionData])
 
   // Extract recipient addresses from the counterparty analysis response
   const recipientAddresses = useMemo(() => {
