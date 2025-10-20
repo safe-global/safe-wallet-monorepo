@@ -1,6 +1,6 @@
+import type { TransactionListItem } from '@safe-global/store/gateway/types'
+import { TransactionInfoType } from '@safe-global/store/gateway/types'
 import { faker } from '@faker-js/faker'
-import { TransactionInfoType } from '@safe-global/safe-gateway-typescript-sdk'
-import type { TransactionListItem } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { groupTxs, groupRecoveryTransactions, _getRecoveryCancellations } from '@/utils/tx-list'
 

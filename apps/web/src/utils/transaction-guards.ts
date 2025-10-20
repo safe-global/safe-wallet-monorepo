@@ -1,50 +1,14 @@
+import type { StakingTxInfo } from '@safe-global/store/gateway/types'
+
 import type {
-  BaselineConfirmationView,
-  Cancellation,
-  ConflictHeader,
-  Creation,
-  Custom,
-  DateLabel,
   DetailedExecutionInfo,
-  Erc20Transfer,
-  Erc721Transfer,
   ExecutionInfo,
-  Label,
-  ModuleExecutionDetails,
-  ModuleExecutionInfo,
-  MultiSend,
-  MultisigExecutionDetails,
-  MultisigExecutionInfo,
-  NativeCoinTransfer,
-  NativeStakingDepositConfirmationView,
-  Order,
-  AnyConfirmationView,
-  AnySwapOrderConfirmationView,
-  SafeInfo,
-  SettingsChange,
-  SwapOrder,
-  SwapOrderConfirmationView,
-  Transaction,
+  OrderTransactionInfo,
   TransactionInfo,
   TransactionListItem,
-  TransactionSummary,
-  Transfer,
   TransferInfo,
-  TwapOrder,
-  TwapOrderConfirmationView,
-  AnyStakingConfirmationView,
-  StakingTxExitInfo,
-  StakingTxDepositInfo,
-  StakingTxWithdrawInfo,
-  NativeStakingWithdrawConfirmationView,
-  NativeStakingValidatorsExitConfirmationView,
-  StakingTxInfo,
-  TransactionData,
-} from '@safe-global/safe-gateway-typescript-sdk'
-import { type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { Operation } from '@safe-global/store/gateway/types'
+} from '@safe-global/store/gateway/types'
 import {
-  ConfirmationViewTypes,
   ConflictType,
   DetailedExecutionInfoType,
   TransactionInfoType,
@@ -52,7 +16,50 @@ import {
   TransactionStatus,
   TransactionTokenType,
   TransferDirection,
+} from '@safe-global/store/gateway/types'
+
+import type {
+  ConflictHeaderQueuedItem,
+  CreationTransaction,
+  CustomTransactionInfo,
+  DateLabel,
+  LabelQueuedItem,
+  MultiSendTransactionInfo,
+  MultisigExecutionDetails,
+  MultisigExecutionInfo,
+  SettingsChangeTransaction,
+  SwapOrderTransactionInfo,
+  ModuleTransaction,
+  Transaction,
+  TransferTransactionInfo,
+  TwapOrderTransactionInfo,
+  NativeStakingValidatorsExitTransactionInfo,
+  NativeStakingDepositTransactionInfo,
+  NativeStakingWithdrawTransactionInfo,
+  TransactionData,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+
+import type {
+  BaselineConfirmationView,
+  Cancellation,
+  Erc20Transfer,
+  Erc721Transfer,
+  ModuleExecutionDetails,
+  ModuleExecutionInfo,
+  NativeCoinTransfer,
+  NativeStakingDepositConfirmationView,
+  AnyConfirmationView,
+  AnySwapOrderConfirmationView,
+  SafeInfo,
+  SwapOrderConfirmationView,
+  TwapOrderConfirmationView,
+  AnyStakingConfirmationView,
+  NativeStakingWithdrawConfirmationView,
+  NativeStakingValidatorsExitConfirmationView,
 } from '@safe-global/safe-gateway-typescript-sdk'
+import { type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { Operation } from '@safe-global/store/gateway/types'
+import { ConfirmationViewTypes } from '@safe-global/safe-gateway-typescript-sdk'
 import { getDeployedSpendingLimitModuleAddress } from '@/services/contracts/spendingLimitContracts'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { NamedAddress } from '@/components/new-safe/create/types'
@@ -154,7 +161,7 @@ export const isMigrateToL2TxData = (value: TransactionData | undefined, chainId:
 }
 
 // TransactionInfo type guards
-export const isTransferTxInfo = (value: TransactionInfo): value is Transfer => {
+export const isTransferTxInfo = (value: TransactionInfo): value is TransferTransactionInfo => {
   return value.type === TransactionInfoType.TRANSFER || isSwapTransferOrderTxInfo(value)
 }
 
@@ -164,19 +171,19 @@ export const isTransferTxInfo = (value: TransactionInfo): value is Transfer => {
  *
  * @param value
  */
-export const isSwapTransferOrderTxInfo = (value: TransactionInfo): value is SwapOrder => {
+export const isSwapTransferOrderTxInfo = (value: TransactionInfo): value is SwapOrderTransactionInfo => {
   return value.type === TransactionInfoType.SWAP_TRANSFER
 }
 
-export const isSettingsChangeTxInfo = (value: TransactionInfo): value is SettingsChange => {
+export const isSettingsChangeTxInfo = (value: TransactionInfo): value is SettingsChangeTransaction => {
   return value.type === TransactionInfoType.SETTINGS_CHANGE
 }
 
-export const isCustomTxInfo = (value: TransactionInfo): value is Custom => {
+export const isCustomTxInfo = (value: TransactionInfo): value is CustomTransactionInfo => {
   return value.type === TransactionInfoType.CUSTOM
 }
 
-export const isMultiSendTxInfo = (value: TransactionInfo): value is MultiSend => {
+export const isMultiSendTxInfo = (value: TransactionInfo): value is MultiSendTransactionInfo => {
   return (
     value.type === TransactionInfoType.CUSTOM &&
     value.methodName === 'multiSend' &&
@@ -184,18 +191,18 @@ export const isMultiSendTxInfo = (value: TransactionInfo): value is MultiSend =>
   )
 }
 
-export const isOrderTxInfo = (value: TransactionInfo): value is Order => {
+export const isOrderTxInfo = (value: TransactionInfo): value is OrderTransactionInfo => {
   return isSwapOrderTxInfo(value) || isTwapOrderTxInfo(value)
 }
 
-export const isMigrateToL2TxInfo = (value: TransactionInfo): value is Custom => {
+export const isMigrateToL2TxInfo = (value: TransactionInfo): value is CustomTransactionInfo => {
   const safeToL2MigrationDeployment = getSafeToL2MigrationDeployment()
   const safeToL2MigrationAddress = safeToL2MigrationDeployment?.defaultAddress
 
   return isCustomTxInfo(value) && sameAddress(value.to.value, safeToL2MigrationAddress)
 }
 
-export const isSwapOrderTxInfo = (value: TransactionInfo): value is SwapOrder => {
+export const isSwapOrderTxInfo = (value: TransactionInfo): value is SwapOrderTransactionInfo => {
   return value.type === TransactionInfoType.SWAP_ORDER
 }
 
@@ -207,19 +214,19 @@ export const isLifiSwapTxInfo = (value: any): value is SwapTransactionInfo => {
   return (value.type as string) === 'Swap'
 }
 
-export const isTwapOrderTxInfo = (value: TransactionInfo): value is TwapOrder => {
+export const isTwapOrderTxInfo = (value: TransactionInfo): value is TwapOrderTransactionInfo => {
   return value.type === TransactionInfoType.TWAP_ORDER
 }
 
-export const isStakingTxDepositInfo = (value: TransactionInfo): value is StakingTxDepositInfo => {
+export const isStakingTxDepositInfo = (value: TransactionInfo): value is NativeStakingDepositTransactionInfo => {
   return value.type === TransactionInfoType.NATIVE_STAKING_DEPOSIT
 }
 
-export const isStakingTxExitInfo = (value: TransactionInfo): value is StakingTxExitInfo => {
+export const isStakingTxExitInfo = (value: TransactionInfo): value is NativeStakingValidatorsExitTransactionInfo => {
   return value.type === TransactionInfoType.NATIVE_STAKING_VALIDATORS_EXIT
 }
 
-export const isStakingTxWithdrawInfo = (value: TransactionInfo): value is StakingTxWithdrawInfo => {
+export const isStakingTxWithdrawInfo = (value: TransactionInfo): value is NativeStakingWithdrawTransactionInfo => {
   return value.type === TransactionInfoType.NATIVE_STAKING_WITHDRAW
 }
 
@@ -311,7 +318,7 @@ export const isCancellationTxInfo = (value: TransactionInfo): value is Cancellat
   return isCustomTxInfo(value) && value.isCancellation
 }
 
-export const isCreationTxInfo = (value: TransactionInfo): value is Creation => {
+export const isCreationTxInfo = (value: TransactionInfo): value is CreationTransaction => {
   return value.type === TransactionInfoType.CREATION
 }
 
@@ -324,11 +331,11 @@ export const isIncomingTransfer = (txInfo: TransactionInfo): boolean => {
 }
 
 // TransactionListItem type guards
-export const isLabelListItem = (value: TransactionListItem): value is Label => {
+export const isLabelListItem = (value: TransactionListItem): value is LabelQueuedItem => {
   return value.type === TransactionListItemType.LABEL
 }
 
-export const isConflictHeaderListItem = (value: TransactionListItem): value is ConflictHeader => {
+export const isConflictHeaderListItem = (value: TransactionListItem): value is ConflictHeaderQueuedItem => {
   return value.type === TransactionListItemType.CONFLICT_HEADER
 }
 
@@ -336,7 +343,7 @@ export const isDateLabel = (value: TransactionListItem): value is DateLabel => {
   return value.type === TransactionListItemType.DATE_LABEL
 }
 
-export const isTransactionListItem = (value: TransactionListItem): value is Transaction => {
+export const isTransactionListItem = (value: TransactionListItem): value is ModuleTransaction => {
   return value.type === TransactionListItemType.TRANSACTION
 }
 
@@ -348,7 +355,7 @@ export function isRecoveryQueueItem(value: TransactionListItem | RecoveryQueueIt
 // Narrows `Transaction`
 // TODO: Consolidate these types with the new sdk
 export const isMultisigExecutionInfo = (
-  value?: ExecutionInfo | DetailedExecutionInfo,
+  value?: ExecutionInfo | DetailedExecutionInfo | null,
 ): value is MultisigExecutionInfo => {
   return value?.type === 'MULTISIG'
 }
@@ -356,12 +363,12 @@ export const isMultisigExecutionInfo = (
 export const isModuleExecutionInfo = (value?: ExecutionInfo | DetailedExecutionInfo): value is ModuleExecutionInfo =>
   value?.type === 'MODULE'
 
-export const isSignableBy = (txSummary: TransactionSummary, walletAddress: string): boolean => {
+export const isSignableBy = (txSummary: Transaction, walletAddress: string): boolean => {
   const executionInfo = isMultisigExecutionInfo(txSummary.executionInfo) ? txSummary.executionInfo : undefined
   return !!executionInfo?.missingSigners?.some((address) => address.value === walletAddress)
 }
 
-export const isConfirmableBy = (txSummary: TransactionSummary, walletAddress: string): boolean => {
+export const isConfirmableBy = (txSummary: Transaction, walletAddress: string): boolean => {
   if (!txSummary.executionInfo || !isMultisigExecutionInfo(txSummary.executionInfo)) {
     return false
   }
@@ -372,11 +379,7 @@ export const isConfirmableBy = (txSummary: TransactionSummary, walletAddress: st
   )
 }
 
-export const isExecutable = (
-  txSummary: TransactionSummary,
-  walletAddress: string,
-  safe: Pick<SafeInfo, 'nonce'>,
-): boolean => {
+export const isExecutable = (txSummary: Transaction, walletAddress: string, safe: Pick<SafeInfo, 'nonce'>): boolean => {
   if (
     !txSummary.executionInfo ||
     !isMultisigExecutionInfo(txSummary.executionInfo) ||
@@ -420,13 +423,13 @@ export const isArrayParameter = (parameter: string): boolean => /(\[\d*?])+$/.te
 export const isAddress = (type: string): boolean => type.indexOf('address') === 0
 export const isByte = (type: string): boolean => type.indexOf('byte') === 0
 
-export const isNoneConflictType = (transaction: Transaction) => {
+export const isNoneConflictType = (transaction: ModuleTransaction) => {
   return transaction.conflictType === ConflictType.NONE
 }
-export const isHasNextConflictType = (transaction: Transaction) => {
+export const isHasNextConflictType = (transaction: ModuleTransaction) => {
   return transaction.conflictType === ConflictType.HAS_NEXT
 }
-export const isEndConflictType = (transaction: Transaction) => {
+export const isEndConflictType = (transaction: ModuleTransaction) => {
   return transaction.conflictType === ConflictType.END
 }
 
@@ -452,7 +455,7 @@ export const isOnChainConfirmationTxData = (data?: TransactionData): boolean => 
   return Boolean(data && data.hexData?.startsWith(approveHashSelector))
 }
 
-export const isOnChainConfirmationTxInfo = (info: TransactionInfo): info is Custom => {
+export const isOnChainConfirmationTxInfo = (info: TransactionInfo): info is CustomTransactionInfo => {
   if (isCustomTxInfo(info)) {
     return info.methodName === 'approveHash' && info.dataSize === '36'
   }
@@ -477,7 +480,7 @@ export const isExecTxData = (data?: TransactionData): boolean => {
   return Boolean(data && data.hexData?.startsWith(execTransactionSelector))
 }
 
-export const isExecTxInfo = (info: TransactionInfo): info is Custom => {
+export const isExecTxInfo = (info: TransactionInfo): info is CustomTransactionInfo => {
   if (isCustomTxInfo(info)) {
     return info.methodName === 'execTransaction'
   }

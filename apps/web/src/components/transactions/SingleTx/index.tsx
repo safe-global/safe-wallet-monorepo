@@ -1,8 +1,12 @@
+import { LabelValue } from '@safe-global/store/gateway/types'
+import type {
+  LabelQueuedItem,
+  ModuleTransaction,
+  TransactionDetails,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useRouter } from 'next/router'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import type { Label, Transaction, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { LabelValue } from '@safe-global/safe-gateway-typescript-sdk'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { ReactElement } from 'react'
 import { useEffect } from 'react'
@@ -18,7 +22,7 @@ import { skipToken } from '@reduxjs/toolkit/query/react'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 const SingleTxGrid = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement => {
-  const tx: Transaction = makeTxFromDetails(txDetails)
+  const tx: ModuleTransaction = makeTxFromDetails(txDetails)
 
   // Show a label for the transaction if it's a queued transaction
   const { safe } = useSafeInfo()
@@ -29,8 +33,7 @@ const SingleTxGrid = ({ txDetails }: { txDetails: TransactionDetails }): ReactEl
 
   return (
     <TxListGrid>
-      {label ? <GroupLabel item={{ label } as Label} /> : null}
-
+      {label ? <GroupLabel item={{ label } as LabelQueuedItem} /> : null}
       <ExpandableTransactionItem item={tx} txDetails={txDetails} />
     </TxListGrid>
   )

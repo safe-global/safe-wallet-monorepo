@@ -1,5 +1,5 @@
+import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useMemo } from 'react'
-import { type TransactionListPage } from '@safe-global/safe-gateway-typescript-sdk'
 import { useAppSelector } from '@/store'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { selectTxHistory } from '@/store/txHistorySlice'
@@ -14,7 +14,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 const useTxHistory = (
   pageUrl?: string,
 ): {
-  page?: TransactionListPage
+  page?: TransactionItemPage
   error?: string
   loading: boolean
 } => {

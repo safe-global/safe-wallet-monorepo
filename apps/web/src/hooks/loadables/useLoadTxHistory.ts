@@ -1,5 +1,5 @@
+import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useEffect } from 'react'
-import { type TransactionListPage } from '@safe-global/safe-gateway-typescript-sdk'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { Errors, logError } from '@/services/exceptions'
 import useSafeInfo from '../useSafeInfo'
@@ -10,7 +10,7 @@ import { useHasFeature } from '../useChains'
 
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
-export const useLoadTxHistory = (): AsyncResult<TransactionListPage> => {
+export const useLoadTxHistory = (): AsyncResult<TransactionItemPage> => {
   const { safe, safeAddress, safeLoaded } = useSafeInfo()
   const { chainId, txHistoryTag } = safe
   const { hideSuspiciousTransactions } = useAppSelector(selectSettings)

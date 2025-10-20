@@ -1,3 +1,4 @@
+import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { Gnosis_safe__factory } from '@safe-global/utils/types/contracts'
 import { JsonRpcProvider, toBeHex } from 'ethers'
 import Safe from '@safe-global/protocol-kit'
@@ -5,7 +6,6 @@ import {
   getSafeContract,
   getSafeProxyFactoryContract,
 } from '@safe-global/protocol-kit/dist/src/contracts/safeDeploymentContracts'
-import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
 import { initSafeSDK } from '../safeCoreSDK'
 import { isValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
 

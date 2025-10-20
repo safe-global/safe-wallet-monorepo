@@ -1,5 +1,5 @@
-import type { TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
-import { type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import {
   isAnyStakingTxInfo,

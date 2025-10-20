@@ -1,13 +1,13 @@
-import usePendingActions from '@/hooks/usePendingActions'
-import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import { renderHook, waitFor } from '@/tests/test-utils'
-import type { TransactionListPage, TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
 import {
   ConflictType,
   DetailedExecutionInfoType,
   LabelValue,
   TransactionListItemType,
-} from '@safe-global/safe-gateway-typescript-sdk'
+} from '@safe-global/store/gateway/types'
+import type { TransactionItemPage, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import usePendingActions from '@/hooks/usePendingActions'
+import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
+import { renderHook, waitFor } from '@/tests/test-utils'
 import { toBeHex } from 'ethers'
 import type { EIP1193Provider } from '@web3-onboard/core'
 import * as useWallet from '@/hooks/wallets/useWallet'
@@ -93,7 +93,7 @@ describe('usePendingActions hook', () => {
       safeLoaded: true,
     })
 
-    const page: TransactionListPage = {
+    const page: TransactionItemPage = {
       next: undefined,
       previous: undefined,
       results: [
@@ -112,7 +112,7 @@ describe('usePendingActions hook', () => {
                 { value: '0x0000000000000000000000000000000000000789' },
               ],
             },
-          } as unknown as TransactionSummary,
+          } as unknown as Transaction,
           conflictType: ConflictType.HAS_NEXT,
         },
         {
@@ -124,7 +124,7 @@ describe('usePendingActions hook', () => {
               confirmationsRequired: 3,
               confirmationsSubmitted: 3,
             },
-          } as unknown as TransactionSummary,
+          } as unknown as Transaction,
           conflictType: ConflictType.END,
         },
       ],
@@ -165,7 +165,7 @@ describe('usePendingActions hook', () => {
       safeLoaded: true,
     })
 
-    const page: TransactionListPage = {
+    const page: TransactionItemPage = {
       next: undefined,
       previous: undefined,
       results: [
@@ -184,7 +184,7 @@ describe('usePendingActions hook', () => {
                 { value: '0x0000000000000000000000000000000000000789' },
               ],
             },
-          } as unknown as TransactionSummary,
+          } as unknown as Transaction,
           conflictType: ConflictType.NONE,
         },
       ],

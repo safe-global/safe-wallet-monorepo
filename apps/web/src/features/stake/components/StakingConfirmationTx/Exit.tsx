@@ -1,12 +1,12 @@
+import type { NativeStakingValidatorsExitTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Alert, Stack, Typography } from '@mui/material'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatters'
 import ConfirmationOrderHeader from '@/components/tx/ConfirmationOrder/ConfirmationOrderHeader'
 import { InfoTooltip } from '@/features/stake/components/InfoTooltip'
-import type { StakingTxExitInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
 type StakingOrderConfirmationViewProps = {
-  order: StakingTxExitInfo
+  order: NativeStakingValidatorsExitTransactionInfo
 }
 
 const StakingConfirmationTxExit = ({ order }: StakingOrderConfirmationViewProps) => {

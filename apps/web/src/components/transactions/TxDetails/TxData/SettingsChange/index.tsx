@@ -1,6 +1,6 @@
+import { SettingsInfoType } from '@safe-global/store/gateway/types'
+import type { SettingsChangeTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ComponentProps, ReactElement } from 'react'
-import type { SettingsChange } from '@safe-global/safe-gateway-typescript-sdk'
-import { SettingsInfoType } from '@safe-global/safe-gateway-typescript-sdk'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { InfoDetails } from '@/components/transactions/InfoDetails'
 import { ThresholdWarning } from '@/components/transactions/Warning'
@@ -8,7 +8,7 @@ import { UntrustedFallbackHandlerWarning } from '@/components/transactions/Warni
 import { useHasUntrustedFallbackHandler } from '@/hooks/useHasUntrustedFallbackHandler'
 
 type SettingsChangeTxInfoProps = {
-  settingsInfo: SettingsChange['settingsInfo']
+  settingsInfo: SettingsChangeTransaction['settingsInfo']
   isTxExecuted?: boolean
 }
 

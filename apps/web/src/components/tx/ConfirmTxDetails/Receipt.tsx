@@ -1,10 +1,10 @@
+import type { TransactionDetails, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Fragment, useMemo, type ReactElement } from 'react'
 import { Box, Divider, Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { PaperViewToggle } from '../../common/PaperViewToggle'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { type TransactionDetails, type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import { Operation } from '@safe-global/store/gateway/types'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import {

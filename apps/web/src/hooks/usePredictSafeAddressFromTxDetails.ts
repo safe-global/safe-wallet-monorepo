@@ -1,4 +1,4 @@
-import type { DataDecoded, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import type { DataDecoded, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 import { predictSafeAddress } from '@/features/multichain/utils/utils'
 import useAsync from '@safe-global/utils/hooks/useAsync'

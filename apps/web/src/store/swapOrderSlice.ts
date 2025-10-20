@@ -1,6 +1,6 @@
+import type { OrderStatuses } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { listenerMiddlewareInstance } from '@/store'
 import { createSelector, createSlice } from '@reduxjs/toolkit'
-import type { OrderStatuses } from '@safe-global/safe-gateway-typescript-sdk'
 import type { RootState } from '@/store'
 import { isSwapOrderTxInfo, isTransactionListItem } from '@/utils/transaction-guards'
 import { txHistorySlice } from '@/store/txHistorySlice'
@@ -17,7 +17,7 @@ type Order = {
 }
 
 type SwapOrderState = {
-  [orderUid: string]: Order
+  [orderUid: string]: OrderTransactionInfo
 }
 
 const initialState: SwapOrderState = {}
@@ -26,7 +26,7 @@ const slice = createSlice({
   name: 'swapOrders',
   initialState,
   reducers: {
-    setSwapOrder: (state, { payload }: { payload: Order }): SwapOrderState => {
+    setSwapOrder: (state, { payload }: { payload: OrderTransactionInfo }): SwapOrderState => {
       return {
         ...state,
         [payload.orderUid]: {

@@ -1,5 +1,5 @@
+import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
-import type { AddressEx } from '@safe-global/safe-gateway-typescript-sdk'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { Typography } from '@mui/material'
 import { DataRow } from '@/components/common/Table/DataRow'
@@ -11,7 +11,7 @@ export const generateDataRowValue = (
   value?: string,
   type?: 'hash' | 'rawData' | 'address' | 'bytes',
   hasExplorer?: boolean,
-  addressInfo?: AddressEx,
+  addressInfo?: AddressInfo,
 ): ReactElement | null => {
   if (value == undefined) return null
 

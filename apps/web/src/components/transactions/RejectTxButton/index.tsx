@@ -1,4 +1,4 @@
-import type { TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Button } from '@mui/material'
 
 import type { ReactElement } from 'react'
@@ -17,7 +17,7 @@ const RejectTxButton = ({
   safeTxHash,
   proposer,
 }: {
-  txSummary: TransactionSummary
+  txSummary: Transaction
   safeTxHash?: string
   proposer?: string
 }): ReactElement | null => {

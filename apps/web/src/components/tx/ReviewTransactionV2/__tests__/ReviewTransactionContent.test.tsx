@@ -1,6 +1,6 @@
+import type { TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import ReviewTransaction from '../index'
 import { render } from '@/tests/test-utils'
-import type { TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { createSafeTx } from '@/tests/builders/safeTx'

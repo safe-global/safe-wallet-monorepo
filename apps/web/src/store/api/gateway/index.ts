@@ -1,11 +1,8 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { AllOwnedSafes } from '@safe-global/store/gateway/types'
 import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react'
 
-import {
-  type AllOwnedSafes,
-  getAllOwnedSafes,
-  getTransactionDetails,
-  type TransactionDetails,
-} from '@safe-global/safe-gateway-typescript-sdk'
+import { getAllOwnedSafes, getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { safeOverviewEndpoints } from './safeOverviews'
 import { createSubmission, getSafe, getSafesByOwner, getSubmission } from '@safe-global/safe-client-gateway-sdk'

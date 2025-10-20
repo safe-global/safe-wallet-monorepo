@@ -1,6 +1,6 @@
+import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
 import { Box, Skeleton, Stack } from '@mui/material'
-import { type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 
 import Link from 'next/link'

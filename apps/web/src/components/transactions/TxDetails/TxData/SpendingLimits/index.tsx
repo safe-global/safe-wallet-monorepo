@@ -1,6 +1,6 @@
+import type { CustomTransactionInfo, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
 import React, { useMemo } from 'react'
-import type { Custom, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import { Stack, Typography } from '@mui/material'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import TokenIcon from '@/components/common/TokenIcon'
@@ -17,7 +17,7 @@ import TxDetailsRow from '@/components/tx/ConfirmTxDetails/TxDetailsRow'
 
 type SpendingLimitsProps = {
   txData?: TransactionData
-  txInfo: Custom
+  txInfo: CustomTransactionInfo
   type: SpendingLimitMethods
 }
 

@@ -1,3 +1,4 @@
+import type { ModuleTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import React, { type ReactElement } from 'react'
 import { useMemo } from 'react'
 import { useRouter } from 'next/router'
@@ -13,7 +14,6 @@ import { isSignableBy, isExecutable } from '@/utils/transaction-guards'
 import useWallet from '@/hooks/wallets/useWallet'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useRecoveryQueue } from '@/features/recovery/hooks/useRecoveryQueue'
-import type { Transaction } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 import { SidebarListItemCounter } from '@/components/sidebar/SidebarList'
@@ -42,7 +42,11 @@ const EmptyState = () => {
   )
 }
 
-function getActionableTransactions(txs: Transaction[], safe: SafeState, walletAddress?: string): Transaction[] {
+function getActionableTransactions(
+  txs: ModuleTransaction[],
+  safe: SafeState,
+  walletAddress?: string,
+): ModuleTransaction[] {
   if (!walletAddress) {
     return txs
   }
@@ -59,10 +63,10 @@ export function _getTransactionsToDisplay({
   safe,
 }: {
   recoveryQueue: RecoveryQueueItem[]
-  queue: Transaction[]
+  queue: ModuleTransaction[]
   walletAddress?: string
   safe: SafeState
-}): [RecoveryQueueItem[], Transaction[]] {
+}): [RecoveryQueueItem[], ModuleTransaction[]] {
   if (recoveryQueue.length >= MAX_TXS) {
     return [recoveryQueue.slice(0, MAX_TXS), []]
   }

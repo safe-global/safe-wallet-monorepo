@@ -1,6 +1,6 @@
+import { SettingsInfoType } from '@safe-global/store/gateway/types'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { render } from '@/tests/test-utils'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { SettingsInfoType } from '@safe-global/safe-gateway-typescript-sdk'
 import SettingsChange from '.'
 import { ownerAddress, txInfo } from './mockData'
 import { SettingsChangeContext } from '@/components/tx-flow/flows/AddOwner/context'

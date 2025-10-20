@@ -1,5 +1,6 @@
-import type { MultisigExecutionInfo, Transaction, TransactionListItem } from '@safe-global/safe-gateway-typescript-sdk'
-import { ConflictType, TransactionListItemType } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionListItem } from '@safe-global/store/gateway/types'
+import { ConflictType, TransactionListItemType } from '@safe-global/store/gateway/types'
+import type { MultisigExecutionInfo, ModuleTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getBatchableTransactions } from '@/hooks/useBatchedTxs'
 import { defaultTx, getMockTx } from '@/tests/mocks/transactions'
 
@@ -11,7 +12,7 @@ describe('getBatchableTransactions', () => {
   })
 
   it('should include a tx with enough confirmations', () => {
-    const mockTx: Transaction = {
+    const mockTx: ModuleTransaction = {
       transaction: {
         ...defaultTx,
         executionInfo: {
@@ -31,7 +32,7 @@ describe('getBatchableTransactions', () => {
   })
 
   it('should ignore a tx with missing confirmations', () => {
-    const mockTx: Transaction = {
+    const mockTx: ModuleTransaction = {
       transaction: {
         ...defaultTx,
         executionInfo: {
@@ -51,7 +52,7 @@ describe('getBatchableTransactions', () => {
   })
 
   it('should pick the newer tx of a group', () => {
-    const mockTx: Transaction = {
+    const mockTx: ModuleTransaction = {
       transaction: {
         ...defaultTx,
         executionInfo: {
@@ -70,7 +71,7 @@ describe('getBatchableTransactions', () => {
       nonce: 1,
     }
 
-    const mockTx1: Transaction = {
+    const mockTx1: ModuleTransaction = {
       transaction: {
         ...defaultTx,
         executionInfo: {
@@ -85,7 +86,7 @@ describe('getBatchableTransactions', () => {
       conflictType: ConflictType.HAS_NEXT,
     }
 
-    const mockTx2: Transaction = {
+    const mockTx2: ModuleTransaction = {
       transaction: {
         ...defaultTx,
         executionInfo: {
@@ -107,7 +108,7 @@ describe('getBatchableTransactions', () => {
   })
 
   it('should ignore a tx with out of order nonce', () => {
-    const mockTx: Transaction = {
+    const mockTx: ModuleTransaction = {
       transaction: {
         ...defaultTx,
         executionInfo: {
@@ -121,7 +122,7 @@ describe('getBatchableTransactions', () => {
       conflictType: ConflictType.NONE,
     }
 
-    const mockTx1: Transaction = {
+    const mockTx1: ModuleTransaction = {
       transaction: {
         ...defaultTx,
         executionInfo: {

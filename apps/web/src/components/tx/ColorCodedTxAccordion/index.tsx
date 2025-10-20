@@ -1,3 +1,5 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { TransactionInfoType } from '@safe-global/store/gateway/types'
 import type { ReactNode } from 'react'
 import { type SyntheticEvent, type ReactElement, memo, useMemo } from 'react'
 import { isNativeTokenTransfer, isTransferTxInfo } from '@/utils/transaction-guards'
@@ -12,7 +14,6 @@ import {
   styled,
   Typography,
 } from '@mui/material'
-import { TransactionInfoType, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { trackEvent, MODALS_EVENTS } from '@/services/analytics'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import accordionCss from '@/styles/accordion.module.css'

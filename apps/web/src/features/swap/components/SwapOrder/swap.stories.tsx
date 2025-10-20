@@ -1,7 +1,7 @@
+import type { OrderStatuses } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { Meta, StoryObj } from '@storybook/react'
 import { SellOrder as SellOrderComponent } from './index'
 import { Paper } from '@mui/material'
-import type { OrderStatuses } from '@safe-global/safe-gateway-typescript-sdk'
 import { appDataBuilder, orderTokenBuilder, swapOrderBuilder } from '@/features/swap/helpers/swapOrderBuilder'
 import { StoreDecorator } from '@/stories/storeDecorator'
 

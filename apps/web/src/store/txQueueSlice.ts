@@ -1,6 +1,6 @@
+import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { listenerMiddlewareInstance } from '@/store'
 import { createSelector } from '@reduxjs/toolkit'
-import type { TransactionListPage } from '@safe-global/safe-gateway-typescript-sdk'
 import type { RootState } from '@/store'
 import { makeLoadableSlice } from './common'
 import { isMultisigExecutionInfo, isTransactionListItem } from '@/utils/transaction-guards'
@@ -10,7 +10,7 @@ import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 
 const SIGNING_STATES = [PendingStatus.SIGNING, PendingStatus.NESTED_SIGNING]
 
-const { slice, selector } = makeLoadableSlice('txQueue', undefined as TransactionListPage | undefined)
+const { slice, selector } = makeLoadableSlice('txQueue', undefined as TransactionItemPage | undefined)
 
 export const txQueueSlice = slice
 export const selectTxQueue = selector

@@ -1,5 +1,5 @@
+import type { OrderStatuses } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SvgIcon } from '@mui/material'
-import type { OrderStatuses } from '@safe-global/safe-gateway-typescript-sdk'
 import type { ReactElement } from 'react'
 import CheckIcon from '@/public/images/common/circle-check.svg'
 import ClockIcon from '@/public/images/common/clock.svg'

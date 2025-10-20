@@ -1,7 +1,7 @@
+import type { MasterCopy } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
 import { Errors, logError } from '@/services/exceptions'
-import type { MasterCopyReponse } from '@safe-global/safe-gateway-typescript-sdk'
 import { getMasterCopies } from '@safe-global/safe-gateway-typescript-sdk'
 
 export enum MasterCopyDeployer {
@@ -9,12 +9,12 @@ export enum MasterCopyDeployer {
   CIRCLES = 'Circles',
 }
 
-export type MasterCopy = MasterCopyReponse[number] & {
+export type MasterCopy = MasterCopy[number] & {
   deployer: MasterCopyDeployer
   deployerRepoUrl: string
 }
 
-const extractMasterCopyInfo = (mc: MasterCopyReponse[number]): MasterCopy => {
+const extractMasterCopyInfo = (mc: MasterCopy[number]): MasterCopy => {
   const isCircles = mc.version.toLowerCase().includes(MasterCopyDeployer.CIRCLES.toLowerCase())
   const dashIndex = mc.version.indexOf('-')
 

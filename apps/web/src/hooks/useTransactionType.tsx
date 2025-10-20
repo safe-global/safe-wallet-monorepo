@@ -1,12 +1,8 @@
+import { SettingsInfoType, TransactionInfoType } from '@safe-global/store/gateway/types'
+import type { AddressInfo, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getOrderClass } from '@/features/swap/helpers/utils'
 import type { ReactElement } from 'react'
 import { useMemo } from 'react'
-import {
-  type AddressEx,
-  SettingsInfoType,
-  TransactionInfoType,
-  type TransactionSummary,
-} from '@safe-global/safe-gateway-typescript-sdk'
 import SwapIcon from '@/public/images/common/swap.svg'
 import BridgeIcon from '@/public/images/common/bridge.svg'
 import StakeIcon from '@/public/images/common/stake.svg'
@@ -27,7 +23,7 @@ import type { AddressBook } from '@/store/addressBookSlice'
 import { TWAP_ORDER_TITLE } from '@/features/swap/constants'
 import { SvgIcon } from '@mui/material'
 
-const getTxTo = ({ txInfo }: Pick<TransactionSummary, 'txInfo'>): AddressEx | undefined => {
+const getTxTo = ({ txInfo }: Pick<Transaction, 'txInfo'>): AddressInfo | undefined => {
   switch (txInfo.type) {
     case TransactionInfoType.CREATION: {
       return txInfo.factory
@@ -49,7 +45,7 @@ type TxType = {
   text: string
 }
 
-export const getTransactionType = (tx: TransactionSummary, addressBook: AddressBook): TxType => {
+export const getTransactionType = (tx: Transaction, addressBook: AddressBook): TxType => {
   const toAddress = getTxTo(tx)
   const addressBookName = toAddress?.value ? addressBook[toAddress.value] : undefined
 
@@ -193,7 +189,7 @@ export const getTransactionType = (tx: TransactionSummary, addressBook: AddressB
   }
 }
 
-export const useTransactionType = (tx: TransactionSummary): TxType => {
+export const useTransactionType = (tx: Transaction): TxType => {
   const addressBook = useAddressBook()
 
   return useMemo(() => {

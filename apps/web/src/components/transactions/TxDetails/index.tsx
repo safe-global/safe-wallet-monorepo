@@ -1,6 +1,6 @@
+import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import useIsExpiredSwap from '@/features/swap/hooks/useIsExpiredSwap'
 import React, { type ReactElement, useEffect, useRef, useState } from 'react'
-import type { TransactionDetails, TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
 import { Box, CircularProgress, Typography } from '@mui/material'
 
 import TxSigners from '@/components/transactions/TxSigners'
@@ -46,7 +46,7 @@ import { QueuedTxSimulation } from '../QueuedTxSimulation'
 export const NOT_AVAILABLE = 'n/a'
 
 type TxDetailsProps = {
-  txSummary: TransactionSummary
+  txSummary: Transaction
   txDetails: TransactionDetails
 }
 
@@ -198,7 +198,7 @@ const TxDetails = ({
   txSummary,
   txDetails,
 }: {
-  txSummary: TransactionSummary
+  txSummary: Transaction
   txDetails?: TransactionDetails // optional
 }): ReactElement => {
   const chainId = useChainId()

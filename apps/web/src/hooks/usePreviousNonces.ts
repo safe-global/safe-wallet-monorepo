@@ -1,10 +1,10 @@
+import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useMemo } from 'react'
 import { isMultisigExecutionInfo, isTransactionListItem } from '@/utils/transaction-guards'
 import uniqBy from 'lodash/uniqBy'
 import useTxQueue from '@/hooks/useTxQueue'
-import { type TransactionListPage } from '@safe-global/safe-gateway-typescript-sdk'
 
-export const _getUniqueQueuedTxs = (page?: TransactionListPage) => {
+export const _getUniqueQueuedTxs = (page?: TransactionItemPage) => {
   if (!page) {
     return []
   }

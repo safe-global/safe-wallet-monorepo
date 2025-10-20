@@ -1,3 +1,4 @@
+import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { createContext, useCallback, useContext, useState } from 'react'
 import type { ReactNode, ReactElement, SetStateAction, Dispatch, ComponentType } from 'react'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
@@ -18,7 +19,6 @@ import { useSigner } from '@/hooks/wallets/useWallet'
 import useChainId from '@/hooks/useChainId'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 import useTxDetails from '@/hooks/useTxDetails'
-import type { TransactionDetails, TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
 
 export type TxFlowContextType<T extends unknown = any> = {
   step: number
@@ -31,7 +31,7 @@ export type TxFlowContextType<T extends unknown = any> = {
     title?: ReactNode
     subtitle?: ReactNode
     icon?: ComponentType
-    txSummary?: TransactionSummary
+    txSummary?: Transaction
     hideNonce?: boolean
     fixedNonce?: boolean
     hideProgress?: boolean

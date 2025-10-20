@@ -1,16 +1,19 @@
-import { fireEvent, render, within } from '@/tests/test-utils'
-import { type SafeTransaction } from '@safe-global/types-kit'
-import DecodedTx from '.'
-import { waitFor } from '@testing-library/react'
-import { createMockTransactionDetails } from '@/tests/transactions'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { DataDecoded } from '@safe-global/store/gateway/AUTO_GENERATED/data-decoded'
+
 import {
   DetailedExecutionInfoType,
   SettingsInfoType,
   TransactionInfoType,
   TransactionTokenType,
   TransferDirection,
-} from '@safe-global/safe-gateway-typescript-sdk'
-import type { DecodedDataResponse, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+} from '@safe-global/store/gateway/types'
+
+import { fireEvent, render, within } from '@/tests/test-utils'
+import { type SafeTransaction } from '@safe-global/types-kit'
+import DecodedTx from '.'
+import { waitFor } from '@testing-library/react'
+import { createMockTransactionDetails } from '@/tests/transactions'
 
 jest.mock('@next/third-parties/google')
 
@@ -202,7 +205,7 @@ describe('DecodedTx', () => {
             ...txDetails.txData,
             dataDecoded: {
               method: '',
-            } as DecodedDataResponse,
+            } as DataDecoded,
           } as TransactionDetails['txData']
         }
       />,

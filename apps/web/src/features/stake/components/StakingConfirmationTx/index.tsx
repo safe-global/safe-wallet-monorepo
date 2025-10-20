@@ -1,4 +1,4 @@
-import type { StakingTxInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { StakingTxInfo } from '@safe-global/store/gateway/AUTO_GENERATED/data-decoded'
 import StakingConfirmationTxDeposit from '@/features/stake/components/StakingConfirmationTx/Deposit'
 import StakingConfirmationTxExit from '@/features/stake/components/StakingConfirmationTx/Exit'
 import StakingConfirmationTxWithdraw from '@/features/stake/components/StakingConfirmationTx/Withdraw'

@@ -1,23 +1,27 @@
-import { type PendingTx } from '@/store/pendingTxsSlice'
-import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import { act, renderHook } from '@/tests/test-utils'
+import type { ExecutionInfo } from '@safe-global/store/gateway/types'
+
 import {
-  type Label,
-  type Transaction,
-  getTransactionQueue,
   TransactionListItemType,
   DetailedExecutionInfoType,
   LabelValue,
-  type TransactionListPage,
-  type ExecutionInfo,
-  type TransactionSummary,
   ConflictType,
-} from '@safe-global/safe-gateway-typescript-sdk'
+} from '@safe-global/store/gateway/types'
+
+import type {
+  LabelQueuedItem,
+  ModuleTransaction,
+  TransactionItemPage,
+  Transaction,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { type PendingTx } from '@/store/pendingTxsSlice'
+import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
+import { act, renderHook } from '@/tests/test-utils'
+import { getTransactionQueue } from '@safe-global/safe-gateway-typescript-sdk'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { filterUntrustedQueue, getNextTransactions, useHasPendingTxs, usePendingTxsQueue } from '../usePendingTxs'
 import { isLabelListItem } from '@/utils/transaction-guards'
 
-const mockQueue = <TransactionListPage>{
+const mockQueue = <TransactionItemPage>{
   next: undefined,
   previous: undefined,
   results: [
@@ -44,7 +48,7 @@ const mockQueue = <TransactionListPage>{
   ],
 }
 
-const mockQueueWithQueued = <TransactionListPage>{
+const mockQueueWithQueued = <TransactionItemPage>{
   next: undefined,
   previous: undefined,
   results: [
@@ -62,7 +66,7 @@ const mockQueueWithQueued = <TransactionListPage>{
   ],
 }
 
-const mockQueueWithConflictHeaders = <TransactionListPage>{
+const mockQueueWithConflictHeaders = <TransactionItemPage>{
   next: undefined,
   previous: undefined,
   results: [
@@ -158,7 +162,7 @@ describe('filterUntrustedQueue', () => {
           confirmationsRequired: 1,
           type: DetailedExecutionInfoType.MULTISIG,
         } as ExecutionInfo,
-      } as unknown as TransactionSummary,
+      } as unknown as Transaction,
       conflictType: ConflictType.NONE,
     })
 
@@ -211,8 +215,8 @@ describe('usePendingTxsQueue', () => {
     expect(result?.current.loading).toBe(false)
     expect(result?.current.page).toBeDefined()
     expect(resultItems?.length).toBe(2)
-    expect((resultItems?.[0] as Label).label).toBe('Pending')
-    expect((resultItems?.[1] as Transaction).transaction.id).toBe('multisig_123')
+    expect((resultItems?.[0] as LabelQueuedItem).label).toBe('Pending')
+    expect((resultItems?.[1] as ModuleTransaction).transaction.id).toBe('multisig_123')
   })
 
   it('should return undefined if none of the returned txs are pending', async () => {
@@ -281,8 +285,8 @@ describe('usePendingTxsQueue', () => {
     expect(result?.current.loading).toBe(false)
     expect(result?.current.page).toBeDefined()
     expect(resultItems?.length).toBe(2)
-    expect((resultItems?.[0] as Label).label).toBe('Pending')
-    expect((resultItems?.[1] as Transaction).transaction.id).toBe('multisig_123')
+    expect((resultItems?.[0] as LabelQueuedItem).label).toBe('Pending')
+    expect((resultItems?.[1] as ModuleTransaction).transaction.id).toBe('multisig_123')
   })
 })
 

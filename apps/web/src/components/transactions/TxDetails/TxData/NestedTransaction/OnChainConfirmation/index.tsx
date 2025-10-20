@@ -1,6 +1,6 @@
+import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import useChainId from '@/hooks/useChainId'
 import { Skeleton, Stack } from '@mui/material'
-import { type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
 import { useMemo } from 'react'

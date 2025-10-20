@@ -1,3 +1,5 @@
+import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { DetailedExecutionInfo } from '@safe-global/store/gateway/types'
 import { useState, type ReactElement } from 'react'
 import {
   Box,
@@ -11,11 +13,6 @@ import {
   Typography,
   type ListItemIconProps,
 } from '@mui/material'
-import type {
-  DetailedExecutionInfo,
-  TransactionDetails,
-  TransactionSummary,
-} from '@safe-global/safe-gateway-typescript-sdk'
 
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsPending from '@/hooks/useIsPending'
@@ -104,7 +101,7 @@ const shouldHideConfirmations = (detailedExecutionInfo?: DetailedExecutionInfo):
 
 type TxSignersProps = {
   txDetails: TransactionDetails
-  txSummary: TransactionSummary
+  txSummary: Transaction
   isTxFromProposer: boolean
   proposer?: string
 }

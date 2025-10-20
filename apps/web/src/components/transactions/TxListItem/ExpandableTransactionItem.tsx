@@ -1,4 +1,4 @@
-import { type Transaction, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import type { ModuleTransaction, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Skeleton } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import TxSummary from '@/components/transactions/TxSummary'
@@ -14,7 +14,7 @@ import { trackEvent, TX_LIST_EVENTS } from '@/services/analytics'
 type ExpandableTransactionItemProps = {
   isConflictGroup?: boolean
   isBulkGroup?: boolean
-  item: Transaction
+  item: ModuleTransaction
   txDetails?: TransactionDetails
 }
 

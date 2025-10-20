@@ -1,3 +1,4 @@
+import type { TransactionDetails, TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import ProposerForm from '@/components/tx-flow/actions/Propose/ProposerForm'
 import CounterfactualForm from '@/features/counterfactual/CounterfactualForm'
 import { useIsWalletProposer } from '@/hooks/useProposers'
@@ -31,7 +32,6 @@ import { BlockaidBalanceChanges } from '../security/blockaid/BlockaidBalanceChan
 import { Blockaid } from '../security/blockaid'
 import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
 import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
-import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ConfirmationView from '../confirmation-views'
 import { SignerForm } from '@/components/tx-flow/features/SignerSelect/SignerForm'

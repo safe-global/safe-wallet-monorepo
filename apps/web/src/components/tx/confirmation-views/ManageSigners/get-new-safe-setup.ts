@@ -1,6 +1,7 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { checksumAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
-import type { TransactionInfo, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 

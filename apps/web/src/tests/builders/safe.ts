@@ -1,6 +1,6 @@
+import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import { faker } from '@faker-js/faker'
-import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
 import {
   type SafeState as SafeInfo,
   type AddressInfo as AddressEx,
@@ -13,7 +13,7 @@ import type { IBuilder } from '../Builder'
 
 const MAX_OWNERS_LENGTH = 10
 
-export function addressExBuilder(): IBuilder<AddressEx> {
+export function addressExBuilder(): IBuilder<AddressInfo> {
   return Builder.new<AddressEx>().with({
     value: checksumAddress(faker.finance.ethereumAddress()),
     name: faker.word.words(),

@@ -1,4 +1,5 @@
-import { getTransactionQueue, type TransactionListPage } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { getTransactionQueue } from '@safe-global/safe-gateway-typescript-sdk'
 import { useAppSelector } from '@/store'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { selectTxQueue, selectQueuedTransactionsByNonce } from '@/store/txQueueSlice'
@@ -9,7 +10,7 @@ import { useRecoveryQueue } from '../features/recovery/hooks/useRecoveryQueue'
 const useTxQueue = (
   pageUrl?: string,
 ): {
-  page?: TransactionListPage
+  page?: TransactionItemPage
   error?: string
   loading: boolean
 } => {

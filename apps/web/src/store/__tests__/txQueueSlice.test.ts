@@ -1,16 +1,12 @@
-import { createListenerMiddleware } from '@reduxjs/toolkit'
-import {
-  LabelValue,
-  TransactionListItemType,
-  DetailedExecutionInfoType,
-} from '@safe-global/safe-gateway-typescript-sdk'
 import type {
-  TransactionListItem,
-  Label,
-  ConflictHeader,
+  LabelQueuedItem,
+  ConflictHeaderQueuedItem,
   DateLabel,
-  TransactionListPage,
-} from '@safe-global/safe-gateway-typescript-sdk'
+  TransactionItemPage,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { TransactionListItem } from '@safe-global/store/gateway/types'
+import { LabelValue, TransactionListItemType, DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
+import { createListenerMiddleware } from '@reduxjs/toolkit'
 
 import * as txEvents from '@/services/tx/txEvents'
 import { txQueueListener, txQueueSlice } from '../txQueueSlice'
@@ -168,12 +164,12 @@ describe('txQueueSlice', () => {
       timestamp: 0,
     }
 
-    const label: Label = {
+    const label: LabelQueuedItem = {
       label: LabelValue.Queued,
       type: TransactionListItemType.LABEL,
     }
 
-    const conflictHeader: ConflictHeader = {
+    const conflictHeader: ConflictHeaderQueuedItem = {
       nonce: 0,
       type: TransactionListItemType.CONFLICT_HEADER,
     }
@@ -252,7 +248,7 @@ describe('txQueueSlice', () => {
       },
     } as TransactionListItem
 
-    const payload: TransactionListPage = {
+    const payload: TransactionItemPage = {
       results: [transaction],
     }
 

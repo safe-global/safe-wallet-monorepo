@@ -1,8 +1,9 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { act, renderHook } from '@/tests/test-utils'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import { useTxTracking } from '../useTxTracking'
 import { trackEvent, WALLET_EVENTS } from '@/services/analytics'
-import { getTransactionDetails, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import { getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { faker } from '@faker-js/faker'
 
 jest.mock('@/services/analytics', () => ({

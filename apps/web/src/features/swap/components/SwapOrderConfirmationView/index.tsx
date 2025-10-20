@@ -1,3 +1,11 @@
+import { TransactionInfoType } from '@safe-global/store/gateway/types'
+import type {
+  DataDecoded,
+  SwapOrderTransactionInfo,
+  SwapTransactionInfo,
+  TwapOrderTransactionInfo,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { StartTimeValue } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import OrderId from '@/features/swap/components/OrderId'
 import { formatDateTime, formatTimeInWords, getPeriod } from '@safe-global/utils/utils/date'
 import { Fragment, type ReactElement } from 'react'
@@ -7,8 +15,6 @@ import { compareAsc } from 'date-fns'
 import { Alert, Typography } from '@mui/material'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { getLimitPrice, getOrderClass, getSlippageInPercent } from '@/features/swap/helpers/utils'
-import type { DataDecoded, SwapOrder, SwapTransferOrder, TwapOrder } from '@safe-global/safe-gateway-typescript-sdk'
-import { StartTimeValue, TransactionInfoType } from '@safe-global/safe-gateway-typescript-sdk'
 import SwapTokens from '@/features/swap/components/SwapTokens'
 import AlertIcon from '@/public/images/common/alert.svg'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -22,7 +28,7 @@ import { isSettingTwapFallbackHandler } from '@/features/swap/helpers/utils'
 import { TwapFallbackHandlerWarning } from '@/features/swap/components/TwapFallbackHandlerWarning'
 
 type SwapOrderProps = {
-  order: SwapOrder | SwapTransferOrder | TwapOrder
+  order: SwapOrderTransactionInfo | SwapTransactionInfo | TwapOrderTransactionInfo
   settlementContract: string
   decodedData?: DataDecoded
 }

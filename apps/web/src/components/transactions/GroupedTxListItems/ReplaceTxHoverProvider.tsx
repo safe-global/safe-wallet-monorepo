@@ -1,5 +1,5 @@
+import type { ModuleTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { createContext, useMemo, useState, type Dispatch, type ReactElement, type SetStateAction } from 'react'
-import type { Transaction } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { useAppSelector } from '@/store'
 import { selectPendingTxs } from '@/store/pendingTxsSlice'
@@ -17,7 +17,7 @@ export const ReplaceTxHoverProvider = ({
   groupedListItems,
   children,
 }: {
-  groupedListItems: Transaction[]
+  groupedListItems: ModuleTransaction[]
   children: ReactElement
 }): ReactElement => {
   const [selectedTxId, setSelectedTxId] = useState<string>()

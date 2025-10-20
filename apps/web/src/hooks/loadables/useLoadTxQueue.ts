@@ -1,11 +1,12 @@
+import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useEffect, useState } from 'react'
-import { getTransactionQueue, type TransactionListPage } from '@safe-global/safe-gateway-typescript-sdk'
+import { getTransactionQueue } from '@safe-global/safe-gateway-typescript-sdk'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '../useSafeInfo'
 import { Errors, logError } from '@/services/exceptions'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 
-export const useLoadTxQueue = (): AsyncResult<TransactionListPage> => {
+export const useLoadTxQueue = (): AsyncResult<TransactionItemPage> => {
   const { safe, safeAddress, safeLoaded } = useSafeInfo()
   const { chainId, txQueuedTag, txHistoryTag } = safe
   const [updatedTxId, setUpdatedTxId] = useState<string>('')

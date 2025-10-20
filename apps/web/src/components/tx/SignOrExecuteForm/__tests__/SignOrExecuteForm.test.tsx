@@ -1,3 +1,4 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SignOrExecuteForm } from '@/components/tx/SignOrExecuteForm/SignOrExecuteForm'
 import * as hooks from '@/components/tx/SignOrExecuteForm/hooks'
 import * as execThroughRoleHooks from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
@@ -6,7 +7,6 @@ import { render } from '@/tests/test-utils'
 import { fireEvent } from '@testing-library/react'
 import { encodeBytes32String } from 'ethers'
 import { Status } from 'zodiac-roles-deployments'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 
 let isSafeOwner = true
 // mock useIsSafeOwner

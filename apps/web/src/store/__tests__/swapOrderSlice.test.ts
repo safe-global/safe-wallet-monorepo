@@ -1,11 +1,8 @@
+import type { TransactionListItem } from '@safe-global/store/gateway/types'
+import { TransactionListItemType, TransactionInfoType } from '@safe-global/store/gateway/types'
 import { listenerMiddlewareInstance } from '@/store'
 import { txHistorySlice } from '@/store/txHistorySlice'
 import { swapOrderListener, swapOrderStatusListener, setSwapOrder, deleteSwapOrder } from '@/store/swapOrderSlice'
-import {
-  TransactionListItemType,
-  type TransactionListItem,
-  TransactionInfoType,
-} from '@safe-global/safe-gateway-typescript-sdk'
 import * as notificationsSlice from '@/store/notificationsSlice'
 
 import { type TypedStartListening } from '@reduxjs/toolkit'

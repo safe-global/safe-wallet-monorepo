@@ -1,13 +1,13 @@
+import type { NativeStakingValidatorsExitTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { NativeStakingStatus } from '@safe-global/store/gateway/types'
 import { Box, Link } from '@mui/material'
-import type { StakingTxExitInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { NativeStakingStatus } from '@safe-global/safe-gateway-typescript-sdk'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 import StakingStatus from '@/features/stake/components/StakingStatus'
 import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatters'
 import { getBeaconChainLink } from '@safe-global/utils/features/stake/utils/beaconChain'
 import useChainId from '@/hooks/useChainId'
 
-const StakingTxExitDetails = ({ info }: { info: StakingTxExitInfo }) => {
+const StakingTxExitDetails = ({ info }: { info: NativeStakingValidatorsExitTransactionInfo }) => {
   const withdrawIn = formatDurationFromMilliseconds(info.estimatedExitTime + info.estimatedWithdrawalTime, [
     'days',
     'hours',

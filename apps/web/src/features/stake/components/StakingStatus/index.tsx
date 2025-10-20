@@ -1,10 +1,11 @@
-import { NativeStakingStatus } from '@safe-global/safe-gateway-typescript-sdk'
+import { NativeStakingStatus } from '@safe-global/store/gateway/types'
 import { SvgIcon } from '@mui/material'
 import CheckIcon from '@/public/images/common/circle-check.svg'
 import ClockIcon from '@/public/images/common/clock.svg'
 import SlashShield from '@/public/images/common/shield-off.svg'
 import SignatureIcon from '@/public/images/common/document_signature.svg'
 import TxStatusChip, { type TxStatusChipProps } from '@/components/transactions/TxStatusChip'
+import type { NativeStakingValidatorsExitTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 const ColorIcons: Record<
   NativeStakingStatus,
@@ -63,7 +64,7 @@ const capitalizedStatus = (status: string) =>
     .replace(/_/g, ' ')
     .replace(/^\w/g, (l) => l.toUpperCase())
 
-const StakingStatus = ({ status }: { status: NativeStakingStatus }) => {
+const StakingStatus = ({ status }: { status: NativeStakingValidatorsExitTransactionInfo['status'] }) => {
   const config = ColorIcons[status]
 
   return (

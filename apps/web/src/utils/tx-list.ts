@@ -1,11 +1,12 @@
-import { TransactionInfoType } from '@safe-global/safe-gateway-typescript-sdk'
-import type { Transaction, TransactionListItem } from '@safe-global/safe-gateway-typescript-sdk'
+import type { ModuleTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { TransactionListItem } from '@safe-global/store/gateway/types'
+import { TransactionInfoType } from '@safe-global/store/gateway/types'
 
 import { isConflictHeaderListItem, isNoneConflictType, isTransactionListItem } from '@/utils/transaction-guards'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 
-type GroupedTxs = Array<TransactionListItem | Transaction[]>
+type GroupedTxs = Array<TransactionListItem | ModuleTransaction[]>
 
 export const groupTxs = (list: TransactionListItem[]) => {
   const groupedByConflicts = groupConflictingTxs(list)
@@ -63,7 +64,7 @@ const groupBulkTxs = (list: GroupedTxs): GroupedTxs => {
     .map((item) => (Array.isArray(item) && item.length === 1 ? item[0] : item))
 }
 
-export function _getRecoveryCancellations(moduleAddress: string, transactions: Array<Transaction>) {
+export function _getRecoveryCancellations(moduleAddress: string, transactions: Array<ModuleTransaction>) {
   const CANCELLATION_TX_METHOD_NAME = 'setTxNonce'
 
   return transactions.filter(({ transaction }) => {
@@ -76,7 +77,7 @@ export function _getRecoveryCancellations(moduleAddress: string, transactions: A
   })
 }
 
-type GroupedRecoveryQueueItem = Transaction | RecoveryQueueItem
+type GroupedRecoveryQueueItem = ModuleTransaction | RecoveryQueueItem
 
 export function groupRecoveryTransactions(queue: Array<TransactionListItem>, recoveryQueue: Array<RecoveryQueueItem>) {
   const transactions = queue.filter(isTransactionListItem)
@@ -94,7 +95,7 @@ export function groupRecoveryTransactions(queue: Array<TransactionListItem>, rec
   }, [])
 }
 
-export const getLatestTransactions = (list: TransactionListItem[] = []): Transaction[] => {
+export const getLatestTransactions = (list: TransactionListItem[] = []): ModuleTransaction[] => {
   return (
     groupConflictingTxs(list)
       // Get latest transaction if there are conflicting ones

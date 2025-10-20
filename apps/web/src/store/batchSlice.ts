@@ -1,8 +1,8 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '.'
 import { selectChainIdAndSafeAddress } from '@/store/common'
 import type { MetaTransactionData, OperationType } from '@safe-global/types-kit'
-import { type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 
 export type CallOnlyTxData = MetaTransactionData & { operation: OperationType.Call }
 

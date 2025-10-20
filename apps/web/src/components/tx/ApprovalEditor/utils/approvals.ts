@@ -1,5 +1,5 @@
+import type { DataDecoded } from '@safe-global/store/gateway/AUTO_GENERATED/data-decoded'
 import type { BaseTransaction } from '@safe-global/safe-apps-sdk'
-import type { DecodedDataResponse } from '@safe-global/safe-gateway-typescript-sdk'
 import { parseUnits } from 'ethers'
 import { EMPTY_DATA } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { type ApprovalInfo } from '../hooks/useApprovalInfos'
@@ -31,9 +31,7 @@ const parseApprovalAmount = (amount: string, decimals: number) => {
   return parseUnits(amount, decimals)
 }
 
-export const extractTxs: (txs: BaseTransaction[] | (DecodedDataResponse & { to: string })) => BaseTransaction[] = (
-  txs,
-) => {
+export const extractTxs: (txs: BaseTransaction[] | (DataDecoded & { to: string })) => BaseTransaction[] = (txs) => {
   if (Array.isArray(txs)) {
     return txs
   }

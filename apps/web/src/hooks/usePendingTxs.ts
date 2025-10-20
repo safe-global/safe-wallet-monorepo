@@ -1,10 +1,7 @@
+import { LabelValue } from '@safe-global/store/gateway/types'
+import type { TransactionItemPage, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useMemo } from 'react'
-import {
-  type TransactionListPage,
-  type TransactionSummary,
-  LabelValue,
-  getTransactionQueue,
-} from '@safe-global/safe-gateway-typescript-sdk'
+import { getTransactionQueue } from '@safe-global/safe-gateway-typescript-sdk'
 import { useAppSelector } from '@/store'
 import { selectPendingTxIdsBySafe } from '@/store/pendingTxsSlice'
 import useAsync from '@safe-global/utils/hooks/useAsync'
@@ -17,7 +14,7 @@ import {
 import useSafeInfo from './useSafeInfo'
 import { shallowEqual } from 'react-redux'
 
-export const usePendingTxIds = (): Array<TransactionSummary['id']> => {
+export const usePendingTxIds = (): Array<Transaction['id']> => {
   const { safe, safeAddress } = useSafeInfo()
   const { chainId } = safe
   return useAppSelector((state) => selectPendingTxIdsBySafe(state, chainId, safeAddress), shallowEqual)
@@ -37,10 +34,7 @@ export const useShowUnsignedQueue = (): boolean => {
   return safe.threshold === 1 && hasPending
 }
 
-export const filterUntrustedQueue = (
-  untrustedQueue: TransactionListPage,
-  pendingIds: Array<TransactionSummary['id']>,
-) => {
+export const filterUntrustedQueue = (untrustedQueue: TransactionItemPage, pendingIds: Array<Transaction['id']>) => {
   // Only keep labels and pending unsigned transactions
   const results = untrustedQueue.results
     .filter((item) => !isTransactionListItem(item) || pendingIds.includes(item.transaction.id))
@@ -63,14 +57,14 @@ export const filterUntrustedQueue = (
   return transactions.length ? { results } : undefined
 }
 
-export function getNextTransactions(queue: TransactionListPage): TransactionListPage {
+export function getNextTransactions(queue: TransactionItemPage): TransactionItemPage {
   const queueLabelIndex = queue.results.findIndex((item) => isLabelListItem(item) && item.label === LabelValue.Queued)
   const nextTransactions = queueLabelIndex === -1 ? queue.results : queue.results.slice(0, queueLabelIndex)
   return { results: nextTransactions }
 }
 
 export const usePendingTxsQueue = (): {
-  page?: TransactionListPage
+  page?: TransactionItemPage
   error?: string
   loading: boolean
 } => {

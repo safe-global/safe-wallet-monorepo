@@ -1,9 +1,9 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { fireEvent, render } from '@/tests/test-utils'
 import SingleTx from '@/pages/transactions/tx'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import * as gatewaySDK from '@safe-global/safe-gateway-typescript-sdk'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { waitFor } from '@testing-library/react'
 
 const MOCK_SAFE_ADDRESS = '0x0000000000000000000000000000000000005AFE'

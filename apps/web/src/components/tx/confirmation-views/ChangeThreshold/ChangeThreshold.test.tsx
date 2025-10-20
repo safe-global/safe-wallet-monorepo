@@ -1,8 +1,9 @@
+import type { TransactionInfo } from '@safe-global/store/gateway/types'
+import { SettingsInfoType, TransactionInfoType } from '@safe-global/store/gateway/types'
 import { render } from '@/tests/test-utils'
 import ChangeThreshold from '.'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import { SettingsInfoType, type TransactionInfo, TransactionInfoType } from '@safe-global/safe-gateway-typescript-sdk'
 
 const extendedSafeInfo = extendedSafeInfoBuilder().build()
 

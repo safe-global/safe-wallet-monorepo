@@ -1,6 +1,6 @@
+import { SafeAppAccessPolicyTypes } from '@safe-global/store/gateway/types'
 import type { AllowedFeatures, SafeAppDataWithPermissions } from '@/components/safe-apps/types'
 import { isRelativeUrl, trimTrailingSlash, stripUrlParams } from '@/utils/url'
-import { SafeAppAccessPolicyTypes } from '@safe-global/safe-gateway-typescript-sdk'
 
 type AppManifestIcon = {
   src: string

@@ -1,5 +1,5 @@
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { TransactionStatus } from '@safe-global/safe-gateway-typescript-sdk'
+import { TransactionStatus } from '@safe-global/store/gateway/types'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { TransactionReceipt } from 'ethers'
 import { numberToHex } from '@/utils/hex'
 

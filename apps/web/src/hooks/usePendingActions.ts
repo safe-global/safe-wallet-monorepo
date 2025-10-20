@@ -1,6 +1,6 @@
+import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { isTransactionListItem } from '@/utils/transaction-guards'
 import { isSignableBy } from '@/utils/transaction-guards'
-import type { TransactionListPage } from '@safe-global/safe-gateway-typescript-sdk'
 import { getTransactionQueue } from '@safe-global/safe-gateway-typescript-sdk'
 import { useMemo } from 'react'
 import useAsync from '@safe-global/utils/hooks/useAsync'
@@ -13,7 +13,7 @@ type PendingActions = {
   totalToSign: string
 }
 
-const getSignableCount = (queue: TransactionListPage, walletAddress: string): number => {
+const getSignableCount = (queue: TransactionItemPage, walletAddress: string): number => {
   return queue.results.filter((tx) => isTransactionListItem(tx) && isSignableBy(tx.transaction, walletAddress)).length
 }
 

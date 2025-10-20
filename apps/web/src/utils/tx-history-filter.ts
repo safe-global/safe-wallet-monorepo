@@ -1,10 +1,10 @@
+import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useMemo } from 'react'
 import { useRouter } from 'next/router'
 import {
   getIncomingTransfers,
   getModuleTransactions,
   getMultisigTransactions,
-  type TransactionListPage,
 } from '@safe-global/safe-gateway-typescript-sdk'
 import type { operations } from '@safe-global/safe-gateway-typescript-sdk/dist/types/api'
 import type { ParsedUrlQuery } from 'querystring'
@@ -121,7 +121,7 @@ export const fetchFilteredTxHistory = async (
   hideUntrustedTxs: boolean,
   hideImitationTxs: boolean,
   pageUrl?: string,
-): Promise<TransactionListPage> => {
+): Promise<TransactionItemPage> => {
   const fetchPage = () => {
     const query = {
       ...filterData.filter,

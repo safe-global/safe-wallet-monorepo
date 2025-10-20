@@ -1,15 +1,17 @@
 import type {
-  ExecutionInfo,
   MultisigExecutionDetails,
   MultisigExecutionInfo,
-  Transaction,
+  ModuleTransaction,
   TransactionDetails,
-  TransactionListPage,
-  TransactionSummary,
-} from '@safe-global/safe-gateway-typescript-sdk'
+  TransactionItemPage,
+  Transaction,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+
+import type { ExecutionInfo } from '@safe-global/store/gateway/types'
+import { ConflictType, TransactionListItemType } from '@safe-global/store/gateway/types'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { ConflictType, getTransactionDetails, TransactionListItemType } from '@safe-global/safe-gateway-typescript-sdk'
+import { getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import {
   isERC20Transfer,
   isModuleDetailedExecutionInfo,
@@ -33,7 +35,7 @@ import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
 import { getOriginPath } from './url'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
-export const makeTxFromDetails = (txDetails: TransactionDetails): Transaction => {
+export const makeTxFromDetails = (txDetails: TransactionDetails): ModuleTransaction => {
   const getMissingSigners = ({
     signers,
     confirmations,
@@ -164,7 +166,7 @@ export const getTxOptions = (params: AdvancedParameters, currentChain: Chain | u
   return txOptions
 }
 
-export const getQueuedTransactionCount = (txPage?: TransactionListPage): string => {
+export const getQueuedTransactionCount = (txPage?: TransactionItemPage): string => {
   if (!txPage) {
     return '0'
   }
@@ -224,7 +226,7 @@ export const isRejectionTx = (tx?: SafeTransaction) => {
   return !!tx && !!tx.data.data && isEmptyHexData(tx.data.data) && tx.data.value === '0'
 }
 
-export const isTrustedTx = (tx: TransactionSummary) => {
+export const isTrustedTx = (tx: Transaction) => {
   return (
     isMultisigExecutionInfo(tx.executionInfo) ||
     isModuleDetailedExecutionInfo(tx.executionInfo) ||
@@ -234,7 +236,7 @@ export const isTrustedTx = (tx: TransactionSummary) => {
   )
 }
 
-export const isImitation = ({ txInfo }: TransactionSummary): boolean => {
+export const isImitation = ({ txInfo }: Transaction): boolean => {
   return isTransferTxInfo(txInfo) && isERC20Transfer(txInfo.transferInfo) && Boolean(txInfo.transferInfo.imitation)
 }
 

@@ -1,14 +1,14 @@
+import type { TransactionListItem } from '@safe-global/store/gateway/types'
+import { LabelValue, TransactionListItemType } from '@safe-global/store/gateway/types'
+import type {
+  ConflictHeaderQueuedItem,
+  DateLabel,
+  LabelQueuedItem,
+  Transaction,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import * as txEvents from '@/services/tx/txEvents'
 import { pendingTxBuilder } from '@/tests/builders/pendingTx'
 import { createListenerMiddleware } from '@reduxjs/toolkit'
-import type {
-  ConflictHeader,
-  DateLabel,
-  Label,
-  TransactionListItem,
-  TransactionSummary,
-} from '@safe-global/safe-gateway-typescript-sdk'
-import { LabelValue, TransactionListItemType } from '@safe-global/safe-gateway-typescript-sdk'
 import type { RootState } from '..'
 import type { PendingTxsState } from '../pendingTxsSlice'
 import { PendingStatus } from '../pendingTxsSlice'
@@ -51,7 +51,7 @@ describe('txHistorySlice', () => {
           txInfo: {
             type: 'TRANSFER',
           },
-        } as unknown as TransactionSummary,
+        } as unknown as Transaction,
       } as TransactionListItem
 
       const action = txHistorySlice.actions.set({
@@ -111,12 +111,12 @@ describe('txHistorySlice', () => {
         timestamp: 0,
       }
 
-      const label: Label = {
+      const label: LabelQueuedItem = {
         label: LabelValue.Queued,
         type: TransactionListItemType.LABEL,
       }
 
-      const conflictHeader: ConflictHeader = {
+      const conflictHeader: ConflictHeaderQueuedItem = {
         nonce: 0,
         type: TransactionListItemType.CONFLICT_HEADER,
       }
@@ -158,7 +158,7 @@ describe('txHistorySlice', () => {
             type: 'Custom',
             methodName: 'createProxyWithNonce',
           },
-        } as unknown as TransactionSummary,
+        } as unknown as Transaction,
       } as TransactionListItem
 
       const action = txHistorySlice.actions.set({
@@ -205,7 +205,7 @@ describe('txHistorySlice', () => {
             type: 'Custom',
             methodName: 'createProxyWithNonce',
           },
-        } as unknown as TransactionSummary,
+        } as unknown as Transaction,
       } as TransactionListItem
 
       const action = txHistorySlice.actions.set({

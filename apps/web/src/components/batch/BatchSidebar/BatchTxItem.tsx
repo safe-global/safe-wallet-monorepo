@@ -1,16 +1,12 @@
+import type { AddressInfo, TransactionData, MultiSend } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type SyntheticEvent, useMemo, useCallback } from 'react'
 import { ButtonBase, ListItem, Skeleton, SvgIcon } from '@mui/material'
 import css from './styles.module.css'
-import { type DraftBatchItem } from '@/store/batchSlice'
 
+import { type DraftBatchItem } from '@/store/batchSlice'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { BATCH_EVENTS, trackEvent } from '@/services/analytics'
 import SingleTxDecoded from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded'
-import {
-  type AddressEx,
-  type TransactionData,
-  type InternalTransaction,
-} from '@safe-global/safe-gateway-typescript-sdk'
 import { Operation } from '@safe-global/store/gateway/types'
 import { type TokenInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
@@ -18,8 +14,8 @@ type BatchTxItemProps = DraftBatchItem & {
   id: string
   count: number
   onDelete?: (id: string) => void
-  txDecoded?: InternalTransaction
-  addressInfoIndex: Record<string, AddressEx>
+  txDecoded?: MultiSend
+  addressInfoIndex: Record<string, AddressInfo>
   tokenInfoIndex: Record<string, TokenInfo>
 }
 

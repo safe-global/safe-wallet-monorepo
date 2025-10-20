@@ -1,9 +1,9 @@
+import type { ModuleTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import Track from '@/components/common/Track'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
 import { Box, Paper, Typography } from '@mui/material'
 import partition from 'lodash/partition'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
-import type { Transaction } from '@safe-global/safe-gateway-typescript-sdk'
 import type { ReactElement } from 'react'
 
 import { isRecoveryQueueItem } from '@/utils/transaction-guards'
@@ -36,7 +36,11 @@ function Disclaimer({ isMalicious }: { isMalicious: boolean }): ReactElement {
   )
 }
 
-export function GroupedRecoveryListItems({ items }: { items: Array<Transaction | RecoveryQueueItem> }): ReactElement {
+export function GroupedRecoveryListItems({
+  items,
+}: {
+  items: Array<ModuleTransaction | RecoveryQueueItem>
+}): ReactElement {
   const [recoveries, cancellations] = partition(items, isRecoveryQueueItem)
 
   // Should only be one recovery item but check array in case

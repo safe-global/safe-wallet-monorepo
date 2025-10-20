@@ -1,8 +1,9 @@
+import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { TransactionStatus } from '@safe-global/store/gateway/types'
 import { useContext } from 'react'
 import { Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, Paper, Typography } from '@mui/material'
 import CreatedIcon from '@/public/images/messages/created.svg'
 import SignedIcon from '@/public/images/messages/signed.svg'
-import { TransactionStatus, type TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { isMultisigExecutionInfo, isSignableBy, isConfirmableBy } from '@/utils/transaction-guards'
 import classnames from 'classnames'
@@ -21,7 +22,7 @@ const TxStatusWidget = ({
   isMessage = false,
   isLastStep = false,
 }: {
-  txSummary?: TransactionSummary
+  txSummary?: Transaction
   handleClose: () => void
   isBatch?: boolean
   isMessage?: boolean

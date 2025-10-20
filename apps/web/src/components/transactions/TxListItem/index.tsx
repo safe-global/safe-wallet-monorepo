@@ -1,5 +1,5 @@
+import type { TransactionListItem } from '@safe-global/store/gateway/types'
 import { type ReactElement } from 'react'
-import type { TransactionListItem } from '@safe-global/safe-gateway-typescript-sdk'
 import { isDateLabel, isLabelListItem, isTransactionListItem } from '@/utils/transaction-guards'
 import GroupLabel from '@/components/transactions/GroupLabel'
 import TxDateLabel from '@/components/transactions/TxDateLabel'

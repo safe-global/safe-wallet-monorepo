@@ -1,6 +1,6 @@
+import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { listenerMiddlewareInstance } from '@/store'
 import { createSelector } from '@reduxjs/toolkit'
-import type { TransactionListPage } from '@safe-global/safe-gateway-typescript-sdk'
 import {
   isCreationTxInfo,
   isCustomTxInfo,
@@ -13,7 +13,7 @@ import { clearPendingTx, selectPendingTxs } from './pendingTxsSlice'
 import { makeLoadableSlice } from './common'
 import { gatewayApi, makeSafeTag, selectSafeInfo } from './slices'
 
-const { slice, selector } = makeLoadableSlice('txHistory', undefined as TransactionListPage | undefined)
+const { slice, selector } = makeLoadableSlice('txHistory', undefined as TransactionItemPage | undefined)
 
 export const txHistorySlice = slice
 export const selectTxHistory = selector

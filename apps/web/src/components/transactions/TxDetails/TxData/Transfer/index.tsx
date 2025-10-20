@@ -1,8 +1,9 @@
+import type { TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { TransactionStatus } from '@safe-global/store/gateway/types'
+import { TransferDirection } from '@safe-global/store/gateway/types'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import { TransferTx } from '@/components/transactions/TxInfo'
 import { isTxQueued } from '@/utils/transaction-guards'
-import type { TransactionStatus, Transfer } from '@safe-global/safe-gateway-typescript-sdk'
-import { TransferDirection } from '@safe-global/safe-gateway-typescript-sdk'
 import { Box, Stack, Typography } from '@mui/material'
 import React from 'react'
 
@@ -13,7 +14,7 @@ import TokenAmount from '@/components/common/TokenAmount'
 import { type NativeToken, type Erc20Token } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 type TransferTxInfoProps = {
-  txInfo: Transfer
+  txInfo: TransferTransactionInfo
   txStatus: TransactionStatus
   trusted: boolean
   imitation: boolean

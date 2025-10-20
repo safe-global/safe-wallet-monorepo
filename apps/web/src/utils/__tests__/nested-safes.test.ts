@@ -1,4 +1,4 @@
-import type { TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { _getFactoryAddressAndSetupData } from '../nested-safes'
 
 describe('Nested Safes', () => {
