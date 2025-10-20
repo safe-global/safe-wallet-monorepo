@@ -1,11 +1,10 @@
-import { type ReactElement, useContext, useState, useMemo } from 'react'
+import { type ReactElement, useContext, useState, useEffect } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse, Tooltip, SvgIcon } from '@mui/material'
-import CheckIcon from '@mui/icons-material/Check'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import LaunchIcon from '@mui/icons-material/Launch'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import UpdateIcon from '@/public/images/safe-shield/update.svg'
-import AlertIcon from '@/public/images/safe-shield/alert.svg'
+import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
 import { TxInfoContext } from '@/components/tx-flow/TxInfoProvider'
 import { useCurrentChain } from '@/hooks/useChains'
 import {
@@ -16,17 +15,10 @@ import ExternalLink from '@/components/common/ExternalLink'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import useAsync from '@safe-global/utils/hooks/useAsync'
-import { getSafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { Safe__factory } from '@safe-global/utils/types/contracts'
 import useSafeAddress from '@/hooks/useSafeAddress'
-import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
-import { skipToken } from '@reduxjs/toolkit/query'
-import extractTxInfo from '@/services/tx/extractTxInfo'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { SEVERITY_COLORS } from '@/features/safe-shield/constants'
-
-const safeInterface = Safe__factory.createInterface()
+import { useNestedTransaction } from '@/features/safe-shield/components/useNestedTransaction'
 
 export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): ReactElement | null => {
   const { simulation, status, nestedTx } = useContext(TxInfoContext)
@@ -39,68 +31,14 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
 
   const [simulationExpanded, setSimulationExpanded] = useState(false)
 
-  const nestedTxInfo = useMemo(() => {
-    if (!safeTx?.data.data) return null
+  // Reset simulation state when transaction changes
+  useEffect(() => {
+    simulation.resetSimulation()
+    nestedTx.simulation.resetSimulation()
+    setSimulationExpanded(false)
+  }, [safeTx, simulation, nestedTx.simulation])
 
-    const txData = safeTx.data.data
-    const approveHashSelector = safeInterface.getFunction('approveHash').selector
-    const execTransactionSelector = safeInterface.getFunction('execTransaction').selector
-
-    if (txData.startsWith(approveHashSelector)) {
-      try {
-        const params = safeInterface.decodeFunctionData('approveHash', txData)
-        return {
-          type: 'approveHash' as const,
-          signedHash: params[0] as string,
-          nestedSafeAddress: safeTx.data.to,
-        }
-      } catch (e) {
-        return null
-      }
-    }
-
-    if (txData.startsWith(execTransactionSelector)) {
-      return {
-        type: 'execTransaction' as const,
-        nestedSafeAddress: safeTx.data.to,
-      }
-    }
-
-    return null
-  }, [safeTx])
-
-  const { data: nestedTxDetails } = useGetTransactionDetailsQuery(
-    nestedTxInfo?.type === 'approveHash' && nestedTxInfo.signedHash && chain
-      ? {
-          chainId: chain.chainId,
-          txId: nestedTxInfo.signedHash,
-        }
-      : skipToken,
-  )
-
-  const [nestedSafeInfo] = useAsync(
-    () =>
-      !!chain && !!nestedTxInfo?.nestedSafeAddress
-        ? getSafeInfo(chain.chainId, nestedTxInfo.nestedSafeAddress)
-        : undefined,
-    [chain, nestedTxInfo],
-  )
-
-  const nestedSafeTx = useMemo<SafeTransaction | undefined>(() => {
-    if (!nestedTxInfo) return undefined
-
-    if (nestedTxInfo.type === 'approveHash' && nestedTxDetails) {
-      return {
-        addSignature: () => {},
-        encodedSignatures: () => '',
-        getSignature: () => undefined,
-        data: extractTxInfo(nestedTxDetails).txParams,
-        signatures: new Map(),
-      }
-    }
-
-    return undefined
-  }, [nestedTxInfo, nestedTxDetails])
+  const { nestedSafeInfo, nestedSafeTx, isNested } = useNestedTransaction(safeTx, chain)
 
   const handleToggleSimulation = () => {
     setSimulationExpanded(!simulationExpanded)
@@ -120,7 +58,7 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
 
     simulation.simulateTransaction(simulationParams)
 
-    if (nestedTxInfo && nestedSafeInfo && nestedSafeTx) {
+    if (isNested) {
       const nestedSimulationParams = {
         safe: nestedSafeInfo,
         executionOwner: safeAddress,
@@ -133,8 +71,6 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
 
     setSimulationExpanded(true)
   }
-
-  const isNested = !!nestedTxInfo && !!nestedSafeInfo && !!nestedSafeTx
 
   const mainIsFinished = status.isFinished
   const nestedIsFinished = isNested ? nestedTx.status.isFinished : true
@@ -150,26 +86,20 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
     return null
   }
 
+  const showExpandable = isNested && isSimulationFinished
+
   return (
     <Box>
       <Stack
         direction="row"
         justifyContent="space-between"
         alignItems="center"
-        sx={{ padding: '12px', cursor: isSimulationFinished ? 'pointer' : 'default' }}
-        onClick={isSimulationFinished ? handleToggleSimulation : undefined}
+        sx={{ padding: '12px', cursor: showExpandable ? 'pointer' : 'default' }}
+        onClick={showExpandable ? handleToggleSimulation : undefined}
       >
         <Stack direction="row" alignItems="center" gap={1}>
           {isSimulationFinished ? (
-            isSimulationSuccess ? (
-              <CheckIcon sx={{ fontSize: 16, color: SEVERITY_COLORS.OK.main }} />
-            ) : (
-              <SvgIcon
-                component={AlertIcon}
-                inheritViewBox
-                sx={{ fontSize: 16, color: SEVERITY_COLORS.CRITICAL.main }}
-              />
-            )
+            <SeverityIcon severity={isSimulationSuccess ? 'OK' : 'CRITICAL'} width={16} height={16} />
           ) : (
             <SvgIcon component={UpdateIcon} inheritViewBox sx={{ fontSize: 16 }} />
           )}
@@ -223,22 +153,25 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
             </Typography>
           </Box>
         ) : (
-          <IconButton
-            size="small"
-            sx={{
-              width: 16,
-              height: 16,
-              padding: 0,
-              transform: simulationExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s',
-            }}
-          >
-            <KeyboardArrowDownIcon sx={{ width: 16, height: 16, color: 'text.secondary' }} />
-          </IconButton>
+          showExpandable && (
+            <IconButton
+              size="small"
+              sx={{
+                width: 16,
+                height: 16,
+                padding: 0,
+                transform: simulationExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s',
+              }}
+            >
+              <KeyboardArrowDownIcon sx={{ width: 16, height: 16, color: 'text.secondary' }} />
+            </IconButton>
+          )
         )}
       </Stack>
 
-      <Collapse in={isSimulationFinished && simulationExpanded}>
+      {/* Show inline when single simulation, expandable when nested */}
+      <Collapse in={showExpandable ? simulationExpanded : isSimulationFinished}>
         <Box sx={{ padding: '4px 12px 16px' }}>
           <Stack gap={2}>
             <Box bgcolor="background.main" borderRadius="4px" overflow="hidden">
@@ -282,20 +215,6 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
                     padding: '12px',
                   }}
                 >
-                  <Typography
-                    variant="overline"
-                    sx={{
-                      color: 'primary.light',
-                      mb: 1,
-                      display: 'block',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      lineHeight: '16px',
-                      letterSpacing: '1px',
-                    }}
-                  >
-                    Nested transaction
-                  </Typography>
                   <Typography variant="body2" color="primary.light" sx={{ mb: 1 }}>
                     {nestedIsSuccess ? 'Transaction simulation successful.' : 'Transaction simulation failed.'}
                   </Typography>

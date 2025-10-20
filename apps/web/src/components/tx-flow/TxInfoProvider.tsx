@@ -1,4 +1,4 @@
-import { createContext, type ReactElement } from 'react'
+import { createContext, useMemo, type ReactElement } from 'react'
 
 import { useSimulation } from '@/components/tx/security/tenderly/useSimulation'
 import { FETCH_STATUS } from '@safe-global/utils/components/tx/security/tenderly/types'
@@ -50,12 +50,15 @@ export const TxInfoProvider = ({ children }: { children: ReactElement }) => {
   const simulation = useSimulation()
   const nestedSimulation = useSimulation()
 
-  const status = getSimulationStatus(simulation)
+  const status = useMemo(() => getSimulationStatus(simulation), [simulation])
 
-  const nestedTx = {
-    simulation: nestedSimulation,
-    status: getSimulationStatus(nestedSimulation),
-  }
+  const nestedTx = useMemo(
+    () => ({
+      simulation: nestedSimulation,
+      status: getSimulationStatus(nestedSimulation),
+    }),
+    [nestedSimulation],
+  )
 
   return <TxInfoContext.Provider value={{ simulation, status, nestedTx }}>{children}</TxInfoContext.Provider>
 }
