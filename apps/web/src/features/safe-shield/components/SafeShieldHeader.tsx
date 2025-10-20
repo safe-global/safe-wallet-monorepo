@@ -1,7 +1,11 @@
 import { type ReactElement } from 'react'
 import { Box, Typography, Stack, SvgIcon } from '@mui/material'
 import SafeShieldLogo from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
-import type { ContractAnalysisResults, RecipientAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
+import type {
+  ContractAnalysisResults,
+  RecipientAnalysisResults,
+  ThreatAnalysisResult,
+} from '@safe-global/utils/features/safe-shield/types'
 import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SEVERITY_COLORS } from '../constants'
@@ -9,17 +13,20 @@ import { SEVERITY_COLORS } from '../constants'
 export const SafeShieldHeader = ({
   recipient = [{}, undefined, false],
   contract = [{}, undefined, false],
+  threat = [{}, undefined, false],
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
+  threat?: AsyncResult<ThreatAnalysisResult>
 }): ReactElement => {
   const [recipientResults = {}, recipientError, recipientLoading = false] = recipient
   const [contractResults = {}, contractError, contractLoading = false] = contract
+  const [threatResults = {}, threatError, threatLoading = false] = threat
 
-  const status = getOverallStatus(recipientResults, contractResults)
+  const status = getOverallStatus(recipientResults, contractResults, threatResults)
 
-  const loading = recipientLoading || contractLoading
-  const error = recipientError || contractError
+  const loading = recipientLoading || contractLoading || threatLoading
+  const error = recipientError || contractError || threatError
 
   const headerBgColor =
     !status || !status?.severity || loading

@@ -1,4 +1,4 @@
-import type { ContractAnalysisResults, RecipientAnalysisResults, ThreatAnalysisResult } from '../types'
+import type { ContractAnalysisResults, RecipientAnalysisResults, ThreatAnalysisResults } from '../types'
 import type { Severity } from '../types'
 import type { AnalysisResult } from '../types'
 import { getPrimaryResult } from './analysisUtils'
@@ -30,7 +30,7 @@ import { SEVERITY_TO_TITLE } from '../constants'
 export const getOverallStatus = (
   recipientResults?: RecipientAnalysisResults,
   contractResults?: ContractAnalysisResults,
-  threatResults?: ThreatAnalysisResult,
+  threatResults?: ThreatAnalysisResults,
 ): { severity: Severity; title: string } | undefined => {
   if (!recipientResults && !contractResults) {
     return undefined
@@ -54,7 +54,13 @@ export const getOverallStatus = (
 
   // Add threat result
   if (threatResults) {
-    allResults.push(threatResults)
+    for (const addressResults of Object.values(threatResults)) {
+      for (const groupResults of Object.values(addressResults)) {
+        if (groupResults) {
+          allResults.push({ ...groupResults })
+        }
+      }
+    }
   }
 
   const primaryResult = getPrimaryResult(allResults)

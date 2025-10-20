@@ -19,7 +19,6 @@ export const SafeShieldDisplay = ({
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<LiveThreatAnalysisResult>
 }): ReactElement => {
-  // ['0x']: { THREAT: threat.THREAT }
   return (
     <Stack gap={1}>
       <Card sx={{ borderRadius: '6px', overflow: 'hidden' }}>
