@@ -1,6 +1,6 @@
 import { SafeAppFeatures } from '@safe-global/safe-gateway-typescript-sdk'
-import { SafeAppSocialPlatforms, SafeAppAccessPolicyTypes } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import { SafeAppSocialPlatforms, SafeAppAccessPolicyTypes } from '@safe-global/store/gateway/types'
+import { type SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 import SafeAppSocialLinksCard from '@/components/safe-apps/SafeAppSocialLinksCard'
 import { render, screen, waitFor } from '@/tests/test-utils'
@@ -21,6 +21,7 @@ const transactionBuilderSafeAppMock: SafeAppData = {
   features: [SafeAppFeatures.BATCHED_TRANSACTIONS],
   socialProfiles: [],
   developerWebsite: '',
+  featured: false,
 }
 
 const developerWebsiteMock = 'http://transaction-builder-website'

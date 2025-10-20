@@ -1,85 +1,23 @@
-import * as safeAppsGatewaySDK from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
 import { render, screen, waitFor } from '@/tests/test-utils'
 import SafeAppsDashboardSection from '@/components/dashboard/SafeAppsDashboardSection/SafeAppsDashboardSection'
 import { LS_NAMESPACE } from '@/config/constants'
+import { http, HttpResponse } from 'msw'
+import { server } from '@/tests/server'
+import { GATEWAY_URL } from '@/config/gateway'
+import {
+  compoundSafeApp,
+  ensSafeApp,
+  synthetixSafeApp,
+  transactionBuilderSafeApp,
+} from '@safe-global/test/msw/mockSafeApps'
 
-jest.mock('@safe-global/safe-gateway-typescript-sdk', () => ({
-  ...jest.requireActual('@safe-global/safe-gateway-typescript-sdk'),
-  getSafeApps: (): Promise<SafeAppData[]> =>
-    Promise.resolve([
-      {
-        id: 13,
-        url: 'https://cloudflare-ipfs.com/ipfs/QmX31xCdhFDmJzoVG33Y6kJtJ5Ujw8r5EJJBrsp8Fbjm7k',
-        name: 'Compound',
-        iconUrl: 'https://cloudflare-ipfs.com/ipfs/QmX31xCdhFDmJzoVG33Y6kJtJ5Ujw8r5EJJBrsp8Fbjm7k/Compound.png',
-        description: 'Money markets on the Ethereum blockchain',
-        chainIds: ['1', '4'],
-        provider: undefined,
-        accessControl: {
-          type: safeAppsGatewaySDK.SafeAppAccessPolicyTypes.NoRestrictions,
-        },
-        tags: [],
-        features: [],
-        socialProfiles: [],
-        developerWebsite: '',
-        featured: true,
-      },
-      {
-        id: 3,
-        url: 'https://app.ens.domains',
-        name: 'ENS App',
-        iconUrl: 'https://app.ens.domains/android-chrome-144x144.png',
-        description: 'Decentralised naming for wallets, websites, & more.',
-        chainIds: ['1', '4'],
-        provider: undefined,
-        accessControl: {
-          type: safeAppsGatewaySDK.SafeAppAccessPolicyTypes.DomainAllowlist,
-          value: ['https://gnosis-safe.io'],
-        },
-        tags: [],
-        features: [],
-        socialProfiles: [],
-        developerWebsite: '',
-        featured: true,
-      },
-      {
-        id: 14,
-        url: 'https://cloudflare-ipfs.com/ipfs/QmXLxxczMH4MBEYDeeN9zoiHDzVkeBmB5rBjA3UniPEFcA',
-        name: 'Synthetix',
-        iconUrl: 'https://cloudflare-ipfs.com/ipfs/QmXLxxczMH4MBEYDeeN9zoiHDzVkeBmB5rBjA3UniPEFcA/Synthetix.png',
-        description: 'Trade synthetic assets on Ethereum',
-        chainIds: ['1', '4'],
-        provider: undefined,
-        accessControl: {
-          type: safeAppsGatewaySDK.SafeAppAccessPolicyTypes.NoRestrictions,
-        },
-        tags: [],
-        features: [],
-        socialProfiles: [],
-        developerWebsite: '',
-        featured: false,
-      },
-      {
-        id: 24,
-        url: 'https://cloudflare-ipfs.com/ipfs/QmdVaZxDov4bVARScTLErQSRQoxgqtBad8anWuw3YPQHCs',
-        name: 'Transaction Builder',
-        iconUrl: 'https://cloudflare-ipfs.com/ipfs/QmdVaZxDov4bVARScTLErQSRQoxgqtBad8anWuw3YPQHCs/tx-builder.png',
-        description: 'A Safe app to compose custom transactions',
-        chainIds: ['1', '4', '56', '100', '137', '246', '73799'],
-        provider: undefined,
-        accessControl: {
-          type: safeAppsGatewaySDK.SafeAppAccessPolicyTypes.DomainAllowlist,
-          value: ['https://gnosis-safe.io'],
-        },
-        tags: [],
-        features: [],
-        socialProfiles: [],
-        developerWebsite: '',
-        featured: true,
-      },
-    ]),
-}))
+// Create featured versions of the apps for this test suite
+const featuredApps = [
+  { ...compoundSafeApp, featured: true },
+  { ...ensSafeApp, featured: true },
+  { ...synthetixSafeApp, featured: false },
+  { ...transactionBuilderSafeApp, featured: true },
+]
 
 describe('Safe Apps Dashboard Section', () => {
   beforeEach(() => {
@@ -97,6 +35,25 @@ describe('Safe Apps Dashboard Section', () => {
       },
     })
     window.localStorage.setItem(`${LS_NAMESPACE}SafeApps__dashboard`, mostUsedApps)
+
+    // Override the default safe-apps handler to return featured apps
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/chains/:chainId/safe-apps`, ({ request }) => {
+        const url = new URL(request.url)
+        const appUrl = url.searchParams.get('url')
+
+        // If filtering by URL, return matching apps
+        if (appUrl) {
+          const matchingApp = featuredApps.find(
+            (app) => app.url === appUrl || app.url === appUrl.replace(/\/$/, '') || `${app.url}/` === appUrl,
+          )
+          return HttpResponse.json(matchingApp ? [matchingApp] : [])
+        }
+
+        // Return featured apps by default
+        return HttpResponse.json(featuredApps)
+      }),
+    )
   })
 
   afterEach(() => {

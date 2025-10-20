@@ -7,7 +7,7 @@ import Button from '@mui/material/Button'
 import SvgIcon from '@mui/material/SvgIcon'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 import { getSafeAppUrl } from '@/components/safe-apps/SafeAppCard'
 import ChainIndicator from '@/components/common/ChainIndicator'
@@ -67,7 +67,7 @@ const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookma
 
         {/* Safe App Info */}
         <Box sx={{ px: 1 }}>
-          <SafeAppIconCard src={safeApp?.iconUrl || ''} alt={`${safeApp?.name} logo`} width={90} height={90} />
+          <SafeAppIconCard src={safeApp?.iconUrl} alt={`${safeApp?.name} logo`} width={90} height={90} />
         </Box>
 
         <Typography variant="h4" fontWeight={700} sx={{ mt: 2 }}>
