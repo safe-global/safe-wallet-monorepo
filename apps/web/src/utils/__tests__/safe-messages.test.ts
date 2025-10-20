@@ -1,5 +1,5 @@
 import { zeroPadValue } from 'ethers'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 import {
   generateSafeMessageTypedData,
@@ -21,7 +21,7 @@ describe('safe-messages', () => {
           value: MOCK_ADDRESS,
         },
         chainId: 1,
-      } as unknown as SafeInfo
+      } as unknown as SafeState
 
       const message = 'Hello world!'
 
@@ -49,7 +49,7 @@ describe('safe-messages', () => {
           value: MOCK_ADDRESS,
         },
         chainId: 1,
-      } as unknown as SafeInfo
+      } as unknown as SafeState
 
       const message = 'Hello world!'
 
@@ -76,7 +76,7 @@ describe('safe-messages', () => {
           value: MOCK_ADDRESS,
         },
         chainId: 1,
-      } as unknown as SafeInfo
+      } as unknown as SafeState
 
       const message = {
         domain: {
@@ -167,7 +167,7 @@ describe('safe-messages', () => {
           value: MOCK_ADDRESS,
         },
         chainId: 1,
-      } as unknown as SafeInfo
+      } as unknown as SafeState
 
       const message = {
         domain: {
