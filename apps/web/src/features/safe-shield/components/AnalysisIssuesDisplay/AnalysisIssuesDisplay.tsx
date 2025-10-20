@@ -4,6 +4,7 @@ import type {
   AnyStatus,
   MaliciousOrModerateThreatAnalysisResult,
 } from '@safe-global/utils/features/safe-shield/types'
+import { sortByIssueSeverity } from '@safe-global/utils/features/safe-shield/utils/analysisUtils'
 import { Typography } from '@mui/material'
 
 interface AnalysisIssuesDisplayProps {
@@ -16,8 +17,9 @@ export const AnalysisIssuesDisplay = ({ result }: AnalysisIssuesDisplayProps) =>
   }
 
   const issues = result.issues as MaliciousOrModerateThreatAnalysisResult['issues']
+  const sortedIssues = sortByIssueSeverity(issues)
 
-  return Array.from(issues?.entries() || []).map(([severity, issues]) => (
+  return sortedIssues.map(({ severity, issues }) => (
     <Typography key={severity} variant="body2" color="primary.light" fontStyle="italic">
       {issues.join(', ')}
     </Typography>
