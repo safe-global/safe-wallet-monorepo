@@ -56,7 +56,6 @@ export const detectNestedTransaction = (safeTx?: SafeTransaction): NestedTxInfo 
   return null
 }
 
-
 export interface UseNestedTransactionResult {
   nestedSafeInfo: SafeInfo | undefined
   nestedSafeTx: SafeTransaction | undefined
