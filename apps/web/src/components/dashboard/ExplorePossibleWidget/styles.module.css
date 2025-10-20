@@ -59,7 +59,9 @@
   justify-content: space-between;
   align-items: flex-end;
   position: relative;
-  transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+  transition:
+    transform 0.2s ease-in-out,
+    background-color 0.2s ease-in-out;
 }
 
 .card:hover {
@@ -71,7 +73,7 @@
   position: absolute;
   top: 24px;
   left: 24px;
-  height: 20px !important; 
+  height: 20px !important;
   border-radius: 6px;
   display: flex;
   padding: 2px 2px;
