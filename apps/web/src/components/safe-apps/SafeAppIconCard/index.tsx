@@ -9,11 +9,11 @@ const SafeAppIconCard = ({
   height = 48,
   fallback = APP_LOGO_FALLBACK_IMAGE,
 }: {
-  src: string
+  src?: string | null
   alt: string
   width?: number
   height?: number
   fallback?: string
-}) => <ImageFallback src={src} alt={alt} width={width} height={height} fallbackSrc={fallback} />
+}) => <ImageFallback src={src || undefined} alt={alt} width={width} height={height} fallbackSrc={fallback} />
 
 export default SafeAppIconCard

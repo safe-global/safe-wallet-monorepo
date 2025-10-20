@@ -1,10 +1,5 @@
-import type {
-  ConflictHeader,
-  DateLabel,
-  Label,
-  SafeAppData,
-  Transaction,
-} from '@safe-global/safe-gateway-typescript-sdk'
+import type { ConflictHeader, DateLabel, Label, Transaction } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { TransactionInfoType } from '@safe-global/safe-gateway-typescript-sdk'
 import { isMultiSendTxInfo } from '../transaction-guards'
 import { getQueuedTransactionCount, getTxOrigin } from '../transactions'
