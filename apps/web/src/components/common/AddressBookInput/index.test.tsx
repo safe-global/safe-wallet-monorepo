@@ -6,7 +6,7 @@ import type { AddressInputProps } from '../AddressInput'
 import * as useChains from '@/hooks/useChains'
 import { faker } from '@faker-js/faker'
 import { chainBuilder } from '@/tests/builders/chains'
-import { FEATURES } from '@safe-global/safe-gateway-typescript-sdk'
+import { FEATURES } from '@safe-global/store/gateway/types'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { AddressBook } from '@/store/addressBookSlice'
 
