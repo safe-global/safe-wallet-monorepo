@@ -1,11 +1,12 @@
 import { useMemo } from 'react'
 import { skipToken } from '@reduxjs/toolkit/query'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { getSafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { getSafeInfo, type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
 import extractTxInfo from '@/services/tx/extractTxInfo'
-import type { SafeTransaction, ChainInfo, SafeInfo } from '@safe-global/types-kit'
+import type { SafeTransaction } from '@safe-global/types-kit'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 const safeInterface = Safe__factory.createInterface()
 
@@ -87,7 +88,7 @@ export interface UseNestedTransactionResult {
  */
 export const useNestedTransaction = (
   safeTx: SafeTransaction | undefined,
-  chain: ChainInfo | undefined,
+  chain: Chain | undefined,
 ): UseNestedTransactionResult => {
   const nestedTxInfo = useMemo(() => detectNestedTransaction(safeTx), [safeTx])
   const { data: nestedTxDetails } = useGetTransactionDetailsQuery(

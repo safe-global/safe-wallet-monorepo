@@ -19,6 +19,7 @@ import useSafeAddress from '@/hooks/useSafeAddress'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { SEVERITY_COLORS } from '@/features/safe-shield/constants'
 import { useNestedTransaction } from '@/features/safe-shield/components/useNestedTransaction'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
 
 export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): ReactElement | null => {
   const { simulation, status, nestedTx } = useContext(TxInfoContext)
@@ -99,7 +100,11 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
       >
         <Stack direction="row" alignItems="center" gap={1}>
           {isSimulationFinished ? (
-            <SeverityIcon severity={isSimulationSuccess ? 'OK' : 'CRITICAL'} width={16} height={16} />
+            <SeverityIcon
+              severity={isSimulationSuccess ? Severity.OK : Severity.CRITICAL}
+              width={16}
+              height={16}
+            />
           ) : (
             <SvgIcon component={UpdateIcon} inheritViewBox sx={{ fontSize: 16 }} />
           )}
