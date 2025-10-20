@@ -139,27 +139,6 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
               />
             </Tooltip>
           )}
-          {/* Show inline link for single (non-nested) simulation */}
-          {isSimulationFinished && !isNested && simulation.simulationLink && (
-            <ExternalLink
-              noIcon
-              href={simulation.simulationLink}
-              sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}
-            >
-              <Typography
-                sx={{
-                  fontSize: '12px',
-                  lineHeight: '16px',
-                  letterSpacing: '1px',
-                  color: 'text.secondary',
-                  textDecoration: 'underline',
-                }}
-              >
-                View
-              </Typography>
-              <LaunchIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-            </ExternalLink>
-          )}
         </Stack>
 
         {!isSimulationFinished ? (
@@ -190,20 +169,39 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
               {isLoading ? 'Running...' : 'Run'}
             </Typography>
           </Box>
+        ) : isNested ? (
+          <IconButton
+            size="small"
+            sx={{
+              width: 16,
+              height: 16,
+              padding: 0,
+              transform: simulationExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s',
+            }}
+          >
+            <KeyboardArrowDownIcon sx={{ width: 16, height: 16, color: 'text.secondary' }} />
+          </IconButton>
         ) : (
-          showExpandable && (
-            <IconButton
-              size="small"
-              sx={{
-                width: 16,
-                height: 16,
-                padding: 0,
-                transform: simulationExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s',
-              }}
+          simulation.simulationLink && (
+            <ExternalLink
+              noIcon
+              href={simulation.simulationLink}
+              sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}
             >
-              <KeyboardArrowDownIcon sx={{ width: 16, height: 16, color: 'text.secondary' }} />
-            </IconButton>
+              <Typography
+                sx={{
+                  fontSize: '12px',
+                  lineHeight: '16px',
+                  letterSpacing: '1px',
+                  color: 'text.secondary',
+                  textDecoration: 'underline',
+                }}
+              >
+                View
+              </Typography>
+              <LaunchIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+            </ExternalLink>
           )
         )}
       </Stack>
