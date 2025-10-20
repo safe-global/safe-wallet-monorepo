@@ -60,10 +60,12 @@ export function useRecipientAnalysis({
   const [activityCheck, activityCheckError, activityCheckLoading] = useAddressActivity(validRecipients, web3ReadOnly)
 
   // Merge backend and local checks
-  // Only merge address book results after fetched results are available
   const mergedResults = useMemo(() => {
-    const addressBookToMerge = fetchedResults && addressBookCheck ? addressBookCheck : undefined
-    return mergeAnalysisResults(fetchedResults, addressBookToMerge, activityCheck)
+    // Only merge different results after all of them are available
+    if (!fetchedResults || !addressBookCheck || !activityCheck) {
+      return undefined
+    }
+    return mergeAnalysisResults(fetchedResults, addressBookCheck, activityCheck)
   }, [fetchedResults, addressBookCheck, activityCheck])
 
   if (!recipientsMemo) {

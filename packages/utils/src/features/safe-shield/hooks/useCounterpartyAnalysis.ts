@@ -90,11 +90,18 @@ export function useCounterpartyAnalysis({
   const [activityCheck, activityCheckError, activityCheckLoading] = useAddressActivity(recipientAddresses, web3ReadOnly)
 
   // Merge backend recipient results with local checks
-  const mergedRecipientResults = useMemo(
-    () =>
-      mergeAnalysisResults(counterpartyData?.recipient as RecipientAnalysisResults, addressBookCheck, activityCheck),
-    [counterpartyData?.recipient, addressBookCheck, activityCheck],
-  )
+  const mergedRecipientResults = useMemo(() => {
+    // Only merge different results after all of them are available
+    if (!counterpartyData?.recipient || !addressBookCheck || !activityCheck) {
+      return undefined
+    }
+
+    return mergeAnalysisResults(
+      counterpartyData?.recipient as RecipientAnalysisResults,
+      addressBookCheck,
+      activityCheck,
+    )
+  }, [counterpartyData?.recipient, addressBookCheck, activityCheck])
 
   const fetchError = useMemo(() => {
     if (error) {
