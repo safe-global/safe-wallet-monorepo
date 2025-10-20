@@ -38,7 +38,7 @@ describe('useFetchRecipientAnalysis', () => {
     })
 
     const [results, error] = result.current
-    expect(results).toEqual({})
+    expect(results).toBeUndefined()
     expect(error).toBeUndefined()
     expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith({
       safeAddress: mockSafeAddress,
@@ -59,7 +59,7 @@ describe('useFetchRecipientAnalysis', () => {
     })
 
     const [results] = result.current
-    expect(results).toEqual({})
+    expect(results).toBeUndefined()
     expect(useFetchMultiRecipientAnalysisSpy).toHaveBeenCalledWith({
       safeAddress: '',
       chainId: mockChainId,

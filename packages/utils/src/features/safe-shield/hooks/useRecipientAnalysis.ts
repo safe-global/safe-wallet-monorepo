@@ -1,41 +1,14 @@
 import { useMemo } from 'react'
 import { isAddress, JsonRpcProvider } from 'ethers'
 import uniq from 'lodash/uniq'
-import {
-  type AddressBookCheckResult,
-  useAddressBookCheck,
-} from './address-analysis/address-book-check/useAddressBookCheck'
-import { type AddressActivityResult, useAddressActivity } from './address-analysis/address-activity/useAddressActivity'
-import { type RecipientAnalysisResults, StatusGroup } from '../types'
+import { useAddressBookCheck } from './address-analysis/address-book-check/useAddressBookCheck'
+import { useAddressActivity } from './address-analysis/address-activity/useAddressActivity'
+import { type RecipientAnalysisResults } from '../types'
 import { useFetchRecipientAnalysis } from './useFetchRecipientAnalysis'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useMemoDeepCompare } from './util-hooks/useMemoDeepCompare'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
-
-/**
- * Merges backend and local check results
- * Backend provides RECIPIENT_INTERACTION (group 3)
- * Local checks provide ADDRESS_BOOK (group 1) and RECIPIENT_ACTIVITY (group 2)
- */
-function mergeAnalysisResults(
-  fetchedResults: RecipientAnalysisResults | undefined,
-  addressBookResult: AddressBookCheckResult,
-  activityResult: AddressActivityResult | undefined,
-): RecipientAnalysisResults {
-  const merged: RecipientAnalysisResults = fetchedResults ? { ...fetchedResults } : {}
-
-  for (const [address, result] of Object.entries(addressBookResult)) {
-    merged[address] = { ...(merged[address] || {}), [StatusGroup.ADDRESS_BOOK]: [result] }
-  }
-
-  if (activityResult) {
-    for (const [address, result] of Object.entries(activityResult)) {
-      merged[address] = { ...(merged[address] || {}), [StatusGroup.RECIPIENT_ACTIVITY]: [result] }
-    }
-  }
-
-  return merged
-}
+import { mergeAnalysisResults } from '../utils'
 
 /**
  * Hook for fetching and analyzing recipient addresses
@@ -86,10 +59,11 @@ export function useRecipientAnalysis({
   const [activityCheck, activityCheckError, activityCheckLoading] = useAddressActivity(validRecipients, web3ReadOnly)
 
   // Merge backend and local checks
-  const mergedResults = useMemo(
-    () => mergeAnalysisResults(fetchedResults, addressBookCheck, activityCheck),
-    [fetchedResults, addressBookCheck, activityCheck],
-  )
+  // Only merge address book results after fetched results are available
+  const mergedResults = useMemo(() => {
+    const addressBookToMerge = fetchedResults && addressBookCheck ? addressBookCheck : undefined
+    return mergeAnalysisResults(fetchedResults, addressBookToMerge, activityCheck)
+  }, [fetchedResults, addressBookCheck, activityCheck])
 
   return [mergedResults, fetchedResultsError || activityCheckError, fetchLoading || activityCheckLoading]
 }

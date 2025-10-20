@@ -8,7 +8,7 @@ import { ProgressBar } from '@/components/common/ProgressBar'
 import css from './styles.module.css'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import TxStatusWidget from '@/components/tx-flow/common/TxStatusWidget'
-import { SafeShieldDisplay } from '@/features/safe-shield/components/SafeShieldDisplay'
+import SafeShieldWidget from '@/features/safe-shield'
 import { TxLayoutHeader } from '../TxLayout'
 import { Slot, SlotName } from '../../slots'
 import SafeInfo from '@/components/tx-flow/common/SafeInfo'
@@ -50,16 +50,7 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
         <Grid sx={{ width: 200 }} pt={5}>
           <aside>
             <Stack gap={3} position="fixed">
-              <Card
-                sx={{
-                  p: '4px 8px 4px 4px',
-                  maxWidth: 212,
-                  mx: '-12px',
-                  overflow: 'visible',
-                  position: 'fixed',
-                  top: 62,
-                }}
-              >
+              <Card className={css.safeInfoCard}>
                 <SafeInfo />
               </Card>
 
@@ -130,7 +121,7 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
                 <Slot name={SlotName.Sidebar} />
 
                 <Box className={css.sticky}>
-                  <SafeShieldDisplay />
+                  <SafeShieldWidget />
                 </Box>
               </Grid>
             )}

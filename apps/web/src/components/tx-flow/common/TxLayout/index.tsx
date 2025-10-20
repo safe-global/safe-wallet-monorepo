@@ -25,7 +25,8 @@ import css from './styles.module.css'
 import { TxSecurityProvider } from '@/components/tx/security/shared/TxSecurityContext'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import SafeInfo from '@/components/tx-flow/common/SafeInfo'
-import { SafeShieldDisplay } from '@/features/safe-shield/components/SafeShieldDisplay'
+import SafeShieldWidget from '@/features/safe-shield'
+import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 
 export const TxLayoutHeader = ({
   hideNonce,
@@ -106,32 +107,24 @@ const TxLayout = ({
     <SafeTxProvider>
       <TxInfoProvider>
         <TxSecurityProvider>
-          <Grid container className={css.container}>
-            {!isReplacement && !isSmallScreen && (
-              <Grid sx={{ width: 200 }} pt={5}>
-                <aside>
-                  <Stack gap={3} position="fixed">
-                    <Card
-                      sx={{
-                        p: '4px 8px 4px 4px',
-                        maxWidth: 212,
-                        mx: '-12px',
-                        overflow: 'visible',
-                        position: 'fixed',
-                        top: 62,
-                      }}
-                    >
-                      <SafeInfo />
-                    </Card>
+          <SafeShieldProvider>
+            <Grid container className={css.container}>
+              {!isReplacement && !isSmallScreen && (
+                <Grid sx={{ width: 200 }} pt={5}>
+                  <aside>
+                    <Stack gap={3} position="fixed">
+                      <Card className={css.safeInfoCard}>
+                        <SafeInfo />
+                      </Card>
 
-                    <TxStatusWidget
-                      isLastStep={step === steps.length - 1}
-                      txSummary={txSummary}
-                      isBatch={isBatch}
-                      isMessage={isMessage}
-                    />
-                  </Stack>
-                </aside>
+                      <TxStatusWidget
+                        isLastStep={step === steps.length - 1}
+                        txSummary={txSummary}
+                        isBatch={isBatch}
+                        isMessage={isMessage}
+                      />
+                    </Stack>
+                  </aside>
               </Grid>
             )}
 
@@ -189,14 +182,15 @@ const TxLayout = ({
                       className={classnames(css.widget)}
                     >
                       <Box className={css.sticky}>
-                        <SafeShieldDisplay />
+                        <SafeShieldWidget />
                       </Box>
                     </Grid>
                   )}
                 </Grid>
               </Container>
             </Grid>
-          </Grid>
+            </Grid>
+          </SafeShieldProvider>
         </TxSecurityProvider>
       </TxInfoProvider>
     </SafeTxProvider>
