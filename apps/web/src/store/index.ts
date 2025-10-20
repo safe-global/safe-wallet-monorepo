@@ -5,8 +5,6 @@ import {
   type ThunkAction,
   type Action,
   type Middleware,
-  type EnhancedStore,
-  type ThunkDispatch,
 } from '@reduxjs/toolkit'
 import { useDispatch, useSelector, type TypedUseSelectorHook } from 'react-redux'
 import merge from 'lodash/merge'
@@ -139,10 +137,7 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
 type MakeStoreOptions = {
   skipBroadcast?: boolean
 }
-export const makeStore = (
-  initialState?: Partial<RootState>,
-  options?: MakeStoreOptions,
-): EnhancedStore<RootState, Action> => {
+export const makeStore = (initialState?: Partial<RootState>, options?: MakeStoreOptions) => {
   setBaseUrl(GATEWAY_URL)
 
   const store = configureStore({
@@ -165,7 +160,8 @@ export const makeStore = (
 }
 
 export type RootState = ReturnType<typeof rootReducer>
-export type AppDispatch = ThunkDispatch<RootState, unknown, Action> & EnhancedStore<RootState, Action>['dispatch']
+export type AppStore = ReturnType<typeof makeStore>
+export type AppDispatch = AppStore['dispatch']
 export type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, Action>
 
 export const useAppDispatch = () => useDispatch<AppDispatch>()

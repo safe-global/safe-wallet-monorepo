@@ -160,8 +160,7 @@ export const pollSafeInfo = async (chainId: string, safeAddress: string): Promis
         },
       )
 
-      // Cast to any to work around TypeScript limitation with thunk actions
-      const queryPromise = store.dispatch(queryAction as any)
+      const queryPromise = store.dispatch(queryAction)
       try {
         const result = await queryPromise.unwrap()
         return result
