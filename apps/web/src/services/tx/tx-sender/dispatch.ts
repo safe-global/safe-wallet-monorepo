@@ -3,7 +3,8 @@ import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import { isEthSignWallet, isSmartContractWallet } from '@/utils/wallets'
 import type { MultiSendCallOnlyContractImplementationType } from '@safe-global/protocol-kit'
-import { relayTransaction } from '@safe-global/safe-gateway-typescript-sdk'
+import { cgwApi as relayApi } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
+import { getStoreInstance } from '@/store'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
@@ -510,6 +511,7 @@ export const dispatchTxRelay = async (
   chain: Chain,
   gasLimit?: string | number | bigint,
 ) => {
+  const store = getStoreInstance()
   const readOnlySafeContract = await getReadOnlyCurrentGnosisSafeContract(safe)
 
   let transactionToRelay = safeTx
@@ -527,12 +529,17 @@ export const dispatchTxRelay = async (
   ])
 
   try {
-    const relayResponse = await relayTransaction(safe.chainId, {
-      to: safe.address.value,
-      data,
-      gasLimit: gasLimit?.toString(),
-      version: safe.version ?? getLatestSafeVersion(chain),
+    const relayAction = relayApi.endpoints.relayRelayV1.initiate({
+      chainId: safe.chainId,
+      relayDto: {
+        to: safe.address.value,
+        data,
+        gasLimit: gasLimit?.toString(),
+        version: safe.version ?? getLatestSafeVersion(chain),
+      },
     })
+
+    const relayResponse = await store.dispatch(relayAction).unwrap()
     const taskId = relayResponse.taskId
 
     if (!taskId) {
@@ -557,6 +564,7 @@ export const dispatchBatchExecutionRelay = async (
   safeAddress: string,
   safeVersion: string,
 ) => {
+  const store = getStoreInstance()
   const to = multiSendContract.getAddress()
 
   const data = multiSendContract.encode('multiSend', [multiSendTxData])
@@ -564,11 +572,16 @@ export const dispatchBatchExecutionRelay = async (
 
   let relayResponse
   try {
-    relayResponse = await relayTransaction(chainId, {
-      to,
-      data,
-      version: safeVersion,
+    const relayAction = relayApi.endpoints.relayRelayV1.initiate({
+      chainId,
+      relayDto: {
+        to,
+        data,
+        version: safeVersion,
+      },
     })
+
+    relayResponse = await store.dispatch(relayAction).unwrap()
   } catch (error) {
     txs.forEach(({ txId }) => {
       txDispatch(TxEvent.FAILED, {

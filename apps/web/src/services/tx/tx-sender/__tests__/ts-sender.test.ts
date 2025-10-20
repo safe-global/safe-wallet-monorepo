@@ -25,14 +25,9 @@ import {
 import * as safeContracts from '@/services/contracts/safeContracts'
 
 import * as web3 from '@/hooks/wallets/web3'
-
-const setupFetchStub = (data: any) => () => {
-  return Promise.resolve({
-    json: () => Promise.resolve(data),
-    status: 200,
-    ok: true,
-  })
-}
+import { http, HttpResponse } from 'msw'
+import { server } from '@/tests/server'
+import { GATEWAY_URL } from '@/config/gateway'
 import { toBeHex } from 'ethers'
 import { generatePreValidatedSignature } from '@safe-global/protocol-kit/dist/src/utils/signatures'
 import { createMockSafeTransaction } from '@/tests/transactions'
@@ -49,7 +44,6 @@ jest.mock('@safe-global/safe-gateway-typescript-sdk', () => ({
   Operation: {
     CALL: 0,
   },
-  relayTransaction: jest.fn(() => Promise.resolve({ taskId: '0xdead1' })),
   __esModule: true,
 }))
 
@@ -117,6 +111,11 @@ describe('txSender', () => {
     setSafeSDK(mockSafeSDK)
 
     jest.spyOn(txEvents, 'txDispatch')
+
+    // Initialize store for tests that need it (e.g., dispatchBatchExecutionRelay)
+    const { makeStore, setStoreInstance } = require('@/store')
+    const testStore = makeStore({}, { skipBroadcast: true })
+    setStoreInstance(testStore)
   })
 
   beforeEach(() => {
@@ -486,22 +485,26 @@ describe('txSender', () => {
         .spyOn(safeContracts, 'getReadOnlyMultiSendCallOnlyContract')
         .mockImplementation(() => multisendContractMock as any)
 
-      const mockData = {
-        taskId: '0xdead1',
-      }
-      global.fetch = jest.fn().mockImplementationOnce(setupFetchStub(mockData))
+      const mockTaskId = '0xdead1'
+
+      // Setup MSW handler for relay endpoint
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/chains/5/relay`, () => {
+          return HttpResponse.json({ taskId: mockTaskId })
+        }),
+      )
 
       await dispatchBatchExecutionRelay(txs, multisendContractMock, '0x1234', '5', safeAddress, '1.3.0')
 
       expect(txEvents.txDispatch).toHaveBeenCalledWith('RELAYING', {
         txId: 'multisig_0x01',
         groupKey: '0x1234',
-        taskId: '0xdead1',
+        taskId: mockTaskId,
       })
       expect(txEvents.txDispatch).toHaveBeenCalledWith('RELAYING', {
         txId: 'multisig_0x02',
         groupKey: '0x1234',
-        taskId: '0xdead1',
+        taskId: mockTaskId,
       })
     })
   })
