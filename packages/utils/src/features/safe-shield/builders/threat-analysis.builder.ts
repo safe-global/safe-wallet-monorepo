@@ -4,6 +4,7 @@ import {
   LiveThreatAnalysisResult,
   MaliciousOrModerateThreatAnalysisResult,
   MasterCopyChangeThreatAnalysisResult,
+  ThreatAnalysisResult,
   ThreatStatus,
 } from '../types'
 import { ThreatAnalysisResultBuilder } from './threat-analysis-result.builder'
@@ -49,13 +50,11 @@ export class ThreatAnalysisBuilder {
 
   addThreat(
     threat:
-      | MaliciousOrModerateThreatAnalysisResult
-      | MasterCopyChangeThreatAnalysisResult
       | AnalysisResult<ThreatStatus.NO_THREAT>
       | AnalysisResult<ThreatStatus.FAILED>
       | AnalysisResult<ThreatStatus.OWNERSHIP_CHANGE>
       | AnalysisResult<ThreatStatus.MODULE_CHANGE>
-      | AnalysisResult<ThreatStatus.MASTER_COPY_CHANGE>,
+      | ThreatAnalysisResult,
   ) {
     this.threatAnalysis.THREAT.push(threat)
     return this

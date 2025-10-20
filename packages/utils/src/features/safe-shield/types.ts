@@ -101,6 +101,15 @@ export type MaliciousOrModerateThreatAnalysisResult = AnalysisResult<ThreatStatu
   issues?: Map<keyof typeof Severity, Array<string>>
 }
 
+export type ThreatAnalysisResult =
+  | MasterCopyChangeThreatAnalysisResult
+  | MaliciousOrModerateThreatAnalysisResult
+  | AnalysisResult<ThreatStatus.NO_THREAT>
+  | AnalysisResult<ThreatStatus.FAILED>
+  | AnalysisResult<ThreatStatus.OWNERSHIP_CHANGE>
+  | AnalysisResult<ThreatStatus.MODULE_CHANGE>
+  | AnalysisResult<ThreatStatus.UNOFFICIAL_FALLBACK_HANDLER>
+
 export type AddressAnalysisResults = {
   [_group in StatusGroup]?: (
     | AnalysisResult<RecipientStatus | BridgeStatus | ContractStatus | ThreatStatus>
@@ -111,7 +120,7 @@ export type AddressAnalysisResults = {
 
 export type RecipientAnalysisResults = { [address: string]: AddressAnalysisResults }
 export type ContractAnalysisResults = { [address: string]: AddressAnalysisResults }
-export type ThreatAnalysisResult = { [address: string]: AddressAnalysisResults }
+export type ThreatAnalysisResults = { [address: string]: AddressAnalysisResults }
 
 export type LiveThreatAnalysisResult = {
   THREAT: [AnalysisResult<ThreatStatus>]

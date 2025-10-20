@@ -4,7 +4,7 @@ import SafeShieldLogo from '@/public/images/safe-shield/safe-shield-logo-no-text
 import type {
   ContractAnalysisResults,
   RecipientAnalysisResults,
-  ThreatAnalysisResult,
+  ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
@@ -17,7 +17,7 @@ export const SafeShieldHeader = ({
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
-  threat?: AsyncResult<ThreatAnalysisResult>
+  threat?: AsyncResult<ThreatAnalysisResults>
 }): ReactElement => {
   const [recipientResults = {}, recipientError, recipientLoading = false] = recipient
   const [contractResults = {}, contractError, contractLoading = false] = contract
