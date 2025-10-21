@@ -4,6 +4,7 @@ import { StakingDeposit } from './Deposit'
 import {
   NativeStakingDepositTransactionInfo,
   MultisigExecutionDetails,
+  Operation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 const mockTxInfo: NativeStakingDepositTransactionInfo = {
@@ -58,7 +59,7 @@ const mockTxData = {
     name: 'Staking Contract',
     logoUri: null,
   },
-  operation: 0,
+  operation: 0 as Operation,
 }
 
 const mockProps = {

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Container } from '@/src/components/Container'
-import { View, YStack, Text } from 'tamagui'
+import { YStack, Text, XStack } from 'tamagui'
 import { HistoryTransactionHeader } from '@/src/features/HistoryTransactionDetails/components/HistoryTransactionHeader'
 import { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { NormalizedSettingsChangeTransaction } from '@/src/features/ConfirmTx/components/ConfirmationView/types'
@@ -25,24 +25,22 @@ export function HistoryAddSigner({ txId, txInfo, executionInfo }: HistoryAddSign
         transactionType="Add signer"
       />
 
-      <View>
-        <YStack gap="$4" marginTop="$8">
-          <Container padding="$4" gap="$4" borderRadius="$3">
-            <View alignItems="center" flexDirection="row" justifyContent="space-between">
-              <Text color="$textSecondaryLight">New signer</Text>
-              <View flexDirection="row" alignItems="center" gap="$2">
-                <HashDisplay value={txInfo.settingsInfo?.owner?.value} />
-              </View>
-            </View>
+      <YStack gap="$4" marginTop="$8">
+        <Container padding="$4" gap="$4" borderRadius="$3">
+          <XStack alignItems="center" justifyContent="space-between">
+            <Text color="$textSecondaryLight">New signer</Text>
+            <XStack alignItems="center" gap="$2">
+              <HashDisplay value={txInfo.settingsInfo?.owner?.value} />
+            </XStack>
+          </XStack>
 
-            <ThresholdChangeDisplay txInfo={txInfo} executionInfo={executionInfo} />
+          <ThresholdChangeDisplay txInfo={txInfo} executionInfo={executionInfo} />
 
-            <NetworkDisplay />
+          <NetworkDisplay />
 
-            <HistoryAdvancedDetailsButton txId={txId} />
-          </Container>
-        </YStack>
-      </View>
+          <HistoryAdvancedDetailsButton txId={txId} />
+        </Container>
+      </YStack>
     </>
   )
 }

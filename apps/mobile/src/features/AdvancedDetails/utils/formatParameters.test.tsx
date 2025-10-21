@@ -1,4 +1,4 @@
-import { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { Operation, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatParameters } from './formatParameters'
 
 // Mock dependencies with minimal implementation
@@ -56,7 +56,7 @@ describe('formatParameters', () => {
       },
       hexData: null,
       value: null,
-      operation: 0,
+      operation: 0 as Operation,
     }
 
     const result = formatParameters({ txData })
@@ -77,7 +77,7 @@ describe('formatParameters', () => {
       },
       hexData: null,
       value: null,
-      operation: 0,
+      operation: 0 as Operation,
     })
 
     isArrayParameter.mockImplementation(() => false)
@@ -97,7 +97,7 @@ describe('formatParameters', () => {
       },
       hexData: null,
       value: null,
-      operation: 0,
+      operation: 0 as Operation,
     }
 
     isArrayParameter.mockImplementation((type: string) => type.endsWith('[]'))
@@ -117,7 +117,7 @@ describe('formatParameters', () => {
       },
       hexData: '0x1234567890abcdef1234567890abcdef',
       value: null,
-      operation: 0,
+      operation: 0 as Operation,
     }
 
     const result = formatParameters({ txData })
@@ -131,7 +131,7 @@ describe('formatParameters', () => {
       dataDecoded: null,
       hexData: '0x1234',
       value: null,
-      operation: 0,
+      operation: 0 as Operation,
     }
 
     const result = formatParameters({ txData })
@@ -153,7 +153,7 @@ describe('formatParameters', () => {
       },
       hexData: '0xabcdef',
       value: null,
-      operation: 0,
+      operation: 0 as Operation,
     })
 
     isArrayParameter.mockImplementation((type: string) => type.endsWith('[]'))

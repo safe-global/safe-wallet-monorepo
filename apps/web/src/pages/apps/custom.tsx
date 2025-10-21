@@ -7,7 +7,7 @@ import SafeAppsHeader from '@/components/safe-apps/SafeAppsHeader'
 import SafeAppList from '@/components/safe-apps/SafeAppList'
 import SafeAppsSDKLink from '@/components/safe-apps/SafeAppsSDKLink'
 import { RemoveCustomAppModal } from '@/components/safe-apps/RemoveCustomAppModal'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { SAFE_APPS_LABELS } from '@/services/analytics'
 import { BRAND_NAME } from '@/config/constants'
 

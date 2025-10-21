@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { rankSafeApps } from '@/services/safe-apps/track-app-usage-count'
 
 // number of ranked Safe Apps that we want to display

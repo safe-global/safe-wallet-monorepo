@@ -46,17 +46,19 @@ export function HistoryContract({ txId, txInfo }: HistoryContractProps) {
 
       <Container padding="$4" gap="$4" borderRadius="$3">
         {/* Method Call Badge */}
-        <View alignItems="center" flexDirection="row" justifyContent="space-between">
-          <Text color="$textSecondaryLight">Call</Text>
-          <Badge
-            circleProps={methodBadgeProps}
-            themeName="badge_background"
-            fontSize={13}
-            textContentProps={{ fontFamily: 'DM Mono' }}
-            circular={false}
-            content={txInfo.methodName ?? ''}
-          />
-        </View>
+        {txInfo.methodName && (
+          <View alignItems="center" flexDirection="row" justifyContent="space-between">
+            <Text color="$textSecondaryLight">Call</Text>
+            <Badge
+              circleProps={methodBadgeProps}
+              themeName="badge_background"
+              fontSize={13}
+              textContentProps={{ fontFamily: 'DM Mono' }}
+              circular={false}
+              content={txInfo.methodName}
+            />
+          </View>
+        )}
 
         {/* Contract Information */}
         <View alignItems="center" flexDirection="row" justifyContent="space-between">

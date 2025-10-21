@@ -10,6 +10,7 @@ import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { TxModalContext } from '@/components/tx-flow'
 import BatchSidebar from '@/components/batch/BatchSidebar'
 import Breadcrumbs from '@/components/common/Breadcrumbs'
+import { AppRoutes } from '@/config/routes'
 
 const PageLayout = ({ pathname, children }: { pathname: string; children: ReactElement }): ReactElement => {
   const [isSidebarRoute, isAnimated] = useIsSidebarRoute(pathname)
@@ -19,6 +20,9 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
   // Hide sidebar when transaction flow is open
   const isSidebarVisible = isSidebarOpen && !txFlow
+  const isSafeLabsTermsPage = pathname === AppRoutes.safeLabsTerms
+  const isWelcomePage = pathname === AppRoutes.welcome.index
+  const hideHeader = isSafeLabsTermsPage || isWelcomePage
 
   useEffect(() => {
     setFullWidth(!isSidebarVisible)
@@ -26,9 +30,11 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
   return (
     <>
-      <header className={css.header}>
-        <Header onMenuToggle={isSidebarRoute ? setSidebarOpen : undefined} onBatchToggle={setBatchOpen} />
-      </header>
+      {!hideHeader && (
+        <header className={css.header}>
+          <Header onMenuToggle={isSidebarRoute ? setSidebarOpen : undefined} onBatchToggle={setBatchOpen} />
+        </header>
+      )}
 
       {isSidebarRoute ? <SideDrawer isOpen={isSidebarVisible} onToggle={setSidebarOpen} /> : null}
 
@@ -36,18 +42,19 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
         className={classnames(css.main, {
           [css.mainNoSidebar]: !isSidebarVisible || !isSidebarRoute,
           [css.mainAnimated]: isSidebarRoute && isAnimated,
+          [css.mainNoHeader]: hideHeader,
         })}
       >
         <div className={css.content}>
           <SafeLoadingError>
-            <Breadcrumbs />
+            {!hideHeader && <Breadcrumbs />}
             {children}
           </SafeLoadingError>
         </div>
 
         <BatchSidebar isOpen={isBatchOpen} onToggle={setBatchOpen} />
 
-        <Footer />
+        {!isSafeLabsTermsPage && <Footer />}
       </div>
     </>
   )

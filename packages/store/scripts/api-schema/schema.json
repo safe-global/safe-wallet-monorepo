@@ -5235,7 +5235,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "",
+    "version": "main",
     "contact": {}
   },
   "tags": [],
@@ -6636,6 +6636,11 @@
         },
         "required": ["data"]
       },
+      "Operation": {
+        "type": "number",
+        "enum": [0, 1],
+        "description": "Operation type: 0 for CALL, 1 for DELEGATE"
+      },
       "BaseDataDecoded": {
         "type": "object",
         "properties": {
@@ -6655,8 +6660,12 @@
         "type": "object",
         "properties": {
           "operation": {
-            "type": "number",
-            "enum": [0, 1]
+            "description": "Operation type: 0 for CALL, 1 for DELEGATE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Operation"
+              }
+            ]
           },
           "value": {
             "type": "string"
@@ -6860,7 +6869,12 @@
             "nullable": true
           },
           "operation": {
-            "type": "number"
+            "description": "Operation type: 0 for CALL, 1 for DELEGATE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Operation"
+              }
+            ]
           }
         },
         "required": ["to", "value", "operation"]
@@ -9885,7 +9899,12 @@
             "nullable": true
           },
           "operation": {
-            "type": "number"
+            "description": "Operation type: 0 for CALL, 1 for DELEGATE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Operation"
+              }
+            ]
           },
           "trustedDelegateCallTarget": {
             "type": "boolean",
@@ -10199,7 +10218,12 @@
             "type": "object"
           },
           "operation": {
-            "type": "number"
+            "description": "Operation type: 0 for CALL, 1 for DELEGATE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Operation"
+              }
+            ]
           },
           "gasToken": {
             "type": "object"
@@ -10626,7 +10650,12 @@
             "type": "string"
           },
           "operation": {
-            "type": "number"
+            "description": "Operation type: 0 for CALL, 1 for DELEGATE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Operation"
+              }
+            ]
           }
         },
         "required": ["to", "value", "operation"]
@@ -10836,7 +10865,12 @@
             "type": "string"
           },
           "operation": {
-            "type": "number"
+            "description": "Operation type: 0 for CALL, 1 for DELEGATE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Operation"
+              }
+            ]
           },
           "safeTxGas": {
             "type": "string"

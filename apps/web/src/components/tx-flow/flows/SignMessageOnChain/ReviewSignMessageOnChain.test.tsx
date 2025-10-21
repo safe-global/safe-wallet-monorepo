@@ -63,6 +63,7 @@ describe('ReviewSignMessageOnChain', () => {
                 accessControl: {
                   type: SafeAppAccessPolicyTypes.NoRestrictions,
                 },
+                featured: false,
               }}
               requestId="73"
               message={{

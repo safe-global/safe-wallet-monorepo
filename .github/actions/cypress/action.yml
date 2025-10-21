@@ -57,6 +57,7 @@ runs:
         wait-on-timeout: 120
         working-directory: apps/web
       env:
+        NODE_ENV: cypress
         CYPRESS_RECORD_KEY: ${{ inputs.record_key || fromJSON(inputs.secrets).CYPRESS_RECORD_KEY }}
         GITHUB_TOKEN: ${{ fromJSON(inputs.secrets).GITHUB_TOKEN }}
         CYPRESS_PROJECT_ID: ${{ inputs.project_id }}

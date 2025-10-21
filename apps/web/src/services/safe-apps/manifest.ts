@@ -121,6 +121,7 @@ const fetchSafeAppFromManifest = async (
     chainIds: [currentChainId],
     iconUrl,
     safeAppsPermissions: appManifest.safe_apps_permissions || [],
+    featured: false,
   }
 }
 

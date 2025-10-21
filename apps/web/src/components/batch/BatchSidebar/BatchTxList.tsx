@@ -6,7 +6,8 @@ import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { type TransactionPreview, type InternalTransaction, Operation } from '@safe-global/safe-gateway-typescript-sdk'
+import { type TransactionPreview, type InternalTransaction } from '@safe-global/safe-gateway-typescript-sdk'
+import { Operation } from '@safe-global/store/gateway/types'
 import { type SafeTransaction } from '@safe-global/types-kit'
 
 const extractMultiSendActions = (txPreview: TransactionPreview | undefined): InternalTransaction[] => {

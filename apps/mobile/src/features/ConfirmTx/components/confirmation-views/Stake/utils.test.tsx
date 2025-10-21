@@ -4,6 +4,7 @@ import { formatStakingDepositItems, formatStakingValidatorItems, formatStakingWi
 import {
   NativeStakingDepositTransactionInfo,
   NativeStakingValidatorsExitTransactionInfo,
+  Operation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 
@@ -74,7 +75,7 @@ describe('Staking Utils', () => {
           name: null,
           logoUri: null,
         },
-        operation: 0,
+        operation: 0 as Operation,
       }
 
       const items = formatStakingDepositItems(mockDepositTxInfo, minimalTxData)
@@ -105,7 +106,7 @@ describe('Staking Utils', () => {
           name: 'Staking Contract',
           logoUri: null,
         },
-        operation: 0,
+        operation: 0 as Operation,
       }
 
       const items = formatStakingDepositItems(mockDepositTxInfo, mockTxData)
@@ -128,7 +129,7 @@ describe('Staking Utils', () => {
           name: null,
           logoUri: null,
         },
-        operation: 0,
+        operation: 0 as Operation,
       }
 
       const items = formatStakingDepositItems(mockDepositTxInfo, basicTxData)
@@ -176,7 +177,7 @@ describe('Staking Utils', () => {
           name: 'Staking Contract',
           logoUri: null,
         },
-        operation: 0,
+        operation: 0 as Operation,
       }
 
       const items = formatStakingWithdrawRequestItems(mockWithdrawRequestTxInfo, mockTxData)
@@ -214,7 +215,7 @@ describe('Staking Utils', () => {
           name: 'Staking Contract',
           logoUri: null,
         },
-        operation: 0,
+        operation: 0 as Operation,
       }
 
       const multiValidatorInfo = {
@@ -242,7 +243,7 @@ describe('Staking Utils', () => {
           name: 'Staking Contract',
           logoUri: null,
         },
-        operation: 0,
+        operation: 0 as Operation,
       }
 
       const singleValidatorInfo = {
@@ -270,7 +271,7 @@ describe('Staking Utils', () => {
           name: 'Staking Contract',
           logoUri: null,
         },
-        operation: 0,
+        operation: 0 as Operation,
       }
 
       const items = formatStakingWithdrawRequestItems(mockWithdrawRequestTxInfo, mockTxData)

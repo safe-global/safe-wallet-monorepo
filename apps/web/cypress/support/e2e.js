@@ -76,10 +76,12 @@ beforeEach(() => {
     const beamerKey1 = `_BEAMER_FIRST_VISIT_${productID}`
     const beamerKey2 = `_BEAMER_BOOSTED_ANNOUNCEMENT_DATE_${productID}`
     const cookiesKey = 'SAFE_v2__cookies_terms'
+    const safeLabsTermsKey = 'SAFE_v2__safe-labs-terms'
     const outreachWindowKey = 'SAFE_v2__outreachPopup_session_v2'
     window.localStorage.setItem(beamerKey1, getDate())
     window.localStorage.setItem(beamerKey2, getDate())
     window.localStorage.setItem(cookiesKey, ls.cookies.acceptedCookies)
+    window.localStorage.setItem(safeLabsTermsKey, ls.safeLabsTerms.acceptedTerms)
     window.localStorage.setItem(
       constants.localStorageKeys.SAFE_v2__SafeApps__infoModal,
       ls.appPermissions(constants.safeTestAppurl).infoModalAccepted,

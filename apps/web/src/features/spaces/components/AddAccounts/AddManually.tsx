@@ -7,7 +7,7 @@ import css from './styles.module.css'
 import useChains from '@/hooks/useChains'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Button, DialogActions, DialogContent, MenuItem, Select, Stack, Box } from '@mui/material'
-import { getSafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import React, { useCallback, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -21,6 +21,7 @@ export type AddManuallyFormValues = {
 const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormValues) => void }) => {
   const [addManuallyOpen, setAddManuallyOpen] = useState(false)
   const { configs } = useChains()
+  const [triggerGetSafe] = useLazySafesGetSafeV1Query()
 
   const formMethods = useForm<AddManuallyFormValues>({
     mode: 'onChange',
@@ -48,7 +49,10 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
 
   const validateSafeAddress = async (address: string) => {
     try {
-      await getSafeInfo(chainId, address)
+      const result = await triggerGetSafe({ chainId, safeAddress: address }).unwrap()
+      if (!result) {
+        return 'Address given is not a valid Safe Account address'
+      }
     } catch (error) {
       return 'Address given is not a valid Safe Account address'
     }

@@ -15,6 +15,7 @@
 .headerInner {
   display: flex;
   justify-content: space-between;
+  word-break: break-all;
   align-items: center;
   padding: var(--space-3);
   border-bottom: 1px solid var(--color-border-light);
