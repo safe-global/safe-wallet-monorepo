@@ -52,7 +52,6 @@ import { useDatadog } from '@/services/datadog'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
-import useClearBatchOnSuccess from '@/hooks/useClearBatchOnSuccess'
 
 const reduxStore = makeStore()
 setStoreInstance(reduxStore)
@@ -81,7 +80,6 @@ const InitApp = (): null => {
   useBeamer()
   useVisitedSafes()
   useSafeLabsTerms() // Automatically disconnect wallets if terms not accepted and feature is enabled
-  useClearBatchOnSuccess()
 
   return null
 }

@@ -14,9 +14,15 @@ export type DraftBatchItem = {
   txData: CallOnlyTxData
 }
 
+export type SafeBatchState = {
+  items: DraftBatchItem[]
+  // Flag indicating the batch is being confirmed and should not be shown in UI
+  isConfirming: boolean
+}
+
 export type BatchTxsState = {
   [chainId: string]: {
-    [safeAddress: string]: DraftBatchItem[]
+    [safeAddress: string]: SafeBatchState
   }
 }
 
@@ -37,15 +43,15 @@ export const batchSlice = createSlice({
     ) => {
       const { chainId, safeAddress, txData } = action.payload
       state[chainId] = state[chainId] || {}
-      state[chainId][safeAddress] = state[chainId][safeAddress] || []
-      state[chainId][safeAddress].push({
+      state[chainId][safeAddress] = state[chainId][safeAddress] || { items: [], isConfirming: false }
+      state[chainId][safeAddress].items.push({
         id: Math.random().toString(36).slice(2),
         timestamp: Date.now(),
         txData,
       })
     },
 
-    // Remove a tx to the batch by txId
+    // Remove a tx from the batch by id
     removeTx: (
       state,
       action: PayloadAction<{
@@ -56,13 +62,46 @@ export const batchSlice = createSlice({
     ) => {
       const { chainId, safeAddress, id } = action.payload
       state[chainId] = state[chainId] || {}
-      state[chainId][safeAddress] = state[chainId][safeAddress] || []
-      state[chainId][safeAddress] = state[chainId][safeAddress].filter((item) => item.id !== id)
+      const batchState = state[chainId][safeAddress]
+      if (batchState) {
+        batchState.items = batchState.items.filter((item) => item.id !== id)
+      }
+    },
+
+    // Mark the batch as being confirmed (hide from UI but don't delete yet)
+    setBatchConfirming: (
+      state,
+      action: PayloadAction<{
+        chainId: string
+        safeAddress: string
+        isConfirming: boolean
+      }>,
+    ) => {
+      const { chainId, safeAddress, isConfirming } = action.payload
+      state[chainId] = state[chainId] || {}
+      const batchState = state[chainId][safeAddress]
+      if (batchState) {
+        batchState.isConfirming = isConfirming
+      }
+    },
+
+    // Clear the entire batch (used after successful confirmation)
+    clearBatch: (
+      state,
+      action: PayloadAction<{
+        chainId: string
+        safeAddress: string
+      }>,
+    ) => {
+      const { chainId, safeAddress } = action.payload
+      if (state[chainId]?.[safeAddress]) {
+        state[chainId][safeAddress] = { items: [], isConfirming: false }
+      }
     },
   },
 })
 
-export const { addTx, removeTx } = batchSlice.actions
+export const { addTx, removeTx, setBatchConfirming, clearBatch } = batchSlice.actions
 
 const selectAllBatches = (state: RootState): BatchTxsState => {
   return state[batchSlice.name] || initialState
@@ -71,6 +110,11 @@ const selectAllBatches = (state: RootState): BatchTxsState => {
 export const selectBatchBySafe = createSelector(
   [selectAllBatches, selectChainIdAndSafeAddress],
   (allBatches, [chainId, safeAddress]): DraftBatchItem[] => {
-    return allBatches[chainId]?.[safeAddress] || []
+    const batchState = allBatches[chainId]?.[safeAddress]
+    // Don't return items if the batch is being confirmed
+    if (batchState?.isConfirming) {
+      return []
+    }
+    return batchState?.items || []
   },
 )

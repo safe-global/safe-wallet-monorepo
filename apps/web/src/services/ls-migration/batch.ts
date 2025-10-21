@@ -6,7 +6,19 @@ export const migrateBatchTxs = (batchSliceState: BatchTxsState) => {
   Object.keys(batchSliceState).forEach((chainId) => {
     if (!batchSliceState[chainId]) return
     Object.keys(batchSliceState[chainId]).forEach((safeAddress) => {
-      batchSliceState[chainId][safeAddress].forEach((batch) => {
+      const batchState = batchSliceState[chainId][safeAddress]
+
+      // Migrate old array format to new SafeBatchState format
+      if (Array.isArray(batchState)) {
+        batchSliceState[chainId][safeAddress] = {
+          items: batchState,
+          isConfirming: false,
+        }
+      }
+
+      // Migrate txDetails to txData in items
+      const items = batchSliceState[chainId][safeAddress].items
+      items.forEach((batch) => {
         if (batch.txDetails && batch.txDetails.txData && !batch.txData) {
           batch.txData = {
             to: batch.txDetails.txData.to.value,

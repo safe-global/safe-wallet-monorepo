@@ -297,18 +297,21 @@ describe('Local storage migration', () => {
     it('should migrate state with new txData', () => {
       const oldStorage: BatchTxsState = {
         '1': {
-          '0x1F2504De05f5167650bE5B28c472601Be434b60A': [
-            {
-              id: '123',
-              timestamp: Date.now(),
-              txData: {
+          '0x1F2504De05f5167650bE5B28c472601Be434b60A': {
+            items: [
+              {
+                id: '123',
+                timestamp: Date.now(),
+                txData: {
                 to: '0x1F2504De05f5167650bE5B28c472601Be434b60A',
                 value: '0',
                 data: '0x',
                 operation: OperationType.Call,
               },
             },
-          ],
+            ],
+            isConfirming: false,
+          },
         },
       }
 
