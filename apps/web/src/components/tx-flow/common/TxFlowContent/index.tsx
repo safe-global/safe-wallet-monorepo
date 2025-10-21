@@ -7,7 +7,6 @@ import classnames from 'classnames'
 import { ProgressBar } from '@/components/common/ProgressBar'
 import css from './styles.module.css'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import SecurityWarnings from '@/components/tx/security/SecurityWarnings'
 import TxStatusWidget from '@/components/tx-flow/common/TxStatusWidget'
 import SafeShieldWidget from '@/features/safe-shield'
 import { TxLayoutHeader } from '../TxLayout'
@@ -123,7 +122,6 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
 
                 <Box className={css.sticky}>
                   <SafeShieldWidget />
-                  <SecurityWarnings />
                 </Box>
               </Grid>
             )}
