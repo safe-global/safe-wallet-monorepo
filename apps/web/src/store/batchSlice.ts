@@ -44,7 +44,16 @@ export const batchSlice = createSlice({
       const { chainId, safeAddress, txData } = action.payload
       state[chainId] = state[chainId] || {}
       state[chainId][safeAddress] = state[chainId][safeAddress] || { items: [], isConfirming: false }
-      state[chainId][safeAddress].items.push({
+
+      const batchState = state[chainId][safeAddress]
+
+      // If batch is being confirmed, clear it and start fresh
+      if (batchState.isConfirming) {
+        batchState.items = []
+        batchState.isConfirming = false
+      }
+
+      batchState.items.push({
         id: Math.random().toString(36).slice(2),
         timestamp: Date.now(),
         txData,
