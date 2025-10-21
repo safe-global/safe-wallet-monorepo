@@ -1,7 +1,9 @@
 import { AppRoutes } from '@/config/routes'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { getStoreInstance } from '@/store'
 
 export const FeatureRoutes = {
   [AppRoutes.apps.index]: FEATURES.SAFE_APPS,
@@ -24,4 +26,23 @@ export const isRouteEnabled = (route: string, chain?: Chain) => {
   if (!chain) return false
   const featureRoute = FeatureRoutes[route]
   return !featureRoute || hasFeature(chain, featureRoute)
+}
+
+/**
+ * Fetches chain configuration using RTK Query
+ * @param chainId - The chain ID to fetch configuration for
+ * @returns Promise that resolves to the Chain configuration
+ * @throws Error if the chain configuration cannot be fetched
+ */
+export const getChainConfig = async (chainId: string): Promise<Chain> => {
+  const store = getStoreInstance()
+
+  const queryThunk = cgwApi.endpoints.chainsGetChainV1.initiate({ chainId })
+  const queryAction = store.dispatch(queryThunk)
+
+  try {
+    return await queryAction.unwrap()
+  } finally {
+    queryAction.unsubscribe()
+  }
 }
