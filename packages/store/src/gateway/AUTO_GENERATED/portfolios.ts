@@ -66,12 +66,12 @@ export type TokenBalance = {
   tokenInfo: TokenBalanceTokenInfo
   /** Token balance (as string to avoid precision loss) */
   balance: string
-  /** Balance in requested fiat currency (decimal string) */
-  balanceFiat?: string | null
-  /** Token price in requested fiat currency (decimal string) */
-  price?: string | null
-  /** Price change percentage in the last 24 hours (decimal string) */
-  priceChangePercentage1d?: string | null
+  /** Balance in requested fiat currency */
+  balanceFiat?: number | null
+  /** Token price in requested fiat currency */
+  price?: number | null
+  /** Price change as decimal (e.g., -0.0431 for -4.31%) */
+  priceChangePercentage1d?: number | null
 }
 export type AppBalanceAppInfo = {
   /** Application name */
@@ -106,26 +106,26 @@ export type AppPosition = {
   tokenInfo: AppPositionTokenInfo
   /** Position balance */
   balance: string
-  /** Balance in requested fiat currency (decimal string) */
-  balanceFiat?: string | null
-  /** Price change percentage in the last 24 hours (decimal string) */
-  priceChangePercentage1d?: string | null
+  /** Balance in requested fiat currency */
+  balanceFiat?: number | null
+  /** Price change as decimal (e.g., -0.0431 for -4.31%) */
+  priceChangePercentage1d?: number | null
 }
 export type AppBalance = {
   /** Application information */
   appInfo: AppBalanceAppInfo
-  /** Total balance in fiat currency across all positions (decimal string) */
-  balanceFiat?: string | null
+  /** Total balance in fiat currency across all positions */
+  balanceFiat?: number | null
   /** List of positions in this app */
   positions: AppPosition[]
 }
 export type Portfolio = {
   /** Total balance in fiat currency across all tokens and positions */
-  totalBalanceFiat: string
+  totalBalanceFiat: number
   /** Total balance in fiat currency for all token holdings */
-  totalTokenBalanceFiat: string
+  totalTokenBalanceFiat: number
   /** Total balance in fiat currency for all app positions */
-  totalPositionsBalanceFiat: string
+  totalPositionsBalanceFiat: number
   /** List of token balances */
   tokenBalances: TokenBalance[]
   /** List of app balances */
