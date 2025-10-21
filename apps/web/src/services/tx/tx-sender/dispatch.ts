@@ -8,7 +8,13 @@ import { getStoreInstance } from '@/store'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
-import type { SafeSignature, SafeTransaction, TransactionOptions, TransactionResult } from '@safe-global/types-kit'
+import type {
+  SafeSignature,
+  SafeTransaction,
+  Transaction,
+  TransactionOptions,
+  TransactionResult,
+} from '@safe-global/types-kit'
 import { didRevert } from '@/utils/ethers-utils'
 import { type SpendingLimitTxParams } from '@/components/tx-flow/flows/TokenTransfer/ReviewSpendingLimitTx'
 import { getSpendingLimitContract } from '@/services/contracts/spendingLimitContracts'
@@ -382,7 +388,7 @@ export const dispatchBatchExecution = async (
  * Execute a module transaction
  */
 export const dispatchModuleTxExecution = async (
-  tx: ModuleTransaction,
+  tx: Transaction,
   provider: Eip1193Provider,
   safeAddress: string,
 ): Promise<string> => {

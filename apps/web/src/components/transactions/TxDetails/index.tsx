@@ -34,7 +34,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsPending from '@/hooks/useIsPending'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
 import { useHasFeature } from '@/hooks/useChains'
-import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
+import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { TxNote } from '@/features/tx-notes'
@@ -210,8 +210,8 @@ const TxDetails = ({
     isLoading: loading,
     refetch,
     isUninitialized,
-  } = useGetTransactionDetailsQuery(
-    { chainId, txId: txSummary.id },
+  } = useTransactionsGetTransactionByIdV1Query(
+    { chainId: chainId || '', id: txSummary.id || '' },
     {
       pollingInterval: isOpenSwapOrder(txSummary.txInfo) ? POLLING_INTERVAL : undefined,
       skipPollingIfUnfocused: true,

@@ -30,7 +30,7 @@ import {
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { BlockaidBalanceChanges } from '../security/blockaid/BlockaidBalanceChange'
 import { Blockaid } from '../security/blockaid'
-import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
+import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ConfirmationView from '../confirmation-views'
@@ -76,7 +76,7 @@ export const SignOrExecuteForm = ({
   const isCorrectNonce = useValidateNonce(safeTx)
   const isBatchable = props.isBatchable !== false && safeTx && !isDelegateCall(safeTx)
 
-  const [trigger] = useLazyGetTransactionDetailsQuery()
+  const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
   const { safe } = useSafeInfo()
@@ -105,7 +105,7 @@ export const SignOrExecuteForm = ({
     async (txId: string, isExecuted = false, isRoleExecution = false, isProposerCreation = false) => {
       onSubmit?.(txId, isExecuted)
 
-      const { data: details } = await trigger({ chainId, txId })
+      const { data: details } = await trigger({ chainId, id: txId })
       // Track tx event
       trackTxEvents(
         details,
@@ -221,8 +221,8 @@ export const SignOrExecuteForm = ({
             isProposing
               ? ConfirmationTitleTypes.propose
               : willExecute
-                ? ConfirmationTitleTypes.execute
-                : ConfirmationTitleTypes.sign
+              ? ConfirmationTitleTypes.execute
+              : ConfirmationTitleTypes.sign
           }
           isCreation={isCreation}
         />

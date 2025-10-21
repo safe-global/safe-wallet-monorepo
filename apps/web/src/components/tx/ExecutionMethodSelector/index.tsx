@@ -1,4 +1,4 @@
-import type { Relay } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
+import type { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import { Box, FormControl, FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
 
 import type { Dispatch, SetStateAction, ReactElement, ChangeEvent } from 'react'
@@ -32,7 +32,7 @@ const _ExecutionMethodSelector = ({
   chain?: Chain
   executionMethod: ExecutionMethod
   setExecutionMethod: Dispatch<SetStateAction<ExecutionMethod>>
-  relays?: Relay
+  relays?: RelaysRemaining
   noLabel?: boolean
   tooltip?: string
 }): ReactElement | null => {

@@ -1,8 +1,7 @@
-import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { AllOwnedSafes } from '@safe-global/store/gateway/types'
 import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react'
 
-import { getAllOwnedSafes, getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import { getAllOwnedSafes } from '@safe-global/safe-gateway-typescript-sdk'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { safeOverviewEndpoints } from './safeOverviews'
 import { createSubmission, getSafe, getSafesByOwner, getSubmission } from '@safe-global/safe-client-gateway-sdk'
@@ -24,16 +23,6 @@ export const gatewayApi = createApi({
   baseQuery: fakeBaseQuery<Error>(),
   tagTypes: ['OwnedSafes', 'Submissions'],
   endpoints: (builder) => ({
-    getTransactionDetails: builder.query<TransactionDetails, { chainId: string; txId: string }>({
-      queryFn({ chainId, txId }) {
-        return buildQueryFn(() => getTransactionDetails(chainId, txId))
-      },
-    }),
-    getMultipleTransactionDetails: builder.query<TransactionDetails[], { chainId: string; txIds: string[] }>({
-      queryFn({ chainId, txIds }) {
-        return buildQueryFn(() => Promise.all(txIds.map((txId) => getTransactionDetails(chainId, txId))))
-      },
-    }),
     getSafe: builder.query<getSafe, { chainId: string; safeAddress: string }>({
       queryFn({ chainId, safeAddress }) {
         return buildQueryFn(() => getSafe({ params: { path: { chainId, safeAddress } } }))
@@ -84,9 +73,6 @@ export const gatewayApi = createApi({
 })
 
 export const {
-  useGetTransactionDetailsQuery,
-  useGetMultipleTransactionDetailsQuery,
-  useLazyGetTransactionDetailsQuery,
   useGetSubmissionQuery,
   useCreateSubmissionMutation,
   useGetSafeQuery,

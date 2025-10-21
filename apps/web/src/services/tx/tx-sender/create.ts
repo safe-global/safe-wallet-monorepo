@@ -2,7 +2,7 @@ import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERAT
 import { getReadOnlyGnosisSafeContract } from '@/services/contracts/safeContracts'
 import { SENTINEL_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import { getTransactionDetails } from '@/utils/transactions'
 import type { AddOwnerTxParams, RemoveOwnerTxParams, SwapOwnerTxParams } from '@safe-global/protocol-kit'
 import type { MetaTransactionData, SafeTransaction, SafeTransactionDataPartial } from '@safe-global/types-kit'
 import extractTxInfo from '../extractTxInfo'

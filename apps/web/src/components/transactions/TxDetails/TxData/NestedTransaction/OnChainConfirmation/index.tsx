@@ -2,9 +2,8 @@ import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/
 import useChainId from '@/hooks/useChainId'
 import { Skeleton, Stack } from '@mui/material'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
+import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useMemo } from 'react'
-import { skipToken } from '@reduxjs/toolkit/query'
 import { NestedTransaction } from '../NestedTransaction'
 import TxData from '../..'
 import { TxSimulation, TxSimulationMessage } from '@/components/tx/security/tenderly'
@@ -24,13 +23,9 @@ export const OnChainConfirmation = ({
   const signedHash = useSignedHash(data)
   const safeAddress = useSafeAddress()
 
-  const { data: nestedTxDetails, error: txDetailsError } = useGetTransactionDetailsQuery(
-    signedHash
-      ? {
-          chainId,
-          txId: signedHash,
-        }
-      : skipToken,
+  const { data: nestedTxDetails, error: txDetailsError } = useTransactionsGetTransactionByIdV1Query(
+    { chainId: chainId || '', id: signedHash || '' },
+    { skip: !signedHash || !chainId },
   )
 
   const nestedTx = useMemo<SafeTransaction | undefined>(

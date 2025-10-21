@@ -32,8 +32,6 @@ import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletReject
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { BlockaidBalanceChanges } from '@/components/tx/security/blockaid/BlockaidBalanceChange'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
-import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
-import { skipToken } from '@reduxjs/toolkit/query'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 import Summary from '@/components/transactions/TxDetails/Summary'
 import useGasPrice from '@/hooks/useGasPrice'
@@ -58,8 +56,7 @@ export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlo
   const [gasPrice] = useGasPrice()
   const chain = useCurrentChain()
 
-  const { data: txDetails } = useGetTransactionDetailsQuery(skipToken)
-  const [txPreview] = useTxPreview(safeTx?.data, undefined, txDetails?.txId)
+  const [txPreview] = useTxPreview(safeTx?.data)
 
   // Proposal
   const newThreshold = Number(params[RecoverAccountFlowFields.threshold])
@@ -145,7 +142,7 @@ export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlo
 
         <Divider className={commonCss.nestedDivider} />
 
-        {txPreview && <Summary txDetails={txDetails} safeTxData={safeTx?.data} {...txPreview} />}
+        {txPreview && <Summary safeTxData={safeTx?.data} {...txPreview} />}
 
         <BlockaidBalanceChanges />
       </TxCard>

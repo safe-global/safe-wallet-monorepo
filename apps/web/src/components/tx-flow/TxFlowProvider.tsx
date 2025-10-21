@@ -13,7 +13,7 @@ import {
   useRoles,
 } from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import { SafeTxContext } from '../tx-flow/SafeTxProvider'
-import { useLazyGetTransactionDetailsQuery } from '@/store/slices'
+import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { trackTxEvents } from '../tx/SignOrExecuteForm/tracking'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useChainId from '@/hooks/useChainId'
@@ -159,7 +159,7 @@ const TxFlowProvider = <T extends unknown>({
   const [submitError, setSubmitError] = useState<Error | undefined>(initialContext.submitError)
   const [isRejectedByUser, setIsRejectedByUser] = useState<boolean>(initialContext.isRejectedByUser)
   const [txLayoutProps, setTxLayoutProps] = useState<TxFlowContextType['txLayoutProps']>(defaultTxLayoutProps)
-  const [trigger] = useLazyGetTransactionDetailsQuery()
+  const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const [txDetails, , txDetailsLoading] = useTxDetails(txId)
 
@@ -190,7 +190,7 @@ const TxFlowProvider = <T extends unknown>({
 
   const trackTxEvent = useCallback(
     async (txId: string, isExecuted = false, isRoleExecution = false, isProposerCreation = false) => {
-      const { data: details } = await trigger({ chainId, txId })
+      const { data: details } = await trigger({ chainId, id: txId })
       // Track tx event
       trackTxEvents(
         details,

@@ -13,7 +13,7 @@ import useWallet from './wallets/useWallet'
 import useSafeAddress from './useSafeAddress'
 import { isWalletRejection } from '@/utils/wallets'
 import { getTxLink } from '@/utils/tx-link'
-import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
+import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 
 const TxNotifications = {
@@ -46,7 +46,7 @@ const useTxNotifications = (): void => {
   const dispatch = useAppDispatch()
   const chain = useCurrentChain()
   const safeAddress = useSafeAddress()
-  const [trigger] = useLazyGetTransactionDetailsQuery()
+  const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
 
   /**
    * Show notifications of a transaction's lifecycle
@@ -71,7 +71,7 @@ const useTxNotifications = (): void => {
         const id = txId || txHash
         if (id) {
           try {
-            const { data: txDetails } = await trigger({ chainId: chain.chainId, txId: id })
+            const { data: txDetails } = await trigger({ chainId: chain.chainId, id })
             humanDescription = txDetails?.txInfo.humanDescription || humanDescription
           } catch {}
         }
@@ -86,8 +86,8 @@ const useTxNotifications = (): void => {
             link: txId
               ? getTxLink(txId, chain, safeAddress)
               : txHash
-                ? getExplorerLink(txHash, chain.blockExplorerUriTemplate)
-                : undefined,
+              ? getExplorerLink(txHash, chain.blockExplorerUriTemplate)
+              : undefined,
           }),
         )
       }),

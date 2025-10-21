@@ -1,9 +1,7 @@
-import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { act, renderHook } from '@/tests/test-utils'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import { useTxTracking } from '../useTxTracking'
 import { trackEvent, WALLET_EVENTS } from '@/services/analytics'
-import { getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { faker } from '@faker-js/faker'
 
 jest.mock('@/services/analytics', () => ({
@@ -11,17 +9,7 @@ jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
 
-jest.mock('@safe-global/safe-gateway-typescript-sdk', () => ({
-  ...jest.requireActual('@safe-global/safe-gateway-typescript-sdk'),
-  getTransactionDetails: jest.fn(),
-}))
-
 describe('useTxTracking', () => {
-  beforeEach(() => {
-    ;(getTransactionDetails as jest.Mock).mockResolvedValue({
-      safeAppInfo: { url: 'google.com' },
-    } as unknown as TransactionDetails)
-  })
   it('should track the ONCHAIN_INTERACTION event', async () => {
     renderHook(() => useTxTracking())
 

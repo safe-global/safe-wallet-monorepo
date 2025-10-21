@@ -2,7 +2,6 @@ import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERAT
 import { setSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import type Safe from '@safe-global/protocol-kit'
 import type { MultiSendCallOnlyContractImplementationType } from '@safe-global/protocol-kit'
-import { getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import extractTxInfo from '../../extractTxInfo'
 import proposeTx from '../../proposeTransaction'
 import * as txEvents from '../../txEvents'
@@ -36,10 +35,9 @@ import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
 
 const SIGNER_ADDRESS = '0x1234567890123456789012345678901234567890'
 const TX_HASH = '0x1234567890'
-// Mock getTransactionDetails
+
 jest.mock('@safe-global/safe-gateway-typescript-sdk', () => ({
   ...jest.requireActual('@safe-global/safe-gateway-typescript-sdk'),
-  getTransactionDetails: jest.fn(),
   postSafeGasEstimation: jest.fn(() => Promise.resolve({ safeTxGas: 60000, recommendedNonce: 17 })),
   Operation: {
     CALL: 0,
@@ -164,7 +162,6 @@ describe('txSender', () => {
     it('should create a tx from an existing proposal', async () => {
       const tx = await createExistingTx('4', '0x345')
 
-      expect(getTransactionDetails).toHaveBeenCalledWith('4', '0x345')
       expect(extractTxInfo).toHaveBeenCalled()
       expect(mockSafeSDK.createTransaction).toHaveBeenCalled()
 

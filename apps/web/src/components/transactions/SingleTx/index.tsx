@@ -17,8 +17,7 @@ import ExpandableTransactionItem, {
 } from '@/components/transactions/TxListItem/ExpandableTransactionItem'
 import GroupLabel from '../GroupLabel'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
-import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
-import { skipToken } from '@reduxjs/toolkit/query/react'
+import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 const SingleTxGrid = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement => {
@@ -45,30 +44,36 @@ const SingleTx = () => {
   const transactionId = Array.isArray(id) ? id[0] : id
   const { safe, safeAddress } = useSafeInfo()
 
-  let {
+  const {
     data: txDetails,
-    error: txDetailsError,
+    error,
     refetch,
     isUninitialized,
-  } = useGetTransactionDetailsQuery(
-    transactionId && safe.chainId
-      ? {
-          chainId: safe.chainId,
-          txId: transactionId,
-        }
-      : skipToken,
+  } = useTransactionsGetTransactionByIdV1Query(
+    {
+      chainId: safe.chainId || '',
+      id: transactionId || '',
+    },
+    {
+      skip: !transactionId || !safe.chainId,
+    },
   )
 
+  let txDetailsError = error ? asError(error) : undefined
+
   useEffect(() => {
-    !isUninitialized && refetch()
-  }, [safe.txHistoryTag, safe.txQueuedTag, safeAddress, refetch, isUninitialized])
+    if (!isUninitialized) {
+      refetch()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [safe.txHistoryTag, safe.txQueuedTag, safeAddress])
 
   if (txDetails && !sameAddress(txDetails.safeAddress, safeAddress)) {
     txDetailsError = new Error('Transaction with this id was not found in this Safe Account')
   }
 
   if (txDetailsError) {
-    return <ErrorMessage error={asError(txDetailsError)}>Failed to load transaction</ErrorMessage>
+    return <ErrorMessage error={txDetailsError}>Failed to load transaction</ErrorMessage>
   }
 
   if (txDetails) {

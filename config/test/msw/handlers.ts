@@ -4,6 +4,7 @@ import { Balances } from '@safe-global/store/src/gateway/AUTO_GENERATED/balances
 import { CollectiblePage } from '@safe-global/store/src/gateway/AUTO_GENERATED/collectibles'
 import type { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import type { MasterCopy } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { defaultMockSafeApps } from './mockSafeApps'
 
 const iso4217Currencies = ['USD', 'EUR', 'GBP']
@@ -288,4 +289,29 @@ export const handlers = (GATEWAY_URL: string) => [
     // Return all apps by default
     return HttpResponse.json(defaultMockSafeApps)
   }),
+
+  // Transaction endpoint for retrieving transaction details
+  http.get<{ chainId: string; id: string }, never, TransactionDetails>(
+    `${GATEWAY_URL}/v1/chains/:chainId/transactions/:id`,
+    () => {
+      // Default mock response; can be customized per test using MSW request handlers
+      return HttpResponse.json({
+        txInfo: {
+          type: 'Custom',
+          to: {
+            value: '0x123',
+            name: 'Test',
+            logoUri: null,
+          },
+          dataSize: '100',
+          value: null,
+          isCancellation: false,
+          methodName: 'test',
+        },
+        safeAddress: '0x456',
+        txId: '0x345',
+        txStatus: 'AWAITING_CONFIRMATIONS' as const,
+      })
+    },
+  ),
 ]

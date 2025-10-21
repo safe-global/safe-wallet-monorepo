@@ -11,7 +11,7 @@ import type { ExecutionInfo } from '@safe-global/store/gateway/types'
 import { ConflictType, TransactionListItemType } from '@safe-global/store/gateway/types'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import {
   isERC20Transfer,
   isModuleDetailedExecutionInfo,
@@ -34,6 +34,32 @@ import { isMultiSendCalldata } from './transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
 import { getOriginPath } from './url'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { getStoreInstance } from '@/store'
+
+/**
+ * Fetch transaction details from the gateway using RTK Query.
+ * This function can be used in non-React contexts (e.g., async functions, services).
+ * It dispatches the query and waits for the result.
+ *
+ * @param chainId - The chain ID where the transaction exists
+ * @param txId - The transaction ID (safe transaction hash or multisig transaction ID)
+ * @returns The transaction details
+ * @throws Error if the store is not initialized or if the request fails
+ */
+export const getTransactionDetails = async (chainId: string, txId: string): Promise<TransactionDetails> => {
+  const store = getStoreInstance()
+
+  const result = await store
+    .dispatch(
+      cgwApi.endpoints.transactionsGetTransactionByIdV1.initiate({
+        chainId,
+        id: txId,
+      }),
+    )
+    .unwrap()
+
+  return result
+}
 
 export const makeTxFromDetails = (txDetails: TransactionDetails): ModuleTransaction => {
   const getMissingSigners = ({
@@ -75,7 +101,7 @@ export const makeTxFromDetails = (txDetails: TransactionDetails): ModuleTransact
     ? isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)
       ? txDetails.detailedExecutionInfo.submittedAt
       : now
-    : (txDetails.executedAt ?? now)
+    : txDetails.executedAt ?? now
 
   return {
     type: TransactionListItemType.TRANSACTION,

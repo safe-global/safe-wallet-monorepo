@@ -1,11 +1,11 @@
-import type { Relay } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
+import type { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import { SvgIcon, Tooltip, Typography } from '@mui/material'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { MAX_DAY_RELAYS } from '@/hooks/useRemainingRelays'
 import css from '../BalanceInfo/styles.module.css'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 
-const RemainingRelays = ({ relays, tooltip }: { relays?: Relay; tooltip?: string }) => {
+const RemainingRelays = ({ relays, tooltip }: { relays?: RelaysRemaining; tooltip?: string }) => {
   if (!tooltip) {
     const limit = relays?.limit ?? MAX_DAY_RELAYS
     tooltip = `${limit} transaction${maybePlural(limit)} per day for free`
