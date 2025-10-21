@@ -371,28 +371,31 @@ describe('Local storage migration', () => {
 
       expect(newData).toEqual({
         '1': {
-          '0x1F2504De05f5167650bE5B28c472601Be434b60A': [
-            {
-              id: '123',
-              timestamp,
-              txData: {
-                to: to1,
-                value: '420',
-                data: '0x',
-                operation: OperationType.Call,
+          '0x1F2504De05f5167650bE5B28c472601Be434b60A': {
+            items: [
+              {
+                id: '123',
+                timestamp,
+                txData: {
+                  to: to1,
+                  value: '420',
+                  data: '0x',
+                  operation: OperationType.Call,
+                },
               },
-            },
-            {
-              id: '234',
-              timestamp,
-              txData: {
-                to: erc20Token,
-                value: '0',
-                data: ERC20_INTERFACE.encodeFunctionData('transfer', [to2, '69']),
-                operation: OperationType.Call,
+              {
+                id: '234',
+                timestamp,
+                txData: {
+                  to: erc20Token,
+                  value: '0',
+                  data: ERC20_INTERFACE.encodeFunctionData('transfer', [to2, '69']),
+                  operation: OperationType.Call,
+                },
               },
-            },
-          ],
+            ],
+            isConfirming: false,
+          },
         },
       })
     })
