@@ -11,7 +11,6 @@ import ExecuteForm from '@/components/tx-flow/actions/Execute/ExecuteForm'
 import SignForm from './SignForm'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import ErrorMessage from '../ErrorMessage'
-import TxChecks from '@/components/tx-flow/features/TxChecks/TxChecks'
 import TxCard from '@/components/tx-flow/common/TxCard'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
 import { useAppSelector } from '@/store'
@@ -208,8 +207,6 @@ export const SignOrExecuteForm = ({
 
         {!isCounterfactualSafe && !props.isRejection && <BlockaidBalanceChanges />}
       </TxCard>
-
-      {!isCounterfactualSafe && !props.isRejection && safeTx && <TxChecks transaction={safeTx} />}
 
       <TxNoteForm isCreation={isCreation ?? false} onChange={onNoteChange} txDetails={props.txDetails} />
 

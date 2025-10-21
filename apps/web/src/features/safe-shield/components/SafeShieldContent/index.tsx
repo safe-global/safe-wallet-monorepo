@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react'
+import { type ReactElement, useContext } from 'react'
 import { Box } from '@mui/material'
 import type {
   AddressAnalysisResults,
@@ -10,7 +10,9 @@ import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
 import { SafeShieldAnalysisError } from './SafeShieldAnalysisError'
 import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
+import { TenderlySimulation } from '../TenderlySimulation'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import isEmpty from 'lodash/isEmpty'
 
 const normalizeThreatData = (
@@ -30,14 +32,14 @@ export const SafeShieldContent = ({
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<LiveThreatAnalysisResult>
 }): ReactElement => {
+  const { safeTx } = useContext(SafeTxContext)
   const [recipientResults, recipientError, recipientLoading = false] = recipient || []
   const [contractResults, contractError, contractLoading = false] = contract || []
   const [threatResults, threatError, threatLoading = false] = threat || []
   const normalizedThreatData = normalizeThreatData(threat)
-
   const loading = recipientLoading || contractLoading || threatLoading
   const error = recipientError || contractError || threatError
-  const empty = isEmpty(recipientResults) && isEmpty(contractResults)
+  const empty = isEmpty(recipientResults) && isEmpty(contractResults) && !safeTx
 
   return (
     <Box padding="0px 4px 4px">
@@ -60,6 +62,8 @@ export const SafeShieldContent = ({
           {contractResults && Object.keys(contractResults).length > 0 && <AnalysisGroupCard data={contractResults} />}
 
           {threatResults && Object.keys(threatResults).length > 0 && <AnalysisGroupCard data={normalizedThreatData} />}
+
+          <TenderlySimulation safeTx={safeTx} />
         </Box>
       </Box>
     </Box>
