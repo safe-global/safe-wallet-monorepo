@@ -3,9 +3,22 @@ import type { FiatCurrencies } from '@safe-global/store/gateway/types'
 import { Balances } from '@safe-global/store/src/gateway/AUTO_GENERATED/balances'
 import { CollectiblePage } from '@safe-global/store/src/gateway/AUTO_GENERATED/collectibles'
 import type { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
+import type { MasterCopy } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { defaultMockSafeApps } from './mockSafeApps'
 
 const iso4217Currencies = ['USD', 'EUR', 'GBP']
+
+const defaultMasterCopies: MasterCopy[] = [
+  {
+    address: '0xd9Db270c1B5E3Bd161E8c8503c55cEFDDe8E6766',
+    version: '1.3.0',
+  },
+  {
+    address: '0x6851D6fDFAfD08c0EF60ac1b9c90E5dE6247cEAC',
+    version: '1.4.1',
+  },
+]
+
 export const handlers = (GATEWAY_URL: string) => [
   http.get(`${GATEWAY_URL}/v1/auth/nonce`, () => {
     return HttpResponse.json({
