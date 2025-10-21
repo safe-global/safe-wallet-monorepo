@@ -120,10 +120,22 @@ export const selectBatchBySafe = createSelector(
   [selectAllBatches, selectChainIdAndSafeAddress],
   (allBatches, [chainId, safeAddress]): DraftBatchItem[] => {
     const batchState = allBatches[chainId]?.[safeAddress]
-    // Don't return items if the batch is being confirmed
-    if (batchState?.isConfirming) {
+
+    if (!batchState) {
       return []
     }
-    return batchState?.items || []
+
+    // Handle old array format (pre-migration)
+    if (Array.isArray(batchState)) {
+      return batchState
+    }
+
+    // Handle new SafeBatchState format
+    // Don't return items if the batch is being confirmed
+    if (batchState.isConfirming) {
+      return []
+    }
+
+    return batchState.items || []
   },
 )
