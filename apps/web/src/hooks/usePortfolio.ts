@@ -10,6 +10,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import {
   usePortfolioGetPortfolioV1Query,
   type TokenBalance as PortfolioTokenBalance,
+  type AppBalance,
 } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
@@ -17,6 +18,21 @@ import { useVisibleBalances } from './useVisibleBalances'
 import useBalances from './useBalances'
 import usePositions from '@/features/positions/hooks/usePositions'
 import { IS_DEV } from '@/config/constants'
+
+export type PortfolioData = {
+  totalBalance: string
+  totalTokenBalance: string
+  totalPositionsBalance: string
+  tokenBalances: Balance[]
+  positionBalances: AppBalance[]
+  visibleTokenBalances: Balance[]
+  visibleTotalTokenBalance: string
+  visibleTotalBalance: string
+  error?: string
+  isLoading: boolean
+  isLoaded: boolean
+  isFetching: boolean
+}
 
 const transformTokenBalances = (tokens: PortfolioTokenBalance[], currentChainId: string): Balance[] => {
   return tokens
@@ -41,7 +57,7 @@ const transformTokenBalances = (tokens: PortfolioTokenBalance[], currentChainId:
     }))
 }
 
-const usePortfolioV2 = (skip: boolean = false) => {
+const usePortfolioV2 = (skip: boolean = false): PortfolioData => {
   const { safeAddress } = useSafeInfo()
   const chainId = useChainId()
   const currency = useAppSelector(selectCurrency)
@@ -94,7 +110,36 @@ const usePortfolioV2 = (skip: boolean = false) => {
   }, [currentData, error, isLoading, isFetching, hiddenTokens, chainId])
 }
 
-const usePortfolioLegacy = (skip: boolean = false) => {
+const transformProtocolsToAppBalances = (protocols: any[]): AppBalance[] => {
+  return protocols.map((protocol) => ({
+    appInfo: {
+      name: protocol.protocol_metadata.name,
+      logoUrl: protocol.protocol_metadata.icon.url,
+      url: null,
+    },
+    balanceFiat: parseFloat(protocol.fiatTotal),
+    positions: protocol.items.flatMap((positionGroup: any) =>
+      positionGroup.items.map((item: any) => ({
+        key: `${item.tokenInfo.address}-${item.position_type}`,
+        type: item.position_type || 'unknown',
+        name: item.tokenInfo.name,
+        tokenInfo: {
+          address: item.tokenInfo.address,
+          decimals: item.tokenInfo.decimals,
+          symbol: item.tokenInfo.symbol,
+          name: item.tokenInfo.name,
+          logoUrl: item.tokenInfo.logoUri,
+          chainId: '', // Not available in old structure
+        },
+        balance: item.balance,
+        balanceFiat: parseFloat(item.fiatBalance),
+        priceChangePercentage1d: item.fiatBalance24hChange ? parseFloat(item.fiatBalance24hChange) : null,
+      })),
+    ),
+  }))
+}
+
+const usePortfolioLegacy = (skip: boolean = false): PortfolioData => {
   const { balances, loaded, loading, error } = useVisibleBalances()
   const allBalancesData = useBalances()
   const { data: positionsData, isLoading: positionsLoading } = usePositions(skip)
@@ -121,12 +166,15 @@ const usePortfolioLegacy = (skip: boolean = false) => {
     const visibleTokenTotal = balances.fiatTotal
     const allTokenTotal = allBalancesData.balances.fiatTotal
 
+    // Transform legacy Protocol[] to AppBalance[]
+    const transformedPositions = positionsData ? transformProtocolsToAppBalances(positionsData) : []
+
     return {
       totalBalance: (parseFloat(allTokenTotal) + parseFloat(positionsTotal)).toString(),
       totalTokenBalance: allTokenTotal,
       totalPositionsBalance: positionsTotal,
       tokenBalances: allTokens,
-      positionBalances: positionsData ?? [],
+      positionBalances: transformedPositions,
       visibleTokenBalances: visibleTokens,
       visibleTotalTokenBalance: visibleTokenTotal,
       visibleTotalBalance: (parseFloat(visibleTokenTotal) + parseFloat(positionsTotal)).toString(),
@@ -138,7 +186,7 @@ const usePortfolioLegacy = (skip: boolean = false) => {
   }, [balances, allBalancesData, positionsData, loaded, loading, error, positionsLoading])
 }
 
-export const usePortfolio = () => {
+export const usePortfolio = (): PortfolioData => {
   const chainId = useChainId()
   let hasPortfolioEndpoint = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT)
 

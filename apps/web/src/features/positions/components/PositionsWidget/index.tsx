@@ -177,12 +177,12 @@ const PositionsWidget = () => {
           <PositionsEmpty entryPoint="Dashboard" />
         ) : (
           protocols.map((protocol, protocolIndex) => {
-            const protocolValue = Number(protocol.fiatTotal) || 0
+            const protocolValue = protocol.balanceFiat || 0
             const isLast = protocolIndex === protocols.length - 1
 
             return (
               <Accordion
-                key={protocol.protocol}
+                key={protocol.appInfo.name}
                 disableGutters
                 elevation={0}
                 variant="elevation"
@@ -192,7 +192,7 @@ const PositionsWidget = () => {
                 onChange={(_, expanded) => {
                   if (expanded) {
                     trackEvent(POSITIONS_EVENTS.POSITION_EXPANDED, {
-                      [MixpanelEventParams.PROTOCOL_NAME]: protocol.protocol,
+                      [MixpanelEventParams.PROTOCOL_NAME]: protocol.appInfo.name,
                       [MixpanelEventParams.LOCATION]: POSITIONS_LABELS.dashboard,
                       [MixpanelEventParams.AMOUNT_USD]: protocolValue,
                     })
@@ -221,24 +221,12 @@ const PositionsWidget = () => {
                     }),
                   }}
                 >
-                  <PositionsHeader protocol={protocol} fiatTotal={totalPositionsBalance} />
+                  <PositionsHeader protocol={protocol} fiatTotal={parseFloat(totalPositionsBalance || '0')} />
                 </AccordionSummary>
 
                 <AccordionDetails sx={{ px: 1.5 }}>
-                  {protocol.items.map((position, idx) => {
-                    return (
-                      <Box key={position.name}>
-                        <Typography variant="body2" fontWeight="bold" mb={1} mt={idx !== 0 ? 2 : 0}>
-                          {position.name}
-                        </Typography>
-
-                        <Divider sx={{ opacity: 0.5 }} />
-
-                        {position.items.map((item) => {
-                          return <Position item={item} key={`${item.tokenInfo.name}-${item.position_type}`} />
-                        })}
-                      </Box>
-                    )
+                  {protocol.positions.map((position) => {
+                    return <Position item={position} key={position.key} />
                   })}
                 </AccordionDetails>
               </Accordion>

@@ -76,7 +76,7 @@ const AssetRow = ({
 
       <Box flex={1} display="block" textAlign="right" height="44px">
         <FiatBalance balanceItem={item} />
-        <FiatChange balanceItem={item} inline />
+        <FiatChange change={item.fiatBalance24hChange} inline />
       </Box>
 
       <Box className={css.assetButtons}>
