@@ -28,7 +28,9 @@ const Balances: NextPage = () => {
   const isStakingBannerVisible = useIsStakingBannerVisible()
   const isNoFeeNovemberVisible = useIsNoFeeNovemberBannerVisible()
   const { isEligible: _isEligible } = useNoFeeNovemberEligibility()
-  const [hideNoFeeNovemberBanner, setHideNoFeeNovemberBanner] = useLocalStorage<boolean>('hideNoFeeNovemberAssetsPageBanner')
+  const [hideNoFeeNovemberBanner, setHideNoFeeNovemberBanner] = useLocalStorage<boolean>(
+    'hideNoFeeNovemberAssetsPageBanner',
+  )
 
   const fiatTotal = balances.fiatTotal ? Number(balances.fiatTotal) : undefined
 
@@ -61,16 +63,14 @@ const Balances: NextPage = () => {
           <>
             {isNoFeeNovemberVisible && !hideNoFeeNovemberBanner && (
               <Box mb={2} sx={{ position: 'sticky', top: 0, zIndex: 1 }}>
-                <NoFeeNovemberBanner 
-                  onDismiss={handleNoFeeNovemberDismiss}
-                />
+                <NoFeeNovemberBanner onDismiss={handleNoFeeNovemberDismiss} />
               </Box>
             )}
-            
+
             <Box mb={2}>
               <TotalAssetValue fiatTotal={fiatTotal} />
             </Box>
-            
+
             <AssetsTable setShowHiddenAssets={setShowHiddenAssets} showHiddenAssets={showHiddenAssets} />
           </>
         )}
