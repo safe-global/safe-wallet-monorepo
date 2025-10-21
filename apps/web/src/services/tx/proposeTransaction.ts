@@ -1,4 +1,5 @@
-import type { Operation, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Operation } from '@safe-global/store/gateway/types'
 import { proposeTransaction } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeTransaction } from '@safe-global/types-kit'
 

@@ -7,6 +7,7 @@ import {
   pendingTxsSlice,
   clearPendingTx,
   setRelayTxHash,
+  selectPendingTxById,
 } from '../pendingTxsSlice'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import { selectChainById } from '../chains'
@@ -19,10 +20,43 @@ import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SimplePoller } from '@safe-global/utils/services/SimplePoller'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
 import logger from '@/src/utils/logger'
+import { TIMEOUT_ERROR_CODE } from '@safe-global/utils/services/RelayTxWatcher'
 
+const cleanUpPendingTx = (listenerApi: AppListenerEffectAPI, txId: string) => {
+  listenerApi.dispatch(clearPendingTx({ txId }))
+  listenerApi.dispatch(cgwApi.util.invalidateTags(['transactions']))
+}
+
+/***
+ * Gelato endpoint is not reliable at times
+ * and sometimes it returns no response yet the transaction might have been submitted to the blockchain.
+ *
+ * Case 1: Transaction was executed but since we're not getting response from Gelato,
+ * we would be polling it for 3 minutes. For the user it would be like the transaction is stuck.
+ *
+ * That is why the relayer is running together with the indexing watcher.
+ * IF the indexing watcher finds out that the transaction was executed successfully,
+ * the Gelato watcher will be stopped.
+ *
+ * Case 2: The transaction was not successful executed we would be polling it for 3 minutes,
+ *  both relayer and indexer,
+ *  but after 3 minutes the Gelato watcher is gonna timeout and clean up the transaction from pending
+ *
+ *
+ */
 const startRelayWatcher = (listenerApi: AppListenerEffectAPI, txId: string, taskId: string, chainId: string) => {
-  RelayTxWatcher.getInstance()
-    .watchTaskId(taskId)
+  const instance = RelayTxWatcher.getInstance()
+
+  instance
+    .watchTaskId(taskId, {
+      onNextPoll: () => {
+        const pendingTx = selectPendingTxById(listenerApi.getState(), txId)
+
+        if (!pendingTx) {
+          instance.stopWatchingTaskId(taskId)
+        }
+      },
+    })
     .then((task) => {
       // Transaction executed successfully, move to indexing
       logger.info('Relay transaction completed', { txId, taskId, txHash: task.transactionHash })
@@ -33,12 +67,27 @@ const startRelayWatcher = (listenerApi: AppListenerEffectAPI, txId: string, task
       }
     })
     .catch((err) => {
+      const errorMessage = err instanceof Error ? err.message : String(err)
+      listenerApi.dispatch(setPendingTxStatus({ txId, chainId, status: PendingStatus.FAILED, error: errorMessage }))
+
+      if (err.cause === TIMEOUT_ERROR_CODE) {
+        setTimeout(() => {
+          cleanUpPendingTx(listenerApi, txId)
+        }, 1000)
+      }
+
       logger.error('Relay watcher error', { txId, taskId, error: err })
     })
 }
 
 const startIndexingWatcher = (listenerApi: AppListenerEffectAPI, txId: string, chainId: string) => {
   const queryUntilSuccess = async () => {
+    const pendingTx = selectPendingTxById(listenerApi.getState(), txId)
+
+    if (!pendingTx) {
+      return
+    }
+
     const thunk = cgwApi.endpoints.transactionsGetTransactionByIdV1.initiate(
       { chainId, id: txId },
       { forceRefetch: true },
@@ -102,6 +151,7 @@ const runWatchers = async (listenerApi: AppListenerEffectAPI, pendingTxs: Pendin
 
     // Handle relay transactions
     if (pendingTx.type === ExecutionMethod.WITH_RELAY) {
+      startIndexingWatcher(listenerApi, txId, chainId)
       startRelayWatcher(listenerApi, txId, pendingTx.taskId, chainId)
       continue
     }
@@ -121,6 +171,7 @@ export const pendingTxsListeners = (startListening: AppStartListening) => {
       const { txId, chainId } = action.payload
 
       if (action.payload.type === ExecutionMethod.WITH_RELAY) {
+        startIndexingWatcher(listenerApi, txId, chainId)
         startRelayWatcher(listenerApi, txId, action.payload.taskId, chainId)
       } else if (action.payload.type === ExecutionMethod.WITH_PK) {
         const { txHash, walletAddress, walletNonce } = action.payload
@@ -143,8 +194,7 @@ export const pendingTxsListeners = (startListening: AppStartListening) => {
 
       if (status == PendingStatus.SUCCESS) {
         await delay(1000)
-        listenerApi.dispatch(clearPendingTx({ txId }))
-        listenerApi.dispatch(cgwApi.util.invalidateTags(['transactions']))
+        cleanUpPendingTx(listenerApi, txId)
       }
 
       if (status === PendingStatus.INDEXING) {

@@ -5,12 +5,11 @@ import * as useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 import { mockedDraftBatch } from './mockData'
 import {
   type TransactionPreview,
-  Operation,
   TransactionInfoType,
   TransferDirection,
   TransactionTokenType,
 } from '@safe-global/safe-gateway-typescript-sdk'
-
+import { Operation } from '@safe-global/store/gateway/types'
 jest.spyOn(useDraftBatch, 'useDraftBatch').mockImplementation(() => mockedDraftBatch)
 
 const mockUseTxPreview = jest.spyOn(useTxPreview, 'default')

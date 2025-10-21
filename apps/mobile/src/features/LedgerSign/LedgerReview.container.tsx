@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { View, Text, ScrollView, getTokenValue } from 'tamagui'
+import React, { useEffect, useState } from 'react'
+import { View, Text, Stack, YStack } from 'tamagui'
 import { useLocalSearchParams, router } from 'expo-router'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector } from '@/src/store/hooks'
@@ -12,15 +12,11 @@ import { useGuard } from '@/src/context/GuardProvider'
 import { useTransactionsAddConfirmationV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { ledgerDMKService } from '@/src/services/ledger/ledger-dmk.service'
-import logger from '@/src/utils/logger'
 import useSafeInfo from '@/src/hooks/useSafeInfo'
-import extractTxInfo from '@/src/services/tx/extractTx'
-import { getSafeTxMessageHash } from '@safe-global/utils/utils/safe-hashes'
 import type { SafeVersion } from '@safe-global/types-kit'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
-import { LargeHeaderTitle, NavBarTitle } from '@/src/components/Title'
-import { Container } from '@/src/components/Container'
+import { ReviewAndConfirmView } from '@/src/features/ConfirmTx/components/ReviewAndConfirm/ReviewAndConfirmView'
+import { LargeHeaderTitle } from '@/src/components/Title'
 
 export const LedgerReviewSignContainer = () => {
   const { bottom } = useSafeAreaInsets()
@@ -34,28 +30,6 @@ export const LedgerReviewSignContainer = () => {
   const [isSigning, setIsSigning] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [addConfirmation] = useTransactionsAddConfirmationV1Mutation()
-  const { handleScroll } = useScrollableHeader({
-    children: (
-      <>
-        <NavBarTitle numberOfLines={1}>Review and confirm transaction on Ledger</NavBarTitle>
-      </>
-    ),
-  })
-  const messageHash = useMemo(() => {
-    try {
-      if (!txId || !chain || !txDetails || !safe.version) {
-        return null
-      }
-      const { txParams } = extractTxInfo(txDetails, activeSafe.address)
-      return getSafeTxMessageHash({
-        safeVersion: safe.version as SafeVersion,
-        safeTxData: txParams,
-      })
-    } catch (e) {
-      logger.info('Failed to pre-compute message hash', e)
-      return null
-    }
-  }, [txId, chain, txDetails, safe.version, activeSafe.address])
 
   useEffect(() => {
     if (!sessionId) {
@@ -119,46 +93,36 @@ export const LedgerReviewSignContainer = () => {
   }
 
   return (
-    <View flex={1} padding="$4" gap="$4" paddingBottom={Math.max(bottom, getTokenValue('$4'))}>
-      <ScrollView onScroll={handleScroll}>
-        <LargeHeaderTitle>Review and confirm transaction on Ledger</LargeHeaderTitle>
-
-        <Container borderRadius="$4" padding="$4" gap="$4" marginTop="$4">
-          <View>
-            <Text fontSize="$3" color="$colorSecondary">
-              Chain ID
-            </Text>
-            <Text fontSize="$5" color="$color">
-              {chain?.chainId}
-            </Text>
-          </View>
-          <View>
-            <Text fontSize="$3" color="$colorSecondary">
-              Verifying contract
-            </Text>
-            <Text fontSize="$5" color="$color">
-              {activeSafe.address}
-            </Text>
-          </View>
-          <View>
-            <Text fontSize="$3" color="$colorSecondary">
-              MessageHash
-            </Text>
-            <Text fontSize="$5" color="$color">
-              {messageHash || '—'}
-            </Text>
-          </View>
-        </Container>
-
-        {error ? <Text color="$error">{error}</Text> : null}
-      </ScrollView>
-      <SafeButton
-        onPress={handleSign}
-        disabled={isSigning}
-        icon={isSigning ? <Loader size={18} thickness={2} /> : null}
+    <ReviewAndConfirmView
+      txDetails={txDetails}
+      header={
+        <YStack space="$4" paddingTop="$4">
+          <LargeHeaderTitle>Review and confirm on your device</LargeHeaderTitle>
+        </YStack>
+      }
+    >
+      <Stack
+        backgroundColor="$background"
+        paddingHorizontal="$4"
+        paddingVertical="$3"
+        borderTopWidth={1}
+        borderTopColor="$borderLight"
+        space="$3"
+        paddingBottom={bottom || '$4'}
       >
-        Continue on Ledger
-      </SafeButton>
-    </View>
+        {error ? (
+          <Text color="$error" textAlign="center">
+            {error}
+          </Text>
+        ) : null}
+        <SafeButton
+          onPress={handleSign}
+          disabled={isSigning}
+          icon={isSigning ? <Loader size={18} thickness={2} /> : null}
+        >
+          Continue on Ledger
+        </SafeButton>
+      </Stack>
+    </ReviewAndConfirmView>
   )
 }

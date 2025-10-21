@@ -18,6 +18,7 @@ import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import { parseFormValues } from './helpers'
 import { setEstimatedFeeValues } from '@/src/store/estimatedFeeSlice'
 import { FeeParams } from '@/src/hooks/useFeeParams/useFeeParams'
+import { CanNotEstimate } from '@/src/features/ExecuteTx/components/CanNotEstimate'
 
 interface ChangeEstimatedFeeFormProps {
   estimatedFeeParams: FeeParams
@@ -64,6 +65,8 @@ export const ChangeEstimatedFeeForm = ({ estimatedFeeParams, txDetails }: Change
   const nonce = watch('nonce')
 
   const { totalFee } = useGasFee(txDetails, parseFormValues({ maxFeePerGas, maxPriorityFeePerGas, gasLimit, nonce }))
+
+  const willFail = Boolean(estimatedFeeParams.gasLimitError)
 
   return (
     <FormProvider {...form}>
@@ -150,19 +153,24 @@ export const ChangeEstimatedFeeForm = ({ estimatedFeeParams, txDetails }: Change
 
         <View
           marginTop="$1"
-          backgroundColor="$background"
+          backgroundColor={willFail ? '$errorBackground' : '$background'}
           borderRadius="$4"
           padding="$5"
           alignItems="center"
           justifyContent="space-between"
           flexDirection="row"
         >
-          <Text color="$colorSecondary" fontSize="$5">
+          <Text color={willFail ? '$color' : '$colorSecondary'} fontSize="$5">
             Est. network fee
           </Text>
-          <Text fontWeight={700} fontSize="$5">
-            {totalFee} {nativeSymbol}
-          </Text>
+
+          {willFail ? (
+            <CanNotEstimate iconName="alert" />
+          ) : (
+            <Text fontWeight={600}>
+              {totalFee} {nativeSymbol}
+            </Text>
+          )}
         </View>
 
         <View paddingTop="$3" paddingBottom={insets.bottom ? insets.bottom : '$2'} flexDirection="row" gap="$2">

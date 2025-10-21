@@ -2,7 +2,8 @@ import { FormControl, FormControlLabel, InputLabel, Radio, RadioGroup, SvgIcon, 
 import { Controller, useFormContext } from 'react-hook-form'
 import classNames from 'classnames'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
-import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+
 import { MultiTransfersFields, TokenTransferType } from '@/components/tx-flow/flows/TokenTransfer'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import ExternalLink from '@/components/common/ExternalLink'
@@ -20,7 +21,7 @@ const SpendingLimitRow = ({
   selectedToken,
 }: {
   availableAmount: bigint
-  selectedToken: TokenInfo | undefined
+  selectedToken: Balance['tokenInfo'] | undefined
 }) => {
   const { control, trigger, resetField } = useFormContext()
   const canCreateStandardTx = useHasPermission(Permission.CreateTransaction)

@@ -11,9 +11,9 @@ import MUILink from '@mui/material/Link'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 import { IS_PRODUCTION, COMMIT_HASH } from '@/config/constants'
+import type { FooterProps } from './footer.type'
 
 const footerPages = [
-  AppRoutes.welcome.index,
   AppRoutes.settings.index,
   AppRoutes.imprint,
   AppRoutes.privacy,
@@ -32,14 +32,20 @@ const FooterLink = ({ children, href }: { children: ReactNode; href: string }): 
   )
 }
 
-const Footer = (): ReactElement | null => {
+const Footer: React.FC<FooterProps> = ({
+  forceShow,
+  preferences = true,
+  versionIcon = true,
+  helpCenter = true,
+  className = css.container,
+}): ReactElement | null => {
   const router = useRouter()
   const isOfficialHost = useIsOfficialHost()
   const initialYear = 2025
   const currentYear = new Date().getFullYear()
   const copyrightYear = initialYear === currentYear ? initialYear : `${initialYear}–${currentYear}`
 
-  if (!footerPages.some((path) => router.pathname.startsWith(path))) {
+  if (!footerPages.some((path) => router.pathname.startsWith(path)) && !forceShow) {
     return null
   }
 
@@ -48,7 +54,7 @@ const Footer = (): ReactElement | null => {
   }
 
   return (
-    <footer className={css.container}>
+    <footer className={className}>
       <ul>
         {isOfficialHost ? (
           <>
@@ -70,14 +76,18 @@ const Footer = (): ReactElement | null => {
             <li>
               <FooterLink href={getHref(AppRoutes.cookie)}>Cookie policy</FooterLink>
             </li>
-            <li>
-              <FooterLink href={getHref(AppRoutes.settings.index)}>Preferences</FooterLink>
-            </li>
-            <li>
-              <ExternalLink href={HELP_CENTER_URL} noIcon sx={{ span: { textDecoration: 'underline' } }}>
-                Help
-              </ExternalLink>
-            </li>
+            {preferences && (
+              <li>
+                <FooterLink href={getHref(AppRoutes.settings.index)}>Preferences</FooterLink>
+              </li>
+            )}
+            {helpCenter && (
+              <li>
+                <ExternalLink href={HELP_CENTER_URL} noIcon sx={{ span: { textDecoration: 'underline' } }}>
+                  Help
+                </ExternalLink>
+              </li>
+            )}
           </>
         ) : (
           <li>This is an unofficial distribution of the app</li>
@@ -85,7 +95,8 @@ const Footer = (): ReactElement | null => {
 
         <li>
           <ExternalLink href={`${packageJson.homepage}/releases/tag/v${packageJson.version}`} noIcon>
-            <SvgIcon component={GitHubIcon} inheritViewBox fontSize="inherit" sx={{ mr: 0.5 }} /> v{packageJson.version}
+            {versionIcon && <SvgIcon component={GitHubIcon} inheritViewBox fontSize="inherit" sx={{ mr: 0.5 }} />}v
+            {packageJson.version}
           </ExternalLink>
         </li>
 

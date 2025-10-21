@@ -42,23 +42,13 @@ import { getDelay, isCustomDelaySelected } from './utils'
 import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils/config/constants'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import { isSmartContractWallet } from '@/utils/wallets'
-import { getSafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useChainId from '@/hooks/useChainId'
 
 enum AddressType {
   EOA = 'EOA',
   Safe = 'Safe',
   Other = 'Other',
-}
-
-const getAddressType = async (address: string, chainId: string) => {
-  const isSmartContract = await isSmartContractWallet(chainId, address)
-  if (!isSmartContract) return AddressType.EOA
-
-  const isSafeContract = await getSafeInfo(chainId, address)
-  if (isSafeContract) return AddressType.Safe
-
-  return AddressType.Other
 }
 
 export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: RecoveryStateItem }): ReactElement {
@@ -68,6 +58,21 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
   const [showAdvanced, setShowAdvanced] = useState(data?.[UpsertRecoveryFlowFields.expiry] !== '0')
   const [understandsRisk, setUnderstandsRisk] = useState(false)
   const periods = useRecoveryPeriods()
+  const [triggerGetSafe] = useLazySafesGetSafeV1Query()
+
+  const getAddressType = async (address: string, chainId: string) => {
+    const isSmartContract = await isSmartContractWallet(chainId, address)
+    if (!isSmartContract) return AddressType.EOA
+
+    try {
+      const result = await triggerGetSafe({ chainId, safeAddress: address }).unwrap()
+      if (result) return AddressType.Safe
+    } catch {
+      // Not a safe
+    }
+
+    return AddressType.Other
+  }
 
   const formMethods = useForm<UpsertRecoveryFlowProps>({
     defaultValues: data,

@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { formatTxDetails } from './formatTxDetails'
 import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
+import { Operation } from '@safe-global/store/gateway/types'
 
 // Mock dependencies
 jest.mock('@safe-global/utils/utils/formatters', () => ({

@@ -38,6 +38,8 @@ export const ImportSuccessScreen = () => {
         router.dismissAll()
         // closes first screen in stack
         router.back()
+        // closes terms and conditions screen
+        router.back()
         // Navigate to the main assets screen
         router.replace('/(tabs)')
         return

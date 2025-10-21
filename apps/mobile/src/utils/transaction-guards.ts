@@ -38,11 +38,13 @@ import type {
   BridgeAndSwapTransactionInfo,
   SwapTransactionInfo,
   MultiSendTransactionInfo,
+  SwapOwner,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 import { HistoryTransactionItems, PendingTransactionItems } from '@safe-global/store/gateway/types'
 
 type TransactionInfo = Transaction['txInfo']
+export type SettingsChangeSwapOwner = SettingsChangeTransaction & { settingsInfo: SwapOwner }
 
 const TransactionStatus = {
   AWAITING_CONFIRMATIONS: 'AWAITING_CONFIRMATIONS',
@@ -222,4 +224,8 @@ export const isBridgeOrderTxInfo = (value: Transaction['txInfo']): value is Brid
 
 export const isLifiSwapTxInfo = (value: Transaction['txInfo']): value is SwapTransactionInfo => {
   return value.type === 'Swap'
+}
+
+export const isSwapOwnerTxInfo = (value: Transaction['txInfo']): value is SettingsChangeSwapOwner => {
+  return value.type === TransactionInfoType.SETTINGS_CHANGE && value.settingsInfo?.type === 'SWAP_OWNER'
 }

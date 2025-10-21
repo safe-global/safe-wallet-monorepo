@@ -21,7 +21,7 @@ import { useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEna
 import useIsStakingPromoEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
 import useChainId from '@/hooks/useChainId'
 import TokenIcon from '@/components/common/TokenIcon'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { TokenType } from '@safe-global/store/gateway/types'
 import StakeButton from '@/features/stake/components/StakeButton'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import NoAssetsIcon from '@/public/images/common/no-assets.svg'

@@ -2,12 +2,12 @@ import type {
   ExecutionInfo,
   MultisigExecutionDetails,
   MultisigExecutionInfo,
-  SafeAppData,
   Transaction,
   TransactionDetails,
   TransactionListPage,
   TransactionSummary,
 } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { ConflictType, getTransactionDetails, TransactionListItemType } from '@safe-global/safe-gateway-typescript-sdk'
 import {

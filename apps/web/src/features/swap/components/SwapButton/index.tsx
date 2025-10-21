@@ -7,7 +7,7 @@ import { SWAP_EVENTS } from '@/services/analytics/events/swaps'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { GA_LABEL_TO_MIXPANEL_PROPERTY } from '@/services/analytics/ga-mixpanel-mapping'
 import { Button } from '@mui/material'
-import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
 import SwapIcon from '@/public/images/common/swap.svg'
@@ -18,7 +18,7 @@ const SwapButton = ({
   trackingLabel,
   light = false,
 }: {
-  tokenInfo: TokenInfo
+  tokenInfo: Balance['tokenInfo']
   amount: string
   trackingLabel: SWAP_LABELS
   light?: boolean

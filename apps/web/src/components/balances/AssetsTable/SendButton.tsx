@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { Button } from '@mui/material'
 import ArrowIconNW from '@/public/images/common/arrow-top-right.svg'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -9,7 +9,7 @@ import { ASSETS_EVENTS } from '@/services/analytics/events/assets'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { TxModalContext } from '@/components/tx-flow'
 
-const SendButton = ({ tokenInfo, light }: { tokenInfo: TokenInfo; light?: boolean }) => {
+const SendButton = ({ tokenInfo, light }: { tokenInfo: Balance['tokenInfo']; light?: boolean }) => {
   const spendingLimit = useSpendingLimit(tokenInfo)
   const { setTxFlow } = useContext(TxModalContext)
 

@@ -7,7 +7,7 @@ import useChainId from '@/hooks/useChainId'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import type { JsonRpcProvider } from 'ethers'
 import { getSpendingLimitContract } from '@/services/contracts/spendingLimitContracts'
-import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { type AllowanceModule } from '@safe-global/utils/types/contracts'
 import { getERC20TokenInfoOnChain } from '@/utils/tokens'
@@ -27,15 +27,17 @@ const DEFAULT_TOKEN_INFO = {
 const discardZeroAllowance = (spendingLimit: SpendingLimitState): boolean =>
   !(sameString(spendingLimit.amount, '0') && sameString(spendingLimit.resetTimeMin, '0'))
 
-const getTokenInfoFromBalances = (tokenInfoFromBalances: TokenInfo[], address: string): TokenInfo | undefined =>
-  tokenInfoFromBalances.find((token) => token.address === address)
+const getTokenInfoFromBalances = (
+  tokenInfoFromBalances: Balance['tokenInfo'][],
+  address: string,
+): Balance['tokenInfo'] | undefined => tokenInfoFromBalances.find((token) => token.address === address)
 
 export const getTokenAllowances = async (
   contract: AllowanceModule,
   provider: JsonRpcProvider,
   safeAddress: string,
   allowanceRequests: { delegate: string; token: string }[],
-  tokenInfoFromBalances: TokenInfo[],
+  tokenInfoFromBalances: Balance['tokenInfo'][],
 ): Promise<SpendingLimitState[]> => {
   const moduleAddress = await contract.getAddress()
   const calls = allowanceRequests.map(({ delegate, token }) => ({
@@ -78,7 +80,7 @@ export const getTokensForDelegates = async (
   provider: JsonRpcProvider,
   safeAddress: string,
   delegates: string[],
-  tokenInfoFromBalances: TokenInfo[],
+  tokenInfoFromBalances: Balance['tokenInfo'][],
 ) => {
   const allowanceAddress = await contract.getAddress()
   const calls = delegates.map((delegate) => ({
@@ -107,7 +109,7 @@ export const getSpendingLimits = async (
   safeModules: AddressInfo[],
   safeAddress: string,
   chainId: string,
-  tokenInfoFromBalances: TokenInfo[],
+  tokenInfoFromBalances: Balance['tokenInfo'][],
 ): Promise<SpendingLimitState[] | undefined> => {
   let contract: ReturnType<typeof getSpendingLimitContract>
   try {

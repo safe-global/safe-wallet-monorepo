@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { Errors, logError } from '@/services/exceptions'
 import { fetchSafeAppFromManifest } from '@/services/safe-apps/manifest'
 import useAsync from '@safe-global/utils/hooks/useAsync'

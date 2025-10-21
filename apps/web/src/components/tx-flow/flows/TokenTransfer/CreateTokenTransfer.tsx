@@ -1,6 +1,7 @@
 import { useVisibleTokens } from '@/components/tx-flow/flows/TokenTransfer/utils'
 import { type ReactElement, useContext, useEffect, useMemo, useState } from 'react'
-import { type TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
 import {
   Alert,
@@ -42,7 +43,7 @@ import { MODALS_EVENTS } from '@/services/analytics'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 
-export const AutocompleteItem = (item: { tokenInfo: TokenInfo; balance: string }): ReactElement => (
+export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balance: string }): ReactElement => (
   <Grid
     container
     sx={{

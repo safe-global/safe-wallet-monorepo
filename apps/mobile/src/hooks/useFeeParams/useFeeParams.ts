@@ -21,6 +21,7 @@ export type FeeParams = {
   nonce?: number
   isLoadingGasPrice: boolean
   gasLimitLoading: boolean
+  gasLimitError?: Error
 }
 
 export interface UseFeeParamsSettings {
@@ -52,7 +53,7 @@ export const useFeeParams = (
 
   const safeTx = useSafeTx(txDetails)
 
-  const { gasLimit, gasLimitLoading } = useGasLimit({
+  const { gasLimit, gasLimitLoading, gasLimitError } = useGasLimit({
     safeTx,
     chainId: activeSafe.chainId,
     safeAddress: activeSafe.address,
@@ -73,6 +74,7 @@ export const useFeeParams = (
         nonce: manualParams.nonce,
         isLoadingGasPrice,
         gasLimitLoading,
+        gasLimitError,
       }
     }
 
@@ -83,6 +85,7 @@ export const useFeeParams = (
       nonce: userNonce,
       isLoadingGasPrice,
       gasLimitLoading,
+      gasLimitError,
     }
   }, [gasPrice, gasPriceError, isLoadingGasPrice, gasLimitLoading, manualParams, gasLimit, userNonce])
 }

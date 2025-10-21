@@ -1,6 +1,6 @@
 import React from 'react'
-import { Stack } from 'tamagui'
-import { router, useLocalSearchParams } from 'expo-router'
+import { Stack, Text } from 'tamagui'
+import { router } from 'expo-router'
 import { SafeButton } from '@/src/components/SafeButton'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
 import { useGuard } from '@/src/context/GuardProvider'
@@ -14,34 +14,21 @@ import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/tr
 import useGasFee from '../../hooks/useGasFee'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectEstimatedFee } from '@/src/store/estimatedFeeSlice'
+import { selectExecutionMethod } from '@/src/store/executionMethodSlice'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
+import { useExecutionFunds } from '../../hooks/useExecutionFunds'
+import { selectActiveChain } from '@/src/store/chains'
+import { Skeleton } from 'moti/skeleton'
+import { useTheme } from '@/src/theme/hooks/useTheme'
+import { getExecutionMethod, getSubmitButtonText } from './helpers'
+import { Alert } from '@/src/components/Alert'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 
 interface ReviewFooterProps {
   txId: string
   txDetails: TransactionDetails
   relaysRemaining?: RelaysRemaining
-}
-
-/**
- * Determines the execution method based on user selection and relay availability
- */
-const getExecutionMethod = (
-  requestedMethod: ExecutionMethod | undefined,
-  isRelayAvailable: boolean,
-): ExecutionMethod => {
-  // If user explicitly requested relay but none are available, fallback to signer
-  if (requestedMethod === ExecutionMethod.WITH_RELAY && !isRelayAvailable) {
-    return ExecutionMethod.WITH_PK
-  }
-
-  // If user selected a method, use it
-  if (requestedMethod) {
-    return requestedMethod
-  }
-
-  // Default: use relay if available, otherwise use signer
-  return isRelayAvailable ? ExecutionMethod.WITH_RELAY : ExecutionMethod.WITH_PK
 }
 
 export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: ReviewFooterProps) {
@@ -53,11 +40,23 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
   const insets = useSafeAreaInsets()
   const { totalFee, estimatedFeeParams, totalFeeRaw } = useGasFee(txDetails, manualParams)
   const isLoadingFees = estimatedFeeParams.isLoadingGasPrice || estimatedFeeParams.gasLimitLoading
+  const { colorScheme } = useTheme()
+  const chain = useAppSelector(selectActiveChain)
 
   // checks the executionMethod
   const isRelayAvailable = Boolean(relaysRemaining?.remaining && relaysRemaining.remaining > 0)
-  const { executionMethod: executionMethodParam } = useLocalSearchParams<{ executionMethod: ExecutionMethod }>()
-  const executionMethod = getExecutionMethod(executionMethodParam, isRelayAvailable)
+  const storedExecutionMethod = useAppSelector(selectExecutionMethod)
+  const executionMethod = chain
+    ? getExecutionMethod(storedExecutionMethod, isRelayAvailable, chain)
+    : ExecutionMethod.WITH_PK
+
+  // Check if signer has sufficient funds
+  const { hasSufficientFunds, isCheckingFunds } = useExecutionFunds({
+    signerAddress: activeSigner?.value,
+    totalFeeRaw,
+    executionMethod,
+    chain: chain ?? undefined,
+  })
 
   const handleConfirmPress = async () => {
     try {
@@ -70,6 +69,14 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
         maxPriorityFeePerGas: estimatedFeeParams.maxPriorityFeePerGas?.toString(),
         gasLimit: estimatedFeeParams.gasLimit?.toString(),
         nonce: estimatedFeeParams.nonce?.toString(),
+      }
+
+      if (executionMethod === ExecutionMethod.WITH_RELAY) {
+        router.push({
+          pathname: '/execute-transaction',
+          params,
+        })
+        return
       }
 
       // If active signer is a Ledger device, start the Ledger-specific execution flow
@@ -97,6 +104,10 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
     }
   }
 
+  const willFail = Boolean(estimatedFeeParams.gasLimitError)
+  const isButtonDisabled = !hasSufficientFunds
+  const buttonText = getSubmitButtonText(hasSufficientFunds)
+
   return (
     <Stack paddingHorizontal="$4" space="$3" paddingBottom={insets.bottom ? insets.bottom : '$4'}>
       <Container
@@ -112,14 +123,29 @@ export function ReviewExecuteFooter({ txId, txDetails, relaysRemaining }: Review
           executionMethod={executionMethod}
           isLoadingFees={isLoadingFees}
           txId={txId}
+          willFail={willFail}
           totalFee={totalFee}
-          totalFeeRaw={totalFeeRaw}
         />
+
+        {willFail && (
+          <Alert
+            gap="$1"
+            startIcon={<SafeFontIcon name="alert-triangle" color="$error" size={20} />}
+            type="error"
+            message={<Text>This transaction will most likely fail</Text>}
+          />
+        )}
       </Container>
 
-      <SafeButton onPress={handleConfirmPress} width="100%">
-        Execute transaction
-      </SafeButton>
+      {isCheckingFunds ? (
+        <Skeleton.Group show>
+          <Skeleton colorMode={colorScheme} height={44} width="100%" radius={12} />
+        </Skeleton.Group>
+      ) : (
+        <SafeButton onPress={handleConfirmPress} width="100%" disabled={isButtonDisabled}>
+          {buttonText}
+        </SafeButton>
+      )}
     </Stack>
   )
 }

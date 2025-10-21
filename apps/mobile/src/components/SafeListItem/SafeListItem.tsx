@@ -2,7 +2,6 @@ import React from 'react'
 import { Container } from '../Container'
 import { Text, Theme, ThemeName, View, ViewProps, YStackProps } from 'tamagui'
 import { IconProps, SafeFontIcon } from '../SafeFontIcon/SafeFontIcon'
-import { ellipsis } from '@/src/utils/formatters'
 import { isMultisigExecutionInfo } from '@/src/utils/transaction-guards'
 import { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Badge } from '../Badge'
@@ -84,8 +83,15 @@ export function SafeListItem({
             )}
 
             {typeof label === 'string' ? (
-              <Text fontSize="$4" lineHeight={20} fontWeight={600} letterSpacing={-0.01}>
-                {ellipsis(label, rightNode || inQueue ? 21 : 30)}
+              <Text
+                fontSize="$4"
+                lineHeight={20}
+                ellipsizeMode="tail"
+                numberOfLines={1}
+                fontWeight={600}
+                letterSpacing={-0.01}
+              >
+                {label}
               </Text>
             ) : (
               label

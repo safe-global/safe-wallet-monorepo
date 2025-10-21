@@ -8,6 +8,9 @@ import {
   ModuleExecutionInfo,
   MultisigExecutionInfo,
   AddressInfo,
+  NativeStakingDepositTransactionInfo,
+  NativeStakingValidatorsExitTransactionInfo,
+  NativeStakingWithdrawTransactionInfo,
 } from './AUTO_GENERATED/transactions'
 import { SafeOverview } from './AUTO_GENERATED/safes'
 import { MessageItem, MessagePage, TypedData } from './AUTO_GENERATED/messages'
@@ -42,6 +45,12 @@ export enum TransferDirection {
   INCOMING = 'INCOMING',
   OUTGOING = 'OUTGOING',
   UNKNOWN = 'UNKNOWN',
+}
+
+export enum TokenType {
+  ERC20 = 'ERC20',
+  ERC721 = 'ERC721',
+  NATIVE_TOKEN = 'NATIVE_TOKEN',
 }
 
 export enum TransactionTokenType {
@@ -136,3 +145,23 @@ export type ActionValueDecoded = {
 export type AddressInfoIndex = Record<string, AddressInfo>
 
 export type { BalancesGetSupportedFiatCodesV1ApiResponse as FiatCurrencies } from './AUTO_GENERATED/balances'
+
+export type StakingTxInfo =
+  | NativeStakingDepositTransactionInfo
+  | NativeStakingValidatorsExitTransactionInfo
+  | NativeStakingWithdrawTransactionInfo
+
+export enum SafeAppAccessPolicyTypes {
+  NoRestrictions = 'NO_RESTRICTIONS',
+  DomainAllowlist = 'DOMAIN_ALLOWLIST',
+}
+export enum SafeAppSocialPlatforms {
+  TWITTER = 'TWITTER',
+  GITHUB = 'GITHUB',
+  DISCORD = 'DISCORD',
+  TELEGRAM = 'TELEGRAM',
+}
+
+export enum SafeAppFeatures {
+  BATCHED_TRANSACTIONS = 'BATCHED_TRANSACTIONS',
+}

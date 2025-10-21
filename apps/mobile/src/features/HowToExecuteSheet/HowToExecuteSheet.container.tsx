@@ -19,6 +19,7 @@ import { ActionType } from '@/src/features/ChangeSignerSheet/utils'
 import { useTransactionData } from '@/src/features/ConfirmTx/hooks/useTransactionData'
 import useGasFee from '@/src/features/ExecuteTx/hooks/useGasFee'
 import { selectEstimatedFee } from '@/src/store/estimatedFeeSlice'
+import { setExecutionMethod, selectExecutionMethod } from '@/src/store/executionMethodSlice'
 import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getTotalFee } from '@safe-global/utils/hooks/useDefaultGasPrice'
 import { toBigInt } from 'ethers'
@@ -27,6 +28,9 @@ import { ExecutionMethod } from './types'
 import { useRelayGetRelaysRemainingV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import { RelayAvailable } from './components/RelayAvailable/RelayAvailable'
 import { RelayUnavailable } from './components/RelayUnavailable/RelayUnavailable'
+import { hasFeature } from '@safe-global/utils/utils/chains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useAppDispatch } from '@/src/store/hooks'
 
 const getActiveSignerRightNode = (
   totalFee: bigint,
@@ -38,13 +42,19 @@ const getActiveSignerRightNode = (
     return <SafeFontIcon name="check" color="$color" />
   }
 
-  return toBigInt(item.balance) < totalFee && <Text>Insufficient balance</Text>
+  return (
+    toBigInt(item.balance) < totalFee && (
+      <Container backgroundColor="$backgroundSecondary" paddingVertical="$1" paddingHorizontal="$3">
+        <Text color="$colorSecondary">Not enough gas</Text>
+      </Container>
+    )
+  )
 }
 
 export const HowToExecuteSheetContainer = () => {
   const router = useRouter()
-  const { txId, executionMethod = ExecutionMethod.WITH_PK } = useLocalSearchParams<{
-    executionMethod: ExecutionMethod
+  const dispatch = useAppDispatch()
+  const { txId } = useLocalSearchParams<{
     txId: string
   }>()
 
@@ -55,6 +65,7 @@ export const HowToExecuteSheetContainer = () => {
 
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const activeSigner = useAppSelector((state: RootState) => selectActiveSigner(state, activeSafe.address))
+  const executionMethod = useAppSelector(selectExecutionMethod)
 
   const { items, loading } = useAvailableSigners(txId, ActionType.EXECUTE)
   const { estimatedFeeParams } = useGasFee(txDetails as TransactionDetails, manualParams)
@@ -65,49 +76,59 @@ export const HowToExecuteSheetContainer = () => {
     safeAddress: activeSafe.address,
   })
 
-  const handleExecutionMethodSelect = (executionMethod: ExecutionMethod, signer?: SignerInfo) => {
+  const handleExecutionMethodSelect = (selectedMethod: ExecutionMethod, signer?: SignerInfo) => {
     if (signer && activeSigner?.value !== signer.value) {
       setTxSigner(signer)
     }
 
+    // Persist execution method to Redux store
+    dispatch(setExecutionMethod(selectedMethod))
+
     router.dismissTo({
       pathname: '/review-and-execute',
-      params: { executionMethod, txId },
+      params: { txId },
     })
   }
 
   const isRelayAvailable = relaysRemaining?.remaining && relaysRemaining.remaining > 0
+  const isRelayEnabled = hasFeature(activeChain, FEATURES.RELAYING)
 
   return (
     <SafeBottomSheet title="Choose how to execute" snapPoints={['90%']} loading={loading || isLoadingTxDetails}>
       <ScrollView>
         <View gap="$3" paddingHorizontal="$1">
           {/* Relayer Option */}
-          <Container
-            spaced={false}
-            backgroundColor={executionMethod === ExecutionMethod.WITH_RELAY ? '$backgroundSecondary' : 'transparent'}
-            borderWidth={executionMethod === ExecutionMethod.WITH_RELAY ? 0 : 1}
-            borderColor={executionMethod !== ExecutionMethod.WITH_RELAY ? '$borderLight' : undefined}
-            paddingVertical="$3"
-            paddingHorizontal="$4"
-            gap="$1"
-            onPress={() => isRelayAvailable && handleExecutionMethodSelect(ExecutionMethod.WITH_RELAY)}
-          >
-            {isRelayAvailable ? (
-              <RelayAvailable
-                isLoadingRelays={isLoadingRelays}
-                relaysRemaining={relaysRemaining}
-                executionMethod={executionMethod}
-              />
-            ) : (
-              <RelayUnavailable />
-            )}
-          </Container>
+          {isRelayEnabled && (
+            <>
+              <Container
+                spaced={false}
+                backgroundColor={
+                  executionMethod === ExecutionMethod.WITH_RELAY ? '$backgroundSecondary' : 'transparent'
+                }
+                borderWidth={executionMethod === ExecutionMethod.WITH_RELAY ? 0 : 1}
+                borderColor={executionMethod !== ExecutionMethod.WITH_RELAY ? '$borderLight' : undefined}
+                paddingVertical="$3"
+                paddingHorizontal="$4"
+                gap="$1"
+                onPress={() => isRelayAvailable && handleExecutionMethodSelect(ExecutionMethod.WITH_RELAY)}
+              >
+                {isRelayAvailable ? (
+                  <RelayAvailable
+                    isLoadingRelays={isLoadingRelays}
+                    relaysRemaining={relaysRemaining}
+                    executionMethod={executionMethod}
+                  />
+                ) : (
+                  <RelayUnavailable />
+                )}
+              </Container>
 
-          {/* Divider Text */}
-          <Text fontWeight="600" fontSize="$4" paddingHorizontal="$1" marginTop="$2">
-            Or use your signer:
-          </Text>
+              {/* Divider Text */}
+              <Text fontWeight="600" fontSize="$4" paddingHorizontal="$1" marginTop="$2">
+                Or use your signer:
+              </Text>
+            </>
+          )}
 
           {/* Signers List */}
           <View gap="$2">

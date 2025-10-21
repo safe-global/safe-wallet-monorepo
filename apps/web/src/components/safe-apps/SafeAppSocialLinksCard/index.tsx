@@ -10,7 +10,7 @@ import GitHubIcon from '@mui/icons-material/GitHub'
 import TelegramIcon from '@mui/icons-material/Telegram'
 import TwitterIcon from '@mui/icons-material/Twitter'
 import { SafeAppSocialPlatforms } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeAppData, SafeAppSocialProfile } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData, SafeAppSocialProfile } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 import DiscordIcon from '@/public/images/common/discord-icon.svg'
 import css from './styles.module.css'
