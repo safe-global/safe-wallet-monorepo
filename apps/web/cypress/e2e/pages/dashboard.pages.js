@@ -10,7 +10,7 @@ const overviewStr = 'Total'
 const sendStr = 'Send'
 const receiveStr = 'Receive'
 const viewAllStr = 'View all'
-const explorePossibleStr = 'Explore what\'s possible'
+const explorePossibleStr = "Explore what's possible"
 const swapSuggestion = 'Swap tokens instantly'
 export const copiedAppUrl = 'share/safe-app?appUrl'
 
