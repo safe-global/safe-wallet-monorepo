@@ -1,7 +1,9 @@
 import merge from 'lodash/merge'
-import type { LiveAnalysisResponse } from '../types'
+import type { LiveAnalysisResponse, LiveThreatAnalysisResult, ThreatStatus } from '../types'
 import { ContractAnalysisBuilder } from './contract-analysis.builder'
 import { RecipientAnalysisBuilder } from './recipient-analysis.builder'
+import { ThreatAnalysisResultBuilder } from './threat-analysis-result.builder'
+import { ThreatAnalysisBuilder } from './threat-analysis.builder'
 
 export class LiveAnalysisResponseBuilder {
   private response: LiveAnalysisResponse = {}
@@ -28,6 +30,13 @@ export class LiveAnalysisResponseBuilder {
     return this
   }
 
+  threat(threatAnalysis: LiveAnalysisResponse['threat']): this {
+    const [threatResult, error, loading = false] = threatAnalysis || []
+
+    this.response.threat = [threatResult, error, loading]
+    return this
+  }
+
   build(): LiveAnalysisResponse {
     return { ...this.response }
   }
@@ -35,6 +44,34 @@ export class LiveAnalysisResponseBuilder {
   // Preset methods for common scenarios
   static empty(): LiveAnalysisResponseBuilder {
     return new LiveAnalysisResponseBuilder()
+  }
+
+  static noThreat(): LiveAnalysisResponseBuilder {
+    return new LiveAnalysisResponseBuilder().threat(ThreatAnalysisBuilder.noThreat())
+  }
+
+  static maliciousThreat(): LiveAnalysisResponseBuilder {
+    return new LiveAnalysisResponseBuilder().threat(ThreatAnalysisBuilder.maliciousThreat())
+  }
+
+  static moderateThreat(): LiveAnalysisResponseBuilder {
+    return new LiveAnalysisResponseBuilder().threat(ThreatAnalysisBuilder.moderateThreat())
+  }
+
+  static failedThreat(): LiveAnalysisResponseBuilder {
+    return new LiveAnalysisResponseBuilder().threat(ThreatAnalysisBuilder.failedThreat())
+  }
+
+  static ownershipChange(): LiveAnalysisResponseBuilder {
+    return new LiveAnalysisResponseBuilder().threat(ThreatAnalysisBuilder.ownershipChange())
+  }
+
+  static moduleChange(): LiveAnalysisResponseBuilder {
+    return new LiveAnalysisResponseBuilder().threat(ThreatAnalysisBuilder.moduleChange())
+  }
+
+  static masterCopyChange(): LiveAnalysisResponseBuilder {
+    return new LiveAnalysisResponseBuilder().threat(ThreatAnalysisBuilder.masterCopyChange())
   }
 
   static verifiedContract(address?: string): LiveAnalysisResponseBuilder {

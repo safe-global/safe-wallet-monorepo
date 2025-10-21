@@ -89,16 +89,57 @@ export type AnyStatus = RecipientStatus | BridgeStatus | ContractStatus | Threat
 
 export type AnalysisResult<T extends AnyStatus> = { severity: Severity; type: T; title: string; description: string }
 
+export type MasterCopyChangeThreatAnalysisResult = AnalysisResult<ThreatStatus.MASTER_COPY_CHANGE> & {
+  /** Address of the old master copy/implementation contract */
+  before: string
+  /** Address of the new master copy/implementation contract */
+  after: string
+}
+
+export type MaliciousOrModerateThreatAnalysisResult = AnalysisResult<ThreatStatus.MALICIOUS | ThreatStatus.MODERATE> & {
+  /** A potential map of specific issues identified during threat analysis, grouped by severity */
+  issues?: Map<keyof typeof Severity, Array<string>>
+}
+
+export type ThreatAnalysisResult =
+  | MasterCopyChangeThreatAnalysisResult
+  | MaliciousOrModerateThreatAnalysisResult
+  | AnalysisResult<ThreatStatus.NO_THREAT>
+  | AnalysisResult<ThreatStatus.FAILED>
+  | AnalysisResult<ThreatStatus.OWNERSHIP_CHANGE>
+  | AnalysisResult<ThreatStatus.MODULE_CHANGE>
+  | AnalysisResult<ThreatStatus.UNOFFICIAL_FALLBACK_HANDLER>
+
 export type AddressAnalysisResults = {
-  [_group in StatusGroup]?: AnalysisResult<RecipientStatus | BridgeStatus | ContractStatus>[]
+  [_group in StatusGroup]?: (
+    | AnalysisResult<RecipientStatus | BridgeStatus | ContractStatus | ThreatStatus>
+    | MaliciousOrModerateThreatAnalysisResult
+    | MasterCopyChangeThreatAnalysisResult
+  )[]
 }
 
 export type RecipientAnalysisResults = { [address: string]: AddressAnalysisResults }
 export type ContractAnalysisResults = { [address: string]: AddressAnalysisResults }
-export type ThreatAnalysisResult = AnalysisResult<ThreatStatus>
+export type ThreatAnalysisResults = { [address: string]: AddressAnalysisResults }
+
+export type LiveThreatAnalysisResult = {
+  THREAT: [AnalysisResult<ThreatStatus>]
+  BALANCE_CHANGE: [
+    {
+      asset: {
+        type: 'NATIVE' | 'ERC20' | 'ERC721' | 'ERC1155'
+        address: `0x${string}`
+        symbol?: string
+        logo_url?: string
+      }
+      in: { value?: string; token_id: number }[]
+      out: { value?: string; token_id: number }[]
+    },
+  ]
+}
 
 export type LiveAnalysisResponse = {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
-  threat?: ThreatAnalysisResult
+  threat?: AsyncResult<LiveThreatAnalysisResult>
 }

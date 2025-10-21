@@ -1,6 +1,11 @@
 import { getOverallStatus } from '../getOverallStatus'
 import { Severity, RecipientStatus, ContractStatus, ThreatStatus, StatusGroup } from '../../types'
-import type { RecipientAnalysisResults, ContractAnalysisResults, ThreatAnalysisResult } from '../../types'
+import type {
+  RecipientAnalysisResults,
+  ContractAnalysisResults,
+  ThreatAnalysisResults,
+  ThreatAnalysisResult,
+} from '../../types'
 
 describe('getOverallStatus', () => {
   describe('undefined cases', () => {
@@ -14,15 +19,21 @@ describe('getOverallStatus', () => {
       expect(result).toBeUndefined()
     })
 
-    it('should return undefined when both recipient and contract results are undefined with threat results', () => {
-      const threatResults: ThreatAnalysisResult = {
-        type: ThreatStatus.MALICIOUS,
-        severity: Severity.CRITICAL,
-        title: 'Malicious',
-        description: 'Critical threat detected',
-      }
+    it('should return threat result when both recipient and contract results are undefined with threat results', () => {
+      const threatResults = {
+        '0xThreat1': {
+          [StatusGroup.THREAT]: {
+            type: ThreatStatus.MALICIOUS,
+            severity: Severity.CRITICAL,
+            title: 'Malicious',
+            description: 'Critical threat detected',
+          },
+        },
+      } as unknown as ThreatAnalysisResults
       const result = getOverallStatus(undefined, undefined, threatResults)
-      expect(result).toBeUndefined()
+      expect(result).toBeDefined()
+      expect(result!.severity).toBe(Severity.CRITICAL)
+      expect(result!.title).toBe('Risk detected')
     })
   })
 
@@ -280,12 +291,16 @@ describe('getOverallStatus', () => {
         },
       }
 
-      const threatResults: ThreatAnalysisResult = {
-        type: ThreatStatus.MALICIOUS,
-        severity: Severity.CRITICAL,
-        title: 'Malicious Threat',
-        description: 'Critical threat detected',
-      }
+      const threatResults = {
+        '0xThreat1': {
+          [StatusGroup.THREAT]: {
+            type: ThreatStatus.MALICIOUS,
+            severity: Severity.CRITICAL,
+            title: 'Malicious Threat',
+            description: 'Critical threat detected',
+          },
+        },
+      } as unknown as ThreatAnalysisResults
 
       const result = getOverallStatus(recipientResults, undefined, threatResults)
 
@@ -321,12 +336,16 @@ describe('getOverallStatus', () => {
         },
       }
 
-      const threatResults: ThreatAnalysisResult = {
-        type: ThreatStatus.MALICIOUS,
-        severity: Severity.CRITICAL,
-        title: 'Critical Threat',
-        description: 'Critical threat detected',
-      }
+      const threatResults = {
+        '0xThreat1': {
+          [StatusGroup.THREAT]: {
+            type: ThreatStatus.MALICIOUS,
+            severity: Severity.CRITICAL,
+            title: 'Critical Threat',
+            description: 'Critical threat detected',
+          },
+        },
+      } as unknown as ThreatAnalysisResults
 
       const result = getOverallStatus(recipientResults, contractResults, threatResults)
 
@@ -349,12 +368,16 @@ describe('getOverallStatus', () => {
         },
       }
 
-      const threatResults: ThreatAnalysisResult = {
-        type: ThreatStatus.NO_THREAT,
-        severity: Severity.INFO,
-        title: 'No Threat',
-        description: 'No threat detected',
-      }
+      const threatResults = {
+        '0xThreat1': {
+          [StatusGroup.THREAT]: {
+            type: ThreatStatus.NO_THREAT,
+            severity: Severity.INFO,
+            title: 'No Threat',
+            description: 'No threat detected',
+          },
+        },
+      } as unknown as ThreatAnalysisResults
 
       const result = getOverallStatus(recipientResults, undefined, threatResults)
 
