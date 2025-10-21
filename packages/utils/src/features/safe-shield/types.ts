@@ -41,7 +41,7 @@ export type StatusGroupType<T extends StatusGroup> = {
     | ThreatStatus.MALICIOUS
     | ThreatStatus.MODERATE
     | ThreatStatus.NO_THREAT
-    | ThreatStatus.FAILED
+    | CommonSharedStatus.FAILED
     | ThreatStatus.MASTER_COPY_CHANGE
     | ThreatStatus.OWNERSHIP_CHANGE
     | ThreatStatus.MODULE_CHANGE
@@ -78,14 +78,17 @@ export enum ThreatStatus {
   MALICIOUS = 'MALICIOUS', // 9A
   MODERATE = 'MODERATE', // 9B
   NO_THREAT = 'NO_THREAT', // 9C
-  FAILED = 'FAILED', // 9D
   MASTER_COPY_CHANGE = 'MASTER_COPY_CHANGE', // 9E
   OWNERSHIP_CHANGE = 'OWNERSHIP_CHANGE', // 9F
   MODULE_CHANGE = 'MODULE_CHANGE', // 9G
   UNOFFICIAL_FALLBACK_HANDLER = 'UNOFFICIAL_FALLBACK_HANDLER', // 9H
 }
 
-export type AnyStatus = RecipientStatus | BridgeStatus | ContractStatus | ThreatStatus
+export enum CommonSharedStatus {
+  FAILED = 'FAILED',
+}
+
+export type AnyStatus = RecipientStatus | BridgeStatus | ContractStatus | ThreatStatus | CommonSharedStatus
 
 export type AnalysisResult<T extends AnyStatus> = { severity: Severity; type: T; title: string; description: string }
 
@@ -105,14 +108,14 @@ export type ThreatAnalysisResult =
   | MasterCopyChangeThreatAnalysisResult
   | MaliciousOrModerateThreatAnalysisResult
   | AnalysisResult<ThreatStatus.NO_THREAT>
-  | AnalysisResult<ThreatStatus.FAILED>
+  | AnalysisResult<CommonSharedStatus.FAILED>
   | AnalysisResult<ThreatStatus.OWNERSHIP_CHANGE>
   | AnalysisResult<ThreatStatus.MODULE_CHANGE>
   | AnalysisResult<ThreatStatus.UNOFFICIAL_FALLBACK_HANDLER>
 
 export type AddressAnalysisResults = {
   [_group in StatusGroup]?: (
-    | AnalysisResult<RecipientStatus | BridgeStatus | ContractStatus | ThreatStatus>
+    | AnalysisResult<RecipientStatus | BridgeStatus | ContractStatus | ThreatStatus | CommonSharedStatus>
     | MaliciousOrModerateThreatAnalysisResult
     | MasterCopyChangeThreatAnalysisResult
   )[]
@@ -123,7 +126,7 @@ export type ContractAnalysisResults = { [address: string]: AddressAnalysisResult
 export type ThreatAnalysisResults = { [address: string]: AddressAnalysisResults }
 
 export type LiveThreatAnalysisResult = {
-  THREAT: [AnalysisResult<ThreatStatus>]
+  THREAT: [AnalysisResult<ThreatStatus | CommonSharedStatus>]
   BALANCE_CHANGE: [
     {
       asset: {

@@ -3,10 +3,10 @@ import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import { type AddressAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import { isAddressChange, mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
-import { SEVERITY_COLORS } from '../constants'
-import { SeverityIcon } from './SeverityIcon'
-import { AnalysisIssuesDisplay } from './AnalysisIssuesDisplay'
-import { AddressChanges } from './AddressChanges'
+import { SeverityIcon } from '../SeverityIcon'
+import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
+import { AddressChanges } from '../AddressChanges'
+import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
 
 export const AnalysisGroupCard = ({
   data,
@@ -15,8 +15,10 @@ export const AnalysisGroupCard = ({
 }): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
 
-  const visibleResults = useMemo(() => mapVisibleAnalysisResults(Object.values(data)), [data])
-  const primaryResult = useMemo(() => visibleResults[0], [visibleResults])
+  const visibleResults = useMemo(() => mapVisibleAnalysisResults(Object.values(data || [])), [data])
+  const primaryResult = useMemo(() => {
+    return visibleResults[0]
+  }, [visibleResults])
 
   if (!visibleResults.length) {
     return null
@@ -58,19 +60,11 @@ export const AnalysisGroupCard = ({
         <Box sx={{ padding: '4px 12px 16px' }}>
           <Stack gap={2}>
             {visibleResults.map((result, index) => (
-              <Box key={index} bgcolor="background.main" borderRadius="4px" overflow="hidden">
-                <Box sx={{ borderLeft: `4px solid ${SEVERITY_COLORS[result.severity].main}`, padding: '12px' }}>
-                  <Stack gap={2}>
-                    <Typography variant="body2" color="primary.light">
-                      {result.description}
-                    </Typography>
+              <AnalysisGroupCardItem key={index} severity={result.severity} description={result.description}>
+                <AnalysisIssuesDisplay result={result} />
 
-                    <AnalysisIssuesDisplay result={result} />
-
-                    {isAddressChange(result) && <AddressChanges result={result} />}
-                  </Stack>
-                </Box>
-              </Box>
+                {isAddressChange(result) && <AddressChanges result={result} />}
+              </AnalysisGroupCardItem>
             ))}
           </Stack>
         </Box>
