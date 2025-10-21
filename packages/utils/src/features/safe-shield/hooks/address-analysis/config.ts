@@ -1,8 +1,8 @@
 // Address check messages
 export const AddressCheckMessages = {
-  ADDRESS_BOOK: { title: 'Known recipient', description: 'Recipient is in the address book.' },
-  OWNED_SAFE: { title: 'Known recipient', description: 'Recipient is an owned Safe.' },
-  UNKNOWN: { title: 'Unknown recipient', description: 'Recipient is not in the address book and not an owned Safe.' },
+  ADDRESS_BOOK: { title: 'Known recipient', description: 'This address is in your address book.' },
+  OWNED_SAFE: { title: 'Known recipient', description: 'This address is a Safe you own.' },
+  UNKNOWN: { title: 'Unknown recipient', description: 'This address is not in your address book or a Safe you own.' },
 } as const
 
 export type AddressCheckType = keyof typeof AddressCheckMessages
