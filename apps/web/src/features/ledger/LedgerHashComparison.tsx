@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -10,23 +9,16 @@ import {
   IconButton,
   Alert,
   Stack,
+  Paper,
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import ledgerHashStore from './store'
+import CopyButton from '@/components/common/CopyButton'
 
 const LedgerHashComparison = () => {
   const hash = ledgerHashStore.useStore()
-  const [open, setOpen] = useState(false)
-
-  // Open dialog when hash is set, close when cleared
-  useEffect(() => {
-    if (hash) {
-      setOpen(true)
-    } else {
-      setOpen(false)
-    }
-  }, [hash])
+  const open = !!hash
 
   const handleClose = () => {
     ledgerHashStore.setStore(undefined)
@@ -48,9 +40,16 @@ const LedgerHashComparison = () => {
         </Alert>
 
         <Stack justifyContent="center" alignItems="center" direction="row">
-          <Box sx={{ maxWidth: '180px' }}>
+          <Paper
+            sx={{ maxWidth: '180px', boxSizing: 'content-box', px: 12, py: 1, position: 'relative' }}
+            elevation={3}
+          >
             <HexEncodedData hexData={hash || ''} highlightFirstBytes={false} limit={9999} />
-          </Box>
+
+            <Box position="absolute" top={2} right={2}>
+              <CopyButton text={hash || ''} />
+            </Box>
+          </Paper>
         </Stack>
       </DialogContent>
       <DialogActions>
