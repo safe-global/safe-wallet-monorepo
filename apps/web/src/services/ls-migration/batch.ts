@@ -18,17 +18,19 @@ export const migrateBatchTxs = (batchSliceState: BatchTxsState) => {
 
       // Migrate txDetails to txData in items
       const items = batchSliceState[chainId][safeAddress].items
-      items.forEach((batch) => {
-        if (batch.txDetails && batch.txDetails.txData && !batch.txData) {
-          batch.txData = {
-            to: batch.txDetails.txData.to.value,
-            value: batch.txDetails.txData.value ?? '0',
-            data: batch.txDetails.txData.hexData ?? '0x',
-            operation: OperationType.Call, // We only support calls
+      if (items && Array.isArray(items)) {
+        items.forEach((batch) => {
+          if (batch.txDetails && batch.txDetails.txData && !batch.txData) {
+            batch.txData = {
+              to: batch.txDetails.txData.to.value,
+              value: batch.txDetails.txData.value ?? '0',
+              data: batch.txDetails.txData.hexData ?? '0x',
+              operation: OperationType.Call, // We only support calls
+            }
+            delete batch.txDetails
           }
-          delete batch.txDetails
-        }
-      })
+        })
+      }
     })
   })
 
