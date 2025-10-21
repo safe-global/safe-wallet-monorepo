@@ -7,7 +7,6 @@ import { useAddressBookCheck } from './address-analysis/address-book-check/useAd
 import { useAddressActivity } from './address-analysis/address-activity/useAddressActivity'
 import { type RecipientAnalysisResults, type ContractAnalysisResults } from '../types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { useMemoDeepCompare } from './util-hooks/useMemoDeepCompare'
 import { mergeAnalysisResults } from '../utils'
 
 /**
@@ -46,7 +45,7 @@ export function useCounterpartyAnalysis({
   const [hasTriggered, setHasTriggered] = useState(false)
 
   // Extract transaction data from SafeTransaction
-  const transactionData = useMemoDeepCompare(() => {
+  const transactionData = useMemo(() => {
     if (safeTx?.data.to) {
       return {
         to: getAddress(safeTx.data.to),
