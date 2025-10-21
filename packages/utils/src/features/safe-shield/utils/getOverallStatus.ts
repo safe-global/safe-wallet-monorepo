@@ -1,8 +1,9 @@
-import type { ContractAnalysisResults, RecipientAnalysisResults, ThreatAnalysisResult } from '../types'
+import type { AnyStatus, ContractAnalysisResults, RecipientAnalysisResults, ThreatAnalysisResults } from '../types'
 import type { Severity } from '../types'
 import type { AnalysisResult } from '../types'
 import { getPrimaryResult } from './analysisUtils'
 import { SEVERITY_TO_TITLE } from '../constants'
+import { isThreatAnalysisResult } from './mapVisibleAnalysisResults'
 
 /**
  * Determines the overall security status by analyzing all available analysis results.
@@ -30,14 +31,14 @@ import { SEVERITY_TO_TITLE } from '../constants'
 export const getOverallStatus = (
   recipientResults?: RecipientAnalysisResults,
   contractResults?: ContractAnalysisResults,
-  threatResults?: ThreatAnalysisResult,
+  threatResults?: ThreatAnalysisResults,
 ): { severity: Severity; title: string } | undefined => {
-  if (!recipientResults && !contractResults) {
+  if (!recipientResults && !contractResults && !threatResults) {
     return undefined
   }
 
   // Flatten all AnalysisResult objects from contract, recipient, and threat into one array
-  const allResults: AnalysisResult<any>[] = []
+  const allResults: AnalysisResult<AnyStatus>[] = []
 
   // Add contract and recipient results
   for (const data of [contractResults, recipientResults]) {
@@ -54,7 +55,13 @@ export const getOverallStatus = (
 
   // Add threat result
   if (threatResults) {
-    allResults.push(threatResults)
+    for (const addressResults of Object.values(threatResults)) {
+      for (const groupResults of Object.values(addressResults)) {
+        if (groupResults && isThreatAnalysisResult(groupResults)) {
+          allResults.push(groupResults)
+        }
+      }
+    }
   }
 
   const primaryResult = getPrimaryResult(allResults)

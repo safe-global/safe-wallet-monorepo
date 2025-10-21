@@ -36,3 +36,6 @@ export const PRIVACY_POLICY_URL =
   'https://s3.eu-central-1.amazonaws.com/mobile.app.safe.global/SafeLabsGmbHPrivacyPolicy_v1.0.html'
 export const TERMS_OF_USE_URL =
   'https://s3.eu-central-1.amazonaws.com/mobile.app.safe.global/MobileTermsAndConditions_v1.0.html'
+
+export const APP_STORE_URL = 'https://apps.apple.com/app/id6748754793'
+export const GOOGLE_PLAY_URL = 'https://play.google.com/store/apps/details?id=global.safe.mobileapp'

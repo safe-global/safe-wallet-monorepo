@@ -36,10 +36,12 @@ export type EstimationResponse = {
   recommendedNonce: number
   safeTxGas: string
 }
+export type Operation = 0 | 1
 export type GetEstimationDto = {
   to: string
   value: string
   data?: string | null
-  operation: number
+  /** Operation type: 0 for CALL, 1 for DELEGATE */
+  operation: Operation
 }
 export const { useEstimationsGetEstimationV2Mutation } = injectedRtkApi

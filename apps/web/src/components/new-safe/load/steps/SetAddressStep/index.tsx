@@ -22,7 +22,7 @@ import { useAddressResolver } from '@/hooks/useAddressResolver'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import AddressInput from '@/components/common/AddressInput'
 import React from 'react'
-import { getSafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useChainId from '@/hooks/useChainId'
 import { useAppSelector } from '@/store'
 import { selectAddedSafes } from '@/store/addedSafesSlice'
@@ -44,6 +44,7 @@ type FormData = {
 const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeFormData>) => {
   const currentChainId = useChainId()
   const addedSafes = useAppSelector((state) => selectAddedSafes(state, currentChainId))
+  const [triggerGetSafe] = useLazySafesGetSafeV1Query()
   const formMethods = useForm<FormData>({
     mode: 'all',
     defaultValues: {
@@ -72,7 +73,10 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
     }
 
     try {
-      await getSafeInfo(currentChainId, address)
+      const result = await triggerGetSafe({ chainId: currentChainId, safeAddress: address }).unwrap()
+      if (!result) {
+        return 'Address given is not a valid Safe Account address'
+      }
     } catch (error) {
       return 'Address given is not a valid Safe Account address'
     }

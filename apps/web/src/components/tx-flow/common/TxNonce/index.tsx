@@ -299,7 +299,7 @@ const TxNonce = ({ canEdit = true }: { canEdit?: boolean } = {}) => {
   const { nonce, recommendedNonce, isReadOnly } = useContext(SafeTxContext)
 
   return (
-    <Box data-testid="nonce-fld" display="flex" alignItems="center" gap={1}>
+    <Box data-testid="nonce-fld" display="flex" alignItems="center" gap={1} className={css.nonce}>
       Nonce{' '}
       <Typography component="span" fontWeight={700}>
         #

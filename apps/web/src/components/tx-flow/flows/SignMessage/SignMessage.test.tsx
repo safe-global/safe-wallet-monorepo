@@ -3,7 +3,7 @@ import type Safe from '@safe-global/protocol-kit'
 import { act } from 'react'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { hexlify, zeroPadValue, toUtf8Bytes } from 'ethers'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import SignMessage from './SignMessage'
 
 import * as useIsWrongChainHook from '@/hooks/useIsWrongChain'
@@ -280,7 +280,7 @@ describe('SignMessage', () => {
           value: zeroPadValue('0x01', 20),
         },
         chainId: '5',
-      } as SafeInfo,
+      } as SafeState,
       messageText,
     )
     const msg = {
@@ -438,7 +438,7 @@ describe('SignMessage', () => {
           value: zeroPadValue('0x01', 20),
         },
         chainId: '5',
-      } as SafeInfo,
+      } as SafeState,
       messageText,
     )
     const msg = {
@@ -527,7 +527,7 @@ describe('SignMessage', () => {
           value: zeroPadValue('0x01', 20),
         },
         chainId: '5',
-      } as SafeInfo,
+      } as SafeState,
       messageText,
     )
     const msg = {
@@ -591,7 +591,7 @@ describe('SignMessage', () => {
           value: zeroPadValue('0x01', 20),
         },
         chainId: '5',
-      } as SafeInfo,
+      } as SafeState,
       messageText,
     )
     const msg = {

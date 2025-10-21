@@ -2,7 +2,8 @@
 
 import { formatUnits } from 'ethers'
 import { getBalances } from '@safe-global/safe-gateway-typescript-sdk'
-import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import { WebhookType } from './webhook-types'
@@ -41,11 +42,13 @@ const getTokenInfo = async (
     name: 'Token',
   }
 
-  let tokenInfo: TokenInfo | undefined
+  let tokenInfo: Balance['tokenInfo'] | undefined
 
   try {
     const balances = await getBalances(chainId, safeAddress, DEFAULT_CURRENCY)
-    tokenInfo = balances.items.find((token) => token.tokenInfo.address === tokenAddress)?.tokenInfo
+    tokenInfo = balances.items.find((token) => token.tokenInfo.address === tokenAddress)?.tokenInfo as
+      | Balance['tokenInfo']
+      | undefined
   } catch {
     // Swallow error
   }

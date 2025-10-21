@@ -42,11 +42,11 @@ import type {
   TransactionData,
 } from '@safe-global/safe-gateway-typescript-sdk'
 import { type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { Operation } from '@safe-global/store/gateway/types'
 import {
   ConfirmationViewTypes,
   ConflictType,
   DetailedExecutionInfoType,
-  Operation,
   TransactionInfoType,
   TransactionListItemType,
   TransactionStatus,

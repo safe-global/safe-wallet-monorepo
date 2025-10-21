@@ -1,6 +1,11 @@
 import { type ReactElement, useContext } from 'react'
 import { Box } from '@mui/material'
-import type { ContractAnalysisResults, RecipientAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
+import type {
+  AddressAnalysisResults,
+  ContractAnalysisResults,
+  LiveThreatAnalysisResult,
+  RecipientAnalysisResults,
+} from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
 import { SafeShieldAnalysisError } from './SafeShieldAnalysisError'
 import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
@@ -10,19 +15,30 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import isEmpty from 'lodash/isEmpty'
 
+const normalizeThreatData = (
+  threat?: AsyncResult<LiveThreatAnalysisResult>,
+): Record<string, AddressAnalysisResults> => {
+  if (threat === undefined) return {}
+
+  return { ['0x']: { THREAT: threat[0]?.THREAT } }
+}
+
 export const SafeShieldContent = ({
   recipient,
   contract,
+  threat,
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
+  threat?: AsyncResult<LiveThreatAnalysisResult>
 }): ReactElement => {
   const { safeTx } = useContext(SafeTxContext)
   const [recipientResults, recipientError, recipientLoading = false] = recipient || []
   const [contractResults, contractError, contractLoading = false] = contract || []
-
-  const loading = recipientLoading || contractLoading
-  const error = recipientError || contractError
+  const [threatResults, threatError, threatLoading = false] = threat || []
+  const normalizedThreatData = normalizeThreatData(threat)
+  const loading = recipientLoading || contractLoading || threatLoading
+  const error = recipientError || contractError || threatError
   const empty = isEmpty(recipientResults) && isEmpty(contractResults) && !safeTx
 
   return (
@@ -44,6 +60,8 @@ export const SafeShieldContent = ({
           )}
 
           {contractResults && Object.keys(contractResults).length > 0 && <AnalysisGroupCard data={contractResults} />}
+
+          {threatResults && Object.keys(threatResults).length > 0 && <AnalysisGroupCard data={normalizedThreatData} />}
 
           <TenderlySimulation safeTx={safeTx} />
         </Box>

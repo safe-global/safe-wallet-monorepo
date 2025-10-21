@@ -18,7 +18,7 @@ export function JSONTab({ txDetails }: JSONTabProps) {
   }
 
   return (
-    <Tabs.ScrollView contentContainerStyle={{ padding: 16, marginTop: 16 }}>
+    <Tabs.ScrollView contentContainerStyle={{ padding: 16, marginTop: 8 }}>
       <Container>
         <View position="absolute" right={10} top={10} zIndex={1000}>
           <CopyButton value={jsonData} color="$colorSecondary" size={16} text="JSON value copied to clipboard" />

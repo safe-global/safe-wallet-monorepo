@@ -1,8 +1,8 @@
 import type { SafeVersion, TransactionOptions } from '@safe-global/types-kit'
 import { type TransactionResponse, type Eip1193Provider, type Provider } from 'ethers'
 import semverSatisfies from 'semver/functions/satisfies'
-
-import { getSafeInfo, type SafeInfo, relayTransaction } from '@safe-global/safe-gateway-typescript-sdk'
+import { relayTransaction } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState, cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getReadOnlyProxyFactoryContract } from '@/services/contracts/safeContracts'
 import type { UrlObject } from 'url'
@@ -141,17 +141,43 @@ export const estimateSafeCreationGas = async (
   return gas
 }
 
-export const pollSafeInfo = async (chainId: string, safeAddress: string): Promise<SafeInfo> => {
-  // exponential delay between attempts for around 4 min
-  return backOff(() => getSafeInfo(chainId, safeAddress), {
-    startingDelay: 750,
-    maxDelay: 20000,
-    numOfAttempts: 19,
-    retry: (e) => {
-      console.info('waiting for client-gateway to provide safe information', e)
-      return true
+/**
+ * Poll for safe info after creation until the safe is indexed by client-gateway
+ * Uses RTK Query with exponential backoff retry (19 attempts over ~4 minutes)
+ */
+export const pollSafeInfo = async (chainId: string, safeAddress: string): Promise<SafeState> => {
+  const { getStoreInstance } = await import('@/store')
+  const store = getStoreInstance()
+
+  // Use exponential backoff to retry RTK Query calls
+  return backOff(
+    async () => {
+      const queryAction = cgwApi.endpoints.safesGetSafeV1.initiate(
+        { chainId, safeAddress },
+        {
+          subscribe: false,
+          forceRefetch: true,
+        },
+      )
+
+      const queryPromise = store.dispatch(queryAction)
+      try {
+        const result = await queryPromise.unwrap()
+        return result
+      } finally {
+        queryPromise.unsubscribe()
+      }
     },
-  })
+    {
+      startingDelay: 750,
+      maxDelay: 20000,
+      numOfAttempts: 19,
+      retry: (e) => {
+        console.info('waiting for client-gateway to provide safe information', e)
+        return true
+      },
+    },
+  )
 }
 
 export const getRedirect = (

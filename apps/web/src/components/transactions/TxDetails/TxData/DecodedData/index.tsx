@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { Stack, Typography } from '@mui/material'
-import { type AddressEx, type TransactionDetails, Operation } from '@safe-global/safe-gateway-typescript-sdk'
-
+import { type AddressEx, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import { Operation } from '@safe-global/store/gateway/types'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { MethodDetails } from '@/components/transactions/TxDetails/TxData/DecodedData/MethodDetails'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'

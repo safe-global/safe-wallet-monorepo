@@ -1,6 +1,6 @@
 import { useVisibleTokens } from '@/components/tx-flow/flows/TokenTransfer/utils'
 import { type ReactElement, useContext, useEffect, useMemo, useState } from 'react'
-import { type TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form'
 import {
   Alert,
@@ -44,7 +44,7 @@ import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
 import uniq from 'lodash/uniq'
 
-export const AutocompleteItem = (item: { tokenInfo: TokenInfo; balance: string }): ReactElement => (
+export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balance: string }): ReactElement => (
   <Grid
     container
     sx={{
