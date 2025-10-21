@@ -1,10 +1,9 @@
 import type {
   LabelQueuedItem,
   ConflictHeaderQueuedItem,
-  DateLabel,
-  TransactionItemPage,
+  TransactionQueuedItem,
+  QueuedItemPage,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import type { TransactionListItem } from '@safe-global/store/gateway/types'
 import { LabelValue, TransactionListItemType, DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
 import { createListenerMiddleware } from '@reduxjs/toolkit'
 
@@ -54,7 +53,7 @@ describe('txQueueSlice', () => {
           missingSigners: [],
         },
       },
-    } as unknown as TransactionListItem
+    } as unknown as TransactionQueuedItem
 
     const action = txQueueSlice.actions.set({
       loading: false,
@@ -97,7 +96,7 @@ describe('txQueueSlice', () => {
           missingSigners: [],
         },
       },
-    } as unknown as TransactionListItem
+    } as unknown as TransactionQueuedItem
 
     const action = txQueueSlice.actions.set({
       loading: false,
@@ -159,11 +158,6 @@ describe('txQueueSlice', () => {
       dispatch: jest.fn(),
     }
 
-    const dateLabel: DateLabel = {
-      type: TransactionListItemType.DATE_LABEL,
-      timestamp: 0,
-    }
-
     const label: LabelQueuedItem = {
       label: LabelValue.Queued,
       type: TransactionListItemType.LABEL,
@@ -178,7 +172,7 @@ describe('txQueueSlice', () => {
       loading: false,
       loaded: true,
       data: {
-        results: [dateLabel, label, conflictHeader],
+        results: [label, conflictHeader],
       },
     })
 
@@ -210,7 +204,7 @@ describe('txQueueSlice', () => {
       transaction: {
         id: '0x456',
       },
-    } as TransactionListItem
+    } as TransactionQueuedItem
 
     const action = txQueueSlice.actions.set({
       loading: false,
@@ -227,7 +221,7 @@ describe('txQueueSlice', () => {
 
   it('should not dispatch event if signature is still missing', () => {
     const listenerApi = {
-      getState: jest.fn(() => ({}) as RootState),
+      getState: jest.fn(() => ({} as RootState)),
       dispatch: jest.fn(),
     }
 
@@ -246,9 +240,9 @@ describe('txQueueSlice', () => {
           ],
         },
       },
-    } as TransactionListItem
+    } as TransactionQueuedItem
 
-    const payload: TransactionItemPage = {
+    const payload: QueuedItemPage = {
       results: [transaction],
     }
 

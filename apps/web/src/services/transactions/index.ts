@@ -1,4 +1,7 @@
 import { getModuleTransactions, getTransactionHistory } from '@safe-global/safe-gateway-typescript-sdk'
+import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { getStoreInstance } from '@/store'
 
 export const getTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone
 
@@ -29,4 +32,30 @@ export const getModuleTransactionId = async (chainId: string, safeAddress: strin
   const { results } = await getModuleTransactions(chainId, safeAddress, { transaction_hash: txHash })
   if (results.length === 0) throw new Error('module transaction not found')
   return results[0].transaction.id
+}
+
+export const getTransactionQueue = async (
+  chainId: string,
+  safeAddress: string,
+  options?: { trusted?: boolean },
+  pageUrl?: string,
+): Promise<QueuedItemPage> => {
+  const store = getStoreInstance()
+
+  // If pageUrl is provided, parse cursor from it
+  const cursor = pageUrl ? new URL(pageUrl).searchParams.get('cursor') || undefined : undefined
+
+  const queryThunk = cgwApi.endpoints.transactionsGetTransactionQueueV1.initiate({
+    chainId,
+    safeAddress,
+    trusted: options?.trusted,
+    cursor,
+  })
+  const queryAction = store.dispatch(queryThunk)
+
+  try {
+    return await queryAction.unwrap()
+  } finally {
+    queryAction.unsubscribe()
+  }
 }

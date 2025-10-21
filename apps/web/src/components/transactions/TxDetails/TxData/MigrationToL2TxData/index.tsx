@@ -73,7 +73,7 @@ export const MigrationToL2TxData = ({
 
   return (
     <Box>
-      <MigrateToL2Information variant="history" txData={txData} />
+      <MigrateToL2Information variant="history" />
 
       {realSafeTxError ? (
         <ErrorMessage>{realSafeTxError.message}</ErrorMessage>

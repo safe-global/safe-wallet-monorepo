@@ -1,8 +1,7 @@
-import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Alert, AlertTitle, Box, SvgIcon, Typography } from '@mui/material'
 import InfoOutlinedIcon from '@/public/images/notifications/info.svg'
 
-export const MigrateToL2Information = ({ variant }: { variant: 'history' | 'queue'; txData?: TransactionData }) => {
+export const MigrateToL2Information = ({ variant }: { variant: 'history' | 'queue' }) => {
   return (
     <Box>
       <Alert severity="info" icon={<SvgIcon component={InfoOutlinedIcon} color="info" />}>

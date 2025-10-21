@@ -17,7 +17,6 @@ import {
   isVaultRedeemTxInfo,
 } from '@/utils/transaction-guards'
 import { type ReactNode, useContext, useMemo, useRef, useState, useEffect } from 'react'
-import type { NarrowConfirmationViewProps } from './types'
 import SettingsChange from './SettingsChange'
 import ChangeThreshold from './ChangeThreshold'
 import BatchTransactions from './BatchTransactions'
@@ -56,11 +55,7 @@ type ConfirmationViewProps = {
   withDecodedData?: boolean
 }
 
-const getConfirmationViewComponent = ({
-  txInfo,
-  txData,
-  txFlow,
-}: NarrowConfirmationViewProps & { txFlow?: ReactElement }) => {
+const getConfirmationViewComponent = ({ txInfo, txData, txFlow }: TransactionPreview & { txFlow?: ReactElement }) => {
   if (txData && isManageSignersView(txInfo, txData)) return <ManageSigners txInfo={txInfo} txData={txData} />
 
   if (isChangeThresholdView(txInfo)) return <ChangeThreshold txInfo={txInfo} />
@@ -81,16 +76,14 @@ const getConfirmationViewComponent = ({
 
   if (isAnyStakingTxInfo(txInfo)) return <StakingTx txInfo={txInfo} />
 
-  // @ts-expect-error TODO: Fix these if there is time
   if (isVaultDepositTxInfo(txInfo)) return <VaultDepositConfirmation txInfo={txInfo} />
 
-  // @ts-expect-error TODO: Fix these if there is time
   if (isVaultRedeemTxInfo(txInfo)) return <VaultRedeemConfirmation txInfo={txInfo} />
 
   if (isCustomTxInfo(txInfo) && isSafeUpdateTxData(txData)) return <UpdateSafe txData={txData} />
 
   if (isCustomTxInfo(txInfo) && isSafeMigrationTxData(txData)) {
-    return <MigrateToL2Information variant="queue" txData={txData} />
+    return <MigrateToL2Information variant="queue" />
   }
 
   if (isCustomTxInfo(txInfo) && txData && isNestedSafeCreation(txData)) {
@@ -122,7 +115,7 @@ const ConfirmationView = ({
   }, [])
 
   const ConfirmationViewComponent = useMemo(() => {
-    return details
+    return details && details.txData && details.txInfo
       ? getConfirmationViewComponent({
           txInfo: details.txInfo,
           txData: details.txData,
@@ -138,7 +131,7 @@ const ConfirmationView = ({
 
   return (
     <>
-      <TransactionWarnings txData={details?.txData} />
+      <TransactionWarnings txData={details?.txData ?? undefined} />
       {withDecodedData &&
         (ConfirmationViewComponent ||
           (details && showTxDetails && (

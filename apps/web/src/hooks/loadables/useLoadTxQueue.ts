@@ -1,12 +1,12 @@
-import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { TransactionItemPage, QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useEffect, useState } from 'react'
-import { getTransactionQueue } from '@safe-global/safe-gateway-typescript-sdk'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '../useSafeInfo'
 import { Errors, logError } from '@/services/exceptions'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
+import { getTransactionQueue } from '@/services/transactions'
 
-export const useLoadTxQueue = (): AsyncResult<TransactionItemPage> => {
+export const useLoadTxQueue = (): AsyncResult<QueuedItemPage> => {
   const { safe, safeAddress, safeLoaded } = useSafeInfo()
   const { chainId, txQueuedTag, txHistoryTag } = safe
   const [updatedTxId, setUpdatedTxId] = useState<string>('')
@@ -14,7 +14,7 @@ export const useLoadTxQueue = (): AsyncResult<TransactionItemPage> => {
   const reloadTag = (txQueuedTag ?? '') + (txHistoryTag ?? '') + updatedTxId
 
   // Re-fetch when chainId/address, or txQueueTag change
-  const [data, error, loading] = useAsync<TransactionListPage>(
+  const [data, error, loading] = useAsync<QueuedItemPage>(
     () => {
       if (!safeLoaded) return
       if (!safe.deployed) return Promise.resolve({ results: [] })

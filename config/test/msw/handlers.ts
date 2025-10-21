@@ -4,7 +4,7 @@ import { Balances } from '@safe-global/store/src/gateway/AUTO_GENERATED/balances
 import { CollectiblePage } from '@safe-global/store/src/gateway/AUTO_GENERATED/collectibles'
 import type { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import type { MasterCopy } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { TransactionDetails, QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { defaultMockSafeApps } from './mockSafeApps'
 
 const iso4217Currencies = ['USD', 'EUR', 'GBP']
@@ -341,4 +341,17 @@ export const handlers = (GATEWAY_URL: string) => [
       confirmations: [],
     })
   }),
+
+  // Transaction queue endpoint for paginated transaction queue
+  http.get<{ chainId: string; safeAddress: string }, never, QueuedItemPage>(
+    `${GATEWAY_URL}/v1/chains/:chainId/safes/:safeAddress/transactions/queued`,
+    () => {
+      return HttpResponse.json({
+        count: 2,
+        next: null,
+        previous: null,
+        results: [],
+      })
+    },
+  ),
 ]

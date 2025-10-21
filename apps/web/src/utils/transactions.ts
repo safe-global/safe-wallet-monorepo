@@ -5,6 +5,7 @@ import type {
   TransactionDetails,
   TransactionItemPage,
   Transaction,
+  QueuedItemPage,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 import type { ExecutionInfo } from '@safe-global/store/gateway/types'
@@ -18,6 +19,7 @@ import {
   isMultisigDetailedExecutionInfo,
   isMultisigExecutionInfo,
   isTransactionListItem,
+  isTransactionQueuedItem,
   isTransferTxInfo,
   isTxQueued,
 } from './transaction-guards'
@@ -192,12 +194,12 @@ export const getTxOptions = (params: AdvancedParameters, currentChain: Chain | u
   return txOptions
 }
 
-export const getQueuedTransactionCount = (txPage?: TransactionItemPage): string => {
+export const getQueuedTransactionCount = (txPage?: QueuedItemPage): string => {
   if (!txPage) {
     return '0'
   }
 
-  const queuedTxs = txPage.results.filter(isTransactionListItem)
+  const queuedTxs = txPage.results.filter(isTransactionQueuedItem)
 
   const queuedTxsByNonce = uniqBy(queuedTxs, (item) =>
     isMultisigExecutionInfo(item.transaction.executionInfo) ? item.transaction.executionInfo.nonce : '',

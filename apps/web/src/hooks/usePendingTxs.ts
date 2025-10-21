@@ -1,18 +1,19 @@
 import { LabelValue } from '@safe-global/store/gateway/types'
-import type { TransactionItemPage, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { Transaction, QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useMemo } from 'react'
-import { getTransactionQueue } from '@safe-global/safe-gateway-typescript-sdk'
 import { useAppSelector } from '@/store'
 import { selectPendingTxIdsBySafe } from '@/store/pendingTxsSlice'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import {
-  isConflictHeaderListItem,
+  isConflictHeaderQueuedItem,
   isLabelListItem,
   isMultisigExecutionInfo,
   isTransactionListItem,
+  isTransactionQueuedItem,
 } from '@/utils/transaction-guards'
 import useSafeInfo from './useSafeInfo'
 import { shallowEqual } from 'react-redux'
+import { getTransactionQueue } from '@/services/transactions'
 
 export const usePendingTxIds = (): Array<Transaction['id']> => {
   const { safe, safeAddress } = useSafeInfo()
@@ -34,15 +35,15 @@ export const useShowUnsignedQueue = (): boolean => {
   return safe.threshold === 1 && hasPending
 }
 
-export const filterUntrustedQueue = (untrustedQueue: TransactionItemPage, pendingIds: Array<Transaction['id']>) => {
+export const filterUntrustedQueue = (untrustedQueue: QueuedItemPage, pendingIds: Array<Transaction['id']>) => {
   // Only keep labels and pending unsigned transactions
-  const results = untrustedQueue.results
-    .filter((item) => !isTransactionListItem(item) || pendingIds.includes(item.transaction.id))
-    .filter((item) => !isConflictHeaderListItem(item))
+  const results = (untrustedQueue.results as Array<any>)
+    .filter((item) => !isTransactionQueuedItem(item) || pendingIds.includes(item.transaction.id))
+    .filter((item) => !isConflictHeaderQueuedItem(item))
     .filter(
       (item) =>
-        !isTransactionListItem(item) ||
-        (isTransactionListItem(item) &&
+        !isTransactionQueuedItem(item) ||
+        (isTransactionQueuedItem(item) &&
           isMultisigExecutionInfo(item.transaction.executionInfo) &&
           item.transaction.executionInfo.confirmationsSubmitted === 0),
     )
@@ -57,14 +58,17 @@ export const filterUntrustedQueue = (untrustedQueue: TransactionItemPage, pendin
   return transactions.length ? { results } : undefined
 }
 
-export function getNextTransactions(queue: TransactionItemPage): TransactionItemPage {
-  const queueLabelIndex = queue.results.findIndex((item) => isLabelListItem(item) && item.label === LabelValue.Queued)
-  const nextTransactions = queueLabelIndex === -1 ? queue.results : queue.results.slice(0, queueLabelIndex)
-  return { results: nextTransactions }
+export function getNextTransactions(queue: QueuedItemPage): QueuedItemPage {
+  const queueLabelIndex = (queue.results as Array<any>).findIndex(
+    (item) => isLabelListItem(item) && item.label === LabelValue.Queued,
+  )
+  const nextTransactions =
+    queueLabelIndex === -1 ? queue.results : (queue.results as Array<any>).slice(0, queueLabelIndex)
+  return { results: nextTransactions as any }
 }
 
 export const usePendingTxsQueue = (): {
-  page?: TransactionItemPage
+  page?: QueuedItemPage
   error?: string
   loading: boolean
 } => {
@@ -73,7 +77,7 @@ export const usePendingTxsQueue = (): {
   const pendingIds = usePendingTxIds()
   const hasPending = pendingIds.length > 0
 
-  const [untrustedNext, error, loading] = useAsync<TransactionListPage | undefined>(
+  const [untrustedNext, error, loading] = useAsync<QueuedItemPage | undefined>(
     async () => {
       if (!hasPending) return
       const untrustedQueue = await getTransactionQueue(chainId, safeAddress, { trusted: false })

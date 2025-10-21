@@ -4,7 +4,7 @@ import {
   LabelValue,
   TransactionListItemType,
 } from '@safe-global/store/gateway/types'
-import type { TransactionItemPage, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { QueuedItemPage, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import usePendingActions from '@/hooks/usePendingActions'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { renderHook, waitFor } from '@/tests/test-utils'
@@ -13,12 +13,9 @@ import type { EIP1193Provider } from '@web3-onboard/core'
 import * as useWallet from '@/hooks/wallets/useWallet'
 import * as useTxQueue from '@/hooks/useTxQueue'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
-import { getTransactionQueue } from '@safe-global/safe-gateway-typescript-sdk'
-
-jest.mock('@safe-global/safe-gateway-typescript-sdk', () => ({
-  ...jest.requireActual('@safe-global/safe-gateway-typescript-sdk'),
-  getTransactionQueue: jest.fn(),
-}))
+import { http, HttpResponse } from 'msw'
+import { server } from '@/tests/server'
+import { GATEWAY_URL } from '@/config/gateway'
 
 describe('usePendingActions hook', () => {
   beforeEach(() => {
@@ -29,11 +26,15 @@ describe('usePendingActions hook', () => {
     const chainId = '5'
     const safeAddress = toBeHex('0x1', 20)
 
-    ;(getTransactionQueue as jest.Mock).mockResolvedValue({
-      next: undefined,
-      previous: undefined,
-      results: [],
-    })
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/chains/${chainId}/safes/${safeAddress}/transactions/queued`, () => {
+        return HttpResponse.json({
+          next: undefined,
+          previous: undefined,
+          results: [],
+        })
+      }),
+    )
 
     const { result } = renderHook(() => usePendingActions(chainId, safeAddress))
     expect(result.current).toEqual({ totalQueued: '', totalToSign: '' })
@@ -72,6 +73,8 @@ describe('usePendingActions hook', () => {
   })
 
   it('should return 2 queued txs and 1 pending signature for non-current Safe with a queue', async () => {
+    const chainId = '5'
+    const safeAddress = toBeHex('0x1', 20)
     const walletAddress = toBeHex('0x789', 20)
     const mockWallet = {
       address: walletAddress,
@@ -93,7 +96,7 @@ describe('usePendingActions hook', () => {
       safeLoaded: true,
     })
 
-    const page: TransactionItemPage = {
+    const page: QueuedItemPage = {
       next: undefined,
       previous: undefined,
       results: [
@@ -130,10 +133,11 @@ describe('usePendingActions hook', () => {
       ],
     }
 
-    ;(getTransactionQueue as jest.Mock).mockResolvedValue(page)
-
-    const chainId = '5'
-    const safeAddress = toBeHex('0x1', 20)
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/chains/${chainId}/safes/${safeAddress}/transactions/queued`, () => {
+        return HttpResponse.json(page)
+      }),
+    )
 
     const { result } = renderHook(() => usePendingActions(chainId, safeAddress))
 
@@ -165,7 +169,7 @@ describe('usePendingActions hook', () => {
       safeLoaded: true,
     })
 
-    const page: TransactionItemPage = {
+    const page: QueuedItemPage = {
       next: undefined,
       previous: undefined,
       results: [

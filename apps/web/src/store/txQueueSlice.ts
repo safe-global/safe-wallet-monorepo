@@ -1,22 +1,22 @@
-import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { listenerMiddlewareInstance } from '@/store'
 import { createSelector } from '@reduxjs/toolkit'
 import type { RootState } from '@/store'
 import { makeLoadableSlice } from './common'
-import { isMultisigExecutionInfo, isTransactionListItem } from '@/utils/transaction-guards'
+import { isMultisigExecutionInfo, isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { PendingStatus, selectPendingTxs } from './pendingTxsSlice'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 
 const SIGNING_STATES = [PendingStatus.SIGNING, PendingStatus.NESTED_SIGNING]
 
-const { slice, selector } = makeLoadableSlice('txQueue', undefined as TransactionItemPage | undefined)
+const { slice, selector } = makeLoadableSlice('txQueue', undefined as QueuedItemPage | undefined)
 
 export const txQueueSlice = slice
 export const selectTxQueue = selector
 
 export const selectQueuedTransactions = createSelector(selectTxQueue, (txQueue) => {
-  return txQueue.data?.results.filter(isTransactionListItem)
+  return txQueue.data?.results?.filter(isTransactionQueuedItem)
 })
 
 export const selectQueuedTransactionsByNonce = createSelector(
@@ -40,7 +40,7 @@ export const txQueueListener = (listenerMiddleware: typeof listenerMiddlewareIns
       const pendingTxs = selectPendingTxs(listenerApi.getState())
 
       for (const result of action.payload.data.results) {
-        if (!isTransactionListItem(result)) {
+        if (!isTransactionQueuedItem(result)) {
           continue
         }
 

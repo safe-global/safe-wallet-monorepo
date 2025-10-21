@@ -10,18 +10,20 @@ import {
 import type {
   LabelQueuedItem,
   ModuleTransaction,
-  TransactionItemPage,
+  QueuedItemPage,
   Transaction,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type PendingTx } from '@/store/pendingTxsSlice'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { act, renderHook } from '@/tests/test-utils'
-import { getTransactionQueue } from '@safe-global/safe-gateway-typescript-sdk'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { filterUntrustedQueue, getNextTransactions, useHasPendingTxs, usePendingTxsQueue } from '../usePendingTxs'
 import { isLabelListItem } from '@/utils/transaction-guards'
+import { http, HttpResponse } from 'msw'
+import { server } from '@/tests/server'
+import { GATEWAY_URL } from '@/config/gateway'
 
-const mockQueue = <TransactionItemPage>{
+const mockQueue = <QueuedItemPage>{
   next: undefined,
   previous: undefined,
   results: [
@@ -48,7 +50,7 @@ const mockQueue = <TransactionItemPage>{
   ],
 }
 
-const mockQueueWithQueued = <TransactionItemPage>{
+const mockQueueWithQueued = <QueuedItemPage>{
   next: undefined,
   previous: undefined,
   results: [
@@ -66,7 +68,7 @@ const mockQueueWithQueued = <TransactionItemPage>{
   ],
 }
 
-const mockQueueWithConflictHeaders = <TransactionItemPage>{
+const mockQueueWithConflictHeaders = <QueuedItemPage>{
   next: undefined,
   previous: undefined,
   results: [
@@ -97,12 +99,6 @@ const mockQueueWithConflictHeaders = <TransactionItemPage>{
   ],
 }
 
-// Mock getTransactionQueue
-jest.mock('@safe-global/safe-gateway-typescript-sdk', () => ({
-  ...jest.requireActual('@safe-global/safe-gateway-typescript-sdk'),
-  getTransactionQueue: jest.fn(() => Promise.resolve(mockQueue)),
-}))
-
 describe('getNextTransactions', () => {
   it('should return all transactions up to the "Queued" label', () => {
     const result = getNextTransactions(mockQueueWithQueued)
@@ -113,7 +109,9 @@ describe('getNextTransactions', () => {
   it('should return all transactions if there is no "Queued" label', () => {
     const mockQueueWithoutQueuedLabel = {
       ...mockQueueWithQueued,
-      results: mockQueueWithQueued.results.filter((item) => isLabelListItem(item) && item.label !== LabelValue.Queued),
+      results: (mockQueueWithQueued.results as Array<any>).filter(
+        (item) => isLabelListItem(item) && item.label !== LabelValue.Queued,
+      ),
     }
 
     const result = getNextTransactions(mockQueueWithoutQueuedLabel)
@@ -177,6 +175,16 @@ describe('usePendingTxsQueue', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     localStorage.clear()
+
+    // Setup MSW handler for transaction queue endpoint
+    server.use(
+      http.get<{ chainId: string; safeAddress: string }>(
+        `${GATEWAY_URL}/v1/chains/:chainId/safes/:safeAddress/transactions/queued`,
+        () => {
+          return HttpResponse.json(mockQueue)
+        },
+      ),
+    )
 
     jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
       safe: {
@@ -262,7 +270,28 @@ describe('usePendingTxsQueue', () => {
   })
 
   it('should remove all conflict headers', async () => {
-    ;(getTransactionQueue as jest.Mock).mockImplementation(() => Promise.resolve(mockQueueWithConflictHeaders))
+    server.use(
+      http.get(
+        `${GATEWAY_URL}/v1/chains/5/safes/0x0000000000000000000000000000000000000001/transactions/queued`,
+        () => {
+          return HttpResponse.json(mockQueueWithConflictHeaders)
+        },
+      ),
+    )
+
+    jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+      safe: {
+        ...extendedSafeInfoBuilder().build(),
+        nonce: 100,
+        threshold: 1,
+        owners: [{ value: '0x123' }],
+        chainId: '5',
+      },
+      safeAddress: '0x0000000000000000000000000000000000000001',
+      safeError: undefined,
+      safeLoading: false,
+      safeLoaded: true,
+    }))
 
     const { result } = renderHook(() => usePendingTxsQueue(), {
       initialReduxState: {
