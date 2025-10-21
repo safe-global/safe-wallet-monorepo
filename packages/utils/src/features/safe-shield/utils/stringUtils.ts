@@ -40,6 +40,11 @@ export const formatCount = (
   plural: string = `${singular}s`,
   allPrefix: string = 'all these',
 ): string => {
+  if (count === totalNumber && totalNumber === 1) {
+    return `this ${singular}`
+  }
+
   const countPrefix = count === totalNumber ? allPrefix : count
+
   return `${countPrefix} ${pluralise(count, singular, plural)}`
 }
