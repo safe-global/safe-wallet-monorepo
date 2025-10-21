@@ -5,7 +5,7 @@ import { RouterContext } from 'next/dist/shared/lib/router-context.shared-runtim
 import type { Theme } from '@mui/material/styles'
 import { ThemeProvider } from '@mui/material/styles'
 import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
-import { type RootState, makeStore, useHydrateStore } from '@/store'
+import { type RootState, makeStore, useHydrateStore, setStoreInstance } from '@/store'
 import * as web3 from '@/hooks/wallets/web3'
 import { Provider } from 'react-redux'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
@@ -58,6 +58,9 @@ const getProviders: (options: {
 }) => React.JSXElementConstructor<{ children: React.ReactNode }> = ({ routerProps, initialReduxState }) =>
   function ProviderComponent({ children }) {
     const store = makeStore(initialReduxState, { skipBroadcast: true })
+
+    // Set the store instance for imperative usage (e.g., in async functions)
+    setStoreInstance(store)
 
     useHydrateStore(store)
 

@@ -11,9 +11,10 @@ import {
 } from '@safe-global/safe-apps-sdk'
 import { SafeAppsTxFlow, SignMessageFlow, SignMessageOnChainFlow } from '@/components/tx-flow/flows'
 import { isOffchainEIP1271Supported } from '@safe-global/utils/utils/safe-messages'
-import { getSafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { getTransactionDetails } from '@/utils/transactions'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
+import { getStoreInstance } from '@/store'
 import useGetSafeInfo from '@/components/safe-apps/AppFrame/useGetSafeInfo'
 import { isSafeMessageListItem } from '@/utils/safe-message-guards'
 import { TxModalContext } from '@/components/tx-flow'
@@ -163,8 +164,14 @@ export const useCustomAppCommunicator = (
       }
 
       try {
-        const { preparedSignature } = await getSafeMessage(chainId, messageHash)
-        return preparedSignature || undefined
+        const store = getStoreInstance()
+        const result = await store.dispatch(
+          cgwApi.endpoints.messagesGetMessageByHashV1.initiate({ chainId, messageHash }),
+        )
+        if ('data' in result && result.data) {
+          return result.data.preparedSignature || undefined
+        }
+        return undefined
       } catch {
         return undefined
       }

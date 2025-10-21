@@ -314,4 +314,31 @@ export const handlers = (GATEWAY_URL: string) => [
       })
     },
   ),
+
+  // Messages endpoint for retrieving safe messages
+  http.get(`${GATEWAY_URL}/v1/chains/:chainId/safes/:safeAddress/messages`, () => {
+    return HttpResponse.json({
+      count: 0,
+      next: null,
+      previous: null,
+      results: [],
+    })
+  }),
+
+  // Message by hash endpoint
+  http.get(`${GATEWAY_URL}/v1/chains/:chainId/messages/:messageHash`, () => {
+    return HttpResponse.json({
+      messageHash: '0x0',
+      status: 'NEEDS_CONFIRMATION',
+      message: '',
+      creationTimestamp: Date.now(),
+      modifiedTimestamp: Date.now(),
+      confirmationsSubmitted: 0,
+      confirmationsRequired: 1,
+      proposedBy: {
+        value: '0x0',
+      },
+      confirmations: [],
+    })
+  }),
 ]
