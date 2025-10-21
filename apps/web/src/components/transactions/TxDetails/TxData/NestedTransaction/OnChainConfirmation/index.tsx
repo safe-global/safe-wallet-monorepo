@@ -1,17 +1,12 @@
 import useChainId from '@/hooks/useChainId'
-import { Skeleton, Stack } from '@mui/material'
+import { Skeleton } from '@mui/material'
 import { type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
-import { useMemo } from 'react'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { NestedTransaction } from '../NestedTransaction'
 import TxData from '../..'
-import { TxSimulation, TxSimulationMessage } from '@/components/tx/security/tenderly'
-import type { SafeTransaction } from '@safe-global/types-kit'
-import extractTxInfo from '@/services/tx/extractTxInfo'
 import { useSignedHash } from '../useSignedHash'
-import useSafeAddress from '@/hooks/useSafeAddress'
 
 export const OnChainConfirmation = ({
   data,
@@ -22,7 +17,6 @@ export const OnChainConfirmation = ({
 }) => {
   const chainId = useChainId()
   const signedHash = useSignedHash(data)
-  const safeAddress = useSafeAddress()
 
   const { data: nestedTxDetails, error: txDetailsError } = useGetTransactionDetailsQuery(
     signedHash
@@ -33,45 +27,16 @@ export const OnChainConfirmation = ({
       : skipToken,
   )
 
-  const nestedTx = useMemo<SafeTransaction | undefined>(
-    () =>
-      nestedTxDetails
-        ? {
-            addSignature: () => {},
-            encodedSignatures: () => '',
-            getSignature: () => undefined,
-            data: extractTxInfo(nestedTxDetails).txParams,
-            signatures: new Map(),
-          }
-        : undefined,
-    [nestedTxDetails],
-  )
-
   return (
     <NestedTransaction txData={data} isConfirmationView={isConfirmationView}>
       {nestedTxDetails ? (
-        <>
-          <TxData
-            txData={nestedTxDetails.txData}
-            txInfo={nestedTxDetails.txInfo}
-            txDetails={nestedTxDetails}
-            trusted
-            imitation={false}
-          />
-
-          {isConfirmationView && (
-            <Stack spacing={2}>
-              <TxSimulation
-                disabled={false}
-                transactions={nestedTx}
-                title="Simulate nested transaction"
-                executionOwner={safeAddress}
-                nestedSafe={nestedTxDetails.safeAddress}
-              />
-              <TxSimulationMessage isNested />
-            </Stack>
-          )}
-        </>
+        <TxData
+          txData={nestedTxDetails.txData}
+          txInfo={nestedTxDetails.txInfo}
+          txDetails={nestedTxDetails}
+          trusted
+          imitation={false}
+        />
       ) : txDetailsError ? (
         <ErrorMessage>Could not load details on hash to approve.</ErrorMessage>
       ) : (

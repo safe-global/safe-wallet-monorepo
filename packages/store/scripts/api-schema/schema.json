@@ -3949,9 +3949,7 @@
           }
         },
         "summary": "Analyze recipient address",
-        "tags": [
-          "safe-shield"
-        ]
+        "tags": ["safe-shield"]
       }
     },
     "/v1/chains/{chainId}/security/{safeAddress}/counterparty-analysis": {
@@ -4003,9 +4001,7 @@
           }
         },
         "summary": "Analyze transaction counterparties",
-        "tags": [
-          "safe-shield"
-        ]
+        "tags": ["safe-shield"]
       }
     },
     "/v1/targeted-messaging/outreaches/{outreachId}/chains/{chainId}/safes/{safeAddress}": {
@@ -8091,14 +8087,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "address",
-          "chainId",
-          "threshold",
-          "owners",
-          "fiatTotal",
-          "queued"
-        ]
+        "required": ["address", "chainId", "threshold", "owners", "fiatTotal", "queued"]
       },
       "RecipientInteractionResultDto": {
         "type": "object",
@@ -8106,23 +8095,14 @@
           "severity": {
             "type": "string",
             "description": "Severity level indicating the importance and risk",
-            "enum": [
-              "OK",
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ],
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"],
             "example": "INFO"
           },
           "type": {
             "type": "string",
             "description": "Recipient interaction status code",
             "example": "NEW_RECIPIENT",
-            "enum": [
-              "NEW_RECIPIENT",
-              "RECURRING_RECIPIENT",
-              "FAILED"
-            ]
+            "enum": ["NEW_RECIPIENT", "RECURRING_RECIPIENT", "FAILED"]
           },
           "title": {
             "type": "string",
@@ -8135,12 +8115,7 @@
             "example": "This is the first time you are interacting with this recipient"
           }
         },
-        "required": [
-          "severity",
-          "type",
-          "title",
-          "description"
-        ]
+        "required": ["severity", "type", "title", "description"]
       },
       "RecipientInteractionAnalysisDto": {
         "type": "object",
@@ -8161,9 +8136,7 @@
             }
           }
         },
-        "required": [
-          "RECIPIENT_INTERACTION"
-        ]
+        "required": ["RECIPIENT_INTERACTION"]
       },
       "CounterpartyAnalysisRequestDto": {
         "type": "object",
@@ -8179,19 +8152,11 @@
           },
           "operation": {
             "type": "number",
-            "enum": [
-              0,
-              1
-            ],
+            "enum": [0, 1],
             "description": "Operation type: 0 for CALL, 1 for DELEGATE"
           }
         },
-        "required": [
-          "to",
-          "value",
-          "data",
-          "operation"
-        ]
+        "required": ["to", "value", "data", "operation"]
       },
       "RecipientResultDto": {
         "type": "object",
@@ -8199,12 +8164,7 @@
           "severity": {
             "type": "string",
             "description": "Severity level indicating the importance and risk",
-            "enum": [
-              "OK",
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ],
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"],
             "example": "INFO"
           },
           "type": {
@@ -8232,12 +8192,7 @@
             "example": "This is the first time you are interacting with this recipient"
           }
         },
-        "required": [
-          "severity",
-          "type",
-          "title",
-          "description"
-        ]
+        "required": ["severity", "type", "title", "description"]
       },
       "RecipientAnalysisDto": {
         "type": "object",
@@ -8280,12 +8235,7 @@
           "severity": {
             "type": "string",
             "description": "Severity level indicating the importance and risk",
-            "enum": [
-              "OK",
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ],
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"],
             "example": "INFO"
           },
           "type": {
@@ -8314,12 +8264,7 @@
             "example": "This is the first time you are interacting with this recipient"
           }
         },
-        "required": [
-          "severity",
-          "type",
-          "title",
-          "description"
-        ]
+        "required": ["severity", "type", "title", "description"]
       },
       "ContractAnalysisDto": {
         "type": "object",
@@ -8413,10 +8358,7 @@
             }
           }
         },
-        "required": [
-          "recipient",
-          "contract"
-        ]
+        "required": ["recipient", "contract"]
       },
       "TargetedSafe": {
         "type": "object",
