@@ -26,7 +26,7 @@ import useAddressBook from '@/hooks/useAddressBook'
 import NameInput from '@/components/common/NameInput'
 import tokenInputCss from '@/components/common/TokenAmountInput/styles.module.css'
 import NumberField from '@/components/common/NumberField'
-import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer'
 import { validateDecimalLength, validateLimitedAmount } from '@safe-global/utils/utils/validation'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
@@ -123,13 +123,13 @@ export function SetUpNestedSafe(): ReactElement {
  * TODO: Refactor the both to share a common implementation.
  */
 function AssetInputs({ name }: { name: SetupNestedSafeFormFields.assets }) {
-  const { balances } = useVisibleBalances()
+  const { visibleTokenBalances } = usePortfolio()
 
   const formMethods = useFormContext<SetupNestedSafeForm>()
   const fieldArray = useFieldArray<SetupNestedSafeForm>({ name })
 
   const selectedAssets = formMethods.watch(name)
-  const nonSelectedAssets = balances.items.filter((item) => {
+  const nonSelectedAssets = visibleTokenBalances.filter((item) => {
     return !selectedAssets.map((asset) => asset.tokenAddress).includes(item.tokenInfo.address)
   })
   const defaultAsset: SetupNestedSafeForm[typeof name][number] = {
@@ -147,10 +147,10 @@ function AssetInputs({ name }: { name: SetupNestedSafeFormFields.assets }) {
           'Amount'
         const isError = !!errors && Object.keys(errors).length > 0
 
-        const thisAsset = balances.items.find((item) => {
+        const thisAsset = visibleTokenBalances.find((item) => {
           return item.tokenInfo.address === selectedAssets[index][SetupNestedSafeFormAssetFields.tokenAddress]
         })
-        const thisAndNonSelectedAssets = balances.items.filter((item) => {
+        const thisAndNonSelectedAssets = visibleTokenBalances.filter((item) => {
           return (
             item.tokenInfo.address === thisAsset?.tokenInfo.address ||
             nonSelectedAssets.some((nonSelected) => item.tokenInfo.address === nonSelected.tokenInfo.address)

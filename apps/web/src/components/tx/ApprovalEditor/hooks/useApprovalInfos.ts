@@ -1,6 +1,6 @@
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import useBalances from '@/hooks/useBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import { type Approval, ApprovalModule } from '@safe-global/utils/services/security/modules/ApprovalModule'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getERC20TokenInfoOnChain, getErc721Symbol, isErc721Token } from '@/utils/tokens'
@@ -32,7 +32,7 @@ export const useApprovalInfos = (payload: {
   safeMessage?: TypedData
 }): [ApprovalInfo[] | undefined, Error | undefined, boolean] => {
   const { safeTransaction, safeMessage } = payload
-  const { balances } = useBalances()
+  const { tokenBalances } = usePortfolio()
   const approvals = useMemo(() => {
     if (safeTransaction) {
       return ApprovalModuleInstance.scanTransaction({ safeTransaction })
@@ -50,7 +50,7 @@ export const useApprovalInfos = (payload: {
 
       return Promise.all(
         approvals.payload.map(async (approval) => {
-          let tokenInfo: Omit<Balance['tokenInfo'], 'name' | 'logoUri'> | undefined = balances.items.find((item) =>
+          let tokenInfo: Omit<Balance['tokenInfo'], 'name' | 'logoUri'> | undefined = tokenBalances.find((item) =>
             sameAddress(item.tokenInfo.address, approval.tokenAddress),
           )?.tokenInfo
 
@@ -80,7 +80,7 @@ export const useApprovalInfos = (payload: {
       )
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [hasApprovalSignatures, balances.items.length],
+    [hasApprovalSignatures, tokenBalances.length],
     false, // Do not clear data on balance updates
   )
 

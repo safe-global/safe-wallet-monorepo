@@ -1,6 +1,6 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
 import TokenIcon from '@/components/common/TokenIcon'
-import useBalances from '@/hooks/useBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import useChainId from '@/hooks/useChainId'
 import { useHasFeature } from '@/hooks/useChains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -30,10 +30,10 @@ import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const FungibleBalanceChange = ({ change, asset }: { asset: AssetDiff['asset']; change: Erc20Diff | NativeDiff }) => {
-  const { balances } = useBalances()
+  const { tokenBalances } = usePortfolio()
   const logoUri =
     asset.logo_url ??
-    balances.items.find((item) => {
+    tokenBalances.find((item) => {
       return asset.type === 'NATIVE'
         ? item.tokenInfo.type === TokenType.NATIVE_TOKEN
         : sameAddress(item.tokenInfo.address, asset.address)

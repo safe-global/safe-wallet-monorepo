@@ -7,7 +7,7 @@ import { Typography, Alert, Box } from '@mui/material'
 import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
 import { getResetTimeOptions } from '@/components/transactions/TxDetails/TxData/SpendingLimits'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
-import useBalances from '@/hooks/useBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import useChainId from '@/hooks/useChainId'
 import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
 import { createNewSpendingLimitTx } from '@/services/tx/tx-sender'
@@ -26,9 +26,9 @@ export const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionPro
   const { safe } = useSafeInfo()
   const chainId = useChainId()
   const chain = useCurrentChain()
-  const { balances } = useBalances()
+  const { tokenBalances } = usePortfolio()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
-  const token = balances.items.find((item) => item.tokenInfo.address === data?.tokenAddress)
+  const token = tokenBalances.find((item) => item.tokenInfo.address === data?.tokenAddress)
   const { decimals } = token?.tokenInfo || {}
 
   const amountInWei = useMemo(

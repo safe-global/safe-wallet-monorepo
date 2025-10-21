@@ -4,7 +4,7 @@ import type { MetaTransactionData, SafeTransaction } from '@safe-global/types-ki
 
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import useBalances from '@/hooks/useBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import { useCurrentChain } from '@/hooks/useChains'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { createNewUndeployedSafeWithoutSalt, encodeSafeCreationTx } from '@/components/new-safe/create/logic'
@@ -29,7 +29,7 @@ export function ReviewNestedSafe({
   const { safeAddress, safe, safeLoaded } = useSafeInfo()
   const chain = useCurrentChain()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
-  const { balances } = useBalances()
+  const { tokenBalances } = usePortfolio()
   const provider = useWeb3ReadOnly()
   const { currentData: ownedSafes } = useOwnersGetAllSafesByOwnerV2Query(
     { ownerAddress: safeAddress },
@@ -80,7 +80,7 @@ export function ReviewNestedSafe({
     const fundingTxs: Array<MetaTransactionData> = []
 
     for (const asset of params.assets) {
-      const token = balances.items.find((item) => {
+      const token = tokenBalances.find((item) => {
         return item.tokenInfo.address === asset[SetupNestedSafeFormAssetFields.tokenAddress]
       })
 
@@ -102,7 +102,7 @@ export function ReviewNestedSafe({
     }
 
     createSafeTx().then(setSafeTx).catch(setSafeTxError)
-  }, [chain, params.assets, safeAccountConfig, predictedSafeAddress, balances.items, setSafeTx, setSafeTxError])
+  }, [chain, params.assets, safeAccountConfig, predictedSafeAddress, tokenBalances, setSafeTx, setSafeTxError])
 
   const handleSubmit = useCallback(() => {
     onSubmit(predictedSafeAddress)

@@ -133,11 +133,9 @@ const headCells = [
 ]
 
 const AssetsTable = ({
-  balances,
   showHiddenAssets,
   setShowHiddenAssets,
 }: {
-  balances: Balance[]
   showHiddenAssets: boolean
   setShowHiddenAssets: (hidden: boolean) => void
 }): ReactElement => {
@@ -147,6 +145,8 @@ const AssetsTable = ({
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
   const isStakingPromoEnabled = useIsStakingPromoEnabled()
   const isEarnPromoEnabled = useIsEarnPromoEnabled()
+
+  const balances = showHiddenAssets ? portfolio.tokenBalances : portfolio.visibleTokenBalances
 
   const { isAssetSelected, toggleAsset, hidingAsset, hideAsset, cancel, deselectAll, saveChanges } = useHideAssets(() =>
     setShowHiddenAssets(false),

@@ -23,8 +23,7 @@ const Balances: NextPage = () => {
   const toggleShowHiddenAssets = () => setShowHiddenAssets((prev) => !prev)
   const isStakingBannerVisible = useIsStakingBannerVisible()
 
-  // Choose which tokens to display
-  const displayedTokens = showHiddenAssets ? portfolio.tokenBalances : portfolio.visibleTokenBalances
+  // Choose total to display based on showHiddenAssets flag
   const displayedTotal = showHiddenAssets ? portfolio.totalTokenBalance : portfolio.visibleTotalTokenBalance
 
   return (
@@ -53,11 +52,7 @@ const Balances: NextPage = () => {
             <Box mb={2}>
               <TotalAssetValue fiatTotal={displayedTotal} />
             </Box>
-            <AssetsTable
-              balances={displayedTokens}
-              setShowHiddenAssets={setShowHiddenAssets}
-              showHiddenAssets={showHiddenAssets}
-            />
+            <AssetsTable setShowHiddenAssets={setShowHiddenAssets} showHiddenAssets={showHiddenAssets} />
           </>
         )}
       </main>

@@ -7,7 +7,7 @@ import { parseUnits, AbiCoder } from 'ethers'
 import AddressBookInput from '@/components/common/AddressBookInput'
 import useChainId from '@/hooks/useChainId'
 import { getResetTimeOptions } from '@/components/transactions/TxDetails/TxData/SpendingLimits'
-import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import type { NewSpendingLimitFlowProps } from '.'
 import TxCard from '../../common/TxCard'
 import css from '@/components/tx/ExecuteCheckbox/styles.module.css'
@@ -28,7 +28,7 @@ export const _validateSpendingLimit = (val: string, decimals?: number | null) =>
 
 export const CreateSpendingLimit = () => {
   const chainId = useChainId()
-  const { balances } = useVisibleBalances()
+  const { visibleTokenBalances } = usePortfolio()
   const { onNext, data } = useContext<TxFlowContextType<NewSpendingLimitFlowProps>>(TxFlowContext)
 
   const resetTimeOptions = useMemo(() => getResetTimeOptions(chainId), [chainId])
@@ -42,7 +42,7 @@ export const CreateSpendingLimit = () => {
 
   const tokenAddress = watch(SpendingLimitFields.tokenAddress)
   const selectedToken = tokenAddress
-    ? balances.items.find((item) => item.tokenInfo.address === tokenAddress)
+    ? visibleTokenBalances.find((item) => item.tokenInfo.address === tokenAddress)
     : undefined
 
   const validateSpendingLimit = useCallback(
@@ -68,7 +68,11 @@ export const CreateSpendingLimit = () => {
             />
           </FormControl>
 
-          <TokenAmountInput balances={balances.items} selectedToken={selectedToken} validate={validateSpendingLimit} />
+          <TokenAmountInput
+            balances={visibleTokenBalances}
+            selectedToken={selectedToken}
+            validate={validateSpendingLimit}
+          />
 
           <Typography variant="h4" fontWeight={700} mt={3}>
             Reset Timer

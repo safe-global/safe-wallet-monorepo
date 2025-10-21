@@ -35,7 +35,7 @@ import { NestedSafesButton } from '@/components/sidebar/NestedSafesButton'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 
 const SafeHeader = (): ReactElement => {
-  const { visibleTotalTokenBalance, visibleTokenBalances } = usePortfolio()
+  const { visibleTotalBalance, visibleTokenBalances } = usePortfolio()
   const safeAddress = useSafeAddress()
   const { safe } = useSafeInfo()
   const { threshold, owners } = safe
@@ -71,8 +71,8 @@ const SafeHeader = (): ReactElement => {
 
             <Typography data-testid="currency-section" variant="body2" fontWeight={700}>
               {safe.deployed ? (
-                visibleTotalTokenBalance ? (
-                  <FiatValue value={visibleTotalTokenBalance} />
+                visibleTotalBalance ? (
+                  <FiatValue value={visibleTotalBalance} />
                 ) : (
                   <Skeleton variant="text" width={60} />
                 )

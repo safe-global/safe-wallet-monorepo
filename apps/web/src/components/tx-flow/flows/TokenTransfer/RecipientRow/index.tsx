@@ -1,6 +1,6 @@
 import AddressBookInput from '@/components/common/AddressBookInput'
 import TokenAmountInput from '@/components/common/TokenAmountInput'
-import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { Box, Button, FormControl, Stack, SvgIcon } from '@mui/material'
 import { get, useFormContext } from 'react-hook-form'
@@ -32,7 +32,7 @@ type RecipientRowProps = {
 }
 
 export const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLimit }: RecipientRowProps) => {
-  const { balances } = useVisibleBalances()
+  const { visibleTokenBalances } = usePortfolio()
   const spendingLimits = useSelector(selectSpendingLimits)
 
   const {
@@ -49,7 +49,7 @@ export const RecipientRow = ({ fieldArray, removable = true, remove, disableSpen
   const recipient = watch(recipientFieldName)
   const tokenAddress = watch(getFieldName(TokenTransferFields.tokenAddress, fieldArray))
 
-  const selectedToken = balances.items.find((item) => sameAddress(item.tokenInfo.address, tokenAddress))
+  const selectedToken = visibleTokenBalances.find((item) => sameAddress(item.tokenInfo.address, tokenAddress))
 
   const { totalAmount, spendingLimitAmount } = useTokenAmount(selectedToken)
 
@@ -63,10 +63,10 @@ export const RecipientRow = ({ fieldArray, removable = true, remove, disableSpen
 
   const spendingLimitBalances = useMemo(
     () =>
-      balances.items.filter(({ tokenInfo }) =>
+      visibleTokenBalances.filter(({ tokenInfo }) =>
         spendingLimits.find((sl) => sameAddress(sl.token.address, tokenInfo.address)),
       ),
-    [balances.items, spendingLimits],
+    [visibleTokenBalances, spendingLimits],
   )
 
   const maxAmount = isSpendingLimitType && totalAmount > spendingLimitAmount ? spendingLimitAmount : totalAmount
@@ -91,7 +91,7 @@ export const RecipientRow = ({ fieldArray, removable = true, remove, disableSpen
           <FormControl fullWidth>
             <TokenAmountInput
               fieldArray={fieldArray}
-              balances={isSpendingLimitType ? spendingLimitBalances : balances.items}
+              balances={isSpendingLimitType ? spendingLimitBalances : visibleTokenBalances}
               selectedToken={selectedToken}
               maxAmount={maxAmount}
               deps={[MultiTokenTransferFields.recipients]}

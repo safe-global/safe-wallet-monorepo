@@ -1,13 +1,13 @@
 import useIsOnlySpendingLimitBeneficiary from '@/hooks/useIsOnlySpendingLimitBeneficiary'
 import useSpendingLimit from '@/hooks/useSpendingLimit'
-import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import usePortfolio from '@/hooks/usePortfolio'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
 import { selectSpendingLimits } from '@/store/spendingLimitsSlice'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
-export const useTokenAmount = (selectedToken: Balances['items'][0] | undefined) => {
+export const useTokenAmount = (selectedToken: Balance | undefined) => {
   const spendingLimit = useSpendingLimit(selectedToken?.tokenInfo)
 
   const spendingLimitAmount = BigInt(spendingLimit?.amount || 0) - BigInt(spendingLimit?.spent || 0)
@@ -18,17 +18,17 @@ export const useTokenAmount = (selectedToken: Balances['items'][0] | undefined) 
 
 export const useVisibleTokens = () => {
   const isOnlySpendingLimitBeneficiary = useIsOnlySpendingLimitBeneficiary()
-  const { balances } = useVisibleBalances()
+  const { visibleTokenBalances } = usePortfolio()
   const spendingLimits = useAppSelector(selectSpendingLimits)
   const wallet = useWallet()
 
   if (isOnlySpendingLimitBeneficiary) {
-    return balances.items.filter(({ tokenInfo }) => {
+    return visibleTokenBalances.filter(({ tokenInfo }) => {
       return spendingLimits?.some(({ beneficiary, token }) => {
         return sameAddress(beneficiary, wallet?.address) && sameAddress(tokenInfo.address, token.address)
       })
     })
   }
 
-  return balances.items
+  return visibleTokenBalances
 }

@@ -56,8 +56,8 @@ export type TokenBalanceTokenInfo = {
   symbol: string
   /** Token name */
   name: string
-  /** Token logo URL */
-  logoUrl?: object | null
+  /** Token logo URL (HTTPS) */
+  logoUrl?: string | null
   /** Chain ID where token is deployed */
   chainId: string
 }
@@ -66,20 +66,20 @@ export type TokenBalance = {
   tokenInfo: TokenBalanceTokenInfo
   /** Token balance (as string to avoid precision loss) */
   balance: string
-  /** Balance in requested fiat currency */
-  balanceFiat?: object | null
-  /** Token price in requested fiat currency */
-  price?: object | null
-  /** Price change percentage in the last 24 hours */
-  priceChangePercentage1d?: object | null
+  /** Balance in requested fiat currency (decimal string) */
+  balanceFiat?: string | null
+  /** Token price in requested fiat currency (decimal string) */
+  price?: string | null
+  /** Price change percentage in the last 24 hours (decimal string) */
+  priceChangePercentage1d?: string | null
 }
 export type AppBalanceAppInfo = {
   /** Application name */
   name: string
-  /** Application logo URL */
-  logoUrl?: object | null
-  /** Application URL */
-  url?: object | null
+  /** Application logo URL (HTTPS) */
+  logoUrl?: string | null
+  /** Application URL (HTTPS) */
+  url?: string | null
 }
 export type AppPositionTokenInfo = {
   /** Token contract address (0x0000000000000000000000000000000000000000 for native tokens) */
@@ -90,8 +90,8 @@ export type AppPositionTokenInfo = {
   symbol: string
   /** Token name */
   name: string
-  /** Token logo URL */
-  logoUrl?: object | null
+  /** Token logo URL (HTTPS) */
+  logoUrl?: string | null
   /** Chain ID where token is deployed */
   chainId: string
 }
@@ -106,16 +106,16 @@ export type AppPosition = {
   tokenInfo: AppPositionTokenInfo
   /** Position balance */
   balance: string
-  /** Balance in requested fiat currency */
-  balanceFiat?: object | null
-  /** Price change percentage in the last 24 hours */
-  priceChangePercentage1d?: object | null
+  /** Balance in requested fiat currency (decimal string) */
+  balanceFiat?: string | null
+  /** Price change percentage in the last 24 hours (decimal string) */
+  priceChangePercentage1d?: string | null
 }
 export type AppBalance = {
   /** Application information */
   appInfo: AppBalanceAppInfo
-  /** Total balance in fiat currency across all positions */
-  balanceFiat?: object | null
+  /** Total balance in fiat currency across all positions (decimal string) */
+  balanceFiat?: string | null
   /** List of positions in this app */
   positions: AppPosition[]
 }
