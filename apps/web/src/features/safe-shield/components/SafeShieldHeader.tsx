@@ -13,7 +13,7 @@ import { SEVERITY_COLORS } from '../constants'
 export const SafeShieldHeader = ({
   recipient = [{}, undefined, false],
   contract = [{}, undefined, false],
-  threat = [{}, undefined, false],
+  threat = [{}, undefined, false] as AsyncResult<LiveThreatAnalysisResult>,
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
