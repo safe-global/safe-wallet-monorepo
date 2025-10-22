@@ -9,7 +9,6 @@ import type {
   Cancellation,
 } from '@safe-global/store/gateway/types'
 import {
-  TransactionStatus,
   DetailedExecutionInfoType,
   TransactionInfoType,
   TransferDirection,
@@ -83,13 +82,10 @@ import type {
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 export const isTxQueued = (value: Transaction['txStatus']): boolean => {
-  return [TransactionStatus.AWAITING_CONFIRMATIONS as string, TransactionStatus.AWAITING_EXECUTION as string].includes(
-    value,
-  )
+  return ['AWAITING_CONFIRMATIONS', 'AWAITING_EXECUTION'].includes(value)
 }
 
-export const isAwaitingExecution = (txStatus: Transaction['txStatus']): boolean =>
-  (TransactionStatus.AWAITING_EXECUTION as string) === txStatus
+export const isAwaitingExecution = (txStatus: Transaction['txStatus']): boolean => 'AWAITING_EXECUTION' === txStatus
 
 const isAddressEx = (owners: AddressInfo[] | NamedAddress[]): owners is AddressInfo[] => {
   return (owners as AddressInfo[]).every((owner) => owner.value !== undefined)
@@ -280,11 +276,7 @@ export const isTransactionListItem = (value: AnyResults): value is TransactionIt
 }
 
 export const isTransactionQueuedItem = (value: AnyResults): value is TransactionQueuedItem => {
-  return (
-    value.type === TransactionListItemType.TRANSACTION &&
-    'conflictType' in value &&
-    value.conflictType !== ConflictType.NONE
-  )
+  return value.type === TransactionListItemType.TRANSACTION
 }
 
 export function isRecoveryQueueItem(value: TransactionListItem | RecoveryQueueItem): value is RecoveryQueueItem {

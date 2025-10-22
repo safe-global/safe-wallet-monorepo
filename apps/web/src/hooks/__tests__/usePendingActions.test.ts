@@ -11,7 +11,6 @@ import { renderHook, waitFor } from '@/tests/test-utils'
 import { toBeHex } from 'ethers'
 import type { EIP1193Provider } from '@web3-onboard/core'
 import * as useWallet from '@/hooks/wallets/useWallet'
-import * as useTxQueue from '@/hooks/useTxQueue'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/tests/server'
@@ -56,19 +55,21 @@ describe('usePendingActions hook', () => {
       safeLoaded: true,
     })
 
-    const mockPage = {
-      error: undefined,
-      loading: false,
-      loaded: true,
-      page: {
-        next: undefined,
-        previous: undefined,
-        results: [],
-      },
+    const emptyPage: QueuedItemPage = {
+      next: undefined,
+      previous: undefined,
+      results: [],
     }
-    jest.spyOn(useTxQueue, 'default').mockReturnValue(mockPage)
 
-    const { result } = renderHook(() => usePendingActions(chainId, safeAddress))
+    const { result } = renderHook(() => usePendingActions(chainId, safeAddress), {
+      initialReduxState: {
+        txQueue: {
+          data: emptyPage,
+          loaded: true,
+          loading: false,
+        },
+      },
+    })
     expect(result.current).toEqual({ totalQueued: '', totalToSign: '' })
   })
 
@@ -194,20 +195,18 @@ describe('usePendingActions hook', () => {
       ],
     }
 
-    const mockPage = {
-      error: undefined,
-      loading: false,
-      loaded: true,
-      page,
-    }
-    jest.spyOn(useTxQueue, 'default').mockReturnValue(mockPage)
-
     const chainId = '5'
 
-    const { result } = renderHook(() => usePendingActions(chainId, safeAddress))
-
-    await waitFor(() => {
-      expect(result.current).toEqual({ totalQueued: '1', totalToSign: '1' })
+    const { result } = renderHook(() => usePendingActions(chainId, safeAddress), {
+      initialReduxState: {
+        txQueue: {
+          data: page,
+          loaded: true,
+          loading: false,
+        },
+      },
     })
+
+    expect(result.current).toEqual({ totalQueued: '1', totalToSign: '1' })
   })
 })

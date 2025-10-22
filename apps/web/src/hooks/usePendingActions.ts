@@ -1,5 +1,5 @@
 import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { isTransactionListItem } from '@/utils/transaction-guards'
+import { isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { isSignableBy } from '@/utils/transaction-guards'
 import { useMemo } from 'react'
 import useAsync from '@safe-global/utils/hooks/useAsync'
@@ -15,7 +15,7 @@ type PendingActions = {
 
 const getSignableCount = (queue: QueuedItemPage, walletAddress: string): number => {
   return (queue.results as Array<any>).filter(
-    (tx) => isTransactionListItem(tx) && isSignableBy(tx.transaction, walletAddress),
+    (tx) => isTransactionQueuedItem(tx) && isSignableBy(tx.transaction, walletAddress),
   ).length
 }
 
@@ -36,7 +36,7 @@ const usePendingActions = (chainId: string, safeAddress?: string): PendingAction
     () => ({
       // Return 20+ if more than one page, otherwise just the length
       totalQueued: queue
-        ? ((queue.results as Array<any>).filter(isTransactionListItem).length || '') + (queue.next ? '+' : '')
+        ? ((queue.results as Array<any>).filter(isTransactionQueuedItem).length || '') + (queue.next ? '+' : '')
         : '',
       // Return the queued txs signable by wallet
       totalToSign: queue ? (getSignableCount(queue, wallet?.address || '') || '').toString() : '',
