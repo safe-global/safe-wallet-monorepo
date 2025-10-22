@@ -8,7 +8,7 @@ import {
 } from '@/store/settingsSlice'
 import useSafeInfo from './useSafeInfo'
 import useHiddenTokens from './useHiddenTokens'
-import { useTokenListSetting } from './loadables/useLoadBalances'
+import useLoadBalances, { useTokenListSetting } from './loadables/useLoadBalances'
 import useChainId from './useChainId'
 import {
   usePortfolioGetPortfolioV1Query,
@@ -17,8 +17,6 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
-import { useVisibleBalances } from './useVisibleBalances'
-import useBalances from './useBalances'
 import usePositions from '@/features/positions/hooks/usePositions'
 import { formatUnits } from 'ethers'
 
@@ -187,20 +185,35 @@ const transformProtocolsToAppBalances = (protocols: any[]): AppBalance[] => {
 }
 
 const usePortfolioLegacy = (skip: boolean = false): PortfolioData => {
-  const { balances, loaded, loading, error } = useVisibleBalances()
-  const allBalancesData = useBalances()
+  // Load balances from legacy endpoint - this contains all the data fetching logic
+  const [balancesData, balancesError, balancesLoading] = useLoadBalances()
+  const hiddenTokens = useHiddenTokens()
   const { data: positionsData, isLoading: positionsLoading } = usePositions(skip)
 
   return useMemo(() => {
-    const allTokens = allBalancesData.balances.items.map((item) => ({
+    if (!balancesData) {
+      return {
+        tokenBalances: [],
+        positionBalances: [],
+        visibleTokenBalances: [],
+        totalBalance: '0',
+        totalTokenBalance: '0',
+        totalPositionsBalance: '0',
+        visibleTotalBalance: '0',
+        visibleTotalTokenBalance: '0',
+        error: balancesError?.message,
+        isLoading: balancesLoading,
+        isLoaded: false,
+        isFetching: balancesLoading || positionsLoading,
+      }
+    }
+
+    const allTokens = balancesData.items.map((item) => ({
       ...item,
       balance: formatUnits(item.balance, item.tokenInfo.decimals),
     }))
 
-    const visibleTokens = balances.items.map((item) => ({
-      ...item,
-      balance: formatUnits(item.balance, item.tokenInfo.decimals),
-    }))
+    const visibleTokens = allTokens.filter((item) => !hiddenTokens.includes(item.tokenInfo.address))
 
     const positionsTotal = positionsData
       ? positionsData
@@ -217,8 +230,9 @@ const usePortfolioLegacy = (skip: boolean = false): PortfolioData => {
           .toString()
       : '0'
 
-    const visibleTokenTotal = balances.fiatTotal
-    const allTokenTotal = allBalancesData.balances.fiatTotal
+    // Calculate visible total from visible tokens
+    const visibleTokenTotal = visibleTokens.reduce((sum, token) => sum + parseFloat(token.fiatBalance || '0'), 0).toString()
+    const allTokenTotal = balancesData.fiatTotal
     const transformedPositions = positionsData ? transformProtocolsToAppBalances(positionsData) : []
 
     return {
@@ -230,12 +244,12 @@ const usePortfolioLegacy = (skip: boolean = false): PortfolioData => {
       visibleTokenBalances: visibleTokens,
       visibleTotalTokenBalance: visibleTokenTotal,
       visibleTotalBalance: (parseFloat(visibleTokenTotal) + parseFloat(positionsTotal)).toString(),
-      error,
-      isLoading: loading || positionsLoading,
-      isLoaded: loaded,
-      isFetching: loading || positionsLoading,
+      error: balancesError?.message,
+      isLoading: balancesLoading || positionsLoading,
+      isLoaded: !balancesLoading && balancesData !== undefined,
+      isFetching: balancesLoading || positionsLoading,
     }
-  }, [balances, allBalancesData, positionsData, loaded, loading, error, positionsLoading])
+  }, [balancesData, balancesError, balancesLoading, hiddenTokens, positionsData, positionsLoading])
 }
 
 export const usePortfolio = (): PortfolioData => {
