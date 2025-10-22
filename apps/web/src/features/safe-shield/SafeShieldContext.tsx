@@ -1,21 +1,27 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
-import { useRecipientAnalysis } from './hooks'
+import { useCounterpartyAnalysis, useRecipientAnalysis } from './hooks'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import type { RecipientAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
+import type { ContractAnalysisResults, RecipientAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 
 type SafeShieldContextType = {
   setRecipientAddresses: (addresses: string[]) => void
-  recipientAnalysis: AsyncResult<RecipientAnalysisResults>
+  recipient?: AsyncResult<RecipientAnalysisResults>
+  contract?: AsyncResult<ContractAnalysisResults>
 }
 
 const SafeShieldContext = createContext<SafeShieldContextType | null>(null)
 
 export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
-  const [recipientAddresses, setRecipientAddresses] = useState<string[]>([])
-  const recipientAnalysis = useRecipientAnalysis(recipientAddresses)
+  const [recipientAddresses, setRecipientAddresses] = useState<string[] | undefined>(undefined)
+
+  const recipientOnlyAnalysis = useRecipientAnalysis(recipientAddresses)
+  const counterpartyAnalysis = useCounterpartyAnalysis()
+
+  const recipient = recipientOnlyAnalysis || counterpartyAnalysis.recipient
+  const contract = counterpartyAnalysis.contract
 
   return (
-    <SafeShieldContext.Provider value={{ setRecipientAddresses, recipientAnalysis }}>
+    <SafeShieldContext.Provider value={{ setRecipientAddresses, recipient, contract }}>
       {children}
     </SafeShieldContext.Provider>
   )
@@ -34,11 +40,11 @@ export const useSafeShield = () => {
  * @param recipientAddresses - Array of recipient addresses to analyze
  */
 export const useSafeShieldForRecipients = (recipientAddresses: string[]) => {
-  const { setRecipientAddresses, recipientAnalysis } = useSafeShield()
+  const { setRecipientAddresses, recipient } = useSafeShield()
 
   useEffect(() => {
     setRecipientAddresses(recipientAddresses)
   }, [recipientAddresses, setRecipientAddresses])
 
-  return recipientAnalysis
+  return recipient
 }
