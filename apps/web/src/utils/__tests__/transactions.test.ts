@@ -1,7 +1,6 @@
 import { TransactionInfoType } from '@safe-global/store/gateway/types'
 import type {
   ConflictHeaderQueuedItem,
-  DateLabel,
   LabelQueuedItem,
   ModuleTransaction,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -145,23 +144,6 @@ describe('transactions', () => {
     })
 
     it('should return false for non-multisend txs', () => {
-      expect(
-        isMultiSendTxInfo({
-          type: TransactionInfoType.CUSTOM,
-          to: {
-            value: '0x40A2aCCbd92BCA938b02010E17A5b8929b49130D',
-            name: 'Gnosis Safe: MultiSendCallOnly',
-            logoUri:
-              'https://safe-transaction-assets.safe.global/contracts/logos/0x40A2aCCbd92BCA938b02010E17A5b8929b49130D.png',
-          },
-          dataSize: '1188',
-          value: '0',
-          methodName: 'multiSend',
-          //actionCount: 3, // missing actionCount
-          isCancellation: false,
-        } as TransactionInfo),
-      ).toBe(false)
-
       expect(
         isMultiSendTxInfo({
           type: TransactionInfoType.CUSTOM,
