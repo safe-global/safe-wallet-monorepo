@@ -97,7 +97,7 @@ describe('create/logic', () => {
       expect(taskId).toEqual(expectedTaskId)
     })
 
-    it.only('should throw an error if relaying fails', async () => {
+    it('should throw an error if relaying fails', async () => {
       const undeployedSafeProps: ReplayedSafeProps = {
         safeAccountConfig: {
           owners: [owner1, owner2],

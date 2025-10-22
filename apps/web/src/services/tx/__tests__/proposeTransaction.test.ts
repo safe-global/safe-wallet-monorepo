@@ -52,7 +52,7 @@ describe('proposeTx', () => {
       }),
     )
 
-    const tx = await createMockSafeTransaction({
+    const tx = createMockSafeTransaction({
       to: '0x123',
       value: '1',
       data: '0x0',
@@ -109,7 +109,7 @@ describe('proposeTx', () => {
       }),
     )
 
-    const tx = await createMockSafeTransaction({
+    const tx = createMockSafeTransaction({
       to: '0x456',
       value: '100',
       data: '0x0',
@@ -158,7 +158,7 @@ describe('proposeTx', () => {
       }),
     )
 
-    const tx = await createMockSafeTransaction({
+    const tx = createMockSafeTransaction({
       to: '0x789',
       value: '0',
       data: '0x0',
@@ -176,7 +176,7 @@ describe('proposeTx', () => {
       }),
     )
 
-    const tx = await createMockSafeTransaction({
+    const tx = createMockSafeTransaction({
       to: '0x123',
       value: '1',
       data: '0x0',
@@ -258,7 +258,7 @@ describe('proposeTx', () => {
       }),
     )
 
-    const tx = await createMockSafeTransaction({
+    const tx = createMockSafeTransaction({
       to: '0x999',
       value: '500',
       data: '0xabcd',

@@ -383,7 +383,7 @@ export const makeTxFromDetails = (txDetails: TransactionDetails): ModuleTransact
     ? isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)
       ? txDetails.detailedExecutionInfo.submittedAt
       : now
-    : txDetails.executedAt ?? now
+    : (txDetails.executedAt ?? now)
 
   return {
     type: TransactionListItemType.TRANSACTION,
