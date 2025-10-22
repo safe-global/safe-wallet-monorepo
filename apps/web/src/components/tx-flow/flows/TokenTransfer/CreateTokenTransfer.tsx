@@ -42,6 +42,8 @@ import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
+import NoFeeNovemberTransactionCard from '@/features/no-fee-november/components/NoFeeNovemberTransactionCard'
+import useIsNoFeeNovemberEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberEnabled'
 
 export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balance: string }): ReactElement => (
   <Grid
@@ -87,6 +89,7 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
   const [safeApps] = useRemoteSafeApps({ name: SafeAppsName.CSV })
   const isMassPayoutsEnabled = useHasFeature(FEATURES.MASS_PAYOUTS)
   const { onNext, data } = useContext(TxFlowContext) as TxFlowContextType<MultiTokenTransferParams>
+  const isNoFeeNovemberEnabled = useIsNoFeeNovemberEnabled()
 
   useEffect(() => {
     if (txNonce !== undefined) {
@@ -203,6 +206,8 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
                     color={canAddMoreRecipients ? 'primary' : 'error.main'}
                   >{`${recipientFields.length}/${MAX_RECIPIENTS}`}</Typography>
                 </Stack>
+
+                {isNoFeeNovemberEnabled && <NoFeeNovemberTransactionCard />}
 
                 {hasInsufficientFunds && (
                   <Alert data-testid="insufficient-balance-error" severity="error">

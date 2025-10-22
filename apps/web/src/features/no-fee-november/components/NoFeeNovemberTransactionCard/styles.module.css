@@ -1,0 +1,58 @@
+.card {
+  padding: var(--space-4);
+  background: #ffffff;
+  border: 1px solid #5fddff;
+  border-radius: 6px;
+  height: 100%;
+}
+
+.iconContainer {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.title {
+  pointer-events: none;
+  user-select: none;
+  margin-bottom: 4px;
+}
+
+.description {
+  pointer-events: auto;
+}
+
+.infoStack {
+  margin-top: var(--space-1);
+}
+
+.infoIcon {
+  color: var(--color-static-light);
+}
+
+/* Skeleton loading states */
+.skeletonIcon {
+  width: 58px;
+  height: 58px;
+  background-color: var(--color-grey-200);
+  border-radius: var(--space-1);
+  flex-shrink: 0;
+}
+
+.skeletonBox {
+  background-color: var(--color-grey-200);
+  border-radius: var(--space-1);
+}
+
+.skeletonTitle {
+  height: 20px;
+  margin-bottom: 4px;
+}
+
+.skeletonSubtitle {
+  height: 16px;
+}
