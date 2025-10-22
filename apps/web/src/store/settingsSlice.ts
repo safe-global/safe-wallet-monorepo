@@ -28,6 +28,8 @@ export type SettingsState = {
 
   portfolioProvider: PORTFOLIO_PROVIDERS
 
+  usePortfolioEndpoint: boolean
+
   hideSuspiciousTransactions?: boolean
 
   shortName: {
@@ -51,6 +53,8 @@ export const initialState: SettingsState = {
   tokenList: TOKEN_LISTS.TRUSTED,
 
   portfolioProvider: PORTFOLIO_PROVIDERS.AUTO,
+
+  usePortfolioEndpoint: true,
 
   hiddenTokens: {},
 
@@ -108,6 +112,9 @@ export const settingsSlice = createSlice({
     setPortfolioProvider: (state, { payload }: PayloadAction<SettingsState['portfolioProvider']>) => {
       state.portfolioProvider = payload
     },
+    setUsePortfolioEndpoint: (state, { payload }: PayloadAction<SettingsState['usePortfolioEndpoint']>) => {
+      state.usePortfolioEndpoint = payload
+    },
     hideSuspiciousTransactions: (state, { payload }: PayloadAction<boolean>) => {
       state.hideSuspiciousTransactions = payload
     },
@@ -144,6 +151,7 @@ export const {
   setHiddenTokensForChain,
   setTokenList,
   setPortfolioProvider,
+  setUsePortfolioEndpoint,
   hideSuspiciousTransactions,
   setRpc,
   setTenderly,
@@ -164,6 +172,10 @@ export const selectTokenList = (state: RootState): SettingsState['tokenList'] =>
 
 export const selectPortfolioProvider = (state: RootState): SettingsState['portfolioProvider'] => {
   return state[settingsSlice.name].portfolioProvider || initialState.portfolioProvider
+}
+
+export const selectUsePortfolioEndpoint = (state: RootState): SettingsState['usePortfolioEndpoint'] => {
+  return state[settingsSlice.name].usePortfolioEndpoint ?? initialState.usePortfolioEndpoint
 }
 
 export const selectHiddenTokensPerChain = createSelector(

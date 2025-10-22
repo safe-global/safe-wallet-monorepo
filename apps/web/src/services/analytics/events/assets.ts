@@ -29,6 +29,11 @@ export const ASSETS_EVENTS = {
     action: 'Change provider',
     category: ASSETS_CATEGORY,
   },
+  TOGGLE_PORTFOLIO_ENDPOINT: {
+    event: EventType.META,
+    action: 'Toggle portfolio endpoint',
+    category: ASSETS_CATEGORY,
+  },
   DIFFERING_TOKENS: {
     event: EventType.META,
     action: 'Tokens',

@@ -1,12 +1,15 @@
 import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
-import { selectCurrency, selectPortfolioProvider, PORTFOLIO_PROVIDERS } from '@/store/settingsSlice'
+import {
+  selectCurrency,
+  selectPortfolioProvider,
+  selectUsePortfolioEndpoint,
+  PORTFOLIO_PROVIDERS,
+} from '@/store/settingsSlice'
 import useSafeInfo from './useSafeInfo'
 import useHiddenTokens from './useHiddenTokens'
 import { useTokenListSetting } from './loadables/useLoadBalances'
 import useChainId from './useChainId'
-import { useHasFeature } from './useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import {
   usePortfolioGetPortfolioV1Query,
   type TokenBalance as PortfolioTokenBalance,
@@ -17,7 +20,6 @@ import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import { useVisibleBalances } from './useVisibleBalances'
 import useBalances from './useBalances'
 import usePositions from '@/features/positions/hooks/usePositions'
-import { IS_DEV } from '@/config/constants'
 import { formatUnits } from 'ethers'
 
 export type PortfolioData = {
@@ -237,18 +239,12 @@ const usePortfolioLegacy = (skip: boolean = false): PortfolioData => {
 }
 
 export const usePortfolio = (): PortfolioData => {
-  const chainId = useChainId()
-  let hasPortfolioEndpoint = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT)
+  const usePortfolioEndpoint = useAppSelector(selectUsePortfolioEndpoint)
 
-  if (IS_DEV && chainId === '1') {
-    hasPortfolioEndpoint = true
-    console.log('[Dev Override] Portfolio endpoint enabled for Ethereum mainnet (chain 1)')
-  }
+  const v2Data = usePortfolioV2(!usePortfolioEndpoint)
+  const legacyData = usePortfolioLegacy(usePortfolioEndpoint)
 
-  const v2Data = usePortfolioV2(!hasPortfolioEndpoint)
-  const legacyData = usePortfolioLegacy(hasPortfolioEndpoint)
-
-  return hasPortfolioEndpoint ? v2Data : legacyData
+  return usePortfolioEndpoint ? v2Data : legacyData
 }
 
 export default usePortfolio
