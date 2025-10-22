@@ -7,7 +7,6 @@ import { useAddressBookCheck } from './address-analysis/address-book-check/useAd
 import { useAddressActivity } from './address-analysis/address-activity/useAddressActivity'
 import { type RecipientAnalysisResults, type ContractAnalysisResults } from '../types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { useMemoDeepCompare } from './util-hooks/useMemoDeepCompare'
 import { mergeAnalysisResults } from '../utils'
 
 /**
@@ -47,14 +46,15 @@ export function useCounterpartyAnalysis({
 
   // Extract transaction data from SafeTransaction
   const transactionData = useMemo(() => {
-    if (!safeTx) return undefined
-    return {
-      to: getAddress(safeTx.data.to),
-      value: safeTx.data.value,
-      data: safeTx.data.data,
-      operation: safeTx.data.operation as 0 | 1,
+    if (safeTx?.data.to) {
+      return {
+        to: getAddress(safeTx.data.to),
+        value: safeTx.data.value,
+        data: safeTx.data.data,
+        operation: safeTx.data.operation as 0 | 1,
+      }
     }
-  }, [safeTx])
+  }, [safeTx?.data.to, safeTx?.data.value, safeTx?.data.data, safeTx?.data.operation])
 
   // Trigger the mutation when transaction data is available
   useEffect(() => {
@@ -69,10 +69,9 @@ export function useCounterpartyAnalysis({
   }, [transactionData, chainId, safeAddress, triggerAnalysis, hasTriggered])
 
   // Reset hasTriggered when transaction data changes
-  const transactionDataMemo = useMemoDeepCompare(() => transactionData, [transactionData])
   useEffect(() => {
     setHasTriggered(false)
-  }, [transactionDataMemo])
+  }, [transactionData])
 
   // Extract recipient addresses from the counterparty analysis response
   const recipientAddresses = useMemo(() => {
@@ -90,11 +89,18 @@ export function useCounterpartyAnalysis({
   const [activityCheck, activityCheckError, activityCheckLoading] = useAddressActivity(recipientAddresses, web3ReadOnly)
 
   // Merge backend recipient results with local checks
-  const mergedRecipientResults = useMemo(
-    () =>
-      mergeAnalysisResults(counterpartyData?.recipient as RecipientAnalysisResults, addressBookCheck, activityCheck),
-    [counterpartyData?.recipient, addressBookCheck, activityCheck],
-  )
+  const mergedRecipientResults = useMemo(() => {
+    // Only merge different results after all of them are available
+    if (!counterpartyData?.recipient || !addressBookCheck || !activityCheck) {
+      return undefined
+    }
+
+    return mergeAnalysisResults(
+      counterpartyData?.recipient as RecipientAnalysisResults,
+      addressBookCheck,
+      activityCheck,
+    )
+  }, [counterpartyData?.recipient, addressBookCheck, activityCheck])
 
   const fetchError = useMemo(() => {
     if (error) {
