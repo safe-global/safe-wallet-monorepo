@@ -21,14 +21,13 @@ const extractMultiSendActions = (txPreview: TransactionPreview | undefined): Mul
 
   const txData = txPreview.txData
   if (!txData.hexData || !isMultiSendCalldata(txData.hexData)) {
-    if (!txData.value || txData.dataDecoded == null) {
-      return []
-    }
-    // Cast to BaseDataDecoded since MultiSend expects it
-    const baseDataDecoded: BaseDataDecoded = {
-      method: txData.dataDecoded.method,
-      parameters: txData.dataDecoded.parameters ?? undefined,
-    }
+    // Return single transaction (non-MultiSend)
+    const baseDataDecoded: BaseDataDecoded | undefined = txData.dataDecoded
+      ? {
+          method: txData.dataDecoded.method,
+          parameters: txData.dataDecoded.parameters ?? undefined,
+        }
+      : undefined
 
     return [
       {
@@ -46,11 +45,12 @@ const extractMultiSendActions = (txPreview: TransactionPreview | undefined): Mul
     return []
   }
 
-  if (Array.isArray(multiSendActions)) {
-    return multiSendActions
+  if (!Array.isArray(multiSendActions)) {
+    console.error('Expected multiSendActions to be an array, got:', typeof multiSendActions)
+    return []
   }
 
-  return []
+  return multiSendActions
 }
 
 const BatchTxList = ({ txItems, onDelete }: { txItems: DraftBatchItem[]; onDelete?: (id: string) => void }) => {
