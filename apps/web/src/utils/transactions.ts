@@ -3,7 +3,6 @@ import type {
   MultisigExecutionInfo,
   ModuleTransaction,
   TransactionDetails,
-  TransactionItemPage,
   Transaction,
   QueuedItemPage,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -18,7 +17,6 @@ import {
   isModuleDetailedExecutionInfo,
   isMultisigDetailedExecutionInfo,
   isMultisigExecutionInfo,
-  isTransactionListItem,
   isTransactionQueuedItem,
   isTransferTxInfo,
   isTxQueued,
@@ -61,6 +59,32 @@ export const getTransactionDetails = async (chainId: string, txId: string): Prom
     .unwrap()
 
   return result
+}
+
+/**
+ * Delete a transaction from the gateway using RTK Query.
+ * This function can be used in non-React contexts (e.g., async functions, services).
+ * It dispatches the mutation and waits for the result.
+ *
+ * @param chainId - The chain ID where the transaction exists
+ * @param safeTxHash - The Safe transaction hash to delete
+ * @param signature - Signature proving authorization to delete the transaction
+ * @throws Error if the store is not initialized or if the request fails
+ */
+export const deleteTransaction = async (chainId: string, safeTxHash: string, signature: string): Promise<void> => {
+  const store = getStoreInstance()
+
+  await store
+    .dispatch(
+      cgwApi.endpoints.transactionsDeleteTransactionV1.initiate({
+        chainId,
+        safeTxHash,
+        deleteTransactionDto: {
+          signature,
+        },
+      }),
+    )
+    .unwrap()
 }
 
 export const makeTxFromDetails = (txDetails: TransactionDetails): ModuleTransaction => {

@@ -1,7 +1,5 @@
-import type { AllOwnedSafes } from '@safe-global/store/gateway/types'
 import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react'
 
-import { getAllOwnedSafes } from '@safe-global/safe-gateway-typescript-sdk'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { safeOverviewEndpoints } from './safeOverviews'
 import { createSubmission, getSafe, getSafesByOwner, getSubmission } from '@safe-global/safe-client-gateway-sdk'
@@ -26,11 +24,6 @@ export const gatewayApi = createApi({
     getSafe: builder.query<getSafe, { chainId: string; safeAddress: string }>({
       queryFn({ chainId, safeAddress }) {
         return buildQueryFn(() => getSafe({ params: { path: { chainId, safeAddress } } }))
-      },
-    }),
-    getAllOwnedSafes: builder.query<AllOwnedSafes, { walletAddress: string }>({
-      queryFn({ walletAddress }) {
-        return buildQueryFn(() => getAllOwnedSafes(walletAddress))
       },
     }),
     getOwnedSafes: builder.query<getSafesByOwner, { chainId: string; ownerAddress: string }>({
@@ -78,6 +71,5 @@ export const {
   useGetSafeQuery,
   useGetSafeOverviewQuery,
   useGetMultipleSafeOverviewsQuery,
-  useGetAllOwnedSafesQuery,
   useGetOwnedSafesQuery,
 } = gatewayApi
