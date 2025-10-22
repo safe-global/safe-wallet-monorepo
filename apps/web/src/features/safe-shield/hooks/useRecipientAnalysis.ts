@@ -7,7 +7,9 @@ import { useRecipientAnalysis as useRecipientAnalysisUtils } from '@safe-global/
 import useOwnedSafes from '@/hooks/useOwnedSafes'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 
-export function useRecipientAnalysis(recipients: string[]): AsyncResult<RecipientAnalysisResults> {
+export function useRecipientAnalysis(
+  recipients: string[] | undefined,
+): AsyncResult<RecipientAnalysisResults> | undefined {
   const safeAddress = useSafeAddress()
   const chainId = useChainId()
   const web3ReadOnly = useWeb3ReadOnly()

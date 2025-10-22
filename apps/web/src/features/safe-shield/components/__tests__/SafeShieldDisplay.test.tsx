@@ -154,10 +154,14 @@ describe('SafeShieldDisplay', () => {
     it('should handle threat results', () => {
       render(<SafeShieldDisplay threat={mockThreat} />)
 
-      // Threat alone shows empty state because getOverallStatus needs recipient or contract
+      // Threat data is displayed with appropriate status
+      expect(screen.getByText('Checks passed')).toBeInTheDocument()
+      // Content should not show empty state when threat data is present
       expect(
-        screen.getByText('Transaction details will be automatically scanned for potential risks and will appear here.'),
-      ).toBeInTheDocument()
+        screen.queryByText(
+          'Transaction details will be automatically scanned for potential risks and will appear here.',
+        ),
+      ).not.toBeInTheDocument()
     })
 
     it('should handle all props together', () => {

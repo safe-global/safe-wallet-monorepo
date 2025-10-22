@@ -15,17 +15,17 @@ export const MULTI_RESULT_DESCRIPTION: Record<
   ((number: number, totalNumber?: number) => string) | undefined
 > = {
   [RecipientStatus.KNOWN_RECIPIENT]: (number, totalNumber) =>
-    `${capitalise(formatCount(number, 'recipient', totalNumber))} ${number === 1 ? 'is' : 'are'} in the address book or an owned Safe.`,
+    `${capitalise(formatCount(number, 'address', totalNumber, 'addresses'))} ${number === 1 ? 'is' : 'are'} in your address book or a Safe you own.`,
   [RecipientStatus.UNKNOWN_RECIPIENT]: (number, totalNumber) =>
-    `${capitalise(formatCount(number, 'recipient', totalNumber))} ${number === 1 ? 'is' : 'are'} not in the address book and not an owned Safe.`,
+    `${capitalise(formatCount(number, 'address', totalNumber, 'addresses'))} ${number === 1 ? 'is' : 'are'} not in your address book or a Safe you own.`,
   [RecipientStatus.LOW_ACTIVITY]: (number, totalNumber) =>
-    `${capitalise(formatCount(number, 'recipient', totalNumber))} ${number === 1 ? 'has' : 'have'} low activity.`,
+    `${capitalise(formatCount(number, 'address', totalNumber, 'addresses'))} ${number === 1 ? 'has' : 'have'} low activity.`,
   [RecipientStatus.HIGH_ACTIVITY]: (number, totalNumber) =>
-    `${capitalise(formatCount(number, 'recipient', totalNumber))} ${number === 1 ? 'has' : 'have'} high activity.`,
+    `${capitalise(formatCount(number, 'address', totalNumber, 'addresses'))} ${number === 1 ? 'has' : 'have'} high activity.`,
   [RecipientStatus.NEW_RECIPIENT]: (number, totalNumber) =>
-    `You are interacting with ${formatCount(number, 'recipient', totalNumber)} for the first time.`,
+    `You are interacting with ${formatCount(number, 'address', totalNumber, 'addresses')} for the first time.`,
   [RecipientStatus.RECURRING_RECIPIENT]: (number, totalNumber) =>
-    `You have interacted with ${formatCount(number, 'recipient', totalNumber)} before.`,
+    `You have interacted with ${formatCount(number, 'address', totalNumber, 'addresses')} before.`,
   [BridgeStatus.INCOMPATIBLE_SAFE]: (number, totalNumber) =>
     `${capitalise(formatCount(number, 'Safe account', totalNumber))} cannot be created on the destination chain. You will not be able to claim ownership of the same address. Funds sent may be inaccessible.`,
   [BridgeStatus.MISSING_OWNERSHIP]: (number, totalNumber) =>
@@ -45,6 +45,6 @@ export const MULTI_RESULT_DESCRIPTION: Record<
   [ContractStatus.UNEXPECTED_DELEGATECALL]: (number) =>
     `${capitalise(formatCount(number, 'unexpected delegateCall'))} detected.`,
   [ContractStatus.NOT_VERIFIED_BY_SAFE]: (number, totalNumber) =>
-    `${capitalise(formatCount(number, 'contract', totalNumber))} ${number === 1 ? 'has' : 'have'} not been interacted with on Safe{Wallet}. If verified, it will be marked as such after the first transaction.`,
+    `${capitalise(formatCount(number, 'contract', totalNumber))} ${number === 1 ? 'has' : 'have'} not been interacted with on Safe{Wallet}. If verified, ${number === 1 ? 'it' : 'they'} will be marked as such after the first transaction.`,
   [ContractStatus.VERIFICATION_UNAVAILABLE]: undefined,
 }
