@@ -3,23 +3,23 @@
 // import useSafeInfo from '@/hooks/useSafeInfo'
 
 /**
- * Hook to determine if the No Fee November banner should be visible
+ * Hook to determine if the No Fee November feature should be enabled
  *
- * Banner is visible when:
+ * Feature is enabled when:
  * - Feature flag is enabled
  * - Safe is on Mainnet (chainId === '1')
  *
- * TODO: Remove mock when ready for production
+ * TODO: Remove mock when feature flag is enabled on Mainnet chain configuration
  */
-const useIsNoFeeNovemberBannerVisible = (): boolean => {
+const useIsNoFeeNovemberEnabled = (): boolean => {
   // const isFeatureEnabled = useHasFeature(FEATURES.NO_FEE_NOVEMBER)
   // const { safe } = useSafeInfo()
 
-  // Mock: Always show banner for testing (remove this line when ready for production)
+  // Mock: Always show banner for testing (remove this line when feature flag is enabled)
   return true
 
-  // Production logic (uncomment when ready):
+  // Production logic (uncomment when feature flag is enabled on Mainnet):
   // return Boolean(isFeatureEnabled && safe.chainId === '1')
 }
 
-export default useIsNoFeeNovemberBannerVisible
+export default useIsNoFeeNovemberEnabled

@@ -21,13 +21,11 @@ import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useI
 import EarnBanner, { earnBannerID } from '@/components/dashboard/NewsCarousel/banners/EarnBanner'
 import SpacesBanner, { spacesBannerID } from '@/components/dashboard/NewsCarousel/banners/SpacesBanner'
 import StakeBanner, { stakeBannerID } from '@/components/dashboard/NewsCarousel/banners/StakeBanner'
-import NoFeeNovemberBanner, {
-  noFeeNovemberBannerID,
-} from '@/components/dashboard/NewsCarousel/banners/NoFeeNovemberBanner'
+import NoFeeNovemberBanner, { noFeeNovemberBannerID } from '@/features/no-fee-november/components/NoFeeNovemberBanner'
 import AddFundsToGetStarted from '@/components/dashboard/AddFundsBanner'
 import useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsPositionsFeatureEnabled'
-import useIsNoFeeNovemberBannerVisible from '@/hooks/useIsNoFeeNovemberBannerVisible'
-import useNoFeeNovemberEligibility from '@/hooks/useNoFeeNovemberEligibility'
+import useIsNoFeeNovemberEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberEnabled'
+import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const PositionsWidget = dynamic(() => import('@/features/positions/components/PositionsWidget'))
@@ -46,7 +44,7 @@ const Dashboard = (): ReactElement => {
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const isStakingBannerVisible = useIsStakingBannerVisible()
   const isPositionsFeatureEnabled = useIsPositionsFeatureEnabled()
-  const isNoFeeNovemberVisible = useIsNoFeeNovemberBannerVisible()
+  const isNoFeeNovemberVisible = useIsNoFeeNovemberEnabled()
   const { isEligible } = useNoFeeNovemberEligibility()
 
   const banners = [

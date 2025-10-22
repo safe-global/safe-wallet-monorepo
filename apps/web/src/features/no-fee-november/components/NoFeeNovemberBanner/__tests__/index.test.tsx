@@ -1,11 +1,11 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
-import NoFeeNovemberBanner from '@/components/dashboard/NewsCarousel/banners/NoFeeNovemberBanner'
-import * as useNoFeeNovemberEligibilityHook from '@/hooks/useNoFeeNovemberEligibility'
+import NoFeeNovemberBanner from '@/features/no-fee-november/components/NoFeeNovemberBanner'
+import * as useNoFeeNovemberEligibilityHook from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
 import { TxModalContext } from '@/components/tx-flow'
 import { NewTxFlow } from '@/components/tx-flow/flows'
 
 // Mock the eligibility hook
-jest.mock('@/hooks/useNoFeeNovemberEligibility')
+jest.mock('@/features/no-fee-november/hooks/useNoFeeNovemberEligibility')
 
 // Mock Next.js router
 jest.mock('next/router', () => ({

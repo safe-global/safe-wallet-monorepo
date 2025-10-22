@@ -13,9 +13,9 @@ import CurrencySelect from '@/components/balances/CurrencySelect'
 import TokenListSelect from '@/components/balances/TokenListSelect'
 import StakingBanner from '@/components/dashboard/StakingBanner'
 import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useIsStakingBannerVisible'
-import NoFeeNovemberBanner from '@/components/dashboard/NewsCarousel/banners/NoFeeNovemberBanner'
-import useIsNoFeeNovemberBannerVisible from '@/hooks/useIsNoFeeNovemberBannerVisible'
-import useNoFeeNovemberEligibility from '@/hooks/useNoFeeNovemberEligibility'
+import NoFeeNovemberBanner from '@/features/no-fee-november/components/NoFeeNovemberBanner'
+import useIsNoFeeNovemberEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberEnabled'
+import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { Box } from '@mui/material'
 import { BRAND_NAME } from '@/config/constants'
@@ -26,7 +26,7 @@ const Balances: NextPage = () => {
   const [showHiddenAssets, setShowHiddenAssets] = useState(false)
   const toggleShowHiddenAssets = () => setShowHiddenAssets((prev) => !prev)
   const isStakingBannerVisible = useIsStakingBannerVisible()
-  const isNoFeeNovemberVisible = useIsNoFeeNovemberBannerVisible()
+  const isNoFeeNovemberVisible = useIsNoFeeNovemberEnabled()
   const { isEligible: _isEligible } = useNoFeeNovemberEligibility()
   const [hideNoFeeNovemberBanner, setHideNoFeeNovemberBanner] = useLocalStorage<boolean>(
     'hideNoFeeNovemberAssetsPageBanner',
