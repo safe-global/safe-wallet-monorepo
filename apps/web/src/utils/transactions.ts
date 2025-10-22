@@ -16,6 +16,10 @@ import { ConflictType, TransactionListItemType } from '@safe-global/store/gatewa
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { cgwApi as estimationsApi } from '@safe-global/store/gateway/AUTO_GENERATED/estimations'
+import { cgwApi as safesApi } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import type { EstimationResponse, GetEstimationDto } from '@safe-global/store/gateway/AUTO_GENERATED/estimations'
+import type { SafeNonces } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import {
   isERC20Transfer,
   isModuleDetailedExecutionInfo,
@@ -276,6 +280,62 @@ export const getTransactionHistory = async (
         trusted: query?.trusted,
         imitation: query?.imitation,
         cursor,
+      }),
+    )
+    .unwrap()
+
+  return result
+}
+
+/**
+ * Fetch Safe nonces from the gateway using RTK Query.
+ * This function can be used in non-React contexts (e.g., async functions, services).
+ * It dispatches the query and waits for the result.
+ *
+ * @param chainId - The chain ID where the Safe exists
+ * @param safeAddress - The Safe address
+ * @returns The Safe nonces (current and recommended)
+ * @throws Error if the store is not initialized or if the request fails
+ */
+export const getNonces = async (chainId: string, safeAddress: string): Promise<SafeNonces> => {
+  const store = getStoreInstance()
+
+  const result = await store
+    .dispatch(
+      safesApi.endpoints.safesGetNoncesV1.initiate({
+        chainId,
+        safeAddress,
+      }),
+    )
+    .unwrap()
+
+  return result
+}
+
+/**
+ * Post Safe gas estimation to the gateway using RTK Query.
+ * This function can be used in non-React contexts (e.g., async functions, services).
+ * It dispatches the mutation and waits for the result.
+ *
+ * @param chainId - The chain ID where the Safe exists
+ * @param safeAddress - The Safe address
+ * @param estimationData - Transaction details for gas estimation
+ * @returns The estimation response with recommended nonce and safeTxGas
+ * @throws Error if the store is not initialized or if the request fails
+ */
+export const postSafeGasEstimation = async (
+  chainId: string,
+  safeAddress: string,
+  estimationData: GetEstimationDto,
+): Promise<EstimationResponse> => {
+  const store = getStoreInstance()
+
+  const result = await store
+    .dispatch(
+      estimationsApi.endpoints.estimationsGetEstimationV2.initiate({
+        chainId,
+        address: safeAddress,
+        getEstimationDto: estimationData,
       }),
     )
     .unwrap()
