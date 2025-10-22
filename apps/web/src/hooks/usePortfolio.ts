@@ -18,6 +18,7 @@ import { useVisibleBalances } from './useVisibleBalances'
 import useBalances from './useBalances'
 import usePositions from '@/features/positions/hooks/usePositions'
 import { IS_DEV } from '@/config/constants'
+import { formatUnits } from 'ethers'
 
 export type PortfolioData = {
   totalBalance: string
@@ -34,10 +35,10 @@ export type PortfolioData = {
   isFetching: boolean
 }
 
-const transformTokenBalances = (tokens: PortfolioTokenBalance[], currentChainId: string): Balance[] => {
-  return tokens
-    .filter((token) => token.tokenInfo.chainId === currentChainId)
-    .map((token) => ({
+const transformTokenBalances = (tokens: PortfolioTokenBalance[]): Balance[] => {
+  // TODO: CGW should filter by chainIds parameter and return numeric chainIds matching the request
+  // For now, we don't filter client-side since the API returns all chains
+  return tokens.map((token) => ({
       balance: token.balance,
       fiatBalance: (token.balanceFiat ?? 0).toString(),
       fiatConversion: (token.price ?? 0).toString(),
@@ -79,7 +80,7 @@ const usePortfolioV2 = (skip: boolean = false): PortfolioData => {
   )
 
   return useMemo(() => {
-    const allTokens = transformTokenBalances(currentData?.tokenBalances ?? [], chainId)
+    const allTokens = transformTokenBalances(currentData?.tokenBalances ?? [])
     const positionBalances = currentData?.positionBalances ?? []
     const visibleTokens = allTokens.filter((item) => !hiddenTokens.includes(item.tokenInfo.address))
 
@@ -107,7 +108,7 @@ const usePortfolioV2 = (skip: boolean = false): PortfolioData => {
       isLoaded: !!currentData,
       isFetching,
     }
-  }, [currentData, error, isLoading, isFetching, hiddenTokens, chainId])
+  }, [currentData, error, isLoading, isFetching, hiddenTokens])
 }
 
 const transformProtocolsToAppBalances = (protocols: any[]): AppBalance[] => {
@@ -131,7 +132,7 @@ const transformProtocolsToAppBalances = (protocols: any[]): AppBalance[] => {
           logoUrl: item.tokenInfo.logoUri,
           chainId: '', // Not available in old structure
         },
-        balance: item.balance,
+        balance: formatUnits(item.balance, item.tokenInfo.decimals),
         balanceFiat: parseFloat(item.fiatBalance),
         priceChangePercentage1d: item.fiatBalance24hChange ? parseFloat(item.fiatBalance24hChange) : null,
       })),
@@ -145,8 +146,16 @@ const usePortfolioLegacy = (skip: boolean = false): PortfolioData => {
   const { data: positionsData, isLoading: positionsLoading } = usePositions(skip)
 
   return useMemo(() => {
-    const allTokens = allBalancesData.balances.items
-    const visibleTokens = balances.items
+    // Convert legacy BigInt balances to decimal strings
+    const allTokens = allBalancesData.balances.items.map((item) => ({
+      ...item,
+      balance: formatUnits(item.balance, item.tokenInfo.decimals),
+    }))
+
+    const visibleTokens = balances.items.map((item) => ({
+      ...item,
+      balance: formatUnits(item.balance, item.tokenInfo.decimals),
+    }))
 
     const positionsTotal = positionsData
       ? positionsData

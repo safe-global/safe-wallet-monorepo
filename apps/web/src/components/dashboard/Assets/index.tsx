@@ -69,7 +69,7 @@ const AssetRow = ({
         <Box>
           <Typography fontWeight="600">{item.tokenInfo.name}</Typography>
           <Typography variant="body2" className={css.tokenAmount}>
-            <TokenAmount value={item.balance} decimals={item.tokenInfo.decimals} tokenSymbol={item.tokenInfo.symbol} />
+            <TokenAmount value={item.balance} tokenSymbol={item.tokenInfo.symbol} />
           </Typography>
         </Box>
       </Stack>

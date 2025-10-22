@@ -2,7 +2,6 @@ import usePortfolio from '@/hooks/usePortfolio'
 import useIsStakingPromoEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
 import { useSanctionedAddress } from '@/hooks/useSanctionedAddress'
 import { useMemo } from 'react'
-import { formatUnits } from 'ethers'
 import { TokenType } from '@safe-global/store/gateway/types'
 
 const MIN_NATIVE_TOKEN_BALANCE = 32
@@ -17,10 +16,7 @@ const useIsStakingBannerVisible = () => {
     [tokenBalances],
   )
 
-  const hasSufficientFunds =
-    nativeTokenBalance != null &&
-    Number(formatUnits(nativeTokenBalance.balance, nativeTokenBalance.tokenInfo.decimals ?? 0)) >=
-      MIN_NATIVE_TOKEN_BALANCE
+  const hasSufficientFunds = nativeTokenBalance != null && Number(nativeTokenBalance.balance) >= MIN_NATIVE_TOKEN_BALANCE
 
   return isStakingBannerEnabled && !Boolean(sanctionedAddress) && hasSufficientFunds
 }

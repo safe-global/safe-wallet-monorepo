@@ -3,6 +3,7 @@ import { Tooltip } from '@mui/material'
 import { TransferDirection } from '@safe-global/store/gateway/types'
 import css from './styles.module.css'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
+import { formatAmount, formatAmountPrecise } from '@safe-global/utils/utils/formatNumber'
 import TokenIcon from '../TokenIcon'
 import classNames from 'classnames'
 import type { TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -31,11 +32,20 @@ const TokenAmount = ({
   chainId?: string
 }): ReactElement => {
   const sign = direction === TransferDirection.OUTGOING ? '-' : ''
+
+  // If decimals is provided, it's BigInt format (transactions)
+  // If decimals is NOT provided, it's already a decimal string (portfolio balances)
   const amount =
-    decimals !== undefined ? formatVisualAmount(value, decimals, preciseAmount ? PRECISION : undefined) : value
+    decimals !== undefined
+      ? formatVisualAmount(value, decimals, preciseAmount ? PRECISION : undefined)
+      : preciseAmount
+        ? formatAmountPrecise(value, PRECISION)
+        : formatAmount(value)
 
   const fullAmount =
-    decimals !== undefined ? sign + formatVisualAmount(value, decimals, PRECISION) + ' ' + tokenSymbol : value
+    decimals !== undefined
+      ? sign + formatVisualAmount(value, decimals, PRECISION) + ' ' + tokenSymbol
+      : sign + formatAmountPrecise(value, PRECISION) + ' ' + tokenSymbol
 
   return (
     <Tooltip title={fullAmount}>

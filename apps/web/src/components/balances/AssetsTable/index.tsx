@@ -208,15 +208,11 @@ const AssetsTable = ({
               ),
             },
             balance: {
-              rawValue: Number(item.balance) / 10 ** (item.tokenInfo.decimals ?? 0),
+              rawValue: Number(item.balance),
               collapsed: item.tokenInfo.address === hidingAsset,
               content: (
                 <Typography sx={{ '& b': { fontWeight: '400' } }} textAlign="right">
-                  <TokenAmount
-                    value={item.balance}
-                    decimals={item.tokenInfo.decimals}
-                    tokenSymbol={item.tokenInfo.symbol}
-                  />
+                  <TokenAmount value={item.balance} tokenSymbol={item.tokenInfo.symbol} />
                 </Typography>
               ),
             },
