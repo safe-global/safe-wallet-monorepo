@@ -1,4 +1,4 @@
-import type { ModuleTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import React, { type ReactElement } from 'react'
 import { useMemo } from 'react'
 import { useRouter } from 'next/router'
@@ -43,10 +43,10 @@ const EmptyState = () => {
 }
 
 function getActionableTransactions(
-  txs: ModuleTransaction[],
+  txs: TransactionQueuedItem[],
   safe: SafeState,
   walletAddress?: string,
-): ModuleTransaction[] {
+): TransactionQueuedItem[] {
   if (!walletAddress) {
     return txs
   }
@@ -63,10 +63,10 @@ export function _getTransactionsToDisplay({
   safe,
 }: {
   recoveryQueue: RecoveryQueueItem[]
-  queue: ModuleTransaction[]
+  queue: TransactionQueuedItem[]
   walletAddress?: string
   safe: SafeState
-}): [RecoveryQueueItem[], ModuleTransaction[]] {
+}): [RecoveryQueueItem[], TransactionQueuedItem[]] {
   if (recoveryQueue.length >= MAX_TXS) {
     return [recoveryQueue.slice(0, MAX_TXS), []]
   }

@@ -1,7 +1,7 @@
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { SettingsInfoType } from '@safe-global/store/gateway/types'
 import type {
-  CreationTransaction,
+  CreationTransactionInfo,
   CustomTransactionInfo,
   MultiSendTransactionInfo,
   SettingsChangeTransaction,
@@ -57,7 +57,7 @@ export const TransferTx = ({
     return (
       <TokenAmount
         direction={direction}
-        value={transfer.value}
+        value={transfer.value ?? '0'}
         decimals={nativeCurrency?.decimals}
         tokenSymbol={nativeCurrency?.symbol}
         logoUri={withLogo ? nativeCurrency?.logoUri : undefined}
@@ -101,7 +101,7 @@ const CustomTx = ({ info }: { info: CustomTransactionInfo }): ReactElement => {
   return <Box className={css.txInfo}>{info.methodName}</Box>
 }
 
-const CreationTx = ({ info }: { info: CreationTransaction }): ReactElement => {
+const CreationTx = ({ info }: { info: CreationTransactionInfo }): ReactElement => {
   return <Box className={css.txInfo}>Created by {shortenAddress(info.creator.value)}</Box>
 }
 

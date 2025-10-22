@@ -16,7 +16,7 @@ export const OnChainConfirmation = ({
   data,
   isConfirmationView = false,
 }: {
-  data?: TransactionData
+  data?: TransactionData | null
   isConfirmationView?: boolean
 }) => {
   const chainId = useChainId()

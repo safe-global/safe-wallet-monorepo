@@ -1,4 +1,4 @@
-import type { ModuleTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { ModuleTransaction, MultisigTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import TxProposalChip from '@/features/proposers/components/TxProposalChip'
 import StatusLabel from '@/features/swap/components/StatusLabel'
 import useIsExpiredSwap from '@/features/swap/hooks/useIsExpiredSwap'
@@ -23,7 +23,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 type TxSummaryProps = {
   isConflictGroup?: boolean
   isBulkGroup?: boolean
-  item: ModuleTransaction
+  item: ModuleTransaction | MultisigTransaction
 }
 
 const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): ReactElement => {

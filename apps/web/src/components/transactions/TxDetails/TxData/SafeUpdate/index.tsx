@@ -2,7 +2,7 @@ import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/
 import { Box, Stack } from '@mui/material'
 import DecodedData from '../DecodedData'
 
-function SafeUpdate({ txData }: { txData?: TransactionData }) {
+function SafeUpdate({ txData }: { txData?: TransactionData | null }) {
   return (
     <Stack mr={5} spacing={2}>
       <Box

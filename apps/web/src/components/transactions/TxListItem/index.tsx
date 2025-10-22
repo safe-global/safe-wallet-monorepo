@@ -1,12 +1,13 @@
-import type { TransactionListItem } from '@safe-global/store/gateway/types'
 import { type ReactElement } from 'react'
 import { isDateLabel, isLabelListItem, isTransactionListItem } from '@/utils/transaction-guards'
 import GroupLabel from '@/components/transactions/GroupLabel'
 import TxDateLabel from '@/components/transactions/TxDateLabel'
 import ExpandableTransactionItem from './ExpandableTransactionItem'
+import type { PendingTransactionItems } from '@safe-global/store/gateway/types'
+import type { AnyListItem } from '@/utils/tx-list'
 
 type TxListItemProps = {
-  item: TransactionListItem
+  item: AnyListItem | PendingTransactionItems
 }
 
 const TxListItem = ({ item }: TxListItemProps): ReactElement | null => {

@@ -88,6 +88,10 @@ export enum TransactionInfoType {
   NATIVE_STAKING_DEPOSIT = 'NativeStakingDeposit',
   NATIVE_STAKING_VALIDATORS_EXIT = 'NativeStakingValidatorsExit',
   NATIVE_STAKING_WITHDRAW = 'NativeStakingWithdraw',
+  SWAP = 'Swap',
+  SWAP_AND_BRIDGE = 'SwapAndBridge',
+  VAULT_DEPOSIT = 'VaultDeposit',
+  VAULT_REDEEM = 'VaultRedeem',
 }
 
 export enum ConflictType {
@@ -212,7 +216,7 @@ export enum NativeStakingStatus {
   SLASHED = 'SLASHED',
 }
 
-export type OrderStatuses = 'presignaturePending' | 'open' | 'fulfilled' | 'cancelled' | 'expired'
+export type OrderStatuses = 'presignaturePending' | 'open' | 'fulfilled' | 'cancelled' | 'expired' | 'unknown'
 export type OrderKind = 'sell' | 'buy'
 
 export enum DurationType {

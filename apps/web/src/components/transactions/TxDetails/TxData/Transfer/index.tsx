@@ -1,5 +1,5 @@
 import type { TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import type { TransactionStatus } from '@safe-global/store/gateway/types'
+import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransferDirection } from '@safe-global/store/gateway/types'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import { TransferTx } from '@/components/transactions/TxInfo'
@@ -15,7 +15,7 @@ import { type NativeToken, type Erc20Token } from '@safe-global/store/gateway/AU
 
 type TransferTxInfoProps = {
   txInfo: TransferTransactionInfo
-  txStatus: TransactionStatus
+  txStatus: Transaction['txStatus']
   trusted: boolean
   imitation: boolean
 }

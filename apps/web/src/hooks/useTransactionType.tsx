@@ -142,7 +142,7 @@ export const getTransactionType = (tx: Transaction, addressBook: AddressBook): T
     case TransactionInfoType.CUSTOM: {
       if (tx.safeAppInfo) {
         return {
-          icon: tx.safeAppInfo.logoUri,
+          icon: tx.safeAppInfo.logoUri || '/images/transactions/custom.svg',
           text: tx.safeAppInfo.name,
         }
       }

@@ -1,4 +1,4 @@
-import type { Balances } from '@safe-global/store/gateway/types'
+import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { ImplementationVersionState, TokenType } from '@safe-global/store/gateway/types'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { safeCreationDispatch, SafeCreationEvent } from '@/features/counterfactual/services/safeCreationEvents'
@@ -318,7 +318,7 @@ export const extractCounterfactualSafeSetup = (
   }
   const { owners, threshold, fallbackHandler } = undeployedSafe.props.safeAccountConfig
   const { safeVersion, saltNonce } = isPredictedSafeProps(undeployedSafe.props)
-    ? (undeployedSafe.props.safeDeploymentConfig ?? {})
+    ? undeployedSafe.props.safeDeploymentConfig ?? {}
     : undeployedSafe.props
 
   return {

@@ -1,5 +1,5 @@
-import type { ModuleTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
+import type { AnyTransactionItem } from '@/utils/tx-list'
 import type { ReactElement } from 'react'
 import { Box, Paper, SvgIcon, Typography } from '@mui/material'
 import { isMultisigExecutionInfo, isSwapTransferOrderTxInfo } from '@/utils/transaction-guards'
@@ -27,7 +27,7 @@ const GroupedTxListItems = ({
   groupedListItems,
   transactionHash,
 }: {
-  groupedListItems: ModuleTransaction[]
+  groupedListItems: AnyTransactionItem[]
   transactionHash: string
 }): ReactElement | null => {
   const chain = useCurrentChain()

@@ -5,7 +5,7 @@ import { isOnChainConfirmationTxData } from '@/utils/transaction-guards'
 
 const safeInterface = Safe__factory.createInterface()
 
-export const useSignedHash = (txData?: TransactionData) => {
+export const useSignedHash = (txData?: TransactionData | null) => {
   const signedHash = useMemo(() => {
     if (!isOnChainConfirmationTxData(txData)) {
       return

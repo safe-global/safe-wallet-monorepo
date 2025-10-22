@@ -47,7 +47,7 @@ export const ExecTransaction = ({
   data,
   isConfirmationView = false,
 }: {
-  data?: TransactionData
+  data?: TransactionData | null
   isConfirmationView?: boolean
 }) => {
   const chain = useCurrentChain()

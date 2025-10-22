@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import { useCurrentChain } from './useChains'
 import useTxQueue from './useTxQueue'
-import { isSignableBy, isTransactionListItem } from '@/utils/transaction-guards'
+import { isSignableBy, isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { selectPendingTxs } from '@/store/pendingTxsSlice'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useWallet from './wallets/useWallet'
@@ -114,7 +114,7 @@ const useTxNotifications = (): void => {
       return []
     }
 
-    return page.results.filter(isTransactionListItem).filter(({ transaction }) => {
+    return page.results.filter(isTransactionQueuedItem).filter(({ transaction }) => {
       const isAwaitingConfirmations = transaction.txStatus === TransactionStatus.AWAITING_CONFIRMATIONS
       const isPending = !!pendingTxs[transaction.id]
       const canSign = isSignableBy(transaction, wallet?.address || '')

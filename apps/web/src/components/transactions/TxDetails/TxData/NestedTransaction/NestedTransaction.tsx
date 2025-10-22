@@ -20,7 +20,7 @@ export const NestedTransaction = ({
   children,
   isConfirmationView = false,
 }: {
-  txData: TransactionData | undefined
+  txData: TransactionData | null | undefined
   children: ReactElement
   isConfirmationView?: boolean
 }) => {

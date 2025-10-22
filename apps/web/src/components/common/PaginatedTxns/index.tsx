@@ -1,4 +1,4 @@
-import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { TransactionItemPage, QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type ReactElement, useEffect, useState } from 'react'
 import { Box } from '@mui/material'
 import TxList from '@/components/transactions/TxList'
@@ -19,7 +19,7 @@ const NoQueuedTxns = () => {
   return <PagePlaceholder img={<NoTransactionsIcon />} text="Queued transactions will appear here" />
 }
 
-const getFilterResultCount = (filter: TxFilter, page: TransactionItemPage) => {
+const getFilterResultCount = (filter: TxFilter, page: TransactionItemPage | QueuedItemPage) => {
   const count = page.results.filter(isTransactionListItem).length
 
   return `${page.next ? '> ' : ''}${count} ${filter.type} transactions found`.toLowerCase()

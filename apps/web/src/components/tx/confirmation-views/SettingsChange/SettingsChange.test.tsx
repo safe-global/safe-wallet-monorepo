@@ -1,12 +1,11 @@
 import { SettingsInfoType } from '@safe-global/store/gateway/types'
-import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { TransactionDetails, SwapOwner } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { render } from '@/tests/test-utils'
 import SettingsChange from '.'
 import { ownerAddress, txInfo } from './mockData'
 import { SettingsChangeContext } from '@/components/tx-flow/flows/AddOwner/context'
 import { type AddOwnerFlowProps } from '@/components/tx-flow/flows/AddOwner'
 import { type ReplaceOwnerFlowProps } from '@/components/tx-flow/flows/ReplaceOwner'
-import { type SwapOwner } from '@safe-global/safe-apps-sdk'
 
 describe('SettingsChange', () => {
   it('should display the SettingsChange component with owner details', () => {

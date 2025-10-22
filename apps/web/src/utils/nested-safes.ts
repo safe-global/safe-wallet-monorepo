@@ -16,15 +16,17 @@ export function _getFactoryAddressAndSetupData(txData: TransactionData): {
   saltNonce: string
 } {
   let factoryAddress: string | undefined
-  let dataDecoded: DataDecoded | undefined
+  let dataDecoded: DataDecoded | null | undefined
 
   if (isCreateProxyWithNonce(txData)) {
     factoryAddress = txData.to.value
     dataDecoded = txData.dataDecoded
   } else if (isMultiSend(txData)) {
-    const batchTxData = txData.dataDecoded?.parameters
-      ?.find((parameter) => parameter?.name === 'transactions')
-      ?.valueDecoded?.find(isCreateProxyWithNonce)
+    const valueDecoded = txData.dataDecoded?.parameters?.find(
+      (parameter) => parameter?.name === 'transactions',
+    )?.valueDecoded
+
+    const batchTxData = Array.isArray(valueDecoded) ? valueDecoded?.find(isCreateProxyWithNonce) : undefined
 
     factoryAddress = batchTxData?.to
     dataDecoded = batchTxData?.dataDecoded

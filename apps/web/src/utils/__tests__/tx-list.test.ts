@@ -3,6 +3,7 @@ import { TransactionInfoType } from '@safe-global/store/gateway/types'
 import { faker } from '@faker-js/faker'
 
 import { groupTxs, groupRecoveryTransactions, _getRecoveryCancellations } from '@/utils/tx-list'
+import type { QueuedItemPage, TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 describe('tx-list', () => {
   describe('groupConflictingTxs', () => {
@@ -25,7 +26,7 @@ describe('tx-list', () => {
         },
       ]
 
-      const result = groupTxs(list as TransactionListItem[])
+      const result = groupTxs(list as QueuedItemPage['results'])
       expect(result).toEqual([
         [
           {
@@ -67,7 +68,7 @@ describe('tx-list', () => {
         },
       ]
 
-      const result = groupTxs(list as TransactionListItem[])
+      const result = groupTxs(list as QueuedItemPage['results'])
       expect(result).toEqual([
         [
           {
@@ -118,7 +119,7 @@ describe('tx-list', () => {
         },
       ]
 
-      const result = groupTxs(list as unknown as TransactionListItem[])
+      const result = groupTxs(list as unknown as QueuedItemPage['results'])
       expect(result).toEqual([
         [
           {
@@ -169,7 +170,7 @@ describe('tx-list', () => {
         },
       ]
 
-      const result = groupTxs(list as unknown as TransactionListItem[])
+      const result = groupTxs(list as unknown as QueuedItemPage['results'])
       expect(result).toEqual(list)
     })
   })

@@ -1,4 +1,4 @@
-import type { StakingTxInfo } from '@safe-global/store/gateway/AUTO_GENERATED/data-decoded'
+import type { StakingTxInfo } from '@safe-global/store/gateway/types'
 import StrakingConfirmationTx from '@/features/stake/components/StakingConfirmationTx'
 import type { NarrowConfirmationViewProps } from '../types'
 

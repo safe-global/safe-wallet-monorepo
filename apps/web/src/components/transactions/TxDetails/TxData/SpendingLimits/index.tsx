@@ -16,7 +16,7 @@ import chains from '@/config/chains'
 import TxDetailsRow from '@/components/tx/ConfirmTxDetails/TxDetailsRow'
 
 type SpendingLimitsProps = {
-  txData?: TransactionData
+  txData?: TransactionData | null
   txInfo: CustomTransactionInfo
   type: SpendingLimitMethods
 }

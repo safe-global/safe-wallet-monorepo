@@ -4,6 +4,7 @@ import type {
   MultisigExecutionInfo,
   Transaction,
   TransactionData,
+  CustomTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Builder, type IBuilder } from '@/tests/Builder'
 import { faker } from '@faker-js/faker'
@@ -76,7 +77,7 @@ export function safeSignatureBuilder(): IBuilder<SafeSignature> {
 }
 
 export function safeTxSummaryBuilder(): IBuilder<Transaction> {
-  return Builder.new<TransactionSummary>().with({
+  return Builder.new<Transaction>().with({
     id: `multisig_${faker.string.hexadecimal({ length: 40 })}_${faker.string.hexadecimal({ length: 64 })}`,
     executionInfo: executionInfoBuilder().build(),
     txInfo: txInfoBuilder().build(),
@@ -101,9 +102,8 @@ export function executionInfoBuilder(): IBuilder<MultisigExecutionInfo> {
 
 export function txInfoBuilder(): IBuilder<TransactionInfo> {
   const mockData = faker.string.hexadecimal({ length: { min: 0, max: 128 } })
-  return Builder.new<Custom>().with({
+  return Builder.new<CustomTransactionInfo>().with({
     type: TransactionInfoType.CUSTOM,
-    actionCount: 1,
     dataSize: mockData.length.toString(),
     isCancellation: false,
     methodName: faker.string.alpha(),

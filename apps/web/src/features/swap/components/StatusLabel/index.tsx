@@ -1,4 +1,4 @@
-import type { OrderStatuses } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { OrderStatuses } from '@safe-global/store/gateway/types'
 import { SvgIcon } from '@mui/material'
 import type { ReactElement } from 'react'
 import CheckIcon from '@/public/images/common/circle-check.svg'
@@ -49,6 +49,12 @@ const statusMap: Record<CustomOrderStatuses, StatusProps> = {
     label: 'Partially filled',
     color: 'success',
     icon: CircleIPartialFillcon,
+  },
+  // CGW claims it can return unknown status, but in reality I've never seen it
+  unknown: {
+    label: 'Unknown',
+    color: 'error',
+    icon: BlockIcon,
   },
 }
 export const StatusLabel = (props: Props): ReactElement => {

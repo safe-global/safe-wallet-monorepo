@@ -6,6 +6,7 @@ import type {
   ModuleTransaction,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
+import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { isMultiSendTxInfo } from '../transaction-guards'
 import { getQueuedTransactionCount, getTxOrigin } from '../transactions'
 
@@ -31,7 +32,6 @@ describe('transactions', () => {
         next: undefined,
         previous: undefined,
         results: [
-          { timestamp: 0, type: 'DATE_LABEL' } as DateLabel,
           { label: 'Next', type: 'LABEL' } as LabelQueuedItem,
           { nonce: 0, type: 'CONFLICT_HEADER' } as ConflictHeaderQueuedItem,
         ],
@@ -140,7 +140,7 @@ describe('transactions', () => {
           methodName: 'multiSend',
           actionCount: 3,
           isCancellation: false,
-        }),
+        } as TransactionInfo),
       ).toBe(true)
     })
 
@@ -159,7 +159,7 @@ describe('transactions', () => {
           methodName: 'multiSend',
           //actionCount: 3, // missing actionCount
           isCancellation: false,
-        }),
+        } as TransactionInfo),
       ).toBe(false)
 
       expect(
@@ -176,7 +176,7 @@ describe('transactions', () => {
           methodName: 'notMultiSend', // wrong method
           actionCount: 3,
           isCancellation: false,
-        }),
+        } as TransactionInfo),
       ).toBe(false)
 
       expect(
@@ -192,7 +192,7 @@ describe('transactions', () => {
               },
             ],
           },
-        }),
+        } as unknown as TransactionInfo),
       ).toBe(false)
     })
   })

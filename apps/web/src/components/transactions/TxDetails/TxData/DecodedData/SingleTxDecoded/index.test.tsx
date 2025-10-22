@@ -38,6 +38,7 @@ describe('SingleTxDecoded', () => {
         actionTitle="0"
         tx={{
           data: ERC20__factory.createInterface().encodeFunctionData('approve', [spender, '100000']),
+          value: '0',
           operation: Operation.CALL,
           to: unknownToken,
         }}
@@ -61,6 +62,7 @@ describe('SingleTxDecoded', () => {
         actionTitle="0"
         tx={{
           data: ERC20__factory.createInterface().encodeFunctionData('approve', [spender, '100000']),
+          value: '0',
           operation: Operation.CALL,
           to: unknownToken,
           dataDecoded: {

@@ -15,12 +15,7 @@ import {
 } from '@/utils/transaction-calldata'
 import { type ReactElement } from 'react'
 
-const MANAGE_SIGNERS_SETTING_INFO_TYPES = [
-  SettingsInfoType.ADD_OWNER,
-  SettingsInfoType.REMOVE_OWNER,
-  SettingsInfoType.SWAP_OWNER,
-  SettingsInfoType.CHANGE_THRESHOLD,
-]
+const MANAGE_SIGNERS_SETTING_INFO_TYPES = ['ADD_OWNER', 'REMOVE_OWNER', 'SWAP_OWNER', 'CHANGE_THRESHOLD']
 
 const MANAGE_SIGNERS_CALLDATA_GUARDS = [
   isAddOwnerWithThresholdCalldata,
@@ -34,7 +29,7 @@ export function isManageSignersView(txInfo: TransactionInfo, txData: Transaction
     return !!txInfo.settingsInfo && MANAGE_SIGNERS_SETTING_INFO_TYPES.includes(txInfo.settingsInfo.type)
   }
 
-  if (isMultiSendTxInfo(txInfo) && txData?.dataDecoded?.parameters?.[0]?.valueDecoded) {
+  if (isMultiSendTxInfo(txInfo) && Array.isArray(txData?.dataDecoded?.parameters?.[0]?.valueDecoded)) {
     return txData.dataDecoded.parameters[0].valueDecoded.every(({ data }) => {
       return data && MANAGE_SIGNERS_CALLDATA_GUARDS.some((guard) => guard(data))
     })

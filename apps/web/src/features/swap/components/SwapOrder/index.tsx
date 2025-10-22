@@ -1,5 +1,6 @@
 import type {
   SwapOrderTransactionInfo as SwapOrderType,
+  SwapTransferTransactionInfo,
   TransactionData,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
@@ -37,8 +38,8 @@ import { PartBuyAmount } from '@/features/swap/components/SwapOrder/rows/PartBuy
 import { SurplusFee } from '@/features/swap/components/SwapOrder/rows/SurplusFee'
 
 type SwapOrderProps = {
-  txData?: TransactionData
-  txInfo?: OrderTransactionInfo
+  txData?: TransactionData | null
+  txInfo?: OrderTransactionInfo | null
 }
 
 const TWAP_PARTS_STATUS_THRESHOLD = 10
@@ -200,7 +201,7 @@ const RecipientRow = ({ order }: { order: OrderTransactionInfo }) => {
   return null
 }
 
-export const SellOrder = ({ order }: { order: SwapOrderType }) => {
+export const SellOrder = ({ order }: { order: SwapOrderType | SwapTransferTransactionInfo }) => {
   const { kind } = order
   const orderKindLabel = capitalize(kind)
 

@@ -12,7 +12,7 @@ const StakingTxDepositDetails = ({
   txData,
 }: {
   info: NativeStakingDepositTransactionInfo
-  txData?: TransactionData
+  txData?: TransactionData | null
 }) => {
   return (
     <Box
@@ -25,7 +25,6 @@ const StakingTxDepositDetails = ({
       }}
     >
       {txData && (
-        // @ts-expect-error: TODO: fix this once we update to NativeStakingDepositTransactionInfo
         <SendAmountBlock title="Deposit" amountInWei={txData.value?.toString() || '0'} tokenInfo={info.tokenInfo} />
       )}
       <FieldsGrid title="Net reward rate">{info.annualNrr.toFixed(3)}%</FieldsGrid>

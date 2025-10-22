@@ -467,7 +467,10 @@ export class SafeWalletProvider {
       return result
     }
 
-    const calls = tx.txData?.dataDecoded?.parameters?.[0].valueDecoded?.length ?? 1
+    let calls = 1
+    if (Array.isArray(tx.txData?.dataDecoded?.parameters?.[0].valueDecoded)) {
+      calls = tx.txData?.dataDecoded?.parameters?.[0].valueDecoded.length ?? 1
+    }
 
     // Typed as number; is hex
     const blockNumber = Number(receipt.blockNumber)

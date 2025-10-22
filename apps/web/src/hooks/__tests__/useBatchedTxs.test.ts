@@ -1,6 +1,10 @@
-import type { TransactionListItem } from '@safe-global/store/gateway/types'
 import { ConflictType, TransactionListItemType } from '@safe-global/store/gateway/types'
-import type { MultisigExecutionInfo, ModuleTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type {
+  MultisigExecutionInfo,
+  ModuleTransaction,
+  ConflictHeaderQueuedItem,
+  TransactionQueuedItem,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getBatchableTransactions } from '@/hooks/useBatchedTxs'
 import { defaultTx, getMockTx } from '@/tests/mocks/transactions'
 
@@ -66,12 +70,12 @@ describe('getBatchableTransactions', () => {
       conflictType: ConflictType.NONE,
     }
 
-    const mockConflict: TransactionListItem = {
+    const mockConflict: ConflictHeaderQueuedItem = {
       type: TransactionListItemType.CONFLICT_HEADER,
       nonce: 1,
     }
 
-    const mockTx1: ModuleTransaction = {
+    const mockTx1: TransactionQueuedItem = {
       transaction: {
         ...defaultTx,
         executionInfo: {
@@ -86,7 +90,7 @@ describe('getBatchableTransactions', () => {
       conflictType: ConflictType.HAS_NEXT,
     }
 
-    const mockTx2: ModuleTransaction = {
+    const mockTx2: TransactionQueuedItem = {
       transaction: {
         ...defaultTx,
         executionInfo: {

@@ -19,7 +19,7 @@ import { JsonView } from './JsonView'
 
 type ReceiptProps = {
   safeTxData: SafeTransaction['data']
-  txData?: TransactionData
+  txData?: TransactionData | null
   txDetails?: TransactionDetails
   txInfo?: TransactionDetails['txInfo']
   grid?: boolean

@@ -125,6 +125,7 @@ describe('txHistorySlice', () => {
         loading: false,
         loaded: true,
         data: {
+          // @ts-expect-error - dateLabel, label, conflictHeader are not sometihng that CGW returns for history txs
           results: [dateLabel, label, conflictHeader],
         },
       })

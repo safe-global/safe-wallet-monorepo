@@ -1,22 +1,20 @@
-import type { ModuleTransaction, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { MultisigTransaction, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 import {
   ConflictType,
   DetailedExecutionInfoType,
   TransactionListItemType,
   TransactionStatus,
+  TransferDirection,
+  TransactionInfoType,
+  TransactionTokenType,
 } from '@safe-global/store/gateway/types'
 
 import TxSummary from '@/components/transactions/TxSummary/index'
 import * as pending from '@/hooks/useIsPending'
 import { render } from '@/tests/test-utils'
-import {
-  TransactionInfoType,
-  TransactionTokenType,
-  TransferDirection,
-} from '@safe-global/safe-gateway-typescript-sdk/dist/types/transactions'
 
-const mockTransaction: ModuleTransaction = {
+const mockTransaction: MultisigTransaction = {
   type: TransactionListItemType.TRANSACTION,
   transaction: {
     timestamp: Date.now(),

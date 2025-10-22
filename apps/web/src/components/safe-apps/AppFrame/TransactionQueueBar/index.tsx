@@ -1,4 +1,4 @@
-import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { Dispatch, ReactElement, SetStateAction } from 'react'
 import { Backdrop, Typography, Box, IconButton, Accordion, AccordionDetails, AccordionSummary } from '@mui/material'
 import { ClickAwayListener } from '@mui/material'
@@ -17,7 +17,7 @@ type Props = {
   visible: boolean
   setExpanded: Dispatch<SetStateAction<boolean>>
   onDismiss: () => void
-  transactions: TransactionItemPage
+  transactions: QueuedItemPage
 }
 
 const TransactionQueueBar = ({

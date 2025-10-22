@@ -1,4 +1,4 @@
-import type { OrderStatuses } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { OrderStatuses } from '@safe-global/store/gateway/types'
 import type { Meta, StoryObj } from '@storybook/react'
 import { SellOrder as SellOrderComponent } from './index'
 import { Paper } from '@mui/material'

@@ -87,7 +87,7 @@ const StyledListItemIcon = ({
   />
 )
 
-const shouldHideConfirmations = (detailedExecutionInfo?: DetailedExecutionInfo): boolean => {
+const shouldHideConfirmations = (detailedExecutionInfo?: DetailedExecutionInfo | null): boolean => {
   if (!detailedExecutionInfo || !isMultisigDetailedExecutionInfo(detailedExecutionInfo)) {
     return true
   }

@@ -81,7 +81,10 @@ export function _getTransactionsData(txInfo: TransactionInfo, txData: Transactio
   if (!isMultiSendTxInfo(txInfo)) {
     transactions = [txData?.hexData]
   } else {
-    transactions = txData?.dataDecoded?.parameters?.[0].valueDecoded?.map(({ data }) => data) ?? []
+    transactions = []
+    if (Array.isArray(txData?.dataDecoded?.parameters?.[0].valueDecoded)) {
+      transactions = txData?.dataDecoded?.parameters?.[0].valueDecoded.map(({ data }) => data)
+    }
   }
 
   return transactions.filter((x) => x != null)

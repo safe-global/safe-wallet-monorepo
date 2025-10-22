@@ -5,7 +5,7 @@ import useAddressBook from '@/hooks/useAddressBook'
 import { isCustomTxInfo } from '@/utils/transaction-guards'
 import { Chip } from '@mui/material'
 
-const NameChip = ({ txData, txInfo }: { txData?: TransactionData; txInfo?: TransactionDetails['txInfo'] }) => {
+const NameChip = ({ txData, txInfo }: { txData?: TransactionData | null; txInfo?: TransactionDetails['txInfo'] }) => {
   const addressBook = useAddressBook()
   const toAddress = txData?.to.value
   const customTxInfo = txInfo && isCustomTxInfo(txInfo) ? txInfo : undefined

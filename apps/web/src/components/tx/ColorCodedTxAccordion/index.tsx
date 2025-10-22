@@ -27,13 +27,8 @@ enum ColorLevel {
 }
 
 const TX_INFO_LEVEL = {
-  [ColorLevel.warning]: [TransactionInfoType.SETTINGS_CHANGE],
-  [ColorLevel.success]: [
-    TransactionInfoType.TRANSFER,
-    TransactionInfoType.SWAP_TRANSFER,
-    TransactionInfoType.TWAP_ORDER,
-    TransactionInfoType.NATIVE_STAKING_DEPOSIT,
-  ],
+  [ColorLevel.warning]: ['SettingsChange'],
+  [ColorLevel.success]: ['Transfer', 'SwapTransfer', 'TwapOrder', 'NativeStakingDeposit'],
 }
 
 const TxInfoColors: Record<ColorLevel, { main: string; mainDark?: string; background: string; border?: string }> = {
@@ -47,7 +42,7 @@ const TxInfoColors: Record<ColorLevel, { main: string; mainDark?: string; backgr
   },
 }
 
-const getMethodLevel = (txInfo?: TransactionInfoType): ColorLevel => {
+const getMethodLevel = (txInfo?: TransactionDetails['txInfo']['type']): ColorLevel => {
   if (!txInfo) {
     return ColorLevel.info
   }
@@ -119,7 +114,7 @@ const ColorCodedTxAccordion = ({ txInfo, txData, children, defaultExpanded }: De
               component="span"
               variant="body2"
               alignContent="center"
-              color={isDarkMode ? (colors.mainDark ?? colors.main) : colors.main}
+              color={isDarkMode ? colors.mainDark ?? colors.main : colors.main}
               py={0.5}
               px={1}
               borderRadius={0.5}

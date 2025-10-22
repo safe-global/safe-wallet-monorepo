@@ -1,4 +1,4 @@
-import type { ModuleTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { AnyTransactionItem } from '@/utils/tx-list'
 import { createContext, useMemo, useState, type Dispatch, type ReactElement, type SetStateAction } from 'react'
 
 import { useAppSelector } from '@/store'
@@ -17,7 +17,7 @@ export const ReplaceTxHoverProvider = ({
   groupedListItems,
   children,
 }: {
-  groupedListItems: ModuleTransaction[]
+  groupedListItems: AnyTransactionItem[]
   children: ReactElement
 }): ReactElement => {
   const [selectedTxId, setSelectedTxId] = useState<string>()

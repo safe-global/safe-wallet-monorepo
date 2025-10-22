@@ -8,10 +8,10 @@ import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 
 type MethodDetailsProps = {
   data: DataDecoded
-  hexData?: string
+  hexData?: string | null
   addressInfoIndex?: {
     [key: string]: AddressInfo
-  }
+  } | null
 }
 
 export const MethodDetails = ({ data, addressInfoIndex, hexData }: MethodDetailsProps): ReactElement | null => {

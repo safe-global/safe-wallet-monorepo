@@ -8,15 +8,14 @@ import DeleteIcon from '@/public/images/common/delete.svg'
 import { BATCH_EVENTS, trackEvent } from '@/services/analytics'
 import SingleTxDecoded from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded'
 import { Operation } from '@safe-global/store/gateway/types'
-import { type TokenInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 type BatchTxItemProps = DraftBatchItem & {
   id: string
   count: number
   onDelete?: (id: string) => void
   txDecoded?: MultiSend
-  addressInfoIndex: Record<string, AddressInfo>
-  tokenInfoIndex: Record<string, TokenInfo>
+  addressInfoIndex: TransactionData['addressInfoIndex']
+  tokenInfoIndex: NonNullable<TransactionData['tokenInfoIndex']>
 }
 
 const BatchTxItem = ({

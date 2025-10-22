@@ -1,6 +1,5 @@
-import type { ModuleTransaction, TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import GroupedTxListItems from '@/components/transactions/GroupedTxListItems'
-import { groupTxs } from '@/utils/tx-list'
+import { groupTxs, type AnyTransactionItem } from '@/utils/tx-list'
 import { Box } from '@mui/material'
 import type { ReactElement, ReactNode } from 'react'
 import { useMemo } from 'react'
@@ -8,12 +7,13 @@ import TxListItem from '../TxListItem'
 import css from './styles.module.css'
 import uniq from 'lodash/uniq'
 import BulkTxListGroup from '@/components/transactions/BulkTxListGroup'
+import type { AnyResults } from '@/utils/transaction-guards'
 
 type TxListProps = {
-  items: TransactionItemPage['results']
+  items: AnyResults[]
 }
 
-const getBulkGroupTxHash = (group: ModuleTransaction[]) => {
+const getBulkGroupTxHash = (group: AnyTransactionItem[]) => {
   const hashList = group.map((item) => item.transaction.txHash)
   return uniq(hashList).length === 1 ? hashList[0] : undefined
 }

@@ -1,4 +1,4 @@
-import type { ModuleTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { AnyTransactionItem } from '@/utils/tx-list'
 import type { ReactElement } from 'react'
 import { useContext } from 'react'
 import { Box, Paper, Typography } from '@mui/material'
@@ -23,7 +23,7 @@ const Disclaimer = () => (
   </Typography>
 )
 
-const TxGroup = ({ groupedListItems }: { groupedListItems: ModuleTransaction[] }): ReactElement => {
+const TxGroup = ({ groupedListItems }: { groupedListItems: AnyTransactionItem[] }): ReactElement => {
   const nonce = isMultisigExecutionInfo(groupedListItems[0].transaction.executionInfo)
     ? groupedListItems[0].transaction.executionInfo.nonce
     : undefined
@@ -72,7 +72,7 @@ const TxGroup = ({ groupedListItems }: { groupedListItems: ModuleTransaction[] }
   )
 }
 
-const GroupedTxListItems = ({ groupedListItems }: { groupedListItems: ModuleTransaction[] }): ReactElement | null => {
+const GroupedTxListItems = ({ groupedListItems }: { groupedListItems: AnyTransactionItem[] }): ReactElement | null => {
   if (groupedListItems.length === 0) return null
 
   return (

@@ -1,4 +1,8 @@
-import type { TransactionPreview, MultiSend } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type {
+  TransactionPreview,
+  MultiSend,
+  BaseDataDecoded,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { DraftBatchItem } from '@/store/batchSlice'
 import BatchTxItem from './BatchTxItem'
 
@@ -17,13 +21,22 @@ const extractMultiSendActions = (txPreview: TransactionPreview | undefined): Mul
 
   const txData = txPreview.txData
   if (!txData.hexData || !isMultiSendCalldata(txData.hexData)) {
+    if (!txData.value || txData.dataDecoded == null) {
+      return []
+    }
+    // Cast to BaseDataDecoded since MultiSend expects it
+    const baseDataDecoded: BaseDataDecoded = {
+      method: txData.dataDecoded.method,
+      parameters: txData.dataDecoded.parameters ?? undefined,
+    }
+
     return [
       {
         data: txData.hexData ?? '0x',
         operation: Operation.CALL,
         to: txData.to.value,
-        value: txData.value,
-        dataDecoded: txData.dataDecoded,
+        value: txData.value ?? '0',
+        dataDecoded: baseDataDecoded,
       },
     ]
   }
@@ -33,7 +46,11 @@ const extractMultiSendActions = (txPreview: TransactionPreview | undefined): Mul
     return []
   }
 
-  return multiSendActions
+  if (Array.isArray(multiSendActions)) {
+    return multiSendActions
+  }
+
+  return []
 }
 
 const BatchTxList = ({ txItems, onDelete }: { txItems: DraftBatchItem[]; onDelete?: (id: string) => void }) => {
