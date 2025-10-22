@@ -1,6 +1,6 @@
 import { Stack, Typography } from '@mui/material'
 import { Box } from '@mui/material'
-import { Severity } from '@safe-global/utils/features/safe-shield/types'
+import type { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { SEVERITY_COLORS } from '../../constants'
 
 interface AnalysisGroupCardItemProps {
