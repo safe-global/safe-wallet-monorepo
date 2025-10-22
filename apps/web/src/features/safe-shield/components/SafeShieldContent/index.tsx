@@ -32,9 +32,10 @@ export const SafeShieldContent = ({
   threat?: AsyncResult<LiveThreatAnalysisResult>
 }): ReactElement => {
   const { safeTx } = useContext(SafeTxContext)
-  const [recipientResults, _recipientError, recipientLoading = false] = recipient || []
-  const [contractResults, _contractError, contractLoading = false] = contract || []
+  const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient || []
+  const [contractResults = {}, _contractError, contractLoading = false] = contract || []
   const [threatResults, _threatError, threatLoading = false] = threat || []
+
   const normalizedThreatData = normalizeThreatData(threat)
 
   const loading = recipientLoading || contractLoading || threatLoading
