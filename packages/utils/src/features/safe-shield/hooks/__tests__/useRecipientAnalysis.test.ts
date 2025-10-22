@@ -226,7 +226,7 @@ describe('useRecipientAnalysis', () => {
     }
 
     const activityResults: AddressActivityResult = {
-      [mockAddress1]: RecipientAnalysisResultBuilder.highActivity().build(),
+      [mockAddress1]: RecipientAnalysisResultBuilder.lowActivity().build(),
     }
 
     mockUseFetchRecipientAnalysis.mockReturnValue([backendResults, undefined, false])
@@ -272,7 +272,7 @@ describe('useRecipientAnalysis', () => {
     }
 
     const activityResults: AddressActivityResult = {
-      [mockAddress1]: RecipientAnalysisResultBuilder.highActivity().build(),
+      [mockAddress1]: RecipientAnalysisResultBuilder.lowActivity().build(),
     }
 
     mockUseFetchRecipientAnalysis.mockReturnValue([backendResults, undefined, false])
