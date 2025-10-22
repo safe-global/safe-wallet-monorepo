@@ -9,22 +9,25 @@ import type {
 import { SafeShieldHeader } from './SafeShieldHeader'
 import { SafeShieldContent } from './SafeShieldContent'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import type { SafeTransaction } from '@safe-global/types-kit'
 
 export const SafeShieldDisplay = ({
   recipient,
   contract,
   threat,
+  safeTx,
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<LiveThreatAnalysisResult>
+  safeTx?: SafeTransaction
 }): ReactElement => {
   return (
     <Stack gap={1}>
       <Card sx={{ borderRadius: '6px', overflow: 'hidden' }}>
         <SafeShieldHeader recipient={recipient} contract={contract} threat={threat} />
 
-        <SafeShieldContent threat={threat} recipient={recipient} contract={contract} />
+        <SafeShieldContent threat={threat} recipient={recipient} contract={contract} safeTx={safeTx} />
       </Card>
 
       <Stack direction="row" alignItems="center" alignSelf="flex-end">
