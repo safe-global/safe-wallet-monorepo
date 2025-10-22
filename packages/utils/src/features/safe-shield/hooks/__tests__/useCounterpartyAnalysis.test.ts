@@ -131,7 +131,39 @@ describe('useCounterpartyAnalysis', () => {
       expect(mockTriggerAnalysis).toHaveBeenCalledTimes(1)
     })
 
-    it('should reset and trigger mutation when transaction data changes', async () => {
+    it('should not trigger mutation when non-relevant transaction data changes', async () => {
+      const mockSafeTx1 = createMockSafeTx(mockRecipientAddress1)
+      const mockSafeTx2 = createMockSafeTx(mockRecipientAddress1)
+      // Change non-relevant fields
+      mockSafeTx2.data.safeTxGas = '100000'
+      mockSafeTx2.data.baseGas = '50000'
+      mockSafeTx2.data.gasPrice = '1000'
+      mockSafeTx2.data.nonce = 5
+
+      const { rerender } = renderHook(
+        ({ safeTx }) =>
+          useCounterpartyAnalysis({
+            safeAddress: mockSafeAddress,
+            chainId: mockChainId,
+            safeTx,
+            isInAddressBook: mockIsInAddressBook,
+            ownedSafes: mockOwnedSafes,
+          }),
+        { initialProps: { safeTx: mockSafeTx1 } },
+      )
+
+      await waitFor(() => {
+        expect(mockTriggerAnalysis).toHaveBeenCalledTimes(1)
+      })
+
+      // Change non-relevant transaction data
+      rerender({ safeTx: mockSafeTx2 })
+
+      // Should still only be called once since relevant fields (to, value, data, operation) didn't change
+      expect(mockTriggerAnalysis).toHaveBeenCalledTimes(1)
+    })
+
+    it('should reset and trigger mutation when relevant transaction data changes', async () => {
       const mockSafeTx1 = createMockSafeTx(mockRecipientAddress1)
       const mockSafeTx2 = createMockSafeTx(mockRecipientAddress2, '1000')
 

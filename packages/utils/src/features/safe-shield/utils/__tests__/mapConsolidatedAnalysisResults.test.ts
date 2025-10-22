@@ -36,7 +36,7 @@ describe('mapConsolidatedAnalysisResults', () => {
     expect(result).toHaveLength(1)
     expect(result[0].type).toBe(RecipientStatus.KNOWN_RECIPIENT)
     expect(result[0].severity).toBe(Severity.OK)
-    expect(result[0].description).toContain('All recipients are in the address book or an owned Safe.')
+    expect(result[0].description).toContain('All these addresses are in your address book or a Safe you own.')
   })
 
   it('should return a multi-recipient description with the correct number of recipients when some recipients match', () => {
@@ -57,7 +57,7 @@ describe('mapConsolidatedAnalysisResults', () => {
     expect(result).toHaveLength(1)
     expect(result[0].severity).toBe(Severity.INFO)
     expect(result[0].type).toBe(RecipientStatus.UNKNOWN_RECIPIENT)
-    expect(result[0].description).toContain('2 recipients are not in the address book and not an owned Safe.')
+    expect(result[0].description).toContain('2 addresses are not in your address book or a Safe you own.')
   })
 
   it('should handle multiple groups per address and return the primary result from each group', () => {
@@ -85,10 +85,10 @@ describe('mapConsolidatedAnalysisResults', () => {
     expect(result).toHaveLength(2)
     expect(result[0].severity).toBe(Severity.WARN)
     expect(result[0].type).toBe(RecipientStatus.LOW_ACTIVITY)
-    expect(result[0].description).toContain('2 recipients have low activity.')
+    expect(result[0].description).toContain('2 addresses have low activity.')
     expect(result[1].severity).toBe(Severity.INFO)
     expect(result[1].type).toBe(RecipientStatus.UNKNOWN_RECIPIENT)
-    expect(result[1].description).toContain('1 recipient is not in the address book and not an owned Safe.')
+    expect(result[1].description).toContain('1 address is not in your address book or a Safe you own.')
   })
 
   it('should select primary result from each group', () => {
