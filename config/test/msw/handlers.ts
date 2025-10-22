@@ -354,4 +354,17 @@ export const handlers = (GATEWAY_URL: string) => [
       })
     },
   ),
+
+  // Notification registration endpoints
+  http.post(`${GATEWAY_URL}/v1/register/notifications`, () => {
+    return HttpResponse.json({})
+  }),
+
+  http.delete(`${GATEWAY_URL}/v1/chains/:chainId/notifications/devices/:uuid`, () => {
+    return HttpResponse.json({})
+  }),
+
+  http.delete(`${GATEWAY_URL}/v1/chains/:chainId/notifications/devices/:uuid/safes/:safeAddress`, () => {
+    return HttpResponse.json({})
+  }),
 ]
