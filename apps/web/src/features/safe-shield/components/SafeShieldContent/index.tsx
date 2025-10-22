@@ -33,13 +33,19 @@ export const SafeShieldContent = ({
   threat?: AsyncResult<LiveThreatAnalysisResult>
 }): ReactElement => {
   const { safeTx } = useContext(SafeTxContext)
-  const [recipientResults, recipientError, recipientLoading = false] = recipient || []
-  const [contractResults, contractError, contractLoading = false] = contract || []
+  const [recipientResults = {}, recipientError, recipientLoading = false] = recipient || []
+  const [contractResults = {}, contractError, contractLoading = false] = contract || []
   const [threatResults, threatError, threatLoading = false] = threat || []
+
   const normalizedThreatData = normalizeThreatData(threat)
+
   const loading = recipientLoading || contractLoading || threatLoading
   const error = recipientError || contractError || threatError
-  const empty = isEmpty(recipientResults) && isEmpty(contractResults) && !safeTx
+
+  const recipientEmpty = isEmpty(recipientResults)
+  const contractEmpty = isEmpty(contractResults)
+  const threatEmpty = isEmpty(threatResults) || isEmpty(threatResults.THREAT)
+  const allEmpty = recipientEmpty && contractEmpty && threatEmpty && !safeTx
 
   return (
     <Box padding="0px 4px 4px">
@@ -50,18 +56,22 @@ export const SafeShieldContent = ({
           <SafeShieldAnalysisLoading />
         ) : error ? (
           <SafeShieldAnalysisError error={error} />
-        ) : empty ? (
+        ) : allEmpty ? (
           <SafeShieldAnalysisEmpty />
         ) : null}
 
-        <Box display={loading ? 'none' : 'block'}>
-          {recipientResults && Object.keys(recipientResults).length > 0 && (
+        <Box display={loading || error ? 'none' : 'block'}>
+          <Box display={recipientEmpty ? 'none' : 'block'}>
             <AnalysisGroupCard data={recipientResults} />
-          )}
+          </Box>
 
-          {contractResults && Object.keys(contractResults).length > 0 && <AnalysisGroupCard data={contractResults} />}
+          <Box display={contractEmpty ? 'none' : 'block'}>
+            <AnalysisGroupCard data={contractResults} />
+          </Box>
 
-          {threatResults && Object.keys(threatResults).length > 0 && <AnalysisGroupCard data={normalizedThreatData} />}
+          <Box display={threatEmpty ? 'none' : 'block'}>
+            <AnalysisGroupCard data={normalizedThreatData} />
+          </Box>
 
           <TenderlySimulation safeTx={safeTx} />
         </Box>

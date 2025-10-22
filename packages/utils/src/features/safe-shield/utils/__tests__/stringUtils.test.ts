@@ -74,13 +74,12 @@ describe('stringUtils', () => {
       expect(formatCount(10, 'item')).toBe('10 items')
     })
 
-    it('should return "all" when count equals totalNumber', () => {
-      expect(formatCount(5, 'recipient', 5)).toBe('all recipients')
-      expect(formatCount(10, 'item', 10)).toBe('all items')
-      expect(formatCount(1, 'item', 1)).toBe('all item') // Uses singular when count is 1
+    it('should return "all these" when count equals totalNumber', () => {
+      expect(formatCount(5, 'recipient', 5)).toBe('all these recipients')
+      expect(formatCount(10, 'item', 10)).toBe('all these items')
     })
 
-    it('should not return "all" when count does not equal totalNumber', () => {
+    it('should not return "all these" when count does not equal totalNumber', () => {
       expect(formatCount(3, 'recipient', 5)).toBe('3 recipients')
       expect(formatCount(1, 'item', 3)).toBe('1 item')
     })
@@ -91,8 +90,18 @@ describe('stringUtils', () => {
     })
 
     it('should work with "all" and custom plural form', () => {
-      expect(formatCount(3, 'person', 3, 'people')).toBe('all people')
-      expect(formatCount(5, 'child', 5, 'children')).toBe('all children')
+      expect(formatCount(3, 'person', 3, 'people')).toBe('all these people')
+      expect(formatCount(5, 'child', 5, 'children')).toBe('all these children')
+    })
+
+    it('should use custom all prefix when provided', () => {
+      expect(formatCount(3, 'person', 3, 'people', 'all of these')).toBe('all of these people')
+      expect(formatCount(5, 'child', 5, 'children', 'all of these')).toBe('all of these children')
+    })
+
+    it('should return "this [singular]" when count equals totalNumber and totalNumber is 1', () => {
+      expect(formatCount(1, 'person', 1)).toBe('this person')
+      expect(formatCount(1, 'child', 1)).toBe('this child')
     })
 
     it('should handle totalNumber as undefined', () => {
@@ -102,7 +111,7 @@ describe('stringUtils', () => {
 
     it('should handle edge cases', () => {
       expect(formatCount(0, 'item')).toBe('0 items')
-      expect(formatCount(0, 'item', 0)).toBe('all items')
+      expect(formatCount(0, 'item', 0)).toBe('all these items')
     })
   })
 })

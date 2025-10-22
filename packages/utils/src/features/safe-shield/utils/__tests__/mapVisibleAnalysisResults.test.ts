@@ -12,7 +12,7 @@ describe('mapVisibleAnalysisResults', () => {
               severity: Severity.OK,
               type: RecipientStatus.KNOWN_RECIPIENT,
               title: 'Known recipient',
-              description: 'Recipient is in the address book.',
+              description: 'Address is in the address book.',
             },
           ],
           [StatusGroup.RECIPIENT_ACTIVITY]: [
@@ -43,7 +43,7 @@ describe('mapVisibleAnalysisResults', () => {
               severity: Severity.INFO,
               type: RecipientStatus.UNKNOWN_RECIPIENT,
               title: 'Unknown recipient',
-              description: 'Recipient is not in the address book.',
+              description: 'Address is not in the address book.',
             },
           ],
         },
@@ -122,7 +122,7 @@ describe('mapVisibleAnalysisResults', () => {
               severity: Severity.OK,
               type: RecipientStatus.KNOWN_RECIPIENT,
               title: 'Known recipient',
-              description: 'Recipient is in the address book.',
+              description: 'Address is in the address book.',
             },
           ],
         },
@@ -132,7 +132,7 @@ describe('mapVisibleAnalysisResults', () => {
               severity: Severity.INFO,
               type: RecipientStatus.UNKNOWN_RECIPIENT,
               title: 'Unknown recipient',
-              description: 'Recipient is not in the address book.',
+              description: 'Address is not in the address book.',
             },
           ],
         },
@@ -153,7 +153,7 @@ describe('mapVisibleAnalysisResults', () => {
               severity: Severity.OK,
               type: RecipientStatus.KNOWN_RECIPIENT,
               title: 'Known recipient',
-              description: 'Recipient is in the address book.',
+              description: 'Address is in the address book.',
             },
           ],
         },
@@ -163,7 +163,7 @@ describe('mapVisibleAnalysisResults', () => {
               severity: Severity.OK,
               type: RecipientStatus.KNOWN_RECIPIENT,
               title: 'Known recipient',
-              description: 'Recipient is in the address book.',
+              description: 'Address is in the address book.',
             },
           ],
         },
@@ -172,7 +172,7 @@ describe('mapVisibleAnalysisResults', () => {
       const result = mapVisibleAnalysisResults(addressResults)
 
       expect(result.length).toBe(1)
-      expect(result[0].description).toContain('All recipients are in the address book or an owned Safe.')
+      expect(result[0].description).toContain('All these addresses are in your address book or a Safe you own.')
     })
 
     it('should return empty array for multiple addresses with no results', () => {

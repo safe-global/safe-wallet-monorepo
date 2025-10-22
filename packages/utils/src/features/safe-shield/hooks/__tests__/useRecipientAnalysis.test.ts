@@ -53,13 +53,33 @@ describe('useRecipientAnalysis', () => {
     })
 
     await waitFor(() => {
-      const [, , loading] = result.current
-      expect(loading).toBe(false)
+      expect(result.current).toBeDefined()
+      if (result.current) {
+        const [, , loading] = result.current
+        expect(loading).toBe(false)
+      }
     })
 
-    const [results, error] = result.current
-    expect(results).toEqual({})
-    expect(error).toBeUndefined()
+    expect(result.current).toBeDefined()
+    if (result.current) {
+      const [results, error] = result.current
+      expect(results).toEqual({})
+      expect(error).toBeUndefined()
+    }
+  })
+
+  it('should return undefined when recipients is undefined', async () => {
+    const { result } = renderHook(() => {
+      return useRecipientAnalysis({
+        safeAddress: mockSafeAddress,
+        chainId: mockChainId,
+        recipients: undefined,
+        isInAddressBook: mockIsInAddressBook,
+        ownedSafes: mockOwnedSafes,
+      })
+    })
+
+    expect(result.current).toBeUndefined()
   })
 
   it('should filter out invalid addresses', async () => {
@@ -77,8 +97,11 @@ describe('useRecipientAnalysis', () => {
     })
 
     await waitFor(() => {
-      const [, , loading] = result.current
-      expect(loading).toBe(false)
+      expect(result.current).toBeDefined()
+      if (result.current) {
+        const [, , loading] = result.current
+        expect(loading).toBe(false)
+      }
     })
 
     // Should only process the valid address
@@ -112,8 +135,11 @@ describe('useRecipientAnalysis', () => {
     })
 
     await waitFor(() => {
-      const [, , loading] = result.current
-      expect(loading).toBe(false)
+      expect(result.current).toBeDefined()
+      if (result.current) {
+        const [, , loading] = result.current
+        expect(loading).toBe(false)
+      }
     })
 
     expect(mockUseFetchRecipientAnalysis).toHaveBeenCalledWith({
@@ -137,8 +163,11 @@ describe('useRecipientAnalysis', () => {
     })
 
     await waitFor(() => {
-      const [, , loading] = result.current
-      expect(loading).toBe(false)
+      expect(result.current).toBeDefined()
+      if (result.current) {
+        const [, , loading] = result.current
+        expect(loading).toBe(false)
+      }
     })
 
     // Should only process unique address once
@@ -173,16 +202,22 @@ describe('useRecipientAnalysis', () => {
     })
 
     await waitFor(() => {
-      const [, , loading] = result.current
-      expect(loading).toBe(false)
+      expect(result.current).toBeDefined()
+      if (result.current) {
+        const [, , loading] = result.current
+        expect(loading).toBe(false)
+      }
     })
 
-    const [results] = result.current
-    const checksummedAddress = getAddress(mockAddress1)
-    expect(results![checksummedAddress]).toEqual({
-      [StatusGroup.RECIPIENT_INTERACTION]: backendResults[mockAddress1][StatusGroup.RECIPIENT_INTERACTION],
-      [StatusGroup.ADDRESS_BOOK]: [addressBookResults[mockAddress1]],
-    })
+    expect(result.current).toBeDefined()
+    if (result.current) {
+      const [results] = result.current
+      const checksummedAddress = getAddress(mockAddress1)
+      expect(results![checksummedAddress]).toEqual({
+        [StatusGroup.RECIPIENT_INTERACTION]: backendResults[mockAddress1][StatusGroup.RECIPIENT_INTERACTION],
+        [StatusGroup.ADDRESS_BOOK]: [addressBookResults[mockAddress1]],
+      })
+    }
   })
 
   it('should merge backend results with activity check', async () => {
@@ -209,16 +244,22 @@ describe('useRecipientAnalysis', () => {
     })
 
     await waitFor(() => {
-      const [, , loading] = result.current
-      expect(loading).toBe(false)
+      expect(result.current).toBeDefined()
+      if (result.current) {
+        const [, , loading] = result.current
+        expect(loading).toBe(false)
+      }
     })
 
-    const [results] = result.current
-    const checksummedAddress = getAddress(mockAddress1)
-    expect(results![checksummedAddress]).toEqual({
-      [StatusGroup.RECIPIENT_INTERACTION]: backendResults[mockAddress1][StatusGroup.RECIPIENT_INTERACTION],
-      [StatusGroup.RECIPIENT_ACTIVITY]: [activityResults[mockAddress1]],
-    })
+    expect(result.current).toBeDefined()
+    if (result.current) {
+      const [results] = result.current
+      const checksummedAddress = getAddress(mockAddress1)
+      expect(results![checksummedAddress]).toEqual({
+        [StatusGroup.RECIPIENT_INTERACTION]: backendResults[mockAddress1][StatusGroup.RECIPIENT_INTERACTION],
+        [StatusGroup.RECIPIENT_ACTIVITY]: [activityResults[mockAddress1]],
+      })
+    }
   })
 
   it('should merge all three types of checks', async () => {
@@ -250,17 +291,23 @@ describe('useRecipientAnalysis', () => {
     })
 
     await waitFor(() => {
-      const [, , loading] = result.current
-      expect(loading).toBe(false)
+      expect(result.current).toBeDefined()
+      if (result.current) {
+        const [, , loading] = result.current
+        expect(loading).toBe(false)
+      }
     })
 
-    const [results] = result.current
-    const checksummedAddress = getAddress(mockAddress1)
-    expect(results![checksummedAddress]).toEqual({
-      [StatusGroup.RECIPIENT_INTERACTION]: backendResults[mockAddress1][StatusGroup.RECIPIENT_INTERACTION],
-      [StatusGroup.ADDRESS_BOOK]: [addressBookResults[mockAddress1]],
-      [StatusGroup.RECIPIENT_ACTIVITY]: [activityResults[mockAddress1]],
-    })
+    expect(result.current).toBeDefined()
+    if (result.current) {
+      const [results] = result.current
+      const checksummedAddress = getAddress(mockAddress1)
+      expect(results![checksummedAddress]).toEqual({
+        [StatusGroup.RECIPIENT_INTERACTION]: backendResults[mockAddress1][StatusGroup.RECIPIENT_INTERACTION],
+        [StatusGroup.ADDRESS_BOOK]: [addressBookResults[mockAddress1]],
+        [StatusGroup.RECIPIENT_ACTIVITY]: [activityResults[mockAddress1]],
+      })
+    }
   })
 
   it('should handle multiple recipients', async () => {
@@ -283,17 +330,23 @@ describe('useRecipientAnalysis', () => {
     })
 
     await waitFor(() => {
-      const [, , loading] = result.current
-      expect(loading).toBe(false)
+      expect(result.current).toBeDefined()
+      if (result.current) {
+        const [, , loading] = result.current
+        expect(loading).toBe(false)
+      }
     })
 
-    const [results] = result.current
-    const checksummedAddress1 = getAddress(mockAddress1)
-    const checksummedAddress2 = getAddress(mockAddress2)
-    expect(results![checksummedAddress1]).toBeDefined()
-    expect(results![checksummedAddress2]).toBeDefined()
-    expect(results![checksummedAddress1][StatusGroup.ADDRESS_BOOK]).toEqual([addressBookResults[mockAddress1]])
-    expect(results![checksummedAddress2][StatusGroup.ADDRESS_BOOK]).toEqual([addressBookResults[mockAddress2]])
+    expect(result.current).toBeDefined()
+    if (result.current) {
+      const [results] = result.current
+      const checksummedAddress1 = getAddress(mockAddress1)
+      const checksummedAddress2 = getAddress(mockAddress2)
+      expect(results![checksummedAddress1]).toBeDefined()
+      expect(results![checksummedAddress2]).toBeDefined()
+      expect(results![checksummedAddress1][StatusGroup.ADDRESS_BOOK]).toEqual([addressBookResults[mockAddress1]])
+      expect(results![checksummedAddress2][StatusGroup.ADDRESS_BOOK]).toEqual([addressBookResults[mockAddress2]])
+    }
   })
 
   it('should propagate loading state from backend fetch', async () => {
@@ -310,8 +363,11 @@ describe('useRecipientAnalysis', () => {
       })
     })
 
-    const [, , loading] = result.current
-    expect(loading).toBe(true)
+    expect(result.current).toBeDefined()
+    if (result.current) {
+      const [, , loading] = result.current
+      expect(loading).toBe(true)
+    }
   })
 
   it('should propagate loading state from activity check', async () => {
@@ -328,8 +384,11 @@ describe('useRecipientAnalysis', () => {
       })
     })
 
-    const [, , loading] = result.current
-    expect(loading).toBe(true)
+    expect(result.current).toBeDefined()
+    if (result.current) {
+      const [, , loading] = result.current
+      expect(loading).toBe(true)
+    }
   })
 
   it('should propagate errors from backend fetch', async () => {
@@ -348,12 +407,18 @@ describe('useRecipientAnalysis', () => {
     })
 
     await waitFor(() => {
-      const [, , loading] = result.current
-      expect(loading).toBe(false)
+      expect(result.current).toBeDefined()
+      if (result.current) {
+        const [, , loading] = result.current
+        expect(loading).toBe(false)
+      }
     })
 
-    const [, returnedError] = result.current
-    expect(returnedError).toBe(error)
+    expect(result.current).toBeDefined()
+    if (result.current) {
+      const [, returnedError] = result.current
+      expect(returnedError).toBe(error)
+    }
   })
 
   it('should propagate errors from activity check', async () => {
@@ -372,12 +437,18 @@ describe('useRecipientAnalysis', () => {
     })
 
     await waitFor(() => {
-      const [, , loading] = result.current
-      expect(loading).toBe(false)
+      expect(result.current).toBeDefined()
+      if (result.current) {
+        const [, , loading] = result.current
+        expect(loading).toBe(false)
+      }
     })
 
-    const [, returnedError] = result.current
-    expect(returnedError).toBe(error)
+    expect(result.current).toBeDefined()
+    if (result.current) {
+      const [, returnedError] = result.current
+      expect(returnedError).toBe(error)
+    }
   })
 
   it('should prioritize backend fetch error over activity check error', async () => {
@@ -399,11 +470,17 @@ describe('useRecipientAnalysis', () => {
     })
 
     await waitFor(() => {
-      const [, , loading] = result.current
-      expect(loading).toBe(false)
+      expect(result.current).toBeDefined()
+      if (result.current) {
+        const [, , loading] = result.current
+        expect(loading).toBe(false)
+      }
     })
 
-    const [, returnedError] = result.current
-    expect(returnedError).toBe(fetchError)
+    expect(result.current).toBeDefined()
+    if (result.current) {
+      const [, returnedError] = result.current
+      expect(returnedError).toBe(fetchError)
+    }
   })
 })
