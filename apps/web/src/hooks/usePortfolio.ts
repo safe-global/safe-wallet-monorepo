@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
-import { selectCurrency } from '@/store/settingsSlice'
+import { selectCurrency, selectPortfolioProvider, PORTFOLIO_PROVIDERS } from '@/store/settingsSlice'
 import useSafeInfo from './useSafeInfo'
 import useHiddenTokens from './useHiddenTokens'
 import { useTokenListSetting } from './loadables/useLoadBalances'
@@ -65,6 +65,7 @@ const usePortfolioV2 = (skip: boolean = false): PortfolioData => {
   const { safeAddress } = useSafeInfo()
   const chainId = useChainId()
   const currency = useAppSelector(selectCurrency)
+  const portfolioProvider = useAppSelector(selectPortfolioProvider)
   const isTrustedTokenList = useTokenListSetting()
   const hiddenTokens = useHiddenTokens()
 
@@ -77,6 +78,7 @@ const usePortfolioV2 = (skip: boolean = false): PortfolioData => {
       fiatCode: currency,
       trusted: isTrustedTokenList,
       excludeDust: true,
+      provider: portfolioProvider === PORTFOLIO_PROVIDERS.AUTO ? undefined : portfolioProvider,
     },
     {
       skip: skip || !safeAddress || !chainId,

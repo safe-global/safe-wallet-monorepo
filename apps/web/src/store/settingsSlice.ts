@@ -11,6 +11,12 @@ export enum TOKEN_LISTS {
   ALL = 'ALL',
 }
 
+export enum PORTFOLIO_PROVIDERS {
+  AUTO = 'AUTO',
+  ZERION = 'zerion',
+  ZAPPER = 'zapper',
+}
+
 export type SettingsState = {
   currency: string
 
@@ -19,6 +25,8 @@ export type SettingsState = {
   }
 
   tokenList: TOKEN_LISTS
+
+  portfolioProvider: PORTFOLIO_PROVIDERS
 
   hideSuspiciousTransactions?: boolean
 
@@ -41,6 +49,8 @@ export const initialState: SettingsState = {
   currency: 'usd',
 
   tokenList: TOKEN_LISTS.TRUSTED,
+
+  portfolioProvider: PORTFOLIO_PROVIDERS.AUTO,
 
   hiddenTokens: {},
 
@@ -95,6 +105,9 @@ export const settingsSlice = createSlice({
     setTokenList: (state, { payload }: PayloadAction<SettingsState['tokenList']>) => {
       state.tokenList = payload
     },
+    setPortfolioProvider: (state, { payload }: PayloadAction<SettingsState['portfolioProvider']>) => {
+      state.portfolioProvider = payload
+    },
     hideSuspiciousTransactions: (state, { payload }: PayloadAction<boolean>) => {
       state.hideSuspiciousTransactions = payload
     },
@@ -130,6 +143,7 @@ export const {
   setDarkMode,
   setHiddenTokensForChain,
   setTokenList,
+  setPortfolioProvider,
   hideSuspiciousTransactions,
   setRpc,
   setTenderly,
@@ -146,6 +160,10 @@ export const selectCurrency = (state: RootState): SettingsState['currency'] => {
 
 export const selectTokenList = (state: RootState): SettingsState['tokenList'] => {
   return state[settingsSlice.name].tokenList || initialState.tokenList
+}
+
+export const selectPortfolioProvider = (state: RootState): SettingsState['portfolioProvider'] => {
+  return state[settingsSlice.name].portfolioProvider || initialState.portfolioProvider
 }
 
 export const selectHiddenTokensPerChain = createSelector(

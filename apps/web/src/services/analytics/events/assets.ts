@@ -11,9 +11,22 @@ export const ASSETS_EVENTS = {
     action: 'Open token list menu',
     category: ASSETS_CATEGORY,
   },
+  OPEN_PROVIDER_MENU: {
+    action: 'Open provider menu',
+    category: ASSETS_CATEGORY,
+  },
+  OPEN_SETTINGS_MODAL: {
+    action: 'Open assets settings modal',
+    category: ASSETS_CATEGORY,
+  },
   CHANGE_CURRENCY: {
     event: EventType.META,
     action: 'Change currency',
+    category: ASSETS_CATEGORY,
+  },
+  CHANGE_PROVIDER: {
+    event: EventType.META,
+    action: 'Change provider',
     category: ASSETS_CATEGORY,
   },
   DIFFERING_TOKENS: {
