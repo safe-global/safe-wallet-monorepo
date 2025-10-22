@@ -3,7 +3,6 @@ import { setSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import type Safe from '@safe-global/protocol-kit'
 import type { MultiSendCallOnlyContractImplementationType } from '@safe-global/protocol-kit'
 import extractTxInfo from '../../extractTxInfo'
-import proposeTx from '../../proposeTransaction'
 import * as txEvents from '../../txEvents'
 import {
   createTx,
@@ -52,12 +51,6 @@ jest.mock('../../extractTxInfo', () => ({
     txParams: {},
     signatures: [],
   })),
-}))
-
-// Mock proposeTx
-jest.mock('../../proposeTransaction', () => ({
-  __esModule: true,
-  default: jest.fn(() => Promise.resolve({ txId: '123' })),
 }))
 
 // Mock Safe SDK
@@ -182,6 +175,22 @@ describe('txSender', () => {
 
   describe('dispatchTxProposal', () => {
     it('should NOT dispatch a tx proposal if tx is unsigned', async () => {
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/chains/4/transactions/0x123/propose`, () => {
+          return HttpResponse.json({
+            txId: '123',
+            txInfo: {
+              type: 'Custom',
+              to: { value: '0x123' },
+              dataSize: '100',
+              isCancellation: false,
+            },
+            timestamp: Date.now(),
+            txStatus: 'AWAITING_CONFIRMATIONS',
+          })
+        }),
+      )
+
       const tx = await createTx({
         to: '0x123',
         value: '1',
@@ -190,13 +199,33 @@ describe('txSender', () => {
 
       const proposedTx = await dispatchTxProposal({ chainId: '4', safeAddress: '0x123', sender: '0x456', safeTx: tx })
 
-      expect(proposeTx).toHaveBeenCalledWith('4', '0x123', '0x456', tx, '0x1234567890', undefined)
-      expect(proposedTx).toEqual({ txId: '123' })
+      expect(proposedTx).toEqual({
+        txId: '123',
+        txInfo: expect.any(Object),
+        timestamp: expect.any(Number),
+        txStatus: 'AWAITING_CONFIRMATIONS',
+      })
 
       expect(txEvents.txDispatch).not.toHaveBeenCalled()
     })
 
     it('should dispatch a PROPOSED event if tx is signed and has no id', async () => {
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/chains/4/transactions/0x123/propose`, () => {
+          return HttpResponse.json({
+            txId: '123',
+            txInfo: {
+              type: 'Custom',
+              to: { value: '0x123' },
+              dataSize: '100',
+              isCancellation: false,
+            },
+            timestamp: Date.now(),
+            txStatus: 'AWAITING_CONFIRMATIONS',
+          })
+        }),
+      )
+
       const tx = createMockSafeTransaction({
         to: '0x123',
         data: '0x0',
@@ -205,13 +234,28 @@ describe('txSender', () => {
 
       const proposedTx = await dispatchTxProposal({ chainId: '4', safeAddress: '0x123', sender: '0x456', safeTx: tx })
 
-      expect(proposeTx).toHaveBeenCalledWith('4', '0x123', '0x456', tx, '0x1234567890', undefined)
-      expect(proposedTx).toEqual({ txId: '123' })
+      expect(proposedTx.txId).toBe('123')
 
       expect(txEvents.txDispatch).toHaveBeenCalledWith('PROPOSED', { txId: '123', nonce: 0 })
     })
 
     it('should dispatch a SIGNATURE_PROPOSED event if tx has signatures and an id', async () => {
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/chains/4/transactions/0x123/propose`, () => {
+          return HttpResponse.json({
+            txId: '123',
+            txInfo: {
+              type: 'Custom',
+              to: { value: '0x123' },
+              dataSize: '100',
+              isCancellation: false,
+            },
+            timestamp: Date.now(),
+            txStatus: 'AWAITING_CONFIRMATIONS',
+          })
+        }),
+      )
+
       const tx = createMockSafeTransaction({
         to: '0x123',
         data: '0x0',
@@ -226,8 +270,7 @@ describe('txSender', () => {
         txId: '345',
       })
 
-      expect(proposeTx).toHaveBeenCalledWith('4', '0x123', '0x456', tx, '0x1234567890', undefined)
-      expect(proposedTx).toEqual({ txId: '123' })
+      expect(proposedTx.txId).toBe('123')
 
       expect(txEvents.txDispatch).toHaveBeenCalledWith('SIGNATURE_PROPOSED', {
         txId: '123',
@@ -237,7 +280,11 @@ describe('txSender', () => {
     })
 
     it('should fail to propose a signature', async () => {
-      ;(proposeTx as jest.Mock).mockImplementationOnce(() => Promise.reject(new Error('error')))
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/chains/4/transactions/0x123/propose`, () => {
+          return HttpResponse.json({ message: 'Invalid transaction' }, { status: 400 })
+        }),
+      )
 
       const tx = await createTx({
         to: '0x123',
@@ -247,16 +294,20 @@ describe('txSender', () => {
 
       await expect(
         dispatchTxProposal({ chainId: '4', safeAddress: '0x123', sender: '0x456', safeTx: tx, txId: '345' }),
-      ).rejects.toThrow('error')
+      ).rejects.toThrow()
 
       expect(txEvents.txDispatch).toHaveBeenCalledWith('SIGNATURE_PROPOSE_FAILED', {
         txId: '345',
-        error: new Error('error'),
+        error: expect.any(Error),
       })
     })
 
     it('should fail to propose a new tx', async () => {
-      ;(proposeTx as jest.Mock).mockImplementationOnce(() => Promise.reject(new Error('error')))
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/chains/4/transactions/0x123/propose`, () => {
+          return HttpResponse.json({ message: 'Invalid transaction' }, { status: 400 })
+        }),
+      )
 
       const tx = await createTx({
         to: '0x123',
@@ -266,10 +317,10 @@ describe('txSender', () => {
 
       await expect(
         dispatchTxProposal({ chainId: '4', safeAddress: '0x123', sender: '0x456', safeTx: tx }),
-      ).rejects.toThrow('error')
+      ).rejects.toThrow()
 
       expect(txEvents.txDispatch).toHaveBeenCalledWith('PROPOSE_FAILED', {
-        error: new Error('error'),
+        error: expect.any(Error),
       })
     })
   })

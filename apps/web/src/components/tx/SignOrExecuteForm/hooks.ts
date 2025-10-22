@@ -68,6 +68,7 @@ export const useTxActions = (): TxActions => {
       assertProvider(signer?.provider)
 
       const tx = await _propose(signer.address, safeTx, undefined, origin)
+
       await addTxToBatch(tx)
       return tx.txId
     }

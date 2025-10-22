@@ -77,7 +77,7 @@ export const dispatchTxProposal = async ({
   // Unsigned txs are proposed only temporarily and won't appear in the queue
   if (safeTx.signatures.size > 0) {
     txDispatch(txId ? TxEvent.SIGNATURE_PROPOSED : TxEvent.PROPOSED, {
-      txId: proposedTx.txId,
+      txId: proposedTx?.txId,
       signerAddress: txId ? sender : undefined,
       nonce: safeTx.data.nonce,
     })
