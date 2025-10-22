@@ -13,6 +13,7 @@ type Props = {
   onFormSubmit: (data: AdvancedParameters) => void
   gasLimitError?: Error
   willRelay?: boolean
+  canSponsor?: boolean
 }
 
 const AdvancedParams = ({
@@ -22,6 +23,7 @@ const AdvancedParams = ({
   onFormSubmit,
   gasLimitError,
   willRelay,
+  canSponsor,
 }: Props) => {
   const [isEditing, setIsEditing] = useState<boolean>(false)
   const isEIP1559 = useHasFeature(FEATURES.EIP1559)
@@ -53,6 +55,7 @@ const AdvancedParams = ({
       gasLimitError={gasLimitError}
       onEdit={onEditOpen}
       willRelay={willRelay}
+      canSponsor={canSponsor}
     />
   )
 }

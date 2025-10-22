@@ -15,6 +15,7 @@ import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
 import useWalletCanRelay from '@/hooks/useWalletCanRelay'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import { hasRemainingRelays } from '@/utils/relaying'
+import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
 import { SuccessScreenFlow } from '@/components/tx-flow/flows'
@@ -83,6 +84,13 @@ export const ExecuteForm = ({
   const canRelay = walletCanRelay && hasRemainingRelays(relays[0])
   const willRelay = canRelay && executionMethod === ExecutionMethod.RELAY
 
+  // No Fee November eligibility
+  const { isEligible: isNoFeeNovemberEligible } = useNoFeeNovemberEligibility()
+  const canSponsor = canRelay || isNoFeeNovemberEligible
+  const willSponsor = canSponsor && executionMethod === ExecutionMethod.RELAY
+  // For execution logic: use relay if No Fee November is not eligible, otherwise use No Fee November
+  const willExecuteWithRelay = !isNoFeeNovemberEligible && willRelay
+
   // Estimate gas limit
   const { gasLimit, gasLimitError } = useGasLimit(safeTx)
   const [advancedParams, setAdvancedParams] = useAdvancedParams(gasLimit)
@@ -113,7 +121,7 @@ export const ExecuteForm = ({
 
     let executedTxId: string
     try {
-      executedTxId = await executeTx(txOptions, safeTx, txId, origin, willRelay)
+      executedTxId = await executeTx(txOptions, safeTx, txId, origin, willExecuteWithRelay)
     } catch (_err) {
       const err = asError(_err)
       if (isWalletRejection(err)) {
@@ -151,17 +159,18 @@ export const ExecuteForm = ({
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <div className={classNames(commonCss.params, { [css.noBottomBorderRadius]: canRelay })}>
+        <div className={classNames(commonCss.params, { [css.noBottomBorderRadius]: canSponsor })}>
           <AdvancedParams
             willExecute
             params={advancedParams}
             recommendedGasLimit={gasLimit}
             onFormSubmit={setAdvancedParams}
             gasLimitError={gasLimitError}
-            willRelay={willRelay}
+            willRelay={willSponsor}
+            canSponsor={canSponsor}
           />
 
-          {canRelay && (
+          {canSponsor && (
             <div className={css.noTopBorder}>
               <ExecutionMethodSelector
                 executionMethod={executionMethod}
@@ -179,7 +188,7 @@ export const ExecuteForm = ({
           <ErrorMessage>
             Cannot execute a transaction from the Safe Account itself, please connect a different account.
           </ErrorMessage>
-        ) : !walletCanPay && !willRelay ? (
+        ) : !walletCanPay && !willSponsor ? (
           <ErrorMessage level="info">
             Your connected wallet doesn&apos;t have enough funds to execute this transaction.
           </ErrorMessage>

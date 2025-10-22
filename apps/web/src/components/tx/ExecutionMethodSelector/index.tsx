@@ -5,6 +5,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import WalletIcon from '@/components/common/WalletIcon'
 import SponsoredBy from '../SponsoredBy'
 import RemainingRelays from '../RemainingRelays'
+import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
 
 import css from './styles.module.css'
 import BalanceInfo from '@/components/tx/BalanceInfo'
@@ -27,6 +28,7 @@ const _ExecutionMethodSelector = ({
   relays,
   noLabel,
   tooltip,
+  noFeeNovember,
 }: {
   wallet: ConnectedWallet | null
   chain?: Chain
@@ -35,8 +37,10 @@ const _ExecutionMethodSelector = ({
   relays?: RelayCountResponse
   noLabel?: boolean
   tooltip?: string
+  noFeeNovember: { isEligible: boolean | undefined; remaining: number | undefined; limit: number | undefined }
 }): ReactElement | null => {
   const shouldRelay = executionMethod === ExecutionMethod.RELAY
+  const { isEligible, remaining } = noFeeNovember
 
   const onChooseExecutionMethod = (_: ChangeEvent<HTMLInputElement>, newExecutionMethod: string) => {
     setExecutionMethod(newExecutionMethod as ExecutionMethod)
@@ -59,8 +63,17 @@ const _ExecutionMethodSelector = ({
               value={ExecutionMethod.RELAY}
               label={
                 <Typography className={css.radioLabel} whiteSpace="nowrap">
-                  Sponsored by
-                  <SponsoredBy chainId={chain?.chainId ?? ''} />
+                  {isEligible ? (
+                    <>
+                      Sponsored gas
+                      <span className={css.noFeeNovemberBadge}>Part of No-fee November</span>
+                    </>
+                  ) : (
+                    <>
+                      Sponsored by
+                      <SponsoredBy chainId={chain?.chainId ?? ''} />
+                    </>
+                  )}
                 </Typography>
               }
               control={<Radio />}
@@ -82,7 +95,19 @@ const _ExecutionMethodSelector = ({
         </FormControl>
       </div>
 
-      {shouldRelay && relays ? <RemainingRelays relays={relays} tooltip={tooltip} /> : wallet ? <BalanceInfo /> : null}
+      {shouldRelay && (
+        <>
+          {isEligible ? (
+            <div className={css.noFeeNovemberCounter}>
+              <strong>{remaining}</strong> free transactions left
+            </div>
+          ) : relays ? (
+            <RemainingRelays relays={relays} tooltip={tooltip} />
+          ) : null}
+        </>
+      )}
+
+      {executionMethod === ExecutionMethod.WALLET && wallet && <BalanceInfo />}
     </Box>
   )
 }
@@ -90,4 +115,5 @@ const _ExecutionMethodSelector = ({
 export const ExecutionMethodSelector = madProps(_ExecutionMethodSelector, {
   wallet: useWallet,
   chain: useCurrentChain,
+  noFeeNovember: useNoFeeNovemberEligibility,
 })

@@ -33,6 +33,7 @@ type GasParamsProps = {
   onEdit?: () => void
   gasLimitError?: Error
   willRelay?: boolean
+  canSponsor?: boolean
 }
 
 export const _GasParams = ({
@@ -42,6 +43,7 @@ export const _GasParams = ({
   onEdit,
   gasLimitError,
   willRelay,
+  canSponsor,
   chain,
   noFeeNovember,
 }: GasParamsProps & { 
@@ -154,7 +156,7 @@ export const _GasParams = ({
 
           {safeTxGas !== undefined && <GasDetail isLoading={false} name="safeTxGas" value={safeTxGas.toString()} />}
 
-          {isExecution && (
+          {isExecution && !canSponsor && (
             <>
               {userNonce !== undefined && (
                 <GasDetail isLoading={false} name="Wallet nonce" value={userNonce.toString()} />
