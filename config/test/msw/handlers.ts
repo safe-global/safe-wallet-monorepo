@@ -2,6 +2,7 @@ import { http, HttpResponse } from 'msw'
 import type { FiatCurrencies } from '@safe-global/store/gateway/types'
 import { Balances } from '@safe-global/store/src/gateway/AUTO_GENERATED/balances'
 import { CollectiblePage } from '@safe-global/store/src/gateway/AUTO_GENERATED/collectibles'
+import type { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import { defaultMockSafeApps } from './mockSafeApps'
 
 const iso4217Currencies = ['USD', 'EUR', 'GBP']
@@ -81,6 +82,23 @@ export const handlers = (GATEWAY_URL: string) => [
       guard: '0x',
       version: '1.3.0',
     })
+  }),
+
+  // Relay endpoint for remaining relays
+  http.get<{ chainId: string; safeAddress: string }, never, RelaysRemaining>(
+    `${GATEWAY_URL}/v1/chains/:chainId/relay/:safeAddress`,
+    ({ params }) => {
+      // Default mock response; can be customized per test using MSW request handlers
+      return HttpResponse.json({
+        remaining: 5,
+        limit: 5,
+      })
+    },
+  ),
+
+  // Master copies endpoint for master copy contracts
+  http.get<{ chainId: string }, never, MasterCopy[]>(`${GATEWAY_URL}/v1/chains/:chainId/about/master-copies`, () => {
+    return HttpResponse.json(defaultMasterCopies)
   }),
 
   // Chains config endpoint for RTK Query initialization
