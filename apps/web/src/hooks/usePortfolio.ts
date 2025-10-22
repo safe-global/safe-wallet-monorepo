@@ -4,6 +4,7 @@ import {
   selectCurrency,
   selectPortfolioProvider,
   selectUsePortfolioEndpoint,
+  selectExcludeDustTokens,
   PORTFOLIO_PROVIDERS,
 } from '@/store/settingsSlice'
 import useSafeInfo from './useSafeInfo'
@@ -74,6 +75,7 @@ const usePortfolioV2 = (skip: boolean = false): PortfolioData => {
   const portfolioProvider = useAppSelector(selectPortfolioProvider)
   const isTrustedTokenList = useTokenListSetting()
   const hiddenTokens = useHiddenTokens()
+  const excludeDust = useAppSelector(selectExcludeDustTokens)
 
   const { currentData, error, isLoading, isFetching } = usePortfolioGetPortfolioV1Query(
     {
@@ -81,7 +83,7 @@ const usePortfolioV2 = (skip: boolean = false): PortfolioData => {
       chainIds: IS_MULTICHAIN_ENABLED ? undefined : chainId,
       fiatCode: currency,
       trusted: isTrustedTokenList,
-      excludeDust: true,
+      excludeDust,
       provider: portfolioProvider === PORTFOLIO_PROVIDERS.AUTO ? undefined : portfolioProvider,
     },
     {

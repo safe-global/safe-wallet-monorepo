@@ -4,6 +4,7 @@ import TokenListSelect from '../TokenListSelect'
 import ProviderSelect from '../ProviderSelect'
 import HiddenTokenButton from '../HiddenTokenButton'
 import PortfolioEndpointToggle from '../PortfolioEndpointToggle'
+import DustTokenToggle from '../DustTokenToggle'
 
 interface AssetsSettingsPopoverProps {
   anchorEl: HTMLElement | null
@@ -45,13 +46,6 @@ const AssetsSettingsPopover = ({
       <Box p={2.5}>
         <Box mb={2.5}>
           <Typography variant="overline" color="text.secondary" display="block" mb={1} fontSize="0.75rem">
-            Token Filter
-          </Typography>
-          <TokenListSelect />
-        </Box>
-
-        <Box mb={2.5}>
-          <Typography variant="overline" color="text.secondary" display="block" mb={1} fontSize="0.75rem">
             Data Provider
           </Typography>
           <ProviderSelect />
@@ -59,8 +53,15 @@ const AssetsSettingsPopover = ({
 
         <Box mb={2.5}>
           <Typography variant="overline" color="text.secondary" display="block" mb={1} fontSize="0.75rem">
-            Portfolio Endpoint
+            Token Filter
           </Typography>
+          <TokenListSelect />
+          <Box mt={1}>
+            <DustTokenToggle />
+          </Box>
+        </Box>
+
+        <Box mb={2.5}>
           <PortfolioEndpointToggle />
         </Box>
 

@@ -34,6 +34,11 @@ export const ASSETS_EVENTS = {
     action: 'Toggle portfolio endpoint',
     category: ASSETS_CATEGORY,
   },
+  TOGGLE_DUST_TOKENS: {
+    event: EventType.META,
+    action: 'Toggle dust tokens',
+    category: ASSETS_CATEGORY,
+  },
   DIFFERING_TOKENS: {
     event: EventType.META,
     action: 'Tokens',
