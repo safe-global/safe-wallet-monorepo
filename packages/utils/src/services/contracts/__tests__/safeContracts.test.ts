@@ -1,6 +1,6 @@
 import { canMigrateUnsupportedMastercopy, isValidMasterCopy, isMigrationToL2Possible } from '../safeContracts'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
+import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import type { BytecodeComparisonResult } from '../bytecodeComparison'
 
 describe('safeContracts', () => {
@@ -28,7 +28,7 @@ describe('safeContracts', () => {
         address: { value: '0x123' },
         implementation: { value: '0xabc' },
         ...overrides,
-      }) as SafeState
+      } as SafeState)
 
     it('should return false for supported mastercopy', () => {
       const safe = createMockSafe({
@@ -81,7 +81,7 @@ describe('safeContracts', () => {
         chainId: '1',
         address: { value: '0x123' },
         ...overrides,
-      }) as SafeState
+      } as SafeState)
 
     it('should return false when nonce is not 0', () => {
       const safe = createMockSafe({ nonce: 1 })

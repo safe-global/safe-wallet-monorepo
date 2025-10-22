@@ -233,3 +233,10 @@ export type OwnedSafes = {
 
 export type TransferInfo = TransferTransactionInfo['transferInfo']
 export type DetailedExecutionInfo = MultisigExecutionDetails | ModuleExecutionDetails
+
+export enum GAS_PRICE_TYPE {
+  ORACLE = 'ORACLE',
+  FIXED = 'FIXED',
+  FIXED_1559 = 'FIXED1559',
+  UNKNOWN = 'UNKNOWN',
+}

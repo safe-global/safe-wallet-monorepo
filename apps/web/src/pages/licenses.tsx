@@ -350,12 +350,6 @@ const SafeLicenses = () => (
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>@safe-global/safe-gateway-typescript-sdk</TableCell>
-              <TableCell>
-                <ExternalLink href="https://github.com/safe-global/safe-gateway-typescript-sdk/blob/main/LICENSE.md" />
-              </TableCell>
-            </TableRow>
-            <TableRow>
               <TableCell>@safe-global/safe-react-components</TableCell>
               <TableCell>
                 <ExternalLink href="https://github.com/safe-global/safe-react-components/blob/main/LICENSE.md" />

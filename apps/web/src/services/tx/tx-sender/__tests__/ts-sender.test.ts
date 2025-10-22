@@ -35,15 +35,6 @@ import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
 const SIGNER_ADDRESS = '0x1234567890123456789012345678901234567890'
 const TX_HASH = '0x1234567890'
 
-jest.mock('@safe-global/safe-gateway-typescript-sdk', () => ({
-  ...jest.requireActual('@safe-global/safe-gateway-typescript-sdk'),
-  postSafeGasEstimation: jest.fn(() => Promise.resolve({ safeTxGas: 60000, recommendedNonce: 17 })),
-  Operation: {
-    CALL: 0,
-  },
-  __esModule: true,
-}))
-
 // Mock extractTxInfo
 jest.mock('../../extractTxInfo', () => ({
   __esModule: true,
