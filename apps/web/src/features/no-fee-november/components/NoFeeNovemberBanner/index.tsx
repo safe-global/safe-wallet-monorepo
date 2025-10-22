@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
 import InfoIcon from '@mui/icons-material/Info'
-import useNoFeeNovemberEligibility from '@/hooks/useNoFeeNovemberEligibility'
+import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
 import { useContext } from 'react'
 import { TxModalContext } from '@/components/tx-flow'
 import { NewTxFlow } from '@/components/tx-flow/flows'
@@ -28,11 +28,11 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: (eligibilityState?: boo
     return (
       <Card className={css.banner}>
         <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2}>
-          <Box width={76} height={76} sx={{ bgcolor: 'grey.200', borderRadius: 1 }} />
+          <Box className={css.skeletonAvatar} />
           <Box flex={1}>
-            <Box height={24} sx={{ bgcolor: 'grey.200', borderRadius: 1, mb: 1 }} />
-            <Box height={20} sx={{ bgcolor: 'grey.200', borderRadius: 1, mb: 2 }} />
-            <Box height={32} width={120} sx={{ bgcolor: 'grey.200', borderRadius: 1 }} />
+            <Box className={`${css.skeletonBox} ${css.skeletonTitle}`} />
+            <Box className={`${css.skeletonBox} ${css.skeletonSubtitle}`} />
+            <Box className={`${css.skeletonBox} ${css.skeletonButton}`} />
           </Box>
         </Stack>
         <IconButton className={css.closeButton} aria-label="close" onClick={() => onDismiss(isEligible)}>
@@ -52,13 +52,13 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: (eligibilityState?: boo
             <Typography variant="h4" fontWeight="bold" color="static.main" className={css.bannerText}>
               Enjoy No Fee November
             </Typography>
-            <Typography variant="body2" color="static.light" sx={{ pointerEvents: 'auto' }}>
+            <Typography variant="body2" color="static.light" className={css.bannerTextInteractive}>
               SAFE holders enjoy gasless transactions on Mainnet this November.{' '}
               <Link href="https://help.safe.global/en/" style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
                 Learn more
               </Link>
             </Typography>
-            <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
+            <Typography variant="caption" color="error" className={css.errorText}>
               Unable to check eligibility
             </Typography>
           </Box>
@@ -80,24 +80,14 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: (eligibilityState?: boo
             <Typography variant="h4" fontWeight="bold" color="static.main" className={css.bannerText}>
               Enjoy No Fee November
             </Typography>
-            <Typography variant="body2" color="static.light" sx={{ pointerEvents: 'auto' }}>
+            <Typography variant="body2" color="static.light" className={css.bannerTextInteractive}>
               SAFE holders enjoy gasless transactions on Mainnet this November.{' '}
               <Link href="https://help.safe.global/en/" style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
                 Learn more
               </Link>
             </Typography>
             <Track {...{ category: 'overview', action: 'open_no_fee_november_new_tx' }}>
-              <Button
-                variant="contained"
-                size="small"
-                onClick={handleNewTransaction}
-                sx={{
-                  mt: 1,
-                  bgcolor: 'static.main',
-                  color: 'static.contrast',
-                  '&:hover': { bgcolor: 'static.main' },
-                }}
-              >
+              <Button variant="contained" size="small" onClick={handleNewTransaction} className={css.actionButton}>
                 New transaction
               </Button>
             </Track>
@@ -121,7 +111,7 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: (eligibilityState?: boo
           <Typography variant="h4" fontWeight="bold" color="static.main" className={css.bannerText}>
             Enjoy No Fee November
           </Typography>
-          <Typography variant="body2" color="static.light" sx={{ pointerEvents: 'auto' }}>
+          <Typography variant="body2" color="static.light" className={css.bannerTextInteractive}>
             SAFE holders enjoy gasless transactions on Mainnet this November.{' '}
             <Link href="https://help.safe.global/en/" style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
               Learn more
@@ -129,8 +119,8 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: (eligibilityState?: boo
           </Typography>
 
           {/* Info message with icon */}
-          <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 1, mb: 2 }}>
-            <InfoIcon fontSize="small" sx={{ color: 'static.light' }} />
+          <Stack direction="row" alignItems="center" spacing={1} className={css.infoStack}>
+            <InfoIcon fontSize="small" className={css.infoIcon} />
             <Typography variant="caption" color="static.light">
               You don&apos;t hold any SAFE yet — get some to enjoy No Fee November.
             </Typography>
@@ -138,15 +128,7 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: (eligibilityState?: boo
 
           <Track {...{ category: 'overview', action: 'open_no_fee_november_get_safe' }}>
             <Link href={AppRoutes.swap && { pathname: AppRoutes.swap, query: { safe: router.query.safe } }} passHref>
-              <Button
-                variant="contained"
-                size="small"
-                sx={{
-                  bgcolor: 'static.main',
-                  color: 'static.contrast',
-                  '&:hover': { bgcolor: 'static.main' },
-                }}
-              >
+              <Button variant="contained" size="small" className={css.actionButton}>
                 Get SAFE token
               </Button>
             </Link>

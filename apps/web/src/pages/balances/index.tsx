@@ -13,6 +13,10 @@ import CurrencySelect from '@/components/balances/CurrencySelect'
 import TokenListSelect from '@/components/balances/TokenListSelect'
 import StakingBanner from '@/components/dashboard/StakingBanner'
 import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useIsStakingBannerVisible'
+import NoFeeNovemberBanner from '@/features/no-fee-november/components/NoFeeNovemberBanner'
+import useIsNoFeeNovemberEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberEnabled'
+import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
+import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { Box } from '@mui/material'
 import { BRAND_NAME } from '@/config/constants'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
@@ -22,8 +26,17 @@ const Balances: NextPage = () => {
   const [showHiddenAssets, setShowHiddenAssets] = useState(false)
   const toggleShowHiddenAssets = () => setShowHiddenAssets((prev) => !prev)
   const isStakingBannerVisible = useIsStakingBannerVisible()
+  const isNoFeeNovemberVisible = useIsNoFeeNovemberEnabled()
+  const { isEligible: _isEligible } = useNoFeeNovemberEligibility()
+  const [hideNoFeeNovemberBanner, setHideNoFeeNovemberBanner] = useLocalStorage<boolean>(
+    'hideNoFeeNovemberAssetsPageBanner',
+  )
 
   const fiatTotal = balances.fiatTotal ? Number(balances.fiatTotal) : undefined
+
+  const handleNoFeeNovemberDismiss = () => {
+    setHideNoFeeNovemberBanner(true)
+  }
 
   return (
     <>
@@ -48,9 +61,16 @@ const Balances: NextPage = () => {
           <PagePlaceholder img={<NoAssetsIcon />} text="There was an error loading your assets" />
         ) : (
           <>
+            {isNoFeeNovemberVisible && !hideNoFeeNovemberBanner && (
+              <Box mb={2} sx={{ position: 'sticky', top: 0, zIndex: 1 }}>
+                <NoFeeNovemberBanner onDismiss={handleNoFeeNovemberDismiss} />
+              </Box>
+            )}
+
             <Box mb={2}>
               <TotalAssetValue fiatTotal={fiatTotal} />
             </Box>
+
             <AssetsTable setShowHiddenAssets={setShowHiddenAssets} showHiddenAssets={showHiddenAssets} />
           </>
         )}

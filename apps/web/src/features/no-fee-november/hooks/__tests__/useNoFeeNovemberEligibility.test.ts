@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react'
-import useNoFeeNovemberEligibility from '@/hooks/useNoFeeNovemberEligibility'
+import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
 import useSafeInfo from '@/hooks/useSafeInfo'
 
 // Mock the dependencies
