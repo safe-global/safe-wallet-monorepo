@@ -19,6 +19,15 @@ import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances
 import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import usePositions from '@/features/positions/hooks/usePositions'
 import { formatUnits } from 'ethers'
+import {
+  NATIVE_TOKEN_ADDRESS,
+  IS_MULTICHAIN_ENABLED,
+  createEmptyPortfolioData,
+  calculateTokensTotal,
+  filterHiddenTokens,
+  calculatePositionsTotal,
+} from './utils/portfolioCalculations'
+import type { LegacyProtocol, LegacyPositionGroup, LegacyPositionItem } from '@/types/legacyPortfolio'
 
 export type PortfolioData = {
   totalBalance: string
@@ -42,23 +51,20 @@ export type PortfolioData = {
 
 const transformTokenBalances = (tokens: PortfolioTokenBalance[]): Balance[] => {
   return tokens.map((token) => ({
-      balance: token.balance,
-      fiatBalance: (token.balanceFiat ?? 0).toString(),
-      fiatConversion: (token.price ?? 0).toString(),
-      fiatBalance24hChange: token.priceChangePercentage1d != null ? token.priceChangePercentage1d.toString() : null,
-      tokenInfo: {
-        address: token.tokenInfo.address,
-        decimals: token.tokenInfo.decimals,
-        symbol: token.tokenInfo.symbol,
-        name: token.tokenInfo.name,
-        chainId: token.tokenInfo.chainId,
-        logoUri: token.tokenInfo.logoUrl ?? '',
-        type:
-          token.tokenInfo.address === '0x0000000000000000000000000000000000000000'
-            ? TokenType.NATIVE_TOKEN
-            : TokenType.ERC20,
-      },
-    }))
+    balance: token.balance,
+    fiatBalance: (token.balanceFiat ?? 0).toString(),
+    fiatConversion: (token.price ?? 0).toString(),
+    fiatBalance24hChange: token.priceChangePercentage1d != null ? token.priceChangePercentage1d.toString() : null,
+    tokenInfo: {
+      address: token.tokenInfo.address,
+      decimals: token.tokenInfo.decimals,
+      symbol: token.tokenInfo.symbol,
+      name: token.tokenInfo.name,
+      chainId: token.tokenInfo.chainId,
+      logoUri: token.tokenInfo.logoUrl ?? '',
+      type: token.tokenInfo.address === NATIVE_TOKEN_ADDRESS ? TokenType.NATIVE_TOKEN : TokenType.ERC20,
+    },
+  }))
 }
 
 const usePortfolioV2 = (skip: boolean = false): PortfolioData => {
@@ -69,12 +75,10 @@ const usePortfolioV2 = (skip: boolean = false): PortfolioData => {
   const isTrustedTokenList = useTokenListSetting()
   const hiddenTokens = useHiddenTokens()
 
-  const isMultichainEnabled = false
-
   const { currentData, error, isLoading, isFetching } = usePortfolioGetPortfolioV1Query(
     {
       address: safeAddress,
-      chainIds: isMultichainEnabled ? undefined : chainId,
+      chainIds: IS_MULTICHAIN_ENABLED ? undefined : chainId,
       fiatCode: currency,
       trusted: isTrustedTokenList,
       excludeDust: true,
@@ -88,83 +92,65 @@ const usePortfolioV2 = (skip: boolean = false): PortfolioData => {
 
   return useMemo(() => {
     if (!currentData) {
-      return {
-        tokenBalances: [],
-        positionBalances: [],
-        visibleTokenBalances: [],
-        totalBalance: '0',
-        totalTokenBalance: '0',
-        totalPositionsBalance: '0',
-        visibleTotalBalance: '0',
-        visibleTotalTokenBalance: '0',
-        error: error?.toString(),
-        isLoading,
-        isLoaded: false,
-        isFetching,
-      }
+      return createEmptyPortfolioData(error?.toString(), isLoading, isFetching)
     }
 
     const allTokens = transformTokenBalances(currentData.tokenBalances ?? [])
     const allPositions = currentData.positionBalances ?? []
 
-    const currentChainTokens = isMultichainEnabled
+    const currentChainTokens = IS_MULTICHAIN_ENABLED
       ? allTokens.filter((token) => (token.tokenInfo as any).chainId === chainId)
       : allTokens
 
-    const currentChainPositions = isMultichainEnabled
+    const currentChainPositions = IS_MULTICHAIN_ENABLED
       ? allPositions.filter((app) => app.positions.some((p) => (p.tokenInfo as any).chainId === chainId))
       : allPositions
 
-    const visibleCurrentChainTokens = currentChainTokens.filter(
-      (item) => !hiddenTokens.includes(item.tokenInfo.address),
-    )
+    const visibleCurrentChainTokens = filterHiddenTokens(currentChainTokens, hiddenTokens)
 
     const totalTokenBalanceFiat = currentData.totalTokenBalanceFiat ?? 0
     const totalPositionsBalanceFiat = currentData.totalPositionsBalanceFiat ?? 0
 
-    const currentChainTokenTotal = currentChainTokens.reduce((sum, t) => sum + parseFloat(t.fiatBalance || '0'), 0)
+    const currentChainTokenTotal = calculateTokensTotal(currentChainTokens)
     const currentChainPositionsTotal = currentChainPositions.reduce((sum, app) => sum + (app.balanceFiat || 0), 0)
-    const visibleCurrentChainTokenTotal = visibleCurrentChainTokens.reduce(
-      (sum, t) => sum + parseFloat(t.fiatBalance || '0'),
-      0,
-    )
+    const visibleCurrentChainTokenTotal = calculateTokensTotal(visibleCurrentChainTokens)
 
     return {
       tokenBalances: currentChainTokens,
       positionBalances: currentChainPositions,
       visibleTokenBalances: visibleCurrentChainTokens,
-      totalBalance: isMultichainEnabled
+      totalBalance: IS_MULTICHAIN_ENABLED
         ? (currentChainTokenTotal + currentChainPositionsTotal).toString()
         : (currentData.totalBalanceFiat ?? 0).toString(),
-      totalTokenBalance: isMultichainEnabled ? currentChainTokenTotal.toString() : totalTokenBalanceFiat.toString(),
-      totalPositionsBalance: isMultichainEnabled
+      totalTokenBalance: IS_MULTICHAIN_ENABLED ? currentChainTokenTotal.toString() : totalTokenBalanceFiat.toString(),
+      totalPositionsBalance: IS_MULTICHAIN_ENABLED
         ? currentChainPositionsTotal.toString()
         : totalPositionsBalanceFiat.toString(),
       visibleTotalBalance: (visibleCurrentChainTokenTotal + currentChainPositionsTotal).toString(),
       visibleTotalTokenBalance: visibleCurrentChainTokenTotal.toString(),
-      allChainsTokenBalances: isMultichainEnabled ? allTokens : undefined,
-      allChainsPositionBalances: isMultichainEnabled ? allPositions : undefined,
-      allChainsTotalBalance: isMultichainEnabled ? (currentData.totalBalanceFiat ?? 0).toString() : undefined,
-      allChainsTotalTokenBalance: isMultichainEnabled ? totalTokenBalanceFiat.toString() : undefined,
-      allChainsTotalPositionsBalance: isMultichainEnabled ? totalPositionsBalanceFiat.toString() : undefined,
+      allChainsTokenBalances: IS_MULTICHAIN_ENABLED ? allTokens : undefined,
+      allChainsPositionBalances: IS_MULTICHAIN_ENABLED ? allPositions : undefined,
+      allChainsTotalBalance: IS_MULTICHAIN_ENABLED ? (currentData.totalBalanceFiat ?? 0).toString() : undefined,
+      allChainsTotalTokenBalance: IS_MULTICHAIN_ENABLED ? totalTokenBalanceFiat.toString() : undefined,
+      allChainsTotalPositionsBalance: IS_MULTICHAIN_ENABLED ? totalPositionsBalanceFiat.toString() : undefined,
       error: error?.toString(),
       isLoading,
       isLoaded: true,
       isFetching,
     }
-  }, [currentData, error, isLoading, isFetching, hiddenTokens, chainId, isMultichainEnabled])
+  }, [currentData, error, isLoading, isFetching, hiddenTokens, chainId])
 }
 
-const transformProtocolsToAppBalances = (protocols: any[]): AppBalance[] => {
+const transformProtocolsToAppBalances = (protocols: LegacyProtocol[]): AppBalance[] => {
   return protocols.map((protocol) => ({
     appInfo: {
       name: protocol.protocol_metadata.name,
-      logoUrl: protocol.protocol_metadata.icon.url,
+      logoUrl: protocol.protocol_metadata.icon.url ?? '',
       url: null,
     },
     balanceFiat: parseFloat(protocol.fiatTotal),
-    positions: protocol.items.flatMap((positionGroup: any) =>
-      positionGroup.items.map((item: any) => ({
+    positions: protocol.items.flatMap((positionGroup: LegacyPositionGroup) =>
+      positionGroup.items.map((item: LegacyPositionItem) => ({
         key: `${item.tokenInfo.address}-${item.position_type}`,
         type: item.position_type || 'unknown',
         name: item.tokenInfo.name,
@@ -192,20 +178,7 @@ const usePortfolioLegacy = (skip: boolean = false): PortfolioData => {
 
   return useMemo(() => {
     if (!balancesData) {
-      return {
-        tokenBalances: [],
-        positionBalances: [],
-        visibleTokenBalances: [],
-        totalBalance: '0',
-        totalTokenBalance: '0',
-        totalPositionsBalance: '0',
-        visibleTotalBalance: '0',
-        visibleTotalTokenBalance: '0',
-        error: balancesError?.message,
-        isLoading: balancesLoading,
-        isLoaded: false,
-        isFetching: balancesLoading || positionsLoading,
-      }
+      return createEmptyPortfolioData(balancesError?.message, balancesLoading, balancesLoading || positionsLoading)
     }
 
     const allTokens = balancesData.items.map((item) => ({
@@ -213,25 +186,9 @@ const usePortfolioLegacy = (skip: boolean = false): PortfolioData => {
       balance: formatUnits(item.balance, item.tokenInfo.decimals),
     }))
 
-    const visibleTokens = allTokens.filter((item) => !hiddenTokens.includes(item.tokenInfo.address))
-
-    const positionsTotal = positionsData
-      ? positionsData
-          .reduce((sum, protocol) => {
-            const protocolTotal = protocol.items.reduce((protocolSum, positionGroup) => {
-              const groupTotal = positionGroup.items.reduce(
-                (itemSum, item) => itemSum + parseFloat(item.fiatBalance || '0'),
-                0,
-              )
-              return protocolSum + groupTotal
-            }, 0)
-            return sum + protocolTotal
-          }, 0)
-          .toString()
-      : '0'
-
-    // Calculate visible total from visible tokens
-    const visibleTokenTotal = visibleTokens.reduce((sum, token) => sum + parseFloat(token.fiatBalance || '0'), 0).toString()
+    const visibleTokens = filterHiddenTokens(allTokens, hiddenTokens)
+    const positionsTotal = calculatePositionsTotal(positionsData)
+    const visibleTokenTotal = calculateTokensTotal(visibleTokens).toString()
     const allTokenTotal = balancesData.fiatTotal
     const transformedPositions = positionsData ? transformProtocolsToAppBalances(positionsData) : []
 

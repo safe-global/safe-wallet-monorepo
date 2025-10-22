@@ -16,7 +16,8 @@ const useIsStakingBannerVisible = () => {
     [tokenBalances],
   )
 
-  const hasSufficientFunds = nativeTokenBalance != null && Number(nativeTokenBalance.balance) >= MIN_NATIVE_TOKEN_BALANCE
+  const hasSufficientFunds =
+    nativeTokenBalance != null && Number(nativeTokenBalance.balance) >= MIN_NATIVE_TOKEN_BALANCE
 
   return isStakingBannerEnabled && !Boolean(sanctionedAddress) && hasSufficientFunds
 }
