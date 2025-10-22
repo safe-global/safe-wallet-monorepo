@@ -5,6 +5,10 @@ import type {
   TransactionDetails,
   Transaction,
   QueuedItemPage,
+  ModuleTransactionPage,
+  IncomingTransferPage,
+  MultisigTransactionPage,
+  TransactionItemPage,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 import type { ExecutionInfo } from '@safe-global/store/gateway/types'
@@ -85,6 +89,198 @@ export const deleteTransaction = async (chainId: string, safeTxHash: string, sig
       }),
     )
     .unwrap()
+}
+
+/**
+ * Fetch module transactions from the gateway using RTK Query.
+ * This function can be used in non-React contexts (e.g., async functions, services).
+ * It dispatches the query and waits for the result.
+ *
+ * @param chainId - The chain ID where the Safe exists
+ * @param safeAddress - The Safe address
+ * @param query - Optional query parameters (to, module, transaction_hash)
+ * @param pageUrl - Optional pagination URL
+ * @returns The module transaction page
+ * @throws Error if the store is not initialized or if the request fails
+ */
+export const getModuleTransactions = async (
+  chainId: string,
+  safeAddress: string,
+  query?: {
+    to?: string
+    module?: string
+    transaction_hash?: string
+  },
+  pageUrl?: string,
+): Promise<ModuleTransactionPage> => {
+  const store = getStoreInstance()
+
+  // If pageUrl is provided, parse cursor from it
+  const cursor = pageUrl ? new URL(pageUrl).searchParams.get('cursor') || undefined : undefined
+
+  const result = await store
+    .dispatch(
+      cgwApi.endpoints.transactionsGetModuleTransactionsV1.initiate({
+        chainId,
+        safeAddress,
+        to: query?.to,
+        module: query?.module,
+        transactionHash: query?.transaction_hash,
+        cursor,
+      }),
+    )
+    .unwrap()
+
+  return result
+}
+
+/**
+ * Fetch incoming transfers from the gateway using RTK Query.
+ * This function can be used in non-React contexts (e.g., async functions, services).
+ * It dispatches the query and waits for the result.
+ *
+ * @param chainId - The chain ID where the Safe exists
+ * @param safeAddress - The Safe address
+ * @param query - Optional query parameters (trusted, execution_date__gte, execution_date__lte, to, value, token_address)
+ * @param pageUrl - Optional pagination URL
+ * @returns The incoming transfer page
+ * @throws Error if the store is not initialized or if the request fails
+ */
+export const getIncomingTransfers = async (
+  chainId: string,
+  safeAddress: string,
+  query?: {
+    trusted?: boolean
+    execution_date__gte?: string
+    execution_date__lte?: string
+    to?: string
+    value?: string
+    token_address?: string
+  },
+  pageUrl?: string,
+): Promise<IncomingTransferPage> => {
+  const store = getStoreInstance()
+
+  // If pageUrl is provided, parse cursor from it
+  const cursor = pageUrl ? new URL(pageUrl).searchParams.get('cursor') || undefined : undefined
+
+  const result = await store
+    .dispatch(
+      cgwApi.endpoints.transactionsGetIncomingTransfersV1.initiate({
+        chainId,
+        safeAddress,
+        trusted: query?.trusted,
+        executionDateGte: query?.execution_date__gte,
+        executionDateLte: query?.execution_date__lte,
+        to: query?.to,
+        value: query?.value,
+        tokenAddress: query?.token_address,
+        cursor,
+      }),
+    )
+    .unwrap()
+
+  return result
+}
+
+/**
+ * Fetch multisig transactions from the gateway using RTK Query.
+ * This function can be used in non-React contexts (e.g., async functions, services).
+ * It dispatches the query and waits for the result.
+ *
+ * @param chainId - The chain ID where the Safe exists
+ * @param safeAddress - The Safe address
+ * @param query - Optional query parameters (execution_date__gte, execution_date__lte, to, value, nonce, executed)
+ * @param pageUrl - Optional pagination URL
+ * @returns The multisig transaction page
+ * @throws Error if the store is not initialized or if the request fails
+ */
+export const getMultisigTransactions = async (
+  chainId: string,
+  safeAddress: string,
+  query?: {
+    execution_date__gte?: string
+    execution_date__lte?: string
+    to?: string
+    value?: string
+    nonce?: string
+    executed?: string | boolean
+  },
+  pageUrl?: string,
+): Promise<MultisigTransactionPage> => {
+  const store = getStoreInstance()
+
+  // If pageUrl is provided, parse cursor from it
+  const cursor = pageUrl ? new URL(pageUrl).searchParams.get('cursor') || undefined : undefined
+
+  // Convert executed string to boolean if needed (for backwards compatibility with old SDK)
+  const executed =
+    query?.executed !== undefined
+      ? typeof query.executed === 'string'
+        ? query.executed === 'true'
+        : query.executed
+      : undefined
+
+  const result = await store
+    .dispatch(
+      cgwApi.endpoints.transactionsGetMultisigTransactionsV1.initiate({
+        chainId,
+        safeAddress,
+        executionDateGte: query?.execution_date__gte,
+        executionDateLte: query?.execution_date__lte,
+        to: query?.to,
+        value: query?.value,
+        nonce: query?.nonce,
+        executed,
+        cursor,
+      }),
+    )
+    .unwrap()
+
+  return result
+}
+
+/**
+ * Fetch transaction history from the gateway using RTK Query.
+ * This function can be used in non-React contexts (e.g., async functions, services).
+ * It dispatches the query and waits for the result.
+ *
+ * @param chainId - The chain ID where the Safe exists
+ * @param safeAddress - The Safe address
+ * @param query - Optional query parameters (timezone, trusted, imitation)
+ * @param pageUrl - Optional pagination URL
+ * @returns The transaction history page
+ * @throws Error if the store is not initialized or if the request fails
+ */
+export const getTransactionHistory = async (
+  chainId: string,
+  safeAddress: string,
+  query?: {
+    timezone?: string
+    trusted?: boolean
+    imitation?: boolean
+  },
+  pageUrl?: string,
+): Promise<TransactionItemPage> => {
+  const store = getStoreInstance()
+
+  // If pageUrl is provided, parse cursor from it
+  const cursor = pageUrl ? new URL(pageUrl).searchParams.get('cursor') || undefined : undefined
+
+  const result = await store
+    .dispatch(
+      cgwApi.endpoints.transactionsGetTransactionsHistoryV1.initiate({
+        chainId,
+        safeAddress,
+        timezone: query?.timezone,
+        trusted: query?.trusted,
+        imitation: query?.imitation,
+        cursor,
+      }),
+    )
+    .unwrap()
+
+  return result
 }
 
 export const makeTxFromDetails = (txDetails: TransactionDetails): ModuleTransaction => {

@@ -1,5 +1,4 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { TransactionInfoType } from '@safe-global/store/gateway/types'
 import type { ReactNode } from 'react'
 import { type SyntheticEvent, type ReactElement, memo, useMemo } from 'react'
 import { isNativeTokenTransfer, isTransferTxInfo } from '@/utils/transaction-guards'

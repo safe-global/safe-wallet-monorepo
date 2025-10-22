@@ -1,21 +1,41 @@
-import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type {
+  IncomingTransferPage,
+  MultisigTransactionPage,
+  ModuleTransactionPage,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useMemo } from 'react'
 import { useRouter } from 'next/router'
-import {
-  getIncomingTransfers,
-  getModuleTransactions,
-  getMultisigTransactions,
-} from '@safe-global/safe-gateway-typescript-sdk'
-import type { operations } from '@safe-global/safe-gateway-typescript-sdk/dist/types/api'
 import type { ParsedUrlQuery } from 'querystring'
 import { startOfDay, endOfDay } from 'date-fns'
 
 import type { TxFilterFormState } from '@/components/transactions/TxFilterForm'
-import { getTimezone } from '@/services/transactions'
+import { getModuleTransactions, getIncomingTransfers, getMultisigTransactions } from '@/utils/transactions'
 
-type IncomingTxFilter = NonNullable<operations['incoming_transfers']['parameters']['query']>
-type MultisigTxFilter = NonNullable<operations['multisig_transactions']['parameters']['query']>
-type ModuleTxFilter = NonNullable<operations['module_transactions']['parameters']['query']>
+// Filter types using snake_case for backward compatibility with forms
+// These correspond to the query parameters (excluding chainId/safeAddress) from the RTK Query API
+type IncomingTxFilter = {
+  trusted?: boolean
+  execution_date__gte?: string
+  execution_date__lte?: string
+  to?: string
+  value?: string
+  token_address?: string
+}
+
+type MultisigTxFilter = {
+  execution_date__gte?: string
+  execution_date__lte?: string
+  to?: string
+  value?: string
+  nonce?: string
+  executed?: string
+}
+
+type ModuleTxFilter = {
+  to?: string
+  module?: string
+  transaction_hash?: string
+}
 
 export enum TxFilterType {
   INCOMING = 'Incoming',
@@ -121,25 +141,52 @@ export const fetchFilteredTxHistory = async (
   hideUntrustedTxs: boolean,
   hideImitationTxs: boolean,
   pageUrl?: string,
-): Promise<TransactionItemPage> => {
+): Promise<IncomingTransferPage | MultisigTransactionPage | ModuleTransactionPage> => {
   const fetchPage = () => {
-    const query = {
-      ...filterData.filter,
-      timezone: getTimezone(),
-      trusted: hideUntrustedTxs,
-      imitation: !hideImitationTxs,
-      executed: filterData.type === TxFilterType.MULTISIG ? 'true' : undefined,
-    }
+    const filter = filterData.filter
 
     switch (filterData.type) {
       case TxFilterType.INCOMING: {
-        return getIncomingTransfers(chainId, safeAddress, query, pageUrl)
+        return getIncomingTransfers(
+          chainId,
+          safeAddress,
+          {
+            trusted: hideUntrustedTxs,
+            execution_date__gte: 'execution_date__gte' in filter ? filter.execution_date__gte : undefined,
+            execution_date__lte: 'execution_date__lte' in filter ? filter.execution_date__lte : undefined,
+            to: filter.to,
+            value: 'value' in filter ? filter.value : undefined,
+            token_address: 'token_address' in filter ? filter.token_address : undefined,
+          },
+          pageUrl,
+        )
       }
       case TxFilterType.MULTISIG: {
-        return getMultisigTransactions(chainId, safeAddress, query, pageUrl)
+        return getMultisigTransactions(
+          chainId,
+          safeAddress,
+          {
+            execution_date__gte: 'execution_date__gte' in filter ? filter.execution_date__gte : undefined,
+            execution_date__lte: 'execution_date__lte' in filter ? filter.execution_date__lte : undefined,
+            to: filter.to,
+            value: 'value' in filter ? filter.value : undefined,
+            nonce: 'nonce' in filter ? filter.nonce : undefined,
+            executed: 'executed' in filter ? filter.executed : 'true',
+          },
+          pageUrl,
+        )
       }
       case TxFilterType.MODULE: {
-        return getModuleTransactions(chainId, safeAddress, query, pageUrl)
+        return getModuleTransactions(
+          chainId,
+          safeAddress,
+          {
+            to: filter.to,
+            module: 'module' in filter ? filter.module : undefined,
+            transaction_hash: 'transaction_hash' in filter ? filter.transaction_hash : undefined,
+          },
+          pageUrl,
+        )
       }
       default: {
         return { results: [] }

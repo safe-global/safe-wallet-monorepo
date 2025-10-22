@@ -1,7 +1,7 @@
-import { getModuleTransactions, getTransactionHistory } from '@safe-global/safe-gateway-typescript-sdk'
 import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getStoreInstance } from '@/store'
+import { getModuleTransactions, getTransactionHistory } from '@/utils/transactions'
 
 export const getTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone
 

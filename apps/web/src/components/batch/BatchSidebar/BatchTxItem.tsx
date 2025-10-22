@@ -1,4 +1,4 @@
-import type { AddressInfo, TransactionData, MultiSend } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { TransactionData, MultiSend } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type SyntheticEvent, useMemo, useCallback } from 'react'
 import { ButtonBase, ListItem, Skeleton, SvgIcon } from '@mui/material'
 import css from './styles.module.css'

@@ -19,7 +19,7 @@ export const useLoadTxHistory = (): AsyncResult<TransactionItemPage> => {
   const hideImitationTxs = hideSuspiciousTransactions ?? true
 
   // Re-fetch when chainId, address, hideSuspiciousTransactions, or txHistoryTag changes
-  const [data, error, loading] = useAsync<TransactionListPage>(
+  const [data, error, loading] = useAsync<TransactionItemPage>(
     () => {
       if (!safeLoaded) return
       if (!safe.deployed) return Promise.resolve({ results: [] })

@@ -1,9 +1,8 @@
-import type { TransactionListItem } from '@safe-global/store/gateway/types'
 import { TransactionInfoType } from '@safe-global/store/gateway/types'
 import { faker } from '@faker-js/faker'
 
 import { groupTxs, groupRecoveryTransactions, _getRecoveryCancellations } from '@/utils/tx-list'
-import type { QueuedItemPage, TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 describe('tx-list', () => {
   describe('groupConflictingTxs', () => {

@@ -32,13 +32,15 @@ const useTxHistory = (
   } = useSafeInfo()
 
   // If filter exists or pageUrl is passed, load a new history page from the API
-  const [page, error, loading] = useAsync<TransactionListPage>(
+  const [page, error, loading] = useAsync<TransactionItemPage>(
     () => {
       if (!(filter || pageUrl)) return
 
-      return filter
-        ? fetchFilteredTxHistory(chainId, safeAddress, filter, hideUntrustedTxs, hideImitationTxs, pageUrl)
-        : getTxHistory(chainId, safeAddress, hideUntrustedTxs, hideImitationTxs, pageUrl)
+      return (
+        filter
+          ? fetchFilteredTxHistory(chainId, safeAddress, filter, hideUntrustedTxs, hideImitationTxs, pageUrl)
+          : getTxHistory(chainId, safeAddress, hideUntrustedTxs, hideImitationTxs, pageUrl)
+      ) as Promise<TransactionItemPage>
     },
     [filter, pageUrl, chainId, safeAddress, hideUntrustedTxs, hideImitationTxs],
     false,
