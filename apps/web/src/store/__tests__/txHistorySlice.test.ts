@@ -1,5 +1,5 @@
 import type { TransactionListItem } from '@safe-global/store/gateway/types'
-import { LabelValue, TransactionListItemType } from '@safe-global/store/gateway/types'
+import { LabelValue, TransactionListItemType, ConflictType } from '@safe-global/store/gateway/types'
 import type {
   ConflictHeaderQueuedItem,
   DateLabel,
@@ -42,6 +42,7 @@ describe('txHistorySlice', () => {
 
       const transaction = {
         type: TransactionListItemType.TRANSACTION,
+        conflictType: ConflictType.NONE,
         transaction: {
           id: '0x123',
           executionInfo: {
@@ -149,6 +150,7 @@ describe('txHistorySlice', () => {
 
       const transaction = {
         type: TransactionListItemType.TRANSACTION,
+        conflictType: ConflictType.NONE,
         transaction: {
           id: '0x456',
           executionInfo: {
@@ -196,6 +198,7 @@ describe('txHistorySlice', () => {
 
       const transaction = {
         type: TransactionListItemType.TRANSACTION,
+        conflictType: ConflictType.NONE,
         transaction: {
           id: '0x456',
           executionInfo: {
