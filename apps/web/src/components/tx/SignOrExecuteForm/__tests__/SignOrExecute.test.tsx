@@ -19,7 +19,7 @@ jest.mock('@/hooks/useIsSafeOwner', () => ({
 // Mock proposeTx
 jest.mock('@/services/tx/proposeTransaction', () => ({
   __esModule: true,
-  default: jest.fn(() => Promise.resolve({ txId: '123' })),
+  default: jest.fn(() => Promise.resolve({ id: '123' })),
 }))
 
 jest.mock('@/hooks/useValidateTxData', () => ({

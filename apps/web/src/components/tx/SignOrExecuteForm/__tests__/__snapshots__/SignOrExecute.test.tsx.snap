@@ -827,57 +827,129 @@ exports[`SignOrExecute should display an error screen 1`] = `
     <div
       class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
       data-testid="card-content"
+    />
+  </div>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1w4z6qv-MuiPaper-root-MuiCard-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
+      data-testid="card-content"
+    >
+      <h5
+        class="MuiTypography-root MuiTypography-h5 css-1whrnku-MuiTypography-root"
+      >
+        Transaction checks
+      </h5>
+    </div>
+  </div>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1w4z6qv-MuiPaper-root-MuiCard-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
+      data-testid="card-content"
     >
       <div
-        class="MuiBox-root css-17luq05"
+        class="wrapper"
       >
         <div
-          class="box MuiBox-root css-0"
+          class="icon sign"
         >
-          <div
-            class="rect rectTl"
+          <mock-icon
+            aria-hidden=""
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+            focusable="false"
           />
-          <div
-            class="rect rectTr"
-          />
-          <div
-            class="rect rectBl"
-          />
-          <div
-            class="rect rectBr"
-          />
-          <div
-            class="rect rectCenter"
-          />
-          <svg
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
+        </div>
+        <div>
+          <h5
+            class="MuiTypography-root MuiTypography-h5 css-1mp5g96-MuiTypography-root"
           >
-            <defs>
-              <filter
-                id="gooey"
-              >
-                <fegaussianblur
-                  in="SourceGraphic"
-                  result="blur"
-                  stdDeviation="3"
-                />
-                <fecolormatrix
-                  in="blur"
-                  mode="matrix"
-                  result="goo"
-                  values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
-                />
-                <fecomposite
-                  in="SourceGraphic"
-                  in2="goo"
-                  operator="atop"
-                />
-              </filter>
-            </defs>
-          </svg>
+            confirm
+          </h5>
+          <p
+            class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+          >
+            You're about to 
+            create and 
+            confirm
+             this transaction.
+          </p>
         </div>
       </div>
+      <form>
+        <hr
+          class="MuiDivider-root MuiDivider-fullWidth nestedDivider css-1jpvyob-MuiDivider-root"
+        />
+        <div
+          class="MuiCardActions-root MuiCardActions-spacing css-1q4nm6f-MuiCardActions-root"
+        >
+          <div
+            class="MuiStack-root css-irtfmw-MuiStack-root"
+          >
+            <span
+              class=""
+              data-mui-internal-clone-element="true"
+            >
+              <span
+                data-track="batching: Add to batch"
+              >
+                <button
+                  class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-16be8yl-MuiButtonBase-root-MuiButton-root"
+                  tabindex="0"
+                  type="button"
+                >
+                  <mock-icon
+                    aria-hidden=""
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-1hr8a3z-MuiSvgIcon-root"
+                    focusable="false"
+                  />
+                  Add to batch
+                </button>
+              </span>
+            </span>
+            <div
+              class="MuiBox-root css-1aqmpzz"
+            >
+               
+              <div
+                aria-orientation="horizontal"
+                class="MuiDivider-root MuiDivider-fullWidth MuiDivider-withChildren css-1lftdsp-MuiDivider-root"
+                role="separator"
+              >
+                <span
+                  class="MuiDivider-wrapper css-tuok6n-MuiDivider-wrapper"
+                >
+                  or
+                </span>
+              </div>
+            </div>
+            <span
+              aria-label="Please connect your wallet"
+              class=""
+              data-mui-internal-clone-element="true"
+            >
+              <span
+                class=""
+                data-mui-internal-clone-element="true"
+              >
+                <button
+                  class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-1hp2ejb-MuiButtonBase-root-MuiButton-root"
+                  data-testid="sign-btn"
+                  disabled=""
+                  tabindex="-1"
+                  type="submit"
+                >
+                  Sign
+                </button>
+              </span>
+            </span>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 </div>
