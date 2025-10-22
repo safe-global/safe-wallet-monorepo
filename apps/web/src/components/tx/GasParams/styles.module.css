@@ -15,3 +15,40 @@
 .error :global .MuiAccordionSummary-expandIconWrapper {
   margin-left: var(--space-1);
 }
+
+.feeContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.feeAmount {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.1px;
+  color: var(--text-primary);
+}
+
+.remainingCounter {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.17px;
+  color: var(--text-secondary);
+}
+
+.noFeeTag {
+  background: linear-gradient(90deg, #b0ffc9 0%, #d7f6ff 99.5%);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 1px;
+  color: var(--text-primary);
+}

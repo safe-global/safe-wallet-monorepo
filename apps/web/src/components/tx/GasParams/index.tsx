@@ -12,6 +12,7 @@ import css from './styles.module.css'
 import accordionCss from '@/styles/accordion.module.css'
 import madProps from '@/utils/mad-props'
 import { getTotalFee } from '@safe-global/utils/hooks/useDefaultGasPrice'
+import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
 
 const GasDetail = ({ name, value, isLoading }: { name: string; value: string; isLoading: boolean }): ReactElement => {
   const valueSkeleton = <Skeleton variant="text" sx={{ minWidth: '5em' }} />
@@ -42,8 +43,13 @@ export const _GasParams = ({
   gasLimitError,
   willRelay,
   chain,
-}: GasParamsProps & { chain?: Chain }): ReactElement => {
+  noFeeNovember,
+}: GasParamsProps & { 
+  chain?: Chain
+  noFeeNovember: { isEligible: boolean | undefined; remaining: number | undefined; limit: number | undefined }
+}): ReactElement => {
   const { nonce, userNonce, safeTxGas, gasLimit, maxFeePerGas, maxPriorityFeePerGas } = params
+  const { isEligible, remaining, limit } = noFeeNovember
 
   const onChangeExpand = (_: SyntheticEvent, expanded: boolean) => {
     trackEvent({ ...MODALS_EVENTS.ESTIMATION, label: expanded ? 'Open' : 'Close' })
@@ -116,7 +122,17 @@ export const _GasParams = ({
               ) : isLoading ? (
                 <Skeleton variant="text" sx={{ display: 'inline-block', minWidth: '7em' }} />
               ) : (
-                <span>{willRelay ? 'Free' : `${totalFee} ${chain?.nativeCurrency.symbol}`}</span>
+                <div className={css.feeContainer}>
+                  {isEligible ? (
+                    <>
+                      <span className={css.feeAmount}>Free</span>
+                      <span className={css.remainingCounter}>{remaining}/{limit} left</span>
+                      <span className={css.noFeeTag}>No-fee November</span>
+                    </>
+                  ) : (
+                    <span>{willRelay ? 'Free' : `${totalFee} ${chain?.nativeCurrency.symbol}`}</span>
+                  )}
+                </div>
               )}
             </Typography>
           ) : (
@@ -166,6 +182,7 @@ export const _GasParams = ({
 
 const GasParams = madProps(_GasParams, {
   chain: useCurrentChain,
+  noFeeNovember: useNoFeeNovemberEligibility,
 })
 
 export default GasParams
