@@ -8,7 +8,6 @@ import {
   isConflictHeaderQueuedItem,
   isLabelListItem,
   isMultisigExecutionInfo,
-  isTransactionListItem,
   isTransactionQueuedItem,
 } from '@/utils/transaction-guards'
 import useSafeInfo from './useSafeInfo'
@@ -37,7 +36,7 @@ export const useShowUnsignedQueue = (): boolean => {
 
 export const filterUntrustedQueue = (untrustedQueue: QueuedItemPage, pendingIds: Array<Transaction['id']>) => {
   // Only keep labels and pending unsigned transactions
-  const results = (untrustedQueue.results as Array<any>)
+  const results = untrustedQueue.results
     .filter((item) => !isTransactionQueuedItem(item) || pendingIds.includes(item.transaction.id))
     .filter((item) => !isConflictHeaderQueuedItem(item))
     .filter(
@@ -47,24 +46,22 @@ export const filterUntrustedQueue = (untrustedQueue: QueuedItemPage, pendingIds:
           isMultisigExecutionInfo(item.transaction.executionInfo) &&
           item.transaction.executionInfo.confirmationsSubmitted === 0),
     )
-
-  // Adjust the first label ("Next" -> "Pending")
-  if (results[0] && isLabelListItem(results[0])) {
-    results[0].label = 'Pending' as LabelValue
+  // Adjust the first label ("Next" -> "Pending") by creating a new object
+  let adjustedResults = results
+  if (results.length > 0 && isLabelListItem(results[0])) {
+    adjustedResults = [...results]
+    adjustedResults[0] = { ...results[0], label: 'Pending' as LabelValue }
   }
 
-  const transactions = results.filter((item) => isTransactionListItem(item))
+  const transactions = adjustedResults.filter((item) => isTransactionQueuedItem(item))
 
-  return transactions.length ? { results } : undefined
+  return transactions.length ? { results: adjustedResults } : undefined
 }
 
 export function getNextTransactions(queue: QueuedItemPage): QueuedItemPage {
-  const queueLabelIndex = (queue.results as Array<any>).findIndex(
-    (item) => isLabelListItem(item) && item.label === LabelValue.Queued,
-  )
-  const nextTransactions =
-    queueLabelIndex === -1 ? queue.results : (queue.results as Array<any>).slice(0, queueLabelIndex)
-  return { results: nextTransactions as any }
+  const queueLabelIndex = queue.results.findIndex((item) => isLabelListItem(item) && item.label === LabelValue.Queued)
+  const nextTransactions = queueLabelIndex === -1 ? queue.results : queue.results.slice(0, queueLabelIndex)
+  return { results: nextTransactions }
 }
 
 export const usePendingTxsQueue = (): {

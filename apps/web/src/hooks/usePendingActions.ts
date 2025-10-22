@@ -14,9 +14,7 @@ type PendingActions = {
 }
 
 const getSignableCount = (queue: QueuedItemPage, walletAddress: string): number => {
-  return (queue.results as Array<any>).filter(
-    (tx) => isTransactionQueuedItem(tx) && isSignableBy(tx.transaction, walletAddress),
-  ).length
+  return queue.results.filter((tx) => isTransactionQueuedItem(tx) && isSignableBy(tx.transaction, walletAddress)).length
 }
 
 const usePendingActions = (chainId: string, safeAddress?: string): PendingActions => {
@@ -35,9 +33,7 @@ const usePendingActions = (chainId: string, safeAddress?: string): PendingAction
   return useMemo(
     () => ({
       // Return 20+ if more than one page, otherwise just the length
-      totalQueued: queue
-        ? ((queue.results as Array<any>).filter(isTransactionQueuedItem).length || '') + (queue.next ? '+' : '')
-        : '',
+      totalQueued: queue ? (queue.results.filter(isTransactionQueuedItem).length || '') + (queue.next ? '+' : '') : '',
       // Return the queued txs signable by wallet
       totalToSign: queue ? (getSignableCount(queue, wallet?.address || '') || '').toString() : '',
     }),

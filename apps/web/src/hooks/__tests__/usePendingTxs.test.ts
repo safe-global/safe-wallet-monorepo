@@ -1,5 +1,3 @@
-import type { ExecutionInfo } from '@safe-global/store/gateway/types'
-
 import {
   TransactionListItemType,
   DetailedExecutionInfoType,
@@ -40,12 +38,18 @@ const mockQueue = <QueuedItemPage>{
           type: DetailedExecutionInfoType.MULTISIG,
         },
       },
+      conflictType: ConflictType.NONE,
     },
     {
       type: 'TRANSACTION',
       transaction: {
         id: 'multisig_456',
+        executionInfo: {
+          confirmationsSubmitted: 0,
+          type: DetailedExecutionInfoType.MULTISIG,
+        },
       },
+      conflictType: ConflictType.NONE,
     },
   ],
 }
@@ -63,7 +67,12 @@ const mockQueueWithQueued = <QueuedItemPage>{
       type: 'TRANSACTION',
       transaction: {
         id: 'multisig_789',
+        executionInfo: {
+          confirmationsSubmitted: 0,
+          type: DetailedExecutionInfoType.MULTISIG,
+        },
       },
+      conflictType: ConflictType.NONE,
     },
   ],
 }
@@ -94,7 +103,34 @@ const mockQueueWithConflictHeaders = <QueuedItemPage>{
       type: 'TRANSACTION',
       transaction: {
         id: 'multisig_456',
+        executionInfo: {
+          confirmationsSubmitted: 0,
+          type: DetailedExecutionInfoType.MULTISIG,
+        },
       },
+    },
+  ],
+}
+
+const mockQueueWithSignedTxsOnly = <QueuedItemPage>{
+  next: undefined,
+  previous: undefined,
+  results: [
+    {
+      type: TransactionListItemType.LABEL,
+      label: LabelValue.Next,
+    },
+    {
+      type: 'TRANSACTION',
+      transaction: {
+        id: 'multisig_456',
+        executionInfo: {
+          confirmationsSubmitted: 1,
+          confirmationsRequired: 1,
+          type: DetailedExecutionInfoType.MULTISIG,
+        },
+      },
+      conflictType: ConflictType.NONE,
     },
   ],
 }
@@ -159,7 +195,7 @@ describe('filterUntrustedQueue', () => {
           confirmationsSubmitted: 1,
           confirmationsRequired: 1,
           type: DetailedExecutionInfoType.MULTISIG,
-        } as ExecutionInfo,
+        },
       } as unknown as Transaction,
       conflictType: ConflictType.NONE,
     })
@@ -249,6 +285,15 @@ describe('usePendingTxsQueue', () => {
   })
 
   it('should return undefined if none of the pending txs are unsigned', async () => {
+    server.use(
+      http.get(
+        `${GATEWAY_URL}/v1/chains/5/safes/0x0000000000000000000000000000000000000001/transactions/queued`,
+        () => {
+          return HttpResponse.json(mockQueueWithSignedTxsOnly)
+        },
+      ),
+    )
+
     const { result } = renderHook(() => usePendingTxsQueue(), {
       initialReduxState: {
         pendingTxs: {
