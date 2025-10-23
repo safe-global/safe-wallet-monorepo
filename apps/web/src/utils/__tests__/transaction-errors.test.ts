@@ -7,17 +7,9 @@ describe('transaction-errors', () => {
       expect(isGuardError(error)).toBe(true)
     })
 
-    it('should detect guard error in reason', () => {
-      const error = Object.assign(new Error('Transaction failed'), {
-        reason: `Guard check failed: ${GUARD_ERROR_CODES.UNAPPROVED_HASH}`,
-      })
-      expect(isGuardError(error)).toBe(true)
-    })
-
-    it('should detect guard error in data', () => {
-      const error = Object.assign(new Error('Transaction failed'), {
-        data: GUARD_ERROR_CODES.UNAPPROVED_HASH,
-      })
+    it('should detect guard error code in sanitized error message', () => {
+      // This simulates what happens after asError() sanitization
+      const error = new Error(`execution reverted: ${GUARD_ERROR_CODES.UNAPPROVED_HASH}`)
       expect(isGuardError(error)).toBe(true)
     })
 

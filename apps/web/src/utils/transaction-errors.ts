@@ -14,19 +14,14 @@ export const GUARD_ERROR_CODES = {
  * @param error - The error to check
  * @returns true if the error is a Guard revert
  */
-export const isGuardError = (error: Error & { reason?: string; data?: string }): boolean => {
+export const isGuardError = (error: Error): boolean => {
   if (!error) return false
 
   const errorMessage = error.message || ''
-  const errorReason = error.reason || ''
-  const errorData = error.data || ''
 
-  // Check if error contains the UnapprovedHash error code
-  return (
-    errorMessage.includes(GUARD_ERROR_CODES.UNAPPROVED_HASH) ||
-    errorReason.includes(GUARD_ERROR_CODES.UNAPPROVED_HASH) ||
-    errorData.includes(GUARD_ERROR_CODES.UNAPPROVED_HASH)
-  )
+  // Check if error message contains the UnapprovedHash error code
+  // Note: After error sanitization via asError(), the guard error code is preserved in the message
+  return errorMessage.includes(GUARD_ERROR_CODES.UNAPPROVED_HASH)
 }
 
 /**
@@ -34,7 +29,7 @@ export const isGuardError = (error: Error & { reason?: string; data?: string }):
  * @param error - The error to check
  * @returns true if the error is UnapprovedHash
  */
-export const isUnapprovedHashError = (error: Error & { reason?: string; data?: string }): boolean => {
+export const isUnapprovedHashError = (error: Error): boolean => {
   return isGuardError(error)
 }
 

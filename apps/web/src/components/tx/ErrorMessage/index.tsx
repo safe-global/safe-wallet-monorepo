@@ -21,7 +21,7 @@ const ErrorMessage = ({
   context,
 }: {
   children: ReactNode
-  error?: Error & { reason?: string; data?: string }
+  error?: Error
   className?: string
   level?: 'error' | 'warning' | 'info'
   title?: string
@@ -98,7 +98,7 @@ const ErrorMessage = ({
 
           {error && showDetails && (
             <Typography variant="body2" className={css.details}>
-              {(error.reason || error.message).replace(ETHERS_PREFIX, '').trim().slice(0, 500)}
+              {error.message.replace(ETHERS_PREFIX, '').trim().slice(0, 500)}
             </Typography>
           )}
         </div>
