@@ -1,16 +1,12 @@
 import { useMemo, useRef, useState } from 'react'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { JsonRpcProvider } from 'ethers'
-import { analyzeAddressActivity, isLowActivityAddress } from './addressActivityService'
-import { ActivityMessages } from '../config'
-import { type AnalysisResult, RecipientStatus, Severity } from '../../../types'
+import { isAddress, JsonRpcProvider } from 'ethers'
+import { ACTIVITY_THRESHOLD_LOW, LowActivityAnalysisResult } from '../config'
+import { type AnalysisResult, RecipientStatus } from '../../../types'
 import { useEffectDeepCompare, useAsyncDeepCompare } from '../../util-hooks'
 import isEmpty from 'lodash/isEmpty'
 
-export type AddressActivityResult = Record<
-  string,
-  AnalysisResult<RecipientStatus.LOW_ACTIVITY | RecipientStatus.HIGH_ACTIVITY>
->
+export type AddressActivityResult = Record<string, AnalysisResult<RecipientStatus.LOW_ACTIVITY>>
 
 /**
  * React hook to analyze activity for multiple addresses
@@ -56,12 +52,17 @@ export const useAddressActivity = (
         if (!address) return
 
         try {
-          const assessment = await analyzeAddressActivity(address, web3ReadOnly)
-          const message = ActivityMessages[assessment.activityLevel]
-          const severity = isLowActivityAddress(assessment) ? Severity.WARN : Severity.OK
-          const type = isLowActivityAddress(assessment) ? RecipientStatus.LOW_ACTIVITY : RecipientStatus.HIGH_ACTIVITY
+          if (!isAddress(address)) {
+            throw new Error('Invalid Ethereum address')
+          }
 
-          activityResults[address] = { type, severity, ...message }
+          // Get transaction count using eth_getTransactionCount
+          const txCount = await web3ReadOnly.getTransactionCount(address, 'latest')
+
+          // Only add result if the address has low activity
+          if (txCount < ACTIVITY_THRESHOLD_LOW) {
+            activityResults[address] = LowActivityAnalysisResult
+          }
         } catch (err) {
           console.error(`Address activity analysis error for ${address}:`, err)
           throw err

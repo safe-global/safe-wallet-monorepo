@@ -8142,18 +8142,21 @@
         "type": "object",
         "properties": {
           "to": {
-            "type": "string"
+            "type": "string",
+            "description": "Recipient address of the transaction."
           },
           "value": {
-            "type": "string"
+            "type": "string",
+            "description": "Amount to send with the transaction."
           },
           "data": {
-            "type": "string"
+            "type": "string",
+            "description": "Hex-encoded data payload for the transaction."
           },
           "operation": {
             "type": "number",
             "enum": [0, 1],
-            "description": "Operation type: 0 for CALL, 1 for DELEGATE"
+            "description": "Operation type: 0 for CALL, 1 for DELEGATECALL."
           }
         },
         "required": ["to", "value", "data", "operation"]
@@ -8190,6 +8193,11 @@
             "type": "string",
             "description": "Detailed description explaining the finding and its implications",
             "example": "This is the first time you are interacting with this recipient"
+          },
+          "targetChainId": {
+            "type": "string",
+            "description": "Target chain ID for bridge operations. Only present for BridgeStatus.",
+            "example": "137"
           }
         },
         "required": ["severity", "type", "title", "description"]
@@ -8219,7 +8227,8 @@
                 "severity": "WARN",
                 "type": "MISSING_OWNERSHIP",
                 "title": "No ownership on target chain",
-                "description": "You do not have ownership of a Safe on the target chain"
+                "description": "You do not have ownership of a Safe on the target chain",
+                "targetChainId": "137"
               }
             ],
             "type": "array",
@@ -8326,7 +8335,7 @@
               "$ref": "#/components/schemas/RecipientAnalysisDto"
             },
             "example": {
-              "0x1234567890123456789012345678901234567890": {
+              "0x0000000000000000000000000000000000000000": {
                 "RECIPIENT_INTERACTION": [
                   {
                     "severity": "INFO",
@@ -8345,7 +8354,7 @@
               "$ref": "#/components/schemas/ContractAnalysisDto"
             },
             "example": {
-              "0x1234567890123456789012345678901234567890": {
+              "0x0000000000000000000000000000000000000000": {
                 "CONTRACT_VERIFICATION": [
                   {
                     "severity": "INFO",

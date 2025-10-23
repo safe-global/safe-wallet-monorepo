@@ -80,6 +80,8 @@ export type RecipientResultDto = {
   title: string
   /** Detailed description explaining the finding and its implications */
   description: string
+  /** Target chain ID for bridge operations. Only present for BridgeStatus. */
+  targetChainId?: string
 }
 export type RecipientAnalysisDto = {
   /** Analysis results related to recipient interaction history. Shows whether this is a new or recurring recipient. */
@@ -124,10 +126,13 @@ export type CounterpartyAnalysisDto = {
   }
 }
 export type CounterpartyAnalysisRequestDto = {
+  /** Recipient address of the transaction. */
   to: string
+  /** Amount to send with the transaction. */
   value: string
+  /** Hex-encoded data payload for the transaction. */
   data: string
-  /** Operation type: 0 for CALL, 1 for DELEGATE */
+  /** Operation type: 0 for CALL, 1 for DELEGATECALL. */
   operation: 0 | 1
 }
 export const {

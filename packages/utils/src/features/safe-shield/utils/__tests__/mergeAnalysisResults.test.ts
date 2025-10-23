@@ -44,7 +44,7 @@ describe('mergeAnalysisResults', () => {
       }
 
       const activityResult: AddressActivityResult = {
-        [address1]: RecipientAnalysisResultBuilder.highActivity().build(),
+        [address1]: RecipientAnalysisResultBuilder.lowActivity().build(),
       }
 
       const result = mergeAnalysisResults(undefined, addressBookResult, activityResult)
@@ -53,7 +53,7 @@ describe('mergeAnalysisResults', () => {
       expect(result[address1Checksum][StatusGroup.ADDRESS_BOOK]).toHaveLength(1)
       expect(result[address1Checksum][StatusGroup.RECIPIENT_ACTIVITY]).toHaveLength(1)
       expect(result[address1Checksum][StatusGroup.ADDRESS_BOOK]?.[0].type).toBe(RecipientStatus.KNOWN_RECIPIENT)
-      expect(result[address1Checksum][StatusGroup.RECIPIENT_ACTIVITY]?.[0].type).toBe(RecipientStatus.HIGH_ACTIVITY)
+      expect(result[address1Checksum][StatusGroup.RECIPIENT_ACTIVITY]?.[0].type).toBe(RecipientStatus.LOW_ACTIVITY)
     })
   })
 
@@ -115,16 +115,15 @@ describe('mergeAnalysisResults', () => {
       }
 
       const activityResult: AddressActivityResult = {
-        [address1]: RecipientAnalysisResultBuilder.highActivity().build(),
         [address2]: RecipientAnalysisResultBuilder.lowActivity().build(),
       }
 
       const result = mergeAnalysisResults(fetchedResults, addressBookResult, activityResult)
 
-      // Address 1 (checksummed)
+      // Address 1 (checksummed) - has RECIPIENT_INTERACTION and ADDRESS_BOOK but no activity result (high activity)
       expect(result[address1Checksum][StatusGroup.RECIPIENT_INTERACTION]).toHaveLength(1)
       expect(result[address1Checksum][StatusGroup.ADDRESS_BOOK]).toHaveLength(1)
-      expect(result[address1Checksum][StatusGroup.RECIPIENT_ACTIVITY]).toHaveLength(1)
+      expect(result[address1Checksum][StatusGroup.RECIPIENT_ACTIVITY]).toBeUndefined()
 
       // Address 2 (checksummed)
       expect(result[address2Checksum]).toBeDefined()

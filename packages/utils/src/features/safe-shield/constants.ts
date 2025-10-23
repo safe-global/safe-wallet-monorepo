@@ -20,8 +20,6 @@ export const MULTI_RESULT_DESCRIPTION: Record<
     `${capitalise(formatCount(number, 'address', totalNumber, 'addresses'))} ${number === 1 ? 'is' : 'are'} not in your address book or a Safe you own.`,
   [RecipientStatus.LOW_ACTIVITY]: (number, totalNumber) =>
     `${capitalise(formatCount(number, 'address', totalNumber, 'addresses'))} ${number === 1 ? 'has' : 'have'} low activity.`,
-  [RecipientStatus.HIGH_ACTIVITY]: (number, totalNumber) =>
-    `${capitalise(formatCount(number, 'address', totalNumber, 'addresses'))} ${number === 1 ? 'has' : 'have'} high activity.`,
   [RecipientStatus.NEW_RECIPIENT]: (number, totalNumber) =>
     `You are interacting with ${formatCount(number, 'address', totalNumber, 'addresses')} for the first time.`,
   [RecipientStatus.RECURRING_RECIPIENT]: (number, totalNumber) =>
