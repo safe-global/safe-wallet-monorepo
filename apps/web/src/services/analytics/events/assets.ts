@@ -39,6 +39,11 @@ export const ASSETS_EVENTS = {
     action: 'Toggle dust tokens',
     category: ASSETS_CATEGORY,
   },
+  VIEW_MULTICHAIN_PORTFOLIO: {
+    event: EventType.META,
+    action: 'View multichain portfolio',
+    category: ASSETS_CATEGORY,
+  },
   DIFFERING_TOKENS: {
     event: EventType.META,
     action: 'Tokens',

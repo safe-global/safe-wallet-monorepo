@@ -5,7 +5,7 @@ import type { PortfolioData } from '../usePortfolio'
  * Constants
  */
 export const NATIVE_TOKEN_ADDRESS = '0x0000000000000000000000000000000000000000'
-export const IS_MULTICHAIN_ENABLED = false
+export const IS_MULTICHAIN_ENABLED = true
 
 /**
  * Creates an empty portfolio data object with default values

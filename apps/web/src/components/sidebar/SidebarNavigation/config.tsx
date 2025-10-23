@@ -48,6 +48,7 @@ export const transactionNavItems = [
 ]
 
 export const balancesNavItems = [
+  { label: 'Portfolio', href: AppRoutes.balances.portfolio },
   { label: 'Tokens', href: AppRoutes.balances.index },
   {
     label: 'Positions',
