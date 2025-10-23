@@ -7,8 +7,9 @@ import type { NftTransferParams } from '.'
 import ImageFallback from '@/components/common/ImageFallback'
 import TxCard from '../../common/TxCard'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { useContext } from 'react'
+import { useContext, useMemo } from 'react'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
+import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
 
 enum Field {
   recipient = 'recipient',
@@ -96,6 +97,9 @@ const SendNftBatch = () => {
 
   const recipient = watch(Field.recipient)
   const isAddressValid = !!recipient && !errors[Field.recipient]
+
+  const recipientArray = useMemo(() => [recipient], [recipient])
+  useSafeShieldForRecipients(recipientArray)
 
   const onFormSubmit = (data: FormData) => {
     onNext({
