@@ -126,9 +126,13 @@ export const _GasParams = ({
                   {noFeeNovember?.isEligible ? (
                     <>
                       <span className={css.feeAmount}>Free</span>
-                      <span className={css.strikethrough}>≈{totalFee} {chain?.nativeCurrency.symbol}</span>
+                      <span className={css.strikethrough}>
+                        ≈{totalFee} {chain?.nativeCurrency.symbol}
+                      </span>
                       <span className={css.noFeeTag}>No fee November</span>
-                      <span className={css.remainingCounter}>{noFeeNovember.remaining}/{noFeeNovember.limit} left</span>
+                      <span className={css.remainingCounter}>
+                        {noFeeNovember.remaining}/{noFeeNovember.limit} left
+                      </span>
                     </>
                   ) : (
                     <span>{willRelay ? 'Free' : `${totalFee} ${chain?.nativeCurrency.symbol}`}</span>

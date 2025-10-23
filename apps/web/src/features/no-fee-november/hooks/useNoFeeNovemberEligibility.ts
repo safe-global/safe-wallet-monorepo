@@ -42,8 +42,8 @@ const useNoFeeNovemberEligibility = (): {
         const mockEligible = true
 
         setIsEligible(mockEligible)
-        setRemaining(5)  // mock value
-        setLimit(5)      // mock value
+        setRemaining(5) // mock value
+        setLimit(5) // mock value
         setIsLoading(false)
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Failed to check eligibility'))

@@ -162,15 +162,17 @@ export const ExecuteForm = ({
     <>
       <form onSubmit={handleSubmit}>
         <div className={classNames(commonCss.params, { [css.noBottomBorderRadius]: canRelay })}>
-              <AdvancedParams
-                willExecute
-                params={advancedParams}
-                recommendedGasLimit={gasLimit}
-                onFormSubmit={setAdvancedParams}
-                gasLimitError={gasLimitError}
-                willRelay={willRelay}
-                noFeeNovember={willNoFeeNovember ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 } : undefined}
-              />
+          <AdvancedParams
+            willExecute
+            params={advancedParams}
+            recommendedGasLimit={gasLimit}
+            onFormSubmit={setAdvancedParams}
+            gasLimitError={gasLimitError}
+            willRelay={willRelay}
+            noFeeNovember={
+              willNoFeeNovember ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 } : undefined
+            }
+          />
 
           {showExecutionSelector && (
             <div className={css.noTopBorder}>
@@ -178,7 +180,9 @@ export const ExecuteForm = ({
                 executionMethod={executionMethod}
                 setExecutionMethod={setExecutionMethod}
                 relays={canNoFeeNovember ? undefined : relays[0]}
-                noFeeNovember={canNoFeeNovember ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 } : undefined}
+                noFeeNovember={
+                  canNoFeeNovember ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 } : undefined
+                }
               />
             </div>
           )}

@@ -67,9 +67,7 @@ const _ExecutionMethodSelector = ({
               label={
                 noFeeNovember?.isEligible ? (
                   <div className={css.noFeeNovemberLabel}>
-                    <Typography className={css.mainLabel}>
-                      Sponsored gas
-                    </Typography>
+                    <Typography className={css.mainLabel}>Sponsored gas</Typography>
                     <div className={css.subLabel}>
                       <Typography variant="body2" color="text.secondary">
                         Part of
