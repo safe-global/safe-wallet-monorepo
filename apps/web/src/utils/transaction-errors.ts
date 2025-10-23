@@ -10,18 +10,42 @@ export const GUARD_ERROR_CODES = {
 } as const
 
 /**
+ * Extracts the Guard error code from an error message
+ * @param error - The error to extract from
+ * @returns The error code if found, undefined otherwise
+ */
+export const extractGuardErrorCode = (error: Error): string | undefined => {
+  if (!error) return undefined
+
+  const errorMessage = error.message || ''
+
+  // Check for each known guard error code in the message
+  for (const code of Object.values(GUARD_ERROR_CODES)) {
+    if (errorMessage.includes(code)) {
+      return code
+    }
+  }
+
+  return undefined
+}
+
+/**
+ * Detects if an error is a Guard revert error and returns the error name
+ * @param error - The error to check
+ * @returns The human-readable error name if it's a guard error, undefined otherwise
+ */
+export const getGuardErrorInfo = (error: Error): string | undefined => {
+  const errorCode = extractGuardErrorCode(error)
+  return errorCode ? getGuardErrorName(errorCode) : undefined
+}
+
+/**
  * Detects if an error is a Guard revert error
  * @param error - The error to check
  * @returns true if the error is a Guard revert
  */
 export const isGuardError = (error: Error): boolean => {
-  if (!error) return false
-
-  const errorMessage = error.message || ''
-
-  // Check if error message contains the UnapprovedHash error code
-  // Note: After error sanitization via asError(), the guard error code is preserved in the message
-  return errorMessage.includes(GUARD_ERROR_CODES.UNAPPROVED_HASH)
+  return extractGuardErrorCode(error) !== undefined
 }
 
 /**

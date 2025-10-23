@@ -3,7 +3,7 @@ import { Link, Typography, SvgIcon, AlertTitle } from '@mui/material'
 import classNames from 'classnames'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
-import { isGuardError } from '@/utils/transaction-errors'
+import { getGuardErrorInfo } from '@/utils/transaction-errors'
 import { getBlockExplorerLink } from '@/utils/chains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -32,9 +32,9 @@ const ErrorMessage = ({
   const chain = useCurrentChain()
 
   // Check if this is a Guard error that should get special treatment
-  const isGuardErrorResult = error && context && isGuardError(error)
+  const guardErrorName = error && context ? getGuardErrorInfo(error) : undefined
   const guardExplorerLink =
-    isGuardErrorResult && safe.guard && chain ? getBlockExplorerLink(chain, safe.guard.value) : undefined
+    guardErrorName && safe.guard && chain ? getBlockExplorerLink(chain, safe.guard.value) : undefined
 
   const onDetailsToggle = (e: SyntheticEvent) => {
     e.preventDefault()
@@ -67,16 +67,16 @@ const ErrorMessage = ({
             )}
             {children}
 
-            {isGuardErrorResult && (
+            {guardErrorName && (
               <Typography variant="body2" component="div" sx={{ mt: 1 }}>
                 <strong>
                   {guardExplorerLink ? (
                     <>
-                      <ExternalLink href={guardExplorerLink.href}>Guard</ExternalLink> reverted the transaction
-                      (UnapprovedHash)
+                      <ExternalLink href={guardExplorerLink.href}>Guard</ExternalLink> reverted the transaction (
+                      {guardErrorName})
                     </>
                   ) : (
-                    <>Guard reverted the transaction (UnapprovedHash)</>
+                    <>Guard reverted the transaction ({guardErrorName})</>
                   )}
                 </strong>
               </Typography>
@@ -88,7 +88,7 @@ const ErrorMessage = ({
                 onClick={onDetailsToggle}
                 sx={{
                   display: 'block',
-                  mt: isGuardErrorResult ? 0.5 : 0,
+                  mt: guardErrorName ? 0.5 : 0,
                 }}
               >
                 Details
