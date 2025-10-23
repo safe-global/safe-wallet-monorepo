@@ -38,7 +38,7 @@ export const mapVisibleAnalysisResults = (
 }
 
 export const isAddressChange = (result: AnalysisResult<AnyStatus>): result is MasterCopyChangeThreatAnalysisResult => {
-  return result.type === ThreatStatus.MASTER_COPY_CHANGE
+  return result.type === ThreatStatus.MASTERCOPY_CHANGE
 }
 
 export const isThreatAnalysisResult = (result: any): result is ThreatAnalysisResult => {

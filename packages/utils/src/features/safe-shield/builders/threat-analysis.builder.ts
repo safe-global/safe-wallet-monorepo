@@ -43,7 +43,7 @@ export class ThreatAnalysisBuilder {
       | AnalysisResult<CommonSharedStatus.FAILED>
       | AnalysisResult<ThreatStatus.OWNERSHIP_CHANGE>
       | AnalysisResult<ThreatStatus.MODULE_CHANGE>
-      | AnalysisResult<ThreatStatus.MASTER_COPY_CHANGE>,
+      | AnalysisResult<ThreatStatus.MASTERCOPY_CHANGE>,
   ) {
     this.threatAnalysis.THREAT = [threat]
     return this

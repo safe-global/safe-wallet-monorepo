@@ -42,7 +42,7 @@ export type StatusGroupType<T extends StatusGroup> = {
     | ThreatStatus.MODERATE
     | ThreatStatus.NO_THREAT
     | CommonSharedStatus.FAILED
-    | ThreatStatus.MASTER_COPY_CHANGE
+    | ThreatStatus.MASTERCOPY_CHANGE
     | ThreatStatus.OWNERSHIP_CHANGE
     | ThreatStatus.MODULE_CHANGE
     | ThreatStatus.UNOFFICIAL_FALLBACK_HANDLER
@@ -77,7 +77,7 @@ export enum ThreatStatus {
   MALICIOUS = 'MALICIOUS', // 9A
   MODERATE = 'MODERATE', // 9B
   NO_THREAT = 'NO_THREAT', // 9C
-  MASTER_COPY_CHANGE = 'MASTER_COPY_CHANGE', // 9E
+  MASTERCOPY_CHANGE = 'MASTERCOPY_CHANGE', // 9E
   OWNERSHIP_CHANGE = 'OWNERSHIP_CHANGE', // 9F
   MODULE_CHANGE = 'MODULE_CHANGE', // 9G
   UNOFFICIAL_FALLBACK_HANDLER = 'UNOFFICIAL_FALLBACK_HANDLER', // 9H
@@ -97,7 +97,7 @@ export type AnalysisResult<T extends AnyStatus> = {
   addresses?: string[]
 }
 
-export type MasterCopyChangeThreatAnalysisResult = AnalysisResult<ThreatStatus.MASTER_COPY_CHANGE> & {
+export type MasterCopyChangeThreatAnalysisResult = AnalysisResult<ThreatStatus.MASTERCOPY_CHANGE> & {
   /** Address of the old master copy/implementation contract */
   before: string
   /** Address of the new master copy/implementation contract */

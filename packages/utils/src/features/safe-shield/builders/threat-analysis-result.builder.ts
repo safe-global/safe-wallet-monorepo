@@ -124,10 +124,10 @@ export class ThreatAnalysisResultBuilder<T extends ThreatStatus | CommonSharedSt
       .description('Verify this change before proceeding as it will change Safe modules.')
   }
 
-  static masterCopyChange(): ThreatAnalysisResultBuilder<ThreatStatus.MASTER_COPY_CHANGE> {
-    return new ThreatAnalysisResultBuilder<ThreatStatus.MASTER_COPY_CHANGE>()
+  static masterCopyChange(): ThreatAnalysisResultBuilder<ThreatStatus.MASTERCOPY_CHANGE> {
+    return new ThreatAnalysisResultBuilder<ThreatStatus.MASTERCOPY_CHANGE>()
       .title('Mastercopy change')
-      .type(ThreatStatus.MASTER_COPY_CHANGE)
+      .type(ThreatStatus.MASTERCOPY_CHANGE)
       .severity(Severity.WARN)
       .description('Verify this change as it may overwrite account ownership.')
       .changes('0x1234567890123456789012345678901234567890', '0x1234567890123456789012345678901234567891')
