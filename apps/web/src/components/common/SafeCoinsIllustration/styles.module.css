@@ -1,0 +1,123 @@
+.container {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.coin {
+  position: absolute;
+  transform: translateX(-50%);
+  transform-origin: center;
+  opacity: 0.6;
+  z-index: 1;
+}
+
+.coinLeft {
+  left: calc(50% - 17.662px);
+  top: 2.52px;
+  rotate: 5.34deg;
+}
+
+.coinRight {
+  left: calc(50% + 18.406px);
+  top: 2.52px;
+  rotate: 354.66deg;
+}
+
+.coinCenter {
+  position: absolute;
+  left: calc(50% + 0.164px);
+  top: 0;
+  transform: translateX(-50%);
+  z-index: 2;
+  opacity: 1;
+}
+
+.coinImage {
+  display: block;
+}
+
+.dollarOverlay {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 23.646px;
+  height: 23.646px;
+  border-radius: 26.273px;
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 0.657px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.1;
+}
+
+.dollarOverlayRight {
+  border: none;
+}
+
+.dollarSign {
+  font-family: 'Citerne', sans-serif;
+  font-size: 15.764px;
+  color: #12ff80;
+  line-height: 1.2;
+}
+
+.cornerDot {
+  position: absolute;
+  width: 5.255px;
+  height: 5.255px;
+  border-radius: 26.273px;
+}
+
+.cornerDotTopLeft {
+  left: -1.97px;
+  top: -1.97px;
+  background-color: transparent;
+}
+
+.cornerDotTopRight {
+  left: 29.89px;
+  top: -1.97px;
+  width: 5.255px;
+  height: 5.255px;
+  border-radius: 26.273px;
+}
+
+.cornerDotTopRightLeft {
+  background-color: #303030;
+}
+
+.cornerDotTopRightRight {
+  background-color: transparent;
+}
+
+.safeLogoOverlay {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 1000px;
+  overflow: hidden;
+}
+
+.safeTokenImage {
+  position: absolute;
+  inset: 0;
+}
+
+.safeLogoContainer {
+  position: absolute;
+  inset: 15.56%;
+}
+
+.safeLogoImage {
+  width: 100%;
+  height: 100%;
+}

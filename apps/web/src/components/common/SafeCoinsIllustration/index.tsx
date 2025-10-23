@@ -1,242 +1,81 @@
 import { Box } from '@mui/material'
 import Image from 'next/image'
+import styles from './styles.module.css'
 
 const SafeCoinsIllustration = () => {
   return (
-    <Box
-      sx={{
-        position: 'relative',
-        width: '76px',
-        height: '76px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
+    <Box className={styles.container}>
       {/* Left coin (rotated 5.34deg) */}
-      <Box
-        sx={{
-          position: 'absolute',
-          left: 'calc(50% - 17.662px)',
-          top: '2.52px',
-          transform: 'translateX(-50%)',
-          transformOrigin: 'center',
-          rotate: '5.34deg',
-          opacity: 0.6,
-          zIndex: 1,
-        }}
-      >
+      <Box className={`${styles.coin} ${styles.coinLeft}`}>
         <Image
           src="/images/common/no-fee-november/coin-left.svg"
           alt="SAFE coin"
           width={33}
           height={55}
-          style={{ display: 'block' }}
+          className={styles.coinImage}
         />
         {/* Dollar sign overlay */}
-        <Box
-          sx={{
-            position: 'absolute',
-            left: '50%',
-            top: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '23.646px',
-            height: '23.646px',
-            borderRadius: '26.273px',
-            backgroundColor: 'rgba(255,255,255,0.06)',
-            border: '0.657px solid white',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: 0.1,
-          }}
-        >
-          <Box
-            component="span"
-            sx={{
-              fontFamily: 'Citerne, sans-serif',
-              fontSize: '15.764px',
-              color: '#12ff80',
-              lineHeight: 1.2,
-            }}
-          >
+        <Box className={styles.dollarOverlay}>
+          <Box component="span" className={styles.dollarSign}>
             $
           </Box>
         </Box>
         {/* Corner dots */}
-        <Box
-          sx={{
-            position: 'absolute',
-            left: '-1.97px',
-            top: '-1.97px',
-            width: '5.255px',
-            height: '5.255px',
-            borderRadius: '26.273px',
-            backgroundColor: 'transparent',
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute',
-            left: '29.89px',
-            top: '-1.97px',
-            width: '5.255px',
-            height: '5.255px',
-            borderRadius: '26.273px',
-            backgroundColor: '#303030',
-          }}
-        />
+        <Box className={`${styles.cornerDot} ${styles.cornerDotTopLeft}`} />
+        <Box className={`${styles.cornerDot} ${styles.cornerDotTopRight} ${styles.cornerDotTopRightLeft}`} />
       </Box>
 
       {/* Right coin (rotated 354.66deg) */}
-      <Box
-        sx={{
-          position: 'absolute',
-          left: 'calc(50% + 18.406px)',
-          top: '2.52px',
-          transform: 'translateX(-50%)',
-          transformOrigin: 'center',
-          rotate: '354.66deg',
-          opacity: 0.6,
-          zIndex: 1,
-        }}
-      >
+      <Box className={`${styles.coin} ${styles.coinRight}`}>
         <Image
           src="/images/common/no-fee-november/coin-right.svg"
           alt="SAFE coin"
           width={33}
           height={55}
-          style={{ display: 'block' }}
+          className={styles.coinImage}
         />
         {/* Dollar sign overlay */}
-        <Box
-          sx={{
-            position: 'absolute',
-            left: '50%',
-            top: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '23.646px',
-            height: '23.646px',
-            borderRadius: '26.273px',
-            backgroundColor: 'rgba(255,255,255,0.06)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: 0.1,
-          }}
-        >
-          <Box
-            component="span"
-            sx={{
-              fontFamily: 'Citerne, sans-serif',
-              fontSize: '15.764px',
-              color: '#12ff80',
-              lineHeight: 1.2,
-            }}
-          >
+        <Box className={`${styles.dollarOverlay} ${styles.dollarOverlayRight}`}>
+          <Box component="span" className={styles.dollarSign}>
             $
           </Box>
         </Box>
         {/* Corner dots */}
-        <Box
-          sx={{
-            position: 'absolute',
-            left: '-1.97px',
-            top: '-1.97px',
-            width: '5.255px',
-            height: '5.255px',
-            borderRadius: '26.273px',
-            backgroundColor: 'transparent',
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute',
-            left: '29.89px',
-            top: '-1.97px',
-            width: '5.255px',
-            height: '5.255px',
-            borderRadius: '26.273px',
-            backgroundColor: 'transparent',
-          }}
-        />
+        <Box className={`${styles.cornerDot} ${styles.cornerDotTopLeft}`} />
+        <Box className={`${styles.cornerDot} ${styles.cornerDotTopRight} ${styles.cornerDotTopRightRight}`} />
       </Box>
 
       {/* Center coin (no rotation) */}
-      <Box
-        sx={{
-          position: 'absolute',
-          left: 'calc(50% + 0.164px)',
-          top: 0,
-          transform: 'translateX(-50%)',
-          zIndex: 2,
-        }}
-      >
+      <Box className={styles.coinCenter}>
         <Image
           src="/images/common/no-fee-november/coin-center.svg"
           alt="SAFE coin"
           width={33}
           height={55}
-          style={{ display: 'block' }}
+          className={styles.coinImage}
         />
         {/* Safe logo overlay */}
-        <Box
-          sx={{
-            position: 'absolute',
-            left: '50%',
-            top: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '20px',
-            height: '20px',
-            borderRadius: '1000px',
-            overflow: 'hidden',
-          }}
-        >
+        <Box className={styles.safeLogoOverlay}>
           <Image
             src="/images/common/no-fee-november/safe-token.png"
             alt="SAFE token"
             width={20}
             height={20}
-            style={{ position: 'absolute', inset: 0 }}
+            className={styles.safeTokenImage}
           />
-          <Box
-            sx={{
-              position: 'absolute',
-              inset: '15.56%',
-            }}
-          >
+          <Box className={styles.safeLogoContainer}>
             <Image
               src="/images/common/no-fee-november/safe-logo.svg"
               alt="Safe logo"
               width={14}
               height={14}
-              style={{ width: '100%', height: '100%' }}
+              className={styles.safeLogoImage}
             />
           </Box>
         </Box>
         {/* Corner dots */}
-        <Box
-          sx={{
-            position: 'absolute',
-            left: '-1.97px',
-            top: '-1.97px',
-            width: '5.255px',
-            height: '5.255px',
-            borderRadius: '26.273px',
-            backgroundColor: 'transparent',
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute',
-            left: '29.89px',
-            top: '-1.97px',
-            width: '5.255px',
-            height: '5.255px',
-            borderRadius: '26.273px',
-            backgroundColor: 'transparent',
-          }}
-        />
+        <Box className={`${styles.cornerDot} ${styles.cornerDotTopLeft}`} />
+        <Box className={`${styles.cornerDot} ${styles.cornerDotTopRight} ${styles.cornerDotTopRightRight}`} />
       </Box>
     </Box>
   )
