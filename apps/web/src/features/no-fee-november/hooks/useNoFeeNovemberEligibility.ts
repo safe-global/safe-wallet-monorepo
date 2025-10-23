@@ -12,11 +12,15 @@ import useSafeInfo from '@/hooks/useSafeInfo'
  */
 const useNoFeeNovemberEligibility = (): {
   isEligible: boolean | undefined
+  remaining: number | undefined
+  limit: number | undefined
   isLoading: boolean
   error: Error | undefined
 } => {
   const { safeAddress } = useSafeInfo()
   const [isEligible, setIsEligible] = useState<boolean | undefined>(undefined)
+  const [remaining, setRemaining] = useState<number | undefined>(undefined)
+  const [limit, setLimit] = useState<number | undefined>(undefined)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | undefined>(undefined)
 
@@ -35,9 +39,11 @@ const useNoFeeNovemberEligibility = (): {
         // const data = await response.json()
 
         // Mock data - randomly determine eligibility for demo purposes
-        const mockEligible = Math.random() > 0.5
+        const mockEligible = true
 
         setIsEligible(mockEligible)
+        setRemaining(5)  // mock value
+        setLimit(5)      // mock value
         setIsLoading(false)
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Failed to check eligibility'))
@@ -50,11 +56,15 @@ const useNoFeeNovemberEligibility = (): {
     } else {
       setIsLoading(false)
       setIsEligible(undefined)
+      setRemaining(undefined)
+      setLimit(undefined)
     }
   }, [safeAddress])
 
   return {
     isEligible,
+    remaining,
+    limit,
     isLoading,
     error,
   }

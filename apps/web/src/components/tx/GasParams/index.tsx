@@ -32,6 +32,11 @@ type GasParamsProps = {
   onEdit?: () => void
   gasLimitError?: Error
   willRelay?: boolean
+  noFeeNovember?: {
+    isEligible: boolean
+    remaining: number
+    limit: number
+  }
 }
 
 export const _GasParams = ({
@@ -41,6 +46,7 @@ export const _GasParams = ({
   onEdit,
   gasLimitError,
   willRelay,
+  noFeeNovember,
   chain,
 }: GasParamsProps & { chain?: Chain }): ReactElement => {
   const { nonce, userNonce, safeTxGas, gasLimit, maxFeePerGas, maxPriorityFeePerGas } = params
@@ -116,7 +122,18 @@ export const _GasParams = ({
               ) : isLoading ? (
                 <Skeleton variant="text" sx={{ display: 'inline-block', minWidth: '7em' }} />
               ) : (
-                <span>{willRelay ? 'Free' : `${totalFee} ${chain?.nativeCurrency.symbol}`}</span>
+                <div className={css.feeContainer}>
+                  {noFeeNovember?.isEligible ? (
+                    <>
+                      <span className={css.feeAmount}>Free</span>
+                      <span className={css.strikethrough}>≈{totalFee} {chain?.nativeCurrency.symbol}</span>
+                      <span className={css.noFeeTag}>No fee November</span>
+                      <span className={css.remainingCounter}>{noFeeNovember.remaining}/{noFeeNovember.limit} left</span>
+                    </>
+                  ) : (
+                    <span>{willRelay ? 'Free' : `${totalFee} ${chain?.nativeCurrency.symbol}`}</span>
+                  )}
+                </div>
               )}
             </Typography>
           ) : (
