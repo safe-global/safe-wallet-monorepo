@@ -2,9 +2,13 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from '
 import { useCounterpartyAnalysis, useRecipientAnalysis } from './hooks'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { ContractAnalysisResults, RecipientAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
+import type { SafeTransaction } from '@safe-global/types-kit'
+import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 
 type SafeShieldContextType = {
   setRecipientAddresses: (addresses: string[]) => void
+  setSafeTx: (safeTx: SafeTransaction) => void
+  safeTx?: SafeTransaction
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
 }
@@ -12,16 +16,20 @@ type SafeShieldContextType = {
 const SafeShieldContext = createContext<SafeShieldContextType | null>(null)
 
 export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
+  const safeTxContext = useContext(SafeTxContext)
   const [recipientAddresses, setRecipientAddresses] = useState<string[] | undefined>(undefined)
+  const [safeTx, setSafeTx] = useState<SafeTransaction | undefined>(undefined)
 
   const recipientOnlyAnalysis = useRecipientAnalysis(recipientAddresses)
-  const counterpartyAnalysis = useCounterpartyAnalysis()
+  const counterpartyAnalysis = useCounterpartyAnalysis(safeTx)
 
   const recipient = recipientOnlyAnalysis || counterpartyAnalysis.recipient
   const contract = counterpartyAnalysis.contract
 
   return (
-    <SafeShieldContext.Provider value={{ setRecipientAddresses, recipient, contract }}>
+    <SafeShieldContext.Provider
+      value={{ setRecipientAddresses, setSafeTx, safeTx: safeTx || safeTxContext.safeTx, recipient, contract }}
+    >
       {children}
     </SafeShieldContext.Provider>
   )
@@ -47,4 +55,18 @@ export const useSafeShieldForRecipients = (recipientAddresses: string[]) => {
   }, [recipientAddresses, setRecipientAddresses])
 
   return recipient
+}
+
+/**
+ * Hook to register transaction data for Safe Shield analysis
+ * @param txData - Transaction data to analyze
+ */
+export const useSafeShieldForTxData = (txData: SafeTransaction | undefined) => {
+  const { setSafeTx } = useSafeShield()
+
+  useEffect(() => {
+    if (txData) {
+      setSafeTx(txData)
+    }
+  }, [txData, setSafeTx])
 }
