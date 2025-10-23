@@ -111,7 +111,7 @@ export const _GasParams = ({
                     fontSize="small"
                     sx={{ color: 'var(--color-error-main)', mr: 'var(--space-1)' }}
                   />
-                  <span style={{ fontWeight: 'normal' }}>Cannot Estimate</span>
+                  <span style={{ fontWeight: 'normal' }}>Cannot estimate</span>
                 </>
               ) : isLoading ? (
                 <Skeleton variant="text" sx={{ display: 'inline-block', minWidth: '7em' }} />

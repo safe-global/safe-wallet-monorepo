@@ -39,7 +39,9 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
     <>
       {submitError && (
         <Box mt={1}>
-          <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
+          <ErrorMessage error={submitError} context="execution">
+            Error submitting the transaction. Please try again.
+          </ErrorMessage>
         </Box>
       )}
 
