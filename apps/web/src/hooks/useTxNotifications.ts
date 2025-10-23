@@ -15,7 +15,6 @@ import { isWalletRejection } from '@/utils/wallets'
 import { getTxLink } from '@/utils/tx-link'
 import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-import { isUnapprovedHashError } from '@/utils/transaction-errors'
 
 const TxNotifications = {
   [TxEvent.SIGN_FAILED]: 'Failed to sign. Please try again.',
@@ -32,7 +31,7 @@ const TxNotifications = {
   [TxEvent.PROCESSED]: 'Successfully validated. Indexing...',
   [TxEvent.REVERTED]: 'Reverted. Please check your gas settings.',
   [TxEvent.SUCCESS]: 'Successfully executed.',
-  [TxEvent.FAILED]: 'Execution failed.',
+  [TxEvent.FAILED]: 'Failed.',
 }
 
 enum Variant {
@@ -63,16 +62,7 @@ const useTxNotifications = (): void => {
         const isError = 'error' in detail
         if (isError && isWalletRejection(detail.error)) return
         const isSuccess = successEvents.includes(event)
-
-        // Check if this is a Guard error
-        const isGuardError = isError && isUnapprovedHashError(detail.error)
-        let message = isError ? `${baseMessage} ${formatError(detail.error)}` : baseMessage
-
-        // Override message for Guard errors
-        if (isGuardError) {
-          message = 'Guard reverted the transaction (UnapprovedHash).'
-        }
-
+        const message = isError ? `${baseMessage} ${formatError(detail.error)}` : baseMessage
         const txId = 'txId' in detail ? detail.txId : undefined
         const txHash = 'txHash' in detail ? detail.txHash : undefined
         const groupKey = 'groupKey' in detail && detail.groupKey ? detail.groupKey : txId || ''
@@ -96,8 +86,8 @@ const useTxNotifications = (): void => {
             link: txId
               ? getTxLink(txId, chain, safeAddress)
               : txHash
-              ? getExplorerLink(txHash, chain.blockExplorerUriTemplate)
-              : undefined,
+                ? getExplorerLink(txHash, chain.blockExplorerUriTemplate)
+                : undefined,
           }),
         )
       }),

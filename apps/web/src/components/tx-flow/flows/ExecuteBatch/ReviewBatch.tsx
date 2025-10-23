@@ -201,15 +201,13 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
         </Alert>
 
         {error && (
-          <ErrorMessage error={asError(error)} context="estimation">
+          <ErrorMessage error={asError(error)}>
             This transaction will most likely fail. To save gas costs, avoid creating the transaction.
           </ErrorMessage>
         )}
 
         {submitError && (
-          <ErrorMessage error={submitError} context="execution">
-            Error submitting the transaction. Please try again.
-          </ErrorMessage>
+          <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
         )}
 
         {isRejectedByUser && <WalletRejectionError />}

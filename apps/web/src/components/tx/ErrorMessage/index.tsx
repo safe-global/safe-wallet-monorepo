@@ -3,11 +3,6 @@ import { Link, Typography, SvgIcon, AlertTitle } from '@mui/material'
 import classNames from 'classnames'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
-import { isUnapprovedHashError } from '@/utils/transaction-errors'
-import { getBlockExplorerLink } from '@/utils/chains'
-import useSafeInfo from '@/hooks/useSafeInfo'
-import { useCurrentChain } from '@/hooks/useChains'
-import ExternalLink from '@/components/common/ExternalLink'
 import css from './styles.module.css'
 
 const ETHERS_PREFIX = 'could not coalesce error'
@@ -18,23 +13,14 @@ const ErrorMessage = ({
   className,
   level = 'error',
   title,
-  context,
 }: {
   children: ReactNode
-  error?: Error & { reason?: string; data?: string }
+  error?: Error & { reason?: string }
   className?: string
   level?: 'error' | 'warning' | 'info'
   title?: string
-  context?: 'estimation' | 'execution'
 }): ReactElement => {
   const [showDetails, setShowDetails] = useState<boolean>(false)
-  const { safe } = useSafeInfo()
-  const chain = useCurrentChain()
-
-  // Check if this is a Guard error that should get special treatment
-  const isGuardError = error && context && isUnapprovedHashError(error)
-  const guardExplorerLink =
-    isGuardError && safe.guard && chain ? getBlockExplorerLink(chain, safe.guard.value) : undefined
 
   const onDetailsToggle = (e: SyntheticEvent) => {
     e.preventDefault()
@@ -67,28 +53,12 @@ const ErrorMessage = ({
             )}
             {children}
 
-            {isGuardError && (
-              <Typography variant="body2" component="div" sx={{ mt: 1 }}>
-                <strong>
-                  {guardExplorerLink ? (
-                    <>
-                      <ExternalLink href={guardExplorerLink.href}>Guard</ExternalLink> reverted the transaction
-                      (UnapprovedHash)
-                    </>
-                  ) : (
-                    <>Guard reverted the transaction (UnapprovedHash)</>
-                  )}
-                </strong>
-              </Typography>
-            )}
-
             {error && (
               <Link
                 component="button"
                 onClick={onDetailsToggle}
                 sx={{
                   display: 'block',
-                  mt: isGuardError ? 0.5 : 0,
                 }}
               >
                 Details
