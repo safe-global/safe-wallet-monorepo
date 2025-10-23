@@ -25,15 +25,6 @@ export const isGuardError = (error: Error): boolean => {
 }
 
 /**
- * Detects if an error is specifically the UnapprovedHash Guard error
- * @param error - The error to check
- * @returns true if the error is UnapprovedHash
- */
-export const isUnapprovedHashError = (error: Error): boolean => {
-  return isGuardError(error)
-}
-
-/**
  * Gets a human-readable error name from a Guard error code
  * @param errorCode - The error code (e.g., '0x70cc6907')
  * @returns Human-readable error name

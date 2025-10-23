@@ -15,7 +15,7 @@ import { isWalletRejection } from '@/utils/wallets'
 import { getTxLink } from '@/utils/tx-link'
 import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-import { isUnapprovedHashError } from '@/utils/transaction-errors'
+import { isGuardError } from '@/utils/transaction-errors'
 
 const TxNotifications = {
   [TxEvent.SIGN_FAILED]: 'Failed to sign. Please try again.',
@@ -65,11 +65,11 @@ const useTxNotifications = (): void => {
         const isSuccess = successEvents.includes(event)
 
         // Check if this is a Guard error
-        const isGuardError = isError && isUnapprovedHashError(detail.error)
+        const isGuardErrorResult = isError && isGuardError(detail.error)
         let message = isError ? `${baseMessage} ${formatError(detail.error)}` : baseMessage
 
         // Override message for Guard errors
-        if (isGuardError) {
+        if (isGuardErrorResult) {
           message = 'Guard reverted the transaction (UnapprovedHash).'
         }
 
@@ -96,8 +96,8 @@ const useTxNotifications = (): void => {
             link: txId
               ? getTxLink(txId, chain, safeAddress)
               : txHash
-              ? getExplorerLink(txHash, chain.blockExplorerUriTemplate)
-              : undefined,
+                ? getExplorerLink(txHash, chain.blockExplorerUriTemplate)
+                : undefined,
           }),
         )
       }),

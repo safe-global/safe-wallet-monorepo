@@ -1,4 +1,4 @@
-import { isUnapprovedHashError, isGuardError, getGuardErrorName, GUARD_ERROR_CODES } from '../transaction-errors'
+import { isGuardError, getGuardErrorName, GUARD_ERROR_CODES } from '../transaction-errors'
 
 describe('transaction-errors', () => {
   describe('isGuardError', () => {
@@ -21,18 +21,6 @@ describe('transaction-errors', () => {
     it('should return false for null/undefined', () => {
       expect(isGuardError(null as any)).toBe(false)
       expect(isGuardError(undefined as any)).toBe(false)
-    })
-  })
-
-  describe('isUnapprovedHashError', () => {
-    it('should detect UnapprovedHash error', () => {
-      const error = new Error(`Reverted with ${GUARD_ERROR_CODES.UNAPPROVED_HASH}`)
-      expect(isUnapprovedHashError(error)).toBe(true)
-    })
-
-    it('should return false for non-UnapprovedHash errors', () => {
-      const error = new Error('Some other error')
-      expect(isUnapprovedHashError(error)).toBe(false)
     })
   })
 

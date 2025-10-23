@@ -19,9 +19,7 @@ import { UseSimulationReturn } from './useSimulation'
 
 const TENDERLY_DASHBOARD_URL = 'https://dashboard.tenderly.co'
 
-const getTenderlyProjectFromUrl = (
-  tenderlyUrl?: string,
-): { org: string; project: string } | undefined => {
+const getTenderlyProjectFromUrl = (tenderlyUrl?: string): { org: string; project: string } | undefined => {
   if (!tenderlyUrl) {
     return
   }
@@ -61,10 +59,7 @@ const getTenderlyProjectFromUrl = (
   }
 }
 
-export const getSimulationLink = (
-  simulationId: string,
-  customTenderly?: EnvState['tenderly'],
-): string => {
+export const getSimulationLink = (simulationId: string, customTenderly?: EnvState['tenderly']): string => {
   const parsedTenderly = getTenderlyProjectFromUrl(customTenderly?.url)
 
   if (parsedTenderly) {

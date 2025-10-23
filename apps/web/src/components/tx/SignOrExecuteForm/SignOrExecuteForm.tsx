@@ -221,8 +221,8 @@ export const SignOrExecuteForm = ({
             isProposing
               ? ConfirmationTitleTypes.propose
               : willExecute
-              ? ConfirmationTitleTypes.execute
-              : ConfirmationTitleTypes.sign
+                ? ConfirmationTitleTypes.execute
+                : ConfirmationTitleTypes.sign
           }
           isCreation={isCreation}
         />
