@@ -221,14 +221,14 @@ export const SignOrExecuteForm = ({
             isProposing
               ? ConfirmationTitleTypes.propose
               : willExecute
-                ? ConfirmationTitleTypes.execute
-                : ConfirmationTitleTypes.sign
+              ? ConfirmationTitleTypes.execute
+              : ConfirmationTitleTypes.sign
           }
           isCreation={isCreation}
         />
 
         {safeTxError && (
-          <ErrorMessage error={safeTxError}>
+          <ErrorMessage error={safeTxError} context="estimation">
             This transaction will most likely fail. To save gas costs, avoid confirming the transaction.
           </ErrorMessage>
         )}
