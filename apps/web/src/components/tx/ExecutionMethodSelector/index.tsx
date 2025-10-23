@@ -17,6 +17,7 @@ import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 export const enum ExecutionMethod {
   RELAY = 'RELAY',
   WALLET = 'WALLET',
+  NO_FEE_NOVEMBER = 'NO_FEE_NOVEMBER',
 }
 
 const _ExecutionMethodSelector = ({
@@ -27,6 +28,7 @@ const _ExecutionMethodSelector = ({
   relays,
   noLabel,
   tooltip,
+  noFeeNovember,
 }: {
   wallet: ConnectedWallet | null
   chain?: Chain
@@ -35,8 +37,13 @@ const _ExecutionMethodSelector = ({
   relays?: RelayCountResponse
   noLabel?: boolean
   tooltip?: string
+  noFeeNovember?: {
+    isEligible: boolean
+    remaining: number
+    limit: number
+  }
 }): ReactElement | null => {
-  const shouldRelay = executionMethod === ExecutionMethod.RELAY
+  const shouldRelay = executionMethod === ExecutionMethod.RELAY || executionMethod === ExecutionMethod.NO_FEE_NOVEMBER
 
   const onChooseExecutionMethod = (_: ChangeEvent<HTMLInputElement>, newExecutionMethod: string) => {
     setExecutionMethod(newExecutionMethod as ExecutionMethod)
@@ -52,16 +59,30 @@ const _ExecutionMethodSelector = ({
             </Typography>
           ) : null}
 
-          <RadioGroup row value={executionMethod} onChange={onChooseExecutionMethod}>
+          <RadioGroup row value={executionMethod} onChange={onChooseExecutionMethod} className={css.radioGroup}>
             <FormControlLabel
               data-testid="relay-execution-method"
               sx={{ flex: 1 }}
-              value={ExecutionMethod.RELAY}
+              value={noFeeNovember?.isEligible ? ExecutionMethod.NO_FEE_NOVEMBER : ExecutionMethod.RELAY}
               label={
-                <Typography className={css.radioLabel} whiteSpace="nowrap">
-                  Sponsored by
-                  <SponsoredBy chainId={chain?.chainId ?? ''} />
-                </Typography>
+                noFeeNovember?.isEligible ? (
+                  <div className={css.noFeeNovemberLabel}>
+                    <Typography className={css.mainLabel}>
+                      Sponsored gas
+                    </Typography>
+                    <div className={css.subLabel}>
+                      <Typography variant="body2" color="text.secondary">
+                        Part of
+                      </Typography>
+                      <span className={css.noFeeTag}>No fee November</span>
+                    </div>
+                  </div>
+                ) : (
+                  <Typography className={css.radioLabel} whiteSpace="nowrap">
+                    Sponsored by
+                    <SponsoredBy chainId={chain?.chainId ?? ''} />
+                  </Typography>
+                )
               }
               control={<Radio />}
             />
@@ -82,7 +103,15 @@ const _ExecutionMethodSelector = ({
         </FormControl>
       </div>
 
-      {shouldRelay && relays ? <RemainingRelays relays={relays} tooltip={tooltip} /> : wallet ? <BalanceInfo /> : null}
+      {shouldRelay && noFeeNovember?.isEligible ? (
+        <Typography variant="body2" className={css.transactionCounter}>
+          <span className={css.counterNumber}>{noFeeNovember.remaining}</span> free transactions left today
+        </Typography>
+      ) : shouldRelay && relays ? (
+        <RemainingRelays relays={relays} tooltip={tooltip} />
+      ) : wallet ? (
+        <BalanceInfo />
+      ) : null}
     </Box>
   )
 }
