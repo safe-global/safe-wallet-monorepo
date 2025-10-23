@@ -767,53 +767,13 @@ exports[`ReviewTransaction should display an error screen 1`] = `
     >
       <div
         class="MuiBox-root css-17luq05"
+        data-testid="error-transaction-preview"
       >
-        <div
-          class="box MuiBox-root css-0"
+        <p
+          class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
         >
-          <div
-            class="rect rectTl"
-          />
-          <div
-            class="rect rectTr"
-          />
-          <div
-            class="rect rectBl"
-          />
-          <div
-            class="rect rectBr"
-          />
-          <div
-            class="rect rectCenter"
-          />
-          <svg
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              <filter
-                id="gooey"
-              >
-                <fegaussianblur
-                  in="SourceGraphic"
-                  result="blur"
-                  stdDeviation="3"
-                />
-                <fecolormatrix
-                  in="blur"
-                  mode="matrix"
-                  result="goo"
-                  values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
-                />
-                <fecomposite
-                  in="SourceGraphic"
-                  in2="goo"
-                  operator="atop"
-                />
-              </filter>
-            </defs>
-          </svg>
-        </div>
+          Error loading preview. Please try again.
+        </p>
       </div>
     </div>
   </div>

@@ -106,8 +106,9 @@ describe('ReviewTransaction', () => {
     )
 
     await waitFor(() => {
-      expect(container.querySelector('continue-sign-btn')).not.toBeInTheDocument()
+      expect(container.querySelector('[data-testid="error-transaction-preview"]')).toBeInTheDocument()
     })
+
     expect(container).toMatchSnapshot()
   })
 })
