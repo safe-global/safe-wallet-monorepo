@@ -6,6 +6,11 @@
   padding: var(--space-2) var(--space-2) var(--space-1) var(--space-2);
 }
 
+.radioGroup {
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
 .label {
   color: var(--color-text-secondary);
 }
@@ -15,4 +20,71 @@
   display: flex;
   align-items: center;
   gap: calc(var(--space-1) / 2);
+}
+
+.noFeeNovemberLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.mainLabel {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 22px;
+  color: #121312;
+  letter-spacing: 0.15px;
+}
+
+.subLabel {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.noFeeTag {
+  background: linear-gradient(90deg, #b0ffc9 0%, #d7f6ff 99.5%);
+  color: #121312;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  letter-spacing: 1px;
+}
+
+.infoIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: #a1a3a7;
+}
+
+.transactionCounter {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #121312;
+  letter-spacing: 0.17px;
+  padding: 8px 12px;
+  background-color: var(--color-background-main);
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  border-top: 1px solid var(--color-border-light);
+  display: flex;
+  gap: 4px;
+}
+
+.counterNumber {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 20px;
+  color: #121312;
 }

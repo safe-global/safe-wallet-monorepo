@@ -15,3 +15,35 @@
 .error :global .MuiAccordionSummary-expandIconWrapper {
   margin-left: var(--space-1);
 }
+
+.feeContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.feeAmount {
+  font-weight: 600;
+}
+
+.strikethrough {
+  text-decoration: line-through;
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+}
+
+.noFeeTag {
+  background: linear-gradient(90deg, #b0ffc9 0%, #d7f6ff 99.5%);
+  color: var(--color-text-primary);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+
+.remainingCounter {
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
