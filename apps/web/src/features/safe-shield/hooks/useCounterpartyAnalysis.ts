@@ -8,8 +8,9 @@ import useOwnedSafes from '@/hooks/useOwnedSafes'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import type { RecipientAnalysisResults, ContractAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import type { SafeTransaction } from '@safe-global/types-kit'
 
-export function useCounterpartyAnalysis(): {
+export function useCounterpartyAnalysis(overrideSafeTx?: SafeTransaction): {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
 } {
@@ -25,7 +26,7 @@ export function useCounterpartyAnalysis(): {
   return useCounterpartyAnalysisUtils({
     safeAddress,
     chainId,
-    safeTx,
+    safeTx: overrideSafeTx || safeTx,
     isInAddressBook: mergedAddressBooks.has,
     ownedSafes,
     web3ReadOnly,
