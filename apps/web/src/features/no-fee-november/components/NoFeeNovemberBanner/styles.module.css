@@ -67,10 +67,12 @@
 
 .bannerTextInteractive {
   pointer-events: auto;
+  margin-top: var(--space-1);
+  margin-bottom: var(--space-1);
 }
 
 .errorText {
-  margin-top: var(--space-1);
+  margin-top: var(--space-2);
   display: block;
 }
 
