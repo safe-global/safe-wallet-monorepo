@@ -39,7 +39,7 @@ const useNoFeeNovemberEligibility = (): {
         // const data = await response.json()
 
         // Mock data - randomly determine eligibility for demo purposes
-        const mockEligible = true
+        const mockEligible = Math.random() > 0.5
 
         setIsEligible(mockEligible)
         setRemaining(5) // mock value

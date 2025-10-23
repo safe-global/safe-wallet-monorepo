@@ -33,6 +33,8 @@ describe('NoFeeNovemberBanner', () => {
   it('should render loading state with skeleton', () => {
     mockUseNoFeeNovemberEligibility.mockReturnValue({
       isEligible: undefined,
+      remaining: undefined,
+      limit: undefined,
       isLoading: true,
       error: undefined,
     })
@@ -49,6 +51,8 @@ describe('NoFeeNovemberBanner', () => {
   it('should render eligible state with new transaction button', () => {
     mockUseNoFeeNovemberEligibility.mockReturnValue({
       isEligible: true,
+      remaining: 5,
+      limit: 5,
       isLoading: false,
       error: undefined,
     })
@@ -69,6 +73,8 @@ describe('NoFeeNovemberBanner', () => {
   it('should render not eligible state with get SAFE button', () => {
     mockUseNoFeeNovemberEligibility.mockReturnValue({
       isEligible: false,
+      remaining: 0,
+      limit: 5,
       isLoading: false,
       error: undefined,
     })
@@ -90,6 +96,8 @@ describe('NoFeeNovemberBanner', () => {
   it('should render error state with error message', () => {
     mockUseNoFeeNovemberEligibility.mockReturnValue({
       isEligible: undefined,
+      remaining: undefined,
+      limit: undefined,
       isLoading: false,
       error: new Error('Failed to check eligibility'),
     })
@@ -110,6 +118,8 @@ describe('NoFeeNovemberBanner', () => {
   it('should call onDismiss when close button is clicked', () => {
     mockUseNoFeeNovemberEligibility.mockReturnValue({
       isEligible: true,
+      remaining: 5,
+      limit: 5,
       isLoading: false,
       error: undefined,
     })
@@ -129,6 +139,8 @@ describe('NoFeeNovemberBanner', () => {
   it('should call setTxFlow when new transaction button is clicked', () => {
     mockUseNoFeeNovemberEligibility.mockReturnValue({
       isEligible: true,
+      remaining: 5,
+      limit: 5,
       isLoading: false,
       error: undefined,
     })
@@ -148,6 +160,8 @@ describe('NoFeeNovemberBanner', () => {
   it('should have correct link for learn more', () => {
     mockUseNoFeeNovemberEligibility.mockReturnValue({
       isEligible: true,
+      remaining: 5,
+      limit: 5,
       isLoading: false,
       error: undefined,
     })
@@ -165,6 +179,8 @@ describe('NoFeeNovemberBanner', () => {
   it('should have correct link for get SAFE token button', () => {
     mockUseNoFeeNovemberEligibility.mockReturnValue({
       isEligible: false,
+      remaining: 0,
+      limit: 5,
       isLoading: false,
       error: undefined,
     })
@@ -183,6 +199,8 @@ describe('NoFeeNovemberBanner', () => {
   it('should pass correct eligibility state to onDismiss', () => {
     mockUseNoFeeNovemberEligibility.mockReturnValue({
       isEligible: false,
+      remaining: 0,
+      limit: 5,
       isLoading: false,
       error: undefined,
     })
@@ -202,6 +220,8 @@ describe('NoFeeNovemberBanner', () => {
   it('should handle undefined eligibility state', () => {
     mockUseNoFeeNovemberEligibility.mockReturnValue({
       isEligible: undefined,
+      remaining: undefined,
+      limit: undefined,
       isLoading: false,
       error: undefined,
     })
