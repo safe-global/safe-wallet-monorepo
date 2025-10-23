@@ -91,7 +91,7 @@ export function useCounterpartyAnalysis({
   // Merge backend recipient results with local checks
   const mergedRecipientResults = useMemo(() => {
     // Only merge different results after all of them are available
-    if (!counterpartyData?.recipient || !addressBookCheck || !activityCheck) {
+    if (!counterpartyData?.recipient || !addressBookCheck || activityCheckLoading) {
       return undefined
     }
 
@@ -100,7 +100,7 @@ export function useCounterpartyAnalysis({
       addressBookCheck,
       activityCheck,
     )
-  }, [counterpartyData?.recipient, addressBookCheck, activityCheck])
+  }, [counterpartyData?.recipient, addressBookCheck, activityCheck, activityCheckLoading])
 
   const fetchError = useMemo(() => {
     if (error) {

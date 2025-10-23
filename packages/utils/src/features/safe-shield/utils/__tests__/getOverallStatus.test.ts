@@ -1,11 +1,9 @@
 import { getOverallStatus } from '../getOverallStatus'
-import { Severity, RecipientStatus, ContractStatus, ThreatStatus, StatusGroup } from '../../types'
-import type {
-  RecipientAnalysisResults,
-  ContractAnalysisResults,
-  ThreatAnalysisResults,
-  ThreatAnalysisResult,
-} from '../../types'
+import { Severity, StatusGroup } from '../../types'
+import type { RecipientAnalysisResults, ContractAnalysisResults, ThreatAnalysisResults } from '../../types'
+import { RecipientAnalysisResultBuilder } from '../../builders/recipient-analysis-result.builder'
+import { ContractAnalysisResultBuilder } from '../../builders/contract-analysis-result.builder'
+import { ThreatAnalysisResultBuilder } from '../../builders/threat-analysis-result.builder'
 
 describe('getOverallStatus', () => {
   describe('undefined cases', () => {
@@ -22,12 +20,7 @@ describe('getOverallStatus', () => {
     it('should return threat result when both recipient and contract results are undefined with threat results', () => {
       const threatResults = {
         '0xThreat1': {
-          [StatusGroup.THREAT]: {
-            type: ThreatStatus.MALICIOUS,
-            severity: Severity.CRITICAL,
-            title: 'Malicious',
-            description: 'Critical threat detected',
-          },
+          [StatusGroup.THREAT]: ThreatAnalysisResultBuilder.malicious().build(),
         },
       } as unknown as ThreatAnalysisResults
       const result = getOverallStatus(undefined, undefined, threatResults)
@@ -41,14 +34,7 @@ describe('getOverallStatus', () => {
     it('should return OK severity for known recipient', () => {
       const recipientResults: RecipientAnalysisResults = {
         '0xRecipient1': {
-          [StatusGroup.ADDRESS_BOOK]: [
-            {
-              type: RecipientStatus.KNOWN_RECIPIENT,
-              severity: Severity.OK,
-              title: 'Known Recipient',
-              description: 'This recipient is in your address book',
-            },
-          ],
+          [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
         },
       }
 
@@ -62,14 +48,7 @@ describe('getOverallStatus', () => {
     it('should return WARN severity for low activity recipient', () => {
       const recipientResults: RecipientAnalysisResults = {
         '0xRecipient1': {
-          [StatusGroup.RECIPIENT_ACTIVITY]: [
-            {
-              type: RecipientStatus.LOW_ACTIVITY,
-              severity: Severity.WARN,
-              title: 'Low Activity',
-              description: 'This recipient has low activity',
-            },
-          ],
+          [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
         },
       }
 
@@ -83,14 +62,7 @@ describe('getOverallStatus', () => {
     it('should return INFO severity for new recipient', () => {
       const recipientResults: RecipientAnalysisResults = {
         '0xRecipient1': {
-          [StatusGroup.RECIPIENT_INTERACTION]: [
-            {
-              type: RecipientStatus.NEW_RECIPIENT,
-              severity: Severity.INFO,
-              title: 'New Recipient',
-              description: 'First interaction with this recipient',
-            },
-          ],
+          [StatusGroup.RECIPIENT_INTERACTION]: [RecipientAnalysisResultBuilder.newRecipient().build()],
         },
       }
 
@@ -104,22 +76,8 @@ describe('getOverallStatus', () => {
     it('should return highest severity when multiple recipient results exist', () => {
       const recipientResults: RecipientAnalysisResults = {
         '0xRecipient1': {
-          [StatusGroup.ADDRESS_BOOK]: [
-            {
-              type: RecipientStatus.KNOWN_RECIPIENT,
-              severity: Severity.OK,
-              title: 'Known Recipient',
-              description: 'In address book',
-            },
-          ],
-          [StatusGroup.RECIPIENT_ACTIVITY]: [
-            {
-              type: RecipientStatus.LOW_ACTIVITY,
-              severity: Severity.WARN,
-              title: 'Low Activity',
-              description: 'Low activity detected',
-            },
-          ],
+          [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
+          [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
         },
       }
 
@@ -135,14 +93,7 @@ describe('getOverallStatus', () => {
     it('should return OK severity for verified contract', () => {
       const contractResults: ContractAnalysisResults = {
         '0xContract1': {
-          [StatusGroup.CONTRACT_VERIFICATION]: [
-            {
-              type: ContractStatus.VERIFIED,
-              severity: Severity.OK,
-              title: 'Verified Contract',
-              description: 'Contract is verified',
-            },
-          ],
+          [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.verified().build()],
         },
       }
 
@@ -153,38 +104,24 @@ describe('getOverallStatus', () => {
       expect(result!.title).toBe('Checks passed')
     })
 
-    it('should return CRITICAL severity for not verified contract', () => {
+    it('should return INFO severity for not verified contract', () => {
       const contractResults: ContractAnalysisResults = {
         '0xContract1': {
-          [StatusGroup.CONTRACT_VERIFICATION]: [
-            {
-              type: ContractStatus.NOT_VERIFIED,
-              severity: Severity.CRITICAL,
-              title: 'Not Verified',
-              description: 'Contract is not verified',
-            },
-          ],
+          [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.unverified().build()],
         },
       }
 
       const result = getOverallStatus(undefined, contractResults)
 
       expect(result).toBeDefined()
-      expect(result!.severity).toBe(Severity.CRITICAL)
-      expect(result!.title).toBe('Risk detected')
+      expect(result!.severity).toBe(Severity.INFO)
+      expect(result!.title).toBe('Review details')
     })
 
-    it('should return WARN severity for new contract', () => {
+    it('should return WARN severity for verification unavailable contract', () => {
       const contractResults: ContractAnalysisResults = {
         '0xContract1': {
-          [StatusGroup.CONTRACT_INTERACTION]: [
-            {
-              type: ContractStatus.NEW_CONTRACT,
-              severity: Severity.WARN,
-              title: 'New Contract',
-              description: 'Contract was recently deployed',
-            },
-          ],
+          [StatusGroup.CONTRACT_INTERACTION]: [ContractAnalysisResultBuilder.verificationUnavailable().build()],
         },
       }
 
@@ -200,71 +137,36 @@ describe('getOverallStatus', () => {
     it('should return highest severity across both recipient and contract results', () => {
       const recipientResults: RecipientAnalysisResults = {
         '0xRecipient1': {
-          [StatusGroup.ADDRESS_BOOK]: [
-            {
-              type: RecipientStatus.KNOWN_RECIPIENT,
-              severity: Severity.OK,
-              title: 'Known Recipient',
-              description: 'In address book',
-            },
-          ],
+          [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
         },
       }
 
       const contractResults: ContractAnalysisResults = {
         '0xContract1': {
-          [StatusGroup.CONTRACT_VERIFICATION]: [
-            {
-              type: ContractStatus.NOT_VERIFIED,
-              severity: Severity.CRITICAL,
-              title: 'Not Verified',
-              description: 'Contract is not verified',
-            },
-          ],
+          [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.unverified().build()],
         },
       }
 
       const result = getOverallStatus(recipientResults, contractResults)
 
       expect(result).toBeDefined()
-      expect(result!.severity).toBe(Severity.CRITICAL)
-      expect(result!.title).toBe('Risk detected')
+      expect(result!.severity).toBe(Severity.INFO)
+      expect(result!.title).toBe('Review details')
     })
 
     it('should handle multiple addresses with mixed severities', () => {
       const recipientResults: RecipientAnalysisResults = {
         '0xRecipient1': {
-          [StatusGroup.ADDRESS_BOOK]: [
-            {
-              type: RecipientStatus.KNOWN_RECIPIENT,
-              severity: Severity.OK,
-              title: 'Known',
-              description: 'Known recipient',
-            },
-          ],
+          [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
         },
         '0xRecipient2': {
-          [StatusGroup.RECIPIENT_ACTIVITY]: [
-            {
-              type: RecipientStatus.LOW_ACTIVITY,
-              severity: Severity.WARN,
-              title: 'Low Activity',
-              description: 'Low activity',
-            },
-          ],
+          [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
         },
       }
 
       const contractResults: ContractAnalysisResults = {
         '0xContract1': {
-          [StatusGroup.CONTRACT_VERIFICATION]: [
-            {
-              type: ContractStatus.VERIFIED,
-              severity: Severity.OK,
-              title: 'Verified',
-              description: 'Verified contract',
-            },
-          ],
+          [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.verified().build()],
         },
       }
 
@@ -280,25 +182,13 @@ describe('getOverallStatus', () => {
     it('should include threat results with CRITICAL severity', () => {
       const recipientResults: RecipientAnalysisResults = {
         '0xRecipient1': {
-          [StatusGroup.ADDRESS_BOOK]: [
-            {
-              type: RecipientStatus.KNOWN_RECIPIENT,
-              severity: Severity.OK,
-              title: 'Known',
-              description: 'Known recipient',
-            },
-          ],
+          [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
         },
       }
 
       const threatResults = {
         '0xThreat1': {
-          [StatusGroup.THREAT]: {
-            type: ThreatStatus.MALICIOUS,
-            severity: Severity.CRITICAL,
-            title: 'Malicious Threat',
-            description: 'Critical threat detected',
-          },
+          [StatusGroup.THREAT]: ThreatAnalysisResultBuilder.malicious().build(),
         },
       } as unknown as ThreatAnalysisResults
 
@@ -312,38 +202,19 @@ describe('getOverallStatus', () => {
     it('should prioritize threat results over other results when severity is higher', () => {
       const recipientResults: RecipientAnalysisResults = {
         '0xRecipient1': {
-          [StatusGroup.RECIPIENT_ACTIVITY]: [
-            {
-              type: RecipientStatus.LOW_ACTIVITY,
-              severity: Severity.WARN,
-              title: 'Low Activity',
-              description: 'Low activity',
-            },
-          ],
+          [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
         },
       }
 
       const contractResults: ContractAnalysisResults = {
         '0xContract1': {
-          [StatusGroup.CONTRACT_VERIFICATION]: [
-            {
-              type: ContractStatus.VERIFIED,
-              severity: Severity.OK,
-              title: 'Verified',
-              description: 'Verified contract',
-            },
-          ],
+          [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.verified().build()],
         },
       }
 
       const threatResults = {
         '0xThreat1': {
-          [StatusGroup.THREAT]: {
-            type: ThreatStatus.MALICIOUS,
-            severity: Severity.CRITICAL,
-            title: 'Critical Threat',
-            description: 'Critical threat detected',
-          },
+          [StatusGroup.THREAT]: ThreatAnalysisResultBuilder.malicious().build(),
         },
       } as unknown as ThreatAnalysisResults
 
@@ -357,25 +228,13 @@ describe('getOverallStatus', () => {
     it('should include INFO threat results in overall calculation', () => {
       const recipientResults: RecipientAnalysisResults = {
         '0xRecipient1': {
-          [StatusGroup.ADDRESS_BOOK]: [
-            {
-              type: RecipientStatus.KNOWN_RECIPIENT,
-              severity: Severity.OK,
-              title: 'Known',
-              description: 'Known recipient',
-            },
-          ],
+          [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.unknownRecipient().build()],
         },
       }
 
       const threatResults = {
         '0xThreat1': {
-          [StatusGroup.THREAT]: {
-            type: ThreatStatus.NO_THREAT,
-            severity: Severity.INFO,
-            title: 'No Threat',
-            description: 'No threat detected',
-          },
+          [StatusGroup.THREAT]: ThreatAnalysisResultBuilder.noThreat().build(),
         },
       } as unknown as ThreatAnalysisResults
 
@@ -391,71 +250,29 @@ describe('getOverallStatus', () => {
     it('should handle multiple recipients and contracts with all severity levels', () => {
       const recipientResults: RecipientAnalysisResults = {
         '0xRecipient1': {
-          [StatusGroup.ADDRESS_BOOK]: [
-            {
-              type: RecipientStatus.KNOWN_RECIPIENT,
-              severity: Severity.OK,
-              title: 'Known',
-              description: 'Known',
-            },
-          ],
-          [StatusGroup.RECIPIENT_ACTIVITY]: [
-            {
-              type: RecipientStatus.HIGH_ACTIVITY,
-              severity: Severity.OK,
-              title: 'High Activity',
-              description: 'High activity',
-            },
-          ],
-          [StatusGroup.RECIPIENT_INTERACTION]: [
-            {
-              type: RecipientStatus.NEW_RECIPIENT,
-              severity: Severity.INFO,
-              title: 'New',
-              description: 'New recipient',
-            },
-          ],
+          [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
+          [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
+          [StatusGroup.RECIPIENT_INTERACTION]: [RecipientAnalysisResultBuilder.newRecipient().build()],
         },
         '0xRecipient2': {
-          [StatusGroup.RECIPIENT_ACTIVITY]: [
-            {
-              type: RecipientStatus.LOW_ACTIVITY,
-              severity: Severity.WARN,
-              title: 'Low Activity',
-              description: 'Low activity',
-            },
-          ],
+          [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
         },
       }
 
       const contractResults: ContractAnalysisResults = {
         '0xContract1': {
-          [StatusGroup.CONTRACT_VERIFICATION]: [
-            {
-              type: ContractStatus.VERIFIED,
-              severity: Severity.OK,
-              title: 'Verified',
-              description: 'Verified',
-            },
-          ],
+          [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.verified().build()],
         },
         '0xContract2': {
-          [StatusGroup.CONTRACT_VERIFICATION]: [
-            {
-              type: ContractStatus.NOT_VERIFIED,
-              severity: Severity.CRITICAL,
-              title: 'Not Verified',
-              description: 'Not verified',
-            },
-          ],
+          [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.unverified().build()],
         },
       }
 
       const result = getOverallStatus(recipientResults, contractResults)
 
       expect(result).toBeDefined()
-      expect(result!.severity).toBe(Severity.CRITICAL)
-      expect(result!.title).toBe('Risk detected')
+      expect(result!.severity).toBe(Severity.WARN)
+      expect(result!.title).toBe('Issues found')
     })
 
     it('should handle empty results objects gracefully', () => {

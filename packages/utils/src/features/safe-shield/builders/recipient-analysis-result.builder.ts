@@ -54,14 +54,6 @@ export class RecipientAnalysisResultBuilder<T extends RecipientStatus | BridgeSt
       .description('This recipient is not in your address book and is not an owned Safe.')
   }
 
-  static highActivity(): RecipientAnalysisResultBuilder<RecipientStatus.HIGH_ACTIVITY> {
-    return new RecipientAnalysisResultBuilder<RecipientStatus.HIGH_ACTIVITY>()
-      .severity(Severity.OK)
-      .type(RecipientStatus.HIGH_ACTIVITY)
-      .title('High activity')
-      .description('This address has many transactions.')
-  }
-
   static lowActivity(): RecipientAnalysisResultBuilder<RecipientStatus.LOW_ACTIVITY> {
     return new RecipientAnalysisResultBuilder<RecipientStatus.LOW_ACTIVITY>()
       .severity(Severity.WARN)
