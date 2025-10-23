@@ -1,9 +1,8 @@
 export { useAddressActivity } from './address-activity/useAddressActivity'
 export { useAddressBookCheck } from './address-book-check/useAddressBookCheck'
 export {
-  analyzeAddressActivity,
-  isLowActivityAddress,
-  type AddressActivityAssessment,
-  type ActivityLevel,
-} from './address-activity/addressActivityService'
-export { ACTIVITY_THRESHOLDS, ActivityMessages, AddressCheckMessages, type AddressCheckType } from './config'
+  ACTIVITY_THRESHOLD_LOW,
+  LowActivityAnalysisResult,
+  AddressCheckMessages,
+  type AddressCheckType,
+} from './config'
