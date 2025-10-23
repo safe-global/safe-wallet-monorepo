@@ -62,11 +62,11 @@ export function useRecipientAnalysis({
   // Merge backend and local checks
   const mergedResults = useMemo(() => {
     // Only merge different results after all of them are available
-    if (!fetchedResults || !addressBookCheck || !activityCheck) {
+    if (!fetchedResults || !addressBookCheck || activityCheckLoading) {
       return undefined
     }
     return mergeAnalysisResults(fetchedResults, addressBookCheck, activityCheck)
-  }, [fetchedResults, addressBookCheck, activityCheck])
+  }, [fetchedResults, addressBookCheck, activityCheck, activityCheckLoading])
 
   if (!recipientsMemo) {
     return undefined
