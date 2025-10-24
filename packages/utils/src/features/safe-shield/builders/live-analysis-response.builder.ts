@@ -1,9 +1,9 @@
 import merge from 'lodash/merge'
-import type { LiveAnalysisResponse, LiveThreatAnalysisResult, ThreatStatus } from '../types'
+import type { LiveAnalysisResponse } from '../types'
 import { ContractAnalysisBuilder } from './contract-analysis.builder'
 import { RecipientAnalysisBuilder } from './recipient-analysis.builder'
-import { ThreatAnalysisResultBuilder } from './threat-analysis-result.builder'
 import { ThreatAnalysisBuilder } from './threat-analysis.builder'
+import { ContractAnalysisResultBuilder } from './contract-analysis-result.builder'
 
 export class LiveAnalysisResponseBuilder {
   private response: LiveAnalysisResponse = {}
@@ -94,5 +94,9 @@ export class LiveAnalysisResponseBuilder {
 
   static knownRecipient(address?: string): LiveAnalysisResponseBuilder {
     return new LiveAnalysisResponseBuilder().recipient(RecipientAnalysisBuilder.knownRecipient(address).build())
+  }
+
+  static failedContract(): LiveAnalysisResponseBuilder {
+    return new LiveAnalysisResponseBuilder().contract(ContractAnalysisBuilder.failedContract().build())
   }
 }
