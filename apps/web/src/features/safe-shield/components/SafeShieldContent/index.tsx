@@ -8,7 +8,6 @@ import type {
 } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
 import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
-import { SafeShieldAnalysisError } from './SafeShieldAnalysisError'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
@@ -52,13 +51,7 @@ export const SafeShieldContent = ({
       <Box
         sx={{ border: '1px solid', borderColor: 'background.main', borderTop: 'none', borderRadius: '0px 0px 6px 6px' }}
       >
-        {error ? (
-          <SafeShieldAnalysisError error={error} />
-        ) : loading ? (
-          <SafeShieldAnalysisLoading />
-        ) : allEmpty ? (
-          <SafeShieldAnalysisEmpty />
-        ) : null}
+        {loading ? <SafeShieldAnalysisLoading /> : allEmpty ? <SafeShieldAnalysisEmpty /> : null}
 
         <Box display={loading || error ? 'none' : 'block'}>
           {recipientResults && <AnalysisGroupCard data={recipientResults} />}

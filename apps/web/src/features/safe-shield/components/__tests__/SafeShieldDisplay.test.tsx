@@ -6,6 +6,12 @@ import {
   ContractAnalysisBuilder,
 } from '@safe-global/utils/features/safe-shield/builders'
 import { faker } from '@faker-js/faker'
+import {
+  CommonSharedStatus,
+  ContractAnalysisResults,
+  Severity,
+  StatusGroup,
+} from '@safe-global/utils/features/safe-shield/types'
 
 describe('SafeShieldDisplay', () => {
   const mockRecipientAddress = faker.finance.ethereumAddress()
@@ -98,12 +104,27 @@ describe('SafeShieldDisplay', () => {
 
     it('should show error message in content', () => {
       const error = new Error('Service unavailable')
-      const errorContract: [undefined, Error, false] = [undefined, error, false]
+      const errorContract: [ContractAnalysisResults, Error, false] = [
+        {
+          [mockContractAddress]: {
+            [StatusGroup.CONTRACT_VERIFICATION]: [
+              {
+                title: 'Contract analysis failed',
+                description: 'Service unavailable',
+                severity: Severity.WARN,
+                type: CommonSharedStatus.FAILED,
+              },
+            ],
+          },
+        },
+        error,
+        false,
+      ]
 
       render(<SafeShieldDisplay contract={errorContract} />)
 
-      expect(screen.getByText(/Unable to perform security analysis:/)).toBeInTheDocument()
-      expect(screen.getByText(/Service unavailable/)).toBeInTheDocument()
+      expect(screen.getByText('Contract analysis failed')).toBeInTheDocument()
+      expect(screen.getByText('Service unavailable')).toBeInTheDocument()
     })
 
     it('should show empty state when no results', () => {
