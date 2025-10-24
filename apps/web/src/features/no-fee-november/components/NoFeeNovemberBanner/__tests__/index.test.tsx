@@ -77,7 +77,7 @@ describe('NoFeeNovemberBanner', () => {
     expect(screen.getByLabelText('close')).toBeInTheDocument()
   })
 
-  it('should render not eligible state with get SAFE button', () => {
+  it('should not render anything when not eligible', () => {
     mockUseNoFeeNovemberEligibility.mockReturnValue({
       isEligible: false,
       remaining: 0,
@@ -86,18 +86,13 @@ describe('NoFeeNovemberBanner', () => {
       error: undefined,
     })
 
-    render(
+    const { container } = render(
       <MockTxModalProvider>
         <NoFeeNovemberBanner onDismiss={mockOnDismiss} />
       </MockTxModalProvider>,
     )
 
-    expect(screen.getByText('Enjoy No Fee November')).toBeInTheDocument()
-    expect(screen.getByText('SAFE holders enjoy gasless transactions on Mainnet this November.')).toBeInTheDocument()
-    expect(screen.getByText('Learn more')).toBeInTheDocument()
-    expect(screen.getByText("You don't hold any SAFE yet — get some to enjoy No Fee November.")).toBeInTheDocument()
-    expect(screen.getByText('Get SAFE token')).toBeInTheDocument()
-    expect(screen.getByLabelText('close')).toBeInTheDocument()
+    expect(container.firstChild).toBeNull()
   })
 
   it('should render error state with error message', () => {
@@ -183,7 +178,7 @@ describe('NoFeeNovemberBanner', () => {
     expect(learnMoreLink.closest('a')).toHaveAttribute('href', 'https://help.safe.global/en/')
   })
 
-  it('should have correct link for get SAFE token button', () => {
+  it('should not render anything when not eligible (false)', () => {
     mockUseNoFeeNovemberEligibility.mockReturnValue({
       isEligible: false,
       remaining: 0,
@@ -192,39 +187,17 @@ describe('NoFeeNovemberBanner', () => {
       error: undefined,
     })
 
-    render(
+    const { container } = render(
       <MockTxModalProvider>
         <NoFeeNovemberBanner onDismiss={mockOnDismiss} />
       </MockTxModalProvider>,
     )
 
-    const getSafeButton = screen.getByText('Get SAFE token')
-    const link = getSafeButton.closest('a')
-    expect(link).toHaveAttribute('href', '/swap?safe=0x123')
+    expect(container.firstChild).toBeNull()
+    expect(mockOnDismiss).not.toHaveBeenCalled()
   })
 
-  it('should pass correct eligibility state to onDismiss', () => {
-    mockUseNoFeeNovemberEligibility.mockReturnValue({
-      isEligible: false,
-      remaining: 0,
-      limit: 5,
-      isLoading: false,
-      error: undefined,
-    })
-
-    render(
-      <MockTxModalProvider>
-        <NoFeeNovemberBanner onDismiss={mockOnDismiss} />
-      </MockTxModalProvider>,
-    )
-
-    const closeButton = screen.getByLabelText('close')
-    fireEvent.click(closeButton)
-
-    expect(mockOnDismiss).toHaveBeenCalledWith(false)
-  })
-
-  it('should handle undefined eligibility state', () => {
+  it('should not render anything when eligibility is undefined', () => {
     mockUseNoFeeNovemberEligibility.mockReturnValue({
       isEligible: undefined,
       remaining: undefined,
@@ -233,15 +206,13 @@ describe('NoFeeNovemberBanner', () => {
       error: undefined,
     })
 
-    render(
+    const { container } = render(
       <MockTxModalProvider>
         <NoFeeNovemberBanner onDismiss={mockOnDismiss} />
       </MockTxModalProvider>,
     )
 
-    const closeButton = screen.getByLabelText('close')
-    fireEvent.click(closeButton)
-
-    expect(mockOnDismiss).toHaveBeenCalledWith(undefined)
+    expect(container.firstChild).toBeNull()
+    expect(mockOnDismiss).not.toHaveBeenCalled()
   })
 })

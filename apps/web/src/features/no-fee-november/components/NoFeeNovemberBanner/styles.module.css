@@ -76,15 +76,6 @@
   display: block;
 }
 
-.infoStack {
-  margin-top: var(--space-1);
-  margin-bottom: var(--space-2);
-}
-
-.infoIcon {
-  color: var(--color-static-light);
-}
-
 .cardsImage {
   display: block;
 }

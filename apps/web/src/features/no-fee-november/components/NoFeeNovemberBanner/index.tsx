@@ -4,9 +4,6 @@ import css from './styles.module.css'
 import CloseIcon from '@mui/icons-material/Close'
 import Track from '@/components/common/Track'
 import Link from 'next/link'
-import { AppRoutes } from '@/config/routes'
-import { useRouter } from 'next/router'
-import InfoIcon from '@mui/icons-material/Info'
 import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
 import { useContext } from 'react'
 import { TxModalContext } from '@/components/tx-flow'
@@ -16,7 +13,6 @@ import CheckWallet from '@/components/common/CheckWallet'
 export const noFeeNovemberBannerID = 'noFeeNovemberBanner'
 
 const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: (eligibilityState?: boolean) => void }) => {
-  const router = useRouter()
   const { setTxFlow } = useContext(TxModalContext)
   const { isEligible, isLoading, error } = useNoFeeNovemberEligibility()
 
@@ -125,59 +121,8 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: (eligibilityState?: boo
     )
   }
 
-  // Not eligible state
-  return (
-    <Card className={css.banner}>
-      <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2}>
-        <Image
-          src="/images/common/no-fee-november/Cards.svg"
-          alt="No Fee November Cards"
-          width={76}
-          height={76}
-          className={css.cardsImage}
-        />
-        <Box>
-          <Typography variant="h4" fontWeight="bold" color="static.main" className={css.bannerText}>
-            Enjoy No Fee November
-          </Typography>
-          <Typography variant="body2" color="static.light" className={css.bannerTextInteractive}>
-            SAFE holders enjoy gasless transactions on Mainnet this November.{' '}
-            <Link href="https://help.safe.global/en/" style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
-              Learn more
-            </Link>
-          </Typography>
-
-          {/* Info message with icon */}
-          <Stack direction="row" alignItems="center" spacing={1} className={css.infoStack}>
-            <InfoIcon fontSize="small" className={css.infoIcon} />
-            <Typography variant="caption" color="static.light">
-              You don&apos;t hold any SAFE yet — get some to enjoy No Fee November.
-            </Typography>
-          </Stack>
-
-          <Track {...{ category: 'overview', action: 'open_no_fee_november_get_safe' }}>
-            <CheckWallet>
-              {(isOk) => (
-                <Link
-                  href={AppRoutes.swap && { pathname: AppRoutes.swap, query: { safe: router.query.safe } }}
-                  passHref
-                >
-                  <Button variant="contained" size="small" className={css.actionButton} disabled={!isOk}>
-                    Get SAFE token
-                  </Button>
-                </Link>
-              )}
-            </CheckWallet>
-          </Track>
-        </Box>
-      </Stack>
-      <Track {...{ category: 'overview', action: 'hide_no_fee_november_banner' }}>
-        <IconButton className={css.closeButton} aria-label="close" onClick={() => onDismiss(isEligible)}>
-          <CloseIcon fontSize="small" color="border" />
-        </IconButton>
-      </Track>
-    </Card>
-  )
+  // Not eligible state - don't show banner
+  return null
 }
 
 export default NoFeeNovemberBanner
