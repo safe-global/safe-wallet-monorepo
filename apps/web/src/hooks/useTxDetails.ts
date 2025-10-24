@@ -7,7 +7,7 @@ function useTxDetails(txId?: string): [TransactionDetails | undefined, Error | u
 
   const { currentData, error, isLoading } = useTransactionsGetTransactionByIdV1Query(
     { chainId: chainId || '', id: txId || '' },
-    { skip: !chainId || !txId },
+    { skip: !chainId || !txId, refetchOnMountOrArgChange: true },
   )
 
   return [currentData, error ? new Error(String(error)) : undefined, isLoading]

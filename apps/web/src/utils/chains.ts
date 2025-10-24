@@ -37,7 +37,12 @@ export const isRouteEnabled = (route: string, chain?: Chain) => {
 export const getChainConfig = async (chainId: string): Promise<Chain> => {
   const store = getStoreInstance()
 
-  const queryThunk = cgwApi.endpoints.chainsGetChainV1.initiate({ chainId })
+  const queryThunk = cgwApi.endpoints.chainsGetChainV1.initiate(
+    { chainId },
+    {
+      forceRefetch: true,
+    },
+  )
   const queryAction = store.dispatch(queryThunk)
 
   try {

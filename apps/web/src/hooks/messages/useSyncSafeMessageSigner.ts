@@ -17,7 +17,12 @@ export const fetchSafeMessage = async (safeMessageHash: string, chainId: string)
     // Use RTK Query endpoint to fetch message
     const store = getStoreInstance()
     const result = await store.dispatch(
-      cgwApi.endpoints.messagesGetMessageByHashV1.initiate({ chainId, messageHash: safeMessageHash }),
+      cgwApi.endpoints.messagesGetMessageByHashV1.initiate(
+        { chainId, messageHash: safeMessageHash },
+        {
+          forceRefetch: true,
+        },
+      ),
     )
 
     if ('data' in result && result.data) {

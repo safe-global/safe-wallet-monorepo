@@ -166,7 +166,12 @@ export const useCustomAppCommunicator = (
       try {
         const store = getStoreInstance()
         const result = await store.dispatch(
-          cgwApi.endpoints.messagesGetMessageByHashV1.initiate({ chainId, messageHash }),
+          cgwApi.endpoints.messagesGetMessageByHashV1.initiate(
+            { chainId, messageHash },
+            {
+              forceRefetch: true,
+            },
+          ),
         )
         if ('data' in result && result.data) {
           return result.data.preparedSignature || undefined

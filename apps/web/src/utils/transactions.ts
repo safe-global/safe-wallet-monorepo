@@ -59,10 +59,15 @@ export const getTransactionDetails = async (chainId: string, txId: string): Prom
 
   const result = await store
     .dispatch(
-      cgwApi.endpoints.transactionsGetTransactionByIdV1.initiate({
-        chainId,
-        id: txId,
-      }),
+      cgwApi.endpoints.transactionsGetTransactionByIdV1.initiate(
+        {
+          chainId,
+          id: txId,
+        },
+        {
+          forceRefetch: true,
+        },
+      ),
     )
     .unwrap()
 
@@ -124,14 +129,19 @@ export const getModuleTransactions = async (
 
   const result = await store
     .dispatch(
-      cgwApi.endpoints.transactionsGetModuleTransactionsV1.initiate({
-        chainId,
-        safeAddress,
-        to: query?.to,
-        module: query?.module,
-        transactionHash: query?.transaction_hash,
-        cursor,
-      }),
+      cgwApi.endpoints.transactionsGetModuleTransactionsV1.initiate(
+        {
+          chainId,
+          safeAddress,
+          to: query?.to,
+          module: query?.module,
+          transactionHash: query?.transaction_hash,
+          cursor,
+        },
+        {
+          forceRefetch: true,
+        },
+      ),
     )
     .unwrap()
 
@@ -170,17 +180,22 @@ export const getIncomingTransfers = async (
 
   const result = await store
     .dispatch(
-      cgwApi.endpoints.transactionsGetIncomingTransfersV1.initiate({
-        chainId,
-        safeAddress,
-        trusted: query?.trusted,
-        executionDateGte: query?.execution_date__gte,
-        executionDateLte: query?.execution_date__lte,
-        to: query?.to,
-        value: query?.value,
-        tokenAddress: query?.token_address,
-        cursor,
-      }),
+      cgwApi.endpoints.transactionsGetIncomingTransfersV1.initiate(
+        {
+          chainId,
+          safeAddress,
+          trusted: query?.trusted,
+          executionDateGte: query?.execution_date__gte,
+          executionDateLte: query?.execution_date__lte,
+          to: query?.to,
+          value: query?.value,
+          tokenAddress: query?.token_address,
+          cursor,
+        },
+        {
+          forceRefetch: true,
+        },
+      ),
     )
     .unwrap()
 
@@ -227,17 +242,22 @@ export const getMultisigTransactions = async (
 
   const result = await store
     .dispatch(
-      cgwApi.endpoints.transactionsGetMultisigTransactionsV1.initiate({
-        chainId,
-        safeAddress,
-        executionDateGte: query?.execution_date__gte,
-        executionDateLte: query?.execution_date__lte,
-        to: query?.to,
-        value: query?.value,
-        nonce: query?.nonce,
-        executed,
-        cursor,
-      }),
+      cgwApi.endpoints.transactionsGetMultisigTransactionsV1.initiate(
+        {
+          chainId,
+          safeAddress,
+          executionDateGte: query?.execution_date__gte,
+          executionDateLte: query?.execution_date__lte,
+          to: query?.to,
+          value: query?.value,
+          nonce: query?.nonce,
+          executed,
+          cursor,
+        },
+        {
+          forceRefetch: true,
+        },
+      ),
     )
     .unwrap()
 
@@ -273,14 +293,19 @@ export const getTransactionHistory = async (
 
   const result = await store
     .dispatch(
-      cgwApi.endpoints.transactionsGetTransactionsHistoryV1.initiate({
-        chainId,
-        safeAddress,
-        timezone: query?.timezone,
-        trusted: query?.trusted,
-        imitation: query?.imitation,
-        cursor,
-      }),
+      cgwApi.endpoints.transactionsGetTransactionsHistoryV1.initiate(
+        {
+          chainId,
+          safeAddress,
+          timezone: query?.timezone,
+          trusted: query?.trusted,
+          imitation: query?.imitation,
+          cursor,
+        },
+        {
+          forceRefetch: true,
+        },
+      ),
     )
     .unwrap()
 
@@ -302,10 +327,15 @@ export const getNonces = async (chainId: string, safeAddress: string): Promise<S
 
   const result = await store
     .dispatch(
-      safesApi.endpoints.safesGetNoncesV1.initiate({
-        chainId,
-        safeAddress,
-      }),
+      safesApi.endpoints.safesGetNoncesV1.initiate(
+        {
+          chainId,
+          safeAddress,
+        },
+        {
+          forceRefetch: true,
+        },
+      ),
     )
     .unwrap()
 

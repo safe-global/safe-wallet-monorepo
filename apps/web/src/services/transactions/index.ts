@@ -45,12 +45,17 @@ export const getTransactionQueue = async (
   // If pageUrl is provided, parse cursor from it
   const cursor = pageUrl ? new URL(pageUrl).searchParams.get('cursor') || undefined : undefined
 
-  const queryThunk = cgwApi.endpoints.transactionsGetTransactionQueueV1.initiate({
-    chainId,
-    safeAddress,
-    trusted: options?.trusted,
-    cursor,
-  })
+  const queryThunk = cgwApi.endpoints.transactionsGetTransactionQueueV1.initiate(
+    {
+      chainId,
+      safeAddress,
+      trusted: options?.trusted,
+      cursor,
+    },
+    {
+      forceRefetch: true,
+    },
+  )
   const queryAction = store.dispatch(queryThunk)
 
   try {

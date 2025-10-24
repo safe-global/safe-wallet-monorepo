@@ -97,7 +97,7 @@ const TxSimulationBlock = ({
 
   const { currentData: nestedSafeInfo } = useSafesGetSafeV1Query(
     { chainId: chain?.chainId || '', safeAddress: nestedSafe || '' },
-    { skip: !chain?.chainId || !nestedSafe },
+    { skip: !chain?.chainId || !nestedSafe, refetchOnMountOrArgChange: true },
   )
 
   const handleSimulation = async () => {
