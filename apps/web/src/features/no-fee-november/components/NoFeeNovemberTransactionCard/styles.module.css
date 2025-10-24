@@ -33,6 +33,12 @@
   width: 100%;
 }
 
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .eligibilityTag {
   display: flex;
   align-items: center;
@@ -79,7 +85,7 @@
 .coinsContainer {
   position: absolute;
   left: 24px;
-  top: 48px;
+  top: 25px; /* Fixed: was 48px, should be 25px according to Figma */
   width: 58px;
   height: 58px;
   display: flex;

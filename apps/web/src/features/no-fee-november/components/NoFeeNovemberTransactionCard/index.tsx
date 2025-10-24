@@ -63,28 +63,28 @@ const NoFeeNovemberTransactionCard = () => {
           <IconButton className={css.closeButton} aria-label="close">
             <CloseIcon fontSize="small" />
           </IconButton>
-          
+
           {/* Main content */}
           <Box className={css.mainContent}>
-            {/* Eligibility tag */}
-            <Box className={css.eligibilityTag}>
-              <Image
-                src="/images/common/no-fee-november/check-icon.svg"
-                alt="Eligible"
-                width={16}
-                height={16}
-                className={css.tagIcon}
-              />
-              <Typography variant="caption" className={css.tagText}>
-                You are eligible
+            {/* Title and eligibility tag inline */}
+            <Box className={css.titleRow}>
+              <Typography variant="subtitle2" fontWeight="bold" className={css.title}>
+                Enjoy No-Fee November
               </Typography>
+              <Box className={css.eligibilityTag}>
+                <Image
+                  src="/images/common/no-fee-november/check-icon.svg"
+                  alt="Eligible"
+                  width={16}
+                  height={16}
+                  className={css.tagIcon}
+                />
+                <Typography variant="caption" className={css.tagText}>
+                  You are eligible
+                </Typography>
+              </Box>
             </Box>
-            
-            {/* Title */}
-            <Typography variant="subtitle2" fontWeight="bold" className={css.title}>
-              Enjoy No-Fee November
-            </Typography>
-            
+
             {/* Description */}
             <Typography variant="body2" className={css.description}>
               SAFE holders enjoy gasless transactions on Ethereum Mainnet this November.{' '}
@@ -93,7 +93,7 @@ const NoFeeNovemberTransactionCard = () => {
               </Link>
             </Typography>
           </Box>
-          
+
           {/* Coins illustration */}
           <Box className={css.coinsContainer}>
             <Image
@@ -110,7 +110,7 @@ const NoFeeNovemberTransactionCard = () => {
   }
 
   // Not eligible state (from banner in assets/home, without Get SAFE button)
-      return null
+  return null
 }
 
 export default NoFeeNovemberTransactionCard
