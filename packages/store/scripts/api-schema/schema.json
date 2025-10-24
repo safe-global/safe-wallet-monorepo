@@ -738,6 +738,230 @@
         ]
       }
     },
+    "/v1/portfolio/{address}": {
+      "get": {
+        "description": "Retrieves the complete portfolio for an address including token balances and app positions across all supported chains.",
+        "operationId": "portfolioGetPortfolioV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "description": "Wallet address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fiatCode",
+            "required": false,
+            "in": "query",
+            "description": "Fiat currency code for balance conversion (e.g., USD, EUR)",
+            "schema": {
+              "example": "USD",
+              "type": "string"
+            }
+          },
+          {
+            "name": "chainIds",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated list of chain IDs to filter by. If omitted, returns data for all chains.",
+            "schema": {
+              "example": "1,137,42161",
+              "type": "string"
+            }
+          },
+          {
+            "name": "trusted",
+            "required": false,
+            "in": "query",
+            "description": "If true, only returns trusted tokens",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "excludeDust",
+            "required": false,
+            "in": "query",
+            "description": "If true, filters out dust positions (balance < $1 USD)",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "provider",
+            "required": false,
+            "in": "query",
+            "description": "Portfolio data provider",
+            "schema": {
+              "enum": [
+                "zerion",
+                "zapper"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Portfolio"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get portfolio",
+        "tags": [
+          "portfolio"
+        ]
+      },
+      "delete": {
+        "description": "Clears the cached portfolio data for a specific address",
+        "operationId": "portfolioClearPortfolioV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "description": "Wallet address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "summary": "Clear portfolio cache",
+        "tags": [
+          "portfolio"
+        ]
+      }
+    },
+    "/v1/charts/{fungibleId}/{period}": {
+      "get": {
+        "description": "Retrieves historical price chart data for a fungible asset (token) over a specified time period. Accepts human-readable asset IDs from the portfolio endpoint (e.g., \"eth\", \"dai\", \"morpho\").",
+        "operationId": "chartsGetChartV1",
+        "parameters": [
+          {
+            "name": "fungibleId",
+            "required": true,
+            "in": "path",
+            "description": "Asset identifier - use the assetId from portfolio endpoint (e.g., \"eth\", \"dai\", \"weth-c02a\")",
+            "schema": {
+              "example": "eth",
+              "type": "string"
+            }
+          },
+          {
+            "name": "period",
+            "required": true,
+            "in": "path",
+            "description": "Time period for the chart data",
+            "schema": {
+              "enum": [
+                "hour",
+                "day",
+                "week",
+                "month",
+                "3months",
+                "year",
+                "max"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "required": false,
+            "in": "query",
+            "description": "Fiat currency code for price conversion (e.g., usd, eur)",
+            "schema": {
+              "example": "usd",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chart"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get fungible price chart",
+        "tags": [
+          "charts"
+        ]
+      },
+      "delete": {
+        "description": "Clears the cached chart data for a specific fungible asset and period",
+        "operationId": "chartsClearChartV1",
+        "parameters": [
+          {
+            "name": "fungibleId",
+            "required": true,
+            "in": "path",
+            "description": "Fungible asset identifier",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "period",
+            "required": true,
+            "in": "path",
+            "description": "Time period",
+            "schema": {
+              "enum": [
+                "hour",
+                "day",
+                "week",
+                "month",
+                "3months",
+                "year",
+                "max"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "required": false,
+            "in": "query",
+            "description": "Fiat currency code",
+            "schema": {
+              "example": "usd",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "summary": "Clear chart cache",
+        "tags": [
+          "charts"
+        ]
+      }
+    },
     "/v1/chains/{chainId}/safes/{safeAddress}/positions/{fiatCode}": {
       "get": {
         "operationId": "positionsGetPositionsV1",
@@ -5417,7 +5641,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Transaction"
+                  "$ref": "#/components/schemas/TransactionDetails"
                 }
               }
             }
@@ -5522,7 +5746,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main",
+    "version": "",
     "contact": {}
   },
   "tags": [],
@@ -5985,6 +6209,448 @@
         "required": [
           "fiatTotal",
           "items"
+        ]
+      },
+      "TokenBalanceTokenInfo": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Token contract address (0x0000000000000000000000000000000000000000 for native tokens)"
+          },
+          "decimals": {
+            "type": "number",
+            "description": "Token decimals"
+          },
+          "symbol": {
+            "type": "string",
+            "description": "Token symbol"
+          },
+          "name": {
+            "type": "string",
+            "description": "Token name"
+          },
+          "logoUri": {
+            "type": "string",
+            "format": "uri",
+            "description": "Token logo URI (HTTPS)"
+          },
+          "chainId": {
+            "type": "string",
+            "description": "Chain ID where token is deployed"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the token is verified by the provider"
+          },
+          "assetId": {
+            "type": "string",
+            "description": "Unique asset identifier (human-readable slug like \"eth\", \"dai\", \"weth-c02a\")",
+            "example": "eth"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ERC20",
+              "NATIVE_TOKEN"
+            ],
+            "description": "Token type"
+          }
+        },
+        "required": [
+          "address",
+          "decimals",
+          "symbol",
+          "name",
+          "logoUri",
+          "chainId",
+          "trusted",
+          "assetId",
+          "type"
+        ]
+      },
+      "TokenBalance": {
+        "type": "object",
+        "properties": {
+          "tokenInfo": {
+            "description": "Token information",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokenBalanceTokenInfo"
+              }
+            ]
+          },
+          "balance": {
+            "type": "string",
+            "description": "Token balance (as string to avoid precision loss)"
+          },
+          "balanceFiat": {
+            "type": "number",
+            "description": "Balance in requested fiat currency",
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "description": "Token price in requested fiat currency",
+            "nullable": true
+          },
+          "priceChangePercentage1d": {
+            "type": "number",
+            "description": "Price change as decimal (e.g., -0.0431 for -4.31%)",
+            "nullable": true
+          }
+        },
+        "required": [
+          "tokenInfo",
+          "balance"
+        ]
+      },
+      "AppBalanceAppInfo": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Application name"
+          },
+          "logoUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Application logo URL (HTTPS)",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Application URL (HTTPS)",
+            "nullable": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "AppPositionTokenInfo": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Token contract address (0x0000000000000000000000000000000000000000 for native tokens)"
+          },
+          "decimals": {
+            "type": "number",
+            "description": "Token decimals"
+          },
+          "symbol": {
+            "type": "string",
+            "description": "Token symbol"
+          },
+          "name": {
+            "type": "string",
+            "description": "Token name"
+          },
+          "logoUri": {
+            "type": "string",
+            "format": "uri",
+            "description": "Token logo URI (HTTPS)"
+          },
+          "chainId": {
+            "type": "string",
+            "description": "Chain ID where token is deployed"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the token is verified by the provider"
+          },
+          "assetId": {
+            "type": "string",
+            "description": "Unique asset identifier (human-readable slug like \"eth\", \"dai\", \"weth-c02a\")",
+            "example": "morpho"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ERC20"
+            ],
+            "description": "Token type (positions are always ERC20)"
+          }
+        },
+        "required": [
+          "address",
+          "decimals",
+          "symbol",
+          "name",
+          "logoUri",
+          "chainId",
+          "trusted",
+          "assetId",
+          "type"
+        ]
+      },
+      "AppPosition": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Unique position key"
+          },
+          "type": {
+            "type": "string",
+            "description": "Position type (e.g., staked, lending, liquidity)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Position name"
+          },
+          "tokenInfo": {
+            "description": "Token information",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AppPositionTokenInfo"
+              }
+            ]
+          },
+          "balance": {
+            "type": "string",
+            "description": "Position balance"
+          },
+          "balanceFiat": {
+            "type": "number",
+            "description": "Balance in requested fiat currency",
+            "nullable": true
+          },
+          "priceChangePercentage1d": {
+            "type": "number",
+            "description": "Price change as decimal (e.g., -0.0431 for -4.31%)",
+            "nullable": true
+          }
+        },
+        "required": [
+          "key",
+          "type",
+          "name",
+          "tokenInfo",
+          "balance"
+        ]
+      },
+      "AppBalance": {
+        "type": "object",
+        "properties": {
+          "appInfo": {
+            "description": "Application information",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AppBalanceAppInfo"
+              }
+            ]
+          },
+          "balanceFiat": {
+            "type": "number",
+            "description": "Total balance in fiat currency across all positions",
+            "example": 15000,
+            "nullable": true
+          },
+          "positions": {
+            "description": "List of positions in this app",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppPosition"
+            }
+          }
+        },
+        "required": [
+          "appInfo",
+          "positions"
+        ]
+      },
+      "PnL": {
+        "type": "object",
+        "properties": {
+          "realizedGain": {
+            "type": "number",
+            "description": "Realized Gain. The gain (or loss) realized from the sale of fungible assets, calculated using the FIFO (First In, First Out) method. The cost basis of the oldest assets is subtracted from the sale proceeds.",
+            "example": 127718.31
+          },
+          "unrealizedGain": {
+            "type": "number",
+            "description": "Unrealized Gain. The potential gain (or loss) on unsold fungible assets, calculated as the difference between their current market value and cost basis using the FIFO method.",
+            "example": 21364.69
+          },
+          "totalFee": {
+            "type": "number",
+            "description": "Total Fees Paid. The sum of all transaction fees associated with asset trades.",
+            "example": 0
+          },
+          "netInvested": {
+            "type": "number",
+            "description": "Net Invested Amount. The total amount invested in fungible assets that have not been sold, calculated using the FIFO method.",
+            "example": 312120.03
+          },
+          "receivedExternal": {
+            "type": "number",
+            "description": "Received Amount from Other Wallets. The cumulative value of all fungible assets received from other wallets. Note: This value does not include amounts traded internally within the wallet but does include received_for_nfts.",
+            "example": 3042647.83
+          },
+          "sentExternal": {
+            "type": "number",
+            "description": "Sent Amount to Other Wallets. The cumulative value of all fungible assets sent to other wallets. Note: This value does not include amounts traded internally within the wallet but does include sent_for_nfts.",
+            "example": 2855624.03
+          },
+          "sentForNfts": {
+            "type": "number",
+            "description": "Sent Amount for NFTs. The cumulative value of all fungible assets sent in transactions where the wallet receives NFTs.",
+            "example": 25059.56
+          },
+          "receivedForNfts": {
+            "type": "number",
+            "description": "Received Amount for NFTs. The cumulative value of all fungible assets received in transactions where the wallet sends NFTs.",
+            "example": 24517.18
+          }
+        },
+        "required": [
+          "realizedGain",
+          "unrealizedGain",
+          "totalFee",
+          "netInvested",
+          "receivedExternal",
+          "sentExternal",
+          "sentForNfts",
+          "receivedForNfts"
+        ]
+      },
+      "Portfolio": {
+        "type": "object",
+        "properties": {
+          "totalBalanceFiat": {
+            "type": "number",
+            "description": "Total balance in fiat currency across all tokens and positions",
+            "example": 50000
+          },
+          "totalTokenBalanceFiat": {
+            "type": "number",
+            "description": "Total balance in fiat currency for all token holdings",
+            "example": 30000
+          },
+          "totalPositionsBalanceFiat": {
+            "type": "number",
+            "description": "Total balance in fiat currency for all app positions",
+            "example": 20000
+          },
+          "tokenBalances": {
+            "description": "List of token balances",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TokenBalance"
+            }
+          },
+          "positionBalances": {
+            "description": "List of app balances",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppBalance"
+            }
+          },
+          "pnl": {
+            "description": "Profit and Loss metrics (null if unavailable)",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PnL"
+              }
+            ]
+          }
+        },
+        "required": [
+          "totalBalanceFiat",
+          "totalTokenBalanceFiat",
+          "totalPositionsBalanceFiat",
+          "tokenBalances",
+          "positionBalances"
+        ]
+      },
+      "ChartStats": {
+        "type": "object",
+        "properties": {
+          "first": {
+            "type": "number",
+            "description": "First price in the period",
+            "example": 3456.78
+          },
+          "min": {
+            "type": "number",
+            "description": "Minimum price in the period",
+            "example": 3401.23
+          },
+          "avg": {
+            "type": "number",
+            "description": "Average price in the period",
+            "example": 3478.45
+          },
+          "max": {
+            "type": "number",
+            "description": "Maximum price in the period",
+            "example": 3567.89
+          },
+          "last": {
+            "type": "number",
+            "description": "Last price in the period",
+            "example": 3501.12
+          }
+        },
+        "required": [
+          "first",
+          "min",
+          "avg",
+          "max",
+          "last"
+        ]
+      },
+      "Chart": {
+        "type": "object",
+        "properties": {
+          "beginAt": {
+            "type": "string",
+            "description": "Start timestamp of the chart period (ISO 8601)",
+            "example": "2024-01-01T00:00:00Z"
+          },
+          "endAt": {
+            "type": "string",
+            "description": "End timestamp of the chart period (ISO 8601)",
+            "example": "2024-12-31T23:59:59Z"
+          },
+          "stats": {
+            "description": "Statistical summary of prices in the period",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ChartStats"
+              }
+            ]
+          },
+          "points": {
+            "type": "array",
+            "description": "Array of price data points. Each point is a tuple of [timestamp (Unix seconds), price]",
+            "example": [
+              [
+                1704067200,
+                3456.78
+              ],
+              [
+                1704070800,
+                3460.23
+              ]
+            ],
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "required": [
+          "beginAt",
+          "endAt",
+          "stats",
+          "points"
         ]
       },
       "Position": {
@@ -7240,7 +7906,18 @@
             "type": "string"
           },
           "value": {
-            "type": "object"
+            "description": "Parameter value - typically a string, but may be an array of strings for array types (e.g., address[], uint256[])",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
           },
           "valueDecoded": {
             "oneOf": [
@@ -10482,8 +11159,12 @@
             "description": "The amount of fees paid for this order."
           },
           "executedFeeToken": {
-            "type": "string",
-            "description": "The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders)."
+            "description": "The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokenInfo"
+              }
+            ]
           },
           "receiver": {
             "type": "string",
@@ -10870,8 +11551,12 @@
             "description": "The executed surplus fee raw amount (no decimals), or null if there are too many parts"
           },
           "executedFeeToken": {
-            "type": "string",
-            "description": "The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders)."
+            "description": "The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokenInfo"
+              }
+            ]
           },
           "sellToken": {
             "description": "The sell token of the TWAP",

@@ -17,11 +17,9 @@ import {
   type AppBalance,
 } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import usePositions from '@/features/positions/hooks/usePositions'
 import { formatUnits } from 'ethers'
 import {
-  NATIVE_TOKEN_ADDRESS,
   IS_MULTICHAIN_ENABLED,
   createEmptyPortfolioData,
   calculateTokensTotal,
@@ -62,9 +60,23 @@ const transformTokenBalances = (tokens: PortfolioTokenBalance[]): Balance[] => {
       symbol: token.tokenInfo.symbol,
       name: token.tokenInfo.name,
       chainId: token.tokenInfo.chainId,
-      logoUri: token.tokenInfo.logoUrl ?? '',
-      type: token.tokenInfo.address === NATIVE_TOKEN_ADDRESS ? TokenType.NATIVE_TOKEN : TokenType.ERC20,
+      logoUri: token.tokenInfo.logoUri ?? '',
+      type: token.tokenInfo.type,
     },
+  }))
+}
+
+const transformAppBalances = (appBalances: AppBalance[]): AppBalance[] => {
+  return appBalances.map((appBalance) => ({
+    ...appBalance,
+    positions: appBalance.positions.map((position) => ({
+      ...position,
+      tokenInfo: {
+        ...position.tokenInfo,
+        logoUri: position.tokenInfo.logoUri ?? '',
+        type: position.tokenInfo.type,
+      },
+    })),
   }))
 }
 
@@ -98,7 +110,7 @@ const usePortfolioV2 = (skip: boolean = false): PortfolioData => {
     }
 
     const allTokens = transformTokenBalances(currentData.tokenBalances ?? [])
-    const allPositions = currentData.positionBalances ?? []
+    const allPositions = transformAppBalances(currentData.positionBalances ?? [])
 
     const currentChainTokens = IS_MULTICHAIN_ENABLED
       ? allTokens.filter((token) => (token.tokenInfo as any).chainId === chainId)
