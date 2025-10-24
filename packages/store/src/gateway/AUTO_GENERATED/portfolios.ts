@@ -8,7 +8,7 @@ const injectedRtkApi = api
     endpoints: (build) => ({
       portfolioGetPortfolioV1: build.query<PortfolioGetPortfolioV1ApiResponse, PortfolioGetPortfolioV1ApiArg>({
         query: (queryArg) => ({
-          url: `/v1/portfolios/${queryArg.address}`,
+          url: `/v1/portfolio/${queryArg.address}`,
           params: {
             fiatCode: queryArg.fiatCode,
             chainIds: queryArg.chainIds,
@@ -20,7 +20,7 @@ const injectedRtkApi = api
         providesTags: ['portfolio'],
       }),
       portfolioClearPortfolioV1: build.mutation<PortfolioClearPortfolioV1ApiResponse, PortfolioClearPortfolioV1ApiArg>({
-        query: (queryArg) => ({ url: `/v1/portfolios/${queryArg.address}`, method: 'DELETE' }),
+        query: (queryArg) => ({ url: `/v1/portfolio/${queryArg.address}`, method: 'DELETE' }),
         invalidatesTags: ['portfolio'],
       }),
     }),

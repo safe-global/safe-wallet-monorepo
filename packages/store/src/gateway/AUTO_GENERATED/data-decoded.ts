@@ -40,14 +40,12 @@ export type MultiSend = {
   value: string
   dataDecoded?: BaseDataDecoded
   to: string
-  /** Hexadecimal encoded data */
   data: string | null
 }
 export type DataDecodedParameter = {
   name: string
   type: string
-  /** Parameter value - typically a string, but may be an array of strings for array types (e.g., address[], uint256[]) */
-  value: string | string[]
+  value: object
   valueDecoded?: BaseDataDecoded | MultiSend[] | null
 }
 export type DataDecoded = {

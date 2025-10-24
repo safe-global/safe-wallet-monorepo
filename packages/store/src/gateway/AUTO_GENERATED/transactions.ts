@@ -368,7 +368,7 @@ export type TransactionsGetTransactionsHistoryV1ApiArg = {
   cursor?: string
 }
 export type TransactionsProposeTransactionV1ApiResponse =
-  /** status 200 Transaction proposed successfully */ TransactionDetails
+  /** status 200 Transaction proposed successfully */ Transaction
 export type TransactionsProposeTransactionV1ApiArg = {
   /** Chain ID where the Safe is deployed */
   chainId: string
@@ -434,14 +434,12 @@ export type MultiSend = {
   value: string
   dataDecoded?: BaseDataDecoded
   to: string
-  /** Hexadecimal encoded data */
   data: string | null
 }
 export type DataDecodedParameter = {
   name: string
   type: string
-  /** Parameter value - typically a string, but may be an array of strings for array types (e.g., address[], uint256[]) */
-  value: string | string[]
+  value: object
   valueDecoded?: BaseDataDecoded | MultiSend[] | null
 }
 export type DataDecoded = {
@@ -580,7 +578,7 @@ export type SwapOrderTransactionInfo = {
   /** The amount of fees paid for this order. */
   executedFee: string
   /** The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders). */
-  executedFeeToken: TokenInfo
+  executedFeeToken: string
   /** The (optional) address to receive the proceeds of the trade */
   receiver?: string | null
   owner: string
@@ -708,7 +706,7 @@ export type TwapOrderTransactionInfo = {
   /** The executed surplus fee raw amount (no decimals), or null if there are too many parts */
   executedFee?: string | null
   /** The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders). */
-  executedFeeToken: TokenInfo
+  executedFeeToken: string
   /** The sell token of the TWAP */
   sellToken: TokenInfo
   /** The buy token of the TWAP */
