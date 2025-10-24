@@ -11,6 +11,7 @@ export enum Severity {
 }
 
 export enum StatusGroup {
+  COMMON = 'COMMON', // 0
   ADDRESS_BOOK = 'ADDRESS_BOOK', // 1
   RECIPIENT_ACTIVITY = 'RECIPIENT_ACTIVITY', // 2
   RECIPIENT_INTERACTION = 'RECIPIENT_INTERACTION', // 3
@@ -22,6 +23,7 @@ export enum StatusGroup {
 }
 
 export type StatusGroupType<T extends StatusGroup> = {
+  [StatusGroup.COMMON]: CommonSharedStatus.FAILED
   [StatusGroup.ADDRESS_BOOK]: RecipientStatus.KNOWN_RECIPIENT | RecipientStatus.UNKNOWN_RECIPIENT
   [StatusGroup.RECIPIENT_ACTIVITY]: RecipientStatus.LOW_ACTIVITY
   [StatusGroup.RECIPIENT_INTERACTION]: RecipientStatus.NEW_RECIPIENT | RecipientStatus.RECURRING_RECIPIENT
@@ -41,7 +43,6 @@ export type StatusGroupType<T extends StatusGroup> = {
     | ThreatStatus.MALICIOUS
     | ThreatStatus.MODERATE
     | ThreatStatus.NO_THREAT
-    | CommonSharedStatus.FAILED
     | ThreatStatus.MASTERCOPY_CHANGE
     | ThreatStatus.OWNERSHIP_CHANGE
     | ThreatStatus.MODULE_CHANGE
@@ -125,17 +126,22 @@ export type GroupedAnalysisResults<G extends StatusGroup = StatusGroup> = {
 
 export type RecipientAnalysisResults = {
   [address: string]: GroupedAnalysisResults<
-    StatusGroup.ADDRESS_BOOK | StatusGroup.RECIPIENT_ACTIVITY | StatusGroup.RECIPIENT_INTERACTION | StatusGroup.BRIDGE
+    | StatusGroup.ADDRESS_BOOK
+    | StatusGroup.RECIPIENT_ACTIVITY
+    | StatusGroup.RECIPIENT_INTERACTION
+    | StatusGroup.BRIDGE
+    | StatusGroup.COMMON
   >
 }
 
 export type ContractAnalysisResults = {
   [address: string]: GroupedAnalysisResults<
-    StatusGroup.CONTRACT_VERIFICATION | StatusGroup.CONTRACT_INTERACTION | StatusGroup.DELEGATECALL
+    StatusGroup.CONTRACT_VERIFICATION | StatusGroup.CONTRACT_INTERACTION | StatusGroup.DELEGATECALL | StatusGroup.COMMON
   >
 }
 
 export type ThreatAnalysisResults = {
+  [StatusGroup.COMMON]?: AnalysisResult<CommonSharedStatus.FAILED>[]
   THREAT?: ThreatAnalysisResult[]
   BALANCE_CHANGE?: BalanceChangeDto[]
 }

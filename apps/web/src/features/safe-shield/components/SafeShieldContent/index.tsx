@@ -17,9 +17,11 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 const normalizeThreatData = (threat?: AsyncResult<ThreatAnalysisResults>): Record<string, GroupedAnalysisResults> => {
   const [result] = threat || []
 
-  if (result?.THREAT === undefined || result?.THREAT.length === 0) return {}
+  const { BALANCE_CHANGE: _, ...groupedThreatResults } = result || {}
 
-  return { ['0x']: { THREAT: result.THREAT } }
+  if (Object.keys(groupedThreatResults).length === 0) return {}
+
+  return { ['0x']: groupedThreatResults }
 }
 
 export const SafeShieldContent = ({
