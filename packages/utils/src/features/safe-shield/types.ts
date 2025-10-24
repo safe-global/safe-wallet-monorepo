@@ -1,7 +1,7 @@
 // Safe Shield API Types based on official tech specs
 // Reference: https://www.notion.so/safe-global/Safe-Shield-Tech-specs-2618180fe5738018b809de16a7a4ab4b
 
-import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import type { BalanceChangeDto } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
 
 export enum Severity {
   OK = 'OK', // No issues detected
@@ -89,7 +89,7 @@ export enum CommonSharedStatus {
 
 export type AnyStatus = RecipientStatus | BridgeStatus | ContractStatus | ThreatStatus | CommonSharedStatus
 
-export type AnalysisResult<T extends AnyStatus> = {
+export type AnalysisResult<T extends AnyStatus = AnyStatus> = {
   severity: Severity
   type: T
   title: string
@@ -106,48 +106,36 @@ export type MasterCopyChangeThreatAnalysisResult = AnalysisResult<ThreatStatus.M
 
 export type MaliciousOrModerateThreatAnalysisResult = AnalysisResult<ThreatStatus.MALICIOUS | ThreatStatus.MODERATE> & {
   /** A potential map of specific issues identified during threat analysis, grouped by severity */
-  issues?: Map<keyof typeof Severity, Array<string>>
+  issues?: { [severity in Severity]?: string[] }
 }
 
 export type ThreatAnalysisResult =
   | MasterCopyChangeThreatAnalysisResult
   | MaliciousOrModerateThreatAnalysisResult
-  | AnalysisResult<ThreatStatus.NO_THREAT>
-  | AnalysisResult<CommonSharedStatus.FAILED>
-  | AnalysisResult<ThreatStatus.OWNERSHIP_CHANGE>
-  | AnalysisResult<ThreatStatus.MODULE_CHANGE>
-  | AnalysisResult<ThreatStatus.UNOFFICIAL_FALLBACK_HANDLER>
+  | AnalysisResult<
+      | Exclude<ThreatStatus, ThreatStatus.MALICIOUS | ThreatStatus.MODERATE | ThreatStatus.MASTERCOPY_CHANGE>
+      | CommonSharedStatus.FAILED
+    >
 
-export type AddressAnalysisResults = {
-  [_group in StatusGroup]?: (
-    | AnalysisResult<RecipientStatus | BridgeStatus | ContractStatus | ThreatStatus | CommonSharedStatus>
-    | MaliciousOrModerateThreatAnalysisResult
-    | MasterCopyChangeThreatAnalysisResult
-  )[]
+export type GroupedAnalysisResults<G extends StatusGroup = StatusGroup> = {
+  [K in Exclude<G, StatusGroup.THREAT>]?: AnalysisResult<StatusGroupType<K>>[]
+} & {
+  THREAT?: ThreatAnalysisResult[]
 }
 
-export type RecipientAnalysisResults = { [address: string]: AddressAnalysisResults }
-export type ContractAnalysisResults = { [address: string]: AddressAnalysisResults }
-export type ThreatAnalysisResults = { [address: string]: AddressAnalysisResults }
-
-export type LiveThreatAnalysisResult = {
-  THREAT: [AnalysisResult<ThreatStatus | CommonSharedStatus>]
-  BALANCE_CHANGE: [
-    {
-      asset: {
-        type: 'NATIVE' | 'ERC20' | 'ERC721' | 'ERC1155'
-        address: `0x${string}`
-        symbol?: string
-        logo_url?: string
-      }
-      in: { value?: string; token_id: number }[]
-      out: { value?: string; token_id: number }[]
-    },
-  ]
+export type RecipientAnalysisResults = {
+  [address: string]: GroupedAnalysisResults<
+    StatusGroup.ADDRESS_BOOK | StatusGroup.RECIPIENT_ACTIVITY | StatusGroup.RECIPIENT_INTERACTION | StatusGroup.BRIDGE
+  >
 }
 
-export type LiveAnalysisResponse = {
-  recipient?: AsyncResult<RecipientAnalysisResults>
-  contract?: AsyncResult<ContractAnalysisResults>
-  threat?: AsyncResult<LiveThreatAnalysisResult>
+export type ContractAnalysisResults = {
+  [address: string]: GroupedAnalysisResults<
+    StatusGroup.CONTRACT_VERIFICATION | StatusGroup.CONTRACT_INTERACTION | StatusGroup.DELEGATECALL
+  >
+}
+
+export type ThreatAnalysisResults = {
+  THREAT?: ThreatAnalysisResult[]
+  BALANCE_CHANGE?: BalanceChangeDto[]
 }

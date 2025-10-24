@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { Box, Paper } from '@mui/material'
 import { SafeShieldDisplay } from './components/SafeShieldDisplay'
 import {
-  LiveAnalysisResponseBuilder,
+  FullAnalysisBuilder,
   ContractAnalysisBuilder,
   RecipientAnalysisBuilder,
 } from '@safe-global/utils/features/safe-shield/builders'
@@ -35,9 +35,9 @@ const recipientAddress = faker.finance.ethereumAddress()
 // Checks passed
 export const NoThreat: Story = {
   args: {
-    ...LiveAnalysisResponseBuilder.verifiedContract(contractAddress)
+    ...FullAnalysisBuilder.verifiedContract(contractAddress)
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
-      .threat(LiveAnalysisResponseBuilder.noThreat().build().threat)
+      .threat(FullAnalysisBuilder.noThreat().build().threat)
       .build(),
   },
   parameters: { docs: { description: { story: 'SafeShieldWidget analyzing with no security concerns' } } },
@@ -45,9 +45,9 @@ export const NoThreat: Story = {
 // Checks passed
 export const MaliciousThreat: Story = {
   args: {
-    ...LiveAnalysisResponseBuilder.verifiedContract(contractAddress)
+    ...FullAnalysisBuilder.verifiedContract(contractAddress)
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
-      .threat(LiveAnalysisResponseBuilder.maliciousThreat().build().threat)
+      .threat(FullAnalysisBuilder.maliciousThreat().build().threat)
       .build(),
   },
   parameters: { docs: { description: { story: 'SafeShieldWidget analyzing with malicious threat detected' } } },
@@ -56,9 +56,9 @@ export const MaliciousThreat: Story = {
 // Moderate threat detected
 export const ModerateThreat: Story = {
   args: {
-    ...LiveAnalysisResponseBuilder.verifiedContract(contractAddress)
+    ...FullAnalysisBuilder.verifiedContract(contractAddress)
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
-      .threat(LiveAnalysisResponseBuilder.moderateThreat().build().threat)
+      .threat(FullAnalysisBuilder.moderateThreat().build().threat)
       .build(),
   },
   parameters: { docs: { description: { story: 'SafeShieldWidget analyzing with moderate threat detected' } } },
@@ -67,9 +67,9 @@ export const ModerateThreat: Story = {
 // Failed threat analysis
 export const FailedThreatAnalysis: Story = {
   args: {
-    ...LiveAnalysisResponseBuilder.verifiedContract(contractAddress)
+    ...FullAnalysisBuilder.verifiedContract(contractAddress)
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
-      .threat(LiveAnalysisResponseBuilder.failedThreat().build().threat)
+      .threat(FullAnalysisBuilder.failedThreat().build().threat)
       .build(),
   },
   parameters: { docs: { description: { story: 'SafeShieldWidget when threat analysis fails' } } },
@@ -78,9 +78,9 @@ export const FailedThreatAnalysis: Story = {
 // Ownership change
 export const OwnershipChange: Story = {
   args: {
-    ...LiveAnalysisResponseBuilder.verifiedContract(contractAddress)
+    ...FullAnalysisBuilder.verifiedContract(contractAddress)
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
-      .threat(LiveAnalysisResponseBuilder.ownershipChange().build().threat)
+      .threat(FullAnalysisBuilder.ownershipChange().build().threat)
       .build(),
   },
   parameters: { docs: { description: { story: 'SafeShieldWidget when transaction will change Safe ownership' } } },
@@ -89,9 +89,9 @@ export const OwnershipChange: Story = {
 // Modules change
 export const ModulesChange: Story = {
   args: {
-    ...LiveAnalysisResponseBuilder.verifiedContract(contractAddress)
+    ...FullAnalysisBuilder.verifiedContract(contractAddress)
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
-      .threat(LiveAnalysisResponseBuilder.moduleChange().build().threat)
+      .threat(FullAnalysisBuilder.moduleChange().build().threat)
       .build(),
   },
   parameters: { docs: { description: { story: 'SafeShieldWidget when transaction will change Safe modules' } } },
@@ -100,9 +100,9 @@ export const ModulesChange: Story = {
 // Mastercopy change
 export const MasterCopyChange: Story = {
   args: {
-    ...LiveAnalysisResponseBuilder.verifiedContract(contractAddress)
+    ...FullAnalysisBuilder.verifiedContract(contractAddress)
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
-      .threat(LiveAnalysisResponseBuilder.masterCopyChange().build().threat)
+      .threat(FullAnalysisBuilder.masterCopyChange().build().threat)
       .build(),
   },
   parameters: { docs: { description: { story: 'SafeShieldWidget when transaction will change Safe mastercopy' } } },
@@ -111,7 +111,7 @@ export const MasterCopyChange: Story = {
 // Checks passed
 export const ChecksPassed: Story = {
   args: {
-    ...LiveAnalysisResponseBuilder.verifiedContract(contractAddress)
+    ...FullAnalysisBuilder.verifiedContract(contractAddress)
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
       .build(),
   },
@@ -121,7 +121,7 @@ export const ChecksPassed: Story = {
 // Unverified contract with warnings
 export const UnverifiedContract: Story = {
   args: {
-    ...LiveAnalysisResponseBuilder.unverifiedContract(contractAddress)
+    ...FullAnalysisBuilder.unverifiedContract(contractAddress)
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
       .build(),
   },
@@ -131,7 +131,7 @@ export const UnverifiedContract: Story = {
 // Unable to verify contract
 export const UnableToVerifyContract: Story = {
   args: {
-    ...LiveAnalysisResponseBuilder.verificationUnavailableContract(contractAddress)
+    ...FullAnalysisBuilder.verificationUnavailableContract(contractAddress)
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
       .build(),
   },
@@ -154,7 +154,7 @@ export const Loading: Story = {
 
 // Empty state
 export const Empty: Story = {
-  args: { ...LiveAnalysisResponseBuilder.empty().build() },
+  args: { ...FullAnalysisBuilder.empty().build() },
   parameters: { docs: { description: { story: 'SafeShieldWidget when no transaction is available to analyze' } } },
 }
 
@@ -167,7 +167,7 @@ export const ErrorState: Story = {
 // Multiple results for the same contract with different severity
 export const MultipleIssues: Story = {
   args: {
-    ...LiveAnalysisResponseBuilder.delegatecallContract(contractAddress)
+    ...FullAnalysisBuilder.delegatecallContract(contractAddress)
       .contract(ContractAnalysisBuilder.unverifiedContract(contractAddress).build())
       .contract(ContractAnalysisBuilder.knownContract(contractAddress).build())
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
@@ -187,7 +187,7 @@ export const MultipleIssues: Story = {
 
 export const MultipleCounterparties: Story = {
   args: {
-    ...LiveAnalysisResponseBuilder.verifiedContract(contractAddress)
+    ...FullAnalysisBuilder.verifiedContract(contractAddress)
       .contract(ContractAnalysisBuilder.verifiedContract(faker.finance.ethereumAddress()).build())
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
       .recipient(RecipientAnalysisBuilder.knownRecipient(faker.finance.ethereumAddress()).build())

@@ -1,17 +1,9 @@
-import {
-  AnalysisResult,
-  LiveAnalysisResponse,
-  LiveThreatAnalysisResult,
-  MaliciousOrModerateThreatAnalysisResult,
-  MasterCopyChangeThreatAnalysisResult,
-  ThreatAnalysisResult,
-  ThreatStatus,
-  CommonSharedStatus,
-} from '../types'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import type { ThreatAnalysisResults, ThreatAnalysisResult } from '../types'
 import { ThreatAnalysisResultBuilder } from './threat-analysis-result.builder'
 
 export class ThreatAnalysisBuilder {
-  private threatAnalysis: LiveThreatAnalysisResult
+  private threatAnalysis: ThreatAnalysisResults
 
   constructor() {
     this.threatAnalysis = {
@@ -20,7 +12,6 @@ export class ThreatAnalysisBuilder {
         {
           asset: {
             type: 'NATIVE',
-            address: '0x000000000000000000000000000000000000dead', // mock address
             symbol: 'ETH',
             logo_url: 'https://example.com/eth-logo.png',
           },
@@ -35,37 +26,24 @@ export class ThreatAnalysisBuilder {
     }
   }
 
-  createThreat(
-    threat:
-      | MaliciousOrModerateThreatAnalysisResult
-      | MasterCopyChangeThreatAnalysisResult
-      | AnalysisResult<ThreatStatus.NO_THREAT>
-      | AnalysisResult<CommonSharedStatus.FAILED>
-      | AnalysisResult<ThreatStatus.OWNERSHIP_CHANGE>
-      | AnalysisResult<ThreatStatus.MODULE_CHANGE>
-      | AnalysisResult<ThreatStatus.MASTERCOPY_CHANGE>,
-  ) {
+  createThreat(threat: ThreatAnalysisResult) {
     this.threatAnalysis.THREAT = [threat]
     return this
   }
 
-  addThreat(
-    threat:
-      | AnalysisResult<ThreatStatus.NO_THREAT>
-      | AnalysisResult<CommonSharedStatus.FAILED>
-      | AnalysisResult<ThreatStatus.OWNERSHIP_CHANGE>
-      | AnalysisResult<ThreatStatus.MODULE_CHANGE>
-      | ThreatAnalysisResult,
-  ) {
+  addThreat(threat: ThreatAnalysisResult) {
+    if (!this.threatAnalysis.THREAT) {
+      this.threatAnalysis.THREAT = []
+    }
     this.threatAnalysis.THREAT.push(threat)
     return this
   }
 
-  build(): LiveAnalysisResponse['threat'] {
+  build(): AsyncResult<ThreatAnalysisResults> {
     return [this.threatAnalysis, undefined, false]
   }
 
-  static noThreat(): LiveAnalysisResponse['threat'] {
+  static noThreat() {
     const threat = ThreatAnalysisResultBuilder.noThreat().build()
     return new ThreatAnalysisBuilder().addThreat(threat).build()
   }

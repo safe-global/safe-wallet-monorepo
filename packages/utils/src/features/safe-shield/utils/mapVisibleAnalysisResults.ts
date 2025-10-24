@@ -1,7 +1,6 @@
 import {
   type AnalysisResult,
-  type AnyStatus,
-  type AddressAnalysisResults,
+  type GroupedAnalysisResults,
   ThreatStatus,
   MasterCopyChangeThreatAnalysisResult,
   ThreatAnalysisResult,
@@ -20,13 +19,13 @@ import { mapConsolidatedAnalysisResults } from './mapConsolidatedAnalysisResults
  */
 export const mapVisibleAnalysisResults = (
   addressesResultsMap: RecipientAnalysisResults | ContractAnalysisResults | ThreatAnalysisResults,
-): AnalysisResult<AnyStatus>[] => {
-  const addressResults = Object.values(addressesResultsMap)
+): AnalysisResult[] => {
+  const addressResults: GroupedAnalysisResults[] = Object.values(addressesResultsMap)
 
   if (addressResults.length === 1) {
-    const results: AnalysisResult<AnyStatus>[] = []
+    const results: AnalysisResult[] = []
     for (const groupResults of Object.values(addressResults[0])) {
-      const primaryGroupResult = getPrimaryResult(groupResults)
+      const primaryGroupResult = getPrimaryResult<AnalysisResult>(groupResults)
       if (primaryGroupResult) {
         results.push(primaryGroupResult)
       }
@@ -37,7 +36,7 @@ export const mapVisibleAnalysisResults = (
   return mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 }
 
-export const isAddressChange = (result: AnalysisResult<AnyStatus>): result is MasterCopyChangeThreatAnalysisResult => {
+export const isAddressChange = (result: AnalysisResult): result is MasterCopyChangeThreatAnalysisResult => {
   return result.type === ThreatStatus.MASTERCOPY_CHANGE
 }
 

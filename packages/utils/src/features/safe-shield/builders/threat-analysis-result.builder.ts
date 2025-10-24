@@ -1,24 +1,22 @@
 import {
-  Severity,
-  type AnalysisResult,
-  ThreatStatus,
   CommonSharedStatus,
-  MaliciousOrModerateThreatAnalysisResult,
-  MasterCopyChangeThreatAnalysisResult,
+  type MaliciousOrModerateThreatAnalysisResult,
+  Severity,
+  ThreatStatus,
+  type ThreatAnalysisResult,
 } from '../types'
 
-export class ThreatAnalysisResultBuilder<T extends ThreatStatus | CommonSharedStatus> {
-  private result: AnalysisResult<T> | MaliciousOrModerateThreatAnalysisResult | MasterCopyChangeThreatAnalysisResult
+export class ThreatAnalysisResultBuilder<
+  T extends ThreatStatus | CommonSharedStatus = ThreatStatus | CommonSharedStatus,
+> {
+  private result: ThreatAnalysisResult
 
   constructor() {
     this.result = {
       severity: Severity.OK,
-      type: ThreatStatus.NO_THREAT as T,
+      type: ThreatStatus.NO_THREAT,
       title: 'No threat detected',
       description: 'Threat analysis found no issues',
-      issues: undefined,
-      before: undefined,
-      after: undefined,
     }
   }
 
@@ -42,7 +40,7 @@ export class ThreatAnalysisResultBuilder<T extends ThreatStatus | CommonSharedSt
     return this
   }
 
-  issues(issues: Map<keyof typeof Severity, Array<string>>): this {
+  issues(issues: MaliciousOrModerateThreatAnalysisResult['issues'] | undefined): this {
     if ('issues' in this.result) {
       this.result.issues = issues
     }
@@ -57,50 +55,44 @@ export class ThreatAnalysisResultBuilder<T extends ThreatStatus | CommonSharedSt
     return this
   }
 
-  build(): AnalysisResult<T> | MaliciousOrModerateThreatAnalysisResult | MasterCopyChangeThreatAnalysisResult {
+  build(): ThreatAnalysisResult {
     return { ...this.result }
   }
+
   // Preset methods for common scenarios
-  static noThreat(): ThreatAnalysisResultBuilder<ThreatStatus.NO_THREAT> {
+  static noThreat() {
     return new ThreatAnalysisResultBuilder<ThreatStatus.NO_THREAT>()
   }
 
-  static malicious(): ThreatAnalysisResultBuilder<ThreatStatus.MALICIOUS> {
+  static malicious() {
     return new ThreatAnalysisResultBuilder<ThreatStatus.MALICIOUS>()
       .title('Malicious threat detected')
       .type(ThreatStatus.MALICIOUS)
       .severity(Severity.CRITICAL)
       .description('The transaction {reason_phrase} {classification_phrase}')
-      .issues(
-        new Map<keyof typeof Severity, Array<string>>([
-          [
-            Severity.CRITICAL,
-            [
-              'Bulleted list from validation.features, grouped by Malicious first, then Warnings.',
-              'Issue 2',
-              'Issue 3',
-            ],
-          ],
-          [Severity.WARN, ['Issue 4', 'Issue 5']],
-          [Severity.INFO, ['Issue 6', 'Issue 7']],
-        ]),
-      )
+      .issues({
+        [Severity.CRITICAL]: [
+          'Bulleted list from validation.features, grouped by Malicious first, then Warnings.',
+          'Issue 2',
+          'Issue 3',
+        ],
+        [Severity.WARN]: ['Issue 4', 'Issue 5'],
+        [Severity.INFO]: ['Issue 6', 'Issue 7'],
+      })
   }
 
-  static moderate(): ThreatAnalysisResultBuilder<ThreatStatus.MODERATE> {
+  static moderate() {
     return new ThreatAnalysisResultBuilder<ThreatStatus.MODERATE>()
       .title('Moderate threat detected')
       .type(ThreatStatus.MODERATE)
       .severity(Severity.WARN)
       .description('The transaction {reason_phrase} {classification_phrase}. Cancel this transaction.')
-      .issues(
-        new Map<keyof typeof Severity, Array<string>>([
-          [Severity.CRITICAL, ['Bulleted list from validation.features, grouped by Malicious first, then Warnings.']],
-        ]),
-      )
+      .issues({
+        [Severity.CRITICAL]: ['Bulleted list from validation.features, grouped by Malicious first, then Warnings.'],
+      })
   }
 
-  static failed(): ThreatAnalysisResultBuilder<CommonSharedStatus.FAILED> {
+  static failed() {
     return new ThreatAnalysisResultBuilder<CommonSharedStatus.FAILED>()
       .title('Threat analysis failed')
       .type(CommonSharedStatus.FAILED)
@@ -108,7 +100,7 @@ export class ThreatAnalysisResultBuilder<T extends ThreatStatus | CommonSharedSt
       .description('Threat analysis failed. Review before processing.')
   }
 
-  static ownershipChange(): ThreatAnalysisResultBuilder<ThreatStatus.OWNERSHIP_CHANGE> {
+  static ownershipChange() {
     return new ThreatAnalysisResultBuilder<ThreatStatus.OWNERSHIP_CHANGE>()
       .title('Ownership change')
       .type(ThreatStatus.OWNERSHIP_CHANGE)
@@ -116,7 +108,7 @@ export class ThreatAnalysisResultBuilder<T extends ThreatStatus | CommonSharedSt
       .description("Verify this change before proceeding as it will change the Safe's ownership")
   }
 
-  static moduleChange(): ThreatAnalysisResultBuilder<ThreatStatus.MODULE_CHANGE> {
+  static moduleChange() {
     return new ThreatAnalysisResultBuilder<ThreatStatus.MODULE_CHANGE>()
       .title('Modules change')
       .type(ThreatStatus.MODULE_CHANGE)
@@ -124,7 +116,7 @@ export class ThreatAnalysisResultBuilder<T extends ThreatStatus | CommonSharedSt
       .description('Verify this change before proceeding as it will change Safe modules.')
   }
 
-  static masterCopyChange(): ThreatAnalysisResultBuilder<ThreatStatus.MASTERCOPY_CHANGE> {
+  static masterCopyChange() {
     return new ThreatAnalysisResultBuilder<ThreatStatus.MASTERCOPY_CHANGE>()
       .title('Mastercopy change')
       .type(ThreatStatus.MASTERCOPY_CHANGE)
