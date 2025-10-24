@@ -1,37 +1,94 @@
 .card {
-  padding: var(--space-4);
+  padding: 24px;
   background: #ffffff;
   border: 1px solid #5fddff;
   border-radius: 6px;
   height: 100%;
+  position: relative;
 }
 
-.iconContainer {
-  position: relative;
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: flex-end;
+  justify-content: center;
+  height: 100%;
+}
+
+.closeButton {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  color: var(--color-text-primary);
+  padding: 4px;
+}
+
+.mainContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  padding-left: 82px;
+  width: 100%;
+}
+
+.eligibilityTag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--background-main, #f4f4f4);
+  padding: 2px 8px 2px 4px;
+  border-radius: 6px;
+}
+
+.tagIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.tagText {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--text-primary, #121312);
+  letter-spacing: 1px;
+}
+
+.title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+  color: var(--text-primary, #121312);
+  letter-spacing: 0.1px;
+  margin: 0;
+}
+
+.description {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--primary-light, #636669);
+  letter-spacing: 0.17px;
+  margin: 0;
+}
+
+.coinsContainer {
+  position: absolute;
+  left: 24px;
+  top: 48px;
   width: 58px;
   height: 58px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
 
-.title {
-  pointer-events: none;
-  user-select: none;
-  margin-bottom: 4px;
-}
-
-.description {
-  pointer-events: auto;
-}
-
-.infoStack {
-  margin-top: var(--space-1);
-}
-
-.infoIcon {
-  color: var(--color-static-light);
+.coinsImage {
+  display: block;
 }
 
 /* Skeleton loading states */
