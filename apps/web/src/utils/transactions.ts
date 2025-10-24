@@ -9,6 +9,7 @@ import type {
   IncomingTransferPage,
   MultisigTransactionPage,
   TransactionItemPage,
+  CreationTransaction,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 import type { ExecutionInfo } from '@safe-global/store/gateway/types'
@@ -413,7 +414,7 @@ export const makeTxFromDetails = (txDetails: TransactionDetails): ModuleTransact
     ? isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)
       ? txDetails.detailedExecutionInfo.submittedAt
       : now
-    : (txDetails.executedAt ?? now)
+    : txDetails.executedAt ?? now
 
   return {
     type: TransactionListItemType.TRANSACTION,
@@ -586,4 +587,34 @@ export const getSafeTransaction = async (safeTxHash: string, chainId: string, sa
   } catch (e) {
     return undefined
   }
+}
+
+/**
+ * Fetch creation transaction data from the gateway using RTK Query.
+ * This function can be used in non-React contexts (e.g., async functions, services).
+ * It dispatches the query and waits for the result.
+ *
+ * @param chainId - The chain ID where the Safe was deployed
+ * @param safeAddress - The Safe address
+ * @returns The creation transaction data
+ * @throws Error if the store is not initialized or if the request fails
+ */
+export const getCreationTransaction = async (chainId: string, safeAddress: string): Promise<CreationTransaction> => {
+  const store = getStoreInstance()
+
+  const result = await store
+    .dispatch(
+      cgwApi.endpoints.transactionsGetCreationTransactionV1.initiate(
+        {
+          chainId,
+          safeAddress,
+        },
+        {
+          forceRefetch: true,
+        },
+      ),
+    )
+    .unwrap()
+
+  return result
 }
