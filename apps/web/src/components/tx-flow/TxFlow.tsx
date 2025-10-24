@@ -11,6 +11,7 @@ import { TxChecks, TxNote, SignerSelect, Blockaid } from './features'
 import { Batching, ComboSubmit, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
 import { SlotProvider } from './slots'
 import { useTrackTimeSpent } from '../tx/SignOrExecuteForm/tracking'
+import LedgerHashComparison from '@/features/ledger'
 
 type SubmitCallbackProps = { txId?: string; isExecuted?: boolean }
 export type SubmitCallback = (args?: SubmitCallbackProps) => void
@@ -114,6 +115,8 @@ export const TxFlow = <T extends unknown>({
                   <Propose />
                 </ConfirmTxReceipt>
               </TxFlowContent>
+
+              <LedgerHashComparison />
             </TxFlowProvider>
           </SlotProvider>
         </TxSecurityProvider>
