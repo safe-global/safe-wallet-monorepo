@@ -16,9 +16,7 @@ export const AnalysisGroupCard = ({
   const [isOpen, setIsOpen] = useState(false)
 
   const visibleResults = useMemo(() => mapVisibleAnalysisResults(Object.values(data || [])), [data])
-  const primaryResult = useMemo(() => {
-    return visibleResults[0]
-  }, [visibleResults])
+  const primaryResult = useMemo(() => visibleResults[0], [visibleResults])
 
   if (!visibleResults.length) {
     return null
