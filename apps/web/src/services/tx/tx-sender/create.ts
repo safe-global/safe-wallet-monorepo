@@ -5,14 +5,25 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import type { AddOwnerTxParams, RemoveOwnerTxParams, SwapOwnerTxParams } from '@safe-global/protocol-kit'
 import type { MetaTransactionData, SafeTransaction, SafeTransactionDataPartial } from '@safe-global/types-kit'
+import { OperationType } from '@safe-global/types-kit'
 import extractTxInfo from '../extractTxInfo'
 import { getAndValidateSafeSDK } from './sdk'
+
+/**
+ * TESTING HELPER: Force transaction operation to DelegateCall
+ */
+const forceDelegateCall = (safeTx: SafeTransaction): SafeTransaction => {
+  safeTx.data.operation = OperationType.DelegateCall
+  return safeTx
+}
 
 /**
  * Create a transaction from raw params
  */
 export const createTx = async (txParams: SafeTransactionDataPartial, nonce?: number): Promise<SafeTransaction> => {
   if (nonce !== undefined) txParams = { ...txParams, nonce }
+  // TESTING: Force all transactions to use DelegateCall
+  txParams = { ...txParams, operation: OperationType.DelegateCall }
   const safeSDK = getAndValidateSafeSDK()
   return safeSDK.createTransaction({ transactions: [txParams] })
 }
@@ -23,12 +34,15 @@ export const createTx = async (txParams: SafeTransactionDataPartial, nonce?: num
  */
 export const createMultiSendCallOnlyTx = async (txParams: MetaTransactionData[]): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
-  return safeSDK.createTransaction({ transactions: txParams, onlyCalls: true })
+  // TESTING: Force all transactions to use DelegateCall
+  const modifiedParams = txParams.map(tx => ({ ...tx, operation: OperationType.DelegateCall }))
+  return safeSDK.createTransaction({ transactions: modifiedParams, onlyCalls: false })
 }
 
 export const createRemoveOwnerTx = async (txParams: RemoveOwnerTxParams): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
-  return safeSDK.createRemoveOwnerTx(txParams)
+  const safeTx = await safeSDK.createRemoveOwnerTx(txParams)
+  return forceDelegateCall(safeTx)
 }
 
 export const createAddOwnerTx = async (
@@ -37,7 +51,10 @@ export const createAddOwnerTx = async (
   txParams: AddOwnerTxParams,
 ): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
-  if (isDeployed) return safeSDK.createAddOwnerTx(txParams)
+  if (isDeployed) {
+    const safeTx = await safeSDK.createAddOwnerTx(txParams)
+    return forceDelegateCall(safeTx)
+  }
 
   const safeVersion = safeSDK.getContractVersion()
 
@@ -49,6 +66,7 @@ export const createAddOwnerTx = async (
     to: await safeSDK.getAddress(),
     value: '0',
     data,
+    operation: OperationType.DelegateCall,
   }
 
   return safeSDK.createTransaction({
@@ -62,7 +80,10 @@ export const createSwapOwnerTx = async (
   txParams: SwapOwnerTxParams,
 ): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
-  if (isDeployed) return safeSDK.createSwapOwnerTx(txParams)
+  if (isDeployed) {
+    const safeTx = await safeSDK.createSwapOwnerTx(txParams)
+    return forceDelegateCall(safeTx)
+  }
 
   const safeVersion = safeSDK.getContractVersion()
 
@@ -74,6 +95,7 @@ export const createSwapOwnerTx = async (
     to: await safeSDK.getAddress(),
     value: '0',
     data,
+    operation: OperationType.DelegateCall,
   }
 
   return safeSDK.createTransaction({
@@ -83,17 +105,20 @@ export const createSwapOwnerTx = async (
 
 export const createUpdateThresholdTx = async (threshold: number): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
-  return safeSDK.createChangeThresholdTx(threshold)
+  const safeTx = await safeSDK.createChangeThresholdTx(threshold)
+  return forceDelegateCall(safeTx)
 }
 
 export const createRemoveModuleTx = async (moduleAddress: string): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
-  return safeSDK.createDisableModuleTx(moduleAddress)
+  const safeTx = await safeSDK.createDisableModuleTx(moduleAddress)
+  return forceDelegateCall(safeTx)
 }
 
 export const createRemoveGuardTx = async (): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
-  return safeSDK.createDisableGuardTx()
+  const safeTx = await safeSDK.createDisableGuardTx()
+  return forceDelegateCall(safeTx)
 }
 
 /**
@@ -101,7 +126,8 @@ export const createRemoveGuardTx = async (): Promise<SafeTransaction> => {
  */
 export const createRejectTx = async (nonce: number): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
-  return safeSDK.createRejectionTransaction(nonce)
+  const safeTx = await safeSDK.createRejectionTransaction(nonce)
+  return forceDelegateCall(safeTx)
 }
 
 /**
