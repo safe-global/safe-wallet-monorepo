@@ -39,9 +39,16 @@
 }
 
 .subLabel {
-  display: flex;
-  gap: 4px;
-  align-items: center;
+  display: block;
+}
+
+.infoIconInline {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  color: #a1a3a7;
+  margin-left: 4px;
+  vertical-align: middle;
 }
 
 .noFeeTag {

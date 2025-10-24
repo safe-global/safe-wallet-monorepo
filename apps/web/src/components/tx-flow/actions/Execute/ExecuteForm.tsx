@@ -15,6 +15,7 @@ import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
 import useWalletCanRelay from '@/hooks/useWalletCanRelay'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
+import NoFeeNovemberTermsCheckbox from '@/features/no-fee-november/components/NoFeeNovemberTermsCheckbox'
 import { hasRemainingRelays } from '@/utils/relaying'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
@@ -76,6 +77,16 @@ export const ExecuteForm = ({
 
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
+
+  // Terms acceptance state for No-Fee November
+  const [termsAccepted, setTermsAccepted] = useState(false)
+
+  // Reset terms acceptance when execution method changes
+  const handleExecutionMethodChange = (method: ExecutionMethod | ((prev: ExecutionMethod) => ExecutionMethod)) => {
+    const newMethod = typeof method === 'function' ? method(executionMethod) : method
+    setExecutionMethod(newMethod)
+    setTermsAccepted(false) // Reset terms acceptance when switching methods
+  }
 
   // SC wallets can relay fully signed transactions
   const [walletCanRelay] = useWalletCanRelay(safeTx)
@@ -156,7 +167,8 @@ export const ExecuteForm = ({
     disableSubmit ||
     isExecutionLoop ||
     cannotPropose ||
-    (needsRiskConfirmation && !isRiskConfirmed)
+    (needsRiskConfirmation && !isRiskConfirmed) ||
+    (willNoFeeNovember && !termsAccepted)
 
   return (
     <>
@@ -170,7 +182,9 @@ export const ExecuteForm = ({
             gasLimitError={gasLimitError}
             willRelay={willRelay}
             noFeeNovember={
-              willNoFeeNovember ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 } : undefined
+              canNoFeeNovember && executionMethod !== ExecutionMethod.WALLET
+                ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 }
+                : undefined
             }
           />
 
@@ -178,12 +192,15 @@ export const ExecuteForm = ({
             <div className={css.noTopBorder}>
               <ExecutionMethodSelector
                 executionMethod={executionMethod}
-                setExecutionMethod={setExecutionMethod}
+                setExecutionMethod={handleExecutionMethodChange}
                 relays={canNoFeeNovember ? undefined : relays[0]}
                 noFeeNovember={
                   canNoFeeNovember ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 } : undefined
                 }
               />
+
+              {/* Terms checkbox - only show when No-Fee November is selected */}
+              {willNoFeeNovember && <NoFeeNovemberTermsCheckbox onAcceptanceChange={setTermsAccepted} />}
             </div>
           )}
         </div>

@@ -1,0 +1,36 @@
+.container {
+  padding: 16px 0;
+  border-top: 1px solid var(--border-light, #dcdee0);
+}
+
+.formControl {
+  margin: 0;
+  align-items: flex-start;
+}
+
+.checkbox {
+  padding: 0;
+  margin-right: 10px;
+  margin-top: 2px;
+}
+
+.label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--text-secondary, #a1a3a7);
+  letter-spacing: 0.17px;
+  margin: 0;
+}
+
+.link {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  text-decoration: underline;
+  color: var(--text-secondary, #a1a3a7);
+
+  &:hover {
+    color: var(--text-primary, #121312);
+  }
+}

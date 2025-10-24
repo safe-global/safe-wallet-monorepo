@@ -35,6 +35,9 @@ describe('useNoFeeNovemberEligibility', () => {
   })
 
   it('should return not eligible after loading completes', async () => {
+    // Mock Math.random to return 0.3 before rendering the hook
+    jest.spyOn(Math, 'random').mockReturnValue(0.3)
+
     mockUseSafeInfo.mockReturnValue({
       safeAddress: '0x123',
       safe: { chainId: '1' },

@@ -1,10 +1,11 @@
-import { Box, FormControl, FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
+import { Box, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Tooltip } from '@mui/material'
 import type { Dispatch, SetStateAction, ReactElement, ChangeEvent } from 'react'
 
 import useWallet from '@/hooks/wallets/useWallet'
 import WalletIcon from '@/components/common/WalletIcon'
 import SponsoredBy from '../SponsoredBy'
 import RemainingRelays from '../RemainingRelays'
+import InfoIcon from '@mui/icons-material/Info'
 
 import css from './styles.module.css'
 import BalanceInfo from '@/components/tx/BalanceInfo'
@@ -70,9 +71,24 @@ const _ExecutionMethodSelector = ({
                     <Typography className={css.mainLabel}>Sponsored gas</Typography>
                     <div className={css.subLabel}>
                       <Typography variant="body2" color="text.secondary">
-                        Part of
+                        Part of the No-Fee November, Safe Ecosystem Foundation sponsorship program.{' '}
+                        <Tooltip
+                          title={
+                            <Box>
+                              <Typography variant="body2" color="inherit">
+                                SAFE holders enjoy gasless transactions on Ethereum Mainnet this November.{' '}
+                                <Typography component="span" fontWeight="bold">
+                                  Learn more
+                                </Typography>
+                              </Typography>
+                            </Box>
+                          }
+                          placement="top"
+                          arrow
+                        >
+                          <InfoIcon className={css.infoIconInline} />
+                        </Tooltip>
                       </Typography>
-                      <span className={css.noFeeTag}>No fee November</span>
                     </div>
                   </div>
                 ) : (
