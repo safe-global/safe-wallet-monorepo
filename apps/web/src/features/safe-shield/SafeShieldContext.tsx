@@ -27,7 +27,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
 
   const recipientOnlyAnalysis = useRecipientAnalysis(recipientAddresses)
   const counterpartyAnalysis = useCounterpartyAnalysis(safeTx)
-  const threat = useThreatAnalysis()
+  const threat = useThreatAnalysis(safeTx)
 
   const recipient = recipientOnlyAnalysis || counterpartyAnalysis.recipient
   const contract = counterpartyAnalysis.contract
