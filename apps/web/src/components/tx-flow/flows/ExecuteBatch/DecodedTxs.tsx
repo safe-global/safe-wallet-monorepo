@@ -1,4 +1,8 @@
-import type { DataDecoded, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import type {
+  BaseDataDecoded,
+  DataDecoded,
+  TransactionDetails,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Box } from '@mui/material'
 import extractTxInfo from '@/services/tx/extractTxInfo'
 import { isCustomTxInfo, isNativeTokenTransfer, isTransferTxInfo } from '@/utils/transaction-guards'
@@ -49,7 +53,7 @@ const DecodedTxs = ({ txs }: { txs: TransactionDetails[] | undefined }) => {
             <SingleTxDecoded
               key={transaction.txId}
               tx={{
-                dataDecoded,
+                dataDecoded: dataDecoded as unknown as BaseDataDecoded,
                 data: txParams.data,
                 value: txParams.value,
                 to: txParams.to,

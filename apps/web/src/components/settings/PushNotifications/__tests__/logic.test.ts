@@ -1,5 +1,4 @@
 import * as firebase from 'firebase/messaging'
-import { DeviceType } from '@safe-global/safe-gateway-typescript-sdk/dist/types/notifications'
 import { BrowserProvider, type JsonRpcSigner, toBeHex } from 'ethers'
 
 import * as logic from '../logic'
@@ -124,7 +123,7 @@ describe('Notifications', () => {
         cloudMessagingToken: token,
         buildNumber: '0',
         bundle: 'safe',
-        deviceType: DeviceType.WEB,
+        deviceType: 'WEB',
         version: packageJson.version,
         timestamp: expect.any(String),
         safeRegistrations: [

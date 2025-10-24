@@ -1,6 +1,6 @@
 import { type Eip1193Provider, getAddress, type JsonRpcProvider } from 'ethers'
 import { SafeWalletProvider, type WalletSDK } from '@/services/safe-wallet-provider'
-import { getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import { getTransactionDetails } from '@/utils/transactions'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { type NextRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'

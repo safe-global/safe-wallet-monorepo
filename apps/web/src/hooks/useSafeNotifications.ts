@@ -1,6 +1,6 @@
+import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { useCallback, useEffect } from 'react'
 import { showNotification, closeNotification } from '@/store/notificationsSlice'
-import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
 import useSafeInfo from './useSafeInfo'
 import { useAppDispatch } from '@/store'
 import { AppRoutes } from '@/config/routes'

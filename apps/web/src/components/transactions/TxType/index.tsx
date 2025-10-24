@@ -1,12 +1,12 @@
+import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useTransactionType } from '@/hooks/useTransactionType'
-import type { TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
 import { Box } from '@mui/material'
 import css from './styles.module.css'
 import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
 import { isValidElement } from 'react'
 
 type TxTypeProps = {
-  tx: TransactionSummary
+  tx: Transaction
 }
 
 export const TxTypeIcon = ({ tx }: TxTypeProps) => {

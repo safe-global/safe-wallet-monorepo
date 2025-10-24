@@ -1,13 +1,10 @@
+import type { NativeStakingWithdrawTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Stack } from '@mui/material'
 import FieldsGrid from '@/components/tx/FieldsGrid'
-import {
-  type NativeStakingWithdrawConfirmationView,
-  type StakingTxWithdrawInfo,
-} from '@safe-global/safe-gateway-typescript-sdk'
 import TokenAmount from '@/components/common/TokenAmount'
 
 type StakingOrderConfirmationViewProps = {
-  order: NativeStakingWithdrawConfirmationView | StakingTxWithdrawInfo
+  order: NativeStakingWithdrawTransactionInfo
 }
 
 const StakingConfirmationTxWithdraw = ({ order }: StakingOrderConfirmationViewProps) => {

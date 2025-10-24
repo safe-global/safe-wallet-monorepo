@@ -1,7 +1,7 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { MutableRefObject } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import { getAddress } from 'ethers'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import type { Chain as WebCoreChain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type {

@@ -3902,6 +3902,108 @@
         "tags": ["safes"]
       }
     },
+    "/v1/chains/{chainId}/security/{safeAddress}/recipient/{recipientAddress}": {
+      "get": {
+        "description": "Performs real-time security analysis of a recipient address for a specific Safe. Returns analysis results grouped by status group, sorted by severity (CRITICAL first).",
+        "operationId": "safeShieldAnalyzeRecipientV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recipientAddress",
+            "required": true,
+            "in": "path",
+            "description": "Recipient address to analyze",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recipient interaction analysis results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipientInteractionAnalysisDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Analyze recipient address",
+        "tags": ["safe-shield"]
+      }
+    },
+    "/v1/chains/{chainId}/security/{safeAddress}/counterparty-analysis": {
+      "post": {
+        "description": "Performs combined contract and recipient analysis for a Safe transaction. Returns both analyses grouped by status group for each counterparty.",
+        "operationId": "safeShieldAnalyzeCounterpartyV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Transaction data used to analyze all counterparties involved.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CounterpartyAnalysisRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Combined counterparty analysis including recipients and contracts grouped by status group and mapped to an address.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CounterpartyAnalysisDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Analyze transaction counterparties",
+        "tags": ["safe-shield"]
+      }
+    },
     "/v1/targeted-messaging/outreaches/{outreachId}/chains/{chainId}/safes/{safeAddress}": {
       "get": {
         "operationId": "targetedMessagingGetTargetedSafeV1",
@@ -5030,7 +5132,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Transaction"
+                  "$ref": "#/components/schemas/TransactionDetails"
                 }
               }
             }
@@ -5129,7 +5231,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main",
+    "version": "",
     "contact": {}
   },
   "tags": [],
@@ -5709,14 +5811,14 @@
         "type": "object",
         "properties": {
           "chainName": {
-            "type": "number",
+            "type": "string",
             "nullable": true
           },
           "enabled": {
             "type": "boolean"
           }
         },
-        "required": ["enabled"]
+        "required": ["chainName", "enabled"]
       },
       "ContractAddresses": {
         "type": "object",
@@ -6571,10 +6673,13 @@
             "type": "string"
           },
           "data": {
-            "type": "object"
+            "type": "string",
+            "nullable": true,
+            "description": "Hexadecimal encoded data",
+            "pattern": "^0x[0-9a-fA-F]*$"
           }
         },
-        "required": ["operation", "value", "to"]
+        "required": ["operation", "value", "to", "data"]
       },
       "DataDecodedParameter": {
         "type": "object",
@@ -6586,7 +6691,18 @@
             "type": "string"
           },
           "value": {
-            "type": "object"
+            "description": "Parameter value - typically a string, but may be an array of strings for array types (e.g., address[], uint256[])",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
           },
           "valueDecoded": {
             "oneOf": [
@@ -7987,6 +8103,280 @@
         },
         "required": ["address", "chainId", "threshold", "owners", "fiatTotal", "queued"]
       },
+      "RecipientInteractionResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"],
+            "example": "INFO"
+          },
+          "type": {
+            "type": "string",
+            "description": "Recipient interaction status code",
+            "example": "NEW_RECIPIENT",
+            "enum": ["NEW_RECIPIENT", "RECURRING_RECIPIENT", "FAILED"]
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding",
+            "example": "New recipient"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications",
+            "example": "This is the first time you are interacting with this recipient"
+          }
+        },
+        "required": ["severity", "type", "title", "description"]
+      },
+      "RecipientInteractionAnalysisDto": {
+        "type": "object",
+        "properties": {
+          "RECIPIENT_INTERACTION": {
+            "description": "Analysis results related to recipient interaction history. Shows whether this is a new or recurring recipient.",
+            "example": [
+              {
+                "severity": "INFO",
+                "type": "NEW_RECIPIENT",
+                "title": "New recipient",
+                "description": "This is the first time you are interacting with this recipient"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecipientInteractionResultDto"
+            }
+          }
+        },
+        "required": ["RECIPIENT_INTERACTION"]
+      },
+      "CounterpartyAnalysisRequestDto": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient address of the transaction."
+          },
+          "value": {
+            "type": "string",
+            "description": "Amount to send with the transaction."
+          },
+          "data": {
+            "type": "string",
+            "description": "Hex-encoded data payload for the transaction."
+          },
+          "operation": {
+            "type": "number",
+            "enum": [0, 1],
+            "description": "Operation type: 0 for CALL, 1 for DELEGATECALL."
+          }
+        },
+        "required": ["to", "value", "data", "operation"]
+      },
+      "RecipientResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"],
+            "example": "INFO"
+          },
+          "type": {
+            "type": "string",
+            "description": "Bridge compatibility status code",
+            "example": "MISSING_OWNERSHIP",
+            "enum": [
+              "NEW_RECIPIENT",
+              "RECURRING_RECIPIENT",
+              "INCOMPATIBLE_SAFE",
+              "MISSING_OWNERSHIP",
+              "UNSUPPORTED_NETWORK",
+              "DIFFERENT_SAFE_SETUP",
+              "FAILED"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding",
+            "example": "New recipient"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications",
+            "example": "This is the first time you are interacting with this recipient"
+          }
+        },
+        "required": ["severity", "type", "title", "description"]
+      },
+      "RecipientAnalysisDto": {
+        "type": "object",
+        "properties": {
+          "RECIPIENT_INTERACTION": {
+            "description": "Analysis results related to recipient interaction history. Shows whether this is a new or recurring recipient.",
+            "example": [
+              {
+                "severity": "INFO",
+                "type": "NEW_RECIPIENT",
+                "title": "New recipient",
+                "description": "This is the first time you are interacting with this recipient"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecipientResultDto"
+            }
+          },
+          "BRIDGE": {
+            "description": "Analysis results for cross-chain bridge operations. Identifies compatibility issues, ownership problems, or unsupported networks.",
+            "example": [
+              {
+                "severity": "WARN",
+                "type": "MISSING_OWNERSHIP",
+                "title": "No ownership on target chain",
+                "description": "You do not have ownership of a Safe on the target chain"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecipientResultDto"
+            }
+          }
+        }
+      },
+      "ContractAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"],
+            "example": "INFO"
+          },
+          "type": {
+            "type": "string",
+            "description": "Contract verification status code",
+            "example": "VERIFIED",
+            "enum": [
+              "VERIFIED",
+              "NOT_VERIFIED",
+              "NOT_VERIFIED_BY_SAFE",
+              "VERIFICATION_UNAVAILABLE",
+              "NEW_CONTRACT",
+              "KNOWN_CONTRACT",
+              "UNEXPECTED_DELEGATECALL",
+              "FAILED"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding",
+            "example": "New recipient"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications",
+            "example": "This is the first time you are interacting with this recipient"
+          }
+        },
+        "required": ["severity", "type", "title", "description"]
+      },
+      "ContractAnalysisDto": {
+        "type": "object",
+        "properties": {
+          "CONTRACT_VERIFICATION": {
+            "description": "Analysis results for contract verification status. Shows whether contracts are verified and source code is available.",
+            "example": [
+              {
+                "severity": "INFO",
+                "type": "VERIFIED",
+                "title": "Verified contract",
+                "description": "This contract has been verified and its source code is available"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractAnalysisResultDto"
+            }
+          },
+          "CONTRACT_INTERACTION": {
+            "description": "Analysis results related to contract interaction history. Shows whether this is a new or previously interacted contract.",
+            "example": [
+              {
+                "severity": "INFO",
+                "type": "NEW_CONTRACT",
+                "title": "New contract",
+                "description": "This is the first time you are interacting with this contract"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractAnalysisResultDto"
+            }
+          },
+          "DELEGATECALL": {
+            "description": "Analysis results for delegatecall operations. Identifies unexpected or potentially dangerous delegate calls.",
+            "example": [
+              {
+                "severity": "CRITICAL",
+                "type": "UNEXPECTED_DELEGATECALL",
+                "title": "Unexpected delegatecall",
+                "description": "An unexpected delegatecall operation was detected that could be dangerous"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractAnalysisResultDto"
+            }
+          }
+        }
+      },
+      "CounterpartyAnalysisDto": {
+        "type": "object",
+        "properties": {
+          "recipient": {
+            "type": "object",
+            "description": "Recipient analysis results mapped by address. Contains recipient interaction history and bridge analysis.",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/RecipientAnalysisDto"
+            },
+            "example": {
+              "0x0000000000000000000000000000000000000000": {
+                "RECIPIENT_INTERACTION": [
+                  {
+                    "severity": "INFO",
+                    "type": "NEW_RECIPIENT",
+                    "title": "New recipient",
+                    "description": "This is the first time you are interacting with this recipient"
+                  }
+                ]
+              }
+            }
+          },
+          "contract": {
+            "type": "object",
+            "description": "Contract analysis results mapped by address. Contains contract verification, interaction history, and delegatecall analysis.",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ContractAnalysisDto"
+            },
+            "example": {
+              "0x0000000000000000000000000000000000000000": {
+                "CONTRACT_VERIFICATION": [
+                  {
+                    "severity": "INFO",
+                    "type": "VERIFIED",
+                    "title": "Verified contract",
+                    "description": "This contract has been verified and its source code is available"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "required": ["recipient", "contract"]
+      },
       "TargetedSafe": {
         "type": "object",
         "properties": {
@@ -8709,8 +9099,12 @@
             "description": "The amount of fees paid for this order."
           },
           "executedFeeToken": {
-            "type": "string",
-            "description": "The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders)."
+            "description": "The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokenInfo"
+              }
+            ]
           },
           "receiver": {
             "type": "string",
@@ -9032,8 +9426,12 @@
             "description": "The executed surplus fee raw amount (no decimals), or null if there are too many parts"
           },
           "executedFeeToken": {
-            "type": "string",
-            "description": "The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders)."
+            "description": "The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokenInfo"
+              }
+            ]
           },
           "sellToken": {
             "description": "The sell token of the TWAP",

@@ -72,7 +72,14 @@ const createMockOrder = (
   },
   explorerUrl: 'https://explorer.example.com',
   executedFee: '0',
-  executedFeeToken: '0xfeetoken',
+  executedFeeToken: {
+    address: '0xfeetoken',
+    name: 'FeeToken',
+    symbol: 'FEE',
+    decimals: 18,
+    logoUri: 'https://example.com/feetoken.png',
+    trusted: true,
+  },
   receiver,
   owner,
   fullAppData: {
@@ -148,7 +155,7 @@ describe('useRecipientItem', () => {
     const mockOrder = {
       ...createMockOrder(),
       receiver: null,
-    } as OrderTransactionInfo & { receiver: null }
+    } as unknown as OrderTransactionInfo
 
     const result = useRecipientItem(mockOrder)
 

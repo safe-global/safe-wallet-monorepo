@@ -1,7 +1,7 @@
 import TokenAmount from '@/components/common/TokenAmount'
-import type { VaultDepositTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { VaultRedeemTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
-const VaultRedeemTxInfo = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) => {
+const VaultRedeemTxInfo = ({ txInfo }: { txInfo: VaultRedeemTransactionInfo }) => {
   return (
     <TokenAmount
       logoUri={txInfo.tokenInfo.logoUri!}

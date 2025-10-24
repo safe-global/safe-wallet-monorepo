@@ -1,5 +1,5 @@
+import type { DataDecoded, DataDecodedParameter } from '@safe-global/store/gateway/AUTO_GENERATED/data-decoded'
 import type { BaseTransaction } from '@safe-global/safe-apps-sdk'
-import type { DecodedDataResponse } from '@safe-global/safe-gateway-typescript-sdk'
 import { parseUnits } from 'ethers'
 import { EMPTY_DATA } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { type ApprovalInfo } from '../hooks/useApprovalInfos'
@@ -31,20 +31,28 @@ const parseApprovalAmount = (amount: string, decimals: number) => {
   return parseUnits(amount, decimals)
 }
 
-export const extractTxs: (txs: BaseTransaction[] | (DecodedDataResponse & { to: string })) => BaseTransaction[] = (
-  txs,
-) => {
+function hasMultiSendParameters(
+  txs: DataDecoded & { to: string },
+): txs is DataDecoded & { to: string; parameters: DataDecodedParameter[] } {
+  return txs.method === MULTISEND_METHOD && txs.parameters?.length === 1
+}
+
+function hasApproveCallParameters(
+  txs: DataDecoded & { to: string },
+): txs is DataDecoded & { to: string; parameters: DataDecodedParameter[] } {
+  return txs.method === APPROVE_METHOD && txs.parameters?.length === 2
+}
+
+export const extractTxs: (txs: BaseTransaction[] | (DataDecoded & { to: string })) => BaseTransaction[] = (txs) => {
   if (Array.isArray(txs)) {
     return txs
   }
 
-  const isMultiSendCall = txs.method === MULTISEND_METHOD && txs.parameters.length === 1
-
   // Our multisend contract takes 1 param called transactions
-  if (isMultiSendCall) {
+  if (hasMultiSendParameters(txs)) {
     const txParam = txs.parameters[0]
     if (txParam.name === TRANSACTIONS_PARAM) {
-      return txParam.valueDecoded
+      return txParam.valueDecoded && Array.isArray(txParam.valueDecoded)
         ? txParam.valueDecoded.map((innerTx) => ({
             to: innerTx.to,
             data: innerTx.data || EMPTY_DATA,
@@ -54,9 +62,7 @@ export const extractTxs: (txs: BaseTransaction[] | (DecodedDataResponse & { to: 
     }
   }
 
-  const isApproveCall = txs.method === APPROVE_METHOD && txs.parameters.length === 2
-
-  if (isApproveCall) {
+  if (hasApproveCallParameters(txs)) {
     const spenderParam = txs.parameters[0]
     const amountParam = txs.parameters[1]
 

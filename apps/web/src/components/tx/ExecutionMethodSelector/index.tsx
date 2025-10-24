@@ -1,16 +1,16 @@
+import type { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import { Box, FormControl, FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
-import type { Dispatch, SetStateAction, ReactElement, ChangeEvent } from 'react'
 
+import type { Dispatch, SetStateAction, ReactElement, ChangeEvent } from 'react'
 import useWallet from '@/hooks/wallets/useWallet'
 import WalletIcon from '@/components/common/WalletIcon'
 import SponsoredBy from '../SponsoredBy'
-import RemainingRelays from '../RemainingRelays'
 
+import RemainingRelays from '../RemainingRelays'
 import css from './styles.module.css'
 import BalanceInfo from '@/components/tx/BalanceInfo'
 import madProps from '@/utils/mad-props'
 import { useCurrentChain } from '@/hooks/useChains'
-import type { RelayCountResponse } from '@safe-global/safe-gateway-typescript-sdk'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 
@@ -32,7 +32,7 @@ const _ExecutionMethodSelector = ({
   chain?: Chain
   executionMethod: ExecutionMethod
   setExecutionMethod: Dispatch<SetStateAction<ExecutionMethod>>
-  relays?: RelayCountResponse
+  relays?: RelaysRemaining
   noLabel?: boolean
   tooltip?: string
 }): ReactElement | null => {

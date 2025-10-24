@@ -1,7 +1,7 @@
+import type { AnyTransactionItem } from '@/utils/tx-list'
 import type { ReactElement } from 'react'
 import { useContext } from 'react'
 import { Box, Paper, Typography } from '@mui/material'
-import type { Transaction } from '@safe-global/safe-gateway-typescript-sdk'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import ExpandableTransactionItem from '@/components/transactions/TxListItem/ExpandableTransactionItem'
 import css from './styles.module.css'
@@ -23,7 +23,7 @@ const Disclaimer = () => (
   </Typography>
 )
 
-const TxGroup = ({ groupedListItems }: { groupedListItems: Transaction[] }): ReactElement => {
+const TxGroup = ({ groupedListItems }: { groupedListItems: AnyTransactionItem[] }): ReactElement => {
   const nonce = isMultisigExecutionInfo(groupedListItems[0].transaction.executionInfo)
     ? groupedListItems[0].transaction.executionInfo.nonce
     : undefined
@@ -72,7 +72,7 @@ const TxGroup = ({ groupedListItems }: { groupedListItems: Transaction[] }): Rea
   )
 }
 
-const GroupedTxListItems = ({ groupedListItems }: { groupedListItems: Transaction[] }): ReactElement | null => {
+const GroupedTxListItems = ({ groupedListItems }: { groupedListItems: AnyTransactionItem[] }): ReactElement | null => {
   if (groupedListItems.length === 0) return null
 
   return (

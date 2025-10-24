@@ -1,9 +1,9 @@
+import type { ModuleTransaction, MultisigTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import TxProposalChip from '@/features/proposers/components/TxProposalChip'
 import StatusLabel from '@/features/swap/components/StatusLabel'
 import useIsExpiredSwap from '@/features/swap/hooks/useIsExpiredSwap'
 import { Box } from '@mui/material'
 import type { ReactElement } from 'react'
-import { type Transaction } from '@safe-global/safe-gateway-typescript-sdk'
 
 import css from './styles.module.css'
 import DateTime from '@/components/common/DateTime'
@@ -23,7 +23,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 type TxSummaryProps = {
   isConflictGroup?: boolean
   isBulkGroup?: boolean
-  item: Transaction
+  item: ModuleTransaction | MultisigTransaction
 }
 
 const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): ReactElement => {

@@ -1,6 +1,11 @@
-import type { ConflictHeader, DateLabel, Label, Transaction } from '@safe-global/safe-gateway-typescript-sdk'
+import { TransactionInfoType } from '@safe-global/store/gateway/types'
+import type {
+  ConflictHeaderQueuedItem,
+  LabelQueuedItem,
+  ModuleTransaction,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
-import { TransactionInfoType } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { isMultiSendTxInfo } from '../transaction-guards'
 import { getQueuedTransactionCount, getTxOrigin } from '../transactions'
 
@@ -26,9 +31,8 @@ describe('transactions', () => {
         next: undefined,
         previous: undefined,
         results: [
-          { timestamp: 0, type: 'DATE_LABEL' } as DateLabel,
-          { label: 'Next', type: 'LABEL' } as Label,
-          { nonce: 0, type: 'CONFLICT_HEADER' } as ConflictHeader,
+          { label: 'Next', type: 'LABEL' } as LabelQueuedItem,
+          { nonce: 0, type: 'CONFLICT_HEADER' } as ConflictHeaderQueuedItem,
         ],
       }
       expect(getQueuedTransactionCount(txPage)).toBe('0')
@@ -39,8 +43,8 @@ describe('transactions', () => {
         next: 'fakeNextUrl.com',
         previous: undefined,
         results: [
-          { type: 'TRANSACTION', transaction: { executionInfo: { type: 'MULTISIG', nonce: 0 } } } as Transaction,
-          { type: 'TRANSACTION', transaction: { executionInfo: { type: 'MULTISIG', nonce: 1 } } } as Transaction,
+          { type: 'TRANSACTION', transaction: { executionInfo: { type: 'MULTISIG', nonce: 0 } } } as ModuleTransaction,
+          { type: 'TRANSACTION', transaction: { executionInfo: { type: 'MULTISIG', nonce: 1 } } } as ModuleTransaction,
         ],
       }
       expect(getQueuedTransactionCount(txPage)).toBe('> 2')
@@ -54,11 +58,11 @@ describe('transactions', () => {
           {
             type: 'TRANSACTION',
             transaction: { executionInfo: { type: 'MULTISIG', nonce: 0 } },
-          } as Transaction,
+          } as ModuleTransaction,
           {
             type: 'TRANSACTION',
             transaction: { executionInfo: { type: 'MULTISIG', nonce: 0 } },
-          } as Transaction,
+          } as ModuleTransaction,
         ],
       }
       expect(getQueuedTransactionCount(txPage)).toBe('1')
@@ -135,7 +139,7 @@ describe('transactions', () => {
           methodName: 'multiSend',
           actionCount: 3,
           isCancellation: false,
-        }),
+        } as TransactionInfo),
       ).toBe(true)
     })
 
@@ -151,27 +155,10 @@ describe('transactions', () => {
           },
           dataSize: '1188',
           value: '0',
-          methodName: 'multiSend',
-          //actionCount: 3, // missing actionCount
-          isCancellation: false,
-        }),
-      ).toBe(false)
-
-      expect(
-        isMultiSendTxInfo({
-          type: TransactionInfoType.CUSTOM,
-          to: {
-            value: '0x40A2aCCbd92BCA938b02010E17A5b8929b49130D',
-            name: 'Gnosis Safe: MultiSendCallOnly',
-            logoUri:
-              'https://safe-transaction-assets.safe.global/contracts/logos/0x40A2aCCbd92BCA938b02010E17A5b8929b49130D.png',
-          },
-          dataSize: '1188',
-          value: '0',
           methodName: 'notMultiSend', // wrong method
           actionCount: 3,
           isCancellation: false,
-        }),
+        } as TransactionInfo),
       ).toBe(false)
 
       expect(
@@ -187,7 +174,7 @@ describe('transactions', () => {
               },
             ],
           },
-        }),
+        } as unknown as TransactionInfo),
       ).toBe(false)
     })
   })

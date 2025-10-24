@@ -1,7 +1,7 @@
+import type { RegisterDeviceDto } from '@safe-global/store/gateway/AUTO_GENERATED/notifications'
+import { DeviceType } from '@safe-global/store/gateway/types'
 import { getBytes, keccak256, toUtf8Bytes, type BrowserProvider } from 'ethers'
 import { getToken, getMessaging } from 'firebase/messaging'
-import { DeviceType } from '@safe-global/safe-gateway-typescript-sdk'
-import type { RegisterNotificationsRequest } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { FIREBASE_VAPID_KEY, initializeFirebaseApp } from '@/services/push-notifications/firebase'
 import packageJson from '../../../../package.json'
@@ -14,7 +14,7 @@ import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
 
 // We store UUID locally to track device registration
-export type NotificationRegistration = WithRequired<RegisterNotificationsRequest, 'uuid'>
+export type NotificationRegistration = WithRequired<RegisterDeviceDto, 'uuid'>
 
 export const requestNotificationPermission = async (): Promise<boolean> => {
   if (Notification.permission === 'granted') {
@@ -70,7 +70,7 @@ export const getRegisterDevicePayload = async ({
   safesToRegister: NotifiableSafes
   uuid: string
   wallet: ConnectedWallet
-}): Promise<RegisterNotificationsRequest> => {
+}): Promise<RegisterDeviceDto> => {
   const BUILD_NUMBER = '0' // Required value, but does not exist on web
   const BUNDLE = 'safe'
 
@@ -95,7 +95,7 @@ export const getRegisterDevicePayload = async ({
 
   const timestamp = Math.floor(new Date().getTime() / 1000).toString()
 
-  let safeRegistrations: RegisterNotificationsRequest['safeRegistrations'] = []
+  let safeRegistrations: RegisterDeviceDto['safeRegistrations'] = []
 
   // We cannot `Promise.all` here as Ledger/Trezor return a "busy" error when signing multiple messages at once
   for await (const [chainId, safeAddresses] of Object.entries(safesToRegister)) {

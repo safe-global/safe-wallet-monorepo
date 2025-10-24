@@ -1,3 +1,5 @@
+import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { ImplementationVersionState, TokenType } from '@safe-global/store/gateway/types'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { safeCreationDispatch, SafeCreationEvent } from '@/features/counterfactual/services/safeCreationEvents'
 import { addUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
@@ -13,11 +15,6 @@ import { assertProvider, assertTx, assertWallet } from '@/utils/helpers'
 import { type PredictedSafeProps } from '@safe-global/protocol-kit'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import type { SafeTransaction, SafeVersion, TransactionOptions } from '@safe-global/types-kit'
-import {
-  ImplementationVersionState,
-  type SafeBalanceResponse,
-  TokenType,
-} from '@safe-global/safe-gateway-typescript-sdk'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { BrowserProvider, Eip1193Provider, Provider, TransactionResponse } from 'ethers'
 
@@ -113,7 +110,7 @@ export const getCounterfactualBalance = async (safeAddress: string, provider?: B
     balance = (await getWeb3ReadOnly()?.getBalance(safeAddress)) ?? 0n
   }
 
-  return <SafeBalanceResponse>{
+  return <Balances>{
     fiatTotal: '0',
     items: [
       {

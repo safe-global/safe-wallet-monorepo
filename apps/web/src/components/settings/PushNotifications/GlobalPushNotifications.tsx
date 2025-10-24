@@ -1,3 +1,4 @@
+import type { AllOwnedSafes } from '@safe-global/store/gateway/types'
 import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
 import {
   Box,
@@ -19,7 +20,6 @@ import difference from 'lodash/difference'
 import pickBy from 'lodash/pickBy'
 import { Fragment, useEffect, useMemo, useState } from 'react'
 import type { ReactElement } from 'react'
-import type { AllOwnedSafes } from '@safe-global/safe-gateway-typescript-sdk'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import EthHashInfo from '@/components/common/EthHashInfo'

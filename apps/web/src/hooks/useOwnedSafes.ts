@@ -1,5 +1,5 @@
+import type { OwnedSafes } from '@safe-global/store/gateway/types'
 import { useMemo } from 'react'
-import { type OwnedSafes } from '@safe-global/safe-gateway-typescript-sdk'
 
 import useWallet from '@/hooks/wallets/useWallet'
 import useChainId from './useChainId'

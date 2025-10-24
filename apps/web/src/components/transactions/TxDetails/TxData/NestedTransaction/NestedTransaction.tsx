@@ -1,5 +1,5 @@
+import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Card, CardContent, CardHeader, cardHeaderClasses, Stack, SvgIcon, Typography } from '@mui/material'
-import { type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { Divider } from '@/components/tx/ColorCodedTxAccordion'
 
@@ -20,7 +20,7 @@ export const NestedTransaction = ({
   children,
   isConfirmationView = false,
 }: {
-  txData: TransactionData | undefined
+  txData: TransactionData | null | undefined
   children: ReactElement
   isConfirmationView?: boolean
 }) => {

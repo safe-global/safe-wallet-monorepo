@@ -1,3 +1,4 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactNode } from 'react'
 import { type SyntheticEvent, type ReactElement, memo, useMemo } from 'react'
 import { isNativeTokenTransfer, isTransferTxInfo } from '@/utils/transaction-guards'
@@ -12,7 +13,6 @@ import {
   styled,
   Typography,
 } from '@mui/material'
-import { TransactionInfoType, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { trackEvent, MODALS_EVENTS } from '@/services/analytics'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import accordionCss from '@/styles/accordion.module.css'
@@ -26,13 +26,8 @@ enum ColorLevel {
 }
 
 const TX_INFO_LEVEL = {
-  [ColorLevel.warning]: [TransactionInfoType.SETTINGS_CHANGE],
-  [ColorLevel.success]: [
-    TransactionInfoType.TRANSFER,
-    TransactionInfoType.SWAP_TRANSFER,
-    TransactionInfoType.TWAP_ORDER,
-    TransactionInfoType.NATIVE_STAKING_DEPOSIT,
-  ],
+  [ColorLevel.warning]: ['SettingsChange'],
+  [ColorLevel.success]: ['Transfer', 'SwapTransfer', 'TwapOrder', 'NativeStakingDeposit'],
 }
 
 const TxInfoColors: Record<ColorLevel, { main: string; mainDark?: string; background: string; border?: string }> = {
@@ -46,7 +41,7 @@ const TxInfoColors: Record<ColorLevel, { main: string; mainDark?: string; backgr
   },
 }
 
-const getMethodLevel = (txInfo?: TransactionInfoType): ColorLevel => {
+const getMethodLevel = (txInfo?: TransactionDetails['txInfo']['type']): ColorLevel => {
   if (!txInfo) {
     return ColorLevel.info
   }

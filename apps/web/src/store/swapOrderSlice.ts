@@ -1,6 +1,6 @@
 import type { listenerMiddlewareInstance } from '@/store'
+import type { OrderStatuses } from '@safe-global/store/gateway/types'
 import { createSelector, createSlice } from '@reduxjs/toolkit'
-import type { OrderStatuses } from '@safe-global/safe-gateway-typescript-sdk'
 import type { RootState } from '@/store'
 import { isSwapOrderTxInfo, isTransactionListItem } from '@/utils/transaction-guards'
 import { txHistorySlice } from '@/store/txHistorySlice'

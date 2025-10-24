@@ -1,4 +1,4 @@
-import type { DataDecoded, InternalTransaction, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { DataDecoded, MultiSend, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 export function isNestedSafeCreation(txData: TransactionData): boolean {
   try {
@@ -16,15 +16,17 @@ export function _getFactoryAddressAndSetupData(txData: TransactionData): {
   saltNonce: string
 } {
   let factoryAddress: string | undefined
-  let dataDecoded: DataDecoded | undefined
+  let dataDecoded: DataDecoded | null | undefined
 
   if (isCreateProxyWithNonce(txData)) {
     factoryAddress = txData.to.value
     dataDecoded = txData.dataDecoded
   } else if (isMultiSend(txData)) {
-    const batchTxData = txData.dataDecoded?.parameters
-      ?.find((parameter) => parameter?.name === 'transactions')
-      ?.valueDecoded?.find(isCreateProxyWithNonce)
+    const valueDecoded = txData.dataDecoded?.parameters?.find(
+      (parameter) => parameter?.name === 'transactions',
+    )?.valueDecoded
+
+    const batchTxData = Array.isArray(valueDecoded) ? valueDecoded?.find(isCreateProxyWithNonce) : undefined
 
     factoryAddress = batchTxData?.to
     dataDecoded = batchTxData?.dataDecoded
@@ -58,7 +60,7 @@ export function _getFactoryAddressAndSetupData(txData: TransactionData): {
   }
 }
 
-function isCreateProxyWithNonce(txData: TransactionData | InternalTransaction) {
+function isCreateProxyWithNonce(txData: TransactionData | MultiSend) {
   return txData.dataDecoded?.method === 'createProxyWithNonce'
 }
 

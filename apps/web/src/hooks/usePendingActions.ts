@@ -1,20 +1,20 @@
-import { isTransactionListItem } from '@/utils/transaction-guards'
+import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { isSignableBy } from '@/utils/transaction-guards'
-import type { TransactionListPage } from '@safe-global/safe-gateway-typescript-sdk'
-import { getTransactionQueue } from '@safe-global/safe-gateway-typescript-sdk'
 import { useMemo } from 'react'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from './useSafeInfo'
 import useTxQueue from './useTxQueue'
 import useWallet from './wallets/useWallet'
+import { getTransactionQueue } from '@/services/transactions'
 
 type PendingActions = {
   totalQueued: string
   totalToSign: string
 }
 
-const getSignableCount = (queue: TransactionListPage, walletAddress: string): number => {
-  return queue.results.filter((tx) => isTransactionListItem(tx) && isSignableBy(tx.transaction, walletAddress)).length
+const getSignableCount = (queue: QueuedItemPage, walletAddress: string): number => {
+  return queue.results.filter((tx) => isTransactionQueuedItem(tx) && isSignableBy(tx.transaction, walletAddress)).length
 }
 
 const usePendingActions = (chainId: string, safeAddress?: string): PendingActions => {
@@ -23,7 +23,7 @@ const usePendingActions = (chainId: string, safeAddress?: string): PendingAction
   const { page: currentSafeQueue } = useTxQueue()
   const isCurrentSafe = currentSafeAddress === safeAddress
 
-  const [loadedQueue] = useAsync<TransactionListPage>(() => {
+  const [loadedQueue] = useAsync<QueuedItemPage>(() => {
     if (isCurrentSafe || !safeAddress) return
     return getTransactionQueue(chainId, safeAddress)
   }, [chainId, safeAddress, isCurrentSafe])
@@ -33,7 +33,7 @@ const usePendingActions = (chainId: string, safeAddress?: string): PendingAction
   return useMemo(
     () => ({
       // Return 20+ if more than one page, otherwise just the length
-      totalQueued: queue ? (queue.results.filter(isTransactionListItem).length || '') + (queue.next ? '+' : '') : '',
+      totalQueued: queue ? (queue.results.filter(isTransactionQueuedItem).length || '') + (queue.next ? '+' : '') : '',
       // Return the queued txs signable by wallet
       totalToSign: queue ? (getSignableCount(queue, wallet?.address || '') || '').toString() : '',
     }),
