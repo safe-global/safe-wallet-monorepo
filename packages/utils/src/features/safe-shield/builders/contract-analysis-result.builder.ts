@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
-import { Severity, ContractStatus, type AnalysisResult } from '../types'
+import { Severity, ContractStatus, type AnalysisResult, CommonSharedStatus } from '../types'
 
-export class ContractAnalysisResultBuilder<T extends ContractStatus = ContractStatus> {
+export class ContractAnalysisResultBuilder<T extends CommonSharedStatus | ContractStatus = ContractStatus> {
   private result: AnalysisResult<T>
 
   constructor() {
@@ -90,5 +90,13 @@ export class ContractAnalysisResultBuilder<T extends ContractStatus = ContractSt
       .description(
         'This contract has not been interacted with on Safe{Wallet}. If verified, it will be marked as such after the first transaction.',
       )
+  }
+
+  static failed(): ContractAnalysisResultBuilder<CommonSharedStatus.FAILED> {
+    return new ContractAnalysisResultBuilder<CommonSharedStatus.FAILED>()
+      .severity(Severity.WARN)
+      .type(CommonSharedStatus.FAILED)
+      .title('Contract analysis failed')
+      .description('Contract analysis failed. Review before processing.')
   }
 }
