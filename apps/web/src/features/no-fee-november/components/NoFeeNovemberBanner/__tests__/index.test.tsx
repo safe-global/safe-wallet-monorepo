@@ -1,11 +1,7 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import NoFeeNovemberBanner from '@/features/no-fee-november/components/NoFeeNovemberBanner'
-import * as useNoFeeNovemberEligibilityHook from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
 import { TxModalContext } from '@/components/tx-flow'
 import { NewTxFlow } from '@/components/tx-flow/flows'
-
-// Mock the eligibility hook
-jest.mock('@/features/no-fee-november/hooks/useNoFeeNovemberEligibility')
 
 // Mock CheckWallet to always return isOk: true for tests
 jest.mock('@/components/common/CheckWallet', () => {
@@ -13,13 +9,6 @@ jest.mock('@/components/common/CheckWallet', () => {
     return children(true)
   }
 })
-
-// Mock Next.js router
-jest.mock('next/router', () => ({
-  useRouter: () => ({
-    query: { safe: '0x123' },
-  }),
-}))
 
 // Mock the TxModalContext
 const mockSetTxFlow = jest.fn()
@@ -29,41 +18,12 @@ const MockTxModalProvider = ({ children }: { children: React.ReactNode }) => (
 
 describe('NoFeeNovemberBanner', () => {
   const mockOnDismiss = jest.fn()
-  const mockUseNoFeeNovemberEligibility = useNoFeeNovemberEligibilityHook.default as jest.MockedFunction<
-    typeof useNoFeeNovemberEligibilityHook.default
-  >
 
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  it('should render loading state with skeleton', () => {
-    mockUseNoFeeNovemberEligibility.mockReturnValue({
-      isEligible: undefined,
-      remaining: undefined,
-      limit: undefined,
-      isLoading: true,
-      error: undefined,
-    })
-
-    render(
-      <MockTxModalProvider>
-        <NoFeeNovemberBanner onDismiss={mockOnDismiss} />
-      </MockTxModalProvider>,
-    )
-
-    expect(screen.getByLabelText('close')).toBeInTheDocument()
-  })
-
-  it('should render eligible state with new transaction button', () => {
-    mockUseNoFeeNovemberEligibility.mockReturnValue({
-      isEligible: true,
-      remaining: 5,
-      limit: 5,
-      isLoading: false,
-      error: undefined,
-    })
-
+  it('should render banner with correct content', () => {
     render(
       <MockTxModalProvider>
         <NoFeeNovemberBanner onDismiss={mockOnDismiss} />
@@ -77,55 +37,7 @@ describe('NoFeeNovemberBanner', () => {
     expect(screen.getByLabelText('close')).toBeInTheDocument()
   })
 
-  it('should not render anything when not eligible', () => {
-    mockUseNoFeeNovemberEligibility.mockReturnValue({
-      isEligible: false,
-      remaining: 0,
-      limit: 5,
-      isLoading: false,
-      error: undefined,
-    })
-
-    const { container } = render(
-      <MockTxModalProvider>
-        <NoFeeNovemberBanner onDismiss={mockOnDismiss} />
-      </MockTxModalProvider>,
-    )
-
-    expect(container.firstChild).toBeNull()
-  })
-
-  it('should render error state with error message', () => {
-    mockUseNoFeeNovemberEligibility.mockReturnValue({
-      isEligible: undefined,
-      remaining: undefined,
-      limit: undefined,
-      isLoading: false,
-      error: new Error('Failed to check eligibility'),
-    })
-
-    render(
-      <MockTxModalProvider>
-        <NoFeeNovemberBanner onDismiss={mockOnDismiss} />
-      </MockTxModalProvider>,
-    )
-
-    expect(screen.getByText('Enjoy No Fee November')).toBeInTheDocument()
-    expect(screen.getByText('SAFE holders enjoy gasless transactions on Mainnet this November.')).toBeInTheDocument()
-    expect(screen.getByText('Learn more')).toBeInTheDocument()
-    expect(screen.getByText('Unable to check eligibility')).toBeInTheDocument()
-    expect(screen.getByLabelText('close')).toBeInTheDocument()
-  })
-
   it('should call onDismiss when close button is clicked', () => {
-    mockUseNoFeeNovemberEligibility.mockReturnValue({
-      isEligible: true,
-      remaining: 5,
-      limit: 5,
-      isLoading: false,
-      error: undefined,
-    })
-
     render(
       <MockTxModalProvider>
         <NoFeeNovemberBanner onDismiss={mockOnDismiss} />
@@ -135,18 +47,10 @@ describe('NoFeeNovemberBanner', () => {
     const closeButton = screen.getByLabelText('close')
     fireEvent.click(closeButton)
 
-    expect(mockOnDismiss).toHaveBeenCalledWith(true)
+    expect(mockOnDismiss).toHaveBeenCalledWith()
   })
 
   it('should call setTxFlow when new transaction button is clicked', () => {
-    mockUseNoFeeNovemberEligibility.mockReturnValue({
-      isEligible: true,
-      remaining: 5,
-      limit: 5,
-      isLoading: false,
-      error: undefined,
-    })
-
     render(
       <MockTxModalProvider>
         <NoFeeNovemberBanner onDismiss={mockOnDismiss} />
@@ -160,14 +64,6 @@ describe('NoFeeNovemberBanner', () => {
   })
 
   it('should have correct link for learn more', () => {
-    mockUseNoFeeNovemberEligibility.mockReturnValue({
-      isEligible: true,
-      remaining: 5,
-      limit: 5,
-      isLoading: false,
-      error: undefined,
-    })
-
     render(
       <MockTxModalProvider>
         <NoFeeNovemberBanner onDismiss={mockOnDismiss} />
@@ -178,41 +74,17 @@ describe('NoFeeNovemberBanner', () => {
     expect(learnMoreLink.closest('a')).toHaveAttribute('href', 'https://help.safe.global/en/')
   })
 
-  it('should not render anything when not eligible (false)', () => {
-    mockUseNoFeeNovemberEligibility.mockReturnValue({
-      isEligible: false,
-      remaining: 0,
-      limit: 5,
-      isLoading: false,
-      error: undefined,
-    })
-
-    const { container } = render(
+  it('should render banner image with correct attributes', () => {
+    render(
       <MockTxModalProvider>
         <NoFeeNovemberBanner onDismiss={mockOnDismiss} />
       </MockTxModalProvider>,
     )
 
-    expect(container.firstChild).toBeNull()
-    expect(mockOnDismiss).not.toHaveBeenCalled()
-  })
-
-  it('should not render anything when eligibility is undefined', () => {
-    mockUseNoFeeNovemberEligibility.mockReturnValue({
-      isEligible: undefined,
-      remaining: undefined,
-      limit: undefined,
-      isLoading: false,
-      error: undefined,
-    })
-
-    const { container } = render(
-      <MockTxModalProvider>
-        <NoFeeNovemberBanner onDismiss={mockOnDismiss} />
-      </MockTxModalProvider>,
-    )
-
-    expect(container.firstChild).toBeNull()
-    expect(mockOnDismiss).not.toHaveBeenCalled()
+    const bannerImage = screen.getByAltText('No Fee November Cards')
+    expect(bannerImage).toBeInTheDocument()
+    expect(bannerImage).toHaveAttribute('src', '/images/common/no-fee-november/Cards.svg')
+    expect(bannerImage).toHaveAttribute('width', '76')
+    expect(bannerImage).toHaveAttribute('height', '76')
   })
 })
