@@ -84,3 +84,7 @@
 .infoIcon {
   color: var(--color-static-light);
 }
+
+.cardsImage {
+  display: block;
+}

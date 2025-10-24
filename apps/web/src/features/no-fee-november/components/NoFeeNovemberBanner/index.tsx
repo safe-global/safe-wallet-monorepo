@@ -1,5 +1,5 @@
 import { Box, Button, Card, IconButton, Stack, Typography } from '@mui/material'
-import SafeCoinsIllustration from '@/components/common/SafeCoinsIllustration'
+import Image from 'next/image'
 import css from './styles.module.css'
 import CloseIcon from '@mui/icons-material/Close'
 import Track from '@/components/common/Track'
@@ -11,6 +11,7 @@ import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoF
 import { useContext } from 'react'
 import { TxModalContext } from '@/components/tx-flow'
 import { NewTxFlow } from '@/components/tx-flow/flows'
+import CheckWallet from '@/components/common/CheckWallet'
 
 export const noFeeNovemberBannerID = 'noFeeNovemberBanner'
 
@@ -47,7 +48,13 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: (eligibilityState?: boo
     return (
       <Card className={css.banner}>
         <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2}>
-          <SafeCoinsIllustration />
+          <Image
+            src="/images/common/no-fee-november/Cards.svg"
+            alt="No Fee November Cards"
+            width={76}
+            height={76}
+            className={css.cardsImage}
+          />
           <Box>
             <Typography variant="h4" fontWeight="bold" color="static.main" className={css.bannerText}>
               Enjoy No Fee November
@@ -75,7 +82,13 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: (eligibilityState?: boo
     return (
       <Card className={css.banner}>
         <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2}>
-          <SafeCoinsIllustration />
+          <Image
+            src="/images/common/no-fee-november/Cards.svg"
+            alt="No Fee November Cards"
+            width={76}
+            height={76}
+            className={css.cardsImage}
+          />
           <Box>
             <Typography variant="h4" fontWeight="bold" color="static.main" className={css.bannerText}>
               Enjoy No Fee November
@@ -87,9 +100,19 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: (eligibilityState?: boo
               </Link>
             </Typography>
             <Track {...{ category: 'overview', action: 'open_no_fee_november_new_tx' }}>
-              <Button variant="contained" size="small" onClick={handleNewTransaction} className={css.actionButton}>
-                New transaction
-              </Button>
+              <CheckWallet allowSpendingLimit>
+                {(isOk) => (
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={handleNewTransaction}
+                    className={css.actionButton}
+                    disabled={!isOk}
+                  >
+                    New transaction
+                  </Button>
+                )}
+              </CheckWallet>
             </Track>
           </Box>
         </Stack>
@@ -106,7 +129,13 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: (eligibilityState?: boo
   return (
     <Card className={css.banner}>
       <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2}>
-        <SafeCoinsIllustration />
+        <Image
+          src="/images/common/no-fee-november/Cards.svg"
+          alt="No Fee November Cards"
+          width={76}
+          height={76}
+          className={css.cardsImage}
+        />
         <Box>
           <Typography variant="h4" fontWeight="bold" color="static.main" className={css.bannerText}>
             Enjoy No Fee November
@@ -127,11 +156,18 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: (eligibilityState?: boo
           </Stack>
 
           <Track {...{ category: 'overview', action: 'open_no_fee_november_get_safe' }}>
-            <Link href={AppRoutes.swap && { pathname: AppRoutes.swap, query: { safe: router.query.safe } }} passHref>
-              <Button variant="contained" size="small" className={css.actionButton}>
-                Get SAFE token
-              </Button>
-            </Link>
+            <CheckWallet>
+              {(isOk) => (
+                <Link
+                  href={AppRoutes.swap && { pathname: AppRoutes.swap, query: { safe: router.query.safe } }}
+                  passHref
+                >
+                  <Button variant="contained" size="small" className={css.actionButton} disabled={!isOk}>
+                    Get SAFE token
+                  </Button>
+                </Link>
+              )}
+            </CheckWallet>
           </Track>
         </Box>
       </Stack>

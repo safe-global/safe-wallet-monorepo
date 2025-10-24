@@ -7,6 +7,13 @@ import { NewTxFlow } from '@/components/tx-flow/flows'
 // Mock the eligibility hook
 jest.mock('@/features/no-fee-november/hooks/useNoFeeNovemberEligibility')
 
+// Mock CheckWallet to always return isOk: true for tests
+jest.mock('@/components/common/CheckWallet', () => {
+  return function MockCheckWallet({ children }: { children: (isOk: boolean) => React.ReactNode }) {
+    return children(true)
+  }
+})
+
 // Mock Next.js router
 jest.mock('next/router', () => ({
   useRouter: () => ({
