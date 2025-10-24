@@ -97,8 +97,8 @@ describe('SafeShieldDisplay', () => {
     })
 
     it('should show error message in content', () => {
-      const errorContract = LiveAnalysisResponseBuilder.failedContract().build().contract
-      console.log(errorContract)
+      const errorContract = FullAnalysisBuilder.failedContract().build().contract
+
       render(<SafeShieldDisplay contract={errorContract} />)
 
       expect(screen.getByText('Contract analysis failed')).toBeInTheDocument()
