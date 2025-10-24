@@ -134,10 +134,9 @@ export function useCounterpartyAnalysis({
 
   // Return results in the expected format
   return {
-    recipient:
-      recipientAddresses.length > 0
-        ? [mergedRecipientResults, fetchError || activityCheckError, isLoading || activityCheckLoading]
-        : undefined,
+    recipient: mergedRecipientResults
+      ? [mergedRecipientResults, fetchError || activityCheckError, isLoading || activityCheckLoading]
+      : undefined,
     contract: contractResults ? [contractResults, fetchError, isLoading] : undefined,
   }
 }
