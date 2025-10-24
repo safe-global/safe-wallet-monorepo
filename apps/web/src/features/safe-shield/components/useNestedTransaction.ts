@@ -1,8 +1,7 @@
 import { useMemo } from 'react'
-import { skipToken } from '@reduxjs/toolkit/query'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { getSafeInfo, type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
+import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import extractTxInfo from '@/services/tx/extractTxInfo'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
@@ -83,13 +82,14 @@ export const useNestedTransaction = (
   chain: Chain | undefined,
 ): UseNestedTransactionResult => {
   const nestedTxInfo = useMemo(() => detectNestedTransaction(safeTx), [safeTx])
-  const { data: nestedTxDetails } = useGetTransactionDetailsQuery(
-    nestedTxInfo?.type === 'approveHash' && nestedTxInfo.signedHash && chain
-      ? {
-          chainId: chain.chainId,
-          txId: nestedTxInfo.signedHash,
-        }
-      : skipToken,
+  const { data: nestedTxDetails } = useTransactionsGetTransactionByIdV1Query(
+    {
+      chainId: chain?.chainId || '',
+      id: nestedTxInfo?.type === 'approveHash' ? nestedTxInfo.signedHash : '',
+    },
+    {
+      skip: !nestedTxInfo || !chain || !chain?.chainId || nestedTxInfo.type !== 'approveHash',
+    },
   )
 
   const [nestedSafeInfo] = useAsync(
