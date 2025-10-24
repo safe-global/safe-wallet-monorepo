@@ -5,9 +5,10 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { useSafeShieldAnalyzeCounterpartyV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
 import { useAddressBookCheck } from './address-analysis/address-book-check/useAddressBookCheck'
 import { useAddressActivity } from './address-analysis/address-activity/useAddressActivity'
-import { type RecipientAnalysisResults, type ContractAnalysisResults } from '../types'
+import { type RecipientAnalysisResults, type ContractAnalysisResults, StatusGroup } from '../types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { mergeAnalysisResults } from '../utils'
+import { ErrorType, getErrorInfo } from '../utils/errors'
 
 /**
  * Hook for fetching and analyzing counterparty addresses (both recipients and contracts)
@@ -88,8 +89,18 @@ export function useCounterpartyAnalysis({
   const addressBookCheck = useAddressBookCheck(chainId, recipientAddresses, isInAddressBook, ownedSafes)
   const [activityCheck, activityCheckError, activityCheckLoading] = useAddressActivity(recipientAddresses, web3ReadOnly)
 
+  const fetchError = useMemo(() => {
+    if (error) {
+      return new Error('error' in error ? error.error : 'Failed to fetch counterparty analysis')
+    }
+    return undefined
+  }, [error])
+
   // Merge backend recipient results with local checks
   const mergedRecipientResults = useMemo(() => {
+    if (fetchError || activityCheckError) {
+      return { [safeAddress]: { [StatusGroup.RECIPIENT_ACTIVITY]: [getErrorInfo(ErrorType.RECIPIENT)] } }
+    }
     // Only merge different results after all of them are available
     if (!counterpartyData?.recipient || !addressBookCheck || activityCheckLoading) {
       return undefined
@@ -100,14 +111,25 @@ export function useCounterpartyAnalysis({
       addressBookCheck,
       activityCheck,
     )
-  }, [counterpartyData?.recipient, addressBookCheck, activityCheck, activityCheckLoading])
+  }, [
+    counterpartyData?.recipient,
+    addressBookCheck,
+    activityCheck,
+    fetchError,
+    activityCheckError,
+    activityCheckLoading,
+  ])
 
-  const fetchError = useMemo(() => {
-    if (error) {
-      return new Error('error' in error ? error.error : 'Failed to fetch counterparty analysis')
+  const contractResults = useMemo(() => {
+    if (fetchError) {
+      return { [safeAddress]: { [StatusGroup.CONTRACT_VERIFICATION]: [getErrorInfo(ErrorType.CONTRACT)] } }
     }
-    return undefined
-  }, [error])
+    if (!counterpartyData?.contract) {
+      return undefined
+    }
+
+    return counterpartyData.contract as ContractAnalysisResults
+  }, [counterpartyData?.contract, fetchError])
 
   // Return results in the expected format
   return {
@@ -115,8 +137,6 @@ export function useCounterpartyAnalysis({
       recipientAddresses.length > 0
         ? [mergedRecipientResults, fetchError || activityCheckError, isLoading || activityCheckLoading]
         : undefined,
-    contract: counterpartyData?.contract
-      ? [counterpartyData.contract as ContractAnalysisResults, fetchError, isLoading]
-      : undefined,
+    contract: contractResults ? [contractResults, fetchError, isLoading] : undefined,
   }
 }

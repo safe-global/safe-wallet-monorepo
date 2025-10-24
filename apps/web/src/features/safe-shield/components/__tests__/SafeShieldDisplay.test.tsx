@@ -97,13 +97,12 @@ describe('SafeShieldDisplay', () => {
     })
 
     it('should show error message in content', () => {
-      const error = new Error('Service unavailable')
-      const errorContract: [undefined, Error, false] = [undefined, error, false]
-
+      const errorContract = LiveAnalysisResponseBuilder.failedContract().build().contract
+      console.log(errorContract)
       render(<SafeShieldDisplay contract={errorContract} />)
 
-      expect(screen.getByText(/Unable to perform security analysis:/)).toBeInTheDocument()
-      expect(screen.getByText(/Service unavailable/)).toBeInTheDocument()
+      expect(screen.getByText('Contract analysis failed')).toBeInTheDocument()
+      expect(screen.getByText('Contract analysis failed. Review before processing.')).toBeInTheDocument()
     })
 
     it('should show empty state when no results', () => {
