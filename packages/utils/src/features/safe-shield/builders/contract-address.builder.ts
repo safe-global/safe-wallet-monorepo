@@ -1,4 +1,4 @@
-import { StatusGroup, type AnalysisResult, type StatusGroupType } from '../types'
+import { StatusGroup, type AnalysisResult, type StatusGroupType, CommonSharedStatus } from '../types'
 import type { ContractAnalysisBuilder } from './contract-analysis.builder'
 
 export class ContractAddressBuilder {
@@ -28,6 +28,14 @@ export class ContractAddressBuilder {
       this.parent['contract'][this.address] = {}
     }
     this.parent['contract'][this.address][StatusGroup.DELEGATECALL] = results
+    return this
+  }
+
+  failed(result: AnalysisResult<CommonSharedStatus.FAILED>): this {
+    if (!this.parent['contract'][this.address]) {
+      this.parent['contract'][this.address] = {}
+    }
+    this.parent['contract'][this.address][StatusGroup.CONTRACT_VERIFICATION] = [result as any]
     return this
   }
 
