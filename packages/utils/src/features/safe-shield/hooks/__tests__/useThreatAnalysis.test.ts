@@ -7,9 +7,10 @@ import { isSafeTransaction } from '../../../../utils/safeTransaction'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import type { ThreatAnalysisResults } from '../../types'
-import { Severity, ThreatStatus } from '../../types'
+import { Severity, StatusGroup, ThreatStatus } from '../../types'
 import { ThreatAnalysisResultBuilder } from '../../builders/threat-analysis-result.builder'
 import { ThreatAnalysisBuilder } from '../../builders/threat-analysis.builder'
+import { ErrorType, getErrorInfo } from '../../utils/errors'
 
 // Mock dependencies
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/safe-shield')
@@ -386,7 +387,7 @@ describe('useThreatAnalysis', () => {
       expect(loading).toBe(false)
     })
 
-    it('should return error when mutation fails', () => {
+    it('should return error and common failure when mutation fails', () => {
       const mockError = { error: 'Failed to analyze threat' }
 
       mockUseSafeShieldAnalyzeThreatV1Mutation.mockReturnValue([
@@ -406,7 +407,7 @@ describe('useThreatAnalysis', () => {
 
       const [data, error, loading] = result.current
 
-      expect(data).toBeUndefined()
+      expect(data).toEqual({ [StatusGroup.COMMON]: [getErrorInfo(ErrorType.THREAT)] })
       expect(error).toBeInstanceOf(Error)
       expect(error?.message).toBe('Failed to analyze threat')
       expect(loading).toBe(false)

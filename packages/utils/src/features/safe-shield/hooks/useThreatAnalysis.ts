@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSafeShieldAnalyzeThreatV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
 import isEqual from 'lodash/isEqual'
-import type { ThreatAnalysisResults } from '../types'
+import { StatusGroup, type ThreatAnalysisResults } from '../types'
 import type { AsyncResult } from '../../../hooks/useAsync'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { generateTypedData } from '../utils/generateTypedData'
 import { isSafeTransaction } from '../../../utils/safeTransaction'
+import { ErrorType, getErrorInfo } from '../utils/errors'
 
 /**
  * Hook for fetching threat analysis data using EIP-712 typed data
@@ -98,5 +99,12 @@ export function useThreatAnalysis({
     [error],
   )
 
-  return [threatData as ThreatAnalysisResults | undefined, fetchError, isLoading]
+  const threatAnalysisResult = useMemo<ThreatAnalysisResults | undefined>(() => {
+    if (fetchError) {
+      return { [StatusGroup.COMMON]: [getErrorInfo(ErrorType.THREAT)] }
+    }
+    return threatData as ThreatAnalysisResults | undefined
+  }, [threatData, fetchError])
+
+  return [threatAnalysisResult, fetchError, isLoading]
 }
