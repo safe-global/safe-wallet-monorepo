@@ -60,4 +60,11 @@ export class ContractAnalysisBuilder {
       .contractVerification([ContractAnalysisResultBuilder.verificationUnavailable().build()])
       .done()
   }
+
+  static failedContract(address: string = '0x0000000000000000000000000000000000000005'): ContractAnalysisBuilder {
+    return new ContractAnalysisBuilder()
+      .addAddress(address)
+      .failed(ContractAnalysisResultBuilder.failed().build())
+      .done()
+  }
 }

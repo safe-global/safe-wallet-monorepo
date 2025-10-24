@@ -7,7 +7,6 @@ import type {
   RecipientAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
-import { SafeShieldAnalysisError } from './SafeShieldAnalysisError'
 import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
@@ -34,14 +33,12 @@ export const SafeShieldContent = ({
   threat?: AsyncResult<LiveThreatAnalysisResult>
   safeTx?: SafeTransaction
 }): ReactElement => {
-  const [recipientResults = {}, recipientError, recipientLoading = false] = recipient || []
-  const [contractResults = {}, contractError, contractLoading = false] = contract || []
-  const [threatResults, threatError, threatLoading = false] = threat || []
-
+  const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient || []
+  const [contractResults = {}, _contractError, contractLoading = false] = contract || []
+  const [threatResults, _threatError, threatLoading = false] = threat || []
   const normalizedThreatData = normalizeThreatData(threat)
 
   const loading = recipientLoading || contractLoading || threatLoading
-  const error = recipientError || contractError || threatError
 
   const recipientEmpty = isEmpty(recipientResults)
   const contractEmpty = isEmpty(contractResults)
@@ -53,26 +50,14 @@ export const SafeShieldContent = ({
       <Box
         sx={{ border: '1px solid', borderColor: 'background.main', borderTop: 'none', borderRadius: '0px 0px 6px 6px' }}
       >
-        {loading ? (
-          <SafeShieldAnalysisLoading />
-        ) : error ? (
-          <SafeShieldAnalysisError error={error} />
-        ) : allEmpty ? (
-          <SafeShieldAnalysisEmpty />
-        ) : null}
+        {loading ? <SafeShieldAnalysisLoading /> : allEmpty ? <SafeShieldAnalysisEmpty /> : null}
 
-        <Box display={loading || error ? 'none' : 'block'}>
-          <Box display={recipientEmpty ? 'none' : 'block'}>
-            <AnalysisGroupCard data={recipientResults} />
-          </Box>
+        <Box display={loading ? 'none' : 'block'}>
+          {recipientResults && <AnalysisGroupCard data={recipientResults} />}
 
-          <Box display={contractEmpty ? 'none' : 'block'}>
-            <AnalysisGroupCard data={contractResults} />
-          </Box>
+          {contractResults && <AnalysisGroupCard data={contractResults} />}
 
-          <Box display={threatEmpty ? 'none' : 'block'}>
-            <AnalysisGroupCard data={normalizedThreatData} />
-          </Box>
+          {normalizedThreatData && <AnalysisGroupCard data={normalizedThreatData} />}
 
           <TenderlySimulation safeTx={safeTx} />
         </Box>

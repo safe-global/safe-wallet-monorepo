@@ -7,17 +7,20 @@ import {
   RecipientAnalysisBuilder,
 } from '@safe-global/utils/features/safe-shield/builders'
 import { faker } from '@faker-js/faker'
+import { StoreDecorator } from '@/stories/storeDecorator'
 
 const meta = {
   component: SafeShieldDisplay,
   parameters: { layout: 'centered' },
   decorators: [
     (Story) => (
-      <Paper sx={{ padding: 2, backgroundColor: 'background.main' }}>
-        <Box sx={{ width: 320 }}>
-          <Story />
-        </Box>
-      </Paper>
+      <StoreDecorator initialState={{}}>
+        <Paper sx={{ padding: 2, backgroundColor: 'background.main' }}>
+          <Box sx={{ width: 320 }}>
+            <Story />
+          </Box>
+        </Paper>
+      </StoreDecorator>
     ),
   ],
   tags: ['autodocs'],
