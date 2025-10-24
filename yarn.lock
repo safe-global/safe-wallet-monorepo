@@ -10207,15 +10207,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-client-gateway-sdk@npm:v1.60.1":
-  version: 1.60.1
-  resolution: "@safe-global/safe-client-gateway-sdk@npm:1.60.1"
-  dependencies:
-    openapi-fetch: "npm:0.10.5"
-  checksum: 10/9899ca9f7590c5543036ae1fd4ac37dd146dba07c390131bb57a4ede645e670756ef4f7c13d607d8f81b161d43b788c1c302919e92321dd40812c493a7442654
-  languageName: node
-  linkType: hard
-
 "@safe-global/safe-deployments@npm:^1.37.35":
   version: 1.37.35
   resolution: "@safe-global/safe-deployments@npm:1.37.35"
@@ -10372,7 +10363,6 @@ __metadata:
     "@safe-global/api-kit": "npm:^2.4.6"
     "@safe-global/protocol-kit": "npm:^5.2.18"
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
-    "@safe-global/safe-client-gateway-sdk": "npm:v1.60.1"
     "@safe-global/safe-deployments": "npm:^1.37.47"
     "@safe-global/safe-modules-deployments": "npm:^2.2.18"
     "@safe-global/store": "workspace:^"
@@ -29003,22 +28993,6 @@ __metadata:
     is-docker: "npm:^2.1.1"
     is-wsl: "npm:^2.2.0"
   checksum: 10/acd81a1d19879c818acb3af2d2e8e9d81d17b5367561e623248133deb7dd3aefaed527531df2677d3e6aaf0199f84df57b6b2262babff8bf46ea0029aac536c9
-  languageName: node
-  linkType: hard
-
-"openapi-fetch@npm:0.10.5":
-  version: 0.10.5
-  resolution: "openapi-fetch@npm:0.10.5"
-  dependencies:
-    openapi-typescript-helpers: "npm:^0.0.11"
-  checksum: 10/a561192249299e2dca87261419af3b5fc9027cebbb0fdddd8e1d9ef11ab701b1dcad7b4e89f8975246e8f4f62cd584ee022bf0725a22365d7056dca60173c0d5
-  languageName: node
-  linkType: hard
-
-"openapi-typescript-helpers@npm:^0.0.11":
-  version: 0.0.11
-  resolution: "openapi-typescript-helpers@npm:0.0.11"
-  checksum: 10/f0c6bd64a80de80ea36961979b4077be50a75250d49ba48ac47ed42a084412148b2efa577a5aa55ea0c57d43a34b79194c95d6075d5dc4acf96c875813fa46d0
   languageName: node
   linkType: hard
 
