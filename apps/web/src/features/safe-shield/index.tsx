@@ -3,10 +3,16 @@ import { SafeShieldDisplay } from './components/SafeShieldDisplay'
 import { useSafeShield } from './SafeShieldContext'
 
 const SafeShieldWidget = (): ReactElement => {
-  const { recipient, contract, safeTx } = useSafeShield()
+  const { recipient, contract, threat, safeTx } = useSafeShield()
 
   return (
-    <SafeShieldDisplay data-testid="safe-shield-widget" recipient={recipient} contract={contract} safeTx={safeTx} />
+    <SafeShieldDisplay
+      data-testid="safe-shield-widget"
+      recipient={recipient}
+      contract={contract}
+      threat={threat}
+      safeTx={safeTx}
+    />
   )
 }
 
