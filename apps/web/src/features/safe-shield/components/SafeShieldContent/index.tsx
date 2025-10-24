@@ -33,13 +33,12 @@ export const SafeShieldContent = ({
   threat?: AsyncResult<LiveThreatAnalysisResult>
   safeTx?: SafeTransaction
 }): ReactElement => {
-  const [recipientResults = {}, recipientError, recipientLoading = false] = recipient || []
-  const [contractResults = {}, contractError, contractLoading = false] = contract || []
-  const [threatResults, threatError, threatLoading = false] = threat || []
+  const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient || []
+  const [contractResults = {}, _contractError, contractLoading = false] = contract || []
+  const [threatResults, _threatError, threatLoading = false] = threat || []
   const normalizedThreatData = normalizeThreatData(threat)
 
   const loading = recipientLoading || contractLoading || threatLoading
-  const error = recipientError || contractError || threatError
 
   const recipientEmpty = isEmpty(recipientResults)
   const contractEmpty = isEmpty(contractResults)
@@ -53,7 +52,7 @@ export const SafeShieldContent = ({
       >
         {loading ? <SafeShieldAnalysisLoading /> : allEmpty ? <SafeShieldAnalysisEmpty /> : null}
 
-        <Box display={loading || error ? 'none' : 'block'}>
+        <Box display={loading ? 'none' : 'block'}>
           {recipientResults && <AnalysisGroupCard data={recipientResults} />}
 
           {contractResults && <AnalysisGroupCard data={contractResults} />}
