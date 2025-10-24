@@ -6,6 +6,7 @@ import {
   MasterCopyChangeThreatAnalysisResult,
   ThreatAnalysisResult,
   ThreatStatus,
+  CommonSharedStatus,
 } from '../types'
 import { ThreatAnalysisResultBuilder } from './threat-analysis-result.builder'
 
@@ -39,7 +40,7 @@ export class ThreatAnalysisBuilder {
       | MaliciousOrModerateThreatAnalysisResult
       | MasterCopyChangeThreatAnalysisResult
       | AnalysisResult<ThreatStatus.NO_THREAT>
-      | AnalysisResult<ThreatStatus.FAILED>
+      | AnalysisResult<CommonSharedStatus.FAILED>
       | AnalysisResult<ThreatStatus.OWNERSHIP_CHANGE>
       | AnalysisResult<ThreatStatus.MODULE_CHANGE>
       | AnalysisResult<ThreatStatus.MASTER_COPY_CHANGE>,
@@ -51,7 +52,7 @@ export class ThreatAnalysisBuilder {
   addThreat(
     threat:
       | AnalysisResult<ThreatStatus.NO_THREAT>
-      | AnalysisResult<ThreatStatus.FAILED>
+      | AnalysisResult<CommonSharedStatus.FAILED>
       | AnalysisResult<ThreatStatus.OWNERSHIP_CHANGE>
       | AnalysisResult<ThreatStatus.MODULE_CHANGE>
       | ThreatAnalysisResult,

@@ -2,11 +2,12 @@ import {
   Severity,
   type AnalysisResult,
   ThreatStatus,
+  CommonSharedStatus,
   MaliciousOrModerateThreatAnalysisResult,
   MasterCopyChangeThreatAnalysisResult,
 } from '../types'
 
-export class ThreatAnalysisResultBuilder<T extends ThreatStatus> {
+export class ThreatAnalysisResultBuilder<T extends ThreatStatus | CommonSharedStatus> {
   private result: AnalysisResult<T> | MaliciousOrModerateThreatAnalysisResult | MasterCopyChangeThreatAnalysisResult
 
   constructor() {
@@ -99,10 +100,10 @@ export class ThreatAnalysisResultBuilder<T extends ThreatStatus> {
       )
   }
 
-  static failed(): ThreatAnalysisResultBuilder<ThreatStatus.FAILED> {
-    return new ThreatAnalysisResultBuilder<ThreatStatus.FAILED>()
+  static failed(): ThreatAnalysisResultBuilder<CommonSharedStatus.FAILED> {
+    return new ThreatAnalysisResultBuilder<CommonSharedStatus.FAILED>()
       .title('Threat analysis failed')
-      .type(ThreatStatus.FAILED)
+      .type(CommonSharedStatus.FAILED)
       .severity(Severity.WARN)
       .description('Threat analysis failed. Review before processing.')
   }

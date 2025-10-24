@@ -1,0 +1,26 @@
+import { Stack, Typography } from '@mui/material'
+import { Box } from '@mui/material'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
+import { SEVERITY_COLORS } from '../../constants'
+
+interface AnalysisGroupCardItemProps {
+  children?: React.ReactNode
+  severity: Severity
+  description: string
+}
+
+export const AnalysisGroupCardItem = ({ children, severity, description }: AnalysisGroupCardItemProps) => {
+  return (
+    <Box bgcolor="background.main" borderRadius="4px" overflow="hidden">
+      <Box sx={{ borderLeft: `4px solid ${SEVERITY_COLORS[severity].main}`, padding: '12px' }}>
+        <Stack gap={2}>
+          <Typography variant="body2" color="primary.light">
+            {description}
+          </Typography>
+
+          {children}
+        </Stack>
+      </Box>
+    </Box>
+  )
+}
