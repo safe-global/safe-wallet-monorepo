@@ -8,7 +8,7 @@ import {
 import { faker } from '@faker-js/faker'
 import {
   CommonSharedStatus,
-  ContractAnalysisResults,
+  type ContractAnalysisResults,
   Severity,
   StatusGroup,
 } from '@safe-global/utils/features/safe-shield/types'
