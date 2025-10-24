@@ -1,4 +1,4 @@
-import { type ReactElement, useContext } from 'react'
+import { type ReactElement } from 'react'
 import { Box } from '@mui/material'
 import type {
   AddressAnalysisResults,
@@ -12,8 +12,8 @@ import { SafeShieldAnalysisError } from './SafeShieldAnalysisError'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import isEmpty from 'lodash/isEmpty'
+import type { SafeTransaction } from '@safe-global/types-kit'
 
 const normalizeThreatData = (
   threat?: AsyncResult<LiveThreatAnalysisResult>,
@@ -27,12 +27,13 @@ export const SafeShieldContent = ({
   recipient,
   contract,
   threat,
+  safeTx,
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<LiveThreatAnalysisResult>
+  safeTx?: SafeTransaction
 }): ReactElement => {
-  const { safeTx } = useContext(SafeTxContext)
   const [recipientResults = {}, recipientError, recipientLoading = false] = recipient || []
   const [contractResults = {}, contractError, contractLoading = false] = contract || []
   const [threatResults, threatError, threatLoading = false] = threat || []

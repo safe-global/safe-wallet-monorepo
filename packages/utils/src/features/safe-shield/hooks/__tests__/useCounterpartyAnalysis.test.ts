@@ -493,7 +493,7 @@ describe('useCounterpartyAnalysis', () => {
       }
 
       const activityResults: AddressActivityResult = {
-        [mockRecipientAddress1]: RecipientAnalysisResultBuilder.highActivity().build(),
+        [mockRecipientAddress1]: RecipientAnalysisResultBuilder.lowActivity().build(),
       }
 
       mockUseSafeShieldAnalyzeCounterpartyV1Mutation.mockReturnValue([
@@ -538,7 +538,7 @@ describe('useCounterpartyAnalysis', () => {
       }
 
       const activityResults: AddressActivityResult = {
-        [mockRecipientAddress1]: RecipientAnalysisResultBuilder.highActivity().build(),
+        [mockRecipientAddress1]: RecipientAnalysisResultBuilder.lowActivity().build(),
       }
 
       mockUseSafeShieldAnalyzeCounterpartyV1Mutation.mockReturnValue([

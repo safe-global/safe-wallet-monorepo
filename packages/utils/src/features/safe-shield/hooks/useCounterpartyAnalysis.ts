@@ -102,7 +102,7 @@ export function useCounterpartyAnalysis({
       return { [safeAddress]: { [StatusGroup.RECIPIENT_ACTIVITY]: [getErrorInfo(ErrorType.RECIPIENT)] } }
     }
     // Only merge different results after all of them are available
-    if (!counterpartyData?.recipient || !addressBookCheck || !activityCheck) {
+    if (!counterpartyData?.recipient || !addressBookCheck || activityCheckLoading) {
       return undefined
     }
 
@@ -111,7 +111,7 @@ export function useCounterpartyAnalysis({
       addressBookCheck,
       activityCheck,
     )
-  }, [counterpartyData?.recipient, addressBookCheck, activityCheck, fetchError, activityCheckError])
+  }, [counterpartyData?.recipient, addressBookCheck, activityCheck, activityCheckLoading, fetchError, activityCheckError])
 
   const contractResults = useMemo(() => {
     if (fetchError) {

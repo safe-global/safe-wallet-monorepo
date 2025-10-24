@@ -8,7 +8,7 @@ import type { MetaTransactionData, SafeTransactionDataPartial } from '@safe-glob
 import { Errors, logError } from '@/services/exceptions'
 import { isLegacyVersion } from '@safe-global/utils/services/contracts/utils'
 
-const fetchRecommendedParams = async (
+export const fetchRecommendedParams = async (
   chainId: string,
   safeAddress: string,
   txParams: MetaTransactionData,

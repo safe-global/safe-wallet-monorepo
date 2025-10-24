@@ -23,7 +23,7 @@ export enum StatusGroup {
 
 export type StatusGroupType<T extends StatusGroup> = {
   [StatusGroup.ADDRESS_BOOK]: RecipientStatus.KNOWN_RECIPIENT | RecipientStatus.UNKNOWN_RECIPIENT
-  [StatusGroup.RECIPIENT_ACTIVITY]: RecipientStatus.LOW_ACTIVITY | RecipientStatus.HIGH_ACTIVITY
+  [StatusGroup.RECIPIENT_ACTIVITY]: RecipientStatus.LOW_ACTIVITY
   [StatusGroup.RECIPIENT_INTERACTION]: RecipientStatus.NEW_RECIPIENT | RecipientStatus.RECURRING_RECIPIENT
   [StatusGroup.BRIDGE]:
     | BridgeStatus.INCOMPATIBLE_SAFE
@@ -51,8 +51,7 @@ export type StatusGroupType<T extends StatusGroup> = {
 export enum RecipientStatus {
   KNOWN_RECIPIENT = 'KNOWN_RECIPIENT', // 1A
   UNKNOWN_RECIPIENT = 'UNKNOWN_RECIPIENT', // 1B
-  LOW_ACTIVITY = 'LOW_ACTIVITY', // 2A
-  HIGH_ACTIVITY = 'HIGH_ACTIVITY', // 2B
+  LOW_ACTIVITY = 'LOW_ACTIVITY', // 2
   NEW_RECIPIENT = 'NEW_RECIPIENT', // 3A
   RECURRING_RECIPIENT = 'RECURRING_RECIPIENT', // 3B
 }

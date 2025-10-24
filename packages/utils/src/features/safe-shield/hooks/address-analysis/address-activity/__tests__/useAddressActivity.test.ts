@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { renderHook, waitFor } from '@testing-library/react'
 import type { JsonRpcProvider } from 'ethers'
 import { useAddressActivity } from '../useAddressActivity'
-import { ActivityMessages } from '../../config'
+import { LowActivityAnalysisResult } from '../../config'
 import { useMemo } from 'react'
 
 describe('useAddressActivity', () => {
@@ -46,7 +46,7 @@ describe('useAddressActivity', () => {
     expect(results).toBeUndefined()
   })
 
-  it('should return NO_ACTIVITY assessment with corresponding title and description', async () => {
+  it('should return LOW_ACTIVITY assessment with corresponding title and description for address with 0 transactions', async () => {
     const address = faker.finance.ethereumAddress()
 
     const { result } = renderHook(() => {
@@ -64,16 +64,11 @@ describe('useAddressActivity', () => {
     )
 
     const [results, error] = result.current
-    expect(results?.[address]).toEqual({
-      type: 'LOW_ACTIVITY',
-      severity: 'WARN',
-      title: ActivityMessages.NO_ACTIVITY.title,
-      description: ActivityMessages.NO_ACTIVITY.description,
-    })
+    expect(results?.[address]).toEqual(LowActivityAnalysisResult)
     expect(error).toBeUndefined()
   })
 
-  it('should return VERY_LOW_ACTIVITY assessment with corresponding title and description', async () => {
+  it('should return LOW_ACTIVITY assessment with corresponding title and description for address with less than 5 transactions', async () => {
     const address = faker.finance.ethereumAddress()
 
     const { result } = renderHook(() => {
@@ -91,67 +86,10 @@ describe('useAddressActivity', () => {
     )
 
     const [results] = result.current
-    expect(results?.[address]).toEqual({
-      type: 'LOW_ACTIVITY',
-      severity: 'WARN',
-      title: ActivityMessages.VERY_LOW_ACTIVITY.title,
-      description: ActivityMessages.VERY_LOW_ACTIVITY.description,
-    })
+    expect(results?.[address]).toEqual(LowActivityAnalysisResult)
   })
 
-  it('should return LOW_ACTIVITY assessment with corresponding title and description', async () => {
-    const address = faker.finance.ethereumAddress()
-
-    const { result } = renderHook(() => {
-      const addresses = useMemo(() => [address], [])
-      const provider = mockProvider(10)
-      return useAddressActivity(addresses, provider)
-    })
-
-    await waitFor(
-      () => {
-        const [results] = result.current
-        expect(results?.[address]).toBeDefined()
-      },
-      { timeout: 3000 },
-    )
-
-    const [results] = result.current
-    expect(results?.[address]).toEqual({
-      type: 'LOW_ACTIVITY',
-      severity: 'WARN',
-      title: ActivityMessages.LOW_ACTIVITY.title,
-      description: ActivityMessages.LOW_ACTIVITY.description,
-    })
-  })
-
-  it('should return MODERATE_ACTIVITY assessment with corresponding title and description', async () => {
-    const address = faker.finance.ethereumAddress()
-
-    const { result } = renderHook(() => {
-      const addresses = useMemo(() => [address], [])
-      const provider = mockProvider(50)
-      return useAddressActivity(addresses, provider)
-    })
-
-    await waitFor(
-      () => {
-        const [results] = result.current
-        expect(results?.[address]).toBeDefined()
-      },
-      { timeout: 3000 },
-    )
-
-    const [results] = result.current
-    expect(results?.[address]).toEqual({
-      type: 'HIGH_ACTIVITY',
-      severity: 'OK',
-      title: ActivityMessages.MODERATE_ACTIVITY.title,
-      description: ActivityMessages.MODERATE_ACTIVITY.description,
-    })
-  })
-
-  it('should return HIGH_ACTIVITY assessment with corresponding title and description', async () => {
+  it('should return no results for HIGH_ACTIVITY addresses', async () => {
     const address = faker.finance.ethereumAddress()
 
     const { result } = renderHook(() => {
@@ -162,19 +100,14 @@ describe('useAddressActivity', () => {
 
     await waitFor(
       () => {
-        const [results] = result.current
-        expect(results?.[address]).toBeDefined()
+        const [, , loading] = result.current
+        expect(loading).toBe(false)
       },
       { timeout: 3000 },
     )
 
     const [results] = result.current
-    expect(results?.[address]).toEqual({
-      type: 'HIGH_ACTIVITY',
-      severity: 'OK',
-      title: ActivityMessages.HIGH_ACTIVITY.title,
-      description: ActivityMessages.HIGH_ACTIVITY.description,
-    })
+    expect(results?.[address]).toBeUndefined()
   })
 
   it('should handle errors gracefully and not include failed addresses', async () => {
@@ -203,11 +136,11 @@ describe('useAddressActivity', () => {
     consoleErrorSpy.mockRestore()
   })
 
-  it('should handle multiple addresses', async () => {
+  it('should handle multiple addresses, only returning results for low activity', async () => {
     const address1 = faker.finance.ethereumAddress()
     const address2 = faker.finance.ethereumAddress()
     const mockGetTransactionCount = jest.fn().mockImplementation((addr) => {
-      if (addr === address1) return Promise.resolve(5)
+      if (addr === address1) return Promise.resolve(3)
       if (addr === address2) return Promise.resolve(100)
       return Promise.resolve(0)
     })
@@ -223,7 +156,6 @@ describe('useAddressActivity', () => {
       () => {
         const [results] = result.current
         expect(results?.[address1]).toBeDefined()
-        expect(results?.[address2]).toBeDefined()
       },
       { timeout: 3000 },
     )
@@ -232,8 +164,8 @@ describe('useAddressActivity', () => {
     expect(results?.[address1]?.type).toBe('LOW_ACTIVITY')
     expect(results?.[address1]?.severity).toBe('WARN')
 
-    expect(results?.[address2]?.type).toBe('HIGH_ACTIVITY')
-    expect(results?.[address2]?.severity).toBe('OK')
+    // High activity address should not have a result
+    expect(results?.[address2]).toBeUndefined()
 
     expect(mockGetTransactionCount).toHaveBeenCalledTimes(2)
   })
@@ -242,8 +174,8 @@ describe('useAddressActivity', () => {
     const address1 = faker.finance.ethereumAddress()
     const address2 = faker.finance.ethereumAddress()
     const mockGetTransactionCount = jest.fn().mockImplementation((addr) => {
-      if (addr === address1) return Promise.resolve(5)
-      if (addr === address2) return Promise.resolve(100)
+      if (addr === address1) return Promise.resolve(3)
+      if (addr === address2) return Promise.resolve(2)
       return Promise.resolve(0)
     })
 
@@ -277,46 +209,10 @@ describe('useAddressActivity', () => {
       },
       { timeout: 3000 },
     )
-  })
-
-  it('should clear cache and re-fetch when provider changes', async () => {
-    const address = faker.finance.ethereumAddress()
-    const provider1 = mockProvider(5)
-    const provider2 = mockProvider(100)
-
-    const { result, rerender } = renderHook(
-      ({ prov }) => {
-        const addresses = useMemo(() => [address], [])
-        return useAddressActivity(addresses, prov)
-      },
-      { initialProps: { prov: provider1 } },
-    )
-
-    await waitFor(
-      () => {
-        const [results] = result.current
-        expect(results?.[address]).toBeDefined()
-      },
-      { timeout: 3000 },
-    )
-
-    const [results1] = result.current
-    expect(results1?.[address]?.type).toBe('LOW_ACTIVITY')
-    expect(provider1.getTransactionCount).toHaveBeenCalledTimes(1)
-
-    // Change provider
-    rerender({ prov: provider2 })
-
-    await waitFor(
-      () => {
-        const [results] = result.current
-        expect(results?.[address]?.type).toBe('HIGH_ACTIVITY')
-      },
-      { timeout: 3000 },
-    )
 
     const [results2] = result.current
-    expect(results2?.[address]?.type).toBe('HIGH_ACTIVITY')
-    expect(provider2.getTransactionCount).toHaveBeenCalledTimes(1)
+    expect(results2?.[address2]?.type).toBe('LOW_ACTIVITY')
+    // Old address should not be in results anymore
+    expect(results2?.[address1]).toBeUndefined()
   })
 })
