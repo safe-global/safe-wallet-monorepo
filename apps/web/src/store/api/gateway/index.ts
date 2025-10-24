@@ -2,7 +2,7 @@ import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { safeOverviewEndpoints } from './safeOverviews'
-import { createSubmission, getSafe, getSafesByOwner, getSubmission } from '@safe-global/safe-client-gateway-sdk'
+import { createSubmission, getSafesByOwner, getSubmission } from '@safe-global/safe-client-gateway-sdk'
 
 export async function buildQueryFn<T>(fn: () => Promise<T>) {
   try {
@@ -21,11 +21,6 @@ export const gatewayApi = createApi({
   baseQuery: fakeBaseQuery<Error>(),
   tagTypes: ['OwnedSafes', 'Submissions'],
   endpoints: (builder) => ({
-    getSafe: builder.query<getSafe, { chainId: string; safeAddress: string }>({
-      queryFn({ chainId, safeAddress }) {
-        return buildQueryFn(() => getSafe({ params: { path: { chainId, safeAddress } } }))
-      },
-    }),
     getOwnedSafes: builder.query<getSafesByOwner, { chainId: string; ownerAddress: string }>({
       queryFn({ chainId, ownerAddress }) {
         return buildQueryFn(() => getSafesByOwner({ params: { path: { chainId, ownerAddress } } }))
@@ -68,7 +63,6 @@ export const gatewayApi = createApi({
 export const {
   useGetSubmissionQuery,
   useCreateSubmissionMutation,
-  useGetSafeQuery,
   useGetSafeOverviewQuery,
   useGetMultipleSafeOverviewsQuery,
   useGetOwnedSafesQuery,
