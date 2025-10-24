@@ -33,7 +33,7 @@ const contractAddress = faker.finance.ethereumAddress()
 const recipientAddress = faker.finance.ethereumAddress()
 
 // Checks passed
-export const NoThreat: Story = {
+export const ChecksPassed: Story = {
   args: {
     ...FullAnalysisBuilder.verifiedContract(contractAddress)
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
@@ -98,7 +98,7 @@ export const ModulesChange: Story = {
 }
 
 // Mastercopy change
-export const MasterCopyChange: Story = {
+export const MastercopyChange: Story = {
   args: {
     ...FullAnalysisBuilder.verifiedContract(contractAddress)
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
@@ -106,16 +106,6 @@ export const MasterCopyChange: Story = {
       .build(),
   },
   parameters: { docs: { description: { story: 'SafeShieldWidget when transaction will change Safe mastercopy' } } },
-}
-
-// Checks passed
-export const ChecksPassed: Story = {
-  args: {
-    ...FullAnalysisBuilder.verifiedContract(contractAddress)
-      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
-      .build(),
-  },
-  parameters: { docs: { description: { story: 'SafeShieldWidget analyzing with no security concerns' } } },
 }
 
 // Unverified contract with warnings
@@ -133,6 +123,7 @@ export const UnableToVerifyContract: Story = {
   args: {
     ...FullAnalysisBuilder.verificationUnavailableContract(contractAddress)
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(FullAnalysisBuilder.noThreat().build().threat)
       .build(),
   },
   parameters: {
@@ -158,12 +149,6 @@ export const Empty: Story = {
   parameters: { docs: { description: { story: 'SafeShieldWidget when no transaction is available to analyze' } } },
 }
 
-// Cotnract analysis error state
-export const ErrorState: Story = {
-  args: { contract: [undefined, new Error('Service temporarily unavailable'), false] },
-  parameters: { docs: { description: { story: 'SafeShieldWidget when the contract analysis encounters an error' } } },
-}
-
 // Multiple results for the same contract with different severity
 export const MultipleIssues: Story = {
   args: {
@@ -174,6 +159,7 @@ export const MultipleIssues: Story = {
       .recipient(RecipientAnalysisBuilder.newRecipient(recipientAddress).build())
       .recipient(RecipientAnalysisBuilder.lowActivity(recipientAddress).build())
       .recipient(RecipientAnalysisBuilder.incompatibleSafe(recipientAddress).build())
+      .threat(FullAnalysisBuilder.moduleChange().build().threat)
       .build(),
   },
   parameters: {
@@ -195,6 +181,7 @@ export const MultipleCounterparties: Story = {
       .recipient(RecipientAnalysisBuilder.newRecipient(faker.finance.ethereumAddress()).build())
       .recipient(RecipientAnalysisBuilder.lowActivity(recipientAddress).build())
       .recipient(RecipientAnalysisBuilder.incompatibleSafe(recipientAddress).build())
+      .threat(FullAnalysisBuilder.moderateThreat().build().threat)
       .build(),
   },
   parameters: {
