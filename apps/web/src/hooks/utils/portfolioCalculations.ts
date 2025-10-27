@@ -20,6 +20,7 @@ export function createEmptyPortfolioData(error?: string, isLoading = false, isFe
     totalPositionsBalance: '0',
     visibleTotalBalance: '0',
     visibleTotalTokenBalance: '0',
+    pnl: null,
     error,
     isLoading,
     isLoaded: false,

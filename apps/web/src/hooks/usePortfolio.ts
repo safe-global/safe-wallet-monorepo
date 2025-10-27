@@ -15,6 +15,7 @@ import {
   usePortfolioGetPortfolioV1Query,
   type TokenBalance as PortfolioTokenBalance,
   type AppBalance,
+  type PnL,
 } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import usePositions from '@/features/positions/hooks/usePositions'
@@ -42,6 +43,7 @@ export type PortfolioData = {
   allChainsTotalBalance?: string
   allChainsTotalTokenBalance?: string
   allChainsTotalPositionsBalance?: string
+  pnl?: PnL | null
   error?: string
   isLoading: boolean
   isLoaded: boolean
@@ -150,6 +152,7 @@ const usePortfolioV2 = (skip: boolean = false): PortfolioData => {
       allChainsTotalBalance: IS_MULTICHAIN_ENABLED ? (currentData.totalBalanceFiat ?? 0).toString() : undefined,
       allChainsTotalTokenBalance: IS_MULTICHAIN_ENABLED ? totalTokenBalanceFiat.toString() : undefined,
       allChainsTotalPositionsBalance: IS_MULTICHAIN_ENABLED ? totalPositionsBalanceFiat.toString() : undefined,
+      pnl: currentData.pnl ?? null,
       error: error?.toString(),
       isLoading,
       isLoaded: true,
@@ -218,6 +221,7 @@ const usePortfolioLegacy = (skip: boolean = false): PortfolioData => {
       visibleTokenBalances: visibleTokens,
       visibleTotalTokenBalance: visibleTokenTotal,
       visibleTotalBalance: (parseFloat(visibleTokenTotal) + parseFloat(positionsTotal)).toString(),
+      pnl: null,
       error: balancesError?.message,
       isLoading: balancesLoading || positionsLoading,
       isLoaded: !balancesLoading && balancesData !== undefined,

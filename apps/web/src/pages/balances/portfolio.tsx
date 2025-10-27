@@ -7,6 +7,7 @@ import AssetsSettingsButton from '@/components/balances/AssetsSettingsButton'
 import CurrencySelect from '@/components/balances/CurrencySelect'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import MultichainPortfolioTable from '@/components/balances/MultichainPortfolioTable'
+import PnLSummary from '@/components/balances/PnLSummary'
 import usePortfolio from '@/hooks/usePortfolio'
 import { BRAND_NAME } from '@/config/constants'
 import PagePlaceholder from '@/components/common/PagePlaceholder'
@@ -15,7 +16,6 @@ import NoAssetsIcon from '@/public/images/balances/no-assets.svg'
 const Portfolio: NextPage = () => {
   const portfolio = usePortfolio()
 
-  // Use the all-chains total for the portfolio view
   const displayedTotal = portfolio.allChainsTotalBalance || portfolio.totalBalance
 
   return (
@@ -37,6 +37,11 @@ const Portfolio: NextPage = () => {
             <Box mb={2}>
               <TotalAssetValue fiatTotal={displayedTotal} title="Total portfolio value" />
             </Box>
+            {portfolio.pnl && (
+              <Box mb={3}>
+                <PnLSummary pnl={portfolio.pnl} />
+              </Box>
+            )}
             <MultichainPortfolioTable />
           </>
         )}

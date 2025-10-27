@@ -1,5 +1,14 @@
 import { type ReactElement } from 'react'
-import { Box, Typography, Skeleton, Alert, Accordion, AccordionSummary, AccordionDetails, Link as MuiLink } from '@mui/material'
+import {
+  Box,
+  Typography,
+  Skeleton,
+  Alert,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Link as MuiLink,
+} from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import Link from 'next/link'
@@ -112,12 +121,12 @@ const TokenTransactions = ({ tokenAddress, tokenSymbol }: TokenTransactionsProps
                   '&.Mui-expanded': { minHeight: 'auto' },
                   '.MuiAccordionSummary-content': {
                     margin: '0',
-                    display: 'contents'
+                    display: 'contents',
                   },
                   '.MuiAccordionSummary-expandIconWrapper': {
                     position: 'absolute',
                     right: 0,
-                  }
+                  },
                 }}
               >
                 <Box className={css.txTypeIcon}>
@@ -127,9 +136,9 @@ const TokenTransactions = ({ tokenAddress, tokenSymbol }: TokenTransactionsProps
                 <Box className={css.txInfo}>
                   <TokenAmount
                     value={transferInfo.value || '0'}
-                    decimals={transferInfo.type === 'ERC20' ? transferInfo.decimals ?? undefined : undefined}
+                    decimals={transferInfo.type === 'ERC20' ? (transferInfo.decimals ?? undefined) : undefined}
                     tokenSymbol={tokenSymbol}
-                    logoUri={transferInfo.type === 'ERC20' ? transferInfo.logoUri ?? undefined : undefined}
+                    logoUri={transferInfo.type === 'ERC20' ? (transferInfo.logoUri ?? undefined) : undefined}
                     direction={
                       tx.txInfo.direction === 'INCOMING'
                         ? TransferDirection.INCOMING

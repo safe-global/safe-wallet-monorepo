@@ -56,7 +56,11 @@ const PriceChart = ({ assetId, currentPrice }: PriceChartProps): ReactElement =>
   const previousChartDataRef = useRef<typeof chartData>(null)
   const isTransitioningRef = useRef(false)
 
-  const { data: chartData, isLoading, isError } = useChartsGetChartV1Query({
+  const {
+    data: chartData,
+    isLoading,
+    isError,
+  } = useChartsGetChartV1Query({
     fungibleId: assetId,
     period,
     currency,
@@ -207,61 +211,63 @@ const PriceChart = ({ assetId, currentPrice }: PriceChartProps): ReactElement =>
       alpha: number,
       horizontalScale: number,
     ) => {
-    if (!data) return
+      if (!data) return
 
-    const chartWidth = width - padding.left - padding.right
-    const chartHeight = height - padding.top - padding.bottom
+      const chartWidth = width - padding.left - padding.right
+      const chartHeight = height - padding.top - padding.bottom
 
-    const prices = data.points.map((p) => p[1])
-    const minPrice = Math.min(...prices)
-    const maxPrice = Math.max(...prices)
-    const priceRange = maxPrice - minPrice || 1
+      const prices = data.points.map((p) => p[1])
+      const minPrice = Math.min(...prices)
+      const maxPrice = Math.max(...prices)
+      const priceRange = maxPrice - minPrice || 1
 
-    const points = data.points.map((point, index) => {
-      const x = padding.left + (index / (data.points.length - 1)) * chartWidth
-      const y = padding.top + chartHeight - ((point[1] - minPrice) / priceRange) * chartHeight
-      return { x, y, price: point[1], timestamp: point[0] }
-    })
+      const points = data.points.map((point, index) => {
+        const x = padding.left + (index / (data.points.length - 1)) * chartWidth
+        const y = padding.top + chartHeight - ((point[1] - minPrice) / priceRange) * chartHeight
+        return { x, y, price: point[1], timestamp: point[0] }
+      })
 
-    const firstPrice = data.points[0][1]
-    const lastPrice = data.points[data.points.length - 1][1]
-    const isPositive = lastPrice >= firstPrice
-    const lineColor = isPositive ? palette.success.main : palette.error.main
-    const gradientColor = isPositive ? `${palette.success.main}40` : `${palette.error.main}40`
+      const firstPrice = data.points[0][1]
+      const lastPrice = data.points[data.points.length - 1][1]
+      const isPositive = lastPrice >= firstPrice
+      const lineColor = isPositive ? palette.success.main : palette.error.main
+      const gradientColor = isPositive ? `${palette.success.main}40` : `${palette.error.main}40`
 
-    ctx.save()
-    const anchorX = width - padding.right
-    ctx.translate(anchorX, 0)
-    ctx.scale(horizontalScale, 1)
-    ctx.translate(-anchorX, 0)
-    ctx.globalAlpha = alpha
+      ctx.save()
+      const anchorX = width - padding.right
+      ctx.translate(anchorX, 0)
+      ctx.scale(horizontalScale, 1)
+      ctx.translate(-anchorX, 0)
+      ctx.globalAlpha = alpha
 
-    const gradient = ctx.createLinearGradient(0, padding.top, 0, height - padding.bottom)
-    gradient.addColorStop(0, gradientColor)
-    gradient.addColorStop(1, 'transparent')
+      const gradient = ctx.createLinearGradient(0, padding.top, 0, height - padding.bottom)
+      gradient.addColorStop(0, gradientColor)
+      gradient.addColorStop(1, 'transparent')
 
-    ctx.beginPath()
-    ctx.moveTo(points[0].x, height - padding.bottom)
-    points.forEach((point) => {
-      ctx.lineTo(point.x, point.y)
-    })
-    ctx.lineTo(points[points.length - 1].x, height - padding.bottom)
-    ctx.closePath()
-    ctx.fillStyle = gradient
-    ctx.fill()
+      ctx.beginPath()
+      ctx.moveTo(points[0].x, height - padding.bottom)
+      points.forEach((point) => {
+        ctx.lineTo(point.x, point.y)
+      })
+      ctx.lineTo(points[points.length - 1].x, height - padding.bottom)
+      ctx.closePath()
+      ctx.fillStyle = gradient
+      ctx.fill()
 
-    ctx.beginPath()
-    ctx.moveTo(points[0].x, points[0].y)
-    points.forEach((point) => {
-      ctx.lineTo(point.x, point.y)
-    })
-    ctx.strokeStyle = lineColor
-    ctx.lineWidth = CHART_CONFIG.line.width
-    ctx.lineJoin = 'round'
-    ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(points[0].x, points[0].y)
+      points.forEach((point) => {
+        ctx.lineTo(point.x, point.y)
+      })
+      ctx.strokeStyle = lineColor
+      ctx.lineWidth = CHART_CONFIG.line.width
+      ctx.lineJoin = 'round'
+      ctx.stroke()
 
-    ctx.restore()
-  }, [palette])
+      ctx.restore()
+    },
+    [palette],
+  )
 
   useEffect(() => {
     if (!chartData || !canvasRef.current || !containerRef.current) return
@@ -487,10 +493,7 @@ const PriceChart = ({ assetId, currentPrice }: PriceChartProps): ReactElement =>
 
       {/* Canvas Chart */}
       <Box ref={containerRef} className={css.chartCanvas}>
-        <canvas
-          ref={canvasRef}
-          style={{ width: '100%', height: `${CHART_CONFIG.height}px`, position: 'absolute' }}
-        />
+        <canvas ref={canvasRef} style={{ width: '100%', height: `${CHART_CONFIG.height}px`, position: 'absolute' }} />
         <canvas
           ref={overlayCanvasRef}
           onMouseMove={handleMouseMove}
