@@ -1,7 +1,7 @@
 import { render, screen } from '@/tests/test-utils'
 import { SafeShieldDisplay } from '../SafeShieldDisplay'
 import {
-  LiveAnalysisResponseBuilder,
+  FullAnalysisBuilder,
   RecipientAnalysisBuilder,
   ContractAnalysisBuilder,
 } from '@safe-global/utils/features/safe-shield/builders'
@@ -13,7 +13,7 @@ describe('SafeShieldDisplay', () => {
 
   const mockRecipient = RecipientAnalysisBuilder.knownRecipient(mockRecipientAddress).build()
   const mockContract = ContractAnalysisBuilder.verifiedContract(mockContractAddress).build()
-  const mockThreat = LiveAnalysisResponseBuilder.noThreat().build().threat
+  const mockThreat = FullAnalysisBuilder.noThreat().build().threat
   const mockCriticalRecipient = RecipientAnalysisBuilder.incompatibleSafe(mockRecipientAddress).build()
   const mockWarningRecipient = RecipientAnalysisBuilder.lowActivity(mockRecipientAddress).build()
 
@@ -97,8 +97,8 @@ describe('SafeShieldDisplay', () => {
     })
 
     it('should show error message in content', () => {
-      const errorContract = LiveAnalysisResponseBuilder.failedContract().build().contract
-      console.log(errorContract)
+      const errorContract = FullAnalysisBuilder.failedContract().build().contract
+
       render(<SafeShieldDisplay contract={errorContract} />)
 
       expect(screen.getByText('Contract analysis failed')).toBeInTheDocument()
@@ -173,7 +173,7 @@ describe('SafeShieldDisplay', () => {
 
   describe('Malicious Threat Handling', () => {
     it('should handle malicious threat results with critical recipient', () => {
-      const maliciousThreat = LiveAnalysisResponseBuilder.maliciousThreat().build().threat
+      const maliciousThreat = FullAnalysisBuilder.maliciousThreat().build().threat
 
       render(<SafeShieldDisplay threat={maliciousThreat} recipient={mockCriticalRecipient} />)
 

@@ -1,7 +1,7 @@
 import { type ReactElement, useMemo, useState } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import { type AddressAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
+import { type GroupedAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import { isAddressChange, mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
 import { SeverityIcon } from '../SeverityIcon'
 import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
@@ -12,7 +12,7 @@ import { ShowAllAddress } from './ShowAllAddress'
 export const AnalysisGroupCard = ({
   data,
 }: {
-  data: { [address: string]: AddressAnalysisResults }
+  data: { [address: string]: GroupedAnalysisResults }
 }): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
 

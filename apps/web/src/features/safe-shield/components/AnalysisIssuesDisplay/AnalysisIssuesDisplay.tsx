@@ -1,7 +1,6 @@
 import React from 'react'
 import type {
   AnalysisResult,
-  AnyStatus,
   MaliciousOrModerateThreatAnalysisResult,
 } from '@safe-global/utils/features/safe-shield/types'
 import { sortByIssueSeverity } from '@safe-global/utils/features/safe-shield/utils/analysisUtils'
@@ -9,7 +8,7 @@ import { Box, Typography } from '@mui/material'
 import { Circle } from '@mui/icons-material'
 
 interface AnalysisIssuesDisplayProps {
-  result: AnalysisResult<AnyStatus>
+  result: AnalysisResult
 }
 
 export const AnalysisIssuesDisplay = ({ result }: AnalysisIssuesDisplayProps) => {

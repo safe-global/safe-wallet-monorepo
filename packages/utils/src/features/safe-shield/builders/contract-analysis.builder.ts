@@ -1,5 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { StatusGroup, type LiveAnalysisResponse, type AnalysisResult, StatusGroupType } from '../types'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import { StatusGroup, type AnalysisResult, StatusGroupType, type ContractAnalysisResults } from '../types'
 import { ContractAddressBuilder } from './contract-address.builder'
 import { ContractAnalysisResultBuilder } from './contract-analysis-result.builder'
 
@@ -19,7 +20,7 @@ export class ContractAnalysisBuilder {
     return new ContractAddressBuilder(this, address)
   }
 
-  build(): LiveAnalysisResponse['contract'] {
+  build(): AsyncResult<ContractAnalysisResults> {
     return [{ ...this.contract }, undefined, false]
   }
 

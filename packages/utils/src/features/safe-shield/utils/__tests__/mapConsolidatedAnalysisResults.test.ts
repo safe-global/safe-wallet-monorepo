@@ -1,6 +1,6 @@
 import { mapConsolidatedAnalysisResults } from '../mapConsolidatedAnalysisResults'
 import { Severity, StatusGroup, RecipientStatus } from '../../types'
-import type { AddressAnalysisResults, RecipientAnalysisResults } from '../../types'
+import type { GroupedAnalysisResults, RecipientAnalysisResults } from '../../types'
 import { RecipientAnalysisResultBuilder } from '../../builders'
 import { faker } from '@faker-js/faker'
 
@@ -18,7 +18,7 @@ describe('mapConsolidatedAnalysisResults', () => {
       },
     }
 
-    const addressResults: AddressAnalysisResults[] = Object.values(addressesResultsMap)
+    const addressResults: GroupedAnalysisResults[] = Object.values(addressesResultsMap)
 
     const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 
@@ -40,7 +40,7 @@ describe('mapConsolidatedAnalysisResults', () => {
       },
     }
 
-    const addressResults: AddressAnalysisResults[] = Object.values(addressesResultsMap)
+    const addressResults: GroupedAnalysisResults[] = Object.values(addressesResultsMap)
 
     const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 
@@ -67,7 +67,7 @@ describe('mapConsolidatedAnalysisResults', () => {
       },
     }
 
-    const addressResults: AddressAnalysisResults[] = Object.values(addressesResultsMap)
+    const addressResults: GroupedAnalysisResults[] = Object.values(addressesResultsMap)
 
     const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 
@@ -101,7 +101,7 @@ describe('mapConsolidatedAnalysisResults', () => {
       },
     }
 
-    const addressResults: AddressAnalysisResults[] = Object.values(addressesResultsMap)
+    const addressResults: GroupedAnalysisResults[] = Object.values(addressesResultsMap)
 
     const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 
@@ -126,7 +126,7 @@ describe('mapConsolidatedAnalysisResults', () => {
       },
     }
 
-    const addressResults: AddressAnalysisResults[] = Object.values(addressesResultsMap)
+    const addressResults: GroupedAnalysisResults[] = Object.values(addressesResultsMap)
 
     const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 
@@ -152,7 +152,7 @@ describe('mapConsolidatedAnalysisResults', () => {
       },
     }
 
-    const addressResults: AddressAnalysisResults[] = Object.values(addressesResultsMap)
+    const addressResults: GroupedAnalysisResults[] = Object.values(addressesResultsMap)
 
     const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 
@@ -164,7 +164,7 @@ describe('mapConsolidatedAnalysisResults', () => {
 
   it('should return empty array for empty input', () => {
     const addressesResultsMap: RecipientAnalysisResults = {}
-    const addressResults: AddressAnalysisResults[] = []
+    const addressResults: GroupedAnalysisResults[] = []
 
     const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 
@@ -182,7 +182,7 @@ describe('mapConsolidatedAnalysisResults', () => {
       [address3]: {},
     }
 
-    const addressResults: AddressAnalysisResults[] = Object.values(addressesResultsMap)
+    const addressResults: GroupedAnalysisResults[] = Object.values(addressesResultsMap)
 
     const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 
@@ -199,7 +199,7 @@ describe('mapConsolidatedAnalysisResults', () => {
       },
     }
 
-    const addressResults: AddressAnalysisResults[] = Object.values(addressesResultsMap)
+    const addressResults: GroupedAnalysisResults[] = Object.values(addressesResultsMap)
 
     const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 
