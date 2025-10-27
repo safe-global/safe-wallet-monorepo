@@ -8940,28 +8940,25 @@
               "INFO",
               "WARN",
               "CRITICAL"
-            ],
-            "example": "INFO"
+            ]
           },
           "type": {
             "type": "string",
             "description": "Recipient interaction status code",
-            "example": "NEW_RECIPIENT",
             "enum": [
               "NEW_RECIPIENT",
               "RECURRING_RECIPIENT",
               "FAILED"
-            ]
+            ],
+            "example": "NEW_RECIPIENT"
           },
           "title": {
             "type": "string",
-            "description": "User-facing title of the finding",
-            "example": "New recipient"
+            "description": "User-facing title of the finding"
           },
           "description": {
             "type": "string",
-            "description": "Detailed description explaining the finding and its implications",
-            "example": "This is the first time you are interacting with this recipient"
+            "description": "Detailed description explaining the finding and its implications"
           }
         },
         "required": [
@@ -9036,13 +9033,11 @@
               "INFO",
               "WARN",
               "CRITICAL"
-            ],
-            "example": "INFO"
+            ]
           },
           "type": {
             "type": "string",
             "description": "Bridge compatibility status code",
-            "example": "MISSING_OWNERSHIP",
             "enum": [
               "NEW_RECIPIENT",
               "RECURRING_RECIPIENT",
@@ -9051,17 +9046,16 @@
               "UNSUPPORTED_NETWORK",
               "DIFFERENT_SAFE_SETUP",
               "FAILED"
-            ]
+            ],
+            "example": "MISSING_OWNERSHIP"
           },
           "title": {
             "type": "string",
-            "description": "User-facing title of the finding",
-            "example": "New recipient"
+            "description": "User-facing title of the finding"
           },
           "description": {
             "type": "string",
-            "description": "Detailed description explaining the finding and its implications",
-            "example": "This is the first time you are interacting with this recipient"
+            "description": "Detailed description explaining the finding and its implications"
           },
           "targetChainId": {
             "type": "string",
@@ -9122,13 +9116,11 @@
               "INFO",
               "WARN",
               "CRITICAL"
-            ],
-            "example": "INFO"
+            ]
           },
           "type": {
             "type": "string",
             "description": "Contract verification status code",
-            "example": "VERIFIED",
             "enum": [
               "VERIFIED",
               "NOT_VERIFIED",
@@ -9138,17 +9130,16 @@
               "KNOWN_CONTRACT",
               "UNEXPECTED_DELEGATECALL",
               "FAILED"
-            ]
+            ],
+            "example": "VERIFIED"
           },
           "title": {
             "type": "string",
-            "description": "User-facing title of the finding",
-            "example": "New recipient"
+            "description": "User-facing title of the finding"
           },
           "description": {
             "type": "string",
-            "description": "Detailed description explaining the finding and its implications",
-            "example": "This is the first time you are interacting with this recipient"
+            "description": "Detailed description explaining the finding and its implications"
           }
         },
         "required": [
@@ -9291,18 +9282,13 @@
               "INFO",
               "WARN",
               "CRITICAL"
-            ],
-            "example": "INFO"
+            ]
           },
           "type": {
             "type": "string",
             "description": "Threat status code",
-            "example": "NEW_RECIPIENT",
             "enum": [
-              "MALICIOUS",
-              "MODERATE",
               "NO_THREAT",
-              "MASTERCOPY_CHANGE",
               "OWNERSHIP_CHANGE",
               "MODULE_CHANGE",
               "FAILED"
@@ -9310,13 +9296,11 @@
           },
           "title": {
             "type": "string",
-            "description": "User-facing title of the finding",
-            "example": "New recipient"
+            "description": "User-facing title of the finding"
           },
           "description": {
             "type": "string",
-            "description": "Detailed description explaining the finding and its implications",
-            "example": "This is the first time you are interacting with this recipient"
+            "description": "Detailed description explaining the finding and its implications"
           }
         },
         "required": [
@@ -9337,26 +9321,22 @@
               "INFO",
               "WARN",
               "CRITICAL"
-            ],
-            "example": "INFO"
+            ]
           },
           "type": {
             "type": "string",
             "description": "Threat status code",
-            "example": "NEW_RECIPIENT",
             "enum": [
               "MASTERCOPY_CHANGE"
             ]
           },
           "title": {
             "type": "string",
-            "description": "User-facing title of the finding",
-            "example": "New recipient"
+            "description": "User-facing title of the finding"
           },
           "description": {
             "type": "string",
-            "description": "Detailed description explaining the finding and its implications",
-            "example": "This is the first time you are interacting with this recipient"
+            "description": "Detailed description explaining the finding and its implications"
           },
           "before": {
             "type": "string",
@@ -9387,13 +9367,11 @@
               "INFO",
               "WARN",
               "CRITICAL"
-            ],
-            "example": "INFO"
+            ]
           },
           "type": {
             "type": "string",
             "description": "Threat status code",
-            "example": "NEW_RECIPIENT",
             "enum": [
               "MALICIOUS",
               "MODERATE"
@@ -9401,13 +9379,11 @@
           },
           "title": {
             "type": "string",
-            "description": "User-facing title of the finding",
-            "example": "New recipient"
+            "description": "User-facing title of the finding"
           },
           "description": {
             "type": "string",
-            "description": "Detailed description explaining the finding and its implications",
-            "example": "This is the first time you are interacting with this recipient"
+            "description": "Detailed description explaining the finding and its implications"
           },
           "issues": {
             "type": "object",
@@ -9435,6 +9411,61 @@
           "description"
         ]
       },
+      "NativeAssetDetailsDto": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "description": "Token symbol (if available)"
+          },
+          "logo_url": {
+            "type": "string",
+            "description": "URL to asset logo (if available)",
+            "example": "https://example.com/logo.png"
+          },
+          "type": {
+            "type": "string",
+            "description": "Asset type",
+            "enum": [
+              "NATIVE"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "TokenAssetDetailsDto": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "description": "Token symbol (if available)"
+          },
+          "logo_url": {
+            "type": "string",
+            "description": "URL to asset logo (if available)",
+            "example": "https://example.com/logo.png"
+          },
+          "type": {
+            "type": "string",
+            "description": "Asset type",
+            "enum": [
+              "ERC20",
+              "ERC721",
+              "ERC1155"
+            ]
+          },
+          "address": {
+            "type": "string",
+            "description": "Token contract address"
+          }
+        },
+        "required": [
+          "type",
+          "address"
+        ]
+      },
       "FungibleDiffDto": {
         "type": "object",
         "properties": {
@@ -9458,46 +9489,17 @@
           "token_id"
         ]
       },
-      "AssetDetailsDto": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "description": "Asset type",
-            "enum": [
-              "NATIVE",
-              "ERC20",
-              "ERC721",
-              "ERC1155"
-            ]
-          },
-          "symbol": {
-            "type": "string",
-            "description": "Token symbol (if available)"
-          },
-          "address": {
-            "type": "string",
-            "description": "Token contract address"
-          },
-          "logo_url": {
-            "type": "string",
-            "description": "URL to asset logo (if available)",
-            "example": "https://example.com/usdc-logo.png"
-          }
-        },
-        "required": [
-          "type",
-          "address"
-        ]
-      },
       "BalanceChangeDto": {
         "type": "object",
         "properties": {
           "asset": {
             "description": "Asset details",
-            "allOf": [
+            "oneOf": [
               {
-                "$ref": "#/components/schemas/AssetDetailsDto"
+                "$ref": "#/components/schemas/NativeAssetDetailsDto"
+              },
+              {
+                "$ref": "#/components/schemas/TokenAssetDetailsDto"
               }
             ]
           },

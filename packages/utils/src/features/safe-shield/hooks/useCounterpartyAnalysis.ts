@@ -99,7 +99,7 @@ export function useCounterpartyAnalysis({
   // Merge backend recipient results with local checks
   const mergedRecipientResults = useMemo(() => {
     if (fetchError || activityCheckError) {
-      return { [safeAddress]: { [StatusGroup.RECIPIENT_ACTIVITY]: [getErrorInfo(ErrorType.RECIPIENT)] } }
+      return { [safeAddress]: { [StatusGroup.COMMON]: [getErrorInfo(ErrorType.RECIPIENT)] } }
     }
     // Only merge different results after all of them are available
     if (!counterpartyData?.recipient || !addressBookCheck || activityCheckLoading) {
@@ -118,11 +118,12 @@ export function useCounterpartyAnalysis({
     fetchError,
     activityCheckError,
     activityCheckLoading,
+    safeAddress,
   ])
 
   const contractResults = useMemo(() => {
     if (fetchError) {
-      return { [safeAddress]: { [StatusGroup.CONTRACT_VERIFICATION]: [getErrorInfo(ErrorType.CONTRACT)] } }
+      return { [safeAddress]: { [StatusGroup.COMMON]: [getErrorInfo(ErrorType.CONTRACT)] } }
     }
     if (!counterpartyData?.contract) {
       return undefined
@@ -133,10 +134,9 @@ export function useCounterpartyAnalysis({
 
   // Return results in the expected format
   return {
-    recipient:
-      recipientAddresses.length > 0
-        ? [mergedRecipientResults, fetchError || activityCheckError, isLoading || activityCheckLoading]
-        : undefined,
+    recipient: mergedRecipientResults
+      ? [mergedRecipientResults, fetchError || activityCheckError, isLoading || activityCheckLoading]
+      : undefined,
     contract: contractResults ? [contractResults, fetchError, isLoading] : undefined,
   }
 }
