@@ -5,6 +5,9 @@ import {
   ThreatStatus,
   MasterCopyChangeThreatAnalysisResult,
   ThreatAnalysisResult,
+  ThreatAnalysisResults,
+  ContractAnalysisResults,
+  RecipientAnalysisResults,
 } from '../types'
 import { getPrimaryResult, sortBySeverity } from './analysisUtils'
 import { mapConsolidatedAnalysisResults } from './mapConsolidatedAnalysisResults'
@@ -15,7 +18,11 @@ import { mapConsolidatedAnalysisResults } from './mapConsolidatedAnalysisResults
  * For multiple addresses, consolidates results by status type and generates appropriate descriptions
  * Results are sorted by severity: CRITICAL > WARN > INFO > OK
  */
-export const mapVisibleAnalysisResults = (addressResults: AddressAnalysisResults[]): AnalysisResult<AnyStatus>[] => {
+export const mapVisibleAnalysisResults = (
+  addressesResultsMap: RecipientAnalysisResults | ContractAnalysisResults | ThreatAnalysisResults,
+): AnalysisResult<AnyStatus>[] => {
+  const addressResults = Object.values(addressesResultsMap)
+
   if (addressResults.length === 1) {
     const results: AnalysisResult<AnyStatus>[] = []
     for (const groupResults of Object.values(addressResults[0])) {
@@ -27,7 +34,7 @@ export const mapVisibleAnalysisResults = (addressResults: AddressAnalysisResults
     return sortBySeverity(results.filter(Boolean))
   }
 
-  return mapConsolidatedAnalysisResults(addressResults)
+  return mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 }
 
 export const isAddressChange = (result: AnalysisResult<AnyStatus>): result is MasterCopyChangeThreatAnalysisResult => {
