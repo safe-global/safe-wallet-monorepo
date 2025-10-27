@@ -1,12 +1,15 @@
 import { mapVisibleAnalysisResults } from '../mapVisibleAnalysisResults'
 import { Severity, StatusGroup, RecipientStatus } from '../../types'
-import type { AddressAnalysisResults, AnalysisResult } from '../../types'
+import type { RecipientAnalysisResults } from '../../types'
+import { faker } from '@faker-js/faker'
 
 describe('mapVisibleAnalysisResults', () => {
   describe('single address', () => {
     it('should return primary result from each group for a single address', () => {
-      const addressResults: AddressAnalysisResults[] = [
-        {
+      const address1 = faker.finance.ethereumAddress()
+
+      const addressesResultsMap: RecipientAnalysisResults = {
+        [address1]: {
           [StatusGroup.ADDRESS_BOOK]: [
             {
               severity: Severity.OK,
@@ -24,9 +27,9 @@ describe('mapVisibleAnalysisResults', () => {
             },
           ],
         },
-      ]
+      }
 
-      const result = mapVisibleAnalysisResults(addressResults)
+      const result = mapVisibleAnalysisResults(addressesResultsMap)
 
       expect(result).toHaveLength(2)
       expect(result[0].severity).toBe(Severity.WARN) // Higher priority
@@ -36,8 +39,10 @@ describe('mapVisibleAnalysisResults', () => {
     })
 
     it('should handle single address with one group', () => {
-      const addressResults: AddressAnalysisResults[] = [
-        {
+      const address1 = faker.finance.ethereumAddress()
+
+      const addressesResultsMap: RecipientAnalysisResults = {
+        [address1]: {
           [StatusGroup.ADDRESS_BOOK]: [
             {
               severity: Severity.INFO,
@@ -47,9 +52,9 @@ describe('mapVisibleAnalysisResults', () => {
             },
           ],
         },
-      ]
+      }
 
-      const result = mapVisibleAnalysisResults(addressResults)
+      const result = mapVisibleAnalysisResults(addressesResultsMap)
 
       expect(result).toHaveLength(1)
       expect(result[0].severity).toBe(Severity.INFO)
@@ -57,8 +62,10 @@ describe('mapVisibleAnalysisResults', () => {
     })
 
     it('should select highest severity result when group has multiple results', () => {
-      const addressResults: AddressAnalysisResults[] = [
-        {
+      const address1 = faker.finance.ethereumAddress()
+
+      const addressesResultsMap: RecipientAnalysisResults = {
+        [address1]: {
           [StatusGroup.ADDRESS_BOOK]: [
             {
               severity: Severity.OK,
@@ -74,9 +81,9 @@ describe('mapVisibleAnalysisResults', () => {
             },
           ],
         },
-      ]
+      }
 
-      const result = mapVisibleAnalysisResults(addressResults)
+      const result = mapVisibleAnalysisResults(addressesResultsMap)
 
       expect(result).toHaveLength(1)
       expect(result[0].severity).toBe(Severity.CRITICAL)
@@ -84,8 +91,10 @@ describe('mapVisibleAnalysisResults', () => {
     })
 
     it('should filter out empty groups', () => {
-      const addressResults: AddressAnalysisResults[] = [
-        {
+      const address1 = faker.finance.ethereumAddress()
+
+      const addressesResultsMap: RecipientAnalysisResults = {
+        [address1]: {
           [StatusGroup.ADDRESS_BOOK]: [
             {
               severity: Severity.OK,
@@ -96,18 +105,22 @@ describe('mapVisibleAnalysisResults', () => {
           ],
           [StatusGroup.RECIPIENT_ACTIVITY]: [],
         },
-      ]
+      }
 
-      const result = mapVisibleAnalysisResults(addressResults)
+      const result = mapVisibleAnalysisResults(addressesResultsMap)
 
       expect(result).toHaveLength(1)
       expect(result[0].type).toBe(RecipientStatus.KNOWN_RECIPIENT)
     })
 
     it('should return empty array for address with no results', () => {
-      const addressResults: AddressAnalysisResults[] = [{}]
+      const address1 = faker.finance.ethereumAddress()
 
-      const result = mapVisibleAnalysisResults(addressResults)
+      const addressesResultsMap: RecipientAnalysisResults = {
+        [address1]: {},
+      }
+
+      const result = mapVisibleAnalysisResults(addressesResultsMap)
 
       expect(result).toEqual([])
     })
@@ -115,8 +128,11 @@ describe('mapVisibleAnalysisResults', () => {
 
   describe('multiple addresses', () => {
     it('should consolidate results for multiple addresses and have a primary result', () => {
-      const addressResults: AddressAnalysisResults[] = [
-        {
+      const address1 = faker.finance.ethereumAddress()
+      const address2 = faker.finance.ethereumAddress()
+
+      const addressesResultsMap: RecipientAnalysisResults = {
+        [address1]: {
           [StatusGroup.ADDRESS_BOOK]: [
             {
               severity: Severity.OK,
@@ -126,7 +142,7 @@ describe('mapVisibleAnalysisResults', () => {
             },
           ],
         },
-        {
+        [address2]: {
           [StatusGroup.ADDRESS_BOOK]: [
             {
               severity: Severity.INFO,
@@ -136,9 +152,9 @@ describe('mapVisibleAnalysisResults', () => {
             },
           ],
         },
-      ]
+      }
 
-      const result = mapVisibleAnalysisResults(addressResults)
+      const result = mapVisibleAnalysisResults(addressesResultsMap)
 
       expect(result.length).toBe(1)
       expect(result[0].severity).toBe(Severity.INFO)
@@ -146,39 +162,50 @@ describe('mapVisibleAnalysisResults', () => {
     })
 
     it('should handle multiple addresses with same status type', () => {
-      const addressResults: AddressAnalysisResults[] = [
-        {
-          [StatusGroup.ADDRESS_BOOK]: [
-            {
-              severity: Severity.OK,
-              type: RecipientStatus.KNOWN_RECIPIENT,
-              title: 'Known recipient',
-              description: 'Address is in the address book.',
-            },
-          ],
-        },
-        {
-          [StatusGroup.ADDRESS_BOOK]: [
-            {
-              severity: Severity.OK,
-              type: RecipientStatus.KNOWN_RECIPIENT,
-              title: 'Known recipient',
-              description: 'Address is in the address book.',
-            },
-          ],
-        },
-      ]
+      const address1 = faker.finance.ethereumAddress()
+      const address2 = faker.finance.ethereumAddress()
 
-      const result = mapVisibleAnalysisResults(addressResults)
+      const addressesResultsMap: RecipientAnalysisResults = {
+        [address1]: {
+          [StatusGroup.ADDRESS_BOOK]: [
+            {
+              severity: Severity.OK,
+              type: RecipientStatus.KNOWN_RECIPIENT,
+              title: 'Known recipient',
+              description: 'Address is in the address book.',
+            },
+          ],
+        },
+        [address2]: {
+          [StatusGroup.ADDRESS_BOOK]: [
+            {
+              severity: Severity.OK,
+              type: RecipientStatus.KNOWN_RECIPIENT,
+              title: 'Known recipient',
+              description: 'Address is in the address book.',
+            },
+          ],
+        },
+      }
+
+      const result = mapVisibleAnalysisResults(addressesResultsMap)
 
       expect(result.length).toBe(1)
       expect(result[0].description).toContain('All these addresses are in your address book or a Safe you own.')
     })
 
     it('should return empty array for multiple addresses with no results', () => {
-      const addressResults: AddressAnalysisResults[] = [{}, {}, {}]
+      const address1 = faker.finance.ethereumAddress()
+      const address2 = faker.finance.ethereumAddress()
+      const address3 = faker.finance.ethereumAddress()
 
-      const result = mapVisibleAnalysisResults(addressResults)
+      const addressesResultsMap: RecipientAnalysisResults = {
+        [address1]: {},
+        [address2]: {},
+        [address3]: {},
+      }
+
+      const result = mapVisibleAnalysisResults(addressesResultsMap)
 
       expect(result).toEqual([])
     })
@@ -186,14 +213,18 @@ describe('mapVisibleAnalysisResults', () => {
 
   describe('edge cases', () => {
     it('should handle empty array', () => {
-      const result = mapVisibleAnalysisResults([])
+      const addressesResultsMap: RecipientAnalysisResults = {}
+
+      const result = mapVisibleAnalysisResults(addressesResultsMap)
 
       expect(result).toEqual([])
     })
 
     it('should sort results by severity priority', () => {
-      const addressResults: AddressAnalysisResults[] = [
-        {
+      const address1 = faker.finance.ethereumAddress()
+
+      const addressesResultsMap: RecipientAnalysisResults = {
+        [address1]: {
           [StatusGroup.ADDRESS_BOOK]: [
             {
               severity: Severity.OK,
@@ -219,9 +250,9 @@ describe('mapVisibleAnalysisResults', () => {
             },
           ],
         },
-      ]
+      }
 
-      const result = mapVisibleAnalysisResults(addressResults)
+      const result = mapVisibleAnalysisResults(addressesResultsMap)
 
       expect(result).toHaveLength(3)
       expect(result[0].severity).toBe(Severity.CRITICAL)
