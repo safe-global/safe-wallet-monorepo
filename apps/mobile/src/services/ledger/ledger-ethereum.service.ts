@@ -1,6 +1,7 @@
 import { SignerEthBuilder } from '@ledgerhq/device-signer-kit-ethereum'
 import type { DeviceSessionId, ExecuteDeviceActionReturnType } from '@ledgerhq/device-management-kit'
 import type { TypedData, Signature } from '@ledgerhq/device-signer-kit-ethereum'
+import { getAccountPath } from 'ethers'
 import { ledgerDMKService } from './ledger-dmk.service'
 import logger from '@/src/utils/logger'
 
@@ -83,9 +84,10 @@ export class LedgerEthereumService {
     const signerEth = this.createSigner(session)
     const addresses: EthereumAddress[] = []
 
-    // Derive addresses using the standard Ethereum derivation path
+    // Derive addresses using the standard Ethereum derivation path (BIP-44 account derivation)
     for (let i = startIndex; i < startIndex + count; i++) {
-      const path = `44'/60'/0'/0/${i}` // Standard Ethereum derivation path
+      const fullPath = getAccountPath(i)
+      const path = fullPath.substring(2) // Remove "m/" prefix for Ledger SDK
 
       try {
         const deviceAction = signerEth.getAddress(path)
