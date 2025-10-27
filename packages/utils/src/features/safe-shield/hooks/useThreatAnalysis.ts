@@ -9,6 +9,15 @@ import { generateTypedData } from '../utils/generateTypedData'
 import { isSafeTransaction } from '../../../utils/safeTransaction'
 import { ErrorType, getErrorInfo } from '../utils/errors'
 
+type UseThreatAnalysisProps = {
+  safeAddress: `0x${string}`
+  chainId: string
+  data: SafeTransaction | TypedData | undefined
+  walletAddress: string
+  origin?: string
+  safeVersion?: string
+}
+
 /**
  * Hook for fetching threat analysis data using EIP-712 typed data
  * Performs backend API call to analyze security threats in the transaction
@@ -27,14 +36,7 @@ export function useThreatAnalysis({
   walletAddress,
   origin: originProp,
   safeVersion,
-}: {
-  safeAddress: `0x${string}`
-  chainId: string
-  data: SafeTransaction | TypedData | undefined
-  walletAddress: string
-  origin?: string
-  safeVersion?: string
-}): AsyncResult<ThreatAnalysisResults> {
+}: UseThreatAnalysisProps): AsyncResult<ThreatAnalysisResults> {
   const [data, setData] = useState<SafeTransaction | TypedData | undefined>(dataProp)
   const [triggerAnalysis, { data: threatData, error, isLoading }] = useSafeShieldAnalyzeThreatV1Mutation()
 
