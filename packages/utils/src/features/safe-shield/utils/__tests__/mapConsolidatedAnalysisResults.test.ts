@@ -1,20 +1,26 @@
 import { mapConsolidatedAnalysisResults } from '../mapConsolidatedAnalysisResults'
 import { Severity, StatusGroup, RecipientStatus } from '../../types'
-import type { AddressAnalysisResults } from '../../types'
+import type { AddressAnalysisResults, RecipientAnalysisResults } from '../../types'
 import { RecipientAnalysisResultBuilder } from '../../builders'
+import { faker } from '@faker-js/faker'
 
 describe('mapConsolidatedAnalysisResults', () => {
   it('should consolidate results from multiple addresses', () => {
-    const addressResults: AddressAnalysisResults[] = [
-      {
+    const address1 = faker.finance.ethereumAddress()
+    const address2 = faker.finance.ethereumAddress()
+
+    const addressesResultsMap: RecipientAnalysisResults = {
+      [address1]: {
         [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
       },
-      {
+      [address2]: {
         [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.unknownRecipient().build()],
       },
-    ]
+    }
 
-    const result = mapConsolidatedAnalysisResults(addressResults)
+    const addressResults: AddressAnalysisResults[] = Object.values(addressesResultsMap)
+
+    const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 
     expect(result.length).toBe(1)
     expect(result[0].severity).toBe(Severity.INFO)
@@ -22,16 +28,21 @@ describe('mapConsolidatedAnalysisResults', () => {
   })
 
   it('should return a multi-recipient description with "all" when all recipients match', () => {
-    const addressResults: AddressAnalysisResults[] = [
-      {
-        [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
-      },
-      {
-        [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
-      },
-    ]
+    const address1 = faker.finance.ethereumAddress()
+    const address2 = faker.finance.ethereumAddress()
 
-    const result = mapConsolidatedAnalysisResults(addressResults)
+    const addressesResultsMap: RecipientAnalysisResults = {
+      [address1]: {
+        [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
+      },
+      [address2]: {
+        [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
+      },
+    }
+
+    const addressResults: AddressAnalysisResults[] = Object.values(addressesResultsMap)
+
+    const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 
     expect(result).toHaveLength(1)
     expect(result[0].type).toBe(RecipientStatus.KNOWN_RECIPIENT)
@@ -40,19 +51,25 @@ describe('mapConsolidatedAnalysisResults', () => {
   })
 
   it('should return a multi-recipient description with the correct number of recipients when some recipients match', () => {
-    const addressResults: AddressAnalysisResults[] = [
-      {
+    const address1 = faker.finance.ethereumAddress()
+    const address2 = faker.finance.ethereumAddress()
+    const address3 = faker.finance.ethereumAddress()
+
+    const addressesResultsMap: RecipientAnalysisResults = {
+      [address1]: {
         [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.unknownRecipient().build()],
       },
-      {
+      [address2]: {
         [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
       },
-      {
+      [address3]: {
         [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.unknownRecipient().build()],
       },
-    ]
+    }
 
-    const result = mapConsolidatedAnalysisResults(addressResults)
+    const addressResults: AddressAnalysisResults[] = Object.values(addressesResultsMap)
+
+    const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 
     expect(result).toHaveLength(1)
     expect(result[0].severity).toBe(Severity.INFO)
@@ -61,25 +78,32 @@ describe('mapConsolidatedAnalysisResults', () => {
   })
 
   it('should handle multiple groups per address and return the primary result from each group', () => {
-    const addressResults: AddressAnalysisResults[] = [
-      {
+    const address1 = faker.finance.ethereumAddress()
+    const address2 = faker.finance.ethereumAddress()
+    const address3 = faker.finance.ethereumAddress()
+    const address4 = faker.finance.ethereumAddress()
+
+    const addressesResultsMap: RecipientAnalysisResults = {
+      [address1]: {
         [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
         [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
       },
-      {
+      [address2]: {
         [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.unknownRecipient().build()],
         [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
       },
-      {
+      [address3]: {
         [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
       },
-      {
+      [address4]: {
         [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
         [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
       },
-    ]
+    }
 
-    const result = mapConsolidatedAnalysisResults(addressResults)
+    const addressResults: AddressAnalysisResults[] = Object.values(addressesResultsMap)
+
+    const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 
     expect(result).toHaveLength(2)
     expect(result[0].severity).toBe(Severity.WARN)
@@ -91,16 +115,20 @@ describe('mapConsolidatedAnalysisResults', () => {
   })
 
   it('should select primary result from each group', () => {
-    const addressResults: AddressAnalysisResults[] = [
-      {
+    const address1 = faker.finance.ethereumAddress()
+
+    const addressesResultsMap: RecipientAnalysisResults = {
+      [address1]: {
         [StatusGroup.ADDRESS_BOOK]: [
           RecipientAnalysisResultBuilder.knownRecipient().build(),
           RecipientAnalysisResultBuilder.unknownRecipient().build(),
         ],
       },
-    ]
+    }
 
-    const result = mapConsolidatedAnalysisResults(addressResults)
+    const addressResults: AddressAnalysisResults[] = Object.values(addressesResultsMap)
+
+    const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 
     expect(result).toHaveLength(1)
     expect(result[0].severity).toBe(Severity.INFO)
@@ -108,20 +136,25 @@ describe('mapConsolidatedAnalysisResults', () => {
   })
 
   it('should sort consolidated results by severity', () => {
-    const addressResults: AddressAnalysisResults[] = [
-      {
+    const address1 = faker.finance.ethereumAddress()
+    const address2 = faker.finance.ethereumAddress()
+
+    const addressesResultsMap: RecipientAnalysisResults = {
+      [address1]: {
         [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
         [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
         [StatusGroup.RECIPIENT_INTERACTION]: [RecipientAnalysisResultBuilder.recurringRecipient().build()],
       },
-      {
+      [address2]: {
         [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.unknownRecipient().build()],
         [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
         [StatusGroup.RECIPIENT_INTERACTION]: [RecipientAnalysisResultBuilder.recurringRecipient().build()],
       },
-    ]
+    }
 
-    const result = mapConsolidatedAnalysisResults(addressResults)
+    const addressResults: AddressAnalysisResults[] = Object.values(addressesResultsMap)
+
+    const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 
     expect(result).toHaveLength(3)
     expect(result[0].severity).toBe(Severity.WARN)
@@ -130,28 +163,45 @@ describe('mapConsolidatedAnalysisResults', () => {
   })
 
   it('should return empty array for empty input', () => {
-    const result = mapConsolidatedAnalysisResults([])
+    const addressesResultsMap: RecipientAnalysisResults = {}
+    const addressResults: AddressAnalysisResults[] = []
+
+    const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 
     expect(result).toEqual([])
   })
 
   it('should return empty array for addresses with no results', () => {
-    const addressResults: AddressAnalysisResults[] = [{}, {}, {}]
+    const address1 = faker.finance.ethereumAddress()
+    const address2 = faker.finance.ethereumAddress()
+    const address3 = faker.finance.ethereumAddress()
 
-    const result = mapConsolidatedAnalysisResults(addressResults)
+    const addressesResultsMap: RecipientAnalysisResults = {
+      [address1]: {},
+      [address2]: {},
+      [address3]: {},
+    }
+
+    const addressResults: AddressAnalysisResults[] = Object.values(addressesResultsMap)
+
+    const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 
     expect(result).toEqual([])
   })
 
   it('should handle addresses with empty groups', () => {
-    const addressResults: AddressAnalysisResults[] = [
-      {
+    const address1 = faker.finance.ethereumAddress()
+
+    const addressesResultsMap: RecipientAnalysisResults = {
+      [address1]: {
         [StatusGroup.ADDRESS_BOOK]: [],
         [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
       },
-    ]
+    }
 
-    const result = mapConsolidatedAnalysisResults(addressResults)
+    const addressResults: AddressAnalysisResults[] = Object.values(addressesResultsMap)
+
+    const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 
     expect(result).toHaveLength(1)
     expect(result[0].type).toBe(RecipientStatus.LOW_ACTIVITY)

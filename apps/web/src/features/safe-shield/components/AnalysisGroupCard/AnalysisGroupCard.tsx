@@ -7,6 +7,7 @@ import { SeverityIcon } from '../SeverityIcon'
 import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
 import { AddressChanges } from '../AddressChanges'
 import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
+import { ShowAllAddress } from './ShowAllAddress'
 
 export const AnalysisGroupCard = ({
   data,
@@ -15,13 +16,12 @@ export const AnalysisGroupCard = ({
 }): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
 
-  const visibleResults = useMemo(() => mapVisibleAnalysisResults(Object.values(data || [])), [data])
+  const visibleResults = useMemo(() => mapVisibleAnalysisResults(data), [data])
   const primaryResult = useMemo(() => visibleResults[0], [visibleResults])
 
   if (!visibleResults.length) {
     return null
   }
-
   return (
     <Box>
       {/* Card header - always visible */}
@@ -62,6 +62,8 @@ export const AnalysisGroupCard = ({
                 <AnalysisIssuesDisplay result={result} />
 
                 {isAddressChange(result) && <AddressChanges result={result} />}
+
+                {result.addresses?.length && <ShowAllAddress addresses={result.addresses} />}
               </AnalysisGroupCardItem>
             ))}
           </Stack>
