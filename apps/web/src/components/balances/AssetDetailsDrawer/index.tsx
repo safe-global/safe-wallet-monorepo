@@ -16,6 +16,7 @@ import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import FiatValue from '@/components/common/FiatValue'
 import PriceChart from './PriceChart'
+import TokenTransactions from './TokenTransactions'
 import css from './styles.module.css'
 
 type AssetDetailsDrawerProps = {
@@ -189,6 +190,18 @@ const AssetDetailsDrawer = ({ asset, assetType, isOpen, onClose }: AssetDetailsD
           <EarnButton tokenInfo={tokenInfo} trackingLabel={EARN_LABELS.asset} compact={false} />
         </Stack>
       </Box>
+
+      {/* Transactions - only for tokens with address */}
+      {assetType === 'token' && 'address' in tokenInfo && (
+        <>
+          <Divider />
+          <TokenTransactions
+            tokenAddress={tokenInfo.address}
+            tokenSymbol={tokenInfo.symbol}
+            tokenDecimals={tokenInfo.decimals}
+          />
+        </>
+      )}
     </Box>
   )
 
