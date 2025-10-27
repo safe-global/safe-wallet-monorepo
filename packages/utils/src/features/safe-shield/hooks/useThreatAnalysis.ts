@@ -69,7 +69,7 @@ export function useThreatAnalysis({
 
   const typedData = useMemo(
     () =>
-      data && safeAddress && chainId && safeVersion
+      data && safeAddress && chainId
         ? generateTypedData({
             data,
             safeAddress,
