@@ -11,7 +11,8 @@ import {
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import { clearPendingTx, selectPendingTxs } from './pendingTxsSlice'
 import { makeLoadableSlice } from './common'
-import { gatewayApi, makeSafeTag, selectSafeInfo } from './slices'
+import { selectSafeInfo } from './slices'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 
 const { slice, selector } = makeLoadableSlice('txHistory', undefined as TransactionItemPage | undefined)
 
@@ -60,10 +61,9 @@ export const txHistoryListener = (listenerMiddleware: typeof listenerMiddlewareI
 
             if (chainId && safeAddress) {
               listenerApi.dispatch(
-                gatewayApi.util.invalidateTags([
+                cgwApi.util.invalidateTags([
                   {
-                    type: 'OwnedSafes',
-                    id: makeSafeTag(chainId, safeAddress),
+                    type: 'owners',
                   },
                 ]),
               )

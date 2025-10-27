@@ -1,25 +1,24 @@
-import { useGetSafeQuery } from '@/store/slices'
-import { skipToken } from '@reduxjs/toolkit/query'
+import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useSafeInfo from './useSafeInfo'
-import type { getSafe } from '@safe-global/safe-client-gateway-sdk'
 import { useHasFeature } from '@/hooks/useChains'
 
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
-export function useParentSafe(): getSafe | undefined {
+export function useParentSafe() {
   const isEnabled = useHasFeature(FEATURES.NESTED_SAFES)
   const { safe } = useSafeInfo()
 
   // Nested Safes are deployed by a single owner
   const maybeParent = safe.owners.length === 1 ? safe.owners[0].value : undefined
 
-  const { data: parentSafe } = useGetSafeQuery(
-    isEnabled && maybeParent
-      ? {
-          chainId: safe.chainId,
-          safeAddress: maybeParent,
-        }
-      : skipToken,
+  const { data: parentSafe } = useSafesGetSafeV1Query(
+    {
+      chainId: safe.chainId || '',
+      safeAddress: maybeParent || '',
+    },
+    {
+      skip: !isEnabled || !maybeParent,
+    },
   )
 
   if (parentSafe?.address.value === maybeParent) {
