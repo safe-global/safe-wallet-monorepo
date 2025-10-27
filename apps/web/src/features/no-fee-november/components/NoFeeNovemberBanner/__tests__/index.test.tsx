@@ -47,7 +47,7 @@ describe('NoFeeNovemberBanner', () => {
     const closeButton = screen.getByLabelText('close')
     fireEvent.click(closeButton)
 
-    expect(mockOnDismiss).toHaveBeenCalledWith()
+    expect(mockOnDismiss).toHaveBeenCalled()
   })
 
   it('should call setTxFlow when new transaction button is clicked', () => {

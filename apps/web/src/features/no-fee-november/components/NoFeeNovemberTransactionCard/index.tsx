@@ -5,9 +5,26 @@ import css from './styles.module.css'
 import Link from 'next/link'
 import CloseIcon from '@mui/icons-material/Close'
 import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
+import BlockedAddress from '@/components/common/BlockedAddress'
 
 const NoFeeNovemberTransactionCard = () => {
-  const { isEligible, isLoading, error } = useNoFeeNovemberEligibility()
+  const { isEligible, isLoading, error, blockedAddress } = useNoFeeNovemberEligibility()
+
+  // Blocked address state - show blocked message (matches Earn pattern)
+  if (blockedAddress) {
+    return (
+      <Stack
+        direction="column"
+        sx={{
+          alignItems: 'center',
+          justifyContent: 'center',
+          flex: 1,
+        }}
+      >
+        <BlockedAddress address={blockedAddress} featureTitle="No Fee November" />
+      </Stack>
+    )
+  }
 
   // Loading state - show skeleton
   if (isLoading) {

@@ -1,25 +1,28 @@
-// import { useHasFeature } from '@/hooks/useChains'
-// import { FEATURES } from '@safe-global/utils/utils/chains'
-// import useSafeInfo from '@/hooks/useSafeInfo'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import { useContext } from 'react'
+import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 
 /**
  * Hook to determine if the No Fee November feature should be enabled
  *
  * Feature is enabled when:
  * - Feature flag is enabled
+ * - User is NOT in a geofenced/blocked country
  * - Safe is on Mainnet (chainId === '1')
- *
- * TODO: Remove mock when feature flag is enabled on Mainnet chain configuration
  */
 const useIsNoFeeNovemberEnabled = (): boolean => {
-  // const isFeatureEnabled = useHasFeature(FEATURES.NO_FEE_NOVEMBER)
-  // const { safe } = useSafeInfo()
+  const isFeatureEnabled = useHasFeature(FEATURES.NO_FEE_NOVEMBER)
+  const { safe } = useSafeInfo()
+  const isBlockedCountry = useContext(GeoblockingContext)
 
-  // Mock: Always show banner for testing (remove this line when feature flag is enabled)
-  return true
+  // Feature is disabled if user is in blocked country
+  if (isBlockedCountry) {
+    return false
+  }
 
-  // Production logic (uncomment when feature flag is enabled on Mainnet):
-  // return Boolean(isFeatureEnabled && safe.chainId === '1')
+  return Boolean(isFeatureEnabled && safe.chainId === '1')
 }
 
 export default useIsNoFeeNovemberEnabled

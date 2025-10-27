@@ -91,11 +91,11 @@ export const ExecuteForm = ({
   // SC wallets can relay fully signed transactions
   const [walletCanRelay] = useWalletCanRelay(safeTx)
   const relays = useRelaysBySafe()
-  const { isEligible: isNoFeeNovember, remaining, limit } = useNoFeeNovemberEligibility()
+  const { isEligible: isNoFeeNovember, remaining, limit, blockedAddress } = useNoFeeNovemberEligibility()
 
-  // No-fee November REPLACES relay when eligible
+  // No-fee November REPLACES relay when eligible AND not blocked
   const canRelay = !isNoFeeNovember && walletCanRelay && hasRemainingRelays(relays[0])
-  const canNoFeeNovember = isNoFeeNovember
+  const canNoFeeNovember = isNoFeeNovember && !blockedAddress
 
   // Show execution selector when either no-fee november OR relay is available
   const showExecutionSelector = canNoFeeNovember || canRelay

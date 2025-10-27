@@ -1,8 +1,14 @@
 import { useState, useEffect } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import useBlockedAddress from '@/hooks/useBlockedAddress'
 
 /**
  * Hook to check eligibility for No Fee November campaign
+ *
+ * Checks:
+ * 1. Geofencing - user is not in OFAC sanctioned country
+ * 2. Blacklist - Safe and wallet addresses are not on OFAC SDN list
+ * 3. Backend eligibility - checks remaining free transactions
  *
  * TODO: Replace with real CGW endpoint when available
  * Expected endpoint: GET /v1/chains/{chainId}/relay/{safeAddress}/eligibility
@@ -16,8 +22,10 @@ const useNoFeeNovemberEligibility = (): {
   limit: number | undefined
   isLoading: boolean
   error: Error | undefined
+  blockedAddress?: string
 } => {
   const { safeAddress } = useSafeInfo()
+  const blockedAddress = useBlockedAddress()
   const [isEligible, setIsEligible] = useState<boolean | undefined>(undefined)
   const [remaining, setRemaining] = useState<number | undefined>(undefined)
   const [limit, setLimit] = useState<number | undefined>(undefined)
@@ -25,6 +33,15 @@ const useNoFeeNovemberEligibility = (): {
   const [error, setError] = useState<Error | undefined>(undefined)
 
   useEffect(() => {
+    // If address is blocked, user is not eligible
+    if (blockedAddress) {
+      setIsEligible(false)
+      setIsLoading(false)
+      setRemaining(undefined)
+      setLimit(undefined)
+      return
+    }
+
     // Mock API call to CGW eligibility endpoint
     const checkEligibility = async () => {
       setIsLoading(true)
@@ -59,7 +76,7 @@ const useNoFeeNovemberEligibility = (): {
       setRemaining(undefined)
       setLimit(undefined)
     }
-  }, [safeAddress])
+  }, [safeAddress, blockedAddress])
 
   return {
     isEligible,
@@ -67,6 +84,7 @@ const useNoFeeNovemberEligibility = (): {
     limit,
     isLoading,
     error,
+    blockedAddress,
   }
 }
 
