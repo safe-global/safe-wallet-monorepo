@@ -1,5 +1,4 @@
 import { Paper, Grid2, Typography, Button, SvgIcon, Tooltip, IconButton } from '@mui/material'
-import { skipToken } from '@reduxjs/toolkit/query'
 import { useContext, useMemo, useState } from 'react'
 import type { ReactElement } from 'react'
 
@@ -12,7 +11,7 @@ import EntryDialog from '@/components/address-book/EntryDialog'
 import { TxModalContext } from '@/components/tx-flow'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useGetOwnedSafesQuery } from '@/store/slices'
+import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { NESTED_SAFE_EVENTS } from '@/services/analytics/events/nested-safes'
 import Track from '@/components/common/Track'
 import { useHasFeature } from '@/hooks/useChains'
@@ -26,12 +25,14 @@ export function NestedSafesList(): ReactElement | null {
   const [addressToRename, setAddressToRename] = useState<string | null>(null)
 
   const { safe, safeLoaded, safeAddress } = useSafeInfo()
-  const { data: nestedSafes } = useGetOwnedSafesQuery(
-    isEnabled && safeLoaded ? { chainId: safe.chainId, ownerAddress: safeAddress } : skipToken,
+  const { currentData: ownedSafes } = useOwnersGetAllSafesByOwnerV2Query(
+    { ownerAddress: safeAddress },
+    { skip: !isEnabled || !safeLoaded },
   )
 
   const rows = useMemo(() => {
-    return nestedSafes?.safes.map((nestedSafe) => {
+    const nestedSafes = ownedSafes?.[safe.chainId] ?? []
+    return nestedSafes.map((nestedSafe) => {
       return {
         cells: {
           owner: {
@@ -64,7 +65,7 @@ export function NestedSafesList(): ReactElement | null {
         },
       }
     })
-  }, [nestedSafes?.safes])
+  }, [ownedSafes, safe.chainId])
 
   if (!isEnabled) {
     return null
@@ -86,7 +87,7 @@ export function NestedSafesList(): ReactElement | null {
               projects.
             </Typography>
 
-            {nestedSafes?.safes.length === 0 && (
+            {rows.length === 0 && (
               <Typography mb={3}>
                 You don&apos;t have any Nested Safes yet. Set one up now to better organize your assets
               </Typography>

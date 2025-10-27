@@ -5,7 +5,6 @@ import IconButton from '@mui/material/IconButton'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import MenuItem from '@mui/material/MenuItem'
 import ListItemText from '@mui/material/ListItemText'
-import { skipToken } from '@reduxjs/toolkit/query'
 
 import EntryDialog from '@/components/address-book/EntryDialog'
 import SafeListRemoveDialog from '@/components/sidebar/SafeListRemoveDialog'
@@ -20,7 +19,7 @@ import useAddressBook from '@/hooks/useAddressBook'
 import { AppRoutes } from '@/config/routes'
 import router from 'next/router'
 import { CreateSafeOnNewChain } from '@/features/multichain/components/CreateSafeOnNewChain'
-import { useGetOwnedSafesQuery } from '@/store/slices'
+import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { NestedSafesPopover } from '../NestedSafesPopover'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import { useHasFeature } from '@/hooks/useChains'
@@ -60,8 +59,9 @@ const SafeListContextMenu = ({
 }): ReactElement => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const isNestedSafesEnabled = useHasFeature(FEATURES.NESTED_SAFES)
-  const { data: nestedSafes } = useGetOwnedSafesQuery(
-    isNestedSafesEnabled && address && anchorEl ? { chainId, ownerAddress: address } : skipToken,
+  const { currentData: ownedSafes } = useOwnersGetAllSafesByOwnerV2Query(
+    { ownerAddress: address },
+    { skip: !isNestedSafesEnabled || !address || !anchorEl },
   )
   const addressBook = useAddressBook()
   const hasName = address in addressBook
@@ -91,13 +91,15 @@ const SafeListContextMenu = ({
     setOpen(defaultOpen)
   }
 
+  const nestedSafesForChain = ownedSafes?.[chainId] ?? []
+
   return (
     <>
       <IconButton data-testid="safe-options-btn" edge="end" size="small" onClick={handleOpenContextMenu}>
         <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
       </IconButton>
       <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>
-        {isNestedSafesEnabled && !undeployedSafe && nestedSafes?.safes && nestedSafes.safes.length > 0 && (
+        {isNestedSafesEnabled && !undeployedSafe && nestedSafesForChain && nestedSafesForChain.length > 0 && (
           <MenuItem
             onClick={handleOpenModal(ModalType.NESTED_SAFES, {
               ...NESTED_SAFE_EVENTS.OPEN_LIST,
@@ -146,7 +148,7 @@ const SafeListContextMenu = ({
             handleCloseModal()
             onClose?.()
           }}
-          nestedSafes={nestedSafes?.safes ?? []}
+          nestedSafes={nestedSafesForChain}
           hideCreationButton
         />
       )}

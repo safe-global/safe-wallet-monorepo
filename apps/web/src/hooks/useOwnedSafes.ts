@@ -3,8 +3,7 @@ import { useMemo } from 'react'
 
 import useWallet from '@/hooks/wallets/useWallet'
 import useChainId from './useChainId'
-import { useGetOwnedSafesQuery } from '@/store/slices'
-import { skipToken } from '@reduxjs/toolkit/query'
+import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 
 type OwnedSafesCache = {
   [walletAddress: string]: {
@@ -17,11 +16,12 @@ const useOwnedSafes = (customChainId?: string): OwnedSafesCache['walletAddress']
   const chainId = customChainId ?? currentChainId
   const { address: walletAddress } = useWallet() || {}
 
-  const { data: ownedSafes } = useGetOwnedSafesQuery(
-    walletAddress ? { chainId, ownerAddress: walletAddress } : skipToken,
+  const { currentData: ownedSafes } = useOwnersGetAllSafesByOwnerV2Query(
+    { ownerAddress: walletAddress || '' },
+    { skip: !walletAddress },
   )
 
-  const result = useMemo(() => ({ [chainId]: ownedSafes?.safes ?? [] }), [chainId, ownedSafes])
+  const result = useMemo(() => ({ [chainId]: ownedSafes?.[chainId] ?? [] }), [chainId, ownedSafes])
 
   return result ?? {}
 }

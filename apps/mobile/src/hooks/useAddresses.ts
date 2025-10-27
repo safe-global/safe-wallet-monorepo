@@ -17,6 +17,7 @@ type Action<T extends BaseAddress> =
   | { type: 'LOAD_SUCCESS'; payload: T[] }
   | { type: 'LOAD_FAILURE'; payload: { code: string; message: string } }
   | { type: 'CLEAR_ERROR' }
+  | { type: 'CLEAR_ADDRESSES' }
 
 const initialState = {
   addresses: [],
@@ -47,17 +48,23 @@ function reducer<T extends BaseAddress>(state: State<T>, action: Action<T>): Sta
     case 'CLEAR_ERROR':
       return { ...state, error: null }
 
+    case 'CLEAR_ADDRESSES':
+      return { ...initialState }
+
     default:
       return state
   }
 }
 
-interface UseAddressesConfig<T extends BaseAddress> {
-  fetchAddresses: (count: number, startIndex: number) => Promise<T[]>
+interface UseAddressesConfig<T extends BaseAddress, TExtra extends unknown[] = []> {
+  fetchAddresses: (count: number, startIndex: number, ...args: TExtra) => Promise<T[]>
   validateInput?: () => { isValid: boolean; error?: { code: string; message: string } }
 }
 
-export const useAddresses = <T extends BaseAddress>({ fetchAddresses, validateInput }: UseAddressesConfig<T>) => {
+export const useAddresses = <T extends BaseAddress, TExtra extends unknown[] = []>({
+  fetchAddresses,
+  validateInput,
+}: UseAddressesConfig<T, TExtra>) => {
   const [state, dispatchLocal] = useReducer(reducer<T>, initialState)
   const isLoadingRef = useRef(state.isLoading)
 
@@ -66,7 +73,7 @@ export const useAddresses = <T extends BaseAddress>({ fetchAddresses, validateIn
   }, [state.isLoading])
 
   const loadAddresses = useCallback(
-    async (count: number) => {
+    async (count: number, explicitStartIndex?: number, ...extraArgs: TExtra) => {
       // Validate input if validator provided
       if (validateInput) {
         const validation = validateInput()
@@ -84,8 +91,8 @@ export const useAddresses = <T extends BaseAddress>({ fetchAddresses, validateIn
       dispatchLocal({ type: 'LOAD_START' })
 
       try {
-        const startIndex = state.addresses.length
-        const addresses = await fetchAddresses(count, startIndex)
+        const startIndex = explicitStartIndex ?? state.addresses.length
+        const addresses = await fetchAddresses(count, startIndex, ...extraArgs)
         dispatchLocal({ type: 'LOAD_SUCCESS', payload: addresses })
       } catch (error) {
         dispatchLocal({
@@ -107,5 +114,6 @@ export const useAddresses = <T extends BaseAddress>({ fetchAddresses, validateIn
     error: state.error,
     clearError: () => dispatchLocal({ type: 'CLEAR_ERROR' }),
     loadAddresses,
+    clearAddresses: () => dispatchLocal({ type: 'CLEAR_ADDRESSES' }),
   }
 }

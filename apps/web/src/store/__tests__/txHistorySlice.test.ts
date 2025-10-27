@@ -226,11 +226,10 @@ describe('txHistorySlice', () => {
       expect(listenerApi.dispatch).toHaveBeenNthCalledWith(1, {
         payload: [
           {
-            id: `${state.safeInfo.data!.chainId}:${state.safeInfo.data!.address.value}`,
-            type: 'OwnedSafes',
+            type: 'owners',
           },
         ],
-        type: 'gatewayApi/invalidateTags',
+        type: 'api/invalidateTags',
       })
       expect(listenerApi.dispatch).toHaveBeenNthCalledWith(2, {
         payload: expect.anything(),
