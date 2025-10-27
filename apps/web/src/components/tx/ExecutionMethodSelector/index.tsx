@@ -1,4 +1,4 @@
-import { Box, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Tooltip } from '@mui/material'
+import { Box, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Tooltip, Chip } from '@mui/material'
 import type { Dispatch, SetStateAction, ReactElement, ChangeEvent } from 'react'
 
 import useWallet from '@/hooks/wallets/useWallet'
@@ -6,6 +6,7 @@ import WalletIcon from '@/components/common/WalletIcon'
 import SponsoredBy from '../SponsoredBy'
 import RemainingRelays from '../RemainingRelays'
 import InfoIcon from '@mui/icons-material/Info'
+import GasTooHighBanner from '@/features/no-fee-november/components/GasTooHighBanner'
 
 import css from './styles.module.css'
 import BalanceInfo from '@/components/tx/BalanceInfo'
@@ -30,6 +31,7 @@ const _ExecutionMethodSelector = ({
   noLabel,
   tooltip,
   noFeeNovember,
+  gasTooHigh,
 }: {
   wallet: ConnectedWallet | null
   chain?: Chain
@@ -43,6 +45,7 @@ const _ExecutionMethodSelector = ({
     remaining: number
     limit: number
   }
+  gasTooHigh?: boolean
 }): ReactElement | null => {
   const shouldRelay = executionMethod === ExecutionMethod.RELAY || executionMethod === ExecutionMethod.NO_FEE_NOVEMBER
 
@@ -61,45 +64,89 @@ const _ExecutionMethodSelector = ({
           ) : null}
 
           <RadioGroup row value={executionMethod} onChange={onChooseExecutionMethod} className={css.radioGroup}>
-            <FormControlLabel
-              data-testid="relay-execution-method"
-              sx={{ flex: 1 }}
-              value={noFeeNovember?.isEligible ? ExecutionMethod.NO_FEE_NOVEMBER : ExecutionMethod.RELAY}
-              label={
-                noFeeNovember?.isEligible ? (
-                  <div className={css.noFeeNovemberLabel}>
-                    <Typography className={css.mainLabel}>Sponsored gas</Typography>
-                    <div className={css.subLabel}>
-                      <Typography variant="body2" color="text.secondary">
-                        Part of the No-Fee November, Safe Ecosystem Foundation sponsorship program.{' '}
-                        <Tooltip
-                          title={
-                            <Box>
-                              <Typography variant="body2" color="inherit">
-                                SAFE holders enjoy gasless transactions on Ethereum Mainnet this November.{' '}
-                                <Typography component="span" fontWeight="bold">
-                                  Learn more
-                                </Typography>
-                              </Typography>
-                            </Box>
-                          }
-                          placement="top"
-                          arrow
-                        >
-                          <InfoIcon className={css.infoIconInline} />
-                        </Tooltip>
+            {gasTooHigh ? (
+              <Tooltip title="Gas prices are too high right now" placement="top" arrow>
+                <FormControlLabel
+                  data-testid="relay-execution-method"
+                  value={noFeeNovember?.isEligible ? ExecutionMethod.NO_FEE_NOVEMBER : ExecutionMethod.RELAY}
+                  disabled
+                  sx={{
+                    flex: 1,
+                    '& .MuiFormControlLabel-label': {
+                      marginLeft: '10px', // Spacing between radio and content
+                    },
+                  }}
+                  label={
+                    noFeeNovember?.isEligible ? (
+                      <div className={css.noFeeNovemberLabel}>
+                        <Chip
+                          label="Not available"
+                          size="small"
+                          className={css.notAvailableChip}
+                          sx={{
+                            '& .MuiChip-label': {
+                              padding: 0,
+                            },
+                          }}
+                        />
+                        <Typography className={css.notAvailableTitle}>Sponsored gas</Typography>
+                        <div className={css.descriptionWrapper}>
+                          <Typography className={css.descriptionText}>
+                            Part of the No-Fee November, Safe Ecosystem Foundation sponsorship program.
+                          </Typography>
+                        </div>
+                      </div>
+                    ) : (
+                      <Typography className={css.radioLabel} whiteSpace="nowrap">
+                        Sponsored by
+                        <SponsoredBy chainId={chain?.chainId ?? ''} />
                       </Typography>
+                    )
+                  }
+                  control={<Radio />}
+                />
+              </Tooltip>
+            ) : (
+              <FormControlLabel
+                data-testid="relay-execution-method"
+                sx={{ flex: 1 }}
+                value={noFeeNovember?.isEligible ? ExecutionMethod.NO_FEE_NOVEMBER : ExecutionMethod.RELAY}
+                label={
+                  noFeeNovember?.isEligible ? (
+                    <div className={css.noFeeNovemberLabel}>
+                      <Typography className={css.mainLabel}>Sponsored gas</Typography>
+                      <div className={css.subLabel}>
+                        <Typography variant="body2" color="text.secondary">
+                          Part of the No-Fee November, Safe Ecosystem Foundation sponsorship program.{' '}
+                          <Tooltip
+                            title={
+                              <Box>
+                                <Typography variant="body2" color="inherit">
+                                  SAFE holders enjoy gasless transactions on Ethereum Mainnet this November.{' '}
+                                  <Typography component="span" fontWeight="bold">
+                                    Learn more
+                                  </Typography>
+                                </Typography>
+                              </Box>
+                            }
+                            placement="top"
+                            arrow
+                          >
+                            <InfoIcon className={css.infoIconInline} />
+                          </Tooltip>
+                        </Typography>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <Typography className={css.radioLabel} whiteSpace="nowrap">
-                    Sponsored by
-                    <SponsoredBy chainId={chain?.chainId ?? ''} />
-                  </Typography>
-                )
-              }
-              control={<Radio />}
-            />
+                  ) : (
+                    <Typography className={css.radioLabel} whiteSpace="nowrap">
+                      Sponsored by
+                      <SponsoredBy chainId={chain?.chainId ?? ''} />
+                    </Typography>
+                  )
+                }
+                control={<Radio />}
+              />
+            )}
 
             <FormControlLabel
               data-testid="connected-wallet-execution-method"
@@ -115,6 +162,13 @@ const _ExecutionMethodSelector = ({
             />
           </RadioGroup>
         </FormControl>
+
+        {/* Gas too high banner - shown inside method section when gas is too high */}
+        {gasTooHigh && noFeeNovember?.isEligible && (
+          <div className={css.gasBannerWrapper}>
+            <GasTooHighBanner />
+          </div>
+        )}
       </div>
 
       {shouldRelay && noFeeNovember?.isEligible ? (

@@ -4,6 +4,9 @@
 
 .method {
   padding: var(--space-2) var(--space-2) var(--space-1) var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .radioGroup {
@@ -27,6 +30,44 @@
   flex-direction: column;
   gap: 4px;
   align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+}
+
+.notAvailableChip {
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 1px;
+  background-color: #dddee0;
+  color: #121312;
+  height: 20px;
+  border-radius: 6px;
+  padding: 2px 8px;
+}
+
+.notAvailableTitle {
+  color: #a1a3a7;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 22px;
+  letter-spacing: 0.15px;
+}
+
+.descriptionWrapper {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  width: 217px;
+}
+
+.descriptionText {
+  color: #a1a3a7;
+  font-size: 14px;
+  line-height: 20px;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: 0.17px;
 }
 
 .mainLabel {
@@ -94,4 +135,8 @@
   font-size: 14px;
   line-height: 20px;
   color: #121312;
+}
+
+.gasBannerWrapper {
+  margin-bottom: 24px; /* 24px spacing below the gas price banner */
 }

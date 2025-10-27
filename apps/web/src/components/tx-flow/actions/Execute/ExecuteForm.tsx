@@ -1,6 +1,6 @@
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
-import { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
+import { type ReactElement, type SyntheticEvent, useContext, useState, useEffect } from 'react'
 import { Box, CardActions, Divider, Tooltip } from '@mui/material'
 import classNames from 'classnames'
 
@@ -15,6 +15,7 @@ import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
 import useWalletCanRelay from '@/hooks/useWalletCanRelay'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
+import useGasTooHigh from '@/features/no-fee-november/hooks/useGasTooHigh'
 import NoFeeNovemberTermsCheckbox from '@/features/no-fee-november/components/NoFeeNovemberTermsCheckbox'
 import { hasRemainingRelays } from '@/utils/relaying'
 import type { SafeTransaction } from '@safe-global/types-kit'
@@ -75,11 +76,24 @@ export const ExecuteForm = ({
   const { isSubmitDisabled, isSubmitLoading, setIsSubmitLoading, setSubmitError, setIsRejectedByUser } =
     useContext(TxFlowContext)
 
+  // SC wallets can relay fully signed transactions
+  const [walletCanRelay] = useWalletCanRelay(safeTx)
+  const relays = useRelaysBySafe()
+  const { isEligible: isNoFeeNovember, remaining, limit, blockedAddress } = useNoFeeNovemberEligibility()
+  const gasTooHigh = useGasTooHigh(safeTx)
+
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
 
   // Terms acceptance state for No-Fee November
   const [termsAccepted, setTermsAccepted] = useState(false)
+
+  // If gas is too high, force WALLET method
+  useEffect(() => {
+    if (gasTooHigh) {
+      setExecutionMethod(ExecutionMethod.WALLET)
+    }
+  }, [gasTooHigh])
 
   // Reset terms acceptance when execution method changes
   const handleExecutionMethodChange = (method: ExecutionMethod | ((prev: ExecutionMethod) => ExecutionMethod)) => {
@@ -88,17 +102,13 @@ export const ExecuteForm = ({
     setTermsAccepted(false) // Reset terms acceptance when switching methods
   }
 
-  // SC wallets can relay fully signed transactions
-  const [walletCanRelay] = useWalletCanRelay(safeTx)
-  const relays = useRelaysBySafe()
-  const { isEligible: isNoFeeNovember, remaining, limit, blockedAddress } = useNoFeeNovemberEligibility()
-
-  // No-fee November REPLACES relay when eligible AND not blocked
+  // No-fee November REPLACES relay when eligible AND not blocked AND gas is not too high
   const canRelay = !isNoFeeNovember && walletCanRelay && hasRemainingRelays(relays[0])
-  const canNoFeeNovember = isNoFeeNovember && !blockedAddress
+  const canNoFeeNovember = isNoFeeNovember && !blockedAddress && !gasTooHigh
 
   // Show execution selector when either no-fee november OR relay is available
-  const showExecutionSelector = canNoFeeNovember || canRelay
+  // Also show if gas is too high but feature is otherwise available (to show disabled state)
+  const showExecutionSelector = canNoFeeNovember || canRelay || (isNoFeeNovember && !blockedAddress && gasTooHigh)
 
   // Determine which method will be used
   const willRelay = canRelay && executionMethod === ExecutionMethod.RELAY
@@ -195,8 +205,11 @@ export const ExecuteForm = ({
                 setExecutionMethod={handleExecutionMethodChange}
                 relays={canNoFeeNovember ? undefined : relays[0]}
                 noFeeNovember={
-                  canNoFeeNovember ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 } : undefined
+                  isNoFeeNovember && !blockedAddress
+                    ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 }
+                    : undefined
                 }
+                gasTooHigh={gasTooHigh}
               />
 
               {/* Terms checkbox - only show when No-Fee November is selected */}
