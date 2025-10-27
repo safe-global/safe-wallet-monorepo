@@ -1,9 +1,9 @@
 import { type ReactElement } from 'react'
 import { Box } from '@mui/material'
 import type {
-  AddressAnalysisResults,
+  GroupedAnalysisResults,
   ContractAnalysisResults,
-  LiveThreatAnalysisResult,
+  ThreatAnalysisResults,
   RecipientAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
@@ -14,12 +14,14 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
 import type { SafeTransaction } from '@safe-global/types-kit'
 
-const normalizeThreatData = (
-  threat?: AsyncResult<LiveThreatAnalysisResult>,
-): Record<string, AddressAnalysisResults> => {
-  if (threat === undefined) return {}
+const normalizeThreatData = (threat?: AsyncResult<ThreatAnalysisResults>): Record<string, GroupedAnalysisResults> => {
+  const [result] = threat || []
 
-  return { ['0x']: { THREAT: threat[0]?.THREAT } }
+  const { BALANCE_CHANGE: _, ...groupedThreatResults } = result || {}
+
+  if (Object.keys(groupedThreatResults).length === 0) return {}
+
+  return { ['0x']: groupedThreatResults }
 }
 
 export const SafeShieldContent = ({
@@ -30,7 +32,7 @@ export const SafeShieldContent = ({
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
-  threat?: AsyncResult<LiveThreatAnalysisResult>
+  threat?: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
 }): ReactElement => {
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient || []

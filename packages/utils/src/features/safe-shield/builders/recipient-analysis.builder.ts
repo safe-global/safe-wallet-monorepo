@@ -1,5 +1,5 @@
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { StatusGroup, type LiveAnalysisResponse, type AnalysisResult, StatusGroupType } from '../types'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import { StatusGroup, type AnalysisResult, StatusGroupType, type RecipientAnalysisResults } from '../types'
 import { RecipientAddressBuilder } from './recipient-address.builder'
 import { RecipientAnalysisResultBuilder } from './recipient-analysis-result.builder'
 
@@ -20,7 +20,7 @@ export class RecipientAnalysisBuilder {
     return new RecipientAddressBuilder(this, address)
   }
 
-  build(): LiveAnalysisResponse['recipient'] {
+  build(): AsyncResult<RecipientAnalysisResults> {
     return [{ ...this.recipient }, undefined, false]
   }
 
@@ -52,36 +52,4 @@ export class RecipientAnalysisBuilder {
       .bridgeState([RecipientAnalysisResultBuilder.incompatibleSafe().build()])
       .done()
   }
-
-  // static unverifiedContract(address: string = '0x0000000000000000000000000000000000000bad'): RecipientAnalysisBuilder {
-  //   return new RecipientAnalysisBuilder()
-  //     .addAddress(address)
-  //     .contractVerification([ContractAnalysisResultBuilder.unverified().build()])
-  //     .done()
-  // }
-
-  // static knownContract(address: string = '0x0000000000000000000000000000000000000002'): RecipientAnalysisBuilder {
-  //   return new RecipientAnalysisBuilder()
-  //     .addAddress(address)
-  //     .contractInteraction([ContractAnalysisResultBuilder.knownContract().build()])
-  //     .done()
-  // }
-
-  // static delegatecallContract(
-  //   address: string = '0x0000000000000000000000000000000000000004',
-  // ): RecipientAnalysisBuilder {
-  //   return new RecipientAnalysisBuilder()
-  //     .addAddress(address)
-  //     .delegatecall([ContractAnalysisResultBuilder.unexpectedDelegatecall().build()])
-  //     .done()
-  // }
-
-  // static verificationUnavailableContract(
-  //   address: string = '0x0000000000000000000000000000000000000005',
-  // ): RecipientAnalysisBuilder {
-  //   return new RecipientAnalysisBuilder()
-  //     .addAddress(address)
-  //     .contractVerification([ContractAnalysisResultBuilder.verificationUnavailable().build()])
-  //     .done()
-  // }
 }
