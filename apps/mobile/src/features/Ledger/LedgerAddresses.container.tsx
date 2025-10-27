@@ -8,20 +8,28 @@ import { SafeButton } from '@/src/components/SafeButton'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import { NavBarTitle } from '@/src/components/Title'
 import { Loader } from '@/src/components/Loader'
+import { SafeFontIcon as Icon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { AddressItem } from '@/src/features/Ledger/components/AddressItem'
 import { LoadMoreButton } from '@/src/features/Ledger/components/LoadMoreButton'
 import { AddressesEmptyState } from '@/src/features/Ledger/components/AddressesEmptyState'
 import { LedgerProgress } from '@/src/features/Ledger/components/LedgerProgress'
-import { useLedgerAddresses } from '@/src/features/Ledger/hooks/useLedgerAddresses'
+import { useLedgerAddresses, type DerivationPathType } from '@/src/features/Ledger/hooks/useLedgerAddresses'
 import { useImportLedgerAddress } from '@/src/features/Ledger/hooks/useImportLedgerAddress'
+import { FloatingMenu } from '@/src/features/Settings/components/FloatingMenu'
 
 const TITLE = 'Select address to import'
+
+const DERIVATION_PATH_OPTIONS = [
+  { id: 'ledger-live' as const, title: 'Ledger Live' },
+  { id: 'legacy-ledger' as const, title: 'Legacy Ledger' },
+]
 
 export const LedgerAddressesContainer = () => {
   const params = useLocalSearchParams<{ deviceName: string; sessionId: string }>()
   const { bottom } = useSafeAreaInsets()
 
   const [selectedIndex, setSelectedIndex] = useState<number>(0)
+  const [derivationPathType, setDerivationPathType] = useState<DerivationPathType>('ledger-live')
   const deviceLabel = params.deviceName || 'Ledger device'
   const {
     addresses,
@@ -29,8 +37,10 @@ export const LedgerAddressesContainer = () => {
     error: fetchError,
     clearError: clearFetchError,
     fetchAddresses,
+    clearAddresses,
   } = useLedgerAddresses({
     sessionId: params.sessionId,
+    derivationPathType,
   })
 
   const { isImporting, error: importError, clearError: clearImportError, importAddress } = useImportLedgerAddress()
@@ -151,6 +161,41 @@ export const LedgerAddressesContainer = () => {
         paddingHorizontal={'$0'}
         description={`Select one or more addresses derived from your ${deviceLabel}. Make sure they are signers of the selected Safe Account.`}
       />
+
+      {/* Derivation Path Selector */}
+      <View backgroundColor="$backgroundDark" borderRadius="$3" marginTop="$4" marginBottom="$4">
+        <View
+          backgroundColor={'$background'}
+          borderRadius={'$3'}
+          paddingHorizontal="$3"
+          paddingVertical="$3"
+          flexDirection="row"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Text fontSize="$4" fontWeight="600" color="$color">
+            Derivation path
+          </Text>
+          <FloatingMenu
+            onPressAction={({ nativeEvent }) => {
+              const selected = nativeEvent.event as DerivationPathType
+              setDerivationPathType(selected)
+              clearAddresses()
+              setSelectedIndex(0)
+              // Fetch with explicitly passed derivation path type
+              void fetchAddresses(1, 0, selected)
+            }}
+            actions={DERIVATION_PATH_OPTIONS}
+          >
+            <View flexDirection="row" alignItems="center" gap={4}>
+              <Text color="$colorSecondary" fontSize="$3">
+                {DERIVATION_PATH_OPTIONS.find((o) => o.id === derivationPathType)?.title || 'Ledger Live'}
+              </Text>
+              <Icon name={'chevron-down'} color="$colorSecondary" />
+            </View>
+          </FloatingMenu>
+        </View>
+      </View>
 
       {addresses[0] && (
         <View>

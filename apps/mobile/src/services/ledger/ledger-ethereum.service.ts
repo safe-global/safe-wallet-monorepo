@@ -11,6 +11,8 @@ export interface EthereumAddress {
   index: number
 }
 
+export type DerivationPathType = 'ledger-live' | 'legacy-ledger'
+
 export class LedgerEthereumService {
   private static instance: LedgerEthereumService
 
@@ -78,15 +80,21 @@ export class LedgerEthereumService {
    * @param session The device session
    * @param count Number of addresses to retrieve (default: 10)
    * @param startIndex Starting index for address derivation (default: 0)
+   * @param derivationPathType Type of derivation path to use: 'ledger-live' uses account path, 'legacy-ledger' uses indexed path (default: 'ledger-live')
    * @returns Array of Ethereum addresses with their derivation paths
    */
-  public async getEthereumAddresses(session: DeviceSessionId, count = 10, startIndex = 0): Promise<EthereumAddress[]> {
+  public async getEthereumAddresses(
+    session: DeviceSessionId,
+    count = 10,
+    startIndex = 0,
+    derivationPathType: DerivationPathType = 'ledger-live',
+  ): Promise<EthereumAddress[]> {
     const signerEth = this.createSigner(session)
     const addresses: EthereumAddress[] = []
 
-    // Derive addresses using the standard Ethereum derivation path (BIP-44 account derivation)
+    // Derive addresses using the appropriate derivation path
     for (let i = startIndex; i < startIndex + count; i++) {
-      const fullPath = getAccountPath(i)
+      const fullPath = derivationPathType === 'ledger-live' ? getAccountPath(i) : `m/44'/60'/0'/${i}`
       const path = fullPath.substring(2) // Remove "m/" prefix for Ledger SDK
 
       try {
