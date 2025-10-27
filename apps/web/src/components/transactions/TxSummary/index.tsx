@@ -67,8 +67,8 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
         <TxType tx={tx} />
 
         {note && (
-          <Typography variant="body2" component="span" color="text.secondary">
-            {ellipsis(note, 40)}
+          <Typography variant="body2" component="span" color="text.secondary" title={note}>
+            {ellipsis(note, 25)}
           </Typography>
         )}
       </Box>
