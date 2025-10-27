@@ -38,7 +38,6 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
   const isPending = useIsPending(tx.id)
   const executionInfo = isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo : undefined
   const expiredSwap = useIsExpiredSwap(tx.txInfo)
-  const note = isMultisigExecutionInfo(tx.executionInfo) ? tx.note : undefined
 
   return (
     <Box
@@ -66,9 +65,9 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
       <Box data-testid="tx-type" gridArea="type">
         <TxType tx={tx} />
 
-        {note && (
-          <Typography variant="body2" component="span" color="text.secondary" title={note}>
-            {ellipsis(note, 25)}
+        {tx.note && (
+          <Typography variant="body2" component="span" color="text.secondary" title={tx.note}>
+            {ellipsis(tx.note, 25)}
           </Typography>
         )}
       </Box>
