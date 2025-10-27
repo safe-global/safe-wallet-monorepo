@@ -152,7 +152,7 @@ describe('useLedgerAddresses', () => {
       expect(result.current.addresses).toEqual(mockAddresses)
       expect(result.current.isLoading).toBe(false)
       expect(result.current.error).toBeNull()
-      expect(mockLedgerEthereumService.getEthereumAddresses).toHaveBeenCalledWith(sessionId, 5, 0)
+      expect(mockLedgerEthereumService.getEthereumAddresses).toHaveBeenCalledWith(sessionId, 5, 0, 'ledger-live')
     })
 
     it('should set loading state during fetch', async () => {
@@ -247,7 +247,7 @@ describe('useLedgerAddresses', () => {
       })
 
       expect(result.current.addresses).toEqual(firstBatch)
-      expect(mockLedgerEthereumService.getEthereumAddresses).toHaveBeenCalledWith(sessionId, 3, 0)
+      expect(mockLedgerEthereumService.getEthereumAddresses).toHaveBeenCalledWith(sessionId, 3, 0, 'ledger-live')
 
       // Fetch second batch
       await act(async () => {
@@ -255,7 +255,7 @@ describe('useLedgerAddresses', () => {
       })
 
       expect(result.current.addresses).toEqual([...firstBatch, ...secondBatch])
-      expect(mockLedgerEthereumService.getEthereumAddresses).toHaveBeenCalledWith(sessionId, 2, 3)
+      expect(mockLedgerEthereumService.getEthereumAddresses).toHaveBeenCalledWith(sessionId, 2, 3, 'ledger-live')
     })
 
     it('should use correct start index for pagination', async () => {
@@ -271,7 +271,7 @@ describe('useLedgerAddresses', () => {
         await result.current.fetchAddresses(5)
       })
 
-      expect(mockLedgerEthereumService.getEthereumAddresses).toHaveBeenCalledWith(sessionId, 5, 0)
+      expect(mockLedgerEthereumService.getEthereumAddresses).toHaveBeenCalledWith(sessionId, 5, 0, 'ledger-live')
 
       // Clear mock to test second call
       mockLedgerEthereumService.getEthereumAddresses.mockClear()
@@ -282,7 +282,7 @@ describe('useLedgerAddresses', () => {
         await result.current.fetchAddresses(3)
       })
 
-      expect(mockLedgerEthereumService.getEthereumAddresses).toHaveBeenCalledWith(sessionId, 3, 5)
+      expect(mockLedgerEthereumService.getEthereumAddresses).toHaveBeenCalledWith(sessionId, 3, 5, 'ledger-live')
     })
   })
 
@@ -472,7 +472,113 @@ describe('useLedgerAddresses', () => {
 
       expect(result.current.addresses).toEqual([])
       expect(result.current.error).toBeNull()
-      expect(mockLedgerEthereumService.getEthereumAddresses).toHaveBeenCalledWith(sessionId, 0, 0)
+      expect(mockLedgerEthereumService.getEthereumAddresses).toHaveBeenCalledWith(sessionId, 0, 0, 'ledger-live')
+    })
+  })
+
+  describe('derivation path types', () => {
+    it('should default to ledger-live derivation path', async () => {
+      const sessionId = createMockSessionId()
+      const mockAddresses = createMockAddresses(3)
+      mockLedgerDMKService.getCurrentSession.mockReturnValue(sessionId)
+      mockLedgerEthereumService.getEthereumAddresses.mockResolvedValue(mockAddresses)
+
+      const { result } = renderHook(() => useLedgerAddresses({ sessionId }))
+
+      await act(async () => {
+        await result.current.fetchAddresses(3)
+      })
+
+      expect(mockLedgerEthereumService.getEthereumAddresses).toHaveBeenCalledWith(sessionId, 3, 0, 'ledger-live')
+      expect(result.current.addresses).toEqual(mockAddresses)
+    })
+
+    it('should fetch addresses with legacy-ledger derivation path', async () => {
+      const sessionId = createMockSessionId()
+      const mockAddresses = createMockAddresses(3)
+      mockLedgerDMKService.getCurrentSession.mockReturnValue(sessionId)
+      mockLedgerEthereumService.getEthereumAddresses.mockResolvedValue(mockAddresses)
+
+      const { result } = renderHook(() => useLedgerAddresses({ sessionId, derivationPathType: 'legacy-ledger' }))
+
+      await act(async () => {
+        await result.current.fetchAddresses(3)
+      })
+
+      expect(mockLedgerEthereumService.getEthereumAddresses).toHaveBeenCalledWith(sessionId, 3, 0, 'legacy-ledger')
+      expect(result.current.addresses).toEqual(mockAddresses)
+    })
+
+    it('should support passing derivation path type to fetchAddresses', async () => {
+      const sessionId = createMockSessionId()
+      const mockAddresses = createMockAddresses(5)
+      mockLedgerDMKService.getCurrentSession.mockReturnValue(sessionId)
+      mockLedgerEthereumService.getEthereumAddresses.mockResolvedValue(mockAddresses)
+
+      // Initialize with ledger-live
+      const { result } = renderHook(() => useLedgerAddresses({ sessionId, derivationPathType: 'ledger-live' }))
+
+      // Fetch with legacy-ledger override
+      await act(async () => {
+        await result.current.fetchAddresses(5, 0, 'legacy-ledger')
+      })
+
+      expect(mockLedgerEthereumService.getEthereumAddresses).toHaveBeenCalledWith(sessionId, 5, 0, 'legacy-ledger')
+      expect(result.current.addresses).toEqual(mockAddresses)
+    })
+
+    it('should switch between derivation paths and update addresses', async () => {
+      const sessionId = createMockSessionId()
+      const liveAddresses = createMockAddresses(3, 0)
+      const legacyAddresses = createMockAddresses(3, 0)
+      mockLedgerDMKService.getCurrentSession.mockReturnValue(sessionId)
+
+      // Fetch with ledger-live
+      mockLedgerEthereumService.getEthereumAddresses.mockResolvedValue(liveAddresses)
+      const { result: resultLive } = renderHook(() =>
+        useLedgerAddresses({ sessionId, derivationPathType: 'ledger-live' }),
+      )
+
+      await act(async () => {
+        await resultLive.current.fetchAddresses(3)
+      })
+
+      expect(mockLedgerEthereumService.getEthereumAddresses).toHaveBeenCalledWith(sessionId, 3, 0, 'ledger-live')
+      expect(resultLive.current.addresses).toEqual(liveAddresses)
+
+      // Switch to legacy-ledger in a new hook instance
+      mockLedgerEthereumService.getEthereumAddresses.mockClear()
+      mockLedgerEthereumService.getEthereumAddresses.mockResolvedValue(legacyAddresses)
+
+      const { result: resultLegacy } = renderHook(() =>
+        useLedgerAddresses({ sessionId, derivationPathType: 'legacy-ledger' }),
+      )
+
+      await act(async () => {
+        await resultLegacy.current.fetchAddresses(3)
+      })
+
+      expect(mockLedgerEthereumService.getEthereumAddresses).toHaveBeenCalledWith(sessionId, 3, 0, 'legacy-ledger')
+      expect(resultLegacy.current.addresses).toEqual(legacyAddresses)
+    })
+
+    it('should handle errors with legacy-ledger derivation', async () => {
+      const sessionId = createMockSessionId()
+      const error = new Error('Ledger device error')
+      mockLedgerDMKService.getCurrentSession.mockReturnValue(sessionId)
+      mockLedgerEthereumService.getEthereumAddresses.mockRejectedValue(error)
+
+      const { result } = renderHook(() => useLedgerAddresses({ sessionId, derivationPathType: 'legacy-ledger' }))
+
+      await act(async () => {
+        await result.current.fetchAddresses(3)
+      })
+
+      expect(result.current.error).toEqual({
+        code: 'LOAD',
+        message: 'Failed to load addresses',
+      })
+      expect(mockLedgerEthereumService.getEthereumAddresses).toHaveBeenCalledWith(sessionId, 3, 0, 'legacy-ledger')
     })
   })
 })
