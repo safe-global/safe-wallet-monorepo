@@ -38,7 +38,6 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
   const isPending = useIsPending(tx.id)
   const executionInfo = isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo : undefined
   const expiredSwap = useIsExpiredSwap(tx.txInfo)
-  // @ts-ignore
   const note = isMultisigExecutionInfo(tx.executionInfo) ? tx.note : undefined
 
   return (
