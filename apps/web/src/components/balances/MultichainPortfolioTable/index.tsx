@@ -1,4 +1,4 @@
-import { type ReactElement, useMemo } from 'react'
+import { type ReactElement, useMemo, useState } from 'react'
 import {
   Box,
   Card,
@@ -19,14 +19,11 @@ import { FiatChange } from '../AssetsTable/FiatChange'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import usePortfolio from '@/hooks/usePortfolio'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import { type AppBalance } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
-import SendButton from '../AssetsTable/SendButton'
-import SwapButton from '@/features/swap/components/SwapButton'
-import { SWAP_LABELS } from '@/services/analytics/events/swaps'
-import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
+import { type AppBalance, type AppPosition } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import AddFundsCTA from '@/components/common/AddFunds'
+import AssetDetailsDrawer from '../AssetDetailsDrawer'
 import css from './styles.module.css'
 
 const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
@@ -73,11 +70,6 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
       </Typography>
     ),
   },
-  actions: {
-    rawValue: '',
-    sticky: true,
-    content: <div></div>,
-  },
 }
 
 const skeletonRows: EnhancedTableProps['rows'] = Array(5).fill({ cells: skeletonCells })
@@ -112,16 +104,14 @@ const headCells = [
     width: '15%',
     align: 'right',
   },
-  {
-    id: 'actions',
-    label: '',
-    sticky: true,
-  },
 ]
 
 const MultichainPortfolioTable = (): ReactElement => {
   const portfolio = usePortfolio()
-  const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
+  const [selectedAsset, setSelectedAsset] = useState<{
+    item: Balance | AppPosition
+    type: 'token' | 'position'
+  } | null>(null)
 
   const allTokens = useMemo(() => portfolio.allChainsTokenBalances || [], [portfolio.allChainsTokenBalances])
   const allPositions = useMemo(() => portfolio.allChainsPositionBalances || [], [portfolio.allChainsPositionBalances])
@@ -155,6 +145,7 @@ const MultichainPortfolioTable = (): ReactElement => {
 
         return {
           key: `${item.tokenInfo.chainId}-${item.tokenInfo.address}`,
+          onClick: () => setSelectedAsset({ item, type: 'token' }),
           cells: {
             asset: {
               rawValue: item.tokenInfo.name,
@@ -211,27 +202,6 @@ const MultichainPortfolioTable = (): ReactElement => {
                 </Box>
               ),
             },
-            actions: {
-              rawValue: '',
-              sticky: true,
-              content: (
-                <Stack
-                  direction="row"
-                  gap={1}
-                  alignItems="center"
-                  justifyContent="flex-end"
-                  mr={-1}
-                  className={css.sticky}
-                >
-                  <Stack direction="row" gap={1} alignItems="center" bgcolor="background.paper" p={1}>
-                    <SendButton tokenInfo={item.tokenInfo} />
-                    {isSwapFeatureEnabled && (
-                      <SwapButton tokenInfo={item.tokenInfo} amount="0" trackingLabel={SWAP_LABELS.asset} />
-                    )}
-                  </Stack>
-                </Stack>
-              ),
-            },
           },
         }
       })
@@ -253,9 +223,7 @@ const MultichainPortfolioTable = (): ReactElement => {
               {totalPortfolioValue > 0 && (
                 <Tooltip title="Based on total portfolio value" placement="top" arrow>
                   <Typography variant="caption" className={css.weightBadge}>
-                    {formatPercentage(
-                      parseFloat(portfolio.allChainsTotalTokenBalance || '0') / totalPortfolioValue,
-                    )}
+                    {formatPercentage(parseFloat(portfolio.allChainsTotalTokenBalance || '0') / totalPortfolioValue)}
                   </Typography>
                 </Tooltip>
               )}
@@ -303,12 +271,13 @@ const MultichainPortfolioTable = (): ReactElement => {
 
             const positionRows = protocol.positions.map((position) => {
               return {
+                onClick: () => setSelectedAsset({ item: position, type: 'position' }),
                 cells: {
                   name: {
                     content: (
                       <Stack direction="row" alignItems="center" gap={1}>
                         <IframeIcon
-                          src={position.tokenInfo.logoUrl || ''}
+                          src={position.tokenInfo.logoUri || ''}
                           alt={position.tokenInfo.name + ' icon'}
                           width={40}
                           height={40}
@@ -403,6 +372,14 @@ const MultichainPortfolioTable = (): ReactElement => {
           })}
         </Box>
       )}
+
+      {/* Asset Details Drawer */}
+      <AssetDetailsDrawer
+        asset={selectedAsset?.item || null}
+        assetType={selectedAsset?.type || 'token'}
+        isOpen={!!selectedAsset}
+        onClose={() => setSelectedAsset(null)}
+      />
     </Stack>
   )
 }

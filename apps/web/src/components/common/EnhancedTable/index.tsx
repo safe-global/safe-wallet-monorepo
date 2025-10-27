@@ -28,6 +28,7 @@ type EnhancedRow = {
   selected?: boolean
   collapsed?: boolean
   key?: string
+  onClick?: () => void
   cells: Record<string, EnhancedCell>
 }
 
@@ -182,6 +183,8 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact }: EnhancedTabl
                     key={rowKey}
                     selected={row.selected}
                     className={row.collapsed ? css.collapsedRow : undefined}
+                    onClick={row.onClick}
+                    sx={row.onClick ? { cursor: 'pointer' } : undefined}
                   >
                     {Object.entries(row.cells).map(([key, cell]) => (
                       <TableCell

@@ -1,21 +1,9 @@
-.container .sticky {
-  opacity: 0;
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 15%;
-  transition: opacity 0.2s;
-  height: 100% !important;
-  display: flex;
-  align-items: center;
+.container tr {
+  transition: background-color 0.2s;
 }
 
-.container tr:hover .sticky {
-  opacity: 1;
-}
-
-.container td {
-  position: relative;
+.container tr:hover {
+  background-color: var(--color-background-light);
 }
 
 .container tr:last-of-type {
