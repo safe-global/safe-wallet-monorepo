@@ -1,10 +1,10 @@
-import { type ReactElement } from 'react'
+import { useMemo, type ReactElement } from 'react'
 import { Box, Typography, Stack, SvgIcon } from '@mui/material'
 import SafeShieldLogo from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
 import type {
   ContractAnalysisResults,
   RecipientAnalysisResults,
-  LiveThreatAnalysisResult,
+  ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
@@ -13,17 +13,20 @@ import { SEVERITY_COLORS } from '../constants'
 export const SafeShieldHeader = ({
   recipient = [{}, undefined, false],
   contract = [{}, undefined, false],
-  threat = [{}, undefined, false] as AsyncResult<LiveThreatAnalysisResult>,
+  threat = [{}, undefined, false],
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
-  threat?: AsyncResult<LiveThreatAnalysisResult>
+  threat?: AsyncResult<ThreatAnalysisResults>
 }): ReactElement => {
-  const [recipientResults = {}, recipientError, recipientLoading = false] = recipient
-  const [contractResults = {}, contractError, contractLoading = false] = contract
-  const [threatResults = {}, threatError, threatLoading = false] = threat
+  const [recipientResults, recipientError, recipientLoading = false] = recipient
+  const [contractResults, contractError, contractLoading = false] = contract
+  const [threatResults, threatError, threatLoading = false] = threat
 
-  const status = getOverallStatus(recipientResults, contractResults, threatResults)
+  const status = useMemo(
+    () => getOverallStatus(recipientResults, contractResults, threatResults),
+    [recipientResults, contractResults, threatResults],
+  )
 
   const loading = recipientLoading || contractLoading || threatLoading
   const error = recipientError || contractError || threatError

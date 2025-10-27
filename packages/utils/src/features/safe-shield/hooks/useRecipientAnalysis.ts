@@ -63,7 +63,7 @@ export function useRecipientAnalysis({
   // Merge backend and local checks
   const mergedResults = useMemo(() => {
     if (fetchedResultsError || activityCheckError) {
-      return { [safeAddress]: { [StatusGroup.RECIPIENT_ACTIVITY]: [getErrorInfo(ErrorType.RECIPIENT)] } }
+      return { [safeAddress]: { [StatusGroup.COMMON]: [getErrorInfo(ErrorType.RECIPIENT)] } }
     }
 
     // Only merge different results after all of them are available
@@ -72,7 +72,15 @@ export function useRecipientAnalysis({
     }
 
     return mergeAnalysisResults(fetchedResults, addressBookCheck, activityCheck)
-  }, [fetchedResults, addressBookCheck, activityCheck, activityCheckLoading])
+  }, [
+    fetchedResults,
+    addressBookCheck,
+    activityCheck,
+    activityCheckLoading,
+    fetchedResultsError,
+    activityCheckError,
+    safeAddress,
+  ])
 
   if (!recipientsMemo) {
     return undefined

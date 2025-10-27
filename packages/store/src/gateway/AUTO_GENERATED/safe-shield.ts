@@ -157,7 +157,7 @@ export type ThreatAnalysisResultDto = {
   /** Severity level indicating the importance and risk */
   severity: 'OK' | 'INFO' | 'WARN' | 'CRITICAL'
   /** Threat status code */
-  type: 'MALICIOUS' | 'MODERATE' | 'NO_THREAT' | 'MASTERCOPY_CHANGE' | 'OWNERSHIP_CHANGE' | 'MODULE_CHANGE' | 'FAILED'
+  type: 'NO_THREAT' | 'OWNERSHIP_CHANGE' | 'MODULE_CHANGE' | 'FAILED'
   /** User-facing title of the finding */
   title: string
   /** Detailed description explaining the finding and its implications */
@@ -191,15 +191,23 @@ export type MaliciousOrModerateThreatAnalysisResultDto = {
     [key: string]: string[]
   }
 }
-export type AssetDetailsDto = {
-  /** Asset type */
-  type: 'NATIVE' | 'ERC20' | 'ERC721' | 'ERC1155'
+export type NativeAssetDetailsDto = {
   /** Token symbol (if available) */
   symbol?: string
-  /** Token contract address */
-  address: string
   /** URL to asset logo (if available) */
   logo_url?: string
+  /** Asset type */
+  type: 'NATIVE'
+}
+export type TokenAssetDetailsDto = {
+  /** Token symbol (if available) */
+  symbol?: string
+  /** URL to asset logo (if available) */
+  logo_url?: string
+  /** Asset type */
+  type: 'ERC20' | 'ERC721' | 'ERC1155'
+  /** Token contract address */
+  address: string
 }
 export type FungibleDiffDto = {
   /** Value change for fungible tokens */
@@ -211,7 +219,7 @@ export type NftDiffDto = {
 }
 export type BalanceChangeDto = {
   /** Asset details */
-  asset: AssetDetailsDto
+  asset: NativeAssetDetailsDto | TokenAssetDetailsDto
   /** Incoming asset changes */
   in: (FungibleDiffDto | NftDiffDto)[]
   /** Outgoing asset changes */

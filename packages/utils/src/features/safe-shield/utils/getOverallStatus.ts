@@ -1,4 +1,4 @@
-import type { AnyStatus, ContractAnalysisResults, RecipientAnalysisResults, ThreatAnalysisResults } from '../types'
+import type { ContractAnalysisResults, ThreatAnalysisResults, RecipientAnalysisResults } from '../types'
 import type { Severity } from '../types'
 import type { AnalysisResult } from '../types'
 import { getPrimaryResult } from './analysisUtils'
@@ -38,7 +38,7 @@ export const getOverallStatus = (
   }
 
   // Flatten all AnalysisResult objects from contract, recipient, and threat into one array
-  const allResults: AnalysisResult<AnyStatus>[] = []
+  const allResults: AnalysisResult[] = []
 
   // Add contract and recipient results
   for (const data of [contractResults, recipientResults]) {
@@ -46,7 +46,7 @@ export const getOverallStatus = (
       for (const addressResults of Object.values(data)) {
         for (const groupResults of Object.values(addressResults)) {
           if (groupResults) {
-            allResults.push(...groupResults)
+            allResults.push(...(groupResults as AnalysisResult[]))
           }
         }
       }

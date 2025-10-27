@@ -1,9 +1,13 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
-import { useCounterpartyAnalysis, useRecipientAnalysis } from './hooks'
+import { useCounterpartyAnalysis, useRecipientAnalysis, useThreatAnalysis } from './hooks'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import type { ContractAnalysisResults, RecipientAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import type {
+  ContractAnalysisResults,
+  ThreatAnalysisResults,
+  RecipientAnalysisResults,
+} from '@safe-global/utils/features/safe-shield/types'
 
 type SafeShieldContextType = {
   setRecipientAddresses: (addresses: string[]) => void
@@ -11,6 +15,7 @@ type SafeShieldContextType = {
   safeTx?: SafeTransaction
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
+  threat?: AsyncResult<ThreatAnalysisResults>
 }
 
 const SafeShieldContext = createContext<SafeShieldContextType | null>(null)
@@ -22,13 +27,14 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
 
   const recipientOnlyAnalysis = useRecipientAnalysis(recipientAddresses)
   const counterpartyAnalysis = useCounterpartyAnalysis(safeTx)
+  const threat = useThreatAnalysis(safeTx)
 
   const recipient = recipientOnlyAnalysis || counterpartyAnalysis.recipient
   const contract = counterpartyAnalysis.contract
 
   return (
     <SafeShieldContext.Provider
-      value={{ setRecipientAddresses, setSafeTx, safeTx: safeTx || safeTxContext.safeTx, recipient, contract }}
+      value={{ setRecipientAddresses, setSafeTx, safeTx: safeTx || safeTxContext.safeTx, recipient, contract, threat }}
     >
       {children}
     </SafeShieldContext.Provider>

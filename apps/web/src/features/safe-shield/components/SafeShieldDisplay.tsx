@@ -4,7 +4,7 @@ import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg
 import type {
   ContractAnalysisResults,
   RecipientAnalysisResults,
-  LiveThreatAnalysisResult,
+  ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldHeader } from './SafeShieldHeader'
 import { SafeShieldContent } from './SafeShieldContent'
@@ -19,7 +19,7 @@ export const SafeShieldDisplay = ({
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
-  threat?: AsyncResult<LiveThreatAnalysisResult>
+  threat?: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
 }): ReactElement => {
   return (

@@ -1,4 +1,4 @@
-import type { AnalysisResult, AnyStatus, AddressAnalysisResults, StatusGroup } from '../types'
+import type { AnalysisResult, AnyStatus, GroupedAnalysisResults, StatusGroup } from '../types'
 import { MULTI_RESULT_DESCRIPTION } from '../constants'
 import { getPrimaryResult, sortBySeverity } from './analysisUtils'
 import { RecipientAnalysisResults, ContractAnalysisResults, ThreatAnalysisResults } from '../types'
@@ -13,9 +13,9 @@ type ConsolidatedResults<T extends AnyStatus = AnyStatus> = {
  */
 export const mapConsolidatedAnalysisResults = (
   addressesResultsMap: RecipientAnalysisResults | ContractAnalysisResults | ThreatAnalysisResults,
-  addressResults: AddressAnalysisResults[],
-): AnalysisResult<AnyStatus>[] => {
-  const results: AnalysisResult<AnyStatus>[] = []
+  addressResults: GroupedAnalysisResults[],
+): AnalysisResult[] => {
+  const results: AnalysisResult[] = []
   const addresses = Object.keys(addressesResultsMap)
 
   /**
@@ -24,10 +24,7 @@ export const mapConsolidatedAnalysisResults = (
    */
   const consolidatedResults = addressResults.reduce<ConsolidatedResults>(
     (acc, currentAddressResults, currentAddressResultIndex) => {
-      for (const [group, groupResults] of Object.entries(currentAddressResults) as [
-        StatusGroup,
-        AnalysisResult<AnyStatus>[],
-      ][]) {
+      for (const [group, groupResults] of Object.entries(currentAddressResults) as [StatusGroup, AnalysisResult[]][]) {
         const primaryGroupResult = getPrimaryResult(groupResults || [])
 
         if (primaryGroupResult) {
@@ -46,7 +43,7 @@ export const mapConsolidatedAnalysisResults = (
   )
 
   for (const groupResults of Object.values(consolidatedResults)) {
-    const currentGroupResults = [] as AnalysisResult<AnyStatus>[]
+    const currentGroupResults = [] as AnalysisResult[]
 
     for (const [type, typeResults] of Object.entries(groupResults)) {
       const numResults = typeResults.length

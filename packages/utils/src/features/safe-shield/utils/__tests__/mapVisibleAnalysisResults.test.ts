@@ -1,7 +1,8 @@
 import { mapVisibleAnalysisResults } from '../mapVisibleAnalysisResults'
-import { Severity, StatusGroup, RecipientStatus } from '../../types'
 import type { RecipientAnalysisResults } from '../../types'
 import { faker } from '@faker-js/faker'
+import { Severity, StatusGroup, RecipientStatus } from '../../types'
+import { RecipientAnalysisResultBuilder } from '../../builders'
 
 describe('mapVisibleAnalysisResults', () => {
   describe('single address', () => {
@@ -10,22 +11,8 @@ describe('mapVisibleAnalysisResults', () => {
 
       const addressesResultsMap: RecipientAnalysisResults = {
         [address1]: {
-          [StatusGroup.ADDRESS_BOOK]: [
-            {
-              severity: Severity.OK,
-              type: RecipientStatus.KNOWN_RECIPIENT,
-              title: 'Known recipient',
-              description: 'Address is in the address book.',
-            },
-          ],
-          [StatusGroup.RECIPIENT_ACTIVITY]: [
-            {
-              severity: Severity.WARN,
-              type: RecipientStatus.LOW_ACTIVITY,
-              title: 'Low activity recipient',
-              description: 'This address has low transaction activity.',
-            },
-          ],
+          [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
+          [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
         },
       }
 
@@ -42,16 +29,7 @@ describe('mapVisibleAnalysisResults', () => {
       const address1 = faker.finance.ethereumAddress()
 
       const addressesResultsMap: RecipientAnalysisResults = {
-        [address1]: {
-          [StatusGroup.ADDRESS_BOOK]: [
-            {
-              severity: Severity.INFO,
-              type: RecipientStatus.UNKNOWN_RECIPIENT,
-              title: 'Unknown recipient',
-              description: 'Address is not in the address book.',
-            },
-          ],
-        },
+        [address1]: { [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.unknownRecipient().build()] },
       }
 
       const result = mapVisibleAnalysisResults(addressesResultsMap)
@@ -67,18 +45,8 @@ describe('mapVisibleAnalysisResults', () => {
       const addressesResultsMap: RecipientAnalysisResults = {
         [address1]: {
           [StatusGroup.ADDRESS_BOOK]: [
-            {
-              severity: Severity.OK,
-              type: RecipientStatus.KNOWN_RECIPIENT,
-              title: 'Known recipient',
-              description: 'Recipient is known.',
-            },
-            {
-              severity: Severity.CRITICAL,
-              type: RecipientStatus.UNKNOWN_RECIPIENT,
-              title: 'Critical issue',
-              description: 'Critical security issue.',
-            },
+            RecipientAnalysisResultBuilder.knownRecipient().build(),
+            RecipientAnalysisResultBuilder.unknownRecipient().build(),
           ],
         },
       }
@@ -86,8 +54,8 @@ describe('mapVisibleAnalysisResults', () => {
       const result = mapVisibleAnalysisResults(addressesResultsMap)
 
       expect(result).toHaveLength(1)
-      expect(result[0].severity).toBe(Severity.CRITICAL)
-      expect(result[0].title).toBe('Critical issue')
+      expect(result[0].severity).toBe(Severity.INFO)
+      expect(result[0].title).toBe('Unknown recipient')
     })
 
     it('should filter out empty groups', () => {
@@ -95,14 +63,7 @@ describe('mapVisibleAnalysisResults', () => {
 
       const addressesResultsMap: RecipientAnalysisResults = {
         [address1]: {
-          [StatusGroup.ADDRESS_BOOK]: [
-            {
-              severity: Severity.OK,
-              type: RecipientStatus.KNOWN_RECIPIENT,
-              title: 'Known recipient',
-              description: 'Recipient is known.',
-            },
-          ],
+          [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
           [StatusGroup.RECIPIENT_ACTIVITY]: [],
         },
       }
@@ -132,26 +93,9 @@ describe('mapVisibleAnalysisResults', () => {
       const address2 = faker.finance.ethereumAddress()
 
       const addressesResultsMap: RecipientAnalysisResults = {
-        [address1]: {
-          [StatusGroup.ADDRESS_BOOK]: [
-            {
-              severity: Severity.OK,
-              type: RecipientStatus.KNOWN_RECIPIENT,
-              title: 'Known recipient',
-              description: 'Address is in the address book.',
-            },
-          ],
-        },
-        [address2]: {
-          [StatusGroup.ADDRESS_BOOK]: [
-            {
-              severity: Severity.INFO,
-              type: RecipientStatus.UNKNOWN_RECIPIENT,
-              title: 'Unknown recipient',
-              description: 'Address is not in the address book.',
-            },
-          ],
-        },
+        [address1]: { [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()] },
+
+        [address2]: { [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.unknownRecipient().build()] },
       }
 
       const result = mapVisibleAnalysisResults(addressesResultsMap)
@@ -167,24 +111,10 @@ describe('mapVisibleAnalysisResults', () => {
 
       const addressesResultsMap: RecipientAnalysisResults = {
         [address1]: {
-          [StatusGroup.ADDRESS_BOOK]: [
-            {
-              severity: Severity.OK,
-              type: RecipientStatus.KNOWN_RECIPIENT,
-              title: 'Known recipient',
-              description: 'Address is in the address book.',
-            },
-          ],
+          [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
         },
         [address2]: {
-          [StatusGroup.ADDRESS_BOOK]: [
-            {
-              severity: Severity.OK,
-              type: RecipientStatus.KNOWN_RECIPIENT,
-              title: 'Known recipient',
-              description: 'Address is in the address book.',
-            },
-          ],
+          [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
         },
       }
 
@@ -225,37 +155,16 @@ describe('mapVisibleAnalysisResults', () => {
 
       const addressesResultsMap: RecipientAnalysisResults = {
         [address1]: {
-          [StatusGroup.ADDRESS_BOOK]: [
-            {
-              severity: Severity.OK,
-              type: RecipientStatus.KNOWN_RECIPIENT,
-              title: 'OK result',
-              description: 'OK description',
-            },
-          ],
-          [StatusGroup.RECIPIENT_ACTIVITY]: [
-            {
-              severity: Severity.CRITICAL,
-              type: RecipientStatus.LOW_ACTIVITY,
-              title: 'Critical result',
-              description: 'Critical description',
-            },
-          ],
-          [StatusGroup.RECIPIENT_INTERACTION]: [
-            {
-              severity: Severity.INFO,
-              type: RecipientStatus.NEW_RECIPIENT,
-              title: 'Info result',
-              description: 'Info description',
-            },
-          ],
+          [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
+          [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
+          [StatusGroup.RECIPIENT_INTERACTION]: [RecipientAnalysisResultBuilder.newRecipient().build()],
         },
       }
 
       const result = mapVisibleAnalysisResults(addressesResultsMap)
 
       expect(result).toHaveLength(3)
-      expect(result[0].severity).toBe(Severity.CRITICAL)
+      expect(result[0].severity).toBe(Severity.WARN)
       expect(result[1].severity).toBe(Severity.INFO)
       expect(result[2].severity).toBe(Severity.OK)
     })

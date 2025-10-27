@@ -265,7 +265,12 @@ describe('useCounterpartyAnalysis', () => {
         }),
       )
 
-      expect(result.current.recipient).toBeUndefined()
+      await waitFor(() => {
+        expect(result.current.recipient).toBeDefined()
+      })
+
+      const [mergedResults] = result.current.recipient!
+      expect(mergedResults).toEqual({})
     })
 
     it('should normalize addresses to lowercase for local checks', async () => {
@@ -712,8 +717,14 @@ describe('useCounterpartyAnalysis', () => {
       )
 
       await waitFor(() => {
-        expect(result.current.recipient).toBeUndefined()
+        expect(result.current.recipient).toBeDefined()
       })
+
+      const [mergedResults, error] = result.current.recipient!
+      expect(mergedResults).toBeDefined()
+      expect(mergedResults![mockSafeAddress]).toBeDefined()
+      expect(mergedResults![mockSafeAddress][StatusGroup.COMMON]).toBeDefined()
+      expect(error).toEqual(new Error(errorMessage))
     })
 
     it('should handle mutation error without error property', async () => {
@@ -735,8 +746,14 @@ describe('useCounterpartyAnalysis', () => {
       )
 
       await waitFor(() => {
-        expect(result.current.recipient).toBeUndefined()
+        expect(result.current.recipient).toBeDefined()
       })
+
+      const [mergedResults, error] = result.current.recipient!
+      expect(mergedResults).toBeDefined()
+      expect(mergedResults![mockSafeAddress]).toBeDefined()
+      expect(mergedResults![mockSafeAddress][StatusGroup.COMMON]).toBeDefined()
+      expect(error).toEqual(new Error('Failed to fetch counterparty analysis'))
     })
 
     it('should propagate mutation error to recipient result', async () => {
@@ -949,7 +966,7 @@ describe('useCounterpartyAnalysis', () => {
       expect(loading).toBe(true)
     })
 
-    it('should propagate loading state from activity check to recipient', async () => {
+    it('should not return recipient results while activity check is loading', async () => {
       const counterpartyData = {
         recipient: {
           [mockRecipientAddress1]: {
@@ -976,15 +993,11 @@ describe('useCounterpartyAnalysis', () => {
         }),
       )
 
-      await waitFor(() => {
-        expect(result.current.recipient).toBeDefined()
-      })
-
-      const [, , loading] = result.current.recipient!
-      expect(loading).toBe(true)
+      // Hook waits for all checks to complete, so results are undefined while activity check is loading
+      expect(result.current.recipient).toBeUndefined()
     })
 
-    it('should combine loading states from mutation and activity check', async () => {
+    it('should not return recipient results when both mutation and activity check are loading', async () => {
       const counterpartyData = {
         recipient: {
           [mockRecipientAddress1]: {
@@ -1011,12 +1024,8 @@ describe('useCounterpartyAnalysis', () => {
         }),
       )
 
-      await waitFor(() => {
-        expect(result.current.recipient).toBeDefined()
-      })
-
-      const [, , loading] = result.current.recipient!
-      expect(loading).toBe(true)
+      // Hook waits for all checks to complete, so results are undefined while loading
+      expect(result.current.recipient).toBeUndefined()
     })
   })
 })

@@ -121,7 +121,7 @@ describe('getOverallStatus', () => {
     it('should return WARN severity for verification unavailable contract', () => {
       const contractResults: ContractAnalysisResults = {
         '0xContract1': {
-          [StatusGroup.CONTRACT_INTERACTION]: [ContractAnalysisResultBuilder.verificationUnavailable().build()],
+          [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.verificationUnavailable().build()],
         },
       }
 
