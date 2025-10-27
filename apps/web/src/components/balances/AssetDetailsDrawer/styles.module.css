@@ -29,6 +29,17 @@
   flex: 1;
 }
 
+.chartContainer {
+  padding: 24px;
+  padding-bottom: 16px;
+}
+
+.chartCanvas {
+  width: 100%;
+  position: relative;
+  height: 240px; /* Must match CHART_CONFIG.height in PriceChart.tsx */
+}
+
 .modal {
   display: flex;
   align-items: center;

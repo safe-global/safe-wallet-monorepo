@@ -15,6 +15,7 @@ import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabl
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import FiatValue from '@/components/common/FiatValue'
+import PriceChart from './PriceChart'
 import css from './styles.module.css'
 
 type AssetDetailsDrawerProps = {
@@ -22,6 +23,43 @@ type AssetDetailsDrawerProps = {
   assetType: 'token' | 'position'
   isOpen: boolean
   onClose: () => void
+}
+
+/** Extract price change from either Balance or AppPosition types */
+const getPriceChangeValue = (asset: Balance | AppPosition): number | null => {
+  if ('priceChangePercentage1d' in asset && asset.priceChangePercentage1d != null) {
+    return asset.priceChangePercentage1d
+  }
+  if ('fiatBalance24hChange' in asset && asset.fiatBalance24hChange) {
+    return parseFloat(asset.fiatBalance24hChange) / 100
+  }
+  return null
+}
+
+/** Format price change as percentage string */
+const formatPriceChange = (value: number | null): string | null => {
+  if (value == null) return null
+  const sign = value >= 0 ? '+' : ''
+  return `${sign}${(value * 100).toFixed(2)}%`
+}
+
+/** Get token price from asset */
+const getTokenPrice = (asset: Balance | AppPosition, assetType: 'token' | 'position'): number | null => {
+  if (assetType === 'token' && 'price' in asset && typeof asset.price === 'number') {
+    return asset.price
+  }
+  return null
+}
+
+/** Get fiat balance from asset */
+const getFiatBalance = (asset: Balance | AppPosition, assetType: 'token' | 'position'): string => {
+  if (assetType === 'token' && 'fiatBalance' in asset) {
+    return asset.fiatBalance
+  }
+  if ('balanceFiat' in asset) {
+    return asset.balanceFiat?.toString() || '0'
+  }
+  return '0'
 }
 
 const AssetDetailsDrawer = ({ asset, assetType, isOpen, onClose }: AssetDetailsDrawerProps): ReactElement => {
@@ -34,19 +72,11 @@ const AssetDetailsDrawer = ({ asset, assetType, isOpen, onClose }: AssetDetailsD
   }
 
   const tokenInfo = asset.tokenInfo
-
   const balance = formatAmount(asset.balance)
-
-  // Handle different price change fields: Balance uses fiatBalance24hChange (string), AppPosition uses priceChangePercentage1d (number)
-  const priceChangeValue =
-    'priceChangePercentage1d' in asset && asset.priceChangePercentage1d != null
-      ? asset.priceChangePercentage1d
-      : 'fiatBalance24hChange' in asset && asset.fiatBalance24hChange
-        ? parseFloat(asset.fiatBalance24hChange) / 100 // Convert from string percentage to decimal
-        : null
-
-  const priceChange =
-    priceChangeValue != null ? `${priceChangeValue >= 0 ? '+' : ''}${(priceChangeValue * 100).toFixed(2)}%` : null
+  const priceChangeValue = getPriceChangeValue(asset)
+  const priceChange = formatPriceChange(priceChangeValue)
+  const tokenPrice = getTokenPrice(asset, assetType)
+  const fiatBalance = getFiatBalance(asset, assetType)
 
   const drawerContent = (
     <Box className={css.container}>
@@ -75,6 +105,14 @@ const AssetDetailsDrawer = ({ asset, assetType, isOpen, onClose }: AssetDetailsD
 
       <Divider />
 
+      {/* Price Chart - only for tokens with assetId */}
+      {assetType === 'token' && 'assetId' in tokenInfo && tokenInfo.assetId && (
+        <>
+          <PriceChart assetId={tokenInfo.assetId} currentPrice={tokenPrice} />
+          <Divider />
+        </>
+      )}
+
       {/* Summary */}
       <Box className={css.summary}>
         <Stack spacing={2}>
@@ -87,13 +125,13 @@ const AssetDetailsDrawer = ({ asset, assetType, isOpen, onClose }: AssetDetailsD
             </Typography>
           </Box>
 
-          {assetType === 'token' && 'price' in asset && asset.price != null && (
+          {tokenPrice != null && (
             <Box>
               <Typography variant="body2" color="text.secondary">
                 Price
               </Typography>
               <Typography variant="body1" fontWeight="medium">
-                <FiatValue value={asset.price.toString()} />
+                <FiatValue value={tokenPrice.toString()} />
               </Typography>
             </Box>
           )}
@@ -103,13 +141,7 @@ const AssetDetailsDrawer = ({ asset, assetType, isOpen, onClose }: AssetDetailsD
               Total Value
             </Typography>
             <Typography variant="body1" fontWeight="medium">
-              {assetType === 'token' && 'fiatBalance' in asset ? (
-                <FiatValue value={asset.fiatBalance} precise />
-              ) : 'balanceFiat' in asset ? (
-                <FiatValue value={asset.balanceFiat?.toString() || '0'} precise />
-              ) : (
-                <FiatValue value="0" precise />
-              )}
+              <FiatValue value={fiatBalance} precise />
             </Typography>
           </Box>
 

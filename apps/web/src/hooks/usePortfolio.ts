@@ -54,6 +54,7 @@ const transformTokenBalances = (tokens: PortfolioTokenBalance[]): Balance[] => {
     fiatBalance: (token.balanceFiat ?? 0).toString(),
     fiatConversion: (token.price ?? 0).toString(),
     fiatBalance24hChange: token.priceChangePercentage1d != null ? token.priceChangePercentage1d.toString() : null,
+    ...(token.price != null && { price: token.price }),
     tokenInfo: {
       address: token.tokenInfo.address,
       decimals: token.tokenInfo.decimals,
@@ -62,6 +63,7 @@ const transformTokenBalances = (tokens: PortfolioTokenBalance[]): Balance[] => {
       chainId: token.tokenInfo.chainId,
       logoUri: token.tokenInfo.logoUri ?? '',
       type: token.tokenInfo.type,
+      ...(token.tokenInfo.assetId && { assetId: token.tokenInfo.assetId }),
     },
   }))
 }
@@ -75,6 +77,7 @@ const transformAppBalances = (appBalances: AppBalance[]): AppBalance[] => {
         ...position.tokenInfo,
         logoUri: position.tokenInfo.logoUri ?? '',
         type: position.tokenInfo.type,
+        ...(position.tokenInfo.assetId && { assetId: position.tokenInfo.assetId }),
       },
     })),
   }))
