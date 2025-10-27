@@ -1,5 +1,5 @@
 import { Alert, FlatList } from 'react-native'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { View, Text, getTokenValue } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
@@ -41,11 +41,14 @@ export const LedgerAddressesContainer = () => {
     clearImportError()
   }
 
+  // Fetch addresses only on initial mount
+  const hasInitializedRef = useRef(false)
   useEffect(() => {
-    if (addresses.length === 0 && !isLoading) {
+    if (!hasInitializedRef.current) {
+      hasInitializedRef.current = true
       void fetchAddresses(1)
     }
-  }, [addresses.length, isLoading, fetchAddresses])
+  }, [])
 
   useEffect(() => {
     if (!error) {
