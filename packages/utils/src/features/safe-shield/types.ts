@@ -89,7 +89,13 @@ export enum CommonSharedStatus {
 
 export type AnyStatus = RecipientStatus | BridgeStatus | ContractStatus | ThreatStatus | CommonSharedStatus
 
-export type AnalysisResult<T extends AnyStatus> = { severity: Severity; type: T; title: string; description: string }
+export type AnalysisResult<T extends AnyStatus> = {
+  severity: Severity
+  type: T
+  title: string
+  description: string
+  addresses?: string[]
+}
 
 export type MasterCopyChangeThreatAnalysisResult = AnalysisResult<ThreatStatus.MASTER_COPY_CHANGE> & {
   /** Address of the old master copy/implementation contract */
