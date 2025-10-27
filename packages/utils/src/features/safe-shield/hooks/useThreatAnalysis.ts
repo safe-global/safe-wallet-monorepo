@@ -59,6 +59,7 @@ export function useThreatAnalysis({
         if (typeof parsed.url === 'string' && parsed.url.length > 0) {
           return parsed.url
         }
+        // Otherwise leave origin undefined to make CGW fall back to non_dapp
       } catch {
         // Not JSON - use the original string as-is
         return originProp
