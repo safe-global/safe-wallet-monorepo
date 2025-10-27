@@ -1,22 +1,36 @@
 import type { TypedData, MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import useWallet from '@/hooks/wallets/useWallet'
 import { Errors, logError } from '@/services/exceptions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { dispatchPreparedSignature } from '@/services/safe-messages/safeMsgNotifications'
 import { dispatchSafeMsgProposal, dispatchSafeMsgConfirmation } from '@/services/safe-messages/safeMsgSender'
-import { getSafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
 import { useEffect, useCallback, useState } from 'react'
 import useSafeInfo from '../useSafeInfo'
+import { getStoreInstance } from '@/store'
 
 const HIDE_DELAY = 3000
 
 export const fetchSafeMessage = async (safeMessageHash: string, chainId: string): Promise<MessageItem | undefined> => {
   let message: MessageItem | undefined
   try {
-    // fetchedMessage does not have a type because it is explicitly a message
-    const fetchedMessage = await getSafeMessage(chainId, safeMessageHash)
-    // @ts-expect-error - the getSafeMessage type from the safe-gateway-typescript-sdk is wrong. The gateway returns a MessageItem
-    message = { ...fetchedMessage, type: 'MESSAGE' }
+    // Use RTK Query endpoint to fetch message
+    const store = getStoreInstance()
+    const result = await store.dispatch(
+      cgwApi.endpoints.messagesGetMessageByHashV1.initiate(
+        { chainId, messageHash: safeMessageHash },
+        {
+          forceRefetch: true,
+        },
+      ),
+    )
+
+    if ('data' in result && result.data) {
+      // Convert Message to MessageItem by adding the type field
+      message = { ...result.data, type: 'MESSAGE' as const }
+    } else {
+      throw new Error('error' in result ? String(result.error) : 'Failed to fetch message')
+    }
   } catch (err) {
     logError(Errors._613, err)
     throw err

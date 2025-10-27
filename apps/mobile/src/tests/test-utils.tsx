@@ -8,6 +8,7 @@ import { FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE } from 'redux-persist
 import { cgwClient } from '@safe-global/store/gateway/cgwClient'
 import { web3API } from '@/src/store/signersBalance'
 import type { SettingsState } from '@/src/store/settingsSlice'
+import { TOKEN_LISTS } from '@/src/store/settingsSlice'
 import type { RootState, AppDispatch } from '../store'
 
 export type TestStore = EnhancedStore<RootState> & {
@@ -22,6 +23,7 @@ const defaultSettings: SettingsState = {
   onboardingVersionSeen: '',
   themePreference: 'light',
   currency: 'usd',
+  tokenList: TOKEN_LISTS.TRUSTED,
   env: {
     rpc: {},
     tenderly: {
@@ -130,6 +132,28 @@ function renderHookWithStore<Result, Props>(render: (initialProps: Props) => Res
   }
 }
 
+function renderWithStore(
+  ui: React.ReactElement,
+  store: TestStore,
+  options?: {
+    wrapper?: React.ComponentType<{ children: React.ReactNode }>
+  },
+) {
+  const wrapper = ({ children }: { children: React.ReactNode }) => {
+    return (
+      <BottomSheetModalProvider>
+        <Provider store={store}>
+          <SafeThemeProvider>
+            {options?.wrapper ? <options.wrapper>{children}</options.wrapper> : children}
+          </SafeThemeProvider>
+        </Provider>
+      </BottomSheetModalProvider>
+    )
+  }
+
+  return nativeRender(ui, { wrapper })
+}
+
 // re-export everything
 export * from '@testing-library/react-native'
 
@@ -137,5 +161,6 @@ export * from '@testing-library/react-native'
 export { customRender as render }
 export { customRenderHook as renderHook }
 export { renderHookWithStore }
+export { renderWithStore }
 export { createTestStore }
 export type { RootState }

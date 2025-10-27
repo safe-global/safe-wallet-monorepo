@@ -159,12 +159,29 @@ export function ledgerModule(): WalletInit {
                 value: txParams.value ? BigInt(txParams.value) : null,
               })
 
-              transaction.signature = await ledgerSdk.signTransaction(
-                getAssertedDerivationPath(),
-                hexaStringToBuffer(transaction.unsignedSerialized)!,
-              )
+              // Calculate hash and show comparison dialog before signing
+              const { keccak256 } = await import('ethers')
+              const txHash = keccak256(transaction.unsignedSerialized)
 
-              return transaction.serialized
+              const { showLedgerHashComparison, hideLedgerHashComparison } = await import('@/features/ledger/store')
+              showLedgerHashComparison(txHash)
+
+              try {
+                // Sign transaction on Ledger device
+                transaction.signature = await ledgerSdk.signTransaction(
+                  getAssertedDerivationPath(),
+                  hexaStringToBuffer(transaction.unsignedSerialized)!,
+                )
+
+                // Hide dialog after successful signing
+                hideLedgerHashComparison()
+
+                return transaction.serialized
+              } catch (error) {
+                // Hide dialog on error (rejection or failure)
+                hideLedgerHashComparison()
+                throw error
+              }
             },
             eth_sendTransaction: async (args) => {
               const signedTransaction = await eip1193Provider.request({
@@ -337,7 +354,7 @@ async function getLedgerSdk() {
   const dmk = new DeviceManagementKitBuilder().addTransport(webHidTransportFactory).build()
   const device = await lastValueFrom(dmk.startDiscovering({ transport: webHidIdentifier }))
   const sessionId = await dmk.connect({ device })
-  const signer = new SignerEthBuilder({ dmk, sessionId }).build()
+  const signer = new SignerEthBuilder({ dmk, sessionId, originToken: 'your-origin-token' }).build()
 
   return {
     disconnect: async (): Promise<void> => {

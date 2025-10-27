@@ -1,5 +1,6 @@
 import { Box, Button, MenuItem, Select, Typography, Grid, FormControl, InputLabel } from '@mui/material'
-import type { ChainInfo, SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import type { UrlObject } from 'url'
@@ -20,7 +21,7 @@ type Props = {
   appUrl: string
   wallet: ConnectedWallet | null
   onConnectWallet: () => Promise<void>
-  chain: ChainInfo
+  chain: Chain
   app: SafeAppData
 }
 
@@ -165,10 +166,10 @@ export { AppActions }
 const getCompatibleSafes = (
   ownedSafes: { [chainId: string]: string[] },
   compatibleChains: string[],
-  chainsData: ChainInfo[],
+  chainsData: Chain[],
 ): CompatibleSafesType[] => {
   return compatibleChains.reduce<CompatibleSafesType[]>((safes, chainId) => {
-    const chainData = chainsData.find((chain: ChainInfo) => chain.chainId === chainId)
+    const chainData = chainsData.find((chain: Chain) => chain.chainId === chainId)
 
     return [
       ...safes,

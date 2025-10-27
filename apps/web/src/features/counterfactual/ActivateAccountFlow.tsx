@@ -11,7 +11,6 @@ import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployed
 import { CF_TX_GROUP_KEY, extractCounterfactualSafeSetup, isPredictedSafeProps } from '@/features/counterfactual/utils'
 import useChainId from '@/hooks/useChainId'
 import { useCurrentChain } from '@/hooks/useChains'
-import useGasPrice, { getTotalFeeFormatted } from '@/hooks/useGasPrice'
 import { useLeastRemainingRelays } from '@/hooks/useRemainingRelays'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWalletCanPay from '@/hooks/useWalletCanPay'
@@ -32,6 +31,8 @@ import { getSafeToL2SetupDeployment } from '@safe-global/safe-deployments'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
 import type { TransactionOptions } from '@safe-global/types-kit'
+import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
+import useGasPrice from '@/hooks/useGasPrice'
 
 const useActivateAccount = (undeployedSafe: UndeployedSafe | undefined) => {
   const chain = useCurrentChain()

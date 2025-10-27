@@ -1,18 +1,15 @@
-import {
-  Operation,
-  postSafeGasEstimation,
-  getNonces as fetchNonces,
-  type SafeTransactionEstimation,
-} from '@safe-global/safe-gateway-typescript-sdk'
+import type { EstimationResponse } from '@safe-global/store/gateway/AUTO_GENERATED/estimations'
+import { Operation } from '@safe-global/store/gateway/types'
 import type { MetaTransactionData, SafeTransactionDataPartial } from '@safe-global/types-kit'
 import { Errors, logError } from '@/services/exceptions'
 import { isLegacyVersion } from '@safe-global/utils/services/contracts/utils'
+import { postSafeGasEstimation, getNonces as fetchNonces } from '@/utils/transactions'
 
 const fetchRecommendedParams = async (
   chainId: string,
   safeAddress: string,
   txParams: MetaTransactionData,
-): Promise<SafeTransactionEstimation> => {
+): Promise<EstimationResponse> => {
   return postSafeGasEstimation(chainId, safeAddress, {
     to: txParams.to,
     value: txParams.value,

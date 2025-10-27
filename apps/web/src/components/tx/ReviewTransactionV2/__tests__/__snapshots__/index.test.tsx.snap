@@ -687,7 +687,6 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
       </div>
     </div>
   </div>
-  ,
 </div>
 `;
 
@@ -765,68 +764,18 @@ exports[`ReviewTransaction should display an error screen 1`] = `
     <div
       class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
       data-testid="card-content"
-    />
-  </div>
-  <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1w4z6qv-MuiPaper-root-MuiCard-root"
-    style="--Paper-shadow: none;"
-  >
-    <div
-      class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
-      data-testid="card-content"
     >
       <div
-        class="wrapper"
+        class="MuiBox-root css-17luq05"
+        data-testid="error-transaction-preview"
       >
-        <div
-          class="icon sign"
+        <p
+          class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
         >
-          <mock-icon
-            aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
-            focusable="false"
-          />
-        </div>
-        <div>
-          <h5
-            class="MuiTypography-root MuiTypography-h5 css-1mp5g96-MuiTypography-root"
-          >
-            confirm
-          </h5>
-          <p
-            class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
-          >
-            You're about to 
-            confirm
-             this transaction.
-          </p>
-        </div>
-      </div>
-      <div
-        class="MuiCardActions-root MuiCardActions-spacing css-1q4nm6f-MuiCardActions-root"
-      >
-        <div
-          class="MuiStack-root css-irtfmw-MuiStack-root"
-        >
-          <span
-            aria-label="Please connect your wallet"
-            class=""
-            data-mui-internal-clone-element="true"
-          >
-            <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-1hp2ejb-MuiButtonBase-root-MuiButton-root"
-              data-testid="continue-sign-btn"
-              disabled=""
-              tabindex="-1"
-              type="submit"
-            >
-              Continue
-            </button>
-          </span>
-        </div>
+          Error loading preview. Please try again.
+        </p>
       </div>
     </div>
   </div>
-  ,
 </div>
 `;

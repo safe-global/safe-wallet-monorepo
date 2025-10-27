@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from '@/tests/test-utils'
-import useGasPrice, { getTotalFee } from '@/hooks/useGasPrice'
+import useGasPrice from '@/hooks/useGasPrice'
 import { useCurrentChain } from '../useChains'
+import { getTotalFee } from '@safe-global/utils/hooks/useDefaultGasPrice'
 
 // mock useWeb3Readonly
 jest.mock('../wallets/web3', () => {

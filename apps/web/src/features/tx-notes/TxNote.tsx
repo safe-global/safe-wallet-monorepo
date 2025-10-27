@@ -1,5 +1,5 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Tooltip, Typography, Stack } from '@mui/material'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import EthHashInfo from '@/components/common/EthHashInfo'

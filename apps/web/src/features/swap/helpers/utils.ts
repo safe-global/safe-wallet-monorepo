@@ -1,4 +1,5 @@
-import type { DataDecoded, Order as SwapOrder } from '@safe-global/safe-gateway-typescript-sdk'
+import type { DataDecoded, SwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { formatUnits } from 'ethers'
 import type { AnyAppDataDocVersion, latest } from '@cowprotocol/app-data'
 
@@ -28,7 +29,7 @@ export const TWAP_FALLBACK_HANDLER = '0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5
 export const TWAP_FALLBACK_HANDLER_NETWORKS = ['1', '100', '137', '11155111', '8453', '42161', '43114', '232']
 
 export const getExecutionPrice = (
-  order: Pick<SwapOrder, 'executedSellAmount' | 'executedBuyAmount' | 'buyToken' | 'sellToken'>,
+  order: Pick<OrderTransactionInfo, 'executedSellAmount' | 'executedBuyAmount' | 'buyToken' | 'sellToken'>,
 ): number => {
   const { executedSellAmount, executedBuyAmount, buyToken, sellToken } = order
 
@@ -44,7 +45,7 @@ export const getExecutionPrice = (
 }
 
 export const getLimitPrice = (
-  order: Pick<SwapOrder, 'sellAmount' | 'buyAmount' | 'buyToken' | 'sellToken'>,
+  order: Pick<SwapOrderTransactionInfo, 'sellAmount' | 'buyAmount' | 'buyToken' | 'sellToken'>,
 ): number => {
   const { sellAmount, buyAmount, buyToken, sellToken } = order
 
@@ -65,7 +66,7 @@ const calculateRatio = (a: Quantity, b: Quantity) => {
 
 export const getSurplusPrice = (
   order: Pick<
-    SwapOrder,
+    OrderTransactionInfo,
     'executedBuyAmount' | 'buyAmount' | 'buyToken' | 'executedSellAmount' | 'sellAmount' | 'sellToken' | 'kind'
   >,
 ): number => {
@@ -79,7 +80,7 @@ export const getSurplusPrice = (
   }
 }
 
-export const getPartiallyFilledSurplus = (order: SwapOrder): number => {
+export const getPartiallyFilledSurplus = (order: OrderTransactionInfo): number => {
   if (order.kind === OrderKind.BUY) {
     return getPartiallyFilledBuySurplus(order)
   } else if (order.kind === OrderKind.SELL) {
@@ -91,7 +92,7 @@ export const getPartiallyFilledSurplus = (order: SwapOrder): number => {
 
 const getPartiallyFilledBuySurplus = (
   order: Pick<
-    SwapOrder,
+    OrderTransactionInfo,
     'executedBuyAmount' | 'buyAmount' | 'buyToken' | 'executedSellAmount' | 'sellAmount' | 'sellToken' | 'kind'
   >,
 ): number => {
@@ -107,7 +108,7 @@ const getPartiallyFilledBuySurplus = (
 
 const getPartiallyFilledSellSurplus = (
   order: Pick<
-    SwapOrder,
+    OrderTransactionInfo,
     'executedBuyAmount' | 'buyAmount' | 'buyToken' | 'executedSellAmount' | 'sellAmount' | 'sellToken' | 'kind'
   >,
 ): number => {
@@ -123,7 +124,7 @@ const getPartiallyFilledSellSurplus = (
 }
 
 export const getFilledPercentage = (
-  order: Pick<SwapOrder, 'executedBuyAmount' | 'kind' | 'buyAmount' | 'executedSellAmount' | 'sellAmount'>,
+  order: Pick<OrderTransactionInfo, 'executedBuyAmount' | 'kind' | 'buyAmount' | 'executedSellAmount' | 'sellAmount'>,
 ): string => {
   let executed: number
   let total: number
@@ -142,7 +143,7 @@ export const getFilledPercentage = (
 }
 
 export const getFilledAmount = (
-  order: Pick<SwapOrder, 'kind' | 'executedBuyAmount' | 'executedSellAmount' | 'buyToken' | 'sellToken'>,
+  order: Pick<OrderTransactionInfo, 'kind' | 'executedBuyAmount' | 'executedSellAmount' | 'buyToken' | 'sellToken'>,
 ): string => {
   if (order.kind === OrderKind.BUY) {
     return formatUnits(order.executedBuyAmount || 0n, order.buyToken.decimals)
@@ -153,14 +154,14 @@ export const getFilledAmount = (
   }
 }
 
-export const getSlippageInPercent = (order: Pick<SwapOrder, 'fullAppData'>): string => {
+export const getSlippageInPercent = (order: Pick<OrderTransactionInfo, 'fullAppData'>): string => {
   const fullAppData = order.fullAppData as AnyAppDataDocVersion
   const slippageBips = (fullAppData?.metadata?.quote as latest.Quote)?.slippageBips || 0
 
   return (Number(slippageBips) / 100).toFixed(2)
 }
 
-export const getOrderClass = (order: Pick<SwapOrder, 'fullAppData'>): latest.OrderClass1 => {
+export const getOrderClass = (order: Pick<OrderTransactionInfo, 'fullAppData'>): latest.OrderClass1 => {
   const fullAppData = order.fullAppData as AnyAppDataDocVersion
   const orderClass = (fullAppData?.metadata?.orderClass as latest.OrderClass)?.orderClass
 
@@ -168,7 +169,7 @@ export const getOrderClass = (order: Pick<SwapOrder, 'fullAppData'>): latest.Ord
 }
 
 export const isOrderPartiallyFilled = (
-  order: Pick<SwapOrder, 'executedBuyAmount' | 'executedSellAmount' | 'sellAmount' | 'buyAmount' | 'kind'>,
+  order: Pick<OrderTransactionInfo, 'executedBuyAmount' | 'executedSellAmount' | 'sellAmount' | 'buyAmount' | 'kind'>,
 ): boolean => {
   const executedBuyAmount = BigInt(order.executedBuyAmount || 0)
   const buyAmount = BigInt(order.buyAmount)

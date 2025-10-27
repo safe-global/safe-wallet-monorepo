@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
-import { ImportError } from '@/src/features/ImportPrivateKey/components/ImportError'
+import { ImportError } from '@/src/features/ImportSigner/components/ImportError'
 import React from 'react'
 import { getTokenValue, useTheme, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'

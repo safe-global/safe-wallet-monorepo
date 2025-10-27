@@ -15,7 +15,7 @@ const TokenIcon = ({
   chainId,
 }: {
   logoUri?: string
-  tokenSymbol?: string
+  tokenSymbol?: string | null
   size?: number
   fallbackSrc?: string
   chainId?: string
@@ -28,7 +28,7 @@ const TokenIcon = ({
     <Box position="relative" marginRight={chainId ? '8px' : '0px'}>
       <ImageFallback
         src={src}
-        alt={tokenSymbol}
+        alt={tokenSymbol ?? ''}
         fallbackSrc={fallbackSrc || FALLBACK_ICON}
         height={size}
         className={css.image}

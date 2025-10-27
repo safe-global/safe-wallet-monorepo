@@ -1,6 +1,7 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import { type SafeInfo, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { createExistingTx } from '@/services/tx/tx-sender'
 import useChainId from '@/hooks/useChainId'
 import useAsync from '@safe-global/utils/hooks/useAsync'
@@ -101,7 +102,7 @@ const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }
 
   const handleSimulation = () => {
     if (safeTransaction && executionOwner) {
-      simulateTransaction({ executionOwner, transactions: safeTransaction, safe: safe as SafeInfo })
+      simulateTransaction({ executionOwner, transactions: safeTransaction, safe: safe as SafeState })
     }
   }
 

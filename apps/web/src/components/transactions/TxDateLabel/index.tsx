@@ -1,5 +1,5 @@
+import type { DateLabel } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { DateLabel as SafeMessageDateLabel } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import type { DateLabel } from '@safe-global/safe-gateway-typescript-sdk'
 import type { ReactElement } from 'react'
 
 import { formatWithSchema } from '@safe-global/utils/utils/date'

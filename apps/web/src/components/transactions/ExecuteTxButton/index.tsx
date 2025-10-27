@@ -1,8 +1,8 @@
+import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import useIsExpiredSwap from '@/features/swap/hooks/useIsExpiredSwap'
 import useIsPending from '@/hooks/useIsPending'
 import type { SyntheticEvent } from 'react'
 import { type ReactElement, useContext } from 'react'
-import { type TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
 import { Button, Tooltip } from '@mui/material'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -19,7 +19,7 @@ const ExecuteTxButton = ({
   txSummary,
   compact = false,
 }: {
-  txSummary: TransactionSummary
+  txSummary: Transaction
   compact?: boolean
 }): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)

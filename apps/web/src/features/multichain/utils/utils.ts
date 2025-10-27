@@ -1,4 +1,5 @@
-import type { DecodedDataResponse, ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { DataDecoded } from '@safe-global/store/gateway/AUTO_GENERATED/data-decoded'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import semverSatisfies from 'semver/functions/satisfies'
 import memoize from 'lodash/memoize'
@@ -24,7 +25,7 @@ type SafeSetup = {
   chainId: string
 }
 
-export const isChangingSignerSetup = (decodedData: DecodedDataResponse | undefined) => {
+export const isChangingSignerSetup = (decodedData: DataDecoded | undefined) => {
   return decodedData?.method === 'addOwnerWithThreshold' || decodedData?.method === 'removeOwner'
 }
 
@@ -137,16 +138,16 @@ export const predictAddressBasedOnReplayData = async (safeCreationData: Replayed
   )
 }
 
-const canMultichain = (chain: ChainInfo) => {
+const canMultichain = (chain: Chain) => {
   const MIN_SAFE_VERSION = '1.4.1'
   return hasFeature(chain, FEATURES.COUNTERFACTUAL) && semverSatisfies(LATEST_SAFE_VERSION, `>=${MIN_SAFE_VERSION}`)
 }
 
-export const hasMultiChainCreationFeatures = (chain: ChainInfo): boolean => {
+export const hasMultiChainCreationFeatures = (chain: Chain): boolean => {
   return hasFeature(chain, FEATURES.MULTI_CHAIN_SAFE_CREATION) && canMultichain(chain)
 }
 
-export const hasMultiChainAddNetworkFeature = (chain: ChainInfo | undefined): boolean => {
+export const hasMultiChainAddNetworkFeature = (chain: Chain | undefined): boolean => {
   if (!chain) return false
   return hasFeature(chain, FEATURES.MULTI_CHAIN_SAFE_ADD_NETWORK) && canMultichain(chain)
 }

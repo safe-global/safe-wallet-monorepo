@@ -2,12 +2,12 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { ACTIVE_OUTREACH, MAX_ASK_AGAIN_DELAY } from '@/features/targetedOutreach/constants'
 import { useAppSelector } from '@/store'
 import { selectCookieBanner } from '@/store/popupSlice'
-import type { getSubmission } from '@safe-global/safe-client-gateway-sdk'
+import type { Submission } from '@safe-global/store/gateway/AUTO_GENERATED/targeted-messages'
 
 const useShowOutreachPopup = (
   isDismissed: boolean | undefined,
   askAgainLaterTimestamp: number | undefined,
-  submission: getSubmission | undefined,
+  submission: Submission | undefined,
 ) => {
   const cookiesPopup = useAppSelector(selectCookieBanner)
   const isSigner = useIsSafeOwner()

@@ -1,10 +1,19 @@
+import type {
+  NativeStakingDepositTransactionInfo,
+  TransactionData,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Box } from '@mui/material'
-import type { StakingTxDepositInfo, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
 import StakingConfirmationTxDeposit from '@/features/stake/components/StakingConfirmationTx/Deposit'
 
-const StakingTxDepositDetails = ({ info, txData }: { info: StakingTxDepositInfo; txData?: TransactionData }) => {
+const StakingTxDepositDetails = ({
+  info,
+  txData,
+}: {
+  info: NativeStakingDepositTransactionInfo
+  txData?: TransactionData | null
+}) => {
   return (
     <Box
       sx={{

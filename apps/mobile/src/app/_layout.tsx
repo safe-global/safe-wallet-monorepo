@@ -33,6 +33,7 @@ import { useFreeRasp } from 'freerasp-react-native'
 import { SafeStatusBar } from '@/src/theme/SafeStatusBar'
 import { GuardProvider } from '@/src/context/GuardProvider'
 import { useNotificationHandler } from '@/src/hooks/useNotificationHandler'
+import { usePendingTxsMonitor } from '../hooks/usePendingTxsMonitor'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 // Initialize all notification handlers
@@ -48,6 +49,7 @@ const HooksInitializer = () => {
   useInitSafeCoreSDK()
   useAnalytics() // Tracks activeSafe changes, but only once analytics is enabled in GetStarted screen
   useNotificationHandler()
+  usePendingTxsMonitor()
   return null
 }
 
@@ -172,6 +174,22 @@ function RootLayout() {
                               }}
                             />
                             <Stack.Screen
+                              name="change-estimated-fee-sheet"
+                              options={{
+                                headerShown: false,
+                                presentation: 'transparentModal',
+                                animation: 'fade',
+                              }}
+                            />
+                            <Stack.Screen
+                              name="how-to-execute-sheet"
+                              options={{
+                                headerShown: false,
+                                presentation: 'transparentModal',
+                                animation: 'fade',
+                              }}
+                            />
+                            <Stack.Screen
                               name="notifications-opt-in"
                               options={{
                                 headerShown: false,
@@ -221,6 +239,10 @@ function RootLayout() {
                                 headerShown: false,
                                 presentation: 'modal',
                               }}
+                            />
+                            <Stack.Screen
+                              name="manage-tokens-sheet"
+                              options={{ headerShown: false, presentation: 'transparentModal', animation: 'fade' }}
                             />
                             <Stack.Screen name="+not-found" />
                           </Stack>

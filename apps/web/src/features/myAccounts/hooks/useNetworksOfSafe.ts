@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useAllSafesGrouped } from './useAllSafesGrouped'
 import useChains from '@/hooks/useChains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 /**
  * Hook to get all networks where a specific Safe is active
@@ -20,7 +20,7 @@ export const useNetworksOfSafe = (safeAddress: string): string[] => {
         acc[chain.chainId] = chain
         return acc
       },
-      {} as Record<string, ChainInfo>,
+      {} as Record<string, Chain>,
     )
   }, [allChains])
 

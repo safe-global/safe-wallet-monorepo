@@ -11,9 +11,10 @@ import { useTheme as useCurrentTheme } from '@/src/theme/hooks/useTheme'
 interface ReviewAndConfirmViewProps {
   txDetails: TransactionDetails
   children: ReactNode
+  header?: ReactNode
 }
 
-export function ReviewAndConfirmView({ txDetails, children }: ReviewAndConfirmViewProps) {
+export function ReviewAndConfirmView({ txDetails, children, header }: ReviewAndConfirmViewProps) {
   const { isDark } = useCurrentTheme()
   const theme = useTheme()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -42,7 +43,7 @@ export function ReviewAndConfirmView({ txDetails, children }: ReviewAndConfirmVi
           shadowColor: 'transparent',
           shadowOffset: { width: 0, height: 0 },
         }}
-        renderHeader={() => <ReviewHeader />}
+        renderHeader={() => (header ? <>{header}</> : <ReviewHeader />)}
       >
         <Tabs.Tab name="Data" label="Data">
           <DataTab />

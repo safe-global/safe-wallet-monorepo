@@ -4,25 +4,25 @@ import { Badge } from '@/src/components/Badge'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { SafeButton } from '@/src/components/SafeButton'
 
-import { router } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AbsoluteLinearGradient } from '@/src/components/LinearGradient'
 import { useTheme } from '@/src/theme/hooks/useTheme'
 
-export function ExecuteProcessing() {
+export function ExecuteProcessing({ handleHomePress }: { handleHomePress: () => void }) {
+  const { txId } = useLocalSearchParams<{ txId: string }>()
   const { bottom } = useSafeAreaInsets()
   const { isDark } = useTheme()
 
   const color = isDark ? getTokenValue('$color.backgroundLightDark') : getTokenValue('$color.backgroundLightLight')
 
   const handleTxPress = () => {
-    // Go back to pending transactions
-    router.back()
-    router.back()
-  }
-
-  const handleHomePress = () => {
-    router.dismissAll()
+    router.dismissTo({
+      pathname: '/confirm-transaction',
+      params: {
+        txId,
+      },
+    })
   }
 
   return (

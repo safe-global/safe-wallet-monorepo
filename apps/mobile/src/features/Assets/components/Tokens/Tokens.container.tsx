@@ -1,10 +1,11 @@
 import React from 'react'
 import { ListRenderItem } from 'react-native'
 import { useSelector } from 'react-redux'
-import { getTokenValue, Text } from 'tamagui'
+import { getTokenValue, Text, View } from 'tamagui'
 
 import { SafeTab } from '@/src/components/SafeTab'
 import { AssetsCard } from '@/src/components/transactions-list/Card/AssetsCard'
+import { FiatChange } from '@/src/components/FiatChange'
 import { POLLING_INTERVAL } from '@/src/config/constants'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { Balance, useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
@@ -16,10 +17,18 @@ import { shouldDisplayPreciseBalance } from '@/src/utils/balance'
 import { NoFunds } from '@/src/features/Assets/components/NoFunds'
 import { AssetError } from '@/src/features/Assets/Assets.error'
 import { useAppSelector } from '@/src/store/hooks'
-import { selectCurrency } from '@/src/store/settingsSlice'
+import { selectCurrency, selectTokenList, TOKEN_LISTS } from '@/src/store/settingsSlice'
+import { useHasFeature } from '@/src/hooks/useHasFeature'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+
 export function TokensContainer() {
   const activeSafe = useSelector(selectActiveSafe)
   const currency = useAppSelector(selectCurrency)
+  const tokenList = useAppSelector(selectTokenList)
+  const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
+
+  const trusted = hasDefaultTokenlist ? tokenList === TOKEN_LISTS.TRUSTED : true
+
   const { data, isFetching, error, isLoading, refetch } = useBalancesGetBalancesV1Query(
     !activeSafe
       ? skipToken
@@ -27,7 +36,7 @@ export function TokensContainer() {
           chainId: activeSafe.chainId,
           fiatCode: currency,
           safeAddress: activeSafe.address,
-          trusted: true,
+          trusted,
         },
     {
       pollingInterval: POLLING_INTERVAL,
@@ -45,11 +54,16 @@ export function TokensContainer() {
             item.tokenInfo.symbol
           }`}
           rightNode={
-            <Text fontSize="$4" fontWeight={600} color="$color">
-              {shouldDisplayPreciseBalance(fiatBalance, 7)
-                ? formatCurrencyPrecise(fiatBalance, currency)
-                : formatCurrency(fiatBalance, currency)}
-            </Text>
+            <View alignItems="flex-end">
+              <Text fontSize="$4" fontWeight={600} color="$color">
+                {shouldDisplayPreciseBalance(fiatBalance, 7)
+                  ? formatCurrencyPrecise(fiatBalance, currency)
+                  : formatCurrency(fiatBalance, currency)}
+              </Text>
+              <View marginTop="$1">
+                <FiatChange balanceItem={item} />
+              </View>
+            </View>
           }
         />
       )

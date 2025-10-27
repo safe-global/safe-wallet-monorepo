@@ -2,25 +2,51 @@ import { act, renderHook } from '@/tests/test-utils'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import { useTxTracking } from '../useTxTracking'
 import { trackEvent, WALLET_EVENTS } from '@/services/analytics'
-import { getTransactionDetails, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { faker } from '@faker-js/faker'
+import { http, HttpResponse } from 'msw'
+import { server } from '@/tests/server'
+import { GATEWAY_URL } from '@/config/gateway'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: jest.fn(),
 }))
 
-jest.mock('@safe-global/safe-gateway-typescript-sdk', () => ({
-  ...jest.requireActual('@safe-global/safe-gateway-typescript-sdk'),
-  getTransactionDetails: jest.fn(),
-}))
-
 describe('useTxTracking', () => {
   beforeEach(() => {
-    ;(getTransactionDetails as jest.Mock).mockResolvedValue({
-      safeAppInfo: { url: 'google.com' },
-    } as unknown as TransactionDetails)
+    // Override the transaction endpoint to include safeAppInfo
+    server.use(
+      http.get<{ chainId: string; id: string }, never, TransactionDetails>(
+        `${GATEWAY_URL}/v1/chains/:chainId/transactions/:id`,
+        () => {
+          return HttpResponse.json({
+            txInfo: {
+              type: 'Custom',
+              to: {
+                value: '0x123',
+                name: 'Test',
+                logoUri: null,
+              },
+              dataSize: '100',
+              value: null,
+              isCancellation: false,
+              methodName: 'test',
+            },
+            safeAddress: '0x456',
+            txId: '0x345',
+            txStatus: 'AWAITING_CONFIRMATIONS' as const,
+            safeAppInfo: {
+              name: 'Google',
+              url: 'google.com',
+              logoUri: null,
+            },
+          })
+        },
+      ),
+    )
   })
+
   it('should track the ONCHAIN_INTERACTION event', async () => {
     renderHook(() => useTxTracking())
 

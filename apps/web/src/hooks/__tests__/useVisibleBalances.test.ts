@@ -1,4 +1,4 @@
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { TokenType } from '@safe-global/store/gateway/types'
 import * as store from '@/store'
 import * as useBalancesHooks from '@/hooks/useBalances'
 import { renderHook } from '@/tests/test-utils'

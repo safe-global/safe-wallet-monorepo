@@ -1,6 +1,6 @@
 import { Link } from '@mui/material'
 import { useState } from 'react'
-import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
+import { Operation } from '@safe-global/store/gateway/types'
 import type { ReactElement } from 'react'
 
 import { dateString } from '@safe-global/utils/utils/formatters'

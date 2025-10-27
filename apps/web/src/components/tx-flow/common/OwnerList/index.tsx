@@ -1,6 +1,6 @@
+import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Paper, Typography, SvgIcon } from '@mui/material'
 import type { PaperProps } from '@mui/material'
-import type { AddressEx } from '@safe-global/safe-gateway-typescript-sdk'
 import type { ReactElement } from 'react'
 
 import PlusIcon from '@/public/images/common/plus.svg'
@@ -15,7 +15,7 @@ export function OwnerList({
   owners,
   sx,
 }: {
-  owners: Array<AddressEx>
+  owners: Array<AddressInfo>
   icon?: React.ElementType
   title?: string
   sx?: PaperProps['sx']

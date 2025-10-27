@@ -1,20 +1,22 @@
-import useAsync from '@safe-global/utils/hooks/useAsync'
+import type { MasterCopy as MasterCopyType } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useChainId from '@/hooks/useChainId'
 import { Errors, logError } from '@/services/exceptions'
-import type { MasterCopyReponse } from '@safe-global/safe-gateway-typescript-sdk'
-import { getMasterCopies } from '@safe-global/safe-gateway-typescript-sdk'
+import { useMemo } from 'react'
+import { useChainsGetMasterCopiesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 
 export enum MasterCopyDeployer {
   GNOSIS = 'Gnosis',
   CIRCLES = 'Circles',
 }
 
-export type MasterCopy = MasterCopyReponse[number] & {
+export type MasterCopy = MasterCopyType & {
   deployer: MasterCopyDeployer
   deployerRepoUrl: string
 }
 
-const extractMasterCopyInfo = (mc: MasterCopyReponse[number]): MasterCopy => {
+const extractMasterCopyInfo = (mc: MasterCopyType): MasterCopy => {
   const isCircles = mc.version.toLowerCase().includes(MasterCopyDeployer.CIRCLES.toLowerCase())
   const dashIndex = mc.version.indexOf('-')
 
@@ -29,15 +31,24 @@ const extractMasterCopyInfo = (mc: MasterCopyReponse[number]): MasterCopy => {
   return masterCopy
 }
 
-export const useMasterCopies = () => {
+export const useMasterCopies = (): AsyncResult<MasterCopy[]> => {
   const chainId = useChainId()
-  const fetchMasterCopies = async (): Promise<MasterCopy[] | undefined> => {
+  const { data, isLoading, error } = useChainsGetMasterCopiesV1Query({ chainId })
+
+  const transformedData = useMemo(() => {
+    if (!data) return undefined
     try {
-      const res = await getMasterCopies(chainId)
-      return res.map(extractMasterCopyInfo)
-    } catch (error) {
-      logError(Errors._619, error)
+      return data.map(extractMasterCopyInfo)
+    } catch (err) {
+      logError(Errors._619, err)
+      return undefined
     }
-  }
-  return useAsync(fetchMasterCopies, [chainId])
+  }, [data])
+
+  const processedError = useMemo(() => {
+    if (!error) return undefined
+    return asError(error)
+  }, [error])
+
+  return [transformedData, processedError, isLoading]
 }

@@ -1,8 +1,8 @@
+import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
 import { useMemo } from 'react'
-import type { TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
 import { Box, Stack, Typography } from '@mui/material'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import TxInfo from '@/components/transactions/TxInfo'
@@ -13,7 +13,7 @@ import TxConfirmations from '@/components/transactions/TxConfirmations'
 import { DateTime } from '@/components/common/DateTime/DateTime'
 
 type PendingTxType = {
-  transaction: TransactionSummary
+  transaction: Transaction
 }
 
 const PendingTx = ({ transaction }: PendingTxType): ReactElement => {

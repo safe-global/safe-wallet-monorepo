@@ -14,7 +14,7 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type AboutGetAboutApiResponse = /** status 200  */ About
+export type AboutGetAboutApiResponse = /** status 200 Application information retrieved successfully */ About
 export type AboutGetAboutApiArg = void
 export type About = {
   name: string

@@ -1,10 +1,12 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { fireEvent, render } from '@/tests/test-utils'
 import SingleTx from '@/pages/transactions/tx'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
-import * as gatewaySDK from '@safe-global/safe-gateway-typescript-sdk'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { waitFor } from '@testing-library/react'
+import { http, HttpResponse } from 'msw'
+import { server } from '@/tests/server'
+import { GATEWAY_URL } from '@/config/gateway'
 
 const MOCK_SAFE_ADDRESS = '0x0000000000000000000000000000000000005AFE'
 const SAFE_ADDRESS = '0x87a57cBf742CC1Fc702D0E9BF595b1E056693e2f'
@@ -52,7 +54,11 @@ describe('SingleTx', () => {
   })
 
   it('renders <SingleTx />', async () => {
-    jest.spyOn(gatewaySDK, 'getTransactionDetails').mockImplementation(() => Promise.resolve(txDetails))
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/chains/:chainId/transactions/:id`, () => {
+        return HttpResponse.json(txDetails)
+      }),
+    )
 
     const screen = render(<SingleTx />)
 
@@ -63,7 +69,11 @@ describe('SingleTx', () => {
   })
 
   it('shows an error when the transaction has failed to load', async () => {
-    jest.spyOn(gatewaySDK, 'getTransactionDetails').mockImplementation(() => Promise.reject(new Error('Server error')))
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/chains/:chainId/transactions/:id`, () => {
+        return HttpResponse.json({ message: 'Server error' }, { status: 500 })
+      }),
+    )
 
     const screen = render(<SingleTx />)
 
@@ -78,10 +88,12 @@ describe('SingleTx', () => {
   })
 
   it('shows an error when transaction is not from the opened Safe', async () => {
-    jest.spyOn(gatewaySDK, 'getTransactionDetails').mockImplementation(() =>
-      Promise.resolve({
-        ...txDetails,
-        safeAddress: MOCK_SAFE_ADDRESS,
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/chains/:chainId/transactions/:id`, () => {
+        return HttpResponse.json({
+          ...txDetails,
+          safeAddress: MOCK_SAFE_ADDRESS,
+        })
       }),
     )
 

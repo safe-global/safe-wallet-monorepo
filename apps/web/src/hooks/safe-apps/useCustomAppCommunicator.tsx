@@ -11,7 +11,10 @@ import {
 } from '@safe-global/safe-apps-sdk'
 import { SafeAppsTxFlow, SignMessageFlow, SignMessageOnChainFlow } from '@/components/tx-flow/flows'
 import { isOffchainEIP1271Supported } from '@safe-global/utils/utils/safe-messages'
-import { getSafeMessage, getTransactionDetails, type SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import { getTransactionDetails } from '@/utils/transactions'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
+import { getStoreInstance } from '@/store'
 import useGetSafeInfo from '@/components/safe-apps/AppFrame/useGetSafeInfo'
 import { isSafeMessageListItem } from '@/utils/safe-message-guards'
 import { TxModalContext } from '@/components/tx-flow'
@@ -22,7 +25,7 @@ import { selectSafeMessages } from '@/store/safeMessagesSlice'
 import { trackSafeAppEvent, SAFE_APPS_EVENTS } from '@/services/analytics'
 import { safeMsgSubscribe, SafeMsgEvent } from '@/services/safe-messages/safeMsgEvents'
 import { txSubscribe, TxEvent } from '@/services/tx/txEvents'
-import type { ChainInfo as WebCoreChainInfo } from '@safe-global/safe-gateway-typescript-sdk/dist/types/chains'
+import type { Chain as WebCoreChainInfo } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useChainId from '@/hooks/useChainId'
 import type AppCommunicator from '@/services/safe-apps/AppCommunicator'
 import useBalances from '@/hooks/useBalances'
@@ -161,8 +164,19 @@ export const useCustomAppCommunicator = (
       }
 
       try {
-        const { preparedSignature } = await getSafeMessage(chainId, messageHash)
-        return preparedSignature || undefined
+        const store = getStoreInstance()
+        const result = await store.dispatch(
+          cgwApi.endpoints.messagesGetMessageByHashV1.initiate(
+            { chainId, messageHash },
+            {
+              forceRefetch: true,
+            },
+          ),
+        )
+        if ('data' in result && result.data) {
+          return result.data.preparedSignature || undefined
+        }
+        return undefined
       } catch {
         return undefined
       }

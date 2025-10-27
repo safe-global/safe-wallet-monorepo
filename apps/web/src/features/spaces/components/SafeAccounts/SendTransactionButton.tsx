@@ -1,3 +1,4 @@
+import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useContext } from 'react'
 import { IconButton, Tooltip } from '@mui/material'
 import { useRouter } from 'next/router'
@@ -9,7 +10,6 @@ import { networks } from '@safe-global/protocol-kit/dist/src/utils/eip-3770/conf
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useWallet from '@/hooks/wallets/useWallet'
 import { isOwner } from '@/utils/transaction-guards'
-import type { AddressEx } from '@safe-global/safe-gateway-typescript-sdk'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import { gtmSetSafeAddress } from '@/services/analytics/gtm'
@@ -24,7 +24,7 @@ const chains = networks.reduce<Chains>((result, { shortName, chainId }) => {
 const SendTransactionButton = ({ safe }: { safe: SafeOverview }) => {
   const router = useRouter()
   const wallet = useWallet()
-  const canSend = isOwner(safe.owners as AddressEx[], wallet?.address)
+  const canSend = isOwner(safe.owners as AddressInfo[], wallet?.address)
 
   const { setTxFlow } = useContext(TxModalContext)
 

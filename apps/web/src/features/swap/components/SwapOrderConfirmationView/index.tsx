@@ -1,3 +1,11 @@
+import { TransactionInfoType } from '@safe-global/store/gateway/types'
+import type {
+  DataDecoded,
+  SwapOrderTransactionInfo,
+  SwapTransferTransactionInfo,
+  TwapOrderTransactionInfo,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { StartTimeValue } from '@safe-global/store/gateway/types'
 import OrderId from '@/features/swap/components/OrderId'
 import { formatDateTime, formatTimeInWords, getPeriod } from '@safe-global/utils/utils/date'
 import { Fragment, type ReactElement } from 'react'
@@ -7,8 +15,6 @@ import { compareAsc } from 'date-fns'
 import { Alert, Typography } from '@mui/material'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { getLimitPrice, getOrderClass, getSlippageInPercent } from '@/features/swap/helpers/utils'
-import type { DataDecoded, SwapOrder, SwapTransferOrder, TwapOrder } from '@safe-global/safe-gateway-typescript-sdk'
-import { StartTimeValue, TransactionInfoType } from '@safe-global/safe-gateway-typescript-sdk'
 import SwapTokens from '@/features/swap/components/SwapTokens'
 import AlertIcon from '@/public/images/common/alert.svg'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -22,13 +28,13 @@ import { isSettingTwapFallbackHandler } from '@/features/swap/helpers/utils'
 import { TwapFallbackHandlerWarning } from '@/features/swap/components/TwapFallbackHandlerWarning'
 
 type SwapOrderProps = {
-  order: SwapOrder | SwapTransferOrder | TwapOrder
+  order: SwapOrderTransactionInfo | SwapTransferTransactionInfo | TwapOrderTransactionInfo
   settlementContract: string
-  decodedData?: DataDecoded
+  decodedData?: DataDecoded | null
 }
 
 export const SwapOrderConfirmation = ({ order, decodedData, settlementContract }: SwapOrderProps): ReactElement => {
-  const { owner, kind, validUntil, sellToken, buyToken, sellAmount, buyAmount, explorerUrl, receiver } = order
+  const { owner, kind, validUntil, sellToken, buyToken, sellAmount, buyAmount, receiver } = order
 
   const isTwapOrder = order.type === TransactionInfoType.TWAP_ORDER
 
@@ -40,6 +46,7 @@ export const SwapOrderConfirmation = ({ order, decodedData, settlementContract }
   const slippage = getSlippageInPercent(order)
   const isSellOrder = kind === 'sell'
   const isChangingFallbackHandler = decodedData && isSettingTwapFallbackHandler(decodedData)
+  const explorerUrl = !isTwapOrder ? order.explorerUrl : undefined
 
   return (
     <>
@@ -90,12 +97,15 @@ export const SwapOrderConfirmation = ({ order, decodedData, settlementContract }
           ),
           !isTwapOrder ? (
             <DataRow datatestid="order-id" key="Order ID" title="Order ID">
-              <OrderId orderId={order.uid} href={explorerUrl} />
+              <OrderId orderId={order.uid} href={explorerUrl!} />
             </DataRow>
           ) : (
             <></>
           ),
-          <OrderFeeConfirmationView key="SurplusFee" order={order} />,
+          <OrderFeeConfirmationView
+            key="SurplusFee"
+            order={order as { fullAppData?: Record<string, unknown> | null }}
+          />,
           <DataRow datatestid="interact-wth" key="Interact with" title="Interact with">
             <NamedAddress address={settlementContract} onlyName hasExplorer shortAddress={false} avatarSize={24} />
           </DataRow>,

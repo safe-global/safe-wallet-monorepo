@@ -1,14 +1,15 @@
+import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Safe_migration__factory } from '@safe-global/utils/types/contracts'
 import { getCompatibilityFallbackHandlerDeployments, getSafeMigrationDeployment } from '@safe-global/safe-deployments'
 import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
 import { type MetaTransactionData, OperationType, type SafeVersion } from '@safe-global/types-kit'
-import type { ChainInfo, TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import { LATEST_SAFE_VERSION, SAFE_TO_L2_MIGRATION_VERSION } from '@safe-global/utils/config/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 export const createUpdateMigration = (
-  chain: ChainInfo,
+  chain: Chain,
   safeVersion: string,
   fallbackHandler?: string,
 ): MetaTransactionData => {
@@ -51,7 +52,7 @@ export const createUpdateMigration = (
   return tx
 }
 
-export const createMigrateToL2 = (chain: ChainInfo) => {
+export const createMigrateToL2 = (chain: Chain) => {
   const deployment = getSafeMigrationDeployment({
     version: SAFE_TO_L2_MIGRATION_VERSION, // This is the only version that has this contract deployed
     released: true,

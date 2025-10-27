@@ -1,4 +1,4 @@
-import { type ChainInfo, RPC_AUTHENTICATION, type RpcUri } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain, type RpcUri } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { JsonRpcProvider, BrowserProvider, type Eip1193Provider } from 'ethers'
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { INFURA_TOKEN, SAFE_APPS_INFURA_TOKEN } from '@safe-global/utils/config/constants'
@@ -13,7 +13,7 @@ const BATCH_MAX_COUNT = 3
 
 // RPC helpers
 const formatRpcServiceUrl = ({ authentication, value }: RpcUri, token: string): string => {
-  const needsToken = authentication === RPC_AUTHENTICATION.API_KEY_PATH
+  const needsToken = authentication === 'API_KEY_PATH'
 
   if (needsToken && !token) {
     console.warn('Infura token not set in .env')
@@ -27,7 +27,7 @@ export const getRpcServiceUrl = (rpcUri: RpcUri): string => {
   return formatRpcServiceUrl(rpcUri, INFURA_TOKEN)
 }
 
-export const createWeb3ReadOnly = (chain: ChainInfo, customRpc?: string): JsonRpcProvider | undefined => {
+export const createWeb3ReadOnly = (chain: Chain, customRpc?: string): JsonRpcProvider | undefined => {
   const url = customRpc || getRpcServiceUrl(chain.rpcUri)
   if (!url) return
   return new JsonRpcProvider(url, Number(chain.chainId), {
@@ -40,7 +40,7 @@ export const createWeb3 = (walletProvider: Eip1193Provider): BrowserProvider => 
   return new BrowserProvider(walletProvider)
 }
 
-export const createSafeAppsWeb3Provider = (chain: ChainInfo, customRpc?: string): JsonRpcProvider | undefined => {
+export const createSafeAppsWeb3Provider = (chain: Chain, customRpc?: string): JsonRpcProvider | undefined => {
   const url = customRpc || formatRpcServiceUrl(chain.rpcUri, SAFE_APPS_INFURA_TOKEN)
   if (!url) return
   return new JsonRpcProvider(url, undefined, {

@@ -1,9 +1,9 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useMemo, type ReactElement } from 'react'
 import { Alert, SvgIcon } from '@mui/material'
 import InfoOutlinedIcon from '@/public/images/notifications/info.svg'
 import { useHasUntrustedFallbackHandler } from '@/hooks/useHasUntrustedFallbackHandler'
 import { FallbackHandlerWarning } from '@/components/settings/FallbackHandler'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 
 export const useSetsUntrustedFallbackHandler = (txData: TransactionDetails['txData']): boolean => {
   // multiSend method receives one parameter `transactions`

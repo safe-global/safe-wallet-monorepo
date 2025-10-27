@@ -1,15 +1,16 @@
-import { getTransactionQueue, type TransactionListPage } from '@safe-global/safe-gateway-typescript-sdk'
+import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useAppSelector } from '@/store'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { selectTxQueue, selectQueuedTransactionsByNonce } from '@/store/txQueueSlice'
 import useSafeInfo from './useSafeInfo'
-import { isTransactionListItem } from '@/utils/transaction-guards'
+import { isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { useRecoveryQueue } from '../features/recovery/hooks/useRecoveryQueue'
+import { getTransactionQueue } from '@/services/transactions'
 
 const useTxQueue = (
   pageUrl?: string,
 ): {
-  page?: TransactionListPage
+  page?: QueuedItemPage
   error?: string
   loading: boolean
 } => {
@@ -17,7 +18,7 @@ const useTxQueue = (
   const { chainId } = safe
 
   // If pageUrl is passed, load a new queue page from the API
-  const [page, error, loading] = useAsync<TransactionListPage>(() => {
+  const [page, error, loading] = useAsync<QueuedItemPage>(() => {
     if (!pageUrl || !safeLoaded) return
     return getTransactionQueue(chainId, safeAddress, undefined, pageUrl)
   }, [chainId, safeAddress, safeLoaded, pageUrl])
@@ -42,7 +43,7 @@ const useTxQueue = (
 // Get the size of the queue as a string with an optional '+' if there are more pages
 export const useQueuedTxsLength = (): string => {
   const queue = useAppSelector(selectTxQueue)
-  const { length } = queue.data?.results.filter(isTransactionListItem) ?? []
+  const { length } = (queue.data?.results as Array<any>)?.filter(isTransactionQueuedItem) ?? []
   const recoveryQueueSize = useRecoveryQueue().length
   const totalSize = length + recoveryQueueSize
   if (totalSize === 0) return ''

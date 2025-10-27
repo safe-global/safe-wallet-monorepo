@@ -3,7 +3,11 @@ import { YStack } from 'tamagui'
 import { TransactionHeader } from '../../TransactionHeader'
 import { ListTable } from '../../ListTable'
 import { formatContractItems } from './utils'
-import { CustomTransactionInfo, MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import {
+  CustomTransactionInfo,
+  MultiSendTransactionInfo,
+  MultisigExecutionDetails,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { RootState } from '@/src/store'
 import { selectChainById } from '@/src/store/chains'
@@ -11,9 +15,10 @@ import { useAppSelector } from '@/src/store/hooks'
 import { ParametersButton } from '@/src/components/ParametersButton'
 import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
 import { ActionsRow } from '@/src/components/ActionsRow'
+import { isMultiSendTxInfo } from '@/src/utils/transaction-guards'
 
 interface ContractProps {
-  txInfo: CustomTransactionInfo
+  txInfo: CustomTransactionInfo | MultiSendTransactionInfo
   executionInfo: MultisigExecutionDetails
   txId: string
 }
@@ -40,7 +45,7 @@ export function Contract({ txInfo, executionInfo, txId }: ContractProps) {
         <ParametersButton txId={txId} />
       </ListTable>
 
-      <ActionsRow txId={txId} actionCount={txInfo.actionCount} />
+      <ActionsRow txId={txId} actionCount={isMultiSendTxInfo(txInfo) ? txInfo.actionCount : null} />
     </YStack>
   )
 }

@@ -8,6 +8,8 @@ import {
   VaultRedeemTransactionInfo,
   NativeStakingDepositTransactionInfo,
   NativeStakingValidatorsExitTransactionInfo,
+  NativeStakingWithdrawTransactionInfo,
+  MultiSendTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { HistoryTokenTransfer } from '../history-views/HistoryTokenTransfer'
@@ -19,6 +21,7 @@ import { HistoryVaultDeposit } from '../history-views/HistoryVaultDeposit'
 import { HistoryVaultRedeem } from '../history-views/HistoryVaultRedeem'
 import { HistoryStakeDeposit } from '../history-views/HistoryStakeDeposit'
 import { HistoryStakeWithdrawRequest } from '../history-views/HistoryStakeWithdrawRequest'
+import { HistorySwapSigner } from '../history-views/HistorySwapSigner'
 import { ETxType } from '@/src/types/txType'
 import { getTransactionType } from '@/src/utils/transactions'
 import { HistoryGenericView } from '@/src/features/HistoryTransactionDetails/components/history-views/HistoryGenericView'
@@ -26,6 +29,8 @@ import { HistoryContract } from '@/src/features/HistoryTransactionDetails/compon
 import { NormalizedSettingsChangeTransaction } from '@/src/features/ConfirmTx/components/ConfirmationView/types'
 import { CancelTx } from '@/src/features/HistoryTransactionDetails/components/history-views/CancelTx'
 import { CustomTransactionInfo, MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { HistoryStakeWithdraw } from '../history-views/HistoryStakeWithdraw'
+import { SettingsChangeSwapOwner } from '@/src/utils/transaction-guards'
 
 interface HistoryTransactionViewProps {
   txDetails: TransactionDetails
@@ -89,8 +94,7 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
       return (
         <HistoryContract
           txId={txDetails.txId}
-          txInfo={txDetails.txInfo as CustomTransactionInfo}
-          _executionInfo={txDetails.detailedExecutionInfo as MultisigExecutionDetails}
+          txInfo={txDetails.txInfo as CustomTransactionInfo | MultiSendTransactionInfo}
         />
       )
 
@@ -111,12 +115,24 @@ export function HistoryTransactionView({ txDetails }: HistoryTransactionViewProp
           txData={txDetails.txData as TransactionData}
         />
       )
+    case ETxType.STAKE_EXIT: {
+      return (
+        <HistoryStakeWithdraw
+          txId={txDetails.txId}
+          txInfo={txDetails.txInfo as NativeStakingWithdrawTransactionInfo}
+          txData={txDetails.txData as TransactionData}
+        />
+      )
+    }
 
     case ETxType.VAULT_DEPOSIT:
       return <HistoryVaultDeposit txId={txDetails.txId} txInfo={txDetails.txInfo as VaultDepositTransactionInfo} />
 
     case ETxType.VAULT_REDEEM:
       return <HistoryVaultRedeem txId={txDetails.txId} txInfo={txDetails.txInfo as VaultRedeemTransactionInfo} />
+
+    case ETxType.SWAP_OWNER:
+      return <HistorySwapSigner txId={txDetails.txId} txInfo={txDetails.txInfo as SettingsChangeSwapOwner} />
 
     // For all other transaction types, use a generic view that can adapt
     default:

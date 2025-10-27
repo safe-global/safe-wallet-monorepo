@@ -10,13 +10,51 @@ import {
   getCreateCallDeployment,
 } from '@safe-global/safe-deployments'
 import type { SingletonDeployment, DeploymentFilter, SingletonDeploymentV2 } from '@safe-global/safe-deployments'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { _SAFE_L2_DEPLOYMENTS } from '@safe-global/safe-deployments/dist/deployments'
+import type { SingletonDeploymentJSON } from '@safe-global/safe-deployments/dist/types'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type SafeVersion } from '@safe-global/types-kit'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 const toNetworkAddressList = (addresses: string | string[]) => (Array.isArray(addresses) ? addresses : [addresses])
+
+type DeploymentRecord = Record<string, { address: string; codeHash: string }>
+
+const SAFE_L2_CODE_HASHES = new Set<string>(
+  (_SAFE_L2_DEPLOYMENTS as SingletonDeploymentJSON[]).flatMap((deployment) =>
+    Object.values(deployment.deployments as DeploymentRecord).map(({ codeHash }) => codeHash.toLowerCase()),
+  ),
+)
+
+export const isL2MasterCopyCodeHash = (codeHash: string | undefined): boolean => {
+  if (!codeHash) {
+    return false
+  }
+
+  return SAFE_L2_CODE_HASHES.has(codeHash.toLowerCase())
+}
+
+export const getL2MasterCopyVersionByCodeHash = (codeHash: string | undefined): string | undefined => {
+  if (!codeHash) {
+    return
+  }
+
+  const normalizedCodeHash = codeHash.toLowerCase()
+
+  const matchingDeployment = (_SAFE_L2_DEPLOYMENTS as SingletonDeploymentJSON[]).find((deployment) =>
+    Object.values(deployment.deployments as DeploymentRecord).some(
+      ({ codeHash }) => codeHash.toLowerCase() === normalizedCodeHash,
+    ),
+  )
+
+  if (!matchingDeployment) {
+    return
+  }
+
+  return `${matchingDeployment.version}+L2`
+}
 
 export const hasCanonicalDeployment = (deployment: SingletonDeploymentV2 | undefined, chainId: string) => {
   const canonicalAddress = deployment?.deployments.canonical?.address
@@ -75,7 +113,7 @@ export const hasMatchingDeployment = (
 
 export const _tryDeploymentVersions = (
   getDeployment: (filter?: DeploymentFilter) => SingletonDeployment | undefined,
-  network: ChainInfo,
+  network: Chain,
   version: SafeState['version'],
 ): SingletonDeployment | undefined => {
   // Unsupported Safe version
@@ -99,7 +137,7 @@ export const _isLegacy = (safeVersion: SafeState['version']): boolean => {
   return !!safeVersion && semverSatisfies(safeVersion, LEGACY_VERSIONS)
 }
 
-export const _isL2 = (chain: ChainInfo, safeVersion: SafeState['version']): boolean => {
+export const _isL2 = (chain: Chain, safeVersion: SafeState['version']): boolean => {
   const L2_VERSIONS = '>=1.3.0'
 
   // Unsupported safe version
@@ -112,7 +150,7 @@ export const _isL2 = (chain: ChainInfo, safeVersion: SafeState['version']): bool
 }
 
 export const getSafeContractDeployment = (
-  chain: ChainInfo,
+  chain: Chain,
   safeVersion: SafeState['version'],
 ): SingletonDeployment | undefined => {
   // Check if prior to 1.0.0 to keep minimum compatibility
@@ -125,26 +163,26 @@ export const getSafeContractDeployment = (
   return _tryDeploymentVersions(getDeployment, chain, safeVersion)
 }
 
-export const getMultiSendCallOnlyContractDeployment = (chain: ChainInfo, safeVersion: SafeState['version']) => {
+export const getMultiSendCallOnlyContractDeployment = (chain: Chain, safeVersion: SafeState['version']) => {
   return _tryDeploymentVersions(getMultiSendCallOnlyDeployment, chain, safeVersion)
 }
 
-export const getMultiSendContractDeployment = (chain: ChainInfo, safeVersion: SafeState['version']) => {
+export const getMultiSendContractDeployment = (chain: Chain, safeVersion: SafeState['version']) => {
   return _tryDeploymentVersions(getMultiSendDeployment, chain, safeVersion)
 }
 
-export const getFallbackHandlerContractDeployment = (chain: ChainInfo, safeVersion: SafeState['version']) => {
+export const getFallbackHandlerContractDeployment = (chain: Chain, safeVersion: SafeState['version']) => {
   return _tryDeploymentVersions(getFallbackHandlerDeployment, chain, safeVersion)
 }
 
-export const getProxyFactoryContractDeployment = (chain: ChainInfo, safeVersion: SafeState['version']) => {
+export const getProxyFactoryContractDeployment = (chain: Chain, safeVersion: SafeState['version']) => {
   return _tryDeploymentVersions(getProxyFactoryDeployment, chain, safeVersion)
 }
 
-export const getSignMessageLibContractDeployment = (chain: ChainInfo, safeVersion: SafeState['version']) => {
+export const getSignMessageLibContractDeployment = (chain: Chain, safeVersion: SafeState['version']) => {
   return _tryDeploymentVersions(getSignMessageLibDeployment, chain, safeVersion)
 }
 
-export const getCreateCallContractDeployment = (chain: ChainInfo, safeVersion: SafeState['version']) => {
+export const getCreateCallContractDeployment = (chain: Chain, safeVersion: SafeState['version']) => {
   return _tryDeploymentVersions(getCreateCallDeployment, chain, safeVersion)
 }
