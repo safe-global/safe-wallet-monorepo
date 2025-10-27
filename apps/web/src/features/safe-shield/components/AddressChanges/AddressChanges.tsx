@@ -26,11 +26,11 @@ export const AddressChanges = ({ result }: AddressChangesProps) => {
     <Box
       padding="8px"
       bgcolor="background.paper"
+      borderRadius="4px"
       gap={1}
       display="flex"
       key={`${item.value}-${index}`}
       flexDirection="column"
-      borderRadius="4px"
       overflow="hidden"
     >
       <Typography letterSpacing="1px" fontSize="12px" color="text.secondary">
