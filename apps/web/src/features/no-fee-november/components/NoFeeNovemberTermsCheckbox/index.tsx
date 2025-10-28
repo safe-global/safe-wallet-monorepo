@@ -22,7 +22,12 @@ const NoFeeNovemberTermsCheckbox = ({ onAcceptanceChange }: NoFeeNovemberTermsCh
         label={
           <Typography className={css.label}>
             I have read and accept the{' '}
-            <Link href="https://help.safe.global/en/" target="_blank" rel="noopener noreferrer" className={css.link}>
+            <Link
+              href="https://help.safe.global/en/articles/456677-terms-of-no-fee-november"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={css.link}
+            >
               Terms and Conditions
             </Link>{' '}
             of the Safe Ecosystem Foundation No-Fee November sponsorship program.
