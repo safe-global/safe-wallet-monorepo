@@ -29,6 +29,12 @@
   background-color: var(--color-static-main);
 }
 
+.actionButton:disabled {
+  background-color: var(--color-static-main);
+  opacity: 0.5;
+  color: var(--color-text-disabled);
+}
+
 /* Skeleton loading states - matching original inline styles */
 .skeletonAvatar {
   width: 76px;

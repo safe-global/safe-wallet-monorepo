@@ -16,7 +16,6 @@ import useWalletCanRelay from '@/hooks/useWalletCanRelay'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
 import useGasTooHigh from '@/features/no-fee-november/hooks/useGasTooHigh'
-import NoFeeNovemberTermsCheckbox from '@/features/no-fee-november/components/NoFeeNovemberTermsCheckbox'
 import { hasRemainingRelays } from '@/utils/relaying'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
@@ -85,9 +84,6 @@ export const ExecuteForm = ({
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
 
-  // Terms acceptance state for No-Fee November
-  const [termsAccepted, setTermsAccepted] = useState(false)
-
   // No-fee November REPLACES relay when eligible AND not blocked AND gas is not too high AND has remaining
   const canRelay = !isNoFeeNovember && walletCanRelay && hasRemainingRelays(relays[0])
   const canNoFeeNovember = isNoFeeNovember && !blockedAddress && !gasTooHigh && remaining && remaining > 0
@@ -100,11 +96,10 @@ export const ExecuteForm = ({
     }
   }, [gasTooHigh, isLimitReached])
 
-  // Reset terms acceptance when execution method changes
+  // Handle execution method changes
   const handleExecutionMethodChange = (method: ExecutionMethod | ((prev: ExecutionMethod) => ExecutionMethod)) => {
     const newMethod = typeof method === 'function' ? method(executionMethod) : method
     setExecutionMethod(newMethod)
-    setTermsAccepted(false) // Reset terms acceptance when switching methods
   }
 
   // Show execution selector when either no-fee november OR relay is available
@@ -180,8 +175,7 @@ export const ExecuteForm = ({
     disableSubmit ||
     isExecutionLoop ||
     cannotPropose ||
-    (needsRiskConfirmation && !isRiskConfirmed) ||
-    (willNoFeeNovember && !termsAccepted)
+    (needsRiskConfirmation && !isRiskConfirmed)
 
   return (
     <>
@@ -214,9 +208,6 @@ export const ExecuteForm = ({
                 }
                 gasTooHigh={gasTooHigh}
               />
-
-              {/* Terms checkbox - only show when No-Fee November is selected */}
-              {willNoFeeNovember && <NoFeeNovemberTermsCheckbox onAcceptanceChange={setTermsAccepted} />}
             </div>
           )}
         </div>

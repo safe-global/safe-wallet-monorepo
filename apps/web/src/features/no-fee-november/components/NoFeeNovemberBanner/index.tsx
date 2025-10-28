@@ -36,6 +36,8 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: () => void }) => {
             SAFE holders enjoy gasless transactions on Mainnet this November.{' '}
             <Link
               href="https://help.safe.global/en/articles/456540-no-fee-november"
+              target="_blank"
+              rel="noopener noreferrer"
               style={{ textDecoration: 'underline', fontWeight: 'bold' }}
             >
               Learn more

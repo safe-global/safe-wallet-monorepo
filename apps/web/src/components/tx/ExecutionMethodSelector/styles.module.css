@@ -39,15 +39,15 @@
   font-weight: 400;
   text-transform: none;
   letter-spacing: 1px;
-  background-color: #dddee0;
-  color: #121312;
+  background-color: var(--color-border-main);
+  color: var(--color-text-primary);
   height: 20px;
   border-radius: 6px;
   padding: 2px 8px;
 }
 
 .notAvailableTitle {
-  color: #a1a3a7;
+  color: var(--color-text-secondary);
   font-family: 'DM Sans', sans-serif;
   font-weight: 700;
   font-size: 16px;
@@ -63,7 +63,7 @@
 }
 
 .descriptionText {
-  color: #a1a3a7;
+  color: var(--color-text-secondary);
   font-size: 14px;
   line-height: 20px;
   font-family: 'DM Sans', sans-serif;
@@ -75,7 +75,7 @@
   font-weight: 700;
   font-size: 16px;
   line-height: 22px;
-  color: #121312;
+  color: var(--color-text-primary);
   letter-spacing: 0.15px;
 }
 
@@ -94,7 +94,7 @@
 
 .noFeeTag {
   background: linear-gradient(90deg, #b0ffc9 0%, #d7f6ff 99.5%);
-  color: #121312;
+  color: var(--color-static-main);
   padding: 2px 8px;
   border-radius: 4px;
   font-family: 'DM Sans', sans-serif;
@@ -118,7 +118,7 @@
   font-size: 14px;
   font-weight: 400;
   line-height: 20px;
-  color: #121312;
+  color: var(--color-text-primary);
   letter-spacing: 0.17px;
   padding: 8px 12px;
   background-color: var(--color-background-main);
@@ -134,7 +134,7 @@
   font-weight: 700;
   font-size: 14px;
   line-height: 20px;
-  color: #121312;
+  color: var(--color-text-primary);
 }
 
 .gasBannerWrapper {
