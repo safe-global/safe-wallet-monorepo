@@ -17,7 +17,9 @@ export class ThreatAnalysisResultBuilder<
       type: ThreatStatus.NO_THREAT,
       title: 'No threat detected',
       description: 'Threat analysis found no issues',
-    }
+      before: undefined,
+      after: undefined,
+    } as ThreatAnalysisResult
   }
 
   severity(severity: Severity): this {
