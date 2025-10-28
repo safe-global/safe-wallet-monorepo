@@ -9,7 +9,7 @@ import {
   getSimulationStatus,
   getSimulationLink,
 } from '../utils'
-import { ImplementationVersionState, type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import type { SafeTransaction, SafeSignature } from '@safe-global/types-kit'
 import type { SingleTransactionSimulationParams } from '../utils'
 import { faker } from '@faker-js/faker'

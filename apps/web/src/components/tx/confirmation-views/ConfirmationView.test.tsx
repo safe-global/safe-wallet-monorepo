@@ -1,13 +1,9 @@
+import { DetailedExecutionInfoType, SettingsInfoType, TransactionInfoType } from '@safe-global/store/gateway/types'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { safeTxBuilder } from '@/tests/builders/safeTx'
 import ConfirmationView from './index'
 import { render } from '@/tests/test-utils'
 import { createMockTransactionDetails } from '@/tests/transactions'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import {
-  DetailedExecutionInfoType,
-  SettingsInfoType,
-  TransactionInfoType,
-} from '@safe-global/safe-gateway-typescript-sdk'
 
 const txDetails = createMockTransactionDetails({
   txInfo: {

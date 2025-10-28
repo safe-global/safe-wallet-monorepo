@@ -1,4 +1,3 @@
-import { skipToken } from '@reduxjs/toolkit/query'
 import { useCallback, useContext, useEffect, useMemo } from 'react'
 import type { PropsWithChildren, ReactElement } from 'react'
 import type { MetaTransactionData, SafeTransaction } from '@safe-global/types-kit'
@@ -9,7 +8,7 @@ import useBalances from '@/hooks/useBalances'
 import { useCurrentChain } from '@/hooks/useChains'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { createNewUndeployedSafeWithoutSalt, encodeSafeCreationTx } from '@/components/new-safe/create/logic'
-import { useGetOwnedSafesQuery } from '@/store/slices'
+import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
@@ -32,10 +31,13 @@ export function ReviewNestedSafe({
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const { balances } = useBalances()
   const provider = useWeb3ReadOnly()
-  const { data: nestedSafes } = useGetOwnedSafesQuery(
-    safeLoaded ? { chainId: safe.chainId, ownerAddress: safeAddress } : skipToken,
+  const { currentData: ownedSafes } = useOwnersGetAllSafesByOwnerV2Query(
+    { ownerAddress: safeAddress },
+    { skip: !safeLoaded },
   )
   const version = getLatestSafeVersion(chain)
+
+  const nestedSafes = ownedSafes?.[safe.chainId]
 
   const safeAccountConfig = useMemo(() => {
     if (!chain || !nestedSafes) {

@@ -1,7 +1,7 @@
+import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import React, { useContext, useMemo, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { Divider, ListItemButton } from '@mui/material'
-import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
 
 import {
   SidebarList,

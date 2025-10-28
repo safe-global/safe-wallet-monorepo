@@ -1,6 +1,7 @@
+import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
+import type { AnyTransactionItem } from '@/utils/tx-list'
 import type { ReactElement } from 'react'
 import { Box, Paper, SvgIcon, Typography } from '@mui/material'
-import type { Order, Transaction } from '@safe-global/safe-gateway-typescript-sdk'
 import { isMultisigExecutionInfo, isSwapTransferOrderTxInfo } from '@/utils/transaction-guards'
 import ExpandableTransactionItem from '@/components/transactions/TxListItem/ExpandableTransactionItem'
 import BatchIcon from '@/public/images/common/batch.svg'
@@ -17,7 +18,7 @@ const orderClassTitles: Record<string, string> = {
   market: 'Swap order settlement',
 }
 
-const getSettlementOrderTitle = (order: Order): string => {
+const getSettlementOrderTitle = (order: OrderTransactionInfo): string => {
   const orderClass = getOrderClass(order)
   return orderClassTitles[orderClass] || orderClassTitles['market']
 }
@@ -26,7 +27,7 @@ const GroupedTxListItems = ({
   groupedListItems,
   transactionHash,
 }: {
-  groupedListItems: Transaction[]
+  groupedListItems: AnyTransactionItem[]
   transactionHash: string
 }): ReactElement | null => {
   const chain = useCurrentChain()
@@ -35,7 +36,7 @@ const GroupedTxListItems = ({
   let title = 'Bulk transactions'
   const isSwapTransfer = isSwapTransferOrderTxInfo(groupedListItems[0].transaction.txInfo)
   if (isSwapTransfer) {
-    title = getSettlementOrderTitle(groupedListItems[0].transaction.txInfo as Order)
+    title = getSettlementOrderTitle(groupedListItems[0].transaction.txInfo as OrderTransactionInfo)
   }
   return (
     <Paper data-testid="grouped-items" className={css.container}>

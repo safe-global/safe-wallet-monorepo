@@ -11,7 +11,6 @@ import { TransactionChecksView } from './components/TransactionChecksView'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveChain } from '@/src/store/chains'
 import { isTxSimulationEnabled } from '@safe-global/utils/components/tx/security/tenderly/utils'
-import { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { useTransactionSigner } from '@/src/features/ConfirmTx/hooks/useTransactionSigner'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/src/hooks/useHasFeature'
@@ -46,7 +45,7 @@ export const TransactionChecksContainer = () => {
         [
           simulationEnabled &&
             simulateTransaction({
-              safe: safeInfo.safe as SafeInfo,
+              safe: safeInfo.safe,
               executionOwner,
               transactions: safeTx,
             }),

@@ -1,5 +1,7 @@
-import { useCreateSubmissionMutation, useGetSubmissionQuery } from '@/store/api/gateway'
-import { skipToken } from '@reduxjs/toolkit/query'
+import {
+  useTargetedMessagingGetSubmissionV1Query,
+  useTargetedMessagingCreateSubmissionV1Mutation,
+} from '@safe-global/store/gateway/AUTO_GENERATED/targeted-messages'
 import { useEffect, type ReactElement } from 'react'
 import { Avatar, Box, Button, IconButton, Link, Paper, Stack, ThemeProvider, Typography } from '@mui/material'
 import { Close } from '@mui/icons-material'
@@ -24,16 +26,17 @@ const OutreachPopup = (): ReactElement | null => {
   const currentChainId = useChainId()
   const safeAddress = useSafeAddress()
   const wallet = useWallet()
-  const [createSubmission] = useCreateSubmissionMutation()
-  const { data: submission } = useGetSubmissionQuery(
-    !wallet || !safeAddress
-      ? skipToken
-      : {
-          outreachId: ACTIVE_OUTREACH.id,
-          chainId: currentChainId,
-          safeAddress,
-          signerAddress: wallet?.address,
-        },
+  const [createSubmission] = useTargetedMessagingCreateSubmissionV1Mutation()
+  const { data: submission } = useTargetedMessagingGetSubmissionV1Query(
+    {
+      outreachId: ACTIVE_OUTREACH.id,
+      chainId: currentChainId,
+      safeAddress,
+      signerAddress: wallet?.address || '',
+    },
+    {
+      skip: !wallet?.address || !safeAddress,
+    },
   )
 
   const outreachUrl = `${ACTIVE_OUTREACH.url}#safe_address=${safeAddress}&signer_address=${wallet?.address}&chain_id=${currentChainId}`
@@ -72,6 +75,7 @@ const OutreachPopup = (): ReactElement | null => {
         chainId: currentChainId,
         safeAddress,
         signerAddress: wallet.address,
+        createSubmissionDto: { completed: true },
       })
     }
     dispatch(closeOutreachBanner())

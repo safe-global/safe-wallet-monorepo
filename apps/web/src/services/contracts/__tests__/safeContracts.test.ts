@@ -1,4 +1,4 @@
-import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
+import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { _getMinimumMultiSendCallOnlyVersion } from '../safeContracts'
 import {
   isValidMasterCopy,

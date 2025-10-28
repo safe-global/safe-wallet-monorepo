@@ -1,3 +1,5 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { TransactionStatus } from '@safe-global/store/gateway/types'
 import SettingsChangeTxInfo from '@/components/transactions/TxDetails/TxData/SettingsChange'
 import {
   isStakingTxExitInfo,
@@ -23,7 +25,6 @@ import {
   type SpendingLimitMethods,
 } from '@/utils/transaction-guards'
 import { SpendingLimits } from '@/components/transactions/TxDetails/TxData/SpendingLimits'
-import { TransactionStatus, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import type { PropsWithChildren, ReactElement } from 'react'
 import RejectionTxInfo from '@/components/transactions/TxDetails/TxData/Rejection'
 import TransferTxInfo from '@/components/transactions/TxDetails/TxData/Transfer'

@@ -4,7 +4,7 @@ import { selectRpc, selectUndeployedSafes } from '@/store/slices'
 import { type UndeployedSafe, type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { Safe_proxy_factory__factory } from '@safe-global/utils/types/contracts'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { getCreationTransaction } from '@safe-global/safe-client-gateway-sdk'
+import { getCreationTransaction } from '@/utils/transactions'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useAppSelector } from '@/store'
 import { isPredictedSafeProps } from '@/features/counterfactual/utils'
@@ -51,14 +51,7 @@ const getCreationDataForChain = async (
     return undeployedCreationData
   }
 
-  const creation = await getCreationTransaction({
-    params: {
-      path: {
-        chainId: chain.chainId,
-        safeAddress,
-      },
-    },
-  })
+  const creation = await getCreationTransaction(chain.chainId, safeAddress)
 
   if (!creation || !creation.masterCopy || !creation.setupData || creation.setupData === '0x') {
     throw new Error(SAFE_CREATION_DATA_ERRORS.NO_CREATION_DATA)

@@ -1,6 +1,6 @@
+import { TokenType } from '@safe-global/store/gateway/types'
 import { act, fireEvent, render, waitFor } from '@/tests/test-utils'
 import { toBeHex } from 'ethers'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import { ApprovalEditorForm } from '@/components/tx/ApprovalEditor/ApprovalEditorForm'
 import { getAllByTestId, getAllByTitle } from '@testing-library/dom'
 import type { ApprovalInfo } from './hooks/useApprovalInfos'

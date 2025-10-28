@@ -1,6 +1,6 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import { type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { createExistingTx } from '@/services/tx/tx-sender'
 import useChainId from '@/hooks/useChainId'

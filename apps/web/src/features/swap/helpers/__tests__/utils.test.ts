@@ -1,3 +1,5 @@
+import type { SwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { DataDecoded, TwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import {
   getExecutionPrice,
   getFilledPercentage,
@@ -8,8 +10,6 @@ import {
   isSettingTwapFallbackHandler,
   TWAP_FALLBACK_HANDLER,
 } from '../utils'
-import type { DataDecoded, TwapOrder } from '@safe-global/safe-gateway-typescript-sdk'
-import { type SwapOrder } from '@safe-global/safe-gateway-typescript-sdk'
 
 describe('Swap helpers', () => {
   test('sellAmount bigger than buyAmount', () => {
@@ -20,7 +20,7 @@ describe('Swap helpers', () => {
       sellToken: { decimals: 18 },
       sellAmount: '100000000000000000000',
       buyAmount: '50000000000000000000',
-    } as unknown as SwapOrder
+    } as unknown as SwapOrderTransactionInfo
 
     const executionPrice = getExecutionPrice(mockOrder)
     const limitPrice = getLimitPrice(mockOrder)
@@ -39,7 +39,7 @@ describe('Swap helpers', () => {
       sellToken: { decimals: 18 },
       sellAmount: '50000000000000000000',
       buyAmount: '100000000000000000000',
-    } as unknown as SwapOrder
+    } as unknown as SwapOrderTransactionInfo
 
     const executionPrice = getExecutionPrice(mockOrder)
     const limitPrice = getLimitPrice(mockOrder)
@@ -58,7 +58,7 @@ describe('Swap helpers', () => {
       sellToken: { decimals: 8 },
       sellAmount: '10000000000',
       buyAmount: '50000000000000000000',
-    } as unknown as SwapOrder
+    } as unknown as SwapOrderTransactionInfo
 
     const executionPrice = getExecutionPrice(mockOrder)
     const limitPrice = getLimitPrice(mockOrder)
@@ -77,7 +77,7 @@ describe('Swap helpers', () => {
       sellToken: { decimals: 18 },
       sellAmount: '100000000000000000000',
       buyAmount: '5000000000',
-    } as unknown as SwapOrder
+    } as unknown as SwapOrderTransactionInfo
 
     const executionPrice = getExecutionPrice(mockOrder)
     const limitPrice = getLimitPrice(mockOrder)
@@ -96,7 +96,7 @@ describe('Swap helpers', () => {
       sellToken: { decimals: 18 },
       sellAmount: '100000000000000000000',
       buyAmount: '5000000000',
-    } as unknown as TwapOrder
+    } as unknown as TwapOrderTransactionInfo
 
     const executionPrice = getExecutionPrice(mockOrder)
     const limitPrice = getLimitPrice(mockOrder)
@@ -116,7 +116,7 @@ describe('Swap helpers', () => {
         sellToken: { decimals: 18 },
         sellAmount: '100000000000000000000',
         buyAmount: '5000000000',
-      } as unknown as SwapOrder
+      } as unknown as SwapOrderTransactionInfo
 
       const result = getFilledPercentage(mockOrder)
 
@@ -132,7 +132,7 @@ describe('Swap helpers', () => {
         sellAmount: '100000000000000000000',
         buyAmount: '5000000000',
         kind: 'buy',
-      } as unknown as SwapOrder
+      } as unknown as SwapOrderTransactionInfo
 
       const result = getFilledPercentage(mockOrder)
 
@@ -148,7 +148,7 @@ describe('Swap helpers', () => {
         sellAmount: '100000000000000000000',
         buyAmount: '5000000000',
         kind: 'sell',
-      } as unknown as SwapOrder
+      } as unknown as SwapOrderTransactionInfo
 
       const result = getFilledPercentage(mockOrder)
 
@@ -164,7 +164,7 @@ describe('Swap helpers', () => {
         sellAmount: '100000000000000000000',
         buyAmount: '5000000000',
         kind: 'buy',
-      } as unknown as SwapOrder
+      } as unknown as SwapOrderTransactionInfo
 
       const result = getFilledPercentage(mockOrder)
 
@@ -180,7 +180,7 @@ describe('Swap helpers', () => {
         sellAmount: '15000000000000000000', //15
         buyAmount: '5000000000',
         kind: 'buy',
-      } as unknown as SwapOrder
+      } as unknown as SwapOrderTransactionInfo
 
       const result = getSurplusPrice(mockOrder)
 
@@ -196,7 +196,7 @@ describe('Swap helpers', () => {
         sellAmount: '100000000000000000000',
         buyAmount: '5000000000', //50
         kind: 'sell',
-      } as unknown as SwapOrder
+      } as unknown as SwapOrderTransactionInfo
 
       const result = getSurplusPrice(mockOrder)
 
@@ -212,7 +212,7 @@ describe('Swap helpers', () => {
         executedSellAmount: '50000000000000000000', // 50 tokens
         sellAmount: '100000000000000000000', // 100 tokens
         kind: 'buy',
-      } as unknown as SwapOrder
+      } as unknown as SwapOrderTransactionInfo
 
       const result = isOrderPartiallyFilled(mockOrder)
 
@@ -226,7 +226,7 @@ describe('Swap helpers', () => {
         executedSellAmount: '100000000000000000000', // 100 tokens
         sellAmount: '100000000000000000000', // 100 tokens
         kind: 'buy',
-      } as unknown as SwapOrder
+      } as unknown as SwapOrderTransactionInfo
 
       const result = isOrderPartiallyFilled(mockOrder)
 
@@ -246,7 +246,7 @@ describe('Swap helpers', () => {
         executedBuyAmount: '50000000000000000000', // 50 tokens
         buyAmount: '100000000000000000000', // 100 tokens
         kind: 'sell',
-      } as unknown as SwapOrder
+      } as unknown as SwapOrderTransactionInfo
 
       const result = isOrderPartiallyFilled(mockOrder)
 
@@ -260,7 +260,7 @@ describe('Swap helpers', () => {
         executedBuyAmount: '100000000000000000000', // 100 tokens
         buyAmount: '100000000000000000000', // 100 tokens
         kind: 'sell',
-      } as unknown as SwapOrder
+      } as unknown as SwapOrderTransactionInfo
 
       const result = isOrderPartiallyFilled(mockOrder)
 
@@ -284,7 +284,7 @@ describe('Swap helpers', () => {
         kind: 'sell',
         buyToken: { decimals: 18 },
         sellToken: { decimals: 18 },
-      } as unknown as SwapOrder
+      } as unknown as SwapOrderTransactionInfo
 
       const result = getPartiallyFilledSurplus(mockOrder)
 
@@ -299,7 +299,7 @@ describe('Swap helpers', () => {
         kind: 'buy',
         buyToken: { decimals: 18 },
         sellToken: { decimals: 18 },
-      } as unknown as SwapOrder
+      } as unknown as SwapOrderTransactionInfo
 
       const result = getPartiallyFilledSurplus(mockOrder)
 
@@ -314,7 +314,7 @@ describe('Swap helpers', () => {
         kind: 'sell',
         buyToken: { decimals: 18 },
         sellToken: { decimals: 18 },
-      } as unknown as SwapOrder
+      } as unknown as SwapOrderTransactionInfo
 
       const result = getPartiallyFilledSurplus(mockOrder)
       expect(result).toEqual(5)
@@ -328,7 +328,7 @@ describe('Swap helpers', () => {
         kind: 'buy',
         buyToken: { decimals: 18 },
         sellToken: { decimals: 18 },
-      } as unknown as SwapOrder
+      } as unknown as SwapOrderTransactionInfo
 
       const result = getPartiallyFilledSurplus(mockOrder)
 

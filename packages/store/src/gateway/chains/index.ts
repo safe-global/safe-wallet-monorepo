@@ -1,7 +1,7 @@
 import { type Chain as ChainInfo } from '../AUTO_GENERATED/chains'
 import { createEntityAdapter, EntityState } from '@reduxjs/toolkit'
 import { cgwClient, getBaseUrl } from '../cgwClient'
-import { QueryReturnValue, FetchBaseQueryError, FetchBaseQueryMeta } from '@reduxjs/toolkit/query'
+import type { QueryReturnValue, FetchBaseQueryMeta, FetchBaseQueryError } from '@reduxjs/toolkit/query'
 
 export const chainsAdapter = createEntityAdapter<ChainInfo, string>({ selectId: (chain: ChainInfo) => chain.chainId })
 export const initialState = chainsAdapter.getInitialState()
@@ -28,12 +28,8 @@ const getChainsConfigs = async (
 const getChains = async (): Promise<
   QueryReturnValue<EntityState<ChainInfo, string>, FetchBaseQueryError, FetchBaseQueryMeta>
 > => {
-  try {
-    const data = await getChainsConfigs()
-    return { data }
-  } catch (error) {
-    return { error: error as FetchBaseQueryError }
-  }
+  const data = await getChainsConfigs()
+  return { data }
 }
 
 export const apiSliceWithChainsConfig = cgwClient.injectEndpoints({

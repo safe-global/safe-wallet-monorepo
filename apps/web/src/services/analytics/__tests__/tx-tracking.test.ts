@@ -1,8 +1,5 @@
-import {
-  SettingsInfoType,
-  type TransactionDetails,
-  TransactionInfoType,
-} from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { SettingsInfoType, TransactionInfoType } from '@safe-global/store/gateway/types'
 import { TransactionTokenType } from '@safe-global/store/gateway/types'
 import { getTransactionTrackingType } from '../tx-tracking'
 import { TX_TYPES } from '../events/transactions'

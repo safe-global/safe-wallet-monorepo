@@ -1,3 +1,4 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -5,7 +6,6 @@ import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { getMultiSendContractDeployment } from '@safe-global/utils/services/contracts/deployments'
 import { createTx } from '@/services/tx/tx-sender/create'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
-import { type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import DecodedData from '../DecodedData'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
@@ -73,7 +73,7 @@ export const MigrationToL2TxData = ({
 
   return (
     <Box>
-      <MigrateToL2Information variant="history" txData={txData} />
+      <MigrateToL2Information variant="history" />
 
       {realSafeTxError ? (
         <ErrorMessage>{realSafeTxError.message}</ErrorMessage>

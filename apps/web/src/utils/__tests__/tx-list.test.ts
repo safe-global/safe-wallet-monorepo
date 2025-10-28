@@ -1,8 +1,8 @@
+import { TransactionInfoType } from '@safe-global/store/gateway/types'
 import { faker } from '@faker-js/faker'
-import { TransactionInfoType } from '@safe-global/safe-gateway-typescript-sdk'
-import type { TransactionListItem } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { groupTxs, groupRecoveryTransactions, _getRecoveryCancellations } from '@/utils/tx-list'
+import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 describe('tx-list', () => {
   describe('groupConflictingTxs', () => {
@@ -25,7 +25,7 @@ describe('tx-list', () => {
         },
       ]
 
-      const result = groupTxs(list as TransactionListItem[])
+      const result = groupTxs(list as QueuedItemPage['results'])
       expect(result).toEqual([
         [
           {
@@ -67,7 +67,7 @@ describe('tx-list', () => {
         },
       ]
 
-      const result = groupTxs(list as TransactionListItem[])
+      const result = groupTxs(list as QueuedItemPage['results'])
       expect(result).toEqual([
         [
           {
@@ -118,7 +118,7 @@ describe('tx-list', () => {
         },
       ]
 
-      const result = groupTxs(list as unknown as TransactionListItem[])
+      const result = groupTxs(list as unknown as QueuedItemPage['results'])
       expect(result).toEqual([
         [
           {
@@ -169,7 +169,7 @@ describe('tx-list', () => {
         },
       ]
 
-      const result = groupTxs(list as unknown as TransactionListItem[])
+      const result = groupTxs(list as unknown as QueuedItemPage['results'])
       expect(result).toEqual(list)
     })
   })

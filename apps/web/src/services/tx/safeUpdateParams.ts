@@ -1,7 +1,7 @@
+import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { SafeContractImplementationType } from '@safe-global/protocol-kit/dist/src/types/contracts'
 import type { MetaTransactionData, SafeVersion } from '@safe-global/types-kit'
 import { OperationType } from '@safe-global/types-kit'
-import type { TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import semverSatisfies from 'semver/functions/satisfies'

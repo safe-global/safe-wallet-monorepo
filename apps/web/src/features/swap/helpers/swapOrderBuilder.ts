@@ -1,13 +1,12 @@
+import type { TransactionInfoType, OrderTransactionInfo } from '@safe-global/store/gateway/types'
+import type {
+  TokenInfo,
+  SwapOrderTransactionInfo,
+  TwapOrderTransactionInfo,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { DurationType, StartTimeValue } from '@safe-global/store/gateway/types'
 import { Builder, type IBuilder } from '@/tests/Builder'
 import { faker } from '@faker-js/faker'
-import type {
-  OrderToken,
-  SwapOrder,
-  TransactionInfoType,
-  TwapOrder,
-  Order,
-} from '@safe-global/safe-gateway-typescript-sdk'
-import { DurationType, StartTimeValue } from '@safe-global/safe-gateway-typescript-sdk'
 
 export function appDataBuilder(
   orderClass: 'limit' | 'market' | 'twap' | 'liquidity' = 'limit',
@@ -34,8 +33,8 @@ export function appDataBuilder(
   })
 }
 
-export function orderTokenBuilder(): IBuilder<OrderToken> {
-  return Builder.new<OrderToken>().with({
+export function orderTokenBuilder(): IBuilder<TokenInfo> {
+  return Builder.new<TokenInfo>().with({
     address: faker.finance.ethereumAddress(),
     decimals: faker.number.int({ max: 18 }),
     logoUri:
@@ -46,10 +45,10 @@ export function orderTokenBuilder(): IBuilder<OrderToken> {
   })
 }
 
-export function swapOrderBuilder(): IBuilder<SwapOrder> {
+export function swapOrderBuilder(): IBuilder<SwapOrderTransactionInfo> {
   const sellToken = orderTokenBuilder().build()
   const executedFee = faker.string.numeric()
-  return Builder.new<SwapOrder>().with({
+  return Builder.new<SwapOrderTransactionInfo>().with({
     type: 'SwapOrder' as TransactionInfoType.SWAP_ORDER,
     uid: faker.string.uuid(),
     status: faker.helpers.arrayElement(['presignaturePending', 'open', 'cancelled', 'fulfilled', 'expired']),
@@ -70,14 +69,14 @@ export function swapOrderBuilder(): IBuilder<SwapOrder> {
   })
 }
 
-export function twapOrderBuilder(): IBuilder<TwapOrder> {
+export function twapOrderBuilder(): IBuilder<TwapOrderTransactionInfo> {
   const sellToken = orderTokenBuilder().build()
   const executedFee = faker.string.numeric()
-  return Builder.new<TwapOrder>().with({
+  return Builder.new<TwapOrderTransactionInfo>().with({
     type: 'TwapOrder' as TransactionInfoType.TWAP_ORDER,
     status: faker.helpers.arrayElement(['presignaturePending', 'open', 'cancelled', 'fulfilled', 'expired']),
     kind: faker.helpers.arrayElement(['buy', 'sell']),
-    orderClass: faker.helpers.arrayElement(['limit', 'market', 'liquidity']),
+    class: faker.helpers.arrayElement(['limit', 'market', 'liquidity']),
     validUntil: faker.date.future().getTime(),
     sellAmount: faker.string.numeric(),
     buyAmount: faker.string.numeric(),
@@ -107,9 +106,9 @@ export function twapOrderBuilder(): IBuilder<TwapOrder> {
 }
 
 // create a builder for SwapOrderConfirmationView
-export function swapOrderConfirmationViewBuilder(): IBuilder<Order> {
+export function swapOrderConfirmationViewBuilder(): IBuilder<OrderTransactionInfo> {
   const ownerAndReceiver = faker.finance.ethereumAddress()
-  return Builder.new<Order>().with({
+  return Builder.new<SwapOrderTransactionInfo>().with({
     type: 'SwapOrder' as TransactionInfoType.SWAP_ORDER,
     uid: faker.string.uuid(),
     kind: faker.helpers.arrayElement(['buy', 'sell']),

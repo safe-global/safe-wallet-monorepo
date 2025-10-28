@@ -1,4 +1,4 @@
-import type { DataDecoded, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import type { DataDecoded, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 import { predictSafeAddress } from '@/features/multichain/utils/utils'
 import useAsync from '@safe-global/utils/hooks/useAsync'
@@ -39,13 +39,25 @@ export function usePredictSafeAddressFromTxDetails(txDetails: TransactionDetails
 
     const isMultiSend = txData?.dataDecoded?.method === 'multiSend'
 
-    const dataDecoded = isMultiSend
-      ? txData?.dataDecoded?.parameters?.[0]?.valueDecoded?.find((tx) => isCreateProxyWithNonce(tx?.dataDecoded))
-          ?.dataDecoded
-      : txData?.dataDecoded
-    const factoryAddress = isMultiSend
-      ? txData?.dataDecoded?.parameters?.[0]?.valueDecoded?.find((tx) => isCreateProxyWithNonce(tx?.dataDecoded))?.to
-      : txData?.to?.value
+    // Extract dataDecoded and factoryAddress
+    let dataDecoded: DataDecoded | undefined
+    let factoryAddress: string | undefined
+
+    if (isMultiSend) {
+      const valueDecoded = txData?.dataDecoded?.parameters?.[0]?.valueDecoded
+      if (Array.isArray(valueDecoded)) {
+        const createProxyTx = valueDecoded.find((tx): tx is typeof tx =>
+          isCreateProxyWithNonce((tx as { dataDecoded?: DataDecoded })?.dataDecoded),
+        )
+        if (createProxyTx) {
+          dataDecoded = (createProxyTx as { dataDecoded?: DataDecoded })?.dataDecoded
+          factoryAddress = (createProxyTx as { to?: string })?.to
+        }
+      }
+    } else {
+      dataDecoded = txData?.dataDecoded ?? undefined
+      factoryAddress = txData?.to?.value
+    }
 
     if (!dataDecoded || !isCreateProxyWithNonce(dataDecoded) || !factoryAddress) {
       return

@@ -1,7 +1,6 @@
 // Be careful what you import here as it will increase the service worker bundle size
 
 import { get as getFromIndexedDb } from 'idb-keyval'
-import { getChainsConfig, setBaseUrl } from '@safe-global/safe-gateway-typescript-sdk'
 import type { MessagePayload } from 'firebase/messaging'
 
 import { AppRoutes } from '@/config/routes' // Has no internal imports
@@ -12,6 +11,7 @@ import {
 } from '@/services/push-notifications/preferences'
 import { FIREBASE_IS_PRODUCTION } from '@/services/push-notifications/firebase'
 import { Notifications } from './notification-mapper'
+import { getChainsConfig, setBaseUrl } from './gateway-utils'
 import type { WebhookEvent } from './webhook-types'
 import type { PushNotificationPreferences, PushNotificationPrefsKey } from '@/services/push-notifications/preferences'
 
@@ -21,6 +21,7 @@ const GATEWAY_URL_STAGING = process.env.NEXT_PUBLIC_GATEWAY_URL_STAGING || 'http
 // localStorage cannot be accessed in service workers so we reference the flag from the environment
 const GATEWAY_URL = FIREBASE_IS_PRODUCTION ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
 
+// Set base URL for direct fetch calls (service workers can't use Redux store)
 setBaseUrl(GATEWAY_URL)
 
 export const shouldShowServiceWorkerPushNotification = async (payload: MessagePayload): Promise<boolean> => {

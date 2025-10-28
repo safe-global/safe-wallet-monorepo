@@ -1,11 +1,10 @@
 import { Tooltip, IconButton, SvgIcon, Badge, Typography } from '@mui/material'
-import { skipToken } from '@reduxjs/toolkit/query'
 import { useState } from 'react'
 import type { ReactElement } from 'react'
 
 import NestedSafesIcon from '@/public/images/sidebar/nested-safes-icon.svg'
 import { NestedSafesPopover } from '@/components/sidebar/NestedSafesPopover'
-import { useGetOwnedSafesQuery } from '@/store/slices'
+import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 
@@ -23,8 +22,11 @@ export function NestedSafesButton({
   const isEnabled = useHasFeature(FEATURES.NESTED_SAFES)
   const { safe } = useSafeInfo()
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
-  const { data } = useGetOwnedSafesQuery(isEnabled && safeAddress ? { chainId, ownerAddress: safeAddress } : skipToken)
-  const nestedSafes = data?.safes ?? []
+  const { currentData: ownedSafes } = useOwnersGetAllSafesByOwnerV2Query(
+    { ownerAddress: safeAddress },
+    { skip: !isEnabled || !safeAddress },
+  )
+  const nestedSafes = ownedSafes?.[chainId] ?? []
 
   if (!isEnabled || !safe.deployed) {
     return null

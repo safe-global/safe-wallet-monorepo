@@ -1,3 +1,4 @@
+import type { TransactionDetails, TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import ProposerForm from '@/components/tx-flow/actions/Propose/ProposerForm'
 import CounterfactualForm from '@/features/counterfactual/CounterfactualForm'
 import { useIsWalletProposer } from '@/hooks/useProposers'
@@ -17,8 +18,7 @@ import {
   useRoles,
 } from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
-import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
+import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { trackTxEvents } from './tracking'
 import SignForm from './SignForm'
@@ -59,7 +59,7 @@ export const SignOrExecuteFormV2 = ({
   const isNewExecutableTx = useImmediatelyExecutable() && isCreation
   const isCorrectNonce = useValidateNonce(safeTx)
 
-  const [trigger] = useLazyGetTransactionDetailsQuery()
+  const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
   const { safe } = useSafeInfo()
   const isSafeOwner = useIsSafeOwner()
   const signer = useSigner()
@@ -86,7 +86,7 @@ export const SignOrExecuteFormV2 = ({
     async (txId: string, isExecuted = false, isRoleExecution = false, isProposerCreation = false) => {
       onSubmit?.(txId, isExecuted)
 
-      const { data: details } = await trigger({ chainId, txId })
+      const { data: details } = await trigger({ chainId, id: txId })
       // Track tx event
       trackTxEvents(
         details,

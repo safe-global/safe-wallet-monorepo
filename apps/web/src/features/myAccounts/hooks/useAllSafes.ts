@@ -1,4 +1,4 @@
-import type { AllOwnedSafes } from '@safe-global/safe-gateway-typescript-sdk'
+import type { AllOwnedSafes } from '@safe-global/store/gateway/types'
 import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
 import type { AddedSafesState } from '@/store/addedSafesSlice'
