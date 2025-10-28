@@ -9,7 +9,6 @@ import { useAlreadySigned, useTxActions } from '@/components/tx/SignOrExecuteFor
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { TxSecurityContext } from '@/components/tx/security/shared/TxSecurityContext'
 import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
@@ -19,6 +18,7 @@ import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import SplitMenuButton from '@/components/common/SplitMenuButton'
 import type { SlotComponentProps, SlotName } from '../../slots'
+import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 
 export const SignForm = ({
   safeTx,
@@ -40,7 +40,7 @@ export const SignForm = ({
   origin?: string
   isOwner: ReturnType<typeof useIsSafeOwner>
   txActions: ReturnType<typeof useTxActions>
-  txSecurity: ReturnType<typeof useTxSecurityContext>
+  txSecurity: ReturnType<typeof useSafeShield>
   safeTx?: SafeTransaction
   tooltip?: string
 }): ReactElement => {
@@ -52,7 +52,7 @@ export const SignForm = ({
   const { setTxFlow } = useContext(TxModalContext)
   const { isSubmitDisabled, isSubmitLoading, setIsSubmitLoading, setSubmitError, setIsRejectedByUser } =
     useContext(TxFlowContext)
-  const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = txSecurity
+  const { needsRiskConfirmation, isRiskConfirmed } = txSecurity
   const hasSigned = useAlreadySigned(safeTx)
   const signer = useSigner()
 
@@ -63,11 +63,6 @@ export const SignForm = ({
   // On modal submit
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault()
-
-    if (needsRiskConfirmation && !isRiskConfirmed) {
-      setIsRiskIgnored(true)
-      return
-    }
 
     if (!safeTx) return
 
@@ -145,10 +140,8 @@ export const SignForm = ({
   )
 }
 
-const useTxSecurityContext = () => useContext(TxSecurityContext)
-
 export default madProps(SignForm, {
   isOwner: useIsSafeOwner,
   txActions: useTxActions,
-  txSecurity: useTxSecurityContext,
+  txSecurity: useSafeShield,
 })
