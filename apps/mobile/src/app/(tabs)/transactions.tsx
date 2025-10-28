@@ -9,11 +9,13 @@ import { Platform } from 'react-native'
 const tabItems = [
   {
     label: 'History',
+    testID: 'history-tab-content',
     title: 'Transactions',
     Component: TxHistoryContainer,
   },
   {
     label: `Messages`,
+    testID: 'messages-tab-content',
     title: 'Messages',
     Component: ComingSoon,
   },
