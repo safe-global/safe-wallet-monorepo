@@ -1,5 +1,4 @@
 import type { Relay } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
-import { defaultSecurityContextValues } from '@safe-global/utils/components/tx/security/shared/utils'
 import { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { OperationType } from '@safe-global/types-kit'
@@ -42,7 +41,13 @@ describe('ExecuteForm', () => {
       executeTx: jest.fn(),
       signProposerTx: jest.fn(),
     },
-    txSecurity: defaultSecurityContextValues,
+    txSecurity: {
+      setRecipientAddresses: jest.fn(),
+      setSafeTx: jest.fn(),
+      needsRiskConfirmation: false,
+      isRiskConfirmed: false,
+      setIsRiskConfirmed: jest.fn(),
+    },
     options: [
       { id: 'execute', label: 'Execute' },
       { id: 'sign', label: 'Sign' },
