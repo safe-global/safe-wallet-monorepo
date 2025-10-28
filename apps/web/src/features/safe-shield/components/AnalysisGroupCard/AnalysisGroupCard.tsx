@@ -58,7 +58,11 @@ export const AnalysisGroupCard = ({
         <Box sx={{ padding: '4px 12px 16px' }}>
           <Stack gap={2}>
             {visibleResults.map((result, index) => (
-              <AnalysisGroupCardItem key={index} severity={result.severity} description={result.description}>
+              <AnalysisGroupCardItem
+                key={index}
+                severity={!index ? result.severity : undefined}
+                description={result.description}
+              >
                 <AnalysisIssuesDisplay result={result} />
 
                 {isAddressChange(result) && <AddressChanges result={result} />}
