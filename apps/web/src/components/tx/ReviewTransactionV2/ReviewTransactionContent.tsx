@@ -8,13 +8,11 @@ import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
 import { ErrorBoundary } from '@sentry/react'
 import ApprovalEditor from '../ApprovalEditor'
-import { BlockaidBalanceChanges } from '../security/blockaid/BlockaidBalanceChange'
 import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ConfirmationView from '../confirmation-views'
 import UnknownContractError from '../SignOrExecuteForm/UnknownContractError'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 import { Slot, SlotName } from '@/components/tx-flow/slots'
 import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
 import { Button, CircularProgress } from '@mui/material'
@@ -43,7 +41,6 @@ export const ReviewTransactionContent = ({
 
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
-  const isCounterfactualSafe = useIsCounterfactualSafe()
 
   const onContinueClick = useCallback(() => {
     trackEvent(MODALS_EVENTS.CONTINUE_CLICKED)
@@ -70,8 +67,6 @@ export const ReviewTransactionContent = ({
             </ErrorBoundary>
           )}
         </ConfirmationView>
-
-        {!isCounterfactualSafe && !isRejection && <BlockaidBalanceChanges />}
 
         <Slot name={SlotName.Main} />
       </TxCard>
