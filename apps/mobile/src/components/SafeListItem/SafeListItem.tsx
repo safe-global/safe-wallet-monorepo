@@ -26,6 +26,7 @@ export interface SafeListItemProps {
   paddingVertical?: YStackProps['paddingVertical']
   bottomContent?: React.ReactNode
   pressStyle?: ViewProps['pressStyle']
+  testID?: string
 }
 
 export function SafeListItem({
@@ -46,6 +47,7 @@ export function SafeListItem({
   paddingVertical = '$4',
   bottomContent,
   pressStyle,
+  testID,
 }: SafeListItemProps) {
   // TODO: Replace this with proposedByDelegate once EN-149 is implemented
   const isProposedTx = isMultisigExecutionInfo(executionInfo) ? executionInfo.confirmationsSubmitted === 0 : false
@@ -63,6 +65,7 @@ export function SafeListItem({
       flexDirection="column"
       justifyContent="flex-start"
       paddingVertical={paddingVertical}
+      testID={testID}
       // If just set pressStyle to undefined, then the onPress doesn't work, that's why we need this hack
       {...(pressStyle ? { pressStyle } : {})}
     >
