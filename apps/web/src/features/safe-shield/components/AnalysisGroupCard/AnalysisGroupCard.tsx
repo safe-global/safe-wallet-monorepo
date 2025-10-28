@@ -1,7 +1,7 @@
 import { type ReactElement, useMemo, useState } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import { type GroupedAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
+import { Severity, type GroupedAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import { isAddressChange, mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
 import { SeverityIcon } from '../SeverityIcon'
 import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
@@ -58,7 +58,11 @@ export const AnalysisGroupCard = ({
         <Box sx={{ padding: '4px 12px 16px' }}>
           <Stack gap={2}>
             {visibleResults.map((result, index) => (
-              <AnalysisGroupCardItem key={index} severity={result.severity} description={result.description}>
+              <AnalysisGroupCardItem
+                key={index}
+                severity={!index ? result.severity : undefined}
+                description={result.description}
+              >
                 <AnalysisIssuesDisplay result={result} />
 
                 {isAddressChange(result) && <AddressChanges result={result} />}
