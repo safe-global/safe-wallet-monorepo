@@ -7,29 +7,29 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { Box, Chip, CircularProgress, Grid, SvgIcon, Tooltip, Typography } from '@mui/material'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { ErrorBoundary } from '@sentry/react'
-import { useContext } from 'react'
-import { TxSecurityContext } from '../shared/TxSecurityContext'
 import ArrowOutwardIcon from '@/public/images/transactions/outgoing.svg'
 import ArrowDownwardIcon from '@/public/images/transactions/incoming.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import ExternalLink from '@/components/common/ExternalLink'
 import { REDEFINE_ARTICLE } from '@/config/constants'
-
 import css from './styles.module.css'
-import type {
-  AssetDiff,
-  Erc1155Diff,
-  Erc1155TokenDetails,
-  Erc20Diff,
-  Erc721Diff,
-  Erc721TokenDetails,
-  GeneralAssetDiff,
-  NativeDiff,
-} from '@safe-global/utils/services/security/modules/BlockaidModule/types'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import type {
+  FungibleDiffDto,
+  NftDiffDto,
+  NativeAssetDetailsDto,
+  TokenAssetDetailsDto,
+} from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
 
-const FungibleBalanceChange = ({ change, asset }: { asset: AssetDiff['asset']; change: Erc20Diff | NativeDiff }) => {
+const FungibleBalanceChange = ({
+  change,
+  asset,
+}: {
+  asset: NativeAssetDetailsDto | TokenAssetDetailsDto
+  change: FungibleDiffDto
+}) => {
   const { balances } = useBalances()
   const logoUri =
     asset.logo_url ??
@@ -54,13 +54,7 @@ const FungibleBalanceChange = ({ change, asset }: { asset: AssetDiff['asset']; c
   )
 }
 
-const NFTBalanceChange = ({
-  change,
-  asset,
-}: {
-  asset: Erc721TokenDetails | Erc1155TokenDetails
-  change: Erc721Diff | Erc1155Diff
-}) => {
+const NFTBalanceChange = ({ change, asset }: { asset: TokenAssetDetailsDto; change: NftDiffDto }) => {
   const chainId = useChainId()
 
   return (
@@ -93,37 +87,43 @@ const NFTBalanceChange = ({
   )
 }
 
+const isNftDiff = (diff: FungibleDiffDto | NftDiffDto): diff is NftDiffDto => {
+  return 'token_id' in diff
+}
+
 const BalanceChange = ({
   asset,
   positive = false,
   diff,
 }: {
-  asset: NonNullable<AssetDiff['asset']>
+  asset: NativeAssetDetailsDto | TokenAssetDetailsDto
   positive?: boolean
-  diff: GeneralAssetDiff
+  diff: FungibleDiffDto | NftDiffDto
 }) => {
   return (
     <Grid item xs={12} md={12}>
       <Box className={css.balanceChange}>
         {positive ? <ArrowDownwardIcon /> : <ArrowOutwardIcon />}
-        {asset.type === 'ERC721' || asset.type === 'ERC1155' ? (
-          <NFTBalanceChange asset={asset} change={diff as Erc721Diff | Erc1155Diff} />
+        {isNftDiff(diff) ? (
+          <NFTBalanceChange asset={asset as TokenAssetDetailsDto} change={diff} />
         ) : (
-          <FungibleBalanceChange asset={asset} change={diff as NativeDiff | Erc20Diff} />
+          <FungibleBalanceChange asset={asset} change={diff} />
         )}
       </Box>
     </Grid>
   )
 }
 const BalanceChanges = () => {
-  const { blockaidResponse } = useContext(TxSecurityContext)
-  const { isLoading, balanceChange, error } = blockaidResponse ?? {}
+  const { threat } = useSafeShield()
+  const [threatResults, threatError, threatLoading = false] = threat || []
+
+  const balanceChange = threatResults?.BALANCE_CHANGE || []
 
   const totalBalanceChanges = balanceChange
     ? balanceChange.reduce((prev, current) => prev + current.in.length + current.out.length, 0)
     : 0
 
-  if (isLoading) {
+  if (threatLoading) {
     return (
       <div className={css.loader}>
         <CircularProgress
@@ -138,7 +138,7 @@ const BalanceChanges = () => {
       </div>
     )
   }
-  if (error) {
+  if (threatError) {
     return (
       <Typography variant="body2" color="text.secondary" sx={{ justifySelf: 'flex-end' }}>
         Could not calculate balance changes.
