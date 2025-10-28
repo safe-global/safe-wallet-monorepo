@@ -32,7 +32,8 @@ const getPriceChangeValue = (asset: Balance | AppPosition): number | null => {
     return asset.priceChangePercentage1d
   }
   if ('fiatBalance24hChange' in asset && asset.fiatBalance24hChange) {
-    return parseFloat(asset.fiatBalance24hChange) / 100
+    // fiatBalance24hChange is in percentage points (4.1 = 4.1%)
+    return parseFloat(asset.fiatBalance24hChange)
   }
   return null
 }
@@ -41,7 +42,8 @@ const getPriceChangeValue = (asset: Balance | AppPosition): number | null => {
 const formatPriceChange = (value: number | null): string | null => {
   if (value == null) return null
   const sign = value >= 0 ? '+' : ''
-  return `${sign}${(value * 100).toFixed(2)}%`
+  // Value is already in percentage points (4.1 = 4.1%), don't multiply by 100
+  return `${sign}${value.toFixed(2)}%`
 }
 
 /** Get token price from asset */

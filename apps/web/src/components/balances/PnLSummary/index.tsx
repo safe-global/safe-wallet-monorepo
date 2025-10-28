@@ -15,7 +15,7 @@ const PnLSummary = ({ pnl }: PnLSummaryProps) => {
   const [expanded, setExpanded] = useState(false)
 
   const totalPnL = pnl.realizedGain + pnl.unrealizedGain
-  const roi = pnl.netInvested !== 0 ? (totalPnL / pnl.netInvested) * 100 : 0
+  const roi = pnl.netInvested !== 0 ? (totalPnL / pnl.netInvested) : 0
   const isProfitable = totalPnL >= 0
 
   const formatValue = (value: number): string => {
