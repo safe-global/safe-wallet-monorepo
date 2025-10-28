@@ -1,21 +1,35 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  type ReactNode,
+  useMemo,
+  type Dispatch,
+  type SetStateAction,
+} from 'react'
 import { useCounterpartyAnalysis, useRecipientAnalysis, useThreatAnalysis } from './hooks'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import type {
-  ContractAnalysisResults,
-  ThreatAnalysisResults,
-  RecipientAnalysisResults,
+import {
+  type ContractAnalysisResults,
+  type ThreatAnalysisResults,
+  type RecipientAnalysisResults,
+  Severity,
 } from '@safe-global/utils/features/safe-shield/types'
+import { getPrimaryResult, SEVERITY_PRIORITY } from '@safe-global/utils/features/safe-shield/utils'
 
 type SafeShieldContextType = {
   setRecipientAddresses: (addresses: string[]) => void
-  setSafeTx: (safeTx: SafeTransaction) => void
+  setSafeTx: Dispatch<SetStateAction<SafeTransaction | undefined>>
   safeTx?: SafeTransaction
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
+  needsRiskConfirmation: boolean
+  isRiskConfirmed: boolean
+  setIsRiskConfirmed: Dispatch<SetStateAction<boolean>>
 }
 
 const SafeShieldContext = createContext<SafeShieldContextType | null>(null)
@@ -32,9 +46,29 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const recipient = recipientOnlyAnalysis || counterpartyAnalysis.recipient
   const contract = counterpartyAnalysis.contract
 
+  const [isRiskConfirmed, setIsRiskConfirmed] = useState(false)
+
+  const needsRiskConfirmation = useMemo(() => {
+    const [threatAnalysisResult] = threat || []
+    const primaryThreatResult = getPrimaryResult(threatAnalysisResult?.THREAT || [])
+    return (
+      !!primaryThreatResult && SEVERITY_PRIORITY[primaryThreatResult.severity] <= SEVERITY_PRIORITY[Severity.CRITICAL]
+    )
+  }, [threat])
+
   return (
     <SafeShieldContext.Provider
-      value={{ setRecipientAddresses, setSafeTx, safeTx: safeTx || safeTxContext.safeTx, recipient, contract, threat }}
+      value={{
+        setRecipientAddresses,
+        setSafeTx,
+        safeTx: safeTx || safeTxContext.safeTx,
+        recipient,
+        contract,
+        threat,
+        needsRiskConfirmation,
+        isRiskConfirmed,
+        setIsRiskConfirmed,
+      }}
     >
       {children}
     </SafeShieldContext.Provider>
