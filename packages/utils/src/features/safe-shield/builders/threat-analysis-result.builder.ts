@@ -19,6 +19,7 @@ export class ThreatAnalysisResultBuilder<
       description: 'Threat analysis found no issues',
       before: undefined,
       after: undefined,
+      issues: undefined,
     } as ThreatAnalysisResult
   }
 
@@ -70,7 +71,7 @@ export class ThreatAnalysisResultBuilder<
     return new ThreatAnalysisResultBuilder<ThreatStatus.MALICIOUS>()
       .title('Malicious threat detected')
       .type(ThreatStatus.MALICIOUS)
-      .severity(Severity.CRITICAL)
+      .severity(Severity.WARN)
       .description('The transaction {reason_phrase} {classification_phrase}')
       .issues({
         [Severity.CRITICAL]: [
