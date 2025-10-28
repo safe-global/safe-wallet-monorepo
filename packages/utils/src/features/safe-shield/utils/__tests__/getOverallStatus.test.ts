@@ -295,5 +295,82 @@ describe('getOverallStatus', () => {
 
       expect(result).toBeUndefined()
     })
+
+    it('should skip non-array group results in recipient analysis', () => {
+      const recipientResults: RecipientAnalysisResults = {
+        '0xRecipient1': {
+          [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
+          [StatusGroup.RECIPIENT_ACTIVITY]: {} as any, // Non-array value
+        },
+      }
+
+      const result = getOverallStatus(recipientResults)
+
+      expect(result).toBeDefined()
+      expect(result!.severity).toBe(Severity.OK)
+      expect(result!.title).toBe('Checks passed')
+    })
+
+    it('should skip non-array group results in contract analysis', () => {
+      const contractResults: ContractAnalysisResults = {
+        '0xContract1': {
+          [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.verified().build()],
+          [StatusGroup.CONTRACT_INTERACTION]: 'invalid' as any, // Non-array value
+        },
+      }
+
+      const result = getOverallStatus(undefined, contractResults)
+
+      expect(result).toBeDefined()
+      expect(result!.severity).toBe(Severity.OK)
+      expect(result!.title).toBe('Checks passed')
+    })
+
+    it('should handle mixed array and non-array group results across all analysis types', () => {
+      const recipientResults: RecipientAnalysisResults = {
+        '0xRecipient1': {
+          [StatusGroup.ADDRESS_BOOK]: null as any, // Non-array value
+          [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
+        },
+      }
+
+      const contractResults: ContractAnalysisResults = {
+        '0xContract1': {
+          [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.verified().build()],
+          [StatusGroup.CONTRACT_INTERACTION]: undefined as any, // Non-array value
+        },
+      }
+
+      const threatResults = {
+        '0xThreat1': {
+          [StatusGroup.THREAT]: ThreatAnalysisResultBuilder.noThreat().build(),
+        },
+      } as unknown as ThreatAnalysisResults
+
+      const result = getOverallStatus(recipientResults, contractResults, threatResults)
+
+      expect(result).toBeDefined()
+      expect(result!.severity).toBe(Severity.WARN)
+      expect(result!.title).toBe('Issues found')
+    })
+
+    it('should return undefined when all group results are non-array values', () => {
+      const recipientResults: RecipientAnalysisResults = {
+        '0xRecipient1': {
+          [StatusGroup.ADDRESS_BOOK]: null as any,
+          [StatusGroup.RECIPIENT_ACTIVITY]: {} as any,
+        },
+      }
+
+      const contractResults: ContractAnalysisResults = {
+        '0xContract1': {
+          [StatusGroup.CONTRACT_VERIFICATION]: 'invalid' as any,
+        },
+      }
+
+      const result = getOverallStatus(recipientResults, contractResults)
+
+      expect(result).toBeUndefined()
+    })
   })
 })
