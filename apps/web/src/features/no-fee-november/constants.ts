@@ -1,2 +1,2 @@
-// Maximum gas cost in USD that can be sponsored for No Fee November
-export const MAX_SPONSORED_GAS_COST_USD = 100 // $100
+// Maximum gas limit that can be relayed for No Fee November
+export const MAX_GAS_LIMIT_NO_FEE_CAMPAIGN = BigInt(1_000_000) // 1M gas

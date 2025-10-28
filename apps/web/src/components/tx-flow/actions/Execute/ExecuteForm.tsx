@@ -88,12 +88,17 @@ export const ExecuteForm = ({
   // Terms acceptance state for No-Fee November
   const [termsAccepted, setTermsAccepted] = useState(false)
 
-  // If gas is too high, force WALLET method
+  // No-fee November REPLACES relay when eligible AND not blocked AND gas is not too high AND has remaining
+  const canRelay = !isNoFeeNovember && walletCanRelay && hasRemainingRelays(relays[0])
+  const canNoFeeNovember = isNoFeeNovember && !blockedAddress && !gasTooHigh && remaining && remaining > 0
+  const isLimitReached = isNoFeeNovember && !blockedAddress && remaining === 0
+
+  // If gas is too high or limit reached, force WALLET method
   useEffect(() => {
-    if (gasTooHigh) {
+    if (gasTooHigh || isLimitReached) {
       setExecutionMethod(ExecutionMethod.WALLET)
     }
-  }, [gasTooHigh])
+  }, [gasTooHigh, isLimitReached])
 
   // Reset terms acceptance when execution method changes
   const handleExecutionMethodChange = (method: ExecutionMethod | ((prev: ExecutionMethod) => ExecutionMethod)) => {
@@ -102,17 +107,15 @@ export const ExecuteForm = ({
     setTermsAccepted(false) // Reset terms acceptance when switching methods
   }
 
-  // No-fee November REPLACES relay when eligible AND not blocked AND gas is not too high
-  const canRelay = !isNoFeeNovember && walletCanRelay && hasRemainingRelays(relays[0])
-  const canNoFeeNovember = isNoFeeNovember && !blockedAddress && !gasTooHigh
-
   // Show execution selector when either no-fee november OR relay is available
   // Also show if gas is too high but feature is otherwise available (to show disabled state)
-  const showExecutionSelector = canNoFeeNovember || canRelay || (isNoFeeNovember && !blockedAddress && gasTooHigh)
+  // Or if limit is reached (to show 0/X available state)
+  const showExecutionSelector =
+    canNoFeeNovember || canRelay || (isNoFeeNovember && !blockedAddress && gasTooHigh) || isLimitReached
 
   // Determine which method will be used
-  const willRelay = canRelay && executionMethod === ExecutionMethod.RELAY
-  const willNoFeeNovember = canNoFeeNovember && executionMethod === ExecutionMethod.NO_FEE_NOVEMBER
+  const willRelay = !!(canRelay && executionMethod === ExecutionMethod.RELAY)
+  const willNoFeeNovember = !!(canNoFeeNovember && executionMethod === ExecutionMethod.NO_FEE_NOVEMBER)
 
   // Estimate gas limit
   const { gasLimit, gasLimitError } = useGasLimit(safeTx)
@@ -192,7 +195,7 @@ export const ExecuteForm = ({
             gasLimitError={gasLimitError}
             willRelay={willRelay}
             noFeeNovember={
-              canNoFeeNovember && executionMethod !== ExecutionMethod.WALLET
+              (canNoFeeNovember || isLimitReached) && executionMethod !== ExecutionMethod.WALLET
                 ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 }
                 : undefined
             }

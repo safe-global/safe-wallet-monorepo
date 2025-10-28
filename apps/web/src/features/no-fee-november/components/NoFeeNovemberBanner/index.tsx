@@ -34,7 +34,10 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: () => void }) => {
           </Typography>
           <Typography variant="body2" color="static.light" className={css.bannerTextInteractive}>
             SAFE holders enjoy gasless transactions on Mainnet this November.{' '}
-            <Link href="https://help.safe.global/en/" style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
+            <Link
+              href="https://help.safe.global/en/articles/456540-no-fee-november"
+              style={{ textDecoration: 'underline', fontWeight: 'bold' }}
+            >
               Learn more
             </Link>
           </Typography>

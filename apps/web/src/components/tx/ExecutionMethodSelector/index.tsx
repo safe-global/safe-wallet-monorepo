@@ -1,4 +1,4 @@
-import { Box, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Tooltip, Chip } from '@mui/material'
+import { Box, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Tooltip, Chip, Link } from '@mui/material'
 import type { Dispatch, SetStateAction, ReactElement, ChangeEvent } from 'react'
 
 import useWallet from '@/hooks/wallets/useWallet'
@@ -64,35 +64,96 @@ const _ExecutionMethodSelector = ({
           ) : null}
 
           <RadioGroup row value={executionMethod} onChange={onChooseExecutionMethod} className={css.radioGroup}>
-            {gasTooHigh ? (
-              <Tooltip title="Gas prices are too high right now" placement="top" arrow>
+            {(() => {
+              const isLimitReached = noFeeNovember?.isEligible && noFeeNovember.remaining === 0
+              const availabilityLabel = noFeeNovember?.limit
+                ? `${noFeeNovember.remaining || 0}/${noFeeNovember.limit} available`
+                : ''
+              const isDisabled = gasTooHigh || isLimitReached
+
+              return isDisabled ? (
+                <Tooltip
+                  title={
+                    gasTooHigh
+                      ? 'Gas prices are too high right now'
+                      : 'You reached the limit of sponsored transactions per day.'
+                  }
+                  placement="top"
+                  arrow
+                >
+                  <FormControlLabel
+                    data-testid="relay-execution-method"
+                    value={noFeeNovember?.isEligible ? ExecutionMethod.NO_FEE_NOVEMBER : ExecutionMethod.RELAY}
+                    disabled
+                    sx={{
+                      flex: 1,
+                      '& .MuiFormControlLabel-label': {
+                        marginLeft: '10px',
+                      },
+                    }}
+                    label={
+                      noFeeNovember?.isEligible ? (
+                        <div className={css.noFeeNovemberLabel}>
+                          <Chip
+                            label={isLimitReached ? availabilityLabel : 'Not available'}
+                            size="small"
+                            className={css.notAvailableChip}
+                            sx={{
+                              '& .MuiChip-label': {
+                                padding: 0,
+                              },
+                            }}
+                          />
+                          <Typography className={css.notAvailableTitle}>Sponsored gas</Typography>
+                          <div className={css.descriptionWrapper}>
+                            <Typography className={css.descriptionText}>
+                              Part of the No-Fee November, Safe Ecosystem Foundation sponsorship program.
+                            </Typography>
+                          </div>
+                        </div>
+                      ) : (
+                        <Typography className={css.radioLabel} whiteSpace="nowrap">
+                          Sponsored by
+                          <SponsoredBy chainId={chain?.chainId ?? ''} />
+                        </Typography>
+                      )
+                    }
+                    control={<Radio />}
+                  />
+                </Tooltip>
+              ) : (
                 <FormControlLabel
                   data-testid="relay-execution-method"
+                  sx={{ flex: 1 }}
                   value={noFeeNovember?.isEligible ? ExecutionMethod.NO_FEE_NOVEMBER : ExecutionMethod.RELAY}
-                  disabled
-                  sx={{
-                    flex: 1,
-                    '& .MuiFormControlLabel-label': {
-                      marginLeft: '10px', // Spacing between radio and content
-                    },
-                  }}
                   label={
                     noFeeNovember?.isEligible ? (
                       <div className={css.noFeeNovemberLabel}>
-                        <Chip
-                          label="Not available"
-                          size="small"
-                          className={css.notAvailableChip}
-                          sx={{
-                            '& .MuiChip-label': {
-                              padding: 0,
-                            },
-                          }}
-                        />
-                        <Typography className={css.notAvailableTitle}>Sponsored gas</Typography>
-                        <div className={css.descriptionWrapper}>
-                          <Typography className={css.descriptionText}>
-                            Part of the No-Fee November, Safe Ecosystem Foundation sponsorship program.
+                        <Typography className={css.mainLabel}>Sponsored gas</Typography>
+                        <div className={css.subLabel}>
+                          <Typography variant="body2" color="text.secondary">
+                            Part of the No-Fee November, Safe Ecosystem Foundation sponsorship program.{' '}
+                            <Tooltip
+                              title={
+                                <Box>
+                                  <Typography variant="body2" color="inherit">
+                                    SAFE holders enjoy gasless transactions on Ethereum Mainnet this November.{' '}
+                                    <Typography component="span" fontWeight="bold">
+                                      <Link
+                                        href="https://help.safe.global/en/articles/456540-no-fee-november"
+                                        style={{ textDecoration: 'underline', fontWeight: 'bold' }}
+                                      >
+                                        Learn more
+                                      </Link>
+                                    </Typography>
+                                  </Typography>
+                                </Box>
+                              }
+                              placement="top"
+                              arrow
+                            >
+                              <InfoIcon className={css.infoIconInline} />
+                            </Tooltip>
                           </Typography>
                         </div>
                       </div>
@@ -105,48 +166,8 @@ const _ExecutionMethodSelector = ({
                   }
                   control={<Radio />}
                 />
-              </Tooltip>
-            ) : (
-              <FormControlLabel
-                data-testid="relay-execution-method"
-                sx={{ flex: 1 }}
-                value={noFeeNovember?.isEligible ? ExecutionMethod.NO_FEE_NOVEMBER : ExecutionMethod.RELAY}
-                label={
-                  noFeeNovember?.isEligible ? (
-                    <div className={css.noFeeNovemberLabel}>
-                      <Typography className={css.mainLabel}>Sponsored gas</Typography>
-                      <div className={css.subLabel}>
-                        <Typography variant="body2" color="text.secondary">
-                          Part of the No-Fee November, Safe Ecosystem Foundation sponsorship program.{' '}
-                          <Tooltip
-                            title={
-                              <Box>
-                                <Typography variant="body2" color="inherit">
-                                  SAFE holders enjoy gasless transactions on Ethereum Mainnet this November.{' '}
-                                  <Typography component="span" fontWeight="bold">
-                                    Learn more
-                                  </Typography>
-                                </Typography>
-                              </Box>
-                            }
-                            placement="top"
-                            arrow
-                          >
-                            <InfoIcon className={css.infoIconInline} />
-                          </Tooltip>
-                        </Typography>
-                      </div>
-                    </div>
-                  ) : (
-                    <Typography className={css.radioLabel} whiteSpace="nowrap">
-                      Sponsored by
-                      <SponsoredBy chainId={chain?.chainId ?? ''} />
-                    </Typography>
-                  )
-                }
-                control={<Radio />}
-              />
-            )}
+              )
+            })()}
 
             <FormControlLabel
               data-testid="connected-wallet-execution-method"

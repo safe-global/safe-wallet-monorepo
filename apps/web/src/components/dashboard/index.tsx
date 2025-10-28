@@ -24,7 +24,6 @@ import StakeBanner, { stakeBannerID } from '@/components/dashboard/NewsCarousel/
 import NoFeeNovemberBanner, { noFeeNovemberBannerID } from '@/features/no-fee-november/components/NoFeeNovemberBanner'
 import AddFundsToGetStarted from '@/components/dashboard/AddFundsBanner'
 import useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsPositionsFeatureEnabled'
-import useIsNoFeeNovemberEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberEnabled'
 import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
@@ -44,11 +43,10 @@ const Dashboard = (): ReactElement => {
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const isStakingBannerVisible = useIsStakingBannerVisible()
   const isPositionsFeatureEnabled = useIsPositionsFeatureEnabled()
-  const isNoFeeNovemberVisible = useIsNoFeeNovemberEnabled()
   const { isEligible } = useNoFeeNovemberEligibility()
 
   const banners = [
-    isNoFeeNovemberVisible && {
+    isEligible && {
       id: noFeeNovemberBannerID,
       element: NoFeeNovemberBanner,
       eligibilityState: isEligible,

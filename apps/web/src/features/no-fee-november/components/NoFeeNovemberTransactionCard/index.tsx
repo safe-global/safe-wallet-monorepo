@@ -10,7 +10,6 @@ import BlockedAddress from '@/components/common/BlockedAddress'
 const NoFeeNovemberTransactionCard = () => {
   const { isEligible, isLoading, error, blockedAddress } = useNoFeeNovemberEligibility()
 
-  // Blocked address state - show blocked message (matches Earn pattern)
   if (blockedAddress) {
     return (
       <Stack
@@ -61,7 +60,10 @@ const NoFeeNovemberTransactionCard = () => {
             </Typography>
             <Typography variant="body2" color="static.light" className={css.description}>
               SAFE holders enjoy gasless transactions on Mainnet this November.{' '}
-              <Link href="https://help.safe.global/en/" style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
+              <Link
+                href="https://help.safe.global/en/articles/456540-no-fee-november"
+                style={{ textDecoration: 'underline', fontWeight: 'bold' }}
+              >
                 Learn more
               </Link>
             </Typography>
@@ -71,7 +73,7 @@ const NoFeeNovemberTransactionCard = () => {
     )
   }
 
-  // Eligible state (from Figma design)
+  // Eligible state
   if (isEligible === true) {
     return (
       <Card className={css.card}>
@@ -105,7 +107,10 @@ const NoFeeNovemberTransactionCard = () => {
             {/* Description */}
             <Typography variant="body2" className={css.description}>
               SAFE holders enjoy gasless transactions on Ethereum Mainnet this November.{' '}
-              <Link href="https://help.safe.global/en/" style={{ textDecoration: 'underline', fontWeight: 'bold' }}>
+              <Link
+                href="https://help.safe.global/en/articles/456540-no-fee-november"
+                style={{ textDecoration: 'underline', fontWeight: 'bold' }}
+              >
                 Learn more
               </Link>
             </Typography>
@@ -126,7 +131,7 @@ const NoFeeNovemberTransactionCard = () => {
     )
   }
 
-  // Not eligible state (from banner in assets/home, without Get SAFE button)
+  // Not eligible state
   return null
 }
 
