@@ -21,7 +21,7 @@ import {
 import { getPrimaryResult, SEVERITY_PRIORITY } from '@safe-global/utils/features/safe-shield/utils'
 
 type SafeShieldContextType = {
-  setRecipientAddresses: (addresses: string[]) => void
+  setRecipientAddresses: Dispatch<SetStateAction<string[] | undefined>>
   setSafeTx: Dispatch<SetStateAction<SafeTransaction | undefined>>
   safeTx?: SafeTransaction
   recipient?: AsyncResult<RecipientAnalysisResults>
