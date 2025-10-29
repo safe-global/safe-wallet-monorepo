@@ -220,6 +220,9 @@ const MultichainPortfolioTable = (): ReactElement => {
               <Typography variant="h4" fontWeight={700}>
                 Tokens
               </Typography>
+              <Typography variant="h4" fontWeight={700} color="text.secondary">
+                <FiatValue value={portfolio.allChainsTotalTokenBalance || '0'} />
+              </Typography>
               {totalPortfolioValue > 0 && (
                 <Tooltip title="Based on total portfolio value" placement="top" arrow>
                   <Typography variant="caption" className={css.weightBadge}>
@@ -242,9 +245,14 @@ const MultichainPortfolioTable = (): ReactElement => {
       {allPositions.length > 0 && (
         <Box>
           <Box mb={2}>
-            <Typography variant="h4" fontWeight={700} mb={1}>
-              Positions
-            </Typography>
+            <Stack direction="row" alignItems="center" spacing={1} mb={1}>
+              <Typography variant="h4" fontWeight={700}>
+                Positions
+              </Typography>
+              <Typography variant="h4" fontWeight={700} color="text.secondary">
+                <FiatValue value={portfolio.allChainsTotalPositionsBalance || '0'} />
+              </Typography>
+            </Stack>
             <Typography variant="caption" color="text.secondary">
               {allPositions.length} {allPositions.length === 1 ? 'protocol' : 'protocols'} with active positions
             </Typography>
