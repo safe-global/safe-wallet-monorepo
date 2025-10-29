@@ -38,7 +38,7 @@ export type SignOrExecuteProps = {
   isMassPayout?: boolean
 }
 
-export const SignOrExecuteFormV2 = ({
+export const SignOrExecuteForm = ({
   chainId,
   safeTx,
   safeTxError,
@@ -159,7 +159,7 @@ export const SignOrExecuteFormV2 = ({
 const useSafeTx = () => useContext(SafeTxContext).safeTx
 const useSafeTxError = () => useContext(SafeTxContext).safeTxError
 
-export default madProps(SignOrExecuteFormV2, {
+export default madProps(SignOrExecuteForm, {
   chainId: useChainId,
   safeTx: useSafeTx,
   safeTxError: useSafeTxError,

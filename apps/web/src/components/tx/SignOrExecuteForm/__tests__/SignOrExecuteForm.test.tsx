@@ -3,7 +3,7 @@ import * as hooks from '@/components/tx/SignOrExecuteForm/hooks'
 import * as execThroughRoleHooks from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import { safeTxBuilder } from '@/tests/builders/safeTx'
 import { render } from '@/tests/test-utils'
-import { SignOrExecuteFormV2 } from '../SignOrExecuteFormV2'
+import { SignOrExecuteForm } from '../SignOrExecuteForm'
 import { encodeBytes32String } from 'ethers'
 import { Status } from 'zodiac-roles-deployments'
 import * as useIsSafeOwner from '@/hooks/useIsSafeOwner'
@@ -125,7 +125,7 @@ const txDetails = {
   safeAppInfo: null,
 } as unknown as TransactionDetails
 
-describe('SignOrExecuteFormV2', () => {
+describe('SignOrExecuteForm', () => {
   it('should offer to execute through a role if the user is a role member and the transaction is executable through the role', () => {
     jest.spyOn(execThroughRoleHooks, 'useRoles').mockReturnValue([TEST_ROLE_OK])
     jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
@@ -133,7 +133,7 @@ describe('SignOrExecuteFormV2', () => {
     jest.spyOn(useIsSafeOwner, 'default').mockReturnValue(true)
 
     const { queryByTestId } = renderWithSafeShield(
-      <SignOrExecuteFormV2
+      <SignOrExecuteForm
         txDetails={txDetails}
         txId="0x012312"
         safeTxError={undefined}
@@ -154,7 +154,7 @@ describe('SignOrExecuteFormV2', () => {
     jest.spyOn(useIsSafeOwner, 'default').mockReturnValue(true)
 
     const { queryByTestId } = renderWithSafeShield(
-      <SignOrExecuteFormV2
+      <SignOrExecuteForm
         txDetails={txDetails}
         txId="0x012312"
         safeTxError={undefined}
@@ -175,7 +175,7 @@ describe('SignOrExecuteFormV2', () => {
     jest.spyOn(useIsSafeOwner, 'default').mockReturnValue(false)
 
     const { queryByTestId } = renderWithSafeShield(
-      <SignOrExecuteFormV2
+      <SignOrExecuteForm
         txDetails={txDetails}
         txId="0x012312"
         safeTxError={undefined}
@@ -195,7 +195,7 @@ describe('SignOrExecuteFormV2', () => {
     jest.spyOn(useIsSafeOwner, 'default').mockReturnValue(true)
 
     const { queryByTestId } = renderWithSafeShield(
-      <SignOrExecuteFormV2
+      <SignOrExecuteForm
         txDetails={txDetails}
         txId="0x012312"
         safeTxError={undefined}
