@@ -36,7 +36,7 @@ const useNoFeeNovemberEligibility = (): {
     }
   }
 
-  const isEligible = data !== undefined
+  const isEligible = data !== undefined && typeof data.limit === 'number' && data.limit > 0
 
   return {
     isEligible,
