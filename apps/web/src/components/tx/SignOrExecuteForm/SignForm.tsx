@@ -1,12 +1,11 @@
 import madProps from '@/utils/mad-props'
-import { type ReactElement, type SyntheticEvent, useContext, useMemo, useState } from 'react'
+import { type ReactElement, ReactNode, type SyntheticEvent, useContext, useMemo, useState } from 'react'
 import { CircularProgress, Box, Button, Divider, Tooltip } from '@mui/material'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useAlreadySigned, useTxActions } from './hooks'
-import type { SignOrExecuteProps } from './SignOrExecuteForm'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
@@ -21,6 +20,21 @@ import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows'
 import { useValidateTxData } from '@/hooks/useValidateTxData'
 import { TxCardActions } from '@/components/tx-flow/common/TxCard'
 
+type SubmitCallback = (txId: string, isExecuted?: boolean) => void
+
+export type SignFormProps = {
+  txId?: string
+  onSubmit?: SubmitCallback
+  children?: ReactNode
+  isExecutable?: boolean
+  isRejection?: boolean
+  isBatch?: boolean
+  isBatchable?: boolean
+  onlyExecute?: boolean
+  disableSubmit?: boolean
+  origin?: string
+}
+
 export const SignForm = ({
   safeTx,
   txId,
@@ -34,7 +48,7 @@ export const SignForm = ({
   txActions,
   txSecurity,
   tooltip,
-}: SignOrExecuteProps & {
+}: SignFormProps & {
   isOwner: ReturnType<typeof useIsSafeOwner>
   txActions: ReturnType<typeof useTxActions>
   txSecurity: ReturnType<typeof useTxSecurityContext>
