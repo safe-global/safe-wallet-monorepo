@@ -48,6 +48,7 @@ export function TokensContainer() {
       const fiatBalance = item.fiatBalance
       return (
         <AssetsCard
+          testID={`token-${item.tokenInfo.symbol}`}
           name={item.tokenInfo.name}
           logoUri={item.tokenInfo.logoUri}
           description={`${formatVisualAmount(item.balance, item.tokenInfo.decimals as number)} ${
@@ -55,7 +56,12 @@ export function TokensContainer() {
           }`}
           rightNode={
             <View alignItems="flex-end">
-              <Text fontSize="$4" fontWeight={600} color="$color">
+              <Text
+                fontSize="$4"
+                fontWeight={600}
+                color="$color"
+                testID={`token-${item.tokenInfo.symbol}-fiat-balance`}
+              >
                 {shouldDisplayPreciseBalance(fiatBalance, 7)
                   ? formatCurrencyPrecise(fiatBalance, currency)
                   : formatCurrency(fiatBalance, currency)}
