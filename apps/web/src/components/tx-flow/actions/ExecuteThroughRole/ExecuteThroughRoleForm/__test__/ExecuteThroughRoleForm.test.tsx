@@ -3,6 +3,7 @@ import { OperationType } from '@safe-global/types-kit'
 import { type ReactElement } from 'react'
 import * as zodiacRoles from 'zodiac-roles-deployments'
 import { fireEvent, render, waitFor, mockWeb3Provider } from '@/tests/test-utils'
+import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
@@ -17,6 +18,10 @@ import * as hooksModule from '../hooks'
 import { chainBuilder } from '@/tests/builders/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+
+const renderWithSafeShield = (ui: ReactElement) => {
+  return render(<SafeShieldProvider>{ui}</SafeShieldProvider>)
+}
 
 // Mock fetch
 Object.defineProperty(window, 'fetch', {
@@ -54,7 +59,9 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 
 jest.mock('@/hooks/useChainId', () => ({
-  useChainId: jest.fn().mockReturnValue(() => '1'),
+  __esModule: true,
+  default: jest.fn().mockReturnValue('1'),
+  useChainId: jest.fn().mockReturnValue('1'),
 }))
 
 // mock getModuleTransactionId
@@ -140,7 +147,7 @@ describe('ExecuteThroughRoleForm', () => {
       operation: OperationType.Call,
     })
 
-    const { findByText, getByText } = render(
+    const { findByText, getByText } = renderWithSafeShield(
       <ExecuteThroughRoleForm
         txId="0x0123412"
         safeTx={safeTx}
@@ -170,7 +177,7 @@ describe('ExecuteThroughRoleForm', () => {
 
     const onSubmit = jest.fn()
 
-    const { findByText } = render(
+    const { findByText } = renderWithSafeShield(
       <ExecuteThroughRoleForm txId="0x01323" safeTx={safeTx} role={TEST_ROLE_OK} onSubmit={onSubmit} />,
     )
 

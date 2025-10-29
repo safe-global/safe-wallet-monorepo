@@ -6,7 +6,6 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { TxSecurityContext } from '@/components/tx/security/shared/TxSecurityContext'
 import { useTxActions } from '@/components/tx/SignOrExecuteForm/hooks'
 import type { SignOrExecuteProps } from '@/components/tx/SignOrExecuteForm/SignOrExecuteFormV2'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -14,6 +13,7 @@ import { Errors, trackError } from '@/services/exceptions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import madProps from '@/utils/mad-props'
 import { TxCardActions } from '@/components/tx-flow/common/TxCard'
+import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 
 export const ProposerForm = ({
   safeTx,
@@ -24,7 +24,7 @@ export const ProposerForm = ({
   onSubmit,
 }: SignOrExecuteProps & {
   txActions: ReturnType<typeof useTxActions>
-  txSecurity: ReturnType<typeof useTxSecurityContext>
+  txSecurity: ReturnType<typeof useSafeShield>
   safeTx?: SafeTransaction
 }): ReactElement => {
   // Form state
@@ -35,16 +35,11 @@ export const ProposerForm = ({
   const wallet = useWallet()
   const { signProposerTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
-  const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = txSecurity
+  const { needsRiskConfirmation, isRiskConfirmed } = txSecurity
 
   // On modal submit
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault()
-
-    if (needsRiskConfirmation && !isRiskConfirmed) {
-      setIsRiskIgnored(true)
-      return
-    }
 
     if (!safeTx || !wallet) return
 
@@ -105,9 +100,7 @@ export const ProposerForm = ({
   )
 }
 
-const useTxSecurityContext = () => useContext(TxSecurityContext)
-
 export default madProps(ProposerForm, {
   txActions: useTxActions,
-  txSecurity: useTxSecurityContext,
+  txSecurity: useSafeShield,
 })
