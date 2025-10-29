@@ -55,6 +55,7 @@ const SignMessageFlow = ({ ...props }: SignMessageProps) => {
       step={0}
       hideNonce
       isMessage
+      hideSafeShield
     >
       <ErrorBoundary fallback={<div>Error signing message</div>}>
         <SignMessage {...props} />

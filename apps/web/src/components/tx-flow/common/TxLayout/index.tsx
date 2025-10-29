@@ -78,6 +78,7 @@ type TxLayoutProps = {
   isBatch?: boolean
   isReplacement?: boolean
   isMessage?: boolean
+  hideSafeShield?: boolean
 }
 
 const TxLayout = ({
@@ -94,6 +95,7 @@ const TxLayout = ({
   isBatch = false,
   isReplacement = false,
   isMessage = false,
+  hideSafeShield = false,
 }: TxLayoutProps): ReactElement => {
   const smallScreenBreakpoint = 'md'
   const theme = useTheme()
@@ -175,7 +177,7 @@ const TxLayout = ({
                     </Grid>
 
                     {/* Sidebar */}
-                    {!isReplacement && (
+                    {!isReplacement && !hideSafeShield && (
                       <Grid
                         size={{ xs: 12, [smallScreenBreakpoint]: 4.5 }}
                         sx={{ width: { lg: 320 } }}
