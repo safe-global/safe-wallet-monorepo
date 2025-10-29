@@ -848,6 +848,119 @@
         ]
       }
     },
+    "/v1/portfolio/{address}/chart/{period}": {
+      "get": {
+        "description": "Retrieves historical portfolio value chart data for a wallet address over a specified time period.",
+        "operationId": "portfolioGetWalletChartV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "description": "Wallet address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "period",
+            "required": true,
+            "in": "path",
+            "description": "Time period for the chart data",
+            "schema": {
+              "enum": [
+                "hour",
+                "day",
+                "week",
+                "month",
+                "3months",
+                "year",
+                "max"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "required": false,
+            "in": "query",
+            "description": "Fiat currency code for value conversion (e.g., USD, EUR)",
+            "schema": {
+              "example": "USD",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalletChart"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get wallet chart",
+        "tags": [
+          "portfolio"
+        ]
+      },
+      "delete": {
+        "description": "Clears the cached wallet chart data for a specific address and period",
+        "operationId": "portfolioClearWalletChartV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "description": "Wallet address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "period",
+            "required": true,
+            "in": "path",
+            "description": "Time period",
+            "schema": {
+              "enum": [
+                "hour",
+                "day",
+                "week",
+                "month",
+                "3months",
+                "year",
+                "max"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "required": false,
+            "in": "query",
+            "description": "Fiat currency code",
+            "schema": {
+              "example": "USD",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "summary": "Clear wallet chart cache",
+        "tags": [
+          "portfolio"
+        ]
+      }
+    },
     "/v1/charts/{fungibleId}/{period}": {
       "get": {
         "description": "Retrieves historical price chart data for a fungible asset (token) over a specified time period. Accepts human-readable asset IDs from the portfolio endpoint (e.g., \"eth\", \"dai\", \"morpho\").",
@@ -6565,6 +6678,34 @@
           "totalPositionsBalanceFiat",
           "tokenBalances",
           "positionBalances"
+        ]
+      },
+      "WalletChart": {
+        "type": "object",
+        "properties": {
+          "beginAt": {
+            "type": "string",
+            "description": "Start timestamp of the chart period (ISO 8601)"
+          },
+          "endAt": {
+            "type": "string",
+            "description": "End timestamp of the chart period (ISO 8601)"
+          },
+          "points": {
+            "type": "array",
+            "description": "Array of portfolio value data points. Each point is a tuple of [timestamp (Unix seconds), value in fiat currency]",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "required": [
+          "beginAt",
+          "endAt",
+          "points"
         ]
       },
       "ChartStats": {

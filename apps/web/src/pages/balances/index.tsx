@@ -1,5 +1,6 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
+import dynamic from 'next/dynamic'
 
 import AssetsTable from '@/components/balances/AssetsTable'
 import AssetsHeader from '@/components/balances/AssetsHeader'
@@ -12,9 +13,11 @@ import AssetsSettingsButton from '@/components/balances/AssetsSettingsButton'
 import CurrencySelect from '@/components/balances/CurrencySelect'
 import StakingBanner from '@/components/dashboard/StakingBanner'
 import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useIsStakingBannerVisible'
-import { Box } from '@mui/material'
+import { Box, Card } from '@mui/material'
 import { BRAND_NAME } from '@/config/constants'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
+
+const PortfolioChart = dynamic(() => import('@/features/charts/components/PortfolioChart'))
 
 const Balances: NextPage = () => {
   const portfolio = usePortfolio()
@@ -50,6 +53,9 @@ const Balances: NextPage = () => {
             <Box mb={2}>
               <TotalAssetValue fiatTotal={displayedTotal} />
             </Box>
+            <Card sx={{ border: 0, p: 2, mb: 3 }}>
+              <PortfolioChart />
+            </Card>
             <AssetsTable setShowHiddenAssets={setShowHiddenAssets} showHiddenAssets={showHiddenAssets} />
           </>
         )}

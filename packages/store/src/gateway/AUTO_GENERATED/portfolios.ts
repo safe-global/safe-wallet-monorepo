@@ -23,6 +23,28 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/portfolio/${queryArg.address}`, method: 'DELETE' }),
         invalidatesTags: ['portfolio'],
       }),
+      portfolioGetWalletChartV1: build.query<PortfolioGetWalletChartV1ApiResponse, PortfolioGetWalletChartV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/portfolio/${queryArg.address}/chart/${queryArg.period}`,
+          params: {
+            currency: queryArg.currency,
+          },
+        }),
+        providesTags: ['portfolio'],
+      }),
+      portfolioClearWalletChartV1: build.mutation<
+        PortfolioClearWalletChartV1ApiResponse,
+        PortfolioClearWalletChartV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/portfolio/${queryArg.address}/chart/${queryArg.period}`,
+          method: 'DELETE',
+          params: {
+            currency: queryArg.currency,
+          },
+        }),
+        invalidatesTags: ['portfolio'],
+      }),
     }),
     overrideExisting: false,
   })
@@ -46,6 +68,24 @@ export type PortfolioClearPortfolioV1ApiResponse = unknown
 export type PortfolioClearPortfolioV1ApiArg = {
   /** Wallet address (0x prefixed hex string) */
   address: string
+}
+export type PortfolioGetWalletChartV1ApiResponse = /** status 200  */ WalletChart
+export type PortfolioGetWalletChartV1ApiArg = {
+  /** Wallet address (0x prefixed hex string) */
+  address: string
+  /** Time period for the chart data */
+  period: 'hour' | 'day' | 'week' | 'month' | '3months' | 'year' | 'max'
+  /** Fiat currency code for value conversion (e.g., USD, EUR) */
+  currency?: string
+}
+export type PortfolioClearWalletChartV1ApiResponse = unknown
+export type PortfolioClearWalletChartV1ApiArg = {
+  /** Wallet address (0x prefixed hex string) */
+  address: string
+  /** Time period */
+  period: 'hour' | 'day' | 'week' | 'month' | '3months' | 'year' | 'max'
+  /** Fiat currency code */
+  currency?: string
 }
 export type TokenBalanceTokenInfo = {
   /** Token contract address (0x0000000000000000000000000000000000000000 for native tokens) */
@@ -163,8 +203,19 @@ export type Portfolio = {
   /** Profit and Loss metrics (null if unavailable) */
   pnl?: PnL | null
 }
+export type WalletChart = {
+  /** Start timestamp of the chart period (ISO 8601) */
+  beginAt: string
+  /** End timestamp of the chart period (ISO 8601) */
+  endAt: string
+  /** Array of portfolio value data points. Each point is a tuple of [timestamp (Unix seconds), value in fiat currency] */
+  points: number[][]
+}
 export const {
   usePortfolioGetPortfolioV1Query,
   useLazyPortfolioGetPortfolioV1Query,
   usePortfolioClearPortfolioV1Mutation,
+  usePortfolioGetWalletChartV1Query,
+  useLazyPortfolioGetWalletChartV1Query,
+  usePortfolioClearWalletChartV1Mutation,
 } = injectedRtkApi

@@ -1,6 +1,7 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { Box } from '@mui/material'
+import { Box, Card } from '@mui/material'
+import dynamic from 'next/dynamic'
 
 import AssetsHeader from '@/components/balances/AssetsHeader'
 import AssetsSettingsButton from '@/components/balances/AssetsSettingsButton'
@@ -12,6 +13,8 @@ import usePortfolio from '@/hooks/usePortfolio'
 import { BRAND_NAME } from '@/config/constants'
 import PagePlaceholder from '@/components/common/PagePlaceholder'
 import NoAssetsIcon from '@/public/images/balances/no-assets.svg'
+
+const PortfolioChart = dynamic(() => import('@/features/charts/components/PortfolioChart'))
 
 const Portfolio: NextPage = () => {
   const portfolio = usePortfolio()
@@ -37,6 +40,9 @@ const Portfolio: NextPage = () => {
             <Box mb={2}>
               <TotalAssetValue fiatTotal={displayedTotal} title="Total portfolio value" />
             </Box>
+            <Card sx={{ border: 0, p: 2, mb: 3 }}>
+              <PortfolioChart />
+            </Card>
             {portfolio.pnl && (
               <Box mb={3}>
                 <PnLSummary pnl={portfolio.pnl} />
