@@ -1,27 +1,7 @@
 appId: global.safe.mobileapp.ios
 ---
-- launchApp:
-    appId: 'global.safe.mobileapp.ios'
-    clearState: true
-    clearKeychain: true
-    permissions:
-      all: allow
 - runFlow:
-    when:
-      visible:
-        text: 'http.*'
-    commands:
-      - tapOn: 'http.*'
-- runFlow:
-    when:
-      visible: 'Continue'
-    commands:
-      - tapOn: 'Continue'
-- runFlow:
-    when:
-      visible: 'Reload'
-    commands:
-      - tapOn: 'Reload'
+    file: ../shared/clean-app-start.yml
 - tapOn:
     id: 'e2eOnboardedAccount'
 - tapOn:
