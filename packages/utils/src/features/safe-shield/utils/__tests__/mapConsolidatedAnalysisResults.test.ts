@@ -206,4 +206,82 @@ describe('mapConsolidatedAnalysisResults', () => {
     expect(result).toHaveLength(1)
     expect(result[0].type).toBe(RecipientStatus.LOW_ACTIVITY)
   })
+
+  it('should skip non-array group results when consolidating', () => {
+    const address1 = faker.finance.ethereumAddress()
+    const address2 = faker.finance.ethereumAddress()
+
+    const addressesResultsMap: RecipientAnalysisResults = {
+      [address1]: {
+        [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
+        [StatusGroup.RECIPIENT_ACTIVITY]: null as any, // Non-array value
+      },
+      [address2]: {
+        [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.unknownRecipient().build()],
+        [StatusGroup.RECIPIENT_ACTIVITY]: {} as any, // Non-array value
+      },
+    }
+
+    const addressResults: GroupedAnalysisResults[] = Object.values(addressesResultsMap)
+
+    const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
+
+    expect(result).toHaveLength(1)
+    expect(result[0].severity).toBe(Severity.INFO)
+    expect(result[0].type).toBe(RecipientStatus.UNKNOWN_RECIPIENT)
+  })
+
+  it('should handle mixed array and non-array group results', () => {
+    const address1 = faker.finance.ethereumAddress()
+    const address2 = faker.finance.ethereumAddress()
+    const address3 = faker.finance.ethereumAddress()
+
+    const addressesResultsMap: RecipientAnalysisResults = {
+      [address1]: {
+        [StatusGroup.ADDRESS_BOOK]: undefined as any, // Non-array value
+        [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
+      },
+      [address2]: {
+        [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
+        [StatusGroup.RECIPIENT_ACTIVITY]: 'invalid' as any, // Non-array value
+      },
+      [address3]: {
+        [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.unknownRecipient().build()],
+        [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
+      },
+    }
+
+    const addressResults: GroupedAnalysisResults[] = Object.values(addressesResultsMap)
+
+    const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
+
+    expect(result).toHaveLength(2)
+    expect(result[0].severity).toBe(Severity.WARN)
+    expect(result[0].type).toBe(RecipientStatus.LOW_ACTIVITY)
+    expect(result[0].description).toContain('2 addresses have low activity.')
+    expect(result[1].severity).toBe(Severity.INFO)
+    expect(result[1].type).toBe(RecipientStatus.UNKNOWN_RECIPIENT)
+  })
+
+  it('should return empty array when all group results are non-array', () => {
+    const address1 = faker.finance.ethereumAddress()
+    const address2 = faker.finance.ethereumAddress()
+
+    const addressesResultsMap: RecipientAnalysisResults = {
+      [address1]: {
+        [StatusGroup.ADDRESS_BOOK]: null as any,
+        [StatusGroup.RECIPIENT_ACTIVITY]: {} as any,
+      },
+      [address2]: {
+        [StatusGroup.ADDRESS_BOOK]: undefined as any,
+        [StatusGroup.RECIPIENT_ACTIVITY]: 'invalid' as any,
+      },
+    }
+
+    const addressResults: GroupedAnalysisResults[] = Object.values(addressesResultsMap)
+
+    const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
+
+    expect(result).toEqual([])
+  })
 })
