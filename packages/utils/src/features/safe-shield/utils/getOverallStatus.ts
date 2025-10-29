@@ -45,6 +45,7 @@ export const getOverallStatus = (
     if (data) {
       for (const addressResults of Object.values(data)) {
         for (const groupResults of Object.values(addressResults)) {
+          if (!Array.isArray(groupResults)) continue
           if (groupResults) {
             allResults.push(...(groupResults as AnalysisResult[]))
           }

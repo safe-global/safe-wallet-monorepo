@@ -7,6 +7,10 @@ import { SignOrExecuteFormV2 } from '../SignOrExecuteFormV2'
 import { encodeBytes32String } from 'ethers'
 import { Status } from 'zodiac-roles-deployments'
 import * as useIsSafeOwner from '@/hooks/useIsSafeOwner'
+import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import type { ReactElement } from 'react'
+
+const renderWithSafeShield = (ui: ReactElement) => render(<SafeShieldProvider>{ui}</SafeShieldProvider>)
 
 const txDetails = {
   safeAddress: '0xE20CcFf2c38Ef3b64109361D7b7691ff2c7D5f67',
@@ -128,7 +132,7 @@ describe('SignOrExecuteFormV2', () => {
     jest.spyOn(hooks, 'useImmediatelyExecutable').mockReturnValue(false)
     jest.spyOn(useIsSafeOwner, 'default').mockReturnValue(true)
 
-    const { queryByTestId } = render(
+    const { queryByTestId } = renderWithSafeShield(
       <SignOrExecuteFormV2
         txDetails={txDetails}
         txId="0x012312"
@@ -149,7 +153,7 @@ describe('SignOrExecuteFormV2', () => {
     jest.spyOn(hooks, 'useImmediatelyExecutable').mockReturnValue(false)
     jest.spyOn(useIsSafeOwner, 'default').mockReturnValue(true)
 
-    const { queryByTestId } = render(
+    const { queryByTestId } = renderWithSafeShield(
       <SignOrExecuteFormV2
         txDetails={txDetails}
         txId="0x012312"
@@ -170,7 +174,7 @@ describe('SignOrExecuteFormV2', () => {
     jest.spyOn(hooks, 'useImmediatelyExecutable').mockReturnValue(false)
     jest.spyOn(useIsSafeOwner, 'default').mockReturnValue(false)
 
-    const { queryByTestId } = render(
+    const { queryByTestId } = renderWithSafeShield(
       <SignOrExecuteFormV2
         txDetails={txDetails}
         txId="0x012312"
@@ -190,7 +194,7 @@ describe('SignOrExecuteFormV2', () => {
     jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
     jest.spyOn(useIsSafeOwner, 'default').mockReturnValue(true)
 
-    const { queryByTestId } = render(
+    const { queryByTestId } = renderWithSafeShield(
       <SignOrExecuteFormV2
         txDetails={txDetails}
         txId="0x012312"

@@ -25,6 +25,7 @@ export const mapVisibleAnalysisResults = (
   if (addressResults.length === 1) {
     const results: AnalysisResult[] = []
     for (const groupResults of Object.values(addressResults[0])) {
+      if (!Array.isArray(groupResults)) continue
       const primaryGroupResult = getPrimaryResult<AnalysisResult>(groupResults)
       if (primaryGroupResult) {
         results.push(primaryGroupResult)
