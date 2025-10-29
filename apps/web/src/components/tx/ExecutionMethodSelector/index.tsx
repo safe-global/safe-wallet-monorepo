@@ -194,7 +194,7 @@ const _ExecutionMethodSelector = ({
 
       {shouldRelay && noFeeNovember?.isEligible ? (
         <Typography variant="body2" className={css.transactionCounter}>
-          <span className={css.counterNumber}>{noFeeNovember.remaining}</span> free transactions left today
+          <span className={css.counterNumber}>{noFeeNovember.remaining}</span> free transactions left
         </Typography>
       ) : shouldRelay && relays ? (
         <RemainingRelays relays={relays} tooltip={tooltip} />
