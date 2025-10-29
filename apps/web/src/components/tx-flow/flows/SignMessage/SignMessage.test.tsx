@@ -284,7 +284,7 @@ describe('SignMessage', () => {
     })
   })
 
-  it.skip('confirms the message if already proposed', async () => {
+  it('confirms the message if already proposed', async () => {
     jest.spyOn(onboard, 'default').mockReturnValue(mockOnboard)
     jest.spyOn(useIsSafeOwnerHook, 'default').mockImplementation(() => true)
     jest.spyOn(useWalletHook, 'default').mockReturnValue({ provider: mockProvider } as unknown as ConnectedWallet)
@@ -314,19 +314,6 @@ describe('SignMessage', () => {
       confirmationsSubmitted: 1,
     } as unknown as MessageItem
 
-    jest.spyOn(useSafeMessage, 'default').mockReturnValueOnce([msg, jest.fn, undefined])
-
-    const { getByText } = renderWithSafeShield(
-      <SignMessage logoUri="www.fake.com/test.png" name="Test App" message={messageText} requestId="123" />,
-    )
-
-    const confirmationSpy = jest
-      .spyOn(sender, 'dispatchSafeMsgConfirmation')
-      .mockImplementation(() => Promise.resolve())
-
-    const button = getByText('Sign')
-    expect(button).toBeEnabled()
-
     const newMsg = {
       ...msg,
       confirmations: [
@@ -355,7 +342,24 @@ describe('SignMessage', () => {
       }),
     )
 
-    jest.spyOn(useSafeMessage, 'default').mockReturnValue([newMsg, jest.fn, undefined])
+    // Use a mutable object to control the return value
+    let currentMessage = msg
+    const mockSetMessage = jest.fn((newVal) => {
+      currentMessage = newVal
+    })
+
+    jest.spyOn(useSafeMessage, 'default').mockImplementation(() => [currentMessage, mockSetMessage, undefined])
+
+    const { getByText } = renderWithSafeShield(
+      <SignMessage logoUri="www.fake.com/test.png" name="Test App" message={messageText} requestId="123" />,
+    )
+
+    const confirmationSpy = jest
+      .spyOn(sender, 'dispatchSafeMsgConfirmation')
+      .mockImplementation(() => Promise.resolve())
+
+    const button = getByText('Sign')
+    expect(button).toBeEnabled()
 
     act(() => {
       fireEvent.click(button)
