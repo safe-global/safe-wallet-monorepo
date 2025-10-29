@@ -168,5 +168,57 @@ describe('mapVisibleAnalysisResults', () => {
       expect(result[1].severity).toBe(Severity.INFO)
       expect(result[2].severity).toBe(Severity.OK)
     })
+
+    it('should skip non-array group results for single address', () => {
+      const address1 = faker.finance.ethereumAddress()
+
+      const addressesResultsMap: RecipientAnalysisResults = {
+        [address1]: {
+          [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
+          [StatusGroup.RECIPIENT_ACTIVITY]: null as any, // Non-array value
+          [StatusGroup.RECIPIENT_INTERACTION]: {} as any, // Non-array value
+        },
+      }
+
+      const result = mapVisibleAnalysisResults(addressesResultsMap)
+
+      expect(result).toHaveLength(1)
+      expect(result[0].severity).toBe(Severity.OK)
+      expect(result[0].type).toBe(RecipientStatus.KNOWN_RECIPIENT)
+    })
+
+    it('should handle mixed array and non-array group results for single address', () => {
+      const address1 = faker.finance.ethereumAddress()
+
+      const addressesResultsMap: RecipientAnalysisResults = {
+        [address1]: {
+          [StatusGroup.ADDRESS_BOOK]: undefined as any, // Non-array value
+          [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
+          [StatusGroup.RECIPIENT_INTERACTION]: 'invalid' as any, // Non-array value
+        },
+      }
+
+      const result = mapVisibleAnalysisResults(addressesResultsMap)
+
+      expect(result).toHaveLength(1)
+      expect(result[0].severity).toBe(Severity.WARN)
+      expect(result[0].type).toBe(RecipientStatus.LOW_ACTIVITY)
+    })
+
+    it('should return empty array when all group results are non-array for single address', () => {
+      const address1 = faker.finance.ethereumAddress()
+
+      const addressesResultsMap: RecipientAnalysisResults = {
+        [address1]: {
+          [StatusGroup.ADDRESS_BOOK]: null as any,
+          [StatusGroup.RECIPIENT_ACTIVITY]: {} as any,
+          [StatusGroup.RECIPIENT_INTERACTION]: 'invalid' as any,
+        },
+      }
+
+      const result = mapVisibleAnalysisResults(addressesResultsMap)
+
+      expect(result).toEqual([])
+    })
   })
 })

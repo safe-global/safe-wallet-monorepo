@@ -7,6 +7,10 @@ import { render } from '@/tests/test-utils'
 import { fireEvent } from '@testing-library/react'
 import { encodeBytes32String } from 'ethers'
 import { Status } from 'zodiac-roles-deployments'
+import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import type { ReactElement } from 'react'
+
+const renderWithSafeShield = (ui: ReactElement) => render(<SafeShieldProvider>{ui}</SafeShieldProvider>)
 
 let isSafeOwner = true
 // mock useIsSafeOwner
@@ -139,7 +143,7 @@ describe('SignOrExecute', () => {
   })
 
   it('should display a safeTxError', () => {
-    const { getByText } = render(
+    const { getByText } = renderWithSafeShield(
       <SignOrExecuteForm
         txDetails={txDetails}
         txId="0x012312"
@@ -159,7 +163,7 @@ describe('SignOrExecute', () => {
     it('should display radio options to sign or execute if both are possible', () => {
       jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
 
-      const { getByText } = render(
+      const { getByText } = renderWithSafeShield(
         <SignOrExecuteForm
           txDetails={txDetails}
           txId="0x012312"
@@ -180,7 +184,7 @@ describe('SignOrExecute', () => {
       jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
       jest.spyOn(hooks, 'useImmediatelyExecutable').mockReturnValue(true)
 
-      const { getByText } = render(
+      const { getByText } = renderWithSafeShield(
         <SignOrExecuteForm
           txDetails={txDetails}
           txId="0x012312"
@@ -200,7 +204,7 @@ describe('SignOrExecute', () => {
       jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
       jest.spyOn(hooks, 'useImmediatelyExecutable').mockReturnValue(false)
 
-      const { queryByTestId } = render(
+      const { queryByTestId } = renderWithSafeShield(
         <SignOrExecuteForm
           txDetails={txDetails}
           txId="0x012312"
@@ -222,7 +226,7 @@ describe('SignOrExecute', () => {
       jest.spyOn(hooks, 'useImmediatelyExecutable').mockReturnValue(false)
       isSafeOwner = true
 
-      const { queryByTestId } = render(
+      const { queryByTestId } = renderWithSafeShield(
         <SignOrExecuteForm
           txDetails={txDetails}
           txId="0x012312"
@@ -244,7 +248,7 @@ describe('SignOrExecute', () => {
       jest.spyOn(hooks, 'useImmediatelyExecutable').mockReturnValue(false)
       isSafeOwner = false
 
-      const { queryByTestId } = render(
+      const { queryByTestId } = renderWithSafeShield(
         <SignOrExecuteForm
           txDetails={txDetails}
           txId="0x012312"
@@ -264,7 +268,7 @@ describe('SignOrExecute', () => {
       jest.spyOn(execThroughRoleHooks, 'useRoles').mockReturnValue([TEST_ROLE_OK])
       jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
 
-      const { queryByTestId } = render(
+      const { queryByTestId } = renderWithSafeShield(
         <SignOrExecuteForm
           txDetails={txDetails}
           txId="0x012312"
@@ -284,7 +288,7 @@ describe('SignOrExecute', () => {
   it('should not display radio options if execution is the only option', () => {
     jest.spyOn(execThroughRoleHooks, 'useRoles').mockReturnValue([])
 
-    const { queryByText } = render(
+    const { queryByText } = renderWithSafeShield(
       <SignOrExecuteForm
         txDetails={txDetails}
         txId="0x012312"
@@ -301,7 +305,7 @@ describe('SignOrExecute', () => {
   it('should display a sign/execute title if that option is selected', () => {
     jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
 
-    const { getByTestId, getByText } = render(
+    const { getByTestId, getByText } = renderWithSafeShield(
       <SignOrExecuteForm
         txDetails={txDetails}
         txId="0x012312"
@@ -330,7 +334,7 @@ describe('SignOrExecute', () => {
   })
 
   it('should not display safeTxError message for valid transactions', () => {
-    const { queryByText } = render(
+    const { queryByText } = renderWithSafeShield(
       <SignOrExecuteForm
         txDetails={txDetails}
         txId="0x012312"
