@@ -111,3 +111,12 @@ appId: global.safe.mobileapp.ios
 
 - runFlow:
     file: ../components/tx-history/disable-module-tx-card.yml
+
+- scroll
+
+# ===========================================
+# Remove Owner Settings Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/remove-owner-tx-card.yml
