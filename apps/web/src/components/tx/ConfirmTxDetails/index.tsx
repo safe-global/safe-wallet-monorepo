@@ -4,8 +4,8 @@ import { Receipt } from './Receipt'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useContext } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import SignOrExecuteFormV2 from '../SignOrExecuteForm/SignOrExecuteFormV2'
-import type { SignOrExecuteProps } from '../SignOrExecuteForm/SignOrExecuteFormV2'
+import SignOrExecuteForm from '../SignOrExecuteForm/SignOrExecuteForm'
+import type { SignOrExecuteProps } from '../SignOrExecuteForm/SignOrExecuteForm'
 import useTxPreview from '../confirmation-views/useTxPreview'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
@@ -96,7 +96,7 @@ export const ConfirmTxDetails = (props: SignOrExecuteProps) => {
         </Grid>
       </Grid>
 
-      <SignOrExecuteFormV2 origin={txOrigin} isCreation={!props.txId} {...props} />
+      <SignOrExecuteForm origin={txOrigin} isCreation={!props.txId} {...props} />
     </TxCard>
   )
 }
