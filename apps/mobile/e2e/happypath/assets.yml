@@ -1,0 +1,129 @@
+appId: global.safe.mobileapp.ios
+---
+# Clean app start and navigate to onboarded account
+- runFlow:
+    file: ../shared/clean-app-start.yml
+
+- tapOn:
+    id: 'e2eOnboardedAccountNoNotifications'
+
+# Test Home tab / Assets default view
+- assertVisible:
+    id: 'home-tab'
+
+- assertVisible:
+    id: 'fiat-balance-symbol'
+    text: '.*\$.*'
+
+# Test Tokens Tab - Default view
+- assertVisible:
+    id: 'tab-content-Tokens-0'
+
+# Verify native token appears in the list
+- assertVisible:
+    text: '.*\d+\.?\d*\s*ETH.*'
+
+# Verify manage tokens button is visible
+- assertVisible:
+    id: 'manage-tokens-button'
+
+# Verify token symbols and balances are visible
+- assertVisible:
+    text: '.*\d+\.\d+.*'
+
+# Verify token fiat symbol is visible
+- assertVisible:
+    id: 'token-ETH-fiat-balance'
+    text: '.*\$.*'
+
+# Switch to NFTs Tab
+- tapOn:
+    text: 'NFTs'
+
+# Verify NFTs tab content appears
+- assertVisible:
+    id: 'tab-content-NFTs-1'
+
+# Verify NFT is visible and there are no NFTs
+- assertVisible:
+    text: '(?i)(No NFTs).*'
+
+# Return to Tokens Tab
+- tapOn:
+    text: 'Tokens'
+
+# Verify token list is preserved when switching back
+- assertVisible:
+    id: 'tab-content-Tokens-0'
+
+# Verify manage tokens button is still visible
+- assertVisible:
+    id: 'manage-tokens-button'
+
+# Open Manage Tokens Sheet
+- tapOn:
+    id: 'manage-tokens-button'
+
+# Verify sheet slides up from bottom
+# Look for sheet title
+- assertVisible:
+    text: 'Manage tokens'
+
+# Verify "hide suspicious tokens" toggle appears
+- assertVisible:
+    id: 'toggle-hide-suspicious-tokens'
+
+# Verify description text appears
+- assertVisible:
+    text: '(?i)choose which tokens.*'
+
+# Test toggling the suspicious tokens filter
+- tapOn:
+    id: 'toggle-hide-suspicious-tokens'
+
+# Tap outside or dismiss the sheet by swiping down
+- swipe:
+    direction: 'DOWN'
+    startPoint: '50%,50%'
+    endPoint: '50%,80%'
+
+# Verify we're back to the tokens list
+- assertVisible:
+    id: 'tab-content-Tokens-0'
+
+# Test completed successfully - Safe1
+
+# ============================================
+# Switch to Safe2 and verify NFTs are loaded
+# ============================================
+
+# Tap on the dropdown to switch safes
+- tapOn:
+    id: 'dropdown-label-view'
+    index: 0
+
+# Select Safe2 from the dropdown
+# (Assuming Safe2 is the second safe in the list)
+- tapOn:
+    text: '.*Safe2.*'
+    index: 0
+
+# Verify we're on Safe2 by checking the balance displays
+- assertVisible:
+    id: 'home-tab'
+
+# Navigate to NFTs Tab
+- tapOn:
+    text: 'NFTs'
+
+# Verify NFTs tab content appears for Safe2
+- assertVisible:
+    id: 'tab-content-NFTs-1'
+
+# Verify NFTs are loaded (not the empty state)
+# Safe2 should have NFTs, so we check for NFT items or collection names
+- assertVisible:
+    text: '(?i)(NFT|Collectible|#\d+).*'
+
+- assertVisible: 'CatFactory #1'
+# Test completed successfully - Safe2 NFTs verified
