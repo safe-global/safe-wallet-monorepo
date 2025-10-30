@@ -1,4 +1,4 @@
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import extractTxInfo from '../extractTxInfo'
 
 describe('extractTxInfo', () => {

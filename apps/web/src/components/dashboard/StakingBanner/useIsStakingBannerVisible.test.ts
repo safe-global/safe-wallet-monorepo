@@ -1,11 +1,6 @@
 import { renderHook } from '@testing-library/react'
 import useIsStakingBannerVisible from './useIsStakingBannerVisible'
 
-jest.mock('@safe-global/safe-gateway-typescript-sdk', () => ({
-  __esModule: true,
-  TokenType: { NATIVE_TOKEN: 'NATIVE_TOKEN', ERC20: 'ERC20' },
-}))
-
 jest.mock('@/features/stake/hooks/useIsStakingBannerEnabled', () => ({
   __esModule: true,
   default: jest.fn(),

@@ -1,6 +1,6 @@
+import type { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import ExternalLink from '@/components/common/ExternalLink'
 import { NOT_AVAILABLE } from '@/components/transactions/TxDetails'
-import type { MultisigExecutionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { Box, Typography } from '@mui/material'
 import React from 'react'
 

@@ -1,4 +1,4 @@
-import { type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { OperationType } from '@safe-global/types-kit'
 import { Safe_migration__factory } from '@safe-global/utils/types/contracts'

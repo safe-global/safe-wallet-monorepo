@@ -1,3 +1,4 @@
+import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactNode } from 'react'
 import { Alert, AlertTitle, Box, Divider, Stack, Typography } from '@mui/material'
 import semverSatisfies from 'semver/functions/satisfies'
@@ -7,7 +8,6 @@ import { useQueuedTxsLength } from '@/hooks/useTxQueue'
 import ExternalLink from '@/components/common/ExternalLink'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import madProps from '@/utils/mad-props'
-import { type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import { extractTargetVersionFromUpdateSafeTx } from '@/services/tx/safeUpdateParams'
 
 const QUEUE_WARNING_VERSION = '<1.3.0'

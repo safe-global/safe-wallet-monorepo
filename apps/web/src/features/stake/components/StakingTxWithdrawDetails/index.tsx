@@ -1,8 +1,8 @@
+import type { NativeStakingWithdrawTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Box } from '@mui/material'
-import type { StakingTxWithdrawInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import StakingConfirmationTxWithdraw from '@/features/stake/components/StakingConfirmationTx/Withdraw'
 
-const StakingTxWithdrawDetails = ({ info }: { info: StakingTxWithdrawInfo }) => {
+const StakingTxWithdrawDetails = ({ info }: { info: NativeStakingWithdrawTransactionInfo }) => {
   return (
     <Box pl={1} pr={5} display="flex" flexDirection="column" gap={1}>
       <StakingConfirmationTxWithdraw order={info} />

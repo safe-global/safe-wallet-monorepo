@@ -1,9 +1,9 @@
+import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { type ComponentType, type ReactElement, type ReactNode, useContext, useEffect, useState } from 'react'
 import { Box, Container, Grid, Typography, Button, Paper, SvgIcon, IconButton, useMediaQuery } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useTheme } from '@mui/material/styles'
-import type { TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
 import classnames from 'classnames'
 import { ProgressBar } from '@/components/common/ProgressBar'
 import SafeTxProvider, { SafeTxContext } from '../../SafeTxProvider'
@@ -72,7 +72,7 @@ type TxLayoutProps = {
   subtitle?: ReactNode
   icon?: ComponentType
   step?: number
-  txSummary?: TransactionSummary
+  txSummary?: Transaction
   onBack?: () => void
   hideNonce?: boolean
   fixedNonce?: boolean

@@ -1,4 +1,4 @@
-import type { DecodedDataResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import type { DataDecoded } from '@safe-global/store/gateway/AUTO_GENERATED/data-decoded'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import semverSatisfies from 'semver/functions/satisfies'
@@ -25,7 +25,7 @@ type SafeSetup = {
   chainId: string
 }
 
-export const isChangingSignerSetup = (decodedData: DecodedDataResponse | undefined) => {
+export const isChangingSignerSetup = (decodedData: DataDecoded | undefined) => {
   return decodedData?.method === 'addOwnerWithThreshold' || decodedData?.method === 'removeOwner'
 }
 

@@ -1,5 +1,5 @@
+import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useMemo, type ReactElement } from 'react'
-import type { TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'

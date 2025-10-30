@@ -1,7 +1,7 @@
-import type { StakingTxWithdrawInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { NativeStakingWithdrawTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import TokenAmount from '@/components/common/TokenAmount'
 
-const StakingTxWithdrawInfo = ({ info }: { info: StakingTxWithdrawInfo }) => {
+const StakingTxWithdrawInfo = ({ info }: { info: NativeStakingWithdrawTransactionInfo }) => {
   return (
     <>
       <TokenAmount

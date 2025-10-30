@@ -1,3 +1,4 @@
+import { TransactionStatus } from '@safe-global/store/gateway/types'
 import { useEffect, useMemo, useRef } from 'react'
 import { formatError } from '@safe-global/utils/utils/formatters'
 import { selectNotifications, showNotification } from '@/store/notificationsSlice'
@@ -5,15 +6,14 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import { useCurrentChain } from './useChains'
 import useTxQueue from './useTxQueue'
-import { isSignableBy, isTransactionListItem } from '@/utils/transaction-guards'
-import { TransactionStatus } from '@safe-global/safe-gateway-typescript-sdk'
+import { isSignableBy, isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { selectPendingTxs } from '@/store/pendingTxsSlice'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useWallet from './wallets/useWallet'
 import useSafeAddress from './useSafeAddress'
 import { isWalletRejection } from '@/utils/wallets'
 import { getTxLink } from '@/utils/tx-link'
-import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
+import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 import { getGuardErrorInfo } from '@/utils/transaction-errors'
 
@@ -47,7 +47,7 @@ const useTxNotifications = (): void => {
   const dispatch = useAppDispatch()
   const chain = useCurrentChain()
   const safeAddress = useSafeAddress()
-  const [trigger] = useLazyGetTransactionDetailsQuery()
+  const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
 
   /**
    * Show notifications of a transaction's lifecycle
@@ -81,7 +81,7 @@ const useTxNotifications = (): void => {
         const id = txId || txHash
         if (id) {
           try {
-            const { data: txDetails } = await trigger({ chainId: chain.chainId, txId: id })
+            const { data: txDetails } = await trigger({ chainId: chain.chainId, id })
             humanDescription = txDetails?.txInfo.humanDescription || humanDescription
           } catch {}
         }
@@ -124,7 +124,7 @@ const useTxNotifications = (): void => {
       return []
     }
 
-    return page.results.filter(isTransactionListItem).filter(({ transaction }) => {
+    return page.results.filter(isTransactionQueuedItem).filter(({ transaction }) => {
       const isAwaitingConfirmations = transaction.txStatus === TransactionStatus.AWAITING_CONFIRMATIONS
       const isPending = !!pendingTxs[transaction.id]
       const canSign = isSignableBy(transaction, wallet?.address || '')

@@ -1,6 +1,6 @@
+import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { listenerMiddlewareInstance } from '@/store'
 import { createSelector } from '@reduxjs/toolkit'
-import type { TransactionListPage } from '@safe-global/safe-gateway-typescript-sdk'
 import {
   isCreationTxInfo,
   isCustomTxInfo,
@@ -11,9 +11,10 @@ import {
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import { clearPendingTx, selectPendingTxs } from './pendingTxsSlice'
 import { makeLoadableSlice } from './common'
-import { gatewayApi, makeSafeTag, selectSafeInfo } from './slices'
+import { selectSafeInfo } from './slices'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 
-const { slice, selector } = makeLoadableSlice('txHistory', undefined as TransactionListPage | undefined)
+const { slice, selector } = makeLoadableSlice('txHistory', undefined as TransactionItemPage | undefined)
 
 export const txHistorySlice = slice
 export const selectTxHistory = selector
@@ -60,10 +61,9 @@ export const txHistoryListener = (listenerMiddleware: typeof listenerMiddlewareI
 
             if (chainId && safeAddress) {
               listenerApi.dispatch(
-                gatewayApi.util.invalidateTags([
+                cgwApi.util.invalidateTags([
                   {
-                    type: 'OwnedSafes',
-                    id: makeSafeTag(chainId, safeAddress),
+                    type: 'owners',
                   },
                 ]),
               )

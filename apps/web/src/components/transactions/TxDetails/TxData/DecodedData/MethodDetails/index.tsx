@@ -1,17 +1,17 @@
+import type { AddressInfo, DataDecoded } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { isAddress, isArrayParameter, isByte } from '@/utils/transaction-guards'
-import type { AddressEx, DataDecoded } from '@safe-global/safe-gateway-typescript-sdk'
 import { Box, Stack, Typography } from '@mui/material'
 import { Value } from '@/components/transactions/TxDetails/TxData/DecodedData/ValueArray'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 
 type MethodDetailsProps = {
   data: DataDecoded
-  hexData?: string
+  hexData?: string | null
   addressInfoIndex?: {
-    [key: string]: AddressEx
-  }
+    [key: string]: AddressInfo
+  } | null
 }
 
 export const MethodDetails = ({ data, addressInfoIndex, hexData }: MethodDetailsProps): ReactElement | null => {

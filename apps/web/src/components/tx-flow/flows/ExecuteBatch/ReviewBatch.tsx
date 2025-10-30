@@ -33,8 +33,7 @@ import { isWalletRejection } from '@/utils/wallets'
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
 import useUserNonce from '@/components/tx/AdvancedParams/useUserNonce'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
-import { useGetMultipleTransactionDetailsQuery } from '@/store/api/gateway'
-import { skipToken } from '@reduxjs/toolkit/query/react'
+import { useTransactionsGetMultipleTransactionDetailsQuery } from '@safe-global/store/src/gateway/transactions'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { FEATURES, getLatestSafeVersion, hasFeature } from '@safe-global/utils/utils/chains'
 
@@ -68,13 +67,14 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
     data: txsWithDetails,
     error,
     isLoading: loading,
-  } = useGetMultipleTransactionDetailsQuery(
-    chain?.chainId && params.txs.length
-      ? {
-          chainId: chain.chainId,
-          txIds: params.txs.map((tx) => tx.transaction.id),
-        }
-      : skipToken,
+  } = useTransactionsGetMultipleTransactionDetailsQuery(
+    {
+      chainId: chain?.chainId || '',
+      txIds: params.txs.map((tx) => tx.transaction.id),
+    },
+    {
+      skip: !chain?.chainId || !params.txs.length,
+    },
   )
 
   const [multiSendContract] = useAsync(async () => {

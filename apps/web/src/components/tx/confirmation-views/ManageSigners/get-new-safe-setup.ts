@@ -1,6 +1,7 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { checksumAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
-import type { TransactionInfo, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
@@ -80,7 +81,10 @@ export function _getTransactionsData(txInfo: TransactionInfo, txData: Transactio
   if (!isMultiSendTxInfo(txInfo)) {
     transactions = [txData?.hexData]
   } else {
-    transactions = txData?.dataDecoded?.parameters?.[0].valueDecoded?.map(({ data }) => data) ?? []
+    transactions = []
+    if (Array.isArray(txData?.dataDecoded?.parameters?.[0].valueDecoded)) {
+      transactions = txData?.dataDecoded?.parameters?.[0].valueDecoded.map(({ data }) => data)
+    }
   }
 
   return transactions.filter((x) => x != null)

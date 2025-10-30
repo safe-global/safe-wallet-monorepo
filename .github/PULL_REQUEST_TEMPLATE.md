@@ -1,6 +1,6 @@
 ## What it solves
 
-Linear: 
+Resolves: 
 
 ## How this PR fixes it
 

@@ -35,6 +35,7 @@ export const NetworkSelectorContent = ({
         paddingHorizontal: 16,
         paddingBottom: bottomInset + topInset + 100,
       }}
+      accessible={true}
     >
       <>
         <AllNetworksItem isSelected={isAllChainsSelected} isReadOnly={isReadOnly} onSelectAll={onSelectAll} />

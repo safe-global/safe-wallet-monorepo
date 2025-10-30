@@ -1,5 +1,5 @@
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { TransactionStatus } from '@safe-global/safe-gateway-typescript-sdk'
+import { TransactionStatus } from '@safe-global/store/gateway/types'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { TransactionReceipt } from 'ethers'
 import { numberToHex } from '@/utils/hex'
 
@@ -467,7 +467,10 @@ export class SafeWalletProvider {
       return result
     }
 
-    const calls = tx.txData?.dataDecoded?.parameters?.[0].valueDecoded?.length ?? 1
+    let calls = 1
+    if (Array.isArray(tx.txData?.dataDecoded?.parameters?.[0].valueDecoded)) {
+      calls = tx.txData?.dataDecoded?.parameters?.[0].valueDecoded.length ?? 1
+    }
 
     // Typed as number; is hex
     const blockNumber = Number(receipt.blockNumber)

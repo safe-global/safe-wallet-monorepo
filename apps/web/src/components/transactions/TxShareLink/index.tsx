@@ -44,7 +44,7 @@ function ExplorerLink({ txHash }: { txHash: string }) {
   )
 }
 
-export function TxShareBlock({ txId, txHash }: { txId: string; txHash?: string }) {
+export function TxShareBlock({ txId, txHash }: { txId: string; txHash?: string | null }) {
   return (
     <Paper data-testid="share-block" className={css.wrapper}>
       <TxShareAccordion noExpand={!!txHash} />

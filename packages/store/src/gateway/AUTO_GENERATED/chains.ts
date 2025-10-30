@@ -83,7 +83,7 @@ export type BlockExplorerUriTemplate = {
   txHash: string
 }
 export type BalancesProvider = {
-  chainName?: number | null
+  chainName: string | null
   enabled: boolean
 }
 export type ContractAddresses = {

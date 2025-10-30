@@ -1,13 +1,13 @@
+import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { faker } from '@faker-js/faker'
 import shuffle from 'lodash/shuffle'
-import type { AddressEx } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { _isSameSetup } from '../RecoverAccountFlowSetup'
 
 describe('RecoverAccountFlowSetup', () => {
   describe('isSameSetup', () => {
     it('should return true if the owners and threshold are the same', () => {
-      const oldOwners: Array<AddressEx> = [
+      const oldOwners: Array<AddressInfo> = [
         { value: faker.finance.ethereumAddress() },
         { value: faker.finance.ethereumAddress() },
         { value: faker.finance.ethereumAddress() },
@@ -28,7 +28,7 @@ describe('RecoverAccountFlowSetup', () => {
     })
 
     it('should return false if the owners are the same but the threshold is different', () => {
-      const oldOwners: Array<AddressEx> = [
+      const oldOwners: Array<AddressInfo> = [
         { value: faker.finance.ethereumAddress() },
         { value: faker.finance.ethereumAddress() },
         { value: faker.finance.ethereumAddress() },
@@ -50,7 +50,7 @@ describe('RecoverAccountFlowSetup', () => {
     })
 
     it('should return false if the threshold is the same but the owners are different', () => {
-      const oldOwners: Array<AddressEx> = [
+      const oldOwners: Array<AddressInfo> = [
         { value: faker.finance.ethereumAddress() },
         { value: faker.finance.ethereumAddress() },
         { value: faker.finance.ethereumAddress() },

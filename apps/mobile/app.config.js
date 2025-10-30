@@ -5,8 +5,8 @@ const appleDevTeamId = '86487MHG6V'
 
 const sslPinningDomains = {
   'safe-client.staging.5afe.dev': [
-    'qrOvKCFoIx4FHtyP9qY8vHF2hjnLwujZUkuOrsFG5Gc=', // 🍃 Leaf cert (Valid: Nov 22 00:00:00 2024 GMT → Dec 21 23:59:59 2025 GMT)
-    'vxRon/El5KuI4vx5ey1DgmsYmRY0nDd5Cg4GfJ8S+bg=', // 🔗 Intermediate (Valid: Aug 23 22:25:30 2022 GMT → Aug 23 22:25:30 2030 GMT)
+    'q4C71761+V3iWTrVYmUj59dTVrOeoD7KYtOrtA74QBs=', // 🍃 Leaf cert (Valid: Oct 23 00:00:00 2025 GMT → Nov 21 23:59:59 2026 GMT)
+    'DxH4tt40L+eduF6szpY6TONlxhZhBd+pJ9wbHlQ2fuw=', // 🔗 Intermediate (Valid: Aug 23 22:21:28 2022 GMT → Aug 23 22:21:28 2030 GMT)
   ],
   'safe-client.safe.global': [
     'VOstDe9L/YZ7RKPPd7iwAMbsAwCqqblfg3l1IqjUvuE=', // 🍃 Leaf cert (Valid: Jul 12 00:00:00 2025 GMT → Aug 10 23:59:59 2026 GMT)
@@ -20,7 +20,7 @@ const config = {
   name: name,
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
-  version: '1.0.3',
+  version: '1.0.4',
   extra: {
     storybookEnabled: process.env.STORYBOOK_ENABLED,
     eas: {

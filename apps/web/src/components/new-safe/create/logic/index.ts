@@ -1,9 +1,10 @@
 import type { SafeVersion, TransactionOptions } from '@safe-global/types-kit'
 import { type TransactionResponse, type Eip1193Provider, type Provider } from 'ethers'
 import semverSatisfies from 'semver/functions/satisfies'
-import { relayTransaction } from '@safe-global/safe-gateway-typescript-sdk'
-import { type SafeState, cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { type SafeState, cgwApi as safesApi } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { cgwApi as relayApi } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { getStoreInstance } from '@/store'
 import { getReadOnlyProxyFactoryContract } from '@/services/contracts/safeContracts'
 import type { UrlObject } from 'url'
 import { AppRoutes } from '@/config/routes'
@@ -146,13 +147,12 @@ export const estimateSafeCreationGas = async (
  * Uses RTK Query with exponential backoff retry (19 attempts over ~4 minutes)
  */
 export const pollSafeInfo = async (chainId: string, safeAddress: string): Promise<SafeState> => {
-  const { getStoreInstance } = await import('@/store')
   const store = getStoreInstance()
 
   // Use exponential backoff to retry RTK Query calls
   return backOff(
     async () => {
-      const queryAction = cgwApi.endpoints.safesGetSafeV1.initiate(
+      const queryAction = safesApi.endpoints.safesGetSafeV1.initiate(
         { chainId, safeAddress },
         {
           subscribe: false,
@@ -210,15 +210,21 @@ export const getRedirect = (
 }
 
 export const relaySafeCreation = async (chain: Chain, undeployedSafeProps: UndeployedSafeProps) => {
+  const store = getStoreInstance()
+
   const replayedSafeProps = assertNewUndeployedSafeProps(undeployedSafeProps, chain)
   const encodedSafeCreationTx = encodeSafeCreationTx(replayedSafeProps, chain)
 
-  const relayResponse = await relayTransaction(chain.chainId, {
-    to: replayedSafeProps.factoryAddress,
-    data: encodedSafeCreationTx,
-    version: replayedSafeProps.safeVersion,
+  const relayAction = relayApi.endpoints.relayRelayV1.initiate({
+    chainId: chain.chainId,
+    relayDto: {
+      to: replayedSafeProps.factoryAddress,
+      data: encodedSafeCreationTx,
+      version: replayedSafeProps.safeVersion,
+    },
   })
 
+  const relayResponse = await store.dispatch(relayAction).unwrap()
   return relayResponse.taskId
 }
 
