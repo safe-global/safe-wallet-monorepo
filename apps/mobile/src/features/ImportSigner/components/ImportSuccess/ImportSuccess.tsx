@@ -20,7 +20,7 @@ export function ImportSuccess() {
   const handleContinuePress = async () => {
     try {
       router.dismissAll()
-      router.back()
+      router.dismissTo('/signers')
     } catch (error) {
       Logger.error('Navigation error:', error)
     }

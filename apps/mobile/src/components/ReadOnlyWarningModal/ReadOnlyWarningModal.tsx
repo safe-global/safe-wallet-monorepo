@@ -46,6 +46,7 @@ export const ReadOnlyWarningModal = ({ onAddSigner, children }: ReadOnlyWarningM
         topInset={insets.top}
         enableDynamicSizing
         handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
+        accessible={true}
       >
         <BottomSheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom }}>
           <YStack gap="$4" padding="$4" alignItems="center" justifyContent="center">

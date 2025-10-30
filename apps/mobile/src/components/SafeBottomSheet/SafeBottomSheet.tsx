@@ -107,6 +107,7 @@ export function SafeBottomSheet<T>({
             onLayout={(e) => {
               setFooterHeight(e.nativeEvent.layout.height)
             }}
+            accessible={true}
           >
             {FooterComponent && <FooterComponent />}
           </View>
@@ -129,6 +130,7 @@ export function SafeBottomSheet<T>({
       footerComponent={isSortable ? undefined : renderFooter}
       topInset={insets.top}
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
+      accessible={true}
     >
       {isSortable ? (
         <DraggableFlatList<T>
@@ -142,6 +144,7 @@ export function SafeBottomSheet<T>({
         />
       ) : (
         <BottomSheetScrollView
+          accessible={true}
           contentContainerStyle={[
             styles.scrollInnerContainer,
             {

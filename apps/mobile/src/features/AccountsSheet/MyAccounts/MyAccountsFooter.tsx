@@ -21,9 +21,9 @@ const MyAccountsButton = styled(View, {
 export function MyAccountsFooter() {
   const { bottom } = useSafeAreaInsets()
   return (
-    <MyAccountsFooterContainer marginBottom={-bottom} paddingBottom={bottom + getTokenValue('$4')}>
+    <MyAccountsFooterContainer marginBottom={-bottom} paddingBottom={bottom + getTokenValue('$4')} tabIndex={0}>
       <Link href={'/(import-accounts)'} asChild>
-        <MyAccountsButton testID="add-existing-account">
+        <MyAccountsButton testID="add-existing-account" tabIndex={0}>
           <View paddingLeft="$2">
             <Badge
               themeName="badge_background"

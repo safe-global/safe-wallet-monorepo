@@ -145,6 +145,7 @@ export const Settings = ({
                   >
                     <SafeListItem
                       label={'Signers'}
+                      testID="settings-signers-list-item"
                       leftNode={<SafeFontIcon name={'owners'} color={'$colorSecondary'} />}
                       rightNode={
                         <View flexDirection={'row'} alignItems={'center'} justifyContent={'center'}>
