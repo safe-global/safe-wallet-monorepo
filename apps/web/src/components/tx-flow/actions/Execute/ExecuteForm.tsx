@@ -16,6 +16,7 @@ import useWalletCanRelay from '@/hooks/useWalletCanRelay'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
 import useGasTooHigh from '@/features/no-fee-november/hooks/useGasTooHigh'
+import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
 import { hasRemainingRelays } from '@/utils/relaying'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
@@ -79,15 +80,17 @@ export const ExecuteForm = ({
   const [walletCanRelay] = useWalletCanRelay(safeTx)
   const relays = useRelaysBySafe()
   const { isEligible: isNoFeeNovember, remaining, limit, blockedAddress } = useNoFeeNovemberEligibility()
+  const isNoFeeNovemberEnabled = useIsNoFeeNovemberFeatureEnabled()
   const gasTooHigh = useGasTooHigh(safeTx)
 
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
 
   // No-fee November REPLACES relay when eligible AND not blocked AND gas is not too high AND has remaining
-  const canRelay = !isNoFeeNovember && walletCanRelay && hasRemainingRelays(relays[0])
-  const canNoFeeNovember = isNoFeeNovember && !blockedAddress && !gasTooHigh && remaining && remaining > 0
-  const isLimitReached = isNoFeeNovember && !blockedAddress && remaining === 0
+  const canRelay = (!isNoFeeNovember || !isNoFeeNovemberEnabled) && walletCanRelay && hasRemainingRelays(relays[0])
+  const canNoFeeNovember =
+    isNoFeeNovemberEnabled && isNoFeeNovember && !blockedAddress && !gasTooHigh && !!remaining && remaining > 0
+  const isLimitReached = isNoFeeNovemberEnabled && isNoFeeNovember && !blockedAddress && remaining === 0
 
   // If gas is too high or limit reached, force WALLET method
   useEffect(() => {
@@ -106,11 +109,18 @@ export const ExecuteForm = ({
   // Also show if gas is too high but feature is otherwise available (to show disabled state)
   // Or if limit is reached (to show 0/X available state)
   const showExecutionSelector =
-    canNoFeeNovember || canRelay || (isNoFeeNovember && !blockedAddress && gasTooHigh) || isLimitReached
+    canNoFeeNovember ||
+    canRelay ||
+    (isNoFeeNovemberEnabled && isNoFeeNovember && !blockedAddress && gasTooHigh) ||
+    isLimitReached
 
   // Determine which method will be used
   const willRelay = !!(canRelay && executionMethod === ExecutionMethod.RELAY)
-  const willNoFeeNovember = !!(canNoFeeNovember && executionMethod === ExecutionMethod.NO_FEE_NOVEMBER)
+  const willNoFeeNovember = !!(
+    isNoFeeNovemberEnabled &&
+    canNoFeeNovember &&
+    executionMethod === ExecutionMethod.NO_FEE_NOVEMBER
+  )
 
   // Estimate gas limit
   const { gasLimit, gasLimitError } = useGasLimit(safeTx)

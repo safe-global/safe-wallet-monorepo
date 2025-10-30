@@ -44,6 +44,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import NoFeeNovemberTransactionCard from '@/features/no-fee-november/components/NoFeeNovemberTransactionCard'
 import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
+import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
 
 export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balance: string }): ReactElement => (
   <Grid
@@ -90,6 +91,7 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
   const isMassPayoutsEnabled = useHasFeature(FEATURES.MASS_PAYOUTS)
   const { onNext, data } = useContext(TxFlowContext) as TxFlowContextType<MultiTokenTransferParams>
   const { isEligible } = useNoFeeNovemberEligibility()
+  const isNoFeeNovemberEnabled = useIsNoFeeNovemberFeatureEnabled()
 
   useEffect(() => {
     if (txNonce !== undefined) {
@@ -207,7 +209,7 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
                   >{`${recipientFields.length}/${MAX_RECIPIENTS}`}</Typography>
                 </Stack>
 
-                {isEligible && <NoFeeNovemberTransactionCard />}
+                {isEligible && isNoFeeNovemberEnabled && <NoFeeNovemberTransactionCard />}
 
                 {hasInsufficientFunds && (
                   <Alert data-testid="insufficient-balance-error" severity="error">
