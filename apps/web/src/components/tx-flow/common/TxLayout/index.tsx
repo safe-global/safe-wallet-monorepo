@@ -175,7 +175,7 @@ const TxLayout = ({
                   </Grid>
 
                   {/* Sidebar */}
-                  {!isReplacement && (
+                  {!isReplacement && !hideSafeShield && (
                     <Grid
                       size={{ xs: 12, [smallScreenBreakpoint]: 4.5 }}
                       sx={{ width: { lg: 320 } }}
