@@ -5,7 +5,7 @@ import { FETCH_STATUS } from '@safe-global/utils/components/tx/security/tenderly
 import type { UseSimulationReturn } from '@safe-global/utils/components/tx/security/tenderly/useSimulation'
 import { getSimulationStatus } from '@safe-global/utils/components/tx/security/tenderly/utils'
 
-type SimulationStatus = {
+export type SimulationStatus = {
   isLoading: boolean
   isFinished: boolean
   isSuccess: boolean
