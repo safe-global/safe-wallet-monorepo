@@ -1,0 +1,21 @@
+appId: global.safe.mobileapp.ios
+---
+- assertVisible: 'Confirmations'
+
+- assertVisible:
+    id: 'history-confirmations-info-badge-text'
+    text: '\d{1,2}/\d{1,2}'
+
+- tapOn: Confirmations
+
+- assertVisible: 'Signed by'
+
+- assertVisible:
+    id: 'confirmations-sheet-signer-status-text'
+    text: 'Signed'
+
+# Tap outside or dismiss the sheet by swiping down
+- swipe:
+    direction: 'DOWN'
+    startPoint: '50%,50%'
+    endPoint: '50%,80%'

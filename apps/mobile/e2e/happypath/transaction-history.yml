@@ -1,0 +1,54 @@
+appId: global.safe.mobileapp.ios
+---
+# Transaction History E2E Test
+# Tests viewing transaction history with infinite scroll and drilling into transaction details
+
+- runFlow:
+    file: ../shared/clean-app-start.yml
+
+- tapOn:
+    id: 'e2eTransactionHistory'
+
+- assertVisible:
+    id: 'home-tab'
+
+- tapOn:
+    id: 'transactions-tab'
+
+- assertVisible:
+    id: 'tx-history-list'
+
+# Verify transactions are loaded (date groups or transaction items should be visible)
+- assertVisible:
+    text: '.*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).*\d{1,2},.*\d{4}.*'
+    optional: true
+
+# Verify date grouping is visible (sticky headers or date labels)
+- assertVisible:
+    text: '.*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).*'
+    optional: true
+
+# ============================================
+# Pull to Refresh
+# ============================================
+# Pull down on transaction list to refresh
+- swipe:
+    direction: DOWN
+    startPoint: '50%,30%'
+    endPoint: '50%,60%'
+    duration: 300
+
+# Wait for refresh to complete (loader should disappear if shown)
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Verify list is still visible after refresh
+- assertVisible:
+    id: 'tx-history-list'
+
+# ===========================================
+# Rejected Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/reject-tx-card.yml

@@ -1,0 +1,77 @@
+appId: global.safe.mobileapp.ios
+---
+# ===========================================
+# Rejected Transaction
+# ===========================================
+
+- assertVisible: Transaction details
+- assertVisible:
+    id: 'share-transaction-button'
+- assertVisible: On-chain rejection
+- assertVisible: This is an on-chain rejection that didn't send any funds. This on-chain rejection replaced all transactions with nonce 16.
+- assertVisible: To
+- assertVisible:
+    id: 'identicon-image'
+- assertVisible:
+    text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
+- assertVisible:
+    id: 'copy-button'
+- assertVisible:
+    id: 'hash-display-external-link-button'
+- assertVisible: Network
+- assertVisible:
+    id: 'logo-image'
+- assertVisible: Sepolia
+- assertVisible:
+    id: 'transaction-details-button'
+    containsDescendants:
+      - text: 'Transaction details'
+- assertVisible: 'Created'
+- assertVisible:
+    id: 'created-at-value'
+    text: '\d{1,2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4}, \d{1,2}:\d{2} (AM|PM)'
+
+- assertVisible: 'Executed'
+- assertVisible:
+    id: 'executed-at-value'
+    text: '\d{1,2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4}, \d{1,2}:\d{2} (AM|PM)'
+
+- assertVisible: 'Transaction hash'
+- assertVisible: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
+- assertVisible:
+    id: 'hash-display-name-or-address'
+    text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
+
+- assertVisible: 'Status'
+- assertVisible: 'Success'
+
+# ===========================================
+# Confirmations
+# ===========================================
+- runFlow:
+    file: ../../shared/test-tx-history-confirmations.yml
+
+# ===========================================
+# Test Explorer Link
+# ===========================================
+- runFlow:
+    file: ../../shared/test-explorer-link.yml
+
+- assertVisible: Transaction details
+
+# ===========================================
+# Test Share Transaction Button
+# ===========================================
+- runFlow:
+    file: ../../shared/test-share-link.yml
+
+- assertVisible: Transaction details
+
+# ===========================================
+# Test Transaction Details Button
+# ===========================================
+
+- runFlow:
+    file: ../../shared/test-advanced-details.yml
+
+- assertVisible: Transaction details

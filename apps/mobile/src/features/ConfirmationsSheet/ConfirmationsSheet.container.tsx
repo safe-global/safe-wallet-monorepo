@@ -87,7 +87,7 @@ export const ConfirmationsSheetContainer = () => {
                   <View alignItems="center" flexDirection="row" gap="$1">
                     {(isHistoryTransaction || hasSigned) && <SafeFontIcon size={12} name="check" />}
 
-                    <Text fontWeight={600} color={'$color'}>
+                    <Text fontWeight={600} color={'$color'} testID="confirmations-sheet-signer-status-text">
                       {isHistoryTransaction || hasSigned ? 'Signed' : 'Pending'}
                     </Text>
                   </View>

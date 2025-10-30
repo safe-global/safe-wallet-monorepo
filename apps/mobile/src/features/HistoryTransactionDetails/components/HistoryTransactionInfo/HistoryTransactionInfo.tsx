@@ -24,12 +24,12 @@ export function HistoryTransactionInfo({ txId, txDetails }: HistoryTransactionIn
   }
 
   return (
-    <YStack paddingHorizontal="$4" gap="$4" marginTop="$4">
-      <Container padding="$4" gap="$4" borderRadius="$3">
+    <YStack paddingHorizontal="$4" gap="$4" marginTop="$4" testID="history-transaction-info">
+      <Container padding="$4" gap="$4" borderRadius="$3" testID="history-transaction-info-container">
         {createdAt && (
           <View alignItems="center" flexDirection="row" justifyContent="space-between">
             <Text color="$textSecondaryLight">Created</Text>
-            <Text fontSize="$4" color="$textPrimary">
+            <Text fontSize="$4" color="$textPrimary" testID="created-at-value">
               {formatWithSchema(createdAt, 'd MMM yyyy, HH:mm a')}
             </Text>
           </View>
@@ -37,7 +37,7 @@ export function HistoryTransactionInfo({ txId, txDetails }: HistoryTransactionIn
         {executedAt && (
           <View alignItems="center" flexDirection="row" justifyContent="space-between">
             <Text color="$textSecondaryLight">Executed</Text>
-            <Text fontSize="$4" color="$textPrimary">
+            <Text fontSize="$4" color="$textPrimary" testID="executed-at-value">
               {formatWithSchema(executedAt, 'd MMM yyyy, HH:mm a')}
             </Text>
           </View>

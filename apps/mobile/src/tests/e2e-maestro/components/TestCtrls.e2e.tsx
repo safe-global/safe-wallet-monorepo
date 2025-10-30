@@ -78,6 +78,24 @@ const assetsTest: { safes: Record<string, SafeOverview> } = {
   },
 }
 
+const mockedTxHistoryAccount: SafeInfo = {
+  address: '0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
+  chainId: '11155111',
+}
+const mockedTxHistorySafeInfo: SafeOverview = {
+  address: { value: '0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb', name: null, logoUri: null },
+  awaitingConfirmation: null,
+  chainId: mockedTxHistoryAccount.chainId,
+  fiatTotal: '0',
+  owners: [
+    { value: '0x4fe7164d7cA511Ab35520bb14065F1693240dC90', name: null, logoUri: null },
+    { value: '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED', name: null, logoUri: null },
+    { value: '0x96D4c6fFC338912322813a77655fCC926b9A5aC5', name: null, logoUri: null },
+  ],
+  queued: 0,
+  threshold: 1,
+}
+
 /**
  * This utility component is only included in the test simulator
  * build. It gives some quick triggers which help improve the pace
@@ -113,6 +131,20 @@ export function TestCtrls() {
       }),
     )
     dispatch(setActiveSafe(mockedActiveAccount1))
+
+    router.replace('/(tabs)')
+  }
+
+  const onPressE2eTransactionHistory = async () => {
+    dispatch(updateSettings({ onboardingVersionSeen: 'v1' }))
+    dispatch(updatePromptAttempts(1))
+    dispatch(
+      addSafe({
+        info: { [mockedTxHistoryAccount.chainId]: mockedTxHistorySafeInfo },
+        address: mockedTxHistoryAccount.address,
+      }),
+    )
+    dispatch(setActiveSafe(mockedTxHistoryAccount))
 
     router.replace('/(tabs)')
   }
@@ -153,6 +185,12 @@ export function TestCtrls() {
       />
       <Pressable testID="e2eTestOnboarding" onPress={onPressTestOnboarding} accessibilityRole="button" style={BTN} />
       <Pressable testID="e2eHistory" onPress={onPressE2eHistory} accessibilityRole="button" style={BTN} />
+      <Pressable
+        testID="e2eTransactionHistory"
+        onPress={() => onPressE2eTransactionHistory()}
+        accessibilityRole="button"
+        style={BTN}
+      />
     </View>
   )
 }

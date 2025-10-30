@@ -50,7 +50,7 @@ const formatTxDetails = ({ txDetails, viewOnExplorer }: formatTxDetailsProps): L
               <View flexDirection="row" alignItems="center" gap="$3">
                 <CopyButton value={txDetails.txData?.to.value || ''} size={16} color={'$textSecondaryLight'} />
 
-                <TouchableOpacity onPress={viewOnExplorer}>
+                <TouchableOpacity onPress={viewOnExplorer} testID="external-link-button">
                   <SafeFontIcon name="external-link" size={16} color="$textSecondaryLight" />
                 </TouchableOpacity>
               </View>
