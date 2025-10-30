@@ -3,22 +3,13 @@ import ProposerForm from '@/components/tx-flow/actions/Propose/ProposerForm'
 import CounterfactualForm from '@/features/counterfactual/CounterfactualForm'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { type ReactElement, type ReactNode, useState, useContext, useCallback } from 'react'
+import { type ReactElement, type ReactNode, useContext, useCallback } from 'react'
 import madProps from '@/utils/mad-props'
-import ExecuteCheckbox from '../ExecuteCheckbox'
 import { useImmediatelyExecutable, useValidateNonce } from './hooks'
 import ExecuteForm from '@/components/tx-flow/actions/Execute/ExecuteForm'
-import SignForm from './SignForm'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import ErrorMessage from '../ErrorMessage'
-import TxCard from '@/components/tx-flow/common/TxCard'
-import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
 import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
-import UnknownContractError from './UnknownContractError'
-import { ErrorBoundary } from '@sentry/react'
-import ApprovalEditor from '../ApprovalEditor'
-import { isDelegateCall } from '@/services/tx/tx-sender/sdk'
 import useChainId from '@/hooks/useChainId'
 import ExecuteThroughRoleForm from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm'
 import {
@@ -27,16 +18,10 @@ import {
   useRoles,
 } from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import { BlockaidBalanceChanges } from '../security/blockaid/BlockaidBalanceChange'
-import { Blockaid } from '../security/blockaid'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
-import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
-import ConfirmationView from '../confirmation-views'
-import { SignerForm } from '@/components/tx-flow/features/SignerSelect/SignerForm'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { trackTxEvents } from './tracking'
-import { TxNoteForm, encodeTxNote, trackAddNote } from '@/features/tx-notes'
+import SignForm from './SignForm'
 
 export type SubmitCallback = (txId: string, isExecuted?: boolean) => void
 
@@ -46,11 +31,11 @@ export type SignOrExecuteProps = {
   children?: ReactNode
   isExecutable?: boolean
   isRejection?: boolean
-  isBatch?: boolean
-  isBatchable?: boolean
   onlyExecute?: boolean
   disableSubmit?: boolean
   origin?: string
+  tooltip?: string
+  isMassPayout?: boolean
 }
 
 export const SignOrExecuteForm = ({
@@ -59,6 +44,8 @@ export const SignOrExecuteForm = ({
   safeTxError,
   onSubmit,
   isCreation,
+  origin,
+  isMassPayout = false,
   ...props
 }: SignOrExecuteProps & {
   chainId: ReturnType<typeof useChainId>
@@ -67,22 +54,17 @@ export const SignOrExecuteForm = ({
   isCreation?: boolean
   txDetails?: TransactionDetails
   txPreview?: TransactionPreview
-}): ReactElement => {
-  const [customOrigin, setCustomOrigin] = useState<string | undefined>(props.origin)
-  const { transactionExecution } = useAppSelector(selectSettings)
-  const [shouldExecute, setShouldExecute] = useState<boolean>(transactionExecution)
+}): ReactElement | undefined => {
+  const { transactionExecution: shouldExecute } = useAppSelector(selectSettings)
   const isNewExecutableTx = useImmediatelyExecutable() && isCreation
   const isCorrectNonce = useValidateNonce(safeTx)
-  const isBatchable = props.isBatchable !== false && safeTx && !isDelegateCall(safeTx)
 
   const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
-  const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
-  const isApproval = readableApprovals && readableApprovals.length > 0
   const { safe } = useSafeInfo()
   const isSafeOwner = useIsSafeOwner()
   const signer = useSigner()
   const isProposer = useIsWalletProposer()
-  const isProposing = isProposer && !isSafeOwner && isCreation
+  const isProposing = isProposer && !isSafeOwner && !!isCreation
   const isCounterfactualSafe = !safe.deployed
 
   // Check if a Zodiac Roles mod is enabled and if the user is a member of any role that allows the transaction
@@ -113,14 +95,11 @@ export const SignOrExecuteForm = ({
         isRoleExecution,
         isProposerCreation,
         !!signer?.isSafe,
-        customOrigin,
+        origin,
+        isMassPayout,
       )
-
-      if (customOrigin !== props.origin) {
-        trackAddNote()
-      }
     },
-    [chainId, isCreation, onSubmit, trigger, signer?.isSafe, customOrigin, props.origin],
+    [chainId, isCreation, onSubmit, trigger, signer?.isSafe, origin, isMassPayout],
   )
 
   const onRoleExecutionSubmit = useCallback<typeof onFormSubmit>(
@@ -133,117 +112,48 @@ export const SignOrExecuteForm = ({
     [onFormSubmit],
   )
 
-  const onNoteChange = useCallback(
-    (note: string) => {
-      setCustomOrigin(encodeTxNote(note, props.origin))
-    },
-    [setCustomOrigin, props.origin],
-  )
-
-  const getForm = () => {
-    const commonProps = {
-      ...props,
-      safeTx,
-      isCreation,
-      origin: customOrigin,
-      onSubmit: onFormSubmit,
-    }
-    if (isCounterfactualSafe && !isProposing) {
-      return <CounterfactualForm {...commonProps} onlyExecute />
-    }
-
-    if (!isCounterfactualSafe && willExecute && !isProposing) {
-      return (
-        <ExecuteForm
-          {...commonProps}
-          options={[{ label: 'Execute', id: 'execute' }]}
-          slotId="execute"
-          onChange={() => {}}
-          onSubmit={() => {}}
-          onSubmitSuccess={({ txId, isExecuted } = {}) => onFormSubmit(txId!, isExecuted)}
-        />
-      )
-    }
-
-    if (!isCounterfactualSafe && willExecuteThroughRole) {
-      return (
-        <ExecuteThroughRoleForm
-          {...commonProps}
-          role={(allowingRole || mostLikelyRole)!}
-          safeTxError={safeTxError}
-          onSubmit={onRoleExecutionSubmit}
-        />
-      )
-    }
-
-    if (!isCounterfactualSafe && !willExecute && !willExecuteThroughRole && !isProposing) {
-      return <SignForm {...commonProps} isBatchable={isBatchable} />
-    }
-
-    if (isProposing) {
-      return <ProposerForm {...commonProps} onSubmit={onProposerFormSubmit} />
-    }
+  const commonProps = {
+    ...props,
+    safeTx,
+    isCreation,
+    origin,
+    onSubmit: onFormSubmit,
+  }
+  if (isCounterfactualSafe && !isProposing) {
+    return <CounterfactualForm {...commonProps} onlyExecute />
   }
 
-  return (
-    <>
-      <TxCard>
-        {props.children}
+  if (!isCounterfactualSafe && willExecute && !isProposing) {
+    return (
+      <ExecuteForm
+        {...commonProps}
+        options={[{ label: 'Execute', id: 'execute' }]}
+        slotId="execute"
+        onChange={() => {}}
+        onSubmit={() => {}}
+        onSubmitSuccess={({ txId, isExecuted } = {}) => onFormSubmit(txId!, isExecuted)}
+      />
+    )
+  }
 
-        <ConfirmationView
-          isCreation={isCreation}
-          txDetails={props.txDetails}
-          txPreview={props.txPreview}
-          safeTx={safeTx}
-          isBatch={props.isBatch}
-          isApproval={isApproval}
-        >
-          {!props.isRejection && (
-            <ErrorBoundary fallback={<div>Error parsing data</div>}>
-              {isApproval && <ApprovalEditor safeTransaction={safeTx} />}
-            </ErrorBoundary>
-          )}
-        </ConfirmationView>
+  if (!isCounterfactualSafe && willExecuteThroughRole) {
+    return (
+      <ExecuteThroughRoleForm
+        {...commonProps}
+        role={(allowingRole || mostLikelyRole)!}
+        safeTxError={safeTxError}
+        onSubmit={onRoleExecutionSubmit}
+      />
+    )
+  }
 
-        {!isCounterfactualSafe && !props.isRejection && <BlockaidBalanceChanges />}
-      </TxCard>
+  if (!isCounterfactualSafe && !willExecute && !willExecuteThroughRole && !isProposing) {
+    return <SignForm {...commonProps} />
+  }
 
-      <TxNoteForm isCreation={isCreation ?? false} onChange={onNoteChange} txDetails={props.txDetails} />
-
-      <SignerForm willExecute={willExecute} />
-
-      <TxCard>
-        <ConfirmationTitle
-          variant={
-            isProposing
-              ? ConfirmationTitleTypes.propose
-              : willExecute
-                ? ConfirmationTitleTypes.execute
-                : ConfirmationTitleTypes.sign
-          }
-          isCreation={isCreation}
-        />
-
-        {safeTxError && (
-          <ErrorMessage error={safeTxError}>
-            This transaction will most likely fail. To save gas costs, avoid confirming the transaction.
-          </ErrorMessage>
-        )}
-
-        {(canExecute || canExecuteThroughRole) && !props.onlyExecute && !isCounterfactualSafe && !isProposing && (
-          <ExecuteCheckbox onChange={setShouldExecute} />
-        )}
-
-        <NetworkWarning />
-
-        <UnknownContractError txData={props.txDetails?.txData ?? props.txPreview?.txData} />
-
-        <Blockaid />
-
-        {getForm()}
-      </TxCard>
-    </>
-  )
+  if (isProposing) {
+    return <ProposerForm {...commonProps} onSubmit={onProposerFormSubmit} />
+  }
 }
 
 const useSafeTx = () => useContext(SafeTxContext).safeTx

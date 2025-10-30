@@ -8,7 +8,6 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { getRecoveryProposalTransactions } from '@/features/recovery/services/transaction'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
-import TxChecks from '@/components/tx-flow/features/TxChecks/TxChecks'
 import TxCard from '../../common/TxCard'
 import { SafeTxContext } from '../../SafeTxProvider'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -146,8 +145,6 @@ export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlo
 
         <BlockaidBalanceChanges />
       </TxCard>
-
-      {safeTx && <TxChecks transaction={safeTx} executionOwner={safe.owners[0].value} />}
 
       <TxCard>
         <>
