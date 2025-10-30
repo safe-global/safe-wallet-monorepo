@@ -20,6 +20,9 @@ export const useRelaysBySafe = (): AsyncResult<RelaysRemaining> => {
     { chainId: chain?.chainId || '', safeAddress: safeAddress || '' },
     {
       skip: !safeAddress || !chain || !hasFeature(chain, FEATURES.RELAYING),
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
     },
   )
 

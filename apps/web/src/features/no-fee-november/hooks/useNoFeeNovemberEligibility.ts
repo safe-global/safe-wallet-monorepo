@@ -22,6 +22,9 @@ const useNoFeeNovemberEligibility = (): {
     },
     {
       skip: skipQuery,
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
     },
   )
 
