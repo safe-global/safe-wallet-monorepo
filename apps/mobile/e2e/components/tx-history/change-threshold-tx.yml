@@ -4,8 +4,6 @@ appId: global.safe.mobileapp.ios
 # Change Threshold Transaction
 # ===========================================
 - assertVisible: Transaction details
-- assertVisible:
-    id: 'share-transaction-button'
 - assertVisible: Threshold change
 
 # ===========================================

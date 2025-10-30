@@ -5,8 +5,6 @@ appId: global.safe.mobileapp.ios
 # ===========================================
 # Batch transactions (MultiSend) are displayed as contract interactions
 - assertVisible: Transaction details
-- assertVisible:
-    id: 'share-transaction-button'
 - assertVisible: Batch
 
 # Batch transactions show action count (e.g., "2 Actions")

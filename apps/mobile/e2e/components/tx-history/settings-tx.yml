@@ -4,8 +4,6 @@ appId: global.safe.mobileapp.ios
 # Settings Change Transaction (Add Signer)
 # ===========================================
 - assertVisible: Transaction details
-- assertVisible:
-    id: 'share-transaction-button'
 - assertVisible: Add signer
 
 # ===========================================

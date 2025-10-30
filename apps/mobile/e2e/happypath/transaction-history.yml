@@ -104,3 +104,10 @@ appId: global.safe.mobileapp.ios
 
 - runFlow:
     file: ../components/tx-history/batch-tx-card.yml
+
+# ===========================================
+# Disable Module Settings Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/disable-module-tx-card.yml

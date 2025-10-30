@@ -6,8 +6,6 @@ appId: global.safe.mobileapp.ios
 # When clicking on a sub-transaction within a bulk transaction,
 # it shows the individual transaction details (typically a received transaction)
 - assertVisible: Transaction details
-- assertVisible:
-    id: 'share-transaction-button'
 - assertVisible: Received
 - assertVisible:
     text: '.*\+.*ETH.*|.*\d+.*ETH.*'

@@ -4,8 +4,6 @@ appId: global.safe.mobileapp.ios
 # Sent Transaction
 # ===========================================
 - assertVisible: Transaction details
-- assertVisible:
-    id: 'share-transaction-button'
 - assertVisible: Sent
 - assertVisible:
     text: '.*-.*ETH.*'

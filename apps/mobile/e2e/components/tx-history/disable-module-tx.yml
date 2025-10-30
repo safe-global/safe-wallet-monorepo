@@ -1,18 +1,10 @@
 appId: global.safe.mobileapp.ios
 ---
 # ===========================================
-# Rejected Transaction
+# Disable Module Transaction
 # ===========================================
-
 - assertVisible: Transaction details
-- assertVisible: On-chain rejection
-- assertVisible: This is an on-chain rejection that didn't send any funds. This on-chain rejection replaced all transactions with nonce 16.
-
-# ===========================================
-# Recipient Address
-# ===========================================
-- runFlow:
-    file: ../../shared/test-tx-recipient.yml
+- assertVisible: disableModule
 
 # ===========================================
 # Network Display
@@ -57,7 +49,6 @@ appId: global.safe.mobileapp.ios
 # ===========================================
 # Test Transaction Details Button
 # ===========================================
-
 - runFlow:
     file: ../../shared/test-advanced-details.yml
 

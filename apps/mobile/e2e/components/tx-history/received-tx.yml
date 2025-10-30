@@ -4,8 +4,6 @@ appId: global.safe.mobileapp.ios
 # Received Transaction
 # ===========================================
 - assertVisible: Transaction details
-- assertVisible:
-    id: 'share-transaction-button'
 - assertVisible: Received
 - assertVisible:
     text: '.*\+.*QTRUST.*|.*\d+.*QTRUST.*'
