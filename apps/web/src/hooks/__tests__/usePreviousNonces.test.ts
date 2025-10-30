@@ -30,13 +30,17 @@ describe('_getUniqueQueuedTxs', () => {
   })
 
   it('includes transactions with reject txs (ConflictType.HAS_NEXT)', () => {
-    const mockTx = getMockTx({ nonce: 0 })
-    const mockTxWithReject = { ...getMockTx({ nonce: 1 }), conflictType: ConflictType.HAS_NEXT }
-    const mockRejectTx = { ...getMockTx({ nonce: 1 }), conflictType: ConflictType.END }
+    const mockTx0 = getMockTx({ nonce: 0 })
+    const mockTx1 = getMockTx({ nonce: 1 })
+    const mockRejectTx1 = getMockTx({ nonce: 1 })
     const mockTx2 = getMockTx({ nonce: 2 })
 
+    // Override conflictType on the queue items (not the transaction)
+    const mockTxWithReject = { ...mockTx1, conflictType: ConflictType.HAS_NEXT }
+    const mockReject = { ...mockRejectTx1, conflictType: ConflictType.END }
+
     const mockPage = {
-      results: [mockTx, mockTxWithReject, mockRejectTx, mockTx2],
+      results: [mockTx0, mockTxWithReject, mockReject, mockTx2],
     }
     const result = _getUniqueQueuedTxs(mockPage)
 
