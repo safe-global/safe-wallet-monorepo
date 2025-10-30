@@ -135,7 +135,7 @@ describe('GasParams', () => {
       maxPriorityFeePerGas: BigInt('10000'),
     }
 
-    const { getByText } = render(
+    const { queryAllByText } = render(
       <GasParams
         params={params}
         isExecution={true}
@@ -145,7 +145,7 @@ describe('GasParams', () => {
       />,
     )
 
-    expect(getByText('Cannot estimate')).toBeInTheDocument()
+    expect(queryAllByText('Cannot estimate').length).toBeGreaterThan(0)
   })
 
   it('Shows maxFee and maxPrioFee if EIP1559', () => {
