@@ -75,8 +75,32 @@ appId: global.safe.mobileapp.ios
     file: ../components/tx-history/received-tx-card.yml
 
 # ===========================================
-# Change Threshold Settings Change Transaction
+# Change Threshold Settings Transaction
 # ===========================================
 
 - runFlow:
     file: ../components/tx-history/change-threshold-tx-card.yml
+
+- scroll
+
+# ===========================================
+# Bulk Transactions
+# ===========================================
+# Scroll down to reveal bulk transactions (Dec 1, 2023 date group)
+
+- runFlow:
+    file: ../components/tx-history/bulk-tx-card.yml
+    env:
+      TRANSACTION_INDEX: '0'
+
+# ===========================================
+# Batch Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/bulk-tx-card.yml
+    env:
+      TRANSACTION_INDEX: '1'
+
+- runFlow:
+    file: ../components/tx-history/batch-tx-card.yml

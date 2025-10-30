@@ -66,6 +66,7 @@ export function SafeListItem({
       justifyContent="flex-start"
       paddingVertical={paddingVertical}
       testID={testID}
+      collapsable={false}
       // If just set pressStyle to undefined, then the onPress doesn't work, that's why we need this hack
       {...(pressStyle ? { pressStyle } : {})}
     >

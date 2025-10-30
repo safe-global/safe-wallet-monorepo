@@ -12,6 +12,7 @@ import { Address } from '@/src/types/address'
 import { EthAddress } from '@/src/components/EthAddress'
 import { EncodedData } from '@/src/components/EncodedData/EncodedData'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { HashDisplay } from '@/src/components/HashDisplay'
 
 const badgeProps: CircleProps = { borderRadius: '$2', paddingHorizontal: '$2', paddingVertical: '$1' }
 
@@ -24,30 +25,11 @@ const getContractCall = (action: ActionValueDecoded, addressInfoIndex?: AddressI
   return addressInfoIndex?.[action.to]
 }
 
-const TxOptions = ({ value }: { value: string }) => {
-  return (
-    <View flexDirection="row" alignItems="center">
-      <CopyButton value={value} color={'$textSecondaryLight'} />
-      <SafeFontIcon name="external-link" size={14} color="$textSecondaryLight" />
-    </View>
-  )
-}
-
-const getContractItemLayout = ({
-  logoUri,
-  value,
-  name,
-}: {
-  logoUri?: string | null
-  value: string
-  name?: string | null
-}) => ({
+const getContractItemLayout = ({ value }: { value: string }) => ({
   label: 'Contract',
   render: () => (
-    <View flexDirection="row" alignItems="center" gap="$2">
-      {logoUri ? <Logo logoUri={logoUri} size="$6" /> : <Identicon address={value as Address} size={24} />}
-      <Text fontSize="$4">{ellipsis(name || value, 16)}</Text>
-      <TxOptions value={value} />
+    <View flexDirection="row" alignItems="center" gap="$2" testID="action-details-contract" collapsable={false}>
+      <HashDisplay value={value} />
     </View>
   ),
 })
@@ -77,10 +59,14 @@ export const formatActionDetails = ({ txData, action }: formatActionDetailsRetur
     columns.push({
       label: 'Interacted with',
       render: () => (
-        <View flexDirection="row" alignItems="center" gap="$2">
-          <Identicon address={action.to as Address} size={24} />
-          <EthAddress copy copyProps={{ color: '$textSecondaryLight' }} address={action.to as Address} />
-          <SafeFontIcon name="external-link" size={14} color="$textSecondaryLight" />
+        <View
+          flexDirection="row"
+          alignItems="center"
+          gap="$2"
+          testID="action-details-interacted-with"
+          collapsable={false}
+        >
+          <HashDisplay value={action.to as `0x${string}`} />
         </View>
       ),
     })

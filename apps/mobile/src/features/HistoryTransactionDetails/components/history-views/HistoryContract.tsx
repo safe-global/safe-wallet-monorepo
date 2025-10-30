@@ -61,7 +61,13 @@ export function HistoryContract({ txId, txInfo }: HistoryContractProps) {
         )}
 
         {/* Contract Information */}
-        <View alignItems="center" flexDirection="row" justifyContent="space-between">
+        <View
+          alignItems="center"
+          flexDirection="row"
+          justifyContent="space-between"
+          testID="history-contract-information"
+          collapsable={false}
+        >
           <Text color="$textSecondaryLight">Contract</Text>
           <HashDisplay value={txInfo.to} />
         </View>
