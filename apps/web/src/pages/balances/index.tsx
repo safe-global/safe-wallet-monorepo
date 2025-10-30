@@ -19,6 +19,7 @@ import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { Box } from '@mui/material'
 import { BRAND_NAME } from '@/config/constants'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
+import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
 
 const Balances: NextPage = () => {
   const { balances, error } = useVisibleBalances()
@@ -26,6 +27,7 @@ const Balances: NextPage = () => {
   const toggleShowHiddenAssets = () => setShowHiddenAssets((prev) => !prev)
   const isStakingBannerVisible = useIsStakingBannerVisible()
   const { isEligible } = useNoFeeNovemberEligibility()
+  const isNoFeeNovemberEnabled = useIsNoFeeNovemberFeatureEnabled()
   const [hideNoFeeNovemberBanner, setHideNoFeeNovemberBanner] = useLocalStorage<boolean>(
     'hideNoFeeNovemberAssetsPageBanner',
   )
@@ -59,7 +61,7 @@ const Balances: NextPage = () => {
           <PagePlaceholder img={<NoAssetsIcon />} text="There was an error loading your assets" />
         ) : (
           <>
-            {isEligible && !hideNoFeeNovemberBanner && (
+            {isEligible && isNoFeeNovemberEnabled && !hideNoFeeNovemberBanner && (
               <Box mb={2} sx={{ position: 'sticky', top: 0, zIndex: 1 }}>
                 <NoFeeNovemberBanner onDismiss={handleNoFeeNovemberDismiss} />
               </Box>

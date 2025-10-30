@@ -5,12 +5,18 @@ import css from './styles.module.css'
 import Link from 'next/link'
 import CloseIcon from '@mui/icons-material/Close'
 import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
+import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
 import BlockedAddress from '@/components/common/BlockedAddress'
 import { useDarkMode } from '@/hooks/useDarkMode'
 
 const NoFeeNovemberTransactionCard = () => {
+  const isEnabled = useIsNoFeeNovemberFeatureEnabled()
   const { isEligible, isLoading, error, blockedAddress } = useNoFeeNovemberEligibility()
   const dark = useDarkMode()
+
+  if (!isEnabled) {
+    return null
+  }
 
   if (blockedAddress) {
     return (
