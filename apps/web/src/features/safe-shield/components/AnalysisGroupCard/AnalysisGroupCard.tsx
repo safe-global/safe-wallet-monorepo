@@ -1,12 +1,13 @@
 import { type ReactElement, useMemo, useState } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import { type GroupedAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
+import { ContractStatus, type GroupedAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import { isAddressChange, mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
 import { SeverityIcon } from '../SeverityIcon'
 import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
 import { AddressChanges } from '../AddressChanges'
 import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
+import { DelegateCallCardItem } from './DelegateCallCardItem'
 import { ShowAllAddress } from './ShowAllAddress'
 
 export const AnalysisGroupCard = ({
@@ -57,19 +58,31 @@ export const AnalysisGroupCard = ({
       <Collapse in={isOpen}>
         <Box sx={{ padding: '4px 12px 16px' }}>
           <Stack gap={2}>
-            {visibleResults.map((result, index) => (
-              <AnalysisGroupCardItem
-                key={index}
-                severity={!index ? result.severity : undefined}
-                description={result.description}
-              >
-                <AnalysisIssuesDisplay result={result} />
+            {visibleResults.map((result, index) => {
+              const severity = !index ? result.severity : undefined
 
-                {isAddressChange(result) && <AddressChanges result={result} />}
+              if (result.type === ContractStatus.UNEXPECTED_DELEGATECALL) {
+                return (
+                  <DelegateCallCardItem key={index} severity={severity}>
+                    <AnalysisIssuesDisplay result={result} />
 
-                {result.addresses?.length && <ShowAllAddress addresses={result.addresses} />}
-              </AnalysisGroupCardItem>
-            ))}
+                    {isAddressChange(result) && <AddressChanges result={result} />}
+
+                    {result.addresses?.length && <ShowAllAddress addresses={result.addresses} />}
+                  </DelegateCallCardItem>
+                )
+              }
+
+              return (
+                <AnalysisGroupCardItem key={index} severity={severity} description={result.description}>
+                  <AnalysisIssuesDisplay result={result} />
+
+                  {isAddressChange(result) && <AddressChanges result={result} />}
+
+                  {result.addresses?.length && <ShowAllAddress addresses={result.addresses} />}
+                </AnalysisGroupCardItem>
+              )
+            })}
           </Stack>
         </Box>
       </Collapse>

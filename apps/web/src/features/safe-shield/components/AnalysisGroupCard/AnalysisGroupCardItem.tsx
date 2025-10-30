@@ -1,12 +1,12 @@
 import { Stack, Typography } from '@mui/material'
 import { Box } from '@mui/material'
-import type { Severity } from '@safe-global/utils/features/safe-shield/types'
+import { type Severity } from '@safe-global/utils/features/safe-shield/types'
 import { SEVERITY_COLORS } from '../../constants'
 
 interface AnalysisGroupCardItemProps {
   children?: React.ReactNode
   severity?: Severity
-  description: string
+  description: React.ReactNode
 }
 
 export const AnalysisGroupCardItem = ({ children, severity, description }: AnalysisGroupCardItemProps) => {
