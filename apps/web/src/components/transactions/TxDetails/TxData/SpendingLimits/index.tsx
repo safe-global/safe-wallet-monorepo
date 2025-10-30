@@ -22,7 +22,7 @@ type SpendingLimitsProps = {
   type: SpendingLimitMethods
 }
 
-export const SpendingLimits = ({ txData, txInfo, type }: SpendingLimitsProps): ReactElement | null => {
+export const SpendingLimits = ({ txData, type }: SpendingLimitsProps): ReactElement | null => {
   const chain = useCurrentChain()
   const tokens = useAppSelector(selectTokens)
   const addressBook = useAddressBook()
@@ -40,7 +40,6 @@ export const SpendingLimits = ({ txData, txInfo, type }: SpendingLimitsProps): R
     () => tokens.find(({ address }) => sameAddress(address, tokenAddress as string)),
     [tokenAddress, tokens],
   )
-  const txTo = txInfo.to
 
   if (!txData) return null
 
