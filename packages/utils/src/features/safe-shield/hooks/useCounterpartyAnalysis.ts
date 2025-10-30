@@ -93,8 +93,8 @@ export function useCounterpartyAnalysis({
 
   // Filter out recipient addresses that are Safe accounts
   const nonSafeRecipients = useMemo(
-    () => filterNonSafeRecipients(recipientAddresses, recipientAnalysisByAddress),
-    [recipientAddresses, recipientAnalysisByAddress],
+    () => filterNonSafeRecipients(recipientAnalysisByAddress),
+    [recipientAnalysisByAddress],
   )
 
   // Perform local checks on recipient addresses

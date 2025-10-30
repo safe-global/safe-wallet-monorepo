@@ -56,10 +56,7 @@ export function useRecipientAnalysis({
     recipients: validRecipients,
   })
 
-  const nonSafeRecipients = useMemo(
-    () => filterNonSafeRecipients(validRecipients, fetchedResults),
-    [fetchedResults, validRecipients],
-  )
+  const nonSafeRecipients = useMemoDeepCompare(() => filterNonSafeRecipients(fetchedResults), [fetchedResults])
 
   const addressBookCheck = useAddressBookCheck(chainId, validRecipients, isInAddressBook, ownedSafes)
   const [activityCheck, activityCheckError, activityCheckLoading] = useAddressActivity(nonSafeRecipients, web3ReadOnly)

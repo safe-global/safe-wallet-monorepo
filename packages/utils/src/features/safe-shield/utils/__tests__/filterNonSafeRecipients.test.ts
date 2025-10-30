@@ -12,7 +12,7 @@ describe('filterNonSafeRecipients', () => {
   const address4Checksum = getAddress(faker.finance.ethereumAddress())
 
   it('should return empty array when analysisByAddress is undefined', () => {
-    const result = filterNonSafeRecipients([address1Checksum, address2Checksum], undefined)
+    const result = filterNonSafeRecipients(undefined)
     expect(result).toEqual([])
   })
 
@@ -21,7 +21,7 @@ describe('filterNonSafeRecipients', () => {
       [address1Checksum]: { isSafe: false },
     }
 
-    const result = filterNonSafeRecipients([address1Checksum], analysisByAddress)
+    const result = filterNonSafeRecipients(analysisByAddress)
     expect(result).toEqual([address1Checksum])
   })
 
@@ -30,7 +30,7 @@ describe('filterNonSafeRecipients', () => {
       [address1Checksum]: {},
     }
 
-    const result = filterNonSafeRecipients([address1Checksum], analysisByAddress)
+    const result = filterNonSafeRecipients(analysisByAddress)
     expect(result).toEqual([address1Checksum])
   })
 
@@ -40,7 +40,7 @@ describe('filterNonSafeRecipients', () => {
       [address2Checksum]: { isSafe: false },
     }
 
-    const result = filterNonSafeRecipients([address1Checksum, address2Checksum], analysisByAddress)
+    const result = filterNonSafeRecipients(analysisByAddress)
     expect(result).toEqual([address2Checksum])
   })
 
@@ -53,7 +53,7 @@ describe('filterNonSafeRecipients', () => {
       [address2Checksum]: { isSafe: false },
     }
 
-    const result = filterNonSafeRecipients([address1Checksum, address2Checksum], analysisByAddress)
+    const result = filterNonSafeRecipients(analysisByAddress)
     expect(result).toEqual([address2Checksum])
   })
 
@@ -73,7 +73,7 @@ describe('filterNonSafeRecipients', () => {
       [address2Checksum]: { isSafe: false },
     }
 
-    const result = filterNonSafeRecipients([address1Checksum, address2Checksum], analysisByAddress)
+    const result = filterNonSafeRecipients(analysisByAddress)
     expect(result).toEqual([address2Checksum])
   })
 
@@ -96,7 +96,7 @@ describe('filterNonSafeRecipients', () => {
       },
     }
 
-    const result = filterNonSafeRecipients([address1Checksum, address2Checksum], analysisByAddress)
+    const result = filterNonSafeRecipients(analysisByAddress)
     expect(result).toEqual([address1Checksum, address2Checksum])
   })
 
@@ -111,19 +111,16 @@ describe('filterNonSafeRecipients', () => {
       [address4Checksum]: {}, // isSafe undefined, no activity - include
     }
 
-    const result = filterNonSafeRecipients(
-      [address1Checksum, address2Checksum, address3Checksum, address4Checksum],
-      analysisByAddress,
-    )
+    const result = filterNonSafeRecipients(analysisByAddress)
     expect(result).toEqual([address3Checksum, address4Checksum])
   })
 
-  it('should include addresses not in analysisByAddress', () => {
+  it('should only return addresses present in analysisByAddress', () => {
     const analysisByAddress: RecipientAnalysisResults = {
       [address1Checksum]: { isSafe: false },
     }
 
-    const result = filterNonSafeRecipients([address1Checksum, address2Checksum], analysisByAddress)
-    expect(result).toEqual([address1Checksum, address2Checksum])
+    const result = filterNonSafeRecipients(analysisByAddress)
+    expect(result).toEqual([address1Checksum])
   })
 })
