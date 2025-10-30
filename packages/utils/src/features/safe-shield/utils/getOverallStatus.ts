@@ -1,5 +1,5 @@
 import type { ContractAnalysisResults, ThreatAnalysisResults, RecipientAnalysisResults } from '../types'
-import type { Severity } from '../types'
+import { CommonSharedStatus, Severity } from '../types'
 import type { AnalysisResult } from '../types'
 import { getPrimaryResult } from './analysisUtils'
 import { SEVERITY_TO_TITLE } from '../constants'
@@ -32,9 +32,14 @@ export const getOverallStatus = (
   recipientResults?: RecipientAnalysisResults,
   contractResults?: ContractAnalysisResults,
   threatResults?: ThreatAnalysisResults,
+  hasSimulationError?: boolean,
 ): { severity: Severity; title: string } | undefined => {
   if (!recipientResults && !contractResults && !threatResults) {
     return undefined
+  }
+
+  if (hasSimulationError) {
+    return { severity: Severity.WARN, title: SEVERITY_TO_TITLE[Severity.WARN] }
   }
 
   // Flatten all AnalysisResult objects from contract, recipient, and threat into one array

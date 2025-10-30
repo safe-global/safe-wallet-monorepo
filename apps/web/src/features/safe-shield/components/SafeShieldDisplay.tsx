@@ -25,7 +25,7 @@ export const SafeShieldDisplay = ({
   return (
     <Stack gap={1}>
       <Card sx={{ borderRadius: '6px', overflow: 'hidden' }}>
-        <SafeShieldHeader recipient={recipient} contract={contract} threat={threat} />
+        <SafeShieldHeader recipient={recipient} contract={contract} threat={threat} safeTx={safeTx} />
 
         <SafeShieldContent threat={threat} recipient={recipient} contract={contract} safeTx={safeTx} />
       </Card>
