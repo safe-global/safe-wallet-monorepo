@@ -73,3 +73,10 @@ appId: global.safe.mobileapp.ios
 
 - runFlow:
     file: ../components/tx-history/received-tx-card.yml
+
+# ===========================================
+# Change Threshold Settings Change Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/change-threshold-tx-card.yml
