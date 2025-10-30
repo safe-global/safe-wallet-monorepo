@@ -39,7 +39,7 @@ const injectedRtkApi = api
   })
 export { injectedRtkApi as cgwApi }
 export type SafeShieldAnalyzeRecipientV1ApiResponse =
-  /** status 200 Recipient interaction analysis results */ RecipientInteractionAnalysisDto
+  /** status 200 Recipient interaction analysis results */ SingleRecipientAnalysisDto
 export type SafeShieldAnalyzeRecipientV1ApiArg = {
   /** Chain ID where the Safe is deployed */
   chainId: string
@@ -68,19 +68,23 @@ export type SafeShieldAnalyzeThreatV1ApiArg = {
   /** EIP-712 typed data and wallet information for threat analysis. */
   threatAnalysisRequestDto: ThreatAnalysisRequestDto
 }
-export type RecipientInteractionResultDto = {
+export type SingleRecipientAnalysisResultDto = {
   /** Severity level indicating the importance and risk */
   severity: 'OK' | 'INFO' | 'WARN' | 'CRITICAL'
   /** Recipient interaction status code */
-  type: 'NEW_RECIPIENT' | 'RECURRING_RECIPIENT' | 'FAILED'
+  type: 'NEW_RECIPIENT' | 'RECURRING_RECIPIENT' | 'LOW_ACTIVITY' | 'FAILED'
   /** User-facing title of the finding */
   title: string
   /** Detailed description explaining the finding and its implications */
   description: string
 }
-export type RecipientInteractionAnalysisDto = {
+export type SingleRecipientAnalysisDto = {
   /** Analysis results related to recipient interaction history. Shows whether this is a new or recurring recipient. */
-  RECIPIENT_INTERACTION: RecipientInteractionResultDto[]
+  RECIPIENT_INTERACTION: SingleRecipientAnalysisResultDto[]
+  /** Analysis results related to recipient activity. Shows whether this is a low activity recipient. (Available only for Safes) */
+  RECIPIENT_ACTIVITY?: SingleRecipientAnalysisResultDto[]
+  /** Indicates whether the analyzed recipient address is a Safe. */
+  isSafe: boolean
 }
 export type RecipientResultDto = {
   /** Severity level indicating the importance and risk */
@@ -89,6 +93,7 @@ export type RecipientResultDto = {
   type:
     | 'NEW_RECIPIENT'
     | 'RECURRING_RECIPIENT'
+    | 'LOW_ACTIVITY'
     | 'INCOMPATIBLE_SAFE'
     | 'MISSING_OWNERSHIP'
     | 'UNSUPPORTED_NETWORK'
@@ -102,8 +107,12 @@ export type RecipientResultDto = {
   targetChainId?: string
 }
 export type RecipientAnalysisDto = {
+  /** Indicates whether the analyzed recipient address is a Safe. */
+  isSafe: boolean
   /** Analysis results related to recipient interaction history. Shows whether this is a new or recurring recipient. */
   RECIPIENT_INTERACTION?: RecipientResultDto[]
+  /** Analysis results related to recipient activity frequency. Shows whether this is a low activity recipient. */
+  RECIPIENT_ACTIVITY?: RecipientResultDto[]
   /** Analysis results for cross-chain bridge operations. Identifies compatibility issues, ownership problems, or unsupported networks. */
   BRIDGE?: RecipientResultDto[]
 }

@@ -25,20 +25,22 @@ export enum StatusGroup {
 export type StatusGroupType<T extends StatusGroup> = {
   [StatusGroup.COMMON]: CommonSharedStatus.FAILED
   [StatusGroup.ADDRESS_BOOK]: RecipientStatus.KNOWN_RECIPIENT | RecipientStatus.UNKNOWN_RECIPIENT
-  [StatusGroup.RECIPIENT_ACTIVITY]: RecipientStatus.LOW_ACTIVITY
-  [StatusGroup.RECIPIENT_INTERACTION]: RecipientStatus.NEW_RECIPIENT | RecipientStatus.RECURRING_RECIPIENT
+  [StatusGroup.RECIPIENT_ACTIVITY]: RecipientStatus.LOW_ACTIVITY | CommonSharedStatus.FAILED
+  [StatusGroup.RECIPIENT_INTERACTION]: RecipientStatus.NEW_RECIPIENT | RecipientStatus.RECURRING_RECIPIENT | CommonSharedStatus.FAILED
   [StatusGroup.BRIDGE]:
     | BridgeStatus.INCOMPATIBLE_SAFE
     | BridgeStatus.MISSING_OWNERSHIP
     | BridgeStatus.UNSUPPORTED_NETWORK
     | BridgeStatus.DIFFERENT_SAFE_SETUP
+    | CommonSharedStatus.FAILED
   [StatusGroup.CONTRACT_VERIFICATION]:
     | ContractStatus.VERIFIED
     | ContractStatus.NOT_VERIFIED
     | ContractStatus.NOT_VERIFIED_BY_SAFE
     | ContractStatus.VERIFICATION_UNAVAILABLE
-  [StatusGroup.CONTRACT_INTERACTION]: ContractStatus.KNOWN_CONTRACT | ContractStatus.NEW_CONTRACT
-  [StatusGroup.DELEGATECALL]: ContractStatus.UNEXPECTED_DELEGATECALL
+    | CommonSharedStatus.FAILED
+  [StatusGroup.CONTRACT_INTERACTION]: ContractStatus.KNOWN_CONTRACT | ContractStatus.NEW_CONTRACT | CommonSharedStatus.FAILED
+  [StatusGroup.DELEGATECALL]: ContractStatus.UNEXPECTED_DELEGATECALL | CommonSharedStatus.FAILED
   [StatusGroup.THREAT]:
     | ThreatStatus.MALICIOUS
     | ThreatStatus.MODERATE
@@ -47,6 +49,7 @@ export type StatusGroupType<T extends StatusGroup> = {
     | ThreatStatus.OWNERSHIP_CHANGE
     | ThreatStatus.MODULE_CHANGE
     | ThreatStatus.UNOFFICIAL_FALLBACK_HANDLER
+    | CommonSharedStatus.FAILED
 }[T]
 
 export enum RecipientStatus {
@@ -131,7 +134,9 @@ export type RecipientAnalysisResults = {
     | StatusGroup.RECIPIENT_INTERACTION
     | StatusGroup.BRIDGE
     | StatusGroup.COMMON
-  >
+  > & {
+    isSafe?: boolean
+  }
 }
 
 export type ContractAnalysisResults = {

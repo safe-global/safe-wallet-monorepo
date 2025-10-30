@@ -8,7 +8,7 @@ import { useFetchRecipientAnalysis } from './useFetchRecipientAnalysis'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useMemoDeepCompare } from './util-hooks/useMemoDeepCompare'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
-import { mergeAnalysisResults } from '../utils'
+import { filterNonSafeRecipients, mergeAnalysisResults } from '../utils'
 import { ErrorType, getErrorInfo } from '../utils/errors'
 
 /**
@@ -56,9 +56,13 @@ export function useRecipientAnalysis({
     recipients: validRecipients,
   })
 
-  const addressBookCheck = useAddressBookCheck(chainId, validRecipients, isInAddressBook, ownedSafes)
+  const nonSafeRecipients = useMemo(
+    () => filterNonSafeRecipients(validRecipients, fetchedResults),
+    [fetchedResults, validRecipients],
+  )
 
-  const [activityCheck, activityCheckError, activityCheckLoading] = useAddressActivity(validRecipients, web3ReadOnly)
+  const addressBookCheck = useAddressBookCheck(chainId, validRecipients, isInAddressBook, ownedSafes)
+  const [activityCheck, activityCheckError, activityCheckLoading] = useAddressActivity(nonSafeRecipients, web3ReadOnly)
 
   // Merge backend and local checks
   const mergedResults = useMemo(() => {
