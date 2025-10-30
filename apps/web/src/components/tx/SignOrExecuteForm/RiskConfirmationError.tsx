@@ -1,11 +1,10 @@
-import { useContext } from 'react'
 import ErrorMessage from '../ErrorMessage'
-import { TxSecurityContext } from '../security/shared/TxSecurityContext'
+import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 
 const RiskConfirmationError = () => {
-  const { isRiskConfirmed, isRiskIgnored } = useContext(TxSecurityContext)
+  const { needsRiskConfirmation, isRiskConfirmed } = useSafeShield()
 
-  if (isRiskConfirmed || !isRiskIgnored) {
+  if (!needsRiskConfirmation || isRiskConfirmed) {
     return null
   }
 
