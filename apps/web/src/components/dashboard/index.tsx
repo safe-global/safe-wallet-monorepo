@@ -52,7 +52,11 @@ const Dashboard = (): ReactElement => {
       eligibilityState: isEligible,
     },
     isEarnPromoEnabled && { id: earnBannerID, element: EarnBanner },
-    isSpacesFeatureEnabled && { id: spacesBannerID, element: SpacesBanner },
+    isSpacesFeatureEnabled && {
+      id: spacesBannerID,
+      element: SpacesBanner,
+      eligibilityState: isEligible === false,
+    },
     isStakingBannerVisible && { id: stakeBannerID, element: StakeBanner },
   ].filter(Boolean) as BannerItem[]
 

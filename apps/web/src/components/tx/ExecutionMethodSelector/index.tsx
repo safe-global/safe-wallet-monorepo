@@ -76,7 +76,7 @@ const _ExecutionMethodSelector = ({
                   title={
                     gasTooHigh
                       ? 'Gas prices are too high right now'
-                      : 'You reached the limit of sponsored transactions per day.'
+                      : 'You reached the limit of sponsored transactions.'
                   }
                   placement="top"
                   arrow
@@ -142,6 +142,8 @@ const _ExecutionMethodSelector = ({
                                       <Link
                                         href="https://help.safe.global/en/articles/456540-no-fee-november"
                                         style={{ textDecoration: 'underline', fontWeight: 'bold' }}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                       >
                                         Learn more
                                       </Link>
