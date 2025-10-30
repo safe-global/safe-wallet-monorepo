@@ -38,6 +38,10 @@ export const getOverallStatus = (
     return undefined
   }
 
+  if (hasSimulationError) {
+    return { severity: Severity.WARN, title: SEVERITY_TO_TITLE[Severity.WARN] }
+  }
+
   // Flatten all AnalysisResult objects from contract, recipient, and threat into one array
   const allResults: AnalysisResult[] = []
 
