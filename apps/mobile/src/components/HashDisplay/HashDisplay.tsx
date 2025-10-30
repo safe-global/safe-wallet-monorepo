@@ -103,7 +103,7 @@ export function HashDisplay({
           maxWidth={150}
           numberOfLines={1}
           ellipsizeMode="tail"
-          testID="hash-display-name-or-address-text"
+          testID="hash-display-name-or-address"
         >
           {displayName || shortenAddress(addressValue)}
         </Text>

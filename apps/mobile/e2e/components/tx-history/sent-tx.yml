@@ -1,14 +1,15 @@
 appId: global.safe.mobileapp.ios
 ---
 # ===========================================
-# Rejected Transaction
+# Sent Transaction
 # ===========================================
-
 - assertVisible: Transaction details
 - assertVisible:
     id: 'share-transaction-button'
-- assertVisible: On-chain rejection
-- assertVisible: This is an on-chain rejection that didn't send any funds. This on-chain rejection replaced all transactions with nonce 16.
+- assertVisible: Sent
+- assertVisible:
+    text: '.*-.*ETH.*'
+    optional: true
 
 # ===========================================
 # Recipient Address
@@ -59,7 +60,6 @@ appId: global.safe.mobileapp.ios
 # ===========================================
 # Test Transaction Details Button
 # ===========================================
-
 - runFlow:
     file: ../../shared/test-advanced-details.yml
 
