@@ -62,7 +62,7 @@ const getConfirmationViewComponent = ({ txInfo, txData, txFlow }: TransactionPre
 
   if (isConfirmBatchView(txFlow)) return <BatchTransactions />
 
-  if (isBridgeOrderTxInfo(txInfo)) return <BridgeTransaction txInfo={txInfo} showWarnings />
+  if (isBridgeOrderTxInfo(txInfo)) return <BridgeTransaction txInfo={txInfo} />
 
   if (isLifiSwapTxInfo(txInfo)) return <LifiSwapTransaction txInfo={txInfo} isPreview={true} />
 

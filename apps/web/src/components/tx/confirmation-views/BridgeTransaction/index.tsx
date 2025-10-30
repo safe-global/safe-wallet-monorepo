@@ -140,7 +140,7 @@ function successfulBridgeTransactionRows(
   return rows
 }
 
-function BridgeTransaction({ txInfo, showWarnings = false }: BridgeTransactionProps) {
+function BridgeTransaction({ txInfo }: BridgeTransactionProps) {
   const chainId = useChainId()
   const { configs } = useChains()
 
