@@ -66,3 +66,10 @@ appId: global.safe.mobileapp.ios
 
 - runFlow:
     file: ../components/tx-history/settings-tx-card.yml
+
+# ===========================================
+# Received Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/received-tx-card.yml
