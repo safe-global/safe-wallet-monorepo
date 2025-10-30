@@ -23,7 +23,9 @@ export function ThresholdChangeDisplay({ txInfo, executionInfo }: ThresholdChang
           </XStack>
         </InfoSheet>
         <XStack alignItems="center" gap="$2">
-          <Text fontSize="$4">{txInfo.settingsInfo?.threshold}</Text>
+          <Text fontSize="$4" testID="threshold-change-display-threshold">
+            {txInfo.settingsInfo?.threshold}
+          </Text>
         </XStack>
       </XStack>
     )

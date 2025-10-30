@@ -59,3 +59,10 @@ appId: global.safe.mobileapp.ios
 
 - runFlow:
     file: ../components/tx-history/sent-tx-card.yml
+
+# ===========================================
+# Settings Change Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/settings-tx-card.yml

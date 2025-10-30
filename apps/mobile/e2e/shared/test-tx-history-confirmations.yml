@@ -1,12 +1,14 @@
 appId: global.safe.mobileapp.ios
 ---
-- assertVisible: 'Confirmations'
+- assertVisible:
+    id: 'history-confirmations-info'
 
 - assertVisible:
     id: 'history-confirmations-info-badge-text'
     text: '\d{1,2}/\d{1,2}'
 
-- tapOn: Confirmations
+- tapOn:
+    id: 'history-confirmations-info'
 
 - assertVisible: 'Signed by'
 
