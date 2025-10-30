@@ -116,7 +116,7 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
       >
         <Stack direction="row" alignItems="center" gap={1}>
           {isSimulationFinished ? (
-            <SeverityIcon severity={isSimulationSuccess ? Severity.OK : Severity.CRITICAL} width={16} height={16} />
+            <SeverityIcon severity={isSimulationSuccess ? Severity.OK : Severity.WARN} width={16} height={16} />
           ) : (
             <SvgIcon component={UpdateIcon} inheritViewBox sx={{ fontSize: 16 }} />
           )}
@@ -159,11 +159,11 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
             }}
           >
             <Typography
+              color="text.primary"
               sx={{
                 fontSize: '12px',
                 lineHeight: '2.015',
                 letterSpacing: '0.4px',
-                color: 'static.main',
               }}
             >
               {isLoading ? 'Running...' : 'Run'}
