@@ -1,5 +1,5 @@
 import { type ReactElement } from 'react'
-import { Box, Divider, Stack } from '@mui/material'
+import { Box } from '@mui/material'
 import type {
   GroupedAnalysisResults,
   ContractAnalysisResults,
@@ -59,9 +59,9 @@ export const SafeShieldContent = ({
       >
         {loading ? <SafeShieldAnalysisLoading /> : allEmpty ? <SafeShieldAnalysisEmpty /> : null}
 
-        <Stack
+        <Box
           display={loading ? 'none' : 'block'}
-          divider={<Divider sx={{ borderColor: 'background.main' }} flexItem />}
+          sx={{ '& > div:not(:last-child)': { borderBottom: '1px solid', borderColor: 'background.main' } }}
         >
           {recipientResults && <AnalysisGroupCard data={recipientResults} />}
 
@@ -70,7 +70,7 @@ export const SafeShieldContent = ({
           {normalizedThreatData && <AnalysisGroupCard data={normalizedThreatData} />}
 
           <TenderlySimulation safeTx={safeTx} />
-        </Stack>
+        </Box>
       </Box>
     </Box>
   )
