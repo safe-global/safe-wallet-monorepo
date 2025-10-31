@@ -5,8 +5,6 @@ appId: global.safe.mobileapp.ios
 - tapOn:
     id: 'e2eOnboardedAccount'
 - tapOn:
-    id: 'opt-in-secondary-button'
-- tapOn:
     id: 'dropdown-label-view'
     index: 0
 - tapOn:

@@ -4,8 +4,6 @@ appId: global.safe.mobileapp.ios
     file: ../shared/clean-app-start.yml
 - tapOn:
     id: 'e2eOnboardedAccount'
-- tapOn:
-    id: 'opt-in-secondary-button'
 - assertVisible:
     id: 'home-tab'
 - tapOn:

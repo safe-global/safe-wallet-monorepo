@@ -132,6 +132,7 @@ export function TestCtrls() {
       }),
     )
     dispatch(setActiveSafe(mockedActiveAccount))
+    dispatch(updatePromptAttempts(1))
     router.replace('/(tabs)')
   }
   const onPressTestOnboarding = async () => {
@@ -198,7 +199,7 @@ export function TestCtrls() {
         style={BTN}
       />
       <Pressable
-        testID="e2eOnboardedAccountNoNotifications"
+        testID="e2eOnboardedAccountTestAssets"
         onPress={() => {
           const keys = Object.keys(assetsTest.safes)
           Object.values(assetsTest.safes).forEach((safe: SafeOverview, index) => {
