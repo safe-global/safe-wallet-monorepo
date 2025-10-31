@@ -3,6 +3,7 @@
 exports[`TxSettingCard should render the default markup 1`] = `
 <View>
   <View
+    collapsable={false}
     onBlur={[Function]}
     onClick={[Function]}
     onFocus={[Function]}
