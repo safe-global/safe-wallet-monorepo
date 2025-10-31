@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { isAddress, JsonRpcProvider } from 'ethers'
 import { ACTIVITY_THRESHOLD_LOW, LowActivityAnalysisResult } from '../config'
@@ -19,9 +19,10 @@ export const useAddressActivity = (
 ): AsyncResult<AddressActivityResult | undefined> => {
   const previousRecipientsRef = useRef<Set<string>>(new Set())
   const [results, setResults] = useState<AddressActivityResult | undefined>(undefined)
+  const [addressesToFetch, setAddressesToFetch] = useState<string[]>([])
 
   // Determine which addresses changed and need fetching
-  const addressesToFetch = useMemo(() => {
+  useEffectDeepCompare(() => {
     const currentSet = new Set(addresses)
     const previousSet = previousRecipientsRef.current
     const toFetch: string[] = []
@@ -32,7 +33,9 @@ export const useAddressActivity = (
       }
     })
 
-    return toFetch
+    if (toFetch.length > 0) {
+      setAddressesToFetch(toFetch)
+    }
   }, [addresses])
 
   // Update previous recipients after determining what to fetch
@@ -41,7 +44,7 @@ export const useAddressActivity = (
   }, [addresses])
 
   const [fetchedResults, error, loading] = useAsyncDeepCompare<AddressActivityResult | undefined>(async () => {
-    if (!web3ReadOnly || addresses.length === 0) {
+    if (!web3ReadOnly) {
       return undefined
     }
 
@@ -71,11 +74,11 @@ export const useAddressActivity = (
     )
 
     return activityResults
-  }, [addressesToFetch, web3ReadOnly, addresses])
+  }, [addressesToFetch, web3ReadOnly])
 
   // Update results to only include addresses that are in the given addresses array
   useEffectDeepCompare(() => {
-    if (!fetchedResults && addresses.length === 0) {
+    if (addresses.length === 0) {
       setResults(undefined)
       return
     }
