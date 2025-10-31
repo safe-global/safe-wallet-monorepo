@@ -45,6 +45,10 @@ export const InfoSheet = ({
         topInset={insets.top}
         enableDynamicSizing
         handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
+        // Setting accessible={false} on the container allows child elements to be
+        // individually accessible to screen readers (VoiceOver/TalkBack). When set to
+        // true, the container would be treated as a single accessible element, grouping
+        // all children together and potentially making them inaccessible.
         accessible={false}
       >
         <BottomSheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom }}>
