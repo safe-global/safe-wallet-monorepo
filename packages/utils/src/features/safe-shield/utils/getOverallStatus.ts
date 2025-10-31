@@ -34,7 +34,7 @@ export const getOverallStatus = (
   threatResults?: ThreatAnalysisResults,
   hasSimulationError?: boolean,
 ): { severity: Severity; title: string } | undefined => {
-  if (!recipientResults && !contractResults && !threatResults) {
+  if (!recipientResults && !contractResults && !threatResults && !hasSimulationError) {
     return undefined
   }
 
