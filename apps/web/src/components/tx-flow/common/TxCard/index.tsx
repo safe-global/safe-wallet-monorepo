@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Card, CardActions, CardContent, Stack, SxProps } from '@mui/material'
+import { Card, CardActions, CardContent, Stack, type SxProps } from '@mui/material'
 import css from '../styles.module.css'
 
 const sxBase = { my: 2, border: 0 }

@@ -4,7 +4,7 @@ import { SlotName, withSlot } from '../../slots'
 import { SignerForm } from './SignerForm'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
-import { Box, Stack } from '@mui/material'
+import { Stack } from '@mui/material'
 
 const useShouldRegisterSlot = () => {
   const { connectedWallet } = useWalletContext() ?? {}
