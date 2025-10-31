@@ -42,7 +42,7 @@ export const ChecksPassed: Story = {
   },
   parameters: { docs: { description: { story: 'SafeShieldWidget analyzing with no security concerns' } } },
 }
-// Checks passed
+// Malicious threat detected
 export const MaliciousThreat: Story = {
   args: {
     ...FullAnalysisBuilder.verifiedContract(contractAddress)

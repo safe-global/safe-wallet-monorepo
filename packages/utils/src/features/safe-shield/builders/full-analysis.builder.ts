@@ -36,7 +36,6 @@ export class FullAnalysisBuilder {
 
   threat(threatAnalysis: AsyncResult<ThreatAnalysisResults> | undefined): this {
     const [threatResult, error, loading = false] = threatAnalysis || []
-
     this.response.threat = [threatResult, error, loading]
     return this
   }
