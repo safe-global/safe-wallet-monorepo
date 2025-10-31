@@ -10,6 +10,8 @@ import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { trackEvent } from '@/services/analytics'
 import { EXPLORE_POSSIBLE_EVENTS } from '@/services/analytics/events/overview'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import css from './styles.module.css'
 
 export type ExplorePossibleApp = {
@@ -69,19 +71,26 @@ const ExplorePossibleWidget = () => {
   const router = useRouter()
   const txBuilderApp = useTxBuilderApp()
   const isDarkMode = useDarkMode()
+  const isSwapEnabled = useHasFeature(FEATURES.NATIVE_SWAPS)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
   const scrollContainerRef = useRef<HTMLUListElement>(null)
 
   const EXPLORE_POSSIBLE_APPS: ExplorePossibleApp[] = useMemo(
     () =>
-      EXPLORE_POSSIBLE_CONFIG.map((config) => ({
+      EXPLORE_POSSIBLE_CONFIG.filter((config) => {
+        // Filter out swap if feature flag is disabled
+        if (config.id === 'swap' && isSwapEnabled !== true) {
+          return false
+        }
+        return true
+      }).map((config) => ({
         id: config.id,
         title: config.title,
         iconUrl: isDarkMode ? config.iconUrl.dark : config.iconUrl.light,
         link: config.getLink(router.query.safe, txBuilderApp?.link),
       })),
-    [router.query.safe, txBuilderApp, isDarkMode],
+    [router.query.safe, txBuilderApp, isDarkMode, isSwapEnabled],
   )
 
   const updateScrollState = () => {

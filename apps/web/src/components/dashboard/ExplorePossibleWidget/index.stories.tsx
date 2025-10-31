@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
 import ExplorePossibleWidget from './index'
@@ -24,7 +25,14 @@ const meta = {
       return (
         <StoreDecorator
           initialState={{
-            chains: { data: [{ chainId: '1' }] },
+            chains: {
+              data: [
+                {
+                  chainId: '1',
+                  features: [FEATURES.NATIVE_SWAPS],
+                },
+              ],
+            },
           }}
         >
           <RouterDecorator
