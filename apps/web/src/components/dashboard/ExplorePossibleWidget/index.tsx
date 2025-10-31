@@ -1,4 +1,4 @@
-import { Card, Chip, IconButton } from '@mui/material'
+import { Card, IconButton } from '@mui/material'
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeftRounded'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRightRounded'
 import Link from 'next/link'
@@ -17,10 +17,6 @@ export type ExplorePossibleApp = {
   title: string
   iconUrl: string
   link: string | UrlObject
-  tag?: {
-    text: string
-    color: string
-  }
 }
 
 const EXPLORE_POSSIBLE_CONFIG = [
@@ -32,10 +28,6 @@ const EXPLORE_POSSIBLE_CONFIG = [
       pathname: AppRoutes.swap,
       query: { safe: safeQuery },
     }),
-    tag: {
-      text: 'Popular',
-      color: '#12FF80',
-    },
   },
   {
     id: 'spaces',
@@ -88,7 +80,6 @@ const ExplorePossibleWidget = () => {
         title: config.title,
         iconUrl: isDarkMode ? config.iconUrl.dark : config.iconUrl.light,
         link: config.getLink(router.query.safe, txBuilderApp?.link),
-        ...('tag' in config && config.tag ? { tag: config.tag } : {}),
       })),
     [router.query.safe, txBuilderApp, isDarkMode],
   )
@@ -192,21 +183,9 @@ const ExplorePossibleWidget = () => {
                 href={app.link}
                 className={css.cardLink}
                 onClick={() => handleAppClick(app.id)}
-                aria-label={`${app.title}${app.tag ? ` - ${app.tag.text}` : ''}`}
+                aria-label={app.title}
               >
                 <div className={css.card}>
-                  {/* Tag */}
-                  {app.tag && (
-                    <Chip
-                      label={<span className={css.tagText}>{app.tag.text}</span>}
-                      size="small"
-                      className={css.tag}
-                      sx={{
-                        backgroundColor: app.tag.color,
-                      }}
-                    />
-                  )}
-
                   {/* Icon */}
                   <div className={css.iconContainer}>
                     <img src={app.iconUrl} alt={`${app.title} icon`} className={css.icon} />
