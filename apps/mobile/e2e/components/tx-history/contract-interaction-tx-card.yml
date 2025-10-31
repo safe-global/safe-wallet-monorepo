@@ -1,0 +1,22 @@
+appId: global.safe.mobileapp.ios
+---
+# ===========================================
+# Contract Interaction Transaction Card
+# ===========================================
+# Contract interactions show method name and contract name
+- assertVisible:
+    text: '.*deleteAllowance.*'
+    optional: true
+
+- assertVisible:
+    text: '.*AllowanceModule.*'
+    optional: true
+
+- tapOn:
+    text: '.*deleteAllowance.*'
+
+- runFlow:
+    file: ./contract-interaction-tx.yml
+
+- tapOn:
+    id: 'go-back'
