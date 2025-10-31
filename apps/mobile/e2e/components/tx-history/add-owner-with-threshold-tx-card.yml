@@ -14,7 +14,7 @@ appId: global.safe.mobileapp.ios
     text: '.*addOwnerWithThreshold.*'
 
 - runFlow:
-    file: ./settings-tx.yml
+    file: ./add-owner-with-threshold-tx.yml
 
 - tapOn:
     id: 'go-back'
