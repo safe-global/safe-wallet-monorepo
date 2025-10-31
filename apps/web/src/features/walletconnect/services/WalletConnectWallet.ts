@@ -25,6 +25,7 @@ function assertWeb3Wallet<T extends Web3WalletType | null>(web3Wallet: T): asser
  */
 class WalletConnectWallet {
   private web3Wallet: Web3WalletType | null = null
+  private initPromise: Promise<Web3WalletType> | null = null
 
   /**
    * Initialize WalletConnect wallet SDK
@@ -32,18 +33,50 @@ class WalletConnectWallet {
   public async init() {
     if (this.web3Wallet) return
 
-    const core = new Core({
-      projectId: WC_PROJECT_ID,
-      logger: IS_PRODUCTION ? undefined : 'debug',
-      customStoragePrefix: LS_NAMESPACE,
-    })
+    if (!this.initPromise) {
+      this.initPromise = (async () => {
+        const core = new Core({
+          projectId: WC_PROJECT_ID,
+          logger: IS_PRODUCTION ? undefined : 'debug',
+          // CRITICAL: Use a unique storage prefix to avoid collision with @web3-onboard/walletconnect.
+          // 
+          // WalletConnect Core uses a global singleton pattern: globalThis._walletConnectCore_${prefix}
+          // Two WalletConnect implementations exist in this app:
+          // 1. Safe-to-dApp (this file): Connects Safe TO external dApps like Uniswap
+          // 2. Wallet-to-Safe (@web3-onboard): Connects wallets like Tangem/Ledger TO Safe
+          //
+          // Without unique prefixes, they share the same global Core instance, causing:
+          // - Session corruption and "No matching key" errors
+          // - Hanging connections when one implementation corrupts the shared Core
+          //
+          // Global Core keys:
+          // - This implementation: globalThis._walletConnectCore_SAFE_v2__wc_dapp_
+          // - @web3-onboard: globalThis._walletConnectCore_ (empty suffix, default)
+          //
+          // This isolation ensures wallet connections work independently from dApp connections.
+          customStoragePrefix: LS_NAMESPACE + 'wc_dapp_',
+        }) as unknown as WalletKitTypes.Options['core']
 
-    const web3wallet = await WalletKit.init({
-      core,
-      metadata: SAFE_WALLET_METADATA,
-    })
+        const web3wallet = await WalletKit.init({
+          core,
+          metadata: SAFE_WALLET_METADATA,
+        })
 
-    this.web3Wallet = web3wallet
+        this.web3Wallet = web3wallet
+
+        return this.web3Wallet
+      })()
+        .catch((error) => {
+          this.web3Wallet = null
+          throw error
+        })
+        .finally(() => {
+          this.initPromise = null
+        })
+    }
+
+    return this.initPromise
+
   }
 
   /**
