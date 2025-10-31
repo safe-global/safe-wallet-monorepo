@@ -1,30 +1,23 @@
-import { Link } from '@mui/material'
-import { type Severity } from '@safe-global/utils/features/safe-shield/types'
+import { type AnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
 import { type ReactElement } from 'react'
+import ExternalLink from '@/components/common/ExternalLink'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 interface DelegateCallCardItemProps {
-  children?: React.ReactNode
-  severity?: Severity
+  result: AnalysisResult
+  isPrimary?: boolean
 }
 
-export const DelegateCallCardItem = ({ children, severity }: DelegateCallCardItemProps): ReactElement => {
+export const DelegateCallCardItem = ({ result, isPrimary = false }: DelegateCallCardItemProps): ReactElement => {
   const description = (
     <>
       This transaction calls a smart contract that will be able to modify your Safe account.{' '}
-      <Link
-        href="https://help.safe.global/en/articles/40794-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
+      <ExternalLink noIcon href={HelpCenterArticle.UNEXPECTED_DELEGATE_CALL}>
         Learn more
-      </Link>
+      </ExternalLink>
     </>
   )
 
-  return (
-    <AnalysisGroupCardItem severity={severity} description={description}>
-      {children}
-    </AnalysisGroupCardItem>
-  )
+  return <AnalysisGroupCardItem description={description} result={result} isPrimary={isPrimary} />
 }

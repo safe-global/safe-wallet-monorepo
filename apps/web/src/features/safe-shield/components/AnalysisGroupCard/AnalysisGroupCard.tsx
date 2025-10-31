@@ -2,13 +2,10 @@ import { type ReactElement, useMemo, useState } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import { ContractStatus, type GroupedAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
-import { isAddressChange, mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
+import { mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
 import { SeverityIcon } from '../SeverityIcon'
-import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
-import { AddressChanges } from '../AddressChanges'
 import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
 import { DelegateCallCardItem } from './DelegateCallCardItem'
-import { ShowAllAddress } from './ShowAllAddress'
 
 export const AnalysisGroupCard = ({
   data,
@@ -59,29 +56,13 @@ export const AnalysisGroupCard = ({
         <Box sx={{ padding: '4px 12px 16px' }}>
           <Stack gap={2}>
             {visibleResults.map((result, index) => {
-              const severity = !index ? result.severity : undefined
+              const isPrimary = index === 0
 
               if (result.type === ContractStatus.UNEXPECTED_DELEGATECALL) {
-                return (
-                  <DelegateCallCardItem key={index} severity={severity}>
-                    <AnalysisIssuesDisplay result={result} />
-
-                    {isAddressChange(result) && <AddressChanges result={result} />}
-
-                    {result.addresses?.length && <ShowAllAddress addresses={result.addresses} />}
-                  </DelegateCallCardItem>
-                )
+                return <DelegateCallCardItem key={index} result={result} isPrimary={isPrimary} />
               }
 
-              return (
-                <AnalysisGroupCardItem key={index} severity={severity} description={result.description}>
-                  <AnalysisIssuesDisplay result={result} />
-
-                  {isAddressChange(result) && <AddressChanges result={result} />}
-
-                  {result.addresses?.length && <ShowAllAddress addresses={result.addresses} />}
-                </AnalysisGroupCardItem>
-              )
+              return <AnalysisGroupCardItem key={index} result={result} isPrimary={isPrimary} />
             })}
           </Stack>
         </Box>
