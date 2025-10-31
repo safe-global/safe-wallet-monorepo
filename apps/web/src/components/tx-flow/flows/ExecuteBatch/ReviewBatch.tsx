@@ -191,9 +191,9 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
         <div>
           <DecodedTxs txs={txsWithDetails} />
         </div>
-      </TxCard>
 
-      <TxCard>
+        <Divider sx={{ mt: 2, mx: -3 }} />
+
         <ConfirmationTitle variant={ConfirmationTitleTypes.execute} />
 
         <NetworkWarning />
