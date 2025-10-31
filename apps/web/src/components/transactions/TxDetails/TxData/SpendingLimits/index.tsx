@@ -14,7 +14,6 @@ import type { SpendingLimitMethods } from '@/utils/transaction-guards'
 import { isSetAllowance } from '@/utils/transaction-guards'
 import chains from '@/config/chains'
 import TxDetailsRow from '@/components/tx/ConfirmTxDetails/TxDetailsRow'
-import useAddressBook from '@/hooks/useAddressBook'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 
 type SpendingLimitsProps = {
@@ -26,12 +25,10 @@ type SpendingLimitsProps = {
 export const SpendingLimits = ({ txData, type }: SpendingLimitsProps): ReactElement | null => {
   const chain = useCurrentChain()
   const tokens = useAppSelector(selectTokens)
-  const addressBook = useAddressBook()
   const isSetAllowanceMethod = useMemo(() => isSetAllowance(type), [type])
 
   const [beneficiary, tokenAddress, amount, resetTimeMin] =
     txData?.dataDecoded?.parameters?.map(({ value }) => value) || []
-  const beneficiaryName = addressBook[beneficiary as string]
 
   const resetTimeLabel = useMemo(
     () => getResetTimeOptions(chain?.chainId).find(({ value }) => +value === +resetTimeMin)?.label,
@@ -53,7 +50,6 @@ export const SpendingLimits = ({ txData, type }: SpendingLimitsProps): ReactElem
       <TxDetailsRow label="Beneficiary" grid>
         <EthHashInfo
           address={(beneficiary as string) || ZERO_ADDRESS}
-          name={beneficiaryName}
           shortAddress={false}
           showCopyButton
           hasExplorer
