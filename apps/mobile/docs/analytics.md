@@ -1,6 +1,6 @@
 # Mobile Analytics Service
 
-This document explains how analytics are implemented in the Safe{Wallet} mobile app using Firebase Analytics, designed to match the Google Analytics implementation in the web app.
+This document explains how analytics are implemented in the Safe{Mobile} app using Firebase Analytics, designed to match the Google Analytics implementation in the web app.
 
 ## Overview
 

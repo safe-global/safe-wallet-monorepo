@@ -1,0 +1,20 @@
+appId: global.safe.mobileapp.ios
+---
+# ===========================================
+# Swap Owner Transaction Card
+# ===========================================
+- assertVisible:
+    text: 'Settings change'
+
+- assertVisible:
+    text: '.*swapOwner.*'
+    optional: true
+
+- tapOn:
+    text: '.*swapOwner.*'
+
+- runFlow:
+    file: ./swap-owner-tx.yml
+
+- tapOn:
+    id: 'go-back'

@@ -1,0 +1,18 @@
+appId: global.safe.mobileapp.ios
+---
+# ===========================================
+# Rejected Transaction Card
+# ===========================================
+- assertVisible:
+    text: 'Rejected'
+
+- assertVisible: On-chain rejection
+
+- tapOn:
+    text: 'On-chain rejection'
+
+- runFlow:
+    file: ./reject-tx.yml
+
+- tapOn:
+    id: 'go-back'

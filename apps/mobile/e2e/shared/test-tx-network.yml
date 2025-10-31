@@ -1,0 +1,12 @@
+appId: global.safe.mobileapp.ios
+---
+# ===========================================
+# Transaction Network Display (Optional)
+# ===========================================
+# This flow asserts the network display element
+# Most transaction views will have this, but include it only when needed
+
+- assertVisible: Network
+- assertVisible:
+    id: 'logo-image'
+- assertVisible: Sepolia
