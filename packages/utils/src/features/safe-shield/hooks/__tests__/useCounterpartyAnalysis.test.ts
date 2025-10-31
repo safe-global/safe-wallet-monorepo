@@ -1028,4 +1028,294 @@ describe('useCounterpartyAnalysis', () => {
       expect(result.current.recipient).toBeUndefined()
     })
   })
+
+  describe('filterNonSafeRecipients behavior', () => {
+    it('should not pass Safe addresses to useAddressActivity', async () => {
+      const backendResults = {
+        [mockRecipientAddress1]: { isSafe: true },
+        [mockRecipientAddress2]: { isSafe: true },
+      }
+
+      mockUseSafeShieldAnalyzeCounterpartyV1Mutation.mockReturnValue([
+        mockTriggerAnalysis,
+        { data: { recipient: backendResults }, error: undefined, isLoading: false },
+      ] as any)
+
+      const mockSafeTx = createMockSafeTx(mockRecipientAddress1)
+
+      renderHook(() =>
+        useCounterpartyAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          safeTx: mockSafeTx,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        }),
+      )
+
+      await waitFor(() => {
+        // Safe addresses should not be passed to activity check
+        expect(mockUseAddressActivity).toHaveBeenCalledWith([], undefined)
+      })
+    })
+
+    it('should pass non-Safe addresses to useAddressActivity', async () => {
+      const backendResults = {
+        [mockRecipientAddress1]: { isSafe: false },
+        [mockRecipientAddress2]: { isSafe: false },
+      }
+
+      mockUseSafeShieldAnalyzeCounterpartyV1Mutation.mockReturnValue([
+        mockTriggerAnalysis,
+        { data: { recipient: backendResults }, error: undefined, isLoading: false },
+      ] as any)
+
+      const mockSafeTx = createMockSafeTx(mockRecipientAddress1)
+
+      renderHook(() =>
+        useCounterpartyAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          safeTx: mockSafeTx,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        }),
+      )
+
+      await waitFor(() => {
+        // Non-Safe addresses should be passed to activity check
+        expect(mockUseAddressActivity).toHaveBeenCalledWith(
+          expect.arrayContaining([getAddress(mockRecipientAddress1), getAddress(mockRecipientAddress2)]),
+          undefined,
+        )
+      })
+    })
+
+    it('should not pass addresses with existing RECIPIENT_ACTIVITY to useAddressActivity', async () => {
+      const backendResults = {
+        [mockRecipientAddress1]: {
+          isSafe: false,
+          [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
+        },
+        [mockRecipientAddress2]: { isSafe: false },
+      }
+
+      mockUseSafeShieldAnalyzeCounterpartyV1Mutation.mockReturnValue([
+        mockTriggerAnalysis,
+        { data: { recipient: backendResults }, error: undefined, isLoading: false },
+      ] as any)
+
+      const mockSafeTx = createMockSafeTx(mockRecipientAddress1)
+
+      renderHook(() =>
+        useCounterpartyAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          safeTx: mockSafeTx,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        }),
+      )
+
+      await waitFor(() => {
+        // Only address2 should be passed (address1 already has activity results)
+        expect(mockUseAddressActivity).toHaveBeenCalledWith([getAddress(mockRecipientAddress2)], undefined)
+      })
+    })
+
+    it('should handle mixed Safe and non-Safe addresses correctly', async () => {
+      const mockAddress3 = faker.finance.ethereumAddress()
+
+      const backendResults = {
+        [mockRecipientAddress1]: { isSafe: true }, // Safe - exclude
+        [mockRecipientAddress2]: { isSafe: false }, // Non-Safe - include
+        [mockAddress3]: {
+          isSafe: false,
+          [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
+        }, // Has activity - exclude
+      }
+
+      mockUseSafeShieldAnalyzeCounterpartyV1Mutation.mockReturnValue([
+        mockTriggerAnalysis,
+        { data: { recipient: backendResults }, error: undefined, isLoading: false },
+      ] as any)
+
+      const mockSafeTx = createMockSafeTx(mockRecipientAddress1)
+
+      renderHook(() =>
+        useCounterpartyAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          safeTx: mockSafeTx,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        }),
+      )
+
+      await waitFor(() => {
+        // Only address2 should be passed to activity check
+        expect(mockUseAddressActivity).toHaveBeenCalledWith([getAddress(mockRecipientAddress2)], undefined)
+      })
+    })
+
+    it('should pass empty array to useAddressActivity when all addresses are filtered out', async () => {
+      const backendResults = {
+        [mockRecipientAddress1]: { isSafe: true },
+        [mockRecipientAddress2]: {
+          isSafe: false,
+          [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
+        },
+      }
+
+      mockUseSafeShieldAnalyzeCounterpartyV1Mutation.mockReturnValue([
+        mockTriggerAnalysis,
+        { data: { recipient: backendResults }, error: undefined, isLoading: false },
+      ] as any)
+
+      const mockSafeTx = createMockSafeTx(mockRecipientAddress1)
+
+      renderHook(() =>
+        useCounterpartyAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          safeTx: mockSafeTx,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        }),
+      )
+
+      await waitFor(() => {
+        // All addresses filtered out - empty array should be passed
+        expect(mockUseAddressActivity).toHaveBeenCalledWith([], undefined)
+      })
+    })
+
+    it('should include addresses without isSafe property in activity check', async () => {
+      const backendResults = {
+        [mockRecipientAddress1]: {}, // No isSafe property - should be included
+        [mockRecipientAddress2]: { isSafe: false },
+      }
+
+      mockUseSafeShieldAnalyzeCounterpartyV1Mutation.mockReturnValue([
+        mockTriggerAnalysis,
+        { data: { recipient: backendResults }, error: undefined, isLoading: false },
+      ] as any)
+
+      const mockSafeTx = createMockSafeTx(mockRecipientAddress1)
+
+      renderHook(() =>
+        useCounterpartyAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          safeTx: mockSafeTx,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        }),
+      )
+
+      await waitFor(() => {
+        // Both addresses should be passed (undefined isSafe is treated as non-Safe)
+        expect(mockUseAddressActivity).toHaveBeenCalledWith(
+          expect.arrayContaining([getAddress(mockRecipientAddress1), getAddress(mockRecipientAddress2)]),
+          undefined,
+        )
+      })
+    })
+
+    it('should preserve existing RECIPIENT_ACTIVITY results from backend in final output', async () => {
+      const existingActivityResult = RecipientAnalysisResultBuilder.lowActivity().build()
+      const backendResults = {
+        [mockRecipientAddress1]: {
+          isSafe: false,
+          [StatusGroup.RECIPIENT_ACTIVITY]: [existingActivityResult],
+          [StatusGroup.RECIPIENT_INTERACTION]: [RecipientAnalysisResultBuilder.newRecipient().build()],
+        },
+        [mockRecipientAddress2]: {
+          isSafe: false,
+          [StatusGroup.RECIPIENT_INTERACTION]: [RecipientAnalysisResultBuilder.recurringRecipient().build()],
+        },
+      }
+
+      const newActivityResults = {
+        [getAddress(mockRecipientAddress2)]: RecipientAnalysisResultBuilder.lowActivity().build(),
+      }
+
+      mockUseSafeShieldAnalyzeCounterpartyV1Mutation.mockReturnValue([
+        mockTriggerAnalysis,
+        { data: { recipient: backendResults }, error: undefined, isLoading: false },
+      ] as any)
+      mockUseAddressActivity.mockReturnValue([newActivityResults, undefined, false])
+
+      const mockSafeTx = createMockSafeTx(mockRecipientAddress1)
+
+      const { result } = renderHook(() =>
+        useCounterpartyAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          safeTx: mockSafeTx,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        }),
+      )
+
+      await waitFor(() => {
+        expect(result.current.recipient).toBeDefined()
+        if (result.current.recipient) {
+          const [, , loading] = result.current.recipient
+          expect(loading).toBe(false)
+        }
+      })
+
+      expect(result.current.recipient).toBeDefined()
+      if (result.current.recipient) {
+        const [mergedResults] = result.current.recipient
+        const checksummedAddress1 = getAddress(mockRecipientAddress1)
+        const checksummedAddress2 = getAddress(mockRecipientAddress2)
+
+        // Address1 should have the backend activity result (not re-fetched)
+        expect(mergedResults![checksummedAddress1][StatusGroup.RECIPIENT_ACTIVITY]).toEqual([existingActivityResult])
+
+        // Address2 should have the new activity result from useAddressActivity
+        expect(mergedResults![checksummedAddress2][StatusGroup.RECIPIENT_ACTIVITY]).toEqual([
+          newActivityResults[checksummedAddress2],
+        ])
+      }
+    })
+
+    it('should still call useAddressBookCheck with all recipient addresses', async () => {
+      const backendResults = {
+        [mockRecipientAddress1]: { isSafe: true }, // Safe - excluded from activity check
+        [mockRecipientAddress2]: { isSafe: false }, // Non-Safe - included in activity check
+      }
+
+      mockUseSafeShieldAnalyzeCounterpartyV1Mutation.mockReturnValue([
+        mockTriggerAnalysis,
+        { data: { recipient: backendResults }, error: undefined, isLoading: false },
+      ] as any)
+
+      const mockSafeTx = createMockSafeTx(mockRecipientAddress1)
+
+      renderHook(() =>
+        useCounterpartyAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          safeTx: mockSafeTx,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        }),
+      )
+
+      await waitFor(() => {
+        // Address book check should be called with ALL addresses (both Safe and non-Safe)
+        expect(mockUseAddressBookCheck).toHaveBeenCalledWith(
+          mockChainId,
+          expect.arrayContaining([getAddress(mockRecipientAddress1), getAddress(mockRecipientAddress2)]),
+          mockIsInAddressBook,
+          mockOwnedSafes,
+        )
+        // But activity check should only be called with non-Safe addresses
+        expect(mockUseAddressActivity).toHaveBeenCalledWith([getAddress(mockRecipientAddress2)], undefined)
+      })
+    })
+  })
 })
