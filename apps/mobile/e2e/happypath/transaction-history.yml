@@ -138,3 +138,7 @@ appId: global.safe.mobileapp.ios
 
 - runFlow:
     file: ../components/tx-history/contract-interaction-tx-card.yml
+
+- scrollUntilVisible:
+    element:
+      text: 'Safe Account created'
