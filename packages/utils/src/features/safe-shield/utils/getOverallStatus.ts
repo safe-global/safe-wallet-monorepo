@@ -38,10 +38,6 @@ export const getOverallStatus = (
     return undefined
   }
 
-  if (hasSimulationError) {
-    return { severity: Severity.WARN, title: SEVERITY_TO_TITLE[Severity.WARN] }
-  }
-
   // Flatten all AnalysisResult objects from contract, recipient, and threat into one array
   const allResults: AnalysisResult[] = []
 
@@ -68,6 +64,15 @@ export const getOverallStatus = (
         }
       }
     }
+  }
+
+  if (hasSimulationError) {
+    allResults.push({
+      severity: Severity.WARN,
+      title: SEVERITY_TO_TITLE[Severity.WARN],
+      type: CommonSharedStatus.FAILED,
+      description: 'Tenderly simulation failed',
+    })
   }
 
   const primaryResult = getPrimaryResult(allResults)
