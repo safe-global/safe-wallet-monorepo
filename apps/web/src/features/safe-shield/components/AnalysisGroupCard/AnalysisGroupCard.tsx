@@ -1,13 +1,11 @@
 import { type ReactElement, useMemo, useState } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import { type GroupedAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
-import { isAddressChange, mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
+import { ContractStatus, type GroupedAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
+import { mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
 import { SeverityIcon } from '../SeverityIcon'
-import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
-import { AddressChanges } from '../AddressChanges'
 import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
-import { ShowAllAddress } from './ShowAllAddress'
+import { DelegateCallCardItem } from './DelegateCallCardItem'
 
 export const AnalysisGroupCard = ({
   data,
@@ -57,19 +55,15 @@ export const AnalysisGroupCard = ({
       <Collapse in={isOpen}>
         <Box sx={{ padding: '4px 12px 16px' }}>
           <Stack gap={2}>
-            {visibleResults.map((result, index) => (
-              <AnalysisGroupCardItem
-                key={index}
-                severity={!index ? result.severity : undefined}
-                description={result.description}
-              >
-                <AnalysisIssuesDisplay result={result} />
+            {visibleResults.map((result, index) => {
+              const isPrimary = index === 0
 
-                {isAddressChange(result) && <AddressChanges result={result} />}
+              if (result.type === ContractStatus.UNEXPECTED_DELEGATECALL) {
+                return <DelegateCallCardItem key={index} result={result} isPrimary={isPrimary} />
+              }
 
-                {result.addresses?.length && <ShowAllAddress addresses={result.addresses} />}
-              </AnalysisGroupCardItem>
-            ))}
+              return <AnalysisGroupCardItem key={index} result={result} isPrimary={isPrimary} />
+            })}
           </Stack>
         </Box>
       </Collapse>
