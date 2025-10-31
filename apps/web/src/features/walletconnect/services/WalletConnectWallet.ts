@@ -38,17 +38,6 @@ class WalletConnectWallet {
         const core = new Core({
           projectId: WC_PROJECT_ID,
           logger: IS_PRODUCTION ? undefined : 'debug',
-          // CRITICAL: Use a unique storage prefix to avoid collision with @web3-onboard/walletconnect.
-          // 
-          // WalletConnect Core uses a global singleton pattern: globalThis._walletConnectCore_${prefix}
-          // Two WalletConnect implementations exist in this app:
-          // 1. Safe-to-dApp (this file): Connects Safe TO external dApps like Uniswap
-          // 2. Wallet-to-Safe (@web3-onboard): Connects wallets like Tangem/Ledger TO Safe
-          //
-          // Without unique prefixes, they share the same global Core instance, causing:
-          // - Session corruption and "No matching key" errors
-          // - Hanging connections when one implementation corrupts the shared Core
-          //
           // Global Core keys:
           // - This implementation: globalThis._walletConnectCore_SAFE_v2__wc_dapp_
           // - @web3-onboard: globalThis._walletConnectCore_ (empty suffix, default)
