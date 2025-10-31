@@ -179,8 +179,7 @@ appId: global.safe.mobileapp.ios
 # Scroll down until we find the first swap order
 - scrollUntilVisible:
     element:
-      text: '.*Swap order.*'
-    centerElement: true
+      text: 'Swap order'
 
 # ===========================================
 # Swap Order Transaction
@@ -199,6 +198,12 @@ appId: global.safe.mobileapp.ios
 # ===========================================
 # Contract Interaction Transaction (Wrapped Ether - deposit)
 # ===========================================
+
+# Scroll down until we find the first deposit
+- scrollUntilVisible:
+    element:
+      text: 'deposit'
+    centerElement: true
 
 - runFlow:
     file: ../components/tx-history/contract-interaction-tx-card.yml
