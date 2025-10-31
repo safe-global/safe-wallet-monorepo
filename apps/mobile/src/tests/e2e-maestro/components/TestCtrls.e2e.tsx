@@ -48,6 +48,23 @@ const mockedActiveSafeInfo1: SafeOverview = {
   threshold: 1,
 }
 
+const mockedSwapOrderAccount: SafeInfo = {
+  address: '0x03042B890b99552b60A073F808100517fb148F60',
+  chainId: '11155111',
+}
+const mockedSwapOrderSafeInfo: SafeOverview = {
+  address: { value: '0x03042B890b99552b60A073F808100517fb148F60', name: null, logoUri: null },
+  awaitingConfirmation: null,
+  chainId: mockedSwapOrderAccount.chainId,
+  fiatTotal: '0',
+  owners: [
+    { value: '0x65F8236309e5A99Ff0d129d04E486EBCE20DC7B0', name: null, logoUri: null },
+    { value: '0x0D65139Da4B36a8A39BF1b63e950038D42231b2e', name: null, logoUri: null },
+  ],
+  queued: 0,
+  threshold: 1,
+}
+
 const assetsTest: { safes: Record<string, SafeOverview> } = {
   safes: {
     Safe1: {
@@ -142,6 +159,29 @@ export function TestCtrls() {
       addSafe({
         info: { [mockedTxHistoryAccount.chainId]: mockedTxHistorySafeInfo },
         address: mockedTxHistoryAccount.address,
+      }),
+    )
+
+    dispatch(
+      addContact({
+        value: mockedTxHistoryAccount.address,
+        name: 'History Safe',
+        chainIds: [mockedTxHistoryAccount.chainId],
+      }),
+    )
+
+    // Add swap order safe with title
+    dispatch(
+      addSafe({
+        info: { [mockedSwapOrderAccount.chainId]: mockedSwapOrderSafeInfo },
+        address: mockedSwapOrderAccount.address,
+      }),
+    )
+    dispatch(
+      addContact({
+        value: mockedSwapOrderAccount.address,
+        name: 'Swap Test Safe',
+        chainIds: [mockedSwapOrderAccount.chainId],
       }),
     )
     dispatch(setActiveSafe(mockedTxHistoryAccount))

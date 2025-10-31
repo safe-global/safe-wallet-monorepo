@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { YStack } from 'tamagui'
+import { YStack, View } from 'tamagui'
 import { SwapHeader } from '@/src/components/SwapHeader'
 import { ListTable } from '@/src/features/ConfirmTx/components/ListTable'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
@@ -45,19 +45,23 @@ export function HistorySwapOrder({ txId, txInfo }: HistorySwapOrderProps) {
   const isSellOrder = kind === 'sell'
 
   return (
-    <YStack gap="$4">
-      <SwapHeader
-        fromToken={sellToken}
-        toToken={buyToken}
-        fromAmount={sellTokenValue}
-        toAmount={buyTokenValue}
-        fromLabel={isSellOrder ? 'Sell' : 'For at most'}
-        toLabel={isSellOrder ? 'For at least' : 'Buy exactly'}
-      />
+    <YStack gap="$4" testID="history-swap-order-container">
+      <View testID="history-swap-order-header">
+        <SwapHeader
+          fromToken={sellToken}
+          toToken={buyToken}
+          fromAmount={sellTokenValue}
+          toAmount={buyTokenValue}
+          fromLabel={isSellOrder ? 'Sell' : 'For at most'}
+          toLabel={isSellOrder ? 'For at least' : 'Buy exactly'}
+        />
+      </View>
 
-      <ListTable items={orderItems}>
-        <HistoryAdvancedDetailsButton txId={txId} />
-      </ListTable>
+      <View testID="history-swap-order-details" collapsable={false}>
+        <ListTable items={orderItems}>
+          <HistoryAdvancedDetailsButton txId={txId} />
+        </ListTable>
+      </View>
     </YStack>
   )
 }

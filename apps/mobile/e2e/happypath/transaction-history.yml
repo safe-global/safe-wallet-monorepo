@@ -142,3 +142,42 @@ appId: global.safe.mobileapp.ios
 - scrollUntilVisible:
     element:
       text: 'Safe Account created'
+
+# ===========================================
+# Switch to Swap Test Safe for Swap Order Test
+# ===========================================
+# Tap on home tab
+- tapOn:
+    id: 'home-tab'
+
+# Tap on the dropdown to switch safes
+- tapOn:
+    id: 'dropdown-label-view'
+    index: 0
+
+# Select Swap Test Safe from the dropdown
+- tapOn:
+    text: '.*Swap Test Safe.*'
+
+# Navigate to transactions tab
+- assertVisible:
+    id: 'home-tab'
+
+- tapOn:
+    id: 'transactions-tab'
+
+- assertVisible:
+    id: 'tx-history-list'
+
+# Scroll down until we find the first swap order
+- scrollUntilVisible:
+    element:
+      text: '.*Swap order.*'
+    centerElement: true
+
+# ===========================================
+# Swap Order Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/swap-order-tx-card.yml
