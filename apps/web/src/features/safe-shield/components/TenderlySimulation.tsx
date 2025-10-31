@@ -125,18 +125,15 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
           </Typography>
           {!isSimulationFinished && !isLoading && (
             <Tooltip
-              title="Run a simulation to see if the transaction will succeed and get a full report."
+              title={
+                <Typography variant="body2" textAlign="center">
+                  Run a simulation to see if the transaction will succeed and get a full report.
+                </Typography>
+              }
               arrow
               placement="top"
             >
-              <SvgIcon
-                component={InfoIcon}
-                inheritViewBox
-                color="border"
-                sx={{
-                  fontSize: 16,
-                }}
-              />
+              <SvgIcon component={InfoIcon} inheritViewBox color="border" sx={{ fontSize: 16 }} />
             </Tooltip>
           )}
         </Stack>
