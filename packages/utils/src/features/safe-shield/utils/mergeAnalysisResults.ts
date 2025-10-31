@@ -5,8 +5,8 @@ import { getAddress } from 'ethers'
 
 /**
  * Merges backend and local check results
- * Backend provides RECIPIENT_INTERACTION (group 3)
- * Local checks provide ADDRESS_BOOK (group 1) and RECIPIENT_ACTIVITY (group 2)
+ * Backend provides RECIPIENT_INTERACTION (group 3) and possibly RECIPIENT_ACTIVITY (group 2) for Safe accounts
+ * Local checks provide ADDRESS_BOOK (group 1) and RECIPIENT_ACTIVITY (group 2, only for EOA)
  */
 export function mergeAnalysisResults(
   fetchedResults: RecipientAnalysisResults | undefined,

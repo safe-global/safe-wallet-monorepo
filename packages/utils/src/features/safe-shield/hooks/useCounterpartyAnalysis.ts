@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { getAddress, isAddress, JsonRpcProvider } from 'ethers'
-import uniq from 'lodash/uniq'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { useSafeShieldAnalyzeCounterpartyV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
 import { useAddressBookCheck } from './address-analysis/address-book-check/useAddressBookCheck'
 import { useAddressActivity } from './address-analysis/address-activity/useAddressActivity'
 import { type RecipientAnalysisResults, type ContractAnalysisResults, StatusGroup } from '../types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { mergeAnalysisResults } from '../utils'
+import { filterNonSafeRecipients, mergeAnalysisResults } from '../utils'
 import { ErrorType, getErrorInfo } from '../utils/errors'
 
 /**
@@ -74,20 +73,33 @@ export function useCounterpartyAnalysis({
     setHasTriggered(false)
   }, [transactionData])
 
-  // Extract recipient addresses from the counterparty analysis response
-  const recipientAddresses = useMemo(() => {
+  const recipientAnalysisByAddress = useMemo(() => {
     if (!counterpartyData?.recipient) {
-      return []
+      return undefined
     }
-    const addresses = Object.keys(counterpartyData.recipient)
-      .filter((address) => address && isAddress(address))
-      .map(getAddress)
-    return uniq(addresses)
+
+    return Object.entries(counterpartyData.recipient).reduce<RecipientAnalysisResults>((acc, [address, result]) => {
+      if (!address || !isAddress(address)) {
+        return acc
+      }
+
+      const checksummedAddress = getAddress(address)
+      acc[checksummedAddress] = result as RecipientAnalysisResults[string]
+      return acc
+    }, {})
   }, [counterpartyData])
+
+  const recipientAddresses = useMemo(() => Object.keys(recipientAnalysisByAddress || {}), [recipientAnalysisByAddress])
+
+  // Filter out recipient addresses that are Safe accounts
+  const nonSafeRecipients = useMemo(
+    () => filterNonSafeRecipients(recipientAnalysisByAddress),
+    [recipientAnalysisByAddress],
+  )
 
   // Perform local checks on recipient addresses
   const addressBookCheck = useAddressBookCheck(chainId, recipientAddresses, isInAddressBook, ownedSafes)
-  const [activityCheck, activityCheckError, activityCheckLoading] = useAddressActivity(recipientAddresses, web3ReadOnly)
+  const [activityCheck, activityCheckError, activityCheckLoading] = useAddressActivity(nonSafeRecipients, web3ReadOnly)
 
   const fetchError = useMemo(() => {
     if (error) {
@@ -102,17 +114,13 @@ export function useCounterpartyAnalysis({
       return { [safeAddress]: { [StatusGroup.COMMON]: [getErrorInfo(ErrorType.RECIPIENT)] } }
     }
     // Only merge different results after all of them are available
-    if (!counterpartyData?.recipient || !addressBookCheck || activityCheckLoading) {
+    if (!recipientAnalysisByAddress || !addressBookCheck || activityCheckLoading) {
       return undefined
     }
 
-    return mergeAnalysisResults(
-      counterpartyData?.recipient as RecipientAnalysisResults,
-      addressBookCheck,
-      activityCheck,
-    )
+    return mergeAnalysisResults(recipientAnalysisByAddress, addressBookCheck, activityCheck)
   }, [
-    counterpartyData?.recipient,
+    recipientAnalysisByAddress,
     addressBookCheck,
     activityCheck,
     fetchError,
