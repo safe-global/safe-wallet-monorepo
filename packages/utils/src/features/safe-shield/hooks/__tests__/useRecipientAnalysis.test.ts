@@ -85,6 +85,12 @@ describe('useRecipientAnalysis', () => {
   it('should filter out invalid addresses', async () => {
     const invalidAddress = 'invalid-address'
 
+    // Mock fetched results to include the valid address as non-Safe
+    const backendResults = {
+      [mockAddress1.toLowerCase()]: { isSafe: false },
+    }
+    mockUseFetchRecipientAnalysis.mockReturnValue([backendResults, undefined, false])
+
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockAddress1, invalidAddress], [])
       return useRecipientAnalysis({
@@ -482,5 +488,257 @@ describe('useRecipientAnalysis', () => {
       const [, returnedError] = result.current
       expect(returnedError).toBe(fetchError)
     }
+  })
+
+  describe('filterNonSafeRecipients behavior', () => {
+    it('should not pass Safe addresses to useAddressActivity', async () => {
+      const backendResults = {
+        [mockAddress1]: { isSafe: true },
+        [mockAddress2]: { isSafe: true },
+      }
+
+      mockUseFetchRecipientAnalysis.mockReturnValue([backendResults, undefined, false])
+
+      const { result } = renderHook(() => {
+        const recipients = useMemo(() => [mockAddress1, mockAddress2], [])
+        return useRecipientAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          recipients,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        })
+      })
+
+      await waitFor(() => {
+        expect(result.current).toBeDefined()
+        if (result.current) {
+          const [, , loading] = result.current
+          expect(loading).toBe(false)
+        }
+      })
+
+      // Safe addresses should not be passed to activity check
+      expect(mockUseAddressActivity).toHaveBeenCalledWith([], undefined)
+    })
+
+    it('should pass non-Safe addresses to useAddressActivity', async () => {
+      const backendResults = {
+        [mockAddress1]: { isSafe: false },
+        [mockAddress2]: { isSafe: false },
+      }
+
+      mockUseFetchRecipientAnalysis.mockReturnValue([backendResults, undefined, false])
+
+      const { result } = renderHook(() => {
+        const recipients = useMemo(() => [mockAddress1, mockAddress2], [])
+        return useRecipientAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          recipients,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        })
+      })
+
+      await waitFor(() => {
+        expect(result.current).toBeDefined()
+        if (result.current) {
+          const [, , loading] = result.current
+          expect(loading).toBe(false)
+        }
+      })
+
+      // Non-Safe addresses should be passed to activity check
+      expect(mockUseAddressActivity).toHaveBeenCalledWith([mockAddress1, mockAddress2], undefined)
+    })
+
+    it('should not pass addresses with existing RECIPIENT_ACTIVITY to useAddressActivity', async () => {
+      const backendResults = {
+        [mockAddress1]: {
+          isSafe: false,
+          [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
+        },
+        [mockAddress2]: { isSafe: false },
+      }
+
+      mockUseFetchRecipientAnalysis.mockReturnValue([backendResults, undefined, false])
+
+      const { result } = renderHook(() => {
+        const recipients = useMemo(() => [mockAddress1, mockAddress2], [])
+        return useRecipientAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          recipients,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        })
+      })
+
+      await waitFor(() => {
+        expect(result.current).toBeDefined()
+        if (result.current) {
+          const [, , loading] = result.current
+          expect(loading).toBe(false)
+        }
+      })
+
+      // Only address2 should be passed (address1 already has activity results)
+      expect(mockUseAddressActivity).toHaveBeenCalledWith([mockAddress2], undefined)
+    })
+
+    it('should handle mixed Safe and non-Safe addresses correctly', async () => {
+      const mockAddress3 = faker.finance.ethereumAddress()
+
+      const backendResults = {
+        [mockAddress1]: { isSafe: true }, // Safe - exclude
+        [mockAddress2]: { isSafe: false }, // Non-Safe - include
+        [mockAddress3]: {
+          isSafe: false,
+          [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
+        }, // Has activity - exclude
+      }
+
+      mockUseFetchRecipientAnalysis.mockReturnValue([backendResults, undefined, false])
+
+      const { result } = renderHook(() => {
+        const recipients = useMemo(() => [mockAddress1, mockAddress2, mockAddress3], [])
+        return useRecipientAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          recipients,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        })
+      })
+
+      await waitFor(() => {
+        expect(result.current).toBeDefined()
+        if (result.current) {
+          const [, , loading] = result.current
+          expect(loading).toBe(false)
+        }
+      })
+
+      // Only address2 should be passed to activity check
+      expect(mockUseAddressActivity).toHaveBeenCalledWith([mockAddress2], undefined)
+    })
+
+    it('should pass empty array to useAddressActivity when all addresses are filtered out', async () => {
+      const backendResults = {
+        [mockAddress1]: { isSafe: true },
+        [mockAddress2]: {
+          isSafe: false,
+          [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
+        },
+      }
+
+      mockUseFetchRecipientAnalysis.mockReturnValue([backendResults, undefined, false])
+
+      const { result } = renderHook(() => {
+        const recipients = useMemo(() => [mockAddress1, mockAddress2], [])
+        return useRecipientAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          recipients,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        })
+      })
+
+      await waitFor(() => {
+        expect(result.current).toBeDefined()
+        if (result.current) {
+          const [, , loading] = result.current
+          expect(loading).toBe(false)
+        }
+      })
+
+      // All addresses filtered out - empty array should be passed
+      expect(mockUseAddressActivity).toHaveBeenCalledWith([], undefined)
+    })
+
+    it('should include addresses without isSafe property in activity check', async () => {
+      const backendResults = {
+        [mockAddress1]: {}, // No isSafe property - should be included
+        [mockAddress2]: { isSafe: false },
+      }
+
+      mockUseFetchRecipientAnalysis.mockReturnValue([backendResults, undefined, false])
+
+      const { result } = renderHook(() => {
+        const recipients = useMemo(() => [mockAddress1, mockAddress2], [])
+        return useRecipientAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          recipients,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        })
+      })
+
+      await waitFor(() => {
+        expect(result.current).toBeDefined()
+        if (result.current) {
+          const [, , loading] = result.current
+          expect(loading).toBe(false)
+        }
+      })
+
+      // Both addresses should be passed (undefined isSafe is treated as non-Safe)
+      expect(mockUseAddressActivity).toHaveBeenCalledWith([mockAddress1, mockAddress2], undefined)
+    })
+
+    it('should preserve existing RECIPIENT_ACTIVITY results from backend in final output', async () => {
+      const existingActivityResult = RecipientAnalysisResultBuilder.lowActivity().build()
+      const backendResults = {
+        [mockAddress1]: {
+          isSafe: false,
+          [StatusGroup.RECIPIENT_ACTIVITY]: [existingActivityResult],
+        },
+        [mockAddress2]: { isSafe: false },
+      }
+
+      const newActivityResults = {
+        [mockAddress2]: RecipientAnalysisResultBuilder.lowActivity().build(),
+      }
+
+      mockUseFetchRecipientAnalysis.mockReturnValue([backendResults, undefined, false])
+      mockUseAddressActivity.mockReturnValue([newActivityResults, undefined, false])
+
+      const { result } = renderHook(() => {
+        const recipients = useMemo(() => [mockAddress1, mockAddress2], [])
+        return useRecipientAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          recipients,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        })
+      })
+
+      await waitFor(() => {
+        expect(result.current).toBeDefined()
+        if (result.current) {
+          const [, , loading] = result.current
+          expect(loading).toBe(false)
+        }
+      })
+
+      expect(result.current).toBeDefined()
+      if (result.current) {
+        const [results] = result.current
+        const checksummedAddress1 = getAddress(mockAddress1)
+        const checksummedAddress2 = getAddress(mockAddress2)
+
+        // Address1 should have the backend activity result (not re-fetched)
+        expect(results![checksummedAddress1][StatusGroup.RECIPIENT_ACTIVITY]).toEqual([existingActivityResult])
+
+        // Address2 should have the new activity result from useAddressActivity
+        expect(results![checksummedAddress2][StatusGroup.RECIPIENT_ACTIVITY]).toEqual([
+          newActivityResults[mockAddress2],
+        ])
+      }
+    })
   })
 })
