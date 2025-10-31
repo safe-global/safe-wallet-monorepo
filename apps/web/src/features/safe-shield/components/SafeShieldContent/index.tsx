@@ -13,6 +13,7 @@ import { TenderlySimulation } from '../TenderlySimulation'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
 import type { SafeTransaction } from '@safe-global/types-kit'
+import { useHighlightedSeverity } from '@safe-global/utils/features/safe-shield/hooks/useHighlightedSeverity'
 
 const normalizeThreatData = (threat?: AsyncResult<ThreatAnalysisResults>): Record<string, GroupedAnalysisResults> => {
   const [result] = threat || []
@@ -39,7 +40,7 @@ export const SafeShieldContent = ({
   const [contractResults = {}, _contractError, contractLoading = false] = contract || []
   const [threatResults, _threatError, threatLoading = false] = threat || []
   const normalizedThreatData = normalizeThreatData(threat)
-
+  const highlightedSeverity = useHighlightedSeverity(recipientResults, contractResults, normalizedThreatData)
   const loading = recipientLoading || contractLoading || threatLoading
 
   const recipientEmpty = isEmpty(recipientResults)
@@ -63,11 +64,13 @@ export const SafeShieldContent = ({
           display={loading ? 'none' : 'block'}
           sx={{ '& > div:not(:last-child)': { borderBottom: '1px solid', borderColor: 'background.main' } }}
         >
-          {recipientResults && <AnalysisGroupCard data={recipientResults} />}
+          {recipientResults && <AnalysisGroupCard data={recipientResults} highlightedSeverity={highlightedSeverity} />}
 
-          {contractResults && <AnalysisGroupCard data={contractResults} />}
+          {contractResults && <AnalysisGroupCard data={contractResults} highlightedSeverity={highlightedSeverity} />}
 
-          {normalizedThreatData && <AnalysisGroupCard data={normalizedThreatData} />}
+          {normalizedThreatData && (
+            <AnalysisGroupCard data={normalizedThreatData} highlightedSeverity={highlightedSeverity} />
+          )}
 
           <TenderlySimulation safeTx={safeTx} />
         </Box>
