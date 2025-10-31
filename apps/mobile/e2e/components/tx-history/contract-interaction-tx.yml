@@ -3,16 +3,20 @@ appId: global.safe.mobileapp.ios
 # ===========================================
 # Contract Interaction Transaction
 # ===========================================
+# Environment variables:
+#   METHOD_NAME: The method name (e.g., "deleteAllowance", "deposit")
+#   CONTRACT_NAME: The contract name (e.g., "AllowanceModule", "Wrapped Ether")
+#   ACTION_NAME: The capitalized action name shown in details (e.g., "DeleteAllowance", "Deposit")
 - assertVisible: Transaction details
 - assertVisible: Contract interaction
-- assertVisible: DeleteAllowance
+- assertVisible: ${ACTION_NAME}
 
 # ===========================================
 # Call Field with Method Name Badge
 # ===========================================
 - assertVisible: Call
 - assertVisible:
-    text: '.*deleteAllowance.*'
+    text: '.*${METHOD_NAME}.*'
 
 # ===========================================
 # Contract Information
@@ -21,7 +25,7 @@ appId: global.safe.mobileapp.ios
 - assertVisible:
     id: 'history-contract-information'
     containsDescendants:
-      - text: '.*AllowanceModule.*'
+      - text: '.*${CONTRACT_NAME}.*'
 
 # ===========================================
 # Network Display

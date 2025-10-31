@@ -104,6 +104,9 @@ appId: global.safe.mobileapp.ios
 
 - runFlow:
     file: ../components/tx-history/batch-tx-card.yml
+    env:
+      METHOD_NAME: 'multiSend'
+      CONTRACT_NAME: 'Safe: MultiSendCallOnly 1.3.0'
 
 # ===========================================
 # Disable Module Settings Transaction
@@ -133,11 +136,15 @@ appId: global.safe.mobileapp.ios
       text: '.*deleteAllowance.*'
 
 # ===========================================
-# Contract Interaction Transaction (AllowanceModule)
+# Contract Interaction Transaction (AllowanceModule - deleteAllowance)
 # ===========================================
 
 - runFlow:
     file: ../components/tx-history/contract-interaction-tx-card.yml
+    env:
+      METHOD_NAME: 'deleteAllowance'
+      CONTRACT_NAME: 'AllowanceModule'
+      ACTION_NAME: 'DeleteAllowance'
 
 - scrollUntilVisible:
     element:
@@ -188,3 +195,14 @@ appId: global.safe.mobileapp.ios
 
 - runFlow:
     file: ../components/tx-history/limit-order-tx-card.yml
+
+# ===========================================
+# Contract Interaction Transaction (Wrapped Ether - deposit)
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/contract-interaction-tx-card.yml
+    env:
+      METHOD_NAME: 'deposit'
+      CONTRACT_NAME: 'Wrapped Ether'
+      ACTION_NAME: 'Deposit'

@@ -44,10 +44,16 @@ export function HistoryContract({ txId, txInfo }: HistoryContractProps) {
         </View>
       </HistoryTransactionHeader>
 
-      <Container padding="$4" gap="$4" borderRadius="$3">
+      <Container padding="$4" gap="$4" borderRadius="$3" testID="history-contract-container" collapsable={false}>
         {/* Method Call Badge */}
         {txInfo.methodName && (
-          <View alignItems="center" flexDirection="row" justifyContent="space-between">
+          <View
+            alignItems="center"
+            flexDirection="row"
+            justifyContent="space-between"
+            collapsable={false}
+            testID="history-contract-call-badge"
+          >
             <Text color="$textSecondaryLight">Call</Text>
             <Badge
               circleProps={methodBadgeProps}

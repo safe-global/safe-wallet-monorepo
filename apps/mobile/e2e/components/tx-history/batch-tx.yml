@@ -13,13 +13,20 @@ appId: global.safe.mobileapp.ios
     containsDescendants:
       - text: '.*\d+\s+Actions.*'
 
+- assertVisible:
+    id: 'history-contract-container'
+    containsDescendants:
+      - id: 'history-contract-call-badge'
+        containsDescendants:
+          - text: '.*${METHOD_NAME}.*'
+
 # Contract information
 - assertVisible: Contract
 - assertVisible:
     id: 'history-contract-information'
     containsDescendants:
       - id: 'hash-display-name-or-address'
-        text: 'Safe: MultiSendCallOnly 1.3.0'
+        text: '.*${CONTRACT_NAME}.*'
 
 # Network display (custom format in HistoryContract)
 - assertVisible: Network

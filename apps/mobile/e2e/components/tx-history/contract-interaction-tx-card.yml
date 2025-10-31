@@ -4,19 +4,26 @@ appId: global.safe.mobileapp.ios
 # Contract Interaction Transaction Card
 # ===========================================
 # Contract interactions show method name and contract name
+# Environment variables:
+#   METHOD_NAME: The method name to search for (e.g., "deleteAllowance", "deposit")
+#   CONTRACT_NAME: Optional contract name to verify (e.g., "AllowanceModule", "Wrapped Ether")
 - assertVisible:
-    text: '.*deleteAllowance.*'
+    text: '.*${METHOD_NAME}.*'
     optional: true
 
 - assertVisible:
-    text: '.*AllowanceModule.*'
+    text: '.*${CONTRACT_NAME}.*'
     optional: true
 
 - tapOn:
-    text: '.*deleteAllowance.*'
+    text: '.*${METHOD_NAME}.*'
 
 - runFlow:
     file: ./contract-interaction-tx.yml
+    env:
+      METHOD_NAME: ${METHOD_NAME}
+      CONTRACT_NAME: ${CONTRACT_NAME}
+      ACTION_NAME: ${ACTION_NAME}
 
 - tapOn:
     id: 'go-back'
