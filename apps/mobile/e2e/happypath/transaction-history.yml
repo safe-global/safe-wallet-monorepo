@@ -181,3 +181,10 @@ appId: global.safe.mobileapp.ios
 
 - runFlow:
     file: ../components/tx-history/swap-order-tx-card.yml
+
+# ===========================================
+# Limit Order Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/limit-order-tx-card.yml
