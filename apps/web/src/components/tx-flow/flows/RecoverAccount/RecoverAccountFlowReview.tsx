@@ -144,57 +144,55 @@ export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlo
         {txPreview && <Summary safeTxData={safeTx?.data} {...txPreview} />}
 
         <BlockaidBalanceChanges />
-      </TxCard>
 
-      <TxCard>
-        <>
-          <ConfirmationTitle variant={ConfirmationTitleTypes.execute} />
+        <Divider sx={{ mt: 2, mx: -3 }} />
 
-          {safeTxError && (
-            <ErrorMessage error={safeTxError}>
-              This recovery will most likely fail. To save gas costs, avoid executing the transaction.
-            </ErrorMessage>
-          )}
+        <ConfirmationTitle variant={ConfirmationTitleTypes.execute} />
 
-          {executionValidationError && (
-            <ErrorMessage error={executionValidationError}>
-              This transaction will most likely fail. To save gas costs, avoid executing the transaction.
-            </ErrorMessage>
-          )}
+        {safeTxError && (
+          <ErrorMessage error={safeTxError}>
+            This recovery will most likely fail. To save gas costs, avoid executing the transaction.
+          </ErrorMessage>
+        )}
 
-          {submitError && (
-            <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
-          )}
+        {executionValidationError && (
+          <ErrorMessage error={executionValidationError}>
+            This transaction will most likely fail. To save gas costs, avoid executing the transaction.
+          </ErrorMessage>
+        )}
 
-          <NetworkWarning />
+        {submitError && (
+          <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
+        )}
 
-          {recovery?.delay !== undefined && (
-            <ErrorMessage level="info">
-              Recovery will be{' '}
-              {recovery.delay === 0n ? 'immediately possible' : `possible in ${getPeriod(Number(recovery.delay))}`}{' '}
-              after this transaction is executed.
-            </ErrorMessage>
-          )}
+        <NetworkWarning />
 
-          {isRejectedByUser && <WalletRejectionError />}
+        {recovery?.delay !== undefined && (
+          <ErrorMessage level="info">
+            Recovery will be{' '}
+            {recovery.delay === 0n ? 'immediately possible' : `possible in ${getPeriod(Number(recovery.delay))}`} after
+            this transaction is executed.
+          </ErrorMessage>
+        )}
 
-          <Divider className={commonCss.nestedDivider} />
+        {isRejectedByUser && <WalletRejectionError />}
 
-          <CardActions sx={{ mt: 'var(--space-1) !important' }}>
-            <CheckWallet allowNonOwner checkNetwork>
-              {(isOk) => (
-                <Button
-                  data-testid="execute-btn"
-                  variant="contained"
-                  disabled={!isOk || submitDisabled}
-                  onClick={onSubmit}
-                >
-                  {!isSubmittable ? <CircularProgress size={20} /> : 'Execute'}
-                </Button>
-              )}
-            </CheckWallet>
-          </CardActions>
-        </>
+        <Divider className={commonCss.nestedDivider} />
+
+        <CardActions sx={{ mt: 'var(--space-1) !important' }}>
+          <CheckWallet allowNonOwner checkNetwork>
+            {(isOk) => (
+              <Button
+                data-testid="execute-btn"
+                variant="contained"
+                disabled={!isOk || submitDisabled}
+                onClick={onSubmit}
+              >
+                {!isSubmittable ? <CircularProgress size={20} /> : 'Execute'}
+              </Button>
+            )}
+          </CheckWallet>
+        </CardActions>
       </TxCard>
     </>
   )
