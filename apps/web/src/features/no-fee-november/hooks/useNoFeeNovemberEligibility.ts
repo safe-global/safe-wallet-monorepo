@@ -1,6 +1,7 @@
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useBlockedAddress from '@/hooks/useBlockedAddress'
 import { useRelayGetRelaysRemainingV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
+import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
 
 const useNoFeeNovemberEligibility = (): {
   isEligible: boolean | undefined
@@ -12,6 +13,7 @@ const useNoFeeNovemberEligibility = (): {
 } => {
   const { safe, safeAddress } = useSafeInfo()
   const blockedAddress = useBlockedAddress()
+  const isFeatureEnabled = useIsNoFeeNovemberFeatureEnabled()
 
   const skipQuery = !safeAddress || !!blockedAddress
 
@@ -39,7 +41,8 @@ const useNoFeeNovemberEligibility = (): {
     }
   }
 
-  const isEligible = data !== undefined && typeof data.limit === 'number' && data.limit > 0
+  // Check eligibility: must have limit > 0 AND feature must be enabled for this chain
+  const isEligible = isFeatureEnabled && data !== undefined && typeof data.limit === 'number' && data.limit > 0
 
   return {
     isEligible,
