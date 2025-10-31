@@ -28,6 +28,7 @@ export function ConfirmationsInfo({ detailedExecutionInfo, txId }: Confirmations
     <SafeListItem
       label="Confirmations"
       onPress={onConfirmationsPress}
+      testID="confirmations-info-list-item"
       rightNode={
         <View alignItems="center" flexDirection="row" gap="$2">
           <Badge

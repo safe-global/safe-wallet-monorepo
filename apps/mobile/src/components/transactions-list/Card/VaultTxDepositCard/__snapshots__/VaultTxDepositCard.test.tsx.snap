@@ -3,6 +3,7 @@
 exports[`VaultTxDepositCard renders correctly 1`] = `
 <View>
   <View
+    collapsable={false}
     style={
       {
         "alignItems": "flex-start",

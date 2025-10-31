@@ -3,6 +3,7 @@
 exports[`SafeListItem should render a list item with a custom label template 1`] = `
 <View>
   <View
+    collapsable={false}
     style={
       {
         "alignItems": "flex-start",
@@ -122,6 +123,7 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
 exports[`SafeListItem should render bottomContent with proper styling and layout 1`] = `
 <View>
   <View
+    collapsable={false}
     style={
       {
         "alignItems": "flex-start",

@@ -8,6 +8,7 @@ import { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { SafeInfo, Address } from '@/src/types/address'
 import { updateSettings } from '@/src/store/settingsSlice'
 import { updatePromptAttempts } from '@/src/store/notificationsSlice'
+import { addContact } from '@/src/store/addressBookSlice'
 
 LogBox.ignoreAllLogs()
 
@@ -44,6 +45,71 @@ const mockedActiveSafeInfo1: SafeOverview = {
     { value: '0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8', name: null, logoUri: null },
   ],
   queued: 1,
+  threshold: 1,
+}
+
+const mockedSwapOrderAccount: SafeInfo = {
+  address: '0x03042B890b99552b60A073F808100517fb148F60',
+  chainId: '11155111',
+}
+const mockedSwapOrderSafeInfo: SafeOverview = {
+  address: { value: '0x03042B890b99552b60A073F808100517fb148F60', name: null, logoUri: null },
+  awaitingConfirmation: null,
+  chainId: mockedSwapOrderAccount.chainId,
+  fiatTotal: '0',
+  owners: [
+    { value: '0x65F8236309e5A99Ff0d129d04E486EBCE20DC7B0', name: null, logoUri: null },
+    { value: '0x0D65139Da4B36a8A39BF1b63e950038D42231b2e', name: null, logoUri: null },
+  ],
+  queued: 0,
+  threshold: 1,
+}
+
+const assetsTest: { safes: Record<string, SafeOverview> } = {
+  safes: {
+    Safe1: {
+      address: { value: '0x2f3e600a3F38b66aDcbe6530B191F2BE55c2Fbb6', name: null, logoUri: null },
+      awaitingConfirmation: null,
+      chainId: mockedActiveAccount.chainId,
+      fiatTotal: '0',
+      owners: [
+        { value: '0x3336745b7EA628F5134Bd9d08aa68b4979fA3472', name: null, logoUri: null },
+        { value: '0x81BdB0a66065363F704A105D67D53d090aD14fec', name: null, logoUri: null },
+        { value: '0x4d5CF9E6df9a95F4c1F5398706cA27218add5949', name: null, logoUri: null },
+      ],
+      queued: 1,
+      threshold: 1,
+    },
+    Safe2: {
+      address: { value: '0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415', name: null, logoUri: null },
+      awaitingConfirmation: null,
+      chainId: mockedActiveAccount.chainId,
+      fiatTotal: '0',
+      owners: [
+        { value: '0x61a0c717d18232711bC788F19C9Cd56a43cc8872', name: null, logoUri: null },
+        { value: '0x0D65139Da4B36a8A39BF1b63e950038D42231b2e', name: null, logoUri: null },
+      ],
+      queued: 1,
+      threshold: 1,
+    },
+  },
+}
+
+const mockedTxHistoryAccount: SafeInfo = {
+  address: '0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
+  chainId: '11155111',
+}
+const mockedTxHistorySafeInfo: SafeOverview = {
+  address: { value: '0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb', name: null, logoUri: null },
+  awaitingConfirmation: null,
+  chainId: mockedTxHistoryAccount.chainId,
+  fiatTotal: '0',
+  owners: [
+    { value: '0x4fe7164d7cA511Ab35520bb14065F1693240dC90', name: null, logoUri: null },
+    { value: '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED', name: null, logoUri: null },
+    { value: '0x96D4c6fFC338912322813a77655fCC926b9A5aC5', name: null, logoUri: null },
+  ],
+  queued: 0,
   threshold: 1,
 }
 
@@ -86,16 +152,85 @@ export function TestCtrls() {
     router.replace('/(tabs)')
   }
 
+  const onPressE2eTransactionHistory = async () => {
+    dispatch(updateSettings({ onboardingVersionSeen: 'v1' }))
+    dispatch(updatePromptAttempts(1))
+    dispatch(
+      addSafe({
+        info: { [mockedTxHistoryAccount.chainId]: mockedTxHistorySafeInfo },
+        address: mockedTxHistoryAccount.address,
+      }),
+    )
+
+    dispatch(
+      addContact({
+        value: mockedTxHistoryAccount.address,
+        name: 'History Safe',
+        chainIds: [mockedTxHistoryAccount.chainId],
+      }),
+    )
+
+    // Add swap order safe with title
+    dispatch(
+      addSafe({
+        info: { [mockedSwapOrderAccount.chainId]: mockedSwapOrderSafeInfo },
+        address: mockedSwapOrderAccount.address,
+      }),
+    )
+    dispatch(
+      addContact({
+        value: mockedSwapOrderAccount.address,
+        name: 'Swap Test Safe',
+        chainIds: [mockedSwapOrderAccount.chainId],
+      }),
+    )
+    dispatch(setActiveSafe(mockedTxHistoryAccount))
+
+    router.replace('/(tabs)')
+  }
+
   return (
     <View position={'absolute'} top={100} right={0} zIndex={99999}>
       <Pressable
         testID="e2eOnboardedAccount"
-        onPress={onPressOnboardedAccount}
+        onPress={() => onPressOnboardedAccount()}
+        accessibilityRole="button"
+        style={BTN}
+      />
+      <Pressable
+        testID="e2eOnboardedAccountNoNotifications"
+        onPress={() => {
+          const keys = Object.keys(assetsTest.safes)
+          Object.values(assetsTest.safes).forEach((safe: SafeOverview, index) => {
+            dispatch(
+              addSafe({
+                address: safe.address.value as Address,
+                info: { [safe.chainId]: safe },
+              }),
+            )
+            dispatch(
+              addContact({
+                value: safe.address.value as Address,
+                name: keys[index],
+                chainIds: [safe.chainId],
+              }),
+            )
+          })
+          dispatch(updatePromptAttempts(1))
+          dispatch(setActiveSafe(mockedActiveAccount))
+          router.replace('/(tabs)')
+        }}
         accessibilityRole="button"
         style={BTN}
       />
       <Pressable testID="e2eTestOnboarding" onPress={onPressTestOnboarding} accessibilityRole="button" style={BTN} />
       <Pressable testID="e2eHistory" onPress={onPressE2eHistory} accessibilityRole="button" style={BTN} />
+      <Pressable
+        testID="e2eTransactionHistory"
+        onPress={() => onPressE2eTransactionHistory()}
+        accessibilityRole="button"
+        style={BTN}
+      />
     </View>
   )
 }

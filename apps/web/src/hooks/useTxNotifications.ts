@@ -15,6 +15,7 @@ import { isWalletRejection } from '@/utils/wallets'
 import { getTxLink } from '@/utils/tx-link'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
+import { getGuardErrorInfo } from '@/utils/transaction-errors'
 
 const TxNotifications = {
   [TxEvent.SIGN_FAILED]: 'Failed to sign. Please try again.',
@@ -31,7 +32,7 @@ const TxNotifications = {
   [TxEvent.PROCESSED]: 'Successfully validated. Indexing...',
   [TxEvent.REVERTED]: 'Reverted. Please check your gas settings.',
   [TxEvent.SUCCESS]: 'Successfully executed.',
-  [TxEvent.FAILED]: 'Failed.',
+  [TxEvent.FAILED]: 'Execution failed.',
 }
 
 enum Variant {
@@ -62,7 +63,16 @@ const useTxNotifications = (): void => {
         const isError = 'error' in detail
         if (isError && isWalletRejection(detail.error)) return
         const isSuccess = successEvents.includes(event)
-        const message = isError ? `${baseMessage} ${formatError(detail.error)}` : baseMessage
+
+        // Check if this is a Guard error
+        const guardErrorName = isError ? getGuardErrorInfo(detail.error) : undefined
+        let message = isError ? `${baseMessage} ${formatError(detail.error)}` : baseMessage
+
+        // Override message for Guard errors
+        if (guardErrorName) {
+          message = `Guard reverted the transaction (${guardErrorName}).`
+        }
+
         const txId = 'txId' in detail ? detail.txId : undefined
         const txHash = 'txHash' in detail ? detail.txHash : undefined
         const groupKey = 'groupKey' in detail && detail.groupKey ? detail.groupKey : txId || ''

@@ -1,0 +1,79 @@
+appId: global.safe.mobileapp.ios
+---
+# ===========================================
+# Swap Owner Transaction
+# ===========================================
+- assertVisible: Transaction details
+- assertVisible: Swap signer
+
+# ===========================================
+# New Signer Field
+# ===========================================
+- assertVisible:
+    id: 'history-swap-signer-new-signer'
+- assertVisible: New signer
+- assertVisible:
+    id: 'history-swap-signer-new-signer'
+    containsDescendants:
+      - id: 'hash-display-name-or-address'
+        text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
+
+# ===========================================
+# Old Signer Field
+# ===========================================
+- assertVisible:
+    id: 'history-swap-signer-old-signer'
+- assertVisible: Old signer
+- assertVisible:
+    id: 'history-swap-signer-old-signer'
+    containsDescendants:
+      - id: 'hash-display-name-or-address'
+        text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
+
+# ===========================================
+# Network Display
+# ===========================================
+- runFlow:
+    file: ../../shared/test-tx-network.yml
+
+# ===========================================
+# Transaction Details Button
+# ===========================================
+- runFlow:
+    file: ../../shared/test-tx-details-button.yml
+
+# ===========================================
+# Common Transaction Info
+# ===========================================
+- runFlow:
+    file: ../../shared/test-tx-info.yml
+
+# ===========================================
+# Confirmations
+# ===========================================
+- runFlow:
+    file: ../../shared/test-tx-history-confirmations.yml
+
+# ===========================================
+# Test Explorer Link
+# ===========================================
+- runFlow:
+    file: ../../shared/test-explorer-link.yml
+
+- assertVisible: Transaction details
+
+# ===========================================
+# Test Share Transaction Button
+# ===========================================
+- runFlow:
+    file: ../../shared/test-share-link.yml
+
+- assertVisible: Transaction details
+
+# ===========================================
+# Test Transaction Details Button
+# ===========================================
+- runFlow:
+    file: ../../shared/test-advanced-details.yml
+
+- assertVisible: Transaction details

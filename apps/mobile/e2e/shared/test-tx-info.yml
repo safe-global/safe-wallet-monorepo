@@ -1,0 +1,28 @@
+appId: global.safe.mobileapp.ios
+---
+# ===========================================
+# Common Transaction Info Assertions
+# ===========================================
+# This flow asserts the common transaction detail fields that appear
+# in all transaction detail views: Created date, Executed date,
+# Transaction hash, and Status
+
+- assertVisible: 'Created'
+- assertVisible:
+    id: 'created-at-value'
+    text: '\d{1,2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4}, \d{1,2}:\d{2} (AM|PM)'
+
+- assertVisible: 'Executed'
+- assertVisible:
+    id: 'executed-at-value'
+    text: '\d{1,2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4}, \d{1,2}:\d{2} (AM|PM)'
+
+- assertVisible: 'Transaction hash'
+- assertVisible:
+    id: 'transaction-hash-display'
+    containsDescendants:
+      - id: hash-display-name-or-address
+        text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
+
+- assertVisible: 'Status'
+- assertVisible: 'Success'

@@ -249,6 +249,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
               "gap": 8,
             }
           }
+          testID="hash-display"
         >
           <View
             style={
@@ -256,6 +257,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                 "flexDirection": "row",
               }
             }
+            testID="hash-display-logo"
           >
             <View
               style={
@@ -370,6 +372,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                 }
               }
               suppressHighlighting={true}
+              testID="hash-display-name-or-address"
             >
               Staking Contract
             </Text>
@@ -407,6 +410,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                   "opacity": 1,
                 }
               }
+              testID="copy-button"
             >
               <Text
                 allowFontScaling={false}
@@ -464,6 +468,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                 "opacity": 1,
               }
             }
+            testID="hash-display-external-link-button"
           >
             <Text
               allowFontScaling={false}
@@ -890,6 +895,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
               "top": 0,
             }
           }
+          testID="transaction-details-button"
         >
           <Text
             lineBreakMode="clip"

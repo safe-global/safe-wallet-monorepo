@@ -1,0 +1,37 @@
+appId: global.safe.mobileapp.ios
+---
+# ===========================================
+# Action Detail View
+# ===========================================
+# Action details view shows the action name as large header title
+# And displays either:
+# 1. "Call" with method name badge (if dataDecoded?.method exists)
+# 2. "Interacted with" with address identicon (if no method)
+
+# Verify either "Interacted with" or "Call" section is visible
+- assertVisible:
+    text: '.*(Interacted with|Call).*'
+
+# Verify address information is displayed
+# Either as identicon + address in "Interacted with" or in "Contract" field
+- assertVisible:
+    id: 'action-details-interacted-with'
+    containsDescendants:
+      - text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
+
+# Verify "Contract" field is visible (always shown in action details)
+- assertVisible: Contract
+
+# Verify contract address is displayed with copy/external link icons
+- assertVisible:
+    id: 'action-details-contract'
+    containsDescendants:
+      - id: 'hash-display-name-or-address'
+        text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
+
+# Go back to actions list
+- tapOn:
+    id: 'go-back'
+
+# Verify we're back at the Actions view
+- assertVisible: Actions
