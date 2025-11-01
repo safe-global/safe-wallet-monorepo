@@ -36,8 +36,10 @@ if (!commitHash) {
   }
 }
 
+const isDev = process.env.NODE_ENV !== 'production'
 const withPWA = withPWAInit({
   dest: 'public',
+  disable: isDev, // Disable PWA in dev for faster HMR
   workboxOptions: {
     mode: 'production',
   },
@@ -156,6 +158,7 @@ const withMDX = isRspack
       options: { remarkPlugins: [remarkFrontmatter, [remarkMdxFrontmatter, { name: 'metadata' }], remarkHeadingId, remarkGfm], rehypePlugins: [] },
     })
 
-let config = withPWA(withMDX(nextConfig))
+// Only wrap with PWA in production (disabled in dev for faster HMR)
+let config = isDev ? withMDX(nextConfig) : withPWA(withMDX(nextConfig))
 if (withRspack) config = withRspack(config)
 export default withBundleAnalyzer({ enabled: process.env.ANALYZE === 'true' })(config)
