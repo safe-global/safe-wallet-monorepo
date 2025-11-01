@@ -91,6 +91,14 @@ yarn start
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the app.
 
+#### Using Rspack (Alternative bundler)
+
+For faster development builds and hot reload, you can use Rspack:
+
+```bash
+yarn workspace @safe-global/web dev:rspack
+```
+
 > [!NOTE]
 >
 > From now on for brevity we will only show the command to run from the root of the monorepo. You can always run the command from the `apps/web` directory you just need to omit the `workspace @safe-global/web`.

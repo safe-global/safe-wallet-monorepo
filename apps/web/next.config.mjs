@@ -10,6 +10,16 @@ import { readFile } from 'fs/promises'
 import { fileURLToPath } from 'url'
 import { execSync } from 'child_process'
 
+let withRspack = null
+if (process.env.USE_RSPACK === '1') {
+  process.env.NEXT_RSPACK = 'true'
+  process.env.RSPACK_CONFIG_VALIDATE = 'loose-silent'
+  delete process.env.TURBOPACK
+  try {
+    withRspack = (await import('next-rspack')).default
+  } catch {}
+}
+
 const SERVICE_WORKERS_PATH = './src/service-workers'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -136,15 +146,16 @@ const nextConfig = {
     return config
   },
 }
-const withMDX = createMDX({
-  extension: /\.(md|mdx)?$/,
-  jsx: true,
-  options: {
-    remarkPlugins: [remarkFrontmatter, [remarkMdxFrontmatter, { name: 'metadata' }], remarkHeadingId, remarkGfm],
-    rehypePlugins: [],
-  },
-})
 
-export default withBundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
-})(withPWA(withMDX(nextConfig)))
+const isRspack = process.env.USE_RSPACK === '1'
+const withMDX = isRspack
+  ? createMDX({ extension: /\.(md|mdx)?$/, jsx: true, options: {} })
+  : createMDX({
+      extension: /\.(md|mdx)?$/,
+      jsx: true,
+      options: { remarkPlugins: [remarkFrontmatter, [remarkMdxFrontmatter, { name: 'metadata' }], remarkHeadingId, remarkGfm], rehypePlugins: [] },
+    })
+
+let config = withPWA(withMDX(nextConfig))
+if (withRspack) config = withRspack(config)
+export default withBundleAnalyzer({ enabled: process.env.ANALYZE === 'true' })(config)
