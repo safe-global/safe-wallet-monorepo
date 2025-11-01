@@ -86,16 +86,6 @@ const nextConfig = {
   eslint: {
     dirs: ['src', 'cypress'],
   },
-  experimental: {
-    optimizePackageImports: [
-      '@mui/material',
-      '@mui/icons-material',
-      'lodash',
-      'date-fns',
-      '@sentry/react',
-      '@gnosis.pm/zodiac',
-    ],
-  },
   webpack(config, { dev }) {
     config.module.rules.push({
       test: /\.svg$/i,
