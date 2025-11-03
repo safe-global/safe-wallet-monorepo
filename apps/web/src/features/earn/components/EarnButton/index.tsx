@@ -2,7 +2,7 @@ import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
 import useSpendingLimit from '@/hooks/useSpendingLimit'
-import { Button } from '@mui/material'
+import { Button, IconButton, Tooltip, SvgIcon } from '@mui/material'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 import { useRouter } from 'next/router'
@@ -18,10 +18,12 @@ const EarnButton = ({
   tokenInfo,
   trackingLabel,
   compact = true,
+  onlyIcon = false,
 }: {
   tokenInfo: Balance['tokenInfo']
   trackingLabel: EARN_LABELS
   compact?: boolean
+  onlyIcon?: boolean
 }): ReactElement => {
   const spendingLimit = useSpendingLimit(tokenInfo)
   const chain = useCurrentChain()
@@ -46,20 +48,46 @@ const EarnButton = ({
             [MixpanelEventParams.ENTRY_POINT]: trackingLabel,
           }}
         >
-          <Button
-            className={classnames({ [css.button]: compact, [css.buttonDisabled]: !isOk })}
-            data-testid="earn-btn"
-            aria-label="Earn"
-            variant={compact ? 'text' : 'contained'}
-            color={compact ? 'info' : 'background.paper'}
-            size={compact ? 'small' : 'compact'}
-            disableElevation
-            startIcon={<EarnIcon />}
-            onClick={onEarnClick}
-            disabled={!isOk}
-          >
-            Earn
-          </Button>
+          {onlyIcon ? (
+            <Tooltip title="Earn" placement="top" arrow>
+              <span>
+                <IconButton
+                  data-testid="earn-btn"
+                  onClick={onEarnClick}
+                  disabled={!isOk}
+                  size="small"
+                  sx={{
+                    width: 28,
+                    height: 28,
+                    minWidth: 28,
+                    padding: '6px',
+                    backgroundColor: 'var(--color-background-paper)',
+                    borderRadius: '4px',
+                    '&:hover': {
+                      backgroundColor: 'var(--color-background-main)',
+                    },
+                  }}
+                >
+                  <SvgIcon component={EarnIcon} inheritViewBox sx={{ width: 16, height: 16 }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+          ) : (
+            <Button
+              className={classnames({ [css.button]: compact, [css.buttonDisabled]: !isOk })}
+              data-testid="earn-btn"
+              aria-label="Earn"
+              variant={compact ? 'text' : 'contained'}
+              color={compact ? 'info' : 'background.paper'}
+              size={compact ? 'small' : 'compact'}
+              disableElevation
+              startIcon={<EarnIcon />}
+              onClick={onEarnClick}
+              disabled={!isOk}
+            >
+              Earn
+            </Button>
+          )}
         </Track>
       )}
     </CheckWallet>

@@ -2,7 +2,7 @@ import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
 import useSpendingLimit from '@/hooks/useSpendingLimit'
-import { Button } from '@mui/material'
+import { Button, IconButton, Tooltip, SvgIcon } from '@mui/material'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
@@ -18,14 +18,28 @@ const StakeButton = ({
   tokenInfo,
   trackingLabel,
   compact = true,
+  onlyIcon = false,
 }: {
   tokenInfo: Balance['tokenInfo']
   trackingLabel: STAKE_LABELS
   compact?: boolean
+  onlyIcon?: boolean
 }): ReactElement => {
   const spendingLimit = useSpendingLimit(tokenInfo)
   const chain = useCurrentChain()
   const router = useRouter()
+
+  const handleClick = () => {
+    router.push({
+      pathname: AppRoutes.stake,
+      query: {
+        ...router.query,
+        asset: `${chain?.shortName}_${
+          tokenInfo.type === TokenType.NATIVE_TOKEN ? 'NATIVE_TOKEN' : tokenInfo.address
+        }`,
+      },
+    })
+  }
 
   return (
     <CheckWallet allowSpendingLimit={!!spendingLimit}>
@@ -36,30 +50,46 @@ const StakeButton = ({
             [MixpanelEventParams.ENTRY_POINT]: trackingLabel,
           }}
         >
-          <Button
-            className={classnames({ [css.button]: compact, [css.buttonDisabled]: !isOk })}
-            data-testid="stake-btn"
-            aria-label="Stake"
-            variant={compact ? 'text' : 'contained'}
-            color={compact ? 'info' : 'background.paper'}
-            size={compact ? 'small' : 'compact'}
-            disableElevation
-            startIcon={<StakeIcon />}
-            onClick={() => {
-              router.push({
-                pathname: AppRoutes.stake,
-                query: {
-                  ...router.query,
-                  asset: `${chain?.shortName}_${
-                    tokenInfo.type === TokenType.NATIVE_TOKEN ? 'NATIVE_TOKEN' : tokenInfo.address
-                  }`,
-                },
-              })
-            }}
-            disabled={!isOk}
-          >
-            Stake
-          </Button>
+          {onlyIcon ? (
+            <Tooltip title="Stake" placement="top" arrow>
+              <span>
+                <IconButton
+                  data-testid="stake-btn"
+                  onClick={handleClick}
+                  disabled={!isOk}
+                  size="small"
+                  sx={{
+                    width: 28,
+                    height: 28,
+                    minWidth: 28,
+                    padding: '6px',
+                    backgroundColor: 'var(--color-background-paper)',
+                    borderRadius: '4px',
+                    '&:hover': {
+                      backgroundColor: 'var(--color-background-main)',
+                    },
+                  }}
+                >
+                  <SvgIcon component={StakeIcon} inheritViewBox sx={{ width: 16, height: 16 }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+          ) : (
+            <Button
+              className={classnames({ [css.button]: compact, [css.buttonDisabled]: !isOk })}
+              data-testid="stake-btn"
+              aria-label="Stake"
+              variant={compact ? 'text' : 'contained'}
+              color={compact ? 'info' : 'background.paper'}
+              size={compact ? 'small' : 'compact'}
+              disableElevation
+              startIcon={<StakeIcon />}
+              onClick={handleClick}
+              disabled={!isOk}
+            >
+              Stake
+            </Button>
+          )}
         </Track>
       )}
     </CheckWallet>
