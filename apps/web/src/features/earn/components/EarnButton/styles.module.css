@@ -14,3 +14,36 @@
 .buttonDisabled {
   border-color: var(--color-text-disabled);
 }
+
+.plainButton {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-size: inherit;
+  color: #00bfe5;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.plainIcon {
+  width: 16px;
+  height: 16px;
+  color: #00bfe5;
+}
+
+.plainButtonDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.plainButtonDisabled .plainIcon {
+  color: var(--color-text-disabled);
+}
+
+.plainButtonDisabled span {
+  color: var(--color-text-disabled);
+}

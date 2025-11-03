@@ -1,5 +1,5 @@
 .container .sticky {
-  opacity: 0;
+  opacity: 1;
   position: absolute;
   top: 0;
   right: 0;
@@ -10,12 +10,25 @@
   align-items: center;
 }
 
-.container tr:hover .sticky {
-  opacity: 1;
-}
-
 .container td {
   position: relative;
+}
+
+.container th:last-of-type,
+.container td:last-of-type {
+  min-width: 76px;
+  width: 76px;
+  flex-shrink: 0;
+}
+
+.container.containerWideActions th:last-of-type,
+.container.containerWideActions td:last-of-type {
+  min-width: 120px;
+  width: 120px;
+}
+
+.container td:last-of-type .sticky > *:last-child {
+  margin-right: 8px;
 }
 
 .container tr:last-of-type {
@@ -72,9 +85,206 @@
   background: var(--color-background-paper);
 }
 
+.iconButton {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 6px;
+  background-color: var(--color-border-background);
+  border-radius: 4px;
+  color: var(--color-text-primary);
+}
+
+.iconButton:hover {
+  background-color: var(--color-background-light);
+}
+
+.iconButton svg {
+  width: 16px;
+  height: 16px;
+  color: inherit;
+}
+
+.iconButton svg path {
+  fill: currentColor;
+}
+
+.mobileContainer {
+  display: none;
+  flex-direction: column;
+  gap: 0;
+  padding: var(--space-2) 0;
+}
+
+.mobileHeader {
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--color-border-light);
+  margin-bottom: var(--space-1);
+}
+
+.mobileRow {
+  display: none;
+  flex-direction: column;
+  padding: var(--space-1) 0 var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.mobileRow:last-child {
+  border-bottom: none;
+}
+
+.mobileAssetRow {
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.mobileBalance {
+  font-weight: 400;
+  font-style: normal;
+}
+
+.mobileBalance * {
+  font-weight: 400 !important;
+  font-style: normal !important;
+}
+
+.mobileBalance b {
+  font-weight: 400 !important;
+}
+
+.desktopSymbol {
+  display: none;
+}
+
+.container .mobileBalance {
+  display: none;
+}
+
+.container .desktopSymbol {
+  display: block;
+}
+
+.mobileValue {
+  display: none;
+  text-align: right;
+}
+
+.mobileValueHeader {
+  display: none;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-1);
+}
+
+.mobileButtons {
+  display: none;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+  width: 100%;
+}
+
+.mobileButtonWrapper {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  width: 100%;
+}
+
+.mobileButtonWrapper > span {
+  display: flex;
+  width: 100%;
+  flex: 1;
+}
+
+.mobileButtonWrapper > span > span {
+  display: flex;
+  width: 100%;
+  flex: 1;
+}
+
+.mobileButtonWrapper > span > button,
+.mobileButtonWrapper > span > span > button,
+.mobileButtonWrapper button {
+  width: 100%;
+  min-width: 0;
+  flex: 1;
+}
+
+.mobileButtonWrapper > span > button:disabled,
+.mobileButtonWrapper > span > span > button:disabled,
+.mobileButtonWrapper button:disabled {
+  width: 100%;
+  min-width: 0;
+  flex: 1;
+}
+
+.mobileButton {
+  height: 38px;
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+  width: 100%;
+  background-color: var(--color-border-background);
+  color: var(--color-text-primary);
+}
+
+.mobileButton:hover:not(:disabled) {
+  background-color: var(--color-background-light);
+}
+
+.mobileButton:disabled,
+.mobileButton.Mui-disabled {
+  background-color: var(--color-border-background);
+  opacity: 0.6;
+}
+
+.container .mobileAssetRow {
+  display: flex;
+}
+
+.container .mobileAssetRow .token {
+  display: flex;
+}
+
+.container .mobileValue {
+  display: none;
+}
+
+.container .mobileButtons {
+  display: none;
+}
+
 @media (max-width: 599.95px) {
-  .container td:last-of-type,
-  .container th:last-of-type {
+  /* Show mobile flex layout */
+  .mobileContainer {
+    display: flex;
+  }
+
+  .mobileHeader {
+    display: flex;
+  }
+
+  .mobileRow {
+    display: flex;
+  }
+
+  .mobileAssetRow {
+    display: flex;
+  }
+
+  .mobileValue {
+    display: block;
+  }
+
+  .mobileButtons {
+    display: flex;
+  }
+
+  .container {
     display: none;
   }
 }
