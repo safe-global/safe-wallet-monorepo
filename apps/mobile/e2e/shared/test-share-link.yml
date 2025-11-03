@@ -8,4 +8,5 @@ appId: global.safe.mobileapp.ios
 
 - assertVisible: 'app.safe.global'
 
-- tapOn: 'Close'
+- tapOn:
+    id: 'header.closeButton'

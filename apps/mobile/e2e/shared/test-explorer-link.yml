@@ -8,4 +8,5 @@ appId: global.safe.mobileapp.ios
 - tapOn:
     id: 'view-on-explorer-button'
 
-- tapOn: Return to Safe{Mobile}
+- tapOn:
+    id: 'breadcrumb'
