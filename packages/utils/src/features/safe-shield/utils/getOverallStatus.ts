@@ -1,5 +1,5 @@
 import type { ContractAnalysisResults, ThreatAnalysisResults, RecipientAnalysisResults } from '../types'
-import type { Severity } from '../types'
+import { CommonSharedStatus, Severity } from '../types'
 import type { AnalysisResult } from '../types'
 import { getPrimaryResult } from './analysisUtils'
 import { SEVERITY_TO_TITLE } from '../constants'
@@ -32,8 +32,9 @@ export const getOverallStatus = (
   recipientResults?: RecipientAnalysisResults,
   contractResults?: ContractAnalysisResults,
   threatResults?: ThreatAnalysisResults,
+  hasSimulationError?: boolean,
 ): { severity: Severity; title: string } | undefined => {
-  if (!recipientResults && !contractResults && !threatResults) {
+  if (!recipientResults && !contractResults && !threatResults && !hasSimulationError) {
     return undefined
   }
 
@@ -63,6 +64,15 @@ export const getOverallStatus = (
         }
       }
     }
+  }
+
+  if (hasSimulationError) {
+    allResults.push({
+      severity: Severity.WARN,
+      title: SEVERITY_TO_TITLE[Severity.WARN],
+      type: CommonSharedStatus.FAILED,
+      description: 'Tenderly simulation failed',
+    })
   }
 
   const primaryResult = getPrimaryResult(allResults)

@@ -17,6 +17,14 @@ describe('getOverallStatus', () => {
       expect(result).toBeUndefined()
     })
 
+    it('should return WARN severity when simulation fails with no analysis results', () => {
+      const result = getOverallStatus(undefined, undefined, undefined, true)
+
+      expect(result).toBeDefined()
+      expect(result!.severity).toBe(Severity.WARN)
+      expect(result!.title).toBe('Issues found')
+    })
+
     it('should return threat result when both recipient and contract results are undefined with threat results', () => {
       const threatResults = {
         '0xThreat1': {

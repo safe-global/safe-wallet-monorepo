@@ -1,3 +1,6 @@
+import { UseSimulationReturn } from './useSimulation'
+import { SimulationStatus } from './utils'
+
 export enum FETCH_STATUS {
   NOT_ASKED = 'NOT_ASKED',
   LOADING = 'LOADING',
@@ -12,6 +15,11 @@ export type StateObject = {
   balance?: string
   code?: string
   storage?: Record<string, string>
+}
+
+export type NestedTxStatus = {
+  simulation: UseSimulationReturn
+  status: SimulationStatus
 }
 
 type ContractObject = {
