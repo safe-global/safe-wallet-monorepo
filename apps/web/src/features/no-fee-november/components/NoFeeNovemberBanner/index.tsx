@@ -23,14 +23,14 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: () => void }) => {
       <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2}>
         <Image
           src="/images/common/no-fee-november/Cards.svg"
-          alt="No Fee November Cards"
+          alt="No-Fee November Cards"
           width={76}
           height={76}
           className={css.cardsImage}
         />
         <Box>
           <Typography variant="h4" fontWeight="bold" color="static.main" className={css.bannerText}>
-            Enjoy No Fee November
+            Enjoy No-Fee November
           </Typography>
           <Typography variant="body2" color="static.light" className={css.bannerTextInteractive}>
             SAFE holders enjoy gasless transactions on Mainnet this November.{' '}
