@@ -72,7 +72,7 @@ export const SafeShieldContent = ({
             <AnalysisGroupCard data={normalizedThreatData} highlightedSeverity={highlightedSeverity} />
           )}
 
-          <TenderlySimulation safeTx={safeTx} />
+          <TenderlySimulation safeTx={safeTx} highlightedSeverity={highlightedSeverity} />
         </Box>
       </Box>
     </Box>

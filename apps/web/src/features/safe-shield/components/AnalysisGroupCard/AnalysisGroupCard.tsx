@@ -13,13 +13,12 @@ import { SeverityIcon } from '../SeverityIcon'
 import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
 import { DelegateCallCardItem } from './DelegateCallCardItem'
 
-export const AnalysisGroupCard = ({
-  data,
-  highlightedSeverity,
-}: {
+interface AnalysisGroupCardProps {
   data: { [address: string]: GroupedAnalysisResults }
   highlightedSeverity?: Severity
-}): ReactElement | null => {
+}
+
+export const AnalysisGroupCard = ({ data, highlightedSeverity }: AnalysisGroupCardProps): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
 
   const visibleResults = useMemo(() => mapVisibleAnalysisResults(data), [data])
