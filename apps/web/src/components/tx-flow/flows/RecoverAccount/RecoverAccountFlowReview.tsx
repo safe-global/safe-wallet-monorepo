@@ -29,7 +29,7 @@ import { isWalletRejection } from '@/utils/wallets'
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
 
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { BlockaidBalanceChanges } from '@/components/tx/security/blockaid/BlockaidBalanceChange'
+import { BalanceChanges } from '@/components/tx/security/BalanceChanges'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 import Summary from '@/components/transactions/TxDetails/Summary'
@@ -143,7 +143,7 @@ export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlo
 
         {txPreview && <Summary safeTxData={safeTx?.data} {...txPreview} />}
 
-        <BlockaidBalanceChanges />
+        <BalanceChanges />
 
         <Divider sx={{ mt: 2, mx: -3 }} />
 

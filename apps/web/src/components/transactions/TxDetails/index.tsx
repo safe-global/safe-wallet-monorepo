@@ -117,6 +117,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
                   <DecodedData
                     txData={txDetails.txData}
                     toInfo={isCustomTxInfo(txDetails.txInfo) ? txDetails.txInfo.to : txDetails.txData?.to}
+                    isQueue={isQueue}
                   />
                 </Box>
               </TxData>

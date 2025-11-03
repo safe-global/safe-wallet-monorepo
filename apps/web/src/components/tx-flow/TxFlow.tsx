@@ -2,7 +2,6 @@ import React, { useCallback, useMemo, type ReactNode } from 'react'
 import useTxStepper from './useTxStepper'
 import SafeTxProvider from './SafeTxProvider'
 import { TxInfoProvider } from './TxInfoProvider'
-import { TxSecurityProvider } from '../tx/security/shared/TxSecurityContext'
 import TxFlowProvider, { type TxFlowProviderProps, type TxFlowContextType } from './TxFlowProvider'
 import { TxFlowContent } from './common/TxFlowContent'
 import ReviewTransaction from '../tx/ReviewTransactionV2'
@@ -76,52 +75,50 @@ export const TxFlow = <T extends unknown>({
   return (
     <SafeTxProvider>
       <TxInfoProvider>
-        <TxSecurityProvider>
-          <SafeShieldProvider>
-            <SlotProvider>
-              <TxFlowProvider
-                step={step}
-                data={data}
-                nextStep={nextStep}
-                prevStep={prevStep}
-                progress={progress}
-                txId={txId}
-                txNonce={txNonce}
-                txLayoutProps={txLayoutProps}
-                onlyExecute={onlyExecute}
-                isExecutable={isExecutable}
-                isRejection={isRejection}
-                isBatch={isBatch}
-                isBatchable={isBatchable}
-              >
-                <TxFlowContent>
-                  {...childrenArray}
+        <SafeShieldProvider>
+          <SlotProvider>
+            <TxFlowProvider
+              step={step}
+              data={data}
+              nextStep={nextStep}
+              prevStep={prevStep}
+              progress={progress}
+              txId={txId}
+              txNonce={txNonce}
+              txLayoutProps={txLayoutProps}
+              onlyExecute={onlyExecute}
+              isExecutable={isExecutable}
+              isRejection={isRejection}
+              isBatch={isBatch}
+              isBatchable={isBatchable}
+            >
+              <TxFlowContent>
+                {...childrenArray}
 
-                  <ReviewTransactionComponent onSubmit={() => nextStep()}>
-                    <BalanceChanges />
-                    <TxNote />
-                    <SignerSelect />
-                    <RiskConfirmation />
-                  </ReviewTransactionComponent>
+                <ReviewTransactionComponent onSubmit={() => nextStep()}>
+                  <BalanceChanges />
+                  <TxNote />
+                  <SignerSelect />
+                  <RiskConfirmation />
+                </ReviewTransactionComponent>
 
-                  <ConfirmTxReceipt onSubmit={handleFlowSubmit}>
-                    <Counterfactual />
-                    <ExecuteThroughRole />
+                <ConfirmTxReceipt onSubmit={handleFlowSubmit}>
+                  <Counterfactual />
+                  <ExecuteThroughRole />
 
-                    <ComboSubmit>
-                      <Sign />
-                      <Execute />
-                      <Batching />
-                    </ComboSubmit>
+                  <ComboSubmit>
+                    <Sign />
+                    <Execute />
+                    <Batching />
+                  </ComboSubmit>
 
-                    <Propose />
-                  </ConfirmTxReceipt>
-                </TxFlowContent>
-                <LedgerHashComparison />
-              </TxFlowProvider>
-            </SlotProvider>
-          </SafeShieldProvider>
-        </TxSecurityProvider>
+                  <Propose />
+                </ConfirmTxReceipt>
+              </TxFlowContent>
+              <LedgerHashComparison />
+            </TxFlowProvider>
+          </SlotProvider>
+        </SafeShieldProvider>
       </TxInfoProvider>
     </SafeTxProvider>
   )
