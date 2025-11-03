@@ -1,10 +1,24 @@
 import type { Preview } from '@storybook/nextjs'
+import React, { useEffect } from 'react'
 
 import { ThemeProvider, CssBaseline } from '@mui/material'
 import { withThemeFromJSXProvider } from '@storybook/addon-themes'
 import createSafeTheme from '../src/components/theme/safeTheme'
 
 import '../src/styles/globals.css'
+
+// Decorator to sync data-theme attribute with Storybook's theme switcher
+// This ensures CSS variables (which rely on [data-theme="dark"]) update correctly
+const DataThemeDecorator = (Story: React.ComponentType<any>, context: { globals?: { theme?: string } }) => {
+  const themeMode = context.globals?.theme || 'light'
+
+  useEffect(() => {
+    // Set data-theme attribute on document.documentElement to match Storybook's theme
+    document.documentElement.setAttribute('data-theme', themeMode)
+  }, [themeMode])
+
+  return React.createElement(Story)
+}
 
 const preview: Preview = {
   parameters: {
@@ -17,6 +31,7 @@ const preview: Preview = {
   },
 
   decorators: [
+    // First, apply the theme provider
     withThemeFromJSXProvider({
       GlobalStyles: CssBaseline,
       Provider: ThemeProvider,
@@ -26,6 +41,8 @@ const preview: Preview = {
       },
       defaultTheme: 'light',
     }),
+    // Then, sync the data-theme attribute for CSS variables
+    DataThemeDecorator,
   ],
 }
 
