@@ -4,6 +4,7 @@ import { SlotName, withSlot } from '../../slots'
 import { SignerForm } from './SignerForm'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
+import { Stack } from '@mui/material'
 
 const useShouldRegisterSlot = () => {
   const { connectedWallet } = useWalletContext() ?? {}
@@ -14,9 +15,13 @@ const useShouldRegisterSlot = () => {
 const SignerSelectSlot = withSlot({
   Component: () => {
     const { willExecute, txId } = useContext(TxFlowContext)
-    return <SignerForm willExecute={willExecute} txId={txId} />
+    return (
+      <Stack gap={2} mt={3}>
+        <SignerForm willExecute={willExecute} txId={txId} />
+      </Stack>
+    )
   },
-  slotName: SlotName.Feature,
+  slotName: SlotName.Main,
   id: 'signerSelect',
   useSlotCondition: useShouldRegisterSlot,
 })
