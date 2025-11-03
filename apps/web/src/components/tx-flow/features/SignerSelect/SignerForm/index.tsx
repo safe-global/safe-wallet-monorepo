@@ -14,7 +14,6 @@ import { useWalletContext } from '@/hooks/wallets/useWallet'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { useCallback, useContext, useEffect, useMemo } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import TxCard from '@/components/tx-flow/common/TxCard'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import SignatureIcon from '@/public/images/transactions/signature.svg'
 
@@ -98,7 +97,7 @@ export const SignerForm = ({ willExecute, txId }: { willExecute?: boolean; txId?
   }
 
   return (
-    <TxCard>
+    <>
       <Typography variant="h5" display="flex" gap={1} alignItems="center">
         <SvgIcon component={SignatureIcon} inheritViewBox fontSize="small" />
         {willExecute ? 'Execute' : 'Sign'} with
@@ -137,6 +136,6 @@ export const SignerForm = ({ willExecute, txId }: { willExecute?: boolean; txId?
           </Select>
         </FormControl>
       </Box>
-    </TxCard>
+    </>
   )
 }

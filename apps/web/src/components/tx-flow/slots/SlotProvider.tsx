@@ -12,7 +12,6 @@ export enum SlotName {
   Main = 'main',
   Submit = 'submit',
   ComboSubmit = 'combo-submit',
-  Feature = 'feature',
   Footer = 'footer',
   Sidebar = 'sidebar',
 }
