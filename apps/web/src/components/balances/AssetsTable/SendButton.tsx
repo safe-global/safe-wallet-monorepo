@@ -8,7 +8,6 @@ import Track from '@/components/common/Track'
 import { ASSETS_EVENTS } from '@/services/analytics/events/assets'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { TxModalContext } from '@/components/tx-flow'
-import css from './styles.module.css'
 
 const SendButton = ({
   tokenInfo,
@@ -38,9 +37,19 @@ const SendButton = ({
                   onClick={onSendClick}
                   disabled={!isOk}
                   size="small"
-                  className={css.iconButton}
+                  sx={{
+                    width: 28,
+                    height: 28,
+                    minWidth: 28,
+                    padding: '6px',
+                    backgroundColor: 'var(--color-background-paper)',
+                    borderRadius: '4px',
+                    '&:hover': {
+                      backgroundColor: 'var(--color-background-main)',
+                    },
+                  }}
                 >
-                  <SvgIcon component={ArrowIconNW} inheritViewBox />
+                  <SvgIcon component={ArrowIconNW} inheritViewBox sx={{ width: 16, height: 16 }} />
                 </IconButton>
               </span>
             </Tooltip>
@@ -53,7 +62,7 @@ const SendButton = ({
               startIcon={<ArrowIconNW />}
               onClick={onSendClick}
               disabled={!isOk}
-              className={css.mobileButton}
+              sx={{ height: 32, px: 2 }}
             >
               Send
             </Button>

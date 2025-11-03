@@ -2,7 +2,7 @@ import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
 import useSpendingLimit from '@/hooks/useSpendingLimit'
-import { Button, SvgIcon, Typography, Box } from '@mui/material'
+import { Button, IconButton, Tooltip, SvgIcon } from '@mui/material'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
@@ -18,12 +18,12 @@ const StakeButton = ({
   tokenInfo,
   trackingLabel,
   compact = true,
-  plain = false,
+  onlyIcon = false,
 }: {
   tokenInfo: Balance['tokenInfo']
   trackingLabel: STAKE_LABELS
   compact?: boolean
-  plain?: boolean
+  onlyIcon?: boolean
 }): ReactElement => {
   const spendingLimit = useSpendingLimit(tokenInfo)
   const chain = useCurrentChain()
@@ -48,20 +48,30 @@ const StakeButton = ({
             [MixpanelEventParams.ENTRY_POINT]: trackingLabel,
           }}
         >
-          {plain ? (
-            <Box
-              component="span"
-              className={classnames(css.plainButton, { [css.plainButtonDisabled]: !isOk })}
-              data-testid="stake-btn"
-              onClick={isOk ? handleClick : undefined}
-              aria-label="Stake"
-              aria-disabled={!isOk}
-            >
-              <SvgIcon component={StakeIcon} inheritViewBox className={css.plainIcon} />
-              <Typography component="span" variant="body2">
-                Stake
-              </Typography>
-            </Box>
+          {onlyIcon ? (
+            <Tooltip title="Stake" placement="top" arrow>
+              <span>
+                <IconButton
+                  data-testid="stake-btn"
+                  onClick={handleClick}
+                  disabled={!isOk}
+                  size="small"
+                  sx={{
+                    width: 28,
+                    height: 28,
+                    minWidth: 28,
+                    padding: '6px',
+                    backgroundColor: 'var(--color-background-paper)',
+                    borderRadius: '4px',
+                    '&:hover': {
+                      backgroundColor: 'var(--color-background-main)',
+                    },
+                  }}
+                >
+                  <SvgIcon component={StakeIcon} inheritViewBox sx={{ width: 16, height: 16 }} />
+                </IconButton>
+              </span>
+            </Tooltip>
           ) : (
             <Button
               className={classnames({ [css.button]: compact, [css.buttonDisabled]: !isOk })}
