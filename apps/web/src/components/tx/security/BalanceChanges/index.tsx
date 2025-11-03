@@ -113,7 +113,7 @@ const BalanceChange = ({
     </Grid>
   )
 }
-const BalanceChanges = () => {
+const BalanceChangesDisplay = () => {
   const { threat } = useSafeShield()
   const [threatResults, threatError, threatLoading = false] = threat || []
 
@@ -171,7 +171,7 @@ const BalanceChanges = () => {
   )
 }
 
-export const BlockaidBalanceChanges = () => {
+export const BalanceChanges = () => {
   const isFeatureEnabled = useHasFeature(FEATURES.RISK_MITIGATION)
 
   if (!isFeatureEnabled) {
@@ -211,7 +211,7 @@ export const BlockaidBalanceChanges = () => {
         </Tooltip>
       </Typography>
       <ErrorBoundary fallback={<div>Error showing balance changes</div>}>
-        <BalanceChanges />
+        <BalanceChangesDisplay />
       </ErrorBoundary>
     </div>
   )

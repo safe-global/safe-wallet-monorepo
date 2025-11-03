@@ -2,7 +2,7 @@ import { useContext } from 'react'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { SlotName, withSlot } from '../slots'
 import { FEATURES } from '@/utils/featureToggled'
-import { BlockaidBalanceChanges } from '@/components/tx/security/blockaid/BlockaidBalanceChange'
+import { BalanceChanges } from '@/components/tx/security/BalanceChanges'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 
 const useShouldRegisterSlot = () => {
@@ -13,7 +13,7 @@ const useShouldRegisterSlot = () => {
 }
 
 const BalanceChangesSlot = withSlot({
-  Component: BlockaidBalanceChanges,
+  Component: BalanceChanges,
   slotName: SlotName.Main,
   id: 'balanceChanges',
   feature: FEATURES.RISK_MITIGATION,
