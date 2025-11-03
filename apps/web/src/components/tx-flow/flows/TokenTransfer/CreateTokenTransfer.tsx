@@ -42,6 +42,9 @@ import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
+import NoFeeNovemberTransactionCard from '@/features/no-fee-november/components/NoFeeNovemberTransactionCard'
+import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
+import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
 
 export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balance: string }): ReactElement => (
   <Grid
@@ -87,6 +90,8 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
   const [safeApps] = useRemoteSafeApps({ name: SafeAppsName.CSV })
   const isMassPayoutsEnabled = useHasFeature(FEATURES.MASS_PAYOUTS)
   const { onNext, data } = useContext(TxFlowContext) as TxFlowContextType<MultiTokenTransferParams>
+  const { isEligible } = useNoFeeNovemberEligibility()
+  const isNoFeeNovemberEnabled = useIsNoFeeNovemberFeatureEnabled()
 
   useEffect(() => {
     if (txNonce !== undefined) {
@@ -100,8 +105,8 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
       [MultiTransfersFields.type]: disableSpendingLimit
         ? TokenTransferType.multiSig
         : canCreateSpendingLimitTx && !canCreateStandardTx
-          ? TokenTransferType.spendingLimit
-          : data?.type,
+        ? TokenTransferType.spendingLimit
+        : data?.type,
       recipients:
         data?.recipients.map(({ tokenAddress, ...rest }) => ({
           ...rest,
@@ -203,6 +208,8 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
                     color={canAddMoreRecipients ? 'primary' : 'error.main'}
                   >{`${recipientFields.length}/${MAX_RECIPIENTS}`}</Typography>
                 </Stack>
+
+                {isEligible && isNoFeeNovemberEnabled && <NoFeeNovemberTransactionCard />}
 
                 {hasInsufficientFunds && (
                   <Alert data-testid="insufficient-balance-error" severity="error">
