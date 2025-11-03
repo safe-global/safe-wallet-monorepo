@@ -1,5 +1,5 @@
 import { orderTokenBuilder, swapOrderBuilder } from '@/features/swap/helpers/swapOrderBuilder'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import SwapProgress from './index'
 import { Paper } from '@mui/material'
 

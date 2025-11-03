@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { TwapOrder as TwapOrderComponent } from './index'
 import { Paper } from '@mui/material'
 import { appDataBuilder, orderTokenBuilder, twapOrderBuilder } from '@/features/swap/helpers/swapOrderBuilder'

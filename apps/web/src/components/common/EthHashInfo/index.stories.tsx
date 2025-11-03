@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import EthHashInfo from './index'
 import { Paper } from '@mui/material'
 

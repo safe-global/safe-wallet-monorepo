@@ -1,5 +1,5 @@
 import type { OrderStatuses } from '@safe-global/store/gateway/types'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { SellOrder as SellOrderComponent } from './index'
 import { Paper } from '@mui/material'
 import { appDataBuilder, orderTokenBuilder, swapOrderBuilder } from '@/features/swap/helpers/swapOrderBuilder'

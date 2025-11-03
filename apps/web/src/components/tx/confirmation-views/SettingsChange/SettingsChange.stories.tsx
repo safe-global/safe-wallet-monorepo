@@ -1,6 +1,6 @@
 import { SettingsInfoType } from '@safe-global/store/gateway/types'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { ownerAddress, txInfo } from './mockData'
