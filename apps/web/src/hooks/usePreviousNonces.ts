@@ -1,6 +1,6 @@
 import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useMemo } from 'react'
-import { isMultisigExecutionInfo, isTransactionListItem } from '@/utils/transaction-guards'
+import { isMultisigExecutionInfo, isTransactionQueuedItem } from '@/utils/transaction-guards'
 import uniqBy from 'lodash/uniqBy'
 import useTxQueue from '@/hooks/useTxQueue'
 
@@ -9,7 +9,7 @@ export const _getUniqueQueuedTxs = (page?: QueuedItemPage) => {
     return []
   }
 
-  const txs = page.results.filter(isTransactionListItem).map((item) => item.transaction)
+  const txs = page.results.filter(isTransactionQueuedItem).map((item) => item.transaction)
 
   return uniqBy(txs, (tx) => {
     return isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo.nonce : ''
