@@ -60,7 +60,7 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
       </Typography>
     ),
   },
-  value: {
+  weight: {
     rawValue: '0',
     content: (
       <Typography>
@@ -68,7 +68,7 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
       </Typography>
     ),
   },
-  weight: {
+  value: {
     rawValue: '0',
     content: (
       <Typography>
@@ -121,12 +121,6 @@ const AssetsTable = ({
       align: 'right',
     },
     {
-      id: 'value',
-      label: 'Value',
-      width: '18%',
-      align: 'right',
-    },
-    {
       id: 'weight',
       label: (
         <Tooltip title="Based on total portfolio value">
@@ -136,6 +130,12 @@ const AssetsTable = ({
         </Tooltip>
       ),
       width: '23%',
+      align: 'right',
+    },
+    {
+      id: 'value',
+      label: 'Value',
+      width: '18%',
       align: 'right',
     },
     {
@@ -261,22 +261,6 @@ const AssetsTable = ({
                 </Typography>
               ),
             },
-            value: {
-              rawValue: rawFiatValue,
-              collapsed: item.tokenInfo.address === hidingAsset,
-              content: (
-                <Box textAlign="right">
-                  <Typography>
-                    <FiatBalance balanceItem={item} />
-                  </Typography>
-                  {item.fiatBalance24hChange && (
-                    <Typography variant="caption">
-                      <FiatChange balanceItem={item} inline />
-                    </Typography>
-                  )}
-                </Box>
-              ),
-            },
             weight: {
               rawValue: itemShareOfFiatTotal,
               content: itemShareOfFiatTotal ? (
@@ -299,6 +283,22 @@ const AssetsTable = ({
                 </Box>
               ) : (
                 <></>
+              ),
+            },
+            value: {
+              rawValue: rawFiatValue,
+              collapsed: item.tokenInfo.address === hidingAsset,
+              content: (
+                <Box textAlign="right">
+                  <Typography>
+                    <FiatBalance balanceItem={item} />
+                  </Typography>
+                  {item.fiatBalance24hChange && (
+                    <Typography variant="caption">
+                      <FiatChange balanceItem={item} inline />
+                    </Typography>
+                  )}
+                </Box>
               ),
             },
             actions: {
