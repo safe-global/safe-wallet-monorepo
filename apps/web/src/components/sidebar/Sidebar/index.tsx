@@ -8,7 +8,7 @@ import SidebarNavigation from '@/components/sidebar/SidebarNavigation'
 import SidebarFooter from '@/components/sidebar/SidebarFooter'
 
 import css from './styles.module.css'
-import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
+import { trackEvent, OVERVIEW_EVENTS, MixpanelEventParams } from '@/services/analytics'
 import MyAccounts from '@/features/myAccounts'
 
 const Sidebar = (): ReactElement => {
@@ -16,7 +16,10 @@ const Sidebar = (): ReactElement => {
 
   const onDrawerToggle = useCallback(() => {
     setIsDrawerOpen((isOpen) => {
-      trackEvent({ ...OVERVIEW_EVENTS.SIDEBAR, label: isOpen ? 'Close' : 'Open' })
+      trackEvent(
+        { ...OVERVIEW_EVENTS.SIDEBAR, label: isOpen ? 'Close' : 'Open' },
+        { [MixpanelEventParams.SIDEBAR_ELEMENT]: isOpen ? 'Close Wallets' : 'Expand Wallets' },
+      )
 
       return !isOpen
     })

@@ -10,6 +10,7 @@ import DebugToggle from '../DebugToggle'
 import { IS_PRODUCTION } from '@/config/constants'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useCurrentChain } from '@/hooks/useChains'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 import IndexingStatus from '@/components/sidebar/IndexingStatus'
@@ -48,14 +49,20 @@ const SidebarFooter = (): ReactElement => {
         <IndexingStatus />
 
         <Box ml="auto !important">
-          <Track {...OVERVIEW_EVENTS.WHATS_NEW}>
+          <Track
+            {...OVERVIEW_EVENTS.WHATS_NEW}
+            mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: "What's New" }}
+          >
             <IconButton onClick={handleBeamer} id={BEAMER_SELECTOR} data-testid="list-item-whats-new" color="primary">
               <SvgIcon component={BeamerIcon} inheritViewBox fontSize="small" />
             </IconButton>
           </Track>
         </Box>
 
-        <Track {...OVERVIEW_EVENTS.HELP_CENTER}>
+        <Track
+          {...OVERVIEW_EVENTS.HELP_CENTER}
+          mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Help Center' }}
+        >
           <IconButton href={HELP_CENTER_URL} target="_blank" data-testid="list-item-need-help" color="primary">
             <SvgIcon component={HelpCenterIcon} inheritViewBox fontSize="small" />
           </IconButton>
