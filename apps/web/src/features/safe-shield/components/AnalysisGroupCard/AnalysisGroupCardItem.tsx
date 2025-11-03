@@ -1,6 +1,6 @@
 import { Stack, Typography } from '@mui/material'
 import { Box } from '@mui/material'
-import { Severity, type AnalysisResult } from '@safe-global/utils/features/safe-shield/types'
+import { type Severity, type AnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import { isAddressChange } from '@safe-global/utils/features/safe-shield/utils'
 import { SEVERITY_COLORS } from '../../constants'
 import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
