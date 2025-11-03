@@ -126,7 +126,7 @@ const ReviewSpendingLimitTx = ({
 
   return (
     <form onSubmit={handleSubmit}>
-      <TxCard>
+      <TxCard sx={{ mt: 0 }}>
         <Typography variant="body2">
           Spending limit transactions only appear in the interface once they are successfully processed and indexed.
           Pending transactions can only be viewed in your signer wallet application or under your wallet address on a

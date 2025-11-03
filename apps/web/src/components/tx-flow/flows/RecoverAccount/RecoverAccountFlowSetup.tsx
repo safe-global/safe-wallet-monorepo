@@ -86,7 +86,7 @@ export function RecoverAccountFlowSetup({
   return (
     <FormProvider {...formMethods}>
       <form onSubmit={formMethods.handleSubmit(onSubmit)} className={commonCss.form}>
-        <TxCard>
+        <TxCard sx={{ mt: 0 }}>
           <div>
             <Typography
               variant="h6"

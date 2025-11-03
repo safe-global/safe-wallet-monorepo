@@ -15,7 +15,7 @@ import UnknownContractError from '../SignOrExecuteForm/UnknownContractError'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { Slot, SlotName } from '@/components/tx-flow/slots'
 import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
-import { Button, CircularProgress } from '@mui/material'
+import { Button, CircularProgress, Divider } from '@mui/material'
 import CheckWallet from '@/components/common/CheckWallet'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
@@ -72,11 +72,9 @@ export const ReviewTransactionContent = ({
         </ConfirmationView>
 
         <Slot name={SlotName.Main} />
-      </TxCard>
 
-      <Slot name={SlotName.Feature} />
+        <Divider sx={{ mt: 2, mx: -3 }} />
 
-      <TxCard>
         <ConfirmationTitle
           variant={
             isProposing
