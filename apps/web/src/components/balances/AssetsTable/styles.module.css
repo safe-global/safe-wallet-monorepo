@@ -258,6 +258,21 @@
   display: none;
 }
 
+/* Adjust column widths for tablet/small desktop (one size larger than mobile) */
+@media (min-width: 600px) and (max-width: 899.95px) {
+  .container th:nth-child(3),
+  .container td:nth-child(3) {
+    /* balance column: 18% + 5% = 23% */
+    width: 23% !important;
+  }
+
+  .container th:nth-child(4),
+  .container td:nth-child(4) {
+    /* weight column: 23% - 5% = 18% */
+    width: 18% !important;
+  }
+}
+
 @media (max-width: 599.95px) {
   /* Show mobile flex layout */
   .mobileContainer {
