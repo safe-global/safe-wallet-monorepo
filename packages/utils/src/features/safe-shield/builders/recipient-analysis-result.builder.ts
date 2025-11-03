@@ -59,7 +59,7 @@ export class RecipientAnalysisResultBuilder<T extends RecipientStatus | BridgeSt
       .severity(Severity.WARN)
       .type(RecipientStatus.LOW_ACTIVITY)
       .title('Low activity')
-      .description('This address has low activity.')
+      .description('This address has few transactions.')
   }
 
   static newRecipient(): RecipientAnalysisResultBuilder<RecipientStatus.NEW_RECIPIENT> {

@@ -16,5 +16,5 @@ export const LowActivityAnalysisResult: AnalysisResult<RecipientStatus.LOW_ACTIV
   type: RecipientStatus.LOW_ACTIVITY,
   severity: Severity.WARN,
   title: 'Low activity recipient',
-  description: 'This address has low activity.',
+  description: 'This address has few transactions.',
 }
