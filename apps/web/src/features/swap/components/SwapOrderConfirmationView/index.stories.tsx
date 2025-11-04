@@ -1,5 +1,5 @@
 import type { OrderStatuses } from '@safe-global/store/gateway/types'
-import type { Meta, StoryObj } from '@storybook/nextjs'
+import type { Meta, StoryObj } from '@storybook/react'
 import CowOrderConfirmationView from './index'
 import { Paper } from '@mui/material'
 import { orderTokenBuilder, swapOrderConfirmationViewBuilder } from '@/features/swap/helpers/swapOrderBuilder'

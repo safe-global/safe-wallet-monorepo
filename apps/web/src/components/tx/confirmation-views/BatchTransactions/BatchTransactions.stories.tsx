@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/nextjs'
+import type { Meta, StoryObj } from '@storybook/react'
 import { Paper, ThemeProvider } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import BatchTransactions from './index'

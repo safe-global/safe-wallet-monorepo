@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/nextjs'
+import type { Meta, StoryObj } from '@storybook/react'
 import NativeSwapsCard from './index'
 import { Box } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'

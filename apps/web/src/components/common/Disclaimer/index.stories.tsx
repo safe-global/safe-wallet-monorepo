@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/nextjs'
+import type { Meta, StoryObj } from '@storybook/react'
 import Disclaimer from './index'
 import LegalDisclaimerContent from '@/components/common/LegalDisclaimerContent'
 
