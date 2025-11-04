@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
-import { AppState, Platform } from 'react-native'
+import { AppState, AppStateStatus, Platform } from 'react-native'
 import NotificationsService from '@/src/services/notifications/NotificationService'
 import useRegisterForNotifications from '@/src/hooks/useRegisterForNotifications'
 import Logger from '@/src/utils/logger'
@@ -25,8 +25,6 @@ export const useNotificationManager = () => {
   const promptThreshold = isAndroid ? 3 : 2
   const { registerForNotifications, unregisterForNotifications, updatePermissionsForNotifications, isLoading } =
     useRegisterForNotifications()
-
-  const appState = useRef(AppState.currentState)
 
   // Using a ref instead of state to ensure the value persists across app background/foreground cycles
   const pendingPermissionRequestRef = useRef(false)
@@ -135,9 +133,8 @@ export const useNotificationManager = () => {
   }, [updatePermissionsForNotifications])
 
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', async (nextAppState) => {
-      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-        // App has come to the foreground
+    const subscription = AppState.addEventListener('change', async (nextAppState: AppStateStatus) => {
+      if (nextAppState === 'active') {
         const deviceNotificationStatus = await NotificationsService.isDeviceNotificationEnabled()
 
         // CASE 1: App notifications enabled but device notifications disabled
@@ -154,8 +151,6 @@ export const useNotificationManager = () => {
           pendingPermissionRequestRef.current = false
         }
       }
-
-      appState.current = nextAppState
     })
 
     return () => {
