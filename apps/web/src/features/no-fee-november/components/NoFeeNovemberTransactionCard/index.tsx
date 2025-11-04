@@ -69,7 +69,7 @@ const NoFeeNovemberTransactionCard = () => {
                 Enjoy No-Fee November
               </Typography>
               <Typography variant="body2" color="static.light" className={css.description}>
-                SAFE holders enjoy gasless transactions on Mainnet this November.{' '}
+                SAFE holders enjoy gasless transactions on Ethereum Mainnet this November.{' '}
                 <Link
                   href="https://help.safe.global/en/articles/456540-no-fee-november"
                   target="_blank"
