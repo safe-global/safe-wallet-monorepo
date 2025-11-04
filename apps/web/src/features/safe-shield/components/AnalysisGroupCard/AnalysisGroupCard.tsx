@@ -66,6 +66,7 @@ export const AnalysisGroupCard = ({ data, highlightedSeverity }: AnalysisGroupCa
           <Stack gap={2}>
             {visibleResults.map((result, index) => {
               const isPrimary = index === 0
+              const shouldHighlight = isHighlighted && isPrimary && result.severity === primarySeverity
 
               if (result.type === ContractStatus.UNEXPECTED_DELEGATECALL) {
                 return <DelegateCallCardItem key={index} result={result} isPrimary={isPrimary} />
@@ -73,10 +74,9 @@ export const AnalysisGroupCard = ({ data, highlightedSeverity }: AnalysisGroupCa
 
               return (
                 <AnalysisGroupCardItem
-                  severity={isHighlighted && result.severity === primarySeverity ? result.severity : undefined}
+                  severity={shouldHighlight ? result.severity : undefined}
                   key={index}
                   result={result}
-                  isPrimary={isPrimary}
                 />
               )
             })}

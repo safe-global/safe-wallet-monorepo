@@ -9,18 +9,12 @@ import { ShowAllAddress } from './ShowAllAddress'
 
 interface AnalysisGroupCardItemProps {
   result: AnalysisResult
-  isPrimary?: boolean
   description?: React.ReactNode
   severity?: Severity
 }
 
-export const AnalysisGroupCardItem = ({
-  result,
-  isPrimary = false,
-  description,
-  severity,
-}: AnalysisGroupCardItemProps) => {
-  const borderColor = isPrimary && severity ? SEVERITY_COLORS[severity].main : 'var(--color-border-main)'
+export const AnalysisGroupCardItem = ({ result, description, severity }: AnalysisGroupCardItemProps) => {
+  const borderColor = severity ? SEVERITY_COLORS[severity].main : 'var(--color-border-main)'
   const displayDescription = description ?? result.description
 
   return (
