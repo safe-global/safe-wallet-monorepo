@@ -1,7 +1,7 @@
 {
   "name": "@safe-global/mobile",
   "main": "index.js",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "doctor": {
     "reactNativeDirectoryCheck": {
       "enabled": true
@@ -30,7 +30,7 @@
     "prepare": "husky",
     "build-storybook": "STORYBOOK_WEB='true' storybook build",
     "e2e:metro": "EXPO_PUBLIC_ENV=e2e NODE_ENV=test RN_SRC_EXT=e2e.ts,e2e.tsx expo start",
-    "e2e:metro-ios": "EXPO_PUBLIC_ENV=e2e NODE_ENV=test RN_SRC_EXT=e2e.ts,e2e.tsx expo run:ios",
+    "e2e:metro-ios": "EXPO_PUBLIC_ENV=e2e NODE_ENV=test RN_SRC_EXT=e2e.ts,e2e.tsx expo run:ios --configuration Release",
     "e2e:metro-android": "EXPO_PUBLIC_ENV=e2e NODE_ENV=test RN_SRC_EXT=e2e.ts,e2e.tsx expo run:android",
     "e2e:run": "maestro test e2e",
     "eas-build-pre-install": "corepack enable && yarn set version 4",
@@ -66,7 +66,7 @@
     "@react-native-menu/menu": "^2.0.0",
     "@react-navigation/native": "^7.1.17",
     "@reduxjs/toolkit": "^2.8.2",
-    "@safe-global/protocol-kit": "^5.2.17",
+    "@safe-global/protocol-kit": "^5.2.18",
     "@safe-global/store": "workspace:^",
     "@safe-global/utils": "workspace:^",
     "@shopify/flash-list": "2.0.2",

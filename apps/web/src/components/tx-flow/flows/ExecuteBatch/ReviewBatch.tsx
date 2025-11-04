@@ -33,8 +33,7 @@ import { isWalletRejection } from '@/utils/wallets'
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
 import useUserNonce from '@/components/tx/AdvancedParams/useUserNonce'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
-import { useGetMultipleTransactionDetailsQuery } from '@/store/api/gateway'
-import { skipToken } from '@reduxjs/toolkit/query/react'
+import { useTransactionsGetMultipleTransactionDetailsQuery } from '@safe-global/store/src/gateway/transactions'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { FEATURES, getLatestSafeVersion, hasFeature } from '@safe-global/utils/utils/chains'
 
@@ -68,13 +67,14 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
     data: txsWithDetails,
     error,
     isLoading: loading,
-  } = useGetMultipleTransactionDetailsQuery(
-    chain?.chainId && params.txs.length
-      ? {
-          chainId: chain.chainId,
-          txIds: params.txs.map((tx) => tx.transaction.id),
-        }
-      : skipToken,
+  } = useTransactionsGetMultipleTransactionDetailsQuery(
+    {
+      chainId: chain?.chainId || '',
+      txIds: params.txs.map((tx) => tx.transaction.id),
+    },
+    {
+      skip: !chain?.chainId || !params.txs.length,
+    },
   )
 
   const [multiSendContract] = useAsync(async () => {
@@ -201,13 +201,15 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
         </Alert>
 
         {error && (
-          <ErrorMessage error={asError(error)}>
+          <ErrorMessage error={asError(error)} context="estimation">
             This transaction will most likely fail. To save gas costs, avoid creating the transaction.
           </ErrorMessage>
         )}
 
         {submitError && (
-          <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
+          <ErrorMessage error={submitError} context="execution">
+            Error submitting the transaction. Please try again.
+          </ErrorMessage>
         )}
 
         {isRejectedByUser && <WalletRejectionError />}

@@ -1,6 +1,9 @@
 import { toBeHex } from 'ethers'
-import * as sdk from '@safe-global/safe-gateway-typescript-sdk'
-import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { http, HttpResponse } from 'msw'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { setBaseUrl } from '../gateway-utils'
+import { server } from '@/tests/server'
 
 import { _parseServiceWorkerWebhookPushNotification } from '../notifications'
 import { WebhookType } from '../webhook-types'
@@ -17,7 +20,10 @@ import type {
   SafeCreatedEvent,
 } from '../webhook-types'
 
-jest.mock('@safe-global/safe-gateway-typescript-sdk')
+const GATEWAY_URL = 'https://safe-client.staging.5afe.dev'
+
+// Set base URL for service worker context (uses direct fetch, not Redux)
+setBaseUrl(GATEWAY_URL)
 
 Object.defineProperty(self, 'location', {
   value: {
@@ -25,15 +31,54 @@ Object.defineProperty(self, 'location', {
   },
 })
 
+// Helper to mock chains response
+const mockChainsResponse = (chains: Chain[]) => {
+  server.use(
+    http.get(`${GATEWAY_URL}/v1/chains`, () => {
+      return HttpResponse.json({
+        count: chains.length,
+        next: null,
+        previous: null,
+        results: chains,
+      })
+    }),
+  )
+}
+
+// Helper to mock empty chains response
+const mockNoChainsResponse = () => mockChainsResponse([])
+
+// Helper to create a chain mock
+const createChainMock = (overrides: Partial<Chain> = {}): Chain =>
+  ({
+    chainName: 'Mainnet',
+    chainId: '1',
+    shortName: 'eth',
+    ...overrides,
+  }) as Chain
+
+// Helper to mock balances response
+const mockBalancesResponse = (chainId: string, safeAddress: string, items: Balances['items']) => {
+  server.use(
+    http.get<never, never, Balances>(`${GATEWAY_URL}/v1/chains/${chainId}/safes/${safeAddress}/balances/USD`, () => {
+      return HttpResponse.json({
+        items,
+        fiatTotal: '1000',
+      } as Balances)
+    }),
+  )
+}
+
+// Helper to mock balances error
+const mockBalancesError = (chainId: string, safeAddress: string) => {
+  server.use(
+    http.get(`${GATEWAY_URL}/v1/chains/${chainId}/safes/${safeAddress}/balances/USD`, () => {
+      return HttpResponse.error()
+    }),
+  )
+}
+
 describe('parseWebhookPushNotification', () => {
-  let getChainsConfigSpy: jest.SpyInstance<Promise<any>>
-  let getBalancesMockSpy: jest.SpyInstance<Promise<sdk.SafeBalanceResponse>>
-
-  beforeEach(() => {
-    getChainsConfigSpy = jest.spyOn(sdk, 'getChainsConfig')
-    getBalancesMockSpy = jest.spyOn(sdk, 'getBalances')
-  })
-
   describe('should parse EXECUTED_MULTISIG_TRANSACTION payloads', () => {
     const payload: Omit<ExecutedMultisigTransactionEvent, 'failed'> = {
       type: WebhookType.EXECUTED_MULTISIG_TRANSACTION,
@@ -45,9 +90,7 @@ describe('parseWebhookPushNotification', () => {
 
     describe('successful transactions', () => {
       it('with chain info', async () => {
-        getChainsConfigSpy.mockResolvedValue({
-          results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
-        })
+        mockChainsResponse([createChainMock({ chainId: payload.chainId })])
 
         const notification = await _parseServiceWorkerWebhookPushNotification({
           ...payload,
@@ -62,7 +105,7 @@ describe('parseWebhookPushNotification', () => {
       })
 
       it('without chain info', async () => {
-        getChainsConfigSpy.mockImplementationOnce(() => Promise.reject()) // chains
+        mockNoChainsResponse()
 
         const notification = await _parseServiceWorkerWebhookPushNotification({
           ...payload,
@@ -79,9 +122,7 @@ describe('parseWebhookPushNotification', () => {
 
     describe('failed transactions', () => {
       it('with chain info', async () => {
-        getChainsConfigSpy.mockResolvedValue({
-          results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
-        })
+        mockChainsResponse([createChainMock({ chainId: payload.chainId })])
 
         const notification = await _parseServiceWorkerWebhookPushNotification({
           ...payload,
@@ -96,7 +137,7 @@ describe('parseWebhookPushNotification', () => {
       })
 
       it('without chain info', async () => {
-        getChainsConfigSpy.mockImplementationOnce(() => Promise.reject()) // chains
+        mockNoChainsResponse()
 
         const notification = await _parseServiceWorkerWebhookPushNotification({
           ...payload,
@@ -122,16 +163,15 @@ describe('parseWebhookPushNotification', () => {
     }
 
     it('with chain info', async () => {
-      getChainsConfigSpy.mockResolvedValue({
-        results: [
-          {
-            chainName: 'Polygon',
-            chainId: payload.chainId,
-            shortName: 'matic',
-            nativeCurrency: { name: 'Matic', symbol: 'MATIC', decimals: 18 },
-          } as Chain,
-        ],
-      })
+      mockChainsResponse([
+        createChainMock({
+          chainName: 'Polygon',
+          chainId: payload.chainId,
+          shortName: 'matic',
+          nativeCurrency: { name: 'Matic', symbol: 'MATIC', decimals: 18, logoUri: '' },
+        }),
+      ])
+
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
       expect(notification).toEqual({
@@ -142,7 +182,7 @@ describe('parseWebhookPushNotification', () => {
     })
 
     it('without chain info', async () => {
-      getChainsConfigSpy.mockImplementationOnce(() => Promise.reject()) // chains
+      mockNoChainsResponse()
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
@@ -168,22 +208,23 @@ describe('parseWebhookPushNotification', () => {
       value: '1000000000000000000',
     }
 
+    const fakeTokenBalance = {
+      tokenInfo: {
+        address: payload.tokenAddress,
+        decimals: 18,
+        name: 'Fake',
+        symbol: 'FAKE',
+        type: 'ERC20' as const,
+        logoUri: 'https://example.com/fake.png',
+      },
+      balance: '1000000000000000000',
+      fiatBalance: '1000',
+      fiatConversion: '1000',
+    }
+
     it('with chain and token info', async () => {
-      getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
-      })
-      getBalancesMockSpy.mockResolvedValue({
-        items: [
-          {
-            tokenInfo: {
-              address: payload.tokenAddress,
-              decimals: 18,
-              name: 'Fake',
-              symbol: 'FAKE',
-            },
-          },
-        ],
-      } as sdk.SafeBalanceResponse)
+      mockChainsResponse([createChainMock({ chainId: payload.chainId })])
+      mockBalancesResponse(payload.chainId, payload.address, [fakeTokenBalance])
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
@@ -192,22 +233,6 @@ describe('parseWebhookPushNotification', () => {
         body: 'Safe 0x0000...0001 on Mainnet received some FAKE in transaction 0x0000...0003.',
         link: 'https://app.safe.global/transactions/history?safe=eth:0x0000000000000000000000000000000000000001',
       })
-
-      getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
-      })
-      getBalancesMockSpy.mockResolvedValue({
-        items: [
-          {
-            tokenInfo: {
-              address: payload.tokenAddress,
-              decimals: 18,
-              name: 'Fake',
-              symbol: 'FAKE',
-            },
-          },
-        ],
-      } as sdk.SafeBalanceResponse)
 
       const erc20Notification = await _parseServiceWorkerWebhookPushNotification(erc20Payload)
 
@@ -219,19 +244,8 @@ describe('parseWebhookPushNotification', () => {
     })
 
     it('without chain info', async () => {
-      getChainsConfigSpy.mockImplementation(() => Promise.reject()) // chains
-      getBalancesMockSpy.mockResolvedValue({
-        items: [
-          {
-            tokenInfo: {
-              address: payload.tokenAddress,
-              decimals: 18,
-              name: 'Fake',
-              symbol: 'FAKE',
-            },
-          },
-        ],
-      } as sdk.SafeBalanceResponse)
+      mockNoChainsResponse()
+      mockBalancesResponse(payload.chainId, payload.address, [fakeTokenBalance])
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
@@ -240,20 +254,6 @@ describe('parseWebhookPushNotification', () => {
         body: 'Safe 0x0000...0001 on chain 1 received some FAKE in transaction 0x0000...0003.',
         link: 'https://app.safe.global',
       })
-
-      getChainsConfigSpy.mockImplementation(() => Promise.reject()) // chains
-      getBalancesMockSpy.mockResolvedValue({
-        items: [
-          {
-            tokenInfo: {
-              address: payload.tokenAddress,
-              decimals: 18,
-              name: 'Fake',
-              symbol: 'FAKE',
-            },
-          },
-        ],
-      } as sdk.SafeBalanceResponse)
 
       const erc20Notification = await _parseServiceWorkerWebhookPushNotification(erc20Payload)
 
@@ -265,10 +265,8 @@ describe('parseWebhookPushNotification', () => {
     })
 
     it('without token info', async () => {
-      getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
-      })
-      getBalancesMockSpy.mockImplementation(() => Promise.reject()) // tokens
+      mockChainsResponse([createChainMock({ chainId: payload.chainId })])
+      mockBalancesError(payload.chainId, payload.address)
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
@@ -277,11 +275,6 @@ describe('parseWebhookPushNotification', () => {
         body: 'Safe 0x0000...0001 on Mainnet received some tokens in transaction 0x0000...0003.',
         link: 'https://app.safe.global/transactions/history?safe=eth:0x0000000000000000000000000000000000000001',
       })
-
-      getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
-      })
-      getBalancesMockSpy.mockImplementation(() => Promise.reject()) // tokens
 
       const erc20Notification = await _parseServiceWorkerWebhookPushNotification(erc20Payload)
 
@@ -293,8 +286,8 @@ describe('parseWebhookPushNotification', () => {
     })
 
     it('without chain and balance info', async () => {
-      getChainsConfigSpy.mockImplementation(() => Promise.reject()) // chains
-      getBalancesMockSpy.mockImplementation(() => Promise.reject()) // tokens
+      mockNoChainsResponse()
+      mockBalancesError(payload.chainId, payload.address)
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
@@ -303,9 +296,6 @@ describe('parseWebhookPushNotification', () => {
         body: 'Safe 0x0000...0001 on chain 1 received some tokens in transaction 0x0000...0003.',
         link: 'https://app.safe.global',
       })
-
-      getChainsConfigSpy.mockImplementation(() => Promise.reject()) // chains
-      getBalancesMockSpy.mockImplementation(() => Promise.reject()) // tokens
 
       const erc20Notification = await _parseServiceWorkerWebhookPushNotification(erc20Payload)
 
@@ -327,9 +317,7 @@ describe('parseWebhookPushNotification', () => {
     }
 
     it('with chain info', async () => {
-      getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: '1', shortName: 'eth' } as Chain],
-      })
+      mockChainsResponse([createChainMock({ chainId: '1' })])
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
@@ -341,7 +329,7 @@ describe('parseWebhookPushNotification', () => {
     })
 
     it('without chain info', async () => {
-      getChainsConfigSpy.mockImplementation(() => Promise.reject()) // chains
+      mockNoChainsResponse()
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
@@ -362,9 +350,7 @@ describe('parseWebhookPushNotification', () => {
     }
 
     it('with chain info', async () => {
-      getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: '1', shortName: 'eth' } as Chain],
-      })
+      mockChainsResponse([createChainMock({ chainId: '1' })])
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
@@ -376,7 +362,7 @@ describe('parseWebhookPushNotification', () => {
     })
 
     it('without chain info', async () => {
-      getChainsConfigSpy.mockImplementation(() => Promise.reject()) // chains
+      mockNoChainsResponse()
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
@@ -398,9 +384,7 @@ describe('parseWebhookPushNotification', () => {
       blockNumber: '1',
     }
     it('with chain info', async () => {
-      getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: '1', shortName: 'eth' } as Chain],
-      })
+      mockChainsResponse([createChainMock({ chainId: '1' })])
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
@@ -408,7 +392,7 @@ describe('parseWebhookPushNotification', () => {
     })
 
     it('without chain info', async () => {
-      getChainsConfigSpy.mockImplementation(() => Promise.reject()) // chains
+      mockNoChainsResponse()
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
@@ -427,9 +411,7 @@ describe('parseWebhookPushNotification', () => {
     }
 
     it('with chain info', async () => {
-      getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
-      })
+      mockChainsResponse([createChainMock({ chainId: payload.chainId })])
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
@@ -437,7 +419,7 @@ describe('parseWebhookPushNotification', () => {
     })
 
     it('without chain info', async () => {
-      getChainsConfigSpy.mockImplementationOnce(() => Promise.reject()) // chains
+      mockNoChainsResponse()
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
@@ -455,9 +437,7 @@ describe('parseWebhookPushNotification', () => {
     }
 
     it('with chain info', async () => {
-      getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
-      })
+      mockChainsResponse([createChainMock({ chainId: payload.chainId })])
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
@@ -465,7 +445,7 @@ describe('parseWebhookPushNotification', () => {
     })
 
     it('without chain info', async () => {
-      getChainsConfigSpy.mockImplementationOnce(() => Promise.reject()) // chains
+      mockNoChainsResponse()
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
@@ -484,23 +464,22 @@ describe('parseWebhookPushNotification', () => {
     }
 
     it('with chain info', async () => {
-      getChainsConfigSpy.mockResolvedValue({
-        results: [
-          {
-            chainName: 'Polygon',
-            chainId: payload.chainId,
-            shortName: 'matic',
-            nativeCurrency: { name: 'Matic', symbol: 'MATIC', decimals: 18 },
-          } as Chain,
-        ],
-      })
+      mockChainsResponse([
+        createChainMock({
+          chainName: 'Polygon',
+          chainId: payload.chainId,
+          shortName: 'matic',
+          nativeCurrency: { name: 'Matic', symbol: 'MATIC', decimals: 18, logoUri: '' },
+        }),
+      ])
+
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
       expect(notification).toEqual(undefined)
     })
 
     it('without chain info', async () => {
-      getChainsConfigSpy.mockImplementationOnce(() => Promise.reject()) // chains
+      mockNoChainsResponse()
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
@@ -523,42 +502,27 @@ describe('parseWebhookPushNotification', () => {
       value: '1000000000000000000',
     }
 
+    const fakeTokenBalance = {
+      tokenInfo: {
+        address: payload.tokenAddress,
+        decimals: 18,
+        name: 'Fake',
+        symbol: 'FAKE',
+        type: 'ERC20' as const,
+        logoUri: 'https://example.com/fake.png',
+      },
+      balance: '1000000000000000000',
+      fiatBalance: '1000',
+      fiatConversion: '1000',
+    }
+
     it('with chain and token info', async () => {
-      getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
-      })
-      getBalancesMockSpy.mockResolvedValue({
-        items: [
-          {
-            tokenInfo: {
-              address: payload.tokenAddress,
-              decimals: 18,
-              name: 'Fake',
-              symbol: 'FAKE',
-            },
-          },
-        ],
-      } as sdk.SafeBalanceResponse)
+      mockChainsResponse([createChainMock({ chainId: payload.chainId })])
+      mockBalancesResponse(payload.chainId, payload.address, [fakeTokenBalance])
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
       expect(notification).toEqual(undefined)
-
-      getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
-      })
-      getBalancesMockSpy.mockResolvedValue({
-        items: [
-          {
-            tokenInfo: {
-              address: payload.tokenAddress,
-              decimals: 18,
-              name: 'Fake',
-              symbol: 'FAKE',
-            },
-          },
-        ],
-      } as sdk.SafeBalanceResponse)
 
       const erc20Notification = await _parseServiceWorkerWebhookPushNotification(erc20Payload)
 
@@ -566,32 +530,12 @@ describe('parseWebhookPushNotification', () => {
     })
 
     it('with chain and empty token info', async () => {
-      getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
-      })
-      getBalancesMockSpy.mockResolvedValue({
-        items: [] as sdk.SafeBalanceResponse['items'], // Transaction sent all of the tokens
-      } as sdk.SafeBalanceResponse)
+      mockChainsResponse([createChainMock({ chainId: payload.chainId })])
+      mockBalancesResponse(payload.chainId, payload.address, [])
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
       expect(notification).toEqual(undefined)
-
-      getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
-      })
-      getBalancesMockSpy.mockResolvedValue({
-        items: [
-          {
-            tokenInfo: {
-              address: payload.tokenAddress,
-              decimals: 18,
-              name: 'Fake',
-              symbol: 'FAKE',
-            },
-          },
-        ],
-      } as sdk.SafeBalanceResponse)
 
       const erc20Notification = await _parseServiceWorkerWebhookPushNotification(erc20Payload)
 
@@ -599,37 +543,12 @@ describe('parseWebhookPushNotification', () => {
     })
 
     it('without chain info', async () => {
-      getChainsConfigSpy.mockImplementation(() => Promise.reject()) // chains
-      getBalancesMockSpy.mockResolvedValue({
-        items: [
-          {
-            tokenInfo: {
-              address: payload.tokenAddress,
-              decimals: 18,
-              name: 'Fake',
-              symbol: 'FAKE',
-            },
-          },
-        ],
-      } as sdk.SafeBalanceResponse)
+      mockNoChainsResponse()
+      mockBalancesResponse(payload.chainId, payload.address, [fakeTokenBalance])
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
       expect(notification).toEqual(undefined)
-
-      getChainsConfigSpy.mockImplementation(() => Promise.reject()) // chains
-      getBalancesMockSpy.mockResolvedValue({
-        items: [
-          {
-            tokenInfo: {
-              address: payload.tokenAddress,
-              decimals: 18,
-              name: 'Fake',
-              symbol: 'FAKE',
-            },
-          },
-        ],
-      } as sdk.SafeBalanceResponse)
 
       const erc20Notification = await _parseServiceWorkerWebhookPushNotification(erc20Payload)
 
@@ -637,19 +556,12 @@ describe('parseWebhookPushNotification', () => {
     })
 
     it('without token info', async () => {
-      getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
-      })
-      getBalancesMockSpy.mockImplementation(() => Promise.reject()) // tokens
+      mockChainsResponse([createChainMock({ chainId: payload.chainId })])
+      mockBalancesError(payload.chainId, payload.address)
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
       expect(notification).toEqual(undefined)
-
-      getChainsConfigSpy.mockResolvedValue({
-        results: [{ chainName: 'Mainnet', chainId: payload.chainId, shortName: 'eth' } as Chain],
-      })
-      getBalancesMockSpy.mockImplementation(() => Promise.reject()) // tokens
 
       const erc20Notification = await _parseServiceWorkerWebhookPushNotification(erc20Payload)
 
@@ -657,15 +569,12 @@ describe('parseWebhookPushNotification', () => {
     })
 
     it('without chain and balance info', async () => {
-      getChainsConfigSpy.mockImplementation(() => Promise.reject()) // chains
-      getBalancesMockSpy.mockImplementation(() => Promise.reject()) // tokens
+      mockNoChainsResponse()
+      mockBalancesError(payload.chainId, payload.address)
 
       const notification = await _parseServiceWorkerWebhookPushNotification(payload)
 
       expect(notification).toEqual(undefined)
-
-      getChainsConfigSpy.mockImplementation(() => Promise.reject()) // chains
-      getBalancesMockSpy.mockImplementation(() => Promise.reject()) // tokens
 
       const erc20Notification = await _parseServiceWorkerWebhookPushNotification(erc20Payload)
 

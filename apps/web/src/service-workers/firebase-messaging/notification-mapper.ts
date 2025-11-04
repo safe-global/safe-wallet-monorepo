@@ -1,13 +1,12 @@
 // Be careful what you import here as it will increase the service worker bundle size
 
 import { formatUnits } from 'ethers'
-import { getBalances } from '@safe-global/safe-gateway-typescript-sdk'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import { WebhookType } from './webhook-types'
 import type { WebhookEvent } from './webhook-types'
+import { getBalances } from './gateway-utils'
 
 type PushNotificationsMap<T extends WebhookEvent = WebhookEvent> = {
   [P in T['type']]: (
@@ -45,10 +44,8 @@ const getTokenInfo = async (
   let tokenInfo: Balance['tokenInfo'] | undefined
 
   try {
-    const balances = await getBalances(chainId, safeAddress, DEFAULT_CURRENCY)
-    tokenInfo = balances.items.find((token) => token.tokenInfo.address === tokenAddress)?.tokenInfo as
-      | Balance['tokenInfo']
-      | undefined
+    const balances = await getBalances({ chainId, safeAddress, fiatCode: DEFAULT_CURRENCY })
+    tokenInfo = balances.items.find((token: Balance) => token.tokenInfo.address === tokenAddress)?.tokenInfo
   } catch {
     // Swallow error
   }

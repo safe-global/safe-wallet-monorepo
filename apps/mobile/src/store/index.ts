@@ -22,11 +22,11 @@ import safesSettings from './safesSettingsSlice'
 import biometrics from './biometricsSlice'
 import pendingTxs from './pendingTxsSlice'
 import estimatedFee from './estimatedFeeSlice'
+import executionMethod from './executionMethodSlice'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import devToolsEnhancer from 'redux-devtools-expo-dev-plugin'
 import { GATEWAY_URL, isTestingEnv } from '../config/constants'
 import { web3API } from './signersBalance'
-import { setBaseUrl as setSDKBaseURL } from '@safe-global/safe-gateway-typescript-sdk'
 import { createFilter } from '@safe-global/store/utils/persistTransformFilter'
 import { setupMobileCookieHandling } from './utils/cookieHandling'
 import notificationsMiddleware from './middleware/notifications'
@@ -35,7 +35,6 @@ import notificationSyncMiddleware from './middleware/notificationSync'
 import { setBackendStore } from '@/src/store/utils/singletonStore'
 import pendingTxsListeners from '@/src/store/middleware/pendingTxs'
 
-setSDKBaseURL(GATEWAY_URL)
 setBaseUrl(GATEWAY_URL)
 
 // Set up mobile-specific cookie handling
@@ -51,7 +50,7 @@ const persistConfig = {
   key: 'root',
   version: 1,
   storage: reduxStorage,
-  blacklist: [web3API.reducerPath, cgwClient.reducerPath, 'myAccounts', 'estimatedFee'],
+  blacklist: [web3API.reducerPath, cgwClient.reducerPath, 'myAccounts', 'estimatedFee', 'executionMethod'],
   transforms: [cgwClientFilter],
 }
 
@@ -71,6 +70,7 @@ export const rootReducer = combineReducers({
   biometrics,
   pendingTxs,
   estimatedFee,
+  executionMethod,
   [web3API.reducerPath]: web3API.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
 })

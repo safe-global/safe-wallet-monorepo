@@ -1,21 +1,20 @@
-import TxSummary from '@/components/transactions/TxSummary/index'
-import * as pending from '@/hooks/useIsPending'
-import { render } from '@/tests/test-utils'
+import type { MultisigTransaction, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+
 import {
   ConflictType,
   DetailedExecutionInfoType,
-  type Transaction,
   TransactionListItemType,
   TransactionStatus,
-  type TransactionSummary,
-} from '@safe-global/safe-gateway-typescript-sdk'
-import {
+  TransferDirection,
   TransactionInfoType,
   TransactionTokenType,
-  TransferDirection,
-} from '@safe-global/safe-gateway-typescript-sdk/dist/types/transactions'
+} from '@safe-global/store/gateway/types'
 
-const mockTransaction: Transaction = {
+import TxSummary from '@/components/transactions/TxSummary/index'
+import * as pending from '@/hooks/useIsPending'
+import { render } from '@/tests/test-utils'
+
+const mockTransaction: MultisigTransaction = {
   type: TransactionListItemType.TRANSACTION,
   transaction: {
     timestamp: Date.now(),
@@ -38,7 +37,7 @@ const mockTransaction: Transaction = {
       },
     },
     txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-  } as unknown as TransactionSummary,
+  } as unknown as Transaction,
   conflictType: ConflictType.HAS_NEXT,
 }
 

@@ -1,3 +1,4 @@
+import type { AllOwnedSafes } from '@safe-global/store/gateway/types'
 import groupBy from 'lodash/groupBy'
 import useAllSafes, { type SafeItem, type SafeItems } from './useAllSafes'
 import { useMemo } from 'react'
@@ -7,7 +8,6 @@ import useWallet from '@/hooks/wallets/useWallet'
 import useAllOwnedSafes from '@/features/myAccounts/hooks/useAllOwnedSafes'
 import { useAppSelector } from '@/store'
 import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
-import type { AllOwnedSafes } from '@safe-global/safe-gateway-typescript-sdk'
 
 export type MultiChainSafeItem = {
   address: string

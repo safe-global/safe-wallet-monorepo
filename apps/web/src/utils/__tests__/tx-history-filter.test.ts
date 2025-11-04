@@ -1,9 +1,4 @@
 import MockDate from 'mockdate'
-import {
-  getIncomingTransfers,
-  getMultisigTransactions,
-  getModuleTransactions,
-} from '@safe-global/safe-gateway-typescript-sdk'
 import * as router from 'next/router'
 
 import type { TxFilterType } from '@/utils/tx-history-filter'
@@ -19,11 +14,11 @@ import {
 import { renderHook } from '@/tests/test-utils'
 import type { NextRouter } from 'next/router'
 import { type TxFilterFormState } from '@/components/transactions/TxFilterForm'
-import { getTimezone } from '@/services/transactions'
+import * as transactionUtils from '@/utils/transactions'
 
 MockDate.set('2021-01-01T00:00:00.000Z')
 
-jest.mock('@safe-global/safe-gateway-typescript-sdk', () => ({
+jest.mock('@/utils/transactions', () => ({
   getIncomingTransfers: jest.fn(() => Promise.resolve({ results: [] })),
   getMultisigTransactions: jest.fn(() => Promise.resolve({ results: [] })),
   getModuleTransactions: jest.fn(() => Promise.resolve({ results: [] })),
@@ -393,15 +388,22 @@ describe('tx-history-filter', () => {
         'pageUrl1',
       )
 
-      expect(getIncomingTransfers).toHaveBeenCalledWith(
+      expect(transactionUtils.getIncomingTransfers).toHaveBeenCalledWith(
         '4',
         '0x123',
-        { value: '123', executed: undefined, timezone: getTimezone(), trusted: false, imitation: true },
+        {
+          trusted: false,
+          execution_date__gte: undefined,
+          execution_date__lte: undefined,
+          to: undefined,
+          value: '123',
+          token_address: undefined,
+        },
         'pageUrl1',
       )
 
-      expect(getMultisigTransactions).not.toHaveBeenCalled()
-      expect(getModuleTransactions).not.toHaveBeenCalled()
+      expect(transactionUtils.getMultisigTransactions).not.toHaveBeenCalled()
+      expect(transactionUtils.getModuleTransactions).not.toHaveBeenCalled()
     })
 
     it('should get outgoing transfers relevant to `type`', () => {
@@ -417,21 +419,22 @@ describe('tx-history-filter', () => {
         'pageUrl2',
       )
 
-      expect(getMultisigTransactions).toHaveBeenCalledWith(
+      expect(transactionUtils.getMultisigTransactions).toHaveBeenCalledWith(
         '100',
         '0x456',
         {
           execution_date__gte: '1970-01-01T00:00:00.000Z',
+          execution_date__lte: undefined,
+          to: undefined,
+          value: undefined,
+          nonce: undefined,
           executed: 'true',
-          timezone: getTimezone(),
-          trusted: false,
-          imitation: true,
         },
         'pageUrl2',
       )
 
-      expect(getIncomingTransfers).not.toHaveBeenCalled()
-      expect(getModuleTransactions).not.toHaveBeenCalled()
+      expect(transactionUtils.getIncomingTransfers).not.toHaveBeenCalled()
+      expect(transactionUtils.getModuleTransactions).not.toHaveBeenCalled()
     })
 
     it('should get module transfers relevant to `type`', () => {
@@ -444,15 +447,19 @@ describe('tx-history-filter', () => {
         'pageUrl3',
       )
 
-      expect(getModuleTransactions).toHaveBeenCalledWith(
+      expect(transactionUtils.getModuleTransactions).toHaveBeenCalledWith(
         '1',
         '0x789',
-        { to: '0x123', executed: undefined, timezone: getTimezone(), trusted: false, imitation: true },
+        {
+          to: '0x123',
+          module: undefined,
+          transaction_hash: undefined,
+        },
         'pageUrl3',
       )
 
-      expect(getIncomingTransfers).not.toHaveBeenCalled()
-      expect(getMultisigTransactions).not.toHaveBeenCalled()
+      expect(transactionUtils.getIncomingTransfers).not.toHaveBeenCalled()
+      expect(transactionUtils.getMultisigTransactions).not.toHaveBeenCalled()
     })
 
     it('should return undefined if invalid `type`', () => {
@@ -468,9 +475,9 @@ describe('tx-history-filter', () => {
         'pageUrl3',
       )
 
-      expect(getIncomingTransfers).not.toHaveBeenCalled()
-      expect(getIncomingTransfers).not.toHaveBeenCalled()
-      expect(getMultisigTransactions).not.toHaveBeenCalled()
+      expect(transactionUtils.getIncomingTransfers).not.toHaveBeenCalled()
+      expect(transactionUtils.getIncomingTransfers).not.toHaveBeenCalled()
+      expect(transactionUtils.getMultisigTransactions).not.toHaveBeenCalled()
     })
   })
 })

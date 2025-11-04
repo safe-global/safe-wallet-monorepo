@@ -1,11 +1,11 @@
+import type { TransactionData, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { useAddressName } from '@/components/common/NamedAddressInfo'
 import useAddressBook from '@/hooks/useAddressBook'
 import { isCustomTxInfo } from '@/utils/transaction-guards'
 import { Chip } from '@mui/material'
-import type { TransactionData, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 
-const NameChip = ({ txData, txInfo }: { txData?: TransactionData; txInfo?: TransactionDetails['txInfo'] }) => {
+const NameChip = ({ txData, txInfo }: { txData?: TransactionData | null; txInfo?: TransactionDetails['txInfo'] }) => {
   const addressBook = useAddressBook()
   const toAddress = txData?.to.value
   const customTxInfo = txInfo && isCustomTxInfo(txInfo) ? txInfo : undefined

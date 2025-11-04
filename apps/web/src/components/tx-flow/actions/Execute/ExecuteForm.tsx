@@ -235,7 +235,7 @@ export const ExecuteForm = ({
           </ErrorMessage>
         ) : (
           (executionValidationError || gasLimitError) && (
-            <ErrorMessage error={executionValidationError || gasLimitError}>
+            <ErrorMessage error={executionValidationError || gasLimitError} context="estimation">
               This transaction will most likely fail.
               {` To save gas costs, ${isCreation ? 'avoid creating' : 'reject'} this transaction.`}
             </ErrorMessage>

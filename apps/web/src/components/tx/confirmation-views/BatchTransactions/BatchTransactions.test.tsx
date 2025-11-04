@@ -1,14 +1,10 @@
+import { TransactionInfoType, TransferDirection, TransactionTokenType } from '@safe-global/store/gateway/types'
+import type { TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { render } from '@/tests/test-utils'
 import BatchTransactions from '.'
 import * as useDraftBatch from '@/hooks/useDraftBatch'
 import * as useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 import { mockedDraftBatch } from './mockData'
-import {
-  type TransactionPreview,
-  TransactionInfoType,
-  TransferDirection,
-  TransactionTokenType,
-} from '@safe-global/safe-gateway-typescript-sdk'
 import { Operation } from '@safe-global/store/gateway/types'
 jest.spyOn(useDraftBatch, 'useDraftBatch').mockImplementation(() => mockedDraftBatch)
 

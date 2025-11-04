@@ -105,8 +105,8 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
       [MultiTransfersFields.type]: disableSpendingLimit
         ? TokenTransferType.multiSig
         : canCreateSpendingLimitTx && !canCreateStandardTx
-          ? TokenTransferType.spendingLimit
-          : data?.type,
+        ? TokenTransferType.spendingLimit
+        : data?.type,
       recipients:
         data?.recipients.map(({ tokenAddress, ...rest }) => ({
           ...rest,

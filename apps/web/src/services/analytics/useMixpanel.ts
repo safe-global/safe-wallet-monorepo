@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useTheme } from '@mui/material/styles'
 import mixpanel from 'mixpanel-browser'
 import {
@@ -43,6 +43,7 @@ const useMixpanel = () => {
   const { safe } = useSafeInfo()
   const currentChain = useChain(safe?.chainId || '')
   const walletChain = useChain(wallet?.chainId || '')
+  const lastUserPropertiesRef = useRef<string | null>(null)
 
   useEffect(() => {
     if (isMixpanelEnabled) {
@@ -122,7 +123,13 @@ const useMixpanel = () => {
   useEffect(() => {
     if (!userProperties) return
 
-    mixpanelSetUserProperties(userProperties.properties)
+    // Deep comparison to prevent infinite loop from object reference changes
+    const currentPropertiesStr = JSON.stringify(userProperties.properties)
+
+    if (lastUserPropertiesRef.current !== currentPropertiesStr) {
+      lastUserPropertiesRef.current = currentPropertiesStr
+      mixpanelSetUserProperties(userProperties.properties)
+    }
   }, [userProperties])
 }
 

@@ -1,5 +1,5 @@
+import type { MultiSend, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { isEmptyHexData } from '@/utils/hex'
-import { type InternalTransaction, type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import type { AccordionProps } from '@mui/material/Accordion/Accordion'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Stack, Typography } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -15,7 +15,7 @@ import { InlineTransferTxInfo } from '../../Transfer'
 import { useTransferTokenInfo } from './useTransferTokenInfo'
 
 type SingleTxDecodedProps = {
-  tx: InternalTransaction
+  tx: MultiSend
   txData: TransactionData
   actionTitle: string
   variant?: AccordionProps['variant']

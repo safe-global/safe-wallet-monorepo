@@ -26,7 +26,7 @@ export type EthHashInfoProps = {
   copyPrefix?: boolean
   shortAddress?: boolean
   copyAddress?: boolean
-  customAvatar?: string
+  customAvatar?: string | null
   hasExplorer?: boolean
   avatarSize?: number
   children?: ReactNode

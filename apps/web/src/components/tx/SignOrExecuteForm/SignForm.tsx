@@ -124,7 +124,9 @@ export const SignForm = ({
         <NonOwnerError />
       ) : (
         submitError && (
-          <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
+          <ErrorMessage error={submitError} context="execution">
+            Error submitting the transaction. Please try again.
+          </ErrorMessage>
         )
       )}
 

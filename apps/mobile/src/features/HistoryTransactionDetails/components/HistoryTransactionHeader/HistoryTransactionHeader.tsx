@@ -32,7 +32,14 @@ export function HistoryTransactionHeader({
   children,
 }: HistoryTransactionHeaderProps) {
   return (
-    <YStack position="relative" alignItems="center" gap="$3" marginTop="$4">
+    <YStack
+      position="relative"
+      alignItems="center"
+      gap="$3"
+      marginTop="$4"
+      testID="history-transaction-header"
+      collapsable={false}
+    >
       {isIdenticon ? (
         <Identicon address={logo as Address} size={44} />
       ) : (

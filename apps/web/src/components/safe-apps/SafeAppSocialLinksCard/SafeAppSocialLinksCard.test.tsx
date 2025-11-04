@@ -1,4 +1,4 @@
-import { SafeAppFeatures } from '@safe-global/safe-gateway-typescript-sdk'
+import { SafeAppFeatures } from '@safe-global/store/gateway/types'
 import { SafeAppSocialPlatforms, SafeAppAccessPolicyTypes } from '@safe-global/store/gateway/types'
 import { type SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 

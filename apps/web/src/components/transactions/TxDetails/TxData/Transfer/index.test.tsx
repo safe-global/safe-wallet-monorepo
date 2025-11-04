@@ -1,11 +1,11 @@
-import { render } from '@/tests/test-utils'
-import TransferTxInfo from '.'
 import {
   TransactionInfoType,
   TransactionStatus,
   TransactionTokenType,
   TransferDirection,
-} from '@safe-global/safe-gateway-typescript-sdk'
+} from '@safe-global/store/gateway/types'
+import { render } from '@/tests/test-utils'
+import TransferTxInfo from '.'
 import { faker } from '@faker-js/faker'
 import { parseUnits } from 'ethers'
 import { chainBuilder } from '@/tests/builders/chains'

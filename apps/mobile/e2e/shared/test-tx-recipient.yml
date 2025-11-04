@@ -1,0 +1,20 @@
+appId: global.safe.mobileapp.ios
+---
+# ===========================================
+# Transaction Recipient Address (Optional)
+# ===========================================
+# This flow asserts the "To" recipient address field
+# Use this flow when testing transactions that have a recipient address
+# Not all transaction types will have this field
+
+- assertVisible: To
+- assertVisible:
+    id: 'identicon-image'
+- assertVisible:
+    id: 'hash-display-name-or-address'
+    text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
+    index: 0
+- assertVisible:
+    id: 'copy-button'
+- assertVisible:
+    id: 'hash-display-external-link-button'

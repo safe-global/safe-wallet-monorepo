@@ -72,7 +72,9 @@ export function SafeBottomSheet<T>({
         alignItems="center"
         backgroundColor="$backgroundPaper"
       >
-        <H5 fontWeight={700}>{title}</H5>
+        <H5 fontWeight={700} tabIndex={0}>
+          {title}
+        </H5>
 
         {actions && (
           <View position="absolute" right={'$4'} top={'$3'} justifyContent="center" alignItems="center">
@@ -107,6 +109,7 @@ export function SafeBottomSheet<T>({
             onLayout={(e) => {
               setFooterHeight(e.nativeEvent.layout.height)
             }}
+            accessible={true}
           >
             {FooterComponent && <FooterComponent />}
           </View>
@@ -129,6 +132,7 @@ export function SafeBottomSheet<T>({
       footerComponent={isSortable ? undefined : renderFooter}
       topInset={insets.top}
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
+      accessible={false}
     >
       {isSortable ? (
         <DraggableFlatList<T>
@@ -142,6 +146,7 @@ export function SafeBottomSheet<T>({
         />
       ) : (
         <BottomSheetScrollView
+          accessible={false}
           contentContainerStyle={[
             styles.scrollInnerContainer,
             {

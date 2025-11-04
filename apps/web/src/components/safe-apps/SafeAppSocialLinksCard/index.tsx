@@ -9,7 +9,7 @@ import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded'
 import GitHubIcon from '@mui/icons-material/GitHub'
 import TelegramIcon from '@mui/icons-material/Telegram'
 import TwitterIcon from '@mui/icons-material/Twitter'
-import { SafeAppSocialPlatforms } from '@safe-global/safe-gateway-typescript-sdk'
+import { SafeAppSocialPlatforms } from '@safe-global/store/gateway/types'
 import type { SafeApp as SafeAppData, SafeAppSocialProfile } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 import DiscordIcon from '@/public/images/common/discord-icon.svg'

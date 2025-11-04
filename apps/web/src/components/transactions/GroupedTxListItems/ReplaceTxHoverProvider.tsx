@@ -1,5 +1,5 @@
+import type { AnyTransactionItem } from '@/utils/tx-list'
 import { createContext, useMemo, useState, type Dispatch, type ReactElement, type SetStateAction } from 'react'
-import type { Transaction } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { useAppSelector } from '@/store'
 import { selectPendingTxs } from '@/store/pendingTxsSlice'
@@ -17,7 +17,7 @@ export const ReplaceTxHoverProvider = ({
   groupedListItems,
   children,
 }: {
-  groupedListItems: Transaction[]
+  groupedListItems: AnyTransactionItem[]
   children: ReactElement
 }): ReactElement => {
   const [selectedTxId, setSelectedTxId] = useState<string>()

@@ -5,7 +5,7 @@ import { Text, View } from 'tamagui'
 import { shortenText } from '@safe-global/utils/utils/formatters'
 import { CopyButton } from '@/src/components/CopyButton'
 
-const renderArrayValue = (value: object, index?: number): ReactElement => {
+const renderArrayValue = (value: string | string[], index?: number): ReactElement => {
   const displayLimit = 30
 
   if (Array.isArray(value)) {

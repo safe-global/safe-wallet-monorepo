@@ -1,14 +1,16 @@
-import { getTransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import useAsync from '@safe-global/utils/hooks/useAsync'
+import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import useChainId from './useChainId'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
-function useTxDetails(txId?: string) {
+function useTxDetails(txId?: string): [TransactionDetails | undefined, Error | undefined, boolean] {
   const chainId = useChainId()
 
-  return useAsync(() => {
-    if (!txId) return
-    return getTransactionDetails(chainId, txId)
-  }, [chainId, txId])
+  const { currentData, error, isLoading } = useTransactionsGetTransactionByIdV1Query(
+    { chainId: chainId || '', id: txId || '' },
+    { skip: !chainId || !txId, refetchOnMountOrArgChange: true },
+  )
+
+  return [currentData, error ? new Error(String(error)) : undefined, isLoading]
 }
 
 export default useTxDetails

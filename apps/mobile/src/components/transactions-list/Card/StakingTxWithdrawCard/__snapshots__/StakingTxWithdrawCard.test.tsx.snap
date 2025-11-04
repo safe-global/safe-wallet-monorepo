@@ -3,6 +3,7 @@
 exports[`StakingTxWithdrawCard matches snapshot 1`] = `
 <View>
   <View
+    collapsable={false}
     onBlur={[Function]}
     onClick={[Function]}
     onFocus={[Function]}

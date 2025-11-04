@@ -1,25 +1,7 @@
-appId: 'global.safe.mobileapp'
+appId: 'global.safe.mobileapp.ios'
 ---
-- launchApp:
-    appId: 'global.safe.mobileapp'
-    clearState: true
-    clearKeychain: true
 - runFlow:
-    when:
-      visible:
-        text: 'http.*'
-    commands:
-      - tapOn: 'http.*'
-- runFlow:
-    when:
-      visible: 'Continue'
-    commands:
-      - tapOn: 'Continue'
-- runFlow:
-    when:
-      visible: 'Reload'
-    commands:
-      - tapOn: 'Reload'
+    file: ../shared/clean-app-start.yml
 - tapOn:
     id: 'e2eTestOnboarding'
 - assertVisible:
@@ -32,10 +14,6 @@ appId: 'global.safe.mobileapp'
     direction: 'LEFT'
 - tapOn:
     id: 'carousel-item-2'
-- swipe:
-    direction: 'LEFT'
-- assertVisible:
-    id: 'carousel-item-3'
 - tapOn:
     id: 'get-started'
 - assertVisible:
@@ -47,11 +25,14 @@ appId: 'global.safe.mobileapp'
     id: 'enter-manually'
 - tapOn: 'Paste address...'
 - inputText: 'celo:0xCB57c3bC317d1905A435Dc75d7e4413E5B4Ecc97'
-- assertVisible:
-    id: 'continue-button'
+
 - assertVisible:
     id: 'success-icon'
 - assertVisible: 'Available on networks:'
+- tapOn: 'Enter safe name here'
+- inputText: 'My test safe'
+- assertVisible:
+    id: 'continue-button'
 - tapOn:
     point: '50%,35%'
 - tapOn:

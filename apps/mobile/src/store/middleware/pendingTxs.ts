@@ -109,7 +109,7 @@ const startIndexingWatcher = (listenerApi: AppListenerEffectAPI, txId: string, c
 
 function isHydrateAction(action: Action): action is Action<typeof REHYDRATE> & {
   key: string
-  payload: RootState
+  payload: Partial<RootState> | undefined
   err: unknown
 } {
   return action.type === REHYDRATE
@@ -183,7 +183,10 @@ export const pendingTxsListeners = (startListening: AppStartListening) => {
   startListening({
     predicate: (action) => isHydrateAction(action),
     effect: (action, listenerApi) => {
-      runWatchers(listenerApi, action.payload.pendingTxs)
+      const pendingTxs = action.payload?.pendingTxs
+      if (pendingTxs) {
+        runWatchers(listenerApi, pendingTxs)
+      }
     },
   })
 

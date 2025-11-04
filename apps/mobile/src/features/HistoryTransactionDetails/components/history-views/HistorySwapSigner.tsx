@@ -54,7 +54,12 @@ export function HistorySwapSigner({ txId, txInfo }: HistorySwapSignerProps) {
       <YStack gap="$4" marginTop="$8">
         <Container padding="$4" gap="$4" borderRadius="$3">
           {/* New signer row */}
-          <XStack alignItems="center" justifyContent="space-between">
+          <XStack
+            alignItems="center"
+            justifyContent="space-between"
+            collapsable={false}
+            testID="history-swap-signer-new-signer"
+          >
             <Text color="$textSecondaryLight">New signer</Text>
             <XStack alignItems="center" gap="$2">
               <HashDisplay value={newOwnerAddress} />
@@ -62,7 +67,12 @@ export function HistorySwapSigner({ txId, txInfo }: HistorySwapSignerProps) {
           </XStack>
 
           {/* Old signer row */}
-          <XStack alignItems="center" justifyContent="space-between">
+          <XStack
+            alignItems="center"
+            justifyContent="space-between"
+            collapsable={false}
+            testID="history-swap-signer-old-signer"
+          >
             <Text color="$textSecondaryLight">Old signer</Text>
             <XStack alignItems="center" gap="$2">
               <HashDisplay value={oldOwnerAddress} />

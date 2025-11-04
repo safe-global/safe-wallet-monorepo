@@ -1,0 +1,12 @@
+appId: global.safe.mobileapp.ios
+---
+# ===========================================
+# Transaction Details Button (Optional)
+# ===========================================
+# This flow asserts that the transaction details button is visible
+# Most transaction views will have this button, but some may not
+
+- assertVisible:
+    id: 'transaction-details-button'
+    containsDescendants:
+      - text: 'Transaction details'

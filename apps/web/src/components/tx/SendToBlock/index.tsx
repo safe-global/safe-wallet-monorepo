@@ -10,9 +10,9 @@ const SendToBlock = ({
   name,
 }: {
   address: string
-  name?: string
+  name?: string | null
   title?: string
-  customAvatar?: string
+  customAvatar?: string | null
   avatarSize?: number
 }) => {
   return (

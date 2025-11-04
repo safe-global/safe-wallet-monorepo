@@ -1,13 +1,13 @@
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { Avatar, Box, Button, Stack, Typography } from '@mui/material'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { AppInfo } from '@/services/safe-wallet-provider'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import SingleAccountItem from '@/features/myAccounts/components/AccountItems/SingleAccountItem'
 
 type WcChainSwitchModalProps = {
   appInfo: AppInfo
-  chain: ChainInfo
+  chain: Chain
   safes: SafeItem[]
   onSelectSafe: (safe: SafeItem) => Promise<void>
   onCancel: () => void

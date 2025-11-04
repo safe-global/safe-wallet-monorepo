@@ -1,5 +1,5 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { FEATURES } from '@safe-global/safe-gateway-typescript-sdk'
+import { FEATURES } from '@safe-global/store/gateway/types'
 
 const contractAddresses = {
   createCallAddress: null,

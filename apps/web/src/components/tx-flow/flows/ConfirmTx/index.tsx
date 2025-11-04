@@ -1,5 +1,5 @@
+import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { isSwapOrderTxInfo } from '@/utils/transaction-guards'
-import type { TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
 import ConfirmProposedTx from './ConfirmProposedTx'
 import { useTransactionType } from '@/hooks/useTransactionType'
 import SwapIcon from '@/public/images/common/swap.svg'
@@ -9,7 +9,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowType } from '@/services/analytics'
 
-const ConfirmTxFlow = ({ txSummary }: { txSummary: TransactionSummary }) => {
+const ConfirmTxFlow = ({ txSummary }: { txSummary: Transaction }) => {
   const { text } = useTransactionType(txSummary)
   const isSwapOrder = isSwapOrderTxInfo(txSummary.txInfo)
   const signer = useSigner()

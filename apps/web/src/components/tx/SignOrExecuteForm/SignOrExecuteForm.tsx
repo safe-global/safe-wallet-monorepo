@@ -1,3 +1,4 @@
+import type { TransactionDetails, TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import ProposerForm from '@/components/tx-flow/actions/Propose/ProposerForm'
 import CounterfactualForm from '@/features/counterfactual/CounterfactualForm'
 import { useIsWalletProposer } from '@/hooks/useProposers'
@@ -29,9 +30,8 @@ import {
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { BlockaidBalanceChanges } from '../security/blockaid/BlockaidBalanceChange'
 import { Blockaid } from '../security/blockaid'
-import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
+import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
-import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ConfirmationView from '../confirmation-views'
 import { SignerForm } from '@/components/tx-flow/features/SignerSelect/SignerForm'
@@ -76,7 +76,7 @@ export const SignOrExecuteForm = ({
   const isCorrectNonce = useValidateNonce(safeTx)
   const isBatchable = props.isBatchable !== false && safeTx && !isDelegateCall(safeTx)
 
-  const [trigger] = useLazyGetTransactionDetailsQuery()
+  const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
   const { safe } = useSafeInfo()
@@ -105,7 +105,7 @@ export const SignOrExecuteForm = ({
     async (txId: string, isExecuted = false, isRoleExecution = false, isProposerCreation = false) => {
       onSubmit?.(txId, isExecuted)
 
-      const { data: details } = await trigger({ chainId, txId })
+      const { data: details } = await trigger({ chainId, id: txId })
       // Track tx event
       trackTxEvents(
         details,
@@ -228,7 +228,7 @@ export const SignOrExecuteForm = ({
         />
 
         {safeTxError && (
-          <ErrorMessage error={safeTxError}>
+          <ErrorMessage error={safeTxError} context="estimation">
             This transaction will most likely fail. To save gas costs, avoid confirming the transaction.
           </ErrorMessage>
         )}

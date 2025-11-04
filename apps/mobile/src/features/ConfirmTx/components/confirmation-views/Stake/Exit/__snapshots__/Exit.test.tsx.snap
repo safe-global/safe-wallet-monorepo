@@ -296,6 +296,7 @@ exports[`StakingExit matches snapshot 1`] = `
               "top": 0,
             }
           }
+          testID="transaction-details-button"
         >
           <Text
             lineBreakMode="clip"

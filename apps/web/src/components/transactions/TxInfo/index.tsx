@@ -1,13 +1,13 @@
-import { type ReactElement } from 'react'
+import type { TransactionInfo } from '@safe-global/store/gateway/types'
+import { SettingsInfoType } from '@safe-global/store/gateway/types'
 import type {
-  Creation,
-  Custom,
-  MultiSend,
-  SettingsChange,
-  TransactionInfo,
-  Transfer,
-} from '@safe-global/safe-gateway-typescript-sdk'
-import { SettingsInfoType } from '@safe-global/safe-gateway-typescript-sdk'
+  CreationTransactionInfo,
+  CustomTransactionInfo,
+  MultiSendTransactionInfo,
+  SettingsChangeTransaction,
+  TransferTransactionInfo,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { type ReactElement } from 'react'
 import TokenAmount from '@/components/common/TokenAmount'
 import {
   isOrderTxInfo,
@@ -43,7 +43,7 @@ export const TransferTx = ({
   withLogo = true,
   preciseAmount = false,
 }: {
-  info: Transfer
+  info: TransferTransactionInfo
   omitSign?: boolean
   withLogo?: boolean
   preciseAmount?: boolean
@@ -57,7 +57,7 @@ export const TransferTx = ({
     return (
       <TokenAmount
         direction={direction}
-        value={transfer.value}
+        value={transfer.value ?? '0'}
         decimals={nativeCurrency?.decimals}
         tokenSymbol={nativeCurrency?.symbol}
         logoUri={withLogo ? nativeCurrency?.logoUri : undefined}
@@ -97,15 +97,15 @@ export const TransferTx = ({
   return <></>
 }
 
-const CustomTx = ({ info }: { info: Custom }): ReactElement => {
+const CustomTx = ({ info }: { info: CustomTransactionInfo }): ReactElement => {
   return <Box className={css.txInfo}>{info.methodName}</Box>
 }
 
-const CreationTx = ({ info }: { info: Creation }): ReactElement => {
+const CreationTx = ({ info }: { info: CreationTransactionInfo }): ReactElement => {
   return <Box className={css.txInfo}>Created by {shortenAddress(info.creator.value)}</Box>
 }
 
-const MultiSendTx = ({ info }: { info: MultiSend }): ReactElement => {
+const MultiSendTx = ({ info }: { info: MultiSendTransactionInfo }): ReactElement => {
   return (
     <Box className={css.txInfo}>
       {info.actionCount} {`action${maybePlural(info.actionCount)}`}
@@ -113,7 +113,7 @@ const MultiSendTx = ({ info }: { info: MultiSend }): ReactElement => {
   )
 }
 
-const SettingsChangeTx = ({ info }: { info: SettingsChange }): ReactElement => {
+const SettingsChangeTx = ({ info }: { info: SettingsChangeTransaction }): ReactElement => {
   if (
     info.settingsInfo?.type === SettingsInfoType.ENABLE_MODULE ||
     info.settingsInfo?.type === SettingsInfoType.DISABLE_MODULE

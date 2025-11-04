@@ -1,11 +1,11 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { solidityPacked, concat } from 'ethers'
 import { OperationType } from '@safe-global/types-kit'
-import type { SafeTransaction } from '@safe-global/types-kit'
 
+import type { SafeTransaction } from '@safe-global/types-kit'
 import { ERC20__factory, ERC721__factory, Multi_send__factory } from '@safe-global/utils/types/contracts'
 import EthSafeTransaction from '@safe-global/protocol-kit/dist/src/utils/transactions/SafeTransaction'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import { TransactionStatus } from '@safe-global/safe-apps-sdk'
 
 export const getMockErc20TransferCalldata = (to: string) => {

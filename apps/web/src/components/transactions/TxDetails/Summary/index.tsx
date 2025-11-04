@@ -1,7 +1,7 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { memo, type ReactElement } from 'react'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { isCustomTxInfo, isMultiSendTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import type { SafeTransactionData } from '@safe-global/types-kit'
 import { dateString } from '@safe-global/utils/utils/formatters'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'

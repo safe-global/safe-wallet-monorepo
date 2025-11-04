@@ -1,6 +1,6 @@
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { JsonRpcProvider, type FeeData } from 'ethers'
-import { GAS_PRICE_TYPE } from '@safe-global/safe-gateway-typescript-sdk'
+import { GAS_PRICE_TYPE } from '@safe-global/store/gateway/types'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'

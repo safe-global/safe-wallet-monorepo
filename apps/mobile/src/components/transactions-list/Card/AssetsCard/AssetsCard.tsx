@@ -12,6 +12,7 @@ interface AssetsCardProps {
   accessibilityLabel?: string
   transparent?: boolean
   onPress?: () => void
+  testID?: string
 }
 
 export function AssetsCard({
@@ -22,9 +23,11 @@ export function AssetsCard({
   rightNode,
   transparent = true,
   onPress,
+  testID,
 }: AssetsCardProps) {
   return (
     <SafeListItem
+      testID={testID}
       onPress={onPress}
       label={
         <View>

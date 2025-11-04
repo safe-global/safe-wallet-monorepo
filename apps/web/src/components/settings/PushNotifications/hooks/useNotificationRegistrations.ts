@@ -1,4 +1,8 @@
-import { registerDevice, unregisterDevice, unregisterSafe } from '@safe-global/safe-gateway-typescript-sdk'
+import {
+  useNotificationsRegisterDeviceV1Mutation,
+  useNotificationsUnregisterDeviceV1Mutation,
+  useNotificationsUnregisterSafeV1Mutation,
+} from '@safe-global/store/gateway/AUTO_GENERATED/notifications'
 import isEmpty from 'lodash/isEmpty'
 
 import { useAppDispatch } from '@/store'
@@ -14,15 +18,20 @@ import type { NotifiableSafes } from '../logic'
 import { NotificationsTokenVersion } from '@/services/push-notifications/preferences'
 import { useNotificationsTokenVersion } from './useNotificationsTokenVersion'
 
-const registrationFlow = async (registrationFn: Promise<unknown>, callback: () => void): Promise<boolean> => {
+const registrationFlow = async (
+  registrationFn: Promise<{ data?: unknown; error?: unknown }>,
+  callback: () => void,
+): Promise<boolean> => {
   let success = false
 
   try {
     const response = await registrationFn
 
-    // Gateway will return 200 with an empty payload if the device was (un-)registered successfully
+    // RTK mutations return { data, error } or throw on error
+    // Gateway will return empty data if the device was (un-)registered successfully
     // @see https://github.com/safe-global/safe-client-gateway-nest/blob/27b6b3846b4ecbf938cdf5d0595ca464c10e556b/src/routes/notifications/notifications.service.ts#L29
-    success = isEmpty(response)
+    // Success only if no error and data is empty/undefined
+    success = !response.error && (isEmpty(response.data) || response.data === undefined)
   } catch (e) {
     logError(ErrorCodes._633, e)
   }
@@ -45,6 +54,11 @@ export const useNotificationRegistrations = (): {
   const { setTokenVersion } = useNotificationsTokenVersion()
   const { uuid, createPreferences, deletePreferences, deleteAllChainPreferences } = useNotificationPreferences()
 
+  // RTK mutation hooks
+  const [triggerRegisterDevice] = useNotificationsRegisterDeviceV1Mutation()
+  const [triggerUnregisterDevice] = useNotificationsUnregisterDeviceV1Mutation()
+  const [triggerUnregisterSafe] = useNotificationsUnregisterSafeV1Mutation()
+
   const registerNotifications = async (safesToRegister: NotifiableSafes) => {
     if (!uuid || !wallet) {
       return
@@ -57,7 +71,7 @@ export const useNotificationRegistrations = (): {
         wallet,
       })
 
-      return registerDevice(payload)
+      return triggerRegisterDevice({ registerDeviceDto: payload })
     }
 
     return registrationFlow(register(), () => {
@@ -90,7 +104,7 @@ export const useNotificationRegistrations = (): {
 
   const unregisterSafeNotifications = async (chainId: string, safeAddress: string) => {
     if (uuid) {
-      return registrationFlow(unregisterSafe(chainId, safeAddress, uuid), () => {
+      return registrationFlow(triggerUnregisterSafe({ chainId, uuid, safeAddress }), () => {
         deletePreferences({ [chainId]: [safeAddress] })
         trackEvent(PUSH_NOTIFICATION_EVENTS.UNREGISTER_SAFE)
       })
@@ -99,7 +113,7 @@ export const useNotificationRegistrations = (): {
 
   const unregisterDeviceNotifications = async (chainId: string) => {
     if (uuid) {
-      return registrationFlow(unregisterDevice(chainId, uuid), () => {
+      return registrationFlow(triggerUnregisterDevice({ chainId, uuid }), () => {
         deleteAllChainPreferences(chainId)
         trackEvent(PUSH_NOTIFICATION_EVENTS.UNREGISTER_DEVICE)
       })
