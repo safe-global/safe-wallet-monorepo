@@ -1,8 +1,9 @@
 import React from 'react'
-import { Box, Card, Stack, Typography } from '@mui/material'
+import { Box, Card, Stack, Typography, IconButton } from '@mui/material'
 import Image from 'next/image'
 import css from './styles.module.css'
 import Link from 'next/link'
+import CloseIcon from '@mui/icons-material/Close'
 import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
 import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
 import BlockedAddress from '@/components/common/BlockedAddress'
@@ -27,7 +28,7 @@ const NoFeeNovemberTransactionCard = () => {
           flex: 1,
         }}
       >
-        <BlockedAddress address={blockedAddress} featureTitle="No-Fee November" />
+        <BlockedAddress address={blockedAddress} featureTitle="No Fee November" />
       </Stack>
     )
   }
@@ -58,7 +59,7 @@ const NoFeeNovemberTransactionCard = () => {
             <Box className={css.iconContainer}>
               <Image
                 src="/images/common/no-fee-november/Cards.svg"
-                alt="No-Fee November Cards"
+                alt="No Fee November Cards"
                 width={48}
                 height={48}
                 className={css.cardsImage}
@@ -66,10 +67,10 @@ const NoFeeNovemberTransactionCard = () => {
             </Box>
             <Box flex={1}>
               <Typography variant="subtitle2" fontWeight="bold" color="static.main" className={css.title}>
-                Enjoy No-Fee November
+                Enjoy No Fee November
               </Typography>
               <Typography variant="body2" color="static.light" className={css.description}>
-                SAFE holders enjoy gasless transactions on Ethereum Mainnet this November.{' '}
+                SAFE holders enjoy gasless transactions on Mainnet this November.{' '}
                 <Link
                   href="https://help.safe.global/en/articles/456540-no-fee-november"
                   target="_blank"
@@ -92,6 +93,11 @@ const NoFeeNovemberTransactionCard = () => {
       <div className={dark ? css.dark : undefined}>
         <Card className={css.card}>
           <Box className={css.cardContent}>
+            {/* Close button */}
+            <IconButton className={css.closeButton} aria-label="close">
+              <CloseIcon fontSize="small" />
+            </IconButton>
+
             {/* Main content */}
             <Box className={css.mainContent}>
               {/* Title and eligibility tag inline */}
@@ -131,7 +137,7 @@ const NoFeeNovemberTransactionCard = () => {
             <Box className={css.coinsContainer}>
               <Image
                 src="/images/common/no-fee-november/Cards.svg"
-                alt="No-Fee November Cards"
+                alt="No Fee November Cards"
                 width={58}
                 height={58}
                 className={css.coinsImage}

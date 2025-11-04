@@ -48,10 +48,12 @@ const Dashboard = (): ReactElement => {
   const isNoFeeNovemberEnabled = useIsNoFeeNovemberFeatureEnabled()
 
   const banners = [
-    isNoFeeNovemberEnabled && {
-      id: noFeeNovemberBannerID,
-      element: NoFeeNovemberBanner,
-    },
+    isEligible &&
+      isNoFeeNovemberEnabled && {
+        id: noFeeNovemberBannerID,
+        element: NoFeeNovemberBanner,
+        eligibilityState: isEligible,
+      },
     isEarnPromoEnabled && { id: earnBannerID, element: EarnBanner },
     isSpacesFeatureEnabled && {
       id: spacesBannerID,
