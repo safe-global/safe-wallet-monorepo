@@ -37,7 +37,7 @@ class WalletConnectWallet {
       logger: IS_PRODUCTION ? undefined : 'debug',
       // This isolation ensures wallet connections work independently from dApp connections.
       customStoragePrefix: LS_NAMESPACE + 'wc_dapp_',
-    }) as unknown as WalletKitTypes.Options['core']
+    })
 
     const web3wallet = await WalletKit.init({
       core,
