@@ -2,10 +2,18 @@ import React from 'react'
 import { PendingTxListContainer } from '@/src/features/PendingTx/components/PendingTxList'
 import usePendingTxs from '@/src/hooks/usePendingTxs'
 import Logger from '@/src/utils/logger'
+import BadgeManager from '@/src/services/notifications/BadgeManager'
 
 export function PendingTxContainer() {
   const { data, isLoading, isFetching, fetchMoreTx, hasMore, amount, refetch } = usePendingTxs()
   const [isRefreshing, setIsRefreshing] = React.useState(false)
+
+  // Clear badge when user views pending transactions (whether from notification tap or normal navigation)
+  React.useEffect(() => {
+    BadgeManager.clearAllBadges().catch((error) => {
+      Logger.error('PendingTxContainer: Failed to clear badges', error)
+    })
+  }, [])
 
   // Handle pull-to-refresh - reset the data and fetch from the beginning
   const onRefresh = React.useCallback(async () => {

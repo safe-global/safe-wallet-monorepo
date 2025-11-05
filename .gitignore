@@ -65,6 +65,9 @@ yarn-error.log*
 yalc.lock
 
 certificates
+
+# storybook
+**/storybook-static/
 *storybook.log
 
 # os

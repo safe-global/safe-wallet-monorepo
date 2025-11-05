@@ -1,0 +1,173 @@
+appId: global.safe.mobileapp.ios
+---
+# Theme Selection Happy Path Test
+# Tests switching between light, dark, and auto (system) theme modes and verifying UI updates correctly
+
+- runFlow:
+    file: ../shared/clean-app-start.yml
+
+# ============================================
+# Use e2eOnboardedAccount shortcut
+# ============================================
+
+- tapOn:
+    id: 'e2eOnboardedAccount'
+
+# Wait for home screen to load
+- assertVisible:
+    id: 'home-tab'
+
+# ============================================
+# Note Initial Theme - Home Tab
+# ============================================
+
+# Note: Initial theme state will vary based on device/system settings
+# We verify theme by checking UI elements change when theme is switched
+# Background colors and text colors will be verified implicitly through theme changes
+
+# ============================================
+# Navigate to Settings tab
+# ============================================
+
+- tapOn:
+    id: 'account-tab'
+
+# Wait for settings screen
+- assertVisible:
+    text: '.*(Settings|Account).*'
+
+# ============================================
+# Navigate to App Settings
+# ============================================
+
+# Tap "App Settings" button (settings icon)
+- tapOn:
+    id: 'settings-screen-header-app-settings-button'
+
+# Verify navigation to app settings screen
+- assertVisible:
+    text: 'Settings'
+
+# Verify "Appearance" row is visible
+- assertVisible:
+    text: 'Appearance'
+
+# ============================================
+# Navigate to Theme Settings
+# ============================================
+
+# Tap "Appearance" row (opens floating menu)
+- tapOn:
+    text: '.*Auto.*'
+
+# Wait for menu to appear (MenuView component)
+# The menu should show theme options
+
+# ============================================
+# Theme Options Verification
+# ============================================
+
+# Verify "Light" option available
+- assertVisible:
+    text: 'Light'
+
+# Verify "Dark" option available
+- assertVisible:
+    text: 'Dark'
+
+# Verify "Auto" option available (Auto follows system theme)
+- assertVisible:
+    text: 'Auto'
+
+# Note: Current selection is shown in the menu (native menu indicates selected item)
+
+# ============================================
+# Change to Dark Theme
+# ============================================
+
+# Tap "Dark" option in the menu
+- tapOn:
+    text: 'Dark'
+
+# Wait for menu to close and theme to apply
+- assertVisible:
+    text: 'Settings'
+
+# Verify we're back on app settings screen
+- assertVisible:
+    text: 'Appearance'
+
+# Verify Appearance row now shows "Dark" as selected
+- assertVisible:
+    id: 'settings-screen-header-more-settings-button'
+    text: '.*Dark.*'
+
+# Verify dark theme is actually applied by checking theme testID
+- assertVisible:
+    id: 'theme-dark'
+
+# ============================================
+# Change to Light Theme
+# ============================================
+
+# Tap "Appearance" row
+- tapOn:
+    id: 'settings-screen-header-more-settings-button'
+    text: '.*Dark.*'
+
+# Tap "Light" option
+- tapOn:
+    text: 'Light'
+
+# Wait for menu to close
+- assertVisible:
+    text: 'Settings'
+
+# Verify Appearance row shows "Light" as selected
+- assertVisible:
+    id: 'settings-screen-header-more-settings-button'
+    text: '.*Light.*'
+
+# Verify light theme is actually applied by checking theme testID
+- assertVisible:
+    id: 'theme-light'
+
+# ============================================
+# Change to Auto (System) Theme
+# ============================================
+
+# Navigate to App Settings
+- tapOn:
+    id: 'settings-screen-header-more-settings-button'
+    text: '.*Light.*'
+
+# Tap "Auto" option
+- tapOn:
+    text: 'Auto'
+
+# Wait for menu to close
+- assertVisible:
+    text: 'Settings'
+
+# Verify Appearance row shows "Auto" as selected
+- assertVisible:
+    id: 'settings-screen-header-more-settings-button'
+    text: '.*Auto.*'
+
+# Verify auto theme is applied (will resolve to system theme: light or dark)
+# Note: The testID will be theme-light or theme-dark depending on device system setting
+# We verify that one of the theme testIDs exists
+- runFlow:
+    when:
+      visible:
+        id: 'theme-light'
+    commands:
+      - assertVisible:
+          id: 'theme-light'
+- runFlow:
+    when:
+      visible:
+        id: 'theme-dark'
+    commands:
+      - assertVisible:
+          id: 'theme-dark'

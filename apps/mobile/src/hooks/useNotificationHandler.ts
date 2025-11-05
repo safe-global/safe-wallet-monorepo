@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { EventType } from '@notifee/react-native'
 import NotificationsService from '@/src/services/notifications/NotificationService'
+import BadgeManager from '@/src/services/notifications/BadgeManager'
 import Logger from '@/src/utils/logger'
 
 /**
@@ -14,7 +15,7 @@ export const useNotificationHandler = () => {
         if (type === EventType.PRESS) {
           await NotificationsService.handleNotificationPress({ detail })
         } else if (type === EventType.DELIVERED) {
-          await NotificationsService.incrementBadgeCount(1)
+          await BadgeManager.incrementBadgeCount(1)
         } else if (type === EventType.DISMISSED) {
           Logger.info('User dismissed notification:', detail.notification?.id)
         }
