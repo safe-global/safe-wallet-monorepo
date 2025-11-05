@@ -1,4 +1,4 @@
-import { type ReactElement, useMemo, useState } from 'react'
+import { type ReactElement, useMemo, useState, useEffect } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 
@@ -16,21 +16,44 @@ import { DelegateCallCardItem } from './DelegateCallCardItem'
 interface AnalysisGroupCardProps {
   data: { [address: string]: GroupedAnalysisResults }
   highlightedSeverity?: Severity
+  delay?: number
 }
 
-export const AnalysisGroupCard = ({ data, highlightedSeverity }: AnalysisGroupCardProps): ReactElement | null => {
+export const AnalysisGroupCard = ({
+  data,
+  highlightedSeverity,
+  delay = 0,
+}: AnalysisGroupCardProps): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
+  const [isVisible, setIsVisible] = useState(false)
 
   const visibleResults = useMemo(() => mapVisibleAnalysisResults(data), [data])
   const primaryResult = useMemo(() => getPrimaryAnalysisResult(data), [data])
   const primarySeverity = primaryResult?.severity
   const isHighlighted = !highlightedSeverity || primarySeverity === highlightedSeverity
 
+  useEffect(() => {
+    if (!primaryResult) return
+
+    setTimeout(() => {
+      setIsVisible(true)
+    }, delay)
+  }, [delay, primaryResult])
+
   if (!primaryResult) {
     return null
   }
+
   return (
-    <Box>
+    <Box
+      sx={{
+        overflow: 'hidden',
+        opacity: isVisible ? 1 : 0,
+        maxHeight: isVisible ? 1000 : 0, // Replace 'fit-content' with a large px value for animatable maxHeight
+        transition: `opacity 0.6s ease-in-out, max-height 0.6s ease-in-out`,
+        transitionDelay: `${delay}ms`,
+      }}
+    >
       {/* Card header - always visible */}
       <Stack
         direction="row"
