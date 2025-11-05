@@ -19,6 +19,7 @@ export interface PromoBannerProps {
   endIcon?: ReactNode
   trackOpenProps: AnalyticsEvent
   trackHideProps: AnalyticsEvent
+  variant?: 'default' | 'dark'
 }
 
 export const PromoBanner = ({
@@ -32,15 +33,21 @@ export const PromoBanner = ({
   endIcon,
   trackOpenProps,
   trackHideProps,
+  variant = 'default',
 }: PromoBannerProps) => {
   return (
-    <Card className={css.banner}>
+    <Card className={`${css.banner} ${variant === 'dark' ? css.dark : ''}`}>
       <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2}>
         {imageSrc ? (
           <Image className={css.bannerImage} src={imageSrc} alt={imageAlt || ''} width={95} height={95} />
         ) : null}
         <Box>
-          <Typography variant="h4" fontWeight="bold" color="static.main" className={css.bannerText}>
+          <Typography
+            variant="h4"
+            fontWeight="bold"
+            color={variant === 'dark' ? 'common.white' : 'static.main'}
+            className={css.bannerText}
+          >
             {title}
           </Typography>
 
@@ -56,7 +63,7 @@ export const PromoBanner = ({
                 endIcon={endIcon ?? <ChevronRightIcon fontSize="small" />}
                 variant="text"
                 size="compact"
-                sx={{ mt: 1, p: 0.5 }}
+                sx={{ mt: 1, p: 0.5, color: variant === 'dark' ? 'common.white' : 'static.main' }}
                 color="static"
               >
                 {ctaLabel}

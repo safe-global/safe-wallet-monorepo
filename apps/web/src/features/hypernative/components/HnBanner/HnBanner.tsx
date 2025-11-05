@@ -21,9 +21,11 @@ const HnBanner = ({ onDismiss }: { onDismiss: () => void }) => {
       }}
       title="Strengthen your Safe"
       description="Automatically monitor and block risky transactions using advanced, user-defined security policies by Hypernative."
-      ctaLabel="Learn more"
+      ctaLabel="Learn more →"
       href={{ pathname: AppRoutes.settings.security, query: { safe: router.query.safe } }}
       onDismiss={onDismiss}
+      endIcon={<></>}
+      variant="dark"
     />
   )
 }

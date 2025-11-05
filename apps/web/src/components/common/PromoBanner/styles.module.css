@@ -7,6 +7,11 @@
   height: 100%;
 }
 
+.dark {
+  /* Dark background gradient */
+  background: linear-gradient(90deg, #1c5538 0%, #1c1c1c 54.327%, #1c1c1c 100%);
+}
+
 .closeButton {
   color: var(--color-static-main);
   position: absolute;
