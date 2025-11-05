@@ -21,7 +21,7 @@
   padding: 0;
   margin: 0;
   font-size: inherit;
-  color: #00bfe5;
+  color: var(--color-info-dark);
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -31,7 +31,7 @@
 .plainIcon {
   width: 16px;
   height: 16px;
-  color: #00bfe5;
+  color: var(--color-info-dark);
 }
 
 .plainButtonDisabled {
