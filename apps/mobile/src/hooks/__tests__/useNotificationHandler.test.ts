@@ -5,6 +5,7 @@ import { renderHook } from '@testing-library/react-native'
 import { EventType, EventDetail } from '@notifee/react-native'
 import { useNotificationHandler } from '../useNotificationHandler'
 import NotificationsService from '@/src/services/notifications/NotificationService'
+import BadgeManager from '@/src/services/notifications/BadgeManager'
 import Logger from '@/src/utils/logger'
 
 // Define types for test events
@@ -17,6 +18,9 @@ interface TestNotificationEvent {
 jest.mock('@/src/services/notifications/NotificationService', () => ({
   onForegroundEvent: jest.fn(),
   handleNotificationPress: jest.fn(),
+}))
+
+jest.mock('@/src/services/notifications/BadgeManager', () => ({
   incrementBadgeCount: jest.fn(),
 }))
 
@@ -35,6 +39,7 @@ jest.mock('@notifee/react-native', () => ({
 }))
 
 const mockNotificationsService = jest.mocked(NotificationsService)
+const mockBadgeManager = jest.mocked(BadgeManager)
 const mockLogger = jest.mocked(Logger)
 
 describe('useNotificationHandler', () => {
@@ -51,7 +56,7 @@ describe('useNotificationHandler', () => {
     })
 
     mockNotificationsService.handleNotificationPress.mockResolvedValue()
-    mockNotificationsService.incrementBadgeCount.mockResolvedValue()
+    mockBadgeManager.incrementBadgeCount.mockResolvedValue()
   })
 
   describe('hook initialization', () => {
@@ -107,8 +112,8 @@ describe('useNotificationHandler', () => {
 
       await mockEventHandler?.(mockEvent)
 
-      expect(mockNotificationsService.incrementBadgeCount).toHaveBeenCalledWith(1)
-      expect(mockNotificationsService.incrementBadgeCount).toHaveBeenCalledTimes(1)
+      expect(mockBadgeManager.incrementBadgeCount).toHaveBeenCalledWith(1)
+      expect(mockBadgeManager.incrementBadgeCount).toHaveBeenCalledTimes(1)
     })
 
     it('should handle DISMISSED event correctly', async () => {
@@ -161,7 +166,7 @@ describe('useNotificationHandler', () => {
 
       // Should not call any notification service methods for unknown events
       expect(mockNotificationsService.handleNotificationPress).not.toHaveBeenCalled()
-      expect(mockNotificationsService.incrementBadgeCount).not.toHaveBeenCalled()
+      expect(mockBadgeManager.incrementBadgeCount).not.toHaveBeenCalled()
       expect(mockLogger.info).not.toHaveBeenCalled()
     })
   })
@@ -195,7 +200,7 @@ describe('useNotificationHandler', () => {
       renderHook(() => useNotificationHandler())
 
       const mockError = new Error('Badge increment failed')
-      mockNotificationsService.incrementBadgeCount.mockRejectedValue(mockError)
+      mockBadgeManager.incrementBadgeCount.mockRejectedValue(mockError)
 
       const mockEvent: TestNotificationEvent = {
         type: EventType.DELIVERED,
@@ -320,7 +325,7 @@ describe('useNotificationHandler', () => {
         await mockEventHandler?.(event)
       }
 
-      expect(mockNotificationsService.incrementBadgeCount).toHaveBeenCalledTimes(1)
+      expect(mockBadgeManager.incrementBadgeCount).toHaveBeenCalledTimes(1)
       expect(mockNotificationsService.handleNotificationPress).toHaveBeenCalledTimes(1)
       expect(mockLogger.info).toHaveBeenCalledTimes(1)
     })
