@@ -1,24 +1,14 @@
 import { PromoBanner } from '@/components/common/PromoBanner'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 
 export const hnBannerID = 'hnBanner'
 
 const HnBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   const router = useRouter()
-  const [isVisible, setIsVisible] = useState(true)
   const imageSrc: string = '/images/common/hypernative/guardian-badge.svg'
   const customBackground = 'linear-gradient(90deg, #1c5538 0%, #1c1c1c 54.327%, #1c1c1c 100%)'
-
-  const handleDismiss = () => {
-    setIsVisible(false)
-    onDismiss()
-    // TODO useLocalStorage later
-  }
-
-  if (!isVisible) return null
 
   return (
     <PromoBanner
@@ -40,7 +30,7 @@ const HnBanner = ({ onDismiss }: { onDismiss: () => void }) => {
       imageAlt="Guardian badge"
       // TODO: add a valid link to Hypernative or to the form page instead of this placeholder:
       href={{ pathname: AppRoutes.settings.security, query: { safe: router.query.safe } }}
-      onDismiss={handleDismiss}
+      onDismiss={onDismiss}
       endIcon={<ChevronRightIcon fontSize="small" />}
       customBackground={customBackground}
     />
