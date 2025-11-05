@@ -1,23 +1,32 @@
 import { type ReactElement, useMemo, useState } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import { ContractStatus, type GroupedAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
+
+import {
+  ContractStatus,
+  type GroupedAnalysisResults,
+  type Severity,
+} from '@safe-global/utils/features/safe-shield/types'
 import { mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
+import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shield/utils/getPrimaryAnalysisResult'
 import { SeverityIcon } from '../SeverityIcon'
 import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
 import { DelegateCallCardItem } from './DelegateCallCardItem'
 
-export const AnalysisGroupCard = ({
-  data,
-}: {
+interface AnalysisGroupCardProps {
   data: { [address: string]: GroupedAnalysisResults }
-}): ReactElement | null => {
+  highlightedSeverity?: Severity
+}
+
+export const AnalysisGroupCard = ({ data, highlightedSeverity }: AnalysisGroupCardProps): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
 
   const visibleResults = useMemo(() => mapVisibleAnalysisResults(data), [data])
-  const primaryResult = useMemo(() => visibleResults[0], [visibleResults])
+  const primaryResult = useMemo(() => getPrimaryAnalysisResult(data), [data])
+  const primarySeverity = primaryResult?.severity
+  const isHighlighted = !highlightedSeverity || primarySeverity === highlightedSeverity
 
-  if (!visibleResults.length) {
+  if (!primaryResult) {
     return null
   }
   return (
@@ -31,7 +40,7 @@ export const AnalysisGroupCard = ({
         onClick={() => setIsOpen(!isOpen)}
       >
         <Stack direction="row" alignItems="center" gap={1}>
-          <SeverityIcon severity={primaryResult.severity} />
+          <SeverityIcon severity={primaryResult.severity} muted={!isHighlighted} />
           <Typography variant="body2" color="primary.light">
             {primaryResult.title}
           </Typography>
@@ -57,12 +66,19 @@ export const AnalysisGroupCard = ({
           <Stack gap={2}>
             {visibleResults.map((result, index) => {
               const isPrimary = index === 0
+              const shouldHighlight = isHighlighted && isPrimary && result.severity === primarySeverity
 
               if (result.type === ContractStatus.UNEXPECTED_DELEGATECALL) {
                 return <DelegateCallCardItem key={index} result={result} isPrimary={isPrimary} />
               }
 
-              return <AnalysisGroupCardItem key={index} result={result} isPrimary={isPrimary} />
+              return (
+                <AnalysisGroupCardItem
+                  severity={shouldHighlight ? result.severity : undefined}
+                  key={index}
+                  result={result}
+                />
+              )
             })}
           </Stack>
         </Box>

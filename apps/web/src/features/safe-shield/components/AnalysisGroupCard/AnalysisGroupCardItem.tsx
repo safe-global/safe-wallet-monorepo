@@ -1,6 +1,6 @@
 import { Stack, Typography } from '@mui/material'
 import { Box } from '@mui/material'
-import { type AnalysisResult } from '@safe-global/utils/features/safe-shield/types'
+import { type Severity, type AnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import { isAddressChange } from '@safe-global/utils/features/safe-shield/utils'
 import { SEVERITY_COLORS } from '../../constants'
 import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
@@ -9,12 +9,12 @@ import { ShowAllAddress } from './ShowAllAddress'
 
 interface AnalysisGroupCardItemProps {
   result: AnalysisResult
-  isPrimary?: boolean
   description?: React.ReactNode
+  severity?: Severity
 }
 
-export const AnalysisGroupCardItem = ({ result, isPrimary = false, description }: AnalysisGroupCardItemProps) => {
-  const borderColor = isPrimary && result.severity ? SEVERITY_COLORS[result.severity].main : 'var(--color-border-main)'
+export const AnalysisGroupCardItem = ({ result, description, severity }: AnalysisGroupCardItemProps) => {
+  const borderColor = severity ? SEVERITY_COLORS[severity].main : 'var(--color-border-main)'
   const displayDescription = description ?? result.description
 
   return (
