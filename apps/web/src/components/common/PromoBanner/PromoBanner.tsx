@@ -83,7 +83,15 @@ export const PromoBanner = ({
           className={css.closeButton}
           aria-label="close"
           onClick={onDismiss}
-          sx={{ position: 'absolute', top: 2, right: 2, p: 1.25, width: 36, height: 36 }}
+          sx={{
+            position: 'absolute',
+            top: 2,
+            right: 2,
+            p: 1.25,
+            width: 36,
+            height: 36,
+            '&:hover': { backgroundColor: 'transparent' },
+          }}
         >
           <CloseIcon
             fontSize="medium"
