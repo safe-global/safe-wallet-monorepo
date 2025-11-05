@@ -18,8 +18,8 @@ export interface PromoBannerProps {
   imageSrc?: string | StaticImageData
   imageAlt?: string
   endIcon?: ReactNode
-  variant?: 'default' | 'dark'
   customClass?: string
+  customBackground?: string
 }
 
 export const PromoBanner = ({
@@ -33,17 +33,15 @@ export const PromoBanner = ({
   endIcon,
   trackOpenProps,
   trackHideProps,
-  variant = 'default',
-  customClass
+  customClass,
+  customBackground
 }: PromoBannerProps) => {
-
-  const darkBackgroundGradient = 'linear-gradient(90deg, #1c5538 0%, #1c1c1c 54.327%, #1c1c1c 100%)'
 
   return (
     <Card
       className={`${css.banner} ${customClass || ''}`}
       style={{ borderRadius: '12px' }}
-      sx={customClass ? { background: darkBackgroundGradient } : undefined}
+      sx={customBackground ? { background: customBackground } : undefined}
     >
       <Stack
         direction={{ xs: 'row', md: 'row' }}
@@ -58,7 +56,7 @@ export const PromoBanner = ({
           <Typography
             variant="h4"
             fontWeight="bold"
-            color={variant === 'dark' ? 'common.white' : 'static.main'}
+            color="common.white"
             className={css.bannerText}
           >
             {title}
@@ -76,7 +74,7 @@ export const PromoBanner = ({
                 {...(endIcon && { endIcon })}
                 variant="text"
                 size="compact"
-                sx={{ mt: 0, p: 0, pt: 1, color: variant === 'dark' ? 'common.white' : 'static.main' }}
+                sx={{ mt: 0, p: 0, pt: 1, color: "common.white" }}
                 color="static"
               >
                 {ctaLabel}
@@ -103,7 +101,7 @@ export const PromoBanner = ({
           >
             <CloseIcon
               fontSize="medium"
-              sx={{ color: variant === 'dark' ? 'common.white' : 'text.primary', opacity: 0.6 }} />
+              sx={{ color: "common.white", opacity: 0.6 }} />
           </IconButton>
         </Track>
       )}

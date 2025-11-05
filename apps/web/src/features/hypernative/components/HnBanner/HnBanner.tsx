@@ -10,7 +10,7 @@ const HnBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   const router = useRouter()
   const [isVisible, setIsVisible] = useState(true)
   const imageSrc: string = '/images/common/hypernative/guardian-badge.svg'
-  const customClass: string = 'hnBannerDark'
+  const customBackground = 'linear-gradient(90deg, #1c5538 0%, #1c1c1c 54.327%, #1c1c1c 100%)'
 
   const handleDismiss = () => {
     setIsVisible(false)
@@ -42,8 +42,7 @@ const HnBanner = ({ onDismiss }: { onDismiss: () => void }) => {
       href={{ pathname: AppRoutes.settings.security, query: { safe: router.query.safe } }}
       onDismiss={handleDismiss}
       endIcon={<ChevronRightIcon fontSize="small" />}
-      variant="dark"
-      customClass={customClass}
+      customBackground={customBackground}
     />
   )
 }
