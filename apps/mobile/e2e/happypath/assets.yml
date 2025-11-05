@@ -5,7 +5,7 @@ appId: global.safe.mobileapp.ios
     file: ../shared/clean-app-start.yml
 
 - tapOn:
-    id: 'e2eOnboardedAccountNoNotifications'
+    id: 'e2eOnboardedAccountTestAssets'
 
 # Test Home tab / Assets default view
 - assertVisible:

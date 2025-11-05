@@ -9,6 +9,7 @@ import { useAppDispatch } from '@/src/store/hooks'
 import { useLocalSearchParams } from 'expo-router'
 import Logger from '@/src/utils/logger'
 import useSafeInfo from '@/src/hooks/useSafeInfo'
+import BadgeManager from '@/src/services/notifications/BadgeManager'
 
 export function TxHistoryContainer() {
   const activeSafe = useDefinedActiveSafe()
@@ -33,6 +34,13 @@ export function TxHistoryContainer() {
     isUninitialized,
     refetch,
   } = useGetTxsHistoryInfiniteQuery(queryArgs)
+
+  // Clear badge when user views transaction history (whether from notification tap or normal navigation)
+  React.useEffect(() => {
+    BadgeManager.clearAllBadges().catch((error) => {
+      Logger.error('TxHistoryContainer: Failed to clear badges', error)
+    })
+  }, [])
 
   // Force refetch when coming from push notification
   React.useEffect(() => {

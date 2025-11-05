@@ -113,6 +113,24 @@ const mockedTxHistorySafeInfo: SafeOverview = {
   threshold: 1,
 }
 
+const mockedStakeDepositAccount: SafeInfo = {
+  address: '0xAD1Cf279D18f34a13c3Bf9b79F4D427D5CD9505B',
+  chainId: '11155111',
+}
+const mockedStakeDepositSafeInfo: SafeOverview = {
+  address: { value: '0xAD1Cf279D18f34a13c3Bf9b79F4D427D5CD9505B', name: null, logoUri: null },
+  awaitingConfirmation: null,
+  chainId: mockedStakeDepositAccount.chainId,
+  fiatTotal: '0',
+  owners: [
+    { value: '0x4fe7164d7cA511Ab35520bb14065F1693240dC90', name: null, logoUri: null },
+    { value: '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED', name: null, logoUri: null },
+    { value: '0x96D4c6fFC338912322813a77655fCC926b9A5aC5', name: null, logoUri: null },
+  ],
+  queued: 0,
+  threshold: 1,
+}
+
 /**
  * This utility component is only included in the test simulator
  * build. It gives some quick triggers which help improve the pace
@@ -132,6 +150,7 @@ export function TestCtrls() {
       }),
     )
     dispatch(setActiveSafe(mockedActiveAccount))
+    dispatch(updatePromptAttempts(1))
     router.replace('/(tabs)')
   }
   const onPressTestOnboarding = async () => {
@@ -184,6 +203,21 @@ export function TestCtrls() {
         chainIds: [mockedSwapOrderAccount.chainId],
       }),
     )
+
+    // Add stake deposit safe with title
+    dispatch(
+      addSafe({
+        info: { [mockedStakeDepositAccount.chainId]: mockedStakeDepositSafeInfo },
+        address: mockedStakeDepositAccount.address,
+      }),
+    )
+    dispatch(
+      addContact({
+        value: mockedStakeDepositAccount.address,
+        name: 'Stake Deposit Safe',
+        chainIds: [mockedStakeDepositAccount.chainId],
+      }),
+    )
     dispatch(setActiveSafe(mockedTxHistoryAccount))
 
     router.replace('/(tabs)')
@@ -198,7 +232,7 @@ export function TestCtrls() {
         style={BTN}
       />
       <Pressable
-        testID="e2eOnboardedAccountNoNotifications"
+        testID="e2eOnboardedAccountTestAssets"
         onPress={() => {
           const keys = Object.keys(assetsTest.safes)
           Object.values(assetsTest.safes).forEach((safe: SafeOverview, index) => {
