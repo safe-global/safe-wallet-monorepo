@@ -234,7 +234,7 @@ describe('useIsHypernativeGuard', () => {
       resolveFirst = resolve
     })
 
-    const isHypernativeGuardSpy = jest
+    jest
       .spyOn(hypernativeGuardCheck, 'isHypernativeGuard')
       .mockReturnValueOnce(firstPromise)
       .mockResolvedValueOnce(false)
