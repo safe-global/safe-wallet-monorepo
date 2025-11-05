@@ -59,3 +59,5 @@ appId: global.safe.mobileapp.ios
     env:
       EXPECTED_SIGNER_PATTERN: '.*6fED.*'
       TX_EXECUTION_STATUS: 'fail'
+      # the send tx flow changed to signer execution, so the default execution method now should be signer
+      EXPECTED_EXECUTION_METHOD: 'signer'

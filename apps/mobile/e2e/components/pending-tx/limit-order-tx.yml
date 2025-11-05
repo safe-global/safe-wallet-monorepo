@@ -132,6 +132,7 @@ appId: global.safe.mobileapp.ios
 # ===========================================
 # Test tapping on confirmations to open the bottom sheet and verify signed badge
 # For pending transactions, we use the confirmations from the confirm transaction screen
+- scroll
 - runFlow:
     file: ../../shared/test-confirmations.yml
     env:
@@ -147,3 +148,4 @@ appId: global.safe.mobileapp.ios
     env:
       EXPECTED_SIGNER_PATTERN: '.*6fED.*'
       IS_FULLY_SIGNED: 'false'
+      EXPECTED_EXECUTION_METHOD: 'signer'

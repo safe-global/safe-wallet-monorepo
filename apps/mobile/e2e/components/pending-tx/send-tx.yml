@@ -61,3 +61,4 @@ appId: global.safe.mobileapp.ios
     env:
       EXPECTED_SIGNER_PATTERN: '.*6fED.*'
       TX_EXECUTION_STATUS: 'succeed'
+      EXPECTED_EXECUTION_METHOD: 'relay'

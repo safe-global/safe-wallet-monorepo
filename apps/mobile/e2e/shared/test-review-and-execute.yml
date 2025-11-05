@@ -19,6 +19,10 @@ jsEngine: graaljs
 #                   If "true": navigates to "Review and execute" screen (execution flow)
 #                   If "false": navigates to "Review and confirm" screen (signing flow)
 #                   Defaults to "true" if not provided
+#   EXPECTED_EXECUTION_METHOD: Expected execution method display - "relay" or "signer"
+#                              If "relay": expects "Sponsored by Safe" and "Free x left / day"
+#                              If "signer": expects signer name/address and estimated network fee
+#                              Defaults to "relay" if not provided
 
 # ===========================================
 # Navigate to Review and Execute
@@ -35,7 +39,7 @@ jsEngine: graaljs
     timeout: 2000
 
 # ===========================================
-# Parse IS_FULLY_SIGNED and set up conditional flows
+# Parse IS_FULLY_SIGNED and EXPECTED_EXECUTION_METHOD and set up conditional flows
 # ===========================================
 # Parse the IS_FULLY_SIGNED environment variable using GraalJS
 # Default to "true" (fully signed = execute flow) if not provided
@@ -44,6 +48,14 @@ jsEngine: graaljs
 # Set flags for conditional execution
 - evalScript: '${output.isExecuteFlow = output.isFullySigned === true}'
 - evalScript: '${output.isConfirmFlow = output.isFullySigned === false}'
+
+# Parse EXPECTED_EXECUTION_METHOD environment variable
+# Default to "relay" if not provided
+- evalScript: '${output.expectedExecutionMethod = (typeof EXPECTED_EXECUTION_METHOD !== "undefined" && EXPECTED_EXECUTION_METHOD) ? EXPECTED_EXECUTION_METHOD.toLowerCase() : "relay"}'
+
+# Set flags for execution method display
+- evalScript: '${output.expectRelay = output.expectedExecutionMethod === "relay"}'
+- evalScript: '${output.expectSigner = output.expectedExecutionMethod === "signer"}'
 
 # ===========================================
 # Verify Review Screen (Execute or Confirm)
@@ -133,7 +145,7 @@ jsEngine: graaljs
 # ===========================================
 # Verify Footer Section (Execution Method or Signer Selection)
 # ===========================================
-# Execute Flow: Verify Execution Method
+# Execute Flow: Verify Execution Method (Configurable: Relay or Signer)
 - runFlow:
     when:
       true: '${output.isExecuteFlow === true}'
@@ -141,31 +153,96 @@ jsEngine: graaljs
       # Verify "Execution method" label is visible
       - assertVisible:
           text: 'Execution method'
-      # Verify the active signer is visible in the execution method (before tapping)
-      - assertVisible:
-          text: '${EXPECTED_SIGNER_PATTERN || ".*Signer.*"}'
-      # Tap on execution method to open the sheet
-      - tapOn:
-          text: 'Execution method'
-      # Wait for sheet to open
-      - waitForAnimationToEnd:
-          timeout: 1000
-      # Verify the sheet opens (should show "Choose how to execute")
-      - assertVisible:
-          text: 'Choose how to execute'
-      # Verify the active signer is visible in the execution method sheet
-      - assertVisible:
-          text: '${EXPECTED_SIGNER_PATTERN || ".*Signer.*"}'
-      # Dismiss the sheet by swiping down
-      - swipe:
-          direction: 'DOWN'
-          startPoint: '50%,50%'
-          endPoint: '50%,80%'
-      # Wait for sheet to close
-      - waitForAnimationToEnd:
-          timeout: 1000
-      # Verify we're back on Review and execute screen
-      - assertVisible: 'Review and execute'
+
+      # ===========================================
+      # Expected: Relay (Sponsored by Safe)
+      # ===========================================
+      - runFlow:
+          when:
+            true: '${output.expectRelay === true}'
+          commands:
+            # Verify "Sponsored by Safe" is visible
+            - assertVisible:
+                text: 'Sponsored by Safe'
+            # Verify "Free x left / day" is visible
+            - assertVisible:
+                text: '.*\d+ left / day.*'
+            # Tap on execution method to open the sheet
+            - tapOn:
+                text: 'Execution method'
+            # Wait for sheet to open
+            - waitForAnimationToEnd:
+                timeout: 1000
+            # Verify the sheet opens (should show "Choose how to execute")
+            - assertVisible:
+                text: 'Choose how to execute'
+            # Verify "Sponsored by Safe" option is visible in the sheet
+            - assertVisible:
+                text: 'Sponsored by Safe'
+            # Verify "Or use your signer:" section is visible
+            - assertVisible:
+                text: '.*Or use your signer.*'
+            # Verify the signer is visible in the signer list
+            - assertVisible:
+                text: '${EXPECTED_SIGNER_PATTERN || ".*Signer.*"}'
+            # Tap on the signer to select it (switch from relay to signer execution)
+            - tapOn:
+                text: '${EXPECTED_SIGNER_PATTERN || ".*Signer.*"}'
+            # Verify we're back on Review and execute screen
+            - assertVisible: 'Review and execute'
+            # Verify "Est. network fee" label is now visible (instead of "Free x left / day")
+            - assertVisible:
+                text: '.*Est\. network fee.*'
+            # Verify estimated fee value is displayed (format: "< 0.00001 ETH" or similar)
+            - assertVisible:
+                text: '.*(<|≈).*\d+.*ETH.*'
+                optional: true
+
+      # ===========================================
+      # Expected: Signer (User previously selected signer)
+      # ===========================================
+      - runFlow:
+          when:
+            true: '${output.expectSigner === true}'
+          commands:
+            # Verify the signer is visible in the execution method
+            - assertVisible:
+                text: '${EXPECTED_SIGNER_PATTERN || ".*Signer.*"}'
+            # Verify "Est. network fee" label is visible
+            - assertVisible:
+                text: '.*Est\. network fee.*'
+            # Verify estimated fee value is displayed (format: "< 0.00001 ETH" or similar)
+            - assertVisible:
+                text: '.*(<|≈).*\d+.*ETH.*'
+                optional: true
+            # Optionally verify we can still open the sheet and see both options
+            - tapOn:
+                text: 'Execution method'
+            # Wait for sheet to open
+            - waitForAnimationToEnd:
+                timeout: 1000
+            # Verify the sheet opens
+            - assertVisible:
+                text: 'Choose how to execute'
+            # Verify "Sponsored by Safe" option is visible
+            - assertVisible:
+                text: 'Sponsored by Safe'
+            # Verify "Or use your signer:" section is visible
+            - assertVisible:
+                text: '.*Or use your signer.*'
+            # Verify the signer is visible and selected (should have checkmark)
+            - assertVisible:
+                text: '${EXPECTED_SIGNER_PATTERN || ".*Signer.*"}'
+            # Dismiss the sheet by swiping down
+            - swipe:
+                direction: 'DOWN'
+                startPoint: '50%,50%'
+                endPoint: '50%,80%'
+            # Wait for sheet to close
+            - waitForAnimationToEnd:
+                timeout: 1000
+            # Verify we're back on Review and execute screen
+            - assertVisible: 'Review and execute'
 
 # Confirm Flow: Verify Signer Selection
 - runFlow:
@@ -211,12 +288,13 @@ jsEngine: graaljs
 - evalScript: '${output.isFailureFlow = output.txStatus === "fail"}'
 
 # ===========================================
-# Success Flow: Verify Estimated Network Fee (Execute Flow Only)
+# Success Flow: Verify Estimated Network Fee (Execute Flow with Signer Only)
 # ===========================================
-# Run success flow if TX_EXECUTION_STATUS is "succeed" AND we're in execute flow
+# Run success flow if TX_EXECUTION_STATUS is "succeed" AND we're in execute flow AND expecting signer
+# Note: Relay execution shows "Free x left / day" instead of estimated fee, so we skip this check
 - runFlow:
     when:
-      true: '${output.isSuccessFlow === true && output.isExecuteFlow === true}'
+      true: '${output.isSuccessFlow === true && output.isExecuteFlow === true && output.expectSigner === true}'
     commands:
       # Verify "Est. network fee" label is visible
       - assertVisible:
@@ -227,12 +305,13 @@ jsEngine: graaljs
           optional: true
 
 # ===========================================
-# Failure Flow: Verify Cannot Estimate and Failure Warning (Execute Flow Only)
+# Failure Flow: Verify Cannot Estimate and Failure Warning (Execute Flow with Signer Only)
 # ===========================================
-# Run failure flow if TX_EXECUTION_STATUS is "fail" AND we're in execute flow
+# Run failure flow if TX_EXECUTION_STATUS is "fail" AND we're in execute flow AND expecting signer
+# Note: Relay execution doesn't show failure warnings, so we skip this check
 - runFlow:
     when:
-      true: '${output.isFailureFlow === true && output.isExecuteFlow === true}'
+      true: '${output.isFailureFlow === true && output.isExecuteFlow === true && output.expectSigner === true}'
     commands:
       # Verify "Est. network fee" label is visible
       - assertVisible:

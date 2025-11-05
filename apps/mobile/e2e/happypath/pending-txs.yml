@@ -62,7 +62,7 @@ appId: global.safe.mobileapp.ios
 # ===========================================
 # Go back to home tab
 - tapOn:
-    id: 'home-tab'
+    id: 'go-back'
 
 # Tap on the dropdown to switch safes
 - tapOn:
