@@ -1,6 +1,7 @@
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useAsync from '@safe-global/utils/hooks/useAsync'
+import { logError, Errors } from '@/services/exceptions'
 import { isHypernativeGuard } from '../services/hypernativeGuardCheck'
 
 export type HypernativeGuardCheckResult = {
@@ -36,9 +37,9 @@ export const useIsHypernativeGuard = (): HypernativeGuardCheckResult => {
     false, // Don't clear data on re-fetch to avoid flickering
   )
 
-  // Log errors for debugging
+  // Log errors for monitoring
   if (error) {
-    console.error('[useIsHypernativeGuard] Error checking guard:', error)
+    logError(Errors._809, error)
   }
 
   return {

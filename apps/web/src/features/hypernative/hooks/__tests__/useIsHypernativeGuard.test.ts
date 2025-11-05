@@ -4,7 +4,13 @@ import * as useSafeInfo from '@/hooks/useSafeInfo'
 import * as web3 from '@/hooks/wallets/web3'
 import * as hypernativeGuardCheck from '../../services/hypernativeGuardCheck'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
+import { logError, Errors } from '@/services/exceptions'
 import type { JsonRpcProvider } from 'ethers'
+
+jest.mock('@/services/exceptions', () => ({
+  ...jest.requireActual('@/services/exceptions'),
+  logError: jest.fn(),
+}))
 
 describe('useIsHypernativeGuard', () => {
   let mockProvider: JsonRpcProvider
@@ -132,7 +138,6 @@ describe('useIsHypernativeGuard', () => {
   it('should handle errors gracefully and return false', async () => {
     const guardAddress = '0x4784e9bF408F649D04A0a3294e87B0c74C5A3020'
     jest.spyOn(hypernativeGuardCheck, 'isHypernativeGuard').mockRejectedValue(new Error('Network error'))
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation()
     jest.spyOn(useSafeInfo, 'default').mockReturnValue({
       safe: extendedSafeInfoBuilder()
         .with({
@@ -156,12 +161,7 @@ describe('useIsHypernativeGuard', () => {
       expect(result.current.isHypernativeGuard).toBe(false)
     })
 
-    expect(consoleSpy).toHaveBeenCalledWith(
-      '[useIsHypernativeGuard] Error checking guard:',
-      expect.any(Error),
-    )
-
-    consoleSpy.mockRestore()
+    expect(logError).toHaveBeenCalledWith(Errors._809, expect.any(Error))
   })
 
   it('should re-check when guard address changes', async () => {
