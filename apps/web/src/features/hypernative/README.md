@@ -61,6 +61,63 @@ HypernativeGuard uses the same bytecode across all chains. When a new version is
 4. The hash is compared against known HypernativeGuard code hashes
 5. Returns `true` if there's a match, `false` otherwise
 
+## Examples
+
+### Badge Component
+
+```typescript
+import { useIsHypernativeGuard } from '@/features/hypernative/hooks'
+import { Box, Chip, CircularProgress } from '@mui/material'
+
+export const HypernativeGuardBadge = () => {
+  const { isHypernativeGuard, loading } = useIsHypernativeGuard()
+
+  if (loading) {
+    return (
+      <Box display="flex" alignItems="center" gap={1}>
+        <CircularProgress size={16} />
+        <span>Checking guard...</span>
+      </Box>
+    )
+  }
+
+  if (!isHypernativeGuard) {
+    return null
+  }
+
+  return <Chip label="Protected by Hypernative" color="success" size="small" />
+}
+```
+
+### Conditional Rendering
+
+```typescript
+export const ConditionalHypernativeFeature = () => {
+  const { isHypernativeGuard, loading } = useIsHypernativeGuard()
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
+  return (
+    <div>
+      {isHypernativeGuard ? (
+        <div>
+          <h3>Hypernative Guard Settings</h3>
+          <p>Configure your Hypernative security policies here.</p>
+        </div>
+      ) : (
+        <div>
+          <h3>Enhance Your Security</h3>
+          <p>Install Hypernative Guard to add advanced transaction monitoring.</p>
+          <button>Install Hypernative Guard</button>
+        </div>
+      )}
+    </div>
+  )
+}
+```
+
 ## Architecture
 
 ```
@@ -73,9 +130,6 @@ services/
   hypernativeGuardCheck.ts  - Core logic for checking guard
   __tests__/
     hypernativeGuardCheck.test.ts
-
-examples/
-  HypernativeGuardBadge.tsx - Example components showing usage
 ```
 
 ## Testing
