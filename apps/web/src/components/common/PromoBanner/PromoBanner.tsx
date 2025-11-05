@@ -40,9 +40,15 @@ export const PromoBanner = ({
   return (
     <Card
       className={`${css.banner} ${variant === 'dark' ? css.dark : ''}`}
+      style={{ borderRadius: '12px' }}
       sx={customBackground ? { background: customBackground } : undefined}
     >
-      <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2}>
+      <Stack
+        direction={{ xs: 'row', md: 'row' }}
+        alignItems="center"
+        spacing={2}
+        sx={{ display: 'inline-flex', flexWrap: 'nowrap' }}
+      >
         {imageSrc ? (
           <Image className={css.bannerImage} src={imageSrc} alt={imageAlt || ''} width={95} height={95} />
         ) : null}
@@ -57,7 +63,7 @@ export const PromoBanner = ({
           </Typography>
 
           {description ? (
-            <Typography variant="body2" color="static.light" className={css.bannerText}>
+            <Typography variant="body2" color="text.secondary" sx={{ pt: 0.5 }} className={css.bannerText}>
               {description}
             </Typography>
           ) : null}
@@ -68,7 +74,7 @@ export const PromoBanner = ({
                 endIcon={endIcon ?? <ChevronRightIcon fontSize="small" />}
                 variant="text"
                 size="compact"
-                sx={{ mt: 1, p: 0.5, color: variant === 'dark' ? 'common.white' : 'static.main' }}
+                sx={{ mt: 0, p: 0, pt: 1, color: variant === 'dark' ? 'common.white' : 'static.main' }}
                 color="static"
               >
                 {ctaLabel}
