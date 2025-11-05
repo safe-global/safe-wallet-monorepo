@@ -13,9 +13,9 @@ export interface PromoBannerProps {
   description?: string
   ctaLabel: string
   href: LinkProps['href']
-  onDismiss: () => void
   trackOpenProps: AnalyticsEvent
   trackHideProps: AnalyticsEvent
+  onDismiss?: () => void
   imageSrc?: string | StaticImageData
   imageAlt?: string
   endIcon?: ReactNode
@@ -78,26 +78,28 @@ export const PromoBanner = ({
         </Box>
       </Stack>
 
-      <Track {...trackHideProps}>
-        <IconButton
-          className={css.closeButton}
-          aria-label="close"
-          onClick={onDismiss}
-          sx={{
-            position: 'absolute',
-            top: 2,
-            right: 2,
-            p: 1.25,
-            width: 36,
-            height: 36,
-            '&:hover': { backgroundColor: 'transparent' },
-          }}
-        >
-          <CloseIcon
-            fontSize="medium"
-            sx={{ color: variant === 'dark' ? 'common.white' : 'text.primary', opacity: 0.6 }} />
-        </IconButton>
-      </Track>
+      {onDismiss && (
+        <Track {...trackHideProps}>
+          <IconButton
+            className={css.closeButton}
+            aria-label="close"
+            onClick={onDismiss}
+            sx={{
+              position: 'absolute',
+              top: 2,
+              right: 2,
+              p: 1.25,
+              width: 36,
+              height: 36,
+              '&:hover': { backgroundColor: 'transparent' },
+            }}
+          >
+            <CloseIcon
+              fontSize="medium"
+              sx={{ color: variant === 'dark' ? 'common.white' : 'text.primary', opacity: 0.6 }} />
+          </IconButton>
+        </Track>
+      )}
     </Card>
   )
 }
