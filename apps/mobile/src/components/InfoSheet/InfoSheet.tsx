@@ -45,7 +45,7 @@ export const InfoSheet = ({
         topInset={insets.top}
         enableDynamicSizing
         handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
-        accessible={true}
+        accessible={false}
       >
         <BottomSheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom }}>
           <YStack gap="$4" padding="$4" alignItems="center" justifyContent="center">

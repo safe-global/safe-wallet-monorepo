@@ -1,5 +1,9 @@
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import { NEWS_BANNER_STORAGE_KEY } from '@/components/dashboard/NewsCarousel/utils'
+import {
+  NEWS_BANNER_STORAGE_KEY,
+  isBannerDismissed,
+  type DismissalState,
+} from '@/components/dashboard/NewsCarousel/utils'
 import { useMemo } from 'react'
 import { Typography } from '@mui/material'
 import { earnBannerDisclaimer, earnBannerID } from '@/components/dashboard/NewsCarousel/banners/EarnBanner'
@@ -13,7 +17,7 @@ const disclaimers = [
 ]
 
 const NewsDisclaimers = () => {
-  const [dismissed = []] = useLocalStorage<string[]>(NEWS_BANNER_STORAGE_KEY)
+  const [dismissed = []] = useLocalStorage<DismissalState>(NEWS_BANNER_STORAGE_KEY)
   const { balances, loading: balancesLoading } = useVisibleBalances()
   const nonZeroBalances = useMemo(() => {
     return balances.items.filter((item) => item.balance !== '0')
@@ -21,7 +25,7 @@ const NewsDisclaimers = () => {
 
   const noAssets = !balancesLoading && nonZeroBalances.length === 0
 
-  const items = useMemo(() => disclaimers.filter((b) => !dismissed.includes(b.id)), [dismissed])
+  const items = useMemo(() => disclaimers.filter((b) => !isBannerDismissed(b.id, dismissed || [])), [dismissed])
 
   if (noAssets) return null
 

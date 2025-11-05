@@ -1,6 +1,6 @@
 # Push Notifications
 
-This document explains how push notifications are implemented in the Safe{Wallet} mobile app. It covers the subscription flow, how notifications are displayed, and differences between iOS and Android.
+This document explains how push notifications are implemented in the Safe{Mobile} app. It covers the subscription flow, how notifications are displayed, and differences between iOS and Android.
 
 ---
 

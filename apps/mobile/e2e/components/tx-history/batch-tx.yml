@@ -1,0 +1,98 @@
+appId: global.safe.mobileapp.ios
+---
+# ===========================================
+# Batch Transaction Detail
+# ===========================================
+# Batch transactions (MultiSend) are displayed as contract interactions
+- assertVisible: Transaction details
+- assertVisible: Batch
+
+# Batch transactions show action count (e.g., "2 Actions")
+- assertVisible:
+    id: 'history-transaction-header'
+    containsDescendants:
+      - text: '.*\d+\s+Actions.*'
+
+- assertVisible:
+    id: 'history-contract-container'
+    containsDescendants:
+      - id: 'history-contract-call-badge'
+        containsDescendants:
+          - text: '.*${METHOD_NAME}.*'
+
+# Contract information
+- assertVisible: Contract
+- assertVisible:
+    id: 'history-contract-information'
+    containsDescendants:
+      - id: 'hash-display-name-or-address'
+        text: '.*${CONTRACT_NAME}.*'
+
+# Network display (custom format in HistoryContract)
+- assertVisible: Network
+
+# ===========================================
+# Transaction Details Button
+# ===========================================
+- runFlow:
+    file: ../../shared/test-tx-details-button.yml
+
+# ===========================================
+# Common Transaction Info
+# ===========================================
+- runFlow:
+    file: ../../shared/test-tx-info.yml
+
+# ===========================================
+# Actions Section
+# ===========================================
+# Verify Actions row is visible with action count
+- assertVisible:
+    id: 'actions-row'
+    containsDescendants:
+      - text: 'Actions'
+
+# Click on Actions to view the actions list
+- tapOn:
+    id: 'actions-row'
+
+# Test the actions list view
+- runFlow:
+    file: ./batch-actions.yml
+
+# Go back to transaction details from actions list
+- tapOn:
+    id: 'go-back'
+
+# Verify we're back at the transaction details
+- assertVisible: Transaction details
+
+# ===========================================
+# Confirmations
+# ===========================================
+- runFlow:
+    file: ../../shared/test-tx-history-confirmations.yml
+
+# ===========================================
+# Test Explorer Link
+# ===========================================
+- runFlow:
+    file: ../../shared/test-explorer-link.yml
+
+- assertVisible: Transaction details
+
+# ===========================================
+# Test Share Transaction Button
+# ===========================================
+- runFlow:
+    file: ../../shared/test-share-link.yml
+
+- assertVisible: Transaction details
+
+# ===========================================
+# Test Transaction Details Button
+# ===========================================
+- runFlow:
+    file: ../../shared/test-advanced-details.yml
+
+- assertVisible: Transaction details

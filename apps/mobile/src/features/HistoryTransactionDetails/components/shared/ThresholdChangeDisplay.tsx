@@ -23,7 +23,9 @@ export function ThresholdChangeDisplay({ txInfo, executionInfo }: ThresholdChang
           </XStack>
         </InfoSheet>
         <XStack alignItems="center" gap="$2">
-          <Text fontSize="$4">{txInfo.settingsInfo?.threshold}</Text>
+          <Text fontSize="$4" testID="threshold-change-display-threshold">
+            {txInfo.settingsInfo?.threshold}
+          </Text>
         </XStack>
       </XStack>
     )
@@ -33,10 +35,15 @@ export function ThresholdChangeDisplay({ txInfo, executionInfo }: ThresholdChang
     <XStack alignItems="center" justifyContent="space-between">
       <Text color="$textSecondaryLight">Threshold change</Text>
       <XStack alignItems="center" gap="$2">
-        <Text fontSize="$4">
+        <Text fontSize="$4" testID="threshold-change-display-threshold">
           {txInfo.settingsInfo?.threshold}/{executionInfo.signers.length}
         </Text>
-        <Text textDecorationLine="line-through" color="$textSecondaryLight" fontSize="$4">
+        <Text
+          textDecorationLine="line-through"
+          color="$textSecondaryLight"
+          fontSize="$4"
+          testID="threshold-change-display-threshold-old"
+        >
           {executionInfo.confirmationsRequired}/{executionInfo.signers.length}
         </Text>
       </XStack>

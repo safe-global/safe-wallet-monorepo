@@ -82,9 +82,9 @@ export function HashDisplay({
   const handleExternalLinkPress = onExternalLinkPress || defaultViewOnExplorer
 
   return (
-    <View flexDirection="row" alignItems="center" gap={sizeConfig.gap}>
+    <View flexDirection="row" alignItems="center" gap={sizeConfig.gap} testID="hash-display">
       {/* Always prefer logo over identicon when both are available */}
-      <View flexDirection="row">
+      <View flexDirection="row" testID="hash-display-logo">
         {showVisualIdentifier && (
           <>
             {resolvedLogoUri ? (
@@ -98,14 +98,20 @@ export function HashDisplay({
 
       {/* Display name or shortened address/hash */}
       <View flexDirection="row" alignItems="center" gap="$1">
-        <Text {...textProps} maxWidth={150} numberOfLines={1} ellipsizeMode="tail">
+        <Text
+          {...textProps}
+          maxWidth={150}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          testID="hash-display-name-or-address"
+        >
           {displayName || shortenAddress(addressValue)}
         </Text>
         {showCopy && <CopyButton value={addressValue} size={sizeConfig.icon} color={iconColor} />}
       </View>
 
       {showExternalLink && (
-        <TouchableOpacity onPress={handleExternalLinkPress}>
+        <TouchableOpacity onPress={handleExternalLinkPress} testID="hash-display-external-link-button">
           <SafeFontIcon name="external-link" size={sizeConfig.icon} color={iconColor} />
         </TouchableOpacity>
       )}

@@ -49,6 +49,7 @@ export function ActionsRow({ txId, decodedData, actionCount }: ActionsRowProps) 
         </View>
       }
       onPress={handleViewActions}
+      testID="actions-row"
     />
   )
 }

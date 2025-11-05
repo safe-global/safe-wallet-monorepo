@@ -43,11 +43,11 @@ export function SwapHeader({
       )}
 
       <View flexDirection="row" gap="$2" position="relative">
-        <Container flex={1} padding="$4" borderRadius="$3">
+        <Container flex={1} padding="$4" borderRadius="$3" testID="swap-header-sell-container">
           <View alignItems="center" gap="$2">
             <TokenIcon logoUri={fromToken.logoUri} size="$10" accessibilityLabel={fromToken.symbol} />
             <Text color="$textSecondaryLight">{fromLabel}</Text>
-            <H5 fontWeight={600}>
+            <H5 fontWeight={600} testID="swap-header-sell-amount">
               {ellipsis(fromAmount, 9)} {fromToken.symbol}
             </H5>
           </View>
@@ -77,11 +77,11 @@ export function SwapHeader({
           />
         </View>
 
-        <Container flex={1} padding="$4" borderRadius="$3">
+        <Container flex={1} padding="$4" borderRadius="$3" testID="swap-header-receive-container">
           <View alignItems="center" gap="$2">
             <TokenIcon logoUri={toToken.logoUri} size="$10" accessibilityLabel={toToken.symbol} />
             <Text color="$textSecondaryLight">{toLabel}</Text>
-            <H5 fontWeight={600}>
+            <H5 fontWeight={600} testID="swap-header-receive-amount">
               {ellipsis(toAmount, 9)} {toToken.symbol}
             </H5>
           </View>

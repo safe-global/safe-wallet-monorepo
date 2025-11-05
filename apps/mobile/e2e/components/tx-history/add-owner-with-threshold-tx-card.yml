@@ -1,0 +1,20 @@
+appId: global.safe.mobileapp.ios
+---
+# ===========================================
+# Settings Change Transaction Card
+# ===========================================
+- assertVisible:
+    text: 'Settings change'
+
+- assertVisible:
+    text: '.*addOwnerWithThreshold.*'
+    optional: true
+
+- tapOn:
+    text: '.*addOwnerWithThreshold.*'
+
+- runFlow:
+    file: ./add-owner-with-threshold-tx.yml
+
+- tapOn:
+    id: 'go-back'
