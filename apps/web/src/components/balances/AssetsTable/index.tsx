@@ -15,9 +15,8 @@ import SwapButton from '@/features/swap/components/SwapButton'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
 import SendButton from './SendButton'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
-// Debug: Feature flags disabled to always show buttons
-// import { useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEnabled'
-// import useIsStakingPromoEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
+import { useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEnabled'
+import useIsStakingPromoEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import StakeButton from '@/features/stake/components/StakeButton'
 import { TokenType } from '@safe-global/store/gateway/types'
@@ -151,9 +150,8 @@ const AssetsTable = ({
 
   const chainId = useChainId()
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
-  // Debug: Feature flags disabled to always show buttons
-  // const isStakingPromoEnabled = useIsStakingPromoEnabled()
-  // const isEarnPromoEnabled = useIsEarnPromoEnabled()
+  const isStakingPromoEnabled = useIsStakingPromoEnabled()
+  const isEarnPromoEnabled = useIsEarnPromoEnabled()
 
   const { isAssetSelected, toggleAsset, hidingAsset, cancel, deselectAll, saveChanges } = useHideAssets(() =>
     setShowHiddenAssets(false),
@@ -194,11 +192,10 @@ const AssetsTable = ({
                             {item.tokenInfo.name}
                             {!isNative && <TokenExplorerLink address={item.tokenInfo.address} />}
                           </Typography>
-                          {/* Debug: Always show buttons, remove feature flag checks */}
-                          {item.tokenInfo.type === TokenType.NATIVE_TOKEN && (
+                          {isStakingPromoEnabled && item.tokenInfo.type === TokenType.NATIVE_TOKEN && (
                             <StakeButton tokenInfo={item.tokenInfo} trackingLabel={STAKE_LABELS.asset} plain />
                           )}
-                          {isEligibleEarnToken(chainId, item.tokenInfo.address) && (
+                          {isEarnPromoEnabled && isEligibleEarnToken(chainId, item.tokenInfo.address) && (
                             <EarnButton tokenInfo={item.tokenInfo} trackingLabel={EARN_LABELS.asset} plain />
                           )}
                         </Box>
@@ -378,11 +375,10 @@ const AssetsTable = ({
                                 {item.tokenInfo.name}
                                 {!isNative && <TokenExplorerLink address={item.tokenInfo.address} />}
                               </Typography>
-                              {/* Debug: Always show buttons, remove feature flag checks */}
-                              {item.tokenInfo.type === TokenType.NATIVE_TOKEN && (
+                              {isStakingPromoEnabled && item.tokenInfo.type === TokenType.NATIVE_TOKEN && (
                                 <StakeButton tokenInfo={item.tokenInfo} trackingLabel={STAKE_LABELS.asset} plain />
                               )}
-                              {isEligibleEarnToken(chainId, item.tokenInfo.address) && (
+                              {isEarnPromoEnabled && isEligibleEarnToken(chainId, item.tokenInfo.address) && (
                                 <EarnButton tokenInfo={item.tokenInfo} trackingLabel={EARN_LABELS.asset} plain />
                               )}
                             </Box>
