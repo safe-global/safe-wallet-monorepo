@@ -51,7 +51,7 @@ export function SwapOrder({ executionInfo, txInfo, decodedData, txId }: SwapOrde
         <ParametersButton txId={txId} />
       </ListTable>
       {recipientItems.length > 0 && <ListTable items={recipientItems} />}
-      {isTwapOrder && <ListTable items={twapItems} />}
+      {isTwapOrder && <ListTable items={twapItems} testID="twap-order-table" />}
 
       {showRecipientWarning && (
         <Alert

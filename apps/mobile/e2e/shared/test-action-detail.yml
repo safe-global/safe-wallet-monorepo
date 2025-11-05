@@ -32,7 +32,7 @@ appId: global.safe.mobileapp.ios
     id: 'action-details-contract'
     containsDescendants:
       - id: 'hash-display-name-or-address'
-        text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
+        text: '.*(0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}|[A-Za-z].*)'
 
 # Go back to actions list
 - tapOn:

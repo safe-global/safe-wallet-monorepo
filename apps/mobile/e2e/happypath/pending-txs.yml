@@ -104,3 +104,12 @@ appId: global.safe.mobileapp.ios
     file: ../components/pending-tx/swap-order-tx-card.yml
     env:
       ORDER_STATUS: 'Expired'
+
+# ===========================================
+# TWAP Order Transaction
+# ===========================================
+# Test a TWAP order in the "In queue" section
+- runFlow:
+    file: ../components/pending-tx/twap-order-tx-card.yml
+    env:
+      ORDER_STATUS: 'Execution needed'

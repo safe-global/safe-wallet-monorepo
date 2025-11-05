@@ -25,21 +25,15 @@ appId: global.safe.mobileapp.ios
 - assertVisible: '.*Balance change.*'
 
 # Verify balance change pattern if provided
-- extendedWaitUntil:
-    visible:
-      text: '${BALANCE_CHANGE_PATTERN}'
-      optional: true
-    timeout: 2000
+- assertVisible:
+    text: '${BALANCE_CHANGE_PATTERN}'
 
 # Verify Transaction simulation section is visible
 - assertVisible: '.*Transaction simulation.*'
 
 # Verify transaction simulation pattern if provided
-- extendedWaitUntil:
-    visible:
-      text: '${TRANSACTION_SIMULATION_PATTERN}'
-      optional: true
-    timeout: 2000
+- assertVisible:
+    text: '${TRANSACTION_SIMULATION_PATTERN}'
 
 # ===========================================
 # Test Info Sheets
@@ -97,8 +91,6 @@ appId: global.safe.mobileapp.ios
 - runFlow:
     when:
       true: '${output.shouldVerifyTenderly === true}'
-      visible:
-        text: 'View details on Tenderly'
     commands:
       - assertVisible: 'View details on Tenderly'
       - tapOn: 'View details on Tenderly'
