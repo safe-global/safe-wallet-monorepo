@@ -14,12 +14,13 @@ export interface PromoBannerProps {
   ctaLabel: string
   href: LinkProps['href']
   onDismiss: () => void
-  imageSrc?: StaticImageData
-  imageAlt?: string
-  endIcon?: ReactNode
   trackOpenProps: AnalyticsEvent
   trackHideProps: AnalyticsEvent
+  imageSrc?: string | StaticImageData
+  imageAlt?: string
+  endIcon?: ReactNode
   variant?: 'default' | 'dark'
+  customBackground?: string
 }
 
 export const PromoBanner = ({
@@ -34,9 +35,13 @@ export const PromoBanner = ({
   trackOpenProps,
   trackHideProps,
   variant = 'default',
+  customBackground
 }: PromoBannerProps) => {
   return (
-    <Card className={`${css.banner} ${variant === 'dark' ? css.dark : ''}`}>
+    <Card
+      className={`${css.banner} ${variant === 'dark' ? css.dark : ''}`}
+      sx={customBackground ? { background: customBackground } : undefined}
+    >
       <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2}>
         {imageSrc ? (
           <Image className={css.bannerImage} src={imageSrc} alt={imageAlt || ''} width={95} height={95} />
@@ -74,8 +79,15 @@ export const PromoBanner = ({
       </Stack>
 
       <Track {...trackHideProps}>
-        <IconButton className={css.closeButton} aria-label="close" onClick={onDismiss}>
-          <CloseIcon fontSize="small" color="border" />
+        <IconButton
+          className={css.closeButton}
+          aria-label="close"
+          onClick={onDismiss}
+          sx={{ position: 'absolute', top: 2, right: 2, p: 1.25, width: 36, height: 36 }}
+        >
+          <CloseIcon
+            fontSize="medium"
+            sx={{ color: variant === 'dark' ? 'common.white' : 'text.primary', opacity: 0.6 }} />
         </IconButton>
       </Track>
     </Card>
