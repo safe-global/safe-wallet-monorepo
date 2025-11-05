@@ -94,3 +94,13 @@ appId: global.safe.mobileapp.ios
 # Test the first limit order in the "Next" section
 - runFlow:
     file: ../components/pending-tx/limit-order-tx-card.yml
+
+# ===========================================
+# Expired Swap Order Transaction
+# ===========================================
+# Test an expired swap order in the "In queue" section
+# Expired swap orders should NOT display a Continue button
+- runFlow:
+    file: ../components/pending-tx/swap-order-tx-card.yml
+    env:
+      ORDER_STATUS: 'Expired'
