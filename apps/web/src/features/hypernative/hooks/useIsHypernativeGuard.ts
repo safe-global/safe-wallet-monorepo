@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { isHypernativeGuard } from '../services/hypernativeGuardCheck'
 
 export type HypernativeGuardCheckResult = {
@@ -16,70 +16,33 @@ export type HypernativeGuardCheckResult = {
 export const useIsHypernativeGuard = (): HypernativeGuardCheckResult => {
   const { safe, safeLoaded } = useSafeInfo()
   const web3ReadOnly = useWeb3ReadOnly()
-  const [isHnGuard, setIsHnGuard] = useState(false)
-  const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    let cancelled = false
-
-    const checkGuard = async () => {
-      // Don't check if Safe is not loaded yet
-      if (!safeLoaded) {
-        if (!cancelled) {
-          setIsHnGuard(false)
-          setLoading(true)
-        }
+  const [isHnGuard, error, loading] = useAsync<boolean>(
+    () => {
+      // Don't check if Safe is not loaded yet or if there's no provider
+      if (!safeLoaded || !web3ReadOnly) {
         return
       }
 
       // If there's no guard, we know it's not a HypernativeGuard
       if (!safe.guard) {
-        if (!cancelled) {
-          setIsHnGuard(false)
-          setLoading(false)
-        }
-        return
+        return Promise.resolve(false)
       }
 
-      // If we don't have a provider yet, wait
-      if (!web3ReadOnly) {
-        if (!cancelled) {
-          setIsHnGuard(false)
-          setLoading(true)
-        }
-        return
-      }
+      // Check if the guard is a HypernativeGuard
+      return isHypernativeGuard(safe.guard.value, web3ReadOnly)
+    },
+    [safe.guard, safeLoaded, web3ReadOnly],
+    false, // Don't clear data on re-fetch to avoid flickering
+  )
 
-      if (!cancelled) {
-        setLoading(true)
-      }
-
-      try {
-        const result = await isHypernativeGuard(safe.guard.value, web3ReadOnly)
-        if (!cancelled) {
-          setIsHnGuard(result)
-        }
-      } catch (error) {
-        console.error('[useIsHypernativeGuard] Error checking guard:', error)
-        if (!cancelled) {
-          setIsHnGuard(false)
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false)
-        }
-      }
-    }
-
-    checkGuard()
-
-    return () => {
-      cancelled = true
-    }
-  }, [safe.guard, safeLoaded, web3ReadOnly])
+  // Log errors for debugging
+  if (error) {
+    console.error('[useIsHypernativeGuard] Error checking guard:', error)
+  }
 
   return {
-    isHypernativeGuard: isHnGuard,
-    loading,
+    isHypernativeGuard: isHnGuard ?? false,
+    loading: !safeLoaded || (safeLoaded && !web3ReadOnly) || loading,
   }
 }
