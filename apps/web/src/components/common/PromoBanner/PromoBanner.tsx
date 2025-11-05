@@ -73,7 +73,7 @@ export const PromoBanner = ({
           <Track {...trackOpenProps}>
             <Link href={href} passHref>
               <Button
-                endIcon={endIcon ?? endIcon}
+                {...(endIcon && { endIcon })}
                 variant="text"
                 size="compact"
                 sx={{ mt: 0, p: 0, pt: 1, color: variant === 'dark' ? 'common.white' : 'static.main' }}
