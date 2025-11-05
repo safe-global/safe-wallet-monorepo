@@ -6,18 +6,15 @@ import { useEffect, useRef, useState, type ReactElement } from 'react'
 
 interface SafeShieldAnalysisLoadingProps {
   loading: boolean
-  isRecipientEmpty: boolean
+  analysesEmpty: boolean
 }
 
-export const SafeShieldAnalysisLoading = ({
-  isRecipientEmpty,
-  loading,
-}: SafeShieldAnalysisLoadingProps): ReactElement => {
+export const SafeShieldAnalysisLoading = ({ analysesEmpty, loading }: SafeShieldAnalysisLoadingProps): ReactElement => {
   const theme = useTheme()
   const [progress, setProgress] = useState(30)
   const isDarkMode = theme.palette.mode === 'dark'
   const color = isDarkMode ? 'primary' : 'secondary'
-  const showSkeleton = loading && isRecipientEmpty
+  const showSkeleton = loading && analysesEmpty
   const hasStarted = useRef(false)
 
   useEffect(() => {

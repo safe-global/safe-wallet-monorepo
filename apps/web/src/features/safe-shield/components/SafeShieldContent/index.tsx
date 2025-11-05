@@ -50,6 +50,7 @@ export const SafeShieldContent = ({
   const recipientEmpty = isEmpty(recipientResults)
   const contractEmpty = isEmpty(contractResults)
   const threatEmpty = isEmpty(threatResults) || isEmpty(threatResults.THREAT)
+  const analysesEmpty = recipientEmpty && contractEmpty && threatEmpty
   const allEmpty = recipientEmpty && contractEmpty && threatEmpty && !safeTx
 
   return (
@@ -63,7 +64,7 @@ export const SafeShieldContent = ({
           position: 'relative',
         }}
       >
-        {loading && <SafeShieldAnalysisLoading isRecipientEmpty={allEmpty} loading={loading} />}
+        {loading && <SafeShieldAnalysisLoading analysesEmpty={analysesEmpty} loading={loading} />}
 
         {!loading && allEmpty && <SafeShieldAnalysisEmpty />}
 
