@@ -16,11 +16,13 @@ appId: global.safe.mobileapp.ios
 
 # Verify address information is displayed
 # Either as identicon + address in "Interacted with" or in "Contract" field
-- assertVisible:
-    id: 'action-details-interacted-with'
-    containsDescendants:
-      - text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      id: 'action-details-interacted-with'
+      containsDescendants:
+        - text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
+      optional: true
+    timeout: 2000
 
 # Verify "Contract" field is visible (always shown in action details)
 - assertVisible: 'Contract'

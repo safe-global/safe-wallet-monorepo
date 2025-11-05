@@ -9,9 +9,11 @@ appId: global.safe.mobileapp.ios
 - assertVisible:
     text: 'Settings change'
 
-- assertVisible:
-    text: '.*addOwnerWithThreshold.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*addOwnerWithThreshold.*'
+      optional: true
+    timeout: 2000
 
 # Tap on the Settings change transaction text within the conflicting card
 # Using index 0 to ensure we tap the settings change transaction (it's the second one)

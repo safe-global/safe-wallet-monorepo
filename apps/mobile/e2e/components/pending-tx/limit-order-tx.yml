@@ -76,18 +76,22 @@ appId: global.safe.mobileapp.ios
       - text: '.*(Execution needed|Pending).*'
 
 # Widget fee row (scoped to details section)
-- assertVisible:
-    id: 'swap-order-table'
-    containsDescendants:
-      - text: 'Widget fee'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      id: 'swap-order-table'
+      containsDescendants:
+        - text: 'Widget fee'
+      optional: true
+    timeout: 2000
 
 # Expiry row (scoped to details section)
-- assertVisible:
-    id: 'swap-order-table'
-    containsDescendants:
-      - text: 'Expiry'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      id: 'swap-order-table'
+      containsDescendants:
+        - text: 'Expiry'
+      optional: true
+    timeout: 2000
 
 # ===========================================
 # Transaction Details Button

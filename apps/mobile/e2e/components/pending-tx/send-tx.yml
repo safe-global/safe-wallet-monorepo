@@ -8,9 +8,11 @@ appId: global.safe.mobileapp.ios
 
 - assertVisible: 'Confirm transaction'
 
-- assertVisible:
-    text: '.*-.*ETH.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*-.*ETH.*'
+      optional: true
+    timeout: 2000
 
 # ===========================================
 # Recipient Address

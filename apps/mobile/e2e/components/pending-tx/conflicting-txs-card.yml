@@ -34,54 +34,78 @@ jsEngine: graaljs
 # You can add up to 5 transactions
 # Note: Since Maestro doesn't support JS expressions in optional, we make all optional: true
 # The empty string fallback ensures assertions don't fail when items don't exist
-- assertVisible:
-    text: '.*${output.txTypes[0] || ""}.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*${output.txTypes[0] || ""}.*'
+      optional: true
+    timeout: 2000
 
-- assertVisible:
-    text: '.*${output.txTypes[1] || ""}.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*${output.txTypes[1] || ""}.*'
+      optional: true
+    timeout: 2000
 
-- assertVisible:
-    text: '.*${output.txTypes[2] || ""}.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*${output.txTypes[2] || ""}.*'
+      optional: true
+    timeout: 2000
 
-- assertVisible:
-    text: '.*${output.txTypes[3] || ""}.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*${output.txTypes[3] || ""}.*'
+      optional: true
+    timeout: 2000
 
-- assertVisible:
-    text: '.*${output.txTypes[4] || ""}.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*${output.txTypes[4] || ""}.*'
+      optional: true
+    timeout: 2000
 
-- assertVisible:
-    text: '.*${output.txTypes[5] || ""}.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*${output.txTypes[5] || ""}.*'
+      optional: true
+    timeout: 2000
 
 # Verify transaction details if provided (optional, matches corresponding TX_TYPES index)
-- assertVisible:
-    text: '.*${output.txDetails[0] || ""}.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*${output.txDetails[0] || ""}.*'
+      optional: true
+    timeout: 2000
 
-- assertVisible:
-    text: '.*${output.txDetails[1] || ""}.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*${output.txDetails[1] || ""}.*'
+      optional: true
+    timeout: 2000
 
-- assertVisible:
-    text: '.*${output.txDetails[2] || ""}.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*${output.txDetails[2] || ""}.*'
+      optional: true
+    timeout: 2000
 
-- assertVisible:
-    text: '.*${output.txDetails[3] || ""}.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*${output.txDetails[3] || ""}.*'
+      optional: true
+    timeout: 2000
 
-- assertVisible:
-    text: '.*${output.txDetails[4] || ""}.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*${output.txDetails[4] || ""}.*'
+      optional: true
+    timeout: 2000
 
-- assertVisible:
-    text: '.*${output.txDetails[5] || ""}.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*${output.txDetails[5] || ""}.*'
+      optional: true
+    timeout: 2000
 
 # Verify confirmations are shown
 # Use provided pattern or default to any confirmation format

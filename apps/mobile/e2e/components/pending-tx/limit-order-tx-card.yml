@@ -10,9 +10,11 @@ appId: global.safe.mobileapp.ios
     text: '.*Limit order.*'
 
 # Verify the token pair is visible (e.g., "COW > DAI")
-- assertVisible:
-    text: '.*[A-Z]{2,}.*>.*[A-Z]{2,}.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*[A-Z]{2,}.*>.*[A-Z]{2,}.*'
+      optional: true
+    timeout: 2000
 
 # Tap on the Limit order transaction text
 - tapOn:

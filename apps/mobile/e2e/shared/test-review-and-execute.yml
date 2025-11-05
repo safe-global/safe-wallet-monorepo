@@ -109,17 +109,23 @@ jsEngine: graaljs
     timeout: 1000
 
 # Verify Hashes tab content is visible (should show hash fields)
-- assertVisible:
-    text: '.*Domain hash.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*Domain hash.*'
+      optional: true
+    timeout: 2000
 
-- assertVisible:
-    text: '.*Message hash.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*Message hash.*'
+      optional: true
+    timeout: 2000
 
-- assertVisible:
-    text: '.*safeTxHash.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*safeTxHash.*'
+      optional: true
+    timeout: 2000
 
 # Tap on JSON tab
 - tapOn:
@@ -130,9 +136,11 @@ jsEngine: graaljs
     timeout: 1000
 
 # Verify JSON tab content is visible (should show JSON data)
-- assertVisible:
-    text: '.*"to".*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*"to".*'
+      optional: true
+    timeout: 2000
 
 # Tap back on Data tab
 - tapOn:
@@ -194,9 +202,11 @@ jsEngine: graaljs
             - assertVisible:
                 text: '.*Est\. network fee.*'
             # Verify estimated fee value is displayed (format: "< 0.00001 ETH" or similar)
-            - assertVisible:
-                text: '.*(<|≈).*\d+.*ETH.*'
-                optional: true
+            - extendedWaitUntil:
+                visible:
+                  text: '.*(<|≈).*\d+.*ETH.*'
+                  optional: true
+                timeout: 2000
 
       # ===========================================
       # Expected: Signer (User previously selected signer)
@@ -212,9 +222,11 @@ jsEngine: graaljs
             - assertVisible:
                 text: '.*Est\. network fee.*'
             # Verify estimated fee value is displayed (format: "< 0.00001 ETH" or similar)
-            - assertVisible:
-                text: '.*(<|≈).*\d+.*ETH.*'
-                optional: true
+            - extendedWaitUntil:
+                visible:
+                  text: '.*(<|≈).*\d+.*ETH.*'
+                  optional: true
+                timeout: 2000
             # Optionally verify we can still open the sheet and see both options
             - tapOn:
                 text: 'Execution method'
@@ -300,9 +312,11 @@ jsEngine: graaljs
       - assertVisible:
           text: '.*Est\. network fee.*'
       # Verify estimated fee value is displayed (format: "< 0.00001 ETH" or similar)
-      - assertVisible:
-          text: '.*(<|≈).*\d+.*ETH.*'
-          optional: true
+      - extendedWaitUntil:
+          visible:
+            text: '.*(<|≈).*\d+.*ETH.*'
+            optional: true
+          timeout: 2000
 
 # ===========================================
 # Failure Flow: Verify Cannot Estimate and Failure Warning (Execute Flow with Signer Only)

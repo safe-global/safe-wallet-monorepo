@@ -9,9 +9,11 @@ appId: global.safe.mobileapp.ios
 - assertVisible:
     text: 'Send'
 
-- assertVisible:
-    text: '.*0\.00002 ETH.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*0\.00002 ETH.*'
+      optional: true
+    timeout: 2000
 
 # Tap on the Send transaction text within the conflicting card
 # Using index 0 to ensure we tap the first transaction (Send)
