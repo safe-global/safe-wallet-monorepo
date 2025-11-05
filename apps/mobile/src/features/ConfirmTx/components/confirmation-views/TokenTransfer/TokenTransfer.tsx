@@ -1,10 +1,7 @@
 import React from 'react'
 import { Container } from '@/src/components/Container'
-import { View, YStack, Text, Button, H3 } from 'tamagui'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { View, YStack, Text, H3 } from 'tamagui'
 import { Logo } from '@/src/components/Logo'
-import { EthAddress } from '@/src/components/EthAddress'
-import { Identicon } from '@/src/components/Identicon'
 import { TransactionHeader } from '../../TransactionHeader'
 import {
   MultisigExecutionDetails,
@@ -17,7 +14,6 @@ import { RootState } from '@/src/store'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { Address } from '@/src/types/address'
 import { TokenAmount } from '@/src/components/TokenAmount'
-import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
 import { ParametersButton } from '@/src/components/ParametersButton'
 import { HashDisplay } from '@/src/components/HashDisplay'
 
@@ -34,8 +30,6 @@ export function TokenTransfer({ txId, txInfo, executionInfo, executedAt }: Token
   const { value, tokenSymbol, logoUri, decimals } = useTokenDetails(txInfo)
 
   const recipientAddress = txInfo.recipient.value as Address
-
-  const viewOnExplorer = useOpenExplorer(recipientAddress)
 
   return (
     <>
