@@ -2,19 +2,23 @@ appId: global.safe.mobileapp.ios
 jsEngine: graaljs
 ---
 # ===========================================
-# Review and Execute (Reusable Component)
+# Review and Execute/Confirm (Reusable Component)
 # ===========================================
-# Tests navigating to the Review and execute screen from Confirm transaction
-# and verifies all elements including tabs, execution method, and execute button
+# Tests navigating to either Review and execute or Review and confirm screen from Confirm transaction
+# and verifies all elements including tabs, execution method/signer, and execute/confirm button
 #
 # Environment variables:
-#   EXPECTED_SIGNER_PATTERN: Optional regex pattern to verify signer name/address in execution method
+#   EXPECTED_SIGNER_PATTERN: Optional regex pattern to verify signer name/address
 #                           Example: "Signer-2a3b" or ".*2a3b.*"
 #                           Defaults to ".*Signer.*" to match any signer
 #   TX_EXECUTION_STATUS: Transaction execution status - "succeed" or "fail"
 #                        If "succeed": verifies estimated network fee is displayed
 #                        If "fail": verifies "Can not estimate" and failure warning
 #                        Defaults to "succeed" if not provided
+#   IS_FULLY_SIGNED: Whether the transaction is fully signed - "true" or "false"
+#                   If "true": navigates to "Review and execute" screen (execution flow)
+#                   If "false": navigates to "Review and confirm" screen (signing flow)
+#                   Defaults to "true" if not provided
 
 # ===========================================
 # Navigate to Review and Execute
@@ -31,12 +35,33 @@ jsEngine: graaljs
     timeout: 2000
 
 # ===========================================
-# Verify Review and Execute Screen
+# Parse IS_FULLY_SIGNED and set up conditional flows
 # ===========================================
-# Verify we're on the Review and execute screen
-- assertVisible: 'Review and execute'
+# Parse the IS_FULLY_SIGNED environment variable using GraalJS
+# Default to "true" (fully signed = execute flow) if not provided
+- evalScript: '${output.isFullySigned = (typeof IS_FULLY_SIGNED !== "undefined" && IS_FULLY_SIGNED === "true") || (typeof IS_FULLY_SIGNED === "undefined")}'
 
-# Verify the instructional text is visible
+# Set flags for conditional execution
+- evalScript: '${output.isExecuteFlow = output.isFullySigned === true}'
+- evalScript: '${output.isConfirmFlow = output.isFullySigned === false}'
+
+# ===========================================
+# Verify Review Screen (Execute or Confirm)
+# ===========================================
+# Verify the correct screen title based on flow type
+- runFlow:
+    when:
+      true: '${output.isExecuteFlow === true}'
+    commands:
+      - assertVisible: 'Review and execute'
+
+- runFlow:
+    when:
+      true: '${output.isConfirmFlow === true}'
+    commands:
+      - assertVisible: 'Review and confirm'
+
+# Verify the instructional text is visible (same for both screens)
 - assertVisible:
     text: '.*Review this transaction data.*'
 
@@ -106,59 +131,79 @@ jsEngine: graaljs
     timeout: 1000
 
 # ===========================================
-# Verify Execution Method
+# Verify Footer Section (Execution Method or Signer Selection)
 # ===========================================
-# Verify "Execution method" label is visible
-- assertVisible:
-    text: 'Execution method'
+# Execute Flow: Verify Execution Method
+- runFlow:
+    when:
+      true: '${output.isExecuteFlow === true}'
+    commands:
+      # Verify "Execution method" label is visible
+      - assertVisible:
+          text: 'Execution method'
+      # Verify the active signer is visible in the execution method (before tapping)
+      - assertVisible:
+          text: '${EXPECTED_SIGNER_PATTERN || ".*Signer.*"}'
+      # Tap on execution method to open the sheet
+      - tapOn:
+          text: 'Execution method'
+      # Wait for sheet to open
+      - waitForAnimationToEnd:
+          timeout: 1000
+      # Verify the sheet opens (should show "Choose how to execute")
+      - assertVisible:
+          text: 'Choose how to execute'
+      # Verify the active signer is visible in the execution method sheet
+      - assertVisible:
+          text: '${EXPECTED_SIGNER_PATTERN || ".*Signer.*"}'
+      # Dismiss the sheet by swiping down
+      - swipe:
+          direction: 'DOWN'
+          startPoint: '50%,50%'
+          endPoint: '50%,80%'
+      # Wait for sheet to close
+      - waitForAnimationToEnd:
+          timeout: 1000
+      # Verify we're back on Review and execute screen
+      - assertVisible: 'Review and execute'
 
-# Verify the active signer is visible in the execution method (before tapping)
-# The signer should be displayed with its name/address on the Review and execute screen
-- assertVisible:
-    text: '${EXPECTED_SIGNER_PATTERN || ".*Signer.*"}'
-
-# Tap on execution method to open the sheet
-- tapOn:
-    text: 'Execution method'
-
-# Wait for sheet to open
-- waitForAnimationToEnd:
-    timeout: 1000
-
-# Verify the sheet opens (should show "Choose how to execute")
-- assertVisible:
-    text: 'Choose how to execute'
-
-# Verify the active signer is visible in the execution method sheet
-# The signer should be displayed with its name/address in the signers list
-- assertVisible:
-    text: '${EXPECTED_SIGNER_PATTERN || ".*Signer.*"}'
-
-# Dismiss the sheet by swiping down
-- swipe:
-    direction: 'DOWN'
-    startPoint: '50%,50%'
-    endPoint: '50%,80%'
-
-# Wait for sheet to close
-- waitForAnimationToEnd:
-    timeout: 1000
-
-# Verify we're back on Review and execute screen
-- assertVisible: 'Review and execute'
+# Confirm Flow: Verify Signer Selection
+- runFlow:
+    when:
+      true: '${output.isConfirmFlow === true}'
+    commands:
+      # Verify "Sign with" label is visible
+      - assertVisible:
+          text: 'Sign with'
+      # Verify the active signer is visible
+      - assertVisible:
+          text: '${EXPECTED_SIGNER_PATTERN || ".*Signer.*"}'
 
 # ===========================================
-# Verify Execute Transaction Button
+# Verify Footer Button (Execute or Confirm)
 # ===========================================
-# Verify the "Execute transaction" button is visible and active
-- assertVisible:
-    text: 'Execute transaction'
+# Execute Flow: Verify Execute Transaction Button
+- runFlow:
+    when:
+      true: '${output.isExecuteFlow === true}'
+    commands:
+      - assertVisible:
+          text: 'Execute transaction'
+
+# Confirm Flow: Verify Confirm Transaction Button
+- runFlow:
+    when:
+      true: '${output.isConfirmFlow === true}'
+    commands:
+      - assertVisible:
+          text: 'Confirm transaction'
 
 # ===========================================
 # Parse TX_EXECUTION_STATUS and set up conditional flows
 # ===========================================
 # Parse the TX_EXECUTION_STATUS environment variable using GraalJS
 # Default to "succeed" if not provided
+# Note: TX_EXECUTION_STATUS only applies to execute flow (fully signed transactions)
 - evalScript: '${output.txStatus = (typeof TX_EXECUTION_STATUS !== "undefined" && TX_EXECUTION_STATUS) ? TX_EXECUTION_STATUS.toLowerCase() : "succeed"}'
 
 # Set flags for conditional execution
@@ -166,12 +211,12 @@ jsEngine: graaljs
 - evalScript: '${output.isFailureFlow = output.txStatus === "fail"}'
 
 # ===========================================
-# Success Flow: Verify Estimated Network Fee
+# Success Flow: Verify Estimated Network Fee (Execute Flow Only)
 # ===========================================
-# Run success flow if TX_EXECUTION_STATUS is "succeed"
+# Run success flow if TX_EXECUTION_STATUS is "succeed" AND we're in execute flow
 - runFlow:
     when:
-      true: '${output.isSuccessFlow === true}'
+      true: '${output.isSuccessFlow === true && output.isExecuteFlow === true}'
     commands:
       # Verify "Est. network fee" label is visible
       - assertVisible:
@@ -182,12 +227,12 @@ jsEngine: graaljs
           optional: true
 
 # ===========================================
-# Failure Flow: Verify Cannot Estimate and Failure Warning
+# Failure Flow: Verify Cannot Estimate and Failure Warning (Execute Flow Only)
 # ===========================================
-# Run failure flow if TX_EXECUTION_STATUS is "fail"
+# Run failure flow if TX_EXECUTION_STATUS is "fail" AND we're in execute flow
 - runFlow:
     when:
-      true: '${output.isFailureFlow === true}'
+      true: '${output.isFailureFlow === true && output.isExecuteFlow === true}'
     commands:
       # Verify "Est. network fee" label is visible
       - assertVisible:

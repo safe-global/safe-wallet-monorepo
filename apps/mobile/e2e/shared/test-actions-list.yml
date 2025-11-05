@@ -1,9 +1,17 @@
 appId: global.safe.mobileapp.ios
 ---
 # ===========================================
-# Batch Transaction Actions List View
+# Actions List View (Reusable Component)
 # ===========================================
-- assertVisible: Actions
+# Tests the actions list view for transactions that have multiple actions
+# Can be used for both history transactions and pending transactions
+#
+# This component assumes you're already on the "Actions" screen
+# Call this after tapping on "Actions" from either:
+# - Transaction details screen (history)
+# - Confirm transaction screen (pending)
+
+- assertVisible: 'Actions'
 
 # Verify action items are visible as containers/cards
 # Actions are displayed in containers that can be tapped
@@ -13,12 +21,12 @@ appId: global.safe.mobileapp.ios
     optional: true
 
 # Verify action descriptions are visible
-# Format: "Send 0.01 ETH to" or "Send 0.05 ETH to"
+# Format: "Send 0.01 ETH to" or "Send 0.05 ETH to" or "approve" or "setPreSignature"
 - assertVisible:
-    text: '.*Send.*ETH.*to.*'
+    text: '.*(Send|approve|setPreSignature).*'
     optional: true
 
-# Verify addresses are visible in action items
+# Verify addresses are visible in action items (if applicable)
 - assertVisible:
     text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
     optional: true
@@ -30,4 +38,4 @@ appId: global.safe.mobileapp.ios
 
 # Test clicking on individual action items
 - runFlow:
-    file: ./action-detail.yml
+    file: ./test-action-detail.yml

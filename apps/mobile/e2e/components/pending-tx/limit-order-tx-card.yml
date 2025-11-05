@@ -1,0 +1,26 @@
+appId: global.safe.mobileapp.ios
+---
+# ===========================================
+# Limit Order Transaction Card (Pending)
+# ===========================================
+# Tests clicking on a limit order transaction in the pending transactions list
+# Limit orders appear in the "Next" section
+
+- assertVisible:
+    text: '.*Limit order.*'
+
+# Verify the token pair is visible (e.g., "COW > DAI")
+- assertVisible:
+    text: '.*[A-Z]{2,}.*>.*[A-Z]{2,}.*'
+    optional: true
+
+# Tap on the Limit order transaction text
+- tapOn:
+    text: '.*Limit order.*'
+    index: 0
+
+- runFlow:
+    file: ./limit-order-tx.yml
+
+- tapOn:
+    id: 'go-back'

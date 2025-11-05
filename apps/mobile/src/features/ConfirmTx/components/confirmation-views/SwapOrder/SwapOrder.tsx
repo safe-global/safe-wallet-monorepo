@@ -47,7 +47,7 @@ export function SwapOrder({ executionInfo, txInfo, decodedData, txId }: SwapOrde
       {isChangingFallbackHandler && <TwapFallbackHandlerWarning />}
       <SwapOrderHeader executionInfo={executionInfo} txInfo={txInfo} />
 
-      <ListTable items={swapItems}>
+      <ListTable items={swapItems} testID="swap-order-table">
         <ParametersButton txId={txId} />
       </ListTable>
       {recipientItems.length > 0 && <ListTable items={recipientItems} />}

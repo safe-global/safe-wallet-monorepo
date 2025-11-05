@@ -85,21 +85,20 @@ appId: global.safe.mobileapp.ios
 - assertVisible: 'Transaction checks'
 
 # Test Tenderly link if VERIFY_TENDERLY_LINK is set to "true" AND button is visible
-# Check VERIFY_TENDERLY_LINK and set a pattern that will only match if we should test
-- evalScript: '${output.tenderlyButtonPattern = (typeof VERIFY_TENDERLY_LINK !== "undefined" && VERIFY_TENDERLY_LINK === "true") ? "View details on Tenderly" : "NEVER_MATCH_TENDERLY_TEST_DISABLED_12345"}'
+# Check VERIFY_TENDERLY_LINK and set a flag for conditional execution
+- evalScript: '${output.shouldVerifyTenderly = (typeof VERIFY_TENDERLY_LINK !== "undefined" && VERIFY_TENDERLY_LINK === "true")}'
 
 # Only test Tenderly link if VERIFY_TENDERLY_LINK is "true" and button is visible
-# The pattern will never match if VERIFY_TENDERLY_LINK is not "true", so the when clause won't execute
+# Use true condition to avoid waiting when VERIFY_TENDERLY_LINK is false
 - runFlow:
     when:
+      true: '${output.shouldVerifyTenderly === true}'
       visible:
-        text: '${output.tenderlyButtonPattern}'
+        text: 'View details on Tenderly'
     commands:
       - assertVisible: 'View details on Tenderly'
       - tapOn: 'View details on Tenderly'
-      # Wait for external link to open (Safari on iOS)
-      - waitForAnimationToEnd:
-          timeout: 3000
+
       # On iOS, external links open Safari. To return to the app:
       # Try multiple approaches to navigate back
       # 1. Look for breadcrumb (if link handler provides in-app return)
