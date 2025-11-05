@@ -2,7 +2,6 @@ import css from './styles.module.css'
 import { Box, Button, Card, IconButton, Stack, Typography } from '@mui/material'
 import Image, { type StaticImageData } from 'next/image'
 import Link, { type LinkProps } from 'next/link'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import CloseIcon from '@mui/icons-material/Close'
 import Track from '@/components/common/Track'
 import type { ReactNode } from 'react'
@@ -20,7 +19,7 @@ export interface PromoBannerProps {
   imageAlt?: string
   endIcon?: ReactNode
   variant?: 'default' | 'dark'
-  customBackground?: string
+  customClass?: string
 }
 
 export const PromoBanner = ({
@@ -35,13 +34,16 @@ export const PromoBanner = ({
   trackOpenProps,
   trackHideProps,
   variant = 'default',
-  customBackground
+  customClass
 }: PromoBannerProps) => {
+
+  const darkBackgroundGradient = 'linear-gradient(90deg, #1c5538 0%, #1c1c1c 54.327%, #1c1c1c 100%)'
+
   return (
     <Card
-      className={`${css.banner} ${variant === 'dark' ? css.dark : ''}`}
+      className={`${css.banner} ${customClass || ''}`}
       style={{ borderRadius: '12px' }}
-      sx={customBackground ? { background: customBackground } : undefined}
+      sx={customClass ? { background: darkBackgroundGradient } : undefined}
     >
       <Stack
         direction={{ xs: 'row', md: 'row' }}
@@ -63,7 +65,7 @@ export const PromoBanner = ({
           </Typography>
 
           {description ? (
-            <Typography variant="body2" color="text.secondary" sx={{ pt: 0.5 }} className={css.bannerText}>
+            <Typography variant="body2" color="primary.light" sx={{ pt: 0.5 }} className={css.bannerText}>
               {description}
             </Typography>
           ) : null}
@@ -71,7 +73,7 @@ export const PromoBanner = ({
           <Track {...trackOpenProps}>
             <Link href={href} passHref>
               <Button
-                endIcon={endIcon ?? <ChevronRightIcon fontSize="small" />}
+                endIcon={endIcon ?? endIcon}
                 variant="text"
                 size="compact"
                 sx={{ mt: 0, p: 0, pt: 1, color: variant === 'dark' ? 'common.white' : 'static.main' }}
@@ -92,11 +94,10 @@ export const PromoBanner = ({
             onClick={onDismiss}
             sx={{
               position: 'absolute',
-              top: 2,
-              right: 2,
               p: 1.25,
-              width: 36,
-              height: 36,
+              pt: 1.5,
+              width: 16,
+              height: 16,
               '&:hover': { backgroundColor: 'transparent' },
             }}
           >
