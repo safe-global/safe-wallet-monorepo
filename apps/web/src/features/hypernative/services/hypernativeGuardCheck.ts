@@ -9,8 +9,7 @@ import { logError, Errors } from '@/services/exceptions'
  * Deployment example: Sepolia at 0x4784e9bF408F649D04A0a3294e87B0c74C5A3020
  */
 export const HYPERNATIVE_GUARD_CODE_HASHES: string[] = [
-  // TODO: Add the actual code hash for HypernativeGuard
-  // This hash will be the same across all chains
+  '0x1e1d445308b347e310f37bba7088b6d0d640faa626e0bbbba35296a1112f9b78', // HypernativeGuard v1
 ]
 
 /**
