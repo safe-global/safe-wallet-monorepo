@@ -224,4 +224,157 @@ describe('useIsHypernativeGuard', () => {
     expect(isHypernativeGuardSpy).toHaveBeenNthCalledWith(1, firstGuardAddress, mockProvider)
     expect(isHypernativeGuardSpy).toHaveBeenNthCalledWith(2, secondGuardAddress, mockProvider)
   })
+
+  it('should cancel stale requests when dependencies change (race condition)', async () => {
+    const guardAddress = '0x4784e9bF408F649D04A0a3294e87B0c74C5A3020'
+
+    // Create a promise we can control
+    let resolveFirst: (value: boolean) => void
+    const firstPromise = new Promise<boolean>((resolve) => {
+      resolveFirst = resolve
+    })
+
+    const isHypernativeGuardSpy = jest
+      .spyOn(hypernativeGuardCheck, 'isHypernativeGuard')
+      .mockReturnValueOnce(firstPromise)
+      .mockResolvedValueOnce(false)
+
+    const useSafeInfoSpy = jest.spyOn(useSafeInfo, 'default').mockReturnValue({
+      safe: extendedSafeInfoBuilder()
+        .with({
+          guard: {
+            value: guardAddress,
+            name: 'HypernativeGuard',
+            logoUri: null,
+          },
+        })
+        .build(),
+      safeAddress: '0x1234567890123456789012345678901234567890',
+      safeLoaded: true,
+      safeLoading: false,
+      safeError: undefined,
+    })
+
+    const { result, rerender } = renderHook(() => useIsHypernativeGuard())
+
+    // First request is pending
+    expect(result.current.loading).toBe(true)
+
+    // Change to a different guard before first resolves
+    useSafeInfoSpy.mockReturnValue({
+      safe: extendedSafeInfoBuilder()
+        .with({
+          guard: {
+            value: '0x9999999999999999999999999999999999999999',
+            name: 'OtherGuard',
+            logoUri: null,
+          },
+        })
+        .build(),
+      safeAddress: '0x1234567890123456789012345678901234567890',
+      safeLoaded: true,
+      safeLoading: false,
+      safeError: undefined,
+    })
+
+    rerender()
+
+    // Second request completes first
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+      expect(result.current.isHypernativeGuard).toBe(false)
+    })
+
+    // Now resolve the first request (should be ignored due to cancellation)
+    resolveFirst!(true)
+
+    // Wait a bit to ensure the stale result doesn't update state
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    // Should still show result from second request, not first
+    expect(result.current.isHypernativeGuard).toBe(false)
+  })
+
+  it('should reset isHnGuard to false when safe is not loaded', async () => {
+    const guardAddress = '0x4784e9bF408F649D04A0a3294e87B0c74C5A3020'
+    jest.spyOn(hypernativeGuardCheck, 'isHypernativeGuard').mockResolvedValue(true)
+
+    const useSafeInfoSpy = jest.spyOn(useSafeInfo, 'default').mockReturnValue({
+      safe: extendedSafeInfoBuilder()
+        .with({
+          guard: {
+            value: guardAddress,
+            name: 'HypernativeGuard',
+            logoUri: null,
+          },
+        })
+        .build(),
+      safeAddress: '0x1234567890123456789012345678901234567890',
+      safeLoaded: true,
+      safeLoading: false,
+      safeError: undefined,
+    })
+
+    const { result, rerender } = renderHook(() => useIsHypernativeGuard())
+
+    // Wait for initial check to complete
+    await waitFor(() => {
+      expect(result.current.isHypernativeGuard).toBe(true)
+      expect(result.current.loading).toBe(false)
+    })
+
+    // Change to safe not loaded
+    useSafeInfoSpy.mockReturnValue({
+      safe: extendedSafeInfoBuilder().build(),
+      safeAddress: '',
+      safeLoaded: false,
+      safeLoading: true,
+      safeError: undefined,
+    })
+
+    rerender()
+
+    // Should reset isHnGuard to false and set loading to true
+    expect(result.current.isHypernativeGuard).toBe(false)
+    expect(result.current.loading).toBe(true)
+  })
+
+  it('should reset isHnGuard to false when provider becomes unavailable', async () => {
+    const guardAddress = '0x4784e9bF408F649D04A0a3294e87B0c74C5A3020'
+    jest.spyOn(hypernativeGuardCheck, 'isHypernativeGuard').mockResolvedValue(true)
+    const web3Spy = jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockProvider)
+
+    jest.spyOn(useSafeInfo, 'default').mockReturnValue({
+      safe: extendedSafeInfoBuilder()
+        .with({
+          guard: {
+            value: guardAddress,
+            name: 'HypernativeGuard',
+            logoUri: null,
+          },
+        })
+        .build(),
+      safeAddress: '0x1234567890123456789012345678901234567890',
+      safeLoaded: true,
+      safeLoading: false,
+      safeError: undefined,
+    })
+
+    const { result, rerender } = renderHook(() => useIsHypernativeGuard())
+
+    // Wait for initial check to complete
+    await waitFor(() => {
+      expect(result.current.isHypernativeGuard).toBe(true)
+      expect(result.current.loading).toBe(false)
+    })
+
+    // Provider becomes unavailable
+    web3Spy.mockReturnValue(undefined)
+
+    rerender()
+
+    // Should reset isHnGuard to false and set loading to true
+    expect(result.current.isHypernativeGuard).toBe(false)
+    expect(result.current.loading).toBe(true)
+  })
 })
