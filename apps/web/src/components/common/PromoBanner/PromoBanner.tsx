@@ -34,9 +34,8 @@ export const PromoBanner = ({
   trackOpenProps,
   trackHideProps,
   customClass,
-  customBackground
+  customBackground,
 }: PromoBannerProps) => {
-
   return (
     <Card
       className={`${css.banner} ${customClass || ''}`}
@@ -53,12 +52,7 @@ export const PromoBanner = ({
           <Image className={css.bannerImage} src={imageSrc} alt={imageAlt || ''} width={95} height={95} />
         ) : null}
         <Box>
-          <Typography
-            variant="h4"
-            fontWeight="bold"
-            color="common.white"
-            className={css.bannerText}
-          >
+          <Typography variant="h4" fontWeight="bold" color="common.white" className={css.bannerText}>
             {title}
           </Typography>
 
@@ -74,7 +68,7 @@ export const PromoBanner = ({
                 {...(endIcon && { endIcon })}
                 variant="text"
                 size="compact"
-                sx={{ mt: 0, p: 0, pt: 1, color: "common.white" }}
+                sx={{ mt: 0, p: 0, pt: 1, color: 'common.white' }}
                 color="static"
               >
                 {ctaLabel}
@@ -99,9 +93,7 @@ export const PromoBanner = ({
               '&:hover': { backgroundColor: 'transparent' },
             }}
           >
-            <CloseIcon
-              fontSize="medium"
-              sx={{ color: "common.white", opacity: 0.6 }} />
+            <CloseIcon fontSize="medium" sx={{ color: 'common.white', opacity: 0.6 }} />
           </IconButton>
         </Track>
       )}
