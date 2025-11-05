@@ -15,7 +15,6 @@ export const useHideAssets = (closeDialog: () => void) => {
 
   const [assetsToHide, setAssetsToHide] = useState<string[]>([])
   const [assetsToUnhide, setAssetsToUnhide] = useState<string[]>([])
-  const [hidingAsset, setHidingAsset] = useState<string>()
   const hiddenAssets = useHiddenTokens()
 
   const toggleAsset = useCallback(
@@ -75,7 +74,6 @@ export const useHideAssets = (closeDialog: () => void) => {
     toggleAsset,
     isAssetSelected,
     deselectAll,
-    hidingAsset,
   }
 }
 
