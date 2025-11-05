@@ -74,4 +74,12 @@ export default [
       ],
     },
   },
+  // Override for story files: allow type-only imports from @storybook/react
+  // since @storybook/nextjs re-exports these types but TypeScript doesn't always resolve them correctly
+  {
+    files: ['**/*.stories.tsx', '**/*.stories.ts'],
+    rules: {
+      'storybook/no-renderer-packages': 'off',
+    },
+  },
 ]
