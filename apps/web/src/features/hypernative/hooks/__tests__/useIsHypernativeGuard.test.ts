@@ -82,7 +82,6 @@ describe('useIsHypernativeGuard', () => {
             name: 'HypernativeGuard',
             logoUri: null,
           },
-          chainId: '11155111',
         })
         .build(),
       safeAddress: '0x1234567890123456789012345678901234567890',
@@ -98,7 +97,7 @@ describe('useIsHypernativeGuard', () => {
       expect(result.current.isHypernativeGuard).toBe(true)
     })
 
-    expect(hypernativeGuardCheck.isHypernativeGuard).toHaveBeenCalledWith(guardAddress, mockProvider, '11155111')
+    expect(hypernativeGuardCheck.isHypernativeGuard).toHaveBeenCalledWith(guardAddress, mockProvider)
   })
 
   it('should return false when guard is not a HypernativeGuard', async () => {
@@ -112,7 +111,6 @@ describe('useIsHypernativeGuard', () => {
             name: 'SomeOtherGuard',
             logoUri: null,
           },
-          chainId: '11155111',
         })
         .build(),
       safeAddress: '0x1234567890123456789012345678901234567890',
@@ -128,7 +126,7 @@ describe('useIsHypernativeGuard', () => {
       expect(result.current.isHypernativeGuard).toBe(false)
     })
 
-    expect(hypernativeGuardCheck.isHypernativeGuard).toHaveBeenCalledWith(guardAddress, mockProvider, '11155111')
+    expect(hypernativeGuardCheck.isHypernativeGuard).toHaveBeenCalledWith(guardAddress, mockProvider)
   })
 
   it('should handle errors gracefully and return false', async () => {
@@ -143,7 +141,6 @@ describe('useIsHypernativeGuard', () => {
             name: 'HypernativeGuard',
             logoUri: null,
           },
-          chainId: '11155111',
         })
         .build(),
       safeAddress: '0x1234567890123456789012345678901234567890',
@@ -184,7 +181,6 @@ describe('useIsHypernativeGuard', () => {
             name: 'FirstGuard',
             logoUri: null,
           },
-          chainId: '11155111',
         })
         .build(),
       safeAddress: '0x1234567890123456789012345678901234567890',
@@ -209,7 +205,6 @@ describe('useIsHypernativeGuard', () => {
             name: 'SecondGuard',
             logoUri: null,
           },
-          chainId: '11155111',
         })
         .build(),
       safeAddress: '0x1234567890123456789012345678901234567890',
@@ -226,68 +221,7 @@ describe('useIsHypernativeGuard', () => {
     })
 
     expect(isHypernativeGuardSpy).toHaveBeenCalledTimes(2)
-    expect(isHypernativeGuardSpy).toHaveBeenNthCalledWith(1, firstGuardAddress, mockProvider, '11155111')
-    expect(isHypernativeGuardSpy).toHaveBeenNthCalledWith(2, secondGuardAddress, mockProvider, '11155111')
-  })
-
-  it('should re-check when chain ID changes', async () => {
-    const guardAddress = '0x4784e9bF408F649D04A0a3294e87B0c74C5A3020'
-    const isHypernativeGuardSpy = jest
-      .spyOn(hypernativeGuardCheck, 'isHypernativeGuard')
-      .mockResolvedValueOnce(false)
-      .mockResolvedValueOnce(true)
-
-    const useSafeInfoSpy = jest.spyOn(useSafeInfo, 'default').mockReturnValue({
-      safe: extendedSafeInfoBuilder()
-        .with({
-          guard: {
-            value: guardAddress,
-            name: 'HypernativeGuard',
-            logoUri: null,
-          },
-          chainId: '11155111',
-        })
-        .build(),
-      safeAddress: '0x1234567890123456789012345678901234567890',
-      safeLoaded: true,
-      safeLoading: false,
-      safeError: undefined,
-    })
-
-    const { result, rerender } = renderHook(() => useIsHypernativeGuard())
-
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false)
-      expect(result.current.isHypernativeGuard).toBe(false)
-    })
-
-    // Update the chain ID
-    useSafeInfoSpy.mockReturnValue({
-      safe: extendedSafeInfoBuilder()
-        .with({
-          guard: {
-            value: guardAddress,
-            name: 'HypernativeGuard',
-            logoUri: null,
-          },
-          chainId: '1',
-        })
-        .build(),
-      safeAddress: '0x1234567890123456789012345678901234567890',
-      safeLoaded: true,
-      safeLoading: false,
-      safeError: undefined,
-    })
-
-    rerender()
-
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false)
-      expect(result.current.isHypernativeGuard).toBe(true)
-    })
-
-    expect(isHypernativeGuardSpy).toHaveBeenCalledTimes(2)
-    expect(isHypernativeGuardSpy).toHaveBeenNthCalledWith(1, guardAddress, mockProvider, '11155111')
-    expect(isHypernativeGuardSpy).toHaveBeenNthCalledWith(2, guardAddress, mockProvider, '1')
+    expect(isHypernativeGuardSpy).toHaveBeenNthCalledWith(1, firstGuardAddress, mockProvider)
+    expect(isHypernativeGuardSpy).toHaveBeenNthCalledWith(2, secondGuardAddress, mockProvider)
   })
 })

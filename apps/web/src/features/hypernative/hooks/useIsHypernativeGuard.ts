@@ -43,7 +43,7 @@ export const useIsHypernativeGuard = (): HypernativeGuardCheckResult => {
       setLoading(true)
 
       try {
-        const result = await isHypernativeGuard(safe.guard.value, web3ReadOnly, safe.chainId)
+        const result = await isHypernativeGuard(safe.guard.value, web3ReadOnly)
         setIsHnGuard(result)
       } catch (error) {
         console.error('[useIsHypernativeGuard] Error checking guard:', error)
@@ -54,7 +54,7 @@ export const useIsHypernativeGuard = (): HypernativeGuardCheckResult => {
     }
 
     checkGuard()
-  }, [safe.guard, safe.chainId, safeLoaded, web3ReadOnly])
+  }, [safe.guard, safeLoaded, web3ReadOnly])
 
   return {
     isHypernativeGuard: isHnGuard,

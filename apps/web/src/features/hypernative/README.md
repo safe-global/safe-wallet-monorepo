@@ -33,28 +33,24 @@ import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 async function checkGuard() {
   const provider = useWeb3ReadOnly()
   const guardAddress = '0x4784e9bF408F649D04A0a3294e87B0c74C5A3020'
-  const chainId = '11155111' // Sepolia
 
-  const result = await isHypernativeGuard(guardAddress, provider, chainId)
+  const result = await isHypernativeGuard(guardAddress, provider)
   console.log('Is HypernativeGuard:', result)
 }
 ```
 
-## Adding New Deployments
+## Adding New Code Hashes
 
-When HypernativeGuard is deployed to a new network or a new version is released:
+HypernativeGuard uses the same bytecode across all chains. When a new version is deployed:
 
-1. Update the RPC URL in `scripts/fetchGuardCodeHash.ts`
-2. Run the script to get the code hash:
-   ```bash
-   npx ts-node src/features/hypernative/scripts/fetchGuardCodeHash.ts
-   ```
-3. Add the returned hash to `HYPERNATIVE_GUARD_CODE_HASHES` in `services/hypernativeGuardCheck.ts`:
+1. Fetch the bytecode from any deployment (e.g., Sepolia at `0x4784e9bF408F649D04A0a3294e87B0c74C5A3020`)
+2. Hash it using `keccak256`
+3. Add the hash to `HYPERNATIVE_GUARD_CODE_HASHES` in `services/hypernativeGuardCheck.ts`:
    ```typescript
-   export const HYPERNATIVE_GUARD_CODE_HASHES: Record<string, string[]> = {
-     '11155111': ['0xabcd1234...'], // Sepolia
-     '1': ['0xef567890...'],         // Mainnet
-   }
+   export const HYPERNATIVE_GUARD_CODE_HASHES: string[] = [
+     '0xabcd1234...', // Version 1.0.0
+     '0xef567890...', // Version 2.0.0
+   ]
    ```
 
 ## How It Works
@@ -62,7 +58,7 @@ When HypernativeGuard is deployed to a new network or a new version is released:
 1. The hook (`useIsHypernativeGuard`) checks if the current Safe (from `useSafeInfo`) has a guard set
 2. If a guard exists, it fetches the contract bytecode using `web3ReadOnly.getCode()`
 3. The bytecode is hashed using `keccak256`
-4. The hash is compared against known HypernativeGuard code hashes for the current chain
+4. The hash is compared against known HypernativeGuard code hashes
 5. Returns `true` if there's a match, `false` otherwise
 
 ## Architecture
@@ -78,8 +74,8 @@ services/
   __tests__/
     hypernativeGuardCheck.test.ts
 
-scripts/
-  fetchGuardCodeHash.ts     - Utility to fetch code hashes
+examples/
+  HypernativeGuardBadge.tsx - Example components showing usage
 ```
 
 ## Testing
@@ -89,9 +85,13 @@ Run the tests:
 npm test -- --testPathPattern="hypernativeGuardCheck|useIsHypernativeGuard"
 ```
 
+All 17 tests should pass.
+
 ## Notes
 
 - The bytecode comparison is done at the bytecode level, not the source code level
-- Different compiler versions or settings may produce different bytecode, requiring multiple hashes per version
+- HypernativeGuard uses the same bytecode across all chains (deterministic deployment)
+- Different compiler versions or settings may produce different bytecode, requiring multiple hashes
 - Empty guard (no guard set) returns `false` immediately without any blockchain calls
-- Chains without known HypernativeGuard deployments return `false` without fetching bytecode
+- No known hashes configured returns `false` without fetching bytecode
+- Errors are logged using `logError(Errors._809, error)` for monitoring

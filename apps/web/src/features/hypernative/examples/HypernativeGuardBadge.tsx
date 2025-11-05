@@ -1,6 +1,9 @@
 /**
- * Example component showing how to use useIsHypernativeGuard hook
- * This is a demo component showing usage patterns
+ * Example components showing how to use useIsHypernativeGuard hook
+ * These are demo components showing various usage patterns
+ *
+ * HypernativeGuard uses the same bytecode across all chains,
+ * so no chain-specific logic is needed
  */
 
 import { useIsHypernativeGuard } from '../hooks'
