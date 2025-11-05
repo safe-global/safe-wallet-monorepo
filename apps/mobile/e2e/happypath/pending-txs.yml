@@ -1,0 +1,58 @@
+appId: global.safe.mobileapp.ios
+---
+# Pending Transactions E2E Test Happy Path
+# Sets up the app with mocked safes and signer for pending transaction tests
+
+- runFlow:
+    file: ../shared/clean-app-start.yml
+
+- tapOn:
+    id: 'e2ePendingTxs'
+
+- assertVisible:
+    id: 'home-tab'
+
+# Verify we're on the home screen with the first pending tx safe loaded
+- assertVisible:
+    id: 'dropdown-label-view'
+    index: 0
+
+# ===========================================
+# Navigate to Pending Transactions
+# ===========================================
+# Tap on the pending transactions banner
+- tapOn:
+    id: 'pending-transactions'
+
+- assertVisible:
+    id: 'pending-tx-list'
+
+# Verify we see the "Next" section header
+- assertVisible:
+    text: 'Next'
+
+# ===========================================
+# Conflicting Transactions
+# ===========================================
+# Test the conflicting transactions card
+# Pass comma-separated environment variables for the expected transaction types and details
+- runFlow:
+    file: ../components/pending-tx/conflicting-txs-card.yml
+    env:
+      TX_TYPES: 'Send,Settings change'
+      TX_DETAILS: '0\.00002 ETH,addOwnerWithThreshold'
+      CONFIRMATIONS_PATTERN: '.*1/1.*'
+
+# ===========================================
+# First Transaction: Send Transaction
+# ===========================================
+# Click on the first send transaction in the conflicting group
+- runFlow:
+    file: ../components/pending-tx/send-tx-card.yml
+
+# ===========================================
+# Second Transaction: Settings Change Transaction
+# ===========================================
+# Click on the second settings change transaction in the conflicting group
+- runFlow:
+    file: ../components/pending-tx/settings-change-tx-card.yml

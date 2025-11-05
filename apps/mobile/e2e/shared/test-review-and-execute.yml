@@ -1,0 +1,203 @@
+appId: global.safe.mobileapp.ios
+jsEngine: graaljs
+---
+# ===========================================
+# Review and Execute (Reusable Component)
+# ===========================================
+# Tests navigating to the Review and execute screen from Confirm transaction
+# and verifies all elements including tabs, execution method, and execute button
+#
+# Environment variables:
+#   EXPECTED_SIGNER_PATTERN: Optional regex pattern to verify signer name/address in execution method
+#                           Example: "Signer-2a3b" or ".*2a3b.*"
+#                           Defaults to ".*Signer.*" to match any signer
+#   TX_EXECUTION_STATUS: Transaction execution status - "succeed" or "fail"
+#                        If "succeed": verifies estimated network fee is displayed
+#                        If "fail": verifies "Can not estimate" and failure warning
+#                        Defaults to "succeed" if not provided
+
+# ===========================================
+# Navigate to Review and Execute
+# ===========================================
+# Tap the Continue button on Confirm transaction screen
+- assertVisible:
+    text: 'Continue'
+
+- tapOn:
+    text: 'Continue'
+
+# Wait for navigation to complete
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# ===========================================
+# Verify Review and Execute Screen
+# ===========================================
+# Verify we're on the Review and execute screen
+- assertVisible: 'Review and execute'
+
+# Verify the instructional text is visible
+- assertVisible:
+    text: '.*Review this transaction data.*'
+
+# ===========================================
+# Verify Tabs
+# ===========================================
+# Verify all three tabs are visible: Data, Hashes, JSON
+- assertVisible:
+    text: 'Data'
+
+- assertVisible:
+    text: 'Hashes'
+
+- assertVisible:
+    text: 'JSON'
+
+# ===========================================
+# Test Data Tab (default selected)
+# ===========================================
+# Verify Data tab content using existing comprehensive tests
+- runFlow:
+    file: ../components/advanced-details/data.yml
+
+# ===========================================
+# Test Tab Switching
+# ===========================================
+# Tap on Hashes tab
+- tapOn:
+    text: 'Hashes'
+
+# Wait for tab content to load
+- waitForAnimationToEnd:
+    timeout: 1000
+
+# Verify Hashes tab content is visible (should show hash fields)
+- assertVisible:
+    text: '.*Domain hash.*'
+    optional: true
+
+- assertVisible:
+    text: '.*Message hash.*'
+    optional: true
+
+- assertVisible:
+    text: '.*safeTxHash.*'
+    optional: true
+
+# Tap on JSON tab
+- tapOn:
+    text: 'JSON'
+
+# Wait for tab content to load
+- waitForAnimationToEnd:
+    timeout: 1000
+
+# Verify JSON tab content is visible (should show JSON data)
+- assertVisible:
+    text: '.*"to".*'
+    optional: true
+
+# Tap back on Data tab
+- tapOn:
+    text: 'Data'
+
+# Wait for tab content to load
+- waitForAnimationToEnd:
+    timeout: 1000
+
+# ===========================================
+# Verify Execution Method
+# ===========================================
+# Verify "Execution method" label is visible
+- assertVisible:
+    text: 'Execution method'
+
+# Verify the active signer is visible in the execution method (before tapping)
+# The signer should be displayed with its name/address on the Review and execute screen
+- assertVisible:
+    text: '${EXPECTED_SIGNER_PATTERN || ".*Signer.*"}'
+
+# Tap on execution method to open the sheet
+- tapOn:
+    text: 'Execution method'
+
+# Wait for sheet to open
+- waitForAnimationToEnd:
+    timeout: 1000
+
+# Verify the sheet opens (should show "Choose how to execute")
+- assertVisible:
+    text: 'Choose how to execute'
+
+# Verify the active signer is visible in the execution method sheet
+# The signer should be displayed with its name/address in the signers list
+- assertVisible:
+    text: '${EXPECTED_SIGNER_PATTERN || ".*Signer.*"}'
+
+# Dismiss the sheet by swiping down
+- swipe:
+    direction: 'DOWN'
+    startPoint: '50%,50%'
+    endPoint: '50%,80%'
+
+# Wait for sheet to close
+- waitForAnimationToEnd:
+    timeout: 1000
+
+# Verify we're back on Review and execute screen
+- assertVisible: 'Review and execute'
+
+# ===========================================
+# Verify Execute Transaction Button
+# ===========================================
+# Verify the "Execute transaction" button is visible and active
+- assertVisible:
+    text: 'Execute transaction'
+
+# ===========================================
+# Parse TX_EXECUTION_STATUS and set up conditional flows
+# ===========================================
+# Parse the TX_EXECUTION_STATUS environment variable using GraalJS
+# Default to "succeed" if not provided
+- evalScript: '${output.txStatus = (typeof TX_EXECUTION_STATUS !== "undefined" && TX_EXECUTION_STATUS) ? TX_EXECUTION_STATUS.toLowerCase() : "succeed"}'
+
+# Set flags for conditional execution
+- evalScript: '${output.isSuccessFlow = output.txStatus === "succeed"}'
+- evalScript: '${output.isFailureFlow = output.txStatus === "fail"}'
+
+# ===========================================
+# Success Flow: Verify Estimated Network Fee
+# ===========================================
+# Run success flow if TX_EXECUTION_STATUS is "succeed"
+- runFlow:
+    when:
+      true: '${output.isSuccessFlow === true}'
+    commands:
+      # Verify "Est. network fee" label is visible
+      - assertVisible:
+          text: '.*Est\. network fee.*'
+      # Verify estimated fee value is displayed (format: "< 0.00001 ETH" or similar)
+      - assertVisible:
+          text: '.*(<|≈).*\d+.*ETH.*'
+          optional: true
+
+# ===========================================
+# Failure Flow: Verify Cannot Estimate and Failure Warning
+# ===========================================
+# Run failure flow if TX_EXECUTION_STATUS is "fail"
+- runFlow:
+    when:
+      true: '${output.isFailureFlow === true}'
+    commands:
+      # Verify "Est. network fee" label is visible
+      - assertVisible:
+          text: '.*Est\. network fee.*'
+      # Verify "Can not estimate." message is displayed
+      - assertVisible:
+          text: '.*Can not estimate.*'
+      # Verify failure warning is displayed
+      - assertVisible:
+          text: '.*This transaction will most likely fail.*'
+
+- tapOn:
+    id: 'go-back'
