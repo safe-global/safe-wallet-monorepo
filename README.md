@@ -1,0 +1,1 @@
+# Storybook Screenshots Storage
