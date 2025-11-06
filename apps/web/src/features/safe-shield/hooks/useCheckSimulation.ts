@@ -4,7 +4,7 @@ import { TxInfoContext } from '@/components/tx-flow/TxInfoProvider'
 import { useNestedTransaction } from '../components/useNestedTransaction'
 import { isTxSimulationEnabled } from '@safe-global/utils/components/tx/security/tenderly/utils'
 import { isSimulationError } from '@safe-global/utils/components/tx/security/tenderly/utils'
-import { SafeTransaction } from '@safe-global/types-kit'
+import { type SafeTransaction } from '@safe-global/types-kit'
 
 export const useCheckSimulation = (safeTx?: SafeTransaction) => {
   const chain = useCurrentChain()
