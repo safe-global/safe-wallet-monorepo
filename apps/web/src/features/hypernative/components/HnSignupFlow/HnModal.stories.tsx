@@ -42,35 +42,3 @@ export const Default: Story = {
     ),
   },
 }
-
-export const SmallSize: Story = {
-  args: {
-    open: true,
-    onClose: () => console.log('Modal closed'),
-    maxWidth: 'sm',
-    children: (
-      <Box p={4}>
-        <Typography variant="h4" gutterBottom>
-          Small Modal
-        </Typography>
-        <Typography>This is a small modal.</Typography>
-      </Box>
-    ),
-  },
-}
-
-export const LargeSize: Story = {
-  args: {
-    open: true,
-    onClose: () => console.log('Modal closed'),
-    maxWidth: 'lg',
-    children: (
-      <Box p={4}>
-        <Typography variant="h4" gutterBottom>
-          Large Modal
-        </Typography>
-        <Typography>This is a large modal.</Typography>
-      </Box>
-    ),
-  },
-}

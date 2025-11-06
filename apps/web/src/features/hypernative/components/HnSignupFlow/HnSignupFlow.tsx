@@ -52,7 +52,7 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
   }
 
   return (
-    <HnModal open={open} onClose={onClose} maxWidth="lg">
+    <HnModal open={open} onClose={onClose}>
       <Box>
         {activeStep > 0 && (
           <Box sx={{ px: 4, pt: 4, pb: 2 }}>
