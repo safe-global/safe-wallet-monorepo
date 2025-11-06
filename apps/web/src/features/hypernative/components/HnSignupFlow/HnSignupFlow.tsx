@@ -21,8 +21,9 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
     setActiveStep((prevStep) => prevStep - 1)
   }
 
-  const handleReset = () => {
+  const handleFinish = () => {
     setActiveStep(0)
+    onClose()
   }
 
   const renderStepContent = () => {
@@ -42,7 +43,7 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
           <Box p={4}>
             <div>Step 3: Confirmation (Coming soon)</div>
             <button onClick={handleBack}>Back</button>
-            <button onClick={handleReset}>Finish</button>
+            <button onClick={handleFinish}>Finish</button>
           </Box>
         )
       default:
