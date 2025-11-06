@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import PromoBanner from './PromoBanner'
+import SpacesIllustration from '@/public/images/common/spaces-illustration.png'
 
 const meta = {
   component: PromoBanner,
@@ -22,8 +23,10 @@ export const Default: Story = {
     trackOpenProps: { action: 'Click promo banner', category: 'overview' },
     trackHideProps: { action: 'Dismiss promo banner', category: 'overview' },
     onDismiss: () => {},
-    imageSrc: '/images/hypernative/guardian-badge.svg',
+    imageSrc: SpacesIllustration,
     imageAlt: 'Promo image',
+    customBackground: 'linear-gradient(90deg, #b0ffc9, #d7f6ff)',
+    customFontColor: 'var(--color-static-light)',
   },
 }
 
@@ -36,6 +39,8 @@ export const WithoutImage: Story = {
     trackOpenProps: { action: 'Click promo banner', category: 'overview' },
     trackHideProps: { action: 'Dismiss promo banner', category: 'overview' },
     onDismiss: () => {},
+    customBackground: 'linear-gradient(90deg, #b0ffc9, #d7f6ff)',
+    customFontColor: 'var(--color-static-light)',
   },
 }
 
@@ -48,7 +53,7 @@ export const WithCustomColors: Story = {
     trackOpenProps: { action: 'Click promo banner', category: 'overview' },
     trackHideProps: { action: 'Dismiss promo banner', category: 'overview' },
     onDismiss: () => {},
-    imageSrc: '/images/hypernative/guardian-badge.svg',
+    imageSrc: SpacesIllustration,
     imageAlt: 'Special offer',
     customFontColor: '#FFD700',
     customBackground: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -63,8 +68,10 @@ export const WithoutDismiss: Story = {
     href: '#',
     trackOpenProps: { action: 'Click promo banner', category: 'overview' },
     trackHideProps: { action: 'Dismiss promo banner', category: 'overview' },
-    imageSrc: '/images/hypernative/guardian-badge.svg',
+    imageSrc: SpacesIllustration,
     imageAlt: 'Welcome',
+    customBackground: 'linear-gradient(90deg, #b0ffc9, #d7f6ff)',
+    customFontColor: 'var(--color-static-light)',
   },
 }
 
@@ -76,5 +83,7 @@ export const ShortText: Story = {
     trackOpenProps: { action: 'Click promo banner', category: 'overview' },
     trackHideProps: { action: 'Dismiss promo banner', category: 'overview' },
     onDismiss: () => {},
+    customBackground: 'linear-gradient(90deg, #b0ffc9, #d7f6ff)',
+    customFontColor: 'var(--color-static-light)',
   },
 }
