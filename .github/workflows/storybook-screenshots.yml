@@ -108,31 +108,37 @@ jobs:
 
       - name: Upload screenshots to branch
         if: steps.changed-stories.outputs.has_changes == 'true'
-        env:
-          BRANCH_NAME: ${{ github.head_ref }}
         run: |
           # Create a unique directory for this PR's screenshots
           SCREENSHOT_DIR="storybook-screenshots/${{ github.event.pull_request.number }}"
 
-          # Commit screenshots to a special branch
+          # Clone the storage branch in a separate directory
+          cd /tmp
+          git clone --depth 1 --branch storybook-screenshots-storage https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git screenshots-storage 2>/dev/null || {
+            # If branch doesn't exist, create it
+            git clone --depth 1 https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git screenshots-storage
+            cd screenshots-storage
+            git checkout --orphan storybook-screenshots-storage
+            git rm -rf . 2>/dev/null || true
+          }
+
+          cd screenshots-storage 2>/dev/null || cd screenshots-storage
+
+          # Configure git
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Create orphan branch for screenshots if it doesn't exist
-          git fetch origin storybook-screenshots-storage || git checkout --orphan storybook-screenshots-storage
-          git checkout storybook-screenshots-storage || git checkout --orphan storybook-screenshots-storage
-
-          # Clear everything except screenshots
-          git rm -rf . 2>/dev/null || true
-
           # Copy screenshots to PR directory
           mkdir -p "$SCREENSHOT_DIR"
-          cp screenshots/*.png "$SCREENSHOT_DIR/" 2>/dev/null || true
+          cp $GITHUB_WORKSPACE/screenshots/*.png "$SCREENSHOT_DIR/" 2>/dev/null || true
 
           # Commit and push
           git add "$SCREENSHOT_DIR"
-          git commit -m "Add screenshots for PR #${{ github.event.pull_request.number }}" || true
-          git push origin storybook-screenshots-storage --force
+          git commit -m "Add screenshots for PR #${{ github.event.pull_request.number }}" || echo "No changes to commit"
+          git push origin storybook-screenshots-storage --force || {
+            # If branch doesn't exist on remote, create it
+            git push -u origin storybook-screenshots-storage
+          }
 
       - name: Post PR comment with screenshots
         if: steps.changed-stories.outputs.has_changes == 'true'
