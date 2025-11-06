@@ -191,13 +191,21 @@ jobs:
             }
 
             // Add screenshots to comment with proper URLs
+            // Show inline if < 10 screenshots, otherwise use collapsible details
+            const useCollapsible = screenshots.length >= 10;
+
             for (const [componentName, stories] of Object.entries(components)) {
               body += `### ${componentName}\n\n`;
               for (const { storyName, file } of stories) {
                 const imageUrl = `${baseUrl}/${file}`;
-                body += `<details>\n<summary>${storyName}</summary>\n\n`;
-                body += `![${storyName}](${imageUrl})\n\n`;
-                body += `</details>\n\n`;
+                if (useCollapsible) {
+                  body += `<details>\n<summary>${storyName}</summary>\n\n`;
+                  body += `![${storyName}](${imageUrl})\n\n`;
+                  body += `</details>\n\n`;
+                } else {
+                  body += `**${storyName}**\n\n`;
+                  body += `![${storyName}](${imageUrl})\n\n`;
+                }
               }
             }
 

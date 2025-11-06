@@ -46,11 +46,15 @@ async function captureScreenshots() {
         timeout: 30000,
       });
 
-      // Wait for story to render
-      await page.waitForTimeout(2000);
-
-      // Find the story root element
+      // Wait for Storybook root element to be visible and stable
       const storyRoot = await page.locator('#storybook-root').first();
+      await storyRoot.waitFor({ state: 'visible', timeout: 10000 });
+
+      // Wait for network to be idle after initial render
+      await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {
+        // Ignore timeout, some stories may have ongoing network activity
+        console.log('  ⚠ Network not fully idle, continuing anyway');
+      });
 
       // Take screenshot
       const screenshotPath = path.join(
