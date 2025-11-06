@@ -20,6 +20,7 @@ const SpacesBanner = ({ onDismiss }: { onDismiss: () => void }) => {
       imageAlt="Spaces illustration"
       endIcon={<ChevronRightIcon fontSize="small" />}
       customBackground="linear-gradient(90deg, #b0ffc9, #d7f6ff)"
+      customTitleColor="var(--color-static-main)"
       customFontColor="var(--color-static-light)"
     />
   )

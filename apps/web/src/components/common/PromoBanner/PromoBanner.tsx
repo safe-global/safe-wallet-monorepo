@@ -19,6 +19,7 @@ export interface PromoBannerProps {
   imageAlt?: string
   endIcon?: ReactNode
   customFontColor?: string
+  customTitleColor?: string
   customBackground?: string
 }
 
@@ -34,6 +35,7 @@ export const PromoBanner = ({
   trackOpenProps,
   trackHideProps,
   customFontColor,
+  customTitleColor,
   customBackground,
 }: PromoBannerProps) => {
   return (
@@ -48,7 +50,7 @@ export const PromoBanner = ({
           <Image className={css.bannerImage} src={imageSrc} alt={imageAlt || ''} width={95} height={95} />
         ) : null}
         <Box sx={{ pr: { xs: 5, md: 0 } }}>
-          <Typography variant="h4" fontWeight="bold" color="common.white" className={css.bannerText}>
+          <Typography variant="h4" fontWeight="bold" color={customTitleColor || 'common.white'} className={css.bannerText}>
             {title}
           </Typography>
 

@@ -26,6 +26,7 @@ export const Default: Story = {
     imageSrc: SpacesIllustration,
     imageAlt: 'Promo image',
     customBackground: 'linear-gradient(90deg, #b0ffc9, #d7f6ff)',
+    customTitleColor: 'var(--color-static-main)',
     customFontColor: 'var(--color-static-light)',
   },
 }
@@ -40,6 +41,7 @@ export const WithoutImage: Story = {
     trackHideProps: { action: 'Dismiss promo banner', category: 'overview' },
     onDismiss: () => {},
     customBackground: 'linear-gradient(90deg, #b0ffc9, #d7f6ff)',
+    customTitleColor: 'var(--color-static-main)',
     customFontColor: 'var(--color-static-light)',
   },
 }
@@ -71,6 +73,7 @@ export const WithoutDismiss: Story = {
     imageSrc: SpacesIllustration,
     imageAlt: 'Welcome',
     customBackground: 'linear-gradient(90deg, #b0ffc9, #d7f6ff)',
+    customTitleColor: 'var(--color-static-main)',
     customFontColor: 'var(--color-static-light)',
   },
 }
@@ -84,6 +87,7 @@ export const ShortText: Story = {
     trackHideProps: { action: 'Dismiss promo banner', category: 'overview' },
     onDismiss: () => {},
     customBackground: 'linear-gradient(90deg, #b0ffc9, #d7f6ff)',
+    customTitleColor: 'var(--color-static-main)',
     customFontColor: 'var(--color-static-light)',
   },
 }
