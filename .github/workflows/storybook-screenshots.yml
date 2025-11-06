@@ -109,6 +109,10 @@ jobs:
       - name: Upload screenshots to branch
         if: steps.changed-stories.outputs.has_changes == 'true'
         run: |
+          # Configure git identity first
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
           # Create a unique directory for this PR's screenshots
           SCREENSHOT_DIR="storybook-screenshots/${{ github.event.pull_request.number }}"
 
@@ -129,10 +133,6 @@ jobs:
             git add README.md
             git commit -m "Initialize storybook-screenshots-storage branch"
           fi
-
-          # Configure git
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
 
           # Copy screenshots to PR directory
           mkdir -p "$SCREENSHOT_DIR"
