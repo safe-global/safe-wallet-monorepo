@@ -13,6 +13,7 @@ import { execSync } from 'child_process'
 let withRspack = null
 if (process.env.USE_RSPACK === '1') {
   process.env.NEXT_RSPACK = 'true'
+  // Disable rspack config validation to avoid warnings, use 'loose' to log errors.
   process.env.RSPACK_CONFIG_VALIDATE = 'loose-silent'
   delete process.env.TURBOPACK
   try {
