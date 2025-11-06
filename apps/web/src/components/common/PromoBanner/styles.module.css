@@ -8,6 +8,36 @@
   min-height: 131px;
 }
 
+.bannerStack {
+  display: inline-flex;
+  flex-wrap: nowrap;
+}
+
+.bannerContent {
+  padding-right: 0;
+}
+
+.bannerTitle {
+  color: var(--color-static-main);
+  font-weight: bold;
+}
+
+.bannerDescription {
+  color: var(--color-static-light);
+  padding-top: 4px;
+}
+
+.bannerCta {
+  color: var(--color-static-main);
+  margin-top: 8px;
+  padding: 0;
+  padding-top: 8px;
+}
+
+.bannerCta :global(.MuiButton-endIcon) {
+  margin-left: 4px;
+}
+
 .closeButton {
   position: absolute !important;
   color: var(--color-static-main);
@@ -23,6 +53,11 @@
   background-color: transparent;
 }
 
+.closeIcon {
+  color: var(--color-static-main);
+  opacity: 1;
+}
+
 .bannerImage,
 .bannerText {
   pointer-events: none;
@@ -32,5 +67,15 @@
 @media (max-width: 599.95px) {
   .banner {
     padding: var(--space-2);
+  }
+
+  .bannerContent {
+    padding-right: var(--space-5);
+  }
+}
+
+@media (min-width: 600px) {
+  .bannerContent {
+    padding-right: 0;
   }
 }

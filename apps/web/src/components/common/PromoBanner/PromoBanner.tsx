@@ -20,6 +20,7 @@ export interface PromoBannerProps {
   endIcon?: ReactNode
   customFontColor?: string
   customTitleColor?: string
+  customCtaColor?: string
   customBackground?: string
 }
 
@@ -36,30 +37,29 @@ export const PromoBanner = ({
   trackHideProps,
   customFontColor,
   customTitleColor,
+  customCtaColor,
   customBackground,
 }: PromoBannerProps) => {
   return (
-    <Card className={`${css.banner}`} sx={customBackground ? { background: customBackground } : undefined}>
-      <Stack
-        direction={{ xs: 'row', md: 'row' }}
-        alignItems="center"
-        spacing={2}
-        sx={{ display: 'inline-flex', flexWrap: 'nowrap' }}
-      >
+    <Card className={css.banner} sx={customBackground ? { background: customBackground } : undefined}>
+      <Stack direction={{ xs: 'row', md: 'row' }} alignItems="center" spacing={2} className={css.bannerStack}>
         {imageSrc ? (
           <Image className={css.bannerImage} src={imageSrc} alt={imageAlt || ''} width={95} height={95} />
         ) : null}
-        <Box sx={{ pr: { xs: 5, md: 0 } }}>
-          <Typography variant="h4" fontWeight="bold" color={customTitleColor || 'common.white'} className={css.bannerText}>
+        <Box className={css.bannerContent}>
+          <Typography
+            variant="h4"
+            className={`${css.bannerText} ${css.bannerTitle}`}
+            sx={customTitleColor ? { color: customTitleColor } : undefined}
+          >
             {title}
           </Typography>
 
           {description ? (
             <Typography
               variant="body2"
-              color={customFontColor || 'primary.light'}
-              sx={{ pt: 0.5 }}
-              className={css.bannerText}
+              className={`${css.bannerText} ${css.bannerDescription}`}
+              sx={customFontColor ? { color: customFontColor } : undefined}
             >
               {description}
             </Typography>
@@ -71,13 +71,8 @@ export const PromoBanner = ({
                 {...(endIcon && { endIcon })}
                 variant="text"
                 size="compact"
-                sx={{
-                  mt: 1,
-                  p: 0,
-                  pt: 1,
-                  color: 'common.white',
-                  '& .MuiButton-endIcon': { marginLeft: 0.5 },
-                }}
+                className={css.bannerCta}
+                sx={customCtaColor ? { color: customCtaColor } : undefined}
                 color="static"
               >
                 {ctaLabel}
@@ -90,7 +85,7 @@ export const PromoBanner = ({
       {onDismiss && (
         <Track {...trackHideProps}>
           <IconButton className={css.closeButton} aria-label="close" onClick={onDismiss}>
-            <CloseIcon fontSize="medium" sx={{ color: 'common.white', opacity: 1 }} />
+            <CloseIcon fontSize="medium" className={css.closeIcon} />
           </IconButton>
         </Track>
       )}
