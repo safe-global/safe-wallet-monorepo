@@ -7,6 +7,19 @@
     width: 100%;
 }
 
+/* Theme specific background color override to match Figma */
+:root:not([data-theme='dark']) .banner {
+    background-color: var(--color-info-light);
+}
+
+[data-theme='dark'] .banner {
+    background-color: var(--color-info-background);
+}
+
+[data-theme='dark'] .description {
+    color: var(--color-text-secondary);
+}
+
 .content {
     flex: 1;
     min-width: 0;
@@ -27,6 +40,7 @@
 .icon {
     width: 16px;
     height: 16px;
+    padding: 4px;
 }
 
 .textContainer {
@@ -56,13 +70,19 @@
 }
 
 .closeButton {
-    position: absolute;
+    position: absolute !important;
     top: var(--space-2);
     right: var(--space-2);
     padding: 0;
     width: 16px;
     height: 16px;
-    color: var(--color-text-primary);
+    min-width: 16px;
+    min-height: 16px;
+}
+
+/* Override the color of the close button icon as this color is not in the design system */
+.closeButton svg {
+    color: #B8CCBE;
 }
 
 .closeButton:hover {

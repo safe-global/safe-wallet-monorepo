@@ -1,7 +1,7 @@
 import { Box, Card, IconButton, Stack, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import { SvgIcon } from '@mui/material'
-import CheckIcon from '@/public/images/common/check.svg'
+import StatusPendingIcon from '@/public/images/hypernative/status-pending.svg'
 import css from './styles.module.css'
 import type { ReactElement } from 'react'
 
@@ -15,11 +15,14 @@ const PendingBanner = ({ onDismiss }: PendingBannerProps): ReactElement => {
             <Stack direction="row" alignItems="flex-start" spacing={1} className={css.content}>
                 <Box className={css.iconContainer}>
                     <SvgIcon
-                        component={CheckIcon}
+                        component={StatusPendingIcon}
                         inheritViewBox
                         className={css.icon}
                         sx={{
-                            color: 'var(--color-success-main)',
+                            '& path': {
+                                fill: 'currentColor',
+                            },
+                            color: 'var(--color-text-secondary)',
                         }}
                     />
                 </Box>
@@ -31,12 +34,12 @@ const PendingBanner = ({ onDismiss }: PendingBannerProps): ReactElement => {
                         We've received your request and will follow up with next steps.
                     </Typography>
                 </Box>
-                {onDismiss && (
-                    <IconButton className={css.closeButton} aria-label="close" onClick={onDismiss}>
-                        <CloseIcon fontSize="small" />
-                    </IconButton>
-                )}
             </Stack>
+            {onDismiss && (
+                <IconButton className={css.closeButton} aria-label="close" onClick={onDismiss}>
+                    <CloseIcon fontSize="medium" />
+                </IconButton>
+            )}
         </Card>
     )
 }
