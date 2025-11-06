@@ -61,7 +61,7 @@ export const SafeShieldHeader = ({
           </Typography>
         ) : loading ? (
           <Typography variant="overline" color={headerTextColor} fontWeight={700} lineHeight="16px">
-            Analyzing details
+            Analyzing...
           </Typography>
         ) : status ? (
           <Typography variant="overline" color={headerTextColor} fontWeight={700} lineHeight="16px">

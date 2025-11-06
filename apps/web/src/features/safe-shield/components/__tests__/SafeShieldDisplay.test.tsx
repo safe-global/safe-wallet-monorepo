@@ -67,13 +67,13 @@ describe('SafeShieldDisplay', () => {
       expect(screen.getByText('Issues found')).toBeInTheDocument()
     })
 
-    it('should show "Analyzing details" during loading', () => {
+    it('should show "Analyzing..." during loading', () => {
       const loadingRecipient = RecipientAnalysisBuilder.knownRecipient(mockRecipientAddress).build()
       if (loadingRecipient) loadingRecipient[2] = true
 
       render(<SafeShieldDisplay recipient={loadingRecipient} />)
 
-      expect(screen.getByText('Analyzing details')).toBeInTheDocument()
+      expect(screen.getByText('Analyzing...')).toBeInTheDocument()
     })
 
     it('should show "Checks unavailable" on error', () => {
@@ -93,7 +93,7 @@ describe('SafeShieldDisplay', () => {
 
       render(<SafeShieldDisplay recipient={loadingRecipient} />)
 
-      expect(screen.getByText('Analyzing transaction security...')).toBeInTheDocument()
+      expect(screen.getByRole('progressbar')).toBeInTheDocument()
     })
 
     it('should show error message in content', () => {
@@ -119,7 +119,7 @@ describe('SafeShieldDisplay', () => {
     it('should not show loading state when data is present', () => {
       render(<SafeShieldDisplay recipient={mockRecipient} />)
 
-      expect(screen.queryByText('Analyzing transaction security...')).not.toBeInTheDocument()
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
     })
   })
 

@@ -25,6 +25,10 @@ const normalizeThreatData = (threat?: AsyncResult<ThreatAnalysisResults>): Recor
   return { ['0x']: groupedThreatResults }
 }
 
+const contractDelay = 200
+const threatDelay = 400
+const simulationDelay = 600
+
 export const SafeShieldContent = ({
   recipient,
   contract,
@@ -46,6 +50,7 @@ export const SafeShieldContent = ({
   const recipientEmpty = isEmpty(recipientResults)
   const contractEmpty = isEmpty(contractResults)
   const threatEmpty = isEmpty(threatResults) || isEmpty(threatResults.THREAT)
+  const analysesEmpty = recipientEmpty && contractEmpty && threatEmpty
   const allEmpty = recipientEmpty && contractEmpty && threatEmpty && !safeTx
 
   return (
@@ -56,23 +61,35 @@ export const SafeShieldContent = ({
           borderColor: 'background.main',
           borderTop: 'none',
           borderRadius: '0px 0px 6px 6px',
+          position: 'relative',
         }}
       >
-        {loading ? <SafeShieldAnalysisLoading /> : allEmpty ? <SafeShieldAnalysisEmpty /> : null}
+        {loading && <SafeShieldAnalysisLoading analysesEmpty={analysesEmpty} loading={loading} />}
 
-        <Box
-          display={loading ? 'none' : 'block'}
-          sx={{ '& > div:not(:last-child)': { borderBottom: '1px solid', borderColor: 'background.main' } }}
-        >
+        {!loading && allEmpty && <SafeShieldAnalysisEmpty />}
+
+        <Box sx={{ '& > div:not(:last-child)': { borderBottom: '1px solid', borderColor: 'background.main' } }}>
           {recipientResults && <AnalysisGroupCard data={recipientResults} highlightedSeverity={highlightedSeverity} />}
 
-          {contractResults && <AnalysisGroupCard data={contractResults} highlightedSeverity={highlightedSeverity} />}
-
-          {normalizedThreatData && (
-            <AnalysisGroupCard data={normalizedThreatData} highlightedSeverity={highlightedSeverity} />
+          {contractResults && (
+            <AnalysisGroupCard data={contractResults} delay={contractDelay} highlightedSeverity={highlightedSeverity} />
           )}
 
-          <TenderlySimulation safeTx={safeTx} highlightedSeverity={highlightedSeverity} />
+          {normalizedThreatData && (
+            <AnalysisGroupCard
+              data={normalizedThreatData}
+              delay={contractEmpty ? contractDelay : threatDelay}
+              highlightedSeverity={highlightedSeverity}
+            />
+          )}
+
+          {!contractLoading && !threatLoading && (
+            <TenderlySimulation
+              safeTx={safeTx}
+              delay={contractEmpty ? threatDelay : simulationDelay}
+              highlightedSeverity={highlightedSeverity}
+            />
+          )}
         </Box>
       </Box>
     </Box>
