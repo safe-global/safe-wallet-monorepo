@@ -114,15 +114,21 @@ jobs:
 
           # Clone the storage branch in a separate directory
           cd /tmp
-          git clone --depth 1 --branch storybook-screenshots-storage https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git screenshots-storage 2>/dev/null || {
-            # If branch doesn't exist, create it
+          rm -rf screenshots-storage
+
+          if git clone --depth 1 --branch storybook-screenshots-storage https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git screenshots-storage; then
+            echo "Cloned existing storage branch"
+            cd screenshots-storage
+          else
+            echo "Storage branch doesn't exist, creating it"
             git clone --depth 1 https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git screenshots-storage
             cd screenshots-storage
             git checkout --orphan storybook-screenshots-storage
             git rm -rf . 2>/dev/null || true
-          }
-
-          cd screenshots-storage 2>/dev/null || cd screenshots-storage
+            echo "# Storybook Screenshots Storage" > README.md
+            git add README.md
+            git commit -m "Initialize storybook-screenshots-storage branch"
+          fi
 
           # Configure git
           git config user.name "github-actions[bot]"
@@ -134,11 +140,11 @@ jobs:
 
           # Commit and push
           git add "$SCREENSHOT_DIR"
-          git commit -m "Add screenshots for PR #${{ github.event.pull_request.number }}" || echo "No changes to commit"
-          git push origin storybook-screenshots-storage --force || {
-            # If branch doesn't exist on remote, create it
-            git push -u origin storybook-screenshots-storage
-          }
+          if git commit -m "Add screenshots for PR #${{ github.event.pull_request.number }}"; then
+            git push origin storybook-screenshots-storage
+          else
+            echo "No changes to commit"
+          fi
 
       - name: Post PR comment with screenshots
         if: steps.changed-stories.outputs.has_changes == 'true'
