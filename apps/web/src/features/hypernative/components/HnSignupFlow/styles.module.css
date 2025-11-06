@@ -1,0 +1,218 @@
+.contentColumn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--space-6) var(--space-4);
+  min-height: 644px;
+}
+
+.contentWrapper {
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.header {
+  margin-bottom: var(--space-6);
+}
+
+.title {
+  font-weight: 700;
+  font-size: 48px;
+  line-height: 56px;
+  margin-bottom: var(--space-1);
+}
+
+.poweredBy {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+}
+
+.poweredByText {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.logo {
+  height: 16px;
+}
+
+.subtitle {
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.features {
+  margin-bottom: var(--space-6);
+}
+
+.feature {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.feature:last-child {
+  margin-bottom: 0;
+}
+
+.featureIcon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.featureTitle {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.featureDescription {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.primaryButton {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 24px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-transform: none;
+}
+
+.secondaryButton {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 24px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-transform: none;
+}
+
+.backgroundColumn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 288px;
+  flex-shrink: 0;
+  background: radial-gradient(ellipse 150px 150px at top left, rgb(47, 47, 47) 0%, transparent 100%),
+    radial-gradient(ellipse 150px 150px at top right, rgb(1, 1, 1) 0%, transparent 100%),
+    radial-gradient(ellipse 150px 150px at bottom left, rgb(24, 28, 25) 0%, transparent 100%),
+    radial-gradient(ellipse 150px 150px at bottom right, rgb(65, 68, 66) 0%, transparent 100%),
+    rgb(28, 28, 28) center/contain no-repeat;
+}
+
+[data-theme='dark'] .backgroundColumn {
+  background: none;
+}
+
+.backgroundColumn:after {
+  content: '';
+  width: 265px;
+  height: 620px;
+  border-radius: 18px;
+  background: url(/images/hypernative/signup-intro-bg.png) no-repeat center;
+  background-size: contain;
+}
+
+@media (min-width: 900px) {
+  .backgroundColumn {
+    display: flex;
+  }
+}
+
+/* Dark mode colors */
+[data-theme='dark'] .container {
+  background-color: var(--color-background-paper);
+}
+
+[data-theme='dark'] .title {
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .poweredByText,
+[data-theme='dark'] .subtitle,
+[data-theme='dark'] .featureDescription {
+  color: var(--color-primary-light);
+}
+
+[data-theme='dark'] .featureIcon {
+  color: var(--color-primary-main);
+}
+
+[data-theme='dark'] .featureTitle {
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .primaryButton {
+  background-color: var(--color-static-primary);
+  color: var(--color-static-main);
+}
+
+[data-theme='dark'] .primaryButton:hover {
+  background-color: var(--color-static-primary);
+  opacity: 0.9;
+}
+
+[data-theme='dark'] .secondaryButton {
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .secondaryButton:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Light mode colors */
+[data-theme='light'] .container {
+  background-color: var(--color-background-paper);
+}
+
+[data-theme='light'] .contentColumn {
+  background: var(--color-background-paper);
+}
+
+[data-theme='light'] .title {
+  color: var(--color-text-primary);
+}
+
+[data-theme='light'] .poweredByText,
+[data-theme='light'] .subtitle,
+[data-theme='light'] .featureDescription {
+  color: var(--color-text-secondary);
+}
+
+[data-theme='light'] .featureIcon {
+  color: var(--color-success-main);
+}
+
+[data-theme='light'] .featureTitle {
+  color: var(--color-text-primary);
+}
+
+[data-theme='light'] .primaryButton {
+  background-color: var(--color-primary-main);
+  color: var(--color-static-primary);
+}
+
+[data-theme='light'] .primaryButton:hover {
+  background-color: var(--color-primary-main);
+  opacity: 0.9;
+}
+
+[data-theme='light'] .secondaryButton {
+  color: var(--color-primary-light);
+}
+
+[data-theme='light'] .secondaryButton:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
