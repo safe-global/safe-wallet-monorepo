@@ -7,7 +7,7 @@ export const hnBannerID = 'hnBanner'
 
 const HnBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   const router = useRouter()
-  const imageSrc: string = '/images/common/hypernative/guardian-badge.svg'
+  const imageSrc: string = '/images/hypernative/guardian-badge.svg'
   const customBackground = 'linear-gradient(90deg, #1c5538 0%, #1c1c1c 54.327%, #1c1c1c 100%)'
   const customFontColor = '#A1A3A7'
 
