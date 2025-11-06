@@ -18,7 +18,7 @@ export interface PromoBannerProps {
   imageSrc?: string | StaticImageData
   imageAlt?: string
   endIcon?: ReactNode
-  customClass?: string
+  customFontColor?: string
   customBackground?: string
 }
 
@@ -33,12 +33,12 @@ export const PromoBanner = ({
   endIcon,
   trackOpenProps,
   trackHideProps,
-  customClass,
+  customFontColor,
   customBackground,
 }: PromoBannerProps) => {
   return (
     <Card
-      className={`${css.banner} ${customClass || ''}`}
+      className={`${css.banner}`}
       style={{ borderRadius: '12px' }}
       sx={customBackground ? { background: customBackground } : undefined}
     >
@@ -57,7 +57,7 @@ export const PromoBanner = ({
           </Typography>
 
           {description ? (
-            <Typography variant="body2" color="primary.light" sx={{ pt: 0.5 }} className={css.bannerText}>
+            <Typography variant="body2" color={customFontColor} sx={{ pt: 0.5 }} className={css.bannerText}>
               {description}
             </Typography>
           ) : null}
