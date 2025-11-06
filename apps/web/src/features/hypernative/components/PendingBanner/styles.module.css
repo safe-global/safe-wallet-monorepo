@@ -3,7 +3,7 @@
     padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
     background-color: var(--color-info-background);
     border: 0;
-    border-radius: 8px;
+    border-radius: var(--space-1);
     width: 100%;
 }
 
@@ -29,18 +29,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
+    width: var(--space-4);
+    height: var(--space-4);
+    min-width: var(--space-4);
     background-color: var(--color-background-main);
     border-radius: 100px;
     padding: var(--space-1);
 }
 
 .icon {
-    width: 16px;
-    height: 16px;
-    padding: 4px;
+    width: var(--space-2);
+    height: var(--space-2);
+    padding: calc(var(--space-1) / 2);
 }
 
 .textContainer {
@@ -74,10 +74,10 @@
     top: var(--space-2);
     right: var(--space-2);
     padding: 0;
-    width: 16px;
-    height: 16px;
-    min-width: 16px;
-    min-height: 16px;
+    width: var(--space-2);
+    height: var(--space-2);
+    min-width: var(--space-2);
+    min-height: var(--space-2);
 }
 
 /* Override the color of the close button icon as this color is not in the design system */
