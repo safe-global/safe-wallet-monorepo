@@ -80,4 +80,8 @@
   .bannerContent {
     padding-right: var(--space-5);
   }
+
+  .bannerImage {
+    display: none;
+  }
 }
