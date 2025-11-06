@@ -3,19 +3,23 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import { getSafeInfo, type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import extractTxInfo from '@/services/tx/extractTxInfo'
-import type { SafeTransaction } from '@safe-global/types-kit'
+import type { SafeTransaction, SafeTransactionData } from '@safe-global/types-kit'
+import type { OperationType } from '@safe-global/types-kit'
+import { toDecimalString } from '@safe-global/utils/utils/numbers'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
+import { getNestedExecTransactionHashFromInfo } from '@safe-global/utils/utils/safeTransaction'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 const safeInterface = Safe__factory.createInterface()
 
+type NestedExecTransactionParams = Omit<SafeTransactionData, 'nonce'>
 /**
  * Information about a detected nested Safe transaction.
  * A nested transaction occurs when a Safe executes a transaction on another Safe.
  */
 export type NestedTxInfo =
   | { type: 'approveHash'; signedHash: string; nestedSafeAddress: string }
-  | { type: 'execTransaction'; nestedSafeAddress: string }
+  | { type: 'execTransaction'; txParams: NestedExecTransactionParams; nestedSafeAddress: string }
   | null
 
 /**
@@ -46,9 +50,32 @@ export const detectNestedTransaction = (safeTx?: SafeTransaction): NestedTxInfo 
   }
 
   if (txData.startsWith(execTransactionSelector)) {
-    return {
-      type: 'execTransaction' as const,
-      nestedSafeAddress: safeTx.data.to,
+    try {
+      const decodedParams = safeInterface.decodeFunctionData('execTransaction', txData) as unknown[]
+
+      if (!decodedParams || decodedParams.length < 9) {
+        return null
+      }
+
+      const [to, value, data, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver] = decodedParams
+
+      return {
+        type: 'execTransaction' as const,
+        nestedSafeAddress: safeTx.data.to,
+        txParams: {
+          to: to as string,
+          value: toDecimalString(value),
+          data: data as string,
+          operation: Number(operation) as OperationType,
+          safeTxGas: toDecimalString(safeTxGas),
+          baseGas: toDecimalString(baseGas),
+          gasPrice: toDecimalString(gasPrice),
+          gasToken: gasToken as string,
+          refundReceiver: refundReceiver as string,
+        },
+      }
+    } catch (error) {
+      return null
     }
   }
 
@@ -82,16 +109,6 @@ export const useNestedTransaction = (
   chain: Chain | undefined,
 ): UseNestedTransactionResult => {
   const nestedTxInfo = useMemo(() => detectNestedTransaction(safeTx), [safeTx])
-  const { data: nestedTxDetails } = useTransactionsGetTransactionByIdV1Query(
-    {
-      chainId: chain?.chainId || '',
-      id: nestedTxInfo?.type === 'approveHash' ? nestedTxInfo.signedHash : '',
-    },
-    {
-      skip: !nestedTxInfo || !chain || !chain?.chainId || nestedTxInfo.type !== 'approveHash',
-    },
-  )
-
   const [nestedSafeInfo] = useAsync(
     () =>
       !!chain && !!nestedTxInfo?.nestedSafeAddress
@@ -100,20 +117,42 @@ export const useNestedTransaction = (
     [chain, nestedTxInfo],
   )
 
-  const nestedSafeTx = useMemo<SafeTransaction | undefined>(() => {
-    if (!nestedTxInfo) return undefined
+  const nestedTxHash = useMemo(() => {
+    if (!nestedTxInfo) return ''
 
-    if (nestedTxInfo.type === 'approveHash' && nestedTxDetails) {
-      return {
-        addSignature: () => {},
-        encodedSignatures: () => '',
-        getSignature: () => undefined,
-        data: extractTxInfo(nestedTxDetails).txParams,
-        signatures: new Map(),
-      }
+    if (nestedTxInfo.type === 'approveHash') {
+      return nestedTxInfo.signedHash
     }
 
-    return undefined
+    return getNestedExecTransactionHashFromInfo({
+      safeAddress: nestedTxInfo.nestedSafeAddress,
+      safeVersion: nestedSafeInfo?.version ?? undefined,
+      chainId: chain?.chainId,
+      txParams: nestedTxInfo.txParams,
+      nonce: nestedSafeInfo?.nonce,
+    })
+  }, [nestedTxInfo, nestedSafeInfo, chain])
+
+  const { data: nestedTxDetails } = useTransactionsGetTransactionByIdV1Query(
+    {
+      chainId: chain?.chainId || '',
+      id: nestedTxHash,
+    },
+    {
+      skip: !nestedTxInfo || !chain?.chainId || !nestedTxHash,
+    },
+  )
+
+  const nestedSafeTx = useMemo<SafeTransaction | undefined>(() => {
+    if (!nestedTxInfo || !nestedTxDetails) return undefined
+
+    return {
+      addSignature: () => {},
+      encodedSignatures: () => '',
+      getSignature: () => undefined,
+      data: extractTxInfo(nestedTxDetails).txParams,
+      signatures: new Map(),
+    }
   }, [nestedTxInfo, nestedTxDetails])
 
   const isNested = !!nestedTxInfo && !!nestedSafeInfo && !!nestedSafeTx
