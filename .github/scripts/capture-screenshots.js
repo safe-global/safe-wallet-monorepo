@@ -4,9 +4,11 @@
  * This script reads story URLs and captures screenshots of each story
  */
 
-const { chromium } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
+
+// Use playwright-core which is globally installed
+const { chromium } = require('playwright');
 
 async function captureScreenshots() {
   // Read story URLs

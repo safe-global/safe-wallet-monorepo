@@ -30,15 +30,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
+      - uses: ./.github/actions/yarn
 
       - name: Install Playwright
         run: |
-          npm install -D @playwright/test
-          npx playwright install --with-deps chromium
+          # Install playwright globally for this workflow
+          npm install -g playwright-core playwright
+          playwright install --with-deps chromium
 
       - name: Get PR number
         id: pr
