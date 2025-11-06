@@ -37,11 +37,7 @@ export const PromoBanner = ({
   customBackground,
 }: PromoBannerProps) => {
   return (
-    <Card
-      className={`${css.banner}`}
-      style={{ borderRadius: '12px' }}
-      sx={customBackground ? { background: customBackground } : undefined}
-    >
+    <Card className={`${css.banner}`} sx={customBackground ? { background: customBackground } : undefined}>
       <Stack
         direction={{ xs: 'row', md: 'row' }}
         alignItems="center"
@@ -74,7 +70,7 @@ export const PromoBanner = ({
                 variant="text"
                 size="compact"
                 sx={{
-                  mt: 0,
+                  mt: 1,
                   p: 0,
                   pt: 1,
                   color: 'common.white',
