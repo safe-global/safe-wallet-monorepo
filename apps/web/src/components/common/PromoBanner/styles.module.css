@@ -28,14 +28,15 @@
 }
 
 .bannerCta {
-  color: var(--color-static-main);
-  margin-top: 8px;
-  padding: 0;
-  padding-top: 8px;
+  color: var(--color-static-main) !important;
+  margin-top: 8px !important;
+  margin-left: 0 !important;
+  padding: 0 !important;
+  padding-top: 8px !important;
 }
 
 .bannerCta :global(.MuiButton-endIcon) {
-  margin-left: 4px;
+  margin-left: 4px !important;
 }
 
 .closeButton {
