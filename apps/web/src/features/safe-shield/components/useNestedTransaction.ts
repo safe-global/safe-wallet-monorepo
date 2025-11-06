@@ -4,7 +4,7 @@ import { getSafeInfo, type SafeInfo } from '@safe-global/safe-gateway-typescript
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import extractTxInfo from '@/services/tx/extractTxInfo'
 import type { SafeTransaction, SafeTransactionData } from '@safe-global/types-kit'
-import { OperationType } from '@safe-global/types-kit'
+import type { OperationType } from '@safe-global/types-kit'
 import { toDecimalString } from '@safe-global/utils/utils/numbers'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
 import { getNestedExecTransactionHashFromInfo } from '@safe-global/utils/utils/safeTransaction'

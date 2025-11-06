@@ -106,5 +106,3 @@ const encodeExecTransaction = ({
     refundReceiver,
     '0x',
   ])
-
-
