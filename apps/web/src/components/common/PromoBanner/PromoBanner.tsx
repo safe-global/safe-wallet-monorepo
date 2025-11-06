@@ -52,7 +52,7 @@ export const PromoBanner = ({
           <Typography
             variant="h4"
             className={`${css.bannerText} ${css.bannerTitle}`}
-            sx={customTitleColor ? { color: customTitleColor } : undefined}
+            sx={customTitleColor ? { color: `${customTitleColor} !important` } : undefined}
           >
             {title}
           </Typography>
@@ -61,7 +61,7 @@ export const PromoBanner = ({
             <Typography
               variant="body2"
               className={`${css.bannerText} ${css.bannerDescription}`}
-              sx={customFontColor ? { color: customFontColor } : undefined}
+              sx={customFontColor ? { color: `${customFontColor} !important` } : undefined}
             >
               {description}
             </Typography>
@@ -75,7 +75,7 @@ export const PromoBanner = ({
                 size="compact"
                 className={css.bannerCta}
                 sx={customCtaColor ? { color: `${customCtaColor} !important` } : undefined}
-                color="static"
+                {...(!customCtaColor && { color: 'static' })}
               >
                 {ctaLabel}
               </Button>
