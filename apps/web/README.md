@@ -77,6 +77,7 @@ If you don't provide some of the variables, the corresponding features will be d
 
 ### Running the app locally
 
+From the root of the monorepo:
 
 **Default (fastest):**
 ```bash
