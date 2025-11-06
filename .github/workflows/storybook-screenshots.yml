@@ -34,9 +34,11 @@ jobs:
 
       - name: Install Playwright
         run: |
-          # Install playwright globally for this workflow
-          npm install -g playwright-core playwright
-          playwright install --with-deps chromium
+          # Install playwright locally in .github/scripts so node can find it
+          cd .github/scripts
+          npm init -y
+          npm install playwright
+          npx playwright install --with-deps chromium
 
       - name: Get PR number
         id: pr
@@ -94,6 +96,7 @@ jobs:
         env:
           STORY_URLS: ${{ steps.story-urls.outputs.urls }}
           BRANCH_NAME: ${{ steps.branch.outputs.normalized }}
+          NODE_PATH: ./.github/scripts/node_modules
 
       - name: Upload screenshots
         if: steps.changed-stories.outputs.has_changes == 'true'
