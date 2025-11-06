@@ -1,0 +1,35 @@
+.banner {
+  position: relative;
+  padding: var(--space-2) var(--space-8) var(--space-2) var(--space-2);
+  background: linear-gradient(90deg, #b0ffc9, #d7f6ff);
+  border: 0;
+  border-radius: 12px !important;
+  height: 100%;
+}
+
+.closeButton {
+  position: absolute !important;
+  color: var(--color-static-main);
+  top: var(--space-2);
+  right: var(--space-2);
+  padding: 10px;
+  padding-top: 12px;
+  width: 16px;
+  height: 16px;
+}
+
+.closeButton:hover {
+  background-color: transparent;
+}
+
+.bannerImage,
+.bannerText {
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (max-width: 599.95px) {
+  .banner {
+    padding: var(--space-2);
+  }
+}
