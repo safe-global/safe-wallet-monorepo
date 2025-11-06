@@ -91,19 +91,7 @@ export const PromoBanner = ({
 
       {onDismiss && (
         <Track {...trackHideProps}>
-          <IconButton
-            className={css.closeButton}
-            aria-label="close"
-            onClick={onDismiss}
-            sx={{
-              position: 'absolute',
-              p: 1.25,
-              pt: 1.5,
-              width: 16,
-              height: 16,
-              '&:hover': { backgroundColor: 'transparent' },
-            }}
-          >
+          <IconButton className={css.closeButton} aria-label="close" onClick={onDismiss}>
             <CloseIcon fontSize="medium" sx={{ color: 'common.white', opacity: 1 }} />
           </IconButton>
         </Track>

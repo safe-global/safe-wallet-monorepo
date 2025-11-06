@@ -7,16 +7,19 @@
   height: 100%;
 }
 
-.dark {
-  /* Dark background gradient */
-  background: linear-gradient(90deg, #1c5538 0%, #1c1c1c 54.327%, #1c1c1c 100%);
-}
-
 .closeButton {
+  position: absolute !important;
   color: var(--color-static-main);
-  position: absolute;
   top: var(--space-2);
   right: var(--space-2);
+  padding: 10px;
+  padding-top: 12px;
+  width: 16px;
+  height: 16px;
+}
+
+.closeButton:hover {
+  background-color: transparent;
 }
 
 .bannerImage,
