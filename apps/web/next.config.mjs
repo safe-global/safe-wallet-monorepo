@@ -161,7 +161,10 @@ const withMDX = isRspack
   : createMDX({
       extension: /\.(md|mdx)?$/,
       jsx: true,
-      options: { remarkPlugins: [remarkFrontmatter, [remarkMdxFrontmatter, { name: 'metadata' }], remarkHeadingId, remarkGfm], rehypePlugins: [] },
+      options: {
+        remarkPlugins: [remarkFrontmatter, [remarkMdxFrontmatter, { name: 'metadata' }], remarkHeadingId, remarkGfm],
+        rehypePlugins: [],
+      },
     })
 
 const shouldEnablePWA = isProd || enablePWA
