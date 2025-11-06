@@ -19,9 +19,10 @@ declare global {
 type HubSpotFormProps = {
   portalId: string
   formId: string
+  region?: string
 }
 
-const HubSpotForm = ({ portalId, formId }: HubSpotFormProps) => {
+const HubSpotForm = ({ portalId, formId, region = 'eu1' }: HubSpotFormProps) => {
   const formContainerRef = useRef<HTMLDivElement>(null)
   const scriptLoadedRef = useRef(false)
 
@@ -41,7 +42,7 @@ const HubSpotForm = ({ portalId, formId }: HubSpotFormProps) => {
         window.hbspt.forms.create({
           portalId,
           formId,
-          region: 'eu1',
+          region,
           target: `#${formContainerRef.current.id}`,
         })
       }
@@ -54,8 +55,9 @@ const HubSpotForm = ({ portalId, formId }: HubSpotFormProps) => {
       if (script.parentNode) {
         script.parentNode.removeChild(script)
       }
+      scriptLoadedRef.current = false
     }
-  }, [portalId, formId])
+  }, [portalId, formId, region])
 
   return (
     <div>
