@@ -34,6 +34,7 @@ const HnBanner = ({ onDismiss }: { onDismiss: () => void }) => {
       customTitleColor="common.white"
       customFontColor="#A1A3A7"
       customCtaColor="common.white"
+      customCloseIconColor="common.white"
     />
   )
 }
