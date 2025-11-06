@@ -1,10 +1,41 @@
 .banner {
   position: relative;
   padding: var(--space-2) var(--space-8) var(--space-2) var(--space-2);
-  background: linear-gradient(90deg, #b0ffc9, #d7f6ff);
+  background: linear-gradient(90deg, #b0ffc9, #d7f6ff) !important;
   border: 0;
   border-radius: 12px !important;
   height: 100%;
+  min-height: 131px;
+}
+
+.bannerStack {
+  display: inline-flex;
+}
+
+.bannerContent {
+  padding-right: 0;
+}
+
+.bannerTitle {
+  color: var(--color-static-main);
+  font-weight: bold;
+}
+
+.bannerDescription {
+  color: var(--color-static-light);
+  padding-top: 4px;
+}
+
+.bannerCta {
+  color: var(--color-static-main) !important;
+  margin-top: 8px !important;
+  margin-left: 0 !important;
+  padding: 0 !important;
+  padding-top: 8px !important;
+}
+
+.bannerCta:has(:global(.MuiButton-endIcon)) :global(.MuiButton-endIcon) {
+  margin-left: 4px !important;
 }
 
 .closeButton {
@@ -22,6 +53,11 @@
   background-color: transparent;
 }
 
+.closeIcon {
+  color: var(--color-static-main);
+  opacity: 1;
+}
+
 .bannerImage,
 .bannerText {
   pointer-events: none;
@@ -31,5 +67,9 @@
 @media (max-width: 599.95px) {
   .banner {
     padding: var(--space-2);
+  }
+
+  .bannerContent {
+    padding-right: var(--space-5);
   }
 }

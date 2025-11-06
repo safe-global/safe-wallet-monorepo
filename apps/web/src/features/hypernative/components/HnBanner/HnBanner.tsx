@@ -7,9 +7,6 @@ export const hnBannerID = 'hnBanner'
 
 const HnBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   const router = useRouter()
-  const imageSrc: string = '/images/hypernative/guardian-badge.svg'
-  const customBackground = 'linear-gradient(90deg, #1c5538 0%, #1c1c1c 54.327%, #1c1c1c 100%)'
-  const customFontColor = '#A1A3A7'
 
   return (
     <PromoBanner
@@ -27,14 +24,17 @@ const HnBanner = ({ onDismiss }: { onDismiss: () => void }) => {
       title="Strengthen your Safe"
       description="Automatically monitor and block risky transactions using advanced, user-defined security policies by Hypernative."
       ctaLabel="Learn more"
-      imageSrc={imageSrc}
+      imageSrc="/images/hypernative/guardian-badge.svg"
       imageAlt="Guardian badge"
       // TODO: add a valid link to Hypernative or to the form page instead of this placeholder:
       href={{ pathname: AppRoutes.settings.security, query: { safe: router.query.safe } }}
       onDismiss={onDismiss}
       endIcon={<ArrowForwardIcon fontSize="small" />}
-      customBackground={customBackground}
-      customFontColor={customFontColor}
+      customBackground="linear-gradient(90deg, #1c5538 0%, #1c1c1c 54.327%, #1c1c1c 100%)"
+      customTitleColor="var(--color-static-primary)"
+      customFontColor="#A1A3A7"
+      customCtaColor="var(--color-static-primary)"
+      customCloseIconColor="var(--color-static-primary)"
     />
   )
 }
