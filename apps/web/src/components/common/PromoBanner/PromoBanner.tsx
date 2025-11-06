@@ -45,8 +45,7 @@ export const PromoBanner = ({
   return (
     <Card className={css.banner} sx={customBackground ? { background: `${customBackground} !important` } : undefined}>
       <Stack
-        direction={{ xs: 'column', md: 'row' }}
-        alignItems={{ xs: 'flex-start', md: 'center' }}
+        direction='row'
         spacing={2}
         className={css.bannerStack}
       >
