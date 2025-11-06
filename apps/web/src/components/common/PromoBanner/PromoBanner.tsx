@@ -73,7 +73,7 @@ export const PromoBanner = ({
                   p: 0,
                   pt: 1,
                   color: 'common.white',
-                  '& .MuiButton-endIcon': { marginLeft: 0.5 }
+                  '& .MuiButton-endIcon': { marginLeft: 0.5 },
                 }}
                 color="static"
               >
