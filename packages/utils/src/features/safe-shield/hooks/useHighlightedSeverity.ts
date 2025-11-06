@@ -7,6 +7,7 @@ export const useHighlightedSeverity = (
   recipientResults: RecipientAnalysisResults,
   contractResults: ContractAnalysisResults,
   normalizedThreatData: ThreatAnalysisResults,
+  hasSimulationError?: boolean,
 ) => {
   const recipientPrimaryResult = useMemo(() => getPrimaryAnalysisResult(recipientResults), [recipientResults])
   const contractPrimaryResult = useMemo(() => getPrimaryAnalysisResult(contractResults), [contractResults])
@@ -17,6 +18,7 @@ export const useHighlightedSeverity = (
       recipientPrimaryResult?.severity,
       contractPrimaryResult?.severity,
       threatPrimaryResult?.severity,
+      hasSimulationError ? Severity.WARN : undefined,
     ].filter(Boolean) as Severity[]
 
     if (!severities.length) {
@@ -30,7 +32,7 @@ export const useHighlightedSeverity = (
 
       return SEVERITY_PRIORITY[severity] < SEVERITY_PRIORITY[current] ? severity : current
     }, undefined)
-  }, [recipientPrimaryResult, contractPrimaryResult, threatPrimaryResult])
+  }, [recipientPrimaryResult, contractPrimaryResult, hasSimulationError, threatPrimaryResult])
 
   return highlightedSeverity
 }

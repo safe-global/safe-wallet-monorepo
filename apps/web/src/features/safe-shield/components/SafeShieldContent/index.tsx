@@ -14,6 +14,7 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { useHighlightedSeverity } from '@safe-global/utils/features/safe-shield/hooks/useHighlightedSeverity'
+import { useCheckSimulation } from '@/features/safe-shield/hooks/useCheckSimulation'
 
 const normalizeThreatData = (threat?: AsyncResult<ThreatAnalysisResults>): Record<string, GroupedAnalysisResults> => {
   const [result] = threat || []
@@ -44,7 +45,13 @@ export const SafeShieldContent = ({
   const [contractResults = {}, _contractError, contractLoading = false] = contract || []
   const [threatResults, _threatError, threatLoading = false] = threat || []
   const normalizedThreatData = normalizeThreatData(threat)
-  const highlightedSeverity = useHighlightedSeverity(recipientResults, contractResults, normalizedThreatData)
+  const { hasSimulationError } = useCheckSimulation(safeTx)
+  const highlightedSeverity = useHighlightedSeverity(
+    recipientResults,
+    contractResults,
+    normalizedThreatData,
+    hasSimulationError,
+  )
   const loading = recipientLoading || contractLoading || threatLoading
 
   const recipientEmpty = isEmpty(recipientResults)
@@ -72,13 +79,17 @@ export const SafeShieldContent = ({
           {recipientResults && <AnalysisGroupCard data={recipientResults} highlightedSeverity={highlightedSeverity} />}
 
           {contractResults && (
-            <AnalysisGroupCard data={contractResults} delay={contractDelay} highlightedSeverity={highlightedSeverity} />
+            <AnalysisGroupCard
+              data={contractResults}
+              delay={recipientEmpty ? 0 : contractDelay}
+              highlightedSeverity={highlightedSeverity}
+            />
           )}
 
           {normalizedThreatData && (
             <AnalysisGroupCard
               data={normalizedThreatData}
-              delay={contractEmpty ? contractDelay : threatDelay}
+              delay={contractEmpty || recipientEmpty ? contractDelay : threatDelay}
               highlightedSeverity={highlightedSeverity}
             />
           )}
@@ -86,7 +97,7 @@ export const SafeShieldContent = ({
           {!contractLoading && !threatLoading && (
             <TenderlySimulation
               safeTx={safeTx}
-              delay={contractEmpty ? threatDelay : simulationDelay}
+              delay={contractEmpty || recipientEmpty ? threatDelay : simulationDelay}
               highlightedSeverity={highlightedSeverity}
             />
           )}
