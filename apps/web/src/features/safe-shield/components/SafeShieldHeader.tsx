@@ -1,4 +1,4 @@
-import { useContext, useMemo, type ReactElement } from 'react'
+import { useMemo, type ReactElement } from 'react'
 import { Box, Typography, Stack, SvgIcon } from '@mui/material'
 import SafeShieldLogo from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
 import type {
@@ -9,11 +9,8 @@ import type {
 import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SEVERITY_COLORS } from '../constants'
-import { TxInfoContext } from '@/components/tx-flow/TxInfoProvider'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { isSimulationError, isTxSimulationEnabled } from '@safe-global/utils/components/tx/security/tenderly/utils'
-import { useNestedTransaction } from './useNestedTransaction'
-import { useCurrentChain } from '@/hooks/useChains'
+import { useCheckSimulation } from '../hooks/useCheckSimulation'
 
 export const SafeShieldHeader = ({
   recipient = [{}, undefined, false],
@@ -26,15 +23,10 @@ export const SafeShieldHeader = ({
   threat?: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
 }): ReactElement => {
-  const chain = useCurrentChain()
   const [recipientResults, recipientError, recipientLoading = false] = recipient
   const [contractResults, contractError, contractLoading = false] = contract
   const [threatResults, threatError, threatLoading = false] = threat
-  const { status: simulationStatus, nestedTx } = useContext(TxInfoContext)
-  const { isNested } = useNestedTransaction(safeTx, chain)
-  const showSimulation = isTxSimulationEnabled(chain) && safeTx
-
-  const hasSimulationError = showSimulation && isSimulationError(simulationStatus, nestedTx, isNested)
+  const { hasSimulationError } = useCheckSimulation(safeTx)
 
   const status = useMemo(
     () => getOverallStatus(recipientResults, contractResults, threatResults, hasSimulationError),
