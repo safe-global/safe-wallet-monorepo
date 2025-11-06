@@ -143,11 +143,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
             </Track>
           </Alert>
 
-          <Box
-            sx={{
-              my: 2,
-            }}
-          >
+          <Box my={2}>
             <Typography variant="h5" gutterBottom>
               Trusted Recoverer
             </Typography>
@@ -169,7 +165,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
             <RecovererWarning />
           </FormControl>
 
-          <Box sx={{ mb: 2 }}>
+          <Box mb={2}>
             <Typography variant="h5" gutterBottom>
               Review window
               <Tooltip placement="top" arrow title={TOOLTIP_TITLES.REVIEW_WINDOW}>
@@ -191,11 +187,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
             </Typography>
           </Box>
 
-          <Box
-            sx={{
-              my: 2,
-            }}
-          >
+          <Box my={2}>
             <Controller
               control={formMethods.control}
               name={UpsertRecoveryFlowFields.selectedDelay}
@@ -255,7 +247,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
             </Box>
           </Box>
 
-          <Box sx={{ mb: 3 }}>
+          <Box mb={3}>
             <Typography
               data-testid="advanced-btn"
               variant="body2"
@@ -283,12 +275,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
                   </Tooltip>
                 </Typography>
 
-                <Typography
-                  variant="body2"
-                  sx={{
-                    mb: 2,
-                  }}
-                >
+                <Typography mb={2} variant="body2">
                   Set a period of time after which the recovery proposal will expire and can no longer be executed.
                 </Typography>
               </Box>
