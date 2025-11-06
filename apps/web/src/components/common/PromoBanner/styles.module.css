@@ -5,6 +5,7 @@
   border: 0;
   border-radius: 12px !important;
   height: 100%;
+  min-height: 131px;
 }
 
 .closeButton {
