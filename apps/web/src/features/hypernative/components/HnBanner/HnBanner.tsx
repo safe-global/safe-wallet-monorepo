@@ -31,10 +31,10 @@ const HnBanner = ({ onDismiss }: { onDismiss: () => void }) => {
       onDismiss={onDismiss}
       endIcon={<ArrowForwardIcon fontSize="small" />}
       customBackground="linear-gradient(90deg, #1c5538 0%, #1c1c1c 54.327%, #1c1c1c 100%)"
-      customTitleColor="common.white"
+      customTitleColor="var(--color-background-paper)"
       customFontColor="#A1A3A7"
-      customCtaColor="common.white"
-      customCloseIconColor="common.white"
+      customCtaColor="var(--color-background-paper)"
+      customCloseIconColor="var(--color-background-paper)"
     />
   )
 }
