@@ -29,14 +29,18 @@ const HnSignupIntro = ({ onGetStarted, onClose }: HnSignupIntroProps) => {
       <Grid2 size="grow" className={css.contentColumn}>
         <div className={css.contentWrapper}>
           <div className={css.header}>
-            <Typography variant="h3" className={css.title}>
+            <Typography variant="h1" className={css.title}>
               Guardian
             </Typography>
             <div className={css.poweredBy}>
-              <Typography className={css.poweredByText}>powered by</Typography>
+              <Typography variant="body2" className={css.poweredByText}>
+                powered by
+              </Typography>
               <img src="/images/hypernative/hypernative-logo.png" alt="Hypernative" className={css.logo} />
             </div>
-            <Typography className={css.subtitle}>Enterprise-level protection for teams and organizations.</Typography>
+            <Typography variant="body1" className={css.subtitle}>
+              Enterprise-level protection for teams and organizations.
+            </Typography>
           </div>
 
           <div className={css.features}>
@@ -44,8 +48,12 @@ const HnSignupIntro = ({ onGetStarted, onClose }: HnSignupIntroProps) => {
               <div key={index} className={css.feature}>
                 <CheckCircleIcon className={css.featureIcon} />
                 <div>
-                  <Typography className={css.featureTitle}>{feature.title}</Typography>
-                  <Typography className={css.featureDescription}>{feature.description}</Typography>
+                  <Typography variant="body1" fontWeight={600} className={css.featureTitle}>
+                    {feature.title}
+                  </Typography>
+                  <Typography variant="body2" className={css.featureDescription}>
+                    {feature.description}
+                  </Typography>
                 </div>
               </div>
             ))}
