@@ -71,8 +71,11 @@ jobs:
       - name: Extract branch name
         if: steps.changed-stories.outputs.has_changes == 'true'
         id: branch
+        env:
+          # Use env var to prevent code injection via branch name
+          # When reverting to workflow_run trigger, use: github.event.workflow_run.head_branch
+          BRANCH_NAME: ${{ github.head_ref }}
         run: |
-          BRANCH_NAME="${{ github.head_ref }}"
           NORMALIZED=$(echo "$BRANCH_NAME" | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')
           echo "normalized=$NORMALIZED" >> $GITHUB_OUTPUT
           echo "Normalized branch: $NORMALIZED"
