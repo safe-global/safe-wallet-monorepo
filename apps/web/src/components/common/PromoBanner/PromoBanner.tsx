@@ -57,7 +57,12 @@ export const PromoBanner = ({
           </Typography>
 
           {description ? (
-            <Typography variant="body2" color={customFontColor} sx={{ pt: 0.5 }} className={css.bannerText}>
+            <Typography
+              variant="body2"
+              color={customFontColor || 'primary.light'}
+              sx={{ pt: 0.5 }}
+              className={css.bannerText}
+            >
               {description}
             </Typography>
           ) : null}
