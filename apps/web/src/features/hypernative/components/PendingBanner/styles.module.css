@@ -1,0 +1,76 @@
+.banner {
+    position: relative;
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+    background-color: var(--color-info-background);
+    border: 0;
+    border-radius: 8px;
+    width: 100%;
+}
+
+.content {
+    flex: 1;
+    min-width: 0;
+}
+
+.iconContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    background-color: var(--color-background-main);
+    border-radius: 100px;
+    padding: var(--space-1);
+}
+
+.icon {
+    width: 16px;
+    height: 16px;
+}
+
+.textContainer {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 22px;
+    letter-spacing: 0.15px;
+    color: var(--color-text-primary);
+}
+
+.description {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    letter-spacing: 0.17px;
+    color: var(--color-primary-dark);
+}
+
+.closeButton {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    padding: 0;
+    width: 16px;
+    height: 16px;
+    color: var(--color-text-primary);
+}
+
+.closeButton:hover {
+    background-color: transparent;
+}
+
+@media (max-width: 599.95px) {
+    .banner {
+        padding: var(--space-2);
+    }
+}
