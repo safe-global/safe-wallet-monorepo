@@ -5,8 +5,8 @@
   "version": "1.74.0",
   "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "dev:rspack": "cross-env USE_RSPACK=1 next dev",
+    "dev": "cross-env USE_RSPACK=1 next dev",
+    "dev:full": "cross-env USE_RSPACK=0 ENABLE_PWA=1 ENABLE_EXPERIMENTAL_OPTIMIZATIONS=1 next dev",
     "start": "next dev",
     "build": "next build",
     "lint": "next lint",

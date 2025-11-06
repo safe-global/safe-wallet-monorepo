@@ -78,25 +78,30 @@ If you don't provide some of the variables, the corresponding features will be d
 
 From the root of the monorepo:
 
+**Default (fastest):**
+```bash
+yarn workspace @safe-global/web dev
+```
+
+Uses [Rspack](https://rspack.dev) for faster development builds and hot reload. Optimized for speed with simplified MDX processing.
+
+**Full features (Webpack + Experimental optimizations + PWA):**
+```bash
+yarn workspace @safe-global/web dev:full
+```
+
+Uses webpack with:
+- Full MDX support (with remark plugins)
+- Experimental package import optimizations (`optimizePackageImports`)
+- PWA enabled in development mode
+
+**Alternative commands:**
 ```bash
 yarn workspace @safe-global/web start
 ```
-
-Or directly from the `apps/web` directory:
-
-```bash
-yarn start
-```
+Standard Next.js dev server (webpack, no optimizations)
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the app.
-
-#### Using Rspack (Alternative bundler)
-
-For faster development builds and hot reload, you can use Rspack:
-
-```bash
-yarn workspace @safe-global/web dev:rspack
-```
 
 > [!NOTE]
 >

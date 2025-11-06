@@ -36,10 +36,8 @@ if (!commitHash) {
   }
 }
 
-const isDev = process.env.NODE_ENV !== 'production'
 const withPWA = withPWAInit({
   dest: 'public',
-  disable: isDev, // Disable PWA in dev for faster HMR
   workboxOptions: {
     mode: 'production',
   },
@@ -67,6 +65,9 @@ const withPWA = withPWAInit({
   cacheId: pkg.version,
 })
 
+const isProd = process.env.NODE_ENV === 'production'
+const enableExperimentalOptimizations = process.env.ENABLE_EXPERIMENTAL_OPTIMIZATIONS === '1'
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export', // static site export
@@ -86,6 +87,20 @@ const nextConfig = {
   eslint: {
     dirs: ['src', 'cypress'],
   },
+  ...(isProd || enableExperimentalOptimizations
+    ? {
+        experimental: {
+          optimizePackageImports: [
+            '@mui/material',
+            '@mui/icons-material',
+            'lodash',
+            'date-fns',
+            '@sentry/react',
+            '@gnosis.pm/zodiac',
+          ],
+        },
+      }
+    : {}),
   webpack(config, { dev }) {
     config.module.rules.push({
       test: /\.svg$/i,
@@ -139,6 +154,8 @@ const nextConfig = {
 }
 
 const isRspack = process.env.USE_RSPACK === '1'
+const enablePWA = process.env.ENABLE_PWA === '1'
+
 const withMDX = isRspack
   ? createMDX({ extension: /\.(md|mdx)?$/, jsx: true, options: {} })
   : createMDX({
@@ -147,7 +164,7 @@ const withMDX = isRspack
       options: { remarkPlugins: [remarkFrontmatter, [remarkMdxFrontmatter, { name: 'metadata' }], remarkHeadingId, remarkGfm], rehypePlugins: [] },
     })
 
-// Only wrap with PWA in production (disabled in dev for faster HMR)
-let config = isDev ? withMDX(nextConfig) : withPWA(withMDX(nextConfig))
+const shouldEnablePWA = isProd || enablePWA
+let config = shouldEnablePWA ? withPWA(withMDX(nextConfig)) : withMDX(nextConfig)
 if (withRspack) config = withRspack(config)
 export default withBundleAnalyzer({ enabled: process.env.ANALYZE === 'true' })(config)
