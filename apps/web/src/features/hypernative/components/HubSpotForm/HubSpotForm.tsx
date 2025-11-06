@@ -5,12 +5,7 @@ declare global {
   interface Window {
     hbspt?: {
       forms: {
-        create: (options: {
-          portalId: string
-          formId: string
-          region: string
-          target?: string
-        }) => void
+        create: (options: { portalId: string; formId: string; region: string; target?: string }) => void
       }
     }
   }
@@ -60,17 +55,15 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1' }: HubSpotFormProps) => 
   }, [portalId, formId, region])
 
   return (
-    <div>
-      <Typography variant="h3" fontWeight={700} gutterBottom>
+    <Paper sx={{ p: 3, backgroundColor: 'var(--color-static-primary)' }}>
+      <Typography variant="h3" fontWeight={700} gutterBottom color="var(--color-static-main)">
         Request demo
       </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+      <Typography variant="body1" sx={{ mb: 2, color: 'var(--color-static-light)' }}>
         Share your details to verify your request and book your demo call.
       </Typography>
-      <Paper sx={{ p: 3, backgroundColor: 'var(--color-static-primary)' }}>
-        <div id="hubspot-form-container" ref={formContainerRef} />
-      </Paper>
-    </div>
+      <div id="hubspot-form-container" ref={formContainerRef} />
+    </Paper>
   )
 }
 
