@@ -28,24 +28,3 @@ export const Default: Story = {
     children: 'Processing',
   },
 }
-
-export const Success: Story = {
-  args: {
-    children: 'Success',
-    color: 'success',
-  },
-}
-
-export const Pending: Story = {
-  args: {
-    children: 'Pending',
-    color: 'warning',
-  },
-}
-
-export const Failed: Story = {
-  args: {
-    children: 'Failed',
-    color: 'error',
-  },
-}

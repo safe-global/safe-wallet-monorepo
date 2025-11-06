@@ -1,17 +1,10 @@
 name: Storybook Screenshots
 
 on:
-  # TODO: Revert to workflow_run trigger after testing
-  pull_request:
-    paths:
-      - 'apps/web/src/**/*.stories.@(ts|tsx|js|jsx)'
-      - '.github/workflows/storybook-screenshots.yml'
-      - '.github/scripts/capture-screenshots.js'
-      - '.github/scripts/generate-story-urls.js'
-  # workflow_run:
-  #   workflows: ["Web Deploy to dev/staging"]
-  #   types:
-  #     - completed
+  workflow_run:
+    workflows: ["Web Deploy to dev/staging"]
+    types:
+      - completed
 
 permissions:
   pull-requests: write
@@ -19,15 +12,16 @@ permissions:
 
 jobs:
   screenshot:
-    # Only run on PRs
-    # if: >
-    #   github.event.workflow_run.event == 'pull_request' &&
-    #   github.event.workflow_run.conclusion == 'success'
+    # Only run on PRs and when the deployment succeeded
+    if: >
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v5
         with:
+          ref: ${{ github.event.workflow_run.head_branch }}
           fetch-depth: 0
 
       - uses: ./.github/actions/yarn
@@ -43,14 +37,23 @@ jobs:
       - name: Get PR number
         id: pr
         run: |
-          echo "number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          PR_NUMBER=$(gh pr view ${{ github.event.workflow_run.head_branch }} --json number -q .number 2>/dev/null || echo "")
+          echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Exit if no PR found
+        if: steps.pr.outputs.number == ''
+        run: |
+          echo "No PR found for branch ${{ github.event.workflow_run.head_branch }}"
+          exit 0
 
       - name: Get changed story files
         id: changed-stories
         run: |
           # Get the base branch (usually dev or main)
-          BASE_SHA=${{ github.event.pull_request.base.sha }}
-          HEAD_SHA=${{ github.event.pull_request.head.sha }}
+          BASE_SHA=${{ github.event.workflow_run.pull_requests[0].base.sha }}
+          HEAD_SHA=${{ github.event.workflow_run.head_sha }}
 
           # Find changed story files
           CHANGED_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '\.(stories|story)\.(tsx?|jsx?)$' || true)
@@ -73,8 +76,7 @@ jobs:
         id: branch
         env:
           # Use env var to prevent code injection via branch name
-          # When reverting to workflow_run trigger, use: github.event.workflow_run.head_branch
-          BRANCH_NAME: ${{ github.head_ref }}
+          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
         run: |
           NORMALIZED=$(echo "$BRANCH_NAME" | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')
           echo "normalized=$NORMALIZED" >> $GITHUB_OUTPUT
@@ -114,7 +116,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
           # Create a unique directory for this PR's screenshots
-          SCREENSHOT_DIR="storybook-screenshots/${{ github.event.pull_request.number }}"
+          SCREENSHOT_DIR="storybook-screenshots/${{ steps.pr.outputs.number }}"
 
           # Clone the storage branch in a separate directory
           cd /tmp
@@ -140,7 +142,7 @@ jobs:
 
           # Commit and push
           git add "$SCREENSHOT_DIR"
-          if git commit -m "Add screenshots for PR #${{ github.event.pull_request.number }}"; then
+          if git commit -m "Add screenshots for PR #${{ steps.pr.outputs.number }}"; then
             git push origin storybook-screenshots-storage
           else
             echo "No changes to commit"

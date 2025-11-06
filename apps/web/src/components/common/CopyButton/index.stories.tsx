@@ -17,16 +17,3 @@ export const Default: Story = {
     text: 'Copy',
   },
 }
-
-export const WithLongText: Story = {
-  args: {
-    text: 'Copy this really long text to clipboard',
-  },
-}
-
-export const CustomInitialToolTip: Story = {
-  args: {
-    text: '0x123456789abcdef',
-    initialToolTipText: 'Click to copy address',
-  },
-}

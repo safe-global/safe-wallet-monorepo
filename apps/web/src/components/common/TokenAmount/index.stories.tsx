@@ -37,19 +37,3 @@ export const WithoutTokenLogo: Story = {
     tokenSymbol: 'ETH',
   },
 }
-
-export const LargeAmount: Story = {
-  args: {
-    value: '1000000.50',
-    logoUri: 'https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png',
-    tokenSymbol: 'USDC',
-  },
-}
-
-export const SmallAmount: Story = {
-  args: {
-    value: '0.000123',
-    logoUri: 'https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png',
-    tokenSymbol: 'BTC',
-  },
-}
