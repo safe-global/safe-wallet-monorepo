@@ -44,11 +44,7 @@ export const PromoBanner = ({
 }: PromoBannerProps) => {
   return (
     <Card className={css.banner} sx={customBackground ? { background: `${customBackground} !important` } : undefined}>
-      <Stack
-        direction='row'
-        spacing={2}
-        className={css.bannerStack}
-      >
+      <Stack direction="row" spacing={2} className={css.bannerStack}>
         {imageSrc ? (
           <Image className={css.bannerImage} src={imageSrc} alt={imageAlt || ''} width={95} height={95} />
         ) : null}
