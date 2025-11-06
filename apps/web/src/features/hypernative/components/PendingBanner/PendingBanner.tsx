@@ -18,12 +18,6 @@ const PendingBanner = ({ onDismiss }: PendingBannerProps): ReactElement => {
                         component={StatusPendingIcon}
                         inheritViewBox
                         className={css.icon}
-                        sx={{
-                            '& path': {
-                                fill: 'currentColor',
-                            },
-                            color: 'var(--color-text-secondary)',
-                        }}
                     />
                 </Box>
                 <Box className={css.textContainer}>

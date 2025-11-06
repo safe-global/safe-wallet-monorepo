@@ -11,7 +11,7 @@ const meta = {
     decorators: [
         (Story) => {
             return (
-                <Paper sx={{ padding: 2, maxWidth: 600 }}>
+                <Paper sx={{ padding: 2, maxWidth: 600, backgroundColor: 'transparent' }}>
                     <Story />
                 </Paper>
             )
@@ -26,18 +26,6 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
     args: {
         onDismiss: () => { },
-    },
-}
-
-export const WithoutDismiss: Story = {
-    args: {},
-}
-
-export const WithDismissHandler: Story = {
-    args: {
-        onDismiss: () => {
-            console.log('Banner dismissed')
-        },
     },
 }
 
