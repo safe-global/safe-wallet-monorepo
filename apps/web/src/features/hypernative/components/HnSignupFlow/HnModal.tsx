@@ -6,18 +6,16 @@ export type HnModalProps = {
   open: boolean
   onClose: () => void
   children: ReactNode
-  maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 }
 
-const HnModal = ({ open, onClose, children, maxWidth = 'sm' }: HnModalProps) => {
+const HnModal = ({ open, onClose, children }: HnModalProps) => {
   return (
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth={maxWidth}
-      fullWidth
       PaperProps={{
         sx: {
+          maxWidth: '720px',
           borderRadius: '16px',
           backgroundColor: 'var(--color-background-paper)',
           backgroundImage: 'none',
