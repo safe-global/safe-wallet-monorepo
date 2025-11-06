@@ -27,7 +27,7 @@ const PendingBanner = ({ onDismiss }: PendingBannerProps): ReactElement => {
       </Stack>
       {onDismiss && (
         <IconButton className={css.closeButton} aria-label="close" onClick={onDismiss}>
-          <CloseIcon fontSize="medium" />
+          <CloseIcon fontSize="small" />
         </IconButton>
       )}
     </Card>

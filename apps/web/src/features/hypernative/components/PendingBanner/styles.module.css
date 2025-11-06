@@ -81,8 +81,10 @@
   right: var(--space-2);
   transform: translateY(4px);
   padding: 0;
-  width: 12px;
-  height: 12px;
+  width: var(--space-2);
+  height: var(--space-2);
+  min-width: var(--space-2);
+  min-height: var(--space-2);
 }
 
 /* Override the color of the close button icon as this color is not in the design system */
