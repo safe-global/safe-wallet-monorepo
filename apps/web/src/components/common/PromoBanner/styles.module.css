@@ -10,7 +10,6 @@
 
 .bannerStack {
   display: inline-flex;
-  flex-wrap: nowrap;
 }
 
 .bannerContent {
@@ -35,7 +34,7 @@
   padding-top: 8px !important;
 }
 
-.bannerCta :global(.MuiButton-endIcon) {
+.bannerCta:has(:global(.MuiButton-endIcon)) :global(.MuiButton-endIcon) {
   margin-left: 4px !important;
 }
 
@@ -72,11 +71,5 @@
 
   .bannerContent {
     padding-right: var(--space-5);
-  }
-}
-
-@media (min-width: 600px) {
-  .bannerContent {
-    padding-right: 0;
   }
 }

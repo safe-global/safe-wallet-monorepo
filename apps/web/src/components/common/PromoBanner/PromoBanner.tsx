@@ -44,7 +44,7 @@ export const PromoBanner = ({
 }: PromoBannerProps) => {
   return (
     <Card className={css.banner} sx={customBackground ? { background: `${customBackground} !important` } : undefined}>
-      <Stack direction={{ xs: 'row', md: 'row' }} alignItems="center" spacing={2} className={css.bannerStack}>
+      <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2} className={css.bannerStack}>
         {imageSrc ? (
           <Image className={css.bannerImage} src={imageSrc} alt={imageAlt || ''} width={95} height={95} />
         ) : null}
@@ -75,7 +75,7 @@ export const PromoBanner = ({
                 size="compact"
                 className={css.bannerCta}
                 sx={customCtaColor ? { color: `${customCtaColor} !important` } : undefined}
-                {...(!customCtaColor && { color: 'static' })}
+                color={customCtaColor ? undefined : 'static'}
               >
                 {ctaLabel}
               </Button>

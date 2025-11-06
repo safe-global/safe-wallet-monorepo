@@ -18,7 +18,7 @@ const EarnBanner = ({ onDismiss }: { onDismiss: () => void }) => {
       title="Try enterprise-grade yields with up to 8.10% APY*"
       description="Deposit stablecoins, wstETH, ETH, and WBTC and let your assets compound in minutes."
       ctaLabel="Try now"
-      href={{ pathname: AppRoutes.earn, query: { safe: router.query.safe } }}
+      href={AppRoutes.earn && { pathname: AppRoutes.earn, query: { safe: router.query.safe } }}
       trackOpenProps={{ ...EARN_EVENTS.OPEN_EARN_PAGE, label: EARN_LABELS.safe_dashboard_banner }}
       trackHideProps={EARN_EVENTS.HIDE_EARN_BANNER}
       onDismiss={onDismiss}
