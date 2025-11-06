@@ -1,7 +1,7 @@
 import { PromoBanner } from '@/components/common/PromoBanner'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 
 export const hnBannerID = 'hnBanner'
 
@@ -32,7 +32,7 @@ const HnBanner = ({ onDismiss }: { onDismiss: () => void }) => {
       // TODO: add a valid link to Hypernative or to the form page instead of this placeholder:
       href={{ pathname: AppRoutes.settings.security, query: { safe: router.query.safe } }}
       onDismiss={onDismiss}
-      endIcon={<ChevronRightIcon fontSize="small" />}
+      endIcon={<ArrowForwardIcon fontSize="small" />}
       customBackground={customBackground}
       customFontColor={customFontColor}
     />
