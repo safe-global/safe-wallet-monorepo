@@ -1,8 +1,8 @@
 import { describe, expect, test } from '@jest/globals'
 import { composeStories } from '@storybook/react'
 import { render } from '@testing-library/react'
-import * as glob from 'glob'
-import * as path from 'path'
+import { globSync } from 'glob'
+import path from 'path'
 
 /**
  * Automatically generates snapshot tests for all Storybook stories
@@ -10,7 +10,7 @@ import * as path from 'path'
  */
 
 // Get all story files
-const storyFiles = glob.sync(path.join(__dirname, '../**/*.stories.tsx'))
+const storyFiles = globSync(path.join(__dirname, '../**/*.stories.tsx'))
 
 describe('Storybook Snapshots', () => {
   storyFiles.forEach((storyFilePath) => {
