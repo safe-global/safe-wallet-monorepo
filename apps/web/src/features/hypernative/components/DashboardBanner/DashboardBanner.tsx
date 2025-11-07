@@ -32,13 +32,7 @@ export const DashboardBanner = ({
 
       <Box className={css.content}>
         <Box className={css.badgeContainer}>
-          <Image
-            src={badgeSrc}
-            alt={badgeAlt}
-            width={54}
-            height={54}
-            className={css.badge}
-          />
+          <Image src={badgeSrc} alt={badgeAlt} width={54} height={54} className={css.badge} />
         </Box>
 
         <Box className={css.textContent}>
@@ -51,11 +45,7 @@ export const DashboardBanner = ({
           </Typography>
 
           <Link href={href} passHref legacyBehavior>
-            <Button
-              variant="outlined"
-              size="small"
-              className={css.ctaButton}
-            >
+            <Button variant="outlined" size="small" className={css.ctaButton}>
               {ctaLabel}
             </Button>
           </Link>
@@ -66,4 +56,3 @@ export const DashboardBanner = ({
 }
 
 export default DashboardBanner
-

@@ -6,7 +6,8 @@ const meta = {
   title: 'Features/Hypernative/DashboardBanner',
   tags: ['autodocs'],
   parameters: {
-    componentSubtitle: 'A dashboard banner component for promoting Hypernative Guardian with badge, tag, title, description, and CTA button.',
+    componentSubtitle:
+      'A dashboard banner component for promoting Hypernative Guardian with badge, tag, title, description, and CTA button.',
   },
 } satisfies Meta<typeof DashboardBanner>
 
@@ -24,4 +25,3 @@ export const Default: Story = {
     badgeAlt: 'Guardian badge',
   },
 }
-
