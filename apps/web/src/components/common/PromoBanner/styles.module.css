@@ -9,16 +9,19 @@
 }
 
 .bannerStack {
-  display: inline-flex;
+  display: flex;
+  width: 100%;
 }
 
 .bannerContent {
   padding-right: 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .bannerTitle {
   color: var(--color-static-main);
-  font-weight: bold;
+  font-weight: bold !important;
 }
 
 .bannerDescription {
@@ -58,7 +61,12 @@
   opacity: 1;
 }
 
-.bannerImage,
+.bannerImage {
+  flex-shrink: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
 .bannerText {
   pointer-events: none;
   user-select: none;
@@ -71,5 +79,9 @@
 
   .bannerContent {
     padding-right: var(--space-5);
+  }
+
+  .bannerImage {
+    display: none;
   }
 }
