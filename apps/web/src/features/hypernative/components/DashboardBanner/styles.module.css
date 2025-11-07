@@ -9,16 +9,14 @@
 
 .banner {
   position: relative;
-  padding: var(--space-2) var(--space-1) var(--space-2) var(--space-2);
-  background: linear-gradient(
-    90deg,
-    var(--dashboard-banner-gradient-start) 0%,
-    var(--dashboard-banner-gradient-end) 54.327%,
-    var(--dashboard-banner-gradient-end) 100%
-  ) !important;
+  padding: 30px var(--space-3) !important;
+  background: linear-gradient(90deg,
+      var(--dashboard-banner-gradient-start) 0%,
+      var(--dashboard-banner-gradient-end) 54.327%,
+      var(--dashboard-banner-gradient-end) 100%) !important;
   border: 0 !important;
   border-radius: 12px;
-  max-width: 599.95px;
+  max-width: 460px;
   overflow: hidden;
   padding: var(--space-2);
 }
@@ -26,7 +24,7 @@
 .tag {
   position: absolute;
   top: 0;
-  right: 0;
+  right: var(--space-2);
   background: var(--dashboard-banner-tag-bg);
   padding: 0 var(--space-1);
   border-radius: 0 0 0 4px;
@@ -54,7 +52,7 @@
 .badgeContainer {
   display: flex;
   align-items: flex-start;
-  margin-bottom: var(--space-2);
+  margin: 0 !important;
 }
 
 .badge {
@@ -94,7 +92,7 @@
   border-color: var(--dashboard-banner-button-color) !important;
   color: var(--dashboard-banner-button-color) !important;
   border-radius: 6px;
-  padding: 6px var(--space-2);
+  padding: 6px var(--space-1);
   font-weight: 700;
   font-size: 14px;
   line-height: 24px;
