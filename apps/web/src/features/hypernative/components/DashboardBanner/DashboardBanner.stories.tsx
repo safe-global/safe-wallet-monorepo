@@ -14,14 +14,4 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {
-  args: {
-    title: 'Strengthen your Safe',
-    description: 'Automatically block risky transactions using advanced, user-defined security policies.',
-    ctaLabel: 'Learn more',
-    href: '#',
-    tagLabel: 'Powered by Hypernative',
-    badgeSrc: '/images/hypernative/guardian-badge.svg',
-    badgeAlt: 'Guardian badge',
-  },
-}
+export const Default: Story = {}

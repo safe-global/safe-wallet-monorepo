@@ -1,27 +1,12 @@
 import { Box, Button, Card, Typography } from '@mui/material'
 import Image from 'next/image'
-import Link, { type LinkProps } from 'next/link'
+import Link from 'next/link'
 import css from './styles.module.css'
+import { dashboardBannerConfig } from './config'
 
-export interface DashboardBannerProps {
-  title: string
-  description: string
-  ctaLabel: string
-  href: LinkProps['href']
-  badgeSrc: string
-  badgeAlt: string
-  tagLabel: string
-}
+export const DashboardBanner = () => {
+  const { title, description, ctaLabel, href, badgeSrc, badgeAlt, tagLabel } = dashboardBannerConfig
 
-export const DashboardBanner = ({
-  title,
-  description,
-  ctaLabel,
-  href,
-  badgeSrc,
-  badgeAlt,
-  tagLabel,
-}: DashboardBannerProps) => {
   return (
     <Card className={css.banner}>
       <Box className={css.tag}>
