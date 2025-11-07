@@ -30,24 +30,28 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: () => void }) => {
 
   return (
     <CheckWallet allowSpendingLimit>
-      {(isOk) => (
-        <PromoBanner
-          title="Enjoy No-Fee November"
-          description={description}
-          ctaLabel="New transaction"
-          onCtaClick={handleNewTransaction}
-          ctaDisabled={!isOk}
-          onDismiss={onDismiss}
-          imageSrc="/images/common/no-fee-november/Cards.svg"
-          imageAlt="No-Fee November Cards"
-          trackOpenProps={{ category: 'overview', action: 'open_no_fee_november_new_tx' }}
-          trackHideProps={{ category: 'overview', action: 'hide_no_fee_november_banner' }}
-          customBackground="linear-gradient(135deg, #12FF80 0%, #7A2BF4 100%)"
-          customTitleColor="var(--color-static-main)"
-          customFontColor="var(--color-static-light)"
-          customCloseIconColor="var(--color-static-main)"
-        />
-      )}
+      {(isOk) => {
+        const handleCtaClick = isOk ? handleNewTransaction : undefined
+
+        return (
+          <PromoBanner
+            title="Enjoy No-Fee November"
+            description={description}
+            ctaLabel="New transaction"
+            onCtaClick={handleCtaClick}
+            ctaDisabled={!isOk}
+            onDismiss={onDismiss}
+            imageSrc="/images/common/no-fee-november/Cards.svg"
+            imageAlt="No-Fee November Cards"
+            trackOpenProps={{ category: 'overview', action: 'open_no_fee_november_new_tx' }}
+            trackHideProps={{ category: 'overview', action: 'hide_no_fee_november_banner' }}
+            customBackground="linear-gradient(135deg, #12FF80 0%, #7A2BF4 100%)"
+            customTitleColor="var(--color-static-main)"
+            customFontColor="var(--color-static-light)"
+            customCloseIconColor="var(--color-static-main)"
+          />
+        )
+      }}
     </CheckWallet>
   )
 }

@@ -9,8 +9,19 @@ import type { AnalyticsEvent } from '@/services/analytics'
 
 export interface PromoBannerProps {
   title: string
+  /**
+   * Banner description text. Can be a plain string for simple text or a ReactNode for rich content
+   * (e.g., text with inline links, formatted content).
+   *
+   * Note: When using ReactNode, ensure proper accessibility by using semantic HTML elements
+   * and consider the impact on text wrapping and styling within the banner layout.
+   */
   description?: string | ReactNode
   ctaLabel: string
+  /**
+   * Optional href for the CTA button. If not provided and onCtaClick is not set,
+   * the CTA button will be rendered without a link wrapper.
+   */
   href?: LinkProps['href']
   onCtaClick?: () => void
   trackOpenProps: AnalyticsEvent
@@ -89,8 +100,8 @@ export const PromoBanner = ({
               >
                 {ctaLabel}
               </Button>
-            ) : (
-              <Link href={href || '#'} passHref>
+            ) : href ? (
+              <Link href={href} passHref>
                 <Button
                   {...(endIcon && { endIcon })}
                   variant="text"
@@ -102,6 +113,17 @@ export const PromoBanner = ({
                   {ctaLabel}
                 </Button>
               </Link>
+            ) : (
+              <Button
+                {...(endIcon && { endIcon })}
+                variant="text"
+                size="compact"
+                className={css.bannerCtaText}
+                sx={customCtaColor ? { color: `${customCtaColor} !important` } : undefined}
+                color={customCtaColor ? undefined : 'static'}
+              >
+                {ctaLabel}
+              </Button>
             )}
           </Track>
         </Box>
