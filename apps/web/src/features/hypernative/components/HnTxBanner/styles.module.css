@@ -1,0 +1,58 @@
+.banner {
+  padding: var(--space-1);
+  background-color: var(--color-background-main) !important;
+  border: 1px solid var(--color-background-main);
+  border-radius: var(--space-1);
+  width: 100%;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+}
+
+.hypernativeIcon {
+  width: 9px;
+  height: 16px;
+  min-width: 9px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hypernativeIcon svg {
+  width: 9px;
+  height: 16px;
+  display: block;
+}
+
+/* Hide hypernative icon in dark theme - TODO find out if it is needed? No icon in the dark theme on Figma */
+[data-theme='dark'] .hypernativeIcon {
+  display: none;
+}
+
+.text {
+  color: var(--color-text-primary);
+}
+
+.externalLinkIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-primary);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.link {
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+}
+
+.link:hover .banner {
+  opacity: 0.9;
+}
