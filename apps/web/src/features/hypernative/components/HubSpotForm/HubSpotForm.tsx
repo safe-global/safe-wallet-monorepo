@@ -59,7 +59,7 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1' }: HubSpotFormProps) => 
       <Typography variant="h3" fontWeight={700} gutterBottom color="var(--color-static-main)">
         Request demo
       </Typography>
-      <Typography variant="body1" sx={{ mb: 2, color: 'var(--color-static-light)' }}>
+      <Typography variant="body1" sx={{ mb: 4, color: 'var(--color-static-light)' }}>
         Share your details to verify your request and book your demo call.
       </Typography>
       <div id="hubspot-form-container" ref={formContainerRef} />
