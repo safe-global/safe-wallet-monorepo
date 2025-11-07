@@ -9,10 +9,10 @@ export interface DashboardBannerProps {
   description: string
   ctaLabel: string
   href: LinkProps['href']
-  badgeSrc?: string
-  badgeAlt?: string
-  tagLabel?: string
-  endIcon?: ReactNode
+  badgeSrc: string
+  badgeAlt: string
+  tagLabel: string
+  endIcon: ReactNode
 }
 
 export const DashboardBanner = ({
@@ -20,33 +20,29 @@ export const DashboardBanner = ({
   description,
   ctaLabel,
   href,
-  badgeSrc = '/images/hypernative/guardian-badge.svg',
-  badgeAlt = 'Guardian badge',
-  tagLabel = 'Powered by Hypernative',
+  badgeSrc,
+  badgeAlt,
+  tagLabel,
   endIcon,
 }: DashboardBannerProps) => {
   return (
     <Card className={css.banner}>
-      {tagLabel && (
-        <Box className={css.tag}>
-          <Typography variant="body2" className={css.tagText}>
-            {tagLabel}
-          </Typography>
-        </Box>
-      )}
+      <Box className={css.tag}>
+        <Typography variant="body2" className={css.tagText}>
+          {tagLabel}
+        </Typography>
+      </Box>
 
       <Stack direction="row" spacing={2} className={css.content}>
-        {badgeSrc && (
-          <Box className={css.badgeContainer}>
-            <Image
-              src={badgeSrc}
-              alt={badgeAlt}
-              width={54}
-              height={54}
-              className={css.badge}
-            />
-          </Box>
-        )}
+        <Box className={css.badgeContainer}>
+          <Image
+            src={badgeSrc}
+            alt={badgeAlt}
+            width={54}
+            height={54}
+            className={css.badge}
+          />
+        </Box>
 
         <Box className={css.textContent}>
           <Typography variant="h6" className={css.title}>

@@ -23,31 +23,7 @@ export const Default: Story = {
     tagLabel: 'Powered by Hypernative',
     badgeSrc: '/images/hypernative/guardian-badge.svg',
     badgeAlt: 'Guardian badge',
-  },
-}
-
-export const WithEndIcon: Story = {
-  args: {
-    title: 'Strengthen your Safe',
-    description: 'Automatically block risky transactions using advanced, user-defined security policies.',
-    ctaLabel: 'Learn more',
-    href: '#',
-    tagLabel: 'Powered by Hypernative',
-    badgeSrc: '/images/hypernative/guardian-badge.svg',
-    badgeAlt: 'Guardian badge',
     endIcon: <ArrowForwardIcon fontSize="small" />,
-  },
-}
-
-export const WithoutTag: Story = {
-  args: {
-    title: 'Strengthen your Safe',
-    description: 'Automatically block risky transactions using advanced, user-defined security policies.',
-    ctaLabel: 'Learn more',
-    href: '#',
-    tagLabel: undefined,
-    badgeSrc: '/images/hypernative/guardian-badge.svg',
-    badgeAlt: 'Guardian badge',
   },
 }
 
