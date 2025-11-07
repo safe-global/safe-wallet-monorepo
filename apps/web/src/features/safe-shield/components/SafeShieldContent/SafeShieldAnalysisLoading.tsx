@@ -12,9 +12,10 @@ interface SafeShieldAnalysisLoadingProps {
 export const SafeShieldAnalysisLoading = ({ analysesEmpty, loading }: SafeShieldAnalysisLoadingProps): ReactElement => {
   const theme = useTheme()
   const [progress, setProgress] = useState(30)
+  const [delayedAnalysesEmpty, setDelayedAnalysesEmpty] = useState(analysesEmpty)
   const isDarkMode = theme.palette.mode === 'dark'
   const color = isDarkMode ? 'primary' : 'secondary'
-  const showSkeleton = loading && analysesEmpty
+  const showSkeleton = loading && delayedAnalysesEmpty
   const hasStarted = useRef(false)
 
   useEffect(() => {
@@ -43,6 +44,21 @@ export const SafeShieldAnalysisLoading = ({ analysesEmpty, loading }: SafeShield
       clearTimeout(interval)
     }
   }, [loading])
+
+  useEffect(() => {
+    if (analysesEmpty) {
+      setDelayedAnalysesEmpty(true)
+      return
+    }
+
+    const timeoutId = setTimeout(() => {
+      setDelayedAnalysesEmpty(false)
+    }, 500)
+
+    return () => {
+      clearTimeout(timeoutId)
+    }
+  }, [analysesEmpty])
 
   return (
     <>

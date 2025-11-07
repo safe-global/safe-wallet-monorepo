@@ -11,6 +11,9 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SEVERITY_COLORS } from '../constants'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { useCheckSimulation } from '../hooks/useCheckSimulation'
+import { useDelayedLoading } from '../hooks/useDelayedLoading'
+
+const headerVisibilityDelay = 500
 
 export const SafeShieldHeader = ({
   recipient = [{}, undefined, false],
@@ -35,14 +38,15 @@ export const SafeShieldHeader = ({
 
   const loading = recipientLoading || contractLoading || threatLoading
   const error = recipientError || contractError || threatError
+  const isLoadingVisible = useDelayedLoading(loading, headerVisibilityDelay)
 
   const headerBgColor =
-    !status || !status?.severity || loading
+    !status || !status?.severity || isLoadingVisible
       ? 'var(--color-background-default)'
       : SEVERITY_COLORS[status.severity].background
 
   const headerTextColor =
-    !status || !status?.severity || loading ? 'text.secondary' : SEVERITY_COLORS[status.severity].main
+    !status || !status?.severity || isLoadingVisible ? 'text.secondary' : SEVERITY_COLORS[status.severity].main
 
   return (
     <Box padding="4px 4px 0px">
@@ -51,7 +55,7 @@ export const SafeShieldHeader = ({
           <Typography variant="overline" color={headerTextColor} fontWeight={700} lineHeight="16px">
             Checks unavailable
           </Typography>
-        ) : loading ? (
+        ) : isLoadingVisible ? (
           <Typography variant="overline" color={headerTextColor} fontWeight={700} lineHeight="16px">
             Analyzing...
           </Typography>
