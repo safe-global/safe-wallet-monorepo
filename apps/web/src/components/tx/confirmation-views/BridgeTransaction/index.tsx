@@ -10,7 +10,6 @@ import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type BridgeAndSwapTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { formatUnits } from 'ethers'
-import { BridgeRecipientWarnings } from './BridgeRecipientWarnings'
 import ExternalLink from '@/components/common/ExternalLink'
 import css from './styles.module.css'
 
@@ -141,7 +140,7 @@ function successfulBridgeTransactionRows(
   return rows
 }
 
-function BridgeTransaction({ txInfo, showWarnings = false }: BridgeTransactionProps) {
+function BridgeTransaction({ txInfo }: BridgeTransactionProps) {
   const chainId = useChainId()
   const { configs } = useChains()
 
@@ -180,7 +179,6 @@ function BridgeTransaction({ txInfo, showWarnings = false }: BridgeTransactionPr
   return (
     <Stack>
       <DataTable rows={rows} />
-      {showWarnings && txInfo.status === 'AWAITING_EXECUTION' && <BridgeRecipientWarnings txInfo={txInfo} />}
     </Stack>
   )
 }

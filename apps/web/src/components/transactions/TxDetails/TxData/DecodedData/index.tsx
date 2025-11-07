@@ -15,9 +15,15 @@ interface Props {
   txData: TransactionDetails['txData']
   toInfo?: AddressInfo
   isTxExecuted?: boolean
+  isWarningEnabled?: boolean
 }
 
-export const DecodedData = ({ txData, toInfo, isTxExecuted = false }: Props): ReactElement | null => {
+export const DecodedData = ({
+  txData,
+  toInfo,
+  isTxExecuted = false,
+  isWarningEnabled = false,
+}: Props): ReactElement | null => {
   const nativeTokenInfo = useNativeTokenInfo()
   const setsUntrustedFallbackHandler = useSetsUntrustedFallbackHandler(txData)
 
@@ -47,7 +53,7 @@ export const DecodedData = ({ txData, toInfo, isTxExecuted = false }: Props): Re
   return (
     <Stack spacing={2}>
       {setsUntrustedFallbackHandler && <UntrustedFallbackHandlerWarning isTxExecuted={isTxExecuted} />}
-      {isDelegateCall && <DelegateCallWarning showWarning={!txData.trustedDelegateCallTarget} />}
+      {isDelegateCall && isWarningEnabled && <DelegateCallWarning showWarning={!txData.trustedDelegateCallTarget} />}
 
       {method ? (
         <MethodCall contractAddress={toAddress} contractName={name} contractLogo={avatar} method={method} />

@@ -10,6 +10,8 @@ import { render } from '@/tests/test-utils'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { TokenType } from '@safe-global/store/gateway/types'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
+import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import * as useRecipientAnalysis from '@/features/safe-shield/hooks/useRecipientAnalysis'
 
 describe('CreateTokenTransfer', () => {
   const mockParams = {
@@ -24,10 +26,12 @@ describe('CreateTokenTransfer', () => {
   }
 
   const useHasPermissionSpy = jest.spyOn(useHasPermission, 'useHasPermission')
+  const useRecipientAnalysisSpy = jest.spyOn(useRecipientAnalysis, 'useRecipientAnalysis')
 
   beforeEach(() => {
     jest.clearAllMocks()
     useHasPermissionSpy.mockReturnValue(true)
+    useRecipientAnalysisSpy.mockReturnValue([undefined, undefined, false])
   })
 
   const renderCreateTokenTransfer = (
@@ -35,9 +39,11 @@ describe('CreateTokenTransfer', () => {
     options: Parameters<typeof render>[1] = undefined,
   ) => {
     return render(
-      <TxFlowProvider step={0} data={mockParams} prevStep={() => {}} nextStep={jest.fn()}>
-        <CreateTokenTransfer {...props} />
-      </TxFlowProvider>,
+      <SafeShieldProvider>
+        <TxFlowProvider step={0} data={mockParams} prevStep={() => {}} nextStep={jest.fn()}>
+          <CreateTokenTransfer {...props} />
+        </TxFlowProvider>
+      </SafeShieldProvider>,
       options,
     )
   }

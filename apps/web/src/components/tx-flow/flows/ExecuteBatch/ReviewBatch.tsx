@@ -10,11 +10,10 @@ import type { SyntheticEvent } from 'react'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import DecodedTxs from '@/components/tx-flow/flows/ExecuteBatch/DecodedTxs'
-import TxChecks from '@/components/tx-flow/features/TxChecks/TxChecks'
 import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { logError, Errors } from '@/services/exceptions'
-import { dispatchBatchExecution, dispatchBatchExecutionRelay } from '@/services/tx/tx-sender'
+import { createMultiSendCallOnlyTx, dispatchBatchExecution, dispatchBatchExecutionRelay } from '@/services/tx/tx-sender'
 import { hasRemainingRelays } from '@/utils/relaying'
 import { getMultiSendTxs } from '@/utils/transactions'
 import TxCard from '../../common/TxCard'
@@ -36,6 +35,9 @@ import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { useTransactionsGetMultipleTransactionDetailsQuery } from '@safe-global/store/src/gateway/transactions'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { FEATURES, getLatestSafeVersion, hasFeature } from '@safe-global/utils/utils/chains'
+import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
+import type { SafeTransaction } from '@safe-global/types-kit'
+import { fetchRecommendedParams } from '@/services/tx/tx-sender/recommendedNonce'
 
 export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
@@ -118,6 +120,20 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
     )
   }
 
+  const [safeTx] = useAsync<SafeTransaction | undefined>(async () => {
+    const safeTx = multiSendTxs ? await createMultiSendCallOnlyTx(multiSendTxs) : undefined
+
+    if (safeTx) {
+      // For simulation purposes, we need to estimate gas even if the Safe version doesn't require it
+      const { safeTxGas } = await fetchRecommendedParams(safe.chainId, safe.address.value, safeTx.data)
+      safeTx.data.safeTxGas = safeTxGas
+    }
+
+    return safeTx
+  }, [multiSendTxs, safe.chainId, safe.address.value])
+
+  useSafeShieldForTxData(safeTx)
+
   const onRelay = async () => {
     if (!multiSendTxData || !multiSendContract || !txsWithDetails) return
 
@@ -175,11 +191,9 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
         <div>
           <DecodedTxs txs={txsWithDetails} />
         </div>
-      </TxCard>
 
-      {multiSendTxs && <TxChecks disabled={submitDisabled} transaction={multiSendTxs} />}
+        <Divider sx={{ mt: 2, mx: -3 }} />
 
-      <TxCard>
         <ConfirmationTitle variant={ConfirmationTitleTypes.execute} />
 
         <NetworkWarning />

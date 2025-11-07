@@ -18,16 +18,16 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { getTxOptions } from '@/utils/transactions'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useIsExecutionLoop } from '@/components/tx/SignOrExecuteForm/hooks'
-import type { SignOrExecuteProps } from '@/components/tx/SignOrExecuteForm/SignOrExecuteFormV2'
+import type { SignOrExecuteProps } from '@/components/tx/SignOrExecuteForm/SignOrExecuteForm'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import AdvancedParams, { useAdvancedParams } from '@/components/tx/AdvancedParams'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { TxSecurityContext } from '@/components/tx/security/shared/TxSecurityContext'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
+import { useSafeShield } from '../safe-shield/SafeShieldContext'
 
 export const CounterfactualForm = ({
   safeTx,
@@ -41,7 +41,7 @@ export const CounterfactualForm = ({
 }: SignOrExecuteProps & {
   isOwner: ReturnType<typeof useIsSafeOwner>
   isExecutionLoop: ReturnType<typeof useIsExecutionLoop>
-  txSecurity: ReturnType<typeof useTxSecurityContext>
+  txSecurity: ReturnType<typeof useSafeShield>
   safeTx?: SafeTransaction
   isCreation?: boolean
 }): ReactElement => {
@@ -55,7 +55,7 @@ export const CounterfactualForm = ({
 
   // Hooks
   const currentChain = useCurrentChain()
-  const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = txSecurity
+  const { needsRiskConfirmation, isRiskConfirmed } = txSecurity
   const { setTxFlow } = useContext(TxModalContext)
 
   // Estimate gas limit
@@ -66,11 +66,6 @@ export const CounterfactualForm = ({
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault()
     onSubmit?.(Math.random().toString())
-
-    if (needsRiskConfirmation && !isRiskConfirmed) {
-      setIsRiskIgnored(true)
-      return
-    }
 
     setIsSubmittable(false)
     setSubmitError(undefined)
@@ -186,10 +181,8 @@ export const CounterfactualForm = ({
   )
 }
 
-const useTxSecurityContext = () => useContext(TxSecurityContext)
-
 export default madProps(CounterfactualForm, {
   isOwner: useIsSafeOwner,
   isExecutionLoop: useIsExecutionLoop,
-  txSecurity: useTxSecurityContext,
+  txSecurity: useSafeShield,
 })

@@ -1,24 +1,16 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { SignOrExecuteForm } from '@/components/tx/SignOrExecuteForm/SignOrExecuteForm'
 import * as hooks from '@/components/tx/SignOrExecuteForm/hooks'
 import * as execThroughRoleHooks from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import { safeTxBuilder } from '@/tests/builders/safeTx'
 import { render } from '@/tests/test-utils'
-import { fireEvent } from '@testing-library/react'
+import { SignOrExecuteForm } from '../SignOrExecuteForm'
 import { encodeBytes32String } from 'ethers'
 import { Status } from 'zodiac-roles-deployments'
+import * as useIsSafeOwner from '@/hooks/useIsSafeOwner'
+import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import type { ReactElement } from 'react'
 
-let isSafeOwner = true
-// mock useIsSafeOwner
-jest.mock('@/hooks/useIsSafeOwner', () => ({
-  __esModule: true,
-  default: jest.fn(() => isSafeOwner),
-}))
-
-jest.mock('@/hooks/useSafeAddress', () => ({
-  __esModule: true,
-  default: jest.fn(() => '0xE20CcFf2c38Ef3b64109361D7b7691ff2c7D5f67'),
-}))
+const renderWithSafeShield = (ui: ReactElement) => render(<SafeShieldProvider>{ui}</SafeShieldProvider>)
 
 const txDetails = {
   safeAddress: '0xE20CcFf2c38Ef3b64109361D7b7691ff2c7D5f67',
@@ -133,158 +125,14 @@ const txDetails = {
   safeAppInfo: null,
 } as unknown as TransactionDetails
 
-describe('SignOrExecute', () => {
-  beforeEach(() => {
-    isSafeOwner = true
-  })
+describe('SignOrExecuteForm', () => {
+  it('should offer to execute through a role if the user is a role member and the transaction is executable through the role', () => {
+    jest.spyOn(execThroughRoleHooks, 'useRoles').mockReturnValue([TEST_ROLE_OK])
+    jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
+    jest.spyOn(hooks, 'useImmediatelyExecutable').mockReturnValue(false)
+    jest.spyOn(useIsSafeOwner, 'default').mockReturnValue(true)
 
-  it('should display a safeTxError', () => {
-    const { getByText } = render(
-      <SignOrExecuteForm
-        txDetails={txDetails}
-        txId="0x012312"
-        onSubmit={jest.fn()}
-        safeTxError={new Error('Safe transaction error')}
-        safeTx={safeTxBuilder().build()}
-        chainId="1"
-      />,
-    )
-
-    expect(
-      getByText('This transaction will most likely fail. To save gas costs, avoid confirming the transaction.'),
-    ).toBeInTheDocument()
-  })
-
-  describe('Existing transaction', () => {
-    it('should display radio options to sign or execute if both are possible', () => {
-      jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
-
-      const { getByText } = render(
-        <SignOrExecuteForm
-          txDetails={txDetails}
-          txId="0x012312"
-          safeTx={safeTxBuilder().build()}
-          onSubmit={jest.fn()}
-          safeTxError={undefined}
-          isExecutable={true}
-          chainId="1"
-        />,
-      )
-
-      expect(getByText('Would you like to execute the transaction immediately?')).toBeInTheDocument()
-    })
-  })
-
-  describe('New transaction', () => {
-    it('should display radio options to sign or execute if both are possible', () => {
-      jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
-      jest.spyOn(hooks, 'useImmediatelyExecutable').mockReturnValue(true)
-
-      const { getByText } = render(
-        <SignOrExecuteForm
-          txDetails={txDetails}
-          txId="0x012312"
-          safeTxError={undefined}
-          safeTx={safeTxBuilder().build()}
-          onSubmit={jest.fn()}
-          isExecutable={true}
-          chainId="1"
-        />,
-      )
-
-      expect(getByText('Would you like to execute the transaction immediately?')).toBeInTheDocument()
-    })
-
-    it('should offer to execute through a role if the user is a role member and the transaction is executable through the role', () => {
-      jest.spyOn(execThroughRoleHooks, 'useRoles').mockReturnValue([TEST_ROLE_OK])
-      jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
-      jest.spyOn(hooks, 'useImmediatelyExecutable').mockReturnValue(false)
-
-      const { queryByTestId } = render(
-        <SignOrExecuteForm
-          txDetails={txDetails}
-          txId="0x012312"
-          safeTxError={undefined}
-          safeTx={safeTxBuilder().build()}
-          onSubmit={jest.fn()}
-          onlyExecute={true}
-          isExecutable={false}
-          chainId="1"
-        />,
-      )
-
-      expect(queryByTestId('execute-through-role-form-btn')).toBeInTheDocument()
-    })
-
-    it('should not offer to execute through a role if the user is a safe owner and role member but the role lacks permissions', () => {
-      jest.spyOn(execThroughRoleHooks, 'useRoles').mockReturnValue([TEST_ROLE_TARGET_NOT_ALLOWED])
-      jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
-      jest.spyOn(hooks, 'useImmediatelyExecutable').mockReturnValue(false)
-      isSafeOwner = true
-
-      const { queryByTestId } = render(
-        <SignOrExecuteForm
-          txDetails={txDetails}
-          txId="0x012312"
-          safeTxError={undefined}
-          safeTx={safeTxBuilder().build()}
-          onSubmit={jest.fn()}
-          onlyExecute={true}
-          isExecutable={false}
-          chainId="1"
-        />,
-      )
-
-      expect(queryByTestId('execute-through-role-form-btn')).not.toBeInTheDocument()
-    })
-
-    it('should offer to execute through a role if the user is a role member but not a safe owner, even if the role lacks permissions', () => {
-      jest.spyOn(execThroughRoleHooks, 'useRoles').mockReturnValue([TEST_ROLE_TARGET_NOT_ALLOWED])
-      jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
-      jest.spyOn(hooks, 'useImmediatelyExecutable').mockReturnValue(false)
-      isSafeOwner = false
-
-      const { queryByTestId } = render(
-        <SignOrExecuteForm
-          txDetails={txDetails}
-          txId="0x012312"
-          safeTxError={undefined}
-          safeTx={safeTxBuilder().build()}
-          onSubmit={jest.fn()}
-          onlyExecute={true}
-          isExecutable={false}
-          chainId="1"
-        />,
-      )
-
-      expect(queryByTestId('execute-through-role-form-btn')).toBeInTheDocument()
-    })
-
-    it('should not offer to execute through a role if the transaction can also be directly executed without going through the role', () => {
-      jest.spyOn(execThroughRoleHooks, 'useRoles').mockReturnValue([TEST_ROLE_OK])
-      jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
-
-      const { queryByTestId } = render(
-        <SignOrExecuteForm
-          txDetails={txDetails}
-          txId="0x012312"
-          safeTxError={undefined}
-          safeTx={safeTxBuilder().build()}
-          onSubmit={jest.fn()}
-          onlyExecute={true}
-          isExecutable={true}
-          chainId="1"
-        />,
-      )
-
-      expect(queryByTestId('execute-through-role-form-btn')).not.toBeInTheDocument()
-    })
-  })
-
-  it('should not display radio options if execution is the only option', () => {
-    jest.spyOn(execThroughRoleHooks, 'useRoles').mockReturnValue([])
-
-    const { queryByText } = render(
+    const { queryByTestId } = renderWithSafeShield(
       <SignOrExecuteForm
         txDetails={txDetails}
         txId="0x012312"
@@ -292,58 +140,73 @@ describe('SignOrExecute', () => {
         safeTx={safeTxBuilder().build()}
         onSubmit={jest.fn()}
         onlyExecute={true}
+        isExecutable={false}
         chainId="1"
       />,
     )
-    expect(queryByText('Would you like to execute the transaction immediately?')).not.toBeInTheDocument()
+    expect(queryByTestId('execute-through-role-form-btn')).toBeInTheDocument()
   })
 
-  it('should display a sign/execute title if that option is selected', () => {
+  it('should not offer to execute through a role if the user is a safe owner and role member but the role lacks permissions', () => {
+    jest.spyOn(execThroughRoleHooks, 'useRoles').mockReturnValue([TEST_ROLE_TARGET_NOT_ALLOWED])
     jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
+    jest.spyOn(hooks, 'useImmediatelyExecutable').mockReturnValue(false)
+    jest.spyOn(useIsSafeOwner, 'default').mockReturnValue(true)
 
-    const { getByTestId, getByText } = render(
+    const { queryByTestId } = renderWithSafeShield(
       <SignOrExecuteForm
         txDetails={txDetails}
         txId="0x012312"
         safeTxError={undefined}
         safeTx={safeTxBuilder().build()}
         onSubmit={jest.fn()}
+        onlyExecute={true}
+        isExecutable={false}
+        chainId="1"
+      />,
+    )
+    expect(queryByTestId('execute-through-role-form-btn')).not.toBeInTheDocument()
+  })
+
+  it('should offer to execute through a role if the user is a role member but not a safe owner, even if the role lacks permissions', () => {
+    jest.spyOn(execThroughRoleHooks, 'useRoles').mockReturnValue([TEST_ROLE_TARGET_NOT_ALLOWED])
+    jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
+    jest.spyOn(hooks, 'useImmediatelyExecutable').mockReturnValue(false)
+    jest.spyOn(useIsSafeOwner, 'default').mockReturnValue(false)
+
+    const { queryByTestId } = renderWithSafeShield(
+      <SignOrExecuteForm
+        txDetails={txDetails}
+        txId="0x012312"
+        safeTxError={undefined}
+        safeTx={safeTxBuilder().build()}
+        onSubmit={jest.fn()}
+        onlyExecute={true}
+        isExecutable={false}
+        chainId="1"
+      />,
+    )
+    expect(queryByTestId('execute-through-role-form-btn')).toBeInTheDocument()
+  })
+
+  it('should not offer to execute through a role if the transaction can also be directly executed without going through the role', () => {
+    jest.spyOn(execThroughRoleHooks, 'useRoles').mockReturnValue([TEST_ROLE_OK])
+    jest.spyOn(hooks, 'useValidateNonce').mockReturnValue(true)
+    jest.spyOn(useIsSafeOwner, 'default').mockReturnValue(true)
+
+    const { queryByTestId } = renderWithSafeShield(
+      <SignOrExecuteForm
+        txDetails={txDetails}
+        txId="0x012312"
+        safeTxError={undefined}
+        safeTx={safeTxBuilder().build()}
+        onSubmit={jest.fn()}
+        onlyExecute={true}
         isExecutable={true}
         chainId="1"
       />,
     )
-
-    expect(getByText('Would you like to execute the transaction immediately?')).toBeInTheDocument()
-
-    const executeCheckbox = getByTestId('execute-checkbox')
-    const signCheckbox = getByTestId('sign-checkbox')
-
-    expect(getByText("You're about to execute this transaction.")).toBeInTheDocument()
-
-    fireEvent.click(signCheckbox)
-
-    expect(getByText("You're about to confirm this transaction.")).toBeInTheDocument()
-
-    fireEvent.click(executeCheckbox)
-
-    expect(getByText("You're about to execute this transaction.")).toBeInTheDocument()
-  })
-
-  it('should not display safeTxError message for valid transactions', () => {
-    const { queryByText } = render(
-      <SignOrExecuteForm
-        txDetails={txDetails}
-        txId="0x012312"
-        safeTxError={undefined}
-        safeTx={safeTxBuilder().build()}
-        onSubmit={jest.fn()}
-        chainId="1"
-      />,
-    )
-
-    expect(
-      queryByText('This transaction will most likely fail. To save gas costs, avoid confirming the transaction.'),
-    ).not.toBeInTheDocument()
+    expect(queryByTestId('execute-through-role-form-btn')).not.toBeInTheDocument()
   })
 })
 

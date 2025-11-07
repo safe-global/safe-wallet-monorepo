@@ -3,15 +3,7 @@ import { createContext, type ReactElement } from 'react'
 import { useSimulation } from '@/components/tx/security/tenderly/useSimulation'
 import { FETCH_STATUS } from '@safe-global/utils/components/tx/security/tenderly/types'
 import type { UseSimulationReturn } from '@safe-global/utils/components/tx/security/tenderly/useSimulation'
-import { getSimulationStatus } from '@safe-global/utils/components/tx/security/tenderly/utils'
-
-type SimulationStatus = {
-  isLoading: boolean
-  isFinished: boolean
-  isSuccess: boolean
-  isCallTraceError: boolean
-  isError: boolean
-}
+import { getSimulationStatus, type SimulationStatus } from '@safe-global/utils/components/tx/security/tenderly/utils'
 
 const initialSimulation: UseSimulationReturn = {
   simulateTransaction: () => {},
