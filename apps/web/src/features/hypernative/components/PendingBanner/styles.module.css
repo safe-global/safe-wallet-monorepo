@@ -89,7 +89,7 @@
 
 /* Override the color of the close button icon as this color is not in the design system */
 .closeButton svg {
-  color: #b8ccbe;
+  color: var(--color-text-secondary);
 }
 
 .closeButton:hover {
