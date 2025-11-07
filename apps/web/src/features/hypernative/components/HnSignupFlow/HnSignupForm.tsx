@@ -1,4 +1,4 @@
-import { Grid2, Typography } from '@mui/material'
+import { Grid2, Typography, Button } from '@mui/material'
 import { useEffect, useRef } from 'react'
 import css from './styles.module.css'
 
@@ -16,9 +16,10 @@ export type HnSignupFormProps = {
   portalId: string
   formId: string
   region?: string
+  onCancel?: () => void
 }
 
-const HnSignupForm = ({ portalId, formId, region = 'eu1' }: HnSignupFormProps) => {
+const HnSignupForm = ({ portalId, formId, region = 'eu1', onCancel }: HnSignupFormProps) => {
   const formContainerRef = useRef<HTMLDivElement>(null)
   const scriptLoadedRef = useRef(false)
 
@@ -66,6 +67,13 @@ const HnSignupForm = ({ portalId, formId, region = 'eu1' }: HnSignupFormProps) =
             Share your details to request a personalized demo call.
           </Typography>
           <div id="hubspot-form-container" ref={formContainerRef} />
+          {onCancel && (
+            <div className={css.cancelButtonWrapper}>
+              <Button variant="text" onClick={onCancel} className={css.cancelButton}>
+                Cancel
+              </Button>
+            </div>
+          )}
         </div>
       </Grid2>
 

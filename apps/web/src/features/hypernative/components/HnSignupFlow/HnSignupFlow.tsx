@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Box } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import HnModal from './HnModal'
 import HnSignupIntro from './HnSignupIntro'
 import HnSignupForm from './HnSignupForm'
@@ -25,12 +25,40 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
     onClose()
   }
 
+  const getHubSpotConfig = () => {
+    const config = process.env.NEXT_PUBLIC_HUBSPOT_CONFIG
+    if (!config) {
+      return null
+    }
+    try {
+      return JSON.parse(config)
+    } catch {
+      return null
+    }
+  }
+
+  const hubSpotConfig = getHubSpotConfig()
+
   const renderStepContent = () => {
     switch (activeStep) {
       case 0:
         return <HnSignupIntro onGetStarted={handleNext} onClose={onClose} />
       case 1:
-        return <HnSignupForm portalId="145395469" formId="66bf6e3e-085b-444a-87bd-4d3dcfe2d195" region="eu1" />
+        if (!hubSpotConfig) {
+          return (
+            <Box p={4}>
+              <Typography color="error">HubSpot configuration is missing or invalid.</Typography>
+            </Box>
+          )
+        }
+        return (
+          <HnSignupForm
+            portalId={hubSpotConfig.portalId}
+            formId={hubSpotConfig.formId}
+            region={hubSpotConfig.region}
+            onCancel={handleBack}
+          />
+        )
       default:
         return null
     }

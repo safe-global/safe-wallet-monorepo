@@ -37,6 +37,16 @@
   margin-bottom: var(--space-4) !important;
 }
 
+.cancelButtonWrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -60px;
+}
+
+.cancelButton {
+  color: var(--color-static-main) !important;
+}
+
 .header {
   margin-bottom: var(--space-6);
 }
