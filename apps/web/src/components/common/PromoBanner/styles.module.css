@@ -26,7 +26,7 @@
   padding-top: 4px;
 }
 
-.bannerCta {
+.bannerCtaText {
   color: var(--color-static-main) !important;
   margin-top: 8px !important;
   margin-left: 0 !important;
@@ -34,8 +34,25 @@
   padding-top: 8px !important;
 }
 
-.bannerCta:has(:global(.MuiButton-endIcon)) :global(.MuiButton-endIcon) {
+.bannerCtaText:has(:global(.MuiButton-endIcon)) :global(.MuiButton-endIcon) {
   margin-left: 4px !important;
+}
+
+.bannerCtaContained {
+  margin-top: var(--space-2) !important;
+  background-color: var(--color-static-main) !important;
+  color: var(--color-static-primary) !important;
+}
+
+.bannerCtaContained:hover {
+  background-color: var(--color-static-main) !important;
+  color: var(--color-static-primary) !important;
+}
+
+.bannerCtaContained:disabled {
+  background-color: var(--color-static-main) !important;
+  color: var(--color-static-primary) !important;
+  opacity: 0.5;
 }
 
 .closeButton {

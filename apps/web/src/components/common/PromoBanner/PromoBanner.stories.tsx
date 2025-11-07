@@ -79,3 +79,17 @@ export const ShortText: Story = {
     onDismiss: () => {},
   },
 }
+
+export const WithOnClick: Story = {
+  args: {
+    title: 'Take action now',
+    description: 'Click the button to perform a custom action',
+    ctaLabel: 'Click me',
+    onCtaClick: () => alert('Button clicked!'),
+    trackOpenProps: { action: 'Click promo banner', category: 'overview' },
+    trackHideProps: { action: 'Dismiss promo banner', category: 'overview' },
+    onDismiss: () => {},
+    imageSrc: SpacesIllustration,
+    imageAlt: 'Action required',
+  },
+}

@@ -1,13 +1,9 @@
-import { Box, Button, Card, IconButton, Stack, Typography } from '@mui/material'
-import Image from 'next/image'
-import css from './styles.module.css'
-import CloseIcon from '@mui/icons-material/Close'
-import Track from '@/components/common/Track'
-import Link from 'next/link'
 import { useContext } from 'react'
+import Link from 'next/link'
 import { TxModalContext } from '@/components/tx-flow'
 import { NewTxFlow } from '@/components/tx-flow/flows'
 import CheckWallet from '@/components/common/CheckWallet'
+import PromoBanner from '@/components/common/PromoBanner/PromoBanner'
 
 export const noFeeNovemberBannerID = 'noFeeNovemberBanner'
 
@@ -18,54 +14,41 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: () => void }) => {
     setTxFlow(<NewTxFlow />, undefined, false)
   }
 
+  const description = (
+    <>
+      SAFE holders enjoy gasless transactions on Ethereum Mainnet this November.{' '}
+      <Link
+        href="https://help.safe.global/en/articles/456540-no-fee-november"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ textDecoration: 'underline', fontWeight: 'bold' }}
+      >
+        Learn more
+      </Link>
+    </>
+  )
+
   return (
-    <Card className={css.banner}>
-      <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2}>
-        <Image
-          src="/images/common/no-fee-november/Cards.svg"
-          alt="No-Fee November Cards"
-          width={76}
-          height={76}
-          className={css.cardsImage}
+    <CheckWallet allowSpendingLimit>
+      {(isOk) => (
+        <PromoBanner
+          title="Enjoy No-Fee November"
+          description={description}
+          ctaLabel="New transaction"
+          onCtaClick={handleNewTransaction}
+          ctaDisabled={!isOk}
+          onDismiss={onDismiss}
+          imageSrc="/images/common/no-fee-november/Cards.svg"
+          imageAlt="No-Fee November Cards"
+          trackOpenProps={{ category: 'overview', action: 'open_no_fee_november_new_tx' }}
+          trackHideProps={{ category: 'overview', action: 'hide_no_fee_november_banner' }}
+          customBackground="linear-gradient(135deg, #12FF80 0%, #7A2BF4 100%)"
+          customTitleColor="var(--color-static-main)"
+          customFontColor="var(--color-static-light)"
+          customCloseIconColor="var(--color-static-main)"
         />
-        <Box>
-          <Typography variant="h4" fontWeight="bold" color="static.main" className={css.bannerText}>
-            Enjoy No-Fee November
-          </Typography>
-          <Typography variant="body2" color="static.light" className={css.bannerTextInteractive}>
-            SAFE holders enjoy gasless transactions on Ethereum Mainnet this November.{' '}
-            <Link
-              href="https://help.safe.global/en/articles/456540-no-fee-november"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ textDecoration: 'underline', fontWeight: 'bold' }}
-            >
-              Learn more
-            </Link>
-          </Typography>
-          <Track {...{ category: 'overview', action: 'open_no_fee_november_new_tx' }}>
-            <CheckWallet allowSpendingLimit>
-              {(isOk) => (
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={handleNewTransaction}
-                  className={css.actionButton}
-                  disabled={!isOk}
-                >
-                  New transaction
-                </Button>
-              )}
-            </CheckWallet>
-          </Track>
-        </Box>
-      </Stack>
-      <Track {...{ category: 'overview', action: 'hide_no_fee_november_banner' }}>
-        <IconButton className={css.closeButton} aria-label="close" onClick={onDismiss}>
-          <CloseIcon fontSize="small" color="border" />
-        </IconButton>
-      </Track>
-    </Card>
+      )}
+    </CheckWallet>
   )
 }
 
