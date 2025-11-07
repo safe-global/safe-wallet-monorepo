@@ -15,6 +15,11 @@ import isEmpty from 'lodash/isEmpty'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { useHighlightedSeverity } from '@safe-global/utils/features/safe-shield/hooks/useHighlightedSeverity'
 import { useCheckSimulation } from '@/features/safe-shield/hooks/useCheckSimulation'
+import {
+  analysisVisibilityDelay,
+  calculateAnalysisDelays,
+  useDelayedLoading,
+} from '@/features/safe-shield/hooks/useDelayedLoading'
 
 const normalizeThreatData = (threat?: AsyncResult<ThreatAnalysisResults>): Record<string, GroupedAnalysisResults> => {
   const [result] = threat || []
@@ -25,10 +30,6 @@ const normalizeThreatData = (threat?: AsyncResult<ThreatAnalysisResults>): Recor
 
   return { ['0x']: groupedThreatResults }
 }
-
-const contractDelay = 200
-const threatDelay = 400
-const simulationDelay = 600
 
 export const SafeShieldContent = ({
   recipient,
@@ -53,12 +54,17 @@ export const SafeShieldContent = ({
     hasSimulationError,
   )
   const loading = recipientLoading || contractLoading || threatLoading
+  const isLoadingVisible = useDelayedLoading(loading, analysisVisibilityDelay)
+  const shouldShowContent = !isLoadingVisible
 
   const recipientEmpty = isEmpty(recipientResults)
   const contractEmpty = isEmpty(contractResults)
   const threatEmpty = isEmpty(threatResults) || isEmpty(threatResults.THREAT)
   const analysesEmpty = recipientEmpty && contractEmpty && threatEmpty
   const allEmpty = recipientEmpty && contractEmpty && threatEmpty && !safeTx
+
+  const { recipientDelay, contractAnalysisDelay, threatAnalysisDelay, simulationAnalysisDelay } =
+    calculateAnalysisDelays(recipientEmpty, contractEmpty)
 
   return (
     <Box padding="0px 4px 4px">
@@ -71,25 +77,31 @@ export const SafeShieldContent = ({
           position: 'relative',
         }}
       >
-        {loading && <SafeShieldAnalysisLoading analysesEmpty={analysesEmpty} loading={loading} />}
+        {isLoadingVisible && <SafeShieldAnalysisLoading analysesEmpty={analysesEmpty} loading={isLoadingVisible} />}
 
-        {!loading && allEmpty && <SafeShieldAnalysisEmpty />}
+        {shouldShowContent && !loading && allEmpty && <SafeShieldAnalysisEmpty />}
 
         <Box sx={{ '& > div:not(:last-child)': { borderBottom: '1px solid', borderColor: 'background.main' } }}>
-          {recipientResults && <AnalysisGroupCard data={recipientResults} highlightedSeverity={highlightedSeverity} />}
-
-          {contractResults && (
+          {!recipientEmpty && (
             <AnalysisGroupCard
-              data={contractResults}
-              delay={recipientEmpty ? 0 : contractDelay}
+              delay={recipientDelay}
+              data={recipientResults}
               highlightedSeverity={highlightedSeverity}
             />
           )}
 
-          {normalizedThreatData && (
+          {!contractEmpty && (
+            <AnalysisGroupCard
+              data={contractResults}
+              delay={contractAnalysisDelay}
+              highlightedSeverity={highlightedSeverity}
+            />
+          )}
+
+          {!threatEmpty && (
             <AnalysisGroupCard
               data={normalizedThreatData}
-              delay={contractEmpty || recipientEmpty ? contractDelay : threatDelay}
+              delay={threatAnalysisDelay}
               highlightedSeverity={highlightedSeverity}
             />
           )}
@@ -97,7 +109,7 @@ export const SafeShieldContent = ({
           {!contractLoading && !threatLoading && (
             <TenderlySimulation
               safeTx={safeTx}
-              delay={contractEmpty || recipientEmpty ? threatDelay : simulationDelay}
+              delay={simulationAnalysisDelay}
               highlightedSeverity={highlightedSeverity}
             />
           )}
