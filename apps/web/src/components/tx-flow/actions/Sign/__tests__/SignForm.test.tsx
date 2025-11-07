@@ -1,4 +1,3 @@
-import { defaultSecurityContextValues } from '@safe-global/utils/components/tx/security/shared/utils'
 import { type ReactElement } from 'react'
 import * as hooks from '@/components/tx/SignOrExecuteForm/hooks'
 import * as useValidateTxData from '@/hooks/useValidateTxData'
@@ -41,7 +40,13 @@ describe('SignForm', () => {
       executeTx: jest.fn(),
       signProposerTx: jest.fn(),
     },
-    txSecurity: defaultSecurityContextValues,
+    txSecurity: {
+      setRecipientAddresses: jest.fn(),
+      setSafeTx: jest.fn(),
+      needsRiskConfirmation: false,
+      isRiskConfirmed: false,
+      setIsRiskConfirmed: jest.fn(),
+    },
     options: [
       { id: 'sign', label: 'Sign' },
       { id: 'execute', label: 'Execute' },
@@ -151,7 +156,7 @@ describe('SignForm', () => {
         <SignForm
           {...defaultProps}
           safeTx={safeTransaction}
-          txSecurity={{ ...defaultSecurityContextValues, needsRiskConfirmation: true, isRiskConfirmed: false }}
+          txSecurity={{ ...defaultProps.txSecurity, needsRiskConfirmation: true, isRiskConfirmed: false }}
         />,
       )
 
@@ -167,7 +172,7 @@ describe('SignForm', () => {
       <SignForm
         {...defaultProps}
         safeTx={safeTransaction}
-        txSecurity={{ ...defaultSecurityContextValues, needsRiskConfirmation: true, isRiskConfirmed: true }}
+        txSecurity={{ ...defaultProps.txSecurity, needsRiskConfirmation: true, isRiskConfirmed: true }}
       />,
     )
 
