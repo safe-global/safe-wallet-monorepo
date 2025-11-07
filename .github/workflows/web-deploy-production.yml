@@ -79,3 +79,29 @@ jobs:
           PROD_DEPLOYMENT_HOOK_TOKEN: ${{ secrets.PROD_DEPLOYMENT_HOOK_TOKEN }}
           PROD_DEPLOYMENT_HOOK_URL: ${{ secrets.PROD_DEPLOYMENT_HOOK_URL }}
           VERSION_TAG: ${{ github.event.release.tag_name }}
+
+      - name: Notify on Slack
+        if: vars.SLACK_WEBHOOK_URL
+        continue-on-error: true
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          RELEASE_URL="${{ github.event.release.html_url }}"
+
+          jq -n \
+            --arg version "$VERSION" \
+            --arg url "$RELEASE_URL" \
+            '{
+              channel: "#topic-wallet-releases",
+              text: ("🚀 *Safe Wallet " + $version + " Released to Production*"),
+              blocks: [
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: ("*Safe Wallet " + $version + " has been deployed to production* 🎉\n\n<" + $url + "|View Release Notes>")
+                  }
+                }
+              ]
+            }' | curl -X POST "${{ vars.SLACK_WEBHOOK_URL }}" \
+              -H 'Content-Type: application/json' \
+              -d @-
