@@ -1,2 +1,2 @@
-export { DashboardBanner, type DashboardBannerProps } from './DashboardBanner'
+export { DashboardBanner } from './DashboardBanner'
 export { default } from './DashboardBanner'
