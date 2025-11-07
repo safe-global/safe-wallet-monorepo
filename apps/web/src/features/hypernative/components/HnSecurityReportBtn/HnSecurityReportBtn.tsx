@@ -1,23 +1,16 @@
-import { Card, Link, Stack, SvgIcon, Typography } from '@mui/material'
+import { Card, Stack, SvgIcon, Typography } from '@mui/material'
+import NextLink from 'next/link'
 import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
 import ExternalLinkIcon from '@/public/images/common/external-link.svg'
 import css from './styles.module.css'
+import { hnSecurityReportBtnConfig } from './config'
 import type { ReactElement } from 'react'
 
-export interface HnSecurityReportBtnProps {
-  /**
-   * The text to display in the banner
-   */
-  text: string
-  /**
-   * The href for the link. The banner will redirect to this URL when clicked.
-   */
-  href: string
-}
+export const HnSecurityReportBtn = (): ReactElement => {
+  const { text, href } = hnSecurityReportBtnConfig
 
-const HnSecurityReportBtn = ({ text, href }: HnSecurityReportBtnProps): ReactElement => {
   return (
-    <Link href={href} target="_blank" rel="noopener noreferrer" className={css.link} underline="none">
+    <NextLink href={href} target="_blank" rel="noopener noreferrer" className={css.link}>
       <Card className={css.banner}>
         <Stack direction="row" alignItems="center" justifyContent="center" spacing={1} className={css.content}>
           <SvgIcon component={HypernativeIcon} inheritViewBox className={css.hypernativeIcon} />
@@ -25,7 +18,7 @@ const HnSecurityReportBtn = ({ text, href }: HnSecurityReportBtnProps): ReactEle
           <SvgIcon component={ExternalLinkIcon} inheritViewBox className={css.externalLinkIcon} />
         </Stack>
       </Card>
-    </Link>
+    </NextLink>
   )
 }
 
