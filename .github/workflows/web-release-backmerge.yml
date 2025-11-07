@@ -119,8 +119,7 @@ jobs:
               --base dev \
               --head "$BRANCH_NAME" \
               --title "🔄 Back-merge main to dev" \
-              --body "$BODY" \
-              --label "backmerge"
+              --body "$BODY"
 
             echo "✅ Back-merge PR created"
           else
@@ -139,8 +138,7 @@ jobs:
 
           **Action Required:** Please resolve merge conflicts manually.
 
-          🤖 *Created automatically by [Back-merge workflow](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})*" \
-              --label "backmerge,conflicts"
+          🤖 *Created automatically by [Back-merge workflow](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})*"
 
             echo "⚠️  Back-merge PR created with conflicts"
           fi

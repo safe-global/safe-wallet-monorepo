@@ -43,6 +43,11 @@ declare -a others=()
 
 # Process commits
 while IFS="|" read -r hash subject author; do
+  # Skip merge commits
+  if [[ $subject =~ ^Merge ]]; then
+    continue
+  fi
+
   # Extract PR number if exists
   if [[ $subject =~ \(#([0-9]+)\) ]]; then
     PR_NUM="${BASH_REMATCH[1]}"

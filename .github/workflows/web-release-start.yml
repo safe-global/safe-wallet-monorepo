@@ -143,11 +143,6 @@ jobs:
           PR_BODY=$(cat <<EOF
           ## 🚀 Release v${{ inputs.version }}
 
-          **Release Type:** ${{ inputs.release_type }}
-          **Base Branch:** ${{ steps.base.outputs.branch }}
-
-          ---
-
           $CHANGELOG
 
           ---
@@ -168,6 +163,9 @@ jobs:
 
           ---
 
+          **Release Type:** ${{ inputs.release_type }}
+          **Base Branch:** ${{ steps.base.outputs.branch }}
+
           🤖 *This PR was created automatically by the [Start Web Release workflow](https://github.com/${{ github.repository }}/actions/workflows/web-release-start.yml)*
           EOF
           )
@@ -183,15 +181,6 @@ jobs:
 
           echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
           echo "✅ Pull Request created: $PR_URL"
-
-      - name: Add PR to project (if configured)
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # This will add to project if GITHUB_PROJECT_ID is configured
-          # For now, this is optional
-          echo "ℹ️  Add to project board manually if needed"
 
       - name: Notify on Slack
         if: vars.SLACK_WEBHOOK_URL
