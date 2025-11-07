@@ -4,3 +4,6 @@ public/sw.js
 public/firebase*.js
 public/fallback*.js
 public/*.map
+
+# Storybook
+storybook-static
