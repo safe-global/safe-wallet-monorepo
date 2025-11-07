@@ -14,7 +14,7 @@ export const simulationDelay = 600
  * @returns An object containing calculated delays (ms) for each analysis section.
  */
 export const calculateAnalysisDelays = (recipientEmpty: boolean, contractEmpty: boolean) => {
-  const recipientDelay = analysisVisibilityDelay
+  const recipientDelay = 300
 
   let contractAnalysisDelay = contractDelay + analysisVisibilityDelay
   if (recipientEmpty) {
