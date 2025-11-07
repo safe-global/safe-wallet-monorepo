@@ -23,4 +23,3 @@ export const HnSecurityReportBtn = (): ReactElement => {
 }
 
 export default HnSecurityReportBtn
-
