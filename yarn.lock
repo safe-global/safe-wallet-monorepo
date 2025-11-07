@@ -8506,7 +8506,7 @@ __metadata:
     "@react-navigation/native": "npm:^7.1.17"
     "@reduxjs/toolkit": "npm:^2.8.2"
     "@rtk-query/codegen-openapi": "npm:^2.0.0"
-    "@safe-global/protocol-kit": "npm:^5.2.19"
+    "@safe-global/protocol-kit": "npm:^5.2.20"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
     "@safe-global/types-kit": "npm:^1.0.5"
@@ -8627,30 +8627,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@safe-global/protocol-kit@npm:^5.1.1":
-  version: 5.2.18
-  resolution: "@safe-global/protocol-kit@npm:5.2.18"
-  dependencies:
-    "@noble/curves": "npm:^1.6.0"
-    "@peculiar/asn1-schema": "npm:^2.3.13"
-    "@safe-global/safe-deployments": "npm:^1.37.47"
-    "@safe-global/safe-modules-deployments": "npm:^2.2.18"
-    "@safe-global/types-kit": "npm:^1.0.5"
-    abitype: "npm:^1.0.2"
-    semver: "npm:^7.6.3"
-    viem: "npm:^2.21.8"
-  dependenciesMeta:
-    "@noble/curves":
-      optional: true
-    "@peculiar/asn1-schema":
-      optional: true
-  checksum: 10/ce8be14aed22e21600cdf2502b7eb778ce204a0163c867965e96d74d733a301033da8290045d04fd42573ce10502186592a42b218ea39a8345da16c850b52b16
-  languageName: node
-  linkType: hard
-
-"@safe-global/protocol-kit@npm:^5.2.19":
-  version: 5.2.19
-  resolution: "@safe-global/protocol-kit@npm:5.2.19"
+"@safe-global/protocol-kit@npm:^5.1.1, @safe-global/protocol-kit@npm:^5.2.20":
+  version: 5.2.20
+  resolution: "@safe-global/protocol-kit@npm:5.2.20"
   dependencies:
     "@noble/curves": "npm:^1.6.0"
     "@peculiar/asn1-schema": "npm:^2.3.13"
@@ -8665,7 +8644,7 @@ __metadata:
       optional: true
     "@peculiar/asn1-schema":
       optional: true
-  checksum: 10/b599270f023334edbcee993c4801503e71a3a63964b325d448b711172d960fd7c152f992a2b2e1db9f0ea1679734fa49a0b4706167eb003f046eb94d3658b893
+  checksum: 10/fc5380115711c491a8efe806fc2599f74afaa22748466f22d4e53426f2b16554ae47b20fedd759075d47a63ecc0e0eb73f2eb6690d0c109d57833ca30efe707a
   languageName: node
   linkType: hard
 
@@ -8676,15 +8655,6 @@ __metadata:
     "@safe-global/safe-gateway-typescript-sdk": "npm:^3.5.3"
     viem: "npm:^2.1.1"
   checksum: 10/b81e1a554509fc41f5b8ec3bcccaf477fd55824010774699dd2c00dee8431cfd351bf13893ff6acb1450028ce4de31a1316548a0e77a66d801ff9e0b4e08b9ff
-  languageName: node
-  linkType: hard
-
-"@safe-global/safe-deployments@npm:^1.37.47":
-  version: 1.37.47
-  resolution: "@safe-global/safe-deployments@npm:1.37.47"
-  dependencies:
-    semver: "npm:^7.6.2"
-  checksum: 10/eb2ce9fe1edb41df8760b8526412eb3b3455c94cdf9f62abce573fc23643e1117762bcfeb51b716e46941cf375534cce6e5cdb517c57bb692c1a8a0e53f29211
   languageName: node
   linkType: hard
 
@@ -8701,13 +8671,6 @@ __metadata:
   version: 3.22.4
   resolution: "@safe-global/safe-gateway-typescript-sdk@npm:3.22.4"
   checksum: 10/5b088499a01a0d0190b4ab6828bfb2df779b603bbcee7645c23ad8e420670aab4ce7ca39b858fc62ee03fded77b322c3f8a9b0203f41ecb779d08f47bd4bfe0c
-  languageName: node
-  linkType: hard
-
-"@safe-global/safe-modules-deployments@npm:^2.2.18":
-  version: 2.2.18
-  resolution: "@safe-global/safe-modules-deployments@npm:2.2.18"
-  checksum: 10/6889d5b596140bf9f0456873cf873d9dcfa5658d25c25acee2700a21407cc8f496785d191eba0b1c4f7020812012252b85fd67e82d141d9a3627963bd28a9c5b
   languageName: node
   linkType: hard
 
@@ -8824,7 +8787,7 @@ __metadata:
     "@reduxjs/toolkit": "npm:^2.8.2"
     "@reown/walletkit": "npm:^1.2.7"
     "@safe-global/api-kit": "npm:^2.4.6"
-    "@safe-global/protocol-kit": "npm:^5.2.19"
+    "@safe-global/protocol-kit": "npm:^5.2.20"
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
     "@safe-global/safe-deployments": "npm:^1.37.48"
     "@safe-global/safe-modules-deployments": "npm:^2.2.19"
