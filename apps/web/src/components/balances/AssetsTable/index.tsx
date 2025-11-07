@@ -3,33 +3,23 @@ import React, { type ReactElement } from 'react'
 import { Box, Card, Checkbox, Skeleton, Stack, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material'
 import classNames from 'classnames'
 import css from './styles.module.css'
-import TokenAmount from '@/components/common/TokenAmount'
-import TokenIcon from '@/components/common/TokenIcon'
 import EnhancedTable, { type EnhancedTableProps } from '@/components/common/EnhancedTable'
-import TokenExplorerLink from '@/components/common/TokenExplorerLink'
 import TokenMenu from '../TokenMenu'
 import useBalances from '@/hooks/useBalances'
 import { useHideAssets, useVisibleAssets } from './useHideAssets'
 import AddFundsCTA from '@/components/common/AddFunds'
-import SwapButton from '@/features/swap/components/SwapButton'
-import { SWAP_LABELS } from '@/services/analytics/events/swaps'
-import SendButton from './SendButton'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 import { useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEnabled'
 import useIsStakingPromoEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
-import { STAKE_LABELS } from '@/services/analytics/events/stake'
-import StakeButton from '@/features/stake/components/StakeButton'
-import { TokenType } from '@safe-global/store/gateway/types'
-import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { FiatChange } from './FiatChange'
 import { FiatBalance } from './FiatBalance'
-import EarnButton from '@/features/earn/components/EarnButton'
-import { EARN_LABELS } from '@/services/analytics/events/earn'
-import { isEligibleEarnToken } from '@/features/earn/utils'
 import useChainId from '@/hooks/useChainId'
 import FiatValue from '@/components/common/FiatValue'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import { AssetRowContent } from './AssetRowContent'
+import { ActionButtons } from './ActionButtons'
+import TokenAmount from '@/components/common/TokenAmount'
 
 const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   asset: {
@@ -89,10 +79,6 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
 }
 
 const skeletonRows: EnhancedTableProps['rows'] = Array(3).fill({ cells: skeletonCells })
-
-const isNativeToken = (tokenInfo: Balance['tokenInfo']) => {
-  return tokenInfo.type === TokenType.NATIVE_TOKEN
-}
 
 const AssetsTable = ({
   showHiddenAssets,
@@ -167,7 +153,6 @@ const AssetsTable = ({
     : (visibleAssets || []).map((item) => {
         const rawFiatValue = parseFloat(item.fiatBalance)
         const rawPriceValue = parseFloat(item.fiatConversion)
-        const isNative = isNativeToken(item.tokenInfo)
         const isSelected = isAssetSelected(item.tokenInfo.address)
         const fiatTotal = visibleBalances.fiatTotal ? Number(visibleBalances.fiatTotal) : undefined
         const itemShareOfFiatTotal = fiatTotal ? Number(item.fiatBalance) / fiatTotal : null
@@ -180,58 +165,19 @@ const AssetsTable = ({
               rawValue: item.tokenInfo.name,
               content: (
                 <Box>
-                  <Box className={css.mobileAssetRow}>
-                    <div className={css.token}>
-                      <TokenIcon logoUri={item.tokenInfo.logoUri} tokenSymbol={item.tokenInfo.symbol} />
-
-                      <Stack>
-                        <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
-                          <Typography component="span" fontWeight="bold">
-                            {item.tokenInfo.name}
-                            {!isNative && <TokenExplorerLink address={item.tokenInfo.address} />}
-                          </Typography>
-                          {isStakingPromoEnabled && item.tokenInfo.type === TokenType.NATIVE_TOKEN && (
-                            <StakeButton tokenInfo={item.tokenInfo} trackingLabel={STAKE_LABELS.asset} plain />
-                          )}
-                          {isEarnPromoEnabled && isEligibleEarnToken(chainId, item.tokenInfo.address) && (
-                            <EarnButton tokenInfo={item.tokenInfo} trackingLabel={EARN_LABELS.asset} plain />
-                          )}
-                        </Box>
-                        <Typography
-                          variant="body2"
-                          color="primary.light"
-                          className={css.mobileBalance}
-                          fontWeight="normal"
-                        >
-                          <TokenAmount
-                            value={item.balance}
-                            decimals={item.tokenInfo.decimals}
-                            tokenSymbol={item.tokenInfo.symbol}
-                          />
-                        </Typography>
-                        <Typography variant="body2" color="primary.light" className={css.desktopSymbol}>
-                          {item.tokenInfo.symbol}
-                        </Typography>
-                      </Stack>
-                    </div>
-                    <Box className={css.mobileValue}>
-                      <Typography>
-                        <FiatBalance balanceItem={item} />
-                      </Typography>
-                      {item.fiatBalance24hChange && (
-                        <Typography variant="caption">
-                          <FiatChange balanceItem={item} inline />
-                        </Typography>
-                      )}
-                    </Box>
-                  </Box>
-                  <Stack direction="row" className={css.mobileButtons}>
-                    <SendButton tokenInfo={item.tokenInfo} />
-
-                    {isSwapFeatureEnabled && (
-                      <SwapButton tokenInfo={item.tokenInfo} amount="0" trackingLabel={SWAP_LABELS.asset} />
-                    )}
-                  </Stack>
+                  <AssetRowContent
+                    item={item}
+                    chainId={chainId}
+                    isStakingPromoEnabled={isStakingPromoEnabled ?? false}
+                    isEarnPromoEnabled={isEarnPromoEnabled ?? false}
+                    showMobileValue
+                    showMobileBalance
+                  />
+                  <ActionButtons
+                    tokenInfo={item.tokenInfo}
+                    isSwapFeatureEnabled={isSwapFeatureEnabled ?? false}
+                    mobile
+                  />
                 </Box>
               ),
             },
@@ -306,11 +252,11 @@ const AssetsTable = ({
                   mr={-1}
                   className={css.sticky}
                 >
-                  <SendButton tokenInfo={item.tokenInfo} onlyIcon />
-
-                  {isSwapFeatureEnabled && (
-                    <SwapButton tokenInfo={item.tokenInfo} amount="0" trackingLabel={SWAP_LABELS.asset} onlyIcon />
-                  )}
+                  <ActionButtons
+                    tokenInfo={item.tokenInfo}
+                    isSwapFeatureEnabled={isSwapFeatureEnabled ?? false}
+                    onlyIcon
+                  />
 
                   {showHiddenAssets && (
                     <Checkbox size="small" checked={isSelected} onClick={() => toggleAsset(item.tokenInfo.address)} />
@@ -356,61 +302,23 @@ const AssetsTable = ({
                       <Skeleton variant="rounded" width="100%" height={80} />
                     </Box>
                   ))
-              : (visibleAssets || []).map((item) => {
-                  const isNative = isNativeToken(item.tokenInfo)
-                  return (
-                    <Box key={item.tokenInfo.address} className={css.mobileRow}>
-                      <Box className={css.mobileAssetRow}>
-                        <div className={css.token}>
-                          <TokenIcon logoUri={item.tokenInfo.logoUri} tokenSymbol={item.tokenInfo.symbol} />
-
-                          <Stack>
-                            <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
-                              <Typography component="span" fontWeight="bold">
-                                {item.tokenInfo.name}
-                                {!isNative && <TokenExplorerLink address={item.tokenInfo.address} />}
-                              </Typography>
-                              {isStakingPromoEnabled && item.tokenInfo.type === TokenType.NATIVE_TOKEN && (
-                                <StakeButton tokenInfo={item.tokenInfo} trackingLabel={STAKE_LABELS.asset} plain />
-                              )}
-                              {isEarnPromoEnabled && isEligibleEarnToken(chainId, item.tokenInfo.address) && (
-                                <EarnButton tokenInfo={item.tokenInfo} trackingLabel={EARN_LABELS.asset} plain />
-                              )}
-                            </Box>
-                            <Typography variant="body2" color="primary.light" className={css.mobileBalance}>
-                              <TokenAmount
-                                value={item.balance}
-                                decimals={item.tokenInfo.decimals}
-                                tokenSymbol={item.tokenInfo.symbol}
-                              />
-                            </Typography>
-                          </Stack>
-                        </div>
-                        <Box className={css.mobileValue}>
-                          <Typography>
-                            <FiatBalance balanceItem={item} />
-                          </Typography>
-                          {item.fiatBalance24hChange && (
-                            <Typography variant="caption">
-                              <FiatChange balanceItem={item} inline />
-                            </Typography>
-                          )}
-                        </Box>
-                      </Box>
-                      <Stack direction="row" className={css.mobileButtons}>
-                        <Box className={css.mobileButtonWrapper}>
-                          <SendButton tokenInfo={item.tokenInfo} />
-                        </Box>
-
-                        {isSwapFeatureEnabled && (
-                          <Box className={css.mobileButtonWrapper}>
-                            <SwapButton tokenInfo={item.tokenInfo} amount="0" trackingLabel={SWAP_LABELS.asset} />
-                          </Box>
-                        )}
-                      </Stack>
-                    </Box>
-                  )
-                })}
+              : (visibleAssets || []).map((item) => (
+                  <Box key={item.tokenInfo.address} className={css.mobileRow}>
+                    <AssetRowContent
+                      item={item}
+                      chainId={chainId}
+                      isStakingPromoEnabled={isStakingPromoEnabled ?? false}
+                      isEarnPromoEnabled={isEarnPromoEnabled ?? false}
+                      showMobileValue
+                      showMobileBalance
+                    />
+                    <ActionButtons
+                      tokenInfo={item.tokenInfo}
+                      isSwapFeatureEnabled={isSwapFeatureEnabled ?? false}
+                      mobile
+                    />
+                  </Box>
+                ))}
           </Box>
         </Card>
       ) : (
