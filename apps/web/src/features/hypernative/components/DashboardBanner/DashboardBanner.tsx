@@ -1,8 +1,7 @@
-import { Box, Button, Card, Stack, Typography } from '@mui/material'
+import { Box, Button, Card, Typography } from '@mui/material'
 import Image from 'next/image'
 import Link, { type LinkProps } from 'next/link'
 import css from './styles.module.css'
-import type { ReactNode } from 'react'
 
 export interface DashboardBannerProps {
   title: string
@@ -12,7 +11,6 @@ export interface DashboardBannerProps {
   badgeSrc: string
   badgeAlt: string
   tagLabel: string
-  endIcon: ReactNode
 }
 
 export const DashboardBanner = ({
@@ -23,7 +21,6 @@ export const DashboardBanner = ({
   badgeSrc,
   badgeAlt,
   tagLabel,
-  endIcon,
 }: DashboardBannerProps) => {
   return (
     <Card className={css.banner}>
@@ -33,7 +30,7 @@ export const DashboardBanner = ({
         </Typography>
       </Box>
 
-      <Stack direction="row" spacing={2} className={css.content}>
+      <Box className={css.content}>
         <Box className={css.badgeContainer}>
           <Image
             src={badgeSrc}
@@ -58,13 +55,12 @@ export const DashboardBanner = ({
               variant="outlined"
               size="small"
               className={css.ctaButton}
-              endIcon={endIcon}
             >
               {ctaLabel}
             </Button>
           </Link>
         </Box>
-      </Stack>
+      </Box>
     </Card>
   )
 }

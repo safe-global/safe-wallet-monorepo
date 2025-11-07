@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import DashboardBanner from './DashboardBanner'
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 
 const meta = {
   component: DashboardBanner,
@@ -23,7 +22,6 @@ export const Default: Story = {
     tagLabel: 'Powered by Hypernative',
     badgeSrc: '/images/hypernative/guardian-badge.svg',
     badgeAlt: 'Guardian badge',
-    endIcon: <ArrowForwardIcon fontSize="small" />,
   },
 }
 
