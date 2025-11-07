@@ -92,13 +92,13 @@ jobs:
             --arg url "$RELEASE_URL" \
             '{
               channel: "#topic-wallet-releases",
-              text: ("🚀 *Safe Wallet " + $version + " Released to Production*"),
+              text: ("✅ Safe Wallet " + $version + " ready for going live"),
               blocks: [
                 {
                   type: "section",
                   text: {
                     type: "mrkdwn",
-                    text: ("*Safe Wallet " + $version + " has been deployed to production* 🎉\n\n<" + $url + "|View Release Notes>")
+                    text: ("*Safe Wallet " + $version + " is ready for going live* ✅\n\n<" + $url + "|View Release on GitHub>")
                   }
                 }
               ]
