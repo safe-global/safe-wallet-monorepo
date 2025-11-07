@@ -9,9 +9,21 @@ import type { AnalyticsEvent } from '@/services/analytics'
 
 export interface PromoBannerProps {
   title: string
-  description?: string
+  /**
+   * Banner description text. Can be a plain string for simple text or a ReactNode for rich content
+   * (e.g., text with inline links, formatted content).
+   *
+   * Note: When using ReactNode, ensure proper accessibility by using semantic HTML elements
+   * and consider the impact on text wrapping and styling within the banner layout.
+   */
+  description?: string | ReactNode
   ctaLabel: string
-  href: LinkProps['href']
+  /**
+   * Optional href for the CTA button. If not provided and onCtaClick is not set,
+   * the CTA button will be rendered without a link wrapper.
+   */
+  href?: LinkProps['href']
+  onCtaClick?: () => void
   trackOpenProps: AnalyticsEvent
   trackHideProps: AnalyticsEvent
   onDismiss?: () => void
@@ -23,6 +35,7 @@ export interface PromoBannerProps {
   customCtaColor?: string
   customCloseIconColor?: string
   customBackground?: string
+  ctaDisabled?: boolean
 }
 
 export const PromoBanner = ({
@@ -30,6 +43,7 @@ export const PromoBanner = ({
   description,
   ctaLabel,
   href,
+  onCtaClick,
   onDismiss,
   imageSrc,
   imageAlt,
@@ -41,6 +55,7 @@ export const PromoBanner = ({
   customCtaColor,
   customCloseIconColor,
   customBackground,
+  ctaDisabled,
 }: PromoBannerProps) => {
   return (
     <Card className={css.banner} sx={customBackground ? { background: `${customBackground} !important` } : undefined}>
@@ -68,18 +83,43 @@ export const PromoBanner = ({
           ) : null}
 
           <Track {...trackOpenProps}>
-            <Link href={href} passHref>
+            {onCtaClick ? (
+              <Button
+                {...(endIcon && { endIcon })}
+                variant="contained"
+                size="small"
+                onClick={onCtaClick}
+                className={css.bannerCtaContained}
+                sx={customCtaColor ? { backgroundColor: `${customCtaColor} !important` } : undefined}
+                disabled={ctaDisabled}
+              >
+                {ctaLabel}
+              </Button>
+            ) : href ? (
+              <Link href={href} passHref>
+                <Button
+                  {...(endIcon && { endIcon })}
+                  variant="text"
+                  size="compact"
+                  className={css.bannerCtaText}
+                  sx={customCtaColor ? { color: `${customCtaColor} !important` } : undefined}
+                  color={customCtaColor ? undefined : 'static'}
+                >
+                  {ctaLabel}
+                </Button>
+              </Link>
+            ) : (
               <Button
                 {...(endIcon && { endIcon })}
                 variant="text"
                 size="compact"
-                className={css.bannerCta}
+                className={css.bannerCtaText}
                 sx={customCtaColor ? { color: `${customCtaColor} !important` } : undefined}
                 color={customCtaColor ? undefined : 'static'}
               >
                 {ctaLabel}
               </Button>
-            </Link>
+            )}
           </Track>
         </Box>
       </Stack>
