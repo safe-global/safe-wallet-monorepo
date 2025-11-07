@@ -24,6 +24,7 @@
 .text {
   color: var(--color-text-primary);
   font-weight: bold !important;
+  margin-left: 0 !important;
 }
 
 .externalLinkIcon {
@@ -43,3 +44,15 @@
   opacity: 0.9;
 }
 
+@media (max-width: 410px) {
+  .text {
+    font-size: 12px !important;
+  }
+
+  .externalLinkIcon,
+  .hypernativeIcon {
+    width: 14px !important;
+    height: 14px !important;
+    margin-left: 0 !important;
+  }
+}
