@@ -20,11 +20,6 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
     setActiveStep((prevStep) => prevStep - 1)
   }
 
-  const handleFinish = () => {
-    setActiveStep(0)
-    onClose()
-  }
-
   const getHubSpotConfig = () => {
     const config = process.env.NEXT_PUBLIC_HUBSPOT_CONFIG
     if (!config) {
