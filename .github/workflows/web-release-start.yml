@@ -67,11 +67,24 @@ jobs:
           else
             # Auto-increment version based on release type
             cd apps/web
-            CURRENT_VERSION=$(node -p "require('./package.json').version")
+            CURRENT_VERSION=$(node -p "require('./package.json').version" || echo "")
+
+            # Validate extraction succeeded
+            if [ -z "$CURRENT_VERSION" ]; then
+              echo "❌ Error: Could not extract version from package.json"
+              exit 1
+            fi
+
             echo "📍 Current version: $CURRENT_VERSION"
 
             # Parse version components
             IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+
+            # Validate parsed components
+            if [ -z "$MAJOR" ] || [ -z "$MINOR" ] || [ -z "$PATCH" ]; then
+              echo "❌ Error: Could not parse version components from: $CURRENT_VERSION"
+              exit 1
+            fi
 
             if [ "${{ inputs.release_type }}" = "hotfix" ]; then
               # Hotfix: increment patch version (last number)
@@ -215,20 +228,30 @@ jobs:
         if: vars.SLACK_WEBHOOK_URL
         continue-on-error: true
         run: |
-          curl -X POST "${{ vars.SLACK_WEBHOOK_URL }}" \
-            -H 'Content-Type: application/json' \
-            -d '{
-              "text": "🚀 *Release v${{ steps.version.outputs.version }} Started*",
-              "blocks": [
+          VERSION="${{ steps.version.outputs.version }}"
+          RELEASE_TYPE="${{ inputs.release_type }}"
+          BASE_BRANCH="${{ steps.base.outputs.branch }}"
+          PR_URL="${{ steps.create_pr.outputs.pr_url }}"
+
+          jq -n \
+            --arg version "$VERSION" \
+            --arg release_type "$RELEASE_TYPE" \
+            --arg base "$BASE_BRANCH" \
+            --arg pr_url "$PR_URL" \
+            '{
+              text: ("🚀 *Release v" + $version + " Started*"),
+              blocks: [
                 {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*Release v${{ steps.version.outputs.version }} has been initiated* ✅\n\n*Type:* ${{ inputs.release_type }}\n*Base:* ${{ steps.base.outputs.branch }}\n*PR:* ${{ steps.create_pr.outputs.pr_url }}\n\n_QA team: Please review and test_ 🧪"
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: ("*Release v" + $version + " has been initiated* ✅\n\n*Type:* " + $release_type + "\n*Base:* " + $base + "\n*PR:* " + $pr_url + "\n\n_QA team: Please review and test_ 🧪")
                   }
                 }
               ]
-            }'
+            }' | curl -X POST "${{ vars.SLACK_WEBHOOK_URL }}" \
+              -H 'Content-Type: application/json' \
+              -d @-
 
       - name: Summary
         run: |
