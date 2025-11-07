@@ -1,0 +1,166 @@
+.container {
+  min-height: 644px;
+}
+
+.contentColumn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--space-5) var(--space-4);
+}
+
+.formColumn {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: var(--space-5) var(--space-4);
+  background-color: var(--color-static-primary);
+}
+
+.contentWrapper {
+  margin: 0 auto;
+  width: 100%;
+}
+
+.formWrapper {
+  margin: 0 auto;
+  width: 100%;
+}
+
+.formTitle {
+  color: var(--color-static-main);
+  margin-bottom: var(--space-2);
+}
+
+.formSubtitle {
+  color: var(--color-static-light);
+  margin-bottom: var(--space-4) !important;
+}
+
+.cancelButtonWrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -60px;
+}
+
+.cancelButton {
+  color: var(--color-static-main) !important;
+}
+
+.header {
+  margin-bottom: var(--space-6);
+}
+
+.title {
+  font-weight: 700;
+  font-size: 48px;
+  line-height: 56px;
+  margin-bottom: var(--space-1);
+}
+
+.poweredBy {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+}
+
+.poweredByText {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.logo {
+  height: 16px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+[data-theme='dark'] .logo {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.subtitle {
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.features {
+  margin-bottom: var(--space-6);
+}
+
+.feature {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.feature:last-child {
+  margin-bottom: 0;
+}
+
+.featureIcon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.featureTitle {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.featureDescription {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.backgroundColumn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 288px;
+  flex-shrink: 0;
+  background:
+    radial-gradient(ellipse 150px 150px at top left, rgb(47, 47, 47) 0%, transparent 100%),
+    radial-gradient(ellipse 150px 150px at top right, rgb(1, 1, 1) 0%, transparent 100%),
+    radial-gradient(ellipse 150px 150px at bottom left, rgb(24, 28, 25) 0%, transparent 100%),
+    radial-gradient(ellipse 150px 150px at bottom right, rgb(65, 68, 66) 0%, transparent 100%),
+    rgb(28, 28, 28) center/contain no-repeat;
+}
+
+[data-theme='dark'] .backgroundColumn {
+  background: none;
+}
+
+.backgroundColumn:after {
+  content: '';
+  width: 265px;
+  height: 620px;
+  border-radius: 18px;
+  background: url(/images/hypernative/signup-intro-bg.png) no-repeat center;
+  background-size: contain;
+}
+
+@media (min-width: 700px) {
+  .backgroundColumn {
+    display: flex;
+  }
+}
+
+.poweredByText,
+.subtitle,
+.featureDescription {
+  color: var(--color-primary-light);
+}
+
+.featureIcon {
+  color: var(--color-success-main);
+}
