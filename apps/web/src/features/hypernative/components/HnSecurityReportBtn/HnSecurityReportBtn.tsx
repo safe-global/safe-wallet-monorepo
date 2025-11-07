@@ -4,7 +4,7 @@ import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
 import css from './styles.module.css'
 import type { ReactElement } from 'react'
 
-export interface HnTxBannerProps {
+export interface HnSecurityReportBtnProps {
   /**
    * The text to display in the banner
    */
@@ -15,7 +15,7 @@ export interface HnTxBannerProps {
   href: string
 }
 
-const HnTxBanner = ({ text, href }: HnTxBannerProps): ReactElement => {
+const HnSecurityReportBtn = ({ text, href }: HnSecurityReportBtnProps): ReactElement => {
   return (
     <Link href={href} target="_blank" rel="noopener noreferrer" className={css.link} underline="none">
       <Card className={css.banner}>
@@ -29,4 +29,5 @@ const HnTxBanner = ({ text, href }: HnTxBannerProps): ReactElement => {
   )
 }
 
-export default HnTxBanner
+export default HnSecurityReportBtn
+

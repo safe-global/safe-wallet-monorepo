@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import HnTxBanner from './HnTxBanner'
+import HnSecurityReportBtn from './HnSecurityReportBtn'
 import { Paper } from '@mui/material'
 
 const meta = {
-  component: HnTxBanner,
-  title: 'Features/Hypernative/HnTxBanner',
+  component: HnSecurityReportBtn,
+  title: 'Features/Hypernative/HnSecurityReportBtn',
   parameters: {
     componentSubtitle:
       'A transaction banner component that displays a security report review link with checkmark icon (light theme) and external link icon.',
@@ -19,7 +19,7 @@ const meta = {
     },
   ],
   tags: ['autodocs'],
-} satisfies Meta<typeof HnTxBanner>
+} satisfies Meta<typeof HnSecurityReportBtn>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -30,3 +30,4 @@ export const Default: Story = {
     href: '#',
   },
 }
+

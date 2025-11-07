@@ -6,6 +6,10 @@
   width: 100%;
 }
 
+.content {
+  gap: var(--space-1);
+}
+
 .hypernativeIcon svg {
   width: 9px;
   height: 16px;
@@ -38,3 +42,4 @@
 .link:hover .banner {
   opacity: 0.9;
 }
+
