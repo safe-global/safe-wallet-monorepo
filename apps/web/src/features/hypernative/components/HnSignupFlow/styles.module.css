@@ -39,6 +39,12 @@
 
 .logo {
   height: 16px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+[data-theme='dark'] .logo {
+  background-color: rgba(255, 255, 255, 0.3);
 }
 
 .subtitle {

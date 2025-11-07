@@ -55,7 +55,7 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
     <HnModal open={open} onClose={onClose}>
       <Box>
         {activeStep > 0 && (
-          <Box sx={{ px: 4, pt: 4, pb: 2 }}>
+          <Box sx={{ px: 4, pt: 7, pb: 2 }}>
             <Stepper activeStep={activeStep}>
               {steps.map((label) => (
                 <Step key={label}>

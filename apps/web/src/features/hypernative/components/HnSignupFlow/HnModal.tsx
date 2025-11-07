@@ -34,7 +34,7 @@ const HnModal = ({ open, onClose, children }: HnModalProps) => {
           <Close />
         </IconButton>
       </Box>
-      <DialogContent sx={{ padding: 0, overflow: 'hidden' }}>{children}</DialogContent>
+      <DialogContent sx={{ padding: 0, overflow: 'auto' }}>{children}</DialogContent>
     </Dialog>
   )
 }
