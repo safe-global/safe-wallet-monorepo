@@ -1,6 +1,6 @@
 import { Card, Link, Stack, SvgIcon, Typography } from '@mui/material'
-import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded'
 import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
+import ExternalLinkIcon from '@/public/images/common/external-link.svg'
 import css from './styles.module.css'
 import type { ReactElement } from 'react'
 
@@ -22,7 +22,7 @@ const HnSecurityReportBtn = ({ text, href }: HnSecurityReportBtnProps): ReactEle
         <Stack direction="row" alignItems="center" justifyContent="center" spacing={1} className={css.content}>
           <SvgIcon component={HypernativeIcon} inheritViewBox className={css.hypernativeIcon} />
           <Typography className={css.text}>{text}</Typography>
-          <OpenInNewRoundedIcon className={css.externalLinkIcon} />
+          <SvgIcon component={ExternalLinkIcon} inheritViewBox className={css.externalLinkIcon} />
         </Stack>
       </Card>
     </Link>
