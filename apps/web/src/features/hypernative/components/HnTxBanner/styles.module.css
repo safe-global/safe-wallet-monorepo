@@ -6,23 +6,6 @@
   width: 100%;
 }
 
-.content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-1);
-}
-
-.hypernativeIcon {
-  width: 9px;
-  height: 16px;
-  min-width: 9px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .hypernativeIcon svg {
   width: 9px;
   height: 16px;
@@ -36,6 +19,7 @@
 
 .text {
   color: var(--color-text-primary);
+  font-weight: bold !important;
 }
 
 .externalLinkIcon {
@@ -43,8 +27,6 @@
   height: 16px;
   color: var(--color-text-primary);
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
 }
 
 .link {

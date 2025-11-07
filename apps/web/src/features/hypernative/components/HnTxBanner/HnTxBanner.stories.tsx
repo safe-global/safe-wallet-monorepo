@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import HnTxBanner from './HnTxBanner'
-import { Paper, Stack } from '@mui/material'
+import { Paper } from '@mui/material'
 
 const meta = {
   component: HnTxBanner,
@@ -30,4 +30,3 @@ export const Default: Story = {
     href: '#',
   },
 }
-

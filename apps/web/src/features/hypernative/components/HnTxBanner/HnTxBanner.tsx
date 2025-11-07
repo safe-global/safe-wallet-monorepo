@@ -17,7 +17,7 @@ export interface HnTxBannerProps {
 
 const HnTxBanner = ({ text, href }: HnTxBannerProps): ReactElement => {
   return (
-    <Link href={href} target="_blank" rel="noopener noreferrer" className={css.link}>
+    <Link href={href} target="_blank" rel="noopener noreferrer" className={css.link} underline="none">
       <Card className={css.banner}>
         <Stack direction="row" alignItems="center" justifyContent="center" spacing={1} className={css.content}>
           <SvgIcon component={HypernativeIcon} inheritViewBox className={css.hypernativeIcon} />
@@ -30,4 +30,3 @@ const HnTxBanner = ({ text, href }: HnTxBannerProps): ReactElement => {
 }
 
 export default HnTxBanner
-
