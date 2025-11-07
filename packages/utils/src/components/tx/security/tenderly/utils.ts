@@ -9,6 +9,7 @@ import {
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import {
   FETCH_STATUS,
+  NestedTxStatus,
   type StateObject,
   type TenderlySimulatePayload,
   type TenderlySimulation,
@@ -95,6 +96,21 @@ export const isTxSimulationEnabled = (chain?: Pick<Chain, 'features'>): boolean 
 
   return isSimulationEnvSet && hasFeature(chain, FEATURES.TX_SIMULATION)
 }
+
+export const isSimulationError = (status: SimulationStatus, nestedTx: NestedTxStatus, isNested: boolean) => {
+  const mainIsSuccess = status.isSuccess && !status.isError
+  const nestedIsSuccess = isNested ? nestedTx.status.isSuccess && !nestedTx.status.isError : true
+  const isSimulationSuccess = mainIsSuccess && nestedIsSuccess
+
+  const mainIsFinished = status.isFinished
+  const nestedIsFinished = isNested ? nestedTx.status.isFinished : true
+  const isSimulationFinished = mainIsFinished && nestedIsFinished
+
+  const isLoading = status.isLoading || (isNested && nestedTx.status.isLoading)
+
+  return isSimulationFinished && !isSimulationSuccess && !isLoading
+}
+
 export const getSimulation = async (
   tx: TenderlySimulatePayload,
   customTenderly: EnvState['tenderly'] | undefined,

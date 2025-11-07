@@ -625,16 +625,9 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
           </div>
         </div>
       </div>
-    </div>
-  </div>
-  <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1w4z6qv-MuiPaper-root-MuiCard-root"
-    style="--Paper-shadow: none;"
-  >
-    <div
-      class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
-      data-testid="card-content"
-    >
+      <hr
+        class="MuiDivider-root MuiDivider-fullWidth css-pqic1n-MuiDivider-root"
+      />
       <div
         class="wrapper"
       >

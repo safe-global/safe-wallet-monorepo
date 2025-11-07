@@ -1,5 +1,5 @@
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Box, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import type { ReactElement } from 'react'
 
 import useAsync from '@safe-global/utils/hooks/useAsync'
@@ -25,12 +25,12 @@ export function NestedSafeCreation({ txData }: { txData: TransactionData }): Rea
   }
 
   return (
-    <Box display="flex" alignItems="center" justifyContent="space-between">
+    <Stack direction="column" gap={1}>
       <Typography variant="body2" color="text.secondary" whiteSpace="nowrap">
         Nested Safe
       </Typography>
 
-      <div>
+      <Box>
         <EthHashInfo
           name={addressBook[predictedSafeAddress]}
           address={predictedSafeAddress}
@@ -39,7 +39,7 @@ export function NestedSafeCreation({ txData }: { txData: TransactionData }): Rea
           showCopyButton
           showAvatar
         />
-      </div>
-    </Box>
+      </Box>
+    </Stack>
   )
 }
