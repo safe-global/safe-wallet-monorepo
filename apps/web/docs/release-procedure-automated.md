@@ -14,13 +14,6 @@ GitHub → Actions → "🚀 Start Web Release"
 → Click "Run workflow"
 ```
 
-### Completing a Release
-```
-GitHub → Actions → "✅ Complete Web Release"
-→ Enter PR number
-→ Click "Run workflow"
-```
-
 ### Back-merge
 ```
 GitHub → Actions → "🔄 Back-merge Main to Dev"
@@ -40,7 +33,7 @@ GitHub → Actions → "🔄 Back-merge Main to Dev"
 3. Fill in:
    - **Version:** e.g., `1.74.0` (must be X.Y.Z format)
    - **Release type:**
-     - `regular` → from `dev` branch (normal releases)
+     - `regular` → from `main` branch (normal releases)
      - `hotfix` → from `main` branch (urgent fixes)
 4. Click **"Run workflow"**
 
@@ -70,48 +63,26 @@ GitHub → Actions → "🔄 Back-merge Main to Dev"
 
 ---
 
-### Step 3: Complete Release
+### Step 3: Merge Release PR
 
 **Who:** Release Manager (after QA approval)
 
-1. Go to **GitHub → Actions → "✅ Complete Web Release"**
-2. Click **"Run workflow"**
-3. Enter the **PR number** from Step 1
-4. Click **"Run workflow"**
-
-**What happens automatically:**
-- ✅ Verifies PR is valid release PR
-- ✅ Checks all PR checks pass
-- ✅ Merges PR to `main`
-- ✅ Creates git tag (via existing workflow)
-- ✅ Creates draft GitHub release
-- ✅ Sends Slack notification (if configured)
-
-**Result:** PR merged, draft release created (~1-2 minutes)
-
----
-
-### Step 4: Deploy to Production
-
-**Who:** Release Manager
-
 **Manual steps:**
-1. Go to **GitHub → Releases**
-2. Find the draft release
-3. Review release notes
-4. Click **"Publish release"**
+1. Review and approve the release PR
+2. Merge the PR to `main`
 
 **What happens automatically:**
-- ✅ Builds production assets (existing workflow)
-- ✅ Deploys to staging
-- ✅ Uploads to S3
-- ✅ Notifies DevOps for production deployment
+- ✅ Creates git tag
+- ✅ Creates and publishes GitHub release
+- ✅ Builds production assets
+- ✅ Deploys to production
+- ✅ Sends Slack notification to `#topic-wallet-releases`
 
-**Result:** Production deployment initiated
+**Result:** Production deployment completed (~5-10 minutes)
 
 ---
 
-### Step 5: Back-merge
+### Step 4: Back-merge
 
 **Who:** Release Manager (after production deployment)
 
@@ -146,7 +117,7 @@ To enable notifications:
 
 Notifications will be sent for:
 - Release started
-- Release completed
+- Production deployment completed (to `#topic-wallet-releases` channel)
 - Back-merge status
 
 ---
@@ -165,17 +136,17 @@ Notifications will be sent for:
 └──────┬───────┘
        │
        │ (2) QA Testing (manual)
-       │ (3) Click "Complete Release"
+       │ (3) Merge PR
        ▼
 ┌──────────────┐
 │   main       │  ← Production-ready
 └──────┬───────┘
        │
-       │ (4) Publish Release
+       │ (Auto: Tag, Release & Deploy)
        ▼
    Production 🎉
        │
-       │ (5) Click "Back-merge"
+       │ (4) Click "Back-merge"
        ▼
 ┌──────────────┐
 │   dev        │  ← Synced
@@ -188,7 +159,7 @@ Notifications will be sent for:
 
 | Aspect | Manual Process | Automated Process |
 |--------|---------------|-------------------|
-| **Steps** | ~20 CLI commands | 3 button clicks |
+| **Steps** | ~20 CLI commands | 2 button clicks + 1 PR merge |
 | **Time** | 30-60 minutes | 5-10 minutes |
 | **Expertise** | Git/CLI expert | Anyone with GitHub access |
 | **Error Rate** | High | Low (validated) |
@@ -278,8 +249,9 @@ Use manual process if:
 - GitHub Actions: https://github.com/safe-global/safe-wallet-monorepo/actions
 - Release Workflows:
   - [Start Release](https://github.com/safe-global/safe-wallet-monorepo/actions/workflows/web-release-start.yml)
-  - [Complete Release](https://github.com/safe-global/safe-wallet-monorepo/actions/workflows/web-release-complete.yml)
   - [Back-merge](https://github.com/safe-global/safe-wallet-monorepo/actions/workflows/web-release-backmerge.yml)
+  - [Tag Release](https://github.com/safe-global/safe-wallet-monorepo/actions/workflows/web-tag-release.yml) (auto-triggered)
+  - [Deploy Production](https://github.com/safe-global/safe-wallet-monorepo/actions/workflows/web-deploy-production.yml) (auto-triggered)
 
 ---
 
