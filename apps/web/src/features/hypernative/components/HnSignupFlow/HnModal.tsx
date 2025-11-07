@@ -14,9 +14,9 @@ const HnModal = ({ open, onClose, children }: HnModalProps) => {
       open={open}
       onClose={onClose}
       fullWidth
+      maxWidth="md"
       PaperProps={{
         sx: {
-          maxWidth: '720px',
           borderRadius: '16px',
           backgroundColor: 'var(--color-background-paper)',
           backgroundImage: 'none',

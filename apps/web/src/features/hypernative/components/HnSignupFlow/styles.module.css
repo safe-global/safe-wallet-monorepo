@@ -9,9 +9,32 @@
   padding: var(--space-5) var(--space-4);
 }
 
+.formColumn {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: var(--space-5) var(--space-4);
+  background-color: var(--color-static-primary);
+}
+
 .contentWrapper {
   margin: 0 auto;
   width: 100%;
+}
+
+.formWrapper {
+  margin: 0 auto;
+  width: 100%;
+}
+
+.formTitle {
+  color: var(--color-static-main);
+  margin-bottom: var(--space-2);
+}
+
+.formSubtitle {
+  color: var(--color-static-light);
+  margin-bottom: var(--space-4) !important;
 }
 
 .header {
