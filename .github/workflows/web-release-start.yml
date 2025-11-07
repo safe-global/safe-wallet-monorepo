@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g., 1.74.0)'
-        required: true
+        description: 'Release version (e.g., 1.74.0) - leave empty to auto-increment'
+        required: false
         type: string
       release_type:
         description: 'Release type'
@@ -28,15 +28,6 @@ jobs:
       pull-requests: write
 
     steps:
-      - name: Validate version format
-        run: |
-          if ! [[ "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "❌ Invalid version format. Expected: X.Y.Z where X, Y, Z are numbers (e.g., 1.74.0)"
-            echo "Received: '${{ inputs.version }}'"
-            exit 1
-          fi
-          echo "✅ Version format is valid"
-
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
@@ -61,10 +52,48 @@ jobs:
           echo "branch=$BASE" >> $GITHUB_OUTPUT
           echo "📍 Base branch: $BASE"
 
+      - name: Determine version
+        id: version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            # Validate provided version format
+            if ! [[ "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "❌ Invalid version format. Expected: X.Y.Z where X, Y, Z are numbers (e.g., 1.74.0)"
+              echo "Received: '${{ inputs.version }}'"
+              exit 1
+            fi
+            VERSION="${{ inputs.version }}"
+            echo "✅ Using provided version: $VERSION"
+          else
+            # Auto-increment version based on release type
+            cd apps/web
+            CURRENT_VERSION=$(node -p "require('./package.json').version")
+            echo "📍 Current version: $CURRENT_VERSION"
+
+            # Parse version components
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+
+            if [ "${{ inputs.release_type }}" = "hotfix" ]; then
+              # Hotfix: increment patch version (last number)
+              PATCH=$((PATCH + 1))
+              echo "🔧 Hotfix: incrementing patch version"
+            else
+              # Regular release: increment minor version (middle number), reset patch
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              echo "🚀 Regular release: incrementing minor version"
+            fi
+
+            VERSION="$MAJOR.$MINOR.$PATCH"
+            echo "✅ Auto-generated version: $VERSION"
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Check if version already exists
         run: |
-          if git rev-parse "v${{ inputs.version }}" >/dev/null 2>&1; then
-            echo "❌ Version v${{ inputs.version }} already exists!"
+          if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "❌ Version v${{ steps.version.outputs.version }} already exists!"
             exit 1
           fi
           echo "✅ Version is new"
@@ -100,15 +129,15 @@ jobs:
           node -e "
             const fs = require('fs');
             const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-            pkg.version = '${{ inputs.version }}';
+            pkg.version = '${{ steps.version.outputs.version }}';
             fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
           "
-          echo "✅ Version bumped to ${{ inputs.version }}"
+          echo "✅ Version bumped to ${{ steps.version.outputs.version }}"
 
       - name: Commit version bump
         run: |
           git add apps/web/package.json
-          git commit -m "${{ inputs.version }}"
+          git commit -m "${{ steps.version.outputs.version }}"
           git push origin release
           echo "✅ Version committed"
 
@@ -141,7 +170,7 @@ jobs:
 
           # Create PR body
           PR_BODY=$(cat <<EOF
-          ## 🚀 Release v${{ inputs.version }}
+          ## 🚀 Release v${{ steps.version.outputs.version }}
 
           $CHANGELOG
 
@@ -174,7 +203,7 @@ jobs:
           PR_URL=$(gh pr create \
             --base main \
             --head release \
-            --title "Release v${{ inputs.version }}" \
+            --title "Release v${{ steps.version.outputs.version }}" \
             --body "$PR_BODY" \
             --label "release" \
             | tail -n 1)
@@ -189,13 +218,13 @@ jobs:
           curl -X POST "${{ vars.SLACK_WEBHOOK_URL }}" \
             -H 'Content-Type: application/json' \
             -d '{
-              "text": "🚀 *Release v${{ inputs.version }} Started*",
+              "text": "🚀 *Release v${{ steps.version.outputs.version }} Started*",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*Release v${{ inputs.version }} has been initiated* ✅\n\n*Type:* ${{ inputs.release_type }}\n*Base:* ${{ steps.base.outputs.branch }}\n*PR:* ${{ steps.create_pr.outputs.pr_url }}\n\n_QA team: Please review and test_ 🧪"
+                    "text": "*Release v${{ steps.version.outputs.version }} has been initiated* ✅\n\n*Type:* ${{ inputs.release_type }}\n*Base:* ${{ steps.base.outputs.branch }}\n*PR:* ${{ steps.create_pr.outputs.pr_url }}\n\n_QA team: Please review and test_ 🧪"
                   }
                 }
               ]
@@ -205,7 +234,7 @@ jobs:
         run: |
           echo "### 🎉 Release Started Successfully!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** v${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "**Type:** ${{ inputs.release_type }}" >> $GITHUB_STEP_SUMMARY
           echo "**Base Branch:** ${{ steps.base.outputs.branch }}" >> $GITHUB_STEP_SUMMARY
           echo "**PR:** ${{ steps.create_pr.outputs.pr_url }}" >> $GITHUB_STEP_SUMMARY
