@@ -1,5 +1,16 @@
 # Releasing to production
 
+> **⚠️ NOTICE: This document describes the LEGACY manual release process.**
+>
+> **For the NEW automated process using GitHub Actions (recommended), see:**
+> **[📖 Automated Release Procedure](./release-procedure-automated.md)**
+>
+> The automated process reduces manual steps from ~20 to just 3 button clicks and requires no CLI expertise.
+>
+> ---
+
+## Legacy Manual Process
+
 The code is being actively developed on the `dev` branch. Pull requests are made against this branch.
 
 We prepare at least one release every sprint. Sprints are two weeks long.

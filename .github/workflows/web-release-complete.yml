@@ -1,0 +1,170 @@
+name: ✅ Complete Web Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Release PR number (from the Start Release workflow)'
+        required: true
+        type: number
+      skip_checks:
+        description: 'Skip PR checks (use only if checks are failing incorrectly)'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  complete-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Verify PR exists and is a release PR
+        id: verify_pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_INFO=$(gh pr view ${{ inputs.pr_number }} --json title,headRefName,baseRefName,state,labels)
+
+          TITLE=$(echo "$PR_INFO" | jq -r '.title')
+          HEAD=$(echo "$PR_INFO" | jq -r '.headRefName')
+          BASE=$(echo "$PR_INFO" | jq -r '.baseRefName')
+          STATE=$(echo "$PR_INFO" | jq -r '.state')
+          HAS_RELEASE_LABEL=$(echo "$PR_INFO" | jq -r '.labels[] | select(.name == "release") | .name')
+
+          echo "PR #${{ inputs.pr_number }}: $TITLE"
+          echo "  Head: $HEAD → Base: $BASE"
+          echo "  State: $STATE"
+
+          # Verify this is a release PR
+          if [ "$HEAD" != "release" ]; then
+            echo "❌ Error: PR #${{ inputs.pr_number }} is not from the 'release' branch"
+            exit 1
+          fi
+
+          if [ "$BASE" != "main" ]; then
+            echo "❌ Error: PR #${{ inputs.pr_number }} is not targeting 'main'"
+            exit 1
+          fi
+
+          if [ "$STATE" != "OPEN" ]; then
+            echo "❌ Error: PR #${{ inputs.pr_number }} is not open (state: $STATE)"
+            exit 1
+          fi
+
+          echo "✅ Verified: This is a valid release PR"
+
+          # Extract version from title
+          VERSION=$(echo "$TITLE" | grep -oP 'v?\K[0-9]+\.[0-9]+\.[0-9]+' || echo "")
+          if [ -z "$VERSION" ]; then
+            echo "❌ Error: Could not extract version from PR title: '$TITLE'"
+            echo "Expected format: 'Release vX.Y.Z' or 'Release X.Y.Z'"
+            exit 1
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "✅ Extracted version: $VERSION"
+
+      - name: Check PR status
+        if: inputs.skip_checks == false
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if PR has any failing checks
+          STATUS=$(gh pr checks ${{ inputs.pr_number }} --json state -q '.[].state' | sort -u)
+
+          if echo "$STATUS" | grep -q "FAILURE"; then
+            echo "❌ Some PR checks are failing. Please fix them or use skip_checks=true"
+            gh pr checks ${{ inputs.pr_number }}
+            exit 1
+          fi
+
+          echo "✅ All PR checks passed"
+
+      - name: Add QA approval comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment ${{ inputs.pr_number }} --body "✅ **QA Approved**
+
+          Release is approved and will now be merged to \`main\`.
+
+          🤖 *Automated by [Complete Web Release workflow](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})*"
+
+      - name: Merge PR to main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔀 Merging PR #${{ inputs.pr_number }} to main..."
+
+          gh pr merge ${{ inputs.pr_number }} \
+            --merge \
+            --delete-branch=false \
+            --subject "Release v${{ steps.verify_pr.outputs.version }}" \
+            --body "QA approved. Automated merge by release workflow."
+
+          echo "✅ PR merged to main"
+
+      - name: Wait for tag creation
+        run: |
+          echo "⏳ Waiting for web-tag-release workflow to create tag..."
+          sleep 30
+
+          # Check if tag was created
+          for i in {1..12}; do
+            if git ls-remote --tags origin | grep -q "v${{ steps.verify_pr.outputs.version }}"; then
+              echo "✅ Tag v${{ steps.verify_pr.outputs.version }} created"
+              exit 0
+            fi
+            echo "Waiting for tag... (attempt $i/12)"
+            sleep 10
+          done
+
+          echo "⚠️  Tag not created yet, but continuing..."
+
+      - name: Notify on Slack
+        if: vars.SLACK_WEBHOOK_URL
+        continue-on-error: true
+        run: |
+          VERSION="${{ steps.verify_pr.outputs.version }}"
+          jq -n --arg version "$VERSION" '{
+            text: ("✅ *Release v" + $version + " Merged to Main*"),
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: ("*Release v" + $version + " has been merged* 🎉\n\n*Status:* QA Approved ✅\n*Branch:* Merged to `main`\n\n_Next: GitHub release will be created automatically. Publish the draft release to deploy to production._ 🚀")
+                }
+              }
+            ]
+          }' | curl -X POST "${{ vars.SLACK_WEBHOOK_URL }}" \
+            -H 'Content-Type: application/json' \
+            -d @-
+
+      - name: Summary
+        run: |
+          echo "### 🎉 Release Completed!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** v${{ steps.verify_pr.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**PR #${{ inputs.pr_number }}:** Merged to main ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📝 Next Steps:" >> $GITHUB_STEP_SUMMARY
+          echo "1. ✅ **QA approved and merged to main**" >> $GITHUB_STEP_SUMMARY
+          echo "2. ⏳ **GitHub draft release will be created automatically**" >> $GITHUB_STEP_SUMMARY
+          echo "3. ⏳ Go to [Releases](https://github.com/${{ github.repository }}/releases) and **publish the draft**" >> $GITHUB_STEP_SUMMARY
+          echo "4. ⏳ Publishing will trigger production deployment" >> $GITHUB_STEP_SUMMARY
+          echo "5. ⏳ After deployment, notify DevOps or run back-merge workflow" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 [View Releases](https://github.com/${{ github.repository }}/releases)" >> $GITHUB_STEP_SUMMARY
