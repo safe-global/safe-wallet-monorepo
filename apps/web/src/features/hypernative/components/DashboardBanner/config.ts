@@ -9,4 +9,3 @@ export const dashboardBannerConfig = {
   badgeSrc: '/images/hypernative/guardian-badge.svg',
   badgeAlt: 'Guardian badge',
 } as const
-

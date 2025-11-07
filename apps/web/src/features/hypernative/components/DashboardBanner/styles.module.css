@@ -10,10 +10,12 @@
 .banner {
   position: relative;
   padding: 30px var(--space-3) !important;
-  background: linear-gradient(90deg,
-      var(--dashboard-banner-gradient-start) 0%,
-      var(--dashboard-banner-gradient-end) 54.327%,
-      var(--dashboard-banner-gradient-end) 100%) !important;
+  background: linear-gradient(
+    90deg,
+    var(--dashboard-banner-gradient-start) 0%,
+    var(--dashboard-banner-gradient-end) 54.327%,
+    var(--dashboard-banner-gradient-end) 100%
+  ) !important;
   border: 0 !important;
   border-radius: 12px;
   max-width: 460px;
