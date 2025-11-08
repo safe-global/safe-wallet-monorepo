@@ -13,9 +13,16 @@ import CheckWallet from '@/components/common/CheckWallet'
 import PlusIcon from '@/public/images/common/plus.svg'
 import EmptyBatch from './EmptyBatch'
 import BatchTxList from './BatchTxList'
+import { useAppDispatch } from '@/store'
+import { setBatchConfirming, clearBatch as clearBatchAction } from '@/store/batchSlice'
+import useChainId from '@/hooks/useChainId'
+import useSafeAddress from '@/hooks/useSafeAddress'
 
 const BatchSidebar = ({ isOpen, onToggle }: { isOpen: boolean; onToggle: (open: boolean) => void }) => {
   const { txFlow, setTxFlow } = useContext(TxModalContext)
+  const dispatch = useAppDispatch()
+  const chainId = useChainId()
+  const safeAddress = useSafeAddress()
   const batchTxs = useDraftBatch()
   const [, deleteTx] = useUpdateBatch()
 
@@ -24,8 +31,9 @@ const BatchSidebar = ({ isOpen, onToggle }: { isOpen: boolean; onToggle: (open: 
   }, [onToggle])
 
   const clearBatch = useCallback(() => {
-    batchTxs.forEach((item) => deleteTx(item.id))
-  }, [deleteTx, batchTxs])
+    // Actually delete all batch items
+    dispatch(clearBatchAction({ chainId, safeAddress }))
+  }, [dispatch, chainId, safeAddress])
 
   // Close confirmation flow when batch is empty
   const isConfirmationFlow = txFlow?.type === ConfirmBatchFlow
@@ -48,10 +56,21 @@ const BatchSidebar = ({ isOpen, onToggle }: { isOpen: boolean; onToggle: (open: 
     async (e: SyntheticEvent) => {
       e.preventDefault()
       if (!batchTxs.length) return
+
+      // Mark the batch as confirming - this hides it from the UI immediately
+      dispatch(setBatchConfirming({ chainId, safeAddress, isConfirming: true }))
+
       closeSidebar()
-      setTxFlow(<ConfirmBatchFlow onSubmit={clearBatch} />, undefined, false)
+
+      // If confirmation succeeds, clearBatch will finalize deletion
+      // If user cancels or it fails, we need to restore the batch
+      const onCancel = () => {
+        dispatch(setBatchConfirming({ chainId, safeAddress, isConfirming: false }))
+      }
+
+      setTxFlow(<ConfirmBatchFlow onSubmit={clearBatch} />, onCancel, false)
     },
-    [setTxFlow, batchTxs, closeSidebar, clearBatch],
+    [setTxFlow, batchTxs, closeSidebar, clearBatch, dispatch, chainId, safeAddress],
   )
 
   // Close sidebar when txFlow modal is opened
