@@ -98,3 +98,4 @@ apps/web/src/types/contracts/*
 
 # https://github.com/steveyegge/beads
 .beads
+!.beads/issues.jsonl
