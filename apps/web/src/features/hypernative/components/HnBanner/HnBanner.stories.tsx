@@ -11,9 +11,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
-  args: {
-    onDismiss: () => { },
-  },
+  args: {},
 }
 
 export const NonDismissable: Story = {

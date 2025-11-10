@@ -33,9 +33,6 @@ import HnBanner, { hnBannerID } from '@/features/hypernative/components/HnBanner
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const PositionsWidget = dynamic(() => import('@/features/positions/components/PositionsWidget'))
 
-const HnBannerWrapper = ({ onDismiss }: { onDismiss: () => void }) => (
-  <HnBanner onDismiss={onDismiss} />
-)
 
 const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()
@@ -56,6 +53,7 @@ const Dashboard = (): ReactElement => {
   const { showBanner: showHnBanner } = useBannerVisibility(BannerType.Promo)
 
   const banners = [
+    showHnBanner && { id: hnBannerID, element: HnBanner },
     isNoFeeNovemberEnabled && {
       id: noFeeNovemberBannerID,
       element: NoFeeNovemberBanner,
@@ -67,7 +65,6 @@ const Dashboard = (): ReactElement => {
       eligibilityState: isEligible === false,
     },
     isStakingBannerVisible && { id: stakeBannerID, element: StakeBanner },
-    showHnBanner && { id: hnBannerID, element: HnBannerWrapper },
   ].filter(Boolean) as BannerItem[]
 
   const noAssets = balancesLoaded && items.length === 0

@@ -6,12 +6,13 @@ import { useBannerStorage, BannerType } from './useBannerStorage'
 import { useIsHypernativeGuard } from './useIsHypernativeGuard'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { useIsHypernativeFeature } from './useIsHypernativeFeature'
+import { IS_PRODUCTION } from '@/config/constants'
 
 /**
- * Minimum USD balance threshold for showing the banner.
+ * Minimum USD balance threshold for showing the banner in production.
  * Safe must have balance greater than this value to show the banner.
  */
-export const MIN_BALANCE_USD = 1_000_000
+export const MIN_BALANCE_USD = IS_PRODUCTION ? 1_000_000 : 1
 
 export type BannerVisibilityResult = {
   showBanner: boolean
@@ -22,7 +23,7 @@ export type BannerVisibilityResult = {
  * Checks if the Safe balance exceeds the minimum threshold.
  *
  * @param fiatTotal - The fiat total balance as a string
- * @returns true if balance is greater than MIN_BALANCE_USD, false otherwise
+ * @returns true if balance is greater than the minimum threshold, false otherwise
  */
 const hasSufficientBalance = (fiatTotal: string): boolean => {
   const balance = Number(fiatTotal) || 0
@@ -63,7 +64,7 @@ const areAllConditionsMet = (
  * 1. useBannerStorage must return true
  * 2. Wallet must be connected
  * 3. Connected wallet must be an owner of the current Safe
- * 4. Safe must have balance > MIN_BALANCE_USD
+ * 4. Safe must have balance > MIN_BALANCE_USD (production) or > 1 USD (non-production)
  * 5. Safe must not have HypernativeGuard installed
  *
  * If any condition fails, showBanner will be false.
