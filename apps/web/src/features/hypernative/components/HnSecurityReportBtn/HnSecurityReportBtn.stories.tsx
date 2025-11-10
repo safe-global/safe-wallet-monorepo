@@ -7,7 +7,7 @@ const meta = {
   title: 'Features/Hypernative/HnSecurityReportBtn',
   parameters: {
     componentSubtitle:
-      'A transaction banner component that displays a security report review link with checkmark icon (light theme) and external link icon.',
+      'A transaction button component that displays a security report review link with checkmark icon (light theme) and external link icon.',
   },
   decorators: [
     (Story) => {
