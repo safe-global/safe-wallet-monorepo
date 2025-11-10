@@ -1,6 +1,6 @@
 import CheckBalance from '@/features/counterfactual/CheckBalance'
 import React, { type ReactElement } from 'react'
-import { Box, Card, Checkbox, Skeleton, Stack, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Card, Skeleton, Stack, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material'
 import classNames from 'classnames'
 import css from './styles.module.css'
 import EnhancedTable, { type EnhancedTableProps } from '@/components/common/EnhancedTable'
@@ -244,24 +244,14 @@ const AssetsTable = ({
               rawValue: '',
               sticky: true,
               content: (
-                <Stack
-                  direction="row"
-                  gap={1}
-                  alignItems="center"
-                  justifyContent="flex-end"
-                  mr={-1}
-                  className={css.sticky}
-                >
-                  <ActionButtons
-                    tokenInfo={item.tokenInfo}
-                    isSwapFeatureEnabled={isSwapFeatureEnabled ?? false}
-                    onlyIcon
-                  />
-
-                  {showHiddenAssets && (
-                    <Checkbox size="small" checked={isSelected} onClick={() => toggleAsset(item.tokenInfo.address)} />
-                  )}
-                </Stack>
+                <ActionButtons
+                  tokenInfo={item.tokenInfo}
+                  isSwapFeatureEnabled={isSwapFeatureEnabled ?? false}
+                  onlyIcon
+                  showHiddenAssets={showHiddenAssets}
+                  isSelected={isSelected}
+                  onToggleAsset={() => toggleAsset(item.tokenInfo.address)}
+                />
               ),
             },
           },
