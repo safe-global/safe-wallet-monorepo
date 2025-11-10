@@ -5,21 +5,26 @@ import css from './styles.module.css'
 import { hnSecurityReportBtnConfig } from './config'
 import type { ReactElement } from 'react'
 
-export const HnSecurityReportBtn = (): ReactElement => {
-  const { text, href } = hnSecurityReportBtnConfig
+interface HnSecurityReportBtnProps {
+  chain: string
+  safe: string
+  tx: string
+}
+
+export const HnSecurityReportBtn = ({ chain, safe, tx }: HnSecurityReportBtnProps): ReactElement => {
+  const { text, baseUrl } = hnSecurityReportBtnConfig
+
+  const href = `${baseUrl}?chain=${encodeURIComponent(chain)}&safe=${encodeURIComponent(safe)}&tx=${encodeURIComponent(tx)}`
 
   return (
-    <Card className={css.banner}>
-      <Stack direction="row" alignItems="center" justifyContent="center" spacing={1} className={css.content}>
-        <SvgIcon component={HypernativeIcon} inheritViewBox className={css.hypernativeIcon} />
-        <Typography className={css.text}>{text}</Typography>
-        <ExternalLink
-          href={typeof href === 'string' ? href : href.href || '#'}
-          className={css.link}
-          noIcon
-        ></ExternalLink>
-      </Stack>
-    </Card>
+    <ExternalLink href={href} className={css.link} noIcon>
+      <Card className={css.banner}>
+        <Stack direction="row" alignItems="center" justifyContent="center" spacing={1} className={css.content}>
+          <SvgIcon component={HypernativeIcon} inheritViewBox className={css.hypernativeIcon} />
+          <Typography className={css.text}>{text}</Typography>
+        </Stack>
+      </Card>
+    </ExternalLink>
   )
 }
 
