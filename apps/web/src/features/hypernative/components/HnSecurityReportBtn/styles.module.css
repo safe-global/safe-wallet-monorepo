@@ -24,7 +24,6 @@
 .text {
   color: var(--color-text-primary);
   font-weight: bold !important;
-  margin-left: 0 !important;
 }
 
 .externalLinkIcon {
