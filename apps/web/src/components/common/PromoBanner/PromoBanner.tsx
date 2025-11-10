@@ -36,6 +36,11 @@ export interface PromoBannerProps {
   customCloseIconColor?: string
   customBackground?: string
   ctaDisabled?: boolean
+  /**
+   * Optional variant for the CTA button when onCtaClick is provided.
+   * Defaults to "contained" if not specified.
+   */
+  ctaVariant?: 'text' | 'contained' | 'outlined'
 }
 
 export const PromoBanner = ({
@@ -56,6 +61,7 @@ export const PromoBanner = ({
   customCloseIconColor,
   customBackground,
   ctaDisabled,
+  ctaVariant,
 }: PromoBannerProps) => {
   return (
     <Card className={css.banner} sx={customBackground ? { background: `${customBackground} !important` } : undefined}>
@@ -86,11 +92,20 @@ export const PromoBanner = ({
             {onCtaClick ? (
               <Button
                 {...(endIcon && { endIcon })}
-                variant="contained"
-                size="small"
+                variant={ctaVariant || 'outlined'}
+                size={ctaVariant === 'text' ? 'compact' : 'small'}
                 onClick={onCtaClick}
-                className={css.bannerCtaContained}
-                sx={customCtaColor ? { backgroundColor: `${customCtaColor} !important` } : undefined}
+                className={ctaVariant === 'text' ? css.bannerCtaText : css.bannerCtaContained}
+                sx={
+                  ctaVariant === 'text'
+                    ? customCtaColor
+                      ? { color: `${customCtaColor} !important` }
+                      : undefined
+                    : customCtaColor
+                      ? { backgroundColor: `${customCtaColor} !important` }
+                      : undefined
+                }
+                color={ctaVariant === 'text' && !customCtaColor ? 'static' : undefined}
                 disabled={ctaDisabled}
               >
                 {ctaLabel}

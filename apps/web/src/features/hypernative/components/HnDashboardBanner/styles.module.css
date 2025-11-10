@@ -1,33 +1,18 @@
-:root {
-  --dashboard-banner-gradient-start: #1c5538;
-  --dashboard-banner-gradient-end: #1c1c1c;
-  --dashboard-banner-tag-bg: #203339;
-  --dashboard-banner-tag-text: #12ff80;
-  --dashboard-banner-description-color: #a1a3a7;
-  --dashboard-banner-button-color: #12ff80;
-}
-
 .banner {
   position: relative;
-  padding: 30px var(--space-3) !important;
-  background: linear-gradient(
-    90deg,
-    var(--dashboard-banner-gradient-start) 0%,
-    var(--dashboard-banner-gradient-end) 54.327%,
-    var(--dashboard-banner-gradient-end) 100%
-  ) !important;
+  padding: var(--space-2);
+  background: linear-gradient(90deg, #1c5538 0%, #1c1c1c 54.327%, #1c1c1c 100%) !important;
   border: 0 !important;
   border-radius: 12px;
-  max-width: 460px;
+  width: auto;
   overflow: hidden;
-  padding: var(--space-2);
 }
 
 .tag {
   position: absolute;
   top: 0;
   right: var(--space-2);
-  background: var(--dashboard-banner-tag-bg);
+  background: #203339;
   padding: 0 var(--space-1);
   border-radius: 0 0 0 4px;
   display: flex;
@@ -37,7 +22,7 @@
 }
 
 .tagText {
-  color: var(--dashboard-banner-tag-text);
+  color: #12ff80;
   font-size: 14px;
   line-height: 20px;
   letter-spacing: 0.17px;
@@ -82,7 +67,7 @@
 }
 
 .description {
-  color: var(--dashboard-banner-description-color);
+  color: #a1a3a7;
   font-size: 14px;
   line-height: 20px;
   letter-spacing: 0.17px;
@@ -90,9 +75,9 @@
 
 .ctaButton {
   margin-top: var(--space-3) !important;
-  margin-bottom: var(--space-2) !important;
-  border-color: var(--dashboard-banner-button-color) !important;
-  color: var(--dashboard-banner-button-color) !important;
+  margin-bottom: var(--space-1) !important;
+  border-color: #12ff80 !important;
+  color: #12ff80 !important;
   border-radius: 6px;
   padding: 6px var(--space-1);
   font-weight: 700;
@@ -104,7 +89,7 @@
 }
 
 .ctaButton:hover {
-  border-color: var(--dashboard-banner-button-color) !important;
+  border-color: #12ff80 !important;
   background-color: rgba(18, 255, 128, 0.1) !important;
   max-width: 100%;
 }

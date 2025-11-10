@@ -26,6 +26,7 @@ import css from './styles.module.css'
 import ActivateAccountButton from '@/features/counterfactual/ActivateAccountButton'
 import { isReplayedSafeProps } from '@/features/counterfactual/utils'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
+import HnDashboardBanner from '@/features/hypernative/components/HnDashboardBanner'
 
 const calculateProgress = (items: boolean[]) => {
   const totalNumberOfItems = items.length
@@ -373,6 +374,7 @@ const FirstSteps = () => {
   if (safe.deployed) return null
 
   const isActivating = undeployedSafe?.status.status !== 'AWAITING_EXECUTION'
+  const showDashboardBanner = true
 
   return (
     <WidgetContainer>
@@ -470,7 +472,7 @@ const FirstSteps = () => {
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <AccountReadyWidget />
+            {showDashboardBanner ? <HnDashboardBanner /> : <AccountReadyWidget />}
           </Grid>
         </Grid>
       </WidgetBody>
