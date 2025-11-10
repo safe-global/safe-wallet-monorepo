@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import { useMemo } from 'react'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import useChainId from '@/hooks/useChainId'
+import { useCurrentChain } from '@/hooks/useChains'
 import { getSafeTxHashFromDetails } from '../../services/safeTxHashCalculation'
 import { HnSecurityReportBtn } from './HnSecurityReportBtn'
 
@@ -24,21 +24,21 @@ export const useSafeTxHash = (txDetails: TransactionDetails): string | null => {
 }
 
 /**
- * Wrapper component that calculates the safeTxHash from transaction details
- * and passes it to HnSecurityReportBtn. The hash is calculated from the transaction
+ * Wrapper component that extracts the safeTxHash from transaction details
+ * and passes it to HnSecurityReportBtn. The hash is the hash of the transaction
  * struct without signatures, which is the correct hash for security reports.
  */
 export const HnSecurityReportBtnWithTxHash = ({
   txDetails,
 }: HnSecurityReportBtnWithTxHashProps): ReactElement | null => {
-  const chainId = useChainId()
+  const chain = useCurrentChain()
   const { safeAddress } = useSafeInfo()
   const safeTxHash = useSafeTxHash(txDetails)
 
-  // Don't render if we couldn't calculate the hash
-  if (!safeTxHash) {
+  // Don't render if we couldn't calculate the hash or if chain info is missing
+  if (!safeTxHash || !chain?.shortName) {
     return null
   }
 
-  return <HnSecurityReportBtn chain={chainId} safe={safeAddress} tx={safeTxHash} />
+  return <HnSecurityReportBtn chain={chain.shortName} safe={safeAddress} tx={safeTxHash} />
 }
