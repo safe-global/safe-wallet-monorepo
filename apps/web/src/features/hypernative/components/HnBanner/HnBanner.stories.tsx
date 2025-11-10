@@ -13,5 +13,13 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     onDismiss: () => {},
+    href: '#',
+  },
+}
+
+export const NonDismissable: Story = {
+  args: {
+    href: '#',
+    isDismissable: false,
   },
 }
