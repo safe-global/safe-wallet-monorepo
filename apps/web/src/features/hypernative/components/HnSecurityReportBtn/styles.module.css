@@ -1,9 +1,11 @@
 .banner {
   padding: var(--space-1);
-  background-color: var(--color-background-main) !important;
-  border: 1px solid var(--color-background-main);
+  border: none;
   border-radius: var(--space-1);
   width: 100%;
+  background-color: transparent;
+  box-shadow: none;
+  background-color: var(--color-background-main) !important;
 }
 
 .content {
@@ -39,8 +41,14 @@
   cursor: pointer;
 }
 
-.link:hover .banner {
-  opacity: 0.9;
+/* Apply background to the wrapper Box that ExternalLink creates */
+.link>span {
+  display: inline-flex !important;
+  align-items: center;
+  background-color: var(--color-background-main);
+  border-radius: var(--space-1);
+  padding: var(--space-1);
+  gap: var(--space-1);
 }
 
 @media (max-width: 410px) {

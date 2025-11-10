@@ -17,7 +17,7 @@ export const HnSecurityReportBtn = ({ chain, safe, tx }: HnSecurityReportBtnProp
   const href = `${baseUrl}?chain=${encodeURIComponent(chain)}&safe=${encodeURIComponent(safe)}&tx=${encodeURIComponent(tx)}`
 
   return (
-    <ExternalLink href={href} className={css.link} noIcon>
+    <ExternalLink href={href} className={css.link}>
       <Card className={css.banner}>
         <Stack direction="row" alignItems="center" justifyContent="center" spacing={1} className={css.content}>
           <SvgIcon component={HypernativeIcon} inheritViewBox className={css.hypernativeIcon} />
