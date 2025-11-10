@@ -374,6 +374,7 @@ const FirstSteps = () => {
   if (safe.deployed) return null
 
   const isActivating = undeployedSafe?.status.status !== 'AWAITING_EXECUTION'
+  const showDashboardBanner = true
 
   return (
     <WidgetContainer>
@@ -471,10 +472,7 @@ const FirstSteps = () => {
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <Box display="flex" flexDirection="column" gap={3}>
-              <DashboardBanner />
-              {/* <AccountReadyWidget /> */}
-            </Box>
+            {showDashboardBanner ? <DashboardBanner /> : <AccountReadyWidget />}
           </Grid>
         </Grid>
       </WidgetBody>
