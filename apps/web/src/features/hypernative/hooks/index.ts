@@ -1,3 +1,3 @@
 export { useIsHypernativeGuard } from './useIsHypernativeGuard'
 export type { HypernativeGuardCheckResult } from './useIsHypernativeGuard'
-export { useIsHypernativeFeatureEnabled } from './useIsHypernativeFeatureEnabled'
+export { useIsHypernativeFeature as useIsHypernativeFeatureEnabled } from './useIsHypernativeFeature'

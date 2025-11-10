@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { useIsHypernativeFeatureEnabled } from '../../hooks/useIsHypernativeFeatureEnabled'
+import { useIsHypernativeFeature } from '../../hooks/useIsHypernativeFeature'
 
 export interface HnFeatureFlagProps {
   children: ReactElement
@@ -10,7 +10,7 @@ export interface HnFeatureFlagProps {
  * Only renders children if Hypernative features are enabled
  */
 export const HnFeatureFlag = ({ children }: HnFeatureFlagProps): ReactElement | null => {
-  const isEnabled = useIsHypernativeFeatureEnabled()
+  const isEnabled = useIsHypernativeFeature()
 
   if (!isEnabled) {
     return null
