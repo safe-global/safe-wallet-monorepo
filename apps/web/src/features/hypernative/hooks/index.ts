@@ -1,3 +1,5 @@
 export { useIsHypernativeGuard } from './useIsHypernativeGuard'
 export type { HypernativeGuardCheckResult } from './useIsHypernativeGuard'
 export { useIsHypernativeFeature as useIsHypernativeFeatureEnabled } from './useIsHypernativeFeature'
+export { useShouldShowBanner } from './useShouldShowBanner'
+export type { BannerType } from './useShouldShowBanner'
