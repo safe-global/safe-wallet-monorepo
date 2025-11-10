@@ -14,6 +14,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import css from './styles.module.css'
 import classnames from 'classnames'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import assetActionCss from '@/components/common/AssetActionButton/styles.module.css'
 const StakeButton = ({
   tokenInfo,
   trackingLabel,
@@ -55,20 +56,11 @@ const StakeButton = ({
               <span>
                 <IconButton
                   data-testid="stake-btn"
+                  aria-label="Stake"
                   onClick={handleClick}
                   disabled={!isOk}
                   size="small"
-                  sx={{
-                    width: 28,
-                    height: 28,
-                    minWidth: 28,
-                    padding: '6px',
-                    backgroundColor: 'var(--color-background-paper)',
-                    borderRadius: '4px',
-                    '&:hover': {
-                      backgroundColor: 'var(--color-background-main)',
-                    },
-                  }}
+                  className={assetActionCss.assetActionIconButton}
                 >
                   <SvgIcon component={StakeIcon} inheritViewBox sx={{ width: 16, height: 16 }} />
                 </IconButton>

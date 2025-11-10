@@ -289,6 +289,7 @@ const AssetsTable = ({
                           <IconButton
                             disabled={hidingAsset !== undefined}
                             size="medium"
+                            aria-label="Hide asset"
                             onClick={() => hideAsset(item.tokenInfo.address)}
                           >
                             <VisibilityOutlined fontSize="small" />
