@@ -12,7 +12,11 @@ interface HnSecurityReportBtnProps {
 }
 
 const buildSecurityReportUrl = (baseUrl: string, chain: string, safe: string, tx: string): string => {
-  return `${baseUrl}?chain=${encodeURIComponent(chain)}&safe=${encodeURIComponent(safe)}&tx=${encodeURIComponent(tx)}`
+  const url = new URL(baseUrl)
+  url.searchParams.set('chain', chain)
+  url.searchParams.set('safe', safe)
+  url.searchParams.set('tx', tx)
+  return url.toString()
 }
 
 export const HnSecurityReportBtn = ({ chain, safe, tx }: HnSecurityReportBtnProps): ReactElement => {
