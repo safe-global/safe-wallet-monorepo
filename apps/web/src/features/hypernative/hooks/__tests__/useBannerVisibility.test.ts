@@ -6,6 +6,7 @@ import * as useWalletHook from '@/hooks/wallets/useWallet'
 import * as useIsSafeOwnerHook from '@/hooks/useIsSafeOwner'
 import * as useVisibleBalancesHook from '@/hooks/useVisibleBalances'
 import * as useIsHypernativeGuardHook from '../useIsHypernativeGuard'
+import * as useIsHypernativeFeatureHook from '../useIsHypernativeFeature'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 
 describe('useBannerVisibility', () => {
@@ -181,6 +182,7 @@ describe('useBannerVisibility', () => {
 
   describe('when all conditions are met', () => {
     it('should return showBanner: true, loading: false', () => {
+      jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(true)
       jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
@@ -273,6 +275,7 @@ describe('useBannerVisibility', () => {
 
   describe('BannerType handling', () => {
     it('should work with BannerType.Promo', () => {
+      jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(true)
       jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
@@ -293,6 +296,7 @@ describe('useBannerVisibility', () => {
     })
 
     it('should work with BannerType.Pending', () => {
+      jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(true)
       jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
@@ -315,6 +319,7 @@ describe('useBannerVisibility', () => {
 
   describe('edge cases', () => {
     it('should handle balance exactly above MIN_BALANCE_USD', () => {
+      jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(true)
       jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
@@ -337,6 +342,7 @@ describe('useBannerVisibility', () => {
     })
 
     it('should handle very large balance values', () => {
+      jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(true)
       jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
@@ -450,11 +456,12 @@ describe('useBannerVisibility', () => {
     })
 
     it('should return false when all conditions fail except one', () => {
+      jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(true)
       jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
-        balances: { fiatTotal: '500000', items: [] },
+        balances: { fiatTotal: '0', items: [] },
         loaded: true,
         loading: false,
       })
@@ -476,6 +483,7 @@ describe('useBannerVisibility', () => {
   describe('helper function behavior', () => {
     it('should correctly evaluate all conditions together', () => {
       // Test that the helper function correctly combines all conditions
+      jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(true)
       jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
