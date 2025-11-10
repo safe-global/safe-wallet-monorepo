@@ -1,3 +1,3 @@
-export { HnFeatureFlag } from './HnFeatureFlag'
-export type { HnFeatureFlagProps } from './HnFeatureFlag'
+export { HnFeature, default } from './HnFeature'
+export type { HnFeatureProps } from './HnFeature'
 
