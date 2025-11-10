@@ -8,6 +8,8 @@ import ExternalLink from '@/components/common/ExternalLink'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { UntrustedFallbackHandlerTxText } from '@/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { Operation } from '@safe-global/store/gateway/types'
 
 const Warning = ({
   datatestid,
@@ -34,15 +36,25 @@ const Warning = ({
   )
 }
 
-export const DelegateCallWarning = ({ showWarning }: { showWarning: boolean }): ReactElement => {
-  const severity = showWarning ? 'warning' : 'success'
+export const DelegateCallWarning = ({
+  txData,
+  showWarning,
+}: {
+  txData: TransactionDetails['txData']
+  showWarning: boolean
+}): ReactElement => {
+  const isDelegateCall = txData?.operation === Operation.DELEGATE
+  const trustedDelegateCall = isDelegateCall && !!txData?.trustedDelegateCallTarget
+
+  if (!isDelegateCall || (!trustedDelegateCall && !showWarning)) return <></>
+
   return (
     <Warning
       datatestid="delegate-call-warning"
       title={
         <>
           This transaction calls a smart contract that will be able to modify your Safe Account.
-          {showWarning && (
+          {!trustedDelegateCall && (
             <>
               <br />
               <ExternalLink href={HelpCenterArticle.UNEXPECTED_DELEGATE_CALL}>Learn more</ExternalLink>
@@ -50,8 +62,8 @@ export const DelegateCallWarning = ({ showWarning }: { showWarning: boolean }): 
           )}
         </>
       }
-      severity={severity}
-      text={showWarning ? 'Unexpected delegate call' : 'Delegate call'}
+      severity={trustedDelegateCall ? 'success' : 'warning'}
+      text={trustedDelegateCall ? 'Delegate call' : 'Unexpected delegate call'}
     />
   )
 }

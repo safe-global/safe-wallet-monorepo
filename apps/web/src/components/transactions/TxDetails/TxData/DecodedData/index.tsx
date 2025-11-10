@@ -1,7 +1,6 @@
 import type { AddressInfo, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
 import { Stack, Typography } from '@mui/material'
-import { Operation } from '@safe-global/store/gateway/types'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { MethodDetails } from '@/components/transactions/TxDetails/TxData/DecodedData/MethodDetails'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
@@ -43,7 +42,6 @@ export const DecodedData = ({
   }
 
   const amountInWei = txData.value ?? '0'
-  const isDelegateCall = txData.operation === Operation.DELEGATE
   const toAddress = toInfo?.value || txData.to?.value
   const method = txData.dataDecoded?.method || ''
   const addressInfo = txData.addressInfoIndex?.[toAddress]
@@ -53,7 +51,7 @@ export const DecodedData = ({
   return (
     <Stack spacing={2}>
       {setsUntrustedFallbackHandler && <UntrustedFallbackHandlerWarning isTxExecuted={isTxExecuted} />}
-      {isDelegateCall && isWarningEnabled && <DelegateCallWarning showWarning={!txData.trustedDelegateCallTarget} />}
+      <DelegateCallWarning txData={txData} showWarning={isWarningEnabled} />
 
       {method ? (
         <MethodCall contractAddress={toAddress} contractName={name} contractLogo={avatar} method={method} />
