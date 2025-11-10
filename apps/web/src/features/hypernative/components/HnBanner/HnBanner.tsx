@@ -1,16 +1,14 @@
 import { PromoBanner } from '@/components/common/PromoBanner'
-import type { LinkProps } from 'next/link'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 
 export const hnBannerID = 'hnBanner'
 
 export interface HnBannerProps {
   onDismiss?: () => void
-  href: LinkProps['href']
   isDismissable?: boolean
 }
 
-const HnBanner = ({ onDismiss, isDismissable = true, href }: HnBannerProps) => {
+const HnBanner = ({ onDismiss, isDismissable = true }: HnBannerProps) => {
   return (
     <PromoBanner
       // TODO: check tracking events naming
@@ -29,7 +27,7 @@ const HnBanner = ({ onDismiss, isDismissable = true, href }: HnBannerProps) => {
       ctaLabel="Learn more"
       imageSrc="/images/hypernative/guardian-badge.svg"
       imageAlt="Guardian badge"
-      href={href}
+      href="https://www.google.com"
       // Only passes the onDismiss prop when both isDismissable is true and onDismiss is provided:
       {...(isDismissable && onDismiss && { onDismiss })}
       endIcon={<ArrowForwardIcon fontSize="small" />}

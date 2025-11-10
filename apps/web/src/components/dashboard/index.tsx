@@ -26,9 +26,16 @@ import AddFundsToGetStarted from '@/components/dashboard/AddFundsBanner'
 import useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsPositionsFeatureEnabled'
 import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
 import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
+import { useBannerVisibility } from '@/features/hypernative/hooks'
+import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
+import HnBanner, { hnBannerID } from '@/features/hypernative/components/HnBanner'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const PositionsWidget = dynamic(() => import('@/features/positions/components/PositionsWidget'))
+
+const HnBannerWrapper = ({ onDismiss }: { onDismiss: () => void }) => (
+  <HnBanner onDismiss={onDismiss} />
+)
 
 const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()
@@ -46,6 +53,7 @@ const Dashboard = (): ReactElement => {
   const isPositionsFeatureEnabled = useIsPositionsFeatureEnabled()
   const { isEligible } = useNoFeeNovemberEligibility()
   const isNoFeeNovemberEnabled = useIsNoFeeNovemberFeatureEnabled()
+  const { showBanner: showHnBanner } = useBannerVisibility(BannerType.Promo)
 
   const banners = [
     isNoFeeNovemberEnabled && {
@@ -59,6 +67,7 @@ const Dashboard = (): ReactElement => {
       eligibilityState: isEligible === false,
     },
     isStakingBannerVisible && { id: stakeBannerID, element: StakeBanner },
+    showHnBanner && { id: hnBannerID, element: HnBannerWrapper },
   ].filter(Boolean) as BannerItem[]
 
   const noAssets = balancesLoaded && items.length === 0
