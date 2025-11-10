@@ -1,7 +1,5 @@
-import * as constants from '../../support/constants'
 import * as main from '../pages/main.page'
 import * as createTx from '../pages/create_tx.pages'
-import * as owner from '../pages/owners.pages'
 
 const SAFE_QA_SEP = 'sep:0x6d0b6F96f665844E6Fcb1919f92656A2D1c5f076'
 const SAFE_QA_SEPOLIA_RECIPIENT = '0xE8b3A9BD45f149VB14D4D4E8Bfbf8B7f8F6F'

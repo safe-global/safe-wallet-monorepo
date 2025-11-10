@@ -1,4 +1,4 @@
-import { useContext, useMemo, type ReactElement } from 'react'
+import { useMemo, type ReactElement } from 'react'
 import { Box, Typography, Stack, SvgIcon } from '@mui/material'
 import SafeShieldLogo from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
 import type {
@@ -9,11 +9,11 @@ import type {
 import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SEVERITY_COLORS } from '../constants'
-import { TxInfoContext } from '@/components/tx-flow/TxInfoProvider'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { isSimulationError, isTxSimulationEnabled } from '@safe-global/utils/components/tx/security/tenderly/utils'
-import { useNestedTransaction } from './useNestedTransaction'
-import { useCurrentChain } from '@/hooks/useChains'
+import { useCheckSimulation } from '../hooks/useCheckSimulation'
+import { useDelayedLoading } from '../hooks/useDelayedLoading'
+
+const headerVisibilityDelay = 500
 
 export const SafeShieldHeader = ({
   recipient = [{}, undefined, false],
@@ -26,15 +26,10 @@ export const SafeShieldHeader = ({
   threat?: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
 }): ReactElement => {
-  const chain = useCurrentChain()
   const [recipientResults, recipientError, recipientLoading = false] = recipient
   const [contractResults, contractError, contractLoading = false] = contract
   const [threatResults, threatError, threatLoading = false] = threat
-  const { status: simulationStatus, nestedTx } = useContext(TxInfoContext)
-  const { isNested } = useNestedTransaction(safeTx, chain)
-  const showSimulation = isTxSimulationEnabled(chain) && safeTx
-
-  const hasSimulationError = showSimulation && isSimulationError(simulationStatus, nestedTx, isNested)
+  const { hasSimulationError } = useCheckSimulation(safeTx)
 
   const status = useMemo(
     () => getOverallStatus(recipientResults, contractResults, threatResults, hasSimulationError),
@@ -43,14 +38,15 @@ export const SafeShieldHeader = ({
 
   const loading = recipientLoading || contractLoading || threatLoading
   const error = recipientError || contractError || threatError
+  const isLoadingVisible = useDelayedLoading(loading, headerVisibilityDelay)
 
   const headerBgColor =
-    !status || !status?.severity || loading
+    !status || !status?.severity || isLoadingVisible
       ? 'var(--color-background-default)'
       : SEVERITY_COLORS[status.severity].background
 
   const headerTextColor =
-    !status || !status?.severity || loading ? 'text.secondary' : SEVERITY_COLORS[status.severity].main
+    !status || !status?.severity || isLoadingVisible ? 'text.secondary' : SEVERITY_COLORS[status.severity].main
 
   return (
     <Box padding="4px 4px 0px">
@@ -59,9 +55,9 @@ export const SafeShieldHeader = ({
           <Typography variant="overline" color={headerTextColor} fontWeight={700} lineHeight="16px">
             Checks unavailable
           </Typography>
-        ) : loading ? (
+        ) : isLoadingVisible ? (
           <Typography variant="overline" color={headerTextColor} fontWeight={700} lineHeight="16px">
-            Analyzing details
+            Analyzing...
           </Typography>
         ) : status ? (
           <Typography variant="overline" color={headerTextColor} fontWeight={700} lineHeight="16px">

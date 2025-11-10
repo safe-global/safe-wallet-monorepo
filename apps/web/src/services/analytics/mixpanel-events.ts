@@ -29,6 +29,7 @@ export enum MixpanelUserProperty {
   NETWORKS = 'Networks',
   TOTAL_TX_COUNT = 'Total Transaction Count',
   LAST_TX_AT = 'Last Transaction at',
+  IS_OWNER = 'Is Owner',
 }
 
 export enum MixpanelEventParams {

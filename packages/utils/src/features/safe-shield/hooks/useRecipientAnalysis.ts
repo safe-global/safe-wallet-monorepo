@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { isAddress, JsonRpcProvider } from 'ethers'
 import uniq from 'lodash/uniq'
 import { useAddressBookCheck } from './address-analysis/address-book-check/useAddressBookCheck'
@@ -50,6 +50,7 @@ export function useRecipientAnalysis({
     return uniq(filteredRecipients)
   }, [debouncedRecipients])
 
+  const [isLoading, setIsLoading] = useState(false)
   const [fetchedResults, fetchedResultsError, fetchLoading] = useFetchRecipientAnalysis({
     safeAddress,
     chainId,
@@ -60,6 +61,16 @@ export function useRecipientAnalysis({
 
   const addressBookCheck = useAddressBookCheck(chainId, validRecipients, isInAddressBook, ownedSafes)
   const [activityCheck, activityCheckError, activityCheckLoading] = useAddressActivity(nonSafeRecipients, web3ReadOnly)
+
+  useEffect(() => {
+    if (fetchLoading || activityCheckLoading) {
+      setIsLoading(true)
+    }
+
+    if (!fetchLoading && !activityCheckLoading) {
+      setIsLoading(false)
+    }
+  }, [activityCheckLoading, fetchLoading])
 
   // Merge backend and local checks
   const mergedResults = useMemo(() => {
@@ -87,5 +98,5 @@ export function useRecipientAnalysis({
     return undefined
   }
 
-  return [mergedResults, fetchedResultsError || activityCheckError, fetchLoading || activityCheckLoading]
+  return [mergedResults, fetchedResultsError || activityCheckError, isLoading]
 }

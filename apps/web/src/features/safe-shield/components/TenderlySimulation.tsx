@@ -21,7 +21,17 @@ import { SEVERITY_COLORS } from '@/features/safe-shield/constants'
 import { useNestedTransaction } from '@/features/safe-shield/components/useNestedTransaction'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 
-export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): ReactElement | null => {
+interface TenderlySimulationProps {
+  safeTx?: SafeTransaction
+  highlightedSeverity?: Severity
+  delay?: number
+}
+
+export const TenderlySimulation = ({
+  safeTx,
+  highlightedSeverity,
+  delay = 0,
+}: TenderlySimulationProps): ReactElement | null => {
   const { simulation, status, nestedTx } = useContext(TxInfoContext)
   const chain = useCurrentChain()
   const { safe } = useSafeInfo()
@@ -31,6 +41,7 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
   const showSimulation = chain && isTxSimulationEnabled(chain) && safeTx
 
   const [simulationExpanded, setSimulationExpanded] = useState(false)
+  const [isVisible, setIsVisible] = useState(false)
 
   // Reset simulation state when transaction changes
   // Use useRef to track the previous transaction and only reset when it actually changes
@@ -93,6 +104,14 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
 
   const isLoading = status.isLoading || (isNested && nestedTx.status.isLoading)
 
+  useEffect(() => {
+    if (!showSimulation) return
+
+    setTimeout(() => {
+      setIsVisible(true)
+    }, delay)
+  }, [delay, showSimulation])
+
   if (!showSimulation) {
     return null
   }
@@ -105,8 +124,21 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
     return isSimulationSuccess ? 'Simulation successful' : 'Simulation failed'
   }
 
+  const isHighlihtedSeverityOK = isSimulationSuccess && highlightedSeverity === Severity.OK
+  const isHighlihtedSeverityWarn = !isSimulationSuccess && highlightedSeverity === Severity.WARN
+
+  const isMuted = !highlightedSeverity || (!isHighlihtedSeverityOK && !isHighlihtedSeverityWarn)
+
   return (
-    <Box>
+    <Box
+      sx={{
+        overflow: 'hidden',
+        opacity: isVisible ? 1 : 0,
+        maxHeight: isVisible ? 1000 : 0, // Replace 'fit-content' with a large px value for animatable maxHeight
+        transition: `opacity 0.3s ease-in-out, max-height 0.3s ease-in-out`,
+        transitionDelay: `${delay}ms`,
+      }}
+    >
       <Stack
         direction="row"
         justifyContent="space-between"
@@ -116,7 +148,12 @@ export const TenderlySimulation = ({ safeTx }: { safeTx?: SafeTransaction }): Re
       >
         <Stack direction="row" alignItems="center" gap={1}>
           {isSimulationFinished ? (
-            <SeverityIcon severity={isSimulationSuccess ? Severity.OK : Severity.WARN} width={16} height={16} />
+            <SeverityIcon
+              severity={isSimulationSuccess ? Severity.OK : Severity.WARN}
+              muted={isMuted}
+              width={16}
+              height={16}
+            />
           ) : (
             <SvgIcon component={UpdateIcon} inheritViewBox sx={{ fontSize: 16 }} />
           )}

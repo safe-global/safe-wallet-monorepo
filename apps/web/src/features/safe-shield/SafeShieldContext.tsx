@@ -45,23 +45,32 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
 
   const recipient = recipientOnlyAnalysis || counterpartyAnalysis.recipient
   const contract = counterpartyAnalysis.contract
+  const safeShieldTx = safeTx || safeTxContext.safeTx
 
   const [isRiskConfirmed, setIsRiskConfirmed] = useState(false)
 
-  const needsRiskConfirmation = useMemo(() => {
+  const { needsRiskConfirmation, primaryThreatSeverity } = useMemo(() => {
     const [threatAnalysisResult] = threat || []
     const primaryThreatResult = getPrimaryResult(threatAnalysisResult?.THREAT || [])
-    return (
-      !!primaryThreatResult && SEVERITY_PRIORITY[primaryThreatResult.severity] <= SEVERITY_PRIORITY[Severity.CRITICAL]
-    )
+    const severity = primaryThreatResult?.severity
+    const needsRiskConfirmation = !!severity && SEVERITY_PRIORITY[severity] <= SEVERITY_PRIORITY[Severity.CRITICAL]
+
+    return {
+      needsRiskConfirmation,
+      primaryThreatSeverity: severity,
+    }
   }, [threat])
+
+  useEffect(() => {
+    setIsRiskConfirmed(false)
+  }, [primaryThreatSeverity, safeShieldTx])
 
   return (
     <SafeShieldContext.Provider
       value={{
         setRecipientAddresses,
         setSafeTx,
-        safeTx: safeTx || safeTxContext.safeTx,
+        safeTx: safeShieldTx,
         recipient,
         contract,
         threat,

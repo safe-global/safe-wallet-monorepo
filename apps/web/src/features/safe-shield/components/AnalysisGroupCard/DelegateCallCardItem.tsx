@@ -19,5 +19,11 @@ export const DelegateCallCardItem = ({ result, isPrimary = false }: DelegateCall
     </>
   )
 
-  return <AnalysisGroupCardItem description={description} result={result} isPrimary={isPrimary} />
+  return (
+    <AnalysisGroupCardItem
+      description={description}
+      result={result}
+      severity={isPrimary ? result.severity : undefined}
+    />
+  )
 }

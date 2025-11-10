@@ -13,6 +13,13 @@ import { TenderlySimulation } from '../TenderlySimulation'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
 import type { SafeTransaction } from '@safe-global/types-kit'
+import { useHighlightedSeverity } from '@safe-global/utils/features/safe-shield/hooks/useHighlightedSeverity'
+import { useCheckSimulation } from '@/features/safe-shield/hooks/useCheckSimulation'
+import {
+  analysisVisibilityDelay,
+  calculateAnalysisDelays,
+  useDelayedLoading,
+} from '@/features/safe-shield/hooks/useDelayedLoading'
 
 const normalizeThreatData = (threat?: AsyncResult<ThreatAnalysisResults>): Record<string, GroupedAnalysisResults> => {
   const [result] = threat || []
@@ -39,13 +46,25 @@ export const SafeShieldContent = ({
   const [contractResults = {}, _contractError, contractLoading = false] = contract || []
   const [threatResults, _threatError, threatLoading = false] = threat || []
   const normalizedThreatData = normalizeThreatData(threat)
-
+  const { hasSimulationError } = useCheckSimulation(safeTx)
+  const highlightedSeverity = useHighlightedSeverity(
+    recipientResults,
+    contractResults,
+    normalizedThreatData,
+    hasSimulationError,
+  )
   const loading = recipientLoading || contractLoading || threatLoading
+  const isLoadingVisible = useDelayedLoading(loading, analysisVisibilityDelay)
+  const shouldShowContent = !isLoadingVisible
 
   const recipientEmpty = isEmpty(recipientResults)
   const contractEmpty = isEmpty(contractResults)
   const threatEmpty = isEmpty(threatResults) || isEmpty(threatResults.THREAT)
+  const analysesEmpty = recipientEmpty && contractEmpty && threatEmpty
   const allEmpty = recipientEmpty && contractEmpty && threatEmpty && !safeTx
+
+  const { recipientDelay, contractAnalysisDelay, threatAnalysisDelay, simulationAnalysisDelay } =
+    calculateAnalysisDelays(recipientEmpty, contractEmpty)
 
   return (
     <Box padding="0px 4px 4px">
@@ -55,21 +74,45 @@ export const SafeShieldContent = ({
           borderColor: 'background.main',
           borderTop: 'none',
           borderRadius: '0px 0px 6px 6px',
+          position: 'relative',
         }}
       >
-        {loading ? <SafeShieldAnalysisLoading /> : allEmpty ? <SafeShieldAnalysisEmpty /> : null}
+        {isLoadingVisible && <SafeShieldAnalysisLoading analysesEmpty={analysesEmpty} loading={isLoadingVisible} />}
 
-        <Box
-          display={loading ? 'none' : 'block'}
-          sx={{ '& > div:not(:last-child)': { borderBottom: '1px solid', borderColor: 'background.main' } }}
-        >
-          {recipientResults && <AnalysisGroupCard data={recipientResults} />}
+        {shouldShowContent && !loading && allEmpty && <SafeShieldAnalysisEmpty />}
 
-          {contractResults && <AnalysisGroupCard data={contractResults} />}
+        <Box sx={{ '& > div:not(:last-child)': { borderBottom: '1px solid', borderColor: 'background.main' } }}>
+          {!recipientEmpty && (
+            <AnalysisGroupCard
+              delay={recipientDelay}
+              data={recipientResults}
+              highlightedSeverity={highlightedSeverity}
+            />
+          )}
 
-          {normalizedThreatData && <AnalysisGroupCard data={normalizedThreatData} />}
+          {!contractEmpty && (
+            <AnalysisGroupCard
+              data={contractResults}
+              delay={contractAnalysisDelay}
+              highlightedSeverity={highlightedSeverity}
+            />
+          )}
 
-          <TenderlySimulation safeTx={safeTx} />
+          {!threatEmpty && (
+            <AnalysisGroupCard
+              data={normalizedThreatData}
+              delay={threatAnalysisDelay}
+              highlightedSeverity={highlightedSeverity}
+            />
+          )}
+
+          {!contractLoading && !threatLoading && (
+            <TenderlySimulation
+              safeTx={safeTx}
+              delay={simulationAnalysisDelay}
+              highlightedSeverity={highlightedSeverity}
+            />
+          )}
         </Box>
       </Box>
     </Box>
