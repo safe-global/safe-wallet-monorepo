@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-import { useShouldShowBanner, BannerType } from './useShouldShowBanner'
+import { useBannerStorage, BannerType } from './useBannerStorage'
 import { useIsHypernativeGuard } from './useIsHypernativeGuard'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 
@@ -31,7 +31,7 @@ const hasSufficientBalance = (fiatTotal: string): boolean => {
 /**
  * Checks if all conditions are met for showing the banner.
  *
- * @param shouldShowBanner - Result from useShouldShowBanner hook
+ * @param shouldShowBanner - Result from useBannerStorage hook
  * @param wallet - Connected wallet or null
  * @param isSafeOwner - Whether the wallet is a Safe owner
  * @param fiatTotal - Safe balance in fiat currency as string
@@ -57,7 +57,7 @@ const areAllConditionsMet = (
  * @returns BannerVisibilityResult with showBanner flag and loading state
  *
  * Conditions checked (in order):
- * 1. useShouldShowBanner must return true
+ * 1. useBannerStorage must return true
  * 2. Wallet must be connected
  * 3. Connected wallet must be an owner of the current Safe
  * 4. Safe must have balance > MIN_BALANCE_USD
@@ -66,7 +66,7 @@ const areAllConditionsMet = (
  * If any condition fails, showBanner will be false.
  */
 export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityResult => {
-  const shouldShowBanner = useShouldShowBanner(bannerType)
+  const shouldShowBanner = useBannerStorage(bannerType)
   const wallet = useWallet()
   const isSafeOwner = useIsSafeOwner()
   const { balances, loading: balancesLoading } = useVisibleBalances()

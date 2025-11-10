@@ -19,7 +19,7 @@ export enum BannerType {
  * - For BannerType.Promo: Returns false if bannerDismissed or formCompleted is true, otherwise true
  * - For BannerType.Pending: Returns true if formCompleted is true AND pendingBannerDismissed is false, otherwise false
  */
-export const useShouldShowBanner = (bannerType: BannerType): boolean => {
+export const useBannerStorage = (bannerType: BannerType): boolean => {
   const chainId = useChainId()
   const { safeAddress } = useSafeInfo()
 

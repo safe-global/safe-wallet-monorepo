@@ -1,11 +1,11 @@
 import { renderHook } from '@/tests/test-utils'
-import { useShouldShowBanner, BannerType } from '../useShouldShowBanner'
+import { useBannerStorage, BannerType } from '../useBannerStorage'
 import * as useChainIdHook from '@/hooks/useChainId'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import type { RootState } from '@/store'
 import type { HnState } from '../../store/hnStateSlice'
 
-describe('useShouldShowBanner', () => {
+describe('useBannerStorage', () => {
   const chainId = '1'
   const safeAddress = '0x1234567890123456789012345678901234567890'
 
@@ -27,7 +27,7 @@ describe('useShouldShowBanner', () => {
         hnState: {},
       }
 
-      const { result } = renderHook(() => useShouldShowBanner(BannerType.Promo), {
+      const { result } = renderHook(() => useBannerStorage(BannerType.Promo), {
         initialReduxState,
       })
 
@@ -45,7 +45,7 @@ describe('useShouldShowBanner', () => {
         } as HnState,
       }
 
-      const { result } = renderHook(() => useShouldShowBanner(BannerType.Promo), {
+      const { result } = renderHook(() => useBannerStorage(BannerType.Promo), {
         initialReduxState,
       })
 
@@ -63,7 +63,7 @@ describe('useShouldShowBanner', () => {
         } as HnState,
       }
 
-      const { result } = renderHook(() => useShouldShowBanner(BannerType.Promo), {
+      const { result } = renderHook(() => useBannerStorage(BannerType.Promo), {
         initialReduxState,
       })
 
@@ -81,7 +81,7 @@ describe('useShouldShowBanner', () => {
         } as HnState,
       }
 
-      const { result } = renderHook(() => useShouldShowBanner(BannerType.Promo), {
+      const { result } = renderHook(() => useBannerStorage(BannerType.Promo), {
         initialReduxState,
       })
 
@@ -99,7 +99,7 @@ describe('useShouldShowBanner', () => {
         } as HnState,
       }
 
-      const { result } = renderHook(() => useShouldShowBanner(BannerType.Promo), {
+      const { result } = renderHook(() => useBannerStorage(BannerType.Promo), {
         initialReduxState,
       })
 
@@ -113,7 +113,7 @@ describe('useShouldShowBanner', () => {
         hnState: {},
       }
 
-      const { result } = renderHook(() => useShouldShowBanner(BannerType.Pending), {
+      const { result } = renderHook(() => useBannerStorage(BannerType.Pending), {
         initialReduxState,
       })
 
@@ -131,7 +131,7 @@ describe('useShouldShowBanner', () => {
         } as HnState,
       }
 
-      const { result } = renderHook(() => useShouldShowBanner(BannerType.Pending), {
+      const { result } = renderHook(() => useBannerStorage(BannerType.Pending), {
         initialReduxState,
       })
 
@@ -149,7 +149,7 @@ describe('useShouldShowBanner', () => {
         } as HnState,
       }
 
-      const { result } = renderHook(() => useShouldShowBanner(BannerType.Pending), {
+      const { result } = renderHook(() => useBannerStorage(BannerType.Pending), {
         initialReduxState,
       })
 
@@ -167,7 +167,7 @@ describe('useShouldShowBanner', () => {
         } as HnState,
       }
 
-      const { result } = renderHook(() => useShouldShowBanner(BannerType.Pending), {
+      const { result } = renderHook(() => useBannerStorage(BannerType.Pending), {
         initialReduxState,
       })
 
@@ -185,7 +185,7 @@ describe('useShouldShowBanner', () => {
         } as HnState,
       }
 
-      const { result } = renderHook(() => useShouldShowBanner(BannerType.Pending), {
+      const { result } = renderHook(() => useBannerStorage(BannerType.Pending), {
         initialReduxState,
       })
 
@@ -206,7 +206,7 @@ describe('useShouldShowBanner', () => {
       }
 
       const { result, rerender } = renderHook(
-        ({ bannerType }) => useShouldShowBanner(bannerType),
+        ({ bannerType }) => useBannerStorage(bannerType),
         {
           initialProps: { bannerType: BannerType.Promo },
           initialReduxState,
@@ -241,7 +241,7 @@ describe('useShouldShowBanner', () => {
         } as HnState,
       }
 
-      const { result } = renderHook(() => useShouldShowBanner(BannerType.Promo), {
+      const { result } = renderHook(() => useBannerStorage(BannerType.Promo), {
         initialReduxState,
       })
 
@@ -267,7 +267,7 @@ describe('useShouldShowBanner', () => {
         } as HnState,
       }
 
-      const { result } = renderHook(() => useShouldShowBanner(BannerType.Promo), {
+      const { result } = renderHook(() => useBannerStorage(BannerType.Promo), {
         initialReduxState,
       })
 

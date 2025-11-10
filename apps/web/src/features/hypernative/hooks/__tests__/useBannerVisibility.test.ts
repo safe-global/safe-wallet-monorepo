@@ -1,7 +1,7 @@
 import { renderHook } from '@/tests/test-utils'
 import { useBannerVisibility, MIN_BALANCE_USD, BannerVisibilityResult } from '../useBannerVisibility'
-import { BannerType } from '../useShouldShowBanner'
-import * as useShouldShowBannerHook from '../useShouldShowBanner'
+import { BannerType } from '../useBannerStorage'
+import * as useBannerStorageHook from '../useBannerStorage'
 import * as useWalletHook from '@/hooks/wallets/useWallet'
 import * as useIsSafeOwnerHook from '@/hooks/useIsSafeOwner'
 import * as useVisibleBalancesHook from '@/hooks/useVisibleBalances'
@@ -15,9 +15,9 @@ describe('useBannerVisibility', () => {
     jest.clearAllMocks()
   })
 
-  describe('when useShouldShowBanner returns false', () => {
+  describe('when useBannerStorage returns false', () => {
     it('should return showBanner: false, loading: false', () => {
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(false)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(false)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -41,7 +41,7 @@ describe('useBannerVisibility', () => {
 
   describe('when wallet is not connected', () => {
     it('should return showBanner: false, loading: false', () => {
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(true)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(null)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -65,7 +65,7 @@ describe('useBannerVisibility', () => {
 
   describe('when wallet is not a Safe owner', () => {
     it('should return showBanner: false, loading: false', () => {
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(true)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(false)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -89,7 +89,7 @@ describe('useBannerVisibility', () => {
 
   describe('when Safe balance is <= MIN_BALANCE_USD', () => {
     it('should return showBanner: false, loading: false when balance equals MIN_BALANCE_USD', () => {
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(true)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -111,7 +111,7 @@ describe('useBannerVisibility', () => {
     })
 
     it('should return showBanner: false, loading: false when balance is less than MIN_BALANCE_USD', () => {
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(true)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -133,7 +133,7 @@ describe('useBannerVisibility', () => {
     })
 
     it('should return showBanner: false, loading: false when fiatTotal is empty string', () => {
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(true)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -157,7 +157,7 @@ describe('useBannerVisibility', () => {
 
   describe('when HypernativeGuard is present', () => {
     it('should return showBanner: false, loading: false', () => {
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(true)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -181,7 +181,7 @@ describe('useBannerVisibility', () => {
 
   describe('when all conditions are met', () => {
     it('should return showBanner: true, loading: false', () => {
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(true)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -205,7 +205,7 @@ describe('useBannerVisibility', () => {
 
   describe('loading states', () => {
     it('should return loading: true when balances are loading', () => {
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(true)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -227,7 +227,7 @@ describe('useBannerVisibility', () => {
     })
 
     it('should return loading: true when guard check is loading', () => {
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(true)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -249,7 +249,7 @@ describe('useBannerVisibility', () => {
     })
 
     it('should return loading: true when both balances and guard check are loading', () => {
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(true)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -273,7 +273,7 @@ describe('useBannerVisibility', () => {
 
   describe('BannerType handling', () => {
     it('should work with BannerType.Promo', () => {
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(true)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -289,11 +289,11 @@ describe('useBannerVisibility', () => {
       const { result } = renderHook(() => useBannerVisibility(BannerType.Promo))
 
       expect(result.current.showBanner).toBe(true)
-      expect(useShouldShowBannerHook.useShouldShowBanner).toHaveBeenCalledWith(BannerType.Promo)
+      expect(useBannerStorageHook.useBannerStorage).toHaveBeenCalledWith(BannerType.Promo)
     })
 
     it('should work with BannerType.Pending', () => {
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(true)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -309,13 +309,13 @@ describe('useBannerVisibility', () => {
       const { result } = renderHook(() => useBannerVisibility(BannerType.Pending))
 
       expect(result.current.showBanner).toBe(true)
-      expect(useShouldShowBannerHook.useShouldShowBanner).toHaveBeenCalledWith(BannerType.Pending)
+      expect(useBannerStorageHook.useBannerStorage).toHaveBeenCalledWith(BannerType.Pending)
     })
   })
 
   describe('edge cases', () => {
     it('should handle balance exactly above MIN_BALANCE_USD', () => {
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(true)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -337,7 +337,7 @@ describe('useBannerVisibility', () => {
     })
 
     it('should handle very large balance values', () => {
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(true)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -359,7 +359,7 @@ describe('useBannerVisibility', () => {
     })
 
     it('should handle invalid fiatTotal string gracefully', () => {
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(true)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -382,7 +382,7 @@ describe('useBannerVisibility', () => {
     })
 
     it('should handle zero balance', () => {
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(true)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -404,7 +404,7 @@ describe('useBannerVisibility', () => {
     })
 
     it('should handle negative balance string (should default to 0)', () => {
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(true)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -428,7 +428,7 @@ describe('useBannerVisibility', () => {
 
   describe('multiple condition failures', () => {
     it('should return false when multiple conditions fail', () => {
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(false)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(false)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(null)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(false)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -450,7 +450,7 @@ describe('useBannerVisibility', () => {
     })
 
     it('should return false when all conditions fail except one', () => {
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(true)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -476,7 +476,7 @@ describe('useBannerVisibility', () => {
   describe('helper function behavior', () => {
     it('should correctly evaluate all conditions together', () => {
       // Test that the helper function correctly combines all conditions
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(true)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
@@ -497,7 +497,7 @@ describe('useBannerVisibility', () => {
 
     it('should handle balance threshold boundary correctly', () => {
       // Test balance exactly at threshold (should fail)
-      jest.spyOn(useShouldShowBannerHook, 'useShouldShowBanner').mockReturnValue(true)
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
       jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
