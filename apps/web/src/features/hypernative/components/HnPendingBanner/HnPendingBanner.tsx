@@ -2,27 +2,19 @@ import { Box, Card, IconButton, Stack, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import { SvgIcon } from '@mui/material'
 import StatusPendingIcon from '@/public/images/hypernative/status-pending.svg'
-import { useAppDispatch } from '@/store'
-import { setPendingBannerDismissed } from '@/features/hypernative/store/hnStateSlice'
-import useChainId from '@/hooks/useChainId'
-import useSafeInfo from '@/hooks/useSafeInfo'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import css from './styles.module.css'
 import type { ReactElement } from 'react'
 
 export interface HnPendingBannerProps extends WithHnSignupFlowProps {
-  isDismissable?: boolean
+  onDismiss?: () => void
 }
 
-export const HnPendingBanner = ({ isDismissable = true }: HnPendingBannerProps): ReactElement => {
-  const dispatch = useAppDispatch()
-  const chainId = useChainId()
-  const { safeAddress } = useSafeInfo()
-
-  const handleDismiss = () => {
-    dispatch(setPendingBannerDismissed({ chainId, safeAddress, dismissed: true }))
-  }
-
+/**
+ * Pure HnPendingBanner component without side effects.
+ * Receives onDismiss callback from parent wrapper.
+ */
+export const HnPendingBanner = ({ onDismiss }: HnPendingBannerProps): ReactElement => {
   return (
     <Card className={css.banner}>
       <Stack direction="row" alignItems="flex-start" spacing={1} className={css.content}>
@@ -38,8 +30,8 @@ export const HnPendingBanner = ({ isDismissable = true }: HnPendingBannerProps):
           </Typography>
         </Box>
       </Stack>
-      {isDismissable && (
-        <IconButton className={css.closeButton} aria-label="close" onClick={handleDismiss}>
+      {onDismiss && (
+        <IconButton className={css.closeButton} aria-label="close" onClick={onDismiss}>
           <CloseIcon fontSize="small" />
         </IconButton>
       )}
