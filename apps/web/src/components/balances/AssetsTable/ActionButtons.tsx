@@ -1,5 +1,5 @@
 import React, { type ReactElement } from 'react'
-import { Box, Stack } from '@mui/material'
+import { Box, Checkbox, Stack } from '@mui/material'
 import SendButton from './SendButton'
 import SwapButton from '@/features/swap/components/SwapButton'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
@@ -11,6 +11,9 @@ interface ActionButtonsProps {
   isSwapFeatureEnabled: boolean
   onlyIcon?: boolean
   mobile?: boolean
+  showHiddenAssets?: boolean
+  isSelected?: boolean
+  onToggleAsset?: () => void
 }
 
 export const ActionButtons = ({
@@ -18,6 +21,9 @@ export const ActionButtons = ({
   isSwapFeatureEnabled,
   onlyIcon = false,
   mobile = false,
+  showHiddenAssets = false,
+  isSelected = false,
+  onToggleAsset,
 }: ActionButtonsProps): ReactElement => {
   if (mobile) {
     return (
@@ -48,6 +54,12 @@ export const ActionButtons = ({
 
       {isSwapFeatureEnabled && (
         <SwapButton tokenInfo={tokenInfo} amount="0" trackingLabel={SWAP_LABELS.asset} onlyIcon={onlyIcon} />
+      )}
+
+      {showHiddenAssets && onToggleAsset && (
+        <Box display="flex" alignItems="center" height="28px">
+          <Checkbox size="small" checked={isSelected} onClick={onToggleAsset} />
+        </Box>
       )}
     </Stack>
   )
