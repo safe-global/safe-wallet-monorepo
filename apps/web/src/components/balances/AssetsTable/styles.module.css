@@ -268,6 +268,24 @@
   padding-right: 138px;
 }
 
+.balanceColumn {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  hyphens: auto;
+  text-align: right;
+}
+
+.balanceColumn b {
+  font-weight: 400;
+}
+
+.container td:nth-child(3) {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 0;
+}
+
 /* Adjust column widths for tablet/small desktop (one size larger than mobile) */
 @media (min-width: 600px) and (max-width: 899.95px) {
   .container th:nth-child(3),

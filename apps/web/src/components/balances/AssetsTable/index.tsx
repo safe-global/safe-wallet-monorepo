@@ -192,7 +192,7 @@ const AssetsTable = ({
             balance: {
               rawValue: Number(item.balance) / 10 ** (item.tokenInfo.decimals ?? 0),
               content: (
-                <Typography sx={{ '& b': { fontWeight: '400' } }} textAlign="right">
+                <Typography className={css.balanceColumn}>
                   <TokenAmount
                     value={item.balance}
                     decimals={item.tokenInfo.decimals}
