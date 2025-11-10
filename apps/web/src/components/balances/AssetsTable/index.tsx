@@ -126,7 +126,7 @@ const AssetsTable = ({
     {
       id: 'actions',
       label: '',
-      width: showHiddenAssets ? '120px' : '76px',
+      width: showHiddenAssets ? '130px' : '86px',
       align: 'right',
       disableSort: true,
     },

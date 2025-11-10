@@ -16,15 +16,15 @@
 
 .container th:last-of-type,
 .container td:last-of-type {
-  min-width: 76px;
-  width: 76px;
+  min-width: 86px;
+  width: 86px;
   flex-shrink: 0;
 }
 
 .container.containerWideActions th:last-of-type,
 .container.containerWideActions td:last-of-type {
-  min-width: 120px;
-  width: 120px;
+  min-width: 130px;
+  width: 130px;
 }
 
 .container td:last-of-type .sticky > *:last-child {
