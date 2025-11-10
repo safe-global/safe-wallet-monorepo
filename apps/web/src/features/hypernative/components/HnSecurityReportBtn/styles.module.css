@@ -42,7 +42,7 @@
 }
 
 /* Apply background to the wrapper Box that ExternalLink creates */
-.link>span {
+.link > span {
   display: inline-flex !important;
   align-items: center;
   background-color: var(--color-background-main);
