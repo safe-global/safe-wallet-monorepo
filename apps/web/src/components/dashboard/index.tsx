@@ -28,7 +28,7 @@ import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoF
 import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
 import { useBannerVisibility } from '@/features/hypernative/hooks'
 import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
-import HnBanner, { hnBannerID } from '@/features/hypernative/components/HnBanner'
+import { HnBannerForCarousel, hnBannerID } from '@/features/hypernative/components/HnBanner'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const PositionsWidget = dynamic(() => import('@/features/positions/components/PositionsWidget'))
@@ -49,10 +49,10 @@ const Dashboard = (): ReactElement => {
   const isPositionsFeatureEnabled = useIsPositionsFeatureEnabled()
   const { isEligible } = useNoFeeNovemberEligibility()
   const isNoFeeNovemberEnabled = useIsNoFeeNovemberFeatureEnabled()
-  const { showBanner: showHnBanner } = useBannerVisibility(BannerType.Promo)
+  const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
 
   const banners = [
-    showHnBanner && { id: hnBannerID, element: HnBanner },
+    (showHnBanner || hnLoading) && { id: hnBannerID, element: HnBannerForCarousel },
     isNoFeeNovemberEnabled && {
       id: noFeeNovemberBannerID,
       element: NoFeeNovemberBanner,

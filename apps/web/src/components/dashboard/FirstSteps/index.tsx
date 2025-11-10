@@ -26,7 +26,7 @@ import css from './styles.module.css'
 import ActivateAccountButton from '@/features/counterfactual/ActivateAccountButton'
 import { isReplayedSafeProps } from '@/features/counterfactual/utils'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-import DashboardBanner from '@/features/hypernative/components/DashboardBanner'
+import HnDashboardBanner from '@/features/hypernative/components/HnDashboardBanner'
 
 const calculateProgress = (items: boolean[]) => {
   const totalNumberOfItems = items.length
@@ -472,7 +472,7 @@ const FirstSteps = () => {
           </Grid>
 
           <Grid item xs={12} md={4}>
-            {showDashboardBanner ? <DashboardBanner /> : <AccountReadyWidget />}
+            {showDashboardBanner ? <HnDashboardBanner /> : <AccountReadyWidget />}
           </Grid>
         </Grid>
       </WidgetBody>
