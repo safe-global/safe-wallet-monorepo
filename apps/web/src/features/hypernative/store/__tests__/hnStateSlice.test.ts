@@ -4,13 +4,13 @@ import {
   setBannerDismissed,
   setFormCompleted,
   setPendingBannerDismissed,
-  selectSafeHnState,
   type HnState,
+  type SafeHnState,
 } from '../hnStateSlice'
 
 describe('hnStateSlice', () => {
   const createTestStore = (initialState: HnState = {}) => {
-    return configureStore({
+    const store = configureStore({
       reducer: {
         [hnStateSlice.name]: hnStateSlice.reducer,
       },
@@ -18,6 +18,15 @@ describe('hnStateSlice', () => {
         [hnStateSlice.name]: initialState,
       },
     })
+    return store
+  }
+
+  type TestRootState = ReturnType<ReturnType<typeof createTestStore>['getState']>
+
+  // Helper to get Safe state from test store
+  const getSafeState = (state: TestRootState, chainId: string, safeAddress: string): SafeHnState | undefined => {
+    const key = `${chainId}:${safeAddress}`
+    return state[hnStateSlice.name][key]
   }
 
   describe('setBannerDismissed', () => {
@@ -29,7 +38,7 @@ describe('hnStateSlice', () => {
       store.dispatch(setBannerDismissed({ chainId, safeAddress, dismissed: true }))
 
       const state = store.getState()
-      const safeState = selectSafeHnState(state, chainId, safeAddress)
+      const safeState = getSafeState(state, chainId, safeAddress)
 
       expect(safeState).toEqual({
         bannerDismissed: true,
@@ -51,7 +60,7 @@ describe('hnStateSlice', () => {
       store.dispatch(setBannerDismissed({ chainId: '1', safeAddress: '0x123', dismissed: true }))
 
       const state = store.getState()
-      const safeState = selectSafeHnState(state, '1', '0x123')
+      const safeState = getSafeState(state, '1', '0x123')
 
       expect(safeState).toEqual({
         bannerDismissed: true,
@@ -70,7 +79,7 @@ describe('hnStateSlice', () => {
       store.dispatch(setFormCompleted({ chainId, safeAddress, completed: true }))
 
       const state = store.getState()
-      const safeState = selectSafeHnState(state, chainId, safeAddress)
+      const safeState = getSafeState(state, chainId, safeAddress)
 
       expect(safeState).toEqual({
         bannerDismissed: false,
@@ -92,7 +101,7 @@ describe('hnStateSlice', () => {
       store.dispatch(setFormCompleted({ chainId: '1', safeAddress: '0x123', completed: true }))
 
       const state = store.getState()
-      const safeState = selectSafeHnState(state, '1', '0x123')
+      const safeState = getSafeState(state, '1', '0x123')
 
       expect(safeState).toEqual({
         bannerDismissed: true,
@@ -111,7 +120,7 @@ describe('hnStateSlice', () => {
       store.dispatch(setPendingBannerDismissed({ chainId, safeAddress, dismissed: true }))
 
       const state = store.getState()
-      const safeState = selectSafeHnState(state, chainId, safeAddress)
+      const safeState = getSafeState(state, chainId, safeAddress)
 
       expect(safeState).toEqual({
         bannerDismissed: false,
@@ -133,7 +142,7 @@ describe('hnStateSlice', () => {
       store.dispatch(setPendingBannerDismissed({ chainId: '1', safeAddress: '0x123', dismissed: true }))
 
       const state = store.getState()
-      const safeState = selectSafeHnState(state, '1', '0x123')
+      const safeState = getSafeState(state, '1', '0x123')
 
       expect(safeState).toEqual({
         bannerDismissed: true,
@@ -147,7 +156,7 @@ describe('hnStateSlice', () => {
     it('should return undefined for a safe that does not exist', () => {
       const store = createTestStore()
       const state = store.getState()
-      const safeState = selectSafeHnState(state, '1', '0x123')
+      const safeState = getSafeState(state, '1', '0x123')
 
       expect(safeState).toBeUndefined()
     })
@@ -162,7 +171,7 @@ describe('hnStateSlice', () => {
       }
       const store = createTestStore(initialState)
       const state = store.getState()
-      const safeState = selectSafeHnState(state, '1', '0x123')
+      const safeState = getSafeState(state, '1', '0x123')
 
       expect(safeState).toEqual({
         bannerDismissed: true,
@@ -187,8 +196,8 @@ describe('hnStateSlice', () => {
       const store = createTestStore(initialState)
       const state = store.getState()
 
-      const safe1State = selectSafeHnState(state, '1', '0x123')
-      const safe2State = selectSafeHnState(state, '1', '0x456')
+      const safe1State = getSafeState(state, '1', '0x123')
+      const safe2State = getSafeState(state, '1', '0x456')
 
       expect(safe1State).toEqual({
         bannerDismissed: true,

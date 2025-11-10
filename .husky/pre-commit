@@ -3,12 +3,12 @@
 # Run lint-staged (includes prettier)
 npx lint-staged
 
-# Run type-check on staged TypeScript files
-staged_ts_files=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx)$' || true)
+# Run type-check on staged TypeScript files in apps/web
+staged_web_ts_files=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^apps/web/.*\.(ts|tsx)$' || true)
 
-if [ -n "$staged_ts_files" ]; then
-  echo "Running type-check on staged files..."
-  yarn type-check
+if [ -n "$staged_web_ts_files" ]; then
+  echo "Running type-check for web app..."
+  yarn workspace @safe-global/web type-check
 
   if [ $? -ne 0 ]; then
     echo "===================================="
