@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import PendingBanner from './PendingBanner'
+import { HnPendingBanner } from './HnPendingBanner'
 import { Paper } from '@mui/material'
 
 const meta = {
-  component: PendingBanner,
-  title: 'Features/Hypernative/PendingBanner',
+  component: HnPendingBanner,
+  title: 'Features/Hypernative/HnPendingBanner',
   parameters: {
     componentSubtitle:
       'A banner component that displays a pending guardian setup status with an icon and close button.',
@@ -19,13 +19,21 @@ const meta = {
     },
   ],
   tags: ['autodocs'],
-} satisfies Meta<typeof PendingBanner>
+} satisfies Meta<typeof HnPendingBanner>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    onDismiss: () => {},
+    onHnSignupClick: () => console.log('Signup clicked'),
+    onDismiss: () => console.log('Dismissed'),
+  },
+}
+
+export const NonDismissable: Story = {
+  args: {
+    onHnSignupClick: () => console.log('Signup clicked'),
+    onDismiss: undefined,
   },
 }

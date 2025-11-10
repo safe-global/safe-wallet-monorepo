@@ -1,11 +1,13 @@
 import { Box, Button, Card, Typography } from '@mui/material'
 import Image from 'next/image'
-import Link from 'next/link'
+import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import css from './styles.module.css'
 import { dashboardBannerConfig } from './config'
 
-export const DashboardBanner = () => {
-  const { title, description, ctaLabel, href, badgeSrc, badgeAlt, tagLabel } = dashboardBannerConfig
+export interface HnDashboardBannerProps extends WithHnSignupFlowProps {}
+
+export const HnDashboardBanner = ({ onHnSignupClick }: HnDashboardBannerProps) => {
+  const { title, description, ctaLabel, badgeSrc, badgeAlt, tagLabel } = dashboardBannerConfig
 
   return (
     <Card className={css.banner}>
@@ -29,15 +31,11 @@ export const DashboardBanner = () => {
             {description}
           </Typography>
 
-          <Link href={href} passHref legacyBehavior>
-            <Button variant="outlined" size="small" className={css.ctaButton}>
-              {ctaLabel}
-            </Button>
-          </Link>
+          <Button variant="outlined" size="small" className={css.ctaButton} onClick={onHnSignupClick}>
+            {ctaLabel}
+          </Button>
         </Box>
       </Box>
     </Card>
   )
 }
-
-export default DashboardBanner

@@ -2,14 +2,19 @@ import { Box, Card, IconButton, Stack, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import { SvgIcon } from '@mui/material'
 import StatusPendingIcon from '@/public/images/hypernative/status-pending.svg'
+import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import css from './styles.module.css'
 import type { ReactElement } from 'react'
 
-export interface PendingBannerProps {
+export interface HnPendingBannerProps extends WithHnSignupFlowProps {
   onDismiss?: () => void
 }
 
-const PendingBanner = ({ onDismiss }: PendingBannerProps): ReactElement => {
+/**
+ * Pure HnPendingBanner component without side effects.
+ * Receives onDismiss callback from parent wrapper.
+ */
+export const HnPendingBanner = ({ onDismiss }: HnPendingBannerProps): ReactElement => {
   return (
     <Card className={css.banner}>
       <Stack direction="row" alignItems="flex-start" spacing={1} className={css.content}>
@@ -33,5 +38,3 @@ const PendingBanner = ({ onDismiss }: PendingBannerProps): ReactElement => {
     </Card>
   )
 }
-
-export default PendingBanner
