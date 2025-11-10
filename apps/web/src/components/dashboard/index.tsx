@@ -29,6 +29,7 @@ import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/u
 import { useBannerVisibility } from '@/features/hypernative/hooks'
 import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
 import { HnBannerForCarousel, hnBannerID } from '@/features/hypernative/components/HnBanner'
+import HnPendingBanner from '@/features/hypernative/components/HnPendingBanner'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const PositionsWidget = dynamic(() => import('@/features/positions/components/PositionsWidget'))
@@ -109,7 +110,11 @@ const Dashboard = (): ReactElement => {
           )}
         </div>
 
-        <div className={css.rightCol}>{safe.deployed && <PendingTxsList />}</div>
+        <div className={css.rightCol}>
+          {safe.deployed && <PendingTxsList />}
+
+          <HnPendingBanner />
+        </div>
       </div>
     </>
   )
