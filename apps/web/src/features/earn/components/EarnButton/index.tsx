@@ -13,6 +13,7 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useCurrentChain } from '@/hooks/useChains'
 import css from './styles.module.css'
 import classnames from 'classnames'
+import assetActionCss from '@/components/common/AssetActionButton/styles.module.css'
 
 const EarnButton = ({
   tokenInfo,
@@ -53,20 +54,11 @@ const EarnButton = ({
               <span>
                 <IconButton
                   data-testid="earn-btn"
+                  aria-label="Earn"
                   onClick={onEarnClick}
                   disabled={!isOk}
                   size="small"
-                  sx={{
-                    width: 28,
-                    height: 28,
-                    minWidth: 28,
-                    padding: '6px',
-                    backgroundColor: 'var(--color-background-paper)',
-                    borderRadius: '4px',
-                    '&:hover': {
-                      backgroundColor: 'var(--color-background-main)',
-                    },
-                  }}
+                  className={assetActionCss.assetActionIconButton}
                 >
                   <SvgIcon component={EarnIcon} inheritViewBox sx={{ width: 16, height: 16 }} />
                 </IconButton>
