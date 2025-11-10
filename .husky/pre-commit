@@ -1,1 +1,20 @@
+#!/bin/bash
+
+# Run lint-staged (includes prettier)
 npx lint-staged
+
+# Run type-check on staged TypeScript files
+staged_ts_files=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx)$' || true)
+
+if [ -n "$staged_ts_files" ]; then
+  echo "Running type-check on staged files..."
+  yarn type-check
+
+  if [ $? -ne 0 ]; then
+    echo "===================================="
+    echo "Type-check failed!"
+    echo "Please fix type errors before committing or use --no-verify to skip."
+    echo "===================================="
+    exit 1
+  fi
+fi
