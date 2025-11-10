@@ -1,9 +1,14 @@
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+
 /**
- * Hook to determine if Hypernative features should be enabled
- * This can be extended to check for feature flags, environment variables, or other conditions
+ * Hook to determine if Hypernative features should be enabled.
+ * Checks if the HYPERNATIVE feature is enabled on the current chain.
+ *
+ * @returns true if Hypernative features are enabled, false otherwise
  */
 export const useIsHypernativeFeature = (): boolean => {
-  // TODO: Add feature flag check or environment variable check when needed
-  // For now, return true to enable Hypernative features
-  return true
+  const hasFeature = useHasFeature(FEATURES.HYPERNATIVE)
+  // Return false if feature is undefined or false
+  return hasFeature === true
 }

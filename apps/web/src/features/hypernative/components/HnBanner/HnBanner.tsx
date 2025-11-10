@@ -1,16 +1,24 @@
 import { PromoBanner } from '@/components/common/PromoBanner'
-import type { LinkProps } from 'next/link'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
+import { useAppDispatch } from '@/store'
+import { setBannerDismissed } from '@/features/hypernative/store/hnStateSlice'
+import useChainId from '@/hooks/useChainId'
+import useSafeInfo from '@/hooks/useSafeInfo'
 
 export const hnBannerID = 'hnBanner'
 
 export interface HnBannerProps {
-  onDismiss?: () => void
-  href: LinkProps['href']
   isDismissable?: boolean
 }
 
-const HnBanner = ({ onDismiss, isDismissable = true, href }: HnBannerProps) => {
+const HnBanner = ({ isDismissable = true }: HnBannerProps) => {
+  const dispatch = useAppDispatch()
+  const chainId = useChainId()
+  const { safeAddress } = useSafeInfo()
+
+  const handleDismiss = () => {
+    dispatch(setBannerDismissed({ chainId, safeAddress, dismissed: true }))
+  }
   return (
     <PromoBanner
       // TODO: check tracking events naming
@@ -29,9 +37,9 @@ const HnBanner = ({ onDismiss, isDismissable = true, href }: HnBannerProps) => {
       ctaLabel="Learn more"
       imageSrc="/images/hypernative/guardian-badge.svg"
       imageAlt="Guardian badge"
-      href={href}
-      // Only passes the onDismiss prop when both isDismissable is true and onDismiss is provided:
-      {...(isDismissable && onDismiss && { onDismiss })}
+      href="https://www.google.com"
+      // Only passes the onDismiss prop when isDismissable is true:
+      {...(isDismissable && { onDismiss: handleDismiss })}
       endIcon={<ArrowForwardIcon fontSize="small" />}
       customBackground="linear-gradient(90deg, #1c5538 0%, #1c1c1c 54.327%, #1c1c1c 100%)"
       customTitleColor="var(--color-static-primary)"

@@ -1,7 +1,7 @@
 .banner {
   position: relative;
   padding: var(--space-2) var(--space-8) var(--space-2) var(--space-2);
-  background: linear-gradient(90deg, #b0ffc9, #d7f6ff) !important;
+  background: linear-gradient(90deg, #b0ffc9, #d7f6ff);
   border: 0;
   border-radius: 12px !important;
   height: 100%;
@@ -30,7 +30,7 @@
 }
 
 .bannerCtaText {
-  color: var(--color-static-main) !important;
+  color: var(--color-static-main);
   margin-top: 8px !important;
   margin-left: 0 !important;
   padding: 0 !important;
