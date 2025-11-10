@@ -2,16 +2,6 @@ import { Grid2, Typography, Button } from '@mui/material'
 import { useEffect, useRef } from 'react'
 import css from './styles.module.css'
 
-declare global {
-  interface Window {
-    hbspt?: {
-      forms: {
-        create: (options: { portalId: string; formId: string; region: string; target?: string }) => void
-      }
-    }
-  }
-}
-
 export type HnSignupFormProps = {
   portalId: string
   formId: string
