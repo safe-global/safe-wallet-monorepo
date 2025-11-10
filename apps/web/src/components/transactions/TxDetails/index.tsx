@@ -42,6 +42,7 @@ import { TxShareBlock } from '../TxShareLink'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
+import HnSecurityReportBtnForTxDetails from '@/features/hypernative/components/HnSecurityReportBtn'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -174,6 +175,8 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
             isTxFromProposer={Boolean(proposedByDelegate)}
             proposer={proposer}
           />
+
+          <HnSecurityReportBtnForTxDetails txDetails={txDetails} />
 
           <TxShareBlock txId={txDetails.txId} txHash={txDetails.txHash} />
 

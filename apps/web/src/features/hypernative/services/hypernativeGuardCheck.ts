@@ -1,5 +1,6 @@
 import { keccak256 } from 'ethers'
 import type { JsonRpcProvider } from 'ethers'
+import memoize from 'lodash/memoize'
 import { logError, Errors } from '@/services/exceptions'
 
 /**
@@ -13,14 +14,10 @@ export const HYPERNATIVE_GUARD_CODE_HASHES: string[] = [
 ]
 
 /**
- * Checks if a guard contract address is a HypernativeGuard
- * by comparing its bytecode hash against known HypernativeGuard code hashes
- *
- * @param guardAddress - The address of the guard contract to check
- * @param provider - Web3 provider to fetch contract bytecode
- * @returns Promise<boolean> - true if the guard is a HypernativeGuard, false otherwise
+ * Internal implementation of the guard check.
+ * Not exported - use the memoized version `isHypernativeGuard` instead.
  */
-export const isHypernativeGuard = async (
+const _isHypernativeGuard = async (
   guardAddress: string | null | undefined,
   provider: JsonRpcProvider | undefined,
 ): Promise<boolean> => {
@@ -53,3 +50,22 @@ export const isHypernativeGuard = async (
     return false
   }
 }
+
+/**
+ * Checks if a guard contract address is a HypernativeGuard
+ * by comparing its bytecode hash against known HypernativeGuard code hashes.
+ *
+ * This function is memoized to avoid redundant RPC calls for the same guard address.
+ * The cache key is based on the guard address, as the bytecode for a given address
+ * will never change.
+ *
+ * @param guardAddress - The address of the guard contract to check
+ * @param provider - Web3 provider to fetch contract bytecode
+ * @returns Promise<boolean> - true if the guard is a HypernativeGuard, false otherwise
+ */
+export const isHypernativeGuard = memoize(
+  _isHypernativeGuard,
+  // Cache key resolver - only use guardAddress as the key
+  // Provider can change but the bytecode at an address doesn't
+  (guardAddress: string | null | undefined) => guardAddress || 'null',
+)
