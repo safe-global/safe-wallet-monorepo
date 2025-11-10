@@ -1,8 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import React from 'react'
-import { HnFeatureFlagWrapper, type HnFeatureFlagWrapperProps } from './HnFeatureFlagWrapper'
-import HnBanner, { type HnBannerProps } from '../HnBanner'
-import PendingBanner, { type PendingBannerProps } from '../PendingBanner'
+import type { ComponentType } from 'react'
+import { HnFeatureFlagWrapper } from './HnFeatureFlagWrapper'
+import type { HnFeatureFlagWrapperProps } from './HnFeatureFlagWrapper'
+import HnBanner from '../HnBanner'
+import type { HnBannerProps } from '../HnBanner'
+import PendingBanner from '../PendingBanner'
+import type { PendingBannerProps } from '../PendingBanner'
 import DashboardBanner from '../DashboardBanner'
 
 const meta: Meta<HnFeatureFlagWrapperProps> = {
@@ -16,7 +19,7 @@ type Story = StoryObj<HnFeatureFlagWrapperProps>
 
 export const WithHnBanner: Story = {
   args: {
-    component: HnBanner as React.ComponentType<HnBannerProps>,
+    component: HnBanner as ComponentType<HnBannerProps>,
     componentProps: {
       href: '#',
       onDismiss: () => {},
@@ -27,7 +30,7 @@ export const WithHnBanner: Story = {
 
 export const WithPendingBanner: Story = {
   args: {
-    component: PendingBanner as React.ComponentType<PendingBannerProps>,
+    component: PendingBanner as ComponentType<PendingBannerProps>,
     componentProps: {
       onDismiss: () => {},
     } as PendingBannerProps,
@@ -36,7 +39,7 @@ export const WithPendingBanner: Story = {
 
 export const WithDashboardBanner: Story = {
   args: {
-    component: DashboardBanner as React.ComponentType<Record<string, never>>,
+    component: DashboardBanner as ComponentType<Record<string, never>>,
     componentProps: {} as Record<string, never>,
   },
 }
