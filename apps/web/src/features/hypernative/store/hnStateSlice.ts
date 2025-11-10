@@ -71,7 +71,11 @@ export const { setBannerDismissed, setFormCompleted, setPendingBannerDismissed }
 export const selectHnState = (state: RootState): HnState => state[hnStateSlice.name] || initialState
 
 export const selectSafeHnState = createSelector(
-  [selectHnState, (_: RootState, chainId: string) => chainId, (_: RootState, __: string, safeAddress: string) => safeAddress],
+  [
+    selectHnState,
+    (_: RootState, chainId: string) => chainId,
+    (_: RootState, __: string, safeAddress: string) => safeAddress,
+  ],
   (hnState, chainId, safeAddress): SafeHnState | undefined => {
     const key = `${chainId}:${safeAddress}`
     return hnState[key]
