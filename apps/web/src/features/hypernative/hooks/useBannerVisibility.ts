@@ -2,7 +2,8 @@ import { useMemo } from 'react'
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-import { useBannerStorage, BannerType } from './useBannerStorage'
+import type { BannerType } from './useBannerStorage'
+import { useBannerStorage } from './useBannerStorage'
 import { useIsHypernativeGuard } from './useIsHypernativeGuard'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { useIsHypernativeFeature } from './useIsHypernativeFeature'
@@ -70,7 +71,6 @@ const areAllConditionsMet = (
  * If any condition fails, showBanner will be false.
  */
 export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityResult => {
-
   const isEnabled = useIsHypernativeFeature()
 
   const shouldShowBanner = useBannerStorage(bannerType)
@@ -86,12 +86,27 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
       return { showBanner: false, loading: true }
     }
 
-    const showBanner = areAllConditionsMet(isEnabled, shouldShowBanner, wallet, isSafeOwner, balances.fiatTotal, isHypernativeGuard)
+    const showBanner = areAllConditionsMet(
+      isEnabled,
+      shouldShowBanner,
+      wallet,
+      isSafeOwner,
+      balances.fiatTotal,
+      isHypernativeGuard,
+    )
 
     return {
       showBanner,
       loading: false,
     }
-  }, [isEnabled, shouldShowBanner, wallet, isSafeOwner, balances.fiatTotal, balancesLoading, isHypernativeGuard, guardLoading])
+  }, [
+    isEnabled,
+    shouldShowBanner,
+    wallet,
+    isSafeOwner,
+    balances.fiatTotal,
+    balancesLoading,
+    isHypernativeGuard,
+    guardLoading,
+  ])
 }
-

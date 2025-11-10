@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { useIsHypernativeFeature } from '../../hooks/useIsHypernativeFeature'
 import { useBannerVisibility } from '../../hooks/useBannerVisibility'
-import { BannerType } from '../../hooks/useBannerStorage'
+import type { BannerType } from '../../hooks/useBannerStorage'
 
 export interface HnFeatureProps {
   children: ReactElement
@@ -38,4 +38,3 @@ export const HnFeature = ({ children, bannerType }: HnFeatureProps): ReactElemen
 }
 
 export default HnFeature
-

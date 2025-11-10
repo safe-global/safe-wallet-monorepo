@@ -41,4 +41,3 @@ export const useBannerStorage = (bannerType: BannerType): boolean => {
     return safeHnState.formCompleted && !safeHnState.pendingBannerDismissed
   }, [safeHnState, bannerType])
 }
-

@@ -205,13 +205,10 @@ describe('useBannerStorage', () => {
         } as HnState,
       }
 
-      const { result, rerender } = renderHook(
-        ({ bannerType }) => useBannerStorage(bannerType),
-        {
-          initialProps: { bannerType: BannerType.Promo },
-          initialReduxState,
-        },
-      )
+      const { result, rerender } = renderHook(({ bannerType }) => useBannerStorage(bannerType), {
+        initialProps: { bannerType: BannerType.Promo },
+        initialReduxState,
+      })
 
       // Promo should return false because formCompleted is true
       expect(result.current).toBe(false)
@@ -276,4 +273,3 @@ describe('useBannerStorage', () => {
     })
   })
 })
-

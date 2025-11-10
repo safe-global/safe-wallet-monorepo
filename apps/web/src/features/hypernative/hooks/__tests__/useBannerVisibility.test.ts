@@ -1,5 +1,5 @@
 import { renderHook } from '@/tests/test-utils'
-import { useBannerVisibility, MIN_BALANCE_USD, BannerVisibilityResult } from '../useBannerVisibility'
+import { useBannerVisibility, MIN_BALANCE_USD } from '../useBannerVisibility'
 import { BannerType } from '../useBannerStorage'
 import * as useBannerStorageHook from '../useBannerStorage'
 import * as useWalletHook from '@/hooks/wallets/useWallet'
@@ -517,4 +517,3 @@ describe('useBannerVisibility', () => {
     })
   })
 })
-
