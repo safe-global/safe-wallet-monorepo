@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react'
+import { Box } from '@mui/material'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import { HnBanner } from './HnBanner'
@@ -25,5 +26,9 @@ export const HnBannerWithLocalStorage = ({
     setBannerVisible(false)
   }
 
-  return <HnBanner onHnSignupClick={onHnSignupClick} onDismiss={handleDismiss} />
+  return (
+    <Box sx={{ mb: 2 }}>
+      <HnBanner onHnSignupClick={onHnSignupClick} onDismiss={handleDismiss} />
+    </Box>
+  )
 }
