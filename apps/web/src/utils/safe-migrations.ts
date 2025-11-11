@@ -36,8 +36,8 @@ export const createUpdateMigration = (
         ? 'migrateL2Singleton'
         : 'migrateSingleton'
       : chain.l2
-        ? 'migrateL2WithFallbackHandler'
-        : 'migrateWithFallbackHandler'
+      ? 'migrateL2WithFallbackHandler'
+      : 'migrateWithFallbackHandler'
   ) as 'migrateSingleton' // apease typescript
 
   const interfce = Safe_migration__factory.createInterface()

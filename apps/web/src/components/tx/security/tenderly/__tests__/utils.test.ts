@@ -47,7 +47,7 @@ describe('simulation utils', () => {
             Promise.resolve({
               gasLimit: BigInt(30_000_000),
             }),
-        }) as any,
+        } as any),
     )
   })
   describe('getSimulationPayload', () => {
