@@ -52,9 +52,8 @@ export type PermissionProps<P extends Permission> = P extends keyof PermissionPr
   : undefined
 
 // Define the type for a permission function that evaluates to a boolean
-type PermissionFn<P extends Permission> = PermissionProps<P> extends undefined
-  ? undefined
-  : (args: PermissionProps<P>) => boolean
+type PermissionFn<P extends Permission> =
+  PermissionProps<P> extends undefined ? undefined : (args: PermissionProps<P>) => boolean
 
 // Define the type for a permission set that maps permissions to their values
 export type PermissionSet = {
@@ -66,9 +65,10 @@ export type CommonProps = {
   wallet: ConnectedWallet | null
 }
 
-export type RolePermissionsFn<R extends Role> = RoleProps<R> extends undefined
-  ? (props: CommonProps) => PermissionSet
-  : (props: CommonProps, roleProps: RoleProps<R>) => PermissionSet
+export type RolePermissionsFn<R extends Role> =
+  RoleProps<R> extends undefined
+    ? (props: CommonProps) => PermissionSet
+    : (props: CommonProps, roleProps: RoleProps<R>) => PermissionSet
 
 type RolePermissionsConfig = {
   [R in Role]?: RolePermissionsFn<R>

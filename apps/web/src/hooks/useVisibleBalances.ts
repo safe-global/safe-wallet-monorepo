@@ -26,12 +26,15 @@ const filterHiddenTokens = (items: Balances['items'], hiddenAssets: string[]) =>
 const getVisibleFiatTotal = (balances: Balances, hiddenAssets: string[]): string => {
   return safeFormatUnits(
     balances.items
-      .reduce((acc, balanceItem) => {
-        if (hiddenAssets.includes(balanceItem.tokenInfo.address)) {
-          return acc - BigInt(safeParseUnits(truncateNumber(balanceItem.fiatBalance), PRECISION) ?? 0)
-        }
-        return acc
-      }, BigInt(balances.fiatTotal === '' ? 0 : safeParseUnits(truncateNumber(balances.fiatTotal), PRECISION) ?? 0))
+      .reduce(
+        (acc, balanceItem) => {
+          if (hiddenAssets.includes(balanceItem.tokenInfo.address)) {
+            return acc - BigInt(safeParseUnits(truncateNumber(balanceItem.fiatBalance), PRECISION) ?? 0)
+          }
+          return acc
+        },
+        BigInt(balances.fiatTotal === '' ? 0 : (safeParseUnits(truncateNumber(balances.fiatTotal), PRECISION) ?? 0)),
+      )
       .toString(),
     PRECISION,
   )

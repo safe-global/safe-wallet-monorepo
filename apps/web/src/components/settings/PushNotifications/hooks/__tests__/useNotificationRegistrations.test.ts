@@ -39,15 +39,15 @@ describe('useNotificationRegistrations', () => {
         .spyOn(tokenVersion, 'useNotificationsTokenVersion')
         .mockImplementation(
           () =>
-            ({ setTokenVersion: setTokenVersionMock } as unknown as ReturnType<
+            ({ setTokenVersion: setTokenVersionMock }) as unknown as ReturnType<
               typeof tokenVersion.useNotificationsTokenVersion
-            >),
+            >,
         )
       jest.spyOn(wallet, 'default').mockImplementation(
         () =>
           ({
             label: 'MetaMask',
-          } as ConnectedWallet),
+          }) as ConnectedWallet,
       )
     })
 
@@ -85,7 +85,7 @@ describe('useNotificationRegistrations', () => {
         () =>
           ({
             uuid: undefined,
-          } as unknown as ReturnType<typeof preferences.useNotificationPreferences>),
+          }) as unknown as ReturnType<typeof preferences.useNotificationPreferences>,
       )
 
       const { result } = renderHook(() => useNotificationRegistrations())
@@ -119,7 +119,7 @@ describe('useNotificationRegistrations', () => {
           ({
             uuid: self.crypto.randomUUID(),
             createPreferences: createPreferencesMock,
-          } as unknown as ReturnType<typeof preferences.useNotificationPreferences>),
+          }) as unknown as ReturnType<typeof preferences.useNotificationPreferences>,
       )
 
       const { result } = renderHook(() => useNotificationRegistrations())
@@ -154,7 +154,7 @@ describe('useNotificationRegistrations', () => {
           ({
             uuid: self.crypto.randomUUID(),
             createPreferences: createPreferencesMock,
-          } as unknown as ReturnType<typeof preferences.useNotificationPreferences>),
+          }) as unknown as ReturnType<typeof preferences.useNotificationPreferences>,
       )
 
       const { result } = renderHook(() => useNotificationRegistrations())
@@ -183,7 +183,7 @@ describe('useNotificationRegistrations', () => {
           ({
             uuid: self.crypto.randomUUID(),
             createPreferences: createPreferencesMock,
-          } as unknown as ReturnType<typeof preferences.useNotificationPreferences>),
+          }) as unknown as ReturnType<typeof preferences.useNotificationPreferences>,
       )
 
       const showNotificationSpy = jest.spyOn(notificationsSlice, 'showNotification')
@@ -211,7 +211,7 @@ describe('useNotificationRegistrations', () => {
         () =>
           ({
             uuid: undefined,
-          } as unknown as ReturnType<typeof preferences.useNotificationPreferences>),
+          }) as unknown as ReturnType<typeof preferences.useNotificationPreferences>,
       )
 
       const { result } = renderHook(() => useNotificationRegistrations())
@@ -235,7 +235,7 @@ describe('useNotificationRegistrations', () => {
           ({
             uuid,
             deletePreferences: deletePreferencesMock,
-          } as unknown as ReturnType<typeof preferences.useNotificationPreferences>),
+          }) as unknown as ReturnType<typeof preferences.useNotificationPreferences>,
       )
 
       const { result } = renderHook(() => useNotificationRegistrations())
@@ -264,7 +264,7 @@ describe('useNotificationRegistrations', () => {
           ({
             uuid,
             deletePreferences: deletePreferencesMock,
-          } as unknown as ReturnType<typeof preferences.useNotificationPreferences>),
+          }) as unknown as ReturnType<typeof preferences.useNotificationPreferences>,
       )
 
       const { result } = renderHook(() => useNotificationRegistrations())
@@ -287,7 +287,7 @@ describe('useNotificationRegistrations', () => {
           ({
             uuid,
             deletePreferences: deletePreferencesMock,
-          } as unknown as ReturnType<typeof preferences.useNotificationPreferences>),
+          }) as unknown as ReturnType<typeof preferences.useNotificationPreferences>,
       )
 
       const { result } = renderHook(() => useNotificationRegistrations())
@@ -307,7 +307,7 @@ describe('useNotificationRegistrations', () => {
         () =>
           ({
             uuid: undefined,
-          } as unknown as ReturnType<typeof preferences.useNotificationPreferences>),
+          }) as unknown as ReturnType<typeof preferences.useNotificationPreferences>,
       )
 
       const { result } = renderHook(() => useNotificationRegistrations())
@@ -331,7 +331,7 @@ describe('useNotificationRegistrations', () => {
           ({
             uuid,
             deleteAllChainPreferences: deleteAllChainPreferencesMock,
-          } as unknown as ReturnType<typeof preferences.useNotificationPreferences>),
+          }) as unknown as ReturnType<typeof preferences.useNotificationPreferences>,
       )
 
       const { result } = renderHook(() => useNotificationRegistrations())
@@ -357,7 +357,7 @@ describe('useNotificationRegistrations', () => {
           ({
             uuid,
             deleteAllChainPreferences: deleteAllChainPreferencesMock,
-          } as unknown as ReturnType<typeof preferences.useNotificationPreferences>),
+          }) as unknown as ReturnType<typeof preferences.useNotificationPreferences>,
       )
 
       const { result } = renderHook(() => useNotificationRegistrations())
@@ -377,7 +377,7 @@ describe('useNotificationRegistrations', () => {
           ({
             uuid,
             deleteAllChainPreferences: deleteAllChainPreferencesMock,
-          } as unknown as ReturnType<typeof preferences.useNotificationPreferences>),
+          }) as unknown as ReturnType<typeof preferences.useNotificationPreferences>,
       )
 
       const { result } = renderHook(() => useNotificationRegistrations())

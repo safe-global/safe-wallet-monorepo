@@ -23,7 +23,7 @@ describe('useSafeMessageStatus', () => {
       () =>
         ({
           address: '0x123',
-        } as ConnectedWallet),
+        }) as ConnectedWallet,
     )
 
     const message = {
@@ -41,7 +41,7 @@ describe('useSafeMessageStatus', () => {
       () =>
         ({
           address: '0x123',
-        } as ConnectedWallet),
+        }) as ConnectedWallet,
     )
 
     const message = {
@@ -59,7 +59,7 @@ describe('useSafeMessageStatus', () => {
       () =>
         ({
           address: '0x123',
-        } as ConnectedWallet),
+        }) as ConnectedWallet,
     )
 
     const message = {

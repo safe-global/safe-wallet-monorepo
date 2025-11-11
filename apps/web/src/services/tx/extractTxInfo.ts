@@ -19,10 +19,13 @@ const extractTxInfo = (
 
   // Format signatures into a map
   const signatures =
-    execInfo?.confirmations.reduce((result, item) => {
-      result[item.signer.value] = item.signature ?? ''
-      return result
-    }, {} as Record<string, string>) ?? {}
+    execInfo?.confirmations.reduce(
+      (result, item) => {
+        result[item.signer.value] = item.signature ?? ''
+        return result
+      },
+      {} as Record<string, string>,
+    ) ?? {}
 
   const nonce = execInfo?.nonce ?? 0
   const baseGas = execInfo?.baseGas ?? '0'
