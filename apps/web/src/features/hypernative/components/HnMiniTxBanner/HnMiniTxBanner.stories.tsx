@@ -13,6 +13,7 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     onHnSignupClick: () => console.log('Signup clicked'),
+    onDismiss: () => console.log('Dismissed'),
   },
 }
 

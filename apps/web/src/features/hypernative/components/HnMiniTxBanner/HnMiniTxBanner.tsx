@@ -1,19 +1,27 @@
-import { Box, Card, Stack, Typography } from '@mui/material'
+import { Box, Card, IconButton, Stack, Typography } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
 import Image from 'next/image'
 import Track from '@/components/common/Track'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import css from './styles.module.css'
 
-export interface HnMiniTxBannerProps extends WithHnSignupFlowProps { }
+export interface HnMiniTxBannerProps extends WithHnSignupFlowProps {
+  onDismiss: () => void
+}
 
 /**
  * Mini Hypernative banner component for transaction flows.
  * Compact, clickable banner that opens the Hypernative signup flow.
  * Uses the same custom background and theme as HnBanner.
  */
-export const HnMiniTxBanner = ({ onHnSignupClick }: HnMiniTxBannerProps) => {
+export const HnMiniTxBanner = ({ onHnSignupClick, onDismiss }: HnMiniTxBannerProps) => {
   const handleClick = () => {
     onHnSignupClick()
+  }
+
+  const handleDismissClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    onDismiss()
   }
 
   return (
@@ -36,6 +44,16 @@ export const HnMiniTxBanner = ({ onHnSignupClick }: HnMiniTxBannerProps) => {
             </Typography>
           </Box>
         </Stack>
+
+        <Track category="hypernative" action="hide_hn_mini_banner" label="Strengthen your Safe">
+          <IconButton className={css.closeButton} aria-label="close" onClick={handleDismissClick}>
+            <CloseIcon
+              fontSize="small"
+              className={css.closeIcon}
+              sx={{ color: 'var(--color-text-secondary) !important' }}
+            />
+          </IconButton>
+        </Track>
       </Card>
     </Track>
   )
