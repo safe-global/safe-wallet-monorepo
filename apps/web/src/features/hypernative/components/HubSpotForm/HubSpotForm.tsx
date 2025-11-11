@@ -67,18 +67,32 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1', onSubmit }: HubSpotForm
           formId,
           region,
           target: `#${formContainerRef.current.id}`,
-          onFormReady: (form: any) => {
+          inlineMessage: '', // Prevent HubSpot's default inline thank you message
+          redirectUrl: '', // Prevent HubSpot's redirect
+          onFormReady: ($form: any) => {
             // Track region selection changes
-            form.on('change', '[name="region"]', function (this: HTMLInputElement) {
-              selectedRegionRef.current = String(this.value || '').toUpperCase()
-            })
+            // $form is a jQuery-like object wrapping the form element
+            try {
+              if ($form && typeof $form === 'object' && $form.find) {
+                // Use jQuery-style delegation
+                const regionField = $form.find('[name="region"]')
+                if (regionField && regionField.length > 0) {
+                  regionField.on('change', function (this: HTMLInputElement) {
+                    selectedRegionRef.current = String(this.value || '').toUpperCase()
+                  })
+                }
+              }
+            } catch (error) {
+              console.warn('[HubSpotForm] Failed to attach region change handler:', error)
+            }
           },
-          onFormSubmit: () => {
+          onFormSubmitted: ($form: any, data: any) => {
+            console.log('[HubSpotForm] Form submitted', { data })
             // Call the onSubmit callback if provided
             onSubmit?.()
             // Show thank you message and Calendly
             setShowThankYou(true)
-            return false // Prevent HubSpot's default thank-you redirect
+            console.log('[HubSpotForm] showThankYou set to true')
           },
         })
       }

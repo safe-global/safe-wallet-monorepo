@@ -8,8 +8,15 @@ import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 
 jest.mock('@/features/hypernative/components/HnSignupFlow/HnModal', () => ({
   __esModule: true,
-  default: ({ children, open }: { children: React.ReactNode; open: boolean }) =>
-    open ? <div data-testid="hn-modal">{children}</div> : null,
+  default: ({ children, open, onClose }: { children: React.ReactNode; open: boolean; onClose: () => void }) =>
+    open ? (
+      <div data-testid="hn-modal">
+        <button aria-label="close" onClick={onClose}>
+          Close
+        </button>
+        {children}
+      </div>
+    ) : null,
 }))
 
 jest.mock('@/features/hypernative/components/HnSignupFlow/HnSignupIntro', () => ({
@@ -133,7 +140,7 @@ describe('HnSignupFlow', () => {
   })
 
   describe('Form submission', () => {
-    it('should dispatch setFormCompleted action when form is submitted', async () => {
+    it('should dispatch setFormCompleted action when modal is closed after form submission', async () => {
       const user = userEvent.setup()
       render(<HnSignupFlow open={true} onClose={mockOnClose} />)
 
@@ -145,6 +152,14 @@ describe('HnSignupFlow', () => {
       const submitButton = screen.getByText('Submit Form')
       await user.click(submitButton)
 
+      // Form submission should not dispatch immediately
+      expect(mockDispatch).not.toHaveBeenCalled()
+
+      // Close the modal
+      const closeButton = screen.getByLabelText('close')
+      await user.click(closeButton)
+
+      // Now it should dispatch
       expect(mockDispatch).toHaveBeenCalledWith(
         setFormCompleted({
           chainId: '1',
@@ -152,6 +167,7 @@ describe('HnSignupFlow', () => {
           completed: true,
         }),
       )
+      expect(mockOnClose).toHaveBeenCalled()
     })
 
     it('should dispatch with correct chainId and safeAddress', async () => {
@@ -171,6 +187,10 @@ describe('HnSignupFlow', () => {
       await user.click(screen.getByText('Get Started'))
       await user.click(screen.getByText('Submit Form'))
 
+      // Close the modal
+      const closeButton = screen.getByLabelText('close')
+      await user.click(closeButton)
+
       expect(mockDispatch).toHaveBeenCalledWith(
         setFormCompleted({
           chainId: '137',
@@ -178,6 +198,23 @@ describe('HnSignupFlow', () => {
           completed: true,
         }),
       )
+    })
+
+    it('should not dispatch setFormCompleted if form was not submitted', async () => {
+      const user = userEvent.setup()
+      render(<HnSignupFlow open={true} onClose={mockOnClose} />)
+
+      // Navigate to step 1 but don't submit
+      const getStartedButton = screen.getByText('Get Started')
+      await user.click(getStartedButton)
+
+      // Close the modal without submitting
+      const closeButton = screen.getByLabelText('close')
+      await user.click(closeButton)
+
+      // Should not dispatch setFormCompleted
+      expect(mockDispatch).not.toHaveBeenCalled()
+      expect(mockOnClose).toHaveBeenCalled()
     })
   })
 

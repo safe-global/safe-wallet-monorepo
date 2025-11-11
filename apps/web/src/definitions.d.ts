@@ -24,8 +24,11 @@ declare global {
           formId: string
           region: string
           target?: string
+          inlineMessage?: string
+          redirectUrl?: string
           onFormReady?: (form: any) => void
           onFormSubmit?: (form: any) => boolean
+          onFormSubmitted?: (form: any, data: any) => void
         }) => void
       }
     }
