@@ -30,7 +30,7 @@ describe('Allocations', () => {
             address: toBeHex('0x2', 20),
             chainId: '1',
           },
-        }) as any,
+        } as any),
     )
   })
 
@@ -44,7 +44,7 @@ describe('Allocations', () => {
               address: undefined,
               chainId: '1',
             },
-          }) as any,
+          } as any),
       )
 
       const { result } = renderHook(() => useSafeTokenAllocation())
@@ -182,7 +182,7 @@ describe('Allocations', () => {
               address: undefined,
               chainId: '1',
             },
-          }) as any,
+          } as any),
       )
 
       const { result } = renderHook(() => useSafeVotingPower([{} as Vesting]))

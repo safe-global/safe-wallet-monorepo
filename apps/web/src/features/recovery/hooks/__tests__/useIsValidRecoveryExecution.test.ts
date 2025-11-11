@@ -134,7 +134,7 @@ describe('useIsValidRecoveryExecution', () => {
       mockUseIsRecoverer.mockReturnValue(true)
 
       mockGetPatchedSignerOrProvider.mockReturnValue({
-        getSigner: () => ({}) as any,
+        getSigner: () => ({} as any),
       } as any)
 
       const isValid = faker.datatype.boolean()
@@ -167,7 +167,7 @@ describe('useIsValidRecoveryExecution', () => {
       mockUseIsRecoverer.mockReturnValue(true)
 
       mockGetPatchedSignerOrProvider.mockReturnValue({
-        getSigner: () => ({}) as any,
+        getSigner: () => ({} as any),
       } as any)
 
       const error = new Error('Some error')
@@ -275,7 +275,7 @@ describe('useIsValidRecoveryExecution', () => {
       mockUseRecoveryTxState.mockReturnValue({ isExecutable: true } as any)
 
       mockGetPatchedSignerOrProvider.mockReturnValue({
-        getSigner: () => ({}) as any,
+        getSigner: () => ({} as any),
       } as any)
 
       mockGetModuleInstance.mockReturnValue({
@@ -312,7 +312,7 @@ describe('useIsValidRecoveryExecution', () => {
       mockUseRecoveryTxState.mockReturnValue({ isExecutable: true } as any)
 
       mockGetPatchedSignerOrProvider.mockReturnValue({
-        getSigner: () => ({}) as any,
+        getSigner: () => ({} as any),
       } as any)
 
       const error = new Error('Some error')
@@ -429,7 +429,7 @@ describe('useIsValidRecoveryExecution', () => {
       mockUseRecoveryTxState.mockReturnValue({ isExpired: true } as any)
 
       mockGetPatchedSignerOrProvider.mockReturnValue({
-        getSigner: () => ({}) as any,
+        getSigner: () => ({} as any),
       } as any)
 
       mockGetModuleInstance.mockReturnValue({
@@ -466,7 +466,7 @@ describe('useIsValidRecoveryExecution', () => {
       mockUseRecoveryTxState.mockReturnValue({ isExpired: true } as any)
 
       mockGetPatchedSignerOrProvider.mockReturnValue({
-        getSigner: () => ({}) as any,
+        getSigner: () => ({} as any),
       } as any)
 
       const error = new Error('Some error')

@@ -42,13 +42,13 @@ export function RecoveryInProgressCard({ orientation = 'vertical', onClose, reco
   const title = isExecutable
     ? 'Account can be recovered'
     : isExpired
-      ? 'Account recovery expired'
-      : 'Account recovery in progress'
+    ? 'Account recovery expired'
+    : 'Account recovery in progress'
   const desc = isExecutable
     ? 'The review window has passed and it is now possible to execute the recovery proposal.'
     : isExpired
-      ? 'The pending recovery proposal has expired and needs to be cancelled before a new one can be created.'
-      : 'The recovery process has started. This Account will be ready to recover in:'
+    ? 'The pending recovery proposal has expired and needs to be cancelled before a new one can be created.'
+    : 'The recovery process has started. This Account will be ready to recover in:'
 
   const link = (
     <Track {...RECOVERY_EVENTS.LEARN_MORE} label="in-progress-card">

@@ -281,7 +281,9 @@ export const TenderlySimulation = ({
               <Box bgcolor="background.main" borderRadius="4px" overflow="hidden">
                 <Box
                   sx={{
-                    borderLeft: `4px solid ${nestedIsSuccess ? SEVERITY_COLORS.OK.main : SEVERITY_COLORS.CRITICAL.main}`,
+                    borderLeft: `4px solid ${
+                      nestedIsSuccess ? SEVERITY_COLORS.OK.main : SEVERITY_COLORS.CRITICAL.main
+                    }`,
                     padding: '12px',
                   }}
                 >
