@@ -1,5 +1,9 @@
 import { useState } from 'react'
 import { Box, Typography } from '@mui/material'
+import { useAppDispatch } from '@/store'
+import { setFormCompleted } from '@/features/hypernative/store/hnStateSlice'
+import useChainId from '@/hooks/useChainId'
+import useSafeInfo from '@/hooks/useSafeInfo'
 import HnModal from './HnModal'
 import HnSignupIntro from './HnSignupIntro'
 import HnSignupForm from './HnSignupForm'
@@ -11,6 +15,9 @@ export type HnSignupFlowProps = {
 
 const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
   const [activeStep, setActiveStep] = useState(0)
+  const dispatch = useAppDispatch()
+  const chainId = useChainId()
+  const { safeAddress } = useSafeInfo()
 
   const handleNext = () => {
     setActiveStep((prevStep) => prevStep + 1)
@@ -18,6 +25,10 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
 
   const handleBack = () => {
     setActiveStep((prevStep) => prevStep - 1)
+  }
+
+  const handleFormSubmit = () => {
+    dispatch(setFormCompleted({ chainId, safeAddress, completed: true }))
   }
 
   const getHubSpotConfig = () => {
@@ -52,6 +63,7 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
             formId={hubSpotConfig.formId}
             region={hubSpotConfig.region}
             onCancel={handleBack}
+            onSubmit={handleFormSubmit}
           />
         )
       default:

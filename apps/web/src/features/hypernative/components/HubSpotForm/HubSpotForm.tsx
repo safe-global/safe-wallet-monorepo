@@ -5,6 +5,7 @@ type HubSpotFormProps = {
   portalId: string
   formId: string
   region?: string
+  onSubmit?: () => void
 }
 
 const getCalendlyConfig = (): Record<string, string> => {
@@ -21,7 +22,7 @@ const getCalendlyConfig = (): Record<string, string> => {
   }
 }
 
-const HubSpotForm = ({ portalId, formId, region = 'eu1' }: HubSpotFormProps) => {
+const HubSpotForm = ({ portalId, formId, region = 'eu1', onSubmit }: HubSpotFormProps) => {
   const formContainerRef = useRef<HTMLDivElement>(null)
   const calendlyContainerRef = useRef<HTMLDivElement>(null)
   const scriptLoadedRef = useRef(false)
@@ -73,6 +74,8 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1' }: HubSpotFormProps) => 
             })
           },
           onFormSubmit: () => {
+            // Call the onSubmit callback if provided
+            onSubmit?.()
             // Show thank you message and Calendly
             setShowThankYou(true)
             return false // Prevent HubSpot's default thank-you redirect
@@ -90,6 +93,8 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1' }: HubSpotFormProps) => 
       }
       scriptLoadedRef.current = false
     }
+    // onSubmit is intentionally excluded from deps as it's only used in onFormSubmit callback
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [portalId, formId, region])
 
   // Initialize Calendly when thank you view is shown
