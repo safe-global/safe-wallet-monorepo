@@ -1,8 +1,9 @@
-import { render, screen } from '@/tests/test-utils'
+import { render, screen, waitFor, renderHook, act } from '@/tests/test-utils'
 import { HnBanner } from './HnBanner'
 import { HnBannerWithLocalStorage, HN_BANNER_LS_KEY } from './HnBannerWithLocalStorage'
 import { HnBannerWithLocalStorageVisibility } from './index'
 import local from '@/services/local-storage/local'
+import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import * as useIsHypernativeFeatureHook from '../../hooks/useIsHypernativeFeature'
 import * as useLocalStorageHook from '@/services/local-storage/useLocalStorage'
 
@@ -51,6 +52,19 @@ describe('HnBanner', () => {
   })
 
   describe('HnBannerWithLocalStorage', () => {
+    beforeEach(() => {
+      // Clear any mocks on useLocalStorage to ensure we use the real implementation
+      jest.restoreAllMocks()
+      // Clear localStorage
+      local.removeItem(HN_BANNER_LS_KEY)
+      window.localStorage.clear()
+      // Clear the ExternalStore cache by setting the value to undefined
+      const { result } = renderHook(() => useLocalStorage<boolean>(HN_BANNER_LS_KEY))
+      act(() => {
+        result.current[1](() => undefined)
+      })
+    })
+
     it('renders the banner with title and CTA', () => {
       const mockOnHnSignupClick = jest.fn()
       render(<HnBannerWithLocalStorage onHnSignupClick={mockOnHnSignupClick} />)
@@ -82,6 +96,10 @@ describe('HnBanner', () => {
       const user = (await import('@testing-library/user-event')).default
       const mockOnHnSignupClick = jest.fn()
       render(<HnBannerWithLocalStorage onHnSignupClick={mockOnHnSignupClick} />)
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Learn more' })).toBeInTheDocument()
+      })
 
       const ctaButton = screen.getByRole('button', { name: 'Learn more' })
       await user.click(ctaButton)
