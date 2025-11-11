@@ -26,8 +26,7 @@ import css from './styles.module.css'
 import ActivateAccountButton from '@/features/counterfactual/ActivateAccountButton'
 import { isReplayedSafeProps } from '@/features/counterfactual/utils'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-// import HnDashboardBanner from '@/features/hypernative/components/HnDashboardBanner'
-import { HnDashboardBanner } from '@/features/hypernative/components/HnDashboardBanner'
+import HnDashboardBanner from '@/features/hypernative/components/HnDashboardBanner'
 import { useBannerVisibility } from '@/features/hypernative/hooks/useBannerVisibility'
 import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
 
@@ -475,8 +474,7 @@ const FirstSteps = () => {
           </Grid>
 
           <Grid item xs={12} md={4}>
-            {/* {showHnDashboardBanner ? <HnDashboardBanner /> : <AccountReadyWidget />} */}
-            <HnDashboardBanner onHnSignupClick={() => { }} />
+            {showHnDashboardBanner ? <HnDashboardBanner /> : <AccountReadyWidget />}
           </Grid>
         </Grid>
       </WidgetBody>
