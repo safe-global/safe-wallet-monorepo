@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import { useMemo } from 'react'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useCurrentChain } from '@/hooks/useChains'
+import useChainId from '@/hooks/useChainId'
 import { getSafeTxHashFromDetails } from '../../services/safeTxHashCalculation'
 import { HnSecurityReportBtn } from './HnSecurityReportBtn'
 
@@ -31,14 +31,14 @@ export const useSafeTxHash = (txDetails: TransactionDetails): string | null => {
 export const HnSecurityReportBtnWithTxHash = ({
   txDetails,
 }: HnSecurityReportBtnWithTxHashProps): ReactElement | null => {
-  const chain = useCurrentChain()
+  const chainId = useChainId()
   const { safeAddress } = useSafeInfo()
   const safeTxHash = useSafeTxHash(txDetails)
 
   // Don't render if we couldn't calculate the hash or if chain info is missing
-  if (!safeTxHash || !chain?.shortName) {
+  if (!safeTxHash || !chainId) {
     return null
   }
 
-  return <HnSecurityReportBtn chain={chain.shortName} safe={safeAddress} tx={safeTxHash} />
+  return <HnSecurityReportBtn chainId={chainId} safe={safeAddress} tx={safeTxHash} />
 }
