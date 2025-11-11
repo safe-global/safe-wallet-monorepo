@@ -6,23 +6,23 @@ import { hnSecurityReportBtnConfig } from './config'
 import type { ReactElement } from 'react'
 
 interface HnSecurityReportBtnProps {
-  chain: string
+  chainId: string
   safe: string
   tx: string
 }
 
-const buildSecurityReportUrl = (baseUrl: string, chain: string, safe: string, tx: string): string => {
+const buildSecurityReportUrl = (baseUrl: string, chainId: string, safe: string, tx: string): string => {
   const url = new URL(baseUrl)
-  url.searchParams.set('chain', chain)
+  url.searchParams.set('chain', chainId)
   url.searchParams.set('safe', safe)
   url.searchParams.set('tx', tx)
   return url.toString()
 }
 
-export const HnSecurityReportBtn = ({ chain, safe, tx }: HnSecurityReportBtnProps): ReactElement => {
+export const HnSecurityReportBtn = ({ chainId, safe, tx }: HnSecurityReportBtnProps): ReactElement => {
   const { text, baseUrl } = hnSecurityReportBtnConfig
 
-  const href = buildSecurityReportUrl(baseUrl, chain, safe, tx)
+  const href = buildSecurityReportUrl(baseUrl, chainId, safe, tx)
 
   return (
     <Tooltip title="Review security report on Hypernative" arrow placement="top">
