@@ -8,18 +8,27 @@
   flex-direction: column;
   justify-content: flex-start;
   padding: var(--space-5) var(--space-4);
-  overflow-y: auto;
   max-height: 644px;
+  overflow-y: auto;
 }
 
 .formColumn {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding: var(--space-5) var(--space-4) var(--space-1);
+  padding: var(--space-5) var(--space-5) var(--space-1) var(--space-6);
   background-color: var(--color-static-primary);
-  overflow-y: auto;
   max-height: 100%;
+  overflow-y: auto;
+}
+
+.calendlyColumn {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background-color: var(--color-static-primary);
+  max-height: 100%;
+  overflow: hidden;
 }
 
 .contentWrapper {
@@ -31,6 +40,19 @@
   margin: 0 auto;
   width: 100%;
   min-height: 776px;
+}
+
+.calendlyWrapper {
+  margin: 0 auto;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.calendlyContainer {
+  flex: 1;
+  min-height: 0;
 }
 
 .formTitle {
