@@ -32,7 +32,7 @@ export const HnPendingBanner = ({ onDismiss }: HnPendingBannerProps): ReactEleme
       </Stack>
       {onDismiss && (
         <IconButton className={css.closeButton} aria-label="close" onClick={onDismiss}>
-          <CloseIcon fontSize="small" />
+          <CloseIcon fontSize="medium" />
         </IconButton>
       )}
     </Card>

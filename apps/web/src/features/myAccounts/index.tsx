@@ -10,6 +10,7 @@ import { type AllSafeItemsGrouped, useAllSafesGrouped } from '@/features/myAccou
 import classNames from 'classnames'
 import useTrackSafesCount from '@/features/myAccounts/hooks/useTrackedSafesCount'
 import { DataWidget } from '@/features/myAccounts/components/DataWidget'
+import { HnBannerWithLocalStorageVisibility } from '@/features/hypernative/components/HnBanner'
 
 type MyAccountsProps = {
   safes: AllSafeItemsGrouped
@@ -26,6 +27,8 @@ const MyAccounts = ({ safes, onLinkClick, isSidebar = false }: MyAccountsProps) 
     <Box data-testid="sidebar-safe-container" className={css.container}>
       <Box className={classNames(css.myAccounts, { [css.sidebarAccounts]: isSidebar })}>
         <AccountsHeader isSidebar={isSidebar} onLinkClick={onLinkClick} />
+
+        {!isSidebar && <HnBannerWithLocalStorageVisibility />}
 
         <Paper sx={{ padding: 0 }}>
           <AccountListFilters setSearchQuery={setSearchQuery} />
