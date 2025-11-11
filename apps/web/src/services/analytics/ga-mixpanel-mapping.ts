@@ -12,6 +12,7 @@ import { TERMS_EVENTS } from './events/terms'
 import { OVERVIEW_EVENTS } from './events/overview'
 import { NESTED_SAFE_EVENTS } from './events/nested-safes'
 import { EXPLORE_POSSIBLE_EVENTS } from './events/overview'
+import { SAFE_SHIELD_EVENTS } from './events/safe-shield'
 
 // If an event is mapped here, it will be tracked in Mixpanel
 export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
@@ -39,6 +40,11 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [OVERVIEW_EVENTS.OPEN_EXPLORER.action]: MixpanelEvent.SIDEBAR_CLICKED,
   [NESTED_SAFE_EVENTS.OPEN_LIST.action]: MixpanelEvent.SIDEBAR_CLICKED,
   [EXPLORE_POSSIBLE_EVENTS.EXPLORE_POSSIBLE_CLICKED.action]: MixpanelEvent.EXPLORE_POSSIBLE_CLICKED,
+  [SAFE_SHIELD_EVENTS.TRANSACTION_STARTED.action]: MixpanelEvent.TRANSACTION_STARTED,
+  [SAFE_SHIELD_EVENTS.RECIPIENT_DECODED.action]: MixpanelEvent.TRANSACTION_RECIPIENT_DECODED,
+  [SAFE_SHIELD_EVENTS.CONTRACT_DECODED.action]: MixpanelEvent.TRANSACTION_CONTRACT_DECODED,
+  [SAFE_SHIELD_EVENTS.THREAT_ANALYZED.action]: MixpanelEvent.TRANSACTION_THREAT_ANALYZED,
+  [SAFE_SHIELD_EVENTS.SIMULATED.action]: MixpanelEvent.TRANSACTION_SIMULATED,
 }
 
 // Maps GA labels (lowercase) to Mixpanel properties (Title Case)

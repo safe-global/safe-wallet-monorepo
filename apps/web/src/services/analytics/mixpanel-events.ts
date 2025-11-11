@@ -15,6 +15,11 @@ export enum MixpanelEvent {
   SAFE_LABS_TERMS_ACCEPTED = 'Safe Labs Terms Accepted',
   SIDEBAR_CLICKED = 'Sidebar Clicked',
   EXPLORE_POSSIBLE_CLICKED = 'Explore Possible Clicked',
+  TRANSACTION_STARTED = 'Transaction Started',
+  TRANSACTION_RECIPIENT_DECODED = 'Transaction Recipient Decoded',
+  TRANSACTION_CONTRACT_DECODED = 'Transaction Contract Decoded',
+  TRANSACTION_THREAT_ANALYZED = 'Transaction Threat Analyzed',
+  TRANSACTION_SIMULATED = 'Transaction Simulated',
 }
 
 export enum MixpanelUserProperty {
@@ -53,6 +58,7 @@ export enum MixpanelEventParams {
   APP_URL = 'App URL',
   DATE_RANGE = 'Date Range',
   SIDEBAR_ELEMENT = 'Sidebar Element',
+  RESULT = 'Result',
 }
 
 export enum SafeAppLaunchLocation {
