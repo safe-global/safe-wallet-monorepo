@@ -58,4 +58,3 @@ export const HnMiniTxBanner = ({ onHnSignupClick, onDismiss }: HnMiniTxBannerPro
     </Track>
   )
 }
-

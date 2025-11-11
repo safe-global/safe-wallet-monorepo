@@ -16,4 +16,3 @@ export const Default: Story = {
     onDismiss: () => console.log('Dismissed'),
   },
 }
-

@@ -24,4 +24,3 @@ export function withLocalStorageVisibility<P extends object>(
     }
   }
 }
-

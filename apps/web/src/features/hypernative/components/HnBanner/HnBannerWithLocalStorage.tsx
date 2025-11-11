@@ -3,7 +3,7 @@ import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import { HnBanner } from './HnBanner'
 import { HN_BANNER_LS_KEY } from './constants'
 
-export interface HnBannerWithLocalStorageProps extends WithHnSignupFlowProps { }
+export interface HnBannerWithLocalStorageProps extends WithHnSignupFlowProps {}
 
 /**
  * Wrapper component for HnBanner that doesn't require SafeInfo.
@@ -18,4 +18,3 @@ export const HnBannerWithLocalStorage = ({ onHnSignupClick }: HnBannerWithLocalS
 
   return <HnBanner onHnSignupClick={onHnSignupClick} onDismiss={handleDismiss} />
 }
-

@@ -5,7 +5,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import { HnMiniTxBanner } from './HnMiniTxBanner'
 
-export interface HnMiniTxBannerWithDismissalProps extends WithHnSignupFlowProps { }
+export interface HnMiniTxBannerWithDismissalProps extends WithHnSignupFlowProps {}
 
 /**
  * Wrapper component that adds dismissal logic to HnMiniTxBanner.
@@ -22,4 +22,3 @@ export const HnMiniTxBannerWithDismissal = ({ onHnSignupClick }: HnMiniTxBannerW
 
   return <HnMiniTxBanner onHnSignupClick={onHnSignupClick} onDismiss={handleDismiss} />
 }
-

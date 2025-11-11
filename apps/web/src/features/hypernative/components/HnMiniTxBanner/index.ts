@@ -16,4 +16,3 @@ const HnMiniTxBannerWithConditions = withHnBannerConditions(BannerType.Promo)(
   HnMiniTxBannerWithSignupAndDismissal as ComponentType<WithHnBannerConditionsProps>,
 )
 export default withHnFeature(HnMiniTxBannerWithConditions)
-

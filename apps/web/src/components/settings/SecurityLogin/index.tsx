@@ -16,7 +16,7 @@ const SecurityLogin = () => {
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>
-      {(showHnBanner || hnLoading) && <HnBannerForCarousel onDismiss={() => { }} />}
+      {(showHnBanner || hnLoading) && <HnBannerForCarousel onDismiss={() => {}} />}
 
       {isRecoverySupported && router.query.safe ? <RecoverySettings /> : null}
 
