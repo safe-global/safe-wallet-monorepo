@@ -1,0 +1,107 @@
+appId: global.safe.mobileapp.ios
+jsEngine: graaljs
+---
+# ===========================================
+# On-Chain Rejection Transaction (Pending State)
+# ===========================================
+# Tests the on-chain rejection transaction detail view for pending transactions
+#
+# Environment variables:
+#   IS_EXECUTABLE: Whether the transaction is expected to be executable - "true" or "false"
+#                  Defaults to "false" if not provided
+#                  If "false": verifies that the nonce message is shown and Continue button is disabled/not clickable
+#                  If "true": verifies that Continue button is enabled and can proceed to review screen
+
+- assertVisible: 'Confirm transaction'
+
+# ===========================================
+# Parse IS_EXECUTABLE environment variable
+# ===========================================
+# Parse the IS_EXECUTABLE environment variable using GraalJS
+# Default to "false" (not executable) if not provided
+- evalScript: '${output.isExecutable = (typeof IS_EXECUTABLE !== "undefined" && IS_EXECUTABLE === "true")}'
+- evalScript: '${output.isNotExecutable = output.isExecutable === false}'
+
+# ===========================================
+# On-Chain Rejection Status and Message
+# ===========================================
+# Verify the rejection icon and status
+- assertVisible:
+    text: '.*On-chain rejection.*'
+
+# Verify the rejection explanation message
+# Message format: "This is an on-chain rejection that didn't send any funds. This on-chain rejection replaced all transactions with nonce X."
+- assertVisible:
+    text: '.*This is an on-chain rejection that.*didn.*send any funds.*'
+- assertVisible:
+    text: '.*This on-chain rejection replaced all transactions with nonce.*'
+
+# ===========================================
+# Network Display
+# ===========================================
+- runFlow:
+    file: ../../shared/test-tx-network.yml
+
+# ===========================================
+# Transaction Details Button
+# ===========================================
+- runFlow:
+    file: ../../shared/test-tx-details-button.yml
+
+# ===========================================
+# Transaction Checks (Pending transactions show checks instead of created/executed)
+# ===========================================
+- runFlow:
+    file: ../../shared/test-tx-checks.yml
+    env:
+      BALANCE_CHANGE_PATTERN: 'No balance change detected'
+      TRANSACTION_SIMULATION_PATTERN: 'Failed'
+      VERIFY_TENDERLY_LINK: 'true'
+
+# ===========================================
+# Confirmations
+# ===========================================
+# Test tapping on confirmations to open the bottom sheet and verify signed badge
+# For pending transactions, we use the confirmations from the confirm transaction screen
+# Verify that confirmations are shown (typically 2/2 for rejections)
+- runFlow:
+    file: ../../shared/test-confirmations.yml
+    env:
+      CONFIRMATIONS_PATTERN: '.*\d+/\d+.*'
+
+# ===========================================
+# Executability Check
+# ===========================================
+# If not executable, verify the nonce message and disabled Continue button
+- runFlow:
+    when:
+      true: '${output.isNotExecutable === true}'
+    commands:
+      # Verify the nonce execution order message is visible
+      - assertVisible:
+          text: '.*You must execute the transaction with the lowest nonce first.*'
+      # Verify Continue button exists but may be disabled (we can't easily test disabled state in Maestro)
+      # Instead, we verify the button text exists and the nonce message is present
+      - assertVisible:
+          text: 'Continue'
+      # Verify we're still on Confirm transaction screen (cannot proceed)
+      - assertVisible: 'Confirm transaction'
+
+# If executable, verify Continue button works and proceed to review screen
+- runFlow:
+    when:
+      true: '${output.isExecutable === true}'
+    commands:
+      # Verify Continue button is visible (should not show nonce message)
+      - assertVisible:
+          text: 'Continue'
+      # Verify the nonce message is NOT visible when executable
+      - assertNotVisible:
+          text: '.*You must execute the transaction with the lowest nonce first.*'
+      # Test navigating to Review and execute screen
+      - runFlow:
+          file: ../../shared/test-review-and-execute.yml
+          env:
+            EXPECTED_SIGNER_PATTERN: '.*6fED.*'
+            IS_FULLY_SIGNED: 'true'
+            EXPECTED_EXECUTION_METHOD: 'signer'

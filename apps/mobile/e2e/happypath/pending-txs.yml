@@ -113,3 +113,13 @@ appId: global.safe.mobileapp.ios
     file: ../components/pending-tx/twap-order-tx-card.yml
     env:
       ORDER_STATUS: 'Execution needed'
+
+# ===========================================
+# On-Chain Rejection Transaction
+# ===========================================
+# Test the on-chain rejection in the conflicting transactions section
+# This rejection cannot be executed because other transactions with lower nonces need to be executed first
+- runFlow:
+    file: ../components/pending-tx/on-chain-rejection-tx-card.yml
+    env:
+      IS_EXECUTABLE: 'false'
