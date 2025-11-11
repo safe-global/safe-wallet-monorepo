@@ -5,7 +5,7 @@ import SecuritySettings from '../SecuritySettings'
 import { useRouter } from 'next/router'
 import { useBannerVisibility } from '@/features/hypernative/hooks'
 import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
-import { HnBannerForCarousel } from '@/features/hypernative/components/HnBanner'
+import HnBannerDefault from '@/features/hypernative/components/HnBanner'
 
 const RecoverySettings = dynamic(() => import('@/features/recovery/components/RecoverySettings'))
 
@@ -16,7 +16,7 @@ const SecurityLogin = () => {
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>
-      {(showHnBanner || hnLoading) && <HnBannerForCarousel onDismiss={() => {}} />}
+      <HnBannerDefault isDismissable={false} />
 
       {isRecoverySupported && router.query.safe ? <RecoverySettings /> : null}
 
