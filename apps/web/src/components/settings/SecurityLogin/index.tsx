@@ -3,8 +3,6 @@ import dynamic from 'next/dynamic'
 import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
 import SecuritySettings from '../SecuritySettings'
 import { useRouter } from 'next/router'
-import { useBannerVisibility } from '@/features/hypernative/hooks'
-import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
 import HnBannerDefault from '@/features/hypernative/components/HnBanner'
 
 const RecoverySettings = dynamic(() => import('@/features/recovery/components/RecoverySettings'))
