@@ -26,7 +26,7 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    chain: 'eth',
+    chainId: '1',
     safe: '0x123',
     tx: '0x456',
   },
