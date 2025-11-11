@@ -299,8 +299,8 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         isCounterfactualEnabled && payMethod === PayMethod.PayLater
           ? 'Pay-later'
           : willRelay
-            ? 'Sponsored'
-            : 'Self-paid',
+          ? 'Sponsored'
+          : 'Self-paid',
     })
 
     try {

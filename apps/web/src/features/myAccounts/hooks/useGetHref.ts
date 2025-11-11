@@ -21,8 +21,8 @@ export const useGetHref = (router: NextRouter) => {
           isWelcomePage || isSpacePage
             ? AppRoutes.home
             : isSingleTxPage
-              ? AppRoutes.transactions.history
-              : router.pathname,
+            ? AppRoutes.transactions.history
+            : router.pathname,
         query: { ...(!isSpacePage && router.query), safe: `${chain.shortName}:${address}` },
       }
     },

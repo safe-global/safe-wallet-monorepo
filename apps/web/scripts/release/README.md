@@ -75,16 +75,6 @@ These scripts are called by the automated release workflows:
 
 ---
 
-## Legacy Scripts
-
-The following scripts in the parent directory are part of the legacy manual process:
-
-- `../release-notes.sh` - Original changelog generator (still functional)
-- `../github/prepare_production_deployment.sh` - Production deployment hook
-- `../github/s3_upload.sh` - S3 upload for releases
-
----
-
 ## Development
 
 ### Testing Changelog Generation

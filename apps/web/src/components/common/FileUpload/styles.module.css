@@ -9,9 +9,7 @@
   margin: var(--space-3) 0;
   background: var(--color-secondary-background);
   color: var(--color-primary-light);
-  transition:
-    border 0.5s,
-    background 0.5s;
+  transition: border 0.5s, background 0.5s;
 }
 
 .verticalLine {

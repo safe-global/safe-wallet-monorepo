@@ -5,8 +5,6 @@
 > **For the NEW automated process using GitHub Actions (recommended), see:**
 > **[📖 Automated Release Procedure](./release-procedure-automated.md)**
 >
-> The automated process reduces manual steps from ~20 to just 3 button clicks and requires no CLI expertise.
->
 > ---
 
 ## Legacy Manual Process

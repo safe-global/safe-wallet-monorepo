@@ -1,6 +1,6 @@
 # Automated Release Procedure
 
-This guide describes the **automated release process** using GitHub Actions workflows. Manual steps have been reduced from ~20 CLI commands to 3 button clicks.
+This guide describes the **automated release process** using GitHub Actions workflows.
 
 ---
 
@@ -155,19 +155,6 @@ Notifications will be sent for:
 
 ---
 
-## Comparison: Before vs After
-
-| Aspect | Manual Process | Automated Process |
-|--------|---------------|-------------------|
-| **Steps** | ~20 CLI commands | 2 button clicks + 1 PR merge |
-| **Time** | 30-60 minutes | 5-10 minutes |
-| **Expertise** | Git/CLI expert | Anyone with GitHub access |
-| **Error Rate** | High | Low (validated) |
-| **QA Process** | Manual | Manual (unchanged) |
-| **Approval** | Manual | Manual (unchanged) |
-
----
-
 ## Troubleshooting
 
 ### Version already exists
@@ -253,6 +240,3 @@ Use manual process if:
   - [Tag Release](https://github.com/safe-global/safe-wallet-monorepo/actions/workflows/web-tag-release.yml) (auto-triggered)
   - [Deploy Production](https://github.com/safe-global/safe-wallet-monorepo/actions/workflows/web-deploy-production.yml) (auto-triggered)
 
----
-
-**Last updated:** 2025-11-07
