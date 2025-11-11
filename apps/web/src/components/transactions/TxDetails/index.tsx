@@ -169,6 +169,8 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
       {/* Signers */}
       {(!isUnsigned || proposedByDelegate) && (
         <div className={css.txSigners}>
+          <TxShareBlock txId={txDetails.txId} txHash={txDetails.txHash} />
+
           <TxSigners
             txDetails={txDetails}
             txSummary={txSummary}
@@ -177,8 +179,6 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
           />
 
           {isQueue && <HnSecurityReportBtnForTxDetails txDetails={txDetails} />}
-
-          <TxShareBlock txId={txDetails.txId} txHash={txDetails.txHash} />
 
           {isQueue && (
             <Box className={css.buttons}>

@@ -1,15 +1,24 @@
-.banner {
-  padding: var(--space-1);
-  border: none;
-  border-radius: var(--space-1);
-  width: 100%;
-  background-color: transparent;
-  box-shadow: none;
-  background-color: var(--color-background-main) !important;
+.button {
+  background-color: var(--color-background-main);
+  border-color: var(--color-background-main);
+  color: var(--color-text-primary);
+  font-weight: bold;
+  text-decoration: none;
+  gap: var(--space-2);
+  padding-top: var(--space-1);
+  padding-bottom: var(--space-1);
+  min-height: 40px;
 }
 
-.content {
-  gap: var(--space-1);
+.button:hover {
+  background-color: var(--color-background-main);
+  border-color: var(--color-background-main);
+  text-decoration: none;
+}
+
+.hypernativeIcon {
+  margin-right: 0;
+  margin-left: 0;
 }
 
 .hypernativeIcon svg {
@@ -18,48 +27,13 @@
   display: block;
 }
 
-/* Hide hypernative icon in dark theme - TODO find out if it is needed? No icon in the dark theme on Figma */
-[data-theme='dark'] .hypernativeIcon {
-  display: none;
-}
-
-.text {
-  color: var(--color-text-primary);
-  font-weight: bold !important;
-}
-
-.externalLinkIcon {
-  width: 16px;
-  height: 16px;
-  color: var(--color-text-primary);
-  flex-shrink: 0;
-}
-
-.link {
-  text-decoration: none;
-  display: block;
-  cursor: pointer;
-}
-
-/* Apply background to the wrapper Box that ExternalLink creates */
-.link > span {
-  display: inline-flex !important;
-  align-items: center;
-  background-color: var(--color-background-main);
-  border-radius: var(--space-1);
-  padding: var(--space-1);
-  gap: var(--space-1);
-}
-
 @media (max-width: 410px) {
-  .text {
-    font-size: 12px !important;
+  .button {
+    font-size: 12px;
   }
 
-  .externalLinkIcon,
   .hypernativeIcon {
     width: 14px !important;
     height: 14px !important;
-    margin-left: 0 !important;
   }
 }

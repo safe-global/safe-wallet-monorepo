@@ -1,4 +1,8 @@
+import { IS_PRODUCTION } from '@/config/constants'
+
 export const hnSecurityReportBtnConfig = {
   text: 'Review security report',
-  baseUrl: 'https://app.hypernative.xyz/transaction-risks',
+  baseUrl: IS_PRODUCTION
+    ? 'https://app.hypernative.xyz/guardian/transaction-risks'
+    : 'https://stage.app.hypernative.xyz/guardian/transaction-risks',
 } as const
