@@ -128,7 +128,8 @@
   justify-content: center;
   width: 288px;
   flex-shrink: 0;
-  background: radial-gradient(ellipse 150px 150px at top left, rgb(47, 47, 47) 0%, transparent 100%),
+  background:
+    radial-gradient(ellipse 150px 150px at top left, rgb(47, 47, 47) 0%, transparent 100%),
     radial-gradient(ellipse 150px 150px at top right, rgb(1, 1, 1) 0%, transparent 100%),
     radial-gradient(ellipse 150px 150px at bottom left, rgb(24, 28, 25) 0%, transparent 100%),
     radial-gradient(ellipse 150px 150px at bottom right, rgb(65, 68, 66) 0%, transparent 100%),
