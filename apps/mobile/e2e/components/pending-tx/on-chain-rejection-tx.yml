@@ -55,7 +55,7 @@ jsEngine: graaljs
     file: ../../shared/test-tx-checks.yml
     env:
       BALANCE_CHANGE_PATTERN: 'No balance change detected'
-      TRANSACTION_SIMULATION_PATTERN: 'Failed'
+      TRANSACTION_SIMULATION_PATTERN: 'Success'
       VERIFY_TENDERLY_LINK: 'true'
 
 # ===========================================

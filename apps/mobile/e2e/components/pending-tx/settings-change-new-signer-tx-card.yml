@@ -22,7 +22,7 @@ appId: global.safe.mobileapp.ios
     index: 0
 
 - runFlow:
-    file: ./settings-change-tx.yml
+    file: ./settings-change-new-signer-tx.yml
 
 - tapOn:
     id: 'go-back'
