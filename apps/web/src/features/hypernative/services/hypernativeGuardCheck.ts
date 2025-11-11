@@ -18,11 +18,12 @@ export const HYPERNATIVE_GUARD_CODE_HASHES: string[] = [
  * Not exported - use the memoized version `isHypernativeGuard` instead.
  */
 const _isHypernativeGuard = async (
+  chainId: string | undefined,
   guardAddress: string | null | undefined,
   provider: JsonRpcProvider | undefined,
 ): Promise<boolean> => {
   // Early returns for invalid inputs
-  if (!guardAddress || !provider) {
+  if (!chainId || !guardAddress || !provider) {
     return false
   }
 
@@ -46,26 +47,50 @@ const _isHypernativeGuard = async (
     // Check if the hash matches any known HypernativeGuard hashes
     return HYPERNATIVE_GUARD_CODE_HASHES.includes(codeHash)
   } catch (error) {
+    // Log error but don't cache the failure - let it be retried
     logError(Errors._809, error)
-    return false
+    throw error
   }
 }
+
+// Create a wrapper to handle memoization that doesn't cache errors
+const _memoizedIsHypernativeGuard = memoize(
+  _isHypernativeGuard,
+  // Cache key resolver - use both chainId and guardAddress
+  (chainId: string | undefined, guardAddress: string | null | undefined) =>
+    `${chainId || 'null'}:${guardAddress || 'null'}`,
+)
 
 /**
  * Checks if a guard contract address is a HypernativeGuard
  * by comparing its bytecode hash against known HypernativeGuard code hashes.
  *
- * This function is memoized to avoid redundant RPC calls for the same guard address.
- * The cache key is based on the guard address, as the bytecode for a given address
- * will never change.
+ * This function is memoized to avoid redundant RPC calls for the same guard address
+ * on the same chain. The cache key includes both chainId and guardAddress because:
+ * - Different chains may have different contracts at the same address
+ * - Only successful lookups are cached (errors are not cached and will retry)
  *
+ * @param chainId - The chain ID to check the guard on
  * @param guardAddress - The address of the guard contract to check
  * @param provider - Web3 provider to fetch contract bytecode
  * @returns Promise<boolean> - true if the guard is a HypernativeGuard, false otherwise
+ * @throws Error if the provider fails to fetch bytecode (not cached, will retry)
  */
-export const isHypernativeGuard = memoize(
-  _isHypernativeGuard,
-  // Cache key resolver - only use guardAddress as the key
-  // Provider can change but the bytecode at an address doesn't
-  (guardAddress: string | null | undefined) => guardAddress || 'null',
-)
+export const isHypernativeGuard = async (
+  chainId: string | undefined,
+  guardAddress: string | null | undefined,
+  provider: JsonRpcProvider | undefined,
+): Promise<boolean> => {
+  const cacheKey = `${chainId || 'null'}:${guardAddress || 'null'}`
+
+  try {
+    return await _memoizedIsHypernativeGuard(chainId, guardAddress, provider)
+  } catch (error) {
+    // Remove the failed result from cache so it can be retried
+    _memoizedIsHypernativeGuard.cache.delete?.(cacheKey)
+    throw error
+  }
+}
+
+// Expose cache for testing
+isHypernativeGuard.cache = _memoizedIsHypernativeGuard.cache
