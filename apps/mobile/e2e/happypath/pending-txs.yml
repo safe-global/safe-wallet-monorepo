@@ -146,3 +146,35 @@ appId: global.safe.mobileapp.ios
 - runFlow:
     file: ../components/pending-tx/setFallbackHandler-tx-card.yml
 
+# ===========================================
+# Switch to Pending Tx Safe 4 for Batch Transaction Test
+# ===========================================
+# Go back to home tab
+- tapOn:
+    id: 'go-back'
+
+- runFlow:
+    file: ../shared/switch-safe.yml
+    env:
+      SAFE_NAME_PATTERN: '.*Pending Tx Safe 4.*'
+
+# Navigate to pending transactions
+- tapOn:
+    id: 'pending-transactions'
+
+- assertVisible:
+    id: 'pending-tx-list'
+
+# Verify we see the "Next" section header
+- assertVisible:
+    text: 'Next'
+
+# ===========================================
+# Batch Transaction
+# ===========================================
+# Test the batch transaction in the "Next" section
+# This batch transaction cannot be executed because threshold hasn't been reached (1/2 confirmations)
+- runFlow:
+    file: ../components/pending-tx/batch-tx-card.yml
+    env:
+      IS_EXECUTABLE: 'false'
