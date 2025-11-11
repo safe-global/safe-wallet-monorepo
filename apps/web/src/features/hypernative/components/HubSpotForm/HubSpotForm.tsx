@@ -1,5 +1,5 @@
-import { Paper, Typography } from '@mui/material'
-import { useEffect, useRef } from 'react'
+import { Paper, Typography, CircularProgress, Box } from '@mui/material'
+import { useEffect, useRef, useState } from 'react'
 
 type HubSpotFormProps = {
   portalId: string
@@ -13,6 +13,7 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1', safeAddress, onSubmit }
   const formContainerRef = useRef<HTMLDivElement>(null)
   const scriptLoadedRef = useRef(false)
   const selectedRegionRef = useRef<string>('AMERICAS')
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     if (scriptLoadedRef.current) {
@@ -36,6 +37,9 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1', safeAddress, onSubmit }
           redirectUrl: '', // Prevent HubSpot's redirect
           onFormReady: (form: HTMLFormElement) => {
             try {
+              // Hide loader when form is ready
+              setIsLoading(false)
+
               // Pre-populate safe address field using native DOM API
               if (safeAddress && form.elements) {
                 const safeAddressField = form.elements.namedItem('safe_address') as HTMLInputElement
@@ -107,14 +111,26 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1', safeAddress, onSubmit }
   }, [portalId, formId, region])
 
   return (
-    <Paper sx={{ py: 1, backgroundColor: 'var(--color-static-primary)' }}>
+    <Paper sx={{ py: 1, backgroundColor: 'var(--color-static-primary)', minHeight: '100%' }}>
       <Typography variant="h3" fontWeight={700} gutterBottom color="var(--color-static-main)">
         Request demo
       </Typography>
       <Typography variant="body1" sx={{ mb: 4, color: 'var(--color-static-light)' }}>
         Share your details to verify your request and book your demo call.
       </Typography>
-      <div id="hubspot-form-container" ref={formContainerRef} />
+      {isLoading && (
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '400px',
+          }}
+        >
+          <CircularProgress sx={{ color: 'var(--color-static-main)' }} />
+        </Box>
+      )}
+      <div id="hubspot-form-container" ref={formContainerRef} style={{ display: isLoading ? 'none' : 'block' }} />
     </Paper>
   )
 }
