@@ -39,11 +39,11 @@ jest.mock('@/features/hypernative/components/HnSignupFlow/HnSignupForm', () => (
     formId: string
     region: string
     onCancel: () => void
-    onSubmit: () => void
+    onSubmit: (region: string) => void
   }) => (
     <div data-testid="hn-signup-form">
       <button onClick={onCancel}>Cancel</button>
-      <button onClick={onSubmit}>Submit Form</button>
+      <button onClick={() => onSubmit('EMEA')}>Submit Form</button>
     </div>
   ),
 }))
