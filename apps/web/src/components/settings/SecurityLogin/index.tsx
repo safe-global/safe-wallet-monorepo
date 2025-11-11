@@ -12,7 +12,6 @@ const RecoverySettings = dynamic(() => import('@/features/recovery/components/Re
 const SecurityLogin = () => {
   const isRecoverySupported = useIsRecoverySupported()
   const router = useRouter()
-  const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>

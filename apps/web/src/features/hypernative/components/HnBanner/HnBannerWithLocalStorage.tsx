@@ -3,9 +3,10 @@ import { Box } from '@mui/material'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import { HnBanner } from './HnBanner'
-import { HN_BANNER_LS_KEY } from './constants'
 
-export interface HnBannerWithLocalStorageProps extends WithHnSignupFlowProps {}
+export const HN_BANNER_LS_KEY = 'hnBannerVisible'
+
+export interface HnBannerWithLocalStorageProps extends WithHnSignupFlowProps { }
 
 /**
  * Wrapper component for HnBanner that doesn't require SafeInfo.

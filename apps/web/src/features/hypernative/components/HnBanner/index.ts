@@ -13,9 +13,6 @@ export type { HnBannerProps } from './HnBanner'
 // Export the carousel-compatible version
 export { HnBannerForCarousel } from './HnBannerForCarousel'
 
-// Export localStorage key for external use
-export { HN_BANNER_LS_KEY as HN_BANNER_LOCAL_STORAGE_KEY } from './constants'
-
 // Export the composed HOC as default for use in Settings
 // Apply withHnSignupFlow first (inner), then withHnBannerConditions, then withHnFeature (outer)
 const HnBannerWithSignupAndDismissal = withHnSignupFlow(HnBannerWithDismissal)
