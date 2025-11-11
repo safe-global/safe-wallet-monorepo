@@ -5,25 +5,34 @@ exports[`AlreadySigned matches snapshot 1`] = `
   <View
     style={
       {
-        "flexDirection": "column",
-        "paddingBottom": 16,
+        "flex": 1,
       }
     }
+    testID="theme-light"
   >
-    <Text
+    <View
       style={
         {
-          "color": "#A1A3A7",
-          "fontFamily": "DM Sans",
-          "fontSize": 14,
-          "marginBottom": 8,
-          "textAlign": "center",
+          "flexDirection": "column",
+          "paddingBottom": 16,
         }
       }
-      suppressHighlighting={true}
     >
-      Can be executed once the threshold is reached.
-    </Text>
+      <Text
+        style={
+          {
+            "color": "#A1A3A7",
+            "fontFamily": "DM Sans",
+            "fontSize": 14,
+            "marginBottom": 8,
+            "textAlign": "center",
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Can be executed once the threshold is reached.
+      </Text>
+    </View>
   </View>
 </View>
 `;

@@ -9,7 +9,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { getTxOptions } from '@/utils/transactions'
 import CheckWallet from '@/components/common/CheckWallet'
 
-import type { SignOrExecuteProps } from '@/components/tx/SignOrExecuteForm/SignOrExecuteFormV2'
+import type { SignOrExecuteProps } from '@/components/tx/SignOrExecuteForm/SignOrExecuteForm'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
 import { SuccessScreenFlow } from '@/components/tx-flow/flows'
@@ -19,7 +19,6 @@ import { isWalletRejection } from '@/utils/wallets'
 
 import css from './styles.module.css'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { TxSecurityContext } from '@/components/tx/security/shared/TxSecurityContext'
 
 import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
 import { pollModuleTransactionId, useExecuteThroughRole, useGasLimit, useMetaTransactions, type Role } from './hooks'
@@ -30,6 +29,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { assertOnboard, assertWallet } from '@/utils/helpers'
 import { dispatchModuleTxExecution } from '@/services/tx/tx-sender'
 import { Status } from 'zodiac-roles-deployments'
+import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 
 const Role = ({ children }: { children: string }) => {
   let humanReadableRoleKey = children
@@ -50,7 +50,7 @@ export const ExecuteThroughRoleForm = ({
   safeTx?: SafeTransaction
   safeTxError?: Error
   role: Role
-  txSecurity: ReturnType<typeof useTxSecurityContext>
+  txSecurity: ReturnType<typeof useSafeShield>
 }): ReactElement => {
   const currentChain = useCurrentChain()
   const onboard = useOnboard()
@@ -64,7 +64,7 @@ export const ExecuteThroughRoleForm = ({
   const [submitError, setSubmitError] = useState<Error | undefined>()
 
   const { setTxFlow } = useContext(TxModalContext)
-  const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = txSecurity
+  const { needsRiskConfirmation, isRiskConfirmed } = txSecurity
 
   const permissionsError = role.status !== null ? PermissionsErrorMessage[role.status] : null
   const metaTransactions = useMetaTransactions(safeTx)
@@ -83,11 +83,6 @@ export const ExecuteThroughRoleForm = ({
   // On form submit
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault()
-
-    if (needsRiskConfirmation && !isRiskConfirmed) {
-      setIsRiskIgnored(true)
-      return
-    }
 
     assertWallet(wallet)
     assertOnboard(onboard)
@@ -242,10 +237,8 @@ export const ExecuteThroughRoleForm = ({
   )
 }
 
-const useTxSecurityContext = () => useContext(TxSecurityContext)
-
 export default madProps(ExecuteThroughRoleForm, {
-  txSecurity: useTxSecurityContext,
+  txSecurity: useSafeShield,
 })
 
 const PermissionsErrorMessage: Record<Status, string | null> = {

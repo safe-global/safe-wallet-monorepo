@@ -5,40 +5,49 @@ exports[`Badge renders badge with custom size and theme 1`] = `
   <View
     style={
       {
-        "alignItems": "center",
-        "backgroundColor": "#3B7A54",
-        "borderBottomLeftRadius": 100000,
-        "borderBottomRightRadius": 100000,
-        "borderTopLeftRadius": 100000,
-        "borderTopRightRadius": 100000,
-        "flexDirection": "column",
-        "height": 32,
-        "justifyContent": "center",
-        "maxHeight": 32,
-        "maxWidth": 32,
-        "minHeight": 32,
-        "minWidth": 32,
-        "paddingBottom": 0,
-        "paddingLeft": 0,
-        "paddingRight": 0,
-        "paddingTop": 0,
-        "width": 32,
+        "flex": 1,
       }
     }
-    testID="badge"
+    testID="theme-light"
   >
-    <Text
+    <View
       style={
         {
-          "color": "#121312",
-          "fontFamily": "DM Sans",
-          "fontSize": 14,
+          "alignItems": "center",
+          "backgroundColor": "#3B7A54",
+          "borderBottomLeftRadius": 100000,
+          "borderBottomRightRadius": 100000,
+          "borderTopLeftRadius": 100000,
+          "borderTopRightRadius": 100000,
+          "flexDirection": "column",
+          "height": 32,
+          "justifyContent": "center",
+          "maxHeight": 32,
+          "maxWidth": 32,
+          "minHeight": 32,
+          "minWidth": 32,
+          "paddingBottom": 0,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "width": 32,
         }
       }
-      suppressHighlighting={true}
+      testID="badge"
     >
-      ok
-    </Text>
+      <Text
+        style={
+          {
+            "color": "#121312",
+            "fontFamily": "DM Sans",
+            "fontSize": 14,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        ok
+      </Text>
+    </View>
   </View>
 </View>
 `;
@@ -48,40 +57,49 @@ exports[`Badge renders circular badge 1`] = `
   <View
     style={
       {
-        "alignItems": "center",
-        "backgroundColor": "#FFECC2",
-        "borderBottomLeftRadius": 100000,
-        "borderBottomRightRadius": 100000,
-        "borderTopLeftRadius": 100000,
-        "borderTopRightRadius": 100000,
-        "flexDirection": "column",
-        "height": 28,
-        "justifyContent": "center",
-        "maxHeight": 28,
-        "maxWidth": 28,
-        "minHeight": 28,
-        "minWidth": 28,
-        "paddingBottom": 0,
-        "paddingLeft": 0,
-        "paddingRight": 0,
-        "paddingTop": 0,
-        "width": 28,
+        "flex": 1,
       }
     }
-    testID="badge"
+    testID="theme-light"
   >
-    <Text
+    <View
       style={
         {
-          "color": "#FF8C00",
-          "fontFamily": "DM Sans",
-          "fontSize": 14,
+          "alignItems": "center",
+          "backgroundColor": "#FFECC2",
+          "borderBottomLeftRadius": 100000,
+          "borderBottomRightRadius": 100000,
+          "borderTopLeftRadius": 100000,
+          "borderTopRightRadius": 100000,
+          "flexDirection": "column",
+          "height": 28,
+          "justifyContent": "center",
+          "maxHeight": 28,
+          "maxWidth": 28,
+          "minHeight": 28,
+          "minWidth": 28,
+          "paddingBottom": 0,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 0,
+          "width": 28,
         }
       }
-      suppressHighlighting={true}
+      testID="badge"
     >
-      12+
-    </Text>
+      <Text
+        style={
+          {
+            "color": "#FF8C00",
+            "fontFamily": "DM Sans",
+            "fontSize": 14,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        12+
+      </Text>
+    </View>
   </View>
 </View>
 `;
@@ -91,33 +109,42 @@ exports[`Badge renders non-circular badge 1`] = `
   <View
     style={
       {
-        "alignSelf": "flex-start",
-        "backgroundColor": "#FFECC2",
-        "borderBottomLeftRadius": 50,
-        "borderBottomRightRadius": 50,
-        "borderTopLeftRadius": 50,
-        "borderTopRightRadius": 50,
-        "gap": 4,
-        "paddingBottom": 4,
-        "paddingLeft": 12,
-        "paddingRight": 12,
-        "paddingTop": 4,
+        "flex": 1,
       }
     }
-    testID="badge"
+    testID="theme-light"
   >
-    <Text
+    <View
       style={
         {
-          "color": "#FF8C00",
-          "fontFamily": "DM Sans",
-          "fontSize": 14,
+          "alignSelf": "flex-start",
+          "backgroundColor": "#FFECC2",
+          "borderBottomLeftRadius": 50,
+          "borderBottomRightRadius": 50,
+          "borderTopLeftRadius": 50,
+          "borderTopRightRadius": 50,
+          "gap": 4,
+          "paddingBottom": 4,
+          "paddingLeft": 12,
+          "paddingRight": 12,
+          "paddingTop": 4,
         }
       }
-      suppressHighlighting={true}
+      testID="badge"
     >
-      Label
-    </Text>
+      <Text
+        style={
+          {
+            "color": "#FF8C00",
+            "fontFamily": "DM Sans",
+            "fontSize": 14,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Label
+      </Text>
+    </View>
   </View>
 </View>
 `;

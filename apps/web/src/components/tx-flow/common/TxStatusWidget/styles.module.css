@@ -1,14 +1,3 @@
-.header {
-  padding: var(--space-4) var(--space-3);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.content {
-  padding: var(--space-2);
-}
-
 .status {
   padding: 0;
 }
@@ -17,7 +6,7 @@
   content: '';
   position: absolute;
   border-left: 2px solid var(--color-border-light);
-  left: 15px;
+  left: 7px;
   top: 20px;
   height: calc(100% - 40px);
 }
@@ -34,13 +23,14 @@
 .status :global .MuiListItemIcon-root {
   color: var(--color-primary-main);
   justify-content: center;
-  min-width: 32px;
+  min-width: auto;
   padding: var(--space-1);
-  background-color: var(--color-background-paper);
+  padding-left: 0;
+  background-color: var(--color-background-main);
 }
 
 [data-theme='light'] .status :global .MuiListItemIcon-root {
-  color: var(--color-secondary-dark);
+  color: var(--color-primary-main);
 }
 
 .incomplete > * {
@@ -60,13 +50,13 @@
   margin-left: var(--space-1);
   padding-right: 2px;
   border-radius: 50%;
-  width: var(--space-3);
-  height: var(--space-3);
+  width: 20px;
+  height: 20px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-secondary-main);
-  color: var(--color-text-primary);
+  background-color: var(--color-text-primary);
+  color: var(--color-logo-background);
 }
 
 [data-theme='dark'] .badge {
@@ -88,9 +78,5 @@
 
   .close {
     display: flex;
-  }
-
-  .content {
-    padding: var(--space-3);
   }
 }

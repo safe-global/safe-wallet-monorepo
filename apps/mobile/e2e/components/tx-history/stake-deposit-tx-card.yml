@@ -1,0 +1,22 @@
+appId: global.safe.mobileapp.ios
+---
+# ===========================================
+# Stake Deposit Transaction Card
+# ===========================================
+# Stake deposit transactions show "Deposit" label and "Stake" type
+- assertVisible:
+    text: '.*Deposit.*'
+    optional: true
+
+- assertVisible:
+    text: '.*Stake.*'
+    optional: true
+
+- tapOn:
+    text: '.*Deposit.*'
+
+- runFlow:
+    file: ./stake-deposit-tx.yml
+
+- tapOn:
+    id: 'go-back'

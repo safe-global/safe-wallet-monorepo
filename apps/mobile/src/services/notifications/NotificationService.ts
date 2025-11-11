@@ -24,6 +24,7 @@ import { NotificationNavigationHandler } from './notificationNavigationHandler'
 import { ChannelId, notificationChannels, withTimeout } from '@/src/utils/notifications'
 import Logger from '@/src/utils/logger'
 import { getStore } from '@/src/store/utils/singletonStore'
+import BadgeManager from './BadgeManager'
 
 interface AlertButton {
   text: string
@@ -208,38 +209,6 @@ class NotificationsService {
     return notifee.onBackgroundEvent(observer)
   }
 
-  async incrementBadgeCount(incrementBy?: number) {
-    await notifee.incrementBadgeCount(incrementBy)
-    const newCount = await notifee.getBadgeCount()
-    Logger.info(`Badge incremented by ${incrementBy || 1}, new count: ${newCount}`)
-  }
-
-  async decrementBadgeCount(decrementBy?: number) {
-    await notifee.decrementBadgeCount(decrementBy)
-    const newCount = await notifee.getBadgeCount()
-    Logger.info(`Badge decremented by ${decrementBy || 1}, new count: ${newCount}`)
-  }
-
-  async setBadgeCount(count: number) {
-    await notifee.setBadgeCount(count)
-    Logger.info(`Badge count set to: ${count}`)
-  }
-
-  async getBadgeCount() {
-    const count = await notifee.getBadgeCount()
-    Logger.info(`Current badge count: ${count}`)
-    return count
-  }
-
-  async clearAllBadges() {
-    try {
-      await this.setBadgeCount(0)
-      Logger.info('All badges cleared manually')
-    } catch (error) {
-      Logger.error('Failed to clear badges manually', error)
-    }
-  }
-
   async handleNotificationPress({
     detail,
     callback,
@@ -247,8 +216,6 @@ class NotificationsService {
     detail: EventDetail
     callback?: (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => void
   }) {
-    await this.clearAllBadges()
-
     if (detail?.notification?.id) {
       await this.cancelTriggerNotification(detail.notification.id)
     }
@@ -271,7 +238,7 @@ class NotificationsService {
   }) {
     switch (type as unknown as EventType) {
       case EventType.DELIVERED:
-        this.incrementBadgeCount(1)
+        BadgeManager.incrementBadgeCount(1)
         break
       case EventType.PRESS:
         this.handleNotificationPress({
@@ -383,8 +350,6 @@ class NotificationsService {
     onNotificationOpenedApp(messaging, async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
       Logger.info('Notification caused app to open from background state:', remoteMessage)
 
-      await this.clearAllBadges()
-
       if (remoteMessage.data) {
         await NotificationNavigationHandler.handleNotificationPress(remoteMessage.data)
       }
@@ -397,8 +362,6 @@ class NotificationsService {
         if (remoteMessage.data) {
           // Add extra delay for app startup from killed state
           setTimeout(async () => {
-            // Clear badge when app is opened from notification
-            await this.clearAllBadges()
             await NotificationNavigationHandler.handleNotificationPress(remoteMessage.data)
           }, 1000) // Wait 1 second for app to fully initialize
         }
