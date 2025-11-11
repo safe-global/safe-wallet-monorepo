@@ -16,13 +16,13 @@ const isCypress = Boolean(typeof window !== 'undefined' && window.Cypress)
 export const ContentSecurityPolicy = `
  default-src 'self';
  connect-src 'self' *;
- script-src 'self' 'unsafe-inline' https://*.getbeamer.com https://www.googletagmanager.com https://*.ingest.sentry.io https://sentry.io https://*.hsforms.com https://*.hubspot.com https://js.hsadspixel.net https://*.hs-scripts.com https://*.usemessages.com https://assets.calendly.com ${
+ script-src 'self' 'unsafe-inline' https://*.getbeamer.com https://www.googletagmanager.com https://*.ingest.sentry.io https://sentry.io https://*.hsforms.com https://*.hsforms.net https://*.hubspot.com https://js.hsadspixel.net https://*.hs-scripts.com https://*.usemessages.com https://assets.calendly.com ${
    !IS_PRODUCTION || isCypress
      ? "'unsafe-eval'" // Dev server and cypress need unsafe-eval
      : "'wasm-unsafe-eval'"
  };
  frame-src http: https:;
- style-src 'self' 'unsafe-inline' https://*.getbeamer.com https://*.googleapis.com https://*.hsforms.com;
+ style-src 'self' 'unsafe-inline' https://*.getbeamer.com https://*.googleapis.com https://*.hsforms.com https://assets.calendly.com;
  font-src 'self' data: https://fonts.gstatic.com https://fonts.reown.com;
  worker-src 'self' blob:;
  img-src * data:;

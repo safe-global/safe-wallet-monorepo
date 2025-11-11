@@ -137,7 +137,7 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1', onSubmit }: HubSpotForm
   }, [showThankYou])
 
   return (
-    <Paper sx={{ p: 3, backgroundColor: 'var(--color-static-primary)' }}>
+    <Paper sx={{ py: 1, px: 3, backgroundColor: 'var(--color-static-primary)' }}>
       {!showThankYou ? (
         <>
           <Typography variant="h3" fontWeight={700} gutterBottom color="var(--color-static-main)">
