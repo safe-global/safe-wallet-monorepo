@@ -4,6 +4,7 @@ import { useAppDispatch } from '@/store'
 import { setFormCompleted } from '@/features/hypernative/store/hnStateSlice'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useCurrentChain } from '@/hooks/useChains'
 import HnModal from './HnModal'
 import HnSignupIntro from './HnSignupIntro'
 import HnSignupForm from './HnSignupForm'
@@ -35,6 +36,11 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
   const dispatch = useAppDispatch()
   const chainId = useChainId()
   const { safeAddress } = useSafeInfo()
+  const currentChain = useCurrentChain()
+
+  // Format safe address with chain prefix (e.g., "eth:0x1234...")
+  const formattedSafeAddress =
+    currentChain?.shortName && safeAddress ? `${currentChain.shortName}:${safeAddress}` : safeAddress
 
   const handleNext = () => {
     setActiveStep((prevStep) => prevStep + 1)
@@ -97,6 +103,7 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
             portalId={hubSpotConfig.portalId}
             formId={hubSpotConfig.formId}
             region={hubSpotConfig.region}
+            safeAddress={formattedSafeAddress}
             onCancel={handleBack}
             onSubmit={handleFormSubmit}
           />

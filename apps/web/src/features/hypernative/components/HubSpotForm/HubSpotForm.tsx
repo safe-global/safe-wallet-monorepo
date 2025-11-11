@@ -5,10 +5,11 @@ type HubSpotFormProps = {
   portalId: string
   formId: string
   region?: string
+  safeAddress?: string
   onSubmit?: (region: string) => void
 }
 
-const HubSpotForm = ({ portalId, formId, region = 'eu1', onSubmit }: HubSpotFormProps) => {
+const HubSpotForm = ({ portalId, formId, region = 'eu1', safeAddress, onSubmit }: HubSpotFormProps) => {
   const formContainerRef = useRef<HTMLDivElement>(null)
   const scriptLoadedRef = useRef(false)
   const selectedRegionRef = useRef<string>('AMERICAS')
@@ -33,22 +34,32 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1', onSubmit }: HubSpotForm
           target: `#${formContainerRef.current.id}`,
           inlineMessage: '', // Prevent HubSpot's default inline thank you message
           redirectUrl: '', // Prevent HubSpot's redirect
-          onFormReady: ($form: any) => {
+          onFormReady: (form: HTMLFormElement) => {
             try {
-              if ($form && typeof $form === 'object' && $form.find) {
-                const regionField = $form.find('[name="region"]')
-                if (regionField && regionField.length > 0) {
-                  const initialValue = regionField.val()
-                  if (initialValue) {
-                    selectedRegionRef.current = String(initialValue).toUpperCase()
-                  }
-                  regionField.on('change', function (this: HTMLInputElement) {
-                    selectedRegionRef.current = String(this.value || '').toUpperCase()
-                  })
+              // Pre-populate safe address field using native DOM API
+              if (safeAddress && form.elements) {
+                const safeAddressField = form.elements.namedItem('safe_address') as HTMLInputElement
+                if (safeAddressField) {
+                  safeAddressField.value = safeAddress
+                  // Trigger change event for HubSpot's internal tracking
+                  const changeEvent = new Event('change', { bubbles: true })
+                  safeAddressField.dispatchEvent(changeEvent)
                 }
               }
+
+              // Track region field changes
+              const regionField = form.elements.namedItem('region') as HTMLSelectElement
+              if (regionField) {
+                const initialValue = regionField.value
+                if (initialValue) {
+                  selectedRegionRef.current = String(initialValue).toUpperCase()
+                }
+                regionField.addEventListener('change', (e) => {
+                  selectedRegionRef.current = String((e.target as HTMLSelectElement).value || '').toUpperCase()
+                })
+              }
             } catch (error) {
-              console.warn('[HubSpotForm] Failed to attach region change handler:', error)
+              console.warn('[HubSpotForm] Error in onFormReady:', error)
             }
           },
           onFormSubmitted: ($form: any, data: any) => {
@@ -91,7 +102,7 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1', onSubmit }: HubSpotForm
       }
       scriptLoadedRef.current = false
     }
-    // onSubmit is intentionally excluded from deps as it's only used in callbacks
+    // onSubmit and safeAddress are intentionally excluded from deps as they're only used in callbacks
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [portalId, formId, region])
 
