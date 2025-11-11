@@ -53,7 +53,7 @@ const Dashboard = (): ReactElement => {
   const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
 
   const banners = [
-    (showHnBanner || hnLoading) && { id: hnBannerID, element: HnBannerForCarousel },
+    showHnBanner && !hnLoading && { id: hnBannerID, element: HnBannerForCarousel },
     isNoFeeNovemberEnabled && {
       id: noFeeNovemberBannerID,
       element: NoFeeNovemberBanner,
