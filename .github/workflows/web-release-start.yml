@@ -1,0 +1,270 @@
+name: 🚀 Start Web Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.74.0) - leave empty to auto-increment'
+        required: false
+        type: string
+      release_type:
+        description: 'Release type'
+        required: true
+        type: choice
+        default: 'regular'
+        options:
+          - regular
+          - hotfix
+      base_branch:
+        description: 'Base branch (auto-selected based on release type, override if needed)'
+        required: false
+        type: string
+
+jobs:
+  start-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Determine base branch
+        id: base
+        run: |
+          if [ -n "${{ inputs.base_branch }}" ]; then
+            BASE="${{ inputs.base_branch }}"
+          elif [ "${{ inputs.release_type }}" = "hotfix" ]; then
+            BASE="main"
+          else
+            BASE="dev"
+          fi
+          echo "branch=$BASE" >> $GITHUB_OUTPUT
+          echo "📍 Base branch: $BASE"
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            # Validate provided version format
+            if ! [[ "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "❌ Invalid version format. Expected: X.Y.Z where X, Y, Z are numbers (e.g., 1.74.0)"
+              echo "Received: '${{ inputs.version }}'"
+              exit 1
+            fi
+            VERSION="${{ inputs.version }}"
+            echo "✅ Using provided version: $VERSION"
+          else
+            # Auto-increment version based on release type
+            cd apps/web
+            CURRENT_VERSION=$(node -p "require('./package.json').version" || echo "")
+
+            # Validate extraction succeeded
+            if [ -z "$CURRENT_VERSION" ]; then
+              echo "❌ Error: Could not extract version from package.json"
+              exit 1
+            fi
+
+            echo "📍 Current version: $CURRENT_VERSION"
+
+            # Parse version components
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+
+            # Validate parsed components
+            if [ -z "$MAJOR" ] || [ -z "$MINOR" ] || [ -z "$PATCH" ]; then
+              echo "❌ Error: Could not parse version components from: $CURRENT_VERSION"
+              exit 1
+            fi
+
+            if [ "${{ inputs.release_type }}" = "hotfix" ]; then
+              # Hotfix: increment patch version (last number)
+              PATCH=$((PATCH + 1))
+              echo "🔧 Hotfix: incrementing patch version"
+            else
+              # Regular release: increment minor version (middle number), reset patch
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              echo "🚀 Regular release: incrementing minor version"
+            fi
+
+            VERSION="$MAJOR.$MINOR.$PATCH"
+            echo "✅ Auto-generated version: $VERSION"
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if version already exists
+        run: |
+          if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "❌ Version v${{ steps.version.outputs.version }} already exists!"
+            exit 1
+          fi
+          echo "✅ Version is new"
+
+      - name: Check for concurrent release
+        run: |
+          git fetch origin
+          if git ls-remote --exit-code --heads origin release >/dev/null 2>&1; then
+            # Release branch exists, check if it differs from base
+            BASE_COMMIT=$(git rev-parse origin/${{ steps.base.outputs.branch }})
+            RELEASE_COMMIT=$(git rev-parse origin/release)
+            if [ "$RELEASE_COMMIT" != "$BASE_COMMIT" ]; then
+              echo "⚠️  Warning: The 'release' branch already exists and differs from ${{ steps.base.outputs.branch }}"
+              echo "This may indicate a concurrent or in-progress release."
+              echo ""
+              echo "If you're sure you want to overwrite it, re-run this workflow."
+              echo "Otherwise, check for open release PRs first."
+              exit 1
+            fi
+          fi
+          echo "✅ Safe to create/update release branch"
+
+      - name: Create/update release branch
+        run: |
+          git checkout -B release origin/${{ steps.base.outputs.branch }}
+          git push origin release
+          echo "✅ Release branch created from ${{ steps.base.outputs.branch }}"
+
+      - name: Bump version in package.json
+        run: |
+          cd apps/web
+          # Update version using Node.js
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            pkg.version = '${{ steps.version.outputs.version }}';
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+          echo "✅ Version bumped to ${{ steps.version.outputs.version }}"
+
+      - name: Commit version bump
+        run: |
+          git add apps/web/package.json
+          git commit -m "${{ steps.version.outputs.version }}"
+          git push origin release
+          echo "✅ Version committed"
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          cd apps/web
+
+          # Use enhanced changelog generator if available, fallback to legacy
+          if [ -f ./scripts/release/generate-changelog.sh ]; then
+            CHANGELOG=$(bash ./scripts/release/generate-changelog.sh main ${{ steps.base.outputs.branch }})
+          else
+            CHANGELOG=$(bash ./scripts/release-notes.sh main ${{ steps.base.outputs.branch }})
+          fi
+
+          # Save to file for PR body
+          echo "$CHANGELOG" > /tmp/changelog.md
+
+          echo "✅ Changelog generated"
+
+      - name: Create Pull Request
+        id: create_pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd apps/web
+
+          # Read changelog
+          CHANGELOG=$(cat /tmp/changelog.md)
+
+          # Create PR body
+          PR_BODY=$(cat <<EOF
+          ## 🚀 Release v${{ steps.version.outputs.version }}
+
+          $CHANGELOG
+
+          ---
+
+          ## 📋 QA Checklist
+          - [ ] Regression testing completed
+          - [ ] New features tested
+          - [ ] Bug fixes verified
+          - [ ] Cross-browser testing done
+          - [ ] Performance checked
+
+          ## 📝 Next Steps
+          1. ✅ PR created - **YOU ARE HERE**
+          2. ⏳ QA team reviews and tests
+          3. ⏳ QA approves (use "Complete Release" workflow)
+          4. ⏳ Auto-merge to main
+          5. ⏳ Deploy to production
+
+          ---
+
+          **Release Type:** ${{ inputs.release_type }}
+          **Base Branch:** ${{ steps.base.outputs.branch }}
+
+          🤖 *This PR was created automatically by the [Start Web Release workflow](https://github.com/${{ github.repository }}/actions/workflows/web-release-start.yml)*
+          EOF
+          )
+
+          # Create the PR
+          PR_URL=$(gh pr create \
+            --base main \
+            --head release \
+            --title "Release v${{ steps.version.outputs.version }}" \
+            --body "$PR_BODY" \
+            --label "release" \
+            | tail -n 1)
+
+          echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+          echo "✅ Pull Request created: $PR_URL"
+
+      - name: Notify on Slack
+        if: vars.SLACK_WEBHOOK_URL
+        continue-on-error: true
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          RELEASE_TYPE="${{ inputs.release_type }}"
+          BASE_BRANCH="${{ steps.base.outputs.branch }}"
+          PR_URL="${{ steps.create_pr.outputs.pr_url }}"
+
+          jq -n \
+            --arg version "$VERSION" \
+            --arg release_type "$RELEASE_TYPE" \
+            --arg base "$BASE_BRANCH" \
+            --arg pr_url "$PR_URL" \
+            '{
+              text: ("🚀 *Release v" + $version + " Started*"),
+              blocks: [
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: ("*Release v" + $version + " has been initiated* ✅\n\n*Type:* " + $release_type + "\n*Base:* " + $base + "\n*PR:* " + $pr_url + "\n\n_QA team: Please review and test_ 🧪")
+                  }
+                }
+              ]
+            }' | curl -X POST "${{ vars.SLACK_WEBHOOK_URL }}" \
+              -H 'Content-Type: application/json' \
+              -d @-
+
+      - name: Summary
+        run: |
+          echo "### 🎉 Release Started Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Type:** ${{ inputs.release_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Base Branch:** ${{ steps.base.outputs.branch }}" >> $GITHUB_STEP_SUMMARY
+          echo "**PR:** ${{ steps.create_pr.outputs.pr_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📝 Next Steps:" >> $GITHUB_STEP_SUMMARY
+          echo "1. ✅ **Release branch created and PR opened**" >> $GITHUB_STEP_SUMMARY
+          echo "2. ⏳ QA team should test the changes" >> $GITHUB_STEP_SUMMARY
+          echo "3. ⏳ When QA approves, run the **Complete Web Release** workflow" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 [View Pull Request](${{ steps.create_pr.outputs.pr_url }})" >> $GITHUB_STEP_SUMMARY
