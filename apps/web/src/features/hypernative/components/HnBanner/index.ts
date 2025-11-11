@@ -6,6 +6,7 @@ import { withLocalStorageVisibility } from '../withLocalStorageVisibility'
 import { BannerType } from '../../hooks/useBannerStorage'
 import { HnBannerWithDismissal } from './HnBannerWithDismissal'
 import { HnBannerWithLocalStorage } from './HnBannerWithLocalStorage'
+import { HN_BANNER_LS_KEY } from './constants'
 
 // Export the original pure component for tests and stories
 export { HnBanner, hnBannerID } from './HnBanner'
@@ -13,6 +14,9 @@ export type { HnBannerProps } from './HnBanner'
 
 // Export the carousel-compatible version
 export { HnBannerForCarousel } from './HnBannerForCarousel'
+
+// Export localStorage key for external use
+export { HN_BANNER_LS_KEY as HN_BANNER_LOCAL_STORAGE_KEY } from './constants'
 
 // Export the composed HOC as default for use in Settings
 // Apply withHnSignupFlow first (inner), then withHnBannerConditions, then withHnFeature (outer)
@@ -23,12 +27,10 @@ const HnBannerWithConditions = withHnBannerConditions(BannerType.Promo)(
 export default withHnFeature(HnBannerWithConditions)
 
 // Export version with localStorage for use in pages without SafeInfo (e.g., /wallets/account)
-// localStorage key for controlling banner visibility
-export const HN_BANNER_LOCAL_STORAGE_KEY = 'hnBannerVisible'
 
 // Apply withHnSignupFlow first (inner), then withLocalStorageVisibility, then withHnFeature (outer)
 const HnBannerWithLocalStorageAndSignup = withHnSignupFlow(HnBannerWithLocalStorage)
-const HnBannerWithLocalStorageVisibilityWrapped = withLocalStorageVisibility(HN_BANNER_LOCAL_STORAGE_KEY)(
+const HnBannerWithLocalStorageVisibilityWrapped = withLocalStorageVisibility(HN_BANNER_LS_KEY)(
   HnBannerWithLocalStorageAndSignup,
 )
 export const HnBannerWithLocalStorageVisibility = withHnFeature(HnBannerWithLocalStorageVisibilityWrapped)
