@@ -26,7 +26,10 @@ import css from './styles.module.css'
 import ActivateAccountButton from '@/features/counterfactual/ActivateAccountButton'
 import { isReplayedSafeProps } from '@/features/counterfactual/utils'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-import HnDashboardBanner from '@/features/hypernative/components/HnDashboardBanner'
+// import HnDashboardBanner from '@/features/hypernative/components/HnDashboardBanner'
+import { HnDashboardBanner } from '@/features/hypernative/components/HnDashboardBanner'
+import { useBannerVisibility } from '@/features/hypernative/hooks/useBannerVisibility'
+import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
 
 const calculateProgress = (items: boolean[]) => {
   const totalNumberOfItems = items.length
@@ -360,6 +363,7 @@ const FirstSteps = () => {
   const outgoingTransactions = useAppSelector(selectOutgoingTransactions)
   const chain = useCurrentChain()
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, safe.chainId, safeAddress))
+  const { showBanner: showHnDashboardBanner } = useBannerVisibility(BannerType.Promo)
 
   const isMultiSig = safe.threshold > 1
   const isReplayedSafe = undeployedSafe && isReplayedSafeProps(undeployedSafe?.props)
@@ -374,7 +378,6 @@ const FirstSteps = () => {
   if (safe.deployed) return null
 
   const isActivating = undeployedSafe?.status.status !== 'AWAITING_EXECUTION'
-  const showDashboardBanner = true
 
   return (
     <WidgetContainer>
@@ -472,7 +475,8 @@ const FirstSteps = () => {
           </Grid>
 
           <Grid item xs={12} md={4}>
-            {showDashboardBanner ? <HnDashboardBanner /> : <AccountReadyWidget />}
+            {/* {showHnDashboardBanner ? <HnDashboardBanner /> : <AccountReadyWidget />} */}
+            <HnDashboardBanner onHnSignupClick={() => { }} />
           </Grid>
         </Grid>
       </WidgetBody>
