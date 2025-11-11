@@ -55,7 +55,7 @@ appId: global.safe.mobileapp.ios
 # ===========================================
 # Click on the second settings change transaction in the conflicting group
 - runFlow:
-    file: ../components/pending-tx/settings-change-tx-card.yml
+    file: ../components/pending-tx/settings-change-new-signer-tx-card.yml
 
 # ===========================================
 # Switch to Pending Tx Safe 2 for Limit Order Test
@@ -64,20 +64,12 @@ appId: global.safe.mobileapp.ios
 - tapOn:
     id: 'go-back'
 
-# Tap on the dropdown to switch safes
-- tapOn:
-    id: 'dropdown-label-view'
-    index: 0
-
-# Select Pending Tx Safe 2 from the dropdown
-- tapOn:
-    text: '.*Pending Tx Safe 2.*'
+- runFlow:
+    file: ../shared/switch-safe.yml
+    env:
+      SAFE_NAME_PATTERN: '.*Pending Tx Safe 2.*'
 
 # Navigate to pending transactions
-- assertVisible:
-    id: 'home-tab'
-
-# Tap on the pending transactions banner
 - tapOn:
     id: 'pending-transactions'
 
@@ -123,3 +115,34 @@ appId: global.safe.mobileapp.ios
     file: ../components/pending-tx/on-chain-rejection-tx-card.yml
     env:
       IS_EXECUTABLE: 'false'
+
+# ===========================================
+# Switch to Pending Tx Safe 3 for setFallbackHandler Test
+# ===========================================
+# Go back to home tab
+- tapOn:
+    id: 'go-back'
+
+- runFlow:
+    file: ../shared/switch-safe.yml
+    env:
+      SAFE_NAME_PATTERN: '.*Pending Tx Safe 3.*'
+
+# Navigate to pending transactions
+- tapOn:
+    id: 'pending-transactions'
+
+- assertVisible:
+    id: 'pending-tx-list'
+
+# Verify we see the "Next" section header
+- assertVisible:
+    text: 'Next'
+
+# ===========================================
+# setFallbackHandler Transaction
+# ===========================================
+# Test the first setFallbackHandler transaction in the "Next" section
+- runFlow:
+    file: ../components/pending-tx/setFallbackHandler-tx-card.yml
+
