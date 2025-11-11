@@ -10,18 +10,6 @@ describe('HubSpotForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-
-    // Mock environment variable
-    process.env.NEXT_PUBLIC_HYPERNATIVE_CALENDLY = JSON.stringify({
-      AMERICAS: 'https://calendly.com/americas',
-      EMEA: 'https://calendly.com/emea',
-      APAC: 'https://calendly.com/apac',
-    })
-  })
-
-  afterEach(() => {
-    // Clean up environment
-    delete process.env.NEXT_PUBLIC_HYPERNATIVE_CALENDLY
   })
 
   it('should render the form title and description', () => {
@@ -53,19 +41,5 @@ describe('HubSpotForm', () => {
 
     const scripts = document.querySelectorAll('script[src*="hsforms"]')
     expect(scripts.length).toBeGreaterThan(0)
-  })
-
-  it('should load Calendly CSS on mount', () => {
-    render(<HubSpotForm {...defaultProps} />)
-
-    const calendlyLink = document.querySelector('link[href*="calendly"]')
-    expect(calendlyLink).toBeInTheDocument()
-  })
-
-  it('should load Calendly script on mount', () => {
-    render(<HubSpotForm {...defaultProps} />)
-
-    const calendlyScript = document.querySelector('script[src*="calendly"]')
-    expect(calendlyScript).toBeInTheDocument()
   })
 })

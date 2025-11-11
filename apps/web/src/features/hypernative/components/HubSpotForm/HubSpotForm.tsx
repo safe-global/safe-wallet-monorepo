@@ -1,55 +1,20 @@
 import { Paper, Typography } from '@mui/material'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 type HubSpotFormProps = {
   portalId: string
   formId: string
   region?: string
-  onSubmit?: () => void
+  safeAddress?: string
+  onSubmit?: (region: string) => void
 }
 
-const getCalendlyConfig = (): Record<string, string> => {
-  try {
-    const configString = process.env.NEXT_PUBLIC_HYPERNATIVE_CALENDLY
-    if (!configString) {
-      console.warn('[HubSpotForm] NEXT_PUBLIC_HYPERNATIVE_CALENDLY not configured')
-      return {}
-    }
-    return JSON.parse(configString)
-  } catch (error) {
-    console.error('[HubSpotForm] Failed to parse NEXT_PUBLIC_HYPERNATIVE_CALENDLY:', error)
-    return {}
-  }
-}
-
-const HubSpotForm = ({ portalId, formId, region = 'eu1', onSubmit }: HubSpotFormProps) => {
+const HubSpotForm = ({ portalId, formId, region = 'eu1', safeAddress, onSubmit }: HubSpotFormProps) => {
   const formContainerRef = useRef<HTMLDivElement>(null)
-  const calendlyContainerRef = useRef<HTMLDivElement>(null)
   const scriptLoadedRef = useRef(false)
-  const calendlyScriptLoadedRef = useRef(false)
   const selectedRegionRef = useRef<string>('AMERICAS')
-  const [showThankYou, setShowThankYou] = useState(false)
 
-  // Load scripts on mount
   useEffect(() => {
-    // Load Calendly CSS
-    if (!document.querySelector('link[href*="calendly"]')) {
-      const link = document.createElement('link')
-      link.rel = 'stylesheet'
-      link.href = 'https://assets.calendly.com/assets/external/widget.css'
-      document.head.appendChild(link)
-    }
-
-    // Load Calendly script
-    if (!calendlyScriptLoadedRef.current && !document.querySelector('script[src*="calendly"]')) {
-      const calendlyScript = document.createElement('script')
-      calendlyScript.src = 'https://assets.calendly.com/assets/external/widget.js'
-      calendlyScript.async = true
-      document.body.appendChild(calendlyScript)
-      calendlyScriptLoadedRef.current = true
-    }
-
-    // Load HubSpot script
     if (scriptLoadedRef.current) {
       return
     }
@@ -69,30 +34,60 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1', onSubmit }: HubSpotForm
           target: `#${formContainerRef.current.id}`,
           inlineMessage: '', // Prevent HubSpot's default inline thank you message
           redirectUrl: '', // Prevent HubSpot's redirect
-          onFormReady: ($form: any) => {
-            // Track region selection changes
-            // $form is a jQuery-like object wrapping the form element
+          onFormReady: (form: HTMLFormElement) => {
             try {
-              if ($form && typeof $form === 'object' && $form.find) {
-                // Use jQuery-style delegation
-                const regionField = $form.find('[name="region"]')
-                if (regionField && regionField.length > 0) {
-                  regionField.on('change', function (this: HTMLInputElement) {
-                    selectedRegionRef.current = String(this.value || '').toUpperCase()
-                  })
+              // Pre-populate safe address field using native DOM API
+              if (safeAddress && form.elements) {
+                const safeAddressField = form.elements.namedItem('safe_address') as HTMLInputElement
+                if (safeAddressField) {
+                  safeAddressField.value = safeAddress
+                  // Trigger change event for HubSpot's internal tracking
+                  const changeEvent = new Event('change', { bubbles: true })
+                  safeAddressField.dispatchEvent(changeEvent)
                 }
               }
+
+              // Track region field changes
+              const regionField = form.elements.namedItem('region') as HTMLSelectElement
+              if (regionField) {
+                const initialValue = regionField.value
+                if (initialValue) {
+                  selectedRegionRef.current = String(initialValue).toUpperCase()
+                }
+                regionField.addEventListener('change', (e) => {
+                  selectedRegionRef.current = String((e.target as HTMLSelectElement).value || '').toUpperCase()
+                })
+              }
             } catch (error) {
-              console.warn('[HubSpotForm] Failed to attach region change handler:', error)
+              console.warn('[HubSpotForm] Error in onFormReady:', error)
             }
           },
           onFormSubmitted: ($form: any, data: any) => {
-            console.log('[HubSpotForm] Form submitted', { data })
-            // Call the onSubmit callback if provided
-            onSubmit?.()
-            // Show thank you message and Calendly
-            setShowThankYou(true)
-            console.log('[HubSpotForm] showThankYou set to true')
+            if (data) {
+              let regionValue: string | undefined
+
+              if (Array.isArray(data)) {
+                const regionField = data.find((field: any) => field.name === 'region')
+                regionValue = regionField?.value
+              } else if (typeof data === 'object') {
+                if (data.submissionValues) {
+                  if (Array.isArray(data.submissionValues)) {
+                    const regionField = data.submissionValues.find((field: any) => field.name === 'region')
+                    regionValue = regionField?.value
+                  } else if (typeof data.submissionValues === 'object') {
+                    regionValue = data.submissionValues.region
+                  }
+                } else {
+                  regionValue = data.region || data.region_of_operation
+                }
+              }
+
+              if (regionValue) {
+                selectedRegionRef.current = String(regionValue).toUpperCase()
+              }
+            }
+
+            onSubmit?.(selectedRegionRef.current)
           },
         })
       }
@@ -107,75 +102,19 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1', onSubmit }: HubSpotForm
       }
       scriptLoadedRef.current = false
     }
-    // onSubmit is intentionally excluded from deps as it's only used in onFormSubmit callback
+    // onSubmit and safeAddress are intentionally excluded from deps as they're only used in callbacks
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [portalId, formId, region])
 
-  // Initialize Calendly when thank you view is shown
-  useEffect(() => {
-    if (!showThankYou || !calendlyContainerRef.current) {
-      return
-    }
-
-    const calendlyConfig = getCalendlyConfig()
-    const url = calendlyConfig[selectedRegionRef.current] || calendlyConfig['AMERICAS']
-
-    if (!url) {
-      console.error('[HubSpotForm] No Calendly URL found for region:', selectedRegionRef.current)
-      return
-    }
-
-    const startCalendly = () => {
-      if (window.Calendly && calendlyContainerRef.current) {
-        window.Calendly.initInlineWidget({
-          url,
-          parentElement: calendlyContainerRef.current,
-        })
-      }
-    }
-
-    if (window.Calendly?.initInlineWidget) {
-      startCalendly()
-    } else {
-      // Poll for Calendly to be available
-      const interval = setInterval(() => {
-        if (window.Calendly?.initInlineWidget) {
-          clearInterval(interval)
-          startCalendly()
-        }
-      }, 100)
-
-      // Cleanup interval if component unmounts
-      return () => clearInterval(interval)
-    }
-  }, [showThankYou])
-
   return (
-    <Paper sx={{ py: 1, px: 3, backgroundColor: 'var(--color-static-primary)' }}>
-      {!showThankYou ? (
-        <>
-          <Typography variant="h3" fontWeight={700} gutterBottom color="var(--color-static-main)">
-            Request demo
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 4, color: 'var(--color-static-light)' }}>
-            Share your details to verify your request and book your demo call.
-          </Typography>
-          <div id="hubspot-form-container" ref={formContainerRef} />
-        </>
-      ) : (
-        <>
-          <Typography variant="h3" fontWeight={700} gutterBottom color="var(--color-static-main)">
-            Thanks! Pick a time that suits you.
-          </Typography>
-          <div
-            ref={calendlyContainerRef}
-            style={{
-              minWidth: '320px',
-              height: '700px',
-            }}
-          />
-        </>
-      )}
+    <Paper sx={{ py: 1, backgroundColor: 'var(--color-static-primary)' }}>
+      <Typography variant="h3" fontWeight={700} gutterBottom color="var(--color-static-main)">
+        Request demo
+      </Typography>
+      <Typography variant="body1" sx={{ mb: 4, color: 'var(--color-static-light)' }}>
+        Share your details to verify your request and book your demo call.
+      </Typography>
+      <div id="hubspot-form-container" ref={formContainerRef} />
     </Paper>
   )
 }
