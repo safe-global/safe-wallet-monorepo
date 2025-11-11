@@ -4,6 +4,7 @@ import { withHnBannerConditions, type WithHnBannerConditionsProps } from '../wit
 import { withHnSignupFlow } from '../withHnSignupFlow'
 import { BannerType } from '../../hooks/useBannerStorage'
 import { HnBannerWithDismissal } from './HnBannerWithDismissal'
+import { HnBannerWithLocalStorage } from './HnBannerWithLocalStorage'
 
 // Export the original pure component for tests and stories
 export { HnBanner, hnBannerID } from './HnBanner'
@@ -19,3 +20,9 @@ const HnBannerWithConditions = withHnBannerConditions(BannerType.Promo)(
   HnBannerWithSignupAndDismissal as ComponentType<WithHnBannerConditionsProps>,
 )
 export default withHnFeature(HnBannerWithConditions)
+
+// Export version with localStorage for use in pages without SafeInfo (e.g., /wallets/account)
+// Apply withHnSignupFlow first (inner), then withHnFeature (outer)
+// Visibility check is now handled directly in HnBannerWithLocalStorage
+const HnBannerWithLocalStorageAndSignup = withHnSignupFlow(HnBannerWithLocalStorage)
+export const HnBannerWithLocalStorageVisibility = withHnFeature(HnBannerWithLocalStorageAndSignup)
