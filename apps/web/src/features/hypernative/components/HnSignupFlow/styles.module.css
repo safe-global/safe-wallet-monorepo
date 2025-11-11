@@ -1,20 +1,25 @@
 .container {
-  min-height: 644px;
+  height: 644px;
+  overflow: hidden;
 }
 
 .contentColumn {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   padding: var(--space-5) var(--space-4);
+  overflow-y: auto;
+  max-height: 644px;
 }
 
 .formColumn {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding: var(--space-5) var(--space-4);
+  padding: var(--space-5) var(--space-4) var(--space-1);
   background-color: var(--color-static-primary);
+  overflow-y: auto;
+  max-height: 100%;
 }
 
 .contentWrapper {
@@ -25,6 +30,7 @@
 .formWrapper {
   margin: 0 auto;
   width: 100%;
+  min-height: 776px;
 }
 
 .formTitle {
@@ -38,8 +44,7 @@
 }
 
 .cancelButtonWrapper {
-  display: flex;
-  justify-content: flex-end;
+  z-index: 1;
   margin-top: -60px;
 }
 
