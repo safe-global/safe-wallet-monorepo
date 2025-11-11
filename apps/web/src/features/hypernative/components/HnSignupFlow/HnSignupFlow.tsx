@@ -15,6 +15,7 @@ export type HnSignupFlowProps = {
 
 const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
   const [activeStep, setActiveStep] = useState(0)
+  const [formSubmitted, setFormSubmitted] = useState(false)
   const dispatch = useAppDispatch()
   const chainId = useChainId()
   const { safeAddress } = useSafeInfo()
@@ -28,7 +29,20 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
   }
 
   const handleFormSubmit = () => {
-    dispatch(setFormCompleted({ chainId, safeAddress, completed: true }))
+    // Mark form as submitted locally, but don't update Redux yet
+    setFormSubmitted(true)
+  }
+
+  const handleClose = () => {
+    // Only mark form as completed in Redux if it was submitted
+    if (formSubmitted) {
+      dispatch(setFormCompleted({ chainId, safeAddress, completed: true }))
+    }
+    // Reset local state
+    setFormSubmitted(false)
+    setActiveStep(0)
+    // Call parent onClose
+    onClose()
   }
 
   const getHubSpotConfig = () => {
@@ -48,7 +62,7 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
   const renderStepContent = () => {
     switch (activeStep) {
       case 0:
-        return <HnSignupIntro onGetStarted={handleNext} onClose={onClose} />
+        return <HnSignupIntro onGetStarted={handleNext} onClose={handleClose} />
       case 1:
         if (!hubSpotConfig) {
           return (
@@ -72,7 +86,7 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
   }
 
   return (
-    <HnModal open={open} onClose={onClose}>
+    <HnModal open={open} onClose={handleClose}>
       <Box>{renderStepContent()}</Box>
     </HnModal>
   )
