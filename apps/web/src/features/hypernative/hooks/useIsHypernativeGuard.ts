@@ -19,21 +19,28 @@ export const useIsHypernativeGuard = (): HypernativeGuardCheckResult => {
   const web3ReadOnly = useWeb3ReadOnly()
 
   const [isHnGuard, error, loading] = useAsync<boolean>(
-    () => {
+    async () => {
       // Don't check if Safe is not loaded yet or if there's no provider
+      // Return false instead of undefined to clear previous cached values
       if (!safeLoaded || !web3ReadOnly) {
-        return
+        return false
       }
 
       // If there's no guard, we know it's not a HypernativeGuard
       if (!safe.guard) {
-        return Promise.resolve(false)
+        return false
       }
 
-      // Check if the guard is a HypernativeGuard
-      return isHypernativeGuard(safe.guard.value, web3ReadOnly)
+      try {
+        // Check if the guard is a HypernativeGuard
+        return await isHypernativeGuard(safe.chainId, safe.guard.value, web3ReadOnly)
+      } catch (error) {
+        // On error (e.g., RPC failure), return false but don't cache it
+        // The error will be logged in the service layer
+        return false
+      }
     },
-    [safe.guard, safeLoaded, web3ReadOnly],
+    [safe.chainId, safe.guard, safeLoaded, web3ReadOnly],
     false, // Don't clear data on re-fetch to avoid flickering
   )
 

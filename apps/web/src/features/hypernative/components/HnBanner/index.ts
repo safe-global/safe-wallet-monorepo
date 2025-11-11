@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react'
-import { withHnFeature, type WithHnFeatureProps } from '../withHnFeature'
+import { withHnFeature } from '../withHnFeature'
+import { withHnBannerConditions, type WithHnBannerConditionsProps } from '../withHnBannerConditions'
 import { withHnSignupFlow } from '../withHnSignupFlow'
 import { BannerType } from '../../hooks/useBannerStorage'
 import { HnBannerWithDismissal } from './HnBannerWithDismissal'
@@ -12,6 +13,9 @@ export type { HnBannerProps } from './HnBanner'
 export { HnBannerForCarousel } from './HnBannerForCarousel'
 
 // Export the composed HOC as default for use in Settings
-// Apply withHnSignupFlow first (inner), then withHnFeature (outer) to the wrapper component
+// Apply withHnSignupFlow first (inner), then withHnBannerConditions, then withHnFeature (outer)
 const HnBannerWithSignupAndDismissal = withHnSignupFlow(HnBannerWithDismissal)
-export default withHnFeature(BannerType.Promo)(HnBannerWithSignupAndDismissal as ComponentType<WithHnFeatureProps>)
+const HnBannerWithConditions = withHnBannerConditions(BannerType.Promo)(
+  HnBannerWithSignupAndDismissal as ComponentType<WithHnBannerConditionsProps>,
+)
+export default withHnFeature(HnBannerWithConditions)
