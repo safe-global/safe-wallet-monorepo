@@ -7,7 +7,7 @@ export type HnSignupFormProps = {
   formId: string
   region?: string
   onCancel?: () => void
-  onSubmit?: () => void
+  onSubmit?: (region: string) => void
 }
 
 const HnSignupForm = ({ portalId, formId, region = 'eu1', onCancel, onSubmit }: HnSignupFormProps) => {
