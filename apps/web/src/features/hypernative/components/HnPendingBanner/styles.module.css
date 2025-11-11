@@ -77,14 +77,16 @@
 
 .closeButton {
   position: absolute !important;
-  top: var(--space-1);
+  top: var(--space-2);
   right: var(--space-2);
-  transform: translateY(4px);
   padding: 0;
   width: var(--space-2);
   height: var(--space-2);
   min-width: var(--space-2);
   min-height: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Override the color of the close button icon as this color is not in the design system */
