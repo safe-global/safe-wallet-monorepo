@@ -221,7 +221,7 @@ describe('txQueueSlice', () => {
 
   it('should not dispatch event if signature is still missing', () => {
     const listenerApi = {
-      getState: jest.fn(() => ({} as RootState)),
+      getState: jest.fn(() => ({}) as RootState),
       dispatch: jest.fn(),
     }
 

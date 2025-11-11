@@ -35,10 +35,13 @@ const FEE_TIERS = {
 }
 
 const getLowerCaseStableCoinAddresses = () => {
-  const lowerCaseStableCoinAddresses = Object.keys(stableCoinAddresses).reduce((result, key) => {
-    result[key.toLowerCase()] = stableCoinAddresses[key]
-    return result
-  }, {} as typeof stableCoinAddresses)
+  const lowerCaseStableCoinAddresses = Object.keys(stableCoinAddresses).reduce(
+    (result, key) => {
+      result[key.toLowerCase()] = stableCoinAddresses[key]
+      return result
+    },
+    {} as typeof stableCoinAddresses,
+  )
 
   return lowerCaseStableCoinAddresses
 }

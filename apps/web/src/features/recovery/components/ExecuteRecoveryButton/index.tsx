@@ -40,8 +40,8 @@ export function ExecuteRecoveryButton({
                 ? isWrongChain
                   ? `Switch your wallet network to ${chain?.chainName} to execute this transaction`
                   : isNext
-                  ? 'You can execute the recovery after the specified review window'
-                  : 'Previous recovery proposals must be executed or cancelled first'
+                    ? 'You can execute the recovery after the specified review window'
+                    : 'Previous recovery proposals must be executed or cancelled first'
                 : null
             }
           >

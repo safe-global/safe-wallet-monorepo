@@ -69,8 +69,10 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const canEdit = !isSigned && !isReadOnly
 
   // Priority to external nonce, then to the recommended one
-  const finalNonce = canEdit ? nonce ?? recommendedNonce ?? safeTx?.data.nonce : safeTx?.data.nonce
-  const finalSafeTxGas = canEdit ? safeTxGas ?? recommendedSafeTxGas ?? safeTx?.data.safeTxGas : safeTx?.data.safeTxGas
+  const finalNonce = canEdit ? (nonce ?? recommendedNonce ?? safeTx?.data.nonce) : safeTx?.data.nonce
+  const finalSafeTxGas = canEdit
+    ? (safeTxGas ?? recommendedSafeTxGas ?? safeTx?.data.safeTxGas)
+    : safeTx?.data.safeTxGas
 
   // Update the tx when the nonce or safeTxGas change
   useEffect(() => {
