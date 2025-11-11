@@ -176,7 +176,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
             proposer={proposer}
           />
 
-          <HnSecurityReportBtnForTxDetails txDetails={txDetails} />
+          {isQueue && <HnSecurityReportBtnForTxDetails txDetails={txDetails} />}
 
           <TxShareBlock txId={txDetails.txId} txHash={txDetails.txHash} />
 
