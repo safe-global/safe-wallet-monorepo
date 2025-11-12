@@ -7,7 +7,7 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import { useAppSelector } from '@/store'
 import { selectCurrency, selectSettings, TOKEN_LISTS } from '@/store/settingsSlice'
-import { useCurrentChain } from '../useChains'
+import { useCurrentChain, useHasFeature } from '../useChains'
 import useSafeInfo from '../useSafeInfo'
 import { POLLING_INTERVAL, PORTFOLIO_POLLING_INTERVAL } from '@/config/constants'
 import { useCounterfactualBalances } from '@/features/counterfactual/useCounterfactualBalances'
@@ -71,15 +71,11 @@ const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
   const currency = useAppSelector(selectCurrency)
   const isTrustedTokenList = useTokenListSetting()
   const { safe, safeAddress } = useSafeInfo()
-  const chain = useCurrentChain()
   const isReady = safeAddress && safe.deployed && isTrustedTokenList !== undefined
   const isReadyPortfolio = safeAddress && isTrustedTokenList !== undefined
   const isCounterfactual = !safe.deployed
 
-  const shouldUsePortfolioEndpoint = useMemo(
-    () => (chain ? hasFeature(chain, FEATURES.PORTFOLIO_ENDPOINT) : false),
-    [chain],
-  )
+  const shouldUsePortfolioEndpoint = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
 
   const {
     currentData: legacyBalances,
