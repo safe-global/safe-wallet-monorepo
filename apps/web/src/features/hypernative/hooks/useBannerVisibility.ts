@@ -1,8 +1,7 @@
 import { useMemo } from 'react'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-import type { BannerType } from './useBannerStorage'
-import { useBannerStorage } from './useBannerStorage'
+import { BannerType, useBannerStorage } from './useBannerStorage'
 import { useIsHypernativeGuard } from './useIsHypernativeGuard'
 import { useIsHypernativeFeature } from './useIsHypernativeFeature'
 import { IS_PRODUCTION } from '@/config/constants'
@@ -32,7 +31,7 @@ const hasSufficientBalance = (fiatTotal: string): boolean => {
 /**
  * Hook to determine if a banner should be shown based on multiple conditions.
  *
- * @param bannerType - The type of banner: BannerType.Promo or BannerType.Pending
+ * @param bannerType - The type of banner: BannerType.Promo, BannerType.Pending, or BannerType.TxReportButton
  * @returns BannerVisibilityResult with showBanner flag and loading state
  *
  * Conditions checked (in order):
@@ -40,7 +39,8 @@ const hasSufficientBalance = (fiatTotal: string): boolean => {
  * 2. Wallet must be connected
  * 3. Connected wallet must be an owner of the current Safe
  * 4. Safe must have balance > MIN_BALANCE_USD (production) or > 1 USD (non-production)
- * 5. Safe must not have HypernativeGuard installed
+ * 5. For Promo/Pending: Safe must not have HypernativeGuard installed
+ *    For TxReportButton: Show if banner conditions are met OR if HypernativeGuard is installed
  *
  * If any condition fails, showBanner will be false.
  */
@@ -59,6 +59,19 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
       return { showBanner: false, loading: true }
     }
 
+    // For TxReportButton, show if banner conditions are met OR if guard is installed
+    if (bannerType === BannerType.TxReportButton) {
+      const bannerConditionsMet =
+        isEnabled && shouldShowBanner && isSafeOwner && hasSufficientBalance(balances.fiatTotal) && !isHypernativeGuard
+      const showBanner = bannerConditionsMet || isHypernativeGuard
+
+      return {
+        showBanner,
+        loading: false,
+      }
+    }
+
+    // For other banner types (Promo, Pending), guard must NOT be installed
     const showBanner =
       isEnabled && shouldShowBanner && isSafeOwner && hasSufficientBalance(balances.fiatTotal) && !isHypernativeGuard
 
@@ -66,5 +79,14 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
       showBanner,
       loading: false,
     }
-  }, [isEnabled, shouldShowBanner, isSafeOwner, balances.fiatTotal, balancesLoading, isHypernativeGuard, guardLoading])
+  }, [
+    bannerType,
+    isEnabled,
+    shouldShowBanner,
+    isSafeOwner,
+    balances.fiatTotal,
+    balancesLoading,
+    isHypernativeGuard,
+    guardLoading,
+  ])
 }

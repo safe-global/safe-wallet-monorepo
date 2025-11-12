@@ -6,7 +6,7 @@ import useChainId from '@/hooks/useChainId'
 import { getSafeTxHashFromDetails } from '../../services/safeTxHashCalculation'
 import { HnSecurityReportBtn } from './HnSecurityReportBtn'
 
-interface HnSecurityReportBtnWithTxHashProps {
+export interface HnSecurityReportBtnWithTxHashProps {
   txDetails: TransactionDetails
 }
 
