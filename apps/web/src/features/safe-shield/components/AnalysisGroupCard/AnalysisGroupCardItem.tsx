@@ -5,12 +5,14 @@ import { isAddressChange } from '@safe-global/utils/features/safe-shield/utils'
 import { SEVERITY_COLORS } from '../../constants'
 import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
 import { AddressChanges } from '../AddressChanges'
-import { ShowAllAddress } from './ShowAllAddress'
+import { ShowAllAddress } from '../ShowAllAddress/ShowAllAddress'
 
 interface AnalysisGroupCardItemProps {
   result: AnalysisResult
   description?: React.ReactNode
   severity?: Severity
+  name?: string
+  logoUrl?: string
 }
 
 export const AnalysisGroupCardItem = ({ result, description, severity }: AnalysisGroupCardItemProps) => {

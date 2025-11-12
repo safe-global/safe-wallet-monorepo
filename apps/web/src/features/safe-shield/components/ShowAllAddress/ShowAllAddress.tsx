@@ -1,10 +1,15 @@
 import { ExpandMore } from '@mui/icons-material'
-import { Collapse, Typography } from '@mui/material'
+import { Collapse, Stack, Typography } from '@mui/material'
 import { useReducer } from 'react'
 import { Box } from '@mui/material'
+import { ContractImage } from '../ContractImage'
 
 interface ShowAllAddressProps {
-  addresses: string[]
+  addresses: {
+    address: string
+    name: string
+    logoUrl: string
+  }[]
 }
 
 export const ShowAllAddress = ({ addresses }: ShowAllAddressProps) => {
@@ -49,10 +54,35 @@ export const ShowAllAddress = ({ addresses }: ShowAllAddressProps) => {
       <Collapse in={expanded}>
         <Box display="flex" flexDirection="column" gap={1}>
           {addresses.map((item, index) => (
-            <Box padding="8px" key={`${item}-${index}`} bgcolor="background.paper" borderRadius="4px">
-              <Typography variant="body2" lineHeight="20px" sx={{ overflowWrap: 'break-word' }}>
-                {item}
-              </Typography>
+            <Box
+              padding="8px"
+              display="flex"
+              gap={1}
+              key={`${item.address}-${index}`}
+              bgcolor="background.paper"
+              borderRadius="6px"
+            >
+              <ContractImage logoUrl={item.logoUrl} />
+
+              <Stack spacing={0.5}>
+                {item.name && (
+                  <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+                    {item.name}
+                  </Typography>
+                )}
+
+                <Typography
+                  variant="body2"
+                  color="primary.light"
+                  lineHeight="1rem"
+                  sx={{
+                    fontSize: 12,
+                    wordBreak: 'break-all',
+                  }}
+                >
+                  {item.address}
+                </Typography>
+              </Stack>
             </Box>
           ))}
         </Box>

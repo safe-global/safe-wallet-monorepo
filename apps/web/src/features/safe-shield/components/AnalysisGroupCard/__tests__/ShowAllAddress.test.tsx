@@ -1,5 +1,5 @@
 import { render, screen, renderWithUserEvent } from '@/tests/test-utils'
-import { ShowAllAddress } from '../ShowAllAddress'
+import { ShowAllAddress } from '../../ShowAllAddress/ShowAllAddress'
 import { faker } from '@faker-js/faker'
 
 describe('ShowAllAddress', () => {
