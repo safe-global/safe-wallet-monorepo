@@ -1,0 +1,66 @@
+import { useCallback } from 'react'
+import useChainId from '@/hooks/useChainId'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import { useAppSelector } from '@/store'
+import { selectCurrency } from '@/store/settingsSlice'
+import { usePositionsGetPositionsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
+import { useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { usePortfolioGetPortfolioV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useHasFeature } from '@/hooks/useChains'
+import { useTokenListSetting } from '@/hooks/loadables/useLoadBalances'
+import useIsPositionsFeatureEnabled from './useIsPositionsFeatureEnabled'
+
+export const useRefetchPositionsAndBalances = () => {
+  const chainId = useChainId()
+  const { safe, safeAddress } = useSafeInfo()
+  const currency = useAppSelector(selectCurrency)
+  const isPositionsEnabled = useIsPositionsFeatureEnabled()
+  const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
+  const isTrustedTokenList = useTokenListSetting()
+
+  const shouldUsePortfolioEndpoint = isPositionsEnabled && isPortfolioEndpointEnabled
+  const shouldUsePositionEndpoint = isPositionsEnabled && !isPortfolioEndpointEnabled
+  const isReady = safeAddress && safe.deployed && isTrustedTokenList !== undefined
+  const isReadyPortfolio = safeAddress && isTrustedTokenList !== undefined
+
+  const { refetch: legacyPositionsRefetch } = usePositionsGetPositionsV1Query(
+    { chainId, safeAddress, fiatCode: currency },
+    {
+      skip: !shouldUsePositionEndpoint || !safeAddress || !chainId || !currency,
+    },
+  )
+
+  const { refetch: portfolioRefetch } = usePortfolioGetPortfolioV1Query(
+    {
+      address: safeAddress,
+      chainIds: safe.chainId,
+      fiatCode: currency,
+      trusted: isTrustedTokenList,
+    },
+    {
+      skip: !shouldUsePortfolioEndpoint || !isReadyPortfolio || !safe.chainId,
+    },
+  )
+
+  const { refetch: legacyBalancesRefetch } = useBalancesGetBalancesV1Query(
+    {
+      chainId: safe.chainId,
+      safeAddress,
+      fiatCode: currency,
+      trusted: isTrustedTokenList,
+    },
+    {
+      skip: !isReady || shouldUsePortfolioEndpoint,
+    },
+  )
+
+  const refetch = useCallback(async () => {
+    if (shouldUsePortfolioEndpoint) {
+      return portfolioRefetch()
+    }
+    await Promise.all([legacyPositionsRefetch(), legacyBalancesRefetch()])
+  }, [shouldUsePortfolioEndpoint, portfolioRefetch, legacyPositionsRefetch, legacyBalancesRefetch])
+
+  return { refetch }
+}
