@@ -1,4 +1,4 @@
-import { type ReactElement, useMemo, useState, useEffect } from 'react'
+import { type ReactElement, useMemo, useState, useEffect, useRef } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 
@@ -12,17 +12,20 @@ import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shiel
 import { SeverityIcon } from '../SeverityIcon'
 import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
 import { DelegateCallCardItem } from './DelegateCallCardItem'
+import { type AnalyticsEvent, MixpanelEventParams, trackEvent } from '@/services/analytics'
 
 interface AnalysisGroupCardProps {
   data: { [address: string]: GroupedAnalysisResults }
   highlightedSeverity?: Severity
   delay?: number
+  analyticsEvent?: AnalyticsEvent
 }
 
 export const AnalysisGroupCard = ({
   data,
   highlightedSeverity,
   delay = 0,
+  analyticsEvent,
 }: AnalysisGroupCardProps): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
@@ -39,6 +42,19 @@ export const AnalysisGroupCard = ({
       setIsVisible(true)
     }, delay)
   }, [delay, primaryResult])
+
+  // Track analytics event when results change
+  const prevTrackedResultsKeyRef = useRef<string>('')
+  useEffect(() => {
+    if (analyticsEvent && visibleResults.length > 0) {
+      const titles = visibleResults.map((result) => result.title)
+      const key = JSON.stringify(titles)
+      if (key !== prevTrackedResultsKeyRef.current && titles.length > 0) {
+        trackEvent(analyticsEvent, { [MixpanelEventParams.RESULT]: titles })
+        prevTrackedResultsKeyRef.current = key
+      }
+    }
+  }, [analyticsEvent, visibleResults])
 
   if (!primaryResult) {
     return null
