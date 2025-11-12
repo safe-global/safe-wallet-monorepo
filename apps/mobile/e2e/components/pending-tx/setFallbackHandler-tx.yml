@@ -50,6 +50,6 @@ appId: global.safe.mobileapp.ios
 - runFlow:
     file: ../../shared/test-review-and-execute.yml
     env:
-      TX_EXECUTION_STATUS: 'success'
+      TX_EXECUTION_STATUS: 'succeed'
       EXPECTED_EXECUTION_METHOD: 'signer'
 
