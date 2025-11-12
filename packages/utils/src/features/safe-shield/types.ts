@@ -106,8 +106,8 @@ export type AnalysisResult<T extends AnyStatus = AnyStatus> = {
   description: string
   addresses?: {
     address: string
-    name: string
-    logoUrl: string
+    name?: string
+    logoUrl?: string
   }[]
 }
 

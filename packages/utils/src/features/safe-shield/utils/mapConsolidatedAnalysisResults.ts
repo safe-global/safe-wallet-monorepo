@@ -64,11 +64,14 @@ export const mapConsolidatedAnalysisResults = (
           addresses: typeResults
             .flatMap((result) => result.addresses)
             .filter((addresses) => addresses !== undefined)
-            .map((addresses) => ({
-              address: addresses,
-              name: addressesResultsMap[addresses]?.name,
-              logoUrl: addressesResultsMap[addresses]?.logoUrl,
-            })),
+            .map((addresses) => {
+              const result = (addressesResultsMap as Record<string, { name?: string; logoUrl?: string }>)[addresses]
+              return {
+                address: addresses,
+                name: result?.name,
+                logoUrl: result?.logoUrl,
+              }
+            }),
         })
       }
     }

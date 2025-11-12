@@ -7,8 +7,8 @@ import { AddressImage } from '../AddressImage'
 interface ShowAllAddressProps {
   addresses: {
     address: string
-    name: string
-    logoUrl: string
+    name?: string
+    logoUrl?: string
   }[]
 }
 
