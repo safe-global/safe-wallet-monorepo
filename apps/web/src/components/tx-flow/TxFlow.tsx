@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, type ReactNode } from 'react'
+import React, { useCallback, useMemo, type ReactNode } from 'react'
 import useTxStepper from './useTxStepper'
 import SafeTxProvider from './SafeTxProvider'
 import { TxInfoProvider } from './TxInfoProvider'
@@ -12,7 +12,6 @@ import { SlotProvider } from './slots'
 import { useTrackTimeSpent } from '../tx/SignOrExecuteForm/tracking'
 import LedgerHashComparison from '@/features/ledger'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
-import { trackEvent, SAFE_SHIELD_EVENTS } from '@/services/analytics'
 
 type SubmitCallbackProps = { txId?: string; isExecuted?: boolean }
 export type SubmitCallback = (args?: SubmitCallbackProps) => void
@@ -64,11 +63,6 @@ export const TxFlow = <T extends unknown>({
   )
 
   const trackTimeSpent = useTrackTimeSpent()
-
-  // Track when a transaction flow is started
-  useEffect(() => {
-    trackEvent(SAFE_SHIELD_EVENTS.TRANSACTION_STARTED)
-  }, [])
 
   const handleFlowSubmit = useCallback<SubmitCallback>(
     (props) => {
