@@ -59,10 +59,11 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
       return { showBanner: false, loading: true }
     }
 
+    const hasSufficientBalanceCheck = hasSufficientBalance(balances.fiatTotal)
+
     // For TxReportButton, show if banner conditions are met OR if guard is installed
     if (bannerType === BannerType.TxReportButton) {
-      const bannerConditionsMet =
-        isEnabled && shouldShowBanner && isSafeOwner && hasSufficientBalance(balances.fiatTotal) && !isHypernativeGuard
+      const bannerConditionsMet = isEnabled && isSafeOwner && hasSufficientBalanceCheck && !isHypernativeGuard
       const showBanner = bannerConditionsMet || isHypernativeGuard
 
       return {
@@ -72,8 +73,7 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
     }
 
     // For other banner types (Promo, Pending), guard must NOT be installed
-    const showBanner =
-      isEnabled && shouldShowBanner && isSafeOwner && hasSufficientBalance(balances.fiatTotal) && !isHypernativeGuard
+    const showBanner = isEnabled && shouldShowBanner && isSafeOwner && hasSufficientBalanceCheck && !isHypernativeGuard
 
     return {
       showBanner,
