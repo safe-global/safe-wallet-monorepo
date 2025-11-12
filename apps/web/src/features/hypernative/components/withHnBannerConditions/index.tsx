@@ -15,9 +15,7 @@ export interface WithHnBannerConditionsProps {
  *
  * @param bannerType - The type of banner to check visibility for
  */
-export function withHnBannerConditions<P extends WithHnBannerConditionsProps = WithHnBannerConditionsProps>(
-  bannerType: BannerType,
-) {
+export function withHnBannerConditions<P extends object = WithHnBannerConditionsProps>(bannerType: BannerType) {
   return function (WrappedComponent: ComponentType<P>) {
     return function WithHnBannerConditionsComponent(props: P): ReactElement | null {
       const { loading, showBanner } = useBannerVisibility(bannerType)
