@@ -7,7 +7,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding: var(--space-5) var(--space-4);
+  padding: var(--space-5) var(--space-3);
   max-height: 644px;
   overflow-y: auto;
 }
