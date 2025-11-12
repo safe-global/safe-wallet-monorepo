@@ -20,6 +20,7 @@ import {
   calculateAnalysisDelays,
   useDelayedLoading,
 } from '@/features/safe-shield/hooks/useDelayedLoading'
+import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 
 const normalizeThreatData = (threat?: AsyncResult<ThreatAnalysisResults>): Record<string, GroupedAnalysisResults> => {
   const [result] = threat || []
@@ -87,6 +88,7 @@ export const SafeShieldContent = ({
               delay={recipientDelay}
               data={recipientResults}
               highlightedSeverity={highlightedSeverity}
+              analyticsEvent={SAFE_SHIELD_EVENTS.RECIPIENT_DECODED}
             />
           )}
 
@@ -95,6 +97,7 @@ export const SafeShieldContent = ({
               data={contractResults}
               delay={contractAnalysisDelay}
               highlightedSeverity={highlightedSeverity}
+              analyticsEvent={SAFE_SHIELD_EVENTS.CONTRACT_DECODED}
             />
           )}
 
@@ -103,6 +106,7 @@ export const SafeShieldContent = ({
               data={normalizedThreatData}
               delay={threatAnalysisDelay}
               highlightedSeverity={highlightedSeverity}
+              analyticsEvent={SAFE_SHIELD_EVENTS.THREAT_ANALYZED}
             />
           )}
 
