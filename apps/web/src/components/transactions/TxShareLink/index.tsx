@@ -27,7 +27,7 @@ export function TxShareBlock({ txId }: { txId: string }) {
         <Button
           data-testid="copy-link-btn"
           variant="neutral"
-          startIcon={<SvgIcon component={ShareIcon} inheritViewBox fontSize="small" />}
+          startIcon={<SvgIcon component={ShareIcon} inheritViewBox fontSize="small" className={css.shareIcon} />}
         >
           Copy link
         </Button>

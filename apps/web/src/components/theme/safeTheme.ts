@@ -170,6 +170,7 @@ const createSafeTheme = (mode: PaletteMode): Theme => {
               fontWeight: 'bold',
               fontSize: '14px',
               minHeight: '40px',
+              gap: '7px',
               transition: 'all 0.2s ease-in-out',
               '&:hover': {
                 backgroundColor: theme.palette.border.light,

@@ -3,3 +3,7 @@
   position: relative;
   z-index: 10;
 }
+
+.shareIcon {
+  margin-right: -8px;
+}
