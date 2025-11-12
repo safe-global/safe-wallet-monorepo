@@ -17,6 +17,7 @@ const buildSecurityReportUrl = (baseUrl: string, chainId: string, safe: string, 
   url.searchParams.set('chain', `evm:${chainId}`)
   url.searchParams.set('safe', safe)
   url.searchParams.set('tx', tx)
+  url.searchParams.set('referrer', 'safe')
   return url.toString()
 }
 
