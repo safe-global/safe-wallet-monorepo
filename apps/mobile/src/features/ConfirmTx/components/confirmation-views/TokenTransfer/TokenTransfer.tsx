@@ -1,10 +1,7 @@
 import React from 'react'
 import { Container } from '@/src/components/Container'
-import { View, YStack, Text, Button, H3 } from 'tamagui'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { View, YStack, Text, H3 } from 'tamagui'
 import { Logo } from '@/src/components/Logo'
-import { EthAddress } from '@/src/components/EthAddress'
-import { Identicon } from '@/src/components/Identicon'
 import { TransactionHeader } from '../../TransactionHeader'
 import {
   MultisigExecutionDetails,
@@ -17,8 +14,8 @@ import { RootState } from '@/src/store'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { Address } from '@/src/types/address'
 import { TokenAmount } from '@/src/components/TokenAmount'
-import { useOpenExplorer } from '@/src/features/ConfirmTx/hooks/useOpenExplorer'
 import { ParametersButton } from '@/src/components/ParametersButton'
+import { HashDisplay } from '@/src/components/HashDisplay'
 
 interface TokenTransferProps {
   txId: string
@@ -33,8 +30,6 @@ export function TokenTransfer({ txId, txInfo, executionInfo, executedAt }: Token
   const { value, tokenSymbol, logoUri, decimals } = useTokenDetails(txInfo)
 
   const recipientAddress = txInfo.recipient.value as Address
-
-  const viewOnExplorer = useOpenExplorer(recipientAddress)
 
   return (
     <>
@@ -64,21 +59,7 @@ export function TokenTransfer({ txId, txInfo, executionInfo, executedAt }: Token
               <Text color="$textSecondaryLight">To</Text>
 
               <View flexDirection="row" alignItems="center" gap="$2">
-                <Identicon address={recipientAddress} size={24} />
-                <EthAddress
-                  address={recipientAddress}
-                  copy
-                  copyProps={{ color: '$textSecondaryLight', size: 18 }}
-                  textProps={{ fontSize: '$4' }}
-                />
-                <Button
-                  onPress={viewOnExplorer}
-                  marginLeft={-10}
-                  height={18}
-                  pressStyle={{ backgroundColor: 'transparent' }}
-                >
-                  <SafeFontIcon name="external-link" color="$textSecondaryLight" size={16} />
-                </Button>
+                <HashDisplay value={recipientAddress} />
               </View>
             </View>
 
