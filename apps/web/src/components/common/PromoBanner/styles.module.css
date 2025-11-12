@@ -70,11 +70,25 @@
 
 .closeButton:hover {
   background-color: transparent;
+  color: var(--color-static-light) !important;
 }
 
 .closeIcon {
   color: var(--color-static-main);
   opacity: 1;
+  transition: color 0.2s ease;
+}
+
+.closeButton:hover .closeIcon {
+  color: var(--color-static-light) !important;
+}
+
+[data-theme='dark'] .closeButton:hover {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme='dark'] .closeButton:hover .closeIcon {
+  color: var(--color-text-primary) !important;
 }
 
 .bannerImage {
