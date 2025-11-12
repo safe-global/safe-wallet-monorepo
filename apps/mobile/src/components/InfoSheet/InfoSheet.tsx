@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useRef, useMemo } from 'react'
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { SafeFontIcon } from '../SafeFontIcon'
 import { BottomSheetModal, TouchableOpacity } from '@gorhom/bottom-sheet'
@@ -29,6 +29,8 @@ export const InfoSheet = ({
     bottomSheetModalRef.current?.present()
   }, [])
 
+  const renderBackdrop = useCallback(() => <BackdropComponent shouldNavigateBack={false} />, [])
+
   return (
     <>
       <TouchableOpacity onPress={handlePresentModalPress}>
@@ -41,27 +43,27 @@ export const InfoSheet = ({
         containerComponent={Platform.OS === 'ios' ? FullWindowOverlay : undefined}
         ref={bottomSheetModalRef}
         backgroundComponent={BackgroundComponent}
-        backdropComponent={() => <BackdropComponent shouldNavigateBack={false} />}
+        backdropComponent={renderBackdrop}
         topInset={insets.top}
         enableDynamicSizing
         handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
         accessible={false}
       >
         <BottomSheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom }}>
-          <YStack gap="$4" padding="$4" alignItems="center" justifyContent="center">
-            {displayIcon && (
-              <Badge
-                themeName="badge_background"
-                circleSize="$10"
-                content={<SafeFontIcon name="info" size={24} color="$color" />}
-              />
-            )}
-            <View gap="$2" alignItems="center">
-              {title && <H4 fontWeight="600">{title}</H4>}
-              <Text textAlign="center">{info}</Text>
-            </View>
-          </YStack>
-        </BottomSheetScrollView>
+        <YStack gap="$4" padding="$4" alignItems="center" justifyContent="center">
+          {displayIcon && (
+            <Badge
+              themeName="badge_background"
+              circleSize="$10"
+              content={<SafeFontIcon name="info" size={24} color="$color" />}
+            />
+          )}
+          <View gap="$2" alignItems="center">
+            {title && <H4 fontWeight="600">{title}</H4>}
+            <Text textAlign="center">{info}</Text>
+          </View>
+        </YStack>
+      </BottomSheetScrollView>
       </BottomSheetModal>
     </>
   )
