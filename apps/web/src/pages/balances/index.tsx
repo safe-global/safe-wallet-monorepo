@@ -30,7 +30,7 @@ const Balances: NextPage = () => {
     'hideNoFeeNovemberAssetsPageBanner',
   )
 
-  const fiatTotal = balances.fiatTotal ? Number(balances.fiatTotal) : undefined
+  const tokensFiatTotal = balances.tokensFiatTotal ? Number(balances.tokensFiatTotal) : undefined
 
   const handleNoFeeNovemberDismiss = () => {
     setHideNoFeeNovemberBanner(true)
@@ -66,7 +66,7 @@ const Balances: NextPage = () => {
             )}
 
             <Box mb={2}>
-              <TotalAssetValue fiatTotal={fiatTotal} />
+              <TotalAssetValue fiatTotal={tokensFiatTotal} />
             </Box>
 
             <AssetsTable setShowHiddenAssets={setShowHiddenAssets} showHiddenAssets={showHiddenAssets} />
