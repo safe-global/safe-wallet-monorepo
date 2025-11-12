@@ -1,0 +1,24 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - util
+---
+# ===========================================
+# Remove Owner Transaction Card
+# ===========================================
+- assertVisible:
+    text: 'Settings change'
+
+- extendedWaitUntil:
+    visible:
+      text: '.*removeOwner.*'
+      optional: true
+    timeout: 2000
+
+- tapOn:
+    text: '.*removeOwner.*'
+
+- runFlow:
+    file: ./remove-owner-tx.yml
+
+- tapOn:
+    id: 'go-back'

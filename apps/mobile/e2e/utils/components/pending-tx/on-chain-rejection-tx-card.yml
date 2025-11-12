@@ -1,0 +1,37 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - util
+---
+# ===========================================
+# On-Chain Rejection Transaction Card (Pending)
+# ===========================================
+# Tests clicking on an on-chain rejection transaction in the pending transactions list
+# On-chain rejections may appear in the "Conflicting transactions" section
+#
+# Environment variables:
+#   IS_EXECUTABLE: Whether the transaction is expected to be executable - "true" or "false"
+#                  Defaults to "false" if not provided (most rejections are not immediately executable)
+
+# Verify the rejection card is visible
+# The card shows "Rejected" (type) and "On-chain rejection" (label)
+- assertVisible:
+    text: '.*Rejected.*'
+- assertVisible:
+    text: '.*On-chain rejection.*'
+
+# Tap on the On-chain rejection transaction text
+# Note: On-chain rejections may appear in "Conflicting transactions" sections
+# Using index: 0 to select the first one found
+- tapOn:
+    text: '.*On-chain rejection.*'
+    index: 0
+
+# Pass IS_EXECUTABLE to the detail test
+# If IS_EXECUTABLE is not provided, on-chain-rejection-tx.yml will default to "false"
+- runFlow:
+    file: ./on-chain-rejection-tx.yml
+    env:
+      IS_EXECUTABLE: ${IS_EXECUTABLE}
+
+- tapOn:
+    id: 'go-back'

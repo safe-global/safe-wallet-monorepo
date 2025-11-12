@@ -1,0 +1,28 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - transactions
+  - history
+  - smoke
+---
+- runFlow:
+    file: ../../../utils/setup/app-start.yml
+
+# Navigate to Transaction History using e2e button
+- tapOn:
+    id: 'e2eTransactionHistoryDirect'
+
+- assertVisible:
+    id: 'tx-history-list'
+
+# Scroll down to reveal batch transactions
+- scrollUntilVisible:
+    element:
+      text: 'Batch'
+    centerElement: true
+
+# Test batch transaction
+- runFlow:
+    file: ../../../utils/components/tx-history/batch-tx-card.yml
+    env:
+      METHOD_NAME: 'multiSend'
+      CONTRACT_NAME: 'Safe: MultiSendCallOnly 1.3.0'

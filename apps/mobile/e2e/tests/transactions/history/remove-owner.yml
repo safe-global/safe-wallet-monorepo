@@ -1,0 +1,25 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - transactions
+  - history
+  - settings
+---
+- runFlow:
+    file: ../../../utils/setup/app-start.yml
+
+# Navigate to Transaction History using e2e button
+- tapOn:
+    id: 'e2eTransactionHistoryDirect'
+
+- assertVisible:
+    id: 'tx-history-list'
+
+# Scroll down to find remove owner transaction
+- scrollUntilVisible:
+    element:
+      text: '.*Remove.*owner.*'
+    centerElement: true
+
+# Test remove owner transaction
+- runFlow:
+    file: ../../../utils/components/tx-history/remove-owner-tx-card.yml

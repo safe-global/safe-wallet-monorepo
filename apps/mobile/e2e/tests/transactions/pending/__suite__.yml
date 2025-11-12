@@ -1,0 +1,47 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - transactions
+  - pending
+  - suite
+---
+# Pending Transactions Test Suite
+# Runs all pending transaction tests with a single app launch for optimal performance
+
+- runFlow:
+    file: ../../../utils/setup/app-start.yml
+
+# Run all pending transaction tests with SKIP_CLEAN_START
+- runFlow:
+    file: ./conflicting-transactions.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./limit-order.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./swap-order.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./twap-order.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./on-chain-rejection.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./set-fallback-handler.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./batch-transaction.yml
+    env:
+      SKIP_CLEAN_START: 'true'

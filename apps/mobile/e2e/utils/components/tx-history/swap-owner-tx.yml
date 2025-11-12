@@ -1,0 +1,81 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - util
+---
+# ===========================================
+# Swap Owner Transaction
+# ===========================================
+- assertVisible: Transaction details
+- assertVisible: Swap signer
+
+# ===========================================
+# New Signer Field
+# ===========================================
+- assertVisible:
+    id: 'history-swap-signer-new-signer'
+- assertVisible: New signer
+- assertVisible:
+    id: 'history-swap-signer-new-signer'
+    containsDescendants:
+      - id: 'hash-display-name-or-address'
+        text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
+
+# ===========================================
+# Old Signer Field
+# ===========================================
+- assertVisible:
+    id: 'history-swap-signer-old-signer'
+- assertVisible: Old signer
+- assertVisible:
+    id: 'history-swap-signer-old-signer'
+    containsDescendants:
+      - id: 'hash-display-name-or-address'
+        text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
+
+# ===========================================
+# Network Display
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-network.yml
+
+# ===========================================
+# Transaction Details Button
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-details.yml
+
+# ===========================================
+# Common Transaction Info
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-info.yml
+
+# ===========================================
+# Confirmations
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-history-confirmations.yml
+
+# ===========================================
+# Test Explorer Link
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-explorer-link.yml
+
+- assertVisible: Transaction details
+
+# ===========================================
+# Test Share Transaction Button
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-share-link.yml
+
+- assertVisible: Transaction details
+
+# ===========================================
+# Test Transaction Details Button
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-advanced-details.yml
+
+- assertVisible: Transaction details

@@ -1,0 +1,102 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - util
+---
+# ===========================================
+# Stake Deposit Transaction
+# ===========================================
+- assertVisible: Transaction details
+- assertVisible: Deposit
+
+# ===========================================
+# Stake Deposit Details Section
+# ===========================================
+# Verify rewards rate is displayed
+- assertVisible:
+    text: '.*Rewards rate.*'
+
+# Verify net annual rewards is displayed
+- assertVisible:
+    text: '.*Net annual rewards.*'
+
+# Verify net monthly rewards is displayed
+- assertVisible:
+    text: '.*Net monthly rewards.*'
+
+# Verify widget fee is displayed
+- assertVisible:
+    text: '.*Widget fee.*'
+
+# Verify contract address is displayed
+- assertVisible:
+    text: '.*Contract.*'
+
+# ===========================================
+# Validator Information Section
+# ===========================================
+# Verify validator count is displayed
+- assertVisible:
+    text: '.*Validator.*'
+
+# Verify activation time is displayed
+- assertVisible:
+    text: '.*Activation time.*'
+
+# Verify rewards information is displayed
+- assertVisible:
+    text: '.*Rewards.*'
+
+# Verify validator status is displayed
+- assertVisible:
+    text: '.*Validator status.*'
+
+# ===========================================
+# Network Display
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-network.yml
+    env:
+      NETWORK: 'Ethereum'
+
+# ===========================================
+# Transaction Details Button
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-details.yml
+
+# ===========================================
+# Common Transaction Info
+# ===========================================
+- scroll
+- runFlow:
+    file: ../../assertions/verify-tx-info.yml
+
+# ===========================================
+# Confirmations
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-history-confirmations.yml
+
+# ===========================================
+# Test Explorer Link
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-explorer-link.yml
+
+- assertVisible: Transaction details
+
+# ===========================================
+# Test Share Transaction Button
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-share-link.yml
+
+- assertVisible: Transaction details
+
+# ===========================================
+# Test Transaction Details Button
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-advanced-details.yml
+
+- assertVisible: Transaction details

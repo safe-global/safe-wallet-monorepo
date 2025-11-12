@@ -1,0 +1,30 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - util
+---
+# ===========================================
+# Settings Change Transaction Card (Pending)
+# ===========================================
+# Tests clicking on a settings change transaction in the conflicting transactions card
+# The settings change transaction is the second one in the conflicting group
+
+- assertVisible:
+    text: 'Settings change'
+
+- extendedWaitUntil:
+    visible:
+      text: '.*addOwnerWithThreshold.*'
+      optional: true
+    timeout: 2000
+
+# Tap on the Settings change transaction text within the conflicting card
+# Using index 0 to ensure we tap the settings change transaction (it's the second one)
+- tapOn:
+    text: 'Settings change'
+    index: 0
+
+- runFlow:
+    file: ./settings-change-new-signer-tx.yml
+
+- tapOn:
+    id: 'go-back'

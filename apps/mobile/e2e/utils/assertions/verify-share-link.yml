@@ -1,0 +1,15 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - util
+---
+- assertVisible:
+    id: 'share-transaction-button'
+
+- tapOn:
+    id: 'share-transaction-button'
+
+- assertVisible: 'app.safe.global'
+
+- tapOn:
+    id: 'header.closeButton'
+

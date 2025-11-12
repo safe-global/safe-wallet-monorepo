@@ -1,0 +1,30 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - util
+---
+# ===========================================
+# Send Transaction Card (Pending)
+# ===========================================
+# Tests clicking on a send transaction in the conflicting transactions card
+# The send transaction is the first one in the conflicting group
+
+- assertVisible:
+    text: 'Send'
+
+- extendedWaitUntil:
+    visible:
+      text: '.*0\.00002 ETH.*'
+      optional: true
+    timeout: 2000
+
+# Tap on the Send transaction text within the conflicting card
+# Using index 0 to ensure we tap the first transaction (Send)
+- tapOn:
+    text: 'Send'
+    index: 0
+
+- runFlow:
+    file: ./send-tx.yml
+
+- tapOn:
+    id: 'go-back'

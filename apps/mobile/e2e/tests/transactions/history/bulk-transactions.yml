@@ -1,0 +1,32 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - transactions
+  - history
+---
+- runFlow:
+    file: ../../../utils/setup/app-start.yml
+
+# Navigate to Transaction History using e2e button
+- tapOn:
+    id: 'e2eTransactionHistoryDirect'
+
+- assertVisible:
+    id: 'tx-history-list'
+
+# Scroll down to reveal bulk transactions
+- scrollUntilVisible:
+    element:
+      text: 'Bulk transactions'
+    centerElement: true
+
+# Test first bulk transaction
+- runFlow:
+    file: ../../../utils/components/tx-history/bulk-tx-card.yml
+    env:
+      TRANSACTION_INDEX: '0'
+
+# Test second bulk transaction
+- runFlow:
+    file: ../../../utils/components/tx-history/bulk-tx-card.yml
+    env:
+      TRANSACTION_INDEX: '1'

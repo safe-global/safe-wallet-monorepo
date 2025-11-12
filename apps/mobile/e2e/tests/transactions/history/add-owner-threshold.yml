@@ -1,0 +1,19 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - transactions
+  - history
+  - settings
+---
+- runFlow:
+    file: ../../../utils/setup/app-start.yml
+
+# Navigate to Transaction History using e2e button
+- tapOn:
+    id: 'e2eTransactionHistoryDirect'
+
+- assertVisible:
+    id: 'tx-history-list'
+
+# Test add owner with threshold transaction
+- runFlow:
+    file: ../../../utils/components/tx-history/add-owner-with-threshold-tx-card.yml

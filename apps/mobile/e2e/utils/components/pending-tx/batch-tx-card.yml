@@ -1,0 +1,32 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - util
+---
+# ===========================================
+# Batch Transaction Card (Pending)
+# ===========================================
+# Tests clicking on a batch transaction in the pending transactions list
+# Batch transactions appear in the "Next" section
+
+- assertVisible:
+    text: 'Batch'
+
+- extendedWaitUntil:
+    visible:
+      text: '.*\d+\s+actions.*'
+      optional: true
+    timeout: 2000
+
+# Tap on the Batch transaction text
+# Using index 0 to ensure we tap the first batch transaction
+- tapOn:
+    text: 'Batch'
+    index: 0
+
+- runFlow:
+    file: ./batch-tx.yml
+    env:
+      IS_EXECUTABLE: 'false'
+
+- tapOn:
+    id: 'go-back'

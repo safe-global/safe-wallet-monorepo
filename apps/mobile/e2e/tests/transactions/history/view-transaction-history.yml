@@ -1,0 +1,48 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - transactions
+  - history
+  - smoke
+---
+# Transaction History E2E Test
+# Tests viewing transaction history with infinite scroll
+
+- runFlow:
+    file: ../../../utils/setup/app-start.yml
+
+# Navigate to Transaction History using e2e button
+- tapOn:
+    id: 'e2eTransactionHistoryDirect'
+
+- assertVisible:
+    id: 'tx-history-list'
+
+# Verify transactions are loaded (date groups or transaction items should be visible)
+- extendedWaitUntil:
+    visible:
+      text: '.*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).*\d{1,2},.*\d{4}.*'
+      optional: true
+    timeout: 2000
+
+# Verify date grouping is visible (sticky headers or date labels)
+- extendedWaitUntil:
+    visible:
+      text: '.*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).*'
+      optional: true
+    timeout: 2000
+
+# ============================================
+# Pull to Refresh
+# ============================================
+# Pull down on transaction list to refresh
+- swipe:
+    direction: DOWN
+    duration: 300
+
+# Wait for refresh to complete (loader should disappear if shown)
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Verify list is still visible after refresh
+- assertVisible:
+    id: 'tx-history-list'

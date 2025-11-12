@@ -1,0 +1,23 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - onboarding
+  - suite
+---
+# Onboarding Test Suite
+# Runs all onboarding tests with a single app launch for optimal performance
+
+# Clean app start ONCE at the beginning
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+# Run all onboarding tests with SKIP_CLEAN_START
+- runFlow:
+    file: ./new-user-onboarding.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./add-existing-safe.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+

@@ -1,0 +1,41 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - transactions
+  - history
+  - cow-protocol
+---
+- runFlow:
+    file: ../../../utils/setup/app-start.yml
+
+# Navigate to Transaction History using e2e button
+- tapOn:
+    id: 'e2eTransactionHistoryDirect'
+
+- assertVisible:
+    id: 'tx-history-list'
+
+# Switch to Swap Test Safe for Limit Order Test
+- tapOn:
+    id: 'home-tab'
+
+# Switch to Swap Test Safe using the utility
+- runFlow:
+    file: ../../../utils/setup/switch-safe.yml
+    env:
+      SAFE_NAME_PATTERN: '.*Swap Test Safe.*'
+
+# Navigate to transactions tab
+- tapOn:
+    id: 'transactions-tab'
+
+- assertVisible:
+    id: 'tx-history-list'
+
+# Scroll down until we find a limit order (should be after swap order)
+- scrollUntilVisible:
+    element:
+      text: 'Limit order'
+
+# Test limit order transaction
+- runFlow:
+    file: ../../../utils/components/tx-history/limit-order-tx-card.yml

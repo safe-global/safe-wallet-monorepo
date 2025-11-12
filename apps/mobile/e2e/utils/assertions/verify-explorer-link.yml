@@ -1,0 +1,15 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - util
+---
+- assertVisible:
+    id: 'view-on-explorer-button'
+    containsDescendants:
+      - text: 'View on Explorer'
+
+- tapOn:
+    id: 'view-on-explorer-button'
+
+- tapOn:
+    id: 'breadcrumb'
+

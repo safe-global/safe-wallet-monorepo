@@ -1,0 +1,24 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - util
+---
+# ===========================================
+# Sent Transaction Card
+# ===========================================
+- assertVisible:
+    text: 'Sent'
+
+- extendedWaitUntil:
+    visible:
+      text: '.*Sepolia Ether.*'
+      optional: true
+    timeout: 2000
+
+- tapOn:
+    text: '.*Sepolia Ether.*'
+
+- runFlow:
+    file: ./sent-tx.yml
+
+- tapOn:
+    id: 'go-back'

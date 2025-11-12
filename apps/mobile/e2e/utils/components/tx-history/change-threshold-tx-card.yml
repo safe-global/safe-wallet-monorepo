@@ -1,0 +1,24 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - util
+---
+# ===========================================
+# Change Threshold Transaction Card
+# ===========================================
+- assertVisible:
+    text: 'Settings change'
+
+- extendedWaitUntil:
+    visible:
+      text: '.*changeThreshold.*'
+      optional: true
+    timeout: 2000
+
+- tapOn:
+    text: '.*changeThreshold.*'
+
+- runFlow:
+    file: ./change-threshold-tx.yml
+
+- tapOn:
+    id: 'go-back'

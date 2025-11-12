@@ -1,0 +1,28 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - transactions
+  - history
+---
+- runFlow:
+    file: ../../../utils/setup/app-start.yml
+
+# Navigate to Transaction History using e2e button
+- tapOn:
+    id: 'e2eTransactionHistoryDirect'
+
+- assertVisible:
+    id: 'tx-history-list'
+
+# Scroll until we find deleteAllowance
+- scrollUntilVisible:
+    element:
+      text: '.*deleteAllowance.*'
+    centerElement: true
+
+# Test contract interaction (AllowanceModule - deleteAllowance)
+- runFlow:
+    file: ../../../utils/components/tx-history/contract-interaction-tx-card.yml
+    env:
+      METHOD_NAME: 'deleteAllowance'
+      CONTRACT_NAME: 'AllowanceModule'
+      ACTION_NAME: 'DeleteAllowance'

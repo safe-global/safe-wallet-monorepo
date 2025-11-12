@@ -1,0 +1,42 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - util
+---
+# ===========================================
+# Confirmations (Reusable Component)
+# ===========================================
+# Tests tapping on confirmations to open the bottom sheet
+# and verifies that signed badges are displayed
+#
+# This component should be called from the "Confirm transaction" screen
+# where the confirmations list item is visible
+#
+# Environment variables:
+#   CONFIRMATIONS_PATTERN: Optional regex pattern to verify confirmations count
+#                         Example: ".*1/1.*" or ".*2/3.*"
+#                         Defaults to ".*\d+/\d+.*" to match any confirmation format
+
+- assertVisible: 'Confirmations'
+
+# Verify confirmations pattern if provided
+- assertVisible:
+    text: '${CONFIRMATIONS_PATTERN || ".*\\d+/\\d+.*"}'
+
+# Tap on the confirmations list item to open the bottom sheet
+- tapOn:
+    id: 'confirmations-info-list-item'
+
+# Verify the bottom sheet opens with "Confirmations" title
+- assertVisible: 'Confirmations'
+
+# Verify that at least one "Signed" badge is visible in the sheet
+- assertVisible:
+    id: 'confirmations-sheet-signer-status-text'
+    text: 'Signed'
+
+# Dismiss the bottom sheet by swiping down
+- swipe:
+    direction: 'DOWN'
+
+# Verify we're back on the confirm transaction screen
+- assertVisible: 'Confirm transaction'

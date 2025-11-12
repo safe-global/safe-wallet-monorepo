@@ -1,0 +1,31 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - util
+---
+# ===========================================
+# Batch Transaction Card
+# ===========================================
+# Find and assert batch transaction is visible
+- assertVisible:
+    text: 'Batch'
+
+- extendedWaitUntil:
+    visible:
+      text: '.*\d+\s+actions.*'
+      optional: true
+    timeout: 2000
+
+# Click on the batch transaction (or a sub-transaction within it)
+# MultiSend transactions show as "Batch" with "X actions"
+- tapOn:
+    text: 'Batch'
+
+- runFlow:
+    file: ./batch-tx.yml
+
+- tapOn:
+    id: 'go-back'
+
+# Verify we're back to the transaction list
+- assertVisible:
+    id: 'tx-history-list'

@@ -1,0 +1,101 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - transactions
+  - history
+  - suite
+---
+# Transaction History Test Suite - Complete Coverage
+# First test does clean start, subsequent tests preserve state
+# This avoids React Hooks ordering issues while maintaining performance
+
+# ============================================
+# Tests on History Safe
+# ============================================
+
+# First test: Clean start + pull-to-refresh + infinite scroll
+- runFlow:
+    file: ./view-transaction-history.yml
+
+# Subsequent tests: Preserve state from previous test
+- runFlow:
+    file: ./rejected-transaction.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./sent-transaction.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./add-owner-threshold.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./received-transaction.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./change-threshold.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./bulk-transactions.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./batch-transaction.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./disable-module.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./remove-owner.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./swap-owner.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./contract-interaction-delete-allowance.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+# ============================================
+# Tests on Swap Test Safe
+# ============================================
+
+- runFlow:
+    file: ./swap-order.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./limit-order.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./contract-interaction-deposit.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+# ============================================
+# Tests on Stake Deposit Safe
+# ============================================
+
+- runFlow:
+    file: ./stake-deposit.yml
+    env:
+      SKIP_CLEAN_START: 'true'

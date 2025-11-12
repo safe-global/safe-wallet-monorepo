@@ -1,0 +1,68 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - util
+---
+# ===========================================
+# Send Transaction (Pending State)
+# ===========================================
+# Tests the send transaction detail view for pending transactions
+# Reuses shared test components from tx-history tests
+
+- assertVisible: 'Confirm transaction'
+
+- extendedWaitUntil:
+    visible:
+      text: '.*-.*ETH.*'
+      optional: true
+    timeout: 2000
+
+# ===========================================
+# Recipient Address
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-recipient.yml
+
+# ===========================================
+# Network Display
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-network.yml
+
+# ===========================================
+# Transaction Details Button
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-details.yml
+
+# ===========================================
+# Transaction Checks (Pending transactions show checks instead of created/executed)
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-checks.yml
+    env:
+      BALANCE_CHANGE_PATTERN: '.*-.*0\.00002.*'
+      TRANSACTION_SIMULATION_PATTERN: 'Success'
+      VERIFY_TENDERLY_LINK: 'true'
+
+# ===========================================
+# Confirmations
+# ===========================================
+# Test tapping on confirmations to open the bottom sheet and verify signed badge
+# For pending transactions, we use the confirmations from the confirm transaction screen
+# Verify that 1/1 confirmations are shown (the transaction has all required confirmations)
+- runFlow:
+    file: ../../assertions/verify-tx-confirmations.yml
+    env:
+      CONFIRMATIONS_PATTERN: '.*1/1.*'
+
+# ===========================================
+# Review and Execute Screen
+# ===========================================
+# Test navigating to Review and execute screen and verifying all elements
+# This send transaction should succeed, so we verify estimated network fee
+- runFlow:
+    file: ../../assertions/verify-review-and-execute.yml
+    env:
+      EXPECTED_SIGNER_PATTERN: '.*6fED.*'
+      TX_EXECUTION_STATUS: 'succeed'
+      EXPECTED_EXECUTION_METHOD: 'relay'

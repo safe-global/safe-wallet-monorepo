@@ -1,0 +1,18 @@
+appId: global.safe.mobileapp.ios
+tags:
+  - transactions
+  - history
+---
+- runFlow:
+    file: ../../../utils/setup/app-start.yml
+
+# Navigate to Transaction History using e2e button
+- tapOn:
+    id: 'e2eTransactionHistoryDirect'
+
+- assertVisible:
+    id: 'tx-history-list'
+
+# Test rejected transaction
+- runFlow:
+    file: ../../../utils/components/tx-history/reject-tx-card.yml

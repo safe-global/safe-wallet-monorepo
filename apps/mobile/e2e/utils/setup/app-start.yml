@@ -1,0 +1,55 @@
+appId: 'global.safe.mobileapp.ios'
+tags:
+  - util
+jsEngine: graaljs
+---
+# Launches app with clearState based on SKIP_CLEAN_START environment variable
+# - If SKIP_CLEAN_START != "true": clears state (fresh start)
+# - If SKIP_CLEAN_START == "true": preserves state (for suite mode)
+
+# Determine whether to clear state using JavaScript
+- evalScript: '${output.shouldClearState = (typeof SKIP_CLEAN_START === "undefined" || SKIP_CLEAN_START !== "true")}'
+
+# Launch with clear state (individual test mode)
+- runFlow:
+    when:
+      true: '${output.shouldClearState === true}'
+    commands:
+      - launchApp:
+          appId: 'global.safe.mobileapp.ios'
+          clearState: true
+          clearKeychain: true
+          permissions:
+            all: allow
+
+# Launch preserving state (suite mode)
+- runFlow:
+    when:
+      true: '${output.shouldClearState === false}'
+    commands:
+      - launchApp:
+          appId: 'global.safe.mobileapp.ios'
+          clearState: false
+          clearKeychain: false
+          permissions:
+            all: allow
+
+# Handle potential environment-specific dialogs (both modes)
+- runFlow:
+    when:
+      visible:
+        text: 'http.*'
+    commands:
+      - tapOn: 'http.*'
+
+- runFlow:
+    when:
+      visible: 'Continue'
+    commands:
+      - tapOn: 'Continue'
+
+- runFlow:
+    when:
+      visible: 'Reload'
+    commands:
+      - tapOn: 'Reload'
