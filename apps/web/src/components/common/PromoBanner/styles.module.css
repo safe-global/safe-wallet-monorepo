@@ -4,7 +4,6 @@
   background: linear-gradient(90deg, #b0ffc9, #d7f6ff);
   border: 0;
   border-radius: 12px !important;
-  height: 100%;
   min-height: 131px;
 }
 
@@ -31,10 +30,10 @@
 
 .bannerCtaText {
   color: var(--color-static-main);
-  margin-top: 8px !important;
   margin-left: 0 !important;
-  padding: 0 !important;
-  padding-top: 8px !important;
+  padding: var(--space-1) !important;
+  margin-left: -8px !important;
+  margin-top: var(--space-1) !important;
 }
 
 .bannerCtaText:has(:global(.MuiButton-endIcon)) :global(.MuiButton-endIcon) {
@@ -71,11 +70,25 @@
 
 .closeButton:hover {
   background-color: transparent;
+  color: var(--color-static-light) !important;
 }
 
 .closeIcon {
   color: var(--color-static-main);
   opacity: 1;
+  transition: color 0.2s ease;
+}
+
+.closeButton:hover .closeIcon {
+  color: var(--color-static-light) !important;
+}
+
+[data-theme='dark'] .closeButton:hover {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme='dark'] .closeButton:hover .closeIcon {
+  color: var(--color-text-primary) !important;
 }
 
 .bannerImage {
