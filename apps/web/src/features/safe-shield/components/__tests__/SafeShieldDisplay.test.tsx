@@ -18,7 +18,7 @@ describe('SafeShieldDisplay', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    
+
     // Recreate mocks for each test to avoid mutation issues
     mockRecipientAddress = faker.finance.ethereumAddress()
     mockContractAddress = faker.finance.ethereumAddress()
