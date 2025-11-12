@@ -49,7 +49,7 @@ export const AnalysisGroupCard = ({
     if (analyticsEvent && visibleResults.length > 0) {
       const titles = visibleResults.map((result) => result.title)
       const key = JSON.stringify(titles)
-      if (key !== prevTrackedResultsKeyRef.current && titles.length > 0) {
+      if (key !== prevTrackedResultsKeyRef.current) {
         trackEvent(analyticsEvent, { [MixpanelEventParams.RESULT]: titles })
         prevTrackedResultsKeyRef.current = key
       }
