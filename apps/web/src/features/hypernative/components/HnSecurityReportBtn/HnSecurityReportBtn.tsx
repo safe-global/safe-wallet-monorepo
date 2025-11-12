@@ -1,9 +1,10 @@
 import { Button, SvgIcon, Tooltip } from '@mui/material'
 import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
 import ExternalLink from '@/components/common/ExternalLink'
-import css from './styles.module.css'
 import { hnSecurityReportBtnConfig } from './config'
 import type { ReactElement } from 'react'
+
+import css from './styles.module.css'
 
 interface HnSecurityReportBtnProps {
   chainId: string
@@ -26,7 +27,7 @@ export const HnSecurityReportBtn = ({ chainId, safe, tx }: HnSecurityReportBtnPr
 
   return (
     <Tooltip title="Review security report on Hypernative" arrow placement="top">
-      <Button variant="outlined" fullWidth className={css.button} component={ExternalLink} href={href}>
+      <Button variant="neutral" fullWidth component={ExternalLink} href={href}>
         <SvgIcon component={HypernativeIcon} inheritViewBox className={css.hypernativeIcon} />
         {text}
       </Button>
