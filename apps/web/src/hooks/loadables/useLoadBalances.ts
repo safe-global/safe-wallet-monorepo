@@ -35,14 +35,7 @@ const transformPortfolioToBalances = (portfolio?: Portfolio): PortfolioBalances 
   }
 }
 
-const createCounterfactualBalances = (cfData: Balances): PortfolioBalances => ({
-  ...cfData,
-  tokensFiatTotal: cfData.fiatTotal,
-  positionsFiatTotal: '0',
-  positions: undefined,
-})
-
-const createLegacyBalancesWithExtras = (balances: Balances): PortfolioBalances => ({
+const createPortfolioBalances = (balances: Balances): PortfolioBalances => ({
   ...balances,
   tokensFiatTotal: balances.fiatTotal,
   positionsFiatTotal: '0',
@@ -127,19 +120,19 @@ const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
   const result = useMemo<AsyncResult<PortfolioBalances>>(() => {
     if (shouldUsePortfolioEndpoint) {
       if (isCounterfactual && isPortfolioEmpty && cfData) {
-        return [createCounterfactualBalances(cfData), cfError, cfLoading]
+        return [createPortfolioBalances(cfData), cfError, cfLoading]
       }
       const error = portfolioError ? new Error(String(portfolioError)) : undefined
       return [memoizedPortfolioBalances, error, portfolioLoading]
     }
 
     if (isCounterfactual && cfData) {
-      return [createCounterfactualBalances(cfData), cfError, cfLoading]
+      return [createPortfolioBalances(cfData), cfError, cfLoading]
     }
 
     if (legacyBalances) {
       const error = legacyError ? new Error(String(legacyError)) : undefined
-      return [createLegacyBalancesWithExtras(legacyBalances), error, legacyLoading]
+      return [createPortfolioBalances(legacyBalances), error, legacyLoading]
     }
 
     const error = legacyError ? new Error(String(legacyError)) : undefined
