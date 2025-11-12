@@ -1,7 +1,13 @@
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { StatusGroup, type AnalysisResult, StatusGroupType, type ContractAnalysisResults } from '../types'
-import { ContractAddressBuilder } from './contract-address.builder'
+import {
+  StatusGroup,
+  type AnalysisResult,
+  StatusGroupType,
+  type ContractAnalysisResults,
+  ContractDetails,
+} from '../types'
+import { ContractAddressBuilder, DEFAULT_INFO } from './contract-address.builder'
 import { ContractAnalysisResultBuilder } from './contract-analysis-result.builder'
 
 export class ContractAnalysisBuilder {
@@ -10,12 +16,12 @@ export class ContractAnalysisBuilder {
       [StatusGroup.CONTRACT_VERIFICATION]?: AnalysisResult<StatusGroupType<StatusGroup.CONTRACT_VERIFICATION>>[]
       [StatusGroup.CONTRACT_INTERACTION]?: AnalysisResult<StatusGroupType<StatusGroup.CONTRACT_INTERACTION>>[]
       [StatusGroup.DELEGATECALL]?: AnalysisResult<StatusGroupType<StatusGroup.DELEGATECALL>>[]
-    }
+    } & ContractDetails
   } = {}
 
   addAddress(address: string): ContractAddressBuilder {
     if (!this.contract[address]) {
-      this.contract[address] = {}
+      this.contract[address] = DEFAULT_INFO
     }
     return new ContractAddressBuilder(this, address)
   }
@@ -28,6 +34,8 @@ export class ContractAnalysisBuilder {
   static verifiedContract(address: string = '0x0000000000000000000000000000000000000001'): ContractAnalysisBuilder {
     return new ContractAnalysisBuilder()
       .addAddress(address)
+      .addName('Balancer')
+      .addLogoUrl('https://placehold.co/160')
       .contractVerification([ContractAnalysisResultBuilder.verified().build()])
       .done()
   }

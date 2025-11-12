@@ -26,7 +26,10 @@ export type StatusGroupType<T extends StatusGroup> = {
   [StatusGroup.COMMON]: CommonSharedStatus.FAILED
   [StatusGroup.ADDRESS_BOOK]: RecipientStatus.KNOWN_RECIPIENT | RecipientStatus.UNKNOWN_RECIPIENT
   [StatusGroup.RECIPIENT_ACTIVITY]: RecipientStatus.LOW_ACTIVITY | CommonSharedStatus.FAILED
-  [StatusGroup.RECIPIENT_INTERACTION]: RecipientStatus.NEW_RECIPIENT | RecipientStatus.RECURRING_RECIPIENT | CommonSharedStatus.FAILED
+  [StatusGroup.RECIPIENT_INTERACTION]:
+    | RecipientStatus.NEW_RECIPIENT
+    | RecipientStatus.RECURRING_RECIPIENT
+    | CommonSharedStatus.FAILED
   [StatusGroup.BRIDGE]:
     | BridgeStatus.INCOMPATIBLE_SAFE
     | BridgeStatus.MISSING_OWNERSHIP
@@ -39,7 +42,10 @@ export type StatusGroupType<T extends StatusGroup> = {
     | ContractStatus.NOT_VERIFIED_BY_SAFE
     | ContractStatus.VERIFICATION_UNAVAILABLE
     | CommonSharedStatus.FAILED
-  [StatusGroup.CONTRACT_INTERACTION]: ContractStatus.KNOWN_CONTRACT | ContractStatus.NEW_CONTRACT | CommonSharedStatus.FAILED
+  [StatusGroup.CONTRACT_INTERACTION]:
+    | ContractStatus.KNOWN_CONTRACT
+    | ContractStatus.NEW_CONTRACT
+    | CommonSharedStatus.FAILED
   [StatusGroup.DELEGATECALL]: ContractStatus.UNEXPECTED_DELEGATECALL | CommonSharedStatus.FAILED
   [StatusGroup.THREAT]:
     | ThreatStatus.MALICIOUS
@@ -98,7 +104,11 @@ export type AnalysisResult<T extends AnyStatus = AnyStatus> = {
   type: T
   title: string
   description: string
-  addresses?: string[]
+  addresses?: {
+    address: string
+    name: string
+    logoUrl: string
+  }[]
 }
 
 export type MasterCopyChangeThreatAnalysisResult = AnalysisResult<ThreatStatus.MASTERCOPY_CHANGE> & {
@@ -139,10 +149,19 @@ export type RecipientAnalysisResults = {
   }
 }
 
+export type ContractDetails = {
+  name: string
+  logoUrl: string
+}
+
 export type ContractAnalysisResults = {
-  [address: string]: GroupedAnalysisResults<
-    StatusGroup.CONTRACT_VERIFICATION | StatusGroup.CONTRACT_INTERACTION | StatusGroup.DELEGATECALL | StatusGroup.COMMON
-  >
+  [address: string]: ContractDetails &
+    GroupedAnalysisResults<
+      | StatusGroup.CONTRACT_VERIFICATION
+      | StatusGroup.CONTRACT_INTERACTION
+      | StatusGroup.DELEGATECALL
+      | StatusGroup.COMMON
+    >
 }
 
 export type ThreatAnalysisResults = {
