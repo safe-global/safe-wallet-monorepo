@@ -3,6 +3,8 @@ import Image from 'next/image'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import css from './styles.module.css'
 import { dashboardBannerConfig } from './config'
+import Track from '@/components/common/Track'
+import { HYPERNATIVE_EVENTS, HYPERNATIVE_SOURCE } from '@/services/analytics'
 
 export interface HnDashboardBannerProps extends WithHnSignupFlowProps {}
 
@@ -14,32 +16,34 @@ export const HnDashboardBanner = ({ onHnSignupClick }: HnDashboardBannerProps) =
   }
 
   return (
-    <Card className={css.banner} onClick={handleBannerClick} role="button" sx={{ cursor: 'pointer' }}>
-      <Box className={css.tag}>
-        <Typography variant="body2" className={css.tagText}>
-          {tagLabel}
-        </Typography>
-      </Box>
-
-      <Box className={css.content}>
-        <Box className={css.badgeContainer}>
-          <Image src={badgeSrc} alt={badgeAlt} width={54} height={54} className={css.badge} />
+    <Track {...HYPERNATIVE_EVENTS.GUARD_LEARN_MORE} mixpanelParams={{ source: HYPERNATIVE_SOURCE.AccountCreation }}>
+      <Card className={css.banner} onClick={handleBannerClick} role="button" sx={{ cursor: 'pointer' }}>
+        <Box className={css.tag}>
+          <Typography variant="body2" className={css.tagText}>
+            {tagLabel}
+          </Typography>
         </Box>
 
-        <Box className={css.textContent}>
-          <Typography variant="h6" className={css.title}>
-            {title}
-          </Typography>
+        <Box className={css.content}>
+          <Box className={css.badgeContainer}>
+            <Image src={badgeSrc} alt={badgeAlt} width={54} height={54} className={css.badge} />
+          </Box>
 
-          <Typography variant="body2" className={css.description}>
-            {description}
-          </Typography>
+          <Box className={css.textContent}>
+            <Typography variant="h6" className={css.title}>
+              {title}
+            </Typography>
 
-          <Button variant="outlined" size="small" className={css.ctaButton}>
-            {ctaLabel}
-          </Button>
+            <Typography variant="body2" className={css.description}>
+              {description}
+            </Typography>
+
+            <Button variant="outlined" size="small" className={css.ctaButton}>
+              {ctaLabel}
+            </Button>
+          </Box>
         </Box>
-      </Box>
-    </Card>
+      </Card>
+    </Track>
   )
 }

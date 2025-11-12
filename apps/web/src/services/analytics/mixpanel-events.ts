@@ -14,6 +14,7 @@ export enum MixpanelEvent {
   NATIVE_SWAP_VIEWED = 'Native Swap Viewed',
   SAFE_LABS_TERMS_ACCEPTED = 'Safe Labs Terms Accepted',
   SIDEBAR_CLICKED = 'Sidebar Clicked',
+  // todo add events here
 }
 
 export enum MixpanelUserProperty {
@@ -52,12 +53,15 @@ export enum MixpanelEventParams {
   APP_URL = 'App URL',
   DATE_RANGE = 'Date Range',
   SIDEBAR_ELEMENT = 'Sidebar Element',
+  // todo add source params
 }
 
 export enum SafeAppLaunchLocation {
   PREVIEW_DRAWER = 'Preview Drawer',
   SAFE_APPS_LIST = 'Safe Apps List',
 }
+
+// todo add enum for HN events
 
 export const ADDRESS_PROPERTIES = new Set([
   MixpanelEventParams.SAFE_ADDRESS,
