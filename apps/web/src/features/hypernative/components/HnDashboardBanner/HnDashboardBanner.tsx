@@ -3,6 +3,8 @@ import Image from 'next/image'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import css from './styles.module.css'
 import { dashboardBannerConfig } from './config'
+import Track from '@/components/common/Track'
+import { HYPERNATIVE_EVENTS, HYPERNATIVE_SOURCE } from '@/services/analytics'
 
 export interface HnDashboardBannerProps extends WithHnSignupFlowProps {}
 
@@ -31,9 +33,14 @@ export const HnDashboardBanner = ({ onHnSignupClick }: HnDashboardBannerProps) =
             {description}
           </Typography>
 
-          <Button variant="outlined" size="small" className={css.ctaButton} onClick={onHnSignupClick}>
-            {ctaLabel}
-          </Button>
+          <Track
+            {...HYPERNATIVE_EVENTS.GUARD_LEARN_MORE}
+            mixpanelParams={{ source: HYPERNATIVE_SOURCE.AccountCreation }}
+          >
+            <Button variant="outlined" size="small" className={css.ctaButton} onClick={onHnSignupClick}>
+              {ctaLabel}
+            </Button>
+          </Track>
         </Box>
       </Box>
     </Card>
