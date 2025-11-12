@@ -28,7 +28,7 @@ const MyAccounts = ({ safes, onLinkClick, isSidebar = false }: MyAccountsProps) 
       <Box className={classNames(css.myAccounts, { [css.sidebarAccounts]: isSidebar })}>
         <AccountsHeader isSidebar={isSidebar} onLinkClick={onLinkClick} />
 
-        {!isSidebar && <HnBannerWithLocalStorageVisibility />}
+        {!isSidebar && wallet && <HnBannerWithLocalStorageVisibility />}
 
         <Paper sx={{ padding: 0 }}>
           <AccountListFilters setSearchQuery={setSearchQuery} />
