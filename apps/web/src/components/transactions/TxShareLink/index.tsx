@@ -11,11 +11,11 @@ import css from './styles.module.css'
 
 export function TxExplorerLink({ txHash }: { txHash: string }) {
   const chain = useCurrentChain()
-  const explorerLiknk = chain ? getBlockExplorerLink(chain, txHash) : undefined
+  const explorerLink = chain ? getBlockExplorerLink(chain, txHash) : undefined
 
   return (
     <Button variant="neutral" fullWidth>
-      <ExplorerButton {...explorerLiknk} isCompact={false} fontSize="14px" />
+      <ExplorerButton {...explorerLink} isCompact={false} fontSize="14px" />
     </Button>
   )
 }
