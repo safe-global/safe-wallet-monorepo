@@ -1,13 +1,53 @@
 import { useMemo } from 'react'
 import { type Balances, useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import {
+  usePortfolioGetPortfolioV1Query,
+  type Portfolio,
+  type AppBalance,
+} from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import { useAppSelector } from '@/store'
-import { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { selectCurrency, selectSettings, TOKEN_LISTS } from '@/store/settingsSlice'
 import { useCurrentChain } from '../useChains'
 import useSafeInfo from '../useSafeInfo'
-import { POLLING_INTERVAL } from '@/config/constants'
+import { POLLING_INTERVAL, PORTFOLIO_POLLING_INTERVAL } from '@/config/constants'
 import { useCounterfactualBalances } from '@/features/counterfactual/useCounterfactualBalances'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+
+const transformPortfolioToBalances = (portfolio?: Portfolio): PortfolioBalances | undefined => {
+  if (!portfolio) return undefined
+
+  return {
+    items: portfolio.tokenBalances.map((token) => ({
+      tokenInfo: {
+        ...token.tokenInfo,
+        logoUri: token.tokenInfo.logoUri || '',
+      },
+      balance: token.balance,
+      fiatBalance: token.balanceFiat || '0',
+      fiatConversion: token.price || '0',
+      fiatBalance24hChange: token.priceChangePercentage1d,
+    })),
+    fiatTotal: portfolio.totalBalanceFiat,
+    tokensFiatTotal: portfolio.totalTokenBalanceFiat,
+    positionsFiatTotal: portfolio.totalPositionsBalanceFiat,
+    positions: portfolio.positionBalances,
+  }
+}
+
+const createCounterfactualBalances = (cfData: Balances): PortfolioBalances => ({
+  ...cfData,
+  tokensFiatTotal: cfData.fiatTotal,
+  positionsFiatTotal: '0',
+  positions: undefined,
+})
+
+const createLegacyBalancesWithExtras = (balances: Balances): PortfolioBalances => ({
+  ...balances,
+  tokensFiatTotal: balances.fiatTotal,
+  positionsFiatTotal: '0',
+  positions: undefined,
+})
 
 export const useTokenListSetting = (): boolean | undefined => {
   const chain = useCurrentChain()
@@ -21,17 +61,30 @@ export const useTokenListSetting = (): boolean | undefined => {
   return isTrustedTokenList
 }
 
-const useLoadBalances = () => {
+export interface PortfolioBalances extends Balances {
+  positions?: AppBalance[]
+  tokensFiatTotal?: string
+  positionsFiatTotal?: string
+}
+
+const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
   const currency = useAppSelector(selectCurrency)
   const isTrustedTokenList = useTokenListSetting()
   const { safe, safeAddress } = useSafeInfo()
+  const chain = useCurrentChain()
   const isReady = safeAddress && safe.deployed && isTrustedTokenList !== undefined
+  const isReadyPortfolio = safeAddress && isTrustedTokenList !== undefined
   const isCounterfactual = !safe.deployed
 
-  let {
-    currentData: balances,
-    isLoading: loading,
-    error: errorStr,
+  const shouldUsePortfolioEndpoint = useMemo(
+    () => (chain ? hasFeature(chain, FEATURES.PORTFOLIO_ENDPOINT) : false),
+    [chain],
+  )
+
+  const {
+    currentData: legacyBalances,
+    isLoading: legacyLoading,
+    error: legacyError,
   } = useBalancesGetBalancesV1Query(
     {
       chainId: safe.chainId,
@@ -40,25 +93,77 @@ const useLoadBalances = () => {
       trusted: isTrustedTokenList,
     },
     {
-      skip: !isReady,
+      skip: !isReady || shouldUsePortfolioEndpoint,
       pollingInterval: POLLING_INTERVAL,
       skipPollingIfUnfocused: true,
       refetchOnFocus: true,
     },
   )
 
-  // Counterfactual balances
+  const {
+    currentData: portfolioData,
+    isLoading: portfolioLoading,
+    error: portfolioError,
+  } = usePortfolioGetPortfolioV1Query(
+    {
+      address: safeAddress,
+      chainIds: safe.chainId,
+      fiatCode: currency,
+      trusted: isTrustedTokenList,
+    },
+    {
+      skip: !shouldUsePortfolioEndpoint || !isReadyPortfolio || !safe.chainId,
+      pollingInterval: PORTFOLIO_POLLING_INTERVAL,
+      skipPollingIfUnfocused: true,
+      refetchOnFocus: true,
+    },
+  )
+
   const [cfData, cfError, cfLoading] = useCounterfactualBalances(safe)
 
-  let error = useMemo(() => (errorStr ? new Error(errorStr.toString()) : undefined), [errorStr])
+  const memoizedPortfolioBalances = useMemo(() => transformPortfolioToBalances(portfolioData), [portfolioData])
 
-  if (isCounterfactual) {
-    balances = cfData as unknown as Balances
-    loading = cfLoading
-    error = cfError
-  }
+  const isPortfolioEmpty = useMemo(() => {
+    if (!portfolioData) return true
+    return portfolioData.tokenBalances.length === 0 && portfolioData.positionBalances.length === 0
+  }, [portfolioData])
 
-  return useMemo(() => [balances, error, loading], [balances, error, loading]) as AsyncResult<Balances>
+  const result = useMemo<AsyncResult<PortfolioBalances>>(() => {
+    if (shouldUsePortfolioEndpoint) {
+      if (isCounterfactual && isPortfolioEmpty && cfData) {
+        return [createCounterfactualBalances(cfData), cfError, cfLoading]
+      }
+      const error = portfolioError ? new Error(String(portfolioError)) : undefined
+      return [memoizedPortfolioBalances, error, portfolioLoading]
+    }
+
+    if (isCounterfactual && cfData) {
+      return [createCounterfactualBalances(cfData), cfError, cfLoading]
+    }
+
+    if (legacyBalances) {
+      const error = legacyError ? new Error(String(legacyError)) : undefined
+      return [createLegacyBalancesWithExtras(legacyBalances), error, legacyLoading]
+    }
+
+    const error = legacyError ? new Error(String(legacyError)) : undefined
+    return [undefined, error, legacyLoading]
+  }, [
+    shouldUsePortfolioEndpoint,
+    isCounterfactual,
+    isPortfolioEmpty,
+    cfData,
+    cfError,
+    cfLoading,
+    memoizedPortfolioBalances,
+    portfolioError,
+    portfolioLoading,
+    legacyBalances,
+    legacyError,
+    legacyLoading,
+  ])
+
+  return result
 }
 
 export default useLoadBalances

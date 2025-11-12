@@ -2,7 +2,7 @@ import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/format
 import { useMemo } from 'react'
 import useBalances from './useBalances'
 import useHiddenTokens from './useHiddenTokens'
-import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import type { PortfolioBalances } from './loadables/useLoadBalances'
 
 const PRECISION = 18
 
@@ -20,10 +20,10 @@ const truncateNumber = (balance: string): string => {
   return currentPrecision < PRECISION ? balance : balance.slice(0, floatingPointPosition + PRECISION + 1)
 }
 
-const filterHiddenTokens = (items: Balances['items'], hiddenAssets: string[]) =>
+const filterHiddenTokens = (items: PortfolioBalances['items'], hiddenAssets: string[]) =>
   items.filter((balanceItem) => !hiddenAssets.includes(balanceItem.tokenInfo.address))
 
-const getVisibleFiatTotal = (balances: Balances, hiddenAssets: string[]): string => {
+const getVisibleFiatTotal = (balances: PortfolioBalances, hiddenAssets: string[]): string => {
   return safeFormatUnits(
     balances.items
       .reduce(
@@ -41,7 +41,7 @@ const getVisibleFiatTotal = (balances: Balances, hiddenAssets: string[]): string
 }
 
 export const useVisibleBalances = (): {
-  balances: Balances
+  balances: PortfolioBalances
   loaded: boolean
   loading: boolean
   error?: string
@@ -53,6 +53,7 @@ export const useVisibleBalances = (): {
     () => ({
       ...data,
       balances: {
+        ...data.balances,
         items: filterHiddenTokens(data.balances.items, hiddenTokens),
         fiatTotal: data.balances.fiatTotal ? getVisibleFiatTotal(data.balances, hiddenTokens) : '',
       },
