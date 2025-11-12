@@ -15,7 +15,7 @@ import { selectSettings, setQrShortName } from '@/store/settingsSlice'
 import { selectOutgoingTransactions } from '@/store/txHistorySlice'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import classnames from 'classnames'
-import { type ReactNode, useState } from 'react'
+import { type ReactNode, useMemo, useState } from 'react'
 import { Card, WidgetBody, WidgetContainer } from '@/components/dashboard/styled'
 import { Box, Button, CircularProgress, FormControlLabel, Grid, Switch, Typography } from '@mui/material'
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
@@ -26,9 +26,18 @@ import css from './styles.module.css'
 import ActivateAccountButton from '@/features/counterfactual/ActivateAccountButton'
 import { isReplayedSafeProps } from '@/features/counterfactual/utils'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-import HnDashboardBanner from '@/features/hypernative/components/HnDashboardBanner'
-import { useBannerVisibility } from '@/features/hypernative/hooks/useBannerVisibility'
-import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
+import { HnDashboardBanner } from '@/features/hypernative/components/HnDashboardBanner'
+import { withHnSignupFlow } from '@/features/hypernative/components/withHnSignupFlow'
+import { withHnFeature } from '@/features/hypernative/components/withHnFeature'
+import { BannerType, useBannerStorage } from '@/features/hypernative/hooks/useBannerStorage'
+import { useIsHypernativeFeature } from '@/features/hypernative/hooks/useIsHypernativeFeature'
+import { useIsHypernativeGuard } from '@/features/hypernative/hooks/useIsHypernativeGuard'
+import useWallet from '@/hooks/wallets/useWallet'
+import useIsSafeOwner from '@/hooks/useIsSafeOwner'
+
+// A banner version without the balance-checking as we can not index the balance till the safe is deployed
+const HnDashboardBannerWithSignup = withHnSignupFlow(HnDashboardBanner)
+const HnFinalDashboardBanner = withHnFeature(HnDashboardBannerWithSignup)
 
 const calculateProgress = (items: boolean[]) => {
   const totalNumberOfItems = items.length
@@ -362,7 +371,20 @@ const FirstSteps = () => {
   const outgoingTransactions = useAppSelector(selectOutgoingTransactions)
   const chain = useCurrentChain()
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, safe.chainId, safeAddress))
-  const { showBanner: showHnDashboardBanner } = useBannerVisibility(BannerType.Promo)
+
+  // Check if banner should show (for conditional rendering of AccountReadyWidget)
+  const wallet = useWallet()
+  const isSafeOwner = useIsSafeOwner()
+  const isEnabled = useIsHypernativeFeature()
+  const shouldShowBanner = useBannerStorage(BannerType.Promo)
+  const { isHypernativeGuard, loading: guardLoading } = useIsHypernativeGuard()
+
+  const showHnDashboardBanner = useMemo(() => {
+    if (guardLoading) {
+      return false
+    }
+    return isEnabled && shouldShowBanner && !!wallet && isSafeOwner && !isHypernativeGuard
+  }, [isEnabled, shouldShowBanner, wallet, isSafeOwner, isHypernativeGuard, guardLoading])
 
   const isMultiSig = safe.threshold > 1
   const isReplayedSafe = undeployedSafe && isReplayedSafeProps(undeployedSafe?.props)
@@ -474,7 +496,7 @@ const FirstSteps = () => {
           </Grid>
 
           <Grid item xs={12} md={4}>
-            {showHnDashboardBanner ? <HnDashboardBanner /> : <AccountReadyWidget />}
+            {showHnDashboardBanner ? <HnFinalDashboardBanner /> : <AccountReadyWidget />}
           </Grid>
         </Grid>
       </WidgetBody>
