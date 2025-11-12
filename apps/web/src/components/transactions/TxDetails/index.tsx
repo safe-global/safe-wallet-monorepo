@@ -38,7 +38,7 @@ import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gat
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { TxNote } from '@/features/tx-notes'
-import { TxShareBlock } from '../TxShareLink'
+import { TxShareBlock, TxExplorerLink } from '../TxShareLink'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
@@ -169,7 +169,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
       {/* Signers */}
       {(!isUnsigned || proposedByDelegate) && (
         <div className={css.txSigners}>
-          <TxShareBlock txId={txDetails.txId} txHash={txDetails.txHash} />
+          <TxShareBlock txId={txDetails.txId} />
 
           <TxSigners
             txDetails={txDetails}
@@ -179,6 +179,8 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
           />
 
           {isQueue && <HnSecurityReportBtnForTxDetails txDetails={txDetails} />}
+
+          {txDetails.txHash && <TxExplorerLink txHash={txDetails.txHash} />}
 
           {isQueue && (
             <Box className={css.buttons}>

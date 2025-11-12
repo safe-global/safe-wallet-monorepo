@@ -68,8 +68,8 @@ const TransferActions = ({
   const amount = isNativeTokenTransfer(txInfo.transferInfo)
     ? safeFormatUnits(txInfo.transferInfo.value ?? '0', ETHER)
     : isERC20Transfer(txInfo.transferInfo)
-      ? safeFormatUnits(txInfo.transferInfo.value, txInfo.transferInfo.decimals)
-      : undefined
+    ? safeFormatUnits(txInfo.transferInfo.value, txInfo.transferInfo.decimals)
+    : undefined
 
   const isOutgoingTx = isOutgoingTransfer(txInfo)
   const canSendAgain =

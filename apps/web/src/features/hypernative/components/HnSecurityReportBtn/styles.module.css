@@ -8,11 +8,12 @@
   padding-top: var(--space-1);
   padding-bottom: var(--space-1);
   min-height: 40px;
+  transition: all 0.2s ease-in-out;
 }
 
 .button:hover {
-  background-color: var(--color-background-main);
-  border-color: var(--color-background-main);
+  background-color: var(--color-border-light);
+  border-color: var(--color-border-light);
   text-decoration: none;
 }
 
