@@ -14,7 +14,7 @@ interface HnSecurityReportBtnProps {
 
 const buildSecurityReportUrl = (baseUrl: string, chainId: string, safe: string, tx: string): string => {
   const url = new URL(baseUrl)
-  url.searchParams.set('chain', chainId)
+  url.searchParams.set('chain', `evm:${chainId}`)
   url.searchParams.set('safe', safe)
   url.searchParams.set('tx', tx)
   return url.toString()

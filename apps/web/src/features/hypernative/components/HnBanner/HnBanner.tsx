@@ -27,7 +27,7 @@ export const HnBanner = ({ onHnSignupClick, onDismiss }: HnBannerProps) => {
         label: 'Strengthen your Safe',
       }}
       title="Strengthen your Safe"
-      description="Automatically monitor and block risky transactions using advanced, user-defined security policies by Hypernative."
+      description="Automatically monitor and block risky transactions using advanced, user-defined security policies, powered by Hypernative."
       ctaLabel="Learn more"
       imageSrc="/images/hypernative/guardian-badge.svg"
       imageAlt="Guardian badge"
