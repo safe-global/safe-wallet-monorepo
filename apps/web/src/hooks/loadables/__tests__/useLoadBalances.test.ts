@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@/tests/test-utils'
 import useLoadBalances from '@/hooks/loadables/useLoadBalances'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
-import * as useCurrentChain from '@/hooks/useChains'
+import * as useChains from '@/hooks/useChains'
 import * as store from '@/store'
 import * as balancesQueries from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import * as portfolioQueries from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
@@ -117,7 +117,15 @@ describe('useLoadBalances', () => {
       safeError: undefined,
     })
 
-    jest.spyOn(useCurrentChain, 'useCurrentChain').mockReturnValue(mockChain)
+    jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => {
+      if (feature === FEATURES.PORTFOLIO_ENDPOINT) {
+        return mockChain.features.includes(FEATURES.PORTFOLIO_ENDPOINT) ? true : false
+      }
+      if (feature === FEATURES.DEFAULT_TOKENLIST) {
+        return mockChain.features.includes(FEATURES.DEFAULT_TOKENLIST) ? true : false
+      }
+      return false
+    })
 
     jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
       selector({
@@ -243,11 +251,15 @@ describe('useLoadBalances', () => {
 
   describe('portfolio endpoint', () => {
     beforeEach(() => {
-      const chainWithPortfolio = chainBuilder()
-        .with({ chainId: CHAIN_ID, features: [FEATURES.PORTFOLIO_ENDPOINT] })
-        .build()
-
-      jest.spyOn(useCurrentChain, 'useCurrentChain').mockReturnValue(chainWithPortfolio)
+      jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => {
+        if (feature === FEATURES.PORTFOLIO_ENDPOINT) {
+          return true
+        }
+        if (feature === FEATURES.DEFAULT_TOKENLIST) {
+          return mockChain.features.includes(FEATURES.DEFAULT_TOKENLIST) ? true : false
+        }
+        return false
+      })
     })
 
     it('should return portfolio balances when portfolio endpoint is enabled', async () => {
@@ -442,7 +454,15 @@ describe('useLoadBalances', () => {
         .with({ chainId: CHAIN_ID, features: [FEATURES.PORTFOLIO_ENDPOINT] })
         .build()
 
-      jest.spyOn(useCurrentChain, 'useCurrentChain').mockReturnValue(chainWithPortfolio)
+      jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => {
+        if (feature === FEATURES.PORTFOLIO_ENDPOINT) {
+          return true
+        }
+        if (feature === FEATURES.DEFAULT_TOKENLIST) {
+          return chainWithPortfolio.features.includes(FEATURES.DEFAULT_TOKENLIST) ? true : false
+        }
+        return false
+      })
 
       jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
         currentData: undefined,
@@ -479,7 +499,15 @@ describe('useLoadBalances', () => {
         .with({ chainId: CHAIN_ID, features: [FEATURES.PORTFOLIO_ENDPOINT] })
         .build()
 
-      jest.spyOn(useCurrentChain, 'useCurrentChain').mockReturnValue(chainWithPortfolio)
+      jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => {
+        if (feature === FEATURES.PORTFOLIO_ENDPOINT) {
+          return true
+        }
+        if (feature === FEATURES.DEFAULT_TOKENLIST) {
+          return chainWithPortfolio.features.includes(FEATURES.DEFAULT_TOKENLIST) ? true : false
+        }
+        return false
+      })
 
       jest.spyOn(useSafeInfo, 'default').mockReturnValue({
         safe: { ...mockDeployedSafe, chainId: '' },
