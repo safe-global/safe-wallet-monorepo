@@ -2,7 +2,7 @@ import { ExpandMore } from '@mui/icons-material'
 import { Collapse, Stack, Typography } from '@mui/material'
 import { useReducer } from 'react'
 import { Box } from '@mui/material'
-import { ContractImage } from '../ContractImage'
+import { AddressImage } from '../AddressImage'
 
 interface ShowAllAddressProps {
   addresses: {
@@ -62,7 +62,7 @@ export const ShowAllAddress = ({ addresses }: ShowAllAddressProps) => {
               bgcolor="background.paper"
               borderRadius="6px"
             >
-              <ContractImage logoUrl={item.logoUrl} />
+              <AddressImage logoUrl={item.logoUrl} />
 
               <Stack spacing={0.5}>
                 {item.name && (
