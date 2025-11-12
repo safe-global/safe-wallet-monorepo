@@ -4,9 +4,11 @@ appId: global.safe.mobileapp.ios
 # Limit Order Transaction Card
 # ===========================================
 # Limit orders show "Limit order" text
-- assertVisible:
-    text: '.*Limit order.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*Limit order.*'
+      optional: true
+    timeout: 2000
 
 - tapOn:
     text: '.*Limit order.*'

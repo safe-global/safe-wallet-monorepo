@@ -1,24 +1,23 @@
 appId: global.safe.mobileapp.ios
 ---
 # ===========================================
-# Limit Order Transaction
+# Limit Order Transaction (Pending State)
 # ===========================================
-- assertVisible: Transaction details
+# Tests the limit order transaction detail view for pending transactions
+# Reuses shared test components from tx-history tests where applicable
+
+- assertVisible: 'Confirm transaction'
 
 # Verify swap order container is visible
-- assertVisible:
-    id: 'history-swap-order-container'
 
 # ===========================================
 # Swap Header - Sell and Receive Sections
 # ===========================================
-- assertVisible:
-    id: 'history-swap-order-header'
 
 # Verify sell container and amount
 - assertVisible:
     id: 'swap-header-sell-container'
-- assertVisible: Sell
+- assertVisible: 'Sell'
 - assertVisible:
     id: 'swap-header-sell-amount'
     text: '.*\d+.*[A-Z]{2,}.*'
@@ -35,61 +34,62 @@ appId: global.safe.mobileapp.ios
 # Limit Order Details Section
 # ===========================================
 - assertVisible:
-    id: 'history-swap-order-details'
+    id: 'swap-order-table'
 
-# Price row - can be "Limit price" or "Execution price" (if fulfilled)
+# Price row - for pending orders it should be "Limit price"
 - assertVisible:
-    id: 'history-swap-order-details'
+    id: 'swap-order-table'
     containsDescendants:
-      - text: '.*(Limit price|Execution price).*'
+      - text: '.*Limit price.*'
 
 # Verify price format (1 TOKEN = AMOUNT TOKEN)
 - assertVisible:
-    id: 'history-swap-order-details'
+    id: 'swap-order-table'
     containsDescendants:
       - text: '.*1 [A-Z]{2,} = .*\d+.*[A-Z]{2,}.*'
 
 # Order ID row (scoped to details section)
 - assertVisible:
-    id: 'history-swap-order-details'
+    id: 'swap-order-table'
     containsDescendants:
       - text: 'Order ID'
 - assertVisible:
-    id: 'history-swap-order-details'
+    id: 'swap-order-table'
     containsDescendants:
       - text: '0x[0-9a-fA-F]{4}.*'
 
 # Network row (scoped to details section)
 - assertVisible:
-    id: 'history-swap-order-details'
+    id: 'swap-order-table'
     containsDescendants:
       - text: 'Network'
 
 # Status row (scoped to details section)
-# Status can be "Expired" or "Filled" (for fulfilled orders)
+# For pending transactions, status should be "Execution needed" or similar
 - assertVisible:
-    id: 'history-swap-order-details'
+    id: 'swap-order-table'
     containsDescendants:
       - text: 'Status'
 - assertVisible:
-    id: 'history-swap-order-details'
+    id: 'swap-order-table'
     containsDescendants:
-      - text: '.*(Expired|Filled|partiallyFilled).*'
+      - text: '.*(Execution needed|Pending).*'
 
-# Total fees row (scoped to details section)
-# Only shown if there are executed fees
+# Widget fee row (scoped to details section)
 - extendedWaitUntil:
     visible:
-      id: 'history-swap-order-details'
+      id: 'swap-order-table'
       containsDescendants:
-        - text: 'Total fees'
+        - text: 'Widget fee'
       optional: true
     timeout: 2000
+
+# Expiry row (scoped to details section)
 - extendedWaitUntil:
     visible:
-      id: 'history-swap-order-details'
+      id: 'swap-order-table'
       containsDescendants:
-        - text: '.*\d+.*[A-Z]{2,}.*'
+        - text: 'Expiry'
       optional: true
     timeout: 2000
 
@@ -100,45 +100,56 @@ appId: global.safe.mobileapp.ios
     file: ../../shared/test-tx-details-button.yml
 
 # ===========================================
-# Common Transaction Info
+# Actions Section
 # ===========================================
+# Verify Actions section is visible (limit orders have actions)
+- assertVisible:
+    text: 'Actions'
+
+# Tap on Actions to view the actions list
+- tapOn:
+    text: 'Actions'
+
+# Test the actions list using shared component
 - runFlow:
-    file: ../../shared/test-tx-info.yml
+    file: ../../shared/test-actions-list.yml
+
+# Go back from Actions screen to Confirm transaction
+- tapOn:
+    id: 'go-back'
+
+# Verify we're back on Confirm transaction screen
+- assertVisible: 'Confirm transaction'
 
 # ===========================================
-# Verify Transaction Status
-# The transaction hash status is typically "Success" even if order status is "Expired"
+# Transaction Checks (Pending transactions show checks instead of created/executed)
 # ===========================================
-- assertVisible: 'Status'
-- assertVisible:
-    text: '.*Success.*'
+- runFlow:
+    file: ../../shared/test-tx-checks.yml
+    env:
+      BALANCE_CHANGE_PATTERN: 'No balance change detected'
+      TRANSACTION_SIMULATION_PATTERN: 'Success'
+      VERIFY_TENDERLY_LINK: 'true'
 
 # ===========================================
 # Confirmations
 # ===========================================
+# Test tapping on confirmations to open the bottom sheet and verify signed badge
+# For pending transactions, we use the confirmations from the confirm transaction screen
+- scroll
 - runFlow:
-    file: ../../shared/test-tx-history-confirmations.yml
+    file: ../../shared/test-confirmations.yml
+    env:
+      CONFIRMATIONS_PATTERN: '.*1/2.*'
 
 # ===========================================
-# Test Explorer Link
+# Review and Execute Screen
 # ===========================================
+# Test navigating to Review and execute screen and verifying all elements
+# Limit orders should succeed
 - runFlow:
-    file: ../../shared/test-explorer-link.yml
-
-- assertVisible: Transaction details
-
-# ===========================================
-# Test Share Transaction Button
-# ===========================================
-- runFlow:
-    file: ../../shared/test-share-link.yml
-
-- assertVisible: Transaction details
-
-# ===========================================
-# Test Transaction Details Button
-# ===========================================
-- runFlow:
-    file: ../../shared/test-advanced-details.yml
-
-- assertVisible: Transaction details
+    file: ../../shared/test-review-and-execute.yml
+    env:
+      EXPECTED_SIGNER_PATTERN: '.*6fED.*'
+      IS_FULLY_SIGNED: 'false'
+      EXPECTED_EXECUTION_METHOD: 'signer'

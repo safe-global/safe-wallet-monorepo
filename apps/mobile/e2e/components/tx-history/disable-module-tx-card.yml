@@ -6,9 +6,11 @@ appId: global.safe.mobileapp.ios
 - assertVisible:
     text: 'Settings change'
 
-- assertVisible:
-    text: '.*disableModule.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*disableModule.*'
+      optional: true
+    timeout: 2000
 
 - tapOn:
     text: '.*disableModule.*'
