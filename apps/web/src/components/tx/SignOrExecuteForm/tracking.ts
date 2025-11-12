@@ -1,6 +1,6 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useCallback, useRef } from 'react'
-import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
+import { MODALS_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 import { TX_EVENTS } from '@/services/analytics/events/transactions'
 import { getTransactionTrackingType } from '@/services/analytics/tx-tracking'
 import { isNestedConfirmationTxInfo } from '@/utils/transaction-guards'
@@ -72,7 +72,7 @@ export function trackTxEvents(
 
   // Immediate execution on creation
   if (isCreation && isExecuted) {
-    trackEvent({ ...executionEvent, label: txType })
+    trackEvent({ ...executionEvent, label: txType }, { [MixpanelEventParams.TRANSACTION_TYPE]: txType })
   }
 }
 
