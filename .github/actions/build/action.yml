@@ -66,6 +66,7 @@ runs:
         NEXT_PUBLIC_PROD_MIXPANEL_TOKEN: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_PROD_MIXPANEL_TOKEN }}
         NEXT_PUBLIC_STAGING_MIXPANEL_TOKEN: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_STAGING_MIXPANEL_TOKEN }}
         NEXT_PUBLIC_HUBSPOT_CONFIG: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_HUBSPOT_CONFIG }}
+        NEXT_PUBLIC_HYPERNATIVE_CALENDLY: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_HYPERNATIVE_CALENDLY }}
 
     - name: Save Next.js Build Cache & Cypress cache
       if: steps.restore-nc.outputs.cache-hit-nc != 'true'
