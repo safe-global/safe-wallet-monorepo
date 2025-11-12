@@ -12,6 +12,10 @@
   overflow-y: auto;
 }
 
+[data-theme='dark'] .contentColumn {
+  background-color: var(--color-background-default);
+}
+
 .formColumn {
   display: flex;
   flex-direction: column;
