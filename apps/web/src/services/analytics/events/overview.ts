@@ -196,6 +196,13 @@ export const OVERVIEW_EVENTS = {
   },
 }
 
+export const EXPLORE_POSSIBLE_EVENTS = {
+  EXPLORE_POSSIBLE_CLICKED: {
+    action: 'Explore Possible clicked',
+    category: OVERVIEW_CATEGORY,
+  },
+}
+
 export enum PIN_SAFE_LABELS {
   pin = 'pin',
   unpin = 'unpin',

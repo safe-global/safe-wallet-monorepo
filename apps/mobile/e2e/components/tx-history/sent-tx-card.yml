@@ -6,9 +6,11 @@ appId: global.safe.mobileapp.ios
 - assertVisible:
     text: 'Sent'
 
-- assertVisible:
-    text: '.*Sepolia Ether.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*Sepolia Ether.*'
+      optional: true
+    timeout: 2000
 
 - tapOn:
     text: '.*Sepolia Ether.*'

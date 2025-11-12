@@ -14,6 +14,7 @@ export enum MixpanelEvent {
   NATIVE_SWAP_VIEWED = 'Native Swap Viewed',
   SAFE_LABS_TERMS_ACCEPTED = 'Safe Labs Terms Accepted',
   SIDEBAR_CLICKED = 'Sidebar Clicked',
+  EXPLORE_POSSIBLE_CLICKED = 'Explore Possible Clicked',
 }
 
 export enum MixpanelUserProperty {
@@ -26,6 +27,7 @@ export enum MixpanelUserProperty {
   NETWORKS = 'Networks',
   TOTAL_TX_COUNT = 'Total Transaction Count',
   LAST_TX_AT = 'Last Transaction at',
+  IS_OWNER = 'Is Owner',
 }
 
 export enum MixpanelEventParams {

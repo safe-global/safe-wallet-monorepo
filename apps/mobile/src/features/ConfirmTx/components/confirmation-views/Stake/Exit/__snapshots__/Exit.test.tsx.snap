@@ -215,6 +215,7 @@ exports[`StakingExit matches snapshot 1`] = `
         }
       >
         <View
+          collapsable={false}
           style={
             {
               "alignItems": "center",
