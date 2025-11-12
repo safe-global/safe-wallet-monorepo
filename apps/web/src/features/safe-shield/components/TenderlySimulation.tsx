@@ -20,6 +20,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { SEVERITY_COLORS } from '@/features/safe-shield/constants'
 import { useNestedTransaction } from '@/features/safe-shield/components/useNestedTransaction'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
+import { trackEvent, SAFE_SHIELD_EVENTS, MixpanelEventParams } from '@/services/analytics'
 
 interface TenderlySimulationProps {
   safeTx?: SafeTransaction
@@ -103,6 +104,34 @@ export const TenderlySimulation = ({
   const isSimulationSuccess = mainIsSuccess && nestedIsSuccess
 
   const isLoading = status.isLoading || (isNested && nestedTx.status.isLoading)
+
+  const mainSimulationResult = isSimulationFinished
+    ? mainIsSuccess
+      ? 'Simulation successful.'
+      : 'Simulation failed.'
+    : undefined
+
+  const nestedSimulationResult =
+    isNested && isSimulationFinished
+      ? nestedIsSuccess
+        ? 'Nested transaction simulation successful.'
+        : 'Nested transaction simulation failed.'
+      : undefined
+
+  // Track simulation result when it finishes
+  useEffect(() => {
+    if (mainSimulationResult) {
+      const results = [mainSimulationResult]
+
+      if (nestedSimulationResult) {
+        results.push(nestedSimulationResult)
+      }
+
+      trackEvent(SAFE_SHIELD_EVENTS.SIMULATED, {
+        [MixpanelEventParams.RESULT]: results,
+      })
+    }
+  }, [mainSimulationResult, nestedSimulationResult])
 
   useEffect(() => {
     if (!showSimulation) return
@@ -253,7 +282,7 @@ export const TenderlySimulation = ({
                   }}
                 >
                   <Typography variant="body2" color="primary.light" sx={{ mb: 1 }}>
-                    {mainIsSuccess ? 'Simulation successful.' : 'Simulation failed.'}
+                    {mainSimulationResult}
                   </Typography>
                   {simulation.simulationLink && (
                     <ExternalLink
@@ -288,9 +317,7 @@ export const TenderlySimulation = ({
                   }}
                 >
                   <Typography variant="body2" color="primary.light" sx={{ mb: 1 }}>
-                    {nestedIsSuccess
-                      ? 'Nested transaction simulation successful.'
-                      : 'Nested transaction simulation failed.'}
+                    {nestedSimulationResult}
                   </Typography>
                   {nestedTx.simulation.simulationLink && (
                     <ExternalLink
