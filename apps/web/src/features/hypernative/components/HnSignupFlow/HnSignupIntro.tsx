@@ -38,7 +38,7 @@ const HnSignupIntro = ({ onGetStarted, onClose }: HnSignupIntroProps) => {
               </Typography>
               <img src="/images/hypernative/hypernative-logo.svg" alt="Hypernative" className={css.logo} />
             </div>
-            <Typography variant="body1" className={css.subtitle}>
+            <Typography variant="body2" className={css.subtitle}>
               Enterprise-level protection for teams and organizations.
             </Typography>
           </div>
@@ -48,7 +48,7 @@ const HnSignupIntro = ({ onGetStarted, onClose }: HnSignupIntroProps) => {
               <div key={index} className={css.feature}>
                 <CheckCircleIcon className={css.featureIcon} />
                 <div>
-                  <Typography variant="body1" fontWeight={600} className={css.featureTitle}>
+                  <Typography variant="body2" fontWeight={600} className={css.featureTitle}>
                     {feature.title}
                   </Typography>
                   <Typography variant="body2" className={css.featureDescription}>
