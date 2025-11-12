@@ -2,7 +2,7 @@ import { renderHook, waitFor } from '@/tests/test-utils'
 import usePositions from '@/features/positions/hooks/usePositions'
 import * as useChainId from '@/hooks/useChainId'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
-import * as useCurrentChain from '@/hooks/useChains'
+import * as useChains from '@/hooks/useChains'
 import * as useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsPositionsFeatureEnabled'
 import * as positionsQueries from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import * as store from '@/store'
@@ -108,7 +108,12 @@ describe('usePositions', () => {
       safeError: undefined,
     })
 
-    jest.spyOn(useCurrentChain, 'useCurrentChain').mockReturnValue(mockChain)
+    jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => {
+      if (feature === FEATURES.PORTFOLIO_ENDPOINT) {
+        return mockChain.features.includes(FEATURES.PORTFOLIO_ENDPOINT) ? true : false
+      }
+      return false
+    })
 
     jest.spyOn(useIsPositionsFeatureEnabled, 'default').mockReturnValue(true)
 
@@ -170,11 +175,12 @@ describe('usePositions', () => {
 
   describe('legacy positions endpoint', () => {
     beforeEach(() => {
-      const chainWithoutPortfolio = chainBuilder()
-        .with({ chainId: CHAIN_ID, features: [FEATURES.POSITIONS] })
-        .build()
-
-      jest.spyOn(useCurrentChain, 'useCurrentChain').mockReturnValue(chainWithoutPortfolio)
+      jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => {
+        if (feature === FEATURES.PORTFOLIO_ENDPOINT) {
+          return false
+        }
+        return false
+      })
     })
 
     it('should return positions from legacy endpoint when portfolio endpoint is disabled', async () => {
@@ -302,11 +308,12 @@ describe('usePositions', () => {
 
   describe('portfolio endpoint', () => {
     beforeEach(() => {
-      const chainWithPortfolio = chainBuilder()
-        .with({ chainId: CHAIN_ID, features: [FEATURES.POSITIONS, FEATURES.PORTFOLIO_ENDPOINT] })
-        .build()
-
-      jest.spyOn(useCurrentChain, 'useCurrentChain').mockReturnValue(chainWithPortfolio)
+      jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => {
+        if (feature === FEATURES.PORTFOLIO_ENDPOINT) {
+          return true
+        }
+        return false
+      })
     })
 
     it('should return transformed positions from portfolio endpoint', async () => {
@@ -648,11 +655,12 @@ describe('usePositions', () => {
 
   describe('multiple positions', () => {
     it('should handle multiple app balances', async () => {
-      const chainWithPortfolio = chainBuilder()
-        .with({ chainId: CHAIN_ID, features: [FEATURES.POSITIONS, FEATURES.PORTFOLIO_ENDPOINT] })
-        .build()
-
-      jest.spyOn(useCurrentChain, 'useCurrentChain').mockReturnValue(chainWithPortfolio)
+      jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => {
+        if (feature === FEATURES.PORTFOLIO_ENDPOINT) {
+          return true
+        }
+        return false
+      })
 
       const mockAppBalances: AppBalance[] = [
         createMockAppBalance(),
@@ -697,11 +705,12 @@ describe('usePositions', () => {
     })
 
     it('should handle app balance with multiple groups', async () => {
-      const chainWithPortfolio = chainBuilder()
-        .with({ chainId: CHAIN_ID, features: [FEATURES.POSITIONS, FEATURES.PORTFOLIO_ENDPOINT] })
-        .build()
-
-      jest.spyOn(useCurrentChain, 'useCurrentChain').mockReturnValue(chainWithPortfolio)
+      jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => {
+        if (feature === FEATURES.PORTFOLIO_ENDPOINT) {
+          return true
+        }
+        return false
+      })
 
       const mockAppBalance: AppBalance = {
         ...createMockAppBalance(),

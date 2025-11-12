@@ -7,8 +7,8 @@ import { selectPositions, selectBalances } from '@/store/balancesSlice'
 import type { AppBalance } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import useIsPositionsFeatureEnabled from './useIsPositionsFeatureEnabled'
 import { useMemo } from 'react'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
-import { useCurrentChain } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useHasFeature } from '@/hooks/useChains'
 
 const POLLING_INTERVAL = 300_000 // 5 minutes
 
@@ -46,12 +46,7 @@ const usePositions = () => {
   const { safeAddress } = useSafeInfo()
   const currency = useAppSelector(selectCurrency)
   const isPositionsEnabled = useIsPositionsFeatureEnabled()
-  const chain = useCurrentChain()
-
-  const isPortfolioEndpointEnabled = useMemo(
-    () => (chain ? hasFeature(chain, FEATURES.PORTFOLIO_ENDPOINT) : false),
-    [chain],
-  )
+  const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
 
   const shouldUsePortfolioEndpoint = isPositionsEnabled && isPortfolioEndpointEnabled
   const shouldUsePositionEndpoint = isPositionsEnabled && !isPortfolioEndpointEnabled
