@@ -3,7 +3,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { usePositionsGetPositionsV1Query, type Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
-import { selectPositions } from '@/store/balancesSlice'
+import { selectPositions, selectBalances } from '@/store/balancesSlice'
 import type { AppBalance } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import useIsPositionsFeatureEnabled from './useIsPositionsFeatureEnabled'
 import { useMemo } from 'react'
@@ -56,7 +56,11 @@ const usePositions = () => {
   const shouldUsePortfolioEndpoint = isPositionsEnabled && isPortfolioEndpointEnabled
   const shouldUsePositionEndpoint = isPositionsEnabled && !isPortfolioEndpointEnabled
 
-  const { currentData, error, isLoading } = usePositionsGetPositionsV1Query(
+  const {
+    currentData: legacyPositionsData,
+    error: legacyPositionsError,
+    isLoading: legacyPositionsLoading,
+  } = usePositionsGetPositionsV1Query(
     { chainId, safeAddress, fiatCode: currency },
     {
       skip: !shouldUsePositionEndpoint || !safeAddress || !chainId || !currency,
@@ -67,24 +71,23 @@ const usePositions = () => {
   )
 
   const portfolioPositions = useAppSelector(selectPositions)
-
-  const transformedPortfolioPositions = useMemo(
-    () => transformAppBalancesToProtocols(portfolioPositions),
-    [portfolioPositions],
-  )
-
-  const resultData = useMemo(
-    () => (shouldUsePortfolioEndpoint ? transformedPortfolioPositions : currentData),
-    [shouldUsePortfolioEndpoint, transformedPortfolioPositions, currentData],
-  )
+  const balancesState = useAppSelector(selectBalances)
 
   return useMemo(
     () => ({
-      data: resultData,
-      error,
-      isLoading,
+      data: shouldUsePortfolioEndpoint ? transformAppBalancesToProtocols(portfolioPositions) : legacyPositionsData,
+      error: shouldUsePortfolioEndpoint ? balancesState.error : legacyPositionsError,
+      isLoading: shouldUsePortfolioEndpoint ? balancesState.loading : legacyPositionsLoading,
     }),
-    [resultData, error, isLoading],
+    [
+      shouldUsePortfolioEndpoint,
+      portfolioPositions,
+      legacyPositionsData,
+      balancesState.error,
+      legacyPositionsError,
+      balancesState.loading,
+      legacyPositionsLoading,
+    ],
   )
 }
 

@@ -7,7 +7,7 @@ import * as useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsP
 import * as positionsQueries from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import * as store from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
-import { selectPositions } from '@/store/balancesSlice'
+import { selectPositions, selectBalances } from '@/store/balancesSlice'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -118,6 +118,14 @@ describe('usePositions', () => {
       }
       if (selector === selectPositions) {
         return undefined
+      }
+      if (selector === selectBalances) {
+        return {
+          data: { items: [], fiatTotal: '' },
+          loaded: false,
+          loading: false,
+          error: undefined,
+        }
       }
       return undefined
     })
@@ -268,6 +276,14 @@ describe('usePositions', () => {
         if (selector === selectPositions) {
           return undefined
         }
+        if (selector === selectBalances) {
+          return {
+            data: { items: [], fiatTotal: '' },
+            loaded: false,
+            loading: false,
+            error: undefined,
+          }
+        }
         return undefined
       })
 
@@ -302,6 +318,14 @@ describe('usePositions', () => {
         }
         if (selector === selectPositions) {
           return mockAppBalances
+        }
+        if (selector === selectBalances) {
+          return {
+            data: { items: [], fiatTotal: '', positions: mockAppBalances },
+            loaded: true,
+            loading: false,
+            error: undefined,
+          }
         }
         return undefined
       })
@@ -343,6 +367,14 @@ describe('usePositions', () => {
         }
         if (selector === selectPositions) {
           return [mockAppBalance]
+        }
+        if (selector === selectBalances) {
+          return {
+            data: { items: [], fiatTotal: '', positions: [mockAppBalance] },
+            loaded: true,
+            loading: false,
+            error: undefined,
+          }
         }
         return undefined
       })
@@ -393,6 +425,14 @@ describe('usePositions', () => {
         if (selector === selectPositions) {
           return [mockAppBalance]
         }
+        if (selector === selectBalances) {
+          return {
+            data: { items: [], fiatTotal: '', positions: [mockAppBalance] },
+            loaded: true,
+            loading: false,
+            error: undefined,
+          }
+        }
         return undefined
       })
 
@@ -442,6 +482,14 @@ describe('usePositions', () => {
         if (selector === selectPositions) {
           return [mockAppBalance]
         }
+        if (selector === selectBalances) {
+          return {
+            data: { items: [], fiatTotal: '', positions: [mockAppBalance] },
+            loaded: true,
+            loading: false,
+            error: undefined,
+          }
+        }
         return undefined
       })
 
@@ -456,11 +504,19 @@ describe('usePositions', () => {
 
     it('should return undefined when portfolio positions are undefined', async () => {
       jest.spyOn(store, 'useAppSelector').mockImplementation((selector) => {
-        if (selector.toString().includes('selectCurrency')) {
+        if (selector === selectCurrency) {
           return 'USD'
         }
-        if (selector.toString().includes('selectPositions')) {
+        if (selector === selectPositions) {
           return undefined
+        }
+        if (selector === selectBalances) {
+          return {
+            data: { items: [], fiatTotal: '' },
+            loaded: true,
+            loading: false,
+            error: undefined,
+          }
         }
         return undefined
       })
@@ -472,13 +528,21 @@ describe('usePositions', () => {
       })
     })
 
-    it('should return undefined when portfolio positions are empty array', async () => {
+    it('should return empty array when portfolio positions are empty array', async () => {
       jest.spyOn(store, 'useAppSelector').mockImplementation((selector) => {
-        if (selector.toString().includes('selectCurrency')) {
+        if (selector === selectCurrency) {
           return 'USD'
         }
-        if (selector.toString().includes('selectPositions')) {
+        if (selector === selectPositions) {
           return []
+        }
+        if (selector === selectBalances) {
+          return {
+            data: { items: [], fiatTotal: '' },
+            loaded: true,
+            loading: false,
+            error: undefined,
+          }
         }
         return undefined
       })
@@ -486,8 +550,10 @@ describe('usePositions', () => {
       const { result } = renderHook(() => usePositions())
 
       await waitFor(() => {
-        expect(result.current.data).toBeUndefined()
+        expect(result.current.data).toBeDefined()
       })
+
+      expect(result.current.data).toEqual([])
     })
 
     it('should not call positions endpoint when portfolio endpoint is enabled', async () => {
@@ -499,6 +565,14 @@ describe('usePositions', () => {
         }
         if (selector === selectPositions) {
           return mockAppBalances
+        }
+        if (selector === selectBalances) {
+          return {
+            data: { items: [], fiatTotal: '', positions: mockAppBalances },
+            loaded: true,
+            loading: false,
+            error: undefined,
+          }
         }
         return undefined
       })
@@ -513,6 +587,62 @@ describe('usePositions', () => {
 
       const callArgs = positionsQuerySpy.mock.calls[0]
       expect(callArgs[1]?.skip).toBe(true)
+    })
+
+    it('should return error from balances state when portfolio endpoint fails', async () => {
+      jest.spyOn(store, 'useAppSelector').mockImplementation((selector) => {
+        if (selector === selectCurrency) {
+          return 'USD'
+        }
+        if (selector === selectPositions) {
+          return undefined
+        }
+        if (selector === selectBalances) {
+          return {
+            data: { items: [], fiatTotal: '' },
+            loaded: false,
+            loading: false,
+            error: 'Portfolio endpoint error',
+          }
+        }
+        return undefined
+      })
+
+      const { result } = renderHook(() => usePositions())
+
+      await waitFor(() => {
+        expect(result.current.error).toBeDefined()
+      })
+
+      expect(result.current.error).toBe('Portfolio endpoint error')
+      expect(result.current.isLoading).toBe(false)
+      expect(result.current.data).toBeUndefined()
+    })
+
+    it('should return loading state from balances state when portfolio endpoint is loading', async () => {
+      jest.spyOn(store, 'useAppSelector').mockImplementation((selector) => {
+        if (selector === selectCurrency) {
+          return 'USD'
+        }
+        if (selector === selectPositions) {
+          return undefined
+        }
+        if (selector === selectBalances) {
+          return {
+            data: { items: [], fiatTotal: '' },
+            loaded: false,
+            loading: true,
+            error: undefined,
+          }
+        }
+        return undefined
+      })
+
+      const { result } = renderHook(() => usePositions())
+
+      expect(result.current.isLoading).toBe(true)
+      expect(result.current.error).toBeUndefined()
+      expect(result.current.data).toBeUndefined()
     })
   })
 
@@ -543,6 +673,14 @@ describe('usePositions', () => {
         }
         if (selector === selectPositions) {
           return mockAppBalances
+        }
+        if (selector === selectBalances) {
+          return {
+            data: { items: [], fiatTotal: '', positions: mockAppBalances },
+            loaded: true,
+            loading: false,
+            error: undefined,
+          }
         }
         return undefined
       })
@@ -623,6 +761,14 @@ describe('usePositions', () => {
         }
         if (selector === selectPositions) {
           return [mockAppBalance]
+        }
+        if (selector === selectBalances) {
+          return {
+            data: { items: [], fiatTotal: '', positions: [mockAppBalance] },
+            loaded: true,
+            loading: false,
+            error: undefined,
+          }
         }
         return undefined
       })
