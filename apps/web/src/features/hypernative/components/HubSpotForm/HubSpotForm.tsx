@@ -1,5 +1,6 @@
 import { Paper, Typography, CircularProgress, Box } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
+import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
 
 type HubSpotFormProps = {
   portalId: string
@@ -67,6 +68,9 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1', safeAddress, onSubmit }
             }
           },
           onFormSubmitted: ($form: any, data: any) => {
+            // Track form submission event (sent to mixpanel as well via the GA_TO_MIXPANEL_MAPPING in services/analytics/)
+            trackEvent(HYPERNATIVE_EVENTS.GUARD_FORM_SUBMITTED)
+
             if (data) {
               let regionValue: string | undefined
 
