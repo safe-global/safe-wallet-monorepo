@@ -117,7 +117,7 @@ export const mockedTxHistorySafeInfo: SafeOverview = {
 // Stake deposit test account
 export const mockedStakeDepositAccount: SafeInfo = {
   address: '0xAD1Cf279D18f34a13c3Bf9b79F4D427D5CD9505B',
-  chainId: '11155111',
+  chainId: '1',
 }
 
 export const mockedStakeDepositSafeInfo: SafeOverview = {
