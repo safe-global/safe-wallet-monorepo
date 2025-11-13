@@ -14,7 +14,7 @@ tags:
     commands:
       - assertVisible: 'app.safe.global'
       - tapOn:
-          id: 'breadcrumb'
+          id: 'header.closeButton'
 
 - runFlow:
     when:

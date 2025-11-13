@@ -40,7 +40,7 @@ tags:
 
 # Wait for navigation to complete
 - waitForAnimationToEnd:
-    timeout: ${output.defaults.extendedWaitUntilTimeout}
+    timeout: 2000
 
 # ===========================================
 # Parse IS_FULLY_SIGNED, EXPECTED_EXECUTION_METHOD, and TX_EXECUTION_STATUS

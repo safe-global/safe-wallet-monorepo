@@ -99,3 +99,8 @@ tags:
     file: ./stake-deposit.yml
     env:
       SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./stake-claim.yml
+    env:
+      SKIP_CLEAN_START: 'true'
