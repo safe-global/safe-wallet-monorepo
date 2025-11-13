@@ -17,6 +17,10 @@ export const HYPERNATIVE_EVENTS = {
     action: 'Security Report Clicked',
     category: HYPERNATIVE_CATEGORY,
   },
+  GUARD_BANNER_DISMISSED: {
+    action: 'Guardian Banner Dismissed',
+    category: HYPERNATIVE_CATEGORY,
+  },
 }
 
 export enum HYPERNATIVE_SOURCE {

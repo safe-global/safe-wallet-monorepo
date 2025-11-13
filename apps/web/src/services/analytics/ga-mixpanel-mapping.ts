@@ -42,6 +42,7 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [HYPERNATIVE_EVENTS.GUARD_START.action]: MixpanelEvent.GUARD_START,
   [HYPERNATIVE_EVENTS.GUARD_FORM_SUBMITTED.action]: MixpanelEvent.GUARD_FORM_SUBMITTED,
   [HYPERNATIVE_EVENTS.REVIEW_REPORT_CLICKED.action]: MixpanelEvent.REVIEW_REPORT_CLICKED,
+  [HYPERNATIVE_EVENTS.GUARD_BANNER_DISMISSED.action]: MixpanelEvent.GUARD_BANNER_DISMISSED,
 }
 
 // Maps GA labels (lowercase) to Mixpanel properties (Title Case)

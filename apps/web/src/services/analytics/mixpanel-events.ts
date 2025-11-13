@@ -18,7 +18,7 @@ export enum MixpanelEvent {
   GUARD_START = 'Guard Start',
   GUARD_FORM_SUBMITTED = 'Guard Form Submitted',
   REVIEW_REPORT_CLICKED = 'Review Report Clicked',
-  // todo add events here
+  GUARD_BANNER_DISMISSED = 'Guard Banner Dismissed',
 }
 
 export enum MixpanelUserProperty {
@@ -64,8 +64,6 @@ export enum SafeAppLaunchLocation {
   PREVIEW_DRAWER = 'Preview Drawer',
   SAFE_APPS_LIST = 'Safe Apps List',
 }
-
-// todo add enum for HN sources
 
 export const ADDRESS_PROPERTIES = new Set([
   MixpanelEventParams.SAFE_ADDRESS,

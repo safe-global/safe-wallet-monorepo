@@ -24,9 +24,9 @@ export const HnBanner = ({ onHnSignupClick, onDismiss, label }: HnBannerProps) =
         label,
       }}
       trackHideProps={{
-        category: 'hypernative',
-        action: 'hide_hn_banner',
-        label: 'Strengthen your Safe',
+        category: HYPERNATIVE_CATEGORY,
+        action: HYPERNATIVE_EVENTS.GUARD_BANNER_DISMISSED.action,
+        label,
       }}
       title="Strengthen your Safe"
       description={
