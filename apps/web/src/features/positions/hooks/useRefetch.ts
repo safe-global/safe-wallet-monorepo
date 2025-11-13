@@ -11,25 +11,25 @@ import { useHasFeature } from '@/hooks/useChains'
 import { useTokenListSetting } from '@/hooks/loadables/useLoadBalances'
 import useIsPositionsFeatureEnabled from './useIsPositionsFeatureEnabled'
 
-export const useRefetchPositionsAndBalances = () => {
+/**
+ * Hook for refetching positions and balances data.
+ * Automatically selects the appropriate endpoint (portfolio or legacy) based on feature flags.
+ *
+ * @returns Object containing:
+ *   - `refetch`: Function to refetch all data (positions + balances)
+ *   - `refetchPositions`: Function to refetch positions only
+ *   - `shouldUsePortfolioEndpoint`: Boolean indicating if portfolio endpoint is active
+ */
+export const useRefetch = () => {
   const chainId = useChainId()
   const { safe, safeAddress } = useSafeInfo()
   const currency = useAppSelector(selectCurrency)
-  const isPositionsEnabled = useIsPositionsFeatureEnabled()
-  const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
   const isTrustedTokenList = useTokenListSetting()
-
-  const shouldUsePortfolioEndpoint = isPositionsEnabled && isPortfolioEndpointEnabled
-  const shouldUsePositionEndpoint = isPositionsEnabled && !isPortfolioEndpointEnabled
   const isReady = safeAddress && safe.deployed && isTrustedTokenList !== undefined
   const isReadyPortfolio = safeAddress && isTrustedTokenList !== undefined
-
-  const { refetch: legacyPositionsRefetch } = usePositionsGetPositionsV1Query(
-    { chainId, safeAddress, fiatCode: currency },
-    {
-      skip: !shouldUsePositionEndpoint || !safeAddress || !chainId || !currency,
-    },
-  )
+  const isPositionsEnabled = useIsPositionsFeatureEnabled()
+  const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
+  const shouldUsePortfolioEndpoint = isPositionsEnabled && isPortfolioEndpointEnabled
 
   const { refetch: portfolioRefetch } = usePortfolioGetPortfolioV1Query(
     {
@@ -40,6 +40,13 @@ export const useRefetchPositionsAndBalances = () => {
     },
     {
       skip: !shouldUsePortfolioEndpoint || !isReadyPortfolio || !safe.chainId,
+    },
+  )
+
+  const { refetch: legacyPositionsRefetch } = usePositionsGetPositionsV1Query(
+    { chainId, safeAddress, fiatCode: currency },
+    {
+      skip: shouldUsePortfolioEndpoint || !safeAddress || !chainId || !currency,
     },
   )
 
@@ -62,5 +69,12 @@ export const useRefetchPositionsAndBalances = () => {
     await Promise.all([legacyPositionsRefetch(), legacyBalancesRefetch()])
   }, [shouldUsePortfolioEndpoint, portfolioRefetch, legacyPositionsRefetch, legacyBalancesRefetch])
 
-  return { refetch }
+  const refetchPositions = useCallback(async () => {
+    if (shouldUsePortfolioEndpoint) {
+      return portfolioRefetch()
+    }
+    return legacyPositionsRefetch()
+  }, [shouldUsePortfolioEndpoint, portfolioRefetch, legacyPositionsRefetch])
+
+  return { refetch, refetchPositions, shouldUsePortfolioEndpoint }
 }
