@@ -1,7 +1,9 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - util
 ---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
 # ===========================================
 # Contract Interaction Transaction Card
 # ===========================================
@@ -13,13 +15,13 @@ tags:
     visible:
       text: '.*${METHOD_NAME}.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 - extendedWaitUntil:
     visible:
       text: '.*${CONTRACT_NAME}.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 - tapOn:
     text: '.*${METHOD_NAME}.*'

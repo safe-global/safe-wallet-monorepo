@@ -1,7 +1,9 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - util
 ---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
 # ===========================================
 # TWAP Order Transaction (Pending State)
 # ===========================================
@@ -25,13 +27,13 @@ tags:
     visible:
       text: '.*Enable TWAPs.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 - extendedWaitUntil:
     visible:
       text: '.*custom fallback handler.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # ===========================================
 # Swap Header - Sell and Receive Sections
@@ -114,7 +116,7 @@ tags:
       containsDescendants:
         - text: 'Widget fee'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # Expiry row (scoped to details section)
 - extendedWaitUntil:
@@ -123,7 +125,7 @@ tags:
       containsDescendants:
         - text: 'Expiry'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # ===========================================
 # TWAP Order Details Section (TWAP-Specific Fields)

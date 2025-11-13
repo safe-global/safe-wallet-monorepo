@@ -1,7 +1,9 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - util
 ---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
 # ===========================================
 # Settings Change Transaction Card
 # ===========================================
@@ -12,7 +14,7 @@ tags:
     visible:
       text: '.*addOwnerWithThreshold.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 - tapOn:
     text: '.*addOwnerWithThreshold.*'

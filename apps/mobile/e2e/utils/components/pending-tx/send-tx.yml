@@ -1,7 +1,9 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - util
 ---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
 # ===========================================
 # Send Transaction (Pending State)
 # ===========================================
@@ -14,7 +16,7 @@ tags:
     visible:
       text: '.*-.*ETH.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # ===========================================
 # Recipient Address

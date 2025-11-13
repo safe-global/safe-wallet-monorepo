@@ -1,7 +1,9 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - util
 ---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
 # ===========================================
 # Swap Order Transaction (Pending State)
 # ===========================================
@@ -108,7 +110,7 @@ tags:
       containsDescendants:
         - text: 'Widget fee'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # Expiry row (scoped to details section)
 - extendedWaitUntil:
@@ -117,7 +119,7 @@ tags:
       containsDescendants:
         - text: 'Expiry'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # ===========================================
 # Transaction Details Button

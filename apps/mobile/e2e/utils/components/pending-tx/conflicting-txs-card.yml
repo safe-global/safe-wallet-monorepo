@@ -1,8 +1,10 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - util
 jsEngine: graaljs
 ---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
 # ===========================================
 # Conflicting Transactions Card
 # ===========================================
@@ -40,74 +42,74 @@ jsEngine: graaljs
     visible:
       text: '.*${output.txTypes[0] || ""}.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 - extendedWaitUntil:
     visible:
       text: '.*${output.txTypes[1] || ""}.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 - extendedWaitUntil:
     visible:
       text: '.*${output.txTypes[2] || ""}.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 - extendedWaitUntil:
     visible:
       text: '.*${output.txTypes[3] || ""}.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 - extendedWaitUntil:
     visible:
       text: '.*${output.txTypes[4] || ""}.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 - extendedWaitUntil:
     visible:
       text: '.*${output.txTypes[5] || ""}.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # Verify transaction details if provided (optional, matches corresponding TX_TYPES index)
 - extendedWaitUntil:
     visible:
       text: '.*${output.txDetails[0] || ""}.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 - extendedWaitUntil:
     visible:
       text: '.*${output.txDetails[1] || ""}.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 - extendedWaitUntil:
     visible:
       text: '.*${output.txDetails[2] || ""}.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 - extendedWaitUntil:
     visible:
       text: '.*${output.txDetails[3] || ""}.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 - extendedWaitUntil:
     visible:
       text: '.*${output.txDetails[4] || ""}.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 - extendedWaitUntil:
     visible:
       text: '.*${output.txDetails[5] || ""}.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # Verify confirmations are shown
 # Use provided pattern or default to any confirmation format

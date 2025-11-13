@@ -1,7 +1,9 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - util
 ---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
 # ===========================================
 # Send Transaction Card (Pending)
 # ===========================================
@@ -15,7 +17,7 @@ tags:
     visible:
       text: '.*0\.00002 ETH.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # Tap on the Send transaction text within the conflicting card
 # Using index 0 to ensure we tap the first transaction (Send)

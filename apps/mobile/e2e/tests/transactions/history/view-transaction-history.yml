@@ -1,4 +1,4 @@
-appId: global.safe.mobileapp.ios
+appId: test
 tags:
   - transactions
   - history
@@ -6,6 +6,9 @@ tags:
 ---
 # Transaction History E2E Test
 # Tests viewing transaction history with infinite scroll
+
+- runScript:
+    file: ../../../utils/scripts/defaults.js
 
 - runFlow:
     file: ../../../utils/setup/app-start.yml
@@ -22,14 +25,14 @@ tags:
     visible:
       text: '.*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).*\d{1,2},.*\d{4}.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # Verify date grouping is visible (sticky headers or date labels)
 - extendedWaitUntil:
     visible:
       text: '.*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # ============================================
 # Pull to Refresh

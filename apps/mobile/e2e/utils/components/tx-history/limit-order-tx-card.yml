@@ -1,7 +1,9 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - util
 ---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
 # ===========================================
 # Limit Order Transaction Card
 # ===========================================
@@ -10,7 +12,7 @@ tags:
     visible:
       text: '.*Limit order.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 - tapOn:
     text: '.*Limit order.*'

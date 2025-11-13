@@ -1,7 +1,9 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - util
 ---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
 # ===========================================
 # Batch Transaction Card
 # ===========================================
@@ -13,7 +15,7 @@ tags:
     visible:
       text: '.*\d+\s+actions.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # Click on the batch transaction (or a sub-transaction within it)
 # MultiSend transactions show as "Batch" with "X actions"

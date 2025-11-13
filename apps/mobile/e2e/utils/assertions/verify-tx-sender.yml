@@ -1,4 +1,4 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - util
 ---
@@ -20,4 +20,3 @@ tags:
     id: 'copy-button'
 - assertVisible:
     id: 'hash-display-external-link-button'
-

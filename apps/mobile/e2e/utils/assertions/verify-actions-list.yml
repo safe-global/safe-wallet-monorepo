@@ -1,7 +1,9 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - util
 ---
+- runScript:
+    file: ../../utils/scripts/defaults.js
 # ===========================================
 # Actions List View (Reusable Component)
 # ===========================================
@@ -22,7 +24,7 @@ tags:
     visible:
       text: '.*\d+.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # Verify action descriptions are visible
 # Format: "Send 0.01 ETH to" or "Send 0.05 ETH to" or "approve" or "setPreSignature"
@@ -30,14 +32,14 @@ tags:
     visible:
       text: '.*(Send|approve|setPreSignature).*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # Verify addresses are visible in action items (if applicable)
 - extendedWaitUntil:
     visible:
       text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # Click on the first action item (Container is clickable)
 # We'll tap on the action text/description
@@ -47,5 +49,3 @@ tags:
 # Test clicking on individual action items
 - runFlow:
     file: ./verify-action-detail.yml
-
-

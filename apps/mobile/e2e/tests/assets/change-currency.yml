@@ -1,4 +1,4 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - assets
   - settings
@@ -6,6 +6,8 @@ tags:
 # Currency Change Happy Path Test
 # Tests changing the display currency and verifying fiat values update throughout the app
 
+- runScript:
+    file: ../../utils/scripts/defaults.js
 - runFlow:
     file: ../../utils/setup/app-start.yml
 
@@ -36,7 +38,7 @@ tags:
       id: 'token-ETH-fiat-balance'
       text: '.*\$.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # ============================================
 # Navigate to Settings tab
@@ -156,7 +158,7 @@ tags:
       id: 'token-ETH-fiat-balance'
       text: '.*€.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # ============================================
 # Change Currency Again - GBP

@@ -1,7 +1,9 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - util
 ---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
 # ===========================================
 # Stake Deposit Transaction Card
 # ===========================================
@@ -10,13 +12,13 @@ tags:
     visible:
       text: '.*Deposit.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 - extendedWaitUntil:
     visible:
       text: '.*Stake.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 - tapOn:
     text: '.*Deposit.*'

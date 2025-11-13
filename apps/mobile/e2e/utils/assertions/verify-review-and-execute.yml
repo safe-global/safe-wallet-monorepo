@@ -1,8 +1,10 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 jsEngine: graaljs
 tags:
   - util
 ---
+- runScript:
+    file: ../../utils/scripts/defaults.js
 # ===========================================
 # Review and Execute/Confirm (Reusable Component)
 # ===========================================
@@ -38,7 +40,7 @@ tags:
 
 # Wait for navigation to complete
 - waitForAnimationToEnd:
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # ===========================================
 # Parse IS_FULLY_SIGNED, EXPECTED_EXECUTION_METHOD, and TX_EXECUTION_STATUS
@@ -123,19 +125,19 @@ tags:
     visible:
       text: '.*Domain hash.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 - extendedWaitUntil:
     visible:
       text: '.*Message hash.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 - extendedWaitUntil:
     visible:
       text: '.*safeTxHash.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # Tap on JSON tab
 - tapOn:
@@ -150,7 +152,7 @@ tags:
     visible:
       text: '.*"to".*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # Tap back on Data tab
 - tapOn:
@@ -237,7 +239,7 @@ tags:
                       visible:
                         text: '.*(<|≈).*\d+.*ETH.*'
                         optional: true
-                      timeout: 2000
+                      timeout: ${output.defaults.extendedWaitUntilTimeout}
 
             # Failure scenario after switching: Verify "Can not estimate" is still shown
             - runFlow:
@@ -265,7 +267,7 @@ tags:
                 visible:
                   text: '.*(<|≈).*\d+.*ETH.*'
                   optional: true
-                timeout: 2000
+                timeout: ${output.defaults.extendedWaitUntilTimeout}
             # Optionally verify we can still open the sheet and see both options
             - tapOn:
                 text: 'Execution method'
@@ -343,7 +345,7 @@ tags:
           visible:
             text: '.*(<|≈).*\d+.*ETH.*'
             optional: true
-          timeout: 2000
+          timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # ===========================================
 # Failure Flow: Verify Cannot Estimate and Failure Warning (Execute Flow - Both Relay and Signer)

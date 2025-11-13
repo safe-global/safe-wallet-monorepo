@@ -1,4 +1,4 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - transactions
   - history
@@ -17,8 +17,9 @@ tags:
 # Scroll down to find swap owner transaction
 - scrollUntilVisible:
     element:
-      text: '.*Swap.*owner.*'
+      text: '.*swapOwner.*'
     centerElement: true
+    speed: 20
 
 # Test swap owner transaction
 - runFlow:

@@ -1,4 +1,4 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - settings
   - suite
@@ -15,4 +15,3 @@ tags:
     file: ./change-theme.yml
     env:
       SKIP_CLEAN_START: 'true'
-

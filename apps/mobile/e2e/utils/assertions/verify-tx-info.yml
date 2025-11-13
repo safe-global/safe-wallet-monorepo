@@ -1,4 +1,4 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - util
 ---
@@ -28,4 +28,3 @@ tags:
 
 - assertVisible: 'Status'
 - assertVisible: 'Success'
-

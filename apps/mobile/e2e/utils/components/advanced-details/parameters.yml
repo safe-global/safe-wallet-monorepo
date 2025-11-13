@@ -1,7 +1,9 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - util
 ---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
 # ============================================
 # Parameters Tab - Verify All Items
 # Based on formatParameters.tsx - all possible items that can appear
@@ -26,7 +28,7 @@ tags:
     visible:
       text: '.*(rejectTransaction|rejectTx|executeTransaction|transfer|approve|multicall|0x[0-9a-fA-F]{40}).*'
       optional: true
-    timeout: 3000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # Parameters section (optional - only if dataDecoded?.parameters exists)
 # Each parameter shows name and type as label
@@ -35,7 +37,7 @@ tags:
     visible:
       text: '.*(uint256|address|bool|bytes|string|uint|int).*'
       optional: true
-    timeout: 3000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # Parameter values (optional - if parameters exist, they will display values)
 # Values could be addresses, numbers, bools, etc.
@@ -43,32 +45,32 @@ tags:
     visible:
       text: '.*(0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}|\d+|true|false).*'
       optional: true
-    timeout: 3000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # Copy buttons for parameter values (optional - if long values exist)
 - extendedWaitUntil:
     visible:
       id: 'copy-button'
       optional: true
-    timeout: 3000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # Hex Data (optional - only if txData?.hexData exists)
 - extendedWaitUntil:
     visible:
       text: 'Hex Data'
       optional: true
-    timeout: 3000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # Hex Data value (shortened format like "0x1234...abcd")
 - extendedWaitUntil:
     visible:
       text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
       optional: true
-    timeout: 3000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # Hex Data copy button (optional - if hex data exists)
 - extendedWaitUntil:
     visible:
       id: 'copy-button'
       optional: true
-    timeout: 3000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}

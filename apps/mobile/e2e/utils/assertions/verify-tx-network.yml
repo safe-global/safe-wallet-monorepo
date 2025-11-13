@@ -1,4 +1,4 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - util
 ---
@@ -16,4 +16,3 @@ tags:
     id: 'logo-image'
 - assertVisible:
     text: '${NETWORK || "Sepolia"}'
-

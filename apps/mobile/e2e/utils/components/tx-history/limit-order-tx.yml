@@ -1,7 +1,9 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - util
 ---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
 # ===========================================
 # Limit Order Transaction
 # ===========================================
@@ -86,14 +88,14 @@ tags:
       containsDescendants:
         - text: 'Total fees'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 - extendedWaitUntil:
     visible:
       id: 'history-swap-order-details'
       containsDescendants:
         - text: '.*\d+.*[A-Z]{2,}.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # ===========================================
 # Transaction Details Button

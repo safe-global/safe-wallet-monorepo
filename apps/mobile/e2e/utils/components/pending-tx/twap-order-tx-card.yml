@@ -1,7 +1,9 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - util
 ---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
 # ===========================================
 # TWAP Order Transaction Card (Pending)
 # ===========================================
@@ -20,7 +22,7 @@ tags:
     visible:
       text: '.*[A-Z]{2,}.*>.*[A-Z]{2,}.*'
       optional: true
-    timeout: 2000
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
 
 # Tap on the TWAP order transaction text
 # Note: TWAP orders may appear in "In queue" or "Conflicting transactions" sections

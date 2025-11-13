@@ -1,4 +1,4 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - transactions
   - history
@@ -37,6 +37,7 @@ tags:
     element:
       text: 'Swap order'
     centerElement: true
+    speed: 20
 
 # Test swap order transaction
 - runFlow:

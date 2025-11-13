@@ -1,4 +1,4 @@
-appId: global.safe.mobileapp.ios
+appId: ${APP_ID}
 tags:
   - util
 ---
@@ -55,4 +55,3 @@ tags:
       EXPECTED_SIGNER_PATTERN: '.*6fED.*'
       TX_EXECUTION_STATUS: 'succeed'
       EXPECTED_EXECUTION_METHOD: 'relay'
-
