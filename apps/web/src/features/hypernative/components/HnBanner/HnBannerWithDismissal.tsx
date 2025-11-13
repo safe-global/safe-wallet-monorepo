@@ -4,7 +4,7 @@ import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import { HnBanner } from './HnBanner'
-import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
+import type { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 
 export interface HnBannerWithDismissalProps extends WithHnSignupFlowProps {
   isDismissable?: boolean

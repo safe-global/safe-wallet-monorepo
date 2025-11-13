@@ -3,7 +3,7 @@ import { Box } from '@mui/material'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import { HnBanner } from './HnBanner'
-import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
+import type { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 
 export const HN_BANNER_LS_KEY = 'hnBannerVisible'
 

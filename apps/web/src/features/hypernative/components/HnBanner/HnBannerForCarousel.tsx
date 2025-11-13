@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react'
 import type { NewsBannerProps } from '@/components/dashboard/NewsCarousel'
 import HnBannerDefault from './index'
-import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
+import type { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 
 /**
  * HnBanner wrapper for use in the dashboard NewsCarousel.

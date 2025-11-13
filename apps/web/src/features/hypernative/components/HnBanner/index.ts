@@ -5,7 +5,7 @@ import { withHnSignupFlow } from '../withHnSignupFlow'
 import { BannerType } from '../../hooks/useBannerStorage'
 import { HnBannerWithDismissal } from './HnBannerWithDismissal'
 import { HnBannerWithLocalStorage } from './HnBannerWithLocalStorage'
-import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
+import type { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 
 // Export the original pure component for tests and stories
 export { HnBanner, hnBannerID } from './HnBanner'
