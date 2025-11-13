@@ -1,4 +1,4 @@
-const HYPERNATIVE_CATEGORY = 'hypernative'
+export const HYPERNATIVE_CATEGORY = 'hypernative'
 
 export const HYPERNATIVE_EVENTS = {
   GUARD_LEARN_MORE: {
