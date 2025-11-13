@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Track from '@/components/common/Track'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import css from './styles.module.css'
-import { HYPERNATIVE_EVENTS, HYPERNATIVE_SOURCE } from '@/services/analytics'
+import { HYPERNATIVE_EVENTS, HYPERNATIVE_SOURCE, MixpanelEventParams } from '@/services/analytics'
 
 export interface HnMiniTxBannerProps extends WithHnSignupFlowProps {
   onDismiss: () => void
@@ -27,12 +27,10 @@ export const HnMiniTxBanner = ({ onHnSignupClick, onDismiss }: HnMiniTxBannerPro
 
   return (
     <Track
-      // eventAction: "guardLearnMore" --> TODO find out if it should be eventAction or event (currently event is customClick)
       {...HYPERNATIVE_EVENTS.GUARD_LEARN_MORE}
       label={HYPERNATIVE_SOURCE.NewTransaction}
       mixpanelParams={{
-        source: HYPERNATIVE_SOURCE.NewTransaction,
-        event: HYPERNATIVE_EVENTS.GUARD_LEARN_MORE.action,
+        [MixpanelEventParams.SOURCE]: HYPERNATIVE_SOURCE.NewTransaction,
       }}
     >
       <Card className={css.banner} onClick={handleClick}>
