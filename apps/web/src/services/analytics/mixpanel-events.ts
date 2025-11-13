@@ -19,6 +19,7 @@ export enum MixpanelEvent {
   GUARD_FORM_SUBMITTED = 'Guard Form Submitted',
   REVIEW_REPORT_CLICKED = 'Review Report Clicked',
   GUARD_BANNER_DISMISSED = 'Guard Banner Dismissed',
+  EXPLORE_POSSIBLE_CLICKED = 'Explore Possible Clicked',
 }
 
 export enum MixpanelUserProperty {

@@ -5,9 +5,11 @@ appId: global.safe.mobileapp.ios
 # ===========================================
 - assertVisible: Transaction details
 - assertVisible: Received
-- assertVisible:
-    text: '.*\+.*QTRUST.*|.*\d+.*QTRUST.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*\+.*QTRUST.*|.*\d+.*QTRUST.*'
+      optional: true
+    timeout: 2000
 
 # ===========================================
 # Sender Address (From field)
