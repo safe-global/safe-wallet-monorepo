@@ -58,7 +58,7 @@ appId: global.safe.mobileapp.ios
 
 # Test the actions list view
 - runFlow:
-    file: ./batch-actions.yml
+    file: ../../shared/test-actions-list.yml
 
 # Go back to transaction details from actions list
 - tapOn:

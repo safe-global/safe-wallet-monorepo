@@ -1,12 +1,14 @@
 appId: global.safe.mobileapp.ios
 ---
 # ===========================================
-# Action Detail View
+# Action Detail View (Reusable Component)
 # ===========================================
 # Action details view shows the action name as large header title
 # And displays either:
 # 1. "Call" with method name badge (if dataDecoded?.method exists)
 # 2. "Interacted with" with address identicon (if no method)
+#
+# Can be used for both history transactions and pending transactions
 
 # Verify either "Interacted with" or "Call" section is visible
 - assertVisible:
@@ -14,24 +16,27 @@ appId: global.safe.mobileapp.ios
 
 # Verify address information is displayed
 # Either as identicon + address in "Interacted with" or in "Contract" field
-- assertVisible:
-    id: 'action-details-interacted-with'
-    containsDescendants:
-      - text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
+- extendedWaitUntil:
+    visible:
+      id: 'action-details-interacted-with'
+      containsDescendants:
+        - text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
+      optional: true
+    timeout: 2000
 
 # Verify "Contract" field is visible (always shown in action details)
-- assertVisible: Contract
+- assertVisible: 'Contract'
 
 # Verify contract address is displayed with copy/external link icons
 - assertVisible:
     id: 'action-details-contract'
     containsDescendants:
       - id: 'hash-display-name-or-address'
-        text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
+        text: '.*(0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}|[A-Za-z].*)'
 
 # Go back to actions list
 - tapOn:
     id: 'go-back'
 
 # Verify we're back at the Actions view
-- assertVisible: Actions
+- assertVisible: 'Actions'

@@ -4,13 +4,17 @@ appId: global.safe.mobileapp.ios
 # Stake Deposit Transaction Card
 # ===========================================
 # Stake deposit transactions show "Deposit" label and "Stake" type
-- assertVisible:
-    text: '.*Deposit.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*Deposit.*'
+      optional: true
+    timeout: 2000
 
-- assertVisible:
-    text: '.*Stake.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*Stake.*'
+      optional: true
+    timeout: 2000
 
 - tapOn:
     text: '.*Deposit.*'

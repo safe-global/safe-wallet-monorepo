@@ -28,10 +28,12 @@ appId: global.safe.mobileapp.ios
     text: '.*\$.*'
 
 # Verify token fiat values in list - should contain dollar sign
-- assertVisible:
-    id: 'token-ETH-fiat-balance'
-    text: '.*\$.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      id: 'token-ETH-fiat-balance'
+      text: '.*\$.*'
+      optional: true
+    timeout: 2000
 
 # ============================================
 # Navigate to Settings tab
@@ -146,10 +148,12 @@ appId: global.safe.mobileapp.ios
     text: '.*€.*'
 
 # Verify token fiat values show € symbol
-- assertVisible:
-    id: 'token-ETH-fiat-balance'
-    text: '.*€.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      id: 'token-ETH-fiat-balance'
+      text: '.*€.*'
+      optional: true
+    timeout: 2000
 
 # ============================================
 # Change Currency Again - GBP

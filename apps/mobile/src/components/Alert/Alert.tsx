@@ -104,6 +104,7 @@ export const Alert = ({
             paddingVertical="$2"
             paddingHorizontal="$4"
             borderRadius={'$2'}
+            collapsableChildren={false}
           >
             {startIcon ? <View testID="alert-start-icon">{startIcon}</View> : Icon}
 
