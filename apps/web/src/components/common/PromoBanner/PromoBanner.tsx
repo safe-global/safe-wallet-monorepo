@@ -24,8 +24,7 @@ export interface PromoBannerProps {
    */
   href?: LinkProps['href']
   onCtaClick?: () => void
-  trackOpenProps: AnalyticsEvent
-  trackHideProps: AnalyticsEvent
+  trackingEvents: AnalyticsEvent
   onDismiss?: () => void
   imageSrc?: string | StaticImageData
   imageAlt?: string
@@ -53,8 +52,7 @@ export const PromoBanner = ({
   imageSrc,
   imageAlt,
   endIcon,
-  trackOpenProps,
-  trackHideProps,
+  trackingEvents: trackOpenProps,
   customFontColor,
   customTitleColor,
   customCtaColor,
@@ -102,8 +100,8 @@ export const PromoBanner = ({
                       ? { color: `${customCtaColor} !important` }
                       : undefined
                     : customCtaColor
-                      ? { backgroundColor: `${customCtaColor} !important` }
-                      : undefined
+                    ? { backgroundColor: `${customCtaColor} !important` }
+                    : undefined
                 }
                 color={ctaVariant === 'text' && !customCtaColor ? 'static' : undefined}
                 disabled={ctaDisabled}
@@ -140,15 +138,13 @@ export const PromoBanner = ({
       </Stack>
 
       {onDismiss && (
-        <Track {...trackHideProps}>
-          <IconButton className={css.closeButton} aria-label="close" onClick={onDismiss}>
-            <CloseIcon
-              fontSize="medium"
-              className={css.closeIcon}
-              sx={customCloseIconColor ? { color: `${customCloseIconColor} !important` } : undefined}
-            />
-          </IconButton>
-        </Track>
+        <IconButton className={css.closeButton} aria-label="close" onClick={onDismiss}>
+          <CloseIcon
+            fontSize="medium"
+            className={css.closeIcon}
+            sx={customCloseIconColor ? { color: `${customCloseIconColor} !important` } : undefined}
+          />
+        </IconButton>
       )}
     </Card>
   )
