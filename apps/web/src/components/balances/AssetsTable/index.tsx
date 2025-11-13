@@ -149,7 +149,7 @@ const AssetsTable = ({
   const isStakingPromoEnabled = useIsStakingPromoEnabled()
   const isEarnPromoEnabled = useIsEarnPromoEnabled()
 
-  const { isAssetSelected, toggleAsset, hidingAsset, hideAsset, cancel, deselectAll, saveChanges } = useHideAssets(() =>
+  const { isAssetSelected, toggleAsset, cancel, deselectAll, saveChanges } = useHideAssets(() =>
     setShowHiddenAssets(false),
   )
 
@@ -171,11 +171,9 @@ const AssetsTable = ({
         return {
           key: item.tokenInfo.address,
           selected: isSelected,
-          collapsed: item.tokenInfo.address === hidingAsset,
           cells: {
             asset: {
               rawValue: item.tokenInfo.name,
-              collapsed: item.tokenInfo.address === hidingAsset,
               content: (
                 <div className={css.token}>
                   <TokenIcon logoUri={item.tokenInfo.logoUri} tokenSymbol={item.tokenInfo.symbol} />
@@ -210,7 +208,6 @@ const AssetsTable = ({
             },
             balance: {
               rawValue: Number(item.balance) / 10 ** (item.tokenInfo.decimals ?? 0),
-              collapsed: item.tokenInfo.address === hidingAsset,
               content: (
                 <Typography sx={{ '& b': { fontWeight: '400' } }} textAlign="right">
                   <TokenAmount
@@ -223,7 +220,6 @@ const AssetsTable = ({
             },
             value: {
               rawValue: rawFiatValue,
-              collapsed: item.tokenInfo.address === hidingAsset,
               content: (
                 <Box textAlign="right">
                   <Typography>
@@ -264,7 +260,6 @@ const AssetsTable = ({
             actions: {
               rawValue: '',
               sticky: true,
-              collapsed: item.tokenInfo.address === hidingAsset,
               content: (
                 <Stack
                   direction="row"
@@ -287,10 +282,12 @@ const AssetsTable = ({
                       <Track {...ASSETS_EVENTS.HIDE_TOKEN}>
                         <Tooltip title="Hide asset" arrow disableInteractive>
                           <IconButton
-                            disabled={hidingAsset !== undefined}
                             size="medium"
                             aria-label="Hide asset"
-                            onClick={() => hideAsset(item.tokenInfo.address)}
+                            onClick={() => {
+                              toggleAsset(item.tokenInfo.address)
+                              saveChanges()
+                            }}
                           >
                             <VisibilityOutlined fontSize="small" />
                           </IconButton>
