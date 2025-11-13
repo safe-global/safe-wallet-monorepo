@@ -53,6 +53,7 @@ export enum MixpanelEventParams {
   APP_URL = 'App URL',
   DATE_RANGE = 'Date Range',
   SIDEBAR_ELEMENT = 'Sidebar Element',
+  TRANSACTION_TYPE = 'Transaction Type',
 }
 
 export enum SafeAppLaunchLocation {

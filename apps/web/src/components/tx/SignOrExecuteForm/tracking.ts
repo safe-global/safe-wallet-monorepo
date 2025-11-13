@@ -1,9 +1,10 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useCallback, useRef } from 'react'
 import { MODALS_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
-import { TX_EVENTS } from '@/services/analytics/events/transactions'
+import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import { getTransactionTrackingType } from '@/services/analytics/tx-tracking'
 import { isNestedConfirmationTxInfo } from '@/utils/transaction-guards'
+import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 
 function getCreationEvent(args: { isParentSigner: boolean; isRoleExecution: boolean; isProposerCreation: boolean }) {
   if (args.isParentSigner) {
@@ -73,6 +74,35 @@ export function trackTxEvents(
   // Immediate execution on creation
   if (isCreation && isExecuted) {
     trackEvent({ ...executionEvent, label: txType })
+  }
+}
+
+export async function trackTransactionSubmitted(
+  txId: string,
+  chainId: string,
+  safe: ExtendedSafeInfo,
+  trigger: (arg: { chainId: string; id: string }) => Promise<{ data: TransactionDetails | undefined }>,
+  origin?: string,
+  isMassPayout?: boolean,
+) {
+  try {
+    const { data: details } = await trigger({ chainId, id: txId })
+    const txType = getTransactionTrackingType(details, origin, isMassPayout)
+    trackEvent(
+      { ...TX_EVENTS.SUBMIT, label: txType },
+      {
+        [MixpanelEventParams.TRANSACTION_TYPE]: txType,
+        [MixpanelEventParams.THRESHOLD]: safe.threshold,
+      },
+    )
+  } catch (error) {
+    trackEvent(
+      { ...TX_EVENTS.SUBMIT, label: TX_TYPES.custom },
+      {
+        [MixpanelEventParams.TRANSACTION_TYPE]: TX_TYPES.custom,
+        [MixpanelEventParams.THRESHOLD]: safe.threshold,
+      },
+    )
   }
 }
 
