@@ -11,8 +11,6 @@ interface AnalysisGroupCardItemProps {
   result: AnalysisResult
   description?: React.ReactNode
   severity?: Severity
-  name?: string
-  logoUrl?: string
 }
 
 export const AnalysisGroupCardItem = ({ result, description, severity }: AnalysisGroupCardItemProps) => {
