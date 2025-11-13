@@ -40,6 +40,26 @@ const getVisibleFiatTotal = (balances: PortfolioBalances, hiddenAssets: string[]
   )
 }
 
+const getVisibleTokensFiatTotal = (balances: PortfolioBalances, hiddenAssets: string[]): string | undefined => {
+  if (!balances.tokensFiatTotal) {
+    return undefined
+  }
+  return safeFormatUnits(
+    balances.items
+      .reduce(
+        (acc, balanceItem) => {
+          if (hiddenAssets.includes(balanceItem.tokenInfo.address)) {
+            return acc - BigInt(safeParseUnits(truncateNumber(balanceItem.fiatBalance), PRECISION) ?? 0)
+          }
+          return acc
+        },
+        BigInt(safeParseUnits(truncateNumber(balances.tokensFiatTotal), PRECISION) ?? 0),
+      )
+      .toString(),
+    PRECISION,
+  )
+}
+
 export const useVisibleBalances = (): {
   balances: PortfolioBalances
   loaded: boolean
@@ -56,6 +76,10 @@ export const useVisibleBalances = (): {
         ...data.balances,
         items: filterHiddenTokens(data.balances.items, hiddenTokens),
         fiatTotal: data.balances.fiatTotal ? getVisibleFiatTotal(data.balances, hiddenTokens) : '',
+        tokensFiatTotal: data.balances.tokensFiatTotal
+          ? getVisibleTokensFiatTotal(data.balances, hiddenTokens)
+          : undefined,
+        positionsFiatTotal: data.balances.positionsFiatTotal,
       },
     }),
     [data, hiddenTokens],

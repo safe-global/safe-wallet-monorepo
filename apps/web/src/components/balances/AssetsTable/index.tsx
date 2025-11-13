@@ -90,50 +90,6 @@ const isNativeToken = (tokenInfo: Balance['tokenInfo']) => {
   return tokenInfo.type === TokenType.NATIVE_TOKEN
 }
 
-const headCells = [
-  {
-    id: 'asset',
-    label: 'Asset',
-    width: '23%',
-  },
-  {
-    id: 'price',
-    label: 'Price',
-    width: '18%',
-    align: 'right',
-  },
-  {
-    id: 'balance',
-    label: 'Balance',
-    width: '18%',
-    align: 'right',
-  },
-  {
-    id: 'value',
-    label: 'Value',
-    width: '18%',
-    align: 'right',
-  },
-  {
-    id: 'weight',
-    label: (
-      <Tooltip title="Based on total portfolio value">
-        <Typography variant="caption" letterSpacing="normal" color="primary.light">
-          Weight
-        </Typography>
-      </Tooltip>
-    ),
-    width: '23%',
-    align: 'right',
-  },
-  {
-    id: 'actions',
-    label: '',
-    width: '15%',
-    sticky: true,
-  },
-]
-
 const AssetsTable = ({
   showHiddenAssets,
   setShowHiddenAssets,
@@ -141,6 +97,50 @@ const AssetsTable = ({
   showHiddenAssets: boolean
   setShowHiddenAssets: (hidden: boolean) => void
 }): ReactElement => {
+  const headCells = [
+    {
+      id: 'asset',
+      label: 'Asset',
+      width: '23%',
+    },
+    {
+      id: 'price',
+      label: 'Price',
+      width: '18%',
+      align: 'right',
+    },
+    {
+      id: 'balance',
+      label: 'Balance',
+      width: '18%',
+      align: 'right',
+    },
+    {
+      id: 'weight',
+      label: (
+        <Tooltip title="Based on total token value">
+          <Typography variant="caption" letterSpacing="normal" color="primary.light">
+            Weight
+          </Typography>
+        </Tooltip>
+      ),
+      width: '23%',
+      align: 'right',
+    },
+    {
+      id: 'value',
+      label: 'Value',
+      width: '18%',
+      align: 'right',
+    },
+    {
+      id: 'actions',
+      label: '',
+      width: showHiddenAssets ? '130px' : '86px',
+      align: 'right',
+      disableSort: true,
+    },
+  ]
   const { balances, loading } = useBalances()
   const { balances: visibleBalances } = useVisibleBalances()
 
@@ -159,6 +159,8 @@ const AssetsTable = ({
     !loading && (balances.items.length === 0 || (balances.items.length === 1 && balances.items[0].balance === '0'))
   const selectedAssetCount = visibleAssets?.filter((item) => isAssetSelected(item.tokenInfo.address)).length || 0
 
+  const tokensFiatTotal = visibleBalances.tokensFiatTotal ? Number(visibleBalances.tokensFiatTotal) : undefined
+
   const rows = loading
     ? skeletonRows
     : (visibleAssets || []).map((item) => {
@@ -166,8 +168,7 @@ const AssetsTable = ({
         const rawPriceValue = parseFloat(item.fiatConversion)
         const isNative = isNativeToken(item.tokenInfo)
         const isSelected = isAssetSelected(item.tokenInfo.address)
-        const fiatTotal = visibleBalances.fiatTotal ? Number(visibleBalances.fiatTotal) : undefined
-        const itemShareOfFiatTotal = fiatTotal ? Number(item.fiatBalance) / fiatTotal : null
+        const itemShareOfFiatTotal = tokensFiatTotal ? Number(item.fiatBalance) / tokensFiatTotal : null
 
         return {
           key: item.tokenInfo.address,
