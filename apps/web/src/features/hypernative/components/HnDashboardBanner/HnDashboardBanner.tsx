@@ -9,8 +9,12 @@ export interface HnDashboardBannerProps extends WithHnSignupFlowProps {}
 export const HnDashboardBanner = ({ onHnSignupClick }: HnDashboardBannerProps) => {
   const { title, description, ctaLabel, badgeSrc, badgeAlt, tagLabel } = dashboardBannerConfig
 
+  const handleBannerClick = () => {
+    onHnSignupClick()
+  }
+
   return (
-    <Card className={css.banner}>
+    <Card className={css.banner} onClick={handleBannerClick} role="button" sx={{ cursor: 'pointer' }}>
       <Box className={css.tag}>
         <Typography variant="body2" className={css.tagText}>
           {tagLabel}
@@ -31,7 +35,7 @@ export const HnDashboardBanner = ({ onHnSignupClick }: HnDashboardBannerProps) =
             {description}
           </Typography>
 
-          <Button variant="outlined" size="small" className={css.ctaButton} onClick={onHnSignupClick}>
+          <Button variant="outlined" size="small" className={css.ctaButton}>
             {ctaLabel}
           </Button>
         </Box>
