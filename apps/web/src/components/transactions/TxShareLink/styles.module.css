@@ -1,7 +1,15 @@
 .shareBlock {
-  margin-bottom: -42px;
+  margin-bottom: -53px;
   position: relative;
   z-index: 10;
+}
+
+.shareBlockStatic {
+  width: 100%;
+}
+
+.shareBlockStatic > * {
+  width: 100%;
 }
 
 .shareIcon {

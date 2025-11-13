@@ -169,7 +169,10 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
       {/* Signers */}
       {(!isUnsigned || proposedByDelegate) && (
         <div className={css.txSigners}>
-          <TxShareBlock txId={txDetails.txId} />
+          <TxShareBlock
+            txId={txDetails.txId}
+            hasSigners={isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)}
+          />
 
           <TxSigners
             txDetails={txDetails}

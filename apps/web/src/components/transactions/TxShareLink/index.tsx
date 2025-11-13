@@ -20,13 +20,19 @@ export function TxExplorerLink({ txHash }: { txHash: string }) {
   )
 }
 
-export function TxShareBlock({ txId }: { txId: string }) {
+export function TxShareBlock({ txId, hasSigners = true }: { txId: string; hasSigners?: boolean }) {
   return (
-    <Box data-testid="share-block" display="flex" justifyContent="flex-end" className={css.shareBlock}>
+    <Box
+      data-testid="share-block"
+      display="flex"
+      justifyContent={hasSigners ? 'flex-end' : 'stretch'}
+      className={hasSigners ? css.shareBlock : css.shareBlockStatic}
+    >
       <TxShareLink id={txId} eventLabel={CopyDeeplinkLabels.shareBlock}>
         <Button
           data-testid="copy-link-btn"
           variant="neutral"
+          fullWidth={!hasSigners}
           startIcon={<SvgIcon component={ShareIcon} inheritViewBox fontSize="small" className={css.shareIcon} />}
         >
           Copy link
