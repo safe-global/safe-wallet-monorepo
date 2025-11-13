@@ -2,19 +2,19 @@ const HYPERNATIVE_CATEGORY = 'hypernative'
 
 export const HYPERNATIVE_EVENTS = {
   GUARD_LEARN_MORE: {
-    action: 'guardLearnMore',
+    action: 'Guardian Form Viewed',
     category: HYPERNATIVE_CATEGORY,
   },
   GUARD_START: {
-    action: 'guardStart',
+    action: 'Guardian Form Started',
     category: HYPERNATIVE_CATEGORY,
   },
   GUARD_FORM_SUBMITTED: {
-    action: 'guardFormSubmitted',
+    action: 'Guardian Form Submitted',
     category: HYPERNATIVE_CATEGORY,
   },
   REVIEW_REPORT_CLICKED: {
-    action: 'reviewReportClicked',
+    action: 'Security Report Clicked',
     category: HYPERNATIVE_CATEGORY,
   },
 }
