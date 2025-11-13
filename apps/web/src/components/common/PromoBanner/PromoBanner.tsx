@@ -41,6 +41,8 @@ export interface PromoBannerProps {
    * Defaults to "contained" if not specified.
    */
   ctaVariant?: 'text' | 'contained' | 'outlined'
+  // Optional callback for when the entire banner is clicked:
+  onBannerClick?: () => void
 }
 
 export const PromoBanner = ({
@@ -50,6 +52,7 @@ export const PromoBanner = ({
   href,
   onCtaClick,
   onDismiss,
+  onBannerClick,
   imageSrc,
   imageAlt,
   endIcon,
@@ -63,8 +66,28 @@ export const PromoBanner = ({
   ctaDisabled,
   ctaVariant,
 }: PromoBannerProps) => {
-  return (
-    <Card className={css.banner} sx={customBackground ? { background: `${customBackground} !important` } : undefined}>
+  const handleBannerClick = (e: React.MouseEvent) => {
+    // Don't trigger banner click if clicking on the close button
+    const target = e.target as HTMLElement
+    if (target.closest('[aria-label="close"]')) {
+      return
+    }
+    onBannerClick?.()
+  }
+
+  // When onBannerClick is provided, use it for CTA instead of onCtaClick
+  const effectiveCtaClick = onBannerClick || onCtaClick
+
+  const bannerContent = (
+    <Card
+      className={css.banner}
+      sx={{
+        ...(customBackground ? { background: `${customBackground} !important` } : undefined),
+        ...(onBannerClick ? { cursor: 'pointer' } : undefined),
+      }}
+      onClick={onBannerClick ? handleBannerClick : undefined}
+      {...(onBannerClick ? { role: 'button' } : {})}
+    >
       <Stack direction="row" spacing={2} className={css.bannerStack}>
         {imageSrc ? (
           <Image className={css.bannerImage} src={imageSrc} alt={imageAlt || ''} width={95} height={95} />
@@ -89,12 +112,17 @@ export const PromoBanner = ({
           ) : null}
 
           <Track {...trackOpenProps}>
-            {onCtaClick ? (
+            {effectiveCtaClick ? (
               <Button
                 {...(endIcon && { endIcon })}
                 variant={ctaVariant || 'outlined'}
                 size={ctaVariant === 'text' ? 'compact' : 'small'}
-                onClick={onCtaClick}
+                onClick={(e) => {
+                  if (onBannerClick) {
+                    e.stopPropagation()
+                  }
+                  effectiveCtaClick()
+                }}
                 className={ctaVariant === 'text' ? css.bannerCtaText : css.bannerCtaContained}
                 sx={
                   ctaVariant === 'text'
@@ -102,8 +130,8 @@ export const PromoBanner = ({
                       ? { color: `${customCtaColor} !important` }
                       : undefined
                     : customCtaColor
-                      ? { backgroundColor: `${customCtaColor} !important` }
-                      : undefined
+                    ? { backgroundColor: `${customCtaColor} !important` }
+                    : undefined
                 }
                 color={ctaVariant === 'text' && !customCtaColor ? 'static' : undefined}
                 disabled={ctaDisabled}
@@ -141,7 +169,14 @@ export const PromoBanner = ({
 
       {onDismiss && (
         <Track {...trackHideProps}>
-          <IconButton className={css.closeButton} aria-label="close" onClick={onDismiss}>
+          <IconButton
+            className={css.closeButton}
+            aria-label="close"
+            onClick={(e) => {
+              e.stopPropagation()
+              onDismiss()
+            }}
+          >
             <CloseIcon
               fontSize="medium"
               className={css.closeIcon}
@@ -151,6 +186,13 @@ export const PromoBanner = ({
         </Track>
       )}
     </Card>
+  )
+
+  // Wrap the entire banner in Track for analytics
+  return (
+    <Track {...trackOpenProps} as="div">
+      {bannerContent}
+    </Track>
   )
 }
 

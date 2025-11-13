@@ -31,7 +31,7 @@ export const HnBanner = ({ onHnSignupClick, onDismiss }: HnBannerProps) => {
       ctaLabel="Learn more"
       imageSrc="/images/hypernative/guardian-badge.svg"
       imageAlt="Guardian badge"
-      onCtaClick={onHnSignupClick}
+      onBannerClick={onHnSignupClick}
       ctaVariant="text"
       onDismiss={onDismiss}
       endIcon={<ArrowForwardIcon fontSize="small" />}

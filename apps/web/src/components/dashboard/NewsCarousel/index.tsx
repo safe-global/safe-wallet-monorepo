@@ -26,7 +26,7 @@ export interface NewsCarouselProps {
 }
 
 const isInteractive = (element: HTMLElement | null) =>
-  !!element?.closest('button, a, input, textarea, select, #carousel-overlay')
+  !!element?.closest('button, a, input, textarea, select, [role="button"], #carousel-overlay')
 
 const ITEM_WIDTH_PERCENT = 100
 const SLIDER_GAP = 16
