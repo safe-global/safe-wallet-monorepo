@@ -60,12 +60,6 @@ env:
 
 - runFlow:
     when:
-      visible: 'Continue'
+      visible: 'Close'
     commands:
-      - tapOn: 'Continue'
-
-- runFlow:
-    when:
-      visible: 'Reload'
-    commands:
-      - tapOn: 'Reload'
+      - tapOn: 'Close'
