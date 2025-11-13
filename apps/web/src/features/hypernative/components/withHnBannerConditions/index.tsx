@@ -1,7 +1,7 @@
 import type { ComponentType, ReactElement } from 'react'
 import { useBannerVisibility } from '../../hooks/useBannerVisibility'
 import type { BannerType } from '../../hooks/useBannerStorage'
-import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
+import type { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 
 export interface WithHnBannerConditionsProps {
   isDismissable?: boolean
