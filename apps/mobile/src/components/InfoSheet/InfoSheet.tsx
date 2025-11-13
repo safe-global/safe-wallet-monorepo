@@ -50,20 +50,20 @@ export const InfoSheet = ({
         accessible={false}
       >
         <BottomSheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom }}>
-        <YStack gap="$4" padding="$4" alignItems="center" justifyContent="center">
-          {displayIcon && (
-            <Badge
-              themeName="badge_background"
-              circleSize="$10"
-              content={<SafeFontIcon name="info" size={24} color="$color" />}
-            />
-          )}
-          <View gap="$2" alignItems="center">
-            {title && <H4 fontWeight="600">{title}</H4>}
-            <Text textAlign="center">{info}</Text>
-          </View>
-        </YStack>
-      </BottomSheetScrollView>
+          <YStack gap="$4" padding="$4" alignItems="center" justifyContent="center">
+            {displayIcon && (
+              <Badge
+                themeName="badge_background"
+                circleSize="$10"
+                content={<SafeFontIcon name="info" size={24} color="$color" />}
+              />
+            )}
+            <View gap="$2" alignItems="center">
+              {title && <H4 fontWeight="600">{title}</H4>}
+              <Text textAlign="center">{info}</Text>
+            </View>
+          </YStack>
+        </BottomSheetScrollView>
       </BottomSheetModal>
     </>
   )

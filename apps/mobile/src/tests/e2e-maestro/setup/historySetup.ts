@@ -58,4 +58,3 @@ export const setupTransactionHistoryDirect = (dispatch: Dispatch, router: Router
   dispatch(setActiveSafe(mockedTxHistoryAccount))
   router.replace('/(tabs)/transactions')
 }
-

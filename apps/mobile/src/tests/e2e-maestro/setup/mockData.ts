@@ -224,4 +224,3 @@ export const pendingTxSafeInfo6: SafeOverview = {
   queued: 0,
   threshold: 1,
 }
-

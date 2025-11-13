@@ -20,12 +20,7 @@ export const setupBaseConfig = (dispatch: Dispatch) => {
 /**
  * Setup a safe with contact entry in address book
  */
-export const setupSafe = (
-  dispatch: Dispatch,
-  account: SafeInfo,
-  info: SafeOverview,
-  name: string,
-) => {
+export const setupSafe = (dispatch: Dispatch, account: SafeInfo, info: SafeOverview, name: string) => {
   dispatch(addSafe({ info: { [account.chainId]: info }, address: account.address }))
   dispatch(addContact({ value: account.address, name, chainIds: [account.chainId] }))
 }
@@ -76,4 +71,3 @@ export const setupPendingTxSafe = (
   dispatch(setActiveSigner({ safeAddress: account.address, signer: mockedSigner }))
   dispatch(setActiveSafe(account))
 }
-

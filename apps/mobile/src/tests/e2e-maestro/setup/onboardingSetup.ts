@@ -29,4 +29,3 @@ export const setupOnboardedAccount = (dispatch: Dispatch, router: Router) => {
 export const setupTestOnboarding = (router: Router) => {
   router.replace('/onboarding')
 }
-

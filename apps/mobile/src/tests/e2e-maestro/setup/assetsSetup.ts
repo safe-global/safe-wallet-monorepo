@@ -33,4 +33,3 @@ export const setupOnboardedAccountForAssets = (dispatch: Dispatch, router: Route
   dispatch(setActiveSafe(mockedActiveAccount))
   router.replace('/(tabs)')
 }
-

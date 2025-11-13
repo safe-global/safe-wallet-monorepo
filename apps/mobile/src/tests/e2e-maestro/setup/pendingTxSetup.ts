@@ -76,13 +76,7 @@ export const setupAllPendingTxSafes = (dispatch: Dispatch, router: Router) => {
  * Creates Pending Tx Safe 1 and navigates directly to pending transactions screen
  */
 export const setupPendingTxsSafe1 = (dispatch: Dispatch, router: Router) => {
-  setupPendingTxSafe(
-    dispatch,
-    pendingTxSafe1,
-    pendingTxSafeInfo1,
-    'Pending Tx Safe 1',
-    mockedPendingTxSignerAddress,
-  )
+  setupPendingTxSafe(dispatch, pendingTxSafe1, pendingTxSafeInfo1, 'Pending Tx Safe 1', mockedPendingTxSignerAddress)
   router.replace('/pending-transactions')
 }
 
@@ -91,13 +85,7 @@ export const setupPendingTxsSafe1 = (dispatch: Dispatch, router: Router) => {
  * Creates Pending Tx Safe 2 and navigates directly to pending transactions screen
  */
 export const setupPendingTxsSafe2 = (dispatch: Dispatch, router: Router) => {
-  setupPendingTxSafe(
-    dispatch,
-    pendingTxSafe2,
-    pendingTxSafeInfo2,
-    'Pending Tx Safe 2',
-    mockedPendingTxSignerAddress,
-  )
+  setupPendingTxSafe(dispatch, pendingTxSafe2, pendingTxSafeInfo2, 'Pending Tx Safe 2', mockedPendingTxSignerAddress)
   router.replace('/pending-transactions')
 }
 
@@ -106,13 +94,7 @@ export const setupPendingTxsSafe2 = (dispatch: Dispatch, router: Router) => {
  * Creates Pending Tx Safe 3 and navigates directly to pending transactions screen
  */
 export const setupPendingTxsSafe3 = (dispatch: Dispatch, router: Router) => {
-  setupPendingTxSafe(
-    dispatch,
-    pendingTxSafe3,
-    pendingTxSafeInfo3,
-    'Pending Tx Safe 3',
-    mockedPendingTxSignerAddress,
-  )
+  setupPendingTxSafe(dispatch, pendingTxSafe3, pendingTxSafeInfo3, 'Pending Tx Safe 3', mockedPendingTxSignerAddress)
   router.replace('/pending-transactions')
 }
 
@@ -121,13 +103,6 @@ export const setupPendingTxsSafe3 = (dispatch: Dispatch, router: Router) => {
  * Creates Pending Tx Safe 4 and navigates directly to pending transactions screen
  */
 export const setupPendingTxsSafe4 = (dispatch: Dispatch, router: Router) => {
-  setupPendingTxSafe(
-    dispatch,
-    pendingTxSafe4,
-    pendingTxSafeInfo4,
-    'Pending Tx Safe 4',
-    mockedPendingTxSignerAddress,
-  )
+  setupPendingTxSafe(dispatch, pendingTxSafe4, pendingTxSafeInfo4, 'Pending Tx Safe 4', mockedPendingTxSignerAddress)
   router.replace('/pending-transactions')
 }
-

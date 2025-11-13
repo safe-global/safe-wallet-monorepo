@@ -11,11 +11,7 @@ import {
   setupPendingTxsSafe3,
   setupPendingTxsSafe4,
 } from '../setup/pendingTxSetup'
-import {
-  setupHistory,
-  setupTransactionHistory,
-  setupTransactionHistoryDirect,
-} from '../setup/historySetup'
+import { setupHistory, setupTransactionHistory, setupTransactionHistoryDirect } from '../setup/historySetup'
 
 LogBox.ignoreAllLogs()
 
