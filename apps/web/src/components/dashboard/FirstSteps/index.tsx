@@ -15,7 +15,7 @@ import { selectSettings, setQrShortName } from '@/store/settingsSlice'
 import { selectOutgoingTransactions } from '@/store/txHistorySlice'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import classnames from 'classnames'
-import { type ReactNode, useMemo, useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import { Card, WidgetBody, WidgetContainer } from '@/components/dashboard/styled'
 import { Box, Button, CircularProgress, FormControlLabel, Grid, Switch, Typography } from '@mui/material'
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
@@ -29,11 +29,8 @@ import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 import { HnDashboardBanner } from '@/features/hypernative/components/HnDashboardBanner'
 import { withHnSignupFlow } from '@/features/hypernative/components/withHnSignupFlow'
 import { withHnFeature } from '@/features/hypernative/components/withHnFeature'
-import { BannerType, useBannerStorage } from '@/features/hypernative/hooks/useBannerStorage'
-import { useIsHypernativeFeature } from '@/features/hypernative/hooks/useIsHypernativeFeature'
-import { useIsHypernativeGuard } from '@/features/hypernative/hooks/useIsHypernativeGuard'
-import useWallet from '@/hooks/wallets/useWallet'
-import useIsSafeOwner from '@/hooks/useIsSafeOwner'
+import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
+import { useBannerVisibility } from '@/features/hypernative/hooks/useBannerVisibility'
 
 // A banner version without the balance-checking as we can not index the balance till the safe is deployed
 const HnDashboardBannerWithSignup = withHnSignupFlow(HnDashboardBanner)
@@ -373,18 +370,8 @@ const FirstSteps = () => {
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, safe.chainId, safeAddress))
 
   // Check if banner should show (for conditional rendering of AccountReadyWidget)
-  const wallet = useWallet()
-  const isSafeOwner = useIsSafeOwner()
-  const isEnabled = useIsHypernativeFeature()
-  const shouldShowBanner = useBannerStorage(BannerType.Promo)
-  const { isHypernativeGuard, loading: guardLoading } = useIsHypernativeGuard()
-
-  const showHnDashboardBanner = useMemo(() => {
-    if (guardLoading) {
-      return false
-    }
-    return isEnabled && shouldShowBanner && !!wallet && isSafeOwner && !isHypernativeGuard
-  }, [isEnabled, shouldShowBanner, wallet, isSafeOwner, isHypernativeGuard, guardLoading])
+  // Use NoBalanceCheck for undeployed safes as the banner should be shown for all non-active safes as well
+  const { showBanner: showHnDashboardBanner } = useBannerVisibility(BannerType.NoBalanceCheck)
 
   const isMultiSig = safe.threshold > 1
   const isReplayedSafe = undeployedSafe && isReplayedSafeProps(undeployedSafe?.props)

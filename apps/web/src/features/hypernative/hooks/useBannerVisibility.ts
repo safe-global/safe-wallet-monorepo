@@ -31,15 +31,15 @@ const hasSufficientBalance = (fiatTotal: string): boolean => {
 /**
  * Hook to determine if a banner should be shown based on multiple conditions.
  *
- * @param bannerType - The type of banner: BannerType.Promo, BannerType.Pending, or BannerType.TxReportButton
+ * @param bannerType - The type of banner: BannerType.Promo, BannerType.Pending, BannerType.TxReportButton, or BannerType.NoBalanceCheck
  * @returns BannerVisibilityResult with showBanner flag and loading state
  *
  * Conditions checked (in order):
  * 1. useBannerStorage must return true
  * 2. Wallet must be connected
  * 3. Connected wallet must be an owner of the current Safe
- * 4. Safe must have balance > MIN_BALANCE_USD (production) or > 1 USD (non-production)
- * 5. For Promo/Pending: Safe must not have HypernativeGuard installed
+ * 4. Safe must have balance > MIN_BALANCE_USD (production) or > 1 USD (non-production) - skipped for BannerType.NoBalanceCheck
+ * 5. For Promo/Pending/NoBalanceCheck: Safe must not have HypernativeGuard installed
  *    For TxReportButton: Show if banner conditions are met OR if HypernativeGuard is installed
  *
  * If any condition fails, showBanner will be false.
@@ -53,13 +53,16 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
   const { isHypernativeGuard, loading: guardLoading } = useIsHypernativeGuard()
 
   return useMemo(() => {
-    const loading = balancesLoading || guardLoading
+    // For NoBalanceCheck, skip balance loading check
+    const skipBalanceCheck = bannerType === BannerType.NoBalanceCheck
+    const loading = (skipBalanceCheck ? false : balancesLoading) || guardLoading
 
     if (loading) {
       return { showBanner: false, loading: true }
     }
 
-    const hasSufficientBalanceCheck = hasSufficientBalance(balances.fiatTotal)
+    // For NoBalanceCheck, skip balance check (always pass)
+    const hasSufficientBalanceCheck = skipBalanceCheck || hasSufficientBalance(balances.fiatTotal)
 
     // For TxReportButton, show if banner conditions are met OR if guard is installed
     if (bannerType === BannerType.TxReportButton) {
@@ -72,7 +75,7 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
       }
     }
 
-    // For other banner types (Promo, Pending), guard must NOT be installed
+    // For other banner types (Promo, Pending, NoBalanceCheck), guard must NOT be installed
     const showBanner = isEnabled && shouldShowBanner && isSafeOwner && hasSufficientBalanceCheck && !isHypernativeGuard
 
     return {
