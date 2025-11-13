@@ -1,7 +1,7 @@
 import { PromoBanner } from '@/components/common/PromoBanner'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
-import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
+import { HYPERNATIVE_EVENTS, HYPERNATIVE_CATEGORY } from '@/services/analytics/events/hypernative'
 
 export const hnBannerID = 'hnBanner'
 
@@ -18,7 +18,7 @@ export const HnBanner = ({ onHnSignupClick, onDismiss }: HnBannerProps) => {
     <PromoBanner
       // TODO: check tracking events naming
       trackingEvents={{
-        category: 'hypernative',
+        category: HYPERNATIVE_CATEGORY,
         action: HYPERNATIVE_EVENTS.GUARD_LEARN_MORE.action,
         label: 'Strengthen your Safe',
       }}
