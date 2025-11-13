@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useMemo } from 'react'
+import React, { useCallback, useRef } from 'react'
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { SafeFontIcon } from '../SafeFontIcon'
 import { BottomSheetModal, TouchableOpacity } from '@gorhom/bottom-sheet'
