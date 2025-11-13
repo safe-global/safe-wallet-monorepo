@@ -6,9 +6,11 @@ appId: global.safe.mobileapp.ios
 - assertVisible:
     text: 'Settings change'
 
-- assertVisible:
-    text: '.*removeOwner.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*removeOwner.*'
+      optional: true
+    timeout: 2000
 
 - tapOn:
     text: '.*removeOwner.*'

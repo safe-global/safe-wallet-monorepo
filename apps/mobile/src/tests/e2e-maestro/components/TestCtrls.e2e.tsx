@@ -9,6 +9,8 @@ import { SafeInfo, Address } from '@/src/types/address'
 import { updateSettings } from '@/src/store/settingsSlice'
 import { updatePromptAttempts } from '@/src/store/notificationsSlice'
 import { addContact } from '@/src/store/addressBookSlice'
+import { addSigner } from '@/src/store/signersSlice'
+import { setActiveSigner } from '@/src/store/activeSignerSlice'
 
 LogBox.ignoreAllLogs()
 
@@ -131,6 +133,94 @@ const mockedStakeDepositSafeInfo: SafeOverview = {
   threshold: 1,
 }
 
+// Mocked signer address for pending tx tests
+const mockedPendingTxSignerAddress = '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED'
+
+// Pending transaction test safes
+const pendingTxSafe1: SafeInfo = {
+  address: '0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415',
+  chainId: '11155111',
+}
+const pendingTxSafeInfo1: SafeOverview = {
+  address: { value: '0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415', name: null, logoUri: null },
+  awaitingConfirmation: null,
+  chainId: pendingTxSafe1.chainId,
+  fiatTotal: '0',
+  owners: [{ value: mockedPendingTxSignerAddress, name: null, logoUri: null }],
+  queued: 0,
+  threshold: 1,
+}
+
+const pendingTxSafe2: SafeInfo = {
+  address: '0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2',
+  chainId: '11155111',
+}
+const pendingTxSafeInfo2: SafeOverview = {
+  address: { value: '0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2', name: null, logoUri: null },
+  awaitingConfirmation: null,
+  chainId: pendingTxSafe2.chainId,
+  fiatTotal: '0',
+  owners: [{ value: mockedPendingTxSignerAddress, name: null, logoUri: null }],
+  queued: 0,
+  threshold: 1,
+}
+
+const pendingTxSafe3: SafeInfo = {
+  address: '0xc36A530ccD728d36a654ccedEB7994473474C018',
+  chainId: '11155111',
+}
+const pendingTxSafeInfo3: SafeOverview = {
+  address: { value: '0xc36A530ccD728d36a654ccedEB7994473474C018', name: null, logoUri: null },
+  awaitingConfirmation: null,
+  chainId: pendingTxSafe3.chainId,
+  fiatTotal: '0',
+  owners: [{ value: mockedPendingTxSignerAddress, name: null, logoUri: null }],
+  queued: 0,
+  threshold: 1,
+}
+
+const pendingTxSafe4: SafeInfo = {
+  address: '0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
+  chainId: '11155111',
+}
+const pendingTxSafeInfo4: SafeOverview = {
+  address: { value: '0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb', name: null, logoUri: null },
+  awaitingConfirmation: null,
+  chainId: pendingTxSafe4.chainId,
+  fiatTotal: '0',
+  owners: [{ value: mockedPendingTxSignerAddress, name: null, logoUri: null }],
+  queued: 0,
+  threshold: 1,
+}
+
+const pendingTxSafe5: SafeInfo = {
+  address: '0x4B8A8Ca9F0002a850CB2c81b205a6D7429a22DEe',
+  chainId: '11155111',
+}
+const pendingTxSafeInfo5: SafeOverview = {
+  address: { value: '0x4B8A8Ca9F0002a850CB2c81b205a6D7429a22DEe', name: null, logoUri: null },
+  awaitingConfirmation: null,
+  chainId: pendingTxSafe5.chainId,
+  fiatTotal: '0',
+  owners: [{ value: mockedPendingTxSignerAddress, name: null, logoUri: null }],
+  queued: 0,
+  threshold: 1,
+}
+
+const pendingTxSafe6: SafeInfo = {
+  address: '0xAC456f5422C13b93d4ac819c3E52bA418E401EaA',
+  chainId: '11155111',
+}
+const pendingTxSafeInfo6: SafeOverview = {
+  address: { value: '0xAC456f5422C13b93d4ac819c3E52bA418E401EaA', name: null, logoUri: null },
+  awaitingConfirmation: null,
+  chainId: pendingTxSafe6.chainId,
+  fiatTotal: '0',
+  owners: [{ value: mockedPendingTxSignerAddress, name: null, logoUri: null }],
+  queued: 0,
+  threshold: 1,
+}
+
 /**
  * This utility component is only included in the test simulator
  * build. It gives some quick triggers which help improve the pace
@@ -223,6 +313,65 @@ export function TestCtrls() {
     router.replace('/(tabs)')
   }
 
+  const onPressE2ePendingTxs = async () => {
+    dispatch(updateSettings({ onboardingVersionSeen: 'v1' }))
+    dispatch(updatePromptAttempts(1))
+
+    // Add the mocked signer
+    const mockedSigner = {
+      value: mockedPendingTxSignerAddress,
+      name: null,
+      logoUri: null,
+      type: 'private-key' as const,
+    }
+    dispatch(addSigner(mockedSigner))
+    dispatch(
+      addContact({
+        value: mockedPendingTxSignerAddress,
+        name: `Signer-${mockedPendingTxSignerAddress.slice(-4)}`,
+        chainIds: [],
+      }),
+    )
+
+    // Add all pending tx safes
+    const pendingTxSafes = [
+      { account: pendingTxSafe1, info: pendingTxSafeInfo1, name: 'Pending Tx Safe 1' },
+      { account: pendingTxSafe2, info: pendingTxSafeInfo2, name: 'Pending Tx Safe 2' },
+      { account: pendingTxSafe3, info: pendingTxSafeInfo3, name: 'Pending Tx Safe 3' },
+      { account: pendingTxSafe4, info: pendingTxSafeInfo4, name: 'Pending Tx Safe 4' },
+      { account: pendingTxSafe5, info: pendingTxSafeInfo5, name: 'Pending Tx Safe 5' },
+      { account: pendingTxSafe6, info: pendingTxSafeInfo6, name: 'Pending Tx Safe 6' },
+    ]
+
+    for (const { account, info, name } of pendingTxSafes) {
+      dispatch(
+        addSafe({
+          info: { [account.chainId]: info },
+          address: account.address,
+        }),
+      )
+      dispatch(
+        addContact({
+          value: account.address,
+          name,
+          chainIds: [account.chainId],
+        }),
+      )
+      // Set the signer as active for each safe
+      dispatch(
+        setActiveSigner({
+          safeAddress: account.address,
+          signer: mockedSigner,
+        }),
+      )
+    }
+
+    // Set the first safe as active
+    dispatch(setActiveSafe(pendingTxSafe1))
+
+    router.replace('/(tabs)')
+  }
+
   return (
     <View position={'absolute'} top={100} right={0} zIndex={99999}>
       <Pressable
@@ -265,6 +414,7 @@ export function TestCtrls() {
         accessibilityRole="button"
         style={BTN}
       />
+      <Pressable testID="e2ePendingTxs" onPress={() => onPressE2ePendingTxs()} accessibilityRole="button" style={BTN} />
     </View>
   )
 }

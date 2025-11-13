@@ -19,14 +19,18 @@ appId: global.safe.mobileapp.ios
     id: 'tx-history-list'
 
 # Verify transactions are loaded (date groups or transaction items should be visible)
-- assertVisible:
-    text: '.*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).*\d{1,2},.*\d{4}.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).*\d{1,2},.*\d{4}.*'
+      optional: true
+    timeout: 2000
 
 # Verify date grouping is visible (sticky headers or date labels)
-- assertVisible:
-    text: '.*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).*'
+      optional: true
+    timeout: 2000
 
 # ============================================
 # Pull to Refresh

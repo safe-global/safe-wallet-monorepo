@@ -5,9 +5,11 @@ appId: global.safe.mobileapp.ios
 # ===========================================
 - assertVisible: Transaction details
 - assertVisible: Sent
-- assertVisible:
-    text: '.*-.*ETH.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*-.*ETH.*'
+      optional: true
+    timeout: 2000
 
 # ===========================================
 # Recipient Address

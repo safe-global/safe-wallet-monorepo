@@ -78,16 +78,20 @@ appId: global.safe.mobileapp.ios
 
 # Total fees row (scoped to details section)
 # Only shown if there are executed fees
-- assertVisible:
-    id: 'history-swap-order-details'
-    containsDescendants:
-      - text: 'Total fees'
-    optional: true
-- assertVisible:
-    id: 'history-swap-order-details'
-    containsDescendants:
-      - text: '.*\d+.*[A-Z]{2,}.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      id: 'history-swap-order-details'
+      containsDescendants:
+        - text: 'Total fees'
+      optional: true
+    timeout: 2000
+- extendedWaitUntil:
+    visible:
+      id: 'history-swap-order-details'
+      containsDescendants:
+        - text: '.*\d+.*[A-Z]{2,}.*'
+      optional: true
+    timeout: 2000
 
 # ===========================================
 # Transaction Details Button
