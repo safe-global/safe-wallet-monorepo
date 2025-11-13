@@ -113,14 +113,21 @@ const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
   const memoizedPortfolioBalances = useMemo(() => transformPortfolioToBalances(portfolioData), [portfolioData])
 
   const isPortfolioEmpty = useMemo(() => {
-    if (!portfolioData) return true
+    if (!portfolioData) return false
     return portfolioData.tokenBalances.length === 0 && portfolioData.positionBalances.length === 0
   }, [portfolioData])
 
   const result = useMemo<AsyncResult<PortfolioBalances>>(() => {
     if (shouldUsePortfolioEndpoint) {
-      if (isCounterfactual && isPortfolioEmpty && cfData) {
-        return [createPortfolioBalances(cfData), cfError, cfLoading]
+      if (isCounterfactual && isPortfolioEmpty) {
+        if (cfData) {
+          return [createPortfolioBalances(cfData), cfError, cfLoading]
+        }
+        const emptyBalances: Balances = {
+          items: [],
+          fiatTotal: '0',
+        }
+        return [createPortfolioBalances(emptyBalances), cfError, false]
       }
       const error = portfolioError ? new Error(String(portfolioError)) : undefined
       return [memoizedPortfolioBalances, error, portfolioLoading]
