@@ -16,3 +16,11 @@ const HnDashboardBannerWithConditions = withHnBannerConditions(BannerType.Promo)
   HnDashboardBannerWithSignup as ComponentType<WithHnBannerConditionsProps>,
 )
 export default withHnFeature(HnDashboardBannerWithConditions)
+
+// Export the composed HOC as default for use in Dashboard FirstSteps
+// Apply withHnBannerConditions, then withHnFeature (outer)
+export const HnDashboardBannerWithNoBalanceCheck = withHnFeature(
+  withHnBannerConditions(BannerType.NoBalanceCheck)(
+    HnDashboardBannerWithSignup as ComponentType<WithHnBannerConditionsProps>,
+  ),
+)

@@ -26,9 +26,8 @@ import css from './styles.module.css'
 import ActivateAccountButton from '@/features/counterfactual/ActivateAccountButton'
 import { isReplayedSafeProps } from '@/features/counterfactual/utils'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-import HnDashboardBanner from '@/features/hypernative/components/HnDashboardBanner'
-import { useBannerVisibility } from '@/features/hypernative/hooks/useBannerVisibility'
-import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
+import { HnDashboardBannerWithNoBalanceCheck } from '@/features/hypernative/components/HnDashboardBanner'
+import { BannerType, useBannerVisibility } from '@/features/hypernative/hooks'
 
 const calculateProgress = (items: boolean[]) => {
   const totalNumberOfItems = items.length
@@ -362,7 +361,10 @@ const FirstSteps = () => {
   const outgoingTransactions = useAppSelector(selectOutgoingTransactions)
   const chain = useCurrentChain()
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, safe.chainId, safeAddress))
-  const { showBanner: showHnDashboardBanner } = useBannerVisibility(BannerType.Promo)
+
+  // Check if banner should show (for conditional rendering of AccountReadyWidget)
+  // Use NoBalanceCheck for undeployed safes as the banner should be shown for all non-active safes as well
+  const { showBanner: showHnDashboardBanner } = useBannerVisibility(BannerType.NoBalanceCheck)
 
   const isMultiSig = safe.threshold > 1
   const isReplayedSafe = undeployedSafe && isReplayedSafeProps(undeployedSafe?.props)
@@ -474,7 +476,7 @@ const FirstSteps = () => {
           </Grid>
 
           <Grid item xs={12} md={4}>
-            {showHnDashboardBanner ? <HnDashboardBanner /> : <AccountReadyWidget />}
+            {showHnDashboardBanner ? <HnDashboardBannerWithNoBalanceCheck /> : <AccountReadyWidget />}
           </Grid>
         </Grid>
       </WidgetBody>
