@@ -11,6 +11,7 @@ import classNames from 'classnames'
 import useTrackSafesCount from '@/features/myAccounts/hooks/useTrackedSafesCount'
 import { DataWidget } from '@/features/myAccounts/components/DataWidget'
 import { HnBannerWithLocalStorageVisibility } from '@/features/hypernative/components/HnBanner'
+import { HYPERNATIVE_SOURCE } from '@/services/analytics'
 
 type MyAccountsProps = {
   safes: AllSafeItemsGrouped
@@ -28,7 +29,7 @@ const MyAccounts = ({ safes, onLinkClick, isSidebar = false }: MyAccountsProps) 
       <Box className={classNames(css.myAccounts, { [css.sidebarAccounts]: isSidebar })}>
         <AccountsHeader isSidebar={isSidebar} onLinkClick={onLinkClick} />
 
-        {!isSidebar && wallet && <HnBannerWithLocalStorageVisibility />}
+        {!isSidebar && wallet && <HnBannerWithLocalStorageVisibility label={HYPERNATIVE_SOURCE.AccountCreation} />}
 
         <Paper sx={{ padding: 0 }}>
           <AccountListFilters setSearchQuery={setSearchQuery} />

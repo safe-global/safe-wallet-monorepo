@@ -26,4 +26,3 @@ appId: global.safe.mobileapp.ios
 
 - tapOn:
     id: 'go-back'
-

@@ -5,6 +5,7 @@ import { withHnSignupFlow } from '../withHnSignupFlow'
 import { BannerType } from '../../hooks/useBannerStorage'
 import { HnBannerWithDismissal } from './HnBannerWithDismissal'
 import { HnBannerWithLocalStorage } from './HnBannerWithLocalStorage'
+import type { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 
 // Export the original pure component for tests and stories
 export { HnBanner, hnBannerID } from './HnBanner'
@@ -25,4 +26,13 @@ export default withHnFeature(HnBannerWithConditions)
 // Apply withHnSignupFlow first (inner), then withHnFeature (outer)
 // Visibility check is now handled directly in HnBannerWithLocalStorage
 const HnBannerWithLocalStorageAndSignup = withHnSignupFlow(HnBannerWithLocalStorage)
-export const HnBannerWithLocalStorageVisibility = withHnFeature(HnBannerWithLocalStorageAndSignup)
+const HnBannerWithLocalStorageVisibilityComponent = withHnFeature(HnBannerWithLocalStorageAndSignup)
+
+// Type for the exported component (excludes onHnSignupClick which is provided by HOC)
+export interface HnBannerWithLocalStorageVisibilityProps {
+  label?: HYPERNATIVE_SOURCE
+}
+
+// Type assertion: the HOC provides onHnSignupClick, so consumers only need to pass label
+export const HnBannerWithLocalStorageVisibility =
+  HnBannerWithLocalStorageVisibilityComponent as ComponentType<HnBannerWithLocalStorageVisibilityProps>

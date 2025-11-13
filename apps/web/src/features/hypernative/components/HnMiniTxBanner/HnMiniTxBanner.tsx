@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Track from '@/components/common/Track'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import css from './styles.module.css'
+import { HYPERNATIVE_EVENTS, HYPERNATIVE_SOURCE, MixpanelEventParams } from '@/services/analytics'
 
 export interface HnMiniTxBannerProps extends WithHnSignupFlowProps {
   onDismiss: () => void
@@ -25,7 +26,13 @@ export const HnMiniTxBanner = ({ onHnSignupClick, onDismiss }: HnMiniTxBannerPro
   }
 
   return (
-    <Track category="hypernative" action="open_hn_mini_banner" label="Strengthen your Safe">
+    <Track
+      {...HYPERNATIVE_EVENTS.GUARD_LEARN_MORE}
+      label={HYPERNATIVE_SOURCE.NewTransaction}
+      mixpanelParams={{
+        [MixpanelEventParams.SOURCE]: HYPERNATIVE_SOURCE.NewTransaction,
+      }}
+    >
       <Card className={css.banner} onClick={handleClick}>
         <Stack direction="row" spacing={1.5} className={css.bannerStack} alignItems="center">
           <Image
@@ -45,15 +52,13 @@ export const HnMiniTxBanner = ({ onHnSignupClick, onDismiss }: HnMiniTxBannerPro
           </Box>
         </Stack>
 
-        <Track category="hypernative" action="hide_hn_mini_banner" label="Strengthen your Safe">
-          <IconButton className={css.closeButton} aria-label="close" onClick={handleDismissClick}>
-            <CloseIcon
-              fontSize="small"
-              className={css.closeIcon}
-              sx={{ color: 'var(--color-text-secondary) !important' }}
-            />
-          </IconButton>
-        </Track>
+        <IconButton className={css.closeButton} aria-label="close" onClick={handleDismissClick}>
+          <CloseIcon
+            fontSize="small"
+            className={css.closeIcon}
+            sx={{ color: 'var(--color-text-secondary) !important' }}
+          />
+        </IconButton>
       </Card>
     </Track>
   )

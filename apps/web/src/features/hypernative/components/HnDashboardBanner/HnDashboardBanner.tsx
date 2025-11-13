@@ -3,6 +3,7 @@ import Image from 'next/image'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import css from './styles.module.css'
 import { dashboardBannerConfig } from './config'
+import { HYPERNATIVE_EVENTS, HYPERNATIVE_SOURCE, trackEvent, MixpanelEventParams } from '@/services/analytics'
 
 export interface HnDashboardBannerProps extends WithHnSignupFlowProps {}
 
@@ -10,6 +11,7 @@ export const HnDashboardBanner = ({ onHnSignupClick }: HnDashboardBannerProps) =
   const { title, description, ctaLabel, badgeSrc, badgeAlt, tagLabel } = dashboardBannerConfig
 
   const handleBannerClick = () => {
+    trackEvent(HYPERNATIVE_EVENTS.GUARD_LEARN_MORE, { [MixpanelEventParams.SOURCE]: HYPERNATIVE_SOURCE.Tutorial })
     onHnSignupClick()
   }
 

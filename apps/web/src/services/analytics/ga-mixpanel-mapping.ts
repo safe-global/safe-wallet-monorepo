@@ -9,9 +9,9 @@ import { WALLETCONNECT_EVENTS } from './events/walletconnect'
 import { TX_LIST_EVENTS } from './events/txList'
 import { SWAP_EVENTS } from './events/swaps'
 import { TERMS_EVENTS } from './events/terms'
-import { OVERVIEW_EVENTS } from './events/overview'
+import { EXPLORE_POSSIBLE_EVENTS, OVERVIEW_EVENTS } from './events/overview'
 import { NESTED_SAFE_EVENTS } from './events/nested-safes'
-import { EXPLORE_POSSIBLE_EVENTS } from './events/overview'
+import { HYPERNATIVE_EVENTS } from './events/hypernative'
 
 // If an event is mapped here, it will be tracked in Mixpanel
 export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
@@ -38,6 +38,11 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [OVERVIEW_EVENTS.COPY_ADDRESS.action]: MixpanelEvent.SIDEBAR_CLICKED,
   [OVERVIEW_EVENTS.OPEN_EXPLORER.action]: MixpanelEvent.SIDEBAR_CLICKED,
   [NESTED_SAFE_EVENTS.OPEN_LIST.action]: MixpanelEvent.SIDEBAR_CLICKED,
+  [HYPERNATIVE_EVENTS.GUARD_LEARN_MORE.action]: MixpanelEvent.GUARD_LEARN_MORE,
+  [HYPERNATIVE_EVENTS.GUARD_START.action]: MixpanelEvent.GUARD_START,
+  [HYPERNATIVE_EVENTS.GUARD_FORM_SUBMITTED.action]: MixpanelEvent.GUARD_FORM_SUBMITTED,
+  [HYPERNATIVE_EVENTS.REVIEW_REPORT_CLICKED.action]: MixpanelEvent.REVIEW_REPORT_CLICKED,
+  [HYPERNATIVE_EVENTS.GUARD_BANNER_DISMISSED.action]: MixpanelEvent.GUARD_BANNER_DISMISSED,
   [EXPLORE_POSSIBLE_EVENTS.EXPLORE_POSSIBLE_CLICKED.action]: MixpanelEvent.EXPLORE_POSSIBLE_CLICKED,
 }
 
