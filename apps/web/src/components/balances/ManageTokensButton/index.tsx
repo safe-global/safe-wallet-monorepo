@@ -2,8 +2,6 @@ import { useState, type ReactElement } from 'react'
 import { Button, Typography } from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
 import ManageTokensMenu from './ManageTokensMenu'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import { trackEvent, ASSETS_EVENTS } from '@/services/analytics'
 import css from './styles.module.css'
 
