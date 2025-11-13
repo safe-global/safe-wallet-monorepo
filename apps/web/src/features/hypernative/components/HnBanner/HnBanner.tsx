@@ -20,12 +20,12 @@ export const HnBanner = ({ onHnSignupClick, onDismiss, label }: HnBannerProps) =
     <PromoBanner
       trackingEvents={{
         category: HYPERNATIVE_CATEGORY,
-        action: HYPERNATIVE_EVENTS.GUARD_LEARN_MORE.action,
+        action: HYPERNATIVE_EVENTS.GUARDIAN_FORM_VIEWED.action,
         label,
       }}
       trackHideProps={{
         category: HYPERNATIVE_CATEGORY,
-        action: HYPERNATIVE_EVENTS.GUARD_BANNER_DISMISSED.action,
+        action: HYPERNATIVE_EVENTS.GUARDIAN_BANNER_DISMISSED.action,
         label,
       }}
       title="Strengthen your Safe"

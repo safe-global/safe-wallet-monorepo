@@ -11,7 +11,10 @@ export const HnDashboardBanner = ({ onHnSignupClick }: HnDashboardBannerProps) =
   const { title, description, ctaLabel, badgeSrc, badgeAlt, tagLabel } = dashboardBannerConfig
 
   const handleBannerClick = () => {
-    trackEvent(HYPERNATIVE_EVENTS.GUARD_LEARN_MORE, { [MixpanelEventParams.SOURCE]: HYPERNATIVE_SOURCE.Tutorial })
+    trackEvent(
+      { ...HYPERNATIVE_EVENTS.GUARDIAN_FORM_VIEWED, label: HYPERNATIVE_SOURCE.Tutorial },
+      { [MixpanelEventParams.SOURCE]: HYPERNATIVE_SOURCE.Tutorial },
+    )
     onHnSignupClick()
   }
 

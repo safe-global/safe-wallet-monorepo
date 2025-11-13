@@ -69,7 +69,7 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1', safeAddress, onSubmit }
           },
           onFormSubmitted: ($form: any, data: any) => {
             // Track form submission event (sent to mixpanel as well via the GA_TO_MIXPANEL_MAPPING in services/analytics/)
-            trackEvent(HYPERNATIVE_EVENTS.GUARD_FORM_SUBMITTED)
+            trackEvent(HYPERNATIVE_EVENTS.GUARDIAN_FORM_SUBMITTED)
 
             if (data) {
               let regionValue: string | undefined
