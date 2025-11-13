@@ -2,6 +2,8 @@ import { Typography, Button } from '@mui/material'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import HnSignupLayout from './HnSignupLayout'
 import css from './styles.module.css'
+import Track from '@/components/common/Track'
+import { HYPERNATIVE_EVENTS } from '@/services/analytics'
 
 export type HnSignupIntroProps = {
   onGetStarted: () => void
@@ -59,9 +61,14 @@ const HnSignupIntro = ({ onGetStarted, onClose }: HnSignupIntroProps) => {
         </div>
 
         <div className={css.actions}>
-          <Button variant="contained" fullWidth onClick={onGetStarted} className={css.primaryButton}>
-            Get started
-          </Button>
+          <Track
+            // Mixpanel: The event name is automatically determined from the GA_TO_MIXPANEL_MAPPING based on the action
+            {...HYPERNATIVE_EVENTS.GUARD_START}
+          >
+            <Button variant="contained" fullWidth onClick={onGetStarted} className={css.primaryButton}>
+              Get started
+            </Button>
+          </Track>
           <Button variant="text" fullWidth onClick={onClose} className={css.secondaryButton}>
             Close
           </Button>

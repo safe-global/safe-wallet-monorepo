@@ -1,33 +1,40 @@
 import { PromoBanner } from '@/components/common/PromoBanner'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
+import type { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
+import { HYPERNATIVE_EVENTS, HYPERNATIVE_CATEGORY } from '@/services/analytics/events/hypernative'
 
 export const hnBannerID = 'hnBanner'
 
 export interface HnBannerProps extends WithHnSignupFlowProps {
   onDismiss?: () => void
+  label?: HYPERNATIVE_SOURCE
 }
 
 /**
  * Pure HnBanner component without side effects.
  * Receives onDismiss callback from parent wrapper.
  */
-export const HnBanner = ({ onHnSignupClick, onDismiss }: HnBannerProps) => {
+export const HnBanner = ({ onHnSignupClick, onDismiss, label }: HnBannerProps) => {
   return (
     <PromoBanner
-      // TODO: check tracking events naming
-      trackOpenProps={{
-        category: 'hypernative',
-        action: 'open_hn_banner',
-        label: 'Strengthen your Safe',
+      trackingEvents={{
+        category: HYPERNATIVE_CATEGORY,
+        action: HYPERNATIVE_EVENTS.GUARD_LEARN_MORE.action,
+        label,
       }}
       trackHideProps={{
-        category: 'hypernative',
-        action: 'hide_hn_banner',
-        label: 'Strengthen your Safe',
+        category: HYPERNATIVE_CATEGORY,
+        action: HYPERNATIVE_EVENTS.GUARD_BANNER_DISMISSED.action,
+        label,
       }}
       title="Strengthen your Safe"
-      description="Automatically monitor and block risky transactions using advanced, user-defined security policies, powered by Hypernative."
+      description={
+        <>
+          Automatically monitor and block risky transactions using advanced, user-defined security policies, powered by{' '}
+          <span style={{ color: '#00B460', fontWeight: 'bold' }}>Hypernative</span>.
+        </>
+      }
       ctaLabel="Learn more"
       imageSrc="/images/hypernative/guardian-badge.svg"
       imageAlt="Guardian badge"

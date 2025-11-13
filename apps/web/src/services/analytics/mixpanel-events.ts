@@ -14,6 +14,11 @@ export enum MixpanelEvent {
   NATIVE_SWAP_VIEWED = 'Native Swap Viewed',
   SAFE_LABS_TERMS_ACCEPTED = 'Safe Labs Terms Accepted',
   SIDEBAR_CLICKED = 'Sidebar Clicked',
+  GUARD_LEARN_MORE = 'Guard Learn More',
+  GUARD_START = 'Guard Start',
+  GUARD_FORM_SUBMITTED = 'Guard Form Submitted',
+  REVIEW_REPORT_CLICKED = 'Review Report Clicked',
+  GUARD_BANNER_DISMISSED = 'Guard Banner Dismissed',
   EXPLORE_POSSIBLE_CLICKED = 'Explore Possible Clicked',
 }
 
@@ -53,6 +58,7 @@ export enum MixpanelEventParams {
   APP_URL = 'App URL',
   DATE_RANGE = 'Date Range',
   SIDEBAR_ELEMENT = 'Sidebar Element',
+  SOURCE = 'Source',
 }
 
 export enum SafeAppLaunchLocation {
