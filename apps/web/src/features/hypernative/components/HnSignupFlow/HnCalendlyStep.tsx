@@ -1,5 +1,5 @@
-import { Grid2 } from '@mui/material'
 import { useEffect, useRef } from 'react'
+import HnSignupLayout from './HnSignupLayout'
 import css from './styles.module.css'
 
 export type HnCalendlyStepProps = {
@@ -60,17 +60,11 @@ const HnCalendlyStep = ({ calendlyUrl }: HnCalendlyStepProps) => {
   }, [calendlyUrl])
 
   return (
-    <Grid2 container className={css.container}>
-      {/* Left Column - Calendly */}
-      <Grid2 size="grow" className={css.calendlyColumn}>
-        <div className={css.calendlyWrapper}>
-          <div ref={calendlyContainerRef} className={css.calendlyContainer} />
-        </div>
-      </Grid2>
-
-      {/* Right Column - Background Image */}
-      <Grid2 className={css.backgroundColumn} />
-    </Grid2>
+    <HnSignupLayout contentClassName={css.calendlyColumn}>
+      <div className={css.calendlyWrapper}>
+        <div ref={calendlyContainerRef} className={css.calendlyContainer} />
+      </div>
+    </HnSignupLayout>
   )
 }
 

@@ -3,16 +3,16 @@
   overflow: hidden;
 }
 
-.contentColumn {
+.introColumn {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   padding: var(--space-7) var(--space-6) var(--space-4);
-  max-height: 644px;
+  max-height: 100%;
   overflow-y: auto;
 }
 
-[data-theme='dark'] .contentColumn {
+[data-theme='dark'] .introColumn {
   background-color: var(--color-background-default);
 }
 
