@@ -62,10 +62,8 @@ const HnSignupIntro = ({ onGetStarted, onClose }: HnSignupIntroProps) => {
 
         <div className={css.actions}>
           <Track
+            // Mixpanel: The event name is automatically determined from the GA_TO_MIXPANEL_MAPPING based on the action
             {...HYPERNATIVE_EVENTS.GUARD_START}
-            mixpanelParams={{
-              event: HYPERNATIVE_EVENTS.GUARD_START.action,
-            }}
           >
             <Button variant="contained" fullWidth onClick={onGetStarted} className={css.primaryButton}>
               Get started

@@ -30,7 +30,6 @@ import { useBannerVisibility } from '@/features/hypernative/hooks'
 import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
 import { HnBannerForCarousel, hnBannerID } from '@/features/hypernative/components/HnBanner'
 import HnPendingBanner from '@/features/hypernative/components/HnPendingBanner'
-import { HYPERNATIVE_SOURCE } from '@/services/analytics'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const PositionsWidget = dynamic(() => import('@/features/positions/components/PositionsWidget'))
@@ -54,7 +53,7 @@ const Dashboard = (): ReactElement => {
   const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
 
   const banners = [
-    showHnBanner && !hnLoading && { id: hnBannerID, element: HnBannerForCarousel, label: HYPERNATIVE_SOURCE.Dashboard },
+    showHnBanner && !hnLoading && { id: hnBannerID, element: HnBannerForCarousel },
     isNoFeeNovemberEnabled && {
       id: noFeeNovemberBannerID,
       element: NoFeeNovemberBanner,

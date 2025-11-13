@@ -5,7 +5,7 @@ import Link, { type LinkProps } from 'next/link'
 import CloseIcon from '@mui/icons-material/Close'
 import type { ReactNode } from 'react'
 import type { AnalyticsEvent } from '@/services/analytics'
-import { trackEvent } from '@/services/analytics'
+import { trackEvent, MixpanelEventParams } from '@/services/analytics'
 
 export interface PromoBannerProps {
   title: string
@@ -76,8 +76,12 @@ export const PromoBanner = ({
       return
     }
 
+    // Extract label from trackingEvents and create trackingParams for Mixpanel if not provided
+    const label = trackingEvents.label
+    const mixpanelParams = trackingParams || (label ? { [MixpanelEventParams.SOURCE]: label } : undefined)
+
     // Track the event
-    trackEvent(trackingEvents, trackingParams)
+    trackEvent(trackingEvents, mixpanelParams)
 
     // When onBannerClick is provided, use it for both banner and CTA clicks
     // Otherwise use onCtaClick for CTA button clicks
@@ -147,8 +151,8 @@ export const PromoBanner = ({
                     ? { color: `${customCtaColor} !important` }
                     : undefined
                   : customCtaColor
-                    ? { backgroundColor: `${customCtaColor} !important` }
-                    : undefined
+                  ? { backgroundColor: `${customCtaColor} !important` }
+                  : undefined
               }
               color={ctaVariant === 'text' && !customCtaColor ? 'static' : undefined}
               disabled={ctaDisabled}
