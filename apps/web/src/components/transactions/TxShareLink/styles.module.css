@@ -1,7 +1,7 @@
 .shareBlock {
   margin-bottom: -53px;
   position: relative;
-  z-index: 10;
+  z-index: 3;
 }
 
 .shareBlockStatic {
