@@ -66,11 +66,13 @@ export interface PortfolioBalances extends Balances {
  */
 const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
   const currency = useAppSelector(selectCurrency)
+  const settings = useAppSelector(selectSettings)
   const isTrustedTokenList = useTokenListSetting()
   const { safe, safeAddress } = useSafeInfo()
   const isReady = safeAddress && safe.deployed && isTrustedTokenList !== undefined
   const isReadyPortfolio = safeAddress && isTrustedTokenList !== undefined
   const isCounterfactual = !safe.deployed
+  const hideDust = settings.hideDust ?? true
 
   const shouldUsePortfolioEndpoint = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
 
@@ -103,6 +105,7 @@ const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
       chainIds: safe.chainId,
       fiatCode: currency,
       trusted: isTrustedTokenList,
+      excludeDust: hideDust,
     },
     {
       skip: !shouldUsePortfolioEndpoint || !isReadyPortfolio || !safe.chainId,
