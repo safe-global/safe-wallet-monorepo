@@ -10,5 +10,15 @@ tags:
 - tapOn:
     id: 'view-on-explorer-button'
 
-- tapOn:
-    id: 'breadcrumb'
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          id: 'breadcrumb'
+
+- runFlow:
+    when:
+      platform: android
+    commands:
+      - back
