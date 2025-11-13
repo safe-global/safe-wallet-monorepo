@@ -1,5 +1,6 @@
-import { Typography, Button, Grid2 } from '@mui/material'
+import { Typography, Button } from '@mui/material'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import HnSignupLayout from './HnSignupLayout'
 import css from './styles.module.css'
 
 export type HnSignupIntroProps = {
@@ -24,55 +25,49 @@ const HnSignupIntro = ({ onGetStarted, onClose }: HnSignupIntroProps) => {
   ]
 
   return (
-    <Grid2 container className={css.container}>
-      {/* Left Column - Content */}
-      <Grid2 size="grow" className={css.contentColumn}>
-        <div className={css.contentWrapper}>
-          <div className={css.header}>
-            <Typography variant="h1" className={css.title}>
-              Guardian
+    <HnSignupLayout contentClassName={css.introColumn}>
+      <div className={css.contentWrapper}>
+        <div className={css.header}>
+          <Typography variant="h1" className={css.title}>
+            Guardian
+          </Typography>
+          <div className={css.poweredBy}>
+            <Typography variant="body2" className={css.poweredByText}>
+              powered by
             </Typography>
-            <div className={css.poweredBy}>
-              <Typography variant="body2" className={css.poweredByText}>
-                powered by
-              </Typography>
-              <img src="/images/hypernative/hypernative-logo.svg" alt="Hypernative" className={css.logo} />
-            </div>
-            <Typography variant="body2" className={css.subtitle}>
-              Enterprise-level protection for teams and organizations.
-            </Typography>
+            <img src="/images/hypernative/hypernative-logo.svg" alt="Hypernative" className={css.logo} />
           </div>
-
-          <div className={css.features}>
-            {features.map((feature, index) => (
-              <div key={index} className={css.feature}>
-                <CheckCircleIcon className={css.featureIcon} />
-                <div>
-                  <Typography variant="body2" fontWeight={600} className={css.featureTitle}>
-                    {feature.title}
-                  </Typography>
-                  <Typography variant="body2" className={css.featureDescription}>
-                    {feature.description}
-                  </Typography>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className={css.actions}>
-            <Button variant="contained" fullWidth onClick={onGetStarted} className={css.primaryButton}>
-              Get started
-            </Button>
-            <Button variant="text" fullWidth onClick={onClose} className={css.secondaryButton}>
-              Close
-            </Button>
-          </div>
+          <Typography variant="body2" className={css.subtitle}>
+            Enterprise-level protection for teams and organizations.
+          </Typography>
         </div>
-      </Grid2>
 
-      {/* Right Column - Background Image */}
-      <Grid2 className={css.backgroundColumn} />
-    </Grid2>
+        <div className={css.features}>
+          {features.map((feature, index) => (
+            <div key={index} className={css.feature}>
+              <CheckCircleIcon className={css.featureIcon} />
+              <div>
+                <Typography variant="body2" fontWeight={600} className={css.featureTitle}>
+                  {feature.title}
+                </Typography>
+                <Typography variant="body2" className={css.featureDescription}>
+                  {feature.description}
+                </Typography>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className={css.actions}>
+          <Button variant="contained" fullWidth onClick={onGetStarted} className={css.primaryButton}>
+            Get started
+          </Button>
+          <Button variant="text" fullWidth onClick={onClose} className={css.secondaryButton}>
+            Close
+          </Button>
+        </div>
+      </div>
+    </HnSignupLayout>
   )
 }
 
