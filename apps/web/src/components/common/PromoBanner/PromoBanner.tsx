@@ -52,7 +52,7 @@ export const PromoBanner = ({
   imageSrc,
   imageAlt,
   endIcon,
-  trackingEvents: trackOpenProps,
+  trackingEvents,
   customFontColor,
   customTitleColor,
   customCtaColor,
@@ -86,7 +86,7 @@ export const PromoBanner = ({
             </Typography>
           ) : null}
 
-          <Track {...trackOpenProps}>
+          <Track {...trackingEvents}>
             {onCtaClick ? (
               <Button
                 {...(endIcon && { endIcon })}

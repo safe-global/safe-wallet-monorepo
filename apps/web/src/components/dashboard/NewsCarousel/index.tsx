@@ -19,6 +19,7 @@ export interface BannerItem {
   id: string
   element: React.ComponentType<NewsBannerProps>
   eligibilityState?: boolean
+  label?: string
 }
 
 export interface NewsCarouselProps {
@@ -113,13 +114,17 @@ const NewsCarousel = ({ banners }: NewsCarouselProps) => {
         onPointerLeave={handleDragEnd}
         onPointerCancel={handleDragEnd}
       >
-        {items.map((item) => (
-          <Box width={1} flexShrink={0} key={item.id}>
-            {createElement(item.element, {
-              onDismiss: () => dismissItem(item.id, item.eligibilityState),
-            })}
-          </Box>
-        ))}
+        {items.map((item) => {
+          const { id, element, eligibilityState, label } = item
+          return (
+            <Box width={1} flexShrink={0} key={id}>
+              {createElement(element, {
+                onDismiss: () => dismissItem(id, eligibilityState),
+                ...(label && { label }),
+              })}
+            </Box>
+          )
+        })}
       </div>
     </Stack>
   )
