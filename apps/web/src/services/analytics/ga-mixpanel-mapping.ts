@@ -12,6 +12,7 @@ import { TERMS_EVENTS } from './events/terms'
 import { OVERVIEW_EVENTS } from './events/overview'
 import { NESTED_SAFE_EVENTS } from './events/nested-safes'
 import { EXPLORE_POSSIBLE_EVENTS } from './events/overview'
+import { TX_EVENTS } from './events/transactions'
 
 // If an event is mapped here, it will be tracked in Mixpanel
 export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
@@ -39,6 +40,11 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [OVERVIEW_EVENTS.OPEN_EXPLORER.action]: MixpanelEvent.SIDEBAR_CLICKED,
   [NESTED_SAFE_EVENTS.OPEN_LIST.action]: MixpanelEvent.SIDEBAR_CLICKED,
   [EXPLORE_POSSIBLE_EVENTS.EXPLORE_POSSIBLE_CLICKED.action]: MixpanelEvent.EXPLORE_POSSIBLE_CLICKED,
+  [TX_EVENTS.EXECUTE.action]: MixpanelEvent.TRANSACTION_EXECUTED,
+  [TX_LIST_EVENTS.EXECUTE.action]: MixpanelEvent.TRANSACTION_EXECUTED,
+  [TX_EVENTS.EXECUTE_VIA_PARENT.action]: MixpanelEvent.TRANSACTION_EXECUTED_VIA_PARENT,
+  [TX_EVENTS.EXECUTE_IN_PARENT.action]: MixpanelEvent.TRANSACTION_EXECUTED_IN_PARENT,
+  [TX_EVENTS.EXECUTE_VIA_ROLE.action]: MixpanelEvent.TRANSACTION_EXECUTED_VIA_ROLE,
 }
 
 // Maps GA labels (lowercase) to Mixpanel properties (Title Case)
