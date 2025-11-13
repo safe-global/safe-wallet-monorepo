@@ -26,15 +26,8 @@ import css from './styles.module.css'
 import ActivateAccountButton from '@/features/counterfactual/ActivateAccountButton'
 import { isReplayedSafeProps } from '@/features/counterfactual/utils'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-import { HnDashboardBanner } from '@/features/hypernative/components/HnDashboardBanner'
-import { withHnSignupFlow } from '@/features/hypernative/components/withHnSignupFlow'
-import { withHnFeature } from '@/features/hypernative/components/withHnFeature'
-import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
-import { useBannerVisibility } from '@/features/hypernative/hooks/useBannerVisibility'
-
-// A banner version without the balance-checking as we can not index the balance till the safe is deployed
-const HnDashboardBannerWithSignup = withHnSignupFlow(HnDashboardBanner)
-const HnFinalDashboardBanner = withHnFeature(HnDashboardBannerWithSignup)
+import { HnDashboardBannerWithNoBalanceCheck } from '@/features/hypernative/components/HnDashboardBanner'
+import { BannerType, useBannerVisibility } from '@/features/hypernative/hooks'
 
 const calculateProgress = (items: boolean[]) => {
   const totalNumberOfItems = items.length
@@ -483,7 +476,7 @@ const FirstSteps = () => {
           </Grid>
 
           <Grid item xs={12} md={4}>
-            {showHnDashboardBanner ? <HnFinalDashboardBanner /> : <AccountReadyWidget />}
+            {showHnDashboardBanner ? <HnDashboardBannerWithNoBalanceCheck /> : <AccountReadyWidget />}
           </Grid>
         </Grid>
       </WidgetBody>
