@@ -155,7 +155,8 @@ const AssetsTable = ({
 
   const visible = useVisibleAssets()
   const visibleAssets = showHiddenAssets ? balances.items : visible
-  const hasNoAssets = !loading && balances.items.length === 1 && balances.items[0].balance === '0'
+  const hasNoAssets =
+    !loading && (balances.items.length === 0 || (balances.items.length === 1 && balances.items[0].balance === '0'))
   const selectedAssetCount = visibleAssets?.filter((item) => isAssetSelected(item.tokenInfo.address)).length || 0
 
   const rows = loading
