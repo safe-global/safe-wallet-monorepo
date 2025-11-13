@@ -11,7 +11,7 @@ export const HnDashboardBanner = ({ onHnSignupClick }: HnDashboardBannerProps) =
   const { title, description, ctaLabel, badgeSrc, badgeAlt, tagLabel } = dashboardBannerConfig
 
   const handleBannerClick = () => {
-    trackEvent(HYPERNATIVE_EVENTS.GUARD_LEARN_MORE, { source: HYPERNATIVE_SOURCE.AccountCreation })
+    trackEvent(HYPERNATIVE_EVENTS.GUARD_LEARN_MORE, { source: HYPERNATIVE_SOURCE.Tutorial })
     onHnSignupClick()
   }
 
