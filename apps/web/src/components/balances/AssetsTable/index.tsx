@@ -108,7 +108,7 @@ const AssetsTable = ({
     {
       id: 'weight',
       label: (
-        <Tooltip title="Based on total portfolio value">
+        <Tooltip title="Based on total token value">
           <Typography variant="caption" letterSpacing="normal" color="primary.light">
             Weight
           </Typography>
@@ -149,14 +149,15 @@ const AssetsTable = ({
     !loading && (balances.items.length === 0 || (balances.items.length === 1 && balances.items[0].balance === '0'))
   const selectedAssetCount = visibleAssets?.filter((item) => isAssetSelected(item.tokenInfo.address)).length || 0
 
+  const tokensFiatTotal = visibleBalances.tokensFiatTotal ? Number(visibleBalances.tokensFiatTotal) : undefined
+
   const rows = loading
     ? skeletonRows
     : (visibleAssets || []).map((item) => {
         const rawFiatValue = parseFloat(item.fiatBalance)
         const rawPriceValue = parseFloat(item.fiatConversion)
         const isSelected = isAssetSelected(item.tokenInfo.address)
-        const fiatTotal = visibleBalances.fiatTotal ? Number(visibleBalances.fiatTotal) : undefined
-        const itemShareOfFiatTotal = fiatTotal ? Number(item.fiatBalance) / fiatTotal : null
+        const itemShareOfFiatTotal = tokensFiatTotal ? Number(item.fiatBalance) / tokensFiatTotal : null
 
         return {
           key: item.tokenInfo.address,
