@@ -9,24 +9,27 @@ import TransactionHeader from '@/src/features/TxHistory/components/TransactionHe
 export default function TabLayout() {
   const theme = useTheme()
 
-  const activeTintColor = theme.color.get()
-  const inactiveTintColor = theme.borderMain.get()
-  const borderTopColor = theme.borderLight.get()
+  const activeTintColor = React.useMemo(() => theme.color.get(), [theme])
+  const inactiveTintColor = React.useMemo(() => theme.borderMain.get(), [theme])
+  const borderTopColor = React.useMemo(() => theme.borderLight.get(), [theme])
+
+  const screenOptions = React.useMemo(
+    () => ({
+      tabBarStyle: { ...styles.tabBar, borderTopColor },
+      tabBarLabelStyle: styles.label,
+      tabBarActiveTintColor: activeTintColor,
+      tabBarInactiveTintColor: inactiveTintColor,
+    }),
+    [borderTopColor, activeTintColor, inactiveTintColor],
+  )
 
   return (
     <>
-      <Tabs
-        screenOptions={{
-          tabBarStyle: { ...styles.tabBar, borderTopColor },
-          tabBarLabelStyle: styles.label,
-          tabBarActiveTintColor: activeTintColor,
-          tabBarInactiveTintColor: inactiveTintColor,
-        }}
-      >
+      <Tabs screenOptions={screenOptions}>
         <Tabs.Screen
           name="index"
           options={{
-            header: AssetsNavbar,
+            header: () => <AssetsNavbar />,
             title: 'Home',
             tabBarButtonTestID: 'home-tab',
             tabBarButton: ({ children, ref, ...rest }) => {
@@ -62,20 +65,18 @@ export default function TabLayout() {
 
         <Tabs.Screen
           name="settings"
-          options={() => {
-            return {
-              title: 'Account',
-              headerShown: false,
-              tabBarButtonTestID: 'account-tab',
-              tabBarButton: ({ children, ref, ...rest }) => {
-                return (
-                  <Pressable {...rest} style={styles.tabButton}>
-                    {children}
-                  </Pressable>
-                )
-              },
-              tabBarIcon: ({ color }) => <TabBarIcon name={'wallet'} color={color} />,
-            }
+          options={{
+            title: 'Account',
+            headerShown: false,
+            tabBarButtonTestID: 'account-tab',
+            tabBarButton: ({ children, ref, ...rest }) => {
+              return (
+                <Pressable {...rest} style={styles.tabButton}>
+                  {children}
+                </Pressable>
+              )
+            },
+            tabBarIcon: ({ color }) => <TabBarIcon name={'wallet'} color={color} />,
           }}
         />
       </Tabs>
