@@ -143,7 +143,7 @@ const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
     }
 
     const error = legacyError ? new Error(String(legacyError)) : undefined
-    return [undefined, error, legacyLoading]
+    return [undefined, error, true]
   }, [
     shouldUsePortfolioEndpoint,
     isCounterfactual,
