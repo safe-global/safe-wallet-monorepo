@@ -8,7 +8,6 @@ import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { TransactionQueuedItem, TransactionItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Container } from '@/src/components/Container'
 import { TxCardPress } from '@/src/components/TxInfo/types'
-
 interface TxGroupedCard {
   transactions: (TransactionItem | TransactionQueuedItem)[]
   inQueue?: boolean
