@@ -6,9 +6,11 @@ appId: global.safe.mobileapp.ios
 - assertVisible:
     text: 'Settings change'
 
-- assertVisible:
-    text: '.*addOwnerWithThreshold.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*addOwnerWithThreshold.*'
+      optional: true
+    timeout: 2000
 
 - tapOn:
     text: '.*addOwnerWithThreshold.*'

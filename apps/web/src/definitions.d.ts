@@ -17,6 +17,24 @@ declare global {
     dataLayer?: any[]
     gtag?: (...args: any[]) => void
     Cypress?
+    hbspt?: {
+      forms: {
+        create: (options: {
+          portalId: string
+          formId: string
+          region: string
+          target?: string
+          inlineMessage?: string
+          redirectUrl?: string
+          onFormReady?: (form: any) => void
+          onFormSubmit?: (form: any) => boolean
+          onFormSubmitted?: (form: any, data: any) => void
+        }) => void
+      }
+    }
+    Calendly?: {
+      initInlineWidget: (options: { url: string; parentElement: HTMLElement }) => void
+    }
   }
 }
 

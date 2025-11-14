@@ -11,7 +11,7 @@ import Link from 'next/link'
 
 export const spacesBannerID = 'spacesBanner'
 
-const SpacesBanner = ({ onDismiss }: { onDismiss: () => void }) => {
+export const SpacesBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   return (
     <Card className={css.banner}>
       <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2}>
@@ -49,5 +49,3 @@ const SpacesBanner = ({ onDismiss }: { onDismiss: () => void }) => {
     </Card>
   )
 }
-
-export default SpacesBanner

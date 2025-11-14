@@ -28,7 +28,7 @@ describe('[SMOKE] Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
   })
 
   it('[SMOKE] Verify the Safe Apps Section is displayed', () => {
-    dashboard.verifySafeAppsSection()
+    dashboard.verifyExplorePossibleSection()
   })
 
   // mock

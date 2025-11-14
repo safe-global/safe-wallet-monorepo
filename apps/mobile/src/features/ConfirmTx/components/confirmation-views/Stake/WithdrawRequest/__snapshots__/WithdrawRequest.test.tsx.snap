@@ -226,6 +226,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
         }
       >
         <View
+          collapsable={false}
           style={
             {
               "alignItems": "center",
@@ -503,6 +504,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
           </View>
         </View>
         <View
+          collapsable={false}
           style={
             {
               "alignItems": "center",
@@ -621,6 +623,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
           </View>
         </View>
         <View
+          collapsable={false}
           style={
             {
               "alignItems": "center",
@@ -689,6 +692,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
           </View>
         </View>
         <View
+          collapsable={false}
           style={
             {
               "alignItems": "center",
@@ -727,6 +731,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
           </Text>
         </View>
         <View
+          collapsable={false}
           style={
             {
               "alignItems": "center",
@@ -766,6 +771,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
           </Text>
         </View>
         <View
+          collapsable={false}
           style={
             {
               "alignItems": "center",
@@ -991,6 +997,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
             }
           >
             <View
+              collapsableChildren={false}
               style={
                 {
                   "alignItems": "center",

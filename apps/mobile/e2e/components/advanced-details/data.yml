@@ -13,9 +13,11 @@ appId: global.safe.mobileapp.ios
     text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}|0x[0-9a-fA-F]{40}'
 
 # To address identicon/image
-- assertVisible:
-    id: 'identicon-image'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      id: 'identicon-image'
+      optional: true
+    timeout: 2000
 
 # To copy button
 - assertVisible:
@@ -40,71 +42,99 @@ appId: global.safe.mobileapp.ios
     text: '.*(call|delegate call).*'
 
 # SafeTxGas (only for multisig transactions)
-- assertVisible:
-    text: 'SafeTxGas'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: 'SafeTxGas'
+      optional: true
+    timeout: 2000
 
 # SafeTxGas value (numeric)
-- assertVisible:
-    text: '^\d+$'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '^\d+$'
+      optional: true
+    timeout: 2000
 
 # BaseGas (only for multisig transactions)
-- assertVisible:
-    text: 'BaseGas'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: 'BaseGas'
+      optional: true
+    timeout: 2000
 
 # GasPrice (only for multisig transactions)
-- assertVisible:
-    text: 'GasPrice'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: 'GasPrice'
+      optional: true
+    timeout: 2000
 
 # GasToken (only for multisig transactions)
-- assertVisible:
-    text: 'GasToken'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: 'GasToken'
+      optional: true
+    timeout: 2000
 
 # GasToken address (either full address or truncated like "0x0000...0000")
-- assertVisible:
-    text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}|0x[0-9a-fA-F]{40}'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}|0x[0-9a-fA-F]{40}'
+      optional: true
+    timeout: 2000
 
 # RefundReceiver (only for multisig transactions)
-- assertVisible:
-    text: 'RefundReceiver'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: 'RefundReceiver'
+      optional: true
+    timeout: 2000
 
 # RefundReceiver address (either full address or truncated)
-- assertVisible:
-    text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}|0x[0-9a-fA-F]{40}'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}|0x[0-9a-fA-F]{40}'
+      optional: true
+    timeout: 2000
 
 # Nonce (only for multisig transactions)
-- assertVisible:
-    text: 'Nonce'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: 'Nonce'
+      optional: true
+    timeout: 2000
 
 # Nonce value (numeric, should appear near "Nonce" label)
-- assertVisible:
-    text: '^\d+$'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '^\d+$'
+      optional: true
+    timeout: 2000
 
 # Safe Tx Hash (only for multisig transactions with safeTxHash)
-- assertVisible:
-    text: 'Safe Tx Hash'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: 'Safe Tx Hash'
+      optional: true
+    timeout: 2000
 
 # Safe Tx Hash value (truncated hash format like "0x9b4ee6ef9271f...")
-- assertVisible:
-    text: '0x[0-9a-fA-F]{10}.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '0x[0-9a-fA-F]{10}.*'
+      optional: true
+    timeout: 2000
 
 # Transaction Hash (always present if txDetails.txHash exists)
-- assertVisible:
-    text: 'Transaction Hash'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: 'Transaction Hash'
+      optional: true
+    timeout: 2000
 
 # Transaction Hash value (truncated hash format)
-- assertVisible:
-    text: '0x[0-9a-fA-F]{10}.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '0x[0-9a-fA-F]{10}.*'
+      optional: true
+    timeout: 2000

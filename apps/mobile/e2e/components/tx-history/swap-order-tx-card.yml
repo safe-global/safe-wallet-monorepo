@@ -4,9 +4,11 @@ appId: global.safe.mobileapp.ios
 # Swap Order Transaction Card
 # ===========================================
 # Swap orders show "Swap order" text
-- assertVisible:
-    text: '.*Swap order.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*Swap order.*'
+      optional: true
+    timeout: 2000
 
 - tapOn:
     text: '.*Swap order.*'

@@ -67,6 +67,11 @@ const config: StorybookConfig = {
 
   staticDirs: ['../public'],
 
+  env: (config) => ({
+    ...config,
+    NEXT_PUBLIC_HUBSPOT_CONFIG: process.env.NEXT_PUBLIC_HUBSPOT_CONFIG,
+  }),
+
   typescript: {
     reactDocgen: 'react-docgen-typescript',
     reactDocgenTypescriptOptions: {

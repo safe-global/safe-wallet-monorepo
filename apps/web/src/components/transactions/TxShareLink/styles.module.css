@@ -1,35 +1,17 @@
-.wrapper {
-  border: 1px solid var(--color-border-light);
+.shareBlock {
+  margin-bottom: -53px;
+  position: relative;
+  z-index: 1;
 }
 
-.accordion {
-  border: unset;
+.shareBlockStatic {
+  width: 100%;
 }
 
-.accordion {
-  background-color: unset !important;
+.shareBlockStatic > * {
+  width: 100%;
 }
 
-.accordion button {
-  opacity: 1 !important;
-}
-
-.summary {
-  background-color: unset !important;
-}
-
-.header {
-  font-weight: 700;
-}
-
-.details {
-  padding-top: 0;
-  padding-bottom: 12px;
-}
-
-.button {
-  padding: var(--space-2);
-  padding-top: 4px;
-  padding-bottom: 4px;
-  white-space: nowrap;
+.shareIcon {
+  margin-right: -8px;
 }

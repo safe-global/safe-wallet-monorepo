@@ -7,9 +7,11 @@ appId: global.safe.mobileapp.ios
 # it shows the individual transaction details (typically a received transaction)
 - assertVisible: Transaction details
 - assertVisible: Received
-- assertVisible:
-    text: '.*\+.*ETH.*|.*\d+.*ETH.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*\+.*ETH.*|.*\d+.*ETH.*'
+      optional: true
+    timeout: 2000
 
 # ===========================================
 # Sender Address (From field)

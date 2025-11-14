@@ -7,9 +7,11 @@ appId: global.safe.mobileapp.ios
 - assertVisible:
     text: 'Batch'
 
-- assertVisible:
-    text: '.*\d+\s+actions.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*\d+\s+actions.*'
+      optional: true
+    timeout: 2000
 
 # Click on the batch transaction (or a sub-transaction within it)
 # MultiSend transactions show as "Batch" with "X actions"

@@ -5,6 +5,7 @@ import { CircleSnail } from 'react-native-progress'
 import { InfoSheet } from '@/src/components/InfoSheet'
 import { PoweredByBlockaid } from '../PoweredByBlockaid'
 import { BalanceChange } from '@/src/features/TransactionChecks/components/blockaid/balance/BalanceChange'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 
 type BlockaidBalanceChangesProps = {
   blockaidResponse?: {
@@ -68,13 +69,17 @@ export const BlockaidBalanceChanges = ({ blockaidResponse, fetchStatusLoading }:
   return (
     <YStack>
       <XStack gap="$2">
-        <Text fontWeight="700" marginBottom="$2">
-          Balance change
-        </Text>
         <InfoSheet
           title="Balance change"
           info="The balance change gives an overview of the implications of a transaction. You can see which assets will be sent and received after the transaction is executed."
-        />
+        >
+          <XStack alignItems="center" marginBottom="$2">
+            <Text fontWeight="700" paddingRight="$1">
+              Balance change
+            </Text>
+            <SafeFontIcon name="info" size={16} color="$colorSecondary" />
+          </XStack>
+        </InfoSheet>
       </XStack>
       {fetchStatusLoading ? (
         <XStack gap={'$2'}>

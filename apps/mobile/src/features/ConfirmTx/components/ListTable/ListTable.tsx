@@ -24,13 +24,14 @@ interface ListTableProps {
   children?: React.ReactNode
   padding?: string
   gap?: string
+  testID?: string
 }
 
 const isRenderRowItem = (item: ListTableItem): item is RenderRowItem => {
   return (item as RenderRowItem).renderRow !== undefined
 }
 
-export const ListTable = ({ items, children, padding = '$4', gap = '$5' }: ListTableProps) => {
+export const ListTable = ({ items, children, padding = '$4', gap = '$5', testID }: ListTableProps) => {
   return (
     <Container padding={padding} gap={gap} borderRadius="$3">
       {items.map((item, index) => {
@@ -42,6 +43,8 @@ export const ListTable = ({ items, children, padding = '$4', gap = '$5' }: ListT
             justifyContent="space-between"
             gap={'$2'}
             flexWrap="wrap"
+            testID={testID}
+            collapsable={false}
           >
             {isRenderRowItem(item) ? (
               item.renderRow()

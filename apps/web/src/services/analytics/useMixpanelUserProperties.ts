@@ -6,6 +6,7 @@ import { selectTxHistory } from '@/store/txHistorySlice'
 import { isTransactionListItem } from '@/utils/transaction-guards'
 import { MixpanelUserProperty } from '@/services/analytics/mixpanel-events'
 import { useNetworksOfSafe } from '@/features/myAccounts/hooks/useNetworksOfSafe'
+import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 
 export interface MixpanelUserProperties {
   safe_address: string
@@ -15,6 +16,7 @@ export interface MixpanelUserProperties {
   networks: string[]
   total_tx_count: number
   last_tx_at: Date | null
+  is_owner: boolean
 }
 
 export interface MixpanelUserPropertiesFormatted {
@@ -34,6 +36,7 @@ export const useMixpanelUserProperties = (): MixpanelUserPropertiesFormatted | n
   const currentChain = useChain(safe?.chainId || '')
   const txHistory = useAppSelector(selectTxHistory)
   const allNetworks = useNetworksOfSafe(safe?.address?.value || '')
+  const isOwner = useIsSafeOwner()
 
   return useMemo(() => {
     if (!safeLoaded || !safe || !currentChain) {
@@ -62,11 +65,12 @@ export const useMixpanelUserProperties = (): MixpanelUserPropertiesFormatted | n
       [MixpanelUserProperty.TOTAL_TX_COUNT]: totalTxCount,
       [MixpanelUserProperty.LAST_TX_AT]: lastTxAt?.toISOString() || null,
       [MixpanelUserProperty.NETWORKS]: networks,
+      [MixpanelUserProperty.IS_OWNER]: isOwner,
     }
 
     return {
       properties,
       networks,
     }
-  }, [safe, safeLoaded, currentChain, txHistory, allNetworks])
+  }, [safe, safeLoaded, currentChain, txHistory, allNetworks, isOwner])
 }

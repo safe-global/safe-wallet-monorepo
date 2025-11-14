@@ -55,6 +55,7 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
         }
       >
         <View
+          collapsableChildren={false}
           style={
             {
               "alignItems": "center",

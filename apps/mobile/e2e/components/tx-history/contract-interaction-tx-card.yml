@@ -7,13 +7,17 @@ appId: global.safe.mobileapp.ios
 # Environment variables:
 #   METHOD_NAME: The method name to search for (e.g., "deleteAllowance", "deposit")
 #   CONTRACT_NAME: Optional contract name to verify (e.g., "AllowanceModule", "Wrapped Ether")
-- assertVisible:
-    text: '.*${METHOD_NAME}.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*${METHOD_NAME}.*'
+      optional: true
+    timeout: 2000
 
-- assertVisible:
-    text: '.*${CONTRACT_NAME}.*'
-    optional: true
+- extendedWaitUntil:
+    visible:
+      text: '.*${CONTRACT_NAME}.*'
+      optional: true
+    timeout: 2000
 
 - tapOn:
     text: '.*${METHOD_NAME}.*'

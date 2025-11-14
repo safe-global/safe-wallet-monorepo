@@ -7,6 +7,7 @@ import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { ProgressBar } from '@/components/common/ProgressBar'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import NewTxIcon from '@/public/images/transactions/new-tx.svg'
+import HnMiniTxBanner from '@/features/hypernative/components/HnMiniTxBanner'
 
 import css from './styles.module.css'
 
@@ -74,6 +75,8 @@ const NewTxFlow = () => {
               <Typography variant="h4" className={css.type}>
                 Manage assets
               </Typography>
+
+              <HnMiniTxBanner />
 
               <SendTokensButton onClick={onTokensClick} />
               <MakeASwapButton />

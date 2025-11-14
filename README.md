@@ -147,6 +147,10 @@ yarn install
 - **Expo**: Mobile app framework for the `mobile` workspace.
 - **Next.js**: React framework for the `web` workspace.
 
+## Release process
+
+For information on releasing the web app, see the [Automated Release Procedure](apps/web/docs/release-procedure-automated.md).
+
 ## Useful links
 
 - [Yarn Workspaces Documentation](https://classic.yarnpkg.com/en/docs/workspaces/)

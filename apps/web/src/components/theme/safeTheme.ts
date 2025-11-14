@@ -61,6 +61,7 @@ declare module '@mui/material/Button' {
 
   export interface ButtonPropsVariantOverrides {
     danger: true
+    neutral: true
   }
 }
 
@@ -157,6 +158,23 @@ const createSafeTheme = (mode: PaletteMode): Theme => {
               '&:hover': {
                 color: theme.palette.error.dark,
                 backgroundColor: theme.palette.error.light,
+              },
+            }),
+          },
+          {
+            props: { variant: 'neutral' },
+            style: ({ theme }) => ({
+              backgroundColor: theme.palette.background.main,
+              borderColor: theme.palette.background.main,
+              color: theme.palette.text.primary,
+              fontWeight: 'bold',
+              fontSize: '14px',
+              minHeight: '40px',
+              gap: '7px',
+              transition: 'all 0.2s ease-in-out',
+              '&:hover': {
+                backgroundColor: theme.palette.border.light,
+                borderColor: theme.palette.border.light,
               },
             }),
           },

@@ -1,0 +1,21 @@
+.hypernativeIcon {
+  margin-right: -3px;
+  margin-left: 0;
+}
+
+.hypernativeIcon svg {
+  width: 9px;
+  height: 16px;
+  display: block;
+}
+
+@media (max-width: 410px) {
+  .button {
+    font-size: 12px;
+  }
+
+  .hypernativeIcon {
+    width: 14px !important;
+    height: 14px !important;
+  }
+}
