@@ -9,6 +9,7 @@ import { inputTheme, inputWithLabelTheme } from '../components/SafeInput/theme'
 import { safeTabTheme } from '@/src/components/SafeTab/theme'
 import { SafeListItemTheme } from '@/src/components/SafeListItem/theme'
 import { alertTheme } from '@/src/components/Alert/theme'
+import { safeShieldStatusTheme } from '@/src/features/SafeShield/theme'
 
 const DmSansFont = createDmSansFont({
   face: {
@@ -70,6 +71,7 @@ export const config = createTamagui({
     ...navbarTheme,
     ...safeTabTheme,
     ...inputWithLabelTheme,
+    ...safeShieldStatusTheme,
     dark_success_light: {},
     light_logo: {
       background: tokens.color.logoBackgroundLight,
