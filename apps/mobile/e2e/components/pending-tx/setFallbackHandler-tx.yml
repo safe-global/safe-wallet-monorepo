@@ -52,4 +52,3 @@ appId: global.safe.mobileapp.ios
     env:
       TX_EXECUTION_STATUS: 'succeed'
       EXPECTED_EXECUTION_METHOD: 'signer'
-

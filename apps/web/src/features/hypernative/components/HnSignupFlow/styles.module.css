@@ -1,0 +1,199 @@
+.container {
+  overflow: hidden;
+  height: 845px;
+  max-height: 90vh;
+}
+
+.introColumn {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: var(--space-7) var(--space-6) var(--space-4);
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+[data-theme='dark'] .introColumn {
+  background-color: var(--color-background-default);
+}
+
+.formColumn {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: var(--space-5) var(--space-5) var(--space-1) var(--space-6);
+  background-color: var(--color-static-primary);
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.calendlyColumn {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background-color: var(--color-static-primary);
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.contentWrapper {
+  margin: 0 auto;
+  width: 100%;
+}
+
+.formWrapper {
+  margin: 0 auto;
+  width: 100%;
+  min-height: 620px;
+}
+
+.calendlyWrapper {
+  margin: 0 auto;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.calendlyContainer {
+  flex: 1;
+  min-height: 0;
+}
+
+.formTitle {
+  color: var(--color-static-main);
+  margin-bottom: var(--space-2);
+}
+
+.formSubtitle {
+  color: var(--color-static-light);
+  margin-bottom: var(--space-4) !important;
+}
+
+.cancelButtonWrapper {
+  z-index: 1;
+  margin-top: -67px;
+}
+
+.cancelButton {
+  color: var(--color-static-main) !important;
+}
+
+.header {
+  margin-bottom: var(--space-5);
+}
+
+.title {
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 56px;
+}
+
+.poweredBy {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+  margin-top: -12px;
+}
+
+.poweredByText {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.logo {
+  height: 16px;
+  border-radius: 4px;
+}
+
+[data-theme='dark'] .logo {
+  filter: brightness(0) invert(1);
+}
+
+.subtitle {
+  font-size: 14px;
+  line-height: 24px;
+}
+
+.features {
+  margin-bottom: var(--space-6);
+}
+
+.feature {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.feature:last-child {
+  margin-bottom: 0;
+}
+
+.featureIcon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.featureTitle {
+  font-size: 14px;
+  line-height: 24px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.featureDescription {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.backgroundColumn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  aspect-ratio: 1 / 2.28;
+  padding: var(--space-1);
+  flex-shrink: 0;
+  background:
+    radial-gradient(ellipse 150px 150px at top left, rgb(47, 47, 47) 0%, transparent 100%),
+    radial-gradient(ellipse 150px 150px at top right, rgb(1, 1, 1) 0%, transparent 100%),
+    radial-gradient(ellipse 150px 150px at bottom left, rgb(24, 28, 25) 0%, transparent 100%),
+    radial-gradient(ellipse 150px 150px at bottom right, rgb(65, 68, 66) 0%, transparent 100%),
+    rgb(28, 28, 28) center/contain no-repeat;
+}
+
+[data-theme='dark'] .backgroundColumn {
+  background: none;
+}
+
+.backgroundColumn:after {
+  content: '';
+  width: 100%;
+  height: 100%;
+  border-radius: 23px;
+  background: url(/images/hypernative/signup-intro-bg.png) no-repeat center;
+  background-size: contain;
+}
+
+@media (min-width: 700px) {
+  .backgroundColumn {
+    display: flex;
+  }
+}
+
+.poweredByText,
+.subtitle,
+.featureDescription {
+  color: var(--color-primary-light);
+}
+
+.featureIcon {
+  color: var(--color-success-main);
+}

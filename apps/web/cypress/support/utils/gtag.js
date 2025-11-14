@@ -75,12 +75,6 @@ export const events = {
     event: 'tx_confirmed',
   },
 
-  txOpenShareBlock: {
-    action: 'Open share block',
-    event: 'customClick',
-    category: 'tx-list',
-  },
-
   txCopyShareBlockLink: {
     action: 'Copy deeplink',
     event: 'customClick',

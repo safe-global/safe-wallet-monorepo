@@ -96,7 +96,6 @@ jsEngine: graaljs
       - assertVisible:
           text: '.*Can be executed once the threshold is reached.*'
 
-
 # If executable, verify Continue button works and proceed to review screen
 - runFlow:
     when:
@@ -116,4 +115,3 @@ jsEngine: graaljs
             IS_FULLY_SIGNED: 'true'
             EXPECTED_EXECUTION_METHOD: 'signer'
             TX_EXECUTION_STATUS: 'succeed'
-

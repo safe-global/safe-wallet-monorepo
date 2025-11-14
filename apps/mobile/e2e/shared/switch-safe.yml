@@ -4,7 +4,7 @@ appId: global.safe.mobileapp.ios
 # Switch Safe Flow
 # ===========================================
 # Shared flow for switching between safes in the app
-# 
+#
 # Environment variables:
 #   SAFE_NAME_PATTERN: Regex pattern for the safe name to select (required)
 #                      Example: '.*Pending Tx Safe 2.*'
@@ -21,4 +21,3 @@ appId: global.safe.mobileapp.ios
 # Verify we're on the home tab
 - assertVisible:
     id: 'home-tab'
-
