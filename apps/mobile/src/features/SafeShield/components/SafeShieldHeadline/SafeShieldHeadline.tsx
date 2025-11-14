@@ -1,12 +1,14 @@
 import React from 'react'
-import { Text, View, Theme, ThemeName } from 'tamagui'
+import { Text, View, Theme } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { TouchableOpacity } from 'react-native'
 import { getSafeShieldHeadlineVariants } from './variants'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 
+export type SafeShieldHeadlineType = `safeShield_${Severity}`
+
 interface SafeShieldHeadlineProps {
-  type?: ThemeName
+  type?: SafeShieldHeadlineType
   onPress?: () => void
   withIcon?: boolean
 }
@@ -30,7 +32,7 @@ export function SafeShieldHeadline({
           alignItems="center"
         >
           <View flexDirection="row" alignItems="center" gap={'$2'}>
-            {withIcon && <SafeFontIcon name={iconName} color="$color" size={16} />}
+            {withIcon && <SafeFontIcon testID={`${iconName}-icon`} name={iconName} color="$color" size={16} />}
 
             <Text textTransform="uppercase" color="$color" fontWeight={700} letterSpacing={1} fontSize="$1">
               {title}
