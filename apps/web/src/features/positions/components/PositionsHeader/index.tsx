@@ -1,5 +1,5 @@
 import { Chip, Stack, Tooltip, Typography } from '@mui/material'
-import IframeIcon from '@/components/common/IframeIcon'
+import TokenIcon from '@/components/common/TokenIcon'
 import FiatValue from '@/components/common/FiatValue'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
@@ -12,11 +12,10 @@ const PositionsHeader = ({ protocol, fiatTotal }: { protocol: Protocol; fiatTota
     <>
       <Stack direction="row" gap={1} alignItems="center" width={1}>
         <Box sx={{ borderRadius: '50%', overflow: 'hidden', display: 'flex' }}>
-          <IframeIcon
-            src={protocol.protocol_metadata.icon.url || ''}
-            alt={protocol.protocol_metadata.name}
-            width={32}
-            height={32}
+          <TokenIcon
+            logoUri={protocol.protocol_metadata.icon.url || undefined}
+            tokenSymbol={protocol.protocol_metadata.name}
+            size={32}
           />
         </Box>
 
