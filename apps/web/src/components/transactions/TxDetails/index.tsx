@@ -99,12 +99,6 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
         </div>
 
         <div className={css.detailsWrapper}>
-          {isQueue && (
-            <div className={css.inlineSimulation}>
-              <QueuedTxSimulation transaction={txDetails} />
-            </div>
-          )}
-
           <div className={css.txData}>
             <ErrorBoundary fallback={<div>Error parsing data</div>}>
               <TxData
@@ -124,6 +118,11 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
               </TxData>
             </ErrorBoundary>
           </div>
+          {isQueue && (
+            <div className={css.inlineSimulation}>
+              <QueuedTxSimulation transaction={txDetails} />
+            </div>
+          )}
         </div>
 
         {/* Module information*/}
