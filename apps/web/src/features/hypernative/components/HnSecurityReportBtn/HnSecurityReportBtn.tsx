@@ -31,7 +31,7 @@ export const HnSecurityReportBtn = ({ chainId, safe, tx }: HnSecurityReportBtnPr
   return (
     // Click event is sent to mixpanel as well via the GA_TO_MIXPANEL_MAPPING in services/analytics/)
     <Tooltip title="Review security report on Hypernative" arrow placement="top">
-      <Track {...HYPERNATIVE_EVENTS.REVIEW_REPORT_CLICKED}>
+      <Track {...HYPERNATIVE_EVENTS.SECURITY_REPORT_CLICKED}>
         <Button variant="neutral" fullWidth component={ExternalLink} href={href}>
           <SvgIcon component={HypernativeIcon} inheritViewBox className={css.hypernativeIcon} />
           {text}

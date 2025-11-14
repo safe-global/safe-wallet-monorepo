@@ -27,7 +27,7 @@ export const HnMiniTxBanner = ({ onHnSignupClick, onDismiss }: HnMiniTxBannerPro
 
   return (
     <Track
-      {...HYPERNATIVE_EVENTS.GUARD_LEARN_MORE}
+      {...HYPERNATIVE_EVENTS.GUARDIAN_FORM_VIEWED}
       label={HYPERNATIVE_SOURCE.NewTransaction}
       mixpanelParams={{
         [MixpanelEventParams.SOURCE]: HYPERNATIVE_SOURCE.NewTransaction,
