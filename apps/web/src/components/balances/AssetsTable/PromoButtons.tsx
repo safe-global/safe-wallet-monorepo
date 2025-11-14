@@ -29,8 +29,8 @@ export const PromoButtons = ({
 
   return (
     <>
-      {showStakeButton && <StakeButton tokenInfo={tokenInfo} trackingLabel={STAKE_LABELS.asset} plain />}
-      {showEarnButton && <EarnButton tokenInfo={tokenInfo} trackingLabel={EARN_LABELS.asset} plain />}
+      {showStakeButton && <StakeButton tokenInfo={tokenInfo} trackingLabel={STAKE_LABELS.asset} />}
+      {showEarnButton && <EarnButton tokenInfo={tokenInfo} trackingLabel={EARN_LABELS.asset} />}
     </>
   )
 }
