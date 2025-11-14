@@ -1,0 +1,103 @@
+.banner {
+  position: relative;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  background-color: var(--color-info-background);
+  border: 0;
+  border-radius: var(--space-1);
+  width: 100%;
+}
+
+/* Theme specific background color override to match Figma */
+:root:not([data-theme='dark']) .banner {
+  background-color: var(--color-info-light);
+}
+
+[data-theme='dark'] .banner {
+  background-color: #203339;
+}
+
+[data-theme='dark'] .description {
+  color: var(--color-primary-light);
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-4);
+  height: var(--space-4);
+  min-width: var(--space-4);
+  background-color: var(--color-background-main);
+  border-radius: 100px;
+  padding: var(--space-1);
+}
+
+.iconContainer svg {
+  padding: 0 !important;
+}
+
+.icon {
+  width: var(--space-2);
+  height: var(--space-2);
+  padding: calc(var(--space-1) / 2);
+  color: var(--color-text-secondary);
+}
+
+.icon path {
+  fill: currentColor;
+}
+
+.textContainer {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding-right: var(--space-3);
+}
+
+.title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3 !important;
+  letter-spacing: 0.15px;
+  color: var(--color-text-primary);
+}
+
+.description {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: 0.17px;
+  margin-top: var(--space-1) !important;
+  color: var(--color-primary-dark);
+}
+
+.closeButton {
+  position: absolute !important;
+  top: var(--space-2);
+  right: var(--space-2);
+  padding: 0;
+  width: var(--space-2);
+  height: var(--space-2);
+  min-width: var(--space-2);
+  min-height: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Override the color of the close button icon as this color is not in the design system */
+.closeButton svg {
+  color: var(--color-text-secondary);
+}
+
+.closeButton:hover {
+  background-color: transparent;
+}

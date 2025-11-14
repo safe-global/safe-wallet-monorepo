@@ -2,8 +2,7 @@
 
 > **⚠️ NOTICE: This document describes the LEGACY manual release process.**
 >
-> **For the NEW automated process using GitHub Actions (recommended), see:**
-> **[📖 Automated Release Procedure](./release-procedure-automated.md)**
+> **For the NEW automated process using GitHub Actions (recommended), see:** > **[📖 Automated Release Procedure](./release-procedure-automated.md)**
 >
 > ---
 
