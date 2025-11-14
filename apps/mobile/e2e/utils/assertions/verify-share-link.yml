@@ -12,7 +12,7 @@ tags:
     when:
       platform: iOS
     commands:
-      - assertVisible: 'app.safe.global'
+      - assertVisible: '.*app.safe.global.*'
       - tapOn:
           id: 'header.closeButton'
 

@@ -17,7 +17,7 @@ tags:
 # Scroll down to find disable module transaction
 - scrollUntilVisible:
     element:
-      text: '.*Disable.*module.*'
+      text: '.*disableModule.*'
     centerElement: true
 
 # Test disable module transaction

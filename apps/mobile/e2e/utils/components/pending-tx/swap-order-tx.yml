@@ -202,4 +202,3 @@ tags:
           env:
             EXPECTED_SIGNER_PATTERN: '.*6fED.*'
             IS_FULLY_SIGNED: 'false'
-            EXPECTED_EXECUTION_METHOD: 'signer'

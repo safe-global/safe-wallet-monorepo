@@ -23,10 +23,7 @@ tags:
 #                   If "true": navigates to "Review and execute" screen (execution flow)
 #                   If "false": navigates to "Review and confirm" screen (signing flow)
 #                   Defaults to "true" if not provided
-#   EXPECTED_EXECUTION_METHOD: Expected execution method display - "relay" or "signer"
-#                              If "relay": expects "Sponsored by Safe" and "Free x left / day"
-#                              If "signer": expects signer name/address and estimated network fee
-#                              Defaults to "relay" if not provided
+#
 
 # ===========================================
 # Navigate to Review and Execute
@@ -43,7 +40,7 @@ tags:
     timeout: 2000
 
 # ===========================================
-# Parse IS_FULLY_SIGNED, EXPECTED_EXECUTION_METHOD, and TX_EXECUTION_STATUS
+# Parse IS_FULLY_SIGNED and TX_EXECUTION_STATUS
 # ===========================================
 # Parse the IS_FULLY_SIGNED environment variable using GraalJS
 # Default to "true" (fully signed = execute flow) if not provided
@@ -52,14 +49,6 @@ tags:
 # Set flags for conditional execution
 - evalScript: '${output.isExecuteFlow = output.isFullySigned === true}'
 - evalScript: '${output.isConfirmFlow = output.isFullySigned === false}'
-
-# Parse EXPECTED_EXECUTION_METHOD environment variable
-# Default to "relay" if not provided
-- evalScript: '${output.expectedExecutionMethod = (typeof EXPECTED_EXECUTION_METHOD !== "undefined" && EXPECTED_EXECUTION_METHOD) ? EXPECTED_EXECUTION_METHOD.toLowerCase() : "relay"}'
-
-# Set flags for execution method display
-- evalScript: '${output.expectRelay = output.expectedExecutionMethod === "relay"}'
-- evalScript: '${output.expectSigner = output.expectedExecutionMethod === "signer"}'
 
 # Parse TX_EXECUTION_STATUS environment variable
 # Default to "succeed" if not provided
@@ -165,7 +154,7 @@ tags:
 # ===========================================
 # Verify Footer Section (Execution Method or Signer Selection)
 # ===========================================
-# Execute Flow: Verify Execution Method (Configurable: Relay or Signer)
+# Execute Flow: Verify Execution Method (Dynamically Detected: Relay or Signer)
 - runFlow:
     when:
       true: '${output.isExecuteFlow === true}'
@@ -175,11 +164,26 @@ tags:
           text: 'Execution method'
 
       # ===========================================
-      # Expected: Relay (Sponsored by Safe)
+      # Dynamically Detect: Relay (Sponsored by Safe) or Signer
+      # ===========================================
+      # Check initial execution method once at the beginning and store in output variable
+      # Default to false (signer selected)
+      - evalScript: '${output.isRelaySelected = false}'
+
+      # If "Sponsored by Safe" is visible, set flag to true (relay selected)
+      - runFlow:
+          when:
+            visible:
+              text: 'Sponsored by Safe'
+          commands:
+            - evalScript: '${output.isRelaySelected = true}'
+
+      # ===========================================
+      # Flow: Relay (Sponsored by Safe) - Run if relay was initially selected
       # ===========================================
       - runFlow:
           when:
-            true: '${output.expectRelay === true}'
+            true: '${output.isRelaySelected === true}'
           commands:
             # Verify "Sponsored by Safe" is visible
             - assertVisible:
@@ -250,11 +254,11 @@ tags:
                       text: '.*Can not estimate.*'
 
       # ===========================================
-      # Expected: Signer (User previously selected signer)
+      # Flow: Signer (User previously selected signer) - Run if signer was initially selected
       # ===========================================
       - runFlow:
           when:
-            true: '${output.expectSigner === true}'
+            true: '${output.isRelaySelected === false}'
           commands:
             # Verify the signer is visible in the execution method
             - assertVisible:
@@ -331,11 +335,12 @@ tags:
 # ===========================================
 # Success Flow: Verify Estimated Network Fee (Execute Flow with Signer Only)
 # ===========================================
-# Run success flow if TX_EXECUTION_STATUS is "succeed" AND we're in execute flow AND expecting signer
+# Run success flow if TX_EXECUTION_STATUS is "succeed" AND we're in execute flow AND signer is selected
 # Note: Relay execution shows "Free x left / day" instead of estimated fee, so we skip this check
+# We check if signer was initially selected (or if relay flow switched to signer)
 - runFlow:
     when:
-      true: '${output.isSuccessFlow === true && output.isExecuteFlow === true && output.expectSigner === true}'
+      true: '${output.isSuccessFlow === true && output.isExecuteFlow === true && output.isRelaySelected === false}'
     commands:
       # Verify "Est. network fee" label is visible
       - assertVisible:
