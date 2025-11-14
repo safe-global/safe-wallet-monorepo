@@ -69,7 +69,7 @@
     "@safe-global/protocol-kit": "^5.2.21",
     "@safe-global/store": "workspace:^",
     "@safe-global/utils": "workspace:^",
-    "@shopify/flash-list": "2.0.2",
+    "@shopify/flash-list": "^2.2.0",
     "@storybook/addon-react-native-web": "^0.0.26",
     "@storybook/addon-webpack5-compiler-babel": "^3.0.3",
     "@tamagui/animations-moti": "^1.126.3",
