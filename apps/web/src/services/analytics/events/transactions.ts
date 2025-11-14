@@ -108,4 +108,9 @@ export const TX_EVENTS = {
     action: 'Execute in parent',
     category: TX_CATEGORY,
   },
+  SUBMIT: {
+    event: EventType.TX_SUBMITTED,
+    action: 'Transaction Submitted',
+    category: TX_CATEGORY,
+  },
 }

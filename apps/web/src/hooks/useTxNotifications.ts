@@ -13,9 +13,15 @@ import useWallet from './wallets/useWallet'
 import useSafeAddress from './useSafeAddress'
 import { isWalletRejection } from '@/utils/wallets'
 import { getTxLink } from '@/utils/tx-link'
-import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import {
+  useLazyTransactionsGetTransactionByIdV1Query,
+  type TransactionDetails,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 import { getGuardErrorInfo } from '@/utils/transaction-errors'
+import { trackTransactionSubmitted } from '@/components/tx/SignOrExecuteForm/tracking'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import useChainId from '@/hooks/useChainId'
 
 const TxNotifications = {
   [TxEvent.SIGN_FAILED]: 'Failed to sign. Please try again.',
@@ -48,6 +54,8 @@ const useTxNotifications = (): void => {
   const chain = useCurrentChain()
   const safeAddress = useSafeAddress()
   const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
+  const { safe } = useSafeInfo()
+  const chainId = useChainId()
 
   /**
    * Show notifications of a transaction's lifecycle
@@ -79,10 +87,12 @@ const useTxNotifications = (): void => {
 
         let humanDescription = 'Transaction'
         const id = txId || txHash
+        let txDetails: { data: TransactionDetails | undefined } | undefined
         if (id) {
           try {
-            const { data: txDetails } = await trigger({ chainId: chain.chainId, id })
-            humanDescription = txDetails?.txInfo.humanDescription || humanDescription
+            const result = await trigger({ chainId: chain.chainId, id })
+            txDetails = { data: result.data }
+            humanDescription = txDetails.data?.txInfo.humanDescription || humanDescription
           } catch {}
         }
 
@@ -100,13 +110,32 @@ const useTxNotifications = (): void => {
                 : undefined,
           }),
         )
+
+        if (event === TxEvent.EXECUTING && txId && chainId) {
+          trackTransactionSubmitted(
+            txId,
+            chainId,
+            safe,
+            async (arg) => {
+              if (txDetails) {
+                return txDetails
+              }
+              const result = await trigger(arg)
+              return { data: result.data }
+            },
+            undefined,
+            false,
+          ).catch(() => {
+            // Silently fail if tracking fails
+          })
+        }
       }),
     )
 
     return () => {
       unsubFns.forEach((unsub) => unsub())
     }
-  }, [dispatch, safeAddress, chain, trigger])
+  }, [dispatch, safeAddress, chain, trigger, chainId, safe])
 
   /**
    * If there's at least one transaction awaiting confirmations, show a notification for it
