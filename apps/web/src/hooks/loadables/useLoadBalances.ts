@@ -60,6 +60,10 @@ export interface PortfolioBalances extends Balances {
   positionsFiatTotal?: string
 }
 
+/**
+ * Hook to load token balances and positions data.
+ * Returns `loading: true` when initialized, even if the query is skipped (e.g., no Safe selected).
+ */
 const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
   const currency = useAppSelector(selectCurrency)
   const isTrustedTokenList = useTokenListSetting()
