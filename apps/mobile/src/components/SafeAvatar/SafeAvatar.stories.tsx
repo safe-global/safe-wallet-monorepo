@@ -12,8 +12,11 @@ const meta: Meta<typeof SafeAvatar> = {
     label: { control: 'text' },
     delayMs: { control: 'number' },
     fallbackBackgroundColor: { control: 'color' },
-    // fallbackIcon is a ReactNode, so we disable controls
-    fallbackIcon: { control: false },
+    // fallbackIcon is a ReactNode, so we disable controls to avoid circular reference
+    fallbackIcon: {
+      control: false,
+      table: { disable: true },
+    },
   },
 }
 
@@ -30,11 +33,14 @@ export const Loaded: Story = {
 }
 
 export const Fallback: Story = {
+  // Don't include fallbackIcon in args to avoid circular reference warnings
   args: {
     src: '',
     size: '$10',
     label: 'Fallback Avatar',
     fallbackBackgroundColor: '$gray4',
-    fallbackIcon: <SafeFontIcon name="code-blocks" size={16} color="$color" />,
   },
+  render: (args) => (
+    <SafeAvatar {...args} fallbackIcon={<SafeFontIcon name="code-blocks" size={16} color="$color" />} />
+  ),
 }
