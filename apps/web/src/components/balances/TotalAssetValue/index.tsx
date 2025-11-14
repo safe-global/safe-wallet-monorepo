@@ -1,4 +1,5 @@
-import { Box, Skeleton, Typography } from '@mui/material'
+import { Box, Skeleton, Typography, Stack } from '@mui/material'
+import type { ReactNode } from 'react'
 import FiatValue from '@/components/common/FiatValue'
 import TokenAmount from '@/components/common/TokenAmount'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -8,10 +9,12 @@ const TotalAssetValue = ({
   fiatTotal,
   title = 'Total asset value',
   size = 'md',
+  action,
 }: {
   fiatTotal: string | number | undefined
   title?: string
   size?: 'md' | 'lg'
+  action?: ReactNode
 }) => {
   const fontSizeValue = size === 'lg' ? '44px' : '24px'
   const { safe } = useSafeInfo()
@@ -19,9 +22,12 @@ const TotalAssetValue = ({
 
   return (
     <Box>
-      <Typography fontWeight={700} mb={0.5} fontSize="14px" sx={{ color: 'var(--color-text-secondary)' }}>
-        {title}
-      </Typography>
+      <Stack direction="row" alignItems="center" gap={1} mb={0.5}>
+        <Typography fontWeight={700} fontSize="14px" sx={{ color: 'var(--color-text-secondary)' }}>
+          {title}
+        </Typography>
+        {action}
+      </Stack>
       <Typography component="div" variant="h1" fontSize={fontSizeValue} lineHeight="1.2" letterSpacing="-0.5px">
         {safe.deployed ? (
           fiatTotal !== undefined ? (

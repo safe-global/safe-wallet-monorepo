@@ -13,6 +13,10 @@ export const POSITIONS_EVENTS = {
     action: 'Empty positions explore clicked',
     category: POSITIONS_CATEGORY,
   },
+  POSITIONS_REFRESH_CLICKED: {
+    action: 'Positions refresh clicked',
+    category: POSITIONS_CATEGORY,
+  },
 }
 
 export enum POSITIONS_LABELS {
