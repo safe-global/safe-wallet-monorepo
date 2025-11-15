@@ -1,0 +1,1 @@
+export { AddressImage } from './AddressImage'

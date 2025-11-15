@@ -101,6 +101,8 @@ describe('getOverallStatus', () => {
     it('should return OK severity for verified contract', () => {
       const contractResults: ContractAnalysisResults = {
         '0xContract1': {
+          name: 'Test Contract',
+          logoUrl: 'https://example.com/logo.png',
           [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.verified().build()],
         },
       }
@@ -115,6 +117,8 @@ describe('getOverallStatus', () => {
     it('should return INFO severity for not verified contract', () => {
       const contractResults: ContractAnalysisResults = {
         '0xContract1': {
+          name: 'Test Contract',
+          logoUrl: 'https://example.com/logo.png',
           [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.unverified().build()],
         },
       }
@@ -129,6 +133,8 @@ describe('getOverallStatus', () => {
     it('should return WARN severity for verification unavailable contract', () => {
       const contractResults: ContractAnalysisResults = {
         '0xContract1': {
+          name: 'Test Contract',
+          logoUrl: 'https://example.com/logo.png',
           [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.verificationUnavailable().build()],
         },
       }
@@ -151,6 +157,8 @@ describe('getOverallStatus', () => {
 
       const contractResults: ContractAnalysisResults = {
         '0xContract1': {
+          name: 'Test Contract',
+          logoUrl: 'https://example.com/logo.png',
           [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.unverified().build()],
         },
       }
@@ -174,6 +182,8 @@ describe('getOverallStatus', () => {
 
       const contractResults: ContractAnalysisResults = {
         '0xContract1': {
+          name: 'Test Contract',
+          logoUrl: 'https://example.com/logo.png',
           [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.verified().build()],
         },
       }
@@ -216,6 +226,8 @@ describe('getOverallStatus', () => {
 
       const contractResults: ContractAnalysisResults = {
         '0xContract1': {
+          name: 'Test Contract',
+          logoUrl: 'https://example.com/logo.png',
           [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.verified().build()],
         },
       }
@@ -269,9 +281,13 @@ describe('getOverallStatus', () => {
 
       const contractResults: ContractAnalysisResults = {
         '0xContract1': {
+          name: 'Test Contract 1',
+          logoUrl: 'https://example.com/logo1.png',
           [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.verified().build()],
         },
         '0xContract2': {
+          name: 'Test Contract 2',
+          logoUrl: 'https://example.com/logo2.png',
           [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.unverified().build()],
         },
       }
@@ -322,6 +338,8 @@ describe('getOverallStatus', () => {
     it('should skip non-array group results in contract analysis', () => {
       const contractResults: ContractAnalysisResults = {
         '0xContract1': {
+          name: 'Test Contract',
+          logoUrl: 'https://example.com/logo.png',
           [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.verified().build()],
           [StatusGroup.CONTRACT_INTERACTION]: 'invalid' as any, // Non-array value
         },
@@ -344,6 +362,8 @@ describe('getOverallStatus', () => {
 
       const contractResults: ContractAnalysisResults = {
         '0xContract1': {
+          name: 'Test Contract',
+          logoUrl: 'https://example.com/logo.png',
           [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.verified().build()],
           [StatusGroup.CONTRACT_INTERACTION]: undefined as any, // Non-array value
         },
@@ -372,6 +392,8 @@ describe('getOverallStatus', () => {
 
       const contractResults: ContractAnalysisResults = {
         '0xContract1': {
+          name: 'Test Contract',
+          logoUrl: 'https://example.com/logo.png',
           [StatusGroup.CONTRACT_VERIFICATION]: 'invalid' as any,
         },
       }
