@@ -50,7 +50,7 @@ import useAllSafes from '@/features/myAccounts/hooks/useAllSafes'
 import uniq from 'lodash/uniq'
 import { selectRpc } from '@/store/settingsSlice'
 import { AppRoutes } from '@/config/routes'
-import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
+import type { CreateSafeResult, ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { updateAddressBook } from '../../logic/address-book'
@@ -246,20 +246,25 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
       const safeAddress = await predictAddressBasedOnReplayData(replayedSafeWithNonce, provider)
 
+      const createSafeResults: CreateSafeResult[] = []
       for (const network of data.networks) {
-        await createSafe(network, replayedSafeWithNonce, safeAddress)
+        const result = await createSafe(network, replayedSafeWithNonce, safeAddress)
+        createSafeResults.push(result)
       }
 
-      // Update addressbook with owners and Safe on all chosen networks
-      dispatch(
-        updateAddressBook(
-          data.networks.map((network) => network.chainId),
-          safeAddress,
-          data.name,
-          data.owners,
-          data.threshold,
-        ),
-      )
+      // Update the addressbook with owners and Safe on all successfully created networks
+      const successfulChains = createSafeResults.filter((result) => result.success)
+      if (successfulChains.length > 0) {
+        dispatch(
+          updateAddressBook(
+            successfulChains.map((res) => res.chain.chainId),
+            safeAddress,
+            data.name,
+            data.owners,
+            data.threshold,
+          ),
+        )
+      }
 
       gtmSetChainId(chain.chainId)
 
@@ -282,8 +287,8 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
     }
   }
 
-  const createSafe = async (chain: Chain, props: ReplayedSafeProps, safeAddress: string) => {
-    if (!wallet) return
+  const createSafe = async (chain: Chain, props: ReplayedSafeProps, safeAddress: string): Promise<CreateSafeResult> => {
+    if (!wallet) return { chain, safeAddress, success: false }
 
     gtmSetChainId(chain.chainId)
 
@@ -310,7 +315,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
         replayCounterfactualSafeDeployment(chain.chainId, safeAddress, props, data.name, dispatch, payMethod)
 
-        return
+        return { chain, safeAddress, success: true }
       }
 
       const options: TransactionOptions = isEIP1559
@@ -368,9 +373,11 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
       if (isWalletRejection(error)) {
         trackEvent(CREATE_SAFE_EVENTS.REJECT_CREATE_SAFE)
       }
+
+      return { chain, safeAddress, success: false }
     }
 
-    setIsCreating(false)
+    return { chain, safeAddress, success: true }
   }
 
   const showNetworkWarning =
