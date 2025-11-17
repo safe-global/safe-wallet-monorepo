@@ -115,6 +115,7 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
             paddingRight: 16,
             paddingLeft: 16,
           }}
+          testID="signer-menu"
         >
           <SafeFontIcon name="options-horizontal" />
         </MenuView>
