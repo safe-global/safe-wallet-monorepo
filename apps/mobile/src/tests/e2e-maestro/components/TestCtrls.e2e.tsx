@@ -2,7 +2,7 @@ import { LogBox, Pressable } from 'react-native'
 import { View } from 'tamagui'
 import { useDispatch } from 'react-redux'
 import { useRouter } from 'expo-router'
-import { setupOnboardedAccount, setupTestOnboarding } from '../setup/onboardingSetup'
+import { setupOnboardedAccount, setupTestOnboarding, setupSeedPhraseImportAccount } from '../setup/onboardingSetup'
 import { setupOnboardedAccountForAssets } from '../setup/assetsSetup'
 import {
   setupAllPendingTxSafes,
@@ -41,6 +41,12 @@ export function TestCtrls() {
       <Pressable
         testID="e2eTestOnboarding"
         onPress={() => setupTestOnboarding(router)}
+        accessibilityRole="button"
+        style={BTN}
+      />
+      <Pressable
+        testID="e2eSeedPhraseImportAccount"
+        onPress={() => setupSeedPhraseImportAccount(dispatch, router)}
         accessibilityRole="button"
         style={BTN}
       />

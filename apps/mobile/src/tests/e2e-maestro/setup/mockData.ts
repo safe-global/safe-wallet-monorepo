@@ -224,3 +224,19 @@ export const pendingTxSafeInfo6: SafeOverview = {
   queued: 0,
   threshold: 1,
 }
+
+// Seed phrase import test account
+export const mockedSeedPhraseImportAccount: SafeInfo = {
+  address: '0x4c425AceFf91aa4398183FE82e210C96dD9E92F8',
+  chainId: '11155111',
+}
+
+export const mockedSeedPhraseImportSafeInfo: SafeOverview = {
+  address: { value: '0x4c425AceFf91aa4398183FE82e210C96dD9E92F8', name: null, logoUri: null },
+  awaitingConfirmation: null,
+  chainId: mockedSeedPhraseImportAccount.chainId,
+  fiatTotal: '0',
+  owners: [{ value: '0xaE03f216A54857b995d79468882AfB07251B1154', name: null, logoUri: null }],
+  queued: 0,
+  threshold: 1,
+}
