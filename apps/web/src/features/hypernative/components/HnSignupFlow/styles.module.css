@@ -1,6 +1,6 @@
 .container {
   overflow: hidden;
-  height: 845px;
+  height: 750px;
   max-height: 90vh;
 }
 
@@ -8,7 +8,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding: var(--space-7) var(--space-6) var(--space-4);
+  padding: var(--space-6);
   max-height: 100%;
   overflow-y: auto;
 }
@@ -21,7 +21,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding: var(--space-5) var(--space-5) var(--space-1) var(--space-6);
+  padding: var(--space-4) var(--space-5) var(--space-1) var(--space-6);
   background-color: var(--color-static-primary);
   max-height: 100%;
   overflow-y: auto;
