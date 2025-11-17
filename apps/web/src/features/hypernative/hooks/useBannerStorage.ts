@@ -40,10 +40,11 @@ export const useBannerStorage = (bannerType: BannerType): boolean => {
     if (!safeHnState) {
       // If no state exists, show promo banner by default, hide pending banner
       // For Settings, show if no state exists (no form completed yet)
-      if (bannerType === BannerType.Settings) {
-        return true
-      }
-      return bannerType === BannerType.Promo || bannerType === BannerType.NoBalanceCheck
+      return (
+        bannerType === BannerType.Settings ||
+        bannerType === BannerType.Promo ||
+        bannerType === BannerType.NoBalanceCheck
+      )
     }
 
     // Settings banner ignores dismissal state but respects formCompleted
