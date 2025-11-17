@@ -1,0 +1,91 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+# ===========================================
+# Remove Owner Transaction
+# ===========================================
+- assertVisible: Transaction details
+- assertVisible: Remove signer
+
+# ===========================================
+# Removed Signer Field
+# ===========================================
+- assertVisible: Removed signer
+- assertVisible:
+    id: 'hash-display-name-or-address'
+    text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
+
+# ===========================================
+# Confirmations Field with Info Sheet
+# ===========================================
+- assertVisible: Confirmations
+- assertVisible:
+    id: 'threshold-change-display-threshold'
+    text: '.*\d+.*'
+
+# Tap on "Confirmations" text in the threshold change display (wrapped by InfoSheet)
+# This is in the upper card section, different from the lower "Confirmations" that opens signers sheet
+- tapOn:
+    text: Confirmations.*
+    index: 0
+
+# Verify InfoSheet is opened with the expected info text
+- assertVisible: Confirmations required for new transactions
+
+# Dismiss the InfoSheet by swiping down
+- swipe:
+    direction: DOWN
+    startPoint: '50%,50%'
+    endPoint: '50%,80%'
+
+# Verify we're back to the transaction details view
+- assertVisible: Transaction details
+
+# ===========================================
+# Network Display
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-network.yml
+
+# ===========================================
+# Transaction Details Button
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-details.yml
+
+# ===========================================
+# Common Transaction Info
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-info.yml
+
+# ===========================================
+# Confirmations
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-history-confirmations.yml
+
+# ===========================================
+# Test Explorer Link
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-explorer-link.yml
+
+- assertVisible: Transaction details
+
+# ===========================================
+# Test Share Transaction Button
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-share-link.yml
+
+- assertVisible: Transaction details
+
+# ===========================================
+# Test Transaction Details Button
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-advanced-details.yml
+
+- assertVisible: Transaction details

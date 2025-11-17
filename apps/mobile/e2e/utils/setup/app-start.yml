@@ -1,0 +1,65 @@
+appId: ${APP_ID}
+tags:
+  - util
+jsEngine: graaljs
+env:
+  APP_ID: ${APP_ID || "unset"}
+---
+# Launches app with clearState based on SKIP_CLEAN_START environment variable
+# - If SKIP_CLEAN_START != "true": clears state (fresh start)
+# - If SKIP_CLEAN_START == "true": preserves state (for suite mode)
+
+# Determine whether to clear state using JavaScript
+- evalScript: '${output.shouldClearState = (typeof SKIP_CLEAN_START === "undefined" || SKIP_CLEAN_START !== "true")}'
+- evalScript: ${output.APP_ID = APP_ID}
+
+- runFlow:
+    when:
+      true: ${APP_ID == "unset"}
+      platform: iOS
+    commands:
+      - evalScript: ${output.APP_ID = "global.safe.mobileapp.ios"}
+- runFlow:
+    when:
+      true: ${APP_ID == "unset"}
+      platform: Android
+    commands:
+      - evalScript: ${output.APP_ID = "global.safe.mobileapp"}
+- evalScript: ${console.log(output.APP_ID)}
+# Launch with clear state (individual test mode)
+- runFlow:
+    when:
+      true: '${output.shouldClearState === true}'
+    commands:
+      - launchApp:
+          appId: ${output.APP_ID}
+          clearState: true
+          clearKeychain: true
+          permissions:
+            all: allow
+
+# Launch preserving state (suite mode)
+- runFlow:
+    when:
+      true: '${output.shouldClearState === false}'
+    commands:
+      - launchApp:
+          appId: ${output.APP_ID}
+          clearState: false
+          clearKeychain: false
+          permissions:
+            all: allow
+
+# Handle potential environment-specific dialogs (both modes)
+- runFlow:
+    when:
+      visible:
+        text: 'http.*'
+    commands:
+      - tapOn: 'http.*'
+
+- runFlow:
+    when:
+      visible: 'Close'
+    commands:
+      - tapOn: 'Close'
