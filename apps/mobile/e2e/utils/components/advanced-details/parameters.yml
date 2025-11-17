@@ -54,20 +54,6 @@ tags:
       optional: true
     timeout: ${output.defaults.extendedWaitUntilTimeout}
 
-# Hex Data (optional - only if txData?.hexData exists)
-- extendedWaitUntil:
-    visible:
-      text: 'Hex Data'
-      optional: true
-    timeout: ${output.defaults.extendedWaitUntilTimeout}
-
-# Hex Data value (shortened format like "0x1234...abcd")
-- extendedWaitUntil:
-    visible:
-      text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
-      optional: true
-    timeout: ${output.defaults.extendedWaitUntilTimeout}
-
 # Hex Data copy button (optional - if hex data exists)
 - extendedWaitUntil:
     visible:
