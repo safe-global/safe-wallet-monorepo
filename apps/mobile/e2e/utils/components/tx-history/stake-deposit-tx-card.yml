@@ -1,0 +1,30 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
+# ===========================================
+# Stake Deposit Transaction Card
+# ===========================================
+# Stake deposit transactions show "Deposit" label and "Stake" type
+- extendedWaitUntil:
+    visible:
+      text: '.*Deposit.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+- extendedWaitUntil:
+    visible:
+      text: '.*Stake.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+- tapOn:
+    text: '.*Deposit.*'
+
+- runFlow:
+    file: ./stake-deposit-tx.yml
+
+- tapOn:
+    id: 'go-back'

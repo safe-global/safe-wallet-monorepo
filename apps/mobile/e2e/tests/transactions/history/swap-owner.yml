@@ -1,0 +1,26 @@
+appId: ${APP_ID}
+tags:
+  - transactions
+  - history
+  - settings
+---
+- runFlow:
+    file: ../../../utils/setup/app-start.yml
+
+# Navigate to Transaction History using e2e button
+- tapOn:
+    id: 'e2eTransactionHistoryDirect'
+
+- assertVisible:
+    id: 'tx-history-list'
+
+# Scroll down to find swap owner transaction
+- scrollUntilVisible:
+    element:
+      text: '.*swapOwner.*'
+    centerElement: true
+    speed: 20
+
+# Test swap owner transaction
+- runFlow:
+    file: ../../../utils/components/tx-history/swap-owner-tx-card.yml

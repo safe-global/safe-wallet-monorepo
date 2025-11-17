@@ -1,0 +1,278 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
+# ===========================================
+# TWAP Order Transaction (Pending State)
+# ===========================================
+# Tests the TWAP order transaction detail view for pending transactions
+# Can handle both active and expired TWAP orders
+# Note: TWAP orders have additional fields and require scrolling to see all content
+#
+# Environment variables:
+#   ORDER_STATUS: Expected status of the TWAP order - "Expired", "Execution needed", or "Pending"
+#                 Defaults to "Execution needed" if not provided
+#                 For expired orders, the Continue button should NOT be visible
+
+- assertVisible: 'Confirm transaction'
+
+# ===========================================
+# TWAP Fallback Handler Warning Banner
+# ===========================================
+# TWAP orders may show a warning banner about enabling TWAPs
+# This is optional and only appears when setting up TWAP fallback handler
+- extendedWaitUntil:
+    visible:
+      text: '.*Enable TWAPs.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+- extendedWaitUntil:
+    visible:
+      text: '.*custom fallback handler.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+# ===========================================
+# Swap Header - Sell and Receive Sections
+# ===========================================
+
+# Verify sell container and amount
+- assertVisible:
+    id: 'swap-header-sell-container'
+- assertVisible: 'Sell'
+- assertVisible:
+    id: 'swap-header-sell-amount'
+    text: '.*\d+.*[A-Z]{2,}.*'
+
+# Verify receive container and amount
+- assertVisible:
+    id: 'swap-header-receive-container'
+- assertVisible: 'For at least'
+- assertVisible:
+    id: 'swap-header-receive-amount'
+    text: '.*\d+.*[A-Z]{2,}.*'
+
+# ===========================================
+# Swap Order Details Section (Standard Fields)
+# ===========================================
+- assertVisible:
+    id: 'swap-order-table'
+
+# Price row - for pending orders it should be "Limit price"
+- assertVisible:
+    id: 'swap-order-table'
+    containsDescendants:
+      - text: '.*Limit price.*'
+
+# Verify price format (1 TOKEN = AMOUNT TOKEN)
+- assertVisible:
+    id: 'swap-order-table'
+    containsDescendants:
+      - text: '.*1 [A-Z]{2,} = .*\d+.*[A-Z]{2,}.*'
+
+# Network row (scoped to details section)
+- assertVisible:
+    id: 'swap-order-table'
+    containsDescendants:
+      - text: 'Network'
+
+# Status row (scoped to details section)
+# Parse ORDER_STATUS environment variable to determine expected status
+- evalScript: '${output.orderStatus = (typeof ORDER_STATUS !== "undefined" && ORDER_STATUS) ? ORDER_STATUS : "Execution needed"}'
+- evalScript: '${output.isExpired = output.orderStatus === "Expired"}'
+- evalScript: '${output.isActive = output.orderStatus !== "Expired"}'
+
+- assertVisible:
+    id: 'swap-order-table'
+    containsDescendants:
+      - text: 'Status'
+
+# Verify status based on ORDER_STATUS
+- runFlow:
+    when:
+      true: '${output.isExpired === true}'
+    commands:
+      - assertVisible:
+          id: 'swap-order-table'
+          containsDescendants:
+            - text: '.*Expired.*'
+
+- runFlow:
+    when:
+      true: '${output.isActive === true}'
+    commands:
+      - assertVisible:
+          id: 'swap-order-table'
+          containsDescendants:
+            - text: '.*(Execution needed|Pending).*'
+
+# Widget fee row (scoped to details section)
+- extendedWaitUntil:
+    visible:
+      id: 'swap-order-table'
+      containsDescendants:
+        - text: 'Widget fee'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+# Expiry row (scoped to details section)
+- extendedWaitUntil:
+    visible:
+      id: 'swap-order-table'
+      containsDescendants:
+        - text: 'Expiry'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+# ===========================================
+# TWAP Order Details Section (TWAP-Specific Fields)
+# ===========================================
+# TWAP orders have additional fields in a separate table
+- scroll
+
+- assertVisible:
+    id: 'twap-order-table'
+
+# Verify "Order will be split in X equal parts" message
+- assertVisible:
+    id: 'twap-order-table'
+    containsDescendants:
+      - text: '.*Order will be split in.*'
+
+- assertVisible:
+    id: 'twap-order-table'
+    containsDescendants:
+      - text: '.*\d+\s+equal parts.*'
+
+# Verify sell amount per part
+- assertVisible:
+    id: 'twap-order-table'
+    containsDescendants:
+      - text: 'Sell amount'
+- assertVisible:
+    id: 'twap-order-table'
+    containsDescendants:
+      - text: '.*\d+.*[A-Z]{2,}.*per part.*'
+
+# Verify buy amount per part
+- assertVisible:
+    id: 'twap-order-table'
+    containsDescendants:
+      - text: 'Buy amount'
+- assertVisible:
+    id: 'twap-order-table'
+    containsDescendants:
+      - text: '.*\d+.*[A-Z]{2,}.*per part.*'
+
+# Verify start time (usually "Now" for pending orders)
+- assertVisible:
+    id: 'twap-order-table'
+    containsDescendants:
+      - text: 'Start time'
+- assertVisible:
+    id: 'twap-order-table'
+    containsDescendants:
+      - text: '.*(Now|At block number).*'
+
+# Verify part duration (e.g., "182 days")
+- assertVisible:
+    id: 'twap-order-table'
+    containsDescendants:
+      - text: 'Part duration'
+- assertVisible:
+    id: 'twap-order-table'
+    containsDescendants:
+      - text: '.*\d+.*(day|days|hour|hours|minute|minutes|second|seconds).*'
+
+# Verify total duration (e.g., "365 days")
+- assertVisible:
+    id: 'twap-order-table'
+    containsDescendants:
+      - text: 'Total duration'
+- assertVisible:
+    id: 'twap-order-table'
+    containsDescendants:
+      - text: '.*\d+.*(day|days|hour|hours|minute|minutes|second|seconds).*'
+
+# ===========================================
+# Transaction Details Button
+# ===========================================
+# Scroll to ensure Transaction details button is visible
+
+- runFlow:
+    file: ../../assertions/verify-tx-details.yml
+
+# ===========================================
+# Actions Section
+# ===========================================
+# Verify Actions section is visible (TWAP orders have actions)
+# Scroll to find Actions section
+- scroll
+- assertVisible:
+    text: 'Actions'
+
+# Tap on Actions to view the actions list
+- tapOn:
+    text: 'Actions'
+
+# Test the actions list using shared component
+# Note: Actions may include setFallbackHandler calls where contract field
+# can show either a contract name (e.g., "Pending Tx Safe 2") or an address
+- runFlow:
+    file: ../../assertions/verify-actions-list.yml
+
+# Go back from Actions screen to Confirm transaction
+- tapOn:
+    id: 'go-back'
+
+# Verify we're back on Confirm transaction screen
+- assertVisible: 'Confirm transaction'
+
+# ===========================================
+# Transaction Checks (Pending transactions show checks instead of created/executed)
+# ===========================================
+
+- runFlow:
+    file: ../../assertions/verify-tx-checks.yml
+    env:
+      BALANCE_CHANGE_PATTERN: 'No balance change detected'
+      TRANSACTION_SIMULATION_PATTERN: 'Success'
+
+# ===========================================
+# Confirmations
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-confirmations.yml
+    env:
+      CONFIRMATIONS_PATTERN: '.*1/2.*'
+
+# ===========================================
+# Continue Button Verification
+# ===========================================
+# For expired orders, the Continue button should NOT be visible
+# For active orders, we proceed to Review and Execute screen
+# Note: Continue button is at the bottom, so we need to scroll
+- runFlow:
+    when:
+      true: '${output.isExpired === true}'
+    commands:
+      # For expired orders, verify that Continue button is NOT visible
+      # This is the key assertion: expired orders should not allow continuation
+      - assertNotVisible:
+          text: 'Continue'
+      # Verify we're still on Confirm transaction screen
+      - assertVisible: 'Confirm transaction'
+
+- runFlow:
+    when:
+      true: '${output.isActive === true}'
+    commands:
+      # Test navigating to Review and execute screen and verifying all elements
+      - runFlow:
+          file: ../../assertions/verify-review-and-execute.yml
+          env:
+            EXPECTED_SIGNER_PATTERN: '.*6fED.*'
+            IS_FULLY_SIGNED: 'false'
