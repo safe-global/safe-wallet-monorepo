@@ -11,7 +11,7 @@ import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances
 import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
 import SwapIcon from '@/public/images/common/swap.svg'
-import assetActionCss from '@/components/common/AssetActionButton/styles.module.css'
+import css from '@/components/balances/AssetsTable/styles.module.css'
 
 const SwapButton = ({
   tokenInfo,
@@ -56,10 +56,9 @@ const SwapButton = ({
                   onClick={handleClick}
                   disabled={!isOk}
                   size="small"
-                  aria-label="Swap"
-                  className={assetActionCss.assetActionIconButton}
+                  className={css.iconButton}
                 >
-                  <SvgIcon component={SwapIcon} inheritViewBox sx={{ width: 16, height: 16 }} />
+                  <SvgIcon component={SwapIcon} inheritViewBox />
                 </IconButton>
               </span>
             </Tooltip>
@@ -73,6 +72,7 @@ const SwapButton = ({
               disableElevation
               onClick={handleClick}
               disabled={!isOk}
+              className={css.mobileButton}
             >
               Swap
             </Button>

@@ -538,12 +538,19 @@ describe('AssetsTable', () => {
       },
     })
 
-    // Verify that '100 DAI' appears in the table
+    // Verify that '100 DAI' appears exactly twice (mobile + desktop views)
     const daiElements = result.getAllByText('100 DAI')
-    expect(daiElements.length).toBeGreaterThanOrEqual(1)
+    expect(daiElements).toHaveLength(2)
 
-    // Verify the element is in the DOM and not null
+    // Verify both elements are in the DOM and not null
     expect(daiElements[0]).not.toBeNull()
+    expect(daiElements[1]).not.toBeNull()
+
+    // Verify the elements are different instances
+    expect(daiElements[0]).not.toBe(daiElements[1])
+
+    // Verify both are visible in the document
     expect(daiElements[0]).toBeInTheDocument()
+    expect(daiElements[1]).toBeInTheDocument()
   })
 })

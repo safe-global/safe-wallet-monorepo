@@ -8,7 +8,7 @@ import Track from '@/components/common/Track'
 import { ASSETS_EVENTS } from '@/services/analytics/events/assets'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { TxModalContext } from '@/components/tx-flow'
-import css from '@/components/common/AssetActionButton/styles.module.css'
+import css from './styles.module.css'
 
 const SendButton = ({
   tokenInfo,
@@ -38,10 +38,9 @@ const SendButton = ({
                   onClick={onSendClick}
                   disabled={!isOk}
                   size="small"
-                  aria-label="Send"
-                  className={css.assetActionIconButton}
+                  className={css.iconButton}
                 >
-                  <SvgIcon component={ArrowIconNW} inheritViewBox sx={{ width: 16, height: 16 }} />
+                  <SvgIcon component={ArrowIconNW} inheritViewBox />
                 </IconButton>
               </span>
             </Tooltip>
@@ -54,7 +53,7 @@ const SendButton = ({
               startIcon={<ArrowIconNW />}
               onClick={onSendClick}
               disabled={!isOk}
-              sx={{ height: 32, px: 2 }}
+              className={css.mobileButton}
             >
               Send
             </Button>
