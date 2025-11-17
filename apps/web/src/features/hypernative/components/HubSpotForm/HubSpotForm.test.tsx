@@ -16,7 +16,7 @@ describe('HubSpotForm', () => {
     render(<HubSpotForm {...defaultProps} />)
 
     expect(screen.getByText('Request demo')).toBeInTheDocument()
-    expect(screen.getByText('Share your details to verify your request and book your demo call.')).toBeInTheDocument()
+    expect(screen.getByText('Share your details to book a demo call.')).toBeInTheDocument()
   })
 
   it('should render the HubSpot form container', () => {
