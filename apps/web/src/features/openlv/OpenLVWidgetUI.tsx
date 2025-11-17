@@ -6,6 +6,7 @@ import type { Address, EIP1193Provider } from 'viem'
 import { createConfig, http, useAccount, useClient, useConnections, useDisconnect, WagmiProvider } from 'wagmi'
 import { mainnet } from 'wagmi/chains'
 import styles from './styles.module.css'
+import useSafeInfo from '@/hooks/useSafeInfo'
 
 const queryClient = new QueryClient()
 
@@ -96,26 +97,19 @@ const ConnectComponent = () => {
 }
 
 const Connected = () => {
-  const { disconnect } = useDisconnect()
-  const { address, connector } = useAccount()
+  const { safeLoading, safeLoaded, safeAddress } = useSafeInfo()
+
+  if (safeLoading) return <div>Connecting to Safe</div>
+
+  if (!safeLoaded) return <div>Connect to a wallet to start</div>
 
   return (
     <div className={styles.connected}>
       <div className={styles.wallet}>
-        {connector?.icon && <img height={24} width={24} src={connector.icon} alt={`${connector.name} icon`} />}
-        <div>Connected to {trimAddress(address)}</div>
+        <div>Connected to {trimAddress(safeAddress as Address)}</div>
       </div>
-      <button
-        type="button"
-        onClick={() => {
-          disconnect()
-        }}
-        className={styles.button}
-      >
-        Disconnect
-      </button>
 
-      {connector?.type !== 'openLv' && <ConnectComponent />}
+      <ConnectComponent />
     </div>
   )
 }
