@@ -26,6 +26,7 @@ import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { BRAND_LOGO, BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { OpenLVHeaderWidget } from '@/features/openlv/OpenLV'
 
 type HeaderProps = {
   onMenuToggle?: Dispatch<SetStateAction<boolean>>
@@ -47,6 +48,9 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
   const isSafeOwner = useIsSafeOwner()
   const router = useRouter()
   const enableWc = useHasFeature(FEATURES.NATIVE_WALLETCONNECT)
+
+  const enableOpenLv = useHasFeature(FEATURES.NATIVE_OPENLV)
+
   const isOfficialHost = useIsOfficialHost()
 
   // If on the home page, the logo should link to the Accounts or Welcome page, otherwise to the home page
@@ -111,6 +115,10 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
           <WalletConnect />
         </div>
       )}
+
+      <div className={classnames(css.element, css.hideMobile)}>
+        <OpenLVHeaderWidget />
+      </div>
 
       <div className={classnames(css.element, css.connectWallet)}>
         <Track label={OVERVIEW_LABELS.top_bar} {...OVERVIEW_EVENTS.OPEN_ONBOARD}>
