@@ -108,23 +108,6 @@ describe('formatParameters', () => {
     expect(formatArrayValue).toHaveBeenCalledTimes(1)
   })
 
-  it('should include hex data when present', () => {
-    const txData = {
-      to: { value: '0x123...' },
-      dataDecoded: {
-        method: 'transfer',
-        parameters: [],
-      },
-      hexData: '0x1234567890abcdef1234567890abcdef',
-      value: null,
-      operation: 0 as Operation,
-    }
-
-    const result = formatParameters({ txData })
-
-    expect(result).toHaveLength(2) // 1 basic + 1 hex data
-  })
-
   it('should handle missing dataDecoded', () => {
     const txData = {
       to: { value: '0x123...' },
@@ -136,7 +119,7 @@ describe('formatParameters', () => {
 
     const result = formatParameters({ txData })
 
-    expect(result).toHaveLength(2) // 1 basic + 1 hex data
+    expect(result).toHaveLength(1) // Only basic item, hexData is ignored
   })
 
   it('should handle mixed parameter types', () => {
@@ -160,7 +143,7 @@ describe('formatParameters', () => {
 
     const result = formatParameters({ txData })
 
-    expect(result).toHaveLength(6) // 1 basic + 4 parameters + 1 hex data
+    expect(result).toHaveLength(5) // 1 basic + 4 parameters
     expect(formatValueTemplate).toHaveBeenCalledTimes(2) // address and flag
     expect(formatArrayValue).toHaveBeenCalledTimes(2) // amounts array and data with array value
   })

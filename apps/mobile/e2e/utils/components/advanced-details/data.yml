@@ -34,6 +34,20 @@ tags:
 # Value (always present if txData.value exists)
 - assertVisible: 'Value'
 
+# Hex Data (optional - only if txData?.hexData exists)
+- extendedWaitUntil:
+    visible:
+      text: 'Data'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+# Hex Data value (shortened format like "0x1234...abcd")
+- extendedWaitUntil:
+    visible:
+      text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
 # Value amount (can be "0" or any number)
 - assertVisible:
     text: '^\d+$'
