@@ -1,0 +1,60 @@
+.button {
+  background: var(--color-background-main);
+  color: var(--button-color);
+  border: 2px solid var(--button-color);
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: 250ms;
+  width: max-content;
+}
+
+.button:hover {
+  color: var(--button-color-hover);
+  background: var(--button-bg-hover, black);
+}
+
+.connect {
+  color: var(--color-background-main);
+  background: #fe7d37;
+}
+.connect:hover {
+  background: #ce6024;
+}
+
+.li {
+  list-style-type: none;
+  padding-left: 0;
+  padding-bottom: 1rem;
+}
+
+.connectionUI {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+.connectionInput {
+  border: 1px solid #fe7d37;
+  background: var(--color-background-main);
+  border-radius: 6px;
+  color: #fe7d37;
+  padding-left: 0.5rem;
+  font-family: inherit;
+}
+
+.connected {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.wallet {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
