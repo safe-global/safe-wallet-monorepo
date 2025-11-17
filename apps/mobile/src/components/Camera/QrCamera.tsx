@@ -31,6 +31,7 @@ function CameraHeader({ heading }: { heading: React.ReactNode }) {
           onPress={() => {
             router.back()
           }}
+          testID="close-camera"
         >
           <Badge themeName="badge_background" circleSize="$9" content={<SafeFontIcon size={20} name="close" />} />
         </Pressable>

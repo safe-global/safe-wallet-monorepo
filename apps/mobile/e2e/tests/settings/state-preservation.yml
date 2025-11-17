@@ -1,0 +1,154 @@
+appId: ${APP_ID}
+tags:
+  - settings
+  - state-preservation
+---
+# ============================================
+# Tests that state is preserved when navigating between screens
+# ============================================
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+# Select e2eTestOnboarding account
+- tapOn:
+    id: 'e2eOnboardedAccount'
+
+# Verify we're on the Home tab
+- assertVisible:
+    id: 'home-tab'
+
+# ============================================
+# Test 1: NFT Sub-tab State Preservation
+# ============================================
+
+# Verify we're on Tokens tab by default
+- assertVisible:
+    id: 'tab-content-Tokens-0'
+
+# Switch to NFTs sub-tab
+- tapOn:
+    text: 'NFTs'
+
+# Verify NFTs tab content appears
+- assertVisible:
+    id: 'tab-content-NFTs-1'
+
+# Navigate to Settings tab
+- tapOn:
+    id: 'account-tab'
+
+# Verify we're on Settings/Account tab
+- assertVisible:
+    text: '.*(Settings|Account).*'
+
+# Navigate back to Home tab
+- tapOn:
+    id: 'home-tab'
+
+# Verify we're still on NFTs sub-tab (not reset to Tokens)
+- assertVisible:
+    id: 'tab-content-NFTs-1'
+
+# Verify Tokens tab is NOT visible (confirming we're on NFTs)
+- assertNotVisible:
+    id: 'tab-content-Tokens-0'
+
+# ============================================
+# Test 2: Transaction History Scroll Position Preservation
+# ============================================
+
+# Navigate to Transactions tab
+- tapOn:
+    id: 'transactions-tab'
+
+# Verify we're on the transactions tab
+- assertVisible:
+    id: 'tx-history-list'
+
+# Scroll down until we find "addOwnerWithThreshold" transaction
+- scrollUntilVisible:
+    element:
+      text: '.*addOwnerWithThreshold.*'
+    centerElement: true
+    speed: 100
+
+# Verify the transaction is visible
+- assertVisible:
+    text: '.*addOwnerWithThreshold.*'
+
+# Navigate to Settings tab
+- tapOn:
+    id: 'account-tab'
+
+# Verify we're on Settings/Account tab
+- assertVisible:
+    text: '.*(Settings|Account).*'
+
+# Navigate back to Transactions tab
+- tapOn:
+    id: 'transactions-tab'
+
+# Verify we're back on transactions tab
+- assertVisible:
+    id: 'tx-history-list'
+
+# Verify scroll position is preserved - "addOwnerWithThreshold" should still be visible
+- assertVisible:
+    text: '.*addOwnerWithThreshold.*'
+
+# ============================================
+# Test 3: Modal Dismissal - Swipe Down
+# ============================================
+# navigate back to Home screen
+- tapOn:
+    id: 'home-tab'
+
+# Open Add account screen
+- tapOn:
+    id: 'dropdown-label-view'
+    index: 0
+
+# Tap on "add existing account"
+- tapOn:
+    id: 'add-existing-account'
+
+# Verify the modal/sheet is visible
+- assertVisible:
+    text: 'Scan a QR code'
+
+# Dismiss the modal by swiping down
+- swipe:
+    direction: DOWN
+    duration: 300
+
+# Verify modal is dismissed (dropdown should be visible or home tab should be visible)
+- assertVisible:
+    text: 'My accounts'
+
+# ============================================
+# Test 4: Modal Dismissal - Cancel Button
+# ============================================
+
+# Tap on "add existing account"
+- tapOn:
+    id: 'add-existing-account'
+
+# Verify the modal/sheet is visible
+- assertVisible:
+    text: 'Scan a QR code'
+
+# Dismiss the modal by tapping on the cancel button
+- tapOn:
+    id: 'close-camera'
+
+# Verify modal is dismissed
+- assertVisible:
+    text: 'My accounts'
+
+- swipe:
+    direction: DOWN
+    duration: 100
+
+- assertVisible:
+    id: 'home-tab'
