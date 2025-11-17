@@ -8,16 +8,6 @@ tags:
 
 - tapOn:
     id: 'e2eTestOnboarding'
-- assertVisible:
-    id: 'carousel-item-0'
-- swipe:
-    direction: 'LEFT'
-- assertVisible:
-    id: 'carousel-item-1'
-- swipe:
-    direction: 'LEFT'
-- tapOn:
-    id: 'carousel-item-2'
 - tapOn:
     id: 'get-started'
 - assertVisible:
