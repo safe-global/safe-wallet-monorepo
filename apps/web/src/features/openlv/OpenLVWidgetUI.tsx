@@ -20,6 +20,8 @@ const ConnectComponent = () => {
 
   const provider = useSafeWalletProvider()
 
+  if (!provider) return <div>Waiting for Safe provider</div>
+
   return (
     <>
       <div>You can connect to a dApp by entering its connection URL and hitting connect.</div>
@@ -42,11 +44,21 @@ const ConnectComponent = () => {
 
             session = await connectSession(url, async (message) => {
               console.log('received message', message)
-              const { method } = message as { method: keyof typeof provider }
+              const { method, params } = message as { method: string; params: string[] }
 
               console.log('method', method)
+              console.log('params', params)
 
-              return await provider[method as any]()
+              return await provider.request(
+                Number.parseInt(Math.random().toString(36).slice(2), 10), // request ID
+                { method, params },
+                {
+                  url: 'openlv-app',
+                  name: 'OpenLV',
+                  description: 'OpenLV Integration',
+                  iconUrl: '',
+                },
+              )
             })
             console.log('session', session)
 
