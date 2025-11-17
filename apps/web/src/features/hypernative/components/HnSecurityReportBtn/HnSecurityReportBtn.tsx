@@ -3,7 +3,6 @@ import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
 import ExternalLink from '@/components/common/ExternalLink'
 import { hnSecurityReportBtnConfig } from './config'
 import type { ReactElement } from 'react'
-import Track from '@/components/common/Track'
 import { HYPERNATIVE_EVENTS, trackEvent } from '@/services/analytics'
 
 import css from './styles.module.css'
