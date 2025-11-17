@@ -9495,7 +9495,6 @@ __metadata:
     lint-staged: "npm:^15.2.10"
     msw: "npm:^2.7.3"
     prettier: "npm:^3.6.2"
-    ts-pattern: "npm:^5.9.0"
     viem: "npm:^2.38.6"
     wagmi: "npm:^2.19.2"
   dependenciesMeta:

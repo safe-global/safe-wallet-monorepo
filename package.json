@@ -43,7 +43,6 @@
     "@tanstack/react-query": "^5.90.7",
     "@yarnpkg/types": "^4.0.1",
     "classnames": "^2.5.1",
-    "ts-pattern": "^5.9.0",
     "viem": "^2.38.6",
     "wagmi": "^2.19.2"
   }

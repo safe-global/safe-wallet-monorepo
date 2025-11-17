@@ -1,23 +1,9 @@
 import { openlv } from '@openlv/connector'
 import { connectSession, type Session } from '@openlv/session'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import classNames from 'classnames'
-import { CSSProperties, useState } from 'react'
-import { match } from 'ts-pattern'
+import { useState } from 'react'
 import type { Address, EIP1193Provider } from 'viem'
-import {
-  type Connector,
-  createConfig,
-  http,
-  useAccount,
-  useClient,
-  useConnect,
-  useConnections,
-  useConnectorClient,
-  useDisconnect,
-  useSignMessage,
-  WagmiProvider,
-} from 'wagmi'
+import { createConfig, http, useAccount, useClient, useConnections, useDisconnect, WagmiProvider } from 'wagmi'
 import { mainnet } from 'wagmi/chains'
 import styles from './styles.module.css'
 
@@ -38,32 +24,6 @@ const trimAddress = (address: Address | undefined | null) => {
 }
 
 let session: Session | undefined = undefined
-
-const TestSign = () => {
-  const { signMessage, data: signedData } = useSignMessage()
-
-  return (
-    <>
-      <div>Test a personal sign</div>
-
-      <button
-        onClick={() => {
-          signMessage({ message: 'Hello, world!' })
-        }}
-        type="button"
-        className={styles.button}
-      >
-        Sign Message
-      </button>
-
-      {signedData && (
-        <div className="rounded-md border border-amber-300 p-2 text-gray-500 text-sm">
-          Signed Data: {JSON.stringify(signedData)}
-        </div>
-      )}
-    </>
-  )
-}
 
 const ConnectComponent = () => {
   const walletClient = useClient()
@@ -156,55 +116,15 @@ const Connected = () => {
       </button>
 
       {connector?.type !== 'openLv' && <ConnectComponent />}
-      <TestSign />
     </div>
   )
-}
-
-const Connectors = () => {
-  const { connect, connectors } = useConnect()
-
-  return (
-    <ul className={styles.ul}>
-      {connectors.map((connector) => (
-        <li key={connector.id} className={styles.li}>
-          <button
-            type="button"
-            onClick={() => {
-              connect({ connector })
-            }}
-            className={styles.button}
-            style={
-              {
-                '--button-color': connector.name === 'Open Lavatory' ? '#fe7d37' : 'var(--color-primary-main)',
-                '--button-color-hover': connector.name === 'Open Lavatory' ? '#ce6024' : 'var(--color-primary-dark)',
-                '--button-bg-hover': connector.name === 'Open Lavatory' ? '#51250d' : '#12261b',
-              } as CSSProperties
-            }
-          >
-            <span>{connector.name}</span>
-            {connector.icon && <img height={24} width={24} src={connector.icon} alt={`${connector.name} icon`} />}
-          </button>
-        </li>
-      ))}
-    </ul>
-  )
-}
-
-export const Inner = () => {
-  const { isConnected } = useAccount()
-
-  return match(isConnected)
-    .with(true, () => <Connected />)
-    .with(false, () => <Connectors />)
-    .exhaustive()
 }
 
 export const Outter = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <WagmiProvider config={config}>
-        <Inner />
+        <Connected />
       </WagmiProvider>
     </QueryClientProvider>
   )
