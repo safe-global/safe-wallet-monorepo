@@ -49,7 +49,7 @@ const ConnectComponent = () => {
               console.log('method', method)
               console.log('params', params)
 
-              return await provider.request(
+              const { result } = await provider.request(
                 Number.parseInt(Math.random().toString(36).slice(2), 10), // request ID
                 { method, params },
                 {
@@ -59,6 +59,8 @@ const ConnectComponent = () => {
                   iconUrl: '',
                 },
               )
+              console.log('result', result)
+              return result
             })
             console.log('session', session)
 
