@@ -1,22 +1,11 @@
-import { openlv } from '@openlv/connector'
 import { connectSession, type Session } from '@openlv/session'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
-import type { Address, EIP1193Provider } from 'viem'
-import { createConfig, http, useAccount, useClient, useConnections, useDisconnect, WagmiProvider } from 'wagmi'
-import { mainnet } from 'wagmi/chains'
+import type { Address } from 'viem'
 import styles from './styles.module.css'
 import useSafeInfo from '@/hooks/useSafeInfo'
 
-const queryClient = new QueryClient()
-
-const config = createConfig({
-  chains: [mainnet],
-  connectors: [openlv()],
-  transports: {
-    [mainnet.id]: http(),
-  },
-})
+import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
+import useSafeWalletProvider from '@/services/safe-wallet-provider/useSafeWalletProvider'
 
 const trimAddress = (address: Address | undefined | null) => {
   if (!(typeof address === 'string')) return address
@@ -27,11 +16,9 @@ const trimAddress = (address: Address | undefined | null) => {
 let session: Session | undefined = undefined
 
 const ConnectComponent = () => {
-  const walletClient = useClient()
-  const connections = useConnections()
   const [url, setUrl] = useState<string | undefined>(undefined)
 
-  if (!walletClient) return <div>No walletclient found</div>
+  const provider = useSafeWalletProvider()
 
   return (
     <>
@@ -52,36 +39,14 @@ const ConnectComponent = () => {
             if (!url) return
 
             console.log('connecting to ', url)
-            const client = (await connections[0]?.connector?.getProvider()) as EIP1193Provider
 
             session = await connectSession(url, async (message) => {
               console.log('received message', message)
-              const { method } = message as { method: string }
-
-              console.log('wc', walletClient)
+              const { method } = message as { method: keyof typeof provider }
 
               console.log('method', method)
 
-              if (method === 'eth_accounts') {
-                const result = await client.request({
-                  method: 'eth_accounts',
-                  params: [] as never,
-                })
-
-                console.log('result from calling wallet', result)
-
-                if (result) return result
-              }
-
-              if (['personal_sign'].includes(method)) {
-                const result = await client.request(message as never)
-
-                console.log('result from calling wallet', result)
-
-                return result
-              }
-
-              return { result: 'success' }
+              return await provider[method as any]()
             })
             console.log('session', session)
 
@@ -97,7 +62,7 @@ const ConnectComponent = () => {
 }
 
 const Connected = () => {
-  const { safeLoading, safeLoaded, safeAddress } = useSafeInfo()
+  const { safeLoading, safeLoaded, safeAddress, safe } = useSafeInfo()
 
   if (safeLoading) return <div>Connecting to Safe</div>
 
@@ -115,13 +80,7 @@ const Connected = () => {
 }
 
 export const Outter = () => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <WagmiProvider config={config}>
-        <Connected />
-      </WagmiProvider>
-    </QueryClientProvider>
-  )
+  return <Connected />
 }
 
 export const TryItOut = () => {
