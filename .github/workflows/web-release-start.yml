@@ -189,18 +189,11 @@ jobs:
 
           ---
 
-          ## 📋 QA Checklist
-          - [ ] Regression testing completed
-          - [ ] New features tested
-          - [ ] Bug fixes verified
-          - [ ] Cross-browser testing done
-          - [ ] Performance checked
-
           ## 📝 Next Steps
           1. ✅ PR created - **YOU ARE HERE**
           2. ⏳ QA team reviews and tests
-          3. ⏳ QA approves (use "Complete Release" workflow)
-          4. ⏳ Auto-merge to main
+          3. ⏳ QA approves
+          4. ⏳ Merge to main via `git push origin release:main`
           5. ⏳ Deploy to production
 
           ---
@@ -208,7 +201,6 @@ jobs:
           **Release Type:** ${{ inputs.release_type }}
           **Base Branch:** ${{ steps.base.outputs.branch }}
 
-          🤖 *This PR was created automatically by the [Start Web Release workflow](https://github.com/${{ github.repository }}/actions/workflows/web-release-start.yml)*
           EOF
           )
 
