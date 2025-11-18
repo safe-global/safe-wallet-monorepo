@@ -4,14 +4,14 @@ This repository uses a Yarn-based monorepo structure. Follow these rules when pr
 
 ## General Principles
 
-- **Solve the Right Problem** – confirm the purpose of your change with the issue or request before modifying code.
-- **Design Before You Code** – think through data flow, APIs and security implications before implementing.
-- **Keep It Simple** – prefer straightforward solutions over clever or unnecessary abstractions.
-- **Fail Fast, Fail Loud** – surface errors early; avoid silent failures.
-- **Write Clean, Readable Code** – meaningful names and concise comments help maintainers understand your work.
-- **Test Thoroughly** – add or update unit and integration tests when changing functionality.
-- **Minimize Technical Debt** – document trade‑offs and avoid quick hacks.
-- **Prioritize Maintainability** – keep modules small and reusable.
+- Follow the DRY principle
+- Cover your changes with unit tests
+- Run type-check, lint, prettier and unit tests before each commit
+
+Specifically for the web app:
+- When making a new component, create a Storybook story file for it
+- Use theme variables from vars.css instead of hard-coded CSS values
+- Use MUI components and the Safe MUI theme
 
 ## Workflow
 
@@ -65,12 +65,6 @@ Use Yarn 4 (managed via `corepack`) for all scripts. Refer to the workspace READ
   requests instead of mocking `fetch`. Use MSW for mocking blockchain RPC calls instead of mocking ethers.js directly
 - Create test data with helpers with faker @https://fakerjs.dev/
 - Ensure shared package tests work for both web and mobile environments
-
-## Web3/Blockchain Development Guidelines
-
-- **Safe Ecosystem Focus** – This is a Safe wallet project. Understand Safe's multi-signature concepts and the Safe{Core} SDK when making changes.
-- **Chain Support** – The app supports multiple EVM chains (Ethereum, Polygon, Arbitrum, etc.). Always consider multi-chain implications.
-- **Ethers.js Usage** – Use ethers v6. Follow existing patterns for provider creation and RPC management.
 
 ## Mobile Development (Expo + Tamagui)
 
