@@ -13,6 +13,7 @@ import { SeverityIcon } from '../SeverityIcon'
 import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
 import { DelegateCallCardItem } from './DelegateCallCardItem'
 import { type AnalyticsEvent, MixpanelEventParams, trackEvent } from '@/services/analytics'
+import isEmpty from 'lodash/isEmpty'
 
 interface AnalysisGroupCardProps {
   data: { [address: string]: GroupedAnalysisResults }
@@ -34,14 +35,18 @@ export const AnalysisGroupCard = ({
   const primaryResult = useMemo(() => getPrimaryAnalysisResult(data), [data])
   const primarySeverity = primaryResult?.severity
   const isHighlighted = !highlightedSeverity || primarySeverity === highlightedSeverity
+  const isDataEmpty = useMemo(() => isEmpty(data), [data])
 
   useEffect(() => {
-    if (!primaryResult) return
+    if (!primaryResult || isDataEmpty) {
+      setIsVisible(false)
+      return
+    }
 
     setTimeout(() => {
       setIsVisible(true)
     }, delay)
-  }, [delay, primaryResult])
+  }, [delay, primaryResult, isDataEmpty])
 
   // Track analytics event when results change
   const prevTrackedResultsKeyRef = useRef<string>('')
@@ -56,7 +61,7 @@ export const AnalysisGroupCard = ({
     }
   }, [analyticsEvent, visibleResults])
 
-  if (!primaryResult) {
+  if (!primaryResult || isDataEmpty) {
     return null
   }
 
