@@ -26,7 +26,7 @@ const useTxQueue = (
   const { hideSuspiciousTransactions } = useAppSelector(selectSettings)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const hideUntrustedTxs = (hasDefaultTokenlist && hideSuspiciousTransactions) ?? true
-  const hideImitationTxs = hideSuspiciousTransactions ?? true
+  const _hideImitationTxs = hideSuspiciousTransactions ?? true
 
   // If pageUrl is passed, load a new queue page from the API
   const [page, error, loading] = useAsync<QueuedItemPage>(() => {
@@ -44,7 +44,6 @@ const useTxQueue = (
       chainId,
       safeAddress,
       trusted: hideUntrustedTxs,
-      imitation: hideImitationTxs,
     },
     {
       skip: !safeAddress || !chainId || !!pageUrl,

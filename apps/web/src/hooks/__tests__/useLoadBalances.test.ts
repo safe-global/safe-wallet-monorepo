@@ -7,7 +7,6 @@ import { TokenType } from '@safe-global/store/gateway/types'
 import * as useChainId from '@/hooks/useChainId'
 import * as balancesQueries from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const safeAddress = toBeHex('0x1234', 20)
 
@@ -49,7 +48,7 @@ const mockBalanceUSD = {
   ],
 }
 
-const mockSafeInfo = {
+const _mockSafeInfo = {
   data: {
     ...defaultSafeInfo,
     address: { value: safeAddress },
@@ -103,22 +102,8 @@ describe('useLoadBalances', () => {
   test('without selected Safe', async () => {
     jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
       selector({
-        chains: {
-          data: [
-            {
-              chainId: '5',
-              features: [FEATURES.DEFAULT_TOKENLIST],
-              chainName: 'Görli',
-            } as any,
-          ],
-        },
         session: {
           lastChainId: '5',
-        },
-        safeInfo: {
-          data: undefined,
-          loading: false,
-          loaded: true,
         },
         settings: {
           currency: 'USD',
@@ -151,16 +136,6 @@ describe('useLoadBalances', () => {
 
     const mockSelector = jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
       selector({
-        chains: {
-          data: [
-            {
-              chainId: '5',
-              features: [FEATURES.DEFAULT_TOKENLIST],
-              chainName: 'Görli',
-            } as any,
-          ],
-        },
-        safeInfo: mockSafeInfo,
         settings: {
           currency: 'EUR',
           hiddenTokens: {},
@@ -189,16 +164,6 @@ describe('useLoadBalances', () => {
 
     mockSelector.mockImplementation((selector) =>
       selector({
-        chains: {
-          data: [
-            {
-              chainId: '5',
-              features: [FEATURES.DEFAULT_TOKENLIST],
-              chainName: 'Görli',
-            } as any,
-          ],
-        },
-        safeInfo: mockSafeInfo,
         settings: {
           currency: 'USD',
           hiddenTokens: {},
@@ -230,16 +195,6 @@ describe('useLoadBalances', () => {
 
     jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
       selector({
-        chains: {
-          data: [
-            {
-              chainId: '5',
-              features: [],
-              chainName: 'Görli',
-            } as any,
-          ],
-        },
-        safeInfo: mockSafeInfo,
         settings: {
           currency: 'EUR',
           hiddenTokens: {},
@@ -270,19 +225,9 @@ describe('useLoadBalances', () => {
 
     const mockSelector = jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
       selector({
-        chains: {
-          data: [
-            {
-              chainId: '5',
-              features: [FEATURES.DEFAULT_TOKENLIST],
-              chainName: 'Görli',
-            } as any,
-          ],
-        },
         session: {
           lastChainId: '5',
         },
-        safeInfo: mockSafeInfo,
         settings: {
           currency: 'EUR',
           hiddenTokens: {},
@@ -311,16 +256,6 @@ describe('useLoadBalances', () => {
 
     mockSelector.mockImplementation((selector) =>
       selector({
-        chains: {
-          data: [
-            {
-              chainId: '5',
-              features: [FEATURES.DEFAULT_TOKENLIST],
-              chainName: 'Görli',
-            } as any,
-          ],
-        },
-        safeInfo: mockSafeInfo,
         settings: {
           currency: 'EUR',
           hiddenTokens: {},

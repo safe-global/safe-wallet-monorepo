@@ -11,7 +11,7 @@ type UseGetContractQueryResult = ReturnType<typeof contractsApi.useContractsGetC
 const mockQueryResult = (result: Partial<UseGetContractQueryResult> = {}): UseGetContractQueryResult =>
   result as unknown as UseGetContractQueryResult
 
-const mockChainInfo = {
+const _mockChainInfo = {
   chainId: '4',
   shortName: 'tst',
   blockExplorerUriTemplate: {
@@ -47,15 +47,6 @@ describe('NamedAddressInfo', () => {
         name="TestAddressName"
         customAvatar="https://img.test.safe.global"
       />,
-      {
-        initialReduxState: {
-          chains: {
-            loading: false,
-            loaded: true,
-            data: [mockChainInfo],
-          },
-        },
-      },
     )
 
     expect(result.getByText('TestAddressName')).toBeVisible()
@@ -80,15 +71,7 @@ describe('NamedAddressInfo', () => {
         },
       }),
     )
-    const result = render(<NamedAddressInfo address={address} />, {
-      initialReduxState: {
-        chains: {
-          loading: false,
-          loaded: true,
-          data: [mockChainInfo],
-        },
-      },
-    })
+    const result = render(<NamedAddressInfo address={address} />)
 
     await waitFor(() => {
       expect(result.getByText('Resolved Test Name')).toBeVisible()
@@ -101,13 +84,7 @@ describe('NamedAddressInfo', () => {
     useSafeAddressMock.mockReturnValue(safeAddress)
 
     const result = render(<NamedAddressInfo address={safeAddress} />, {
-      initialReduxState: {
-        chains: {
-          loading: false,
-          loaded: true,
-          data: [mockChainInfo],
-        },
-      },
+      initialReduxState: {},
     })
 
     expect(result.getByText('This Safe Account')).toBeVisible()
@@ -119,13 +96,7 @@ describe('NamedAddressInfo', () => {
     useSafeAddressMock.mockReturnValue(safeAddress)
 
     const result = render(<NamedAddressInfo address={differentAddress} />, {
-      initialReduxState: {
-        chains: {
-          loading: false,
-          loaded: true,
-          data: [mockChainInfo],
-        },
-      },
+      initialReduxState: {},
     })
 
     expect(result.queryByText('This Safe Account')).not.toBeInTheDocument()

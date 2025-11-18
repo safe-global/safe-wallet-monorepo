@@ -1,6 +1,5 @@
 import { blo } from 'blo'
 import { act } from 'react'
-import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import { fireEvent, render, waitFor } from '@/tests/test-utils'
 import * as useAllAddressBooks from '@/hooks/useAllAddressBooks'
@@ -73,9 +72,6 @@ describe('EthHashInfo', () => {
               copy: true,
             },
           },
-          chains: {
-            data: [{ chainId: '4', shortName: 'rin' }],
-          },
         } as store.RootState),
       )
 
@@ -92,12 +88,6 @@ describe('EthHashInfo', () => {
             shortName: {
               copy: true,
             },
-          },
-          chains: {
-            data: [
-              { chainId: '4', shortName: 'rin' },
-              { chainId: '100', shortName: 'gno' },
-            ],
           },
         } as store.RootState),
       )
@@ -129,9 +119,6 @@ describe('EthHashInfo', () => {
             shortName: {
               copy: true,
             },
-          },
-          chains: {
-            data: [{ chainId: '4', shortName: 'rin' }],
           },
         } as store.RootState),
       )
@@ -258,9 +245,6 @@ describe('EthHashInfo', () => {
               copy: true,
             },
           },
-          chains: {
-            data: [{ chainId: '4', shortName: 'rin' }],
-          },
         } as store.RootState),
       )
 
@@ -290,9 +274,6 @@ describe('EthHashInfo', () => {
               copy: true,
             },
           },
-          chains: {
-            data: [{ chainId: '4', shortName: 'rin' }],
-          },
         } as store.RootState),
       )
 
@@ -317,9 +298,6 @@ describe('EthHashInfo', () => {
             shortName: {
               copy: true,
             },
-          },
-          chains: {
-            data: [{ chainId: '4', shortName: 'rin' }],
           },
         } as store.RootState),
       )
@@ -348,12 +326,6 @@ describe('EthHashInfo', () => {
               copy: true,
             },
           },
-          chains: {
-            data: [
-              { chainId: '4', shortName: 'rin' },
-              { chainId: '100', shortName: 'gno' },
-            ],
-          },
         } as store.RootState),
       )
 
@@ -376,9 +348,6 @@ describe('EthHashInfo', () => {
             shortName: {
               copy: false,
             },
-          },
-          chains: {
-            data: [] as Chain[],
           },
         } as store.RootState),
       )
@@ -406,14 +375,6 @@ describe('EthHashInfo', () => {
         selector({
           session: {},
           settings: { shortName: {} },
-          chains: {
-            data: [
-              {
-                chainId: '4',
-                blockExplorerUriTemplate: { address: 'https://rinkeby.etherscan.io/address/{{address}}' },
-              },
-            ],
-          },
         } as store.RootState),
       )
 

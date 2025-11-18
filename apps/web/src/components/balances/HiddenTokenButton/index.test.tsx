@@ -27,7 +27,7 @@ describe('HiddenTokenToggle', () => {
     const mockHiddenAssets = {
       '5': [toBeHex('0x3', 20)],
     }
-    const mockBalances: Loadable<Balances> = {
+    const _mockBalances: Loadable<Balances> = {
       data: {
         fiatTotal: '300',
         items: [
@@ -66,7 +66,6 @@ describe('HiddenTokenToggle', () => {
 
     const result = render(<TestComponent />, {
       initialReduxState: {
-        balances: mockBalances,
         settings: {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,

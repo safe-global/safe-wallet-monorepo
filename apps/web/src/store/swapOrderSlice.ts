@@ -86,15 +86,18 @@ export const swapOrderStatusListener = (listenerMiddleware: typeof listenerMiddl
       }
 
       // Access safeInfo and chains from RTK Query cache
-      const state = getState() as RootState
+      const state = getState()
       let threshold: number | undefined
-      let link: string | undefined
+      let link: ReturnType<typeof getTxLink> | undefined
 
       if (swapOrder.chainId && swapOrder.safeAddress) {
+        // RTK Query select expects specific RootState shape with API reducers
         const safeInfoState = safesApi.endpoints.safesGetSafeV1.select({
           chainId: swapOrder.chainId,
           safeAddress: swapOrder.safeAddress,
+          // @ts-ignore
         })(state)
+        // @ts-ignore
         const chainsState = chainsApi.endpoints.chainsGetChainsV1.select({})(state)
 
         threshold = safeInfoState.data?.threshold

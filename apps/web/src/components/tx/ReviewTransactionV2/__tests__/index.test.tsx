@@ -19,33 +19,10 @@ const mockTxPreview: TransactionPreview = {
   },
 } as unknown as TransactionPreview
 
-const mockSafeAddress = '0x1234567890123456789012345678901234567890'
-const mockChainId = '1'
+const _mockSafeAddress = '0x1234567890123456789012345678901234567890'
+const _mockChainId = '1'
 
-const createMockSafeState = (): Partial<RootState> => ({
-  safeInfo: {
-    data: {
-      address: { value: mockSafeAddress },
-      chainId: mockChainId,
-      nonce: 0,
-      threshold: 1,
-      owners: [{ value: '0x1111111111111111111111111111111111111111' }],
-      implementation: { value: '0x' },
-      implementationVersionState: 'UP_TO_DATE',
-      modules: [],
-      guard: null,
-      fallbackHandler: { value: '0x' },
-      version: '1.3.0',
-      collectiblesTag: '',
-      txQueuedTag: '',
-      txHistoryTag: '',
-      messagesTag: '',
-      deployed: true,
-    },
-    loaded: true,
-    loading: false,
-  },
-})
+const createMockSafeState = (): Partial<RootState> => ({})
 
 describe('ReviewTransaction', () => {
   beforeEach(() => {

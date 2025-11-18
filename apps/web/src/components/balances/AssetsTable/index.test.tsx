@@ -48,7 +48,7 @@ describe('AssetsTable', () => {
     const mockHiddenAssets = {
       '5': [toBeHex('0x2', 20), toBeHex('0x3', 20)],
     }
-    const mockBalances: Balances = {
+    const _mockBalances: Balances = {
       fiatTotal: '300',
       items: [
         {
@@ -82,11 +82,6 @@ describe('AssetsTable', () => {
 
     const result = render(<TestComponent />, {
       initialReduxState: {
-        balances: {
-          data: mockBalances,
-          loading: false,
-          loaded: true,
-        },
         settings: {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,
@@ -154,7 +149,7 @@ describe('AssetsTable', () => {
     const mockHiddenAssets = {
       '5': [toBeHex('0x2', 20), toBeHex('0x3', 20), toBeHex('0xdead', 20)],
     }
-    const mockBalances: Balances = {
+    const _mockBalances: Balances = {
       fiatTotal: '300',
       items: [
         {
@@ -188,11 +183,6 @@ describe('AssetsTable', () => {
 
     const result = render(<TestComponent />, {
       initialReduxState: {
-        balances: {
-          data: mockBalances,
-          loading: false,
-          loaded: true,
-        },
         settings: {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,
@@ -256,7 +246,7 @@ describe('AssetsTable', () => {
     const mockHiddenAssets = {
       '5': [],
     }
-    const mockBalances: Balances = {
+    const _mockBalances: Balances = {
       fiatTotal: '300',
       items: [
         {
@@ -290,11 +280,6 @@ describe('AssetsTable', () => {
 
     const result = render(<TestComponent />, {
       initialReduxState: {
-        balances: {
-          data: mockBalances,
-          loading: false,
-          loaded: true,
-        },
         settings: {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,
@@ -355,7 +340,7 @@ describe('AssetsTable', () => {
     const mockHiddenAssets = {
       '5': [],
     }
-    const mockBalances: Balances = {
+    const _mockBalances: Balances = {
       fiatTotal: '300',
       items: [
         {
@@ -389,11 +374,6 @@ describe('AssetsTable', () => {
 
     const result = render(<TestComponent />, {
       initialReduxState: {
-        balances: {
-          data: mockBalances,
-          loading: false,
-          loaded: true,
-        },
         settings: {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,

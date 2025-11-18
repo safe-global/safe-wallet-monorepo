@@ -36,6 +36,7 @@ describe('ApprovalEditor', () => {
       balances: { fiatTotal: '0', items: [] },
       error: undefined,
       loading: false,
+      loaded: true,
     })
   })
 
@@ -194,6 +195,7 @@ describe('ApprovalEditor', () => {
       balances: mockBalances,
       error: undefined,
       loading: false,
+      loaded: true,
     })
 
     const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />)
@@ -303,6 +305,7 @@ describe('ApprovalEditor', () => {
       balances: mockBalances,
       error: undefined,
       loading: false,
+      loaded: true,
     })
 
     const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />)

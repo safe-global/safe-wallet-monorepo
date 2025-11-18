@@ -1,6 +1,4 @@
-import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { renderHook, getAppName } from '@/tests/test-utils'
-import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { WalletKitTypes } from '@reown/walletkit'
 import { useCompatibilityWarning } from '../useCompatibilityWarning'
 import * as wcUtils from '@/features/walletconnect/services/utils'
@@ -128,31 +126,7 @@ describe('useCompatibilityWarning', () => {
         verifyContext: { verified: { origin: '' } },
       } as unknown as WalletKitTypes.SessionProposal
 
-      const { result } = renderHook(() => useCompatibilityWarning(proposal, false), {
-        initialReduxState: {
-          chains: {
-            loading: false,
-            loaded: true,
-            error: undefined,
-            data: [
-              {
-                chainId: '1',
-                chainName: 'Ethereum',
-              },
-            ] as unknown as Array<Chain>,
-          },
-          safeInfo: {
-            loading: false,
-            loaded: true,
-            error: undefined,
-            data: {
-              ...extendedSafeInfoBuilder().build(),
-              address: { value: '' },
-              chainId: '1',
-            },
-          },
-        },
-      })
+      const { result } = renderHook(() => useCompatibilityWarning(proposal, false))
 
       expect(result.current).toEqual({
         message: 'Please make sure that the dApp is connected to Ethereum.',

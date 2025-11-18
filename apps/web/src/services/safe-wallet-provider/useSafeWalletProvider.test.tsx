@@ -1,5 +1,4 @@
 import { Provider } from 'react-redux'
-import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import * as router from 'next/router'
 
 import * as web3 from '@/hooks/wallets/web3'
@@ -85,23 +84,7 @@ describe('useSafeWalletProvider', () => {
 
   describe('useSafeWalletProvider', () => {
     it('should return a provider', () => {
-      const { result } = renderHook(() => useSafeWalletProvider(), {
-        initialReduxState: {
-          safeInfo: {
-            loading: false,
-            loaded: true,
-            error: undefined,
-            data: {
-              chainId: '1',
-              address: {
-                value: '0x1234567890000000000000000000000000000000',
-              },
-              deployed: true,
-              version: '1.3.0',
-            } as unknown as ExtendedSafeInfo,
-          },
-        },
-      })
+      const { result } = renderHook(() => useSafeWalletProvider())
 
       expect(result.current instanceof SafeWalletProvider).toBe(true)
     })
@@ -396,32 +379,7 @@ describe('useSafeWalletProvider', () => {
         query: {},
       } as unknown as router.NextRouter)
 
-      const store = makeStore(
-        {
-          chains: {
-            data: [
-              {
-                chainId: '1',
-                shortName: 'eth',
-                chainName: 'Ethereum',
-                zk: false,
-                beaconChainExplorerUriTemplate: {},
-              } as any,
-              {
-                chainId: '5',
-                shortName: 'gor',
-                chainName: 'Goerli',
-                zk: false,
-                beaconChainExplorerUriTemplate: {},
-              } as any,
-            ],
-            loading: false,
-            loaded: true,
-            error: undefined,
-          },
-        } as Partial<RootState>,
-        { skipBroadcast: true },
-      )
+      const store = makeStore({} as Partial<RootState>, { skipBroadcast: true })
 
       wcPopupStore.setStore(true)
 
@@ -480,32 +438,7 @@ describe('useSafeWalletProvider', () => {
         query: {},
       } as unknown as router.NextRouter)
 
-      const store = makeStore(
-        {
-          chains: {
-            data: [
-              {
-                chainId: '1',
-                shortName: 'eth',
-                chainName: 'Ethereum',
-                zk: false,
-                beaconChainExplorerUriTemplate: {},
-              } as any,
-              {
-                chainId: '5',
-                shortName: 'gor',
-                chainName: 'Goerli',
-                zk: false,
-                beaconChainExplorerUriTemplate: {},
-              } as any,
-            ],
-            loading: false,
-            loaded: true,
-            error: undefined,
-          },
-        } as Partial<RootState>,
-        { skipBroadcast: true },
-      )
+      const store = makeStore({} as Partial<RootState>, { skipBroadcast: true })
 
       const { result } = renderHook(() => useTxFlowApi('1', currentSafeAddress), {
         wrapper: ({ children }) => (
@@ -551,32 +484,7 @@ describe('useSafeWalletProvider', () => {
         query: {},
       } as unknown as router.NextRouter)
 
-      const store = makeStore(
-        {
-          chains: {
-            data: [
-              {
-                chainId: '1',
-                shortName: 'eth',
-                chainName: 'Ethereum',
-                zk: false,
-                beaconChainExplorerUriTemplate: {},
-              } as any,
-              {
-                chainId: '5',
-                shortName: 'gor',
-                chainName: 'Goerli',
-                zk: false,
-                beaconChainExplorerUriTemplate: {},
-              } as any,
-            ],
-            loading: false,
-            loaded: true,
-            error: undefined,
-          },
-        } as Partial<RootState>,
-        { skipBroadcast: true },
-      )
+      const store = makeStore({} as Partial<RootState>, { skipBroadcast: true })
 
       const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
         wrapper: ({ children }) => (
@@ -632,32 +540,7 @@ describe('useSafeWalletProvider', () => {
         query: {},
       } as unknown as router.NextRouter)
 
-      const store = makeStore(
-        {
-          chains: {
-            data: [
-              {
-                chainId: '1',
-                shortName: 'eth',
-                chainName: 'Ethereum',
-                zk: false,
-                beaconChainExplorerUriTemplate: {},
-              } as any,
-              {
-                chainId: '5',
-                shortName: 'gor',
-                chainName: 'Goerli',
-                zk: false,
-                beaconChainExplorerUriTemplate: {},
-              } as any,
-            ],
-            loading: false,
-            loaded: true,
-            error: undefined,
-          },
-        } as Partial<RootState>,
-        { skipBroadcast: true },
-      )
+      const store = makeStore({} as Partial<RootState>, { skipBroadcast: true })
 
       const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
         wrapper: ({ children }) => (
@@ -725,25 +608,7 @@ describe('useSafeWalletProvider', () => {
         query: {},
       } as unknown as router.NextRouter)
 
-      const store = makeStore(
-        {
-          chains: {
-            data: [
-              {
-                chainId: '5',
-                shortName: 'gor',
-                chainName: 'Goerli',
-                zk: false,
-                beaconChainExplorerUriTemplate: {},
-              } as any,
-            ],
-            loading: false,
-            loaded: true,
-            error: undefined,
-          },
-        } as Partial<RootState>,
-        { skipBroadcast: true },
-      )
+      const store = makeStore({} as Partial<RootState>, { skipBroadcast: true })
 
       const { result } = renderHook(() => useTxFlowApi('5', safes[0].address), {
         wrapper: ({ children }) => (
@@ -841,23 +706,7 @@ describe('useSafeWalletProvider', () => {
     const createCallDeployment = getCreateCallDeployment({ version: '1.3.0', network: '1' })
     const createCallInterface = new Interface(['function performCreate(uint256,bytes)'])
     const safeAddress = faker.finance.ethereumAddress()
-    const { result } = renderHook(() => useTxFlowApi('1', safeAddress), {
-      initialReduxState: {
-        safeInfo: {
-          loading: false,
-          loaded: true,
-          error: undefined,
-          data: {
-            chainId: '1',
-            address: {
-              value: safeAddress,
-            },
-            deployed: true,
-            version: '1.3.0',
-          } as unknown as ExtendedSafeInfo,
-        },
-      },
-    })
+    const { result } = renderHook(() => useTxFlowApi('1', safeAddress))
 
     const tx = result.current?.getCreateCallTransaction('0x1234')
 

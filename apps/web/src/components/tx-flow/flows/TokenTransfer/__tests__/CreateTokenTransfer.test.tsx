@@ -8,7 +8,6 @@ import * as useHasPermission from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
 import { render } from '@/tests/test-utils'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import { TokenType } from '@safe-global/store/gateway/types'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 import * as useRecipientAnalysis from '@/features/safe-shield/hooks/useRecipientAnalysis'
@@ -65,37 +64,9 @@ describe('CreateTokenTransfer', () => {
       .spyOn(tokenUtils, 'useTokenAmount')
       .mockReturnValue({ totalAmount: BigInt(1000), spendingLimitAmount: BigInt(500) })
 
-    const tokenAddress = ZERO_ADDRESS
+    const _tokenAddress = ZERO_ADDRESS
 
-    const { getByText } = renderCreateTokenTransfer(
-      {},
-      {
-        initialReduxState: {
-          balances: {
-            loading: false,
-            loaded: true,
-            data: {
-              fiatTotal: '0',
-              items: [
-                {
-                  balance: '10',
-                  tokenInfo: {
-                    address: tokenAddress,
-                    decimals: 18,
-                    logoUri: 'someurl',
-                    name: 'Test token',
-                    symbol: 'TST',
-                    type: TokenType.ERC20,
-                  },
-                  fiatBalance: '10',
-                  fiatConversion: '1',
-                },
-              ],
-            },
-          },
-        },
-      },
-    )
+    const { getByText } = renderCreateTokenTransfer({}, {})
 
     expect(getByText('Send as')).toBeInTheDocument()
 

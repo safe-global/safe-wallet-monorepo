@@ -7,7 +7,7 @@ import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { TransactionItemPage, QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import type { SafeMessagesPage } from '@safe-global/store/gateway/types'
+import type { MessagePage } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 
 // Default mock data
 export const mockSafeInfo: SafeState = {
@@ -21,6 +21,7 @@ export const mockSafeInfo: SafeState = {
   fallbackHandler: null,
   guard: null,
   version: '1.3.0',
+  implementationVersionState: 'UP_TO_DATE',
 }
 
 export const mockBalances: Balances = {
@@ -49,6 +50,7 @@ export const mockChains: { results: Chain[] } = {
       chainLogoUri: null,
       l2: false,
       isTestnet: false,
+      zk: false,
       nativeCurrency: {
         name: 'Ether',
         symbol: 'ETH',
@@ -61,6 +63,7 @@ export const mockChains: { results: Chain[] } = {
         txHash: 'https://etherscan.io/tx/{{txHash}}',
         api: 'https://api.etherscan.io/api?module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
       },
+      beaconChainExplorerUriTemplate: {},
       disabledWallets: [],
       features: [],
       gasPrice: [],
@@ -72,11 +75,22 @@ export const mockChains: { results: Chain[] } = {
       ensRegistryAddress: null,
       recommendedMasterCopyVersion: '1.3.0',
       balancesProvider: { enabled: true, chainName: 'ethereum' },
+      contractAddresses: {
+        safeSingletonAddress: null,
+        safeProxyFactoryAddress: null,
+        multiSendAddress: null,
+        multiSendCallOnlyAddress: null,
+        fallbackHandlerAddress: null,
+        signMessageLibAddress: null,
+        createCallAddress: null,
+        simulateTxAccessorAddress: null,
+        safeWebAuthnSignerFactoryAddress: null,
+      },
     },
   ],
 }
 
-export const mockSafeMessages: SafeMessagesPage = {
+export const mockSafeMessages: MessagePage = {
   results: [],
   next: null,
   previous: null,

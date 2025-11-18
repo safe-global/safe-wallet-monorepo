@@ -4,7 +4,6 @@ import { Contract } from 'ethers'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { CHAINALYSIS_OFAC_CONTRACT } from '@/config/constants'
 import chains from '@/config/chains'
-import type { RootState } from '@/store'
 
 // Chainalysis contract ABI and address
 const contractAbi = [
@@ -46,7 +45,9 @@ export const ofacApi = createApi({
   endpoints: (builder) => ({
     getIsSanctioned: builder.query<boolean, string>({
       async queryFn(address, { getState }) {
-        const state = getState() as RootState
+        const state = getState()
+        // RTK Query select expects specific RootState shape with API reducers
+        // @ts-ignore
         const chainsResult = chainsApi.endpoints.chainsGetChainsV1.select({})(state)
         const chain = chainsResult.data?.results?.find((c) => c.chainId === chains.eth)
 

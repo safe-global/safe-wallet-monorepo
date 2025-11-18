@@ -4,7 +4,6 @@ import { ClearPendingTxs } from '../ClearPendingTxs'
 import { render } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import { PendingStatus, PendingTxType } from '@/store/pendingTxsSlice'
-import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
 const safeAddress = faker.finance.ethereumAddress()
 
@@ -26,14 +25,6 @@ describe('ClearPendingTxs', () => {
             signerNonce: 0,
             txType: PendingTxType.CUSTOM_TX,
           },
-        },
-        safeInfo: {
-          data: extendedSafeInfoBuilder()
-            .with({ address: { value: safeAddress } })
-            .with({ chainId: '1' })
-            .build(),
-          loading: false,
-          loaded: true,
         },
       },
     })
@@ -86,14 +77,6 @@ describe('ClearPendingTxs', () => {
             signerNonce: 0,
             txType: PendingTxType.CUSTOM_TX,
           },
-        },
-        safeInfo: {
-          data: extendedSafeInfoBuilder()
-            .with({ address: { value: safeAddress } })
-            .with({ chainId: '1' })
-            .build(),
-          loading: false,
-          loaded: true,
         },
       },
     })
