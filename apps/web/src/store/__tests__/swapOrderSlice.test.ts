@@ -1,6 +1,7 @@
 import type { TransactionListItem } from '@safe-global/store/gateway/types'
 import { TransactionListItemType, TransactionInfoType, ConflictType } from '@safe-global/store/gateway/types'
 import { listenerMiddlewareInstance } from '@/store'
+import { txHistorySlice } from '@/store/txHistorySlice'
 import { swapOrderListener, swapOrderStatusListener, setSwapOrder, deleteSwapOrder } from '@/store/swapOrderSlice'
 import * as notificationsSlice from '@/store/notificationsSlice'
 

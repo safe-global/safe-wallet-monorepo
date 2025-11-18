@@ -1,11 +1,8 @@
 import { useMemo } from 'react'
-import type { Balance, Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import useLoadBalances from './loadables/useLoadBalances'
-
-const initialBalancesState: Balances = {
-  items: [],
-  fiatTotal: '',
-}
+import isEqual from 'lodash/isEqual'
+import { useAppSelector } from '@/store'
+import { selectBalances } from '@/store/balancesSlice'
+import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 const useBalances = (): {
   balances: Balances
@@ -13,22 +10,18 @@ const useBalances = (): {
   loading: boolean
   error?: string
 } => {
-  const [data, error, loading] = useLoadBalances()
+  const state = useAppSelector(selectBalances, isEqual)
+  const { data, error, loaded, loading } = state
 
   return useMemo(
     () => ({
-      balances: data ?? initialBalancesState,
-      error: error?.message,
-      loaded: !!data,
+      balances: data,
+      error,
+      loaded,
       loading,
     }),
-    [data, error, loading],
+    [data, error, loaded, loading],
   )
-}
-
-export const useTokens = (): Balance['tokenInfo'][] => {
-  const [data] = useLoadBalances()
-  return useMemo(() => data?.items.map(({ tokenInfo }) => tokenInfo) ?? [], [data])
 }
 
 export default useBalances

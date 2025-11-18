@@ -1,9 +1,9 @@
 import { useMemo } from 'react'
-import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import isEqual from 'lodash/isEqual'
+import { useAppSelector } from '@/store'
+import { selectSafeInfo } from '@/store/safeInfoSlice'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
-import { useSafeAddressFromUrl } from './useSafeAddressFromUrl'
-import { useChainId } from './useChainId'
 
 const useSafeInfo = (): {
   safe: ExtendedSafeInfo
@@ -12,23 +12,17 @@ const useSafeInfo = (): {
   safeLoading: boolean
   safeError?: string
 } => {
-  const safeAddress = useSafeAddressFromUrl()
-  const chainId = useChainId()
-
-  const { currentData, error, isLoading } = useSafesGetSafeV1Query(
-    { chainId: chainId!, safeAddress: safeAddress! },
-    { skip: !chainId || !safeAddress },
-  )
+  const { data, error, loaded, loading } = useAppSelector(selectSafeInfo, isEqual)
 
   return useMemo(
     () => ({
-      safe: currentData ? { ...currentData, deployed: true } : defaultSafeInfo,
-      safeAddress: currentData?.address.value || '',
-      safeLoaded: !!currentData && !isLoading,
-      safeError: error ? (error as any).error || 'Failed to load Safe' : undefined,
-      safeLoading: isLoading,
+      safe: data || defaultSafeInfo,
+      safeAddress: data?.address.value || '',
+      safeLoaded: loaded,
+      safeError: error,
+      safeLoading: loading,
     }),
-    [currentData, error, isLoading],
+    [data, error, loaded, loading],
   )
 }
 
