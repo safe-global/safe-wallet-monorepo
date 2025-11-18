@@ -1,0 +1,26 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
+# ===========================================
+# Change Threshold Transaction Card
+# ===========================================
+- assertVisible:
+    text: 'Settings change'
+
+- extendedWaitUntil:
+    visible:
+      text: '.*changeThreshold.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+- tapOn:
+    text: '.*changeThreshold.*'
+
+- runFlow:
+    file: ./change-threshold-tx.yml
+
+- tapOn:
+    id: 'go-back'

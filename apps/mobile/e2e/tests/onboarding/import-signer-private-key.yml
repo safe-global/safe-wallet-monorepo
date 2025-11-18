@@ -1,0 +1,181 @@
+appId: ${APP_ID}
+tags:
+  - onboarding
+  - import-signer
+  - private-key
+---
+# Test importing a signer using a raw private key with validation and error handling
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+# Use e2eOnboardedAccount shortcut
+- tapOn:
+    id: 'e2eOnboardedAccount'
+- assertVisible:
+    id: 'home-tab'
+
+# Navigate to Settings tab
+- tapOn: 'Account, tab, 3 of 3'
+- assertVisible: '0x2f3e...Fbb6.*'
+
+# Navigate to Signers
+- tapOn:
+    id: 'settings-signers-list-item'
+- assertVisible: 'Signers'
+- assertVisible:
+    id: 'signers-screen'
+
+# Tap "Add Signer" button (Import signer button)
+- tapOn:
+    id: 'import-signer-button'
+- assertVisible: 'Import a signer'
+- tapOn:
+    id: 'seed'
+
+- runFlow:
+    when:
+      visible: 'Enable biometrics'
+    commands:
+      - tapOn: 'Enable biometrics'
+      
+- assertVisible: 'Enter your private key or seed phrase below. Make sure to do so in a safe and private place.'
+
+# Note: The app auto-detects private key vs seed phrase, so there's no explicit selection step
+
+# Error Case 1 - Invalid Format
+- tapOn: 'Paste here or type...'
+- inputText: 'not-a-private-key'
+# Verify error message appears (generic error message)
+- assertVisible: 'Invalid private key or seed phrase.'
+# Verify "Import signer" button is disabled (opacity 0.5 when error exists)
+- assertVisible:
+    id: 'import-signer-button'
+
+# Error Case 2 - Wrong Length
+# Clear input by tapping and replacing
+- eraseText
+- inputText: '0x1234567890abcdef'
+# Verify error message for wrong length
+- assertVisible: 'Invalid private key or seed phrase.'
+- assertVisible:
+    id: 'import-signer-button'
+
+# Error Case 3 - Missing 0x Prefix (should auto-add or work without)
+# Enter valid private key without "0x" prefix
+- eraseText
+- inputText: 'ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+# Verify app accepts it (no error should appear)
+- assertNotVisible: 'Invalid private key or seed phrase.'
+- assertVisible:
+    id: 'import-signer-button'
+
+# Clear for next test
+
+- eraseText: 66
+
+# Wrong signer - Valid Private Key
+# Enter a correct PK, but not a signer of the safe
+- tapOn: 'Paste here or type...'
+- inputText: '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+# Verify no error
+- assertNotVisible: 'Invalid private key or seed phrase.'
+- assertVisible:
+    id: 'import-signer-button'
+
+# Tap "Continue" (Import signer button) - this will fail because PK doesn't belong to safe
+- tapOn:
+    id: 'import-signer-button'
+
+# Verify error screen appears (PK doesn't belong to any signer of the Safe)
+- assertVisible: "Private key couldn't be imported"
+- assertVisible: 'This private key does not belong to any signer of this Safe Account. Double-check the address and try to import again.'
+- assertVisible: Don’t worry, your private key was not stored!
+
+# Tap "Import again" to go back to import screen
+- tapOn: 'Import again'
+
+# Verify we're back on the import screen
+- assertVisible: 'Import a signer'
+- assertVisible: 'Enter your private key or seed phrase below. Make sure to do so in a safe and private place.'
+
+# Clear the input field (the wrong PK should still be there)
+- eraseText
+
+# Enter valid private key from import-signer.yml (this PK belongs to a signer of the safe)
+- eraseText: 66
+- tapOn: 'Paste here or type...'
+- inputText: 'ffc4b004b8746a7ce547ffa644686ca660efcf7a5a39910c714f922d7ad9bcc8'
+
+# Verify no error
+- assertNotVisible: 'Invalid private key or seed phrase.'
+- assertVisible:
+    id: 'import-signer-button'
+
+# Tap "Continue" (Import signer button)
+- tapOn:
+    id: 'import-signer-button'
+
+# Verify success message appears
+- assertVisible:
+    id: 'import-success'
+- assertVisible: 'Your signer is ready!'
+
+# Tap Continue on success screen
+- tapOn:
+    id: 'import-success-continue'
+
+# Verify navigation back to signers list
+- assertVisible:
+    id: 'signers-screen'
+- assertVisible: 'My signers'
+
+# Verify Signer was properly imported
+# The default signer name should be Signer-3472 (derived from address 0x3336...3472)
+- assertVisible: '.*Signer-3472.*'
+- assertVisible: '.*0x3336...3472.*'
+
+# Click on the signer to open detail screen
+- tapOn:
+    id: 'signer-0x3336745b7EA628F5134Bd9d08aa68b4979fA3472'
+
+# Verify we're on the signer detail screen
+- assertVisible: 'Signer'
+- assertVisible: 'Signer-3472'
+- assertVisible: '0x3336745b7EA628F5134Bd9d08aa68b4979fA3472'
+
+# Quick check of the "View private key" screen
+- tapOn: 'View private key'
+
+# Verify we're on the Private Key screen
+- assertVisible: 'Private Key'
+- assertVisible: 'View private key'
+- assertVisible: 'Delete private key'
+# Verify the private key is masked (showing dots)
+- assertVisible: '.*•.*'
+
+# Navigate back to signer detail screen
+- tapOn:
+    id: 'go-back'
+
+# Verify we're back on the signer detail screen
+- assertVisible: 'Signer'
+- assertVisible: 'Signer-3472'
+
+# Tap the edit icon (on the right side of the name field) to enable edit mode
+- tapOn:
+    id: 'edit-signer-name-button'
+
+# Verify edit mode is enabled (the input field should now be editable)
+# Enter a new name for the signer
+- tapOn:
+    text: 'Signer-3472'
+    index: 1
+- eraseText
+- inputText: 'My Test Signer'
+
+# Tap the close icon (same position, now shows close icon in edit mode) to save
+- tapOn: 'Save'
+
+# Verify the name was changed on the detail screen
+- assertVisible: 'My Test Signer'
+- assertNotVisible: 'Signer-3472'

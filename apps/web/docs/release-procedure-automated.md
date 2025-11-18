@@ -7,6 +7,7 @@ This guide describes the **automated release process** using GitHub Actions work
 ## Quick Reference
 
 ### Starting a Release
+
 ```
 GitHub → Actions → "🚀 Start Web Release"
 → Enter version (e.g., 1.74.0)
@@ -15,6 +16,7 @@ GitHub → Actions → "🚀 Start Web Release"
 ```
 
 ### Back-merge
+
 ```
 GitHub → Actions → "🔄 Back-merge Main to Dev"
 → Click "Run workflow"
@@ -38,6 +40,7 @@ GitHub → Actions → "🔄 Back-merge Main to Dev"
 4. Click **"Run workflow"**
 
 **What happens automatically:**
+
 - ✅ Creates/updates `release` branch
 - ✅ Bumps version in `package.json`
 - ✅ Generates changelog with grouped changes
@@ -53,6 +56,7 @@ GitHub → Actions → "🔄 Back-merge Main to Dev"
 **Who:** QA Team
 
 **Manual process** (unchanged):
+
 1. Find the release PR (has `release` label)
 2. Test the changes thoroughly
 3. If bugs found:
@@ -68,10 +72,12 @@ GitHub → Actions → "🔄 Back-merge Main to Dev"
 **Who:** Release Manager (after QA approval)
 
 **Manual steps:**
+
 1. Review and approve the release PR
 2. Merge the PR to `main`
 
 **What happens automatically:**
+
 - ✅ Creates git tag
 - ✅ Creates and publishes GitHub release
 - ✅ Builds production assets
@@ -92,6 +98,7 @@ GitHub → Actions → "🔄 Back-merge Main to Dev"
 4. Click **"Run workflow"**
 
 **What happens automatically:**
+
 - ✅ Checks if back-merge needed
 - ✅ Detects merge conflicts
 - ✅ If clean → merges directly to `dev`
@@ -111,11 +118,13 @@ Workflows work immediately after merging this PR.
 ### Optional: Slack Notifications
 
 To enable notifications:
+
 1. Create a Slack webhook URL
 2. Go to **Settings → Secrets and variables → Actions → Variables**
 3. Add variable: `SLACK_WEBHOOK_URL` with your webhook URL
 
 Notifications will be sent for:
+
 - Release started
 - Production deployment completed (to `#topic-wallet-releases` channel)
 - Back-merge status
@@ -158,29 +167,37 @@ Notifications will be sent for:
 ## Troubleshooting
 
 ### Version already exists
+
 **Problem:** Version tag already exists
 **Solution:** Use a different version number
 
 ### PR checks failing
+
 **Problem:** Complete Release won't run due to failing checks
 **Solution:**
+
 - Fix the failing checks, or
 - Use `skip_checks: true` if checks are incorrectly failing
 
 ### Back-merge conflicts
+
 **Problem:** Cannot automatically merge main to dev
 **Solution:** Workflow creates PR automatically - resolve conflicts manually
 
 ### Workflow not appearing
+
 **Problem:** Can't find workflow in Actions tab
 **Solution:**
+
 - Ensure workflows are merged to main/dev branch
 - Refresh the Actions page
 - Check you have repository access
 
 ### Slack notifications not working
+
 **Problem:** No Slack messages received
 **Solution:**
+
 - Verify `SLACK_WEBHOOK_URL` is configured in repository variables
 - Test webhook manually with curl
 - Check workflow logs for errors
@@ -190,6 +207,7 @@ Notifications will be sent for:
 ## Important Notes
 
 ### What's Automated
+
 - Creating release branches
 - Bumping versions
 - Generating changelogs
@@ -197,6 +215,7 @@ Notifications will be sent for:
 - Syncing branches
 
 ### What's Manual (Human Control)
+
 - **QA testing and approval** - Still requires thorough testing
 - **PR review and approval** - Team still reviews changes
 - **Decision to merge** - You trigger "Complete Release" only after QA approves
@@ -204,6 +223,7 @@ Notifications will be sent for:
 - **Production deployment** - DevOps still controls final deployment
 
 ### Safety
+
 - ✅ No breaking changes - manual process still documented
 - ✅ Existing deployment workflows unchanged
 - ✅ Easy rollback - just don't use the workflows
@@ -216,6 +236,7 @@ Notifications will be sent for:
 If you need to use the manual process, see the legacy documentation in `release-procedure.md`.
 
 Use manual process if:
+
 - Automated workflows are unavailable
 - You need emergency access without GitHub UI
 - Debugging workflow issues
@@ -239,4 +260,3 @@ Use manual process if:
   - [Back-merge](https://github.com/safe-global/safe-wallet-monorepo/actions/workflows/web-release-backmerge.yml)
   - [Tag Release](https://github.com/safe-global/safe-wallet-monorepo/actions/workflows/web-tag-release.yml) (auto-triggered)
   - [Deploy Production](https://github.com/safe-global/safe-wallet-monorepo/actions/workflows/web-deploy-production.yml) (auto-triggered)
-

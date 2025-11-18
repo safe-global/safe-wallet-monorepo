@@ -2,7 +2,11 @@ import { renderHook } from '@/tests/test-utils'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import * as useWalletHook from '@/hooks/wallets/useWallet'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import type { RootState } from '@/store'
+import useSafeInfo from '@/hooks/useSafeInfo'
+
+jest.mock('@/hooks/useSafeInfo')
+
+const mockUseSafeInfo = useSafeInfo as jest.MockedFunction<typeof useSafeInfo>
 
 describe('useIsSafeOwner hook', () => {
   const ownerAddress1 = '0x1111111111111111111111111111111111111111'
@@ -46,16 +50,15 @@ describe('useIsSafeOwner hook', () => {
       })
       .build()
 
-    const initialReduxState: Partial<RootState> = {
-      safeInfo: {
-        loading: false,
-        error: undefined,
-        data: mockSafe,
-        loaded: true,
-      },
-    }
+    mockUseSafeInfo.mockReturnValue({
+      safe: mockSafe,
+      safeAddress: mockSafe.address.value,
+      safeError: undefined,
+      safeLoading: false,
+      safeLoaded: true,
+    })
 
-    const { result } = renderHook(() => useIsSafeOwner(), { initialReduxState })
+    const { result } = renderHook(() => useIsSafeOwner())
 
     expect(result.current).toBe(true)
   })
@@ -72,16 +75,15 @@ describe('useIsSafeOwner hook', () => {
       })
       .build()
 
-    const initialReduxState: Partial<RootState> = {
-      safeInfo: {
-        loading: false,
-        error: undefined,
-        data: mockSafe,
-        loaded: true,
-      },
-    }
+    mockUseSafeInfo.mockReturnValue({
+      safe: mockSafe,
+      safeAddress: mockSafe.address.value,
+      safeError: undefined,
+      safeLoading: false,
+      safeLoaded: true,
+    })
 
-    const { result } = renderHook(() => useIsSafeOwner(), { initialReduxState })
+    const { result } = renderHook(() => useIsSafeOwner())
 
     expect(result.current).toBe(false)
   })
@@ -98,16 +100,15 @@ describe('useIsSafeOwner hook', () => {
       })
       .build()
 
-    const initialReduxState: Partial<RootState> = {
-      safeInfo: {
-        loading: false,
-        error: undefined,
-        data: mockSafe,
-        loaded: true,
-      },
-    }
+    mockUseSafeInfo.mockReturnValue({
+      safe: mockSafe,
+      safeAddress: mockSafe.address.value,
+      safeError: undefined,
+      safeLoading: false,
+      safeLoaded: true,
+    })
 
-    const { result } = renderHook(() => useIsSafeOwner(), { initialReduxState })
+    const { result } = renderHook(() => useIsSafeOwner())
 
     expect(result.current).toBe(false)
   })
@@ -121,16 +122,15 @@ describe('useIsSafeOwner hook', () => {
       })
       .build()
 
-    const initialReduxState: Partial<RootState> = {
-      safeInfo: {
-        loading: false,
-        error: undefined,
-        data: mockSafe,
-        loaded: true,
-      },
-    }
+    mockUseSafeInfo.mockReturnValue({
+      safe: mockSafe,
+      safeAddress: mockSafe.address.value,
+      safeError: undefined,
+      safeLoading: false,
+      safeLoaded: true,
+    })
 
-    const { result } = renderHook(() => useIsSafeOwner(), { initialReduxState })
+    const { result } = renderHook(() => useIsSafeOwner())
 
     expect(result.current).toBe(false)
   })
@@ -147,16 +147,15 @@ describe('useIsSafeOwner hook', () => {
       })
       .build()
 
-    const initialReduxState: Partial<RootState> = {
-      safeInfo: {
-        loading: false,
-        error: undefined,
-        data: mockSafe,
-        loaded: true,
-      },
-    }
+    mockUseSafeInfo.mockReturnValue({
+      safe: mockSafe,
+      safeAddress: mockSafe.address.value,
+      safeError: undefined,
+      safeLoading: false,
+      safeLoaded: true,
+    })
 
-    const { result } = renderHook(() => useIsSafeOwner(), { initialReduxState })
+    const { result } = renderHook(() => useIsSafeOwner())
 
     expect(result.current).toBe(true)
   })
@@ -175,16 +174,15 @@ describe('useIsSafeOwner hook', () => {
       })
       .build()
 
-    const initialReduxState: Partial<RootState> = {
-      safeInfo: {
-        loading: false,
-        error: undefined,
-        data: mockSafe,
-        loaded: true,
-      },
-    }
+    mockUseSafeInfo.mockReturnValue({
+      safe: mockSafe,
+      safeAddress: mockSafe.address.value,
+      safeError: undefined,
+      safeLoading: false,
+      safeLoaded: true,
+    })
 
-    const { result } = renderHook(() => useIsSafeOwner(), { initialReduxState })
+    const { result } = renderHook(() => useIsSafeOwner())
 
     expect(result.current).toBe(true)
   })
@@ -202,16 +200,15 @@ describe('useIsSafeOwner hook', () => {
       })
       .build()
 
-    const initialReduxState: Partial<RootState> = {
-      safeInfo: {
-        loading: false,
-        error: undefined,
-        data: mockSafe,
-        loaded: true,
-      },
-    }
+    mockUseSafeInfo.mockReturnValue({
+      safe: mockSafe,
+      safeAddress: mockSafe.address.value,
+      safeError: undefined,
+      safeLoading: false,
+      safeLoaded: true,
+    })
 
-    const { result } = renderHook(() => useIsSafeOwner(), { initialReduxState })
+    const { result } = renderHook(() => useIsSafeOwner())
 
     expect(result.current).toBe(true)
   })
@@ -226,16 +223,15 @@ describe('useIsSafeOwner hook', () => {
       })
       .build()
 
-    const initialReduxState: Partial<RootState> = {
-      safeInfo: {
-        loading: false,
-        error: undefined,
-        data: mockSafe,
-        loaded: true,
-      },
-    }
+    mockUseSafeInfo.mockReturnValue({
+      safe: mockSafe,
+      safeAddress: mockSafe.address.value,
+      safeError: undefined,
+      safeLoading: false,
+      safeLoaded: true,
+    })
 
-    const { result } = renderHook(() => useIsSafeOwner(), { initialReduxState })
+    const { result } = renderHook(() => useIsSafeOwner())
 
     expect(result.current).toBe(true)
   })
@@ -252,16 +248,15 @@ describe('useIsSafeOwner hook', () => {
       })
       .build()
 
-    const initialReduxState: Partial<RootState> = {
-      safeInfo: {
-        loading: false,
-        error: undefined,
-        data: mockSafe,
-        loaded: true,
-      },
-    }
+    mockUseSafeInfo.mockReturnValue({
+      safe: mockSafe,
+      safeAddress: mockSafe.address.value,
+      safeError: undefined,
+      safeLoading: false,
+      safeLoaded: true,
+    })
 
-    const { result } = renderHook(() => useIsSafeOwner(), { initialReduxState })
+    const { result } = renderHook(() => useIsSafeOwner())
 
     expect(result.current).toBe(true)
   })
@@ -269,16 +264,17 @@ describe('useIsSafeOwner hook', () => {
   it('should return false when Safe is loading', () => {
     mockSigner(ownerAddress1)
 
-    const initialReduxState: Partial<RootState> = {
-      safeInfo: {
-        loading: true,
-        error: undefined,
-        data: undefined,
-        loaded: false,
-      },
-    }
+    const mockSafe = extendedSafeInfoBuilder().with({ owners: [] }).build()
 
-    const { result } = renderHook(() => useIsSafeOwner(), { initialReduxState })
+    mockUseSafeInfo.mockReturnValue({
+      safe: mockSafe,
+      safeAddress: '',
+      safeError: undefined,
+      safeLoading: true,
+      safeLoaded: false,
+    })
+
+    const { result } = renderHook(() => useIsSafeOwner())
 
     // When Safe is loading, default safe info has no owners
     expect(result.current).toBe(false)
@@ -287,16 +283,17 @@ describe('useIsSafeOwner hook', () => {
   it('should return false when Safe failed to load', () => {
     mockSigner(ownerAddress1)
 
-    const initialReduxState: Partial<RootState> = {
-      safeInfo: {
-        loading: false,
-        error: 'Failed to load Safe',
-        data: undefined,
-        loaded: false,
-      },
-    }
+    const mockSafe = extendedSafeInfoBuilder().with({ owners: [] }).build()
 
-    const { result } = renderHook(() => useIsSafeOwner(), { initialReduxState })
+    mockUseSafeInfo.mockReturnValue({
+      safe: mockSafe,
+      safeAddress: '',
+      safeError: 'Failed to load Safe',
+      safeLoading: false,
+      safeLoaded: false,
+    })
+
+    const { result } = renderHook(() => useIsSafeOwner())
 
     expect(result.current).toBe(false)
   })
@@ -311,16 +308,15 @@ describe('useIsSafeOwner hook', () => {
       })
       .build()
 
-    const initialReduxState: Partial<RootState> = {
-      safeInfo: {
-        loading: false,
-        error: undefined,
-        data: mockSafe,
-        loaded: true,
-      },
-    }
+    mockUseSafeInfo.mockReturnValue({
+      safe: mockSafe,
+      safeAddress: mockSafe.address.value,
+      safeError: undefined,
+      safeLoading: false,
+      safeLoaded: true,
+    })
 
-    const { result } = renderHook(() => useIsSafeOwner(), { initialReduxState })
+    const { result } = renderHook(() => useIsSafeOwner())
 
     expect(result.current).toBe(true)
   })

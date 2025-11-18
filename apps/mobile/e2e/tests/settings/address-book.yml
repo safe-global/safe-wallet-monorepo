@@ -1,0 +1,397 @@
+appId: ${APP_ID}
+tags:
+  - settings
+  - address-book
+  - smoke
+---
+# Address Book E2E Test
+# Tests the complete address book functionality including:
+# - Navigating to address book from app settings
+# - Adding a new contact
+# - Viewing contact details
+# - Editing a contact
+# - Deleting a contact
+# - Verifying empty state
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+# ============================================
+# Use e2eOnboardedAccount shortcut
+# ============================================
+
+- tapOn:
+    id: 'e2eOnboardedAccount'
+
+# Wait for home screen to load
+- assertVisible:
+    id: 'home-tab'
+
+# ============================================
+# Navigate to Settings/Account tab
+# ============================================
+
+- tapOn:
+    id: 'account-tab'
+
+# Wait for account/settings screen
+- assertVisible:
+    text: '.*(Settings|Account|Unnamed Safe).*'
+
+# ============================================
+# Navigate to App Settings
+# ============================================
+
+# Tap on app settings button (gear icon in header)
+- tapOn:
+    id: 'settings-screen-header-app-settings-button'
+
+# Wait for app settings screen to load
+- assertVisible:
+    text: '.*Settings.*'
+
+# Verify General section is visible
+- assertVisible:
+    text: 'General'
+
+# ============================================
+# Navigate to Address Book
+# ============================================
+
+# Tap on "Address book" option in General section
+- tapOn:
+    text: '.*Address book.*'
+
+# Wait for address book screen to load
+- assertVisible:
+    id: 'address-book-screen'
+
+# Verify address book title is visible
+- assertVisible:
+    text: '.*Address book.*'
+
+# ============================================
+# Verify Empty State
+# ============================================
+
+# Verify empty state is shown when no contacts exist
+- assertVisible:
+    text: '.*No contacts yet.*'
+
+- assertVisible:
+    text: '.*This account has no contacts added.*'
+
+# Verify "Add contact" button is visible
+- assertVisible:
+    text: '.*Add contact.*'
+
+# ============================================
+# Add a New Contact
+# ============================================
+
+# Tap "Add contact" button
+- tapOn:
+    text: '.*Add contact.*'
+
+# Wait for new contact screen to load
+- assertVisible:
+    text: '.*New contact.*'
+
+# Verify contact form fields are visible
+- assertVisible:
+    text: '.*Name.*'
+
+- assertVisible:
+    text: '.*Network.*'
+
+- assertVisible:
+    text: '.*Address.*'
+
+# Fill in contact name
+# Tap on Name field placeholder to focus it
+- tapOn:
+    text: '.*Enter name.*'
+
+- inputText:
+    text: 'Test Safe'
+
+# Verify name field is filled
+- assertVisible:
+    text: '.*Test Safe.*'
+
+# Fill in contact address
+# Tap on Address field placeholder to focus it
+- tapOn:
+    text: '.*Enter address.*'
+
+# Using a valid Ethereum address format
+- inputText:
+    text: '0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415'
+
+# Verify address field is filled
+- assertVisible:
+    text: '.*0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415.*'
+
+# Verify Network field shows "All Networks" by default
+- assertVisible:
+    text: '.*All Networks.*'
+
+# ============================================
+# Test Network Selection (Optional)
+# ============================================
+
+# Tap on Network field to open network selector
+- tapOn:
+    text: '.*Network.*'
+
+# Wait for network selector modal to appear
+- assertVisible:
+    text: '.*Select Networks.*'
+
+# Verify "All Networks" option is visible and selected
+- assertVisible:
+    text: '.*All Networks.*'
+
+# Close network selector by tapping outside or back
+- swipe:
+    direction: DOWN
+
+# ============================================
+# Save Contact
+# ============================================
+
+# Verify "Save contact" button is visible
+- assertVisible:
+    text: '.*Save contact.*'
+
+# Tap "Save contact" button
+- tapOn:
+    text: '.*Save contact.*'
+
+# Wait for contact detail/view screen to load
+# After saving, we're navigated to the contact view screen
+- assertVisible:
+    text: '.*Contact.*'
+
+# Verify contact name is displayed
+- assertVisible:
+    text: '.*Test Safe.*'
+
+# Verify contact address is displayed
+- assertVisible:
+    text: '.*0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415.*'
+
+# Verify "Edit contact" button is visible
+- assertVisible:
+    text: '.*Edit contact.*'
+
+# ============================================
+# Navigate Back to Address Book List
+# ============================================
+
+# Tap back button to return to address book list
+- tapOn:
+    id: 'go-back'
+
+# Wait for address book screen to load
+- assertVisible:
+    id: 'address-book-screen'
+
+# Verify contact is now in the list
+# The contact should be visible in the address book
+- assertVisible:
+    text: '.*Test Safe.*'
+
+# ============================================
+# View Contact Details
+# ============================================
+
+# Tap on the contact to view details
+# Using text matching since we don't have a specific testID for contact items
+- tapOn:
+    text: '.*Test Safe.*'
+
+# Wait for contact detail screen to load
+- assertVisible:
+    text: '.*Contact.*'
+
+# Verify contact details are displayed
+- assertVisible:
+    text: '.*Test Safe.*'
+
+- assertVisible:
+    text: '.*0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415.*'
+
+# ============================================
+# Edit Contact
+# ============================================
+
+# Tap "Edit contact" button
+- tapOn:
+    text: '.*Edit contact.*'
+
+# Verify we're in edit mode
+# The delete button should appear in the header when editing
+- assertVisible:
+    text: '.*Contact.*'
+
+# Modify the contact name
+# Tap on Name field to focus it for editing
+- tapOn:
+    text: '.*Test Safe.*'
+
+# Clear existing text and enter new name
+- eraseText
+
+- inputText:
+    text: 'Updated Test Safe'
+
+# Verify name is updated
+- assertVisible:
+    text: '.*Updated Test Safe.*'
+
+# Save the changes
+- tapOn:
+    text: '.*Save contact.*'
+
+# Verify updated name is displayed
+- assertVisible:
+    text: '.*Updated Test Safe.*'
+
+# ============================================
+# Delete Contact
+# ============================================
+
+# Tap "Edit contact" button again to enable delete option
+- tapOn:
+    text: '.*Edit contact.*'
+
+# Wait for edit mode
+- assertVisible:
+    text: '.*Contact.*'
+
+# Tap delete button in header (trash icon)
+# The delete button appears as an icon in the header when editing
+# It's positioned on the right side of the header (top right corner)
+- tapOn:
+    id: delete-contact-button
+
+# Verify delete confirmation dialog appears
+- assertVisible:
+    text: '.*Delete Contact.*'
+
+- assertVisible:
+    text: '.*Do you really want to delete this contact.*'
+
+# Confirm deletion by tapping "Delete" button
+- tapOn:
+    text: 'Delete'
+
+# Wait for navigation back to address book list
+- assertVisible:
+    id: 'address-book-screen'
+
+# Verify contact is deleted (empty state should appear)
+- assertVisible:
+    text: '.*No contacts yet.*'
+
+# ============================================
+# Test Search Functionality (Optional)
+# ============================================
+
+# Add a contact again for search testing
+- tapOn:
+    text: '.*Add contact.*'
+
+- assertVisible:
+    text: '.*New contact.*'
+
+# Fill in name
+- tapOn:
+    text: '.*Enter name.*'
+
+- inputText:
+    text: 'Search Test Contact'
+
+# Fill in address
+- tapOn:
+    text: '.*Enter address.*'
+
+- inputText:
+    text: '0x1234567890123456789012345678901234567890'
+
+- tapOn:
+    text: '.*Save contact.*'
+
+# Navigate back to address book list
+- tapOn:
+    id: 'go-back'
+
+- assertVisible:
+    id: 'address-book-screen'
+
+# Verify contact is in the list
+- assertVisible:
+    text: '.*Search Test Contact.*'
+
+# Test search functionality
+# Tap on search input placeholder
+- tapOn:
+    text: '.*Name, address.*'
+
+# Type search query
+- inputText:
+    text: 'Search'
+
+# Verify filtered results
+- assertVisible:
+    text: '.*Search Test Contact.*'
+
+# Clear search and verify all contacts appear
+- tapOn:
+    text: '.*Search.*'
+
+# Clear the search field
+- eraseText
+
+- inputText:
+    text: 'Non existing'
+
+- assertVisible: No contacts found matching your search.
+
+# Clear the search field
+- eraseText
+
+# Verify search is cleared (contact should still be visible if search is empty)
+- assertVisible:
+    text: '.*Search Test Contact.*'
+
+# Navigate back to clean up
+- tapOn:
+    id: 'go-back'
+
+# ============================================
+# Cleanup - Delete Test Contact
+# ============================================
+
+- tapOn:
+    text: '.*Address book.*'
+
+- tapOn:
+    id: 'contact-item-menu'
+
+- tapOn: 'Delete contact'
+
+- tapOn: 'Delete'
+
+- assertVisible: This account has no contacts added.
+
+- tapOn:
+    id: 'go-back'
+
+- tapOn:
+    id: 'go-back'
+
+# Wait for account/settings screen
+- assertVisible:
+    text: '.*(Settings|Account|Unnamed Safe).*'

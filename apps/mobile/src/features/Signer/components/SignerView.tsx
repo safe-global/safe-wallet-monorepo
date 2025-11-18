@@ -78,7 +78,7 @@ export const SignerView = ({
                   error={dirtyFields.name && !!errors.name}
                   success={dirtyFields.name && !errors.name}
                   right={
-                    <TouchableOpacity onPress={onPressEdit} hitSlop={8}>
+                    <TouchableOpacity onPress={onPressEdit} hitSlop={8} testID="edit-signer-name-button">
                       <SafeFontIcon name={editMode ? 'close' : 'edit'} color="$textSecondaryLight" size={16} />
                     </TouchableOpacity>
                   }

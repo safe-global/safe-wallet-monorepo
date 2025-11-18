@@ -4,20 +4,24 @@ This repository uses a Yarn-based monorepo structure. Follow these rules when pr
 
 ## General Principles
 
-- **Solve the Right Problem** – confirm the purpose of your change with the issue or request before modifying code.
-- **Design Before You Code** – think through data flow, APIs and security implications before implementing.
-- **Keep It Simple** – prefer straightforward solutions over clever or unnecessary abstractions.
-- **Fail Fast, Fail Loud** – surface errors early; avoid silent failures.
-- **Write Clean, Readable Code** – meaningful names and concise comments help maintainers understand your work.
-- **Test Thoroughly** – add or update unit and integration tests when changing functionality.
-- **Minimize Technical Debt** – document trade‑offs and avoid quick hacks.
-- **Prioritize Maintainability** – keep modules small and reusable.
+- Follow the DRY principle
+- Cover your changes with unit tests
+- Run type-check, lint, prettier and unit tests before each commit
+
+Specifically for the web app:
+- When making a new component, create a Storybook story file for it
+- Use theme variables from vars.css instead of hard-coded CSS values
+- Use MUI components and the Safe MUI theme
 
 ## Workflow
 
 1. **Install dependencies**: `yarn install` (from the repository root).
-2. **Formatting**: run `yarn prettier:fix` before committing.
-3. **Linting and tests**: when you change any source code under `apps/` or `packages/`, execute, for web:
+2. **Pre-commit hooks**: The repository uses Husky for git hooks:
+   - **pre-commit**: Automatically runs `lint-staged` (prettier) and type-check on staged TypeScript files
+   - **pre-push**: Runs linting before pushing
+   - These hooks ensure code quality before commits reach the repository
+3. **Formatting**: run `yarn prettier:fix` before committing (also handled automatically by pre-commit hook).
+4. **Linting and tests**: when you change any source code under `apps/` or `packages/`, execute, for web:
    ```bash
    yarn workspace @safe-global/web type-check
    yarn workspace @safe-global/web lint
@@ -30,11 +34,11 @@ This repository uses a Yarn-based monorepo structure. Follow these rules when pr
    yarn workspace @safe-global/mobile prettier
    yarn workspace @safe-global/mobile test
    ```
-4. **Commit messages**: use [semantic commit messages](https://www.conventionalcommits.org/en/v1.0.0/) as described in `CONTRIBUTING.md`.
-5. **Code style**: follow the guidelines in:
+5. **Commit messages**: use [semantic commit messages](https://www.conventionalcommits.org/en/v1.0.0/) as described in `CONTRIBUTING.md`.
+6. **Code style**: follow the guidelines in:
    - `apps/web/docs/code-style.md` for the web app.
    - `apps/mobile/docs/code-style.md` for the mobile app.
-6. **Pull requests**: fill out the PR template and ensure all checks pass.
+7. **Pull requests**: fill out the PR template and ensure all checks pass.
 
 Use Yarn 4 (managed via `corepack`) for all scripts. Refer to the workspace READMEs for environment details.
 
@@ -44,16 +48,23 @@ Use Yarn 4 (managed via `corepack`) for all scripts. Refer to the workspace READ
 
 - When writing Redux tests, verify resulting state changes rather than checking
   that specific actions were dispatched.
+- **Avoid `any` type assertions** – Create properly typed test helpers instead of using `as any`. For example, when testing Redux slices with a minimal store, create a helper function that properly types the state:
+
+  ```typescript
+  // Good: Properly typed helper
+  type TestRootState = ReturnType<ReturnType<typeof createTestStore>['getState']>
+  const getSafeState = (state: TestRootState, chainId: string, safeAddress: string) => {
+    return state[sliceName][`${chainId}:${safeAddress}`]
+  }
+
+  // Bad: Using 'any'
+  const state = store.getState() as any
+  ```
+
 - Use [Mock Service Worker](https://mswjs.io/) (MSW) for tests involving network
   requests instead of mocking `fetch`. Use MSW for mocking blockchain RPC calls instead of mocking ethers.js directly
 - Create test data with helpers with faker @https://fakerjs.dev/
 - Ensure shared package tests work for both web and mobile environments
-
-## Web3/Blockchain Development Guidelines
-
-- **Safe Ecosystem Focus** – This is a Safe wallet project. Understand Safe's multi-signature concepts and the Safe{Core} SDK when making changes.
-- **Chain Support** – The app supports multiple EVM chains (Ethereum, Polygon, Arbitrum, etc.). Always consider multi-chain implications.
-- **Ethers.js Usage** – Use ethers v6. Follow existing patterns for provider creation and RPC management.
 
 ## Mobile Development (Expo + Tamagui)
 

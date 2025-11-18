@@ -1,0 +1,20 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+# ===========================================
+# Rejected Transaction Card
+# ===========================================
+- assertVisible:
+    text: 'Rejected'
+
+- assertVisible: On-chain rejection
+
+- tapOn:
+    text: 'On-chain rejection'
+
+- runFlow:
+    file: ./reject-tx.yml
+
+- tapOn:
+    id: 'go-back'

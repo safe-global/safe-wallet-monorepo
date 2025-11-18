@@ -9,10 +9,10 @@ import { WALLETCONNECT_EVENTS } from './events/walletconnect'
 import { TX_LIST_EVENTS } from './events/txList'
 import { SWAP_EVENTS } from './events/swaps'
 import { TERMS_EVENTS } from './events/terms'
-import { OVERVIEW_EVENTS } from './events/overview'
+import { EXPLORE_POSSIBLE_EVENTS, OVERVIEW_EVENTS } from './events/overview'
 import { NESTED_SAFE_EVENTS } from './events/nested-safes'
-import { EXPLORE_POSSIBLE_EVENTS } from './events/overview'
 import { SAFE_SHIELD_EVENTS } from './events/safe-shield'
+import { HYPERNATIVE_EVENTS } from './events/hypernative'
 
 // If an event is mapped here, it will be tracked in Mixpanel
 export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
@@ -39,6 +39,11 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [OVERVIEW_EVENTS.COPY_ADDRESS.action]: MixpanelEvent.SIDEBAR_CLICKED,
   [OVERVIEW_EVENTS.OPEN_EXPLORER.action]: MixpanelEvent.SIDEBAR_CLICKED,
   [NESTED_SAFE_EVENTS.OPEN_LIST.action]: MixpanelEvent.SIDEBAR_CLICKED,
+  [HYPERNATIVE_EVENTS.GUARDIAN_FORM_VIEWED.action]: MixpanelEvent.GUARDIAN_FORM_VIEWED,
+  [HYPERNATIVE_EVENTS.GUARDIAN_FORM_STARTED.action]: MixpanelEvent.GUARDIAN_FORM_STARTED,
+  [HYPERNATIVE_EVENTS.GUARDIAN_FORM_SUBMITTED.action]: MixpanelEvent.GUARDIAN_FORM_SUBMITTED,
+  [HYPERNATIVE_EVENTS.SECURITY_REPORT_CLICKED.action]: MixpanelEvent.SECURITY_REPORT_CLICKED,
+  [HYPERNATIVE_EVENTS.GUARDIAN_BANNER_DISMISSED.action]: MixpanelEvent.GUARDIAN_BANNER_DISMISSED,
   [EXPLORE_POSSIBLE_EVENTS.EXPLORE_POSSIBLE_CLICKED.action]: MixpanelEvent.EXPLORE_POSSIBLE_CLICKED,
   [SAFE_SHIELD_EVENTS.TRANSACTION_STARTED.action]: MixpanelEvent.TRANSACTION_STARTED,
   [SAFE_SHIELD_EVENTS.RECIPIENT_DECODED.action]: MixpanelEvent.TRANSACTION_RECIPIENT_DECODED,

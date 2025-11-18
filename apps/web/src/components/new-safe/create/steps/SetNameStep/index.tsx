@@ -14,14 +14,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import NoWalletConnectedWarning from '../../NoWalletConnectedWarning'
 import { type SafeVersion } from '@safe-global/types-kit'
-import { useCurrentChain } from '@/hooks/useChains'
+import { useCurrentChain, useChain } from '@/hooks/useChains'
 import { useEffect } from 'react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useSafeSetupHints } from '../OwnerPolicyStep/useSafeSetupHints'
 import type { CreateSafeInfoItem } from '../../CreateSafeInfos'
 import SafeCreationNetworkInput from '@/features/multichain/components/SafeCreationNetworkInput'
-import { useAppSelector } from '@/store'
-import { selectChainById } from '@/store/chainsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
@@ -55,7 +53,7 @@ function SetNameStep({
   const router = useRouter()
   const currentChain = useCurrentChain()
   const wallet = useWallet()
-  const walletChain = useAppSelector((state) => selectChainById(state, wallet?.chainId || ''))
+  const walletChain = useChain(wallet?.chainId || '')
 
   const initialState = data.networks.length ? data.networks : walletChain ? [walletChain] : []
   const formMethods = useForm<SetNameStepForm>({
