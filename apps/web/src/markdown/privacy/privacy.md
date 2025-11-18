@@ -368,6 +368,20 @@ We rely on our legitimate interest to ensure that our services or derivatives do
 
 We rely on our legitimate interest to ensure the prevention of fraud (GDPR Art.6.1f). This also helps us detect users who may want to circumvent the restriction on US users by the use of VPN.
 
+3.5.10 We process personal data when you fill out forms to register for a demo or request more information about new product integrations. Personal data processed include:
+
+1. Full name;  
+2. Email address;  
+3. Company name;  
+4. Location;  
+5. Responses to open text fields;  
+6. SafeWallet address (optional);  
+7. Telegram account (optional).  
+
+We rely on the user consent (Art. 6.1a GDPR) to process this information, as users can choose to fill out an optional form should they be currently interested in our partnership with Hypernative with the goal of adding their transaction protection technology and its “Guardian” product into Safe{Wallet} to create a jointly commercialized experience that offers automated, policy-based transaction guarding with native discoverability and seamless user experience. We retain this data for a year after collection through the form. 
+
+Please note that Hypernative will also be collecting the same data when you fill out the form, and processing it in accordance with the terms stipulated in their Privacy Policy.
+
 ## 3.6 Contacting us {#contacting-us}
 
 It is possible to contact us on our Website by e-mail or via the contact form. When you contact us, we collect and process certain information in connection with your specific request, such as, *e.g.*, your name, e-mail address, and other data requested by us or personal data you voluntarily provide to us (hereinafter “**Contact Data**”). If you contact us as part of an existing contractual relationship or contact us in advance for information about our range of services, the Contact Data will be processed for the performance of a contract or in order to take steps prior to entering into a contract and to respond to your contact request in accordance with GDPR Art.6.1.b. 
