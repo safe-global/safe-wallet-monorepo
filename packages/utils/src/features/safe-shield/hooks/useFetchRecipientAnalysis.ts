@@ -63,9 +63,13 @@ export function useFetchRecipientAnalysis({
   }, [recipients, fetchedResults, results])
 
   // Check if is loading or if the results are not complete
+  // When safeAddress is empty, we can't fetch, so don't wait for results
   const isLoading = useMemo(() => {
+    if (!safeAddress) {
+      return false
+    }
     return fetchLoading || (recipients.length > 0 && Object.keys(results || {}).length !== recipients.length)
-  }, [fetchLoading, recipients.length, results])
+  }, [fetchLoading, recipients.length, results, safeAddress])
 
   return [results, error, isLoading]
 }
