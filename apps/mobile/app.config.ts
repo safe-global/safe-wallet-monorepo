@@ -1,3 +1,4 @@
+import { ExpoConfig, ConfigContext } from 'expo/config'
 /* eslint-disable no-undef */
 const IS_DEV = process.env.APP_VARIANT === 'development'
 
@@ -16,7 +17,7 @@ const sslPinningDomains = {
 
 const name = IS_DEV ? 'Dev-Safe{Mobile}' : 'Safe{Mobile}'
 
-const config = {
+const config: ExpoConfig = {
   name: name,
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
@@ -179,12 +180,6 @@ const config = {
     androidMode: 'default',
     androidCollapsedTitle: 'Updates from Safe Wallet',
     iosDisplayInForeground: true,
-  },
-  // Define background tasks
-  tasks: {
-    'app.notifee.notification-event': {
-      backgroundMode: ['processing', 'remote-notification'],
-    },
   },
 }
 
