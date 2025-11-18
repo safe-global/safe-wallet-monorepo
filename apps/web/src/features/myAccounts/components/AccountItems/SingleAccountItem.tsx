@@ -76,8 +76,8 @@ const SingleAccountItem = ({
   const trackingLabel = isWelcomePage
     ? OVERVIEW_LABELS.login_page
     : isSpaceSafe
-      ? OVERVIEW_LABELS.space_page
-      : OVERVIEW_LABELS.sidebar
+    ? OVERVIEW_LABELS.space_page
+    : OVERVIEW_LABELS.sidebar
 
   const getHref = useGetHref(router)
 

@@ -69,8 +69,8 @@ const useTxHistory = (
   const errorMessage = isFetched
     ? error?.message
     : historyError
-      ? (historyError as any).error || 'Failed to load history'
-      : undefined
+    ? (historyError as any).error || 'Failed to load history'
+    : undefined
   const isLoading = isFetched ? loading : historyLoading
 
   // Return the new page or the stored page
