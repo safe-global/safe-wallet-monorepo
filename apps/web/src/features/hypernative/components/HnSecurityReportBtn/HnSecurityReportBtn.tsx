@@ -3,8 +3,7 @@ import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
 import ExternalLink from '@/components/common/ExternalLink'
 import { hnSecurityReportBtnConfig } from './config'
 import type { ReactElement } from 'react'
-import Track from '@/components/common/Track'
-import { HYPERNATIVE_EVENTS } from '@/services/analytics'
+import { HYPERNATIVE_EVENTS, trackEvent } from '@/services/analytics'
 
 import css from './styles.module.css'
 
@@ -23,6 +22,12 @@ const buildSecurityReportUrl = (baseUrl: string, chainId: string, safe: string, 
   return url.toString()
 }
 
+const onBtnClick = () => {
+  setTimeout(() => {
+    trackEvent(HYPERNATIVE_EVENTS.SECURITY_REPORT_CLICKED)
+  }, 300)
+}
+
 export const HnSecurityReportBtn = ({ chainId, safe, tx }: HnSecurityReportBtnProps): ReactElement => {
   const { text, baseUrl } = hnSecurityReportBtnConfig
 
@@ -30,13 +35,11 @@ export const HnSecurityReportBtn = ({ chainId, safe, tx }: HnSecurityReportBtnPr
 
   return (
     // Click event is sent to mixpanel as well via the GA_TO_MIXPANEL_MAPPING in services/analytics/)
-    <Tooltip title="Review security report on Hypernative" arrow placement="top">
-      <Track {...HYPERNATIVE_EVENTS.SECURITY_REPORT_CLICKED}>
-        <Button variant="neutral" fullWidth component={ExternalLink} href={href}>
-          <SvgIcon component={HypernativeIcon} inheritViewBox className={css.hypernativeIcon} />
-          {text}
-        </Button>
-      </Track>
+    <Tooltip title="Review security report on Hypernative" arrow placement="top" onClick={onBtnClick}>
+      <Button variant="neutral" fullWidth component={ExternalLink} href={href}>
+        <SvgIcon component={HypernativeIcon} inheritViewBox className={css.hypernativeIcon} />
+        {text}
+      </Button>
     </Tooltip>
   )
 }

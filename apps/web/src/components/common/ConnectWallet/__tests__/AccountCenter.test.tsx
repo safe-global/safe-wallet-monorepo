@@ -29,11 +29,8 @@ describe('AccountCenter', () => {
       disconnectButton.click()
     })
 
-    await waitFor(
-      () => {
-        expect(disconnectButton).not.toBeInTheDocument()
-      },
-      { timeout: 3000 },
-    )
+    await waitFor(() => {
+      expect(disconnectButton).not.toBeInTheDocument()
+    })
   })
 })
