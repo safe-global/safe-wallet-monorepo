@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { isAddress, JsonRpcProvider } from 'ethers'
 import uniq from 'lodash/uniq'
 import { useAddressBookCheck } from './address-analysis/address-book-check/useAddressBookCheck'
@@ -50,7 +50,6 @@ export function useRecipientAnalysis({
     return uniq(filteredRecipients)
   }, [debouncedRecipients])
 
-  const [isLoading, setIsLoading] = useState(false)
   const [fetchedResults, fetchedResultsError, fetchLoading] = useFetchRecipientAnalysis({
     safeAddress,
     chainId,
@@ -62,15 +61,22 @@ export function useRecipientAnalysis({
   const addressBookCheck = useAddressBookCheck(chainId, validRecipients, isInAddressBook, ownedSafes)
   const [activityCheck, activityCheckError, activityCheckLoading] = useAddressActivity(nonSafeRecipients, web3ReadOnly)
 
-  useEffect(() => {
-    if (fetchLoading || activityCheckLoading) {
-      setIsLoading(true)
-    }
-
-    if (!fetchLoading && !activityCheckLoading) {
-      setIsLoading(false)
-    }
-  }, [activityCheckLoading, fetchLoading])
+  // Check if any of the checks are loading or if the results are not complete
+  const isLoading = useMemo(
+    () =>
+      fetchLoading ||
+      activityCheckLoading ||
+      (validRecipients.length > 0 && !fetchedResults) ||
+      (nonSafeRecipients.length > 0 && Object.keys(activityCheck || {}).length !== nonSafeRecipients.length),
+    [
+      fetchLoading,
+      activityCheckLoading,
+      validRecipients.length,
+      fetchedResults,
+      nonSafeRecipients.length,
+      activityCheck,
+    ],
+  )
 
   // Merge backend and local checks
   const mergedResults = useMemo(() => {
@@ -78,21 +84,13 @@ export function useRecipientAnalysis({
       return { [safeAddress]: { [StatusGroup.COMMON]: [getErrorInfo(ErrorType.RECIPIENT)] } }
     }
 
-    // Only merge different results after all of them are available
-    if (!fetchedResults || !addressBookCheck || activityCheckLoading) {
+    // Only merge results if all of them are available
+    if (isLoading || validRecipients.length === 0) {
       return undefined
     }
 
     return mergeAnalysisResults(fetchedResults, addressBookCheck, activityCheck)
-  }, [
-    fetchedResults,
-    addressBookCheck,
-    activityCheck,
-    activityCheckLoading,
-    fetchedResultsError,
-    activityCheckError,
-    safeAddress,
-  ])
+  }, [fetchedResults, addressBookCheck, activityCheck, fetchedResultsError, activityCheckError, isLoading, safeAddress])
 
   if (!recipientsMemo) {
     return undefined
