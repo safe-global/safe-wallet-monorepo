@@ -7,7 +7,7 @@ import type { UrlObject } from 'url'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { useAppSelector } from '@/store'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
-import useChains from '@/hooks/useChains'
+import { selectChains } from '@/store/chainsSlice'
 import useLastSafe from '@/hooks/useLastSafe'
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import SafeIcon from '@/components/common/SafeIcon'
@@ -31,12 +31,12 @@ const AppActions = ({ wallet, onConnectWallet, chain, appUrl, app }: Props): Rea
   const lastUsedSafe = useLastSafe()
   const ownedSafes = useOwnedSafes()
   const addressBook = useAppSelector(selectAllAddressBooks)
-  const { configs: chains } = useChains()
+  const chains = useAppSelector(selectChains)
   const compatibleChains = app.chainIds
 
   const compatibleSafes = useMemo(
-    () => getCompatibleSafes(ownedSafes, compatibleChains, chains),
-    [ownedSafes, compatibleChains, chains],
+    () => getCompatibleSafes(ownedSafes, compatibleChains, chains.data),
+    [ownedSafes, compatibleChains, chains.data],
   )
 
   const [safeToUse, setSafeToUse] = useState<CompatibleSafesType>()

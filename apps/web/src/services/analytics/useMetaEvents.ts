@@ -1,13 +1,13 @@
 import { useEffect, useMemo } from 'react'
 import { gtmTrack } from '@/services/analytics/gtm'
 import { TX_LIST_EVENTS, ASSETS_EVENTS } from './events'
-import useTxQueue from '@/hooks/useTxQueue'
+import { selectQueuedTransactions } from '@/store/txQueueSlice'
+import { useAppSelector } from '@/store'
 import useChainId from '@/hooks/useChainId'
 import useBalances from '@/hooks/useBalances'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useHiddenTokens from '@/hooks/useHiddenTokens'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
-import { isTransactionQueuedItem } from '@/utils/transaction-guards'
 
 // Track meta events on app load
 const useMetaEvents = () => {
@@ -16,10 +16,9 @@ const useMetaEvents = () => {
   const isSpaceRoute = useIsSpaceRoute()
 
   // Queue size
-  const { page: txQueuePage } = useTxQueue()
-  const queue = useMemo(() => txQueuePage?.results.filter(isTransactionQueuedItem) || [], [txQueuePage])
+  const queue = useAppSelector(selectQueuedTransactions)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const safeQueue = useMemo(() => queue, [safeAddress, queue.length])
+  const safeQueue = useMemo(() => queue, [safeAddress, queue !== undefined])
   useEffect(() => {
     if (!safeQueue || isSpaceRoute) return
 

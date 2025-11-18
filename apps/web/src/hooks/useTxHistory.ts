@@ -1,15 +1,15 @@
 import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { useTransactionsGetTransactionsHistoryV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
 import useAsync from '@safe-global/utils/hooks/useAsync'
+import { selectTxHistory } from '@/store/txHistorySlice'
 import useSafeInfo from './useSafeInfo'
 import { fetchFilteredTxHistory, useTxFilter } from '@/utils/tx-history-filter'
 import { getTxHistory } from '@/services/transactions'
 import { selectSettings } from '@/store/settingsSlice'
 import { useHasFeature } from './useChains'
+
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { POLLING_INTERVAL } from '@/config/constants'
 
 const useTxHistory = (
   pageUrl?: string,
@@ -18,6 +18,8 @@ const useTxHistory = (
   error?: string
   loading: boolean
 } => {
+  // The latest page of the history is always in the store
+  const historyState = useAppSelector(selectTxHistory)
   const [filter] = useTxFilter()
   const { hideSuspiciousTransactions } = useAppSelector(selectSettings)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
@@ -28,26 +30,6 @@ const useTxHistory = (
     safe: { chainId },
     safeAddress,
   } = useSafeInfo()
-
-  // The latest page of the history is fetched via RTK Query
-  const {
-    currentData: historyData,
-    error: historyError,
-    isLoading: historyLoading,
-  } = useTransactionsGetTransactionsHistoryV1Query(
-    {
-      chainId,
-      safeAddress,
-      trusted: !hideUntrustedTxs,
-      imitation: !hideImitationTxs,
-    },
-    {
-      skip: !safeAddress || !chainId || !!(filter || pageUrl),
-      pollingInterval: POLLING_INTERVAL,
-      skipPollingIfUnfocused: true,
-      refetchOnFocus: true,
-    },
-  )
 
   // If filter exists or pageUrl is passed, load a new history page from the API
   const [page, error, loading] = useAsync<TransactionItemPage>(
@@ -65,13 +47,9 @@ const useTxHistory = (
   )
 
   const isFetched = filter || pageUrl
-  const dataPage = isFetched ? page : historyData
-  const errorMessage = isFetched
-    ? error?.message
-    : historyError
-    ? (historyError as any).error || 'Failed to load history'
-    : undefined
-  const isLoading = isFetched ? loading : historyLoading
+  const dataPage = isFetched ? page : historyState.data
+  const errorMessage = isFetched ? error?.message : historyState.error
+  const isLoading = isFetched ? loading : historyState.loading
 
   // Return the new page or the stored page
   return useMemo(
