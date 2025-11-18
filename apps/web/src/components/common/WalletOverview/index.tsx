@@ -6,8 +6,7 @@ import type { ReactElement } from 'react'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import WalletIcon from '@/components/common/WalletIcon'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
-import { useAppSelector } from '@/store'
-import { selectChainById } from '@/store/chainsSlice'
+import { useChain } from '@/hooks/useChains'
 import WalletBalance from '@/components/common/WalletBalance'
 
 import css from './styles.module.css'
@@ -34,7 +33,7 @@ const WalletOverview = ({
   balance?: string
   showBalance?: boolean
 }): ReactElement => {
-  const walletChain = useAppSelector((state) => selectChainById(state, wallet.chainId))
+  const walletChain = useChain(wallet.chainId)
   const prefix = walletChain?.shortName
 
   return (

@@ -10,7 +10,7 @@ import { useAppDispatch } from '@/store'
 import { isCustomTxInfo, isMultiSendTxInfo, isTransactionListItem } from '@/utils/transaction-guards'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { addListener } from '@reduxjs/toolkit'
-import { txHistorySlice } from '@/store/txHistorySlice'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { RecoveryEvent, recoverySubscribe } from '@/features/recovery/services/recoveryEvents'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { RecoveryState } from '@/features/recovery/services/recovery-state'
@@ -49,10 +49,10 @@ export function useRecoveryState(delayModifiers?: Array<Delay>): AsyncResult<Rec
     const listener = dispatch(
       addListener({
         // Listen to history polls (only occuring when the txHistoryTag changes)
-        actionCreator: txHistorySlice.actions.set,
+        matcher: cgwApi.endpoints.transactionsGetTransactionsHistoryV1.matchFulfilled,
         effect: async (action) => {
           // Get the most recent transaction
-          const [latestTx] = action.payload.data?.results.filter(isTransactionListItem) ?? []
+          const [latestTx] = action.payload?.results.filter(isTransactionListItem) ?? []
 
           if (!latestTx) {
             return

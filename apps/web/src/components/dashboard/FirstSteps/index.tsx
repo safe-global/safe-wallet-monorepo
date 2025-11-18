@@ -12,10 +12,11 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { OVERVIEW_EVENTS } from '@/services/analytics'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setQrShortName } from '@/store/settingsSlice'
-import { selectOutgoingTransactions } from '@/store/txHistorySlice'
+import useTxHistory from '@/hooks/useTxHistory'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { isTransactionListItem, isOutgoingTransfer } from '@/utils/transaction-guards'
 import classnames from 'classnames'
-import { type ReactNode, useState } from 'react'
+import { type ReactNode, useState, useMemo } from 'react'
 import { Card, WidgetBody, WidgetContainer } from '@/components/dashboard/styled'
 import { Box, Button, CircularProgress, FormControlLabel, Grid, Switch, Typography } from '@mui/material'
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
@@ -358,7 +359,14 @@ const AccountReadyWidget = () => {
 const FirstSteps = () => {
   const { balances } = useBalances()
   const { safe, safeAddress } = useSafeInfo()
-  const outgoingTransactions = useAppSelector(selectOutgoingTransactions)
+  const { page: txHistoryPage } = useTxHistory()
+
+  const outgoingTransactions = useMemo(() => {
+    return txHistoryPage?.results
+      .filter(isTransactionListItem)
+      .filter((tx) => isOutgoingTransfer(tx.transaction.txInfo))
+  }, [txHistoryPage])
+
   const chain = useCurrentChain()
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, safe.chainId, safeAddress))
 

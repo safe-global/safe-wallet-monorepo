@@ -3,10 +3,10 @@ import type { OrderStatuses } from '@safe-global/store/gateway/types'
 import { createSelector, createSlice } from '@reduxjs/toolkit'
 import type { RootState } from '@/store'
 import { isSwapOrderTxInfo, isTransactionListItem } from '@/utils/transaction-guards'
-import { txHistorySlice } from '@/store/txHistorySlice'
+import { cgwApi as safesApi } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { cgwApi as chainsApi } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { cgwApi as transactionsApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { showNotification } from '@/store/notificationsSlice'
-import { selectSafeInfo } from '@/store/safeInfoSlice'
-import { selectChainById } from '@/store/chainsSlice'
 import { getTxLink } from '@/utils/tx-link'
 
 type AllStatuses = OrderStatuses | 'created'
@@ -74,7 +74,7 @@ export const swapOrderStatusListener = (listenerMiddleware: typeof listenerMiddl
   listenerMiddleware.startListening({
     actionCreator: slice.actions.setSwapOrder,
     effect: (action, listenerApi) => {
-      const { dispatch } = listenerApi
+      const { dispatch, getState } = listenerApi
       const swapOrder = action.payload
       const oldStatus = selectSwapOrderStatus(listenerApi.getOriginalState(), swapOrder.orderUid)
       const newStatus = swapOrder.status
@@ -82,15 +82,23 @@ export const swapOrderStatusListener = (listenerMiddleware: typeof listenerMiddl
       if (oldStatus === newStatus || newStatus === undefined) {
         return
       }
-      const safeInfo = selectSafeInfo(listenerApi.getState())
+
+      // Access safeInfo and chains from RTK Query cache instead of Redux
+      const state = getState()
+      const safeInfoState = safesApi.endpoints.safesGetSafeV1.select({ chainId: '', safeAddress: '' } as any)(
+        state as any,
+      )
+      const chainsState = chainsApi.endpoints.chainsGetChainsV1.select({})(state as any)
 
       let link = undefined
-      if (swapOrder.txId && safeInfo.data?.chainId && safeInfo.data?.address) {
-        const chainInfo = selectChainById(listenerApi.getState(), safeInfo.data?.chainId)
+      if (swapOrder.txId && safeInfoState.data?.chainId && safeInfoState.data?.address) {
+        const chainInfo = chainsState.data?.results?.find((c) => c.chainId === safeInfoState.data?.chainId)
         if (chainInfo !== undefined) {
-          link = getTxLink(swapOrder.txId, chainInfo, safeInfo.data?.address.value)
+          link = getTxLink(swapOrder.txId, chainInfo, safeInfoState.data?.address.value)
         }
       }
+
+      const threshold = safeInfoState.data?.threshold
 
       switch (newStatus) {
         case 'created':
@@ -98,7 +106,7 @@ export const swapOrderStatusListener = (listenerMiddleware: typeof listenerMiddl
             showNotification({
               title: 'Order created',
               message:
-                safeInfo.data?.threshold === 1
+                threshold === 1
                   ? 'Waiting for the transaction to be executed'
                   : 'Waiting for confirmation from signers of your Safe',
               groupKey,
@@ -185,14 +193,19 @@ export const swapOrderStatusListener = (listenerMiddleware: typeof listenerMiddl
  * @param listenerMiddleware
  */
 export const swapOrderListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
+  // Check if endpoint exists before setting up listener (may not exist in test environment)
+  if (!transactionsApi.endpoints?.transactionsGetTransactionsHistoryV1?.matchFulfilled) {
+    return
+  }
+
   listenerMiddleware.startListening({
-    actionCreator: txHistorySlice.actions.set,
+    matcher: transactionsApi.endpoints.transactionsGetTransactionsHistoryV1.matchFulfilled,
     effect: (action, listenerApi) => {
-      if (!action.payload.data) {
+      if (!action.payload) {
         return
       }
 
-      for (const result of action.payload.data.results) {
+      for (const result of action.payload.results) {
         if (!isTransactionListItem(result)) {
           continue
         }

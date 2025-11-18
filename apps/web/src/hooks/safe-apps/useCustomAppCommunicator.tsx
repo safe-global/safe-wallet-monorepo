@@ -21,7 +21,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import { selectOnChainSigning, selectTokenList, TOKEN_LISTS } from '@/store/settingsSlice'
 import { useAppSelector } from '@/store'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { selectSafeMessages } from '@/store/safeMessagesSlice'
+import useSafeMessages from '@/hooks/messages/useSafeMessages'
 import { trackSafeAppEvent, SAFE_APPS_EVENTS } from '@/services/analytics'
 import { safeMsgSubscribe, SafeMsgEvent } from '@/services/safe-messages/safeMsgEvents'
 import { txSubscribe, TxEvent } from '@/services/tx/txEvents'
@@ -40,7 +40,7 @@ export const useCustomAppCommunicator = (
   overrideHandlers?: Partial<UseAppCommunicatorHandlers>,
 ): AppCommunicator | undefined => {
   const [currentRequestId, setCurrentRequestId] = useState<RequestId | undefined>()
-  const safeMessages = useAppSelector(selectSafeMessages)
+  const { page: safeMessagesPage } = useSafeMessages()
   const { setTxFlow } = useContext(TxModalContext)
   const { safe, safeAddress } = useSafeInfo()
   const onChainSigning = useAppSelector(selectOnChainSigning)
@@ -155,7 +155,7 @@ export const useCustomAppCommunicator = (
       return newSettings
     },
     onGetOffChainSignature: async (messageHash: string) => {
-      const safeMessage = safeMessages.data?.results
+      const safeMessage = safeMessagesPage?.results
         ?.filter(isSafeMessageListItem)
         ?.find((item) => item.messageHash === messageHash)
 
