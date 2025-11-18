@@ -75,6 +75,7 @@ const config: ExpoConfig = {
       'android.permission.WAKE_LOCK',
     ],
     edgeToEdgeEnabled: true,
+    allowBackup: false,
   },
   web: {
     bundler: 'metro',
