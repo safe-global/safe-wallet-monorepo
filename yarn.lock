@@ -13494,6 +13494,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@safe-global/support-chat-embed@portal:../../../support-chat/packages/support-chat-embed::locator=%40safe-global%2Fweb%40workspace%3Aapps%2Fweb":
+  version: 0.0.0-use.local
+  resolution: "@safe-global/support-chat-embed@portal:../../../support-chat/packages/support-chat-embed::locator=%40safe-global%2Fweb%40workspace%3Aapps%2Fweb"
+  peerDependencies:
+    "@mui/material": ^5.0.0
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  languageName: node
+  linkType: soft
+
 "@safe-global/test@workspace:^, @safe-global/test@workspace:config/test":
   version: 0.0.0-use.local
   resolution: "@safe-global/test@workspace:config/test"
@@ -13671,6 +13681,7 @@ __metadata:
     "@safe-global/safe-deployments": "npm:^1.37.52"
     "@safe-global/safe-modules-deployments": "npm:^2.2.24"
     "@safe-global/store": "workspace:^"
+    "@safe-global/support-chat-embed": "portal:../../../support-chat/packages/support-chat-embed"
     "@safe-global/test": "workspace:^"
     "@safe-global/theme": "workspace:^"
     "@safe-global/types-kit": "npm:^1.0.5"
