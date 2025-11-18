@@ -12,13 +12,25 @@ import { toBeHex } from 'ethers'
 import type { EIP1193Provider } from '@web3-onboard/core'
 import * as useWallet from '@/hooks/wallets/useWallet'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
+import * as useTxQueue from '@/hooks/useTxQueue'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 
+jest.mock('@/hooks/useTxQueue')
+
+const mockUseTxQueue = useTxQueue.default as jest.MockedFunction<typeof useTxQueue.default>
+
 describe('usePendingActions hook', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+
+    // Default mock for useTxQueue
+    mockUseTxQueue.mockReturnValue({
+      page: undefined,
+      error: undefined,
+      loading: false,
+    })
   })
 
   it('should return no pending actions for non-current Safe with an empty queue', () => {
@@ -61,15 +73,13 @@ describe('usePendingActions hook', () => {
       results: [],
     }
 
-    const { result } = renderHook(() => usePendingActions(chainId, safeAddress), {
-      initialReduxState: {
-        txQueue: {
-          data: emptyPage,
-          loaded: true,
-          loading: false,
-        },
-      },
+    mockUseTxQueue.mockReturnValue({
+      page: emptyPage,
+      error: undefined,
+      loading: false,
     })
+
+    const { result } = renderHook(() => usePendingActions(chainId, safeAddress))
     expect(result.current).toEqual({ totalQueued: '', totalToSign: '' })
   })
 
@@ -197,15 +207,13 @@ describe('usePendingActions hook', () => {
 
     const chainId = '5'
 
-    const { result } = renderHook(() => usePendingActions(chainId, safeAddress), {
-      initialReduxState: {
-        txQueue: {
-          data: page,
-          loaded: true,
-          loading: false,
-        },
-      },
+    mockUseTxQueue.mockReturnValue({
+      page,
+      error: undefined,
+      loading: false,
     })
+
+    const { result } = renderHook(() => usePendingActions(chainId, safeAddress))
 
     expect(result.current).toEqual({ totalQueued: '1', totalToSign: '1' })
   })

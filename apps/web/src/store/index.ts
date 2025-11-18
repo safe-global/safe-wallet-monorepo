@@ -14,11 +14,8 @@ import { broadcastState, listenToBroadcast } from './broadcast'
 import {
   cookiesAndTermsSlice,
   cookiesAndTermsInitialState,
-  safeMessagesListener,
   swapOrderListener,
   swapOrderStatusListener,
-  txHistoryListener,
-  txQueueListener,
   authListener,
 } from './slices'
 import * as slices from './slices'
@@ -32,12 +29,7 @@ import { setupListeners } from '@reduxjs/toolkit/query'
 import { migrateBatchTxs } from '@/services/ls-migration/batch'
 
 const rootReducer = combineReducers({
-  [slices.chainsSlice.name]: slices.chainsSlice.reducer,
-  [slices.safeInfoSlice.name]: slices.safeInfoSlice.reducer,
-  [slices.balancesSlice.name]: slices.balancesSlice.reducer,
   [slices.sessionSlice.name]: slices.sessionSlice.reducer,
-  [slices.txHistorySlice.name]: slices.txHistorySlice.reducer,
-  [slices.txQueueSlice.name]: slices.txQueueSlice.reducer,
   [slices.swapOrderSlice.name]: slices.swapOrderSlice.reducer,
   [slices.addressBookSlice.name]: slices.addressBookSlice.reducer,
   [slices.notificationsSlice.name]: slices.notificationsSlice.reducer,
@@ -48,7 +40,6 @@ const rootReducer = combineReducers({
   [slices.popupSlice.name]: slices.popupSlice.reducer,
   [slices.spendingLimitSlice.name]: slices.spendingLimitSlice.reducer,
   [slices.safeAppsSlice.name]: slices.safeAppsSlice.reducer,
-  [slices.safeMessagesSlice.name]: slices.safeMessagesSlice.reducer,
   [slices.pendingSafeMessagesSlice.name]: slices.pendingSafeMessagesSlice.reducer,
   [slices.batchSlice.name]: slices.batchSlice.reducer,
   [slices.undeployedSafesSlice.name]: slices.undeployedSafesSlice.reducer,
@@ -97,14 +88,7 @@ const middleware: Middleware<{}, RootState>[] = [
   slices.gatewayApi.middleware,
 ]
 
-const listeners = [
-  safeMessagesListener,
-  txHistoryListener,
-  txQueueListener,
-  swapOrderListener,
-  swapOrderStatusListener,
-  authListener,
-]
+const listeners = [swapOrderListener, swapOrderStatusListener, authListener]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {
   if (action.type === hydrate.HYDRATE_ACTION) {

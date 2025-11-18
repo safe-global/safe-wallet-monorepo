@@ -1,8 +1,6 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import Track from '@/components/common/Track'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { useAppSelector } from '@/store'
-import { selectChains } from '@/store/chainsSlice'
 import { useTheme } from '@mui/material/styles'
 import Link from 'next/link'
 import {
@@ -42,6 +40,7 @@ import useChainId from '@/hooks/useChainId'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { InfoOutlined } from '@mui/icons-material'
 import { selectUndeployedSafe } from '@/store/slices'
+import { useAppSelector } from '@/store'
 import { hasMultiChainAddNetworkFeature } from '@/features/multichain/utils/utils'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
 import { AppRoutes } from '@/config/routes'
@@ -367,7 +366,6 @@ const NetworkSelector = ({
   const router = useRouter()
   const safeAddress = useSafeAddress()
   const currentChain = useCurrentChain()
-  const chains = useAppSelector(selectChains)
   const { currentSafeApp } = useSafeApps()
 
   const isSafeOpened = safeAddress !== ''
@@ -399,7 +397,7 @@ const NetworkSelector = ({
 
   const renderMenuItem = useCallback(
     (chainId: string, isSelected: boolean) => {
-      const chain = chains.data.find((chain) => chain.chainId === chainId)
+      const chain = configs.find((chain) => chain.chainId === chainId)
       if (!chain) return null
 
       const onSwitchNetwork = () => {
@@ -425,7 +423,7 @@ const NetworkSelector = ({
         </MenuItem>
       )
     },
-    [chains.data, onChainSelect, router, safeAddress, currentSafeApp],
+    [configs, onChainSelect, router, safeAddress, currentSafeApp],
   )
 
   const handleClose = () => {
