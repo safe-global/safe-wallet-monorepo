@@ -14,6 +14,8 @@ type Order = {
   orderUid: string
   status: AllStatuses
   txId?: string
+  chainId?: string
+  safeAddress?: string
 }
 
 type SwapOrderState = {
@@ -83,22 +85,27 @@ export const swapOrderStatusListener = (listenerMiddleware: typeof listenerMiddl
         return
       }
 
-      // Access safeInfo and chains from RTK Query cache instead of Redux
-      const state = getState()
-      const safeInfoState = safesApi.endpoints.safesGetSafeV1.select({ chainId: '', safeAddress: '' } as any)(
-        state as any,
-      )
-      const chainsState = chainsApi.endpoints.chainsGetChainsV1.select({})(state as any)
+      // Access safeInfo and chains from RTK Query cache
+      const state = getState() as RootState
+      let threshold: number | undefined
+      let link: string | undefined
 
-      let link = undefined
-      if (swapOrder.txId && safeInfoState.data?.chainId && safeInfoState.data?.address) {
-        const chainInfo = chainsState.data?.results?.find((c) => c.chainId === safeInfoState.data?.chainId)
-        if (chainInfo !== undefined) {
-          link = getTxLink(swapOrder.txId, chainInfo, safeInfoState.data?.address.value)
+      if (swapOrder.chainId && swapOrder.safeAddress) {
+        const safeInfoState = safesApi.endpoints.safesGetSafeV1.select({
+          chainId: swapOrder.chainId,
+          safeAddress: swapOrder.safeAddress,
+        })(state)
+        const chainsState = chainsApi.endpoints.chainsGetChainsV1.select({})(state)
+
+        threshold = safeInfoState.data?.threshold
+
+        if (swapOrder.txId && safeInfoState.data?.address) {
+          const chainInfo = chainsState.data?.results?.find((c) => c.chainId === swapOrder.chainId)
+          if (chainInfo !== undefined) {
+            link = getTxLink(swapOrder.txId, chainInfo, safeInfoState.data.address.value)
+          }
         }
       }
-
-      const threshold = safeInfoState.data?.threshold
 
       switch (newStatus) {
         case 'created':
@@ -205,6 +212,9 @@ export const swapOrderListener = (listenerMiddleware: typeof listenerMiddlewareI
         return
       }
 
+      // Get chainId and safeAddress from the query args
+      const { chainId, safeAddress } = action.meta.arg.originalArgs
+
       for (const result of action.payload.results) {
         if (!isTransactionListItem(result)) {
           continue
@@ -225,6 +235,8 @@ export const swapOrderListener = (listenerMiddleware: typeof listenerMiddlewareI
               orderUid: swapOrder.uid,
               status: swapOrder.status,
               txId: result.transaction.id,
+              chainId,
+              safeAddress,
             },
           })
         }

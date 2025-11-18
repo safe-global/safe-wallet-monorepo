@@ -8,6 +8,10 @@ import { getTransactionQueue } from '@/services/transactions'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import { useMemo } from 'react'
+import { useAppSelector } from '@/store'
+import { selectSettings } from '@/store/settingsSlice'
+import { useHasFeature } from './useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const useTxQueue = (
   pageUrl?: string,
@@ -18,6 +22,10 @@ const useTxQueue = (
 } => {
   const { safe, safeAddress, safeLoaded } = useSafeInfo()
   const { chainId } = safe
+  const { hideSuspiciousTransactions } = useAppSelector(selectSettings)
+  const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
+  const hideUntrustedTxs = (hasDefaultTokenlist && hideSuspiciousTransactions) ?? true
+  const hideImitationTxs = hideSuspiciousTransactions ?? true
 
   // If pageUrl is passed, load a new queue page from the API
   const [page, error, loading] = useAsync<QueuedItemPage>(() => {
@@ -34,7 +42,8 @@ const useTxQueue = (
     {
       chainId,
       safeAddress,
-      trusted: true,
+      trusted: hideUntrustedTxs,
+      imitation: hideImitationTxs,
     },
     {
       skip: !safeAddress || !chainId || !!pageUrl,
@@ -53,7 +62,7 @@ const useTxQueue = (
       }
     : {
         page: queueData,
-        error: queueError ? (queueError as any).error || 'Failed to load queue' : undefined,
+        error: queueError ? ('error' in queueError ? queueError.error : 'Failed to load queue') : undefined,
         loading: queueLoading,
       }
 }
@@ -61,7 +70,7 @@ const useTxQueue = (
 // Get the size of the queue as a string with an optional '+' if there are more pages
 export const useQueuedTxsLength = (): string => {
   const { page } = useTxQueue()
-  const { length } = (page?.results as Array<any>)?.filter(isTransactionQueuedItem) ?? []
+  const { length } = page?.results?.filter(isTransactionQueuedItem) ?? []
   const recoveryQueueSize = useRecoveryQueue().length
   const totalSize = length + recoveryQueueSize
   if (totalSize === 0) return ''

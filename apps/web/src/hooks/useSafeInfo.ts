@@ -16,7 +16,7 @@ const useSafeInfo = (): {
   const chainId = useChainId()
 
   const { currentData, error, isLoading } = useSafesGetSafeV1Query(
-    { chainId: chainId!, safeAddress: safeAddress! },
+    { chainId: chainId || '', safeAddress: safeAddress || '' },
     { skip: !chainId || !safeAddress },
   )
 
@@ -25,7 +25,7 @@ const useSafeInfo = (): {
       safe: currentData ? { ...currentData, deployed: true } : defaultSafeInfo,
       safeAddress: currentData?.address.value || '',
       safeLoaded: !!currentData && !isLoading,
-      safeError: error ? (error as any).error || 'Failed to load Safe' : undefined,
+      safeError: error ? ('error' in error ? error.error : 'Failed to load Safe') : undefined,
       safeLoading: isLoading,
     }),
     [currentData, error, isLoading],
