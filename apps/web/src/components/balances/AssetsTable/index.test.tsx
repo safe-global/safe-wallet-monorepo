@@ -1,12 +1,13 @@
 import * as useChainId from '@/hooks/useChainId'
 import useHiddenTokens from '@/hooks/useHiddenTokens'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
-import { fireEvent, getByRole, render, waitFor } from '@/tests/test-utils'
+import { act, fireEvent, getByRole, getByTestId, render, waitFor } from '@/tests/test-utils'
 import { safeParseUnits } from '@safe-global/utils/utils/formatters'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { toBeHex } from 'ethers'
 import { useState } from 'react'
 import AssetsTable from '.'
+import { COLLAPSE_TIMEOUT_MS } from './useHideAssets'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 const getParentRow = (element: HTMLElement | null) => {
@@ -119,25 +120,25 @@ describe('AssetsTable', () => {
     fireEvent.click(toggleHiddenButton)
 
     await waitFor(() => {
-      expect(result.getAllByText('100 DAI')[0]).not.toBeNull()
-      expect(result.getAllByText('200 SPM')[0]).not.toBeNull()
+      expect(result.queryByText('100 DAI')).not.toBeNull()
+      expect(result.queryByText('200 SPM')).not.toBeNull()
     })
 
     // unhide both tokens
-    let tableRow = getParentRow(result.getAllByText('100 DAI')[0])
+    let tableRow = getParentRow(result.getByText('100 DAI'))
     expect(tableRow).not.toBeNull()
     fireEvent.click(getByRole(tableRow!, 'checkbox'))
 
-    tableRow = getParentRow(result.getAllByText('200 SPM')[0])
+    tableRow = getParentRow(result.getByText('200 SPM'))
     expect(tableRow).not.toBeNull()
     fireEvent.click(getByRole(tableRow!, 'checkbox'))
 
     // hide them again
-    tableRow = getParentRow(result.getAllByText('100 DAI')[0])
+    tableRow = getParentRow(result.getByText('100 DAI'))
     expect(tableRow).not.toBeNull()
     fireEvent.click(getByRole(tableRow!, 'checkbox'))
 
-    tableRow = getParentRow(result.getAllByText('200 SPM')[0])
+    tableRow = getParentRow(result.getByText('200 SPM'))
     expect(tableRow).not.toBeNull()
     fireEvent.click(getByRole(tableRow!, 'checkbox'))
 
@@ -225,8 +226,8 @@ describe('AssetsTable', () => {
     fireEvent.click(toggleHiddenButton)
 
     await waitFor(() => {
-      expect(result.getAllByText('100 DAI')[0]).not.toBeNull()
-      expect(result.getAllByText('200 SPM')[0]).not.toBeNull()
+      expect(result.queryByText('100 DAI')).not.toBeNull()
+      expect(result.queryByText('200 SPM')).not.toBeNull()
     })
 
     // Expect 3 hidden token addresses
@@ -241,8 +242,8 @@ describe('AssetsTable', () => {
       // Menu should disappear
       expect(result.queryByText('Save')).toBeNull()
       // Assets should still be visible (unhidden)
-      expect(result.getAllByText('100 DAI')[0]).not.toBeNull()
-      expect(result.getAllByText('200 SPM')[0]).not.toBeNull()
+      expect(result.queryByText('100 DAI')).not.toBeNull()
+      expect(result.queryByText('200 SPM')).not.toBeNull()
     })
 
     // Expect one hidden token, which was not part of the current balance
@@ -322,36 +323,32 @@ describe('AssetsTable', () => {
     })
 
     // Initially we see all tokens
-    expect(result.getAllByText('100 DAI')[0]).not.toBeNull()
-    expect(result.getAllByText('200 SPM')[0]).not.toBeNull()
+    expect(result.queryByText('100 DAI')).not.toBeNull()
+    expect(result.queryByText('200 SPM')).not.toBeNull()
 
-    // Activate "hide tokens" mode
-    const toggleHiddenButton = result.getByTestId('showHidden')
-    fireEvent.click(toggleHiddenButton)
-
-    // hide one token using checkbox
-    let tableRow = getParentRow(result.getAllByText('200 SPM')[0])
+    // hide one token
+    let tableRow = getParentRow(result.getByText('200 SPM'))
     expect(tableRow).not.toBeNull()
-    fireEvent.click(getByRole(tableRow!, 'checkbox'))
-    fireEvent.click(result.getByText('Save'))
+    fireEvent.click(getByTestId(tableRow!, 'VisibilityOutlinedIcon'))
 
+    // As the animation runs for 300ms it is still visible in the first 299 ms
+    jest.advanceTimersByTime(COLLAPSE_TIMEOUT_MS - 1)
+    expect(result.queryByText('200 SPM')).not.toBeNull()
+
+    act(() => jest.advanceTimersByTime(1))
     // We only see DAI
-    await waitFor(() => {
-      expect(result.getAllByText('100 DAI')[0]).not.toBeNull()
-      expect(result.queryByText('200 SPM')).toBeNull()
-    })
+    expect(result.queryByText('100 DAI')).not.toBeNull()
+    expect(result.queryByText('200 SPM')).toBeNull()
 
     // Hide 2nd token
-    fireEvent.click(toggleHiddenButton)
-    tableRow = getParentRow(result.getAllByText('100 DAI')[0])
+    tableRow = getParentRow(result.getByText('100 DAI'))
     expect(tableRow).not.toBeNull()
-    fireEvent.click(getByRole(tableRow!, 'checkbox'))
-    fireEvent.click(result.getByText('Save'))
+    fireEvent.click(getByTestId(tableRow!, 'VisibilityOutlinedIcon'))
 
-    await waitFor(() => {
-      expect(result.queryByText('100 DAI')).toBeNull()
-      expect(result.queryByText('200 SPM')).toBeNull()
-    })
+    act(() => jest.advanceTimersByTime(COLLAPSE_TIMEOUT_MS))
+
+    expect(result.queryByText('100 DAI')).toBeNull()
+    expect(result.queryByText('200 SPM')).toBeNull()
   })
 
   test('hideAndUnhideAssets', async () => {
@@ -427,21 +424,19 @@ describe('AssetsTable', () => {
     const toggleHiddenButton = result.getByTestId('showHidden')
 
     // Initially we see all tokens (as none are hidden)
-    expect(result.getAllByText('100 DAI')[0]).not.toBeNull()
-    expect(result.getAllByText('200 SPM')[0]).not.toBeNull()
+    expect(result.queryByText('100 DAI')).not.toBeNull()
+    expect(result.queryByText('200 SPM')).not.toBeNull()
 
-    // Activate "hide tokens" mode
-    fireEvent.click(toggleHiddenButton)
-
-    // toggle spam token using checkbox
-    let tableRow = getParentRow(result.getAllByText('200 SPM')[0])
+    // toggle spam token
+    let tableRow = getParentRow(result.getByText('200 SPM'))
     expect(tableRow).not.toBeNull()
-    fireEvent.click(getByRole(tableRow!, 'checkbox'))
-    fireEvent.click(result.getByText('Save'))
+
+    // hide button
+    fireEvent.click(getByTestId(tableRow!, 'VisibilityOutlinedIcon'))
 
     // SPAM token is hidden now
     await waitFor(() => {
-      expect(result.getAllByText('100 DAI')[0]).not.toBeNull()
+      expect(result.queryByText('100 DAI')).not.toBeNull()
       expect(result.queryByText('200 SPM')).toBeNull()
     })
 
@@ -450,12 +445,12 @@ describe('AssetsTable', () => {
 
     // All assets are visible
     await waitFor(() => {
-      expect(result.getAllByText('100 DAI')[0]).not.toBeNull()
-      expect(result.getAllByText('200 SPM')[0]).not.toBeNull()
+      expect(result.queryByText('100 DAI')).not.toBeNull()
+      expect(result.queryByText('200 SPM')).not.toBeNull()
     })
 
     // Unhide token & reset (make no changes)
-    tableRow = getParentRow(result.getAllByText('200 SPM')[0])
+    tableRow = getParentRow(result.getByText('200 SPM'))
     expect(tableRow).not.toBeNull()
     fireEvent.click(getByRole(tableRow!, 'checkbox'))
     const resetButton = result.getByText('Cancel')
@@ -463,7 +458,7 @@ describe('AssetsTable', () => {
 
     // SPAM token is hidden again
     await waitFor(() => {
-      expect(result.getAllByText('100 DAI')[0]).not.toBeNull()
+      expect(result.queryByText('100 DAI')).not.toBeNull()
       expect(result.queryByText('200 SPM')).toBeNull()
     })
 
@@ -471,7 +466,7 @@ describe('AssetsTable', () => {
     fireEvent.click(toggleHiddenButton)
 
     // Unhide token & apply
-    tableRow = getParentRow(result.getAllByText('200 SPM')[0])
+    tableRow = getParentRow(result.getByText('200 SPM'))
     expect(tableRow).not.toBeNull()
     fireEvent.click(getByRole(tableRow!, 'checkbox'))
     const saveButton = result.getByText('Save')
@@ -479,71 +474,8 @@ describe('AssetsTable', () => {
 
     // Both tokens are visible again
     await waitFor(() => {
-      expect(result.getAllByText('100 DAI')[0]).not.toBeNull()
-      expect(result.getAllByText('200 SPM')[0]).not.toBeNull()
+      expect(result.queryByText('100 DAI')).not.toBeNull()
+      expect(result.queryByText('200 SPM')).not.toBeNull()
     })
-  })
-
-  test('renders elements in both mobile and desktop views', async () => {
-    const mockBalances: Balances = {
-      fiatTotal: '100',
-      items: [
-        {
-          balance: safeParseUnits('100', 18)!.toString(),
-          fiatBalance: '100',
-          fiatConversion: '1',
-          tokenInfo: {
-            address: toBeHex('0x2', 20),
-            decimals: 18,
-            logoUri: '',
-            name: 'DAI',
-            symbol: 'DAI',
-            type: TokenType.ERC20,
-          },
-        },
-      ],
-    }
-
-    const result = render(<TestComponent />, {
-      initialReduxState: {
-        balances: {
-          data: mockBalances,
-          loading: false,
-          loaded: true,
-        },
-        settings: {
-          currency: 'usd',
-          hiddenTokens: { '5': [] },
-          tokenList: TOKEN_LISTS.ALL,
-          shortName: {
-            copy: true,
-            qr: true,
-          },
-          theme: {
-            darkMode: true,
-          },
-          env: {
-            tenderly: {
-              url: '',
-              accessToken: '',
-            },
-            rpc: {},
-          },
-          signing: {
-            onChainSigning: false,
-            blindSigning: false,
-          },
-          transactionExecution: true,
-        },
-      },
-    })
-
-    // Verify that '100 DAI' appears in the table
-    const daiElements = result.getAllByText('100 DAI')
-    expect(daiElements.length).toBeGreaterThanOrEqual(1)
-
-    // Verify the element is in the DOM and not null
-    expect(daiElements[0]).not.toBeNull()
-    expect(daiElements[0]).toBeInTheDocument()
   })
 })

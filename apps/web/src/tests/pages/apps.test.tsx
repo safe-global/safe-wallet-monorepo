@@ -301,12 +301,7 @@ describe('AppsPage', () => {
       await waitFor(() => expect(screen.getByLabelText(/Safe App URL/)).toBeInTheDocument(), { timeout: 3000 })
       const appURLInput = screen.getByLabelText(/Safe App URL/)
       fireEvent.change(appURLInput, { target: { value: INVALID_SAFE_APP_URL } })
-      await waitFor(
-        () => {
-          expect(screen.getByText(/the app doesn't support Safe App functionality/i)).toBeInTheDocument()
-        },
-        { timeout: 5000 },
-      )
+      await screen.findByText(/the app doesn't support Safe App functionality/i)
     })
 
     it('Requires risk acknowledgment checkbox to add the app', async () => {

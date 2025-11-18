@@ -7,8 +7,10 @@ This repository uses a Yarn-based monorepo structure. Follow these rules when pr
 - Follow the DRY principle
 - Cover your changes with unit tests
 - Run type-check, lint, prettier and unit tests before each commit
+- Never use the `any` type!
 
 Specifically for the web app:
+
 - When making a new component, create a Storybook story file for it
 - Use theme variables from vars.css instead of hard-coded CSS values
 - Use MUI components and the Safe MUI theme

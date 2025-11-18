@@ -10,7 +10,7 @@ import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { useChain } from '@/hooks/useChains'
+import { selectChainById } from '@/store/chainsSlice'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import css from './styles.module.css'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
@@ -58,7 +58,7 @@ const SingleAccountItem = ({
   showActions = true,
 }: AccountItemProps) => {
   const { chainId, address, isReadOnly, isPinned } = safeItem
-  const chain = useChain(chainId)
+  const chain = useAppSelector((state) => selectChainById(state, chainId))
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, chainId, address))
   const safeAddress = useSafeAddress()
   const currChainId = useChainId()
@@ -76,8 +76,8 @@ const SingleAccountItem = ({
   const trackingLabel = isWelcomePage
     ? OVERVIEW_LABELS.login_page
     : isSpaceSafe
-    ? OVERVIEW_LABELS.space_page
-    : OVERVIEW_LABELS.sidebar
+      ? OVERVIEW_LABELS.space_page
+      : OVERVIEW_LABELS.sidebar
 
   const getHref = useGetHref(router)
 

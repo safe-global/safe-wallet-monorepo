@@ -38,5 +38,3 @@ describe('numbers utils', () => {
     })
   })
 })
-
-
