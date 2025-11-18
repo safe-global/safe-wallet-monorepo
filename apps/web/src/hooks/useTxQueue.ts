@@ -12,6 +12,7 @@ import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
 import { useHasFeature } from './useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQueryError'
 
 const useTxQueue = (
   pageUrl?: string,
@@ -62,7 +63,7 @@ const useTxQueue = (
       }
     : {
         page: queueData,
-        error: queueError ? ('error' in queueError ? queueError.error : 'Failed to load queue') : undefined,
+        error: getRtkQueryErrorMessage(queueError, 'Failed to load queue'),
         loading: queueLoading,
       }
 }

@@ -7,7 +7,6 @@ import { act, fireEvent, render, waitFor } from '@/tests/test-utils'
 import { WalletConnectContext } from '../WalletConnectContext'
 import WalletConnectWallet from '../services/WalletConnectWallet'
 import { WalletConnectProvider, WCLoadingState } from '../WalletConnectContext'
-// import { safeInfoSlice } from '@/store/safeInfoSlice' // Deleted - using RTK Query now
 import { useAppDispatch } from '@/store'
 import * as useSafeWalletProvider from '@/services/safe-wallet-provider/useSafeWalletProvider'
 import * as useLocalStorageHook from '@/services/local-storage/useLocalStorage'

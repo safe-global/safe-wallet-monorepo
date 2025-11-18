@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useAppDispatch } from '@/store'
 import { spendingLimitSlice } from '@/store/spendingLimitsSlice'
 import { useLoadSpendingLimits } from './loadables/useLoadSpendingLimits'
@@ -11,14 +11,18 @@ export const useSpendingLimitsLoader = () => {
   const dispatch = useAppDispatch()
   const [data, error, loading] = useLoadSpendingLimits()
 
+  // Memoize the payload to avoid unnecessary dispatches
+  const payload = useMemo(
+    () => ({
+      data,
+      error: error?.message,
+      loading,
+      loaded: !loading && !error,
+    }),
+    [data, error, loading],
+  )
+
   useEffect(() => {
-    dispatch(
-      spendingLimitSlice.actions.set({
-        data,
-        error: error?.message,
-        loading,
-        loaded: !loading && !error,
-      }),
-    )
-  }, [dispatch, data, error, loading])
+    dispatch(spendingLimitSlice.actions.set(payload))
+  }, [dispatch, payload])
 }

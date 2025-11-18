@@ -10,6 +10,7 @@ import { selectSettings } from '@/store/settingsSlice'
 import { useHasFeature } from './useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { POLLING_INTERVAL } from '@/config/constants'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQueryError'
 
 const useTxHistory = (
   pageUrl?: string,
@@ -66,11 +67,7 @@ const useTxHistory = (
 
   const isFetched = filter || pageUrl
   const dataPage = isFetched ? page : historyData
-  const errorMessage = isFetched
-    ? error?.message
-    : historyError
-      ? (historyError as any).error || 'Failed to load history'
-      : undefined
+  const errorMessage = isFetched ? error?.message : getRtkQueryErrorMessage(historyError, 'Failed to load history')
   const isLoading = isFetched ? loading : historyLoading
 
   // Return the new page or the stored page

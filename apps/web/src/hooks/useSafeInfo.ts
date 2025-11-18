@@ -4,6 +4,7 @@ import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { useSafeAddressFromUrl } from './useSafeAddressFromUrl'
 import { useChainId } from './useChainId'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQueryError'
 
 const useSafeInfo = (): {
   safe: ExtendedSafeInfo
@@ -25,7 +26,7 @@ const useSafeInfo = (): {
       safe: currentData ? { ...currentData, deployed: true } : defaultSafeInfo,
       safeAddress: currentData?.address.value || '',
       safeLoaded: !!currentData && !isLoading,
-      safeError: error ? ('error' in error ? error.error : 'Failed to load Safe') : undefined,
+      safeError: getRtkQueryErrorMessage(error, 'Failed to load Safe'),
       safeLoading: isLoading,
     }),
     [currentData, error, isLoading],
