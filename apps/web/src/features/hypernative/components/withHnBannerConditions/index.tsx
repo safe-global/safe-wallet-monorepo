@@ -27,7 +27,7 @@ export function withHnBannerConditions<P extends object = WithHnBannerConditions
       const debouncedLoading = useDebounce(loading, 50)
 
       // If still loading (or debouncing), show skeleton (only for Promo banner type in dashboard carousel)
-      if (debouncedLoading && bannerType === BannerType.Promo) {
+      if (!showBanner && debouncedLoading && bannerType === BannerType.Promo) {
         return <SkeletonBanner />
       }
 
