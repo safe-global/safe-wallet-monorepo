@@ -1,14 +1,13 @@
 import type { ReactElement } from 'react'
 import { useMemo } from 'react'
 import classnames from 'classnames'
-import { useAppSelector } from '@/store'
-import { selectChainById, selectChains } from '@/store/chainsSlice'
 import css from './styles.module.css'
 import useChainId from '@/hooks/useChainId'
 import { Skeleton, Stack, SvgIcon, Typography } from '@mui/material'
 import isEmpty from 'lodash/isEmpty'
 import FiatValue from '../FiatValue'
 import UnknownChainIcon from '@/public/images/common/unknown.svg'
+import useChains, { useChain } from '@/hooks/useChains'
 
 type ChainIndicatorProps = {
   chainId?: string
@@ -45,10 +44,9 @@ const ChainIndicator = ({
 }: ChainIndicatorProps): ReactElement | null => {
   const currentChainId = useChainId()
   const id = chainId || currentChainId
-  const chains = useAppSelector(selectChains)
-  const chainConfig =
-    useAppSelector((state) => selectChainById(state, id)) || (showUnknown ? fallbackChainConfig : null)
-  const noChains = isEmpty(chains.data)
+  const { configs: chains, loading } = useChains()
+  const chainConfig = useChain(id) || (showUnknown ? fallbackChainConfig : null)
+  const noChains = isEmpty(chains) || loading
 
   const style = useMemo(() => {
     if (!chainConfig) return

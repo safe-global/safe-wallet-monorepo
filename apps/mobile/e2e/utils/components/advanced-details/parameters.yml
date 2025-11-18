@@ -1,0 +1,62 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
+# ============================================
+# Parameters Tab - Verify All Items
+# Based on formatParameters.tsx - all possible items that can appear
+# ============================================
+
+# Switch to Parameters tab
+- tapOn: 'Parameters'
+
+# Verify Parameters tab is selected and visible
+- assertVisible: 'Parameters'
+
+# Call or Interacted with (always present)
+# Shows "Call" if dataDecoded?.method exists, otherwise "Interacted with"
+- assertVisible:
+    text: '(Call|Interacted with)'
+
+# Method name or address in badge (shows either decoded method or to.address)
+# If "Call": shows method name in badge (e.g., rejectTransaction, executeTransaction, etc.)
+# If "Interacted with": shows to.address in badge
+# This could be a method signature like "rejectTransaction" or an address
+- extendedWaitUntil:
+    visible:
+      text: '.*(rejectTransaction|rejectTx|executeTransaction|transfer|approve|multicall|0x[0-9a-fA-F]{40}).*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+# Parameters section (optional - only if dataDecoded?.parameters exists)
+# Each parameter shows name and type as label
+# We can't predict exact parameter names/types, so we verify structure exists if parameters are present
+- extendedWaitUntil:
+    visible:
+      text: '.*(uint256|address|bool|bytes|string|uint|int).*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+# Parameter values (optional - if parameters exist, they will display values)
+# Values could be addresses, numbers, bools, etc.
+- extendedWaitUntil:
+    visible:
+      text: '.*(0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}|\d+|true|false).*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+# Copy buttons for parameter values (optional - if long values exist)
+- extendedWaitUntil:
+    visible:
+      id: 'copy-button'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+# Hex Data copy button (optional - if hex data exists)
+- extendedWaitUntil:
+    visible:
+      id: 'copy-button'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}

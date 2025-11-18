@@ -1,0 +1,26 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
+# ===========================================
+# Swap Owner Transaction Card
+# ===========================================
+- assertVisible:
+    text: 'Settings change'
+
+- extendedWaitUntil:
+    visible:
+      text: '.*swapOwner.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+- tapOn:
+    text: '.*swapOwner.*'
+
+- runFlow:
+    file: ./swap-owner-tx.yml
+
+- tapOn:
+    id: 'go-back'

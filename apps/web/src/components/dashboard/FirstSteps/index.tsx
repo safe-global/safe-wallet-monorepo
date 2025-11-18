@@ -12,10 +12,11 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { OVERVIEW_EVENTS } from '@/services/analytics'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setQrShortName } from '@/store/settingsSlice'
-import { selectOutgoingTransactions } from '@/store/txHistorySlice'
+import useTxHistory from '@/hooks/useTxHistory'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { isTransactionListItem, isOutgoingTransfer } from '@/utils/transaction-guards'
 import classnames from 'classnames'
-import { type ReactNode, useState } from 'react'
+import { type ReactNode, useState, useMemo } from 'react'
 import { Card, WidgetBody, WidgetContainer } from '@/components/dashboard/styled'
 import { Box, Button, CircularProgress, FormControlLabel, Grid, Switch, Typography } from '@mui/material'
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
@@ -26,6 +27,8 @@ import css from './styles.module.css'
 import ActivateAccountButton from '@/features/counterfactual/ActivateAccountButton'
 import { isReplayedSafeProps } from '@/features/counterfactual/utils'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
+import { HnDashboardBannerWithNoBalanceCheck } from '@/features/hypernative/components/HnDashboardBanner'
+import { BannerType, useBannerVisibility } from '@/features/hypernative/hooks'
 
 const calculateProgress = (items: boolean[]) => {
   const totalNumberOfItems = items.length
@@ -356,9 +359,20 @@ const AccountReadyWidget = () => {
 const FirstSteps = () => {
   const { balances } = useBalances()
   const { safe, safeAddress } = useSafeInfo()
-  const outgoingTransactions = useAppSelector(selectOutgoingTransactions)
+  const { page: txHistoryPage } = useTxHistory()
+
+  const outgoingTransactions = useMemo(() => {
+    return txHistoryPage?.results
+      .filter(isTransactionListItem)
+      .filter((tx) => isOutgoingTransfer(tx.transaction.txInfo))
+  }, [txHistoryPage])
+
   const chain = useCurrentChain()
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, safe.chainId, safeAddress))
+
+  // Check if banner should show (for conditional rendering of AccountReadyWidget)
+  // Use NoBalanceCheck for undeployed safes as the banner should be shown for all non-active safes as well
+  const { showBanner: showHnDashboardBanner } = useBannerVisibility(BannerType.NoBalanceCheck)
 
   const isMultiSig = safe.threshold > 1
   const isReplayedSafe = undeployedSafe && isReplayedSafeProps(undeployedSafe?.props)
@@ -470,7 +484,7 @@ const FirstSteps = () => {
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <AccountReadyWidget />
+            {showHnDashboardBanner ? <HnDashboardBannerWithNoBalanceCheck /> : <AccountReadyWidget />}
           </Grid>
         </Grid>
       </WidgetBody>

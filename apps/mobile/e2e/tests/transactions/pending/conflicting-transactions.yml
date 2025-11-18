@@ -1,0 +1,39 @@
+appId: ${APP_ID}
+tags:
+  - transactions
+  - pending
+  - smoke
+---
+- runFlow:
+    file: ../../../utils/setup/app-start.yml
+
+# Direct navigation to Pending Tx Safe 1
+- tapOn:
+    id: 'e2ePendingTxsSafe1'
+
+# Verify we're on the pending transactions screen
+- assertVisible:
+    id: 'pending-tx-list'
+
+# Verify we see the "Next" section header
+- assertVisible:
+    text: 'Next'
+
+# ===========================================
+# Conflicting Transactions
+# ===========================================
+# Test the conflicting transactions card
+- runFlow:
+    file: ../../../utils/components/pending-tx/conflicting-txs-card.yml
+    env:
+      TX_TYPES: 'Send,Settings change'
+      TX_DETAILS: '0\.00002 ETH,addOwnerWithThreshold'
+      CONFIRMATIONS_PATTERN: '.*1/1.*'
+
+# First Transaction: Send Transaction
+- runFlow:
+    file: ../../../utils/components/pending-tx/send-tx-card.yml
+
+# Second Transaction: Settings Change (Add Owner)
+- runFlow:
+    file: ../../../utils/components/pending-tx/settings-change-new-signer-tx-card.yml

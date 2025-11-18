@@ -1,0 +1,24 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
+# ===========================================
+# Limit Order Transaction Card
+# ===========================================
+# Limit orders show "Limit order" text
+- extendedWaitUntil:
+    visible:
+      text: '.*Limit order.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+- tapOn:
+    text: '.*Limit order.*'
+
+- runFlow:
+    file: ./limit-order-tx.yml
+
+- tapOn:
+    id: 'go-back'

@@ -12,11 +12,17 @@ import { getAndValidateSafeSDK } from '@/services/tx/tx-sender/sdk'
 import { parseUnits } from 'ethers'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import * as useBalances from '@/hooks/useBalances'
+
 jest.mock('@/services/tx/tx-sender/sdk', () => ({
   getAndValidateSafeSDK: jest.fn().mockReturnValue({
     createTransaction: jest.fn(),
   }),
 }))
+
+jest.mock('@/hooks/useBalances')
+
+const mockUseBalances = useBalances.default as jest.MockedFunction<typeof useBalances.default>
 
 const ERC20_INTERFACE = ERC20__factory.createInterface()
 const MULTISEND_INTERFACE = Multi_send__factory.createInterface()
@@ -24,6 +30,13 @@ const MULTISEND_INTERFACE = Multi_send__factory.createInterface()
 describe('ApprovalEditor', () => {
   beforeEach(() => {
     jest.restoreAllMocks()
+
+    // Default mock for useBalances
+    mockUseBalances.mockReturnValue({
+      balances: { fiatTotal: '0', items: [] },
+      error: undefined,
+      loading: false,
+    })
   })
 
   it('returns null if there is no safe transaction', () => {
@@ -177,15 +190,13 @@ describe('ApprovalEditor', () => {
       ],
     }
 
-    const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />, {
-      initialReduxState: {
-        balances: {
-          data: mockBalances,
-          loading: false,
-          loaded: true,
-        },
-      },
+    mockUseBalances.mockReturnValue({
+      balances: mockBalances,
+      error: undefined,
+      loading: false,
     })
+
+    const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />)
 
     await waitFor(() => {
       const amountInput1 = result.container.querySelector('input[name="approvals.0"]') as HTMLInputElement
@@ -288,15 +299,13 @@ describe('ApprovalEditor', () => {
       ],
     }
 
-    const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />, {
-      initialReduxState: {
-        balances: {
-          data: mockBalances,
-          loading: false,
-          loaded: true,
-        },
-      },
+    mockUseBalances.mockReturnValue({
+      balances: mockBalances,
+      error: undefined,
+      loading: false,
     })
+
+    const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />)
 
     await waitFor(() => {
       const amountInput1 = result.container.querySelector('input[name="approvals.0"]') as HTMLInputElement

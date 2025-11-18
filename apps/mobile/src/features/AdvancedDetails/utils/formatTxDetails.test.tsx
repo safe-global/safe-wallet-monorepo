@@ -100,9 +100,11 @@ describe('formatTxDetails', () => {
 
     const result = formatTxDetails({ txDetails, viewOnExplorer })
 
-    expect(result.length).toBeGreaterThanOrEqual(1)
+    expect(result.length).toBeGreaterThanOrEqual(2)
     // Check that we have a 'To' field
     expect(result.some((item) => 'label' in item && item.label === 'To')).toBe(true)
+    // Check that we have a 'Data' field (always shown when txData exists)
+    expect(result.some((item) => 'label' in item && item.label === 'Data')).toBe(true)
   })
 
   it('should include Value field when transaction has value', () => {
@@ -137,6 +139,23 @@ describe('formatTxDetails', () => {
 
     // Check that we have an 'Operation' field
     expect(result.some((item) => 'label' in item && item.label === 'Operation')).toBe(true)
+  })
+
+  it('should include Data field when txData exists', () => {
+    const txDetails = createMockTxDetails({
+      txData: {
+        to: { value: faker.finance.ethereumAddress() },
+        value: null,
+        operation: Operation.CALL,
+        hexData: '0x1234',
+        dataDecoded: null,
+      },
+    })
+
+    const result = formatTxDetails({ txDetails, viewOnExplorer })
+
+    // Check that we have a 'Data' field
+    expect(result.some((item) => 'label' in item && item.label === 'Data')).toBe(true)
   })
 
   it('should include multisig execution details when available', () => {
@@ -204,8 +223,10 @@ describe('formatTxDetails', () => {
 
     const result = formatTxDetails({ txDetails, viewOnExplorer })
 
-    // Should only have the 'To' field
-    expect(result).toHaveLength(1)
+    // Should have the 'To' and 'Data' fields (Data is always shown when txData exists)
+    expect(result).toHaveLength(2)
+    expect(result.some((item) => 'label' in item && item.label === 'To')).toBe(true)
+    expect(result.some((item) => 'label' in item && item.label === 'Data')).toBe(true)
     expect(result.some((item) => 'label' in item && item.label === 'Value')).toBe(false)
     expect(result.some((item) => 'label' in item && item.label === 'Operation')).toBe(false)
     expect(result.some((item) => 'label' in item && item.label === 'Transaction Hash')).toBe(false)
@@ -277,6 +298,7 @@ describe('formatTxDetails', () => {
     // Should have all possible fields
     expect(result.some((item) => 'label' in item && item.label === 'To')).toBe(true)
     expect(result.some((item) => 'label' in item && item.label === 'Value')).toBe(true)
+    expect(result.some((item) => 'label' in item && item.label === 'Data')).toBe(true)
     expect(result.some((item) => 'label' in item && item.label === 'Operation')).toBe(true)
     expect(result.some((item) => 'label' in item && item.label === 'SafeTxGas')).toBe(true)
     expect(result.some((item) => 'label' in item && item.label === 'Transaction Hash')).toBe(true)

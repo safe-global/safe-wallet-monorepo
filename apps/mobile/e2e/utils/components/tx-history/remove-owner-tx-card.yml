@@ -1,0 +1,26 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
+# ===========================================
+# Remove Owner Transaction Card
+# ===========================================
+- assertVisible:
+    text: 'Settings change'
+
+- extendedWaitUntil:
+    visible:
+      text: '.*removeOwner.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+- tapOn:
+    text: '.*removeOwner.*'
+
+- runFlow:
+    file: ./remove-owner-tx.yml
+
+- tapOn:
+    id: 'go-back'

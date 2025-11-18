@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text, Theme } from 'tamagui'
+import { Text, Theme, View } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { MultiSend } from '@safe-global/store/gateway/types'
 import { CustomTransactionInfo, SafeAppInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -31,7 +31,13 @@ export function TxContractInteractionCard({ txInfo, safeAppInfo, ...rest }: TxCo
           />
         </Theme>
       }
-      rightNode={<Text>{txInfo.methodName}</Text>}
+      rightNode={
+        <View flex={1}>
+          <Text numberOfLines={1} ellipsizeMode="tail">
+            {txInfo.methodName}
+          </Text>
+        </View>
+      }
       {...rest}
     />
   )

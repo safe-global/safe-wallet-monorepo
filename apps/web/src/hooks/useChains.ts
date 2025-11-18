@@ -1,35 +1,32 @@
 import { useMemo } from 'react'
-import isEqual from 'lodash/isEqual'
-import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { useAppSelector } from '@/store'
-import { selectChainById, selectChains } from '@/store/chainsSlice'
+import { type Chain, useChainsGetChainsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useChainId } from './useChainId'
 import type { FEATURES } from '@safe-global/utils/utils/chains'
 import { hasFeature } from '@safe-global/utils/utils/chains'
 
 const useChains = (): { configs: Chain[]; error?: string; loading?: boolean } => {
-  const state = useAppSelector(selectChains, isEqual)
+  const { currentData, error, isLoading } = useChainsGetChainsV1Query({})
 
   return useMemo(
     () => ({
-      configs: state.data,
-      error: state.error,
-      loading: state.loading,
+      configs: currentData?.results || [],
+      error: error ? (error as any).error || 'Failed to load chains' : undefined,
+      loading: isLoading,
     }),
-    [state.data, state.error, state.loading],
+    [currentData, error, isLoading],
   )
 }
 
 export default useChains
 
 export const useChain = (chainId: string): Chain | undefined => {
-  return useAppSelector((state) => selectChainById(state, chainId), isEqual)
+  const { configs } = useChains()
+  return useMemo(() => configs.find((chain) => chain.chainId === chainId), [configs, chainId])
 }
 
 export const useCurrentChain = (): Chain | undefined => {
   const chainId = useChainId()
-  const chainInfo = useAppSelector((state) => selectChainById(state, chainId), isEqual)
-  return chainInfo
+  return useChain(chainId)
 }
 
 /**

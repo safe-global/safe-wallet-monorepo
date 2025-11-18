@@ -1,0 +1,26 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
+# ===========================================
+# Settings Change Transaction Card
+# ===========================================
+- assertVisible:
+    text: 'Settings change'
+
+- extendedWaitUntil:
+    visible:
+      text: '.*addOwnerWithThreshold.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+- tapOn:
+    text: '.*addOwnerWithThreshold.*'
+
+- runFlow:
+    file: ./add-owner-with-threshold-tx.yml
+
+- tapOn:
+    id: 'go-back'

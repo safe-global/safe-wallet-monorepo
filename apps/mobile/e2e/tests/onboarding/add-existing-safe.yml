@@ -1,0 +1,38 @@
+appId: ${APP_ID}
+tags:
+  - onboarding
+---
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eOnboardedAccount'
+- tapOn:
+    id: 'dropdown-label-view'
+    index: 0
+- tapOn:
+    id: 'add-existing-account'
+- tapOn:
+    id: 'enter-manually'
+- tapOn: 'Enter safe name here'
+- inputText: 'My safe'
+- tapOn:
+    text: 'Paste address...'
+- inputText: 'sep:0x9BFCA75a05175503580D593F4330b5505c594596'
+- assertVisible: 'Sepolia'
+- assertVisible:
+    id: 'success-icon'
+- tapOn:
+    id: 'continue-button'
+- assertVisible: 'Import your signers to unlock account'
+- assertVisible: '.*Before you import signers....*'
+- assertVisible:
+    id: 'signer-0x65F8236309e5A99Ff0d129d04E486EBCE20DC7B0'
+- assertVisible:
+    id: 'signer-0x0D65139Da4B36a8A39BF1b63e950038D42231b2e'
+- assertVisible:
+    id: 'signer-0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8'
+- tapOn:
+    id: 'continue-button'
+- assertVisible: '0x9BFC...4596.*'
+- assertVisible: 'Sepolia'

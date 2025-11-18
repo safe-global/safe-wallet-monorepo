@@ -9,16 +9,19 @@ This directory contains helper scripts for the automated release process.
 Enhanced changelog generator with better formatting and categorization.
 
 **Usage:**
+
 ```bash
 ./generate-changelog.sh <base_branch> <compare_branch>
 ```
 
 **Example:**
+
 ```bash
 ./generate-changelog.sh main dev
 ```
 
 **Features:**
+
 - Groups commits by type (features, fixes, mobile, chores, etc.)
 - Detects breaking changes
 - Links to PRs and commits
@@ -34,11 +37,13 @@ Enhanced changelog generator with better formatting and categorization.
 Sends formatted notifications to Slack about release events.
 
 **Usage:**
+
 ```bash
 SLACK_WEBHOOK_URL="<url>" ./notify-slack.sh <event_type> <version> [additional_info]
 ```
 
 **Event Types:**
+
 - `release_started` - Release initiated and ready for QA
 - `qa_approved` - Release approved and merged
 - `release_published` - Release deployed to production
@@ -47,12 +52,14 @@ SLACK_WEBHOOK_URL="<url>" ./notify-slack.sh <event_type> <version> [additional_i
 - `release_failed` - Release encountered an error
 
 **Example:**
+
 ```bash
 export SLACK_WEBHOOK_URL="https://hooks.slack.com/..."
 ./notify-slack.sh release_started "1.74.0"
 ```
 
 **Environment Variables:**
+
 - `SLACK_WEBHOOK_URL` (required) - Slack webhook URL
 - `GITHUB_REPOSITORY` (optional) - Repository name for links
 - `GITHUB_RUN_ID` (optional) - Workflow run ID for links
@@ -64,10 +71,12 @@ export SLACK_WEBHOOK_URL="https://hooks.slack.com/..."
 These scripts are called by the automated release workflows:
 
 - **Start Web Release** (`../.github/workflows/web-release-start.yml`)
+
   - Uses `generate-changelog.sh` to create PR description
   - Uses `notify-slack.sh` to announce release start
 
 - **Complete Web Release** (`../.github/workflows/web-release-complete.yml`)
+
   - Uses `notify-slack.sh` to announce QA approval
 
 - **Back-merge Main to Dev** (`../.github/workflows/web-release-backmerge.yml`)
@@ -118,6 +127,7 @@ chmod +x notify-slack.sh
 ### Git commands failing
 
 Ensure you're in a git repository and have fetched latest changes:
+
 ```bash
 git fetch --all
 ```

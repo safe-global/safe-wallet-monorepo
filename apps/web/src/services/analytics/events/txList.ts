@@ -26,10 +26,6 @@ export const TX_LIST_EVENTS = {
     category: TX_LIST_CATEGORY,
     label: CopyDeeplinkLabels.shareBlock,
   },
-  OPEN_SHARE_BLOCK: {
-    action: 'Open share block',
-    category: TX_LIST_CATEGORY,
-  },
   CONFIRM: {
     action: 'Confirm transaction',
     category: TX_LIST_CATEGORY,
