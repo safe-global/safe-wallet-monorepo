@@ -15,13 +15,21 @@ tags:
     visible:
       text: '.*${METHOD_NAME}.*'
       optional: true
+<<<<<<< HEAD:apps/mobile/e2e/utils/components/tx-history/contract-interaction-tx-card.yml
     timeout: ${output.defaults.extendedWaitUntilTimeout}
+=======
+    timeout: 2000
+>>>>>>> origin/main:apps/mobile/e2e/components/tx-history/contract-interaction-tx-card.yml
 
 - extendedWaitUntil:
     visible:
       text: '.*${CONTRACT_NAME}.*'
       optional: true
+<<<<<<< HEAD:apps/mobile/e2e/utils/components/tx-history/contract-interaction-tx-card.yml
     timeout: ${output.defaults.extendedWaitUntilTimeout}
+=======
+    timeout: 2000
+>>>>>>> origin/main:apps/mobile/e2e/components/tx-history/contract-interaction-tx-card.yml
 
 - tapOn:
     text: '.*${METHOD_NAME}.*'

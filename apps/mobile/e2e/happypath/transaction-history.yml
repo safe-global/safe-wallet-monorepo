@@ -1,0 +1,255 @@
+appId: global.safe.mobileapp.ios
+---
+# Transaction History E2E Test
+# Tests viewing transaction history with infinite scroll and drilling into transaction details
+
+- runFlow:
+    file: ../shared/clean-app-start.yml
+
+- tapOn:
+    id: 'e2eTransactionHistory'
+
+- assertVisible:
+    id: 'home-tab'
+
+- tapOn:
+    id: 'transactions-tab'
+
+- assertVisible:
+    id: 'tx-history-list'
+
+# Verify transactions are loaded (date groups or transaction items should be visible)
+- extendedWaitUntil:
+    visible:
+      text: '.*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).*\d{1,2},.*\d{4}.*'
+      optional: true
+    timeout: 2000
+
+# Verify date grouping is visible (sticky headers or date labels)
+- extendedWaitUntil:
+    visible:
+      text: '.*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec).*'
+      optional: true
+    timeout: 2000
+
+# ============================================
+# Pull to Refresh
+# ============================================
+# Pull down on transaction list to refresh
+- swipe:
+    direction: DOWN
+    startPoint: '50%,30%'
+    endPoint: '50%,60%'
+    duration: 300
+
+# Wait for refresh to complete (loader should disappear if shown)
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Verify list is still visible after refresh
+- assertVisible:
+    id: 'tx-history-list'
+
+# ===========================================
+# Rejected Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/reject-tx-card.yml
+
+# ===========================================
+# Sent Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/sent-tx-card.yml
+
+# ===========================================
+# Settings Change Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/add-owner-with-threshold-tx-card.yml
+
+# ===========================================
+# Received Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/received-tx-card.yml
+
+# ===========================================
+# Change Threshold Settings Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/change-threshold-tx-card.yml
+
+- scroll
+
+# ===========================================
+# Bulk Transactions
+# ===========================================
+# Scroll down to reveal bulk transactions (Dec 1, 2023 date group)
+
+- runFlow:
+    file: ../components/tx-history/bulk-tx-card.yml
+    env:
+      TRANSACTION_INDEX: '0'
+
+# ===========================================
+# Batch Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/bulk-tx-card.yml
+    env:
+      TRANSACTION_INDEX: '1'
+
+- runFlow:
+    file: ../components/tx-history/batch-tx-card.yml
+    env:
+      METHOD_NAME: 'multiSend'
+      CONTRACT_NAME: 'Safe: MultiSendCallOnly 1.3.0'
+
+# ===========================================
+# Disable Module Settings Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/disable-module-tx-card.yml
+
+- scroll
+
+# ===========================================
+# Remove Owner Settings Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/remove-owner-tx-card.yml
+
+# ===========================================
+# Swap Owner Settings Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/swap-owner-tx-card.yml
+
+- scrollUntilVisible:
+    element:
+      text: '.*deleteAllowance.*'
+
+# ===========================================
+# Contract Interaction Transaction (AllowanceModule - deleteAllowance)
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/contract-interaction-tx-card.yml
+    env:
+      METHOD_NAME: 'deleteAllowance'
+      CONTRACT_NAME: 'AllowanceModule'
+      ACTION_NAME: 'DeleteAllowance'
+
+- scrollUntilVisible:
+    element:
+      text: 'Safe Account created'
+
+# ===========================================
+# Switch to Swap Test Safe for Swap Order Test
+# ===========================================
+# Tap on home tab
+- tapOn:
+    id: 'home-tab'
+
+# Tap on the dropdown to switch safes
+- tapOn:
+    id: 'dropdown-label-view'
+    index: 0
+
+# Select Swap Test Safe from the dropdown
+- tapOn:
+    text: '.*Swap Test Safe.*'
+
+# Navigate to transactions tab
+- assertVisible:
+    id: 'home-tab'
+
+- tapOn:
+    id: 'transactions-tab'
+
+- assertVisible:
+    id: 'tx-history-list'
+
+# Scroll down until we find the first swap order
+- scrollUntilVisible:
+    element:
+      text: 'Swap order'
+
+# ===========================================
+# Swap Order Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/swap-order-tx-card.yml
+
+# ===========================================
+# Limit Order Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/limit-order-tx-card.yml
+
+# ===========================================
+# Contract Interaction Transaction (Wrapped Ether - deposit)
+# ===========================================
+
+# Scroll down until we find the first deposit
+- scrollUntilVisible:
+    element:
+      text: 'deposit'
+    centerElement: true
+
+- runFlow:
+    file: ../components/tx-history/contract-interaction-tx-card.yml
+    env:
+      METHOD_NAME: 'deposit'
+      CONTRACT_NAME: 'Wrapped Ether'
+      ACTION_NAME: 'Deposit'
+
+# ===========================================
+# Switch to Stake Deposit Test Safe for Stake Deposit Test
+# ===========================================
+# Tap on home tab
+- tapOn:
+    id: 'home-tab'
+
+# Tap on the dropdown to switch safes
+- tapOn:
+    id: 'dropdown-label-view'
+    index: 0
+
+# Select Stake Deposit Safe from the dropdown
+- tapOn:
+    text: '.*Stake Deposit Safe.*'
+
+# Navigate to transactions tab
+- assertVisible:
+    id: 'home-tab'
+
+- tapOn:
+    id: 'transactions-tab'
+
+- assertVisible:
+    id: 'tx-history-list'
+
+# Scroll down until we find the first stake deposit
+- scrollUntilVisible:
+    element:
+      text: '.*Deposit.*'
+
+# ===========================================
+# Stake Deposit Transaction
+# ===========================================
+
+- runFlow:
+    file: ../components/tx-history/stake-deposit-tx-card.yml

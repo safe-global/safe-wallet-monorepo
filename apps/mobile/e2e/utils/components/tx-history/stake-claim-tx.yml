@@ -6,7 +6,16 @@ tags:
 # Stake Claim Transaction
 # ===========================================
 - assertVisible: Transaction details
+<<<<<<< HEAD:apps/mobile/e2e/utils/components/tx-history/stake-claim-tx.yml
 - assertVisible: Claim
+=======
+- assertVisible: Sent
+- extendedWaitUntil:
+    visible:
+      text: '.*-.*ETH.*'
+      optional: true
+    timeout: 2000
+>>>>>>> origin/main:apps/mobile/e2e/components/tx-history/sent-tx.yml
 
 # ===========================================
 # Stake Claim Details Section

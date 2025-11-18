@@ -14,7 +14,11 @@ tags:
     visible:
       text: '.*QATRUSTED.*'
       optional: true
+<<<<<<< HEAD:apps/mobile/e2e/utils/components/tx-history/received-tx-card.yml
     timeout: ${output.defaults.extendedWaitUntilTimeout}
+=======
+    timeout: 2000
+>>>>>>> origin/main:apps/mobile/e2e/components/tx-history/received-tx-card.yml
 
 - tapOn:
     text: '.*QATRUSTED.*'

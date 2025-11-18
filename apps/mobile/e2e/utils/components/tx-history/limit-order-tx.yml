@@ -88,14 +88,22 @@ tags:
       containsDescendants:
         - text: 'Total fees'
       optional: true
+<<<<<<< HEAD:apps/mobile/e2e/utils/components/tx-history/limit-order-tx.yml
     timeout: ${output.defaults.extendedWaitUntilTimeout}
+=======
+    timeout: 2000
+>>>>>>> origin/main:apps/mobile/e2e/components/tx-history/limit-order-tx.yml
 - extendedWaitUntil:
     visible:
       id: 'history-swap-order-details'
       containsDescendants:
         - text: '.*\d+.*[A-Z]{2,}.*'
       optional: true
+<<<<<<< HEAD:apps/mobile/e2e/utils/components/tx-history/limit-order-tx.yml
     timeout: ${output.defaults.extendedWaitUntilTimeout}
+=======
+    timeout: 2000
+>>>>>>> origin/main:apps/mobile/e2e/components/tx-history/limit-order-tx.yml
 
 # ===========================================
 # Transaction Details Button

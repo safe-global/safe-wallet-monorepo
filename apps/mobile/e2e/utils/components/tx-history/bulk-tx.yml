@@ -15,7 +15,11 @@ tags:
     visible:
       text: '.*\+.*ETH.*|.*\d+.*ETH.*'
       optional: true
+<<<<<<< HEAD:apps/mobile/e2e/utils/components/tx-history/bulk-tx.yml
     timeout: ${output.defaults.extendedWaitUntilTimeout}
+=======
+    timeout: 2000
+>>>>>>> origin/main:apps/mobile/e2e/components/tx-history/bulk-tx.yml
 
 # ===========================================
 # Sender Address (From field)

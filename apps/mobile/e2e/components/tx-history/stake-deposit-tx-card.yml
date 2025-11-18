@@ -1,0 +1,26 @@
+appId: global.safe.mobileapp.ios
+---
+# ===========================================
+# Stake Deposit Transaction Card
+# ===========================================
+# Stake deposit transactions show "Deposit" label and "Stake" type
+- extendedWaitUntil:
+    visible:
+      text: '.*Deposit.*'
+      optional: true
+    timeout: 2000
+
+- extendedWaitUntil:
+    visible:
+      text: '.*Stake.*'
+      optional: true
+    timeout: 2000
+
+- tapOn:
+    text: '.*Deposit.*'
+
+- runFlow:
+    file: ./stake-deposit-tx.yml
+
+- tapOn:
+    id: 'go-back'

@@ -120,7 +120,11 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1', safeAddress, onSubmit }
         Request demo
       </Typography>
       <Typography variant="body1" sx={{ mb: 4, color: 'var(--color-static-light)' }}>
+<<<<<<< HEAD
         Share your details to verify your request and book your demo call.
+=======
+        Share your details to book a demo call.
+>>>>>>> origin/main
       </Typography>
       {isLoading && (
         <Box

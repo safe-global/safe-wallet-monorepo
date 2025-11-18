@@ -1,0 +1,54 @@
+appId: global.safe.mobileapp.ios
+---
+# ===========================================
+# setFallbackHandler Transaction (Pending State)
+# ===========================================
+# Tests the setFallbackHandler transaction detail view for pending transactions
+# Reuses shared test components where applicable
+
+- assertVisible: 'Confirm transaction'
+
+# Verify the transaction method name is visible
+- assertVisible:
+    text: 'setFallbackHandler'
+
+# ===========================================
+# Network Display
+# ===========================================
+- runFlow:
+    file: ../../shared/test-tx-network.yml
+
+# ===========================================
+# Transaction Details Button
+# ===========================================
+- runFlow:
+    file: ../../shared/test-tx-details-button.yml
+
+# ===========================================
+# Transaction Checks (Pending transactions show checks instead of created/executed)
+# ===========================================
+- runFlow:
+    file: ../../shared/test-tx-checks.yml
+    env:
+      BALANCE_CHANGE_PATTERN: 'No balance change detected'
+      TRANSACTION_SIMULATION_PATTERN: 'Success'
+
+# ===========================================
+# Confirmations
+# ===========================================
+# Test tapping on confirmations to open the bottom sheet and verify signed badge
+# Verify that 1/1 confirmations are shown (the transaction has all required confirmations)
+- runFlow:
+    file: ../../shared/test-confirmations.yml
+    env:
+      CONFIRMATIONS_PATTERN: '.*1/1.*'
+
+# ===========================================
+# Review and Execute Screen
+# ===========================================
+# Test navigating to Review and execute screen and verifying all elements
+- runFlow:
+    file: ../../shared/test-review-and-execute.yml
+    env:
+      TX_EXECUTION_STATUS: 'succeed'
+      EXPECTED_EXECUTION_METHOD: 'signer'

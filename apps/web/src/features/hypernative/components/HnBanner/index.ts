@@ -14,7 +14,11 @@ export type { HnBannerProps } from './HnBanner'
 // Export the carousel-compatible version
 export { HnBannerForCarousel } from './HnBannerForCarousel'
 
+<<<<<<< HEAD
 // Export the composed HOC as default for use in Settings
+=======
+// Export the composed HOC as default for use in Carousel (uses Promo banner type)
+>>>>>>> origin/main
 // Apply withHnSignupFlow first (inner), then withHnBannerConditions, then withHnFeature (outer)
 const HnBannerWithSignupAndDismissal = withHnSignupFlow(HnBannerWithDismissal)
 const HnBannerWithConditions = withHnBannerConditions(BannerType.Promo)(
@@ -22,6 +26,15 @@ const HnBannerWithConditions = withHnBannerConditions(BannerType.Promo)(
 )
 export default withHnFeature(HnBannerWithConditions)
 
+<<<<<<< HEAD
+=======
+// Export version for Settings page (uses Settings banner type, ignores dismissal state)
+const HnBannerForSettingsWithConditions = withHnBannerConditions(BannerType.Settings)(
+  HnBannerWithSignupAndDismissal as ComponentType<WithHnBannerConditionsProps>,
+)
+export const HnBannerForSettings = withHnFeature(HnBannerForSettingsWithConditions)
+
+>>>>>>> origin/main
 // Export version with localStorage for use in pages without SafeInfo (e.g., /wallets/account)
 // Apply withHnSignupFlow first (inner), then withHnFeature (outer)
 // Visibility check is now handled directly in HnBannerWithLocalStorage

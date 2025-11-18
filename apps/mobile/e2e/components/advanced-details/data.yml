@@ -1,0 +1,140 @@
+appId: global.safe.mobileapp.ios
+---
+# ============================================
+# Data Tab - Verify All Items
+# Based on formatTxDetails.tsx - all possible items that can appear
+# ============================================
+
+# To (always present if txData.to.value exists)
+- assertVisible: 'To'
+
+# To address - verify address format is visible (full or truncated)
+- assertVisible:
+    text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}|0x[0-9a-fA-F]{40}'
+
+# To address identicon/image
+- extendedWaitUntil:
+    visible:
+      id: 'identicon-image'
+      optional: true
+    timeout: 2000
+
+# To copy button
+- assertVisible:
+    id: 'copy-button'
+
+# To external link button
+- assertVisible:
+    id: 'external-link-button'
+
+# Value (always present if txData.value exists)
+- assertVisible: 'Value'
+
+# Value amount (can be "0" or any number)
+- assertVisible:
+    text: '^\d+$'
+
+# Operation (always present if txData.operation exists)
+- assertVisible: 'Operation'
+
+# Operation value (either "0 (call)" or "1 (delegate call)")
+- assertVisible:
+    text: '.*(call|delegate call).*'
+
+# SafeTxGas (only for multisig transactions)
+- extendedWaitUntil:
+    visible:
+      text: 'SafeTxGas'
+      optional: true
+    timeout: 2000
+
+# SafeTxGas value (numeric)
+- extendedWaitUntil:
+    visible:
+      text: '^\d+$'
+      optional: true
+    timeout: 2000
+
+# BaseGas (only for multisig transactions)
+- extendedWaitUntil:
+    visible:
+      text: 'BaseGas'
+      optional: true
+    timeout: 2000
+
+# GasPrice (only for multisig transactions)
+- extendedWaitUntil:
+    visible:
+      text: 'GasPrice'
+      optional: true
+    timeout: 2000
+
+# GasToken (only for multisig transactions)
+- extendedWaitUntil:
+    visible:
+      text: 'GasToken'
+      optional: true
+    timeout: 2000
+
+# GasToken address (either full address or truncated like "0x0000...0000")
+- extendedWaitUntil:
+    visible:
+      text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}|0x[0-9a-fA-F]{40}'
+      optional: true
+    timeout: 2000
+
+# RefundReceiver (only for multisig transactions)
+- extendedWaitUntil:
+    visible:
+      text: 'RefundReceiver'
+      optional: true
+    timeout: 2000
+
+# RefundReceiver address (either full address or truncated)
+- extendedWaitUntil:
+    visible:
+      text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}|0x[0-9a-fA-F]{40}'
+      optional: true
+    timeout: 2000
+
+# Nonce (only for multisig transactions)
+- extendedWaitUntil:
+    visible:
+      text: 'Nonce'
+      optional: true
+    timeout: 2000
+
+# Nonce value (numeric, should appear near "Nonce" label)
+- extendedWaitUntil:
+    visible:
+      text: '^\d+$'
+      optional: true
+    timeout: 2000
+
+# Safe Tx Hash (only for multisig transactions with safeTxHash)
+- extendedWaitUntil:
+    visible:
+      text: 'Safe Tx Hash'
+      optional: true
+    timeout: 2000
+
+# Safe Tx Hash value (truncated hash format like "0x9b4ee6ef9271f...")
+- extendedWaitUntil:
+    visible:
+      text: '0x[0-9a-fA-F]{10}.*'
+      optional: true
+    timeout: 2000
+
+# Transaction Hash (always present if txDetails.txHash exists)
+- extendedWaitUntil:
+    visible:
+      text: 'Transaction Hash'
+      optional: true
+    timeout: 2000
+
+# Transaction Hash value (truncated hash format)
+- extendedWaitUntil:
+    visible:
+      text: '0x[0-9a-fA-F]{10}.*'
+      optional: true
+    timeout: 2000

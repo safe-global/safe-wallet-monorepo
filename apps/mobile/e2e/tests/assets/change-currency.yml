@@ -38,7 +38,11 @@ tags:
       id: 'token-ETH-fiat-balance'
       text: '.*\$.*'
       optional: true
+<<<<<<< HEAD:apps/mobile/e2e/tests/assets/change-currency.yml
     timeout: ${output.defaults.extendedWaitUntilTimeout}
+=======
+    timeout: 2000
+>>>>>>> origin/main:apps/mobile/e2e/happypath/change-currency.yml
 
 # ============================================
 # Navigate to Settings tab
@@ -158,7 +162,11 @@ tags:
       id: 'token-ETH-fiat-balance'
       text: '.*€.*'
       optional: true
+<<<<<<< HEAD:apps/mobile/e2e/tests/assets/change-currency.yml
     timeout: ${output.defaults.extendedWaitUntilTimeout}
+=======
+    timeout: 2000
+>>>>>>> origin/main:apps/mobile/e2e/happypath/change-currency.yml
 
 # ============================================
 # Change Currency Again - GBP

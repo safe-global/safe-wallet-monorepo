@@ -31,7 +31,11 @@ const hasSufficientBalance = (fiatTotal: string): boolean => {
 /**
  * Hook to determine if a banner should be shown based on multiple conditions.
  *
+<<<<<<< HEAD
  * @param bannerType - The type of banner: BannerType.Promo, BannerType.Pending, BannerType.TxReportButton, or BannerType.NoBalanceCheck
+=======
+ * @param bannerType - The type of banner: BannerType.Promo, BannerType.Pending, BannerType.TxReportButton, BannerType.NoBalanceCheck, or BannerType.Settings
+>>>>>>> origin/main
  * @returns BannerVisibilityResult with showBanner flag and loading state
  *
  * Conditions checked (in order):
@@ -39,7 +43,11 @@ const hasSufficientBalance = (fiatTotal: string): boolean => {
  * 2. Wallet must be connected
  * 3. Connected wallet must be an owner of the current Safe
  * 4. Safe must have balance > MIN_BALANCE_USD (production) or > 1 USD (non-production) - skipped for BannerType.NoBalanceCheck
+<<<<<<< HEAD
  * 5. For Promo/Pending/NoBalanceCheck: Safe must not have HypernativeGuard installed
+=======
+ * 5. For Promo/Pending/NoBalanceCheck/Settings: Safe must not have HypernativeGuard installed
+>>>>>>> origin/main
  *    For TxReportButton: Show if banner conditions are met OR if HypernativeGuard is installed
  *
  * If any condition fails, showBanner will be false.
@@ -75,7 +83,11 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
       }
     }
 
+<<<<<<< HEAD
     // For other banner types (Promo, Pending, NoBalanceCheck), guard must NOT be installed
+=======
+    // For other banner types (Promo, Pending, NoBalanceCheck, Settings), guard must NOT be installed
+>>>>>>> origin/main
     const showBanner = isEnabled && shouldShowBanner && isSafeOwner && hasSufficientBalanceCheck && !isHypernativeGuard
 
     return {

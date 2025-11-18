@@ -60,7 +60,11 @@ tags:
 
 # Test the actions list view
 - runFlow:
+<<<<<<< HEAD:apps/mobile/e2e/utils/components/tx-history/batch-tx.yml
     file: ../../assertions/verify-actions-list.yml
+=======
+    file: ../../shared/test-actions-list.yml
+>>>>>>> origin/main:apps/mobile/e2e/components/tx-history/batch-tx.yml
 
 # Go back to transaction details from actions list
 - tapOn:
