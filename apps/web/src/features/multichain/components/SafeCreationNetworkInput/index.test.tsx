@@ -66,6 +66,17 @@ describe('NetworkMultiSelector', () => {
       .build(),
   ]
 
+  beforeEach(() => {
+    jest.spyOn(useChains, 'default').mockReturnValue({
+      configs: mockChains,
+      error: undefined,
+      loading: false,
+    })
+    jest.spyOn(useChains, 'useChain').mockImplementation((chainId) => {
+      return mockChains.find((chain) => chain.chainId === chainId)
+    })
+  })
+
   it('should be possible to select and deselect networks', async () => {
     jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockChains[0])
     const { getByRole, queryByText, getByText, getByTestId, getAllByRole } = render(<TestForm />)

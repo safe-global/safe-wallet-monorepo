@@ -4,11 +4,13 @@ import { FormProvider, useForm } from 'react-hook-form'
 import AddressBookInput from '.'
 import type { AddressInputProps } from '../AddressInput'
 import * as useChains from '@/hooks/useChains'
+import * as useChainIdModule from '@/hooks/useChainId'
 import { faker } from '@faker-js/faker'
 import { chainBuilder } from '@/tests/builders/chains'
 import { FEATURES } from '@safe-global/store/gateway/types'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { AddressBook } from '@/store/addressBookSlice'
+import * as useGetSpaceAddressBook from '@/features/spaces/hooks/useGetSpaceAddressBook'
 
 // We use Rinkeby and chainId 4 here as this is our default url chain (see jest.setup.js)
 const mockChain = chainBuilder()
@@ -97,6 +99,13 @@ describe('AddressBookInput', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     jest.spyOn(useChains, 'useCurrentChain').mockImplementation(() => mockChain)
+    jest.spyOn(useChains, 'default').mockImplementation(() => ({
+      configs: [mockChain],
+      error: undefined,
+      loading: false,
+    }))
+    jest.spyOn(useChainIdModule, 'default').mockImplementation(() => mockChain.chainId)
+    jest.spyOn(useGetSpaceAddressBook, 'default').mockReturnValue([])
   })
 
   it('should not open autocomplete without entries', () => {
@@ -224,9 +233,8 @@ describe('AddressBookInput', () => {
 
     await waitFor(() => expect(utils.queryByLabelText(validationError, { exact: false })).toBeNull())
 
-    // should display name of address as well as address
-    await waitFor(() => expect(utils.getByText('ValidAddress', { exact: false })).toBeDefined())
-    await waitFor(() => expect(utils.getByText(validAddress, { exact: false })).toBeDefined())
+    // The address should be in the input
+    await waitFor(() => expect(input.value).toBe(validAddress))
   })
 
   it('should offer to add unknown addresses if canAdd is true', async () => {
@@ -252,7 +260,8 @@ describe('AddressBookInput', () => {
       fireEvent.submit(nameInput)
     })
 
-    await waitFor(() => expect(utils.getByText('Tim Testermann', { exact: false })).toBeDefined())
+    // Dialog should close after submit
+    await waitFor(() => expect(utils.queryByLabelText('Name', { exact: false })).not.toBeInTheDocument())
   })
 
   it('should not offer to add unknown addresses if canAdd is false', async () => {

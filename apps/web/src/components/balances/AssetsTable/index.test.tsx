@@ -9,6 +9,9 @@ import { useState } from 'react'
 import AssetsTable from '.'
 import { COLLAPSE_TIMEOUT_MS } from './useHideAssets'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import * as useBalances from '@/hooks/useBalances'
+import * as useSafeInfo from '@/hooks/useSafeInfo'
+import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
 const getParentRow = (element: HTMLElement | null) => {
   while (element !== null) {
@@ -41,6 +44,13 @@ describe('AssetsTable', () => {
     window.localStorage.clear()
     jest.clearAllMocks()
     jest.spyOn(useChainId, 'default').mockReturnValue('5')
+    jest.spyOn(useSafeInfo, 'default').mockReturnValue({
+      safe: extendedSafeInfoBuilder().with({ chainId: '5' }).build(),
+      safeAddress: '0x1234567890123456789012345678901234567890',
+      safeLoaded: true,
+      safeLoading: false,
+      safeError: undefined,
+    })
     jest.useFakeTimers()
   })
 
@@ -48,7 +58,7 @@ describe('AssetsTable', () => {
     const mockHiddenAssets = {
       '5': [toBeHex('0x2', 20), toBeHex('0x3', 20)],
     }
-    const _mockBalances: Balances = {
+    const mockBalances: Balances = {
       fiatTotal: '300',
       items: [
         {
@@ -79,6 +89,13 @@ describe('AssetsTable', () => {
         },
       ],
     }
+
+    jest.spyOn(useBalances, 'default').mockReturnValue({
+      balances: mockBalances,
+      error: undefined,
+      loading: false,
+      loaded: true,
+    })
 
     const result = render(<TestComponent />, {
       initialReduxState: {

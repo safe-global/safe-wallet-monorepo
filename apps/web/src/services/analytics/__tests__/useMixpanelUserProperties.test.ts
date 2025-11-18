@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react'
+import { renderHook } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import { useMixpanelUserProperties } from '../useMixpanelUserProperties'
 import { MixpanelUserProperty } from '@/services/analytics/mixpanel-events'
@@ -12,6 +12,7 @@ jest.mock('@/hooks/useChains', () => ({
     }
     return chains[chainId] || null
   }),
+  useHasFeature: jest.fn(() => true),
 }))
 
 jest.mock('@/hooks/useSafeInfo', () => ({
@@ -19,28 +20,8 @@ jest.mock('@/hooks/useSafeInfo', () => ({
   default: jest.fn(),
 }))
 
-jest.mock('@/store', () => ({
-  useAppSelector: jest.fn(() => ({
-    data: {
-      results: [
-        {
-          type: 'TRANSACTION',
-          transaction: {
-            id: 'tx2',
-            timestamp: 1672531200000, // Jan 1, 2023 (most recent first)
-          },
-        },
-        {
-          type: 'TRANSACTION',
-          transaction: {
-            id: 'tx1',
-            timestamp: 1640995200000, // Jan 1, 2022
-          },
-        },
-      ],
-    },
-  })),
-}))
+// Don't mock the entire store module to avoid circular dependency issues
+// We'll use jest.spyOn in the tests instead
 
 jest.mock('@/utils/transaction-guards', () => ({
   isTransactionListItem: jest.fn((item) => item.type === 'TRANSACTION'),
@@ -53,6 +34,11 @@ jest.mock('@/features/myAccounts/hooks/useNetworksOfSafe', () => ({
 jest.mock('@/hooks/useIsSafeOwner', () => ({
   __esModule: true,
   default: jest.fn(() => false),
+}))
+
+jest.mock('@/hooks/useTxHistory', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }))
 
 describe('useMixpanelUserProperties', () => {
@@ -74,6 +60,29 @@ describe('useMixpanelUserProperties', () => {
         chainId: '1',
       },
       safeLoaded: true,
+    })
+
+    // Mock useTxHistory with initial data
+    const useTxHistory = require('@/hooks/useTxHistory').default
+    useTxHistory.mockReturnValue({
+      page: {
+        results: [
+          {
+            type: 'TRANSACTION',
+            transaction: {
+              id: 'tx2',
+              timestamp: 1672531200000, // Jan 1, 2023 (most recent first)
+            },
+          },
+          {
+            type: 'TRANSACTION',
+            transaction: {
+              id: 'tx1',
+              timestamp: 1640995200000, // Jan 1, 2022
+            },
+          },
+        ],
+      },
     })
   })
 
@@ -140,9 +149,9 @@ describe('useMixpanelUserProperties', () => {
       safeLoaded: true,
     })
 
-    const { useAppSelector } = require('@/store')
-    useAppSelector.mockReturnValueOnce({
-      data: {
+    const useTxHistory = require('@/hooks/useTxHistory').default
+    useTxHistory.mockReturnValueOnce({
+      page: {
         results: [], // empty transaction history
       },
     })

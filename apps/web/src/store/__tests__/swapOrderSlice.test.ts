@@ -1,5 +1,5 @@
 import { listenerMiddlewareInstance } from '@/store'
-import { swapOrderListener, swapOrderStatusListener, setSwapOrder, deleteSwapOrder } from '@/store/swapOrderSlice'
+import { swapOrderStatusListener, setSwapOrder, deleteSwapOrder } from '@/store/swapOrderSlice'
 import * as notificationsSlice from '@/store/notificationsSlice'
 
 import { type TypedStartListening } from '@reduxjs/toolkit'
@@ -14,147 +14,13 @@ const createStartListeningMock = () => {
   return mock
 }
 describe('swapOrderSlice', () => {
-  // TODO: These tests are disabled because txHistorySlice was deleted
-  // These tests need to be refactored to work without the txHistorySlice
+  // TODO: These tests are disabled because txHistorySlice was deleted and migrated to RTK Query
+  // These tests need to be refactored to mock the RTK Query hook instead
   describe.skip('swapOrderListener', () => {
-    const listenerMiddleware = listenerMiddlewareInstance
-    const _mockDispatch = jest.fn()
-    const startListeningMock = createStartListeningMock()
-
-    beforeEach(() => {
-      jest.clearAllMocks()
-      listenerMiddleware.startListening = startListeningMock
-      swapOrderListener(listenerMiddleware)
-    })
-
-    it('should not dispatch an event if the transaction is not a swapTx', () => {
-      // const nonSwapTransaction = {
-      //   type: TransactionListItemType.TRANSACTION,
-      //   conflictType: ConflictType.NONE,
-      //   transaction: {
-      //     id: '0x123',
-      //     txInfo: {
-      //       type: TransactionInfoType.TRANSFER,
-      //     },
-      //   },
-      // } as TransactionListItem
-      // const action = txHistorySlice.actions.set({
-      //   loading: false,
-      //   loaded: true,
-      //   data: {
-      //     results: [nonSwapTransaction],
-      //   },
-      // })
-      // const effect = startListeningMock.mock.calls[0][0].effect
-      // effect(action, { dispatch: mockDispatch })
-      // expect(mockDispatch).not.toHaveBeenCalled()
-    })
-
-    it('should not dispatch an event if the swapOrder status did not change', () => {
-      // const swapTransaction = {
-      //   type: TransactionListItemType.TRANSACTION,
-      //   conflictType: ConflictType.NONE,
-      //   transaction: {
-      //     id: '0x123',
-      //     txInfo: {
-      //       type: TransactionInfoType.SWAP_ORDER,
-      //       uid: 'order1',
-      //       status: 'open',
-      //     },
-      //   },
-      // } as unknown as TransactionListItem
-      // const action = txHistorySlice.actions.set({
-      //   loading: false,
-      //   loaded: true,
-      //   data: {
-      //     results: [swapTransaction],
-      //   },
-      // })
-      // const effect = startListeningMock.mock.calls[0][0].effect
-      // effect(action, {
-      //   dispatch: mockDispatch,
-      //   getOriginalState: () => ({
-      //     swapOrders: {
-      //       order1: {
-      //         orderUid: 'order1',
-      //         status: 'open',
-      //       },
-      //     },
-      //   }),
-      // })
-      // expect(mockDispatch).not.toHaveBeenCalled()
-    })
-
-    it('should dispatch setSwapOrder if the swapOrder status changed', () => {
-      // const swapTransaction = {
-      //   type: TransactionListItemType.TRANSACTION,
-      //   conflictType: ConflictType.NONE,
-      //   transaction: {
-      //     id: '0x123',
-      //     txInfo: {
-      //       type: TransactionInfoType.SWAP_ORDER,
-      //       uid: 'order1',
-      //       status: 'fulfilled',
-      //     },
-      //   },
-      // } as unknown as TransactionListItem
-      // const action = txHistorySlice.actions.set({
-      //   loading: false,
-      //   loaded: true,
-      //   data: {
-      //     results: [swapTransaction],
-      //   },
-      // })
-      // const effect = startListeningMock.mock.calls[0][0].effect
-      // effect(action, {
-      //   dispatch: mockDispatch,
-      //   getOriginalState: () => ({
-      //     swapOrders: {
-      //       order1: {
-      //         orderUid: 'order1',
-      //         status: 'open',
-      //       },
-      //     },
-      //   }),
-      // })
-      // expect(mockDispatch).toHaveBeenCalledWith(
-      //   setSwapOrder({
-      //     orderUid: 'order1',
-      //     status: 'fulfilled',
-      //     txId: '0x123',
-      //   }),
-      // )
-    })
-
-    it('should not dispatch setSwapOrder if the old status is undefined and new status is fulfilled, expired, or cancelled', () => {
-      // const swapTransaction = {
-      //   type: TransactionListItemType.TRANSACTION,
-      //   conflictType: ConflictType.NONE,
-      //   transaction: {
-      //     id: '0x123',
-      //     txInfo: {
-      //       type: TransactionInfoType.SWAP_ORDER,
-      //       uid: 'order1',
-      //       status: 'fulfilled', // Test with 'expired' and 'cancelled' as well
-      //     },
-      //   },
-      // } as unknown as TransactionListItem
-      // const action = txHistorySlice.actions.set({
-      //   loading: false,
-      //   loaded: true,
-      //   data: {
-      //     results: [swapTransaction],
-      //   },
-      // })
-      // const effect = startListeningMock.mock.calls[0][0].effect
-      // effect(action, {
-      //   dispatch: mockDispatch,
-      //   getOriginalState: () => ({
-      //     swapOrders: {}, // Old status is undefined
-      //   }),
-      // })
-      // expect(mockDispatch).not.toHaveBeenCalled()
-    })
+    it('should not dispatch an event if the transaction is not a swapTx', () => {})
+    it('should not dispatch an event if the swapOrder status did not change', () => {})
+    it('should dispatch setSwapOrder if the swapOrder status changed', () => {})
+    it('should not dispatch setSwapOrder if the old status is undefined and new status is fulfilled, expired, or cancelled', () => {})
   })
 
   describe('swapOrderStatusListener', () => {
@@ -174,6 +40,8 @@ describe('swapOrderSlice', () => {
         orderUid: 'order1',
         status: 'created' as const,
         txId: '0x123',
+        chainId: '1',
+        safeAddress: '0xSafeAddress',
       }
 
       const action = setSwapOrder(swapOrder)
@@ -182,9 +50,19 @@ describe('swapOrderSlice', () => {
       effect(action, {
         dispatch: mockDispatch,
         getState: () => ({
-          safeInfo: {
-            data: {
-              threshold: 1,
+          api: {
+            queries: {
+              'safesGetSafeV1({"chainId":"1","safeAddress":"0xSafeAddress"})': {
+                data: {
+                  threshold: 1,
+                  address: { value: '0xSafeAddress' },
+                },
+              },
+              'chainsGetChainsV1({})': {
+                data: {
+                  results: [{ chainId: '1' }],
+                },
+              },
             },
           },
         }),
@@ -198,6 +76,7 @@ describe('swapOrderSlice', () => {
         message: 'Waiting for the transaction to be executed',
         groupKey: 'swap-order-status',
         variant: 'info',
+        link: expect.any(Object),
       })
     })
 
@@ -206,6 +85,8 @@ describe('swapOrderSlice', () => {
         orderUid: 'order1',
         status: 'created' as const,
         txId: '0x123',
+        chainId: '1',
+        safeAddress: '0xSafeAddress',
       }
 
       const action = setSwapOrder(swapOrder)
@@ -214,9 +95,19 @@ describe('swapOrderSlice', () => {
       effect(action, {
         dispatch: mockDispatch,
         getState: () => ({
-          safeInfo: {
-            data: {
-              threshold: 2,
+          api: {
+            queries: {
+              'safesGetSafeV1({"chainId":"1","safeAddress":"0xSafeAddress"})': {
+                data: {
+                  threshold: 2,
+                  address: { value: '0xSafeAddress' },
+                },
+              },
+              'chainsGetChainsV1({})': {
+                data: {
+                  results: [{ chainId: '1' }],
+                },
+              },
             },
           },
         }),
@@ -230,6 +121,7 @@ describe('swapOrderSlice', () => {
         message: 'Waiting for confirmation from signers of your Safe',
         groupKey: 'swap-order-status',
         variant: 'info',
+        link: expect.any(Object),
       })
     })
 
@@ -238,6 +130,8 @@ describe('swapOrderSlice', () => {
         orderUid: 'order1',
         status: 'open' as const,
         txId: '0x123',
+        chainId: '1',
+        safeAddress: '0xSafeAddress',
       }
 
       const action = setSwapOrder(swapOrder)
@@ -246,9 +140,19 @@ describe('swapOrderSlice', () => {
       effect(action, {
         dispatch: mockDispatch,
         getState: () => ({
-          safeInfo: {
-            data: {
-              threshold: 1,
+          api: {
+            queries: {
+              'safesGetSafeV1({"chainId":"1","safeAddress":"0xSafeAddress"})': {
+                data: {
+                  threshold: 1,
+                  address: { value: '0xSafeAddress' },
+                },
+              },
+              'chainsGetChainsV1({})': {
+                data: {
+                  results: [{ chainId: '1' }],
+                },
+              },
             },
           },
         }),
@@ -267,6 +171,7 @@ describe('swapOrderSlice', () => {
         message: 'Waiting for order execution by the CoW Protocol',
         groupKey: 'swap-order-status',
         variant: 'info',
+        link: expect.any(Object),
       })
     })
 
@@ -282,13 +187,7 @@ describe('swapOrderSlice', () => {
       const effect = startListeningMock.mock.calls[0][0].effect
       effect(action, {
         dispatch: mockDispatch,
-        getState: () => ({
-          safeInfo: {
-            data: {
-              threshold: 1,
-            },
-          },
-        }),
+        getState: () => ({}),
         getOriginalState: () => ({
           swapOrders: {},
         }),
@@ -299,6 +198,7 @@ describe('swapOrderSlice', () => {
         message: 'Waiting for confirmation from signers of your Safe',
         groupKey: 'swap-order-status',
         variant: 'info',
+        link: undefined,
       })
     })
 
@@ -314,13 +214,7 @@ describe('swapOrderSlice', () => {
       const effect = startListeningMock.mock.calls[0][0].effect
       effect(action, {
         dispatch: mockDispatch,
-        getState: () => ({
-          safeInfo: {
-            data: {
-              threshold: 1,
-            },
-          },
-        }),
+        getState: () => ({}),
         getOriginalState: () => ({
           swapOrders: {},
         }),
@@ -331,6 +225,7 @@ describe('swapOrderSlice', () => {
         message: 'Waiting for order execution by the CoW Protocol',
         groupKey: 'swap-order-status',
         variant: 'info',
+        link: undefined,
       })
     })
 
@@ -346,13 +241,7 @@ describe('swapOrderSlice', () => {
       const effect = startListeningMock.mock.calls[0][0].effect
       effect(action, {
         dispatch: mockDispatch,
-        getState: () => ({
-          safeInfo: {
-            data: {
-              threshold: 1,
-            },
-          },
-        }),
+        getState: () => ({}),
         getOriginalState: () => ({
           swapOrders: {},
         }),
@@ -373,13 +262,7 @@ describe('swapOrderSlice', () => {
       const effect = startListeningMock.mock.calls[0][0].effect
       effect(action, {
         dispatch: mockDispatch,
-        getState: () => ({
-          safeInfo: {
-            data: {
-              threshold: 1,
-            },
-          },
-        }),
+        getState: () => ({}),
         getOriginalState: () => ({
           swapOrders: {
             order1: {
@@ -395,6 +278,7 @@ describe('swapOrderSlice', () => {
         message: 'Your order has been successful',
         groupKey: 'swap-order-status',
         variant: 'success',
+        link: undefined,
       })
 
       expect(mockDispatch).toHaveBeenCalledWith(deleteSwapOrder('order1'))
@@ -412,13 +296,7 @@ describe('swapOrderSlice', () => {
       const effect = startListeningMock.mock.calls[0][0].effect
       effect(action, {
         dispatch: mockDispatch,
-        getState: () => ({
-          safeInfo: {
-            data: {
-              threshold: 1,
-            },
-          },
-        }),
+        getState: () => ({}),
         getOriginalState: () => ({
           swapOrders: {},
         }),
@@ -440,13 +318,7 @@ describe('swapOrderSlice', () => {
       const effect = startListeningMock.mock.calls[0][0].effect
       effect(action, {
         dispatch: mockDispatch,
-        getState: () => ({
-          safeInfo: {
-            data: {
-              threshold: 1,
-            },
-          },
-        }),
+        getState: () => ({}),
         getOriginalState: () => ({
           swapOrders: {
             order1: {
@@ -462,6 +334,7 @@ describe('swapOrderSlice', () => {
         message: 'Your order has reached the expiry time and has become invalid',
         groupKey: 'swap-order-status',
         variant: 'warning',
+        link: undefined,
       })
 
       expect(mockDispatch).toHaveBeenCalledWith(deleteSwapOrder('order1'))
@@ -479,13 +352,7 @@ describe('swapOrderSlice', () => {
       const effect = startListeningMock.mock.calls[0][0].effect
       effect(action, {
         dispatch: mockDispatch,
-        getState: () => ({
-          safeInfo: {
-            data: {
-              threshold: 1,
-            },
-          },
-        }),
+        getState: () => ({}),
         getOriginalState: () => ({
           swapOrders: {},
         }),
@@ -507,13 +374,7 @@ describe('swapOrderSlice', () => {
       const effect = startListeningMock.mock.calls[0][0].effect
       effect(action, {
         dispatch: mockDispatch,
-        getState: () => ({
-          safeInfo: {
-            data: {
-              threshold: 1,
-            },
-          },
-        }),
+        getState: () => ({}),
         getOriginalState: () => ({
           swapOrders: {
             order1: {
@@ -529,6 +390,7 @@ describe('swapOrderSlice', () => {
         message: 'Your order has been cancelled',
         groupKey: 'swap-order-status',
         variant: 'warning',
+        link: undefined,
       })
       expect(mockDispatch).toHaveBeenCalledWith(deleteSwapOrder('order1'))
     })

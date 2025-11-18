@@ -24,6 +24,7 @@ import CustomSafeAppsPage from '@/pages/apps/custom'
 import * as safeAppsService from '@/services/safe-apps/manifest'
 import { LS_NAMESPACE } from '@/config/constants'
 import * as chainHooks from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
 
 jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
@@ -35,6 +36,9 @@ describe('AppsPage', () => {
     jest.restoreAllMocks()
     window.localStorage.clear()
     jest.spyOn(chainHooks, 'useHasFeature').mockImplementation(() => true)
+    jest
+      .spyOn(chainHooks, 'useCurrentChain')
+      .mockReturnValue(chainBuilder().with({ chainId: '137', chainName: 'Polygon', shortName: 'matic' }).build())
   })
 
   describe('Safe Apps List Page', () => {
@@ -207,7 +211,7 @@ describe('AppsPage', () => {
 
       // shows Add custom app modal
       await waitFor(() => {
-        expect(screen.getByRole('heading', { level: 2, name: 'Add custom Safe App' })).toBeInTheDocument()
+        expect(screen.getByTestId('modal-title')).toHaveTextContent('Add custom Safe App')
 
         // shows custom safe App App Url input
         const customSafeAppURLInput = screen.getByLabelText(/Safe App URL/)

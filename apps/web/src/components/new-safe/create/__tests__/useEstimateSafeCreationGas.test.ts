@@ -14,6 +14,8 @@ import { waitFor } from '@testing-library/react'
 import { type EIP1193Provider } from '@web3-onboard/core'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { faker } from '@faker-js/faker'
+import * as chainHooks from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
 
 const mockProps: ReplayedSafeProps = {
   safeAccountConfig: {
@@ -36,6 +38,9 @@ describe('useEstimateSafeCreationGas', () => {
 
     jest.spyOn(store, 'useAppSelector').mockReturnValue({})
     jest.spyOn(chainIdModule, 'useChainId').mockReturnValue('4')
+    jest
+      .spyOn(chainHooks, 'useCurrentChain')
+      .mockReturnValue(chainBuilder().with({ chainId: '4', recommendedMasterCopyVersion: '1.3.0' }).build())
     jest
       .spyOn(safeContracts, 'getReadOnlyProxyFactoryContract')
       .mockResolvedValue({ getAddress: () => ZERO_ADDRESS } as unknown as SafeProxyFactoryContractImplementationType)

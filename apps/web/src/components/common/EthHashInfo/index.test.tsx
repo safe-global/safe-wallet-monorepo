@@ -7,6 +7,8 @@ import * as useChainId from '@/hooks/useChainId'
 import * as store from '@/store'
 import EthHashInfo from '.'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
+import * as chainHooks from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
 
 const originalClipboard = { ...global.navigator.clipboard }
 
@@ -34,6 +36,26 @@ describe('EthHashInfo', () => {
       lastUpdatedBy: '0x123',
       source: ContactSource.local,
     }))
+
+    jest.spyOn(chainHooks, 'useChain').mockImplementation((chainId) => {
+      if (chainId === '4') {
+        return chainBuilder()
+          .with({
+            chainId: '4',
+            shortName: 'rin',
+            blockExplorerUriTemplate: {
+              address: 'https://rinkeby.etherscan.io/address/{{address}}',
+              txHash: 'https://rinkeby.etherscan.io/tx/{{txHash}}',
+              api: 'https://api-rinkeby.etherscan.io/api?module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
+            },
+          })
+          .build()
+      }
+      if (chainId === '100') {
+        return chainBuilder().with({ chainId: '100', shortName: 'gno' }).build()
+      }
+      return chainBuilder().build()
+    })
 
     //@ts-ignore
     global.navigator.clipboard = {

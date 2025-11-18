@@ -66,7 +66,7 @@ Last updated: October, 2025
 
 # 1\. What is the scope of the Terms? {#1.-what-is-the-scope-of-the-terms?}
 
-These Terms and Conditions (“**Terms**”) become part of any contract (“**Agreement**”) between you (“**you**”, “**yours**” or “**User**”) and Safe Labs GmbH (“**Safe Labs**”, “**we**”, “**our**” or “**us**”) provided we made these Terms accessible to you prior to entering into the Agreement and you consent to these Terms. We are a limited liability company registered with the commercial register of Berlin Charlottenburg under company number HRB 270980 B, with its registered office at Unter den Linden 10, 10117 Berlin. 
+These Terms and Conditions (“**Terms**”) become part of any contract (“**Agreement**”) between you (“**you**”, “**yours**” or “**User**”) and Safe Labs GmbH (“**Safe Labs**”, “**we**”, “**our**” or “**us**”) provided we made these Terms accessible to you prior to entering into the Agreement and you consent to these Terms. We are a limited liability company registered with the commercial register of Berlin Charlottenburg under company number HRB 270980 B, with its registered office at Unter den Linden 10, 10117 Berlin.
 
 For the avoidance of doubt, this Agreement is exclusively concluded with Safe Labs. Through this Agreement of the use of our Services, no contractual relationship whatsoever is concluded with Core Contributors GmbH. Further, please note that Safe Labs is not a legal successor of Core Contributors GmbH and does not assume any liability or responsibility for Core Contributors GmbH.
 
@@ -74,7 +74,7 @@ The Agreement is concluded by using the Mobile App, Web App and/or Browser Exten
 
 The application of your general terms and conditions is excluded. Your deviating, conflicting or supplementary general terms and conditions shall only become part of the Agreement if and to the extent that Safe Labs has expressly agreed to their application in writing. This consent requirement shall apply in any case, even if for example Safe Labs, being aware of your general terms and conditions, accepts payments by the contractual partner without reservations.
 
-We reserve the right to change these Terms at any time and without giving reasons, while considering and weighing your interests. The new Terms will be communicated to you in advance. If you do not accept the new Terms, you are no longer entitled to use the Services. 
+We reserve the right to change these Terms at any time and without giving reasons, while considering and weighing your interests. The new Terms will be communicated to you in advance. If you do not accept the new Terms, you are no longer entitled to use the Services.
 
 # 2\. What do some of the capitalized terms mean in the Agreement? {#2.-what-do-some-of-the-capitalized-terms-mean-in-the-agreement?}
 
@@ -150,25 +150,25 @@ Our Services do not consist of:
 
 3. This means specifically:
 
-* We do not have any oversight over your activities with Third-Party Services especially by using Third-Party Safe Apps, and therefore we do not and cannot make any representation regarding their appropriateness and suitability for you.
+- We do not have any oversight over your activities with Third-Party Services especially by using Third-Party Safe Apps, and therefore we do not and cannot make any representation regarding their appropriateness and suitability for you.
 
-* Third-Party Safe Apps and Third-Party Services are not hosted, owned, controlled or maintained by us. We also do not participate in the Transaction and will not and cannot monitor, verify, censor or edit the functioning or content of any Third-Party Safe Apps and Third-Party Services.
+- Third-Party Safe Apps and Third-Party Services are not hosted, owned, controlled or maintained by us. We also do not participate in the Transaction and will not and cannot monitor, verify, censor or edit the functioning or content of any Third-Party Safe Apps and Third-Party Services.
 
-* We have not conducted any security audit, bug bounty or formal verification (whether internal or external) of the Third-Party Safe Apps and Third-Party Services.
+- We have not conducted any security audit, bug bounty or formal verification (whether internal or external) of the Third-Party Safe Apps and Third-Party Services.
 
-* We have no control over, do not recommend, endorse, or otherwise take a position on the integrity, functioning of, content and your use of Third-Party Safe Apps and Third-Party Services, whose sole responsibility lies with the person from whom such services or content originated.
+- We have no control over, do not recommend, endorse, or otherwise take a position on the integrity, functioning of, content and your use of Third-Party Safe Apps and Third-Party Services, whose sole responsibility lies with the person from whom such services or content originated.
 
-* When you access or use Third-Party Safe Apps and Third-Party Services you accept that there are risks in doing so and that you alone assume any such risks when choosing to interact with them. We are not liable for any errors or omissions or for any damages or loss you might suffer through interacting with those Third-Party Safe Apps and Third-Party Services.
+- When you access or use Third-Party Safe Apps and Third-Party Services you accept that there are risks in doing so and that you alone assume any such risks when choosing to interact with them. We are not liable for any errors or omissions or for any damages or loss you might suffer through interacting with those Third-Party Safe Apps and Third-Party Services.
 
-* You know of the inherent risks of cryptographic and Blockchain-based systems and the high volatility of Token markets. Transactions undertaken in the Blockchain are irrevocable and irreversible and there is no possibility to refund Token that have been deployed.
+- You know of the inherent risks of cryptographic and Blockchain-based systems and the high volatility of Token markets. Transactions undertaken in the Blockchain are irrevocable and irreversible and there is no possibility to refund Token that have been deployed.
 
-* You should read the license requirements, terms and conditions as well as privacy policy of each Third-Party Safe App and Third-Party Service that you access or use. Certain Third-Party Safe Apps and Third-Party Services may involve complex Transactions that entail a high degree of risk.
+- You should read the license requirements, terms and conditions as well as privacy policy of each Third-Party Safe App and Third-Party Service that you access or use. Certain Third-Party Safe Apps and Third-Party Services may involve complex Transactions that entail a high degree of risk.
 
-* If you contribute integrations to Third-Party Safe Apps and Third-Party Services, you are responsible for all content you contribute, in any manner, and you must have all rights necessary to do so, in the manner in which you contribute it. You are responsible for all your activity in connection with any such Third-Party Safe Apps and Third-Party Services.
+- If you contribute integrations to Third-Party Safe Apps and Third-Party Services, you are responsible for all content you contribute, in any manner, and you must have all rights necessary to do so, in the manner in which you contribute it. You are responsible for all your activity in connection with any such Third-Party Safe Apps and Third-Party Services.
 
-* Your interactions with persons found on or through the Third-Party Safe Apps and Third-Party Services, including payment and delivery of goods and services, financial transactions, and any other terms associated with such dealings, are solely between you and such persons. You agree that we shall not be responsible or liable for any loss or damage of any sort incurred as the result of any such dealings.
+- Your interactions with persons found on or through the Third-Party Safe Apps and Third-Party Services, including payment and delivery of goods and services, financial transactions, and any other terms associated with such dealings, are solely between you and such persons. You agree that we shall not be responsible or liable for any loss or damage of any sort incurred as the result of any such dealings.
 
-* If there is a dispute between you and the Third-Party Safe Apps or Third-Party Services provider or/and other users of the Third-Party Safe Apps or Third-Party Service, you agree that we are under no obligation to become involved. In the event that you have a dispute with one or more other users, you release us, our officers, employees, agents, contractors and successors from claims, demands, and damages of every kind or nature, known or unknown, suspected or unsuspected, disclosed or undisclosed, arising out of or in any way related to such disputes and/or our Services.
+- If there is a dispute between you and the Third-Party Safe Apps or Third-Party Services provider or/and other users of the Third-Party Safe Apps or Third-Party Service, you agree that we are under no obligation to become involved. In the event that you have a dispute with one or more other users, you release us, our officers, employees, agents, contractors and successors from claims, demands, and damages of every kind or nature, known or unknown, suspected or unsuspected, disclosed or undisclosed, arising out of or in any way related to such disputes and/or our Services.
 
 # 6\. What are the fees for the Services? {#6.-what-are-the-fees-for-the-services?}
 
@@ -188,7 +188,7 @@ Our Services do not consist of:
 
 1. We shall not be responsible for recovering your Safe Account.
 
-2. You are solely responsible for securing a back-up of your Safe Account access as you see fit. 
+2. You are solely responsible for securing a back-up of your Safe Account access as you see fit.
 
 3. Any recovery feature we provide access to within the Safe{Wallet} App is a mechanism controlled by your Safe Account on the Blockchain, both of which we don’t have any influence over once you have set it up. We will never act as a recoverer ourselves and don’t offer recovery services. The Self Custodial Recovery feature allows you to determine your own recovery setup and nominate anyone including yourself as your recoverer. The recoverer can start the recovery process at any time. Please note that we are not responsible for notifying you of this process (see Section 7 above). Furthermore we reserve the right to cease the access to the Self Custodial Recovery feature via our Safe{Wallet} App taking the user’s reasonable interests into account and providing due notification.
 
@@ -198,7 +198,7 @@ Our Services do not consist of:
 
 1. We shall not be responsible for notifying you of any interactions or events occurring in your Safe Account, be it on the Blockchain, third-party interfaces, within any other infrastructure, or our Services.
 
-2. You are responsible for monitoring Safe Account as you see fit. 
+2. You are responsible for monitoring Safe Account as you see fit.
 
 3. Any notification service we provide or offer for subscription within the Safe{Wallet} App via e-mail or push notifications or any other means of communication is provided free of charge and liability is limited pursuant to Section 18 below. Furthermore we reserve the right to change the notification feature from time to time or cease to provide them without notice.
 
@@ -206,9 +206,9 @@ Our Services do not consist of:
 
 1. We shall not be responsible for flagging malicious transactions in our Safe{Wallet} App.
 
-2. You are solely responsible for checking any transaction, address, Token or other item you interact with via your Smart Account in our Safe{Wallet} App. 
+2. You are solely responsible for checking any transaction, address, Token or other item you interact with via your Smart Account in our Safe{Wallet} App.
 
-5. Any security flagging or warning service we provide or offer for subscription within the Safe{Wallet} App is provided free of charge and liability is limited pursuant to Section 18 below. Furthermore we reserve the right to change the feature from time to time or cease to provide them without notice.
+3. Any security flagging or warning service we provide or offer for subscription within the Safe{Wallet} App is provided free of charge and liability is limited pursuant to Section 18 below. Furthermore we reserve the right to change the feature from time to time or cease to provide them without notice.
 
 # 11\. Are we responsible for the issuance of the Safe Token and any related functionalities or reward programs? {#11.-are-we-responsible-for-the-issuance-of-the-safe-token-and-any-related-functionalities-or-reward-programs?}
 
@@ -221,16 +221,15 @@ Our Services do not consist of:
 # 12\. Are we responsible for third-party content and services? {#12.-are-we-responsible-for-third-party-content-and-services?}
 
 1. You may view, have access to, and may use third-party content and services, for example widget integrations, within the Safe{Wallet} App (“Third-Party Features”). You view, access, or use Third-Party Features at your own election. Your reliance on Third-Party Features is subject to separate terms and conditions set forth by the applicable third party content and/or service provider (“Third-Party Terms”). Third-Party Terms may, amongst other things,
+   1. involve separate fees and charges,
 
-   1. involve separate fees and charges, 
+   2. include disclaimers or risk warnings,
 
-   2. include disclaimers or risk warnings, 
-
-   3. apply a different terms and privacy policy. 
+   3. apply a different terms and privacy policy.
 
    It is your responsibility to understand the Third-Party Terms, including how Third-Party Features use any of your information under their privacy policies.
 
-2. Third Party Features are provided for your convenience only. We do not verify, curate, or control Third Party Features. 
+2. Third Party Features are provided for your convenience only. We do not verify, curate, or control Third Party Features.
 
 3. If we offer access to Third-Party Features in the Safe{Wallet} App free of charge by us (Third-Parties may charge separate fees), the liability for providing access to such Third-Party Feature is limited pursuant to Section 18 below. Furthermore we reserve the right to cease to provide access to those Third-Party Features through the Safe{Wallet} App without notice.
 
@@ -298,11 +297,11 @@ By using our Services you hereby agree, represent and warrant that:
 
 # 18\. What about our liability to you? {#18.-what-about-our-liability-to-you?}
 
-1. If the Safe{Wallet} App or Services are provided to the User free of charge (please note, in this context, that any service, network, and/or transaction fees may be charged by third parties via the Blockchain and not necessarily by us), Safe Labs shall be liable only in cases of intent, gross negligence, or if Safe Labs has fraudulently concealed a possible material or legal defect of the Safe{Wallet} App or Services.  
-2. If the Safe{Wallet} App or Services are not provided to the User free of charge, Safe Labs shall be liable only (i) in cases pursuant to Clause 18.1 as well as (ii) in cases of simple negligence for damages resulting from the breach of an essential contractual duty, a duty, the performance of which enables the proper execution of this Agreement in the first place and on the compliance of which the User regularly relies and may rely, whereby Safe Labs’ liability shall be limited to the compensation of the foreseeable, typically occurring damage. The Parties agree that the typical foreseeable damage equals the sum of the annual Fees paid or agreed to be paid by the User to Safe Labs during the course of the calendar year in which the event giving rise to the damage claim occurred. Liability in cases of simple negligence for damages resulting from the breach of a non-essential contractual duty are excluded.  
-3. The limitations of liability according to Clause 18.1 and Clause 18.2 do not apply (i) to damages resulting from injury to life, body or health, (ii) insofar as Safe Labs has assumed a guarantee, (iii) to claims of the User according to the Product Liability Act and (iv) to claims of the User according to the applicable data protection law.  
-4. The limitation of liability also applies to the personal liability of the organs, legal representatives, employees and vicarious agents of Safe Labs.  
-5. If the User suffers damages due to the loss of data, Safe Labs is not liable for this, insofar as the damage would have been avoided by a regular and complete backup of all relevant data by the User.  
+1. If the Safe{Wallet} App or Services are provided to the User free of charge (please note, in this context, that any service, network, and/or transaction fees may be charged by third parties via the Blockchain and not necessarily by us), Safe Labs shall be liable only in cases of intent, gross negligence, or if Safe Labs has fraudulently concealed a possible material or legal defect of the Safe{Wallet} App or Services.
+2. If the Safe{Wallet} App or Services are not provided to the User free of charge, Safe Labs shall be liable only (i) in cases pursuant to Clause 18.1 as well as (ii) in cases of simple negligence for damages resulting from the breach of an essential contractual duty, a duty, the performance of which enables the proper execution of this Agreement in the first place and on the compliance of which the User regularly relies and may rely, whereby Safe Labs’ liability shall be limited to the compensation of the foreseeable, typically occurring damage. The Parties agree that the typical foreseeable damage equals the sum of the annual Fees paid or agreed to be paid by the User to Safe Labs during the course of the calendar year in which the event giving rise to the damage claim occurred. Liability in cases of simple negligence for damages resulting from the breach of a non-essential contractual duty are excluded.
+3. The limitations of liability according to Clause 18.1 and Clause 18.2 do not apply (i) to damages resulting from injury to life, body or health, (ii) insofar as Safe Labs has assumed a guarantee, (iii) to claims of the User according to the Product Liability Act and (iv) to claims of the User according to the applicable data protection law.
+4. The limitation of liability also applies to the personal liability of the organs, legal representatives, employees and vicarious agents of Safe Labs.
+5. If the User suffers damages due to the loss of data, Safe Labs is not liable for this, insofar as the damage would have been avoided by a regular and complete backup of all relevant data by the User.
 6. Notwithstanding the limitations provided in Clause 18.1 and 18.3, in case of an event that prevents us from performing and whose elimination is not possible or cannot be economically expected of Safe Labs, we shall be exempt from our obligation to perform..
 
 # 19\. What about viruses, bugs and security vulnerabilities? {#19.-what-about-viruses,-bugs-and-security-vulnerabilities?}
@@ -321,21 +320,21 @@ By using our Services you hereby agree, represent and warrant that:
 
 2. A “Force Majeure Event" shall mean any external event that is caused by elementary natural forces or acts of third parties, which is unforeseeable according to human insight and experience, and that cannot be prevented or rendered harmless by economically reasonable means even by exercising the utmost care reasonably to be expected under the circumstances, and which Safe Labs may not have to accept due to its frequency, and which prevents, hinders or delays the provision of our Services or makes their provision impossible, including, without limitation:
 
-* acts of God, flood, storm, drought, earthquake or other natural disaster;
+- acts of God, flood, storm, drought, earthquake or other natural disaster;
 
-* epidemic or pandemic (for the avoidance of doubt, including the 2020 Coronavirus Pandemic);
+- epidemic or pandemic (for the avoidance of doubt, including the 2020 Coronavirus Pandemic);
 
-* terrorist attack, hacking or cyber threats, civil war, civil commotion or riots, war, threat of or preparation for war, armed conflict, imposition of sanctions, embargo, or breaking off of diplomatic relations;
+- terrorist attack, hacking or cyber threats, civil war, civil commotion or riots, war, threat of or preparation for war, armed conflict, imposition of sanctions, embargo, or breaking off of diplomatic relations;
 
-* equipment or software malfunction or bugs including network splits or forks or unexpected changes in the Blockchain, as well as hacks, phishing attacks, distributed denials of service or any other security attacks;
+- equipment or software malfunction or bugs including network splits or forks or unexpected changes in the Blockchain, as well as hacks, phishing attacks, distributed denials of service or any other security attacks;
 
-* nuclear, chemical or biological contamination;
+- nuclear, chemical or biological contamination;
 
-* any law statutes, ordinances, rules, regulations, judgments, injunctions, orders and decrees or any action taken by a government or public authority, including without limitation imposing a prohibition, or failing to grant a necessary license or consent;
+- any law statutes, ordinances, rules, regulations, judgments, injunctions, orders and decrees or any action taken by a government or public authority, including without limitation imposing a prohibition, or failing to grant a necessary license or consent;
 
-* collapse of buildings, breakdown of plant or machinery, fire, explosion or accident; and
+- collapse of buildings, breakdown of plant or machinery, fire, explosion or accident; and
 
-* strike, industrial action or lockout.
+- strike, industrial action or lockout.
 
 3. Notwithstanding the limitations provided in Clause 18.1 and 18.3, we shall not be liable or responsible to you, or be deemed to have defaulted under or breached this Agreement, for any failure or delay in the provision of the Services or the performance of this Agreement, if and to the extent such failure or delay is caused by or results from or is connected to a Force Majeure Event for which Safe Labs bears no responsibility whatsoever.
 
@@ -377,8 +376,8 @@ The Agreement including these Terms shall be governed by German law. The applica
 
 If you want to learn more about Safe Accounts or the Service or have any problems using them or have any complaints please get in touch via any of the following channels:
 
-1. Intercom: https://help.safe.global  
-2. Discord: https://chat.safe.global  
+1. Intercom: https://help.safe.global
+2. Discord: https://chat.safe.global
 3. Twitter: https://twitter.com/safe
 
 # 30\. Where is the place of legal proceedings? {#30.-where-is-the-place-of-legal-proceedings?}
@@ -387,4 +386,4 @@ For users who are merchants within the meaning of the German Commercial Code (Ha
 
 # 31\. Is this all? {#31.-is-this-all?}
 
-These Terms constitute the entire agreement between you and us in relation to the Agreement’s subject matter. It replaces and extinguishes any and all prior agreements, draft agreements, arrangements, warranties, statements, assurances, representations and undertakings of any nature made by, or on behalf of either of us, whether oral or written, public or private, in relation to that subject matter.  
+These Terms constitute the entire agreement between you and us in relation to the Agreement’s subject matter. It replaces and extinguishes any and all prior agreements, draft agreements, arrangements, warranties, statements, assurances, representations and undertakings of any nature made by, or on behalf of either of us, whether oral or written, public or private, in relation to that subject matter.

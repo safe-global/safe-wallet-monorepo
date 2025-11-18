@@ -21,6 +21,8 @@ import { wcPopupStore } from '@/features/walletconnect/components'
 import { wcChainSwitchStore } from '@/features/walletconnect/components/WcChainSwitchModal/store'
 import walletConnectInstance from '@/features/walletconnect/services/walletConnectInstance'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import * as useSafeInfoHook from '@/hooks/useSafeInfo'
+import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
 jest.mock('@/features/walletconnect/services/walletConnectInstance', () => ({
   __esModule: true,
@@ -68,8 +70,39 @@ describe('useSafeWalletProvider', () => {
     jest.clearAllMocks()
     updateSessionsMock.mockClear()
 
+    const mockSafe = extendedSafeInfoBuilder()
+      .with({
+        chainId: '1',
+        address: {
+          value: '0x1234567890000000000000000000000000000000',
+          name: 'Test Safe',
+          logoUri: null,
+        },
+        version: '1.3.0',
+      })
+      .build()
+
+    jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
+      safe: mockSafe,
+      safeAddress: '0x1234567890000000000000000000000000000000',
+      safeLoaded: true,
+      safeLoading: false,
+      safeError: undefined,
+    })
+
     jest.spyOn(chainHooks, 'useCurrentChain').mockImplementation(() => {
       return chainBuilder().with({ chainId: '1', recommendedMasterCopyVersion: '1.4.1' }).build()
+    })
+
+    jest.spyOn(chainHooks, 'default').mockImplementation(() => {
+      return {
+        configs: [
+          chainBuilder().with({ chainId: '1', recommendedMasterCopyVersion: '1.4.1' }).build(),
+          chainBuilder().with({ chainId: '5', shortName: 'gor', recommendedMasterCopyVersion: '1.4.1' }).build(),
+        ],
+        error: undefined,
+        loading: false,
+      }
     })
 
     mockedUseAllSafes.mockReturnValue([])
@@ -104,7 +137,10 @@ describe('useSafeWalletProvider', () => {
     })
 
     it('should open signing window for off-chain messages', () => {
-      jest.spyOn(router, 'useRouter').mockReturnValue({} as unknown as router.NextRouter)
+      jest.spyOn(router, 'useRouter').mockReturnValue({
+        pathname: '/',
+        query: {},
+      } as unknown as router.NextRouter)
       jest.spyOn(messages, 'isOffchainEIP1271Supported').mockReturnValue(true)
       const showNotificationSpy = jest.spyOn(notifications, 'showNotification')
 
@@ -139,7 +175,10 @@ describe('useSafeWalletProvider', () => {
     })
 
     it('should open a signing window for on-chain messages', async () => {
-      jest.spyOn(router, 'useRouter').mockReturnValue({} as unknown as router.NextRouter)
+      jest.spyOn(router, 'useRouter').mockReturnValue({
+        pathname: '/',
+        query: {},
+      } as unknown as router.NextRouter)
       jest.spyOn(messages, 'isOffchainEIP1271Supported').mockReturnValue(true)
       const showNotificationSpy = jest.spyOn(notifications, 'showNotification')
 
@@ -194,7 +233,10 @@ describe('useSafeWalletProvider', () => {
     })
 
     it('should open signing window for off-chain typed messages', () => {
-      jest.spyOn(router, 'useRouter').mockReturnValue({} as unknown as router.NextRouter)
+      jest.spyOn(router, 'useRouter').mockReturnValue({
+        pathname: '/',
+        query: {},
+      } as unknown as router.NextRouter)
       const showNotificationSpy = jest.spyOn(notifications, 'showNotification')
 
       const mockSetTxFlow = jest.fn()
@@ -266,7 +308,10 @@ describe('useSafeWalletProvider', () => {
     })
 
     it('should should send (batched) transactions', () => {
-      jest.spyOn(router, 'useRouter').mockReturnValue({} as unknown as router.NextRouter)
+      jest.spyOn(router, 'useRouter').mockReturnValue({
+        pathname: '/',
+        query: {},
+      } as unknown as router.NextRouter)
       const showNotificationSpy = jest.spyOn(notifications, 'showNotification')
 
       const mockSetTxFlow = jest.fn()

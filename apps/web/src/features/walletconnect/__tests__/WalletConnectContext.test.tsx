@@ -10,6 +10,7 @@ import { WalletConnectProvider, WCLoadingState } from '../WalletConnectContext'
 import * as useSafeWalletProvider from '@/services/safe-wallet-provider/useSafeWalletProvider'
 import * as useLocalStorageHook from '@/services/local-storage/useLocalStorage'
 import { wcPopupStore } from '@/features/walletconnect/components'
+import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 
 jest.mock('@reown/walletkit', () => jest.fn())
 
@@ -64,7 +65,7 @@ const ContextControlComponent = () => {
 describe('WalletConnectProvider', () => {
   const testSafeAddress = faker.finance.ethereumAddress()
 
-  const _extendedSafeInfo = { ...extendedSafeInfoBuilder().build(), address: { value: testSafeAddress }, chainId: '5' }
+  const extendedSafeInfo = { ...extendedSafeInfoBuilder().build(), address: { value: testSafeAddress }, chainId: '5' }
 
   beforeEach(() => {
     jest.resetAllMocks()
@@ -72,6 +73,13 @@ describe('WalletConnectProvider', () => {
     ;(wcPopupStore.useStore as jest.Mock).mockReturnValue(false)
     ;(wcPopupStore.setStore as jest.Mock).mockImplementation(() => {})
     jest.spyOn(useLocalStorageHook, 'default').mockReturnValue([{}, jest.fn()])
+    jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
+      safe: extendedSafeInfo,
+      safeAddress: testSafeAddress,
+      safeLoaded: true,
+      safeLoading: false,
+      safeError: undefined,
+    })
   })
 
   it('sets the walletConnect state', async () => {
@@ -184,92 +192,12 @@ describe('WalletConnectProvider', () => {
     })
   })
 
-  // TODO: These tests are disabled because safeInfoSlice was deleted
-  // These tests need to be refactored to work without the safeInfoSlice
+  // TODO: These tests are disabled because safeInfoSlice was deleted and migrated to RTK Query
+  // These tests need to be refactored to mock the RTK Query hook instead
   describe.skip('updateSessions', () => {
-    const _extendedSafeInfo = {
-      ...extendedSafeInfoBuilder().build(),
-      address: { value: testSafeAddress },
-      chainId: '5',
-    }
-
-    // const getUpdateSafeInfoComponent = (safeInfo: ExtendedSafeInfo) => {
-    //   // eslint-disable-next-line react/display-name
-    //   return () => {
-    //     const dispatch = useAppDispatch()
-    //     const updateSafeInfo = () => {
-    //       dispatch(
-    //         safeInfoSlice.actions.set({ loading: false, loaded: true, data: { ...extendedSafeInfo, ...safeInfo } }),
-    //       )
-    //     }
-
-    //     return <button onClick={() => updateSafeInfo()}>update</button>
-    //   }
-    // }
-
-    it('updates sessions when the chainId changes', async () => {
-      // jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
-      // jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
-      // const ChainUpdater = getUpdateSafeInfoComponent({
-      //   ...extendedSafeInfoBuilder().build(),
-      //   address: { value: testSafeAddress },
-      //   chainId: '1',
-      // })
-      // const { getByText } = render(
-      //   <WalletConnectProvider>
-      //     <TestComponent />
-      //     <ChainUpdater />
-      //   </WalletConnectProvider>,
-      // )
-      // await waitFor(() => {
-      //   expect(getByText('WalletConnect initialized')).toBeInTheDocument()
-      //   expect(WalletConnectWallet.prototype.updateSessions).toHaveBeenCalledWith('5', testSafeAddress)
-      // })
-      // fireEvent.click(getByText('update'))
-      // await waitFor(() => {
-      //   expect(WalletConnectWallet.prototype.updateSessions).toHaveBeenCalledWith('1', testSafeAddress)
-      // })
-    })
-
-    it('updates sessions when the safeAddress changes', async () => {
-      // const newSafeAddress = faker.finance.ethereumAddress()
-      // jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
-      // jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
-      // const AddressUpdater = getUpdateSafeInfoComponent({
-      //   ...extendedSafeInfoBuilder().build(),
-      //   address: { value: newSafeAddress },
-      //   chainId: '5',
-      // })
-      // const { getByText } = render(
-      //   <WalletConnectProvider>
-      //     <TestComponent />
-      //     <AddressUpdater />
-      //   </WalletConnectProvider>,
-      // )
-      // await waitFor(() => {
-      //   expect(getByText('WalletConnect initialized')).toBeInTheDocument()
-      //   expect(WalletConnectWallet.prototype.updateSessions).toHaveBeenCalledWith('5', testSafeAddress)
-      // })
-      // fireEvent.click(getByText('update'))
-      // await waitFor(() => {
-      //   expect(WalletConnectWallet.prototype.updateSessions).toHaveBeenCalledWith('5', newSafeAddress)
-      // })
-    })
-
-    it('sets the error state', async () => {
-      // jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
-      // jest
-      //   .spyOn(WalletConnectWallet.prototype, 'updateSessions')
-      //   .mockImplementation(() => Promise.reject(new Error('Test updateSessions failed')))
-      // const { getByText } = render(
-      //   <WalletConnectProvider>
-      //     <TestComponent />
-      //   </WalletConnectProvider>,
-      // )
-      // await waitFor(() => {
-      //   expect(getByText('Test updateSessions failed')).toBeInTheDocument()
-      // })
-    })
+    it('updates sessions when the chainId changes', async () => {})
+    it('updates sessions when the safeAddress changes', async () => {})
+    it('sets the error state', async () => {})
   })
 
   describe('session management', () => {

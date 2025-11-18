@@ -10,6 +10,8 @@ import { http, HttpResponse } from 'msw'
 import { GATEWAY_URL } from '@/config/gateway'
 import type { RootState } from '@/store'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import * as useSafeInfoModule from '@/hooks/useSafeInfo'
+import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
 const mockTxPreview: TransactionPreview = {
   txInfo: {},
@@ -19,8 +21,21 @@ const mockTxPreview: TransactionPreview = {
   },
 } as unknown as TransactionPreview
 
-const _mockSafeAddress = '0x1234567890123456789012345678901234567890'
-const _mockChainId = '1'
+const mockSafeAddress = '0x1234567890123456789012345678901234567890'
+const mockChainId = '4'
+
+jest.spyOn(useSafeInfoModule, 'default').mockReturnValue({
+  safe: extendedSafeInfoBuilder()
+    .with({
+      chainId: mockChainId,
+      address: { value: mockSafeAddress, name: 'Test Safe', logoUri: null },
+    })
+    .build(),
+  safeAddress: mockSafeAddress,
+  safeLoaded: true,
+  safeLoading: false,
+  safeError: undefined,
+})
 
 const createMockSafeState = (): Partial<RootState> => ({})
 

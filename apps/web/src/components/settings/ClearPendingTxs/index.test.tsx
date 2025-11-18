@@ -4,12 +4,30 @@ import { ClearPendingTxs } from '../ClearPendingTxs'
 import { render } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import { PendingStatus, PendingTxType } from '@/store/pendingTxsSlice'
+import * as useSafeInfoModule from '@/hooks/useSafeInfo'
+import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
 const safeAddress = faker.finance.ethereumAddress()
+
+jest.spyOn(useSafeInfoModule, 'default').mockReturnValue({
+  safe: extendedSafeInfoBuilder()
+    .with({
+      chainId: '1',
+      address: { value: safeAddress, name: 'Test Safe', logoUri: null },
+    })
+    .build(),
+  safeAddress,
+  safeLoaded: true,
+  safeLoading: false,
+  safeError: undefined,
+})
 
 describe('ClearPendingTxs', () => {
   it('clears a single transaction', () => {
     render(<ClearPendingTxs />, {
+      routerProps: {
+        query: { safe: `eth:${safeAddress}` },
+      },
       initialReduxState: {
         pendingTxs: {
           ['0x123']: {
@@ -36,6 +54,9 @@ describe('ClearPendingTxs', () => {
   })
   it('clears multiple transactions', () => {
     render(<ClearPendingTxs />, {
+      routerProps: {
+        query: { safe: `eth:${safeAddress}` },
+      },
       initialReduxState: {
         pendingTxs: {
           ['0x123']: {

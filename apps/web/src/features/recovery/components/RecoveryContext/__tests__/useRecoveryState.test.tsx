@@ -164,76 +164,9 @@ describe('useRecoveryState', () => {
     })
   })
 
-  // TODO: This test is disabled because txHistorySlice was deleted
-  // This test needs to be refactored to work without the txHistorySlice
-  it.skip('should refetch when interacting with a Delay Modifier via the Safe', async () => {
-    mockUseHasFeature.mockReturnValue(true)
-    const provider = {}
-    mockUseWeb3ReadOnly.mockReturnValue(provider as any)
-    const chainId = '5'
-    const safe = safeInfoBuilder()
-      .with({ chainId, modules: [addressExBuilder().build()] })
-      .build()
-    const safeInfo = { safe, safeAddress: safe.address.value }
-    mockUseSafeInfo.mockReturnValue(safeInfo as any)
-    const chain = chainBuilder().build()
-    mockUseCurrentChain.mockReturnValue(chain)
-    const delayModifierAddress = faker.finance.ethereumAddress()
-    mockGetRecoveryDelayModifiers.mockResolvedValue([
-      { getAddress: jest.fn().mockResolvedValue(delayModifierAddress) } as any,
-    ])
-
-    // function Test() {
-    //   const dispatch = useAppDispatch()
-
-    //   const fakeTxHistoryPoll = () => {
-    //     dispatch(
-    //       txHistorySlice.actions.set({
-    //         loading: false,
-    //         loaded: true,
-    //         data: {
-    //           results: [
-    //             {
-    //               type: 'TRANSACTION',
-    //               conflictType: ConflictType.NONE,
-    //               transaction: {
-    //                 txInfo: {
-    //                   type: 'Custom',
-    //                   to: {
-    //                     value: delayModifierAddress,
-    //                   },
-    //                 },
-    //               },
-    //             },
-    //           ],
-    //         },
-    //       } as any),
-    //     )
-    //   }
-
-    //   return <button onClick={fakeTxHistoryPoll}>Fake poll</button>
-    // }
-
-    // const { queryByText } = render(
-    //   <>
-    //     <Test />
-    //     <RecoveryContextHooks />
-    //   </>,
-    // )
-
-    // await waitFor(() => {
-    //   expect(mockGetRecoveryDelayModifiers).toHaveBeenCalledTimes(1)
-    //   expect(mockGetRecoveryState).toHaveBeenCalledTimes(1)
-    // })
-
-    // act(() => {
-    //   fireEvent.click(queryByText('Fake poll')!)
-    // })
-
-    // await waitFor(() => {
-    //   expect(mockGetRecoveryState).toHaveBeenCalledTimes(2)
-    // })
-  })
+  // TODO: This test is disabled because txHistorySlice was deleted and migrated to RTK Query
+  // This test needs to be refactored to mock the RTK Query hook instead
+  it.skip('should refetch when interacting with a Delay Modifier via the Safe', async () => {})
 
   it('should refetch when interacting with a Delay Modifier as a Recoverer', async () => {
     mockUseHasFeature.mockReturnValue(true)
