@@ -71,12 +71,10 @@ export SLACK_WEBHOOK_URL="https://hooks.slack.com/..."
 These scripts are called by the automated release workflows:
 
 - **Start Web Release** (`../.github/workflows/web-release-start.yml`)
-
   - Uses `generate-changelog.sh` to create PR description
   - Uses `notify-slack.sh` to announce release start
 
 - **Complete Web Release** (`../.github/workflows/web-release-complete.yml`)
-
   - Uses `notify-slack.sh` to announce QA approval
 
 - **Back-merge Main to Dev** (`../.github/workflows/web-release-backmerge.yml`)
