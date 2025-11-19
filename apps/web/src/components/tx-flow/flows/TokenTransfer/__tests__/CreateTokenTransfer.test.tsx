@@ -64,8 +64,6 @@ describe('CreateTokenTransfer', () => {
       .spyOn(tokenUtils, 'useTokenAmount')
       .mockReturnValue({ totalAmount: BigInt(1000), spendingLimitAmount: BigInt(500) })
 
-    const _tokenAddress = ZERO_ADDRESS
-
     const { getByText } = renderCreateTokenTransfer({}, {})
 
     expect(getByText('Send as')).toBeInTheDocument()

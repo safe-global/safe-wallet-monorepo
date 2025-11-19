@@ -8,7 +8,6 @@ import { SlotProvider } from '@/components/tx-flow/slots'
 import { server } from '@/tests/server'
 import { http, HttpResponse } from 'msw'
 import { GATEWAY_URL } from '@/config/gateway'
-import type { RootState } from '@/store'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 import * as useSafeInfoModule from '@/hooks/useSafeInfo'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
@@ -37,17 +36,13 @@ jest.spyOn(useSafeInfoModule, 'default').mockReturnValue({
   safeError: undefined,
 })
 
-const createMockSafeState = (): Partial<RootState> => ({})
-
 describe('ReviewTransaction', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
   it('should display a loading component', () => {
-    const { container } = render(<ReviewTransaction onSubmit={jest.fn()} />, {
-      initialReduxState: createMockSafeState(),
-    })
+    const { container } = render(<ReviewTransaction onSubmit={jest.fn()} />)
 
     expect(container).toMatchSnapshot()
   })
@@ -67,9 +62,6 @@ describe('ReviewTransaction', () => {
           </SafeShieldProvider>
         </SafeTxContext.Provider>
       </SlotProvider>,
-      {
-        initialReduxState: createMockSafeState(),
-      },
     )
 
     await waitFor(() => {
@@ -97,9 +89,6 @@ describe('ReviewTransaction', () => {
           </SafeShieldProvider>
         </SafeTxContext.Provider>
       </SlotProvider>,
-      {
-        initialReduxState: createMockSafeState(),
-      },
     )
 
     await waitFor(() => {
