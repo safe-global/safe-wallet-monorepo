@@ -234,18 +234,14 @@ describe('ShowAllAddress', () => {
     })
 
     it('should render addresses in separate containers', async () => {
-      const { user, container } = renderWithUserEvent(<ShowAllAddress addresses={mockAddresses} />)
+      const { user } = renderWithUserEvent(<ShowAllAddress addresses={mockAddresses} />)
 
       await user.click(screen.getByText('Show all'))
 
-      // Check that addresses are rendered in body2 typography
-      const addressTexts = container.querySelectorAll('.MuiTypography-body2')
-      // Filter to only address text (not "Hide all" text)
-      const actualAddresses = Array.from(addressTexts).filter(
-        (el) => el.textContent && mockAddresses.includes(el.textContent),
-      )
-
-      expect(actualAddresses.length).toBe(mockAddresses.length)
+      // Check that all addresses are present and visible
+      mockAddresses.forEach((address) => {
+        expect(screen.getByText(address)).toBeVisible()
+      })
     })
   })
 
