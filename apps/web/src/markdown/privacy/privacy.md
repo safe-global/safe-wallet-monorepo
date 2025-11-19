@@ -375,7 +375,7 @@ We rely on our legitimate interest to ensure the prevention of fraud (GDPR Art.6
 3. Company name;  
 4. Location;  
 5. Responses to open text fields;  
-6. SafeWallet address (optional);  
+6. Safe Wallet address (optional);  
 7. Telegram account (optional).  
 
 We rely on the user consent (Art. 6.1a GDPR) to process this information, as users can choose to fill out an optional form should they be currently interested in our partnership with Hypernative with the goal of adding their transaction protection technology and its “Guardian” product into Safe{Wallet} to create a jointly commercialized experience that offers automated, policy-based transaction guarding with native discoverability and seamless user experience. We retain this data for a year after collection through the form. 
