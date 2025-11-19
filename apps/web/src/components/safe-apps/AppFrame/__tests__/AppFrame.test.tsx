@@ -97,9 +97,7 @@ describe('AppFrame', () => {
       error: undefined,
     } as any)
 
-    const { container } = render(
-      <AppFrame appUrl="https://app.url" allowedFeaturesList="" safeAppFromManifest={emptySafeApp} />,
-    )
+    render(<AppFrame appUrl="https://app.url" allowedFeaturesList="" safeAppFromManifest={emptySafeApp} />)
 
     // Wait for the component to render the queue bar
     const queueText = await screen.findByText('(1) Transaction queue')
