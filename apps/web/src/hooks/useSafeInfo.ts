@@ -5,6 +5,7 @@ import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { useSafeAddressFromUrl } from './useSafeAddressFromUrl'
 import { useChainId } from './useChainId'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQueryError'
+import { useMemoDeepCompare } from '@safe-global/utils/features/safe-shield/hooks/util-hooks/useMemoDeepCompare'
 
 const useSafeInfo = (): {
   safe: ExtendedSafeInfo
@@ -21,8 +22,9 @@ const useSafeInfo = (): {
     { skip: !chainId || !safeAddress },
   )
 
-  // Memoize the safe object to prevent unnecessary re-renders
-  const safe = useMemo(() => {
+  // Memoize the safe object with deep comparison to prevent unnecessary re-renders
+  // RTK Query's currentData returns a new reference even when data hasn't changed
+  const safe = useMemoDeepCompare(() => {
     return currentData ? { ...currentData, deployed: true } : defaultSafeInfo
   }, [currentData])
 
