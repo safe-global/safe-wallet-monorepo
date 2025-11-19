@@ -58,7 +58,7 @@ describe('swapOrderSlice', () => {
                   address: { value: '0xSafeAddress' },
                 },
               },
-              'chainsGetChainsV1({})': {
+              'chainsGetChainsV1(undefined)': {
                 data: {
                   results: [{ chainId: '1' }],
                 },
@@ -103,7 +103,7 @@ describe('swapOrderSlice', () => {
                   address: { value: '0xSafeAddress' },
                 },
               },
-              'chainsGetChainsV1({})': {
+              'chainsGetChainsV1(undefined)': {
                 data: {
                   results: [{ chainId: '1' }],
                 },
@@ -148,7 +148,7 @@ describe('swapOrderSlice', () => {
                   address: { value: '0xSafeAddress' },
                 },
               },
-              'chainsGetChainsV1({})': {
+              'chainsGetChainsV1(undefined)': {
                 data: {
                   results: [{ chainId: '1' }],
                 },
