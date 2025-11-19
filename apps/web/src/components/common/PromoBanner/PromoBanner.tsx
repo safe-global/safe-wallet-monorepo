@@ -153,8 +153,8 @@ export const PromoBanner = ({
                     ? { color: `${customCtaColor} !important` }
                     : undefined
                   : customCtaColor
-                  ? { backgroundColor: `${customCtaColor} !important` }
-                  : undefined
+                    ? { backgroundColor: `${customCtaColor} !important` }
+                    : undefined
               }
               color={ctaVariant === 'text' && !customCtaColor ? 'static' : undefined}
               disabled={ctaDisabled}
