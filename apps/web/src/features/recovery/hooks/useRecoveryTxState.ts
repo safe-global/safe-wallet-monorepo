@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useClock } from '../../../hooks/useClock'
 import { selectDelayModifierByTxHash } from '@/features/recovery/services/selectors'
 import recoveryStore from '@/features/recovery/components/RecoveryContext'
@@ -31,5 +32,9 @@ export function useRecoveryTxState({ validFrom, expiresAt, transactionHash, args
 
   const remainingSeconds = isValid ? 0 : Math.ceil(remainingMs / 1_000)
 
-  return { isNext, isExecutable, isExpired, remainingSeconds, isPending }
+  // Memoize the return object to prevent unnecessary re-renders
+  return useMemo(
+    () => ({ isNext, isExecutable, isExpired, remainingSeconds, isPending }),
+    [isNext, isExecutable, isExpired, remainingSeconds, isPending],
+  )
 }
