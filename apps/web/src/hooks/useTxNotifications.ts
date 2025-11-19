@@ -96,8 +96,8 @@ const useTxNotifications = (): void => {
             link: txId
               ? getTxLink(txId, chain, safeAddress)
               : txHash
-              ? getExplorerLink(txHash, chain.blockExplorerUriTemplate)
-              : undefined,
+                ? getExplorerLink(txHash, chain.blockExplorerUriTemplate)
+                : undefined,
           }),
         )
       }),
