@@ -7,6 +7,8 @@ import type { ReactNode } from 'react'
 import type { AnalyticsEvent } from '@/services/analytics'
 import { trackEvent, MixpanelEventParams } from '@/services/analytics'
 
+const DEFAULT_BACKGROUND = 'linear-gradient(90deg, #b0ffc9, #d7f6ff)'
+
 export interface PromoBannerProps {
   title: string
   /**
@@ -104,7 +106,7 @@ export const PromoBanner = ({
     <Card
       className={css.banner}
       sx={{
-        ...(customBackground ? { background: `${customBackground} !important` } : undefined),
+        background: `${customBackground || DEFAULT_BACKGROUND} !important`,
         ...(onBannerClick ? { cursor: 'pointer' } : undefined),
       }}
       onClick={onBannerClick ? handleClick : undefined}
@@ -151,8 +153,8 @@ export const PromoBanner = ({
                     ? { color: `${customCtaColor} !important` }
                     : undefined
                   : customCtaColor
-                    ? { backgroundColor: `${customCtaColor} !important` }
-                    : undefined
+                  ? { backgroundColor: `${customCtaColor} !important` }
+                  : undefined
               }
               color={ctaVariant === 'text' && !customCtaColor ? 'static' : undefined}
               disabled={ctaDisabled}
