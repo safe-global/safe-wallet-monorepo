@@ -18,6 +18,7 @@ import {
   swapOrderStatusListener,
   authListener,
 } from './slices'
+import { txHistoryListener, txQueueListener, safeMessagesListener } from './txEventsListener'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
 import { ofacApi } from '@/store/api/ofac'
@@ -88,7 +89,14 @@ const middleware: Middleware<{}, RootState>[] = [
   slices.gatewayApi.middleware,
 ]
 
-const listeners = [swapOrderListener, swapOrderStatusListener, authListener]
+const listeners = [
+  safeMessagesListener,
+  txHistoryListener,
+  txQueueListener,
+  swapOrderListener,
+  swapOrderStatusListener,
+  authListener,
+]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {
   if (action.type === hydrate.HYDRATE_ACTION) {
