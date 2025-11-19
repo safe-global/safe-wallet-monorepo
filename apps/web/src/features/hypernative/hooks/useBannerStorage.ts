@@ -23,7 +23,7 @@ export enum BannerType {
  * - For BannerType.Pending: Returns true if formCompleted is true AND pendingBannerDismissed is false, otherwise false
  * - For BannerType.TxReportButton: Always returns true (ignores bannerDismissed and formCompleted)
  * - For BannerType.NoBalanceCheck: Same as BannerType.Promo, but used when balance cannot be checked (e.g., for undeployed safes)
- * - For BannerType.Settings: Ignores bannerDismissed but respects formCompleted (used for Settings page)
+ * - For BannerType.Settings: Always true, visibility depends on the guard status in useBannerVisibility
  */
 export const useBannerStorage = (bannerType: BannerType): boolean => {
   const chainId = useChainId()
@@ -37,19 +37,14 @@ export const useBannerStorage = (bannerType: BannerType): boolean => {
       return true
     }
 
-    if (!safeHnState) {
-      // If no state exists, show promo banner by default, hide pending banner
-      // For Settings, show if no state exists (no form completed yet)
-      return (
-        bannerType === BannerType.Settings ||
-        bannerType === BannerType.Promo ||
-        bannerType === BannerType.NoBalanceCheck
-      )
+    // Settings banner always shows (visibility controlled by guard status in useBannerVisibility)
+    if (bannerType === BannerType.Settings) {
+      return true
     }
 
-    // Settings banner ignores dismissal state but respects formCompleted
-    if (bannerType === BannerType.Settings) {
-      return !safeHnState.formCompleted
+    if (!safeHnState) {
+      // If no state exists, show promo banner by default, hide pending banner
+      return bannerType === BannerType.Promo || bannerType === BannerType.NoBalanceCheck
     }
 
     if (bannerType === BannerType.Promo || bannerType === BannerType.NoBalanceCheck) {
