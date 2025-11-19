@@ -492,7 +492,7 @@ describe('WalletConnectProvider', () => {
       jest
         .spyOn(useSafeWalletProvider, 'default')
         .mockImplementation(
-          () => ({ request: mockRequest } as unknown as ReturnType<typeof useSafeWalletProvider.default>),
+          () => ({ request: mockRequest }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
         )
 
       jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
@@ -591,7 +591,7 @@ describe('WalletConnectProvider', () => {
       jest
         .spyOn(useSafeWalletProvider, 'default')
         .mockImplementation(
-          () => ({ request: mockRequest } as unknown as ReturnType<typeof useSafeWalletProvider.default>),
+          () => ({ request: mockRequest }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
         )
 
       jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
@@ -632,7 +632,7 @@ describe('WalletConnectProvider', () => {
       jest
         .spyOn(useSafeWalletProvider, 'default')
         .mockImplementation(
-          () => ({ request: mockRequest } as unknown as ReturnType<typeof useSafeWalletProvider.default>),
+          () => ({ request: mockRequest }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
         )
 
       jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
@@ -696,7 +696,7 @@ describe('WalletConnectProvider', () => {
       jest
         .spyOn(useSafeWalletProvider, 'default')
         .mockImplementation(
-          () => ({ request: mockRequest } as unknown as ReturnType<typeof useSafeWalletProvider.default>),
+          () => ({ request: mockRequest }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
         )
 
       render(
@@ -746,7 +746,7 @@ describe('WalletConnectProvider', () => {
       jest
         .spyOn(useSafeWalletProvider, 'default')
         .mockImplementation(
-          () => ({ request: mockRequest } as unknown as ReturnType<typeof useSafeWalletProvider.default>),
+          () => ({ request: mockRequest }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
         )
 
       render(
@@ -796,7 +796,7 @@ describe('WalletConnectProvider', () => {
       jest
         .spyOn(useSafeWalletProvider, 'default')
         .mockImplementation(
-          () => ({ request: mockRequest } as unknown as ReturnType<typeof useSafeWalletProvider.default>),
+          () => ({ request: mockRequest }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
         )
 
       const { getByText } = render(
@@ -856,7 +856,7 @@ describe('WalletConnectProvider', () => {
       jest
         .spyOn(useSafeWalletProvider, 'default')
         .mockImplementation(
-          () => ({ request: mockRequest } as unknown as ReturnType<typeof useSafeWalletProvider.default>),
+          () => ({ request: mockRequest }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
         )
 
       render(
@@ -920,7 +920,7 @@ describe('WalletConnectProvider', () => {
       jest
         .spyOn(useSafeWalletProvider, 'default')
         .mockImplementation(
-          () => ({ request: mockRequest } as unknown as ReturnType<typeof useSafeWalletProvider.default>),
+          () => ({ request: mockRequest }) as unknown as ReturnType<typeof useSafeWalletProvider.default>,
         )
 
       render(
@@ -971,9 +971,9 @@ describe('WalletConnectProvider', () => {
         .spyOn(useSafeWalletProvider, 'default')
         .mockImplementation(
           () =>
-            ({ request: () => Promise.reject(new Error('Test request failed')) } as unknown as ReturnType<
+            ({ request: () => Promise.reject(new Error('Test request failed')) }) as unknown as ReturnType<
               typeof useSafeWalletProvider.default
-            >),
+            >,
         )
 
       const onRequestSpy = jest.spyOn(WalletConnectWallet.prototype, 'onRequest')
