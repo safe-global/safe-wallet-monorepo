@@ -14,6 +14,7 @@ import '@/styles/globals.css'
 import { BRAND_NAME } from '@/config/constants'
 import { makeStore, setStoreInstance, useHydrateStore } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
+import useLoadableStores from '@/hooks/useLoadableStores'
 import { useInitOnboard } from '@/hooks/wallets/useOnboard'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
 import { useInitSafeCoreSDK } from '@/hooks/coreSDK/useInitSafeCoreSDK'
@@ -49,7 +50,6 @@ import { useDatadog } from '@/services/datadog'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
-import { useSpendingLimitsLoader } from '@/hooks/useSpendingLimitsLoader'
 
 const reduxStore = makeStore()
 setStoreInstance(reduxStore)
@@ -62,6 +62,7 @@ const InitApp = (): null => {
   useMixpanel()
   useNotificationTracking()
   useInitSession()
+  useLoadableStores()
   useInitOnboard()
   useInitWeb3()
   useInitSafeCoreSDK()
@@ -75,7 +76,6 @@ const InitApp = (): null => {
   useBeamer()
   useVisitedSafes()
   useSafeLabsTerms() // Automatically disconnect wallets if terms not accepted and feature is enabled
-  useSpendingLimitsLoader() // Load spending limits into Redux store
 
   return null
 }

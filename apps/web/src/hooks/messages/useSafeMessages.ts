@@ -1,12 +1,10 @@
 import type { MessagePage } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import {
-  useLazyMessagesGetMessagesBySafeV1Query,
-  useMessagesGetMessagesBySafeV1Query,
-} from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import { useLazyMessagesGetMessagesBySafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 
+import { useAppSelector } from '@/store'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { POLLING_INTERVAL } from '@/config/constants'
+import { selectSafeMessages } from '@/store/safeMessagesSlice'
 
 const useSafeMessages = (
   cursor?: string,
@@ -17,24 +15,6 @@ const useSafeMessages = (
 } => {
   const { safe, safeAddress, safeLoaded } = useSafeInfo()
   const [trigger, { data, error, isLoading }] = useLazyMessagesGetMessagesBySafeV1Query()
-
-  // The latest page of messages is fetched via RTK Query
-  const {
-    currentData: messagesData,
-    error: messagesError,
-    isLoading: messagesLoading,
-  } = useMessagesGetMessagesBySafeV1Query(
-    {
-      chainId: safe.chainId,
-      safeAddress,
-    },
-    {
-      skip: !safeAddress || !safe.chainId || !!cursor,
-      pollingInterval: POLLING_INTERVAL,
-      skipPollingIfUnfocused: true,
-      refetchOnFocus: true,
-    },
-  )
 
   // If cursor is passed, load a new messages page from the API
   const [page, asyncError, asyncLoading] = useAsync<MessagePage>(
@@ -53,6 +33,8 @@ const useSafeMessages = (
     false,
   )
 
+  const messagesState = useAppSelector(selectSafeMessages)
+
   return cursor
     ? // New page
       {
@@ -62,9 +44,9 @@ const useSafeMessages = (
       }
     : // Stored page
       {
-        page: messagesData,
-        error: messagesError ? (messagesError as any).error || 'Failed to load messages' : undefined,
-        loading: messagesLoading,
+        page: messagesState.data,
+        error: messagesState.error,
+        loading: messagesState.loading,
       }
 }
 

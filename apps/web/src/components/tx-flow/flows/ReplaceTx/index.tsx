@@ -6,7 +6,7 @@ import CancelIcon from '@/public/images/common/cancel.svg'
 import ReplaceTxIcon from '@/public/images/transactions/replace-tx.svg'
 import CachedIcon from '@mui/icons-material/Cached'
 import { useQueuedTxByNonce } from '@/hooks/useTxQueue'
-import { isCustomTxInfo, isTransactionListItem } from '@/utils/transaction-guards'
+import { isCustomTxInfo } from '@/utils/transaction-guards'
 
 import css from './styles.module.css'
 import { TxModalContext } from '../..'
@@ -115,8 +115,7 @@ const ReplaceTxMenu = ({
   const { setTxFlow } = useContext(TxModalContext)
   const queuedTxsByNonce = useQueuedTxByNonce(txNonce)
   const canCancel = !queuedTxsByNonce?.some(
-    (item) =>
-      isTransactionListItem(item) && isCustomTxInfo(item.transaction.txInfo) && item.transaction.txInfo.isCancellation,
+    (item) => isCustomTxInfo(item.transaction.txInfo) && item.transaction.txInfo.isCancellation,
   )
 
   const isDeleteEnabled = useHasFeature(FEATURES.DELETE_TX)

@@ -1,37 +1,10 @@
 import { renderHook } from '@/tests/test-utils'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import * as safesQueries from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
-import { useChainId } from '@/hooks/useChainId'
-import useChains from '@/hooks/useChains'
-
-jest.mock('@/hooks/useSafeAddressFromUrl')
-jest.mock('@/hooks/useChainId')
-jest.mock('@/hooks/useChains')
-
-const mockUseSafeAddressFromUrl = useSafeAddressFromUrl as jest.MockedFunction<typeof useSafeAddressFromUrl>
-const mockUseChainId = useChainId as jest.MockedFunction<typeof useChainId>
-const mockUseChains = useChains as jest.MockedFunction<typeof useChains>
+import type { RootState } from '@/store'
 
 describe('useSafeInfo hook', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-    mockUseChainId.mockReturnValue('1')
-    mockUseSafeAddressFromUrl.mockReturnValue('')
-    mockUseChains.mockReturnValue({
-      configs: [],
-      error: undefined,
-      loading: false,
-    })
-  })
   it('should return default safe info when no data in Redux', () => {
-    jest.spyOn(safesQueries, 'useSafesGetSafeV1Query').mockReturnValue({
-      currentData: undefined,
-      error: undefined,
-      isLoading: false,
-    } as any)
-
     const { result } = renderHook(() => useSafeInfo())
 
     expect(result.current.safe).toBeDefined()
@@ -45,15 +18,16 @@ describe('useSafeInfo hook', () => {
     const mockSafe = extendedSafeInfoBuilder().build()
     const mockAddress = mockSafe.address.value
 
-    mockUseSafeAddressFromUrl.mockReturnValue(mockAddress)
+    const initialReduxState: Partial<RootState> = {
+      safeInfo: {
+        loading: false,
+        error: undefined,
+        data: mockSafe,
+        loaded: true,
+      },
+    }
 
-    jest.spyOn(safesQueries, 'useSafesGetSafeV1Query').mockReturnValue({
-      currentData: mockSafe,
-      error: undefined,
-      isLoading: false,
-    } as any)
-
-    const { result } = renderHook(() => useSafeInfo())
+    const { result } = renderHook(() => useSafeInfo(), { initialReduxState })
 
     expect(result.current.safe).toEqual(mockSafe)
     expect(result.current.safeAddress).toBe(mockAddress)
@@ -63,13 +37,16 @@ describe('useSafeInfo hook', () => {
   })
 
   it('should return loading state correctly', () => {
-    jest.spyOn(safesQueries, 'useSafesGetSafeV1Query').mockReturnValue({
-      currentData: undefined,
-      error: undefined,
-      isLoading: true,
-    } as any)
+    const initialReduxState: Partial<RootState> = {
+      safeInfo: {
+        loading: true,
+        error: undefined,
+        data: undefined,
+        loaded: false,
+      },
+    }
 
-    const { result } = renderHook(() => useSafeInfo())
+    const { result } = renderHook(() => useSafeInfo(), { initialReduxState })
 
     expect(result.current.safeLoading).toBe(true)
     expect(result.current.safeLoaded).toBe(false)
@@ -78,13 +55,16 @@ describe('useSafeInfo hook', () => {
   it('should return error state correctly', () => {
     const errorMessage = 'Failed to load Safe'
 
-    jest.spyOn(safesQueries, 'useSafesGetSafeV1Query').mockReturnValue({
-      currentData: undefined,
-      error: { error: errorMessage } as any,
-      isLoading: false,
-    } as any)
+    const initialReduxState: Partial<RootState> = {
+      safeInfo: {
+        loading: false,
+        error: errorMessage,
+        data: undefined,
+        loaded: false,
+      },
+    }
 
-    const { result } = renderHook(() => useSafeInfo())
+    const { result } = renderHook(() => useSafeInfo(), { initialReduxState })
 
     expect(result.current.safeError).toBe(errorMessage)
     expect(result.current.safeLoaded).toBe(false)
@@ -102,27 +82,31 @@ describe('useSafeInfo hook', () => {
       })
       .build()
 
-    mockUseSafeAddressFromUrl.mockReturnValue(mockSafe.address.value)
+    const initialReduxState: Partial<RootState> = {
+      safeInfo: {
+        loading: false,
+        error: undefined,
+        data: mockSafe,
+        loaded: true,
+      },
+    }
 
-    jest.spyOn(safesQueries, 'useSafesGetSafeV1Query').mockReturnValue({
-      currentData: mockSafe,
-      error: undefined,
-      isLoading: false,
-    } as any)
-
-    const { result } = renderHook(() => useSafeInfo())
+    const { result } = renderHook(() => useSafeInfo(), { initialReduxState })
 
     expect(result.current.safeAddress).toBe('0x1234567890123456789012345678901234567890')
   })
 
   it('should return empty string when no address data', () => {
-    jest.spyOn(safesQueries, 'useSafesGetSafeV1Query').mockReturnValue({
-      currentData: undefined,
-      error: undefined,
-      isLoading: false,
-    } as any)
+    const initialReduxState: Partial<RootState> = {
+      safeInfo: {
+        loading: false,
+        error: undefined,
+        data: undefined,
+        loaded: true,
+      },
+    }
 
-    const { result } = renderHook(() => useSafeInfo())
+    const { result } = renderHook(() => useSafeInfo(), { initialReduxState })
 
     expect(result.current.safeAddress).toBe('')
   })
@@ -140,15 +124,16 @@ describe('useSafeInfo hook', () => {
       })
       .build()
 
-    mockUseSafeAddressFromUrl.mockReturnValue(mockSafe.address.value)
+    const initialReduxState: Partial<RootState> = {
+      safeInfo: {
+        loading: false,
+        error: undefined,
+        data: mockSafe,
+        loaded: true,
+      },
+    }
 
-    jest.spyOn(safesQueries, 'useSafesGetSafeV1Query').mockReturnValue({
-      currentData: mockSafe,
-      error: undefined,
-      isLoading: false,
-    } as any)
-
-    const { result } = renderHook(() => useSafeInfo())
+    const { result } = renderHook(() => useSafeInfo(), { initialReduxState })
 
     expect(result.current.safe.threshold).toBe(2)
     expect(result.current.safe.owners).toHaveLength(3)
@@ -158,35 +143,39 @@ describe('useSafeInfo hook', () => {
   it('should maintain referential equality with useMemo when data does not change', () => {
     const mockSafe = extendedSafeInfoBuilder().build()
 
-    mockUseSafeAddressFromUrl.mockReturnValue(mockSafe.address.value)
+    const initialReduxState: Partial<RootState> = {
+      safeInfo: {
+        loading: false,
+        error: undefined,
+        data: mockSafe,
+        loaded: true,
+      },
+    }
 
-    jest.spyOn(safesQueries, 'useSafesGetSafeV1Query').mockReturnValue({
-      currentData: mockSafe,
-      error: undefined,
-      isLoading: false,
-    } as any)
-
-    const { result, rerender } = renderHook(() => useSafeInfo())
+    const { result, rerender } = renderHook(() => useSafeInfo(), { initialReduxState })
 
     const firstRender = result.current
 
-    // Rerender without changing mocks
+    // Rerender without changing Redux state
     rerender()
 
     const secondRender = result.current
 
     // useMemo should return the same reference if dependencies haven't changed
-    expect(firstRender).toStrictEqual(secondRender)
+    expect(firstRender).toBe(secondRender)
   })
 
   it('should handle both loading and error states simultaneously', () => {
-    jest.spyOn(safesQueries, 'useSafesGetSafeV1Query').mockReturnValue({
-      currentData: undefined,
-      error: { error: 'Network error' } as any,
-      isLoading: true,
-    } as any)
+    const initialReduxState: Partial<RootState> = {
+      safeInfo: {
+        loading: true,
+        error: 'Network error',
+        data: undefined,
+        loaded: false,
+      },
+    }
 
-    const { result } = renderHook(() => useSafeInfo())
+    const { result } = renderHook(() => useSafeInfo(), { initialReduxState })
 
     expect(result.current.safeLoading).toBe(true)
     expect(result.current.safeError).toBe('Network error')
@@ -196,15 +185,16 @@ describe('useSafeInfo hook', () => {
   it('should handle loaded state with data', () => {
     const mockSafe = extendedSafeInfoBuilder().build()
 
-    mockUseSafeAddressFromUrl.mockReturnValue(mockSafe.address.value)
+    const initialReduxState: Partial<RootState> = {
+      safeInfo: {
+        loading: false,
+        error: undefined,
+        data: mockSafe,
+        loaded: true,
+      },
+    }
 
-    jest.spyOn(safesQueries, 'useSafesGetSafeV1Query').mockReturnValue({
-      currentData: mockSafe,
-      error: undefined,
-      isLoading: false,
-    } as any)
-
-    const { result } = renderHook(() => useSafeInfo())
+    const { result } = renderHook(() => useSafeInfo(), { initialReduxState })
 
     expect(result.current.safeLoaded).toBe(true)
     expect(result.current.safe).toEqual(mockSafe)

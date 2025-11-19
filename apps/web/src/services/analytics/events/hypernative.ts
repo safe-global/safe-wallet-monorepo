@@ -25,7 +25,6 @@ export const HYPERNATIVE_EVENTS = {
 
 export enum HYPERNATIVE_SOURCE {
   Dashboard = 'Dashboard',
-  AccountCreation = 'Account creation',
   Settings = 'Settings',
   NewTransaction = 'New transaction',
   Tutorial = 'Tutorial',

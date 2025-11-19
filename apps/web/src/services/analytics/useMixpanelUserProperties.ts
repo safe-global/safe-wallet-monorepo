@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
 import { useChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import useTxHistory from '@/hooks/useTxHistory'
+import { useAppSelector } from '@/store'
+import { selectTxHistory } from '@/store/txHistorySlice'
 import { isTransactionListItem } from '@/utils/transaction-guards'
 import { MixpanelUserProperty } from '@/services/analytics/mixpanel-events'
 import { useNetworksOfSafe } from '@/features/myAccounts/hooks/useNetworksOfSafe'
@@ -33,7 +34,7 @@ export interface MixpanelUserPropertiesFormatted {
 export const useMixpanelUserProperties = (): MixpanelUserPropertiesFormatted | null => {
   const { safe, safeLoaded } = useSafeInfo()
   const currentChain = useChain(safe?.chainId || '')
-  const { page: txHistoryPage } = useTxHistory()
+  const txHistory = useAppSelector(selectTxHistory)
   const allNetworks = useNetworksOfSafe(safe?.address?.value || '')
   const isOwner = useIsSafeOwner()
 
@@ -48,8 +49,8 @@ export const useMixpanelUserProperties = (): MixpanelUserPropertiesFormatted | n
 
     let lastTxAt: Date | null = null
 
-    if (txHistoryPage?.results) {
-      const transactions = txHistoryPage.results.filter(isTransactionListItem).map((item) => item.transaction)
+    if (txHistory.data?.results) {
+      const transactions = txHistory.data.results.filter(isTransactionListItem).map((item) => item.transaction)
 
       if (transactions.length > 0 && transactions[0].timestamp) {
         lastTxAt = new Date(transactions[0].timestamp)
@@ -71,5 +72,5 @@ export const useMixpanelUserProperties = (): MixpanelUserPropertiesFormatted | n
       properties,
       networks,
     }
-  }, [safe, safeLoaded, currentChain, txHistoryPage, allNetworks, isOwner])
+  }, [safe, safeLoaded, currentChain, txHistory, allNetworks, isOwner])
 }

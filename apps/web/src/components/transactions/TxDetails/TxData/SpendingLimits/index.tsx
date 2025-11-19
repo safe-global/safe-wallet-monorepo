@@ -6,7 +6,8 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import TokenIcon from '@/components/common/TokenIcon'
 import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
 import { useCurrentChain } from '@/hooks/useChains'
-import useBalances from '@/hooks/useBalances'
+import { selectTokens } from '@/store/balancesSlice'
+import { useAppSelector } from '@/store'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import type { SpendingLimitMethods } from '@/utils/transaction-guards'
@@ -23,8 +24,7 @@ type SpendingLimitsProps = {
 
 export const SpendingLimits = ({ txData, type }: SpendingLimitsProps): ReactElement | null => {
   const chain = useCurrentChain()
-  const { balances } = useBalances()
-  const tokens = balances?.items || []
+  const tokens = useAppSelector(selectTokens)
   const isSetAllowanceMethod = useMemo(() => isSetAllowance(type), [type])
 
   const [beneficiary, tokenAddress, amount, resetTimeMin] =
@@ -35,7 +35,7 @@ export const SpendingLimits = ({ txData, type }: SpendingLimitsProps): ReactElem
     [chain?.chainId, resetTimeMin],
   )
   const tokenInfo = useMemo(
-    () => tokens.find((token) => sameAddress(token.tokenInfo.address, tokenAddress as string))?.tokenInfo,
+    () => tokens.find(({ address }) => sameAddress(address, tokenAddress as string)),
     [tokenAddress, tokens],
   )
 

@@ -1,7 +1,8 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
-import { cgwApi as chainsApi } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { selectChainById } from '@/store/chainsSlice'
 import { Contract } from 'ethers'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
+import type { RootState } from '..'
 import { CHAINALYSIS_OFAC_CONTRACT } from '@/config/constants'
 import chains from '@/config/chains'
 
@@ -46,8 +47,7 @@ export const ofacApi = createApi({
     getIsSanctioned: builder.query<boolean, string>({
       async queryFn(address, { getState }) {
         const state = getState()
-        const chainsResult = chainsApi.endpoints.chainsGetChainsV1.select({})(state as any)
-        const chain = chainsResult.data?.results?.find((c) => c.chainId === chains.eth)
+        const chain = selectChainById(state as RootState, chains.eth)
 
         if (!chain) return createBadRequestError('Chain info not found')
         if (!address) return createBadRequestError('No address provided')
