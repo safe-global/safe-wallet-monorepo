@@ -1,6 +1,6 @@
 # Privacy Policy {#privacy-policy}
 
-Last updated: October 2025
+Last updated: November 2025
 
 Safe Labs GmbH, Unter den Linden 10, 10117 Berlin (hereinafter “**Safe Labs**”, “**we**” or “**us**”) takes the protection of personal data very seriously.
 
