@@ -1,13 +1,9 @@
 import * as useChainId from '@/hooks/useChainId'
 import { fireEvent, render } from '@/tests/test-utils'
 import { toBeHex } from 'ethers'
-import { TokenType } from '@safe-global/store/gateway/types'
-import { safeParseUnits } from '@safe-global/utils/utils/formatters'
 import HiddenTokenButton from '.'
 import { useState } from 'react'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
-import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import { type Loadable } from '@/store/common'
 
 const TestComponent = () => {
   const [showHidden, setShowHidden] = useState(false)
@@ -26,42 +22,6 @@ describe('HiddenTokenToggle', () => {
   test('button disabled if hidden assets are visible', async () => {
     const mockHiddenAssets = {
       '5': [toBeHex('0x3', 20)],
-    }
-    const _mockBalances: Loadable<Balances> = {
-      data: {
-        fiatTotal: '300',
-        items: [
-          {
-            balance: safeParseUnits('100', 18)!.toString(),
-            fiatBalance: '100',
-            fiatConversion: '1',
-            tokenInfo: {
-              address: toBeHex('0x2', 20),
-              decimals: 18,
-              logoUri: '',
-              name: 'DAI',
-              symbol: 'DAI',
-              type: TokenType.ERC20,
-            },
-          },
-          {
-            balance: safeParseUnits('200', 18)!.toString(),
-            fiatBalance: '200',
-            fiatConversion: '1',
-            tokenInfo: {
-              address: toBeHex('0x3', 20),
-              decimals: 18,
-              logoUri: '',
-              name: 'SPAM',
-              symbol: 'SPM',
-              type: TokenType.ERC20,
-            },
-          },
-        ],
-      },
-      loading: false,
-      loaded: true,
-      error: undefined,
     }
 
     const result = render(<TestComponent />, {
