@@ -21,15 +21,20 @@ const useSafeInfo = (): {
     { skip: !chainId || !safeAddress },
   )
 
+  // Memoize the safe object to prevent unnecessary re-renders
+  const safe = useMemo(() => {
+    return currentData ? { ...currentData, deployed: true } : defaultSafeInfo
+  }, [currentData])
+
   return useMemo(
     () => ({
-      safe: currentData ? { ...currentData, deployed: true } : defaultSafeInfo,
+      safe,
       safeAddress: currentData?.address.value || '',
       safeLoaded: !!currentData && !isLoading,
       safeError: getRtkQueryErrorMessage(error, 'Failed to load Safe'),
       safeLoading: isLoading,
     }),
-    [currentData, error, isLoading],
+    [safe, currentData, error, isLoading],
   )
 }
 
