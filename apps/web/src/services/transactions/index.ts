@@ -17,9 +17,11 @@ export const getTxHistory = (
     safeAddress,
     {
       timezone: getTimezone(), // used for grouping txs by date
-      // Untrusted and imitation txs are filtered together in the UI
-      trusted: hideUntrustedTxs, // if false, include transactions marked untrusted in the UI
-      imitation: !hideImitationTxs, // If true, include transactions marked imitation in the UI
+      // API expects: trusted=true means show only trusted txs, imitation=true means show only imitation txs
+      // We have: hideUntrustedTxs=true means hide untrusted, hideImitationTxs=true means hide imitation
+      // So: trusted should be !hideUntrustedTxs, imitation should be !hideImitationTxs
+      trusted: !hideUntrustedTxs, // If true, show only trusted transactions
+      imitation: !hideImitationTxs, // If true, show only imitation transactions
     },
     pageUrl,
   )

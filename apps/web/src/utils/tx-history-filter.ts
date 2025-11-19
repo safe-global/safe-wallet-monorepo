@@ -151,7 +151,7 @@ export const fetchFilteredTxHistory = async (
           chainId,
           safeAddress,
           {
-            trusted: hideUntrustedTxs,
+            trusted: !hideUntrustedTxs,
             execution_date__gte: 'execution_date__gte' in filter ? filter.execution_date__gte : undefined,
             execution_date__lte: 'execution_date__lte' in filter ? filter.execution_date__lte : undefined,
             to: filter.to,

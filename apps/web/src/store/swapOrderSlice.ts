@@ -98,7 +98,7 @@ export const swapOrderStatusListener = (listenerMiddleware: typeof listenerMiddl
           // @ts-ignore
         })(state)
         // @ts-ignore
-        const chainsState = chainsApi.endpoints.chainsGetChainsV1.select({})(state)
+        const chainsState = chainsApi.endpoints.chainsGetChainsV1.select()(state)
 
         threshold = safeInfoState.data?.threshold
 

@@ -39,8 +39,8 @@ const useTxHistory = (
     {
       chainId,
       safeAddress,
-      trusted: hideUntrustedTxs,
-      imitation: hideImitationTxs,
+      trusted: !hideUntrustedTxs,
+      imitation: !hideImitationTxs,
     },
     {
       skip: !safeAddress || !chainId || !!(filter || pageUrl),

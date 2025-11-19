@@ -17,7 +17,7 @@ const useSafeInfo = (): {
   const chainId = useChainId()
 
   const { currentData, error, isLoading } = useSafesGetSafeV1Query(
-    { chainId: chainId || '', safeAddress: safeAddress || '' },
+    { chainId: chainId ?? '', safeAddress: safeAddress ?? '' },
     { skip: !chainId || !safeAddress },
   )
 

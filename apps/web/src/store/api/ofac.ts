@@ -48,7 +48,7 @@ export const ofacApi = createApi({
         const state = getState()
         // RTK Query select expects specific RootState shape with API reducers
         // @ts-ignore
-        const chainsResult = chainsApi.endpoints.chainsGetChainsV1.select({})(state)
+        const chainsResult = chainsApi.endpoints.chainsGetChainsV1.select()(state)
         const chain = chainsResult.data?.results?.find((c) => c.chainId === chains.eth)
 
         if (!chain) return createBadRequestError('Chain info not found')

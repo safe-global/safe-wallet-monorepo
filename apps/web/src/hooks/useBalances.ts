@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import type { Balance, Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import useLoadBalances from './loadables/useLoadBalances'
 
 const initialBalancesState: Balances = {
@@ -24,11 +24,6 @@ const useBalances = (): {
     }),
     [data, error, loading],
   )
-}
-
-export const useTokens = (): Balance['tokenInfo'][] => {
-  const [data] = useLoadBalances()
-  return useMemo(() => data?.items.map(({ tokenInfo }) => tokenInfo) ?? [], [data])
 }
 
 export default useBalances

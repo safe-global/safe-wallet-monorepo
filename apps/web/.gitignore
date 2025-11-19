@@ -5,3 +5,4 @@ public/firebase*.js
 public/fallback*.js
 public/*.map
 coverage/
+report.json

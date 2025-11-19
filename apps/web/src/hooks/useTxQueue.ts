@@ -31,8 +31,8 @@ const useTxQueue = (
   // If pageUrl is passed, load a new queue page from the API
   const [page, error, loading] = useAsync<QueuedItemPage>(() => {
     if (!pageUrl || !safeLoaded) return
-    return getTransactionQueue(chainId, safeAddress, undefined, pageUrl)
-  }, [chainId, safeAddress, safeLoaded, pageUrl])
+    return getTransactionQueue(chainId, safeAddress, { trusted: !hideUntrustedTxs }, pageUrl)
+  }, [chainId, safeAddress, safeLoaded, pageUrl, hideUntrustedTxs])
 
   // The latest page of the queue is fetched via RTK Query
   const {
@@ -43,7 +43,7 @@ const useTxQueue = (
     {
       chainId,
       safeAddress,
-      trusted: hideUntrustedTxs,
+      trusted: !hideUntrustedTxs,
     },
     {
       skip: !safeAddress || !chainId || !!pageUrl,
