@@ -11,16 +11,6 @@ type UseGetContractQueryResult = ReturnType<typeof contractsApi.useContractsGetC
 const mockQueryResult = (result: Partial<UseGetContractQueryResult> = {}): UseGetContractQueryResult =>
   result as unknown as UseGetContractQueryResult
 
-const _mockChainInfo = {
-  chainId: '4',
-  shortName: 'tst',
-  blockExplorerUriTemplate: {
-    address: 'https://test.scan.eth/{address}',
-    api: 'https://test.scan.eth/',
-    txHash: 'https://test.scan.eth/{txHash}',
-  },
-  features: [],
-} as any
 jest.mock('@/hooks/useSafeAddress', () => ({
   __esModule: true,
   default: jest.fn(),
