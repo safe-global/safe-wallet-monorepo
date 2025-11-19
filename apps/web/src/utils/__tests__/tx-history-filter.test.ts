@@ -392,7 +392,7 @@ describe('tx-history-filter', () => {
         '4',
         '0x123',
         {
-          trusted: false,
+          trusted: true,
           execution_date__gte: undefined,
           execution_date__lte: undefined,
           to: undefined,
