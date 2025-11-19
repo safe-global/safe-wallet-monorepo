@@ -140,9 +140,12 @@ const Notifications = (): ReactElement | null => {
 
     Object.values(groups).forEach((items) => {
       const previous = getVisibleNotifications(items).slice(0, -1)
-      previous.forEach(handleClose)
+      previous.forEach((item) => {
+        dispatch(closeNotification(item))
+        item.onClose?.()
+      })
     })
-  }, [notifications, handleClose])
+  }, [notifications, dispatch])
 
   if (visibleItems === 0) {
     return null
