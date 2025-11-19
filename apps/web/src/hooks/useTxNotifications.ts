@@ -1,7 +1,7 @@
 import { TransactionStatus } from '@safe-global/store/gateway/types'
 import { useEffect, useMemo, useRef } from 'react'
 import { formatError } from '@safe-global/utils/utils/formatters'
-import { selectNotifications, showNotification } from '@/store/notificationsSlice'
+import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import { useCurrentChain } from './useChains'
@@ -96,8 +96,8 @@ const useTxNotifications = (): void => {
             link: txId
               ? getTxLink(txId, chain, safeAddress)
               : txHash
-                ? getExplorerLink(txHash, chain.blockExplorerUriTemplate)
-                : undefined,
+              ? getExplorerLink(txHash, chain.blockExplorerUriTemplate)
+              : undefined,
           }),
         )
       }),
@@ -115,7 +115,6 @@ const useTxNotifications = (): void => {
   const { page } = useTxQueue()
   const isOwner = useIsSafeOwner()
   const pendingTxs = useAppSelector(selectPendingTxs)
-  const notifications = useAppSelector(selectNotifications)
   const wallet = useWallet()
   const notifiedAwaitingTxIds = useRef<Array<string>>([])
 
@@ -154,7 +153,7 @@ const useTxNotifications = (): void => {
     )
 
     notifiedAwaitingTxIds.current.push(txId)
-  }, [chain, dispatch, isOwner, notifications, safeAddress, txsAwaitingConfirmation])
+  }, [chain, dispatch, isOwner, safeAddress, txsAwaitingConfirmation])
 }
 
 export default useTxNotifications
