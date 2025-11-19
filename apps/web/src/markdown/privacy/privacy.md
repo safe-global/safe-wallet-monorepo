@@ -117,8 +117,22 @@ When visiting our Website or using Safe Interfaces, we will collect and process 
 
    1. public Wallet address, and  
    2. WalletConnect connection data.
+  
+2. We process personal data when you fill out forms to register for a demo or request more information about new product integrations. Personal data processed include:
 
-2. When you create a new Safe Account we process the following personal data to compose a Transaction based on your entered data to be approved by your Wallet:
+   1. Full name;
+   2. Email address;
+   3. Company name;
+   4. Location;
+   5. Responses to open text fields;
+   6. Safe Wallet address (optional);
+   7. Telegram account (optional).
+
+We rely on the user consent (Art. 6.1a GDPR) to process this information, as users can choose to fill out an optional form should they be currently interested in our partnership with Hypernative with the goal of adding their transaction protection technology and its “Guardian” product into Safe{Wallet} to create a jointly commercialized experience that offers automated, policy-based transaction guarding with native discoverability and seamless user experience. We retain this data for a year after collection through the form. 
+  
+Please note that Hypernative will also be collecting the same data when you fill out the form, and processing it in accordance with the terms stipulated in their Privacy Policy.
+
+3. When you create a new Safe Account we process the following personal data to compose a Transaction based on your entered data to be approved by your Wallet:
 
    1. your public Wallet address,  
    2. account balance,  
@@ -126,30 +140,30 @@ When visiting our Website or using Safe Interfaces, we will collect and process 
    4. addresses of externally owned accounts, and  
    5. user activity.
 
-3. When you create a Profile for a new Safe Account we process the following personal data for the purpose of enabling you to view your Safe Account after creation as well as enabling you to view all co-owned Safes Accounts:
+4. When you create a Profile for a new Safe Account we process the following personal data for the purpose of enabling you to view your Safe Account after creation as well as enabling you to view all co-owned Safes Accounts:
 
    1. your public Wallet address, and  
    2. account balance.
 
-4. When you create a Profile for an existing Safe Account for the purpose of allowing you to view and use them in the Safe Interface, we process your
+5. When you create a Profile for an existing Safe Account for the purpose of allowing you to view and use them in the Safe Interface, we process your
 
    1. public Wallet address,  
    2. Safe Account balance,  
    3. smart contract address of the Safe Account, and  
    4. Safe Account owner's public Wallet addresses.
 
-5. When you initiate a Safe Account Transaction we process the following personal data to compose the Transaction for you based on your entered personal data:
+6. When you initiate a Safe Account Transaction we process the following personal data to compose the Transaction for you based on your entered personal data:
 
    1. your public Wallet address, and  
    2. smart contract address of Safe Account.
 
-6. When you sign a Safe Account Transaction we process the following personal data to enable you to sign the Transaction using your Wallet:
+7. When you sign a Safe Account Transaction we process the following personal data to enable you to sign the Transaction using your Wallet:
 
    1. Safe Account balance,  
    2. smart contract address of Safe Account, and  
    3. Safe Account owner's public Wallet addresses.
 
-7. To enable you to execute the Transaction on the Blockchain we process:
+8. To enable you to execute the Transaction on the Blockchain we process:
 
    1. your public Wallet address,  
    2. Safe Account balance,  
@@ -157,20 +171,20 @@ When visiting our Website or using Safe Interfaces, we will collect and process 
    4. Safe Account owner's public Wallet addresses, and  
    5. Transactions signed by all Safe Account owners.
 
-8. When we collect relevant personal data from the Blockchain to display context information in the Safe Interface we process:
+9. When we collect relevant personal data from the Blockchain to display context information in the Safe Interface we process:
 
    1. your public Wallet address,  
    2. account balance,  
    3. account activity, and  
    4. Safe Account owner's Public wallet addresses.
 
-9. When we decode Transactions from the Blockchain for the purpose of providing Transaction information in a conveniently readable format, we process:
+10. When we decode Transactions from the Blockchain for the purpose of providing Transaction information in a conveniently readable format, we process:
 
    1. your public Wallet address,  
    2. account balance, and  
    3. account activity.
 
-10. When we maintain a user profile to provide you with a good user experience through Profiles and an address book we process:
+11. When we maintain a user profile to provide you with a good user experience through Profiles and an address book we process:
 
     1. your public Wallet address,  
     2. label,  
@@ -367,20 +381,6 @@ We rely on our legitimate interest to ensure that our services or derivatives do
 4. approximate location.
 
 We rely on our legitimate interest to ensure the prevention of fraud (GDPR Art.6.1f). This also helps us detect users who may want to circumvent the restriction on US users by the use of VPN.
-
-3.5.10 We process personal data when you fill out forms to register for a demo or request more information about new product integrations. Personal data processed include:
-
-1. Full name;  
-2. Email address;  
-3. Company name;  
-4. Location;  
-5. Responses to open text fields;  
-6. Safe Wallet address (optional);  
-7. Telegram account (optional).  
-
-We rely on the user consent (Art. 6.1a GDPR) to process this information, as users can choose to fill out an optional form should they be currently interested in our partnership with Hypernative with the goal of adding their transaction protection technology and its “Guardian” product into Safe{Wallet} to create a jointly commercialized experience that offers automated, policy-based transaction guarding with native discoverability and seamless user experience. We retain this data for a year after collection through the form. 
-
-Please note that Hypernative will also be collecting the same data when you fill out the form, and processing it in accordance with the terms stipulated in their Privacy Policy.
 
 ## 3.6 Contacting us {#contacting-us}
 
