@@ -75,27 +75,25 @@ const AssetRow = ({
         </Box>
       </Stack>
 
-      <Box className={css.valueContainer}>
-        <Box className={css.valueContent}>
-          <FiatBalance balanceItem={item} />
-          <FiatChange balanceItem={item} inline />
-        </Box>
+      <Box flex={1} display="block" textAlign="right" height="44px">
+        <FiatBalance balanceItem={item} />
+        <FiatChange balanceItem={item} inline />
+      </Box>
 
-        <Box className={css.assetButtons}>
-          <SendButton tokenInfo={item.tokenInfo} onlyIcon />
+      <Box className={css.assetButtons}>
+        {showSwap ? (
+          <SwapButton tokenInfo={item.tokenInfo} amount="0" trackingLabel={SWAP_LABELS.dashboard_assets} light />
+        ) : (
+          <SendButton tokenInfo={item.tokenInfo} light />
+        )}
 
-          {showSwap && (
-            <SwapButton tokenInfo={item.tokenInfo} amount="0" trackingLabel={SWAP_LABELS.dashboard_assets} onlyIcon />
-          )}
+        {showEarn && isEligibleEarnToken(chainId, item.tokenInfo.address) && (
+          <EarnButton tokenInfo={item.tokenInfo} trackingLabel={EARN_LABELS.dashboard_asset} compact={false} />
+        )}
 
-          {showEarn && isEligibleEarnToken(chainId, item.tokenInfo.address) && (
-            <EarnButton tokenInfo={item.tokenInfo} trackingLabel={EARN_LABELS.dashboard_asset} onlyIcon />
-          )}
-
-          {showStake && item.tokenInfo.type === TokenType.NATIVE_TOKEN && (
-            <StakeButton tokenInfo={item.tokenInfo} trackingLabel={STAKE_LABELS.asset} onlyIcon />
-          )}
-        </Box>
+        {showStake && item.tokenInfo.type === TokenType.NATIVE_TOKEN && (
+          <StakeButton tokenInfo={item.tokenInfo} trackingLabel={STAKE_LABELS.asset} compact={false} />
+        )}
       </Box>
     </Box>
   )
