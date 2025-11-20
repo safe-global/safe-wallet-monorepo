@@ -1,4 +1,4 @@
-import { id } from 'ethers'
+import { Interface, type FunctionFragment } from 'ethers'
 import type { JsonRpcProvider } from 'ethers'
 import memoize from 'lodash/memoize'
 import { logError, Errors } from '@/services/exceptions'
@@ -6,40 +6,21 @@ import HypernativeGuardAbi from './HypernativeGuard.abi.json'
 
 /**
  * HypernativeGuard ABI
- * Used to create contract instances for verification
  */
 export const HYPERNATIVE_GUARD_ABI = HypernativeGuardAbi
 
 /**
- * Distinctive function signatures that uniquely identify the HypernativeGuard contract.
- * These functions are unique to HypernativeGuard and unlikely to appear together in other guards.
+ * Interface instance to extract function selectors
  */
-const HYPERNATIVE_GUARD_DISTINCTIVE_FUNCTIONS = [
-  'approveHash(bytes32)',
-  'revokeHash(bytes32)',
-  'approveNonceFreeHash(bytes32)',
-  'revokeNonceFreeHash(bytes32)',
-  'approveFunctionCallHash(bytes32)',
-  'revokeFunctionCallHash(bytes32)',
-  'getPolicyExtensions()',
-  'addPolicyExtension(address)',
-  'removePolicyExtension(address)',
-  'KEEPER_ROLE()',
-  'grantKeeperRole(address)',
-  'revokeKeeperRole(address)',
-  'activateTimelock()',
-  'disableTimelock()',
-  'isTimelockTriggered()',
-  'getTimelockBlock()',
-]
+const HYPERNATIVE_GUARD_INTERFACE = new Interface(HypernativeGuardAbi)
 
 /**
- * Function selectors (first 4 bytes of keccak256 hash of function signature).
+ * Extract all function selectors from the ABI.
  * Similar to how ERC20 approvals are detected using APPROVAL_SIGNATURE_HASH.
  */
-export const HYPERNATIVE_GUARD_FUNCTION_SELECTORS = HYPERNATIVE_GUARD_DISTINCTIVE_FUNCTIONS.map((sig) =>
-  id(sig).slice(0, 10).toLowerCase(),
-)
+export const HYPERNATIVE_GUARD_FUNCTION_SELECTORS = HYPERNATIVE_GUARD_INTERFACE.fragments
+  .filter((fragment): fragment is FunctionFragment => fragment.type === 'function')
+  .map((fragment) => HYPERNATIVE_GUARD_INTERFACE.getFunction(fragment.name)!.selector.toLowerCase())
 
 /**
  * Internal implementation of the guard check.
