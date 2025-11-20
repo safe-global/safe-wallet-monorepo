@@ -1,12 +1,12 @@
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { isAddress, JsonRpcProvider } from 'ethers'
 import { ACTIVITY_THRESHOLD_LOW, LowActivityAnalysisResult } from '../config'
 import { type AnalysisResult, RecipientStatus } from '../../../types'
 import { useEffectDeepCompare, useAsyncDeepCompare } from '../../util-hooks'
-import isEmpty from 'lodash/isEmpty'
+import pick from 'lodash/pick'
 
-export type AddressActivityResult = Record<string, AnalysisResult<RecipientStatus.LOW_ACTIVITY>>
+export type AddressActivityResult = Record<string, AnalysisResult<RecipientStatus.LOW_ACTIVITY> | undefined>
 
 /**
  * React hook to analyze activity for multiple addresses
@@ -44,7 +44,7 @@ export const useAddressActivity = (
   }, [addresses])
 
   const [fetchedResults, error, loading] = useAsyncDeepCompare<AddressActivityResult | undefined>(async () => {
-    if (!web3ReadOnly) {
+    if (!web3ReadOnly || !addressesToFetch.length) {
       return undefined
     }
 
@@ -63,9 +63,7 @@ export const useAddressActivity = (
           const txCount = await web3ReadOnly.getTransactionCount(address, 'latest')
 
           // Only add result if the address has low activity
-          if (txCount < ACTIVITY_THRESHOLD_LOW) {
-            activityResults[address] = LowActivityAnalysisResult
-          }
+          activityResults[address] = txCount < ACTIVITY_THRESHOLD_LOW ? LowActivityAnalysisResult : undefined
         } catch (err) {
           console.error(`Address activity analysis error for ${address}:`, err)
           throw err
@@ -79,21 +77,19 @@ export const useAddressActivity = (
   // Update results to only include addresses that are in the given addresses array
   useEffectDeepCompare(() => {
     if (addresses.length === 0) {
-      setResults(undefined)
+      setResults({})
       return
     }
 
-    setResults((prevResults) => {
-      const newResults = addresses.reduce<AddressActivityResult>((acc, address) => {
-        const addressResults = fetchedResults?.[address] || prevResults?.[address]
-        if (addressResults) {
-          acc[address] = addressResults
-        }
-        return acc
-      }, {})
-      return isEmpty(newResults) ? undefined : newResults
-    })
+    setResults((prevResults) => pick({ ...prevResults, ...fetchedResults }, addresses))
   }, [addresses, fetchedResults])
 
-  return [results, error, loading]
+  // Check if the activity check is loading
+  // We expect an entry for each address in the results array
+  const isLoading = useMemo(
+    () => !error && !!web3ReadOnly && addresses.length > 0 && Object.keys(results || {}).length !== addresses.length,
+    [addresses.length, web3ReadOnly, results, error],
+  )
+
+  return [results, error, isLoading]
 }

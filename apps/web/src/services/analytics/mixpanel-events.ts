@@ -20,6 +20,11 @@ export enum MixpanelEvent {
   SECURITY_REPORT_CLICKED = 'Security Report Clicked',
   GUARDIAN_BANNER_DISMISSED = 'Guardian Banner Dismissed',
   EXPLORE_POSSIBLE_CLICKED = 'Explore Possible Clicked',
+  TRANSACTION_STARTED = 'Transaction Started',
+  TRANSACTION_RECIPIENT_DECODED = 'Transaction Recipient Decoded',
+  TRANSACTION_CONTRACT_DECODED = 'Transaction Contract Decoded',
+  TRANSACTION_THREAT_ANALYZED = 'Transaction Threat Analyzed',
+  TRANSACTION_SIMULATED = 'Transaction Simulated',
 }
 
 export enum MixpanelUserProperty {
@@ -58,6 +63,7 @@ export enum MixpanelEventParams {
   APP_URL = 'App URL',
   DATE_RANGE = 'Date Range',
   SIDEBAR_ELEMENT = 'Sidebar Element',
+  RESULT = 'Result',
   SOURCE = 'Source',
 }
 

@@ -20,6 +20,7 @@ import {
   calculateAnalysisDelays,
   useDelayedLoading,
 } from '@/features/safe-shield/hooks/useDelayedLoading'
+import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 
 const normalizeThreatData = (threat?: AsyncResult<ThreatAnalysisResults>): Record<string, GroupedAnalysisResults> => {
   const [result] = threat || []
@@ -82,29 +83,26 @@ export const SafeShieldContent = ({
         {shouldShowContent && !loading && allEmpty && <SafeShieldAnalysisEmpty />}
 
         <Box sx={{ '& > div:not(:last-child)': { borderBottom: '1px solid', borderColor: 'background.main' } }}>
-          {!recipientEmpty && (
-            <AnalysisGroupCard
-              delay={recipientDelay}
-              data={recipientResults}
-              highlightedSeverity={highlightedSeverity}
-            />
-          )}
+          <AnalysisGroupCard
+            delay={recipientDelay}
+            data={recipientResults}
+            highlightedSeverity={highlightedSeverity}
+            analyticsEvent={SAFE_SHIELD_EVENTS.RECIPIENT_DECODED}
+          />
 
-          {!contractEmpty && (
-            <AnalysisGroupCard
-              data={contractResults}
-              delay={contractAnalysisDelay}
-              highlightedSeverity={highlightedSeverity}
-            />
-          )}
+          <AnalysisGroupCard
+            data={contractResults}
+            delay={contractAnalysisDelay}
+            highlightedSeverity={highlightedSeverity}
+            analyticsEvent={SAFE_SHIELD_EVENTS.CONTRACT_DECODED}
+          />
 
-          {!threatEmpty && (
-            <AnalysisGroupCard
-              data={normalizedThreatData}
-              delay={threatAnalysisDelay}
-              highlightedSeverity={highlightedSeverity}
-            />
-          )}
+          <AnalysisGroupCard
+            data={normalizedThreatData}
+            delay={threatAnalysisDelay}
+            highlightedSeverity={highlightedSeverity}
+            analyticsEvent={SAFE_SHIELD_EVENTS.THREAT_ANALYZED}
+          />
 
           {!contractLoading && !threatLoading && (
             <TenderlySimulation

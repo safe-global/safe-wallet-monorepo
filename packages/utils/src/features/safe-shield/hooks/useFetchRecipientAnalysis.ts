@@ -43,7 +43,7 @@ export function useFetchRecipientAnalysis({
     previousRecipientsRef.current = new Set(recipients)
   }, [recipients])
 
-  const [fetchedResults, error, loading] = useFetchMultiRecipientAnalysis({
+  const [fetchedResults, error, fetchLoading] = useFetchMultiRecipientAnalysis({
     safeAddress,
     chainId,
     recipientAddresses: recipientsToFetch,
@@ -62,5 +62,14 @@ export function useFetchRecipientAnalysis({
     setResults(isEmpty(newResults) ? undefined : newResults)
   }, [recipients, fetchedResults, results])
 
-  return [results, error, loading]
+  // Check if is loading or if the results are not complete
+  // When safeAddress is empty, we can't fetch, so don't wait for results
+  const isLoading = useMemo(() => {
+    if (!safeAddress) {
+      return false
+    }
+    return fetchLoading || (recipients.length > 0 && Object.keys(results || {}).length !== recipients.length && !error)
+  }, [fetchLoading, recipients.length, results, safeAddress, error])
+
+  return [results, error, isLoading]
 }
