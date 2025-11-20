@@ -32,7 +32,7 @@ export function TxContractInteractionCard({ txInfo, safeAppInfo, ...rest }: TxCo
         </Theme>
       }
       rightNode={
-        <View flex={1}>
+        <View flex={1} alignItems="flex-end">
           <Text numberOfLines={1} ellipsizeMode="tail">
             {txInfo.methodName}
           </Text>
