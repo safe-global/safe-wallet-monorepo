@@ -68,15 +68,9 @@ describe('NetworkMultiSelector', () => {
 
   it('should be possible to select and deselect networks', async () => {
     jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockChains[0])
-    const { getByRole, queryByText, getByText, getByTestId, getAllByRole } = render(<TestForm />, {
-      initialReduxState: {
-        chains: {
-          data: mockChains,
-          loading: false,
-          loaded: true,
-        },
-      },
-    })
+    jest.spyOn(useChains, 'default').mockReturnValue({ configs: mockChains, loading: false })
+
+    const { getByRole, queryByText, getByText, getByTestId, getAllByRole } = render(<TestForm />)
     const input = getByRole('combobox')
 
     act(() => {
@@ -172,15 +166,9 @@ describe('NetworkMultiSelector', () => {
 
   it('should disable all other chains when zkSync gets selected first', async () => {
     jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockChains[0])
-    const { getByRole, queryByText, getByText, getAllByRole } = render(<TestForm />, {
-      initialReduxState: {
-        chains: {
-          data: mockChains,
-          loading: false,
-          loaded: true,
-        },
-      },
-    })
+    jest.spyOn(useChains, 'default').mockReturnValue({ configs: mockChains, loading: false })
+
+    const { getByRole, queryByText, getByText, getAllByRole } = render(<TestForm />)
     const input = getByRole('combobox')
 
     act(() => {
@@ -225,15 +213,9 @@ describe('NetworkMultiSelector', () => {
     } as unknown as router.NextRouter)
 
     jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockChains[0])
-    const { getByRole, queryByText, getByText, getAllByRole } = render(<TestForm />, {
-      initialReduxState: {
-        chains: {
-          data: mockChains,
-          loading: false,
-          loaded: true,
-        },
-      },
-    })
+    jest.spyOn(useChains, 'default').mockReturnValue({ configs: mockChains, loading: false })
+
+    const { getByRole, queryByText, getByText, getAllByRole } = render(<TestForm />)
     const input = getByRole('combobox')
 
     act(() => {
@@ -271,15 +253,9 @@ describe('NetworkMultiSelector', () => {
 
   it('should only allow single chain selection if advanced flow', async () => {
     jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockChains[0])
-    const { getByRole, queryByText, getByText, getByTestId, getAllByRole } = render(<TestForm isAdvancedFlow />, {
-      initialReduxState: {
-        chains: {
-          data: mockChains,
-          loading: false,
-          loaded: true,
-        },
-      },
-    })
+    jest.spyOn(useChains, 'default').mockReturnValue({ configs: mockChains, loading: false })
+
+    const { getByRole, queryByText, getByText, getByTestId, getAllByRole } = render(<TestForm isAdvancedFlow />)
     const input = getByRole('combobox')
 
     act(() => {
@@ -337,15 +313,9 @@ describe('NetworkMultiSelector', () => {
     } as unknown as router.NextRouter)
 
     jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockChains[0])
-    const { getByRole, getByText, getAllByRole, queryByText } = render(<TestForm />, {
-      initialReduxState: {
-        chains: {
-          data: mockChains,
-          loading: false,
-          loaded: true,
-        },
-      },
-    })
+    jest.spyOn(useChains, 'default').mockReturnValue({ configs: mockChains, loading: false })
+
+    const { getByRole, getByText, getAllByRole, queryByText } = render(<TestForm />)
     const input = getByRole('combobox')
 
     act(() => {
@@ -387,15 +357,9 @@ describe('NetworkMultiSelector', () => {
     } as unknown as router.NextRouter)
 
     jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockChains[0])
-    const { getByRole, getByText, getAllByRole, queryByText } = render(<TestForm />, {
-      initialReduxState: {
-        chains: {
-          data: mockChains,
-          loading: false,
-          loaded: true,
-        },
-      },
-    })
+    jest.spyOn(useChains, 'default').mockReturnValue({ configs: mockChains, loading: false })
+
+    const { getByRole, getByText, getAllByRole, queryByText } = render(<TestForm />)
     const input = getByRole('combobox')
 
     act(() => {

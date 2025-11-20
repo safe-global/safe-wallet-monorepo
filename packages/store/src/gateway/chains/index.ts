@@ -42,3 +42,5 @@ export const apiSliceWithChainsConfig = cgwClient.injectEndpoints({
   }),
   overrideExisting: true,
 })
+
+export const { useGetChainsConfigQuery } = apiSliceWithChainsConfig

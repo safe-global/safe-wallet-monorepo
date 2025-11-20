@@ -1,12 +1,11 @@
 import { useMemo } from 'react'
 import Fuse from 'fuse.js'
 import type { AllSafeItems } from './useAllSafesGrouped'
-import { selectChains } from '@/store/chainsSlice'
-import { useAppSelector } from '@/store'
+import useChains from '@/hooks/useChains'
 import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
 
 const useSafesSearch = (safes: AllSafeItems, query: string): AllSafeItems => {
-  const chains = useAppSelector(selectChains)
+  const { configs: chains } = useChains()
 
   // Include chain names in the search
   const safesWithChainNames = useMemo(
@@ -14,15 +13,15 @@ const useSafesSearch = (safes: AllSafeItems, query: string): AllSafeItems => {
       safes.map((safe) => {
         if (isMultiChainSafeItem(safe)) {
           const nestedSafeChains = safe.safes.map(
-            (nestedSafe) => chains.data.find((chain) => chain.chainId === nestedSafe.chainId)?.chainName,
+            (nestedSafe) => chains.find((chain) => chain.chainId === nestedSafe.chainId)?.chainName,
           )
           const nestedSafeNames = safe.safes.map((nestedSafe) => nestedSafe.name)
           return { ...safe, chainNames: nestedSafeChains, names: nestedSafeNames }
         }
-        const chain = chains.data.find((chain) => chain.chainId === safe.chainId)
+        const chain = chains.find((chain) => chain.chainId === safe.chainId)
         return { ...safe, chainNames: [chain?.chainName], names: [safe.name] }
       }),
-    [safes, chains.data],
+    [safes, chains],
   )
 
   const fuse = useMemo(

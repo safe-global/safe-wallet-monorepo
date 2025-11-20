@@ -34,12 +34,10 @@ describe('FallbackHandler', () => {
               name: 'FallbackHandlerName',
             },
           },
-        }) as unknown as ReturnType<typeof useSafeInfoHook.default>,
+        } as unknown as ReturnType<typeof useSafeInfoHook.default>),
     )
 
-    const fbHandler = render(<FallbackHandler />, {
-      initialReduxState: { chains: { loading: false, loaded: true, data: [mockChain] } },
-    })
+    const fbHandler = render(<FallbackHandler />)
 
     await waitFor(() => {
       expect(
@@ -71,12 +69,10 @@ describe('FallbackHandler', () => {
               name: 'FallbackHandlerName',
             },
           },
-        }) as unknown as ReturnType<typeof useSafeInfoHook.default>,
+        } as unknown as ReturnType<typeof useSafeInfoHook.default>),
     )
 
-    const fbHandler = render(<FallbackHandler />, {
-      initialReduxState: { chains: { loading: false, loaded: true, data: [mockChain] } },
-    })
+    const fbHandler = render(<FallbackHandler />)
 
     await waitFor(() => {
       expect(
@@ -104,12 +100,10 @@ describe('FallbackHandler', () => {
               value: GOERLI_FALLBACK_HANDLER,
             },
           },
-        }) as unknown as ReturnType<typeof useSafeInfoHook.default>,
+        } as unknown as ReturnType<typeof useSafeInfoHook.default>),
     )
 
-    const fbHandler = render(<FallbackHandler />, {
-      initialReduxState: { chains: { loading: false, loaded: true, data: [mockChain] } },
-    })
+    const fbHandler = render(<FallbackHandler />)
 
     await waitFor(() => {
       expect(fbHandler.getByText('CompatibilityFallbackHandler')).toBeDefined()
@@ -125,7 +119,7 @@ describe('FallbackHandler', () => {
               version: '1.3.0',
               chainId: '5',
             },
-          }) as unknown as ReturnType<typeof useSafeInfoHook.default>,
+          } as unknown as ReturnType<typeof useSafeInfoHook.default>),
       )
 
       const fbHandler = render(<FallbackHandler />)
@@ -150,7 +144,7 @@ describe('FallbackHandler', () => {
               version: '1.3.0',
               chainId: '5',
             },
-          }) as unknown as ReturnType<typeof useSafeInfoHook.default>,
+          } as unknown as ReturnType<typeof useSafeInfoHook.default>),
       )
 
       const fbHandler = render(<FallbackHandler />)
@@ -178,7 +172,7 @@ describe('FallbackHandler', () => {
                 value: '0x123',
               },
             },
-          }) as unknown as ReturnType<typeof useSafeInfoHook.default>,
+          } as unknown as ReturnType<typeof useSafeInfoHook.default>),
       )
 
       const fbHandler = render(<FallbackHandler />)
@@ -212,7 +206,7 @@ describe('FallbackHandler', () => {
                 value: '0x123',
               },
             },
-          }) as unknown as ReturnType<typeof useSafeInfoHook.default>,
+          } as unknown as ReturnType<typeof useSafeInfoHook.default>),
       )
 
       const fbHandler = render(<FallbackHandler />)
@@ -232,7 +226,7 @@ describe('FallbackHandler', () => {
             version: '1.0.0',
             chainId: '5',
           },
-        }) as unknown as ReturnType<typeof useSafeInfoHook.default>,
+        } as unknown as ReturnType<typeof useSafeInfoHook.default>),
     )
 
     const fbHandler = render(<FallbackHandler />)
@@ -251,7 +245,7 @@ describe('FallbackHandler', () => {
               value: TWAP_FALLBACK_HANDLER,
             },
           },
-        }) as unknown as ReturnType<typeof useSafeInfoHook.default>,
+        } as unknown as ReturnType<typeof useSafeInfoHook.default>),
     )
 
     const { getByText } = render(<FallbackHandler />)
@@ -274,7 +268,7 @@ describe('FallbackHandler', () => {
               value: TWAP_FALLBACK_HANDLER,
             },
           },
-        }) as unknown as ReturnType<typeof useSafeInfoHook.default>,
+        } as unknown as ReturnType<typeof useSafeInfoHook.default>),
     )
 
     const { queryByText } = render(<FallbackHandler />)
