@@ -18,9 +18,6 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
 
-    env:
-      ARCHIVE_NAME: ${{ github.event.repository.name }}-v${{ steps.version.outputs.version_number }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v5
