@@ -134,6 +134,8 @@ jobs:
           VERSION_TAG: ${{ steps.version.outputs.version }}
 
       - name: Back-merge to dev
+        continue-on-error: true
+        id: backmerge
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -144,13 +146,28 @@ jobs:
           # Checkout dev branch
           git checkout dev
 
-          # Merge main into dev
-          git merge origin/main -m "chore: back-merge main to dev after release ${{ steps.version.outputs.version }}"
+          # Attempt to merge main into dev
+          if git merge origin/main -m "chore: back-merge main to dev after release ${{ steps.version.outputs.version }}"; then
+            # Push to dev if merge succeeded
+            git push origin dev
+            echo "✅ Back-merge completed: main → dev"
+          else
+            # Merge failed due to conflicts
+            echo "⚠️ Back-merge failed due to conflicts"
+            echo "Please manually resolve conflicts using the instructions in the documentation"
+            git merge --abort
+            exit 1
+          fi
 
-          # Push to dev
-          git push origin dev
-
-          echo "✅ Back-merge completed: main → dev"
+      - name: Report back-merge status
+        if: always()
+        run: |
+          if [ "${{ steps.backmerge.outcome }}" = "success" ]; then
+            echo "✅ Back-merge to dev completed successfully"
+          else
+            echo "⚠️ Back-merge to dev failed - manual intervention required"
+            echo "See troubleshooting docs: https://github.com/${{ github.repository }}/blob/dev/apps/web/docs/release-procedure-automated.md#back-merge-conflicts"
+          fi
 
       - name: Notify on Slack
         if: vars.SLACK_WEBHOOK_URL
@@ -158,10 +175,18 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.version }}"
+          BACKMERGE_STATUS="${{ steps.backmerge.outcome }}"
+
+          if [ "$BACKMERGE_STATUS" = "success" ]; then
+            BACKMERGE_MSG="_Back-merge to dev completed automatically_ 🔄"
+          else
+            BACKMERGE_MSG="_⚠️ Back-merge failed - manual resolution needed_"
+          fi
 
           jq -n \
             --arg version "$VERSION" \
             --arg url "$RELEASE_URL" \
+            --arg backmerge "$BACKMERGE_MSG" \
             '{
               channel: "#topic-wallet-releases",
               text: ("✅ Safe Wallet " + $version + " ready for going live"),
@@ -170,7 +195,7 @@ jobs:
                   type: "section",
                   text: {
                     type: "mrkdwn",
-                    text: ("*Safe Wallet " + $version + " is ready for going live* ✅\n\n<" + $url + "|View Release on GitHub>\n\n_Back-merge to dev completed automatically_ 🔄")
+                    text: ("*Safe Wallet " + $version + " is ready for going live* ✅\n\n<" + $url + "|View Release on GitHub>\n\n" + $backmerge)
                   }
                 }
               ]
