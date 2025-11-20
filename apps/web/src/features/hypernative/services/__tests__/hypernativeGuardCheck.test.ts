@@ -1,6 +1,5 @@
-import { keccak256 } from 'ethers'
 import type { JsonRpcProvider } from 'ethers'
-import { isHypernativeGuard, HYPERNATIVE_GUARD_CODE_HASHES } from '../hypernativeGuardCheck'
+import { isHypernativeGuard, HYPERNATIVE_GUARD_FUNCTION_SELECTORS } from '../hypernativeGuardCheck'
 import { logError, Errors } from '@/services/exceptions'
 
 jest.mock('@/services/exceptions', () => ({
@@ -8,14 +7,31 @@ jest.mock('@/services/exceptions', () => ({
   logError: jest.fn(),
 }))
 
-// Mock bytecode for testing (must be even-length hex strings)
-const MOCK_HYPERNATIVE_GUARD_BYTECODE = '0x608060405234801561001057600080fd5b50600436106100365760003560e01c'
-const MOCK_OTHER_GUARD_BYTECODE = '0x123456789abcdef0'
-const MOCK_HYPERNATIVE_CODE_HASH = keccak256(MOCK_HYPERNATIVE_GUARD_BYTECODE)
+/**
+ * Helper to create mock bytecode with specific function selectors
+ * Function selectors appear after PUSH4 (0x63) opcode in bytecode
+ */
+function createMockBytecode(selectors: string[]): string {
+  let bytecode = '0x608060405234801561001057600080fd5b506004361061003657' // Standard contract preamble
+
+  // Add each selector with PUSH4 opcode
+  for (const selector of selectors) {
+    const selectorHex = selector.startsWith('0x') ? selector.slice(2) : selector
+    bytecode += '63' + selectorHex // 0x63 is PUSH4 opcode
+  }
+
+  bytecode += '00'.repeat(50) // Add some padding
+  return bytecode
+}
+
+// Create mock bytecode with all HypernativeGuard selectors
+const MOCK_HYPERNATIVE_GUARD_BYTECODE = createMockBytecode(HYPERNATIVE_GUARD_FUNCTION_SELECTORS)
+
+// Create mock bytecode with no matching selectors
+const MOCK_OTHER_GUARD_BYTECODE = createMockBytecode(['0x12345678', '0x9abcdef0'])
 
 describe('isHypernativeGuard', () => {
   let mockProvider: jest.Mocked<JsonRpcProvider>
-  let originalHashes: string[]
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -28,18 +44,9 @@ describe('isHypernativeGuard', () => {
     mockProvider = {
       getCode: jest.fn(),
     } as unknown as jest.Mocked<JsonRpcProvider>
-
-    // Store original hashes and setup test hashes
-    originalHashes = [...HYPERNATIVE_GUARD_CODE_HASHES]
-    HYPERNATIVE_GUARD_CODE_HASHES.length = 0
-    HYPERNATIVE_GUARD_CODE_HASHES.push(MOCK_HYPERNATIVE_CODE_HASH)
   })
 
   afterEach(() => {
-    // Restore original hashes
-    HYPERNATIVE_GUARD_CODE_HASHES.length = 0
-    HYPERNATIVE_GUARD_CODE_HASHES.push(...originalHashes)
-
     // Clear memoization cache after each test
     if (isHypernativeGuard.cache && typeof isHypernativeGuard.cache.clear === 'function') {
       isHypernativeGuard.cache.clear()
@@ -69,13 +76,6 @@ describe('isHypernativeGuard', () => {
     expect(result).toBe(false)
   })
 
-  it('should return false if there are no known hashes', async () => {
-    HYPERNATIVE_GUARD_CODE_HASHES.length = 0
-    const result = await isHypernativeGuard('1', '0x1234567890123456789012345678901234567890', mockProvider)
-    expect(result).toBe(false)
-    expect(mockProvider.getCode).not.toHaveBeenCalled()
-  })
-
   it('should return false if the bytecode is empty', async () => {
     mockProvider.getCode.mockResolvedValue('0x')
     const result = await isHypernativeGuard('1', '0x1234567890123456789012345678901234567890', mockProvider)
@@ -83,18 +83,29 @@ describe('isHypernativeGuard', () => {
     expect(mockProvider.getCode).toHaveBeenCalledWith('0x1234567890123456789012345678901234567890')
   })
 
-  it('should return true if the code hash matches a known HypernativeGuard hash', async () => {
+  it('should return true if bytecode contains all HypernativeGuard function selectors', async () => {
     mockProvider.getCode.mockResolvedValue(MOCK_HYPERNATIVE_GUARD_BYTECODE)
+
     const result = await isHypernativeGuard('1', '0x1234567890123456789012345678901234567890', mockProvider)
     expect(result).toBe(true)
     expect(mockProvider.getCode).toHaveBeenCalledWith('0x1234567890123456789012345678901234567890')
   })
 
-  it('should return false if the code hash does not match any known hash', async () => {
-    mockProvider.getCode.mockResolvedValue(MOCK_OTHER_GUARD_BYTECODE)
+  it('should return false if bytecode is missing even one HypernativeGuard selector', async () => {
+    // Create bytecode with all selectors except one
+    const selectorsToInclude = HYPERNATIVE_GUARD_FUNCTION_SELECTORS.slice(0, -1)
+    const partialBytecode = createMockBytecode(selectorsToInclude)
+    mockProvider.getCode.mockResolvedValue(partialBytecode)
+
     const result = await isHypernativeGuard('1', '0x1234567890123456789012345678901234567890', mockProvider)
     expect(result).toBe(false)
-    expect(mockProvider.getCode).toHaveBeenCalledWith('0x1234567890123456789012345678901234567890')
+  })
+
+  it('should return false if bytecode contains no matching selectors', async () => {
+    mockProvider.getCode.mockResolvedValue(MOCK_OTHER_GUARD_BYTECODE)
+
+    const result = await isHypernativeGuard('1', '0x1234567890123456789012345678901234567890', mockProvider)
+    expect(result).toBe(false)
   })
 
   it('should throw error on provider failure and not cache it', async () => {
@@ -105,34 +116,6 @@ describe('isHypernativeGuard', () => {
     )
 
     expect(logError).toHaveBeenCalledWith(Errors._809, expect.any(Error))
-  })
-
-  it('should support multiple code hashes', async () => {
-    const SECOND_MOCK_BYTECODE = '0xdeadbeef'
-    const SECOND_MOCK_CODE_HASH = keccak256(SECOND_MOCK_BYTECODE)
-    HYPERNATIVE_GUARD_CODE_HASHES.push(SECOND_MOCK_CODE_HASH)
-
-    // Test first hash
-    mockProvider.getCode.mockResolvedValue(MOCK_HYPERNATIVE_GUARD_BYTECODE)
-    let result = await isHypernativeGuard('1', '0x1234567890123456789012345678901234567890', mockProvider)
-    expect(result).toBe(true)
-
-    // Test second hash
-    mockProvider.getCode.mockResolvedValue(SECOND_MOCK_BYTECODE)
-    result = await isHypernativeGuard('1', '0x9876543210987654321098765432109876543210', mockProvider)
-    expect(result).toBe(true)
-
-    // Test unmatched hash
-    mockProvider.getCode.mockResolvedValue(MOCK_OTHER_GUARD_BYTECODE)
-    result = await isHypernativeGuard('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd', mockProvider)
-    expect(result).toBe(false)
-  })
-
-  it('should handle empty known hashes array', async () => {
-    HYPERNATIVE_GUARD_CODE_HASHES.length = 0
-    const result = await isHypernativeGuard('1', '0x1234567890123456789012345678901234567890', mockProvider)
-    expect(result).toBe(false)
-    expect(mockProvider.getCode).not.toHaveBeenCalled()
   })
 
   describe('memoization', () => {
@@ -212,7 +195,7 @@ describe('isHypernativeGuard', () => {
       expect(mockProvider2.getCode).toHaveBeenCalledTimes(0) // Cached result used
     })
 
-    it('should cache false results for non-matching bytecode', async () => {
+    it('should cache false results for non-HypernativeGuard contracts', async () => {
       mockProvider.getCode.mockResolvedValue(MOCK_OTHER_GUARD_BYTECODE)
 
       const chainId = '1'
@@ -240,6 +223,7 @@ describe('isHypernativeGuard', () => {
 
       // Second call - should retry (not cached)
       mockProvider.getCode.mockResolvedValueOnce(MOCK_HYPERNATIVE_GUARD_BYTECODE)
+
       const result = await isHypernativeGuard(chainId, guardAddress, mockProvider)
       expect(result).toBe(true)
       expect(mockProvider.getCode).toHaveBeenCalledTimes(2) // Called again, not cached
@@ -280,6 +264,73 @@ describe('isHypernativeGuard', () => {
 
       // All should return quickly without RPC calls
       expect(mockProvider.getCode).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('skipAbiCheck parameter', () => {
+    beforeEach(() => {
+      // Clear the cache before each test
+      if (isHypernativeGuard.cache && typeof isHypernativeGuard.cache.clear === 'function') {
+        isHypernativeGuard.cache.clear()
+      }
+    })
+
+    it('should return true for any guard when skipAbiCheck is true', async () => {
+      // Use bytecode that doesn't match HypernativeGuard selectors
+      mockProvider.getCode.mockResolvedValue(MOCK_OTHER_GUARD_BYTECODE)
+
+      const result = await isHypernativeGuard('1', '0x1234567890123456789012345678901234567890', mockProvider, true)
+
+      // Should return true because skipAbiCheck is enabled and contract has code
+      expect(result).toBe(true)
+      expect(mockProvider.getCode).toHaveBeenCalledWith('0x1234567890123456789012345678901234567890')
+    })
+
+    it('should perform ABI check when skipAbiCheck is false (default)', async () => {
+      // Use bytecode that doesn't match HypernativeGuard selectors
+      mockProvider.getCode.mockResolvedValue(MOCK_OTHER_GUARD_BYTECODE)
+
+      const result = await isHypernativeGuard('1', '0x1234567890123456789012345678901234567890', mockProvider, false)
+
+      // Should return false because ABI check fails
+      expect(result).toBe(false)
+    })
+
+    it('should still return false for empty bytecode even when skipAbiCheck is true', async () => {
+      // No code at address
+      mockProvider.getCode.mockResolvedValue('0x')
+
+      const result = await isHypernativeGuard('1', '0x1234567890123456789012345678901234567890', mockProvider, true)
+
+      // Should return false because no code exists
+      expect(result).toBe(false)
+    })
+
+    it('should cache results separately for different skipAbiCheck values', async () => {
+      mockProvider.getCode.mockResolvedValue(MOCK_OTHER_GUARD_BYTECODE)
+
+      const chainId = '1'
+      const guardAddress = '0x1234567890123456789012345678901234567890'
+
+      // Call with skipAbiCheck = false
+      const result1 = await isHypernativeGuard(chainId, guardAddress, mockProvider, false)
+      expect(result1).toBe(false)
+      expect(mockProvider.getCode).toHaveBeenCalledTimes(1)
+
+      // Call with skipAbiCheck = true - should make new call since cache key is different
+      const result2 = await isHypernativeGuard(chainId, guardAddress, mockProvider, true)
+      expect(result2).toBe(true)
+      expect(mockProvider.getCode).toHaveBeenCalledTimes(2)
+
+      // Call with skipAbiCheck = false again - should use cache
+      const result3 = await isHypernativeGuard(chainId, guardAddress, mockProvider, false)
+      expect(result3).toBe(false)
+      expect(mockProvider.getCode).toHaveBeenCalledTimes(2) // No new call
+
+      // Call with skipAbiCheck = true again - should use cache
+      const result4 = await isHypernativeGuard(chainId, guardAddress, mockProvider, true)
+      expect(result4).toBe(true)
+      expect(mockProvider.getCode).toHaveBeenCalledTimes(2) // No new call
     })
   })
 })
