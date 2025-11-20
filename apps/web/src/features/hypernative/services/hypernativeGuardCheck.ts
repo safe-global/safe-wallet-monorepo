@@ -84,15 +84,13 @@ const _memoizedIsHypernativeGuard = memoize(
 
 /**
  * Checks if a guard contract address is a HypernativeGuard by checking if its bytecode
- * contains all the distinctive function selectors.
+ * contains all the expected function selectors.
  *
- * Since the deployment bytecode of HypernativeGuard contains the Safe address,
- * each deployment has unique bytecode. Therefore, we verify the contract by checking
- * if the bytecode contains all expected function selectors (4-byte signatures).
+ * We verify the contract by checking if the bytecode contains all expected function
+ * selectors (4-byte signatures) extracted from the ABI.
  *
  * This approach is similar to how ERC20 approvals are detected in ApprovalEditor
- * using APPROVAL_SIGNATURE_HASH. It only requires one RPC call (getCode) and is
- * more reliable than comparing full bytecode hashes.
+ * using APPROVAL_SIGNATURE_HASH. It only requires one RPC call (getCode).
  *
  * Feature Flag: FEATURES.HYPERNATIVE_NO_ABI_CHECK
  * When enabled via useHasFeature, this function will skip the ABI check and simply
