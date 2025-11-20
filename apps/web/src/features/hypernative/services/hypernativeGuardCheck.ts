@@ -1,20 +1,18 @@
-import { keccak256, toUtf8Bytes } from 'ethers'
+import { id } from 'ethers'
 import type { JsonRpcProvider } from 'ethers'
 import memoize from 'lodash/memoize'
 import { logError, Errors } from '@/services/exceptions'
 import HypernativeGuardAbi from './HypernativeGuard.abi.json'
 
 /**
- * HypernativeGuard ABI interface
- * The deployment bytecode contains the Safe address, making each deployment unique.
- * Therefore, we compare the ABI (function selectors) instead of bytecode hashes.
+ * HypernativeGuard ABI
+ * Used to create contract instances for verification
  */
 export const HYPERNATIVE_GUARD_ABI = HypernativeGuardAbi
 
 /**
- * Key function selectors that uniquely identify the HypernativeGuard contract.
- * These are the function signatures that distinguish this guard from others.
- * We select a subset of distinctive functions that are unlikely to appear in other guards.
+ * Distinctive function signatures that uniquely identify the HypernativeGuard contract.
+ * These functions are unique to HypernativeGuard and unlikely to appear together in other guards.
  */
 const HYPERNATIVE_GUARD_DISTINCTIVE_FUNCTIONS = [
   'approveHash(bytes32)',
@@ -35,37 +33,13 @@ const HYPERNATIVE_GUARD_DISTINCTIVE_FUNCTIONS = [
   'getTimelockBlock()',
 ]
 
-export const HYPERNATIVE_GUARD_FUNCTION_SELECTORS = HYPERNATIVE_GUARD_DISTINCTIVE_FUNCTIONS.map((sig) =>
-  keccak256(toUtf8Bytes(sig)).slice(0, 10).toLowerCase(),
-) // First 4 bytes (8 hex chars + 0x)
-
 /**
- * Extracts function selectors from contract bytecode.
- * Function selectors are 4-byte signatures that appear in the bytecode.
- *
- * @param bytecode - The contract bytecode
- * @returns Set of function selectors found in the bytecode
+ * Function selectors (first 4 bytes of keccak256 hash of function signature).
+ * Similar to how ERC20 approvals are detected using APPROVAL_SIGNATURE_HASH.
  */
-function extractFunctionSelectors(bytecode: string): Set<string> {
-  const selectors = new Set<string>()
-
-  // Remove 0x prefix if present
-  const code = bytecode.startsWith('0x') ? bytecode.slice(2) : bytecode
-
-  // Function selectors are 4 bytes (8 hex chars)
-  // They typically appear after PUSH4 opcode (0x63) in the bytecode
-  for (let i = 0; i < code.length - 8; i += 2) {
-    const byte = code.slice(i, i + 2)
-
-    // Check for PUSH4 opcode (0x63)
-    if (byte === '63') {
-      const selector = '0x' + code.slice(i + 2, i + 10).toLowerCase()
-      selectors.add(selector)
-    }
-  }
-
-  return selectors
-}
+export const HYPERNATIVE_GUARD_FUNCTION_SELECTORS = HYPERNATIVE_GUARD_DISTINCTIVE_FUNCTIONS.map((sig) =>
+  id(sig).slice(0, 10).toLowerCase(),
+)
 
 /**
  * Internal implementation of the guard check.
@@ -97,20 +71,17 @@ const _isHypernativeGuard = async (
       return true
     }
 
-    // Extract function selectors from the deployed bytecode
-    const deployedSelectors = extractFunctionSelectors(code)
-
-    // Check how many of our expected HypernativeGuard selectors are present
-    let matchCount = 0
-    for (const expectedSelector of HYPERNATIVE_GUARD_FUNCTION_SELECTORS) {
-      if (deployedSelectors.has(expectedSelector)) {
-        matchCount++
+    // Check if all distinctive function selectors are present in the bytecode
+    // This is similar to how we detect ERC20 approvals by checking for function selectors
+    const lowerCode = code.toLowerCase()
+    for (const selector of HYPERNATIVE_GUARD_FUNCTION_SELECTORS) {
+      if (!lowerCode.includes(selector.slice(2))) {
+        // slice(2) to remove '0x' prefix for includes check
+        return false
       }
     }
 
-    // Require 100% of distinctive function selectors to match
-    // If Hypernative releases a new version, we'll add a new ABI for it
-    return matchCount === HYPERNATIVE_GUARD_FUNCTION_SELECTORS.length
+    return true
   } catch (error) {
     // Log error but don't cache the failure - let it be retried
     logError(Errors._809, error)
@@ -131,16 +102,16 @@ const _memoizedIsHypernativeGuard = memoize(
 )
 
 /**
- * Checks if a guard contract address is a HypernativeGuard
- * by extracting and comparing function selectors from its bytecode.
+ * Checks if a guard contract address is a HypernativeGuard by checking if its bytecode
+ * contains all the distinctive function selectors.
  *
  * Since the deployment bytecode of HypernativeGuard contains the Safe address,
- * each deployment has unique bytecode. Therefore, we verify the contract by
- * extracting function selectors (4-byte signatures) from the deployed bytecode
- * and matching them against the known HypernativeGuard function selectors.
+ * each deployment has unique bytecode. Therefore, we verify the contract by checking
+ * if the bytecode contains all expected function selectors (4-byte signatures).
  *
- * This approach is more efficient than making multiple RPC calls to test individual
- * functions, and more reliable than comparing full bytecode hashes.
+ * This approach is similar to how ERC20 approvals are detected in ApprovalEditor
+ * using APPROVAL_SIGNATURE_HASH. It only requires one RPC call (getCode) and is
+ * more reliable than comparing full bytecode hashes.
  *
  * Feature Flag: FEATURES.HYPERNATIVE_NO_ABI_CHECK
  * When enabled via useHasFeature, this function will skip the ABI check and simply

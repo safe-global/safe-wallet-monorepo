@@ -9,15 +9,15 @@ jest.mock('@/services/exceptions', () => ({
 
 /**
  * Helper to create mock bytecode with specific function selectors
- * Function selectors appear after PUSH4 (0x63) opcode in bytecode
+ * The selectors just need to appear somewhere in the bytecode (similar to how ERC20 approvals are detected)
  */
 function createMockBytecode(selectors: string[]): string {
   let bytecode = '0x608060405234801561001057600080fd5b506004361061003657' // Standard contract preamble
 
-  // Add each selector with PUSH4 opcode
+  // Add each selector - they just need to appear in the bytecode
   for (const selector of selectors) {
     const selectorHex = selector.startsWith('0x') ? selector.slice(2) : selector
-    bytecode += '63' + selectorHex // 0x63 is PUSH4 opcode
+    bytecode += selectorHex
   }
 
   bytecode += '00'.repeat(50) // Add some padding
