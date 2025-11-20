@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { isAddress, JsonRpcProvider } from 'ethers'
 import { ACTIVITY_THRESHOLD_LOW, LowActivityAnalysisResult } from '../config'
@@ -84,5 +84,12 @@ export const useAddressActivity = (
     setResults((prevResults) => pick({ ...prevResults, ...fetchedResults }, addresses))
   }, [addresses, fetchedResults])
 
-  return [results, error, loading]
+  // Check if the activity check is loading
+  // We expect an entry for each address in the results array
+  const isLoading = useMemo(
+    () => !error && !!web3ReadOnly && addresses.length > 0 && Object.keys(results || {}).length !== addresses.length,
+    [addresses.length, web3ReadOnly, results, error],
+  )
+
+  return [results, error, isLoading]
 }

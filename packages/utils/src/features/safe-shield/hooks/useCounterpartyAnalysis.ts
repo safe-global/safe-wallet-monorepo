@@ -111,11 +111,8 @@ export function useCounterpartyAnalysis({
 
   // Check if any of the checks are loading or if the results are not complete
   const isLoading = useMemo(
-    () =>
-      isCounterpartyLoading ||
-      activityCheckLoading ||
-      (nonSafeRecipients.length > 0 && Object.keys(activityCheck || {}).length !== nonSafeRecipients.length),
-    [isCounterpartyLoading, activityCheckLoading, nonSafeRecipients.length, activityCheck],
+    () => isCounterpartyLoading || activityCheckLoading,
+    [isCounterpartyLoading, activityCheckLoading],
   )
 
   // Merge backend recipient results with local checks

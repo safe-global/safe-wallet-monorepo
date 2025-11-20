@@ -63,19 +63,8 @@ export function useRecipientAnalysis({
 
   // Check if any of the checks are loading or if the results are not complete
   const isLoading = useMemo(
-    () =>
-      fetchLoading ||
-      activityCheckLoading ||
-      (validRecipients.length > 0 && !fetchedResults) ||
-      (nonSafeRecipients.length > 0 && Object.keys(activityCheck || {}).length !== nonSafeRecipients.length),
-    [
-      fetchLoading,
-      activityCheckLoading,
-      validRecipients.length,
-      fetchedResults,
-      nonSafeRecipients.length,
-      activityCheck,
-    ],
+    () => fetchLoading || activityCheckLoading || (validRecipients.length > 0 && !fetchedResults),
+    [fetchLoading, activityCheckLoading, validRecipients.length, fetchedResults],
   )
 
   // Merge backend and local checks
@@ -90,7 +79,16 @@ export function useRecipientAnalysis({
     }
 
     return mergeAnalysisResults(fetchedResults, addressBookCheck, activityCheck)
-  }, [fetchedResults, addressBookCheck, activityCheck, fetchedResultsError, activityCheckError, isLoading, safeAddress, validRecipients])
+  }, [
+    fetchedResults,
+    addressBookCheck,
+    activityCheck,
+    fetchedResultsError,
+    activityCheckError,
+    isLoading,
+    safeAddress,
+    validRecipients,
+  ])
 
   if (!recipientsMemo) {
     return undefined
