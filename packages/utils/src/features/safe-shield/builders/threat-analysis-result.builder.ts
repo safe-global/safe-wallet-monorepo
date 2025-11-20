@@ -71,7 +71,7 @@ export class ThreatAnalysisResultBuilder<
     return new ThreatAnalysisResultBuilder<ThreatStatus.MALICIOUS>()
       .title('Malicious threat detected')
       .type(ThreatStatus.MALICIOUS)
-      .severity(Severity.WARN)
+      .severity(Severity.CRITICAL)
       .description('The transaction {reason_phrase} {classification_phrase}')
       .issues({
         [Severity.CRITICAL]: [
