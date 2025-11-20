@@ -45,15 +45,25 @@ export const ofacApi = createApi({
   baseQuery: noopBaseQuery,
   endpoints: (builder) => ({
     getIsSanctioned: builder.query<boolean, string>({
-      async queryFn(address, { getState }) {
+      async queryFn(address, { getState, dispatch }) {
+        if (!address) return createBadRequestError('No address provided')
+
         const state = getState() as RootState
-        const chainsCache = apiSliceWithChainsConfig.endpoints.getChainsConfig.select()(state)
+        let chainsCache = apiSliceWithChainsConfig.endpoints.getChainsConfig.select()(state)
+
+        // If chains aren't loaded yet, trigger the fetch and wait for it
+        if (!chainsCache.data) {
+          await dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
+          // Re-select after fetch
+          const updatedState = getState() as RootState
+          chainsCache = apiSliceWithChainsConfig.endpoints.getChainsConfig.select()(updatedState)
+        }
+
         const chain = chainsCache.data
           ? chainsAdapter.getSelectors().selectById(chainsCache.data, chains.eth)
           : undefined
 
         if (!chain) return createBadRequestError('Chain info not found')
-        if (!address) return createBadRequestError('No address provided')
 
         const provider = createWeb3ReadOnly(chain)
         const contract = new Contract(CHAINALYSIS_OFAC_CONTRACT, contractAbi, provider)

@@ -6,7 +6,8 @@ import useChainId from '@/hooks/useChainId'
 import { Skeleton, Stack, SvgIcon, Typography } from '@mui/material'
 import FiatValue from '../FiatValue'
 import UnknownChainIcon from '@/public/images/common/unknown.svg'
-import useChains, { useChain } from '@/hooks/useChains'
+import useChains from '@/hooks/useChains'
+import { useChain } from '@/hooks/useChains'
 
 type ChainIndicatorProps = {
   chainId?: string
