@@ -1,51 +1,31 @@
 import React from 'react'
 import { Text, View, Theme } from 'tamagui'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { TouchableOpacity } from 'react-native'
-import { getSafeShieldHeadlineVariants } from './variants'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
-
-export type SafeShieldHeadlineType = `safeShield_${Severity}`
+import { getSafeShieldHeadlineVariants } from './variants'
 
 interface SafeShieldHeadlineProps {
-  type?: SafeShieldHeadlineType
-  onPress?: () => void
-  withIcon?: boolean
+  type?: Severity
 }
 
-export function SafeShieldHeadline({
-  type = `safeShield_${Severity.OK}`,
-  onPress,
-  withIcon = true,
-}: SafeShieldHeadlineProps) {
-  const { iconName, title, actionLabel } = getSafeShieldHeadlineVariants(type)
+export function SafeShieldHeadline({ type = Severity.OK }: SafeShieldHeadlineProps) {
+  const { title } = getSafeShieldHeadlineVariants(`safeShield_${type}`)
 
   return (
-    <Theme name={type}>
-      <TouchableOpacity activeOpacity={0.9} onPress={onPress} disabled={!onPress}>
-        <View
-          backgroundColor="$background"
-          padding="$4"
-          borderRadius="$2"
-          flexDirection="row"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <View flexDirection="row" alignItems="center" gap={'$2'}>
-            {withIcon && <SafeFontIcon testID={`${iconName}-icon`} name={iconName} color="$color" size={16} />}
-
-            <Text textTransform="uppercase" color="$color" fontWeight={700} letterSpacing={1} fontSize="$1">
-              {title}
-            </Text>
-          </View>
-
-          {onPress && (
-            <Text color="$color" fontSize="$2" fontWeight={700}>
-              {actionLabel}
-            </Text>
-          )}
-        </View>
-      </TouchableOpacity>
+    <Theme name={`safeShieldHeadline_${type}`}>
+      <View
+        backgroundColor="$background"
+        paddingVertical="$3"
+        paddingHorizontal="$4"
+        borderTopLeftRadius="$3"
+        borderTopRightRadius="$3"
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Text textTransform="uppercase" color="$color" fontWeight={700} letterSpacing={1} fontSize="$1">
+          {title}
+        </Text>
+      </View>
     </Theme>
   )
 }
