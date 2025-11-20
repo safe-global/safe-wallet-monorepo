@@ -15,8 +15,7 @@ export const HYPERNATIVE_GUARD_ABI = HypernativeGuardAbi
 const HYPERNATIVE_GUARD_INTERFACE = new Interface(HypernativeGuardAbi)
 
 /**
- * Extract all function selectors from the ABI.
- * Similar to how ERC20 approvals are detected using APPROVAL_SIGNATURE_HASH.
+ * Extract all function selectors from the ABI to check for their presence in deployed bytecode.
  */
 export const HYPERNATIVE_GUARD_FUNCTION_SELECTORS = HYPERNATIVE_GUARD_INTERFACE.fragments
   .filter((fragment): fragment is FunctionFragment => fragment.type === 'function')
@@ -83,16 +82,14 @@ const _memoizedIsHypernativeGuard = memoize(
 )
 
 /**
- * Checks if a guard contract address is a HypernativeGuard by checking if its bytecode
- * contains all the expected function selectors.
+ * Checks if a guard contract address is a HypernativeGuard by inspecting its deployed
+ * bytecode for the presence of all expected function selectors.
  *
- * We verify the contract by checking if the bytecode contains all expected function
- * selectors (4-byte signatures) extracted from the ABI.
+ * This approach inspects deployed bytecode for function selectors (4-byte signatures)
+ * extracted from the ABI. It only requires one RPC call (getCode) and searches for
+ * selector presence anywhere in the bytecode using includes().
  *
- * This approach is similar to how ERC20 approvals are detected in ApprovalEditor
- * using APPROVAL_SIGNATURE_HASH. It only requires one RPC call (getCode).
- *
- * Feature Flag: FEATURES.HYPERNATIVE_NO_ABI_CHECK
+ * Feature Flag: FEATURES.HYPERNATIVE_RELAX_GUARD_CHECK
  * When enabled via useHasFeature, this function will skip the ABI check and simply
  * verify that ANY guard contract is present at the address. This provides a fallback
  * mechanism if the ABI-based detection encounters issues.

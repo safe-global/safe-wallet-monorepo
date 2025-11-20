@@ -19,7 +19,7 @@ export type HypernativeGuardCheckResult = {
 export const useIsHypernativeGuard = (): HypernativeGuardCheckResult => {
   const { safe, safeLoaded } = useSafeInfo()
   const web3ReadOnly = useWeb3ReadOnly()
-  const skipAbiCheck = useHasFeature(FEATURES.HYPERNATIVE_NO_ABI_CHECK)
+  const skipAbiCheck = useHasFeature(FEATURES.HYPERNATIVE_RELAX_GUARD_CHECK)
 
   const [isHnGuard, error, loading] = useAsync<boolean>(
     async () => {
