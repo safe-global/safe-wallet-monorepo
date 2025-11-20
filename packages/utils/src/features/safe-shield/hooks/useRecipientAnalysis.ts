@@ -90,7 +90,7 @@ export function useRecipientAnalysis({
     }
 
     return mergeAnalysisResults(fetchedResults, addressBookCheck, activityCheck)
-  }, [fetchedResults, addressBookCheck, activityCheck, fetchedResultsError, activityCheckError, isLoading, safeAddress])
+  }, [fetchedResults, addressBookCheck, activityCheck, fetchedResultsError, activityCheckError, isLoading, safeAddress, validRecipients])
 
   if (!recipientsMemo) {
     return undefined
