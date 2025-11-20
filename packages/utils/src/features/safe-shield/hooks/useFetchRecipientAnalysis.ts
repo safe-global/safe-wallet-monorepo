@@ -68,8 +68,8 @@ export function useFetchRecipientAnalysis({
     if (!safeAddress) {
       return false
     }
-    return fetchLoading || (recipients.length > 0 && Object.keys(results || {}).length !== recipients.length)
-  }, [fetchLoading, recipients.length, results, safeAddress])
+    return fetchLoading || (recipients.length > 0 && Object.keys(results || {}).length !== recipients.length && !error)
+  }, [fetchLoading, recipients.length, results, safeAddress, error])
 
   return [results, error, isLoading]
 }
