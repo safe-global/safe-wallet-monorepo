@@ -62,10 +62,7 @@ export function useRecipientAnalysis({
   const [activityCheck, activityCheckError, activityCheckLoading] = useAddressActivity(nonSafeRecipients, web3ReadOnly)
 
   // Check if any of the checks are loading or if the results are not complete
-  const isLoading = useMemo(
-    () => fetchLoading || activityCheckLoading || (validRecipients.length > 0 && !fetchedResults),
-    [fetchLoading, activityCheckLoading, validRecipients.length, fetchedResults],
-  )
+  const isLoading = useMemo(() => fetchLoading || activityCheckLoading, [fetchLoading, activityCheckLoading])
 
   // Merge backend and local checks
   const mergedResults = useMemo(() => {
