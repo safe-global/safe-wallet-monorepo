@@ -199,9 +199,20 @@ jobs:
           ## 📝 Next Steps
           1. ✅ PR created - **YOU ARE HERE**
           2. ⏳ QA team reviews and tests
-          3. ⏳ QA approves (use "Complete Release" workflow)
-          4. ⏳ Auto-merge to main
-          5. ⏳ Deploy to production
+          3. ⏳ **Merge PR to main WITHOUT SQUASHING** (after QA approval)
+          4. ⏳ Auto: Tag, release, build, upload to S3 & back-merge to dev
+
+          ---
+
+          ## ⚠️ IMPORTANT: How to Merge
+
+          **Do NOT use GitHub's merge button!**
+
+          Merge commits are disabled in this repo. Use the command line:
+
+          \`\`\`bash
+          git push origin release:main
+          \`\`\`
 
           ---
 
@@ -265,6 +276,7 @@ jobs:
           echo "### 📝 Next Steps:" >> $GITHUB_STEP_SUMMARY
           echo "1. ✅ **Release branch created and PR opened**" >> $GITHUB_STEP_SUMMARY
           echo "2. ⏳ QA team should test the changes" >> $GITHUB_STEP_SUMMARY
-          echo "3. ⏳ When QA approves, run the **Complete Web Release** workflow" >> $GITHUB_STEP_SUMMARY
+          echo "3. ⏳ When QA approves, merge the PR to main" >> $GITHUB_STEP_SUMMARY
+          echo "4. ⏳ Auto: Tag, release, build, upload to S3 & back-merge to dev" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🔗 [View Pull Request](${{ steps.create_pr.outputs.pr_url }})" >> $GITHUB_STEP_SUMMARY
