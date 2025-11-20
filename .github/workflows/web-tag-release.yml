@@ -40,13 +40,12 @@ jobs:
 
       - name: Extract changelog from PR body
         id: extract_changelog
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           # Extract only the changelog section from the PR body
           # Remove everything from "## 📋 QA Checklist" onwards
-          PR_BODY=$(cat <<'EOF'
-          ${{ github.event.pull_request.body }}
-          EOF
-          )
+          # Using environment variable to avoid code injection
 
           # Extract content between release header and QA checklist
           CHANGELOG=$(echo "$PR_BODY" | sed -n '/^## 🚀 Release/,/^## 📋 QA Checklist/p' | sed '$d')
