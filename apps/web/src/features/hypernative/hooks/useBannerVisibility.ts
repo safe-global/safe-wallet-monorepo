@@ -66,8 +66,8 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
 
     // For TxReportButton, show if banner conditions are met OR if guard is installed
     if (bannerType === BannerType.TxReportButton) {
-      const bannerConditionsMet = isEnabled && isSafeOwner && hasSufficientBalanceCheck
-      const showBanner = bannerConditionsMet || isHypernativeGuard
+      const bannerConditionsMet = isEnabled && isSafeOwner
+      const showBanner = bannerConditionsMet && (hasSufficientBalanceCheck || isHypernativeGuard)
 
       return {
         showBanner,
