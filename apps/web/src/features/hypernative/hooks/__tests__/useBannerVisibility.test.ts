@@ -552,11 +552,11 @@ describe('useBannerVisibility', () => {
     })
 
     describe('when guard is installed', () => {
-      it('should show button when guard is installed (regardless of other conditions)', () => {
-        jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(false)
-        jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(false)
-        jest.spyOn(useWalletHook, 'default').mockReturnValue(null)
-        jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(false)
+      it('should show button when guard is installed AND isEnabled AND isSafeOwner', () => {
+        jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(true)
+        jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
+        jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
+        jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
         jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
           balances: { fiatTotal: '0', items: [] },
           loaded: true,
@@ -594,6 +594,52 @@ describe('useBannerVisibility', () => {
 
         expect(result.current).toEqual({
           showBanner: true,
+          loading: false,
+        })
+      })
+
+      it('should NOT show button when guard is installed but feature is disabled', () => {
+        jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(false)
+        jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
+        jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
+        jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
+        jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
+          balances: { fiatTotal: '2000000', items: [] },
+          loaded: true,
+          loading: false,
+        })
+        jest.spyOn(useIsHypernativeGuardHook, 'useIsHypernativeGuard').mockReturnValue({
+          isHypernativeGuard: true,
+          loading: false,
+        })
+
+        const { result } = renderHook(() => useBannerVisibility(BannerType.TxReportButton))
+
+        expect(result.current).toEqual({
+          showBanner: false,
+          loading: false,
+        })
+      })
+
+      it('should NOT show button when guard is installed but user is not an owner', () => {
+        jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(true)
+        jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
+        jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
+        jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(false)
+        jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
+          balances: { fiatTotal: '2000000', items: [] },
+          loaded: true,
+          loading: false,
+        })
+        jest.spyOn(useIsHypernativeGuardHook, 'useIsHypernativeGuard').mockReturnValue({
+          isHypernativeGuard: true,
+          loading: false,
+        })
+
+        const { result } = renderHook(() => useBannerVisibility(BannerType.TxReportButton))
+
+        expect(result.current).toEqual({
+          showBanner: false,
           loading: false,
         })
       })
