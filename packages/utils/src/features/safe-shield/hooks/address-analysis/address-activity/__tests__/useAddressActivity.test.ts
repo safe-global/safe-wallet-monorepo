@@ -26,7 +26,7 @@ describe('useAddressActivity', () => {
     })
 
     const [results, error] = result.current
-    expect(results).toBeUndefined()
+    expect(results).toEqual({})
     expect(error).toBeUndefined()
   })
 
@@ -43,7 +43,7 @@ describe('useAddressActivity', () => {
     })
 
     const [results] = result.current
-    expect(results).toBeUndefined()
+    expect(results).toEqual({})
   })
 
   it('should return LOW_ACTIVITY assessment with corresponding title and description for address with 0 transactions', async () => {
