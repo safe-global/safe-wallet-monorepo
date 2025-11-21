@@ -4,6 +4,8 @@ import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { BannerType, useBannerStorage } from './useBannerStorage'
 import { useIsHypernativeGuard } from './useIsHypernativeGuard'
 import { useIsHypernativeFeature } from './useIsHypernativeFeature'
+import { useIsOutreachSafe } from '@/features/targetedFeatures/hooks/useIsOutreachSafe'
+import { HYPERNATIVE_OUTREACH_ID } from '../constants'
 import { IS_PRODUCTION } from '@/config/constants'
 import { useTrackBannerEligibilityOnConnect } from './useTrackBannerEligibilityOnConnect'
 
@@ -40,6 +42,7 @@ const hasSufficientBalance = (fiatTotal: string): boolean => {
  * 2. Wallet must be connected
  * 3. Connected wallet must be an owner of the current Safe
  * 4. Safe must have balance > MIN_BALANCE_USD (production) or > 1 USD (non-production) - skipped for BannerType.NoBalanceCheck
+ *    OR Safe is in the targeted list (bypasses balance requirement)
  * 5. For Promo/Pending/NoBalanceCheck/Settings: Safe must not have HypernativeGuard installed
  *    For TxReportButton: Requires isEnabled AND isSafeOwner, and either sufficient balance OR HypernativeGuard is installed
  *
@@ -52,6 +55,7 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
   const isSafeOwner = useIsSafeOwner()
   const { balances, loading: balancesLoading } = useVisibleBalances()
   const { isHypernativeGuard, loading: guardLoading } = useIsHypernativeGuard()
+  const isTargetedSafe = useIsOutreachSafe(HYPERNATIVE_OUTREACH_ID)
 
   const visibilityResult = useMemo(() => {
     // For NoBalanceCheck, skip balance loading check
@@ -63,7 +67,9 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
     }
 
     // For NoBalanceCheck, skip balance check (always pass)
+    // For targeted Safes, bypass balance check (works for all banner types including NoBalanceCheck)
     const hasSufficientBalanceCheck = skipBalanceCheck || hasSufficientBalance(balances.fiatTotal)
+    const passesBalanceOrTargetedCheck = hasSufficientBalanceCheck || isTargetedSafe
 
     // For TxReportButton, require isEnabled AND isSafeOwner, and either sufficient balance OR guard is installed
     if (bannerType === BannerType.TxReportButton) {
@@ -77,7 +83,9 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
     }
 
     // For other banner types (Promo, Pending, NoBalanceCheck, Settings), guard must NOT be installed
-    const showBanner = isEnabled && shouldShowBanner && isSafeOwner && hasSufficientBalanceCheck && !isHypernativeGuard
+    // Targeted Safes can bypass balance requirement, but still need: isEnabled, shouldShowBanner, isSafeOwner, !isHypernativeGuard
+    const showBanner =
+      isEnabled && shouldShowBanner && isSafeOwner && passesBalanceOrTargetedCheck && !isHypernativeGuard
 
     return {
       showBanner,
@@ -92,6 +100,7 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
     balancesLoading,
     isHypernativeGuard,
     guardLoading,
+    isTargetedSafe,
   ])
 
   // Track banner eligibility once per Safe connection
