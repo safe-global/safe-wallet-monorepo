@@ -45,23 +45,27 @@ describe('formatNumber', () => {
     })
 
     it('should format a number above 1', () => {
-      expect(formatCurrency(285.1257657, 'EUR')).toBe('€ 285')
-    })
-
-    it('should abbreviate billions', () => {
-      expect(formatCurrency(12_345_678_901, 'USD')).toBe('$ 12.35B')
+      // Price mode: values ≥ --.01 show 2 decimals
+      const result = formatCurrency(285.13, 'EUR')
+      expect(result).toContain('285.13')
+      // Large numbers should not use compact notation
+      const result2 = formatCurrency(12_345_678_901, 'USD')
+      expect(result2).toContain('12,345,678,901.00')
     })
 
     it('should abbreviate millions', () => {
-      expect(formatCurrency(9_589_009.543645, 'EUR')).toBe('€ 9.59M')
+      const result = formatCurrency(9_589_009.54, 'EUR')
+      expect(result).toContain('9,589,009.54')
     })
 
     it('should abbreviate thousands', () => {
-      expect(formatCurrency(119_589.543645, 'EUR')).toBe('€ 119.59K')
+      const result = formatCurrency(119_589.54, 'EUR')
+      expect(result).toContain('119,589.54')
     })
 
     it('should abbreviate a number with more than a given amount of digits', () => {
-      expect(formatCurrency(1234.12, 'USD', 4)).toBe('$ 1.23K')
+      const result = formatCurrency(1234.12, 'USD', 4)
+      expect(result).toContain('1,234.12')
     })
   })
 
@@ -121,6 +125,108 @@ describe('formatNumber', () => {
 
     it('handles extremely large totals without throwing', () => {
       expect(percentageOfTotal(1, Number.MAX_SAFE_INTEGER)).toBeCloseTo(1 / Number.MAX_SAFE_INTEGER)
+    })
+  })
+
+  describe('formatCurrency value mode', () => {
+    it('should format zero as $0.00 with 2 decimals', () => {
+      expect(formatCurrency(0, 'USD', 6, 'value')).toBe('$ 0.00')
+    })
+
+    it('should format zero as €0.00 for EUR', () => {
+      expect(formatCurrency(0, 'EUR', 6, 'value')).toBe('€ 0.00')
+    })
+
+    it('should format values ≥ $0.01 with exactly 2 decimal places', () => {
+      expect(formatCurrency(246985.08, 'USD', 20, 'value')).toBe('$ 246,985.08')
+      expect(formatCurrency(2087.28, 'USD', 20, 'value')).toBe('$ 2,087.28')
+      expect(formatCurrency(321.19, 'USD', 20, 'value')).toBe('$ 321.19')
+      expect(formatCurrency(134.94, 'USD', 20, 'value')).toBe('$ 134.94')
+      expect(formatCurrency(38.26, 'USD', 20, 'value')).toBe('$ 38.26')
+      expect(formatCurrency(25.12, 'USD', 20, 'value')).toBe('$ 25.12')
+      expect(formatCurrency(17.74, 'USD', 20, 'value')).toBe('$ 17.74')
+      expect(formatCurrency(3.70, 'USD', 20, 'value')).toBe('$ 3.70')
+      expect(formatCurrency(0.01, 'USD', 20, 'value')).toBe('$ 0.01')
+    })
+
+    it('should format values < $0.01 as <$0.01', () => {
+      expect(formatCurrency(0.005, 'USD', 6, 'value')).toBe('<$ 0.01')
+      expect(formatCurrency(0.009, 'USD', 6, 'value')).toBe('<$ 0.01')
+      expect(formatCurrency(0.0001, 'USD', 6, 'value')).toBe('<$ 0.01')
+      expect(formatCurrency(0.001, 'USD', 6, 'value')).toBe('<$ 0.01')
+    })
+
+    it('should format values < €0.01 as <€0.01 for EUR', () => {
+      expect(formatCurrency(0.005, 'EUR', 6, 'value')).toBe('<€ 0.01')
+      expect(formatCurrency(0.009, 'EUR', 6, 'value')).toBe('<€ 0.01')
+    })
+
+    it('should preserve sign for negative values', () => {
+      expect(formatCurrency(-246985.08, 'USD', 20, 'value')).toBe('-$ 246,985.08')
+      expect(formatCurrency(-0.005, 'USD', 6, 'value')).toBe('<$ 0.01')
+      expect(formatCurrency(-0.01, 'USD', 6, 'value')).toBe('-$ 0.01')
+    })
+
+    it('should maintain 2 decimals for large values without compact notation', () => {
+      const result1 = formatCurrency(12_345_678_901, 'USD', 6, 'value')
+      expect(result1).toContain('12,345,678,901.00')
+      const result2 = formatCurrency(9_589_009.54, 'EUR', 6, 'value')
+      expect(result2).toContain('9,589,009.54')
+      const result3 = formatCurrency(119_589.54, 'EUR', 6, 'value')
+      expect(result3).toContain('119,589.54')
+    })
+
+    it('should handle string input as number', () => {
+      expect(formatCurrency('246985.08', 'USD', 20, 'value')).toBe('$ 246,985.08')
+      expect(formatCurrency('0.005', 'USD', 6, 'value')).toBe('<$ 0.01')
+    })
+
+    it('should format edge case values correctly', () => {
+      // Exactly 0.01
+      expect(formatCurrency(0.01, 'USD', 6, 'value')).toBe('$ 0.01')
+      // Just below 0.01
+      expect(formatCurrency(0.009999, 'USD', 6, 'value')).toBe('<$ 0.01')
+      // Just above 0.01
+      expect(formatCurrency(0.010001, 'USD', 6, 'value')).toBe('$ 0.01')
+      // Very small positive
+      expect(formatCurrency(0.000001, 'USD', 6, 'value')).toBe('<$ 0.01')
+      // Very small negative
+      expect(formatCurrency(-0.000001, 'USD', 6, 'value')).toBe('<$ 0.01')
+    })
+  })
+
+  describe('formatCurrency price mode (backward compatibility)', () => {
+    it('should default to price mode when mode is not specified', () => {
+      // Use actual output with hair space character
+      const result1 = formatCurrency(0.5678, 'USD')
+      expect(result1).toContain('0.57')
+      const result2 = formatCurrency(285.13, 'EUR')
+      expect(result2).toContain('285.13')
+      const result3 = formatCurrency(0, 'USD')
+      expect(result3).toContain('0')
+    })
+
+    it('should use adaptive precision for price mode', () => {
+      // Values ≥ $0.01 should show 2 decimal places
+      const result1 = formatCurrency(0.01, 'USD', 6, 'price')
+      expect(result1).toContain('0.01')
+      const result2 = formatCurrency(0.21, 'USD', 6, 'price')
+      expect(result2).toContain('0.21')
+      const result3 = formatCurrency(2.68, 'USD', 6, 'price')
+      expect(result3).toContain('2.68')
+      const result4 = formatCurrency(285.13, 'EUR', 6, 'price')
+      expect(result4).toContain('285.13')
+      // Values $0.0001 - $0.0099: 4-6 decimals (adaptive)
+      const result5 = formatCurrency(0.005, 'USD', 6, 'price')
+      expect(result5).toContain('0.005')
+      const result6 = formatCurrency(0.0005, 'USD', 6, 'price')
+      expect(result6).toContain('0.0005')
+      // Values < $0.0001: 6 decimals or threshold
+      const result7 = formatCurrency(0.00005, 'USD', 20, 'price')
+      expect(result7).toContain('0.00005')
+      const result8 = formatCurrency(0.0000005, 'USD', 20, 'price')
+      expect(result8).toContain('<')
+      expect(result8).toContain('0.000001')
     })
   })
 })

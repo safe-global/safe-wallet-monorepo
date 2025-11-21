@@ -204,7 +204,7 @@ const AssetsTable = ({
               rawValue: rawPriceValue,
               content: (
                 <Typography textAlign="right">
-                  <FiatValue value={item.fiatConversion == '0' ? null : item.fiatConversion} />
+                  <FiatValue value={item.fiatConversion == '0' ? null : item.fiatConversion} mode="price" />
                 </Typography>
               ),
             },
