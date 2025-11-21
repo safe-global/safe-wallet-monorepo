@@ -103,7 +103,7 @@ describe('TWAP tests', { defaultCommandTimeout: 30000 }, () => {
     })
   })
 
-  it.skip('Verify "Sell amount too low" if the amount of tokens is worth less than 200 USD', () => {
+  it('Verify "Sell amount too low" if the amount of tokens is worth less than 200 USD', () => {
     swaps.acceptLegalDisclaimer()
     cy.wait(4000)
     main.getIframeBody(iframeSelector).within(() => {
