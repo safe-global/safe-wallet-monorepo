@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/gnosis/GS/safe-wallet-monorepo/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
