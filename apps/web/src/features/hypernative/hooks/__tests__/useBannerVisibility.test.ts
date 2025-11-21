@@ -1085,5 +1085,79 @@ describe('useBannerVisibility', () => {
         })
       })
     })
+
+    describe('TxReportButton with targeted Safe', () => {
+      it('should show button when Safe is targeted, even with insufficient balance and no guard', () => {
+        jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(true)
+        jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
+        jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
+        jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
+        jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
+          balances: { fiatTotal: '0.5', items: [] }, // Insufficient balance
+          loaded: true,
+          loading: false,
+        })
+        jest.spyOn(useIsHypernativeGuardHook, 'useIsHypernativeGuard').mockReturnValue({
+          isHypernativeGuard: false,
+          loading: false,
+        })
+        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true) // Safe is targeted
+
+        const { result } = renderHook(() => useBannerVisibility(BannerType.TxReportButton))
+
+        expect(result.current).toEqual({
+          showBanner: true,
+          loading: false,
+        })
+      })
+
+      it('should show button when Safe is targeted and guard is also installed', () => {
+        jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(true)
+        jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
+        jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
+        jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
+        jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
+          balances: { fiatTotal: '0.5', items: [] },
+          loaded: true,
+          loading: false,
+        })
+        jest.spyOn(useIsHypernativeGuardHook, 'useIsHypernativeGuard').mockReturnValue({
+          isHypernativeGuard: true,
+          loading: false,
+        })
+        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true) // Safe is targeted
+
+        const { result } = renderHook(() => useBannerVisibility(BannerType.TxReportButton))
+
+        expect(result.current).toEqual({
+          showBanner: true,
+          loading: false,
+        })
+      })
+
+      it('should NOT show button when Safe is not targeted, balance is insufficient, and no guard', () => {
+        jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(true)
+        jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
+        jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
+        jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
+        jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
+          balances: { fiatTotal: '0.5', items: [] }, // Insufficient balance
+          loaded: true,
+          loading: false,
+        })
+        jest.spyOn(useIsHypernativeGuardHook, 'useIsHypernativeGuard').mockReturnValue({
+          isHypernativeGuard: false,
+          loading: false,
+        })
+        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(false) // Safe is NOT targeted
+
+        const { result } = renderHook(() => useBannerVisibility(BannerType.TxReportButton))
+
+        expect(result.current).toEqual({
+          showBanner: false,
+          loading: false,
+        })
+      })
+    })
   })
 })

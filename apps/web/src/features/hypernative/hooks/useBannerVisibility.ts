@@ -44,7 +44,7 @@ const hasSufficientBalance = (fiatTotal: string): boolean => {
  * 4. Safe must have balance > MIN_BALANCE_USD (production) or > 1 USD (non-production) - skipped for BannerType.NoBalanceCheck
  *    OR Safe is in the targeted list (bypasses balance requirement)
  * 5. For Promo/Pending/NoBalanceCheck/Settings: Safe must not have HypernativeGuard installed
- *    For TxReportButton: Requires isEnabled AND isSafeOwner, and either sufficient balance OR HypernativeGuard is installed
+ *    For TxReportButton: Requires isEnabled AND isSafeOwner, and either sufficient balance OR targeted Safe OR HypernativeGuard is installed
  *
  * If any condition fails, showBanner will be false.
  */
@@ -71,10 +71,10 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
     const hasSufficientBalanceCheck = skipBalanceCheck || hasSufficientBalance(balances.fiatTotal)
     const passesBalanceOrTargetedCheck = hasSufficientBalanceCheck || isTargetedSafe
 
-    // For TxReportButton, require isEnabled AND isSafeOwner, and either sufficient balance OR guard is installed
+    // For TxReportButton, require isEnabled AND isSafeOwner, and either sufficient balance OR targeted Safe OR guard is installed
     if (bannerType === BannerType.TxReportButton) {
       const bannerConditionsMet = isEnabled && isSafeOwner
-      const showBanner = bannerConditionsMet && (hasSufficientBalanceCheck || isHypernativeGuard)
+      const showBanner = bannerConditionsMet && (passesBalanceOrTargetedCheck || isHypernativeGuard)
 
       return {
         showBanner,
