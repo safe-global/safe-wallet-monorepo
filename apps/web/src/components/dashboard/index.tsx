@@ -30,6 +30,7 @@ import { useBannerVisibility } from '@/features/hypernative/hooks'
 import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
 import { HnBannerForCarousel, hnBannerID } from '@/features/hypernative/components/HnBanner'
 import HnPendingBanner from '@/features/hypernative/components/HnPendingBanner'
+import { useTrackBannerEligibilityOnConnect } from '@/features/hypernative/hooks/useTrackBannerEligibilityOnConnect'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const PositionsWidget = dynamic(() => import('@/features/positions/components/PositionsWidget'))
@@ -51,6 +52,9 @@ const Dashboard = (): ReactElement => {
   const { isEligible } = useNoFeeNovemberEligibility()
   const isNoFeeNovemberEnabled = useIsNoFeeNovemberFeatureEnabled()
   const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
+
+  // Track once per wallet connection when Safe loads and banner conditions are met
+  useTrackBannerEligibilityOnConnect(BannerType.Promo)
 
   const banners = [
     showHnBanner && !hnLoading && { id: hnBannerID, element: HnBannerForCarousel },

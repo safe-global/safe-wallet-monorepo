@@ -41,6 +41,7 @@ describe('useBannerStorage', () => {
             bannerDismissed: true,
             formCompleted: false,
             pendingBannerDismissed: false,
+            bannerEligibilityTracked: false,
           },
         } as HnState,
       }
@@ -59,6 +60,7 @@ describe('useBannerStorage', () => {
             bannerDismissed: false,
             formCompleted: true,
             pendingBannerDismissed: false,
+            bannerEligibilityTracked: false,
           },
         } as HnState,
       }
@@ -77,6 +79,7 @@ describe('useBannerStorage', () => {
             bannerDismissed: true,
             formCompleted: true,
             pendingBannerDismissed: false,
+            bannerEligibilityTracked: false,
           },
         } as HnState,
       }
@@ -95,6 +98,7 @@ describe('useBannerStorage', () => {
             bannerDismissed: false,
             formCompleted: false,
             pendingBannerDismissed: false,
+            bannerEligibilityTracked: false,
           },
         } as HnState,
       }
@@ -127,6 +131,7 @@ describe('useBannerStorage', () => {
             bannerDismissed: false,
             formCompleted: false,
             pendingBannerDismissed: false,
+            bannerEligibilityTracked: false,
           },
         } as HnState,
       }
@@ -145,6 +150,7 @@ describe('useBannerStorage', () => {
             bannerDismissed: false,
             formCompleted: true,
             pendingBannerDismissed: true,
+            bannerEligibilityTracked: false,
           },
         } as HnState,
       }
@@ -163,6 +169,7 @@ describe('useBannerStorage', () => {
             bannerDismissed: false,
             formCompleted: true,
             pendingBannerDismissed: false,
+            bannerEligibilityTracked: false,
           },
         } as HnState,
       }
@@ -181,6 +188,7 @@ describe('useBannerStorage', () => {
             bannerDismissed: true,
             formCompleted: true,
             pendingBannerDismissed: false,
+            bannerEligibilityTracked: false,
           },
         } as HnState,
       }
@@ -201,6 +209,7 @@ describe('useBannerStorage', () => {
             bannerDismissed: false,
             formCompleted: true,
             pendingBannerDismissed: false,
+            bannerEligibilityTracked: false,
           },
         } as HnState,
       }
@@ -229,11 +238,13 @@ describe('useBannerStorage', () => {
             bannerDismissed: false,
             formCompleted: false,
             pendingBannerDismissed: false,
+            bannerEligibilityTracked: false,
           },
           [`${chainId}:${otherSafeAddress}`]: {
             bannerDismissed: true,
             formCompleted: false,
             pendingBannerDismissed: false,
+            bannerEligibilityTracked: false,
           },
         } as HnState,
       }
@@ -255,11 +266,13 @@ describe('useBannerStorage', () => {
             bannerDismissed: false,
             formCompleted: false,
             pendingBannerDismissed: false,
+            bannerEligibilityTracked: false,
           },
           [`${otherChainId}:${safeAddress}`]: {
             bannerDismissed: true,
             formCompleted: false,
             pendingBannerDismissed: false,
+            bannerEligibilityTracked: false,
           },
         } as HnState,
       }
