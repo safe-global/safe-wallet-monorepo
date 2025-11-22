@@ -96,6 +96,12 @@ describe('AddressBookInput', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.spyOn(useChains, 'default').mockImplementation(() => ({
+      configs: [mockChain],
+      error: undefined,
+      loading: false,
+    }))
+    jest.spyOn(useChains, 'useChain').mockImplementation(() => mockChain)
     jest.spyOn(useChains, 'useCurrentChain').mockImplementation(() => mockChain)
   })
 

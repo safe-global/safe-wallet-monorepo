@@ -11,16 +11,30 @@ import { server } from '../server'
 import { GATEWAY_URL } from '@/config/gateway'
 import crypto from 'crypto'
 import type { EIP1193Provider } from '@web3-onboard/core'
+import * as useChains from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
 
 const TX_BUILDER = 'https://apps-portal.safe.global/tx-builder'
 
 describe('Share Safe App Page', () => {
   let fetchSafeAppFromManifestSpy: jest.SpyInstance<Promise<unknown>>
 
+  const mockChains = [
+    chainBuilder().with({ chainId: '1', shortName: 'eth', chainName: 'Ethereum' }).build(),
+    chainBuilder().with({ chainId: '5', shortName: 'gor', chainName: 'Goerli' }).build(),
+  ]
+
   beforeEach(() => {
     jest.restoreAllMocks()
     jest.useFakeTimers()
     window.localStorage.clear()
+
+    jest.spyOn(useChains, 'default').mockImplementation(() => ({
+      configs: mockChains,
+      error: undefined,
+      loading: false,
+    }))
+    jest.spyOn(useChains, 'useChain').mockImplementation((chainId) => mockChains.find((c) => c.chainId === chainId))
 
     fetchSafeAppFromManifestSpy = jest.spyOn(manifest, 'fetchSafeAppFromManifest').mockResolvedValue({
       id: Math.random(),
@@ -138,6 +152,8 @@ describe('Share Safe App Page', () => {
       label: 'Metamask',
       chainId: '5',
     }))
+
+    jest.spyOn(useChains, 'useCurrentChain').mockImplementation(() => mockChains[1])
 
     render(<ShareSafeApp />, {
       routerProps: {

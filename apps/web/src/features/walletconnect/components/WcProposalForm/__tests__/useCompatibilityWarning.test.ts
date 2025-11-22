@@ -3,8 +3,19 @@ import { renderHook, getAppName } from '@/tests/test-utils'
 import type { WalletKitTypes } from '@reown/walletkit'
 import { useCompatibilityWarning } from '../useCompatibilityWarning'
 import * as wcUtils from '@/features/walletconnect/services/utils'
+import * as useChains from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
 
 describe('useCompatibilityWarning', () => {
+  const mockEthereumChain = chainBuilder().with({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' }).build()
+
+  beforeEach(() => {
+    jest.spyOn(useChains, 'default').mockImplementation(() => ({
+      configs: [mockEthereumChain],
+      error: undefined,
+      loading: false,
+    }))
+  })
   describe('should return an error for a dangerous bridge', () => {
     it('if the dApp is named', () => {
       jest.spyOn(wcUtils, 'isBlockedBridge').mockReturnValue(true)
