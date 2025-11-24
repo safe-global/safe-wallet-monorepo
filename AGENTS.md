@@ -230,7 +230,7 @@ Avoid these common mistakes when contributing:
 ## Debugging Tips
 
 - **Type errors**: Run `yarn workspace @safe-global/web type-check` to see all TypeScript errors
-- **Test failures**: Run tests in watch mode with `yarn workspace @safe-global/web test` (omit `--watchAll=false`)
+- **Test failures**: Run tests in watch mode with `yarn workspace @safe-global/web test --watch`
 - **RPC issues**: Check that `INFURA_TOKEN` or other RPC provider env vars are set correctly
 - **Build errors**: Check `.next` cache – sometimes `rm -rf apps/web/.next` helps
 - **Storybook issues**: Try `rm -rf node_modules/.cache/storybook`
