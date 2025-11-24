@@ -1,14 +1,18 @@
 import { Box, SvgIcon, Typography } from '@mui/material'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import ExternalLink from '@/components/common/ExternalLink'
-import { useAppSelector } from '@/store'
-import { selectSafeMessages } from '@/store/safeMessagesSlice'
+import { useMessagesGetMessagesBySafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import useSafeInfo from '@/hooks/useSafeInfo'
 
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 const SignedMessagesHelpLink = () => {
-  const safeMessages = useAppSelector(selectSafeMessages)
-  const safeMessagesCount = safeMessages.data?.results.length ?? 0
+  const { safe, safeAddress, safeLoaded } = useSafeInfo()
+  const { currentData: safeMessages } = useMessagesGetMessagesBySafeV1Query(
+    { chainId: safe.chainId, safeAddress },
+    { skip: !safeLoaded || !safe.deployed },
+  )
+  const safeMessagesCount = safeMessages?.results.length ?? 0
 
   if (safeMessagesCount === 0) {
     return null
