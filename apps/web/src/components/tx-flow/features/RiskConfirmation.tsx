@@ -28,7 +28,7 @@ export const RiskConfirmation = () => {
         <FormControlLabel
           data-testid="risk-confirmation-checkbox"
           label={
-            <Typography variant="body2">
+            <Typography variant="body2" data-testid="risk-confirmation-text">
               I understand the risks and would like to proceed with this {isTransaction ? 'transaction' : 'message'}.
             </Typography>
           }

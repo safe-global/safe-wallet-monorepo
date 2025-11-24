@@ -1,4 +1,5 @@
 import * as constants from '../../support/constants'
+import { continueSignBtn } from './create_tx.pages'
 
 // Safe Shield Page Object
 
@@ -26,7 +27,6 @@ export const progressBar = '[role="progressbar"]'
 // ========================================
 
 // Transaction IDs for Safe Shield testing scenarios
-// Format: '&id=multisig_<SAFE_ADDRESS>_<TX_HASH>'
 export const testTransactions = {
   // Threat analysis test - transaction with threat analysis failure
   // Shows "Issues found" status with warning colors and threat analysis failed state
@@ -330,16 +330,20 @@ export function verifyMaliciousAddressDetails() {
 }
 
 // ========================================
-// Risk Confirmation Functions
+// Risk Confirmation Selectors
 // ========================================
 
 export const riskConfirmationCheckbox = '[data-testid="risk-confirmation-checkbox"]'
+
+// ========================================
+// Risk Confirmation Functions
+// ========================================
 
 /**
  * Verify risk confirmation checkbox is visible and unchecked
  */
 export function verifyRiskConfirmationCheckboxUnchecked() {
-  cy.get(riskConfirmationCheckbox).should('be.visible')
+  cy.get(riskConfirmationCheckbox).scrollIntoView().should('be.visible')
   cy.get(riskConfirmationCheckbox).find('input[type="checkbox"]').should('not.be.checked')
 }
 
@@ -347,19 +351,19 @@ export function verifyRiskConfirmationCheckboxUnchecked() {
  * Check the risk confirmation checkbox
  */
 export function checkRiskConfirmationCheckbox() {
-  cy.get(riskConfirmationCheckbox).find('input[type="checkbox"]').check()
+  cy.get(riskConfirmationCheckbox).scrollIntoView().find('input[type="checkbox"]').check()
 }
 
 /**
  * Verify continue button is disabled
  */
 export function verifyContinueButtonDisabled() {
-  cy.get('[data-testid="continue-sign-btn"]').should('be.disabled')
+  cy.get(continueSignBtn).should('be.disabled')
 }
 
 /**
  * Verify continue button is enabled
  */
 export function verifyContinueButtonEnabled() {
-  cy.get('[data-testid="continue-sign-btn"]').should('not.be.disabled')
+  cy.get(continueSignBtn).should('not.be.disabled')
 }

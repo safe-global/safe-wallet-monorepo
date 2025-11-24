@@ -185,7 +185,7 @@ describe('Safe Shield tests', { defaultCommandTimeout: 30000 }, () => {
     shield.expandThreatAnalysisCard()
     shield.verifyMaliciousAddressDetails()
   })
-
+  //TODO: Add tests for offchain messages when implemented
   // ========================================
   // 4. Contract Analyse
   // ========================================
