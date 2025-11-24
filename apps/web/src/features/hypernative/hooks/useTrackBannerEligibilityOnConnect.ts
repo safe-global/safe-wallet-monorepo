@@ -6,6 +6,7 @@ import { selectSafeHnState, setBannerEligibilityTracked } from '../store/hnState
 import { trackEvent, MixpanelEventParams } from '@/services/analytics'
 import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 import type { BannerVisibilityResult } from './useBannerVisibility'
+import { BannerType } from './useBannerStorage'
 
 /**
  * Hook to track once per wallet connection when Safe loads and satisfies banner rendering conditions.
@@ -17,8 +18,12 @@ import type { BannerVisibilityResult } from './useBannerVisibility'
  * The tracking flag persists across Safe switches and page reloads.
  *
  * @param visibilityResult - The banner visibility result from useBannerVisibility
+ * @param bannerType - The type of banner (used to skip tracking for TxReportButton and Pending)
  */
-export const useTrackBannerEligibilityOnConnect = (visibilityResult: BannerVisibilityResult): void => {
+export const useTrackBannerEligibilityOnConnect = (
+  visibilityResult: BannerVisibilityResult,
+  bannerType?: BannerType,
+): void => {
   const dispatch = useAppDispatch()
   const chainId = useChainId()
   const { safeAddress, safeLoaded, safeLoading } = useSafeInfo()
@@ -36,6 +41,13 @@ export const useTrackBannerEligibilityOnConnect = (visibilityResult: BannerVisib
   }, [chainId, safeAddress])
 
   useEffect(() => {
+    // Skip tracking for:
+    // - TxReportButton: shows even when guard is already installed
+    // - Pending: only appears after promo banner was viewed (which already triggered tracking)
+    if (bannerType === BannerType.TxReportButton || bannerType === BannerType.Pending) {
+      return
+    }
+
     // Only track if:
     // 1. Safe info is fully loaded (not loading)
     // 2. We have a Safe address and chain ID
@@ -83,5 +95,6 @@ export const useTrackBannerEligibilityOnConnect = (visibilityResult: BannerVisib
     visibilityResult.loading,
     safeHnState,
     dispatch,
+    bannerType,
   ])
 }

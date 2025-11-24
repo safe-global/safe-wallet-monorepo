@@ -1,6 +1,7 @@
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { useTrackBannerEligibilityOnConnect } from '../useTrackBannerEligibilityOnConnect'
 import type { BannerVisibilityResult } from '../useBannerVisibility'
+import { BannerType } from '../useBannerStorage'
 import * as useChainIdHook from '@/hooks/useChainId'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { trackEvent } from '@/services/analytics'
@@ -191,6 +192,86 @@ describe('useTrackBannerEligibilityOnConnect', () => {
       })
 
       expect(mockTrackEvent).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('Event does not fire for excluded banner types', () => {
+    it('should not track when bannerType is TxReportButton', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.TxReportButton), {
+        initialReduxState,
+      })
+
+      // Wait a bit to ensure effect has run
+      await waitFor(
+        () => {
+          expect(mockTrackEvent).not.toHaveBeenCalled()
+        },
+        { timeout: 100 },
+      )
+    })
+
+    it('should not track when bannerType is Pending', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Pending), {
+        initialReduxState,
+      })
+
+      // Wait a bit to ensure effect has run
+      await waitFor(
+        () => {
+          expect(mockTrackEvent).not.toHaveBeenCalled()
+        },
+        { timeout: 100 },
+      )
+    })
+
+    it('should track when bannerType is Promo', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    it('should track when bannerType is Settings', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Settings), {
+        initialReduxState,
+      })
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    it('should track when bannerType is NoBalanceCheck', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.NoBalanceCheck), {
+        initialReduxState,
+      })
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
     })
   })
 

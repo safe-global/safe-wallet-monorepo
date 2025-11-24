@@ -95,7 +95,8 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
   ])
 
   // Track banner eligibility once per Safe connection
-  useTrackBannerEligibilityOnConnect(visibilityResult)
+  // The hook will skip tracking internally for TxReportButton and Pending
+  useTrackBannerEligibilityOnConnect(visibilityResult, bannerType)
 
   return visibilityResult
 }
