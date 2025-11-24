@@ -14,6 +14,7 @@ export enum MixpanelEvent {
   NATIVE_SWAP_VIEWED = 'Native Swap Viewed',
   SAFE_LABS_TERMS_ACCEPTED = 'Safe Labs Terms Accepted',
   SIDEBAR_CLICKED = 'Sidebar Clicked',
+  GUARDIAN_BANNER_VIEWED = 'Guardian Banner Viewed',
   GUARDIAN_FORM_VIEWED = 'Guardian Form Viewed',
   GUARDIAN_FORM_STARTED = 'Guardian Form Started',
   GUARDIAN_FORM_SUBMITTED = 'Guardian Form Submitted',

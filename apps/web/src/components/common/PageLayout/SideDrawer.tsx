@@ -10,7 +10,7 @@ import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeftRoun
 import classnames from 'classnames'
 import Sidebar from '@/components/sidebar/Sidebar'
 import css from './styles.module.css'
-import useDebounce from '@/hooks/useDebounce'
+import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 
 type SideDrawerProps = {

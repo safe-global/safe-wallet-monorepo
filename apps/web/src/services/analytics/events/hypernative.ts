@@ -1,6 +1,10 @@
 export const HYPERNATIVE_CATEGORY = 'hypernative'
 
 export const HYPERNATIVE_EVENTS = {
+  GUARDIAN_BANNER_VIEWED: {
+    action: 'Guardian Banner Viewed',
+    category: HYPERNATIVE_CATEGORY,
+  },
   GUARDIAN_FORM_VIEWED: {
     action: 'Guardian Form Viewed',
     category: HYPERNATIVE_CATEGORY,

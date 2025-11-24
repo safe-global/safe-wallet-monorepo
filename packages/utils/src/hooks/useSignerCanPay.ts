@@ -6,9 +6,9 @@ interface UseSignerCanPayProps {
   balance: bigint
 }
 
-const useWalletCanPay = ({ gasLimit, maxFeePerGas, balance }: UseSignerCanPayProps) => {
-  // Take an optimistic approach and assume the wallet can pay
-  // if gasLimit, maxFeePerGas or their walletBalance are missing
+const useSignerCanPay = ({ gasLimit, maxFeePerGas, balance }: UseSignerCanPayProps) => {
+  // Take an optimistic approach and assume the signer can pay
+  // if gasLimit, maxFeePerGas or their balance are missing
   if (gasLimit === undefined || maxFeePerGas === undefined || maxFeePerGas === null || balance === undefined)
     return true
 
@@ -17,4 +17,4 @@ const useWalletCanPay = ({ gasLimit, maxFeePerGas, balance }: UseSignerCanPayPro
   return balance >= totalFee
 }
 
-export default useWalletCanPay
+export default useSignerCanPay
