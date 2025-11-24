@@ -32,7 +32,6 @@ import { setupListeners } from '@reduxjs/toolkit/query'
 import { migrateBatchTxs } from '@/services/ls-migration/batch'
 
 const rootReducer = combineReducers({
-  [slices.chainsSlice.name]: slices.chainsSlice.reducer,
   [slices.safeInfoSlice.name]: slices.safeInfoSlice.reducer,
   [slices.balancesSlice.name]: slices.balancesSlice.reducer,
   [slices.sessionSlice.name]: slices.sessionSlice.reducer,
