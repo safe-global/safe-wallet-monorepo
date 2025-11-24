@@ -434,6 +434,9 @@ describe('AssetsTable', () => {
     // hide button
     fireEvent.click(getByTestId(tableRow!, 'VisibilityOutlinedIcon'))
 
+    // Wait for the hide animation to complete
+    act(() => jest.advanceTimersByTime(COLLAPSE_TIMEOUT_MS))
+
     // SPAM token is hidden now
     await waitFor(() => {
       expect(result.queryByText('100 DAI')).not.toBeNull()
