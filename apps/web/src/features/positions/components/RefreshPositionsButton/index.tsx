@@ -5,10 +5,7 @@ import { trackEvent } from '@/services/analytics'
 import { POSITIONS_EVENTS } from '@/services/analytics/events/positions'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { logError, Errors } from '@/services/exceptions'
-import { useRefetchPositionsAndBalances } from '@/features/positions/hooks/useRefetchPositionsAndBalances'
-import { FEATURES } from '@safe-global/utils/utils/chains'
-import { useHasFeature } from '@/hooks/useChains'
-import useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsPositionsFeatureEnabled'
+import { useRefetch } from '@/features/positions/hooks/useRefetch'
 import css from './styles.module.css'
 
 const RefreshIcon = (props: SvgIconProps & { isLoading?: boolean }) => {
@@ -31,10 +28,7 @@ const RefreshPositionsButton = ({
   disabled = false,
   ...buttonProps
 }: RefreshPositionsButtonProps) => {
-  const { refetch } = useRefetchPositionsAndBalances()
-  const isPositionsEnabled = useIsPositionsFeatureEnabled()
-  const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
-  const shouldUsePortfolioEndpoint = isPositionsEnabled && isPortfolioEndpointEnabled
+  const { refetch, shouldUsePortfolioEndpoint } = useRefetch()
 
   const defaultTooltip = useMemo(() => {
     return shouldUsePortfolioEndpoint ? 'Refresh portfolio data' : 'Refresh positions data'
