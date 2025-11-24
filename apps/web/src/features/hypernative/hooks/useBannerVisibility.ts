@@ -5,6 +5,7 @@ import { BannerType, useBannerStorage } from './useBannerStorage'
 import { useIsHypernativeGuard } from './useIsHypernativeGuard'
 import { useIsHypernativeFeature } from './useIsHypernativeFeature'
 import { IS_PRODUCTION } from '@/config/constants'
+import { useTrackBannerEligibilityOnConnect } from './useTrackBannerEligibilityOnConnect'
 
 /**
  * Minimum USD balance threshold for showing the banner in production.
@@ -52,7 +53,7 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
   const { balances, loading: balancesLoading } = useVisibleBalances()
   const { isHypernativeGuard, loading: guardLoading } = useIsHypernativeGuard()
 
-  return useMemo(() => {
+  const visibilityResult = useMemo(() => {
     // For NoBalanceCheck, skip balance loading check
     const skipBalanceCheck = bannerType === BannerType.NoBalanceCheck
     const loading = (skipBalanceCheck ? false : balancesLoading) || guardLoading
@@ -92,4 +93,11 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
     isHypernativeGuard,
     guardLoading,
   ])
+
+  // Track banner eligibility once per Safe connection
+  // The hook will skip tracking internally for TxReportButton and Pending
+  useTrackBannerEligibilityOnConnect(visibilityResult, bannerType)
+
+  return visibilityResult
 }
+export { BannerType }

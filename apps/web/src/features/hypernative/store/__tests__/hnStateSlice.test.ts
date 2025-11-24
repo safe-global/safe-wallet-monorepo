@@ -4,6 +4,7 @@ import {
   setBannerDismissed,
   setFormCompleted,
   setPendingBannerDismissed,
+  setBannerEligibilityTracked,
   type HnState,
   type SafeHnState,
 } from '../hnStateSlice'
@@ -44,6 +45,7 @@ describe('hnStateSlice', () => {
         bannerDismissed: true,
         formCompleted: false,
         pendingBannerDismissed: false,
+        bannerEligibilityTracked: false,
       })
     })
 
@@ -53,6 +55,7 @@ describe('hnStateSlice', () => {
           bannerDismissed: false,
           formCompleted: true,
           pendingBannerDismissed: true,
+          bannerEligibilityTracked: false,
         },
       }
       const store = createTestStore(initialState)
@@ -66,6 +69,7 @@ describe('hnStateSlice', () => {
         bannerDismissed: true,
         formCompleted: true,
         pendingBannerDismissed: true,
+        bannerEligibilityTracked: false,
       })
     })
   })
@@ -85,6 +89,7 @@ describe('hnStateSlice', () => {
         bannerDismissed: false,
         formCompleted: true,
         pendingBannerDismissed: false,
+        bannerEligibilityTracked: false,
       })
     })
 
@@ -94,6 +99,7 @@ describe('hnStateSlice', () => {
           bannerDismissed: true,
           formCompleted: false,
           pendingBannerDismissed: true,
+          bannerEligibilityTracked: false,
         },
       }
       const store = createTestStore(initialState)
@@ -107,6 +113,7 @@ describe('hnStateSlice', () => {
         bannerDismissed: true,
         formCompleted: true,
         pendingBannerDismissed: true,
+        bannerEligibilityTracked: false,
       })
     })
   })
@@ -126,6 +133,7 @@ describe('hnStateSlice', () => {
         bannerDismissed: false,
         formCompleted: false,
         pendingBannerDismissed: true,
+        bannerEligibilityTracked: false,
       })
     })
 
@@ -135,6 +143,7 @@ describe('hnStateSlice', () => {
           bannerDismissed: true,
           formCompleted: true,
           pendingBannerDismissed: false,
+          bannerEligibilityTracked: false,
         },
       }
       const store = createTestStore(initialState)
@@ -148,6 +157,51 @@ describe('hnStateSlice', () => {
         bannerDismissed: true,
         formCompleted: true,
         pendingBannerDismissed: true,
+        bannerEligibilityTracked: false,
+      })
+    })
+  })
+
+  describe('setBannerEligibilityTracked', () => {
+    it('should set bannerEligibilityTracked to true for a new safe', () => {
+      const store = createTestStore()
+      const chainId = '1'
+      const safeAddress = '0x123'
+
+      store.dispatch(setBannerEligibilityTracked({ chainId, safeAddress, tracked: true }))
+
+      const state = store.getState()
+      const safeState = getSafeState(state, chainId, safeAddress)
+
+      expect(safeState).toEqual({
+        bannerDismissed: false,
+        formCompleted: false,
+        pendingBannerDismissed: false,
+        bannerEligibilityTracked: true,
+      })
+    })
+
+    it('should update bannerEligibilityTracked for an existing safe', () => {
+      const initialState: HnState = {
+        '1:0x123': {
+          bannerDismissed: true,
+          formCompleted: true,
+          pendingBannerDismissed: false,
+          bannerEligibilityTracked: false,
+        },
+      }
+      const store = createTestStore(initialState)
+
+      store.dispatch(setBannerEligibilityTracked({ chainId: '1', safeAddress: '0x123', tracked: true }))
+
+      const state = store.getState()
+      const safeState = getSafeState(state, '1', '0x123')
+
+      expect(safeState).toEqual({
+        bannerDismissed: true,
+        formCompleted: true,
+        pendingBannerDismissed: false,
+        bannerEligibilityTracked: true,
       })
     })
   })
@@ -167,6 +221,7 @@ describe('hnStateSlice', () => {
           bannerDismissed: true,
           formCompleted: true,
           pendingBannerDismissed: false,
+          bannerEligibilityTracked: false,
         },
       }
       const store = createTestStore(initialState)
@@ -177,6 +232,7 @@ describe('hnStateSlice', () => {
         bannerDismissed: true,
         formCompleted: true,
         pendingBannerDismissed: false,
+        bannerEligibilityTracked: false,
       })
     })
 
@@ -186,11 +242,13 @@ describe('hnStateSlice', () => {
           bannerDismissed: true,
           formCompleted: true,
           pendingBannerDismissed: false,
+          bannerEligibilityTracked: false,
         },
         '1:0x456': {
           bannerDismissed: false,
           formCompleted: false,
           pendingBannerDismissed: true,
+          bannerEligibilityTracked: false,
         },
       }
       const store = createTestStore(initialState)
@@ -203,11 +261,13 @@ describe('hnStateSlice', () => {
         bannerDismissed: true,
         formCompleted: true,
         pendingBannerDismissed: false,
+        bannerEligibilityTracked: false,
       })
       expect(safe2State).toEqual({
         bannerDismissed: false,
         formCompleted: false,
         pendingBannerDismissed: true,
+        bannerEligibilityTracked: false,
       })
     })
   })
