@@ -187,7 +187,7 @@ describe('getOverallStatus', () => {
   })
 
   describe('threat analysis results', () => {
-    it('should include threat results with WARN severity', () => {
+    it('should include threat results with CRITICAL severity', () => {
       const recipientResults: RecipientAnalysisResults = {
         '0xRecipient1': {
           [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
@@ -203,7 +203,7 @@ describe('getOverallStatus', () => {
       const result = getOverallStatus(recipientResults, undefined, threatResults)
 
       expect(result).toBeDefined()
-      expect(result!.severity).toBe(Severity.WARN)
+      expect(result!.severity).toBe(Severity.CRITICAL)
       expect(result!.title).toBe('Issues found')
     })
 
@@ -229,7 +229,7 @@ describe('getOverallStatus', () => {
       const result = getOverallStatus(recipientResults, contractResults, threatResults)
 
       expect(result).toBeDefined()
-      expect(result!.severity).toBe(Severity.WARN)
+      expect(result!.severity).toBe(Severity.CRITICAL)
       expect(result!.title).toBe('Issues found')
     })
 
