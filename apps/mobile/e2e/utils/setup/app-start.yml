@@ -4,6 +4,7 @@ tags:
 jsEngine: graaljs
 env:
   APP_ID: ${APP_ID || "unset"}
+  IS_DEV_MODE: ${IS_DEV_MODE || "false"}
 ---
 # Launches app with clearState based on SKIP_CLEAN_START environment variable
 # - If SKIP_CLEAN_START != "true": clears state (fresh start)
@@ -25,7 +26,7 @@ env:
       platform: Android
     commands:
       - evalScript: ${output.APP_ID = "global.safe.mobileapp"}
-- evalScript: ${console.log(output.APP_ID)}
+
 # Launch with clear state (individual test mode)
 - runFlow:
     when:
@@ -53,13 +54,17 @@ env:
 # Handle potential environment-specific dialogs (both modes)
 - runFlow:
     when:
-      visible:
-        text: 'http.*'
+      true: '${IS_DEV_MODE == "true"}'
     commands:
-      - tapOn: 'http.*'
+      - runFlow:
+          when:
+            visible:
+              text: 'http.*'
+          commands:
+            - tapOn: 'http.*'
 
-- runFlow:
-    when:
-      visible: 'Close'
-    commands:
-      - tapOn: 'Close'
+      - runFlow:
+          when:
+            visible: 'Close'
+          commands:
+            - tapOn: 'Close'

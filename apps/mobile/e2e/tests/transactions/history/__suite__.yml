@@ -18,32 +18,7 @@ tags:
 
 # Subsequent tests: Preserve state from previous test
 - runFlow:
-    file: ./rejected-transaction.yml
-    env:
-      SKIP_CLEAN_START: 'true'
-
-- runFlow:
-    file: ./sent-transaction.yml
-    env:
-      SKIP_CLEAN_START: 'true'
-
-- runFlow:
     file: ./add-owner-threshold.yml
-    env:
-      SKIP_CLEAN_START: 'true'
-
-- runFlow:
-    file: ./received-transaction.yml
-    env:
-      SKIP_CLEAN_START: 'true'
-
-- runFlow:
-    file: ./change-threshold.yml
-    env:
-      SKIP_CLEAN_START: 'true'
-
-- runFlow:
-    file: ./bulk-transactions.yml
     env:
       SKIP_CLEAN_START: 'true'
 
@@ -53,17 +28,12 @@ tags:
       SKIP_CLEAN_START: 'true'
 
 - runFlow:
-    file: ./disable-module.yml
+    file: ./bulk-transactions.yml
     env:
       SKIP_CLEAN_START: 'true'
 
 - runFlow:
-    file: ./remove-owner.yml
-    env:
-      SKIP_CLEAN_START: 'true'
-
-- runFlow:
-    file: ./swap-owner.yml
+    file: ./change-threshold.yml
     env:
       SKIP_CLEAN_START: 'true'
 
@@ -72,12 +42,13 @@ tags:
     env:
       SKIP_CLEAN_START: 'true'
 
-# ============================================
-# Tests on Swap Test Safe
-# ============================================
+- runFlow:
+    file: ./contract-interaction-deposit.yml
+    env:
+      SKIP_CLEAN_START: 'true'
 
 - runFlow:
-    file: ./swap-order.yml
+    file: ./disable-module.yml
     env:
       SKIP_CLEAN_START: 'true'
 
@@ -87,13 +58,32 @@ tags:
       SKIP_CLEAN_START: 'true'
 
 - runFlow:
-    file: ./contract-interaction-deposit.yml
+    file: ./received-transaction.yml
     env:
       SKIP_CLEAN_START: 'true'
 
-# ============================================
-# Tests on Stake Deposit Safe
-# ============================================
+- runFlow:
+    file: ./rejected-transaction.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./remove-owner.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./sent-transaction.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- retry:
+    maxRetries: 3
+    commands:
+      - runFlow:
+          file: ./stake-claim.yml
+          env:
+            SKIP_CLEAN_START: 'true'
 
 - runFlow:
     file: ./stake-deposit.yml
@@ -101,6 +91,19 @@ tags:
       SKIP_CLEAN_START: 'true'
 
 - runFlow:
-    file: ./stake-claim.yml
+    file: ./swap-order.yml
     env:
       SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./swap-owner.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+# ============================================
+# Tests on Swap Test Safe
+# ============================================
+
+# ============================================
+# Tests on Stake Deposit Safe
+# ============================================
+

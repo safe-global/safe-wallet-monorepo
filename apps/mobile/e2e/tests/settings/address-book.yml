@@ -239,6 +239,7 @@ tags:
 # Tap on Name field to focus it for editing
 - tapOn:
     text: '.*Test Safe.*'
+    index: 1
 
 # Clear existing text and enter new name
 - eraseText

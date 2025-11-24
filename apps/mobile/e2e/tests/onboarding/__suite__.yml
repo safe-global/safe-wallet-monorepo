@@ -12,11 +12,25 @@ tags:
 
 # Run all onboarding tests with SKIP_CLEAN_START
 - runFlow:
-    file: ./new-user-onboarding.yml
+    file: ./add-existing-safe.yml
     env:
       SKIP_CLEAN_START: 'true'
 
 - runFlow:
-    file: ./add-existing-safe.yml
+    file: ./enhanced-onboarding-flow.yml
+
+- runFlow:
+    file: ./import-signer-private-key.yml
     env:
       SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./import-signer-seed-phrase.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./import-signer.yml
+
+- runFlow:
+    file: ./new-user-onboarding.yml

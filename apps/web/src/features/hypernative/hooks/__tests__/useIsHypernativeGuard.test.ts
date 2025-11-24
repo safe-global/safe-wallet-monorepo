@@ -2,6 +2,7 @@ import { renderHook, waitFor, mockWeb3Provider } from '@/tests/test-utils'
 import { useIsHypernativeGuard } from '../useIsHypernativeGuard'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import * as web3 from '@/hooks/wallets/web3'
+import * as useChains from '@/hooks/useChains'
 import * as hypernativeGuardCheck from '../../services/hypernativeGuardCheck'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import type { JsonRpcProvider } from 'ethers'
@@ -13,6 +14,8 @@ describe('useIsHypernativeGuard', () => {
     jest.clearAllMocks()
     mockProvider = mockWeb3Provider([])
     jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockProvider)
+    // Mock useHasFeature to return false by default (ABI check enabled)
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
   })
 
   it('should return loading true when safe is not loaded', () => {
@@ -99,7 +102,7 @@ describe('useIsHypernativeGuard', () => {
       expect(result.current.isHypernativeGuard).toBe(true)
     })
 
-    expect(hypernativeGuardCheck.isHypernativeGuard).toHaveBeenCalledWith(chainId, guardAddress, mockProvider)
+    expect(hypernativeGuardCheck.isHypernativeGuard).toHaveBeenCalledWith(chainId, guardAddress, mockProvider, false)
   })
 
   it('should return false when guard is not a HypernativeGuard', async () => {
@@ -130,7 +133,7 @@ describe('useIsHypernativeGuard', () => {
       expect(result.current.isHypernativeGuard).toBe(false)
     })
 
-    expect(hypernativeGuardCheck.isHypernativeGuard).toHaveBeenCalledWith(chainId, guardAddress, mockProvider)
+    expect(hypernativeGuardCheck.isHypernativeGuard).toHaveBeenCalledWith(chainId, guardAddress, mockProvider, false)
   })
 
   it('should handle errors gracefully and return false', async () => {
@@ -225,8 +228,8 @@ describe('useIsHypernativeGuard', () => {
     })
 
     expect(isHypernativeGuardSpy).toHaveBeenCalledTimes(2)
-    expect(isHypernativeGuardSpy).toHaveBeenNthCalledWith(1, chainId1, firstGuardAddress, mockProvider)
-    expect(isHypernativeGuardSpy).toHaveBeenNthCalledWith(2, chainId2, secondGuardAddress, mockProvider)
+    expect(isHypernativeGuardSpy).toHaveBeenNthCalledWith(1, chainId1, firstGuardAddress, mockProvider, false)
+    expect(isHypernativeGuardSpy).toHaveBeenNthCalledWith(2, chainId2, secondGuardAddress, mockProvider, false)
   })
 
   it('should cancel stale requests when dependencies change (race condition)', async () => {

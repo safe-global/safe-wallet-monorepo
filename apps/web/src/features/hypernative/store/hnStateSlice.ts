@@ -12,6 +12,7 @@ export type SafeHnState = {
   bannerDismissed: boolean
   formCompleted: boolean
   pendingBannerDismissed: boolean
+  bannerEligibilityTracked: boolean
 }
 
 export type HnState = {
@@ -24,6 +25,7 @@ const defaultSafeState: SafeHnState = {
   bannerDismissed: false,
   formCompleted: false,
   pendingBannerDismissed: false,
+  bannerEligibilityTracked: false,
 }
 
 const ensureStateExists = (state: HnState, key: string): void => {
@@ -63,10 +65,20 @@ export const hnStateSlice = createSlice({
       ensureStateExists(state, key)
       state[key].pendingBannerDismissed = dismissed
     },
+    setBannerEligibilityTracked: (
+      state,
+      { payload }: PayloadAction<{ chainId: string; safeAddress: string; tracked: boolean }>,
+    ) => {
+      const { chainId, safeAddress, tracked } = payload
+      const key = `${chainId}:${safeAddress}`
+      ensureStateExists(state, key)
+      state[key].bannerEligibilityTracked = tracked
+    },
   },
 })
 
-export const { setBannerDismissed, setFormCompleted, setPendingBannerDismissed } = hnStateSlice.actions
+export const { setBannerDismissed, setFormCompleted, setPendingBannerDismissed, setBannerEligibilityTracked } =
+  hnStateSlice.actions
 
 export const selectHnState = (state: RootState): HnState => state[hnStateSlice.name] || initialState
 

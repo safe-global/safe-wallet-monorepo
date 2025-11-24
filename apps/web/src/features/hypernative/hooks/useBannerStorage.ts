@@ -9,12 +9,13 @@ export enum BannerType {
   Pending = 'pending',
   TxReportButton = 'txReportButton',
   NoBalanceCheck = 'noBalanceCheck',
+  Settings = 'settings',
 }
 
 /**
  * Hook to determine if a banner should be shown based on the banner type and Hypernative state.
  *
- * @param bannerType - The type of banner: BannerType.Promo, BannerType.Pending, BannerType.TxReportButton, or BannerType.NoBalanceCheck
+ * @param bannerType - The type of banner: BannerType.Promo, BannerType.Pending, BannerType.TxReportButton, BannerType.NoBalanceCheck, or BannerType.Settings
  * @returns true if the banner should be shown, false otherwise
  *
  * Logic:
@@ -22,6 +23,7 @@ export enum BannerType {
  * - For BannerType.Pending: Returns true if formCompleted is true AND pendingBannerDismissed is false, otherwise false
  * - For BannerType.TxReportButton: Always returns true (ignores bannerDismissed and formCompleted)
  * - For BannerType.NoBalanceCheck: Same as BannerType.Promo, but used when balance cannot be checked (e.g., for undeployed safes)
+ * - For BannerType.Settings: Always true, visibility depends on the guard status in useBannerVisibility
  */
 export const useBannerStorage = (bannerType: BannerType): boolean => {
   const chainId = useChainId()
@@ -32,6 +34,11 @@ export const useBannerStorage = (bannerType: BannerType): boolean => {
   return useMemo(() => {
     // TxReportButton ignores all state and always shows (subject to other visibility conditions)
     if (bannerType === BannerType.TxReportButton) {
+      return true
+    }
+
+    // Settings banner always shows (visibility controlled by guard status in useBannerVisibility)
+    if (bannerType === BannerType.Settings) {
       return true
     }
 

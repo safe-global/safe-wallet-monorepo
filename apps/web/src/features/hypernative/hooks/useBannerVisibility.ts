@@ -5,6 +5,7 @@ import { BannerType, useBannerStorage } from './useBannerStorage'
 import { useIsHypernativeGuard } from './useIsHypernativeGuard'
 import { useIsHypernativeFeature } from './useIsHypernativeFeature'
 import { IS_PRODUCTION } from '@/config/constants'
+import { useTrackBannerEligibilityOnConnect } from './useTrackBannerEligibilityOnConnect'
 
 /**
  * Minimum USD balance threshold for showing the banner in production.
@@ -31,7 +32,7 @@ const hasSufficientBalance = (fiatTotal: string): boolean => {
 /**
  * Hook to determine if a banner should be shown based on multiple conditions.
  *
- * @param bannerType - The type of banner: BannerType.Promo, BannerType.Pending, BannerType.TxReportButton, or BannerType.NoBalanceCheck
+ * @param bannerType - The type of banner: BannerType.Promo, BannerType.Pending, BannerType.TxReportButton, BannerType.NoBalanceCheck, or BannerType.Settings
  * @returns BannerVisibilityResult with showBanner flag and loading state
  *
  * Conditions checked (in order):
@@ -39,8 +40,8 @@ const hasSufficientBalance = (fiatTotal: string): boolean => {
  * 2. Wallet must be connected
  * 3. Connected wallet must be an owner of the current Safe
  * 4. Safe must have balance > MIN_BALANCE_USD (production) or > 1 USD (non-production) - skipped for BannerType.NoBalanceCheck
- * 5. For Promo/Pending/NoBalanceCheck: Safe must not have HypernativeGuard installed
- *    For TxReportButton: Show if banner conditions are met OR if HypernativeGuard is installed
+ * 5. For Promo/Pending/NoBalanceCheck/Settings: Safe must not have HypernativeGuard installed
+ *    For TxReportButton: Requires isEnabled AND isSafeOwner, and either sufficient balance OR HypernativeGuard is installed
  *
  * If any condition fails, showBanner will be false.
  */
@@ -52,7 +53,7 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
   const { balances, loading: balancesLoading } = useVisibleBalances()
   const { isHypernativeGuard, loading: guardLoading } = useIsHypernativeGuard()
 
-  return useMemo(() => {
+  const visibilityResult = useMemo(() => {
     // For NoBalanceCheck, skip balance loading check
     const skipBalanceCheck = bannerType === BannerType.NoBalanceCheck
     const loading = (skipBalanceCheck ? false : balancesLoading) || guardLoading
@@ -64,10 +65,10 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
     // For NoBalanceCheck, skip balance check (always pass)
     const hasSufficientBalanceCheck = skipBalanceCheck || hasSufficientBalance(balances.fiatTotal)
 
-    // For TxReportButton, show if banner conditions are met OR if guard is installed
+    // For TxReportButton, require isEnabled AND isSafeOwner, and either sufficient balance OR guard is installed
     if (bannerType === BannerType.TxReportButton) {
-      const bannerConditionsMet = isEnabled && isSafeOwner && hasSufficientBalanceCheck
-      const showBanner = bannerConditionsMet || isHypernativeGuard
+      const bannerConditionsMet = isEnabled && isSafeOwner
+      const showBanner = bannerConditionsMet && (hasSufficientBalanceCheck || isHypernativeGuard)
 
       return {
         showBanner,
@@ -75,7 +76,7 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
       }
     }
 
-    // For other banner types (Promo, Pending, NoBalanceCheck), guard must NOT be installed
+    // For other banner types (Promo, Pending, NoBalanceCheck, Settings), guard must NOT be installed
     const showBanner = isEnabled && shouldShowBanner && isSafeOwner && hasSufficientBalanceCheck && !isHypernativeGuard
 
     return {
@@ -92,4 +93,11 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
     isHypernativeGuard,
     guardLoading,
   ])
+
+  // Track banner eligibility once per Safe connection
+  // The hook will skip tracking internally for TxReportButton and Pending
+  useTrackBannerEligibilityOnConnect(visibilityResult, bannerType)
+
+  return visibilityResult
 }
+export { BannerType }

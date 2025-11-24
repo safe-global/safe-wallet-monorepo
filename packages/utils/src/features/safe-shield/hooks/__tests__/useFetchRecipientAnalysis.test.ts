@@ -48,6 +48,9 @@ describe('useFetchRecipientAnalysis', () => {
   })
 
   it('should return empty results when safeAddress is not available', async () => {
+    // When safeAddress is empty, useFetchMultiRecipientAnalysis returns undefined
+    useFetchMultiRecipientAnalysisSpy.mockReturnValue([undefined, undefined, false])
+
     const { result } = renderHook(() => {
       const recipients = useMemo(() => [mockRecipient1], [])
       return useFetchRecipientAnalysis({ safeAddress: '', chainId: mockChainId, recipients })

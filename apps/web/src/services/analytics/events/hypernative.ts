@@ -1,6 +1,10 @@
 export const HYPERNATIVE_CATEGORY = 'hypernative'
 
 export const HYPERNATIVE_EVENTS = {
+  GUARDIAN_BANNER_VIEWED: {
+    action: 'Guardian Banner Viewed',
+    category: HYPERNATIVE_CATEGORY,
+  },
   GUARDIAN_FORM_VIEWED: {
     action: 'Guardian Form Viewed',
     category: HYPERNATIVE_CATEGORY,
@@ -25,7 +29,6 @@ export const HYPERNATIVE_EVENTS = {
 
 export enum HYPERNATIVE_SOURCE {
   Dashboard = 'Dashboard',
-  AccountCreation = 'Account creation',
   Settings = 'Settings',
   NewTransaction = 'New transaction',
   Tutorial = 'Tutorial',
