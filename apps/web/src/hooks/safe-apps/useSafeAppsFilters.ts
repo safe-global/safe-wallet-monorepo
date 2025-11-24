@@ -6,7 +6,7 @@ import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GEN
 import { useAppsFilterByCategory } from './useAppsFilterByCategory'
 import { useAppsSearch } from './useAppsSearch'
 import { useAppsFilterByOptimizedForBatch } from './useAppsFilterByOptimizedForBatch'
-import useDebounce from '../useDebounce'
+import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { SAFE_APPS_EVENTS, trackSafeAppEvent } from '@/services/analytics'
 
 type ReturnType = {
