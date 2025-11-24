@@ -33,8 +33,8 @@ describe('getOverallStatus', () => {
       } as unknown as ThreatAnalysisResults
       const result = getOverallStatus(undefined, undefined, threatResults)
       expect(result).toBeDefined()
-      expect(result!.severity).toBe(Severity.WARN)
-      expect(result!.title).toBe('Issues found')
+      expect(result!.severity).toBe(Severity.CRITICAL)
+      expect(result!.title).toBe('Risk detected')
     })
   })
 
@@ -204,7 +204,7 @@ describe('getOverallStatus', () => {
 
       expect(result).toBeDefined()
       expect(result!.severity).toBe(Severity.CRITICAL)
-      expect(result!.title).toBe('Issues found')
+      expect(result!.title).toBe('Risk detected')
     })
 
     it('should prioritize threat results over other results when severity is higher', () => {
@@ -230,7 +230,7 @@ describe('getOverallStatus', () => {
 
       expect(result).toBeDefined()
       expect(result!.severity).toBe(Severity.CRITICAL)
-      expect(result!.title).toBe('Issues found')
+      expect(result!.title).toBe('Risk detected')
     })
 
     it('should include INFO threat results in overall calculation', () => {
