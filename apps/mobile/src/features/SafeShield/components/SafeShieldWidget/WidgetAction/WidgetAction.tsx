@@ -39,7 +39,11 @@ export function WidgetAction({ loading, error, status, onPress }: WidgetActionPr
         gap="$0"
       >
         <View flexDirection="row" alignItems="center" justifyContent="center" gap="$1">
-          {Boolean(Logo) && <Image source={Logo} marginTop="$1" width={38} height={38} />}
+          {Boolean(Logo) && (
+            <View marginTop="$1" width={38} height={38}>
+              <Logo />
+            </View>
+          )}
 
           <Text fontWeight={600}>
             {loading ? 'Checking transaction...' : error ? 'Checks unavailable' : status?.title}

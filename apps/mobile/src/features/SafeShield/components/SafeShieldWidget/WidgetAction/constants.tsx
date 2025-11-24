@@ -1,15 +1,17 @@
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 
-import CriticalLogo from '@/assets/images/safe-shield-issues.png'
-import InfoLogo from '@/assets/images/safe-shield-info.png'
-import WarnLogo from '@/assets/images/safe-shield-warn.png'
-import NeutralLogo from '@/assets/images/safe-shield-neutral.png'
-import SuccessLogo from '@/assets/images/safe-shield-success.png'
+import {
+  SafeShieldInfo,
+  SafeShieldIssues,
+  SafeShieldNeutral,
+  SafeShieldOk,
+  SafeShieldWarning,
+} from '../../SafeShieldIcons'
 
 export const safeShieldLogoStatusMap = {
-  [Severity.CRITICAL]: CriticalLogo,
-  [Severity.INFO]: InfoLogo,
-  [Severity.WARN]: WarnLogo,
-  [Severity.OK]: SuccessLogo,
-  error: NeutralLogo,
+  [Severity.CRITICAL]: SafeShieldIssues,
+  [Severity.INFO]: SafeShieldInfo,
+  [Severity.WARN]: SafeShieldWarning,
+  [Severity.OK]: SafeShieldOk,
+  error: SafeShieldNeutral,
 }
