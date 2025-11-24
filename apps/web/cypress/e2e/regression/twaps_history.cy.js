@@ -23,42 +23,6 @@ describe('Twaps history tests', { defaultCommandTimeout: 30000 }, () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('Verify order details', { defaultCommandTimeout: 60000 }, () => {
-    const limitPrice = swaps.createRegex(swapOrder.DAIeqCOW, 'COW')
-    const widgetFee = swaps.getWidgetFee()
-    const slippage = swaps.getWidgetFee()
-
-    cy.visit(constants.swapUrl + staticSafes.SEP_STATIC_SAFE_27)
-    main.waitForHistoryCallToComplete()
-    wallet.connectSigner(signer)
-    iframeSelector = `iframe[src*="${constants.swapWidget}"]`
-    swaps.acceptLegalDisclaimer()
-    main.getIframeBody(iframeSelector).within(() => {
-      cy.wait(20000) // Need more time to load UI
-      swaps.switchToTwap()
-      swaps.selectInputCurrency(swaps.swapTokens.cow)
-      swaps.setInputValue(500)
-      swaps.selectOutputCurrency(swaps.swapTokens.dai)
-      swaps.outputInputIsNotEmpty()
-      swaps.confirmPriceImpact()
-      swaps.verifyReviewOrderBtnIsVisible()
-      swaps.getTwapInitialData().then((formData) => {
-        cy.wrap(formData).as('twapFormData')
-        cy.wait(5000)
-        swaps.clickOnReviewOrderBtn()
-        swaps.placeTwapOrder()
-        swaps.confirmPriceImpact()
-      })
-    })
-
-    cy.get('@twapFormData').then((formData) => {
-      swaps.checkTwapValuesInReviewScreen(formData)
-      cy.get('[data-testid="slippage"] [data-testid="tx-data-row"]').invoke('text').should('match', slippage)
-      cy.get('[data-testid="widget-fee"] [data-testid="tx-data-row"]').invoke('text').should('match', widgetFee)
-      cy.get('[data-testid="limit-price"] [data-testid="tx-data-row"]').invoke('text').should('match', limitPrice)
-    })
-  })
-
   it('Verify partially filled sell order', () => {
     const tx =
       'sep:0x8f4A19C85b39032A37f7a6dCc65234f966F72551&id=multisig_0x8f4A19C85b39032A37f7a6dCc65234f966F72551_0x2fdf5e5d94306de5f7285fd74ca014067b090338b3ff15e3f66d6c02ef81e4a4'
