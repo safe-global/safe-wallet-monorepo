@@ -15,43 +15,17 @@ describe('Safe Shield tests', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
-
-  beforeEach(() => {
-    // MATIC_STATIC_SAFE_30 - dedicated for Safe Shield testing
-    cy.visit(constants.BALANCE_URL + staticSafes.MATIC_STATIC_SAFE_30)
-
-    // Setup addressBook
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, {
-      137: {
-        [shield.TEST_RECIPIENT]: 'Test Recipient',
-        [shield.TEST_SAFE_ADDRESS]: 'Test Safe Address', // Safe contract address
-        [signerAddress]: 'Test Signer (Owner 4)', // Add signer address to addressBook
-      },
-    })
-    cy.wait(1000) // Wait for localStorage to be set
-    cy.reload() // Reload to apply addressBook
-
-    // Connect OWNER_4 wallet for each test
-    wallet.connectSigner(signer)
-    // main.waitForHistoryCallToComplete()
-  })
-
   // ========================================
   // 1. Widget General
   // ========================================
 
   it.only('[Widget General] Verify that Safe Shield empty state is shown on New Transaction start before scanning', () => {
-    // Start creating a new transaction
+    cy.visit(constants.BALANCE_URL + staticSafes.MATIC_STATIC_SAFE_30)
+    wallet.connectSigner(signer)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
-
-    // Verify Safe Shield widget is displayed
     shield.verifySafeShieldDisplayed()
-
-    // Verify empty state message before any scanning
     shield.verifyEmptyState()
-
-    // Verify "Secured by" footer is present
     shield.verifySecuredByFooter()
   })
 
