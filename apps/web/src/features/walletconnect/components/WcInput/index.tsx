@@ -1,7 +1,7 @@
 import Track from '@/components/common/Track'
 import { isPairingUri } from '@/features/walletconnect/services/utils'
 import { WalletConnectContext, WCLoadingState } from '@/features/walletconnect/WalletConnectContext'
-import useDebounce from '@/hooks/useDebounce'
+import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { trackEvent } from '@/services/analytics'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
