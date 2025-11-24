@@ -35,9 +35,7 @@ const StakeButton = ({
       pathname: AppRoutes.stake,
       query: {
         ...router.query,
-        asset: `${chain?.shortName}_${
-          tokenInfo.type === TokenType.NATIVE_TOKEN ? 'NATIVE_TOKEN' : tokenInfo.address
-        }`,
+        asset: `${chain?.shortName}_${tokenInfo.type === TokenType.NATIVE_TOKEN ? 'NATIVE_TOKEN' : tokenInfo.address}`,
       },
     })
   }

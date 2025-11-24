@@ -10,7 +10,15 @@ import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { TxModalContext } from '@/components/tx-flow'
 import css from '@/components/common/AssetActionButton/styles.module.css'
 
-const SendButton = ({ tokenInfo, light, onlyIcon = false }: { tokenInfo: Balance['tokenInfo']; light?: boolean; onlyIcon?: boolean }) => {
+const SendButton = ({
+  tokenInfo,
+  light,
+  onlyIcon = false,
+}: {
+  tokenInfo: Balance['tokenInfo']
+  light?: boolean
+  onlyIcon?: boolean
+}) => {
   const spendingLimit = useSpendingLimit(tokenInfo)
   const { setTxFlow } = useContext(TxModalContext)
 
