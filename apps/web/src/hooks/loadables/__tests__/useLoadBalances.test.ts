@@ -147,7 +147,7 @@ describe('useLoadBalances', () => {
           theme: {},
           tokenList: TOKEN_LISTS.ALL,
         },
-      } as store.RootState),
+      } as unknown as store.RootState),
     )
 
     jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
