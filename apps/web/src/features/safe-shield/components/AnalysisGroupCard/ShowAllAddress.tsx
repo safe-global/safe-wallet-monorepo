@@ -1,7 +1,12 @@
 import { ExpandMore } from '@mui/icons-material'
-import { Collapse, Typography } from '@mui/material'
-import { useReducer } from 'react'
+import { Collapse, Typography, Tooltip } from '@mui/material'
+import { useReducer, useState } from 'react'
 import { Box } from '@mui/material'
+import { useCurrentChain } from '@/hooks/useChains'
+import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
+import ExplorerButton from '@/components/common/ExplorerButton'
+import useAddressBook from '@/hooks/useAddressBook'
+import useChainId from '@/hooks/useChainId'
 
 interface ShowAllAddressProps {
   addresses: string[]
@@ -9,6 +14,20 @@ interface ShowAllAddressProps {
 
 export const ShowAllAddress = ({ addresses }: ShowAllAddressProps) => {
   const [expanded, toggle] = useReducer((state: boolean) => !state, false)
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
+  const currentChain = useCurrentChain()
+  const chainId = useChainId()
+  const addressBook = useAddressBook(chainId)
+
+  const handleCopyToClipboard = async (address: string, index: number) => {
+    try {
+      await navigator.clipboard.writeText(address)
+      setCopiedIndex(index)
+      setTimeout(() => setCopiedIndex(null), 1000)
+    } catch (error) {
+      console.error('Failed to copy address:', error)
+    }
+  }
 
   return (
     <Box mt={-1.5}>
@@ -48,13 +67,46 @@ export const ShowAllAddress = ({ addresses }: ShowAllAddressProps) => {
 
       <Collapse in={expanded}>
         <Box display="flex" flexDirection="column" gap={1}>
-          {addresses.map((item, index) => (
-            <Box padding="8px" key={`${item}-${index}`} bgcolor="background.paper" borderRadius="4px">
-              <Typography variant="body2" lineHeight="20px" sx={{ overflowWrap: 'break-word' }}>
-                {item}
-              </Typography>
-            </Box>
-          ))}
+          {addresses.map((item, index) => {
+            const explorerLink = currentChain ? getBlockExplorerLink(currentChain, item) : undefined
+            const name = addressBook[item]
+
+            return (
+              <Box key={`${item}-${index}`} padding="8px" gap={1} bgcolor="background.paper" borderRadius="4px">
+                {name && (
+                  <Typography variant="body2" color="text.primary" fontSize={12} mb={0.5}>
+                    {name}
+                  </Typography>
+                )}
+                <Typography variant="body2" lineHeight="20px" onClick={() => handleCopyToClipboard(item, index)}>
+                  <Tooltip title={copiedIndex === index ? 'Copied to clipboard' : 'Copy address'} placement="top" arrow>
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      lineHeight="20px"
+                      fontSize={12}
+                      color="primary.light"
+                      sx={{
+                        cursor: 'pointer',
+                        transition: 'background-color 0.2s',
+                        overflowWrap: 'break-word',
+                        wordBreak: 'break-all',
+                        flex: 1,
+                        '&:hover': {
+                          color: 'text.primary',
+                        },
+                      }}
+                    >
+                      {item}
+                    </Typography>
+                  </Tooltip>
+                  <Box component="span" color="text.secondary">
+                    {explorerLink && <ExplorerButton href={explorerLink.href} />}
+                  </Box>
+                </Typography>
+              </Box>
+            )
+          })}
         </Box>
       </Collapse>
     </Box>
