@@ -10,6 +10,7 @@ import useAddressBook from '@/hooks/useAddressBook'
 import useChainId from '@/hooks/useChainId'
 
 interface ShowAllAddressProps {
+  showImage?: boolean
   addresses: {
     address: string
     name?: string
@@ -17,7 +18,7 @@ interface ShowAllAddressProps {
   }[]
 }
 
-export const ShowAllAddress = ({ addresses }: ShowAllAddressProps) => {
+export const ShowAllAddress = ({ addresses, showImage }: ShowAllAddressProps) => {
   const [expanded, toggle] = useReducer((state: boolean) => !state, false)
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
   const currentChain = useCurrentChain()
@@ -74,11 +75,19 @@ export const ShowAllAddress = ({ addresses }: ShowAllAddressProps) => {
         <Box display="flex" flexDirection="column" gap={1}>
           {addresses.map((item, index) => {
             const explorerLink = currentChain ? getBlockExplorerLink(currentChain, item.address) : undefined
-            const name = addressBook[item.address]
+            const name = addressBook[item.address] || item.name
 
             return (
-              <Box key={`${item}-${index}`} padding="8px" gap={1} bgcolor="background.paper" borderRadius="4px">
-                <AddressImage logoUrl={item.logoUrl} />
+              <Box
+                key={`${item}-${index}`}
+                padding="8px"
+                gap={1}
+                display="flex"
+                flexDirection="row"
+                bgcolor="background.paper"
+                borderRadius="4px"
+              >
+                {showImage && <AddressImage logoUrl={item.logoUrl} />}
                 <Stack spacing={0.5}>
                   {name && (
                     <Typography variant="body2" color="text.primary" fontSize={12} mb={0.5}>
