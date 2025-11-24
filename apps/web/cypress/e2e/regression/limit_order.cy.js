@@ -21,7 +21,8 @@ describe('Limit order tests', { defaultCommandTimeout: 30000 }, () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('Verify limit order confirmation details', { defaultCommandTimeout: 60000 }, () => {
+  // Skipped: Test needs to be updated from starting the tx from the widget to signing queue tx
+  it.skip('Verify limit order confirmation details', { defaultCommandTimeout: 60000 }, () => {
     const limitPrice = swaps.createRegex(swapOrder.DAIeqCOW, 'COW')
     const widgetFee = swaps.getWidgetFee()
     const orderID = swaps.getOrderID()

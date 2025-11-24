@@ -7,6 +7,7 @@ This guide describes the **automated release process** using GitHub Actions work
 ## Quick Reference
 
 ### Starting a Release
+
 ```
 GitHub → Actions → "🚀 Start Web Release"
 → Enter version (e.g., 1.74.0)
@@ -14,17 +15,11 @@ GitHub → Actions → "🚀 Start Web Release"
 → Click "Run workflow"
 ```
 
-### Back-merge
-```
-GitHub → Actions → "🔄 Back-merge Main to Dev"
-→ Click "Run workflow"
-```
-
 ---
 
 ## Complete Release Process
 
-### Step 1: Start Release
+### Step 1: Start Release & QA
 
 **Who:** Release Manager
 
@@ -33,11 +28,12 @@ GitHub → Actions → "🔄 Back-merge Main to Dev"
 3. Fill in:
    - **Version:** e.g., `1.74.0` (must be X.Y.Z format)
    - **Release type:**
-     - `regular` → from `main` branch (normal releases)
+     - `regular` → from `dev` branch (normal releases)
      - `hotfix` → from `main` branch (urgent fixes)
 4. Click **"Run workflow"**
 
 **What happens automatically:**
+
 - ✅ Creates/updates `release` branch
 - ✅ Bumps version in `package.json`
 - ✅ Generates changelog with grouped changes
@@ -46,13 +42,8 @@ GitHub → Actions → "🔄 Back-merge Main to Dev"
 
 **Result:** Pull Request ready for QA (~2-3 minutes)
 
----
+**QA Process:**
 
-### Step 2: QA Testing
-
-**Who:** QA Team
-
-**Manual process** (unchanged):
 1. Find the release PR (has `release` label)
 2. Test the changes thoroughly
 3. If bugs found:
@@ -63,42 +54,32 @@ GitHub → Actions → "🔄 Back-merge Main to Dev"
 
 ---
 
-### Step 3: Merge Release PR
+### Step 2: Merge & Deploy
 
 **Who:** Release Manager (after QA approval)
 
 **Manual steps:**
+
 1. Review and approve the release PR
-2. Merge the PR to `main`
+2. **IMPORTANT:** Merge the PR to `main` **WITHOUT SQUASHING**
+
+   **Do not use GitHub's merge button!** Use the command line:
+
+   ```bash
+   git push origin release:main
+   ```
 
 **What happens automatically:**
+
 - ✅ Creates git tag
 - ✅ Creates and publishes GitHub release
 - ✅ Builds production assets
-- ✅ Deploys to production
+- ✅ Uploads to S3
+- ✅ Prepares production deployment
+- ✅ Back-merges main to dev automatically
 - ✅ Sends Slack notification to `#topic-wallet-releases`
 
-**Result:** Production deployment completed (~5-10 minutes)
-
----
-
-### Step 4: Back-merge
-
-**Who:** Release Manager (after production deployment)
-
-1. Go to **GitHub → Actions → "🔄 Back-merge Main to Dev"**
-2. Click **"Run workflow"**
-3. Keep defaults or choose "Create PR" to review changes
-4. Click **"Run workflow"**
-
-**What happens automatically:**
-- ✅ Checks if back-merge needed
-- ✅ Detects merge conflicts
-- ✅ If clean → merges directly to `dev`
-- ✅ If conflicts → creates PR for manual resolution
-- ✅ Sends Slack notification (if configured)
-
-**Result:** Branches synced (~1 minute)
+**Result:** Release published, ready for production deployment, and dev branch synced (~5-10 minutes)
 
 ---
 
@@ -111,14 +92,15 @@ Workflows work immediately after merging this PR.
 ### Optional: Slack Notifications
 
 To enable notifications:
+
 1. Create a Slack webhook URL
 2. Go to **Settings → Secrets and variables → Actions → Variables**
 3. Add variable: `SLACK_WEBHOOK_URL` with your webhook URL
 
 Notifications will be sent for:
+
 - Release started
-- Production deployment completed (to `#topic-wallet-releases` channel)
-- Back-merge status
+- Production deployment completed with back-merge status (to `#topic-wallet-releases` channel)
 
 ---
 
@@ -135,22 +117,20 @@ Notifications will be sent for:
 │   release    │  ← Code freeze for QA
 └──────┬───────┘
        │
-       │ (2) QA Testing (manual)
-       │ (3) Merge PR
+       │ (QA Testing - manual)
+       │ (2) Merge PR
        ▼
 ┌──────────────┐
 │   main       │  ← Production-ready
 └──────┬───────┘
        │
-       │ (Auto: Tag, Release & Deploy)
-       ▼
-   Production 🎉
+       │ (Auto: Tag, Release, Build, Upload to S3 & Back-merge)
        │
-       │ (4) Click "Back-merge"
-       ▼
-┌──────────────┐
-│   dev        │  ← Synced
-└──────────────┘
+       ├─────────────────┐
+       ▼                 ▼
+   Production 🎉    ┌──────────────┐
+                    │   dev        │  ← Auto-synced
+                    └──────────────┘
 ```
 
 ---
@@ -158,29 +138,47 @@ Notifications will be sent for:
 ## Troubleshooting
 
 ### Version already exists
+
 **Problem:** Version tag already exists
 **Solution:** Use a different version number
 
 ### PR checks failing
+
 **Problem:** Complete Release won't run due to failing checks
 **Solution:**
+
 - Fix the failing checks, or
 - Use `skip_checks: true` if checks are incorrectly failing
 
 ### Back-merge conflicts
+
 **Problem:** Cannot automatically merge main to dev
-**Solution:** Workflow creates PR automatically - resolve conflicts manually
+**Solution:**
+
+- The automated back-merge will fail if there are conflicts
+- Manually resolve by running:
+  ```bash
+  git checkout dev
+  git pull origin dev
+  git merge main
+  # Resolve conflicts
+  git push origin dev
+  ```
 
 ### Workflow not appearing
+
 **Problem:** Can't find workflow in Actions tab
 **Solution:**
+
 - Ensure workflows are merged to main/dev branch
 - Refresh the Actions page
 - Check you have repository access
 
 ### Slack notifications not working
+
 **Problem:** No Slack messages received
 **Solution:**
+
 - Verify `SLACK_WEBHOOK_URL` is configured in repository variables
 - Test webhook manually with curl
 - Check workflow logs for errors
@@ -190,6 +188,7 @@ Notifications will be sent for:
 ## Important Notes
 
 ### What's Automated
+
 - Creating release branches
 - Bumping versions
 - Generating changelogs
@@ -197,13 +196,14 @@ Notifications will be sent for:
 - Syncing branches
 
 ### What's Manual (Human Control)
+
 - **QA testing and approval** - Still requires thorough testing
 - **PR review and approval** - Team still reviews changes
-- **Decision to merge** - You trigger "Complete Release" only after QA approves
-- **Publishing releases** - You manually publish the draft
+- **Decision to merge** - Merge release PR only after QA approves
 - **Production deployment** - DevOps still controls final deployment
 
 ### Safety
+
 - ✅ No breaking changes - manual process still documented
 - ✅ Existing deployment workflows unchanged
 - ✅ Easy rollback - just don't use the workflows
@@ -216,6 +216,7 @@ Notifications will be sent for:
 If you need to use the manual process, see the legacy documentation in `release-procedure.md`.
 
 Use manual process if:
+
 - Automated workflows are unavailable
 - You need emergency access without GitHub UI
 - Debugging workflow issues
@@ -236,7 +237,4 @@ Use manual process if:
 - GitHub Actions: https://github.com/safe-global/safe-wallet-monorepo/actions
 - Release Workflows:
   - [Start Release](https://github.com/safe-global/safe-wallet-monorepo/actions/workflows/web-release-start.yml)
-  - [Back-merge](https://github.com/safe-global/safe-wallet-monorepo/actions/workflows/web-release-backmerge.yml)
-  - [Tag Release](https://github.com/safe-global/safe-wallet-monorepo/actions/workflows/web-tag-release.yml) (auto-triggered)
-  - [Deploy Production](https://github.com/safe-global/safe-wallet-monorepo/actions/workflows/web-deploy-production.yml) (auto-triggered)
-
+  - [Tag, Release & Deploy](https://github.com/safe-global/safe-wallet-monorepo/actions/workflows/web-tag-release.yml) (auto-triggered on PR merge)

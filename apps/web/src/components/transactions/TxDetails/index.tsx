@@ -38,10 +38,11 @@ import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gat
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { TxNote } from '@/features/tx-notes'
-import { TxShareBlock } from '../TxShareLink'
+import { TxShareBlock, TxExplorerLink } from '../TxShareLink'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
+import HnSecurityReportBtnForTxDetails from '@/features/hypernative/components/HnSecurityReportBtn'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -168,6 +169,11 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
       {/* Signers */}
       {(!isUnsigned || proposedByDelegate) && (
         <div className={css.txSigners}>
+          <TxShareBlock
+            txId={txDetails.txId}
+            hasSigners={isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)}
+          />
+
           <TxSigners
             txDetails={txDetails}
             txSummary={txSummary}
@@ -175,7 +181,9 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
             proposer={proposer}
           />
 
-          <TxShareBlock txId={txDetails.txId} txHash={txDetails.txHash} />
+          {isQueue && <HnSecurityReportBtnForTxDetails txDetails={txDetails} />}
+
+          {txDetails.txHash && <TxExplorerLink txHash={txDetails.txHash} />}
 
           {isQueue && (
             <Box className={css.buttons}>

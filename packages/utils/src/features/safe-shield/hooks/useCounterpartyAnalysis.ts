@@ -40,7 +40,8 @@ export function useCounterpartyAnalysis({
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
 } {
-  const [triggerAnalysis, { data: counterpartyData, error, isLoading }] = useSafeShieldAnalyzeCounterpartyV1Mutation()
+  const [triggerAnalysis, { data: counterpartyData, error, isLoading: isCounterpartyLoading }] =
+    useSafeShieldAnalyzeCounterpartyV1Mutation()
 
   const [hasTriggered, setHasTriggered] = useState(false)
 
@@ -108,13 +109,20 @@ export function useCounterpartyAnalysis({
     return undefined
   }, [error])
 
+  // Check if any of the checks are loading or if the results are not complete
+  const isLoading = useMemo(
+    () => isCounterpartyLoading || activityCheckLoading,
+    [isCounterpartyLoading, activityCheckLoading],
+  )
+
   // Merge backend recipient results with local checks
   const mergedRecipientResults = useMemo(() => {
     if (fetchError || activityCheckError) {
       return { [safeAddress]: { [StatusGroup.COMMON]: [getErrorInfo(ErrorType.RECIPIENT)] } }
     }
-    // Only merge different results after all of them are available
-    if (!recipientAnalysisByAddress || !addressBookCheck || activityCheckLoading) {
+
+    // Only merge results if all of them are available
+    if (isLoading) {
       return undefined
     }
 
@@ -125,7 +133,7 @@ export function useCounterpartyAnalysis({
     activityCheck,
     fetchError,
     activityCheckError,
-    activityCheckLoading,
+    isLoading,
     safeAddress,
   ])
 
@@ -149,8 +157,8 @@ export function useCounterpartyAnalysis({
   // Return results in the expected format
   return {
     recipient: mergedRecipientResults
-      ? [mergedRecipientResults, fetchError || activityCheckError, isLoading || activityCheckLoading]
+      ? [mergedRecipientResults, fetchError || activityCheckError, isLoading]
       : undefined,
-    contract: contractResults ? [contractResults, fetchError, isLoading] : undefined,
+    contract: contractResults ? [contractResults, fetchError, isCounterpartyLoading] : undefined,
   }
 }

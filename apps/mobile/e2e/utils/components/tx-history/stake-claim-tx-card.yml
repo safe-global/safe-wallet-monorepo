@@ -1,0 +1,32 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
+# ===========================================
+# Stake Claim Transaction Card
+# ===========================================
+# Stake claim transactions show "Claim" label and "Stake" type
+- extendedWaitUntil:
+    visible:
+      text: '.*Claim.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+- extendedWaitUntil:
+    visible:
+      text: '.*Stake.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+- tapOn:
+    text: '.*Claim.*'
+
+- runFlow:
+    file: ./stake-claim-tx.yml
+
+- tapOn:
+    id: 'go-back'
+
+

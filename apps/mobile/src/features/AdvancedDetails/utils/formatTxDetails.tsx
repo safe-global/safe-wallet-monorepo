@@ -14,6 +14,7 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { TouchableOpacity } from 'react-native'
 import { Receiver } from '../components/Receiver'
 import { InfoSheet } from '@/src/components/InfoSheet'
+import { HexDataDisplay } from '@/src/components/HexDataDisplay'
 
 interface formatTxDetailsProps {
   txDetails?: TransactionDetails
@@ -66,6 +67,14 @@ const formatTxDetails = ({ txDetails, viewOnExplorer }: formatTxDetailsProps): L
     items.push({
       label: 'Value',
       render: () => <Text>{txDetails.txData?.value || '0'}</Text>,
+    })
+  }
+
+  // Data field - always show when txData exists
+  if (txDetails.txData) {
+    items.push({
+      label: 'Data',
+      render: () => <HexDataDisplay data={txDetails.txData?.hexData || '0x'} title="Data" copyMessage="Data copied." />,
     })
   }
 

@@ -61,7 +61,14 @@ describe('useCounterpartyAnalysis', () => {
       { data: undefined, error: undefined, isLoading: false },
     ] as any)
     mockUseAddressBookCheck.mockReturnValue({})
-    mockUseAddressActivity.mockReturnValue([{}, undefined, false])
+    // Mock useAddressActivity to return an object with keys for all addresses when called
+    mockUseAddressActivity.mockImplementation((addresses: string[]) => {
+      const result = addresses.reduce<AddressActivityResult>((acc, addr) => {
+        acc[addr] = undefined
+        return acc
+      }, {})
+      return [result, undefined, false]
+    })
     mockIsInAddressBook.mockReturnValue(false)
   })
 
@@ -598,7 +605,11 @@ describe('useCounterpartyAnalysis', () => {
         }),
       )
 
-      expect(result.current.recipient).toBeUndefined()
+      expect(result.current.recipient).toBeDefined()
+      if (result.current.recipient) {
+        const [results] = result.current.recipient
+        expect(results).toEqual({})
+      }
     })
 
     it('should return contract data when available', async () => {
@@ -926,12 +937,7 @@ describe('useCounterpartyAnalysis', () => {
         }),
       )
 
-      await waitFor(() => {
-        expect(result.current.recipient).toBeDefined()
-      })
-
-      const [, , loading] = result.current.recipient!
-      expect(loading).toBe(true)
+      expect(result.current.recipient).toBeUndefined()
     })
 
     it('should propagate loading state from mutation to contract', async () => {

@@ -26,7 +26,7 @@ export interface NewsCarouselProps {
 }
 
 const isInteractive = (element: HTMLElement | null) =>
-  !!element?.closest('button, a, input, textarea, select, #carousel-overlay')
+  !!element?.closest('button, a, input, textarea, select, [role="button"], #carousel-overlay')
 
 const ITEM_WIDTH_PERCENT = 100
 const SLIDER_GAP = 16
@@ -113,13 +113,16 @@ const NewsCarousel = ({ banners }: NewsCarouselProps) => {
         onPointerLeave={handleDragEnd}
         onPointerCancel={handleDragEnd}
       >
-        {items.map((item) => (
-          <Box width={1} flexShrink={0} key={item.id}>
-            {createElement(item.element, {
-              onDismiss: () => dismissItem(item.id, item.eligibilityState),
-            })}
-          </Box>
-        ))}
+        {items.map((item) => {
+          const { id, element, eligibilityState } = item
+          return (
+            <Box width={1} flexShrink={0} key={id}>
+              {createElement(element, {
+                onDismiss: () => dismissItem(id, eligibilityState),
+              })}
+            </Box>
+          )
+        })}
       </div>
     </Stack>
   )

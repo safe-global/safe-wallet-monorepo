@@ -90,6 +90,7 @@ export const ContactItem: React.FC<ContactItemProps> = ({ contact, onPress, onMe
             paddingRight: 16,
             paddingLeft: 16,
           }}
+          testID="contact-item-menu"
         >
           <SafeFontIcon name={'options-horizontal'} />
         </MenuView>

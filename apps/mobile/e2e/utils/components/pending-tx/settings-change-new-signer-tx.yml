@@ -1,0 +1,63 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+# ===========================================
+# Settings Change Transaction (Pending State)
+# ===========================================
+# Tests the settings change transaction detail view for pending transactions
+# Reuses shared test components where applicable
+
+- assertVisible: 'Confirm transaction'
+
+# ===========================================
+# New Signer Field
+# ===========================================
+- assertVisible: 'New signer'
+
+- assertVisible:
+    id: 'hash-display-name-or-address'
+    text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
+
+# ===========================================
+# Network Display
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-network.yml
+
+# ===========================================
+# Transaction Details Button
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-details.yml
+
+# ===========================================
+# Transaction Checks (Pending transactions show checks instead of created/executed)
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-checks.yml
+    env:
+      BALANCE_CHANGE_PATTERN: 'No balance change detected'
+      TRANSACTION_SIMULATION_PATTERN: 'Failed'
+      VERIFY_TENDERLY_LINK: 'true'
+
+# ===========================================
+# Confirmations
+# ===========================================
+# Test tapping on confirmations to open the bottom sheet and verify signed badge
+# Verify that 1/1 confirmations are shown (the transaction has all required confirmations)
+- runFlow:
+    file: ../../assertions/verify-tx-confirmations.yml
+    env:
+      CONFIRMATIONS_PATTERN: '.*1/1.*'
+
+# ===========================================
+# Review and Execute Screen
+# ===========================================
+# Test navigating to Review and execute screen and verifying all elements
+# This settings change transaction will fail, so we verify "Can not estimate" and failure warning
+- runFlow:
+    file: ../../assertions/verify-review-and-execute.yml
+    env:
+      EXPECTED_SIGNER_PATTERN: '.*6fED.*'
+      TX_EXECUTION_STATUS: 'fail'

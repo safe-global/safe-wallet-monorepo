@@ -5,7 +5,6 @@ import { CircleProps } from 'tamagui'
 import { formatValueTemplate } from '../formatters/singleValue'
 import { formatArrayValue } from '../formatters/arrayValue'
 import { Badge } from '@/src/components/Badge'
-import { HexDataDisplay } from '@/src/components/HexDataDisplay'
 import React from 'react'
 
 interface formatParametersProps {
@@ -51,13 +50,6 @@ const formatParameters = ({ txData }: formatParametersProps): ListTableItem[] =>
     }, [])
 
     items.push(...formatedParameters)
-  }
-
-  if (txData?.hexData) {
-    items.push({
-      label: 'Hex Data',
-      render: () => <HexDataDisplay data={txData?.hexData} title="Hex Data" copyMessage="Data copied." />,
-    })
   }
 
   return items

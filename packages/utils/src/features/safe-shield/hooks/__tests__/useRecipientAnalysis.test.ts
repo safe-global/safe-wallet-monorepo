@@ -36,7 +36,14 @@ describe('useRecipientAnalysis', () => {
     // Default mock implementations
     mockUseFetchRecipientAnalysis.mockReturnValue([{}, undefined, false])
     mockUseAddressBookCheck.mockReturnValue({})
-    mockUseAddressActivity.mockReturnValue([{}, undefined, false])
+    // Mock useAddressActivity to return an object with keys for all addresses when called
+    mockUseAddressActivity.mockImplementation((addresses: string[]) => {
+      const result = addresses.reduce<AddressActivityResult>((acc, addr) => {
+        acc[addr] = undefined
+        return acc
+      }, {})
+      return [result, undefined, false]
+    })
     mockIsInAddressBook.mockReturnValue(false)
   })
 
@@ -63,7 +70,7 @@ describe('useRecipientAnalysis', () => {
     expect(result.current).toBeDefined()
     if (result.current) {
       const [results, error] = result.current
-      expect(results).toEqual({})
+      expect(results).toBeUndefined()
       expect(error).toBeUndefined()
     }
   })

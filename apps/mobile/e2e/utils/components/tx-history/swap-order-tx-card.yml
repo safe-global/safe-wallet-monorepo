@@ -1,0 +1,24 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
+# ===========================================
+# Swap Order Transaction Card
+# ===========================================
+# Swap orders show "Swap order" text
+- extendedWaitUntil:
+    visible:
+      text: '.*Swap order.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+- tapOn:
+    text: '.*Swap order.*'
+
+- runFlow:
+    file: ./swap-order-tx.yml
+
+- tapOn:
+    id: 'go-back'

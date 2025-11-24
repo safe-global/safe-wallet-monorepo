@@ -2,8 +2,7 @@
 
 > **⚠️ NOTICE: This document describes the LEGACY manual release process.**
 >
-> **For the NEW automated process using GitHub Actions (recommended), see:**
-> **[📖 Automated Release Procedure](./release-procedure-automated.md)**
+> **For the NEW automated process using GitHub Actions (recommended), see:** > **[📖 Automated Release Procedure](./release-procedure-automated.md)**
 >
 > ---
 
@@ -85,12 +84,14 @@ git push
 
 A deployment workflow will be triggered and it will do the following things:
 
-- Deploy the build to [staging](https://safe-wallet-web.staging.5afe.dev/)
 - Create a new git tag from the version in `package.json`
-- Create a draft [GitHub release](https://github.com/safe-global/safe-wallet-web/releases) linked to this tag, with a changelog taken from the release PR
+- Create and publish a [GitHub release](https://github.com/safe-global/safe-wallet-web/releases) linked to this tag, with a changelog taken from the release PR
+- Build production assets
+- Upload to S3
+- Prepare production deployment
 
 After that, the release manager should:
 
-- Publish the draft release. This will trigger a build and upload the code to an S3 bucket – wait for the job to finish
 - Notify devops on Slack and send them the release link to deploy to production
-- Back-merge `main` into the `dev` branch to keep them in sync unless the release branch was based on `dev`
+
+**Note:** The `main` branch is automatically back-merged into `dev` by the workflow

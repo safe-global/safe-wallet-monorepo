@@ -21,7 +21,6 @@ describe('Transaction share block tests', { defaultCommandTimeout: 30000 }, () =
   it('Verify share tx block URL exists on Tx details in Queued list when additional signature is required', () => {
     cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_7 + txs.tx1)
     main.verifyElementsExist([create_tx.txShareBlock])
-    create_tx.expandTxShareBlock()
   })
 
   it('Verify that share block exists in the executed tx', () => {
@@ -33,25 +32,15 @@ describe('Transaction share block tests', { defaultCommandTimeout: 30000 }, () =
   it('Verify that share block is displayed for the proposed for signing txs', () => {
     cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_31 + txs.tx3)
     main.verifyElementsExist([create_tx.txShareBlock])
-    create_tx.expandTxShareBlock()
   })
 
   it('Verify click on the Copy link, copies the correct URL', () => {
     cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_31 + txs.tx3)
     main.verifyElementsExist([create_tx.txShareBlock])
-    create_tx.expandTxShareBlock()
     create_tx.verifyCopiedURL()
   })
 
-  it('Verify the tracking for the Share block. GA: Open share block, Copy deeplink', () => {
-    const shareBlockExpanded = [
-      {
-        eventAction: events.txOpenShareBlock.action,
-        eventCategory: events.txOpenShareBlock.category,
-        event: events.txOpenShareBlock.event,
-        safeAddress: staticSafes.SEP_STATIC_SAFE_31.slice(6),
-      },
-    ]
+  it('Verify the tracking for the Share block. GA: Copy deeplink', () => {
     const shareBlockCopiedLink = [
       {
         eventAction: events.txCopyShareBlockLink.action,
@@ -62,11 +51,9 @@ describe('Transaction share block tests', { defaultCommandTimeout: 30000 }, () =
     ]
     cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_31 + txs.tx3)
     main.verifyElementsExist([create_tx.txShareBlock])
-    create_tx.expandTxShareBlock()
     create_tx.verifyCopiedURL()
 
     getEvents()
-    checkDataLayerEvents(shareBlockExpanded)
     checkDataLayerEvents(shareBlockCopiedLink)
   })
 })

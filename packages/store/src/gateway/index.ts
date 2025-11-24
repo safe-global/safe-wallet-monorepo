@@ -6,3 +6,4 @@ export {
 
 export { useGetTxsHistoryInfiniteQuery, useGetPendingTxsInfiniteQuery } from './transactions'
 export { useGetCollectiblesInfiniteQuery } from './collectibles'
+export { useGetChainsConfigQuery, chainsAdapter } from './chains'
