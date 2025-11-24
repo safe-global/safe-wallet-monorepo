@@ -83,105 +83,79 @@ const threatAnalysisFailedStr = 'Threat analysis failed'
 const threatReviewBeforeProcessingStr = 'Threat analysis failed. Review before processing. '
 const noThreatDetectedStr = 'No threat detected'
 const threatAnalysisFoundNoIssuesStr = 'Threat analysis found no issues.'
-const maliciousApprovalMessageStr = 'The transaction approves erc20 tokens to a known drainer contract'
-const maliciousTransferMessageStr = 'The transaction transfers tokens to a known drainer contract'
-const maliciousNativeTransferMessageStr = 'The transaction transfers native currency to a known drainer contract'
-const maliciousAddressMessageStr = 'The transaction contains a known malicious address'
-const maliciousActivityStr = 'This address has recorded malicious activity'
-const walletDrainerBehaviorStr = 'This address shows a wallet drainer behavior or patterns'
+export const maliciousApprovalMessageStr = 'The transaction approves erc20 tokens to a known drainer contract'
+export const maliciousTransferMessageStr = 'The transaction transfers tokens to a known drainer contract'
+export const maliciousNativeTransferMessageStr = 'The transaction transfers native currency to a known drainer contract'
+export const maliciousAddressMessageStr = 'The transaction contains a known malicious address'
+export const maliciousActivityStr = 'This address has recorded malicious activity'
+export const walletDrainerBehaviorStr = 'This address shows a wallet drainer behavior or patterns'
 
 // ========================================
 // Helper Functions
 // ========================================
 
-/**
- * Verify Safe Shield widget is displayed
- */
+// Verify Safe Shield widget is displayed
 export function verifySafeShieldDisplayed() {
   cy.get(safeShieldWidget).should('be.visible')
 }
 
-/**
- * Verify "Secured by" footer is displayed
- */
+// Verify "Secured by" footer is displayed
 export function verifySecuredByFooter() {
   cy.contains(securedByStr).should('be.visible')
 }
 
-/**
- * Verify status shows "Checks passed"
- */
+// Verify status shows "Checks passed"
 export function verifyChecksPassed() {
   cy.contains(checksPassedStr).should('be.visible')
 }
 
-/**
- * Verify status shows "Risk detected"
- */
+// Verify status shows "Risk detected"
 export function verifyRiskDetected() {
   cy.contains(riskDetectedStr).should('be.visible')
 }
 
-/**
- * Verify status shows "Issues found"
- */
+// Verify status shows "Issues found"
 export function verifyIssuesFound() {
   cy.contains(issuesFoundStr).should('be.visible')
 }
 
-/**
- * Verify status shows "Analyzing..."
- */
+// Verify status shows "Analyzing..."
 export function verifyAnalyzing() {
   cy.contains(analyzingStr).should('be.visible')
 }
 
-/**
- * Verify status shows "Checks unavailable"
- */
+// Verify status shows "Checks unavailable"
 export function verifyChecksUnavailable() {
   cy.contains(checksUnavailableStr).should('be.visible')
 }
 
-/**
- * Verify loading state with progress bar
- */
+// Verify loading state with progress bar
 export function verifyLoadingState() {
   cy.get(progressBar).should('be.visible')
 }
 
-/**
- * Verify loading state is not displayed
- */
+// Verify loading state is not displayed
 export function verifyNotLoading() {
   cy.get(progressBar).should('not.exist')
 }
 
-/**
- * Verify empty state message is displayed
- */
+// Verify empty state message is displayed
 export function verifyEmptyState() {
   cy.contains(emptyStateStr).should('be.visible')
 }
 
-/**
- * Verify empty state is not displayed
- */
+// Verify empty state is not displayed
 export function verifyNotEmptyState() {
   cy.contains(emptyStateStr).should('not.exist')
 }
 
-/**
- * Verify contract analysis failed error
- */
+// Verify contract analysis failed error
 export function verifyContractAnalysisError() {
   cy.contains(contractAnalysisFailedStr).should('be.visible')
   cy.contains(reviewBeforeProcessingStr).should('be.visible')
 }
 
-/**
- * Verify malicious threat detected message
- */
+// Verify malicious threat detected message
 export function verifyMaliciousThreat() {
   cy.contains(maliciousThreatStr).should('be.visible')
 }
@@ -219,114 +193,68 @@ export function verifyTextNotVisible(text) {
   cy.contains(text).should('not.exist')
 }
 
-/**
- * Verify Safe Shield header shows Issues found
- */
+// Verify Safe Shield header shows Issues found
 export function verifyIssuesFoundWarningHeader() {
   cy.get(safeShieldStatusBar).should('contain.text', issuesFoundStr)
 }
 
-/**
- * Verify recipient analysis group card is displayed
- */
+// Verify recipient analysis group card is displayed
 export function verifyRecipientAnalysisGroupCard() {
   cy.get(recipientAnalysisGroupCard).should('be.visible')
 }
 
-/**
- * Verify contract analysis group card is displayed
- */
+// Verify contract analysis group card is displayed
 export function verifyContractAnalysisGroupCard() {
   cy.get(contractAnalysisGroupCard).should('be.visible')
 }
 
-/**
- * Verify threat analysis group card is displayed
- */
+// Verify threat analysis group card is displayed
 export function verifyThreatAnalysisGroupCard() {
   cy.get(threatAnalysisGroupCard).should('be.visible')
 }
 
-/**
- * Verify threat analysis warning icon and state
- */
+// Verify threat analysis warning icon and state
 export function verifyThreatAnalysisWarningState() {
   cy.get(threatAnalysisGroupCard).should('contain.text', threatAnalysisFailedStr)
 }
 
-/**
- * Verify Tenderly simulation is displayed
- */
+// Verify Tenderly simulation is displayed
 export function verifyTenderlySimulation() {
   cy.get(tenderlySimulation).should('be.visible')
 }
 
-/**
- * Expand threat analysis card
- */
+// Expand threat analysis card
 export function expandThreatAnalysisCard() {
   cy.get(threatAnalysisGroupCard).click()
 }
 
-/**
- * Verify threat analysis failed details
- */
+// Verify threat analysis failed details
 export function verifyThreatAnalysisFailedDetails() {
   cy.contains(threatAnalysisFailedStr).should('be.visible')
   cy.contains(threatReviewBeforeProcessingStr).should('be.visible')
 }
 
-/**
- * Verify threat analysis shows no threat detected state
- */
+// Verify threat analysis shows no threat detected state
 export function verifyThreatAnalysisNoThreatState() {
   cy.get(threatAnalysisGroupCard).should('contain.text', noThreatDetectedStr)
 }
 
-/**
- * Verify threat analysis found no issues details
- */
+// Verify threat analysis found no issues details
 export function verifyThreatAnalysisFoundNoIssues() {
   cy.contains(threatAnalysisFoundNoIssuesStr).should('be.visible')
 }
 
-/**
- * Verify threat analysis shows malicious threat detected state
- */
+// Verify threat analysis shows malicious threat detected state
 export function verifyThreatAnalysisMaliciousState() {
   cy.get(threatAnalysisGroupCard).should('contain.text', maliciousThreatStr)
 }
 
-/**
- * Verify malicious approval details in expanded threat analysis card
- */
-export function verifyMaliciousApprovalDetails() {
-  cy.contains(maliciousApprovalMessageStr).should('be.visible')
-  cy.contains(walletDrainerBehaviorStr).should('be.visible')
-}
-
-/**
- * Verify malicious transfer details in expanded threat analysis card
- */
-export function verifyMaliciousTransferDetails() {
-  cy.contains(maliciousTransferMessageStr).should('be.visible')
-  cy.contains(walletDrainerBehaviorStr).should('be.visible')
-}
-
-/**
- * Verify malicious native transfer details in expanded threat analysis card
- */
-export function verifyMaliciousNativeTransferDetails() {
-  cy.contains(maliciousNativeTransferMessageStr).should('be.visible')
-  cy.contains(walletDrainerBehaviorStr).should('be.visible')
-}
-
-/**
- * Verify malicious address details in expanded threat analysis card
- */
-export function verifyMaliciousAddressDetails() {
-  cy.contains(maliciousAddressMessageStr).should('be.visible')
-  cy.contains(maliciousActivityStr).should('be.visible')
+// Verify malicious details in expanded threat analysis card
+// @param {string} message1 - First message to verify
+// @param {string} message2 - Second message to verify
+export function verifyMaliciousDetails(message1, message2) {
+  verifyTextVisible(message1)
+  verifyTextVisible(message2)
 }
 
 // ========================================
@@ -339,31 +267,24 @@ export const riskConfirmationCheckbox = '[data-testid="risk-confirmation-checkbo
 // Risk Confirmation Functions
 // ========================================
 
-/**
- * Verify risk confirmation checkbox is visible and unchecked
- */
+// Verify risk confirmation checkbox is visible and unchecked
 export function verifyRiskConfirmationCheckboxUnchecked() {
   cy.get(riskConfirmationCheckbox).scrollIntoView().should('be.visible')
   cy.get(riskConfirmationCheckbox).find('input[type="checkbox"]').should('not.be.checked')
 }
 
-/**
- * Check the risk confirmation checkbox
- */
+// Check the risk confirmation checkbox
 export function checkRiskConfirmationCheckbox() {
   cy.get(riskConfirmationCheckbox).scrollIntoView().find('input[type="checkbox"]').check()
 }
 
-/**
- * Verify continue button is disabled
- */
+//Verify continue button is disabled
+
 export function verifyContinueButtonDisabled() {
   cy.get(continueSignBtn).should('be.disabled')
 }
 
-/**
- * Verify continue button is enabled
- */
+// Verify continue button is enabled
 export function verifyContinueButtonEnabled() {
   cy.get(continueSignBtn).should('not.be.disabled')
 }

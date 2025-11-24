@@ -43,7 +43,7 @@ describe('Safe Shield tests', { defaultCommandTimeout: 30000 }, () => {
     shield.verifyRiskConfirmationCheckboxUnchecked()
     shield.verifyContinueButtonDisabled()
 
-    // Check the risk confirmation checkbox
+    // Check the risk confirmation checkbox and continue
     shield.checkRiskConfirmationCheckbox()
     shield.verifyContinueButtonEnabled()
     createtx.clickOnContinueSignTransactionBtn()
@@ -107,7 +107,7 @@ describe('Safe Shield tests', { defaultCommandTimeout: 30000 }, () => {
     shield.verifyThreatAnalysisGroupCard()
     shield.verifyThreatAnalysisMaliciousState()
     shield.expandThreatAnalysisCard()
-    shield.verifyMaliciousApprovalDetails()
+    shield.verifyMaliciousDetails(shield.maliciousApprovalMessageStr, shield.walletDrainerBehaviorStr)
   })
 
   it('[Threat Analyse] Verify Malicious Transfer detection - 9A', () => {
@@ -126,7 +126,7 @@ describe('Safe Shield tests', { defaultCommandTimeout: 30000 }, () => {
     shield.verifyThreatAnalysisGroupCard()
     shield.verifyThreatAnalysisMaliciousState()
     shield.expandThreatAnalysisCard()
-    shield.verifyMaliciousTransferDetails()
+    shield.verifyMaliciousDetails(shield.maliciousTransferMessageStr, shield.walletDrainerBehaviorStr)
   })
 
   it('[Threat Analyse] Verify Malicious Native Transfer detection - 9A', () => {
@@ -145,7 +145,7 @@ describe('Safe Shield tests', { defaultCommandTimeout: 30000 }, () => {
     shield.verifyThreatAnalysisGroupCard()
     shield.verifyThreatAnalysisMaliciousState()
     shield.expandThreatAnalysisCard()
-    shield.verifyMaliciousNativeTransferDetails()
+    shield.verifyMaliciousDetails(shield.maliciousNativeTransferMessageStr, shield.walletDrainerBehaviorStr)
   })
 
   it('[Threat Analyse] Verify Malicious wallet_sendCalls detection - 9A', () => {
@@ -164,7 +164,7 @@ describe('Safe Shield tests', { defaultCommandTimeout: 30000 }, () => {
     shield.verifyThreatAnalysisGroupCard()
     shield.verifyThreatAnalysisMaliciousState()
     shield.expandThreatAnalysisCard()
-    shield.verifyMaliciousAddressDetails()
+    shield.verifyMaliciousDetails(shield.maliciousAddressMessageStr, shield.maliciousActivityStr)
   })
 
   it('[Threat Analyse] Verify Malicious wallet_sendCalls(Eth) detection - 9A', () => {
@@ -183,7 +183,7 @@ describe('Safe Shield tests', { defaultCommandTimeout: 30000 }, () => {
     shield.verifyThreatAnalysisGroupCard()
     shield.verifyThreatAnalysisMaliciousState()
     shield.expandThreatAnalysisCard()
-    shield.verifyMaliciousAddressDetails()
+    shield.verifyMaliciousDetails(shield.maliciousAddressMessageStr, shield.maliciousActivityStr)
   })
   //TODO: Add tests for offchain messages when implemented
   // ========================================
