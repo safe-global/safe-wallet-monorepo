@@ -5,16 +5,12 @@ import SecuritySettings from '../SecuritySettings'
 import { useRouter } from 'next/router'
 import { HnBannerForSettings } from '@/features/hypernative/components/HnBanner'
 import { HYPERNATIVE_SOURCE } from '@/services/analytics'
-import { useTrackBannerEligibilityOnConnect } from '@/features/hypernative/hooks/useTrackBannerEligibilityOnConnect'
-import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
 
 const RecoverySettings = dynamic(() => import('@/features/recovery/components/RecoverySettings'))
 
 const SecurityLogin = () => {
   const isRecoverySupported = useIsRecoverySupported()
   const router = useRouter()
-
-  useTrackBannerEligibilityOnConnect(BannerType.Settings)
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>

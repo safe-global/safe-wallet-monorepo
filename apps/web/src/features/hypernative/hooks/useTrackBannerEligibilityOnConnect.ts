@@ -2,11 +2,10 @@ import { useEffect, useRef } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useBannerVisibility } from './useBannerVisibility'
-import { BannerType } from './useBannerStorage'
 import { selectSafeHnState, setBannerEligibilityTracked } from '../store/hnStateSlice'
 import { trackEvent, MixpanelEventParams } from '@/services/analytics'
 import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
+import type { BannerVisibilityResult } from './useBannerVisibility'
 
 /**
  * Hook to track once per wallet connection when Safe loads and satisfies banner rendering conditions.
@@ -17,13 +16,12 @@ import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
  *
  * The tracking flag persists across Safe switches and page reloads.
  *
- * @param bannerType - The type of banner to check eligibility for (defaults to BannerType.Promo)
+ * @param visibilityResult - The banner visibility result from useBannerVisibility
  */
-export const useTrackBannerEligibilityOnConnect = (bannerType: BannerType = BannerType.Promo): void => {
+export const useTrackBannerEligibilityOnConnect = (visibilityResult: BannerVisibilityResult): void => {
   const dispatch = useAppDispatch()
   const chainId = useChainId()
   const { safeAddress, safeLoaded, safeLoading } = useSafeInfo()
-  const { showBanner, loading: bannerLoading } = useBannerVisibility(bannerType)
   const safeHnState = useAppSelector((state) => selectSafeHnState(state, chainId, safeAddress))
 
   // Use ref to track if we've already initiated tracking for this Safe (prevents race condition)
@@ -43,7 +41,7 @@ export const useTrackBannerEligibilityOnConnect = (bannerType: BannerType = Bann
     // 2. We have a Safe address and chain ID
     // 3. Banner visibility check is complete (not loading)
     // 4. Haven't tracked for this Safe yet (check Redux state)
-    if (safeLoading || !safeLoaded || !safeAddress || !chainId || bannerLoading) {
+    if (safeLoading || !safeLoaded || !safeAddress || !chainId || visibilityResult.loading) {
       return
     }
 
@@ -60,8 +58,8 @@ export const useTrackBannerEligibilityOnConnect = (bannerType: BannerType = Bann
       return // Already initiated tracking, don't track again
     }
 
-    // Only track if banner is the Hypernative promo banner (should be shown)
-    if (!showBanner) {
+    // Only track if banner should be shown
+    if (!visibilityResult.showBanner) {
       return
     }
 
@@ -76,5 +74,14 @@ export const useTrackBannerEligibilityOnConnect = (bannerType: BannerType = Bann
       [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
       [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chainId,
     })
-  }, [safeLoaded, safeLoading, safeAddress, chainId, showBanner, bannerLoading, safeHnState, dispatch, bannerType])
+  }, [
+    safeLoaded,
+    safeLoading,
+    safeAddress,
+    chainId,
+    visibilityResult.showBanner,
+    visibilityResult.loading,
+    safeHnState,
+    dispatch,
+  ])
 }

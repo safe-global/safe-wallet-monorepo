@@ -8,16 +8,12 @@ import { ProgressBar } from '@/components/common/ProgressBar'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import NewTxIcon from '@/public/images/transactions/new-tx.svg'
 import HnMiniTxBanner from '@/features/hypernative/components/HnMiniTxBanner'
-import { useTrackBannerEligibilityOnConnect } from '@/features/hypernative/hooks/useTrackBannerEligibilityOnConnect'
-import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
 
 import css from './styles.module.css'
 
 const NewTxFlow = () => {
   const txBuilder = useTxBuilderApp()
   const { setTxFlow } = useContext(TxModalContext)
-
-  useTrackBannerEligibilityOnConnect(BannerType.Promo)
 
   const onTokensClick = useCallback(() => {
     setTxFlow(<TokenTransferFlow />)
