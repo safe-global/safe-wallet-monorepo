@@ -245,13 +245,10 @@ describe('useTrackBannerEligibilityOnConnect', () => {
         hnState: {},
       }
 
-      const { rerender: rerender1 } = renderHook(
-        ({ visibilityResult }) => useTrackBannerEligibilityOnConnect(visibilityResult),
-        {
-          initialProps: { visibilityResult: eligibleVisibilityResult },
-          initialReduxState: initialReduxState1,
-        },
-      )
+      renderHook(({ visibilityResult }) => useTrackBannerEligibilityOnConnect(visibilityResult), {
+        initialProps: { visibilityResult: eligibleVisibilityResult },
+        initialReduxState: initialReduxState1,
+      })
 
       await waitFor(() => {
         expect(mockTrackEvent).toHaveBeenCalledTimes(1)
