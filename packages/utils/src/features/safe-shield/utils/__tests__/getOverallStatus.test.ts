@@ -33,8 +33,8 @@ describe('getOverallStatus', () => {
       } as unknown as ThreatAnalysisResults
       const result = getOverallStatus(undefined, undefined, threatResults)
       expect(result).toBeDefined()
-      expect(result!.severity).toBe(Severity.WARN)
-      expect(result!.title).toBe('Issues found')
+      expect(result!.severity).toBe(Severity.CRITICAL)
+      expect(result!.title).toBe('Risk detected')
     })
   })
 
@@ -187,7 +187,7 @@ describe('getOverallStatus', () => {
   })
 
   describe('threat analysis results', () => {
-    it('should include threat results with WARN severity', () => {
+    it('should include threat results with CRITICAL severity', () => {
       const recipientResults: RecipientAnalysisResults = {
         '0xRecipient1': {
           [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
@@ -203,8 +203,8 @@ describe('getOverallStatus', () => {
       const result = getOverallStatus(recipientResults, undefined, threatResults)
 
       expect(result).toBeDefined()
-      expect(result!.severity).toBe(Severity.WARN)
-      expect(result!.title).toBe('Issues found')
+      expect(result!.severity).toBe(Severity.CRITICAL)
+      expect(result!.title).toBe('Risk detected')
     })
 
     it('should prioritize threat results over other results when severity is higher', () => {
@@ -229,8 +229,8 @@ describe('getOverallStatus', () => {
       const result = getOverallStatus(recipientResults, contractResults, threatResults)
 
       expect(result).toBeDefined()
-      expect(result!.severity).toBe(Severity.WARN)
-      expect(result!.title).toBe('Issues found')
+      expect(result!.severity).toBe(Severity.CRITICAL)
+      expect(result!.title).toBe('Risk detected')
     })
 
     it('should include INFO threat results in overall calculation', () => {
