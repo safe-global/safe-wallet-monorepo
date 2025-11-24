@@ -100,7 +100,9 @@ export const ShowAllAddress = ({ addresses }: ShowAllAddressProps) => {
                       {item}
                     </Typography>
                   </Tooltip>
-                  {explorerLink && <ExplorerButton href={explorerLink.href} />}
+                  <Box component="span" color="text.secondary">
+                    {explorerLink && <ExplorerButton href={explorerLink.href} />}
+                  </Box>
                 </Typography>
               </Box>
             )
