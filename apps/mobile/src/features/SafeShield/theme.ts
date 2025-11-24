@@ -6,9 +6,9 @@ export type SafeShieldAnalysisStatusType = `safeShieldAnalysisStatus_${Severity}
 
 export const safeShieldIcons: Record<SafeShieldSeverityType, IconName> = {
   [`safeShield_${Severity.OK}`]: 'check',
-  [`safeShield_${Severity.CRITICAL}`]: 'alert-triangle',
+  [`safeShield_${Severity.CRITICAL}`]: 'alert',
   [`safeShield_${Severity.INFO}`]: 'info',
-  [`safeShield_${Severity.WARN}`]: 'info',
+  [`safeShield_${Severity.WARN}`]: 'alert-triangle',
 }
 
 // Centralized colors for SafeShield theme by severity and mode
