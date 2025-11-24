@@ -4,8 +4,22 @@ import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import ArrowDown from '@/public/images/balances/change-down.svg'
 import ArrowUp from '@/public/images/balances/change-up.svg'
 
-export const FiatChange = ({ balanceItem, inline = false }: { balanceItem: Balance; inline?: boolean }) => {
-  if (!balanceItem.fiatBalance24hChange) {
+interface FiatChangeProps {
+  balanceItem?: Balance
+  change?: string | null
+  inline?: boolean
+}
+
+/**
+ * Displays 24h fiat change percentage with directional indicator.
+ * @param balanceItem - Optional balance item for backward compatibility
+ * @param change - 24h price change as decimal string (e.g., "0.0431" for 4.31%). Takes precedence over balanceItem.fiatBalance24hChange
+ * @param inline - Inline display variant
+ */
+export const FiatChange = ({ balanceItem, change, inline = false }: FiatChangeProps) => {
+  const fiatChange = change ?? balanceItem?.fiatBalance24hChange ?? null
+
+  if (!fiatChange) {
     return (
       <Typography variant="caption" color="text.secondary" paddingLeft={3} display="block">
         n/a
@@ -13,7 +27,7 @@ export const FiatChange = ({ balanceItem, inline = false }: { balanceItem: Balan
     )
   }
 
-  const changeAsNumber = Number(balanceItem.fiatBalance24hChange) / 100
+  const changeAsNumber = Number(fiatChange) / 100
   const changeLabel = formatPercentage(changeAsNumber)
   const direction = changeAsNumber < 0 ? 'down' : changeAsNumber > 0 ? 'up' : 'none'
 
