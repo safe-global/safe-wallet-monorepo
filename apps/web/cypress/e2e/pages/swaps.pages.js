@@ -688,10 +688,7 @@ export function getTwapInitialData() {
         .invoke('text')
         .should('not.be.empty')
         .then((value) => {
-          // Matches patterns like: "1 hour", "6 hours", "24 hours", "1 week", "1 month"
-          const match = value.match(/^(\d+\s+(hour|hours|week|month|day|days))/i)
-          const extractedValue = match ? match[1] : value.split(/\d+\s+(hour|hours)/i)[0] + '1 hour'
-          formData.totalDuration = extractedValue
+          formData.totalDuration = value
             .toLowerCase()
             .replace(/\bhours?\b/, 'hour')
             .trim()
@@ -703,10 +700,7 @@ export function getTwapInitialData() {
         .invoke('text')
         .should('not.be.empty')
         .then((value) => {
-          // Matches patterns like: "30 minutes", "1 hour", "30m", etc.
-          const match = value.match(/^(\d+\s*(m|minutes?|hour|hours))/i)
-          const extractedValue = match ? match[1] : value.split(/\d+\s*(m|minutes?)/i)[0] + '30 minutes'
-          formData.partDuration = extractedValue
+          formData.partDuration = value
             .toLowerCase()
             .replace(/(\d+)m\b/, '$1 minutes')
             .trim()
