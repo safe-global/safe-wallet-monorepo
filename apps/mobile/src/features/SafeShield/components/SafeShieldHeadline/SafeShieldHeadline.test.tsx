@@ -7,25 +7,25 @@ describe('SafeShieldHeadline', () => {
     it('should render OK variant with correct text', () => {
       const { getByText } = render(<SafeShieldHeadline type={Severity.OK} />)
 
-      expect(getByText('CHECKS PASSED')).toBeTruthy()
+      expect(getByText('Checks passed')).toBeTruthy()
     })
 
     it('should render CRITICAL variant with correct text', () => {
       const { getByText } = render(<SafeShieldHeadline type={Severity.CRITICAL} />)
 
-      expect(getByText('RISK DETECTED')).toBeTruthy()
+      expect(getByText('Risk detected')).toBeTruthy()
     })
 
     it('should render INFO variant with correct text', () => {
       const { getByText } = render(<SafeShieldHeadline type={Severity.INFO} />)
 
-      expect(getByText('REVIEW DETAILS')).toBeTruthy()
+      expect(getByText('Review details')).toBeTruthy()
     })
 
     it('should render WARN variant with correct text', () => {
       const { getByText } = render(<SafeShieldHeadline type={Severity.WARN} />)
 
-      expect(getByText('ISSUES FOUND')).toBeTruthy()
+      expect(getByText('Issues found')).toBeTruthy()
     })
   })
 
@@ -33,7 +33,7 @@ describe('SafeShieldHeadline', () => {
     it('should use OK variant as default type', () => {
       const { getByText } = render(<SafeShieldHeadline />)
 
-      expect(getByText('CHECKS PASSED')).toBeTruthy()
+      expect(getByText('Checks passed')).toBeTruthy()
     })
   })
 })
