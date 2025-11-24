@@ -28,7 +28,9 @@ const normalizeThreatData = (threat?: AsyncResult<ThreatAnalysisResults>): Recor
   const [result] = threat || []
   const { BALANCE_CHANGE: _, ...groupedThreatResults } = result || {}
 
-  if (Object.keys(groupedThreatResults).length === 0) return {}
+  if (Object.keys(groupedThreatResults).length === 0) {
+    return {}
+  }
 
   return { ['0x']: groupedThreatResults }
 }
