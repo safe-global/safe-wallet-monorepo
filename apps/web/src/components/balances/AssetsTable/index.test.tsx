@@ -478,4 +478,67 @@ describe('AssetsTable', () => {
       expect(result.queryByText('200 SPM')).not.toBeNull()
     })
   })
+
+  test('renders elements in both mobile and desktop views', async () => {
+    const mockBalances: Balances = {
+      fiatTotal: '100',
+      items: [
+        {
+          balance: safeParseUnits('100', 18)!.toString(),
+          fiatBalance: '100',
+          fiatConversion: '1',
+          tokenInfo: {
+            address: toBeHex('0x2', 20),
+            decimals: 18,
+            logoUri: '',
+            name: 'DAI',
+            symbol: 'DAI',
+            type: TokenType.ERC20,
+          },
+        },
+      ],
+    }
+
+    const result = render(<TestComponent />, {
+      initialReduxState: {
+        balances: {
+          data: mockBalances,
+          loading: false,
+          loaded: true,
+        },
+        settings: {
+          currency: 'usd',
+          hiddenTokens: { '5': [] },
+          tokenList: TOKEN_LISTS.ALL,
+          shortName: {
+            copy: true,
+            qr: true,
+          },
+          theme: {
+            darkMode: true,
+          },
+          env: {
+            tenderly: {
+              url: '',
+              accessToken: '',
+            },
+            rpc: {},
+          },
+          signing: {
+            onChainSigning: false,
+            blindSigning: false,
+          },
+          transactionExecution: true,
+        },
+      },
+    })
+
+    // Verify that '100 DAI' appears in the table
+    const daiElements = result.getAllByText('100 DAI')
+    expect(daiElements.length).toBeGreaterThanOrEqual(1)
+
+    // Verify the element is in the DOM and not null
+    expect(daiElements[0]).not.toBeNull()
+    expect(daiElements[0]).toBeInTheDocument()
+  })
 })
