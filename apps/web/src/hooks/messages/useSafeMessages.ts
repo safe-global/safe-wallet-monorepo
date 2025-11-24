@@ -15,14 +15,16 @@ const useSafeMessages = (
   loading: boolean
 } => {
   const { safe, safeAddress, safeLoaded } = useSafeInfo()
+  const { messagesTag } = safe
 
   // For the first page (no cursor), use the regular query hook which caches automatically
+  // messagesTag is included in query args to invalidate cache when it changes
   const skip = !safeLoaded || !safe.deployed || !!cursor
   const {
     currentData,
     error: queryError,
     isLoading: queryLoading,
-  } = useMessagesGetMessagesBySafeV1Query({ chainId: safe.chainId, safeAddress }, { skip })
+  } = useMessagesGetMessagesBySafeV1Query({ chainId: safe.chainId, safeAddress, messagesTag } as any, { skip })
 
   // For pagination (with cursor), use lazy query
   const [trigger, { data: lazyData, error: lazyError, isLoading: lazyLoading }] =
