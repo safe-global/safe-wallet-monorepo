@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { Image, Text, View } from 'tamagui'
+import { Text, View } from 'tamagui'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { safeShieldLogoStatusMap } from './constants'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'

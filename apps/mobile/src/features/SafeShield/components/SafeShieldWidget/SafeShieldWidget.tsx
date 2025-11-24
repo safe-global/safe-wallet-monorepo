@@ -17,7 +17,9 @@ interface SafeShieldWidgetProps {
 }
 
 export function SafeShieldWidget({ recipient, contract, threat }: SafeShieldWidgetProps) {
-  const onPress = () => {}
+  const onPress = () => {
+    console.log('onPress')
+  }
 
   // Extract data, error, and loading from each AsyncResult
   const [recipientData, recipientError, recipientLoading = false] = recipient || []
