@@ -26,6 +26,30 @@ describe('Safe Shield tests', { defaultCommandTimeout: 30000 }, () => {
     shield.verifySecuredByFooter()
   })
 
+  it('[Widget General] Verify that Risk detected requires Risk Confirmation checkbox to continue', () => {
+    cy.visit(
+      constants.transactionUrl +
+        staticSafes.MATIC_STATIC_SAFE_30 +
+        shield.testTransactions.threatAnalysisMaliciousApproval,
+    )
+    wallet.connectSigner(signer)
+
+    createtx.clickOnConfirmTransactionBtn()
+    shield.verifySafeShieldDisplayed()
+    shield.waitForAnalysisComplete()
+    shield.verifyRiskDetected()
+
+    // Verify risk confirmation checkbox is unchecked and continue button is disabled
+    shield.verifyRiskConfirmationCheckboxUnchecked()
+    shield.verifyContinueButtonDisabled()
+
+    // Check the risk confirmation checkbox
+    shield.checkRiskConfirmationCheckbox()
+    shield.verifyContinueButtonEnabled()
+    createtx.clickOnContinueSignTransactionBtn()
+    cy.contains(createtx.txDetailsStr).should('be.visible')
+  })
+
   // ========================================
   // 2. Recipient Analyse
   // ========================================
