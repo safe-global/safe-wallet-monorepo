@@ -84,15 +84,9 @@ const ManageTokensMenu = ({ anchorEl, open, onClose, onHideTokens }: ManageToken
                 }
               />
             </Box>
-            {showAllTokens ? (
-              <Track {...ASSETS_EVENTS.SHOW_ALL_TOKENS}>
-                <Switch size="small" checked={showAllTokens} onChange={handleToggleShowAllTokens} />
-              </Track>
-            ) : (
-              <Track {...ASSETS_EVENTS.SHOW_DEFAULT_TOKENS}>
-                <Switch size="small" checked={showAllTokens} onChange={handleToggleShowAllTokens} />
-              </Track>
-            )}
+            <Track {...(showAllTokens ? ASSETS_EVENTS.SHOW_ALL_TOKENS : ASSETS_EVENTS.SHOW_DEFAULT_TOKENS)}>
+              <Switch size="small" checked={showAllTokens} onChange={handleToggleShowAllTokens} />
+            </Track>
           </Box>
         </MenuItem>
       )}
