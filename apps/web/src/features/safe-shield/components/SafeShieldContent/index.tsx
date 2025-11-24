@@ -84,6 +84,7 @@ export const SafeShieldContent = ({
 
         <Box sx={{ '& > div:not(:last-child)': { borderBottom: '1px solid', borderColor: 'background.main' } }}>
           <AnalysisGroupCard
+            data-testid="recipient-analysis-group-card"
             delay={recipientDelay}
             data={recipientResults}
             highlightedSeverity={highlightedSeverity}
@@ -91,6 +92,7 @@ export const SafeShieldContent = ({
           />
 
           <AnalysisGroupCard
+            data-testid="contract-analysis-group-card"
             data={contractResults}
             delay={contractAnalysisDelay}
             highlightedSeverity={highlightedSeverity}
@@ -98,6 +100,7 @@ export const SafeShieldContent = ({
           />
 
           <AnalysisGroupCard
+            data-testid="threat-analysis-group-card"
             data={normalizedThreatData}
             delay={threatAnalysisDelay}
             highlightedSeverity={highlightedSeverity}
@@ -106,6 +109,7 @@ export const SafeShieldContent = ({
 
           {!contractLoading && !threatLoading && (
             <TenderlySimulation
+              data-testid="tenderly-simulation"
               safeTx={safeTx}
               delay={simulationAnalysisDelay}
               highlightedSeverity={highlightedSeverity}

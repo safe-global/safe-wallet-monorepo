@@ -11,15 +11,7 @@ const SafeShieldWidget = (): ReactElement => {
     trackEvent(SAFE_SHIELD_EVENTS.TRANSACTION_STARTED)
   }, [])
 
-  return (
-    <SafeShieldDisplay
-      data-testid="safe-shield-widget"
-      recipient={recipient}
-      contract={contract}
-      threat={threat}
-      safeTx={safeTx}
-    />
-  )
+  return <SafeShieldDisplay recipient={recipient} contract={contract} threat={threat} safeTx={safeTx} />
 }
 
 export default SafeShieldWidget

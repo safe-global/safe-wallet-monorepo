@@ -6,13 +6,57 @@ import * as constants from '../../support/constants'
 // Selectors
 // ========================================
 
-// Main Safe Shield widget (only element with data-testid)
+// Main Safe Shield widget (data-testid targets)
 export const safeShieldWidget = '[data-testid="safe-shield-widget"]'
+export const safeShieldStatusBar = '[data-testid="safe-shield-status"]'
 export const TEST_RECIPIENT = '0x773B97f0b2D38Dbf5C8CbE04C2C622453500F3e0'
 export const TEST_SAFE_ADDRESS = '0xb412684F4F0B5d27cC4A4D287F42595aB3ae124D'
 
+// Analysis group cards
+export const recipientAnalysisGroupCard = '[data-testid="recipient-analysis-group-card"]'
+export const contractAnalysisGroupCard = '[data-testid="contract-analysis-group-card"]'
+export const threatAnalysisGroupCard = '[data-testid="threat-analysis-group-card"]'
+export const tenderlySimulation = '[data-testid="tenderly-simulation"]'
+
 //no data-testids, accessed via class or structure
 export const progressBar = '[role="progressbar"]'
+
+// ========================================
+// Test Transactions
+// ========================================
+
+// Transaction IDs for Safe Shield testing scenarios
+// Format: '&id=multisig_<SAFE_ADDRESS>_<TX_HASH>'
+export const testTransactions = {
+  // Threat analysis test - transaction with threat analysis failure
+  // Shows "Issues found" status with warning colors and threat analysis failed state
+  threatAnalysisFailed:
+    '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x531e49fc6655b8013148d08f0e669b91fc29ee23c9ab005948d93447eaef079b',
+  // Threat analysis test - transaction with no threat detected
+  // Shows "Checks passed" status and threat analysis found no issues
+  threatAnalysisNoThreat:
+    '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0xe329b8243ff94c02fa4d9fd382789d669cb5969efbce5e275635ce6d3577fa5e',
+  // Threat analysis test - transaction with malicious approval (drainer contract)
+  // Shows "Risk detected" status and malicious threat detected with drainer warning
+  threatAnalysisMaliciousApproval:
+    '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x657afdcb7589bb4b6386c39d71692840f3f616c512401dff51bef1ccb46592d7',
+  // Threat analysis test - transaction with malicious transfer (drainer contract)
+  // Shows "Risk detected" status and malicious threat detected with drainer transfer warning
+  threatAnalysisMaliciousTransfer:
+    '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0xc764a15c522af6477ebbe7d808a509806879a68bd097b8594e1437c71fb345f1',
+  // Threat analysis test - transaction with malicious native currency transfer (drainer contract)
+  // Shows "Risk detected" status and malicious threat detected with native currency drainer warning
+  threatAnalysisMaliciousNativeTransfer:
+    '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x1de5f38dde9d01705482a9fae07a82e90091a4d4683c148701858fd03d48db05',
+  // Threat analysis test - transaction with malicious address (wallet_sendCalls)
+  // Shows "Risk detected" status and malicious threat detected with known malicious address warning
+  threatAnalysisMaliciousAddress:
+    '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x5727020cc864376612fba6ee8fd146a8d2e8b671857b22efc9ef45062f7a517f',
+  // Threat analysis test - transaction with malicious address (wallet_sendCalls with Eth)
+  // Shows "Risk detected" status and malicious threat detected with known malicious address warning
+  threatAnalysisMaliciousAddressEth:
+    '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x228751aa0f0442baf8a670e3af8bbe93c22c7e9a0ad14527620f9a50b972f52c',
+}
 
 // ========================================
 // Text Constants (used for assertions)
@@ -35,6 +79,16 @@ const emptyStateStr = 'Transaction details will be automatically scanned for pot
 
 // Threat messages
 const maliciousThreatStr = 'Malicious threat detected'
+const threatAnalysisFailedStr = 'Threat analysis failed'
+const threatReviewBeforeProcessingStr = 'Threat analysis failed. Review before processing. '
+const noThreatDetectedStr = 'No threat detected'
+const threatAnalysisFoundNoIssuesStr = 'Threat analysis found no issues.'
+const maliciousApprovalMessageStr = 'The transaction approves erc20 tokens to a known drainer contract'
+const maliciousTransferMessageStr = 'The transaction transfers tokens to a known drainer contract'
+const maliciousNativeTransferMessageStr = 'The transaction transfers native currency to a known drainer contract'
+const maliciousAddressMessageStr = 'The transaction contains a known malicious address'
+const maliciousActivityStr = 'This address has recorded malicious activity'
+const walletDrainerBehaviorStr = 'This address shows a wallet drainer behavior or patterns'
 
 // ========================================
 // Helper Functions
@@ -163,4 +217,149 @@ export function verifyTextVisible(text) {
  */
 export function verifyTextNotVisible(text) {
   cy.contains(text).should('not.exist')
+}
+
+/**
+ * Verify Safe Shield header shows Issues found
+ */
+export function verifyIssuesFoundWarningHeader() {
+  cy.get(safeShieldStatusBar).should('contain.text', issuesFoundStr)
+}
+
+/**
+ * Verify recipient analysis group card is displayed
+ */
+export function verifyRecipientAnalysisGroupCard() {
+  cy.get(recipientAnalysisGroupCard).should('be.visible')
+}
+
+/**
+ * Verify contract analysis group card is displayed
+ */
+export function verifyContractAnalysisGroupCard() {
+  cy.get(contractAnalysisGroupCard).should('be.visible')
+}
+
+/**
+ * Verify threat analysis group card is displayed
+ */
+export function verifyThreatAnalysisGroupCard() {
+  cy.get(threatAnalysisGroupCard).should('be.visible')
+}
+
+/**
+ * Verify threat analysis warning icon and state
+ */
+export function verifyThreatAnalysisWarningState() {
+  cy.get(threatAnalysisGroupCard).should('contain.text', threatAnalysisFailedStr)
+}
+
+/**
+ * Verify Tenderly simulation is displayed
+ */
+export function verifyTenderlySimulation() {
+  cy.get(tenderlySimulation).should('be.visible')
+}
+
+/**
+ * Expand threat analysis card
+ */
+export function expandThreatAnalysisCard() {
+  cy.get(threatAnalysisGroupCard).click()
+}
+
+/**
+ * Verify threat analysis failed details
+ */
+export function verifyThreatAnalysisFailedDetails() {
+  cy.contains(threatAnalysisFailedStr).should('be.visible')
+  cy.contains(threatReviewBeforeProcessingStr).should('be.visible')
+}
+
+/**
+ * Verify threat analysis shows no threat detected state
+ */
+export function verifyThreatAnalysisNoThreatState() {
+  cy.get(threatAnalysisGroupCard).should('contain.text', noThreatDetectedStr)
+}
+
+/**
+ * Verify threat analysis found no issues details
+ */
+export function verifyThreatAnalysisFoundNoIssues() {
+  cy.contains(threatAnalysisFoundNoIssuesStr).should('be.visible')
+}
+
+/**
+ * Verify threat analysis shows malicious threat detected state
+ */
+export function verifyThreatAnalysisMaliciousState() {
+  cy.get(threatAnalysisGroupCard).should('contain.text', maliciousThreatStr)
+}
+
+/**
+ * Verify malicious approval details in expanded threat analysis card
+ */
+export function verifyMaliciousApprovalDetails() {
+  cy.contains(maliciousApprovalMessageStr).should('be.visible')
+  cy.contains(walletDrainerBehaviorStr).should('be.visible')
+}
+
+/**
+ * Verify malicious transfer details in expanded threat analysis card
+ */
+export function verifyMaliciousTransferDetails() {
+  cy.contains(maliciousTransferMessageStr).should('be.visible')
+  cy.contains(walletDrainerBehaviorStr).should('be.visible')
+}
+
+/**
+ * Verify malicious native transfer details in expanded threat analysis card
+ */
+export function verifyMaliciousNativeTransferDetails() {
+  cy.contains(maliciousNativeTransferMessageStr).should('be.visible')
+  cy.contains(walletDrainerBehaviorStr).should('be.visible')
+}
+
+/**
+ * Verify malicious address details in expanded threat analysis card
+ */
+export function verifyMaliciousAddressDetails() {
+  cy.contains(maliciousAddressMessageStr).should('be.visible')
+  cy.contains(maliciousActivityStr).should('be.visible')
+}
+
+// ========================================
+// Risk Confirmation Functions
+// ========================================
+
+export const riskConfirmationCheckbox = '[data-testid="risk-confirmation-checkbox"]'
+
+/**
+ * Verify risk confirmation checkbox is visible and unchecked
+ */
+export function verifyRiskConfirmationCheckboxUnchecked() {
+  cy.get(riskConfirmationCheckbox).should('be.visible')
+  cy.get(riskConfirmationCheckbox).find('input[type="checkbox"]').should('not.be.checked')
+}
+
+/**
+ * Check the risk confirmation checkbox
+ */
+export function checkRiskConfirmationCheckbox() {
+  cy.get(riskConfirmationCheckbox).find('input[type="checkbox"]').check()
+}
+
+/**
+ * Verify continue button is disabled
+ */
+export function verifyContinueButtonDisabled() {
+  cy.get('[data-testid="continue-sign-btn"]').should('be.disabled')
+}
+
+/**
+ * Verify continue button is enabled
+ */
+export function verifyContinueButtonEnabled() {
+  cy.get('[data-testid="continue-sign-btn"]').should('not.be.disabled')
 }

@@ -26,6 +26,7 @@ export const RiskConfirmation = () => {
     <Card sx={{ px: 1, backgroundColor: 'background.main' }}>
       <Track {...MODALS_EVENTS.ACCEPT_RISK}>
         <FormControlLabel
+          data-testid="risk-confirmation-checkbox"
           label={
             <Typography variant="body2">
               I understand the risks and would like to proceed with this {isTransaction ? 'transaction' : 'message'}.
