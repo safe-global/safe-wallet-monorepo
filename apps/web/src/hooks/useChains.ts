@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { useGetChainsConfigQuery, chainsAdapter } from '@safe-global/store/gateway'
+import { useGetChainsConfigQuery } from '@safe-global/store/gateway'
 import { useChainId } from './useChainId'
 import type { FEATURES } from '@safe-global/utils/utils/chains'
 import { hasFeature } from '@safe-global/utils/utils/chains'
@@ -11,7 +11,8 @@ const useChains = (): { configs: Chain[]; error?: string; loading?: boolean } =>
 
   const configs = useMemo(() => {
     if (!data) return []
-    return chainsAdapter.getSelectors().selectAll(data)
+    // data is already EntityState with { ids: string[], entities: { [id: string]: Chain } }
+    return data.ids.map((id) => data.entities[id]!)
   }, [data])
 
   return useMemo(
@@ -31,7 +32,8 @@ export const useChain = (chainId: string): Chain | undefined => {
 
   return useMemo(() => {
     if (!data) return undefined
-    return chainsAdapter.getSelectors().selectById(data, chainId)
+    // data.entities is a direct lookup by chainId
+    return data.entities[chainId]
   }, [data, chainId])
 }
 
