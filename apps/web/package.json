@@ -70,7 +70,7 @@
     "@web3-onboard/core": "^2.24.1",
     "@web3-onboard/hw-common": "^2.3.3",
     "@web3-onboard/injected-wallets": "^2.11.3",
-    "@web3-onboard/walletconnect": "^2.6.3",
+    "@web3-onboard/walletconnect": "2.6.2",
     "blo": "^1.1.1",
     "classnames": "^2.5.1",
     "date-fns": "^2.30.0",
