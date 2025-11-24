@@ -824,9 +824,7 @@
           }
         },
         "summary": "Get portfolio",
-        "tags": [
-          "portfolio"
-        ]
+        "tags": ["portfolio"]
       },
       "delete": {
         "description": "Clears the cached portfolio data for a specific address",
@@ -848,9 +846,7 @@
           }
         },
         "summary": "Clear portfolio cache",
-        "tags": [
-          "portfolio"
-        ]
+        "tags": ["portfolio"]
       }
     },
     "/v1/chains": {
@@ -5897,9 +5893,7 @@
           },
           "type": {
             "type": "string",
-            "enum": [
-              "NATIVE_TOKEN"
-            ]
+            "enum": ["NATIVE_TOKEN"]
           },
           "chainId": {
             "type": "string",
@@ -5910,16 +5904,7 @@
             "description": "Whether the token is trusted (spam filter)"
           }
         },
-        "required": [
-          "address",
-          "decimals",
-          "logoUri",
-          "name",
-          "symbol",
-          "type",
-          "chainId",
-          "trusted"
-        ]
+        "required": ["address", "decimals", "logoUri", "name", "symbol", "type", "chainId", "trusted"]
       },
       "PortfolioErc20Token": {
         "type": "object",
@@ -5941,9 +5926,7 @@
           },
           "type": {
             "type": "string",
-            "enum": [
-              "ERC20"
-            ]
+            "enum": ["ERC20"]
           },
           "chainId": {
             "type": "string",
@@ -5954,16 +5937,7 @@
             "description": "Whether the token is trusted (spam filter)"
           }
         },
-        "required": [
-          "address",
-          "decimals",
-          "logoUri",
-          "name",
-          "symbol",
-          "type",
-          "chainId",
-          "trusted"
-        ]
+        "required": ["address", "decimals", "logoUri", "name", "symbol", "type", "chainId", "trusted"]
       },
       "PortfolioErc721Token": {
         "type": "object",
@@ -5985,9 +5959,7 @@
           },
           "type": {
             "type": "string",
-            "enum": [
-              "ERC721"
-            ]
+            "enum": ["ERC721"]
           },
           "chainId": {
             "type": "string",
@@ -5998,16 +5970,7 @@
             "description": "Whether the token is trusted (spam filter)"
           }
         },
-        "required": [
-          "address",
-          "decimals",
-          "logoUri",
-          "name",
-          "symbol",
-          "type",
-          "chainId",
-          "trusted"
-        ]
+        "required": ["address", "decimals", "logoUri", "name", "symbol", "type", "chainId", "trusted"]
       },
       "TokenBalance": {
         "type": "object",
@@ -6049,10 +6012,7 @@
             "example": "-0.0431"
           }
         },
-        "required": [
-          "tokenInfo",
-          "balance"
-        ]
+        "required": ["tokenInfo", "balance"]
       },
       "AppPosition": {
         "type": "object",
@@ -6108,13 +6068,7 @@
             "example": "-0.0431"
           }
         },
-        "required": [
-          "key",
-          "type",
-          "name",
-          "tokenInfo",
-          "balance"
-        ]
+        "required": ["key", "type", "name", "tokenInfo", "balance"]
       },
       "AppPositionGroup": {
         "type": "object",
@@ -6131,10 +6085,7 @@
             }
           }
         },
-        "required": [
-          "name",
-          "items"
-        ]
+        "required": ["name", "items"]
       },
       "AppBalanceAppInfo": {
         "type": "object",
@@ -6154,9 +6105,7 @@
             "description": "Application URL (HTTPS)"
           }
         },
-        "required": [
-          "name"
-        ]
+        "required": ["name"]
       },
       "AppBalance": {
         "type": "object",
@@ -6183,11 +6132,7 @@
             }
           }
         },
-        "required": [
-          "appInfo",
-          "balanceFiat",
-          "groups"
-        ]
+        "required": ["appInfo", "balanceFiat", "groups"]
       },
       "Portfolio": {
         "type": "object",
