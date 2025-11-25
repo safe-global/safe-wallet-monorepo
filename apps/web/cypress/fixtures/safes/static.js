@@ -1,12 +1,11 @@
 /**
  * @fileoverview Static Safe addresses for Cypress E2E tests
- * 
+ *
  * Predefined Safe addresses across multiple networks for use in Cypress tests.
- * 
+ *
  * When adding new safes, use the next available number and follow the naming convention:
  * `{NETWORK}_STATIC_SAFE_{NUMBER}`
  */
-
 
 export default {
   // Sepolia Safes
@@ -41,39 +40,39 @@ export default {
   SEP_STATIC_SAFE_13: 'sep:0x027bBe128174F0e5e5d22ECe9623698E01cd3970',
   /** Dashboard testing - Used in: dashboard.cy.js */
   SEP_STATIC_SAFE_14: 'sep:0xe41D568F5040FD9adeE8B64200c6B7C363C68c41',
-  
+
   // Ethereum Safes
   /** Recovery testing - Used in: recovery.cy.js, prodhealthcheck/recovery.cy.js */
   ETH_STATIC_SAFE_15: 'eth:0xfF501B324DC6d78dC9F983f140B9211c3EdB4dc7',
-  
+
   // Gnosis Chain Safes
   /** Recovery testing - Used in: recovery.cy.js, prodhealthcheck/recovery.cy.js */
   GNO_STATIC_SAFE_16: 'gno:0xB8d760a90a5ed54D3c2b3EFC231277e99188642A',
-  
+
   // Polygon (Matic) Safes
   /** Recovery module testing - Used in: recovery.cy.js, prodhealthcheck/recovery.cy.js */
   MATIC_STATIC_SAFE_17: 'matic:0x6D04edC44F7C88faa670683036edC2F6FC10b86e',
-  
+
   // BNB Chain Safes
   /** BNB Chain testing */
   BNB_STATIC_SAFE_18: 'bnb:0x1D28a316431bAFf410Fe53398c6C5BD566032Eec',
-  
+
   // Aurora Safes
   /** Aurora testing */
   AURORA_STATIC_SAFE_19: 'aurora:0xCEA454dD3d76Da856E72C3CBaDa8ee6A789aD167',
-  
+
   // Avalanche Safes
   /** Avalanche testing */
   AVAX_STATIC_SAFE_20: 'avax:0x480e5A3E90a3fF4a16AECCB5d638fAba96a15c28',
-  
+
   // Linea Safes
   /** Linea testing */
   LINEA_STATIC_SAFE_21: 'linea:0x95934e67299E0B3DD277907acABB512802f3536E',
-  
+
   // zkSync Safes
   /** zkSync testing */
   ZKSYNC_STATIC_SAFE_22: 'zksync:0x49136c0270c5682FFbb38Cb29Ecf0563b2E1F9f6',
-  
+
   // More Sepolia Safes
   /** Transaction history, NFTs, messages, and spending limits testing - Used in: tx_history.cy.js, nfts.cy.js, messages_offchain.cy.js, spending_limits.cy.js */
   SEP_STATIC_SAFE_23: 'sep:0x589d862CE2d519d5A862066bB923da0564c3D2EA',
@@ -85,16 +84,16 @@ export default {
   SEP_STATIC_SAFE_26: 'sep:0x755428b02A458eD17fa93c86F6C3a2046F2c4C3C',
   /** TWAP and swap testing - Used in: twaps_integration.cy.js, twaps_history.cy.js, limit_order.cy.js */
   SEP_STATIC_SAFE_27: 'sep:0xC97FCf0B8890a5a7b1a1490d44Dc9EbE3cE04884',
-  
+
   // More Polygon (Matic) Safes
   /** Multichain testing (primary CF safe) - Used in: multichain_*.cy.js, sidebar_*.cy.js, create_tx.cy.js
    * ⚠️ Heavily used for multichain testing - avoid modifying its state */
   MATIC_STATIC_SAFE_28: 'matic:0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B',
-  
+
   // More zkSync Safes
   /** zkSync testing */
   ZKSYNC_STATIC_SAFE_29: 'zksync:0x950e07c80d7Bb754CcD84afE2b7751dc7Fd65D1f',
-  
+
   // More Sepolia Safes
   /** Swaps testing - Used in: swaps.cy.js (happypath_2) */
   SEP_STATIC_SAFE_30: 'sep:0x2687E6643E189c1245EA8419e5e427809136021F',
@@ -128,7 +127,7 @@ export default {
   SEP_STATIC_SAFE_44: 'sep:0x8A3faB996b721d68357B42eD0D6328eBE6113e00',
   /** Nested safes review and fund asset testing - Used in: nested_safes_review.cy.js, nested_safes_fund_asset.cy.js */
   SEP_STATIC_SAFE_45: 'sep:0x5958B92f412408bF12Bbc8638d524ebe5878E795',
-  
+
   // More Polygon (Matic) Safes
   /** Available for general testing - Currently unused */
   MATIC_STATIC_SAFE_29: 'matic:0x5E9242FD52c4c4A60d874E8ff4Ba25657dd6e551',
@@ -136,4 +135,3 @@ export default {
    * Dedicated for Safe Shield transaction monitoring and risk detection tests */
   MATIC_STATIC_SAFE_30: 'matic:0x65e1Ff7e0901055B3bea7D8b3AF457a659714013',
 }
-
