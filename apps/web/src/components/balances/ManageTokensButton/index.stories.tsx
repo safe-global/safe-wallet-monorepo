@@ -31,8 +31,14 @@ const meta: Meta<StoryArgs> = {
       if (hasDefaultTokenlist) features.push(FEATURES.DEFAULT_TOKENLIST)
       if (hasPortfolioEndpoint) features.push(FEATURES.PORTFOLIO_ENDPOINT)
 
+      // Set hidden tokens for common chainIds (mainnet and Sepolia) to work in different environments
       const hiddenTokens: Record<string, string[]> =
-        hiddenTokensCount > 0 ? { '1': Array(hiddenTokensCount).fill('0x123') } : {}
+        hiddenTokensCount > 0
+          ? {
+              '1': Array(hiddenTokensCount).fill('0x123'),
+              '11155111': Array(hiddenTokensCount).fill('0x123'),
+            }
+          : {}
 
       return (
         <StoreDecorator
