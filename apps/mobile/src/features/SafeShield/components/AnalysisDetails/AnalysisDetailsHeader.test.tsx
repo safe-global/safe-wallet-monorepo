@@ -23,4 +23,3 @@ describe('AnalysisDetailsHeader', () => {
     expect(getByText('Issues found')).toBeTruthy()
   })
 })
-

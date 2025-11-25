@@ -37,30 +37,25 @@ export function AddressListItem({
           {displayName}
         </Text>
       )}
-      <View flexDirection="row" alignItems="center" gap="$1" flexWrap="wrap">
-        <TouchableOpacity onPress={() => onCopy(address, index)} style={{ flexShrink: 1, flexGrow: 1, minWidth: 0 }}>
-          <Text
-            fontSize="$3"
-            color={copiedIndex === index ? '$color' : '$colorSecondary'}
-            style={{
-              overflowWrap: 'break-word',
-              wordBreak: 'break-all',
-            }}
-          >
-            {address}
-          </Text>
-        </TouchableOpacity>
 
+      <Text flexDirection="row" alignItems="center" gap="$2" flexWrap="wrap">
+        <Text
+          onPress={() => onCopy(address, index)}
+          fontSize="$3"
+          color={copiedIndex === index ? '$color' : '$colorSecondary'}
+        >
+          {address}
+        </Text>{' '}
         {explorerLink && (
           <TouchableOpacity
             onPress={() => onOpenExplorer(address)}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            style={{ flexShrink: 0 }}
+            style={{ flexShrink: 0, transform: [{ translateY: 2 }] }}
           >
             <SafeFontIcon name="external-link" size={14} color="$colorSecondary" />
           </TouchableOpacity>
         )}
-      </View>
+      </Text>
     </Stack>
   )
 }

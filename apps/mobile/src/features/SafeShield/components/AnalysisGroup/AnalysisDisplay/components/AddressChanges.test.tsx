@@ -6,9 +6,16 @@ import { Severity, type MasterCopyChangeThreatAnalysisResult } from '@safe-globa
 
 describe('AddressChanges', () => {
   it('should render nothing when result has no before/after addresses', () => {
-    // Create a masterCopyChange result without calling .changes() (no before/after)
+    // Create a masterCopyChange result and manually clear the before/after addresses
     const result = ThreatAnalysisResultBuilder.masterCopyChange().build()
-    const { queryByText } = render(<AddressChanges result={result as MasterCopyChangeThreatAnalysisResult} />)
+    const resultWithoutAddresses = {
+      ...result,
+      before: undefined,
+      after: undefined,
+    }
+    const { queryByText } = render(
+      <AddressChanges result={resultWithoutAddresses as unknown as MasterCopyChangeThreatAnalysisResult} />,
+    )
     // Component returns null, so no text should be found
     expect(queryByText('CURRENT MASTERCOPY:')).toBeNull()
   })
