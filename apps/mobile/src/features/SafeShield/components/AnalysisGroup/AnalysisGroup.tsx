@@ -3,12 +3,12 @@ import { mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shie
 import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shield/utils/getPrimaryAnalysisResult'
 import { isEmpty } from 'lodash'
 import React, { useMemo } from 'react'
-import { Stack, View } from 'tamagui'
+import { Stack } from 'tamagui'
 import { AnalysisLabel } from '../AnalysisLabel'
 import { AnalysisDisplay } from './AnalysisDisplay'
 
 interface AnalysisGroup {
-  data: { [address: string]: GroupedAnalysisResults }
+  data: Record<string, GroupedAnalysisResults>
   highlightedSeverity?: Severity
   delay?: number
 }

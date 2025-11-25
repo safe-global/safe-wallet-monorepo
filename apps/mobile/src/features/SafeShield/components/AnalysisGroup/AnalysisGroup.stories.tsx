@@ -25,19 +25,25 @@ export default meta
 type Story = StoryObj<typeof AnalysisGroup>
 
 // Helper to create mock data for AnalysisGroup
-const createRecipientData = (address: string, groups: Partial<Record<StatusGroup, any[]>>) => {
+const createRecipientData = (
+  address: string,
+  groups: Partial<Record<StatusGroup, unknown[]>>,
+): Record<string, GroupedAnalysisResults> => {
   return {
     [address]: groups as GroupedAnalysisResults,
   }
 }
 
-const createContractData = (address: string, groups: Partial<Record<StatusGroup, any[]>>) => {
+const createContractData = (
+  address: string,
+  groups: Partial<Record<StatusGroup, unknown[]>>,
+): Record<string, GroupedAnalysisResults> => {
   return {
     [address]: groups as GroupedAnalysisResults,
   }
 }
 
-const createThreatData = (threatResults: any[]) => {
+const createThreatData = (threatResults: unknown[]): Record<string, GroupedAnalysisResults> => {
   return {
     ['0x']: {
       THREAT: threatResults,
@@ -168,4 +174,3 @@ export const Complex: Story = {
     }),
   },
 }
-

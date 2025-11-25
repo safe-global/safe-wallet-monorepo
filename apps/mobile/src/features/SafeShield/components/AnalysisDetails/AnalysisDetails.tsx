@@ -6,7 +6,7 @@ import {
   Severity,
 } from '@safe-global/utils/features/safe-shield/types'
 import React from 'react'
-import { ScrollView, View } from 'tamagui'
+import { ScrollView } from 'tamagui'
 import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
 import { AnalysisDetailsHeader } from './AnalysisDetailsHeader'
 import { AnalysisDetailsContent } from './AnalysisDetailsContent'

@@ -3,7 +3,6 @@ import type {
   ContractAnalysisResults,
   RecipientAnalysisResults,
   ThreatAnalysisResults,
-  GroupedAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shield/utils/getPrimaryAnalysisResult'

@@ -19,11 +19,13 @@ describe('AnalysisDetailsContent', () => {
 
     // Should render recipient analysis group
     const result = recipient[0]
-    const firstGroup = Object.values(result)[0]
-    if (firstGroup && typeof firstGroup === 'object') {
-      const firstStatusGroup = Object.values(firstGroup)[0]
-      if (firstStatusGroup && Array.isArray(firstStatusGroup) && firstStatusGroup[0]) {
-        expect(getByText(firstStatusGroup[0].description)).toBeTruthy()
+    if (result) {
+      const firstGroup = Object.values(result)[0]
+      if (firstGroup && typeof firstGroup === 'object') {
+        const firstStatusGroup = Object.values(firstGroup)[0]
+        if (firstStatusGroup && Array.isArray(firstStatusGroup) && firstStatusGroup[0]) {
+          expect(getByText(firstStatusGroup[0].description)).toBeTruthy()
+        }
       }
     }
   })
@@ -36,11 +38,13 @@ describe('AnalysisDetailsContent', () => {
 
     // Should render contract analysis group
     const result = contract[0]
-    const firstGroup = Object.values(result)[0]
-    if (firstGroup && typeof firstGroup === 'object') {
-      const firstStatusGroup = Object.values(firstGroup)[0]
-      if (firstStatusGroup && Array.isArray(firstStatusGroup) && firstStatusGroup[0]) {
-        expect(getByText(firstStatusGroup[0].description)).toBeTruthy()
+    if (result) {
+      const firstGroup = Object.values(result)[0]
+      if (firstGroup && typeof firstGroup === 'object') {
+        const firstStatusGroup = Object.values(firstGroup)[0]
+        if (firstStatusGroup && Array.isArray(firstStatusGroup) && firstStatusGroup[0]) {
+          expect(getByText(firstStatusGroup[0].description)).toBeTruthy()
+        }
       }
     }
   })

@@ -13,7 +13,7 @@ describe('AddressListItem', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseDisplayName.mockReturnValue({ displayName: undefined })
+    mockUseDisplayName.mockReturnValue({ displayName: null, address: '', logoUri: null, nameSource: null })
   })
 
   it('should render address without display name', () => {
@@ -37,7 +37,12 @@ describe('AddressListItem', () => {
   it('should render address with display name', () => {
     const address = faker.finance.ethereumAddress()
     const displayName = 'Test Contact'
-    mockUseDisplayName.mockReturnValue({ displayName })
+    mockUseDisplayName.mockReturnValue({
+      displayName,
+      address: '',
+      logoUri: null,
+      nameSource: null,
+    })
 
     const onCopy = jest.fn()
     const onOpenExplorer = jest.fn()

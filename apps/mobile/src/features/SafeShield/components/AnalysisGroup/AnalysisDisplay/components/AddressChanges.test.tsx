@@ -2,12 +2,13 @@ import { render } from '@/src/tests/test-utils'
 import { AddressChanges } from './AddressChanges'
 import { ThreatAnalysisResultBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis-result.builder'
 import { faker } from '@faker-js/faker'
-import { Severity } from '@safe-global/utils/features/safe-shield/types'
+import { Severity, type MasterCopyChangeThreatAnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 
 describe('AddressChanges', () => {
   it('should render nothing when result has no before/after addresses', () => {
-    const result = ThreatAnalysisResultBuilder.malicious().build()
-    const { queryByText } = render(<AddressChanges result={result} />)
+    // Create a masterCopyChange result without calling .changes() (no before/after)
+    const result = ThreatAnalysisResultBuilder.masterCopyChange().build()
+    const { queryByText } = render(<AddressChanges result={result as MasterCopyChangeThreatAnalysisResult} />)
     // Component returns null, so no text should be found
     expect(queryByText('CURRENT MASTERCOPY:')).toBeNull()
   })
@@ -18,7 +19,7 @@ describe('AddressChanges', () => {
 
     const result = ThreatAnalysisResultBuilder.masterCopyChange().changes(beforeAddress, afterAddress).build()
 
-    const { getByText } = render(<AddressChanges result={result} />)
+    const { getByText } = render(<AddressChanges result={result as MasterCopyChangeThreatAnalysisResult} />)
 
     expect(getByText('CURRENT MASTERCOPY:')).toBeTruthy()
     expect(getByText('NEW MASTERCOPY:')).toBeTruthy()
@@ -37,7 +38,9 @@ describe('AddressChanges', () => {
       before: undefined,
     }
 
-    const { queryByText } = render(<AddressChanges result={resultWithoutBefore as any} />)
+    const { queryByText } = render(
+      <AddressChanges result={resultWithoutBefore as unknown as MasterCopyChangeThreatAnalysisResult} />,
+    )
     expect(queryByText('CURRENT MASTERCOPY:')).toBeNull()
   })
 
@@ -52,7 +55,9 @@ describe('AddressChanges', () => {
       after: undefined,
     }
 
-    const { queryByText } = render(<AddressChanges result={resultWithoutAfter as any} />)
+    const { queryByText } = render(
+      <AddressChanges result={resultWithoutAfter as unknown as MasterCopyChangeThreatAnalysisResult} />,
+    )
     expect(queryByText('CURRENT MASTERCOPY:')).toBeNull()
   })
 })
