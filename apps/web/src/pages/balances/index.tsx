@@ -18,7 +18,6 @@ import { Box } from '@mui/material'
 import { BRAND_NAME } from '@/config/constants'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
-
 const Balances: NextPage = () => {
   const { balances, error } = useVisibleBalances()
   const [showHiddenAssets, setShowHiddenAssets] = useState(false)
