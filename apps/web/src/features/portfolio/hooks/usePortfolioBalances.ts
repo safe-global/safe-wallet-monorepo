@@ -5,7 +5,6 @@ import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { POLLING_INTERVAL, PORTFOLIO_POLLING_INTERVAL } from '@/config/constants'
-import { useCounterfactualBalances } from '@/features/counterfactual/useCounterfactualBalances'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useTokenListSetting, type PortfolioBalances } from '@/hooks/loadables/useLoadBalances'
 
@@ -40,6 +39,7 @@ const createPortfolioBalances = (balances: Balances): PortfolioBalances => ({
 /**
  * Hook to load balances using the portfolio endpoint with legacy fallback.
  * Falls back to legacy endpoint if portfolio returns empty data for deployed Safes.
+ * Note: Portfolio endpoint supports counterfactual (undeployed) Safes natively.
  * @param skip - Skip fetching when portfolio endpoint is disabled
  */
 const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
@@ -48,7 +48,6 @@ const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
   const { safe, safeAddress } = useSafeInfo()
   const isReady = safeAddress && safe.deployed && isTrustedTokenList !== undefined
   const isReadyPortfolio = safeAddress && isTrustedTokenList !== undefined
-  const isCounterfactual = !safe.deployed
 
   // Portfolio endpoint (called first)
   const {
@@ -70,10 +69,10 @@ const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
     },
   )
 
-  // Check if portfolio failed or returned empty data (need legacy fallback)
+  // Check if portfolio failed or returned empty data for deployed Safes (need legacy fallback)
   const isPortfolioEmpty =
     portfolioData && portfolioData.tokenBalances.length === 0 && portfolioData.positionBalances.length === 0
-  const needsLegacyFallback = !skip && !portfolioLoading && (portfolioError || (isPortfolioEmpty && !isCounterfactual))
+  const needsLegacyFallback = !skip && !portfolioLoading && (portfolioError || (isPortfolioEmpty && safe.deployed))
 
   // Legacy endpoint: only fetch as fallback when portfolio fails/empty
   const {
@@ -95,25 +94,11 @@ const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
     },
   )
 
-  const [cfData, cfError, cfLoading] = useCounterfactualBalances(safe)
-
   const memoizedPortfolioBalances = useMemo(() => transformPortfolioToBalances(portfolioData), [portfolioData])
 
   return useMemo<AsyncResult<PortfolioBalances>>(() => {
     if (skip) {
       return [undefined, undefined, false]
-    }
-
-    // Counterfactual Safe with empty portfolio - use counterfactual balances
-    if (isCounterfactual && isPortfolioEmpty) {
-      if (cfData) {
-        return [createPortfolioBalances(cfData), cfError, cfLoading]
-      }
-      const emptyBalances: Balances = {
-        items: [],
-        fiatTotal: '0',
-      }
-      return [createPortfolioBalances(emptyBalances), cfError, false]
     }
 
     // Portfolio failed or returned empty for deployed Safe - fallback to legacy
@@ -132,12 +117,7 @@ const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
     return [memoizedPortfolioBalances, error, portfolioLoading]
   }, [
     skip,
-    isCounterfactual,
-    isPortfolioEmpty,
     needsLegacyFallback,
-    cfData,
-    cfError,
-    cfLoading,
     memoizedPortfolioBalances,
     portfolioError,
     portfolioLoading,
