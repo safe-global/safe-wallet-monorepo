@@ -10,3 +10,15 @@
 .assetActionIconButton:hover {
   background-color: var(--color-background-main);
 }
+
+.assetActionIconButton svg {
+  width: 16px;
+  height: 16px;
+  color: inherit;
+}
+
+.sendButton {
+  height: 32px;
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+}
