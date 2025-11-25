@@ -15,6 +15,7 @@ import { TransactionSimulation } from '../../TransactionSimulation'
 import { WidgetDisplayWrapper } from './WidgetDisplayWrapper'
 import { ErrorWidget } from './ErrorWidget'
 import { LoadingWidget } from './LoadingWidget'
+import { normalizeThreatData } from '@safe-global/utils/features/safe-shield/utils'
 
 interface WidgetDisplayProps {
   recipient?: AsyncResult<RecipientAnalysisResults>
@@ -22,17 +23,6 @@ interface WidgetDisplayProps {
   threat?: AsyncResult<ThreatAnalysisResults>
   loading?: boolean
   error?: boolean
-}
-
-const normalizeThreatData = (threat?: AsyncResult<ThreatAnalysisResults>): Record<string, GroupedAnalysisResults> => {
-  const [result] = threat || []
-  const { BALANCE_CHANGE: _, ...groupedThreatResults } = result || {}
-
-  if (Object.keys(groupedThreatResults).length === 0) {
-    return {}
-  }
-
-  return { ['0x']: groupedThreatResults }
 }
 
 export function WidgetDisplay({ recipient, contract, threat, loading, error }: WidgetDisplayProps) {
