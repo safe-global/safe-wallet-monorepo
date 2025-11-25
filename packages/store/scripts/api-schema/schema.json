@@ -753,6 +753,102 @@
         "tags": ["positions"]
       }
     },
+    "/v1/portfolio/{address}": {
+      "get": {
+        "description": "Retrieves the complete portfolio for an address including token balances and app positions across all supported chains.",
+        "operationId": "portfolioGetPortfolioV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "description": "Wallet address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fiatCode",
+            "required": false,
+            "in": "query",
+            "description": "Fiat currency code for balance conversion (e.g., USD, EUR)",
+            "schema": {
+              "default": "USD",
+              "example": "USD",
+              "type": "string"
+            }
+          },
+          {
+            "name": "chainIds",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated list of chain IDs to filter by. If omitted, returns data for all chains.",
+            "schema": {
+              "example": "1,137,42161",
+              "type": "string"
+            }
+          },
+          {
+            "name": "trusted",
+            "required": false,
+            "in": "query",
+            "description": "If true, only returns trusted tokens",
+            "schema": {
+              "default": true,
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "excludeDust",
+            "required": false,
+            "in": "query",
+            "description": "If true, filters out dust positions (balance < $0.001 USD)",
+            "schema": {
+              "default": true,
+              "example": true,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Portfolio"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get portfolio",
+        "tags": ["portfolio"]
+      },
+      "delete": {
+        "description": "Clears the cached portfolio data for a specific address",
+        "operationId": "portfolioClearPortfolioV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "description": "Wallet address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "summary": "Clear portfolio cache",
+        "tags": ["portfolio"]
+      }
+    },
     "/v1/chains": {
       "get": {
         "description": "Retrieves a paginated list of all blockchain networks supported by the Safe infrastructure, including their configuration and capabilities.",
@@ -5776,6 +5872,311 @@
           }
         },
         "required": ["protocol", "protocol_metadata", "fiatTotal", "items"]
+      },
+      "PortfolioNativeToken": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["NATIVE_TOKEN"]
+          },
+          "chainId": {
+            "type": "string",
+            "description": "The chain ID"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the token is trusted (spam filter)"
+          }
+        },
+        "required": ["address", "decimals", "logoUri", "name", "symbol", "type", "chainId", "trusted"]
+      },
+      "PortfolioErc20Token": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["ERC20"]
+          },
+          "chainId": {
+            "type": "string",
+            "description": "The chain ID"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the token is trusted (spam filter)"
+          }
+        },
+        "required": ["address", "decimals", "logoUri", "name", "symbol", "type", "chainId", "trusted"]
+      },
+      "PortfolioErc721Token": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["ERC721"]
+          },
+          "chainId": {
+            "type": "string",
+            "description": "The chain ID"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the token is trusted (spam filter)"
+          }
+        },
+        "required": ["address", "decimals", "logoUri", "name", "symbol", "type", "chainId", "trusted"]
+      },
+      "TokenBalance": {
+        "type": "object",
+        "properties": {
+          "tokenInfo": {
+            "description": "Token information",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PortfolioNativeToken"
+              },
+              {
+                "$ref": "#/components/schemas/PortfolioErc20Token"
+              },
+              {
+                "$ref": "#/components/schemas/PortfolioErc721Token"
+              }
+            ]
+          },
+          "balance": {
+            "type": "string",
+            "description": "Balance in smallest unit as string integer. Use decimals to convert."
+          },
+          "balanceFiat": {
+            "type": "string",
+            "description": "Balance in requested fiat currency. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "4801.653401839"
+          },
+          "price": {
+            "type": "string",
+            "description": "Token price in requested fiat currency. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "3890.12"
+          },
+          "priceChangePercentage1d": {
+            "type": "string",
+            "description": "Price change as decimal (e.g., \"-0.0431\" for -4.31%). Decimal string without exponent notation.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "-0.0431"
+          }
+        },
+        "required": ["tokenInfo", "balance"]
+      },
+      "AppPosition": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Unique position key"
+          },
+          "type": {
+            "type": "string",
+            "description": "Position type (e.g., staked, lending, liquidity)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Position name"
+          },
+          "groupId": {
+            "type": "string",
+            "description": "Group ID for grouping related positions together"
+          },
+          "tokenInfo": {
+            "description": "Token information",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PortfolioNativeToken"
+              },
+              {
+                "$ref": "#/components/schemas/PortfolioErc20Token"
+              },
+              {
+                "$ref": "#/components/schemas/PortfolioErc721Token"
+              }
+            ]
+          },
+          "receiptTokenAddress": {
+            "type": "string",
+            "description": "Receipt token address (pool address) representing this position. This is the contract address for the position token (LP token, staking receipt, etc.), not the underlying token."
+          },
+          "balance": {
+            "type": "string",
+            "description": "Balance in smallest unit as string integer. Use decimals to convert."
+          },
+          "balanceFiat": {
+            "type": "string",
+            "description": "Balance in requested fiat currency. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "18638914.125656575"
+          },
+          "priceChangePercentage1d": {
+            "type": "string",
+            "description": "Price change as decimal (e.g., \"-0.0431\" for -4.31%). Decimal string without exponent notation.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "-0.0431"
+          }
+        },
+        "required": ["key", "type", "name", "tokenInfo", "balance"]
+      },
+      "AppPositionGroup": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Group name (e.g., \"Protocol A Vesting\")"
+          },
+          "items": {
+            "type": "array",
+            "description": "Positions in this group",
+            "items": {
+              "$ref": "#/components/schemas/AppPosition"
+            }
+          }
+        },
+        "required": ["name", "items"]
+      },
+      "AppBalanceAppInfo": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Application name"
+          },
+          "logoUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Application logo URL (HTTPS)"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Application URL (HTTPS)"
+          }
+        },
+        "required": ["name"]
+      },
+      "AppBalance": {
+        "type": "object",
+        "properties": {
+          "appInfo": {
+            "description": "Application information",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AppBalanceAppInfo"
+              }
+            ]
+          },
+          "balanceFiat": {
+            "type": "string",
+            "description": "Total balance in fiat currency across all position groups. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "18638914.125656575"
+          },
+          "groups": {
+            "type": "array",
+            "description": "Position groups in this app, grouped by position name",
+            "items": {
+              "$ref": "#/components/schemas/AppPositionGroup"
+            }
+          }
+        },
+        "required": ["appInfo", "balanceFiat", "groups"]
+      },
+      "Portfolio": {
+        "type": "object",
+        "properties": {
+          "totalBalanceFiat": {
+            "type": "string",
+            "description": "Total balance in fiat currency across all tokens and positions. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "954181237.094243"
+          },
+          "totalTokenBalanceFiat": {
+            "type": "string",
+            "description": "Total balance in fiat currency for all token holdings. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "935542322.9685864"
+          },
+          "totalPositionsBalanceFiat": {
+            "type": "string",
+            "description": "Total balance in fiat currency for all app positions. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "18638914.125656575"
+          },
+          "tokenBalances": {
+            "description": "List of token balances",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TokenBalance"
+            }
+          },
+          "positionBalances": {
+            "description": "List of app balances",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppBalance"
+            }
+          }
+        },
+        "required": [
+          "totalBalanceFiat",
+          "totalTokenBalanceFiat",
+          "totalPositionsBalanceFiat",
+          "tokenBalances",
+          "positionBalances"
+        ]
       },
       "GasPriceOracle": {
         "type": "object",

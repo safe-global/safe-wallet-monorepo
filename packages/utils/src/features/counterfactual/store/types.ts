@@ -1,6 +1,7 @@
 import type { SafeVersion } from '@safe-global/types-kit'
 import type { PredictedSafeProps } from '@safe-global/protocol-kit'
 import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 export enum PendingSafeStatus {
   AWAITING_EXECUTION = 'AWAITING_EXECUTION',
@@ -41,3 +42,9 @@ export type UndeployedSafe = {
 }
 type UndeployedSafesSlice = { [address: string]: UndeployedSafe }
 export type UndeployedSafesState = { [chainId: string]: UndeployedSafesSlice }
+
+export type CreateSafeResult = {
+  chain: Chain
+  safeAddress: string
+  success: boolean
+}

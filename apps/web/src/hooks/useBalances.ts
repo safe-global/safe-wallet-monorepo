@@ -2,10 +2,10 @@ import { useMemo } from 'react'
 import isEqual from 'lodash/isEqual'
 import { useAppSelector } from '@/store'
 import { selectBalances } from '@/store/balancesSlice'
-import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import type { PortfolioBalances } from './loadables/useLoadBalances'
 
 const useBalances = (): {
-  balances: Balances
+  balances: PortfolioBalances
   loaded: boolean
   loading: boolean
   error?: string
