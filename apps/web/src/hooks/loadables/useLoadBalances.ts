@@ -88,9 +88,17 @@ export const useLegacyBalances = (skip = false): AsyncResult<PortfolioBalances> 
 /**
  * Hook to load token balances and positions data.
  * Uses portfolio endpoint when enabled, otherwise falls back to legacy endpoint.
+ * Falls back to legacy endpoint when "All tokens" is selected to show tokens that Zerion may not support.
+ * Returns `loading: true` when initialized, even if the query is skipped (e.g., no Safe selected).
  */
 const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
-  const shouldUsePortfolioEndpoint = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
+  const settings = useAppSelector(selectSettings)
+  const hasPortfolioFeature = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
+  const isAllTokensSelected = settings.tokenList === TOKEN_LISTS.ALL
+
+  // Use legacy balances when portfolio feature is disabled OR when "All tokens" is selected
+  // This ensures users can see tokens that Zerion may not support via the legacy endpoint
+  const shouldUsePortfolioEndpoint = hasPortfolioFeature && !isAllTokensSelected
 
   const legacyResult = useLegacyBalances(shouldUsePortfolioEndpoint)
   const portfolioResult = usePortfolioBalances(!shouldUsePortfolioEndpoint)
