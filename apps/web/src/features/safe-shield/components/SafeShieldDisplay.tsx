@@ -23,7 +23,7 @@ export const SafeShieldDisplay = ({
   safeTx?: SafeTransaction
 }): ReactElement => {
   return (
-    <Stack gap={1}>
+    <Stack gap={1} data-testid="safe-shield-widget">
       <Card sx={{ borderRadius: '6px', overflow: 'hidden' }}>
         <SafeShieldHeader recipient={recipient} contract={contract} threat={threat} safeTx={safeTx} />
 

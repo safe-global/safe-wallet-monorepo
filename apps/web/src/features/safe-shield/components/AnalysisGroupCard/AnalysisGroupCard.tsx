@@ -20,6 +20,7 @@ interface AnalysisGroupCardProps {
   highlightedSeverity?: Severity
   delay?: number
   analyticsEvent?: AnalyticsEvent
+  'data-testid'?: string
 }
 
 export const AnalysisGroupCard = ({
@@ -27,6 +28,7 @@ export const AnalysisGroupCard = ({
   highlightedSeverity,
   delay = 0,
   analyticsEvent,
+  'data-testid': dataTestId,
 }: AnalysisGroupCardProps): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
@@ -67,6 +69,7 @@ export const AnalysisGroupCard = ({
 
   return (
     <Box
+      data-testid={dataTestId}
       sx={{
         overflow: 'hidden',
         opacity: isVisible ? 1 : 0,

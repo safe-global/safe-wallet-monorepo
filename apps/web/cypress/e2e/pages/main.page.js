@@ -406,6 +406,12 @@ export function verifyTextVisibility(stringsArray) {
   })
 }
 
+export function verifyTextNotVisible(stringsArray) {
+  stringsArray.forEach((string) => {
+    cy.contains(string).should('not.exist')
+  })
+}
+
 export function getIframeBody(iframe) {
   return cy.get(iframe).its('0.contentDocument.body').should('not.be.empty').then(cy.wrap)
 }
