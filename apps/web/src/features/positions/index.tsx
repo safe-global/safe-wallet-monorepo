@@ -9,10 +9,14 @@ import React from 'react'
 import PositionsUnavailable from './components/PositionsUnavailable'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import PositionsSkeleton from '@/features/positions/components/PositionsSkeleton'
+import RefreshPositionsButton from '@/features/positions/components/RefreshPositionsButton'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useHasFeature } from '@/hooks/useChains'
 
 export const Positions = () => {
   const positionsFiatTotal = usePositionsFiatTotal()
   const { data: protocols, error, isLoading } = usePositions()
+  const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
 
   if (isLoading || (!error && !protocols)) {
     return <PositionsSkeleton />
@@ -31,15 +35,18 @@ export const Positions = () => {
           <TotalAssetValue fiatTotal={positionsFiatTotal} title="Total positions value" />
         </Box>
 
-        <Typography variant="h4" fontWeight={700}>
+        <Typography variant="h4" fontWeight={700} mb={1}>
           Positions
         </Typography>
 
-        <Box mb={1}>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            Position balances are not included in the total asset value.
-          </Typography>
-        </Box>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+          {!isPortfolioEndpointEnabled && (
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              Position balances are not included in the total asset value.
+            </Typography>
+          )}
+          <RefreshPositionsButton entryPoint="Positions" label="Refresh positions" />
+        </Stack>
       </Box>
 
       {protocols.map((protocol) => {
