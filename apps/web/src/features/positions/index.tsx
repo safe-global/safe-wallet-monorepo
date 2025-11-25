@@ -4,7 +4,7 @@ import EnhancedTable from '@/components/common/EnhancedTable'
 import FiatValue from '@/components/common/FiatValue'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { getReadablePositionType } from '@/features/positions/utils'
-import IframeIcon from '@/components/common/IframeIcon'
+import TokenIcon from '@/components/common/TokenIcon'
 import { FiatChange } from '@/components/balances/AssetsTable/FiatChange'
 import usePositions from '@/features/positions/hooks/usePositions'
 import PositionsEmpty from '@/features/positions/components/PositionsEmpty'
@@ -15,10 +15,13 @@ import PositionsUnavailable from './components/PositionsUnavailable'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import PositionsSkeleton from '@/features/positions/components/PositionsSkeleton'
 import RefreshPositionsButton from '@/features/positions/components/RefreshPositionsButton'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useHasFeature } from '@/hooks/useChains'
 
 export const Positions = () => {
   const positionsFiatTotal = usePositionsFiatTotal()
   const { data: protocols, error, isLoading } = usePositions()
+  const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
 
   if (isLoading || (!error && !protocols)) {
     return <PositionsSkeleton />
@@ -42,9 +45,11 @@ export const Positions = () => {
         </Typography>
 
         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            Position balances are not included in the total asset value.
-          </Typography>
+          {!isPortfolioEndpointEnabled && (
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              Position balances are not included in the total asset value.
+            </Typography>
+          )}
           <RefreshPositionsButton entryPoint="Positions" label="Refresh positions" />
         </Stack>
       </Box>
@@ -66,11 +71,10 @@ export const Positions = () => {
                       name: {
                         content: (
                           <Stack direction="row" alignItems="center" gap={1}>
-                            <IframeIcon
-                              src={position.tokenInfo.logoUri || ''}
-                              alt={position.tokenInfo.name + ' icon'}
-                              width={32}
-                              height={32}
+                            <TokenIcon
+                              logoUri={position.tokenInfo.logoUri || undefined}
+                              tokenSymbol={position.tokenInfo.symbol}
+                              size={32}
                             />
 
                             <Box>
