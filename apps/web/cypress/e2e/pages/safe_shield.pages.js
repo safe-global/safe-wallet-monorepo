@@ -73,9 +73,9 @@ const emptyStateStr = 'Transaction details will be automatically scanned for pot
 // Threat messages
 const maliciousThreatStr = 'Malicious threat detected'
 const threatAnalysisFailedStr = 'Threat analysis failed'
-const threatReviewBeforeProcessingStr = 'Threat analysis failed. Review before processing. '
+const threatReviewBeforeProcessingStr = 'Threat analysis failed. Review before processing'
 const noThreatDetectedStr = 'No threat detected'
-const threatAnalysisFoundNoIssuesStr = 'Threat analysis found no issues.'
+const threatAnalysisFoundNoIssuesStr = 'Threat analysis found no issues'
 export const maliciousApprovalMessageStr = 'The transaction approves erc20 tokens to a known drainer contract'
 export const maliciousTransferMessageStr = 'The transaction transfers tokens to a known drainer contract'
 export const maliciousNativeTransferMessageStr = 'The transaction transfers native currency to a known drainer contract'
