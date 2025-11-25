@@ -74,25 +74,7 @@ const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
 
   const shouldUsePortfolioEndpoint = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
 
-  const {
-    currentData: legacyBalances,
-    isLoading: legacyLoading,
-    error: legacyError,
-  } = useBalancesGetBalancesV1Query(
-    {
-      chainId: safe.chainId,
-      safeAddress,
-      fiatCode: currency,
-      trusted: isTrustedTokenList,
-    },
-    {
-      skip: !isReady,
-      pollingInterval: POLLING_INTERVAL,
-      skipPollingIfUnfocused: true,
-      refetchOnFocus: true,
-    },
-  )
-
+  // Portfolio endpoint (called first to determine if we need legacy fallback)
   const {
     currentData: portfolioData,
     isLoading: portfolioLoading,
@@ -112,17 +94,39 @@ const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
     },
   )
 
+  // Check if portfolio failed or returned empty data (need legacy fallback)
+  const isPortfolioEmpty =
+    portfolioData && portfolioData.tokenBalances.length === 0 && portfolioData.positionBalances.length === 0
+  const needsLegacyFallback =
+    shouldUsePortfolioEndpoint && !portfolioLoading && (portfolioError || (isPortfolioEmpty && !isCounterfactual))
+
+  // Legacy endpoint: primary when portfolio disabled, fallback when portfolio fails/empty
+  const {
+    currentData: legacyBalances,
+    isLoading: legacyLoading,
+    error: legacyError,
+  } = useBalancesGetBalancesV1Query(
+    {
+      chainId: safe.chainId,
+      safeAddress,
+      fiatCode: currency,
+      trusted: isTrustedTokenList,
+    },
+    {
+      skip: !isReady || (shouldUsePortfolioEndpoint && !needsLegacyFallback),
+      pollingInterval: POLLING_INTERVAL,
+      skipPollingIfUnfocused: true,
+      refetchOnFocus: true,
+    },
+  )
+
   const [cfData, cfError, cfLoading] = useCounterfactualBalances(safe)
 
   const memoizedPortfolioBalances = useMemo(() => transformPortfolioToBalances(portfolioData), [portfolioData])
 
-  const isPortfolioEmpty = useMemo(() => {
-    if (!portfolioData) return false
-    return portfolioData.tokenBalances.length === 0 && portfolioData.positionBalances.length === 0
-  }, [portfolioData])
-
   const result = useMemo<AsyncResult<PortfolioBalances>>(() => {
     if (shouldUsePortfolioEndpoint) {
+      // Counterfactual Safe with empty portfolio - use counterfactual balances
       if (isCounterfactual && isPortfolioEmpty) {
         if (cfData) {
           return [createPortfolioBalances(cfData), cfError, cfLoading]
@@ -134,13 +138,13 @@ const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
         return [createPortfolioBalances(emptyBalances), cfError, false]
       }
 
-      // When portfolio returns empty data for deployed Safe, fallback to legacy endpoint
-      if (isPortfolioEmpty && !isCounterfactual) {
+      // Portfolio failed or returned empty for deployed Safe - fallback to legacy
+      if (needsLegacyFallback) {
         if (legacyBalances) {
           const error = legacyError ? new Error(String(legacyError)) : undefined
           return [createPortfolioBalances(legacyBalances), error, false]
         }
-        // If legacy data is still loading, show loading state until it arrives
+        // Legacy data is still loading
         if (legacyLoading) {
           return [undefined, undefined, true]
         }
@@ -165,6 +169,7 @@ const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
     shouldUsePortfolioEndpoint,
     isCounterfactual,
     isPortfolioEmpty,
+    needsLegacyFallback,
     cfData,
     cfError,
     cfLoading,
