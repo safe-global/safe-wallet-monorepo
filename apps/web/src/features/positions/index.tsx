@@ -1,11 +1,6 @@
 import { Accordion, AccordionDetails, AccordionSummary, Box, Card, Stack, Typography } from '@mui/material'
 import PositionsHeader from '@/features/positions/components/PositionsHeader'
-import EnhancedTable from '@/components/common/EnhancedTable'
-import FiatValue from '@/components/common/FiatValue'
-import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
-import { getReadablePositionType } from '@/features/positions/utils'
-import TokenIcon from '@/components/common/TokenIcon'
-import { FiatChange } from '@/components/balances/AssetsTable/FiatChange'
+import { PositionGroup } from '@/features/positions/components/PositionGroup'
 import usePositions from '@/features/positions/hooks/usePositions'
 import PositionsEmpty from '@/features/positions/components/PositionsEmpty'
 import usePositionsFiatTotal from '@/features/positions/hooks/usePositionsFiatTotal'
@@ -40,18 +35,18 @@ export const Positions = () => {
           <TotalAssetValue fiatTotal={positionsFiatTotal} title="Total positions value" />
         </Box>
 
-        <Typography variant="h4" fontWeight={700} mb={1}>
-          Positions
-        </Typography>
-
         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
-          {!isPortfolioEndpointEnabled && (
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              Position balances are not included in the total asset value.
-            </Typography>
-          )}
+          <Typography variant="h4" fontWeight={700}>
+            Positions
+          </Typography>
           <RefreshPositionsButton entryPoint="Positions" label="Refresh positions" />
         </Stack>
+
+        {!isPortfolioEndpointEnabled && (
+          <Typography variant="caption" sx={{ color: 'text.secondary' }} mb={1}>
+            Position balances are not included in the total asset value.
+          </Typography>
+        )}
       </Box>
 
       {protocols.map((protocol) => {
@@ -65,76 +60,9 @@ export const Positions = () => {
                 <PositionsHeader protocol={protocol} fiatTotal={positionsFiatTotal} />
               </AccordionSummary>
               <AccordionDetails sx={{ pt: 0, pb: 0 }}>
-                {protocol.items.map((positionGroup) => {
-                  const rows = positionGroup.items.map((position) => ({
-                    cells: {
-                      name: {
-                        content: (
-                          <Stack direction="row" alignItems="center" gap={1}>
-                            <TokenIcon
-                              logoUri={position.tokenInfo.logoUri || undefined}
-                              tokenSymbol={position.tokenInfo.symbol}
-                              size={32}
-                            />
-
-                            <Box>
-                              <Typography variant="body2" fontWeight="bold">
-                                {position.tokenInfo.name}
-                              </Typography>
-                              <Typography variant="body2" color="primary.light">
-                                {position.tokenInfo.symbol} •&nbsp; {getReadablePositionType(position.position_type)}
-                              </Typography>
-                            </Box>
-                          </Stack>
-                        ),
-                        rawValue: 'Test',
-                      },
-                      balance: {
-                        content: (
-                          <Typography textAlign="right">
-                            {formatVisualAmount(position.balance, position.tokenInfo.decimals)}{' '}
-                            {position.tokenInfo.symbol}
-                          </Typography>
-                        ),
-                        rawValue: position.balance,
-                      },
-                      value: {
-                        content: (
-                          <Box textAlign="right">
-                            <Typography>
-                              <FiatValue value={position.fiatBalance} />
-                            </Typography>
-                            <Typography variant="caption">
-                              <FiatChange balanceItem={position} inline />
-                            </Typography>
-                          </Box>
-                        ),
-                        rawValue: position.fiatBalance,
-                      },
-                    },
-                  }))
-
-                  const headCells = [
-                    {
-                      id: 'name',
-                      label: (
-                        <Typography variant="body2" fontWeight="bold" color="text.primary">
-                          {positionGroup.name}
-                        </Typography>
-                      ),
-                      width: '25%',
-                      disableSort: true,
-                    },
-                    { id: 'balance', label: 'Balance', width: '35%', align: 'right', disableSort: true },
-                    { id: 'value', label: 'Value', width: '40%', align: 'right', disableSort: true },
-                  ]
-
-                  return (
-                    <Box key={positionGroup.name}>
-                      <EnhancedTable rows={rows} headCells={headCells} compact />
-                    </Box>
-                  )
-                })}
+                {protocol.items.map((group, groupIndex) => (
+                  <PositionGroup key={groupIndex} group={group} isLast={groupIndex === protocol.items.length - 1} />
+                ))}
               </AccordionDetails>
             </Accordion>
           </Card>
