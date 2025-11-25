@@ -16,7 +16,7 @@ const hiddenTokenCheckbox = 'input[type="checkbox"]'
 const paginationPageList = 'ul[role="listbox"]'
 const currencyDropDown = 'div[id="currency"]'
 export const tokenListTable = 'table[aria-labelledby="tableTitle"]'
-const tokenListDropdown = 'div[id="tokenlist-select"]'
+const manageTokensButton = '[data-testid="manage-tokens-button"]'
 export const tablePaginationContainer = '[data-testid="table-pagination"]'
 
 const hiddenTokenSaveBtn = 'span[data-track="assets: Save hide dialog"]'
@@ -138,8 +138,8 @@ export function checkNftCopyIconAndLink() {
   })
 }
 
-export function showSendBtn() {
-  return cy.get(sendBtn).invoke('css', 'opacity', '1').should('have.css', 'opacity', '1')
+export function showSendBtn(index = 0) {
+  return cy.get(sendBtn).eq(index).invoke('css', 'opacity', '1').should('have.css', 'opacity', '1')
 }
 
 export function showSwapBtn() {
@@ -212,7 +212,7 @@ export function clickOnExecuteBtn(index) {
 }
 
 export function VerifySendButtonIsDisabled() {
-  cy.get('button').contains(sendBtnStr).should('be.disabled')
+  cy.get(sendBtn).first().should('be.disabled')
 }
 
 export function verifyTableRows(assetsLength) {
@@ -311,11 +311,27 @@ export function verifyTokenIsPresent(token) {
 }
 
 export function selectTokenList(option) {
-  cy.get(tokenListDropdown)
-    .click({ force: true })
-    .then(() => {
-      cy.get(option).click({ force: true })
+  const wantAllTokens = option === tokenListOptions.allTokens
+
+  cy.get(manageTokensButton).click()
+
+  cy.get('[role="menu"]')
+    .should('be.visible')
+    .within(() => {
+      cy.contains('Show all tokens')
+        .parents('li')
+        .find('input[type="checkbox"]')
+        .then(($checkbox) => {
+          const isChecked = $checkbox.is(':checked')
+          if (wantAllTokens && !isChecked) {
+            cy.wrap($checkbox).click({ force: true })
+          } else if (!wantAllTokens && isChecked) {
+            cy.wrap($checkbox).click({ force: true })
+          }
+        })
     })
+
+  cy.get('body').click(0, 0)
 }
 
 export function verityTokenAltImageIsVisible(currency, alttext) {
