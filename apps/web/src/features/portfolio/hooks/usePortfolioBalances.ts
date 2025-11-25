@@ -1,12 +1,11 @@
 import { useMemo } from 'react'
-import { type Balances, useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { usePortfolioGetPortfolioV1Query, type Portfolio } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { POLLING_INTERVAL, PORTFOLIO_POLLING_INTERVAL } from '@/config/constants'
+import { PORTFOLIO_POLLING_INTERVAL } from '@/config/constants'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { useTokenListSetting, type PortfolioBalances } from '@/hooks/loadables/useLoadBalances'
+import { useLegacyBalances, useTokenListSetting, type PortfolioBalances } from '@/hooks/loadables/useLoadBalances'
 
 const transformPortfolioToBalances = (portfolio?: Portfolio): PortfolioBalances | undefined => {
   if (!portfolio) return undefined
@@ -29,13 +28,6 @@ const transformPortfolioToBalances = (portfolio?: Portfolio): PortfolioBalances 
   }
 }
 
-const createPortfolioBalances = (balances: Balances): PortfolioBalances => ({
-  ...balances,
-  tokensFiatTotal: balances.fiatTotal,
-  positionsFiatTotal: '0',
-  positions: undefined,
-})
-
 /**
  * Hook to load balances using the portfolio endpoint with legacy fallback.
  * Falls back to legacy endpoint if portfolio returns empty data for deployed Safes.
@@ -46,7 +38,6 @@ const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
   const currency = useAppSelector(selectCurrency)
   const isTrustedTokenList = useTokenListSetting()
   const { safe, safeAddress } = useSafeInfo()
-  const isReady = safeAddress && safe.deployed && isTrustedTokenList !== undefined
   const isReadyPortfolio = safeAddress && isTrustedTokenList !== undefined
 
   // Portfolio endpoint (called first)
@@ -74,25 +65,8 @@ const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
     portfolioData && portfolioData.tokenBalances.length === 0 && portfolioData.positionBalances.length === 0
   const needsLegacyFallback = !skip && !portfolioLoading && (portfolioError || (isPortfolioEmpty && safe.deployed))
 
-  // Legacy endpoint: only fetch as fallback when portfolio fails/empty
-  const {
-    currentData: legacyBalances,
-    isLoading: legacyLoading,
-    error: legacyError,
-  } = useBalancesGetBalancesV1Query(
-    {
-      chainId: safe.chainId,
-      safeAddress,
-      fiatCode: currency,
-      trusted: isTrustedTokenList,
-    },
-    {
-      skip: skip || !isReady || !needsLegacyFallback,
-      pollingInterval: POLLING_INTERVAL,
-      skipPollingIfUnfocused: true,
-      refetchOnFocus: true,
-    },
-  )
+  // Legacy endpoint: reuse useLegacyBalances hook as fallback
+  const [legacyBalances, legacyError, legacyLoading] = useLegacyBalances(!needsLegacyFallback)
 
   const memoizedPortfolioBalances = useMemo(() => transformPortfolioToBalances(portfolioData), [portfolioData])
 
@@ -103,14 +77,8 @@ const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
 
     // Portfolio failed or returned empty for deployed Safe - fallback to legacy
     if (needsLegacyFallback) {
-      if (legacyBalances) {
-        const error = legacyError ? new Error(String(legacyError)) : undefined
-        return [createPortfolioBalances(legacyBalances), error, false]
-      }
-      // Legacy data is still loading
-      if (legacyLoading) {
-        return [undefined, undefined, true]
-      }
+      // Return legacy result (includes counterfactual handling)
+      return [legacyBalances, legacyError, legacyLoading]
     }
 
     const error = portfolioError ? new Error(String(portfolioError)) : undefined

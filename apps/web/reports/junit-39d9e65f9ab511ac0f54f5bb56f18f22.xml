@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="11.453" tests="1" failures="0">
+  <testsuite name="Root Suite" timestamp="2025-11-25T12:22:58" tests="0" file="cypress/e2e/smoke/tokens.cy.js" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="[SMOKE] Tokens tests" timestamp="2025-11-25T12:22:58" tests="1" time="11.447" failures="0">
+    <testcase name="[SMOKE] Tokens tests Verify that when owner is disconnected, Send button is disabled" time="11.407" classname="Verify that when owner is disconnected, Send button is disabled">
+    </testcase>
+  </testsuite>
+</testsuites>

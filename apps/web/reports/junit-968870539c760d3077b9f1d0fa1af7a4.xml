@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="40.115" tests="5" failures="0">
+  <testsuite name="Root Suite" timestamp="2025-11-25T12:17:20" tests="0" file="cypress/e2e/smoke/dashboard.cy.js" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="[SMOKE] Dashboard tests" timestamp="2025-11-25T12:17:20" tests="5" time="40.101" failures="0">
+    <testcase name="[SMOKE] Dashboard tests [SMOKE] Verify the overview widget is displayed" time="11.464" classname="[SMOKE] Verify the overview widget is displayed">
+    </testcase>
+    <testcase name="[SMOKE] Dashboard tests [SMOKE] Verify the transaction queue widget is displayed" time="9.229" classname="[SMOKE] Verify the transaction queue widget is displayed">
+    </testcase>
+    <testcase name="[SMOKE] Dashboard tests [SMOKE] Verify the Safe Apps Section is displayed" time="6.874" classname="[SMOKE] Verify the Safe Apps Section is displayed">
+    </testcase>
+    <testcase name="[SMOKE] Dashboard tests [SMOKE] Verify that the last created tx in conflicting tx is showed in the widget" time="6.123" classname="[SMOKE] Verify that the last created tx in conflicting tx is showed in the widget">
+    </testcase>
+    <testcase name="[SMOKE] Dashboard tests [SMOKE] Verify that tx are displayed correctly in Pending tx section" time="5.869" classname="[SMOKE] Verify that tx are displayed correctly in Pending tx section">
+    </testcase>
+  </testsuite>
+</testsuites>

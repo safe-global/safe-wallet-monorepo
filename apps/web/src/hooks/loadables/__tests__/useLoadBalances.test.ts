@@ -356,13 +356,52 @@ describe('useLoadBalances', () => {
       expect(balances?.tokensFiatTotal).toBe(mockPortfolio.totalTokenBalanceFiat)
     })
 
-    it('should handle portfolio endpoint errors', async () => {
-      const mockError = new Error('Portfolio endpoint error')
+    it('should fallback to legacy endpoint when portfolio fails', async () => {
+      const mockPortfolioError = new Error('Portfolio endpoint error')
+      const mockLegacyBalances = createMockLegacyBalances()
 
       jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
         currentData: undefined,
         isLoading: false,
-        error: mockError,
+        error: mockPortfolioError,
+        refetch: jest.fn(),
+      } as any)
+
+      jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
+        currentData: mockLegacyBalances,
+        isLoading: false,
+        error: undefined,
+        refetch: jest.fn(),
+      } as any)
+
+      const { result } = renderHook(() => useLoadBalances())
+
+      await waitFor(() => {
+        expect(result.current[0]).toBeDefined()
+      })
+
+      const [balances, error] = result.current
+
+      // Should fallback to legacy balances when portfolio fails
+      expect(balances?.fiatTotal).toBe(mockLegacyBalances.fiatTotal)
+      expect(error).toBeUndefined()
+    })
+
+    it('should return error when both portfolio and legacy fail', async () => {
+      const mockPortfolioError = new Error('Portfolio endpoint error')
+      const mockLegacyError = new Error('Legacy endpoint error')
+
+      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
+        currentData: undefined,
+        isLoading: false,
+        error: mockPortfolioError,
+        refetch: jest.fn(),
+      } as any)
+
+      jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
+        currentData: undefined,
+        isLoading: false,
+        error: mockLegacyError,
         refetch: jest.fn(),
       } as any)
 
@@ -376,7 +415,6 @@ describe('useLoadBalances', () => {
 
       expect(balances).toBeUndefined()
       expect(error).toBeInstanceOf(Error)
-      expect(error?.message).toBe('Error: Portfolio endpoint error')
     })
 
     it('should handle loading state', async () => {

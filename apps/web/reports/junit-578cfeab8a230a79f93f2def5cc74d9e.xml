@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="136.609" tests="3" failures="2">
+  <testsuite name="Root Suite" timestamp="2025-11-25T11:10:54" tests="0" file="cypress/e2e/smoke/assets.cy.js" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="[SMOKE] Assets tests" timestamp="2025-11-25T11:10:54" tests="3" time="136.603" failures="2">
+    <testcase name="[SMOKE] Assets tests [SMOKE] Verify that the native token is visible" time="14.889" classname="[SMOKE] Verify that the native token is visible">
+      <failure message="Timed out retrying after 10000ms: `cy.contains()` failed because it requires a DOM element, window or document.
+
+No elements in the current DOM matched your query:
+
+  &gt; cy.get(table[aria-labelledby=&quot;tableTitle&quot;])" type="CypressError"><![CDATA[CypressError: Timed out retrying after 10000ms: `cy.contains()` failed because it requires a DOM element, window or document.
+
+No elements in the current DOM matched your query:
+
+  > cy.get(table[aria-labelledby="tableTitle"])
+    at isElement (http://localhost:3000/__cypress/runner/cypress_runner.js:144996:62)
+    at validateType (http://localhost:3000/__cypress/runner/cypress_runner.js:144854:14)
+    at Object.isType (http://localhost:3000/__cypress/runner/cypress_runner.js:144885:7)
+    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:132102:22)
+    at Object.subjectFn (http://localhost:3000/__cypress/runner/cypress_runner.js:143866:16)
+    at $Cy.verifyUpcomingAssertions (http://localhost:3000/__cypress/runner/cypress_runner.js:143205:31)
+    at onRetry (http://localhost:3000/__cypress/runner/cypress_runner.js:143857:15)
+    at tryCatcher (http://localhost:3000/__cypress/runner/cypress_runner.js:1830:23)
+    at Promise.attempt.Promise.try (http://localhost:3000/__cypress/runner/cypress_runner.js:4338:29)
+    at whenStable (http://localhost:3000/__cypress/runner/cypress_runner.js:143744:68)
+    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:143685:14)
+    at tryCatcher (http://localhost:3000/__cypress/runner/cypress_runner.js:1830:23)
+    at Promise._settlePromiseFromHandler (http://localhost:3000/__cypress/runner/cypress_runner.js:1542:31)
+    at Promise._settlePromise (http://localhost:3000/__cypress/runner/cypress_runner.js:1599:18)
+    at Promise._settlePromise0 (http://localhost:3000/__cypress/runner/cypress_runner.js:1644:10)
+    at Promise._settlePromises (http://localhost:3000/__cypress/runner/cypress_runner.js:1724:18)
+    at Promise._fulfill (http://localhost:3000/__cypress/runner/cypress_runner.js:1668:18)
+    at <unknown> (http://localhost:3000/__cypress/runner/cypress_runner.js:5473:46)
+From Your Spec Code:
+    at Object.verifyTokenIsPresent (webpack://@safe-global/web/./cypress/e2e/pages/assets.pages.js:310:25)
+    at Context.eval (webpack://@safe-global/web/./cypress/e2e/smoke/assets.cy.js:21:11)]]></failure>
+    </testcase>
+    <testcase name="[SMOKE] Assets tests [SMOKE] Verify that the token tab is selected by default and the table is visible" time="5.948" classname="[SMOKE] Verify that the token tab is selected by default and the table is visible">
+    </testcase>
+    <testcase name="[SMOKE] Assets tests [SMOKE] Verify that Token list dropdown shows options &quot;Default tokens&quot; and &quot;All tokens&quot;" time="15.764" classname="[SMOKE] Verify that Token list dropdown shows options &quot;Default tokens&quot; and &quot;All tokens&quot;">
+      <failure message="Timed out retrying after 10000ms: Expected to find element: `table[aria-labelledby=&quot;tableTitle&quot;]`, but never found it." type="AssertionError"><![CDATA[AssertionError: Timed out retrying after 10000ms: Expected to find element: `table[aria-labelledby="tableTitle"]`, but never found it.
+    at eval (webpack://@safe-global/web/./cypress/e2e/pages/main.page.js:315:20)
+at Array.forEach (<anonymous>)
+    at Object.verifyValuesExist (webpack://@safe-global/web/./cypress/e2e/pages/main.page.js:314:9)
+    at Context.eval (webpack://@safe-global/web/./cypress/e2e/smoke/assets.cy.js:39:9)]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

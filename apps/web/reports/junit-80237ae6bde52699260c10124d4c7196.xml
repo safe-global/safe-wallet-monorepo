@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="20.438" tests="1" failures="0">
+  <testsuite name="Root Suite" timestamp="2025-11-25T12:16:32" tests="0" file="cypress/e2e/smoke/address_book.cy.js" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="[SMOKE] Address book tests" timestamp="2025-11-25T12:16:32" tests="1" time="20.422" failures="0">
+    <testcase name="[SMOKE] Address book tests [SMOKE] Verify empty name is not allowed when editing" time="20.295" classname="[SMOKE] Verify empty name is not allowed when editing">
+    </testcase>
+  </testsuite>
+</testsuites>

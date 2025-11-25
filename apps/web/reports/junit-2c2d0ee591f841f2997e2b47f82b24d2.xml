@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="22.933" tests="3" failures="0">
+  <testsuite name="Root Suite" timestamp="2025-11-25T12:15:56" tests="0" file="cypress/e2e/smoke/assets.cy.js" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="[SMOKE] Assets tests" timestamp="2025-11-25T12:15:56" tests="3" time="22.919" failures="0">
+    <testcase name="[SMOKE] Assets tests [SMOKE] Verify that the native token is visible" time="8.268" classname="[SMOKE] Verify that the native token is visible">
+    </testcase>
+    <testcase name="[SMOKE] Assets tests [SMOKE] Verify that the token tab is selected by default and the table is visible" time="6.767" classname="[SMOKE] Verify that the token tab is selected by default and the table is visible">
+    </testcase>
+    <testcase name="[SMOKE] Assets tests [SMOKE] Verify that Token list dropdown shows options &quot;Default tokens&quot; and &quot;All tokens&quot;" time="7.604" classname="[SMOKE] Verify that Token list dropdown shows options &quot;Default tokens&quot; and &quot;All tokens&quot;">
+    </testcase>
+  </testsuite>
+</testsuites>

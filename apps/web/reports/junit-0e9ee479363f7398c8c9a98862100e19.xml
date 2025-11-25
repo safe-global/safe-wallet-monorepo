@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="91.225" tests="7" failures="0">
+  <testsuite name="Root Suite" timestamp="2025-11-25T12:23:11" tests="0" file="cypress/e2e/smoke/tx_history.cy.js" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="[SMOKE] Tx history tests" timestamp="2025-11-25T12:23:11" tests="7" time="91.210" failures="0">
+    <testcase name="[SMOKE] Tx history tests [SMOKE] Verify summary for token receipt" time="8.857" classname="[SMOKE] Verify summary for token receipt">
+    </testcase>
+    <testcase name="[SMOKE] Tx history tests [SMOKE] Verify exapanded details for token receipt" time="10.286" classname="[SMOKE] Verify exapanded details for token receipt">
+    </testcase>
+    <testcase name="[SMOKE] Tx history tests [SMOKE] Verify summary for token send" time="8.282" classname="[SMOKE] Verify summary for token send">
+    </testcase>
+    <testcase name="[SMOKE] Tx history tests [SMOKE] Verify summary for on-chain rejection" time="10.838" classname="[SMOKE] Verify summary for on-chain rejection">
+    </testcase>
+    <testcase name="[SMOKE] Tx history tests [SMOKE] Verify summary for batch" time="9.721" classname="[SMOKE] Verify summary for batch">
+    </testcase>
+    <testcase name="[SMOKE] Tx history tests [SMOKE] Verify summary for allowance deletion" time="9.769" classname="[SMOKE] Verify summary for allowance deletion">
+    </testcase>
+    <testcase name="[SMOKE] Tx history tests [SMOKE] Verify summary for untrusted token" time="12.594" classname="[SMOKE] Verify summary for untrusted token">
+    </testcase>
+  </testsuite>
+</testsuites>
