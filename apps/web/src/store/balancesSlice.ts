@@ -3,12 +3,14 @@ import type { AppBalance } from '@safe-global/store/gateway/AUTO_GENERATED/portf
 
 import { createSelector } from '@reduxjs/toolkit'
 import { makeLoadableSlice } from './common'
-import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import type { PortfolioBalances } from '@/hooks/loadables/useLoadBalances'
 
-export const initialBalancesState: Balances = {
+export const initialBalancesState: PortfolioBalances = {
   items: [],
   fiatTotal: '',
+  tokensFiatTotal: undefined,
+  positionsFiatTotal: undefined,
+  positions: undefined,
 }
 
 const { slice, selector } = makeLoadableSlice('balances', initialBalancesState)
@@ -21,5 +23,5 @@ export const selectTokens = createSelector(selectBalances, (balancesState): Bala
 )
 
 export const selectPositions = createSelector(selectBalances, (balancesState): AppBalance[] | undefined => {
-  return (balancesState.data as PortfolioBalances)?.positions
+  return balancesState.data.positions
 })
