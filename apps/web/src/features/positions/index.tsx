@@ -4,7 +4,7 @@ import EnhancedTable from '@/components/common/EnhancedTable'
 import FiatValue from '@/components/common/FiatValue'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { getReadablePositionType } from '@/features/positions/utils'
-import IframeIcon from '@/components/common/IframeIcon'
+import TokenIcon from '@/components/common/TokenIcon'
 import { FiatChange } from '@/components/balances/AssetsTable/FiatChange'
 import usePositions from '@/features/positions/hooks/usePositions'
 import PositionsEmpty from '@/features/positions/components/PositionsEmpty'
@@ -69,11 +69,10 @@ export const Positions = () => {
                       name: {
                         content: (
                           <Stack direction="row" alignItems="center" gap={1}>
-                            <IframeIcon
-                              src={position.tokenInfo.logoUri || ''}
-                              alt={position.tokenInfo.name + ' icon'}
-                              width={32}
-                              height={32}
+                            <TokenIcon
+                              logoUri={position.tokenInfo.logoUri || undefined}
+                              tokenSymbol={position.tokenInfo.symbol}
+                              size={32}
                             />
 
                             <Box>
