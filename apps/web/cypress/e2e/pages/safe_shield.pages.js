@@ -177,22 +177,6 @@ export function verifyWidgetContainsText(text) {
   cy.get(safeShieldWidget).should('contain', text)
 }
 
-/**
- * Verify specific text is visible anywhere in the page
- * @param {string} text - Text to search for
- */
-export function verifyTextVisible(text) {
-  cy.contains(text).should('be.visible')
-}
-
-/**
- * Verify specific text is not visible
- * @param {string} text - Text to search for
- */
-export function verifyTextNotVisible(text) {
-  cy.contains(text).should('not.exist')
-}
-
 // Verify Safe Shield header shows Issues found
 export function verifyIssuesFoundWarningHeader() {
   cy.get(safeShieldStatusBar).should('contain.text', issuesFoundStr)
@@ -247,14 +231,6 @@ export function verifyThreatAnalysisFoundNoIssues() {
 // Verify threat analysis shows malicious threat detected state
 export function verifyThreatAnalysisMaliciousState() {
   cy.get(threatAnalysisGroupCard).should('contain.text', maliciousThreatStr)
-}
-
-// Verify malicious details in expanded threat analysis card
-// @param {string} message1 - First message to verify
-// @param {string} message2 - Second message to verify
-export function verifyMaliciousDetails(message1, message2) {
-  verifyTextVisible(message1)
-  verifyTextVisible(message2)
 }
 
 // ========================================

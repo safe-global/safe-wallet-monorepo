@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as shield from '../pages/safe_shield.pages.js'
 import * as createtx from '../pages/create_tx.pages.js'
+import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 
@@ -89,6 +90,7 @@ describe('Safe Shield tests', { defaultCommandTimeout: 30000 }, () => {
     shield.verifyThreatAnalysisNoThreatState()
     shield.expandThreatAnalysisCard()
     shield.verifyThreatAnalysisFoundNoIssues()
+    main.verifyTextNotVisible(['Malicious threat detected', 'Threat analysis failed'])
   })
 
   it('[Threat Analyse] Verify Malicious Approval detection - 9A', () => {
@@ -107,7 +109,7 @@ describe('Safe Shield tests', { defaultCommandTimeout: 30000 }, () => {
     shield.verifyThreatAnalysisGroupCard()
     shield.verifyThreatAnalysisMaliciousState()
     shield.expandThreatAnalysisCard()
-    shield.verifyMaliciousDetails(shield.maliciousApprovalMessageStr, shield.walletDrainerBehaviorStr)
+    main.verifyTextVisibility([shield.maliciousApprovalMessageStr, shield.walletDrainerBehaviorStr])
   })
 
   it('[Threat Analyse] Verify Malicious Transfer detection - 9A', () => {
@@ -126,7 +128,7 @@ describe('Safe Shield tests', { defaultCommandTimeout: 30000 }, () => {
     shield.verifyThreatAnalysisGroupCard()
     shield.verifyThreatAnalysisMaliciousState()
     shield.expandThreatAnalysisCard()
-    shield.verifyMaliciousDetails(shield.maliciousTransferMessageStr, shield.walletDrainerBehaviorStr)
+    main.verifyTextVisibility([shield.maliciousTransferMessageStr, shield.walletDrainerBehaviorStr])
   })
 
   it('[Threat Analyse] Verify Malicious Native Transfer detection - 9A', () => {
@@ -145,7 +147,7 @@ describe('Safe Shield tests', { defaultCommandTimeout: 30000 }, () => {
     shield.verifyThreatAnalysisGroupCard()
     shield.verifyThreatAnalysisMaliciousState()
     shield.expandThreatAnalysisCard()
-    shield.verifyMaliciousDetails(shield.maliciousNativeTransferMessageStr, shield.walletDrainerBehaviorStr)
+    main.verifyTextVisibility([shield.maliciousNativeTransferMessageStr, shield.walletDrainerBehaviorStr])
   })
 
   it('[Threat Analyse] Verify Malicious wallet_sendCalls detection - 9A', () => {
@@ -164,7 +166,7 @@ describe('Safe Shield tests', { defaultCommandTimeout: 30000 }, () => {
     shield.verifyThreatAnalysisGroupCard()
     shield.verifyThreatAnalysisMaliciousState()
     shield.expandThreatAnalysisCard()
-    shield.verifyMaliciousDetails(shield.maliciousAddressMessageStr, shield.maliciousActivityStr)
+    main.verifyTextVisibility([shield.maliciousAddressMessageStr, shield.maliciousActivityStr])
   })
 
   it('[Threat Analyse] Verify Malicious wallet_sendCalls(Eth) detection - 9A', () => {
@@ -183,7 +185,7 @@ describe('Safe Shield tests', { defaultCommandTimeout: 30000 }, () => {
     shield.verifyThreatAnalysisGroupCard()
     shield.verifyThreatAnalysisMaliciousState()
     shield.expandThreatAnalysisCard()
-    shield.verifyMaliciousDetails(shield.maliciousAddressMessageStr, shield.maliciousActivityStr)
+    main.verifyTextVisibility([shield.maliciousAddressMessageStr, shield.maliciousActivityStr])
   })
   //TODO: Add tests for offchain messages when implemented
   // ========================================
