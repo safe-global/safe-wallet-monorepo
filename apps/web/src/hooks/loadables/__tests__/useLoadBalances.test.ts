@@ -260,6 +260,30 @@ describe('useLoadBalances', () => {
         }
         return false
       })
+
+      // Set token list to TRUSTED to use portfolio endpoint (ALL uses legacy)
+      jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
+        selector({
+          chains: {
+            data: [mockChain],
+          },
+          safeInfo: {
+            data: mockDeployedSafe,
+            loading: false,
+            loaded: true,
+          },
+          settings: {
+            currency: 'USD',
+            hiddenTokens: {},
+            shortName: {
+              copy: true,
+              qr: true,
+            },
+            theme: {},
+            tokenList: TOKEN_LISTS.TRUSTED,
+          },
+        } as unknown as store.RootState),
+      )
     })
 
     it('should return portfolio balances when portfolio endpoint is enabled', async () => {
@@ -428,6 +452,125 @@ describe('useLoadBalances', () => {
       const { result } = renderHook(() => useLoadBalances())
 
       expect(result.current[2]).toBe(true)
+    })
+
+    it('should use legacy endpoint when "All tokens" is selected', async () => {
+      const mockLegacyBalances = createMockLegacyBalances()
+      const mockPortfolio = createMockPortfolio()
+
+      // Set token list to ALL
+      jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
+        selector({
+          chains: {
+            data: [mockChain],
+          },
+          safeInfo: {
+            data: mockDeployedSafe,
+            loading: false,
+            loaded: true,
+          },
+          settings: {
+            currency: 'USD',
+            hiddenTokens: {},
+            shortName: {
+              copy: true,
+              qr: true,
+            },
+            theme: {},
+            tokenList: TOKEN_LISTS.ALL,
+          },
+        } as unknown as store.RootState),
+      )
+
+      jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
+        currentData: mockLegacyBalances,
+        isLoading: false,
+        error: undefined,
+        refetch: jest.fn(),
+      } as any)
+
+      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
+        currentData: mockPortfolio,
+        isLoading: false,
+        error: undefined,
+        refetch: jest.fn(),
+      } as any)
+
+      const { result } = renderHook(() => useLoadBalances())
+
+      await waitFor(() => {
+        expect(result.current[0]).toBeDefined()
+      })
+
+      const [balances, error, loading] = result.current
+
+      // Should return legacy balances, not portfolio (even when portfolio feature is enabled)
+      // This ensures users can see tokens that Zerion may not support via the legacy endpoint
+      expect(balances?.fiatTotal).toBe(mockLegacyBalances.fiatTotal)
+      expect(balances?.tokensFiatTotal).toBe(mockLegacyBalances.fiatTotal)
+      expect(balances?.positionsFiatTotal).toBe('0')
+      expect(balances?.positions).toBeUndefined()
+      expect(error).toBeUndefined()
+      expect(loading).toBe(false)
+    })
+
+    it('should use portfolio endpoint when "Default tokens" is selected', async () => {
+      const mockLegacyBalances = createMockLegacyBalances()
+      const mockPortfolio = createMockPortfolio()
+
+      // Set token list to TRUSTED
+      jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
+        selector({
+          chains: {
+            data: [mockChain],
+          },
+          safeInfo: {
+            data: mockDeployedSafe,
+            loading: false,
+            loaded: true,
+          },
+          settings: {
+            currency: 'USD',
+            hiddenTokens: {},
+            shortName: {
+              copy: true,
+              qr: true,
+            },
+            theme: {},
+            tokenList: TOKEN_LISTS.TRUSTED,
+          },
+        } as unknown as store.RootState),
+      )
+
+      jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
+        currentData: mockLegacyBalances,
+        isLoading: false,
+        error: undefined,
+        refetch: jest.fn(),
+      } as any)
+
+      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
+        currentData: mockPortfolio,
+        isLoading: false,
+        error: undefined,
+        refetch: jest.fn(),
+      } as any)
+
+      const { result } = renderHook(() => useLoadBalances())
+
+      await waitFor(() => {
+        expect(result.current[0]).toBeDefined()
+      })
+
+      const [balances, error, loading] = result.current
+
+      // Should return portfolio balances when "Default tokens" is selected and portfolio feature is enabled
+      expect(balances?.fiatTotal).toBe(mockPortfolio.totalBalanceFiat)
+      expect(balances?.tokensFiatTotal).toBe(mockPortfolio.totalTokenBalanceFiat)
+      expect(balances?.positionsFiatTotal).toBe(mockPortfolio.totalPositionsBalanceFiat)
+      expect(balances?.positions).toEqual(mockPortfolio.positionBalances)
+      expect(error).toBeUndefined()
+      expect(loading).toBe(false)
     })
 
     it('should transform portfolio data correctly', async () => {
