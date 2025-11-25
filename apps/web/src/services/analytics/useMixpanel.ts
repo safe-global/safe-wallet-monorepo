@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useTheme } from '@mui/material/styles'
-import mixpanel from 'mixpanel-browser'
 import {
   mixpanelInit,
   mixpanelSetBlockchainNetwork,
@@ -11,6 +10,8 @@ import {
   mixpanelSetEOAWalletLabel,
   mixpanelSetEOAWalletAddress,
   mixpanelSetEOAWalletNetwork,
+  mixpanelOptInTracking,
+  mixpanelOptOutTracking,
 } from './mixpanel'
 import { useAppSelector } from '@/store'
 import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
@@ -55,16 +56,12 @@ const useMixpanel = () => {
     if (!isMixpanelEnabled) return
 
     if (isAnalyticsEnabled) {
-      mixpanel.opt_in_tracking()
+      mixpanelOptInTracking()
       if (!IS_PRODUCTION) {
         console.info('[Mixpanel] - User opted in')
       }
     } else {
-      try {
-        mixpanel.opt_out_tracking()
-      } catch {
-        // do nothing, opt_out_tracking throws an error if tracking was never enabled
-      }
+      mixpanelOptOutTracking()
       if (!IS_PRODUCTION) {
         console.info('[Mixpanel] - User opted out')
       }
