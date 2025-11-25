@@ -29,31 +29,24 @@ export const progressBar = '[role="progressbar"]'
 // Transaction IDs for Safe Shield testing scenarios
 export const testTransactions = {
   // Threat analysis test - transaction with threat analysis failure
-  // Shows "Issues found" status with warning colors and threat analysis failed state
   threatAnalysisFailed:
     '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x531e49fc6655b8013148d08f0e669b91fc29ee23c9ab005948d93447eaef079b',
   // Threat analysis test - transaction with no threat detected
-  // Shows "Checks passed" status and threat analysis found no issues
   threatAnalysisNoThreat:
     '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0xe329b8243ff94c02fa4d9fd382789d669cb5969efbce5e275635ce6d3577fa5e',
   // Threat analysis test - transaction with malicious approval (drainer contract)
-  // Shows "Risk detected" status and malicious threat detected with drainer warning
   threatAnalysisMaliciousApproval:
     '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x657afdcb7589bb4b6386c39d71692840f3f616c512401dff51bef1ccb46592d7',
   // Threat analysis test - transaction with malicious transfer (drainer contract)
-  // Shows "Risk detected" status and malicious threat detected with drainer transfer warning
   threatAnalysisMaliciousTransfer:
     '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0xc764a15c522af6477ebbe7d808a509806879a68bd097b8594e1437c71fb345f1',
   // Threat analysis test - transaction with malicious native currency transfer (drainer contract)
-  // Shows "Risk detected" status and malicious threat detected with native currency drainer warning
   threatAnalysisMaliciousNativeTransfer:
     '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x1de5f38dde9d01705482a9fae07a82e90091a4d4683c148701858fd03d48db05',
   // Threat analysis test - transaction with malicious address (wallet_sendCalls)
-  // Shows "Risk detected" status and malicious threat detected with known malicious address warning
   threatAnalysisMaliciousAddress:
     '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x5727020cc864376612fba6ee8fd146a8d2e8b671857b22efc9ef45062f7a517f',
   // Threat analysis test - transaction with malicious address (wallet_sendCalls with Eth)
-  // Shows "Risk detected" status and malicious threat detected with known malicious address warning
   threatAnalysisMaliciousAddressEth:
     '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x228751aa0f0442baf8a670e3af8bbe93c22c7e9a0ad14527620f9a50b972f52c',
 }
