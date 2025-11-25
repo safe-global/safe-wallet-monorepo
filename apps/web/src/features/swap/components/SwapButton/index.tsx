@@ -59,7 +59,7 @@ const SwapButton = ({
                   aria-label="Swap"
                   className={assetActionCss.assetActionIconButton}
                 >
-                  <SvgIcon component={SwapIcon} inheritViewBox sx={{ width: 16, height: 16 }} />
+                  <SvgIcon component={SwapIcon} inheritViewBox />
                 </IconButton>
               </span>
             </Tooltip>
@@ -73,6 +73,7 @@ const SwapButton = ({
               disableElevation
               onClick={handleClick}
               disabled={!isOk}
+              className={assetActionCss.sendButton}
             >
               Swap
             </Button>

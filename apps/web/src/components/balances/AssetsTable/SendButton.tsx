@@ -41,7 +41,7 @@ const SendButton = ({
                   aria-label="Send"
                   className={css.assetActionIconButton}
                 >
-                  <SvgIcon component={ArrowIconNW} inheritViewBox sx={{ width: 16, height: 16 }} />
+                  <SvgIcon component={ArrowIconNW} inheritViewBox />
                 </IconButton>
               </span>
             </Tooltip>
@@ -54,7 +54,7 @@ const SendButton = ({
               startIcon={<ArrowIconNW />}
               onClick={onSendClick}
               disabled={!isOk}
-              sx={{ height: 32, px: 2 }}
+              className={css.sendButton}
             >
               Send
             </Button>

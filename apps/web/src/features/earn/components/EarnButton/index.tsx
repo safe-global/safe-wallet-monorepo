@@ -60,7 +60,7 @@ const EarnButton = ({
                   size="small"
                   className={assetActionCss.assetActionIconButton}
                 >
-                  <SvgIcon component={EarnIcon} inheritViewBox sx={{ width: 16, height: 16 }} />
+                  <SvgIcon component={EarnIcon} inheritViewBox />
                 </IconButton>
               </span>
             </Tooltip>

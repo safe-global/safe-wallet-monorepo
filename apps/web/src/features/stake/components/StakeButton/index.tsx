@@ -15,6 +15,7 @@ import css from './styles.module.css'
 import classnames from 'classnames'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import assetActionCss from '@/components/common/AssetActionButton/styles.module.css'
+
 const StakeButton = ({
   tokenInfo,
   trackingLabel,
@@ -60,7 +61,7 @@ const StakeButton = ({
                   size="small"
                   className={assetActionCss.assetActionIconButton}
                 >
-                  <SvgIcon component={StakeIcon} inheritViewBox sx={{ width: 16, height: 16 }} />
+                  <SvgIcon component={StakeIcon} inheritViewBox />
                 </IconButton>
               </span>
             </Tooltip>
