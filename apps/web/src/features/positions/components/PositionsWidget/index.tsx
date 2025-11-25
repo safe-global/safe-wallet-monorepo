@@ -26,6 +26,8 @@ import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { POSITIONS_EVENTS, POSITIONS_LABELS } from '@/services/analytics/events/positions'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useHasFeature } from '@/hooks/useChains'
 
 const MAX_PROTOCOLS = 4
 
@@ -34,6 +36,7 @@ const PositionsWidget = () => {
   const { safe } = router.query
   const { data, error, isLoading } = usePositions()
   const positionsFiatTotal = usePositionsFiatTotal()
+  const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
 
   const viewAllUrl = useMemo(
     () => ({
@@ -161,17 +164,19 @@ const PositionsWidget = () => {
         )}
       </Stack>
 
-      <Box mb={1} sx={{ px: 1.5 }}>
-        <Typography
-          variant="caption"
-          sx={{
-            color: 'text.secondary',
-            letterSpacing: '1px',
-          }}
-        >
-          Position balances are not included in the total asset value.
-        </Typography>
-      </Box>
+      {!isPortfolioEndpointEnabled && (
+        <Box mb={1} sx={{ px: 1.5 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'text.secondary',
+              letterSpacing: '1px',
+            }}
+          >
+            Position balances are not included in the total asset value.
+          </Typography>
+        </Box>
+      )}
 
       <Box>
         {protocols.length === 0 ? (
