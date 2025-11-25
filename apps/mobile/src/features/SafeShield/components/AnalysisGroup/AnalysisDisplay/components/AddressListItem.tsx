@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text, View, Stack } from 'tamagui'
+import { Text, Stack } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { TouchableOpacity } from 'react-native'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
