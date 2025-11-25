@@ -12,7 +12,6 @@ import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { CookieAndTermType, cookiesAndTermsSlice, cookiesAndTermsInitialState } from '@/store/cookiesAndTermsSlice'
 import { DeviceType } from '../types'
 import { MixpanelUserProperty } from '../mixpanel-events'
-import mixpanel from 'mixpanel-browser'
 import { version } from '@/markdown/terms/version'
 import type { RootState } from '@/store'
 
@@ -150,6 +149,7 @@ describe('useMixpanel', () => {
   })
 
   it('should opt in tracking when analytics is enabled', () => {
+    jest.spyOn(mixpanelModule, 'mixpanelOptInTracking')
     const initialReduxState: Partial<RootState> = {
       [cookiesAndTermsSlice.name]: {
         ...cookiesAndTermsInitialState,
@@ -160,10 +160,11 @@ describe('useMixpanel', () => {
 
     renderHook(() => useMixpanel(), { initialReduxState })
 
-    expect(mixpanel.opt_in_tracking).toHaveBeenCalled()
+    expect(mixpanelModule.mixpanelOptInTracking).toHaveBeenCalled()
   })
 
   it('should opt out tracking when analytics is disabled', () => {
+    jest.spyOn(mixpanelModule, 'mixpanelOptOutTracking')
     const initialReduxState: Partial<RootState> = {
       [cookiesAndTermsSlice.name]: {
         ...cookiesAndTermsInitialState,
@@ -174,7 +175,7 @@ describe('useMixpanel', () => {
 
     renderHook(() => useMixpanel(), { initialReduxState })
 
-    expect(mixpanel.opt_out_tracking).toHaveBeenCalled()
+    expect(mixpanelModule.mixpanelOptOutTracking).toHaveBeenCalled()
   })
 
   const getDefaultInitialReduxState = (): Partial<RootState> => ({

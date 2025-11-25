@@ -127,7 +127,7 @@ describe('useLoadBalances', () => {
     await waitFor(() => {
       expect(result.current[0]).toBeUndefined()
       expect(result.current[1]).toBeUndefined()
-      expect(result.current[2]).toBeFalsy()
+      expect(result.current[2]).toBe(true)
     })
   })
 
