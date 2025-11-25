@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="Mocha Tests" time="9.206" tests="1" failures="0">
-  <testsuite name="Root Suite" timestamp="2025-11-25T12:20:18" tests="0" file="cypress/e2e/smoke/landing.cy.js" time="0.000" failures="0">
-  </testsuite>
-  <testsuite name="[SMOKE] Landing page tests" timestamp="2025-11-25T12:20:18" tests="1" time="9.198" failures="0">
-    <testcase name="[SMOKE] Landing page tests [SMOKE] Verify a user will be redirected to welcome page" time="8.932" classname="[SMOKE] Verify a user will be redirected to welcome page">
-    </testcase>
-  </testsuite>
-</testsuites>
