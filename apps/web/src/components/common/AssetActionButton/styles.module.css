@@ -3,18 +3,38 @@
   height: 28px;
   min-width: 28px;
   padding: 6px;
-  background-color: var(--color-background-paper);
-  border-radius: 4px;
+  background-color: #f4f4f4 !important;
+  border-radius: 4px !important;
 }
 
 .assetActionIconButton:hover {
-  background-color: var(--color-background-main);
+  background-color: #dddee0 !important;
+}
+
+.assetActionIconButton:hover svg {
+  color: #121312;
+}
+
+:global([data-theme='dark']) .assetActionIconButton {
+  background-color: #121312 !important;
+}
+
+:global([data-theme='dark']) .assetActionIconButton:hover {
+  background-color: #303033 !important;
+}
+
+:global([data-theme='dark']) .assetActionIconButton svg {
+  color: #a1a3a7;
+}
+
+:global([data-theme='dark']) .assetActionIconButton:hover svg {
+  color: #ffffff;
 }
 
 .assetActionIconButton svg {
   width: 16px;
   height: 16px;
-  color: inherit;
+  color: var(--color-primary-light);
 }
 
 .sendButton {

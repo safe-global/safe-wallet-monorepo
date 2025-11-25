@@ -50,7 +50,7 @@ const EarnButton = ({
           }}
         >
           {onlyIcon ? (
-            <Tooltip title="Earn" placement="top" arrow>
+            <Tooltip title={isOk ? 'Earn' : ''} placement="top" arrow>
               <span>
                 <IconButton
                   data-testid="earn-btn"

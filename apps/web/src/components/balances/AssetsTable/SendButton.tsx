@@ -31,7 +31,7 @@ const SendButton = ({
       {(isOk) => (
         <Track {...ASSETS_EVENTS.SEND}>
           {onlyIcon ? (
-            <Tooltip title="Send" placement="top" arrow>
+            <Tooltip title={isOk ? 'Send' : ''} placement="top" arrow>
               <span>
                 <IconButton
                   data-testid="send-button"
