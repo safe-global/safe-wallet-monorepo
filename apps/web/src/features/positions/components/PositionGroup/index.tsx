@@ -3,7 +3,7 @@ import EnhancedTable from '@/components/common/EnhancedTable'
 import FiatValue from '@/components/common/FiatValue'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { getReadablePositionType } from '@/features/positions/utils'
-import IframeIcon from '@/components/common/IframeIcon'
+import TokenIcon from '@/components/common/TokenIcon'
 import { FiatChange } from '@/components/balances/AssetsTable/FiatChange'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 
@@ -38,12 +38,7 @@ export const PositionGroup = ({ group, isLast = false }: PositionGroupProps) => 
       name: {
         content: (
           <Stack direction="row" alignItems="center" gap={1}>
-            <IframeIcon
-              src={position.tokenInfo.logoUri || ''}
-              alt={position.tokenInfo.name + ' icon'}
-              width={32}
-              height={32}
-            />
+            <TokenIcon logoUri={position.tokenInfo.logoUri} tokenSymbol={position.tokenInfo.symbol} size={32} />
 
             <Box>
               <Typography variant="body2" fontWeight="bold">

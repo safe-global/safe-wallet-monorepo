@@ -7,9 +7,17 @@ import css from './styles.module.css'
 
 interface ManageTokensButtonProps {
   onHideTokens?: () => void
+  /** Takes precedence over useHasFeature(FEATURES.DEFAULT_TOKENLIST) when provided */
+  _hasDefaultTokenlist?: boolean
+  /** Takes precedence over useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) when provided */
+  _hasPortfolioEndpoint?: boolean
 }
 
-const ManageTokensButton = ({ onHideTokens }: ManageTokensButtonProps): ReactElement => {
+const ManageTokensButton = ({
+  onHideTokens,
+  _hasDefaultTokenlist,
+  _hasPortfolioEndpoint,
+}: ManageTokensButtonProps): ReactElement => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const open = Boolean(anchorEl)
 
@@ -34,7 +42,14 @@ const ManageTokensButton = ({ onHideTokens }: ManageTokensButtonProps): ReactEle
       >
         <Typography fontSize="medium">Manage tokens</Typography>
       </Button>
-      <ManageTokensMenu anchorEl={anchorEl} open={open} onClose={handleClose} onHideTokens={onHideTokens} />
+      <ManageTokensMenu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        onHideTokens={onHideTokens}
+        _hasDefaultTokenlist={_hasDefaultTokenlist}
+        _hasPortfolioEndpoint={_hasPortfolioEndpoint}
+      />
     </>
   )
 }

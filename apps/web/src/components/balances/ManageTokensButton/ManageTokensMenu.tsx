@@ -19,6 +19,10 @@ interface ManageTokensMenuProps {
   open: boolean
   onClose: () => void
   onHideTokens?: () => void
+  /** Takes precedence over useHasFeature(FEATURES.DEFAULT_TOKENLIST) when provided */
+  _hasDefaultTokenlist?: boolean
+  /** Takes precedence over useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) when provided */
+  _hasPortfolioEndpoint?: boolean
 }
 
 const menuItemHoverSx = {
@@ -27,12 +31,22 @@ const menuItemHoverSx = {
   },
 }
 
-const ManageTokensMenu = ({ anchorEl, open, onClose, onHideTokens }: ManageTokensMenuProps): ReactElement => {
+const ManageTokensMenu = ({
+  anchorEl,
+  open,
+  onClose,
+  onHideTokens,
+  _hasDefaultTokenlist,
+  _hasPortfolioEndpoint,
+}: ManageTokensMenuProps): ReactElement => {
   const dispatch = useAppDispatch()
   const settings = useAppSelector(selectSettings)
-  const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
-  const shouldUsePortfolioEndpoint = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
+  const hasDefaultTokenlistFromHook = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
+  const hasPortfolioEndpointFromHook = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT)
   const hiddenTokens = useHiddenTokens()
+
+  const hasDefaultTokenlist = _hasDefaultTokenlist ?? hasDefaultTokenlistFromHook
+  const shouldUsePortfolioEndpoint = _hasPortfolioEndpoint ?? hasPortfolioEndpointFromHook ?? false
 
   const showAllTokens = settings.tokenList === TOKEN_LISTS.ALL || settings.tokenList === undefined
   const hideDust = settings.hideDust ?? true

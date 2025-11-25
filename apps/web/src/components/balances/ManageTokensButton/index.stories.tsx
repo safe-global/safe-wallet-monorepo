@@ -3,155 +3,109 @@ import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import ManageTokensButton from './index'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 
-interface StoryArgs {
-  hasDefaultTokenlist?: boolean
-  hasPortfolioEndpoint?: boolean
-  tokenList?: TOKEN_LISTS
-  hiddenTokensCount?: number
-  onHideTokens?: () => void
+const baseSettings = {
+  currency: 'usd',
+  tokenList: TOKEN_LISTS.TRUSTED,
+  hideDust: true,
+  shortName: { copy: true, qr: true },
+  theme: {},
+  env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
+  signing: { onChainSigning: false, blindSigning: false },
+  transactionExecution: true,
 }
 
-const meta: Meta<StoryArgs> = {
+const meta: Meta<typeof ManageTokensButton> = {
   title: 'Components/Balances/ManageTokensButton',
   component: ManageTokensButton,
   parameters: {
     layout: 'centered',
+    docs: {
+      description: {
+        component: `
+ManageTokensButton opens a menu with token management options:
+- **Show all tokens**: Toggle between trusted tokens and all tokens (requires DEFAULT_TOKENLIST feature)
+- **Hide small balances**: Hide tokens below dust threshold (requires PORTFOLIO_ENDPOINT feature)
+- **Hide tokens**: Open hidden tokens management (shows count if tokens are hidden)
+        `,
+      },
+    },
   },
   decorators: [
-    (Story, context) => {
-      const args = context.args as StoryArgs
-      const hasDefaultTokenlist = args.hasDefaultTokenlist ?? true
-      const hasPortfolioEndpoint = args.hasPortfolioEndpoint ?? false
-      const tokenList = args.tokenList ?? TOKEN_LISTS.TRUSTED
-      const hiddenTokensCount = args.hiddenTokensCount ?? 0
-
-      const features: string[] = []
-      if (hasDefaultTokenlist) features.push(FEATURES.DEFAULT_TOKENLIST)
-      if (hasPortfolioEndpoint) features.push(FEATURES.PORTFOLIO_ENDPOINT)
-
-      // Set hidden tokens for common chainIds (mainnet and Sepolia) to work in different environments
-      const hiddenTokens: Record<string, string[]> =
-        hiddenTokensCount > 0
-          ? {
-              '1': Array(hiddenTokensCount).fill('0x123'),
-              '11155111': Array(hiddenTokensCount).fill('0x123'),
-            }
-          : {}
-
-      return (
-        <StoreDecorator
-          initialState={{
-            settings: {
-              currency: 'usd',
-              hiddenTokens,
-              tokenList,
-              hideDust: true,
-              shortName: { copy: true, qr: true },
-              theme: {},
-              env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
-              signing: { onChainSigning: false, blindSigning: false },
-              transactionExecution: true,
-            },
-            chains: {
-              data: [{ chainId: '1', features }],
-            },
-            safeInfo: {
-              data: { chainId: '1' },
-              loading: false,
-              loaded: true,
-            },
-          }}
-        >
-          <Paper sx={{ padding: 4 }}>
-            <Story />
-          </Paper>
-        </StoreDecorator>
-      )
-    },
+    (Story) => (
+      <StoreDecorator
+        initialState={{
+          settings: { ...baseSettings, hiddenTokens: {} },
+        }}
+      >
+        <Paper sx={{ padding: 4 }}>
+          <Story />
+        </Paper>
+      </StoreDecorator>
+    ),
   ],
   argTypes: {
-    hasDefaultTokenlist: {
+    _hasDefaultTokenlist: {
       control: { type: 'boolean' },
-      description: 'Whether DEFAULT_TOKENLIST feature is enabled',
+      description: 'Show "Show all tokens" option',
     },
-    hasPortfolioEndpoint: {
+    _hasPortfolioEndpoint: {
       control: { type: 'boolean' },
-      description: 'Whether PORTFOLIO_ENDPOINT feature is enabled',
-    },
-    tokenList: {
-      control: { type: 'select' },
-      options: [TOKEN_LISTS.TRUSTED, TOKEN_LISTS.ALL],
-      description: 'Current token list setting',
-    },
-    hiddenTokensCount: {
-      control: { type: 'number' },
-      description: 'Number of hidden tokens',
+      description: 'Show "Hide small balances" option (portfolio endpoint)',
     },
   },
   tags: ['autodocs'],
 }
 
 export default meta
-type Story = StoryObj<StoryArgs>
+type Story = StoryObj<typeof ManageTokensButton>
 
 /**
- * Default ManageTokensButton with default tokenlist feature enabled.
+ * Legacy endpoint - Shows "Show all tokens" and "Hide tokens" options.
+ * Does NOT show "Hide small balances" option.
  */
-export const Default: Story = {
+export const LegacyEndpoint: Story = {
   args: {
-    hasDefaultTokenlist: true,
-    hasPortfolioEndpoint: false,
-    tokenList: TOKEN_LISTS.TRUSTED,
-    hiddenTokensCount: 0,
+    _hasDefaultTokenlist: true,
+    _hasPortfolioEndpoint: false,
   },
 }
 
 /**
- * ManageTokensButton with portfolio endpoint enabled (shows "Hide small balances" option).
+ * Portfolio endpoint - Shows all options including "Hide small balances".
  */
-export const WithPortfolioEndpoint: Story = {
+export const PortfolioEndpoint: Story = {
   args: {
-    hasDefaultTokenlist: true,
-    hasPortfolioEndpoint: true,
-    tokenList: TOKEN_LISTS.TRUSTED,
-    hiddenTokensCount: 0,
+    _hasDefaultTokenlist: true,
+    _hasPortfolioEndpoint: true,
   },
 }
 
 /**
- * ManageTokensButton showing hidden tokens count.
+ * Shows hidden tokens count in the menu when tokens are hidden.
  */
 export const WithHiddenTokens: Story = {
   args: {
-    hasDefaultTokenlist: true,
-    hasPortfolioEndpoint: false,
-    tokenList: TOKEN_LISTS.TRUSTED,
-    hiddenTokensCount: 5,
+    _hasDefaultTokenlist: true,
+    _hasPortfolioEndpoint: false,
   },
-}
-
-/**
- * ManageTokensButton with "Show all tokens" enabled.
- */
-export const AllTokensEnabled: Story = {
-  args: {
-    hasDefaultTokenlist: true,
-    hasPortfolioEndpoint: false,
-    tokenList: TOKEN_LISTS.ALL,
-    hiddenTokensCount: 0,
-  },
-}
-
-/**
- * ManageTokensButton with all features enabled and hidden tokens.
- */
-export const FullFeatured: Story = {
-  args: {
-    hasDefaultTokenlist: true,
-    hasPortfolioEndpoint: true,
-    tokenList: TOKEN_LISTS.ALL,
-    hiddenTokensCount: 3,
-  },
+  decorators: [
+    (Story) => (
+      <StoreDecorator
+        initialState={{
+          settings: {
+            ...baseSettings,
+            hiddenTokens: {
+              '1': ['0x123', '0x456', '0x789'],
+              '11155111': ['0x123', '0x456', '0x789'],
+            },
+          },
+        }}
+      >
+        <Paper sx={{ padding: 4 }}>
+          <Story />
+        </Paper>
+      </StoreDecorator>
+    ),
+  ],
 }

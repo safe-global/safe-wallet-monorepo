@@ -3,66 +3,87 @@ import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { PositionGroup } from './index'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
-import { toBeHex } from 'ethers'
 
-const createMockPosition = (
-  name: string,
-  symbol: string,
-  balance: string,
-  fiatBalance: string,
-  positionType: string = 'deposit',
-  fiatChange?: string,
-): Protocol['items'][0]['items'][0] => ({
-  balance,
-  fiatBalance,
-  fiatConversion: '1.0',
-  fiatBalance24hChange: fiatChange ?? null,
-  position_type: positionType as Protocol['items'][0]['items'][0]['position_type'],
-  tokenInfo: {
-    address: toBeHex(Math.floor(Math.random() * 999999), 20),
-    decimals: 18,
-    logoUri: '',
-    name,
-    symbol,
-    type: 'ERC20',
-  },
-})
+const WETH_LOGO = 'https://assets.coingecko.com/coins/images/2518/small/weth.png'
+const USDC_LOGO = 'https://assets.coingecko.com/coins/images/6319/small/usdc.png'
+const DAI_LOGO = 'https://assets.coingecko.com/coins/images/9956/small/dai-multi-collateral-mcd.png'
 
 const mockSupplyGroup: Protocol['items'][0] = {
   name: 'Supply',
   items: [
-    createMockPosition('Wrapped Ether', 'WETH', '1500000000000000000', '5475.00', 'deposit', '2.5'),
-    createMockPosition('USD Coin', 'USDC', '10000000000', '10000.00', 'deposit', '0.01'),
-    createMockPosition('Dai Stablecoin', 'DAI', '5000000000000000000000', '5000.00', 'deposit', '-0.02'),
+    {
+      balance: '1500000000000000000',
+      fiatBalance: '5475.00',
+      fiatConversion: '3650.00',
+      fiatBalance24hChange: '2.5',
+      position_type: 'deposit',
+      tokenInfo: {
+        address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        decimals: 18,
+        logoUri: WETH_LOGO,
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        type: 'ERC20',
+      },
+    },
+    {
+      balance: '10000000000',
+      fiatBalance: '10000.00',
+      fiatConversion: '1.00',
+      fiatBalance24hChange: '0.01',
+      position_type: 'deposit',
+      tokenInfo: {
+        address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        decimals: 6,
+        logoUri: USDC_LOGO,
+        name: 'USD Coin',
+        symbol: 'USDC',
+        type: 'ERC20',
+      },
+    },
+    {
+      balance: '5000000000000000000000',
+      fiatBalance: '5000.00',
+      fiatConversion: '1.00',
+      fiatBalance24hChange: '-0.02',
+      position_type: 'deposit',
+      tokenInfo: {
+        address: '0x6B175474E89094C44Da98b954EedesCdB5BC64F3',
+        decimals: 18,
+        logoUri: DAI_LOGO,
+        name: 'Dai Stablecoin',
+        symbol: 'DAI',
+        type: 'ERC20',
+      },
+    },
+    {
+      balance: '1000000000000000000000',
+      fiatBalance: '2500.00',
+      fiatConversion: '2.50',
+      fiatBalance24hChange: '1.23',
+      position_type: 'deposit',
+      tokenInfo: {
+        address: '0x1234567890123456789012345678901234567890',
+        decimals: 18,
+        logoUri: '',
+        name: 'Unknown Token',
+        symbol: 'UNK',
+        type: 'ERC20',
+      },
+    },
   ],
 }
 
-const mockBorrowGroup: Protocol['items'][0] = {
-  name: 'Borrow',
-  items: [
-    createMockPosition('Wrapped Ether', 'WETH', '500000000000000000', '-1825.00', 'borrow', '2.5'),
-    createMockPosition('USD Coin', 'USDC', '2000000000', '-2000.00', 'borrow', '0.01'),
-  ],
-}
-
-const mockRewardsGroup: Protocol['items'][0] = {
-  name: 'Claimable Rewards',
-  items: [createMockPosition('Aave Token', 'AAVE', '10000000000000000000', '1200.00', 'claimable', '5.2')],
-}
-
-const mockStakingGroup: Protocol['items'][0] = {
-  name: 'Staking',
-  items: [
-    createMockPosition('Lido Staked ETH', 'stETH', '2000000000000000000', '7300.00', 'staking', '2.1'),
-    createMockPosition('Rocket Pool ETH', 'rETH', '1000000000000000000', '3700.00', 'staking', '2.3'),
-  ],
-}
-
-const meta = {
+const meta: Meta<typeof PositionGroup> = {
   title: 'Features/Positions/PositionGroup',
   component: PositionGroup,
   parameters: {
-    layout: 'fullscreen',
+    layout: 'padded',
+    docs: {
+      description: {
+        component: 'Displays a position group with its positions in a table.',
+      },
+    },
   },
   decorators: [
     (Story) => (
@@ -79,87 +100,24 @@ const meta = {
           },
         }}
       >
-        <Paper sx={{ padding: 2, maxWidth: 800 }}>
+        <Paper sx={{ padding: 2, maxWidth: 900 }}>
           <Story />
         </Paper>
       </StoreDecorator>
     ),
   ],
-  argTypes: {
-    group: {
-      control: { type: 'object' },
-      description: 'Position group data to display',
-    },
-    isLast: {
-      control: { type: 'boolean' },
-      description: 'Whether this is the last group (removes bottom margin)',
-    },
-  },
   tags: ['autodocs'],
-} satisfies Meta<typeof PositionGroup>
+}
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 /**
- * Supply position group (typical lending protocol supply positions).
+ * Displays a position group with multiple supply positions.
  */
-export const SupplyGroup: Story = {
+export const Default: Story = {
   args: {
     group: mockSupplyGroup,
-    isLast: false,
-  },
-}
-
-/**
- * Borrow position group (typical lending protocol borrow positions).
- */
-export const BorrowGroup: Story = {
-  args: {
-    group: mockBorrowGroup,
-    isLast: false,
-  },
-}
-
-/**
- * Rewards position group (claimable protocol rewards).
- */
-export const RewardsGroup: Story = {
-  args: {
-    group: mockRewardsGroup,
-    isLast: false,
-  },
-}
-
-/**
- * Staking position group (liquid staking positions).
- */
-export const StakingGroup: Story = {
-  args: {
-    group: mockStakingGroup,
-    isLast: false,
-  },
-}
-
-/**
- * Position group marked as last (no bottom margin).
- */
-export const LastGroup: Story = {
-  args: {
-    group: mockSupplyGroup,
-    isLast: true,
-  },
-}
-
-/**
- * Single position in a group.
- */
-export const SinglePosition: Story = {
-  args: {
-    group: {
-      name: 'Vault Position',
-      items: [createMockPosition('Yearn USDC Vault', 'yvUSDC', '50000000000', '50000.00', 'vault', '3.2')],
-    },
     isLast: false,
   },
 }
