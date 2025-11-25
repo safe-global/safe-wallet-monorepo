@@ -4,7 +4,7 @@ import * as modal from './modals.page.js'
 import * as navigation from './navigation.page.js'
 import { safeHeaderInfo } from './import_export.pages.js'
 import * as file from './import_export.pages.js'
-import safes from '../../fixtures/safes/static.json'
+import safes from '../../fixtures/safes/static.js'
 import * as address_book from './address_book.page.js'
 import * as create_wallet from '../pages/create_wallet.pages.js'
 

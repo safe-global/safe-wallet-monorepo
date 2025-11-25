@@ -2,7 +2,7 @@ import * as constants from '../../support/constants.js'
 import * as safeapps from './safeapps.pages.js'
 import * as main from './main.page.js'
 import * as createtx from './create_tx.pages.js'
-import staticSafes from '../../fixtures/safes/static.json'
+import staticSafes from '../../fixtures/safes/static.js'
 
 const transactionQueueStr = 'Pending transactions'
 const noTransactionStr = 'This Safe has no queued transactions'
