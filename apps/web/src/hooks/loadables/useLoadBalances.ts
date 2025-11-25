@@ -86,7 +86,7 @@ const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
       trusted: isTrustedTokenList,
     },
     {
-      skip: !isReady || shouldUsePortfolioEndpoint,
+      skip: !isReady,
       pollingInterval: POLLING_INTERVAL,
       skipPollingIfUnfocused: true,
       refetchOnFocus: true,
@@ -133,6 +133,19 @@ const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
         }
         return [createPortfolioBalances(emptyBalances), cfError, false]
       }
+
+      // When portfolio returns empty data for deployed Safe, fallback to legacy endpoint
+      if (isPortfolioEmpty && !isCounterfactual) {
+        if (legacyBalances) {
+          const error = legacyError ? new Error(String(legacyError)) : undefined
+          return [createPortfolioBalances(legacyBalances), error, false]
+        }
+        // If legacy data is still loading, show loading state until it arrives
+        if (legacyLoading) {
+          return [undefined, undefined, true]
+        }
+      }
+
       const error = portfolioError ? new Error(String(portfolioError)) : undefined
       return [memoizedPortfolioBalances, error, portfolioLoading]
     }
