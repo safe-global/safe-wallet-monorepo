@@ -688,7 +688,10 @@ export function getTwapInitialData() {
         .invoke('text')
         .should('not.be.empty')
         .then((value) => {
-          formData.totalDuration = value
+          const durationRegex = /(\d+\s+(hour|hours|week|month|day|days))/i
+          const match = value.match(durationRegex)
+          expect(match, 'Total duration pattern not found').to.not.be.null
+          formData.totalDuration = match[1]
             .toLowerCase()
             .replace(/\bhours?\b/, 'hour')
             .trim()
@@ -700,7 +703,10 @@ export function getTwapInitialData() {
         .invoke('text')
         .should('not.be.empty')
         .then((value) => {
-          formData.partDuration = value
+          const durationRegex = /(\d+\s*(m|minutes?|hour|hours))/i
+          const match = value.match(durationRegex)
+          expect(match, 'Part duration pattern not found').to.not.be.null
+          formData.partDuration = match[1]
             .toLowerCase()
             .replace(/(\d+)m\b/, '$1 minutes')
             .trim()

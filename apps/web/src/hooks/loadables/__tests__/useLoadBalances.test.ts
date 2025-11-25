@@ -290,9 +290,8 @@ describe('useLoadBalances', () => {
       expect(loading).toBe(false)
     })
 
-    it('should return counterfactual balances for counterfactual safe with empty portfolio', async () => {
+    it('should return portfolio balances for counterfactual safe with empty portfolio', async () => {
       const mockPortfolio = createMockEmptyPortfolio()
-      const mockCfBalances = createMockCounterfactualBalances()
 
       jest.spyOn(useSafeInfo, 'default').mockReturnValue({
         safe: mockCounterfactualSafe,
@@ -308,10 +307,6 @@ describe('useLoadBalances', () => {
         error: undefined,
         refetch: jest.fn(),
       } as any)
-
-      jest
-        .spyOn(useCounterfactualBalances, 'useCounterfactualBalances')
-        .mockReturnValue([mockCfBalances, undefined, false])
 
       const { result } = renderHook(() => useLoadBalances())
 
@@ -321,17 +316,17 @@ describe('useLoadBalances', () => {
 
       const [balances, error, loading] = result.current
 
-      expect(balances?.fiatTotal).toBe(mockCfBalances.fiatTotal)
-      expect(balances?.tokensFiatTotal).toBe(mockCfBalances.fiatTotal)
-      expect(balances?.positionsFiatTotal).toBe('0')
-      expect(balances?.positions).toBeUndefined()
+      // Portfolio endpoint natively supports counterfactual Safes
+      expect(balances?.fiatTotal).toBe(mockPortfolio.totalBalanceFiat)
+      expect(balances?.tokensFiatTotal).toBe(mockPortfolio.totalTokenBalanceFiat)
+      expect(balances?.positionsFiatTotal).toBe(mockPortfolio.totalPositionsBalanceFiat)
+      expect(balances?.positions).toEqual(mockPortfolio.positionBalances)
       expect(error).toBeUndefined()
       expect(loading).toBe(false)
     })
 
     it('should return portfolio balances for counterfactual safe with non-empty portfolio', async () => {
       const mockPortfolio = createMockPortfolio()
-      const mockCfBalances = createMockCounterfactualBalances()
 
       jest.spyOn(useSafeInfo, 'default').mockReturnValue({
         safe: mockCounterfactualSafe,
@@ -348,10 +343,6 @@ describe('useLoadBalances', () => {
         refetch: jest.fn(),
       } as any)
 
-      jest
-        .spyOn(useCounterfactualBalances, 'useCounterfactualBalances')
-        .mockReturnValue([mockCfBalances, undefined, false])
-
       const { result } = renderHook(() => useLoadBalances())
 
       await waitFor(() => {
@@ -360,17 +351,57 @@ describe('useLoadBalances', () => {
 
       const [balances] = result.current
 
+      // Portfolio endpoint natively supports counterfactual Safes
       expect(balances?.fiatTotal).toBe(mockPortfolio.totalBalanceFiat)
       expect(balances?.tokensFiatTotal).toBe(mockPortfolio.totalTokenBalanceFiat)
     })
 
-    it('should handle portfolio endpoint errors', async () => {
-      const mockError = new Error('Portfolio endpoint error')
+    it('should fallback to legacy endpoint when portfolio fails', async () => {
+      const mockPortfolioError = new Error('Portfolio endpoint error')
+      const mockLegacyBalances = createMockLegacyBalances()
 
       jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
         currentData: undefined,
         isLoading: false,
-        error: mockError,
+        error: mockPortfolioError,
+        refetch: jest.fn(),
+      } as any)
+
+      jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
+        currentData: mockLegacyBalances,
+        isLoading: false,
+        error: undefined,
+        refetch: jest.fn(),
+      } as any)
+
+      const { result } = renderHook(() => useLoadBalances())
+
+      await waitFor(() => {
+        expect(result.current[0]).toBeDefined()
+      })
+
+      const [balances, error] = result.current
+
+      // Should fallback to legacy balances when portfolio fails
+      expect(balances?.fiatTotal).toBe(mockLegacyBalances.fiatTotal)
+      expect(error).toBeUndefined()
+    })
+
+    it('should return error when both portfolio and legacy fail', async () => {
+      const mockPortfolioError = new Error('Portfolio endpoint error')
+      const mockLegacyError = new Error('Legacy endpoint error')
+
+      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
+        currentData: undefined,
+        isLoading: false,
+        error: mockPortfolioError,
+        refetch: jest.fn(),
+      } as any)
+
+      jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
+        currentData: undefined,
+        isLoading: false,
+        error: mockLegacyError,
         refetch: jest.fn(),
       } as any)
 
@@ -384,7 +415,6 @@ describe('useLoadBalances', () => {
 
       expect(balances).toBeUndefined()
       expect(error).toBeInstanceOf(Error)
-      expect(error?.message).toBe('Error: Portfolio endpoint error')
     })
 
     it('should handle loading state', async () => {
