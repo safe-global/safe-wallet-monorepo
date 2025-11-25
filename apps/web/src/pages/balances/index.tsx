@@ -8,9 +8,8 @@ import { useState } from 'react'
 
 import PagePlaceholder from '@/components/common/PagePlaceholder'
 import NoAssetsIcon from '@/public/images/balances/no-assets.svg'
-import HiddenTokenButton from '@/components/balances/HiddenTokenButton'
 import CurrencySelect from '@/components/balances/CurrencySelect'
-import TokenListSelect from '@/components/balances/TokenListSelect'
+import ManageTokensButton from '@/components/balances/ManageTokensButton'
 import StakingBanner from '@/components/dashboard/StakingBanner'
 import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useIsStakingBannerVisible'
 import NoFeeNovemberBanner from '@/features/no-fee-november/components/NoFeeNovemberBanner'
@@ -43,8 +42,7 @@ const Balances: NextPage = () => {
       </Head>
 
       <AssetsHeader>
-        <HiddenTokenButton showHiddenAssets={showHiddenAssets} toggleShowHiddenAssets={toggleShowHiddenAssets} />
-        <TokenListSelect />
+        <ManageTokensButton onHideTokens={toggleShowHiddenAssets} />
         <CurrencySelect />
       </AssetsHeader>
 
