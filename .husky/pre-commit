@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Get all staged files once
 all_staged=$(git diff --cached --name-only --diff-filter=ACMR)
@@ -68,12 +69,4 @@ staged_web_ts_files=$(echo "$all_staged" | grep -E '^apps/web/.*\.(ts|tsx)$' || 
 if [ -n "$staged_web_ts_files" ]; then
   echo "Running type-check for web app..."
   yarn workspace @safe-global/web type-check
-
-  if [ $? -ne 0 ]; then
-    echo "===================================="
-    echo "Type-check failed!"
-    echo "Please fix type errors before committing or use --no-verify to skip."
-    echo "===================================="
-    exit 1
-  fi
 fi

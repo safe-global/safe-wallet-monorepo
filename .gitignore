@@ -7,6 +7,8 @@
 # testing
 /coverage
 /packages/utils/coverage
+/reports
+report.json
 
 # generated types
 /packages/utils/src/types/contracts
