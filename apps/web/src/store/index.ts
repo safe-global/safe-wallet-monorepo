@@ -33,7 +33,6 @@ import { migrateBatchTxs } from '@/services/ls-migration/batch'
 
 const rootReducer = combineReducers({
   [slices.safeInfoSlice.name]: slices.safeInfoSlice.reducer,
-  [slices.balancesSlice.name]: slices.balancesSlice.reducer,
   [slices.sessionSlice.name]: slices.sessionSlice.reducer,
   [slices.txHistorySlice.name]: slices.txHistorySlice.reducer,
   [slices.txQueueSlice.name]: slices.txQueueSlice.reducer,
@@ -47,7 +46,6 @@ const rootReducer = combineReducers({
   [slices.popupSlice.name]: slices.popupSlice.reducer,
   [slices.spendingLimitSlice.name]: slices.spendingLimitSlice.reducer,
   [slices.safeAppsSlice.name]: slices.safeAppsSlice.reducer,
-  [slices.safeMessagesSlice.name]: slices.safeMessagesSlice.reducer,
   [slices.pendingSafeMessagesSlice.name]: slices.pendingSafeMessagesSlice.reducer,
   [slices.batchSlice.name]: slices.batchSlice.reducer,
   [slices.undeployedSafesSlice.name]: slices.undeployedSafesSlice.reducer,

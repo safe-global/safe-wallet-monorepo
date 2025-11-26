@@ -367,4 +367,14 @@ export const handlers = (GATEWAY_URL: string) => [
   http.delete(`${GATEWAY_URL}/v1/chains/:chainId/notifications/devices/:uuid/safes/:safeAddress`, () => {
     return HttpResponse.json({})
   }),
+
+  // Transaction confirmation endpoint for signing
+  http.post<{ chainId: string; safeTxHash: string }, { signature: string }>(
+    `${GATEWAY_URL}/v1/chains/:chainId/transactions/:safeTxHash/confirmations`,
+    async ({ request }) => {
+      const body = await request.json()
+      // Success case - echo back the signature
+      return HttpResponse.json({ signature: body.signature }, { status: 201 })
+    },
+  ),
 ]
