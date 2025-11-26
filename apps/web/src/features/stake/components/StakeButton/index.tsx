@@ -2,7 +2,7 @@ import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
 import useSpendingLimit from '@/hooks/useSpendingLimit'
-import { Button, SvgIcon, Typography, Box } from '@mui/material'
+import { Button, IconButton, Tooltip, SvgIcon } from '@mui/material'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
@@ -14,16 +14,18 @@ import { useCurrentChain } from '@/hooks/useChains'
 import css from './styles.module.css'
 import classnames from 'classnames'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import assetActionCss from '@/components/common/AssetActionButton/styles.module.css'
+
 const StakeButton = ({
   tokenInfo,
   trackingLabel,
   compact = true,
-  plain = false,
+  onlyIcon = false,
 }: {
   tokenInfo: Balance['tokenInfo']
   trackingLabel: STAKE_LABELS
   compact?: boolean
-  plain?: boolean
+  onlyIcon?: boolean
 }): ReactElement => {
   const spendingLimit = useSpendingLimit(tokenInfo)
   const chain = useCurrentChain()
@@ -48,20 +50,21 @@ const StakeButton = ({
             [MixpanelEventParams.ENTRY_POINT]: trackingLabel,
           }}
         >
-          {plain ? (
-            <Box
-              component="span"
-              className={classnames(css.plainButton, { [css.plainButtonDisabled]: !isOk })}
-              data-testid="stake-btn"
-              onClick={isOk ? handleClick : undefined}
-              aria-label="Stake"
-              aria-disabled={!isOk}
-            >
-              <SvgIcon component={StakeIcon} inheritViewBox className={css.plainIcon} />
-              <Typography component="span" variant="body2">
-                Stake
-              </Typography>
-            </Box>
+          {onlyIcon ? (
+            <Tooltip title="Stake" placement="top" arrow>
+              <span>
+                <IconButton
+                  data-testid="stake-btn"
+                  aria-label="Stake"
+                  onClick={handleClick}
+                  disabled={!isOk}
+                  size="small"
+                  className={assetActionCss.assetActionIconButton}
+                >
+                  <SvgIcon component={StakeIcon} inheritViewBox />
+                </IconButton>
+              </span>
+            </Tooltip>
           ) : (
             <Button
               className={classnames({ [css.button]: compact, [css.buttonDisabled]: !isOk })}

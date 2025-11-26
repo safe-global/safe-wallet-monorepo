@@ -11,7 +11,7 @@ import {
 } from '@safe-global/safe-apps-sdk'
 import { SafeAppsTxFlow, SignMessageFlow, SignMessageOnChainFlow } from '@/components/tx-flow/flows'
 import { isOffchainEIP1271Supported } from '@safe-global/utils/utils/safe-messages'
-import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import { cgwApi, useMessagesGetMessagesBySafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { getTransactionDetails } from '@/utils/transactions'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { getStoreInstance } from '@/store'
@@ -21,7 +21,6 @@ import { TxModalContext } from '@/components/tx-flow'
 import { selectOnChainSigning, selectTokenList, TOKEN_LISTS } from '@/store/settingsSlice'
 import { useAppSelector } from '@/store'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { selectSafeMessages } from '@/store/safeMessagesSlice'
 import { trackSafeAppEvent, SAFE_APPS_EVENTS } from '@/services/analytics'
 import { safeMsgSubscribe, SafeMsgEvent } from '@/services/safe-messages/safeMsgEvents'
 import { txSubscribe, TxEvent } from '@/services/tx/txEvents'
@@ -40,10 +39,14 @@ export const useCustomAppCommunicator = (
   overrideHandlers?: Partial<UseAppCommunicatorHandlers>,
 ): AppCommunicator | undefined => {
   const [currentRequestId, setCurrentRequestId] = useState<RequestId | undefined>()
-  const safeMessages = useAppSelector(selectSafeMessages)
   const { setTxFlow } = useContext(TxModalContext)
-  const { safe, safeAddress } = useSafeInfo()
+  const { safe, safeAddress, safeLoaded } = useSafeInfo()
+  const chainId = useChainId()
   const onChainSigning = useAppSelector(selectOnChainSigning)
+  const { currentData: safeMessages } = useMessagesGetMessagesBySafeV1Query(
+    { chainId, safeAddress },
+    { skip: !safeLoaded || !safe.deployed },
+  )
   const [settings, setSettings] = useState<SafeSettings>({
     offChainSigning: true,
   })
@@ -58,7 +61,6 @@ export const useCustomAppCommunicator = (
     })
   }
   const tokenlist = useAppSelector(selectTokenList)
-  const chainId = useChainId()
   const { balances } = useBalances()
   const [getBalances] = useLazyBalancesGetBalancesV1Query()
 
@@ -155,7 +157,7 @@ export const useCustomAppCommunicator = (
       return newSettings
     },
     onGetOffChainSignature: async (messageHash: string) => {
-      const safeMessage = safeMessages.data?.results
+      const safeMessage = safeMessages?.results
         ?.filter(isSafeMessageListItem)
         ?.find((item) => item.messageHash === messageHash)
 

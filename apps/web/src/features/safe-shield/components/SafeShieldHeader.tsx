@@ -50,7 +50,14 @@ export const SafeShieldHeader = ({
 
   return (
     <Box padding="4px 4px 0px">
-      <Stack direction="row" sx={{ backgroundColor: headerBgColor }} borderRadius="6px 6px 0px 0px" px={2} py={1}>
+      <Stack
+        direction="row"
+        data-testid="safe-shield-status"
+        sx={{ backgroundColor: headerBgColor }}
+        borderRadius="6px 6px 0px 0px"
+        px={2}
+        py={1}
+      >
         {error ? (
           <Typography variant="overline" color={headerTextColor} fontWeight={700} lineHeight="16px">
             Checks unavailable
