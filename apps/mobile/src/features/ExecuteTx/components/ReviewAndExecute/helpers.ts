@@ -57,12 +57,20 @@ export const buildRouteParams = (txId: string, executionMethod: ExecutionMethod,
 })
 
 /**
- * Determines which execution path to use based on signer type and biometrics
+ * Determines which execution path to use based on signer type, biometrics, and execution method.
+ * When relay is selected, always use standard path (relay doesn't require Ledger signing).
  */
 export const determineExecutionPath = (
   activeSigner: Signer | undefined,
   isBiometricsEnabled: boolean,
+  executionMethod?: ExecutionMethod,
 ): ExecutionPath => {
+  // If relay is selected, use standard path (relay uses existing signatures, doesn't need Ledger signing)
+  if (executionMethod === ExecutionMethod.WITH_RELAY) {
+    return 'standard'
+  }
+
+  // Ledger signer uses Ledger path (unless relay was selected above)
   if (activeSigner?.type === 'ledger') {
     return 'ledger'
   }

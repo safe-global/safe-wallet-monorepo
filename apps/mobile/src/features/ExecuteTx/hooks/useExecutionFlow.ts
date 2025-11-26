@@ -44,7 +44,7 @@ export const useExecutionFlow = ({
     }
 
     const routeParams = buildRouteParams(txId, executionMethod, feeParams)
-    const executionPath = determineExecutionPath(activeSigner, isBiometricsEnabled)
+    const executionPath = determineExecutionPath(activeSigner, isBiometricsEnabled, executionMethod)
 
     // Ledger flow - navigate to Ledger connection screen
     if (executionPath === 'ledger') {

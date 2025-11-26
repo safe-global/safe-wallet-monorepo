@@ -140,6 +140,16 @@ describe('helpers', () => {
       expect(determineExecutionPath(mockLedgerSigner, false)).toBe('ledger')
     })
 
+    it('should return "standard" when relay is selected, even with Ledger signer', () => {
+      expect(determineExecutionPath(mockLedgerSigner, true, ExecutionMethod.WITH_RELAY)).toBe('standard')
+      expect(determineExecutionPath(mockLedgerSigner, false, ExecutionMethod.WITH_RELAY)).toBe('standard')
+    })
+
+    it('should return "standard" when relay is selected with private key signer', () => {
+      expect(determineExecutionPath(mockPrivateKeySigner, true, ExecutionMethod.WITH_RELAY)).toBe('standard')
+      expect(determineExecutionPath(mockPrivateKeySigner, false, ExecutionMethod.WITH_RELAY)).toBe('standard')
+    })
+
     it('should return "biometrics" when biometrics is not enabled', () => {
       expect(determineExecutionPath(mockPrivateKeySigner, false)).toBe('biometrics')
     })

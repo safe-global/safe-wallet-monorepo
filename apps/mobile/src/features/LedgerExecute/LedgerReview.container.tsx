@@ -18,12 +18,21 @@ import { useIsMounted } from '@/src/hooks/useIsMounted'
 
 export const LedgerReviewExecuteContainer = () => {
   const { bottom } = useSafeAreaInsets()
-  const { txId, sessionId } = useLocalSearchParams<{ txId: string; sessionId: string }>()
+  const {
+    txId,
+    sessionId,
+    executionMethod: executionMethodParam,
+  } = useLocalSearchParams<{
+    txId: string
+    sessionId: string
+    executionMethod?: ExecutionMethod
+  }>()
   const globalParams = useGlobalSearchParams<{
     maxFeePerGas?: string
     maxPriorityFeePerGas?: string
     gasLimit?: string
     nonce?: string
+    executionMethod?: ExecutionMethod
   }>()
   const activeSafe = useDefinedActiveSafe()
   const activeSigner = useAppSelector((s) => selectActiveSigner(s, activeSafe.address))
@@ -33,9 +42,13 @@ export const LedgerReviewExecuteContainer = () => {
   const feeParams = useMemo(() => parseFeeParams(globalParams), [globalParams])
   const isMounted = useIsMounted()
 
+  // Use executionMethod from route params if available, otherwise default to WITH_LEDGER
+  // This allows relay execution to work even when routed through Ledger flow
+  const executionMethod = (executionMethodParam || globalParams.executionMethod) ?? ExecutionMethod.WITH_LEDGER
+
   const { execute } = useTransactionExecution({
     txId: txId || '',
-    executionMethod: ExecutionMethod.WITH_LEDGER,
+    executionMethod,
     signerAddress: activeSigner?.value || '',
     feeParams,
   })

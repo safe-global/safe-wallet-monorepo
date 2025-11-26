@@ -83,6 +83,32 @@ describe('useExecutionFlow', () => {
       })
       expect(mockExecute).not.toHaveBeenCalled()
     })
+
+    it('should use standard flow when relay is selected, even with Ledger signer', async () => {
+      const { result } = renderHook(() =>
+        useExecutionFlow({
+          ...defaultParams,
+          activeSigner: mockLedgerSigner,
+          executionMethod: ExecutionMethod.WITH_RELAY,
+        }),
+      )
+
+      await act(async () => {
+        await result.current.handleConfirmPress()
+      })
+
+      // Should execute directly (standard flow) instead of navigating to Ledger flow
+      expect(mockExecute).toHaveBeenCalled()
+      expect(mockPush).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          pathname: '/execute-transaction/ledger-connect',
+        }),
+      )
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/execution-success',
+        params: { txId: 'tx123' },
+      })
+    })
   })
 
   describe('biometrics flow', () => {

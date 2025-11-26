@@ -12,6 +12,7 @@ export const LedgerPairingExecuteContainer = () => {
       deviceName: device.name,
       sessionId,
       txId: searchParams?.txId || '',
+      executionMethod: searchParams?.executionMethod || '',
     }),
   }
 
