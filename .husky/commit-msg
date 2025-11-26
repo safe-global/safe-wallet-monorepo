@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Validate commit message follows conventional commit format
 # Format: type(scope): description OR type: description
@@ -26,7 +27,7 @@ types="feat|fix|docs|style|refactor|perf|test|tests|build|ci|chore|revert"
 
 # Regex pattern for conventional commits
 # type(scope): description OR type: description
-pattern="^($types)(\([a-zA-Z0-9_-]+\))?!?: .+"
+pattern="^($types)(\([a-zA-Z0-9_-]+\))?: .+"
 
 if ! echo "$commit_msg" | head -1 | grep -qE "$pattern"; then
   echo "======================================"
