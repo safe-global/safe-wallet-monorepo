@@ -1,7 +1,16 @@
 #!/bin/bash
 
-# Run lint-staged (includes prettier)
+# Run lint-staged
 npx lint-staged
+
+# Run prettier on staged files in apps/web and apps/mobile
+staged_app_files=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^apps/(web|mobile)/.*\.(ts|tsx|css|js)$' || true)
+
+if [ -n "$staged_app_files" ]; then
+  echo "Running prettier on staged web/mobile files..."
+  echo "$staged_app_files" | xargs yarn prettier --write
+  echo "$staged_app_files" | xargs git add
+fi
 
 # Run type-check on staged TypeScript files in apps/web
 staged_web_ts_files=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^apps/web/.*\.(ts|tsx)$' || true)
