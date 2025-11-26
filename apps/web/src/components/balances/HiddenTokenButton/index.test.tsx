@@ -7,7 +7,7 @@ import HiddenTokenButton from '.'
 import { useState } from 'react'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import { type Loadable } from '@/store/common'
+import * as useBalances from '@/hooks/useBalances'
 
 const TestComponent = () => {
   const [showHidden, setShowHidden] = useState(false)
@@ -27,46 +27,44 @@ describe('HiddenTokenToggle', () => {
     const mockHiddenAssets = {
       '5': [toBeHex('0x3', 20)],
     }
-    const mockBalances: Loadable<Balances> = {
-      data: {
-        fiatTotal: '300',
-        items: [
-          {
-            balance: safeParseUnits('100', 18)!.toString(),
-            fiatBalance: '100',
-            fiatConversion: '1',
-            tokenInfo: {
-              address: toBeHex('0x2', 20),
-              decimals: 18,
-              logoUri: '',
-              name: 'DAI',
-              symbol: 'DAI',
-              type: TokenType.ERC20,
-            },
+    const mockBalances: Balances = {
+      fiatTotal: '300',
+      items: [
+        {
+          balance: safeParseUnits('100', 18)!.toString(),
+          fiatBalance: '100',
+          fiatConversion: '1',
+          tokenInfo: {
+            address: toBeHex('0x2', 20),
+            decimals: 18,
+            logoUri: '',
+            name: 'DAI',
+            symbol: 'DAI',
+            type: TokenType.ERC20,
           },
-          {
-            balance: safeParseUnits('200', 18)!.toString(),
-            fiatBalance: '200',
-            fiatConversion: '1',
-            tokenInfo: {
-              address: toBeHex('0x3', 20),
-              decimals: 18,
-              logoUri: '',
-              name: 'SPAM',
-              symbol: 'SPM',
-              type: TokenType.ERC20,
-            },
+        },
+        {
+          balance: safeParseUnits('200', 18)!.toString(),
+          fiatBalance: '200',
+          fiatConversion: '1',
+          tokenInfo: {
+            address: toBeHex('0x3', 20),
+            decimals: 18,
+            logoUri: '',
+            name: 'SPAM',
+            symbol: 'SPM',
+            type: TokenType.ERC20,
           },
-        ],
-      },
-      loading: false,
-      loaded: true,
-      error: undefined,
+        },
+      ],
     }
+
+    jest
+      .spyOn(useBalances, 'default')
+      .mockReturnValue({ balances: mockBalances, loaded: true, loading: false, error: undefined })
 
     const result = render(<TestComponent />, {
       initialReduxState: {
-        balances: mockBalances,
         settings: {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,

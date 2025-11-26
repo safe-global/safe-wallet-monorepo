@@ -12,6 +12,7 @@ import { TokenType } from '@safe-global/store/gateway/types'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 import * as useRecipientAnalysis from '@/features/safe-shield/hooks/useRecipientAnalysis'
+import * as useBalances from '@/hooks/useBalances'
 
 describe('CreateTokenTransfer', () => {
   const mockParams = {
@@ -67,35 +68,31 @@ describe('CreateTokenTransfer', () => {
 
     const tokenAddress = ZERO_ADDRESS
 
-    const { getByText } = renderCreateTokenTransfer(
-      {},
-      {
-        initialReduxState: {
-          balances: {
-            loading: false,
-            loaded: true,
-            data: {
-              fiatTotal: '0',
-              items: [
-                {
-                  balance: '10',
-                  tokenInfo: {
-                    address: tokenAddress,
-                    decimals: 18,
-                    logoUri: 'someurl',
-                    name: 'Test token',
-                    symbol: 'TST',
-                    type: TokenType.ERC20,
-                  },
-                  fiatBalance: '10',
-                  fiatConversion: '1',
-                },
-              ],
+    jest.spyOn(useBalances, 'default').mockReturnValue({
+      balances: {
+        fiatTotal: '0',
+        items: [
+          {
+            balance: '10',
+            tokenInfo: {
+              address: tokenAddress,
+              decimals: 18,
+              logoUri: 'someurl',
+              name: 'Test token',
+              symbol: 'TST',
+              type: TokenType.ERC20,
             },
+            fiatBalance: '10',
+            fiatConversion: '1',
           },
-        },
+        ],
       },
-    )
+      loaded: true,
+      loading: false,
+      error: undefined,
+    })
+
+    const { getByText } = renderCreateTokenTransfer()
 
     expect(getByText('Send as')).toBeInTheDocument()
 
