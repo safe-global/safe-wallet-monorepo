@@ -99,7 +99,12 @@ const ManageTokensMenu = ({
               />
             </Box>
             <Track {...(showAllTokens ? ASSETS_EVENTS.SHOW_ALL_TOKENS : ASSETS_EVENTS.SHOW_DEFAULT_TOKENS)}>
-              <Switch size="small" checked={showAllTokens} onChange={handleToggleShowAllTokens} />
+              <Switch
+                size="small"
+                checked={showAllTokens}
+                onClick={(e) => e.stopPropagation()}
+                onChange={handleToggleShowAllTokens}
+              />
             </Track>
           </Box>
         </MenuItem>
@@ -112,7 +117,12 @@ const ManageTokensMenu = ({
               <Typography variant="body2">Hide small balances</Typography>
               <InfoTooltip title={<Typography>Hide tokens with a value less than ${DUST_THRESHOLD}</Typography>} />
             </Box>
-            <Switch size="small" checked={hideDust} onChange={handleToggleHideDust} />
+            <Switch
+              size="small"
+              checked={hideDust}
+              onClick={(e) => e.stopPropagation()}
+              onChange={handleToggleHideDust}
+            />
           </Box>
         </MenuItem>
       )}

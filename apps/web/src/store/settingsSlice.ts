@@ -173,3 +173,4 @@ export const isEnvInitialState = createSelector([selectSettings, (_, chainId) =>
 
 export const selectOnChainSigning = createSelector(selectSettings, (settings) => settings.signing.onChainSigning)
 export const selectBlindSigning = createSelector(selectSettings, (settings) => settings.signing.blindSigning)
+export const selectHideDust = createSelector(selectSettings, (settings) => settings.hideDust ?? true)

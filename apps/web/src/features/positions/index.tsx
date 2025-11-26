@@ -61,7 +61,7 @@ export const Positions = () => {
               </AccordionSummary>
               <AccordionDetails sx={{ pt: 0, pb: 0 }}>
                 {protocol.items.map((group, groupIndex) => (
-                  <PositionGroup key={groupIndex} group={group} isLast={groupIndex === protocol.items.length - 1} />
+                  <PositionGroup key={group.name} group={group} isLast={groupIndex === protocol.items.length - 1} />
                 ))}
               </AccordionDetails>
             </Accordion>
