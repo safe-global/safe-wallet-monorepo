@@ -8,6 +8,7 @@ import { toBeHex } from 'ethers'
 import { useState } from 'react'
 import AssetsTable from '.'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import * as useBalances from '@/hooks/useBalances'
 
 const getParentRow = (element: HTMLElement | null) => {
   while (element !== null) {
@@ -79,13 +80,12 @@ describe('AssetsTable', () => {
       ],
     }
 
+    jest
+      .spyOn(useBalances, 'default')
+      .mockReturnValue({ balances: mockBalances, loaded: true, loading: false, error: undefined })
+
     const result = render(<TestComponent />, {
       initialReduxState: {
-        balances: {
-          data: mockBalances,
-          loading: false,
-          loaded: true,
-        },
         settings: {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,
@@ -185,13 +185,12 @@ describe('AssetsTable', () => {
       ],
     }
 
+    jest
+      .spyOn(useBalances, 'default')
+      .mockReturnValue({ balances: mockBalances, loaded: true, loading: false, error: undefined })
+
     const result = render(<TestComponent />, {
       initialReduxState: {
-        balances: {
-          data: mockBalances,
-          loading: false,
-          loaded: true,
-        },
         settings: {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,
@@ -287,13 +286,12 @@ describe('AssetsTable', () => {
       ],
     }
 
+    jest
+      .spyOn(useBalances, 'default')
+      .mockReturnValue({ balances: mockBalances, loaded: true, loading: false, error: undefined })
+
     const result = render(<TestComponent />, {
       initialReduxState: {
-        balances: {
-          data: mockBalances,
-          loading: false,
-          loaded: true,
-        },
         settings: {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,
@@ -390,13 +388,12 @@ describe('AssetsTable', () => {
       ],
     }
 
+    jest
+      .spyOn(useBalances, 'default')
+      .mockReturnValue({ balances: mockBalances, loaded: true, loading: false, error: undefined })
+
     const result = render(<TestComponent />, {
       initialReduxState: {
-        balances: {
-          data: mockBalances,
-          loading: false,
-          loaded: true,
-        },
         settings: {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,
@@ -504,13 +501,12 @@ describe('AssetsTable', () => {
       ],
     }
 
+    jest
+      .spyOn(useBalances, 'default')
+      .mockReturnValue({ balances: mockBalances, loaded: true, loading: false, error: undefined })
+
     const result = render(<TestComponent />, {
       initialReduxState: {
-        balances: {
-          data: mockBalances,
-          loading: false,
-          loaded: true,
-        },
         settings: {
           currency: 'usd',
           hiddenTokens: { '5': [] },

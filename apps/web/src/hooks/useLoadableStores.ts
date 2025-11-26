@@ -5,13 +5,11 @@ import { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 
 // Import all the loadable hooks
 import useLoadSafeInfo from './loadables/useLoadSafeInfo'
-import useLoadBalances from './loadables/useLoadBalances'
 import useLoadTxHistory from './loadables/useLoadTxHistory'
 import useLoadTxQueue from './loadables/useLoadTxQueue'
 
 // Import all the loadable slices
 import { safeInfoSlice } from '@/store/safeInfoSlice'
-import { balancesSlice } from '@/store/balancesSlice'
 import { txHistorySlice } from '@/store/txHistorySlice'
 import { txQueueSlice } from '@/store/txQueueSlice'
 import { spendingLimitSlice } from '@/store/spendingLimitsSlice'
@@ -36,7 +34,6 @@ const useUpdateStore = (slice: Slice, useLoadHook: () => AsyncResult<unknown>): 
 
 const useLoadableStores = () => {
   useUpdateStore(safeInfoSlice, useLoadSafeInfo)
-  useUpdateStore(balancesSlice, useLoadBalances)
   useUpdateStore(txHistorySlice, useLoadTxHistory)
   useUpdateStore(txQueueSlice, useLoadTxQueue)
   useUpdateStore(spendingLimitSlice, useLoadSpendingLimits)
