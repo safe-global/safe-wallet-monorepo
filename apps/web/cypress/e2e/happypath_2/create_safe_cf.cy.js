@@ -28,12 +28,10 @@ describe('CF Safe creation happy path tests', () => {
     main.getAddedSafeAddressFromLocalStorage(constants.networkKeys.sepolia, 0).then((address) => {
       const safe_created = [
         {
-          // eventLabel: events.safeCreatedCF.eventLabel,
           eventCategory: events.safeCreatedCF.category,
           eventAction: events.safeCreatedCF.action,
           eventType: events.safeCreatedCF.eventType,
           event: events.safeCreatedCF.eventName,
-          // safeAddress: address.slice(2),
         },
       ]
       checkDataLayerEvents(safe_created)
