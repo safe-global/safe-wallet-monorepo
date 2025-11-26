@@ -34,6 +34,7 @@ import analyticsMiddleware from './middleware/analytics'
 import notificationSyncMiddleware from './middleware/notificationSync'
 import { setBackendStore } from '@/src/store/utils/singletonStore'
 import pendingTxsListeners from '@/src/store/middleware/pendingTxs'
+import signingState from './signingStateSlice'
 
 setBaseUrl(GATEWAY_URL)
 
@@ -50,7 +51,14 @@ const persistConfig = {
   key: 'root',
   version: 1,
   storage: reduxStorage,
-  blacklist: [web3API.reducerPath, cgwClient.reducerPath, 'myAccounts', 'estimatedFee', 'executionMethod'],
+  blacklist: [
+    web3API.reducerPath,
+    cgwClient.reducerPath,
+    'myAccounts',
+    'estimatedFee',
+    'executionMethod',
+    'signingState',
+  ],
   transforms: [cgwClientFilter],
 }
 
@@ -71,6 +79,7 @@ export const rootReducer = combineReducers({
   pendingTxs,
   estimatedFee,
   executionMethod,
+  signingState,
   [web3API.reducerPath]: web3API.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
 })

@@ -17,7 +17,7 @@ function BiometricsOptIn() {
     import_safe: string
     txId: string
     signerAddress: string
-    caller: '/import-signers' | '/sign-transaction'
+    caller: '/import-signers' | '/review-and-confirm'
   }>()
 
   const redirectTo = useMemo(() => {
@@ -32,7 +32,7 @@ function BiometricsOptIn() {
       }
     }
     return {
-      pathname: '/sign-transaction' as const,
+      pathname: '/review-and-confirm' as const,
       params: {
         txId: local.txId,
         signerAddress: local.signerAddress,

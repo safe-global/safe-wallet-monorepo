@@ -7,7 +7,7 @@ import * as useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsP
 import * as positionsQueries from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import * as store from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
-import { selectPositions, selectBalances } from '@/store/balancesSlice'
+import * as useBalances from '@/hooks/useBalances'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -121,19 +121,12 @@ describe('usePositions', () => {
       if (selector === selectCurrency) {
         return 'USD'
       }
-      if (selector === selectPositions) {
-        return undefined
-      }
-      if (selector === selectBalances) {
-        return {
-          data: { items: [], fiatTotal: '' },
-          loaded: false,
-          loading: false,
-          error: undefined,
-        }
-      }
       return undefined
     })
+
+    jest
+      .spyOn(useBalances, 'default')
+      .mockReturnValue({ balances: { items: [], fiatTotal: '' }, loaded: false, loading: false, error: undefined })
 
     jest.spyOn(positionsQueries, 'usePositionsGetPositionsV1Query').mockReturnValue({
       currentData: undefined,
@@ -279,19 +272,12 @@ describe('usePositions', () => {
         if (selector === selectCurrency) {
           return ''
         }
-        if (selector === selectPositions) {
-          return undefined
-        }
-        if (selector === selectBalances) {
-          return {
-            data: { items: [], fiatTotal: '' },
-            loaded: false,
-            loading: false,
-            error: undefined,
-          }
-        }
         return undefined
       })
+
+      jest
+        .spyOn(useBalances, 'default')
+        .mockReturnValue({ balances: { items: [], fiatTotal: '' }, loaded: false, loading: false, error: undefined })
 
       const positionsQuerySpy = jest.spyOn(positionsQueries, 'usePositionsGetPositionsV1Query')
 
@@ -323,18 +309,14 @@ describe('usePositions', () => {
         if (selector === selectCurrency) {
           return 'USD'
         }
-        if (selector === selectPositions) {
-          return mockAppBalances
-        }
-        if (selector === selectBalances) {
-          return {
-            data: { items: [], fiatTotal: '', positions: mockAppBalances },
-            loaded: true,
-            loading: false,
-            error: undefined,
-          }
-        }
         return undefined
+      })
+
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances: { items: [], fiatTotal: '', positions: mockAppBalances },
+        loaded: true,
+        loading: false,
+        error: undefined,
       })
 
       const { result } = renderHook(() => usePositions())
@@ -372,18 +354,14 @@ describe('usePositions', () => {
         if (selector === selectCurrency) {
           return 'USD'
         }
-        if (selector === selectPositions) {
-          return [mockAppBalance]
-        }
-        if (selector === selectBalances) {
-          return {
-            data: { items: [], fiatTotal: '', positions: [mockAppBalance] },
-            loaded: true,
-            loading: false,
-            error: undefined,
-          }
-        }
         return undefined
+      })
+
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances: { items: [], fiatTotal: '', positions: [mockAppBalance] },
+        loaded: true,
+        loading: false,
+        error: undefined,
       })
 
       const { result } = renderHook(() => usePositions())
@@ -429,18 +407,14 @@ describe('usePositions', () => {
         if (selector === selectCurrency) {
           return 'USD'
         }
-        if (selector === selectPositions) {
-          return [mockAppBalance]
-        }
-        if (selector === selectBalances) {
-          return {
-            data: { items: [], fiatTotal: '', positions: [mockAppBalance] },
-            loaded: true,
-            loading: false,
-            error: undefined,
-          }
-        }
         return undefined
+      })
+
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances: { items: [], fiatTotal: '', positions: [mockAppBalance] },
+        loaded: true,
+        loading: false,
+        error: undefined,
       })
 
       const { result } = renderHook(() => usePositions())
@@ -486,18 +460,14 @@ describe('usePositions', () => {
         if (selector === selectCurrency) {
           return 'USD'
         }
-        if (selector === selectPositions) {
-          return [mockAppBalance]
-        }
-        if (selector === selectBalances) {
-          return {
-            data: { items: [], fiatTotal: '', positions: [mockAppBalance] },
-            loaded: true,
-            loading: false,
-            error: undefined,
-          }
-        }
         return undefined
+      })
+
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances: { items: [], fiatTotal: '', positions: [mockAppBalance] },
+        loaded: true,
+        loading: false,
+        error: undefined,
       })
 
       const { result } = renderHook(() => usePositions())
@@ -514,19 +484,12 @@ describe('usePositions', () => {
         if (selector === selectCurrency) {
           return 'USD'
         }
-        if (selector === selectPositions) {
-          return undefined
-        }
-        if (selector === selectBalances) {
-          return {
-            data: { items: [], fiatTotal: '' },
-            loaded: true,
-            loading: false,
-            error: undefined,
-          }
-        }
         return undefined
       })
+
+      jest
+        .spyOn(useBalances, 'default')
+        .mockReturnValue({ balances: { items: [], fiatTotal: '' }, loaded: true, loading: false, error: undefined })
 
       const { result } = renderHook(() => usePositions())
 
@@ -540,18 +503,14 @@ describe('usePositions', () => {
         if (selector === selectCurrency) {
           return 'USD'
         }
-        if (selector === selectPositions) {
-          return []
-        }
-        if (selector === selectBalances) {
-          return {
-            data: { items: [], fiatTotal: '' },
-            loaded: true,
-            loading: false,
-            error: undefined,
-          }
-        }
         return undefined
+      })
+
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances: { items: [], fiatTotal: '', positions: [] },
+        loaded: true,
+        loading: false,
+        error: undefined,
       })
 
       const { result } = renderHook(() => usePositions())
@@ -570,18 +529,14 @@ describe('usePositions', () => {
         if (selector === selectCurrency) {
           return 'USD'
         }
-        if (selector === selectPositions) {
-          return mockAppBalances
-        }
-        if (selector === selectBalances) {
-          return {
-            data: { items: [], fiatTotal: '', positions: mockAppBalances },
-            loaded: true,
-            loading: false,
-            error: undefined,
-          }
-        }
         return undefined
+      })
+
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances: { items: [], fiatTotal: '', positions: mockAppBalances },
+        loaded: true,
+        loading: false,
+        error: undefined,
       })
 
       const positionsQuerySpy = jest.spyOn(positionsQueries, 'usePositionsGetPositionsV1Query')
@@ -601,18 +556,14 @@ describe('usePositions', () => {
         if (selector === selectCurrency) {
           return 'USD'
         }
-        if (selector === selectPositions) {
-          return undefined
-        }
-        if (selector === selectBalances) {
-          return {
-            data: { items: [], fiatTotal: '' },
-            loaded: false,
-            loading: false,
-            error: 'Portfolio endpoint error',
-          }
-        }
         return undefined
+      })
+
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances: { items: [], fiatTotal: '' },
+        loaded: false,
+        loading: false,
+        error: 'Portfolio endpoint error',
       })
 
       const { result } = renderHook(() => usePositions())
@@ -631,19 +582,12 @@ describe('usePositions', () => {
         if (selector === selectCurrency) {
           return 'USD'
         }
-        if (selector === selectPositions) {
-          return undefined
-        }
-        if (selector === selectBalances) {
-          return {
-            data: { items: [], fiatTotal: '' },
-            loaded: false,
-            loading: true,
-            error: undefined,
-          }
-        }
         return undefined
       })
+
+      jest
+        .spyOn(useBalances, 'default')
+        .mockReturnValue({ balances: { items: [], fiatTotal: '' }, loaded: false, loading: true, error: undefined })
 
       const { result } = renderHook(() => usePositions())
 
@@ -679,18 +623,14 @@ describe('usePositions', () => {
         if (selector === selectCurrency) {
           return 'USD'
         }
-        if (selector === selectPositions) {
-          return mockAppBalances
-        }
-        if (selector === selectBalances) {
-          return {
-            data: { items: [], fiatTotal: '', positions: mockAppBalances },
-            loaded: true,
-            loading: false,
-            error: undefined,
-          }
-        }
         return undefined
+      })
+
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances: { items: [], fiatTotal: '', positions: mockAppBalances },
+        loaded: true,
+        loading: false,
+        error: undefined,
       })
 
       const { result } = renderHook(() => usePositions())
@@ -768,18 +708,14 @@ describe('usePositions', () => {
         if (selector === selectCurrency) {
           return 'USD'
         }
-        if (selector === selectPositions) {
-          return [mockAppBalance]
-        }
-        if (selector === selectBalances) {
-          return {
-            data: { items: [], fiatTotal: '', positions: [mockAppBalance] },
-            loaded: true,
-            loading: false,
-            error: undefined,
-          }
-        }
         return undefined
+      })
+
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances: { items: [], fiatTotal: '', positions: [mockAppBalance] },
+        loaded: true,
+        loading: false,
+        error: undefined,
       })
 
       const { result } = renderHook(() => usePositions())

@@ -17,6 +17,11 @@ export interface PortfolioBalances extends Balances {
   positionsFiatTotal?: string
 }
 
+export const initialBalancesState: PortfolioBalances = {
+  items: [],
+  fiatTotal: '',
+}
+
 const createPortfolioBalances = (balances: Balances): PortfolioBalances => ({
   ...balances,
   tokensFiatTotal: balances.fiatTotal,
