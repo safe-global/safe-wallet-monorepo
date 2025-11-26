@@ -8,7 +8,7 @@ import { toBeHex } from 'ethers'
 import { useState } from 'react'
 import AssetsTable from '.'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import * as useLoadBalances from '@/hooks/loadables/useLoadBalances'
+import * as useBalances from '@/hooks/useBalances'
 
 const getParentRow = (element: HTMLElement | null) => {
   while (element !== null) {
@@ -80,7 +80,9 @@ describe('AssetsTable', () => {
       ],
     }
 
-    jest.spyOn(useLoadBalances, 'default').mockReturnValue([mockBalances, undefined, false])
+    jest
+      .spyOn(useBalances, 'default')
+      .mockReturnValue({ balances: mockBalances, loaded: true, loading: false, error: undefined })
 
     const result = render(<TestComponent />, {
       initialReduxState: {
@@ -183,7 +185,9 @@ describe('AssetsTable', () => {
       ],
     }
 
-    jest.spyOn(useLoadBalances, 'default').mockReturnValue([mockBalances, undefined, false])
+    jest
+      .spyOn(useBalances, 'default')
+      .mockReturnValue({ balances: mockBalances, loaded: true, loading: false, error: undefined })
 
     const result = render(<TestComponent />, {
       initialReduxState: {
@@ -282,7 +286,9 @@ describe('AssetsTable', () => {
       ],
     }
 
-    jest.spyOn(useLoadBalances, 'default').mockReturnValue([mockBalances, undefined, false])
+    jest
+      .spyOn(useBalances, 'default')
+      .mockReturnValue({ balances: mockBalances, loaded: true, loading: false, error: undefined })
 
     const result = render(<TestComponent />, {
       initialReduxState: {
@@ -382,7 +388,9 @@ describe('AssetsTable', () => {
       ],
     }
 
-    jest.spyOn(useLoadBalances, 'default').mockReturnValue([mockBalances, undefined, false])
+    jest
+      .spyOn(useBalances, 'default')
+      .mockReturnValue({ balances: mockBalances, loaded: true, loading: false, error: undefined })
 
     const result = render(<TestComponent />, {
       initialReduxState: {
@@ -493,7 +501,9 @@ describe('AssetsTable', () => {
       ],
     }
 
-    jest.spyOn(useLoadBalances, 'default').mockReturnValue([mockBalances, undefined, false])
+    jest
+      .spyOn(useBalances, 'default')
+      .mockReturnValue({ balances: mockBalances, loaded: true, loading: false, error: undefined })
 
     const result = render(<TestComponent />, {
       initialReduxState: {

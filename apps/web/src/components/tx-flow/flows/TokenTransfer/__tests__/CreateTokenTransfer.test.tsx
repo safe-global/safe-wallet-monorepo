@@ -12,7 +12,7 @@ import { TokenType } from '@safe-global/store/gateway/types'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 import * as useRecipientAnalysis from '@/features/safe-shield/hooks/useRecipientAnalysis'
-import * as useLoadBalances from '@/hooks/loadables/useLoadBalances'
+import * as useBalances from '@/hooks/useBalances'
 
 describe('CreateTokenTransfer', () => {
   const mockParams = {
@@ -68,8 +68,8 @@ describe('CreateTokenTransfer', () => {
 
     const tokenAddress = ZERO_ADDRESS
 
-    jest.spyOn(useLoadBalances, 'default').mockReturnValue([
-      {
+    jest.spyOn(useBalances, 'default').mockReturnValue({
+      balances: {
         fiatTotal: '0',
         items: [
           {
@@ -87,9 +87,10 @@ describe('CreateTokenTransfer', () => {
           },
         ],
       },
-      undefined,
-      false,
-    ])
+      loaded: true,
+      loading: false,
+      error: undefined,
+    })
 
     const { getByText } = renderCreateTokenTransfer()
 

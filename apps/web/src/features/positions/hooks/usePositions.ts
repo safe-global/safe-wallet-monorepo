@@ -8,7 +8,7 @@ import useIsPositionsFeatureEnabled from './useIsPositionsFeatureEnabled'
 import { useMemo } from 'react'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
-import useLoadBalances from '@/hooks/loadables/useLoadBalances'
+import useBalances from '@/hooks/useBalances'
 
 const POLLING_INTERVAL = 300_000 // 5 minutes
 
@@ -65,17 +65,17 @@ const usePositions = () => {
     },
   )
 
-  const [balancesData, balancesError, balancesLoading] = useLoadBalances()
+  const { balances, error: balancesError, loading: balancesLoading } = useBalances()
 
   return useMemo(
     () => ({
-      data: shouldUsePortfolioEndpoint ? transformAppBalancesToProtocols(balancesData?.positions) : legacyPositionsData,
-      error: shouldUsePortfolioEndpoint ? balancesError?.message : legacyPositionsError,
+      data: shouldUsePortfolioEndpoint ? transformAppBalancesToProtocols(balances?.positions) : legacyPositionsData,
+      error: shouldUsePortfolioEndpoint ? balancesError : legacyPositionsError,
       isLoading: shouldUsePortfolioEndpoint ? balancesLoading : legacyPositionsLoading,
     }),
     [
       shouldUsePortfolioEndpoint,
-      balancesData?.positions,
+      balances?.positions,
       legacyPositionsData,
       balancesError,
       legacyPositionsError,

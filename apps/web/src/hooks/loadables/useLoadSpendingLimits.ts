@@ -15,7 +15,7 @@ import { getERC20TokenInfoOnChain } from '@/utils/tokens'
 import { sameString } from '@safe-global/protocol-kit/dist/src/utils'
 import { multicall } from '@safe-global/utils/utils/multicall'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import useLoadBalances from './useLoadBalances'
+import useBalances from '../useBalances'
 
 const DEFAULT_TOKEN_INFO = {
   decimals: 18,
@@ -132,10 +132,10 @@ export const useLoadSpendingLimits = (): AsyncResult<SpendingLimitState[]> => {
   const { safeAddress, safe, safeLoaded } = useSafeInfo()
   const chainId = useChainId()
   const provider = useWeb3ReadOnly()
-  const [balancesData] = useLoadBalances()
+  const { balances } = useBalances()
   const tokenInfoFromBalances = useMemo(
-    () => balancesData?.items.map(({ tokenInfo }) => tokenInfo) ?? [],
-    [balancesData?.items],
+    () => balances?.items.map(({ tokenInfo }) => tokenInfo) ?? [],
+    [balances?.items],
   )
 
   const [data, error, loading] = useAsync<SpendingLimitState[] | undefined>(

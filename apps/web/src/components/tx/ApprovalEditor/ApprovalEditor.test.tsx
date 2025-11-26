@@ -12,7 +12,7 @@ import { getAndValidateSafeSDK } from '@/services/tx/tx-sender/sdk'
 import { parseUnits } from 'ethers'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import * as useLoadBalances from '@/hooks/loadables/useLoadBalances'
+import * as useBalances from '@/hooks/useBalances'
 jest.mock('@/services/tx/tx-sender/sdk', () => ({
   getAndValidateSafeSDK: jest.fn().mockReturnValue({
     createTransaction: jest.fn(),
@@ -178,7 +178,9 @@ describe('ApprovalEditor', () => {
       ],
     }
 
-    jest.spyOn(useLoadBalances, 'default').mockReturnValue([mockBalances, undefined, false])
+    jest
+      .spyOn(useBalances, 'default')
+      .mockReturnValue({ balances: mockBalances, loaded: true, loading: false, error: undefined })
 
     const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />)
 
@@ -283,7 +285,9 @@ describe('ApprovalEditor', () => {
       ],
     }
 
-    jest.spyOn(useLoadBalances, 'default').mockReturnValue([mockBalances, undefined, false])
+    jest
+      .spyOn(useBalances, 'default')
+      .mockReturnValue({ balances: mockBalances, loaded: true, loading: false, error: undefined })
 
     const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />)
 
