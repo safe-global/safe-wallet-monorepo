@@ -79,6 +79,7 @@ describe('TxOrderCard', () => {
         txInfo={mockSwapTransfer as OrderTransactionInfo}
         executionInfo={executionInfo}
         inQueue
+        txId="test-tx-id"
       />,
     )
 

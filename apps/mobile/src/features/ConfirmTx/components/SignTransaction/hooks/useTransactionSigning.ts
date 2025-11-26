@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectChainById } from '@/src/store/chains'
@@ -7,12 +7,15 @@ import { getPrivateKey } from '@/src/hooks/useSign/useSign'
 import { signTx } from '@/src/services/tx/tx-sender/sign'
 import { useTransactionsAddConfirmationV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import logger from '@/src/utils/logger'
-import { useGuard } from '@/src/context/GuardProvider'
 import { selectSignerByAddress } from '@/src/store/signersSlice'
 import { SigningResponse, ledgerSafeSigningService } from '@/src/services/ledger/ledger-safe-signing.service'
 import { Chain as ChainInfo } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { SafeVersion } from '@safe-global/types-kit'
 import useSafeInfo from '@/src/hooks/useSafeInfo'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { useAppDispatch } from '@/src/store/hooks'
+import { setSigningError, setSigningSuccess, startSigning } from '@/src/store/signingStateSlice'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 export enum SigningStatus {
   IDLE = 'idle',
   LOADING = 'loading',
@@ -26,11 +29,10 @@ interface UseTransactionSigningProps {
 }
 
 export function useTransactionSigning({ txId, signerAddress }: UseTransactionSigningProps) {
+  const dispatch = useAppDispatch()
   const [status, setStatus] = useState<SigningStatus>(SigningStatus.IDLE)
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
-  const { resetGuard } = useGuard()
-  const hasTriggeredAutoSign = useRef(false)
   const signer = useAppSelector((state: RootState) => selectSignerByAddress(state, signerAddress))
   const { safe } = useSafeInfo()
 
@@ -38,13 +40,8 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
     useTransactionsAddConfirmationV1Mutation()
 
   const executeSign = useCallback(async () => {
-    if (hasTriggeredAutoSign.current) {
-      return
-    }
-
     setStatus(SigningStatus.LOADING)
-    hasTriggeredAutoSign.current = true
-
+    dispatch(startSigning(txId))
     try {
       let signedTx: SigningResponse
 
@@ -75,8 +72,7 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
         const privateKey = await getPrivateKey(signerAddress)
 
         if (!privateKey) {
-          setStatus(SigningStatus.ERROR)
-          return
+          throw new Error('Failed to retrieve private key')
         }
 
         signedTx = await signTx({
@@ -97,23 +93,30 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
         },
       })
 
-      // CRITICAL: Reset guard immediately after successful signing
-      resetGuard('signing')
+      // Mark signing as successful - SigningMonitor will handle cleanup
+      dispatch(setSigningSuccess(txId))
+
+      // Invalidate the transactions cache
+      dispatch(cgwApi.util.invalidateTags(['transactions']))
+
       setStatus(SigningStatus.SUCCESS)
     } catch (error) {
       logger.error('Error signing transaction:', error)
       setStatus(SigningStatus.ERROR)
+
+      dispatch(setSigningError({ txId, error: asError(error).message }))
+
+      // Re-throw error so it can be handled imperatively by the caller
+      throw error
     }
-  }, [activeChain, activeSafe, txId, signerAddress, addConfirmation, resetGuard, signer, safe.version])
+  }, [activeChain, activeSafe, txId, signerAddress, addConfirmation, signer, safe.version, dispatch])
 
   const retry = useCallback(() => {
-    hasTriggeredAutoSign.current = false
     executeSign()
   }, [executeSign])
 
   const reset = useCallback(() => {
     setStatus(SigningStatus.IDLE)
-    hasTriggeredAutoSign.current = false
   }, [])
 
   return {
@@ -124,7 +127,6 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
     isApiLoading,
     apiData,
     isApiError,
-    hasTriggeredAutoSign: hasTriggeredAutoSign.current,
     signer,
   }
 }
