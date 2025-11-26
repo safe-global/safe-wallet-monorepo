@@ -3,6 +3,27 @@
 # Get all staged files once
 all_staged=$(git diff --cached --name-only --diff-filter=ACMR)
 
+# Check if there are unstaged changes to preserve
+has_unstaged_changes=false
+if ! git diff --quiet; then
+  has_unstaged_changes=true
+fi
+
+# Stash unstaged changes (keep staged changes in working tree)
+if [ "$has_unstaged_changes" = true ]; then
+  git stash push --keep-index --quiet -m "pre-commit: unstaged changes"
+fi
+
+# Cleanup function to restore unstaged changes
+cleanup() {
+  if [ "$has_unstaged_changes" = true ]; then
+    git stash pop --quiet 2>/dev/null || true
+  fi
+}
+
+# Restore unstaged changes on exit (success or failure)
+trap cleanup EXIT
+
 # Run prettier on staged files
 staged_prettier_files=$(echo "$all_staged" | grep -E '\.(js|jsx|ts|tsx|mjs|cjs|md|yml|json|css)$' || true)
 
