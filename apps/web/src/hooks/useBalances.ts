@@ -1,5 +1,4 @@
-import { useRef } from 'react'
-import isEqual from 'lodash/isEqual'
+import { useMemo } from 'react'
 import useLoadBalances, { type PortfolioBalances, initialBalancesState } from './loadables/useLoadBalances'
 
 export type UseBalancesResult = {
@@ -11,25 +10,16 @@ export type UseBalancesResult = {
 
 const useBalances = (): UseBalancesResult => {
   const [data, error, loading] = useLoadBalances()
-  const resultRef = useRef<UseBalancesResult>({
-    balances: initialBalancesState,
-    loaded: false,
-    loading: false,
-    error: undefined,
-  })
 
-  const newResult: UseBalancesResult = {
-    balances: data ?? initialBalancesState,
-    error: error?.message,
-    loaded: !!data,
-    loading,
-  }
-
-  if (!isEqual(resultRef.current, newResult)) {
-    resultRef.current = newResult
-  }
-
-  return resultRef.current
+  return useMemo(
+    () => ({
+      balances: data ?? initialBalancesState,
+      error: error?.message,
+      loaded: !!data,
+      loading,
+    }),
+    [data, error, loading],
+  )
 }
 
 export default useBalances

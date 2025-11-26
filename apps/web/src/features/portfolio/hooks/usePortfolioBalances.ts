@@ -82,7 +82,10 @@ const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
     }
 
     const error = portfolioError ? new Error(String(portfolioError)) : undefined
-    return [memoizedPortfolioBalances, error, portfolioLoading]
+    // Show loading when we don't have data yet (initial load or safe switch)
+    // but not during polling refreshes when we already have cached data
+    const isInitialLoading = !memoizedPortfolioBalances && !error
+    return [memoizedPortfolioBalances, error, portfolioLoading || isInitialLoading]
   }, [
     skip,
     needsLegacyFallback,
