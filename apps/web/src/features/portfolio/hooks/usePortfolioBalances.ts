@@ -75,15 +75,10 @@ const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
       return [undefined, undefined, false]
     }
 
-    // Fallback to legacy if portfolio failed or returned empty for deployed Safe
+    // Portfolio failed or returned empty for deployed Safe - fallback to legacy
     if (needsLegacyFallback) {
+      // Return legacy result (includes counterfactual handling)
       return [legacyBalances, legacyError, legacyLoading]
-    }
-
-    // No data yet - return loading to prevent flash of empty state
-    if (!memoizedPortfolioBalances) {
-      const error = portfolioError ? new Error(String(portfolioError)) : undefined
-      return [undefined, error, true]
     }
 
     const error = portfolioError ? new Error(String(portfolioError)) : undefined

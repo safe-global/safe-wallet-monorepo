@@ -5,7 +5,6 @@ import { toBeHex } from 'ethers'
 import useLoadBalances from '../loadables/useLoadBalances'
 import { TokenType } from '@safe-global/store/gateway/types'
 import * as useChainId from '@/hooks/useChainId'
-import * as useChains from '@/hooks/useChains'
 import * as balancesQueries from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
 
@@ -98,8 +97,6 @@ describe('useLoadBalances', () => {
     jest.clearAllMocks()
     localStorage.clear()
     jest.spyOn(useChainId, 'useChainId').mockReturnValue('5')
-    // Mock useHasFeature to return false for portfolio (use legacy endpoint)
-    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
   })
 
   test('without selected Safe', async () => {

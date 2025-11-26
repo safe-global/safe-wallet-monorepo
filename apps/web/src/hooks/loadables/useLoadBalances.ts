@@ -93,24 +93,17 @@ export const useLegacyBalances = (skip = false): AsyncResult<PortfolioBalances> 
  */
 const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
   const settings = useAppSelector(selectSettings)
-  const hasPortfolioFeature = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT)
+  const hasPortfolioFeature = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
   const isAllTokensSelected = settings.tokenList === TOKEN_LISTS.ALL
 
-  // Wait for feature flag before fetching to avoid switching endpoints mid-load
-  const isFeatureFlagReady = hasPortfolioFeature !== undefined
-  const shouldUsePortfolioEndpoint = isFeatureFlagReady && hasPortfolioFeature && !isAllTokensSelected
-  const shouldUseLegacyEndpoint = isFeatureFlagReady && (!hasPortfolioFeature || isAllTokensSelected)
+  // Use legacy balances when portfolio feature is disabled OR when "All tokens" is selected
+  // This ensures users can see tokens that Zerion may not support via the legacy endpoint
+  const shouldUsePortfolioEndpoint = hasPortfolioFeature && !isAllTokensSelected
 
-  // Only fetch from the endpoint we'll actually use
-  const legacyResult = useLegacyBalances(!shouldUseLegacyEndpoint)
+  const legacyResult = useLegacyBalances(shouldUsePortfolioEndpoint)
   const portfolioResult = usePortfolioBalances(!shouldUsePortfolioEndpoint)
 
-  return useMemo<AsyncResult<PortfolioBalances>>(() => {
-    if (!isFeatureFlagReady) {
-      return [undefined, undefined, true]
-    }
-    return shouldUsePortfolioEndpoint ? portfolioResult : legacyResult
-  }, [isFeatureFlagReady, shouldUsePortfolioEndpoint, portfolioResult, legacyResult])
+  return shouldUsePortfolioEndpoint ? portfolioResult : legacyResult
 }
 
 export default useLoadBalances
