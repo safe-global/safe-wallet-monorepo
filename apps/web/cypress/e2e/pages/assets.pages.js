@@ -51,6 +51,7 @@ const pageCountString10to20 = '11–20 of'
 const PRICE_COLUMN = 1
 const TOKEN_AMOUNT_COLUMN = 2
 const FIAT_AMOUNT_COLUMN = 3
+// column with the send button and swap in the assets table
 const ACTION_COLUMN = 5
 
 export const fiatRegex = new RegExp(`\\$?(([0-9]{1,3},)*[0-9]{1,3}(\\.[0-9]{2})?|0)`)
@@ -182,6 +183,16 @@ export function clickOnSendBtn(index) {
         .then((elements) => {
           cy.wrap(elements[0]).invoke('css', 'opacity', 100).click()
         })
+    })
+}
+
+export function clickOnSendBtnAssetsTable(index) {
+  cy.get(balanceSingleRow)
+    .eq(index)
+    .find('td')
+    .eq(ACTION_COLUMN)
+    .within(() => {
+      cy.get(sendBtn).should('be.visible').click()
     })
 }
 

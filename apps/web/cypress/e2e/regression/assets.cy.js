@@ -27,7 +27,8 @@ describe('Assets tests', () => {
   it('Verify that clicking the button with an owner opens the Send funds form', () => {
     wallet.connectSigner(signer)
     assets.selectTokenList(assets.tokenListOptions.allTokens)
-    assets.clickOnSendBtn(0)
+    cy.wait(2000)
+    assets.clickOnSendBtnAssetsTable(0)
   })
 
   it('Verify that Token list dropdown shows options "Default tokens" and "All tokens"', () => {
