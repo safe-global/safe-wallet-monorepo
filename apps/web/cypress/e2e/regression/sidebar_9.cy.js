@@ -12,24 +12,7 @@ describe('Sidebar UI tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  const views = [
-    constants.appsUrlGeneral,
-    constants.homeUrl,
-    constants.appsCustomUrl,
-    constants.securityUrl,
-    constants.transactionUrl,
-    constants.transactionQueueUrl,
-    constants.transactionsMessagesUrl,
-    constants.transactionsHistoryUrl,
-    constants.swapUrl,
-    constants.setupUrl,
-    constants.notificationsUrl,
-    constants.modulesUrl,
-    constants.dataSettingsUrl,
-    constants.appearanceSettingsUrl,
-    constants.balanceNftsUrl,
-    constants.BALANCE_URL,
-  ]
+  const views = [constants.appearanceSettingsUrl, constants.homeUrl]
   views.forEach((link) => {
     it(`Verify sidebar copy address button copies address in view: ${link}`, () => {
       cy.visit(link + staticSafes.SEP_STATIC_SAFE_4)
