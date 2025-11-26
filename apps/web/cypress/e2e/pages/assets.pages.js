@@ -18,6 +18,7 @@ const currencyDropDown = 'div[id="currency"]'
 export const tokenListTable = 'table[aria-labelledby="tableTitle"]'
 const tokenListDropdown = 'div[id="tokenlist-select"]'
 export const tablePaginationContainer = '[data-testid="table-pagination"]'
+export const tableContainer = '[data-testid="table-container"]'
 
 const hiddenTokenSaveBtn = 'span[data-track="assets: Save hide dialog"]'
 const hiddenTokenCancelBtn = 'span[data-track="assets: Cancel hide dialog"]'
@@ -52,7 +53,8 @@ const PRICE_COLUMN = 1
 const TOKEN_AMOUNT_COLUMN = 2
 const FIAT_AMOUNT_COLUMN = 3
 // column with the send button and swap in the assets table
-const ACTION_COLUMN = 5
+export const ACTION_COLUMN = 5
+export const actionColumnCell = '[data-testid="table-cell-actions"]'
 
 export const fiatRegex = new RegExp(`\\$?(([0-9]{1,3},)*[0-9]{1,3}(\\.[0-9]{2})?|0)`)
 

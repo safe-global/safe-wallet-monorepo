@@ -40,15 +40,17 @@ describe('Swaps token tests', () => {
 
   it('Verify swap button are displayed in assets table and dashboard', () => {
     assets.selectTokenList(assets.tokenListOptions.allTokens)
-    main.verifyElementsCount(swaps.assetsSwapBtn, 4)
+    swaps.verifyAssetsPageSwapButtonsCount(4)
+
     cy.window().then((window) => {
       window.localStorage.setItem(
         constants.localStorageKeys.SAFE_v2__settings,
         JSON.stringify(ls.safeSettings.slimitSettings),
       )
     })
+
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_1)
-    main.verifyElementsCount(swaps.assetsSwapBtn, 4)
+    swaps.verifyDashboardPageSwapButtonsCount(4)
     main.verifyElementsCount(swaps.dashboardSwapBtn, 1)
   })
 })
