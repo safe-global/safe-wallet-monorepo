@@ -1,14 +1,13 @@
 import { Box, SvgIcon, Typography } from '@mui/material'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import ExternalLink from '@/components/common/ExternalLink'
-import { useAppSelector } from '@/store'
-import { selectSafeMessages } from '@/store/safeMessagesSlice'
+import useSafeMessages from '@/hooks/messages/useSafeMessages'
 
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 const SignedMessagesHelpLink = () => {
-  const safeMessages = useAppSelector(selectSafeMessages)
-  const safeMessagesCount = safeMessages.data?.results.length ?? 0
+  const { page } = useSafeMessages()
+  const safeMessagesCount = page?.results.length ?? 0
 
   if (safeMessagesCount === 0) {
     return null
