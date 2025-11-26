@@ -1,5 +1,10 @@
 # Ignore auto-generated service workers but allow public/beamer-embed.js
 public/work*.js
+
+# testing
+coverage
+reports
+report.json
 public/sw.js
 public/firebase*.js
 public/fallback*.js
