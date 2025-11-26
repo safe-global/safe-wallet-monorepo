@@ -25,7 +25,7 @@ const meta: Meta<typeof ManageTokensButton> = {
         component: `
 ManageTokensButton opens a menu with token management options:
 - **Show all tokens**: Toggle between trusted tokens and all tokens (requires DEFAULT_TOKENLIST feature)
-- **Hide small balances**: Hide tokens below dust threshold (requires PORTFOLIO_ENDPOINT feature)
+- **Hide small balances**: Hide tokens below dust threshold
 - **Hide tokens**: Open hidden tokens management (shows count if tokens are hidden)
         `,
       },
@@ -49,10 +49,6 @@ ManageTokensButton opens a menu with token management options:
       control: { type: 'boolean' },
       description: 'Show "Show all tokens" option',
     },
-    _hasPortfolioEndpoint: {
-      control: { type: 'boolean' },
-      description: 'Show "Hide small balances" option (portfolio endpoint)',
-    },
   },
   tags: ['autodocs'],
 }
@@ -61,23 +57,20 @@ export default meta
 type Story = StoryObj<typeof ManageTokensButton>
 
 /**
- * Legacy endpoint - Shows "Show all tokens" and "Hide tokens" options.
- * Does NOT show "Hide small balances" option.
+ * Default state with all menu options visible.
  */
-export const LegacyEndpoint: Story = {
+export const Default: Story = {
   args: {
     _hasDefaultTokenlist: true,
-    _hasPortfolioEndpoint: false,
   },
 }
 
 /**
- * Portfolio endpoint - Shows all options including "Hide small balances".
+ * Without default tokenlist feature - only shows "Hide small balances" and "Hide tokens".
  */
-export const PortfolioEndpoint: Story = {
+export const WithoutDefaultTokenlist: Story = {
   args: {
-    _hasDefaultTokenlist: true,
-    _hasPortfolioEndpoint: true,
+    _hasDefaultTokenlist: false,
   },
 }
 
@@ -87,7 +80,6 @@ export const PortfolioEndpoint: Story = {
 export const WithHiddenTokens: Story = {
   args: {
     _hasDefaultTokenlist: true,
-    _hasPortfolioEndpoint: false,
   },
   decorators: [
     (Story) => (

@@ -129,34 +129,12 @@ describe('ManageTokensButton', () => {
     })
   })
 
-  it('should show "Hide small balances" option when portfolio endpoint is enabled', async () => {
-    jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => {
-      if (feature === FEATURES.DEFAULT_TOKENLIST) return true
-      if (feature === FEATURES.PORTFOLIO_ENDPOINT) return true
-      return false
-    })
-
+  it('should always show "Hide small balances" option', async () => {
     render(<ManageTokensButton />)
     fireEvent.click(screen.getByTestId('manage-tokens-button'))
 
     await waitFor(() => {
       expect(screen.getByText('Hide small balances')).toBeInTheDocument()
-    })
-  })
-
-  it('should not show "Hide small balances" when portfolio endpoint is disabled', async () => {
-    jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => {
-      if (feature === FEATURES.DEFAULT_TOKENLIST) return true
-      if (feature === FEATURES.PORTFOLIO_ENDPOINT) return false
-      return false
-    })
-
-    render(<ManageTokensButton />)
-    fireEvent.click(screen.getByTestId('manage-tokens-button'))
-
-    await waitFor(() => {
-      expect(screen.getByText('Show all tokens')).toBeInTheDocument()
-      expect(screen.queryByText('Hide small balances')).not.toBeInTheDocument()
     })
   })
 

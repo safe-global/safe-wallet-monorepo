@@ -21,8 +21,6 @@ interface ManageTokensMenuProps {
   onHideTokens?: () => void
   /** Takes precedence over useHasFeature(FEATURES.DEFAULT_TOKENLIST) when provided */
   _hasDefaultTokenlist?: boolean
-  /** Takes precedence over useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) when provided */
-  _hasPortfolioEndpoint?: boolean
 }
 
 const menuItemHoverSx = {
@@ -37,16 +35,13 @@ const ManageTokensMenu = ({
   onClose,
   onHideTokens,
   _hasDefaultTokenlist,
-  _hasPortfolioEndpoint,
 }: ManageTokensMenuProps): ReactElement => {
   const dispatch = useAppDispatch()
   const settings = useAppSelector(selectSettings)
   const hasDefaultTokenlistFromHook = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
-  const hasPortfolioEndpointFromHook = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT)
   const hiddenTokens = useHiddenTokens()
 
   const hasDefaultTokenlist = _hasDefaultTokenlist ?? hasDefaultTokenlistFromHook
-  const shouldUsePortfolioEndpoint = _hasPortfolioEndpoint ?? hasPortfolioEndpointFromHook ?? false
 
   const showAllTokens = settings.tokenList === TOKEN_LISTS.ALL || settings.tokenList === undefined
   const hideDust = settings.hideDust ?? true
@@ -110,24 +105,22 @@ const ManageTokensMenu = ({
         </MenuItem>
       )}
 
-      {shouldUsePortfolioEndpoint && (
-        <MenuItem className={css.menuItem} sx={menuItemHoverSx} onClick={handleToggleHideDust}>
-          <Box className={css.menuItemContent}>
-            <Box className={css.menuItemLeft}>
-              <Typography variant="body2">Hide small balances</Typography>
-              <InfoTooltip title={<Typography>Hide tokens with a value less than ${DUST_THRESHOLD}</Typography>} />
-            </Box>
-            <Switch
-              size="small"
-              checked={hideDust}
-              onClick={(e) => e.stopPropagation()}
-              onChange={handleToggleHideDust}
-            />
+      <MenuItem className={css.menuItem} sx={menuItemHoverSx} onClick={handleToggleHideDust}>
+        <Box className={css.menuItemContent}>
+          <Box className={css.menuItemLeft}>
+            <Typography variant="body2">Hide small balances</Typography>
+            <InfoTooltip title={<Typography>Hide tokens with a value less than ${DUST_THRESHOLD}</Typography>} />
           </Box>
-        </MenuItem>
-      )}
+          <Switch
+            size="small"
+            checked={hideDust}
+            onClick={(e) => e.stopPropagation()}
+            onChange={handleToggleHideDust}
+          />
+        </Box>
+      </MenuItem>
 
-      {(hasDefaultTokenlist || shouldUsePortfolioEndpoint) && <Divider />}
+      <Divider />
 
       <MenuItem onClick={handleHideTokens} className={css.menuItem} sx={menuItemHoverSx}>
         <Track {...ASSETS_EVENTS.SHOW_HIDDEN_ASSETS}>
