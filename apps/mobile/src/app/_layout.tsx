@@ -34,6 +34,7 @@ import { SafeStatusBar } from '@/src/theme/SafeStatusBar'
 import { GuardProvider } from '@/src/context/GuardProvider'
 import { useNotificationHandler } from '@/src/hooks/useNotificationHandler'
 import { usePendingTxsMonitor } from '../hooks/usePendingTxsMonitor'
+import { SigningMonitor } from '@/src/components/SigningMonitor'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 // Initialize all notification handlers
@@ -81,6 +82,7 @@ function RootLayout() {
                       <GuardProvider>
                         <NavigationGuardHOC>
                           <HooksInitializer />
+                          <SigningMonitor />
                           <TestCtrls />
                           <Stack
                             screenOptions={({ navigation }) => ({
@@ -243,6 +245,14 @@ function RootLayout() {
                             <Stack.Screen
                               name="manage-tokens-sheet"
                               options={{ headerShown: false, presentation: 'transparentModal', animation: 'fade' }}
+                            />
+                            <Stack.Screen
+                              name="signing-error"
+                              options={{ headerShown: false, presentation: 'modal' }}
+                            />
+                            <Stack.Screen
+                              name="signing-success"
+                              options={{ headerShown: false, presentation: 'modal' }}
                             />
                             <Stack.Screen name="+not-found" />
                           </Stack>

@@ -15,7 +15,7 @@ export function TxDataContainer() {
 
   const {
     data: txDetails,
-    isFetching,
+    isLoading,
     isError,
   } = useTransactionsGetTransactionByIdV1Query({
     chainId: activeSafe.chainId,
@@ -35,8 +35,6 @@ export function TxDataContainer() {
   }
 
   return (
-    <ScrollView marginTop="$2">
-      {isFetching || !txDetails ? <LoadingTx /> : <ListTable items={parameters} />}
-    </ScrollView>
+    <ScrollView marginTop="$2">{isLoading || !txDetails ? <LoadingTx /> : <ListTable items={parameters} />}</ScrollView>
   )
 }
