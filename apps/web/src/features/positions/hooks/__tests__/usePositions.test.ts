@@ -312,14 +312,12 @@ describe('usePositions', () => {
         return undefined
       })
 
-      jest
-        .spyOn(useBalances, 'default')
-        .mockReturnValue({
-          balances: { items: [], fiatTotal: '', positions: mockAppBalances },
-          loaded: true,
-          loading: false,
-          error: undefined,
-        })
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances: { items: [], fiatTotal: '', positions: mockAppBalances },
+        loaded: true,
+        loading: false,
+        error: undefined,
+      })
 
       const { result } = renderHook(() => usePositions())
 
@@ -359,14 +357,12 @@ describe('usePositions', () => {
         return undefined
       })
 
-      jest
-        .spyOn(useBalances, 'default')
-        .mockReturnValue({
-          balances: { items: [], fiatTotal: '', positions: [mockAppBalance] },
-          loaded: true,
-          loading: false,
-          error: undefined,
-        })
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances: { items: [], fiatTotal: '', positions: [mockAppBalance] },
+        loaded: true,
+        loading: false,
+        error: undefined,
+      })
 
       const { result } = renderHook(() => usePositions())
 
@@ -414,14 +410,12 @@ describe('usePositions', () => {
         return undefined
       })
 
-      jest
-        .spyOn(useBalances, 'default')
-        .mockReturnValue({
-          balances: { items: [], fiatTotal: '', positions: [mockAppBalance] },
-          loaded: true,
-          loading: false,
-          error: undefined,
-        })
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances: { items: [], fiatTotal: '', positions: [mockAppBalance] },
+        loaded: true,
+        loading: false,
+        error: undefined,
+      })
 
       const { result } = renderHook(() => usePositions())
 
@@ -469,14 +463,12 @@ describe('usePositions', () => {
         return undefined
       })
 
-      jest
-        .spyOn(useBalances, 'default')
-        .mockReturnValue({
-          balances: { items: [], fiatTotal: '', positions: [mockAppBalance] },
-          loaded: true,
-          loading: false,
-          error: undefined,
-        })
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances: { items: [], fiatTotal: '', positions: [mockAppBalance] },
+        loaded: true,
+        loading: false,
+        error: undefined,
+      })
 
       const { result } = renderHook(() => usePositions())
 
@@ -514,14 +506,12 @@ describe('usePositions', () => {
         return undefined
       })
 
-      jest
-        .spyOn(useBalances, 'default')
-        .mockReturnValue({
-          balances: { items: [], fiatTotal: '', positions: [] },
-          loaded: true,
-          loading: false,
-          error: undefined,
-        })
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances: { items: [], fiatTotal: '', positions: [] },
+        loaded: true,
+        loading: false,
+        error: undefined,
+      })
 
       const { result } = renderHook(() => usePositions())
 
@@ -542,14 +532,12 @@ describe('usePositions', () => {
         return undefined
       })
 
-      jest
-        .spyOn(useBalances, 'default')
-        .mockReturnValue({
-          balances: { items: [], fiatTotal: '', positions: mockAppBalances },
-          loaded: true,
-          loading: false,
-          error: undefined,
-        })
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances: { items: [], fiatTotal: '', positions: mockAppBalances },
+        loaded: true,
+        loading: false,
+        error: undefined,
+      })
 
       const positionsQuerySpy = jest.spyOn(positionsQueries, 'usePositionsGetPositionsV1Query')
 
@@ -571,14 +559,12 @@ describe('usePositions', () => {
         return undefined
       })
 
-      jest
-        .spyOn(useBalances, 'default')
-        .mockReturnValue({
-          balances: { items: [], fiatTotal: '' },
-          loaded: false,
-          loading: false,
-          error: 'Portfolio endpoint error',
-        })
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances: { items: [], fiatTotal: '' },
+        loaded: false,
+        loading: false,
+        error: 'Portfolio endpoint error',
+      })
 
       const { result } = renderHook(() => usePositions())
 
@@ -640,14 +626,12 @@ describe('usePositions', () => {
         return undefined
       })
 
-      jest
-        .spyOn(useBalances, 'default')
-        .mockReturnValue({
-          balances: { items: [], fiatTotal: '', positions: mockAppBalances },
-          loaded: true,
-          loading: false,
-          error: undefined,
-        })
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances: { items: [], fiatTotal: '', positions: mockAppBalances },
+        loaded: true,
+        loading: false,
+        error: undefined,
+      })
 
       const { result } = renderHook(() => usePositions())
 
@@ -727,14 +711,12 @@ describe('usePositions', () => {
         return undefined
       })
 
-      jest
-        .spyOn(useBalances, 'default')
-        .mockReturnValue({
-          balances: { items: [], fiatTotal: '', positions: [mockAppBalance] },
-          loaded: true,
-          loading: false,
-          error: undefined,
-        })
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances: { items: [], fiatTotal: '', positions: [mockAppBalance] },
+        loaded: true,
+        loading: false,
+        error: undefined,
+      })
 
       const { result } = renderHook(() => usePositions())
 
