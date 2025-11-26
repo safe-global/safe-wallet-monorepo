@@ -1,3 +1,31 @@
+/**
+ * SlotProvider - Dynamic component registration system for transaction actions
+ *
+ * The slot system allows action components (Sign, Execute, Batch, etc.) to
+ * dynamically register themselves based on conditions. This enables:
+ * - Conditional rendering based on user role and transaction state
+ * - Multiple action options in a single slot (ComboSubmit dropdown)
+ * - Clean separation between slot definition and component implementation
+ *
+ * Usage:
+ * 1. Define a slot component with withSlot() HOC
+ * 2. The component registers itself when its condition hook returns true
+ * 3. Slot component renders registered components for that slot name
+ *
+ * @example
+ * ```tsx
+ * // Register a Sign action in the ComboSubmit slot
+ * const SignSlot = withSlot({
+ *   Component: Sign,
+ *   label: 'Sign',
+ *   slotName: SlotName.ComboSubmit,
+ *   id: 'sign',
+ *   useSlotCondition: useShouldShowSign,
+ * })
+ * ```
+ *
+ * @see docs/tx-flow-refactoring-plan.md for slot system documentation
+ */
 import React, {
   createContext,
   type ReactNode,
@@ -8,6 +36,9 @@ import React, {
 } from 'react'
 import type { SubmitCallback } from '../TxFlow'
 
+/**
+ * Available slot names for action registration
+ */
 export enum SlotName {
   Main = 'main',
   Submit = 'submit',
