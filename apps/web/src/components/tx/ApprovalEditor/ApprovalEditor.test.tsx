@@ -12,6 +12,7 @@ import { getAndValidateSafeSDK } from '@/services/tx/tx-sender/sdk'
 import { parseUnits } from 'ethers'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import * as useLoadBalances from '@/hooks/loadables/useLoadBalances'
 jest.mock('@/services/tx/tx-sender/sdk', () => ({
   getAndValidateSafeSDK: jest.fn().mockReturnValue({
     createTransaction: jest.fn(),
@@ -177,15 +178,9 @@ describe('ApprovalEditor', () => {
       ],
     }
 
-    const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />, {
-      initialReduxState: {
-        balances: {
-          data: mockBalances,
-          loading: false,
-          loaded: true,
-        },
-      },
-    })
+    jest.spyOn(useLoadBalances, 'default').mockReturnValue([mockBalances, undefined, false])
+
+    const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />)
 
     await waitFor(() => {
       const amountInput1 = result.container.querySelector('input[name="approvals.0"]') as HTMLInputElement
@@ -288,15 +283,9 @@ describe('ApprovalEditor', () => {
       ],
     }
 
-    const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />, {
-      initialReduxState: {
-        balances: {
-          data: mockBalances,
-          loading: false,
-          loaded: true,
-        },
-      },
-    })
+    jest.spyOn(useLoadBalances, 'default').mockReturnValue([mockBalances, undefined, false])
+
+    const result = render(<ApprovalEditor safeTransaction={mockSafeTx} />)
 
     await waitFor(() => {
       const amountInput1 = result.container.querySelector('input[name="approvals.0"]') as HTMLInputElement

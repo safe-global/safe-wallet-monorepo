@@ -3,12 +3,12 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { usePositionsGetPositionsV1Query, type Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
-import { selectPositions, selectBalances } from '@/store/balancesSlice'
 import type { AppBalance } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import useIsPositionsFeatureEnabled from './useIsPositionsFeatureEnabled'
 import { useMemo } from 'react'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
+import useLoadBalances from '@/hooks/loadables/useLoadBalances'
 
 const POLLING_INTERVAL = 300_000 // 5 minutes
 
@@ -65,22 +65,21 @@ const usePositions = () => {
     },
   )
 
-  const portfolioPositions = useAppSelector(selectPositions)
-  const balancesState = useAppSelector(selectBalances)
+  const [balancesData, balancesError, balancesLoading] = useLoadBalances()
 
   return useMemo(
     () => ({
-      data: shouldUsePortfolioEndpoint ? transformAppBalancesToProtocols(portfolioPositions) : legacyPositionsData,
-      error: shouldUsePortfolioEndpoint ? balancesState.error : legacyPositionsError,
-      isLoading: shouldUsePortfolioEndpoint ? balancesState.loading : legacyPositionsLoading,
+      data: shouldUsePortfolioEndpoint ? transformAppBalancesToProtocols(balancesData?.positions) : legacyPositionsData,
+      error: shouldUsePortfolioEndpoint ? balancesError?.message : legacyPositionsError,
+      isLoading: shouldUsePortfolioEndpoint ? balancesLoading : legacyPositionsLoading,
     }),
     [
       shouldUsePortfolioEndpoint,
-      portfolioPositions,
+      balancesData?.positions,
       legacyPositionsData,
-      balancesState.error,
+      balancesError,
       legacyPositionsError,
-      balancesState.loading,
+      balancesLoading,
       legacyPositionsLoading,
     ],
   )
