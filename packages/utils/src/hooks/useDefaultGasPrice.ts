@@ -237,7 +237,6 @@ export const useDefaultGasPrice = (
         maxPriorityFeePerGas: undefined,
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [gasPriceConfigs, provider, intervalCounter, isEIP1559],
     false,
   )

@@ -31,6 +31,7 @@ class ExternalStore<T extends unknown> {
   }
 
   public readonly useStore = () => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     return useSyncExternalStore(this.subscribe, this.getStore, this.getStore)
   }
 }
