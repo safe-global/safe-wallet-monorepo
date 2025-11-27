@@ -1,13 +1,10 @@
 .image {
   display: block;
   width: auto;
+  background: transparent;
 }
 
-[data-theme='dark'] .image {
-  background: var(--color-secondary-main);
-  border-radius: 4px;
-  padding: 2px;
-}
+
 
 .chainIcon {
   position: absolute;

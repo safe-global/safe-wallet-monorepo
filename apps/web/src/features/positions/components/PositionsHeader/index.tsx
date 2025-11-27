@@ -3,7 +3,6 @@ import TokenIcon from '@/components/common/TokenIcon'
 import FiatValue from '@/components/common/FiatValue'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
-import { Box } from '@mui/system'
 
 const PositionsHeader = ({ protocol, fiatTotal }: { protocol: Protocol; fiatTotal?: number }) => {
   const shareOfFiatTotal = fiatTotal ? formatPercentage(Number(protocol.fiatTotal) / fiatTotal) : null
@@ -11,13 +10,11 @@ const PositionsHeader = ({ protocol, fiatTotal }: { protocol: Protocol; fiatTota
   return (
     <>
       <Stack direction="row" gap={1} alignItems="center" width={1}>
-        <Box sx={{ borderRadius: '50%', overflow: 'hidden', display: 'flex' }}>
-          <TokenIcon
-            logoUri={protocol.protocol_metadata.icon.url || undefined}
-            tokenSymbol={protocol.protocol_metadata.name}
-            size={32}
-          />
-        </Box>
+        <TokenIcon
+          logoUri={protocol.protocol_metadata.icon.url ?? undefined}
+          tokenSymbol={protocol.protocol_metadata.name}
+          size={32}
+        />
 
         <Typography fontWeight="bold" ml={0.5}>
           {protocol.protocol_metadata.name}
