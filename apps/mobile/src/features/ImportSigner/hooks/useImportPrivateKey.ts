@@ -12,7 +12,7 @@ export const useImportPrivateKey = () => {
   const [input, setInput] = useState('')
   const [inputType, setInputType] = useState<InputType>('unknown')
   const [wallet, setWallet] = useState<ethers.Wallet>()
-  const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string }>()
+  const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string; safeName?: string }>()
   const [error, setError] = useState<string | undefined>(undefined)
   const router = useRouter()
   const { createDelegate } = useDelegate()
@@ -79,6 +79,7 @@ export const useImportPrivateKey = () => {
             safeAddress: local.safeAddress,
             chainId: local.chainId,
             import_safe: local.import_safe,
+            safeName: local.safeName,
           },
         })
       } catch (err) {
@@ -93,6 +94,7 @@ export const useImportPrivateKey = () => {
           safeAddress: local.safeAddress,
           chainId: local.chainId,
           import_safe: local.import_safe,
+          safeName: local.safeName,
         },
       })
     } else {

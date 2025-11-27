@@ -13,14 +13,30 @@ import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 import Logger from '@/src/utils/logger'
 
 export function ImportSuccess() {
-  const { address, name } = useLocalSearchParams<{ address: `0x${string}`; name: string }>()
+  const { address, name, import_safe, safeAddress, safeName } = useLocalSearchParams<{
+    address: `0x${string}`
+    name: string
+    import_safe: string
+    safeAddress?: string
+    safeName?: string
+  }>()
   const router = useRouter()
   const copy = useCopyAndDispatchToast()
 
   const handleContinuePress = async () => {
     try {
       router.dismissAll()
-      router.dismissTo('/signers')
+      if (safeAddress && safeName && import_safe === 'true') {
+        router.dismissTo({
+          pathname: '/(import-accounts)/signers',
+          params: {
+            safeAddress: safeAddress,
+            safeName: safeName,
+          },
+        })
+      } else {
+        router.dismissTo('/signers')
+      }
     } catch (error) {
       Logger.error('Navigation error:', error)
     }

@@ -23,7 +23,7 @@ interface SignersListItemProps {
 function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
   const { isDark } = useTheme()
   const contact = useAppSelector(selectContactByAddress(item.value))
-  const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string }>()
+  const local = useLocalSearchParams<{ safeAddress: string; safeName: string; chainId: string; import_safe: string }>()
 
   // Check if the current item belongs to the 'Imported signers' section
   const isMySigner = signersGroup.some(
@@ -50,6 +50,7 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
         safeAddress: local.safeAddress,
         chainId: local.chainId,
         import_safe: local.import_safe,
+        safeName: local.safeName,
       },
     })
   }

@@ -45,7 +45,7 @@ const title = 'Import a signer'
 
 export const ImportSignersContainer = () => {
   const { isBiometricsEnabled } = useBiometrics()
-  const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string }>()
+  const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string; safeName?: string }>()
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle paddingRight={5}>{title}</NavBarTitle>,
   })
@@ -62,6 +62,7 @@ export const ImportSignersContainer = () => {
               safeAddress: local.safeAddress,
               chainId: local.chainId,
               import_safe: local.import_safe,
+              safeName: local.safeName,
               caller: '/import-signers',
             },
           })

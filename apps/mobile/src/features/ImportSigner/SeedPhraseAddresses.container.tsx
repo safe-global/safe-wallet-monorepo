@@ -22,6 +22,7 @@ export const SeedPhraseAddressesContainer = () => {
     safeAddress: string
     chainId: string
     import_safe: string
+    safeName?: string
   }>()
 
   const [selectedIndex, setSelectedIndex] = useState<number>(0)
@@ -139,6 +140,7 @@ export const SeedPhraseAddressesContainer = () => {
           safeAddress: params.safeAddress,
           chainId: params.chainId,
           import_safe: params.import_safe,
+          safeName: params.safeName,
         },
       })
     }

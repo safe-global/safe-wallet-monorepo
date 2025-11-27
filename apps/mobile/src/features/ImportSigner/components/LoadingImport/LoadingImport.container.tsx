@@ -6,7 +6,12 @@ import { LoadingScreen } from '@/src/components/LoadingScreen'
 import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipValidation'
 
 export function LoadingImport() {
-  const glob = useGlobalSearchParams<{ safeAddress?: string; chainId?: string; import_safe?: string }>()
+  const glob = useGlobalSearchParams<{
+    safeAddress?: string
+    chainId?: string
+    import_safe?: string
+    safeName?: string
+  }>()
   const { address } = useLocalSearchParams<{ address: string }>()
   const dispatch = useAppDispatch()
   const router = useRouter()
@@ -47,6 +52,7 @@ export function LoadingImport() {
               safeAddress: glob.safeAddress,
               chainId: glob.chainId,
               import_safe: glob.import_safe,
+              safeName: glob.safeName,
             },
           })
         } else {
