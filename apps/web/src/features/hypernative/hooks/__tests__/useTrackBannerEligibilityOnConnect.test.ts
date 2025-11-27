@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@/tests/test-utils'
-import { useTrackBannerEligibilityOnConnect } from '../useTrackBannerEligibilityOnConnect'
+import { useTrackBannerEligibilityOnConnect, activeTrackingSafes } from '../useTrackBannerEligibilityOnConnect'
 import type { BannerVisibilityResult } from '../useBannerVisibility'
 import { BannerType } from '../useBannerStorage'
 import * as useChainIdHook from '@/hooks/useChainId'
@@ -41,6 +41,7 @@ describe('useTrackBannerEligibilityOnConnect', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    activeTrackingSafes.clear()
     mockTrackEvent.mockReturnValue(undefined)
     jest.spyOn(useChainIdHook, 'default').mockReturnValue(chainId)
     jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
@@ -513,6 +514,49 @@ describe('useTrackBannerEligibilityOnConnect', () => {
       await waitFor(() => {
         // Should only track once despite multiple rerenders
         expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+    })
+  })
+
+  describe('Tracking guard prevents multiple hook instances from tracking the same Safe simultaneously', () => {
+    it('should prevent double tracking when guard already initiated', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      const safeKey = `${chainId}:${safeAddress}`
+      activeTrackingSafes.add(safeKey)
+
+      renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult), {
+        initialReduxState,
+      })
+
+      await waitFor(() => {
+        expect(mockTrackEvent).not.toHaveBeenCalled()
+      })
+
+      activeTrackingSafes.delete(safeKey)
+    })
+
+    it('should clear guard when hook unmounts', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      const safeKey = `${chainId}:${safeAddress}`
+
+      const { unmount } = renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult), {
+        initialReduxState,
+      })
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+
+      unmount()
+
+      await waitFor(() => {
+        expect(activeTrackingSafes.has(safeKey)).toBe(false)
       })
     })
   })

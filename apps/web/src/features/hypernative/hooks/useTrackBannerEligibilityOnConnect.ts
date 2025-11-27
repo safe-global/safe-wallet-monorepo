@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { useAppDispatch, useAppSelector } from '@/store'
+import { useAppDispatch, useAppSelector, type RootState } from '@/store'
+import { useStore } from 'react-redux'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { selectSafeHnState, setBannerEligibilityTracked } from '../store/hnStateSlice'
@@ -7,6 +8,9 @@ import { trackEvent, MixpanelEventParams } from '@/services/analytics'
 import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 import type { BannerVisibilityResult } from './useBannerVisibility'
 import { BannerType } from './useBannerStorage'
+
+//A shared Set across hook instances to prevent concurrent tracking for the same Safe
+export const activeTrackingSafes = new Set<string>()
 
 /**
  * Hook to track once per wallet connection when Safe loads and satisfies banner rendering conditions.
@@ -25,6 +29,7 @@ export const useTrackBannerEligibilityOnConnect = (
   bannerType?: BannerType,
 ): void => {
   const dispatch = useAppDispatch()
+  const store = useStore()
   const chainId = useChainId()
   const { safeAddress, safeLoaded, safeLoading } = useSafeInfo()
   const safeHnState = useAppSelector((state) => selectSafeHnState(state, chainId, safeAddress))
@@ -37,6 +42,15 @@ export const useTrackBannerEligibilityOnConnect = (
     const safeKey = chainId && safeAddress ? `${chainId}:${safeAddress}` : null
     if (safeKey !== trackingInitiatedRef.current) {
       trackingInitiatedRef.current = null
+    }
+  }, [chainId, safeAddress])
+
+  useEffect(() => {
+    const safeKey = chainId && safeAddress ? `${chainId}:${safeAddress}` : null
+    return () => {
+      if (safeKey) {
+        activeTrackingSafes.delete(safeKey)
+      }
     }
   }, [chainId, safeAddress])
 
@@ -59,19 +73,32 @@ export const useTrackBannerEligibilityOnConnect = (
 
     const safeKey = `${chainId}:${safeAddress}`
 
+    // Atomic check-and-add: prevent concurrent tracking from multiple components
+    if (activeTrackingSafes.has(safeKey)) {
+      return // Another instance already initiated tracking
+    }
+    activeTrackingSafes.add(safeKey) // Acquire lock immediately
+
     // Check if we've already tracked for this Safe (Redux state)
-    const alreadyTracked = safeHnState?.bannerEligibilityTracked ?? false
+    // Check BOTH the selector value (reactive) AND the current store state (fresh)
+    // This prevents race conditions where multiple components mount simultaneously
+    const currentSafeHnState = selectSafeHnState(store.getState() as RootState, chainId, safeAddress)
+    const alreadyTracked = safeHnState?.bannerEligibilityTracked || currentSafeHnState?.bannerEligibilityTracked
+
     if (alreadyTracked) {
+      activeTrackingSafes.delete(safeKey) // Release lock if already tracked
       return // Already tracked, don't track again
     }
 
     // Check if we've already initiated tracking in this effect run (prevents race condition)
     if (trackingInitiatedRef.current === safeKey) {
+      activeTrackingSafes.delete(safeKey) // Release lock if already initiated
       return // Already initiated tracking, don't track again
     }
 
     // Only track if banner should be shown
     if (!visibilityResult.showBanner) {
+      activeTrackingSafes.delete(safeKey) // Release lock if banner shouldn't show
       return
     }
 
@@ -96,5 +123,6 @@ export const useTrackBannerEligibilityOnConnect = (
     safeHnState,
     dispatch,
     bannerType,
+    store,
   ])
 }
