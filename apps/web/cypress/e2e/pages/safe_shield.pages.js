@@ -17,7 +17,7 @@ export const TEST_SAFE_ADDRESS = '0xb412684F4F0B5d27cC4A4D287F42595aB3ae124D'
 export const recipientAnalysisGroupCard = '[data-testid="recipient-analysis-group-card"]'
 export const contractAnalysisGroupCard = '[data-testid="contract-analysis-group-card"]'
 export const threatAnalysisGroupCard = '[data-testid="threat-analysis-group-card"]'
-export const tenderlySimulationGroupCard = '[data-testid="tenderly-simulation"]'
+export const tenderlySimulation = '[data-testid="tenderly-simulation"]'
 export const runSimulationBtn = '[data-testid="run-simulation-btn"]'
 
 //no data-testids, accessed via class or structure
@@ -205,11 +205,6 @@ export function verifyThreatAnalysisWarningState() {
 }
 
 // Verify Tenderly simulation group card is displayed
-export function verifyTenderlySimulationGroupCard() {
-  cy.get(tenderlySimulationGroupCard).should('be.visible')
-}
-
-// Verify Tenderly simulation is displayed
 export function verifyTenderlySimulation() {
   cy.get(tenderlySimulation).should('be.visible')
 }

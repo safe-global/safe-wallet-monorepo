@@ -204,9 +204,9 @@ describe('Safe Shield tests', { defaultCommandTimeout: 30000 }, () => {
     createtx.clickOnConfirmTransactionBtn()
     shield.verifySafeShieldDisplayed()
     shield.waitForAnalysisComplete()
-    shield.verifyTenderlySimulationGroupCard()
-    cy.get(shield.tenderlySimulationGroupCard).should('contain.text', 'Transaction simulation')
-    cy.get(shield.tenderlySimulationGroupCard).find(shield.runSimulationBtn).should('be.visible')
+    shield.verifyTenderlySimulation()
+    cy.get(shield.tenderlySimulation).should('contain.text', 'Transaction simulation')
+    cy.get(shield.tenderlySimulation).find(shield.runSimulationBtn).should('be.visible')
     cy.contains('Run').should('be.visible')
   })
 
@@ -216,13 +216,13 @@ describe('Safe Shield tests', { defaultCommandTimeout: 30000 }, () => {
     createtx.clickOnConfirmTransactionBtn()
     shield.verifySafeShieldDisplayed()
     shield.waitForAnalysisComplete()
-    shield.verifyTenderlySimulationGroupCard()
-    cy.get(shield.tenderlySimulationGroupCard, { timeout: 15000 }).find(shield.runSimulationBtn).click()
-    cy.get(shield.tenderlySimulationGroupCard).find(shield.runSimulationBtn).should('contain.text', 'Running...')
+    shield.verifyTenderlySimulation()
+    cy.get(shield.tenderlySimulation, { timeout: 15000 }).find(shield.runSimulationBtn).click()
+    cy.get(shield.tenderlySimulation).find(shield.runSimulationBtn).should('contain.text', 'Running...')
     cy.contains('Simulation successful', { timeout: 10000 }).should('be.visible')
-    cy.get(shield.tenderlySimulationGroupCard).should('contain.text', 'Simulation successful')
+    cy.get(shield.tenderlySimulation).should('contain.text', 'Simulation successful')
     cy.contains('View').should('be.visible')
-    cy.get(shield.tenderlySimulationGroupCard).find(shield.runSimulationBtn).should('not.exist')
+    cy.get(shield.tenderlySimulation).find(shield.runSimulationBtn).should('not.exist')
     main.verifyLinkContainsUrl('View', shield.tenderlySimulationUrl)
   })
 
@@ -232,24 +232,15 @@ describe('Safe Shield tests', { defaultCommandTimeout: 30000 }, () => {
     createtx.clickOnConfirmTransactionBtn()
     shield.verifySafeShieldDisplayed()
     shield.waitForAnalysisComplete()
-    shield.verifyTenderlySimulationGroupCard()
-    cy.get(shield.tenderlySimulationGroupCard, { timeout: 15000 }).find(shield.runSimulationBtn).click()
-    cy.get(shield.tenderlySimulationGroupCard).find(shield.runSimulationBtn).should('contain.text', 'Running...')
+    shield.verifyTenderlySimulation()
+    cy.get(shield.tenderlySimulation, { timeout: 15000 }).find(shield.runSimulationBtn).click()
+    cy.get(shield.tenderlySimulation).find(shield.runSimulationBtn).should('contain.text', 'Running...')
     cy.contains('Simulation failed', { timeout: 10000 }).should('be.visible')
-    cy.get(shield.tenderlySimulationGroupCard).should('contain.text', 'Simulation failed')
+    cy.get(shield.tenderlySimulation).should('contain.text', 'Simulation failed')
     cy.contains('View').should('be.visible')
-    cy.get(shield.tenderlySimulationGroupCard).find(shield.runSimulationBtn).should('not.exist')
+    cy.get(shield.tenderlySimulation).find(shield.runSimulationBtn).should('not.exist')
     main.verifyLinkContainsUrl('View', shield.tenderlySimulationUrl)
   })
 
-  it.skip('[Tenderly Simulation] Verify original and nested txs simulations in Tenderly card', () => {
-    // Test would verify that for nested transactions:
-    // 1. Card header shows "Transaction simulations" (plural)
-    // 2. Card is expandable/collapsible
-    // 3. When expanded, shows both parent and nested simulation results
-    // 4. Each simulation result has its own status (success/failed)
-    // 5. Each simulation result has its own "View" link
-    // 6. Parent simulation shows "Simulation successful." or "Simulation failed."
-    // 7. Nested simulation shows "Nested transaction simulation successful." or "Nested transaction simulation failed."
-  })
+  //it('[Tenderly Simulation] Verify original and nested txs simulations in Tenderly card'
 })
