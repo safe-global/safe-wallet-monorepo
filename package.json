@@ -14,7 +14,7 @@
     "eslint": "yarn workspaces foreach --all -pt run eslint",
     "prettier": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "prettier:fix": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
-    "prepare": "husky"
+    "postinstall": "husky"
   },
   "resolutions": {
     "@ledgerhq/context-module/ethers": "6.14.3",
