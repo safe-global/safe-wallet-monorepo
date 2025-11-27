@@ -9,16 +9,34 @@ import { Stack } from 'tamagui'
 import { WidgetAction } from './WidgetAction'
 import { WidgetDisplay } from './WidgetDisplay'
 import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
+import { useRouter } from 'expo-router'
+import type { SafeTransaction } from '@safe-global/types-kit'
 
 interface SafeShieldWidgetProps {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
+  safeTx?: SafeTransaction
+  txId?: string
 }
 
-export function SafeShieldWidget({ recipient, contract, threat }: SafeShieldWidgetProps) {
+export function SafeShieldWidget({ recipient, contract, threat, safeTx, txId }: SafeShieldWidgetProps) {
+  const router = useRouter()
+
   const onPress = () => {
-    console.log('onPress')
+    if (txId) {
+      const params: Record<string, string> = {
+        txId,
+        recipient: JSON.stringify(recipient),
+        contract: JSON.stringify(contract),
+        threat: JSON.stringify(threat),
+      }
+
+      router.push({
+        pathname: '/safe-shield-details-sheet',
+        params,
+      })
+    }
   }
 
   // Extract data, error, and loading from each AsyncResult
@@ -37,16 +55,23 @@ export function SafeShieldWidget({ recipient, contract, threat }: SafeShieldWidg
     (hasRecipient ? !!recipientError : true) &&
     (hasContract ? !!contractError : true) &&
     (hasThreat ? !!threatError : true)
-  const error = (hasRecipient || hasContract || hasThreat) && allHaveErrors
 
   // Get actual status from analysis
   const overallStatus = getOverallStatus(recipientData, contractData, threatData) ?? null
 
   return (
     <Stack gap="$3" padding="$1" borderRadius="$2" paddingBottom="$4" backgroundColor="$backgroundPaper">
-      <WidgetAction onPress={onPress} loading={loading} error={error} status={overallStatus} />
+      <WidgetAction onPress={onPress} loading={loading} error={allHaveErrors} status={overallStatus} />
 
-      <WidgetDisplay recipient={recipient} contract={contract} threat={threat} loading={loading} error={error} />
+      <WidgetDisplay
+        recipient={recipient}
+        contract={contract}
+        threat={threat}
+        loading={loading}
+        error={allHaveErrors}
+        safeTx={safeTx}
+        txId={txId}
+      />
     </Stack>
   )
 }

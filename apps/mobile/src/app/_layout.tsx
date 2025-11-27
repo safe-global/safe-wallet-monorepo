@@ -166,6 +166,14 @@ function RootLayout() {
                               }}
                             />
                             <Stack.Screen
+                              name="safe-shield-details-sheet"
+                              options={{
+                                headerShown: false,
+                                presentation: 'transparentModal',
+                                animation: 'fade',
+                              }}
+                            />
+                            <Stack.Screen
                               name="change-signer-sheet"
                               options={{
                                 headerShown: false,

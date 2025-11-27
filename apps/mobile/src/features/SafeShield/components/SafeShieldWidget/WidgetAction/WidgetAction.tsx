@@ -29,7 +29,7 @@ export function WidgetAction({ loading, error, status, onPress }: WidgetActionPr
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
       <View
-        backgroundColor="$background"
+        backgroundColor="$backgroundFocus"
         paddingHorizontal="$1"
         borderTopLeftRadius="$2"
         borderTopRightRadius="$2"
