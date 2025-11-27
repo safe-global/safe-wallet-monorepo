@@ -38,7 +38,11 @@ export const PositionGroup = ({ group, isLast = false }: PositionGroupProps) => 
       name: {
         content: (
           <Stack direction="row" alignItems="center" gap={1}>
-            <TokenIcon logoUri={position.tokenInfo.logoUri} tokenSymbol={position.tokenInfo.symbol} size={32} />
+            <TokenIcon
+              logoUri={position.tokenInfo.logoUri ?? undefined}
+              tokenSymbol={position.tokenInfo.symbol}
+              size={32}
+            />
 
             <Box>
               <Typography variant="body2" fontWeight="bold">

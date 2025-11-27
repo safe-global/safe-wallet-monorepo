@@ -9,7 +9,7 @@ import { getReadablePositionType } from '@/features/positions/utils'
 const Position = ({ item }: { item: Position }) => {
   return (
     <Stack direction="row" alignItems="center" key={item.tokenInfo.name} py={1} gap={1}>
-      <TokenIcon logoUri={item.tokenInfo.logoUri || undefined} tokenSymbol={item.tokenInfo.symbol} size={32} />
+      <TokenIcon logoUri={item.tokenInfo.logoUri ?? undefined} tokenSymbol={item.tokenInfo.symbol} size={32} />
 
       <Box>
         <Typography fontWeight="bold">{item.tokenInfo.name}</Typography>
