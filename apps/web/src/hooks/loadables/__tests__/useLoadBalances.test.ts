@@ -128,6 +128,8 @@ describe('useLoadBalances', () => {
       return false
     })
 
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockChain)
+
     jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
       selector({
         chains: {
@@ -775,6 +777,8 @@ describe('useLoadBalances', () => {
         return false
       })
 
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockChain)
+
       jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
         selector({
           chains: {
@@ -979,12 +983,20 @@ describe('useLoadBalances', () => {
     it('should handle legacy error gracefully in merged mode', async () => {
       jest.spyOn(useCounterfactualBalances, 'useCounterfactualBalances').mockReturnValue([undefined, undefined, false])
 
-      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
-        currentData: mockMergedPortfolio,
-        isLoading: false,
-        error: undefined,
-        refetch: jest.fn(),
-      } as any)
+      const portfolioBalances = {
+        items: mockMergedPortfolio.tokenBalances.map((t) => ({
+          tokenInfo: { ...t.tokenInfo, logoUri: t.tokenInfo.logoUri || '' },
+          balance: t.balance,
+          fiatBalance: t.balanceFiat || '0',
+          fiatConversion: t.price || '0',
+        })),
+        fiatTotal: mockMergedPortfolio.totalBalanceFiat,
+        tokensFiatTotal: mockMergedPortfolio.totalTokenBalanceFiat,
+        positionsFiatTotal: mockMergedPortfolio.totalPositionsBalanceFiat,
+        positions: mockMergedPortfolio.positionBalances,
+      }
+
+      jest.spyOn(usePortfolioBalances, 'default').mockReturnValue([portfolioBalances, undefined, false])
 
       jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
         currentData: undefined,
@@ -1000,7 +1012,6 @@ describe('useLoadBalances', () => {
         expect(result.current[1]).toBeInstanceOf(Error)
       })
 
-      // Should return error when legacy fails (since we need legacy for token list)
       expect(result.current[1]?.message).toContain('Legacy error')
     })
 
@@ -1028,12 +1039,20 @@ describe('useLoadBalances', () => {
         } as unknown as store.RootState),
       )
 
-      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
-        currentData: mockMergedPortfolio,
-        isLoading: false,
-        error: undefined,
-        refetch: jest.fn(),
-      } as any)
+      const portfolioBalances = {
+        items: mockMergedPortfolio.tokenBalances.map((t) => ({
+          tokenInfo: { ...t.tokenInfo, logoUri: t.tokenInfo.logoUri || '' },
+          balance: t.balance,
+          fiatBalance: t.balanceFiat || '0',
+          fiatConversion: t.price || '0',
+        })),
+        fiatTotal: mockMergedPortfolio.totalBalanceFiat,
+        tokensFiatTotal: mockMergedPortfolio.totalTokenBalanceFiat,
+        positionsFiatTotal: mockMergedPortfolio.totalPositionsBalanceFiat,
+        positions: mockMergedPortfolio.positionBalances,
+      }
+
+      jest.spyOn(usePortfolioBalances, 'default').mockReturnValue([portfolioBalances, undefined, false])
 
       const { result } = renderHook(() => useLoadBalances())
 
@@ -1043,7 +1062,6 @@ describe('useLoadBalances', () => {
 
       const [balances] = result.current
 
-      // isAllTokensMode should be false when using Default tokens
       expect(balances?.isAllTokensMode).toBeFalsy()
     })
   })

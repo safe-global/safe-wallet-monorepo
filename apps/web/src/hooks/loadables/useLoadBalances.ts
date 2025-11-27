@@ -16,6 +16,7 @@ export interface PortfolioBalances extends Balances {
   tokensFiatTotal?: string
   positionsFiatTotal?: string
   isAllTokensMode?: boolean
+  portfolioTokenAddresses?: Set<string>
 }
 
 export const initialBalancesState: PortfolioBalances = {
@@ -87,8 +88,10 @@ export const useLegacyBalances = (skip = false): AsyncResult<PortfolioBalances> 
     }
 
     const error = legacyError ? new Error(String(legacyError)) : undefined
-    return [undefined, error, true]
-  }, [skip, isCounterfactual, cfData, cfError, cfLoading, legacyBalances, legacyError, legacyLoading])
+    const isWaitingForReady = !isReady && !error
+    const isLoading = isWaitingForReady || legacyLoading
+    return [undefined, error, isLoading]
+  }, [skip, isCounterfactual, cfData, cfError, cfLoading, legacyBalances, legacyError, legacyLoading, isReady])
 }
 
 /**
@@ -155,6 +158,9 @@ const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
     }
 
     // Merge: portfolio fiatTotal/positions + legacy items + calculated tokensFiatTotal
+    // Store portfolio token addresses to check if hidden tokens should affect fiatTotal
+    const portfolioTokenAddresses = new Set(portfolioData.items.map((item) => item.tokenInfo.address.toLowerCase()))
+
     const mergedBalances: PortfolioBalances = {
       items: legacyData.items,
       fiatTotal: portfolioData.fiatTotal,
@@ -162,6 +168,7 @@ const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
       positionsFiatTotal: portfolioData.positionsFiatTotal,
       positions: portfolioData.positions,
       isAllTokensMode: true,
+      portfolioTokenAddresses,
     }
 
     return [mergedBalances, undefined, false]

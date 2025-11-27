@@ -373,4 +373,134 @@ describe('useVisibleBalances', () => {
 
     expect(result.current.balances.items).toHaveLength(2)
   })
+
+  test('deducts fiatTotal when hiding a portfolio token in "All tokens" mode', () => {
+    const portfolioTokenAddress = hiddenTokenAddress
+    const balance = {
+      fiatTotal: '5000',
+      tokensFiatTotal: '3000',
+      positionsFiatTotal: '2000',
+      isAllTokensMode: true,
+      portfolioTokenAddresses: new Set([portfolioTokenAddress.toLowerCase()]),
+      items: [
+        {
+          balance: '1000000000000000000',
+          fiatBalance: '1000',
+          fiatConversion: '1000',
+          tokenInfo: {
+            address: portfolioTokenAddress,
+            decimals: 18,
+            logoUri: '',
+            name: 'Portfolio Token (Hidden)',
+            symbol: 'PT',
+            type: TokenType.ERC20,
+          },
+        },
+        {
+          balance: '2000000000000000000',
+          fiatBalance: '2000',
+          fiatConversion: '2000',
+          tokenInfo: {
+            address: visibleTokenAddress,
+            decimals: 18,
+            logoUri: '',
+            name: 'Visible Token',
+            symbol: 'VT',
+            type: TokenType.ERC20,
+          },
+        },
+      ],
+    }
+
+    jest.spyOn(useBalancesHooks, 'default').mockImplementation(() => ({
+      balances: balance,
+      error: undefined,
+      loading: false,
+      loaded: true,
+    }))
+
+    jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
+      selector({
+        settings: {
+          currency: 'USD',
+          shortName: { copy: true, qr: true, show: true },
+          theme: { darkMode: false },
+          hiddenTokens: { ['4']: [portfolioTokenAddress] },
+          hideDust: false,
+        },
+        chains: { data: [], error: undefined, loading: false, loaded: true },
+      } as unknown as store.RootState),
+    )
+
+    const { result } = renderHook(() => useVisibleBalances())
+
+    expect(result.current.balances.fiatTotal).toEqual('4000')
+    expect(result.current.balances.tokensFiatTotal).toEqual('2000')
+    expect(result.current.balances.items).toHaveLength(1)
+  })
+
+  test('does not deduct fiatTotal when hiding a legacy-only token in "All tokens" mode', () => {
+    const legacyOnlyTokenAddress = hiddenTokenAddress
+    const balance = {
+      fiatTotal: '5000',
+      tokensFiatTotal: '3000',
+      positionsFiatTotal: '2000',
+      isAllTokensMode: true,
+      portfolioTokenAddresses: new Set([visibleTokenAddress.toLowerCase()]),
+      items: [
+        {
+          balance: '1000000000000000000',
+          fiatBalance: '1000',
+          fiatConversion: '1000',
+          tokenInfo: {
+            address: legacyOnlyTokenAddress,
+            decimals: 18,
+            logoUri: '',
+            name: 'Legacy Only Token (Hidden)',
+            symbol: 'LT',
+            type: TokenType.ERC20,
+          },
+        },
+        {
+          balance: '2000000000000000000',
+          fiatBalance: '2000',
+          fiatConversion: '2000',
+          tokenInfo: {
+            address: visibleTokenAddress,
+            decimals: 18,
+            logoUri: '',
+            name: 'Portfolio Token (Visible)',
+            symbol: 'PT',
+            type: TokenType.ERC20,
+          },
+        },
+      ],
+    }
+
+    jest.spyOn(useBalancesHooks, 'default').mockImplementation(() => ({
+      balances: balance,
+      error: undefined,
+      loading: false,
+      loaded: true,
+    }))
+
+    jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
+      selector({
+        settings: {
+          currency: 'USD',
+          shortName: { copy: true, qr: true, show: true },
+          theme: { darkMode: false },
+          hiddenTokens: { ['4']: [legacyOnlyTokenAddress] },
+          hideDust: false,
+        },
+        chains: { data: [], error: undefined, loading: false, loaded: true },
+      } as unknown as store.RootState),
+    )
+
+    const { result } = renderHook(() => useVisibleBalances())
+
+    expect(result.current.balances.fiatTotal).toEqual('5000')
+    expect(result.current.balances.tokensFiatTotal).toEqual('2000')
+    expect(result.current.balances.items).toHaveLength(1)
+  })
 })

@@ -48,6 +48,30 @@ const getVisibleFiatTotal = (balances: PortfolioBalances, hiddenAssets: string[]
   )
 }
 
+const getVisibleFiatTotalForMergedMode = (
+  balances: PortfolioBalances,
+  hiddenAssets: string[],
+  portfolioTokenAddresses: Set<string>,
+): string => {
+  return safeFormatUnits(
+    balances.items
+      .reduce(
+        (acc, balanceItem) => {
+          const address = balanceItem.tokenInfo.address.toLowerCase()
+          const isHidden = hiddenAssets.some((h) => h.toLowerCase() === address)
+          const isInPortfolio = portfolioTokenAddresses.has(address)
+          if (isHidden && isInPortfolio) {
+            return acc - BigInt(safeParseUnits(truncateNumber(balanceItem.fiatBalance), PRECISION) ?? 0)
+          }
+          return acc
+        },
+        BigInt(balances.fiatTotal === '' ? 0 : (safeParseUnits(truncateNumber(balances.fiatTotal), PRECISION) ?? 0)),
+      )
+      .toString(),
+    PRECISION,
+  )
+}
+
 const getVisibleTokensFiatTotal = (balances: PortfolioBalances, hiddenAssets: string[]): string | undefined => {
   if (!balances.tokensFiatTotal) {
     return undefined
@@ -82,12 +106,23 @@ export const useVisibleBalances = (): {
     const itemsWithoutHidden = filterHiddenTokens(data.balances.items, hiddenTokens)
     const visibleItems = filterDustTokens(itemsWithoutHidden, hideDust)
 
+    const { isAllTokensMode, portfolioTokenAddresses } = data.balances
+
+    let visibleFiatTotal: string
+    if (!data.balances.fiatTotal) {
+      visibleFiatTotal = ''
+    } else if (isAllTokensMode && portfolioTokenAddresses) {
+      visibleFiatTotal = getVisibleFiatTotalForMergedMode(data.balances, hiddenTokens, portfolioTokenAddresses)
+    } else {
+      visibleFiatTotal = getVisibleFiatTotal(data.balances, hiddenTokens)
+    }
+
     return {
       ...data,
       balances: {
         ...data.balances,
         items: visibleItems,
-        fiatTotal: data.balances.fiatTotal ? getVisibleFiatTotal(data.balances, hiddenTokens) : '',
+        fiatTotal: visibleFiatTotal,
         tokensFiatTotal: data.balances.tokensFiatTotal
           ? getVisibleTokensFiatTotal(data.balances, hiddenTokens)
           : undefined,
