@@ -378,7 +378,7 @@ export const handlers = (GATEWAY_URL: string) => [
     },
   ),
 
-  // Mock targeted-messaging endpoint for Hypernative (outreachId: 3)
+  // Mock targeted-messaging endpoint for Hypernative (outreachId: 11)
   http.get<{ outreachId: string; chainId: string; safeAddress: string }>(
     `${GATEWAY_URL}/v1/targeted-messaging/outreaches/:outreachId/chains/:chainId/safes/:safeAddress`,
     ({ params }) => {
@@ -394,8 +394,7 @@ export const handlers = (GATEWAY_URL: string) => [
 
       const isTargeted = targetedSafes.some((addr) => addr.toLowerCase() === safeAddress.toLowerCase())
 
-      // Only return targeted Safe for Hypernative outreach ID (3)
-      if (isTargeted && outreachId === '3') {
+      if (isTargeted && outreachId === '11') {
         return HttpResponse.json({
           outreachId: Number(outreachId),
           address: safeAddress,
