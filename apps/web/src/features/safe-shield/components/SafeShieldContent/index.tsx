@@ -109,7 +109,6 @@ export const SafeShieldContent = ({
 
           {!contractLoading && !threatLoading && (
             <TenderlySimulation
-              data-testid="tenderly-simulation"
               safeTx={safeTx}
               delay={simulationAnalysisDelay}
               highlightedSeverity={highlightedSeverity}
