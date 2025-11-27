@@ -9,6 +9,13 @@ const eslintConfig = defineConfig([
       'react-hooks/set-state-in-effect': 'off',
       'react-hooks/preserve-manual-memoization': 'off',
       'react-hooks/refs': 'off',
+
+      'react-hooks/exhaustive-deps': [
+        'warn',
+        {
+          additionalHooks: 'useAsync',
+        },
+      ],
     },
   },
   // Override default ignores of eslint-config-next.

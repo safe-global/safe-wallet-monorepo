@@ -15,5 +15,6 @@ export function useAsyncDeepCompare<T>(asyncFn: () => Promise<T>, deps: Dependen
     prevDepsRef.current = deps
   }
 
-  return useAsync(asyncFn, [prevDepsRef.current])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useAsync(() => asyncFn(), [prevDepsRef.current])
 }

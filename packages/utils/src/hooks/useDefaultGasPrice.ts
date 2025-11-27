@@ -237,7 +237,9 @@ export const useDefaultGasPrice = (
         maxPriorityFeePerGas: undefined,
       }
     },
-    [gasPriceConfigs, provider, intervalCounter, isEIP1559],
+    // intervalCounter is intentionally included to trigger periodic re-fetching
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [gasPriceConfigs, provider, intervalCounter, isEIP1559, isSpeedUp, logError],
     false,
   )
 

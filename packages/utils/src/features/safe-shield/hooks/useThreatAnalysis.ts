@@ -50,7 +50,7 @@ export function useThreatAnalysis({
     }
 
     setData(dataProp)
-  }, [dataProp])
+  }, [dataProp, data])
 
   // Parse origin if it's a JSON string containing url
   const origin = useMemo<string | undefined>(() => {
