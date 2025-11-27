@@ -1,7 +1,6 @@
-import { defineConfig, globalIgnores } from 'eslint/config'
 import nextVitals from 'eslint-config-next/core-web-vitals'
 
-const eslintConfig = defineConfig([
+const eslintConfig = [
   ...nextVitals,
   {
     rules: {
@@ -18,17 +17,9 @@ const eslintConfig = defineConfig([
       ],
     },
   },
-  // Override default ignores of eslint-config-next.
-  globalIgnores([
-    // Default ignores of eslint-config-next:
-    '.next/**',
-    'out/**',
-    'build/**',
-    'next-env.d.ts',
-  ]),
   {
     ignores: ['**/node_modules/', '**/src/types/contracts/'],
   },
-])
+]
 
 export default eslintConfig
