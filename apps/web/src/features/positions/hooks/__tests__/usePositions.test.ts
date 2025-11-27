@@ -127,16 +127,19 @@ describe('usePositions', () => {
       return undefined
     })
 
-    jest
-      .spyOn(useBalances, 'default')
-      .mockReturnValue({ balances: { items: [], fiatTotal: '' }, loaded: false, loading: false, error: undefined })
+    jest.spyOn(useBalances, 'default').mockReturnValue({
+      balances: { items: [], fiatTotal: '' },
+      loaded: false,
+      loading: false,
+      error: undefined,
+    })
 
     jest.spyOn(positionsQueries, 'usePositionsGetPositionsV1Query').mockReturnValue({
       currentData: undefined,
       isLoading: false,
       error: undefined,
       refetch: jest.fn(),
-    } as any)
+    })
   })
 
   describe('positions feature disabled', () => {
@@ -306,7 +309,7 @@ describe('usePositions', () => {
     })
 
     it('should return transformed positions from portfolio endpoint', async () => {
-      const mockAppBalances = [createMockAppBalance()]
+      const mockAppBalances: AppBalance[] = [createMockAppBalance()]
 
       jest.spyOn(store, 'useAppSelector').mockImplementation((selector) => {
         if (selector === selectCurrency) {
@@ -526,7 +529,7 @@ describe('usePositions', () => {
     })
 
     it('should not call positions endpoint when portfolio endpoint is enabled', async () => {
-      const mockAppBalances = [createMockAppBalance()]
+      const mockAppBalances: AppBalance[] = [createMockAppBalance()]
 
       jest.spyOn(store, 'useAppSelector').mockImplementation((selector) => {
         if (selector === selectCurrency) {
@@ -730,6 +733,51 @@ describe('usePositions', () => {
       expect(result.current.data?.[0]?.items).toHaveLength(2)
       expect(result.current.data?.[0]?.items[0]?.name).toBe('Group A')
       expect(result.current.data?.[0]?.items[1]?.name).toBe('Group B')
+    })
+
+    it('should always use portfolio positions when portfolio endpoint is enabled, even with "All tokens" selected', async () => {
+      const mockAppBalances: AppBalance[] = [createMockAppBalance()]
+
+      jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => {
+        if (feature === FEATURES.PORTFOLIO_ENDPOINT) {
+          return true
+        }
+        return false
+      })
+
+      jest.spyOn(useIsPositionsFeatureEnabled, 'default').mockReturnValue(true)
+
+      jest.spyOn(store, 'useAppSelector').mockImplementation((selector) => {
+        if (selector === selectCurrency) {
+          return 'USD'
+        }
+        if (selector === selectSettings) {
+          return { tokenList: TOKEN_LISTS.ALL }
+        }
+        return undefined
+      })
+
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances: { items: [], fiatTotal: '', positions: mockAppBalances },
+        loaded: true,
+        loading: false,
+        error: undefined,
+      })
+
+      const { result } = renderHook(() => usePositions())
+
+      await waitFor(
+        () => {
+          expect(result.current.data).toBeDefined()
+        },
+        { timeout: 3000 },
+      )
+
+      // Should still use portfolio positions even when "All tokens" is selected
+      expect(result.current.data).toHaveLength(1)
+      expect(result.current.data?.[0]?.protocol).toBe('Test Protocol')
+      expect(result.current.error).toBeUndefined()
+      expect(result.current.isLoading).toBe(false)
     })
   })
 })

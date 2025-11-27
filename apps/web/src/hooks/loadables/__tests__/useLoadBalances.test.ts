@@ -6,6 +6,7 @@ import * as store from '@/store'
 import * as balancesQueries from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import * as portfolioQueries from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import * as useCounterfactualBalances from '@/features/counterfactual/useCounterfactualBalances'
+import * as usePortfolioBalances from '@/features/portfolio/hooks/usePortfolioBalances'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { chainBuilder } from '@/tests/builders/chains'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
@@ -504,12 +505,13 @@ describe('useLoadBalances', () => {
 
       const [balances, error, loading] = result.current
 
-      // Should return legacy balances, not portfolio (even when portfolio feature is enabled)
-      // This ensures users can see tokens that Zerion may not support via the legacy endpoint
-      expect(balances?.fiatTotal).toBe(mockLegacyBalances.fiatTotal)
+      // Should return merged mode: portfolio fiatTotal/positions + legacy token items
+      expect(balances?.fiatTotal).toBe(mockPortfolio.totalBalanceFiat)
       expect(balances?.tokensFiatTotal).toBe(mockLegacyBalances.fiatTotal)
-      expect(balances?.positionsFiatTotal).toBe('0')
-      expect(balances?.positions).toBeUndefined()
+      expect(balances?.positionsFiatTotal).toBe(mockPortfolio.totalPositionsBalanceFiat)
+      expect(balances?.positions).toEqual(mockPortfolio.positionBalances)
+      expect(balances?.items).toEqual(mockLegacyBalances.items)
+      expect(balances?.isAllTokensMode).toBe(true)
       expect(error).toBeUndefined()
       expect(loading).toBe(false)
     })
@@ -952,12 +954,9 @@ describe('useLoadBalances', () => {
     })
 
     it('should handle portfolio error gracefully in merged mode', async () => {
-      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
-        currentData: undefined,
-        isLoading: false,
-        error: new Error('Portfolio error'),
-        refetch: jest.fn(),
-      } as any)
+      jest.spyOn(useCounterfactualBalances, 'useCounterfactualBalances').mockReturnValue([undefined, undefined, false])
+
+      jest.spyOn(usePortfolioBalances, 'default').mockReturnValue([undefined, new Error('Portfolio error'), false])
 
       jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
         currentData: mockLegacyBalancesWithMultipleTokens,
@@ -970,13 +969,16 @@ describe('useLoadBalances', () => {
 
       await waitFor(() => {
         expect(result.current[1]).toBeDefined()
+        expect(result.current[1]).toBeInstanceOf(Error)
       })
 
       // Should return error when portfolio fails (since we need portfolio for fiatTotal)
-      expect(result.current[1]).toBeInstanceOf(Error)
+      expect(result.current[1]?.message).toContain('Portfolio error')
     })
 
     it('should handle legacy error gracefully in merged mode', async () => {
+      jest.spyOn(useCounterfactualBalances, 'useCounterfactualBalances').mockReturnValue([undefined, undefined, false])
+
       jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
         currentData: mockMergedPortfolio,
         isLoading: false,
@@ -995,10 +997,11 @@ describe('useLoadBalances', () => {
 
       await waitFor(() => {
         expect(result.current[1]).toBeDefined()
+        expect(result.current[1]).toBeInstanceOf(Error)
       })
 
       // Should return error when legacy fails (since we need legacy for token list)
-      expect(result.current[1]).toBeInstanceOf(Error)
+      expect(result.current[1]?.message).toContain('Legacy error')
     })
 
     it('should set isAllTokensMode to false when Default tokens is selected', async () => {
