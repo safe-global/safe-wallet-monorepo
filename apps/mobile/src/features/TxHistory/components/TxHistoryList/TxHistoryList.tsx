@@ -115,8 +115,8 @@ export function TxHistoryList({
         refreshControl={<RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} />}
         contentContainerStyle={contentContainerStyle}
         ListEmptyComponent={listEmptyComponent}
-        ListHeaderComponent={isLoading && hasTransactions ? HeaderComponent : null}
-        ListFooterComponent={isLoadingNext && hasTransactions ? FooterComponent : null}
+        ListHeaderComponent={isLoading && hasTransactions ? <HeaderComponent /> : null}
+        ListFooterComponent={isLoadingNext && hasTransactions ? <FooterComponent /> : null}
         contentInsetAdjustmentBehavior="automatic"
       />
     </View>
