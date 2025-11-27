@@ -5,6 +5,14 @@ on:
     paths:
       - apps/web/**
       - packages/**
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - apps/web/**
+      - packages/**
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -29,3 +37,27 @@ jobs:
           spec: cypress/e2e/smoke/*.cy.js
           group: 'Smoke tests'
           tag: 'smoke'
+
+  notify:
+    if: failure() && github.event_name == 'push'
+    needs: [e2e]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Slack on failure
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_DEV_ALERT }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "❌ Web smoke tests failed on ${{ github.ref_name }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*❌ Web Smoke Tests (E2E) Failed*\n• Branch: `${{ github.ref_name }}`\n• Commit: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n• Author: ${{ github.actor }}\n• <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
+                  }
+                }
+              ]
+            }

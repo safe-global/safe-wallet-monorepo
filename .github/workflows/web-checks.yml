@@ -60,3 +60,27 @@ jobs:
       - name: Type check
         run: yarn type-check
         working-directory: apps/web
+
+  notify:
+    if: failure() && github.event_name == 'push'
+    needs: [lint, prettier, type-check]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Slack on failure
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_DEV_ALERT }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "❌ Web checks failed on ${{ github.ref_name }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*❌ Web Checks Failed (lint/prettier/type-check)*\n• Branch: `${{ github.ref_name }}`\n• Commit: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n• Author: ${{ github.actor }}\n• <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
+                  }
+                }
+              ]
+            }
