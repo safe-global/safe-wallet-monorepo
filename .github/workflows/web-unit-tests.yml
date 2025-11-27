@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - apps/web/**
+      - packages/**
 
   push:
     branches:
