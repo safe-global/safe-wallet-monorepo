@@ -198,5 +198,49 @@ describe('Safe Shield tests', { defaultCommandTimeout: 30000 }, () => {
   // 5. Tenderly Simulation
   // ========================================
 
-  // TODO: Add Tenderly Simulation tests
+  it('[Tenderly Simulation] Verify that tenderly section is presented in the safe shield', () => {
+    cy.visit(constants.transactionUrl + staticSafes.MATIC_STATIC_SAFE_30 + shield.testTransactions.tenderlySimulation)
+    wallet.connectSigner(signer)
+    createtx.clickOnConfirmTransactionBtn()
+    shield.verifySafeShieldDisplayed()
+    shield.waitForAnalysisComplete()
+    shield.verifyTenderlySimulation()
+    cy.get(shield.tenderlySimulation).should('contain.text', 'Transaction simulation')
+    cy.get(shield.tenderlySimulation).find(shield.runSimulationBtn).should('be.visible')
+    cy.contains('Run').should('be.visible')
+  })
+
+  it('[Tenderly Simulation] Verify success simulation state', () => {
+    cy.visit(constants.transactionUrl + staticSafes.MATIC_STATIC_SAFE_30 + shield.testTransactions.tenderlySimulation)
+    wallet.connectSigner(signer)
+    createtx.clickOnConfirmTransactionBtn()
+    shield.verifySafeShieldDisplayed()
+    shield.waitForAnalysisComplete()
+    shield.verifyTenderlySimulation()
+    cy.get(shield.tenderlySimulation, { timeout: 15000 }).find(shield.runSimulationBtn).click()
+    cy.get(shield.tenderlySimulation).find(shield.runSimulationBtn).should('contain.text', 'Running...')
+    cy.contains('Simulation successful', { timeout: 10000 }).should('be.visible')
+    cy.get(shield.tenderlySimulation).should('contain.text', 'Simulation successful')
+    cy.contains('View').should('be.visible')
+    cy.get(shield.tenderlySimulation).find(shield.runSimulationBtn).should('not.exist')
+    main.verifyLinkContainsUrl('View', shield.tenderlySimulationUrl)
+  })
+
+  it('[Tenderly Simulation] Verify failed simulation state', () => {
+    cy.visit(constants.transactionUrl + staticSafes.MATIC_STATIC_SAFE_30 + shield.testTransactions.threatAnalysisFailed)
+    wallet.connectSigner(signer)
+    createtx.clickOnConfirmTransactionBtn()
+    shield.verifySafeShieldDisplayed()
+    shield.waitForAnalysisComplete()
+    shield.verifyTenderlySimulation()
+    cy.get(shield.tenderlySimulation, { timeout: 15000 }).find(shield.runSimulationBtn).click()
+    cy.get(shield.tenderlySimulation).find(shield.runSimulationBtn).should('contain.text', 'Running...')
+    cy.contains('Simulation failed', { timeout: 10000 }).should('be.visible')
+    cy.get(shield.tenderlySimulation).should('contain.text', 'Simulation failed')
+    cy.contains('View').should('be.visible')
+    cy.get(shield.tenderlySimulation).find(shield.runSimulationBtn).should('not.exist')
+    main.verifyLinkContainsUrl('View', shield.tenderlySimulationUrl)
+  })
+
+  //it('[Tenderly Simulation] Verify original and nested txs simulations in Tenderly card'
 })
