@@ -62,6 +62,29 @@ export const tokenListOptions = {
   allTokens: 'span[data-track="assets: Show all tokens"]',
   default: 'span[data-track="assets: Show default tokens"]',
 }
+
+export function toggleHideDust(shouldHide) {
+  cy.get(manageTokensButton).click()
+
+  cy.get('[role="menu"]')
+    .should('be.visible')
+    .within(() => {
+      cy.contains('Hide small balances')
+        .parents('li')
+        .find('input[type="checkbox"]')
+        .then(($checkbox) => {
+          const isChecked = $checkbox.is(':checked')
+          if (shouldHide && !isChecked) {
+            cy.wrap($checkbox).click({ force: true })
+          } else if (!shouldHide && isChecked) {
+            cy.wrap($checkbox).click({ force: true })
+          }
+        })
+    })
+
+  cy.get('body').click(0, 0)
+  cy.wait(1000)
+}
 export const currencyEUR = '€'
 export const currencyOptionEUR = 'EUR'
 export const currency$ = '$'
