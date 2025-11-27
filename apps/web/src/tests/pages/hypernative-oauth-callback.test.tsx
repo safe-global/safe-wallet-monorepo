@@ -1,0 +1,324 @@
+import { render, waitFor, screen } from '@testing-library/react'
+import { Provider } from 'react-redux'
+import { useRouter } from 'next/router'
+import { configureStore } from '@reduxjs/toolkit'
+import HypernativeOAuthCallback from '../../pages/hypernative/oauth-callback'
+import { hnAuthSlice } from '@/features/hypernative/store/hnAuthSlice'
+import { HN_AUTH_SUCCESS_EVENT, HN_AUTH_ERROR_EVENT } from '@/features/hypernative/hooks/useHypernativeOAuth'
+
+// Mock Next.js router
+jest.mock('next/router', () => ({
+  useRouter: jest.fn(),
+}))
+
+// Mock fetch
+const mockFetch = jest.fn()
+global.fetch = mockFetch as unknown as typeof fetch
+
+describe('HypernativeOAuthCallback', () => {
+  let store: ReturnType<typeof createTestStore>
+  const mockRouterPush = jest.fn()
+  const mockPostMessage = jest.fn()
+  const mockWindowClose = jest.fn()
+
+  // Mock sessionStorage
+  const mockSessionStorage: Record<string, string> = {}
+  const sessionStorageMock = {
+    getItem: jest.fn((key: string) => mockSessionStorage[key] || null),
+    setItem: jest.fn((key: string, value: string) => {
+      mockSessionStorage[key] = value
+    }),
+    removeItem: jest.fn((key: string) => {
+      delete mockSessionStorage[key]
+    }),
+    clear: jest.fn(() => {
+      Object.keys(mockSessionStorage).forEach((key) => delete mockSessionStorage[key])
+    }),
+  }
+
+  function createTestStore() {
+    return configureStore({
+      reducer: {
+        [hnAuthSlice.name]: hnAuthSlice.reducer,
+      },
+    })
+  }
+
+  function createWrapper() {
+    const Wrapper = ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>
+    Wrapper.displayName = 'TestWrapper'
+    return Wrapper
+  }
+
+  beforeEach(() => {
+    store = createTestStore()
+    jest.clearAllMocks()
+    sessionStorageMock.clear()
+
+    // Setup router mock
+    ;(useRouter as jest.Mock).mockReturnValue({
+      isReady: false,
+      query: {},
+      push: mockRouterPush,
+    })
+
+    // Setup window.opener mock
+    Object.defineProperty(window, 'opener', {
+      value: {
+        postMessage: mockPostMessage,
+        closed: false,
+      },
+      writable: true,
+      configurable: true,
+    })
+
+    // Setup window.close mock
+    window.close = mockWindowClose
+
+    // Setup sessionStorage mock
+    Object.defineProperty(window, 'sessionStorage', {
+      value: sessionStorageMock,
+      writable: true,
+    })
+
+    // Setup fetch mock with default success response
+    const mockJsonFn = jest.fn().mockResolvedValue({
+      access_token: 'test-access-token',
+      expires_in: 3600,
+      token_type: 'Bearer',
+    })
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: mockJsonFn,
+      text: jest.fn().mockResolvedValue(''),
+      clone: jest.fn().mockReturnThis(),
+    } as unknown as Response)
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
+  })
+
+  it('should show loading state initially', () => {
+    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+
+    expect(screen.getByText('Authentication in progress...')).toBeInTheDocument()
+    expect(screen.getByRole('progressbar')).toBeInTheDocument()
+  })
+
+  it('should not process callback until router is ready', () => {
+    ;(useRouter as jest.Mock).mockReturnValue({
+      isReady: false,
+      query: { code: 'test-code', state: 'test-state' },
+    })
+
+    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+
+    // Should still show loading, not try to process
+    expect(screen.getByText('Authentication in progress...')).toBeInTheDocument()
+    expect(mockFetch).not.toHaveBeenCalled()
+  })
+
+  it('should handle successful OAuth callback', async () => {
+    jest.useFakeTimers()
+
+    // Setup query params and sessionStorage
+    ;(useRouter as jest.Mock).mockReturnValue({
+      isReady: true,
+      query: { code: 'auth-code-123', state: 'state-456' },
+    })
+
+    mockSessionStorage['hn_oauth_state'] = 'state-456'
+    mockSessionStorage['hn_pkce_verifier'] = 'verifier-789'
+
+    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+
+    // Wait for token exchange
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalled()
+    })
+
+    // Wait for success state
+    await waitFor(() => {
+      expect(screen.getByText('Authentication successful!')).toBeInTheDocument()
+    })
+
+    // Check that postMessage was sent to parent
+    expect(mockPostMessage).toHaveBeenCalledWith(
+      {
+        type: HN_AUTH_SUCCESS_EVENT,
+        token: 'test-access-token',
+        expiresIn: 3600,
+      },
+      window.location.origin,
+    )
+
+    // Check that sessionStorage was cleaned up
+    expect(sessionStorageMock.removeItem).toHaveBeenCalledWith('hn_oauth_state')
+    expect(sessionStorageMock.removeItem).toHaveBeenCalledWith('hn_pkce_verifier')
+
+    jest.useRealTimers()
+  })
+
+  it('should handle missing authorization code', async () => {
+    ;(useRouter as jest.Mock).mockReturnValue({
+      isReady: true,
+      query: { state: 'test-state' }, // Missing code
+    })
+
+    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+
+    await waitFor(() => {
+      expect(screen.getByText(/Missing authorization code/)).toBeInTheDocument()
+    })
+
+    expect(mockPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: HN_AUTH_ERROR_EVENT,
+        error: expect.stringContaining('Missing authorization code'),
+      }),
+      window.location.origin,
+    )
+  })
+
+  it('should handle invalid OAuth state (CSRF protection)', async () => {
+    ;(useRouter as jest.Mock).mockReturnValue({
+      isReady: true,
+      query: { code: 'test-code', state: 'wrong-state' },
+    })
+
+    mockSessionStorage['hn_oauth_state'] = 'correct-state'
+
+    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+
+    await waitFor(() => {
+      expect(screen.getByText(/Invalid OAuth state parameter/)).toBeInTheDocument()
+    })
+
+    expect(mockPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: HN_AUTH_ERROR_EVENT,
+        error: expect.stringContaining('Invalid OAuth state parameter'),
+      }),
+      window.location.origin,
+    )
+  })
+
+  it('should handle missing PKCE verifier', async () => {
+    ;(useRouter as jest.Mock).mockReturnValue({
+      isReady: true,
+      query: { code: 'test-code', state: 'test-state' },
+    })
+
+    mockSessionStorage['hn_oauth_state'] = 'test-state'
+    // Missing PKCE verifier
+
+    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+
+    await waitFor(() => {
+      expect(screen.getByText(/Missing PKCE code verifier/)).toBeInTheDocument()
+    })
+  })
+
+  it('should handle OAuth error in query params', async () => {
+    ;(useRouter as jest.Mock).mockReturnValue({
+      isReady: true,
+      query: {
+        error: 'access_denied',
+        error_description: 'User denied authorization',
+      },
+    })
+
+    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+
+    await waitFor(() => {
+      expect(screen.getByText(/User denied authorization/)).toBeInTheDocument()
+    })
+
+    expect(mockPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: HN_AUTH_ERROR_EVENT,
+      }),
+      window.location.origin,
+    )
+  })
+
+  it('should handle token exchange failure', async () => {
+    ;(useRouter as jest.Mock).mockReturnValue({
+      isReady: true,
+      query: { code: 'test-code', state: 'test-state' },
+    })
+
+    mockSessionStorage['hn_oauth_state'] = 'test-state'
+    mockSessionStorage['hn_pkce_verifier'] = 'verifier-123'
+
+    // Mock failed token exchange
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 400,
+      text: jest.fn().mockResolvedValue('invalid_grant'),
+      clone: jest.fn().mockReturnThis(),
+    } as unknown as Response)
+
+    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+
+    await waitFor(() => {
+      expect(screen.getByText(/Token exchange failed/)).toBeInTheDocument()
+    })
+  })
+
+  it('should handle invalid token response', async () => {
+    ;(useRouter as jest.Mock).mockReturnValue({
+      isReady: true,
+      query: { code: 'test-code', state: 'test-state' },
+    })
+
+    mockSessionStorage['hn_oauth_state'] = 'test-state'
+    mockSessionStorage['hn_pkce_verifier'] = 'verifier-123'
+
+    // Mock token response missing required fields
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: jest.fn().mockResolvedValue({
+        token_type: 'Bearer',
+        // Missing access_token and expires_in
+      }),
+      clone: jest.fn().mockReturnThis(),
+    } as unknown as Response)
+
+    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+
+    await waitFor(() => {
+      expect(screen.getByText(/Invalid token response/)).toBeInTheDocument()
+    })
+  })
+
+  it('should handle window without opener', async () => {
+    jest.useFakeTimers()
+
+    // No window.opener
+    Object.defineProperty(window, 'opener', {
+      value: null,
+      writable: true,
+      configurable: true,
+    })
+    ;(useRouter as jest.Mock).mockReturnValue({
+      isReady: true,
+      query: { code: 'test-code', state: 'test-state' },
+    })
+
+    mockSessionStorage['hn_oauth_state'] = 'test-state'
+    mockSessionStorage['hn_pkce_verifier'] = 'verifier-123'
+
+    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+
+    await waitFor(() => {
+      expect(screen.getByText('Authentication successful!')).toBeInTheDocument()
+    })
+
+    // postMessage should not have been called
+    expect(mockPostMessage).not.toHaveBeenCalled()
+
+    jest.useRealTimers()
+  })
+})
