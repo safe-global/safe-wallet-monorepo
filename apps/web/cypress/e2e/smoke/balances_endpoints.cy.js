@@ -1,0 +1,42 @@
+import * as constants from '../../support/constants'
+import * as main from '../../e2e/pages/main.page'
+import * as assets from '../pages/assets.pages'
+import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+
+let staticSafes = []
+
+const commonTokens = ['ETH', 'GNO', 'SAFE', 'USDT', 'SAI', 'OMG', 'OWL', 'PERL']
+const legacyOnlyTokens = ['cSAI', 'LUNC', 'BUN']
+
+describe('[SMOKE] Balances endpoint tests', () => {
+  before(async () => {
+    staticSafes = await getSafes(CATEGORIES.static)
+  })
+
+  beforeEach(() => {
+    cy.visit(constants.BALANCE_URL + staticSafes.ETH_STATIC_SAFE_15)
+  })
+
+  it('[SMOKE] Verify default token list shows expected tokens', () => {
+    assets.selectTokenList(assets.tokenListOptions.default)
+    assets.toggleHideDust(false)
+    main.verifyValuesExist(assets.tokenListTable, commonTokens)
+    main.verifyValuesDoNotExist(assets.tokenListTable, legacyOnlyTokens)
+  })
+
+  it('[SMOKE] Verify all tokens list shows additional tokens', () => {
+    assets.toggleHideDust(false)
+    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    main.verifyValuesExist(assets.tokenListTable, commonTokens)
+    main.verifyValuesExist(assets.tokenListTable, legacyOnlyTokens)
+  })
+
+  it('[SMOKE] Verify switching token list updates displayed tokens', () => {
+    assets.toggleHideDust(false)
+    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    main.verifyValuesExist(assets.tokenListTable, legacyOnlyTokens)
+    assets.selectTokenList(assets.tokenListOptions.default)
+    main.verifyValuesDoNotExist(assets.tokenListTable, legacyOnlyTokens)
+    main.verifyValuesExist(assets.tokenListTable, commonTokens)
+  })
+})
