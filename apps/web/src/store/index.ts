@@ -53,6 +53,7 @@ const rootReducer = combineReducers({
   [slices.visitedSafesSlice.name]: slices.visitedSafesSlice.reducer,
   [slices.orderByPreferenceSlice.name]: slices.orderByPreferenceSlice.reducer,
   [slices.hnStateSlice.name]: slices.hnStateSlice.reducer,
+  [slices.hnAuthSlice.name]: slices.hnAuthSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
   [slices.gatewayApi.reducerPath]: slices.gatewayApi.reducer,
@@ -77,6 +78,7 @@ const persistedSlices: (keyof Partial<RootState>)[] = [
   slices.orderByPreferenceSlice.name,
   slices.authSlice.name,
   slices.hnStateSlice.name,
+  slices.hnAuthSlice.name,
 ]
 
 export const getPersistedState = () => {
