@@ -23,8 +23,6 @@
  *   useSlotCondition: useShouldShowSign,
  * })
  * ```
- *
- * @see docs/tx-flow-refactoring-plan.md for slot system documentation
  */
 import React, {
   createContext,

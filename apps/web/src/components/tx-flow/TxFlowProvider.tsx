@@ -6,8 +6,6 @@
  * - Transaction state (isCreation, canExecute, willExecute, etc.)
  * - Form state (isSubmitLoading, submitError, isRejectedByUser)
  * - Role execution state (canExecuteThroughRole, willExecuteThroughRole)
- *
- * @see docs/tx-flow-refactoring-plan.md for architecture overview
  */
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { createContext, useCallback, useContext, useState } from 'react'
