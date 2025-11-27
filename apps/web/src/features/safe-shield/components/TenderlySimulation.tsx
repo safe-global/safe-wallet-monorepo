@@ -26,12 +26,14 @@ interface TenderlySimulationProps {
   safeTx?: SafeTransaction
   highlightedSeverity?: Severity
   delay?: number
+  'data-testid'?: string
 }
 
 export const TenderlySimulation = ({
   safeTx,
   highlightedSeverity,
   delay = 0,
+  'data-testid': dataTestId,
 }: TenderlySimulationProps): ReactElement | null => {
   const { simulation, status, nestedTx } = useContext(TxInfoContext)
   const chain = useCurrentChain()
@@ -160,6 +162,7 @@ export const TenderlySimulation = ({
 
   return (
     <Box
+      data-testid={dataTestId}
       sx={{
         overflow: 'hidden',
         opacity: isVisible ? 1 : 0,
@@ -207,6 +210,7 @@ export const TenderlySimulation = ({
         {!isSimulationFinished ? (
           <Box
             component="button"
+            data-testid="run-simulation-btn"
             onClick={handleRunSimulation}
             disabled={isLoading}
             sx={{
