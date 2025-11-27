@@ -20,6 +20,7 @@ const viewAllLink = '[data-testid="view-all-link"][href^="/transactions/queue"]'
 const noTxText = '[data-testid="no-tx-text"]'
 export const pendingTxWidget = '[data-testid="pending-tx-widget"]'
 export const pendingTxItem = '[data-testid="tx-pending-item"]'
+export const assetsWidget = '[data-testid="assets-widget"]'
 const singleTxDetailsHeader = '[data-testid="tx-details"]'
 
 export function clickOnTxByIndex(index) {

@@ -18,6 +18,7 @@ const currencyDropDown = 'div[id="currency"]'
 export const tokenListTable = 'table[aria-labelledby="tableTitle"]'
 const manageTokensButton = '[data-testid="manage-tokens-button"]'
 export const tablePaginationContainer = '[data-testid="table-pagination"]'
+export const tableContainer = '[data-testid="table-container"]'
 
 const hiddenTokenSaveBtn = 'span[data-track="assets: Save hide dialog"]'
 const hiddenTokenCancelBtn = 'span[data-track="assets: Cancel hide dialog"]'
@@ -51,7 +52,9 @@ const pageCountString10to20 = '11–20 of'
 const PRICE_COLUMN = 1
 const TOKEN_AMOUNT_COLUMN = 2
 const FIAT_AMOUNT_COLUMN = 3
-const ACTION_COLUMN = 5
+// column with the send button and swap in the assets table
+export const ACTION_COLUMN = 5
+export const actionColumnCell = '[data-testid="table-cell-actions"]'
 
 export const fiatRegex = new RegExp(`\\$?(([0-9]{1,3},)*[0-9]{1,3}(\\.[0-9]{2})?|0)`)
 
@@ -182,6 +185,16 @@ export function clickOnSendBtn(index) {
         .then((elements) => {
           cy.wrap(elements[0]).invoke('css', 'opacity', 100).click()
         })
+    })
+}
+
+export function clickOnSendBtnAssetsTable(index) {
+  cy.get(balanceSingleRow)
+    .eq(index)
+    .find('td')
+    .eq(ACTION_COLUMN)
+    .within(() => {
+      cy.get(sendBtn).should('be.visible').click()
     })
 }
 
