@@ -146,7 +146,7 @@ export function useCounterpartyAnalysis({
     }
 
     return counterpartyData.contract as ContractAnalysisResults
-  }, [counterpartyData?.contract, fetchError])
+  }, [counterpartyData?.contract, fetchError, safeAddress])
 
   // Return results in the expected format
   return {
