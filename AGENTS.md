@@ -34,17 +34,13 @@ The monorepo uses **Yarn 4 workspaces** to manage dependencies and enables shari
 
 ## General Principles
 
-- Follow the DRY principle – avoid code duplication by extracting reusable functions, hooks, and components
-- Prefer functional code over imperative – use pure functions, avoid side effects, leverage `map`/`filter`/`reduce` instead of loops
-- Use declarative and reactive patterns – prefer React hooks, derived state, and data transformations over manual state synchronization
-- Always cover new logic, services, and hooks with unit tests
+- Follow the DRY principle
+- Cover your changes with unit tests
 - Run type-check, lint, prettier and unit tests before each commit
 - Never use the `any` type!
 
 Specifically for the web app:
 
-- New features must be created in a separate folder inside `src/features/` – only components, hooks, and services used globally across many features belong in top-level folders inside `src/`
-- Each new feature must be behind a feature flag (stored on the CGW API in chains configs)
 - When making a new component, create a Storybook story file for it
 - Use theme variables from vars.css instead of hard-coded CSS values
 - Use MUI components and the Safe MUI theme

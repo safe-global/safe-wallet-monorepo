@@ -10,44 +10,43 @@ const app3 = 'https://app3.com'
 
 describe('Permissions settings tests', () => {
   before(() => {
-    // Set up localStorage before visiting (must be before cy.visit)
-    cy.on('window:before:load', (window) => {
-      window.localStorage.setItem(
-        constants.BROWSER_PERMISSIONS_KEY,
-        JSON.stringify({
-          app1: [
-            { feature: 'camera', status: 'granted' },
-            { feature: 'fullscreen', status: 'granted' },
-            { feature: 'geolocation', status: 'granted' },
-          ],
-          app2: [{ feature: 'microphone', status: 'granted' }],
-          app3: [{ feature: 'camera', status: 'denied' }],
-        }),
-      )
-      window.localStorage.setItem(
-        constants.SAFE_PERMISSIONS_KEY,
-        JSON.stringify({
-          app2: [
-            {
-              invoker: app1,
-              parentCapability: 'requestAddressBook',
-              date: 1666103778276,
-              caveats: [],
-            },
-          ],
-          app4: [
-            {
-              invoker: app3,
-              parentCapability: 'requestAddressBook',
-              date: 1666103787026,
-              caveats: [],
-            },
-          ],
-        }),
-      )
-    })
-    cy.wrap(getSafes(CATEGORIES.static)).then((statics) => {
+    getSafes(CATEGORIES.static).then((statics) => {
       staticSafes = statics
+      cy.on('window:before:load', (window) => {
+        window.localStorage.setItem(
+          constants.BROWSER_PERMISSIONS_KEY,
+          JSON.stringify({
+            app1: [
+              { feature: 'camera', status: 'granted' },
+              { feature: 'fullscreen', status: 'granted' },
+              { feature: 'geolocation', status: 'granted' },
+            ],
+            app2: [{ feature: 'microphone', status: 'granted' }],
+            app3: [{ feature: 'camera', status: 'denied' }],
+          }),
+        )
+        window.localStorage.setItem(
+          constants.SAFE_PERMISSIONS_KEY,
+          JSON.stringify({
+            app2: [
+              {
+                invoker: app1,
+                parentCapability: 'requestAddressBook',
+                date: 1666103778276,
+                caveats: [],
+              },
+            ],
+            app4: [
+              {
+                invoker: app3,
+                parentCapability: 'requestAddressBook',
+                date: 1666103787026,
+                caveats: [],
+              },
+            ],
+          }),
+        )
+      })
       cy.visit(`${constants.appSettingsUrl}?safe=${staticSafes.SEP_STATIC_SAFE_2}`, {
         failOnStatusCode: false,
       })

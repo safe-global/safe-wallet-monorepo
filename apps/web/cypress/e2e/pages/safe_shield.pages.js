@@ -18,15 +18,9 @@ export const recipientAnalysisGroupCard = '[data-testid="recipient-analysis-grou
 export const contractAnalysisGroupCard = '[data-testid="contract-analysis-group-card"]'
 export const threatAnalysisGroupCard = '[data-testid="threat-analysis-group-card"]'
 export const tenderlySimulation = '[data-testid="tenderly-simulation"]'
-export const runSimulationBtn = '[data-testid="run-simulation-btn"]'
 
 //no data-testids, accessed via class or structure
 export const progressBar = '[role="progressbar"]'
-
-// ========================================
-// URL Constants
-// ========================================
-export const tenderlySimulationUrl = 'dashboard.tenderly.co/public/safe/safe-apps/simulator/'
 
 // ========================================
 // Test Transactions
@@ -55,9 +49,6 @@ export const testTransactions = {
   // Threat analysis test - transaction with malicious address (wallet_sendCalls with Eth)
   threatAnalysisMaliciousAddressEth:
     '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x228751aa0f0442baf8a670e3af8bbe93c22c7e9a0ad14527620f9a50b972f52c',
-  // Tenderly simulation test - transaction for simulation testing
-  tenderlySimulation:
-    '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0xe329b8243ff94c02fa4d9fd382789d669cb5969efbce5e275635ce6d3577fa5e',
 }
 
 // ========================================
@@ -204,7 +195,7 @@ export function verifyThreatAnalysisWarningState() {
   cy.get(threatAnalysisGroupCard).should('contain.text', threatAnalysisFailedStr)
 }
 
-// Verify Tenderly simulation group card is displayed
+// Verify Tenderly simulation is displayed
 export function verifyTenderlySimulation() {
   cy.get(tenderlySimulation).should('be.visible')
 }
