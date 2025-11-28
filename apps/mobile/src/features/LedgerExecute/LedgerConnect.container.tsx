@@ -8,6 +8,7 @@ export const LedgerConnectExecuteContainer = () => {
     getParams: (device: DiscoveredDevice, searchParams?: Record<string, string>) => ({
       deviceData: JSON.stringify(device),
       txId: searchParams?.txId || '',
+      executionMethod: searchParams?.executionMethod || '',
     }),
   }
 
