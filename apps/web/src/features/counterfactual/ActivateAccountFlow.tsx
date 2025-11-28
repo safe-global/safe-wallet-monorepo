@@ -15,7 +15,7 @@ import { useLeastRemainingRelays } from '@/hooks/useRemainingRelays'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import useWallet from '@/hooks/wallets/useWallet'
-import { OVERVIEW_EVENTS, trackEvent, WALLET_EVENTS } from '@/services/analytics'
+import { OVERVIEW_EVENTS, trackEvent, WALLET_EVENTS, MixpanelEventParams } from '@/services/analytics'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useAppSelector } from '@/store'
@@ -101,8 +101,12 @@ const ActivateAccountFlow = () => {
   const isMultichainSafe = sameAddress(safeAccountConfig?.to, safeToL2SetupAddress)
 
   const onSubmit = (txHash?: string) => {
-    trackEvent({ ...TX_EVENTS.CREATE, label: TX_TYPES.activate_without_tx })
-    trackEvent({ ...TX_EVENTS.EXECUTE, label: TX_TYPES.activate_without_tx })
+    const mixpanelProps = {
+      [MixpanelEventParams.TRANSACTION_TYPE]: TX_TYPES.activate_without_tx,
+      [MixpanelEventParams.THRESHOLD]: threshold,
+    }
+    trackEvent({ ...TX_EVENTS.CREATE, label: TX_TYPES.activate_without_tx }, mixpanelProps)
+    trackEvent({ ...TX_EVENTS.EXECUTE, label: TX_TYPES.activate_without_tx }, mixpanelProps)
     trackEvent(WALLET_EVENTS.ONCHAIN_INTERACTION)
 
     if (txHash) {

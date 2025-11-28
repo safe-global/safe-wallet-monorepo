@@ -97,9 +97,10 @@ export const SignOrExecuteForm = ({
         !!signer?.isSafe,
         origin,
         isMassPayout,
+        safe.threshold,
       )
     },
-    [chainId, isCreation, onSubmit, trigger, signer?.isSafe, origin, isMassPayout],
+    [chainId, isCreation, onSubmit, trigger, signer?.isSafe, origin, isMassPayout, safe.threshold],
   )
 
   const onRoleExecutionSubmit = useCallback<typeof onFormSubmit>(

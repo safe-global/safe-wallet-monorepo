@@ -18,7 +18,7 @@ import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletReject
 import { useCurrentChain } from '@/hooks/useChains'
 import { dispatchSpendingLimitTxExecution } from '@/services/tx/tx-sender'
 import { getTxOptions } from '@/utils/transactions'
-import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
+import { MODALS_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import TxCard from '@/components/tx-flow/common/TxCard'
@@ -118,8 +118,12 @@ const ReviewSpendingLimitTx = ({
       return
     }
 
-    trackEvent({ ...TX_EVENTS.CREATE_VIA_SPENDING_LIMTI, label: TX_TYPES.transfer_token })
-    trackEvent({ ...TX_EVENTS.EXECUTE_VIA_SPENDING_LIMIT, label: TX_TYPES.transfer_token })
+    const mixpanelProps = {
+      [MixpanelEventParams.TRANSACTION_TYPE]: TX_TYPES.transfer_token,
+      [MixpanelEventParams.THRESHOLD]: safe.threshold,
+    }
+    trackEvent({ ...TX_EVENTS.CREATE_VIA_SPENDING_LIMTI, label: TX_TYPES.transfer_token }, mixpanelProps)
+    trackEvent({ ...TX_EVENTS.EXECUTE_VIA_SPENDING_LIMIT, label: TX_TYPES.transfer_token }, mixpanelProps)
   }
 
   const submitDisabled = !isSubmittable || gasLimitLoading

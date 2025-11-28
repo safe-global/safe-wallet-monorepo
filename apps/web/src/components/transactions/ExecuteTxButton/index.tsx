@@ -7,7 +7,7 @@ import { Button, Tooltip } from '@mui/material'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
-import Track from '@/components/common/Track'
+import { gtmTrack } from '@/services/analytics/gtm'
 import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import { ReplaceTxHoverContext } from '../GroupedTxListItems/ReplaceTxHoverProvider'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -37,6 +37,8 @@ const ExecuteTxButton = ({
   const onClick = (e: SyntheticEvent) => {
     e.stopPropagation()
     e.preventDefault()
+    // GA only - Mixpanel "Transaction Executed" is tracked in trackTxEvents() after actual execution
+    gtmTrack(TX_LIST_EVENTS.EXECUTE)
     setTxFlow(<ConfirmTxFlow txSummary={txSummary} />, undefined, false)
   }
 
@@ -49,29 +51,25 @@ const ExecuteTxButton = ({
   }
 
   return (
-    <>
-      <CheckWallet allowNonOwner>
-        {(isOk) => (
-          <Tooltip title={isOk && !isNext ? 'You must execute the transaction with the lowest nonce first' : ''}>
-            <span>
-              <Track {...TX_LIST_EVENTS.EXECUTE}>
-                <Button
-                  onClick={onClick}
-                  onMouseEnter={onMouseEnter}
-                  onMouseLeave={onMouseLeave}
-                  variant="contained"
-                  disabled={!isOk || isDisabled}
-                  size={compact ? 'small' : 'stretched'}
-                  sx={{ minWidth: '106.5px', py: compact ? 0.8 : undefined }}
-                >
-                  Execute
-                </Button>
-              </Track>
-            </span>
-          </Tooltip>
-        )}
-      </CheckWallet>
-    </>
+    <CheckWallet allowNonOwner>
+      {(isOk) => (
+        <Tooltip title={isOk && !isNext ? 'You must execute the transaction with the lowest nonce first' : ''}>
+          <span>
+            <Button
+              onClick={onClick}
+              onMouseEnter={onMouseEnter}
+              onMouseLeave={onMouseLeave}
+              variant="contained"
+              disabled={!isOk || isDisabled}
+              size={compact ? 'small' : 'stretched'}
+              sx={{ minWidth: '106.5px', py: compact ? 0.8 : undefined }}
+            >
+              Execute
+            </Button>
+          </span>
+        </Tooltip>
+      )}
+    </CheckWallet>
   )
 }
 
