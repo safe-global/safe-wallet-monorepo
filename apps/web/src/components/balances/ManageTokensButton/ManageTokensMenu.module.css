@@ -1,0 +1,29 @@
+.menu {
+  width: 250px;
+  margin-top: 8px;
+  border-radius: 4px;
+}
+
+.menuItem {
+  padding: 8px;
+  margin: 0 8px;
+}
+
+.menuItem:hover {
+  border-radius: 6px;
+}
+
+.menuItemContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 16px;
+}
+
+.menuItemLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}

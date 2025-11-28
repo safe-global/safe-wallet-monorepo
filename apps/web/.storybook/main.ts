@@ -69,7 +69,7 @@ const config: StorybookConfig = {
 
   env: (config) => ({
     ...config,
-    NEXT_PUBLIC_HUBSPOT_CONFIG: process.env.NEXT_PUBLIC_HUBSPOT_CONFIG,
+    NEXT_PUBLIC_HUBSPOT_CONFIG: process.env.NEXT_PUBLIC_HUBSPOT_CONFIG ?? '',
   }),
 
   typescript: {

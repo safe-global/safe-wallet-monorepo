@@ -18,6 +18,9 @@ import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabl
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import CheckWallet from '@/components/common/CheckWallet'
 import OverviewSkeleton from './OverviewSkeleton'
+import RefreshPositionsButton from '@/features/positions/components/RefreshPositionsButton'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const Overview = (): ReactElement => {
   const { safe, safeLoading, safeLoaded } = useSafeInfo()
@@ -25,6 +28,7 @@ const Overview = (): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)
   const router = useRouter()
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
+  const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT)
 
   const isInitialState = !safeLoaded && !safeLoading
   const isLoading = safeLoading || balancesLoading || isInitialState
@@ -50,7 +54,15 @@ const Overview = (): ReactElement => {
           alignItems={{ xs: 'flex-start', md: 'center' }}
           justifyContent="space-between"
         >
-          <TotalAssetValue fiatTotal={balances.fiatTotal} size="lg" />
+          <TotalAssetValue
+            fiatTotal={balances.fiatTotal}
+            size="lg"
+            action={
+              isPortfolioEndpointEnabled ? (
+                <RefreshPositionsButton entryPoint="Dashboard" tooltip="Refresh balances" size="small" />
+              ) : undefined
+            }
+          />
 
           {safe.deployed && (
             <Stack

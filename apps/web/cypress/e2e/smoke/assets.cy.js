@@ -25,7 +25,7 @@ describe('[SMOKE] Assets tests', () => {
     assets.verifyTokensTabIsSelected('true')
   })
 
-  it('[SMOKE] Verify that Token list dropdown shows options "Default tokens" and "All tokens"', () => {
+  it('[SMOKE] Verify token list filter and dust filter functionality', () => {
     let spamTokens = [
       assets.currencyAave,
       assets.currencyTestTokenA,
@@ -35,12 +35,22 @@ describe('[SMOKE] Assets tests', () => {
       assets.currencyDaiCap,
     ]
 
+    // Disable dust filter to see tokens with no fiat value
+    assets.toggleHideDust(false)
+
+    // Verify default tokens list shows only native token
     assets.selectTokenList(assets.tokenListOptions.default)
     main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther])
     main.verifyValuesDoNotExist(assets.tokenListTable, spamTokens)
 
+    // Verify all tokens list shows spam tokens
     assets.selectTokenList(assets.tokenListOptions.allTokens)
     spamTokens.push(constants.tokenNames.sepoliaEther)
     main.verifyValuesExist(assets.tokenListTable, spamTokens)
+
+    // Verify dust filter hides tokens with no value
+    assets.toggleHideDust(true)
+    main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther])
+    main.verifyValuesDoNotExist(assets.tokenListTable, [assets.currencyAave])
   })
 })
