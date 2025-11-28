@@ -26,6 +26,8 @@ import { GATEWAY_URL } from '@/config/gateway'
 import type { Message } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 import type { ReactElement } from 'react'
+import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import type { SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 
 const renderWithSafeShield = (ui: ReactElement) => {
   return render(<SafeShieldProvider>{ui}</SafeShieldProvider>)
@@ -425,7 +427,7 @@ describe('SignMessage', () => {
       () =>
         ({
           address: zeroPadValue('0x07', 20),
-        }) as ConnectedWallet,
+        } as ConnectedWallet),
     )
     jest.spyOn(useIsSafeOwnerHook, 'default').mockImplementation(() => false)
     jest.spyOn(useSafeMessage, 'default').mockImplementation(() => [undefined, jest.fn(), undefined])
@@ -454,7 +456,7 @@ describe('SignMessage', () => {
       () =>
         ({
           address: zeroPadValue('0x02', 20),
-        }) as ConnectedWallet,
+        } as ConnectedWallet),
     )
     const messageText = 'Hello world!'
     const messageHash = generateSafeMessageHash(
@@ -500,7 +502,7 @@ describe('SignMessage', () => {
       () =>
         ({
           address: zeroPadValue('0x03', 20),
-        }) as ConnectedWallet,
+        } as ConnectedWallet),
     )
 
     jest.spyOn(useSafeMessage, 'default').mockReturnValue([undefined, jest.fn(), undefined])
@@ -548,7 +550,7 @@ describe('SignMessage', () => {
       () =>
         ({
           address: zeroPadValue('0x03', 20),
-        }) as ConnectedWallet,
+        } as ConnectedWallet),
     )
 
     const messageText = 'Hello world!'
@@ -620,7 +622,7 @@ describe('SignMessage', () => {
       () =>
         ({
           address: zeroPadValue('0x03', 20),
-        }) as ConnectedWallet,
+        } as ConnectedWallet),
     )
 
     const messageText = 'Hello world!'
@@ -671,6 +673,175 @@ describe('SignMessage', () => {
 
     await waitFor(() => {
       expect(getByText('Message successfully signed')).toBeInTheDocument()
+    })
+  })
+
+  describe('Safe Shield integration', () => {
+    const EXAMPLE_EIP712_MESSAGE = {
+      types: {
+        EIP712Domain: [
+          { name: 'name', type: 'string' },
+          { name: 'version', type: 'string' },
+          { name: 'chainId', type: 'uint256' },
+          { name: 'verifyingContract', type: 'address' },
+        ],
+        Person: [
+          { name: 'name', type: 'string' },
+          { name: 'wallet', type: 'address' },
+        ],
+      },
+      primaryType: 'Person',
+      domain: {
+        name: 'Test Dapp',
+        version: '1.0',
+        chainId: 5,
+        verifyingContract: '0x0000000000000000000000000000000000000000',
+      },
+      message: {
+        name: 'Alice',
+        wallet: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      },
+    }
+
+    let mockSetSafeMessage: jest.Mock
+    let mockSafeTxContext: SafeTxContextParams
+
+    beforeEach(() => {
+      jest.spyOn(useIsSafeOwnerHook, 'default').mockImplementation(() => true)
+      jest.spyOn(onboard, 'default').mockReturnValue(mockOnboard)
+      jest.spyOn(useWalletHook, 'default').mockReturnValue({} as ConnectedWallet)
+      jest.spyOn(useSafeMessage, 'default').mockImplementation(() => [undefined, jest.fn(), undefined])
+
+      mockSetSafeMessage = jest.fn()
+      mockSafeTxContext = {
+        safeTx: undefined,
+        setSafeTx: jest.fn(),
+        safeMessage: undefined,
+        setSafeMessage: mockSetSafeMessage,
+        safeTxError: undefined,
+        setSafeTxError: jest.fn(),
+        nonce: undefined,
+        setNonce: jest.fn(),
+        nonceNeeded: true,
+        setNonceNeeded: jest.fn(),
+        safeTxGas: undefined,
+        setSafeTxGas: jest.fn(),
+        txOrigin: undefined,
+        setTxOrigin: jest.fn(),
+        isReadOnly: false,
+        setIsReadOnly: jest.fn(),
+        setIsMassPayout: jest.fn(),
+      }
+    })
+
+    it('sets EIP-712 message in SafeTxContext for threat analysis', async () => {
+      let capturedSafeMessage: any = undefined
+      mockSetSafeMessage.mockImplementation((msg) => {
+        capturedSafeMessage = msg
+      })
+
+      const { getByText } = render(
+        <SafeTxContext.Provider value={mockSafeTxContext}>
+          <SafeShieldProvider>
+            <SignMessage
+              logoUri="www.fake.com/test.png"
+              name="Test App"
+              message={EXAMPLE_EIP712_MESSAGE}
+              requestId="123"
+            />
+          </SafeShieldProvider>
+        </SafeTxContext.Provider>,
+      )
+
+      await waitFor(() => {
+        expect(getByText('Alice')).toBeInTheDocument()
+      })
+
+      expect(mockSetSafeMessage).toHaveBeenCalled()
+      expect(capturedSafeMessage).toEqual(EXAMPLE_EIP712_MESSAGE)
+    })
+
+    it('does not set plain text messages in SafeTxContext (not EIP-712)', async () => {
+      const { getByText } = render(
+        <SafeTxContext.Provider value={mockSafeTxContext}>
+          <SafeShieldProvider>
+            <SignMessage logoUri="www.fake.com/test.png" name="Test App" message="Hello world!" requestId="123" />
+          </SafeShieldProvider>
+        </SafeTxContext.Provider>,
+      )
+
+      await waitFor(() => {
+        expect(getByText('Hello world!')).toBeInTheDocument()
+      })
+
+      expect(mockSetSafeMessage).not.toHaveBeenCalled()
+    })
+
+    it('disables Sign button when risk confirmation is needed but not confirmed', async () => {
+      jest.spyOn(require('@/features/safe-shield/SafeShieldContext'), 'useSafeShield').mockReturnValue({
+        needsRiskConfirmation: true,
+        isRiskConfirmed: false,
+        setIsRiskConfirmed: jest.fn(),
+        setRecipientAddresses: jest.fn(),
+        setSafeTx: jest.fn(),
+        safeTx: undefined,
+        recipient: undefined,
+        contract: undefined,
+        threat: undefined,
+      })
+
+      const { getByText } = renderWithSafeShield(
+        <SignMessage logoUri="www.fake.com/test.png" name="Test App" message="Hello world!" requestId="123" />,
+      )
+
+      await waitFor(() => {
+        expect(getByText('Sign')).toBeDisabled()
+      })
+    })
+
+    it('enables Sign button when risk is confirmed', async () => {
+      jest.spyOn(require('@/features/safe-shield/SafeShieldContext'), 'useSafeShield').mockReturnValue({
+        needsRiskConfirmation: true,
+        isRiskConfirmed: true,
+        setIsRiskConfirmed: jest.fn(),
+        setRecipientAddresses: jest.fn(),
+        setSafeTx: jest.fn(),
+        safeTx: undefined,
+        recipient: undefined,
+        contract: undefined,
+        threat: undefined,
+      })
+
+      const { getByText } = renderWithSafeShield(
+        <SignMessage logoUri="www.fake.com/test.png" name="Test App" message="Hello world!" requestId="123" />,
+      )
+
+      await waitFor(() => {
+        expect(getByText('Sign')).toBeEnabled()
+      })
+    })
+
+    it('shows RiskConfirmation checkbox when threat is detected', async () => {
+      jest.spyOn(require('@/features/safe-shield/SafeShieldContext'), 'useSafeShield').mockReturnValue({
+        needsRiskConfirmation: true,
+        isRiskConfirmed: false,
+        setIsRiskConfirmed: jest.fn(),
+        setRecipientAddresses: jest.fn(),
+        setSafeTx: jest.fn(),
+        safeTx: undefined,
+        recipient: undefined,
+        contract: undefined,
+        threat: undefined,
+      })
+
+      const { getByTestId, getByText } = renderWithSafeShield(
+        <SignMessage logoUri="www.fake.com/test.png" name="Test App" message="Hello world!" requestId="123" />,
+      )
+
+      await waitFor(() => {
+        expect(getByTestId('risk-confirmation-checkbox')).toBeInTheDocument()
+        expect(getByText('I understand the risks and would like to proceed with this message.')).toBeInTheDocument()
+      })
     })
   })
 })
