@@ -1,0 +1,220 @@
+import { setupServer } from 'msw/node'
+import { handlers } from '@safe-global/test/msw/handlers'
+import { GATEWAY_URL } from '@/config/gateway'
+
+// Create a test server with our handlers
+const server = setupServer(...handlers(GATEWAY_URL))
+
+describe('Hypernative OAuth Token Exchange Handler', () => {
+  beforeAll(() => server.listen())
+  afterEach(() => server.resetHandlers())
+  afterAll(() => server.close())
+
+  const tokenUrl = 'https://mock-hn-auth.example.com/oauth/token'
+
+  const validTokenRequest = {
+    grant_type: 'authorization_code',
+    code: 'test-auth-code-123',
+    code_verifier: 'test-verifier-456',
+    redirect_uri: 'http://localhost:3000/hypernative/oauth-callback',
+    client_id: 'mock-client-id',
+  }
+
+  it('should return access token for valid request', async () => {
+    const body = new URLSearchParams(validTokenRequest)
+
+    const response = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body.toString(),
+    })
+
+    expect(response.ok).toBe(true)
+    expect(response.status).toBe(200)
+
+    const data = await response.json()
+    expect(data).toMatchObject({
+      access_token: expect.stringMatching(/^mock-hn-token-\d+$/),
+      token_type: 'Bearer',
+      expires_in: 3600,
+      scope: 'read:analysis write:analysis',
+    })
+  })
+
+  it('should reject request with invalid grant_type', async () => {
+    const body = new URLSearchParams({
+      ...validTokenRequest,
+      grant_type: 'client_credentials',
+    })
+
+    const response = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body.toString(),
+    })
+
+    expect(response.status).toBe(400)
+
+    const data = await response.json()
+    expect(data).toEqual({
+      error: 'invalid_grant',
+      error_description: 'Invalid grant type',
+    })
+  })
+
+  it('should reject request with missing code', async () => {
+    const body = new URLSearchParams({
+      grant_type: validTokenRequest.grant_type,
+      code_verifier: validTokenRequest.code_verifier,
+      redirect_uri: validTokenRequest.redirect_uri,
+      client_id: validTokenRequest.client_id,
+    })
+
+    const response = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body.toString(),
+    })
+
+    expect(response.status).toBe(400)
+
+    const data = await response.json()
+    expect(data).toEqual({
+      error: 'invalid_request',
+      error_description: 'Missing code',
+    })
+  })
+
+  it('should reject request with missing code_verifier', async () => {
+    const body = new URLSearchParams({
+      grant_type: validTokenRequest.grant_type,
+      code: validTokenRequest.code,
+      redirect_uri: validTokenRequest.redirect_uri,
+      client_id: validTokenRequest.client_id,
+    })
+
+    const response = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body.toString(),
+    })
+
+    expect(response.status).toBe(400)
+
+    const data = await response.json()
+    expect(data).toEqual({
+      error: 'invalid_request',
+      error_description: 'Missing PKCE code_verifier',
+    })
+  })
+
+  it('should reject request with missing redirect_uri', async () => {
+    const body = new URLSearchParams({
+      grant_type: validTokenRequest.grant_type,
+      code: validTokenRequest.code,
+      code_verifier: validTokenRequest.code_verifier,
+      client_id: validTokenRequest.client_id,
+    })
+
+    const response = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body.toString(),
+    })
+
+    expect(response.status).toBe(400)
+
+    const data = await response.json()
+    expect(data).toEqual({
+      error: 'invalid_request',
+      error_description: 'Missing redirect_uri',
+    })
+  })
+
+  it('should reject request with invalid client_id', async () => {
+    const body = new URLSearchParams({
+      ...validTokenRequest,
+      client_id: 'wrong-client-id',
+    })
+
+    const response = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body.toString(),
+    })
+
+    expect(response.status).toBe(401)
+
+    const data = await response.json()
+    expect(data).toEqual({
+      error: 'invalid_client',
+      error_description: 'Invalid client_id',
+    })
+  })
+
+  it('should reject request with missing client_id', async () => {
+    const body = new URLSearchParams({
+      grant_type: validTokenRequest.grant_type,
+      code: validTokenRequest.code,
+      code_verifier: validTokenRequest.code_verifier,
+      redirect_uri: validTokenRequest.redirect_uri,
+    })
+
+    const response = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body.toString(),
+    })
+
+    expect(response.status).toBe(401)
+
+    const data = await response.json()
+    expect(data).toEqual({
+      error: 'invalid_client',
+      error_description: 'Invalid client_id',
+    })
+  })
+
+  it('should generate unique tokens for each request', async () => {
+    const body = new URLSearchParams(validTokenRequest)
+
+    const response1 = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body.toString(),
+    })
+
+    const data1 = await response1.json()
+
+    // Wait a moment to ensure different timestamp
+    await new Promise((resolve) => setTimeout(resolve, 10))
+
+    const response2 = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body.toString(),
+    })
+
+    const data2 = await response2.json()
+
+    expect(data1.access_token).not.toBe(data2.access_token)
+  })
+})
