@@ -49,7 +49,7 @@ const SwapButton = ({
           mixpanelParams={{ [MixpanelEventParams.ENTRY_POINT]: GA_LABEL_TO_MIXPANEL_PROPERTY[trackingLabel] || 'Home' }}
         >
           {onlyIcon ? (
-            <Tooltip title="Swap" placement="top" arrow>
+            <Tooltip title={isOk ? 'Swap' : ''} placement="top" arrow>
               <span>
                 <IconButton
                   data-testid="swap-btn"

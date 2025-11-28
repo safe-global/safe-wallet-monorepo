@@ -97,6 +97,7 @@ export const SafeShieldContent = ({
             delay={contractAnalysisDelay}
             highlightedSeverity={highlightedSeverity}
             analyticsEvent={SAFE_SHIELD_EVENTS.CONTRACT_DECODED}
+            showImage
           />
 
           <AnalysisGroupCard

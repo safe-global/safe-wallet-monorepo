@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Paper } from '@mui/material'
 import { faker } from '@faker-js/faker'
 import { StoreDecorator } from '@/stories/storeDecorator'
@@ -9,6 +9,33 @@ import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balance
 import { toBeHex } from 'ethers'
 import { safeParseUnits } from '@safe-global/utils/utils/formatters'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
+import { WalletContext, type WalletContextType } from '@/components/common/WalletProvider'
+import { setSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
+
+const MOCK_WALLET_ADDRESS = '0x1234567890123456789012345678901234567890'
+
+const mockConnectedWallet: WalletContextType = {
+  connectedWallet: {
+    address: MOCK_WALLET_ADDRESS,
+    chainId: '1',
+    label: 'MetaMask',
+    provider: null as never,
+  },
+  signer: {
+    address: MOCK_WALLET_ADDRESS,
+    chainId: '1',
+    provider: null,
+  },
+  setSignerAddress: () => {},
+}
+
+const MockSDKProvider = ({ children }: { children: React.ReactNode }) => {
+  useEffect(() => {
+    setSafeSDK({} as never)
+    return () => setSafeSDK(undefined)
+  }, [])
+  return <>{children}</>
+}
 
 // Helper function to create mock balance items
 const createMockBalanceItem = (
@@ -204,47 +231,62 @@ const meta = {
       const isDarkMode = currentTheme === 'dark'
 
       return (
-        <StoreDecorator
-          initialState={{
-            balances: {
-              data: mockBalances,
-              loading: isLoading,
-              loaded: !isLoading,
-              error: undefined,
-            },
-            settings: {
-              currency,
-              hiddenTokens,
-              tokenList: TOKEN_LISTS.ALL,
-              shortName: {
-                copy: true,
-                qr: true,
-              },
-              theme: {
-                darkMode: isDarkMode,
-              },
-              env: {
-                tenderly: {
-                  url: '',
-                  accessToken: '',
+        <MockSDKProvider>
+          <WalletContext.Provider value={mockConnectedWallet}>
+            <StoreDecorator
+              initialState={{
+                balances: {
+                  data: mockBalances,
+                  loading: isLoading,
+                  loaded: !isLoading,
+                  error: undefined,
                 },
-                rpc: {},
-              },
-              signing: {
-                onChainSigning: false,
-                blindSigning: false,
-              },
-              transactionExecution: true,
-            },
-            chains: {
-              data: [{ chainId }],
-            },
-          }}
-        >
-          <Paper sx={{ padding: 2, minHeight: '100vh' }}>
-            <Story />
-          </Paper>
-        </StoreDecorator>
+                settings: {
+                  currency,
+                  hiddenTokens,
+                  tokenList: TOKEN_LISTS.ALL,
+                  shortName: {
+                    copy: true,
+                    qr: true,
+                  },
+                  theme: {
+                    darkMode: isDarkMode,
+                  },
+                  env: {
+                    tenderly: {
+                      url: '',
+                      accessToken: '',
+                    },
+                    rpc: {},
+                  },
+                  signing: {
+                    onChainSigning: false,
+                    blindSigning: false,
+                  },
+                  transactionExecution: true,
+                },
+                chains: {
+                  data: [{ chainId }],
+                },
+                safeInfo: {
+                  data: {
+                    address: { value: MOCK_WALLET_ADDRESS },
+                    chainId,
+                    owners: [{ value: MOCK_WALLET_ADDRESS }],
+                    threshold: 1,
+                    deployed: true,
+                  },
+                  loading: false,
+                  loaded: true,
+                },
+              }}
+            >
+              <Paper sx={{ padding: 2, minHeight: '100vh' }}>
+                <Story />
+              </Paper>
+            </StoreDecorator>
+          </WalletContext.Provider>
+        </MockSDKProvider>
       )
     },
   ],
