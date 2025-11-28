@@ -24,6 +24,7 @@ export const DelegateCallCardItem = ({ result, isPrimary = false }: DelegateCall
       description={description}
       result={result}
       severity={isPrimary ? result.severity : undefined}
+      showImage
     />
   )
 }
