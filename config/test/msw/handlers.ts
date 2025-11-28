@@ -377,4 +377,32 @@ export const handlers = (GATEWAY_URL: string) => [
       return HttpResponse.json({ signature: body.signature }, { status: 201 })
     },
   ),
+
+  // Mock targeted-messaging endpoint for Hypernative (outreachId: 11)
+  http.get<{ outreachId: string; chainId: string; safeAddress: string }>(
+    `${GATEWAY_URL}/v1/targeted-messaging/outreaches/:outreachId/chains/:chainId/safes/:safeAddress`,
+    ({ params }) => {
+      const { outreachId, chainId, safeAddress } = params
+
+      // List of Safe addresses that should be considered "targeted" for Hypernative
+      // Add your test Safe addresses here (use lowercase for comparison)
+      const targetedSafes = [
+        '0x1234567890123456789012345678901234567890',
+        '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+        '0x8f02c3d4a63b2fe436762c807eff182d35df721f',
+      ]
+
+      const isTargeted = targetedSafes.some((addr) => addr.toLowerCase() === safeAddress.toLowerCase())
+
+      if (isTargeted && outreachId === '11') {
+        return HttpResponse.json({
+          outreachId: Number(outreachId),
+          address: safeAddress,
+        })
+      }
+
+      // Return 404 for non-targeted Safes (matches backend behavior)
+      return HttpResponse.json({ detail: 'Not found' }, { status: 404 })
+    },
+  ),
 ]

@@ -160,6 +160,7 @@ export const TenderlySimulation = ({
 
   return (
     <Box
+      data-testid="tenderly-simulation"
       sx={{
         overflow: 'hidden',
         opacity: isVisible ? 1 : 0,
@@ -207,6 +208,7 @@ export const TenderlySimulation = ({
         {!isSimulationFinished ? (
           <Box
             component="button"
+            data-testid="run-simulation-btn"
             onClick={handleRunSimulation}
             disabled={isLoading}
             sx={{

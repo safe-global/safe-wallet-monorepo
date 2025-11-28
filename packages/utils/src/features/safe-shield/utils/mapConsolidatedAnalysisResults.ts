@@ -3,8 +3,12 @@ import { MULTI_RESULT_DESCRIPTION } from '../constants'
 import { getPrimaryResult, sortBySeverity } from './analysisUtils'
 import { RecipientAnalysisResults, ContractAnalysisResults, ThreatAnalysisResults } from '../types'
 
+interface ConsolidatedAnalysisResult<T extends AnyStatus = AnyStatus> extends Omit<AnalysisResult<T>, 'addresses'> {
+  addresses: string[]
+}
+
 type ConsolidatedResults<T extends AnyStatus = AnyStatus> = {
-  [group in StatusGroup]?: { [type in T]?: AnalysisResult<T>[] }
+  [group in StatusGroup]?: { [type in T]?: ConsolidatedAnalysisResult<T>[] }
 }
 
 /**
@@ -57,7 +61,17 @@ export const mapConsolidatedAnalysisResults = (
           title: typeResults[0].title,
           type: type as AnyStatus,
           description: formatPluralDescription(numResults, addressResults.length),
-          addresses: typeResults.flatMap((result) => result.addresses).filter((addresses) => addresses !== undefined),
+          addresses: typeResults
+            .flatMap((result) => result.addresses)
+            .filter((addresses) => addresses !== undefined)
+            .map((addresses) => {
+              const result = (addressesResultsMap as Record<string, { name?: string; logoUrl?: string }>)[addresses]
+              return {
+                address: addresses,
+                name: result?.name,
+                logoUrl: result?.logoUrl,
+              }
+            }),
         })
       }
     }

@@ -4,6 +4,9 @@ import * as create_tx from '../pages/create_tx.pages.js'
 import * as table from '../pages/tables.page.js'
 import * as modals from '../pages/modals.page.js'
 import * as swaps_data from '../../fixtures/swaps_data.json'
+import * as assets from './assets.pages.js'
+import * as addressbook from './address_book.page.js'
+import * as dashboard from './dashboard.pages.js'
 
 export const inputCurrencyInput = '[id="input-currency-input"]'
 export const outputCurrencyInput = '[id="output-currency-input"]'
@@ -154,6 +157,18 @@ export const tokenBlockLabels = {
 
 export function verifySwapBtnIsVisible() {
   cy.get(assetsSwapBtn).should('be.visible')
+}
+
+export function verifyAssetsPageSwapButtonsCount(count) {
+  cy.get(assets.tableContainer)
+    .find(addressbook.tableRow)
+    .find(assets.actionColumnCell)
+    .find(assetsSwapBtn)
+    .should('have.length', count)
+}
+
+export function verifyDashboardPageSwapButtonsCount(count) {
+  cy.get(dashboard.assetsWidget).find(assetsSwapBtn).should('have.length', count)
 }
 
 export function checkInputCurrencyPreviewValue(value) {

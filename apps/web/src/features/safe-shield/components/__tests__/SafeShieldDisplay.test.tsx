@@ -8,17 +8,25 @@ import {
 import { faker } from '@faker-js/faker'
 
 describe('SafeShieldDisplay', () => {
-  const mockRecipientAddress = faker.finance.ethereumAddress()
-  const mockContractAddress = faker.finance.ethereumAddress()
-
-  const mockRecipient = RecipientAnalysisBuilder.knownRecipient(mockRecipientAddress).build()
-  const mockContract = ContractAnalysisBuilder.verifiedContract(mockContractAddress).build()
-  const mockThreat = FullAnalysisBuilder.noThreat().build().threat
-  const mockCriticalRecipient = RecipientAnalysisBuilder.incompatibleSafe(mockRecipientAddress).build()
-  const mockWarningRecipient = RecipientAnalysisBuilder.lowActivity(mockRecipientAddress).build()
+  let mockRecipientAddress: string
+  let mockContractAddress: string
+  let mockRecipient: any
+  let mockContract: any
+  let mockThreat: any
+  let mockCriticalRecipient: any
+  let mockWarningRecipient: any
 
   beforeEach(() => {
     jest.clearAllMocks()
+
+    // Recreate mocks for each test to avoid mutation issues
+    mockRecipientAddress = faker.finance.ethereumAddress()
+    mockContractAddress = faker.finance.ethereumAddress()
+    mockRecipient = RecipientAnalysisBuilder.knownRecipient(mockRecipientAddress).build()
+    mockContract = ContractAnalysisBuilder.verifiedContract(mockContractAddress).build()
+    mockThreat = FullAnalysisBuilder.noThreat().build().threat
+    mockCriticalRecipient = RecipientAnalysisBuilder.incompatibleSafe(mockRecipientAddress).build()
+    mockWarningRecipient = RecipientAnalysisBuilder.lowActivity(mockRecipientAddress).build()
   })
 
   describe('Basic Rendering', () => {
