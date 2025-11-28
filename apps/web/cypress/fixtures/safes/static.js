@@ -42,7 +42,7 @@ export default {
   SEP_STATIC_SAFE_14: 'sep:0xe41D568F5040FD9adeE8B64200c6B7C363C68c41',
 
   // Ethereum Safes
-  /** Recovery testing - Used in: recovery.cy.js, prodhealthcheck/recovery.cy.js */
+  /** Recovery and balances testing - Used in: recovery.cy.js, prodhealthcheck/recovery.cy.js, balances_endpoints.cy.js */
   ETH_STATIC_SAFE_15: 'eth:0xfF501B324DC6d78dC9F983f140B9211c3EdB4dc7',
 
   // Gnosis Chain Safes

@@ -1,7 +1,8 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 import useBalances from '@/hooks/useBalances'
 import useChainId from '@/hooks/useChainId'
 import useHiddenTokens from '@/hooks/useHiddenTokens'
+import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { useAppDispatch } from '@/store'
 import { setHiddenTokensForChain } from '@/store/settingsSlice'
 
@@ -78,10 +79,6 @@ export const useHideAssets = (closeDialog: () => void) => {
 }
 
 export const useVisibleAssets = () => {
-  const hiddenAssets = useHiddenTokens()
-  const { balances } = useBalances()
-  return useMemo(
-    () => balances.items?.filter((item) => !hiddenAssets.includes(item.tokenInfo.address)),
-    [hiddenAssets, balances.items],
-  )
+  const { balances } = useVisibleBalances()
+  return balances.items
 }

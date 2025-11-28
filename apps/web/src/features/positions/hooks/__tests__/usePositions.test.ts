@@ -6,7 +6,7 @@ import * as useChains from '@/hooks/useChains'
 import * as useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsPositionsFeatureEnabled'
 import * as positionsQueries from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import * as store from '@/store'
-import { selectCurrency } from '@/store/settingsSlice'
+import { selectCurrency, selectSettings, TOKEN_LISTS } from '@/store/settingsSlice'
 import * as useBalances from '@/hooks/useBalances'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
@@ -120,6 +120,9 @@ describe('usePositions', () => {
     jest.spyOn(store, 'useAppSelector').mockImplementation((selector) => {
       if (selector === selectCurrency) {
         return 'USD'
+      }
+      if (selector === selectSettings) {
+        return { tokenList: TOKEN_LISTS.TRUSTED }
       }
       return undefined
     })

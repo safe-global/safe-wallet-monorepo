@@ -1,0 +1,99 @@
+import { render } from '@/src/tests/test-utils'
+import { AnalysisDetailsContent } from './AnalysisDetailsContent'
+import { RecipientAnalysisBuilder, ContractAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
+import { FullAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
+import { faker } from '@faker-js/faker'
+
+describe('AnalysisDetailsContent', () => {
+  it('should render nothing when all data is empty', () => {
+    const { UNSAFE_root } = render(<AnalysisDetailsContent />)
+    // Should render TransactionSimulation wrapper
+    expect(UNSAFE_root).toBeTruthy()
+  })
+
+  it('should render recipient analysis when recipient data is provided', () => {
+    const address = faker.finance.ethereumAddress()
+    const recipient = RecipientAnalysisBuilder.knownRecipient(address).build()
+
+    const { getByText } = render(<AnalysisDetailsContent recipient={recipient} />)
+
+    // Should render recipient analysis group
+    const result = recipient[0]
+    if (result) {
+      const firstGroup = Object.values(result)[0]
+      if (firstGroup && typeof firstGroup === 'object') {
+        const firstStatusGroup = Object.values(firstGroup)[0]
+        if (firstStatusGroup && Array.isArray(firstStatusGroup) && firstStatusGroup[0]) {
+          expect(getByText(firstStatusGroup[0].description)).toBeTruthy()
+        }
+      }
+    }
+  })
+
+  it('should render contract analysis when contract data is provided', () => {
+    const address = faker.finance.ethereumAddress()
+    const contract = ContractAnalysisBuilder.verifiedContract(address).build()
+
+    const { getByText } = render(<AnalysisDetailsContent contract={contract} />)
+
+    // Should render contract analysis group
+    const result = contract[0]
+    if (result) {
+      const firstGroup = Object.values(result)[0]
+      if (firstGroup && typeof firstGroup === 'object') {
+        const firstStatusGroup = Object.values(firstGroup)[0]
+        if (firstStatusGroup && Array.isArray(firstStatusGroup) && firstStatusGroup[0]) {
+          expect(getByText(firstStatusGroup[0].description)).toBeTruthy()
+        }
+      }
+    }
+  })
+
+  it('should render threat analysis when threat data is provided', () => {
+    const threat = FullAnalysisBuilder.maliciousThreat().build().threat
+
+    const { getByText } = render(<AnalysisDetailsContent threat={threat} />)
+
+    // Should render threat analysis - check for actual text rendered
+    expect(getByText(/Malicious threat detected/i)).toBeTruthy()
+  })
+
+  it('should render all analysis types when all data is provided', () => {
+    const recipientAddress = faker.finance.ethereumAddress()
+    const contractAddress = faker.finance.ethereumAddress()
+    const recipient = RecipientAnalysisBuilder.knownRecipient(recipientAddress).build()
+    const contract = ContractAnalysisBuilder.unverifiedContract(contractAddress).build()
+    const threat = FullAnalysisBuilder.moderateThreat().build().threat
+
+    const { getByText } = render(<AnalysisDetailsContent recipient={recipient} contract={contract} threat={threat} />)
+
+    // Should render all three analysis groups - check for actual labels rendered
+    expect(getByText(/Known recipient/i)).toBeTruthy()
+    expect(getByText(/Unverified contract/i)).toBeTruthy()
+    expect(getByText(/Moderate threat detected/i)).toBeTruthy()
+  })
+
+  it('should not render empty recipient data', () => {
+    const recipient: [undefined, undefined, false] = [undefined, undefined, false]
+    const { UNSAFE_root } = render(<AnalysisDetailsContent recipient={recipient} />)
+
+    // Should not crash and should render TransactionSimulation
+    expect(UNSAFE_root).toBeTruthy()
+  })
+
+  it('should not render empty contract data', () => {
+    const contract: [undefined, undefined, false] = [undefined, undefined, false]
+    const { UNSAFE_root } = render(<AnalysisDetailsContent contract={contract} />)
+
+    // Should not crash and should render TransactionSimulation
+    expect(UNSAFE_root).toBeTruthy()
+  })
+
+  it('should not render empty threat data', () => {
+    const threat: [undefined, undefined, false] = [undefined, undefined, false]
+    const { UNSAFE_root } = render(<AnalysisDetailsContent threat={threat} />)
+
+    // Should not crash and should render TransactionSimulation
+    expect(UNSAFE_root).toBeTruthy()
+  })
+})

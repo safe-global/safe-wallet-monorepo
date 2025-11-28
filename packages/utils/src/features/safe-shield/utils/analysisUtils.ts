@@ -1,4 +1,5 @@
-import type { Severity } from '../types'
+import { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import type { GroupedAnalysisResults, Severity, ThreatAnalysisResults } from '../types'
 import isEmpty from 'lodash/isEmpty'
 
 /**
@@ -13,6 +14,19 @@ export const SEVERITY_PRIORITY: Record<Severity, number> = { CRITICAL: 0, WARN: 
  */
 export function sortBySeverity<T extends { severity: Severity }>(results: T[]): T[] {
   return [...results].sort((a, b) => SEVERITY_PRIORITY[a.severity] - SEVERITY_PRIORITY[b.severity])
+}
+
+export const normalizeThreatData = (
+  threat?: AsyncResult<ThreatAnalysisResults>,
+): Record<string, GroupedAnalysisResults> => {
+  const [result] = threat || []
+  const { BALANCE_CHANGE: _, ...groupedThreatResults } = result || {}
+
+  if (Object.keys(groupedThreatResults).length === 0) {
+    return {}
+  }
+
+  return { ['0x']: groupedThreatResults }
 }
 
 /**

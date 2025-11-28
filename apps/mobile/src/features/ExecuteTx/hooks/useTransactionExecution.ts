@@ -11,6 +11,7 @@ import { useRelayRelayV1Mutation } from '@safe-global/store/gateway/AUTO_GENERAT
 import useSafeInfo from '@/src/hooks/useSafeInfo'
 import { executePrivateKeyTx } from '@/src/services/tx-execution/privateKeyExecutor'
 import { executeRelayTx } from '@/src/services/tx-execution/relayExecutor'
+import { executeLedgerTx } from '@/src/services/tx-execution/ledgerExecutor'
 
 export enum ExecutionStatus {
   IDLE = 'idle',
@@ -63,6 +64,15 @@ export function useTransactionExecution({
         },
       })
     },
+    [ExecutionMethod.WITH_LEDGER]: async () => {
+      return await executeLedgerTx({
+        chain: activeChain,
+        activeSafe,
+        txId,
+        signerAddress,
+        feeParams,
+      })
+    },
   }
 
   const execute = useCallback(async () => {
@@ -83,6 +93,9 @@ export function useTransactionExecution({
     } catch (error) {
       logger.error('Error executing transaction:', error)
       setStatus(ExecutionStatus.ERROR)
+
+      // Re-throw error so it can be handled imperatively by the caller
+      throw error
     }
   }, [executionMethod, activeChain, activeSafe, safe, txId, signerAddress, feeParams, relayMutation, dispatch])
 

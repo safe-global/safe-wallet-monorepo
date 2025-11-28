@@ -71,4 +71,44 @@ describe('FiatChange', () => {
     expect(chip).toBeInTheDocument()
     expect(chip).toHaveStyle({ backgroundColor: 'success.background', color: 'success.main' })
   })
+
+  it('uses change prop when provided instead of balanceItem', () => {
+    const mockBalance: Balance = {
+      fiatBalance24hChange: '2.00',
+    } as Balance
+
+    render(<FiatChange balanceItem={mockBalance} change="5.00" />)
+
+    const chip = screen.getByText('5.00%')
+    expect(chip).toBeInTheDocument()
+  })
+
+  it('uses change prop when balanceItem is not provided', () => {
+    render(<FiatChange change="3.50" />)
+
+    const chip = screen.getByText('3.50%')
+    expect(chip).toBeInTheDocument()
+  })
+
+  it('falls back to balanceItem when change is null', () => {
+    const mockBalance: Balance = {
+      fiatBalance24hChange: '4.00',
+    } as Balance
+
+    render(<FiatChange balanceItem={mockBalance} change={null} />)
+
+    const chip = screen.getByText('4.00%')
+    expect(chip).toBeInTheDocument()
+  })
+
+  it('renders inline variant correctly', () => {
+    const mockBalance: Balance = {
+      fiatBalance24hChange: '5.00',
+    } as Balance
+
+    render(<FiatChange balanceItem={mockBalance} inline />)
+
+    const chip = screen.getByText('5.00%')
+    expect(chip).toBeInTheDocument()
+  })
 })

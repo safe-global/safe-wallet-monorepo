@@ -17,7 +17,7 @@ function BiometricsOptIn() {
     import_safe: string
     txId: string
     signerAddress: string
-    caller: '/import-signers' | '/review-and-confirm'
+    caller: '/import-signers' | '/review-and-confirm' | '/review-and-execute'
   }>()
 
   const redirectTo = useMemo(() => {
@@ -31,6 +31,14 @@ function BiometricsOptIn() {
         },
       }
     }
+    if (local.caller === '/review-and-execute') {
+      return {
+        pathname: '/review-and-execute' as const,
+        params: {
+          txId: local.txId,
+        },
+      }
+    }
     return {
       pathname: '/review-and-confirm' as const,
       params: {
@@ -38,7 +46,7 @@ function BiometricsOptIn() {
         signerAddress: local.signerAddress,
       },
     }
-  }, [local.caller])
+  }, [local.caller, local.safeAddress, local.chainId, local.import_safe, local.txId, local.signerAddress])
 
   const { colorScheme, isDark } = useTheme()
   const toast = useToastController()
