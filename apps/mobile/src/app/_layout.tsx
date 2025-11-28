@@ -254,6 +254,14 @@ function RootLayout() {
                               name="signing-success"
                               options={{ headerShown: false, presentation: 'modal' }}
                             />
+                            <Stack.Screen
+                              name="execution-error"
+                              options={{ headerShown: false, presentation: 'modal' }}
+                            />
+                            <Stack.Screen
+                              name="execution-success"
+                              options={{ headerShown: false, presentation: 'modal' }}
+                            />
                             <Stack.Screen name="+not-found" />
                           </Stack>
                           <SafeStatusBar />

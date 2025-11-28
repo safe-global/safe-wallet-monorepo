@@ -1,31 +1,20 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { View, Text, Stack, YStack } from 'tamagui'
-import { router, useLocalSearchParams, useGlobalSearchParams, useNavigation } from 'expo-router'
+import { router, useLocalSearchParams, useGlobalSearchParams } from 'expo-router'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
-import { useAppSelector, useAppDispatch } from '@/src/store/hooks'
-import { selectChainById } from '@/src/store/chains'
+import { useAppSelector } from '@/src/store/hooks'
 import { useTransactionData } from '@/src/features/ConfirmTx/hooks/useTransactionData'
-import { ledgerExecutionService } from '@/src/services/ledger/ledger-execution.service'
 import { Loader } from '@/src/components/Loader'
 import { SafeButton } from '@/src/components/SafeButton'
 import { selectActiveSigner } from '@/src/store/activeSignerSlice'
-import { ledgerDMKService } from '@/src/services/ledger/ledger-dmk.service'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { addPendingTx } from '@/src/store/pendingTxsSlice'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
-import { getUserNonce } from '@/src/services/web3'
-import { ExecuteProcessing } from '@/src/features/ExecuteTx/components/ExecuteProcessing'
-import { ExecuteError } from '@/src/features/ExecuteTx/components/ExecuteError'
 import { parseFeeParams } from '@/src/utils/feeParams'
 import { ReviewAndConfirmView } from '@/src/features/ConfirmTx/components/ReviewAndConfirm/ReviewAndConfirmView'
 import { LargeHeaderTitle } from '@/src/components/Title'
-
-enum ExecutionState {
-  REVIEW = 'review',
-  EXECUTING = 'executing',
-  PROCESSING = 'processing',
-  ERROR = 'error',
-}
+import { getErrorMessage } from '@/src/features/ExecuteTx/components/ReviewAndExecute/helpers'
+import { useTransactionExecution } from '@/src/features/ExecuteTx/hooks/useTransactionExecution'
+import { useIsMounted } from '@/src/hooks/useIsMounted'
 
 export const LedgerReviewExecuteContainer = () => {
   const { bottom } = useSafeAreaInsets()
@@ -37,87 +26,55 @@ export const LedgerReviewExecuteContainer = () => {
     nonce?: string
   }>()
   const activeSafe = useDefinedActiveSafe()
-  const chain = useAppSelector((s) => selectChainById(s, activeSafe.chainId))
   const activeSigner = useAppSelector((s) => selectActiveSigner(s, activeSafe.address))
-  const { data: txDetails, isFetching } = useTransactionData(txId || '')
-  const [executionState, setExecutionState] = useState<ExecutionState>(ExecutionState.REVIEW)
+  const { data: txDetails, isLoading } = useTransactionData(txId || '')
+  const [isExecuting, setIsExecuting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const dispatch = useAppDispatch()
-  const navigation = useNavigation()
   const feeParams = useMemo(() => parseFeeParams(globalParams), [globalParams])
+  const isMounted = useIsMounted()
+
+  const { execute } = useTransactionExecution({
+    txId: txId || '',
+    executionMethod: ExecutionMethod.WITH_LEDGER,
+    signerAddress: activeSigner?.value || '',
+    feeParams,
+  })
 
   useEffect(() => {
     if (!sessionId) {
       setError('No Ledger session. Please reconnect.')
-      setExecutionState(ExecutionState.ERROR)
     }
   }, [sessionId])
 
-  const handleExecute = async () => {
-    if (!txId || !activeSigner?.derivationPath || !activeSigner?.value) {
-      setError('Missing execution context')
-      setExecutionState(ExecutionState.ERROR)
+  const handleExecute = useCallback(async () => {
+    if (isExecuting) {
       return
     }
 
     try {
-      setExecutionState(ExecutionState.EXECUTING)
+      setIsExecuting(true)
       setError(null)
-      if (!chain) {
-        throw new Error('Missing chain information')
+
+      await execute()
+
+      if (isMounted()) {
+        router.replace({
+          pathname: '/execution-success',
+          params: { txId },
+        })
       }
-
-      // Execute with Ledger
-      const { hash } = await ledgerExecutionService.executeTransaction({
-        chain,
-        activeSafe,
-        txId,
-        signerAddress: activeSigner.value,
-        derivationPath: activeSigner.derivationPath,
-        feeParams,
-      })
-
-      // Get wallet nonce for tracking
-      const walletNonce = await getUserNonce(chain, activeSigner.value)
-
-      // Add to pending transactions
-      dispatch(
-        addPendingTx({
-          txId,
-          type: ExecutionMethod.WITH_PK,
-          chainId: activeSafe.chainId,
-          safeAddress: activeSafe.address,
-          txHash: hash,
-          walletAddress: activeSigner.value,
-          walletNonce,
-        }),
-      )
-
-      // Disconnect to prevent DMK background pinger from continuing after execution
-      await ledgerDMKService.disconnect()
-
-      // Show processing state
-      setExecutionState(ExecutionState.PROCESSING)
-    } catch (e) {
-      const message = e instanceof Error ? e.message : 'Failed to execute with Ledger'
-      setError(message)
-      setExecutionState(ExecutionState.ERROR)
+    } catch (err) {
+      if (isMounted()) {
+        setIsExecuting(false)
+        router.push({
+          pathname: '/execution-error',
+          params: { description: getErrorMessage(err) },
+        })
+      }
     }
-  }
+  }, [isExecuting, execute, txId, isMounted])
 
-  useEffect(() => {
-    if ([ExecutionState.ERROR, ExecutionState.PROCESSING].includes(executionState)) {
-      navigation.setOptions({ headerShown: false })
-    }
-    return () => navigation.setOptions({ headerShown: true })
-  }, [executionState])
-
-  const handleRetry = () => {
-    setExecutionState(ExecutionState.REVIEW)
-    setError(null)
-  }
-
-  if (isFetching || !txDetails) {
+  if (isLoading || !txDetails) {
     return (
       <View flex={1} alignItems="center" justifyContent="center">
         <Loader />
@@ -125,38 +82,6 @@ export const LedgerReviewExecuteContainer = () => {
     )
   }
 
-  // Show error state
-  if (executionState === ExecutionState.ERROR) {
-    return (
-      <ExecuteError
-        onRetryPress={handleRetry}
-        onViewTransactionPress={() => {
-          router.dismissTo({
-            pathname: '/confirm-transaction',
-            params: {
-              txId,
-            },
-          })
-        }}
-        description={error || 'Failed to execute with Ledger'}
-      />
-    )
-  }
-
-  // Show processing state (transaction submitted successfully)
-  if (executionState === ExecutionState.PROCESSING) {
-    return (
-      <ExecuteProcessing
-        handleHomePress={() => {
-          // We create several router contexts and we need to dismiss once the ledger navigation & then the execute navigation
-          router.dismissAll()
-          router.dismissAll()
-        }}
-      />
-    )
-  }
-
-  // Show review state (default)
   return (
     <ReviewAndConfirmView
       txDetails={txDetails}
@@ -180,12 +105,8 @@ export const LedgerReviewExecuteContainer = () => {
             {error}
           </Text>
         )}
-        <SafeButton
-          onPress={handleExecute}
-          icon={executionState === ExecutionState.EXECUTING ? <Loader size={18} thickness={2} /> : null}
-          disabled={executionState === ExecutionState.EXECUTING}
-        >
-          {executionState === ExecutionState.EXECUTING ? 'Execute on Ledger...' : 'Continue on Ledger'}
+        <SafeButton onPress={handleExecute} loading={isExecuting} disabled={isExecuting || !sessionId}>
+          {isExecuting ? 'Execute on Ledger...' : 'Continue on Ledger'}
         </SafeButton>
       </Stack>
     </ReviewAndConfirmView>

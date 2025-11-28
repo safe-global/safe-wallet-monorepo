@@ -3,26 +3,29 @@ import { getTokenValue, H2, ScrollView, Text, View } from 'tamagui'
 import { Badge } from '@/src/components/Badge'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { SafeButton } from '@/src/components/SafeButton'
-
-import { router, useLocalSearchParams } from 'expo-router'
+import { router, useGlobalSearchParams } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AbsoluteLinearGradient } from '@/src/components/LinearGradient'
 import { useTheme } from '@/src/theme/hooks/useTheme'
 
-export function ExecuteProcessing({ handleHomePress }: { handleHomePress: () => void }) {
-  const { txId } = useLocalSearchParams<{ txId: string }>()
+export const ExecuteSuccess = () => {
+  const { txId } = useGlobalSearchParams<{ txId: string }>()
   const { bottom } = useSafeAreaInsets()
   const { isDark } = useTheme()
 
   const color = isDark ? getTokenValue('$color.backgroundLightDark') : getTokenValue('$color.backgroundLightLight')
 
-  const handleTxPress = () => {
+  const handleViewTransaction = () => {
     router.dismissTo({
       pathname: '/confirm-transaction',
       params: {
         txId,
       },
     })
+  }
+
+  const handleHomePress = () => {
+    router.dismissAll()
   }
 
   return (
@@ -51,7 +54,7 @@ export function ExecuteProcessing({ handleHomePress }: { handleHomePress: () => 
         </View>
 
         <View paddingHorizontal="$4" gap="$2">
-          <SafeButton onPress={handleTxPress}>View transaction</SafeButton>
+          <SafeButton onPress={handleViewTransaction}>View transaction</SafeButton>
           <SafeButton text onPress={handleHomePress}>
             Back to Home
           </SafeButton>

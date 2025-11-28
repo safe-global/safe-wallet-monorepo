@@ -7,7 +7,7 @@ import { EstimatedFeeValues } from '@/src/store/estimatedFeeSlice'
 import { useFeeParams, UseFeeParamsSettings } from '@/src/hooks/useFeeParams/useFeeParams'
 
 const useGasFee = (
-  txDetails: TransactionDetails,
+  txDetails: TransactionDetails | undefined,
   manualParams: EstimatedFeeValues | null,
   settings?: UseFeeParamsSettings,
 ) => {
