@@ -1,6 +1,6 @@
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import React from 'react'
-import { Stack, Text, Theme, View } from 'tamagui'
+import { Spinner, Stack, Text, Theme, View } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { SafeButton } from '@/src/components/SafeButton'
 import { safeShieldIcons } from '../../theme'
@@ -41,19 +41,28 @@ export function TransactionSimulation({
     }
   }
 
+  const getSimulationHeaderText = () => {
+    if (!isFinished) return 'Transaction simulation'
+    return severity === Severity.OK ? 'Simulation successful' : 'Simulation failed'
+  }
+
   return (
     <Theme name={`safeShieldAnalysisStatus_${themeSeverity}`}>
       <Stack gap="$3">
         <View flexDirection="row" alignItems="center" gap={'$3'}>
-          <SafeFontIcon
-            testID={`transaction-simulation-icon`}
-            name={iconName}
-            color={highlighted ? '$icon' : '$colorLight'}
-            size={16}
-          />
+          {isLoading ? (
+            <Spinner size="small" />
+          ) : (
+            <SafeFontIcon
+              testID={`transaction-simulation-icon`}
+              name={iconName}
+              color={highlighted ? '$icon' : '$colorLight'}
+              size={16}
+            />
+          )}
 
           <Text color="$color" fontSize="$4">
-            Transaction simulation
+            {getSimulationHeaderText()}
           </Text>
         </View>
 
@@ -63,7 +72,14 @@ export function TransactionSimulation({
           </Text>
         )}
 
-        <SafeButton size="$sm" secondary onPress={handleButtonPress} disabled={!canSimulate || isLoading}>
+        <SafeButton
+          iconAfter={isFinished ? <SafeFontIcon name="external-link" size={16} /> : undefined}
+          size="$sm"
+          secondary
+          gap="$1"
+          onPress={handleButtonPress}
+          disabled={!canSimulate || isLoading}
+        >
           {buttonText}
         </SafeButton>
       </Stack>

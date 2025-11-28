@@ -11,6 +11,7 @@ import { WidgetDisplay } from './WidgetDisplay'
 import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
 import { useRouter } from 'expo-router'
 import type { SafeTransaction } from '@safe-global/types-kit'
+import { isEmpty } from 'lodash'
 
 interface SafeShieldWidgetProps {
   recipient?: AsyncResult<RecipientAnalysisResults>
@@ -44,17 +45,20 @@ export function SafeShieldWidget({ recipient, contract, threat, safeTx, txId }: 
   const [contractData, contractError, contractLoading = false] = contract || []
   const [threatData, threatError, threatLoading = false] = threat || []
 
-  // Determine overall loading state - true if ANY is loading
-  const loading = recipientLoading || contractLoading || threatLoading
-
   // Determine overall error state - true if ALL have errors (and at least one exists)
   const hasRecipient = recipient !== undefined
   const hasContract = contract !== undefined
   const hasThreat = threat !== undefined
+
+  const allEmpty = isEmpty(recipientData) && isEmpty(contractData) && isEmpty(threatData)
+
   const allHaveErrors =
     (hasRecipient ? !!recipientError : true) &&
     (hasContract ? !!contractError : true) &&
     (hasThreat ? !!threatError : true)
+
+  // Determine overall loading state - true if ANY is loading
+  const loading = recipientLoading || contractLoading || threatLoading || (allEmpty && !allHaveErrors)
 
   // Get actual status from analysis
   const overallStatus = getOverallStatus(recipientData, contractData, threatData) ?? null
@@ -68,9 +72,8 @@ export function SafeShieldWidget({ recipient, contract, threat, safeTx, txId }: 
         contract={contract}
         threat={threat}
         loading={loading}
-        error={allHaveErrors}
+        error={allHaveErrors || (allEmpty && !loading)}
         safeTx={safeTx}
-        txId={txId}
       />
     </Stack>
   )

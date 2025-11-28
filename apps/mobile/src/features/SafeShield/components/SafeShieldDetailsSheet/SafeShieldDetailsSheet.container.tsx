@@ -14,6 +14,7 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import useSafeTx from '@/src/hooks/useSafeTx'
+import { Image, Text, View } from 'tamagui'
 
 export const SafeShieldDetailsSheetContainer = () => {
   const { recipient, contract, threat, txId } = useLocalSearchParams<{
@@ -58,6 +59,14 @@ export const SafeShieldDetailsSheetContainer = () => {
         safeTx={safeTx}
         txId={txId}
       />
+
+      <View flexDirection="row" width="100%" gap="$1" justifyContent="center" alignItems="center">
+        <Text fontSize="$2" color="$textSecondary">
+          Secured by
+        </Text>
+
+        <Image source={require('@/assets/images/safe-shield-logo.png')} width={77} objectFit="contain" />
+      </View>
     </SafeBottomSheet>
   )
 }

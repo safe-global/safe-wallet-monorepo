@@ -6,12 +6,12 @@ import type {
 } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shield/utils/getPrimaryAnalysisResult'
-import { useHighlightedSeverity } from '@safe-global/utils/features/safe-shield/hooks/useHighlightedSeverity'
 import isEmpty from 'lodash/isEmpty'
 
 import { AnalysisLabel } from '../../AnalysisLabel'
 import { TransactionSimulation } from '../../TransactionSimulation'
 import { useTransactionSimulation } from '../../TransactionSimulation/hooks/useTransactionSimulation'
+import { useSafeShieldSeverity } from '../../../hooks/useSafeShieldSeverity'
 import { WidgetDisplayWrapper } from './WidgetDisplayWrapper'
 import { ErrorWidget } from './ErrorWidget'
 import { LoadingWidget } from './LoadingWidget'
@@ -27,18 +27,9 @@ interface WidgetDisplayProps {
   loading?: boolean
   error?: boolean
   safeTx?: SafeTransaction
-  txId?: string
 }
 
-export function WidgetDisplay({ recipient, contract, threat, loading, error, safeTx, txId }: WidgetDisplayProps) {
-  if (loading) {
-    return <LoadingWidget />
-  }
-
-  if (error) {
-    return <ErrorWidget />
-  }
-
+export function WidgetDisplay({ recipient, contract, threat, loading, error, safeTx }: WidgetDisplayProps) {
   // Extract data from AsyncResults
   const [recipientData = {}] = recipient || []
   const [contractData = {}] = contract || []
@@ -71,17 +62,25 @@ export function WidgetDisplay({ recipient, contract, threat, loading, error, saf
   }, [hasError, isCallTraceError, isSuccess, simulationStatus.isFinished])
 
   // Get highlighted severity
-  const highlightedSeverity = useHighlightedSeverity(
-    recipientData,
-    contractData,
-    normalizedThreatData,
-    simulationSeverity === Severity.WARN,
-  )
+  const highlightedSeverity = useSafeShieldSeverity({
+    recipient,
+    contract,
+    threat,
+    hasSimulationError: hasError || isCallTraceError,
+  })
 
   // Check if analyses are empty
   const recipientEmpty = isEmpty(recipientData)
   const contractEmpty = isEmpty(contractData)
   const threatEmpty = isEmpty(normalizedThreatData)
+
+  if (loading) {
+    return <LoadingWidget />
+  }
+
+  if (error) {
+    return <ErrorWidget />
+  }
 
   return (
     <WidgetDisplayWrapper>
