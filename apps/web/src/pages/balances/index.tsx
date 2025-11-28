@@ -57,7 +57,7 @@ const Balances: NextPage = () => {
         ) : (
           <>
             {isNoFeeNovemberEnabled && !hideNoFeeNovemberBanner && (
-              <Box mb={2} sx={{ position: 'sticky', top: 0, zIndex: 1 }}>
+              <Box mb={2}>
                 <NoFeeNovemberBanner onDismiss={handleNoFeeNovemberDismiss} />
               </Box>
             )}
