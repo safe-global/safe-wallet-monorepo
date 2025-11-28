@@ -136,12 +136,12 @@ const MessageDialogError = ({ isOwner, submitError }: { isOwner: boolean; submit
     !wallet || !onboard
       ? 'No wallet is connected.'
       : !isOwner
-        ? "You are currently not a signer of this Safe Account and won't be able to confirm this message."
-        : submitError && isWalletRejection(submitError)
-          ? 'User rejected signing.'
-          : submitError
-            ? 'Error confirming the message. Please try again.'
-            : null
+      ? "You are currently not a signer of this Safe Account and won't be able to confirm this message."
+      : submitError && isWalletRejection(submitError)
+      ? 'User rejected signing.'
+      : submitError
+      ? 'Error confirming the message. Please try again.'
+      : null
 
   if (errorMessage) {
     return <ErrorMessage>{errorMessage}</ErrorMessage>
@@ -310,12 +310,13 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
     await dispatchPreparedSignature(safeMessage, safeMessageHash, () => setTxFlow(undefined), requestId)
   }
 
-  // Set message for redefine scan
+  // Set message for Safe Shield threat analysis
   useEffect(() => {
-    if (typeof message !== 'string') {
-      setContextSafeMessage(message)
+    console.log('SIGN::', isEip712, message, decodedMessage)
+    if (isEip712) {
+      setContextSafeMessage(decodedMessage)
     }
-  }, [message, setContextSafeMessage])
+  }, [decodedMessage, isEip712, setContextSafeMessage])
 
   return (
     <>
