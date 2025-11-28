@@ -87,7 +87,6 @@ const Dashboard = (): ReactElement => {
         <div className={css.leftCol}>
           <Overview />
 
-          {/* If the Safe has no assets AND in the Safe targeted list, show the Hypernative banner */}
           {noAssets ? (
             <Stack spacing={1}>
               {showHnBanner && <HnBannerForCarousel onDismiss={() => {}} />}

@@ -816,7 +816,7 @@ describe('useBannerVisibility', () => {
           showBanner: true,
           loading: false,
         })
-        // Verify that useIsOutreachSafe was called with the correct outreach ID
+
         expect(useIsOutreachSafeHook.useIsOutreachSafe).toHaveBeenCalledWith(HYPERNATIVE_OUTREACH_ID)
       })
 
