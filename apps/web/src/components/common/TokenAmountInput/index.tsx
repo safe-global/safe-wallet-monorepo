@@ -2,15 +2,18 @@ import NumberField from '@/components/common/NumberField'
 import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer'
 import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
 import { validateDecimalLength, validateLimitedAmount } from '@safe-global/utils/utils/validation'
-import { Button, Divider, FormControl, InputLabel, MenuItem, TextField } from '@mui/material'
+import { Button, Divider, FormControl, InputLabel, MenuItem, TextField, Typography } from '@mui/material'
 import classNames from 'classnames'
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { get, useFormContext } from 'react-hook-form'
 import type { FieldArrayPath, FieldValues } from 'react-hook-form'
 import css from './styles.module.css'
 import { MultiTokenTransferFields, type MultiTokenTransferParams } from '@/components/tx-flow/flows/TokenTransfer'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { useAppSelector } from '@/store'
+import { selectCurrency } from '@/store/settingsSlice'
+import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 
 export enum TokenAmountFields {
   tokenAddress = 'tokenAddress',
@@ -54,6 +57,7 @@ const TokenAmountInput = ({
   const amountField = getFieldName(TokenAmountFields.amount, fieldArray)
 
   const tokenAddress = watch(tokenAddressField)
+  const amount = watch(amountField)
 
   const isAmountError = !!get(errors, tokenAddressField) || !!get(errors, amountField)
 
@@ -102,6 +106,20 @@ const TokenAmountInput = ({
     trigger(deps)
   }, [resetField, amountField, trigger, deps, defaultValues, fieldArray])
 
+  const currency = useAppSelector(selectCurrency)
+
+  const formattedFiatValue = useMemo(() => {
+    if (!selectedToken?.fiatConversion || !amount) return null
+
+    const fiatConversion = parseFloat(selectedToken.fiatConversion)
+    const amountNum = parseFloat(amount)
+
+    if (isNaN(fiatConversion) || isNaN(amountNum) || fiatConversion === 0) return null
+
+    const fiatValue = (amountNum * fiatConversion).toString()
+    return formatCurrency(fiatValue, currency)
+  }, [selectedToken?.fiatConversion, amount, currency])
+
   return (
     <FormControl
       data-testid="token-amount-section"
@@ -114,33 +132,44 @@ const TokenAmountInput = ({
           'Amount'}
       </InputLabel>
       <div className={css.inputs}>
-        <NumberField
-          data-testid="token-amount-field"
-          variant="standard"
-          InputProps={{
-            disableUnderline: true,
-            endAdornment: maxAmount !== undefined && (
-              <Button data-testid="max-btn" className={css.max} onClick={onMaxAmountClick}>
-                Max
-              </Button>
-            ),
-          }}
-          className={css.amount}
-          required
-          placeholder="0"
-          {...register(amountField, {
-            required: true,
-            setValueAs: (value: string): string => {
-              if (typeof value !== 'string') {
-                return value
-              }
+        <div className={css.amountContainer}>
+          <NumberField
+            data-testid="token-amount-field"
+            variant="standard"
+            InputProps={{
+              disableUnderline: true,
+              endAdornment: (
+                <div className={css.endAdornment}>
+                  {formattedFiatValue && (
+                    <Typography variant="caption" color="text.secondary" className={css.fiatValue}>
+                      {formattedFiatValue}
+                    </Typography>
+                  )}
+                  {maxAmount !== undefined && (
+                    <Button data-testid="max-btn" className={css.max} onClick={onMaxAmountClick}>
+                      Max
+                    </Button>
+                  )}
+                </div>
+              ),
+            }}
+            className={css.amount}
+            required
+            placeholder="0"
+            {...register(amountField, {
+              required: true,
+              setValueAs: (value: string): string => {
+                if (typeof value !== 'string') {
+                  return value
+                }
 
-              return value.replace(/,/g, '.')
-            },
-            validate: validate ?? validateAmount,
-            deps,
-          })}
-        />
+                return value.replace(/,/g, '.')
+              },
+              validate: validate ?? validateAmount,
+              deps,
+            })}
+          />
+        </div>
         <Divider orientation="vertical" flexItem />
         <TextField
           data-testid="token-balance"
