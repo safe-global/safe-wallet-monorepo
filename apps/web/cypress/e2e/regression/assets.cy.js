@@ -21,7 +21,7 @@ describe('Assets tests', () => {
   it('Verify that "Hide token" button is present and opens the "Hide tokens menu"', () => {
     assets.toggleShowAllTokens(true)
     assets.toggleHideDust(false)
-    assets.openHideTokenMenu()
+    assets.openHiddenTokensFromManageMenu()
     assets.verifyEachRowHasCheckbox()
   })
 
