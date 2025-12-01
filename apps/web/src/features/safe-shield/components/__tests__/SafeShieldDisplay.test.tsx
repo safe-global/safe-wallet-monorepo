@@ -30,17 +30,10 @@ describe('SafeShieldDisplay', () => {
   })
 
   describe('Basic Rendering', () => {
-    it('should render the component with all main elements', () => {
-      render(<SafeShieldDisplay />)
-
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
-    })
-
     it('should render without any props', () => {
       const { container } = render(<SafeShieldDisplay />)
 
       expect(container.querySelector('.MuiCard-root')).toBeInTheDocument()
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
     })
 
     it('should have correct layout structure', () => {
@@ -175,7 +168,6 @@ describe('SafeShieldDisplay', () => {
       render(<SafeShieldDisplay recipient={mockRecipient} contract={mockContract} threat={mockThreat} />)
 
       expect(screen.getByText('Checks passed')).toBeInTheDocument()
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
     })
   })
 
@@ -188,34 +180,6 @@ describe('SafeShieldDisplay', () => {
       // Header shows "Risk detected" from critical recipient, threat content is displayed
       expect(screen.getByText('Risk detected')).toBeInTheDocument()
       expect(screen.getByText('Malicious threat detected')).toBeInTheDocument()
-    })
-  })
-
-  describe('Footer', () => {
-    it('should always render the "Secured by" footer', () => {
-      render(<SafeShieldDisplay />)
-
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
-    })
-
-    it('should render footer even with errors', () => {
-      const error = new Error('Analysis failed')
-      const errorRecipient: [undefined, Error, false] = [undefined, error, false]
-
-      render(<SafeShieldDisplay recipient={errorRecipient} />)
-
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
-    })
-
-    it('should render footer during loading', () => {
-      const loadingRecipient = RecipientAnalysisBuilder.knownRecipient(mockRecipientAddress).build()
-      if (loadingRecipient) {
-        loadingRecipient[2] = true
-      }
-
-      render(<SafeShieldDisplay recipient={loadingRecipient} />)
-
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
     })
   })
 })
