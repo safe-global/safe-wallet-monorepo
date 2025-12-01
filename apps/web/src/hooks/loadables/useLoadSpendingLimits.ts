@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '../useSafeInfo'
 import { Errors, logError } from '@/services/exceptions'
@@ -13,11 +13,9 @@ import { type AllowanceModule } from '@safe-global/utils/types/contracts'
 import { getERC20TokenInfoOnChain } from '@/utils/tokens'
 
 import { sameString } from '@safe-global/protocol-kit/dist/src/utils'
-import { useAppSelector } from '@/store'
-import { selectTokens } from '@/store/balancesSlice'
-import isEqual from 'lodash/isEqual'
 import { multicall } from '@safe-global/utils/utils/multicall'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import useBalances from '../useBalances'
 
 const DEFAULT_TOKEN_INFO = {
   decimals: 18,
@@ -134,7 +132,11 @@ export const useLoadSpendingLimits = (): AsyncResult<SpendingLimitState[]> => {
   const { safeAddress, safe, safeLoaded } = useSafeInfo()
   const chainId = useChainId()
   const provider = useWeb3ReadOnly()
-  const tokenInfoFromBalances = useAppSelector(selectTokens, isEqual)
+  const { balances } = useBalances()
+  const tokenInfoFromBalances = useMemo(
+    () => balances?.items.map(({ tokenInfo }) => tokenInfo) ?? [],
+    [balances?.items],
+  )
 
   const [data, error, loading] = useAsync<SpendingLimitState[] | undefined>(
     () => {

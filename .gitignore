@@ -7,6 +7,8 @@
 # testing
 /coverage
 /packages/utils/coverage
+/reports
+report.json
 
 # generated types
 /packages/utils/src/types/contracts
@@ -65,6 +67,9 @@ yarn-error.log*
 yalc.lock
 
 certificates
+
+# storybook
+**/storybook-static/
 *storybook.log
 
 # os

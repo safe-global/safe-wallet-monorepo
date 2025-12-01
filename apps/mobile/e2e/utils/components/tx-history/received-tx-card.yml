@@ -1,0 +1,26 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
+# ===========================================
+# Received Transaction Card
+# ===========================================
+- assertVisible:
+    text: 'Received'
+
+- extendedWaitUntil:
+    visible:
+      text: '.*QATRUSTED.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+- tapOn:
+    text: '.*QATRUSTED.*'
+
+- runFlow:
+    file: ./received-tx.yml
+
+- tapOn:
+    id: 'go-back'

@@ -21,7 +21,7 @@ const TokenIcon = ({
   chainId?: string
 }): ReactElement => {
   const src = useMemo(() => {
-    return upgradeCoinGeckoThumbToQuality(logoUri, 'small')
+    return upgradeCoinGeckoThumbToQuality(logoUri || undefined, 'small')
   }, [logoUri])
 
   return (

@@ -1,0 +1,22 @@
+appId: ${APP_ID}
+tags:
+  - transactions
+  - pending
+  - cow-protocol
+---
+- runFlow:
+    file: ../../../utils/setup/app-start.yml
+
+# Direct navigation to Pending Tx Safe 2
+- tapOn:
+    id: 'e2ePendingTxsSafe2'
+
+# Verify we're on the pending transactions screen
+- assertVisible:
+    id: 'pending-tx-list'
+
+# Test swap order transaction
+- runFlow:
+    file: ../../../utils/components/pending-tx/swap-order-tx-card.yml
+    env:
+      ORDER_STATUS: 'Expired'

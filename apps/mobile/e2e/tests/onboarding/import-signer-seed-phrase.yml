@@ -1,0 +1,167 @@
+appId: ${APP_ID}
+tags:
+  - onboarding
+  - import-signer
+  - seed-phrase
+---
+# Test importing a signer using a seed phrase with validation and error handling
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+# Use e2eSeedPhraseImportAccount shortcut
+# This sets up the Safe account 0x4c425AceFf91aa4398183FE82e210C96dD9E92F8
+# which has the default address (0xaE03f216A54857b995d79468882AfB07251B1154) as an owner
+- tapOn:
+    id: 'e2eSeedPhraseImportAccount'
+- assertVisible:
+    id: 'home-tab'
+- assertVisible: '.*4c42...92F8.*'
+
+# Navigate to Settings tab
+- tapOn: 'Account, tab, 3 of 3'
+
+# Navigate to Signers
+- tapOn:
+    id: 'settings-signers-list-item'
+- assertVisible: 'Signers'
+- assertNotVisible: 'My signers'
+
+- assertVisible:
+    id: 'signers-screen'
+
+# Tap "Add Signer" button (Import signer button)
+- tapOn:
+    id: 'import-signer-button'
+- assertVisible: 'Import a signer'
+- tapOn:
+    id: 'seed'
+
+# Handle biometrics prompt if it appears
+- runFlow:
+    when:
+      visible: 'Enable biometrics'
+    commands:
+      - tapOn: 'Enable biometrics'
+
+- assertVisible: 'Enter your private key or seed phrase below. Make sure to do so in a safe and private place.'
+
+# ============================================
+# Error Case 1 - Invalid Word Count (11 words)
+# ============================================
+- tapOn: 'Paste here or type...'
+- inputText: 'multiply warm aspect border juice tape helmet ramp more pig dad'
+# Verify error message appears
+- assertVisible: Invalid private key or seed phrase.
+
+# ============================================
+# Error Case 2 - Invalid Words (12 words with invalid BIP39 word)
+# ============================================
+# Clear input
+- eraseText: 80
+- inputText: 'multiply warm aspect border juice tape helmet ramp more pig dad invalidword'
+# Verify error message appears (may appear immediately or after validation)
+- extendedWaitUntil:
+    visible:
+      text: Invalid private key or seed phrase.
+    timeout: 3000
+
+# ============================================
+# Success Case - Valid Seed Phrase
+# ============================================
+# Clear input and enter valid seed phrase
+- eraseText: 80
+# dummy seed phrase created specially for this test - no funds
+- inputText: 'multiply warm aspect border juice tape helmet ramp more pig dad program'
+
+# Verify no error messages
+- assertNotVisible: 'Invalid private key or seed phrase'
+
+# Verify "Import signer" button is enabled
+- assertVisible:
+    id: 'import-signer-button'
+
+# Tap Continue to proceed to address selection
+- tapOn:
+    id: 'import-signer-button'
+
+# ============================================
+# Address Selection Screen
+# ============================================
+# Verify address selection screen appears
+- assertVisible: 'Select address to import'
+- assertVisible: 'Select one or more addresses derived from your seed phrase. Make sure they are signers of the selected Safe Account.'
+
+# Verify "Default address:" section appears
+- assertVisible: 'Default address:'
+
+# Verify default address (index 0) is displayed and selected
+# Default address: 0xaE03f216A54857b995d79468882AfB07251B1154
+- assertVisible:
+    id: 'address-item-0'
+- assertVisible: '.*aE03.*1154.*'
+
+# Verify derivation path for default address
+- assertVisible: ".*m/44'/60'/0'/0/0.*"
+
+# Verify "Other addresses:" section appears (initially empty)
+- assertNotVisible: 'Other addresses:'
+
+# Verify "Load More" button is visible
+- assertVisible:
+    id: 'load-more-button'
+
+# ============================================
+# Load More Addresses
+# ============================================
+# Tap "Load More" to load additional addresses
+- tapOn:
+    id: 'load-more-button'
+
+# Wait for addresses to load
+- extendedWaitUntil:
+    visible:
+      text: 'Other addresses:'
+    timeout: 5000
+
+# Verify "Other addresses:" section appears
+- assertVisible: 'Other addresses:'
+
+# Verify first address after Load More (index 1) is displayed
+# First address after Load More: 0x9A4F1Bc0729b54D8cDd6e3DE6559a3B4bb313d21
+- assertVisible:
+    id: 'address-item-1'
+- assertVisible: '.*9A4F.*3d21.*'
+
+# Verify derivation path for first "other" address
+- assertVisible: ".*m/44'/60'/0'/0/1.*"
+
+# ============================================
+# Import Default Address
+# ============================================
+# Default address should already be selected (index 0)
+# Verify Import button is enabled
+- assertVisible:
+    id: 'import-address-button'
+
+# Tap Import button
+- tapOn:
+    id: 'import-address-button'
+
+# Wait for import to complete and navigate to success screen
+- extendedWaitUntil:
+    visible:
+      id: 'import-success'
+    timeout: 10000
+
+# Verify success screen appears
+- assertVisible:
+    id: 'import-success'
+
+# Continue from success screen
+- tapOn:
+    id: 'import-success-continue'
+
+# Verify we're back on signers screen
+- assertVisible:
+    id: 'signers-screen'
+- assertVisible: 'My signers'

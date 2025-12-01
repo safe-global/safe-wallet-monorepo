@@ -10,10 +10,54 @@
   gap: var(--space-2);
   min-height: 50px;
   position: relative;
+  overflow: hidden;
 }
 
 .container:hover {
   background-color: var(--color-background-main);
+}
+
+.valueContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  flex: 1;
+  /* 80px = width of action buttons container (up to 3 buttons × 28px + gaps)
+     This slides content right to hide buttons, revealing them on hover */
+  transform: translateX(80px);
+  transition: transform 0.2s ease-out;
+}
+
+.container:hover .valueContainer {
+  transform: translateX(0);
+}
+
+.valueContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.assetButtons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.iconButton {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 6px;
+  background-color: var(--color-background-paper);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .bar {
@@ -33,27 +77,6 @@
   border-radius: 4px;
   height: 100%;
   background: linear-gradient(225deg, #5fddff 12.5%, #12ff80 88.07%);
-}
-
-.assetButtons {
-  position: absolute;
-  right: 12px;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s;
-  background-color: var(--color-background-main);
-  border-radius: var(--space-1);
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  width: calc(100% - 200px);
-}
-
-.container:hover .assetButtons {
-  opacity: 1;
-  visibility: visible;
 }
 
 @media (max-width: 600px) {

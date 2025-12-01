@@ -35,7 +35,8 @@ class WalletConnectWallet {
     const core = new Core({
       projectId: WC_PROJECT_ID,
       logger: IS_PRODUCTION ? undefined : 'debug',
-      customStoragePrefix: LS_NAMESPACE,
+      // This isolation ensures wallet connections work independently from dApp connections.
+      customStoragePrefix: LS_NAMESPACE + 'wc_dapp_',
     })
 
     const web3wallet = await WalletKit.init({

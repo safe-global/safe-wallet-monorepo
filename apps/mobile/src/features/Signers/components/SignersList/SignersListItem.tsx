@@ -87,6 +87,7 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
           borderTopLeftRadius={index === 0 ? '$4' : undefined}
           borderBottomRightRadius={isLastItem ? '$4' : undefined}
           borderBottomLeftRadius={isLastItem ? '$4' : undefined}
+          collapsable={false}
         >
           <SignersCard
             name={contact ? (contact.name as string) : (item.name as string)}
@@ -114,6 +115,7 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
             paddingRight: 16,
             paddingLeft: 16,
           }}
+          testID="signer-menu"
         >
           <SafeFontIcon name="options-horizontal" />
         </MenuView>

@@ -8,7 +8,6 @@ export default function ExecuteTransactionLayout() {
         ...getDefaultScreenOptions(navigation.goBack),
       })}
     >
-      <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="ledger-connect" options={{ headerShown: true, title: '', headerLeft: () => null }} />
       <Stack.Screen name="ledger-pairing" options={{ headerShown: false, title: '' }} />
       <Stack.Screen name="ledger-review" options={{ headerShown: true, title: '' }} />

@@ -1,4 +1,4 @@
-import { useClock } from '../../../hooks/useClock'
+import { useClock } from './useClock'
 import { selectDelayModifierByTxHash } from '@/features/recovery/services/selectors'
 import recoveryStore from '@/features/recovery/components/RecoveryContext'
 import { sameAddress } from '@safe-global/utils/utils/addresses'

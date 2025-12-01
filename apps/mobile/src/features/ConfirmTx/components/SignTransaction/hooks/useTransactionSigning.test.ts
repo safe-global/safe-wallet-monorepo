@@ -3,15 +3,20 @@ import { useTransactionSigning } from './useTransactionSigning'
 import { getPrivateKey } from '@/src/hooks/useSign/useSign'
 import { signTx } from '@/src/services/tx/tx-sender/sign'
 import { useTransactionsAddConfirmationV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { useGuard } from '@/src/context/GuardProvider'
 import logger from '@/src/utils/logger'
 import type { RootState } from '@/src/tests/test-utils'
 
 // Mock only external dependencies that can't be mocked through Redux state
 jest.mock('@/src/hooks/useSign/useSign')
 jest.mock('@/src/services/tx/tx-sender/sign')
-jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions')
-jest.mock('@/src/context/GuardProvider')
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
+  useTransactionsAddConfirmationV1Mutation: jest.fn(),
+  cgwApi: {
+    util: {
+      invalidateTags: jest.fn(() => ({ type: 'cgwApi/invalidateTags' })),
+    },
+  },
+}))
 jest.mock('@/src/utils/logger')
 jest.mock('@/src/services/ledger/ledger-safe-signing.service')
 
@@ -20,13 +25,11 @@ const mockSignTx = signTx as jest.MockedFunction<typeof signTx>
 const mockUseTransactionsAddConfirmationV1Mutation = useTransactionsAddConfirmationV1Mutation as jest.MockedFunction<
   typeof useTransactionsAddConfirmationV1Mutation
 >
-const mockUseGuard = useGuard as jest.MockedFunction<typeof useGuard>
 
-const mockAddConfirmation = jest.fn()
-const mockResetGuard = jest.fn()
-const mockGetGuard = jest.fn()
-const mockSetGuard = jest.fn()
-const mockResetAllGuards = jest.fn()
+const mockAddConfirmation = jest.fn(() => ({
+  unwrap: jest.fn().mockResolvedValue({ data: 'success' }),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+})) as any // RTK Query mutation mock
 
 const mockSignedTx = {
   safeTransactionHash: '0xabcd',
@@ -135,13 +138,6 @@ describe('useTransactionSigning', () => {
   beforeEach(() => {
     jest.clearAllMocks()
 
-    mockUseGuard.mockReturnValue({
-      resetGuard: mockResetGuard,
-      getGuard: mockGetGuard,
-      setGuard: mockSetGuard,
-      resetAllGuards: mockResetAllGuards,
-      guards: {},
-    })
     mockUseTransactionsAddConfirmationV1Mutation.mockReturnValue([mockAddConfirmation, mockMutationResult])
   })
 
@@ -150,7 +146,6 @@ describe('useTransactionSigning', () => {
       const { result } = renderHook(() => useTransactionSigning(defaultProps), createMockState())
 
       expect(result.current.status).toBe('idle')
-      expect(result.current.hasTriggeredAutoSign).toBe(false)
     })
 
     it('should provide all required methods and properties', () => {
@@ -172,7 +167,9 @@ describe('useTransactionSigning', () => {
     it('should successfully sign transaction', async () => {
       mockGetPrivateKey.mockResolvedValue('private-key')
       mockSignTx.mockResolvedValue(mockSignedTx)
-      mockAddConfirmation.mockResolvedValue({ data: 'success' })
+      mockAddConfirmation.mockReturnValue({
+        unwrap: jest.fn().mockResolvedValue({ data: 'success' }),
+      })
 
       const initialState = createMockState()
       const { result } = renderHook(() => useTransactionSigning(defaultProps), initialState)
@@ -202,7 +199,6 @@ describe('useTransactionSigning', () => {
           signature: '0xsignature',
         },
       })
-      expect(mockResetGuard).toHaveBeenCalledWith('signing')
     })
 
     it('should handle missing private key', async () => {
@@ -211,16 +207,20 @@ describe('useTransactionSigning', () => {
       const { result } = renderHook(() => useTransactionSigning(defaultProps), createMockState())
 
       await act(async () => {
-        await result.current.executeSign()
+        try {
+          await result.current.executeSign()
+        } catch (err) {
+          expect((err as Error).message).toBe('Failed to retrieve private key')
+        }
       })
 
       await waitFor(() => {
         expect(result.current.status).toBe('error')
       })
 
+      expect(logger.error).toHaveBeenCalledWith('Error signing transaction:', expect.any(Error))
       expect(mockSignTx).not.toHaveBeenCalled()
       expect(mockAddConfirmation).not.toHaveBeenCalled()
-      expect(mockResetGuard).not.toHaveBeenCalled()
     })
 
     it('should handle signing errors', async () => {
@@ -231,7 +231,11 @@ describe('useTransactionSigning', () => {
       const { result } = renderHook(() => useTransactionSigning(defaultProps), createMockState())
 
       await act(async () => {
-        await result.current.executeSign()
+        try {
+          await result.current.executeSign()
+        } catch (err) {
+          expect(err).toBe(signingError)
+        }
       })
 
       await waitFor(() => {
@@ -240,7 +244,6 @@ describe('useTransactionSigning', () => {
 
       expect(logger.error).toHaveBeenCalledWith('Error signing transaction:', signingError)
       expect(mockAddConfirmation).not.toHaveBeenCalled()
-      expect(mockResetGuard).not.toHaveBeenCalled()
     })
 
     it('should handle API confirmation errors', async () => {
@@ -252,7 +255,11 @@ describe('useTransactionSigning', () => {
       const { result } = renderHook(() => useTransactionSigning(defaultProps), createMockState())
 
       await act(async () => {
-        await result.current.executeSign()
+        try {
+          await result.current.executeSign()
+        } catch (err) {
+          expect(err).toBe(apiError)
+        }
       })
 
       await waitFor(() => {
@@ -260,31 +267,28 @@ describe('useTransactionSigning', () => {
       })
 
       expect(logger.error).toHaveBeenCalledWith('Error signing transaction:', apiError)
-      expect(mockResetGuard).not.toHaveBeenCalled()
     })
 
-    it('should prevent multiple executions', async () => {
+    it('should allow multiple executions when called multiple times', async () => {
       mockGetPrivateKey.mockResolvedValue('private-key')
       mockSignTx.mockResolvedValue(mockSignedTx)
       mockAddConfirmation.mockResolvedValue({ data: 'success' })
 
       const { result } = renderHook(() => useTransactionSigning(defaultProps), createMockState())
 
-      // Call executeSign multiple times
+      // Call executeSign multiple times - each call is independent
       await act(async () => {
-        result.current.executeSign()
-        result.current.executeSign()
-        result.current.executeSign()
+        await Promise.all([result.current.executeSign(), result.current.executeSign(), result.current.executeSign()])
       })
 
       await waitFor(() => {
         expect(result.current.status).toBe('success')
       })
 
-      // Should only call once
-      expect(mockGetPrivateKey).toHaveBeenCalledTimes(1)
-      expect(mockSignTx).toHaveBeenCalledTimes(1)
-      expect(mockAddConfirmation).toHaveBeenCalledTimes(1)
+      // Each call executes independently
+      expect(mockGetPrivateKey).toHaveBeenCalledTimes(3)
+      expect(mockSignTx).toHaveBeenCalledTimes(3)
+      expect(mockAddConfirmation).toHaveBeenCalledTimes(3)
     })
 
     it('should handle Ledger signing', async () => {
@@ -318,7 +322,9 @@ describe('useTransactionSigning', () => {
     it('should reset state and re-execute signing', async () => {
       mockGetPrivateKey.mockResolvedValue('private-key')
       mockSignTx.mockResolvedValue(mockSignedTx)
-      mockAddConfirmation.mockResolvedValue({ data: 'success' })
+      mockAddConfirmation.mockReturnValue({
+        unwrap: jest.fn().mockResolvedValue({ data: 'success' }),
+      })
 
       const { result } = renderHook(() => useTransactionSigning(defaultProps), createMockState())
 
@@ -348,7 +354,9 @@ describe('useTransactionSigning', () => {
     it('should reset to idle state', async () => {
       mockGetPrivateKey.mockResolvedValue('private-key')
       mockSignTx.mockResolvedValue(mockSignedTx)
-      mockAddConfirmation.mockResolvedValue({ data: 'success' })
+      mockAddConfirmation.mockReturnValue({
+        unwrap: jest.fn().mockResolvedValue({ data: 'success' }),
+      })
 
       const { result } = renderHook(() => useTransactionSigning(defaultProps), createMockState())
 
@@ -365,7 +373,6 @@ describe('useTransactionSigning', () => {
 
       await waitFor(() => {
         expect(result.current.status).toBe('idle')
-        expect(result.current.hasTriggeredAutoSign).toBe(false)
       })
     })
   })

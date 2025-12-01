@@ -24,6 +24,7 @@ import CustomSafeAppsPage from '@/pages/apps/custom'
 import * as safeAppsService from '@/services/safe-apps/manifest'
 import { LS_NAMESPACE } from '@/config/constants'
 import * as chainHooks from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
 
 jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
@@ -34,6 +35,16 @@ describe('AppsPage', () => {
   beforeEach(() => {
     jest.restoreAllMocks()
     window.localStorage.clear()
+
+    const mockChain = chainBuilder().with({ chainId: '137', shortName: 'matic', chainName: 'Polygon' }).build()
+
+    jest.spyOn(chainHooks, 'default').mockImplementation(() => ({
+      configs: [mockChain],
+      error: undefined,
+      loading: false,
+    }))
+    jest.spyOn(chainHooks, 'useChain').mockImplementation(() => mockChain)
+    jest.spyOn(chainHooks, 'useCurrentChain').mockImplementation(() => mockChain)
     jest.spyOn(chainHooks, 'useHasFeature').mockImplementation(() => true)
   })
 
@@ -207,7 +218,7 @@ describe('AppsPage', () => {
 
       // shows Add custom app modal
       await waitFor(() => {
-        expect(screen.getByRole('heading', { level: 2, name: 'Add custom Safe App' })).toBeInTheDocument()
+        expect(screen.getByRole('heading', { level: 2, name: /Add custom Safe App/i })).toBeInTheDocument()
 
         // shows custom safe App App Url input
         const customSafeAppURLInput = screen.getByLabelText(/Safe App URL/)
@@ -301,7 +312,12 @@ describe('AppsPage', () => {
       await waitFor(() => expect(screen.getByLabelText(/Safe App URL/)).toBeInTheDocument(), { timeout: 3000 })
       const appURLInput = screen.getByLabelText(/Safe App URL/)
       fireEvent.change(appURLInput, { target: { value: INVALID_SAFE_APP_URL } })
-      await screen.findByText(/the app doesn't support Safe App functionality/i)
+      await waitFor(
+        () => {
+          expect(screen.getByText(/the app doesn't support Safe App functionality/i)).toBeInTheDocument()
+        },
+        { timeout: 5000 },
+      )
     })
 
     it('Requires risk acknowledgment checkbox to add the app', async () => {

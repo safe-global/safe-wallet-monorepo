@@ -6,7 +6,7 @@ import { isSwapOrderTxInfo, isTransactionListItem } from '@/utils/transaction-gu
 import { txHistorySlice } from '@/store/txHistorySlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { selectSafeInfo } from '@/store/safeInfoSlice'
-import { selectChainById } from '@/store/chainsSlice'
+import { chainsAdapter, apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 import { getTxLink } from '@/utils/tx-link'
 
 type AllStatuses = OrderStatuses | 'created'
@@ -86,7 +86,13 @@ export const swapOrderStatusListener = (listenerMiddleware: typeof listenerMiddl
 
       let link = undefined
       if (swapOrder.txId && safeInfo.data?.chainId && safeInfo.data?.address) {
-        const chainInfo = selectChainById(listenerApi.getState(), safeInfo.data?.chainId)
+        const state = listenerApi.getState()
+        const chainsCache = apiSliceWithChainsConfig.endpoints.getChainsConfig.select()(state)
+
+        // Only create link if chains are already loaded (don't trigger fetch in listener)
+        const chainInfo = chainsCache.data
+          ? chainsAdapter.getSelectors().selectById(chainsCache.data, safeInfo.data?.chainId)
+          : undefined
         if (chainInfo !== undefined) {
           link = getTxLink(swapOrder.txId, chainInfo, safeInfo.data?.address.value)
         }

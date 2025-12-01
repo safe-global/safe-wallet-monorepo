@@ -186,6 +186,7 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact }: EnhancedTabl
                     {Object.entries(row.cells).map(([key, cell]) => (
                       <TableCell
                         key={key}
+                        data-testid={`table-cell-${key}`}
                         className={classNames({
                           [css.collapsedCell]: row.collapsed,
                         })}

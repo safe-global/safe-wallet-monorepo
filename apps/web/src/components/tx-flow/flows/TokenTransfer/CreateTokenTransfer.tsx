@@ -1,8 +1,8 @@
 import { useVisibleTokens } from '@/components/tx-flow/flows/TokenTransfer/utils'
 import { type ReactElement, useContext, useEffect, useMemo, useState } from 'react'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form'
 
-import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
 import {
   Alert,
   AlertTitle,
@@ -45,6 +45,8 @@ import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import NoFeeNovemberTransactionCard from '@/features/no-fee-november/components/NoFeeNovemberTransactionCard'
 import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
 import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
+import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
+import uniq from 'lodash/uniq'
 
 export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balance: string }): ReactElement => (
   <Grid
@@ -105,8 +107,8 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
       [MultiTransfersFields.type]: disableSpendingLimit
         ? TokenTransferType.multiSig
         : canCreateSpendingLimitTx && !canCreateStandardTx
-        ? TokenTransferType.spendingLimit
-        : data?.type,
+          ? TokenTransferType.spendingLimit
+          : data?.type,
       recipients:
         data?.recipients.map(({ tokenAddress, ...rest }) => ({
           ...rest,
@@ -169,6 +171,14 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
   )
 
   const canBatch = isMassPayoutsEnabled && type === TokenTransferType.multiSig
+
+  const recipientsWatched = useWatch({ control, name: MultiTokenTransferFields.recipients })
+  const recipientAddresses = useMemo(
+    () => uniq(recipientsWatched.map((recipient) => recipient.recipient).filter(Boolean)),
+    [recipientsWatched],
+  )
+
+  useSafeShieldForRecipients(recipientAddresses)
 
   return (
     <TxCard>

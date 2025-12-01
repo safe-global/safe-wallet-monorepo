@@ -61,7 +61,7 @@ const toggleUntrustedBtn = '[data-testid="toggle-untrusted"]'
 const simulateTxBtn = '[data-testid="simulate-btn"]'
 const simulateSuccess = '[data-testid="simulation-success-msg"]'
 const signBtn = '[data-testid="combo-submit-sign"]'
-const continueSignBtn = '[data-testid="continue-sign-btn"]'
+export const continueSignBtn = '[data-testid="continue-sign-btn"]'
 export const altImgDai = 'img[alt="DAI"]'
 export const altImgCow = 'img[alt="COW"]'
 export const altImgWeth = 'img[alt="WETH"]'
@@ -71,8 +71,6 @@ export const altImgSwaps = 'svg[alt="Swap order"]'
 export const altImgLimitOrder = 'svg[alt="Limit order"]'
 export const altImgTwapOrder = 'svg[alt="Twap Order"]'
 export const txShareBlock = '[data-testid="share-block"]'
-export const txShareBlockHeader = '[data-testid="share-block-header"]'
-export const txShareBlockDetails = '[data-testid="share-block-details"]'
 const copyLinkBtn = '[data-testid="copy-link-btn"]'
 export const noteTextField = '[data-testid="tx-note-textfield"]'
 const noteAlert = "[data-testid='tx-note-alert']"
@@ -139,7 +137,7 @@ export const settingsStr = 'Settings'
 export const assetsStr = 'Assets'
 export const topAssetsStr = 'Top assets'
 export const getStartedStr = 'Get started'
-export const txNoteWarningMessage = 'Notes are publicly visible.Do not share any private or sensitive details'
+export const txNoteWarningMessage = 'Notes are publicly visible. Do not share any private or sensitive details.'
 export const recordedTxNote = 'Tx note one'
 
 const comboButton = '[data-testid="combo-submit-dropdown"]'
@@ -301,11 +299,6 @@ export function verifyCopiedURL() {
 
     cy.get('@clipboardWrite').should('have.been.calledWith', currentUrl)
   })
-}
-
-export function expandTxShareBlock() {
-  cy.get(txShareBlockHeader).click()
-  cy.get(txShareBlockDetails).should('be.visible')
 }
 
 export function checkCopyBtnExistsInShareblock() {

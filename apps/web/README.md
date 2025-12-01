@@ -65,7 +65,6 @@ Here's the list of all the environment variables:
 | `NEXT_PUBLIC_SAFE_APPS_GA_TRACKING_ID`       | Safe Apps GA property id                                                                                                                                                                      |
 | `NEXT_PUBLIC_SENTRY_DSN`                     | [Sentry](https://sentry.io) id for tracking runtime errors                                                                                                                                    |
 | `NEXT_PUBLIC_IS_OFFICIAL_HOST`               | Whether it's the official distribution of the app, or a fork; has legal implications. Set to true only if you also update the legal pages like Imprint and Terms of use                       |
-| `NEXT_PUBLIC_BLOCKAID_CLIENT_ID`             | Blockaid client id                                                                                                                                                                            |
 | `NEXT_PUBLIC_FIREBASE_OPTIONS_PRODUCTION`    | Firebase Cloud Messaging (FCM) `initializeApp` options on production                                                                                                                          |
 | `NEXT_PUBLIC_FIREBASE_VAPID_KEY_PRODUCTION`  | FCM vapid key on production                                                                                                                                                                   |
 | `NEXT_PUBLIC_FIREBASE_OPTIONS_STAGING`       | FCM `initializeApp` options on staging                                                                                                                                                        |
@@ -79,15 +78,33 @@ If you don't provide some of the variables, the corresponding features will be d
 
 From the root of the monorepo:
 
+**Default (fastest):**
+
+```bash
+yarn workspace @safe-global/web dev
+```
+
+Uses [Rspack](https://rspack.dev) for faster development builds and hot reload. Optimized for speed with simplified MDX processing.
+
+**Full features (Webpack + Experimental optimizations + PWA):**
+
+```bash
+yarn workspace @safe-global/web dev:full
+```
+
+Uses webpack with:
+
+- Full MDX support (with remark plugins)
+- Experimental package import optimizations (`optimizePackageImports`)
+- PWA enabled in development mode
+
+**Alternative commands:**
+
 ```bash
 yarn workspace @safe-global/web start
 ```
 
-Or directly from the `apps/web` directory:
-
-```bash
-yarn start
-```
+Standard Next.js dev server (webpack, no optimizations)
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the app.
 

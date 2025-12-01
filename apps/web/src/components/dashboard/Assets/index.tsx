@@ -66,7 +66,7 @@ const AssetRow = ({
   return (
     <Box className={css.container} key={item.tokenInfo.address}>
       <Stack direction="row" gap={1.5} alignItems="center">
-        <TokenIcon tokenSymbol={item.tokenInfo.symbol} logoUri={item.tokenInfo.logoUri ?? undefined} size={32} />
+        <TokenIcon tokenSymbol={item.tokenInfo.symbol} logoUri={item.tokenInfo.logoUri || undefined} size={32} />
         <Box>
           <Typography fontWeight="600">{item.tokenInfo.name}</Typography>
           <Typography variant="body2" className={css.tokenAmount}>
@@ -75,25 +75,27 @@ const AssetRow = ({
         </Box>
       </Stack>
 
-      <Box flex={1} display="block" textAlign="right" height="44px">
-        <FiatBalance balanceItem={item} />
-        <FiatChange balanceItem={item} inline />
-      </Box>
+      <Box className={css.valueContainer}>
+        <Box className={css.valueContent}>
+          <FiatBalance balanceItem={item} />
+          <FiatChange balanceItem={item} inline />
+        </Box>
 
-      <Box className={css.assetButtons}>
-        {showSwap ? (
-          <SwapButton tokenInfo={item.tokenInfo} amount="0" trackingLabel={SWAP_LABELS.dashboard_assets} light />
-        ) : (
-          <SendButton tokenInfo={item.tokenInfo} light />
-        )}
+        <Box className={css.assetButtons}>
+          <SendButton tokenInfo={item.tokenInfo} onlyIcon />
 
-        {showEarn && isEligibleEarnToken(chainId, item.tokenInfo.address) && (
-          <EarnButton tokenInfo={item.tokenInfo} trackingLabel={EARN_LABELS.dashboard_asset} compact={false} />
-        )}
+          {showSwap && (
+            <SwapButton tokenInfo={item.tokenInfo} amount="0" trackingLabel={SWAP_LABELS.dashboard_assets} onlyIcon />
+          )}
 
-        {showStake && item.tokenInfo.type === TokenType.NATIVE_TOKEN && (
-          <StakeButton tokenInfo={item.tokenInfo} trackingLabel={STAKE_LABELS.asset} compact={false} />
-        )}
+          {showEarn && isEligibleEarnToken(chainId, item.tokenInfo.address) && (
+            <EarnButton tokenInfo={item.tokenInfo} trackingLabel={EARN_LABELS.dashboard_asset} onlyIcon />
+          )}
+
+          {showStake && item.tokenInfo.type === TokenType.NATIVE_TOKEN && (
+            <StakeButton tokenInfo={item.tokenInfo} trackingLabel={STAKE_LABELS.asset} onlyIcon />
+          )}
+        </Box>
       </Box>
     </Box>
   )

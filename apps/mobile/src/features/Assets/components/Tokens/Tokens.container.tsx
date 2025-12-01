@@ -27,7 +27,7 @@ export function TokensContainer() {
   const tokenList = useAppSelector(selectTokenList)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
 
-  const trusted = hasDefaultTokenlist ? tokenList === TOKEN_LISTS.TRUSTED : true
+  const trusted = hasDefaultTokenlist ? tokenList === TOKEN_LISTS.TRUSTED : false
 
   const { data, isFetching, error, isLoading, refetch } = useBalancesGetBalancesV1Query(
     !activeSafe

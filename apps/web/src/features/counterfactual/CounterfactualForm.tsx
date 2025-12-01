@@ -5,7 +5,7 @@ import { deploySafeAndExecuteTx } from '@/features/counterfactual/utils'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import useWallet from '@/hooks/wallets/useWallet'
-import { OVERVIEW_EVENTS, trackEvent, WALLET_EVENTS } from '@/services/analytics'
+import { OVERVIEW_EVENTS, trackEvent, WALLET_EVENTS, MixpanelEventParams } from '@/services/analytics'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import madProps from '@/utils/mad-props'
 import React, { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
@@ -17,17 +17,17 @@ import { trackError, Errors } from '@/services/exceptions'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getTxOptions } from '@/utils/transactions'
 import CheckWallet from '@/components/common/CheckWallet'
-import { useIsExecutionLoop } from '@/components/tx/SignOrExecuteForm/hooks'
-import type { SignOrExecuteProps } from '@/components/tx/SignOrExecuteForm/SignOrExecuteFormV2'
+import { useIsExecutionLoop } from '@/components/tx/shared/hooks'
+import type { SignOrExecuteProps } from '@/components/tx/shared/types'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import AdvancedParams, { useAdvancedParams } from '@/components/tx/AdvancedParams'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { TxSecurityContext } from '@/components/tx/security/shared/TxSecurityContext'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
+import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
+import { useSafeShield } from '../safe-shield/SafeShieldContext'
 
 export const CounterfactualForm = ({
   safeTx,
@@ -41,13 +41,13 @@ export const CounterfactualForm = ({
 }: SignOrExecuteProps & {
   isOwner: ReturnType<typeof useIsSafeOwner>
   isExecutionLoop: ReturnType<typeof useIsExecutionLoop>
-  txSecurity: ReturnType<typeof useTxSecurityContext>
+  txSecurity: ReturnType<typeof useSafeShield>
   safeTx?: SafeTransaction
   isCreation?: boolean
 }): ReactElement => {
   const wallet = useWallet()
   const chain = useCurrentChain()
-  const { safeAddress } = useSafeInfo()
+  const { safe, safeAddress } = useSafeInfo()
 
   // Form state
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
@@ -55,7 +55,7 @@ export const CounterfactualForm = ({
 
   // Hooks
   const currentChain = useCurrentChain()
-  const { needsRiskConfirmation, isRiskConfirmed, setIsRiskIgnored } = txSecurity
+  const { needsRiskConfirmation, isRiskConfirmed } = txSecurity
   const { setTxFlow } = useContext(TxModalContext)
 
   // Estimate gas limit
@@ -67,11 +67,6 @@ export const CounterfactualForm = ({
     e.preventDefault()
     onSubmit?.(Math.random().toString())
 
-    if (needsRiskConfirmation && !isRiskConfirmed) {
-      setIsRiskIgnored(true)
-      return
-    }
-
     setIsSubmittable(false)
     setSubmitError(undefined)
 
@@ -82,8 +77,12 @@ export const CounterfactualForm = ({
 
       await deploySafeAndExecuteTx(txOptions, wallet, safeAddress, safeTx, wallet?.provider)
 
-      trackEvent({ ...TX_EVENTS.CREATE, label: TX_TYPES.activate_with_tx })
-      trackEvent({ ...TX_EVENTS.EXECUTE, label: TX_TYPES.activate_with_tx })
+      const mixpanelProps = {
+        [MixpanelEventParams.TRANSACTION_TYPE]: TX_TYPES.activate_with_tx,
+        [MixpanelEventParams.THRESHOLD]: safe.threshold,
+      }
+      trackEvent({ ...TX_EVENTS.CREATE, label: TX_TYPES.activate_with_tx }, mixpanelProps)
+      trackEvent({ ...TX_EVENTS.EXECUTE, label: TX_TYPES.activate_with_tx }, mixpanelProps)
       trackEvent(WALLET_EVENTS.ONCHAIN_INTERACTION)
     } catch (_err) {
       const err = asError(_err)
@@ -186,10 +185,8 @@ export const CounterfactualForm = ({
   )
 }
 
-const useTxSecurityContext = () => useContext(TxSecurityContext)
-
 export default madProps(CounterfactualForm, {
   isOwner: useIsSafeOwner,
   isExecutionLoop: useIsExecutionLoop,
-  txSecurity: useTxSecurityContext,
+  txSecurity: useSafeShield,
 })

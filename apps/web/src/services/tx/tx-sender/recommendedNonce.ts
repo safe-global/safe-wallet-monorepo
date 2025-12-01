@@ -5,7 +5,7 @@ import { Errors, logError } from '@/services/exceptions'
 import { isLegacyVersion } from '@safe-global/utils/services/contracts/utils'
 import { postSafeGasEstimation, getNonces as fetchNonces } from '@/utils/transactions'
 
-const fetchRecommendedParams = async (
+export const fetchRecommendedParams = async (
   chainId: string,
   safeAddress: string,
   txParams: MetaTransactionData,

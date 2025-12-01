@@ -753,6 +753,102 @@
         "tags": ["positions"]
       }
     },
+    "/v1/portfolio/{address}": {
+      "get": {
+        "description": "Retrieves the complete portfolio for an address including token balances and app positions across all supported chains.",
+        "operationId": "portfolioGetPortfolioV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "description": "Wallet address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fiatCode",
+            "required": false,
+            "in": "query",
+            "description": "Fiat currency code for balance conversion (e.g., USD, EUR)",
+            "schema": {
+              "default": "USD",
+              "example": "USD",
+              "type": "string"
+            }
+          },
+          {
+            "name": "chainIds",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated list of chain IDs to filter by. If omitted, returns data for all chains.",
+            "schema": {
+              "example": "1,137,42161",
+              "type": "string"
+            }
+          },
+          {
+            "name": "trusted",
+            "required": false,
+            "in": "query",
+            "description": "If true, only returns trusted tokens",
+            "schema": {
+              "default": true,
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "excludeDust",
+            "required": false,
+            "in": "query",
+            "description": "If true, filters out dust positions (balance < $0.001 USD)",
+            "schema": {
+              "default": true,
+              "example": true,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Portfolio"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get portfolio",
+        "tags": ["portfolio"]
+      },
+      "delete": {
+        "description": "Clears the cached portfolio data for a specific address",
+        "operationId": "portfolioClearPortfolioV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "description": "Wallet address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "summary": "Clear portfolio cache",
+        "tags": ["portfolio"]
+      }
+    },
     "/v1/chains": {
       "get": {
         "description": "Retrieves a paginated list of all blockchain networks supported by the Safe infrastructure, including their configuration and capabilities.",
@@ -3942,7 +4038,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RecipientInteractionAnalysisDto"
+                  "$ref": "#/components/schemas/SingleRecipientAnalysisDto"
                 }
               }
             }
@@ -4001,6 +4097,57 @@
           }
         },
         "summary": "Analyze transaction counterparties",
+        "tags": ["safe-shield"]
+      }
+    },
+    "/v1/chains/{chainId}/security/{safeAddress}/threat-analysis": {
+      "post": {
+        "description": "Performs real-time threat analysis for a Safe transaction.",
+        "operationId": "safeShieldAnalyzeThreatV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "EIP-712 typed data and wallet information for threat analysis.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ThreatAnalysisRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Threat analysis results including threat findings and balance changes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThreatAnalysisResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Analyze transaction threat",
         "tags": ["safe-shield"]
       }
     },
@@ -5231,7 +5378,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "",
+    "version": "main",
     "contact": {}
   },
   "tags": [],
@@ -5725,6 +5872,311 @@
           }
         },
         "required": ["protocol", "protocol_metadata", "fiatTotal", "items"]
+      },
+      "PortfolioNativeToken": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["NATIVE_TOKEN"]
+          },
+          "chainId": {
+            "type": "string",
+            "description": "The chain ID"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the token is trusted (spam filter)"
+          }
+        },
+        "required": ["address", "decimals", "logoUri", "name", "symbol", "type", "chainId", "trusted"]
+      },
+      "PortfolioErc20Token": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["ERC20"]
+          },
+          "chainId": {
+            "type": "string",
+            "description": "The chain ID"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the token is trusted (spam filter)"
+          }
+        },
+        "required": ["address", "decimals", "logoUri", "name", "symbol", "type", "chainId", "trusted"]
+      },
+      "PortfolioErc721Token": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["ERC721"]
+          },
+          "chainId": {
+            "type": "string",
+            "description": "The chain ID"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the token is trusted (spam filter)"
+          }
+        },
+        "required": ["address", "decimals", "logoUri", "name", "symbol", "type", "chainId", "trusted"]
+      },
+      "TokenBalance": {
+        "type": "object",
+        "properties": {
+          "tokenInfo": {
+            "description": "Token information",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PortfolioNativeToken"
+              },
+              {
+                "$ref": "#/components/schemas/PortfolioErc20Token"
+              },
+              {
+                "$ref": "#/components/schemas/PortfolioErc721Token"
+              }
+            ]
+          },
+          "balance": {
+            "type": "string",
+            "description": "Balance in smallest unit as string integer. Use decimals to convert."
+          },
+          "balanceFiat": {
+            "type": "string",
+            "description": "Balance in requested fiat currency. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "4801.653401839"
+          },
+          "price": {
+            "type": "string",
+            "description": "Token price in requested fiat currency. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "3890.12"
+          },
+          "priceChangePercentage1d": {
+            "type": "string",
+            "description": "Price change as decimal (e.g., \"-0.0431\" for -4.31%). Decimal string without exponent notation.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "-0.0431"
+          }
+        },
+        "required": ["tokenInfo", "balance"]
+      },
+      "AppPosition": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Unique position key"
+          },
+          "type": {
+            "type": "string",
+            "description": "Position type (e.g., staked, lending, liquidity)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Position name"
+          },
+          "groupId": {
+            "type": "string",
+            "description": "Group ID for grouping related positions together"
+          },
+          "tokenInfo": {
+            "description": "Token information",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PortfolioNativeToken"
+              },
+              {
+                "$ref": "#/components/schemas/PortfolioErc20Token"
+              },
+              {
+                "$ref": "#/components/schemas/PortfolioErc721Token"
+              }
+            ]
+          },
+          "receiptTokenAddress": {
+            "type": "string",
+            "description": "Receipt token address (pool address) representing this position. This is the contract address for the position token (LP token, staking receipt, etc.), not the underlying token."
+          },
+          "balance": {
+            "type": "string",
+            "description": "Balance in smallest unit as string integer. Use decimals to convert."
+          },
+          "balanceFiat": {
+            "type": "string",
+            "description": "Balance in requested fiat currency. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "18638914.125656575"
+          },
+          "priceChangePercentage1d": {
+            "type": "string",
+            "description": "Price change as decimal (e.g., \"-0.0431\" for -4.31%). Decimal string without exponent notation.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "-0.0431"
+          }
+        },
+        "required": ["key", "type", "name", "tokenInfo", "balance"]
+      },
+      "AppPositionGroup": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Group name (e.g., \"Protocol A Vesting\")"
+          },
+          "items": {
+            "type": "array",
+            "description": "Positions in this group",
+            "items": {
+              "$ref": "#/components/schemas/AppPosition"
+            }
+          }
+        },
+        "required": ["name", "items"]
+      },
+      "AppBalanceAppInfo": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Application name"
+          },
+          "logoUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Application logo URL (HTTPS)"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Application URL (HTTPS)"
+          }
+        },
+        "required": ["name"]
+      },
+      "AppBalance": {
+        "type": "object",
+        "properties": {
+          "appInfo": {
+            "description": "Application information",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AppBalanceAppInfo"
+              }
+            ]
+          },
+          "balanceFiat": {
+            "type": "string",
+            "description": "Total balance in fiat currency across all position groups. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "18638914.125656575"
+          },
+          "groups": {
+            "type": "array",
+            "description": "Position groups in this app, grouped by position name",
+            "items": {
+              "$ref": "#/components/schemas/AppPositionGroup"
+            }
+          }
+        },
+        "required": ["appInfo", "balanceFiat", "groups"]
+      },
+      "Portfolio": {
+        "type": "object",
+        "properties": {
+          "totalBalanceFiat": {
+            "type": "string",
+            "description": "Total balance in fiat currency across all tokens and positions. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "954181237.094243"
+          },
+          "totalTokenBalanceFiat": {
+            "type": "string",
+            "description": "Total balance in fiat currency for all token holdings. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "935542322.9685864"
+          },
+          "totalPositionsBalanceFiat": {
+            "type": "string",
+            "description": "Total balance in fiat currency for all app positions. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "18638914.125656575"
+          },
+          "tokenBalances": {
+            "description": "List of token balances",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TokenBalance"
+            }
+          },
+          "positionBalances": {
+            "description": "List of app balances",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppBalance"
+            }
+          }
+        },
+        "required": [
+          "totalBalanceFiat",
+          "totalTokenBalanceFiat",
+          "totalPositionsBalanceFiat",
+          "tokenBalances",
+          "positionBalances"
+        ]
       },
       "GasPriceOracle": {
         "type": "object",
@@ -8103,35 +8555,32 @@
         },
         "required": ["address", "chainId", "threshold", "owners", "fiatTotal", "queued"]
       },
-      "RecipientInteractionResultDto": {
+      "SingleRecipientAnalysisResultDto": {
         "type": "object",
         "properties": {
           "severity": {
             "type": "string",
             "description": "Severity level indicating the importance and risk",
-            "enum": ["OK", "INFO", "WARN", "CRITICAL"],
-            "example": "INFO"
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
           },
           "type": {
             "type": "string",
             "description": "Recipient interaction status code",
-            "example": "NEW_RECIPIENT",
-            "enum": ["NEW_RECIPIENT", "RECURRING_RECIPIENT", "FAILED"]
+            "enum": ["NEW_RECIPIENT", "RECURRING_RECIPIENT", "LOW_ACTIVITY", "FAILED"],
+            "example": "NEW_RECIPIENT"
           },
           "title": {
             "type": "string",
-            "description": "User-facing title of the finding",
-            "example": "New recipient"
+            "description": "User-facing title of the finding"
           },
           "description": {
             "type": "string",
-            "description": "Detailed description explaining the finding and its implications",
-            "example": "This is the first time you are interacting with this recipient"
+            "description": "Detailed description explaining the finding and its implications"
           }
         },
         "required": ["severity", "type", "title", "description"]
       },
-      "RecipientInteractionAnalysisDto": {
+      "SingleRecipientAnalysisDto": {
         "type": "object",
         "properties": {
           "RECIPIENT_INTERACTION": {
@@ -8141,16 +8590,36 @@
                 "severity": "INFO",
                 "type": "NEW_RECIPIENT",
                 "title": "New recipient",
-                "description": "This is the first time you are interacting with this recipient"
+                "description": "This is the first time you are interacting with this recipient."
               }
             ],
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/RecipientInteractionResultDto"
+              "$ref": "#/components/schemas/SingleRecipientAnalysisResultDto"
             }
+          },
+          "RECIPIENT_ACTIVITY": {
+            "description": "Analysis results related to recipient activity. Shows whether this is a low activity recipient. (Available only for Safes)",
+            "example": [
+              {
+                "severity": "WARN",
+                "type": "LOW_ACTIVITY",
+                "title": "Low activity recipient",
+                "description": "This address has few transactions."
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SingleRecipientAnalysisResultDto"
+            }
+          },
+          "isSafe": {
+            "type": "boolean",
+            "description": "Indicates whether the analyzed recipient address is a Safe.",
+            "example": false
           }
         },
-        "required": ["RECIPIENT_INTERACTION"]
+        "required": ["RECIPIENT_INTERACTION", "isSafe"]
       },
       "CounterpartyAnalysisRequestDto": {
         "type": "object",
@@ -8181,32 +8650,34 @@
           "severity": {
             "type": "string",
             "description": "Severity level indicating the importance and risk",
-            "enum": ["OK", "INFO", "WARN", "CRITICAL"],
-            "example": "INFO"
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
           },
           "type": {
             "type": "string",
             "description": "Bridge compatibility status code",
-            "example": "MISSING_OWNERSHIP",
             "enum": [
               "NEW_RECIPIENT",
               "RECURRING_RECIPIENT",
+              "LOW_ACTIVITY",
               "INCOMPATIBLE_SAFE",
               "MISSING_OWNERSHIP",
               "UNSUPPORTED_NETWORK",
               "DIFFERENT_SAFE_SETUP",
               "FAILED"
-            ]
+            ],
+            "example": "MISSING_OWNERSHIP"
           },
           "title": {
             "type": "string",
-            "description": "User-facing title of the finding",
-            "example": "New recipient"
+            "description": "User-facing title of the finding"
           },
           "description": {
             "type": "string",
-            "description": "Detailed description explaining the finding and its implications",
-            "example": "This is the first time you are interacting with this recipient"
+            "description": "Detailed description explaining the finding and its implications"
+          },
+          "targetChainId": {
+            "type": "string",
+            "description": "Target chain ID for bridge operations. Only present for BridgeStatus."
           }
         },
         "required": ["severity", "type", "title", "description"]
@@ -8214,6 +8685,11 @@
       "RecipientAnalysisDto": {
         "type": "object",
         "properties": {
+          "isSafe": {
+            "type": "boolean",
+            "description": "Indicates whether the analyzed recipient address is a Safe.",
+            "example": true
+          },
           "RECIPIENT_INTERACTION": {
             "description": "Analysis results related to recipient interaction history. Shows whether this is a new or recurring recipient.",
             "example": [
@@ -8221,7 +8697,22 @@
                 "severity": "INFO",
                 "type": "NEW_RECIPIENT",
                 "title": "New recipient",
-                "description": "This is the first time you are interacting with this recipient"
+                "description": "This is the first time you are interacting with this recipient."
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecipientResultDto"
+            }
+          },
+          "RECIPIENT_ACTIVITY": {
+            "description": "Analysis results related to recipient activity frequency. Shows whether this is a low activity recipient.",
+            "example": [
+              {
+                "severity": "WARN",
+                "type": "LOW_ACTIVITY",
+                "title": "Low activity recipient",
+                "description": "This address has few transactions."
               }
             ],
             "type": "array",
@@ -8236,7 +8727,8 @@
                 "severity": "WARN",
                 "type": "MISSING_OWNERSHIP",
                 "title": "No ownership on target chain",
-                "description": "You do not have ownership of a Safe on the target chain"
+                "description": "You do not have ownership of a Safe on the target chain.",
+                "targetChainId": "137"
               }
             ],
             "type": "array",
@@ -8244,7 +8736,8 @@
               "$ref": "#/components/schemas/RecipientResultDto"
             }
           }
-        }
+        },
+        "required": ["isSafe"]
       },
       "ContractAnalysisResultDto": {
         "type": "object",
@@ -8252,13 +8745,11 @@
           "severity": {
             "type": "string",
             "description": "Severity level indicating the importance and risk",
-            "enum": ["OK", "INFO", "WARN", "CRITICAL"],
-            "example": "INFO"
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
           },
           "type": {
             "type": "string",
             "description": "Contract verification status code",
-            "example": "VERIFIED",
             "enum": [
               "VERIFIED",
               "NOT_VERIFIED",
@@ -8268,17 +8759,16 @@
               "KNOWN_CONTRACT",
               "UNEXPECTED_DELEGATECALL",
               "FAILED"
-            ]
+            ],
+            "example": "VERIFIED"
           },
           "title": {
             "type": "string",
-            "description": "User-facing title of the finding",
-            "example": "New recipient"
+            "description": "User-facing title of the finding"
           },
           "description": {
             "type": "string",
-            "description": "Detailed description explaining the finding and its implications",
-            "example": "This is the first time you are interacting with this recipient"
+            "description": "Detailed description explaining the finding and its implications"
           }
         },
         "required": ["severity", "type", "title", "description"]
@@ -8338,12 +8828,13 @@
         "properties": {
           "recipient": {
             "type": "object",
-            "description": "Recipient analysis results mapped by address. Contains recipient interaction history and bridge analysis.",
+            "description": "Recipient analysis results mapped by address. Contains recipient interaction history and bridge analysis.type: Record<Address, RecipientAnalysisDto>.",
             "additionalProperties": {
               "$ref": "#/components/schemas/RecipientAnalysisDto"
             },
             "example": {
               "0x0000000000000000000000000000000000000000": {
+                "isSafe": true,
                 "RECIPIENT_INTERACTION": [
                   {
                     "severity": "INFO",
@@ -8357,7 +8848,7 @@
           },
           "contract": {
             "type": "object",
-            "description": "Contract analysis results mapped by address. Contains contract verification, interaction history, and delegatecall analysis.",
+            "description": "Contract analysis results mapped by address. Contains contract verification, interaction history, and delegatecall analysis.type: Record<Address, ContractAnalysisDto>.",
             "additionalProperties": {
               "$ref": "#/components/schemas/ContractAnalysisDto"
             },
@@ -8376,6 +8867,299 @@
           }
         },
         "required": ["recipient", "contract"]
+      },
+      "ThreatAnalysisRequestDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "description": "EIP-712 typed data to analyze for security threats. Contains domain, primaryType, types, and message fields following the EIP-712 standard for structured data signing.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TypedData"
+              }
+            ]
+          },
+          "walletAddress": {
+            "type": "string",
+            "description": "Address of the transaction signer/wallet"
+          },
+          "origin": {
+            "type": "string",
+            "description": "Optional origin identifier for the request"
+          }
+        },
+        "required": ["data", "walletAddress"]
+      },
+      "ThreatAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
+          },
+          "type": {
+            "type": "string",
+            "description": "Threat status code",
+            "enum": ["NO_THREAT", "OWNERSHIP_CHANGE", "MODULE_CHANGE", "FAILED"]
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          }
+        },
+        "required": ["severity", "type", "title", "description"]
+      },
+      "MasterCopyChangeThreatAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
+          },
+          "type": {
+            "type": "string",
+            "description": "Threat status code",
+            "enum": ["MASTERCOPY_CHANGE"]
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          },
+          "before": {
+            "type": "string",
+            "description": "Address of the old master copy/implementation contract"
+          },
+          "after": {
+            "type": "string",
+            "description": "Address of the new master copy/implementation contract"
+          }
+        },
+        "required": ["severity", "type", "title", "description", "before", "after"]
+      },
+      "MaliciousOrModerateThreatAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
+          },
+          "type": {
+            "type": "string",
+            "description": "Threat status code",
+            "enum": ["MALICIOUS", "MODERATE"]
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          },
+          "issues": {
+            "type": "object",
+            "description": "A partial record of specific issues identified during threat analysis, grouped by severity.Record<Severity, string[]> - keys should be one of the Severity enum.",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": {
+              "CRITICAL": ["Malicious contract interaction detected"],
+              "WARN": ["High gas price detected"]
+            }
+          }
+        },
+        "required": ["severity", "type", "title", "description"]
+      },
+      "NativeAssetDetailsDto": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "description": "Token symbol (if available)"
+          },
+          "logo_url": {
+            "type": "string",
+            "description": "URL to asset logo (if available)",
+            "example": "https://example.com/logo.png"
+          },
+          "type": {
+            "type": "string",
+            "description": "Asset type",
+            "enum": ["NATIVE"]
+          }
+        },
+        "required": ["type"]
+      },
+      "TokenAssetDetailsDto": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "description": "Token symbol (if available)"
+          },
+          "logo_url": {
+            "type": "string",
+            "description": "URL to asset logo (if available)",
+            "example": "https://example.com/logo.png"
+          },
+          "type": {
+            "type": "string",
+            "description": "Asset type",
+            "enum": ["ERC20", "ERC721", "ERC1155"]
+          },
+          "address": {
+            "type": "string",
+            "description": "Token contract address"
+          }
+        },
+        "required": ["type", "address"]
+      },
+      "FungibleDiffDto": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "Value change for fungible tokens",
+            "example": "1000000"
+          }
+        }
+      },
+      "NFTDiffDto": {
+        "type": "object",
+        "properties": {
+          "token_id": {
+            "type": "number",
+            "description": "Token ID for NFTs",
+            "example": 42
+          }
+        },
+        "required": ["token_id"]
+      },
+      "BalanceChangeDto": {
+        "type": "object",
+        "properties": {
+          "asset": {
+            "description": "Asset details",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NativeAssetDetailsDto"
+              },
+              {
+                "$ref": "#/components/schemas/TokenAssetDetailsDto"
+              }
+            ]
+          },
+          "in": {
+            "type": "array",
+            "description": "Incoming asset changes",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/FungibleDiffDto"
+                },
+                {
+                  "$ref": "#/components/schemas/NFTDiffDto"
+                }
+              ]
+            },
+            "example": [
+              {
+                "value": "1000000"
+              }
+            ]
+          },
+          "out": {
+            "type": "array",
+            "description": "Outgoing asset changes",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/FungibleDiffDto"
+                },
+                {
+                  "$ref": "#/components/schemas/NFTDiffDto"
+                }
+              ]
+            },
+            "example": [
+              {
+                "value": "500000"
+              }
+            ]
+          }
+        },
+        "required": ["asset", "in", "out"]
+      },
+      "ThreatAnalysisResponseDto": {
+        "type": "object",
+        "properties": {
+          "THREAT": {
+            "description": "Array of threat analysis results. Results are sorted by severity (CRITICAL first). May include malicious patterns, ownership changes, module changes, or master copy upgrades.",
+            "example": [
+              {
+                "severity": "OK",
+                "type": "NO_THREAT",
+                "title": "No threats detected",
+                "description": "Transaction analysis found no security threats"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ThreatAnalysisResultDto"
+                },
+                {
+                  "$ref": "#/components/schemas/MasterCopyChangeThreatAnalysisResultDto"
+                },
+                {
+                  "$ref": "#/components/schemas/MaliciousOrModerateThreatAnalysisResultDto"
+                }
+              ]
+            }
+          },
+          "BALANCE_CHANGE": {
+            "description": "Balance changes resulting from the transaction. Shows incoming and outgoing transfers for various asset types.",
+            "example": [
+              {
+                "asset": {
+                  "type": "ERC20",
+                  "symbol": "USDC",
+                  "address": "0x0000000000000000000000000000000000000000",
+                  "logo_url": "https://example.com/usdc-logo.png"
+                },
+                "in": [
+                  {
+                    "value": "1000000"
+                  }
+                ],
+                "out": [
+                  {
+                    "value": "500000"
+                  }
+                ]
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BalanceChangeDto"
+            }
+          }
+        }
       },
       "TargetedSafe": {
         "type": "object",

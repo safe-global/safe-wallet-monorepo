@@ -2,16 +2,16 @@ import React, { useCallback, useMemo, type ReactNode } from 'react'
 import useTxStepper from './useTxStepper'
 import SafeTxProvider from './SafeTxProvider'
 import { TxInfoProvider } from './TxInfoProvider'
-import { TxSecurityProvider } from '../tx/security/shared/TxSecurityContext'
 import TxFlowProvider, { type TxFlowProviderProps, type TxFlowContextType } from './TxFlowProvider'
 import { TxFlowContent } from './common/TxFlowContent'
 import ReviewTransaction from '../tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
-import { TxChecks, TxNote, SignerSelect, Blockaid } from './features'
+import { TxNote, SignerSelect, BalanceChanges, RiskConfirmation } from './features'
 import { Batching, ComboSubmit, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
 import { SlotProvider } from './slots'
-import { useTrackTimeSpent } from '../tx/SignOrExecuteForm/tracking'
+import { useTrackTimeSpent } from '@/components/tx/shared/tracking'
 import LedgerHashComparison from '@/features/ledger'
+import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 
 type SubmitCallbackProps = { txId?: string; isExecuted?: boolean }
 export type SubmitCallback = (args?: SubmitCallbackProps) => void
@@ -75,7 +75,7 @@ export const TxFlow = <T extends unknown>({
   return (
     <SafeTxProvider>
       <TxInfoProvider>
-        <TxSecurityProvider>
+        <SafeShieldProvider>
           <SlotProvider>
             <TxFlowProvider
               step={step}
@@ -96,10 +96,10 @@ export const TxFlow = <T extends unknown>({
                 {...childrenArray}
 
                 <ReviewTransactionComponent onSubmit={() => nextStep()}>
-                  <TxChecks />
+                  <BalanceChanges />
                   <TxNote />
                   <SignerSelect />
-                  <Blockaid />
+                  <RiskConfirmation />
                 </ReviewTransactionComponent>
 
                 <ConfirmTxReceipt onSubmit={handleFlowSubmit}>
@@ -115,11 +115,10 @@ export const TxFlow = <T extends unknown>({
                   <Propose />
                 </ConfirmTxReceipt>
               </TxFlowContent>
-
               <LedgerHashComparison />
             </TxFlowProvider>
           </SlotProvider>
-        </TxSecurityProvider>
+        </SafeShieldProvider>
       </TxInfoProvider>
     </SafeTxProvider>
   )

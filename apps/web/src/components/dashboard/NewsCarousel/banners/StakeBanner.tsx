@@ -12,7 +12,7 @@ import { useRouter } from 'next/router'
 
 export const stakeBannerID = 'stakeBanner'
 
-const StakeBanner = ({ onDismiss }: { onDismiss: () => void }) => {
+export const StakeBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   const router = useRouter()
 
   return (
@@ -53,5 +53,3 @@ const StakeBanner = ({ onDismiss }: { onDismiss: () => void }) => {
     </Card>
   )
 }
-
-export default StakeBanner

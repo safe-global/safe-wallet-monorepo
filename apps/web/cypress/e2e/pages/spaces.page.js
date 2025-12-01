@@ -1,6 +1,6 @@
 import * as constants from '../../support/constants.js'
 import * as main from './main.page.js'
-import staticSafes from '../../fixtures/safes/static.json'
+import staticSafes from '../../fixtures/safes/static.js'
 import { tableContainer } from './address_book.page.js'
 
 export const orgList = '[data-testid="org-list"]'

@@ -56,6 +56,7 @@ function TxInfoComponent({ tx, onPress, ...rest }: TxInfoProps) {
   if (isTransferTxInfo(txInfo)) {
     return (
       <TxTokenCard
+        txId={tx.id}
         onPress={onCardPress}
         executionInfo={tx.executionInfo}
         txInfo={txInfo}
@@ -66,16 +67,19 @@ function TxInfoComponent({ tx, onPress, ...rest }: TxInfoProps) {
   }
 
   if (isSettingsChangeTxInfo(txInfo)) {
-    return <TxSettingsCard onPress={onCardPress} executionInfo={tx.executionInfo} txInfo={txInfo} {...rest} />
+    return (
+      <TxSettingsCard txId={tx.id} onPress={onCardPress} executionInfo={tx.executionInfo} txInfo={txInfo} {...rest} />
+    )
   }
 
   if (isMultiSendTxInfo(txInfo) && !tx.safeAppInfo) {
-    return <TxBatchCard onPress={onCardPress} executionInfo={tx.executionInfo} txInfo={txInfo} {...rest} />
+    return <TxBatchCard txId={tx.id} onPress={onCardPress} executionInfo={tx.executionInfo} txInfo={txInfo} {...rest} />
   }
 
   if (isMultiSendTxInfo(txInfo) && tx.safeAppInfo) {
     return (
       <TxSafeAppCard
+        txId={tx.id}
         onPress={onCardPress}
         executionInfo={tx.executionInfo}
         txInfo={txInfo}
@@ -86,16 +90,21 @@ function TxInfoComponent({ tx, onPress, ...rest }: TxInfoProps) {
   }
 
   if (isCreationTxInfo(txInfo)) {
-    return <TxCreationCard onPress={onCardPress} executionInfo={tx.executionInfo} txInfo={txInfo} {...rest} />
+    return (
+      <TxCreationCard txId={tx.id} onPress={onCardPress} executionInfo={tx.executionInfo} txInfo={txInfo} {...rest} />
+    )
   }
 
   if (isCancellationTxInfo(txInfo)) {
-    return <TxRejectionCard onPress={onCardPress} executionInfo={tx.executionInfo} txInfo={txInfo} {...rest} />
+    return (
+      <TxRejectionCard txId={tx.id} onPress={onCardPress} executionInfo={tx.executionInfo} txInfo={txInfo} {...rest} />
+    )
   }
 
   if (isMultiSendTxInfo(txInfo) || isCustomTxInfo(txInfo)) {
     return (
       <TxContractInteractionCard
+        txId={tx.id}
         onPress={onCardPress}
         executionInfo={tx.executionInfo}
         txInfo={txInfo}
@@ -106,35 +115,43 @@ function TxInfoComponent({ tx, onPress, ...rest }: TxInfoProps) {
   }
 
   if (isOrderTxInfo(txInfo)) {
-    return <TxOrderCard onPress={onCardPress} executionInfo={tx.executionInfo} txInfo={txInfo} {...rest} />
+    return <TxOrderCard txId={tx.id} onPress={onCardPress} executionInfo={tx.executionInfo} txInfo={txInfo} {...rest} />
   }
 
   if (isStakingTxDepositInfo(txInfo)) {
-    return <StakingTxDepositCard info={txInfo} onPress={onCardPress} {...rest} />
+    return <StakingTxDepositCard txId={tx.id} info={txInfo} onPress={onCardPress} {...rest} />
   }
 
   if (isStakingTxExitInfo(txInfo)) {
-    return <StakingTxExitCard info={txInfo} onPress={onCardPress} {...rest} />
+    return <StakingTxExitCard txId={tx.id} info={txInfo} onPress={onCardPress} {...rest} />
   }
 
   if (isStakingTxWithdrawInfo(txInfo)) {
-    return <StakingTxWithdrawCard info={txInfo} onPress={onCardPress} {...rest} />
+    return <StakingTxWithdrawCard txId={tx.id} info={txInfo} onPress={onCardPress} {...rest} />
   }
 
   if (isVaultDepositTxInfo(txInfo)) {
-    return <VaultTxDepositCard info={txInfo} onPress={onCardPress} executionInfo={tx.executionInfo} {...rest} />
+    return (
+      <VaultTxDepositCard txId={tx.id} info={txInfo} onPress={onCardPress} executionInfo={tx.executionInfo} {...rest} />
+    )
   }
 
   if (isVaultRedeemTxInfo(txInfo)) {
-    return <VaultTxRedeemCard info={txInfo} onPress={onCardPress} executionInfo={tx.executionInfo} {...rest} />
+    return (
+      <VaultTxRedeemCard txId={tx.id} info={txInfo} onPress={onCardPress} executionInfo={tx.executionInfo} {...rest} />
+    )
   }
 
   if (isBridgeOrderTxInfo(txInfo)) {
-    return <TxBridgeCard txInfo={txInfo} onPress={onCardPress} executionInfo={tx.executionInfo} {...rest} />
+    return (
+      <TxBridgeCard txId={tx.id} txInfo={txInfo} onPress={onCardPress} executionInfo={tx.executionInfo} {...rest} />
+    )
   }
 
   if (isLifiSwapTxInfo(txInfo)) {
-    return <TxLifiSwapCard txInfo={txInfo} onPress={onCardPress} executionInfo={tx.executionInfo} {...rest} />
+    return (
+      <TxLifiSwapCard txId={tx.id} txInfo={txInfo} onPress={onCardPress} executionInfo={tx.executionInfo} {...rest} />
+    )
   }
 
   return <></>

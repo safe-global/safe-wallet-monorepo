@@ -50,6 +50,11 @@ jest.mock('@/features/myAccounts/hooks/useNetworksOfSafe', () => ({
   useNetworksOfSafe: jest.fn(() => ['ethereum', 'polygon']),
 }))
 
+jest.mock('@/hooks/useIsSafeOwner', () => ({
+  __esModule: true,
+  default: jest.fn(() => false),
+}))
+
 describe('useMixpanelUserProperties', () => {
   // Generate test addresses
   const safeAddress = faker.finance.ethereumAddress()
@@ -84,6 +89,7 @@ describe('useMixpanelUserProperties', () => {
         [MixpanelUserProperty.TOTAL_TX_COUNT]: 42,
         [MixpanelUserProperty.LAST_TX_AT]: new Date(1672531200000).toISOString(),
         [MixpanelUserProperty.NETWORKS]: ['ethereum', 'polygon'],
+        [MixpanelUserProperty.IS_OWNER]: false,
       },
       networks: ['ethereum', 'polygon'],
     })

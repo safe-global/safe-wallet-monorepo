@@ -407,6 +407,13 @@ export const addressBookData = {
       '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED': 'Automation owner Eth',
     },
   },
+  safeSchiledAddressBook: {
+    137: {
+      '0x773B97f0b2D38Dbf5C8CbE04C2C622453500F3e0': 'Test Recipient',
+      '0xb412684F4F0B5d27cC4A4D287F42595aB3ae124D': 'Test Safe Address',
+      '0x9445deb174C1eCbbfce8d31D33F438B8e7a0F1BA': 'Test Signer (Owner 4)',
+    },
+  },
   pagination: {
     11155111: {
       '0xB8Bfd72663602dB33A454e3D899fb1ee95F54c26': 'Safe 1',

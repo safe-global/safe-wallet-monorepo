@@ -1,29 +1,33 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
 import { useContext } from 'react'
-import { Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, Paper, Typography } from '@mui/material'
+import { List, ListItem, ListItemIcon, Paper, styled, Typography } from '@mui/material'
 import CreatedIcon from '@/public/images/messages/created.svg'
 import SignedIcon from '@/public/images/messages/signed.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { isMultisigExecutionInfo, isSignableBy, isConfirmableBy } from '@/utils/transaction-guards'
 import classnames from 'classnames'
 import css from './styles.module.css'
-import CloseIcon from '@mui/icons-material/Close'
 import useWallet from '@/hooks/wallets/useWallet'
-import SafeLogo from '@/public/images/logo-no-text.svg'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 
+const StatusLabel = styled(Typography)(({ theme }) => ({
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  letterSpacing: 1,
+  ...theme.typography.caption,
+}))
+
 const TxStatusWidget = ({
   txSummary,
-  handleClose,
   isBatch = false,
   isMessage = false,
   isLastStep = false,
 }: {
   txSummary?: Transaction
-  handleClose: () => void
   isBatch?: boolean
   isMessage?: boolean
   isLastStep?: boolean
@@ -47,66 +51,49 @@ const TxStatusWidget = ({
   const canSign = txSummary ? isSignableBy(txSummary, wallet?.address || '') : !isProposing
 
   return (
-    <Paper>
-      <div className={css.header}>
-        <Typography fontWeight="700" display="flex" alignItems="center" gap={1}>
-          <SafeLogo width={16} height={16} className={css.logo} />
-          {isMessage ? 'Message' : 'Transaction'} status
-        </Typography>
+    <Paper sx={{ backgroundColor: 'transparent' }}>
+      <List className={css.status}>
+        <ListItem>
+          <ListItemIcon>
+            <CreatedIcon />
+          </ListItemIcon>
 
-        <IconButton className={css.close} aria-label="close" onClick={handleClose} size="small">
-          <CloseIcon />
-        </IconButton>
-      </div>
+          <StatusLabel>{isBatch ? 'Queue transactions' : 'Create'}</StatusLabel>
+        </ListItem>
 
-      <Divider />
+        <ListItem className={classnames({ [css.incomplete]: !canConfirm && !isBatch })}>
+          <ListItemIcon>
+            <SignedIcon />
+          </ListItemIcon>
 
-      <div className={css.content}>
-        <List className={css.status}>
-          <ListItem>
-            <ListItemIcon>
-              <CreatedIcon />
-            </ListItemIcon>
+          <StatusLabel>
+            {isBatch ? (
+              'Create batch'
+            ) : !nonceNeeded ? (
+              'Confirmed'
+            ) : isMessage ? (
+              'Collect signatures'
+            ) : (
+              <>
+                Confirmed ({confirmationsSubmitted} of {threshold})
+                {canSign && (
+                  <Typography variant="caption" component="span" className={css.badge}>
+                    +1
+                  </Typography>
+                )}
+              </>
+            )}
+          </StatusLabel>
+        </ListItem>
 
-            <ListItemText primaryTypographyProps={{ fontWeight: 700 }}>
-              {isBatch ? 'Queue transactions' : 'Create'}
-            </ListItemText>
-          </ListItem>
+        <ListItem className={classnames({ [css.incomplete]: !(isAwaitingExecution && isLastStep) })}>
+          <ListItemIcon>
+            <SignedIcon />
+          </ListItemIcon>
 
-          <ListItem className={classnames({ [css.incomplete]: !canConfirm && !isBatch })}>
-            <ListItemIcon>
-              <SignedIcon />
-            </ListItemIcon>
-
-            <ListItemText primaryTypographyProps={{ fontWeight: 700 }}>
-              {isBatch ? (
-                'Create batch'
-              ) : !nonceNeeded ? (
-                'Confirmed'
-              ) : isMessage ? (
-                'Collect signatures'
-              ) : (
-                <>
-                  Confirmed ({confirmationsSubmitted} of {threshold})
-                  {canSign && (
-                    <Typography variant="body2" component="span" className={css.badge}>
-                      +1
-                    </Typography>
-                  )}
-                </>
-              )}
-            </ListItemText>
-          </ListItem>
-
-          <ListItem className={classnames({ [css.incomplete]: !(isAwaitingExecution && isLastStep) })}>
-            <ListItemIcon>
-              <SignedIcon />
-            </ListItemIcon>
-
-            <ListItemText primaryTypographyProps={{ fontWeight: 700 }}>{isMessage ? 'Done' : 'Execute'}</ListItemText>
-          </ListItem>
-        </List>
-      </div>
+          <StatusLabel>{isMessage ? 'Done' : 'Execute'}</StatusLabel>
+        </ListItem>
+      </List>
     </Paper>
   )
 }

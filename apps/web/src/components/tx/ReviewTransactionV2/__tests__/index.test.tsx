@@ -9,6 +9,7 @@ import { server } from '@/tests/server'
 import { http, HttpResponse } from 'msw'
 import { GATEWAY_URL } from '@/config/gateway'
 import type { RootState } from '@/store'
+import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 
 const mockTxPreview: TransactionPreview = {
   txInfo: {},
@@ -69,7 +70,9 @@ describe('ReviewTransaction', () => {
     const { container, getByText } = render(
       <SlotProvider>
         <SafeTxContext.Provider value={{ safeTx: createSafeTx() } as SafeTxContextParams}>
-          <ReviewTransaction onSubmit={jest.fn()} />
+          <SafeShieldProvider>
+            <ReviewTransaction onSubmit={jest.fn()} />
+          </SafeShieldProvider>
         </SafeTxContext.Provider>
       </SlotProvider>,
       {
@@ -97,7 +100,9 @@ describe('ReviewTransaction', () => {
             } as SafeTxContextParams
           }
         >
-          <ReviewTransaction onSubmit={jest.fn()} />
+          <SafeShieldProvider>
+            <ReviewTransaction onSubmit={jest.fn()} />
+          </SafeShieldProvider>
         </SafeTxContext.Provider>
       </SlotProvider>,
       {
