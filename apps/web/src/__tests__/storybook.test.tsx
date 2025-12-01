@@ -3,6 +3,7 @@ import { composeStories } from '@storybook/react'
 import { render } from '@testing-library/react'
 import { globSync } from 'glob'
 import path from 'path'
+import type { ComponentType } from 'react'
 
 /**
  * Automatically generates snapshot tests for all Storybook stories
@@ -19,6 +20,7 @@ describe('Storybook Snapshots', () => {
 
     describe(relativePath, () => {
       // Dynamically import each story file
+       
       const storyModule = require(storyFilePath)
 
       // Compose all stories from the file
@@ -26,8 +28,9 @@ describe('Storybook Snapshots', () => {
 
       // Create a test for each story
       Object.entries(composedStories).forEach(([storyName, Story]) => {
-        test(storyName, async () => {
-          const { container } = render(<Story />)
+        test(storyName, () => {
+          const StoryComponent = Story as ComponentType
+          const { container } = render(<StoryComponent />)
           expect(container.firstChild).toMatchSnapshot()
         })
       })

@@ -35,6 +35,6 @@ const customJestConfig = {
 module.exports = async () => ({
   ...(await createJestConfig(customJestConfig)()),
   transformIgnorePatterns: [
-    'node_modules/(?!(uint8arrays|multiformats|@web3-onboard/common|@walletconnect/(.*)/uint8arrays)/)',
+    'node_modules/(?!(uint8arrays|multiformats|@web3-onboard/common|@walletconnect/(.*)/uint8arrays|@storybook|storybook)/)',
   ],
 })
