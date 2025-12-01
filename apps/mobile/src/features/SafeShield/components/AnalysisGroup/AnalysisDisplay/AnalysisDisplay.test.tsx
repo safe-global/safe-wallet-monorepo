@@ -51,7 +51,7 @@ describe('AnalysisDisplay', () => {
   })
 
   it('should render addresses when result has addresses', () => {
-    const addresses = [faker.finance.ethereumAddress(), faker.finance.ethereumAddress()]
+    const addresses = [{ address: faker.finance.ethereumAddress() }, { address: faker.finance.ethereumAddress() }]
 
     const result = {
       ...ContractAnalysisResultBuilder.newContract().build(),
@@ -79,7 +79,7 @@ describe('AnalysisDisplay', () => {
       fireEvent.press(showAllText.parent?.parent || showAllText)
     }
 
-    addresses.forEach((address) => {
+    addresses.forEach(({ address }) => {
       expect(getByText(address)).toBeTruthy()
     })
   })
@@ -94,7 +94,7 @@ describe('AnalysisDisplay', () => {
   })
 
   it('should render all components together', () => {
-    const addresses = [faker.finance.ethereumAddress()]
+    const addresses = [{ address: faker.finance.ethereumAddress() }]
     const beforeAddress = faker.finance.ethereumAddress()
     const afterAddress = faker.finance.ethereumAddress()
 
@@ -130,6 +130,6 @@ describe('AnalysisDisplay', () => {
     } else {
       fireEvent.press(showAllText)
     }
-    expect(getByText(addresses[0])).toBeTruthy()
+    expect(getByText(addresses[0].address)).toBeTruthy()
   })
 })

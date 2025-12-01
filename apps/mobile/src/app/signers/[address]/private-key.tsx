@@ -1,6 +1,6 @@
 import React from 'react'
 import { useLocalSearchParams } from 'expo-router'
-import { PrivateKeyContainer } from '@/src/features/PrivateKey/PrivateKey.container'
+import { PrivateKeyContainer } from '@/src/features/PrivateKey'
 import { type Address } from '@/src/types/address'
 import { useScreenProtection } from '@/src/hooks/useScreenProtection'
 
