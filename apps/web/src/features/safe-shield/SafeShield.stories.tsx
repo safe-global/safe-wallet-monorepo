@@ -13,8 +13,8 @@ const meta = {
   component: SafeShieldDisplay,
   parameters: { layout: 'centered' },
   decorators: [
-    (Story) => (
-      <StoreDecorator initialState={{}}>
+    (Story, context) => (
+      <StoreDecorator initialState={{}} context={context}>
         <Paper sx={{ padding: 2, backgroundColor: 'background.main' }}>
           <Box sx={{ width: 320 }}>
             <Story />
