@@ -6,6 +6,14 @@ import {
   ContractAnalysisBuilder,
 } from '@safe-global/utils/features/safe-shield/builders'
 import { faker } from '@faker-js/faker'
+import * as useHypernativeOAuth from '@/features/hypernative/hooks/useHypernativeOAuth'
+import * as useCheckSimulation from '@/features/safe-shield/hooks/useCheckSimulation'
+import * as useIsHypernativeGuard from '@/features/hypernative/hooks/useIsHypernativeGuard'
+
+// Mock hooks
+jest.mock('@/features/hypernative/hooks/useHypernativeOAuth')
+jest.mock('@/features/safe-shield/hooks/useCheckSimulation')
+jest.mock('@/features/hypernative/hooks/useIsHypernativeGuard')
 
 describe('SafeShieldDisplay', () => {
   let mockRecipientAddress: string
@@ -18,6 +26,26 @@ describe('SafeShieldDisplay', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+
+    // Mock useHypernativeOAuth to return authenticated state by default
+    jest.spyOn(useHypernativeOAuth, 'useHypernativeOAuth').mockReturnValue({
+      isAuthenticated: true,
+      isTokenExpired: false,
+      loading: false,
+      initiateLogin: jest.fn(),
+      logout: jest.fn(),
+    })
+
+    // Mock useIsHypernativeGuard to return guard active by default
+    jest.spyOn(useIsHypernativeGuard, 'useIsHypernativeGuard').mockReturnValue({
+      isHypernativeGuard: true,
+      loading: false,
+    })
+
+    // Mock useCheckSimulation to return no simulation error by default
+    jest.spyOn(useCheckSimulation, 'useCheckSimulation').mockReturnValue({
+      hasSimulationError: false,
+    })
 
     // Recreate mocks for each test to avoid mutation issues
     mockRecipientAddress = faker.finance.ethereumAddress()
@@ -218,6 +246,99 @@ describe('SafeShieldDisplay', () => {
       const { container } = render(<SafeShieldDisplay recipient={loadingRecipient} />)
 
       expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
+    })
+  })
+
+  describe('Hypernative Authentication', () => {
+    it('should show "Authentication required" when user is not authenticated and HN Guard is active', () => {
+      jest.spyOn(useHypernativeOAuth, 'useHypernativeOAuth').mockReturnValue({
+        isAuthenticated: false,
+        isTokenExpired: false,
+        loading: false,
+        initiateLogin: jest.fn(),
+        logout: jest.fn(),
+      })
+
+      jest.spyOn(useIsHypernativeGuard, 'useIsHypernativeGuard').mockReturnValue({
+        isHypernativeGuard: true,
+        loading: false,
+      })
+
+      render(<SafeShieldDisplay />)
+
+      expect(screen.getByText('Authentication required')).toBeInTheDocument()
+    })
+
+    it('should not show authentication required when user is authenticated', () => {
+      jest.spyOn(useHypernativeOAuth, 'useHypernativeOAuth').mockReturnValue({
+        isAuthenticated: true,
+        isTokenExpired: false,
+        loading: false,
+        initiateLogin: jest.fn(),
+        logout: jest.fn(),
+      })
+
+      render(<SafeShieldDisplay recipient={mockRecipient} />)
+
+      expect(screen.queryByText('Authentication required')).not.toBeInTheDocument()
+      expect(screen.getByText('Checks passed')).toBeInTheDocument()
+    })
+
+    it('should not show authentication required when auth is loading', () => {
+      jest.spyOn(useHypernativeOAuth, 'useHypernativeOAuth').mockReturnValue({
+        isAuthenticated: false,
+        isTokenExpired: false,
+        loading: true,
+        initiateLogin: jest.fn(),
+        logout: jest.fn(),
+      })
+
+      jest.spyOn(useIsHypernativeGuard, 'useIsHypernativeGuard').mockReturnValue({
+        isHypernativeGuard: true,
+        loading: false,
+      })
+
+      render(<SafeShieldDisplay />)
+
+      expect(screen.queryByText('Authentication required')).not.toBeInTheDocument()
+    })
+
+    it('should not show authentication required when HN Guard is not active', () => {
+      jest.spyOn(useHypernativeOAuth, 'useHypernativeOAuth').mockReturnValue({
+        isAuthenticated: false,
+        isTokenExpired: false,
+        loading: false,
+        initiateLogin: jest.fn(),
+        logout: jest.fn(),
+      })
+
+      jest.spyOn(useIsHypernativeGuard, 'useIsHypernativeGuard').mockReturnValue({
+        isHypernativeGuard: false,
+        loading: false,
+      })
+
+      render(<SafeShieldDisplay />)
+
+      expect(screen.queryByText('Authentication required')).not.toBeInTheDocument()
+    })
+
+    it('should not show authentication required when HN Guard check is loading', () => {
+      jest.spyOn(useHypernativeOAuth, 'useHypernativeOAuth').mockReturnValue({
+        isAuthenticated: false,
+        isTokenExpired: false,
+        loading: false,
+        initiateLogin: jest.fn(),
+        logout: jest.fn(),
+      })
+
+      jest.spyOn(useIsHypernativeGuard, 'useIsHypernativeGuard').mockReturnValue({
+        isHypernativeGuard: true,
+        loading: true,
+      })
+
+      render(<SafeShieldDisplay />)
+
+      expect(screen.queryByText('Authentication required')).not.toBeInTheDocument()
     })
   })
 })
