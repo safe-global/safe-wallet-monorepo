@@ -5,6 +5,14 @@ on:
     workflows: ['Web Deploy to dev/staging']
     types:
       - completed
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to screenshot'
+        required: true
+      branch_name:
+        description: 'Branch name (normalized, e.g., feat_my_branch)'
+        required: true
 
 permissions:
   pull-requests: write
@@ -13,16 +21,17 @@ permissions:
 jobs:
   screenshot:
     # Only run on PRs from the same repository (not forks) and when the deployment succeeded
-    # This prevents untrusted code from forks being executed with elevated permissions
+    # For workflow_dispatch, always run
     if: >
-      github.event.workflow_run.event == 'pull_request' &&
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.event == 'pull_request' &&
       github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_repository.full_name == github.repository
+      github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.workflow_run.head_branch }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || github.event.workflow_run.head_branch }}
           fetch-depth: 0
 
       - uses: ./.github/actions/yarn
@@ -39,30 +48,37 @@ jobs:
         id: pr
         env:
           GH_TOKEN: ${{ github.token }}
-          # Use env var to prevent code injection via branch name
-          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
+          BRANCH_NAME: ${{ github.event_name == 'workflow_dispatch' && github.ref_name || github.event.workflow_run.head_branch }}
+          INPUT_PR_NUMBER: ${{ github.event.inputs.pr_number }}
         run: |
-          PR_NUMBER=$(gh pr view "$BRANCH_NAME" --json number -q .number 2>/dev/null || echo "")
-          echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          if [ -n "$INPUT_PR_NUMBER" ]; then
+            echo "number=$INPUT_PR_NUMBER" >> $GITHUB_OUTPUT
+          else
+            PR_NUMBER=$(gh pr view "$BRANCH_NAME" --json number -q .number 2>/dev/null || echo "")
+            echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          fi
 
       - name: Exit if no PR found
         if: steps.pr.outputs.number == ''
-        env:
-          # Use env var to prevent code injection via branch name
-          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
         run: |
-          echo "No PR found for branch $BRANCH_NAME"
+          echo "No PR found"
           exit 0
 
       - name: Get changed files
         id: changed-files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_PR_NUMBER: ${{ github.event.inputs.pr_number }}
         run: |
-          # Get the base branch (usually dev or main)
-          BASE_SHA=${{ github.event.workflow_run.pull_requests[0].base.sha }}
-          HEAD_SHA=${{ github.event.workflow_run.head_sha }}
-
-          # Find changed source files (excluding tests and stories)
-          CHANGED_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '\.(tsx?|jsx?)$' | grep -v '\.test\.' | grep -v '\.stories\.' | grep -E '^(apps/web/src|packages/)' || true)
+          if [ -n "$INPUT_PR_NUMBER" ]; then
+            # For manual runs, get files from PR
+            CHANGED_FILES=$(gh pr diff "$INPUT_PR_NUMBER" --name-only | grep -E '\.(tsx?|jsx?)$' | grep -v '\.test\.' | grep -v '\.stories\.' | grep -E '^(apps/web/src|packages/)' || true)
+          else
+            # Get the base branch (usually dev or main)
+            BASE_SHA=${{ github.event.workflow_run.pull_requests[0].base.sha }}
+            HEAD_SHA=${{ github.event.workflow_run.head_sha }}
+            CHANGED_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '\.(tsx?|jsx?)$' | grep -v '\.test\.' | grep -v '\.stories\.' | grep -E '^(apps/web/src|packages/)' || true)
+          fi
 
           if [ -z "$CHANGED_FILES" ]; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
@@ -71,7 +87,6 @@ jobs:
             echo "has_changes=true" >> $GITHUB_OUTPUT
             echo "Changed source files:"
             echo "$CHANGED_FILES"
-            # Store as multiline output
             echo "files<<EOF" >> $GITHUB_OUTPUT
             echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
@@ -81,8 +96,7 @@ jobs:
         if: steps.changed-files.outputs.has_changes == 'true'
         id: branch
         env:
-          # Use env var to prevent code injection via branch name
-          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
+          BRANCH_NAME: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch_name || github.event.workflow_run.head_branch }}
         run: |
           NORMALIZED=$(echo "$BRANCH_NAME" | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')
           echo "normalized=$NORMALIZED" >> $GITHUB_OUTPUT
@@ -114,24 +128,24 @@ jobs:
 
       - name: Upload screenshots to branch
         if: steps.changed-files.outputs.has_changes == 'true' && steps.routes.outputs.has_routes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Configure git identity first
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global credential.helper '!f() { echo "username=x-access-token"; echo "password=$GH_TOKEN"; }; f'
 
-          # Create a unique directory for this PR's screenshots
           SCREENSHOT_DIR="page-screenshots/${{ steps.pr.outputs.number }}"
 
-          # Clone the storage branch in a separate directory
           cd /tmp
           rm -rf screenshots-storage
 
-          if git clone --depth 1 --branch page-screenshots-storage https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git screenshots-storage; then
+          if git clone --depth 1 --branch page-screenshots-storage https://github.com/${{ github.repository }}.git screenshots-storage; then
             echo "Cloned existing storage branch"
             cd screenshots-storage
           else
             echo "Storage branch doesn't exist, creating it"
-            git clone --depth 1 https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git screenshots-storage
+            git clone --depth 1 https://github.com/${{ github.repository }}.git screenshots-storage
             cd screenshots-storage
             git checkout --orphan page-screenshots-storage
             git rm -rf . 2>/dev/null || true
@@ -140,11 +154,9 @@ jobs:
             git commit -m "Initialize page-screenshots-storage branch"
           fi
 
-          # Copy screenshots to PR directory
           mkdir -p "$SCREENSHOT_DIR"
           cp $GITHUB_WORKSPACE/page-screenshots/*.png "$SCREENSHOT_DIR/" 2>/dev/null || true
 
-          # Commit and push
           git add "$SCREENSHOT_DIR"
           if git commit -m "Add page screenshots for PR #${{ steps.pr.outputs.number }}"; then
             git push origin page-screenshots-storage
@@ -160,14 +172,12 @@ jobs:
             const fs = require('fs');
             const path = require('path');
 
-            // Read screenshot directory
             const screenshotDir = 'page-screenshots';
             if (!fs.existsSync(screenshotDir)) {
               console.log('No screenshots directory found');
               return;
             }
 
-            // Read routes for metadata
             const routesFile = path.join(screenshotDir, 'routes.json');
             let routes = [];
             if (fs.existsSync(routesFile)) {
@@ -186,31 +196,16 @@ jobs:
             const baseUrl = `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/page-screenshots-storage/page-screenshots/${prNumber}`;
             const previewBaseUrl = `https://${{ steps.branch.outputs.normalized }}--walletweb.review.5afe.dev`;
 
-            // Build comment body
             let body = '## 📸 Page Screenshots\n\n';
             body += `Found ${screenshots.length} screenshot(s) for pages affected by changes in this PR.\n\n`;
             body += `**Preview Site:** ${previewBaseUrl}/home?safe=eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6\n\n`;
 
-            // Group screenshots by section
-            const sections = {
-              'Dashboard & Overview': ['dashboard'],
-              'Assets': ['assets', 'nfts'],
-              'Transactions': ['transaction', 'messages', 'queue', 'history'],
-              'Address Book': ['address-book'],
-              'Safe Apps': ['safe-apps'],
-              'Settings': ['settings'],
-              'Welcome & Onboarding': ['welcome', 'create', 'load', 'my-accounts'],
-            };
-
-            // Show inline if < 8 screenshots, otherwise use collapsible details
             const useCollapsible = screenshots.length >= 8;
 
-            // Add screenshots to comment with proper URLs
             for (const file of screenshots) {
               const name = file.replace('.png', '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
               const imageUrl = `${baseUrl}/${file}`;
 
-              // Find the route for this screenshot
               const routeInfo = routes.find(r =>
                 r.name.toLowerCase().replace(/\s+/g, '-') === file.replace('.png', '')
               );
@@ -231,7 +226,6 @@ jobs:
             body += '\n---\n';
             body += '*Screenshots are automatically captured from pages affected by changed files.*';
 
-            // Find existing comment
             const { data: comments } = await github.rest.issues.listComments({
               owner: repo.owner,
               repo: repo.repo,
@@ -243,7 +237,6 @@ jobs:
               comment.body.includes('📸 Page Screenshots')
             );
 
-            // Create or update comment
             if (botComment) {
               await github.rest.issues.updateComment({
                 owner: repo.owner,
@@ -276,7 +269,6 @@ jobs:
               comment.body.includes('📸 Page Screenshots')
             );
 
-            // Delete the comment if no routes affected
             if (botComment) {
               await github.rest.issues.deleteComment({
                 owner: context.repo.owner,
@@ -301,7 +293,6 @@ jobs:
               comment.body.includes('📸 Page Screenshots')
             );
 
-            // Delete the comment if no source files changed
             if (botComment) {
               await github.rest.issues.deleteComment({
                 owner: context.repo.owner,
