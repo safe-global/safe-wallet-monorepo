@@ -203,22 +203,22 @@ async function exchangeCodeForToken(
   // Get redirect URI (must match the one used in authorization request)
   const redirectUri = typeof window !== 'undefined' ? `${window.location.origin}/hypernative/oauth-callback` : ''
 
-  // Build token exchange request body
-  const body = new URLSearchParams({
+  // Build token exchange request body (JSON format per Hypernative API spec)
+  const body = {
     grant_type: 'authorization_code',
     code,
     redirect_uri: redirectUri,
     client_id: clientId,
     code_verifier: codeVerifier,
-  })
+  }
 
   // Make token exchange request
   const response = await fetch(tokenUrl, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/json',
     },
-    body: body.toString(),
+    body: JSON.stringify(body),
   })
 
   if (!response.ok) {

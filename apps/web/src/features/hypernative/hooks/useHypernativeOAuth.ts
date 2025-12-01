@@ -57,10 +57,11 @@ const PKCE_VERIFIER_LENGTH = 128
 const OAUTH_STATE_LENGTH = 32
 
 /**
- * Mock token expiry time in seconds (1 hour)
+ * Mock token expiry time in seconds (10 minutes)
  * Used when MOCK_AUTH_ENABLED is true for development
+ * Matches Hypernative OAuth API specification default expiry
  */
-const MOCK_TOKEN_EXPIRES_IN = 3600
+const MOCK_TOKEN_EXPIRES_IN = 600
 
 /**
  * Mock authentication delay in milliseconds

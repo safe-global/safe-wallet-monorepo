@@ -409,15 +409,21 @@ export const handlers = (GATEWAY_URL: string) => [
   // Mock Hypernative OAuth token exchange endpoint
   // This handles the OAuth authorization code exchange for access tokens
   // Used in development and testing when NEXT_PUBLIC_HYPERNATIVE_TOKEN_URL is set to mock URL
+  // Per Hypernative API spec: accepts JSON body, returns 600s expiry, read-only scope
   http.post('https://mock-hn-auth.example.com/oauth/token', async ({ request }) => {
-    const body = await request.text()
-    const params = new URLSearchParams(body)
+    const body = (await request.json()) as {
+      grant_type?: string
+      code?: string
+      code_verifier?: string
+      redirect_uri?: string
+      client_id?: string
+    }
 
-    const grantType = params.get('grant_type')
-    const code = params.get('code')
-    const codeVerifier = params.get('code_verifier')
-    const redirectUri = params.get('redirect_uri')
-    const clientId = params.get('client_id')
+    const grantType = body?.grant_type
+    const code = body?.code
+    const codeVerifier = body?.code_verifier
+    const redirectUri = body?.redirect_uri
+    const clientId = body?.client_id
 
     // Validate required OAuth parameters
     if (!grantType || grantType !== 'authorization_code') {
@@ -439,16 +445,16 @@ export const handlers = (GATEWAY_URL: string) => [
       return HttpResponse.json({ error: 'invalid_request', error_description: 'Missing redirect_uri' }, { status: 400 })
     }
 
-    if (!clientId || clientId !== 'mock-client-id') {
+    if (!clientId || clientId !== 'SAFE_WALLET_SPA') {
       return HttpResponse.json({ error: 'invalid_client', error_description: 'Invalid client_id' }, { status: 401 })
     }
 
-    // Return successful token response
+    // Return successful token response per Hypernative spec
     return HttpResponse.json({
       access_token: `mock-hn-token-${Date.now()}`,
       token_type: 'Bearer',
-      expires_in: 3600,
-      scope: 'read:analysis write:analysis',
+      expires_in: 600,
+      scope: 'read',
     })
   }),
 ]

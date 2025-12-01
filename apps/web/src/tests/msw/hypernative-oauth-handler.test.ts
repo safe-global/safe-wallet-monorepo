@@ -17,18 +17,16 @@ describe('Hypernative OAuth Token Exchange Handler', () => {
     code: 'test-auth-code-123',
     code_verifier: 'test-verifier-456',
     redirect_uri: 'http://localhost:3000/hypernative/oauth-callback',
-    client_id: 'mock-client-id',
+    client_id: 'SAFE_WALLET_SPA',
   }
 
   it('should return access token for valid request', async () => {
-    const body = new URLSearchParams(validTokenRequest)
-
     const response = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
-      body: body.toString(),
+      body: JSON.stringify(validTokenRequest),
     })
 
     expect(response.ok).toBe(true)
@@ -38,23 +36,21 @@ describe('Hypernative OAuth Token Exchange Handler', () => {
     expect(data).toMatchObject({
       access_token: expect.stringMatching(/^mock-hn-token-\d+$/),
       token_type: 'Bearer',
-      expires_in: 3600,
-      scope: 'read:analysis write:analysis',
+      expires_in: 600,
+      scope: 'read',
     })
   })
 
   it('should reject request with invalid grant_type', async () => {
-    const body = new URLSearchParams({
-      ...validTokenRequest,
-      grant_type: 'client_credentials',
-    })
-
     const response = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
-      body: body.toString(),
+      body: JSON.stringify({
+        ...validTokenRequest,
+        grant_type: 'client_credentials',
+      }),
     })
 
     expect(response.status).toBe(400)
@@ -67,19 +63,17 @@ describe('Hypernative OAuth Token Exchange Handler', () => {
   })
 
   it('should reject request with missing code', async () => {
-    const body = new URLSearchParams({
-      grant_type: validTokenRequest.grant_type,
-      code_verifier: validTokenRequest.code_verifier,
-      redirect_uri: validTokenRequest.redirect_uri,
-      client_id: validTokenRequest.client_id,
-    })
-
     const response = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
-      body: body.toString(),
+      body: JSON.stringify({
+        grant_type: validTokenRequest.grant_type,
+        code_verifier: validTokenRequest.code_verifier,
+        redirect_uri: validTokenRequest.redirect_uri,
+        client_id: validTokenRequest.client_id,
+      }),
     })
 
     expect(response.status).toBe(400)
@@ -92,19 +86,17 @@ describe('Hypernative OAuth Token Exchange Handler', () => {
   })
 
   it('should reject request with missing code_verifier', async () => {
-    const body = new URLSearchParams({
-      grant_type: validTokenRequest.grant_type,
-      code: validTokenRequest.code,
-      redirect_uri: validTokenRequest.redirect_uri,
-      client_id: validTokenRequest.client_id,
-    })
-
     const response = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
-      body: body.toString(),
+      body: JSON.stringify({
+        grant_type: validTokenRequest.grant_type,
+        code: validTokenRequest.code,
+        redirect_uri: validTokenRequest.redirect_uri,
+        client_id: validTokenRequest.client_id,
+      }),
     })
 
     expect(response.status).toBe(400)
@@ -117,19 +109,17 @@ describe('Hypernative OAuth Token Exchange Handler', () => {
   })
 
   it('should reject request with missing redirect_uri', async () => {
-    const body = new URLSearchParams({
-      grant_type: validTokenRequest.grant_type,
-      code: validTokenRequest.code,
-      code_verifier: validTokenRequest.code_verifier,
-      client_id: validTokenRequest.client_id,
-    })
-
     const response = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
-      body: body.toString(),
+      body: JSON.stringify({
+        grant_type: validTokenRequest.grant_type,
+        code: validTokenRequest.code,
+        code_verifier: validTokenRequest.code_verifier,
+        client_id: validTokenRequest.client_id,
+      }),
     })
 
     expect(response.status).toBe(400)
@@ -142,17 +132,15 @@ describe('Hypernative OAuth Token Exchange Handler', () => {
   })
 
   it('should reject request with invalid client_id', async () => {
-    const body = new URLSearchParams({
-      ...validTokenRequest,
-      client_id: 'wrong-client-id',
-    })
-
     const response = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
-      body: body.toString(),
+      body: JSON.stringify({
+        ...validTokenRequest,
+        client_id: 'wrong-client-id',
+      }),
     })
 
     expect(response.status).toBe(401)
@@ -165,19 +153,17 @@ describe('Hypernative OAuth Token Exchange Handler', () => {
   })
 
   it('should reject request with missing client_id', async () => {
-    const body = new URLSearchParams({
-      grant_type: validTokenRequest.grant_type,
-      code: validTokenRequest.code,
-      code_verifier: validTokenRequest.code_verifier,
-      redirect_uri: validTokenRequest.redirect_uri,
-    })
-
     const response = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
-      body: body.toString(),
+      body: JSON.stringify({
+        grant_type: validTokenRequest.grant_type,
+        code: validTokenRequest.code,
+        code_verifier: validTokenRequest.code_verifier,
+        redirect_uri: validTokenRequest.redirect_uri,
+      }),
     })
 
     expect(response.status).toBe(401)
@@ -190,14 +176,12 @@ describe('Hypernative OAuth Token Exchange Handler', () => {
   })
 
   it('should generate unique tokens for each request', async () => {
-    const body = new URLSearchParams(validTokenRequest)
-
     const response1 = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
-      body: body.toString(),
+      body: JSON.stringify(validTokenRequest),
     })
 
     const data1 = await response1.json()
@@ -208,9 +192,9 @@ describe('Hypernative OAuth Token Exchange Handler', () => {
     const response2 = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
-      body: body.toString(),
+      body: JSON.stringify(validTokenRequest),
     })
 
     const data2 = await response2.json()
