@@ -53,7 +53,7 @@ export const getOverallStatus = (
           if (groupResults) {
             const results = groupResults.map((result) => ({
               ...result,
-              title: SEVERITY_TO_TITLE[result.severity],
+              title: SEVERITY_TO_TITLE[result.severity as Severity],
             })) as AnalysisResult[]
             allResults.push(...results)
           }
@@ -68,7 +68,7 @@ export const getOverallStatus = (
       if (typeof addressResults !== 'object' || addressResults === null) continue
       for (const groupResults of Object.values(addressResults)) {
         if (groupResults && isThreatAnalysisResult(groupResults)) {
-          allResults.push({ ...groupResults, title: SEVERITY_TO_TITLE[groupResults.severity] })
+          allResults.push({ ...groupResults, title: SEVERITY_TO_TITLE[groupResults.severity as Severity] })
         }
       }
     }
@@ -95,6 +95,9 @@ export const getOverallStatus = (
   const primaryResult = getPrimaryResult(allResults)
 
   if (primaryResult) {
-    return { severity: primaryResult.severity, title: primaryResult.title || SEVERITY_TO_TITLE[primaryResult.severity] }
+    return {
+      severity: primaryResult.severity,
+      title: primaryResult.title || SEVERITY_TO_TITLE[primaryResult.severity as Severity],
+    }
   }
 }
