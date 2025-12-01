@@ -82,7 +82,7 @@ export const useGasLimit = ({
     if (gasLimitError && logError) {
       logError(gasLimitError.message)
     }
-  }, [gasLimitError])
+  }, [gasLimitError, logError])
 
   return { gasLimit, gasLimitError, gasLimitLoading }
 }

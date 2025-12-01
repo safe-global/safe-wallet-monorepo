@@ -97,6 +97,7 @@ export const SafeShieldContent = ({
             delay={contractAnalysisDelay}
             highlightedSeverity={highlightedSeverity}
             analyticsEvent={SAFE_SHIELD_EVENTS.CONTRACT_DECODED}
+            showImage
           />
 
           <AnalysisGroupCard
@@ -109,7 +110,6 @@ export const SafeShieldContent = ({
 
           {!contractLoading && !threatLoading && (
             <TenderlySimulation
-              data-testid="tenderly-simulation"
               safeTx={safeTx}
               delay={simulationAnalysisDelay}
               highlightedSeverity={highlightedSeverity}

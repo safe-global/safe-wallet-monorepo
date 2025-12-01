@@ -250,6 +250,14 @@ export function verifyHomeSafeUrl(safe) {
   cy.location('href', { timeout: 10000 }).should('include', constants.homeUrl + safe)
 }
 
+export function verifyLinkContainsUrl(linkSelector, urlPattern) {
+  if (typeof linkSelector === 'string') {
+    cy.contains(linkSelector).closest('a').should('have.attr', 'href').and('include', urlPattern)
+  } else {
+    linkSelector.should('have.attr', 'href').and('include', urlPattern)
+  }
+}
+
 export function checkTextsExistWithinElement(element, texts) {
   texts.forEach((text) => {
     cy.get(element)

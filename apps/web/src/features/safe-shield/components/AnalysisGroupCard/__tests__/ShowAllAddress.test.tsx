@@ -1,12 +1,12 @@
 import { render, screen, renderWithUserEvent } from '@/tests/test-utils'
-import { ShowAllAddress } from '../ShowAllAddress'
+import { ShowAllAddress } from '../../ShowAllAddress/ShowAllAddress'
 import { faker } from '@faker-js/faker'
 
 describe('ShowAllAddress', () => {
   const mockAddresses = [
-    faker.finance.ethereumAddress(),
-    faker.finance.ethereumAddress(),
-    faker.finance.ethereumAddress(),
+    { address: faker.finance.ethereumAddress(), name: 'Test Address 1', logoUrl: 'https://example.com/logo1.png' },
+    { address: faker.finance.ethereumAddress(), name: 'Test Address 2', logoUrl: 'https://example.com/logo2.png' },
+    { address: faker.finance.ethereumAddress() },
   ]
 
   beforeEach(() => {
@@ -31,9 +31,10 @@ describe('ShowAllAddress', () => {
     it('should not display addresses initially (collapsed)', () => {
       render(<ShowAllAddress addresses={mockAddresses} />)
 
-      // Addresses should not be visible in the collapsed state
-      mockAddresses.forEach((address) => {
-        expect(screen.queryByText(address)).not.toBeVisible()
+      // Addresses are in the DOM but not visible in the collapsed state
+      mockAddresses.forEach((item) => {
+        const element = screen.getByText(item.address)
+        expect(element).not.toBeVisible()
       })
     })
   })
@@ -57,8 +58,8 @@ describe('ShowAllAddress', () => {
       await user.click(showAllButton)
 
       // All addresses should now be visible
-      mockAddresses.forEach((address) => {
-        expect(screen.getByText(address)).toBeVisible()
+      mockAddresses.forEach((item) => {
+        expect(screen.getByText(item.address)).toBeVisible()
       })
     })
 
@@ -83,8 +84,8 @@ describe('ShowAllAddress', () => {
       const { user } = renderWithUserEvent(<ShowAllAddress addresses={mockAddresses} />)
 
       // Initially, addresses should not be visible
-      mockAddresses.forEach((address) => {
-        const element = screen.queryByText(address)
+      mockAddresses.forEach((item) => {
+        const element = screen.getByText(item.address)
         expect(element).not.toBeVisible()
       })
 
@@ -92,8 +93,8 @@ describe('ShowAllAddress', () => {
       await user.click(screen.getByText('Show all'))
 
       // Verify all addresses are now visible
-      mockAddresses.forEach((address) => {
-        const element = screen.getByText(address)
+      mockAddresses.forEach((item) => {
+        const element = screen.getByText(item.address)
         expect(element).toBeVisible()
       })
 
@@ -133,8 +134,8 @@ describe('ShowAllAddress', () => {
       await user.click(screen.getByText('Show all'))
 
       // Check that each address is rendered
-      mockAddresses.forEach((address) => {
-        expect(screen.getByText(address)).toBeInTheDocument()
+      mockAddresses.forEach((item) => {
+        expect(screen.getByText(item.address)).toBeInTheDocument()
       })
 
       // Check that addresses are in separate boxes
@@ -143,34 +144,37 @@ describe('ShowAllAddress', () => {
     })
 
     it('should display single address correctly', async () => {
-      const singleAddress = [faker.finance.ethereumAddress()]
+      const singleAddress = [{ address: faker.finance.ethereumAddress() }]
       const { user } = renderWithUserEvent(<ShowAllAddress addresses={singleAddress} />)
 
       await user.click(screen.getByText('Show all'))
 
-      expect(screen.getByText(singleAddress[0])).toBeVisible()
+      expect(screen.getByText(singleAddress[0].address)).toBeVisible()
     })
 
     it('should display many addresses correctly', async () => {
-      const manyAddresses = Array.from({ length: 10 }, () => faker.finance.ethereumAddress())
+      const manyAddresses = Array.from({ length: 10 }, () => ({ address: faker.finance.ethereumAddress() }))
       const { user } = renderWithUserEvent(<ShowAllAddress addresses={manyAddresses} />)
 
       await user.click(screen.getByText('Show all'))
 
-      manyAddresses.forEach((address) => {
-        expect(screen.getByText(address)).toBeVisible()
+      manyAddresses.forEach((item) => {
+        expect(screen.getByText(item.address)).toBeVisible()
       })
     })
 
     it('should handle addresses with word wrapping', async () => {
-      const longAddresses = ['0x1234567890123456789012345678901234567890', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd']
+      const longAddresses = [
+        { address: '0x1234567890123456789012345678901234567890' },
+        { address: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd' },
+      ]
       const { user } = renderWithUserEvent(<ShowAllAddress addresses={longAddresses} />)
 
       await user.click(screen.getByText('Show all'))
 
       // Check that both addresses are rendered
-      longAddresses.forEach((address) => {
-        expect(screen.getByText(address)).toBeInTheDocument()
+      longAddresses.forEach((item) => {
+        expect(screen.getByText(item.address)).toBeInTheDocument()
       })
     })
   })
@@ -228,8 +232,8 @@ describe('ShowAllAddress', () => {
       await user.click(screen.getByText('Show all'))
 
       // Each address should be rendered
-      mockAddresses.forEach((address) => {
-        expect(screen.getByText(address)).toBeInTheDocument()
+      mockAddresses.forEach((item) => {
+        expect(screen.getByText(item.address)).toBeInTheDocument()
       })
     })
 
@@ -240,7 +244,7 @@ describe('ShowAllAddress', () => {
 
       // Check that all addresses are present and visible
       mockAddresses.forEach((address) => {
-        expect(screen.getByText(address)).toBeVisible()
+        expect(screen.getByText(address.address)).toBeVisible()
       })
     })
   })
@@ -277,37 +281,37 @@ describe('ShowAllAddress', () => {
   describe('Component Props', () => {
     it('should accept and render different address formats', async () => {
       const differentAddresses = [
-        '0x0000000000000000000000000000000000000001',
-        '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF',
-        faker.finance.ethereumAddress().toLowerCase(),
+        { address: '0x0000000000000000000000000000000000000001' },
+        { address: '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF' },
+        { address: faker.finance.ethereumAddress().toLowerCase() },
       ]
       const { user } = renderWithUserEvent(<ShowAllAddress addresses={differentAddresses} />)
 
       await user.click(screen.getByText('Show all'))
 
-      differentAddresses.forEach((address) => {
-        expect(screen.getByText(address)).toBeVisible()
+      differentAddresses.forEach((item) => {
+        expect(screen.getByText(item.address)).toBeVisible()
       })
     })
 
     it('should handle addresses prop update', async () => {
-      const initialAddresses = [faker.finance.ethereumAddress()]
+      const initialAddresses = [{ address: faker.finance.ethereumAddress() }]
       const { user, rerender } = renderWithUserEvent(<ShowAllAddress addresses={initialAddresses} />)
 
       await user.click(screen.getByText('Show all'))
-      expect(screen.getByText(initialAddresses[0])).toBeVisible()
+      expect(screen.getByText(initialAddresses[0].address)).toBeVisible()
 
       // Update addresses
-      const newAddresses = [faker.finance.ethereumAddress(), faker.finance.ethereumAddress()]
+      const newAddresses = [{ address: faker.finance.ethereumAddress() }, { address: faker.finance.ethereumAddress() }]
       rerender(<ShowAllAddress addresses={newAddresses} />)
 
       // New addresses should be visible (component is still expanded)
-      newAddresses.forEach((address) => {
-        expect(screen.getByText(address)).toBeVisible()
+      newAddresses.forEach((item) => {
+        expect(screen.getByText(item.address)).toBeVisible()
       })
 
       // Old address should not be present
-      expect(screen.queryByText(initialAddresses[0])).not.toBeInTheDocument()
+      expect(screen.queryByText(initialAddresses[0].address)).not.toBeInTheDocument()
     })
   })
 })

@@ -28,6 +28,7 @@ import { useSigner } from '@/hooks/wallets/useWallet'
 import useChainId from '@/hooks/useChainId'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 import useTxDetails from '@/hooks/useTxDetails'
+import useSafeInfo from '@/hooks/useSafeInfo'
 
 export type TxFlowContextType<T extends unknown = any> = {
   step: number
@@ -157,6 +158,7 @@ const TxFlowProvider = <T extends unknown>({
 }: TxFlowProviderProps<T>): ReactElement => {
   const signer = useSigner()
   const isSafeOwner = useIsSafeOwner()
+  const { safe } = useSafeInfo()
   const isProposer = useIsWalletProposer()
   const chainId = useChainId()
   const { safeTx, txOrigin, isMassPayout } = useContext(SafeTxContext)
@@ -210,9 +212,10 @@ const TxFlowProvider = <T extends unknown>({
         !!signer?.isSafe,
         txOrigin,
         isMassPayout,
+        safe.threshold,
       )
     },
-    [chainId, isCreation, trigger, signer?.isSafe, txOrigin, isMassPayout],
+    [chainId, isCreation, trigger, signer?.isSafe, txOrigin, isMassPayout, safe.threshold],
   )
 
   const value = {

@@ -5,7 +5,7 @@ import { deploySafeAndExecuteTx } from '@/features/counterfactual/utils'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import useWallet from '@/hooks/wallets/useWallet'
-import { OVERVIEW_EVENTS, trackEvent, WALLET_EVENTS } from '@/services/analytics'
+import { OVERVIEW_EVENTS, trackEvent, WALLET_EVENTS, MixpanelEventParams } from '@/services/analytics'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import madProps from '@/utils/mad-props'
 import React, { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
@@ -47,7 +47,7 @@ export const CounterfactualForm = ({
 }): ReactElement => {
   const wallet = useWallet()
   const chain = useCurrentChain()
-  const { safeAddress } = useSafeInfo()
+  const { safe, safeAddress } = useSafeInfo()
 
   // Form state
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
@@ -77,8 +77,12 @@ export const CounterfactualForm = ({
 
       await deploySafeAndExecuteTx(txOptions, wallet, safeAddress, safeTx, wallet?.provider)
 
-      trackEvent({ ...TX_EVENTS.CREATE, label: TX_TYPES.activate_with_tx })
-      trackEvent({ ...TX_EVENTS.EXECUTE, label: TX_TYPES.activate_with_tx })
+      const mixpanelProps = {
+        [MixpanelEventParams.TRANSACTION_TYPE]: TX_TYPES.activate_with_tx,
+        [MixpanelEventParams.THRESHOLD]: safe.threshold,
+      }
+      trackEvent({ ...TX_EVENTS.CREATE, label: TX_TYPES.activate_with_tx }, mixpanelProps)
+      trackEvent({ ...TX_EVENTS.EXECUTE, label: TX_TYPES.activate_with_tx }, mixpanelProps)
       trackEvent(WALLET_EVENTS.ONCHAIN_INTERACTION)
     } catch (_err) {
       const err = asError(_err)

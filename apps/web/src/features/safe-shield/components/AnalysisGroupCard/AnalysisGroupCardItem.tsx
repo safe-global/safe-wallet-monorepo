@@ -5,15 +5,16 @@ import { isAddressChange } from '@safe-global/utils/features/safe-shield/utils'
 import { SEVERITY_COLORS } from '../../constants'
 import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
 import { AddressChanges } from '../AddressChanges'
-import { ShowAllAddress } from './ShowAllAddress'
+import { ShowAllAddress } from '../ShowAllAddress/ShowAllAddress'
 
 interface AnalysisGroupCardItemProps {
   result: AnalysisResult
   description?: React.ReactNode
   severity?: Severity
+  showImage?: boolean
 }
 
-export const AnalysisGroupCardItem = ({ result, description, severity }: AnalysisGroupCardItemProps) => {
+export const AnalysisGroupCardItem = ({ result, description, severity, showImage }: AnalysisGroupCardItemProps) => {
   const borderColor = severity ? SEVERITY_COLORS[severity].main : 'var(--color-border-main)'
   const displayDescription = description ?? result.description
 
@@ -29,7 +30,7 @@ export const AnalysisGroupCardItem = ({ result, description, severity }: Analysi
 
           {isAddressChange(result) && <AddressChanges result={result} />}
 
-          {result.addresses?.length && <ShowAllAddress addresses={result.addresses} />}
+          {result.addresses?.length && <ShowAllAddress addresses={result.addresses} showImage={showImage} />}
         </Stack>
       </Box>
     </Box>

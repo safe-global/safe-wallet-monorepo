@@ -1,6 +1,6 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useCallback, useRef } from 'react'
-import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
+import { MODALS_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 import { TX_EVENTS } from '@/services/analytics/events/transactions'
 import { getTransactionTrackingType } from '@/services/analytics/tx-tracking'
 import { isNestedConfirmationTxInfo } from '@/utils/transaction-guards'
@@ -50,6 +50,7 @@ export function trackTxEvents(
   isParentSigner: boolean,
   origin?: string,
   isMassPayout: boolean = false,
+  threshold?: number,
 ) {
   const isNestedConfirmation = !!details && isNestedConfirmationTxInfo(details.txInfo)
 
@@ -57,22 +58,33 @@ export function trackTxEvents(
   const confirmationEvent = getConfirmationEvent({ isParentSigner, isNestedConfirmation })
   const executionEvent = getExecutionEvent({ isParentSigner, isNestedConfirmation, isRoleExecution })
 
-  const event = (() => {
-    if (isCreation) {
-      return creationEvent
-    }
-    if (isExecuted) {
-      return executionEvent
-    }
-    return confirmationEvent
-  })()
-
   const txType = getTransactionTrackingType(details, origin, isMassPayout)
-  trackEvent({ ...event, label: txType })
 
-  // Immediate execution on creation
-  if (isCreation && isExecuted) {
-    trackEvent({ ...executionEvent, label: txType })
+  // Build Mixpanel properties for events that need them
+  const getMixpanelProperties = () => {
+    const properties: Record<string, string | number | undefined> = {
+      [MixpanelEventParams.TRANSACTION_TYPE]: txType,
+    }
+    if (threshold !== undefined) {
+      properties[MixpanelEventParams.THRESHOLD] = threshold
+    }
+    return properties
+  }
+
+  if (isCreation) {
+    // Track "Transaction Submitted" to Mixpanel with properties
+    trackEvent({ ...creationEvent, label: txType }, getMixpanelProperties())
+
+    // If also executed immediately, track "Transaction Executed" with properties
+    if (isExecuted) {
+      trackEvent({ ...executionEvent, label: txType }, getMixpanelProperties())
+    }
+  } else if (isExecuted) {
+    // Track "Transaction Executed" to Mixpanel with properties
+    trackEvent({ ...executionEvent, label: txType }, getMixpanelProperties())
+  } else {
+    // Confirmation - no Mixpanel properties
+    trackEvent({ ...confirmationEvent, label: txType })
   }
 }
 

@@ -2,7 +2,7 @@ import FirstSteps from '@/components/dashboard/FirstSteps'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { type ReactElement, useMemo } from 'react'
 import dynamic from 'next/dynamic'
-import { Grid } from '@mui/material'
+import { Grid, Stack } from '@mui/material'
 import PendingTxsList from '@/components/dashboard/PendingTxs/PendingTxsList'
 import AssetsWidget from '@/components/dashboard/Assets'
 import Overview from '@/components/dashboard/Overview/Overview'
@@ -87,7 +87,14 @@ const Dashboard = (): ReactElement => {
         <div className={css.leftCol}>
           <Overview />
 
-          {noAssets ? <AddFundsToGetStarted /> : <NewsCarousel banners={banners} />}
+          {noAssets ? (
+            <Stack spacing={1}>
+              {showHnBanner && <HnBannerForCarousel onDismiss={() => {}} />}
+              {!showHnBanner && <AddFundsToGetStarted />}
+            </Stack>
+          ) : (
+            <NewsCarousel banners={banners} />
+          )}
 
           <div className={css.hideIfEmpty}>
             <FirstSteps />

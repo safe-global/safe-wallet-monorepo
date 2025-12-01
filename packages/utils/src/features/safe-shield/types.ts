@@ -104,7 +104,11 @@ export type AnalysisResult<T extends AnyStatus = AnyStatus> = {
   type: T
   title: string
   description: string
-  addresses?: string[]
+  addresses?: {
+    address: string
+    name?: string
+    logoUrl?: string
+  }[]
 }
 
 export type MasterCopyChangeThreatAnalysisResult = AnalysisResult<ThreatStatus.MASTERCOPY_CHANGE> & {
@@ -145,10 +149,19 @@ export type RecipientAnalysisResults = {
   }
 }
 
+export type ContractDetails = {
+  name: string
+  logoUrl: string
+}
+
 export type ContractAnalysisResults = {
-  [address: string]: GroupedAnalysisResults<
-    StatusGroup.CONTRACT_VERIFICATION | StatusGroup.CONTRACT_INTERACTION | StatusGroup.DELEGATECALL | StatusGroup.COMMON
-  >
+  [address: string]: ContractDetails &
+    GroupedAnalysisResults<
+      | StatusGroup.CONTRACT_VERIFICATION
+      | StatusGroup.CONTRACT_INTERACTION
+      | StatusGroup.DELEGATECALL
+      | StatusGroup.COMMON
+    >
 }
 
 export type ThreatAnalysisResults = {

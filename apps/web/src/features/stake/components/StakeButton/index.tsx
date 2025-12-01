@@ -51,7 +51,7 @@ const StakeButton = ({
           }}
         >
           {onlyIcon ? (
-            <Tooltip title="Stake" placement="top" arrow>
+            <Tooltip title={isOk ? 'Stake' : ''} placement="top" arrow>
               <span>
                 <IconButton
                   data-testid="stake-btn"

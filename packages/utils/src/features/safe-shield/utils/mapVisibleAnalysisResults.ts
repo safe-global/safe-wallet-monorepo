@@ -20,10 +20,12 @@ import { mapConsolidatedAnalysisResults } from './mapConsolidatedAnalysisResults
 export const mapVisibleAnalysisResults = (
   addressesResultsMap: RecipientAnalysisResults | ContractAnalysisResults | ThreatAnalysisResults,
 ): AnalysisResult[] => {
-  const addressResults: GroupedAnalysisResults[] = Object.values(addressesResultsMap)
+  const { name: _name, logoUrl: _logoUrl, ...resultsMap } = addressesResultsMap as ContractAnalysisResults
+  const addressResults: GroupedAnalysisResults[] = Object.values(resultsMap)
 
   if (addressResults.length === 1) {
     const results: AnalysisResult[] = []
+
     for (const groupResults of Object.values(addressResults[0])) {
       if (!Array.isArray(groupResults)) continue
       const primaryGroupResult = getPrimaryResult<AnalysisResult>(groupResults)

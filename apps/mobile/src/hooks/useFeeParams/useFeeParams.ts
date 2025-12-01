@@ -30,7 +30,7 @@ export interface UseFeeParamsSettings {
 }
 
 export const useFeeParams = (
-  txDetails: TransactionDetails,
+  txDetails: TransactionDetails | undefined,
   manualParams: EstimatedFeeValues | null,
   settings?: UseFeeParamsSettings,
 ): FeeParams => {

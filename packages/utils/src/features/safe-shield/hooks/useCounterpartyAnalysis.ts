@@ -139,14 +139,20 @@ export function useCounterpartyAnalysis({
 
   const contractResults = useMemo(() => {
     if (fetchError) {
-      return { [safeAddress]: { [StatusGroup.COMMON]: [getErrorInfo(ErrorType.CONTRACT)] } }
+      return {
+        [safeAddress]: {
+          name: '',
+          logoUrl: '',
+          [StatusGroup.COMMON]: [getErrorInfo(ErrorType.CONTRACT)],
+        },
+      }
     }
     if (!counterpartyData?.contract) {
       return undefined
     }
 
     return counterpartyData.contract as ContractAnalysisResults
-  }, [counterpartyData?.contract, fetchError])
+  }, [counterpartyData?.contract, fetchError, safeAddress])
 
   // Return results in the expected format
   return {

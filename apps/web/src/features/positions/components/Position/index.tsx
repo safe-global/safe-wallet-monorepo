@@ -1,4 +1,4 @@
-import IframeIcon from '@/components/common/IframeIcon'
+import TokenIcon from '@/components/common/TokenIcon'
 import { Box, Stack, Typography } from '@mui/material'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import FiatValue from '@/components/common/FiatValue'
@@ -9,7 +9,7 @@ import { getReadablePositionType } from '@/features/positions/utils'
 const Position = ({ item }: { item: Position }) => {
   return (
     <Stack direction="row" alignItems="center" key={item.tokenInfo.name} py={1} gap={1}>
-      <IframeIcon src={item.tokenInfo.logoUri || ''} alt={item.tokenInfo.name + ' icon'} width={32} height={32} />
+      <TokenIcon logoUri={item.tokenInfo.logoUri ?? undefined} tokenSymbol={item.tokenInfo.symbol} size={32} />
 
       <Box>
         <Typography fontWeight="bold">{item.tokenInfo.name}</Typography>

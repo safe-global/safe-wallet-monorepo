@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect } from 'react'
 import { View, Stack, YStack } from 'tamagui'
 import { useLocalSearchParams, router } from 'expo-router'
 import { useTransactionData } from '@/src/features/ConfirmTx/hooks/useTransactionData'
@@ -11,21 +11,14 @@ import { LargeHeaderTitle } from '@/src/components/Title'
 import { useTransactionSigningState } from '@/src/hooks/useTransactionSigningState'
 import { useTransactionSigning } from '@/src/features/ConfirmTx/components/SignTransaction/hooks/useTransactionSigning'
 import { useTransactionSigner } from '@/src/features/ConfirmTx/hooks/useTransactionSigner'
+import { useIsMounted } from '@/src/hooks/useIsMounted'
+import Logger from '@/src/utils/logger'
 
 export const LedgerReviewSignContainer = () => {
   const { bottom } = useSafeAreaInsets()
   const { txId, sessionId } = useLocalSearchParams<{ txId: string; sessionId: string }>()
   const { data: txDetails, isLoading: isLoadingTx } = useTransactionData(txId || '')
-
-  // Track if component is mounted to handle navigation in closure
-  const isMountedRef = useRef(true)
-
-  useEffect(() => {
-    isMountedRef.current = true
-    return () => {
-      isMountedRef.current = false
-    }
-  }, [])
+  const isMounted = useIsMounted()
 
   // Get the active signer for this transaction
   const { signerState } = useTransactionSigner(txId || '')
@@ -62,14 +55,17 @@ export const LedgerReviewSignContainer = () => {
       // Disconnect Ledger to prevent DMK background pinger from continuing after signing
       await ledgerDMKService.disconnect()
 
-      if (isMountedRef.current) {
-        router.replace('/signing-success')
+      if (isMounted()) {
+        router.replace({
+          pathname: '/signing-success',
+          params: { txId },
+        })
       }
     } catch (e) {
-      console.error('Ledger signing error:', e)
+      Logger.error('Ledger signing error:', e)
       const errorMessage = e instanceof Error ? e.message : 'Failed to sign with Ledger'
 
-      if (isMountedRef.current) {
+      if (isMounted()) {
         router.push({
           pathname: '/signing-error',
           params: { description: errorMessage },
