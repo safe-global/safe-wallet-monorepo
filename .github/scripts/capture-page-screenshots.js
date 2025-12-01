@@ -57,7 +57,7 @@ async function capturePageScreenshots() {
         updates: true,
         analytics: true,
         terms: true,
-        termsVersion: '1.1',
+        termsVersion: '1.3',
       }),
     )
     // Dismiss outreach popup
