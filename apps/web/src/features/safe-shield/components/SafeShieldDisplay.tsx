@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react'
+import { useMemo, type ReactElement } from 'react'
 import { Card, SvgIcon, Stack } from '@mui/material'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
 import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
@@ -14,6 +14,10 @@ import { SafeShieldHeader } from './SafeShieldHeader'
 import { SafeShieldContent } from './SafeShieldContent'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
+import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
+import { useCheckSimulation } from '../hooks/useCheckSimulation'
+import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import { useIsHypernativeGuard } from '@/features/hypernative/hooks/useIsHypernativeGuard'
 
 const shieldLogoOnHover = {
   width: 78,
@@ -49,13 +53,36 @@ export const SafeShieldDisplay = ({
   threat?: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
 }): ReactElement => {
+  const [recipientResults] = recipient || []
+  const [contractResults] = contract || []
+  const [threatResults] = threat || []
+  const { hasSimulationError } = useCheckSimulation(safeTx)
   const isDarkMode = useDarkMode()
+  const { isAuthenticated, loading: authLoading } = useHypernativeOAuth()
+  const { isHypernativeGuard, loading: HNGuardCheckLoading } = useIsHypernativeGuard()
+
+  const hnLoginRequired = useMemo(
+    () => !isAuthenticated && !authLoading && !HNGuardCheckLoading && isHypernativeGuard,
+    [isAuthenticated, authLoading, HNGuardCheckLoading, isHypernativeGuard],
+  )
+
+  const overallStatus = useMemo(
+    () => getOverallStatus(recipientResults, contractResults, threatResults, hasSimulationError, hnLoginRequired),
+    [recipientResults, contractResults, threatResults, hasSimulationError, hnLoginRequired],
+  )
+
   return (
     <Stack gap={1} data-testid="safe-shield-widget">
       <Card sx={{ borderRadius: '6px', overflow: 'hidden' }}>
-        <SafeShieldHeader recipient={recipient} contract={contract} threat={threat} safeTx={safeTx} />
+        <SafeShieldHeader recipient={recipient} contract={contract} threat={threat} overallStatus={overallStatus} />
 
-        <SafeShieldContent threat={threat} recipient={recipient} contract={contract} safeTx={safeTx} />
+        <SafeShieldContent
+          threat={threat}
+          recipient={recipient}
+          contract={contract}
+          safeTx={safeTx}
+          overallStatus={overallStatus}
+        />
       </Card>
 
       <Stack direction="row" alignItems="center" alignSelf="flex-end">
