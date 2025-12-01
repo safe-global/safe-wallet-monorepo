@@ -27,7 +27,8 @@ describe('Swaps token tests', () => {
     { defaultCommandTimeout: 30000 },
     () => {
       wallet.connectSigner(signer)
-      assets.selectTokenList(assets.tokenListOptions.allTokens)
+      assets.toggleShowAllTokens(true)
+      assets.toggleHideDust(false)
 
       swaps.clickOnAssetSwapBtn(0)
       swaps.acceptLegalDisclaimer()
@@ -39,7 +40,8 @@ describe('Swaps token tests', () => {
   )
 
   it('Verify swap button are displayed in assets table and dashboard', () => {
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     swaps.verifyAssetsPageSwapButtonsCount(4)
 
     cy.window().then((window) => {
