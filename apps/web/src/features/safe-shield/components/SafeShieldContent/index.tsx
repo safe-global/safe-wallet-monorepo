@@ -11,6 +11,7 @@ import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
 import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
+import { HypernativeInfo } from '../HypernativeInfo'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
 import type { SafeTransaction } from '@safe-global/types-kit'
@@ -81,6 +82,8 @@ export const SafeShieldContent = ({
           position: 'relative',
         }}
       >
+        <HypernativeInfo overallStatus={overallStatus} />
+
         {isLoadingVisible && <SafeShieldAnalysisLoading analysesEmpty={analysesEmpty} loading={isLoadingVisible} />}
 
         {shouldShowContent && !loading && allEmpty && <SafeShieldAnalysisEmpty />}
