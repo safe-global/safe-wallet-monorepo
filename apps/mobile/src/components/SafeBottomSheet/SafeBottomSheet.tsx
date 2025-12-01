@@ -155,7 +155,7 @@ export function SafeBottomSheet<T>({
                 getTokenValue(Platform.OS === 'ios' ? '$4' : '$8'),
             },
           ]}
-          stickyHeaderIndices={[0]}
+          stickyHeaderIndices={title ? [0] : undefined}
         >
           {title && <TitleHeader />}
           <View minHeight={200} alignItems="center" paddingVertical="$3">
