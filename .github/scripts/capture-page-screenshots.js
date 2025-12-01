@@ -8,6 +8,15 @@ const fs = require('fs')
 const path = require('path')
 const { chromium } = require('playwright')
 
+// LocalStorage values to dismiss modals/banners (from Cypress e2e setup)
+const COOKIE_CONSENT = JSON.stringify({
+  necessary: true,
+  updates: true,
+  analytics: true,
+  terms: true,
+  termsVersion: '1.1',
+})
+
 async function capturePageScreenshots() {
   // Read routes file
   const routesFile = 'page-screenshots/routes.json'
@@ -36,34 +45,26 @@ async function capturePageScreenshots() {
   // Set a longer default timeout
   context.setDefaultTimeout(60000)
 
+  // Add script to set localStorage before page loads to dismiss modals
+  await context.addInitScript(() => {
+    // Accept Safe Labs terms
+    localStorage.setItem('SAFE_v2__safe-labs-terms', 'true')
+    // Accept cookies
+    localStorage.setItem(
+      'SAFE_v2__cookies_terms',
+      JSON.stringify({
+        necessary: true,
+        updates: true,
+        analytics: true,
+        terms: true,
+        termsVersion: '1.1',
+      }),
+    )
+    // Dismiss outreach popup
+    sessionStorage.setItem('SAFE_v2__outreachPopup_session_v2', Date.now().toString())
+  })
+
   const page = await context.newPage()
-
-  // Dismiss any cookie banners or modals that might appear
-  async function dismissOverlays() {
-    try {
-      // Common cookie banner selectors
-      const cookieSelectors = [
-        '[data-testid="cookie-banner-accept"]',
-        '[data-testid="accept-cookies"]',
-        'button:has-text("Accept")',
-        '[class*="cookie"] button:has-text("Accept")',
-      ]
-
-      for (const selector of cookieSelectors) {
-        const button = await page.locator(selector).first()
-        if ((await button.count()) > 0 && (await button.isVisible())) {
-          await button.click()
-          console.log('  Dismissed cookie banner')
-          break
-        }
-      }
-
-      // Wait a bit for any animations
-      await page.waitForTimeout(500)
-    } catch (error) {
-      // Ignore errors - overlays might not exist
-    }
-  }
 
   // Capture each route
   for (let i = 0; i < routes.length; i++) {
@@ -77,11 +78,6 @@ async function capturePageScreenshots() {
         waitUntil: 'networkidle',
         timeout: 60000,
       })
-
-      // Dismiss any overlays on first page load
-      if (i === 0) {
-        await dismissOverlays()
-      }
 
       // Wait for specific selector if configured
       if (waitForSelector) {
