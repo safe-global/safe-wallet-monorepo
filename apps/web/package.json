@@ -33,7 +33,7 @@
     "static-serve": "yarn build && yarn serve",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build --quiet",
-    "test:storybook": "cross-env NODE_ENV=test jest src/__tests__/storybook.test.tsx",
+    "test:storybook": "cross-env NODE_ENV=test jest src/__tests__/storybook.test.tsx --testPathIgnorePatterns='/node_modules/' --testPathIgnorePatterns='/.next/'",
     "test:storybook:ci": "cross-env NODE_ENV=test yarn test:storybook --ci --silent --coverage=false --watchAll=false",
     "integrity": "node scripts/integrity-hashes.cjs"
   },
