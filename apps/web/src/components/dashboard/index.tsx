@@ -34,6 +34,7 @@ import HnPendingBanner from '@/features/hypernative/components/HnPendingBanner'
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const PositionsWidget = dynamic(() => import('@/features/positions/components/PositionsWidget'))
 
+// Test change to trigger page screenshot workflow
 const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)

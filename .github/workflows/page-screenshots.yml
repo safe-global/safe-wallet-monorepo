@@ -1,0 +1,311 @@
+name: Page Screenshots
+
+on:
+  workflow_run:
+    workflows: ['Web Deploy to dev/staging']
+    types:
+      - completed
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  screenshot:
+    # Only run on PRs from the same repository (not forks) and when the deployment succeeded
+    # This prevents untrusted code from forks being executed with elevated permissions
+    if: >
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+
+      - uses: ./.github/actions/yarn
+
+      - name: Install Playwright
+        run: |
+          # Install playwright locally in .github/scripts so node can find it
+          cd .github/scripts
+          npm init -y 2>/dev/null || true
+          npm install playwright
+          npx playwright install --with-deps chromium
+
+      - name: Get PR number
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # Use env var to prevent code injection via branch name
+          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          PR_NUMBER=$(gh pr view "$BRANCH_NAME" --json number -q .number 2>/dev/null || echo "")
+          echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
+
+      - name: Exit if no PR found
+        if: steps.pr.outputs.number == ''
+        env:
+          # Use env var to prevent code injection via branch name
+          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          echo "No PR found for branch $BRANCH_NAME"
+          exit 0
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          # Get the base branch (usually dev or main)
+          BASE_SHA=${{ github.event.workflow_run.pull_requests[0].base.sha }}
+          HEAD_SHA=${{ github.event.workflow_run.head_sha }}
+
+          # Find changed source files (excluding tests and stories)
+          CHANGED_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '\.(tsx?|jsx?)$' | grep -v '\.test\.' | grep -v '\.stories\.' | grep -E '^(apps/web/src|packages/)' || true)
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No relevant source files changed"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Changed source files:"
+            echo "$CHANGED_FILES"
+            # Store as multiline output
+            echo "files<<EOF" >> $GITHUB_OUTPUT
+            echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Extract branch name
+        if: steps.changed-files.outputs.has_changes == 'true'
+        id: branch
+        env:
+          # Use env var to prevent code injection via branch name
+          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          NORMALIZED=$(echo "$BRANCH_NAME" | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')
+          echo "normalized=$NORMALIZED" >> $GITHUB_OUTPUT
+          echo "Normalized branch: $NORMALIZED"
+
+      - name: Map files to routes
+        if: steps.changed-files.outputs.has_changes == 'true'
+        id: routes
+        run: |
+          node ./.github/scripts/map-files-to-routes.js
+        env:
+          CHANGED_FILES: ${{ steps.changed-files.outputs.files }}
+          BRANCH_NAME: ${{ steps.branch.outputs.normalized }}
+
+      - name: Take screenshots
+        if: steps.changed-files.outputs.has_changes == 'true' && steps.routes.outputs.has_routes == 'true'
+        run: |
+          node ./.github/scripts/capture-page-screenshots.js
+        env:
+          NODE_PATH: ./.github/scripts/node_modules
+
+      - name: Upload screenshots
+        if: steps.changed-files.outputs.has_changes == 'true' && steps.routes.outputs.has_routes == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: page-screenshots
+          path: page-screenshots/
+          retention-days: 5
+
+      - name: Upload screenshots to branch
+        if: steps.changed-files.outputs.has_changes == 'true' && steps.routes.outputs.has_routes == 'true'
+        run: |
+          # Configure git identity first
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create a unique directory for this PR's screenshots
+          SCREENSHOT_DIR="page-screenshots/${{ steps.pr.outputs.number }}"
+
+          # Clone the storage branch in a separate directory
+          cd /tmp
+          rm -rf screenshots-storage
+
+          if git clone --depth 1 --branch page-screenshots-storage https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git screenshots-storage; then
+            echo "Cloned existing storage branch"
+            cd screenshots-storage
+          else
+            echo "Storage branch doesn't exist, creating it"
+            git clone --depth 1 https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git screenshots-storage
+            cd screenshots-storage
+            git checkout --orphan page-screenshots-storage
+            git rm -rf . 2>/dev/null || true
+            echo "# Page Screenshots Storage" > README.md
+            git add README.md
+            git commit -m "Initialize page-screenshots-storage branch"
+          fi
+
+          # Copy screenshots to PR directory
+          mkdir -p "$SCREENSHOT_DIR"
+          cp $GITHUB_WORKSPACE/page-screenshots/*.png "$SCREENSHOT_DIR/" 2>/dev/null || true
+
+          # Commit and push
+          git add "$SCREENSHOT_DIR"
+          if git commit -m "Add page screenshots for PR #${{ steps.pr.outputs.number }}"; then
+            git push origin page-screenshots-storage
+          else
+            echo "No changes to commit"
+          fi
+
+      - name: Post PR comment with screenshots
+        if: steps.changed-files.outputs.has_changes == 'true' && steps.routes.outputs.has_routes == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // Read screenshot directory
+            const screenshotDir = 'page-screenshots';
+            if (!fs.existsSync(screenshotDir)) {
+              console.log('No screenshots directory found');
+              return;
+            }
+
+            // Read routes for metadata
+            const routesFile = path.join(screenshotDir, 'routes.json');
+            let routes = [];
+            if (fs.existsSync(routesFile)) {
+              routes = JSON.parse(fs.readFileSync(routesFile, 'utf-8'));
+            }
+
+            const screenshots = fs.readdirSync(screenshotDir).filter(f => f.endsWith('.png'));
+
+            if (screenshots.length === 0) {
+              console.log('No screenshots found');
+              return;
+            }
+
+            const prNumber = ${{ steps.pr.outputs.number }};
+            const repo = context.repo;
+            const baseUrl = `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/page-screenshots-storage/page-screenshots/${prNumber}`;
+            const previewBaseUrl = `https://${{ steps.branch.outputs.normalized }}--walletweb.review.5afe.dev`;
+
+            // Build comment body
+            let body = '## 📸 Page Screenshots\n\n';
+            body += `Found ${screenshots.length} screenshot(s) for pages affected by changes in this PR.\n\n`;
+            body += `**Preview Site:** ${previewBaseUrl}/home?safe=eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6\n\n`;
+
+            // Group screenshots by section
+            const sections = {
+              'Dashboard & Overview': ['dashboard'],
+              'Assets': ['assets', 'nfts'],
+              'Transactions': ['transaction', 'messages', 'queue', 'history'],
+              'Address Book': ['address-book'],
+              'Safe Apps': ['safe-apps'],
+              'Settings': ['settings'],
+              'Welcome & Onboarding': ['welcome', 'create', 'load', 'my-accounts'],
+            };
+
+            // Show inline if < 8 screenshots, otherwise use collapsible details
+            const useCollapsible = screenshots.length >= 8;
+
+            // Add screenshots to comment with proper URLs
+            for (const file of screenshots) {
+              const name = file.replace('.png', '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+              const imageUrl = `${baseUrl}/${file}`;
+
+              // Find the route for this screenshot
+              const routeInfo = routes.find(r =>
+                r.name.toLowerCase().replace(/\s+/g, '-') === file.replace('.png', '')
+              );
+              const routeUrl = routeInfo ? `${previewBaseUrl}${routeInfo.url.replace(previewBaseUrl, '')}` : null;
+
+              if (useCollapsible) {
+                body += `<details>\n<summary>`;
+                body += routeUrl ? `<a href="${routeUrl}">${name}</a>` : name;
+                body += `</summary>\n\n`;
+                body += `![${name}](${imageUrl})\n\n`;
+                body += `</details>\n\n`;
+              } else {
+                body += routeUrl ? `### [${name}](${routeUrl})\n\n` : `### ${name}\n\n`;
+                body += `![${name}](${imageUrl})\n\n`;
+              }
+            }
+
+            body += '\n---\n';
+            body += '*Screenshots are automatically captured from pages affected by changed files.*';
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: repo.owner,
+              repo: repo.repo,
+              issue_number: prNumber
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('📸 Page Screenshots')
+            );
+
+            // Create or update comment
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: repo.owner,
+                repo: repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: repo.owner,
+                repo: repo.repo,
+                issue_number: prNumber,
+                body: body
+              });
+            }
+
+      - name: Post no routes comment
+        if: steps.changed-files.outputs.has_changes == 'true' && steps.routes.outputs.has_routes == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ steps.pr.outputs.number }}
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('📸 Page Screenshots')
+            );
+
+            // Delete the comment if no routes affected
+            if (botComment) {
+              await github.rest.issues.deleteComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id
+              });
+            }
+
+      - name: Post no changes comment
+        if: steps.changed-files.outputs.has_changes == 'false' && steps.pr.outputs.number != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ steps.pr.outputs.number }}
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('📸 Page Screenshots')
+            );
+
+            // Delete the comment if no source files changed
+            if (botComment) {
+              await github.rest.issues.deleteComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id
+              });
+            }
