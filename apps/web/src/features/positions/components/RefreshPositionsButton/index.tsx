@@ -60,7 +60,7 @@ const RefreshPositionsButton = ({
     return shouldUsePortfolioEndpoint ? 'Refresh portfolio data' : 'Refresh positions data'
   }, [shouldUsePortfolioEndpoint, isOnCooldown])
 
-  const displayTooltip = isOnCooldown ? defaultTooltip : tooltip ?? defaultTooltip
+  const displayTooltip = isOnCooldown ? defaultTooltip : (tooltip ?? defaultTooltip)
 
   const handleRefresh = useCallback(async () => {
     if (isLoading || isOnCooldown) return
