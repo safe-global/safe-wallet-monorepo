@@ -62,11 +62,6 @@ export const actionColumnCell = '[data-testid="table-cell-actions"]'
 
 export const fiatRegex = new RegExp(`\\$?(([0-9]{1,3},)*[0-9]{1,3}(\\.[0-9]{2})?|0)`)
 
-export const tokenListOptions = {
-  allTokens: 'span[data-track="assets: Show all tokens"]',
-  default: 'span[data-track="assets: Show default tokens"]',
-}
-
 export function toggleShowAllTokens(shouldShow) {
   cy.get(manageTokensButton).click()
 
@@ -371,13 +366,7 @@ export function verifyTokenIsPresent(token) {
   cy.get(tokenListTable).contains(token)
 }
 
-// Deprecated: Use toggleShowAllTokens(true) or toggleShowAllTokens(false) instead
-export function selectTokenList(option) {
-  const wantAllTokens = option === tokenListOptions.allTokens
-  toggleShowAllTokens(wantAllTokens)
-}
-
-export function verityTokenAltImageIsVisible(currency, alttext) {
+export function verifyTokenAltImageIsVisible(currency, alttext) {
   cy.contains(currency)
     .parents('tr')
     .within(() => {
