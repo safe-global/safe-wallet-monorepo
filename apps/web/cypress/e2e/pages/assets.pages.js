@@ -54,7 +54,8 @@ const pageCountString10to20 = '11–20 of'
 
 const PRICE_COLUMN = 1
 const TOKEN_AMOUNT_COLUMN = 2
-const FIAT_AMOUNT_COLUMN = 3
+const WEIGHT_COLUMN = 3
+const FIAT_AMOUNT_COLUMN = 4
 // column with the send button and swap in the assets table
 export const ACTION_COLUMN = 5
 export const actionColumnCell = '[data-testid="table-cell-actions"]'
