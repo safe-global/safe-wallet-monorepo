@@ -30,7 +30,8 @@ describe('[PROD] Swaps token tests', () => {
     { defaultCommandTimeout: 30000 },
     () => {
       wallet.connectSigner(signer)
-      assets.selectTokenList(assets.tokenListOptions.allTokens)
+      assets.toggleShowAllTokens(true)
+      assets.toggleHideDust(false)
 
       swaps.clickOnAssetSwapBtn(0)
       swaps.acceptLegalDisclaimer()

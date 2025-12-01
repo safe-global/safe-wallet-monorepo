@@ -179,7 +179,8 @@ describe('Send funds with relay happy path tests', { defaultCommandTimeout: 3000
     function executeTransactionFlow(fromSafe, toSafe) {
       visit(constants.BALANCE_URL + fromSafe)
       wallet.connectSigner(signer)
-      assets.selectTokenList(assets.tokenListOptions.allTokens)
+      assets.toggleShowAllTokens(true)
+      assets.toggleHideDust(false)
       assets.clickOnSendBtn(1)
 
       loadsafe.inputOwnerAddress(0, toSafe)

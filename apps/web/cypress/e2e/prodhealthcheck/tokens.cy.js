@@ -20,7 +20,8 @@ describe('[PROD] Prod tokens tests', () => {
   })
 
   it('Verify that non-native tokens are present and have balance', () => {
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     assets.verifyBalance(assets.currencyDaiCap, assets.currencyDaiAlttext)
     assets.verifyTokenBalanceFormat(assets.currencyDaiCap, assets.currencyDaiFormat_2, value)
 
@@ -41,14 +42,16 @@ describe('[PROD] Prod tokens tests', () => {
   })
 
   it('Verify that when owner is disconnected, Send button is disabled', () => {
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     assets.showSendBtn(0)
     assets.VerifySendButtonIsDisabled()
   })
 
   it('Verify that when connected user is not owner, Send button is disabled', () => {
     cy.visit(constants.prodbaseUrl + constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_3)
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     assets.showSendBtn(0)
     assets.VerifySendButtonIsDisabled()
   })

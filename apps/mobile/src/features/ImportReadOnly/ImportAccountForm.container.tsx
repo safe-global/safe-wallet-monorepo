@@ -6,9 +6,12 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { formSchema } from './schema'
 import { FormValues } from './types'
+import { useAppDispatch } from '@/src/store/hooks'
+import { setPendingSafe } from '@/src/store/signerImportFlowSlice'
 
 export const ImportAccountFormContainer = () => {
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const params = useLocalSearchParams<{ safeAddress: string }>()
   const methods = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -23,14 +26,12 @@ export const ImportAccountFormContainer = () => {
 
   const handleContinue = useCallback(() => {
     const inputAddress = methods.getValues('safeAddress')
-    const chainId = methods.getValues('importedSafeResult.data.0.chainId')
     const safeName = methods.getValues('name')
     const { address } = parsePrefixedAddress(inputAddress)
 
-    router.push(
-      `/(import-accounts)/signers?safeAddress=${address}&chainId=${chainId}&import_safe=true&safeName=${safeName}`,
-    )
-  }, [router, methods.getValues])
+    dispatch(setPendingSafe({ address, name: safeName }))
+    router.push(`/(import-accounts)/signers?safeAddress=${address}&safeName=${safeName}`)
+  }, [router, methods.getValues, dispatch])
 
   return (
     <FormProvider {...methods}>

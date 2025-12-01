@@ -7,7 +7,8 @@ const ASSETS_LENGTH = 8
 describe('Balance pagination tests', () => {
   it('Verify a user can change rows per page and navigate to next and previous page', () => {
     cy.visit(constants.BALANCE_URL + constants.SEPOLIA_TEST_SAFE_6)
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     assets.verifyInitialTableState()
     assets.changeTo10RowsPerPage()
     assets.verifyTableHas10Rows()

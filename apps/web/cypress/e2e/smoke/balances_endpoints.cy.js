@@ -18,7 +18,7 @@ describe('[SMOKE] Balances endpoint tests', () => {
   })
 
   it('[SMOKE] Verify default token list shows expected tokens', () => {
-    assets.selectTokenList(assets.tokenListOptions.default)
+    assets.toggleShowAllTokens(false)
     assets.toggleHideDust(false)
     main.verifyValuesExist(assets.tokenListTable, commonTokens)
     main.verifyValuesDoNotExist(assets.tokenListTable, legacyOnlyTokens)
@@ -26,16 +26,16 @@ describe('[SMOKE] Balances endpoint tests', () => {
 
   it('[SMOKE] Verify all tokens list shows additional tokens', () => {
     assets.toggleHideDust(false)
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
     main.verifyValuesExist(assets.tokenListTable, commonTokens)
     main.verifyValuesExist(assets.tokenListTable, legacyOnlyTokens)
   })
 
   it('[SMOKE] Verify switching token list updates displayed tokens', () => {
     assets.toggleHideDust(false)
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
     main.verifyValuesExist(assets.tokenListTable, legacyOnlyTokens)
-    assets.selectTokenList(assets.tokenListOptions.default)
+    assets.toggleShowAllTokens(false)
     main.verifyValuesDoNotExist(assets.tokenListTable, legacyOnlyTokens)
     main.verifyValuesExist(assets.tokenListTable, commonTokens)
   })

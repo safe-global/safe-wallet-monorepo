@@ -170,7 +170,8 @@ describe('Send funds with connected signer happy path tests', { defaultCommandTi
     function executeTransactionFlow(fromSafe, toSafe) {
       visit(constants.BALANCE_URL + fromSafe)
       wallet.connectSigner(signer)
-      assets.selectTokenList(assets.tokenListOptions.allTokens)
+      assets.toggleShowAllTokens(true)
+      assets.toggleHideDust(false)
       assets.clickOnSendBtn(1)
       loadsafe.inputOwnerAddress(0, toSafe)
       assets.enterAmount(1)

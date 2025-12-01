@@ -24,7 +24,8 @@ describe('Tokens tests', () => {
 
   // Added to prod
   it('Verify that non-native tokens are present and have balance', () => {
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     assets.verifyBalance(assets.currencyDaiCap, assets.currencyDaiAlttext)
     assets.verifyTokenBalanceFormat(assets.currencyDaiCap, assets.currencyDaiFormat_2, value)
 
@@ -45,7 +46,8 @@ describe('Tokens tests', () => {
   })
 
   it('Verify that every token except the native token has a "go to blockexplorer link"', () => {
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     assets.verifyAssetNameHasExplorerLink(assets.currencyUSDC, ASSET_NAME_COLUMN)
     assets.verifyAssetNameHasExplorerLink(assets.currencyTestTokenB, ASSET_NAME_COLUMN)
     assets.verifyAssetNameHasExplorerLink(assets.currencyTestTokenA, ASSET_NAME_COLUMN)
@@ -56,7 +58,8 @@ describe('Tokens tests', () => {
   })
 
   it('Verify the default Fiat currency and the effects after changing it', () => {
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     assets.verifyFirstRowDoesNotContainCurrency(assets.currencyEUR)
     assets.verifyFirstRowContainsCurrency(assets.currency$)
     assets.clickOnCurrencyDropdown()
@@ -66,14 +69,16 @@ describe('Tokens tests', () => {
   })
 
   it('Verify that checking the checkboxes increases the token selected counter', () => {
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     assets.openHideTokenMenu()
     assets.clickOnTokenCheckbox(assets.currencyLink)
     assets.checkTokenCounter(1)
   })
 
   it('Verify that selecting tokens and saving hides them from the table', () => {
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     assets.openHideTokenMenu()
     assets.clickOnTokenCheckbox(assets.currencyLink)
     assets.saveHiddenTokenSelection()
@@ -81,7 +86,8 @@ describe('Tokens tests', () => {
   })
 
   it('Verify that Cancel closes the menu and does not change the table status', () => {
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     assets.openHideTokenMenu()
     assets.clickOnTokenCheckbox(assets.currencyLink)
     assets.clickOnTokenCheckbox(assets.currencyAave)
@@ -95,7 +101,8 @@ describe('Tokens tests', () => {
   })
 
   it('Verify that Deselect All unchecks all tokens from the list', () => {
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     assets.openHideTokenMenu()
     assets.clickOnTokenCheckbox(assets.currencyLink)
     assets.clickOnTokenCheckbox(assets.currencyAave)
@@ -104,7 +111,8 @@ describe('Tokens tests', () => {
   })
 
   it('Verify the Hidden tokens counter works for spam tokens', () => {
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     assets.openHideTokenMenu()
     assets.clickOnTokenCheckbox(assets.currencyLink)
     assets.saveHiddenTokenSelection()
@@ -119,12 +127,14 @@ describe('Tokens tests', () => {
   })
 
   it('Verify you can hide tokens from the eye icon in the table rows', () => {
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     assets.hideAsset(assets.currencyLink)
   })
 
   it('Verify the sorting of "Assets" and "Balance" in the table', () => {
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     assets.verifyTableRows(7)
     assets.clickOnTokenNameSortBtn()
     assets.verifyTokenNamesOrder()
@@ -139,7 +149,8 @@ describe('Tokens tests', () => {
   // Added to prod
   it('Verify that when connected user is not owner, Send button is disabled', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_3)
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     assets.showSendBtn(0)
     assets.VerifySendButtonIsDisabled()
   })
