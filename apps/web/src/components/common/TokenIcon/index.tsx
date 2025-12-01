@@ -24,14 +24,17 @@ const TokenIcon = ({
     return upgradeCoinGeckoThumbToQuality(logoUri || undefined, 'small')
   }, [logoUri])
 
+  const fallback = fallbackSrc || FALLBACK_ICON
+
   return (
     <Box position="relative" marginRight={chainId ? '8px' : '0px'}>
       <IframeIcon
-        src={src || fallbackSrc || FALLBACK_ICON}
+        src={src || fallback}
         alt={tokenSymbol ?? ''}
         width={size}
         height={size}
         borderRadius="100%"
+        fallbackSrc={fallback}
       />
       {chainId && (
         <div className={css.chainIcon}>
