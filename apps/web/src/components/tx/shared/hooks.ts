@@ -1,3 +1,11 @@
+/**
+ * Shared transaction hooks for the tx-flow system
+ *
+ * These hooks provide core transaction functionality used across
+ * all action components (Sign, Execute, Batch, etc.)
+ *
+ * @module tx/shared/hooks
+ */
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { assertTx, assertOnboard, assertChainInfo, assertProvider } from '@/utils/helpers'
 import { useMemo } from 'react'
@@ -35,6 +43,11 @@ type TxActions = {
   proposeTx: (safeTx: SafeTransaction, txId?: string, origin?: string) => Promise<TransactionDetails>
 }
 
+/**
+ * Returns transaction action functions for signing, executing, and batching
+ *
+ * @returns Object containing signTx, executeTx, addToBatch, signProposerTx, proposeTx
+ */
 export const useTxActions = (): TxActions => {
   const { safe } = useSafeInfo()
   const onboard = useOnboard()
