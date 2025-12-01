@@ -32,6 +32,7 @@ export function TxHistoryContainer() {
     isFetchingNextPage,
     isLoading,
     isUninitialized,
+    isError,
     refetch,
   } = useGetTxsHistoryInfiniteQuery(queryArgs)
 
@@ -104,6 +105,7 @@ export function TxHistoryContainer() {
       onEndReached={onEndReached}
       isLoading={isLoadingState}
       isLoadingNext={isFetchingNextPage}
+      isError={isError}
       onRefresh={onRefresh}
       refreshing={isRefreshing}
     />

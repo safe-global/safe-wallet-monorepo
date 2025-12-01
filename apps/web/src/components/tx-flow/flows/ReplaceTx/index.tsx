@@ -23,7 +23,7 @@ import { AppRoutes } from '@/config/routes'
 import { useHasFeature } from '@/hooks/useChains'
 import Track from '@/components/common/Track'
 import { REJECT_TX_EVENTS } from '@/services/analytics/events/reject-tx'
-import { useRecommendedNonce } from '@/components/tx/SignOrExecuteForm/hooks'
+import { useRecommendedNonce } from '@/components/tx/shared/hooks'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const goToQueue = (router: NextRouter) => {

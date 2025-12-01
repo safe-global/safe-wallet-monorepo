@@ -3,7 +3,7 @@ import { useMemo, type ReactElement } from 'react'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import ErrorMessage from '../ErrorMessage'
+import ErrorMessage from '@/components/tx/ErrorMessage'
 import {
   canMigrateUnsupportedMastercopy,
   isMigrationToL2Possible,

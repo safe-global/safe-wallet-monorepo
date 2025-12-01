@@ -50,7 +50,11 @@ export const WithAddresses: Story = {
   args: {
     result: {
       ...ContractAnalysisResultBuilder.newContract().build(),
-      addresses: [faker.finance.ethereumAddress(), faker.finance.ethereumAddress(), faker.finance.ethereumAddress()],
+      addresses: [
+        { address: faker.finance.ethereumAddress() },
+        { address: faker.finance.ethereumAddress() },
+        { address: faker.finance.ethereumAddress() },
+      ],
     },
     severity: Severity.INFO,
   },
@@ -99,7 +103,7 @@ export const Complex: Story = {
           [Severity.INFO]: ['First interaction with this address'],
         })
         .build(),
-      addresses: [faker.finance.ethereumAddress(), faker.finance.ethereumAddress()],
+      addresses: [{ address: faker.finance.ethereumAddress() }, { address: faker.finance.ethereumAddress() }],
     },
     severity: Severity.CRITICAL,
   },

@@ -1,5 +1,5 @@
 import { type ReactElement } from 'react'
-import * as hooks from '@/components/tx/SignOrExecuteForm/hooks'
+import * as hooks from '@/components/tx/shared/hooks'
 import * as useValidateTxData from '@/hooks/useValidateTxData'
 import { SignForm } from '../SignForm'
 import { render as renderTestUtils } from '@/tests/test-utils'
