@@ -19,14 +19,16 @@ describe('Assets tests', () => {
   })
 
   it('Verify that "Hide token" button is present and opens the "Hide tokens menu"', () => {
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     assets.openHideTokenMenu()
     assets.verifyEachRowHasCheckbox()
   })
 
   it('Verify that clicking the button with an owner opens the Send funds form', () => {
     wallet.connectSigner(signer)
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     cy.wait(2000)
     assets.clickOnSendBtnAssetsTable(0)
   })
@@ -41,11 +43,13 @@ describe('Assets tests', () => {
       assets.currencyDaiCap,
     ]
 
-    assets.selectTokenList(assets.tokenListOptions.default)
+    assets.toggleShowAllTokens(false)
+    assets.toggleHideDust(false)
     main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther])
     main.verifyValuesDoNotExist(assets.tokenListTable, spamTokens)
 
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     spamTokens.push(constants.tokenNames.sepoliaEther)
     main.verifyValuesExist(assets.tokenListTable, spamTokens)
   })
