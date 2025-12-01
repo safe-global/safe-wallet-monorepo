@@ -30,7 +30,7 @@ const customJestConfig = {
   },
   coveragePathIgnorePatterns: ['/node_modules/', '/src/tests/', '/src/types/contracts/'],
   // Exclude storybook snapshot tests from main test run - they have their own CI workflow
-  testPathIgnorePatterns: ['/node_modules/', '/.next/', '/src/__tests__/storybook\\.test\\.tsx'],
+  testPathIgnorePatterns: ['/node_modules/', '/.next/', '\\.stories\\.test\\.tsx$'],
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
