@@ -35,6 +35,7 @@ import notificationSyncMiddleware from './middleware/notificationSync'
 import { setBackendStore } from '@/src/store/utils/singletonStore'
 import pendingTxsListeners from '@/src/store/middleware/pendingTxs'
 import signingState from './signingStateSlice'
+import signerImportFlow from './signerImportFlowSlice'
 
 setBaseUrl(GATEWAY_URL)
 
@@ -58,6 +59,7 @@ const persistConfig = {
     'estimatedFee',
     'executionMethod',
     'signingState',
+    'signerImportFlow',
   ],
   transforms: [cgwClientFilter],
 }
@@ -80,6 +82,7 @@ export const rootReducer = combineReducers({
   estimatedFee,
   executionMethod,
   signingState,
+  signerImportFlow,
   [web3API.reducerPath]: web3API.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
 })

@@ -6,12 +6,16 @@ import { SafeButton } from '@/src/components/SafeButton'
 import { SignersList } from './components/SignersList'
 import { useSignersGroupService } from './hooks/useSignersGroupService'
 import { useRouter } from 'expo-router'
+import { useAppDispatch } from '@/src/store/hooks'
+import { clearPendingSafe } from '@/src/store/signerImportFlowSlice'
 
 export const SignersContainer = () => {
   const { group, isFetching } = useSignersGroupService()
   const router = useRouter()
+  const dispatch = useAppDispatch()
 
   const onImportSigner = () => {
+    dispatch(clearPendingSafe())
     router.push('/import-signers')
   }
 
