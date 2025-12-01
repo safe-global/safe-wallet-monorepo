@@ -5,6 +5,7 @@ import type {
   ContractAnalysisResults,
   ThreatAnalysisResults,
   RecipientAnalysisResults,
+  Severity,
 } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
 import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
@@ -37,11 +38,13 @@ export const SafeShieldContent = ({
   contract,
   threat,
   safeTx,
+  overallStatus,
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
+  overallStatus?: { severity: Severity; title: string } | undefined
 }): ReactElement => {
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient || []
   const [contractResults = {}, _contractError, contractLoading = false] = contract || []
