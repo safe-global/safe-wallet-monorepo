@@ -81,18 +81,24 @@ describe('HypernativeOAuthCallback', () => {
       writable: true,
     })
 
-    // Setup fetch mock with default success response
+    // Reset fetch mock completely and set up default successful response
+    mockFetch.mockReset()
+    // Ensure global.fetch still points to our mock
+    global.fetch = mockFetch as unknown as typeof fetch
+
     const mockJsonFn = jest.fn().mockResolvedValue({
       access_token: 'test-access-token',
       expires_in: 3600,
       token_type: 'Bearer',
     })
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: mockJsonFn,
-      text: jest.fn().mockResolvedValue(''),
-      clone: jest.fn().mockReturnThis(),
-    } as unknown as Response)
+    mockFetch.mockImplementation(() =>
+      Promise.resolve({
+        ok: true,
+        json: mockJsonFn,
+        text: jest.fn().mockResolvedValue(''),
+        clone: jest.fn().mockReturnThis(),
+      } as unknown as Response),
+    )
   })
 
   afterEach(() => {
@@ -120,9 +126,7 @@ describe('HypernativeOAuthCallback', () => {
   })
 
   it('should handle successful OAuth callback', async () => {
-    jest.useFakeTimers()
-
-    // Setup query params and sessionStorage
+    // Setup query params and sessionStorage BEFORE rendering
     ;(useRouter as jest.Mock).mockReturnValue({
       isReady: true,
       query: { code: 'auth-code-123', state: 'state-456' },
@@ -134,14 +138,20 @@ describe('HypernativeOAuthCallback', () => {
     render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
 
     // Wait for token exchange
-    await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalled()
-    })
+    await waitFor(
+      () => {
+        expect(mockFetch).toHaveBeenCalled()
+      },
+      { timeout: 3000 },
+    )
 
     // Wait for success state
-    await waitFor(() => {
-      expect(screen.getByText('Authentication successful!')).toBeInTheDocument()
-    })
+    await waitFor(
+      () => {
+        expect(screen.getByText('Authentication successful!')).toBeInTheDocument()
+      },
+      { timeout: 3000 },
+    )
 
     // Check that postMessage was sent to parent
     expect(mockPostMessage).toHaveBeenCalledWith(
@@ -156,8 +166,6 @@ describe('HypernativeOAuthCallback', () => {
     // Check that sessionStorage was cleaned up
     expect(sessionStorageMock.removeItem).toHaveBeenCalledWith('hn_oauth_state')
     expect(sessionStorageMock.removeItem).toHaveBeenCalledWith('hn_pkce_verifier')
-
-    jest.useRealTimers()
   })
 
   it('should handle missing authorization code', async () => {
@@ -166,16 +174,39 @@ describe('HypernativeOAuthCallback', () => {
       query: { state: 'test-state' }, // Missing code
     })
 
+    mockSessionStorage['hn_oauth_state'] = 'test-state'
+
     render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
 
     await waitFor(() => {
-      expect(screen.getByText(/Missing authorization code/)).toBeInTheDocument()
+      expect(screen.getByText(/Missing authorization code in callback URL/)).toBeInTheDocument()
     })
 
     expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         type: HN_AUTH_ERROR_EVENT,
-        error: expect.stringContaining('Missing authorization code'),
+        error: expect.stringContaining('Missing authorization code in callback URL'),
+      }),
+      window.location.origin,
+    )
+  })
+
+  it('should handle missing state parameter', async () => {
+    ;(useRouter as jest.Mock).mockReturnValue({
+      isReady: true,
+      query: { code: 'test-code' }, // Missing state
+    })
+
+    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+
+    await waitFor(() => {
+      expect(screen.getByText(/Missing state parameter in callback URL/)).toBeInTheDocument()
+    })
+
+    expect(mockPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: HN_AUTH_ERROR_EVENT,
+        error: expect.stringContaining('Missing state parameter in callback URL'),
       }),
       window.location.origin,
     )
@@ -192,13 +223,13 @@ describe('HypernativeOAuthCallback', () => {
     render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
 
     await waitFor(() => {
-      expect(screen.getByText(/Invalid OAuth state parameter/)).toBeInTheDocument()
+      expect(screen.getByText(/Invalid OAuth state parameter - possible CSRF attack/)).toBeInTheDocument()
     })
 
     expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         type: HN_AUTH_ERROR_EVENT,
-        error: expect.stringContaining('Invalid OAuth state parameter'),
+        error: expect.stringContaining('Invalid OAuth state parameter - possible CSRF attack'),
       }),
       window.location.origin,
     )
@@ -216,8 +247,16 @@ describe('HypernativeOAuthCallback', () => {
     render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
 
     await waitFor(() => {
-      expect(screen.getByText(/Missing PKCE code verifier/)).toBeInTheDocument()
+      expect(screen.getByText(/Missing PKCE code verifier - authentication flow corrupted/)).toBeInTheDocument()
     })
+
+    expect(mockPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: HN_AUTH_ERROR_EVENT,
+        error: expect.stringContaining('Missing PKCE code verifier - authentication flow corrupted'),
+      }),
+      window.location.origin,
+    )
   })
 
   it('should handle OAuth error in query params', async () => {
@@ -232,18 +271,20 @@ describe('HypernativeOAuthCallback', () => {
     render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
 
     await waitFor(() => {
-      expect(screen.getByText(/User denied authorization/)).toBeInTheDocument()
+      expect(screen.getByText(/OAuth authorization failed: User denied authorization/)).toBeInTheDocument()
     })
 
     expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         type: HN_AUTH_ERROR_EVENT,
+        error: expect.stringContaining('OAuth authorization failed: User denied authorization'),
       }),
       window.location.origin,
     )
   })
 
   it('should handle token exchange failure', async () => {
+    // Setup query params and sessionStorage BEFORE rendering
     ;(useRouter as jest.Mock).mockReturnValue({
       isReady: true,
       query: { code: 'test-code', state: 'test-state' },
@@ -252,22 +293,39 @@ describe('HypernativeOAuthCallback', () => {
     mockSessionStorage['hn_oauth_state'] = 'test-state'
     mockSessionStorage['hn_pkce_verifier'] = 'verifier-123'
 
-    // Mock failed token exchange
-    mockFetch.mockResolvedValueOnce({
-      ok: false,
-      status: 400,
-      text: jest.fn().mockResolvedValue('invalid_grant'),
-      clone: jest.fn().mockReturnThis(),
-    } as unknown as Response)
+    // Mock failed token exchange - reset and override the default mock BEFORE rendering
+    mockFetch.mockReset()
+    const mockTextFn = jest.fn().mockResolvedValue('invalid_grant')
+    mockFetch.mockImplementation(() =>
+      Promise.resolve({
+        ok: false,
+        status: 400,
+        text: mockTextFn,
+        clone: jest.fn().mockReturnThis(),
+      } as unknown as Response),
+    )
 
     render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
 
-    await waitFor(() => {
-      expect(screen.getByText(/Token exchange failed/)).toBeInTheDocument()
-    })
+    await waitFor(
+      () => {
+        const alert = screen.getByRole('alert')
+        expect(alert).toHaveTextContent('Token exchange failed: 400 invalid_grant')
+      },
+      { timeout: 3000 },
+    )
+
+    expect(mockPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: HN_AUTH_ERROR_EVENT,
+        error: expect.stringContaining('Token exchange failed: 400 invalid_grant'),
+      }),
+      window.location.origin,
+    )
   })
 
   it('should handle invalid token response', async () => {
+    // Setup query params and sessionStorage BEFORE rendering
     ;(useRouter as jest.Mock).mockReturnValue({
       isReady: true,
       query: { code: 'test-code', state: 'test-state' },
@@ -276,49 +334,80 @@ describe('HypernativeOAuthCallback', () => {
     mockSessionStorage['hn_oauth_state'] = 'test-state'
     mockSessionStorage['hn_pkce_verifier'] = 'verifier-123'
 
-    // Mock token response missing required fields
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: jest.fn().mockResolvedValue({
-        token_type: 'Bearer',
-        // Missing access_token and expires_in
-      }),
-      clone: jest.fn().mockReturnThis(),
-    } as unknown as Response)
+    // Mock token response missing required fields - reset and override the default mock BEFORE rendering
+    mockFetch.mockReset()
+    const mockJsonFn = jest.fn().mockResolvedValue({
+      token_type: 'Bearer',
+      // Missing access_token and expires_in
+    })
+    mockFetch.mockImplementation(() =>
+      Promise.resolve({
+        ok: true,
+        json: mockJsonFn,
+        text: jest.fn().mockResolvedValue(''),
+        clone: jest.fn().mockReturnThis(),
+      } as unknown as Response),
+    )
 
     render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
 
-    await waitFor(() => {
-      expect(screen.getByText(/Invalid token response/)).toBeInTheDocument()
-    })
+    await waitFor(
+      () => {
+        const alert = screen.getByRole('alert')
+        expect(alert).toHaveTextContent('Invalid token response: missing access_token or expires_in')
+      },
+      { timeout: 3000 },
+    )
+
+    expect(mockPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: HN_AUTH_ERROR_EVENT,
+        error: expect.stringContaining('Invalid token response: missing access_token or expires_in'),
+      }),
+      window.location.origin,
+    )
   })
 
   it('should handle window without opener', async () => {
-    jest.useFakeTimers()
+    // Setup query params and sessionStorage BEFORE rendering
+    ;(useRouter as jest.Mock).mockReturnValue({
+      isReady: true,
+      query: { code: 'test-code', state: 'test-state' },
+    })
 
-    // No window.opener
+    mockSessionStorage['hn_oauth_state'] = 'test-state'
+    mockSessionStorage['hn_pkce_verifier'] = 'verifier-123'
+
+    // No window.opener - set this BEFORE rendering
     Object.defineProperty(window, 'opener', {
       value: null,
       writable: true,
       configurable: true,
     })
-    ;(useRouter as jest.Mock).mockReturnValue({
-      isReady: true,
-      query: { code: 'test-code', state: 'test-state' },
-    })
 
-    mockSessionStorage['hn_oauth_state'] = 'test-state'
-    mockSessionStorage['hn_pkce_verifier'] = 'verifier-123'
+    // Setup fetch mock for successful token exchange
+    const mockJsonFn = jest.fn().mockResolvedValue({
+      access_token: 'test-access-token',
+      expires_in: 3600,
+      token_type: 'Bearer',
+    })
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: mockJsonFn,
+      text: jest.fn().mockResolvedValue(''),
+      clone: jest.fn().mockReturnThis(),
+    } as unknown as Response)
 
     render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
 
-    await waitFor(() => {
-      expect(screen.getByText('Authentication successful!')).toBeInTheDocument()
-    })
+    await waitFor(
+      () => {
+        expect(screen.getByText('Authentication successful!')).toBeInTheDocument()
+      },
+      { timeout: 3000 },
+    )
 
-    // postMessage should not have been called
+    // postMessage should not have been called since there's no opener
     expect(mockPostMessage).not.toHaveBeenCalled()
-
-    jest.useRealTimers()
   })
 })
