@@ -1,4 +1,3 @@
-// Test change to trigger page screenshot workflow
 import { useMemo } from 'react'
 import { Box, Skeleton, Typography, Paper, Card, Stack, Divider } from '@mui/material'
 import useBalances from '@/hooks/useBalances'
