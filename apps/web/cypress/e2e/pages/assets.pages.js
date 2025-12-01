@@ -17,6 +17,7 @@ const paginationPageList = 'ul[role="listbox"]'
 const currencyDropDown = 'div[id="currency"]'
 export const tokenListTable = 'table[aria-labelledby="tableTitle"]'
 const manageTokensButton = '[data-testid="manage-tokens-button"]'
+const hideTokensMenuItem = '[data-testid="hide-tokens-menu-item"]'
 export const tablePaginationContainer = '[data-testid="table-pagination"]'
 export const tableContainer = '[data-testid="table-container"]'
 
@@ -450,6 +451,11 @@ export function openHideTokenMenu() {
     .within(() => {
       cy.get('p')
     })
+}
+
+export function openHiddenTokensFromManageMenu() {
+  cy.get(manageTokensButton).click()
+  cy.get(hideTokensMenuItem).should('be.visible').click()
 }
 
 export function clickOnTokenCheckbox(token) {

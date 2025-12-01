@@ -67,14 +67,14 @@ describe('Tokens tests', () => {
 
   it('Verify that checking the checkboxes increases the token selected counter', () => {
     assets.selectTokenList(assets.tokenListOptions.allTokens)
-    assets.openHideTokenMenu()
+    assets.openHiddenTokensFromManageMenu()
     assets.clickOnTokenCheckbox(assets.currencyLink)
     assets.checkTokenCounter(1)
   })
 
   it('Verify that selecting tokens and saving hides them from the table', () => {
     assets.selectTokenList(assets.tokenListOptions.allTokens)
-    assets.openHideTokenMenu()
+    assets.openHiddenTokensFromManageMenu()
     assets.clickOnTokenCheckbox(assets.currencyLink)
     assets.saveHiddenTokenSelection()
     main.verifyValuesDoNotExist(assets.tokenListTable, [assets.currencyLink])
@@ -82,12 +82,12 @@ describe('Tokens tests', () => {
 
   it('Verify that Cancel closes the menu and does not change the table status', () => {
     assets.selectTokenList(assets.tokenListOptions.allTokens)
-    assets.openHideTokenMenu()
+    assets.openHiddenTokensFromManageMenu()
     assets.clickOnTokenCheckbox(assets.currencyLink)
     assets.clickOnTokenCheckbox(assets.currencyAave)
     assets.saveHiddenTokenSelection()
     main.verifyValuesDoNotExist(assets.tokenListTable, [assets.currencyLink, assets.currencyAave])
-    assets.openHideTokenMenu()
+    assets.openHiddenTokensFromManageMenu()
     assets.clickOnTokenCheckbox(assets.currencyLink)
     assets.clickOnTokenCheckbox(assets.currencyAave)
     assets.cancelSaveHiddenTokenSelection()
@@ -96,7 +96,7 @@ describe('Tokens tests', () => {
 
   it('Verify that Deselect All unchecks all tokens from the list', () => {
     assets.selectTokenList(assets.tokenListOptions.allTokens)
-    assets.openHideTokenMenu()
+    assets.openHiddenTokensFromManageMenu()
     assets.clickOnTokenCheckbox(assets.currencyLink)
     assets.clickOnTokenCheckbox(assets.currencyAave)
     assets.deselecAlltHiddenTokenSelection()
@@ -105,14 +105,14 @@ describe('Tokens tests', () => {
 
   it('Verify the Hidden tokens counter works for spam tokens', () => {
     assets.selectTokenList(assets.tokenListOptions.allTokens)
-    assets.openHideTokenMenu()
+    assets.openHiddenTokensFromManageMenu()
     assets.clickOnTokenCheckbox(assets.currencyLink)
     assets.saveHiddenTokenSelection()
     assets.checkHiddenTokenBtnCounter(1)
   })
 
   it('Verify the Hidden tokens counter works for native tokens', () => {
-    assets.openHideTokenMenu()
+    assets.openHiddenTokensFromManageMenu()
     assets.clickOnTokenCheckbox(constants.tokenNames.sepoliaEther)
     assets.saveHiddenTokenSelection()
     assets.checkHiddenTokenBtnCounter(1)

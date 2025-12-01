@@ -122,7 +122,12 @@ const ManageTokensMenu = ({
 
       <Divider />
 
-      <MenuItem onClick={handleHideTokens} className={css.menuItem} sx={menuItemHoverSx}>
+      <MenuItem
+        onClick={handleHideTokens}
+        className={css.menuItem}
+        sx={menuItemHoverSx}
+        data-testid="hide-tokens-menu-item"
+      >
         <Track {...ASSETS_EVENTS.SHOW_HIDDEN_ASSETS}>
           <Typography variant="body2">Hide tokens{hiddenTokensCount > 0 && ` (${hiddenTokensCount})`}</Typography>
         </Track>
