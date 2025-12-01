@@ -5,13 +5,6 @@ on:
     workflows: ['Web Deploy to dev/staging']
     types:
       - completed
-  # TODO: Remove pull_request trigger after initial testing
-  pull_request:
-    paths:
-      - '.github/workflows/page-screenshots.yml'
-      - '.github/scripts/map-files-to-routes.js'
-      - '.github/scripts/capture-page-screenshots.js'
-      - '.github/scripts/page-screenshot-config.js'
   workflow_dispatch:
     inputs:
       pr_number:
@@ -27,9 +20,8 @@ permissions:
 
 jobs:
   screenshot:
-    # Run for: pull_request, workflow_dispatch, or workflow_run (when deployment succeeded and not a fork)
+    # Run for: workflow_dispatch or workflow_run (when deployment succeeded and not a fork)
     if: >
-      github.event_name == 'pull_request' ||
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.event == 'pull_request' &&
       github.event.workflow_run.conclusion == 'success' &&
@@ -38,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: ${{ github.event_name == 'pull_request' && github.head_ref || (github.event_name == 'workflow_dispatch' && github.ref || github.event.workflow_run.head_branch) }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || github.event.workflow_run.head_branch }}
           fetch-depth: 0
 
       - uses: ./.github/actions/yarn
@@ -55,13 +47,10 @@ jobs:
         id: pr
         env:
           GH_TOKEN: ${{ github.token }}
-          BRANCH_NAME: ${{ github.event_name == 'pull_request' && github.head_ref || (github.event_name == 'workflow_dispatch' && github.ref_name || github.event.workflow_run.head_branch) }}
+          BRANCH_NAME: ${{ github.event_name == 'workflow_dispatch' && github.ref_name || github.event.workflow_run.head_branch }}
           INPUT_PR_NUMBER: ${{ github.event.inputs.pr_number }}
-          PR_EVENT_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          if [ -n "$PR_EVENT_NUMBER" ]; then
-            echo "number=$PR_EVENT_NUMBER" >> $GITHUB_OUTPUT
-          elif [ -n "$INPUT_PR_NUMBER" ]; then
+          if [ -n "$INPUT_PR_NUMBER" ]; then
             echo "number=$INPUT_PR_NUMBER" >> $GITHUB_OUTPUT
           else
             PR_NUMBER=$(gh pr view "$BRANCH_NAME" --json number -q .number 2>/dev/null || echo "")
@@ -79,12 +68,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           INPUT_PR_NUMBER: ${{ github.event.inputs.pr_number }}
-          PR_EVENT_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          if [ -n "$PR_EVENT_NUMBER" ]; then
-            # For pull_request trigger, get files from PR
-            CHANGED_FILES=$(gh pr diff "$PR_EVENT_NUMBER" --name-only | grep -E '\.(tsx?|jsx?)$' | grep -v '\.test\.' | grep -v '\.stories\.' | grep -E '^(apps/web/src|packages/)' || true)
-          elif [ -n "$INPUT_PR_NUMBER" ]; then
+          if [ -n "$INPUT_PR_NUMBER" ]; then
             # For manual runs, get files from PR
             CHANGED_FILES=$(gh pr diff "$INPUT_PR_NUMBER" --name-only | grep -E '\.(tsx?|jsx?)$' | grep -v '\.test\.' | grep -v '\.stories\.' | grep -E '^(apps/web/src|packages/)' || true)
           else
@@ -110,7 +95,7 @@ jobs:
         if: steps.changed-files.outputs.has_changes == 'true'
         id: branch
         env:
-          BRANCH_NAME: ${{ github.event_name == 'pull_request' && github.head_ref || (github.event_name == 'workflow_dispatch' && github.event.inputs.branch_name || github.event.workflow_run.head_branch) }}
+          BRANCH_NAME: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch_name || github.event.workflow_run.head_branch }}
         run: |
           NORMALIZED=$(echo "$BRANCH_NAME" | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')
           echo "normalized=$NORMALIZED" >> $GITHUB_OUTPUT

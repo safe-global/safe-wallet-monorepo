@@ -7,7 +7,25 @@
 
 const fs = require('fs')
 const path = require('path')
-const { SCREENSHOTTABLE_ROUTES, TEST_SAFE } = require('./page-screenshot-config.js')
+
+// Test Safe account for screenshots
+const TEST_SAFE = 'eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6'
+
+// Routes to exclude from screenshots (error pages, internal pages, pages requiring specific params)
+const EXCLUDED_ROUTES = [
+  '/403',
+  '/404',
+  '/_offline',
+  '/wc', // WalletConnect - requires specific session
+  '/transactions/tx', // Requires specific tx id
+  '/transactions/msg', // Requires specific msg id
+  '/apps/open', // Requires specific app
+  '/share/safe-app', // Requires specific app
+  '/addOwner', // Requires specific flow
+  '/settings/cookies', // Just shows cookie banner
+  '/settings/environment-variables', // Dev settings
+  '/', // Redirects to /welcome or /home
+]
 
 const changedFiles = process.env.CHANGED_FILES || ''
 const branchName = process.env.BRANCH_NAME || ''
@@ -24,6 +42,43 @@ console.log('Processing changed files:', files.length)
 const cwd = process.cwd()
 const webAppRoot = path.join(cwd, 'apps/web')
 const packagesRoot = path.join(cwd, 'packages')
+
+/**
+ * Parse the AppRoutes object from routes.ts to get all available routes
+ */
+function parseRoutesFromFile() {
+  const routesFile = path.join(webAppRoot, 'src/config/routes.ts')
+  const content = fs.readFileSync(routesFile, 'utf-8')
+
+  const routes = []
+
+  // Match all route strings in the file: '/some/path'
+  const routeRegex = /['"](\/([\w-]+\/)*[\w-]*)['"]/g
+  let match
+  while ((match = routeRegex.exec(content)) !== null) {
+    const route = match[1]
+    // Skip duplicates and excluded routes
+    if (!routes.includes(route) && !EXCLUDED_ROUTES.includes(route)) {
+      routes.push(route)
+    }
+  }
+
+  console.log(`Parsed ${routes.length} routes from routes.ts`)
+  return routes
+}
+
+/**
+ * Convert route to a human-readable name
+ */
+function routeToName(route) {
+  return (
+    route
+      .split('/')
+      .filter(Boolean)
+      .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' '))
+      .join(' ') || 'Home'
+  )
+}
 
 /**
  * Parse import statements from a TypeScript/JavaScript file
@@ -271,6 +326,10 @@ function pageFileToRoute(filePath) {
 
 // Main execution
 
+// Parse available routes from routes.ts
+const availableRoutes = parseRoutesFromFile()
+const availableRoutesSet = new Set(availableRoutes)
+
 // Get all source files
 console.log('Scanning source files...')
 const webSrcFiles = getAllSourceFiles(path.join(webAppRoot, 'src'))
@@ -342,16 +401,14 @@ for (const page of affectedPages) {
   }
 }
 
-// Filter to only screenshottable routes
-const screenshottableRouteSet = new Set(SCREENSHOTTABLE_ROUTES.map((r) => r.route))
+// Filter to only routes that exist in routes.ts and don't have dynamic params
 let finalRoutes = Array.from(affectedRoutes).filter((route) => {
-  // Handle parameterized routes - check if base route is screenshottable
-  if (screenshottableRouteSet.has(route)) {
-    return true
+  // Skip routes with dynamic params (e.g., :txId)
+  if (route.includes(':')) {
+    return false
   }
-  // For dynamic routes like /transactions/tx, check if /transactions is screenshottable
-  const baseRoute = route.replace(/\/:[^/]+/g, '')
-  return screenshottableRouteSet.has(baseRoute)
+  // Check if route exists in routes.ts
+  return availableRoutesSet.has(route)
 })
 
 // If more than 10 routes are affected, limit to just one screenshot
@@ -372,27 +429,17 @@ if (finalRoutes.length === 0) {
 }
 
 // Build URL list for screenshot capture
-const urlList = finalRoutes
-  .map((route) => {
-    const routeConfig = SCREENSHOTTABLE_ROUTES.find((r) => r.route === route)
-    if (!routeConfig) {
-      return null
-    }
+const baseUrl = `https://${branchName}--walletweb.review.5afe.dev`
+const urlList = finalRoutes.map((route) => {
+  // Add safe query param to all routes - it won't break pages that don't need it
+  const url = `${baseUrl}${route}?safe=${TEST_SAFE}`
 
-    const baseUrl = `https://${branchName}--walletweb.review.5afe.dev`
-    let url = `${baseUrl}${route}`
-    if (routeConfig.requiresSafe) {
-      url += `?safe=${TEST_SAFE}`
-    }
-
-    return {
-      url,
-      route,
-      name: routeConfig.name,
-      waitForSelector: routeConfig.waitForSelector,
-    }
-  })
-  .filter(Boolean)
+  return {
+    url,
+    route,
+    name: routeToName(route),
+  }
+})
 
 console.log('\n=== Screenshot URLs ===')
 console.log(JSON.stringify(urlList, null, 2))
