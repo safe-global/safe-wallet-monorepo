@@ -80,4 +80,3 @@ export const useTransactionSimulation = (safeTx?: SafeTransaction) => {
     runSimulation,
   }
 }
-

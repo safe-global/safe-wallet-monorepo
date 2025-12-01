@@ -42,8 +42,12 @@ export function TransactionSimulation({
   }
 
   const getSimulationHeaderText = () => {
-    if (!isFinished) return 'Transaction simulation'
-    return severity === Severity.OK ? 'Simulation successful' : 'Simulation failed'
+    if (!isFinished) {
+      return 'Transaction simulation'
+    }
+    {
+      return severity === Severity.OK ? 'Simulation successful' : 'Simulation failed'
+    }
   }
 
   return (

@@ -22,4 +22,3 @@ export function useThreatAnalysis(overrideSafeTx?: SafeTransaction) {
     safeVersion: safe.version || undefined,
   })
 }
-

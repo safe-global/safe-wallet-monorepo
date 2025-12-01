@@ -1,2 +1,1 @@
 export { RiskAcknowledgmentCheckbox } from './RiskAcknowledgmentCheckbox'
-

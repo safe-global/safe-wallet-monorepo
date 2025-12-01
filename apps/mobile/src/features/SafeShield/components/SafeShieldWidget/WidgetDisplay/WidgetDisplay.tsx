@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import type {
   ContractAnalysisResults,
   RecipientAnalysisResults,
@@ -6,15 +6,19 @@ import type {
 } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shield/utils/getPrimaryAnalysisResult'
-import { useHighlightedSeverity } from '@safe-global/utils/features/safe-shield/hooks/useHighlightedSeverity'
 import isEmpty from 'lodash/isEmpty'
 
 import { AnalysisLabel } from '../../AnalysisLabel'
 import { TransactionSimulation } from '../../TransactionSimulation'
+import { useTransactionSimulation } from '../../TransactionSimulation/hooks/useTransactionSimulation'
+import { useSafeShieldSeverity } from '../../../hooks/useSafeShieldSeverity'
 import { WidgetDisplayWrapper } from './WidgetDisplayWrapper'
 import { ErrorWidget } from './ErrorWidget'
 import { LoadingWidget } from './LoadingWidget'
 import { normalizeThreatData } from '@safe-global/utils/features/safe-shield/utils'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
+
+import type { SafeTransaction } from '@safe-global/types-kit'
 
 interface WidgetDisplayProps {
   recipient?: AsyncResult<RecipientAnalysisResults>
@@ -22,17 +26,10 @@ interface WidgetDisplayProps {
   threat?: AsyncResult<ThreatAnalysisResults>
   loading?: boolean
   error?: boolean
+  safeTx?: SafeTransaction
 }
 
-export function WidgetDisplay({ recipient, contract, threat, loading, error }: WidgetDisplayProps) {
-  if (loading) {
-    return <LoadingWidget />
-  }
-
-  if (error) {
-    return <ErrorWidget />
-  }
-
+export function WidgetDisplay({ recipient, contract, threat, loading, error, safeTx }: WidgetDisplayProps) {
   // Extract data from AsyncResults
   const [recipientData = {}] = recipient || []
   const [contractData = {}] = contract || []
@@ -43,13 +40,47 @@ export function WidgetDisplay({ recipient, contract, threat, loading, error }: W
   const primaryContract = getPrimaryAnalysisResult(contractData)
   const primaryThreat = getPrimaryAnalysisResult(normalizedThreatData)
 
+  // Transaction simulation logic
+  const {
+    hasError,
+    isCallTraceError,
+    isSuccess,
+    simulationStatus,
+    simulationLink,
+    requestError,
+    canSimulate,
+    runSimulation,
+  } = useTransactionSimulation(safeTx)
+
+  const simulationSeverity = useMemo(() => {
+    if (isSuccess) {
+      return Severity.OK
+    }
+    if (simulationStatus.isFinished || hasError || isCallTraceError) {
+      return Severity.WARN
+    }
+  }, [hasError, isCallTraceError, isSuccess, simulationStatus.isFinished])
+
   // Get highlighted severity
-  const highlightedSeverity = useHighlightedSeverity(recipientData, contractData, normalizedThreatData, false)
+  const highlightedSeverity = useSafeShieldSeverity({
+    recipient,
+    contract,
+    threat,
+    hasSimulationError: hasError || isCallTraceError,
+  })
 
   // Check if analyses are empty
   const recipientEmpty = isEmpty(recipientData)
   const contractEmpty = isEmpty(contractData)
   const threatEmpty = isEmpty(normalizedThreatData)
+
+  if (loading) {
+    return <LoadingWidget />
+  }
+
+  if (error) {
+    return <ErrorWidget />
+  }
 
   return (
     <WidgetDisplayWrapper>
@@ -77,7 +108,17 @@ export function WidgetDisplay({ recipient, contract, threat, loading, error }: W
         />
       )}
 
-      {highlightedSeverity && <TransactionSimulation severity={highlightedSeverity} />}
+      {highlightedSeverity && (
+        <TransactionSimulation
+          severity={simulationSeverity}
+          highlighted={highlightedSeverity === simulationSeverity}
+          simulationStatus={simulationStatus}
+          simulationLink={simulationLink}
+          requestError={requestError}
+          canSimulate={canSimulate}
+          onRunSimulation={runSimulation}
+        />
+      )}
     </WidgetDisplayWrapper>
   )
 }

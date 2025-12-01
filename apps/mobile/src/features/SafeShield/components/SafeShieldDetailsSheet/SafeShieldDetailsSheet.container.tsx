@@ -52,13 +52,7 @@ export const SafeShieldDetailsSheetContainer = () => {
 
   return (
     <SafeBottomSheet snapPoints={['100%']} loading={false}>
-      <AnalysisDetails
-        recipient={recipientData}
-        contract={contractData}
-        threat={threatData}
-        safeTx={safeTx}
-        txId={txId}
-      />
+      <AnalysisDetails recipient={recipientData} contract={contractData} threat={threatData} safeTx={safeTx} />
 
       <View flexDirection="row" width="100%" gap="$1" justifyContent="center" alignItems="center">
         <Text fontSize="$2" color="$textSecondary">

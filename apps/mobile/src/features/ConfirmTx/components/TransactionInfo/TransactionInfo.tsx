@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react'
 import { YStack } from 'tamagui'
 import { MultisigExecutionDetails, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { TransactionChecks } from '../TransactionChecks'
 import { ConfirmationsInfo } from '../ConfirmationsInfo'
 import { isMultisigDetailedExecutionInfo } from '@/src/utils/transaction-guards'
 import { PendingTx } from '@/src/store/pendingTxsSlice'
