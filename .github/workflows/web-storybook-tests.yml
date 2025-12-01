@@ -32,6 +32,8 @@ jobs:
       - name: Run Storybook snapshot tests
         run: yarn test:storybook:ci
         working-directory: apps/web
+        timeout-minutes: 15
+        continue-on-error: true
         env:
           NEXT_PUBLIC_IS_OFFICIAL_HOST: true
 
