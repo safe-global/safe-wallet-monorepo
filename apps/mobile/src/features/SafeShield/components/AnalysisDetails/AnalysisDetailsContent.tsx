@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Stack, styled, View } from 'tamagui'
 import { AnalysisGroup } from '../AnalysisGroup'
 import { ContractAnalysisResults, Severity } from '@safe-global/utils/features/safe-shield/types'
@@ -7,12 +7,15 @@ import { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/t
 import { getOverallStatus, normalizeThreatData } from '@safe-global/utils/features/safe-shield/utils'
 import { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { TransactionSimulation } from '../TransactionSimulation'
+import { useTransactionSimulation } from '../TransactionSimulation/hooks/useTransactionSimulation'
 import { isEmpty } from 'lodash'
+import type { SafeTransaction } from '@safe-global/types-kit'
 
 interface AnalysisDetailsContentProps {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
+  safeTx?: SafeTransaction
 }
 
 const AnalysisGroupWrapper = styled(View, {
@@ -27,13 +30,39 @@ const AnalysisGroupWrapper = styled(View, {
   },
 })
 
-export const AnalysisDetailsContent = ({ recipient, contract, threat }: AnalysisDetailsContentProps) => {
+export const AnalysisDetailsContent = ({ recipient, contract, threat, safeTx }: AnalysisDetailsContentProps) => {
   const [recipientData] = recipient || []
   const [contractData] = contract || []
   const [threatData] = threat || []
 
+  // Transaction simulation logic
+  const {
+    hasError,
+    isCallTraceError,
+    isSuccess,
+    simulationStatus,
+    simulationLink,
+    requestError,
+    canSimulate,
+    runSimulation,
+  } = useTransactionSimulation(safeTx)
+
+  const simulationSeverityStatus = useMemo(() => {
+    if (isSuccess) {
+      return Severity.OK
+    }
+    if (simulationStatus.isFinished || hasError || isCallTraceError) {
+      return Severity.WARN
+    }
+  }, [hasError, isCallTraceError, isSuccess, simulationStatus.isFinished])
+
   const normalizedThreatData = normalizeThreatData(threat)
-  const overallStatus = getOverallStatus(recipientData, contractData, threatData)
+  const overallStatus = getOverallStatus(
+    recipientData,
+    contractData,
+    threatData,
+    simulationSeverityStatus === Severity.WARN,
+  )
 
   const isEmptyRecipient = isEmpty(recipientData)
   const isEmptyContract = isEmpty(contractData)
@@ -65,7 +94,15 @@ export const AnalysisDetailsContent = ({ recipient, contract, threat }: Analysis
         )}
 
         <AnalysisGroupWrapper>
-          <TransactionSimulation highlighted={false} severity={Severity.OK} />
+          <TransactionSimulation
+            severity={simulationSeverityStatus}
+            highlighted={simulationSeverityStatus === overallStatus?.severity}
+            simulationStatus={simulationStatus}
+            simulationLink={simulationLink}
+            requestError={requestError}
+            canSimulate={canSimulate}
+            onRunSimulation={runSimulation}
+          />
         </AnalysisGroupWrapper>
       </Stack>
     </View>
