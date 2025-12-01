@@ -1,5 +1,5 @@
 import { useMemo, type ReactElement } from 'react'
-import ImageFallback from '../ImageFallback'
+import IframeIcon from '../IframeIcon'
 import css from './styles.module.css'
 import { upgradeCoinGeckoThumbToQuality } from '@safe-global/utils/utils/image'
 import { Box } from '@mui/material'
@@ -26,14 +26,12 @@ const TokenIcon = ({
 
   return (
     <Box position="relative" marginRight={chainId ? '8px' : '0px'}>
-      <ImageFallback
-        src={src}
+      <IframeIcon
+        src={src || fallbackSrc || FALLBACK_ICON}
         alt={tokenSymbol ?? ''}
-        fallbackSrc={fallbackSrc || FALLBACK_ICON}
+        width={size}
         height={size}
-        className={css.image}
-        referrerPolicy="no-referrer"
-        loading="lazy"
+        borderRadius="100%"
       />
       {chainId && (
         <div className={css.chainIcon}>
