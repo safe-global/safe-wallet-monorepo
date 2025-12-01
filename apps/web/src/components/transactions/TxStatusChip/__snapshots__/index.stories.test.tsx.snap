@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./index.stories Default 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-9rbzef-MuiChip-root"
+  >
+    <span
+      class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+    >
+      <span
+        class="MuiTypography-root MuiTypography-caption css-lkspku-MuiTypography-root"
+      >
+        Processing
+      </span>
+    </span>
+  </div>
+</div>
+`;
