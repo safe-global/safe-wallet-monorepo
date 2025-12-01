@@ -100,7 +100,7 @@ svg .safe-shield-inner-logo {
 }
 
 svg.OK .safe-shield-shape {
-  fill: #12FF80;
+  fill: #12ff80;
 }
 svg.INFO .safe-shield-shape {
   fill: var(--color-info-main);
@@ -112,9 +112,9 @@ svg.CRITICAL .safe-shield-shape {
   fill: var(--color-error-main);
 }
 
-svg.OK .safe-shield-inner-logo, 
-svg.INFO .safe-shield-inner-logo, 
-svg.WARN .safe-shield-inner-logo, 
+svg.OK .safe-shield-inner-logo,
+svg.INFO .safe-shield-inner-logo,
+svg.WARN .safe-shield-inner-logo,
 svg.CRITICAL .safe-shield-inner-logo {
   fill: var(--color-static-main);
 }
