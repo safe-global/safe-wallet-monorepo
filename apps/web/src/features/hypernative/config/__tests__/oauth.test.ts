@@ -34,8 +34,76 @@ describe('oauth config', () => {
   })
 
   describe('MOCK_AUTH_ENABLED', () => {
+    const originalEnv = process.env.NEXT_PUBLIC_HN_MOCK_AUTH
+
+    afterEach(() => {
+      // Restore original env var
+      if (originalEnv !== undefined) {
+        process.env.NEXT_PUBLIC_HN_MOCK_AUTH = originalEnv
+      } else {
+        delete process.env.NEXT_PUBLIC_HN_MOCK_AUTH
+      }
+    })
+
     it('should be false when env var is not set', () => {
-      expect(MOCK_AUTH_ENABLED).toBe(false)
+      // Temporarily remove the env var
+      const originalValue = process.env.NEXT_PUBLIC_HN_MOCK_AUTH
+      delete process.env.NEXT_PUBLIC_HN_MOCK_AUTH
+
+      // Reset modules to re-evaluate the config
+      jest.resetModules()
+
+      // Re-import to get the new value
+      const { MOCK_AUTH_ENABLED: mockAuthEnabled } = require('../oauth')
+      expect(mockAuthEnabled).toBe(false)
+
+      // Restore env var and modules for other tests
+      if (originalValue !== undefined) {
+        process.env.NEXT_PUBLIC_HN_MOCK_AUTH = originalValue
+      }
+      jest.resetModules()
+    })
+
+    it('should be true when env var is set to "true"', () => {
+      // Set the env var
+      const originalValue = process.env.NEXT_PUBLIC_HN_MOCK_AUTH
+      process.env.NEXT_PUBLIC_HN_MOCK_AUTH = 'true'
+
+      // Reset modules to re-evaluate the config
+      jest.resetModules()
+
+      // Re-import to get the new value
+      const { MOCK_AUTH_ENABLED: mockAuthEnabled } = require('../oauth')
+      expect(mockAuthEnabled).toBe(true)
+
+      // Restore env var and modules for other tests
+      if (originalValue !== undefined) {
+        process.env.NEXT_PUBLIC_HN_MOCK_AUTH = originalValue
+      } else {
+        delete process.env.NEXT_PUBLIC_HN_MOCK_AUTH
+      }
+      jest.resetModules()
+    })
+
+    it('should be false when env var is set to anything other than "true"', () => {
+      // Set the env var to something other than "true"
+      const originalValue = process.env.NEXT_PUBLIC_HN_MOCK_AUTH
+      process.env.NEXT_PUBLIC_HN_MOCK_AUTH = 'false'
+
+      // Reset modules to re-evaluate the config
+      jest.resetModules()
+
+      // Re-import to get the new value
+      const { MOCK_AUTH_ENABLED: mockAuthEnabled } = require('../oauth')
+      expect(mockAuthEnabled).toBe(false)
+
+      // Restore env var and modules for other tests
+      if (originalValue !== undefined) {
+        process.env.NEXT_PUBLIC_HN_MOCK_AUTH = originalValue
+      } else {
+        delete process.env.NEXT_PUBLIC_HN_MOCK_AUTH
+      }
+      jest.resetModules()
     })
   })
 
