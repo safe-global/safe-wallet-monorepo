@@ -92,30 +92,30 @@ input[type='number'] {
   fill: var(--color-background-lightGrey);
 }
 
-svg .safe-shield-shape {
+svg .shield-img {
   fill: var(--color-background-lightGrey);
 }
-svg .safe-shield-inner-logo {
+svg .shield-lines {
   fill: var(--color-text-secondary);
 }
 
-svg.OK .safe-shield-shape {
+svg.OK .shield-img {
   fill: #12FF80;
 }
-svg.INFO .safe-shield-shape {
+svg.INFO .shield-img {
   fill: var(--color-info-main);
 }
-svg.WARN .safe-shield-shape {
+svg.WARN .shield-img {
   fill: var(--color-warning-main);
 }
-svg.CRITICAL .safe-shield-shape {
+svg.CRITICAL .shield-img {
   fill: var(--color-error-main);
 }
 
-svg.OK .safe-shield-inner-logo, 
-svg.INFO .safe-shield-inner-logo, 
-svg.WARN .safe-shield-inner-logo, 
-svg.CRITICAL .safe-shield-inner-logo {
+svg.OK .shield-lines, 
+svg.INFO .shield-lines, 
+svg.WARN .shield-lines, 
+svg.CRITICAL .shield-lines {
   fill: var(--color-static-main);
 }
 
