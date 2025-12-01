@@ -20,7 +20,7 @@ describe('Storybook Snapshots', () => {
 
     describe(relativePath, () => {
       // Dynamically import each story file
-       
+
       const storyModule = require(storyFilePath)
 
       // Compose all stories from the file
