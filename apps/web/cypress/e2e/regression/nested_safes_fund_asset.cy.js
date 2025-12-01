@@ -4,6 +4,7 @@ import * as nsafes from '../pages/nestedsafes.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as owner from '../pages/owners.pages.js'
+import * as assets from '../pages/assets.pages.js'
 
 let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
@@ -15,8 +16,10 @@ describe('Nested safes fund asset tests', () => {
   })
 
   beforeEach(() => {
-    cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_45)
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_45)
     wallet.connectSigner(signer)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     sideBar.clickOnOpenNestedSafeListBtn()
     nsafes.clickOnAddNestedSafeBtn()
   })
