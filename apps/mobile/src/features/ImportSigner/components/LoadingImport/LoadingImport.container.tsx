@@ -1,17 +1,11 @@
 import { useAppDispatch } from '@/src/store/hooks'
 import { useCallback, useEffect } from 'react'
-import { useGlobalSearchParams, useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { addSignerWithEffects } from '@/src/store/signersSlice'
 import { LoadingScreen } from '@/src/components/LoadingScreen'
 import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipValidation'
 
 export function LoadingImport() {
-  const glob = useGlobalSearchParams<{
-    safeAddress?: string
-    chainId?: string
-    import_safe?: string
-    safeName?: string
-  }>()
   const { address } = useLocalSearchParams<{ address: string }>()
   const dispatch = useAppDispatch()
   const router = useRouter()
@@ -49,10 +43,6 @@ export function LoadingImport() {
             params: {
               name: validationResult.ownerInfo.name,
               address: validationResult.ownerInfo.value,
-              safeAddress: glob.safeAddress,
-              chainId: glob.chainId,
-              import_safe: glob.import_safe,
-              safeName: glob.safeName,
             },
           })
         } else {
@@ -64,7 +54,7 @@ export function LoadingImport() {
     }
 
     validateAndImport()
-  }, [address, validateAddressOwnership, dispatch, router, glob, redirectToError])
+  }, [address, validateAddressOwnership, dispatch, router, redirectToError])
 
   return <LoadingScreen title="Creating your signer..." description="Verifying address..." />
 }

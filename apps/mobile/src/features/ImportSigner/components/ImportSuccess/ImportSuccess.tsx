@@ -11,27 +11,27 @@ import { Button, Text, View } from 'tamagui'
 import { ToastViewport } from '@tamagui/toast'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 import Logger from '@/src/utils/logger'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectPendingSafe } from '@/src/store/signerImportFlowSlice'
 
 export function ImportSuccess() {
-  const { address, name, import_safe, safeAddress, safeName } = useLocalSearchParams<{
+  const { address, name } = useLocalSearchParams<{
     address: `0x${string}`
     name: string
-    import_safe: string
-    safeAddress?: string
-    safeName?: string
   }>()
   const router = useRouter()
   const copy = useCopyAndDispatchToast()
+  const pendingSafe = useAppSelector(selectPendingSafe)
 
   const handleContinuePress = async () => {
     try {
       router.dismissAll()
-      if (safeAddress && safeName && import_safe === 'true') {
+      if (pendingSafe) {
         router.dismissTo({
           pathname: '/(import-accounts)/signers',
           params: {
-            safeAddress: safeAddress,
-            safeName: safeName,
+            safeAddress: pendingSafe.address,
+            safeName: pendingSafe.name,
           },
         })
       } else {

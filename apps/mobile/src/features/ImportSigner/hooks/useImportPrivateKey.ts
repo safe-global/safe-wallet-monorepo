@@ -1,7 +1,7 @@
 import { ethers } from 'ethers'
 import { useState } from 'react'
 import Clipboard from '@react-native-clipboard/clipboard'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { storePrivateKey } from '@/src/hooks/useSign/useSign'
 import useDelegate from '@/src/hooks/useDelegate'
 import Logger from '@/src/utils/logger'
@@ -12,7 +12,6 @@ export const useImportPrivateKey = () => {
   const [input, setInput] = useState('')
   const [inputType, setInputType] = useState<InputType>('unknown')
   const [wallet, setWallet] = useState<ethers.Wallet>()
-  const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string; safeName?: string }>()
   const [error, setError] = useState<string | undefined>(undefined)
   const router = useRouter()
   const { createDelegate } = useDelegate()
@@ -76,10 +75,6 @@ export const useImportPrivateKey = () => {
           pathname: '/import-signers/loading',
           params: {
             address: wallet.address,
-            safeAddress: local.safeAddress,
-            chainId: local.chainId,
-            import_safe: local.import_safe,
-            safeName: local.safeName,
           },
         })
       } catch (err) {
@@ -91,10 +86,6 @@ export const useImportPrivateKey = () => {
         pathname: '/import-signers/seed-phrase-addresses',
         params: {
           seedPhrase: trimmedInput,
-          safeAddress: local.safeAddress,
-          chainId: local.chainId,
-          import_safe: local.import_safe,
-          safeName: local.safeName,
         },
       })
     } else {
