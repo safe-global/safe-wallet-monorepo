@@ -31,11 +31,11 @@ export const SafeShieldDisplay = ({
       </Card>
 
       <Stack direction="row" alignItems="center" alignSelf="flex-end">
-        <Typography variant="body2" color="text.secondary" fontSize={13} lineHeight={1.38} whiteSpace="nowrap">
-          Secured by
-        </Typography>
-
-        <SvgIcon component={SafeShieldLogoFull} inheritViewBox sx={{ width: 100.83, height: 14.87 }} />
+        <SvgIcon
+          component={isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull}
+          inheritViewBox
+          sx={{ width: 78, height: 18 }}
+        />
       </Stack>
     </Stack>
   )
