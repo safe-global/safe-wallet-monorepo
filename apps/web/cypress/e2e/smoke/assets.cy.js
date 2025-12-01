@@ -39,12 +39,12 @@ describe('[SMOKE] Assets tests', () => {
     assets.toggleHideDust(false)
 
     // Verify default tokens list shows only native token
-    assets.selectTokenList(assets.tokenListOptions.default)
+    assets.toggleShowAllTokens(false)
     main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther])
     main.verifyValuesDoNotExist(assets.tokenListTable, spamTokens)
 
     // Verify all tokens list shows spam tokens
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
     spamTokens.push(constants.tokenNames.sepoliaEther)
     main.verifyValuesExist(assets.tokenListTable, spamTokens)
 

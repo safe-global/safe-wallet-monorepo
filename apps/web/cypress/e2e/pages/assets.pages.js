@@ -17,6 +17,9 @@ const paginationPageList = 'ul[role="listbox"]'
 const currencyDropDown = 'div[id="currency"]'
 export const tokenListTable = 'table[aria-labelledby="tableTitle"]'
 const manageTokensButton = '[data-testid="manage-tokens-button"]'
+const manageTokensMenu = '[data-testid="manage-tokens-menu"]'
+const showAllTokensSwitch = '[data-testid="show-all-tokens-switch"]'
+const hideSmallBalancesSwitch = '[data-testid="hide-small-balances-switch"]'
 export const tablePaginationContainer = '[data-testid="table-pagination"]'
 export const tableContainer = '[data-testid="table-container"]'
 
@@ -51,26 +54,43 @@ const pageCountString10to20 = '11–20 of'
 
 const PRICE_COLUMN = 1
 const TOKEN_AMOUNT_COLUMN = 2
-const FIAT_AMOUNT_COLUMN = 3
+const WEIGHT_COLUMN = 3
+const FIAT_AMOUNT_COLUMN = 4
 // column with the send button and swap in the assets table
 export const ACTION_COLUMN = 5
 export const actionColumnCell = '[data-testid="table-cell-actions"]'
 
 export const fiatRegex = new RegExp(`\\$?(([0-9]{1,3},)*[0-9]{1,3}(\\.[0-9]{2})?|0)`)
 
-export const tokenListOptions = {
-  allTokens: 'span[data-track="assets: Show all tokens"]',
-  default: 'span[data-track="assets: Show default tokens"]',
+export function toggleShowAllTokens(shouldShow) {
+  cy.get(manageTokensButton).click()
+
+  cy.get(manageTokensMenu)
+    .should('be.visible')
+    .within(() => {
+      cy.get(showAllTokensSwitch)
+        .find('input[type="checkbox"]')
+        .then(($checkbox) => {
+          const isChecked = $checkbox.is(':checked')
+          if (shouldShow && !isChecked) {
+            cy.wrap($checkbox).click({ force: true })
+          } else if (!shouldShow && isChecked) {
+            cy.wrap($checkbox).click({ force: true })
+          }
+        })
+    })
+
+  cy.get('body').click(0, 0)
+  cy.get(manageTokensMenu).should('not.exist')
 }
 
 export function toggleHideDust(shouldHide) {
   cy.get(manageTokensButton).click()
 
-  cy.get('[role="menu"]')
+  cy.get(manageTokensMenu)
     .should('be.visible')
     .within(() => {
-      cy.contains('Hide small balances')
-        .parents('li')
+      cy.get(hideSmallBalancesSwitch)
         .find('input[type="checkbox"]')
         .then(($checkbox) => {
           const isChecked = $checkbox.is(':checked')
@@ -83,7 +103,7 @@ export function toggleHideDust(shouldHide) {
     })
 
   cy.get('body').click(0, 0)
-  cy.wait(1000)
+  cy.get(manageTokensMenu).should('not.exist')
 }
 export const currencyEUR = '€'
 export const currencyOptionEUR = 'EUR'
@@ -346,31 +366,7 @@ export function verifyTokenIsPresent(token) {
   cy.get(tokenListTable).contains(token)
 }
 
-export function selectTokenList(option) {
-  const wantAllTokens = option === tokenListOptions.allTokens
-
-  cy.get(manageTokensButton).click()
-
-  cy.get('[role="menu"]')
-    .should('be.visible')
-    .within(() => {
-      cy.contains('Show all tokens')
-        .parents('li')
-        .find('input[type="checkbox"]')
-        .then(($checkbox) => {
-          const isChecked = $checkbox.is(':checked')
-          if (wantAllTokens && !isChecked) {
-            cy.wrap($checkbox).click({ force: true })
-          } else if (!wantAllTokens && isChecked) {
-            cy.wrap($checkbox).click({ force: true })
-          }
-        })
-    })
-
-  cy.get('body').click(0, 0)
-}
-
-export function verityTokenAltImageIsVisible(currency, alttext) {
+export function verifyTokenAltImageIsVisible(currency, alttext) {
   cy.contains(currency)
     .parents('tr')
     .within(() => {
