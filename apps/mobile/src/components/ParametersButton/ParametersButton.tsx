@@ -1,6 +1,8 @@
+import { TouchableOpacity } from '@gorhom/bottom-sheet'
 import { router } from 'expo-router'
 import React from 'react'
-import { Button, View } from 'tamagui'
+import { Text, View } from 'tamagui'
+import { SafeFontIcon } from '../SafeFontIcon'
 
 interface ParametersButtonProps {
   txId: string
@@ -16,21 +18,24 @@ export function ParametersButton({ txId, title = 'Transaction details' }: Parame
   }
 
   return (
-    <View height="$10" alignItems="center">
-      <Button
-        paddingHorizontal="$2"
-        height="$9"
-        borderRadius={8}
-        borderWidth={0}
-        backgroundColor="$borderLight"
-        fontWeight="700"
-        size="$4"
-        fullscreen
-        onPress={goToAdvancedDetails}
-        testID="transaction-details-button"
+    <TouchableOpacity onPress={goToAdvancedDetails} activeOpacity={0.7} testID="transaction-details-button">
+      <View
+        backgroundColor="$backgroundFocus"
+        padding="$4"
+        paddingVertical="$3"
+        borderBottomLeftRadius="$2"
+        borderBottomRightRadius="$2"
+        flexDirection="row"
+        alignItems="center"
+        justifyContent="space-between"
+        gap="$0"
       >
-        {title}
-      </Button>
-    </View>
+        <View flexDirection="row" alignItems="center" justifyContent="center" gap="$1">
+          <Text fontWeight={600}>{title}</Text>
+        </View>
+
+        <SafeFontIcon name="chevron-right" size={16} color="$color" />
+      </View>
+    </TouchableOpacity>
   )
 }
