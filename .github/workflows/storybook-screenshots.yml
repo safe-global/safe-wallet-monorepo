@@ -2,7 +2,7 @@ name: Storybook Screenshots
 
 on:
   workflow_run:
-    workflows: ["Web Deploy to dev/staging"]
+    workflows: ['Web Deploy to dev/staging']
     types:
       - completed
 
@@ -12,12 +12,13 @@ permissions:
 
 jobs:
   screenshot:
-    # Only run on PRs and when the deployment succeeded
+    # Only run on PRs from the same repository (not forks) and when the deployment succeeded
+    # This prevents untrusted code from forks being executed with elevated permissions
     if: >
       github.event.workflow_run.event == 'pull_request' &&
-      github.event.workflow_run.conclusion == 'success'
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v5
         with:
@@ -36,16 +37,21 @@ jobs:
 
       - name: Get PR number
         id: pr
-        run: |
-          PR_NUMBER=$(gh pr view ${{ github.event.workflow_run.head_branch }} --json number -q .number 2>/dev/null || echo "")
-          echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ github.token }}
+          # Use env var to prevent code injection via branch name
+          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          PR_NUMBER=$(gh pr view "$BRANCH_NAME" --json number -q .number 2>/dev/null || echo "")
+          echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
 
       - name: Exit if no PR found
         if: steps.pr.outputs.number == ''
+        env:
+          # Use env var to prevent code injection via branch name
+          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
         run: |
-          echo "No PR found for branch ${{ github.event.workflow_run.head_branch }}"
+          echo "No PR found for branch $BRANCH_NAME"
           exit 0
 
       - name: Get changed story files
