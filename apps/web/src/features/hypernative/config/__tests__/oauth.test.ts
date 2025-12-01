@@ -1,4 +1,4 @@
-import { HYPERNATIVE_OAUTH_CONFIG, OAUTH_CALLBACK_ROUTE, MOCK_AUTH_ENABLED, getRedirectUri } from '../oauth'
+import { HYPERNATIVE_OAUTH_CONFIG, OAUTH_CALLBACK_ROUTE, getRedirectUri } from '../oauth'
 
 describe('oauth config', () => {
   describe('HYPERNATIVE_OAUTH_CONFIG', () => {
@@ -15,7 +15,7 @@ describe('oauth config', () => {
     })
 
     it('should have default clientId', () => {
-      expect(HYPERNATIVE_OAUTH_CONFIG.clientId).toBe('mock-client-id')
+      expect(HYPERNATIVE_OAUTH_CONFIG.clientId).toBe('SAFE_WALLET_SPA')
     })
 
     it('should have default redirectUri as empty string', () => {
@@ -23,7 +23,7 @@ describe('oauth config', () => {
     })
 
     it('should have correct scope', () => {
-      expect(HYPERNATIVE_OAUTH_CONFIG.scope).toBe('read:analysis write:analysis')
+      expect(HYPERNATIVE_OAUTH_CONFIG.scope).toBe('read')
     })
   })
 
