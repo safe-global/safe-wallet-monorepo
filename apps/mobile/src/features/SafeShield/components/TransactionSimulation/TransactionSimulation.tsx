@@ -1,6 +1,6 @@
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import React from 'react'
-import { Spinner, Stack, Text, Theme, View } from 'tamagui'
+import { Stack, Text, Theme, View } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { SafeButton } from '@/src/components/SafeButton'
 import { safeShieldIcons } from '../../theme'
@@ -54,16 +54,12 @@ export function TransactionSimulation({
     <Theme name={`safeShieldAnalysisStatus_${themeSeverity}`}>
       <Stack gap="$3">
         <View flexDirection="row" alignItems="center" gap={'$3'}>
-          {isLoading ? (
-            <Spinner size="small" />
-          ) : (
-            <SafeFontIcon
-              testID={`transaction-simulation-icon`}
-              name={iconName}
-              color={highlighted ? '$icon' : '$colorLight'}
-              size={16}
-            />
-          )}
+          <SafeFontIcon
+            testID={`transaction-simulation-icon`}
+            name={iconName}
+            color={highlighted ? '$icon' : '$colorLight'}
+            size={16}
+          />
 
           <Text color="$color" fontSize="$4">
             {getSimulationHeaderText()}
