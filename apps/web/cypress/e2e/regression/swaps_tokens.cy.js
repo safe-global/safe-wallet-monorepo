@@ -19,6 +19,8 @@ describe('Swaps token tests', () => {
 
   beforeEach(() => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_1)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
   })
 
   // Added to prod
@@ -27,9 +29,7 @@ describe('Swaps token tests', () => {
     { defaultCommandTimeout: 30000 },
     () => {
       wallet.connectSigner(signer)
-      assets.toggleShowAllTokens(true)
-      assets.toggleHideDust(false)
-
+      main.clickOnSideMenuItem('Home')
       swaps.clickOnAssetSwapBtn(0)
       swaps.acceptLegalDisclaimer()
       cy.wait(2000)
@@ -52,7 +52,7 @@ describe('Swaps token tests', () => {
     })
 
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_1)
-    swaps.verifyDashboardPageSwapButtonsCount(4)
+    swaps.verifyDashboardPageSwapButtonsCount(1)
     main.verifyElementsCount(swaps.dashboardSwapBtn, 1)
   })
 })
