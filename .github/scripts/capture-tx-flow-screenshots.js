@@ -123,8 +123,8 @@ async function initiateSendTokenFlow(page) {
   await page.waitForTimeout(1500)
 
   // Click "Send tokens" option
-  const sendTokensBtn = page.locator('[data-testid="new-tx-button-send-tokens"]')
-  await sendTokensBtn.waitFor({ state: 'visible', timeout: 10000 })
+  const sendTokensBtn = page.locator('[data-testid="send-tokens-btn"]')
+  await sendTokensBtn.waitFor({ state: 'visible', timeout: 15000 })
   await sendTokensBtn.click()
 
   await page.waitForTimeout(2000)
