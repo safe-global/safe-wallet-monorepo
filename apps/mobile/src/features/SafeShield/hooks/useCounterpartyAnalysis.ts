@@ -47,6 +47,11 @@ export function useCounterpartyAnalysis(overrideSafeTx?: SafeTransaction): {
         return false
       }
 
+      // when the contact has no chainIds, it means it is a global contact
+      if (contact?.chainIds.length === 0) {
+        return true
+      }
+
       // Check if the chainId is in the contact's chainIds array
       return contact.chainIds.includes(checkChainId)
     }
