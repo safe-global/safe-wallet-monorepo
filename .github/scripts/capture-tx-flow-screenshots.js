@@ -20,8 +20,8 @@ if (!privateKey) {
   process.exit(1)
 }
 
-// Test Safe for screenshots - using a Sepolia test safe with funds
-const TEST_SAFE = 'sep:0xBb26E3717172d5000F87DEeA5ff0f5BbCF35E74C'
+// Test Safe for screenshots - using a Sepolia test safe where OWNER_4 is an owner
+const TEST_SAFE = 'sep:0xbaDd745E0e2738152651185217349A3B0aF415cd'
 const BRANCH_NAME = process.env.BRANCH_NAME || ''
 
 // LocalStorage values to dismiss modals/banners
