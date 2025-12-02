@@ -116,7 +116,7 @@ async function initiateSendTokenFlow(page) {
   console.log('Initiating send token flow using session storage...')
 
   // Use session storage to pre-fill the transaction flow
-  // This is much faster and more reliable than clicking through the UI
+  // The flow will auto-restore on page load thanks to TxModalProvider
   await page.evaluate(() => {
     const mockState = {
       flowType: 'token-transfer',
@@ -139,21 +139,15 @@ async function initiateSendTokenFlow(page) {
 
   console.log('Mock transaction state set in session storage')
 
-  // Now open the send tokens flow - it will automatically restore to the review screen
-  const newTxBtn = page.locator('[data-testid="new-tx-btn"]').first()
-  await newTxBtn.waitFor({ state: 'visible', timeout: 15000 })
-  await newTxBtn.click()
+  // Reload the page - the flow will automatically reopen at the review screen
+  await page.reload({ waitUntil: 'networkidle' })
 
-  await page.waitForTimeout(1000)
+  console.log('Page reloaded - flow should auto-restore to review screen')
 
-  const sendTokensBtn = page.locator('[data-testid="send-tokens-btn"]')
-  await sendTokensBtn.waitFor({ state: 'visible', timeout: 15000 })
-  await sendTokensBtn.click()
-
-  // Wait for the flow to restore and render the review screen
+  // Wait for the modal to open and render
   await page.waitForTimeout(3000)
 
-  console.log('Send token flow initiated successfully (auto-restored to review screen)')
+  console.log('Send token flow initiated successfully (auto-restored on reload)')
 }
 
 async function captureTxFlowScreenshots() {
