@@ -46,13 +46,6 @@ export const HN_AUTH_SUCCESS_EVENT = 'HN_AUTH_SUCCESS'
 export const HN_AUTH_ERROR_EVENT = 'HN_AUTH_ERROR'
 
 /**
- * Length of OAuth state parameter (recommended minimum 32 characters)
- * Note: State generation now uses crypto.randomUUID() instead of this constant
- * @deprecated Will be removed in Phase 2 refactoring
- */
-const OAUTH_STATE_LENGTH = 32
-
-/**
  * Mock token expiry time in seconds (10 minutes)
  * Used when MOCK_AUTH_ENABLED is true for development
  * Matches Hypernative OAuth API specification default expiry
@@ -82,22 +75,6 @@ function base64urlEncode(bytes: Uint8Array): string {
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=+$/, '')
-}
-
-/**
- * Generate a random string for OAuth state parameter
- * Uses crypto.getRandomValues for cryptographically secure randomness
- * @deprecated Will be replaced with crypto.randomUUID() in Phase 2
- * @param length - Length of the random string to generate
- * @returns Random string containing URL-safe characters
- */
-function generateRandomString(length: number): string {
-  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~'
-  const randomValues = new Uint8Array(length)
-  crypto.getRandomValues(randomValues)
-  return Array.from(randomValues)
-    .map((value) => charset[value % charset.length])
-    .join('')
 }
 
 /**
@@ -134,9 +111,9 @@ async function buildAuthUrl(): Promise<string> {
   const codeVerifier = base64urlEncode(randomBytes)
   const codeChallenge = await generateCodeChallenge(codeVerifier)
 
-  // Generate OAuth state parameter for CSRF protection
-  // TODO: Phase 2 - Replace with crypto.randomUUID()
-  const state = generateRandomString(OAUTH_STATE_LENGTH)
+  // Generate OAuth state parameter for CSRF protection using UUID v4
+  // UUID provides better uniqueness guarantees and is the standard approach
+  const state = crypto.randomUUID()
 
   // Store verifier and state in sessionStorage for callback page
   sessionStorage.setItem(PKCE_VERIFIER_KEY, codeVerifier)
