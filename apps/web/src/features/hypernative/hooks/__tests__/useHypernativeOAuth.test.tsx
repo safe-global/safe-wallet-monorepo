@@ -1,8 +1,21 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
-import { useHypernativeOAuth, HN_AUTH_SUCCESS_EVENT } from '../useHypernativeOAuth'
+import { useHypernativeOAuth, HN_AUTH_SUCCESS_EVENT, HN_AUTH_ERROR_EVENT } from '../useHypernativeOAuth'
 import { hnAuthSlice } from '../../store/hnAuthSlice'
+
+// Mock notifications
+const mockShowNotification = jest.fn()
+jest.mock('@/store/notificationsSlice', () => {
+  const actual = jest.requireActual('@/store/notificationsSlice')
+  return {
+    ...actual,
+    showNotification: (payload: Parameters<typeof actual.showNotification>[0]) => {
+      mockShowNotification(payload)
+      return () => 'mock-notification-id'
+    },
+  }
+})
 
 // Mock oauth config to ensure consistent test values
 const mockGetRedirectUri = jest.fn(() => 'http://localhost:3000/hypernative/oauth-callback')
@@ -88,6 +101,12 @@ describe('useHypernativeOAuth', () => {
     // Setup window.open mock
     window.open = mockWindowOpen
     mockWindowOpen.mockReturnValue({ closed: false, close: jest.fn() })
+
+    // Mock requestAnimationFrame
+    global.requestAnimationFrame = jest.fn((cb) => {
+      setTimeout(cb, 0)
+      return 1
+    }) as unknown as typeof requestAnimationFrame
 
     // Setup crypto mocks
     Object.defineProperty(global, 'crypto', {
@@ -252,8 +271,9 @@ describe('useHypernativeOAuth', () => {
       expect(url).toContain('code_challenge_method=S256')
     })
 
-    it('should fallback to new tab when popup is blocked', async () => {
-      mockWindowOpen.mockReturnValueOnce(null)
+    it('should fallback to new tab when popup is blocked (null)', async () => {
+      const mockTab = { closed: false, close: jest.fn() }
+      mockWindowOpen.mockReturnValueOnce(null).mockReturnValueOnce(mockTab)
 
       const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
 
@@ -267,6 +287,115 @@ describe('useHypernativeOAuth', () => {
 
       // Second call: fallback to new tab
       expect(mockWindowOpen).toHaveBeenNthCalledWith(2, expect.any(String), '_blank')
+    })
+
+    it('should show notification with clickable link when both popup and tab are blocked', async () => {
+      mockWindowOpen.mockReturnValueOnce(null).mockReturnValueOnce(null)
+
+      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+
+      await act(async () => {
+        result.current.initiateLogin()
+        await waitFor(() => expect(mockWindowOpen).toHaveBeenCalledTimes(2))
+      })
+
+      expect(mockShowNotification).toHaveBeenCalledWith({
+        message: 'Popup blocked. Click the link below to complete authentication.',
+        variant: 'error',
+        groupKey: 'hypernative-auth-blocked',
+        link: {
+          onClick: expect.any(Function),
+          title: 'Open authentication page',
+        },
+      })
+
+      expect(result.current.loading).toBe(false)
+    })
+
+    it('should fallback to new tab when popup is immediately closed', async () => {
+      const mockTab = { closed: false, close: jest.fn() }
+      const mockPopup = { closed: true, close: jest.fn() }
+      mockWindowOpen.mockReturnValueOnce(mockPopup).mockReturnValueOnce(mockTab)
+
+      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+
+      await act(async () => {
+        result.current.initiateLogin()
+        await waitFor(() => expect(mockWindowOpen).toHaveBeenCalledTimes(2))
+      })
+
+      // First call: attempt popup (returns closed popup)
+      expect(mockWindowOpen).toHaveBeenNthCalledWith(1, expect.any(String), 'hypernative-oauth', expect.any(String))
+
+      // Second call: fallback to new tab (via requestAnimationFrame)
+      await waitFor(() => expect(mockWindowOpen).toHaveBeenCalledTimes(2))
+    })
+
+    it('should fallback to new tab when popup closes after delay', async () => {
+      jest.useFakeTimers()
+      const mockTab = { closed: false, close: jest.fn() }
+      const mockPopup = { closed: false, close: jest.fn() }
+      mockWindowOpen.mockReturnValueOnce(mockPopup).mockReturnValueOnce(mockTab)
+
+      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+
+      await act(async () => {
+        result.current.initiateLogin()
+        await waitFor(() => expect(mockWindowOpen).toHaveBeenCalled())
+      })
+
+      // Popup is initially open
+      expect(mockWindowOpen).toHaveBeenCalledTimes(1)
+
+      // Simulate popup closing after delay
+      await act(async () => {
+        Object.defineProperty(mockPopup, 'closed', { value: true, writable: true })
+        jest.advanceTimersByTime(100)
+      })
+
+      // Should fallback to new tab
+      await waitFor(() => expect(mockWindowOpen).toHaveBeenCalledTimes(2))
+
+      jest.useRealTimers()
+    })
+
+    it('should set up popup monitoring when popup opens successfully', async () => {
+      jest.useFakeTimers()
+      const mockPopup = { closed: false, close: jest.fn() }
+      mockWindowOpen.mockReturnValue(mockPopup)
+
+      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+
+      await act(async () => {
+        result.current.initiateLogin()
+        await waitFor(() => expect(mockWindowOpen).toHaveBeenCalled())
+      })
+
+      // Wait for delayed check
+      await act(async () => {
+        jest.advanceTimersByTime(100)
+      })
+
+      // Popup should still be monitored (not closed)
+      expect(result.current.loading).toBe(true)
+
+      // Simulate popup being closed without authentication
+      await act(async () => {
+        Object.defineProperty(mockPopup, 'closed', { value: true, writable: true })
+        jest.advanceTimersByTime(500)
+      })
+
+      // Should show cancelled notification and reset loading
+      await waitFor(() => {
+        expect(mockShowNotification).toHaveBeenCalledWith({
+          message: 'Authentication cancelled. Please try again to log in to Hypernative.',
+          variant: 'error',
+          groupKey: 'hypernative-auth-cancelled',
+        })
+        expect(result.current.loading).toBe(false)
+      })
+
+      jest.useRealTimers()
     })
   })
 
@@ -293,6 +422,85 @@ describe('useHypernativeOAuth', () => {
 
       const state = store.getState()
       expect(state.hnAuth.authToken).toBeUndefined()
+    })
+
+    it('should handle successful authentication and cleanup', async () => {
+      jest.useFakeTimers()
+      const mockPopup = { closed: false, close: jest.fn() }
+      mockWindowOpen.mockReturnValue(mockPopup)
+
+      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+
+      await act(async () => {
+        result.current.initiateLogin()
+        await waitFor(() => expect(mockWindowOpen).toHaveBeenCalled())
+        jest.advanceTimersByTime(100)
+      })
+
+      expect(result.current.loading).toBe(true)
+
+      // Simulate successful authentication message
+      const successEvent = new MessageEvent('message', {
+        data: {
+          type: HN_AUTH_SUCCESS_EVENT,
+          token: 'test-token',
+          expiresIn: 3600,
+        },
+        origin: 'http://localhost:3000',
+      })
+
+      await act(async () => {
+        window.dispatchEvent(successEvent)
+        jest.advanceTimersByTime(100)
+      })
+
+      expect(result.current.isAuthenticated).toBe(true)
+      expect(result.current.loading).toBe(false)
+      expect(mockPopup.close).toHaveBeenCalled()
+
+      const state = store.getState()
+      expect(state.hnAuth.authToken).toBe('test-token')
+
+      jest.useRealTimers()
+    })
+
+    it('should handle authentication error and cleanup', async () => {
+      jest.useFakeTimers()
+      const mockPopup = { closed: false, close: jest.fn() }
+      mockWindowOpen.mockReturnValue(mockPopup)
+
+      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+
+      await act(async () => {
+        result.current.initiateLogin()
+        await waitFor(() => expect(mockWindowOpen).toHaveBeenCalled())
+        jest.advanceTimersByTime(100)
+      })
+
+      expect(result.current.loading).toBe(true)
+
+      // Simulate authentication error message
+      const errorEvent = new MessageEvent('message', {
+        data: {
+          type: HN_AUTH_ERROR_EVENT,
+          error: 'Authentication failed',
+        },
+        origin: 'http://localhost:3000',
+      })
+
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation()
+
+      await act(async () => {
+        window.dispatchEvent(errorEvent)
+        jest.advanceTimersByTime(100)
+      })
+
+      expect(result.current.loading).toBe(false)
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Hypernative OAuth error:', 'Authentication failed')
+      expect(mockPopup.close).toHaveBeenCalled()
+
+      consoleErrorSpy.mockRestore()
+      jest.useRealTimers()
     })
   })
 
@@ -349,6 +557,112 @@ describe('useHypernativeOAuth', () => {
 
       expect(result.current.isAuthenticated).toBe(true)
       expect(result.current.isTokenExpired).toBe(false)
+    })
+  })
+
+  describe('timeout fallback', () => {
+    beforeEach(() => {
+      mockAuthEnabled = false
+      jest.useFakeTimers()
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    it('should show cancelled notification after timeout when no message received', async () => {
+      const mockTab = { closed: false, close: jest.fn() }
+      mockWindowOpen.mockReturnValueOnce(null).mockReturnValueOnce(mockTab)
+
+      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+
+      await act(async () => {
+        result.current.initiateLogin()
+        await waitFor(() => expect(mockWindowOpen).toHaveBeenCalledTimes(2))
+      })
+
+      expect(result.current.loading).toBe(true)
+
+      // Advance time past timeout (5 minutes)
+      await act(async () => {
+        jest.advanceTimersByTime(5 * 60 * 1000 + 100)
+      })
+
+      await waitFor(() => {
+        expect(mockShowNotification).toHaveBeenCalledWith({
+          message: 'Authentication cancelled. Please try again to log in to Hypernative.',
+          variant: 'error',
+          groupKey: 'hypernative-auth-cancelled',
+        })
+        expect(result.current.loading).toBe(false)
+      })
+    })
+
+    it('should not show cancelled notification if message received before timeout', async () => {
+      const mockTab = { closed: false, close: jest.fn() }
+      mockWindowOpen.mockReturnValueOnce(null).mockReturnValueOnce(mockTab)
+
+      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+
+      await act(async () => {
+        result.current.initiateLogin()
+        await waitFor(() => expect(mockWindowOpen).toHaveBeenCalledTimes(2))
+      })
+
+      // Send success message before timeout
+      const successEvent = new MessageEvent('message', {
+        data: {
+          type: HN_AUTH_SUCCESS_EVENT,
+          token: 'test-token',
+          expiresIn: 3600,
+        },
+        origin: 'http://localhost:3000',
+      })
+
+      await act(async () => {
+        window.dispatchEvent(successEvent)
+      })
+
+      // Advance time past timeout
+      await act(async () => {
+        jest.advanceTimersByTime(5 * 60 * 1000 + 100)
+      })
+
+      // Should not show cancelled notification since we received a message
+      const cancelledNotifications = mockShowNotification.mock.calls.filter(
+        (call) => call[0]?.groupKey === 'hypernative-auth-cancelled',
+      )
+      expect(cancelledNotifications).toHaveLength(0)
+    })
+  })
+
+  describe('cleanup', () => {
+    it('should cleanup timers on unmount', async () => {
+      jest.useFakeTimers()
+      const mockPopup = { closed: false, close: jest.fn() }
+      mockWindowOpen.mockReturnValue(mockPopup)
+
+      const clearIntervalSpy = jest.spyOn(global, 'clearInterval')
+      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout')
+
+      const { result, unmount } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+
+      await act(async () => {
+        result.current.initiateLogin()
+        await waitFor(() => expect(mockWindowOpen).toHaveBeenCalled())
+        jest.advanceTimersByTime(100)
+      })
+
+      // Unmount should cleanup
+      unmount()
+
+      // Should cleanup timers
+      expect(clearIntervalSpy).toHaveBeenCalled()
+      expect(clearTimeoutSpy).toHaveBeenCalled()
+
+      clearIntervalSpy.mockRestore()
+      clearTimeoutSpy.mockRestore()
+      jest.useRealTimers()
     })
   })
 })
