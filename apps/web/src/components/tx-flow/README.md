@@ -19,11 +19,13 @@ When a user progresses through a transaction flow, the state is automatically sa
 
 ### Automatic State Restoration
 
-When a user opens a transaction flow, the system checks for saved state:
+When a user reloads the page, the system automatically checks for saved state:
 
-1. If saved state exists for the same flow type
+1. If saved state exists for a flow type
 2. And the state is not stale (< 1 hour old)
-3. The flow automatically restores to the saved step with all data intact
+3. The flow **automatically reopens** at the saved step with all data intact
+
+**No manual action required** - just reload the page and continue where you left off!
 
 ### Automatic Cleanup
 
