@@ -1,27 +1,27 @@
 import type { ComponentType } from 'react'
-import { TxFlowType } from '@/services/analytics'
 
 // Lazy imports to avoid circular dependencies and improve initial load time
+// Using string literals instead of enum to avoid Jest module resolution issues
 const flowRegistry: Record<string, () => Promise<{ default: ComponentType<any> }>> = {
-  [TxFlowType.TOKEN_TRANSFER]: () => import('./flows/TokenTransfer'),
-  [TxFlowType.NFT_TRANSFER]: () => import('./flows/NftTransfer'),
-  [TxFlowType.ADD_OWNER]: () => import('./flows/AddOwner'),
-  [TxFlowType.REMOVE_OWNER]: () => import('./flows/RemoveOwner'),
-  [TxFlowType.REPLACE_OWNER]: () => import('./flows/ReplaceOwner'),
-  [TxFlowType.CHANGE_THRESHOLD]: () => import('./flows/ChangeThreshold'),
-  [TxFlowType.REMOVE_MODULE]: () => import('./flows/RemoveModule'),
-  [TxFlowType.REMOVE_GUARD]: () => import('./flows/RemoveGuard'),
-  [TxFlowType.REMOVE_SPENDING_LIMIT]: () => import('./flows/RemoveSpendingLimit'),
-  [TxFlowType.SETUP_SPENDING_LIMIT]: () => import('./flows/NewSpendingLimit'),
-  [TxFlowType.SIGNERS_STRUCTURE]: () => import('./flows/ManagerSigners'),
-  [TxFlowType.CONFIRM_TX]: () => import('./flows/ConfirmTx'),
-  [TxFlowType.REJECT_TX]: () => import('./flows/RejectTx'),
-  [TxFlowType.CONFIRM_BATCH]: () => import('./flows/ConfirmBatch'),
-  [TxFlowType.UPDATE_SAFE]: () => import('./flows/UpdateSafe'),
-  [TxFlowType.SIGN_MESSAGE_ON_CHAIN]: () => import('./flows/SignMessageOnChain'),
-  [TxFlowType.SETUP_RECOVERY]: () => import('./flows/UpsertRecovery'),
-  [TxFlowType.REMOVE_RECOVERY]: () => import('./flows/RemoveRecovery'),
-  [TxFlowType.CANCEL_RECOVERY]: () => import('./flows/CancelRecovery'),
+  'token-transfer': () => import('./flows/TokenTransfer'),
+  'nft-transfer': () => import('./flows/NftTransfer'),
+  'add-owner': () => import('./flows/AddOwner'),
+  'remove-owner': () => import('./flows/RemoveOwner'),
+  'replace-owner': () => import('./flows/ReplaceOwner'),
+  'change-threshold': () => import('./flows/ChangeThreshold'),
+  'remove-module': () => import('./flows/RemoveModule'),
+  'remove-guard': () => import('./flows/RemoveGuard'),
+  'remove-spending-limit': () => import('./flows/RemoveSpendingLimit'),
+  'setup-spending-limit': () => import('./flows/NewSpendingLimit'),
+  'signers-structure': () => import('./flows/ManagerSigners'),
+  'confirm-tx': () => import('./flows/ConfirmTx'),
+  'reject-tx': () => import('./flows/RejectTx'),
+  'confirm-batch': () => import('./flows/ConfirmBatch'),
+  'update-safe': () => import('./flows/UpdateSafe'),
+  'sign-message-on-chain': () => import('./flows/SignMessageOnChain'),
+  'setup-recovery': () => import('./flows/UpsertRecovery'),
+  'remove-recovery': () => import('./flows/RemoveRecovery'),
+  'cancel-recovery': () => import('./flows/CancelRecovery'),
 }
 
 /**
