@@ -21,11 +21,11 @@ import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useI
 import { EarnBanner, earnBannerID } from '@/components/dashboard/NewsCarousel/banners/EarnBanner'
 import { SpacesBanner, spacesBannerID } from '@/components/dashboard/NewsCarousel/banners/SpacesBanner'
 import { StakeBanner, stakeBannerID } from '@/components/dashboard/NewsCarousel/banners/StakeBanner'
-import NoFeeNovemberBanner, { noFeeNovemberBannerID } from '@/features/no-fee-november/components/NoFeeNovemberBanner'
+import NoFeeCampaignBanner, { noFeeCampaignBannerID } from '@/features/no-fee-campaign/components/NoFeeCampaignBanner'
 import AddFundsToGetStarted from '@/components/dashboard/AddFundsBanner'
 import useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsPositionsFeatureEnabled'
-import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
-import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
+import useNoFeeCampaignEligibility from '@/features/no-fee-campaign/hooks/useNoFeeCampaignEligibility'
+import useIsNoFeeCampaignEnabled from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'
 import { useBannerVisibility } from '@/features/hypernative/hooks'
 import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
 import { HnBannerForCarousel, hnBannerID } from '@/features/hypernative/components/HnBanner'
@@ -48,15 +48,15 @@ const Dashboard = (): ReactElement => {
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const isStakingBannerVisible = useIsStakingBannerVisible()
   const isPositionsFeatureEnabled = useIsPositionsFeatureEnabled()
-  const { isEligible } = useNoFeeNovemberEligibility()
-  const isNoFeeNovemberEnabled = useIsNoFeeNovemberFeatureEnabled()
+  const { isEligible } = useNoFeeCampaignEligibility()
+  const isNoFeeCampaignEnabled = useIsNoFeeCampaignEnabled()
   const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
 
   const banners = [
     showHnBanner && !hnLoading && { id: hnBannerID, element: HnBannerForCarousel },
-    isNoFeeNovemberEnabled && {
-      id: noFeeNovemberBannerID,
-      element: NoFeeNovemberBanner,
+    isNoFeeCampaignEnabled && {
+      id: noFeeCampaignBannerID,
+      element: NoFeeCampaignBanner,
     },
     isEarnPromoEnabled && { id: earnBannerID, element: EarnBanner },
     isSpacesFeatureEnabled && {

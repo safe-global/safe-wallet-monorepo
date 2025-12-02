@@ -8,7 +8,7 @@ import SponsoredBy from '../SponsoredBy'
 
 import RemainingRelays from '../RemainingRelays'
 import InfoIcon from '@mui/icons-material/Info'
-import GasTooHighBanner from '@/features/no-fee-november/components/GasTooHighBanner'
+import GasTooHighBanner from '@/features/no-fee-campaign/components/GasTooHighBanner'
 
 import css from './styles.module.css'
 import BalanceInfo from '@/components/tx/BalanceInfo'
@@ -20,7 +20,7 @@ import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 export const enum ExecutionMethod {
   RELAY = 'RELAY',
   WALLET = 'WALLET',
-  NO_FEE_NOVEMBER = 'NO_FEE_NOVEMBER',
+  NO_FEE_CAMPAIGN = 'NO_FEE_CAMPAIGN',
 }
 
 const _ExecutionMethodSelector = ({
@@ -31,7 +31,7 @@ const _ExecutionMethodSelector = ({
   relays,
   noLabel,
   tooltip,
-  noFeeNovember,
+  noFeeCampaign,
   gasTooHigh,
 }: {
   wallet: ConnectedWallet | null
@@ -41,14 +41,14 @@ const _ExecutionMethodSelector = ({
   relays?: RelaysRemaining
   noLabel?: boolean
   tooltip?: string
-  noFeeNovember?: {
+  noFeeCampaign?: {
     isEligible: boolean
     remaining: number
     limit: number
   }
   gasTooHigh?: boolean
 }): ReactElement | null => {
-  const shouldRelay = executionMethod === ExecutionMethod.RELAY || executionMethod === ExecutionMethod.NO_FEE_NOVEMBER
+  const shouldRelay = executionMethod === ExecutionMethod.RELAY || executionMethod === ExecutionMethod.NO_FEE_CAMPAIGN
 
   const onChooseExecutionMethod = (_: ChangeEvent<HTMLInputElement>, newExecutionMethod: string) => {
     setExecutionMethod(newExecutionMethod as ExecutionMethod)
@@ -66,9 +66,9 @@ const _ExecutionMethodSelector = ({
 
           <RadioGroup row value={executionMethod} onChange={onChooseExecutionMethod} className={css.radioGroup}>
             {(() => {
-              const isLimitReached = noFeeNovember?.isEligible && noFeeNovember.remaining === 0
-              const availabilityLabel = noFeeNovember?.limit
-                ? `${noFeeNovember.remaining || 0}/${noFeeNovember.limit} available`
+              const isLimitReached = noFeeCampaign?.isEligible && noFeeCampaign.remaining === 0
+              const availabilityLabel = noFeeCampaign?.limit
+                ? `${noFeeCampaign.remaining || 0}/${noFeeCampaign.limit} available`
                 : ''
               const isDisabled = gasTooHigh || isLimitReached
 
@@ -84,7 +84,7 @@ const _ExecutionMethodSelector = ({
                 >
                   <FormControlLabel
                     data-testid="relay-execution-method"
-                    value={noFeeNovember?.isEligible ? ExecutionMethod.NO_FEE_NOVEMBER : ExecutionMethod.RELAY}
+                    value={noFeeCampaign?.isEligible ? ExecutionMethod.NO_FEE_CAMPAIGN : ExecutionMethod.RELAY}
                     disabled
                     sx={{
                       flex: 1,
@@ -93,8 +93,8 @@ const _ExecutionMethodSelector = ({
                       },
                     }}
                     label={
-                      noFeeNovember?.isEligible ? (
-                        <div className={css.noFeeNovemberLabel}>
+                      noFeeCampaign?.isEligible ? (
+                        <div className={css.noFeeCampaignLabel}>
                           <Chip
                             label={isLimitReached ? availabilityLabel : 'Not available'}
                             size="small"
@@ -108,7 +108,7 @@ const _ExecutionMethodSelector = ({
                           <Typography className={css.notAvailableTitle}>Sponsored gas</Typography>
                           <div className={css.descriptionWrapper}>
                             <Typography className={css.descriptionText}>
-                              Part of the No-Fee November, Safe Ecosystem Foundation sponsorship program.
+                              Part of the DecENA, Safe Foundation&apos;s gas sponsorship program for USDe holders
                             </Typography>
                           </div>
                         </div>
@@ -126,22 +126,22 @@ const _ExecutionMethodSelector = ({
                 <FormControlLabel
                   data-testid="relay-execution-method"
                   sx={{ flex: 1 }}
-                  value={noFeeNovember?.isEligible ? ExecutionMethod.NO_FEE_NOVEMBER : ExecutionMethod.RELAY}
+                  value={noFeeCampaign?.isEligible ? ExecutionMethod.NO_FEE_CAMPAIGN : ExecutionMethod.RELAY}
                   label={
-                    noFeeNovember?.isEligible ? (
-                      <div className={css.noFeeNovemberLabel}>
+                    noFeeCampaign?.isEligible ? (
+                      <div className={css.noFeeCampaignLabel}>
                         <Typography className={css.mainLabel}>Sponsored gas</Typography>
                         <div className={css.subLabel}>
                           <Typography variant="body2" color="text.secondary">
-                            Part of the No-Fee November, Safe Ecosystem Foundation sponsorship program.{' '}
+                            Part of the DecENA, Safe Foundation&apos;s gas sponsorship program for USDe holders{' '}
                             <Tooltip
                               title={
                                 <Box>
                                   <Typography variant="body2" color="inherit">
-                                    SAFE holders enjoy gasless transactions on Ethereum Mainnet this November.{' '}
+                                    USDe holders enjoy gasless transactions on Ethereum mainnet this December.{' '}
                                     <Typography component="span" fontWeight="bold">
                                       <Link
-                                        href="https://help.safe.global/en/articles/456540-no-fee-november"
+                                        href="https://help.safe.global/en/articles/484423-no-fee-december-decena-campaign"
                                         style={{ textDecoration: 'underline', fontWeight: 'bold' }}
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -188,16 +188,16 @@ const _ExecutionMethodSelector = ({
         </FormControl>
 
         {/* Gas too high banner - shown inside method section when gas is too high */}
-        {gasTooHigh && noFeeNovember?.isEligible && (
+        {gasTooHigh && noFeeCampaign?.isEligible && (
           <div className={css.gasBannerWrapper}>
             <GasTooHighBanner />
           </div>
         )}
       </div>
 
-      {shouldRelay && noFeeNovember?.isEligible ? (
+      {shouldRelay && noFeeCampaign?.isEligible ? (
         <Typography variant="body2" className={css.transactionCounter}>
-          <span className={css.counterNumber}>{noFeeNovember.remaining}</span> free transactions left
+          <span className={css.counterNumber}>{noFeeCampaign.remaining}</span> free transactions left
         </Typography>
       ) : shouldRelay && relays ? (
         <RemainingRelays relays={relays} tooltip={tooltip} />

@@ -3,14 +3,14 @@ import { Box, Card, Stack, Typography } from '@mui/material'
 import Image from 'next/image'
 import css from './styles.module.css'
 import Link from 'next/link'
-import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
-import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
+import useNoFeeCampaignEligibility from '@/features/no-fee-campaign/hooks/useNoFeeCampaignEligibility'
+import useIsNoFeeCampaignEnabled from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'
 import BlockedAddress from '@/components/common/BlockedAddress'
 import { useDarkMode } from '@/hooks/useDarkMode'
 
-const NoFeeNovemberTransactionCard = () => {
-  const isEnabled = useIsNoFeeNovemberFeatureEnabled()
-  const { isEligible, isLoading, error, blockedAddress } = useNoFeeNovemberEligibility()
+const NoFeeCampaignTransactionCard = () => {
+  const isEnabled = useIsNoFeeCampaignEnabled()
+  const { isEligible, isLoading, error, blockedAddress } = useNoFeeCampaignEligibility()
   const dark = useDarkMode()
 
   if (!isEnabled) {
@@ -27,7 +27,7 @@ const NoFeeNovemberTransactionCard = () => {
           flex: 1,
         }}
       >
-        <BlockedAddress address={blockedAddress} featureTitle="No-Fee November" />
+        <BlockedAddress address={blockedAddress} featureTitle="DecENA" />
       </Stack>
     )
   }
@@ -57,8 +57,8 @@ const NoFeeNovemberTransactionCard = () => {
           <Stack direction="row" alignItems="center" spacing={3}>
             <Box className={css.iconContainer}>
               <Image
-                src="/images/common/no-fee-november/Cards.svg"
-                alt="No-Fee November Cards"
+                src="/images/common/no-fee-campaign/card-ethena.svg"
+                alt="USDe Logo"
                 width={48}
                 height={48}
                 className={css.cardsImage}
@@ -66,12 +66,12 @@ const NoFeeNovemberTransactionCard = () => {
             </Box>
             <Box flex={1}>
               <Typography variant="subtitle2" fontWeight="bold" color="static.main" className={css.title}>
-                Enjoy No-Fee November
+                Enjoy DecENA: No Fee for on Ethereum mainnet
               </Typography>
               <Typography variant="body2" color="static.light" className={css.description}>
-                SAFE holders enjoy gasless transactions on Ethereum Mainnet this November.{' '}
+                USDe holders enjoy gasless transactions on Ethereum mainnet this December.{' '}
                 <Link
-                  href="https://help.safe.global/en/articles/456540-no-fee-november"
+                  href="https://help.safe.global/en/articles/484423-no-fee-december-decena-campaign"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ textDecoration: 'underline', fontWeight: 'bold' }}
@@ -97,11 +97,11 @@ const NoFeeNovemberTransactionCard = () => {
               {/* Title and eligibility tag inline */}
               <Box className={css.titleRow}>
                 <Typography variant="subtitle2" fontWeight="bold" className={css.title}>
-                  Enjoy No-Fee November
+                  Enjoy DecENA
                 </Typography>
                 <Box className={css.eligibilityTag}>
                   <Image
-                    src="/images/common/no-fee-november/check-icon.svg"
+                    src="/images/common/no-fee-campaign/check-icon.svg"
                     alt="Eligible"
                     width={16}
                     height={16}
@@ -115,9 +115,9 @@ const NoFeeNovemberTransactionCard = () => {
 
               {/* Description */}
               <Typography variant="body2" className={css.description}>
-                SAFE holders enjoy gasless transactions on Ethereum Mainnet this November.{' '}
+                USDe holders enjoy gasless transactions on Ethereum mainnet this December.{' '}
                 <Link
-                  href="https://help.safe.global/en/articles/456540-no-fee-november"
+                  href="https://help.safe.global/en/articles/484423-no-fee-december-decena-campaign"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ textDecoration: 'underline', fontWeight: 'bold' }}
@@ -130,8 +130,8 @@ const NoFeeNovemberTransactionCard = () => {
             {/* Coins illustration */}
             <Box className={css.coinsContainer}>
               <Image
-                src="/images/common/no-fee-november/Cards.svg"
-                alt="No-Fee November Cards"
+                src="/images/common/no-fee-campaign/card-ethena.svg"
+                alt="USDe Logo"
                 width={58}
                 height={58}
                 className={css.coinsImage}
@@ -147,4 +147,4 @@ const NoFeeNovemberTransactionCard = () => {
   return null
 }
 
-export default NoFeeNovemberTransactionCard
+export default NoFeeCampaignTransactionCard
