@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, type ReactNode } from 'react'
+import React, { useCallback, useMemo, useEffect, type ReactNode } from 'react'
 import useTxStepper from './useTxStepper'
 import SafeTxProvider from './SafeTxProvider'
 import { TxInfoProvider } from './TxInfoProvider'
@@ -12,6 +12,7 @@ import { SlotProvider } from './slots'
 import { useTrackTimeSpent } from '@/components/tx/shared/tracking'
 import LedgerHashComparison from '@/features/ledger'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import { loadTxFlowState, clearTxFlowState } from './txFlowStorage'
 
 type SubmitCallbackProps = { txId?: string; isExecuted?: boolean }
 export type SubmitCallback = (args?: SubmitCallbackProps) => void
@@ -30,6 +31,7 @@ type TxFlowProps<T extends unknown> = {
   isBatchable?: TxFlowProviderProps<T>['isBatchable']
   ReviewTransactionComponent?: typeof ReviewTransaction
   eventCategory?: string
+  flowType?: string
 } & TxFlowContextType['txLayoutProps']
 
 /**
@@ -51,9 +53,39 @@ export const TxFlow = <T extends unknown>({
   isBatchable,
   ReviewTransactionComponent = ReviewTransaction,
   eventCategory,
+  flowType,
   ...txLayoutProps
 }: TxFlowProps<T>) => {
-  const { step, data, nextStep, prevStep } = useTxStepper(initialData, eventCategory)
+  // Try to restore saved state on mount
+  const savedState = useMemo(() => {
+    if (!flowType) return null
+    const state = loadTxFlowState<T>()
+    // Only restore if the flow type matches
+    if (state && state.flowType === flowType) {
+      return state
+    }
+    return null
+  }, [flowType])
+
+  const restoredData = (savedState?.data as T) ?? initialData
+  const restoredStep = savedState?.step ?? 0
+
+  const { step, data, nextStep, prevStep, setStep, setData } = useTxStepper(
+    restoredData,
+    eventCategory,
+    flowType,
+    txId,
+    txNonce,
+  )
+
+  // Initialize with restored step if we have saved state
+  useEffect(() => {
+    if (savedState && restoredStep > 0) {
+      setStep(restoredStep)
+      setData(restoredData)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const childrenArray = Array.isArray(children) ? children : [children]
 
@@ -68,6 +100,8 @@ export const TxFlow = <T extends unknown>({
     (props) => {
       onSubmit?.({ ...props, data })
       trackTimeSpent()
+      // Clear saved state when flow completes
+      clearTxFlowState()
     },
     [onSubmit, data, trackTimeSpent],
   )

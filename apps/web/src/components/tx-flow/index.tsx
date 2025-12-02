@@ -3,6 +3,7 @@ import TxModalDialog from '@/components/common/TxModalDialog'
 import { SuccessScreenFlow, NestedTxSuccessScreenFlow } from './flows'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { usePreventNavigation } from '@/hooks/usePreventNavigation'
+import { clearTxFlowState } from './txFlowStorage'
 
 const noop = () => {}
 
@@ -38,6 +39,9 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
     setFlow(undefined)
 
     setSignerAddress?.(undefined)
+
+    // Clear saved tx flow state when modal closes
+    clearTxFlowState()
 
     return true
   }, [setSignerAddress])

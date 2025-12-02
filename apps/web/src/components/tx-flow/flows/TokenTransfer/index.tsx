@@ -73,6 +73,8 @@ const TokenTransferFlow = ({ txNonce, ...params }: MultiTokenTransferFlowProps) 
       icon={AssetsIcon}
       subtitle="Send tokens"
       eventCategory={TxFlowType.TOKEN_TRANSFER}
+      flowType="TokenTransfer"
+      txNonce={txNonce}
       ReviewTransactionComponent={ReviewTokenTx}
     >
       <TxFlowStep title="New transaction">

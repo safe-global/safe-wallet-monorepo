@@ -1,9 +1,23 @@
 import { MODAL_NAVIGATION, trackEvent } from '@/services/analytics'
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useEffect } from 'react'
+import { saveTxFlowState } from './txFlowStorage'
 
-const useTxStepper = <T extends unknown>(initialData: T, eventCategory?: string) => {
+const useTxStepper = <T extends unknown>(
+  initialData: T,
+  eventCategory?: string,
+  flowType?: string,
+  txId?: string,
+  txNonce?: number,
+) => {
   const [step, setStep] = useState(0)
   const [data, setData] = useState<T>(initialData)
+
+  // Save state to session storage whenever it changes
+  useEffect(() => {
+    if (flowType && (step > 0 || data !== initialData)) {
+      saveTxFlowState(flowType, step, data, txId, txNonce)
+    }
+  }, [flowType, step, data, txId, txNonce, initialData])
 
   const nextStep = useCallback(
     (entireData?: T) => {
@@ -29,7 +43,7 @@ const useTxStepper = <T extends unknown>(initialData: T, eventCategory?: string)
     })
   }, [eventCategory])
 
-  return { step, data, nextStep, prevStep }
+  return { step, data, nextStep, prevStep, setStep, setData }
 }
 
 export default useTxStepper
