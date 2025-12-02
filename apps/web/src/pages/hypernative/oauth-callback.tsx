@@ -1,5 +1,5 @@
 import type { NextPage } from 'next'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { Box, CircularProgress, Typography, Alert } from '@mui/material'
@@ -34,12 +34,20 @@ const HypernativeOAuthCallback: NextPage = () => {
   const dispatch = useAppDispatch()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [errorMessage, setErrorMessage] = useState<string>('')
+  const hasProcessedRef = useRef(false)
 
   useEffect(() => {
     /**
      * Handle the OAuth callback flow
      */
     const handleCallback = async () => {
+      // Prevent double processing (e.g., React Strict Mode, navigation changes)
+      if (hasProcessedRef.current) {
+        return
+      }
+
+      hasProcessedRef.current = true
+
       try {
         // Step 1: Extract query parameters
         const { code, state, error, error_description } = router.query
@@ -122,6 +130,9 @@ const HypernativeOAuthCallback: NextPage = () => {
 
         // Clean up PKCE data on error
         clearPkce()
+
+        // Reset flag on error so user can retry
+        hasProcessedRef.current = false
 
         // Notify parent window of error
         if (window.opener) {
