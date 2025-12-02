@@ -10,6 +10,9 @@ import { TransactionSimulation } from '../TransactionSimulation'
 import { useTransactionSimulation } from '../TransactionSimulation/hooks/useTransactionSimulation'
 import { isEmpty } from 'lodash'
 import type { SafeTransaction } from '@safe-global/types-kit'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectActiveChain } from '@/src/store/chains'
+import { isTxSimulationEnabled } from '@safe-global/utils/components/tx/security/tenderly/utils'
 
 interface AnalysisDetailsContentProps {
   recipient?: AsyncResult<RecipientAnalysisResults>
@@ -46,6 +49,10 @@ export const AnalysisDetailsContent = ({ recipient, contract, threat, safeTx }: 
     canSimulate,
     runSimulation,
   } = useTransactionSimulation(safeTx)
+
+  const chain = useAppSelector(selectActiveChain)
+
+  const tenderlyEnabled = isTxSimulationEnabled(chain ?? undefined) ?? false
 
   const simulationSeverityStatus = useMemo(() => {
     if (isSuccess) {
@@ -88,22 +95,24 @@ export const AnalysisDetailsContent = ({ recipient, contract, threat, safeTx }: 
           </AnalysisGroupWrapper>
         )}
         {!isEmptyThreat && normalizedThreatData && (
-          <AnalysisGroupWrapper bordered>
+          <AnalysisGroupWrapper bordered={tenderlyEnabled}>
             <AnalysisGroup highlightedSeverity={overallStatus?.severity} data={normalizedThreatData} />
           </AnalysisGroupWrapper>
         )}
 
-        <AnalysisGroupWrapper>
-          <TransactionSimulation
-            severity={simulationSeverityStatus}
-            highlighted={simulationSeverityStatus === overallStatus?.severity}
-            simulationStatus={simulationStatus}
-            simulationLink={simulationLink}
-            requestError={requestError}
-            canSimulate={canSimulate}
-            onRunSimulation={runSimulation}
-          />
-        </AnalysisGroupWrapper>
+        {tenderlyEnabled && (
+          <AnalysisGroupWrapper>
+            <TransactionSimulation
+              severity={simulationSeverityStatus}
+              highlighted={simulationSeverityStatus === overallStatus?.severity}
+              simulationStatus={simulationStatus}
+              simulationLink={simulationLink}
+              requestError={requestError}
+              canSimulate={canSimulate}
+              onRunSimulation={runSimulation}
+            />
+          </AnalysisGroupWrapper>
+        )}
       </Stack>
     </View>
   )

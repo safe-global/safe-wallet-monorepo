@@ -19,6 +19,9 @@ import { normalizeThreatData } from '@safe-global/utils/features/safe-shield/uti
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 
 import type { SafeTransaction } from '@safe-global/types-kit'
+import { selectActiveChain } from '@/src/store/chains'
+import { useAppSelector } from '@/src/store/hooks'
+import { isTxSimulationEnabled } from '@safe-global/utils/components/tx/security/tenderly/utils'
 
 interface WidgetDisplayProps {
   recipient?: AsyncResult<RecipientAnalysisResults>
@@ -39,6 +42,10 @@ export function WidgetDisplay({ recipient, contract, threat, loading, error, saf
   const primaryRecipient = getPrimaryAnalysisResult(recipientData)
   const primaryContract = getPrimaryAnalysisResult(contractData)
   const primaryThreat = getPrimaryAnalysisResult(normalizedThreatData)
+
+  const chain = useAppSelector(selectActiveChain)
+
+  const tenderlyEnabled = isTxSimulationEnabled(chain ?? undefined) ?? false
 
   // Transaction simulation logic
   const {
@@ -108,7 +115,7 @@ export function WidgetDisplay({ recipient, contract, threat, loading, error, saf
         />
       )}
 
-      {highlightedSeverity && (
+      {highlightedSeverity && tenderlyEnabled && (
         <TransactionSimulation
           severity={simulationSeverity}
           highlighted={highlightedSeverity === simulationSeverity}
