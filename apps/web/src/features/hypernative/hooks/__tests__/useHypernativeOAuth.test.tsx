@@ -3,7 +3,32 @@ import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import { useHypernativeOAuth, HN_AUTH_SUCCESS_EVENT } from '../useHypernativeOAuth'
 import { hnAuthSlice } from '../../store/hnAuthSlice'
-import * as oauthConfig from '../../config/oauth'
+
+// Mock oauth config to ensure consistent test values
+const mockGetRedirectUri = jest.fn(() => 'http://localhost:3000/hypernative/oauth-callback')
+let mockAuthEnabled = false
+
+jest.mock('../../config/oauth', () => {
+  const actual = jest.requireActual('../../config/oauth')
+  return {
+    ...actual,
+    HYPERNATIVE_OAUTH_CONFIG: {
+      ...actual.HYPERNATIVE_OAUTH_CONFIG,
+      authUrl: 'https://mock-hn-auth.example.com/oauth/authorize',
+      tokenUrl: 'https://mock-hn-auth.example.com/oauth/token',
+      apiBaseUrl: 'https://mock-hn-api.example.com',
+      clientId: 'SAFE_WALLET_SPA',
+      redirectUri: '',
+      scope: 'read',
+    },
+    get getRedirectUri() {
+      return mockGetRedirectUri
+    },
+    get MOCK_AUTH_ENABLED() {
+      return mockAuthEnabled
+    },
+  }
+})
 
 // Mock window.open
 const mockWindowOpen = jest.fn()
@@ -16,6 +41,8 @@ const mockGetRandomValues = jest.fn((array: Uint8Array) => {
   }
   return array
 })
+
+const mockRandomUUID = jest.fn(() => 'test-uuid-1234-5678-90ab-cdef')
 
 const mockDigest = jest.fn(async () => {
   return new ArrayBuffer(32)
@@ -66,6 +93,7 @@ describe('useHypernativeOAuth', () => {
     Object.defineProperty(global, 'crypto', {
       value: {
         getRandomValues: mockGetRandomValues,
+        randomUUID: mockRandomUUID,
         subtle: {
           digest: mockDigest,
         },
@@ -119,11 +147,12 @@ describe('useHypernativeOAuth', () => {
 
   describe('initiateLogin - mock mode', () => {
     beforeEach(() => {
-      jest.spyOn(oauthConfig, 'MOCK_AUTH_ENABLED', 'get').mockReturnValue(true)
+      mockAuthEnabled = true
       jest.useFakeTimers()
     })
 
     afterEach(() => {
+      mockAuthEnabled = false
       jest.useRealTimers()
     })
 
@@ -173,7 +202,7 @@ describe('useHypernativeOAuth', () => {
 
   describe('initiateLogin - real mode', () => {
     beforeEach(() => {
-      jest.spyOn(oauthConfig, 'MOCK_AUTH_ENABLED', 'get').mockReturnValue(false)
+      mockAuthEnabled = false
     })
 
     it('should generate PKCE parameters and store in sessionStorage', async () => {
@@ -184,8 +213,17 @@ describe('useHypernativeOAuth', () => {
         await waitFor(() => expect(mockWindowOpen).toHaveBeenCalled())
       })
 
-      expect(sessionStorageMock.setItem).toHaveBeenCalledWith('hn_pkce_verifier', expect.any(String))
-      expect(sessionStorageMock.setItem).toHaveBeenCalledWith('hn_oauth_state', expect.any(String))
+      // Verify PKCE data is stored as single JSON object
+      expect(sessionStorageMock.setItem).toHaveBeenCalledWith('hn_pkce', expect.any(String))
+
+      // Verify the stored data contains both state and codeVerifier
+      const pkceCall = sessionStorageMock.setItem.mock.calls.find((call) => call[0] === 'hn_pkce')
+      expect(pkceCall).toBeDefined()
+      const storedData = JSON.parse(pkceCall![1] as string)
+      expect(storedData).toHaveProperty('state')
+      expect(storedData).toHaveProperty('codeVerifier')
+      expect(storedData.state).toBe('test-uuid-1234-5678-90ab-cdef')
+      expect(storedData.codeVerifier).toBeTruthy()
     })
 
     it('should open popup with correct URL and dimensions', async () => {
