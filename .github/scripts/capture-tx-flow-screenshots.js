@@ -113,72 +113,47 @@ async function connectPrivateKeyWallet(page, privateKey) {
 }
 
 async function initiateSendTokenFlow(page) {
-  console.log('Initiating send token flow...')
+  console.log('Initiating send token flow using session storage...')
 
-  // Click "New transaction" button
+  // Use session storage to pre-fill the transaction flow
+  // This is much faster and more reliable than clicking through the UI
+  await page.evaluate(() => {
+    const mockState = {
+      flowType: 'token-transfer',
+      step: 1, // Start at review screen (step 1)
+      data: {
+        recipients: [
+          {
+            recipient: 'vitalik.eth',
+            tokenAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F', // DAI on Ethereum
+            amount: '5',
+          },
+        ],
+        type: 'multiSig',
+      },
+      timestamp: Date.now(),
+    }
+
+    sessionStorage.setItem('txFlowState_v1', JSON.stringify(mockState))
+  })
+
+  console.log('Mock transaction state set in session storage')
+
+  // Now open the send tokens flow - it will automatically restore to the review screen
   const newTxBtn = page.locator('[data-testid="new-tx-btn"]').first()
   await newTxBtn.waitFor({ state: 'visible', timeout: 15000 })
   await newTxBtn.click()
 
-  await page.waitForTimeout(1500)
+  await page.waitForTimeout(1000)
 
-  // Click "Send tokens" option
   const sendTokensBtn = page.locator('[data-testid="send-tokens-btn"]')
   await sendTokensBtn.waitFor({ state: 'visible', timeout: 15000 })
   await sendTokensBtn.click()
 
-  await page.waitForTimeout(2000)
+  // Wait for the flow to restore and render the review screen
+  await page.waitForTimeout(3000)
 
-  // Enter recipient address (vitalik.eth)
-  const recipientInput = page.locator('[name="recipient"]').first()
-  await recipientInput.waitFor({ state: 'visible', timeout: 10000 })
-  await recipientInput.fill('vitalik.eth')
-
-  await page.waitForTimeout(1500)
-
-  // Wait for ENS resolution
-  await page.waitForTimeout(2000)
-
-  // Select token - look for DAI in the token selector
-  const tokenSelector = page.locator('[data-testid="token-selector"]').first()
-  await tokenSelector.click()
-
-  await page.waitForTimeout(1000)
-
-  // Search for DAI
-  const tokenSearch = page.locator('[placeholder="Search tokens"]').first()
-  if (await tokenSearch.isVisible().catch(() => false)) {
-    await tokenSearch.fill('DAI')
-    await page.waitForTimeout(1000)
-  }
-
-  // Select DAI from the list
-  const daiOption = page.locator('[data-testid="token-item"]').filter({ hasText: 'DAI' }).first()
-  if (await daiOption.isVisible().catch(() => false)) {
-    await daiOption.click()
-  } else {
-    // Fallback: select first token if DAI not found
-    console.log('DAI not found, selecting first available token')
-    await page.locator('[data-testid="token-item"]').first().click()
-  }
-
-  await page.waitForTimeout(1000)
-
-  // Enter amount: 5
-  const amountInput = page.locator('[data-testid="token-amount-field"]').locator('input').first()
-  await amountInput.fill('5')
-
-  await page.waitForTimeout(1000)
-
-  // Click "Next" or "Review" button
-  const nextBtn = page
-    .locator('button')
-    .filter({ hasText: /^Next$|^Review/ })
-    .first()
-  await nextBtn.waitFor({ state: 'visible', timeout: 10000 })
-  await nextBtn.click()
-
-  console.log('Send token flow initiated successfully')
+  console.log('Send token flow initiated successfully (auto-restored to review screen)')
 }
 
 async function captureTxFlowScreenshots() {
