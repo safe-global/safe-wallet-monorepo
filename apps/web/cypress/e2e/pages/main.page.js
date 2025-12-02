@@ -1,4 +1,5 @@
 import * as constants from '../../support/constants'
+import * as ls from '../../support/localstorage_data.js'
 
 const acceptSelection = 'Save settings'
 const executeStr = 'Execute'
@@ -381,6 +382,23 @@ export function addToLocalStorage(key, jsonValue) {
       reject('Error adding item to local storage: ' + error)
     }
   })
+}
+
+/**
+ * Sets up SAFE_v2__settings in localStorage with tokenList: "ALL" and hideDust: false
+ * This function sets up the settings and verifies they are stored correctly before proceeding
+ * @returns {Promise} A promise that resolves when settings are set and verified
+ */
+export function setupSafeSettingsWithAllTokens() {
+  const settings = {
+    ...ls.safeSettings.slimitSettings,
+    // tokenList: 'ALL',
+    // hideDust: false,
+  }
+  return cy
+    .wrap(null)
+    .then(() => addToLocalStorage(constants.localStorageKeys.SAFE_v2__settings, settings))
+    .then(() => isItemInLocalstorage(constants.localStorageKeys.SAFE_v2__settings, settings))
 }
 
 export function checkTextOrder(selector, expectedTextArray) {

@@ -477,6 +477,7 @@ export const safeSettings = {
     currency: 'usd',
     tokenList: 'ALL',
     hiddenTokens: {},
+    hideDust: false,
     shortName: {
       show: true,
       copy: true,
