@@ -1,13 +1,12 @@
 import { useRouter } from 'next/router'
 import usePositionsFiatTotal from '@/features/positions/hooks/usePositionsFiatTotal'
-import React, { useMemo } from 'react'
+import React, { useMemo, type ReactElement } from 'react'
 import { AppRoutes } from '@/config/routes'
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
   Box,
-  Card,
   Chip,
   Divider,
   Stack,
@@ -15,7 +14,7 @@ import {
   Typography,
   Skeleton,
 } from '@mui/material'
-import { ViewAllLink } from '@/components/dashboard/styled'
+import { WidgetCard } from '@/components/dashboard/styled'
 import css from './styles.module.css'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import PositionsHeader from '@/features/positions/components/PositionsHeader'
@@ -46,13 +45,46 @@ const PositionsWidget = () => {
     [safe],
   )
 
+  const betaChip = (
+    <Tooltip
+      title="Experimental. Data may be missing or outdated."
+      placement="top"
+      arrow
+      slotProps={{
+        tooltip: {
+          sx: {
+            maxWidth: { xs: '250px', sm: 'none' },
+          },
+        },
+      }}
+    >
+      <Chip
+        label="Beta"
+        size="small"
+        sx={{
+          backgroundColor: 'background.lightGrey',
+          letterSpacing: '0.4px',
+          borderRadius: '4px',
+        }}
+      />
+    </Tooltip>
+  )
+
+  const viewAllWrapper = (children: ReactElement) => (
+    <Track
+      {...POSITIONS_EVENTS.POSITIONS_VIEW_ALL_CLICKED}
+      mixpanelParams={{
+        [MixpanelEventParams.TOTAL_VALUE_OF_PORTFOLIO]: positionsFiatTotal || 0,
+        [MixpanelEventParams.ENTRY_POINT]: 'Dashboard',
+      }}
+    >
+      {children}
+    </Track>
+  )
+
   if (isLoading) {
     return (
-      <Card data-testid="positions-widget" sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5 }}>
-        <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
-          <Typography fontWeight={700}>Top positions</Typography>
-        </Stack>
-
+      <WidgetCard title="Top positions" titleExtra={betaChip} testId="positions-widget">
         <Box>
           {Array(2)
             .fill(0)
@@ -114,7 +146,7 @@ const PositionsWidget = () => {
               </Accordion>
             ))}
         </Box>
-      </Card>
+      </WidgetCard>
     )
   }
 
@@ -123,47 +155,13 @@ const PositionsWidget = () => {
   const protocols = data.slice(0, MAX_PROTOCOLS)
 
   return (
-    <Card data-testid="positions-widget" sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5 }}>
-      <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5 }}>
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Typography fontWeight={700}>Top positions</Typography>
-          <Tooltip
-            title="Experimental. Data may be missing or outdated."
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  maxWidth: { xs: '250px', sm: 'none' },
-                },
-              },
-            }}
-          >
-            <Chip
-              label="Beta"
-              size="small"
-              sx={{
-                backgroundColor: 'background.lightGrey',
-                letterSpacing: '0.4px',
-                borderRadius: '4px',
-              }}
-            />
-          </Tooltip>
-        </Stack>
-
-        {protocols.length > 0 && (
-          <Track
-            {...POSITIONS_EVENTS.POSITIONS_VIEW_ALL_CLICKED}
-            mixpanelParams={{
-              [MixpanelEventParams.TOTAL_VALUE_OF_PORTFOLIO]: positionsFiatTotal || 0,
-              [MixpanelEventParams.ENTRY_POINT]: 'Dashboard',
-            }}
-          >
-            <ViewAllLink url={viewAllUrl} text="View all" />
-          </Track>
-        )}
-      </Stack>
-
+    <WidgetCard
+      title="Top positions"
+      titleExtra={betaChip}
+      viewAllUrl={protocols.length > 0 ? viewAllUrl : undefined}
+      viewAllWrapper={viewAllWrapper}
+      testId="positions-widget"
+    >
       {!isPortfolioEndpointEnabled && (
         <Box mb={1} sx={{ px: 1.5 }}>
           <Typography
@@ -240,7 +238,7 @@ const PositionsWidget = () => {
           })
         )}
       </Box>
-    </Card>
+    </WidgetCard>
   )
 }
 

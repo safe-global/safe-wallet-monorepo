@@ -1,8 +1,8 @@
-import type { ReactElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import styled from '@emotion/styled'
 import NextLink from 'next/link'
 import type { LinkProps } from 'next/link'
-import { Link } from '@mui/material'
+import { Card as MuiCard, Link, Stack, Typography } from '@mui/material'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 
 export const WidgetContainer = styled.section`
@@ -53,3 +53,39 @@ export const ViewAllLink = ({ url, text }: { url: LinkProps['href']; text?: stri
     </Link>
   </NextLink>
 )
+
+export const WidgetCard = ({
+  title,
+  titleExtra,
+  viewAllUrl,
+  viewAllText,
+  viewAllWrapper,
+  children,
+  testId,
+}: {
+  title: string
+  titleExtra?: ReactNode
+  viewAllUrl?: LinkProps['href']
+  viewAllText?: string
+  viewAllWrapper?: (children: ReactElement) => ReactElement
+  children: ReactNode
+  testId?: string
+}): ReactElement => {
+  const viewAllLink = viewAllUrl ? <ViewAllLink url={viewAllUrl} text={viewAllText} /> : null
+  const wrappedViewAllLink = viewAllWrapper && viewAllLink ? viewAllWrapper(viewAllLink) : viewAllLink
+
+  return (
+    <MuiCard data-testid={testId} sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5 }}>
+      <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
+        <Stack direction="row" alignItems="center" gap={1}>
+          <Typography fontWeight={700}>{title}</Typography>
+          {titleExtra}
+        </Stack>
+
+        {wrappedViewAllLink}
+      </Stack>
+
+      {children}
+    </MuiCard>
+  )
+}

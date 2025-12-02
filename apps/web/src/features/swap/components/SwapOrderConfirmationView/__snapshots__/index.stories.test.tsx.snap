@@ -1,0 +1,849 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./index.stories CustomRecipient 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="MuiStack-root css-1qh2y1i-MuiStack-root"
+  >
+    <p
+      class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+    >
+      <b>
+        Order details
+      </b>
+    </p>
+    <div
+      class="amount"
+    >
+      <div
+        class="MuiStack-root css-niqf4j-MuiStack-root"
+      >
+        <div
+          class="MuiStack-root css-p24gtu-MuiStack-root"
+        >
+          <div
+            class="MuiBox-root css-wvnvdm"
+          >
+            <div
+              class="MuiBox-root css-olq4e8"
+            >
+              <img
+                alt="KPW"
+                class="image"
+                height="40"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                src="https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14.png"
+              />
+            </div>
+          </div>
+          <div
+            class="MuiBox-root css-1rr4qq7"
+            data-testid="block-label"
+          >
+            <p
+              class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+            >
+              Sell
+            </p>
+            <div
+              class="MuiTypography-root MuiTypography-h4 css-1wz4xwf-MuiTypography-root"
+            >
+              <span
+                aria-label="10 KPW"
+                class="container"
+                data-mui-internal-clone-element="true"
+              >
+                <b
+                  class="tokenText"
+                >
+                  10
+                   
+                  KPW
+                </b>
+              </span>
+            </div>
+          </div>
+          <div
+            class="MuiStack-root css-1nxlmhd-MuiStack-root"
+          >
+            <svg
+              aria-hidden="true"
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-15tzxj8-MuiSvgIcon-root-MuiSvgIcon-root"
+              data-testid="EastRoundedIcon"
+              focusable="false"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M14.29 5.71c-.39.39-.39 1.02 0 1.41L18.17 11H3c-.55 0-1 .45-1 1s.45 1 1 1h15.18l-3.88 3.88c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0l5.59-5.59c.39-.39.39-1.02 0-1.41l-5.6-5.58c-.38-.39-1.02-.39-1.41 0"
+              />
+            </svg>
+          </div>
+        </div>
+        <div
+          class="MuiStack-root css-p24gtu-MuiStack-root"
+        >
+          <div
+            class="MuiBox-root css-wvnvdm"
+          >
+            <div
+              class="MuiBox-root css-olq4e8"
+            >
+              <img
+                alt="QAR"
+                class="image"
+                height="40"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                src="https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14.png"
+              />
+            </div>
+          </div>
+          <div
+            class="MuiBox-root css-1rr4qq7"
+            data-testid="block-label"
+          >
+            <p
+              class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+            >
+              For at least
+            </p>
+            <div
+              class="MuiTypography-root MuiTypography-h4 css-1wz4xwf-MuiTypography-root"
+            >
+              <span
+                aria-label="0.000000001 QAR"
+                class="container"
+                data-mui-internal-clone-element="true"
+              >
+                <b
+                  class="tokenText"
+                >
+                  &lt; 0.00001
+                   
+                  QAR
+                </b>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+      data-testid="limit-price"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+        data-testid="tx-row-title"
+        style="word-break: break-word;"
+      >
+        <span
+          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+        >
+          Limit price
+        </span>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+        data-testid="tx-data-row"
+      >
+        <div
+          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+        >
+          1 
+          QAR
+           = 
+          10B
+           
+          KPW
+        </div>
+      </div>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+      data-testid="expiry"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+        data-testid="tx-row-title"
+        style="word-break: break-word;"
+      >
+        <span
+          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+        >
+          Expiry
+        </span>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+        data-testid="tx-data-row"
+      >
+        <div
+          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+        >
+          <p
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+          >
+            <span
+              class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+            >
+              in 28 minutes
+            </span>
+             
+            (
+            Dec 1, 2025 - 4:17:42 PM
+            )
+          </p>
+        </div>
+      </div>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+      data-testid="order-id"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+        data-testid="tx-row-title"
+        style="word-break: break-word;"
+      >
+        <span
+          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+        >
+          Order ID
+        </span>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+        data-testid="tx-data-row"
+      >
+        <div
+          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+        >
+          <div
+            class="MuiStack-root css-m69qwo-MuiStack-root"
+          >
+            <span>
+              5cc89535
+            </span>
+            <span
+              aria-label="Copy to clipboard"
+              class=""
+              data-mui-internal-clone-element="true"
+              style="cursor: pointer;"
+            >
+              <button
+                aria-label="Copy to clipboard"
+                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                tabindex="0"
+                type="button"
+              >
+                <mock-icon
+                  aria-hidden=""
+                  class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                  data-testid="copy-btn-icon"
+                  focusable="false"
+                />
+              </button>
+            </span>
+            <div
+              class="MuiBox-root css-yjghm1"
+            >
+              <a
+                aria-label=""
+                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                data-mui-internal-clone-element="true"
+                data-testid="explorer-btn"
+                href="https://explorer.cow.fi/orders/0x03a5d561ad2452d719a0d075573f4bed68217c696b52f151122c30e3e4426f1b05e6b5eb1d0e6aabab082057d5bb91f2ee6d11be66223d88"
+                rel="noreferrer"
+                tabindex="0"
+                target="_blank"
+              >
+                <mock-icon
+                  aria-hidden=""
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                  focusable="false"
+                />
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+      data-testid="widget-fee"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+        data-testid="tx-row-title"
+        style="word-break: break-word;"
+      >
+        <span
+          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+        >
+          Widget fee
+           
+          <span
+            class=""
+            data-mui-internal-clone-element="true"
+          >
+            <mock-icon
+              aria-hidden=""
+              class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-1nezs5b-MuiSvgIcon-root"
+              focusable="false"
+            />
+          </span>
+        </span>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+        data-testid="tx-data-row"
+      >
+        <div
+          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+        >
+          0.5
+           %
+        </div>
+      </div>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+      data-testid="interact-wth"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+        data-testid="tx-row-title"
+        style="word-break: break-word;"
+      >
+        <span
+          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+        >
+          Interact with
+        </span>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+        data-testid="tx-data-row"
+      >
+        <div
+          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+        >
+          <div
+            class="container"
+          >
+            <div
+              class="avatarContainer"
+              style="width: 24px; height: 24px;"
+            >
+              <div
+                class="icon"
+                style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjggNDclIDQ0JSkiIGQ9Ik0wLDBIOFY4SDB6Ii8+PHBhdGggZmlsbD0iaHNsKDE5OCA4NyUgMzQlKSIgZD0iTTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTMsMGgxdjFoLTF6TTQsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTIsMWgxdjFoLTF6TTUsMWgxdjFoLTF6TTIsMmgxdjFoLTF6TTUsMmgxdjFoLTF6TTEsM2gxdjFoLTF6TTYsM2gxdjFoLTF6TTMsM2gxdjFoLTF6TTQsM2gxdjFoLTF6TTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTIsNWgxdjFoLTF6TTUsNWgxdjFoLTF6TTEsNmgxdjFoLTF6TTYsNmgxdjFoLTF6TTEsN2gxdjFoLTF6TTYsN2gxdjFoLTF6TTIsN2gxdjFoLTF6TTUsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDM0MCA0MCUgNDAlKSIgZD0iTTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTAsMmgxdjFoLTF6TTcsMmgxdjFoLTF6TTIsNmgxdjFoLTF6TTUsNmgxdjFoLTF6TTMsN2gxdjFoLTF6TTQsN2gxdjFoLTF6Ii8+PC9zdmc+); width: 24px; height: 24px;"
+              />
+            </div>
+            <div
+              class="inline MuiBox-root css-1lchl8k"
+            >
+              <div
+                class="addressContainer inline"
+              >
+                <div
+                  class="MuiBox-root css-b5p5gz"
+                >
+                  <span
+                    aria-label="Copy to clipboard"
+                    class=""
+                    data-mui-internal-clone-element="true"
+                    style="cursor: pointer;"
+                  >
+                    <span>
+                      0x1d05fffa0d15f5bcbfb0db1deb353b6a2acb3cd5
+                    </span>
+                  </span>
+                </div>
+                <div
+                  class="MuiBox-root css-yjghm1"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+      data-testid="recipient"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+        data-testid="tx-row-title"
+        style="word-break: break-word;"
+      >
+        <span
+          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+        >
+          Recipient
+        </span>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+        data-testid="tx-data-row"
+      >
+        <div
+          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+        >
+          <div
+            class="container"
+          >
+            <div
+              class="avatarContainer"
+              style="width: 24px; height: 24px;"
+            >
+              <div
+                class="icon"
+                style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjc2IDk1JSA0OCUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCg1NiA2MSUgNjQlKSIgZD0iTTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTMsMGgxdjFoLTF6TTQsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTMsMWgxdjFoLTF6TTQsMWgxdjFoLTF6TTAsMmgxdjFoLTF6TTcsMmgxdjFoLTF6TTEsMmgxdjFoLTF6TTYsMmgxdjFoLTF6TTAsNGgxdjFoLTF6TTcsNGgxdjFoLTF6TTEsNGgxdjFoLTF6TTYsNGgxdjFoLTF6TTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTIsNWgxdjFoLTF6TTUsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTEsNmgxdjFoLTF6TTYsNmgxdjFoLTF6TTIsNmgxdjFoLTF6TTUsNmgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6TTEsN2gxdjFoLTF6TTYsN2gxdjFoLTF6TTMsN2gxdjFoLTF6TTQsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDI0OSA5NSUgNjMlKSIgZD0iTTAsMGgxdjFoLTF6TTcsMGgxdjFoLTF6TTIsMmgxdjFoLTF6TTUsMmgxdjFoLTF6TTIsM2gxdjFoLTF6TTUsM2gxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6Ii8+PC9zdmc+); width: 24px; height: 24px;"
+              />
+            </div>
+            <div
+              class="MuiBox-root css-1lchl8k"
+            >
+              <div
+                class="addressContainer"
+              >
+                <div
+                  class="MuiBox-root css-b5p5gz"
+                >
+                  <span
+                    aria-label="Copy to clipboard"
+                    class=""
+                    data-mui-internal-clone-element="true"
+                    style="cursor: pointer;"
+                  >
+                    <span>
+                      0x05bd...1def
+                    </span>
+                  </span>
+                </div>
+                <div
+                  class="MuiBox-root css-yjghm1"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAlert-root MuiAlert-colorWarning MuiAlert-standardWarning MuiAlert-standard css-1wi6bbj-MuiPaper-root-MuiAlert-root"
+        data-testid="recipient-alert"
+        role="alert"
+        style="--Paper-shadow: none;"
+      >
+        <div
+          class="MuiAlert-icon css-vab54s-MuiAlert-icon"
+        >
+          mock-icon
+        </div>
+        <div
+          class="MuiAlert-message css-zioonp-MuiAlert-message"
+        >
+          <p
+            class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+          >
+            <span
+              class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+            >
+              Order recipient address differs from order owner.
+            </span>
+             
+            Double check the address to prevent fund loss.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./index.stories Default 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="MuiStack-root css-1qh2y1i-MuiStack-root"
+  >
+    <p
+      class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+    >
+      <b>
+        Order details
+      </b>
+    </p>
+    <div
+      class="amount"
+    >
+      <div
+        class="MuiStack-root css-niqf4j-MuiStack-root"
+      >
+        <div
+          class="MuiStack-root css-p24gtu-MuiStack-root"
+        >
+          <div
+            class="MuiBox-root css-wvnvdm"
+          >
+            <div
+              class="MuiBox-root css-olq4e8"
+            >
+              <img
+                alt="KPW"
+                class="image"
+                height="40"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                src="https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14.png"
+              />
+            </div>
+          </div>
+          <div
+            class="MuiBox-root css-1rr4qq7"
+            data-testid="block-label"
+          >
+            <p
+              class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+            >
+              Sell
+            </p>
+            <div
+              class="MuiTypography-root MuiTypography-h4 css-1wz4xwf-MuiTypography-root"
+            >
+              <span
+                aria-label="10 KPW"
+                class="container"
+                data-mui-internal-clone-element="true"
+              >
+                <b
+                  class="tokenText"
+                >
+                  10
+                   
+                  KPW
+                </b>
+              </span>
+            </div>
+          </div>
+          <div
+            class="MuiStack-root css-1nxlmhd-MuiStack-root"
+          >
+            <svg
+              aria-hidden="true"
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-15tzxj8-MuiSvgIcon-root-MuiSvgIcon-root"
+              data-testid="EastRoundedIcon"
+              focusable="false"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M14.29 5.71c-.39.39-.39 1.02 0 1.41L18.17 11H3c-.55 0-1 .45-1 1s.45 1 1 1h15.18l-3.88 3.88c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0l5.59-5.59c.39-.39.39-1.02 0-1.41l-5.6-5.58c-.38-.39-1.02-.39-1.41 0"
+              />
+            </svg>
+          </div>
+        </div>
+        <div
+          class="MuiStack-root css-p24gtu-MuiStack-root"
+        >
+          <div
+            class="MuiBox-root css-wvnvdm"
+          >
+            <div
+              class="MuiBox-root css-olq4e8"
+            >
+              <img
+                alt="QAR"
+                class="image"
+                height="40"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                src="https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14.png"
+              />
+            </div>
+          </div>
+          <div
+            class="MuiBox-root css-1rr4qq7"
+            data-testid="block-label"
+          >
+            <p
+              class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+            >
+              For at least
+            </p>
+            <div
+              class="MuiTypography-root MuiTypography-h4 css-1wz4xwf-MuiTypography-root"
+            >
+              <span
+                aria-label="0.000000001 QAR"
+                class="container"
+                data-mui-internal-clone-element="true"
+              >
+                <b
+                  class="tokenText"
+                >
+                  &lt; 0.00001
+                   
+                  QAR
+                </b>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+      data-testid="limit-price"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+        data-testid="tx-row-title"
+        style="word-break: break-word;"
+      >
+        <span
+          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+        >
+          Limit price
+        </span>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+        data-testid="tx-data-row"
+      >
+        <div
+          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+        >
+          1 
+          QAR
+           = 
+          10B
+           
+          KPW
+        </div>
+      </div>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+      data-testid="expiry"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+        data-testid="tx-row-title"
+        style="word-break: break-word;"
+      >
+        <span
+          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+        >
+          Expiry
+        </span>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+        data-testid="tx-data-row"
+      >
+        <div
+          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+        >
+          <p
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+          >
+            <span
+              class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+            >
+              in 28 minutes
+            </span>
+             
+            (
+            Dec 1, 2025 - 4:17:42 PM
+            )
+          </p>
+        </div>
+      </div>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+      data-testid="order-id"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+        data-testid="tx-row-title"
+        style="word-break: break-word;"
+      >
+        <span
+          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+        >
+          Order ID
+        </span>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+        data-testid="tx-data-row"
+      >
+        <div
+          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+        >
+          <div
+            class="MuiStack-root css-m69qwo-MuiStack-root"
+          >
+            <span>
+              5cc89535
+            </span>
+            <span
+              aria-label="Copy to clipboard"
+              class=""
+              data-mui-internal-clone-element="true"
+              style="cursor: pointer;"
+            >
+              <button
+                aria-label="Copy to clipboard"
+                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                tabindex="0"
+                type="button"
+              >
+                <mock-icon
+                  aria-hidden=""
+                  class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                  data-testid="copy-btn-icon"
+                  focusable="false"
+                />
+              </button>
+            </span>
+            <div
+              class="MuiBox-root css-yjghm1"
+            >
+              <a
+                aria-label=""
+                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                data-mui-internal-clone-element="true"
+                data-testid="explorer-btn"
+                href="https://explorer.cow.fi/orders/0x03a5d561ad2452d719a0d075573f4bed68217c696b52f151122c30e3e4426f1b05e6b5eb1d0e6aabab082057d5bb91f2ee6d11be66223d88"
+                rel="noreferrer"
+                tabindex="0"
+                target="_blank"
+              >
+                <mock-icon
+                  aria-hidden=""
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                  focusable="false"
+                />
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+      data-testid="widget-fee"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+        data-testid="tx-row-title"
+        style="word-break: break-word;"
+      >
+        <span
+          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+        >
+          Widget fee
+           
+          <span
+            class=""
+            data-mui-internal-clone-element="true"
+          >
+            <mock-icon
+              aria-hidden=""
+              class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-1nezs5b-MuiSvgIcon-root"
+              focusable="false"
+            />
+          </span>
+        </span>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+        data-testid="tx-data-row"
+      >
+        <div
+          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+        >
+          0.5
+           %
+        </div>
+      </div>
+    </div>
+    <div
+      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+      data-testid="interact-wth"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+        data-testid="tx-row-title"
+        style="word-break: break-word;"
+      >
+        <span
+          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+        >
+          Interact with
+        </span>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+        data-testid="tx-data-row"
+      >
+        <div
+          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+        >
+          <div
+            class="container"
+          >
+            <div
+              class="avatarContainer"
+              style="width: 24px; height: 24px;"
+            >
+              <div
+                class="icon"
+                style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woODcgNzUlIDU3JSkiIGQ9Ik0wLDBIOFY4SDB6Ii8+PHBhdGggZmlsbD0iaHNsKDEyNCA5NiUgNDglKSIgZD0iTTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTAsMmgxdjFoLTF6TTcsMmgxdjFoLTF6TTEsMmgxdjFoLTF6TTYsMmgxdjFoLTF6TTIsMmgxdjFoLTF6TTUsMmgxdjFoLTF6TTAsM2gxdjFoLTF6TTcsM2gxdjFoLTF6TTEsM2gxdjFoLTF6TTYsM2gxdjFoLTF6TTAsNGgxdjFoLTF6TTcsNGgxdjFoLTF6TTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTAsNmgxdjFoLTF6TTcsNmgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTIsN2gxdjFoLTF6TTUsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDIwMCA5OSUgMzElKSIgZD0iTTEsNGgxdjFoLTF6TTYsNGgxdjFoLTF6TTEsN2gxdjFoLTF6TTYsN2gxdjFoLTF6Ii8+PC9zdmc+); width: 24px; height: 24px;"
+              />
+            </div>
+            <div
+              class="inline MuiBox-root css-1lchl8k"
+            >
+              <div
+                class="addressContainer inline"
+              >
+                <div
+                  class="MuiBox-root css-b5p5gz"
+                >
+                  <span
+                    aria-label="Copy to clipboard"
+                    class=""
+                    data-mui-internal-clone-element="true"
+                    style="cursor: pointer;"
+                  >
+                    <span>
+                      0xb6da3aecbecc1a9137e9576e3b9daae4e3a6b312
+                    </span>
+                  </span>
+                </div>
+                <div
+                  class="MuiBox-root css-yjghm1"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

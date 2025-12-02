@@ -1,0 +1,130 @@
+/**
+ * Generate Storybook URLs from changed story files
+ *
+ * This script takes changed story files and converts them to Storybook preview URLs
+ */
+
+const fs = require('fs')
+const path = require('path')
+
+const changedFiles = process.env.CHANGED_FILES || ''
+const branchName = process.env.BRANCH_NAME || ''
+
+if (!changedFiles || !branchName) {
+  console.log('No changed files or branch name provided')
+  process.exit(0)
+}
+
+const baseUrl = `https://${branchName}--walletweb.review.5afe.dev/storybook`
+const files = changedFiles.split('\n').filter(Boolean)
+
+console.log('Processing files:', files)
+
+/**
+ * Convert file path to Storybook story ID
+ * Example: src/components/common/CopyButton/index.stories.tsx
+ * -> components-common-copybutton--default
+ */
+function filePathToStoryId(filePath) {
+  // Remove apps/web/ prefix if present
+  let normalized = filePath.replace(/^apps\/web\//, '')
+
+  // Remove src/ prefix
+  normalized = normalized.replace(/^src\//, '')
+
+  // Remove file extension and .stories suffix
+  normalized = normalized.replace(/\.(stories|story)\.(tsx?|jsx?)$/, '')
+
+  // Remove index if present
+  normalized = normalized.replace(/\/index$/, '')
+
+  // Convert path separators to hyphens and lowercase
+  normalized = normalized.replace(/\//g, '-').toLowerCase()
+
+  return normalized
+}
+
+/**
+ * Parse story file to extract story names
+ */
+function extractStoryNames(filePath) {
+  try {
+    const fullPath = path.join(process.cwd(), filePath)
+    if (!fs.existsSync(fullPath)) {
+      console.log(`File not found: ${fullPath}`)
+      return []
+    }
+
+    const content = fs.readFileSync(fullPath, 'utf-8')
+    const stories = []
+
+    // Match: export const StoryName = ...
+    const namedExportRegex = /export\s+const\s+(\w+)\s*[:=]/g
+    let match
+    while ((match = namedExportRegex.exec(content)) !== null) {
+      const name = match[1]
+      // Skip meta exports
+      if (name !== 'default' && name !== 'meta' && name !== 'Meta') {
+        stories.push(name)
+      }
+    }
+
+    // If no stories found, add a 'default' story
+    if (stories.length === 0) {
+      stories.push('Default')
+    }
+
+    return stories
+  } catch (error) {
+    console.error(`Error parsing ${filePath}:`, error.message)
+    return ['Default']
+  }
+}
+
+const storyUrls = []
+
+for (const file of files) {
+  // Skip mobile app stories - they use Tamagui/React Native and won't render in web Storybook
+  if (file.includes('apps/mobile/')) {
+    console.log(`Skipping mobile story: ${file}`)
+    continue
+  }
+
+  const storyId = filePathToStoryId(file)
+  const storyNames = extractStoryNames(file)
+
+  console.log(`File: ${file}`)
+  console.log(`Story ID: ${storyId}`)
+  console.log(`Stories: ${storyNames.join(', ')}`)
+
+  for (const storyName of storyNames) {
+    // Convert story name to kebab-case for URL
+    const storySlug = storyName.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
+
+    const url = `${baseUrl}/iframe.html?id=${storyId}--${storySlug}&viewMode=story`
+    storyUrls.push({
+      url,
+      file,
+      componentName: storyId
+        .split('-')
+        .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+        .join(''),
+      storyName,
+    })
+  }
+}
+
+console.log('\nGenerated URLs:')
+console.log(JSON.stringify(storyUrls, null, 2))
+
+// Write to file for next step
+fs.mkdirSync('screenshots', { recursive: true })
+fs.writeFileSync('screenshots/story-urls.json', JSON.stringify(storyUrls, null, 2))
+
+// Output for GitHub Actions
+const outputFile = process.env.GITHUB_OUTPUT
+if (outputFile) {
+  fs.appendFileSync(outputFile, `urls=${JSON.stringify(storyUrls)}\n`)
+}
+
+console.log(`\nGenerated ${storyUrls.length} story URLs`)

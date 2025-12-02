@@ -263,13 +263,26 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
                               <div
                                 class="MuiBox-root css-olq4e8"
                               >
-                                <img
-                                  alt="ETH"
-                                  class="image"
+                                <iframe
                                   height="26"
                                   loading="lazy"
-                                  referrerpolicy="no-referrer"
-                                  src="/images/common/token-placeholder.svg"
+                                  referrerpolicy="strict-origin"
+                                  sandbox="allow-scripts"
+                                  srcdoc="
+     <body style="margin: 0; overflow: hidden; display: flex;">
+       <img src="/images/common/token-placeholder.svg" alt="Safe App logo" width="26" height="26" style="border-radius: 100%;" />
+       <script>
+          document.querySelector('img').onerror = (e) => {
+           e.target.onerror = null
+           e.target.src = "/images/common/token-placeholder.svg"
+         }
+       </script>
+     </body>
+  "
+                                  style="pointer-events: none; border: 0px;"
+                                  tabindex="-1"
+                                  title="ETH"
+                                  width="26"
                                 />
                               </div>
                               <p
