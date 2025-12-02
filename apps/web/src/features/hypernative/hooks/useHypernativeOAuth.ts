@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectIsAuthenticated, selectIsTokenExpired, setAuthToken, clearAuthToken } from '../store/hnAuthSlice'
 import { HYPERNATIVE_OAUTH_CONFIG, MOCK_AUTH_ENABLED, getRedirectUri } from '../config/oauth'
+import { showNotification } from '@/store/notificationsSlice'
 
 /**
  * OAuth authentication status and controls
@@ -187,6 +188,45 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
 
   // Reference to popup window for cleanup
   const popupRef = useRef<Window | null>(null)
+  // Track if we've received a success/error message to avoid false positives when popup closes
+  const hasReceivedMessageRef = useRef(false)
+  // Reference to popup check interval
+  const popupCheckIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  // Reference to timeout for new tab fallback (when popup is blocked)
+  const fallbackTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  /**
+   * Clear all timers and intervals
+   */
+  const clearAllTimers = useCallback(() => {
+    if (popupCheckIntervalRef.current) {
+      clearInterval(popupCheckIntervalRef.current)
+      popupCheckIntervalRef.current = null
+    }
+    if (fallbackTimeoutRef.current) {
+      clearTimeout(fallbackTimeoutRef.current)
+      fallbackTimeoutRef.current = null
+    }
+  }, [])
+
+  /**
+   * Close popup window if it's still open
+   */
+  const closePopup = useCallback(() => {
+    if (popupRef.current && !popupRef.current.closed) {
+      popupRef.current.close()
+      popupRef.current = null
+    }
+  }, [])
+
+  /**
+   * Clean up after authentication completes (success or error)
+   */
+  const cleanupAfterAuth = useCallback(() => {
+    setLoading(false)
+    clearAllTimers()
+    closePopup()
+  }, [clearAllTimers, closePopup])
 
   /**
    * Handle postMessage events from OAuth callback page
@@ -201,33 +241,159 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
 
       // Handle successful authentication
       if (event.data?.type === HN_AUTH_SUCCESS_EVENT) {
+        hasReceivedMessageRef.current = true
         const { token, expiresIn } = event.data
         if (token && expiresIn) {
           dispatch(setAuthToken({ token, expiresIn }))
         }
-        setLoading(false)
-
-        // Close popup if it's still open
-        if (popupRef.current && !popupRef.current.closed) {
-          popupRef.current.close()
-        }
+        cleanupAfterAuth()
       }
 
       // Handle authentication error
       if (event.data?.type === HN_AUTH_ERROR_EVENT) {
+        hasReceivedMessageRef.current = true
         console.error('Hypernative OAuth error:', event.data.error)
-        setLoading(false)
-
-        // Close popup if it's still open
-        if (popupRef.current && !popupRef.current.closed) {
-          popupRef.current.close()
-        }
+        cleanupAfterAuth()
       }
     }
 
     window.addEventListener('message', handleMessage)
-    return () => window.removeEventListener('message', handleMessage)
+    return () => {
+      window.removeEventListener('message', handleMessage)
+      clearAllTimers()
+    }
+  }, [dispatch, cleanupAfterAuth, clearAllTimers])
+
+  /**
+   * Show notification when popup is blocked with a clickable link
+   */
+  const showPopupBlockedNotification = useCallback(
+    (authUrl: string) => {
+      setLoading(false)
+      dispatch(
+        showNotification({
+          message: 'Popup blocked. Click the link below to complete authentication.',
+          variant: 'error',
+          groupKey: 'hypernative-auth-blocked',
+          link: {
+            onClick: () => window.open(authUrl, '_blank'),
+            title: 'Open authentication page',
+          },
+        }),
+      )
+    },
+    [dispatch],
+  )
+
+  /**
+   * Show notification when authentication is cancelled
+   */
+  const showAuthCancelledNotification = useCallback(() => {
+    setLoading(false)
+    dispatch(
+      showNotification({
+        message: 'Authentication cancelled. Please try again to log in to Hypernative.',
+        variant: 'error',
+        groupKey: 'hypernative-auth-cancelled',
+      }),
+    )
   }, [dispatch])
+
+  /**
+   * Set up timeout fallback to reset loading state if no message is received
+   */
+  const setupTimeoutFallback = useCallback(() => {
+    fallbackTimeoutRef.current = setTimeout(() => {
+      if (!hasReceivedMessageRef.current) {
+        showAuthCancelledNotification()
+      }
+    }, 5 * 60 * 1000) // 5 minutes timeout
+  }, [showAuthCancelledNotification])
+
+  /**
+   * Set up popup monitoring interval to detect when popup is closed
+   */
+  const setupPopupMonitoring = useCallback(
+    (popup: Window) => {
+      popupRef.current = popup
+      popupCheckIntervalRef.current = setInterval(() => {
+        if (popupRef.current?.closed && !hasReceivedMessageRef.current) {
+          popupRef.current = null
+          showAuthCancelledNotification()
+
+          if (popupCheckIntervalRef.current) {
+            clearInterval(popupCheckIntervalRef.current)
+            popupCheckIntervalRef.current = null
+          }
+        }
+      }, 500) // Check every 500ms
+    },
+    [showAuthCancelledNotification],
+  )
+
+  /**
+   * Try to open authentication in a new tab and handle the result
+   */
+  const tryOpenNewTab = useCallback(
+    (authUrl: string, useAnimationFrame = false) => {
+      const openTab = () => {
+        const newTab = window.open(authUrl, '_blank')
+        if (!newTab || newTab.closed) {
+          showPopupBlockedNotification(authUrl)
+        } else {
+          setupTimeoutFallback()
+        }
+      }
+
+      if (useAnimationFrame) {
+        requestAnimationFrame(openTab)
+      } else {
+        openTab()
+      }
+    },
+    [showPopupBlockedNotification, setupTimeoutFallback],
+  )
+
+  /**
+   * Handle OAuth flow error
+   */
+  const handleOAuthError = useCallback(
+    (error: unknown) => {
+      console.error('Failed to initiate Hypernative OAuth:', error)
+      setLoading(false)
+      clearAllTimers()
+    },
+    [clearAllTimers],
+  )
+
+  /**
+   * Handle popup opening and blocking scenarios
+   */
+  const handlePopupOpen = useCallback(
+    (authUrl: string, popup: Window | null) => {
+      if (!popup) {
+        // Popup completely blocked (returns null) - try new tab immediately
+        tryOpenNewTab(authUrl)
+      } else if (popup.closed) {
+        // Popup was opened but immediately closed (blocked by browser)
+        // Use requestAnimationFrame to stay in user interaction context
+        tryOpenNewTab(authUrl, true)
+      } else {
+        // Popup opened successfully - verify it stays open
+        // Some browsers might close it after a short delay
+        setTimeout(() => {
+          if (popup.closed) {
+            // Popup was closed after opening (blocked) - fallback to new tab
+            tryOpenNewTab(authUrl)
+          } else {
+            // Popup is still open - set up normal popup monitoring
+            setupPopupMonitoring(popup)
+          }
+        }, 100) // Check after 100ms to catch delayed closures
+      }
+    },
+    [tryOpenNewTab, setupPopupMonitoring],
+  )
 
   /**
    * Initiate OAuth login flow
@@ -236,6 +402,8 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
    */
   const initiateLogin = useCallback(async () => {
     setLoading(true)
+    hasReceivedMessageRef.current = false
+    clearAllTimers()
 
     try {
       // Mock authentication for development
@@ -263,18 +431,11 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
         `width=${POPUP_WIDTH},height=${POPUP_HEIGHT},left=${left},top=${top},popup=1`,
       )
 
-      if (!popup || popup.closed) {
-        // Popup blocked - fallback to new tab
-        window.open(authUrl, '_blank')
-      } else {
-        // Store popup reference to close it later
-        popupRef.current = popup
-      }
+      handlePopupOpen(authUrl, popup)
     } catch (error) {
-      console.error('Failed to initiate Hypernative OAuth:', error)
-      setLoading(false)
+      handleOAuthError(error)
     }
-  }, [dispatch])
+  }, [dispatch, clearAllTimers, handlePopupOpen, handleOAuthError])
 
   /**
    * Logout - clear authentication token
