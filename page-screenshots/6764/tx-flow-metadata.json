@@ -1,0 +1,9 @@
+{
+  "timestamp": "2025-12-02T14:18:41.210Z",
+  "safe": "sep:0xbaDd745E0e2738152651185217349A3B0aF415cd",
+  "flow": "send-token",
+  "screenshots": [
+    "tx-flow-review.png",
+    "tx-flow-receipt.png"
+  ]
+}
