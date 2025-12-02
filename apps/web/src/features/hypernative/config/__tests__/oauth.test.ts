@@ -1,29 +1,53 @@
-import { HYPERNATIVE_OAUTH_CONFIG, OAUTH_CALLBACK_ROUTE, getRedirectUri } from '../oauth'
+import { OAUTH_CALLBACK_ROUTE, getRedirectUri } from '../oauth'
 
 describe('oauth config', () => {
   describe('HYPERNATIVE_OAUTH_CONFIG', () => {
+    const originalEnv = process.env
+
+    beforeEach(() => {
+      // Clear env vars to test defaults
+      jest.resetModules()
+      process.env = { ...originalEnv }
+      delete process.env.NEXT_PUBLIC_HYPERNATIVE_AUTH_URL
+      delete process.env.NEXT_PUBLIC_HYPERNATIVE_TOKEN_URL
+      delete process.env.NEXT_PUBLIC_HYPERNATIVE_API_URL
+    })
+
+    afterEach(() => {
+      process.env = originalEnv
+      jest.resetModules()
+    })
+
     it('should have default authUrl', () => {
-      expect(HYPERNATIVE_OAUTH_CONFIG.authUrl).toBe('https://mock-hn-auth.example.com/oauth/authorize')
+      // Re-import after clearing env vars
+      const { HYPERNATIVE_OAUTH_CONFIG: config } = require('../oauth')
+      expect(config.authUrl).toBe('https://mock-hn-auth.example.com/oauth/authorize')
     })
 
     it('should have default tokenUrl', () => {
-      expect(HYPERNATIVE_OAUTH_CONFIG.tokenUrl).toBe('https://mock-hn-auth.example.com/oauth/token')
+      // Re-import after clearing env vars
+      const { HYPERNATIVE_OAUTH_CONFIG: config } = require('../oauth')
+      expect(config.tokenUrl).toBe('https://mock-hn-auth.example.com/oauth/token')
     })
 
     it('should have default apiBaseUrl', () => {
-      expect(HYPERNATIVE_OAUTH_CONFIG.apiBaseUrl).toBe('https://mock-hn-api.example.com')
+      const { HYPERNATIVE_OAUTH_CONFIG: config } = require('../oauth')
+      expect(config.apiBaseUrl).toBe('https://mock-hn-api.example.com')
     })
 
     it('should have default clientId', () => {
-      expect(HYPERNATIVE_OAUTH_CONFIG.clientId).toBe('SAFE_WALLET_SPA')
+      const { HYPERNATIVE_OAUTH_CONFIG: config } = require('../oauth')
+      expect(config.clientId).toBe('SAFE_WALLET_SPA')
     })
 
     it('should have default redirectUri as empty string', () => {
-      expect(HYPERNATIVE_OAUTH_CONFIG.redirectUri).toBe('')
+      const { HYPERNATIVE_OAUTH_CONFIG: config } = require('../oauth')
+      expect(config.redirectUri).toBe('')
     })
 
     it('should have correct scope', () => {
-      expect(HYPERNATIVE_OAUTH_CONFIG.scope).toBe('read')
+      const { HYPERNATIVE_OAUTH_CONFIG: config } = require('../oauth')
+      expect(config.scope).toBe('read')
     })
   })
 
@@ -109,20 +133,28 @@ describe('oauth config', () => {
 
   describe('getRedirectUri', () => {
     const originalWindow = global.window
+    const originalEnv = process.env
+
+    beforeEach(() => {
+      jest.resetModules()
+      process.env = { ...originalEnv }
+      delete process.env.NEXT_PUBLIC_HYPERNATIVE_REDIRECT_URI
+    })
 
     afterEach(() => {
       // Restore window
       global.window = originalWindow
+      process.env = originalEnv
+      jest.resetModules()
     })
 
     it('should return configured redirectUri if available', () => {
-      const mockConfig = {
-        ...HYPERNATIVE_OAUTH_CONFIG,
-        redirectUri: 'https://custom-redirect.example.com/callback',
-      }
+      // Set env var for redirectUri
+      process.env.NEXT_PUBLIC_HYPERNATIVE_REDIRECT_URI = 'https://custom-redirect.example.com/callback'
+      jest.resetModules()
 
-      // Mock the config by accessing it directly through the module
-      const result = mockConfig.redirectUri || getRedirectUri()
+      const { getRedirectUri: getRedirectUriFn, HYPERNATIVE_OAUTH_CONFIG: config } = require('../oauth')
+      const result = config.redirectUri || getRedirectUriFn()
       expect(result).toBe('https://custom-redirect.example.com/callback')
     })
 
