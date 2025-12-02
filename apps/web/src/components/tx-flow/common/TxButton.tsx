@@ -30,6 +30,7 @@ export const SendTokensButton = ({ onClick, sx }: { onClick: () => void; sx?: Bu
         sx={sx ?? buttonSx}
         fullWidth
         startIcon={<AssetsIcon width={20} />}
+        aria-label="Send tokens"
       >
         Send tokens
       </Button>

@@ -101,6 +101,19 @@ jobs:
           echo "normalized=$NORMALIZED" >> $GITHUB_OUTPUT
           echo "Normalized branch: $NORMALIZED"
 
+      - name: Check for tx-flow changes
+        if: steps.changed-files.outputs.has_changes == 'true'
+        id: tx-flow-changes
+        run: |
+          CHANGED_FILES="${{ steps.changed-files.outputs.files }}"
+          if echo "$CHANGED_FILES" | grep -q "components/tx-flow\|components/tx/\|services/tx/"; then
+            echo "has_tx_flow_changes=true" >> $GITHUB_OUTPUT
+            echo "Transaction flow components changed"
+          else
+            echo "has_tx_flow_changes=false" >> $GITHUB_OUTPUT
+            echo "No transaction flow components changed"
+          fi
+
       - name: Map files to routes
         if: steps.changed-files.outputs.has_changes == 'true'
         id: routes
@@ -110,15 +123,24 @@ jobs:
           CHANGED_FILES: ${{ steps.changed-files.outputs.files }}
           BRANCH_NAME: ${{ steps.branch.outputs.normalized }}
 
-      - name: Take screenshots
+      - name: Take page screenshots
         if: steps.changed-files.outputs.has_changes == 'true' && steps.routes.outputs.has_routes == 'true'
         run: |
           node ./.github/scripts/capture-page-screenshots.js
         env:
           NODE_PATH: ./.github/scripts/node_modules
 
+      - name: Take tx-flow screenshots
+        if: steps.changed-files.outputs.has_changes == 'true' && steps.tx-flow-changes.outputs.has_tx_flow_changes == 'true'
+        run: |
+          node ./.github/scripts/capture-tx-flow-screenshots.js
+        env:
+          NODE_PATH: ./.github/scripts/node_modules
+          CYPRESS_WALLET_CREDENTIALS: ${{ secrets.CYPRESS_WALLET_CREDENTIALS }}
+          BRANCH_NAME: ${{ steps.branch.outputs.normalized }}
+
       - name: Upload screenshots
-        if: steps.changed-files.outputs.has_changes == 'true' && steps.routes.outputs.has_routes == 'true'
+        if: steps.changed-files.outputs.has_changes == 'true' && (steps.routes.outputs.has_routes == 'true' || steps.tx-flow-changes.outputs.has_tx_flow_changes == 'true')
         uses: actions/upload-artifact@v4
         with:
           name: page-screenshots
@@ -126,7 +148,7 @@ jobs:
           retention-days: 5
 
       - name: Upload screenshots to branch
-        if: steps.changed-files.outputs.has_changes == 'true' && steps.routes.outputs.has_routes == 'true'
+        if: steps.changed-files.outputs.has_changes == 'true' && (steps.routes.outputs.has_routes == 'true' || steps.tx-flow-changes.outputs.has_tx_flow_changes == 'true')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -155,6 +177,7 @@ jobs:
 
           mkdir -p "$SCREENSHOT_DIR"
           cp $GITHUB_WORKSPACE/page-screenshots/*.png "$SCREENSHOT_DIR/" 2>/dev/null || true
+          cp $GITHUB_WORKSPACE/page-screenshots/*.json "$SCREENSHOT_DIR/" 2>/dev/null || true
 
           git add "$SCREENSHOT_DIR"
           if git commit -m "Add page screenshots for PR ${{ steps.pr.outputs.number }}"; then
@@ -164,7 +187,7 @@ jobs:
           fi
 
       - name: Post PR comment with screenshots
-        if: steps.changed-files.outputs.has_changes == 'true' && steps.routes.outputs.has_routes == 'true'
+        if: steps.changed-files.outputs.has_changes == 'true' && (steps.routes.outputs.has_routes == 'true' || steps.tx-flow-changes.outputs.has_tx_flow_changes == 'true')
         uses: actions/github-script@v7
         with:
           script: |
@@ -195,35 +218,68 @@ jobs:
             const baseUrl = `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/page-screenshots-storage/page-screenshots/${prNumber}`;
             const previewBaseUrl = `https://${{ steps.branch.outputs.normalized }}--walletweb.review.5afe.dev`;
 
+            // Separate tx-flow screenshots from page screenshots
+            const txFlowScreenshots = screenshots.filter(f => f.startsWith('tx-flow-'));
+            const pageScreenshots = screenshots.filter(f => !f.startsWith('tx-flow-'));
+
             let body = '## 📸 Page Screenshots\n\n';
-            body += `Found ${screenshots.length} screenshot(s) for pages affected by changes in this PR.\n\n`;
-            body += `**Preview Site:** ${previewBaseUrl}/home?safe=eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6\n\n`;
 
-            const useCollapsible = screenshots.length >= 8;
+            if (pageScreenshots.length > 0 || txFlowScreenshots.length > 0) {
+              body += `Found ${screenshots.length} screenshot(s) for pages affected by changes in this PR.\n\n`;
+              body += `**Preview Site:** ${previewBaseUrl}/home?safe=eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6\n\n`;
+            }
 
-            for (const file of screenshots) {
-              const name = file.replace('.png', '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-              const imageUrl = `${baseUrl}/${file}`;
-
-              const routeInfo = routes.find(r =>
-                r.name.toLowerCase().replace(/\s+/g, '-') === file.replace('.png', '')
-              );
-              const routeUrl = routeInfo ? `${previewBaseUrl}${routeInfo.url.replace(previewBaseUrl, '')}` : null;
-
-              if (useCollapsible) {
-                body += `<details>\n<summary>`;
-                body += routeUrl ? `<a href="${routeUrl}">${name}</a>` : name;
-                body += `</summary>\n\n`;
+            // Add tx-flow screenshots section
+            if (txFlowScreenshots.length > 0) {
+              body += '### 🔄 Transaction Flow Screenshots\n\n';
+              body += 'Screenshots captured from an automated send token transaction flow:\n\n';
+              
+              for (const file of txFlowScreenshots) {
+                const name = file.replace('.png', '').replace(/tx-flow-/, '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                const imageUrl = `${baseUrl}/${file}`;
+                body += `#### ${name}\n\n`;
                 body += `![${name}](${imageUrl})\n\n`;
-                body += `</details>\n\n`;
-              } else {
-                body += routeUrl ? `### [${name}](${routeUrl})\n\n` : `### ${name}\n\n`;
-                body += `![${name}](${imageUrl})\n\n`;
+              }
+              
+              body += '---\n\n';
+            }
+
+            // Add page screenshots section
+            if (pageScreenshots.length === 0) {
+              if (txFlowScreenshots.length > 0) {
+                body += '\n*No additional page screenshots captured.*\n';
+              }
+            } else {
+              if (txFlowScreenshots.length > 0) {
+                body += '### 📄 Page Screenshots\n\n';
+              }
+              
+              const useCollapsible = pageScreenshots.length >= 8;
+
+              for (const file of pageScreenshots) {
+                const name = file.replace('.png', '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                const imageUrl = `${baseUrl}/${file}`;
+
+                const routeInfo = routes.find(r =>
+                  r.name.toLowerCase().replace(/\s+/g, '-') === file.replace('.png', '')
+                );
+                const routeUrl = routeInfo ? `${previewBaseUrl}${routeInfo.url.replace(previewBaseUrl, '')}` : null;
+
+                if (useCollapsible) {
+                  body += `<details>\n<summary>`;
+                  body += routeUrl ? `<a href="${routeUrl}">${name}</a>` : name;
+                  body += `</summary>\n\n`;
+                  body += `![${name}](${imageUrl})\n\n`;
+                  body += `</details>\n\n`;
+                } else {
+                  body += routeUrl ? `### [${name}](${routeUrl})\n\n` : `### ${name}\n\n`;
+                  body += `![${name}](${imageUrl})\n\n`;
+                }
               }
             }
 
             body += '\n---\n';
-            body += '*Screenshots are automatically captured from pages affected by changed files.*';
+            body += '*Screenshots are automatically captured from pages and transaction flows affected by changed files.*';
 
             const { data: comments } = await github.rest.issues.listComments({
               owner: repo.owner,
@@ -253,7 +309,7 @@ jobs:
             }
 
       - name: Post no routes comment
-        if: steps.changed-files.outputs.has_changes == 'true' && steps.routes.outputs.has_routes == 'false'
+        if: steps.changed-files.outputs.has_changes == 'true' && steps.routes.outputs.has_routes == 'false' && steps.tx-flow-changes.outputs.has_tx_flow_changes == 'false'
         uses: actions/github-script@v7
         with:
           script: |
