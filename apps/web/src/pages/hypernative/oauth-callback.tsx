@@ -44,6 +44,13 @@ const HypernativeOAuthCallback: NextPage = () => {
         // Step 1: Extract query parameters
         const { code, state, error, error_description } = router.query
 
+        // Clean URL history immediately after extracting parameters
+        // This prevents the authorization code from appearing in browser history
+        // (security best practice - avoids leaking sensitive OAuth codes)
+        if (typeof window !== 'undefined' && window.history) {
+          window.history.replaceState({}, document.title, window.location.pathname + window.location.hash)
+        }
+
         // Check for OAuth errors
         if (error) {
           const errorMsg = error_description ? String(error_description) : String(error)
