@@ -27,7 +27,7 @@ export const AnalysisDetails = ({ recipient, contract, threat, safeTx }: SafeShi
   const overallStatus = getOverallStatus(recipientData, contractData, threatData) ?? null
 
   return (
-    <View backgroundColor="$background" borderRadius={12} padding="$1">
+    <View backgroundColor="$background" width="100%" borderRadius={12} padding="$1">
       <AnalysisDetailsHeader severity={overallStatus?.severity || Severity.OK} />
 
       <AnalysisDetailsContent recipient={recipient} contract={contract} threat={threat} safeTx={safeTx} />
