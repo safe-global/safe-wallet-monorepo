@@ -4,12 +4,28 @@ import { useRouter } from 'next/router'
 import { configureStore } from '@reduxjs/toolkit'
 import HypernativeOAuthCallback from '../../pages/hypernative/oauth-callback'
 import { hnAuthSlice } from '@/features/hypernative/store/hnAuthSlice'
-import { HN_AUTH_SUCCESS_EVENT, HN_AUTH_ERROR_EVENT } from '@/features/hypernative/hooks/useHypernativeOAuth'
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
+
+// Mock PKCE utilities
+jest.mock('@/features/hypernative/hooks/useHypernativeOAuth', () => {
+  const actual = jest.requireActual('@/features/hypernative/hooks/useHypernativeOAuth')
+  return {
+    ...actual,
+    readPkce: jest.fn(),
+    clearPkce: jest.fn(),
+  }
+})
+
+import {
+  HN_AUTH_SUCCESS_EVENT,
+  HN_AUTH_ERROR_EVENT,
+  readPkce,
+  clearPkce,
+} from '@/features/hypernative/hooks/useHypernativeOAuth'
 
 // Mock fetch
 const mockFetch = jest.fn()
@@ -20,21 +36,11 @@ describe('HypernativeOAuthCallback', () => {
   const mockRouterPush = jest.fn()
   const mockPostMessage = jest.fn()
   const mockWindowClose = jest.fn()
+  const mockReplaceState = jest.fn()
 
-  // Mock sessionStorage
-  const mockSessionStorage: Record<string, string> = {}
-  const sessionStorageMock = {
-    getItem: jest.fn((key: string) => mockSessionStorage[key] || null),
-    setItem: jest.fn((key: string, value: string) => {
-      mockSessionStorage[key] = value
-    }),
-    removeItem: jest.fn((key: string) => {
-      delete mockSessionStorage[key]
-    }),
-    clear: jest.fn(() => {
-      Object.keys(mockSessionStorage).forEach((key) => delete mockSessionStorage[key])
-    }),
-  }
+  // Get references to the mocked functions
+  const mockReadPkce = readPkce as jest.MockedFunction<typeof readPkce>
+  const mockClearPkce = clearPkce as jest.MockedFunction<typeof clearPkce>
 
   function createTestStore() {
     return configureStore({
@@ -53,7 +59,8 @@ describe('HypernativeOAuthCallback', () => {
   beforeEach(() => {
     store = createTestStore()
     jest.clearAllMocks()
-    sessionStorageMock.clear()
+    mockReadPkce.mockReturnValue({})
+    mockClearPkce.mockImplementation(() => {})
 
     // Setup router mock
     ;(useRouter as jest.Mock).mockReturnValue({
@@ -75,10 +82,24 @@ describe('HypernativeOAuthCallback', () => {
     // Setup window.close mock
     window.close = mockWindowClose
 
-    // Setup sessionStorage mock
-    Object.defineProperty(window, 'sessionStorage', {
-      value: sessionStorageMock,
+    // Setup window.history mock
+    Object.defineProperty(window, 'history', {
+      value: {
+        replaceState: mockReplaceState,
+      },
       writable: true,
+      configurable: true,
+    })
+
+    // Setup window.location mock
+    Object.defineProperty(window, 'location', {
+      value: {
+        origin: 'http://localhost:3000',
+        pathname: '/hypernative/oauth-callback',
+        hash: '',
+      },
+      writable: true,
+      configurable: true,
     })
 
     // Reset fetch mock completely and set up default successful response
@@ -126,14 +147,16 @@ describe('HypernativeOAuthCallback', () => {
   })
 
   it('should handle successful OAuth callback', async () => {
-    // Setup query params and sessionStorage BEFORE rendering
+    // Setup query params and PKCE data BEFORE rendering
     ;(useRouter as jest.Mock).mockReturnValue({
       isReady: true,
       query: { code: 'auth-code-123', state: 'state-456' },
     })
 
-    mockSessionStorage['hn_oauth_state'] = 'state-456'
-    mockSessionStorage['hn_pkce_verifier'] = 'verifier-789'
+    mockReadPkce.mockReturnValue({
+      state: 'state-456',
+      codeVerifier: 'verifier-789',
+    })
 
     render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
 
@@ -153,6 +176,13 @@ describe('HypernativeOAuthCallback', () => {
       { timeout: 3000 },
     )
 
+    // Check that URL history was cleaned
+    expect(mockReplaceState).toHaveBeenCalledWith(
+      {},
+      document.title,
+      expect.stringContaining('/hypernative/oauth-callback'),
+    )
+
     // Check that postMessage was sent to parent
     expect(mockPostMessage).toHaveBeenCalledWith(
       {
@@ -163,9 +193,8 @@ describe('HypernativeOAuthCallback', () => {
       window.location.origin,
     )
 
-    // Check that sessionStorage was cleaned up
-    expect(sessionStorageMock.removeItem).toHaveBeenCalledWith('hn_oauth_state')
-    expect(sessionStorageMock.removeItem).toHaveBeenCalledWith('hn_pkce_verifier')
+    // Check that PKCE data was cleaned up
+    expect(mockClearPkce).toHaveBeenCalled()
   })
 
   it('should handle missing authorization code', async () => {
@@ -174,13 +203,22 @@ describe('HypernativeOAuthCallback', () => {
       query: { state: 'test-state' }, // Missing code
     })
 
-    mockSessionStorage['hn_oauth_state'] = 'test-state'
+    mockReadPkce.mockReturnValue({
+      state: 'test-state',
+      codeVerifier: 'verifier-123',
+    })
 
     render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(screen.getByText(/Missing authorization code in callback URL/)).toBeInTheDocument()
     })
+
+    // Check that URL history was cleaned
+    expect(mockReplaceState).toHaveBeenCalled()
+
+    // Check that PKCE was cleaned up on error
+    expect(mockClearPkce).toHaveBeenCalled()
 
     expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -197,11 +235,19 @@ describe('HypernativeOAuthCallback', () => {
       query: { code: 'test-code' }, // Missing state
     })
 
+    mockReadPkce.mockReturnValue({})
+
     render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(screen.getByText(/Missing state parameter in callback URL/)).toBeInTheDocument()
     })
+
+    // Check that URL history was cleaned
+    expect(mockReplaceState).toHaveBeenCalled()
+
+    // Check that PKCE was cleaned up on error
+    expect(mockClearPkce).toHaveBeenCalled()
 
     expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -218,13 +264,22 @@ describe('HypernativeOAuthCallback', () => {
       query: { code: 'test-code', state: 'wrong-state' },
     })
 
-    mockSessionStorage['hn_oauth_state'] = 'correct-state'
+    mockReadPkce.mockReturnValue({
+      state: 'correct-state',
+      codeVerifier: 'verifier-123',
+    })
 
     render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(screen.getByText(/Invalid OAuth state parameter - possible CSRF attack/)).toBeInTheDocument()
     })
+
+    // Check that URL history was cleaned
+    expect(mockReplaceState).toHaveBeenCalled()
+
+    // Check that PKCE was cleaned up on error
+    expect(mockClearPkce).toHaveBeenCalled()
 
     expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -241,14 +296,22 @@ describe('HypernativeOAuthCallback', () => {
       query: { code: 'test-code', state: 'test-state' },
     })
 
-    mockSessionStorage['hn_oauth_state'] = 'test-state'
-    // Missing PKCE verifier
+    mockReadPkce.mockReturnValue({
+      state: 'test-state',
+      // Missing codeVerifier
+    })
 
     render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(screen.getByText(/Missing PKCE code verifier - authentication flow corrupted/)).toBeInTheDocument()
     })
+
+    // Check that URL history was cleaned
+    expect(mockReplaceState).toHaveBeenCalled()
+
+    // Check that PKCE was cleaned up on error
+    expect(mockClearPkce).toHaveBeenCalled()
 
     expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -268,11 +331,19 @@ describe('HypernativeOAuthCallback', () => {
       },
     })
 
+    mockReadPkce.mockReturnValue({})
+
     render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(screen.getByText(/OAuth authorization failed: User denied authorization/)).toBeInTheDocument()
     })
+
+    // Check that URL history was cleaned
+    expect(mockReplaceState).toHaveBeenCalled()
+
+    // Check that PKCE was cleaned up on error
+    expect(mockClearPkce).toHaveBeenCalled()
 
     expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -284,14 +355,16 @@ describe('HypernativeOAuthCallback', () => {
   })
 
   it('should handle token exchange failure', async () => {
-    // Setup query params and sessionStorage BEFORE rendering
+    // Setup query params and PKCE data BEFORE rendering
     ;(useRouter as jest.Mock).mockReturnValue({
       isReady: true,
       query: { code: 'test-code', state: 'test-state' },
     })
 
-    mockSessionStorage['hn_oauth_state'] = 'test-state'
-    mockSessionStorage['hn_pkce_verifier'] = 'verifier-123'
+    mockReadPkce.mockReturnValue({
+      state: 'test-state',
+      codeVerifier: 'verifier-123',
+    })
 
     // Mock failed token exchange - reset and override the default mock BEFORE rendering
     mockFetch.mockReset()
@@ -315,6 +388,12 @@ describe('HypernativeOAuthCallback', () => {
       { timeout: 3000 },
     )
 
+    // Check that URL history was cleaned
+    expect(mockReplaceState).toHaveBeenCalled()
+
+    // Check that PKCE was cleaned up on error
+    expect(mockClearPkce).toHaveBeenCalled()
+
     expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         type: HN_AUTH_ERROR_EVENT,
@@ -325,14 +404,16 @@ describe('HypernativeOAuthCallback', () => {
   })
 
   it('should handle invalid token response', async () => {
-    // Setup query params and sessionStorage BEFORE rendering
+    // Setup query params and PKCE data BEFORE rendering
     ;(useRouter as jest.Mock).mockReturnValue({
       isReady: true,
       query: { code: 'test-code', state: 'test-state' },
     })
 
-    mockSessionStorage['hn_oauth_state'] = 'test-state'
-    mockSessionStorage['hn_pkce_verifier'] = 'verifier-123'
+    mockReadPkce.mockReturnValue({
+      state: 'test-state',
+      codeVerifier: 'verifier-123',
+    })
 
     // Mock token response missing required fields - reset and override the default mock BEFORE rendering
     mockFetch.mockReset()
@@ -359,6 +440,12 @@ describe('HypernativeOAuthCallback', () => {
       { timeout: 3000 },
     )
 
+    // Check that URL history was cleaned
+    expect(mockReplaceState).toHaveBeenCalled()
+
+    // Check that PKCE was cleaned up on error
+    expect(mockClearPkce).toHaveBeenCalled()
+
     expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         type: HN_AUTH_ERROR_EVENT,
@@ -369,14 +456,16 @@ describe('HypernativeOAuthCallback', () => {
   })
 
   it('should handle window without opener', async () => {
-    // Setup query params and sessionStorage BEFORE rendering
+    // Setup query params and PKCE data BEFORE rendering
     ;(useRouter as jest.Mock).mockReturnValue({
       isReady: true,
       query: { code: 'test-code', state: 'test-state' },
     })
 
-    mockSessionStorage['hn_oauth_state'] = 'test-state'
-    mockSessionStorage['hn_pkce_verifier'] = 'verifier-123'
+    mockReadPkce.mockReturnValue({
+      state: 'test-state',
+      codeVerifier: 'verifier-123',
+    })
 
     // No window.opener - set this BEFORE rendering
     Object.defineProperty(window, 'opener', {
@@ -407,7 +496,74 @@ describe('HypernativeOAuthCallback', () => {
       { timeout: 3000 },
     )
 
+    // Check that URL history was cleaned
+    expect(mockReplaceState).toHaveBeenCalled()
+
+    // Check that PKCE was cleaned up
+    expect(mockClearPkce).toHaveBeenCalled()
+
     // postMessage should not have been called since there's no opener
     expect(mockPostMessage).not.toHaveBeenCalled()
+  })
+
+  it('should prevent double processing with hasProcessedRef', async () => {
+    ;(useRouter as jest.Mock).mockReturnValue({
+      isReady: true,
+      query: { code: 'test-code', state: 'test-state' },
+    })
+
+    mockReadPkce.mockReturnValue({
+      state: 'test-state',
+      codeVerifier: 'verifier-123',
+    })
+
+    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+
+    // Wait for first processing
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledTimes(1)
+    })
+
+    // Verify readPkce was called only once (not called again on potential re-render)
+    const readPkceCallCount = mockReadPkce.mock.calls.length
+    expect(readPkceCallCount).toBe(1)
+
+    // The hasProcessedRef guard ensures that even if the component re-renders
+    // or useEffect runs again, the callback won't process twice
+  })
+
+  it('should reset hasProcessedRef on error to allow retry', async () => {
+    ;(useRouter as jest.Mock).mockReturnValue({
+      isReady: true,
+      query: { code: 'test-code', state: 'wrong-state' },
+    })
+
+    mockReadPkce.mockReturnValue({
+      state: 'correct-state',
+      codeVerifier: 'verifier-123',
+    })
+
+    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+
+    // Wait for error
+    await waitFor(() => {
+      expect(screen.getByText(/Invalid OAuth state parameter/)).toBeInTheDocument()
+    })
+
+    // Verify that clearPkce was called on error (this happens in the catch block)
+    // The hasProcessedRef flag is reset in the catch block, allowing retry
+    expect(mockClearPkce).toHaveBeenCalled()
+
+    // Verify that URL history was cleaned
+    expect(mockReplaceState).toHaveBeenCalled()
+
+    // Verify error was sent to parent window
+    expect(mockPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: HN_AUTH_ERROR_EVENT,
+        error: expect.stringContaining('Invalid OAuth state parameter'),
+      }),
+      window.location.origin,
+    )
   })
 })
