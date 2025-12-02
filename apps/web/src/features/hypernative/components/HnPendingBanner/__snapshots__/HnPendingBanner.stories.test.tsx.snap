@@ -1,0 +1,99 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./HnPendingBanner.stories Default 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1qhe4wj-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner css-1869usn-MuiPaper-root-MuiCard-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiStack-root content css-14ed0e9-MuiStack-root"
+    >
+      <div
+        class="iconContainer MuiBox-root css-0"
+      >
+        <mock-icon
+          aria-hidden=""
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium icon css-1dhtbeh-MuiSvgIcon-root"
+          focusable="false"
+        />
+      </div>
+      <div
+        class="textContainer MuiBox-root css-0"
+      >
+        <h6
+          class="MuiTypography-root MuiTypography-subtitle1 title css-yjg58m-MuiTypography-root"
+        >
+          Guardian setup in progress
+        </h6>
+        <p
+          class="MuiTypography-root MuiTypography-body2 description css-17vdyq3-MuiTypography-root"
+        >
+          We've received your request and will follow up with next steps.
+        </p>
+      </div>
+    </div>
+    <button
+      aria-label="close"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      tabindex="0"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
+        data-testid="CloseIcon"
+        focusable="false"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+        />
+      </svg>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`./HnPendingBanner.stories NonDismissable 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1qhe4wj-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner css-1869usn-MuiPaper-root-MuiCard-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiStack-root content css-14ed0e9-MuiStack-root"
+    >
+      <div
+        class="iconContainer MuiBox-root css-0"
+      >
+        <mock-icon
+          aria-hidden=""
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium icon css-1dhtbeh-MuiSvgIcon-root"
+          focusable="false"
+        />
+      </div>
+      <div
+        class="textContainer MuiBox-root css-0"
+      >
+        <h6
+          class="MuiTypography-root MuiTypography-subtitle1 title css-yjg58m-MuiTypography-root"
+        >
+          Guardian setup in progress
+        </h6>
+        <p
+          class="MuiTypography-root MuiTypography-body2 description css-17vdyq3-MuiTypography-root"
+        >
+          We've received your request and will follow up with next steps.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+`;

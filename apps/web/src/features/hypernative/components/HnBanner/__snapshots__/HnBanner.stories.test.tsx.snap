@@ -1,0 +1,153 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./HnBanner.stories Default 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner css-1o21zae-MuiPaper-root-MuiCard-root"
+  role="button"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="MuiStack-root bannerStack css-pl8gqh-MuiStack-root"
+  >
+    <img
+      alt="Guardian badge"
+      class="bannerImage"
+      data-nimg="1"
+      decoding="async"
+      height="95"
+      loading="lazy"
+      src="/images/hypernative/guardian-badge.svg"
+      style="color: transparent;"
+      width="95"
+    />
+    <div
+      class="bannerContent MuiBox-root css-0"
+    >
+      <h4
+        class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle css-122d7uu-MuiTypography-root"
+      >
+        Strengthen your Safe
+      </h4>
+      <p
+        class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription css-6sro4l-MuiTypography-root"
+      >
+        Automatically monitor and block risky transactions using advanced, user-defined security policies, powered by
+         
+        <span
+          style="color: rgb(0, 180, 96); font-weight: bold;"
+        >
+          Hypernative
+        </span>
+        .
+      </p>
+      <button
+        class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorPrimary bannerCtaText css-926e8y-MuiButtonBase-root-MuiButton-root"
+        tabindex="0"
+        type="button"
+      >
+        Learn more
+        <span
+          class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeCompact css-ioep0k-MuiButton-endIcon"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+            data-testid="ArrowForwardIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="m12 4-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"
+            />
+          </svg>
+        </span>
+      </button>
+    </div>
+  </div>
+  <button
+    aria-label="close"
+    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+    tabindex="0"
+    type="button"
+  >
+    <svg
+      aria-hidden="true"
+      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium closeIcon css-1tabcwi-MuiSvgIcon-root"
+      data-testid="CloseIcon"
+      focusable="false"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+      />
+    </svg>
+  </button>
+</div>
+`;
+
+exports[`./HnBanner.stories NonDismissable 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner css-1o21zae-MuiPaper-root-MuiCard-root"
+  role="button"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="MuiStack-root bannerStack css-pl8gqh-MuiStack-root"
+  >
+    <img
+      alt="Guardian badge"
+      class="bannerImage"
+      data-nimg="1"
+      decoding="async"
+      height="95"
+      loading="lazy"
+      src="/images/hypernative/guardian-badge.svg"
+      style="color: transparent;"
+      width="95"
+    />
+    <div
+      class="bannerContent MuiBox-root css-0"
+    >
+      <h4
+        class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle css-122d7uu-MuiTypography-root"
+      >
+        Strengthen your Safe
+      </h4>
+      <p
+        class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription css-6sro4l-MuiTypography-root"
+      >
+        Automatically monitor and block risky transactions using advanced, user-defined security policies, powered by
+         
+        <span
+          style="color: rgb(0, 180, 96); font-weight: bold;"
+        >
+          Hypernative
+        </span>
+        .
+      </p>
+      <button
+        class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorPrimary bannerCtaText css-926e8y-MuiButtonBase-root-MuiButton-root"
+        tabindex="0"
+        type="button"
+      >
+        Learn more
+        <span
+          class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeCompact css-ioep0k-MuiButton-endIcon"
+        >
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+            data-testid="ArrowForwardIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="m12 4-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"
+            />
+          </svg>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;

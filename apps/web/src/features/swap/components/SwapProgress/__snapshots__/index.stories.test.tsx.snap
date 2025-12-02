@@ -1,0 +1,130 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./index.stories Filled 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="MuiStack-root css-1rlitzi-MuiStack-root"
+  >
+    <span
+      aria-valuemax="100"
+      aria-valuemin="0"
+      aria-valuenow="100"
+      class="MuiLinearProgress-root MuiLinearProgress-colorSuccess MuiLinearProgress-determinate css-1rjo7s5-MuiLinearProgress-root"
+      role="progressbar"
+    >
+      <span
+        class="MuiLinearProgress-bar MuiLinearProgress-barColorSuccess MuiLinearProgress-bar1Determinate css-12tk9s4-MuiLinearProgress-bar1"
+        style="transform: translateX(0%);"
+      />
+    </span>
+    <p
+      class="MuiTypography-root MuiTypography-body1 css-18btzt5-MuiTypography-root"
+    >
+      100
+       %
+    </p>
+    <p
+      class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+    >
+      <span
+        class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+      >
+        10
+         
+        LAK
+      </span>
+       
+      sold
+    </p>
+  </div>
+</div>
+`;
+
+exports[`./index.stories NotFilled 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="MuiStack-root css-1rlitzi-MuiStack-root"
+  >
+    <span
+      aria-valuemax="100"
+      aria-valuemin="0"
+      aria-valuenow="0"
+      class="MuiLinearProgress-root MuiLinearProgress-colorWarning MuiLinearProgress-determinate css-3xps2c-MuiLinearProgress-root"
+      role="progressbar"
+    >
+      <span
+        class="MuiLinearProgress-bar MuiLinearProgress-barColorWarning MuiLinearProgress-bar1Determinate css-17dlr3g-MuiLinearProgress-bar1"
+        style="transform: translateX(-100%);"
+      />
+    </span>
+    <p
+      class="MuiTypography-root MuiTypography-body1 css-1am4l5a-MuiTypography-root"
+    >
+      0
+       %
+    </p>
+    <p
+      class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+    >
+      <span
+        class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+      >
+        0
+         
+        VUV
+      </span>
+       
+      sold
+    </p>
+  </div>
+</div>
+`;
+
+exports[`./index.stories PartiallyFilled 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="MuiStack-root css-1rlitzi-MuiStack-root"
+  >
+    <span
+      aria-valuemax="100"
+      aria-valuemin="0"
+      aria-valuenow="20"
+      class="MuiLinearProgress-root MuiLinearProgress-colorWarning MuiLinearProgress-determinate css-3xps2c-MuiLinearProgress-root"
+      role="progressbar"
+    >
+      <span
+        class="MuiLinearProgress-bar MuiLinearProgress-barColorWarning MuiLinearProgress-bar1Determinate css-17dlr3g-MuiLinearProgress-bar1"
+        style="transform: translateX(-80%);"
+      />
+    </span>
+    <p
+      class="MuiTypography-root MuiTypography-body1 css-1am4l5a-MuiTypography-root"
+    >
+      20
+       %
+    </p>
+    <p
+      class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+    >
+      <span
+        class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+      >
+        1
+         
+        ETB
+      </span>
+       
+      sold
+    </p>
+  </div>
+</div>
+`;

@@ -1,0 +1,55 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./index.stories WithTokenLogo 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <span
+    aria-label="100"
+    class="container verticalAlign"
+    data-mui-internal-clone-element="true"
+  >
+    <div
+      class="MuiBox-root css-olq4e8"
+    >
+      <img
+        alt="ETH"
+        class="image"
+        height="26"
+        loading="lazy"
+        referrerpolicy="no-referrer"
+        src="https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png"
+      />
+    </div>
+    <b
+      class="tokenText"
+    >
+      100
+       
+      ETH
+    </b>
+  </span>
+</div>
+`;
+
+exports[`./index.stories WithoutTokenLogo 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <span
+    aria-label="100"
+    class="container"
+    data-mui-internal-clone-element="true"
+  >
+    <b
+      class="tokenText"
+    >
+      100
+       
+      ETH
+    </b>
+  </span>
+</div>
+`;
