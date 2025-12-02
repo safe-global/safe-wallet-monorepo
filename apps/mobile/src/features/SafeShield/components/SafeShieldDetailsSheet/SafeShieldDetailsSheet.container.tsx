@@ -8,13 +8,11 @@ import type {
   ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import {
-  useTransactionsGetTransactionByIdV1Query,
-  TransactionDetails,
-} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import useSafeTx from '@/src/hooks/useSafeTx'
 import { Image, Text, View } from 'tamagui'
+import { ToastViewport } from '@tamagui/toast'
 
 export const SafeShieldDetailsSheetContainer = () => {
   const { recipient, contract, threat, txId } = useLocalSearchParams<{
@@ -36,22 +34,24 @@ export const SafeShieldDetailsSheetContainer = () => {
     },
   )
 
-  const safeTx = useSafeTx(txDetails || ({} as TransactionDetails))
+  const safeTx = useSafeTx(txDetails)
 
   const recipientData = useMemo<AsyncResult<RecipientAnalysisResults> | undefined>(() => {
-    return JSON.parse(recipient || '{}') as AsyncResult<RecipientAnalysisResults>
+    return recipient ? JSON.parse(recipient) : undefined
   }, [recipient])
 
   const contractData = useMemo<AsyncResult<ContractAnalysisResults> | undefined>(() => {
-    return JSON.parse(contract || '{}') as AsyncResult<ContractAnalysisResults>
+    return contract ? JSON.parse(contract) : undefined
   }, [contract])
 
   const threatData = useMemo<AsyncResult<ThreatAnalysisResults> | undefined>(() => {
-    return JSON.parse(threat || '{}') as AsyncResult<ThreatAnalysisResults>
+    return threat ? JSON.parse(threat) : undefined
   }, [threat])
 
   return (
     <SafeBottomSheet snapPoints={['100%']} loading={false}>
+      <ToastViewport multipleToasts={false} left={0} right={0} />
+
       <AnalysisDetails recipient={recipientData} contract={contractData} threat={threatData} safeTx={safeTx} />
 
       <View flexDirection="row" width="100%" gap="$1" justifyContent="center" alignItems="center">

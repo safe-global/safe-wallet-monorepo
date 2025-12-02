@@ -13,7 +13,6 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveChain } from '@/src/store/chains'
 import { isTxSimulationEnabled } from '@safe-global/utils/components/tx/security/tenderly/utils'
-import { ToastViewport } from '@tamagui/toast'
 
 interface AnalysisDetailsContentProps {
   recipient?: AsyncResult<RecipientAnalysisResults>
@@ -78,8 +77,6 @@ export const AnalysisDetailsContent = ({ recipient, contract, threat, safeTx }: 
 
   return (
     <View>
-      <ToastViewport multipleToasts={false} left={0} right={0} />
-
       <Stack
         borderWidth={1}
         borderColor="$backgroundPaper"
