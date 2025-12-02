@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useCounterpartyAnalysis as useCounterpartyAnalysisUtils } from '@safe-global/utils/features/safe-shield/hooks'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useAppSelector } from '@/src/store/hooks'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useWeb3ReadOnly } from '@/src/hooks/wallets/web3'
@@ -23,8 +24,24 @@ export function useCounterpartyAnalysis(overrideSafeTx?: SafeTransaction): {
   // Create isInAddressBook function that checks if address exists in address book for the given chainId
   const isInAddressBook = useMemo(() => {
     return (address: string, checkChainId: string): boolean => {
-      // Check both lowercase and original case
-      const contact = addressBookState.contacts[address]
+      // Check both exact match and case-insensitive match
+      // First try exact lookup (fast path)
+      let contact = addressBookState.contacts[address]
+
+      // If not found, try lowercase lookup (addresses may be stored with different casing)
+      if (!contact) {
+        contact = addressBookState.contacts[address.toLowerCase()]
+      }
+
+      // If still not found, iterate through contacts for case-insensitive comparison
+      // This handles cases where addresses are stored with checksummed casing
+      if (!contact) {
+        const contacts = Object.values(addressBookState.contacts)
+        const foundContact = contacts.find((c) => sameAddress(c.value, address))
+        if (foundContact) {
+          contact = foundContact
+        }
+      }
 
       if (!contact) {
         return false
