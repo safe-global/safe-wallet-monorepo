@@ -31,7 +31,7 @@ const isRenderRowItem = (item: ListTableItem): item is RenderRowItem => {
   return (item as RenderRowItem).renderRow !== undefined
 }
 
-export const ListTable = ({ items, children, padding = '$1', gap = '$5', testID }: ListTableProps) => {
+export const ListTable = ({ items, children, padding = '$4', gap = '$5', testID }: ListTableProps) => {
   return (
     <Container padding={padding} gap={gap} borderRadius="$3">
       {items.map((item, index) => {
@@ -40,7 +40,6 @@ export const ListTable = ({ items, children, padding = '$1', gap = '$5', testID 
             key={index}
             alignItems={item.alignItems || 'center'}
             flexDirection={item.direction || 'row'}
-            padding="$3"
             justifyContent="space-between"
             gap={'$2'}
             flexWrap="wrap"
