@@ -46,13 +46,9 @@ export const HN_AUTH_SUCCESS_EVENT = 'HN_AUTH_SUCCESS'
 export const HN_AUTH_ERROR_EVENT = 'HN_AUTH_ERROR'
 
 /**
- * Length of PKCE code verifier string (43-128 characters per RFC 7636)
- * Using 128 for maximum entropy
- */
-const PKCE_VERIFIER_LENGTH = 128
-
-/**
  * Length of OAuth state parameter (recommended minimum 32 characters)
+ * Note: State generation now uses crypto.randomUUID() instead of this constant
+ * @deprecated Will be removed in Phase 2 refactoring
  */
 const OAUTH_STATE_LENGTH = 32
 
@@ -76,8 +72,22 @@ const POPUP_WIDTH = 600
 const POPUP_HEIGHT = 800
 
 /**
- * Generate a random string for PKCE code verifier or OAuth state
+ * Base64url encode a byte array
+ * Converts bytes to base64 and then replaces URL-unsafe characters per RFC 4648
+ * @param bytes - Uint8Array of bytes to encode
+ * @returns Base64url-encoded string
+ */
+function base64urlEncode(bytes: Uint8Array): string {
+  return btoa(String.fromCharCode(...bytes))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '')
+}
+
+/**
+ * Generate a random string for OAuth state parameter
  * Uses crypto.getRandomValues for cryptographically secure randomness
+ * @deprecated Will be replaced with crypto.randomUUID() in Phase 2
  * @param length - Length of the random string to generate
  * @returns Random string containing URL-safe characters
  */
@@ -117,11 +127,15 @@ async function buildAuthUrl(): Promise<string> {
   const { authUrl, clientId, scope } = HYPERNATIVE_OAUTH_CONFIG
   const redirectUri = getRedirectUri()
 
-  // Generate PKCE code verifier and challenge
-  const codeVerifier = generateRandomString(PKCE_VERIFIER_LENGTH)
+  // Generate PKCE code verifier using base64url encoding of 32 random bytes
+  // This produces ~43 characters, matching RFC 7636 standard
+  const randomBytes = new Uint8Array(32)
+  crypto.getRandomValues(randomBytes)
+  const codeVerifier = base64urlEncode(randomBytes)
   const codeChallenge = await generateCodeChallenge(codeVerifier)
 
   // Generate OAuth state parameter for CSRF protection
+  // TODO: Phase 2 - Replace with crypto.randomUUID()
   const state = generateRandomString(OAUTH_STATE_LENGTH)
 
   // Store verifier and state in sessionStorage for callback page
