@@ -1,38 +1,35 @@
 import { type Chain as ChainInfo } from '../AUTO_GENERATED/chains'
 import { createEntityAdapter, EntityState } from '@reduxjs/toolkit'
-import { cgwClient, dynamicBaseQuery } from '../cgwClient'
+import { cgwClient, getBaseUrl } from '../cgwClient'
 import type { QueryReturnValue, FetchBaseQueryMeta, FetchBaseQueryError } from '@reduxjs/toolkit/query'
 
 export const chainsAdapter = createEntityAdapter<ChainInfo, string>({ selectId: (chain: ChainInfo) => chain.chainId })
 export const initialState = chainsAdapter.getInitialState()
 
 const getChainsConfigs = async (
-  url = '/v1/chains',
+  url = `${getBaseUrl()}/v1/chains`,
   results: ChainInfo[] = [],
-): Promise<QueryReturnValue<EntityState<ChainInfo, string>, FetchBaseQueryError, FetchBaseQueryMeta>> => {
-  const response = await dynamicBaseQuery(url, { endpoint: 'getChainsConfig', type: 'query' } as any, {})
-
-  if (response.error) {
-    return { error: response.error }
+): Promise<EntityState<ChainInfo, string>> => {
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
   }
-
-  const data = response.data as { results: ChainInfo[]; next?: string }
+  const data = await response.json()
 
   const nextResults = [...results, ...data.results]
 
   if (data.next) {
-    // Extract the relative path from the next URL
-    const nextUrl = new URL(data.next).pathname + new URL(data.next).search
-    return getChainsConfigs(nextUrl, nextResults)
+    return getChainsConfigs(data.next, nextResults)
   }
 
-  return { data: chainsAdapter.setAll(initialState, nextResults) }
+  return chainsAdapter.setAll(initialState, nextResults)
 }
 
 const getChains = async (): Promise<
   QueryReturnValue<EntityState<ChainInfo, string>, FetchBaseQueryError, FetchBaseQueryMeta>
 > => {
-  return getChainsConfigs()
+  const data = await getChainsConfigs()
+  return { data }
 }
 
 export const apiSliceWithChainsConfig = cgwClient.injectEndpoints({
@@ -45,5 +42,3 @@ export const apiSliceWithChainsConfig = cgwClient.injectEndpoints({
   }),
   overrideExisting: true,
 })
-
-export const { useGetChainsConfigQuery } = apiSliceWithChainsConfig

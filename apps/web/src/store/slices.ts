@@ -1,3 +1,4 @@
+export * from './chainsSlice'
 export * from './safeInfoSlice'
 export * from './sessionSlice'
 export * from './txHistorySlice'

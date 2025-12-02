@@ -4,11 +4,13 @@ import { useAppDispatch } from '@/store'
 import { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 
 // Import all the loadable hooks
+import useLoadChains from './loadables/useLoadChains'
 import useLoadSafeInfo from './loadables/useLoadSafeInfo'
 import useLoadTxHistory from './loadables/useLoadTxHistory'
 import useLoadTxQueue from './loadables/useLoadTxQueue'
 
 // Import all the loadable slices
+import { chainsSlice } from '@/store/chainsSlice'
 import { safeInfoSlice } from '@/store/safeInfoSlice'
 import { txHistorySlice } from '@/store/txHistorySlice'
 import { txQueueSlice } from '@/store/txQueueSlice'
@@ -33,6 +35,7 @@ const useUpdateStore = (slice: Slice, useLoadHook: () => AsyncResult<unknown>): 
 }
 
 const useLoadableStores = () => {
+  useUpdateStore(chainsSlice, useLoadChains)
   useUpdateStore(safeInfoSlice, useLoadSafeInfo)
   useUpdateStore(txHistorySlice, useLoadTxHistory)
   useUpdateStore(txQueueSlice, useLoadTxQueue)

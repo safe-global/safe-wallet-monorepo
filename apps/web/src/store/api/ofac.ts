@@ -1,5 +1,5 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
-import { chainsAdapter, apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
+import { selectChainById } from '@/store/chainsSlice'
 import { Contract } from 'ethers'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import type { RootState } from '..'
@@ -45,25 +45,12 @@ export const ofacApi = createApi({
   baseQuery: noopBaseQuery,
   endpoints: (builder) => ({
     getIsSanctioned: builder.query<boolean, string>({
-      async queryFn(address, { getState, dispatch }) {
-        if (!address) return createBadRequestError('No address provided')
-
-        const state = getState() as RootState
-        let chainsCache = apiSliceWithChainsConfig.endpoints.getChainsConfig.select()(state)
-
-        // If chains aren't loaded yet, trigger the fetch and wait for it
-        if (!chainsCache.data) {
-          await dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
-          // Re-select after fetch
-          const updatedState = getState() as RootState
-          chainsCache = apiSliceWithChainsConfig.endpoints.getChainsConfig.select()(updatedState)
-        }
-
-        const chain = chainsCache.data
-          ? chainsAdapter.getSelectors().selectById(chainsCache.data, chains.eth)
-          : undefined
+      async queryFn(address, { getState }) {
+        const state = getState()
+        const chain = selectChainById(state as RootState, chains.eth)
 
         if (!chain) return createBadRequestError('Chain info not found')
+        if (!address) return createBadRequestError('No address provided')
 
         const provider = createWeb3ReadOnly(chain)
         const contract = new Contract(CHAINALYSIS_OFAC_CONTRACT, contractAbi, provider)

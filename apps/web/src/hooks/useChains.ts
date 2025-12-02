@@ -1,45 +1,35 @@
 import { useMemo } from 'react'
+import isEqual from 'lodash/isEqual'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { useGetChainsConfigQuery } from '@safe-global/store/gateway'
+import { useAppSelector } from '@/store'
+import { selectChainById, selectChains } from '@/store/chainsSlice'
 import { useChainId } from './useChainId'
 import type { FEATURES } from '@safe-global/utils/utils/chains'
 import { hasFeature } from '@safe-global/utils/utils/chains'
-import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 
 const useChains = (): { configs: Chain[]; error?: string; loading?: boolean } => {
-  const { data, error, isLoading } = useGetChainsConfigQuery()
-
-  const configs = useMemo(() => {
-    if (!data) return []
-    // data is already EntityState with { ids: string[], entities: { [id: string]: Chain } }
-    return data.ids.map((id) => data.entities[id]!)
-  }, [data])
+  const state = useAppSelector(selectChains, isEqual)
 
   return useMemo(
     () => ({
-      configs,
-      error: error ? getRtkQueryErrorMessage(error) : undefined,
-      loading: isLoading,
+      configs: state.data,
+      error: state.error,
+      loading: state.loading,
     }),
-    [configs, error, isLoading],
+    [state.data, state.error, state.loading],
   )
 }
 
 export default useChains
 
 export const useChain = (chainId: string): Chain | undefined => {
-  const { data } = useGetChainsConfigQuery()
-
-  return useMemo(() => {
-    if (!data) return undefined
-    // data.entities is a direct lookup by chainId
-    return data.entities[chainId]
-  }, [data, chainId])
+  return useAppSelector((state) => selectChainById(state, chainId), isEqual)
 }
 
 export const useCurrentChain = (): Chain | undefined => {
   const chainId = useChainId()
-  return useChain(chainId)
+  const chainInfo = useAppSelector((state) => selectChainById(state, chainId), isEqual)
+  return chainInfo
 }
 
 /**
