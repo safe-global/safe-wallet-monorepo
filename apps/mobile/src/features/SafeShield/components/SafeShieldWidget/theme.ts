@@ -1,9 +1,11 @@
-// Headline theme
+import { tokens } from '@/src/theme/tokens'
+
+// Widget theme
 export const safeShieldWidgetTheme = {
   light_widget: {
-    background: '#fff',
+    background: tokens.color.backgroundDefaultLight,
   },
   dark_widget: {
-    background: '#1C1C1C',
+    background: tokens.color.backgroundPaperDark,
   },
 }

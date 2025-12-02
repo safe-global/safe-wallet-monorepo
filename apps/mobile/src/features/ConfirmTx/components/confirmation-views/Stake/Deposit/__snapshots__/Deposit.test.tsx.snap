@@ -207,10 +207,10 @@ exports[`StakingDeposit matches snapshot 1`] = `
             "borderTopRightRadius": 7,
             "flexDirection": "column",
             "gap": 20,
-            "paddingBottom": 4,
-            "paddingLeft": 4,
-            "paddingRight": 4,
-            "paddingTop": 4,
+            "paddingBottom": 16,
+            "paddingLeft": 16,
+            "paddingRight": 16,
+            "paddingTop": 16,
           }
         }
       >
@@ -223,10 +223,6 @@ exports[`StakingDeposit matches snapshot 1`] = `
               "flexWrap": "wrap",
               "gap": 8,
               "justifyContent": "space-between",
-              "paddingBottom": 12,
-              "paddingLeft": 12,
-              "paddingRight": 12,
-              "paddingTop": 12,
             }
           }
         >
@@ -267,10 +263,6 @@ exports[`StakingDeposit matches snapshot 1`] = `
               "flexWrap": "wrap",
               "gap": 8,
               "justifyContent": "space-between",
-              "paddingBottom": 12,
-              "paddingLeft": 12,
-              "paddingRight": 12,
-              "paddingTop": 12,
             }
           }
         >
@@ -333,10 +325,6 @@ exports[`StakingDeposit matches snapshot 1`] = `
               "flexWrap": "wrap",
               "gap": 8,
               "justifyContent": "space-between",
-              "paddingBottom": 12,
-              "paddingLeft": 12,
-              "paddingRight": 12,
-              "paddingTop": 12,
             }
           }
         >
@@ -399,10 +387,6 @@ exports[`StakingDeposit matches snapshot 1`] = `
               "flexWrap": "wrap",
               "gap": 8,
               "justifyContent": "space-between",
-              "paddingBottom": 12,
-              "paddingLeft": 12,
-              "paddingRight": 12,
-              "paddingTop": 12,
             }
           }
         >
@@ -443,10 +427,6 @@ exports[`StakingDeposit matches snapshot 1`] = `
               "flexWrap": "wrap",
               "gap": 8,
               "justifyContent": "space-between",
-              "paddingBottom": 12,
-              "paddingLeft": 12,
-              "paddingRight": 12,
-              "paddingTop": 12,
             }
           }
         >
@@ -725,10 +705,6 @@ exports[`StakingDeposit matches snapshot 1`] = `
               "flexWrap": "wrap",
               "gap": 8,
               "justifyContent": "space-between",
-              "paddingBottom": 12,
-              "paddingLeft": 12,
-              "paddingRight": 12,
-              "paddingTop": 12,
             }
           }
         >
@@ -747,98 +723,77 @@ exports[`StakingDeposit matches snapshot 1`] = `
           </Text>
         </View>
         <View
-          accessibilityState={
-            {
-              "busy": undefined,
-              "checked": undefined,
-              "disabled": undefined,
-              "expanded": undefined,
-              "selected": undefined,
-            }
-          }
-          accessibilityValue={
-            {
-              "max": undefined,
-              "min": undefined,
-              "now": undefined,
-              "text": undefined,
-            }
-          }
-          accessible={true}
-          collapsable={false}
-          focusable={true}
-          onClick={[Function]}
-          onResponderGrant={[Function]}
-          onResponderMove={[Function]}
-          onResponderRelease={[Function]}
-          onResponderTerminate={[Function]}
-          onResponderTerminationRequest={[Function]}
-          onStartShouldSetResponder={[Function]}
           style={
             {
-              "opacity": 1,
+              "alignItems": "center",
+              "height": 40,
             }
           }
-          testID="transaction-details-button"
         >
           <View
+            focusVisibleStyle={{}}
+            focusable={true}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            role="button"
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": "#F4F4F4",
-                "borderBottomLeftRadius": 5,
-                "borderBottomRightRadius": 5,
+                "backgroundColor": "#DCDEE0",
+                "borderBottomColor": "transparent",
+                "borderBottomLeftRadius": 8,
+                "borderBottomRightRadius": 8,
+                "borderBottomWidth": 0,
+                "borderLeftColor": "transparent",
+                "borderLeftWidth": 0,
+                "borderRightColor": "transparent",
+                "borderRightWidth": 0,
+                "borderStyle": "solid",
+                "borderTopColor": "transparent",
+                "borderTopLeftRadius": 8,
+                "borderTopRightRadius": 8,
+                "borderTopWidth": 0,
+                "bottom": 0,
                 "flexDirection": "row",
-                "justifyContent": "space-between",
-                "paddingBottom": 12,
-                "paddingLeft": 16,
-                "paddingRight": 16,
-                "paddingTop": 12,
+                "flexWrap": "nowrap",
+                "fontWeight": "700",
+                "height": 36,
+                "justifyContent": "center",
+                "left": 0,
+                "paddingLeft": 8,
+                "paddingRight": 8,
+                "position": "absolute",
+                "right": 0,
+                "top": 0,
               }
             }
+            testID="transaction-details-button"
           >
-            <View
+            <Text
+              lineBreakMode="clip"
+              numberOfLines={1}
               style={
                 {
-                  "alignItems": "center",
-                  "flexDirection": "row",
-                  "gap": 4,
-                  "justifyContent": "center",
+                  "color": "#121312",
+                  "flexGrow": 0,
+                  "flexShrink": 1,
+                  "fontFamily": "DMSans-Bold",
+                  "fontSize": 14,
+                  "letterSpacing": 0,
+                  "lineHeight": 15.400000000000002,
+                  "userSelect": "none",
                 }
               }
+              suppressHighlighting={true}
             >
-              <Text
-                style={
-                  {
-                    "color": "#121312",
-                    "fontFamily": "DMSans-SemiBold",
-                  }
-                }
-                suppressHighlighting={true}
-              >
-                Transaction details
-              </Text>
-            </View>
-            <Text
-              allowFontScaling={false}
-              selectable={false}
-              style={
-                [
-                  {
-                    "color": "#121312",
-                    "fontSize": 16,
-                  },
-                  undefined,
-                  {
-                    "fontFamily": "SafeIcons",
-                    "fontStyle": "normal",
-                    "fontWeight": "normal",
-                  },
-                  {},
-                ]
-              }
-            >
-              
+              Transaction details
             </Text>
           </View>
         </View>
@@ -853,10 +808,10 @@ exports[`StakingDeposit matches snapshot 1`] = `
             "borderTopRightRadius": 7,
             "flexDirection": "column",
             "gap": 20,
-            "paddingBottom": 4,
-            "paddingLeft": 4,
-            "paddingRight": 4,
-            "paddingTop": 4,
+            "paddingBottom": 16,
+            "paddingLeft": 16,
+            "paddingRight": 16,
+            "paddingTop": 16,
           }
         }
       >
@@ -869,10 +824,6 @@ exports[`StakingDeposit matches snapshot 1`] = `
               "flexWrap": "wrap",
               "gap": 8,
               "justifyContent": "space-between",
-              "paddingBottom": 12,
-              "paddingLeft": 12,
-              "paddingRight": 12,
-              "paddingTop": 12,
             }
           }
         >
@@ -913,10 +864,6 @@ exports[`StakingDeposit matches snapshot 1`] = `
               "flexWrap": "wrap",
               "gap": 8,
               "justifyContent": "space-between",
-              "paddingBottom": 12,
-              "paddingLeft": 12,
-              "paddingRight": 12,
-              "paddingTop": 12,
             }
           }
         >
@@ -955,10 +902,6 @@ exports[`StakingDeposit matches snapshot 1`] = `
               "flexWrap": "wrap",
               "gap": 8,
               "justifyContent": "space-between",
-              "paddingBottom": 12,
-              "paddingLeft": 12,
-              "paddingRight": 12,
-              "paddingTop": 12,
             }
           }
         >
@@ -999,10 +942,6 @@ exports[`StakingDeposit matches snapshot 1`] = `
               "flexWrap": "wrap",
               "gap": 8,
               "justifyContent": "space-between",
-              "paddingBottom": 12,
-              "paddingLeft": 12,
-              "paddingRight": 12,
-              "paddingTop": 12,
             }
           }
         >
