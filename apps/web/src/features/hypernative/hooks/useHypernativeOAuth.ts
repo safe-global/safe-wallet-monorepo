@@ -20,18 +20,11 @@ export type HypernativeAuthStatus = {
 }
 
 /**
- * PKCE code verifier key in sessionStorage
- * The code verifier is a cryptographically random string used in PKCE flow.
- * It's stored temporarily during OAuth flow and retrieved by the callback page.
+ * PKCE storage key in sessionStorage
+ * Stores both state and codeVerifier as a single JSON object: { state, codeVerifier }
+ * This ensures they are always paired together and prevents mismatches.
  */
-const PKCE_VERIFIER_KEY = 'hn_pkce_verifier'
-
-/**
- * OAuth state parameter key in sessionStorage
- * The state parameter is used for CSRF protection in OAuth flows.
- * It's verified in the callback to ensure the response matches the request.
- */
-const OAUTH_STATE_KEY = 'hn_oauth_state'
+const PKCE_KEY = 'hn_pkce'
 
 /**
  * PostMessage event type for successful authentication
@@ -78,6 +71,46 @@ function base64urlEncode(bytes: Uint8Array): string {
 }
 
 /**
+ * PKCE data structure stored in sessionStorage
+ */
+export interface PkceData {
+  state?: string
+  codeVerifier?: string
+}
+
+/**
+ * Save PKCE data (state and codeVerifier) to sessionStorage as a single JSON object
+ * This ensures state and verifier are always paired together
+ * @param state - OAuth state parameter for CSRF protection
+ * @param codeVerifier - PKCE code verifier for token exchange
+ */
+export function savePkce(state: string, codeVerifier: string): void {
+  sessionStorage.setItem(PKCE_KEY, JSON.stringify({ state, codeVerifier }))
+}
+
+/**
+ * Read PKCE data from sessionStorage
+ * Returns parsed JSON object with state and codeVerifier, or empty object if not found
+ * @returns PKCE data object with optional state and codeVerifier
+ */
+export function readPkce(): PkceData {
+  try {
+    return JSON.parse(sessionStorage.getItem(PKCE_KEY) || '{}')
+  } catch (error) {
+    console.error('Failed to parse PKCE data from sessionStorage:', error)
+    return {}
+  }
+}
+
+/**
+ * Clear PKCE data from sessionStorage
+ * Should be called after successful token exchange or on error
+ */
+export function clearPkce(): void {
+  sessionStorage.removeItem(PKCE_KEY)
+}
+
+/**
  * Generate SHA256 hash of the code verifier for PKCE challenge
  * The code challenge is sent in the authorization request, and the verifier
  * is sent in the token exchange request. The server verifies they match.
@@ -115,9 +148,9 @@ async function buildAuthUrl(): Promise<string> {
   // UUID provides better uniqueness guarantees and is the standard approach
   const state = crypto.randomUUID()
 
-  // Store verifier and state in sessionStorage for callback page
-  sessionStorage.setItem(PKCE_VERIFIER_KEY, codeVerifier)
-  sessionStorage.setItem(OAUTH_STATE_KEY, state)
+  // Store verifier and state together as a single JSON object
+  // This ensures they are always paired and prevents mismatches
+  savePkce(state, codeVerifier)
 
   // Build authorization URL
   const params = new URLSearchParams({
