@@ -24,7 +24,7 @@ export function SignForm({ txId, riskAcknowledged, onRiskAcknowledgedChange, sho
 
   return (
     <View gap="$4" paddingBottom={Math.max(bottom, getTokenValue('$4'))}>
-      <View paddingHorizontal={'$3'} gap="$2" flexDirection="row">
+      <View paddingHorizontal={'$4'} gap="$2" flexDirection="row">
         <YStack justifyContent="center" gap="$2" width="100%">
           {showRiskCheckbox && (
             <RiskAcknowledgmentCheckbox
