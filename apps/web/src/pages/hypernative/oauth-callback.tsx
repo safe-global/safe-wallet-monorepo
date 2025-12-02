@@ -5,7 +5,12 @@ import Head from 'next/head'
 import { Box, CircularProgress, Typography, Alert } from '@mui/material'
 import { useAppDispatch } from '@/store'
 import { setAuthToken } from '@/features/hypernative/store/hnAuthSlice'
-import { HN_AUTH_SUCCESS_EVENT, HN_AUTH_ERROR_EVENT } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import {
+  HN_AUTH_SUCCESS_EVENT,
+  HN_AUTH_ERROR_EVENT,
+  readPkce,
+  clearPkce,
+} from '@/features/hypernative/hooks/useHypernativeOAuth'
 import { HYPERNATIVE_OAUTH_CONFIG } from '@/features/hypernative/config/oauth'
 
 /**
@@ -54,22 +59,23 @@ const HypernativeOAuthCallback: NextPage = () => {
           throw new Error('Missing state parameter in callback URL')
         }
 
-        // Step 2: Verify OAuth state (CSRF protection)
-        const storedState = sessionStorage.getItem('hn_oauth_state')
-        if (!storedState || storedState !== state) {
+        // Step 2: Retrieve PKCE data (state and codeVerifier)
+        const pkce = readPkce()
+
+        // Step 3: Verify OAuth state (CSRF protection)
+        if (!state || state !== pkce.state) {
           throw new Error('Invalid OAuth state parameter - possible CSRF attack')
         }
 
-        // Step 3: Retrieve PKCE code verifier
-        const codeVerifier = sessionStorage.getItem('hn_pkce_verifier')
-        if (!codeVerifier) {
+        // Step 4: Validate codeVerifier exists
+        if (!pkce.codeVerifier) {
           throw new Error('Missing PKCE code verifier - authentication flow corrupted')
         }
 
-        // Step 4: Exchange authorization code for access token
-        const tokenResponse = await exchangeCodeForToken(code, codeVerifier)
+        // Step 5: Exchange authorization code for access token
+        const tokenResponse = await exchangeCodeForToken(code, pkce.codeVerifier)
 
-        // Step 5: Store token in Redux
+        // Step 6: Store token in Redux
         dispatch(
           setAuthToken({
             token: tokenResponse.access_token,
@@ -77,11 +83,10 @@ const HypernativeOAuthCallback: NextPage = () => {
           }),
         )
 
-        // Step 6: Clean up sessionStorage
-        sessionStorage.removeItem('hn_oauth_state')
-        sessionStorage.removeItem('hn_pkce_verifier')
+        // Step 7: Clean up sessionStorage
+        clearPkce()
 
-        // Step 7: Notify parent window of successful authentication
+        // Step 8: Notify parent window of successful authentication
         if (window.opener) {
           window.opener.postMessage(
             {
@@ -107,6 +112,9 @@ const HypernativeOAuthCallback: NextPage = () => {
         const errorMsg = error instanceof Error ? error.message : 'Unknown authentication error'
         setErrorMessage(errorMsg)
         setStatus('error')
+
+        // Clean up PKCE data on error
+        clearPkce()
 
         // Notify parent window of error
         if (window.opener) {
