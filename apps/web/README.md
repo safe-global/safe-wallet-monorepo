@@ -182,18 +182,6 @@ yarn workspace @safe-global/web cmp MyNewComponent
 
 This repo has a pre-push hook that runs the linter (always) and the tests (if the `RUN_TESTS_ON_PUSH` env variable is set to true) before pushing. If you want to skip the hooks, you can use the `--no-verify` flag.
 
-## Storybook
-
-This project uses Storybook for developing and documenting UI components in isolation.
-
-```bash
-yarn workspace @safe-global/web storybook
-```
-
-This will start Storybook on [http://localhost:6006](http://localhost:6006).
-
-When creating new components, add a corresponding `.stories.tsx` file for documentation. See `docs/storybook-snapshots.md` for more information on Storybook snapshot testing.
-
 ## Frameworks
 
 This app is built using the following frameworks:
