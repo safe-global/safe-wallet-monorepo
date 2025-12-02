@@ -37,16 +37,19 @@ Saved state is automatically cleared when:
 
 ### Adding State Persistence to a Flow
 
-To enable state persistence for a transaction flow, simply add the `flowType` prop to the `TxFlow` component:
+State persistence is **automatically enabled** for all flows that have an `eventCategory` prop! The `eventCategory` is used as the flow identifier for storing and restoring state.
+
+No additional configuration needed - if your flow already tracks analytics with `eventCategory`, it will automatically support state persistence:
 
 ```tsx
 import { TxFlow } from '@/components/tx-flow/TxFlow'
+import { TxFlowType } from '@/services/analytics'
 
 const MyCustomFlow = ({ txNonce, ...params }: MyFlowProps) => {
   return (
     <TxFlow
       initialData={myInitialData}
-      flowType="MyCustomFlow" // Add this!
+      eventCategory={TxFlowType.MY_CUSTOM_FLOW} // That's it! State persistence is enabled
       txNonce={txNonce}
       // ... other props
     >
@@ -56,7 +59,7 @@ const MyCustomFlow = ({ txNonce, ...params }: MyFlowProps) => {
 }
 ```
 
-**Important**: Use a unique, stable `flowType` identifier that won't change between releases.
+**Note**: Flows without an `eventCategory` will not save state (which is fine for simple, single-step flows).
 
 ### Example: Token Transfer Flow
 
@@ -95,6 +98,7 @@ Pre-fill a transaction flow with mock data:
 
 ```javascript
 import { setMockTxFlowState, mockTxFlowData } from '@/components/tx-flow/txFlowStorage.testHelpers'
+import { TxFlowType } from '@/services/analytics'
 
 describe('Token Transfer Flow', () => {
   it('should complete a pre-filled token transfer', () => {
@@ -104,7 +108,7 @@ describe('Token Transfer Flow', () => {
     cy.window().then((win) => {
       setMockTxFlowState(
         win,
-        'TokenTransfer',
+        TxFlowType.TOKEN_TRANSFER, // Use the enum value
         1, // Start at step 1 (review screen)
         mockTxFlowData.TokenTransfer.single,
       )
@@ -213,7 +217,7 @@ type SerializedTxFlowState<T = any> = {
 
 ## Best Practices
 
-1. **Choose stable flowType identifiers**: Don't use component names that might change during refactoring
+1. **Use TxFlowType enum values**: Always use the `TxFlowType` enum for `eventCategory` to ensure stable identifiers
 2. **Don't store sensitive data**: Avoid storing private keys or passwords in the flow state
 3. **Test state restoration**: Ensure your flow handles restored state correctly
 4. **Handle stale state gracefully**: Users might return after the 1-hour expiry
@@ -223,8 +227,8 @@ type SerializedTxFlowState<T = any> = {
 
 ### State not restoring
 
-- Check that `flowType` prop is set on the `TxFlow` component
-- Verify the flow type matches exactly (case-sensitive)
+- Check that `eventCategory` prop is set on the `TxFlow` component
+- Verify the event category matches exactly (case-sensitive)
 - Ensure state isn't older than 1 hour
 - Check browser console for errors
 

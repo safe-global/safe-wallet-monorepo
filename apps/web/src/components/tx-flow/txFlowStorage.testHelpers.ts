@@ -32,7 +32,7 @@ const TX_FLOW_STORAGE_KEY = 'txFlowState_v1'
  * await page.evaluate((mockState) => {
  *   sessionStorage.setItem('txFlowState_v1', JSON.stringify(mockState))
  * }, {
- *   flowType: 'TokenTransfer',
+ *   flowType: 'token-transfer',
  *   step: 1,
  *   data: { recipients: [{ recipient: 'vitalik.eth', tokenAddress: '0x...', amount: '5' }] },
  *   timestamp: Date.now()

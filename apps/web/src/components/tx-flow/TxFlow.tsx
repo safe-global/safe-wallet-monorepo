@@ -31,7 +31,6 @@ type TxFlowProps<T extends unknown> = {
   isBatchable?: TxFlowProviderProps<T>['isBatchable']
   ReviewTransactionComponent?: typeof ReviewTransaction
   eventCategory?: string
-  flowType?: string
 } & TxFlowContextType['txLayoutProps']
 
 /**
@@ -53,9 +52,11 @@ export const TxFlow = <T extends unknown>({
   isBatchable,
   ReviewTransactionComponent = ReviewTransaction,
   eventCategory,
-  flowType,
   ...txLayoutProps
 }: TxFlowProps<T>) => {
+  // Use eventCategory as the flow type identifier (it's already unique per flow)
+  const flowType = eventCategory
+
   // Try to restore saved state on mount
   const savedState = useMemo(() => {
     if (!flowType) return null
