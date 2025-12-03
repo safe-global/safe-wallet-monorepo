@@ -27,19 +27,18 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
 
   const initialSubmitAction = slotIds?.[0]
   const options = useMemo(() => slotItems.map(({ label, id }) => ({ label, id })), [slotItems])
-  const [submitAction = initialSubmitAction, setSubmitAction] = useLocalStorage<string>(COMBO_SUBMIT_ACTION)
+  const [submitAction, setSubmitAction] = useLocalStorage<string>(COMBO_SUBMIT_ACTION)
 
   const executeAvailable = slotIds.includes('execute')
 
-  // Auto-select Execute if available, otherwise use stored preference
+  // Auto-select Execute if available on first load, otherwise respect user's stored preference
   const slotId = useMemo(() => {
-    if (!slotIds.includes(submitAction)) {
-      return initialSubmitAction
+    // If no stored preference or stored action is not available in current slots
+    if (submitAction === undefined || !slotIds.includes(submitAction)) {
+      // Prefer Execute if available, otherwise use first option
+      return executeAvailable ? 'execute' : initialSubmitAction
     }
-    // Prefer Execute if available
-    if (executeAvailable) {
-      return 'execute'
-    }
+    // Use stored preference (respect user's choice)
     return submitAction
   }, [slotIds, submitAction, initialSubmitAction, executeAvailable])
 
