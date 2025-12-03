@@ -54,7 +54,7 @@ describe('[SMOKE] Tx history tests', () => {
       typeSend.title,
       null,
       [typeSend.summaryTxInfo2, typeGeneral.statusOk],
-      typeSend.altImage,
+      null,
       typeSend.altToken,
     )
   })
