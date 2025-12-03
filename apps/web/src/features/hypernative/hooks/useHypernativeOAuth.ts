@@ -330,11 +330,15 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
    * Set up timeout fallback to reset loading state if no message is received
    */
   const setupTimeoutFallback = useCallback(() => {
-    fallbackTimeoutRef.current = setTimeout(() => {
-      if (!hasReceivedMessageRef.current) {
-        showAuthCancelledNotification()
-      }
-    }, 5 * 60 * 1000) // 5 minutes timeout
+    fallbackTimeoutRef.current = setTimeout(
+      () => {
+        if (!hasReceivedMessageRef.current) {
+          showAuthCancelledNotification()
+        }
+      },
+      // 5 minutes timeout
+      5 * 60 * 1000,
+    )
   }, [showAuthCancelledNotification])
 
   /**
