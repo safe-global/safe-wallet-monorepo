@@ -188,6 +188,7 @@ export const advancedDetailsViewOptions = {
   table: 'table',
   grid: 'grid',
 }
+
 //tbr - will check if it should be removed ( we can cound by data-testid="tx-hexData" elements)
 export function checkHashesExist(count) {
   cy.contains(txAccordionDetails)
@@ -812,12 +813,19 @@ export function verifySubmitBtnIsEnabled() {
   cy.get('button[type="submit"]').should('not.be.disabled')
 }
 
+export function verifyContinueSignBtnIsEnabled() {
+  cy.get(continueSignBtn).should('not.be.disabled')
+}
+
 export function verifyAddToBatchBtnIsEnabled() {
   return cy.get(addToBatchBtn).should('not.be.disabled')
 }
 
 export function verifyNativeTokenTransfer() {
-  cy.contains(nativeTokenTransferStr).should('be.visible')
+  cy.get(modal.cardContent).within(() => {
+    cy.contains('Send').should('be.visible')
+    cy.contains(nativeTokenTransferStr).should('be.visible')
+  })
 }
 
 export function changeNonce(value) {
