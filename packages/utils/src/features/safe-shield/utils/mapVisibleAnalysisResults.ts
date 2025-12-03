@@ -20,7 +20,12 @@ import { mapConsolidatedAnalysisResults } from './mapConsolidatedAnalysisResults
 export const mapVisibleAnalysisResults = (
   addressesResultsMap: RecipientAnalysisResults | ContractAnalysisResults | ThreatAnalysisResults,
 ): AnalysisResult[] => {
-  const { name: _name, logoUrl: _logoUrl, ...resultsMap } = addressesResultsMap as ContractAnalysisResults
+  const {
+    name: _name,
+    logoUrl: _logoUrl,
+    request_id: _requestId,
+    ...resultsMap
+  } = addressesResultsMap as ContractAnalysisResults & { request_id?: string }
   const addressResults: GroupedAnalysisResults[] = Object.values(resultsMap)
 
   if (addressResults.length === 1) {
