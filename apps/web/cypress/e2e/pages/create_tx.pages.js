@@ -636,8 +636,11 @@ export function verifySummaryByName(name, token, data, alt, altToken) {
     }
 
     if (altToken) {
-      const secondImg = $element.find('img').eq(1)
-      expect(secondImg.attr('alt')).to.equal(altToken)
+      // const secondImg = $element.find('img').eq(1)
+      //expect(secondImg.attr('alt')).to.equal(altToken)
+      // Use Cypress commands to wait for the image to load and be visible
+      // This will automatically retry until the image is loaded or timeout
+      cy.wrap($element).find('img').eq(1).should('be.visible').should('have.attr', 'alt', altToken)
     }
   })
 }
