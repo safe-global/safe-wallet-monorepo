@@ -73,16 +73,16 @@ export const HypernativeInfo = ({
       {/* Show login card if user is not authenticated or token is expired */}
       {showLoginCard && (
         <Box p={2} sx={{ backgroundColor: 'background.main', borderRadius: '4px' }}>
-          <Stack gap={1} direction="column">
-            <Typography variant="body2">Log in to Hypernative to view the full analysis.</Typography>
+          <Stack gap={2} direction="column">
+            <Typography variant="body2" color="primary.light">
+              Log in to Hypernative to view the full analysis.
+            </Typography>
             <Button
               variant="outlined"
               onClick={initiateLogin}
               disabled={authLoading}
               size="small"
-              sx={{
-                width: 'fit-content',
-              }}
+              sx={{ width: 'fit-content', py: 0.5, px: 2 }}
               endIcon={
                 authLoading ? (
                   <CircularProgress size={16} color="inherit" />
