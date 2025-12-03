@@ -39,7 +39,9 @@ export const HypernativeInfo = ({
             inheritViewBox
             sx={{ width: 16, height: 16 }}
           />
-          <Typography variant="body2">Hypernative Guardian is active</Typography>
+          <Typography variant="body2" color="primary.light">
+            Hypernative Guardian is active
+          </Typography>
         </Stack>
         <Tooltip
           title={
@@ -63,11 +65,7 @@ export const HypernativeInfo = ({
           placement="top"
         >
           <span style={{ display: 'flex' }}>
-            <SvgIcon
-              component={InfoIcon}
-              inheritViewBox
-              sx={{ width: 14, height: 14, color: 'text.secondary', cursor: 'help' }}
-            />
+            <SvgIcon component={InfoIcon} inheritViewBox color="border" sx={{ fontSize: 16 }} />
           </span>
         </Tooltip>
       </Stack>
