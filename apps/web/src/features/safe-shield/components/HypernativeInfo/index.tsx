@@ -44,6 +44,7 @@ export const HypernativeInfo = ({
           title={
             <Stack gap={1} p={1.5}>
               <SvgIcon
+                // We use the inverted theme mode here so that it matches the tooltip background color
                 component={isDarkMode ? SafeShieldLogoFull : SafeShieldLogoFullDark}
                 inheritViewBox
                 sx={{ width: 78, height: 18 }}
