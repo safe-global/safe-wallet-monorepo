@@ -2,28 +2,29 @@ import { type ReactElement } from 'react'
 import { Box, Button, CircularProgress, SvgIcon, Stack, Tooltip, Typography } from '@mui/material'
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded'
 import ExternalLink from '@/components/common/ExternalLink'
-import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
 import SafeShieldLogo from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
 import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import type { Severity } from '@safe-global/utils/features/safe-shield/types'
-import { useIsHypernativeGuard } from '@/features/hypernative/hooks/useIsHypernativeGuard'
+import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
 
 export const HypernativeInfo = ({
   overallStatus,
+  hypernativeAuth,
 }: {
   overallStatus?: { severity: Severity; title: string } | undefined
+  hypernativeAuth?: HypernativeAuthStatus
 }): ReactElement | null => {
   const isDarkMode = useDarkMode()
-  const { isAuthenticated, isTokenExpired, loading: authLoading, initiateLogin } = useHypernativeOAuth()
-  const { isHypernativeGuard, loading: HNGuardCheckLoading } = useIsHypernativeGuard()
 
-  // If the HN Guard is not installed or still loading, don't show the HypernativeInfo
-  if (HNGuardCheckLoading || !isHypernativeGuard) {
+  // If hypernativeAuth is not provided, don't show the HypernativeInfo
+  if (!hypernativeAuth) {
     return null
   }
+
+  const { isAuthenticated, isTokenExpired, loading: authLoading, initiateLogin } = hypernativeAuth
 
   // Show login card if user is not authenticated or token is expired
   const showLoginCard = !isAuthenticated || isTokenExpired
@@ -61,7 +62,7 @@ export const HypernativeInfo = ({
           arrow
           placement="top"
         >
-          <span>
+          <span style={{ display: 'flex' }}>
             <SvgIcon
               component={InfoIcon}
               inheritViewBox
