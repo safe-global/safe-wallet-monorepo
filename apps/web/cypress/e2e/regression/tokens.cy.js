@@ -126,12 +126,6 @@ describe('Tokens tests', () => {
     assets.checkHiddenTokenBtnCounter(1)
   })
 
-  it('Verify you can hide tokens from the eye icon in the table rows', () => {
-    assets.toggleShowAllTokens(true)
-    assets.toggleHideDust(false)
-    assets.hideAsset(assets.currencyLink)
-  })
-
   it('Verify the sorting of "Assets" and "Balance" in the table', () => {
     assets.toggleShowAllTokens(true)
     assets.toggleHideDust(false)

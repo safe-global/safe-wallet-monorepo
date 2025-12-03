@@ -338,9 +338,13 @@ export function checkNFTCounter(value) {
 }
 
 export function checkHiddenTokenBtnCounter(value) {
-  cy.get(hiddeTokensBtn).within(() => {
-    cy.get('p').should('include.text', value)
-  })
+  cy.get(manageTokensButton).click()
+
+  cy.get(manageTokensMenu)
+    .should('be.visible')
+    .within(() => {
+      cy.get(hideTokensMenuItem).should('include.text', `Hide tokens (${value})`)
+    })
 }
 
 export function verifyEachRowHasCheckbox(state) {
