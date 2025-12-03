@@ -3,6 +3,14 @@ import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import { useHypernativeOAuth, HN_AUTH_SUCCESS_EVENT, HN_AUTH_ERROR_EVENT } from '../useHypernativeOAuth'
 import { hnAuthSlice } from '../../store/hnAuthSlice'
+import Cookies from 'js-cookie'
+
+// Mock js-cookie
+jest.mock('js-cookie', () => ({
+  set: jest.fn(),
+  get: jest.fn(),
+  remove: jest.fn(),
+}))
 
 // Mock notifications
 const mockShowNotification = jest.fn()
@@ -61,20 +69,28 @@ const mockDigest = jest.fn(async () => {
   return new ArrayBuffer(32)
 })
 
-// Mock sessionStorage
-const mockSessionStorage: Record<string, string> = {}
-const sessionStorageMock = {
-  getItem: jest.fn((key: string) => mockSessionStorage[key] || null),
-  setItem: jest.fn((key: string, value: string) => {
-    mockSessionStorage[key] = value
-  }),
-  removeItem: jest.fn((key: string) => {
-    delete mockSessionStorage[key]
-  }),
-  clear: jest.fn(() => {
-    Object.keys(mockSessionStorage).forEach((key) => delete mockSessionStorage[key])
-  }),
-}
+// Mock cookies
+const mockCookies: Record<string, string> = {}
+const mockCookiesSet = Cookies.set as jest.MockedFunction<typeof Cookies.set>
+const mockCookiesGet = Cookies.get as jest.MockedFunction<typeof Cookies.get>
+const mockCookiesRemove = Cookies.remove as jest.MockedFunction<typeof Cookies.remove>
+
+// Setup cookie mocks
+mockCookiesSet.mockImplementation((name: string, value: string) => {
+  mockCookies[name] = value
+  return value
+})
+
+mockCookiesGet.mockImplementation(((name?: string) => {
+  if (name === undefined) {
+    return mockCookies as any
+  }
+  return mockCookies[name] || undefined
+}) as any)
+
+mockCookiesRemove.mockImplementation((name: string) => {
+  delete mockCookies[name]
+})
 
 describe('useHypernativeOAuth', () => {
   let store: ReturnType<typeof createTestStore>
@@ -96,7 +112,9 @@ describe('useHypernativeOAuth', () => {
   beforeEach(() => {
     store = createTestStore()
     jest.clearAllMocks()
-    sessionStorageMock.clear()
+
+    // Clear mock cookies
+    Object.keys(mockCookies).forEach((key) => delete mockCookies[key])
 
     // Setup window.open mock
     window.open = mockWindowOpen
@@ -120,16 +138,11 @@ describe('useHypernativeOAuth', () => {
       writable: true,
     })
 
-    // Setup sessionStorage mock
-    Object.defineProperty(window, 'sessionStorage', {
-      value: sessionStorageMock,
-      writable: true,
-    })
-
     // Setup window.location
     Object.defineProperty(window, 'location', {
       value: {
         origin: 'http://localhost:3000',
+        protocol: 'http:',
       },
       writable: true,
     })
@@ -224,7 +237,7 @@ describe('useHypernativeOAuth', () => {
       mockAuthEnabled = false
     })
 
-    it('should generate PKCE parameters and store in sessionStorage', async () => {
+    it('should generate PKCE parameters and store in secure cookie', async () => {
       const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
 
       await act(async () => {
@@ -232,17 +245,23 @@ describe('useHypernativeOAuth', () => {
         await waitFor(() => expect(mockWindowOpen).toHaveBeenCalled())
       })
 
-      // Verify PKCE data is stored as single JSON object
-      expect(sessionStorageMock.setItem).toHaveBeenCalledWith('hn_pkce', expect.any(String))
+      // Verify PKCE data is stored in cookie as single JSON object
+      expect(mockCookiesSet).toHaveBeenCalledWith('hn_pkce', expect.any(String), expect.any(Object))
 
       // Verify the stored data contains both state and codeVerifier
-      const pkceCall = sessionStorageMock.setItem.mock.calls.find((call) => call[0] === 'hn_pkce')
+      const pkceCall = mockCookiesSet.mock.calls.find((call) => call[0] === 'hn_pkce')
       expect(pkceCall).toBeDefined()
       const storedData = JSON.parse(pkceCall![1] as string)
       expect(storedData).toHaveProperty('state')
       expect(storedData).toHaveProperty('codeVerifier')
       expect(storedData.state).toBe('test-uuid-1234-5678-90ab-cdef')
       expect(storedData.codeVerifier).toBeTruthy()
+
+      // Verify cookie options include security settings
+      const cookieOptions = pkceCall![2]
+      expect(cookieOptions).toHaveProperty('path', '/')
+      expect(cookieOptions).toHaveProperty('sameSite', 'lax')
+      expect(cookieOptions).toHaveProperty('expires')
     })
 
     it('should open popup with correct URL and dimensions', async () => {
