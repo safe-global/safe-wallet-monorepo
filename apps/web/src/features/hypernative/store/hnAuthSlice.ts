@@ -55,10 +55,17 @@ export const { setAuthToken, clearAuthToken } = hnAuthSlice.actions
 export const selectHnAuthState = (state: RootState): HnAuthState => state[hnAuthSlice.name] || initialState
 
 /**
- * Select whether user is authenticated
+ * Select whether user is authenticated with a valid, non-expired token
+ * Returns false if token is expired or missing
  */
 export const selectIsAuthenticated = createSelector([selectHnAuthState], (authState): boolean => {
-  return authState.isAuthenticated
+  if (!authState.isAuthenticated || !authState.authToken || !authState.authTokenExpiry) {
+    return false
+  }
+
+  // Check if token is expired
+  const isExpired = Date.now() >= authState.authTokenExpiry
+  return !isExpired
 })
 
 /**
