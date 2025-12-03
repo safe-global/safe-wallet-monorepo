@@ -623,24 +623,29 @@ export function verifySummaryByName(name, token, data, alt, altToken) {
     }
 
     if (alt) {
-      const firstImg = $element.find('img')
-      const firstSvg = $element.find('svg')
+      // Old implementation - checking img and svg alt attributes
+      // const firstImg = $element.find('img')
+      // const firstSvg = $element.find('svg')
+      //
+      // if (firstImg.length > 0) {
+      //   const targetImg = firstImg.first()
+      //   expect(targetImg.attr('alt')).to.equal(alt)
+      // } else if (firstSvg.length > 0) {
+      //   const targetSvg = firstSvg.first()
+      //   expect(targetSvg.attr('alt')).to.equal(alt)
+      // }
 
-      if (firstImg.length > 0) {
-        const targetImg = firstImg.first()
-        expect(targetImg.attr('alt')).to.equal(alt)
-      } else if (firstSvg.length > 0) {
-        const targetSvg = firstSvg.first()
-        expect(targetSvg.attr('alt')).to.equal(alt)
+      // New implementation - checking iframe title attribute
+      const firstIframe = $element.find('iframe')
+      if (firstIframe.length > 0) {
+        const targetIframe = firstIframe.first()
+        expect(targetIframe.attr('title')).to.equal(alt)
       }
     }
 
     if (altToken) {
-      // const secondImg = $element.find('img').eq(1)
-      //expect(secondImg.attr('alt')).to.equal(altToken)
-      // Use Cypress commands to wait for the image to load and be visible
-      // This will automatically retry until the image is loaded or timeout
-      cy.wrap($element).find('img').eq(1).should('be.visible').should('have.attr', 'alt', altToken)
+      const secondImg = $element.find('img').eq(1)
+      expect(secondImg.attr('alt')).to.equal(altToken)
     }
   })
 }
