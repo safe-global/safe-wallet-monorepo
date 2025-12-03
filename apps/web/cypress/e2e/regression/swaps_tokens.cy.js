@@ -29,7 +29,6 @@ describe('Swaps token tests', () => {
     { defaultCommandTimeout: 30000 },
     () => {
       wallet.connectSigner(signer)
-      main.clickOnSideMenuItem('Home')
       swaps.clickOnAssetSwapBtn(0)
       swaps.acceptLegalDisclaimer()
       cy.wait(2000)

@@ -68,7 +68,7 @@ describe('Tokens tests', () => {
     assets.verifyFirstRowContainsCurrency(assets.currencyEUR)
   })
 
-  it.only('Verify that checking the checkboxes increases the token selected counter', () => {
+  it('Verify that checking the checkboxes increases the token selected counter', () => {
     assets.toggleShowAllTokens(true)
     assets.toggleHideDust(false)
     assets.openHiddenTokensFromManageMenu()
