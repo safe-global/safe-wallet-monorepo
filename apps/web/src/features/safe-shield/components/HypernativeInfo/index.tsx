@@ -17,13 +17,16 @@ export const HypernativeInfo = ({
   overallStatus?: { severity: Severity; title: string } | undefined
 }): ReactElement | null => {
   const isDarkMode = useDarkMode()
-  const { isAuthenticated, loading: authLoading, initiateLogin } = useHypernativeOAuth()
+  const { isAuthenticated, isTokenExpired, loading: authLoading, initiateLogin } = useHypernativeOAuth()
   const { isHypernativeGuard, loading: HNGuardCheckLoading } = useIsHypernativeGuard()
 
   // If the HN Guard is not installed or still loading, don't show the HypernativeInfo
   if (HNGuardCheckLoading || !isHypernativeGuard) {
     return null
   }
+
+  // Show login card if user is not authenticated or token is expired
+  const showLoginCard = !isAuthenticated || isTokenExpired
 
   return (
     <Stack gap={2} p={1.5} pb={2}>
@@ -67,8 +70,8 @@ export const HypernativeInfo = ({
         </Tooltip>
       </Stack>
 
-      {/* Show login card if user is not authenticated */}
-      {!isAuthenticated && (
+      {/* Show login card if user is not authenticated or token is expired */}
+      {showLoginCard && (
         <Box p={2} sx={{ backgroundColor: 'background.main', borderRadius: '4px' }}>
           <Stack gap={1} direction="column">
             <Typography variant="body2">Log in to Hypernative to view the full analysis.</Typography>
