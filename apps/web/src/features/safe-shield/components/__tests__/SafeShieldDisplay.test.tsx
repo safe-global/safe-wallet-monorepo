@@ -231,20 +231,73 @@ describe('SafeShieldDisplay', () => {
   })
 
   describe('Hypernative Authentication', () => {
-    it('should show "Authentication required" when hnLoginRequired is true', () => {
-      render(<SafeShieldDisplay hnLoginRequired={true} />)
+    it('should show "Authentication required" when hypernativeAuth is provided and user is not authenticated', () => {
+      render(
+        <SafeShieldDisplay
+          hypernativeAuth={{
+            isAuthenticated: false,
+            isTokenExpired: false,
+            loading: false,
+            initiateLogin: jest.fn(),
+            logout: jest.fn(),
+          }}
+        />,
+      )
 
       expect(screen.getByText('Authentication required')).toBeInTheDocument()
     })
 
-    it('should not show authentication required when hnLoginRequired is false', () => {
-      render(<SafeShieldDisplay recipient={mockRecipient} hnLoginRequired={false} />)
+    it('should show "Authentication required" when hypernativeAuth is provided and token is expired', () => {
+      render(
+        <SafeShieldDisplay
+          hypernativeAuth={{
+            isAuthenticated: true,
+            isTokenExpired: true,
+            loading: false,
+            initiateLogin: jest.fn(),
+            logout: jest.fn(),
+          }}
+        />,
+      )
+
+      expect(screen.getByText('Authentication required')).toBeInTheDocument()
+    })
+
+    it('should not show authentication required when hypernativeAuth is provided and user is authenticated', () => {
+      render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          hypernativeAuth={{
+            isAuthenticated: true,
+            isTokenExpired: false,
+            loading: false,
+            initiateLogin: jest.fn(),
+            logout: jest.fn(),
+          }}
+        />,
+      )
 
       expect(screen.queryByText('Authentication required')).not.toBeInTheDocument()
       expect(screen.getByText('Checks passed')).toBeInTheDocument()
     })
 
-    it('should not show authentication required when hnLoginRequired is not provided (defaults to false)', () => {
+    it('should not show authentication required when auth is loading', () => {
+      render(
+        <SafeShieldDisplay
+          hypernativeAuth={{
+            isAuthenticated: false,
+            isTokenExpired: false,
+            loading: true,
+            initiateLogin: jest.fn(),
+            logout: jest.fn(),
+          }}
+        />,
+      )
+
+      expect(screen.queryByText('Authentication required')).not.toBeInTheDocument()
+    })
+
+    it('should not show authentication required when hypernativeAuth is not provided', () => {
       render(<SafeShieldDisplay recipient={mockRecipient} />)
 
       expect(screen.queryByText('Authentication required')).not.toBeInTheDocument()

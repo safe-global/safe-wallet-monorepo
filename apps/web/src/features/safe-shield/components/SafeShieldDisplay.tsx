@@ -16,6 +16,7 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
 import { useCheckSimulation } from '../hooks/useCheckSimulation'
+import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
 
 const shieldLogoOnHover = {
   width: 78,
@@ -45,19 +46,27 @@ export const SafeShieldDisplay = ({
   contract,
   threat,
   safeTx,
-  hnLoginRequired = false,
+  hypernativeAuth,
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
-  hnLoginRequired?: boolean
+  hypernativeAuth?: HypernativeAuthStatus
 }): ReactElement => {
   const [recipientResults] = recipient || []
   const [contractResults] = contract || []
   const [threatResults] = threat || []
   const { hasSimulationError } = useCheckSimulation(safeTx)
   const isDarkMode = useDarkMode()
+
+  const hnLoginRequired = useMemo(
+    () =>
+      hypernativeAuth !== undefined &&
+      (!hypernativeAuth.isAuthenticated || hypernativeAuth.isTokenExpired) &&
+      !hypernativeAuth.loading,
+    [hypernativeAuth],
+  )
 
   const overallStatus = useMemo(
     () => getOverallStatus(recipientResults, contractResults, threatResults, hasSimulationError, hnLoginRequired),
@@ -75,6 +84,7 @@ export const SafeShieldDisplay = ({
           contract={contract}
           safeTx={safeTx}
           overallStatus={overallStatus}
+          hypernativeAuth={hypernativeAuth}
         />
       </Card>
 
