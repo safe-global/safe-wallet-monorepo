@@ -631,29 +631,23 @@ function verifyIconAlt($container, expectedAlt, context = 'element') {
 
 /**
  * Helper function to verify token symbol in token text elements
+ * Handles both single-word tokens (e.g., "ETH") and multi-word tokens (e.g., "FLOWER #6188", "$ ETH35.com")
  */
 function verifyTokenSymbol($element, expectedToken) {
   const tokenTextElements = $element.find('b[class*="tokenText"]')
   expect(tokenTextElements.length, 'At least one token text element should exist').to.be.greaterThan(0)
 
-  // Extract token symbols from all token text elements
-  const tokenSymbols = []
+  // Check if the expected token appears in any of the token text elements
+  let found = false
   tokenTextElements.each((index, el) => {
     const tokenText = Cypress.$(el).text().trim()
-    if (tokenText) {
-      // Extract token symbol (last word, e.g., "1 WOOFY" -> "WOOFY", "-0.0001 ETH" -> "ETH")
-      const tokenSymbol = tokenText.split(/\s+/).pop()
-      if (tokenSymbol) {
-        tokenSymbols.push(tokenSymbol)
-      }
+    if (tokenText && tokenText.includes(expectedToken)) {
+      found = true
+      return false // Break the loop
     }
   })
 
-  expect(
-    tokenSymbols.length,
-    'At least one valid token symbol should be extracted from token text elements',
-  ).to.be.greaterThan(0)
-  expect(tokenSymbols, `Token "${expectedToken}" should be found in token text elements`).to.include(expectedToken)
+  expect(found, `Token "${expectedToken}" should be found in token text elements`).to.be.true
 }
 
 export function verifySummaryByName(name, token, data, alt, altToken) {
