@@ -36,6 +36,7 @@ const advancedDetails = '[data-testid="tx-advanced-details"]'
 const baseGas = '[data-testid="tx-base-gas"]'
 const requiredConfirmation = '[data-testid="required-confirmations"]'
 export const txDate = '[data-testid="tx-date"]'
+export const txType = '[data-testid="tx-type"]'
 export const proposalStatus = '[data-testid="proposal-status"]'
 export const txSigner = '[data-testid="signer"]'
 const spamTokenWarningIcon = '[data-testid="warning"]'
@@ -599,6 +600,62 @@ export function verifySpamIconIsDisplayed(name, token) {
     })
 }
 
+/**
+ * Helper function to verify icon alt/title attribute
+ * Checks for iframe (title), img (alt), or svg (alt) in the given element
+ */
+function verifyIconAlt($container, expectedAlt, context = 'element') {
+  const $iframe = $container.find('iframe')
+  const $img = $container.find('img')
+  const $svg = $container.find('svg')
+
+  if ($iframe.length > 0) {
+    const $targetIframe = $iframe.first()
+    const title = $targetIframe.attr('title')
+    expect(title, `iframe title attribute should exist and equal "${expectedAlt}" in ${context}`).to.exist
+    expect(title).to.equal(expectedAlt)
+  } else if ($img.length > 0) {
+    const $targetImg = $img.first()
+    const alt = $targetImg.attr('alt')
+    expect(alt, `img alt attribute should exist and equal "${expectedAlt}" in ${context}`).to.exist
+    expect(alt).to.equal(expectedAlt)
+  } else if ($svg.length > 0) {
+    const $targetSvg = $svg.first()
+    const alt = $targetSvg.attr('alt')
+    expect(alt, `svg alt attribute should exist and equal "${expectedAlt}" in ${context}`).to.exist
+    expect(alt).to.equal(expectedAlt)
+  } else {
+    throw new Error(`Expected alt "${expectedAlt}" in ${context} but no iframe, img, or svg found`)
+  }
+}
+
+/**
+ * Helper function to verify token symbol in token text elements
+ */
+function verifyTokenSymbol($element, expectedToken) {
+  const tokenTextElements = $element.find('b[class*="tokenText"]')
+  expect(tokenTextElements.length, 'At least one token text element should exist').to.be.greaterThan(0)
+
+  // Extract token symbols from all token text elements
+  const tokenSymbols = []
+  tokenTextElements.each((index, el) => {
+    const tokenText = Cypress.$(el).text().trim()
+    if (tokenText) {
+      // Extract token symbol (last word, e.g., "1 WOOFY" -> "WOOFY", "-0.0001 ETH" -> "ETH")
+      const tokenSymbol = tokenText.split(/\s+/).pop()
+      if (tokenSymbol) {
+        tokenSymbols.push(tokenSymbol)
+      }
+    }
+  })
+
+  expect(
+    tokenSymbols.length,
+    'At least one valid token symbol should be extracted from token text elements',
+  ).to.be.greaterThan(0)
+  expect(tokenSymbols, `Token "${expectedToken}" should be found in token text elements`).to.include(expectedToken)
+}
+
 export function verifySummaryByName(name, token, data, alt, altToken) {
   if (!name) {
     throw new Error('Name parameter is required for verification')
@@ -614,6 +671,7 @@ export function verifySummaryByName(name, token, data, alt, altToken) {
 
     const $element = $elements.first()
 
+    // Verify data text content
     if (Array.isArray(data)) {
       data.forEach((text) => {
         expect($element.text()).to.include(text)
@@ -622,30 +680,21 @@ export function verifySummaryByName(name, token, data, alt, altToken) {
       expect($element.text()).to.include(data)
     }
 
+    // Verify transaction type icon (alt parameter)
     if (alt) {
-      // Old implementation - checking img and svg alt attributes
-      // const firstImg = $element.find('img')
-      // const firstSvg = $element.find('svg')
-      //
-      // if (firstImg.length > 0) {
-      //   const targetImg = firstImg.first()
-      //   expect(targetImg.attr('alt')).to.equal(alt)
-      // } else if (firstSvg.length > 0) {
-      //   const targetSvg = firstSvg.first()
-      //   expect(targetSvg.attr('alt')).to.equal(alt)
-      // }
-
-      // New implementation - checking iframe title attribute
-      const firstIframe = $element.find('iframe')
-      if (firstIframe.length > 0) {
-        const targetIframe = firstIframe.first()
-        expect(targetIframe.attr('title')).to.equal(alt)
+      const $txTypeElement = $element.find(txType)
+      if ($txTypeElement.length > 0) {
+        // Transaction type icon is in the tx-type element
+        verifyIconAlt($txTypeElement, alt, 'tx-type element')
+      } else {
+        // Fallback: check entire element for backward compatibility
+        verifyIconAlt($element, alt, 'transaction element')
       }
     }
 
+    // Verify token symbol (altToken parameter)
     if (altToken) {
-      const secondImg = $element.find('img').eq(1)
-      expect(secondImg.attr('alt')).to.equal(altToken)
+      verifyTokenSymbol($element, altToken)
     }
   })
 }

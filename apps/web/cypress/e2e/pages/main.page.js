@@ -392,8 +392,6 @@ export function addToLocalStorage(key, jsonValue) {
 export function setupSafeSettingsWithAllTokens() {
   const settings = {
     ...ls.safeSettings.slimitSettings,
-    // tokenList: 'ALL',
-    // hideDust: false,
   }
   return cy
     .wrap(null)
