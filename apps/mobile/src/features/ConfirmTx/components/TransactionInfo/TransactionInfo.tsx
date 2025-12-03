@@ -6,6 +6,7 @@ import { isMultisigDetailedExecutionInfo } from '@/src/utils/transaction-guards'
 import { PendingTx } from '@/src/store/pendingTxsSlice'
 import { PendingTxInfo } from '@/src/features/ConfirmTx/components/PendingTxInfo'
 import { SafeShieldWidget } from '@/src/features/SafeShield/components/SafeShieldWidget'
+import { BalanceChangeBlock } from '@/src/features/SafeShield/components/BalanceChange'
 import useSafeTx from '@/src/hooks/useSafeTx'
 import { useCounterpartyAnalysis, useThreatAnalysis } from '@/src/features/SafeShield/hooks'
 import { useSafeShieldSeverity } from '@/src/features/SafeShield/hooks/useSafeShieldSeverity'
@@ -45,7 +46,10 @@ export function TransactionInfo({
   return (
     <YStack paddingHorizontal="$4" gap="$4" marginTop="$4">
       {activeSigner && (
-        <SafeShieldWidget recipient={recipient} contract={contract} threat={threat} safeTx={safeTx} txId={txId} />
+        <>
+          <SafeShieldWidget recipient={recipient} contract={contract} threat={threat} safeTx={safeTx} txId={txId} />
+          <BalanceChangeBlock threat={threat} />
+        </>
       )}
 
       {pendingTx && <PendingTxInfo createdAt={createdAt} pendingTx={pendingTx} />}
