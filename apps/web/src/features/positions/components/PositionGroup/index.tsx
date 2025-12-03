@@ -34,6 +34,7 @@ export const PositionGroup = ({ group, isLast = false }: PositionGroupProps) => 
   ]
 
   const rows = group.items.map((position) => ({
+    key: `${position.tokenInfo.address}-${position.position_type}`,
     cells: {
       name: {
         content: (

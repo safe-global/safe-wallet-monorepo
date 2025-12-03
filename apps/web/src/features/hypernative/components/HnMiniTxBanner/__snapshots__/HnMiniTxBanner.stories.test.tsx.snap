@@ -1,0 +1,60 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./HnMiniTxBanner.stories Default 1`] = `
+<span
+  data-track="hypernative: Guardian Form Viewed"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner css-1869usn-MuiPaper-root-MuiCard-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiStack-root bannerStack css-1hyf038-MuiStack-root"
+    >
+      <img
+        alt="Guardian badge"
+        class="bannerImage"
+        data-nimg="1"
+        decoding="async"
+        height="32"
+        loading="lazy"
+        src="/images/hypernative/guardian-badge.svg"
+        style="color: transparent;"
+        width="32"
+      />
+      <div
+        class="bannerContent MuiBox-root css-0"
+      >
+        <p
+          class="MuiTypography-root MuiTypography-body2 bannerTitle css-17vdyq3-MuiTypography-root"
+        >
+          Strengthen your Safe
+        </p>
+        <span
+          class="MuiTypography-root MuiTypography-caption bannerDescription css-19nflmw-MuiTypography-root"
+        >
+          Monitor and block risky transactions
+        </span>
+      </div>
+    </div>
+    <button
+      aria-label="close"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      tabindex="0"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall closeIcon css-1yr0wav-MuiSvgIcon-root"
+        data-testid="CloseIcon"
+        focusable="false"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+        />
+      </svg>
+    </button>
+  </div>
+</span>
+`;

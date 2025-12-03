@@ -2,7 +2,7 @@
   "name": "@safe-global/web",
   "homepage": "https://github.com/safe-global/safe-wallet-web",
   "license": "GPL-3.0",
-  "version": "1.75.2",
+  "version": "1.76.0",
   "type": "module",
   "scripts": {
     "dev": "cross-env USE_RSPACK=1 next dev",
@@ -33,6 +33,9 @@
     "static-serve": "yarn build && yarn serve",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build --quiet",
+    "test:storybook": "cross-env NODE_ENV=test jest --testMatch '**/*.stories.test.tsx' --testPathIgnorePatterns='/node_modules/' --testPathIgnorePatterns='/.next/'",
+    "test:storybook:ci": "cross-env NODE_ENV=test yarn test:storybook --ci --silent --coverage=false --watchAll=false",
+    "generate:storybook-tests": "node scripts/generate-storybook-tests.cjs",
     "integrity": "node scripts/integrity-hashes.cjs"
   },
   "engines": {
