@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { selectIsAuthenticated, selectIsTokenExpired, setAuthToken, clearAuthToken } from '../store/hnAuthSlice'
 import { HYPERNATIVE_OAUTH_CONFIG, MOCK_AUTH_ENABLED, getRedirectUri } from '../config/oauth'
 import { showNotification } from '@/store/notificationsSlice'
+import Cookies from 'js-cookie'
 
 /**
  * OAuth authentication status and controls
@@ -21,11 +22,29 @@ export type HypernativeAuthStatus = {
 }
 
 /**
- * PKCE storage key in sessionStorage
+ * PKCE storage key in cookies
  * Stores both state and codeVerifier as a single JSON object: { state, codeVerifier }
- * This ensures they are always paired together and prevents mismatches.
+ * Uses cookies instead of sessionStorage to support OAuth popup flow where
+ * the callback page runs in a separate browsing context.
  */
 const PKCE_KEY = 'hn_pkce'
+
+/**
+ * Cookie options for PKCE storage
+ * - Secure: Only sent over HTTPS (when available)
+ * - SameSite: Lax - protects against CSRF while allowing OAuth redirects
+ * - Path: Root path so it's accessible from callback route
+ * - MaxAge: 10 minutes (600 seconds) - matches typical OAuth flow duration
+ */
+const getCookieOptions = (): Cookies.CookieAttributes => {
+  const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:'
+  return {
+    secure: isSecure,
+    sameSite: 'lax',
+    path: '/',
+    expires: 10 / (24 * 60), // 10 minutes
+  }
+}
 
 /**
  * PostMessage event type for successful authentication
@@ -72,7 +91,7 @@ function base64urlEncode(bytes: Uint8Array): string {
 }
 
 /**
- * PKCE data structure stored in sessionStorage
+ * PKCE data structure stored in cookies
  */
 export interface PkceData {
   state?: string
@@ -80,35 +99,43 @@ export interface PkceData {
 }
 
 /**
- * Save PKCE data (state and codeVerifier) to sessionStorage as a single JSON object
+ * Save PKCE data (state and codeVerifier) to secure cookie as a single JSON object
  * This ensures state and verifier are always paired together
+ * Uses cookies instead of sessionStorage to support OAuth popup flow where
+ * the callback page runs in a separate browsing context (popup window).
+ *
  * @param state - OAuth state parameter for CSRF protection
  * @param codeVerifier - PKCE code verifier for token exchange
  */
 export function savePkce(state: string, codeVerifier: string): void {
-  sessionStorage.setItem(PKCE_KEY, JSON.stringify({ state, codeVerifier }))
+  const data = JSON.stringify({ state, codeVerifier })
+  Cookies.set(PKCE_KEY, data, getCookieOptions())
 }
 
 /**
- * Read PKCE data from sessionStorage
+ * Read PKCE data from secure cookie
  * Returns parsed JSON object with state and codeVerifier, or empty object if not found
  * @returns PKCE data object with optional state and codeVerifier
  */
 export function readPkce(): PkceData {
   try {
-    return JSON.parse(sessionStorage.getItem(PKCE_KEY) || '{}')
+    const cookieValue = Cookies.get(PKCE_KEY)
+    if (!cookieValue) {
+      return {}
+    }
+    return JSON.parse(cookieValue)
   } catch (error) {
-    console.error('Failed to parse PKCE data from sessionStorage:', error)
+    console.error('Failed to parse PKCE data from cookie:', error)
     return {}
   }
 }
 
 /**
- * Clear PKCE data from sessionStorage
+ * Clear PKCE data from secure cookie
  * Should be called after successful token exchange or on error
  */
 export function clearPkce(): void {
-  sessionStorage.removeItem(PKCE_KEY)
+  Cookies.remove(PKCE_KEY, { path: '/' })
 }
 
 /**
