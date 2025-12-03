@@ -5284,6 +5284,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@faker-js/faker@npm:^9.2.0":
+  version: 9.9.0
+  resolution: "@faker-js/faker@npm:9.9.0"
+  checksum: 10/b24b1be0fb3090d54abaaa3a814f37d1a7551f1207dcd330a1af2c70f6312a8b95ebb82653577757dd62f4cbbb56caa3c83513053253654dc3e286a05040ecbe
+  languageName: node
+  linkType: hard
+
 "@figspec/components@npm:^1.0.1":
   version: 1.0.3
   resolution: "@figspec/components@npm:1.0.3"
@@ -10349,10 +10356,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@safe-global/test@workspace:config/test"
   dependencies:
+    "@faker-js/faker": "npm:^9.2.0"
     "@safe-global/store": "workspace:^"
+    "@safe-global/types-kit": "npm:^1.0.0"
+    ethers: "npm:^6.13.4"
     jest: "npm:^29.7.0"
     jest-transform-stub: "npm:2.0.0"
     ts-jest: "npm:29.2.5"
+  peerDependencies:
+    msw: ^2.6.0
   languageName: unknown
   linkType: soft
 
@@ -10362,7 +10374,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@safe-global/types-kit@npm:^1.0.1, @safe-global/types-kit@npm:^1.0.5":
+"@safe-global/types-kit@npm:^1.0.0, @safe-global/types-kit@npm:^1.0.1, @safe-global/types-kit@npm:^1.0.5":
   version: 1.0.5
   resolution: "@safe-global/types-kit@npm:1.0.5"
   dependencies:
@@ -21210,6 +21222,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ethers@npm:^6.13.4":
+  version: 6.15.0
+  resolution: "ethers@npm:6.15.0"
+  dependencies:
+    "@adraffy/ens-normalize": "npm:1.10.1"
+    "@noble/curves": "npm:1.2.0"
+    "@noble/hashes": "npm:1.3.2"
+    "@types/node": "npm:22.7.5"
+    aes-js: "npm:4.0.0-beta.5"
+    tslib: "npm:2.7.0"
+    ws: "npm:8.17.1"
+  checksum: 10/21ab1d31e1b89f62dce5611c3686e4b81e000107aff8dccdbeaa1eac2da43459d5b590efa127470208729ca99a3b5757dd690943cf60745c2393d13db6a3218a
+  languageName: node
+  linkType: hard
+
 "event-emitter@npm:^0.3.5":
   version: 0.3.5
   resolution: "event-emitter@npm:0.3.5"
@@ -26601,8 +26628,8 @@ __metadata:
   linkType: hard
 
 "mdast-util-to-hast@npm:^13.0.0":
-  version: 13.2.0
-  resolution: "mdast-util-to-hast@npm:13.2.0"
+  version: 13.2.1
+  resolution: "mdast-util-to-hast@npm:13.2.1"
   dependencies:
     "@types/hast": "npm:^3.0.0"
     "@types/mdast": "npm:^4.0.0"
@@ -26613,7 +26640,7 @@ __metadata:
     unist-util-position: "npm:^5.0.0"
     unist-util-visit: "npm:^5.0.0"
     vfile: "npm:^6.0.0"
-  checksum: 10/b17ee338f843af31a1c7a2ebf0df6f0b41c9380b7119a63ab521d271df665456578e1234bb7617883e8d860fe878038dcf2b76ab2f21e0f7451215a096d26cce
+  checksum: 10/8fddf5e66ea24dc85c8fe1cc2acd8fbe36e9d4f21b06322e156431fd71385eab9d2d767646f50276ca4ce3684cb967c4e226c60c3fff3428feb687ccb598fa39
   languageName: node
   linkType: hard
 

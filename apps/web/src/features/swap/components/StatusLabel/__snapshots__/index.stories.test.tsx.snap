@@ -1,0 +1,157 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./index.stories Cancelled 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1im6wh6-MuiChip-root"
+  >
+    <span
+      class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+    >
+      <span
+        class="MuiTypography-root MuiTypography-caption css-lkspku-MuiTypography-root"
+      >
+        <mock-icon
+          aria-hidden=""
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+          focusable="false"
+        />
+        Cancelled
+      </span>
+    </span>
+  </div>
+</div>
+`;
+
+exports[`./index.stories Expired 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-a204je-MuiChip-root"
+  >
+    <span
+      class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+    >
+      <span
+        class="MuiTypography-root MuiTypography-caption css-lkspku-MuiTypography-root"
+      >
+        <mock-icon
+          aria-hidden=""
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+          focusable="false"
+        />
+        Expired
+      </span>
+    </span>
+  </div>
+</div>
+`;
+
+exports[`./index.stories Filled 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1cjet8q-MuiChip-root"
+  >
+    <span
+      class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+    >
+      <span
+        class="MuiTypography-root MuiTypography-caption css-lkspku-MuiTypography-root"
+      >
+        <mock-icon
+          aria-hidden=""
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+          focusable="false"
+        />
+        Filled
+      </span>
+    </span>
+  </div>
+</div>
+`;
+
+exports[`./index.stories Open 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-2q1p8k-MuiChip-root"
+  >
+    <span
+      class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+    >
+      <span
+        class="MuiTypography-root MuiTypography-caption css-lkspku-MuiTypography-root"
+      >
+        <mock-icon
+          aria-hidden=""
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+          focusable="false"
+        />
+        Open
+      </span>
+    </span>
+  </div>
+</div>
+`;
+
+exports[`./index.stories PartiallyFilled 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1cjet8q-MuiChip-root"
+  >
+    <span
+      class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+    >
+      <span
+        class="MuiTypography-root MuiTypography-caption css-lkspku-MuiTypography-root"
+      >
+        <mock-icon
+          aria-hidden=""
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+          focusable="false"
+        />
+        Partially filled
+      </span>
+    </span>
+  </div>
+</div>
+`;
+
+exports[`./index.stories Pending 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-2q1p8k-MuiChip-root"
+  >
+    <span
+      class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+    >
+      <span
+        class="MuiTypography-root MuiTypography-caption css-lkspku-MuiTypography-root"
+      >
+        <mock-icon
+          aria-hidden=""
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+          focusable="false"
+        />
+        Execution needed
+      </span>
+    </span>
+  </div>
+</div>
+`;

@@ -49,7 +49,7 @@ export function AnalysisDisplay({ result, description, severity }: AnalysisDispl
 
           {isAddressChange(result) && <AddressChanges result={result} />}
 
-          {result.addresses?.length && <ShowAllAddress addresses={result.addresses} />}
+          {result.addresses?.length && <ShowAllAddress addresses={result.addresses.map((a) => a.address)} />}
         </Stack>
       </View>
     </View>

@@ -1,0 +1,160 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./index.stories BlockedAddress 1`] = `
+<div
+  class="container"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1jhq0nx-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiStack-root css-1ogap9g-MuiStack-root"
+    >
+      <p
+        class="MuiTypography-root MuiTypography-body1 css-10q7br5-MuiTypography-root"
+      >
+        0xD3a484faEa53313eF85b5916C9302a3E304ae622
+      </p>
+      <div
+        class="iconCircle MuiBox-root css-0"
+      >
+        <mock-icon
+          aria-hidden=""
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
+          focusable="false"
+        />
+      </div>
+      <h3
+        class="MuiTypography-root MuiTypography-h3 css-cc5p6-MuiTypography-root"
+      >
+        Blocked Address
+      </h3>
+      <p
+        class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+      >
+        This signer address is blocked by the Safe interface, due to being associated with the blocked activities by the U.S. Department of Treasury in the Specially Designated Nationals (SDN) list.
+      </p>
+      <hr
+        class="MuiDivider-root MuiDivider-fullWidth css-1facvfi-MuiDivider-root"
+      />
+    </div>
+    <div
+      class="MuiBox-root css-fbqrg1"
+    >
+      <button
+        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary css-svj0yx-MuiButtonBase-root-MuiButton-root"
+        tabindex="0"
+        type="button"
+      >
+        Got it
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./index.stories LegalDisclaimer 1`] = `
+<div
+  class="container"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1jhq0nx-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiStack-root css-1ogap9g-MuiStack-root"
+    >
+      <div
+        class="iconCircle MuiBox-root css-0"
+      >
+        <mock-icon
+          aria-hidden=""
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
+          focusable="false"
+        />
+      </div>
+      <h3
+        class="MuiTypography-root MuiTypography-h3 css-cc5p6-MuiTypography-root"
+      >
+        Legal Disclaimer
+      </h3>
+      <p
+        class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+      >
+        <div
+          class="disclaimerContainer"
+        >
+          <div
+            class="disclaimerInner"
+          >
+            <p
+              class="MuiTypography-root MuiTypography-body1 css-1hsdx29-MuiTypography-root"
+            >
+              You are now accessing 
+              third-party apps
+              , which we do not own, control, maintain or audit. We are not liable for any loss you may suffer in connection with interacting with the
+               
+              apps
+              , which is at your own risk.
+            </p>
+            <p
+              class="MuiTypography-root MuiTypography-body1 css-1hsdx29-MuiTypography-root"
+            >
+              You must read our Terms, which contain more detailed provisions binding on you relating to the
+               
+              apps
+              .
+            </p>
+            <p
+              class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+            >
+              I have read and understood the
+               
+              <a
+                class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-ey0kse-MuiTypography-root-MuiLink-root"
+                href="/terms"
+                rel="noreferrer noopener"
+                target="_blank"
+              >
+                <span
+                  class="MuiBox-root css-u9xrjn"
+                >
+                  Terms
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                    data-testid="OpenInNewRoundedIcon"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M18 19H6c-.55 0-1-.45-1-1V6c0-.55.45-1 1-1h5c.55 0 1-.45 1-1s-.45-1-1-1H5c-1.11 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-6c0-.55-.45-1-1-1s-1 .45-1 1v5c0 .55-.45 1-1 1M14 4c0 .55.45 1 1 1h2.59l-9.13 9.13c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0L19 6.41V9c0 .55.45 1 1 1s1-.45 1-1V4c0-.55-.45-1-1-1h-5c-.55 0-1 .45-1 1"
+                    />
+                  </svg>
+                </span>
+              </a>
+               
+              and this Disclaimer, and agree to be bound by them.
+            </p>
+          </div>
+        </div>
+      </p>
+      <hr
+        class="MuiDivider-root MuiDivider-fullWidth css-1facvfi-MuiDivider-root"
+      />
+    </div>
+    <div
+      class="MuiBox-root css-fbqrg1"
+    >
+      <button
+        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary css-svj0yx-MuiButtonBase-root-MuiButton-root"
+        tabindex="0"
+        type="button"
+      >
+        Continue
+      </button>
+    </div>
+  </div>
+</div>
+`;

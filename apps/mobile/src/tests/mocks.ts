@@ -19,7 +19,7 @@ import {
   AddressInfo,
   Transaction,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { createMockChain as createSharedMockChain } from '@safe-global/test'
 
 export const mockBalanceData = {
   items: [
@@ -36,53 +36,7 @@ export const mockBalanceData = {
   ],
 }
 
-export const mockChain: Chain = {
-  chainId: '1',
-  chainName: 'Ethereum',
-  shortName: 'eth',
-  description: 'Ethereum Mainnet',
-  l2: false,
-  isTestnet: false,
-  nativeCurrency: {
-    name: 'Ether',
-    symbol: 'ETH',
-    decimals: 18,
-    logoUri: '',
-  },
-  blockExplorerUriTemplate: {
-    address: 'https://etherscan.io/address/{{address}}',
-    txHash: 'https://etherscan.io/tx/{{txHash}}',
-    api: 'https://api.etherscan.io/api?module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}',
-  },
-  transactionService: 'https://safe-transaction-mainnet.safe.global',
-  chainLogoUri: '',
-  theme: {
-    textColor: '#001428',
-    backgroundColor: '#E8E7E6',
-  },
-  rpcUri: {
-    authentication: 'NO_AUTHENTICATION',
-    value: 'https://eth.llamarpc.com',
-  },
-  safeAppsRpcUri: {
-    authentication: 'NO_AUTHENTICATION',
-    value: 'https://eth.llamarpc.com',
-  },
-  publicRpcUri: {
-    authentication: 'NO_AUTHENTICATION',
-    value: 'https://eth.llamarpc.com',
-  },
-  features: [],
-  gasPrice: [],
-  ensRegistryAddress: '',
-  disabledWallets: [],
-  contractAddresses: {},
-  balancesProvider: '',
-  beaconChainExplorerUriTemplate: {
-    address: '',
-    api: '',
-  },
-} as unknown as Chain
+export const mockChain = createSharedMockChain()
 
 export const mockNFTData = {
   count: 2,

@@ -10,7 +10,6 @@ jest.mock('@react-native-clipboard/clipboard')
 jest.mock('@/src/hooks/useSign/useSign')
 jest.mock('@/src/hooks/useDelegate')
 jest.mock('expo-router', () => ({
-  useLocalSearchParams: jest.fn(),
   useRouter: jest.fn(),
 }))
 
@@ -18,8 +17,7 @@ const mockClipboard = Clipboard as jest.Mocked<typeof Clipboard>
 const mockStorePrivateKey = storePrivateKey as jest.MockedFunction<typeof storePrivateKey>
 const mockUseDelegate = useDelegate as jest.MockedFunction<typeof useDelegate>
 
-// Import the mocked modules
-const { useLocalSearchParams, useRouter } = require('expo-router')
+const { useRouter } = require('expo-router')
 
 describe('useImportPrivateKey', () => {
   const mockRouter = {
@@ -35,13 +33,6 @@ describe('useImportPrivateKey', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-
-    // Setup default mocks
-    useLocalSearchParams.mockReturnValue({
-      safeAddress: '0x1234567890123456789012345678901234567890',
-      chainId: '1',
-      import_safe: 'true',
-    })
 
     useRouter.mockReturnValue(mockRouter)
 
@@ -143,7 +134,7 @@ describe('useImportPrivateKey', () => {
 
       expect(result.current.input).toBe(VALID_SEED_PHRASE)
       expect(result.current.inputType).toBe('seed-phrase')
-      expect(result.current.wallet).toBeUndefined() // Wallet not created for seed phrases
+      expect(result.current.wallet).toBeUndefined()
       expect(result.current.error).toBeUndefined()
     })
 
@@ -163,7 +154,7 @@ describe('useImportPrivateKey', () => {
 
     it('should reject seed phrase with wrong word count', () => {
       const { result } = renderHook(() => useImportPrivateKey())
-      const invalidPhrase = 'test test test test test' // Only 5 words
+      const invalidPhrase = 'test test test test test'
 
       act(() => {
         result.current.handleInputChange(invalidPhrase)
@@ -196,9 +187,8 @@ describe('useImportPrivateKey', () => {
         result.current.handleInputChange(phraseWithSpaces)
       })
 
-      // Should properly trim and validate the seed phrase
       expect(result.current.inputType).toBe('seed-phrase')
-      expect(result.current.wallet).toBeUndefined() // Wallet not created for seed phrases
+      expect(result.current.wallet).toBeUndefined()
       expect(result.current.error).toBeUndefined()
     })
   })
@@ -220,13 +210,11 @@ describe('useImportPrivateKey', () => {
     it('should clear error when input becomes valid', () => {
       const { result } = renderHook(() => useImportPrivateKey())
 
-      // First set invalid input
       act(() => {
         result.current.handleInputChange('invalid')
       })
       expect(result.current.error).toBe('Invalid private key or seed phrase.')
 
-      // Then set valid input
       act(() => {
         result.current.handleInputChange(VALID_PRIVATE_KEY)
       })
@@ -236,13 +224,11 @@ describe('useImportPrivateKey', () => {
     it('should clear error when input becomes empty', () => {
       const { result } = renderHook(() => useImportPrivateKey())
 
-      // First set invalid input
       act(() => {
         result.current.handleInputChange('invalid')
       })
       expect(result.current.error).toBe('Invalid private key or seed phrase.')
 
-      // Then clear input
       act(() => {
         result.current.handleInputChange('')
       })
@@ -281,7 +267,6 @@ describe('useImportPrivateKey', () => {
       mockStorePrivateKey.mockResolvedValue(undefined)
       mockCreateDelegate.mockResolvedValue({ success: true })
 
-      // Set up valid private key
       act(() => {
         result.current.handleInputChange(VALID_PRIVATE_KEY)
       })
@@ -290,20 +275,12 @@ describe('useImportPrivateKey', () => {
         await result.current.handleImport()
       })
 
-      // Verify storage was called with correct address and key
       expect(mockStorePrivateKey).toHaveBeenCalledWith(EXPECTED_ADDRESS, VALID_PRIVATE_KEY)
-
-      // Verify delegate creation was attempted
       expect(mockCreateDelegate).toHaveBeenCalledWith(VALID_PRIVATE_KEY, null)
-
-      // Verify navigation happened
       expect(mockRouter.push).toHaveBeenCalledWith({
         pathname: '/import-signers/loading',
         params: {
           address: EXPECTED_ADDRESS,
-          safeAddress: '0x1234567890123456789012345678901234567890',
-          chainId: '1',
-          import_safe: 'true',
         },
       })
 
@@ -397,13 +374,9 @@ describe('useImportPrivateKey', () => {
         pathname: '/import-signers/seed-phrase-addresses',
         params: {
           seedPhrase: VALID_SEED_PHRASE,
-          safeAddress: '0x1234567890123456789012345678901234567890',
-          chainId: '1',
-          import_safe: 'true',
         },
       })
 
-      // Should not attempt storage or delegate creation
       expect(mockStorePrivateKey).not.toHaveBeenCalled()
       expect(mockCreateDelegate).not.toHaveBeenCalled()
     })
@@ -476,41 +449,6 @@ describe('useImportPrivateKey', () => {
 
       expect(result.current.inputType).toBe('unknown')
       expect(result.current.error).toBe('Invalid private key or seed phrase.')
-    })
-  })
-
-  describe('integration with route params', () => {
-    it('should pass custom route params to navigation', async () => {
-      const customParams = {
-        safeAddress: '0x9876543210987654321098765432109876543210',
-        chainId: '137',
-        import_safe: 'false',
-      }
-
-      useLocalSearchParams.mockReturnValue(customParams)
-
-      const { result } = renderHook(() => useImportPrivateKey())
-
-      mockStorePrivateKey.mockResolvedValue(undefined)
-      mockCreateDelegate.mockResolvedValue({ success: true })
-
-      act(() => {
-        result.current.handleInputChange(VALID_PRIVATE_KEY)
-      })
-
-      await act(async () => {
-        await result.current.handleImport()
-      })
-
-      expect(mockRouter.push).toHaveBeenCalledWith({
-        pathname: '/import-signers/loading',
-        params: {
-          address: EXPECTED_ADDRESS,
-          safeAddress: customParams.safeAddress,
-          chainId: customParams.chainId,
-          import_safe: customParams.import_safe,
-        },
-      })
     })
   })
 })

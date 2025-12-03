@@ -12,6 +12,7 @@ import { GroupedTransactionItem } from './components/GroupedTransactionItem'
 import { DateHeaderItem } from './components/DateHeaderItem'
 import { TransactionListItem } from './components/TransactionListItem'
 import { EmptyComponent, HeaderComponent, FooterComponent } from './components/LoadingComponents'
+import { ErrorComponent } from './components/ErrorComponent'
 import { keyExtractor, getItemType } from './utils'
 import { EMPTY_ARRAY } from './constants'
 
@@ -20,6 +21,7 @@ interface TxHistoryList {
   onEndReached: (info: { distanceFromEnd: number }) => void
   isLoading: boolean
   isLoadingNext: boolean
+  isError: boolean
   refreshing: boolean
   onRefresh: () => void
 }
@@ -29,6 +31,7 @@ export function TxHistoryList({
   onEndReached,
   isLoading,
   isLoadingNext,
+  isError,
   refreshing,
   onRefresh,
 }: TxHistoryList) {
@@ -96,11 +99,15 @@ export function TxHistoryList({
   )
 
   const listEmptyComponent = useMemo(() => {
+    // Prioritize error state over loading state
+    if (isError && !hasTransactions && !refreshing) {
+      return <ErrorComponent />
+    }
     if (isInitialLoading) {
       return <EmptyComponent />
     }
     return null
-  }, [isInitialLoading])
+  }, [isError, hasTransactions, refreshing, isInitialLoading])
 
   return (
     <View position="relative" flex={1}>
@@ -115,8 +122,8 @@ export function TxHistoryList({
         refreshControl={<RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} />}
         contentContainerStyle={contentContainerStyle}
         ListEmptyComponent={listEmptyComponent}
-        ListHeaderComponent={isLoading && hasTransactions ? HeaderComponent : null}
-        ListFooterComponent={isLoadingNext && hasTransactions ? FooterComponent : null}
+        ListHeaderComponent={isLoading && hasTransactions ? <HeaderComponent /> : null}
+        ListFooterComponent={isLoadingNext && hasTransactions ? <FooterComponent /> : null}
         contentInsetAdjustmentBehavior="automatic"
       />
     </View>

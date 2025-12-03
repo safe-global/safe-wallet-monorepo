@@ -1,0 +1,185 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./index.stories Default 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="container"
+  >
+    <div
+      class="avatarContainer"
+    >
+      <div
+        class="icon"
+        style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjg1IDUyJSAzMyUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCg1NiA1NiUgMTclKSIgZD0iTTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTMsMGgxdjFoLTF6TTQsMGgxdjFoLTF6TTIsMWgxdjFoLTF6TTUsMWgxdjFoLTF6TTEsMmgxdjFoLTF6TTYsMmgxdjFoLTF6TTIsM2gxdjFoLTF6TTUsM2gxdjFoLTF6TTMsM2gxdjFoLTF6TTQsM2gxdjFoLTF6TTEsNGgxdjFoLTF6TTYsNGgxdjFoLTF6TTIsNGgxdjFoLTF6TTUsNGgxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTAsNmgxdjFoLTF6TTcsNmgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTMsN2gxdjFoLTF6TTQsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDEzOCA3NyUgNDIlKSIgZD0iTTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTEsM2gxdjFoLTF6TTYsM2gxdjFoLTF6TTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTEsNmgxdjFoLTF6TTYsNmgxdjFoLTF6Ii8+PC9zdmc+); width: 40px; height: 40px;"
+      />
+    </div>
+    <div
+      class="MuiBox-root css-1lchl8k"
+    >
+      <div
+        class="addressContainer"
+      >
+        <div
+          class="MuiBox-root css-b5p5gz"
+        >
+          <span
+            aria-label="Copy to clipboard"
+            class=""
+            data-mui-internal-clone-element="true"
+            style="cursor: pointer;"
+          >
+            <span>
+              0xd9Db...9552
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./index.stories WithAvatar 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="container"
+  >
+    <div
+      class="avatarContainer"
+      style="width: 30px; height: 30px;"
+    >
+      <div
+        class="icon"
+        style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjg1IDUyJSAzMyUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCg1NiA1NiUgMTclKSIgZD0iTTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTMsMGgxdjFoLTF6TTQsMGgxdjFoLTF6TTIsMWgxdjFoLTF6TTUsMWgxdjFoLTF6TTEsMmgxdjFoLTF6TTYsMmgxdjFoLTF6TTIsM2gxdjFoLTF6TTUsM2gxdjFoLTF6TTMsM2gxdjFoLTF6TTQsM2gxdjFoLTF6TTEsNGgxdjFoLTF6TTYsNGgxdjFoLTF6TTIsNGgxdjFoLTF6TTUsNGgxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTAsNmgxdjFoLTF6TTcsNmgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTMsN2gxdjFoLTF6TTQsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDEzOCA3NyUgNDIlKSIgZD0iTTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTEsM2gxdjFoLTF6TTYsM2gxdjFoLTF6TTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTEsNmgxdjFoLTF6TTYsNmgxdjFoLTF6Ii8+PC9zdmc+); width: 30px; height: 30px;"
+      />
+    </div>
+    <div
+      class="MuiBox-root css-1lchl8k"
+    >
+      <div
+        class="ethHashInfo-name MuiBox-root css-171onha"
+        title="Real OG"
+      >
+        <div
+          class="MuiBox-root css-1o4wo1x"
+        >
+          Real OG
+        </div>
+      </div>
+      <div
+        class="addressContainer"
+      >
+        <div
+          class="MuiBox-root css-b5p5gz"
+        >
+          <span
+            aria-label="Copy to clipboard"
+            class=""
+            data-mui-internal-clone-element="true"
+            style="cursor: pointer;"
+          >
+            <span>
+              0xd9Db...9552
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./index.stories WithName 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="container"
+  >
+    <div
+      class="avatarContainer"
+    >
+      <div
+        class="icon"
+        style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjg1IDUyJSAzMyUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCg1NiA1NiUgMTclKSIgZD0iTTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTMsMGgxdjFoLTF6TTQsMGgxdjFoLTF6TTIsMWgxdjFoLTF6TTUsMWgxdjFoLTF6TTEsMmgxdjFoLTF6TTYsMmgxdjFoLTF6TTIsM2gxdjFoLTF6TTUsM2gxdjFoLTF6TTMsM2gxdjFoLTF6TTQsM2gxdjFoLTF6TTEsNGgxdjFoLTF6TTYsNGgxdjFoLTF6TTIsNGgxdjFoLTF6TTUsNGgxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTAsNmgxdjFoLTF6TTcsNmgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTMsN2gxdjFoLTF6TTQsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDEzOCA3NyUgNDIlKSIgZD0iTTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTEsM2gxdjFoLTF6TTYsM2gxdjFoLTF6TTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTEsNmgxdjFoLTF6TTYsNmgxdjFoLTF6Ii8+PC9zdmc+); width: 40px; height: 40px;"
+      />
+    </div>
+    <div
+      class="MuiBox-root css-1lchl8k"
+    >
+      <div
+        class="ethHashInfo-name MuiBox-root css-171onha"
+        title="Real OG"
+      >
+        <div
+          class="MuiBox-root css-1o4wo1x"
+        >
+          Real OG
+        </div>
+      </div>
+      <div
+        class="addressContainer"
+      >
+        <div
+          class="MuiBox-root css-b5p5gz"
+        >
+          <span
+            aria-label="Copy to clipboard"
+            class=""
+            data-mui-internal-clone-element="true"
+            style="cursor: pointer;"
+          >
+            <span>
+              0xd9Db...9552
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./index.stories WithOnlyName 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="container"
+  >
+    <div
+      class="avatarContainer"
+    >
+      <div
+        class="icon"
+        style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjg1IDUyJSAzMyUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCg1NiA1NiUgMTclKSIgZD0iTTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTMsMGgxdjFoLTF6TTQsMGgxdjFoLTF6TTIsMWgxdjFoLTF6TTUsMWgxdjFoLTF6TTEsMmgxdjFoLTF6TTYsMmgxdjFoLTF6TTIsM2gxdjFoLTF6TTUsM2gxdjFoLTF6TTMsM2gxdjFoLTF6TTQsM2gxdjFoLTF6TTEsNGgxdjFoLTF6TTYsNGgxdjFoLTF6TTIsNGgxdjFoLTF6TTUsNGgxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTAsNmgxdjFoLTF6TTcsNmgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTMsN2gxdjFoLTF6TTQsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDEzOCA3NyUgNDIlKSIgZD0iTTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTEsM2gxdjFoLTF6TTYsM2gxdjFoLTF6TTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTEsNmgxdjFoLTF6TTYsNmgxdjFoLTF6Ii8+PC9zdmc+); width: 40px; height: 40px;"
+      />
+    </div>
+    <div
+      class="inline MuiBox-root css-1lchl8k"
+    >
+      <div
+        class="ethHashInfo-name MuiBox-root css-171onha"
+        title="Real OG"
+      >
+        <div
+          class="MuiBox-root css-1o4wo1x"
+        >
+          Real OG
+        </div>
+      </div>
+      <div
+        class="addressContainer inline"
+      />
+    </div>
+  </div>
+</div>
+`;

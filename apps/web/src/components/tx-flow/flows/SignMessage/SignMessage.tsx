@@ -40,7 +40,7 @@ import { dispatchPreparedSignature } from '@/services/safe-messages/safeMsgNotif
 import { trackEvent } from '@/services/analytics'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import { SafeTxContext } from '../../SafeTxProvider'
-import RiskConfirmationError from '@/components/tx/SignOrExecuteForm/RiskConfirmationError'
+import RiskConfirmationError from '@/components/tx/shared/errors/RiskConfirmationError'
 import { isBlindSigningPayload, isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
 import ApprovalEditor from '@/components/tx/ApprovalEditor'
 import { ErrorBoundary } from '@sentry/react'

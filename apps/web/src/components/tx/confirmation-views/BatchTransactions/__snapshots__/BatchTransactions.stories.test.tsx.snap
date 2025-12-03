@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./BatchTransactions.stories Default 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1femcay-MuiPaper-root"
+  style="--Paper-shadow: none; --Paper-overlay: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0));"
+>
+  <ul
+    class="MuiList-root MuiList-padding css-8g50lk-MuiList-root"
+  />
+</div>
+`;
