@@ -47,10 +47,6 @@ button {
 :root {
   --header-height: 52px;
   --footer-height: 67px;
-
-  /* Gradient variants */
-  --gradient-white-light: linear-gradient(90deg, #ffffff 0%, rgb(83, 83, 83) 100%);
-  --gradient-white-light-dark: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.05) 100%);
 }
 
 input::-webkit-outer-spin-button,

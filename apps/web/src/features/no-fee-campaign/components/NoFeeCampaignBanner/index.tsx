@@ -22,7 +22,7 @@ const NoFeeCampaignBanner = ({ onDismiss }: { onDismiss: () => void }) => {
     <Card className={css.banner}>
       <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2}>
         <Image
-          src="/images/common/no-fee-campaign/card-ethena.svg"
+          src="/images/common/no-fee-campaign/Cards_USDe.svg"
           alt="USDe Logo"
           width={76}
           height={76}

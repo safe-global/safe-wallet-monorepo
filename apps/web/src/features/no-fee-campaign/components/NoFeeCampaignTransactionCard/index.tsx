@@ -57,7 +57,7 @@ const NoFeeCampaignTransactionCard = () => {
           <Stack direction="row" alignItems="center" spacing={3}>
             <Box className={css.iconContainer}>
               <Image
-                src="/images/common/no-fee-campaign/card-ethena.svg"
+                src="/images/common/no-fee-campaign/Cards_USDe.svg"
                 alt="USDe Logo"
                 width={48}
                 height={48}
@@ -130,7 +130,7 @@ const NoFeeCampaignTransactionCard = () => {
             {/* Coins illustration */}
             <Box className={css.coinsContainer}>
               <Image
-                src="/images/common/no-fee-campaign/card-ethena.svg"
+                src="/images/common/no-fee-campaign/Cards_USDe.svg"
                 alt="USDe Logo"
                 width={58}
                 height={58}

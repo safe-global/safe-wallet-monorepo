@@ -1,37 +1,15 @@
 .banner {
   composes: banner from '../../../../components/dashboard/NewsCarousel/banners/styles.module.css';
-  /* Override with white-black gradient for no-fee campaign only */
-  background: var(--gradient-white-light) !important;
-  border: 1px solid var(--color-border-light) !important;
-}
-
-@media (prefers-color-scheme: dark) {
-  .banner {
-    background: var(--gradient-white-light-dark) !important;
-    border: 1px solid var(--color-border-light) !important;
-  }
 }
 
 .closeButton {
   composes: closeButton from '../../../../components/dashboard/NewsCarousel/banners/styles.module.css';
 }
 
-@media (prefers-color-scheme: dark) {
-  .closeButton {
-    color: var(--color-text-primary) !important;
-  }
-}
-
 .bannerImage,
 .bannerText {
   pointer-events: none;
   user-select: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  .bannerText {
-    color: var(--color-text-primary) !important;
-  }
 }
 
 @media (max-width: 599.95px) {
@@ -89,12 +67,6 @@
   pointer-events: auto;
   margin-top: var(--space-1);
   margin-bottom: var(--space-1);
-}
-
-@media (prefers-color-scheme: dark) {
-  .bannerTextInteractive {
-    color: var(--color-text-secondary) !important;
-  }
 }
 
 .errorText {
