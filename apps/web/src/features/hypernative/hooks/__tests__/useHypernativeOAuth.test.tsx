@@ -541,8 +541,9 @@ describe('useHypernativeOAuth', () => {
 
       const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
 
-      expect(result.current.isAuthenticated).toBe(true) // Still marked as authenticated
-      expect(result.current.isTokenExpired).toBe(true) // But token is expired
+      // isAuthenticated should be false when token is expired
+      expect(result.current.isAuthenticated).toBe(false)
+      expect(result.current.isTokenExpired).toBe(true)
     })
 
     it('should detect valid tokens', () => {

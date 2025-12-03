@@ -99,7 +99,7 @@ describe('hnAuthSlice', () => {
     })
 
     describe('selectIsAuthenticated', () => {
-      it('should return true when authenticated', () => {
+      it('should return true when authenticated with valid, non-expired token', () => {
         const state = mockRootState({
           authToken: 'test-token',
           authTokenExpiry: Date.now() + 3600000,
@@ -114,6 +114,36 @@ describe('hnAuthSlice', () => {
           authToken: undefined,
           authTokenExpiry: undefined,
           isAuthenticated: false,
+        }) as RootState
+
+        expect(selectIsAuthenticated(state)).toBe(false)
+      })
+
+      it('should return false when token is expired even if isAuthenticated flag is true', () => {
+        const state = mockRootState({
+          authToken: 'expired-token',
+          authTokenExpiry: Date.now() - 1000,
+          isAuthenticated: true, // Flag is still true but token is expired
+        }) as RootState
+
+        expect(selectIsAuthenticated(state)).toBe(false)
+      })
+
+      it('should return false when token is missing even if isAuthenticated flag is true', () => {
+        const state = mockRootState({
+          authToken: undefined,
+          authTokenExpiry: Date.now() + 3600000,
+          isAuthenticated: true,
+        }) as RootState
+
+        expect(selectIsAuthenticated(state)).toBe(false)
+      })
+
+      it('should return false when expiry is missing even if isAuthenticated flag is true', () => {
+        const state = mockRootState({
+          authToken: 'token',
+          authTokenExpiry: undefined,
+          isAuthenticated: true,
         }) as RootState
 
         expect(selectIsAuthenticated(state)).toBe(false)

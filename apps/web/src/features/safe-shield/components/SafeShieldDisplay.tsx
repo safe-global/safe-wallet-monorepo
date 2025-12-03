@@ -58,12 +58,12 @@ export const SafeShieldDisplay = ({
   const [threatResults] = threat || []
   const { hasSimulationError } = useCheckSimulation(safeTx)
   const isDarkMode = useDarkMode()
-  const { isAuthenticated, loading: authLoading } = useHypernativeOAuth()
+  const { isAuthenticated, isTokenExpired, loading: authLoading } = useHypernativeOAuth()
   const { isHypernativeGuard, loading: HNGuardCheckLoading } = useIsHypernativeGuard()
 
   const hnLoginRequired = useMemo(
-    () => !isAuthenticated && !authLoading && !HNGuardCheckLoading && isHypernativeGuard,
-    [isAuthenticated, authLoading, HNGuardCheckLoading, isHypernativeGuard],
+    () => (!isAuthenticated || isTokenExpired) && !authLoading && !HNGuardCheckLoading && isHypernativeGuard,
+    [isAuthenticated, isTokenExpired, authLoading, HNGuardCheckLoading, isHypernativeGuard],
   )
 
   const overallStatus = useMemo(
