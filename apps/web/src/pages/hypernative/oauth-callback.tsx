@@ -11,7 +11,7 @@ import {
   readPkce,
   clearPkce,
 } from '@/features/hypernative/hooks/useHypernativeOAuth'
-import { HYPERNATIVE_OAUTH_CONFIG } from '@/features/hypernative/config/oauth'
+import { HYPERNATIVE_OAUTH_CONFIG, getRedirectUri } from '@/features/hypernative/config/oauth'
 
 /**
  * OAuth callback page for Hypernative authentication
@@ -227,7 +227,7 @@ async function exchangeCodeForToken(
   const { tokenUrl, clientId } = HYPERNATIVE_OAUTH_CONFIG
 
   // Get redirect URI (must match the one used in authorization request)
-  const redirectUri = typeof window !== 'undefined' ? `${window.location.origin}/hypernative/oauth-callback` : ''
+  const redirectUri = getRedirectUri()
 
   // Build token exchange request body (JSON format per Hypernative API spec)
   const body = {
