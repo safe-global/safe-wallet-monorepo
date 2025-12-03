@@ -37,8 +37,8 @@ export function BalanceChangeItem({ asset, diff, positive = false }: BalanceChan
   const valueDisplay = isNftDiff(diff)
     ? `#${Number(diff.token_id)}`
     : diff.value
-    ? `${positive ? '+' : '-'}${formatAmount(diff.value)}`
-    : 'unknown'
+      ? `${positive ? '+' : '-'}${formatAmount(diff.value)}`
+      : 'unknown'
 
   const typeLabel = getAssetTypeLabel(asset)
 
