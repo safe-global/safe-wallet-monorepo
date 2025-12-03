@@ -6,11 +6,14 @@ import ErrorMessage from '@/components/tx/ErrorMessage'
 import { TxFlowContext } from '../TxFlowProvider'
 import { useValidateTxData } from '@/hooks/useValidateTxData'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { SafeTxContext } from '../SafeTxProvider'
+import { useAlreadySigned } from '@/components/tx/shared/hooks'
 
 const COMBO_SUBMIT_ACTION = 'comboSubmitAction'
 
 export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
   const { txId, submitError, isRejectedByUser } = useContext(TxFlowContext)
+  const { safeTx } = useContext(SafeTxContext)
   const slotItems = useSlot(SlotName.ComboSubmit)
   const slotIds = useSlotIds(SlotName.ComboSubmit)
 
@@ -20,14 +23,28 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
     [validationResult],
   )
 
+  const hasSigned = useAlreadySigned(safeTx)
+
   const initialSubmitAction = slotIds?.[0]
   const options = useMemo(() => slotItems.map(({ label, id }) => ({ label, id })), [slotItems])
   const [submitAction = initialSubmitAction, setSubmitAction] = useLocalStorage<string>(COMBO_SUBMIT_ACTION)
 
-  const slotId = useMemo(
-    () => (slotIds.includes(submitAction) ? submitAction : initialSubmitAction),
-    [slotIds, submitAction, initialSubmitAction],
-  )
+  const executeAvailable = slotIds.includes('execute')
+
+  // Auto-select Execute if available, otherwise use stored preference
+  const slotId = useMemo(() => {
+    if (!slotIds.includes(submitAction)) {
+      return initialSubmitAction
+    }
+    // Prefer Execute if available
+    if (executeAvailable) {
+      return 'execute'
+    }
+    return submitAction
+  }, [slotIds, submitAction, initialSubmitAction, executeAvailable])
+
+  // Show warning if Execute is available but user manually selected Sign
+  const showLastSignerWarning = executeAvailable && submitAction === 'sign' && !hasSigned
 
   if (slotIds.length === 0) {
     return false
@@ -53,6 +70,15 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
 
       {validationError !== undefined && (
         <ErrorMessage error={validationError}>Error validating transaction data</ErrorMessage>
+      )}
+
+      {showLastSignerWarning && (
+        <Box mt={1}>
+          <ErrorMessage level="warning">
+            You are providing the last signature. Once signed, anyone can execute this transaction since the queue is
+            public.
+          </ErrorMessage>
+        </Box>
       )}
 
       <Slot
