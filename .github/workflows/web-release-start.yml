@@ -42,8 +42,8 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
           git_config_global: true
-          git_committer_name: 'GitHub Actions'
-          git_committer_email: 'github-actions@users.noreply.github.com'
+          git_committer_name: ${{ secrets.GPG_COMMITTER_NAME || 'safe-global-bot' }}
+          git_committer_email: ${{ secrets.GPG_COMMITTER_EMAIL || '167743637+safe-global-bot@users.noreply.github.com' }}
 
       - name: Determine base branch
         id: base
