@@ -21,7 +21,7 @@ export function TransactionInfo({
 }: {
   detailedExecutionInfo: MultisigExecutionDetails
   txId: string
-  txDetails: TransactionDetails
+  txDetails?: TransactionDetails
   pendingTx?: PendingTx
   onSeverityChange?: (severity: Severity | undefined) => void
 }) {

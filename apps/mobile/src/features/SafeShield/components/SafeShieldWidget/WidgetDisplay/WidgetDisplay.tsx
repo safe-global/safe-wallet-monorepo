@@ -15,8 +15,7 @@ import { useSafeShieldSeverity } from '../../../hooks/useSafeShieldSeverity'
 import { WidgetDisplayWrapper } from './WidgetDisplayWrapper'
 import { ErrorWidget } from './ErrorWidget'
 import { LoadingWidget } from './LoadingWidget'
-import { normalizeThreatData } from '@safe-global/utils/features/safe-shield/utils'
-import { Severity } from '@safe-global/utils/features/safe-shield/types'
+import { getSeverity, normalizeThreatData } from '@safe-global/utils/features/safe-shield/utils'
 
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { selectActiveChain } from '@/src/store/chains'
@@ -59,14 +58,10 @@ export function WidgetDisplay({ recipient, contract, threat, loading, error, saf
     runSimulation,
   } = useTransactionSimulation(safeTx)
 
-  const simulationSeverity = useMemo(() => {
-    if (isSuccess) {
-      return Severity.OK
-    }
-    if (simulationStatus.isFinished || hasError || isCallTraceError) {
-      return Severity.WARN
-    }
-  }, [hasError, isCallTraceError, isSuccess, simulationStatus.isFinished])
+  const simulationSeverity = useMemo(
+    () => getSeverity(isSuccess, simulationStatus.isFinished, hasError || isCallTraceError),
+    [hasError, isCallTraceError, isSuccess, simulationStatus.isFinished],
+  )
 
   // Get highlighted severity
   const highlightedSeverity = useSafeShieldSeverity({

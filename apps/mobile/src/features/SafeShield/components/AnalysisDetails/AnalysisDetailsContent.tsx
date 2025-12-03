@@ -4,7 +4,7 @@ import { AnalysisGroup } from '../AnalysisGroup'
 import { ContractAnalysisResults, Severity } from '@safe-global/utils/features/safe-shield/types'
 import { RecipientAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
-import { getOverallStatus, normalizeThreatData } from '@safe-global/utils/features/safe-shield/utils'
+import { getOverallStatus, getSeverity, normalizeThreatData } from '@safe-global/utils/features/safe-shield/utils'
 import { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { TransactionSimulation } from '../TransactionSimulation'
 import { useTransactionSimulation } from '../TransactionSimulation/hooks/useTransactionSimulation'
@@ -54,14 +54,10 @@ export const AnalysisDetailsContent = ({ recipient, contract, threat, safeTx }: 
 
   const tenderlyEnabled = isTxSimulationEnabled(chain ?? undefined) ?? false
 
-  const simulationSeverityStatus = useMemo(() => {
-    if (isSuccess) {
-      return Severity.OK
-    }
-    if (simulationStatus.isFinished || hasError || isCallTraceError) {
-      return Severity.WARN
-    }
-  }, [hasError, isCallTraceError, isSuccess, simulationStatus.isFinished])
+  const simulationSeverityStatus = useMemo(
+    () => getSeverity(isSuccess, simulationStatus.isFinished, hasError || isCallTraceError),
+    [hasError, isCallTraceError, isSuccess, simulationStatus.isFinished],
+  )
 
   const normalizedThreatData = normalizeThreatData(threat)
   const overallStatus = getOverallStatus(
