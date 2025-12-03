@@ -19,7 +19,7 @@ import {
   AddressInfo,
   Transaction,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { createMockChain as createSharedMockChain } from '@safe-global/test'
+import { createMockChain as createSharedMockChain } from '@safe-global/test/factories'
 
 export const mockBalanceData = {
   items: [

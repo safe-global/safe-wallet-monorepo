@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 import { ScrollView, View } from 'tamagui'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import { NavBarTitle } from '@/src/components/Title'
@@ -13,11 +13,14 @@ import { useTxSignerAutoSelection } from './hooks/useTxSignerAutoSelection'
 import { useAppSelector } from '@/src/store/hooks'
 import { PendingStatus, selectPendingTxById } from '@/src/store/pendingTxsSlice'
 import { useFocusEffect, useRouter } from 'expo-router'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
 
 function ConfirmTxContainer() {
   const txId = useRoute<RouteProp<{ params: { txId: string } }>>().params.txId
   const router = useRouter()
   const pendingTx = useAppSelector((state) => selectPendingTxById(state, txId))
+  const [highlightedSeverity, setHighlightedSeverity] = useState<Severity | undefined>(undefined)
+  const [riskAcknowledged, setRiskAcknowledged] = useState(false)
 
   const { txDetails, detailedExecutionInfo, isLoading, isError } = useTransactionSigner(txId)
 
@@ -73,6 +76,7 @@ function ConfirmTxContainer() {
           detailedExecutionInfo={detailedExecutionInfo}
           txDetails={txDetails}
           pendingTx={pendingTx}
+          onSeverityChange={setHighlightedSeverity}
         />
       </ScrollView>
 
@@ -82,6 +86,9 @@ function ConfirmTxContainer() {
           isExpired={isExpired}
           isPending={!!pendingTx}
           txId={txId}
+          highlightedSeverity={highlightedSeverity}
+          riskAcknowledged={riskAcknowledged}
+          onRiskAcknowledgedChange={setRiskAcknowledged}
         />
       </View>
     </View>

@@ -6,17 +6,30 @@ import { CanNotSign } from '../CanNotSign'
 import { useTransactionSigner } from '../../hooks/useTransactionSigner'
 import { CanNotExecute } from '@/src/features/ExecuteTx/components/CanNotExecute'
 import { PendingTx } from '@/src/features/ConfirmTx/components/PendingTx'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
 
 interface ConfirmTxFormProps {
   hasEnoughConfirmations: boolean
   isExpired: boolean
   isPending: boolean
   txId: string
+  highlightedSeverity?: Severity
+  riskAcknowledged: boolean
+  onRiskAcknowledgedChange: (acknowledged: boolean) => void
 }
 
-export function ConfirmTxForm({ hasEnoughConfirmations, isExpired, isPending, txId }: ConfirmTxFormProps) {
+export function ConfirmTxForm({
+  hasEnoughConfirmations,
+  isExpired,
+  isPending,
+  txId,
+  highlightedSeverity,
+  riskAcknowledged,
+  onRiskAcknowledgedChange,
+}: ConfirmTxFormProps) {
   const { signerState } = useTransactionSigner(txId)
   const { activeSigner, hasSigned, canSign } = signerState
+  const showRiskCheckbox = highlightedSeverity === Severity.CRITICAL
 
   if (isPending) {
     return <PendingTx />
@@ -27,7 +40,14 @@ export function ConfirmTxForm({ hasEnoughConfirmations, isExpired, isPending, tx
   }
 
   if (hasEnoughConfirmations) {
-    return <ExecuteForm txId={txId} />
+    return (
+      <ExecuteForm
+        txId={txId}
+        riskAcknowledged={riskAcknowledged}
+        onRiskAcknowledgedChange={onRiskAcknowledgedChange}
+        showRiskCheckbox={showRiskCheckbox}
+      />
+    )
   }
 
   if (hasSigned) {
@@ -39,7 +59,14 @@ export function ConfirmTxForm({ hasEnoughConfirmations, isExpired, isPending, tx
   }
 
   if (activeSigner && !isExpired) {
-    return <SignForm txId={txId} />
+    return (
+      <SignForm
+        txId={txId}
+        showRiskCheckbox={showRiskCheckbox}
+        riskAcknowledged={riskAcknowledged}
+        onRiskAcknowledgedChange={onRiskAcknowledgedChange}
+      />
+    )
   }
 
   return null
