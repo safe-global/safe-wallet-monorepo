@@ -30,6 +30,8 @@ type SafeShieldContextType = {
   needsRiskConfirmation: boolean
   isRiskConfirmed: boolean
   setIsRiskConfirmed: Dispatch<SetStateAction<boolean>>
+  /** Blockaid request ID for reporting false results */
+  requestId?: string
 }
 
 const SafeShieldContext = createContext<SafeShieldContextType | null>(null)
@@ -49,7 +51,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
 
   const [isRiskConfirmed, setIsRiskConfirmed] = useState(false)
 
-  const { needsRiskConfirmation, primaryThreatSeverity } = useMemo(() => {
+  const { needsRiskConfirmation, primaryThreatSeverity, requestId } = useMemo(() => {
     const [threatAnalysisResult] = threat || []
     const primaryThreatResult = getPrimaryResult(threatAnalysisResult?.THREAT || [])
     const severity = primaryThreatResult?.severity
@@ -58,6 +60,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
     return {
       needsRiskConfirmation,
       primaryThreatSeverity: severity,
+      requestId: threatAnalysisResult?.request_id,
     }
   }, [threat])
 
@@ -77,6 +80,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
         needsRiskConfirmation,
         isRiskConfirmed,
         setIsRiskConfirmed,
+        requestId,
       }}
     >
       {children}

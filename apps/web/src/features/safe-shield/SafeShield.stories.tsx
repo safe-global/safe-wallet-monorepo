@@ -39,6 +39,7 @@ export const ChecksPassed: Story = {
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
       .threat(FullAnalysisBuilder.noThreat().build().threat)
       .build(),
+    requestId: 'mock-request-id-12345',
   },
   parameters: { docs: { description: { story: 'SafeShieldWidget analyzing with no security concerns' } } },
 }
@@ -49,6 +50,7 @@ export const MaliciousThreat: Story = {
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
       .threat(FullAnalysisBuilder.maliciousThreat().build().threat)
       .build(),
+    requestId: 'mock-request-id-12345',
   },
   parameters: { docs: { description: { story: 'SafeShieldWidget analyzing with malicious threat detected' } } },
 }
@@ -60,6 +62,7 @@ export const ModerateThreat: Story = {
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
       .threat(FullAnalysisBuilder.moderateThreat().build().threat)
       .build(),
+    requestId: 'mock-request-id-12345',
   },
   parameters: { docs: { description: { story: 'SafeShieldWidget analyzing with moderate threat detected' } } },
 }

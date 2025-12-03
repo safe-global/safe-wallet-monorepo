@@ -34,6 +34,16 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['safe-shield'],
       }),
+      safeShieldReportFalseResultV1: build.mutation<
+        SafeShieldReportFalseResultV1ApiResponse,
+        SafeShieldReportFalseResultV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/chains/${queryArg.chainId}/security/${queryArg.safeAddress}/report-false-result`,
+          method: 'POST',
+          body: queryArg.reportFalseResultRequestDto,
+        }),
+      }),
     }),
     overrideExisting: false,
   })
@@ -67,6 +77,16 @@ export type SafeShieldAnalyzeThreatV1ApiArg = {
   safeAddress: string
   /** EIP-712 typed data and wallet information for threat analysis. */
   threatAnalysisRequestDto: ThreatAnalysisRequestDto
+}
+export type SafeShieldReportFalseResultV1ApiResponse =
+  /** status 200 Report submitted successfully. */ ReportFalseResultResponseDto
+export type SafeShieldReportFalseResultV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
+  chainId: string
+  /** Safe contract address */
+  safeAddress: string
+  /** Report details including event type, request_id from scan response, and details. */
+  reportFalseResultRequestDto: ReportFalseResultRequestDto
 }
 export type SingleRecipientAnalysisResultDto = {
   /** Severity level indicating the importance and risk */
@@ -243,6 +263,8 @@ export type ThreatAnalysisResponseDto = {
   )[]
   /** Balance changes resulting from the transaction. Shows incoming and outgoing transfers for various asset types. */
   BALANCE_CHANGE?: BalanceChangeDto[]
+  /** Blockaid request ID from x-request-id header. Used for reporting false positives/negatives via the report endpoint. */
+  request_id?: string
 }
 export type TypedDataDomain = {
   chainId?: number
@@ -273,9 +295,24 @@ export type ThreatAnalysisRequestDto = {
   /** Optional origin identifier for the request */
   origin?: string
 }
+/** Event types for reporting false Blockaid scan results. */
+export type ReportEvent = 'FALSE_POSITIVE' | 'FALSE_NEGATIVE'
+export type ReportFalseResultRequestDto = {
+  /** Type of report: FALSE_POSITIVE if flagged incorrectly, FALSE_NEGATIVE if should have been flagged */
+  event: ReportEvent
+  /** The request_id from the original Blockaid scan response */
+  request_id: string
+  /** Details about why this is a false result */
+  details: string
+}
+export type ReportFalseResultResponseDto = {
+  /** Whether the report was submitted successfully */
+  success: boolean
+}
 export const {
   useSafeShieldAnalyzeRecipientV1Query,
   useLazySafeShieldAnalyzeRecipientV1Query,
   useSafeShieldAnalyzeCounterpartyV1Mutation,
   useSafeShieldAnalyzeThreatV1Mutation,
+  useSafeShieldReportFalseResultV1Mutation,
 } = injectedRtkApi

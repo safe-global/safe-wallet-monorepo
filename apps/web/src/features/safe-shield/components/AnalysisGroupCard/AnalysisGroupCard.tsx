@@ -21,6 +21,7 @@ interface AnalysisGroupCardProps {
   highlightedSeverity?: Severity
   delay?: number
   analyticsEvent?: AnalyticsEvent
+  footer?: React.ReactNode
   'data-testid'?: string
 }
 
@@ -30,6 +31,7 @@ export const AnalysisGroupCard = ({
   highlightedSeverity,
   delay = 0,
   analyticsEvent,
+  footer,
   'data-testid': dataTestId,
 }: AnalysisGroupCardProps): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
@@ -127,6 +129,7 @@ export const AnalysisGroupCard = ({
                   severity={shouldHighlight ? result.severity : undefined}
                   key={index}
                   result={result}
+                  footer={isPrimary ? footer : undefined}
                 />
               )
             })}

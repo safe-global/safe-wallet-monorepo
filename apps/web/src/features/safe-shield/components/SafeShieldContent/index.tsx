@@ -1,5 +1,5 @@
-import { type ReactElement } from 'react'
-import { Box } from '@mui/material'
+import { useState, useEffect, type ReactElement } from 'react'
+import { Box, Link } from '@mui/material'
 import type {
   GroupedAnalysisResults,
   ContractAnalysisResults,
@@ -10,6 +10,7 @@ import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
 import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
+import { ReportFalseResultModal } from '../ReportFalseResultModal'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
 import type { SafeTransaction } from '@safe-global/types-kit'
@@ -37,11 +38,13 @@ export const SafeShieldContent = ({
   contract,
   threat,
   safeTx,
+  requestId,
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
+  requestId?: string
 }): ReactElement => {
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient || []
   const [contractResults = {}, _contractError, contractLoading = false] = contract || []
@@ -66,6 +69,15 @@ export const SafeShieldContent = ({
 
   const { recipientDelay, contractAnalysisDelay, threatAnalysisDelay, simulationAnalysisDelay } =
     calculateAnalysisDelays(recipientEmpty, contractEmpty)
+
+  // Report modal state
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false)
+  const showReportLink = !!requestId && !threatLoading
+
+  // Close modal when requestId changes to prevent submitting against wrong analysis
+  useEffect(() => {
+    setIsReportModalOpen(false)
+  }, [requestId])
 
   return (
     <Box padding="0px 4px 4px">
@@ -106,6 +118,25 @@ export const SafeShieldContent = ({
             delay={threatAnalysisDelay}
             highlightedSeverity={highlightedSeverity}
             analyticsEvent={SAFE_SHIELD_EVENTS.THREAT_ANALYZED}
+            footer={
+              showReportLink ? (
+                <Link
+                  component="button"
+                  variant="body2"
+                  onClick={() => setIsReportModalOpen(true)}
+                  sx={{
+                    alignSelf: 'flex-start',
+                    color: 'text.secondary',
+                    textDecoration: 'none',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
+                  Report false result
+                </Link>
+              ) : undefined
+            }
           />
 
           {!contractLoading && !threatLoading && (
@@ -117,6 +148,14 @@ export const SafeShieldContent = ({
           )}
         </Box>
       </Box>
+
+      {requestId && (
+        <ReportFalseResultModal
+          open={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+          requestId={requestId}
+        />
+      )}
     </Box>
   )
 }
