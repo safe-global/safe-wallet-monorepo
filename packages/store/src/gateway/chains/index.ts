@@ -28,8 +28,12 @@ const getChainsConfigs = async (
 const getChains = async (): Promise<
   QueryReturnValue<EntityState<ChainInfo, string>, FetchBaseQueryError, FetchBaseQueryMeta>
 > => {
-  const data = await getChainsConfigs()
-  return { data }
+  try {
+    const data = await getChainsConfigs()
+    return { data }
+  } catch (error) {
+    return { error: { status: 'FETCH_ERROR', error: String(error) } as FetchBaseQueryError }
+  }
 }
 
 export const apiSliceWithChainsConfig = cgwClient.injectEndpoints({

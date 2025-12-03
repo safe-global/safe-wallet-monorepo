@@ -46,11 +46,12 @@ export const ofacApi = createApi({
   endpoints: (builder) => ({
     getIsSanctioned: builder.query<boolean, string>({
       async queryFn(address, { getState }) {
+        if (!address) return createBadRequestError('No address provided')
+
         const state = getState()
         const chain = selectChainById(state as RootState, chains.eth)
 
         if (!chain) return createBadRequestError('Chain info not found')
-        if (!address) return createBadRequestError('No address provided')
 
         const provider = createWeb3ReadOnly(chain)
         const contract = new Contract(CHAINALYSIS_OFAC_CONTRACT, contractAbi, provider)

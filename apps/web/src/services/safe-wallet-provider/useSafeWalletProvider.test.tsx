@@ -637,15 +637,7 @@ describe('useSafeWalletProvider', () => {
       const store = makeStore(
         {
           chains: {
-            data: [
-              {
-                chainId: '5',
-                shortName: 'gor',
-                chainName: 'Goerli',
-                zk: false,
-                beaconChainExplorerUriTemplate: {},
-              } as any,
-            ],
+            data: [chainBuilder().with({ chainId: '5', shortName: 'gor', chainName: 'Goerli' }).build()],
             loading: false,
             loaded: true,
             error: undefined,
