@@ -27,35 +27,35 @@ export type StatusGroupType<T extends StatusGroup> = {
   [StatusGroup.ADDRESS_BOOK]: RecipientStatus.KNOWN_RECIPIENT | RecipientStatus.UNKNOWN_RECIPIENT
   [StatusGroup.RECIPIENT_ACTIVITY]: RecipientStatus.LOW_ACTIVITY | CommonSharedStatus.FAILED
   [StatusGroup.RECIPIENT_INTERACTION]:
-    | RecipientStatus.NEW_RECIPIENT
-    | RecipientStatus.RECURRING_RECIPIENT
-    | CommonSharedStatus.FAILED
+  | RecipientStatus.NEW_RECIPIENT
+  | RecipientStatus.RECURRING_RECIPIENT
+  | CommonSharedStatus.FAILED
   [StatusGroup.BRIDGE]:
-    | BridgeStatus.INCOMPATIBLE_SAFE
-    | BridgeStatus.MISSING_OWNERSHIP
-    | BridgeStatus.UNSUPPORTED_NETWORK
-    | BridgeStatus.DIFFERENT_SAFE_SETUP
-    | CommonSharedStatus.FAILED
+  | BridgeStatus.INCOMPATIBLE_SAFE
+  | BridgeStatus.MISSING_OWNERSHIP
+  | BridgeStatus.UNSUPPORTED_NETWORK
+  | BridgeStatus.DIFFERENT_SAFE_SETUP
+  | CommonSharedStatus.FAILED
   [StatusGroup.CONTRACT_VERIFICATION]:
-    | ContractStatus.VERIFIED
-    | ContractStatus.NOT_VERIFIED
-    | ContractStatus.NOT_VERIFIED_BY_SAFE
-    | ContractStatus.VERIFICATION_UNAVAILABLE
-    | CommonSharedStatus.FAILED
+  | ContractStatus.VERIFIED
+  | ContractStatus.NOT_VERIFIED
+  | ContractStatus.NOT_VERIFIED_BY_SAFE
+  | ContractStatus.VERIFICATION_UNAVAILABLE
+  | CommonSharedStatus.FAILED
   [StatusGroup.CONTRACT_INTERACTION]:
-    | ContractStatus.KNOWN_CONTRACT
-    | ContractStatus.NEW_CONTRACT
-    | CommonSharedStatus.FAILED
+  | ContractStatus.KNOWN_CONTRACT
+  | ContractStatus.NEW_CONTRACT
+  | CommonSharedStatus.FAILED
   [StatusGroup.DELEGATECALL]: ContractStatus.UNEXPECTED_DELEGATECALL | CommonSharedStatus.FAILED
   [StatusGroup.THREAT]:
-    | ThreatStatus.MALICIOUS
-    | ThreatStatus.MODERATE
-    | ThreatStatus.NO_THREAT
-    | ThreatStatus.MASTERCOPY_CHANGE
-    | ThreatStatus.OWNERSHIP_CHANGE
-    | ThreatStatus.MODULE_CHANGE
-    | ThreatStatus.UNOFFICIAL_FALLBACK_HANDLER
-    | CommonSharedStatus.FAILED
+  | ThreatStatus.MALICIOUS
+  | ThreatStatus.MODERATE
+  | ThreatStatus.NO_THREAT
+  | ThreatStatus.MASTERCOPY_CHANGE
+  | ThreatStatus.OWNERSHIP_CHANGE
+  | ThreatStatus.MODULE_CHANGE
+  | ThreatStatus.UNOFFICIAL_FALLBACK_HANDLER
+  | CommonSharedStatus.FAILED
 }[T]
 
 export enum RecipientStatus {
@@ -119,18 +119,23 @@ export type MasterCopyChangeThreatAnalysisResult = AnalysisResult<ThreatStatus.M
   after: string
 }
 
+export type ThreatIssue = {
+  description: string
+  address?: string
+}
+
 export type MaliciousOrModerateThreatAnalysisResult = AnalysisResult<ThreatStatus.MALICIOUS | ThreatStatus.MODERATE> & {
   /** A potential map of specific issues identified during threat analysis, grouped by severity */
-  issues?: { [severity in Severity]?: string[] }
+  issues?: { [severity in Severity]?: ThreatIssue[] }
 }
 
 export type ThreatAnalysisResult =
   | MasterCopyChangeThreatAnalysisResult
   | MaliciousOrModerateThreatAnalysisResult
   | AnalysisResult<
-      | Exclude<ThreatStatus, ThreatStatus.MALICIOUS | ThreatStatus.MODERATE | ThreatStatus.MASTERCOPY_CHANGE>
-      | CommonSharedStatus.FAILED
-    >
+    | Exclude<ThreatStatus, ThreatStatus.MALICIOUS | ThreatStatus.MODERATE | ThreatStatus.MASTERCOPY_CHANGE>
+    | CommonSharedStatus.FAILED
+  >
 
 export type GroupedAnalysisResults<G extends StatusGroup = StatusGroup> = {
   [K in Exclude<G, StatusGroup.THREAT>]?: AnalysisResult<StatusGroupType<K>>[]
@@ -157,12 +162,12 @@ export type ContractDetails = {
 
 export type ContractAnalysisResults = {
   [address: string]: ContractDetails &
-    GroupedAnalysisResults<
-      | StatusGroup.CONTRACT_VERIFICATION
-      | StatusGroup.CONTRACT_INTERACTION
-      | StatusGroup.DELEGATECALL
-      | StatusGroup.COMMON
-    >
+  GroupedAnalysisResults<
+    | StatusGroup.CONTRACT_VERIFICATION
+    | StatusGroup.CONTRACT_INTERACTION
+    | StatusGroup.DELEGATECALL
+    | StatusGroup.COMMON
+  >
 }
 
 export type ThreatAnalysisResults = {

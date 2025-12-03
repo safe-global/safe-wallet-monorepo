@@ -186,6 +186,12 @@ export type MasterCopyChangeThreatAnalysisResultDto = {
   /** Address of the new master copy/implementation contract */
   after: string
 }
+export type ThreatIssue = {
+  /** Address involved in the issue, if applicable */
+  address?: string
+  /** Issue description */
+  description: string
+}
 export type MaliciousOrModerateThreatAnalysisResultDto = {
   /** Severity level indicating the importance and risk */
   severity: 'OK' | 'INFO' | 'WARN' | 'CRITICAL'
@@ -195,9 +201,9 @@ export type MaliciousOrModerateThreatAnalysisResultDto = {
   title: string
   /** Detailed description explaining the finding and its implications */
   description: string
-  /** A partial record of specific issues identified during threat analysis, grouped by severity.Record<Severity, string[]> - keys should be one of the Severity enum. */
+  /** A partial record of specific issues identified during threat analysis, grouped by severity.Record<Severity, ThreatIssue[]> - keys should be one of the Severity enum. */
   issues?: {
-    [key: string]: string[]
+    [key: string]: ThreatIssue[]
   }
 }
 export type NativeAssetDetailsDto = {

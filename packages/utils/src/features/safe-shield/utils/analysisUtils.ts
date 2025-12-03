@@ -1,5 +1,5 @@
 import { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import type { GroupedAnalysisResults, Severity, ThreatAnalysisResults } from '../types'
+import type { GroupedAnalysisResults, Severity, ThreatAnalysisResults, ThreatIssue } from '../types'
 import isEmpty from 'lodash/isEmpty'
 
 /**
@@ -39,8 +39,8 @@ export function getPrimaryResult<T extends { severity: Severity }>(results: T[])
 }
 
 export function sortByIssueSeverity(
-  issuesMap: { [severity in Severity]?: string[] } | undefined,
-): Array<{ severity: Severity; issues: string[] }> {
+  issuesMap: { [severity in Severity]?: ThreatIssue[] } | undefined,
+): Array<{ severity: Severity; issues: ThreatIssue[] }> {
   if (!issuesMap || isEmpty(issuesMap)) return []
 
   const issuesWithSeverity = Object.entries(issuesMap).map(([severity, issues]) => ({
