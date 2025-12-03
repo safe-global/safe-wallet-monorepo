@@ -1,4 +1,4 @@
-import { useEffect, useMemo, type ReactElement } from 'react'
+import { useEffect, type ReactElement } from 'react'
 import { SafeShieldDisplay } from './components/SafeShieldDisplay'
 import { useSafeShield } from './SafeShieldContext'
 import { SAFE_SHIELD_EVENTS, trackEvent } from '@/services/analytics'
@@ -7,13 +7,8 @@ import { useIsHypernativeGuard } from '@/features/hypernative/hooks/useIsHyperna
 
 const SafeShieldWidget = (): ReactElement => {
   const { recipient, contract, threat, safeTx } = useSafeShield()
-  const { isAuthenticated, isTokenExpired, loading: authLoading } = useHypernativeOAuth()
+  const hypernativeAuth = useHypernativeOAuth()
   const { isHypernativeGuard, loading: HNGuardCheckLoading } = useIsHypernativeGuard()
-
-  const hnLoginRequired = useMemo(
-    () => (!isAuthenticated || isTokenExpired) && !authLoading && !HNGuardCheckLoading && isHypernativeGuard,
-    [isAuthenticated, isTokenExpired, authLoading, HNGuardCheckLoading, isHypernativeGuard],
-  )
 
   // Track when a transaction flow is started
   useEffect(() => {
@@ -27,7 +22,7 @@ const SafeShieldWidget = (): ReactElement => {
       contract={contract}
       threat={threat}
       safeTx={safeTx}
-      hnLoginRequired={hnLoginRequired}
+      hypernativeAuth={!HNGuardCheckLoading && isHypernativeGuard ? hypernativeAuth : undefined}
     />
   )
 }

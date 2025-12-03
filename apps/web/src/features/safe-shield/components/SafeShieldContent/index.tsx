@@ -23,6 +23,7 @@ import {
   useDelayedLoading,
 } from '@/features/safe-shield/hooks/useDelayedLoading'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
+import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
 
 const normalizeThreatData = (threat?: AsyncResult<ThreatAnalysisResults>): Record<string, GroupedAnalysisResults> => {
   const [result] = threat || []
@@ -40,12 +41,14 @@ export const SafeShieldContent = ({
   threat,
   safeTx,
   overallStatus,
+  hypernativeAuth,
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
   overallStatus?: { severity: Severity; title: string } | undefined
+  hypernativeAuth?: HypernativeAuthStatus
 }): ReactElement => {
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient || []
   const [contractResults = {}, _contractError, contractLoading = false] = contract || []
@@ -83,13 +86,13 @@ export const SafeShieldContent = ({
           position: 'relative',
         }}
       >
-        <HypernativeInfo overallStatus={overallStatus} />
+        <HypernativeInfo overallStatus={overallStatus} hypernativeAuth={hypernativeAuth} />
 
         {isLoadingVisible && <SafeShieldAnalysisLoading analysesEmpty={analysesEmpty} loading={isLoadingVisible} />}
 
         {shouldShowContent && !loading && allEmpty && <SafeShieldAnalysisEmpty />}
 
-        <Box sx={{ '& > div:not(:last-child)': { borderBottom: '1px solid', borderColor: 'background.main' } }}>
+        <Box sx={{ '& > div': { borderTop: '1px solid', borderColor: 'background.main' } }}>
           <AnalysisGroupCard
             data-testid="recipient-analysis-group-card"
             delay={recipientDelay}
