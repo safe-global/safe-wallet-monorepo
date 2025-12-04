@@ -70,7 +70,6 @@ const SwapButton = ({
               color={light ? 'background.paper' : 'primary'}
               size="compact"
               startIcon={<SwapIcon />}
-              disableElevation
               onClick={handleClick}
               disabled={!isOk}
               className={assetActionCss.sendButton}
