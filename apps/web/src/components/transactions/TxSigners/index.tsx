@@ -169,17 +169,15 @@ export const TxSigners = ({
           </ListItem>
         )}
 
-        {confirmations.length > 0 && (
-          <ListItem>
-            <StyledListItemIcon $state={isConfirmed ? StepState.CONFIRMED : StepState.ACTIVE}>
-              {isConfirmed ? <Check /> : <MissingConfirmation />}
-            </StyledListItemIcon>
-            <ListItemText data-testid="confirmation-action" primaryTypographyProps={{ fontWeight: 700 }}>
-              Confirmations{' '}
-              <Box className={css.confirmationsTotal}>({`${confirmationsCount} of ${confirmationsRequired}`})</Box>
-            </ListItemText>
-          </ListItem>
-        )}
+        <ListItem>
+          <StyledListItemIcon $state={isConfirmed ? StepState.CONFIRMED : StepState.ACTIVE}>
+            {isConfirmed ? <Check /> : <MissingConfirmation />}
+          </StyledListItemIcon>
+          <ListItemText data-testid="confirmation-action" primaryTypographyProps={{ fontWeight: 700 }}>
+            Confirmations{' '}
+            <Box className={css.confirmationsTotal}>({`${confirmationsCount} of ${confirmationsRequired}`})</Box>
+          </ListItemText>
+        </ListItem>
 
         {!hideConfirmations &&
           confirmations.map(({ signer }) => (
