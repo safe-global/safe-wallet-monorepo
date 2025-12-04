@@ -55,12 +55,12 @@ jobs:
             echo 'CHANGELOG_EOF'
           } >> $GITHUB_OUTPUT
 
-      - name: Create GitHub release
+      - name: Create GitHub release (draft)
         if: steps.version.outputs.version
         uses: softprops/action-gh-release@v2
         id: create_release
         with:
-          draft: false
+          draft: true
           prerelease: false
           name: ${{ steps.version.outputs.version }}
           tag_name: ${{ steps.version.outputs.version }}
@@ -166,6 +166,12 @@ jobs:
             echo "⚠️ Back-merge to dev failed - manual intervention required"
             echo "See troubleshooting docs: https://github.com/${{ github.repository }}/blob/dev/apps/web/docs/release-procedure-automated.md#back-merge-conflicts"
           fi
+
+      - name: Publish GitHub release
+        if: steps.version.outputs.version
+        run: gh release edit ${{ steps.version.outputs.version }} --draft=false
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Notify on Slack
         if: vars.SLACK_WEBHOOK_URL
