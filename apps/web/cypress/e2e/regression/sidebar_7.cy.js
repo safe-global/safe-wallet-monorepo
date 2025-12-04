@@ -21,8 +21,13 @@ describe('Sidebar tests 7', () => {
   it('Verify Import/export buttons are present', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.addedSafes)
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
-    cy.intercept('GET', constants.safeListEndpoint, {
-      11155111: [sideBar.sideBarSafes.safe1, sideBar.sideBarSafes.safe2],
+    cy.intercept('GET', constants.ownedSafesEndpoint, (req) => {
+      req.reply({
+        statusCode: 200,
+        body: {
+          11155111: [sideBar.sideBarSafes.safe1, sideBar.sideBarSafes.safe2],
+        },
+      })
     })
     wallet.connectSigner(signer)
     sideBar.openSidebar()
@@ -33,8 +38,13 @@ describe('Sidebar tests 7', () => {
   // Added to prod
   it('Verify the "Accounts" counter at the top is counting all safes the user owns', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
-    cy.intercept('GET', constants.safeListEndpoint, {
-      11155111: [sideBar.sideBarSafes.safe1, sideBar.sideBarSafes.safe2],
+    cy.intercept('GET', constants.ownedSafesEndpoint, (req) => {
+      req.reply({
+        statusCode: 200,
+        body: {
+          11155111: [sideBar.sideBarSafes.safe1, sideBar.sideBarSafes.safe2],
+        },
+      })
     })
     wallet.connectSigner(signer)
     sideBar.openSidebar()
@@ -60,16 +70,26 @@ describe('Sidebar tests 7', () => {
   // Added to prod
   it('Verify pending signature is displayed in sidebar for unsigned tx', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
-    wallet.connectSigner(signer)
-    cy.intercept('GET', constants.safeListEndpoint, {
-      11155111: [sideBar.sideBarSafesPendingActions.safe1],
+    cy.intercept('GET', constants.ownedSafesEndpoint, (req) => {
+      req.reply({
+        statusCode: 200,
+        body: {
+          11155111: [sideBar.sideBarSafesPendingActions.safe1],
+        },
+      })
     })
+    wallet.connectSigner(signer)
     sideBar.openSidebar()
     sideBar.verifyTxToConfirmDoesNotExist()
     owner.clickOnWalletExpandMoreIcon()
     navigation.clickOnDisconnectBtn()
-    cy.intercept('GET', constants.safeListEndpoint, {
-      11155111: [sideBar.sideBarSafesPendingActions.safe1],
+    cy.intercept('GET', constants.ownedSafesEndpoint, (req) => {
+      req.reply({
+        statusCode: 200,
+        body: {
+          11155111: [sideBar.sideBarSafesPendingActions.safe1],
+        },
+      })
     })
     wallet.connectSigner(signer2)
     sideBar.verifyAddedSafesExist([sideBar.sideBarSafesPendingActions.safe1short])
@@ -79,13 +99,15 @@ describe('Sidebar tests 7', () => {
   // Added to prod
   it('Verify balance exists in a tx in sidebar', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
-    wallet.connectSigner(signer)
-    owner.clickOnWalletExpandMoreIcon()
-    navigation.clickOnDisconnectBtn()
-    wallet.connectSigner(signer)
-    cy.intercept('GET', constants.safeListEndpoint, {
-      11155111: [sideBar.sideBarSafesPendingActions.safe1],
+    cy.intercept('GET', constants.ownedSafesEndpoint, (req) => {
+      req.reply({
+        statusCode: 200,
+        body: {
+          11155111: [sideBar.sideBarSafesPendingActions.safe1],
+        },
+      })
     })
+    wallet.connectSigner(signer)
     sideBar.openSidebar()
     sideBar.verifyTxToConfirmDoesNotExist()
     sideBar.checkBalanceExists()

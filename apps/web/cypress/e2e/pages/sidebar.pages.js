@@ -637,7 +637,7 @@ export function verifyTxToConfirmDoesNotExist() {
 
 export function checkBalanceExists() {
   const balance = new RegExp(`\\s*\\d*\\.?\\d*\\s*`, 'i')
-  const element = cy.get(chainLogo).prev().contains(balance)
+  cy.get(chainLogo).next().contains(balance).should('exist')
 }
 
 export function clickOnAddOptionsBtn() {
