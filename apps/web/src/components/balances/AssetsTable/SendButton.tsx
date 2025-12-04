@@ -48,13 +48,14 @@ const SendButton = ({
           ) : (
             <Button
               data-testid="send-button"
-              variant="contained"
-              color={light ? 'background.paper' : 'primary'}
+              variant={light ? 'neutral' : 'contained'}
+              color={light ? undefined : 'primary'}
               size="compact"
               startIcon={<ArrowIconNW />}
               onClick={onSendClick}
               disabled={!isOk}
               className={css.sendButton}
+              sx={light ? { minHeight: 'auto' } : undefined}
             >
               Send
             </Button>
