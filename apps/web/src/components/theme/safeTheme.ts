@@ -178,6 +178,12 @@ const createSafeTheme = (mode: PaletteMode): Theme => {
               },
             }),
           },
+          {
+            props: { variant: 'neutral', size: 'compact' },
+            style: ({ theme }) => ({
+              color: theme.palette.primary.light,
+            }),
+          },
         ],
         styleOverrides: {
           sizeSmall: {

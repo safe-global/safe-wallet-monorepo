@@ -1,30 +1,15 @@
 import CheckBalance from '@/features/counterfactual/CheckBalance'
 import React, { type ReactElement } from 'react'
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  Card,
-  Skeleton,
-  Stack,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Box, Card, Skeleton, Stack } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import css from './styles.module.css'
 import TokenMenu from '../TokenMenu'
 import useBalances from '@/hooks/useBalances'
 import { useHideAssets, useVisibleAssets } from './useHideAssets'
 import AddFundsCTA from '@/components/common/AddFunds'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
-import { useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEnabled'
 import useIsStakingPromoEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
 import useChainId from '@/hooks/useChainId'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-import { AssetRowContent } from './AssetRowContent'
-import { ActionButtons } from './ActionButtons'
 import AssetHeader from './AssetHeader'
 import AssetDetails from './AssetDetails'
 
@@ -54,7 +39,6 @@ const AssetsTable = ({
   const chainId = useChainId()
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
   const isStakingPromoEnabled = useIsStakingPromoEnabled()
-  const isEarnPromoEnabled = useIsEarnPromoEnabled()
 
   const { isAssetSelected, cancel, deselectAll, saveChanges } = useHideAssets(() => setShowHiddenAssets(false))
 
@@ -65,9 +49,6 @@ const AssetsTable = ({
   const selectedAssetCount = visibleAssets?.filter((item) => isAssetSelected(item.tokenInfo.address)).length || 0
 
   const tokensFiatTotal = visibleBalances.tokensFiatTotal ? Number(visibleBalances.tokensFiatTotal) : undefined
-
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   return (
     <>
@@ -81,44 +62,6 @@ const AssetsTable = ({
 
       {hasNoAssets ? (
         <AddFundsCTA />
-      ) : isMobile ? (
-        <Card sx={{ px: 2, mb: 2 }}>
-          <Box className={css.mobileContainer}>
-            <Box className={css.mobileHeader}>
-              <Typography variant="body2" color="text.secondary">
-                Asset
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Value
-              </Typography>
-            </Box>
-            {loading
-              ? Array(3)
-                  .fill(null)
-                  .map((_, index) => (
-                    <Box key={index} className={css.mobileRow}>
-                      <Skeleton variant="rounded" width="100%" height={80} />
-                    </Box>
-                  ))
-              : (visibleAssets || []).map((item) => (
-                  <Box key={item.tokenInfo.address} className={css.mobileRow}>
-                    <AssetRowContent
-                      item={item}
-                      chainId={chainId}
-                      isStakingPromoEnabled={isStakingPromoEnabled ?? false}
-                      isEarnPromoEnabled={isEarnPromoEnabled ?? false}
-                      showMobileValue
-                      showMobileBalance
-                    />
-                    <ActionButtons
-                      tokenInfo={item.tokenInfo}
-                      isSwapFeatureEnabled={isSwapFeatureEnabled ?? false}
-                      mobile
-                    />
-                  </Box>
-                ))}
-          </Box>
-        </Card>
       ) : (
         <Stack gap={2}>
           {loading
@@ -132,18 +75,18 @@ const AssetsTable = ({
                   <Card key={item.tokenInfo.address} sx={{ border: 0 }}>
                     <Accordion disableGutters elevation={0} variant="elevation">
                       <AccordionSummary
-                        expandIcon={
-                          <Box ml={1}>
-                            <ExpandMoreIcon fontSize="small" />
-                          </Box>
-                        }
-                        sx={{ justifyContent: 'center', overflowX: 'auto', backgroundColor: 'transparent !important' }}
+                        expandIcon={<ExpandMoreIcon fontSize="small" />}
+                        sx={{
+                          justifyContent: 'center',
+                          overflowX: 'auto',
+                          backgroundColor: 'transparent !important',
+                          alignItems: { xs: 'flex-start', sm: 'center' },
+                          '& .MuiAccordionSummary-expandIconWrapper': {
+                            marginTop: { xs: 1.5, sm: 0 },
+                          },
+                        }}
                       >
-                        <AssetHeader
-                          item={item}
-                          weightShare={itemShareOfFiatTotal}
-                          isSwapFeatureEnabled={isSwapFeatureEnabled ?? false}
-                        />
+                        <AssetHeader item={item} isSwapFeatureEnabled={isSwapFeatureEnabled ?? false} />
                       </AccordionSummary>
                       <AccordionDetails sx={{ pt: 0, pb: 0 }}>
                         <AssetDetails

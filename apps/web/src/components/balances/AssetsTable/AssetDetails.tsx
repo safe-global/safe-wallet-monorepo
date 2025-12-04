@@ -4,7 +4,6 @@ import { TokenType } from '@safe-global/store/gateway/types'
 import { type ReactElement } from 'react'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import FiatValue from '@/components/common/FiatValue'
-import TokenAmount from '@/components/common/TokenAmount'
 import StakeButton from '@/features/stake/components/StakeButton'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
@@ -20,29 +19,27 @@ interface AssetDetailsProps {
 const AssetDetails = ({ item, chainId, isStakingPromoEnabled, weightShare }: AssetDetailsProps): ReactElement => {
   const isNative = item.tokenInfo.type === TokenType.NATIVE_TOKEN
   const showStakeButton = isStakingPromoEnabled && isNative
-  const priceValue = parseFloat(item.fiatConversion)
-  const showPrecisePrice = priceValue >= 1 || priceValue === 0
 
   return (
     <Stack spacing={2} sx={{ px: 2, pb: 2 }}>
       <Stack direction="row" spacing={4} flexWrap="wrap">
-        {/* Price */}
+        {/* Token price */}
         <Box>
           <Typography variant="body2" color="text.secondary" mb={0.5}>
-            Price
+            Token price
           </Typography>
           <Typography variant="body1" fontWeight="bold">
-            <FiatValue value={item.fiatConversion === '0' ? null : item.fiatConversion} precise={showPrecisePrice} />
+            <FiatValue value={item.fiatConversion === '0' ? null : item.fiatConversion} precise />
           </Typography>
         </Box>
 
-        {/* Balance */}
+        {/* Total value */}
         <Box>
           <Typography variant="body2" color="text.secondary" mb={0.5}>
-            Balance
+            Total value
           </Typography>
           <Typography variant="body1" fontWeight="bold">
-            <TokenAmount value={item.balance} decimals={item.tokenInfo.decimals} tokenSymbol={item.tokenInfo.symbol} />
+            <FiatValue value={item.fiatBalance} precise />
           </Typography>
         </Box>
 
@@ -69,14 +66,11 @@ const AssetDetails = ({ item, chainId, isStakingPromoEnabled, weightShare }: Ass
             </Stack>
           </Box>
         )}
-      </Stack>
 
-      {/* Address - only for non-native tokens */}
-      {!isNative && (
-        <>
-          <Divider />
+        {/* Token address - only for non-native tokens */}
+        {!isNative && (
           <Box>
-            <Typography variant="body2" color="text.secondary" mb={1}>
+            <Typography variant="body2" color="text.secondary" mb={0.5}>
               Token address
             </Typography>
             <EthHashInfo
@@ -84,12 +78,12 @@ const AssetDetails = ({ item, chainId, isStakingPromoEnabled, weightShare }: Ass
               chainId={chainId}
               hasExplorer
               showCopyButton
-              shortAddress={false}
+              shortAddress
               showAvatar={false}
             />
           </Box>
-        </>
-      )}
+        )}
+      </Stack>
 
       {/* Stake Button */}
       {showStakeButton && (

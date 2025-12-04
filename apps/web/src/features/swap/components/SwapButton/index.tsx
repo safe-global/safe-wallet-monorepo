@@ -73,7 +73,7 @@ const SwapButton = ({
               onClick={handleClick}
               disabled={!isOk}
               className={assetActionCss.sendButton}
-              sx={light ? { minHeight: 'auto' } : undefined}
+              sx={light ? { minHeight: 'auto', width: '100%' } : undefined}
             >
               Swap
             </Button>

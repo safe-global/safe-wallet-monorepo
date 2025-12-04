@@ -55,7 +55,7 @@ const SendButton = ({
               onClick={onSendClick}
               disabled={!isOk}
               className={css.sendButton}
-              sx={light ? { minHeight: 'auto' } : undefined}
+              sx={light ? { minHeight: 'auto', width: '100%' } : undefined}
             >
               Send
             </Button>

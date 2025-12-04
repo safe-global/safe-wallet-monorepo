@@ -1,4 +1,4 @@
-import { Stack, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import TokenIcon from '@/components/common/TokenIcon'
 import TokenAmount from '@/components/common/TokenAmount'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
@@ -8,17 +8,15 @@ import SendButton from './SendButton'
 import SwapButton from '@/features/swap/components/SwapButton'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { type ReactElement } from 'react'
-import css from './styles.module.css'
 
 interface AssetHeaderProps {
   item: Balance
-  weightShare: number | null
   isSwapFeatureEnabled: boolean
 }
 
-const AssetHeader = ({ item, weightShare, isSwapFeatureEnabled }: AssetHeaderProps): ReactElement => {
+const AssetHeader = ({ item, isSwapFeatureEnabled }: AssetHeaderProps): ReactElement => {
   return (
-    <Stack direction="row" gap={1} alignItems="center" width={1}>
+    <Stack direction="row" gap={1} alignItems="center" width={1} flexWrap="wrap">
       <TokenIcon logoUri={item.tokenInfo.logoUri} tokenSymbol={item.tokenInfo.symbol} size={32} />
 
       <Stack>
@@ -29,23 +27,9 @@ const AssetHeader = ({ item, weightShare, isSwapFeatureEnabled }: AssetHeaderPro
       </Stack>
 
       <Stack direction="column" alignItems="flex-end" ml="auto" mr={1}>
-        <Stack direction="row" alignItems="center" gap={0.5}>
-          <Typography fontWeight="bold">
-            <FiatBalance balanceItem={item} />
-          </Typography>
-          {weightShare && (
-            <div className={css.customProgress}>
-              <div
-                className={css.progressRing}
-                style={
-                  {
-                    '--progress': `${(weightShare * 100).toFixed(1)}%`,
-                  } as React.CSSProperties & { '--progress': string }
-                }
-              />
-            </div>
-          )}
-        </Stack>
+        <Typography fontWeight="bold">
+          <FiatBalance balanceItem={item} />
+        </Typography>
         {item.fiatBalance24hChange && (
           <Typography variant="caption">
             <FiatChange balanceItem={item} inline />
@@ -53,10 +37,24 @@ const AssetHeader = ({ item, weightShare, isSwapFeatureEnabled }: AssetHeaderPro
         )}
       </Stack>
 
-      <Stack direction="row" gap={1} alignItems="center" ml={1}>
-        <SendButton tokenInfo={item.tokenInfo} light />
+      <Stack
+        direction="row"
+        gap={1}
+        alignItems="center"
+        sx={{
+          ml: { xs: 0, sm: 1 },
+          mr: 1,
+          width: { xs: '100%', sm: 'auto' },
+          mt: { xs: 1, sm: 0 },
+        }}
+      >
+        <Box sx={{ flex: { xs: '1 1 0', sm: 'initial' }, minWidth: 0 }}>
+          <SendButton tokenInfo={item.tokenInfo} light />
+        </Box>
         {isSwapFeatureEnabled && (
-          <SwapButton tokenInfo={item.tokenInfo} amount="0" trackingLabel={SWAP_LABELS.asset} light />
+          <Box sx={{ flex: { xs: '1 1 0', sm: 'initial' }, minWidth: 0 }}>
+            <SwapButton tokenInfo={item.tokenInfo} amount="0" trackingLabel={SWAP_LABELS.asset} light />
+          </Box>
         )}
       </Stack>
     </Stack>
