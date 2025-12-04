@@ -4,7 +4,7 @@ import { useSafeShield } from './SafeShieldContext'
 import { SAFE_SHIELD_EVENTS, trackEvent } from '@/services/analytics'
 
 const SafeShieldWidget = (): ReactElement => {
-  const { recipient, contract, threat, safeTx } = useSafeShield()
+  const { recipient, contract, threat, safeTx, requestId } = useSafeShield()
 
   // Track when a transaction flow is started
   useEffect(() => {
@@ -18,6 +18,7 @@ const SafeShieldWidget = (): ReactElement => {
       contract={contract}
       threat={threat}
       safeTx={safeTx}
+      requestId={requestId}
     />
   )
 }

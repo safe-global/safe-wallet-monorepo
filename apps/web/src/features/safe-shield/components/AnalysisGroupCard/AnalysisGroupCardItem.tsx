@@ -12,9 +12,16 @@ interface AnalysisGroupCardItemProps {
   description?: React.ReactNode
   severity?: Severity
   showImage?: boolean
+  footer?: React.ReactNode
 }
 
-export const AnalysisGroupCardItem = ({ result, description, severity, showImage }: AnalysisGroupCardItemProps) => {
+export const AnalysisGroupCardItem = ({
+  result,
+  description,
+  severity,
+  showImage,
+  footer,
+}: AnalysisGroupCardItemProps) => {
   const borderColor = severity ? SEVERITY_COLORS[severity].main : 'var(--color-border-main)'
   const displayDescription = description ?? result.description
 
@@ -31,6 +38,8 @@ export const AnalysisGroupCardItem = ({ result, description, severity, showImage
           {isAddressChange(result) && <AddressChanges result={result} />}
 
           {result.addresses?.length && <ShowAllAddress addresses={result.addresses} showImage={showImage} />}
+
+          {footer}
         </Stack>
       </Box>
     </Box>

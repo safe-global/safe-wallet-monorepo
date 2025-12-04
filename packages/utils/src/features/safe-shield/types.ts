@@ -169,4 +169,6 @@ export type ThreatAnalysisResults = {
   [StatusGroup.COMMON]?: AnalysisResult<CommonSharedStatus.FAILED>[]
   THREAT?: ThreatAnalysisResult[]
   BALANCE_CHANGE?: BalanceChangeDto[]
+  /** Blockaid request ID for reporting false positives/negatives */
+  request_id?: string
 }

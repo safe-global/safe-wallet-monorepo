@@ -16,18 +16,26 @@ export const SafeShieldDisplay = ({
   contract,
   threat,
   safeTx,
+  requestId,
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
+  requestId?: string
 }): ReactElement => {
   return (
     <Stack gap={1} data-testid="safe-shield-widget">
       <Card sx={{ borderRadius: '6px', overflow: 'hidden' }}>
         <SafeShieldHeader recipient={recipient} contract={contract} threat={threat} safeTx={safeTx} />
 
-        <SafeShieldContent threat={threat} recipient={recipient} contract={contract} safeTx={safeTx} />
+        <SafeShieldContent
+          threat={threat}
+          recipient={recipient}
+          contract={contract}
+          safeTx={safeTx}
+          requestId={requestId}
+        />
       </Card>
 
       <Stack direction="row" alignItems="center" alignSelf="flex-end">

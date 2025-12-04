@@ -21,4 +21,16 @@ export const SAFE_SHIELD_EVENTS = {
     action: 'Transaction simulated',
     category: SAFE_SHIELD_CATEGORY,
   },
+  REPORT_MODAL_OPENED: {
+    action: 'Report modal opened',
+    category: SAFE_SHIELD_CATEGORY,
+  },
+  REPORT_SUBMITTED: {
+    action: 'Report submitted',
+    category: SAFE_SHIELD_CATEGORY,
+  },
+  REPORT_FAILED: {
+    action: 'Report submission failed',
+    category: SAFE_SHIELD_CATEGORY,
+  },
 }
