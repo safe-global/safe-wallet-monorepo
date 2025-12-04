@@ -1,6 +1,8 @@
 import { type ReactElement } from 'react'
-import { Typography, Card, SvgIcon, Stack } from '@mui/material'
+import { Card, SvgIcon, Stack } from '@mui/material'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
+import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import type {
   ContractAnalysisResults,
   RecipientAnalysisResults,
@@ -10,6 +12,33 @@ import { SafeShieldHeader } from './SafeShieldHeader'
 import { SafeShieldContent } from './SafeShieldContent'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
+
+const shieldLogoOnHover = {
+  width: 78,
+  height: 18,
+  '&:hover': {
+    cursor: 'pointer',
+    // bg:
+    rect: {
+      fill: 'var(--color-background-lightGrey)',
+    },
+    // Shield image:
+    '& g:first-of-type > path:first-of-type': {
+      fill: 'var(--color-text-brand)',
+      transition: 'fill 0.2s ease',
+    },
+    // Lines on shield:
+    '& g:first-of-type > g[filter] > path': {
+      fill: '#121312', // consistent between dark/light modes
+      transition: 'fill 0.2s ease',
+    },
+    // "Safe Shield" text:
+    '& > path': {
+      fill: 'var(--color-text-primary)',
+      transition: 'fill 0.2s ease',
+    },
+  },
+} as const
 
 export const SafeShieldDisplay = ({
   recipient,
@@ -22,6 +51,7 @@ export const SafeShieldDisplay = ({
   threat?: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
 }): ReactElement => {
+  const isDarkMode = useDarkMode()
   return (
     <Stack gap={1} data-testid="safe-shield-widget">
       <Card sx={{ borderRadius: '6px', overflow: 'hidden' }}>
@@ -34,7 +64,7 @@ export const SafeShieldDisplay = ({
         <SvgIcon
           component={isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull}
           inheritViewBox
-          sx={{ width: 78, height: 18 }}
+          sx={shieldLogoOnHover}
         />
       </Stack>
     </Stack>
