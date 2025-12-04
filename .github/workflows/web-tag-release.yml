@@ -168,7 +168,7 @@ jobs:
           fi
 
       - name: Publish GitHub release
-        if: steps.version.outputs.version
+        if: steps.version.outputs.version && success()
         run: gh release edit ${{ steps.version.outputs.version }} --draft=false
         env:
           GITHUB_TOKEN: ${{ github.token }}
