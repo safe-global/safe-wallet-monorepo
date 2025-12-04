@@ -41,6 +41,7 @@ import { POLLING_INTERVAL } from '@/config/constants'
 import { TxNote } from '@/features/tx-notes'
 import { TxShareBlock, TxExplorerLink } from '../TxShareLink'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
 import HnSecurityReportBtnForTxDetails from '@/features/hypernative/components/HnSecurityReportBtn'
@@ -91,7 +92,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
   // Check if the proposer is actually a delegate
   const isProposerDelegate = useMemo(() => {
     if (!proposer || !proposersData?.results) return false
-    return proposersData.results.some((p) => p.delegate === proposer)
+    return proposersData.results.some((p) => sameAddress(p.delegate, proposer))
   }, [proposer, proposersData])
 
   const isTxFromProposer = Boolean(proposedByDelegate) || isProposerDelegate
