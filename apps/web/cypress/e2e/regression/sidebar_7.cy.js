@@ -61,14 +61,14 @@ describe('Sidebar tests 7', () => {
   it('Verify pending signature is displayed in sidebar for unsigned tx', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
     wallet.connectSigner(signer)
-    cy.intercept('GET', constants.safeListEndpoint, {
+    cy.intercept('GET', constants.ownedSafesEndpoint, {
       11155111: [sideBar.sideBarSafesPendingActions.safe1],
     })
     sideBar.openSidebar()
     sideBar.verifyTxToConfirmDoesNotExist()
     owner.clickOnWalletExpandMoreIcon()
     navigation.clickOnDisconnectBtn()
-    cy.intercept('GET', constants.safeListEndpoint, {
+    cy.intercept('GET', constants.ownedSafesEndpoint, {
       11155111: [sideBar.sideBarSafesPendingActions.safe1],
     })
     wallet.connectSigner(signer2)
