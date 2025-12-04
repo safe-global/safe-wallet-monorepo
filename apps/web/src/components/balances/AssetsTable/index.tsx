@@ -1,9 +1,19 @@
 import CheckBalance from '@/features/counterfactual/CheckBalance'
 import React, { type ReactElement } from 'react'
-import { Box, Card, Skeleton, Stack, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material'
-import classNames from 'classnames'
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Card,
+  Skeleton,
+  Stack,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import css from './styles.module.css'
-import EnhancedTable, { type EnhancedTableProps } from '@/components/common/EnhancedTable'
 import TokenMenu from '../TokenMenu'
 import useBalances from '@/hooks/useBalances'
 import { useHideAssets, useVisibleAssets } from './useHideAssets'
@@ -11,74 +21,25 @@ import AddFundsCTA from '@/components/common/AddFunds'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 import { useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEnabled'
 import useIsStakingPromoEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
-import { FiatChange } from './FiatChange'
-import { FiatBalance } from './FiatBalance'
 import useChainId from '@/hooks/useChainId'
-import FiatValue from '@/components/common/FiatValue'
-import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { AssetRowContent } from './AssetRowContent'
 import { ActionButtons } from './ActionButtons'
-import TokenAmount from '@/components/common/TokenAmount'
+import AssetHeader from './AssetHeader'
+import AssetDetails from './AssetDetails'
 
-const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
-  asset: {
-    rawValue: '0x0',
-    content: (
-      <div className={css.token}>
-        <Skeleton variant="rounded" width="26px" height="26px" />
-        <Typography>
-          <Skeleton width="80px" />
-        </Typography>
-      </div>
-    ),
-  },
-  price: {
-    rawValue: '0',
-    content: (
-      <Typography>
-        <Skeleton width="32px" />
-      </Typography>
-    ),
-  },
-  balance: {
-    rawValue: '0',
-    content: (
-      <Typography>
-        <Skeleton width="32px" />
-      </Typography>
-    ),
-  },
-  weight: {
-    rawValue: '0',
-    content: (
-      <Typography>
-        <Skeleton width="32px" />
-      </Typography>
-    ),
-  },
-  value: {
-    rawValue: '0',
-    content: (
-      <Typography>
-        <Skeleton width="32px" />
-      </Typography>
-    ),
-  },
-  actions: {
-    rawValue: '',
-    sticky: true,
-    content: (
-      <Stack direction="row" gap={1} justifyContent="flex-end">
-        <Skeleton variant="rounded" width={28} height={28} />
-        <Skeleton variant="rounded" width={28} height={28} />
-        <Skeleton variant="rounded" width={24} height={24} />
+const SkeletonAsset = () => (
+  <Card sx={{ mb: 2 }}>
+    <Box sx={{ px: 2, py: 2 }}>
+      <Stack direction="row" gap={1} alignItems="center" width={1}>
+        <Skeleton variant="rounded" width="32px" height="32px" />
+        <Skeleton width="120px" height="24px" />
+        <Skeleton width="60px" height="20px" sx={{ ml: 1 }} />
+        <Skeleton width="80px" height="24px" sx={{ ml: 'auto' }} />
       </Stack>
-    ),
-  },
-}
-
-const skeletonRows: EnhancedTableProps['rows'] = Array(3).fill({ cells: skeletonCells })
+    </Box>
+  </Card>
+)
 
 const AssetsTable = ({
   showHiddenAssets,
@@ -87,50 +48,6 @@ const AssetsTable = ({
   showHiddenAssets: boolean
   setShowHiddenAssets: (hidden: boolean) => void
 }): ReactElement => {
-  const headCells = [
-    {
-      id: 'asset',
-      label: 'Asset',
-      width: '23%',
-    },
-    {
-      id: 'price',
-      label: 'Price',
-      width: '18%',
-      align: 'right',
-    },
-    {
-      id: 'balance',
-      label: 'Balance',
-      width: '18%',
-      align: 'right',
-    },
-    {
-      id: 'weight',
-      label: (
-        <Tooltip title="Based on total portfolio value">
-          <Typography variant="caption" letterSpacing="normal" color="primary.light">
-            Weight
-          </Typography>
-        </Tooltip>
-      ),
-      width: '23%',
-      align: 'right',
-    },
-    {
-      id: 'value',
-      label: 'Value',
-      width: '18%',
-      align: 'right',
-    },
-    {
-      id: 'actions',
-      label: '',
-      width: showHiddenAssets ? '130px' : '86px',
-      align: 'right',
-      disableSort: true,
-    },
-  ]
   const { balances, loading } = useBalances()
   const { balances: visibleBalances } = useVisibleBalances()
 
@@ -139,9 +56,7 @@ const AssetsTable = ({
   const isStakingPromoEnabled = useIsStakingPromoEnabled()
   const isEarnPromoEnabled = useIsEarnPromoEnabled()
 
-  const { isAssetSelected, toggleAsset, cancel, deselectAll, saveChanges } = useHideAssets(() =>
-    setShowHiddenAssets(false),
-  )
+  const { isAssetSelected, cancel, deselectAll, saveChanges } = useHideAssets(() => setShowHiddenAssets(false))
 
   const visible = useVisibleAssets()
   const visibleAssets = showHiddenAssets ? balances.items : visible
@@ -150,115 +65,6 @@ const AssetsTable = ({
   const selectedAssetCount = visibleAssets?.filter((item) => isAssetSelected(item.tokenInfo.address)).length || 0
 
   const tokensFiatTotal = visibleBalances.tokensFiatTotal ? Number(visibleBalances.tokensFiatTotal) : undefined
-
-  const rows = loading
-    ? skeletonRows
-    : (visibleAssets || []).map((item) => {
-        const rawFiatValue = parseFloat(item.fiatBalance)
-        const rawPriceValue = parseFloat(item.fiatConversion)
-        const isSelected = isAssetSelected(item.tokenInfo.address)
-        const itemShareOfFiatTotal = tokensFiatTotal ? Number(item.fiatBalance) / tokensFiatTotal : null
-
-        return {
-          key: item.tokenInfo.address,
-          selected: isSelected,
-          cells: {
-            asset: {
-              rawValue: item.tokenInfo.name,
-              content: (
-                <Box>
-                  <AssetRowContent
-                    item={item}
-                    chainId={chainId}
-                    isStakingPromoEnabled={isStakingPromoEnabled ?? false}
-                    isEarnPromoEnabled={isEarnPromoEnabled ?? false}
-                    showMobileValue
-                    showMobileBalance
-                  />
-                  <ActionButtons
-                    tokenInfo={item.tokenInfo}
-                    isSwapFeatureEnabled={isSwapFeatureEnabled ?? false}
-                    mobile
-                  />
-                </Box>
-              ),
-            },
-            price: {
-              rawValue: rawPriceValue,
-              content: (
-                <Typography textAlign="right">
-                  <FiatValue value={item.fiatConversion == '0' ? null : item.fiatConversion} />
-                </Typography>
-              ),
-            },
-            balance: {
-              rawValue: Number(item.balance) / 10 ** (item.tokenInfo.decimals ?? 0),
-              content: (
-                <Typography className={css.balanceColumn}>
-                  <TokenAmount
-                    value={item.balance}
-                    decimals={item.tokenInfo.decimals}
-                    tokenSymbol={item.tokenInfo.symbol}
-                  />
-                </Typography>
-              ),
-            },
-            weight: {
-              rawValue: itemShareOfFiatTotal,
-              content: itemShareOfFiatTotal ? (
-                <Box textAlign="right">
-                  <Stack direction="row" alignItems="center" gap={0.5} position="relative" display="inline-flex">
-                    <div className={css.customProgress}>
-                      <div
-                        className={css.progressRing}
-                        style={
-                          {
-                            '--progress': `${(itemShareOfFiatTotal * 100).toFixed(1)}%`,
-                          } as React.CSSProperties & { '--progress': string }
-                        }
-                      />
-                    </div>
-                    <Typography variant="body2" sx={{ minWidth: '52px', textAlign: 'right' }}>
-                      {formatPercentage(itemShareOfFiatTotal)}
-                    </Typography>
-                  </Stack>
-                </Box>
-              ) : (
-                <></>
-              ),
-            },
-            value: {
-              rawValue: rawFiatValue,
-              content: (
-                <Box textAlign="right">
-                  <Typography>
-                    <FiatBalance balanceItem={item} />
-                  </Typography>
-                  {item.fiatBalance24hChange && (
-                    <Typography variant="caption">
-                      <FiatChange balanceItem={item} inline />
-                    </Typography>
-                  )}
-                </Box>
-              ),
-            },
-            actions: {
-              rawValue: '',
-              sticky: true,
-              content: (
-                <ActionButtons
-                  tokenInfo={item.tokenInfo}
-                  isSwapFeatureEnabled={isSwapFeatureEnabled ?? false}
-                  onlyIcon
-                  showHiddenAssets={showHiddenAssets}
-                  isSelected={isSelected}
-                  onToggleAsset={() => toggleAsset(item.tokenInfo.address)}
-                />
-              ),
-            },
-          },
-        }
-      })
 
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -314,11 +120,44 @@ const AssetsTable = ({
           </Box>
         </Card>
       ) : (
-        <Card sx={{ px: 2, mb: 2 }}>
-          <div className={classNames(css.container, { [css.containerWideActions]: showHiddenAssets })}>
-            <EnhancedTable rows={rows} headCells={headCells} compact />
-          </div>
-        </Card>
+        <Stack gap={2}>
+          {loading
+            ? Array(3)
+                .fill(null)
+                .map((_, index) => <SkeletonAsset key={index} />)
+            : (visibleAssets || []).map((item) => {
+                const itemShareOfFiatTotal = tokensFiatTotal ? Number(item.fiatBalance) / tokensFiatTotal : null
+
+                return (
+                  <Card key={item.tokenInfo.address} sx={{ border: 0 }}>
+                    <Accordion disableGutters elevation={0} variant="elevation" defaultExpanded>
+                      <AccordionSummary
+                        expandIcon={
+                          <Box ml={1}>
+                            <ExpandMoreIcon fontSize="small" />
+                          </Box>
+                        }
+                        sx={{ justifyContent: 'center', overflowX: 'auto', backgroundColor: 'transparent !important' }}
+                      >
+                        <AssetHeader
+                          item={item}
+                          weightShare={itemShareOfFiatTotal}
+                          isSwapFeatureEnabled={isSwapFeatureEnabled ?? false}
+                        />
+                      </AccordionSummary>
+                      <AccordionDetails sx={{ pt: 0, pb: 0 }}>
+                        <AssetDetails
+                          item={item}
+                          chainId={chainId}
+                          isStakingPromoEnabled={isStakingPromoEnabled ?? false}
+                          weightShare={itemShareOfFiatTotal}
+                        />
+                      </AccordionDetails>
+                    </Accordion>
+                  </Card>
+                )
+              })}
+        </Stack>
       )}
 
       <CheckBalance />
