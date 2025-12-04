@@ -173,4 +173,28 @@ describe('ComboSubmit', () => {
     // Component should fall back to first option ('sign')
     expect(container).toBeInTheDocument()
   })
+
+  it('does not auto-select Execute when validation is loading', () => {
+    jest.spyOn(hooks, 'useAlreadySigned').mockReturnValue(false)
+    jest.spyOn(slotsHooks, 'useSlotIds').mockReturnValue(['sign', 'execute'])
+
+    // Mock validation loading state (third parameter is loading)
+    jest.spyOn(useValidateTxData, 'useValidateTxData').mockReturnValue([undefined, undefined, true])
+
+    // Mock localStorage to return undefined (no stored preference)
+    const mockUseLocalStorage = require('@/services/local-storage/useLocalStorage').default
+    const mockSetSubmitAction = jest.fn()
+    mockUseLocalStorage.mockReturnValue([undefined, mockSetSubmitAction])
+
+    const { container } = render(
+      <ComboSubmit onSubmit={jest.fn()} slotId="" />,
+      { canExecute: true },
+      { safeTx: safeTransaction },
+    )
+
+    // Component should render but not auto-select during validation loading
+    expect(container).toBeInTheDocument()
+    // The submit action setter should not be called during loading
+    expect(mockSetSubmitAction).not.toHaveBeenCalled()
+  })
 })
