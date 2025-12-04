@@ -3,6 +3,8 @@ import { Card, SvgIcon, Stack } from '@mui/material'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
 import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import ExternalLink from '@/components/common/ExternalLink'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import type {
   ContractAnalysisResults,
   RecipientAnalysisResults,
@@ -61,11 +63,13 @@ export const SafeShieldDisplay = ({
       </Card>
 
       <Stack direction="row" alignItems="center" alignSelf="flex-end">
-        <SvgIcon
-          component={isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull}
-          inheritViewBox
-          sx={shieldLogoOnHover}
-        />
+        <ExternalLink href={HelpCenterArticle.SAFE_SHIELD} noIcon>
+          <SvgIcon
+            component={isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull}
+            inheritViewBox
+            sx={shieldLogoOnHover}
+          />
+        </ExternalLink>
       </Stack>
     </Stack>
   )
