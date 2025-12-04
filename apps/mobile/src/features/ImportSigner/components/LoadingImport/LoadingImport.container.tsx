@@ -1,7 +1,7 @@
 import { useAppDispatch } from '@/src/store/hooks'
 import { useCallback, useEffect } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { addSignerWithEffects } from '@/src/store/signersSlice'
+import { addSignerWithEffects } from '@/src/store/signerThunks'
 import { LoadingScreen } from '@/src/components/LoadingScreen'
 import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipValidation'
 
