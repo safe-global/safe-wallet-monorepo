@@ -169,4 +169,5 @@ export type ThreatAnalysisResults = {
   [StatusGroup.COMMON]?: AnalysisResult<CommonSharedStatus.FAILED>[]
   THREAT?: ThreatAnalysisResult[]
   BALANCE_CHANGE?: BalanceChangeDto[]
+  request_id?: string
 }
