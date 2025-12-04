@@ -90,7 +90,7 @@ export const SafeShieldContent = ({
 
         {isLoadingVisible && <SafeShieldAnalysisLoading analysesEmpty={analysesEmpty} loading={isLoadingVisible} />}
 
-        {shouldShowContent && !loading && allEmpty && <SafeShieldAnalysisEmpty />}
+        {shouldShowContent && !loading && allEmpty && !hypernativeAuth && <SafeShieldAnalysisEmpty />}
 
         <Box sx={{ '& > div': { borderTop: '1px solid', borderColor: 'background.main' } }}>
           <AnalysisGroupCard
