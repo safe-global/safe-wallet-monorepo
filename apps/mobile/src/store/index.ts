@@ -36,6 +36,7 @@ import { setBackendStore } from '@/src/store/utils/singletonStore'
 import pendingTxsListeners from '@/src/store/middleware/pendingTxs'
 import signingState from './signingStateSlice'
 import signerImportFlow from './signerImportFlowSlice'
+import executingState from './executingStateSlice'
 
 setBaseUrl(GATEWAY_URL)
 
@@ -60,6 +61,7 @@ const persistConfig = {
     'executionMethod',
     'signingState',
     'signerImportFlow',
+    'executingState',
   ],
   transforms: [cgwClientFilter],
 }
@@ -83,6 +85,7 @@ export const rootReducer = combineReducers({
   executionMethod,
   signingState,
   signerImportFlow,
+  executingState,
   [web3API.reducerPath]: web3API.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
 })

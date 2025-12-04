@@ -12,13 +12,25 @@ import { useTransactionSigner } from './hooks/useTransactionSigner'
 import { useTxSignerAutoSelection } from './hooks/useTxSignerAutoSelection'
 import { useAppSelector } from '@/src/store/hooks'
 import { PendingStatus, selectPendingTxById } from '@/src/store/pendingTxsSlice'
+import { useTransactionProcessingState } from '@/src/hooks/useTransactionProcessingState'
 import { useFocusEffect, useRouter } from 'expo-router'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
+
+const getHeaderText = (isExecuting: boolean, isSigning: boolean): string => {
+  if (isExecuting) {
+    return 'Executing...'
+  }
+  if (isSigning) {
+    return 'Signing...'
+  }
+  return 'Confirm transaction'
+}
 
 function ConfirmTxContainer() {
   const txId = useRoute<RouteProp<{ params: { txId: string } }>>().params.txId
   const router = useRouter()
   const pendingTx = useAppSelector((state) => selectPendingTxById(state, txId))
+  const { isProcessing, isExecuting, isSigning } = useTransactionProcessingState(txId)
   const [highlightedSeverity, setHighlightedSeverity] = useState<Severity | undefined>(undefined)
   const [riskAcknowledged, setRiskAcknowledged] = useState(false)
 
@@ -41,9 +53,10 @@ function ConfirmTxContainer() {
   }, [pendingTx?.status, isFinalizedTx])
 
   useFocusEffect(handleHistoryNavigation)
+  const headerText = getHeaderText(isExecuting, isSigning)
 
   const { handleScroll } = useScrollableHeader({
-    children: <NavBarTitle paddingRight={5}>{pendingTx ? 'Executing...' : 'Confirm transaction'}</NavBarTitle>,
+    children: <NavBarTitle paddingRight={5}>{headerText}</NavBarTitle>,
     alwaysVisible: true,
   })
 
@@ -84,7 +97,7 @@ function ConfirmTxContainer() {
         <ConfirmTxForm
           hasEnoughConfirmations={hasEnoughConfirmations}
           isExpired={isExpired}
-          isPending={!!pendingTx}
+          isPending={isProcessing}
           txId={txId}
           highlightedSeverity={highlightedSeverity}
           riskAcknowledged={riskAcknowledged}
