@@ -790,6 +790,59 @@ describe('useTrackBannerEligibilityOnConnect', () => {
       )
     })
 
+    it('should not track when NoBalanceCheck banner type has showBanner: true but Safe is deployed', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      // Mock Safe as deployed
+      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
+        safe: { deployed: true } as any,
+        safeAddress,
+        safeLoaded: true,
+        safeLoading: false,
+        safeError: undefined,
+      })
+
+      renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.NoBalanceCheck), {
+        initialReduxState,
+      })
+
+      await waitFor(
+        () => {
+          expect(mockTrackEvent).not.toHaveBeenCalled()
+        },
+        { timeout: 100 },
+      )
+    })
+
+    it('should track when NoBalanceCheck banner type has showBanner: true and Safe is not deployed', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      // Mock Safe as not deployed
+      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
+        safe: { deployed: false } as any,
+        safeAddress,
+        safeLoaded: true,
+        safeLoading: false,
+        safeError: undefined,
+      })
+
+      renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.NoBalanceCheck), {
+        initialReduxState,
+      })
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+        expect(mockTrackEvent).toHaveBeenCalledWith(HYPERNATIVE_EVENTS.GUARDIAN_BANNER_VIEWED, {
+          [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+          [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chainId,
+        })
+      })
+    })
+
     it('should track when visibility changes from false to true for Promo banner and the banner was not tracked yet', async () => {
       const initialReduxState: Partial<RootState> = {
         hnState: {},
@@ -818,6 +871,32 @@ describe('useTrackBannerEligibilityOnConnect', () => {
         // Should track now
         expect(mockTrackEvent).toHaveBeenCalledTimes(1)
       })
+    })
+
+    it('should not track when showBanner is false even if all other conditions are met', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      // All conditions are met except showBanner
+      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
+        safe: { deployed: false } as any,
+        safeAddress,
+        safeLoaded: true,
+        safeLoading: false,
+        safeError: undefined,
+      })
+
+      renderHook(() => useTrackBannerEligibilityOnConnect(ineligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+
+      await waitFor(
+        () => {
+          expect(mockTrackEvent).not.toHaveBeenCalled()
+        },
+        { timeout: 100 },
+      )
     })
   })
 
