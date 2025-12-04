@@ -171,16 +171,8 @@ export type MasterCopy = {
   version: string
 }
 export type IndexingStatus = {
-  currentBlockNumber: number
-  currentBlockTimestamp: string
-  erc20BlockNumber: number
-  erc20BlockTimestamp: string
-  erc20Synced: boolean
-  masterCopiesBlockNumber: number
-  masterCopiesBlockTimestamp: string
-  masterCopiesSynced: boolean
-  synced: boolean
   lastSync: number
+  synced: boolean
 }
 export const {
   useChainsGetChainsV1Query,
