@@ -66,14 +66,14 @@ const SwapButton = ({
           ) : (
             <Button
               data-testid="swap-btn"
-              variant="contained"
-              color={light ? 'background.paper' : 'primary'}
+              variant={light ? 'neutral' : 'contained'}
+              color={light ? undefined : 'primary'}
               size="compact"
               startIcon={<SwapIcon />}
-              disableElevation
               onClick={handleClick}
               disabled={!isOk}
               className={assetActionCss.sendButton}
+              sx={light ? { minHeight: 'auto', width: '100%' } : undefined}
             >
               Swap
             </Button>
