@@ -23,13 +23,16 @@ const AssetHeader = ({ item, weightShare, isSwapFeatureEnabled }: AssetHeaderPro
 
       <Stack>
         <Typography fontWeight="bold">{item.tokenInfo.name}</Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{ '& *': { fontWeight: 'normal', color: 'var(--color-primary-light)' } }}>
           <TokenAmount value={item.balance} decimals={item.tokenInfo.decimals} tokenSymbol={item.tokenInfo.symbol} />
         </Typography>
       </Stack>
 
       <Stack direction="column" alignItems="flex-end" ml="auto" mr={1}>
         <Stack direction="row" alignItems="center" gap={0.5}>
+          <Typography fontWeight="bold">
+            <FiatBalance balanceItem={item} />
+          </Typography>
           {weightShare && (
             <div className={css.customProgress}>
               <div
@@ -42,9 +45,6 @@ const AssetHeader = ({ item, weightShare, isSwapFeatureEnabled }: AssetHeaderPro
               />
             </div>
           )}
-          <Typography fontWeight="bold">
-            <FiatBalance balanceItem={item} />
-          </Typography>
         </Stack>
         {item.fiatBalance24hChange && (
           <Typography variant="caption">
