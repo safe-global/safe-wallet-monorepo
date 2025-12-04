@@ -2934,24 +2934,73 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@datadog/browser-core@npm:6.6.3":
-  version: 6.6.3
-  resolution: "@datadog/browser-core@npm:6.6.3"
-  checksum: 10/2b0ccf614bd0c1e99dbd916ae7308fccddc4d1330f4e9dc28c66a11481db5222f7ffc8ca7eff985dc7359810d295adacb535ccf4c095ba02ec1e03472855d907
+"@datadog/browser-core@npm:6.24.1":
+  version: 6.24.1
+  resolution: "@datadog/browser-core@npm:6.24.1"
+  checksum: 10/c17bf3745073e6c3b0e3c15b4563e17679fa7842dd0f6d6bcc11600524c40175887d17bb43fb27f75b2a6d6b8b14e1da8c6d2f086fce944537f268d566beccfd
   languageName: node
   linkType: hard
 
-"@datadog/browser-logs@npm:^6.6.3":
-  version: 6.6.3
-  resolution: "@datadog/browser-logs@npm:6.6.3"
+"@datadog/browser-logs@npm:^6.24.1":
+  version: 6.24.1
+  resolution: "@datadog/browser-logs@npm:6.24.1"
   dependencies:
-    "@datadog/browser-core": "npm:6.6.3"
+    "@datadog/browser-core": "npm:6.24.1"
   peerDependencies:
-    "@datadog/browser-rum": 6.6.3
+    "@datadog/browser-rum": 6.24.1
   peerDependenciesMeta:
     "@datadog/browser-rum":
       optional: true
-  checksum: 10/2a347917afd3739d672daac3cd5113cae4e8b94d87542775a6e81ff86661837e39bda3457b8d0b32784ef76f4ad2191b0912ea184620dbe0a0eadf76528691bf
+  checksum: 10/753a7c76e93cf6fa876413241cbc623a9d178728892f259706898fdd608bbe8d5598b6190ecd470e8d4b59630620a82787379e190ad320699e144dcb748a9a80
+  languageName: node
+  linkType: hard
+
+"@datadog/browser-rum-core@npm:6.24.1":
+  version: 6.24.1
+  resolution: "@datadog/browser-rum-core@npm:6.24.1"
+  dependencies:
+    "@datadog/browser-core": "npm:6.24.1"
+  checksum: 10/d0a6b14fbdc917385bc70a3c7ae1e3b10c5b27015d7be280db1b3779e819bea253df75502d69ce342230d9508ace1759361fe642086e20750db3cb33b9970a28
+  languageName: node
+  linkType: hard
+
+"@datadog/browser-rum-react@npm:^6.24.1":
+  version: 6.24.1
+  resolution: "@datadog/browser-rum-react@npm:6.24.1"
+  dependencies:
+    "@datadog/browser-core": "npm:6.24.1"
+    "@datadog/browser-rum-core": "npm:6.24.1"
+  peerDependencies:
+    react: 18 || 19
+    react-router: 6 || 7
+    react-router-dom: 6 || 7
+  peerDependenciesMeta:
+    "@datadog/browser-rum":
+      optional: true
+    "@datadog/browser-rum-slim":
+      optional: true
+    react:
+      optional: true
+    react-router:
+      optional: true
+    react-router-dom:
+      optional: true
+  checksum: 10/d8e8da89beec586c14c9e1d7725230c9ff77e5b8b646f4cb82269abff21ad24098ba3590f4cec5f146be0ead248f3025c6f9d54889ced9a1c63c0197dfdee996
+  languageName: node
+  linkType: hard
+
+"@datadog/browser-rum@npm:^6.24.1":
+  version: 6.24.1
+  resolution: "@datadog/browser-rum@npm:6.24.1"
+  dependencies:
+    "@datadog/browser-core": "npm:6.24.1"
+    "@datadog/browser-rum-core": "npm:6.24.1"
+  peerDependencies:
+    "@datadog/browser-logs": 6.24.1
+  peerDependenciesMeta:
+    "@datadog/browser-logs":
+      optional: true
+  checksum: 10/5ba89597720fd87bc4e2bc4e711215830837f5335e9e85eb82f3aeeccdcfc2aff374f017d00f8271c8dc7dc54ebb51d60f94b3d9ce5b9e21d8921b732c8382a8
   languageName: node
   linkType: hard
 
@@ -10400,7 +10449,9 @@ __metadata:
     "@chromatic-com/storybook": "npm:^4.1.2"
     "@cowprotocol/app-data": "npm:^3.1.0"
     "@cowprotocol/widget-react": "npm:^0.13.0"
-    "@datadog/browser-logs": "npm:^6.6.3"
+    "@datadog/browser-logs": "npm:^6.24.1"
+    "@datadog/browser-rum": "npm:^6.24.1"
+    "@datadog/browser-rum-react": "npm:^6.24.1"
     "@ducanh2912/next-pwa": "npm:^10.2.9"
     "@emotion/cache": "npm:^11.13.5"
     "@emotion/react": "npm:^11.13.5"
