@@ -54,8 +54,10 @@ const AssetHeader = ({ item, weightShare, isSwapFeatureEnabled }: AssetHeaderPro
       </Stack>
 
       <Stack direction="row" gap={1} alignItems="center" ml={1}>
-        <SendButton tokenInfo={item.tokenInfo} />
-        {isSwapFeatureEnabled && <SwapButton tokenInfo={item.tokenInfo} amount="0" trackingLabel={SWAP_LABELS.asset} />}
+        <SendButton tokenInfo={item.tokenInfo} light />
+        {isSwapFeatureEnabled && (
+          <SwapButton tokenInfo={item.tokenInfo} amount="0" trackingLabel={SWAP_LABELS.asset} light />
+        )}
       </Stack>
     </Stack>
   )
