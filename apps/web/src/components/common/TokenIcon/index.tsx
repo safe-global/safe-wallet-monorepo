@@ -13,12 +13,14 @@ const TokenIcon = ({
   size = 26,
   fallbackSrc,
   chainId,
+  noRadius,
 }: {
   logoUri?: string
   tokenSymbol?: string | null
   size?: number
   fallbackSrc?: string
   chainId?: string
+  noRadius?: boolean
 }): ReactElement => {
   const src = useMemo(() => {
     return upgradeCoinGeckoThumbToQuality(logoUri || undefined, 'small')
@@ -33,7 +35,7 @@ const TokenIcon = ({
         alt={tokenSymbol ?? ''}
         width={size}
         height={size}
-        borderRadius="100%"
+        borderRadius={noRadius ? undefined : '100%'}
         fallbackSrc={fallback}
       />
       {chainId && (

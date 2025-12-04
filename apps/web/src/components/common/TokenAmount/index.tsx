@@ -47,6 +47,7 @@ const TokenAmount = ({
             fallbackSrc={fallbackSrc}
             size={iconSize}
             chainId={chainId}
+            noRadius
           />
         )}
         <b className={css.tokenText}>

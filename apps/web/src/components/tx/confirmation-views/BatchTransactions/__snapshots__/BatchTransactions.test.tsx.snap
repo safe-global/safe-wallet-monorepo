@@ -269,17 +269,17 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
                                   referrerpolicy="strict-origin"
                                   sandbox="allow-scripts"
                                   srcdoc="
-     <body style="margin: 0; overflow: hidden; display: flex;">
-       <img src="/images/common/token-placeholder.svg" alt="Safe App logo" width="26" height="26" style="border-radius: 100%;" />
-       <script>
-          document.querySelector('img').onerror = (e) => {
-           e.target.onerror = null
-           e.target.src = "/images/common/token-placeholder.svg"
-         }
-       </script>
-     </body>
+    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+      <img src="/images/common/token-placeholder.svg" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <script>
+        document.querySelector('img').onerror = (e) => {
+          e.target.onerror = null
+          e.target.src = "/images/common/token-placeholder.svg"
+        }
+      </script>
+    </body>
   "
-                                  style="pointer-events: none; border: 0px;"
+                                  style="pointer-events: none; border: 0px; display: block;"
                                   tabindex="-1"
                                   title="ETH"
                                   width="26"

@@ -15,9 +15,21 @@ interface WidgetActionProps {
   onPress: () => void
 }
 
+const getWidgetActionContent = (
+  loading: boolean,
+  error: boolean,
+  status: { severity: Severity; title: string } | null,
+) => {
+  return loading ? 'Checking transaction...' : error ? 'Checks unavailable' : status?.title
+}
+
 export function WidgetAction({ loading, error, status, onPress }: WidgetActionProps) {
   const Logo = useMemo(() => {
     const key = status?.severity || Severity.OK
+
+    if (loading) {
+      return safeShieldLogoStatusMap.OK
+    }
 
     if (error) {
       return safeShieldLogoStatusMap.error
@@ -29,7 +41,7 @@ export function WidgetAction({ loading, error, status, onPress }: WidgetActionPr
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
       <View
-        backgroundColor="$background"
+        backgroundColor="$backgroundFocus"
         paddingHorizontal="$1"
         borderTopLeftRadius="$2"
         borderTopRightRadius="$2"
@@ -45,9 +57,7 @@ export function WidgetAction({ loading, error, status, onPress }: WidgetActionPr
             </View>
           )}
 
-          <Text fontWeight={600}>
-            {loading ? 'Checking transaction...' : error ? 'Checks unavailable' : status?.title}
-          </Text>
+          <Text fontWeight={600}>{getWidgetActionContent(loading, error, status)}</Text>
         </View>
 
         <View marginRight="$3">

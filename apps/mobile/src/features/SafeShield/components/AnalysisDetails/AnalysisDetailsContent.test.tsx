@@ -2,6 +2,7 @@ import { render } from '@/src/tests/test-utils'
 import { AnalysisDetailsContent } from './AnalysisDetailsContent'
 import { RecipientAnalysisBuilder, ContractAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
 import { FullAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
+import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shield/utils/getPrimaryAnalysisResult'
 import { faker } from '@faker-js/faker'
 
 describe('AnalysisDetailsContent', () => {
@@ -17,16 +18,10 @@ describe('AnalysisDetailsContent', () => {
 
     const { getByText } = render(<AnalysisDetailsContent recipient={recipient} />)
 
-    // Should render recipient analysis group
-    const result = recipient[0]
-    if (result) {
-      const firstGroup = Object.values(result)[0]
-      if (firstGroup && typeof firstGroup === 'object') {
-        const firstStatusGroup = Object.values(firstGroup)[0]
-        if (firstStatusGroup && Array.isArray(firstStatusGroup) && firstStatusGroup[0]) {
-          expect(getByText(firstStatusGroup[0].description)).toBeTruthy()
-        }
-      }
+    // Should render the analysis description for the known recipient
+    const primaryResult = getPrimaryAnalysisResult(recipient[0])
+    if (primaryResult) {
+      expect(getByText(primaryResult.description)).toBeTruthy()
     }
   })
 
@@ -37,15 +32,9 @@ describe('AnalysisDetailsContent', () => {
     const { getByText } = render(<AnalysisDetailsContent contract={contract} />)
 
     // Should render contract analysis group
-    const result = contract[0]
-    if (result) {
-      const firstGroup = Object.values(result)[0]
-      if (firstGroup && typeof firstGroup === 'object') {
-        const firstStatusGroup = Object.values(firstGroup)[0]
-        if (firstStatusGroup && Array.isArray(firstStatusGroup) && firstStatusGroup[0]) {
-          expect(getByText(firstStatusGroup[0].description)).toBeTruthy()
-        }
-      }
+    const primaryResult = getPrimaryAnalysisResult(contract[0])
+    if (primaryResult) {
+      expect(getByText(primaryResult.description)).toBeTruthy()
     }
   })
 

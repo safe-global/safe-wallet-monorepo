@@ -1,24 +1,18 @@
 import type { ReactElement } from 'react'
 
-const getIframeContent = (
-  url: string,
-  width: number,
-  height: number,
-  borderRadius?: string,
-  fallbackSrc?: string,
-): string => {
+const getIframeContent = (url: string, height: number, borderRadius?: string, fallbackSrc?: string): string => {
   const style = borderRadius ? `border-radius: ${borderRadius};` : ''
   const fallback = fallbackSrc ? encodeURI(fallbackSrc) : ''
   return `
-     <body style="margin: 0; overflow: hidden; display: flex;">
-       <img src="${encodeURI(url)}" alt="Safe App logo" width="${width}" height="${height}" style="${style}" />
-       <script>
-          document.querySelector('img').onerror = (e) => {
-           e.target.onerror = null
-           e.target.src = "${fallback}"
-         }
-       </script>
-     </body>
+    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+      <img src="${encodeURI(url)}" alt="Safe App logo" height="${height}" width="auto" style="${style}" />
+      <script>
+        document.querySelector('img').onerror = (e) => {
+          e.target.onerror = null
+          e.target.src = "${fallback}"
+        }
+      </script>
+    </body>
   `
 }
 
@@ -40,12 +34,12 @@ const IframeIcon = ({
   return (
     <iframe
       title={alt}
-      srcDoc={getIframeContent(src, width, height, borderRadius, fallbackSrc)}
+      srcDoc={getIframeContent(src, height, borderRadius, fallbackSrc)}
       sandbox="allow-scripts"
       referrerPolicy="strict-origin"
       width={width}
       height={height}
-      style={{ pointerEvents: 'none', border: 0 }}
+      style={{ pointerEvents: 'none', border: 0, display: 'block' }}
       tabIndex={-1}
       loading="lazy"
     />
