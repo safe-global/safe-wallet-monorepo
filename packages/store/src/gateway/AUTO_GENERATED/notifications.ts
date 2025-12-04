@@ -6,6 +6,33 @@ const injectedRtkApi = api
   })
   .injectEndpoints({
     endpoints: (build) => ({
+      notificationsRegisterDeviceV1: build.mutation<
+        NotificationsRegisterDeviceV1ApiResponse,
+        NotificationsRegisterDeviceV1ApiArg
+      >({
+        query: (queryArg) => ({ url: `/v1/register/notifications`, method: 'POST', body: queryArg.registerDeviceDto }),
+        invalidatesTags: ['notifications'],
+      }),
+      notificationsUnregisterDeviceV1: build.mutation<
+        NotificationsUnregisterDeviceV1ApiResponse,
+        NotificationsUnregisterDeviceV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/chains/${queryArg.chainId}/notifications/devices/${queryArg.uuid}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: ['notifications'],
+      }),
+      notificationsUnregisterSafeV1: build.mutation<
+        NotificationsUnregisterSafeV1ApiResponse,
+        NotificationsUnregisterSafeV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/chains/${queryArg.chainId}/notifications/devices/${queryArg.uuid}/safes/${queryArg.safeAddress}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: ['notifications'],
+      }),
       notificationsUpsertSubscriptionsV2: build.mutation<
         NotificationsUpsertSubscriptionsV2ApiResponse,
         NotificationsUpsertSubscriptionsV2ApiArg
@@ -57,37 +84,31 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['notifications'],
       }),
-      notificationsRegisterDeviceV1: build.mutation<
-        NotificationsRegisterDeviceV1ApiResponse,
-        NotificationsRegisterDeviceV1ApiArg
-      >({
-        query: (queryArg) => ({ url: `/v1/register/notifications`, method: 'POST', body: queryArg.registerDeviceDto }),
-        invalidatesTags: ['notifications'],
-      }),
-      notificationsUnregisterDeviceV1: build.mutation<
-        NotificationsUnregisterDeviceV1ApiResponse,
-        NotificationsUnregisterDeviceV1ApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/v1/chains/${queryArg.chainId}/notifications/devices/${queryArg.uuid}`,
-          method: 'DELETE',
-        }),
-        invalidatesTags: ['notifications'],
-      }),
-      notificationsUnregisterSafeV1: build.mutation<
-        NotificationsUnregisterSafeV1ApiResponse,
-        NotificationsUnregisterSafeV1ApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/v1/chains/${queryArg.chainId}/notifications/devices/${queryArg.uuid}/safes/${queryArg.safeAddress}`,
-          method: 'DELETE',
-        }),
-        invalidatesTags: ['notifications'],
-      }),
     }),
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
+export type NotificationsRegisterDeviceV1ApiResponse = unknown
+export type NotificationsRegisterDeviceV1ApiArg = {
+  /** Device registration data including device token, UUID, and Safe registrations with signatures */
+  registerDeviceDto: RegisterDeviceDto
+}
+export type NotificationsUnregisterDeviceV1ApiResponse = unknown
+export type NotificationsUnregisterDeviceV1ApiArg = {
+  /** Chain ID (kept for backward compatibility) */
+  chainId: string
+  /** Device UUID to unregister */
+  uuid: string
+}
+export type NotificationsUnregisterSafeV1ApiResponse = unknown
+export type NotificationsUnregisterSafeV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
+  chainId: string
+  /** Device UUID */
+  uuid: string
+  /** Safe contract address (0x prefixed hex string) */
+  safeAddress: string
+}
 export type NotificationsUpsertSubscriptionsV2ApiResponse =
   /** status 201 Device registered successfully with returned device UUID */ {
     /** Generated UUID for the registered device */
@@ -127,26 +148,20 @@ export type NotificationsDeleteDeviceV2ApiArg = {
   /** Device UUID to delete */
   deviceUuid: string
 }
-export type NotificationsRegisterDeviceV1ApiResponse = unknown
-export type NotificationsRegisterDeviceV1ApiArg = {
-  /** Device registration data including device token, UUID, and Safe registrations with signatures */
-  registerDeviceDto: RegisterDeviceDto
-}
-export type NotificationsUnregisterDeviceV1ApiResponse = unknown
-export type NotificationsUnregisterDeviceV1ApiArg = {
-  /** Chain ID (kept for backward compatibility) */
+export type SafeRegistration = {
   chainId: string
-  /** Device UUID to unregister */
-  uuid: string
+  safes: string[]
+  signatures: string[]
 }
-export type NotificationsUnregisterSafeV1ApiResponse = unknown
-export type NotificationsUnregisterSafeV1ApiArg = {
-  /** Chain ID where the Safe is deployed */
-  chainId: string
-  /** Device UUID */
-  uuid: string
-  /** Safe contract address (0x prefixed hex string) */
-  safeAddress: string
+export type RegisterDeviceDto = {
+  uuid?: string | null
+  cloudMessagingToken: string
+  buildNumber: string
+  bundle: string
+  deviceType: string
+  version: string
+  timestamp?: string | null
+  safeRegistrations: SafeRegistration[]
 }
 export type NotificationTypeEnum =
   | 'CONFIRMATION_REQUEST'
@@ -186,29 +201,14 @@ export type DeleteAllSubscriptionsDto = {
   /** At least one subscription is required */
   subscriptions: DeleteAllSubscriptionItemDto[]
 }
-export type SafeRegistration = {
-  chainId: string
-  safes: string[]
-  signatures: string[]
-}
-export type RegisterDeviceDto = {
-  uuid?: string | null
-  cloudMessagingToken: string
-  buildNumber: string
-  bundle: string
-  deviceType: string
-  version: string
-  timestamp?: string | null
-  safeRegistrations: SafeRegistration[]
-}
 export const {
+  useNotificationsRegisterDeviceV1Mutation,
+  useNotificationsUnregisterDeviceV1Mutation,
+  useNotificationsUnregisterSafeV1Mutation,
   useNotificationsUpsertSubscriptionsV2Mutation,
   useNotificationsGetSafeSubscriptionV2Query,
   useLazyNotificationsGetSafeSubscriptionV2Query,
   useNotificationsDeleteSubscriptionV2Mutation,
   useNotificationsDeleteAllSubscriptionsV2Mutation,
   useNotificationsDeleteDeviceV2Mutation,
-  useNotificationsRegisterDeviceV1Mutation,
-  useNotificationsUnregisterDeviceV1Mutation,
-  useNotificationsUnregisterSafeV1Mutation,
 } = injectedRtkApi
