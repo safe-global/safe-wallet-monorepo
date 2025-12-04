@@ -130,7 +130,7 @@ const AssetsTable = ({
 
                 return (
                   <Card key={item.tokenInfo.address} sx={{ border: 0 }}>
-                    <Accordion disableGutters elevation={0} variant="elevation" defaultExpanded>
+                    <Accordion disableGutters elevation={0} variant="elevation">
                       <AccordionSummary
                         expandIcon={
                           <Box ml={1}>
