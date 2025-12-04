@@ -10,6 +10,8 @@ import { SafeTxContext } from '../SafeTxProvider'
 import { useAlreadySigned } from '@/components/tx/shared/hooks'
 
 const COMBO_SUBMIT_ACTION = 'comboSubmitAction'
+const EXECUTE_ACTION = 'execute'
+const SIGN_ACTION = 'sign'
 
 export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
   const { txId, submitError, isRejectedByUser } = useContext(TxFlowContext)
@@ -25,25 +27,26 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
 
   const hasSigned = useAlreadySigned(safeTx)
 
-  const initialSubmitAction = slotIds?.[0]
   const options = useMemo(() => slotItems.map(({ label, id }) => ({ label, id })), [slotItems])
   const [submitAction, setSubmitAction] = useLocalStorage<string>(COMBO_SUBMIT_ACTION)
 
-  const executeAvailable = slotIds.includes('execute')
-
   // Auto-select Execute if available on first load, otherwise respect user's stored preference
   const slotId = useMemo(() => {
+    const executeAvailable = slotIds.includes(EXECUTE_ACTION)
+    const initialSubmitAction = slotIds?.[0]
+
     // If no stored preference or stored action is not available in current slots
     if (submitAction === undefined || !slotIds.includes(submitAction)) {
       // Prefer Execute if available, otherwise use first option
-      return executeAvailable ? 'execute' : initialSubmitAction
+      return executeAvailable ? EXECUTE_ACTION : initialSubmitAction
     }
     // Use stored preference (respect user's choice)
     return submitAction
-  }, [slotIds, submitAction, initialSubmitAction, executeAvailable])
+  }, [slotIds, submitAction])
 
-  // Show warning if Execute is available but user manually selected Sign
-  const showLastSignerWarning = executeAvailable && submitAction === 'sign' && !hasSigned
+  // Show warning if Execute is available but user selected Sign (either manually or from stored preference)
+  const executeAvailable = slotIds.includes(EXECUTE_ACTION)
+  const showLastSignerWarning = executeAvailable && submitAction === SIGN_ACTION && !hasSigned
 
   if (slotIds.length === 0) {
     return false
