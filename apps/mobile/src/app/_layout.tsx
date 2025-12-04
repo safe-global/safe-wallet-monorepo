@@ -34,6 +34,7 @@ import { SafeStatusBar } from '@/src/theme/SafeStatusBar'
 import { useNotificationHandler } from '@/src/hooks/useNotificationHandler'
 import { usePendingTxsMonitor } from '../hooks/usePendingTxsMonitor'
 import { SigningMonitor } from '@/src/components/SigningMonitor'
+import { ExecutingMonitor } from '@/src/components/ExecutingMonitor'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 // Initialize all notification handlers
@@ -81,6 +82,7 @@ function RootLayout() {
                       <NavigationGuardHOC>
                         <HooksInitializer />
                         <SigningMonitor />
+                        <ExecutingMonitor />
                         <TestCtrls />
                         <Stack
                           screenOptions={({ navigation }) => ({
