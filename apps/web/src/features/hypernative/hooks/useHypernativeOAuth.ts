@@ -413,13 +413,17 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
         // Popup opened successfully - verify it stays open
         // Some browsers might close it after a short delay
         setTimeout(() => {
-          if (popup.closed) {
+          if (popup.closed && !hasReceivedMessageRef.current) {
             // Popup was closed after opening (blocked) - fallback to new tab
+            // Only open new tab if we haven't received a success/error message
+            // (which would indicate successful auth and popup closure)
             tryOpenNewTab(authUrl)
-          } else {
+          } else if (!popup.closed) {
             // Popup is still open - set up normal popup monitoring
             setupPopupMonitoring(popup)
           }
+          // If popup.closed && hasReceivedMessageRef.current, auth completed successfully
+          // so we don't need to do anything (cleanupAfterAuth already handled it)
         }, 100) // Check after 100ms to catch delayed closures
       }
     },
