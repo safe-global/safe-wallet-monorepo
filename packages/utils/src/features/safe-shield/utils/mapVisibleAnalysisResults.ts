@@ -17,16 +17,19 @@ import { mapConsolidatedAnalysisResults } from './mapConsolidatedAnalysisResults
  * For multiple addresses, consolidates results by status type and generates appropriate descriptions
  * Results are sorted by severity: CRITICAL > WARN > INFO > OK
  */
+// Metadata fields to exclude when extracting analysis result groups
+// - name, logoUrl: present in ContractAnalysisResults entries (per-address metadata)
+// - request_id: present in ThreatAnalysisResults (from Blockaid API x-request-id header)
+// - BALANCE_CHANGE: present in ThreatAnalysisResults (handled separately, not a status group)
+const METADATA_KEYS = ['name', 'logoUrl', 'request_id', 'BALANCE_CHANGE'] as const
+
 export const mapVisibleAnalysisResults = (
   addressesResultsMap: RecipientAnalysisResults | ContractAnalysisResults | ThreatAnalysisResults,
 ): AnalysisResult[] => {
-  const {
-    name: _name,
-    logoUrl: _logoUrl,
-    request_id: _requestId,
-    ...resultsMap
-  } = addressesResultsMap as ContractAnalysisResults & { request_id?: string }
-  const addressResults: GroupedAnalysisResults[] = Object.values(resultsMap)
+  // Filter out metadata fields that should not be treated as analysis result groups
+  const addressResults: GroupedAnalysisResults[] = Object.entries(addressesResultsMap)
+    .filter(([key]) => !METADATA_KEYS.includes(key as (typeof METADATA_KEYS)[number]))
+    .map(([, value]) => value as GroupedAnalysisResults)
 
   if (addressResults.length === 1) {
     const results: AnalysisResult[] = []
