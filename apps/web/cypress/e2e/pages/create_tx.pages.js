@@ -36,6 +36,7 @@ const advancedDetails = '[data-testid="tx-advanced-details"]'
 const baseGas = '[data-testid="tx-base-gas"]'
 const requiredConfirmation = '[data-testid="required-confirmations"]'
 export const txDate = '[data-testid="tx-date"]'
+export const txType = '[data-testid="tx-type"]'
 export const proposalStatus = '[data-testid="proposal-status"]'
 export const txSigner = '[data-testid="signer"]'
 const spamTokenWarningIcon = '[data-testid="warning"]'
@@ -62,11 +63,11 @@ const simulateTxBtn = '[data-testid="simulate-btn"]'
 const simulateSuccess = '[data-testid="simulation-success-msg"]'
 const signBtn = '[data-testid="combo-submit-sign"]'
 export const continueSignBtn = '[data-testid="continue-sign-btn"]'
-export const altImgDai = 'img[alt="DAI"]'
-export const altImgCow = 'img[alt="COW"]'
-export const altImgWeth = 'img[alt="WETH"]'
-export const altImgUsdc = 'img[alt="USDC"]'
-export const altImgUsdt = 'img[alt="USDT"]'
+export const altImgDai = 'iframe[title="DAI"]'
+export const altImgCow = 'iframe[title="COW"]'
+export const altImgWeth = 'iframe[title="WETH"]'
+export const altImgUsdc = 'iframe[title="USDC"]'
+export const altImgUsdt = 'iframe[title="USDT"]'
 export const altImgSwaps = 'svg[alt="Swap order"]'
 export const altImgLimitOrder = 'svg[alt="Limit order"]'
 export const altImgTwapOrder = 'svg[alt="Twap Order"]'
@@ -187,6 +188,7 @@ export const advancedDetailsViewOptions = {
   table: 'table',
   grid: 'grid',
 }
+
 //tbr - will check if it should be removed ( we can cound by data-testid="tx-hexData" elements)
 export function checkHashesExist(count) {
   cy.contains(txAccordionDetails)
@@ -599,6 +601,56 @@ export function verifySpamIconIsDisplayed(name, token) {
     })
 }
 
+/**
+ * Helper function to verify icon alt/title attribute
+ * Checks for iframe (title), img (alt), or svg (alt) in the given element
+ */
+function verifyIconAlt($container, expectedAlt, context = 'element') {
+  const $iframe = $container.find('iframe')
+  const $img = $container.find('img')
+  const $svg = $container.find('svg')
+
+  if ($iframe.length > 0) {
+    const $targetIframe = $iframe.first()
+    const title = $targetIframe.attr('title')
+    expect(title, `iframe title attribute should exist and equal "${expectedAlt}" in ${context}`).to.exist
+    expect(title).to.equal(expectedAlt)
+  } else if ($img.length > 0) {
+    const $targetImg = $img.first()
+    const alt = $targetImg.attr('alt')
+    expect(alt, `img alt attribute should exist and equal "${expectedAlt}" in ${context}`).to.exist
+    expect(alt).to.equal(expectedAlt)
+  } else if ($svg.length > 0) {
+    const $targetSvg = $svg.first()
+    const alt = $targetSvg.attr('alt')
+    expect(alt, `svg alt attribute should exist and equal "${expectedAlt}" in ${context}`).to.exist
+    expect(alt).to.equal(expectedAlt)
+  } else {
+    throw new Error(`Expected alt "${expectedAlt}" in ${context} but no iframe, img, or svg found`)
+  }
+}
+
+/**
+ * Helper function to verify token symbol in token text elements
+ * Handles both single-word tokens (e.g., "ETH") and multi-word tokens (e.g., "FLOWER #6188", "$ ETH35.com")
+ */
+function verifyTokenSymbol($element, expectedToken) {
+  const tokenTextElements = $element.find('b[class*="tokenText"]')
+  expect(tokenTextElements.length, 'At least one token text element should exist').to.be.greaterThan(0)
+
+  // Check if the expected token appears in any of the token text elements
+  let found = false
+  tokenTextElements.each((index, el) => {
+    const tokenText = Cypress.$(el).text().trim()
+    if (tokenText && tokenText.includes(expectedToken)) {
+      found = true
+      return false // Break the loop
+    }
+  })
+
+  expect(found, `Token "${expectedToken}" should be found in token text elements`).to.be.true
+}
+
 export function verifySummaryByName(name, token, data, alt, altToken) {
   if (!name) {
     throw new Error('Name parameter is required for verification')
@@ -614,6 +666,7 @@ export function verifySummaryByName(name, token, data, alt, altToken) {
 
     const $element = $elements.first()
 
+    // Verify data text content
     if (Array.isArray(data)) {
       data.forEach((text) => {
         expect($element.text()).to.include(text)
@@ -622,22 +675,21 @@ export function verifySummaryByName(name, token, data, alt, altToken) {
       expect($element.text()).to.include(data)
     }
 
+    // Verify transaction type icon (alt parameter)
     if (alt) {
-      const firstImg = $element.find('img')
-      const firstSvg = $element.find('svg')
-
-      if (firstImg.length > 0) {
-        const targetImg = firstImg.first()
-        expect(targetImg.attr('alt')).to.equal(alt)
-      } else if (firstSvg.length > 0) {
-        const targetSvg = firstSvg.first()
-        expect(targetSvg.attr('alt')).to.equal(alt)
+      const $txTypeElement = $element.find(txType)
+      if ($txTypeElement.length > 0) {
+        // Transaction type icon is in the tx-type element
+        verifyIconAlt($txTypeElement, alt, 'tx-type element')
+      } else {
+        // Fallback: check entire element for backward compatibility
+        verifyIconAlt($element, alt, 'transaction element')
       }
     }
 
+    // Verify token symbol (altToken parameter)
     if (altToken) {
-      const secondImg = $element.find('img').eq(1)
-      expect(secondImg.attr('alt')).to.equal(altToken)
+      verifyTokenSymbol($element, altToken)
     }
   })
 }
@@ -761,12 +813,19 @@ export function verifySubmitBtnIsEnabled() {
   cy.get('button[type="submit"]').should('not.be.disabled')
 }
 
+export function verifyContinueSignBtnIsEnabled() {
+  cy.get(continueSignBtn).should('not.be.disabled')
+}
+
 export function verifyAddToBatchBtnIsEnabled() {
   return cy.get(addToBatchBtn).should('not.be.disabled')
 }
 
 export function verifyNativeTokenTransfer() {
-  cy.contains(nativeTokenTransferStr).should('be.visible')
+  cy.get(modal.cardContent).within(() => {
+    cy.contains('Send').should('be.visible')
+    cy.contains(nativeTokenTransferStr).should('be.visible')
+  })
 }
 
 export function changeNonce(value) {
