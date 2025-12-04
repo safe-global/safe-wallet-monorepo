@@ -51,7 +51,7 @@ describe('Swaps token tests', () => {
     })
 
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_1)
-    swaps.verifyDashboardPageSwapButtonsCount(1)
+    swaps.verifyDashboardPageSwapButtonsCount(4)
     main.verifyElementsCount(swaps.dashboardSwapBtn, 1)
   })
 })
