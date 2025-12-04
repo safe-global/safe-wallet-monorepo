@@ -201,7 +201,12 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
             <Box className={css.buttons}>
               {isTxFromProposer ? (
                 <>
-                  {!expiredSwap && <SignTxButton txSummary={txSummary} />}
+                  {!expiredSwap &&
+                    (awaitingExecution ? (
+                      <ExecuteTxButton txSummary={txSummary} />
+                    ) : (
+                      <SignTxButton txSummary={txSummary} />
+                    ))}
                   <RejectTxButton txSummary={txSummary} safeTxHash={safeTxHash} proposer={proposer} />
                 </>
               ) : (
