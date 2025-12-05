@@ -21,21 +21,21 @@ const shieldLogoOnHover = {
   '&:hover': {
     cursor: 'pointer',
     // bg:
-    rect: {
+    '& .shield-bg': {
       fill: 'var(--color-background-lightGrey)',
     },
     // Shield image:
-    '& g:first-of-type > path:first-of-type': {
+    '& .shield-img': {
       fill: 'var(--color-text-brand)',
       transition: 'fill 0.2s ease',
     },
     // Lines on shield:
-    '& g:first-of-type > g[filter] > path': {
+    '& .shield-lines': {
       fill: '#121312', // consistent between dark/light modes
       transition: 'fill 0.2s ease',
     },
     // "Safe Shield" text:
-    '& > path': {
+    '& .shield-text': {
       fill: 'var(--color-text-primary)',
       transition: 'fill 0.2s ease',
     },
