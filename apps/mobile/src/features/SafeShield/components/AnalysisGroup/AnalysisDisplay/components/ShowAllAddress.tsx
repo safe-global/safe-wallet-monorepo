@@ -54,7 +54,7 @@ export function ShowAllAddress({ addresses }: ShowAllAddressProps) {
           overflow="hidden"
           marginBottom={expanded ? '$1' : 0}
         >
-          <Text fontSize="$3" color="$colorSecondary" letterSpacing={1}>
+          <Text fontSize="$3" color="$colorLight" letterSpacing={1}>
             {expanded ? 'Hide all' : 'Show all'}
           </Text>
           <View
@@ -62,7 +62,7 @@ export function ShowAllAddress({ addresses }: ShowAllAddressProps) {
               transform: [{ rotate: expanded ? '180deg' : '0deg' }],
             }}
           >
-            <SafeFontIcon name="chevron-down" size={16} color="$colorSecondary" />
+            <SafeFontIcon name="chevron-down" size={16} color="$colorLight" />
           </View>
         </View>
       </TouchableOpacity>
