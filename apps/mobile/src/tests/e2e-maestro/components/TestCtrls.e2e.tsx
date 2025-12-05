@@ -10,6 +10,7 @@ import {
   setupPendingTxsSafe2,
   setupPendingTxsSafe3,
   setupPendingTxsSafe4,
+  setupSafeShieldSafe,
 } from '../setup/pendingTxSetup'
 import { setupHistory, setupTransactionHistory, setupTransactionHistoryDirect } from '../setup/historySetup'
 
@@ -109,6 +110,14 @@ export function TestCtrls() {
       <Pressable
         testID="e2ePendingTxsSafe4"
         onPress={() => setupPendingTxsSafe4(dispatch, router)}
+        accessibilityRole="button"
+        style={BTN}
+      />
+
+      {/* SafeShield Test Safe (Polygon) */}
+      <Pressable
+        testID="e2eSafeShieldSafe"
+        onPress={() => setupSafeShieldSafe(dispatch, router)}
         accessibilityRole="button"
         style={BTN}
       />
