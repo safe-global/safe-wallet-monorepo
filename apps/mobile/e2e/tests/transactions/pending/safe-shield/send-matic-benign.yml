@@ -61,7 +61,7 @@ tags:
       HEADER: 'CHECKS PASSED'
       LABEL_1: 'Recurring recipient'
       DESCRIPTION_1: '.*You have interacted with this address.*'
-      DESCRIPTION_1_1: '.*This address is in your address book.*'
+      DESCRIPTION_1_2: '.*This address is in your address book.*'
       LABEL_2: 'No threat detected'
       DESCRIPTION_2: '.*Threat analysis found no issues.*'
 

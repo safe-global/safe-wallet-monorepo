@@ -46,7 +46,7 @@ tags:
       LABEL_2: 'Verified contract'
       LABEL_3: 'Threat analysis failed'
       RUN_SIMULATION: 'true'
-      SIMULATION_RESULT: 'Simulation failed'
+      SIMULATION_RESULT: 'fail'
 
 # ===========================================
 # Balance Change Block
