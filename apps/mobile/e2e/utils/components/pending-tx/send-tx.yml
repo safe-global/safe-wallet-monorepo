@@ -37,14 +37,15 @@ tags:
     file: ../../assertions/verify-tx-details.yml
 
 # ===========================================
-# Transaction Checks (Pending transactions show checks instead of created/executed)
+# SafeShield Transaction Checks
 # ===========================================
 - runFlow:
     file: ../../assertions/verify-tx-checks.yml
     env:
+      WIDGET_HEADER_PATTERN: '.*(Review details|Issues found|Checks passed).*'
       BALANCE_CHANGE_PATTERN: '.*-.*0\.00002.*'
-      TRANSACTION_SIMULATION_PATTERN: 'Success'
-      VERIFY_TENDERLY_LINK: 'true'
+      RUN_SIMULATION: 'true'
+      EXPECTED_SIMULATION_RESULT: 'success'
 
 # ===========================================
 # Confirmations
@@ -52,6 +53,8 @@ tags:
 # Test tapping on confirmations to open the bottom sheet and verify signed badge
 # For pending transactions, we use the confirmations from the confirm transaction screen
 # Verify that 1/1 confirmations are shown (the transaction has all required confirmations)
+# Scroll to make confirmations visible (SafeShield block takes more vertical space)
+- scroll
 - runFlow:
     file: ../../assertions/verify-tx-confirmations.yml
     env:
