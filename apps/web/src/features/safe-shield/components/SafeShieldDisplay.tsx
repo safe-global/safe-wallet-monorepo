@@ -20,21 +20,17 @@ const shieldLogoOnHover = {
   height: 18,
   '&:hover': {
     cursor: 'pointer',
-    // bg:
     '& .shield-bg': {
       fill: 'var(--color-background-lightGrey)',
     },
-    // Shield image:
     '& .shield-img': {
       fill: 'var(--color-text-brand)',
       transition: 'fill 0.2s ease',
     },
-    // Lines on shield:
     '& .shield-lines': {
       fill: '#121312', // consistent between dark/light modes
       transition: 'fill 0.2s ease',
     },
-    // "Safe Shield" text:
     '& .shield-text': {
       fill: 'var(--color-text-primary)',
       transition: 'fill 0.2s ease',
