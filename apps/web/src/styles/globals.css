@@ -109,6 +109,10 @@ input[type='number'] {
   stroke: var(--color-border-light);
 }
 
+.illustration-border-light-fill {
+  fill: var(--color-border-light);
+}
+
 .illustration-background-stroke {
   stroke: var(--color-logo-background);
 }
