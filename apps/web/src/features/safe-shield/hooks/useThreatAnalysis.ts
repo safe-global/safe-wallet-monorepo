@@ -1,17 +1,22 @@
-import { useThreatAnalysis as useThreatAnalysisUtils } from '@safe-global/utils/features/safe-shield/hooks'
+import {
+  useThreatAnalysis as useThreatAnalysisUtils,
+  useThreatAnalysisHypernative,
+} from '@safe-global/utils/features/safe-shield/hooks'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { useContext, useMemo } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { useIsHypernativeGuard } from '@/features/hypernative/hooks/useIsHypernativeGuard'
-import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
-import { Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useNestedTransaction } from '../components/useNestedTransaction'
 import { useCurrentChain } from '@/hooks/useChains'
+import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 
-export function useThreatAnalysis(overrideSafeTx?: SafeTransaction) {
+export function useThreatAnalysis(
+  overrideSafeTx?: SafeTransaction,
+  hypernativeAuthToken?: string,
+): AsyncResult<ThreatAnalysisResults> | undefined {
   const {
     safe: { chainId, version },
     safeAddress,
@@ -34,6 +39,18 @@ export function useThreatAnalysis(overrideSafeTx?: SafeTransaction) {
     walletAddress,
     origin: txOrigin,
     safeVersion: version || undefined,
+    skip: isHypernativeGuard,
+  })
+
+  const hypernativeThreatAnalysis = useThreatAnalysisHypernative({
+    safeAddress: safeAddress as `0x${string}`,
+    chainId,
+    data: overrideSafeTx || safeTx || safeMessage,
+    walletAddress,
+    origin: txOrigin,
+    safeVersion: version || undefined,
+    authToken: hypernativeAuthToken,
+    skip: !isHypernativeGuard || !hypernativeAuthToken,
   })
 
   const nestedThreatAnalysis = useThreatAnalysisUtils({
@@ -67,27 +84,12 @@ export function useThreatAnalysis(overrideSafeTx?: SafeTransaction) {
     return [combinedResult, mainError || nestedError, mainLoading || nestedLoading]
   }, [mainThreatAnalysis, nestedThreatAnalysis, isNested, isNestedLoading])
 
-  // If HN Guard is installed, return a static INFO status.
-  // This is a temporary solution to avoid the error message "Threat analysis failed"
-  // when HN Guard is installed.
   if (HNGuardCheckLoading) {
-    return [undefined, undefined, true] as AsyncResult<ThreatAnalysisResults>
+    return [undefined, undefined, true]
   }
+
   if (isHypernativeGuard) {
-    return [
-      {
-        [StatusGroup.THREAT]: [
-          {
-            severity: Severity.INFO,
-            type: ThreatStatus.HYPERNATIVE_GUARD,
-            title: 'Threat analysis on Hypernative',
-            description: 'The full threat report is available in your Hypernative account',
-          },
-        ],
-      },
-      undefined,
-      false,
-    ] as AsyncResult<ThreatAnalysisResults>
+    return hypernativeThreatAnalysis
   }
 
   return combinedThreatAnalysis

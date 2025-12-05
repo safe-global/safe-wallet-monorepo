@@ -1,0 +1,414 @@
+import { faker } from '@faker-js/faker'
+import { mapHypernativeResponse } from '../mapHypernativeResponse'
+import { Severity, StatusGroup, ThreatStatus } from '../../types'
+import type {
+  HypernativeAssessmentFailedResponseDto,
+  HypernativeAssessmentResponseDto,
+} from '@safe-global/store/hypernative/hypernativeApi.dto'
+
+describe('mapHypernativeResponse', () => {
+  const createNoThreatResponse = (): HypernativeAssessmentResponseDto => ({
+    safeTxHash: faker.string.hexadecimal({ length: 64 }) as `0x${string}`,
+    status: 'OK',
+    assessmentData: {
+      assessmentId: faker.string.uuid(),
+      assessmentTimestamp: new Date().toISOString(),
+      recommendation: 'accept',
+      interpretation: 'Transfer 1 ETH to recipient',
+      findings: {
+        THREAT_ANALYSIS: {
+          status: 'No risks found',
+          severity: 'accept',
+          risks: [],
+        },
+        CUSTOM_CHECKS: {
+          status: 'Passed',
+          severity: 'accept',
+          risks: [],
+        },
+      },
+    },
+  })
+
+  describe('status handling', () => {
+    it('should return error result when status is ERROR', () => {
+      const responseTitle = 'Hypernative analysis failed'
+      const responseDescription = 'The threat analysis failed'
+      const response: HypernativeAssessmentFailedResponseDto = {
+        status: 'FAILED',
+        error: {
+          reason: responseTitle,
+          message: responseDescription,
+        },
+      }
+
+      const result = mapHypernativeResponse(response)
+
+      expect(result[StatusGroup.THREAT]).toHaveLength(1)
+      expect(result[StatusGroup.THREAT]?.[0]).toEqual({
+        severity: Severity.CRITICAL,
+        type: ThreatStatus.HYPERNATIVE_GUARD,
+        title: responseTitle,
+        description: responseDescription,
+      })
+    })
+  })
+
+  describe('no risks found', () => {
+    it('should return NO_THREAT when no risks found', () => {
+      const response = createNoThreatResponse()
+
+      const result = mapHypernativeResponse(response)
+
+      expect(result[StatusGroup.THREAT]).toContainEqual(
+        expect.objectContaining({
+          severity: Severity.OK,
+          type: ThreatStatus.NO_THREAT,
+          title: 'No threats detected',
+          description: 'Threat analysis found no issues.',
+        }),
+      )
+    })
+  })
+
+  describe('threat analysis risks', () => {
+    it('should map CRITICAL severity for deny risks', () => {
+      const response: HypernativeAssessmentResponseDto = {
+        ...createNoThreatResponse(),
+        assessmentData: {
+          ...createNoThreatResponse().assessmentData,
+          recommendation: 'deny',
+          findings: {
+            THREAT_ANALYSIS: {
+              status: 'Risks found',
+              severity: 'deny',
+              risks: [
+                {
+                  title: 'Transfer to malicious',
+                  details: 'Transfer to known phishing address',
+                  severity: 'deny',
+                },
+              ],
+            },
+            CUSTOM_CHECKS: {
+              status: 'Passed',
+              severity: 'accept',
+              risks: [],
+            },
+          },
+        },
+      }
+
+      const result = mapHypernativeResponse(response)
+
+      expect(result[StatusGroup.THREAT]?.[0]).toEqual({
+        severity: Severity.CRITICAL,
+        type: ThreatStatus.HYPERNATIVE_GUARD,
+        title: 'Transfer to malicious',
+        description: 'Transfer to known phishing address',
+      })
+    })
+
+    it('should map WARN severity for warn risks', () => {
+      const response: HypernativeAssessmentResponseDto = {
+        ...createNoThreatResponse(),
+        assessmentData: {
+          ...createNoThreatResponse().assessmentData,
+          recommendation: 'warn',
+          findings: {
+            THREAT_ANALYSIS: {
+              status: 'Risks found',
+              severity: 'warn',
+              risks: [
+                {
+                  title: 'Suspicious swap pattern',
+                  details: 'Swap volume unusually large',
+                  severity: 'warn',
+                },
+              ],
+            },
+            CUSTOM_CHECKS: {
+              status: 'Passed',
+              severity: 'accept',
+              risks: [],
+            },
+          },
+        },
+      }
+
+      const result = mapHypernativeResponse(response)
+
+      expect(result[StatusGroup.THREAT]?.[0]).toEqual({
+        severity: Severity.WARN,
+        type: ThreatStatus.HYPERNATIVE_GUARD,
+        title: 'Suspicious swap pattern',
+        description: 'Swap volume unusually large',
+      })
+    })
+
+    it('should map OK severity for accept risks', () => {
+      const response: HypernativeAssessmentResponseDto = {
+        ...createNoThreatResponse(),
+        assessmentData: {
+          ...createNoThreatResponse().assessmentData,
+          findings: {
+            THREAT_ANALYSIS: {
+              status: 'No risks found',
+              severity: 'accept',
+              risks: [
+                {
+                  title: 'All checks passed',
+                  details: 'Transaction appears safe',
+                  severity: 'accept',
+                },
+              ],
+            },
+            CUSTOM_CHECKS: {
+              status: 'Passed',
+              severity: 'accept',
+              risks: [],
+            },
+          },
+        },
+      }
+
+      const result = mapHypernativeResponse(response)
+
+      expect(result[StatusGroup.THREAT]).toContainEqual({
+        severity: Severity.OK,
+        type: ThreatStatus.HYPERNATIVE_GUARD,
+        title: 'All checks passed',
+        description: 'Transaction appears safe',
+      })
+    })
+  })
+
+  describe('custom checks risks', () => {
+    it('should include custom checks risks in results', () => {
+      const response: HypernativeAssessmentResponseDto = {
+        ...createNoThreatResponse(),
+        assessmentData: {
+          ...createNoThreatResponse().assessmentData,
+          recommendation: 'warn',
+          findings: {
+            THREAT_ANALYSIS: {
+              status: 'No risks found',
+              severity: 'accept',
+              risks: [],
+            },
+            CUSTOM_CHECKS: {
+              status: 'Risks found',
+              severity: 'warn',
+              risks: [
+                {
+                  title: 'Pool Toxicity',
+                  details: 'Pool contains 4% of illicit funds',
+                  severity: 'warn',
+                },
+                {
+                  title: 'Unusually high gas price',
+                  details: 'Gas price higher than max allowed',
+                  severity: 'warn',
+                },
+              ],
+            },
+          },
+        },
+      }
+
+      const result = mapHypernativeResponse(response)
+
+      expect(result[StatusGroup.CUSTOM_CHECKS]).toContainEqual({
+        severity: Severity.WARN,
+        type: ThreatStatus.HYPERNATIVE_GUARD,
+        title: 'Pool Toxicity',
+        description: 'Pool contains 4% of illicit funds',
+      })
+
+      expect(result[StatusGroup.CUSTOM_CHECKS]).toContainEqual({
+        severity: Severity.WARN,
+        type: ThreatStatus.HYPERNATIVE_GUARD,
+        title: 'Unusually high gas price',
+        description: 'Gas price higher than max allowed',
+      })
+    })
+  })
+
+  describe('multiple risks', () => {
+    it('should combine risks from both THREAT_ANALYSIS and CUSTOM_CHECKS', () => {
+      const response: HypernativeAssessmentResponseDto = {
+        ...createNoThreatResponse(),
+        assessmentData: {
+          ...createNoThreatResponse().assessmentData,
+          recommendation: 'deny',
+          interpretation: 'Swap 2 USDC for 2.01 USDT',
+          findings: {
+            THREAT_ANALYSIS: {
+              status: 'Risks found',
+              severity: 'deny',
+              risks: [
+                {
+                  title: 'Transfer to malicious',
+                  details: 'Transfer to phishing address',
+                  severity: 'deny',
+                },
+              ],
+            },
+            CUSTOM_CHECKS: {
+              status: 'Risks found',
+              severity: 'warn',
+              risks: [
+                {
+                  title: 'Pool Toxicity',
+                  details: 'Pool contains illicit funds',
+                  severity: 'warn',
+                },
+              ],
+            },
+          },
+        },
+      }
+
+      const result = mapHypernativeResponse(response)
+
+      // THREAT_ANALYSIS has 1 deny risk
+      expect(result[StatusGroup.THREAT]).toHaveLength(1)
+      expect(result[StatusGroup.THREAT]?.[0].severity).toBe(Severity.CRITICAL)
+      expect(result[StatusGroup.THREAT]?.[0].title).toBe('Transfer to malicious')
+
+      // CUSTOM_CHECKS has 1 warn risk
+      expect(result[StatusGroup.CUSTOM_CHECKS]).toHaveLength(1)
+      expect(result[StatusGroup.CUSTOM_CHECKS]?.[0].severity).toBe(Severity.WARN)
+      expect(result[StatusGroup.CUSTOM_CHECKS]?.[0].title).toBe('Pool Toxicity')
+    })
+  })
+
+  describe('severity sorting', () => {
+    it('should sort results by severity (CRITICAL first, then WARN, INFO, OK)', () => {
+      const response: HypernativeAssessmentResponseDto = {
+        ...createNoThreatResponse(),
+        assessmentData: {
+          ...createNoThreatResponse().assessmentData,
+          interpretation: 'Transaction interpretation',
+          findings: {
+            THREAT_ANALYSIS: {
+              status: 'Risks found',
+              severity: 'warn',
+              risks: [
+                {
+                  title: 'Warning risk',
+                  details: 'This is a warning',
+                  severity: 'warn',
+                },
+                {
+                  title: 'OK risk',
+                  details: 'This is OK',
+                  severity: 'accept',
+                },
+              ],
+            },
+            CUSTOM_CHECKS: {
+              status: 'Risks found',
+              severity: 'deny',
+              risks: [
+                {
+                  title: 'Critical risk',
+                  details: 'This is critical',
+                  severity: 'deny',
+                },
+              ],
+            },
+          },
+        },
+      }
+
+      const result = mapHypernativeResponse(response)
+
+      // THREAT_ANALYSIS should have warn and accept risks sorted by severity
+      expect(result[StatusGroup.THREAT]?.[0].severity).toBe(Severity.WARN)
+      expect(result[StatusGroup.THREAT]?.[0].title).toBe('Warning risk')
+      expect(result[StatusGroup.THREAT]?.[1].severity).toBe(Severity.OK)
+      expect(result[StatusGroup.THREAT]?.[1].title).toBe('OK risk')
+
+      // CUSTOM_CHECKS should have deny risk
+      expect(result[StatusGroup.CUSTOM_CHECKS]?.[0].severity).toBe(Severity.CRITICAL)
+      expect(result[StatusGroup.CUSTOM_CHECKS]?.[0].title).toBe('Critical risk')
+    })
+  })
+
+  describe('risk title mapping', () => {
+    it('should map known Hypernative risk titles to specific ThreatStatus types', () => {
+      const response: HypernativeAssessmentResponseDto = {
+        ...createNoThreatResponse(),
+        assessmentData: {
+          ...createNoThreatResponse().assessmentData,
+          findings: {
+            THREAT_ANALYSIS: {
+              status: 'Risks found',
+              severity: 'warn',
+              risks: [
+                {
+                  title: 'Safe Multisig governance change',
+                  details: 'Governance structure is being modified',
+                  severity: 'warn',
+                },
+                {
+                  title: 'Multisig - module change',
+                  details: 'A module is being added or removed',
+                  severity: 'warn',
+                },
+                {
+                  title: 'Safe Multisig - fallback handler updated',
+                  details: 'Fallback handler is being changed',
+                  severity: 'warn',
+                },
+              ],
+            },
+            CUSTOM_CHECKS: {
+              status: 'Passed',
+              severity: 'accept',
+              risks: [],
+            },
+          },
+        },
+      }
+
+      const result = mapHypernativeResponse(response)
+
+      expect(result[StatusGroup.THREAT]?.[0].type).toBe(ThreatStatus.OWNERSHIP_CHANGE)
+      expect(result[StatusGroup.THREAT]?.[1].type).toBe(ThreatStatus.MODULE_CHANGE)
+      expect(result[StatusGroup.THREAT]?.[2].type).toBe(ThreatStatus.UNOFFICIAL_FALLBACK_HANDLER)
+    })
+
+    it('should use HYPERNATIVE_GUARD for unknown risk titles', () => {
+      const response: HypernativeAssessmentResponseDto = {
+        ...createNoThreatResponse(),
+        assessmentData: {
+          ...createNoThreatResponse().assessmentData,
+          findings: {
+            THREAT_ANALYSIS: {
+              status: 'Risks found',
+              severity: 'warn',
+              risks: [
+                {
+                  title: 'Unknown risk type',
+                  details: 'This is a new type of risk',
+                  severity: 'warn',
+                },
+              ],
+            },
+            CUSTOM_CHECKS: {
+              status: 'Passed',
+              severity: 'accept',
+              risks: [],
+            },
+          },
+        },
+      }
+
+      const result = mapHypernativeResponse(response)
+
+      expect(result[StatusGroup.THREAT]?.[0].type).toBe(ThreatStatus.HYPERNATIVE_GUARD)
+    })
+  })
+})
