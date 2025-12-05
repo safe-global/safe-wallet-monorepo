@@ -1,0 +1,42 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+# ===========================================
+# Balance Change Block (Reusable Component)
+# ===========================================
+# Verifies the SafeShield balance change block on the Confirm transaction screen
+#
+# Environment variables:
+#   NO_CHANGE: Set to "true" if expecting "No balance change detected"
+#   TOKEN_SYMBOL: Token symbol to verify (e.g., "POL", "ETH", "USDC")
+#                 Only used when NO_CHANGE is not "true"
+#   AMOUNT_PATTERN: Regex pattern for the amount (e.g., ".*-0\\.001.*")
+#                   Only used when NO_CHANGE is not "true"
+
+- assertVisible:
+    id: 'balance-change-block'
+
+- assertVisible:
+    text: 'Balance change'
+
+- evalScript: '${output.noChange = (typeof NO_CHANGE !== "undefined" && NO_CHANGE === "true")}'
+
+# No balance change scenario
+- runFlow:
+    when:
+      true: '${output.noChange === true}'
+    commands:
+      - assertVisible:
+          text: 'No balance change detected'
+
+# Balance change with token and amount
+- runFlow:
+    when:
+      true: '${output.noChange === false}'
+    commands:
+      - assertVisible:
+          text: '${TOKEN_SYMBOL}'
+      - assertVisible:
+          text: '${AMOUNT_PATTERN}'
+

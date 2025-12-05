@@ -1,0 +1,72 @@
+appId: ${APP_ID}
+tags:
+  - transactions
+  - pending
+  - safe-shield
+---
+# ===========================================
+# SafeShield: Send MATIC (Malicious - 0.000001 MATIC to drainer)
+# ===========================================
+# Safe: 0x65e1Ff7e0901055B3bea7D8b3AF457a659714013 (Polygon)
+# Expected widget: Risk detected (CRITICAL)
+# - Low activity recipient (WARN) - unknown recipient, not in address book
+# - Malicious threat detected (CRITICAL)
+# - Balance change: POL -< 0.00001
+# - Risk disclaimer required
+
+- runFlow:
+    file: ../../../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eSafeShieldSafe'
+
+- assertVisible:
+    id: 'pending-tx-list'
+
+- runFlow:
+    file: ../../../../utils/components/pending-tx/tap-tx-card.yml
+    env:
+      WAIT_FOR: '.*0\.000001 MATIC.*'
+      TAP_TEXT: '.*0\.000001 MATIC.*'
+
+- assertVisible: 'Confirm transaction'
+
+# ===========================================
+# SafeShield Widget
+# ===========================================
+- runFlow:
+    file: ../../../../utils/assertions/verify-safe-shield-widget.yml
+    env:
+      WIDGET_HEADER: 'Risk detected'
+      LABEL_1: 'Low activity recipient'
+      LABEL_2: 'Malicious threat detected'
+      VERIFY_DISCLAIMER: 'true'
+
+# ===========================================
+# Balance Change Block
+# ===========================================
+- runFlow:
+    file: ../../../../utils/assertions/verify-balance-change.yml
+    env:
+      TOKEN_SYMBOL: 'POL'
+      AMOUNT_PATTERN: '.*0\.00001.*'
+
+# ===========================================
+# SafeShield Details Sheet
+# ===========================================
+- runFlow:
+    file: ../../../../utils/assertions/verify-safe-shield-sheet.yml
+    env:
+      TAP_TO_OPEN: 'Risk detected'
+      HEADER: 'RISK DETECTED'
+      LABEL_1: 'Low activity recipient'
+      DESCRIPTION_1: '.*has few transactions.*'
+      DESCRIPTION_1_2: '.*interacting with this address for the first time.*'
+      DESCRIPTION_1_3: '.*not in your address book.*'
+      LABEL_2: 'Malicious threat detected'
+      DESCRIPTION_2: '.*transfers native currency to a known drainer.*'
+      DESCRIPTION_2_2: '.*wallet drainer behavior.*'
+
+# Verify back on Confirm transaction screen
+- assertVisible: 'Confirm transaction'
+

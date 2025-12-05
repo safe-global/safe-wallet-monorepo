@@ -1,0 +1,77 @@
+appId: ${APP_ID}
+tags:
+  - transactions
+  - pending
+  - safe-shield
+---
+# ===========================================
+# SafeShield: Pending Bridge (AAVE → Ethereum)
+# ===========================================
+# Safe: 0x65e1Ff7e0901055B3bea7D8b3AF457a659714013 (Polygon)
+# Expected widget: Issues found (WARN)
+# - Missing ownership (WARN)
+# - Verified contract (OK)
+# - Threat analysis failed (WARN)
+# - Balance change: No balance change detected
+# - No disclaimer (not CRITICAL)
+
+- runFlow:
+    file: ../../../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eSafeShieldSafe'
+
+- assertVisible:
+    id: 'pending-tx-list'
+
+# Scroll to see the bridge transaction at the bottom
+- scroll
+
+- runFlow:
+    file: ../../../../utils/components/pending-tx/tap-tx-card.yml
+    env:
+      WAIT_FOR: '.*Pending bridge.*'
+      TAP_TEXT: '.*Pending bridge.*'
+
+- assertVisible: 'Confirm transaction'
+
+# ===========================================
+# SafeShield Widget
+# ===========================================
+- runFlow:
+    file: ../../../../utils/assertions/verify-safe-shield-widget.yml
+    env:
+      WIDGET_HEADER: 'Issues found'
+      LABEL_1: 'Missing ownership'
+      LABEL_2: 'Verified contract'
+      LABEL_3: 'Threat analysis failed'
+      RUN_SIMULATION: 'true'
+      SIMULATION_RESULT: 'Simulation failed'
+
+# ===========================================
+# Balance Change Block
+# ===========================================
+- runFlow:
+    file: ../../../../utils/assertions/verify-balance-change.yml
+    env:
+      NO_CHANGE: 'true'
+
+# ===========================================
+# SafeShield Details Sheet
+# ===========================================
+- runFlow:
+    file: ../../../../utils/assertions/verify-safe-shield-sheet.yml
+    env:
+      TAP_TO_OPEN: 'Issues found'
+      HEADER: 'ISSUES FOUND'
+      LABEL_1: 'Missing ownership'
+      DESCRIPTION_1: '.*not activated on the target chain.*'
+      DESCRIPTION_1_2: '.*has few transactions.*'
+      DESCRIPTION_1_3: '.*in your address book.*'
+      LABEL_2: 'Verified contract'
+      DESCRIPTION_2: '.*contracts are verified.*'
+      LABEL_3: 'Threat analysis failed'
+      DESCRIPTION_3: '.*Threat analysis failed.*Review before processing.*'
+
+# Verify back on Confirm transaction screen
+- assertVisible: 'Confirm transaction'

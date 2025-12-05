@@ -1,0 +1,69 @@
+appId: ${APP_ID}
+tags:
+  - transactions
+  - pending
+  - safe-shield
+---
+# ===========================================
+# SafeShield: Send (0.001 MATIC)
+# ===========================================
+# Safe: 0x65e1Ff7e0901055B3bea7D8b3AF457a659714013 (Polygon)
+# Expected widget: Checks passed
+# - Recurring recipient (OK)
+# - No threat detected (OK)
+# - Balance change: POL -0.001
+
+- runFlow:
+    file: ../../../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eSafeShieldSafe'
+
+- assertVisible:
+    id: 'pending-tx-list'
+
+- runFlow:
+    file: ../../../../utils/components/pending-tx/tap-tx-card.yml
+    env:
+      WAIT_FOR: '.*0\.001 MATIC.*'
+      TAP_TEXT: '.*0\.001 MATIC.*'
+
+- assertVisible: 'Confirm transaction'
+
+# ===========================================
+# SafeShield Widget
+# ===========================================
+- runFlow:
+    file: ../../../../utils/assertions/verify-safe-shield-widget.yml
+    env:
+      WIDGET_HEADER: 'Checks passed'
+      LABEL_1: 'Recurring recipient'
+      LABEL_2: 'No threat detected'
+      RUN_SIMULATION: 'true'
+      SIMULATION_RESULT: 'success'
+
+# ===========================================
+# Balance Change Block
+# ===========================================
+- runFlow:
+    file: ../../../../utils/assertions/verify-balance-change.yml
+    env:
+      TOKEN_SYMBOL: 'POL'
+      AMOUNT_PATTERN: '.*-0\.001.*'
+
+# ===========================================
+# SafeShield Details Sheet
+# ===========================================
+- runFlow:
+    file: ../../../../utils/assertions/verify-safe-shield-sheet.yml
+    env:
+      TAP_TO_OPEN: 'Checks passed'
+      HEADER: 'CHECKS PASSED'
+      LABEL_1: 'Recurring recipient'
+      DESCRIPTION_1: '.*You have interacted with this address.*'
+      DESCRIPTION_1_1: '.*This address is in your address book.*'
+      LABEL_2: 'No threat detected'
+      DESCRIPTION_2: '.*Threat analysis found no issues.*'
+
+# Verify back on Confirm transaction screen
+- assertVisible: 'Confirm transaction'
