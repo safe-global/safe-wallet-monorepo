@@ -97,7 +97,7 @@ function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem) {
   )
 
   const currency = useAppSelector(selectCurrency)
-  const { address: walletAddress = '' } = useWallet() || {}
+  const { address: walletAddress } = useWallet() || {}
 
   const { data: safeOverviews } = useGetMultipleSafeOverviewsQuery({ currency, walletAddress, safes: deployedSafes })
 

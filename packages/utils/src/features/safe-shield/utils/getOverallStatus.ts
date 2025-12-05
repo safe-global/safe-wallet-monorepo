@@ -55,9 +55,10 @@ export const getOverallStatus = (
     }
   }
 
-  // Add threat result
+  // Add threat result (skip primitive values like request_id string)
   if (threatResults) {
     for (const addressResults of Object.values(threatResults)) {
+      if (typeof addressResults !== 'object' || addressResults === null) continue
       for (const groupResults of Object.values(addressResults)) {
         if (groupResults && isThreatAnalysisResult(groupResults)) {
           allResults.push(groupResults)

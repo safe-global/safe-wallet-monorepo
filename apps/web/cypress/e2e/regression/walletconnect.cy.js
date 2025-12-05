@@ -23,7 +23,6 @@ describe('Walletconnect UI tests', () => {
     constants.welcomeAccountsSepoliaUrl,
     constants.addressBookUrl,
     constants.appsUrlGeneral,
-    constants.welcomeSepoliaUrl,
     constants.transactionQueueUrl,
     constants.transactionsMessagesUrl,
     constants.modulesUrl,
