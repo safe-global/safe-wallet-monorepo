@@ -1,9 +1,6 @@
 import { render, waitFor, screen } from '@testing-library/react'
-import { Provider } from 'react-redux'
 import { useRouter } from 'next/router'
-import { configureStore } from '@reduxjs/toolkit'
 import HypernativeOAuthCallback from '../../pages/hypernative/oauth-callback'
-import { hnAuthSlice } from '@/features/hypernative/store/hnAuthSlice'
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
@@ -32,7 +29,6 @@ const mockFetch = jest.fn()
 global.fetch = mockFetch as unknown as typeof fetch
 
 describe('HypernativeOAuthCallback', () => {
-  let store: ReturnType<typeof createTestStore>
   const mockRouterPush = jest.fn()
   const mockPostMessage = jest.fn()
   const mockWindowClose = jest.fn()
@@ -42,22 +38,7 @@ describe('HypernativeOAuthCallback', () => {
   const mockReadPkce = readPkce as jest.MockedFunction<typeof readPkce>
   const mockClearPkce = clearPkce as jest.MockedFunction<typeof clearPkce>
 
-  function createTestStore() {
-    return configureStore({
-      reducer: {
-        [hnAuthSlice.name]: hnAuthSlice.reducer,
-      },
-    })
-  }
-
-  function createWrapper() {
-    const Wrapper = ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>
-    Wrapper.displayName = 'TestWrapper'
-    return Wrapper
-  }
-
   beforeEach(() => {
-    store = createTestStore()
     jest.clearAllMocks()
     mockReadPkce.mockReturnValue({})
     mockClearPkce.mockImplementation(() => {})
@@ -127,7 +108,7 @@ describe('HypernativeOAuthCallback', () => {
   })
 
   it('should show loading state initially', () => {
-    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+    render(<HypernativeOAuthCallback />)
 
     expect(screen.getByText('Authentication in progress...')).toBeInTheDocument()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
@@ -139,7 +120,7 @@ describe('HypernativeOAuthCallback', () => {
       query: { code: 'test-code', state: 'test-state' },
     })
 
-    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+    render(<HypernativeOAuthCallback />)
 
     // Should still show loading, not try to process
     expect(screen.getByText('Authentication in progress...')).toBeInTheDocument()
@@ -158,7 +139,7 @@ describe('HypernativeOAuthCallback', () => {
       codeVerifier: 'verifier-789',
     })
 
-    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+    render(<HypernativeOAuthCallback />)
 
     // Wait for token exchange
     await waitFor(
@@ -208,7 +189,7 @@ describe('HypernativeOAuthCallback', () => {
       codeVerifier: 'verifier-123',
     })
 
-    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+    render(<HypernativeOAuthCallback />)
 
     await waitFor(() => {
       expect(screen.getByText(/Missing authorization code in callback URL/)).toBeInTheDocument()
@@ -237,7 +218,7 @@ describe('HypernativeOAuthCallback', () => {
 
     mockReadPkce.mockReturnValue({})
 
-    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+    render(<HypernativeOAuthCallback />)
 
     await waitFor(() => {
       expect(screen.getByText(/Missing state parameter in callback URL/)).toBeInTheDocument()
@@ -269,7 +250,7 @@ describe('HypernativeOAuthCallback', () => {
       codeVerifier: 'verifier-123',
     })
 
-    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+    render(<HypernativeOAuthCallback />)
 
     await waitFor(() => {
       expect(screen.getByText(/Invalid OAuth state parameter - possible CSRF attack/)).toBeInTheDocument()
@@ -301,7 +282,7 @@ describe('HypernativeOAuthCallback', () => {
       // Missing codeVerifier
     })
 
-    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+    render(<HypernativeOAuthCallback />)
 
     await waitFor(() => {
       expect(screen.getByText(/Missing PKCE code verifier - authentication flow corrupted/)).toBeInTheDocument()
@@ -333,7 +314,7 @@ describe('HypernativeOAuthCallback', () => {
 
     mockReadPkce.mockReturnValue({})
 
-    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+    render(<HypernativeOAuthCallback />)
 
     await waitFor(() => {
       expect(screen.getByText(/OAuth authorization failed: User denied authorization/)).toBeInTheDocument()
@@ -378,7 +359,7 @@ describe('HypernativeOAuthCallback', () => {
       } as unknown as Response),
     )
 
-    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+    render(<HypernativeOAuthCallback />)
 
     await waitFor(
       () => {
@@ -430,7 +411,7 @@ describe('HypernativeOAuthCallback', () => {
       } as unknown as Response),
     )
 
-    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+    render(<HypernativeOAuthCallback />)
 
     await waitFor(
       () => {
@@ -487,7 +468,7 @@ describe('HypernativeOAuthCallback', () => {
       clone: jest.fn().mockReturnThis(),
     } as unknown as Response)
 
-    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+    render(<HypernativeOAuthCallback />)
 
     await waitFor(
       () => {
@@ -517,7 +498,7 @@ describe('HypernativeOAuthCallback', () => {
       codeVerifier: 'verifier-123',
     })
 
-    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+    render(<HypernativeOAuthCallback />)
 
     // Wait for first processing
     await waitFor(() => {
@@ -543,7 +524,7 @@ describe('HypernativeOAuthCallback', () => {
       codeVerifier: 'verifier-123',
     })
 
-    render(<HypernativeOAuthCallback />, { wrapper: createWrapper() })
+    render(<HypernativeOAuthCallback />)
 
     // Wait for error
     await waitFor(() => {
