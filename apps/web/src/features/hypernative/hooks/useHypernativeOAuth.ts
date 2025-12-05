@@ -480,7 +480,7 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
     } catch (error) {
       handleOAuthError(error)
     }
-  }, [dispatch, clearAllTimers, handlePopupOpen, handleOAuthError])
+  }, [clearAllTimers, handlePopupOpen, handleOAuthError])
 
   /**
    * Logout - clear authentication token
