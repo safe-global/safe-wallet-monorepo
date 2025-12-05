@@ -62,4 +62,3 @@ tags:
 
 # Verify back on Confirm transaction screen
 - assertVisible: 'Confirm transaction'
-

@@ -39,4 +39,3 @@ tags:
           text: '${TOKEN_SYMBOL}'
       - assertVisible:
           text: '${AMOUNT_PATTERN}'
-
