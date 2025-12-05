@@ -6,6 +6,10 @@ import {
   ContractAnalysisBuilder,
 } from '@safe-global/utils/features/safe-shield/builders'
 import { faker } from '@faker-js/faker'
+import * as useCheckSimulation from '@/features/safe-shield/hooks/useCheckSimulation'
+
+// Mock hooks
+jest.mock('@/features/safe-shield/hooks/useCheckSimulation')
 
 describe('SafeShieldDisplay', () => {
   let mockRecipientAddress: string
@@ -19,6 +23,11 @@ describe('SafeShieldDisplay', () => {
   beforeEach(() => {
     jest.clearAllMocks()
 
+    // Mock useCheckSimulation to return no simulation error by default
+    jest.spyOn(useCheckSimulation, 'useCheckSimulation').mockReturnValue({
+      hasSimulationError: false,
+    })
+
     // Recreate mocks for each test to avoid mutation issues
     mockRecipientAddress = faker.finance.ethereumAddress()
     mockContractAddress = faker.finance.ethereumAddress()
@@ -30,17 +39,10 @@ describe('SafeShieldDisplay', () => {
   })
 
   describe('Basic Rendering', () => {
-    it('should render the component with all main elements', () => {
-      render(<SafeShieldDisplay />)
-
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
-    })
-
     it('should render without any props', () => {
       const { container } = render(<SafeShieldDisplay />)
 
       expect(container.querySelector('.MuiCard-root')).toBeInTheDocument()
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
     })
 
     it('should have correct layout structure', () => {
@@ -175,7 +177,6 @@ describe('SafeShieldDisplay', () => {
       render(<SafeShieldDisplay recipient={mockRecipient} contract={mockContract} threat={mockThreat} />)
 
       expect(screen.getByText('Checks passed')).toBeInTheDocument()
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
     })
   })
 
@@ -191,31 +192,78 @@ describe('SafeShieldDisplay', () => {
     })
   })
 
-  describe('Footer', () => {
-    it('should always render the "Secured by" footer', () => {
-      render(<SafeShieldDisplay />)
+  describe('Hypernative Authentication', () => {
+    it('should show "Authentication required" when hypernativeAuth is provided and user is not authenticated', () => {
+      render(
+        <SafeShieldDisplay
+          hypernativeAuth={{
+            isAuthenticated: false,
+            isTokenExpired: false,
+            loading: false,
+            initiateLogin: jest.fn(),
+            logout: jest.fn(),
+          }}
+        />,
+      )
 
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
+      expect(screen.getByText('Authentication required')).toBeInTheDocument()
     })
 
-    it('should render footer even with errors', () => {
-      const error = new Error('Analysis failed')
-      const errorRecipient: [undefined, Error, false] = [undefined, error, false]
+    it('should show "Authentication required" when hypernativeAuth is provided and token is expired', () => {
+      render(
+        <SafeShieldDisplay
+          hypernativeAuth={{
+            isAuthenticated: true,
+            isTokenExpired: true,
+            loading: false,
+            initiateLogin: jest.fn(),
+            logout: jest.fn(),
+          }}
+        />,
+      )
 
-      render(<SafeShieldDisplay recipient={errorRecipient} />)
-
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
+      expect(screen.getByText('Authentication required')).toBeInTheDocument()
     })
 
-    it('should render footer during loading', () => {
-      const loadingRecipient = RecipientAnalysisBuilder.knownRecipient(mockRecipientAddress).build()
-      if (loadingRecipient) {
-        loadingRecipient[2] = true
-      }
+    it('should not show authentication required when hypernativeAuth is provided and user is authenticated', () => {
+      render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          hypernativeAuth={{
+            isAuthenticated: true,
+            isTokenExpired: false,
+            loading: false,
+            initiateLogin: jest.fn(),
+            logout: jest.fn(),
+          }}
+        />,
+      )
 
-      render(<SafeShieldDisplay recipient={loadingRecipient} />)
+      expect(screen.queryByText('Authentication required')).not.toBeInTheDocument()
+      expect(screen.getByText('Checks passed')).toBeInTheDocument()
+    })
 
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
+    it('should not show authentication required when auth is loading', () => {
+      render(
+        <SafeShieldDisplay
+          hypernativeAuth={{
+            isAuthenticated: false,
+            isTokenExpired: false,
+            loading: true,
+            initiateLogin: jest.fn(),
+            logout: jest.fn(),
+          }}
+        />,
+      )
+
+      expect(screen.queryByText('Authentication required')).not.toBeInTheDocument()
+    })
+
+    it('should not show authentication required when hypernativeAuth is not provided', () => {
+      render(<SafeShieldDisplay recipient={mockRecipient} />)
+
+      expect(screen.queryByText('Authentication required')).not.toBeInTheDocument()
+      expect(screen.getByText('Checks passed')).toBeInTheDocument()
     })
   })
 })

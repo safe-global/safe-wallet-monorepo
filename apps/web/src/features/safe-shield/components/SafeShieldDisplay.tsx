@@ -1,6 +1,8 @@
-import { type ReactElement } from 'react'
-import { Typography, Card, SvgIcon, Stack } from '@mui/material'
+import { useMemo, type ReactElement } from 'react'
+import { Card, SvgIcon, Stack } from '@mui/material'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
+import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import type {
   ContractAnalysisResults,
   RecipientAnalysisResults,
@@ -10,32 +12,63 @@ import { SafeShieldHeader } from './SafeShieldHeader'
 import { SafeShieldContent } from './SafeShieldContent'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
+import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
+import { useCheckSimulation } from '../hooks/useCheckSimulation'
+import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
 
 export const SafeShieldDisplay = ({
   recipient,
   contract,
   threat,
   safeTx,
+  hypernativeAuth,
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
+  hypernativeAuth?: HypernativeAuthStatus
 }): ReactElement => {
+  const [recipientResults] = recipient || []
+  const [contractResults] = contract || []
+  const [threatResults] = threat || []
+  const { hasSimulationError } = useCheckSimulation(safeTx)
+  const isDarkMode = useDarkMode()
+
+  const hnLoginRequired = useMemo(
+    () =>
+      hypernativeAuth !== undefined &&
+      (!hypernativeAuth.isAuthenticated || hypernativeAuth.isTokenExpired) &&
+      !hypernativeAuth.loading,
+    [hypernativeAuth],
+  )
+
+  const overallStatus = useMemo(
+    () => getOverallStatus(recipientResults, contractResults, threatResults, hasSimulationError, hnLoginRequired),
+    [recipientResults, contractResults, threatResults, hasSimulationError, hnLoginRequired],
+  )
+
   return (
     <Stack gap={1} data-testid="safe-shield-widget">
       <Card sx={{ borderRadius: '6px', overflow: 'hidden' }}>
-        <SafeShieldHeader recipient={recipient} contract={contract} threat={threat} safeTx={safeTx} />
+        <SafeShieldHeader recipient={recipient} contract={contract} threat={threat} overallStatus={overallStatus} />
 
-        <SafeShieldContent threat={threat} recipient={recipient} contract={contract} safeTx={safeTx} />
+        <SafeShieldContent
+          threat={threat}
+          recipient={recipient}
+          contract={contract}
+          safeTx={safeTx}
+          overallStatus={overallStatus}
+          hypernativeAuth={hypernativeAuth}
+        />
       </Card>
 
       <Stack direction="row" alignItems="center" alignSelf="flex-end">
-        <Typography variant="body2" color="text.secondary" fontSize={13} lineHeight={1.38} whiteSpace="nowrap">
-          Secured by
-        </Typography>
-
-        <SvgIcon component={SafeShieldLogoFull} inheritViewBox sx={{ width: 100.83, height: 14.87 }} />
+        <SvgIcon
+          component={isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull}
+          inheritViewBox
+          sx={{ width: 78, height: 18 }}
+        />
       </Stack>
     </Stack>
   )
