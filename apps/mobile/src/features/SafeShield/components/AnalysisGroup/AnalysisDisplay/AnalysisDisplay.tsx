@@ -41,7 +41,7 @@ export function AnalysisDisplay({ result, description, severity }: AnalysisDispl
         }}
       >
         <Stack gap="$3">
-          <Text fontSize="$4" color="$colorSecondary">
+          <Text fontSize="$4" color="$colorLight">
             {displayDescription}
           </Text>
 

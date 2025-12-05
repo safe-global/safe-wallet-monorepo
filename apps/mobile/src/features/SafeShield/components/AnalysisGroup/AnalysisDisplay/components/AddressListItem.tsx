@@ -42,7 +42,7 @@ export function AddressListItem({
         <Text
           onPress={() => onCopy(address, index)}
           fontSize="$3"
-          color={copiedIndex === index ? '$color' : '$colorSecondary'}
+          color={copiedIndex === index ? '$color' : '$colorLight'}
         >
           {address}
         </Text>{' '}
@@ -52,7 +52,7 @@ export function AddressListItem({
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             style={{ flexShrink: 0, transform: [{ translateY: 2 }] }}
           >
-            <SafeFontIcon name="external-link" size={14} color="$colorSecondary" />
+            <SafeFontIcon name="external-link" size={14} color="$colorLight" />
           </TouchableOpacity>
         )}
       </Text>
