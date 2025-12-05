@@ -16,6 +16,7 @@ type UseThreatAnalysisProps = {
   walletAddress: string
   origin?: string
   safeVersion?: string
+  skip?: boolean
 }
 
 /**
@@ -36,6 +37,7 @@ export function useThreatAnalysis({
   walletAddress,
   origin: originProp,
   safeVersion,
+  skip = false,
 }: UseThreatAnalysisProps): AsyncResult<ThreatAnalysisResults> {
   const [data, setData] = useState<SafeTransaction | TypedData | undefined>(dataProp)
   const [triggerAnalysis, { data: threatData, error, isLoading }] = useSafeShieldAnalyzeThreatV1Mutation()
@@ -84,6 +86,10 @@ export function useThreatAnalysis({
 
   // Trigger the mutation when typed data is available
   useEffect(() => {
+    if (skip) {
+      return
+    }
+
     if (typedData && chainId && safeAddress && walletAddress) {
       triggerAnalysis({
         chainId,
@@ -95,7 +101,7 @@ export function useThreatAnalysis({
         },
       })
     }
-  }, [typedData, chainId, safeAddress, walletAddress, origin, triggerAnalysis])
+  }, [typedData, chainId, safeAddress, walletAddress, origin, triggerAnalysis, skip])
 
   const fetchError = useMemo(
     () => (error ? new Error('error' in error ? error.error : 'Failed to fetch threat analysis') : undefined),
@@ -103,11 +109,15 @@ export function useThreatAnalysis({
   )
 
   const threatAnalysisResult = useMemo<ThreatAnalysisResults | undefined>(() => {
+    if (skip) {
+      return undefined
+    }
+
     if (fetchError) {
       return { [StatusGroup.COMMON]: [getErrorInfo(ErrorType.THREAT)] }
     }
     return threatData as ThreatAnalysisResults | undefined
-  }, [threatData, fetchError])
+  }, [threatData, fetchError, skip])
 
   return [threatAnalysisResult, fetchError, isLoading]
 }
