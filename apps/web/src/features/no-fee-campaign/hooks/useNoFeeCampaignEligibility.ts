@@ -1,9 +1,9 @@
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useBlockedAddress from '@/hooks/useBlockedAddress'
 import { useRelayGetRelaysRemainingV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
-import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
+import useIsNoFeeCampaignEnabled from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'
 
-const useNoFeeNovemberEligibility = (): {
+const useNoFeeCampaignEligibility = (): {
   isEligible: boolean | undefined
   remaining: number | undefined
   limit: number | undefined
@@ -13,7 +13,7 @@ const useNoFeeNovemberEligibility = (): {
 } => {
   const { safe, safeAddress } = useSafeInfo()
   const blockedAddress = useBlockedAddress()
-  const isFeatureEnabled = useIsNoFeeNovemberFeatureEnabled()
+  const isFeatureEnabled = useIsNoFeeCampaignEnabled()
 
   const skipQuery = !safeAddress || !!blockedAddress
 
@@ -54,4 +54,4 @@ const useNoFeeNovemberEligibility = (): {
   }
 }
 
-export default useNoFeeNovemberEligibility
+export default useNoFeeCampaignEligibility
