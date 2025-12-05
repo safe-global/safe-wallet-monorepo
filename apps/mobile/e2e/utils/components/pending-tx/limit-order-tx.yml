@@ -126,14 +126,15 @@ tags:
 - assertVisible: 'Confirm transaction'
 
 # ===========================================
-# Transaction Checks (Pending transactions show checks instead of created/executed)
+# SafeShield Transaction Checks
 # ===========================================
 - runFlow:
     file: ../../assertions/verify-tx-checks.yml
     env:
+      WIDGET_HEADER_PATTERN: '.*(Review details|Issues found|Checks passed).*'
       BALANCE_CHANGE_PATTERN: 'No balance change detected'
-      TRANSACTION_SIMULATION_PATTERN: 'Success'
-      VERIFY_TENDERLY_LINK: 'true'
+      RUN_SIMULATION: 'true'
+      EXPECTED_SIMULATION_RESULT: 'success'
 
 # ===========================================
 # Confirmations
