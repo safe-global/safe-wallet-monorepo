@@ -310,12 +310,12 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
     await dispatchPreparedSignature(safeMessage, safeMessageHash, () => setTxFlow(undefined), requestId)
   }
 
-  // Set message for redefine scan
+  // Set message for Safe Shield threat analysis
   useEffect(() => {
-    if (typeof message !== 'string') {
-      setContextSafeMessage(message)
+    if (isEip712) {
+      setContextSafeMessage(decodedMessage)
     }
-  }, [message, setContextSafeMessage])
+  }, [decodedMessage, isEip712, setContextSafeMessage])
 
   return (
     <>
