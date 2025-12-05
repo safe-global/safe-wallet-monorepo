@@ -3,8 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { Box, CircularProgress, Typography, Alert } from '@mui/material'
-import { useAppDispatch } from '@/store'
-import { setAuthToken } from '@/features/hypernative/store/hnAuthSlice'
+import { setAuthCookie } from '@/features/hypernative/store/cookieStorage'
 import {
   HN_AUTH_SUCCESS_EVENT,
   HN_AUTH_ERROR_EVENT,
@@ -31,7 +30,6 @@ import { HYPERNATIVE_OAUTH_CONFIG, getRedirectUri } from '@/features/hypernative
  */
 const HypernativeOAuthCallback: NextPage = () => {
   const router = useRouter()
-  const dispatch = useAppDispatch()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [errorMessage, setErrorMessage] = useState<string>('')
   const hasProcessedRef = useRef(false)
@@ -90,13 +88,8 @@ const HypernativeOAuthCallback: NextPage = () => {
         // Step 5: Exchange authorization code for access token
         const tokenResponse = await exchangeCodeForToken(code, pkce.codeVerifier)
 
-        // Step 6: Store token in Redux
-        dispatch(
-          setAuthToken({
-            token: tokenResponse.access_token,
-            expiresIn: tokenResponse.expires_in,
-          }),
-        )
+        // Step 6: Store token in cookie
+        setAuthCookie(tokenResponse.access_token, tokenResponse.expires_in)
 
         // Step 7: Clean up sessionStorage
         clearPkce()
@@ -158,7 +151,7 @@ const HypernativeOAuthCallback: NextPage = () => {
     if (router.isReady) {
       handleCallback()
     }
-  }, [router.isReady, router.query, dispatch])
+  }, [router.isReady, router.query])
 
   return (
     <>

@@ -1,8 +1,6 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
 import { useHypernativeOAuth, HN_AUTH_SUCCESS_EVENT, HN_AUTH_ERROR_EVENT } from '../useHypernativeOAuth'
-import { hnAuthSlice } from '../../store/hnAuthSlice'
+import { setAuthCookie, clearAuthCookie } from '../../store/cookieStorage'
 import Cookies from 'js-cookie'
 
 // Mock js-cookie
@@ -24,6 +22,13 @@ jest.mock('@/store/notificationsSlice', () => {
     },
   }
 })
+
+// Mock useAppDispatch
+const mockDispatch = jest.fn()
+jest.mock('@/store', () => ({
+  useAppDispatch: () => mockDispatch,
+  useAppSelector: jest.fn(),
+}))
 
 // Mock oauth config to ensure consistent test values
 const mockGetRedirectUri = jest.fn(() => 'http://localhost:3000/hypernative/oauth-callback')
@@ -93,25 +98,9 @@ mockCookiesRemove.mockImplementation((name: string) => {
 })
 
 describe('useHypernativeOAuth', () => {
-  let store: ReturnType<typeof createTestStore>
-
-  function createTestStore() {
-    return configureStore({
-      reducer: {
-        [hnAuthSlice.name]: hnAuthSlice.reducer,
-      },
-    })
-  }
-
-  function createWrapper() {
-    const Wrapper = ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>
-    Wrapper.displayName = 'TestWrapper'
-    return Wrapper
-  }
-
   beforeEach(() => {
-    store = createTestStore()
     jest.clearAllMocks()
+    mockDispatch.mockClear()
 
     // Clear mock cookies
     Object.keys(mockCookies).forEach((key) => delete mockCookies[key])
@@ -154,26 +143,26 @@ describe('useHypernativeOAuth', () => {
 
   describe('initial state', () => {
     it('should return unauthenticated state by default', () => {
-      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result } = renderHook(() => useHypernativeOAuth())
 
       expect(result.current.isAuthenticated).toBe(false)
       expect(result.current.isTokenExpired).toBe(true)
       expect(result.current.loading).toBe(false)
     })
 
-    it('should return authenticated state when token exists', () => {
-      // Pre-populate store with auth token
-      store.dispatch(
-        hnAuthSlice.actions.setAuthToken({
-          token: 'test-token',
-          expiresIn: 3600,
-        }),
-      )
+    it('should return authenticated state when token exists', async () => {
+      // Pre-populate cookie with auth token
+      setAuthCookie('test-token', 3600)
 
-      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result } = renderHook(() => useHypernativeOAuth())
 
-      expect(result.current.isAuthenticated).toBe(true)
-      expect(result.current.isTokenExpired).toBe(false)
+      await waitFor(() => {
+        expect(result.current.isAuthenticated).toBe(true)
+        expect(result.current.isTokenExpired).toBe(false)
+      })
+
+      // Cleanup
+      clearAuthCookie()
     })
   })
 
@@ -189,7 +178,7 @@ describe('useHypernativeOAuth', () => {
     })
 
     it('should set loading to true during login', () => {
-      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result } = renderHook(() => useHypernativeOAuth())
 
       act(() => {
         result.current.initiateLogin()
@@ -199,7 +188,7 @@ describe('useHypernativeOAuth', () => {
     })
 
     it('should generate and store mock token', async () => {
-      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result } = renderHook(() => useHypernativeOAuth())
 
       act(() => {
         result.current.initiateLogin()
@@ -209,16 +198,26 @@ describe('useHypernativeOAuth', () => {
         jest.advanceTimersByTime(1000)
       })
 
-      expect(result.current.isAuthenticated).toBe(true)
-      expect(result.current.loading).toBe(false)
+      await waitFor(() => {
+        expect(result.current.isAuthenticated).toBe(true)
+        expect(result.current.loading).toBe(false)
+      })
 
-      const state = store.getState()
-      expect(state.hnAuth.authToken).toMatch(/^mock-token-\d+$/)
-      expect(state.hnAuth.authTokenExpiry).toBeGreaterThan(Date.now())
+      // Verify token is stored in cookie
+      const authCookie = Cookies.get('hn_auth')
+      expect(authCookie).toBeDefined()
+      if (authCookie) {
+        const authData = JSON.parse(authCookie)
+        expect(authData.token).toMatch(/^mock-token-\d+$/)
+        expect(authData.expiry).toBeGreaterThan(Date.now())
+      }
+
+      // Cleanup
+      clearAuthCookie()
     })
 
     it('should not open popup in mock mode', async () => {
-      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result } = renderHook(() => useHypernativeOAuth())
 
       act(() => {
         result.current.initiateLogin()
@@ -238,7 +237,7 @@ describe('useHypernativeOAuth', () => {
     })
 
     it('should generate PKCE parameters and store in secure cookie', async () => {
-      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result } = renderHook(() => useHypernativeOAuth())
 
       await act(async () => {
         result.current.initiateLogin()
@@ -265,7 +264,7 @@ describe('useHypernativeOAuth', () => {
     })
 
     it('should open popup with correct URL and dimensions', async () => {
-      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result } = renderHook(() => useHypernativeOAuth())
 
       await act(async () => {
         result.current.initiateLogin()
@@ -294,7 +293,7 @@ describe('useHypernativeOAuth', () => {
       const mockTab = { closed: false, close: jest.fn() }
       mockWindowOpen.mockReturnValueOnce(null).mockReturnValueOnce(mockTab)
 
-      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result } = renderHook(() => useHypernativeOAuth())
 
       await act(async () => {
         result.current.initiateLogin()
@@ -311,7 +310,7 @@ describe('useHypernativeOAuth', () => {
     it('should show notification with clickable link when both popup and tab are blocked', async () => {
       mockWindowOpen.mockReturnValueOnce(null).mockReturnValueOnce(null)
 
-      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result } = renderHook(() => useHypernativeOAuth())
 
       await act(async () => {
         result.current.initiateLogin()
@@ -336,7 +335,7 @@ describe('useHypernativeOAuth', () => {
       const mockPopup = { closed: true, close: jest.fn() }
       mockWindowOpen.mockReturnValueOnce(mockPopup).mockReturnValueOnce(mockTab)
 
-      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result } = renderHook(() => useHypernativeOAuth())
 
       await act(async () => {
         result.current.initiateLogin()
@@ -356,7 +355,7 @@ describe('useHypernativeOAuth', () => {
       const mockPopup = { closed: false, close: jest.fn() }
       mockWindowOpen.mockReturnValueOnce(mockPopup).mockReturnValueOnce(mockTab)
 
-      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result } = renderHook(() => useHypernativeOAuth())
 
       await act(async () => {
         result.current.initiateLogin()
@@ -383,7 +382,7 @@ describe('useHypernativeOAuth', () => {
       const mockPopup = { closed: false, close: jest.fn() }
       mockWindowOpen.mockReturnValue(mockPopup)
 
-      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result } = renderHook(() => useHypernativeOAuth())
 
       await act(async () => {
         result.current.initiateLogin()
@@ -420,7 +419,7 @@ describe('useHypernativeOAuth', () => {
 
   describe('postMessage handling', () => {
     it('should ignore messages from different origins', async () => {
-      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result } = renderHook(() => useHypernativeOAuth())
 
       // Create a fake message event from different origin
       const fakeEvent = new MessageEvent('message', {
@@ -437,10 +436,12 @@ describe('useHypernativeOAuth', () => {
         await new Promise((resolve) => setTimeout(resolve, 100))
       })
 
-      expect(result.current.isAuthenticated).toBe(false)
+      await waitFor(() => {
+        expect(result.current.isAuthenticated).toBe(false)
+      })
 
-      const state = store.getState()
-      expect(state.hnAuth.authToken).toBeUndefined()
+      // Verify token was not stored in cookie
+      expect(Cookies.get('hn_auth')).toBeUndefined()
     })
 
     it('should handle successful authentication and cleanup', async () => {
@@ -448,7 +449,7 @@ describe('useHypernativeOAuth', () => {
       const mockPopup = { closed: false, close: jest.fn() }
       mockWindowOpen.mockReturnValue(mockPopup)
 
-      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result } = renderHook(() => useHypernativeOAuth())
 
       await act(async () => {
         result.current.initiateLogin()
@@ -473,13 +474,23 @@ describe('useHypernativeOAuth', () => {
         jest.advanceTimersByTime(100)
       })
 
-      expect(result.current.isAuthenticated).toBe(true)
-      expect(result.current.loading).toBe(false)
+      await waitFor(() => {
+        expect(result.current.isAuthenticated).toBe(true)
+        expect(result.current.loading).toBe(false)
+      })
+
       expect(mockPopup.close).toHaveBeenCalled()
 
-      const state = store.getState()
-      expect(state.hnAuth.authToken).toBe('test-token')
+      // Verify token is stored in cookie
+      const authCookie = Cookies.get('hn_auth')
+      expect(authCookie).toBeDefined()
+      if (authCookie) {
+        const authData = JSON.parse(authCookie)
+        expect(authData.token).toBe('test-token')
+      }
 
+      // Cleanup
+      clearAuthCookie()
       jest.useRealTimers()
     })
 
@@ -488,7 +499,7 @@ describe('useHypernativeOAuth', () => {
       const mockPopup = { closed: false, close: jest.fn() }
       mockWindowOpen.mockReturnValue(mockPopup)
 
-      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result } = renderHook(() => useHypernativeOAuth())
 
       await act(async () => {
         result.current.initiateLogin()
@@ -524,59 +535,65 @@ describe('useHypernativeOAuth', () => {
   })
 
   describe('logout', () => {
-    it('should clear auth token', () => {
-      // Pre-populate store with auth token
-      store.dispatch(
-        hnAuthSlice.actions.setAuthToken({
-          token: 'test-token',
-          expiresIn: 3600,
-        }),
-      )
+    it('should clear auth token', async () => {
+      // Pre-populate cookie with auth token
+      setAuthCookie('test-token', 3600)
 
-      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result } = renderHook(() => useHypernativeOAuth())
 
-      expect(result.current.isAuthenticated).toBe(true)
+      // Wait for initial state to be set
+      await waitFor(() => {
+        expect(result.current.isAuthenticated).toBe(true)
+      })
 
       act(() => {
         result.current.logout()
       })
 
-      expect(result.current.isAuthenticated).toBe(false)
+      await waitFor(() => {
+        expect(result.current.isAuthenticated).toBe(false)
+      })
 
-      const state = store.getState()
-      expect(state.hnAuth.authToken).toBeUndefined()
+      // Verify cookie is cleared
+      expect(Cookies.get('hn_auth')).toBeUndefined()
     })
   })
 
   describe('token expiry', () => {
-    it('should detect expired tokens', () => {
-      // Set token with expiry in the past
-      store.dispatch(
-        hnAuthSlice.actions.setAuthToken({
-          token: 'expired-token',
-          expiresIn: -1,
-        }),
-      )
+    it('should detect expired tokens', async () => {
+      // Set token with expiry in the past (negative expiresIn means expired)
+      // We'll set it directly in the cookie with a past expiry timestamp
+      const expiredData = {
+        token: 'expired-token',
+        expiry: Date.now() - 1000, // Expired 1 second ago
+      }
+      Cookies.set('hn_auth', JSON.stringify(expiredData))
 
-      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result } = renderHook(() => useHypernativeOAuth())
 
-      // isAuthenticated should be false when token is expired
-      expect(result.current.isAuthenticated).toBe(false)
-      expect(result.current.isTokenExpired).toBe(true)
+      // Wait for state to update
+      await waitFor(() => {
+        // isAuthenticated should be false when token is expired
+        expect(result.current.isAuthenticated).toBe(false)
+        expect(result.current.isTokenExpired).toBe(true)
+      })
+
+      // Cleanup
+      clearAuthCookie()
     })
 
-    it('should detect valid tokens', () => {
-      store.dispatch(
-        hnAuthSlice.actions.setAuthToken({
-          token: 'valid-token',
-          expiresIn: 3600,
-        }),
-      )
+    it('should detect valid tokens', async () => {
+      setAuthCookie('valid-token', 3600)
 
-      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result } = renderHook(() => useHypernativeOAuth())
 
-      expect(result.current.isAuthenticated).toBe(true)
-      expect(result.current.isTokenExpired).toBe(false)
+      await waitFor(() => {
+        expect(result.current.isAuthenticated).toBe(true)
+        expect(result.current.isTokenExpired).toBe(false)
+      })
+
+      // Cleanup
+      clearAuthCookie()
     })
   })
 
@@ -594,7 +611,7 @@ describe('useHypernativeOAuth', () => {
       const mockTab = { closed: false, close: jest.fn() }
       mockWindowOpen.mockReturnValueOnce(null).mockReturnValueOnce(mockTab)
 
-      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result } = renderHook(() => useHypernativeOAuth())
 
       await act(async () => {
         result.current.initiateLogin()
@@ -622,7 +639,7 @@ describe('useHypernativeOAuth', () => {
       const mockTab = { closed: false, close: jest.fn() }
       mockWindowOpen.mockReturnValueOnce(null).mockReturnValueOnce(mockTab)
 
-      const { result } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result } = renderHook(() => useHypernativeOAuth())
 
       await act(async () => {
         result.current.initiateLogin()
@@ -665,7 +682,7 @@ describe('useHypernativeOAuth', () => {
       const clearIntervalSpy = jest.spyOn(global, 'clearInterval')
       const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout')
 
-      const { result, unmount } = renderHook(() => useHypernativeOAuth(), { wrapper: createWrapper() })
+      const { result, unmount } = renderHook(() => useHypernativeOAuth())
 
       await act(async () => {
         result.current.initiateLogin()
