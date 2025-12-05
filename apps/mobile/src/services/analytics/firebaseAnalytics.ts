@@ -9,7 +9,6 @@
 import {
   getAnalytics,
   logEvent,
-  logScreenView,
   setAnalyticsCollectionEnabled as setAnalyticsCollectionEnabledFirebase,
 } from '@react-native-firebase/analytics'
 import type { AnalyticsEvent } from './types'
@@ -117,7 +116,10 @@ export const trackScreenView = async (screenName: string, screenClass?: string):
   try {
     const analytics = getAnalytics()
 
-    await logScreenView(analytics, {
+    // there is a bug in the type definition (screen_name & screen_class are correct here)
+    // https://github.com/invertase/react-native-firebase/pull/8687
+    // @ts-expect-error
+    await logEvent(analytics, 'screen_view', {
       screen_name: screenName,
       screen_class: screenClass || screenName,
       ...commonEventParams,
