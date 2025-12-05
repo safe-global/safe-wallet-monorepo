@@ -21,6 +21,7 @@ export enum StatusGroup {
   CONTRACT_INTERACTION = 'CONTRACT_INTERACTION', // 6
   DELEGATECALL = 'DELEGATECALL', // 7
   THREAT = 'THREAT', // 9
+  CUSTOM_CHECKS = 'CUSTOM_CHECKS', // 10
 }
 
 export type StatusGroupType<T extends StatusGroup> = {
@@ -56,7 +57,9 @@ export type StatusGroupType<T extends StatusGroup> = {
     | ThreatStatus.OWNERSHIP_CHANGE
     | ThreatStatus.MODULE_CHANGE
     | ThreatStatus.UNOFFICIAL_FALLBACK_HANDLER
+    | ThreatStatus.HYPERNATIVE_GUARD
     | CommonSharedStatus.FAILED
+  [StatusGroup.CUSTOM_CHECKS]: ThreatStatus.NO_THREAT | ThreatStatus.CUSTOM_CHECKS_FAILED
 }[T]
 
 export enum RecipientStatus {
@@ -88,6 +91,7 @@ export enum ThreatStatus {
   MALICIOUS = 'MALICIOUS', // 9A
   MODERATE = 'MODERATE', // 9B
   NO_THREAT = 'NO_THREAT', // 9C
+  CUSTOM_CHECKS_FAILED = 'CUSTOM_CHECKS_FAILED', // 9D
   MASTERCOPY_CHANGE = 'MASTERCOPY_CHANGE', // 9E
   OWNERSHIP_CHANGE = 'OWNERSHIP_CHANGE', // 9F
   MODULE_CHANGE = 'MODULE_CHANGE', // 9G
@@ -139,9 +143,10 @@ export type ThreatAnalysisResult =
     >
 
 export type GroupedAnalysisResults<G extends StatusGroup = StatusGroup> = {
-  [K in Exclude<G, StatusGroup.THREAT>]?: AnalysisResult<StatusGroupType<K>>[]
+  [K in Exclude<G, StatusGroup.THREAT | StatusGroup.CUSTOM_CHECKS>]?: AnalysisResult<StatusGroupType<K>>[]
 } & {
   THREAT?: ThreatAnalysisResult[]
+  CUSTOM_CHECKS?: ThreatAnalysisResult[]
 }
 
 export type RecipientAnalysisResults = {
@@ -174,6 +179,7 @@ export type ContractAnalysisResults = {
 export type ThreatAnalysisResults = {
   [StatusGroup.COMMON]?: AnalysisResult<CommonSharedStatus.FAILED>[]
   THREAT?: ThreatAnalysisResult[]
+  CUSTOM_CHECKS?: ThreatAnalysisResult[]
   BALANCE_CHANGE?: BalanceChangeDto[]
   request_id?: string
 }
