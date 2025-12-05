@@ -1,16 +1,26 @@
 import { type Chain as ChainInfo } from '../AUTO_GENERATED/chains'
 import { createEntityAdapter, EntityState } from '@reduxjs/toolkit'
+import { retry } from '@reduxjs/toolkit/query'
 import { cgwClient, dynamicBaseQuery } from '../cgwClient'
 import type { QueryReturnValue, FetchBaseQueryMeta, FetchBaseQueryError } from '@reduxjs/toolkit/query'
 
 export const chainsAdapter = createEntityAdapter<ChainInfo, string>({ selectId: (chain: ChainInfo) => chain.chainId })
 export const initialState = chainsAdapter.getInitialState()
 
+const retryingBaseQuery = retry(dynamicBaseQuery, {
+  maxRetries: 5,
+  backoff: async (attempt) => {
+    const base = 3000 * Math.pow(2, attempt)
+    const jitter = Math.random() * base * 0.5
+    await new Promise((resolve) => setTimeout(resolve, base + jitter))
+  },
+})
+
 const getChainsConfigs = async (
   url = '/v1/chains',
   results: ChainInfo[] = [],
 ): Promise<QueryReturnValue<EntityState<ChainInfo, string>, FetchBaseQueryError, FetchBaseQueryMeta>> => {
-  const response = await dynamicBaseQuery(url, { endpoint: 'getChainsConfig', type: 'query' } as any, {})
+  const response = await retryingBaseQuery(url, { endpoint: 'getChainsConfig', type: 'query' } as any, {})
 
   if (response.error) {
     return { error: response.error }
@@ -21,7 +31,6 @@ const getChainsConfigs = async (
   const nextResults = [...results, ...data.results]
 
   if (data.next) {
-    // Extract the relative path from the next URL
     const nextUrl = new URL(data.next).pathname + new URL(data.next).search
     return getChainsConfigs(nextUrl, nextResults)
   }
