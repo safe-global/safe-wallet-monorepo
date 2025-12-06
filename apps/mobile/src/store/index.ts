@@ -43,27 +43,30 @@ setBaseUrl(GATEWAY_URL)
 // Set up mobile-specific cookie handling
 setupMobileCookieHandling()
 
-const cgwClientFilter = createFilter(
+export const cgwClientFilter = createFilter(
   cgwClient.reducerPath,
   ['queries.getChainsConfig(undefined)', 'config'],
   ['queries.getChainsConfig(undefined)', 'config'],
 )
 
+export const persistBlacklist = [
+  web3API.reducerPath,
+  'myAccounts',
+  'estimatedFee',
+  'executionMethod',
+  'signingState',
+  'signerImportFlow',
+  'executingState',
+]
+
+export const persistTransforms = [cgwClientFilter]
+
 const persistConfig = {
   key: 'root',
   version: 1,
   storage: reduxStorage,
-  blacklist: [
-    web3API.reducerPath,
-    cgwClient.reducerPath,
-    'myAccounts',
-    'estimatedFee',
-    'executionMethod',
-    'signingState',
-    'signerImportFlow',
-    'executingState',
-  ],
-  transforms: [cgwClientFilter],
+  blacklist: persistBlacklist,
+  transforms: persistTransforms,
 }
 
 export const rootReducer = combineReducers({
