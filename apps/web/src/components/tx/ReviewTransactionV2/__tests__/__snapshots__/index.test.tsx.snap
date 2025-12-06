@@ -626,35 +626,8 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
         </div>
       </div>
       <hr
-        class="MuiDivider-root MuiDivider-fullWidth css-pqic1n-MuiDivider-root"
+        class="MuiDivider-root MuiDivider-fullWidth css-1f8eu3q-MuiDivider-root"
       />
-      <div
-        class="wrapper"
-      >
-        <div
-          class="icon sign"
-        >
-          <mock-icon
-            aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
-            focusable="false"
-          />
-        </div>
-        <div>
-          <h5
-            class="MuiTypography-root MuiTypography-h5 css-1mp5g96-MuiTypography-root"
-          >
-            confirm
-          </h5>
-          <p
-            class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
-          >
-            You're about to 
-            confirm
-             this transaction.
-          </p>
-        </div>
-      </div>
       <div
         class="MuiCardActions-root MuiCardActions-spacing css-1q4nm6f-MuiCardActions-root"
       >
