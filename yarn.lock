@@ -10342,10 +10342,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@safe-global/store@workspace:packages/store"
   dependencies:
+    "@safe-global/test": "workspace:^"
     "@types/jest": "npm:^29.5.14"
     eslint: "npm:^9.29.0"
     eslint-config-next: "npm:^16.0.5"
     jest: "npm:^29.7.0"
+    jest-fixed-jsdom: "npm:^0.0.10"
     redux-persist: "npm:^6.0.0"
     ts-node: "npm:^10.9.2"
     typescript: "npm:~5.9.2"
@@ -10362,9 +10364,8 @@ __metadata:
     ethers: "npm:^6.13.4"
     jest: "npm:^29.7.0"
     jest-transform-stub: "npm:2.0.0"
+    msw: "npm:^2.7.3"
     ts-jest: "npm:29.2.5"
-  peerDependencies:
-    msw: ^2.6.0
   languageName: unknown
   linkType: soft
 

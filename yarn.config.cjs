@@ -10,6 +10,8 @@ const DEPS_TO_CHECK = [
   'eslint',
   'prettier',
   'jest',
+  'jest-fixed-jsdom',
+  'msw',
   '@ledgerhq/context-module',
   '@ledgerhq/device-management-kit',
   '@ledgerhq/device-signer-kit-ethereum',
