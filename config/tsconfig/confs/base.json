@@ -2,9 +2,9 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "paths": {
-      "@safe-global/store/*": ["packages/store/src/*"],
-      "@safe-global/utils/*": ["packages/utils/src/*"],
-      "@safe-global/test/*": ["config/test/*"]
+      "@safe-global/store/*": ["../../packages/store/src/*"],
+      "@safe-global/utils/*": ["../../packages/utils/src/*"],
+      "@safe-global/test/*": ["../../config/test/*"]
     },
     "importHelpers": true,
     "allowJs": false,
@@ -27,7 +27,6 @@
     "removeComments": false,
     "strict": true,
     "skipLibCheck": true,
-    "typeRoots": ["../../../node_modules/@types"],
     "sourceMap": false,
     "target": "ESNext",
     "types": ["node", "jest"],
