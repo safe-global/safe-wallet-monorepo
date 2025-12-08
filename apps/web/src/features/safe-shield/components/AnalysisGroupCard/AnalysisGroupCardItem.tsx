@@ -17,6 +17,7 @@ interface AnalysisGroupCardItemProps {
 export const AnalysisGroupCardItem = ({ result, description, severity, showImage }: AnalysisGroupCardItemProps) => {
   const borderColor = severity ? SEVERITY_COLORS[severity].main : 'var(--color-border-main)'
   const displayDescription = description ?? result.description
+  const hasIssues = 'issues' in result
 
   return (
     <Box bgcolor="background.main" borderRadius="4px" overflow="hidden">
@@ -30,7 +31,10 @@ export const AnalysisGroupCardItem = ({ result, description, severity, showImage
 
           {isAddressChange(result) && <AddressChanges result={result} />}
 
-          {result.addresses?.length && <ShowAllAddress addresses={result.addresses} showImage={showImage} />}
+          {/* Only show ShowAllAddress dropdown if there are no issues (to avoid duplication) */}
+          {!hasIssues && result.addresses?.length && (
+            <ShowAllAddress addresses={result.addresses} showImage={showImage} />
+          )}
         </Stack>
       </Box>
     </Box>
