@@ -58,7 +58,7 @@ export function SafeShieldWidget({ recipient, contract, threat, safeTx, txId }: 
     (hasThreat ? !!threatError : true)
 
   // Determine overall loading state - true if ANY is loading
-  const loading = recipientLoading || contractLoading || threatLoading || (allEmpty && !allHaveErrors)
+  const loading = recipientLoading || contractLoading || threatLoading
 
   // Get actual status from analysis
   const overallStatus = getOverallStatus(recipientData, contractData, threatData) ?? null
