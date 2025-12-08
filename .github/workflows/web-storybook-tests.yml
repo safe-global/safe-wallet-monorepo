@@ -40,7 +40,7 @@ jobs:
 
       - name: Upload snapshot diffs on failure
         if: steps.storybook-tests.outcome == 'failure'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: storybook-snapshot-diffs
           path: apps/web/src/**/__snapshots__/*.stories.test.tsx.snap
