@@ -178,7 +178,7 @@ export class BlockaidModule implements SecurityModule<BlockaidModuleRequest, Blo
     return {
       severity: result.validation?.result_type
         ? blockaidSeverityMap[result.validation.result_type]
-        : SecuritySeverity.NONE ?? SecuritySeverity.NONE,
+        : SecuritySeverity.NONE,
       payload: {
         description: result.validation?.description,
         classification: result.validation?.classification,
