@@ -25,13 +25,11 @@ export interface LegacyDataStructure {
 
 import { AppDispatch } from '@/src/store'
 import { addSafe as _addSafe } from '@/src/store/safesSlice'
-import { addSignerWithEffects as _addSignerWithEffects } from '@/src/store/signersSlice'
+import { addSignerWithEffects } from '@/src/store/signerThunks'
 import { addContact as _addContact, addContacts, Contact } from '@/src/store/addressBookSlice'
-import { storePrivateKey as _storePrivateKey } from '@/src/hooks/useSign/useSign'
 import { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
-import { addSignerWithEffects } from '@/src/store/signersSlice'
 import { storePrivateKey } from '@/src/hooks/useSign/useSign'
 import Logger from '@/src/utils/logger'
 

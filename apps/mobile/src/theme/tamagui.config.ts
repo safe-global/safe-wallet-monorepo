@@ -11,6 +11,7 @@ import { SafeListItemTheme } from '@/src/components/SafeListItem/theme'
 import { alertTheme } from '@/src/components/Alert/theme'
 import { safeShieldHeadlineStatusTheme } from '@/src/features/SafeShield/components/SafeShieldHeadline/theme'
 import { safeShieldAnalysisStatusTheme } from '@/src/features/SafeShield/theme'
+import { safeShieldWidgetTheme } from '../features/SafeShield/components/SafeShieldWidget/theme'
 
 const DmSansFont = createDmSansFont({
   face: {
@@ -74,6 +75,7 @@ export const config = createTamagui({
     ...inputWithLabelTheme,
     ...safeShieldAnalysisStatusTheme,
     ...safeShieldHeadlineStatusTheme,
+    ...safeShieldWidgetTheme,
     dark_success_light: {},
     light_logo: {
       background: tokens.color.logoBackgroundLight,

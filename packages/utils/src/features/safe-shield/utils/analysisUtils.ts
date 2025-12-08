@@ -1,6 +1,7 @@
 import { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import type { GroupedAnalysisResults, Severity, ThreatAnalysisResults, ThreatIssue } from '../types'
+import { Severity, type GroupedAnalysisResults, type ThreatAnalysisResults, type ThreatIssue } from '../types'
 import isEmpty from 'lodash/isEmpty'
+import { SimulationStatus } from '@safe-global/utils/components/tx/security/tenderly/utils'
 
 /**
  * Severity priority mapping for sorting analysis results
@@ -14,6 +15,20 @@ export const SEVERITY_PRIORITY: Record<Severity, number> = { CRITICAL: 0, WARN: 
  */
 export function sortBySeverity<T extends { severity: Severity }>(results: T[]): T[] {
   return [...results].sort((a, b) => SEVERITY_PRIORITY[a.severity] - SEVERITY_PRIORITY[b.severity])
+}
+
+export const getSeverity = (
+  isSuccess: boolean,
+  isSimulationFinished: boolean,
+  hasError?: boolean,
+): Severity | undefined => {
+  if (isSuccess) {
+    return Severity.OK
+  }
+
+  if (isSimulationFinished || hasError) {
+    return Severity.WARN
+  }
 }
 
 export const normalizeThreatData = (
