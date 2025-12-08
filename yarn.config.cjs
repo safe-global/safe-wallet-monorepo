@@ -12,6 +12,7 @@ const DEPS_TO_CHECK = [
   'jest',
   'jest-fixed-jsdom',
   'msw',
+  'date-fns',
   '@ledgerhq/context-module',
   '@ledgerhq/device-management-kit',
   '@ledgerhq/device-signer-kit-ethereum',
