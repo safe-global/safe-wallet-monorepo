@@ -1,0 +1,67 @@
+import { faker } from '@faker-js/faker'
+import type { TransactionInfo } from '@safe-global/store/gateway/types'
+import { SettingsInfoType, TransactionInfoType } from '@safe-global/store/gateway/types'
+import type { TransactionDetails, SettingsChangeTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+
+export const mockAddOwnerTxInfo: SettingsChangeTransaction = {
+  type: TransactionInfoType.SETTINGS_CHANGE,
+  humanDescription: null,
+  dataDecoded: null,
+  settingsInfo: {
+    type: SettingsInfoType.ADD_OWNER,
+    owner: {
+      value: faker.finance.ethereumAddress(),
+      name: faker.person.fullName(),
+      logoUri: null,
+    },
+    threshold: 2,
+  },
+}
+
+export const mockRemoveOwnerTxInfo: SettingsChangeTransaction = {
+  type: TransactionInfoType.SETTINGS_CHANGE,
+  humanDescription: null,
+  dataDecoded: null,
+  settingsInfo: {
+    type: SettingsInfoType.REMOVE_OWNER,
+    owner: {
+      value: faker.finance.ethereumAddress(),
+      name: faker.person.fullName(),
+      logoUri: null,
+    },
+    threshold: 1,
+  },
+}
+
+export const mockSwapOwnerTxInfo: SettingsChangeTransaction = {
+  type: TransactionInfoType.SETTINGS_CHANGE,
+  humanDescription: null,
+  dataDecoded: null,
+  settingsInfo: {
+    type: SettingsInfoType.SWAP_OWNER,
+    oldOwner: {
+      value: faker.finance.ethereumAddress(),
+      name: faker.person.fullName(),
+      logoUri: null,
+    },
+    newOwner: {
+      value: faker.finance.ethereumAddress(),
+      name: faker.person.fullName(),
+      logoUri: null,
+    },
+  },
+}
+
+export const mockTxData: TransactionDetails['txData'] = {
+  hexData: '0x',
+  dataDecoded: null,
+  to: {
+    value: faker.finance.ethereumAddress(),
+    name: null,
+    logoUri: null,
+  },
+  value: '0',
+  operation: 0,
+  trustedDelegateCallTarget: null,
+  addressInfoIndex: null,
+}
