@@ -48,6 +48,12 @@ export const AnalysisIssuesDisplay = ({ result }: AnalysisIssuesDisplayProps) =>
   const issues = result.issues as MaliciousOrModerateThreatAnalysisResult['issues']
   const sortedIssues = sortByIssueSeverity(issues)
 
+  // Check if there are any actual issues to display (not just empty arrays)
+  const hasAnyIssues = sortedIssues.some(({ issues: issueArray }) => issueArray.length > 0)
+  if (!hasAnyIssues) {
+    return null
+  }
+
   const handleCopyToClipboard = async (address: string, index: number) => {
     try {
       await navigator.clipboard.writeText(address)
