@@ -1,9 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
-import { AppDispatch, RootState } from '.'
-import { setActiveSigner } from './activeSignerSlice'
-import { addContact } from './addressBookSlice'
+import { RootState } from '@/src/store'
 import logger from '@/src/utils/logger'
 
 export type Signer = AddressInfo &
@@ -36,26 +34,6 @@ const signersSlice = createSlice({
     },
   },
 })
-
-export const addSignerWithEffects =
-  (signerInfo: Signer) => async (dispatch: AppDispatch, getState: () => RootState) => {
-    const { activeSafe, activeSigner } = getState()
-    const signerName = signerInfo.name || `Signer-${signerInfo.value.slice(-4)}`
-
-    dispatch(addSigner(signerInfo))
-
-    if (activeSafe && !activeSigner[activeSafe.address]) {
-      dispatch(setActiveSigner({ safeAddress: activeSafe.address, signer: signerInfo }))
-    }
-
-    dispatch(
-      addContact({
-        value: signerInfo.value,
-        name: signerName,
-        chainIds: [],
-      }),
-    )
-  }
 
 export const { addSigner, removeSigner } = signersSlice.actions
 
