@@ -1,0 +1,95 @@
+.banner {
+  position: relative;
+  padding: var(--space-8, 32px);
+  background: var(--color-background-paper, #ffffff);
+  border: 0;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6, 24px);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.badgeContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background: #ebebeb;
+  border-radius: 13.362px;
+  padding: 2px 6px 2px 3px;
+  width: fit-content;
+}
+
+.title {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 22px;
+  letter-spacing: 0.15px;
+  color: var(--color-text-primary, #121312);
+  margin: 0;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.description {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 22px;
+  letter-spacing: 0.15px;
+  color: var(--color-text-primary, #121312);
+  margin: 0;
+}
+
+.statusBadge {
+  background: #b0ffc9;
+  border-radius: 100px;
+  padding: 2px 8px;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statusLabel {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 1px;
+  color: var(--color-text-primary, #121312);
+  white-space: nowrap;
+}
+
+.button {
+  width: fit-content;
+}
+
+.buttonText {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 24px;
+  letter-spacing: 0.4px;
+  color: var(--color-primary-main, #121312);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.externalLinkIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--color-primary-main, #121312);
+}
+
