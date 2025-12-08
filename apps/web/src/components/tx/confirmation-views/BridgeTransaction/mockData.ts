@@ -9,7 +9,8 @@ export const mockPendingBridgeTxInfo: BridgeAndSwapTransactionInfo = {
   fromToken: {
     address: faker.finance.ethereumAddress(),
     decimals: 18,
-    logoUri: 'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
+    logoUri:
+      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
     name: 'Ether',
     symbol: 'ETH',
     trusted: true,
@@ -17,7 +18,8 @@ export const mockPendingBridgeTxInfo: BridgeAndSwapTransactionInfo = {
   toToken: {
     address: faker.finance.ethereumAddress(),
     decimals: 18,
-    logoUri: 'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
+    logoUri:
+      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
     name: 'Ether',
     symbol: 'ETH',
     trusted: true,

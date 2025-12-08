@@ -20,12 +20,13 @@ export const mockStakingDepositTxInfo: NativeStakingDepositTransactionInfo = {
   value: '64000000000000000000',
   expectedAnnualReward: '3200000000000000000',
   expectedMonthlyReward: '266666666666666666',
-  expectedFiatAnnualReward: '6400',
-  expectedFiatMonthlyReward: '533.33',
+  expectedFiatAnnualReward: 6400,
+  expectedFiatMonthlyReward: 533.33,
   tokenInfo: {
     address: '0x0000000000000000000000000000000000000000',
     decimals: 18,
-    logoUri: 'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
+    logoUri:
+      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
     name: 'Ether',
     symbol: 'ETH',
     trusted: true,
@@ -47,7 +48,8 @@ export const mockStakingExitTxInfo: NativeStakingValidatorsExitTransactionInfo =
   tokenInfo: {
     address: '0x0000000000000000000000000000000000000000',
     decimals: 18,
-    logoUri: 'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
+    logoUri:
+      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
     name: 'Ether',
     symbol: 'ETH',
     trusted: true,
@@ -58,12 +60,12 @@ export const mockStakingExitTxInfo: NativeStakingValidatorsExitTransactionInfo =
 export const mockStakingWithdrawTxInfo: NativeStakingWithdrawTransactionInfo = {
   type: TransactionInfoType.NATIVE_STAKING_WITHDRAW,
   humanDescription: null,
-  numValidators: 1,
   value: '32000000000000000000',
   tokenInfo: {
     address: '0x0000000000000000000000000000000000000000',
     decimals: 18,
-    logoUri: 'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
+    logoUri:
+      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
     name: 'Ether',
     symbol: 'ETH',
     trusted: true,

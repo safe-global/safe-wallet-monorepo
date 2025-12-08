@@ -9,7 +9,8 @@ export const mockVaultRedeemTxInfo: VaultRedeemTransactionInfo = {
   tokenInfo: {
     address: faker.finance.ethereumAddress(),
     decimals: 18,
-    logoUri: 'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+    logoUri:
+      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
     name: 'USD Coin',
     symbol: 'USDC',
     trusted: true,
@@ -17,17 +18,21 @@ export const mockVaultRedeemTxInfo: VaultRedeemTransactionInfo = {
   vaultInfo: {
     address: faker.finance.ethereumAddress(),
     name: 'Morpho USDC Vault',
-    description: 'A high-yield USDC vault powered by Morpho protocol, optimizing lending rates across multiple markets.',
+    description:
+      'A high-yield USDC vault powered by Morpho protocol, optimizing lending rates across multiple markets.',
     logoUri: 'https://example.com/morpho-logo.png',
   },
+  baseNrr: 450,
   additionalRewardsNrr: 150,
+  fee: 500,
   currentReward: faker.number.bigInt({ min: 50000000000000000n, max: 500000000000000000n }).toString(),
   additionalRewards: [
     {
       tokenInfo: {
         address: faker.finance.ethereumAddress(),
         decimals: 18,
-        logoUri: 'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
+        logoUri:
+          'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
         name: 'Morpho Token',
         symbol: 'MORPHO',
         trusted: true,

@@ -1,12 +1,17 @@
 import { faker } from '@faker-js/faker'
-import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { SettingsInfoType, TransactionInfoType } from '@safe-global/store/gateway/types'
-import type { TransactionDetails, SettingsChangeTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type {
+  TransactionDetails,
+  SettingsChangeTransaction,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 export const mockAddOwnerTxInfo: SettingsChangeTransaction = {
   type: TransactionInfoType.SETTINGS_CHANGE,
   humanDescription: null,
-  dataDecoded: null,
+  dataDecoded: {
+    method: 'addOwnerWithThreshold',
+    parameters: [],
+  },
   settingsInfo: {
     type: SettingsInfoType.ADD_OWNER,
     owner: {
@@ -21,7 +26,10 @@ export const mockAddOwnerTxInfo: SettingsChangeTransaction = {
 export const mockRemoveOwnerTxInfo: SettingsChangeTransaction = {
   type: TransactionInfoType.SETTINGS_CHANGE,
   humanDescription: null,
-  dataDecoded: null,
+  dataDecoded: {
+    method: 'removeOwner',
+    parameters: [],
+  },
   settingsInfo: {
     type: SettingsInfoType.REMOVE_OWNER,
     owner: {
@@ -36,7 +44,10 @@ export const mockRemoveOwnerTxInfo: SettingsChangeTransaction = {
 export const mockSwapOwnerTxInfo: SettingsChangeTransaction = {
   type: TransactionInfoType.SETTINGS_CHANGE,
   humanDescription: null,
-  dataDecoded: null,
+  dataDecoded: {
+    method: 'swapOwner',
+    parameters: [],
+  },
   settingsInfo: {
     type: SettingsInfoType.SWAP_OWNER,
     oldOwner: {

@@ -1,5 +1,8 @@
 import { faker } from '@faker-js/faker'
-import type { SwapOrderTransactionInfo, TwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type {
+  SwapOrderTransactionInfo,
+  TwapOrderTransactionInfo,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionInfoType } from '@safe-global/store/gateway/types'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
@@ -18,7 +21,8 @@ export const mockSwapOrderTxInfo: SwapOrderTransactionInfo = {
   executedFeeToken: {
     address: faker.finance.ethereumAddress(),
     decimals: 18,
-    logoUri: 'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
+    logoUri:
+      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
     name: 'Ether',
     symbol: 'ETH',
     trusted: true,
@@ -26,7 +30,8 @@ export const mockSwapOrderTxInfo: SwapOrderTransactionInfo = {
   sellToken: {
     address: faker.finance.ethereumAddress(),
     decimals: 18,
-    logoUri: 'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
+    logoUri:
+      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
     name: 'Ether',
     symbol: 'ETH',
     trusted: true,
@@ -34,7 +39,8 @@ export const mockSwapOrderTxInfo: SwapOrderTransactionInfo = {
   buyToken: {
     address: faker.finance.ethereumAddress(),
     decimals: 6,
-    logoUri: 'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+    logoUri:
+      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
     name: 'USD Coin',
     symbol: 'USDC',
     trusted: true,
@@ -49,19 +55,38 @@ export const mockSwapOrderTxInfo: SwapOrderTransactionInfo = {
 export const mockTwapOrderTxInfo: TwapOrderTransactionInfo = {
   type: TransactionInfoType.TWAP_ORDER,
   humanDescription: null,
+  kind: 'sell',
+  validUntil: Math.floor(Date.now() / 1000) + 86400,
+  startTime: {
+    startType: 'AT_EPOCH',
+    epoch: Math.floor(Date.now() / 1000),
+  },
   durationOfPart: {
     durationType: 'AUTO',
   },
+  timeBetweenParts: 3600,
   minPartLimit: faker.number.bigInt({ min: 100000000000000000n, max: 1000000000000000000n }).toString(),
   numberOfParts: '10',
+  partSellAmount: faker.number.bigInt({ min: 1000000000000000000n, max: 10000000000000000000n }).toString(),
   sellAmount: faker.number.bigInt({ min: 10000000000000000000n, max: 100000000000000000000n }).toString(),
   buyAmount: faker.number.bigInt({ min: 20000000000000000000n, max: 200000000000000000000n }).toString(),
   executedSellAmount: faker.number.bigInt({ min: 1000000000000000000n, max: 5000000000000000000n }).toString(),
   executedBuyAmount: faker.number.bigInt({ min: 2000000000000000000n, max: 10000000000000000000n }).toString(),
+  executedFee: '0',
+  executedFeeToken: {
+    address: faker.finance.ethereumAddress(),
+    decimals: 18,
+    logoUri:
+      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
+    name: 'Ether',
+    symbol: 'ETH',
+    trusted: true,
+  },
   sellToken: {
     address: faker.finance.ethereumAddress(),
     decimals: 18,
-    logoUri: 'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
+    logoUri:
+      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
     name: 'Ether',
     symbol: 'ETH',
     trusted: true,
@@ -69,7 +94,8 @@ export const mockTwapOrderTxInfo: TwapOrderTransactionInfo = {
   buyToken: {
     address: faker.finance.ethereumAddress(),
     decimals: 6,
-    logoUri: 'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+    logoUri:
+      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
     name: 'USD Coin',
     symbol: 'USDC',
     trusted: true,
