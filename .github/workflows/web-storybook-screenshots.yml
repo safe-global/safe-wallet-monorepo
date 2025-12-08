@@ -116,10 +116,16 @@ jobs:
 
       - name: Upload screenshots to branch
         if: steps.changed-stories.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Configure git identity first
+          # Configure git identity
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Configure git credentials using extraheader (token not visible in process list)
+          git config --global credential.helper store
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
 
           # Create a unique directory for this PR's screenshots
           SCREENSHOT_DIR="storybook-screenshots/${{ steps.pr.outputs.number }}"
@@ -128,12 +134,13 @@ jobs:
           cd /tmp
           rm -rf screenshots-storage
 
-          if git clone --depth 1 --branch storybook-screenshots-storage https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git screenshots-storage; then
+          # Use gh CLI to clone (token handled securely)
+          if gh repo clone ${{ github.repository }} screenshots-storage -- --depth 1 --branch storybook-screenshots-storage; then
             echo "Cloned existing storage branch"
             cd screenshots-storage
           else
             echo "Storage branch doesn't exist, creating it"
-            git clone --depth 1 https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git screenshots-storage
+            gh repo clone ${{ github.repository }} screenshots-storage -- --depth 1
             cd screenshots-storage
             git checkout --orphan storybook-screenshots-storage
             git rm -rf . 2>/dev/null || true
