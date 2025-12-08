@@ -76,11 +76,11 @@ export const WithIssues: Story = {
         .description('This transaction contains potentially malicious activity.')
         .issues({
           [Severity.CRITICAL]: [
-            'Suspicious token transfer detected',
-            'Unusual contract interaction pattern',
-            'Potential phishing attempt',
+            { description: 'Suspicious token transfer detected' },
+            { description: 'Unusual contract interaction pattern' },
+            { description: 'Potential phishing attempt' },
           ],
-          [Severity.WARN]: ['High gas usage detected'],
+          [Severity.WARN]: [{ description: 'High gas usage detected' }],
         })
         .build(),
     ]),
@@ -138,7 +138,7 @@ export const Highlighted: Story = {
       ThreatAnalysisResultBuilder.malicious()
         .description('This is a critical threat that should be highlighted.')
         .issues({
-          [Severity.CRITICAL]: ['Critical security issue detected'],
+          [Severity.CRITICAL]: [{ description: 'Critical security issue detected' }],
         })
         .build(),
     ]),
@@ -152,7 +152,7 @@ export const NotHighlighted: Story = {
       ThreatAnalysisResultBuilder.malicious()
         .description('This is a critical threat but should not be highlighted.')
         .issues({
-          [Severity.CRITICAL]: ['Critical security issue detected'],
+          [Severity.CRITICAL]: [{ description: 'Critical security issue detected' }],
         })
         .build(),
     ]),
