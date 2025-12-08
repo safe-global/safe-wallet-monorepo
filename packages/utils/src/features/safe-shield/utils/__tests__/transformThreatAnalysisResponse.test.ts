@@ -273,4 +273,86 @@ describe('transformThreatAnalysisResponse', () => {
       ],
     })
   })
+
+  it('should preserve request_id metadata field', () => {
+    const response: ThreatAnalysisResponseDto = {
+      THREAT: [
+        {
+          severity: Severity.CRITICAL,
+          type: ThreatStatus.MALICIOUS,
+          title: 'Malicious activity detected',
+          description: 'This is a malicious transaction',
+          issues: {
+            [Severity.CRITICAL]: [{ description: 'Issue 1', address: '0x1234567890123456789012345678901234567890' }],
+          },
+        },
+      ],
+      request_id: 'test-request-id-12345',
+    }
+
+    const result = transformThreatAnalysisResponse(response)
+
+    expect(result).toBeDefined()
+    expect(result?.request_id).toBe('test-request-id-12345')
+    expect(result?.THREAT).toBeDefined()
+    expect(result?.THREAT).toHaveLength(1)
+  })
+
+  it('should preserve request_id even when THREAT is empty', () => {
+    const response: ThreatAnalysisResponseDto = {
+      THREAT: [],
+      request_id: 'test-request-id-67890',
+    }
+
+    const result = transformThreatAnalysisResponse(response)
+
+    expect(result).toBeDefined()
+    expect(result?.request_id).toBe('test-request-id-67890')
+  })
+
+  it('should preserve request_id with balance changes', () => {
+    const response: ThreatAnalysisResponseDto = {
+      BALANCE_CHANGE: [
+        {
+          asset: { symbol: 'ETH', type: 'NATIVE' },
+          in: [],
+          out: [{ value: '1000000000000000000' }],
+        },
+      ],
+      request_id: 'test-request-id-balance',
+    }
+
+    const result = transformThreatAnalysisResponse(response)
+
+    expect(result).toBeDefined()
+    expect(result?.request_id).toBe('test-request-id-balance')
+    expect(result?.BALANCE_CHANGE).toBeDefined()
+  })
+
+  it('should preserve request_id when extracting addresses from issues', () => {
+    const response: ThreatAnalysisResponseDto = {
+      THREAT: [
+        {
+          severity: Severity.CRITICAL,
+          type: ThreatStatus.MALICIOUS,
+          title: 'Malicious activity detected',
+          description: 'This is a malicious transaction',
+          issues: {
+            [Severity.CRITICAL]: [
+              { description: 'Issue 1', address: '0x1234567890123456789012345678901234567890' },
+              { description: 'Issue 2', address: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd' },
+            ],
+          },
+        },
+      ],
+      request_id: 'test-request-id-with-addresses',
+    }
+
+    const result = transformThreatAnalysisResponse(response)
+
+    expect(result).toBeDefined()
+    expect(result?.request_id).toBe('test-request-id-with-addresses')
+    expect(result?.THREAT).toBeDefined()
+    expect(result?.THREAT?.[0].addresses).toHaveLength(2)
+  })
 })

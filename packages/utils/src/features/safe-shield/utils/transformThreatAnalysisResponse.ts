@@ -57,10 +57,16 @@ export const transformThreatAnalysisResponse = (
     return baseResult
   })
 
-  return {
+  // Preserve all metadata fields (like request_id) and only transform THREAT
+  const { THREAT: _THREAT, BALANCE_CHANGE: _BALANCE_CHANGE, ...metadataFields } = response
+
+  const result: ThreatAnalysisResults = {
     ...(transformedThreats && transformedThreats.length > 0 ? { THREAT: transformedThreats } : {}),
     ...(response.BALANCE_CHANGE && response.BALANCE_CHANGE.length > 0
       ? { BALANCE_CHANGE: response.BALANCE_CHANGE }
       : {}),
+    ...metadataFields,
   }
+
+  return result
 }
