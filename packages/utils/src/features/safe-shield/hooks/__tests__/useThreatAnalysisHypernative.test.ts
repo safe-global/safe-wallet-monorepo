@@ -5,8 +5,8 @@ import { isSafeTransaction, getNestedExecTransactionHash } from '@safe-global/ut
 import type { SafeTransaction } from '@safe-global/types-kit'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
-import type { HypernativeAssessmentResponseDto } from '@safe-global/store/src/hypernative/hypernativeApi.dto'
-import { hypernativeApi } from '@safe-global/store/src/hypernative/hypernativeApi'
+import type { HypernativeAssessmentResponseDto } from '@safe-global/store/hypernative/hypernativeApi.dto'
+import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 
 // Mock dependencies
 jest.mock('@safe-global/utils/utils/safeTransaction')
