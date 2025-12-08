@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { HypernativeAssessmentResponseDto, HypernativeAssessmentRequestWithAuthDto } from './hypernativeApi.dto'
-import { HYPERNATIVE_API_BASE_URL } from '@safe-global/utils/src/config/constants'
+import { HYPERNATIVE_API_BASE_URL } from '@safe-global/utils/config/constants'
 
 export type { HypernativeAssessmentResponseDto } from './hypernativeApi.dto'
 export const addTagTypes = ['hypernative-threat-analysis']

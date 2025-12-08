@@ -4,7 +4,7 @@ import {
   HypernativeFinding,
   HypernativeRiskSeverity,
   HypernativeTx,
-} from '@safe-global/utils/src/features/safe-shield/types/hypernative.type'
+} from '@safe-global/utils/features/safe-shield/types/hypernative.type'
 
 export type HypernativeAssessmentRequestDto = {
   safeAddress: `0x${string}`
