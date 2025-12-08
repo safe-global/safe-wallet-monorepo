@@ -70,8 +70,14 @@ tags:
       DESCRIPTION_1_3: '.*in your address book.*'
       LABEL_2: 'Verified contract'
       DESCRIPTION_2: '.*contracts are verified.*'
+      EXPAND_SHOW_ALL: 'true'
+      EXPANDED_ADDRESS: '0x1231DEB6f5749EF6cE6943a275A1D3E7486F4EaE'
+      VERIFY_CLIPBOARD: 'true'
+      ADDRESS_TO_COPY: '0x1231DEB6f5749EF6cE6943a275A1D3E7486F4EaE'
+      EXPECTED_CLIPBOARD_TEXT: '0x1231DEB6f5749EF6cE6943a275A1D3E7486F4EaE'
       LABEL_3: 'Threat analysis failed'
       DESCRIPTION_3: '.*Threat analysis failed.*Review before processing.*'
+      SCROLL_TO_FOOTER: 'true'
 
 # Verify back on Confirm transaction screen
 - assertVisible: 'Confirm transaction'

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text, Stack } from 'tamagui'
+import { Text, Stack, View } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { TouchableOpacity } from 'react-native'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
@@ -38,14 +38,16 @@ export function AddressListItem({
         </Text>
       )}
 
-      <Text flexDirection="row" alignItems="center" gap="$2" flexWrap="wrap">
+      <View flexDirection="row" alignItems="flex-start" gap="$2" flexWrap="wrap">
         <Text
           onPress={() => onCopy(address, index)}
           fontSize="$3"
           color={copiedIndex === index ? '$color' : '$colorLight'}
+          flex={1}
+          flexShrink={1}
         >
           {address}
-        </Text>{' '}
+        </Text>
         {explorerLink && (
           <TouchableOpacity
             onPress={() => onOpenExplorer(address)}
@@ -55,7 +57,7 @@ export function AddressListItem({
             <SafeFontIcon name="external-link" size={14} color="$colorLight" />
           </TouchableOpacity>
         )}
-      </Text>
+      </View>
     </Stack>
   )
 }
