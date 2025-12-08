@@ -1,8 +1,10 @@
-import { createContext, type ReactElement, type ReactNode, useState, useCallback, useRef } from 'react'
+import { createContext, type ReactElement, type ReactNode, useState, useCallback, useRef, useEffect } from 'react'
 import TxModalDialog from '@/components/common/TxModalDialog'
 import { SuccessScreenFlow, NestedTxSuccessScreenFlow } from './flows'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { usePreventNavigation } from '@/hooks/usePreventNavigation'
+import { clearTxFlowState, loadTxFlowState } from './txFlowStorage'
+import { loadFlowByType } from './flowRegistry'
 
 const noop = () => {}
 
@@ -28,6 +30,7 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
   const shouldWarn = useRef<boolean>(true)
   const onClose = useRef<() => void>(noop)
   const { setSignerAddress } = useWalletContext() ?? {}
+  const hasRestoredFlow = useRef<boolean>(false)
 
   const handleModalClose = useCallback(() => {
     if (shouldWarn.current && !confirmClose()) {
@@ -38,6 +41,9 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
     setFlow(undefined)
 
     setSignerAddress?.(undefined)
+
+    // Clear saved tx flow state when modal closes
+    clearTxFlowState()
 
     return true
   }, [setSignerAddress])
@@ -64,6 +70,32 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
     },
     [],
   )
+
+  // Auto-restore saved flow on mount
+  useEffect(() => {
+    if (hasRestoredFlow.current) return
+
+    const restoreFlow = async () => {
+      const savedState = loadTxFlowState()
+      if (!savedState) return
+
+      hasRestoredFlow.current = true
+      console.log('[TxModalProvider] Auto-restoring flow:', savedState.flowType)
+
+      const FlowComponent = await loadFlowByType(savedState.flowType)
+      if (!FlowComponent) {
+        console.warn('[TxModalProvider] Failed to load flow, clearing saved state')
+        clearTxFlowState()
+        return
+      }
+
+      // Restore the flow - it will auto-restore to the saved step via TxFlow component
+      setFlow(<FlowComponent />)
+      shouldWarn.current = true
+    }
+
+    restoreFlow()
+  }, [])
 
   usePreventNavigation(txFlow ? handleModalClose : undefined)
 
