@@ -10,7 +10,7 @@ import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 
 // Mock dependencies
 jest.mock('@safe-global/utils/utils/safeTransaction')
-jest.mock('@safe-global/store/gateway/safe-shield/hypernativeApi', () => ({
+jest.mock('@safe-global/store/hypernative/hypernativeApi', () => ({
   hypernativeApi: {
     useAssessTransactionMutation: jest.fn(),
   },
