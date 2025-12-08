@@ -4,6 +4,8 @@ import { isAddress } from 'ethers'
 import { useTheme } from '@mui/material/styles'
 import { Box, SvgIcon, Tooltip } from '@mui/material'
 import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
+import SafeShieldIcon from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
+import SafeShieldIconWithText from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
 import CloudOutlinedIcon from '@mui/icons-material/CloudOutlined'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import Identicon from '../../Identicon'
@@ -34,9 +36,39 @@ export type EthHashInfoProps = {
   ExplorerButtonProps?: ExplorerButtonProps
   addressBookNameSource?: ContactSource
   highlight4bytes?: boolean
+  showShieldIcon?: boolean
 }
 
 const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
+
+const ShieldIconTooltip = ({ iconStyles }: { iconStyles: object }) => {
+  const tooltipTitle = (
+    <Box display="flex" flexDirection="column" gap={1} alignItems="flex-start" padding={1}>
+      <Box display="flex" alignItems="center" gap={0.5} marginLeft={-1}>
+        <SvgIcon component={SafeShieldIconWithText} inheritViewBox sx={{ fontSize: '100px', height: '20px' }} />
+      </Box>
+      <Box>Hypernative Guardian is actively monitoring this account.</Box>
+    </Box>
+  )
+
+  return (
+    <Tooltip
+      componentsProps={{
+        tooltip: {
+          sx: {
+            maxWidth: '230px',
+          },
+        },
+      }}
+      title={tooltipTitle}
+      placement="right"
+    >
+      <span style={{ lineHeight: 0 }}>
+        <SvgIcon component={SafeShieldIcon} inheritViewBox sx={iconStyles} />
+      </span>
+    </Tooltip>
+  )
+}
 
 const SrcEthHashInfo = ({
   address,
@@ -57,6 +89,7 @@ const SrcEthHashInfo = ({
   trusted = true,
   addressBookNameSource,
   highlight4bytes = false,
+  showShieldIcon = false,
 }: EthHashInfoProps): ReactElement => {
   const shouldPrefix = isAddress(address)
   const theme = useTheme()
@@ -82,6 +115,27 @@ const SrcEthHashInfo = ({
     </>
   )
 
+  const safeShieldSvgStyles = {
+    fontSize: 'medium',
+    '& .shield-img': {
+      fill: 'var(--color-text-brand)',
+      transition: 'fill 0.2s ease',
+    },
+    '& .shield-lines': {
+      fill: '#121312 !important', // consistent between dark/light modes
+      stroke: '#121312 !important',
+      transition: 'fill 0.2s ease',
+    },
+  }
+
+  const accountStylesWithShieldEnabled = {
+    backgroundColor: 'var(--color-background-main)',
+    fontWeight: 'bold',
+    borderRadius: '16px',
+    padding: name ? '2px 8px 2px 6px' : undefined,
+    width: 'fit-content',
+  }
+
   return (
     <div className={css.container}>
       {showAvatar && (
@@ -99,23 +153,41 @@ const SrcEthHashInfo = ({
 
       <Box overflow="hidden" className={onlyName ? css.inline : undefined} gap={0.5}>
         {name && (
-          <Box title={name} className="ethHashInfo-name" display="flex" alignItems="center" gap={0.5}>
+          <Box
+            title={name}
+            className="ethHashInfo-name"
+            display="flex"
+            alignItems="center"
+            gap={0.5}
+            sx={showShieldIcon ? accountStylesWithShieldEnabled : undefined}
+          >
             <Box overflow="hidden" textOverflow="ellipsis">
               {name}
             </Box>
 
-            {!!addressBookNameSource && (
-              <Tooltip title={`From your ${addressBookNameSource} address book`} placement="top">
-                <span style={{ lineHeight: 0 }}>
-                  <SvgIcon
-                    component={addressBookNameSource === ContactSource.local ? AddressBookIcon : CloudOutlinedIcon}
-                    inheritViewBox
-                    color="border"
-                    fontSize="small"
-                  />
-                </span>
-              </Tooltip>
+            {showShieldIcon ? (
+              <ShieldIconTooltip iconStyles={safeShieldSvgStyles} />
+            ) : (
+              !!addressBookNameSource && (
+                <Tooltip title={`From your ${addressBookNameSource} address book`} placement="top">
+                  <span style={{ lineHeight: 0 }}>
+                    <SvgIcon
+                      component={addressBookNameSource === ContactSource.local ? AddressBookIcon : CloudOutlinedIcon}
+                      inheritViewBox
+                      color="border"
+                      fontSize="small"
+                    />
+                  </span>
+                </Tooltip>
+              )
             )}
+          </Box>
+        )}
+
+        {/* Show shield icon even when there's no name */}
+        {!name && showShieldIcon && (
+          <Box display="flex" alignItems="center" gap={0.5} sx={accountStylesWithShieldEnabled}>
+            <ShieldIconTooltip iconStyles={safeShieldSvgStyles} />
           </Box>
         )}
 
