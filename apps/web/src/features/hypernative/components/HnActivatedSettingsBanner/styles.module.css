@@ -80,3 +80,20 @@
   text-align: center;
   white-space: nowrap;
 }
+
+.ctaButton {
+  border: 2px solid;
+  border-color: var(--color-primary-main, #121312);
+  border-radius: 6px;
+  padding: 6px 16px;
+  gap: 8px;
+  background-color: transparent;
+  text-transform: none;
+  inline-size: fit-content;
+  padding-inline: 16px;
+}
+
+.ctaButton:hover {
+  border-color: var(--color-primary-main, #121312);
+  background-color: transparent;
+}

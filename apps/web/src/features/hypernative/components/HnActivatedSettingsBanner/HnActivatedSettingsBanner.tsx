@@ -1,24 +1,8 @@
-import { Card, Stack, SvgIcon, type SxProps } from '@mui/material'
+import { Card, Stack, SvgIcon } from '@mui/material'
 import ExternalLink from '@/components/common/ExternalLink'
 import { hnActivatedSettingsBannerConfig } from './config'
 import css from './styles.module.css'
 import SafeShieldColored from '@/public/images/safe-shield/safe-shield-colored.svg'
-
-const ctaButtonStyles: SxProps = {
-  border: '2px solid',
-  borderColor: 'var(--color-primary-main, #121312)',
-  borderRadius: '6px',
-  padding: '6px 16px',
-  gap: '8px',
-  backgroundColor: 'transparent',
-  textTransform: 'none',
-  inlineSize: 'fit-content',
-  '&:hover': {
-    borderColor: 'var(--color-primary-main, #121312)',
-    backgroundColor: 'transparent',
-  },
-  paddingInline: '16px',
-}
 
 export const HnActivatedSettingsBanner = () => {
   const { title, description, statusLabel, buttonLabel, dashboardUrl } = hnActivatedSettingsBannerConfig
@@ -48,7 +32,7 @@ export const HnActivatedSettingsBanner = () => {
           <div className={css.statusBadge}>
             <span className={css.statusLabel}>{statusLabel}</span>
           </div>
-          <ExternalLink href={dashboardUrl} mode="button" sx={ctaButtonStyles}>
+          <ExternalLink href={dashboardUrl} mode="button" className={css.ctaButton}>
             <span className={css.buttonText}>{buttonLabel}</span>
           </ExternalLink>
         </div>

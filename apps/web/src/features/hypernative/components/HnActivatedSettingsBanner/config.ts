@@ -1,3 +1,5 @@
+import { IS_PRODUCTION } from '@/config/constants'
+
 export const hnActivatedSettingsBannerConfig = {
   title: 'Hypernative Guardian',
   description:
@@ -5,5 +7,5 @@ export const hnActivatedSettingsBannerConfig = {
   statusLabel: 'Active',
   buttonLabel: 'View on Hypernative',
   // Dummy URL for now
-  dashboardUrl: 'https://app.hypernative.xyz/guardian',
+  dashboardUrl: IS_PRODUCTION ? 'https://app.hypernative.xyz/guardian' : 'https://stage.app.hypernative.xyz/guardian',
 } as const
