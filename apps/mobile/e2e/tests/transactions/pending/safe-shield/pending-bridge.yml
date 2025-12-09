@@ -24,12 +24,11 @@ tags:
 - assertVisible:
     id: 'pending-tx-list'
 
-- waitForAnimationToEnd
-
 # Scroll to see the bridge transaction at the bottom
-- scroll
-
-
+- scrollUntilVisible:
+    element:
+      text: '.*Pending bridge.*'
+    centerElement: true
 
 - runFlow:
     file: ../../../../utils/components/pending-tx/tap-tx-card.yml

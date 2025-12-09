@@ -23,6 +23,7 @@ tags:
 - scrollUntilVisible:
     element:
       text: '.*3 actions.*'
+      index: 1
     centerElement: true
 
 # Tap on the second 3 actions batch transaction card (the one with issues)
