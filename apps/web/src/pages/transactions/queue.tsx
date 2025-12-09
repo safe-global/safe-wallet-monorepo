@@ -10,9 +10,11 @@ import { usePendingTxsQueue, useShowUnsignedQueue } from '@/hooks/usePendingTxs'
 import RecoveryList from '@/features/recovery/components/RecoveryList'
 import { BRAND_NAME } from '@/config/constants'
 import { HnLoginCard } from '@/features/hypernative/components/HnLoginCard'
+import { useIsHypernativeGuard } from '@/features/hypernative/hooks/useIsHypernativeGuard'
 
 const Queue: NextPage = () => {
   const showPending = useShowUnsignedQueue()
+  const { isHypernativeGuard, loading: HNGuardCheckLoading } = useIsHypernativeGuard()
 
   return (
     <>
@@ -22,7 +24,7 @@ const Queue: NextPage = () => {
 
       <BatchExecuteHoverProvider>
         <TxHeader>
-          <HnLoginCard />
+          {!HNGuardCheckLoading && isHypernativeGuard && <HnLoginCard />}
           <BatchExecuteButton />
         </TxHeader>
 
