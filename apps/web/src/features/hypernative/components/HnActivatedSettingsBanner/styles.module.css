@@ -19,9 +19,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  background: #ebebeb;
   border-radius: 13.362px;
-  padding: 2px 6px 2px 3px;
   width: fit-content;
 }
 
@@ -68,12 +66,8 @@
   font-size: 11px;
   line-height: 16px;
   letter-spacing: 1px;
-  color: var(--color-text-primary, #121312);
+  color: #121312; /* same color across themes */
   white-space: nowrap;
-}
-
-.button {
-  width: fit-content;
 }
 
 .buttonText {
@@ -86,10 +80,3 @@
   text-align: center;
   white-space: nowrap;
 }
-
-.externalLinkIcon {
-  width: 16px;
-  height: 16px;
-  color: var(--color-primary-main, #121312);
-}
-
