@@ -106,10 +106,10 @@ const HypernativeOAuthCallback: NextPage = () => {
           )
         }
 
-        // Step 8: Update UI state
+        // Step 9: Update UI state
         setStatus('success')
 
-        // Step 9: Close popup after short delay (allow postMessage to be delivered)
+        // Step 10: Close popup after short delay (allow postMessage to be delivered)
         setTimeout(() => {
           if (window.opener && !window.opener.closed) {
             window.close()
