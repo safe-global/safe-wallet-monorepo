@@ -1,7 +1,6 @@
 import { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { Severity, type GroupedAnalysisResults, type ThreatAnalysisResults, type ThreatIssue } from '../types'
 import isEmpty from 'lodash/isEmpty'
-import { SimulationStatus } from '@safe-global/utils/components/tx/security/tenderly/utils'
 
 /**
  * Severity priority mapping for sorting analysis results

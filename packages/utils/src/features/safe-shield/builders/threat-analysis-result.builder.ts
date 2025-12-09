@@ -76,12 +76,18 @@ export class ThreatAnalysisResultBuilder<
       .issues({
         [Severity.CRITICAL]: [
           {
+            address: '0x1234567890123456789012345678901234567890',
             description: 'Bulleted list from validation.features, grouped by Malicious first, then Warnings.',
           },
-          { description: 'Issue 2' },
-          { description: 'Issue 3' },
+          {
+            address: '0x1234567890123456789012345678901234567890',
+            description: 'Issue 2',
+          },
         ],
-        [Severity.WARN]: [{ description: 'Issue 4' }, { description: 'Issue 5' }],
+        [Severity.WARN]: [
+          { description: 'Issue 4', address: '0x1234567890123456789012345678901234567890' },
+          { description: 'Issue without address' },
+        ],
         [Severity.INFO]: [{ description: 'Issue 6' }, { description: 'Issue 7' }],
       })
   }
