@@ -26,6 +26,11 @@ export enum MixpanelEvent {
   TRANSACTION_CONTRACT_DECODED = 'Transaction Contract Decoded',
   TRANSACTION_THREAT_ANALYZED = 'Transaction Threat Analyzed',
   TRANSACTION_SIMULATED = 'Transaction Simulated',
+  TRANSACTION_EXECUTED = 'Transaction Executed',
+  TRANSACTION_EXECUTED_VIA_PARENT = 'Transaction Executed Via Parent',
+  TRANSACTION_EXECUTED_IN_PARENT = 'Transaction Executed In Parent',
+  TRANSACTION_EXECUTED_VIA_ROLE = 'Transaction Executed Via Role',
+  TRANSACTION_SUBMITTED = 'Transaction Submitted',
 }
 
 export enum MixpanelUserProperty {
@@ -66,6 +71,7 @@ export enum MixpanelEventParams {
   SIDEBAR_ELEMENT = 'Sidebar Element',
   RESULT = 'Result',
   SOURCE = 'Source',
+  TRANSACTION_TYPE = 'Transaction Type',
 }
 
 export enum SafeAppLaunchLocation {

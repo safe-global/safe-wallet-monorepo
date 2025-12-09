@@ -240,3 +240,21 @@ export const mockedSeedPhraseImportSafeInfo: SafeOverview = {
   queued: 0,
   threshold: 1,
 }
+
+// SafeShield test safe (Polygon)
+export const safeShieldTestSignerAddress = '0x8eeC30d6FB6eC104B7308a8847db5FF487152a3b'
+
+export const safeShieldTestSafe: SafeInfo = {
+  address: '0x65e1Ff7e0901055B3bea7D8b3AF457a659714013',
+  chainId: '137',
+}
+
+export const safeShieldTestSafeInfo: SafeOverview = {
+  address: { value: '0x65e1Ff7e0901055B3bea7D8b3AF457a659714013', name: null, logoUri: null },
+  awaitingConfirmation: null,
+  chainId: safeShieldTestSafe.chainId,
+  fiatTotal: '0',
+  owners: [{ value: safeShieldTestSignerAddress, name: null, logoUri: null }],
+  queued: 13,
+  threshold: 2,
+}

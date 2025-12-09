@@ -21,18 +21,18 @@ import CheckWallet from '@/components/common/CheckWallet'
 import type { ExecuteBatchFlowProps } from '.'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import SendToBlock from '@/components/tx/SendToBlock'
-import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
+import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/shared/ConfirmationTitle'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxModalContext } from '@/components/tx-flow'
 import useGasPrice from '@/hooks/useGasPrice'
 import type { Overrides } from 'ethers'
-import { trackEvent } from '@/services/analytics'
+import { trackEvent, MixpanelEventParams } from '@/services/analytics'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import { isWalletRejection } from '@/utils/wallets'
-import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
+import WalletRejectionError from '@/components/tx/shared/errors/WalletRejectionError'
 import useUserNonce from '@/components/tx/AdvancedParams/useUserNonce'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
-import { useTransactionsGetMultipleTransactionDetailsQuery } from '@safe-global/store/src/gateway/transactions'
+import { useTransactionsGetMultipleTransactionDetailsQuery } from '@safe-global/store/gateway/transactions'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { FEATURES, getLatestSafeVersion, hasFeature } from '@safe-global/utils/utils/chains'
 import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
@@ -169,7 +169,13 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
       return
     }
 
-    trackEvent({ ...TX_EVENTS.EXECUTE, label: TX_TYPES.bulk_execute })
+    trackEvent(
+      { ...TX_EVENTS.EXECUTE, label: TX_TYPES.bulk_execute },
+      {
+        [MixpanelEventParams.TRANSACTION_TYPE]: TX_TYPES.bulk_execute,
+        [MixpanelEventParams.THRESHOLD]: safe.threshold,
+      },
+    )
   }
 
   const submitDisabled = loading || !isSubmittable || !gasPrice

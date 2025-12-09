@@ -1,0 +1,168 @@
+appId: ${APP_ID}
+tags:
+  - onboarding
+  - import-signer
+  - add-safe
+---
+# Test adding a safe during onboarding and then importing a signer
+# This test replicates the crash scenario where importing a signer after adding a safe causes issues
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+# ============================================
+# Launch app and start import
+# ============================================
+- tapOn:
+    id: 'e2eTestOnboarding'
+
+- tapOn:
+    id: 'get-started'
+
+# Verify Get Started screen
+- assertVisible:
+    id: 'get-started-screen'
+
+# ============================================
+# Navigate to Add Safe Account
+# ============================================
+- tapOn:
+    id: 'add-account-button'
+
+# Verify QR code scan screen appears
+- assertVisible: 'Scan a QR code'
+
+# ============================================
+# Add Safe Account (using safe from import-signer-private-key test)
+# ============================================
+- tapOn:
+    id: 'enter-manually'
+
+# Enter Safe address
+- tapOn: 'Paste address...'
+- inputText: 'sep:0x2f3e600a3F38b66aDcbe6530B191F2BE55c2Fbb6'
+
+# Verify network auto-detection (Sepolia)
+- assertVisible: 'Sepolia'
+
+# Verify success icon appears
+- assertVisible:
+    id: 'success-icon'
+
+# Enter Safe name
+- tapOn: 'Enter safe name here'
+- inputText: 'My test safe'
+
+# Verify Continue button is enabled
+- assertVisible:
+    id: 'continue-button'
+
+# Tap Continue to proceed
+- tapOn:
+    id: 'continue-button'
+
+# ============================================
+# Signer Selection/Import Screen
+# ============================================
+
+# Verify signers form screen appears
+- assertVisible:
+    id: 'add-signers-form-screen'
+- assertVisible: 'Import your signers to unlock account'
+- assertVisible: '.*Before you import signers....*'
+
+# Verify signers are listed
+- assertVisible:
+    id: 'signer-0x3336745b7EA628F5134Bd9d08aa68b4979fA3472'
+- assertVisible:
+    id: 'signer-0x4d5CF9E6df9a95F4c1F5398706cA27218add5949'
+
+# ============================================
+# Import a signer instead of skipping
+# ============================================
+
+# Tap on the menu (three dots) for the first signer to import it
+- tapOn:
+    id: 'signer-menu'
+    index: 0
+
+# Tap "Import signer" option from the menu
+- tapOn: 'Import signer'
+
+# Verify we're on the "Import a signer" screen
+- assertVisible: 'Import a signer'
+- assertVisible: "Select how you'd like to import your signer. Ensure it belongs to this Safe account so you can interact with it seamlessly."
+
+# Tap on "Import signer" option (seed/private key option)
+- tapOn:
+    id: 'seed'
+
+# Handle biometrics opt-in if needed
+- runFlow:
+    when:
+      visible: 'Enable biometrics'
+    commands:
+      - tapOn: 'Enable biometrics'
+
+# Verify we're on the private key/seed phrase input screen
+- assertVisible: 'Enter your private key or seed phrase below. Make sure to do so in a safe and private place.'
+
+# Enter valid private key for signer
+- tapOn: 'Paste here or type...'
+- inputText: 'ffc4b004b8746a7ce547ffa644686ca660efcf7a5a39910c714f922d7ad9bcc8'
+
+# Verify no error
+- assertNotVisible: 'Invalid private key or seed phrase.'
+- assertVisible:
+    id: 'import-signer-button'
+
+# Tap "Continue" (Import signer button)
+- tapOn:
+    id: 'import-signer-button'
+
+# Verify success message appears
+- assertVisible:
+    id: 'import-success'
+- assertVisible: 'Your signer is ready!'
+
+# Verify the imported signer address is displayed
+- assertVisible: '.*0x3336...3472.*'
+
+# Tap Continue on success screen (this is where the crash was happening)
+- tapOn:
+    id: 'import-success-continue'
+
+# Verify navigation back to signers list (should not crash)
+- assertVisible:
+    id: 'add-signers-form-screen'
+- assertVisible: 'Import your signers to unlock account'
+
+# Verify the imported signer is now in the "My signers" section or marked as imported
+# The signer should now be imported, so we can continue with onboarding
+
+# Continue to notifications screen
+- tapOn:
+    id: 'continue-button'
+
+# ============================================
+# Test Skip Path: Skip notifications opt-in
+# ============================================
+
+# Verify notifications opt-in screen appears
+- assertVisible:
+    id: 'notifications-opt-in-screen'
+- assertVisible:
+    id: 'opt-in-primary-button'
+- assertVisible:
+    id: 'opt-in-secondary-button'
+
+# Tap Skip (secondary button)
+- tapOn:
+    id: 'opt-in-secondary-button'
+
+# Verify lands on Home tab (onboarding complete)
+- assertVisible:
+    id: 'home-tab'
+
+# Verify Safe account is displayed
+- assertVisible: '0x2f3e...Fbb6.*'
+- assertVisible: 'Sepolia'

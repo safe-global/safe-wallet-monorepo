@@ -91,6 +91,7 @@ export enum ThreatStatus {
   OWNERSHIP_CHANGE = 'OWNERSHIP_CHANGE', // 9F
   MODULE_CHANGE = 'MODULE_CHANGE', // 9G
   UNOFFICIAL_FALLBACK_HANDLER = 'UNOFFICIAL_FALLBACK_HANDLER', // 9H
+  HYPERNATIVE_GUARD = 'HYPERNATIVE_GUARD', // used only for Safes with Hypernative Guard installed
 }
 
 export enum CommonSharedStatus {
@@ -168,4 +169,5 @@ export type ThreatAnalysisResults = {
   [StatusGroup.COMMON]?: AnalysisResult<CommonSharedStatus.FAILED>[]
   THREAT?: ThreatAnalysisResult[]
   BALANCE_CHANGE?: BalanceChangeDto[]
+  request_id?: string
 }

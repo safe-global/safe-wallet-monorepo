@@ -7,7 +7,7 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import { NavBarTitle, SectionTitle } from '@/src/components/Title'
 import { SafeCard } from '@/src/components/SafeCard'
-import { router, useLocalSearchParams } from 'expo-router'
+import { router } from 'expo-router'
 import { Tag } from '@/src/components/Tag'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
 import { View } from 'tamagui'
@@ -45,7 +45,6 @@ const title = 'Import a signer'
 
 export const ImportSignersContainer = () => {
   const { isBiometricsEnabled } = useBiometrics()
-  const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string }>()
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle paddingRight={5}>{title}</NavBarTitle>,
   })
@@ -59,9 +58,6 @@ export const ImportSignersContainer = () => {
           router.push({
             pathname: '/biometrics-opt-in',
             params: {
-              safeAddress: local.safeAddress,
-              chainId: local.chainId,
-              import_safe: local.import_safe,
               caller: '/import-signers',
             },
           })
@@ -69,7 +65,7 @@ export const ImportSignersContainer = () => {
 
       return newItem
     })
-  }, [isBiometricsEnabled, local.safeAddress, local.chainId, local.import_safe])
+  }, [isBiometricsEnabled])
 
   return (
     <View flex={1}>

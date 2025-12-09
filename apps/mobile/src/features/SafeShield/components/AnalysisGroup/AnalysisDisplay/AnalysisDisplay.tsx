@@ -31,6 +31,18 @@ export function AnalysisDisplay({ result, description, severity }: AnalysisDispl
 
   const borderColor = getBorderColor()
 
+  const renderDescription = () => {
+    if (typeof displayDescription === 'string' || typeof displayDescription === 'number') {
+      return (
+        <Text fontSize="$4" color="$colorLight">
+          {displayDescription}
+        </Text>
+      )
+    }
+
+    return displayDescription
+  }
+
   return (
     <View backgroundColor="$backgroundPaper" borderRadius="$1" overflow="hidden">
       <View
@@ -41,15 +53,13 @@ export function AnalysisDisplay({ result, description, severity }: AnalysisDispl
         }}
       >
         <Stack gap="$3">
-          <Text fontSize="$4" color="$colorSecondary">
-            {displayDescription}
-          </Text>
+          {renderDescription()}
 
           <AnalysisIssuesDisplay result={result} />
 
           {isAddressChange(result) && <AddressChanges result={result} />}
 
-          {result.addresses?.length && <ShowAllAddress addresses={result.addresses} />}
+          {result.addresses?.length && <ShowAllAddress addresses={result.addresses.map((a) => a.address)} />}
         </Stack>
       </View>
     </View>

@@ -16,6 +16,7 @@ import { extractSignersFromSafes } from '@/src/features/ImportReadOnly/helpers/s
 import { AddSignersFormView } from '@/src/features/ImportReadOnly/components/AddSignersFormView'
 import { upsertContact } from '@/src/store/addressBookSlice'
 import { selectCurrency } from '@/src/store/settingsSlice'
+import { clearPendingSafe } from '@/src/store/signerImportFlowSlice'
 
 export const AddSignersFormContainer = () => {
   const params = useLocalSearchParams<{ safeAddress: string; safeName: string }>()
@@ -56,6 +57,7 @@ export const AddSignersFormContainer = () => {
         chainId: currentData[0].chainId,
       }),
     )
+    dispatch(clearPendingSafe())
 
     navigation.dispatch(
       CommonActions.reset({

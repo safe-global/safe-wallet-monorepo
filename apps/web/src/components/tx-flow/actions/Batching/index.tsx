@@ -1,6 +1,6 @@
 import { useContext, type SyntheticEvent } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { useTxActions } from '@/components/tx/SignOrExecuteForm/hooks'
+import { useTxActions } from '@/components/tx/shared/hooks'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { isDelegateCall as checkIsDelegateCall } from '@/services/tx/tx-sender/sdk'
 import { TxModalContext } from '@/components/tx-flow'

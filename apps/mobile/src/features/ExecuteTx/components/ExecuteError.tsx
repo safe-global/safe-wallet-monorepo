@@ -5,16 +5,11 @@ import { Badge } from '@/src/components/Badge'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { LargeHeaderTitle } from '@/src/components/Title'
 import { SafeButton } from '@/src/components/SafeButton'
+import { useRouter } from 'expo-router'
 import { AbsoluteLinearGradient } from '@/src/components/LinearGradient'
-export function ExecuteError({
-  onRetryPress,
-  onViewTransactionPress,
-  description,
-}: {
-  onRetryPress: () => void
-  onViewTransactionPress: () => void
-  description?: string
-}) {
+
+export function ExecuteError({ description }: { description?: string }) {
+  const router = useRouter()
   const theme = useTheme()
   const colors: [string, string] = [theme.errorDark.get(), 'transparent']
   const { bottom } = useSafeAreaInsets()
@@ -52,10 +47,7 @@ export function ExecuteError({
         </View>
 
         <View paddingHorizontal="$4" gap="$4">
-          <SafeButton onPress={onRetryPress}>Retry</SafeButton>
-          <SafeButton text onPress={onViewTransactionPress}>
-            View transaction
-          </SafeButton>
+          <SafeButton onPress={router.back}>Close</SafeButton>
         </View>
       </View>
     </View>
