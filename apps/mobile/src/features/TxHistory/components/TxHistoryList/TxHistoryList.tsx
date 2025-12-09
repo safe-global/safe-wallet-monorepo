@@ -11,7 +11,7 @@ import { TxCardPress } from '@/src/components/TxInfo/types'
 import { GroupedTransactionItem } from './components/GroupedTransactionItem'
 import { DateHeaderItem } from './components/DateHeaderItem'
 import { TransactionListItem } from './components/TransactionListItem'
-import { EmptyComponent, HeaderComponent, FooterComponent } from './components/LoadingComponents'
+import { EmptyComponent, FooterComponent } from './components/LoadingComponents'
 import { ErrorComponent } from './components/ErrorComponent'
 import { keyExtractor, getItemType } from './utils'
 import { EMPTY_ARRAY } from './constants'
@@ -122,7 +122,6 @@ export function TxHistoryList({
         refreshControl={<RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} />}
         contentContainerStyle={contentContainerStyle}
         ListEmptyComponent={listEmptyComponent}
-        ListHeaderComponent={isLoading && hasTransactions ? <HeaderComponent /> : null}
         ListFooterComponent={isLoadingNext && hasTransactions ? <FooterComponent /> : null}
         contentInsetAdjustmentBehavior="automatic"
       />

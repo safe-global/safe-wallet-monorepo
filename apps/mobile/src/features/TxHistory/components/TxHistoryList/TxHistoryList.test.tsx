@@ -133,12 +133,6 @@ describe('TxHistoryList', () => {
       expect(screen.queryByTestId('tx-history-initial-loader')).toBeNull()
     })
 
-    it('shows header loading component when loading with existing transactions', () => {
-      render(<TxHistoryList {...defaultProps} isLoading={true} transactions={mockTransactions} />)
-
-      expect(screen.getByTestId('tx-history-previous-loader')).toBeTruthy()
-    })
-
     it('shows footer loading component when loading next page', () => {
       render(<TxHistoryList {...defaultProps} isLoadingNext={true} transactions={mockTransactions} />)
 
