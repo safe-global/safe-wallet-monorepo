@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text, Stack, View } from 'tamagui'
+import { Text, View } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { TouchableOpacity } from 'react-native'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
@@ -25,13 +25,7 @@ export function AddressListItem({
   const { displayName } = useDisplayName({ value: address })
 
   return (
-    <Stack
-      padding="$2"
-      paddingRight={explorerLink ? '$3' : '$2'}
-      gap="$1"
-      backgroundColor="$background"
-      borderRadius="$1"
-    >
+    <>
       {displayName && (
         <Text fontSize="$3" color="$color" marginBottom="$1">
           {displayName}
@@ -58,6 +52,6 @@ export function AddressListItem({
           </TouchableOpacity>
         )}
       </View>
-    </Stack>
+    </>
   )
 }
