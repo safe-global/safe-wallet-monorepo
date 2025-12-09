@@ -23,8 +23,8 @@ export function AnalysisIssuesDisplay({ result }: AnalysisIssuesDisplayProps) {
       {sortedIssues.flatMap(({ severity, issues }) =>
         issues.map((issue, index) => (
           <View key={`${severity}-${index}`} flexDirection="row" gap="$1" paddingLeft="$4" alignItems="flex-start">
-            <View width={4} height={4} borderRadius={3} backgroundColor="$colorSecondary" marginTop={8} />
-            <Text fontSize="$4" color="$colorSecondary" fontStyle="italic" flex={1}>
+            <View width={4} height={4} borderRadius={3} backgroundColor="$colorLight" marginTop={8} />
+            <Text fontSize="$4" color="$colorLight" fontStyle="italic" flex={1}>
               {issue}
             </Text>
           </View>

@@ -13,6 +13,7 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import useSafeTx from '@/src/hooks/useSafeTx'
 import { Image, Text, View } from 'tamagui'
 import { ToastViewport } from '@tamagui/toast'
+import { Platform } from 'react-native'
 
 export const SafeShieldDetailsSheetContainer = () => {
   const { recipient, contract, threat, txId } = useLocalSearchParams<{
@@ -50,7 +51,7 @@ export const SafeShieldDetailsSheetContainer = () => {
 
   return (
     <SafeBottomSheet snapPoints={['100%']} loading={false}>
-      <ToastViewport multipleToasts={false} left={0} right={0} />
+      {Platform.OS === 'ios' && <ToastViewport multipleToasts={false} left={0} right={0} />}
 
       <AnalysisDetails recipient={recipientData} contract={contractData} threat={threatData} safeTx={safeTx} />
 

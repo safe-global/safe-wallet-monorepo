@@ -23,6 +23,9 @@ tags:
 #   EXPANDED_ADDRESS: Address pattern to verify after first expansion
 #   EXPAND_SHOW_ALL_2: Set to "true" to tap second "Show all" button
 #   EXPANDED_ADDRESS_2: Address pattern to verify after second expansion
+#   VERIFY_CLIPBOARD: Set to "true" to verify clipboard content after tapping an address
+#   ADDRESS_TO_COPY: Address pattern to tap for copying (required if VERIFY_CLIPBOARD is "true")
+#   EXPECTED_CLIPBOARD_TEXT: Expected clipboard content pattern (required if VERIFY_CLIPBOARD is "true")
 #   SCROLL_TO_FOOTER: Set to "true" to scroll before verifying footer (when content is expanded)
 
 # Tap widget to open sheet
@@ -134,6 +137,21 @@ tags:
     commands:
       - assertVisible:
           text: '${DESCRIPTION_3}'
+
+# Verify clipboard content after tapping address (optional)
+- evalScript: '${output.verifyClipboard = (typeof VERIFY_CLIPBOARD !== "undefined" && VERIFY_CLIPBOARD === "true")}'
+- runFlow:
+    when:
+      true: '${output.verifyClipboard === true}'
+    commands:
+      - tapOn:
+          text: '${ADDRESS_TO_COPY}'
+      - assertVisible:
+          text: '.*Copied to clipboard.*'
+      - runFlow:
+          file: ./verify-clipboard-content.yml
+          env:
+            EXPECTED_TEXT: '${EXPECTED_CLIPBOARD_TEXT}'
 
 # Scroll to footer if content is expanded and footer is out of view (optional)
 - evalScript: '${output.scrollToFooter = (typeof SCROLL_TO_FOOTER !== "undefined" && SCROLL_TO_FOOTER === "true")}'
