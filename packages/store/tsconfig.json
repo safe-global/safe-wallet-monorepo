@@ -1,7 +1,6 @@
 {
   "extends": "../../config/tsconfig/confs/base.json",
-  "include": ["**/*.ts"],
   "compilerOptions": {
-    "baseUrl": "."
+    "baseUrl": "./"
   }
 }

@@ -1,4 +1,5 @@
-import signersReducer, { addSigner, addSignerWithEffects, selectSigners, selectTotalSignerCount } from '../signersSlice'
+import signersReducer, { addSigner, selectSigners, selectTotalSignerCount } from '../signersSlice'
+import { addSignerWithEffects } from '../signerThunks'
 import { selectActiveSigner } from '../activeSignerSlice'
 import { selectAllContacts, selectContactByAddress } from '../addressBookSlice'
 import type { RootState } from '../index'

@@ -199,7 +199,16 @@ describe('notificationSyncMiddleware', () => {
       )
 
       // Dispatch the real RTK Query thunk
-      await testStore.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate() as unknown as Action)
+      const promise = testStore.dispatch(
+        apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate() as unknown as Action,
+      )
+
+      // Advance through all retry delays (5 retries with exponential backoff)
+      for (let i = 0; i < 5; i++) {
+        await jest.runAllTimersAsync()
+      }
+
+      await promise
 
       // The middleware should NOT have been triggered by the rejected action
       expect(mockSyncNotificationExtensionData).not.toHaveBeenCalled()

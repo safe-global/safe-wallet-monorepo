@@ -1,0 +1,173 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+# ===========================================
+# SafeShield Details Sheet (Reusable)
+# ===========================================
+# Opens and verifies the SafeShield details bottom sheet
+#
+# Environment variables:
+#   TAP_TO_OPEN: Text to tap to open sheet (e.g., "Issues found", "Review details")
+#   HEADER: Expected sheet header in uppercase (e.g., "ISSUES FOUND", "REVIEW DETAILS")
+#   LABEL_1: First analysis label
+#   DESCRIPTION_1: Description pattern for first label (optional)
+#   DESCRIPTION_1_2: Second description for first label (optional)
+#   DESCRIPTION_1_3: Third description for first label (optional)
+#   LABEL_2: Second analysis label (optional)
+#   DESCRIPTION_2: Description pattern for second label (optional)
+#   DESCRIPTION_2_2: Second description for second label (optional)
+#   LABEL_3: Third analysis label (optional)
+#   DESCRIPTION_3: Description pattern for third label (optional)
+#   EXPAND_SHOW_ALL: Set to "true" to tap first "Show all" and expand hidden addresses
+#   EXPANDED_ADDRESS: Address pattern to verify after first expansion
+#   EXPAND_SHOW_ALL_2: Set to "true" to tap second "Show all" button
+#   EXPANDED_ADDRESS_2: Address pattern to verify after second expansion
+#   VERIFY_CLIPBOARD: Set to "true" to verify clipboard content after tapping an address
+#   ADDRESS_TO_COPY: Address pattern to tap for copying (required if VERIFY_CLIPBOARD is "true")
+#   EXPECTED_CLIPBOARD_TEXT: Expected clipboard content pattern (required if VERIFY_CLIPBOARD is "true")
+#   SCROLL_TO_FOOTER: Set to "true" to scroll before verifying footer (when content is expanded)
+
+# Tap widget to open sheet
+- tapOn:
+    text: '${TAP_TO_OPEN}'
+
+# Verify sheet header
+- assertVisible:
+    text: '${HEADER}'
+
+# First label and descriptions
+- assertVisible:
+    text: '${LABEL_1}'
+
+- evalScript: '${output.hasDesc1 = (typeof DESCRIPTION_1 !== "undefined" && DESCRIPTION_1 !== "")}'
+- runFlow:
+    when:
+      true: '${output.hasDesc1 === true}'
+    commands:
+      - assertVisible:
+          text: '${DESCRIPTION_1}'
+
+- evalScript: '${output.hasDesc1_2 = (typeof DESCRIPTION_1_2 !== "undefined" && DESCRIPTION_1_2 !== "")}'
+- runFlow:
+    when:
+      true: '${output.hasDesc1_2 === true}'
+    commands:
+      - assertVisible:
+          text: '${DESCRIPTION_1_2}'
+
+- evalScript: '${output.hasDesc1_3 = (typeof DESCRIPTION_1_3 !== "undefined" && DESCRIPTION_1_3 !== "")}'
+- runFlow:
+    when:
+      true: '${output.hasDesc1_3 === true}'
+    commands:
+      - assertVisible:
+          text: '${DESCRIPTION_1_3}'
+
+# Expand first "Show all" to reveal hidden addresses (optional)
+- evalScript: '${output.expandShowAll = (typeof EXPAND_SHOW_ALL !== "undefined" && EXPAND_SHOW_ALL === "true")}'
+- runFlow:
+    when:
+      true: '${output.expandShowAll === true}'
+    commands:
+      - tapOn:
+          text: '.*Show all.*'
+      - evalScript: '${output.hasExpandedAddr = (typeof EXPANDED_ADDRESS !== "undefined" && EXPANDED_ADDRESS !== "")}'
+      - runFlow:
+          when:
+            true: '${output.hasExpandedAddr === true}'
+          commands:
+            - assertVisible:
+                text: '${EXPANDED_ADDRESS}'
+
+# Expand second "Show all" to reveal more hidden addresses (optional)
+- evalScript: '${output.expandShowAll2 = (typeof EXPAND_SHOW_ALL_2 !== "undefined" && EXPAND_SHOW_ALL_2 === "true")}'
+- runFlow:
+    when:
+      true: '${output.expandShowAll2 === true}'
+    commands:
+      - tapOn:
+          text: '.*Show all.*'
+      - evalScript: '${output.hasExpandedAddr2 = (typeof EXPANDED_ADDRESS_2 !== "undefined" && EXPANDED_ADDRESS_2 !== "")}'
+      - runFlow:
+          when:
+            true: '${output.hasExpandedAddr2 === true}'
+          commands:
+            - assertVisible:
+                text: '${EXPANDED_ADDRESS_2}'
+
+# Second label and descriptions (optional)
+- evalScript: '${output.hasLabel2 = (typeof LABEL_2 !== "undefined" && LABEL_2 !== "")}'
+- runFlow:
+    when:
+      true: '${output.hasLabel2 === true}'
+    commands:
+      - assertVisible:
+          text: '${LABEL_2}'
+
+- evalScript: '${output.hasDesc2 = (typeof DESCRIPTION_2 !== "undefined" && DESCRIPTION_2 !== "")}'
+- runFlow:
+    when:
+      true: '${output.hasDesc2 === true}'
+    commands:
+      - assertVisible:
+          text: '${DESCRIPTION_2}'
+
+- evalScript: '${output.hasDesc2_2 = (typeof DESCRIPTION_2_2 !== "undefined" && DESCRIPTION_2_2 !== "")}'
+- runFlow:
+    when:
+      true: '${output.hasDesc2_2 === true}'
+    commands:
+      - assertVisible:
+          text: '${DESCRIPTION_2_2}'
+
+# Third label and description (optional)
+- evalScript: '${output.hasLabel3 = (typeof LABEL_3 !== "undefined" && LABEL_3 !== "")}'
+- runFlow:
+    when:
+      true: '${output.hasLabel3 === true}'
+    commands:
+      - assertVisible:
+          text: '${LABEL_3}'
+
+- evalScript: '${output.hasDesc3 = (typeof DESCRIPTION_3 !== "undefined" && DESCRIPTION_3 !== "")}'
+- runFlow:
+    when:
+      true: '${output.hasDesc3 === true}'
+    commands:
+      - assertVisible:
+          text: '${DESCRIPTION_3}'
+
+# Verify clipboard content after tapping address (optional)
+- evalScript: '${output.verifyClipboard = (typeof VERIFY_CLIPBOARD !== "undefined" && VERIFY_CLIPBOARD === "true")}'
+- runFlow:
+    when:
+      true: '${output.verifyClipboard === true}'
+    commands:
+      - tapOn:
+          text: '${ADDRESS_TO_COPY}'
+      - assertVisible:
+          text: '.*Copied to clipboard.*'
+      - runFlow:
+          file: ./verify-clipboard-content.yml
+          env:
+            EXPECTED_TEXT: '${EXPECTED_CLIPBOARD_TEXT}'
+
+# Scroll to footer if content is expanded and footer is out of view (optional)
+- evalScript: '${output.scrollToFooter = (typeof SCROLL_TO_FOOTER !== "undefined" && SCROLL_TO_FOOTER === "true")}'
+- runFlow:
+    when:
+      true: '${output.scrollToFooter === true}'
+    commands:
+      - scroll
+
+# Verify simulation section and footer
+- assertVisible:
+    text: 'Transaction simulation'
+
+- assertVisible:
+    text: '.*Secured by.*'
+
+# Close sheet
+- swipe:
+    direction: DOWN
