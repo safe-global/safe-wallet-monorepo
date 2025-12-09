@@ -15,6 +15,7 @@ export interface PortfolioBalances extends Balances {
   positions?: AppBalance[]
   tokensFiatTotal?: string
   positionsFiatTotal?: string
+  isAllTokensMode?: boolean
 }
 
 export const initialBalancesState: PortfolioBalances = {
@@ -91,24 +92,70 @@ export const useLegacyBalances = (skip = false): AsyncResult<PortfolioBalances> 
 }
 
 /**
+ * Calculates the sum of fiat balances from token items
+ */
+const calculateTokensFiatTotal = (items: Balances['items']): string => {
+  const total = items.reduce((sum, item) => sum + parseFloat(item.fiatBalance || '0'), 0)
+  return total.toString()
+}
+
+/**
  * Hook to load token balances and positions data.
- * Uses portfolio endpoint when enabled, otherwise falls back to legacy endpoint.
- * Falls back to legacy endpoint when "All tokens" is selected to show tokens that Zerion may not support.
- * Returns `loading: true` when initialized, even if the query is skipped (e.g., no Safe selected).
+ *
+ * Behavior:
+ * - fiatTotal: always from portfolio endpoint (Zerion) when available
+ * - Token list: portfolio tokens for "Default tokens", legacy tokens for "All tokens"
+ * - tokensFiatTotal: calculated from the displayed token list
+ * - positions: always from portfolio endpoint when available
  */
 const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
   const settings = useAppSelector(selectSettings)
   const hasPortfolioFeature = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
   const isAllTokensSelected = settings.tokenList === TOKEN_LISTS.ALL
 
-  // Use legacy balances when portfolio feature is disabled OR when "All tokens" is selected
-  // This ensures users can see tokens that Zerion may not support via the legacy endpoint
-  const shouldUsePortfolioEndpoint = hasPortfolioFeature && !isAllTokensSelected
+  const portfolioResult = usePortfolioBalances(!hasPortfolioFeature)
 
-  const legacyResult = useLegacyBalances(shouldUsePortfolioEndpoint)
-  const portfolioResult = usePortfolioBalances(!shouldUsePortfolioEndpoint)
+  const shouldUseLegacyForTokenList = !hasPortfolioFeature || isAllTokensSelected
+  const legacyResult = useLegacyBalances(!shouldUseLegacyForTokenList)
 
-  return shouldUsePortfolioEndpoint ? portfolioResult : legacyResult
+  return useMemo<AsyncResult<PortfolioBalances>>(() => {
+    if (!hasPortfolioFeature) {
+      return legacyResult
+    }
+
+    if (!isAllTokensSelected) {
+      return portfolioResult
+    }
+
+    const [portfolioData, portfolioError, portfolioLoading] = portfolioResult
+    const [legacyData, legacyError, legacyLoading] = legacyResult
+
+    if (portfolioLoading || legacyLoading) {
+      return [undefined, undefined, true]
+    }
+
+    if (portfolioError) {
+      return [undefined, portfolioError, false]
+    }
+    if (legacyError) {
+      return [undefined, legacyError, false]
+    }
+
+    if (!portfolioData || !legacyData) {
+      return [undefined, undefined, true]
+    }
+
+    const mergedBalances: PortfolioBalances = {
+      items: legacyData.items,
+      fiatTotal: portfolioData.fiatTotal,
+      tokensFiatTotal: calculateTokensFiatTotal(legacyData.items),
+      positionsFiatTotal: portfolioData.positionsFiatTotal,
+      positions: portfolioData.positions,
+      isAllTokensMode: true,
+    }
+
+    return [mergedBalances, undefined, false]
+  }, [hasPortfolioFeature, isAllTokensSelected, portfolioResult, legacyResult])
 }
 
 export default useLoadBalances

@@ -454,7 +454,7 @@ describe('useLoadBalances', () => {
       expect(result.current[2]).toBe(true)
     })
 
-    it('should use legacy endpoint when "All tokens" is selected', async () => {
+    it('should merge portfolio fiatTotal with legacy items when "All tokens" is selected', async () => {
       const mockLegacyBalances = createMockLegacyBalances()
       const mockPortfolio = createMockPortfolio()
 
@@ -504,14 +504,41 @@ describe('useLoadBalances', () => {
 
       const [balances, error, loading] = result.current
 
-      // Should return legacy balances, not portfolio (even when portfolio feature is enabled)
-      // This ensures users can see tokens that Zerion may not support via the legacy endpoint
-      expect(balances?.fiatTotal).toBe(mockLegacyBalances.fiatTotal)
-      expect(balances?.tokensFiatTotal).toBe(mockLegacyBalances.fiatTotal)
-      expect(balances?.positionsFiatTotal).toBe('0')
-      expect(balances?.positions).toBeUndefined()
+      // fiatTotal should come from portfolio (Zerion)
+      expect(balances?.fiatTotal).toBe(mockPortfolio.totalBalanceFiat)
+      // tokensFiatTotal should be calculated from legacy items
+      expect(balances?.tokensFiatTotal).toBe('1000')
+      // positionsFiatTotal should come from portfolio
+      expect(balances?.positionsFiatTotal).toBe(mockPortfolio.totalPositionsBalanceFiat)
+      // positions should come from portfolio
+      expect(balances?.positions).toEqual(mockPortfolio.positionBalances)
+      // items should come from legacy (transaction service)
+      expect(balances?.items).toEqual(mockLegacyBalances.items)
+      // isAllTokensMode flag should be true
+      expect(balances?.isAllTokensMode).toBe(true)
       expect(error).toBeUndefined()
       expect(loading).toBe(false)
+    })
+
+    it('should not set isAllTokensMode when "Default tokens" is selected', async () => {
+      const mockPortfolio = createMockPortfolio()
+
+      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
+        currentData: mockPortfolio,
+        isLoading: false,
+        error: undefined,
+        refetch: jest.fn(),
+      } as any)
+
+      const { result } = renderHook(() => useLoadBalances())
+
+      await waitFor(() => {
+        expect(result.current[0]).toBeDefined()
+      })
+
+      const [balances] = result.current
+
+      expect(balances?.isAllTokensMode).toBeUndefined()
     })
 
     it('should use portfolio endpoint when "Default tokens" is selected', async () => {
