@@ -25,7 +25,7 @@ export const AnalysisIssuesDisplay = ({ result }: AnalysisIssuesDisplayProps) =>
         <Circle sx={{ fontSize: 6, color: 'primary.light', mt: 0.8 }} />
 
         <Typography variant="body2" color="primary.light" fontStyle="italic">
-          {issue}
+          {issue.description}
         </Typography>
       </Box>
     )),

@@ -119,9 +119,14 @@ export type MasterCopyChangeThreatAnalysisResult = AnalysisResult<ThreatStatus.M
   after: string
 }
 
+export type ThreatIssue = {
+  address?: string
+  description: string
+}
+
 export type MaliciousOrModerateThreatAnalysisResult = AnalysisResult<ThreatStatus.MALICIOUS | ThreatStatus.MODERATE> & {
   /** A potential map of specific issues identified during threat analysis, grouped by severity */
-  issues?: { [severity in Severity]?: string[] }
+  issues?: { [severity in Severity]?: ThreatIssue[] }
 }
 
 export type ThreatAnalysisResult =

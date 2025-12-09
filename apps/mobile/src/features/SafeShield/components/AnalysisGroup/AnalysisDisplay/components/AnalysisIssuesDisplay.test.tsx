@@ -15,8 +15,8 @@ describe('AnalysisIssuesDisplay', () => {
   it('should render issues when result has issues', () => {
     const result = ThreatAnalysisResultBuilder.malicious()
       .issues({
-        [Severity.CRITICAL]: ['Critical issue 1', 'Critical issue 2'],
-        [Severity.WARN]: ['Warning issue 1'],
+        [Severity.CRITICAL]: [{ description: 'Critical issue 1' }, { description: 'Critical issue 2' }],
+        [Severity.WARN]: [{ description: 'Warning issue 1' }],
       })
       .build()
 
@@ -30,9 +30,9 @@ describe('AnalysisIssuesDisplay', () => {
   it('should sort issues by severity', () => {
     const result = ThreatAnalysisResultBuilder.moderate()
       .issues({
-        [Severity.WARN]: ['Warning issue'],
-        [Severity.CRITICAL]: ['Critical issue'],
-        [Severity.INFO]: ['Info issue'],
+        [Severity.WARN]: [{ description: 'Warning issue' }],
+        [Severity.CRITICAL]: [{ description: 'Critical issue' }],
+        [Severity.INFO]: [{ description: 'Info issue' }],
       })
       .build()
 
