@@ -4,13 +4,25 @@ import type {
   MaliciousOrModerateThreatAnalysisResult,
 } from '@safe-global/utils/features/safe-shield/types'
 import { sortByIssueSeverity } from '@safe-global/utils/features/safe-shield/utils/analysisUtils'
-import { Text, View } from 'tamagui'
+import { Text } from 'tamagui'
+import { AddressListItem } from './AddressListItem'
+import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { useAppSelector } from '@/src/store/hooks'
+import { RootState } from '@/src/store'
+import { selectChainById } from '@/src/store/chains'
+import { getExplorerLink } from '@safe-global/utils/utils/gateway'
+import { useAnalysisAddress } from '@/src/features/SafeShield/hooks/useAnalysisAddress'
+import { AnalysisPaper } from '../../../AnalysisPaper'
 
 interface AnalysisIssuesDisplayProps {
   result: AnalysisResult
 }
 
 export function AnalysisIssuesDisplay({ result }: AnalysisIssuesDisplayProps) {
+  const activeSafe = useDefinedActiveSafe()
+  const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
+  const { handleOpenExplorer, handleCopyToClipboard, copiedIndex } = useAnalysisAddress()
+
   if (!('issues' in result)) {
     return null
   }
@@ -21,14 +33,30 @@ export function AnalysisIssuesDisplay({ result }: AnalysisIssuesDisplayProps) {
   return (
     <>
       {sortedIssues.flatMap(({ severity, issues }) =>
-        issues.map((issue, index) => (
-          <View key={`${severity}-${index}`} flexDirection="row" gap="$1" paddingLeft="$4" alignItems="flex-start">
-            <View width={4} height={4} borderRadius={3} backgroundColor="$colorLight" marginTop={8} />
-            <Text fontSize="$4" color="$colorLight" fontStyle="italic" flex={1}>
-              {issue}
-            </Text>
-          </View>
-        )),
+        issues.map((issue, index) => {
+          const explorerLink =
+            activeChain?.blockExplorerUriTemplate &&
+            getExplorerLink(issue.address ?? '', activeChain.blockExplorerUriTemplate)
+
+          return (
+            <AnalysisPaper key={`${severity}-${index}`} spaced={Boolean(explorerLink)}>
+              {issue.address && (
+                <AddressListItem
+                  index={index}
+                  copiedIndex={copiedIndex}
+                  onCopy={handleCopyToClipboard}
+                  explorerLink={explorerLink}
+                  onOpenExplorer={handleOpenExplorer}
+                  address={issue.address}
+                />
+              )}
+
+              <Text fontSize="$3" marginTop="$2" color="$colorLight" fontStyle="italic">
+                {issue.description}
+              </Text>
+            </AnalysisPaper>
+          )
+        }),
       )}
     </>
   )
