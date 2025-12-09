@@ -97,11 +97,9 @@ export const AnalysisIssuesDisplay = ({ result }: AnalysisIssuesDisplayProps) =>
                 </Typography>
               )}
 
-              {issue.description && (
-                <Typography variant="body2" color="primary.light" fontStyle="italic" fontSize={12}>
-                  {issue.description}
-                </Typography>
-              )}
+              <Typography variant="body2" color="primary.light" fontStyle="italic" fontSize={12}>
+                {issue.description}
+              </Typography>
             </Box>
           )
         }),
