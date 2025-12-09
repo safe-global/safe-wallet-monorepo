@@ -24,7 +24,10 @@ tags:
     id: 'pending-tx-list'
 
 # Scroll to see the 2 actions batch transaction
-- scroll
+- scrollUntilVisible:
+    element:
+      text: '.*2 actions.*'
+    centerElement: true
 
 - runFlow:
     file: ../../../../utils/components/pending-tx/tap-tx-card.yml

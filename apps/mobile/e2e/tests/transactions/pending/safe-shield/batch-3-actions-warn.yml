@@ -19,8 +19,11 @@ tags:
 - assertVisible:
     id: 'pending-tx-list'
 
-# Scroll to see the batch transaction cards
-- scroll
+# Scroll to see the setFallbackHandler transaction card
+- scrollUntilVisible:
+    element:
+      text: '.*3 actions.*'
+    centerElement: true
 
 # Tap on the second 3 actions batch transaction card (the one with issues)
 - runFlow:
