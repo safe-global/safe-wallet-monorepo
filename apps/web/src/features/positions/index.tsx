@@ -35,12 +35,9 @@ export const Positions = () => {
           <TotalAssetValue fiatTotal={positionsFiatTotal} title="Total positions value" />
         </Box>
 
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
-          <Typography variant="h4" fontWeight={700}>
-            Positions
-          </Typography>
+        <Box mb={1} mt="-47px" display="flex" justifyContent="flex-end">
           <RefreshPositionsButton entryPoint="Positions" label="Refresh positions" />
-        </Stack>
+        </Box>
 
         {!isPortfolioEndpointEnabled && (
           <Typography variant="caption" sx={{ color: 'text.secondary' }} mb={1}>
@@ -61,7 +58,7 @@ export const Positions = () => {
               </AccordionSummary>
               <AccordionDetails sx={{ pt: 0, pb: 0 }}>
                 {protocol.items.map((group, groupIndex) => (
-                  <PositionGroup key={group.name} group={group} isLast={groupIndex === protocol.items.length - 1} />
+                  <PositionGroup key={groupIndex} group={group} isLast={groupIndex === protocol.items.length - 1} />
                 ))}
               </AccordionDetails>
             </Accordion>

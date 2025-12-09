@@ -18,6 +18,9 @@ import {
   pendingTxSafeInfo5,
   pendingTxSafe6,
   pendingTxSafeInfo6,
+  safeShieldTestSafe,
+  safeShieldTestSafeInfo,
+  safeShieldTestSignerAddress,
 } from './mockData'
 import { setupBaseConfig, setupSigner, setupPendingTxSafe } from './setupHelpers'
 
@@ -104,5 +107,30 @@ export const setupPendingTxsSafe3 = (dispatch: Dispatch, router: Router) => {
  */
 export const setupPendingTxsSafe4 = (dispatch: Dispatch, router: Router) => {
   setupPendingTxSafe(dispatch, pendingTxSafe4, pendingTxSafeInfo4, 'Pending Tx Safe 4', mockedPendingTxSignerAddress)
+  router.replace('/pending-transactions')
+}
+
+/**
+ * Setup for e2eSafeShieldSafe button
+ * Creates SafeShield test safe (Polygon) and navigates directly to pending transactions screen
+ * Also adds a known recipient to address book for testing "Known recipient" vs "Unknown recipient" scenarios
+ */
+export const setupSafeShieldSafe = (dispatch: Dispatch, router: Router) => {
+  setupPendingTxSafe(
+    dispatch,
+    safeShieldTestSafe,
+    safeShieldTestSafeInfo,
+    'SafeShield Test Safe',
+    safeShieldTestSignerAddress,
+  )
+
+  dispatch(
+    addContact({
+      value: '0xb412684F4F0B5d27cC4A4D287F42595aB3ae124D',
+      name: 'Known Recipient',
+      chainIds: [safeShieldTestSafe.chainId],
+    }),
+  )
+
   router.replace('/pending-transactions')
 }

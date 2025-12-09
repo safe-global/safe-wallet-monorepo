@@ -12,6 +12,7 @@ import { Platform, StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LoadingTx } from '@/src/features/ConfirmTx/components/LoadingTx'
+import { TestCtrls } from '@/src/tests/e2e-maestro/components/TestCtrls'
 
 interface SafeBottomSheetProps<T> {
   children?: React.ReactNode
@@ -134,6 +135,11 @@ export function SafeBottomSheet<T>({
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
       accessible={false}
     >
+      {/** in e2e tests, the bottom sheet renders on top of the normal content,
+       * and the test controls are no longer visible, so we need to render them again here
+       * We need this mostly for the copy/paste tests.
+       **/}
+      <TestCtrls />
       {isSortable ? (
         <DraggableFlatList<T>
           data={items}
@@ -155,7 +161,7 @@ export function SafeBottomSheet<T>({
                 getTokenValue(Platform.OS === 'ios' ? '$4' : '$8'),
             },
           ]}
-          stickyHeaderIndices={[0]}
+          stickyHeaderIndices={title ? [0] : undefined}
         >
           {title && <TitleHeader />}
           <View minHeight={200} alignItems="center" paddingVertical="$3">

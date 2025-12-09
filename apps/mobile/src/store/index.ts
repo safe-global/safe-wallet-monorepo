@@ -36,32 +36,37 @@ import { setBackendStore } from '@/src/store/utils/singletonStore'
 import pendingTxsListeners from '@/src/store/middleware/pendingTxs'
 import signingState from './signingStateSlice'
 import signerImportFlow from './signerImportFlowSlice'
+import executingState from './executingStateSlice'
 
 setBaseUrl(GATEWAY_URL)
 
 // Set up mobile-specific cookie handling
 setupMobileCookieHandling()
 
-const cgwClientFilter = createFilter(
+export const cgwClientFilter = createFilter(
   cgwClient.reducerPath,
   ['queries.getChainsConfig(undefined)', 'config'],
   ['queries.getChainsConfig(undefined)', 'config'],
 )
 
+export const persistBlacklist = [
+  web3API.reducerPath,
+  'myAccounts',
+  'estimatedFee',
+  'executionMethod',
+  'signingState',
+  'signerImportFlow',
+  'executingState',
+]
+
+export const persistTransforms = [cgwClientFilter]
+
 const persistConfig = {
   key: 'root',
   version: 1,
   storage: reduxStorage,
-  blacklist: [
-    web3API.reducerPath,
-    cgwClient.reducerPath,
-    'myAccounts',
-    'estimatedFee',
-    'executionMethod',
-    'signingState',
-    'signerImportFlow',
-  ],
-  transforms: [cgwClientFilter],
+  blacklist: persistBlacklist,
+  transforms: persistTransforms,
 }
 
 export const rootReducer = combineReducers({
@@ -83,6 +88,7 @@ export const rootReducer = combineReducers({
   executionMethod,
   signingState,
   signerImportFlow,
+  executingState,
   [web3API.reducerPath]: web3API.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
 })

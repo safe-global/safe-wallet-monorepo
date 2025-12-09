@@ -1,0 +1,68 @@
+appId: ${APP_ID}
+tags:
+  - safe-shield
+  - pending-tx
+---
+# ===========================================
+# SafeShield Test: 3 Actions Batch (WARN)
+# ===========================================
+# Tests SafeShield functionality for a 3-action multiSend batch transaction
+# with moderate threat detected (WARN severity).
+
+# Launch app with SafeShield test safe
+- runFlow:
+    file: '../../../../utils/setup/app-start.yml'
+
+- tapOn:
+    id: 'e2eSafeShieldSafe'
+
+- assertVisible:
+    id: 'pending-tx-list'
+
+# Scroll to see the batch transaction cards
+- scroll
+
+# Tap on the second 3 actions batch transaction card (the one with issues)
+- runFlow:
+    file: '../../../../utils/components/pending-tx/tap-tx-card.yml'
+    env:
+      WAIT_FOR: '.*3 actions.*'
+      TAP_TEXT: '.*3 actions.*'
+      TAP_INDEX: '2'
+
+- assertVisible: 'Confirm transaction'
+
+# Verify SafeShield widget (WARN severity - Issues found)
+- runFlow:
+    file: '../../../../utils/assertions/verify-safe-shield-widget.yml'
+    env:
+      WIDGET_HEADER: 'Issues found'
+      LABEL_1: 'Verified contract'
+      LABEL_2: 'Moderate threat detected'
+
+# Verify balance change block (no balance change)
+- runFlow:
+    file: '../../../../utils/assertions/verify-balance-change.yml'
+    env:
+      NO_CHANGE: 'true'
+
+# Open and verify SafeShield details sheet
+- runFlow:
+    file: '../../../../utils/assertions/verify-safe-shield-sheet.yml'
+    env:
+      TAP_TO_OPEN: 'Issues found'
+      HEADER: 'ISSUES FOUND'
+      LABEL_1: 'Verified contract'
+      DESCRIPTION_1: '.*1 contract is verified.*'
+      DESCRIPTION_1_2: '.*You have interacted with 1 contract before.*'
+      EXPAND_SHOW_ALL: 'true'
+      EXPANDED_ADDRESS: '.*0x000000000000aDdB49795b0f9bA5BC298c.*'
+      EXPAND_SHOW_ALL_2: 'true'
+      EXPANDED_ADDRESS_2: '.*0x65e1Ff7e0901055B3bea7D8b3AF457a659714.*'
+      SCROLL_TO_FOOTER: 'true'
+      LABEL_2: 'Moderate threat detected'
+      DESCRIPTION_2: '.*The transaction enables an untrusted address as a module.*'
+      DESCRIPTION_2_2: '.*This address is untrusted.*'
+
+# Verify we're back on the confirm transaction screen
+- assertVisible: 'Confirm transaction'
