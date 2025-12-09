@@ -31,7 +31,7 @@ export function WidgetAction({ loading, error, status, onPress }: WidgetActionPr
     }
 
     if (error) {
-      return safeShieldLogoStatusMap.error
+      return safeShieldLogoStatusMap.ERROR
     }
 
     return safeShieldLogoStatusMap[key]
