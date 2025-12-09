@@ -55,11 +55,13 @@ export function AnalysisDisplay({ result, description, severity }: AnalysisDispl
         <Stack gap="$3">
           {renderDescription()}
 
-          <AnalysisIssuesDisplay result={result} />
-
           {isAddressChange(result) && <AddressChanges result={result} />}
 
-          {result.addresses?.length && <ShowAllAddress addresses={result.addresses.map((a) => a.address)} />}
+          {'issues' in result ? (
+            <AnalysisIssuesDisplay result={result} />
+          ) : result.addresses?.length ? (
+            <ShowAllAddress addresses={result.addresses.map((a) => a.address)} />
+          ) : null}
         </Stack>
       </View>
     </View>
