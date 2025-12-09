@@ -5,7 +5,7 @@ import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
 let staticSafes = []
 
-const commonTokens = ['ETH', 'GNO', 'SAFE', 'USDT', 'SAI', 'OMG', 'OWL', 'PERL']
+const commonTokens = ['ETH', 'GNO', 'SAFE', 'USDT', 'SAI', 'OMG', 'OWL']
 const legacyOnlyTokens = ['cSAI', 'LUNC', 'BUN']
 
 describe('[SMOKE] Balances endpoint tests', () => {

@@ -139,19 +139,14 @@ describe('Spending limits tests', () => {
   })
 
   it('Verify that when multiple assets are available, they are displayed in token dropdown', () => {
-    cy.wrap(null)
-      .then(() => main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__settings, ls.safeSettings.slimitSettings))
-      .then(() =>
-        main.isItemInLocalstorage(constants.localStorageKeys.SAFE_v2__settings, ls.safeSettings.slimitSettings),
-      )
-      .then(() => {
-        cy.reload()
-        wallet.connectSigner(signer)
-        navigation.clickOnNewTxBtn()
-        tx.clickOnSendTokensBtn()
-        spendinglimit.clickOnTokenDropdown()
-        spendinglimit.verifyMandatoryTokensExist()
-      })
+    main.setupSafeSettingsWithAllTokens().then(() => {
+      cy.reload()
+      wallet.connectSigner(signer)
+      navigation.clickOnNewTxBtn()
+      tx.clickOnSendTokensBtn()
+      spendinglimit.clickOnTokenDropdown()
+      spendinglimit.verifyMandatoryTokensExist()
+    })
   })
 
   it('Verify that beneficiary can be retried from address book', () => {

@@ -5,27 +5,26 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Text, View } from 'tamagui'
 import { ProposalBadge } from '@/src/components/ProposalBadge'
 import type { MultisigExecutionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { useTransactionSigningState } from '@/src/hooks/useTransactionSigningState'
+import { useTransactionProcessingState } from '@/src/hooks/useTransactionProcessingState'
 
-interface SigningStateProps {
+interface TransactionProcessingStateProps {
   txId: string
   executionInfo: MultisigExecutionInfo
   isProposedTx: boolean
 }
 
 /**
- * Displays the signing state for a transaction in the pending transactions list.
+ * Displays the processing state for a transaction in the pending transactions list.
  *
  * Shows either:
- * - A loading spinner while signing is in progress (entire flow, not just API call)
+ * - A loading spinner while signing, executing, or waiting for on-chain confirmation
  * - The confirmation badge showing X/Y signers
  */
-export function SigningState({ txId, executionInfo, isProposedTx }: SigningStateProps) {
-  // Use global signing state to determine if this transaction is being signed
-  const { isSigning } = useTransactionSigningState(txId)
+export function TransactionProcessingState({ txId, executionInfo, isProposedTx }: TransactionProcessingStateProps) {
+  const { isProcessing } = useTransactionProcessingState(txId)
 
-  if (isSigning) {
-    return <Loader size={20} testID="signing-state-loader" />
+  if (isProcessing) {
+    return <Loader size={20} testID="transaction-processing-state-loader" />
   }
 
   if (isProposedTx) {

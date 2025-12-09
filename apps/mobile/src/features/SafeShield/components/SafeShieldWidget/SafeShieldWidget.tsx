@@ -5,20 +5,39 @@ import type {
 } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import React from 'react'
-import { Stack } from 'tamagui'
+import { Stack, Theme } from 'tamagui'
 import { WidgetAction } from './WidgetAction'
 import { WidgetDisplay } from './WidgetDisplay'
 import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
+import { useRouter } from 'expo-router'
+import type { SafeTransaction } from '@safe-global/types-kit'
+import { isEmpty } from 'lodash'
 
 interface SafeShieldWidgetProps {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
+  safeTx?: SafeTransaction
+  txId?: string
 }
 
-export function SafeShieldWidget({ recipient, contract, threat }: SafeShieldWidgetProps) {
+export function SafeShieldWidget({ recipient, contract, threat, safeTx, txId }: SafeShieldWidgetProps) {
+  const router = useRouter()
+
   const onPress = () => {
-    console.log('onPress')
+    if (txId) {
+      const params: Record<string, string> = {
+        txId,
+        recipient: JSON.stringify(recipient),
+        contract: JSON.stringify(contract),
+        threat: JSON.stringify(threat),
+      }
+
+      router.push({
+        pathname: '/safe-shield-details-sheet',
+        params,
+      })
+    }
   }
 
   // Extract data, error, and loading from each AsyncResult
@@ -26,27 +45,38 @@ export function SafeShieldWidget({ recipient, contract, threat }: SafeShieldWidg
   const [contractData, contractError, contractLoading = false] = contract || []
   const [threatData, threatError, threatLoading = false] = threat || []
 
-  // Determine overall loading state - true if ANY is loading
-  const loading = recipientLoading || contractLoading || threatLoading
-
   // Determine overall error state - true if ALL have errors (and at least one exists)
   const hasRecipient = recipient !== undefined
   const hasContract = contract !== undefined
   const hasThreat = threat !== undefined
+
+  const allEmpty = isEmpty(recipientData) && isEmpty(contractData) && isEmpty(threatData)
+
   const allHaveErrors =
     (hasRecipient ? !!recipientError : true) &&
     (hasContract ? !!contractError : true) &&
     (hasThreat ? !!threatError : true)
-  const error = (hasRecipient || hasContract || hasThreat) && allHaveErrors
+
+  // Determine overall loading state - true if ANY is loading
+  const loading = recipientLoading || contractLoading || threatLoading
 
   // Get actual status from analysis
   const overallStatus = getOverallStatus(recipientData, contractData, threatData) ?? null
 
   return (
-    <Stack gap="$3" padding="$1" borderRadius="$2" paddingBottom="$4" backgroundColor="$backgroundPaper">
-      <WidgetAction onPress={onPress} loading={loading} error={error} status={overallStatus} />
+    <Theme name="widget">
+      <Stack gap="$3" padding="$1" borderRadius="$2" paddingBottom="$4" backgroundColor="$background">
+        <WidgetAction onPress={onPress} loading={loading} error={allHaveErrors} status={overallStatus} />
 
-      <WidgetDisplay recipient={recipient} contract={contract} threat={threat} loading={loading} error={error} />
-    </Stack>
+        <WidgetDisplay
+          recipient={recipient}
+          contract={contract}
+          threat={threat}
+          loading={loading}
+          error={allHaveErrors || (allEmpty && !loading)}
+          safeTx={safeTx}
+        />
+      </Stack>
+    </Theme>
   )
 }

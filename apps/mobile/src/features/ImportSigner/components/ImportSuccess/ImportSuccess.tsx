@@ -6,7 +6,7 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { LargeHeaderTitle } from '@/src/components/Title'
 import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { ScrollView } from 'react-native'
+import { Platform, ScrollView } from 'react-native'
 import { Button, Text, View } from 'tamagui'
 import { ToastViewport } from '@tamagui/toast'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
@@ -88,7 +88,7 @@ export function ImportSuccess() {
             />
           </View>
         </ScrollView>
-        <ToastViewport multipleToasts={false} left={0} right={0} />
+        {Platform.OS === 'ios' && <ToastViewport multipleToasts={false} left={0} right={0} />}
       </View>
 
       <View paddingHorizontal="$3">
