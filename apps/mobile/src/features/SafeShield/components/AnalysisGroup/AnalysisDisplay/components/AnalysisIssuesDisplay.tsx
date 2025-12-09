@@ -30,10 +30,13 @@ export function AnalysisIssuesDisplay({ result }: AnalysisIssuesDisplayProps) {
   const issues = result.issues as MaliciousOrModerateThreatAnalysisResult['issues']
   const sortedIssues = sortByIssueSeverity(issues)
 
+  let issueCounter = 0
+
   return (
     <>
       {sortedIssues.flatMap(({ severity, issues }) =>
         issues.map((issue, index) => {
+          const globalIndex = issueCounter++
           const explorerLink =
             activeChain?.blockExplorerUriTemplate &&
             getExplorerLink(issue.address ?? '', activeChain.blockExplorerUriTemplate)
@@ -42,7 +45,7 @@ export function AnalysisIssuesDisplay({ result }: AnalysisIssuesDisplayProps) {
             <AnalysisPaper key={`${severity}-${index}`} spaced={Boolean(explorerLink)}>
               {issue.address && (
                 <AddressListItem
-                  index={index}
+                  index={globalIndex}
                   copiedIndex={copiedIndex}
                   onCopy={handleCopyToClipboard}
                   explorerLink={explorerLink}
