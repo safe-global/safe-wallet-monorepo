@@ -4,10 +4,18 @@ import { RecipientAnalysisBuilder, ContractAnalysisBuilder } from '@safe-global/
 import { FullAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
 import { Severity, type GroupedAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import { faker } from '@faker-js/faker'
+import type { Address } from '@/src/types/address'
 
 describe('AnalysisGroup', () => {
+  const initialStore = {
+    activeSafe: {
+      address: '0x1234567890123456789012345678901234567890' as Address,
+      chainId: '1',
+    },
+  }
+
   it('should render nothing when data is empty', () => {
-    const { queryByText } = render(<AnalysisGroup data={{}} />)
+    const { queryByText } = render(<AnalysisGroup data={{}} />, { initialStore })
     // Component returns null, so no text should be found
     expect(queryByText(/Known recipient|Low activity|Risk detected/i)).toBeNull()
   })
@@ -19,7 +27,7 @@ describe('AnalysisGroup', () => {
       return
     }
 
-    const { getByText } = render(<AnalysisGroup data={recipientResult} />)
+    const { getByText } = render(<AnalysisGroup data={recipientResult} />, { initialStore })
 
     // The primary result should be displayed in AnalysisLabel
     expect(getByText(/Known recipient|No threats detected/i)).toBeTruthy()
@@ -32,7 +40,7 @@ describe('AnalysisGroup', () => {
       return
     }
 
-    const { getByText } = render(<AnalysisGroup data={recipientResult} />)
+    const { getByText } = render(<AnalysisGroup data={recipientResult} />, { initialStore })
 
     // Should render the description from the result
     const result = Object.values(recipientResult)[0]
@@ -51,7 +59,9 @@ describe('AnalysisGroup', () => {
       return
     }
 
-    const { getByText } = render(<AnalysisGroup data={recipientResult} highlightedSeverity={Severity.WARN} />)
+    const { getByText } = render(<AnalysisGroup data={recipientResult} highlightedSeverity={Severity.WARN} />, {
+      initialStore,
+    })
 
     // Component should render (highlighting is visual, tested through AnalysisLabel)
     expect(getByText(/Low activity/i)).toBeTruthy()
@@ -64,7 +74,9 @@ describe('AnalysisGroup', () => {
       return
     }
 
-    const { getByText } = render(<AnalysisGroup data={recipientResult} highlightedSeverity={Severity.CRITICAL} />)
+    const { getByText } = render(<AnalysisGroup data={recipientResult} highlightedSeverity={Severity.CRITICAL} />, {
+      initialStore,
+    })
 
     // Component should still render
     expect(getByText(/Known recipient|No threats detected/i)).toBeTruthy()
@@ -77,7 +89,7 @@ describe('AnalysisGroup', () => {
       return
     }
 
-    const { getByText } = render(<AnalysisGroup data={contractResult} />)
+    const { getByText } = render(<AnalysisGroup data={contractResult} />, { initialStore })
 
     // Should render contract analysis
     const result = Object.values(contractResult)[0]
@@ -99,7 +111,7 @@ describe('AnalysisGroup', () => {
       ['0x']: threatData[0] as unknown as GroupedAnalysisResults,
     }
 
-    const { getByText } = render(<AnalysisGroup data={normalizedData} />)
+    const { getByText } = render(<AnalysisGroup data={normalizedData} />, { initialStore })
 
     // Should render threat analysis - check for the actual text rendered
     expect(getByText(/Malicious threat detected/i)).toBeTruthy()
@@ -122,7 +134,7 @@ describe('AnalysisGroup', () => {
       },
     }
 
-    const { getByText } = render(<AnalysisGroup data={data} />)
+    const { getByText } = render(<AnalysisGroup data={data} />, { initialStore })
 
     // Should render multiple analysis displays
     expect(getByText(/Low activity/i)).toBeTruthy()
