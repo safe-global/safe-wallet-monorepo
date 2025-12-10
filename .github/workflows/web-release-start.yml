@@ -34,10 +34,16 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.RELEASE_BOT_TOKEN }}
 
-      - name: Configure git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+          git_config_global: true
+          git_committer_name: 'github-actions[bot]'
+          git_committer_email: 'github-actions[bot]@users.noreply.github.com'
 
       - name: Determine base branch
         id: base
