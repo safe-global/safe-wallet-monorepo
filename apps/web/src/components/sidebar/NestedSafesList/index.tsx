@@ -68,6 +68,7 @@ export function NestedSafesList({
               safeItem={safeItem}
               safeOverview={safeOverview}
               showActions={false}
+              showChainBadge={false}
             />
           </Box>
         )

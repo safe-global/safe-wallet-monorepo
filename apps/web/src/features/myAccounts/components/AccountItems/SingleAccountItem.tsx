@@ -47,6 +47,7 @@ type AccountItemProps = {
   isSpaceSafe?: boolean
   onSelectSafe?: (safeItem: SafeItem) => void | Promise<void>
   showActions?: boolean
+  showChainBadge?: boolean
 }
 
 const SingleAccountItem = ({
@@ -57,6 +58,7 @@ const SingleAccountItem = ({
   isSpaceSafe = false,
   onSelectSafe,
   showActions = true,
+  showChainBadge = true,
 }: AccountItemProps) => {
   const { chainId, address, isReadOnly, isPinned } = safeItem
   const chain = useChain(chainId)
@@ -189,7 +191,7 @@ const SingleAccountItem = ({
             shortAddress
             chainId={chain?.chainId}
             showAvatar={false}
-            copyAddress={!isMobile}
+            copyAddress={false}
           />
         )}
         {!isMobile && (
@@ -207,7 +209,7 @@ const SingleAccountItem = ({
         )}
       </Typography>
 
-      {!isMultiChainItem ? (
+      {!isMultiChainItem && showChainBadge ? (
         <ChainIndicator chainId={chainId} responsive onlyLogo className={css.chainIndicator} />
       ) : (
         <div />
