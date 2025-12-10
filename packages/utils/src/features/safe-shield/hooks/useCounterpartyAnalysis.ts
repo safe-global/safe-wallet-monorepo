@@ -126,7 +126,9 @@ export function useCounterpartyAnalysis({
       return undefined
     }
 
-    return mergeAnalysisResults(recipientAnalysisByAddress, addressBookCheck, activityCheck)
+    return recipientAnalysisByAddress
+      ? mergeAnalysisResults(recipientAnalysisByAddress, addressBookCheck, activityCheck)
+      : undefined
   }, [
     recipientAnalysisByAddress,
     addressBookCheck,

@@ -13,7 +13,7 @@ import { useIsMounted } from '@/src/hooks/useIsMounted'
 
 export function ReviewAndConfirmContainer() {
   const { txId } = useLocalSearchParams<{ txId: string }>()
-  const { data: txDetails, isLoading, isError } = useTransactionData(txId || '')
+  const { currentData: txDetails, isLoading, isError } = useTransactionData(txId || '')
   const { isBiometricsEnabled } = useBiometrics()
   const isMounted = useIsMounted()
 
@@ -87,7 +87,7 @@ export function ReviewAndConfirmContainer() {
     )
   }
 
-  if (isError || !txDetails) {
+  if ((isError && !txDetails) || !txDetails) {
     return (
       <View flex={1} justifyContent="center" alignItems="center">
         <Text>Error loading transaction details</Text>

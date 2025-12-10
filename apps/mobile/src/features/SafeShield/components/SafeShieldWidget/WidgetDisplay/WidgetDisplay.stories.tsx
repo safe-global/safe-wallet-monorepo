@@ -6,6 +6,7 @@ import {
   FullAnalysisBuilder,
 } from '@safe-global/utils/features/safe-shield/builders'
 import { faker } from '@faker-js/faker'
+import { CommonSharedStatus, Severity, StatusGroup } from '@safe-global/utils/features/safe-shield/types'
 
 const meta: Meta<typeof WidgetDisplay> = {
   title: 'SafeShield/Widget/WidgetDisplay',
@@ -25,7 +26,6 @@ export const WithAllAnalysis: Story = {
     contract: ContractAnalysisBuilder.unverifiedContract(contractAddress).build(),
     threat: FullAnalysisBuilder.maliciousThreat().build().threat,
     loading: false,
-    error: false,
   },
 }
 
@@ -35,7 +35,6 @@ export const NoThreats: Story = {
     contract: ContractAnalysisBuilder.verifiedContract(contractAddress).build(),
     threat: FullAnalysisBuilder.noThreat().build().threat,
     loading: false,
-    error: false,
   },
 }
 
@@ -43,20 +42,33 @@ export const RecipientOnly: Story = {
   args: {
     recipient: RecipientAnalysisBuilder.lowActivity(recipientAddress).build(),
     loading: false,
-    error: false,
   },
 }
 
 export const Loading: Story = {
   args: {
     loading: true,
-    error: false,
   },
 }
 
-export const Error: Story = {
+export const WithErrors: Story = {
   args: {
+    recipient: [
+      {
+        [recipientAddress]: {
+          [StatusGroup.COMMON]: [
+            {
+              title: 'Recipient analysis failed',
+              description: 'The analysis failed. Please try again later.',
+              type: CommonSharedStatus.FAILED,
+              severity: Severity.WARN,
+            },
+          ],
+        },
+      },
+      new Error('Network error'),
+      false,
+    ],
     loading: false,
-    error: true,
   },
 }
