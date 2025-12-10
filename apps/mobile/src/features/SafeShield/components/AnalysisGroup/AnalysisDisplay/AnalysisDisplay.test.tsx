@@ -29,7 +29,7 @@ describe('AnalysisDisplay', () => {
   it('should render issues when result has issues', () => {
     const result = ThreatAnalysisResultBuilder.malicious()
       .issues({
-        [Severity.CRITICAL]: ['Critical issue'],
+        [Severity.CRITICAL]: [{ description: 'Critical issue' }],
       })
       .build()
 
@@ -101,7 +101,7 @@ describe('AnalysisDisplay', () => {
     const result = ThreatAnalysisResultBuilder.masterCopyChange()
       .changes(beforeAddress, afterAddress)
       .issues({
-        [Severity.CRITICAL]: ['Critical issue'],
+        [Severity.CRITICAL]: [{ description: 'Critical issue' }],
       })
       .build()
 
