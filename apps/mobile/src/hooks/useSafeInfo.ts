@@ -8,9 +8,10 @@ export const useSafeInfo = () => {
   const activeSafe = useAppSelector(selectActiveSafe)
 
   const {
-    data = defaultSafeInfo,
+    currentData = defaultSafeInfo,
     error,
     isLoading,
+    isSuccess,
   } = useGetSafeQuery(
     {
       chainId: activeSafe?.chainId ?? '',
@@ -22,10 +23,12 @@ export const useSafeInfo = () => {
     },
   )
 
+  // console.log('safe data', currentData.address.value, activeSafe?.address)
+
   return {
-    safe: data,
+    safe: currentData,
     safeAddress: activeSafe?.address,
-    safeLoaded: data.address.value !== '',
+    safeLoaded: isSuccess,
     safeError: error,
     safeLoading: isLoading,
   }
