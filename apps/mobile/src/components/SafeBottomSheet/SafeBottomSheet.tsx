@@ -129,7 +129,12 @@ export function SafeBottomSheet<T>({
       enablePanDownToClose
       overDragResistanceFactor={10}
       backgroundComponent={BackgroundComponent}
-      backdropComponent={() => <BackdropComponent />}
+      // on iOS, if we don't call router.back() from the backdrop the close animation feels extremely slow
+      // iOS first slides the sheet down then triggers the removal of the backdrop
+      // when router.back() is called from the backdrop, the sheet no longer emits onChange events on iOS
+      // on Android the router.back() on the backdrop navigates back, but the onChange event is still triggered
+      // because of this on Android we end up with double navigation back and end up on the wrong screen
+      backdropComponent={() => <BackdropComponent shouldNavigateBack={Platform.OS === 'ios'} />}
       footerComponent={isSortable ? undefined : renderFooter}
       topInset={insets.top}
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}

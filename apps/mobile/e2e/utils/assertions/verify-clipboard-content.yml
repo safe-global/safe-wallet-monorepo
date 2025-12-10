@@ -20,11 +20,23 @@ tags:
 - assertVisible:
     id: 'e2eClipboardVerificationInput'
 
-# Tap on TextInput to ensure it's focused
-- tapOn:
-    id: 'e2eClipboardVerificationInput'
+# iOS: Tap on TextInput to focus and show paste option
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          id: 'e2eClipboardVerificationInput'
 
-# Tap paste button (iOS/Android will show paste option)
+# Android: Long press on TextInput to show paste option
+- runFlow:
+    when:
+      platform: android
+    commands:
+      - longPressOn:
+          id: 'e2eClipboardVerificationInput'
+
+# Tap paste button
 - tapOn:
     text: 'Paste'
 

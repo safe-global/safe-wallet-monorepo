@@ -55,8 +55,8 @@ export const SafeShieldDetailsSheetContainer = () => {
 
       <AnalysisDetails recipient={recipientData} contract={contractData} threat={threatData} safeTx={safeTx} />
 
-      <View flexDirection="row" width="100%" gap="$1" justifyContent="center" alignItems="center">
-        <Text fontSize="$2" color="$textSecondary">
+      <View flexDirection="row" width="100%" gap="$1" marginTop={-4} justifyContent="center" alignItems="center">
+        <Text fontSize="$2" color="$colorSecondary">
           Secured by
         </Text>
 

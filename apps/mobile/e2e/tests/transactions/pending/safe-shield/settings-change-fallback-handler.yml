@@ -20,7 +20,10 @@ tags:
     id: 'pending-tx-list'
 
 # Scroll to see the setFallbackHandler transaction card
-- scroll
+- scrollUntilVisible:
+    element:
+      text: '.*setFallbackHandler.*'
+    centerElement: true
 
 # Tap on the setFallbackHandler transaction card
 - runFlow:
@@ -58,4 +61,3 @@ tags:
 
 # Verify we're back on the confirm transaction screen
 - assertVisible: 'Confirm transaction'
-
