@@ -20,8 +20,10 @@ tags:
     id: 'pending-tx-list'
 
 # Scroll to see the last transaction (pending bridge to unknown network)
-- scroll
-- scroll
+- scrollUntilVisible:
+    element:
+      text: '.*Unknown network.*'
+    centerElement: true
 
 # Tap on the pending bridge transaction with unknown network
 - runFlow:

@@ -65,5 +65,3 @@ tags:
     file: ../../assertions/verify-advanced-details.yml
 
 - assertVisible: Transaction details
-
-
