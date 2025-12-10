@@ -57,7 +57,7 @@ export function TransactionSimulation({
           <SafeFontIcon
             testID={`transaction-simulation-icon`}
             name={iconName}
-            color={highlighted ? '$icon' : '$colorLight'}
+            color={highlighted ? '$icon' : '$borderMain'}
             size={16}
           />
 
