@@ -32,7 +32,7 @@ function initDatadogLogs() {
 
   datadogLogs.init({
     clientToken: DATADOG_CLIENT_TOKEN,
-    site: 'datadoghq.eu',
+    site: DATADOG_RUM_SITE,
     forwardErrorsToLogs: true,
     sessionSampleRate: 100,
   })
