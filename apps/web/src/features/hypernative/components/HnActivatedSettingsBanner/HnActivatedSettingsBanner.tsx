@@ -20,7 +20,10 @@ export const HnActivatedSettingsBanner = () => {
                   width: 78,
                   height: 18,
                   '& rect': {
-                    fill: 'var(--color-border-light)',
+                    fill: 'var(--color-background-main)',
+                  },
+                  '& .safeShieldText': {
+                    fill: 'var(--color-logo-main)',
                   },
                 }}
               />
