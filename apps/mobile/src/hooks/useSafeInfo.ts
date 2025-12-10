@@ -11,7 +11,6 @@ export const useSafeInfo = () => {
     data = defaultSafeInfo,
     error,
     isLoading,
-    isSuccess,
   } = useGetSafeQuery(
     {
       chainId: activeSafe?.chainId ?? '',
@@ -26,7 +25,7 @@ export const useSafeInfo = () => {
   return {
     safe: data,
     safeAddress: activeSafe?.address,
-    safeLoaded: isSuccess,
+    safeLoaded: data.address.value !== '',
     safeError: error,
     safeLoading: isLoading,
   }

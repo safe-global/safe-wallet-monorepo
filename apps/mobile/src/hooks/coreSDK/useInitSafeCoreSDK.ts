@@ -27,6 +27,7 @@ export const useInitSafeCoreSDK = () => {
     })
       .then(setSafeSDK)
       .catch((_e) => {
+        setSafeSDK(undefined)
         const e = asError(_e)
         Logger.error('error init', e)
       })
