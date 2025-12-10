@@ -626,10 +626,10 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
         </div>
       </div>
       <hr
-        class="MuiDivider-root MuiDivider-fullWidth css-1f8eu3q-MuiDivider-root"
+        class="MuiDivider-root MuiDivider-fullWidth css-pqic1n-MuiDivider-root"
       />
       <div
-        class="MuiCardActions-root MuiCardActions-spacing css-1q4nm6f-MuiCardActions-root"
+        class="MuiCardActions-root MuiCardActions-spacing css-55e0t5-MuiCardActions-root"
       >
         <div
           class="MuiStack-root css-irtfmw-MuiStack-root"
