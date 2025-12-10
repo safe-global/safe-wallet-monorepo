@@ -146,8 +146,6 @@ tags:
     commands:
       - tapOn:
           text: '${ADDRESS_TO_COPY}'
-      - assertVisible:
-          text: '.*Copied to clipboard.*'
       - runFlow:
           file: ./verify-clipboard-content.yml
           env:

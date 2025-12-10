@@ -1,6 +1,10 @@
 import { type ReactElement } from 'react'
-import { Card, SvgIcon, Stack, Typography } from '@mui/material'
+import { Card, SvgIcon, Stack } from '@mui/material'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
+import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
+import { useDarkMode } from '@/hooks/useDarkMode'
+import ExternalLink from '@/components/common/ExternalLink'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import type {
   ContractAnalysisResults,
   RecipientAnalysisResults,
@@ -10,6 +14,29 @@ import { SafeShieldHeader } from './SafeShieldHeader'
 import { SafeShieldContent } from './SafeShieldContent'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
+
+const shieldLogoOnHover = {
+  width: 78,
+  height: 18,
+  '&:hover': {
+    cursor: 'pointer',
+    '& .shield-bg': {
+      fill: 'var(--color-background-lightGrey)',
+    },
+    '& .shield-img': {
+      fill: 'var(--color-text-brand)',
+      transition: 'fill 0.2s ease',
+    },
+    '& .shield-lines': {
+      fill: '#121312', // consistent between dark/light modes
+      transition: 'fill 0.2s ease',
+    },
+    '& .shield-text': {
+      fill: 'var(--color-text-primary)',
+      transition: 'fill 0.2s ease',
+    },
+  },
+} as const
 
 export const SafeShieldDisplay = ({
   recipient,
@@ -22,6 +49,7 @@ export const SafeShieldDisplay = ({
   threat?: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
 }): ReactElement => {
+  const isDarkMode = useDarkMode()
   return (
     <Stack gap={1} data-testid="safe-shield-widget">
       <Card sx={{ borderRadius: '6px', overflow: 'hidden' }}>
@@ -31,10 +59,13 @@ export const SafeShieldDisplay = ({
       </Card>
 
       <Stack direction="row" alignItems="center" alignSelf="flex-end">
-        <Typography variant="body2" color="text.secondary" fontSize={13} lineHeight={1.38} whiteSpace="nowrap">
-          Secured by
-        </Typography>
-        <SvgIcon component={SafeShieldLogoFull} inheritViewBox sx={{ width: 100.83, height: 14.87 }} />
+        <ExternalLink href={HelpCenterArticle.SAFE_SHIELD} noIcon>
+          <SvgIcon
+            component={isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull}
+            inheritViewBox
+            sx={shieldLogoOnHover}
+          />
+        </ExternalLink>
       </Stack>
     </Stack>
   )
