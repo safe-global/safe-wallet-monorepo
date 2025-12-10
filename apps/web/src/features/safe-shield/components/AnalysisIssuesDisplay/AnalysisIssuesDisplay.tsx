@@ -15,12 +15,11 @@ interface AnalysisIssuesDisplayProps {
 }
 
 const issueBoxStyles = {
-  padding: '8px',
-  gap: 1,
   display: 'flex',
   flexDirection: 'column',
   bgcolor: 'background.paper',
   borderRadius: '4px',
+  overflow: 'hidden',
 } as const
 
 const addressTypographyStyles = {
@@ -77,29 +76,49 @@ export const AnalysisIssuesDisplay = ({ result }: AnalysisIssuesDisplayProps) =>
           return (
             <Box key={`${severity}-${index}`} sx={issueBoxStyles}>
               {issue.address && (
-                <Typography
-                  variant="body2"
-                  lineHeight="20px"
-                  onClick={() => handleCopyToClipboard(issue.address!, globalIndex)}
-                >
-                  <Tooltip
-                    title={copiedIndex === globalIndex ? 'Copied to clipboard' : 'Copy address'}
-                    placement="top"
-                    arrow
+                <Box sx={{ padding: '8px' }}>
+                  <Typography
+                    variant="body2"
+                    lineHeight="20px"
+                    onClick={() => handleCopyToClipboard(issue.address!, globalIndex)}
                   >
-                    <Typography component="span" variant="body2" sx={addressTypographyStyles}>
-                      {issue.address}
-                    </Typography>
-                  </Tooltip>
-                  <Box component="span" color="text.secondary">
-                    {explorerLink && <ExplorerButton href={explorerLink.href} />}
-                  </Box>
-                </Typography>
+                    <Tooltip
+                      title={copiedIndex === globalIndex ? 'Copied to clipboard' : 'Copy address'}
+                      placement="top"
+                      arrow
+                    >
+                      <Typography component="span" variant="body2" sx={addressTypographyStyles}>
+                        {issue.address}
+                      </Typography>
+                    </Tooltip>
+                    <Box component="span" color="text.secondary">
+                      {explorerLink && <ExplorerButton href={explorerLink.href} />}
+                    </Box>
+                  </Typography>
+                </Box>
               )}
 
-              <Typography variant="body2" color="primary.light" fontStyle="italic" fontSize={12}>
-                {issue.description}
-              </Typography>
+              <Box
+                sx={{
+                  bgcolor: issue.address ? 'var(--color-error-background)' : 'transparent',
+                  px: 1,
+                  py: 0.5,
+                  width: '100%',
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  color="text.primary"
+                  fontSize={12}
+                  lineHeight="14px"
+                  sx={{
+                    fontFamily: 'DM Sans, sans-serif',
+                    fontWeight: 400,
+                  }}
+                >
+                  {issue.description}
+                </Typography>
+              </Box>
             </Box>
           )
         }),

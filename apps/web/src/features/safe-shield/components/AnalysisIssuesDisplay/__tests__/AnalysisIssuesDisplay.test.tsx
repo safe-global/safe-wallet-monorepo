@@ -134,7 +134,6 @@ describe('AnalysisIssuesDisplay', () => {
 
       const descriptionElement = screen.getByText('This address is untrusted')
       expect(descriptionElement).toBeInTheDocument()
-      expect(descriptionElement).toHaveStyle({ fontStyle: 'italic' })
     })
 
     it('should render description without address if address is missing', () => {
