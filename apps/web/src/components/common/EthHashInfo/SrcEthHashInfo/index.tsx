@@ -5,7 +5,8 @@ import { useTheme } from '@mui/material/styles'
 import { Box, SvgIcon, Tooltip } from '@mui/material'
 import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
 import SafeShieldIcon from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
-import SafeShieldIconWithText from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
+import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
+import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
 import CloudOutlinedIcon from '@mui/icons-material/CloudOutlined'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import Identicon from '../../Identicon'
@@ -15,6 +16,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import ImageFallback from '../../ImageFallback'
 import css from './styles.module.css'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
+import { useDarkMode } from '@/hooks/useDarkMode'
 
 export type EthHashInfoProps = {
   address: string
@@ -42,10 +44,16 @@ export type EthHashInfoProps = {
 const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
 
 const ShieldIconTooltip = ({ iconStyles }: { iconStyles: object }) => {
+  const isDarkMode = useDarkMode()
+
   const tooltipTitle = (
     <Box display="flex" flexDirection="column" gap={1} alignItems="flex-start" padding={1}>
       <Box display="flex" alignItems="center" gap={0.5} marginLeft={-1}>
-        <SvgIcon component={SafeShieldIconWithText} inheritViewBox sx={{ fontSize: '100px', height: '20px' }} />
+        <SvgIcon
+          component={isDarkMode ? SafeShieldLogoFull : SafeShieldLogoFullDark}
+          inheritViewBox
+          sx={{ fontSize: '100px', height: '20px' }}
+        />
       </Box>
       <Box>Hypernative Guardian is actively monitoring this account.</Box>
     </Box>
