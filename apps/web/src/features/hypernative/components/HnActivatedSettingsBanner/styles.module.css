@@ -90,7 +90,6 @@
   background-color: transparent;
   text-transform: none;
   inline-size: fit-content;
-  padding-inline: 16px;
 }
 
 .ctaButton:hover {
