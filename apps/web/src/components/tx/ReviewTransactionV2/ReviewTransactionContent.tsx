@@ -71,7 +71,7 @@ export const ReviewTransactionContent = ({
 
         <Slot name={SlotName.Main} />
 
-        <Divider sx={{ mt: 2, mx: -3, mb: -2 }} />
+        <Divider sx={{ mt: 2, mx: -3 }} />
 
         {safeTxError && (
           <ErrorMessage error={safeTxError}>
@@ -83,7 +83,7 @@ export const ReviewTransactionContent = ({
         <NetworkWarning />
         <UnknownContractError txData={txDetails?.txData ?? txPreview?.txData} />
 
-        <TxCardActions>
+        <TxCardActions sx={{ marginTop: '0 !important' }}>
           {/* Continue button */}
           <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!isSubmitDisabled}>
             {(isOk) => {
