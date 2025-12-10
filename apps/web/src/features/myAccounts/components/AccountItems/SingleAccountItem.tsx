@@ -52,6 +52,7 @@ type AccountItemProps = {
 const SingleAccountItem = ({
   onLinkClick,
   safeItem,
+  safeOverview: providedSafeOverview,
   isMultiChainItem = false,
   isSpaceSafe = false,
   onSelectSafe,
@@ -97,8 +98,8 @@ const SingleAccountItem = ({
   const isReplayable =
     addNetworkFeatureEnabled && !isReadOnly && (!undeployedSafe || !isPredictedSafeProps(undeployedSafe.props))
 
-  const { data: safeOverview } = useGetSafeOverviewQuery(
-    undeployedSafe || !isVisible
+  const { data: fetchedSafeOverview } = useGetSafeOverviewQuery(
+    undeployedSafe || !isVisible || providedSafeOverview !== undefined
       ? skipToken
       : {
           chainId: safeItem.chainId,
@@ -106,6 +107,8 @@ const SingleAccountItem = ({
           walletAddress,
         },
   )
+
+  const safeOverview = providedSafeOverview ?? fetchedSafeOverview
 
   const safeThreshold = safeOverview?.threshold ?? counterfactualSetup?.threshold ?? defaultSafeInfo.threshold
   const safeOwners =
