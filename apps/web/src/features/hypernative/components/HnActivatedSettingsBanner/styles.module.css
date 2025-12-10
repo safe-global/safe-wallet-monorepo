@@ -1,53 +1,9 @@
-.banner {
-  position: relative;
-  padding: var(--space-8, 32px);
-  background: var(--color-background-paper, #ffffff);
-  border: 0;
-  border-radius: 6px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6, 24px);
-}
-
-.header {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 .badgeContainer {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   border-radius: 13.362px;
   width: fit-content;
-}
-
-.title {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
-  font-size: 16px;
-  line-height: 22px;
-  letter-spacing: 0.15px;
-  color: var(--color-text-primary, #121312);
-  margin: 0;
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  flex: 1;
-}
-
-.description {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 22px;
-  letter-spacing: 0.15px;
-  color: var(--color-text-primary, #121312);
-  margin: 0;
 }
 
 .statusBadge {

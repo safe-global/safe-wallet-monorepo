@@ -1,4 +1,4 @@
-import { Card, Stack, SvgIcon } from '@mui/material'
+import { Paper, Grid, Typography, SvgIcon, Box } from '@mui/material'
 import ExternalLink from '@/components/common/ExternalLink'
 import { hnActivatedSettingsBannerConfig } from './config'
 import css from './styles.module.css'
@@ -8,36 +8,42 @@ export const HnActivatedSettingsBanner = () => {
   const { title, description, statusLabel, buttonLabel, dashboardUrl } = hnActivatedSettingsBannerConfig
 
   return (
-    <Card className={css.banner}>
-      <Stack direction="row" spacing={3} sx={{ width: '100%' }}>
-        <div className={css.header}>
-          <div className={css.badgeContainer}>
-            <SvgIcon
-              component={SafeShieldColored}
-              inheritViewBox
-              sx={{
-                width: 78,
-                height: 18,
-                '& rect': {
-                  fill: 'var(--color-border-light)',
-                },
-              }}
-            />
-          </div>
-          <h3 className={css.title}>{title}</h3>
-        </div>
+    <Paper sx={{ padding: 4 }}>
+      <Grid container spacing={3}>
+        <Grid item lg={4} xs={12}>
+          <Box display="flex" flexDirection="column" gap={1}>
+            <div className={css.badgeContainer}>
+              <SvgIcon
+                component={SafeShieldColored}
+                inheritViewBox
+                sx={{
+                  width: 78,
+                  height: 18,
+                  '& rect': {
+                    fill: 'var(--color-border-light)',
+                  },
+                }}
+              />
+            </div>
+            <Typography variant="h4" fontWeight="bold">
+              {title}
+            </Typography>
+          </Box>
+        </Grid>
 
-        <div className={css.content}>
-          <p className={css.description}>{description}</p>
-          <div className={css.statusBadge}>
-            <span className={css.statusLabel}>{statusLabel}</span>
-          </div>
-          <ExternalLink href={dashboardUrl} mode="button" className={css.ctaButton}>
-            <span className={css.buttonText}>{buttonLabel}</span>
-          </ExternalLink>
-        </div>
-      </Stack>
-    </Card>
+        <Grid item xs>
+          <Typography mb={2}>{description}</Typography>
+          <Box display="flex" flexDirection="column" gap={2}>
+            <div className={css.statusBadge}>
+              <span className={css.statusLabel}>{statusLabel}</span>
+            </div>
+            <ExternalLink href={dashboardUrl} mode="button" className={css.ctaButton}>
+              <span className={css.buttonText}>{buttonLabel}</span>
+            </ExternalLink>
+          </Box>
+        </Grid>
+      </Grid>
+    </Paper>
   )
 }
 
