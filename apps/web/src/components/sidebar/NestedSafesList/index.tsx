@@ -2,8 +2,9 @@ import { ChevronRight } from '@mui/icons-material'
 import { List, Typography, Box } from '@mui/material'
 
 import Track from '@/components/common/Track'
-import { NESTED_SAFE_EVENTS } from '@/services/analytics/events/nested-safes'
+import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import { useState, useMemo, type ReactElement } from 'react'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useCurrentChain } from '@/hooks/useChains'
 import SingleAccountItem from '@/features/myAccounts/components/AccountItems/SingleAccountItem'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
@@ -59,17 +60,19 @@ export function NestedSafesList({
     <List sx={{ gap: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', p: 0 }}>
       {nestedSafesToShow.map((safeItem) => {
         const safeOverview = safeOverviews?.find(
-          (overview) => overview.address.value === safeItem.address && overview.chainId === safeItem.chainId,
+          (overview) => overview.chainId === safeItem.chainId && sameAddress(overview.address.value, safeItem.address),
         )
         return (
           <Box key={safeItem.address} sx={{ width: '100%' }}>
-            <SingleAccountItem
-              onLinkClick={onClose}
-              safeItem={safeItem}
-              safeOverview={safeOverview}
-              showActions={false}
-              showChainBadge={false}
-            />
+            <Track {...NESTED_SAFE_EVENTS.OPEN_NESTED_SAFE} label={NESTED_SAFE_LABELS.list}>
+              <SingleAccountItem
+                onLinkClick={onClose}
+                safeItem={safeItem}
+                safeOverview={safeOverview}
+                showActions={false}
+                showChainBadge={false}
+              />
+            </Track>
           </Box>
         )
       })}
