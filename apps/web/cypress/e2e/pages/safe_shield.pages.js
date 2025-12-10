@@ -70,7 +70,7 @@ const riskDetectedStr = 'Risk detected'
 const issuesFoundStr = 'Issues found'
 const analyzingStr = 'Analyzing...'
 const checksUnavailableStr = 'Checks unavailable'
-const securedByStr = 'Secured by'
+// Note: "Secured by" text was removed, now only the logo is displayed
 
 // Error messages
 const contractAnalysisFailedStr = 'Contract analysis failed'
@@ -101,9 +101,10 @@ export function verifySafeShieldDisplayed() {
   cy.get(safeShieldWidget).should('be.visible')
 }
 
-// Verify "Secured by" footer is displayed
+// Verify Safe Shield logo footer is displayed
 export function verifySecuredByFooter() {
-  cy.contains(securedByStr).should('be.visible')
+  // Check for the Safe Shield logo SVG icon
+  cy.get('[data-testid="safe-shield-widget"]').find('.MuiSvgIcon-root').should('be.visible')
 }
 
 // Verify status shows "Checks passed"
