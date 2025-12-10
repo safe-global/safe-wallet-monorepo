@@ -7,6 +7,7 @@ import * as useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import * as useChainId from '@/hooks/useChainId'
 import * as store from '@/store'
 import * as useChains from '@/hooks/useChains'
+import * as useDarkMode from '@/hooks/useDarkMode'
 import EthHashInfo from '.'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
 
@@ -18,10 +19,13 @@ const MOCK_CHAIN_ID = '4'
 jest.mock('@/hooks/useAllAddressBooks')
 jest.mock('@/hooks/useChainId')
 jest.mock('@/hooks/useChains')
+jest.mock('@/hooks/useDarkMode')
 
 describe('EthHashInfo', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+
+    jest.spyOn(useDarkMode, 'useDarkMode').mockReturnValue(false)
 
     jest.spyOn(useAllAddressBooks, 'default').mockImplementation(() => ({
       [MOCK_CHAIN_ID]: {
