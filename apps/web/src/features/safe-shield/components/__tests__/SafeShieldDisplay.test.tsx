@@ -31,16 +31,16 @@ describe('SafeShieldDisplay', () => {
 
   describe('Basic Rendering', () => {
     it('should render the component with all main elements', () => {
-      render(<SafeShieldDisplay />)
+      const { container } = render(<SafeShieldDisplay />)
 
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
+      expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
     })
 
     it('should render without any props', () => {
       const { container } = render(<SafeShieldDisplay />)
 
       expect(container.querySelector('.MuiCard-root')).toBeInTheDocument()
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
+      expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
     })
 
     it('should have correct layout structure', () => {
@@ -172,10 +172,12 @@ describe('SafeShieldDisplay', () => {
     })
 
     it('should handle all props together', () => {
-      render(<SafeShieldDisplay recipient={mockRecipient} contract={mockContract} threat={mockThreat} />)
+      const { container } = render(
+        <SafeShieldDisplay recipient={mockRecipient} contract={mockContract} threat={mockThreat} />,
+      )
 
       expect(screen.getByText('Checks passed')).toBeInTheDocument()
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
+      expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
     })
   })
 
@@ -192,30 +194,30 @@ describe('SafeShieldDisplay', () => {
   })
 
   describe('Footer', () => {
-    it('should always render the "Secured by" footer', () => {
-      render(<SafeShieldDisplay />)
+    it('should always render the Safe Shield logo', () => {
+      const { container } = render(<SafeShieldDisplay />)
 
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
+      expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
     })
 
-    it('should render footer even with errors', () => {
+    it('should render logo even with errors', () => {
       const error = new Error('Analysis failed')
       const errorRecipient: [undefined, Error, false] = [undefined, error, false]
 
-      render(<SafeShieldDisplay recipient={errorRecipient} />)
+      const { container } = render(<SafeShieldDisplay recipient={errorRecipient} />)
 
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
+      expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
     })
 
-    it('should render footer during loading', () => {
+    it('should render logo during loading', () => {
       const loadingRecipient = RecipientAnalysisBuilder.knownRecipient(mockRecipientAddress).build()
       if (loadingRecipient) {
         loadingRecipient[2] = true
       }
 
-      render(<SafeShieldDisplay recipient={loadingRecipient} />)
+      const { container } = render(<SafeShieldDisplay recipient={loadingRecipient} />)
 
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
+      expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
     })
   })
 })
