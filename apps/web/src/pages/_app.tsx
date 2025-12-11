@@ -1,5 +1,4 @@
 import Analytics from '@/services/analytics/Analytics'
-import { SentryErrorBoundary } from '@/services/sentry'
 import type { ReactNode } from 'react'
 import { type ReactElement } from 'react'
 import { type AppProps } from 'next/app'
@@ -47,7 +46,7 @@ import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
 import usePortfolioRefetchOnTxHistory from '@/features/portfolio/hooks/usePortfolioRefetchOnTxHistory'
 import OutreachPopup from '@/features/targetedOutreach/components/OutreachPopup'
 import { GATEWAY_URL } from '@/config/gateway'
-import { datadogCaptureException, useDatadog } from '@/services/datadog'
+import { getErrorBoundary, captureException } from '@/services/observability'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
@@ -58,7 +57,6 @@ setStoreInstance(reduxStore)
 const InitApp = (): null => {
   useHydrateStore(reduxStore)
   useAdjustUrl()
-  useDatadog()
   useGtm()
   useMixpanel()
   useNotificationTracking()
@@ -91,20 +89,33 @@ const THEME_LIGHT = 'light'
 export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }) => {
   const isDarkMode = useDarkMode()
   const themeMode = isDarkMode ? THEME_DARK : THEME_LIGHT
+  const ObservabilityErrorBoundary = getErrorBoundary() as React.ComponentType<any> | undefined
+
+  const handleError = (error: Error, componentStack?: string) => {
+    captureException(error, { componentStack })
+  }
+
+  const content = (
+    <WalletProvider>
+      <GeoblockingProvider>
+        <TxModalProvider>
+          <AddressBookSourceProvider>{children}</AddressBookSourceProvider>
+        </TxModalProvider>
+      </GeoblockingProvider>
+    </WalletProvider>
+  )
 
   return (
     <SafeThemeProvider mode={themeMode}>
       {(safeTheme: Theme) => (
         <ThemeProvider theme={safeTheme}>
-          <SentryErrorBoundary showDialog fallback={ErrorBoundary} onError={datadogCaptureException}>
-            <WalletProvider>
-              <GeoblockingProvider>
-                <TxModalProvider>
-                  <AddressBookSourceProvider>{children}</AddressBookSourceProvider>
-                </TxModalProvider>
-              </GeoblockingProvider>
-            </WalletProvider>
-          </SentryErrorBoundary>
+          {ObservabilityErrorBoundary ? (
+            <ObservabilityErrorBoundary showDialog fallback={ErrorBoundary} onError={handleError}>
+              {content}
+            </ObservabilityErrorBoundary>
+          ) : (
+            content
+          )}
         </ThemeProvider>
       )}
     </SafeThemeProvider>
