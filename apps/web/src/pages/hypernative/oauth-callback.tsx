@@ -245,7 +245,7 @@ async function exchangeCodeForToken(
     throw new Error(`Token exchange failed: ${response.status} ${errorText}`)
   }
 
-  const data = await response.json()
+  const { data } = await response.json() // @todo: use response type
 
   // Validate response structure
   if (!data.access_token || !data.expires_in) {
