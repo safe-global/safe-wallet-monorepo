@@ -76,9 +76,8 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
 
       {showLastSignerWarning && (
         <Box mt={1}>
-          <ErrorMessage level="warning">
-            You are providing the last signature. Once signed, anyone can execute this transaction since the queue is
-            public.
+          <ErrorMessage level="info">
+            You&apos;re providing the last signature. After you sign, anyone can execute this transaction.
           </ErrorMessage>
         </Box>
       )}
