@@ -134,11 +134,9 @@ const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
       return [undefined, undefined, true]
     }
 
-    if (portfolioError) {
-      return [undefined, portfolioError, false]
-    }
-    if (legacyError) {
-      return [undefined, legacyError, false]
+    const error = portfolioError || legacyError
+    if (error) {
+      return [undefined, error, false]
     }
 
     if (!portfolioData || !legacyData) {
