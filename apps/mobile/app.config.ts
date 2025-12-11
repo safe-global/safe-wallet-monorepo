@@ -1,5 +1,5 @@
-import { ExpoConfig, ConfigContext } from 'expo/config'
-/* eslint-disable no-undef */
+import { ExpoConfig } from 'expo/config'
+ 
 const IS_DEV = process.env.APP_VARIANT === 'development'
 
 const appleDevTeamId = '86487MHG6V'
@@ -21,7 +21,7 @@ const config: ExpoConfig = {
   name: name,
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
-  version: '1.0.4',
+  version: '1.0.5',
   extra: {
     storybookEnabled: process.env.STORYBOOK_ENABLED,
     eas: {
