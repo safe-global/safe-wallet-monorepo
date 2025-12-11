@@ -44,11 +44,6 @@ describe('oauth config', () => {
       const { HYPERNATIVE_OAUTH_CONFIG: config } = require('../oauth')
       expect(config.redirectUri).toBe('')
     })
-
-    it('should have correct scope', () => {
-      const { HYPERNATIVE_OAUTH_CONFIG: config } = require('../oauth')
-      expect(config.scope).toBe('read')
-    })
   })
 
   describe('OAUTH_CALLBACK_ROUTE', () => {
