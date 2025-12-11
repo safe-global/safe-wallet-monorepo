@@ -3,10 +3,10 @@ import { SENTRY_DSN } from '@/config/constants'
 import packageJson from '../../../../package.json'
 
 interface SentryModule {
-  init: (config: any) => void
-  captureException: (error: Error, context?: any) => void
-  captureMessage: (message: string, context?: any) => void
-  ErrorBoundary: any
+  init: (config: Record<string, unknown>) => void
+  captureException: (error: Error, context?: Record<string, unknown>) => void
+  captureMessage: (message: string, context?: Record<string, unknown>) => void
+  ErrorBoundary: React.ComponentType<Record<string, unknown>>
 }
 
 let sentryModule: SentryModule | null = null
@@ -18,12 +18,17 @@ export class SentryProvider implements IObservabilityProvider {
   private isInitialized = false
 
   async init(): Promise<void> {
-    if (!isSentryEnabled || this.isInitialized) {
+    const isClient = typeof window !== 'undefined'
+    if (!isClient || !isSentryEnabled || this.isInitialized) {
       return
     }
 
     try {
       sentryModule = await import('@sentry/react')
+
+      if (!sentryModule) {
+        return
+      }
 
       sentryModule.init({
         dsn: SENTRY_DSN,
@@ -34,14 +39,16 @@ export class SentryProvider implements IObservabilityProvider {
           'JsonRpcEngine',
           'Non-Error promise rejection captured with keys: code',
         ],
-        beforeSend: (event: any) => {
-          const query = event.request?.query_string
-          if (event.request && query) {
-            const appUrl = typeof query !== 'string' && !Array.isArray(query) ? query.appUrl : ''
+        beforeSend: (event: Record<string, unknown>) => {
+          const request = event.request as Record<string, unknown> | undefined
+          const query = request?.query_string
+          if (request && query) {
+            const appUrl =
+              typeof query !== 'string' && !Array.isArray(query) ? (query as Record<string, unknown>).appUrl : ''
             if (appUrl) {
-              event.request.query_string = { appUrl }
+              request.query_string = { appUrl }
             } else {
-              delete event.request.query_string
+              delete request.query_string
             }
           }
           return event

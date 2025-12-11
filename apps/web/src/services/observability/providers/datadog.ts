@@ -15,9 +15,35 @@ import {
   IS_PRODUCTION,
 } from '@/config/constants'
 
+interface DatadogLogsConfig {
+  clientToken: string
+  site: string
+  forwardErrorsToLogs: boolean
+  sessionSampleRate: number
+}
+
+interface DatadogRumConfig {
+  applicationId: string
+  clientToken: string
+  site: string
+  service: string
+  env: string
+  version: string
+  sessionSampleRate: number
+  sessionReplaySampleRate: number
+  trackUserInteractions: boolean
+  trackResources: boolean
+  trackLongTasks: boolean
+  defaultPrivacyLevel: 'mask' | 'mask-user-input' | 'allow'
+  allowedTracingUrls?: Array<{
+    match: string
+    propagatorTypes: ('tracecontext' | 'datadog' | 'b3' | 'b3multi')[]
+  }>
+}
+
 interface DatadogLogsModule {
   datadogLogs: {
-    init: (config: any) => void
+    init: (config: DatadogLogsConfig) => void
     logger: {
       info: (message: string, context?: Record<string, unknown>) => void
       warn: (message: string, context?: Record<string, unknown>) => void
@@ -29,7 +55,7 @@ interface DatadogLogsModule {
 
 interface DatadogRumModule {
   datadogRum: {
-    init: (config: any) => void
+    init: (config: DatadogRumConfig) => void
     addError: (error: Error, context?: Record<string, unknown>) => void
   }
 }
@@ -48,12 +74,24 @@ export class DatadogProvider implements IObservabilityProvider {
   private isRumInitialized = false
 
   async init(): Promise<void> {
+    const isClient = typeof window !== 'undefined'
+    if (!isClient) {
+      return
+    }
+
+    const hasLogsToInit = isDatadogLogsEnabled && !this.isLogsInitialized
+    const hasRumToInit = isDatadogRumEnabled && !this.isRumInitialized
+
+    if (!hasLogsToInit && !hasRumToInit) {
+      return
+    }
+
     try {
-      if (isDatadogLogsEnabled && !this.isLogsInitialized) {
+      if (hasLogsToInit) {
         await this.initLogs()
       }
 
-      if (isDatadogRumEnabled && !this.isRumInitialized) {
+      if (hasRumToInit) {
         await this.initRum()
       }
     } catch (error) {
@@ -66,14 +104,17 @@ export class DatadogProvider implements IObservabilityProvider {
       datadogLogsModule = await import('@datadog/browser-logs')
     }
 
-    datadogLogsModule.datadogLogs.init({
-      clientToken: DATADOG_CLIENT_TOKEN,
-      site: DATADOG_RUM_SITE,
-      forwardErrorsToLogs: true,
-      sessionSampleRate: 100,
-    })
-
-    this.isLogsInitialized = true
+    try {
+      datadogLogsModule.datadogLogs.init({
+        clientToken: DATADOG_CLIENT_TOKEN,
+        site: DATADOG_RUM_SITE,
+        forwardErrorsToLogs: true,
+        sessionSampleRate: 100,
+      })
+      this.isLogsInitialized = true
+    } catch (error) {
+      console.warn('Failed to initialize Datadog Logs (might be already initialized):', error)
+    }
   }
 
   private async initRum(): Promise<void> {
@@ -81,28 +122,35 @@ export class DatadogProvider implements IObservabilityProvider {
       datadogRumModule = await import('@datadog/browser-rum')
     }
 
-    datadogRumModule.datadogRum.init({
-      applicationId: DATADOG_RUM_APPLICATION_ID,
-      clientToken: DATADOG_RUM_CLIENT_TOKEN,
-      site: DATADOG_RUM_SITE,
-      service: DATADOG_RUM_SERVICE,
-      env: DATADOG_RUM_ENV,
-      version: COMMIT_HASH,
-      sessionSampleRate: DATADOG_RUM_SESSION_SAMPLE_RATE,
-      sessionReplaySampleRate: 0,
-      trackUserInteractions: true,
-      trackResources: true,
-      trackLongTasks: true,
-      defaultPrivacyLevel: 'mask',
-      ...(DATADOG_RUM_TRACING_ENABLED && {
-        allowedTracingUrls: [
-          { match: GATEWAY_URL_PRODUCTION, propagatorTypes: ['tracecontext', 'datadog'] },
-          { match: GATEWAY_URL_STAGING, propagatorTypes: ['tracecontext', 'datadog'] },
-        ],
-      }),
-    })
+    if (!datadogRumModule) {
+      return
+    }
 
-    this.isRumInitialized = true
+    try {
+      datadogRumModule.datadogRum.init({
+        applicationId: DATADOG_RUM_APPLICATION_ID,
+        clientToken: DATADOG_RUM_CLIENT_TOKEN,
+        site: DATADOG_RUM_SITE,
+        service: DATADOG_RUM_SERVICE,
+        env: DATADOG_RUM_ENV,
+        version: COMMIT_HASH,
+        sessionSampleRate: DATADOG_RUM_SESSION_SAMPLE_RATE,
+        sessionReplaySampleRate: 0,
+        trackUserInteractions: true,
+        trackResources: true,
+        trackLongTasks: true,
+        defaultPrivacyLevel: 'mask',
+        ...(DATADOG_RUM_TRACING_ENABLED && {
+          allowedTracingUrls: [
+            { match: GATEWAY_URL_PRODUCTION, propagatorTypes: ['tracecontext', 'datadog'] },
+            { match: GATEWAY_URL_STAGING, propagatorTypes: ['tracecontext', 'datadog'] },
+          ],
+        }),
+      })
+      this.isRumInitialized = true
+    } catch (error) {
+      console.warn('Failed to initialize Datadog RUM (might be already initialized):', error)
+    }
   }
 
   getLogger(): ILogger {
