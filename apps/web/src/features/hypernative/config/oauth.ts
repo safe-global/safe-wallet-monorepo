@@ -34,9 +34,9 @@ export const HYPERNATIVE_OAUTH_CONFIG = {
   /**
    * OAuth client ID
    * Identifies this application to Hypernative OAuth server
-   * Production value: SAFE_WALLET_SPA
+   * Production value: SAFE_WALLET_WEB
    */
-  clientId: process.env.NEXT_PUBLIC_HYPERNATIVE_CLIENT_ID || 'SAFE_WALLET_SPA',
+  clientId: process.env.NEXT_PUBLIC_HYPERNATIVE_CLIENT_ID || 'SAFE_WALLET_WEB',
 
   /**
    * OAuth redirect URI
