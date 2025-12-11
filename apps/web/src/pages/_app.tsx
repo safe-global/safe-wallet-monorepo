@@ -89,7 +89,7 @@ const THEME_LIGHT = 'light'
 export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }) => {
   const isDarkMode = useDarkMode()
   const themeMode = isDarkMode ? THEME_DARK : THEME_LIGHT
-  const ObservabilityErrorBoundary = getErrorBoundary() as React.ComponentType<any> | undefined
+  const ObservabilityErrorBoundary = getErrorBoundary() as React.ComponentType<Record<string, unknown>> | undefined
 
   const handleError = (error: Error, componentStack?: string) => {
     captureException(error, { componentStack })

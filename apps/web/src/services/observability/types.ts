@@ -5,12 +5,6 @@ export interface ILogger {
   debug: (message: string, context?: Record<string, unknown>) => void
 }
 
-export interface IRumProvider {
-  init: () => void
-  addError: (error: Error, context?: Record<string, unknown>) => void
-  trackInteraction: (name: string) => void
-}
-
 export interface IObservabilityProvider {
   readonly name: string
   init: () => void
