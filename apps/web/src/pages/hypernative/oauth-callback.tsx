@@ -171,6 +171,7 @@ const HypernativeOAuthCallback: NextPage = () => {
         justifyContent="center"
         minHeight="100vh"
         padding={3}
+        mt="calc(-1 * var(--header-height))" // subtract header height to center content in the viewport
       >
         <Card
           sx={{ p: 4, justifyItems: 'center', textAlign: 'center', borderRadius: 2, maxWidth: 433, width: { sm: 433 } }}
