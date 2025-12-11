@@ -11,8 +11,8 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
 
 export function useCounterpartyAnalysis(overrideSafeTx?: SafeTransaction): {
-  recipient?: AsyncResult<RecipientAnalysisResults>
-  contract?: AsyncResult<ContractAnalysisResults>
+  recipient: AsyncResult<RecipientAnalysisResults>
+  contract: AsyncResult<ContractAnalysisResults>
 } {
   const safeAddress = useSafeAddress()
   const chainId = useChainId()

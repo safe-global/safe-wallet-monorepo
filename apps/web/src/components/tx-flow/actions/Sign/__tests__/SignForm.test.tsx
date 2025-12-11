@@ -7,6 +7,12 @@ import { createMockSafeTransaction } from '@/tests/transactions'
 import { OperationType } from '@safe-global/types-kit'
 import { fireEvent, waitFor } from '@testing-library/react'
 import { initialContext, TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import type {
+  RecipientAnalysisResults,
+  ContractAnalysisResults,
+  ThreatAnalysisResults,
+} from '@safe-global/utils/features/safe-shield/types'
 
 // We assume that CheckWallet always returns true
 jest.mock('@/components/common/CheckWallet', () => ({
@@ -43,6 +49,9 @@ describe('SignForm', () => {
     txSecurity: {
       setRecipientAddresses: jest.fn(),
       setSafeTx: jest.fn(),
+      recipient: [undefined, undefined, false] as AsyncResult<RecipientAnalysisResults>,
+      contract: [undefined, undefined, false] as AsyncResult<ContractAnalysisResults>,
+      threat: [undefined, undefined, false] as AsyncResult<ThreatAnalysisResults>,
       needsRiskConfirmation: false,
       isRiskConfirmed: false,
       setIsRiskConfirmed: jest.fn(),
