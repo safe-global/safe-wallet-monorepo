@@ -4,9 +4,9 @@ import isEmpty from 'lodash/isEmpty'
 
 /**
  * Severity priority mapping for sorting analysis results
- * Lower numbers indicate higher priority: CRITICAL > WARN > INFO > OK
+ * Lower numbers indicate higher priority: CRITICAL > ERROR > WARN > INFO > OK
  */
-export const SEVERITY_PRIORITY: Record<Severity, number> = { CRITICAL: 0, WARN: 1, INFO: 2, OK: 3 }
+export const SEVERITY_PRIORITY: Record<Severity, number> = { CRITICAL: 0, ERROR: 1, WARN: 1, INFO: 2, OK: 3 }
 
 /**
  * Sort analysis results by severity (highest severity first)

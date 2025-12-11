@@ -10,6 +10,7 @@ import { type BaseTransaction } from '@safe-global/safe-apps-sdk'
 import { SWAP_TITLE } from '@/features/swap/constants'
 import { STAKE_TITLE } from '@/features/stake/constants'
 import { getStakeTitle } from '@/features/stake/helpers/utils'
+import { isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
 
 const APP_LOGO_FALLBACK_IMAGE = '/images/apps/apps-icon.svg'
 const APP_NAME_FALLBACK = 'Sign message'
@@ -47,7 +48,9 @@ export const AppTitle = ({
   )
 }
 
-const SignMessageFlow = ({ ...props }: SignMessageProps) => {
+const SignMessageFlow = ({ message, ...props }: SignMessageProps) => {
+  const isEip712 = isEIP712TypedData(message)
+
   return (
     <TxLayout
       title="Confirm message"
@@ -55,10 +58,10 @@ const SignMessageFlow = ({ ...props }: SignMessageProps) => {
       step={0}
       hideNonce
       isMessage
-      hideSafeShield
+      hideSafeShield={!isEip712}
     >
       <ErrorBoundary fallback={<div>Error signing message</div>}>
-        <SignMessage {...props} />
+        <SignMessage message={message} {...props} />
       </ErrorBoundary>
     </TxLayout>
   )

@@ -67,7 +67,7 @@ describe('ReviewTransaction', () => {
       ),
     )
 
-    const { container, getByText } = render(
+    const { container } = render(
       <SlotProvider>
         <SafeTxContext.Provider value={{ safeTx: createSafeTx() } as SafeTxContextParams}>
           <SafeShieldProvider>
@@ -81,7 +81,7 @@ describe('ReviewTransaction', () => {
     )
 
     await waitFor(() => {
-      expect(getByText("You're about to confirm this transaction.")).toBeInTheDocument()
+      expect(container.querySelector('[data-testid="continue-sign-btn"]')).toBeInTheDocument()
     })
     expect(container).toMatchSnapshot()
   })

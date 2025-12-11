@@ -20,7 +20,11 @@ tags:
     id: 'pending-tx-list'
 
 # Scroll to see the batch transaction card
-- scroll
+# Scroll to see the setFallbackHandler transaction card
+- scrollUntilVisible:
+    element:
+      text: '.*3 actions.*'
+    centerElement: true
 
 # Tap on the 3 actions batch transaction card
 - runFlow:

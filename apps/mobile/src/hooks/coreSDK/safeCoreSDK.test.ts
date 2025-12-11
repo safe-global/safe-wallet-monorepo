@@ -1,4 +1,4 @@
-import { initSafeSDK, setSafeSDK, getSafeSDK } from './safeCoreSDK'
+import { initSafeSDK, setSafeSDK, getSafeSDK, clearSingletonCache } from './safeCoreSDK'
 import chains from '@safe-global/utils/config/chains'
 import Safe from '@safe-global/protocol-kit'
 import type { SafeCoreSDKProps } from '@safe-global/utils/hooks/coreSDK/types'
@@ -49,6 +49,7 @@ describe('initSafeSDK', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    clearSingletonCache()
     mockIsValidMasterCopy.mockReturnValue(true)
     mockIsLegacyVersion.mockReturnValue(false)
     mockIsInDeployments.mockReturnValue(true)
@@ -197,6 +198,42 @@ describe('initSafeSDK', () => {
       network: mockChainId,
       version: '1.3.0',
     })
+  })
+
+  it('returns cached SDK instance when called with same parameters', async () => {
+    const mockSafe = { address: mockAddress }
+    ;(Safe.init as jest.Mock).mockResolvedValue(mockSafe)
+    const props = createDefaultProps()
+
+    const result1 = await initSafeSDK(props)
+    const result2 = await initSafeSDK(props)
+
+    expect(Safe.init).toHaveBeenCalledTimes(1)
+    expect(result1).toBe(mockSafe)
+    expect(result2).toBe(mockSafe)
+    expect(result1).toBe(result2)
+  })
+
+  it('creates new SDK instance when key parameters differ', async () => {
+    const mockSafe1 = { address: mockAddress }
+    const mockSafe2 = { address: generateChecksummedAddress() }
+    ;(Safe.init as jest.Mock).mockResolvedValueOnce(mockSafe1).mockResolvedValueOnce(mockSafe2)
+
+    const props1 = createDefaultProps({
+      chainId: '1',
+      provider: createMockProvider({ chainId: '1' }) as unknown as SafeCoreSDKProps['provider'],
+    })
+    const props2 = createDefaultProps({
+      chainId: '137',
+      provider: createMockProvider({ chainId: '137' }) as unknown as SafeCoreSDKProps['provider'],
+    })
+
+    const result1 = await initSafeSDK(props1)
+    const result2 = await initSafeSDK(props2)
+
+    expect(Safe.init).toHaveBeenCalledTimes(2)
+    expect(result1).toBe(mockSafe1)
+    expect(result2).toBe(mockSafe2)
   })
 })
 
