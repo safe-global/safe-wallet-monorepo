@@ -32,7 +32,7 @@ export const AnalysisGroupCardItem = ({ result, description, severity, showImage
             {displayDescription}
           </Typography>
 
-          <AnalysisIssuesDisplay result={result} />
+          <AnalysisIssuesDisplay result={result} borderColor={borderColor} />
 
           {isAddressChange(result) && <AddressChanges result={result} />}
 
