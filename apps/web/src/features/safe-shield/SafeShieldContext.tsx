@@ -19,6 +19,8 @@ import {
   Severity,
 } from '@safe-global/utils/features/safe-shield/types'
 import { getPrimaryResult, SEVERITY_PRIORITY } from '@safe-global/utils/features/safe-shield/utils'
+import { useNestedTransaction } from './components/useNestedTransaction'
+import { useCurrentChain } from '@/hooks/useChains'
 
 type SafeShieldContextType = {
   setRecipientAddresses: Dispatch<SetStateAction<string[] | undefined>>
@@ -27,6 +29,8 @@ type SafeShieldContextType = {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
   threat: AsyncResult<ThreatAnalysisResults>
+  nestedThreat: AsyncResult<ThreatAnalysisResults>
+  isNested: boolean
   needsRiskConfirmation: boolean
   isRiskConfirmed: boolean
   setIsRiskConfirmed: Dispatch<SetStateAction<boolean>>
@@ -47,19 +51,36 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const contract = counterpartyAnalysis.contract
   const safeShieldTx = safeTx || safeTxContext.safeTx
 
+  const chain = useCurrentChain()
+  const { nestedSafeTx, isNested } = useNestedTransaction(safeShieldTx, chain)
+  const nestedThreat = useThreatAnalysis(isNested ? nestedSafeTx : undefined)
+
   const [isRiskConfirmed, setIsRiskConfirmed] = useState(false)
 
   const { needsRiskConfirmation, primaryThreatSeverity } = useMemo(() => {
     const [threatAnalysisResult] = threat || []
+    const [nestedThreatAnalysisResult] = nestedThreat || []
+
     const primaryThreatResult = getPrimaryResult(threatAnalysisResult?.THREAT || [])
-    const severity = primaryThreatResult?.severity
+    const nestedPrimaryThreatResult = getPrimaryResult(nestedThreatAnalysisResult?.THREAT || [])
+
+    const mainSeverity = primaryThreatResult?.severity
+    const nestedSeverity = nestedPrimaryThreatResult?.severity
+
+    const severity =
+      mainSeverity && nestedSeverity
+        ? SEVERITY_PRIORITY[mainSeverity] <= SEVERITY_PRIORITY[nestedSeverity]
+          ? mainSeverity
+          : nestedSeverity
+        : mainSeverity || nestedSeverity
+
     const needsRiskConfirmation = !!severity && SEVERITY_PRIORITY[severity] <= SEVERITY_PRIORITY[Severity.CRITICAL]
 
     return {
       needsRiskConfirmation,
       primaryThreatSeverity: severity,
     }
-  }, [threat])
+  }, [threat, nestedThreat])
 
   useEffect(() => {
     setIsRiskConfirmed(false)
@@ -74,6 +95,8 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
         recipient,
         contract,
         threat,
+        nestedThreat,
+        isNested,
         needsRiskConfirmation,
         isRiskConfirmed,
         setIsRiskConfirmed,
