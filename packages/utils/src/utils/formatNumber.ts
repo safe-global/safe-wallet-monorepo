@@ -71,16 +71,79 @@ export const formatAmountPrecise = (number: string | number, precision?: number)
  * Currency formatter that appends the currency code
  * @param number Number to format
  * @param currency ISO 4217 currency code
+ * @param maxLength Maximum length of the formatted string
+ * @param mode Formatting mode: 'value' for total balances (always 2 decimals or <$0.01), 'price' for unit prices (adaptive precision)
  */
-export const formatCurrency = (number: string | number, currency: string, maxLength = 6): string => {
+export const formatCurrency = (
+  number: string | number,
+  currency: string,
+  maxLength = 6,
+  mode: 'value' | 'price' = 'price',
+): string => {
   const float = Number(number)
 
-  let result = getCurrencyFormatter(currency, false, Math.abs(float) >= 1 || float === 0 ? 0 : 2).format(float)
+  // Value mode: Always 2 decimals for ≥$0.01, <$0.01 threshold, $0.00 for zero
+  if (mode === 'value') {
+    if (float === 0) {
+      const result = getCurrencyFormatter(currency, false, 2, 2).format(0)
+      return result.replace(/^(\D+)/, '$1 ')
+    }
 
-  // +1 for the currency symbol
-  if (result.length > maxLength + 1) {
-    result = getCurrencyFormatter(currency, true, 2).format(float)
+    if (Math.abs(float) < 0.01) {
+      // Get currency symbol for threshold display
+      const zeroFormatted = getCurrencyFormatter(currency, false, 2, 2).format(0)
+      const currencySymbol = zeroFormatted.match(/^(\D+)/)?.[1] || ''
+      const thresholdValue = getCurrencyFormatter(currency, false, 2, 2).format(0.01)
+      // Extract just the number part (0.01) from the formatted string, preserving hair space
+      const numberPart = thresholdValue.replace(/^(\D+)/, '').trim()
+      return `<${currencySymbol} ${numberPart}`
+    }
+
+    // Always 2 decimal places for values ≥ $0.01
+    const result = getCurrencyFormatter(currency, false, 2, 2).format(float)
+
+    return result.replace(/^(\D+)/, '$1 ')
   }
+
+  // Price mode: Adaptive precision
+  // Values ≥ $0.01: 2 decimal places
+  // Values $0.0001 - $0.0099: 4-6 decimals (adaptive)
+  // Values < $0.0001: 6 decimals or threshold
+  let maximumFractionDigits: number
+  let minimumFractionDigits: number
+
+  if (float === 0) {
+    maximumFractionDigits = 0
+    minimumFractionDigits = 0
+  } else if (Math.abs(float) >= 0.01) {
+    // Values ≥ $0.01: 2 decimal places
+    maximumFractionDigits = 2
+    minimumFractionDigits = 2
+  } else if (Math.abs(float) >= 0.0001) {
+    // Values $0.0001 - $0.0099: 4-6 decimals (adaptive based on magnitude)
+    // Use more decimals for smaller values
+    if (Math.abs(float) >= 0.001) {
+      maximumFractionDigits = 4
+      minimumFractionDigits = 4
+    } else {
+      maximumFractionDigits = 6
+      minimumFractionDigits = 4
+    }
+  } else {
+    // Values < $0.0001: 6 decimals or threshold
+    if (Math.abs(float) < 0.000001) {
+      // Extremely small values: show threshold
+      const zeroFormatted = getCurrencyFormatter(currency, false, 2, 2).format(0)
+      const currencySymbol = zeroFormatted.match(/^(\D+)/)?.[1] || ''
+      const thresholdValue = getCurrencyFormatter(currency, false, 6, 6).format(0.000001)
+      const numberPart = thresholdValue.replace(/^(\D+)/, '').trim()
+      return `<${currencySymbol} ${numberPart}`
+    }
+    maximumFractionDigits = 6
+    minimumFractionDigits = 6
+  }
+
+  const result = getCurrencyFormatter(currency, false, maximumFractionDigits, minimumFractionDigits).format(float)
 
   return result.replace(/^(\D+)/, '$1 ')
 }
