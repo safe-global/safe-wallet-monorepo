@@ -27,7 +27,7 @@ tags:
 - scrollUntilVisible:
     element:
       text: '.*0\.000001 MATIC.*'
-    centerElement: true    
+    centerElement: true
 
 - runFlow:
     file: ../../../../utils/components/pending-tx/tap-tx-card.yml
