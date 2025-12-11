@@ -13,21 +13,21 @@ export const HYPERNATIVE_OAUTH_CONFIG = {
   /**
    * OAuth authorization endpoint (Step 1 of OAuth flow)
    * User is redirected here to authorize the application
-   * Production: https://api.hypernative.io/oauth/authorize
+   * Production: https://api.hypernative.xyz/oauth/authorize
    */
   authUrl: process.env.NEXT_PUBLIC_HYPERNATIVE_AUTH_URL || 'https://mock-hn-auth.example.com/oauth/authorize',
 
   /**
    * OAuth token exchange endpoint (Step 2 of OAuth flow)
    * Used to exchange authorization code for access token
-   * Production: https://api.hypernative.io/oauth/token
+   * Production: https://api.hypernative.xyz/oauth/token
    */
   tokenUrl: process.env.NEXT_PUBLIC_HYPERNATIVE_TOKEN_URL || 'https://mock-hn-auth.example.com/oauth/token',
 
   /**
    * Hypernative API base URL
    * Used for threat analysis and other API calls
-   * Production: https://api.hypernative.io
+   * Production: https://api.hypernative.xyz
    */
   apiBaseUrl: process.env.NEXT_PUBLIC_HYPERNATIVE_API_URL || 'https://mock-hn-api.example.com',
 
