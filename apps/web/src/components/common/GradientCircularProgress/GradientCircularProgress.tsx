@@ -1,4 +1,4 @@
-import type { CircularProgressProps } from '@mui/material';
+import type { CircularProgressProps } from '@mui/material'
 import { CircularProgress } from '@mui/material'
 import { useMemo, useRef } from 'react'
 
