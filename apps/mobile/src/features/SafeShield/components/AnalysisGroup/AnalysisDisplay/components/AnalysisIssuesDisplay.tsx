@@ -30,6 +30,12 @@ export function AnalysisIssuesDisplay({ result }: AnalysisIssuesDisplayProps) {
   const issues = result.issues as MaliciousOrModerateThreatAnalysisResult['issues']
   const sortedIssues = sortByIssueSeverity(issues)
 
+  // Check if there are any actual issues to display (not just empty arrays)
+  const hasAnyIssues = sortedIssues.some(({ issues: issueArray }) => issueArray.length > 0)
+  if (!hasAnyIssues) {
+    return null
+  }
+
   let issueCounter = 0
 
   return (
@@ -38,8 +44,9 @@ export function AnalysisIssuesDisplay({ result }: AnalysisIssuesDisplayProps) {
         issues.map((issue, index) => {
           const globalIndex = issueCounter++
           const explorerLink =
-            activeChain?.blockExplorerUriTemplate &&
-            getExplorerLink(issue.address ?? '', activeChain.blockExplorerUriTemplate)
+            issue.address && activeChain?.blockExplorerUriTemplate
+              ? getExplorerLink(issue.address, activeChain.blockExplorerUriTemplate)
+              : undefined
 
           return (
             <AnalysisPaper key={`${severity}-${index}`} spaced={Boolean(explorerLink)}>
