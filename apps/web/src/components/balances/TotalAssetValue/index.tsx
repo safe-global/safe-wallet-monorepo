@@ -37,7 +37,7 @@ const TotalAssetValue = ({
             <>
               <FiatValue value={fiatTotal} precise />
               {isAllTokensMode && (
-                <InfoTooltip title="This total includes all tokens. Your portfolio total may differ." />
+                <InfoTooltip title="Total from this list only. Portfolio total includes positions and may use other token data." />
               )}
             </>
           ) : (
