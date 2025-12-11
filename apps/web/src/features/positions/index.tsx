@@ -9,7 +9,7 @@ import React from 'react'
 import PositionsUnavailable from './components/PositionsUnavailable'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import PositionsSkeleton from '@/features/positions/components/PositionsSkeleton'
-import RefreshPositionsButton from '@/features/positions/components/RefreshPositionsButton'
+import PortfolioRefreshHint from '@/features/portfolio/components/PortfolioRefreshHint'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 
@@ -31,16 +31,14 @@ export const Positions = () => {
   return (
     <Stack gap={2}>
       <Box>
-        <Box mb={2}>
-          <TotalAssetValue fiatTotal={positionsFiatTotal} title="Total positions value" />
-        </Box>
-
-        <Box mb={1} mt="-47px" display="flex" justifyContent="flex-end">
-          <RefreshPositionsButton entryPoint="Positions" label="Refresh positions" />
-        </Box>
+        <TotalAssetValue
+          fiatTotal={positionsFiatTotal}
+          title="Total positions value"
+          action={isPortfolioEndpointEnabled ? <PortfolioRefreshHint /> : undefined}
+        />
 
         {!isPortfolioEndpointEnabled && (
-          <Typography variant="caption" sx={{ color: 'text.secondary' }} mb={1}>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }} mt={2}>
             Position balances are not included in the total asset value.
           </Typography>
         )}

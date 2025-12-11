@@ -18,7 +18,7 @@ import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabl
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import CheckWallet from '@/components/common/CheckWallet'
 import OverviewSkeleton from './OverviewSkeleton'
-import RefreshPositionsButton from '@/features/positions/components/RefreshPositionsButton'
+import PortfolioRefreshHint from '@/features/portfolio/components/PortfolioRefreshHint'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
@@ -48,21 +48,18 @@ const Overview = (): ReactElement => {
 
   return (
     <Card sx={{ border: 0, px: 3, pt: 2.5, pb: 1.5 }} component="section">
+      {isPortfolioEndpointEnabled && (
+        <Box display="flex" justifyContent="flex-end" mb={-3}>
+          <PortfolioRefreshHint />
+        </Box>
+      )}
       <Box>
         <Stack
           direction={{ xs: 'column', md: 'row' }}
-          alignItems={{ xs: 'flex-start', md: 'center' }}
+          alignItems={{ xs: 'flex-start', md: 'flex-end' }}
           justifyContent="space-between"
         >
-          <TotalAssetValue
-            fiatTotal={balances.fiatTotal}
-            size="lg"
-            action={
-              isPortfolioEndpointEnabled ? (
-                <RefreshPositionsButton entryPoint="Dashboard" tooltip="Refresh balances" size="small" />
-              ) : undefined
-            }
-          />
+          <TotalAssetValue fiatTotal={balances.fiatTotal} size="lg" />
 
           {safe.deployed && (
             <Stack
