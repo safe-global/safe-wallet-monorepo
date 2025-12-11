@@ -75,11 +75,19 @@ export class ThreatAnalysisResultBuilder<
       .description('The transaction {reason_phrase} {classification_phrase}')
       .issues({
         [Severity.CRITICAL]: [
-          { description: 'Bulleted list from validation.features, grouped by Malicious first, then Warnings.' },
-          { description: 'Issue 2' },
-          { description: 'Issue 3' },
+          {
+            address: '0x1234567890123456789012345678901234567890',
+            description: 'Bulleted list from validation.features, grouped by Malicious first, then Warnings.',
+          },
+          {
+            address: '0x1234567890123456789012345678901234567890',
+            description: 'Issue 2',
+          },
         ],
-        [Severity.WARN]: [{ description: 'Issue 4' }, { description: 'Issue 5' }],
+        [Severity.WARN]: [
+          { description: 'Issue 4', address: '0x1234567890123456789012345678901234567890' },
+          { description: 'Issue without address' },
+        ],
         [Severity.INFO]: [{ description: 'Issue 6' }, { description: 'Issue 7' }],
       })
   }
@@ -92,7 +100,9 @@ export class ThreatAnalysisResultBuilder<
       .description('The transaction {reason_phrase} {classification_phrase}. Cancel this transaction.')
       .issues({
         [Severity.CRITICAL]: [
-          { description: 'Bulleted list from validation.features, grouped by Malicious first, then Warnings.' },
+          {
+            description: 'Bulleted list from validation.features, grouped by Malicious first, then Warnings.',
+          },
         ],
       })
   }

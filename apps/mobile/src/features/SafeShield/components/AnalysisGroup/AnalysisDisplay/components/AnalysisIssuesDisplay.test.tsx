@@ -3,11 +3,19 @@ import { AnalysisIssuesDisplay } from './AnalysisIssuesDisplay'
 import { ThreatAnalysisResultBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis-result.builder'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { RecipientAnalysisResultBuilder } from '@safe-global/utils/features/safe-shield/builders'
+import type { Address } from '@/src/types/address'
 
 describe('AnalysisIssuesDisplay', () => {
+  const initialStore = {
+    activeSafe: {
+      address: '0x1234567890123456789012345678901234567890' as Address,
+      chainId: '1',
+    },
+  }
+
   it('should render nothing when result has no issues', () => {
     const result = RecipientAnalysisResultBuilder.knownRecipient().build()
-    const { queryByText } = render(<AnalysisIssuesDisplay result={result} />)
+    const { queryByText } = render(<AnalysisIssuesDisplay result={result} />, { initialStore })
     // Component returns null, so no text should be found
     expect(queryByText(/issue/i)).toBeNull()
   })
@@ -20,7 +28,7 @@ describe('AnalysisIssuesDisplay', () => {
       })
       .build()
 
-    const { getByText } = render(<AnalysisIssuesDisplay result={result} />)
+    const { getByText } = render(<AnalysisIssuesDisplay result={result} />, { initialStore })
 
     expect(getByText('Critical issue 1')).toBeTruthy()
     expect(getByText('Critical issue 2')).toBeTruthy()
@@ -36,7 +44,7 @@ describe('AnalysisIssuesDisplay', () => {
       })
       .build()
 
-    const { getAllByText } = render(<AnalysisIssuesDisplay result={result} />)
+    const { getAllByText } = render(<AnalysisIssuesDisplay result={result} />, { initialStore })
 
     const issues = getAllByText(/issue/)
     expect(issues).toHaveLength(3)

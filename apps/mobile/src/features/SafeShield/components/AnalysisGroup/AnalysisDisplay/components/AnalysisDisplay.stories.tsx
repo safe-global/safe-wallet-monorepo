@@ -32,12 +32,12 @@ export const Basic: Story = {
 export const WithIssues: Story = {
   args: {
     result: ThreatAnalysisResultBuilder.malicious()
-      .description('This transaction contains potentially malicious activity.')
+      .description('The transaction contains a known malicious address.')
       .issues({
         [Severity.CRITICAL]: [
-          { description: 'Suspicious token transfer detected' },
-          { description: 'Unusual contract interaction pattern' },
-          { description: 'Potential phishing attempt' },
+          { description: 'This address has recorded malicious activity', address: faker.finance.ethereumAddress() },
+          { description: 'Unusual contract interaction pattern', address: faker.finance.ethereumAddress() },
+          { description: 'Potential phishing attempt', address: faker.finance.ethereumAddress() },
         ],
         [Severity.WARN]: [{ description: 'High gas usage detected' }],
       })
