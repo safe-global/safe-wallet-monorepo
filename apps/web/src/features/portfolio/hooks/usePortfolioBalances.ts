@@ -3,7 +3,6 @@ import { usePortfolioGetPortfolioV1Query, type Portfolio } from '@safe-global/st
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { PORTFOLIO_POLLING_INTERVAL } from '@/config/constants'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useLegacyBalances, useTokenListSetting, type PortfolioBalances } from '@/hooks/loadables/useLoadBalances'
 
@@ -54,9 +53,6 @@ const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
     },
     {
       skip: skip || !isReadyPortfolio || !safe.chainId,
-      pollingInterval: PORTFOLIO_POLLING_INTERVAL,
-      skipPollingIfUnfocused: true,
-      refetchOnFocus: true,
     },
   )
 
