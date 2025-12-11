@@ -28,7 +28,7 @@ tags:
 - scrollUntilVisible:
     element:
       text: '.*Pending bridge.*'
-    centerElement: true
+      index: 0
 
 - runFlow:
     file: ../../../../utils/components/pending-tx/tap-tx-card.yml
