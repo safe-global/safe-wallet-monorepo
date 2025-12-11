@@ -2,7 +2,8 @@ import type { NextPage } from 'next'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
-import { Box, CircularProgress, Typography, Alert } from '@mui/material'
+import { Box, Typography, Card, SvgIcon } from '@mui/material'
+import { GradientCircularProgress } from '@/components/common/GradientCircularProgress'
 import { setAuthCookie } from '@/features/hypernative/store/cookieStorage'
 import {
   HN_AUTH_SUCCESS_EVENT,
@@ -11,6 +12,9 @@ import {
   clearPkce,
 } from '@/features/hypernative/hooks/useHypernativeOAuth'
 import { HYPERNATIVE_OAUTH_CONFIG, getRedirectUri } from '@/features/hypernative/config/oauth'
+import InfoIcon from '@/public/images/notifications/info.svg'
+import CheckIcon from '@/public/images/common/check.svg'
+import { useDarkMode } from '@/hooks/useDarkMode'
 
 /**
  * OAuth callback page for Hypernative authentication
@@ -33,6 +37,7 @@ const HypernativeOAuthCallback: NextPage = () => {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [errorMessage, setErrorMessage] = useState<string>('')
   const hasProcessedRef = useRef(false)
+  const isDarkMode = useDarkMode()
 
   useEffect(() => {
     /**
@@ -167,39 +172,65 @@ const HypernativeOAuthCallback: NextPage = () => {
         minHeight="100vh"
         padding={3}
       >
-        {status === 'loading' && (
-          <>
-            <CircularProgress size={60} />
-            <Typography variant="h6" marginTop={3}>
-              Authentication in progress...
-            </Typography>
-            <Typography variant="body2" color="text.secondary" marginTop={1}>
-              Please wait while we complete your login
-            </Typography>
-          </>
-        )}
+        <Card
+          sx={{ p: 4, justifyItems: 'center', textAlign: 'center', borderRadius: 2, maxWidth: 433, width: { sm: 433 } }}
+        >
+          {status === 'loading' && (
+            <>
+              <GradientCircularProgress size={40} thickness={5} />
+              <Typography variant="h3" fontWeight={700} marginTop={3}>
+                Authentication in progress
+              </Typography>
+              <Typography variant="body2" color="text.secondary" marginTop={1}>
+                Hypernative authentication is in progress. Don’t close this window.
+              </Typography>
+            </>
+          )}
 
-        {status === 'success' && (
-          <>
-            <Typography variant="h6" color="success.main">
-              Authentication successful!
-            </Typography>
-            <Typography variant="body2" color="text.secondary" marginTop={1}>
-              This window will close automatically
-            </Typography>
-          </>
-        )}
+          {status === 'success' && (
+            <>
+              <Box
+                sx={{
+                  backgroundColor: 'success.background',
+                  width: 40,
+                  height: 40,
+                  borderRadius: 40,
+                  padding: 1,
+                }}
+              >
+                <SvgIcon component={CheckIcon} inheritViewBox color="success" width={20} height={20} />
+              </Box>
+              <Typography variant="h3" fontWeight={700} marginTop={3}>
+                Login successful
+              </Typography>
+              <Typography variant="body2" color="text.secondary" marginTop={1}>
+                You’re now signed in to Hypernative.
+              </Typography>
+            </>
+          )}
 
-        {status === 'error' && (
-          <>
-            <Alert severity="error" sx={{ maxWidth: 500, marginBottom: 2 }}>
-              {errorMessage}
-            </Alert>
-            <Typography variant="body2" color="text.secondary">
-              This window will close automatically. Please try again.
-            </Typography>
-          </>
-        )}
+          {status === 'error' && (
+            <>
+              <Box
+                sx={{
+                  backgroundColor: isDarkMode ? 'info.background' : 'info.light',
+                  width: 40,
+                  height: 40,
+                  borderRadius: 40,
+                  padding: 1,
+                }}
+              >
+                <SvgIcon component={InfoIcon} inheritViewBox color="info" width={20} height={20} />
+              </Box>
+              <Typography variant="h3" fontWeight={700} marginTop={3}>
+                Something went wrong
+              </Typography>
+              <Typography variant="body2" color="text.secondary" marginTop={1}>
+                {errorMessage}
+              </Typography>
+            </>
+          )}
+        </Card>
       </Box>
     </>
   )
