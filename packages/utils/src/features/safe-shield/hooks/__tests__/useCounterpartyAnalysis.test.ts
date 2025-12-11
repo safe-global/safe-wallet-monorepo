@@ -605,11 +605,7 @@ describe('useCounterpartyAnalysis', () => {
         }),
       )
 
-      expect(result.current.recipient).toBeDefined()
-      if (result.current.recipient) {
-        const [results] = result.current.recipient
-        expect(results).toEqual({})
-      }
+      expect(result.current.recipient).toBeUndefined()
     })
 
     it('should return contract data when available', async () => {

@@ -50,7 +50,7 @@ export const SafeShieldDetailsSheetContainer = () => {
   }, [threat])
 
   return (
-    <SafeBottomSheet snapPoints={['100%']} loading={false}>
+    <SafeBottomSheet snapPoints={[]} loading={false}>
       {Platform.OS === 'ios' && <ToastViewport multipleToasts={false} left={0} right={0} />}
 
       <AnalysisDetails recipient={recipientData} contract={contractData} threat={threatData} safeTx={safeTx} />

@@ -20,15 +20,17 @@ interface SafeShieldWidgetProps {
 }
 export const AnalysisDetails = ({ recipient, contract, threat, safeTx }: SafeShieldWidgetProps) => {
   // Extract data, error, and loading from each AsyncResult
-  const [recipientData] = recipient || []
-  const [contractData] = contract || []
-  const [threatData] = threat || []
+  const [recipientData, recipientError] = recipient || []
+  const [contractData, contractError] = contract || []
+  const [threatData, threatError] = threat || []
 
+  const hasAnyError = !!recipientError || !!contractError || !!threatError || !safeTx
   const overallStatus = getOverallStatus(recipientData, contractData, threatData) ?? null
 
+  const severity = hasAnyError ? Severity.ERROR : overallStatus?.severity || Severity.OK
   return (
     <View backgroundColor="$background" width="100%" borderRadius={12} padding="$1">
-      <AnalysisDetailsHeader severity={overallStatus?.severity || Severity.OK} />
+      <AnalysisDetailsHeader severity={severity} />
 
       <AnalysisDetailsContent recipient={recipient} contract={contract} threat={threat} safeTx={safeTx} />
     </View>
