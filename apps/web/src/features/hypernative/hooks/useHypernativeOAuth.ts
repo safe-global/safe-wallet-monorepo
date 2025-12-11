@@ -162,7 +162,8 @@ async function generateCodeChallenge(verifier: string): Promise<string> {
  * @returns Complete OAuth authorization URL
  */
 async function buildAuthUrl(): Promise<string> {
-  const { authUrl, clientId, scope } = HYPERNATIVE_OAUTH_CONFIG
+  const { authUrl, clientId } = HYPERNATIVE_OAUTH_CONFIG
+
   const redirectUri = getRedirectUri()
 
   // Generate PKCE code verifier using base64url encoding of 32 random bytes
@@ -185,7 +186,6 @@ async function buildAuthUrl(): Promise<string> {
     response_type: 'code',
     client_id: clientId,
     redirect_uri: redirectUri,
-    scope,
     state,
     code_challenge: codeChallenge,
     code_challenge_method: 'S256',

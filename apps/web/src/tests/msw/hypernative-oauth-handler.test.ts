@@ -37,7 +37,6 @@ describe('Hypernative OAuth Token Exchange Handler', () => {
       access_token: expect.stringMatching(/^mock-hn-token-\d+$/),
       token_type: 'Bearer',
       expires_in: 600,
-      scope: 'read',
     })
   })
 

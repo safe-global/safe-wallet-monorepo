@@ -45,7 +45,6 @@ jest.mock('../../config/oauth', () => {
       apiBaseUrl: 'https://mock-hn-api.example.com',
       clientId: 'SAFE_WALLET_SPA',
       redirectUri: '',
-      scope: 'read',
     },
     get getRedirectUri() {
       return mockGetRedirectUri

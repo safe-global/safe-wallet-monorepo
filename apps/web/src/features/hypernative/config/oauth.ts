@@ -45,13 +45,6 @@ export const HYPERNATIVE_OAUTH_CONFIG = {
    * Must be pre-registered with Hypernative
    */
   redirectUri: process.env.NEXT_PUBLIC_HYPERNATIVE_REDIRECT_URI || '',
-
-  /**
-   * OAuth scopes
-   * Permissions requested from the user
-   * Hypernative OAuth tokens are read-only by default
-   */
-  scope: 'read',
 } as const
 
 /**
