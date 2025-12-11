@@ -59,7 +59,15 @@ export const AnalysisGroupCardItem = ({
                 variant="body2"
                 color="text.secondary"
                 onClick={() => setIsReportModalOpen(true)}
-                sx={{ cursor: 'pointer', textAlign: 'left', textDecoration: 'none', fontWeight: 'normal' }}
+                sx={{
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  textDecoration: 'none',
+                  fontWeight: 400,
+                  fontSize: '12px',
+                  lineHeight: '16px',
+                  letterSpacing: '1px',
+                }}
               >
                 Report false result
               </Link>
