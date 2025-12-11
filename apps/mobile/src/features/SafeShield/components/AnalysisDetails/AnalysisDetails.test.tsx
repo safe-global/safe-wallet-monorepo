@@ -3,12 +3,21 @@ import { AnalysisDetails } from './AnalysisDetails'
 import { RecipientAnalysisBuilder, ContractAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
 import { FullAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
 import { faker } from '@faker-js/faker'
+import type { Address } from '@/src/types/address'
 import { SafeTransaction } from '@safe-global/types-kit'
 
 describe('AnalysisDetails', () => {
+  const initialStore = {
+    activeSafe: {
+      address: '0x1234567890123456789012345678901234567890' as Address,
+      chainId: '1',
+    },
+  }
+
   it('should render with default OK severity when no data is provided', () => {
     const { getByText } = render(
       <AnalysisDetails safeTx={{ txHash: faker.finance.ethereumAddress() } as unknown as SafeTransaction} />,
+      { initialStore },
     )
     expect(getByText('Checks passed')).toBeTruthy()
   })
@@ -22,6 +31,7 @@ describe('AnalysisDetails', () => {
         recipient={recipient}
         safeTx={{ txHash: faker.finance.ethereumAddress() } as unknown as SafeTransaction}
       />,
+      { initialStore },
     )
 
     expect(getByText('Checks passed')).toBeTruthy()
@@ -33,9 +43,10 @@ describe('AnalysisDetails', () => {
 
     const { getByText } = render(
       <AnalysisDetails
-        contract={contract}
         safeTx={{ txHash: faker.finance.ethereumAddress() } as unknown as SafeTransaction}
+        contract={contract}
       />,
+      { initialStore },
     )
 
     expect(getByText(/Review details|Issues found/i)).toBeTruthy()
@@ -46,9 +57,10 @@ describe('AnalysisDetails', () => {
 
     const { getByText } = render(
       <AnalysisDetails
-        threat={threat}
         safeTx={{ txHash: faker.finance.ethereumAddress() } as unknown as SafeTransaction}
+        threat={threat}
       />,
+      { initialStore },
     )
 
     expect(getByText('Risk detected')).toBeTruthy()
@@ -64,10 +76,13 @@ describe('AnalysisDetails', () => {
     const { getByText } = render(
       <AnalysisDetails
         recipient={recipient}
+        safeTx={{ txHash: faker.finance.ethereumAddress() } as unknown as SafeTransaction}
         contract={contract}
         threat={threat}
-        safeTx={{ txHash: faker.finance.ethereumAddress() } as unknown as SafeTransaction}
       />,
+      {
+        initialStore,
+      },
     )
 
     // Should show the highest severity (CRITICAL from threat)
@@ -84,10 +99,13 @@ describe('AnalysisDetails', () => {
     const { getByText } = render(
       <AnalysisDetails
         recipient={recipient}
+        safeTx={{ txHash: faker.finance.ethereumAddress() } as unknown as SafeTransaction}
         contract={contract}
         threat={threat}
-        safeTx={{ txHash: faker.finance.ethereumAddress() } as unknown as SafeTransaction}
       />,
+      {
+        initialStore,
+      },
     )
 
     // Should show OK when all are safe
@@ -101,6 +119,7 @@ describe('AnalysisDetails', () => {
         recipient={recipient}
         safeTx={{ txHash: faker.finance.ethereumAddress() } as unknown as SafeTransaction}
       />,
+      { initialStore },
     )
 
     // Should still render with default OK severity
@@ -110,7 +129,7 @@ describe('AnalysisDetails', () => {
   it('should handle error state', () => {
     const error = new Error('Test error')
     const recipient: [undefined, Error, boolean] = [undefined, error, false]
-    const { getByText } = render(<AnalysisDetails recipient={recipient} />)
+    const { getByText } = render(<AnalysisDetails recipient={recipient} />, { initialStore })
 
     // Should show "Checks unavailable" when there are errors
     expect(getByText('Checks unavailable')).toBeTruthy()

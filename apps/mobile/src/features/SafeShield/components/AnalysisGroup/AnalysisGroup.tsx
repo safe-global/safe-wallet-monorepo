@@ -35,12 +35,12 @@ export const AnalysisGroup = ({ data, highlightedSeverity }: AnalysisGroup) => {
         const shouldHighlight = isHighlighted && isPrimary && result.severity === primarySeverity
 
         if (result.type === ContractStatus.UNEXPECTED_DELEGATECALL) {
-          return <DelegateCallItem key={result.title} result={result} isPrimary={isPrimary} />
+          return <DelegateCallItem key={`${result.title}-${index}`} result={result} isPrimary={isPrimary} />
         }
 
         return (
           <AnalysisDisplay
-            key={result.title}
+            key={`${result.title}-${index}`}
             severity={shouldHighlight ? result.severity : undefined}
             result={result}
           />

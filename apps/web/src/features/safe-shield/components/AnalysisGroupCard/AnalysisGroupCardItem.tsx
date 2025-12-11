@@ -1,6 +1,10 @@
 import { Stack, Typography } from '@mui/material'
 import { Box } from '@mui/material'
-import { type Severity, type AnalysisResult } from '@safe-global/utils/features/safe-shield/types'
+import {
+  type Severity,
+  type AnalysisResult,
+  type MaliciousOrModerateThreatAnalysisResult,
+} from '@safe-global/utils/features/safe-shield/types'
 import { isAddressChange } from '@safe-global/utils/features/safe-shield/utils'
 import { SEVERITY_COLORS } from '../../constants'
 import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
@@ -17,6 +21,8 @@ interface AnalysisGroupCardItemProps {
 export const AnalysisGroupCardItem = ({ result, description, severity, showImage }: AnalysisGroupCardItemProps) => {
   const borderColor = severity ? SEVERITY_COLORS[severity].main : 'var(--color-border-main)'
   const displayDescription = description ?? result.description
+  // Double-check in case if issues are undefined:
+  const hasIssues = 'issues' in result && !!(result as MaliciousOrModerateThreatAnalysisResult).issues
 
   return (
     <Box bgcolor="background.main" borderRadius="4px" overflow="hidden">
@@ -30,7 +36,10 @@ export const AnalysisGroupCardItem = ({ result, description, severity, showImage
 
           {isAddressChange(result) && <AddressChanges result={result} />}
 
-          {result.addresses?.length && <ShowAllAddress addresses={result.addresses} showImage={showImage} />}
+          {/* Only show ShowAllAddress dropdown if there are no issues (to avoid duplication) */}
+          {!hasIssues && result.addresses?.length && (
+            <ShowAllAddress addresses={result.addresses} showImage={showImage} />
+          )}
         </Stack>
       </Box>
     </Box>

@@ -121,8 +121,8 @@ export type MasterCopyChangeThreatAnalysisResult = AnalysisResult<ThreatStatus.M
 }
 
 export type ThreatIssue = {
-  address?: string
   description: string
+  address?: string
 }
 
 export type MaliciousOrModerateThreatAnalysisResult = AnalysisResult<ThreatStatus.MALICIOUS | ThreatStatus.MODERATE> & {

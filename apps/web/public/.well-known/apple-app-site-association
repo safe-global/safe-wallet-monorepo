@@ -8,7 +8,9 @@
                     "ZKG876RKJ8.io.gnosis.multisig.dev.mainnet",
                     "ZKG876RKJ8.io.gnosis.multisig.dev.rinkeby",
                     "ZKG876RKJ8.io.gnosis.multisig.staging.mainnet",
-                    "ZKG876RKJ8.io.gnosis.multisig.staging.rinkeby"
+                    "ZKG876RKJ8.io.gnosis.multisig.staging.rinkeby",
+                    "86487MHG6V.global.safe.mobileapp.ios",
+                    "86487MHG6V.global.safe.mobileapp.ios.dev"
                 ],
                 "components": [
                     {

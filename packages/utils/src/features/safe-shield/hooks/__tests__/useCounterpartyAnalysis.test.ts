@@ -605,7 +605,9 @@ describe('useCounterpartyAnalysis', () => {
         }),
       )
 
-      expect(result.current.recipient).toBeUndefined()
+      expect(result.current.recipient).toBeDefined()
+      const [recipientResults] = result.current.recipient
+      expect(recipientResults).toBeUndefined()
     })
 
     it('should return contract data when available', async () => {
@@ -660,7 +662,9 @@ describe('useCounterpartyAnalysis', () => {
         }),
       )
 
-      expect(result.current.contract).toBeUndefined()
+      expect(result.current.contract).toBeDefined()
+      const [contract] = result.current.contract!
+      expect(contract).toBeUndefined()
     })
 
     it('should return both recipient and contract data when both available', async () => {
@@ -933,7 +937,10 @@ describe('useCounterpartyAnalysis', () => {
         }),
       )
 
-      expect(result.current.recipient).toBeUndefined()
+      expect(result.current.recipient).toBeDefined()
+      const [recipientResults, , isLoading] = result.current.recipient!
+      expect(recipientResults).toBeUndefined()
+      expect(isLoading).toBe(true)
     })
 
     it('should propagate loading state from mutation to contract', async () => {
@@ -996,7 +1003,10 @@ describe('useCounterpartyAnalysis', () => {
       )
 
       // Hook waits for all checks to complete, so results are undefined while activity check is loading
-      expect(result.current.recipient).toBeUndefined()
+      expect(result.current.recipient).toBeDefined()
+      const [recipientResults, , isLoading] = result.current.recipient!
+      expect(recipientResults).toBeUndefined()
+      expect(isLoading).toBe(true)
     })
 
     it('should not return recipient results when both mutation and activity check are loading', async () => {
@@ -1027,7 +1037,10 @@ describe('useCounterpartyAnalysis', () => {
       )
 
       // Hook waits for all checks to complete, so results are undefined while loading
-      expect(result.current.recipient).toBeUndefined()
+      expect(result.current.recipient).toBeDefined()
+      const [recipientResults, , isLoading] = result.current.recipient!
+      expect(recipientResults).toBeUndefined()
+      expect(isLoading).toBe(true)
     })
   })
 

@@ -1,5 +1,5 @@
 import { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { Severity, ThreatIssue, type GroupedAnalysisResults, type ThreatAnalysisResults } from '../types'
+import { Severity, type GroupedAnalysisResults, type ThreatAnalysisResults, type ThreatIssue } from '../types'
 import isEmpty from 'lodash/isEmpty'
 
 /**
