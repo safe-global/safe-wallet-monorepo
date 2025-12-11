@@ -131,8 +131,9 @@ const SrcEthHashInfo = ({
             gap={0.5}
             sx={showShieldIcon ? accountStylesWithShieldEnabled : undefined}
           >
-            <Box overflow="hidden" textOverflow="ellipsis">
-              {name}
+            <Box overflow="hidden" whiteSpace="nowrap">
+              {/* Trim long names: */}
+              {showShieldIcon && name.length > 15 ? `${name.slice(0, 15)}...` : name}
             </Box>
 
             {showShieldIcon ? (
