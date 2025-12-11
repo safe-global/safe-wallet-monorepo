@@ -1,8 +1,7 @@
-import { sentryCaptureException } from '@/services/sentry'
 import { IS_PRODUCTION } from '@/config/constants'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { logger } from '../datadog'
+import { logger, captureException } from '../observability'
 
 export class CodedException extends Error {
   public readonly code: number
@@ -53,7 +52,7 @@ export class CodedException extends Error {
     this.log()
 
     if (IS_PRODUCTION) {
-      sentryCaptureException(this)
+      captureException(this)
     }
   }
 }
