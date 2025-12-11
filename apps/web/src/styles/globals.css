@@ -100,7 +100,7 @@ svg .shield-lines {
 }
 
 svg.OK .shield-img {
-  fill: #12FF80;
+  fill: var(--color-text-brand);
 }
 svg.INFO .shield-img {
   fill: var(--color-info-main);
