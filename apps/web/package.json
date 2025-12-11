@@ -40,9 +40,6 @@
   },
   "dependencies": {
     "@cowprotocol/widget-react": "^0.13.0",
-    "@datadog/browser-logs": "^6.24.1",
-    "@datadog/browser-rum": "^6.24.1",
-    "@datadog/browser-rum-react": "^6.24.1",
     "@ducanh2912/next-pwa": "^10.2.9",
     "@emotion/cache": "^11.13.5",
     "@emotion/react": "^11.13.5",
@@ -65,7 +62,6 @@
     "@safe-global/safe-deployments": "^1.37.49",
     "@safe-global/safe-modules-deployments": "^2.2.21",
     "@safe-global/store": "workspace:^",
-    "@sentry/react": "^7.91.0",
     "@walletconnect/core": "^2.21.10",
     "@walletconnect/utils": "^2.21.10",
     "@web3-onboard/coinbase": "^2.4.2",
@@ -95,6 +91,12 @@
     "react-redux": "^9.1.2",
     "semver": "^7.7.1",
     "zodiac-roles-deployments": "^2.3.4"
+  },
+  "optionalDependencies": {
+    "@datadog/browser-logs": "^6.24.1",
+    "@datadog/browser-rum": "^6.24.1",
+    "@datadog/browser-rum-react": "^6.24.1",
+    "@sentry/react": "^7.91.0"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^4.1.2",
