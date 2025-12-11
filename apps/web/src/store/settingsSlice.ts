@@ -46,7 +46,9 @@ export const initialState: SettingsState = {
 
   hiddenTokens: {},
 
-  hideDust: true,
+  // hideDust is undefined by default to allow the useHideDust hook to determine
+  // the default based on the PORTFOLIO_ENDPOINT (Zerion) feature flag
+  hideDust: undefined,
 
   hideSuspiciousTransactions: true,
 
