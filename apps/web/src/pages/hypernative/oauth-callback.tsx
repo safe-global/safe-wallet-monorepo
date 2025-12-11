@@ -217,7 +217,10 @@ async function exchangeCodeForToken(
   code: string,
   codeVerifier: string,
 ): Promise<{ access_token: string; expires_in: number; token_type: string }> {
-  const { tokenUrl, clientId } = HYPERNATIVE_OAUTH_CONFIG
+  // @todo: remove this after testing
+  const tokenUrl = 'https://api.hypernative.xyz/oauth/token'
+  const { clientId } = HYPERNATIVE_OAUTH_CONFIG
+  // const { tokenUrl, clientId } = HYPERNATIVE_OAUTH_CONFIG
 
   // Get redirect URI (must match the one used in authorization request)
   const redirectUri = getRedirectUri()
