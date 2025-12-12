@@ -24,7 +24,7 @@ const shieldLogoOnHover = {
       fill: 'var(--color-background-lightGrey)',
     },
     '& .shield-img': {
-      fill: 'var(--color-text-brand)',
+      fill: 'var(--color-static-text-brand)',
       transition: 'fill 0.2s ease',
     },
     '& .shield-lines': {
