@@ -75,6 +75,9 @@ const PortfolioRefreshHint = ({
 
   return (
     <Box display="flex" alignItems="center" gap={0.5}>
+      <Typography variant="caption" color="text.secondary">
+        {isFetching ? 'Fetching data' : timeAgo ? <>Updated {timeAgo} ago</> : 'Loading...'}
+      </Typography>
       <Tooltip title={tooltip} arrow>
         <span style={{ display: 'inline-flex' }}>
           <IconButton
@@ -88,9 +91,6 @@ const PortfolioRefreshHint = ({
           </IconButton>
         </span>
       </Tooltip>
-      <Typography variant="caption" color="text.secondary">
-        {isFetching ? 'Fetching data' : timeAgo ? <>Updated {timeAgo} ago</> : 'Loading...'}
-      </Typography>
     </Box>
   )
 }
