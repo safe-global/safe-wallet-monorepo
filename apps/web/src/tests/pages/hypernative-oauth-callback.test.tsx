@@ -1,4 +1,5 @@
-import { render, waitFor, screen } from '@testing-library/react'
+import { waitFor, screen } from '@testing-library/react'
+import { render } from '@/tests/test-utils'
 import { useRouter } from 'next/router'
 import HypernativeOAuthCallback from '../../pages/hypernative/oauth-callback'
 
@@ -89,9 +90,11 @@ describe('HypernativeOAuthCallback', () => {
     global.fetch = mockFetch as unknown as typeof fetch
 
     const mockJsonFn = jest.fn().mockResolvedValue({
-      access_token: 'test-access-token',
-      expires_in: 3600,
-      token_type: 'Bearer',
+      data: {
+        access_token: 'test-access-token',
+        expires_in: 3600,
+        token_type: 'Bearer',
+      },
     })
     mockFetch.mockImplementation(() =>
       Promise.resolve({
@@ -110,7 +113,9 @@ describe('HypernativeOAuthCallback', () => {
   it('should show loading state initially', () => {
     render(<HypernativeOAuthCallback />)
 
-    expect(screen.getByText('Authentication in progress...')).toBeInTheDocument()
+    expect(screen.getByText('Authentication in progress')).toBeInTheDocument()
+    expect(screen.getByText(/Hypernative authentication is in progress/i)).toBeInTheDocument()
+    expect(screen.getByText(/close this window/i)).toBeInTheDocument()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
 
@@ -123,7 +128,7 @@ describe('HypernativeOAuthCallback', () => {
     render(<HypernativeOAuthCallback />)
 
     // Should still show loading, not try to process
-    expect(screen.getByText('Authentication in progress...')).toBeInTheDocument()
+    expect(screen.getByText('Authentication in progress')).toBeInTheDocument()
     expect(mockFetch).not.toHaveBeenCalled()
   })
 
@@ -152,10 +157,12 @@ describe('HypernativeOAuthCallback', () => {
     // Wait for success state
     await waitFor(
       () => {
-        expect(screen.getByText('Authentication successful!')).toBeInTheDocument()
+        expect(screen.getByText('Login successful')).toBeInTheDocument()
       },
       { timeout: 3000 },
     )
+
+    expect(screen.getByText(/signed in to Hypernative/i)).toBeInTheDocument()
 
     // Check that URL history was cleaned
     expect(mockReplaceState).toHaveBeenCalledWith(
@@ -192,6 +199,7 @@ describe('HypernativeOAuthCallback', () => {
     render(<HypernativeOAuthCallback />)
 
     await waitFor(() => {
+      expect(screen.getByText('Something went wrong')).toBeInTheDocument()
       expect(screen.getByText(/Missing authorization code in callback URL/)).toBeInTheDocument()
     })
 
@@ -221,6 +229,7 @@ describe('HypernativeOAuthCallback', () => {
     render(<HypernativeOAuthCallback />)
 
     await waitFor(() => {
+      expect(screen.getByText('Something went wrong')).toBeInTheDocument()
       expect(screen.getByText(/Missing state parameter in callback URL/)).toBeInTheDocument()
     })
 
@@ -253,6 +262,7 @@ describe('HypernativeOAuthCallback', () => {
     render(<HypernativeOAuthCallback />)
 
     await waitFor(() => {
+      expect(screen.getByText('Something went wrong')).toBeInTheDocument()
       expect(screen.getByText(/Invalid OAuth state parameter - possible CSRF attack/)).toBeInTheDocument()
     })
 
@@ -285,6 +295,7 @@ describe('HypernativeOAuthCallback', () => {
     render(<HypernativeOAuthCallback />)
 
     await waitFor(() => {
+      expect(screen.getByText('Something went wrong')).toBeInTheDocument()
       expect(screen.getByText(/Missing PKCE code verifier - authentication flow corrupted/)).toBeInTheDocument()
     })
 
@@ -317,6 +328,7 @@ describe('HypernativeOAuthCallback', () => {
     render(<HypernativeOAuthCallback />)
 
     await waitFor(() => {
+      expect(screen.getByText('Something went wrong')).toBeInTheDocument()
       expect(screen.getByText(/OAuth authorization failed: User denied authorization/)).toBeInTheDocument()
     })
 
@@ -363,8 +375,8 @@ describe('HypernativeOAuthCallback', () => {
 
     await waitFor(
       () => {
-        const alert = screen.getByRole('alert')
-        expect(alert).toHaveTextContent('Token exchange failed: 400 invalid_grant')
+        expect(screen.getByText('Something went wrong')).toBeInTheDocument()
+        expect(screen.getByText('Token exchange failed: 400 invalid_grant')).toBeInTheDocument()
       },
       { timeout: 3000 },
     )
@@ -399,8 +411,10 @@ describe('HypernativeOAuthCallback', () => {
     // Mock token response missing required fields - reset and override the default mock BEFORE rendering
     mockFetch.mockReset()
     const mockJsonFn = jest.fn().mockResolvedValue({
-      token_type: 'Bearer',
-      // Missing access_token and expires_in
+      data: {
+        token_type: 'Bearer',
+        // Missing access_token and expires_in
+      },
     })
     mockFetch.mockImplementation(() =>
       Promise.resolve({
@@ -415,8 +429,8 @@ describe('HypernativeOAuthCallback', () => {
 
     await waitFor(
       () => {
-        const alert = screen.getByRole('alert')
-        expect(alert).toHaveTextContent('Invalid token response: missing access_token or expires_in')
+        expect(screen.getByText('Something went wrong')).toBeInTheDocument()
+        expect(screen.getByText('Invalid token response: missing access_token or expires_in')).toBeInTheDocument()
       },
       { timeout: 3000 },
     )
@@ -457,9 +471,11 @@ describe('HypernativeOAuthCallback', () => {
 
     // Setup fetch mock for successful token exchange
     const mockJsonFn = jest.fn().mockResolvedValue({
-      access_token: 'test-access-token',
-      expires_in: 3600,
-      token_type: 'Bearer',
+      data: {
+        access_token: 'test-access-token',
+        expires_in: 3600,
+        token_type: 'Bearer',
+      },
     })
     mockFetch.mockResolvedValue({
       ok: true,
@@ -472,10 +488,12 @@ describe('HypernativeOAuthCallback', () => {
 
     await waitFor(
       () => {
-        expect(screen.getByText('Authentication successful!')).toBeInTheDocument()
+        expect(screen.getByText('Login successful')).toBeInTheDocument()
       },
       { timeout: 3000 },
     )
+
+    expect(screen.getByText(/signed in to Hypernative/i)).toBeInTheDocument()
 
     // Check that URL history was cleaned
     expect(mockReplaceState).toHaveBeenCalled()
@@ -528,6 +546,7 @@ describe('HypernativeOAuthCallback', () => {
 
     // Wait for error
     await waitFor(() => {
+      expect(screen.getByText('Something went wrong')).toBeInTheDocument()
       expect(screen.getByText(/Invalid OAuth state parameter/)).toBeInTheDocument()
     })
 
