@@ -13,8 +13,6 @@ export type HypernativeAuthStatus = {
   isAuthenticated: boolean
   /** Whether the current token has expired */
   isTokenExpired: boolean
-  /** Whether authentication flow is in progress */
-  loading: boolean
   /** Initiates OAuth login flow (popup or new tab) */
   initiateLogin: () => void
   /** Clears authentication token and logs out user */
@@ -212,7 +210,6 @@ async function buildAuthUrl(): Promise<string> {
  */
 export const useHypernativeOAuth = (): HypernativeAuthStatus => {
   const dispatch = useAppDispatch()
-  const [loading, setLoading] = useState(false)
   const [authState, setAuthState] = useState({
     isAuthenticated: isAuthenticated(),
     isTokenExpired: isExpired(),
@@ -255,7 +252,6 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
    * Clean up after authentication completes (success or error)
    */
   const cleanupAfterAuth = useCallback(() => {
-    setLoading(false)
     clearAllTimers()
     closePopup()
   }, [clearAllTimers, closePopup])
@@ -305,7 +301,6 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
    */
   const showPopupBlockedNotification = useCallback(
     (authUrl: string) => {
-      setLoading(false)
       dispatch(
         showNotification({
           message: 'Popup blocked. Click the link below to complete authentication.',
@@ -325,7 +320,6 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
    * Show notification when authentication is cancelled
    */
   const showAuthCancelledNotification = useCallback(() => {
-    setLoading(false)
     dispatch(
       showNotification({
         message: 'Authentication cancelled. Please try again to log in to Hypernative.',
@@ -336,7 +330,7 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
   }, [dispatch])
 
   /**
-   * Set up timeout fallback to reset loading state if no message is received
+   * Set up timeout fallback to show cancelled notification if no message is received
    */
   const setupTimeoutFallback = useCallback(() => {
     fallbackTimeoutRef.current = setTimeout(
@@ -400,7 +394,6 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
   const handleOAuthError = useCallback(
     (error: unknown) => {
       console.error('Failed to initiate Hypernative OAuth:', error)
-      setLoading(false)
       clearAllTimers()
     },
     [clearAllTimers],
@@ -445,7 +438,6 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
    * - In real mode: open popup/tab with OAuth authorization URL
    */
   const initiateLogin = useCallback(async () => {
-    setLoading(true)
     hasReceivedMessageRef.current = false
     clearAllTimers()
 
@@ -457,11 +449,6 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
 
         const mockToken = `mock-token-${Date.now()}`
         setAuthCookie(mockToken, MOCK_TOKEN_EXPIRES_IN)
-        setAuthState({
-          isAuthenticated: isAuthenticated(),
-          isTokenExpired: isExpired(),
-        })
-        setLoading(false)
         return
       }
 
@@ -515,7 +502,6 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
   return {
     isAuthenticated: authState.isAuthenticated,
     isTokenExpired: authState.isTokenExpired,
-    loading,
     initiateLogin,
     logout,
   }

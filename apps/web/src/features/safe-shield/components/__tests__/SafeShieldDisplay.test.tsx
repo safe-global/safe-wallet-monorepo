@@ -237,7 +237,6 @@ describe('SafeShieldDisplay', () => {
           hypernativeAuth={{
             isAuthenticated: false,
             isTokenExpired: false,
-            loading: false,
             initiateLogin: jest.fn(),
             logout: jest.fn(),
           }}
@@ -253,7 +252,6 @@ describe('SafeShieldDisplay', () => {
           hypernativeAuth={{
             isAuthenticated: true,
             isTokenExpired: true,
-            loading: false,
             initiateLogin: jest.fn(),
             logout: jest.fn(),
           }}
@@ -270,7 +268,6 @@ describe('SafeShieldDisplay', () => {
           hypernativeAuth={{
             isAuthenticated: true,
             isTokenExpired: false,
-            loading: false,
             initiateLogin: jest.fn(),
             logout: jest.fn(),
           }}
@@ -279,22 +276,6 @@ describe('SafeShieldDisplay', () => {
 
       expect(screen.queryByText('Authentication required')).not.toBeInTheDocument()
       expect(screen.getByText('Checks passed')).toBeInTheDocument()
-    })
-
-    it('should not show authentication required when auth is loading', () => {
-      render(
-        <SafeShieldDisplay
-          hypernativeAuth={{
-            isAuthenticated: false,
-            isTokenExpired: false,
-            loading: true,
-            initiateLogin: jest.fn(),
-            logout: jest.fn(),
-          }}
-        />,
-      )
-
-      expect(screen.queryByText('Authentication required')).not.toBeInTheDocument()
     })
 
     it('should not show authentication required when hypernativeAuth is not provided', () => {

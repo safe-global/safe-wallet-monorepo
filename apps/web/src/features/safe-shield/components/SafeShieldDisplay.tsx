@@ -61,10 +61,7 @@ export const SafeShieldDisplay = ({
   const isDarkMode = useDarkMode()
 
   const hnLoginRequired = useMemo(
-    () =>
-      hypernativeAuth !== undefined &&
-      (!hypernativeAuth.isAuthenticated || hypernativeAuth.isTokenExpired) &&
-      !hypernativeAuth.loading,
+    () => hypernativeAuth !== undefined && (!hypernativeAuth.isAuthenticated || hypernativeAuth.isTokenExpired),
     [hypernativeAuth],
   )
 

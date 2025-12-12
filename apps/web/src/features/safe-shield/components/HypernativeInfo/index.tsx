@@ -1,5 +1,5 @@
 import { type ReactElement } from 'react'
-import { Box, Button, CircularProgress, SvgIcon, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, SvgIcon, Stack, Tooltip, Typography } from '@mui/material'
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded'
 import ExternalLink from '@/components/common/ExternalLink'
 import SafeShieldLogo from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
@@ -24,7 +24,7 @@ export const HypernativeInfo = ({
     return null
   }
 
-  const { isAuthenticated, isTokenExpired, loading: authLoading, initiateLogin } = hypernativeAuth
+  const { isAuthenticated, isTokenExpired, initiateLogin } = hypernativeAuth
 
   // Show login card if user is not authenticated or token is expired
   const showLoginCard = !isAuthenticated || isTokenExpired
@@ -80,18 +80,11 @@ export const HypernativeInfo = ({
             <Button
               variant="outlined"
               onClick={initiateLogin}
-              disabled={authLoading}
               size="small"
               sx={{ width: 'fit-content', py: 0.5, px: 2 }}
-              endIcon={
-                authLoading ? (
-                  <CircularProgress size={16} color="inherit" />
-                ) : (
-                  <SvgIcon component={OpenInNewRoundedIcon} fontSize="small" />
-                )
-              }
+              endIcon={<SvgIcon component={OpenInNewRoundedIcon} fontSize="small" />}
             >
-              {authLoading ? 'Authenticating...' : 'Log in'}
+              Log in
             </Button>
           </Stack>
         </Box>

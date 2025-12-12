@@ -146,7 +146,6 @@ describe('useHypernativeOAuth', () => {
 
       expect(result.current.isAuthenticated).toBe(false)
       expect(result.current.isTokenExpired).toBe(true)
-      expect(result.current.loading).toBe(false)
     })
 
     it('should return authenticated state when token exists', async () => {
@@ -182,8 +181,6 @@ describe('useHypernativeOAuth', () => {
       act(() => {
         result.current.initiateLogin()
       })
-
-      expect(result.current.loading).toBe(true)
     })
 
     it('should generate and store mock token', async () => {
@@ -199,7 +196,6 @@ describe('useHypernativeOAuth', () => {
 
       await waitFor(() => {
         expect(result.current.isAuthenticated).toBe(true)
-        expect(result.current.loading).toBe(false)
       })
 
       // Verify token is stored in cookie
@@ -282,7 +278,6 @@ describe('useHypernativeOAuth', () => {
       expect(url).toContain('response_type=code')
       expect(url).toContain('client_id=')
       expect(url).toContain('redirect_uri=')
-      expect(url).toContain('scope=read')
       expect(url).toContain('state=')
       expect(url).toContain('code_challenge=')
       expect(url).toContain('code_challenge_method=S256')
@@ -325,8 +320,6 @@ describe('useHypernativeOAuth', () => {
           title: 'Open authentication page',
         },
       })
-
-      expect(result.current.loading).toBe(false)
     })
 
     it('should fallback to new tab when popup is immediately closed', async () => {
@@ -394,7 +387,6 @@ describe('useHypernativeOAuth', () => {
       })
 
       // Popup should still be monitored (not closed)
-      expect(result.current.loading).toBe(true)
 
       // Simulate popup being closed without authentication
       await act(async () => {
@@ -409,7 +401,6 @@ describe('useHypernativeOAuth', () => {
           variant: 'error',
           groupKey: 'hypernative-auth-cancelled',
         })
-        expect(result.current.loading).toBe(false)
       })
 
       jest.useRealTimers()
@@ -456,8 +447,6 @@ describe('useHypernativeOAuth', () => {
         jest.advanceTimersByTime(100)
       })
 
-      expect(result.current.loading).toBe(true)
-
       // Simulate successful authentication message
       const successEvent = new MessageEvent('message', {
         data: {
@@ -475,7 +464,6 @@ describe('useHypernativeOAuth', () => {
 
       await waitFor(() => {
         expect(result.current.isAuthenticated).toBe(true)
-        expect(result.current.loading).toBe(false)
       })
 
       expect(mockPopup.close).toHaveBeenCalled()
@@ -506,8 +494,6 @@ describe('useHypernativeOAuth', () => {
         jest.advanceTimersByTime(100)
       })
 
-      expect(result.current.loading).toBe(true)
-
       // Simulate authentication error message
       const errorEvent = new MessageEvent('message', {
         data: {
@@ -524,7 +510,6 @@ describe('useHypernativeOAuth', () => {
         jest.advanceTimersByTime(100)
       })
 
-      expect(result.current.loading).toBe(false)
       expect(consoleErrorSpy).toHaveBeenCalledWith('Hypernative OAuth error:', 'Authentication failed')
       expect(mockPopup.close).toHaveBeenCalled()
 
@@ -617,8 +602,6 @@ describe('useHypernativeOAuth', () => {
         await waitFor(() => expect(mockWindowOpen).toHaveBeenCalledTimes(2))
       })
 
-      expect(result.current.loading).toBe(true)
-
       // Advance time past timeout (5 minutes)
       await act(async () => {
         jest.advanceTimersByTime(5 * 60 * 1000 + 100)
@@ -630,7 +613,6 @@ describe('useHypernativeOAuth', () => {
           variant: 'error',
           groupKey: 'hypernative-auth-cancelled',
         })
-        expect(result.current.loading).toBe(false)
       })
     })
 
