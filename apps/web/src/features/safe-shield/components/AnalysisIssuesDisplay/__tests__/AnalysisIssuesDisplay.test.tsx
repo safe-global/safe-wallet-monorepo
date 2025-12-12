@@ -4,6 +4,7 @@ import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
 import { ThreatAnalysisResultBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis-result.builder'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { faker } from '@faker-js/faker'
+import { ISSUE_BACKGROUND_COLORS } from '@/features/safe-shield/constants'
 
 describe('AnalysisIssuesDisplay', () => {
   beforeEach(() => {
@@ -13,14 +14,20 @@ describe('AnalysisIssuesDisplay', () => {
   describe('Basic Rendering', () => {
     it('should return null when result has no issues', () => {
       const result = ThreatAnalysisResultBuilder.noThreat().build()
-      const { container } = render(<AnalysisIssuesDisplay result={result} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const { container } = render(
+        <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
+      )
 
       expect(container.firstChild).toBeNull()
     })
 
     it('should render nothing for non-threat results', () => {
       const result = ThreatAnalysisResultBuilder.ownershipChange().build()
-      const { container } = render(<AnalysisIssuesDisplay result={result} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const { container } = render(
+        <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
+      )
 
       expect(container.firstChild).toBeNull()
     })
@@ -38,7 +45,8 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      render(<AnalysisIssuesDisplay result={result} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       expect(screen.getByText(address)).toBeInTheDocument()
       expect(screen.getByText('This address is untrusted')).toBeInTheDocument()
@@ -59,7 +67,8 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      render(<AnalysisIssuesDisplay result={result} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       expect(screen.getByText(address)).toBeInTheDocument()
       // Explorer button may not be present if currentChain is not available in test context
@@ -92,7 +101,10 @@ describe('AnalysisIssuesDisplay', () => {
         },
       })
 
-      const { container } = render(<AnalysisIssuesDisplay result={result} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const { container } = render(
+        <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
+      )
 
       const addressElement = screen.getByText(address)
       const allTypography = container.querySelectorAll('p.MuiTypography-body2')
@@ -130,7 +142,8 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      render(<AnalysisIssuesDisplay result={result} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       const descriptionElement = screen.getByText('This address is untrusted')
       expect(descriptionElement).toBeInTheDocument()
@@ -147,7 +160,8 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      render(<AnalysisIssuesDisplay result={result} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       expect(screen.getByText('Issue without address')).toBeInTheDocument()
       expect(screen.queryByText(/0x/)).not.toBeInTheDocument()
@@ -173,7 +187,10 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const { container } = render(<AnalysisIssuesDisplay result={result} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const { container } = render(
+        <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
+      )
 
       expect(container.querySelectorAll('[class*="MuiBox-root"]').length).toBeGreaterThanOrEqual(2)
 
@@ -203,7 +220,8 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      render(<AnalysisIssuesDisplay result={result} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.CRITICAL]!
+      render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       expect(screen.getByText(criticalAddress)).toBeInTheDocument()
       expect(screen.getByText(warnAddress)).toBeInTheDocument()
@@ -231,7 +249,10 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const { container } = render(<AnalysisIssuesDisplay result={result} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.CRITICAL]!
+      const { container } = render(
+        <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
+      )
 
       const textContent = container.textContent || ''
       const criticalIndex = textContent.indexOf('Critical issue')
@@ -245,8 +266,11 @@ describe('AnalysisIssuesDisplay', () => {
   describe('Edge Cases', () => {
     it('should handle empty issues object', () => {
       const result = ThreatAnalysisResultBuilder.moderate().issues({}).build()
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
 
-      const { container } = render(<AnalysisIssuesDisplay result={result} />)
+      const { container } = render(
+        <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
+      )
 
       expect(container.firstChild).toBeNull()
     })
@@ -258,9 +282,99 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const { container } = render(<AnalysisIssuesDisplay result={result} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const { container } = render(
+        <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
+      )
 
       expect(container.firstChild).toBeNull()
+    })
+  })
+
+  describe('Issue Background Color', () => {
+    it('should apply CRITICAL issue background color when provided', () => {
+      const address = faker.finance.ethereumAddress()
+      const result = ThreatAnalysisResultBuilder.malicious()
+        .issues({
+          [Severity.CRITICAL]: [
+            {
+              description: 'Critical issue',
+              address,
+            },
+          ],
+        })
+        .build()
+
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.CRITICAL]!
+      render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
+
+      expect(screen.getByText(address)).toBeInTheDocument()
+      expect(screen.getByText('Critical issue')).toBeInTheDocument()
+    })
+
+    it('should apply WARN issue background color when provided', () => {
+      const address = faker.finance.ethereumAddress()
+      const result = ThreatAnalysisResultBuilder.moderate()
+        .issues({
+          [Severity.WARN]: [
+            {
+              description: 'Warning issue',
+              address,
+            },
+          ],
+        })
+        .build()
+
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
+
+      expect(screen.getByText(address)).toBeInTheDocument()
+      expect(screen.getByText('Warning issue')).toBeInTheDocument()
+    })
+
+    it('should use transparent background when issue has no address', () => {
+      const result = ThreatAnalysisResultBuilder.moderate()
+        .issues({
+          [Severity.WARN]: [
+            {
+              description: 'Issue without address',
+            },
+          ],
+        })
+        .build()
+
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
+
+      expect(screen.getByText('Issue without address')).toBeInTheDocument()
+      expect(screen.queryByText(/0x/)).not.toBeInTheDocument()
+    })
+
+    it('should apply CRITICAL issue background color to multiple issues', () => {
+      const address1 = faker.finance.ethereumAddress()
+      const address2 = faker.finance.ethereumAddress()
+      const result = ThreatAnalysisResultBuilder.malicious()
+        .issues({
+          [Severity.CRITICAL]: [
+            {
+              description: 'First critical issue',
+              address: address1,
+            },
+            {
+              description: 'Second critical issue',
+              address: address2,
+            },
+          ],
+        })
+        .build()
+
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.CRITICAL]!
+      render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
+
+      expect(screen.getByText(address1)).toBeInTheDocument()
+      expect(screen.getByText(address2)).toBeInTheDocument()
+      expect(screen.getByText('First critical issue')).toBeInTheDocument()
+      expect(screen.getByText('Second critical issue')).toBeInTheDocument()
     })
   })
 })
