@@ -45,18 +45,6 @@ const getCookieOptions = (): Cookies.CookieAttributes => {
 }
 
 /**
- * PostMessage event type for successful authentication
- * Sent from OAuth callback page to parent window when token exchange succeeds
- */
-export const HN_AUTH_SUCCESS_EVENT = 'HN_AUTH_SUCCESS'
-
-/**
- * PostMessage event type for authentication error
- * Sent from OAuth callback page to parent window when OAuth flow fails
- */
-export const HN_AUTH_ERROR_EVENT = 'HN_AUTH_ERROR'
-
-/**
  * Mock token expiry time in seconds (10 minutes)
  * Used when MOCK_AUTH_ENABLED is true for development
  * Matches Hypernative OAuth API specification default expiry
@@ -215,10 +203,6 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
     isTokenExpired: isExpired(),
   })
 
-  // Reference to popup window for cleanup
-  const popupRef = useRef<Window | null>(null)
-  // Track if we've received a success/error message to avoid false positives when popup closes
-  const hasReceivedMessageRef = useRef(false)
   // Reference to popup check interval
   const popupCheckIntervalRef = useRef<NodeJS.Timeout | null>(null)
   // Reference to timeout for new tab fallback (when popup is blocked)
@@ -237,64 +221,6 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
       fallbackTimeoutRef.current = null
     }
   }, [])
-
-  /**
-   * Close popup window if it's still open
-   */
-  const closePopup = useCallback(() => {
-    if (popupRef.current && !popupRef.current.closed) {
-      popupRef.current.close()
-      popupRef.current = null
-    }
-  }, [])
-
-  /**
-   * Clean up after authentication completes (success or error)
-   */
-  const cleanupAfterAuth = useCallback(() => {
-    clearAllTimers()
-    closePopup()
-  }, [clearAllTimers, closePopup])
-
-  /**
-   * Handle postMessage events from OAuth callback page
-   * Listens for success/error messages and updates auth state accordingly
-   */
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      // Verify message origin matches our app (security check)
-      if (event.origin !== window.location.origin) {
-        return
-      }
-
-      // Handle successful authentication
-      if (event.data?.type === HN_AUTH_SUCCESS_EVENT) {
-        hasReceivedMessageRef.current = true
-        const { token, expiresIn } = event.data
-        if (token && expiresIn) {
-          setAuthCookie(token, expiresIn)
-          setAuthState({
-            isAuthenticated: isAuthenticated(),
-            isTokenExpired: isExpired(),
-          })
-        }
-        cleanupAfterAuth()
-      }
-
-      // Handle authentication error
-      if (event.data?.type === HN_AUTH_ERROR_EVENT) {
-        hasReceivedMessageRef.current = true
-        console.error('Hypernative OAuth error:', event.data.error)
-        cleanupAfterAuth()
-      }
-    }
-
-    window.addEventListener('message', handleMessage)
-    return () => {
-      window.removeEventListener('message', handleMessage)
-      clearAllTimers()
-    }
-  }, [dispatch, cleanupAfterAuth, clearAllTimers])
 
   /**
    * Show notification when popup is blocked with a clickable link
@@ -317,55 +243,6 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
   )
 
   /**
-   * Show notification when authentication is cancelled
-   */
-  const showAuthCancelledNotification = useCallback(() => {
-    dispatch(
-      showNotification({
-        message: 'Authentication cancelled. Please try again to log in to Hypernative.',
-        variant: 'error',
-        groupKey: 'hypernative-auth-cancelled',
-      }),
-    )
-  }, [dispatch])
-
-  /**
-   * Set up timeout fallback to show cancelled notification if no message is received
-   */
-  const setupTimeoutFallback = useCallback(() => {
-    fallbackTimeoutRef.current = setTimeout(
-      () => {
-        if (!hasReceivedMessageRef.current) {
-          showAuthCancelledNotification()
-        }
-      },
-      // 5 minutes timeout
-      5 * 60 * 1000,
-    )
-  }, [showAuthCancelledNotification])
-
-  /**
-   * Set up popup monitoring interval to detect when popup is closed
-   */
-  const setupPopupMonitoring = useCallback(
-    (popup: Window) => {
-      popupRef.current = popup
-      popupCheckIntervalRef.current = setInterval(() => {
-        if (popupRef.current?.closed && !hasReceivedMessageRef.current) {
-          popupRef.current = null
-          showAuthCancelledNotification()
-
-          if (popupCheckIntervalRef.current) {
-            clearInterval(popupCheckIntervalRef.current)
-            popupCheckIntervalRef.current = null
-          }
-        }
-      }, 500) // Check every 500ms
-    },
-    [showAuthCancelledNotification],
-  )
-
-  /**
    * Try to open authentication in a new tab and handle the result
    */
   const tryOpenNewTab = useCallback(
@@ -374,8 +251,6 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
         const newTab = window.open(authUrl, '_blank')
         if (!newTab || newTab.closed) {
           showPopupBlockedNotification(authUrl)
-        } else {
-          setupTimeoutFallback()
         }
       }
 
@@ -385,7 +260,7 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
         openTab()
       }
     },
-    [showPopupBlockedNotification, setupTimeoutFallback],
+    [showPopupBlockedNotification],
   )
 
   /**
@@ -411,25 +286,9 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
         // Popup was opened but immediately closed (blocked by browser)
         // Use requestAnimationFrame to stay in user interaction context
         tryOpenNewTab(authUrl, true)
-      } else {
-        // Popup opened successfully - verify it stays open
-        // Some browsers might close it after a short delay
-        setTimeout(() => {
-          if (popup.closed && !hasReceivedMessageRef.current) {
-            // Popup was closed after opening (blocked) - fallback to new tab
-            // Only open new tab if we haven't received a success/error message
-            // (which would indicate successful auth and popup closure)
-            tryOpenNewTab(authUrl)
-          } else if (!popup.closed) {
-            // Popup is still open - set up normal popup monitoring
-            setupPopupMonitoring(popup)
-          }
-          // If popup.closed && hasReceivedMessageRef.current, auth completed successfully
-          // so we don't need to do anything (cleanupAfterAuth already handled it)
-        }, 100) // Check after 100ms to catch delayed closures
       }
     },
-    [tryOpenNewTab, setupPopupMonitoring],
+    [tryOpenNewTab],
   )
 
   /**
@@ -438,7 +297,6 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
    * - In real mode: open popup/tab with OAuth authorization URL
    */
   const initiateLogin = useCallback(async () => {
-    hasReceivedMessageRef.current = false
     clearAllTimers()
 
     try {
@@ -498,6 +356,10 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
 
     return () => clearInterval(interval)
   }, [])
+
+  useEffect(() => {
+    return () => clearAllTimers()
+  }, [clearAllTimers])
 
   return {
     isAuthenticated: authState.isAuthenticated,

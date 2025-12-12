@@ -18,12 +18,7 @@ jest.mock('@/features/hypernative/hooks/useHypernativeOAuth', () => {
   }
 })
 
-import {
-  HN_AUTH_SUCCESS_EVENT,
-  HN_AUTH_ERROR_EVENT,
-  readPkce,
-  clearPkce,
-} from '@/features/hypernative/hooks/useHypernativeOAuth'
+import { readPkce, clearPkce } from '@/features/hypernative/hooks/useHypernativeOAuth'
 
 // Mock fetch
 const mockFetch = jest.fn()
@@ -31,7 +26,6 @@ global.fetch = mockFetch as unknown as typeof fetch
 
 describe('HypernativeOAuthCallback', () => {
   const mockRouterPush = jest.fn()
-  const mockPostMessage = jest.fn()
   const mockWindowClose = jest.fn()
   const mockReplaceState = jest.fn()
 
@@ -49,16 +43,6 @@ describe('HypernativeOAuthCallback', () => {
       isReady: false,
       query: {},
       push: mockRouterPush,
-    })
-
-    // Setup window.opener mock
-    Object.defineProperty(window, 'opener', {
-      value: {
-        postMessage: mockPostMessage,
-        closed: false,
-      },
-      writable: true,
-      configurable: true,
     })
 
     // Setup window.close mock
@@ -171,16 +155,6 @@ describe('HypernativeOAuthCallback', () => {
       expect.stringContaining('/hypernative/oauth-callback'),
     )
 
-    // Check that postMessage was sent to parent
-    expect(mockPostMessage).toHaveBeenCalledWith(
-      {
-        type: HN_AUTH_SUCCESS_EVENT,
-        token: 'test-access-token',
-        expiresIn: 3600,
-      },
-      window.location.origin,
-    )
-
     // Check that PKCE data was cleaned up
     expect(mockClearPkce).toHaveBeenCalled()
   })
@@ -208,14 +182,6 @@ describe('HypernativeOAuthCallback', () => {
 
     // Check that PKCE was cleaned up on error
     expect(mockClearPkce).toHaveBeenCalled()
-
-    expect(mockPostMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: HN_AUTH_ERROR_EVENT,
-        error: expect.stringContaining('Missing authorization code in callback URL'),
-      }),
-      window.location.origin,
-    )
   })
 
   it('should handle missing state parameter', async () => {
@@ -238,14 +204,6 @@ describe('HypernativeOAuthCallback', () => {
 
     // Check that PKCE was cleaned up on error
     expect(mockClearPkce).toHaveBeenCalled()
-
-    expect(mockPostMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: HN_AUTH_ERROR_EVENT,
-        error: expect.stringContaining('Missing state parameter in callback URL'),
-      }),
-      window.location.origin,
-    )
   })
 
   it('should handle invalid OAuth state (CSRF protection)', async () => {
@@ -271,14 +229,6 @@ describe('HypernativeOAuthCallback', () => {
 
     // Check that PKCE was cleaned up on error
     expect(mockClearPkce).toHaveBeenCalled()
-
-    expect(mockPostMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: HN_AUTH_ERROR_EVENT,
-        error: expect.stringContaining('Invalid OAuth state parameter - possible CSRF attack'),
-      }),
-      window.location.origin,
-    )
   })
 
   it('should handle missing PKCE verifier', async () => {
@@ -304,14 +254,6 @@ describe('HypernativeOAuthCallback', () => {
 
     // Check that PKCE was cleaned up on error
     expect(mockClearPkce).toHaveBeenCalled()
-
-    expect(mockPostMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: HN_AUTH_ERROR_EVENT,
-        error: expect.stringContaining('Missing PKCE code verifier - authentication flow corrupted'),
-      }),
-      window.location.origin,
-    )
   })
 
   it('should handle OAuth error in query params', async () => {
@@ -337,14 +279,6 @@ describe('HypernativeOAuthCallback', () => {
 
     // Check that PKCE was cleaned up on error
     expect(mockClearPkce).toHaveBeenCalled()
-
-    expect(mockPostMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: HN_AUTH_ERROR_EVENT,
-        error: expect.stringContaining('OAuth authorization failed: User denied authorization'),
-      }),
-      window.location.origin,
-    )
   })
 
   it('should handle token exchange failure', async () => {
@@ -386,14 +320,6 @@ describe('HypernativeOAuthCallback', () => {
 
     // Check that PKCE was cleaned up on error
     expect(mockClearPkce).toHaveBeenCalled()
-
-    expect(mockPostMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: HN_AUTH_ERROR_EVENT,
-        error: expect.stringContaining('Token exchange failed: 400 invalid_grant'),
-      }),
-      window.location.origin,
-    )
   })
 
   it('should handle invalid token response', async () => {
@@ -440,14 +366,6 @@ describe('HypernativeOAuthCallback', () => {
 
     // Check that PKCE was cleaned up on error
     expect(mockClearPkce).toHaveBeenCalled()
-
-    expect(mockPostMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: HN_AUTH_ERROR_EVENT,
-        error: expect.stringContaining('Invalid token response: missing access_token or expires_in'),
-      }),
-      window.location.origin,
-    )
   })
 
   it('should handle window without opener', async () => {
@@ -500,9 +418,6 @@ describe('HypernativeOAuthCallback', () => {
 
     // Check that PKCE was cleaned up
     expect(mockClearPkce).toHaveBeenCalled()
-
-    // postMessage should not have been called since there's no opener
-    expect(mockPostMessage).not.toHaveBeenCalled()
   })
 
   it('should prevent double processing with hasProcessedRef', async () => {
@@ -553,17 +468,7 @@ describe('HypernativeOAuthCallback', () => {
     // Verify that clearPkce was called on error (this happens in the catch block)
     // The hasProcessedRef flag is reset in the catch block, allowing retry
     expect(mockClearPkce).toHaveBeenCalled()
-
     // Verify that URL history was cleaned
     expect(mockReplaceState).toHaveBeenCalled()
-
-    // Verify error was sent to parent window
-    expect(mockPostMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: HN_AUTH_ERROR_EVENT,
-        error: expect.stringContaining('Invalid OAuth state parameter'),
-      }),
-      window.location.origin,
-    )
   })
 })
