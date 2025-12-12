@@ -1,7 +1,7 @@
 import React, { useCallback, useRef } from 'react'
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { SafeFontIcon } from '../SafeFontIcon'
-import { BottomSheetModal, TouchableOpacity } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { getVariable, Text, View, useTheme, H4, YStack } from 'tamagui'
 import { BackdropComponent, BackgroundComponent } from '@/src/components/Dropdown/sheetComponents'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -33,10 +33,10 @@ export const InfoSheet = ({
 
   return (
     <>
-      <TouchableOpacity onPress={handlePresentModalPress}>
+      <View onPress={handlePresentModalPress}>
         {!children && <SafeFontIcon name="info" size={16} color="$colorSecondary" />}
         {children}
-      </TouchableOpacity>
+      </View>
 
       <BottomSheetModal
         // @ts-expect-error - FullWindowOverlay is not typed

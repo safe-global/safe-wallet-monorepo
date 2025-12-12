@@ -10,8 +10,9 @@ import { TouchableOpacity } from 'react-native'
 import { useTheme } from '@/src/theme/hooks/useTheme'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'
+import { selectPendingSafe } from '@/src/store/signerImportFlowSlice'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
-import { router, useLocalSearchParams } from 'expo-router'
+import { router } from 'expo-router'
 import logger from '@/src/utils/logger'
 
 interface SignersListItemProps {
@@ -23,15 +24,14 @@ interface SignersListItemProps {
 function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
   const { isDark } = useTheme()
   const contact = useAppSelector(selectContactByAddress(item.value))
-  const local = useLocalSearchParams<{ safeAddress: string; chainId: string; import_safe: string }>()
+  const pendingSafe = useAppSelector(selectPendingSafe)
 
   // Check if the current item belongs to the 'Imported signers' section
   const isMySigner = signersGroup.some(
     (section) => section.id === 'imported_signers' && section.data.some((signer) => signer.value === item.value),
   )
 
-  const fullActions = useSignersActions(isMySigner) // This was necessary to prevent typescript from complaining about the actions array
-  // Filter out any false values to ensure the array type matches MenuAction[]
+  const fullActions = useSignersActions(isMySigner)
   const actions = fullActions.filter(Boolean) as MenuAction[]
   const isLastItem = signersGroup.some((section) => section.data.length === index + 1)
   const copy = useCopyAndDispatchToast()
@@ -44,18 +44,11 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
   }
 
   const redirectToImport = () => {
-    router.push({
-      pathname: '/import-signers',
-      params: {
-        safeAddress: local.safeAddress,
-        chainId: local.chainId,
-        import_safe: local.import_safe,
-      },
-    })
+    router.push('/import-signers')
   }
 
   const handleItemPress = () => {
-    if (local.import_safe && !isMySigner) {
+    if (pendingSafe && !isMySigner) {
       return redirectToImport()
     }
 

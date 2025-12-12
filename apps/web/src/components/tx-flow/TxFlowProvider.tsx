@@ -1,9 +1,18 @@
+/**
+ * TxFlowProvider - Central state management for transaction flows
+ *
+ * This provider manages:
+ * - Flow navigation (step, progress, onPrev, onNext)
+ * - Transaction state (isCreation, canExecute, willExecute, etc.)
+ * - Form state (isSubmitLoading, submitError, isRejectedByUser)
+ * - Role execution state (canExecuteThroughRole, willExecuteThroughRole)
+ */
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { createContext, useCallback, useContext, useState } from 'react'
 import type { ReactNode, ReactElement, SetStateAction, Dispatch, ComponentType } from 'react'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
-import { useImmediatelyExecutable, useValidateNonce } from '@/components/tx/SignOrExecuteForm/hooks'
+import { useImmediatelyExecutable, useValidateNonce } from '@/components/tx/shared/hooks'
 import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
 import {
@@ -14,7 +23,7 @@ import {
 } from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import { SafeTxContext } from '../tx-flow/SafeTxProvider'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { trackTxEvents } from '../tx/SignOrExecuteForm/tracking'
+import { trackTxEvents } from '@/components/tx/shared/tracking'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useChainId from '@/hooks/useChainId'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'

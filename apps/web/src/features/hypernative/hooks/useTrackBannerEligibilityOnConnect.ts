@@ -31,7 +31,7 @@ export const useTrackBannerEligibilityOnConnect = (
   const dispatch = useAppDispatch()
   const store = useStore()
   const chainId = useChainId()
-  const { safeAddress, safeLoaded, safeLoading } = useSafeInfo()
+  const { safeAddress, safeLoaded, safeLoading, safe } = useSafeInfo()
   const safeHnState = useAppSelector((state) => selectSafeHnState(state, chainId, safeAddress))
 
   // Use ref to track if we've already initiated tracking for this Safe (prevents race condition)
@@ -59,6 +59,11 @@ export const useTrackBannerEligibilityOnConnect = (
     // - TxReportButton: shows even when guard is already installed
     // - Pending: only appears after promo banner was viewed (which already triggered tracking)
     if (bannerType === BannerType.TxReportButton || bannerType === BannerType.Pending) {
+      return
+    }
+
+    // Dashboard banner on the FirstSteps page: Only when banner is visible (for undeployed Safes)
+    if (bannerType === BannerType.NoBalanceCheck && safe?.deployed) {
       return
     }
 
@@ -124,5 +129,6 @@ export const useTrackBannerEligibilityOnConnect = (
     dispatch,
     bannerType,
     store,
+    safe.deployed,
   ])
 }

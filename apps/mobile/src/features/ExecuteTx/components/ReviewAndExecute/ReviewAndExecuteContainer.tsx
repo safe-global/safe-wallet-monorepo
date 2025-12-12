@@ -26,7 +26,7 @@ import { useExecutionFlow } from '../../hooks/useExecutionFlow'
 export function ReviewAndExecuteContainer() {
   const { txId } = useLocalSearchParams<{ txId: string }>()
 
-  const { data: txDetails, isLoading, isError } = useTransactionData(txId || '')
+  const { currentData: txDetails, isLoading, isError } = useTransactionData(txId || '')
 
   const activeSafe = useDefinedActiveSafe()
   const chain = useAppSelector(selectActiveChain)
@@ -114,7 +114,7 @@ export function ReviewAndExecuteContainer() {
     )
   }
 
-  if (isError || !txDetails) {
+  if ((isError && !txDetails) || !txDetails) {
     return (
       <View flex={1} justifyContent="center" alignItems="center">
         <Text>Error loading transaction details</Text>

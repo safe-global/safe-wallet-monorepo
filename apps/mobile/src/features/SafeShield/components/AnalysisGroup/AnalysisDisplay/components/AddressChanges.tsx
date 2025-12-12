@@ -33,7 +33,7 @@ export function AddressChanges({ result }: AddressChangesProps) {
           gap="$1"
           overflow="hidden"
         >
-          <Text letterSpacing={1} fontSize="$3" color="$colorSecondary">
+          <Text letterSpacing={1} fontSize="$3" color="$colorLight">
             {item.label}
           </Text>
           <Text fontSize="$4" style={{ wordBreak: 'break-all', whiteSpace: 'pre-wrap' }}>

@@ -2,7 +2,7 @@ export const stableCoinAddresses: {
   [address: string]: {
     name: string
     symbol: string
-    chains: Array<'gnosis' | 'ethereum' | 'arbitrum-one' | 'sepolia' | 'base'>
+    chains: Array<'gnosis' | 'ethereum' | 'arbitrum-one' | 'sepolia' | 'base' | 'linea'>
   }
 } = {
   '0xdd96b45877d0e8361a4ddb732da741e97f3191ff': {
@@ -571,5 +571,21 @@ export const stableCoinAddresses: {
     name: 'EURC',
     symbol: 'eurc',
     chains: ['base'],
+  },
+  // Linea
+  '0x176211869cA2b568f2A7D4EE941E073a821EE1ff': {
+    name: 'USDC',
+    symbol: 'usdc',
+    chains: ['linea'],
+  },
+  '0xA219439258ca9da29E9Cc4cE5596924745e12B93': {
+    name: 'Tether USD',
+    symbol: 'usdt',
+    chains: ['linea'],
+  },
+  '0x4AF15ec2A0bd43Db75dd04E62FAA3B8EF36b00d5': {
+    name: 'Dai Stablecoin',
+    symbol: 'dai',
+    chains: ['linea'],
   },
 }

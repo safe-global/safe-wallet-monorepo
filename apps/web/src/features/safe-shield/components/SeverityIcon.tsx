@@ -7,7 +7,7 @@ import CheckIcon from '@/public/images/common/check.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import ErrorIcon from '@/public/images/common/error.svg'
 
-const IconComponent = { CRITICAL: ErrorIcon, WARN: AlertIcon, OK: CheckIcon, INFO: InfoIcon }
+const IconComponent = { CRITICAL: ErrorIcon, WARN: AlertIcon, OK: CheckIcon, INFO: InfoIcon, ERROR: AlertIcon }
 
 const getIconProps = (severity: Severity, color: string) => {
   return {
@@ -15,6 +15,7 @@ const getIconProps = (severity: Severity, color: string) => {
     WARN: { path: { fill: color } },
     OK: { path: { fill: color, stroke: color } },
     INFO: { path: { fill: color }, rect: { fill: color } },
+    ERROR: { path: { fill: color } },
   }[severity]
 }
 

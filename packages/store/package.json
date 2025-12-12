@@ -15,6 +15,7 @@
     "build:local": "NODE_ENV=local yarn fetch-schema && yarn generate-api"
   },
   "devDependencies": {
+    "@safe-global/test": "workspace:^",
     "@types/jest": "^29.5.14",
     "eslint": "^9.29.0",
     "eslint-config-next": "^16.0.5",
@@ -22,6 +23,7 @@
     "typescript": "~5.9.2"
   },
   "dependencies": {
+    "jest-fixed-jsdom": "^0.0.10",
     "redux-persist": "^6.0.0",
     "ts-node": "^10.9.2"
   }

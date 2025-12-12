@@ -9,6 +9,7 @@ export const safeShieldIcons: Record<SafeShieldSeverityType, IconName> = {
   [`safeShield_${Severity.CRITICAL}`]: 'alert',
   [`safeShield_${Severity.INFO}`]: 'info',
   [`safeShield_${Severity.WARN}`]: 'alert-triangle',
+  [`safeShield_${Severity.ERROR}`]: 'alert-triangle',
 }
 
 // Centralized colors for SafeShield theme by severity and mode
@@ -30,6 +31,10 @@ export const safeShieldStatusColors = {
       background: '#FFECC2',
       color: '#FF8C00',
     },
+    [Severity.ERROR]: {
+      background: '#FFECC2',
+      color: '#FF8C00',
+    },
   },
   dark: {
     [Severity.OK]: {
@@ -45,6 +50,10 @@ export const safeShieldStatusColors = {
       color: '#00BFE5',
     },
     [Severity.WARN]: {
+      background: '#4A3621',
+      color: '#FF8C00',
+    },
+    [Severity.ERROR]: {
       background: '#4A3621',
       color: '#FF8C00',
     },
@@ -65,6 +74,9 @@ export const safeShieldAnalysisStatusTheme = {
   [`light_safeShieldAnalysisStatus_${Severity.WARN}`]: {
     icon: safeShieldStatusColors.light[Severity.WARN].color,
   },
+  [`light_safeShieldAnalysisStatus_${Severity.ERROR}`]: {
+    icon: safeShieldStatusColors.light[Severity.ERROR].color,
+  },
   [`dark_safeShieldAnalysisStatus_${Severity.OK}`]: {
     icon: safeShieldStatusColors.dark[Severity.OK].color,
   },
@@ -76,5 +88,8 @@ export const safeShieldAnalysisStatusTheme = {
   },
   [`dark_safeShieldAnalysisStatus_${Severity.WARN}`]: {
     icon: safeShieldStatusColors.dark[Severity.WARN].color,
+  },
+  [`dark_safeShieldAnalysisStatus_${Severity.ERROR}`]: {
+    icon: safeShieldStatusColors.dark[Severity.ERROR].color,
   },
 }

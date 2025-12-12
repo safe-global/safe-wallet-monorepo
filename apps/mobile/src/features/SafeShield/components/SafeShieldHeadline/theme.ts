@@ -19,6 +19,10 @@ export const safeShieldHeadlineStatusTheme = {
     background: safeShieldStatusColors.light[Severity.WARN].background,
     color: safeShieldStatusColors.light[Severity.WARN].color,
   },
+  [`light_safeShieldHeadline_${Severity.ERROR}`]: {
+    background: safeShieldStatusColors.light[Severity.ERROR].background,
+    color: safeShieldStatusColors.light[Severity.ERROR].color,
+  },
   [`dark_safeShieldHeadline_${Severity.OK}`]: {
     background: safeShieldStatusColors.dark[Severity.OK].background,
     color: safeShieldStatusColors.dark[Severity.OK].color,
@@ -34,5 +38,9 @@ export const safeShieldHeadlineStatusTheme = {
   [`dark_safeShieldHeadline_${Severity.WARN}`]: {
     background: safeShieldStatusColors.dark[Severity.WARN].background,
     color: safeShieldStatusColors.dark[Severity.WARN].color,
+  },
+  [`dark_safeShieldHeadline_${Severity.ERROR}`]: {
+    background: safeShieldStatusColors.dark[Severity.ERROR].background,
+    color: safeShieldStatusColors.dark[Severity.ERROR].color,
   },
 }

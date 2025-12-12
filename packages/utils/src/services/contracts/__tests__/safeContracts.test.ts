@@ -28,7 +28,7 @@ describe('safeContracts', () => {
         address: { value: '0x123' },
         implementation: { value: '0xabc' },
         ...overrides,
-      }) as SafeState
+      } as SafeState)
 
     it('should return false for supported mastercopy', () => {
       const safe = createMockSafe({
@@ -81,7 +81,7 @@ describe('safeContracts', () => {
         chainId: '1',
         address: { value: '0x123' },
         ...overrides,
-      }) as SafeState
+      } as SafeState)
 
     it('should return false when nonce is not 0', () => {
       const safe = createMockSafe({ nonce: 1 })

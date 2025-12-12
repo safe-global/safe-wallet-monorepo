@@ -194,8 +194,7 @@ export function unlockTwapOrders(iframeSelector) {
 }
 
 export function clickOnAssetSwapBtn(index) {
-  cy.get(assetsSwapBtn).eq(index).as('btn')
-  cy.get('@btn').click()
+  cy.get(assetsSwapBtn).filter(':visible').eq(index).click()
 }
 
 export function verifyOrderSubmittedConfirmation() {

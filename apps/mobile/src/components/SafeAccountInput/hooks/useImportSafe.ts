@@ -9,6 +9,7 @@ import { useLazySafesGetOverviewForManyQuery } from '@safe-global/store/gateway/
 import { FormValues } from '@/src/features/ImportReadOnly/types'
 import debounce from 'lodash/debounce'
 import { selectCurrency } from '@/src/store/settingsSlice'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 const NO_SAFE_DEPLOYMENT_ERROR = 'No Safe deployment found for this address'
 
@@ -35,12 +36,15 @@ export const useImportSafe = () => {
       const isValid = isValidAddress(address)
 
       if (isValid) {
-        trigger({
-          safes: chainIds.map((chainId: string) => makeSafeId(chainId, address)),
-          currency,
-          trusted: true,
-          excludeSpam: true,
-        })
+        trigger(
+          {
+            safes: chainIds.map((chainId: string) => makeSafeId(chainId, address)),
+            currency,
+            trusted: true,
+            excludeSpam: true,
+          },
+          false,
+        )
       } else {
         setValue('importedSafeResult', undefined)
       }
@@ -71,6 +75,9 @@ export const useImportSafe = () => {
 
       if (result?.data?.length === 0 && !result?.isLoading) {
         setError('safeAddress', { message: NO_SAFE_DEPLOYMENT_ERROR })
+      } else if (result?.error) {
+        const error = asError(result.error)
+        setError('safeAddress', { message: error.message })
       } else if (addressState.invalid) {
         triggerInput('name')
         clearErrors('safeAddress')

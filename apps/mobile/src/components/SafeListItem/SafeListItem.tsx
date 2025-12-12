@@ -5,7 +5,7 @@ import { IconProps, SafeFontIcon } from '../SafeFontIcon/SafeFontIcon'
 import { isMultisigExecutionInfo } from '@/src/utils/transaction-guards'
 import { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Tag } from '../Tag'
-import { SigningState } from '../SigningState'
+import { TransactionProcessingState } from '../TransactionProcessingState'
 
 export interface SafeListItemProps {
   type?: string
@@ -107,7 +107,7 @@ export function SafeListItem({
 
         {inQueue && executionInfo && isMultisigExecutionInfo(executionInfo) && txId ? (
           <View alignItems="center" flexDirection="row" gap="$2">
-            <SigningState txId={txId} executionInfo={executionInfo} isProposedTx={isProposedTx} />
+            <TransactionProcessingState txId={txId} executionInfo={executionInfo} isProposedTx={isProposedTx} />
 
             <SafeFontIcon name="chevron-right" size={16} />
           </View>

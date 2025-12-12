@@ -9,7 +9,7 @@ import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
 import { TxNote, SignerSelect, BalanceChanges, RiskConfirmation } from './features'
 import { Batching, ComboSubmit, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
 import { SlotProvider } from './slots'
-import { useTrackTimeSpent } from '../tx/SignOrExecuteForm/tracking'
+import { useTrackTimeSpent } from '@/components/tx/shared/tracking'
 import LedgerHashComparison from '@/features/ledger'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 

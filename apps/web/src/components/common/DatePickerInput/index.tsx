@@ -1,7 +1,7 @@
 import { useFormContext, Controller } from 'react-hook-form'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3'
 import { isFuture, isValid, startOfDay } from 'date-fns'
 
 import inputCss from '@/styles/inputs.module.css'

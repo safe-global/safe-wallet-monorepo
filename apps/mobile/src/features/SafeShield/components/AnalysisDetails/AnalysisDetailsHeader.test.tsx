@@ -22,4 +22,9 @@ describe('AnalysisDetailsHeader', () => {
     const { getByText } = render(<AnalysisDetailsHeader severity={Severity.WARN} />)
     expect(getByText('Issues found')).toBeTruthy()
   })
+
+  it('should render Checks unavailable when severity is ERROR', () => {
+    const { getByText } = render(<AnalysisDetailsHeader severity={Severity.ERROR} />)
+    expect(getByText('Checks unavailable')).toBeTruthy()
+  })
 })

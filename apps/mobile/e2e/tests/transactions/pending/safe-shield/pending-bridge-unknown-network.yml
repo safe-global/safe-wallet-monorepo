@@ -1,0 +1,71 @@
+appId: ${APP_ID}
+tags:
+  - safe-shield
+  - pending-tx
+---
+# ===========================================
+# SafeShield Test: Pending Bridge - Unknown Network
+# ===========================================
+# Tests SafeShield functionality for a pending bridge transaction
+# to an unsupported/unknown network with multiple warnings.
+
+# Launch app with SafeShield test safe
+- runFlow:
+    file: '../../../../utils/setup/app-start.yml'
+
+- tapOn:
+    id: 'e2eSafeShieldSafe'
+
+- assertVisible:
+    id: 'pending-tx-list'
+
+# Scroll to see the last transaction (pending bridge to unknown network)
+- scrollUntilVisible:
+    element:
+      text: '.*Unknown network.*'
+    centerElement: true
+
+# Tap on the pending bridge transaction with unknown network
+- runFlow:
+    file: '../../../../utils/components/pending-tx/tap-tx-card.yml'
+    env:
+      WAIT_FOR: '.*Unknown ne.*'
+      TAP_TEXT: '.*Unknown ne.*'
+
+- assertVisible: 'Confirm transaction'
+
+# Verify SafeShield widget (WARN severity - Issues found with 3 labels)
+- runFlow:
+    file: '../../../../utils/assertions/verify-safe-shield-widget.yml'
+    env:
+      WIDGET_HEADER: 'Issues found'
+      LABEL_1: 'Unsupported network'
+      LABEL_2: 'Verified contract'
+      LABEL_3: 'Threat analysis failed'
+
+# Verify balance change block (no balance change)
+- runFlow:
+    file: '../../../../utils/assertions/verify-balance-change.yml'
+    env:
+      NO_CHANGE: 'true'
+
+# Open and verify SafeShield details sheet
+- runFlow:
+    file: '../../../../utils/assertions/verify-safe-shield-sheet.yml'
+    env:
+      TAP_TO_OPEN: 'Issues found'
+      HEADER: 'ISSUES FOUND'
+      LABEL_1: 'Unsupported network'
+      DESCRIPTION_1: '.*app.safe.global does not support the network.*'
+      DESCRIPTION_1_2: '.*This address has few transactions.*'
+      DESCRIPTION_1_3: '.*This address is in your address book.*'
+      LABEL_2: 'Verified contract'
+      DESCRIPTION_2: '.*All these contracts are verified.*'
+      EXPAND_SHOW_ALL: 'true'
+      EXPANDED_ADDRESS: '.*0x1231DEB6f5749EF6cE6943a275A1D3E7486F4E.*'
+      SCROLL_TO_FOOTER: 'true'
+      LABEL_3: 'Threat analysis failed'
+      DESCRIPTION_3: '.*Threat analysis failed.*Simulation Error.*Reverted.*'
+
+# Verify we're back on the confirm transaction screen
+- assertVisible: 'Confirm transaction'

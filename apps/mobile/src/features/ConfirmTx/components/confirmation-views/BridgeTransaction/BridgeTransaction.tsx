@@ -9,7 +9,6 @@ import { TokenAmount } from '@/src/components/TokenAmount'
 import { formatUnits } from 'ethers'
 import { EthAddress } from '@/src/components/EthAddress'
 import { type ListTableItem } from '../../ListTable'
-import { BridgeRecipientWarnings } from './BridgeRecipientWarnings'
 import { ChainIndicator } from '@/src/components/ChainIndicator'
 import { ParametersButton } from '@/src/components/ParametersButton'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
@@ -153,8 +152,6 @@ export function BridgeTransaction({ txId, txInfo, decodedData }: BridgeTransacti
       <ListTable items={bridgeItems}>
         <ParametersButton txId={txId} />
       </ListTable>
-
-      <BridgeRecipientWarnings txInfo={txInfo} />
 
       <ActionsRow txId={txId} decodedData={decodedData} />
     </YStack>

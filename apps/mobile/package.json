@@ -1,7 +1,7 @@
 {
   "name": "@safe-global/mobile",
   "main": "index.js",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "doctor": {
     "reactNativeDirectoryCheck": {
       "enabled": true
@@ -65,7 +65,7 @@
     "@react-native-masked-view/masked-view": "0.3.2",
     "@react-native-menu/menu": "^2.0.0",
     "@react-navigation/native": "^7.1.17",
-    "@reduxjs/toolkit": "^2.8.2",
+    "@reduxjs/toolkit": "^2.11.0",
     "@safe-global/protocol-kit": "^5.2.22",
     "@safe-global/store": "workspace:^",
     "@safe-global/utils": "workspace:^",

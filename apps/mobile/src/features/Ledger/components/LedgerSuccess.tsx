@@ -1,5 +1,5 @@
 import React from 'react'
-import { ScrollView } from 'react-native'
+import { Platform, ScrollView } from 'react-native'
 import { View, Text, Button } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ToastViewport } from '@tamagui/toast'
@@ -82,7 +82,7 @@ export const LedgerSuccess = ({ address, name, onDone, onCopyAddress }: LedgerSu
             )}
           </View>
         </ScrollView>
-        <ToastViewport multipleToasts={false} left={0} right={0} />
+        {Platform.OS === 'ios' && <ToastViewport multipleToasts={false} left={0} right={0} />}
       </View>
 
       <View paddingHorizontal="$4" paddingBottom={bottom}>

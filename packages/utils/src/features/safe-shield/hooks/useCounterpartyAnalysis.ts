@@ -37,8 +37,8 @@ export function useCounterpartyAnalysis({
   ownedSafes: string[]
   web3ReadOnly?: JsonRpcProvider
 }): {
-  recipient?: AsyncResult<RecipientAnalysisResults>
-  contract?: AsyncResult<ContractAnalysisResults>
+  recipient: AsyncResult<RecipientAnalysisResults>
+  contract: AsyncResult<ContractAnalysisResults>
 } {
   const [triggerAnalysis, { data: counterpartyData, error, isLoading: isCounterpartyLoading }] =
     useSafeShieldAnalyzeCounterpartyV1Mutation()
@@ -126,7 +126,9 @@ export function useCounterpartyAnalysis({
       return undefined
     }
 
-    return mergeAnalysisResults(recipientAnalysisByAddress, addressBookCheck, activityCheck)
+    return recipientAnalysisByAddress
+      ? mergeAnalysisResults(recipientAnalysisByAddress, addressBookCheck, activityCheck)
+      : undefined
   }, [
     recipientAnalysisByAddress,
     addressBookCheck,
@@ -156,9 +158,7 @@ export function useCounterpartyAnalysis({
 
   // Return results in the expected format
   return {
-    recipient: mergedRecipientResults
-      ? [mergedRecipientResults, fetchError || activityCheckError, isLoading]
-      : undefined,
-    contract: contractResults ? [contractResults, fetchError, isCounterpartyLoading] : undefined,
+    recipient: [mergedRecipientResults, fetchError || activityCheckError, isLoading],
+    contract: [contractResults, fetchError, isCounterpartyLoading],
   }
 }
