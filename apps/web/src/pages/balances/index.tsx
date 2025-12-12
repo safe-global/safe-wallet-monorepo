@@ -70,7 +70,7 @@ const Balances: NextPage = () => {
               <TotalAssetValue
                 fiatTotal={tokensFiatTotal}
                 isAllTokensMode={balances.isAllTokensMode}
-                action={isPortfolioEndpointEnabled ? <PortfolioRefreshHint /> : undefined}
+                action={isPortfolioEndpointEnabled ? <PortfolioRefreshHint entryPoint="Assets" /> : undefined}
               />
             </Box>
 

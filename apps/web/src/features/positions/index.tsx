@@ -34,7 +34,7 @@ export const Positions = () => {
         <TotalAssetValue
           fiatTotal={positionsFiatTotal}
           title="Total positions value"
-          action={isPortfolioEndpointEnabled ? <PortfolioRefreshHint /> : undefined}
+          action={isPortfolioEndpointEnabled ? <PortfolioRefreshHint entryPoint="Positions" /> : undefined}
         />
 
         {!isPortfolioEndpointEnabled && (

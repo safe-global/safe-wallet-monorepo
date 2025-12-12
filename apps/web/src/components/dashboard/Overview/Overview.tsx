@@ -50,7 +50,7 @@ const Overview = (): ReactElement => {
     <Card sx={{ border: 0, px: 3, pt: 2.5, pb: 1.5 }} component="section">
       {isPortfolioEndpointEnabled && (
         <Box display="flex" justifyContent="flex-end" mb={-3}>
-          <PortfolioRefreshHint />
+          <PortfolioRefreshHint entryPoint="Dashboard" />
         </Box>
       )}
       <Box>

@@ -5,7 +5,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { useRefetch } from '@/features/positions/hooks/useRefetch'
 import { PORTFOLIO_CACHE_TIME_MS } from '@/config/constants'
 import { trackEvent } from '@/services/analytics'
-import { POSITIONS_EVENTS } from '@/services/analytics/events/positions'
+import { PORTFOLIO_EVENTS } from '@/services/analytics/events/portfolio'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { logError, Errors } from '@/services/exceptions'
 import css from './styles.module.css'
@@ -16,6 +16,8 @@ const RefreshIcon = (props: SvgIconProps & { isLoading?: boolean }) => {
 }
 
 interface PortfolioRefreshHintProps {
+  /** Analytics entry point for tracking which page triggered the refresh */
+  entryPoint: 'Dashboard' | 'Assets' | 'Positions'
   /** Override fulfilledTimeStamp for Storybook */
   _fulfilledTimeStamp?: number
   /** Override isFetching for Storybook */
@@ -28,7 +30,12 @@ interface PortfolioRefreshHintProps {
  * Component that displays when portfolio data was last updated and provides a refresh button.
  * The refresh button is disabled for PORTFOLIO_CACHE_TIME_MS (30s) after the last successful fetch.
  */
-const PortfolioRefreshHint = ({ _fulfilledTimeStamp, _isFetching, _freezeTime }: PortfolioRefreshHintProps = {}) => {
+const PortfolioRefreshHint = ({
+  entryPoint,
+  _fulfilledTimeStamp,
+  _isFetching,
+  _freezeTime,
+}: PortfolioRefreshHintProps) => {
   const { refetch, fulfilledTimeStamp: hookFulfilledTimeStamp, isFetching: hookIsFetching } = useRefetch()
   const fulfilledTimeStamp = _fulfilledTimeStamp ?? hookFulfilledTimeStamp
   const isFetching = _isFetching ?? hookIsFetching
@@ -47,8 +54,8 @@ const PortfolioRefreshHint = ({ _fulfilledTimeStamp, _isFetching, _freezeTime }:
   const handleRefresh = useCallback(async () => {
     if (isFetching || isOnCooldown) return
 
-    trackEvent(POSITIONS_EVENTS.POSITIONS_REFRESH_CLICKED, {
-      [MixpanelEventParams.ENTRY_POINT]: 'Assets',
+    trackEvent(PORTFOLIO_EVENTS.PORTFOLIO_REFRESH_CLICKED, {
+      [MixpanelEventParams.ENTRY_POINT]: entryPoint,
     })
 
     try {
@@ -56,7 +63,7 @@ const PortfolioRefreshHint = ({ _fulfilledTimeStamp, _isFetching, _freezeTime }:
     } catch (error) {
       logError(Errors._601, error)
     }
-  }, [isFetching, isOnCooldown, refetch])
+  }, [isFetching, isOnCooldown, refetch, entryPoint])
 
   const isDisabled = isFetching || isOnCooldown
 

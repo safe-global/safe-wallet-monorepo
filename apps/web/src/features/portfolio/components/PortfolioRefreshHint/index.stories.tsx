@@ -71,47 +71,55 @@ type Story = StoryObj<typeof PortfolioRefreshHint>
  * Default state showing "Last update 5s ago" with refresh button on cooldown.
  */
 export const Default: Story = {
-  render: () => <PortfolioRefreshHint _fulfilledTimeStamp={Date.now() - 5000} _isFetching={false} />,
+  render: () => <PortfolioRefreshHint entryPoint="Assets" _fulfilledTimeStamp={Date.now() - 5000} _isFetching={false} />,
 }
 
 /**
  * Loading state when data hasn't been fetched yet (no fulfilledTimeStamp).
  */
 export const Loading: Story = {
-  render: () => <PortfolioRefreshHint _fulfilledTimeStamp={undefined} _isFetching={false} />,
+  render: () => <PortfolioRefreshHint entryPoint="Assets" _fulfilledTimeStamp={undefined} _isFetching={false} />,
 }
 
 /**
  * Fetching state - shows "Fetching data" with spinner, button disabled.
  */
 export const Fetching: Story = {
-  render: () => <PortfolioRefreshHint _fulfilledTimeStamp={Date.now() - 45000} _isFetching={true} />,
+  render: () => <PortfolioRefreshHint entryPoint="Assets" _fulfilledTimeStamp={Date.now() - 45000} _isFetching={true} />,
 }
 
 /**
  * On cooldown - button disabled because data was refreshed within 30s.
  */
 export const OnCooldown: Story = {
-  render: () => <PortfolioRefreshHint _fulfilledTimeStamp={Date.now() - 10000} _isFetching={false} _freezeTime />,
+  render: () => (
+    <PortfolioRefreshHint entryPoint="Assets" _fulfilledTimeStamp={Date.now() - 10000} _isFetching={false} _freezeTime />
+  ),
 }
 
 /**
  * Minutes format - showing "Last update Xm ago".
  */
 export const MinutesAgo: Story = {
-  render: () => <PortfolioRefreshHint _fulfilledTimeStamp={Date.now() - 120000} _isFetching={false} />,
+  render: () => (
+    <PortfolioRefreshHint entryPoint="Assets" _fulfilledTimeStamp={Date.now() - 120000} _isFetching={false} />
+  ),
 }
 
 /**
  * Hours format - showing "Last update Xh ago".
  */
 export const HoursAgo: Story = {
-  render: () => <PortfolioRefreshHint _fulfilledTimeStamp={Date.now() - 10800000} _isFetching={false} />,
+  render: () => (
+    <PortfolioRefreshHint entryPoint="Assets" _fulfilledTimeStamp={Date.now() - 10800000} _isFetching={false} />
+  ),
 }
 
 /**
  * Days format - showing "Last update Xd ago".
  */
 export const DaysAgo: Story = {
-  render: () => <PortfolioRefreshHint _fulfilledTimeStamp={Date.now() - 86400000} _isFetching={false} />,
+  render: () => (
+    <PortfolioRefreshHint entryPoint="Assets" _fulfilledTimeStamp={Date.now() - 86400000} _isFetching={false} />
+  ),
 }
