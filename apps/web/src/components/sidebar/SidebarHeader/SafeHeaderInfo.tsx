@@ -46,7 +46,7 @@ const SafeHeaderInfo = (): ReactElement => {
             balances.fiatTotal ? (
               <>
                 <FiatValue value={balances.fiatTotal} />
-                {balances.isAllTokensMode && <InfoTooltip title="Total based on default tokens." />}
+                {balances.isAllTokensMode && <InfoTooltip title="Total based on default tokens and positions." />}
               </>
             ) : (
               <Skeleton variant="text" width={60} />
