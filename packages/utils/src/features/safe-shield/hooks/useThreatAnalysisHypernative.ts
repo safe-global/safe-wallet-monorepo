@@ -10,6 +10,8 @@ import { mapHypernativeResponse } from '@safe-global/utils/features/safe-shield/
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import type { HypernativeAssessmentRequestDto } from '@safe-global/store/hypernative/hypernativeApi.dto'
 import { ErrorType, getErrorInfo } from '@safe-global/utils/features/safe-shield/utils/errors'
+import { calculateSafeTransactionHash } from '@safe-global/protocol-kit/dist/src/utils'
+import { useParsedOrigin } from './useParsedOrigin'
 
 type UseThreatAnalysisHypernativeProps = {
   safeAddress: `0x${string}`
@@ -65,21 +67,7 @@ export function useThreatAnalysisHypernative({
   }, [dataProp, data])
 
   // Parse origin if it's a JSON string containing url
-  const origin = useMemo<string | undefined>(() => {
-    if (originProp) {
-      try {
-        const parsed = JSON.parse(originProp)
-        // Only use parsed.url if it's a non-empty string
-        if (typeof parsed.url === 'string' && parsed.url.length > 0) {
-          return parsed.url
-        }
-        // Otherwise leave origin undefined
-      } catch {
-        // Not JSON - use the original string as-is
-        return originProp
-      }
-    }
-  }, [originProp])
+  const origin = useParsedOrigin(originProp)
 
   // Build Hypernative request payload
   const hypernativeRequest = useMemo<HypernativeAssessmentRequestDto | undefined>(() => {
@@ -89,12 +77,7 @@ export function useThreatAnalysisHypernative({
 
     const txData = data.data
 
-    const safeTxHash = getNestedExecTransactionHash({
-      safeAddress,
-      safeVersion,
-      chainId,
-      txData,
-    }) as `0x${string}`
+    const safeTxHash = calculateSafeTransactionHash(safeAddress, txData, safeVersion, BigInt(chainId)) as `0x${string}`
 
     if (!safeTxHash) {
       return undefined
@@ -107,17 +90,16 @@ export function useThreatAnalysisHypernative({
       transaction: {
         chain: chainId,
         input: txData.data as `0x${string}`,
-        operation: txData.operation,
+        operation: String(txData.operation),
         toAddress: txData.to as `0x${string}`,
         fromAddress: walletAddress as `0x${string}`,
         safeTxGas: txData.safeTxGas,
         value: txData.value,
-        gas: txData.baseGas,
         baseGas: txData.baseGas,
         gasPrice: txData.gasPrice,
         gasToken: txData.gasToken as `0x${string}`,
         refundReceiver: txData.refundReceiver as `0x${string}`,
-        nonce: txData.nonce,
+        nonce: String(txData.nonce),
       },
       url: origin ?? '',
     }

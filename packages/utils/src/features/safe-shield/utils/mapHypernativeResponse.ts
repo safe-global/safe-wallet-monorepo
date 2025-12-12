@@ -66,9 +66,14 @@ function mapFindings(findings: HypernativeFinding): ThreatAnalysisResult[] {
   }
 
   const results: ThreatAnalysisResult[] = findings.risks.map((risk: HypernativeRisk) => {
+    const mappedType = HypernativeRiskTitleMap[risk.safeCheckId] ?? ThreatStatus.HYPERNATIVE_GUARD
+    // MASTERCOPY_CHANGE requires additional fields (before/after) that Hypernative doesn't provide
+    // So we fall back to HYPERNATIVE_GUARD for these cases
+    const type = mappedType === ThreatStatus.MASTERCOPY_CHANGE ? ThreatStatus.HYPERNATIVE_GUARD : mappedType
+
     return {
       severity: HypernativeRiskSeverityMap[risk.severity] ?? Severity.INFO,
-      type: HypernativeRiskTitleMap[risk.title] ?? ThreatStatus.HYPERNATIVE_GUARD,
+      type,
       title: risk.title,
       description: risk.details,
     }

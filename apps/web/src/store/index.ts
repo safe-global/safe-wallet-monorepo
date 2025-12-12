@@ -28,6 +28,7 @@ import { safePassApi } from './api/safePass'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { version as termsVersion } from '@/markdown/terms/version'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
+import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { GATEWAY_URL } from '@/config/gateway'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import { migrateBatchTxs } from '@/services/ls-migration/batch'
@@ -60,6 +61,7 @@ const rootReducer = combineReducers({
   [slices.gatewayApi.reducerPath]: slices.gatewayApi.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
   [slices.authSlice.reducerPath]: slices.authSlice.reducer,
+  [hypernativeApi.reducerPath]: hypernativeApi.reducer,
 })
 
 const persistedSlices: (keyof Partial<RootState>)[] = [
@@ -95,6 +97,7 @@ const middleware: Middleware<{}, RootState>[] = [
   safePassApi.middleware,
   hypernativeApi.middleware,
   slices.gatewayApi.middleware,
+  hypernativeApi.middleware,
 ]
 
 const listeners = [

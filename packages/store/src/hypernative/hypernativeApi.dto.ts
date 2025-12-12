@@ -21,7 +21,7 @@ export type HypernativeRiskDto = {
 
 export type HypernativeAssessmentResponseDto = {
   safeTxHash: `0x${string}`
-  status: 'OK' | 'ERROR'
+  status: 'OK'
   assessmentData: HypernativeAssessmentData
   balanceChanges?: HypernativeBalanceChanges
 }

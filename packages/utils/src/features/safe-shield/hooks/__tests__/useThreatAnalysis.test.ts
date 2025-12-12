@@ -458,4 +458,158 @@ describe('useThreatAnalysis', () => {
       expect(error?.message).toBe('Failed to fetch threat analysis')
     })
   })
+
+  describe('skip parameter', () => {
+    it('should not trigger mutation when skip is true', async () => {
+      const mockTypedData = createMockTypedData()
+      mockGenerateTypedData.mockReturnValue(mockTypedData)
+
+      renderHook(() =>
+        useThreatAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          data: mockTypedData,
+          walletAddress: mockWalletAddress,
+          origin: mockOrigin,
+          safeVersion: mockSafeVersion,
+          skip: true,
+        }),
+      )
+
+      await waitFor(() => {
+        expect(mockTriggerAnalysis).not.toHaveBeenCalled()
+      })
+    })
+
+    it('should return undefined result when skip is true', () => {
+      const mockThreatResult = ThreatAnalysisBuilder.noThreat()!
+
+      mockUseSafeShieldAnalyzeThreatV1Mutation.mockReturnValue([
+        mockTriggerAnalysis,
+        { data: mockThreatResult[0], error: undefined, isLoading: false },
+      ] as any)
+
+      const { result } = renderHook(() =>
+        useThreatAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          data: undefined,
+          walletAddress: mockWalletAddress,
+          safeVersion: mockSafeVersion,
+          skip: true,
+        }),
+      )
+
+      const [data] = result.current
+      expect(data).toBeUndefined()
+    })
+
+    it('should return undefined result when skip is true even if there is an error', () => {
+      const mockError = { error: 'Failed to analyze threat' }
+
+      mockUseSafeShieldAnalyzeThreatV1Mutation.mockReturnValue([
+        mockTriggerAnalysis,
+        { data: undefined, error: mockError, isLoading: false },
+      ] as any)
+
+      const { result } = renderHook(() =>
+        useThreatAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          data: undefined,
+          walletAddress: mockWalletAddress,
+          safeVersion: mockSafeVersion,
+          skip: true,
+        }),
+      )
+
+      const [data] = result.current
+      expect(data).toBeUndefined()
+    })
+
+    it('should stop triggering mutation when skip changes from false to true', async () => {
+      const mockTypedData = createMockTypedData()
+      mockGenerateTypedData.mockReturnValue(mockTypedData)
+
+      const { rerender } = renderHook(
+        ({ skip }) =>
+          useThreatAnalysis({
+            safeAddress: mockSafeAddress,
+            chainId: mockChainId,
+            data: mockTypedData,
+            walletAddress: mockWalletAddress,
+            origin: mockOrigin,
+            safeVersion: mockSafeVersion,
+            skip,
+          }),
+        { initialProps: { skip: false } },
+      )
+
+      await waitFor(() => {
+        expect(mockTriggerAnalysis).toHaveBeenCalledTimes(1)
+      })
+
+      mockTriggerAnalysis.mockClear()
+      rerender({ skip: true })
+
+      await waitFor(() => {
+        expect(mockTriggerAnalysis).not.toHaveBeenCalled()
+      })
+    })
+
+    it('should start triggering mutation when skip changes from true to false', async () => {
+      const mockTypedData = createMockTypedData()
+      mockGenerateTypedData.mockReturnValue(mockTypedData)
+
+      const { rerender } = renderHook(
+        ({ skip }) =>
+          useThreatAnalysis({
+            safeAddress: mockSafeAddress,
+            chainId: mockChainId,
+            data: mockTypedData,
+            walletAddress: mockWalletAddress,
+            origin: mockOrigin,
+            safeVersion: mockSafeVersion,
+            skip,
+          }),
+        { initialProps: { skip: true } },
+      )
+
+      await waitFor(() => {
+        expect(mockTriggerAnalysis).not.toHaveBeenCalled()
+      })
+
+      rerender({ skip: false })
+
+      await waitFor(() => {
+        expect(mockTriggerAnalysis).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    it('should return undefined when skip is true even with successful mutation data', () => {
+      const mockThreatResult = ThreatAnalysisBuilder.noThreat()!
+
+      mockUseSafeShieldAnalyzeThreatV1Mutation.mockReturnValue([
+        mockTriggerAnalysis,
+        { data: mockThreatResult[0], error: undefined, isLoading: false },
+      ] as any)
+
+      const { result } = renderHook(() =>
+        useThreatAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          data: undefined,
+          walletAddress: mockWalletAddress,
+          safeVersion: mockSafeVersion,
+          skip: true,
+        }),
+      )
+
+      const [data, error, loading] = result.current
+
+      expect(data).toBeUndefined()
+      expect(error).toBeUndefined()
+      expect(loading).toBe(false)
+    })
+  })
 })
