@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen } from '@/tests/test-utils'
 import { AnalysisGroupCardItem } from '../AnalysisGroupCardItem'
 import { ThreatAnalysisResultBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis-result.builder'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
@@ -22,6 +22,11 @@ jest.mock('../../AnalysisIssuesDisplay', () => ({
     }
     return null
   },
+}))
+
+jest.mock('../../ReportFalseResultModal', () => ({
+  ReportFalseResultModal: ({ open }: { open: boolean }) =>
+    open ? <div data-testid="report-modal">Report Modal</div> : null,
 }))
 
 describe('AnalysisGroupCardItem', () => {
@@ -230,6 +235,55 @@ describe('AnalysisGroupCardItem', () => {
 
       expect(screen.queryByTestId('analysis-issues-display')).not.toBeInTheDocument()
       expect(screen.queryByTestId('show-all-address')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Report False Result', () => {
+    it('should show report link for malicious threat when requestId is provided', () => {
+      const requestId = faker.string.uuid()
+      const result = ThreatAnalysisResultBuilder.malicious().build()
+
+      render(<AnalysisGroupCardItem result={result} requestId={requestId} />)
+
+      expect(screen.getByText('Report false result')).toBeInTheDocument()
+    })
+
+    it('should show report link for moderate threat when requestId is provided', () => {
+      const requestId = faker.string.uuid()
+      const result = ThreatAnalysisResultBuilder.moderate().build()
+
+      render(<AnalysisGroupCardItem result={result} requestId={requestId} />)
+
+      expect(screen.getByText('Report false result')).toBeInTheDocument()
+    })
+
+    it('should not show report link when requestId is not provided', () => {
+      const result = ThreatAnalysisResultBuilder.malicious().build()
+
+      render(<AnalysisGroupCardItem result={result} />)
+
+      expect(screen.queryByText('Report false result')).not.toBeInTheDocument()
+    })
+
+    it('should not show report link for non-threat results', () => {
+      const requestId = faker.string.uuid()
+      const result = ThreatAnalysisResultBuilder.noThreat().build()
+
+      render(<AnalysisGroupCardItem result={result} requestId={requestId} />)
+
+      expect(screen.queryByText('Report false result')).not.toBeInTheDocument()
+    })
+
+    it('should open modal when report link is clicked', () => {
+      const requestId = faker.string.uuid()
+      const result = ThreatAnalysisResultBuilder.malicious().build()
+
+      render(<AnalysisGroupCardItem result={result} requestId={requestId} />)
+
+      const reportLink = screen.getByText('Report false result')
+      fireEvent.click(reportLink)
+
+      expect(screen.getByTestId('report-modal')).toBeInTheDocument()
     })
   })
 })

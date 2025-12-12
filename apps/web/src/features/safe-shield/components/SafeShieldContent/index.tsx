@@ -119,6 +119,7 @@ export const SafeShieldContent = ({
             delay={threatAnalysisDelay}
             highlightedSeverity={highlightedSeverity}
             analyticsEvent={SAFE_SHIELD_EVENTS.THREAT_ANALYZED}
+            requestId={threatResults?.request_id}
           />
 
           {!contractLoading && !threatLoading && (
