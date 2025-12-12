@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Box, IconButton, Tooltip, Typography, type SvgIconProps } from '@mui/material'
 import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded'
+import { formatDistanceToNow } from 'date-fns'
 import { useRefetch } from '@/features/positions/hooks/useRefetch'
 import { PORTFOLIO_CACHE_TIME_MS } from '@/config/constants'
 import { trackEvent } from '@/services/analytics'
@@ -12,24 +13,6 @@ import css from './styles.module.css'
 const RefreshIcon = (props: SvgIconProps & { isLoading?: boolean }) => {
   const { isLoading, ...iconProps } = props
   return <AutorenewRoundedIcon {...iconProps} className={isLoading ? css.spinning : undefined} sx={iconProps.sx} />
-}
-
-const formatTimeAgo = (diffMs: number): string => {
-  const diffSeconds = Math.floor(diffMs / 1000)
-
-  if (diffSeconds < 60) {
-    return 'less than 1 min'
-  }
-  const diffMinutes = Math.floor(diffSeconds / 60)
-  if (diffMinutes < 60) {
-    return `${diffMinutes} min`
-  }
-  const diffHours = Math.floor(diffMinutes / 60)
-  if (diffHours < 24) {
-    return `${diffHours} hour${diffHours > 1 ? 's' : ''}`
-  }
-  const diffDays = Math.floor(diffHours / 24)
-  return `${diffDays} day${diffDays > 1 ? 's' : ''}`
 }
 
 interface PortfolioRefreshHintProps {
@@ -59,7 +42,7 @@ const PortfolioRefreshHint = ({ _fulfilledTimeStamp, _isFetching, _freezeTime }:
 
   const timeSinceLastFetch = fulfilledTimeStamp ? now - fulfilledTimeStamp : Infinity
   const isOnCooldown = timeSinceLastFetch < PORTFOLIO_CACHE_TIME_MS
-  const timeAgo = fulfilledTimeStamp ? formatTimeAgo(timeSinceLastFetch) : null
+  const timeAgo = fulfilledTimeStamp ? formatDistanceToNow(fulfilledTimeStamp) : null
 
   const handleRefresh = useCallback(async () => {
     if (isFetching || isOnCooldown) return
