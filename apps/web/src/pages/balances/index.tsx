@@ -18,12 +18,16 @@ import { Box } from '@mui/material'
 import { BRAND_NAME } from '@/config/constants'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
+import PortfolioRefreshHint from '@/features/portfolio/components/PortfolioRefreshHint'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 const Balances: NextPage = () => {
   const { balances, error } = useVisibleBalances()
   const [showHiddenAssets, setShowHiddenAssets] = useState(false)
   const toggleShowHiddenAssets = () => setShowHiddenAssets((prev) => !prev)
   const isStakingBannerVisible = useIsStakingBannerVisible()
   const isNoFeeNovemberEnabled = useIsNoFeeNovemberFeatureEnabled()
+  const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
   const [hideNoFeeNovemberBanner, setHideNoFeeNovemberBanner] = useLocalStorage<boolean>(
     'hideNoFeeNovemberAssetsPageBanner',
   )
@@ -63,7 +67,11 @@ const Balances: NextPage = () => {
             )}
 
             <Box mb={2}>
-              <TotalAssetValue fiatTotal={tokensFiatTotal} isAllTokensMode={balances.isAllTokensMode} />
+              <TotalAssetValue
+                fiatTotal={tokensFiatTotal}
+                isAllTokensMode={balances.isAllTokensMode}
+                action={isPortfolioEndpointEnabled ? <PortfolioRefreshHint entryPoint="Assets" /> : undefined}
+              />
             </Box>
 
             <AssetsTable setShowHiddenAssets={setShowHiddenAssets} showHiddenAssets={showHiddenAssets} />
