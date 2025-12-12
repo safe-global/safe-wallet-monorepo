@@ -54,37 +54,6 @@
   justify-content: center;
 }
 
-.customProgress {
-  position: relative;
-  width: 16px;
-  height: 16px;
-}
-
-.progressRing {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: conic-gradient(
-    from 0deg,
-    var(--color-info-main) 0%,
-    var(--color-secondary-main) var(--progress, 0%),
-    var(--color-border-light) var(--progress, 0%),
-    var(--color-border-light) 100%
-  );
-  position: relative;
-}
-
-.progressRing::after {
-  content: '';
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--color-background-paper);
-}
-
 .iconButton {
   width: 28px;
   height: 28px;
