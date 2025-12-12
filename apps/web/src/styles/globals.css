@@ -101,9 +101,9 @@ svg.CRITICAL .shield-img {
   fill: var(--color-error-main);
 }
 
-svg.OK .shield-lines, 
-svg.INFO .shield-lines, 
-svg.WARN .shield-lines, 
+svg.OK .shield-lines,
+svg.INFO .shield-lines,
+svg.WARN .shield-lines,
 svg.CRITICAL .shield-lines {
   fill: var(--color-static-main);
   stroke: var(--color-static-main);
