@@ -107,24 +107,24 @@ describe('useRefetch', () => {
       expect(portfolioRefetch).toHaveBeenCalled()
     })
 
-    it('should call legacy refetch functions when portfolio endpoint is disabled', async () => {
-      const legacyPositionsRefetch = jest.fn().mockResolvedValue({})
-      const legacyBalancesRefetch = jest.fn().mockResolvedValue({})
+    it('should call positions and balances refetch functions when portfolio endpoint is disabled', async () => {
+      const positionsRefetch = jest.fn().mockResolvedValue({})
+      const txServiceBalancesRefetch = jest.fn().mockResolvedValue({})
 
       jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
       jest.spyOn(positionsQueries, 'usePositionsGetPositionsV1Query').mockReturnValue({
-        refetch: legacyPositionsRefetch,
+        refetch: positionsRefetch,
       } as any)
       jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
-        refetch: legacyBalancesRefetch,
+        refetch: txServiceBalancesRefetch,
       } as any)
 
       const { result } = renderHook(() => useRefetch())
 
       await result.current.refetch()
 
-      expect(legacyPositionsRefetch).toHaveBeenCalled()
-      expect(legacyBalancesRefetch).toHaveBeenCalled()
+      expect(positionsRefetch).toHaveBeenCalled()
+      expect(txServiceBalancesRefetch).toHaveBeenCalled()
     })
   })
 
@@ -144,23 +144,23 @@ describe('useRefetch', () => {
     })
 
     it('should only call positions refetch when portfolio endpoint is disabled', async () => {
-      const legacyPositionsRefetch = jest.fn().mockResolvedValue({})
-      const legacyBalancesRefetch = jest.fn().mockResolvedValue({})
+      const positionsRefetch = jest.fn().mockResolvedValue({})
+      const txServiceBalancesRefetch = jest.fn().mockResolvedValue({})
 
       jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
       jest.spyOn(positionsQueries, 'usePositionsGetPositionsV1Query').mockReturnValue({
-        refetch: legacyPositionsRefetch,
+        refetch: positionsRefetch,
       } as any)
       jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
-        refetch: legacyBalancesRefetch,
+        refetch: txServiceBalancesRefetch,
       } as any)
 
       const { result } = renderHook(() => useRefetch())
 
       await result.current.refetchPositions()
 
-      expect(legacyPositionsRefetch).toHaveBeenCalled()
-      expect(legacyBalancesRefetch).not.toHaveBeenCalled()
+      expect(positionsRefetch).toHaveBeenCalled()
+      expect(txServiceBalancesRefetch).not.toHaveBeenCalled()
     })
   })
 })
