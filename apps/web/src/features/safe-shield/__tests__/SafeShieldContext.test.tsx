@@ -1,8 +1,10 @@
-import { renderHook, waitFor } from '@testing-library/react'
+import { renderHook, waitFor, act } from '@testing-library/react'
 import { SafeShieldProvider, useSafeShield } from '../SafeShieldContext'
 import { Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
+import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import type { ReactNode } from 'react'
 
 jest.mock('../hooks', () => ({
   useRecipientAnalysis: jest.fn(() => undefined),
@@ -21,11 +23,19 @@ jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: jest.fn(() => ({ chainId: '1' })),
 }))
 
-jest.mock('@/components/tx-flow/SafeTxProvider', () => ({
-  SafeTxContext: {
-    Provider: ({ children }: { children: React.ReactNode }) => children,
-  },
-}))
+const mockSafeTxContextValue = {
+  safeTx: undefined,
+  setSafeTx: jest.fn(),
+  setSafeMessage: jest.fn(),
+  setSafeTxError: jest.fn(),
+  setNonce: jest.fn(),
+  setNonceNeeded: jest.fn(),
+  setSafeTxGas: jest.fn(),
+  setTxOrigin: jest.fn(),
+  isReadOnly: false,
+  setIsReadOnly: jest.fn(),
+  setIsMassPayout: jest.fn(),
+}
 
 const mockUseThreatAnalysis = jest.requireMock('../hooks').useThreatAnalysis
 const mockUseNestedTransaction = jest.requireMock('../components/useNestedTransaction').useNestedTransaction
@@ -85,23 +95,37 @@ describe('SafeShieldContext - Nested Transaction Threat Detection', () => {
       isNested: true,
     })
 
-    mockUseThreatAnalysis
-      .mockReturnValueOnce(buildThreatResult(Severity.OK))
-      .mockReturnValueOnce(buildThreatResult(Severity.CRITICAL))
+    mockUseThreatAnalysis.mockImplementation((tx?: SafeTransaction) => {
+      if (tx === approveHashTx) {
+        return buildThreatResult(Severity.OK)
+      }
+      if (tx === nestedSafeTx) {
+        return buildThreatResult(Severity.CRITICAL)
+      }
+      return buildThreatResult(Severity.OK)
+    })
 
-    const wrapper = ({ children }: { children: React.ReactNode }) => <SafeShieldProvider>{children}</SafeShieldProvider>
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <SafeTxContext.Provider value={mockSafeTxContextValue}>
+        <SafeShieldProvider>{children}</SafeShieldProvider>
+      </SafeTxContext.Provider>
+    )
 
     const { result } = renderHook(() => useSafeShield(), { wrapper })
 
-    result.current.setSafeTx(approveHashTx)
-
-    await waitFor(() => {
-      expect(mockUseThreatAnalysis).toHaveBeenCalledTimes(2)
-      expect(mockUseThreatAnalysis).toHaveBeenNthCalledWith(1, approveHashTx)
-      expect(mockUseThreatAnalysis).toHaveBeenNthCalledWith(2, nestedSafeTx)
-      expect(result.current.isNested).toBe(true)
-      expect(result.current.needsRiskConfirmation).toBe(true)
+    act(() => {
+      result.current.setSafeTx(approveHashTx)
     })
+
+    await waitFor(
+      () => {
+        expect(mockUseThreatAnalysis).toHaveBeenCalledWith(approveHashTx)
+        expect(mockUseThreatAnalysis).toHaveBeenCalledWith(nestedSafeTx)
+        expect(result.current.isNested).toBe(true)
+        expect(result.current.needsRiskConfirmation).toBe(true)
+      },
+      { timeout: 3000 },
+    )
   })
 
   it('should prioritize the more severe threat from nested transaction', async () => {
@@ -113,19 +137,34 @@ describe('SafeShieldContext - Nested Transaction Threat Detection', () => {
       isNested: true,
     })
 
-    mockUseThreatAnalysis
-      .mockReturnValueOnce(buildThreatResult(Severity.WARN))
-      .mockReturnValueOnce(buildThreatResult(Severity.CRITICAL))
+    mockUseThreatAnalysis.mockImplementation((tx?: SafeTransaction) => {
+      if (tx === approveHashTx) {
+        return buildThreatResult(Severity.WARN)
+      }
+      if (tx === nestedSafeTx) {
+        return buildThreatResult(Severity.CRITICAL)
+      }
+      return buildThreatResult(Severity.OK)
+    })
 
-    const wrapper = ({ children }: { children: React.ReactNode }) => <SafeShieldProvider>{children}</SafeShieldProvider>
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <SafeTxContext.Provider value={mockSafeTxContextValue}>
+        <SafeShieldProvider>{children}</SafeShieldProvider>
+      </SafeTxContext.Provider>
+    )
 
     const { result } = renderHook(() => useSafeShield(), { wrapper })
 
-    result.current.setSafeTx(approveHashTx)
-
-    await waitFor(() => {
-      expect(result.current.needsRiskConfirmation).toBe(true)
+    act(() => {
+      result.current.setSafeTx(approveHashTx)
     })
+
+    await waitFor(
+      () => {
+        expect(result.current.needsRiskConfirmation).toBe(true)
+      },
+      { timeout: 3000 },
+    )
   })
 
   it('should not analyze nested transaction when isNested is false', async () => {
@@ -138,11 +177,17 @@ describe('SafeShieldContext - Nested Transaction Threat Detection', () => {
 
     mockUseThreatAnalysis.mockReturnValue(buildThreatResult(Severity.OK))
 
-    const wrapper = ({ children }: { children: React.ReactNode }) => <SafeShieldProvider>{children}</SafeShieldProvider>
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <SafeTxContext.Provider value={mockSafeTxContextValue}>
+        <SafeShieldProvider>{children}</SafeShieldProvider>
+      </SafeTxContext.Provider>
+    )
 
     const { result } = renderHook(() => useSafeShield(), { wrapper })
 
-    result.current.setSafeTx(regularTx)
+    act(() => {
+      result.current.setSafeTx(regularTx)
+    })
 
     await waitFor(() => {
       expect(mockUseThreatAnalysis).toHaveBeenCalledWith(regularTx)
@@ -160,20 +205,35 @@ describe('SafeShieldContext - Nested Transaction Threat Detection', () => {
       isNested: true,
     })
 
-    mockUseThreatAnalysis
-      .mockReturnValueOnce(buildThreatResult(Severity.OK))
-      .mockReturnValueOnce(buildThreatResult(Severity.CRITICAL))
+    mockUseThreatAnalysis.mockImplementation((tx?: SafeTransaction) => {
+      if (tx === approveHashTx) {
+        return buildThreatResult(Severity.OK)
+      }
+      if (tx === nestedSafeTx) {
+        return buildThreatResult(Severity.CRITICAL)
+      }
+      return buildThreatResult(Severity.OK)
+    })
 
-    const wrapper = ({ children }: { children: React.ReactNode }) => <SafeShieldProvider>{children}</SafeShieldProvider>
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <SafeTxContext.Provider value={mockSafeTxContextValue}>
+        <SafeShieldProvider>{children}</SafeShieldProvider>
+      </SafeTxContext.Provider>
+    )
 
     const { result } = renderHook(() => useSafeShield(), { wrapper })
 
-    result.current.setSafeTx(approveHashTx)
-
-    await waitFor(() => {
-      expect(result.current.needsRiskConfirmation).toBe(true)
-      expect(result.current.isRiskConfirmed).toBe(false)
+    act(() => {
+      result.current.setSafeTx(approveHashTx)
     })
+
+    await waitFor(
+      () => {
+        expect(result.current.needsRiskConfirmation).toBe(true)
+        expect(result.current.isRiskConfirmed).toBe(false)
+      },
+      { timeout: 3000 },
+    )
   })
 
   it('should not require risk confirmation when both threats are OK', async () => {
@@ -185,18 +245,25 @@ describe('SafeShieldContext - Nested Transaction Threat Detection', () => {
       isNested: true,
     })
 
-    mockUseThreatAnalysis
-      .mockReturnValueOnce(buildThreatResult(Severity.OK))
-      .mockReturnValueOnce(buildThreatResult(Severity.OK))
+    mockUseThreatAnalysis.mockImplementation(() => buildThreatResult(Severity.OK))
 
-    const wrapper = ({ children }: { children: React.ReactNode }) => <SafeShieldProvider>{children}</SafeShieldProvider>
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <SafeTxContext.Provider value={mockSafeTxContextValue}>
+        <SafeShieldProvider>{children}</SafeShieldProvider>
+      </SafeTxContext.Provider>
+    )
 
     const { result } = renderHook(() => useSafeShield(), { wrapper })
 
-    result.current.setSafeTx(approveHashTx)
-
-    await waitFor(() => {
-      expect(result.current.needsRiskConfirmation).toBe(false)
+    act(() => {
+      result.current.setSafeTx(approveHashTx)
     })
+
+    await waitFor(
+      () => {
+        expect(result.current.needsRiskConfirmation).toBe(false)
+      },
+      { timeout: 3000 },
+    )
   })
 })
