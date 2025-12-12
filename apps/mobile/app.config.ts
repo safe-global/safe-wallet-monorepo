@@ -1,5 +1,5 @@
 import { ExpoConfig } from 'expo/config'
- 
+
 const IS_DEV = process.env.APP_VARIANT === 'development'
 
 const appleDevTeamId = '86487MHG6V'
