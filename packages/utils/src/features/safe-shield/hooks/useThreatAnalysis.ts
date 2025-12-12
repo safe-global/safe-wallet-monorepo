@@ -9,6 +9,7 @@ import { generateTypedData } from '../utils/generateTypedData'
 import { isSafeTransaction } from '../../../utils/safeTransaction'
 import { ErrorType, getErrorInfo } from '../utils/errors'
 import { transformThreatAnalysisResponse } from '../utils/transformThreatAnalysisResponse'
+import { useParsedOrigin } from './useParsedOrigin'
 
 type UseThreatAnalysisProps = {
   safeAddress: `0x${string}`
@@ -56,21 +57,7 @@ export function useThreatAnalysis({
   }, [dataProp, data])
 
   // Parse origin if it's a JSON string containing url
-  const origin = useMemo<string | undefined>(() => {
-    if (originProp) {
-      try {
-        const parsed = JSON.parse(originProp)
-        // Only use parsed.url if it's a non-empty string
-        if (typeof parsed.url === 'string' && parsed.url.length > 0) {
-          return parsed.url
-        }
-        // Otherwise leave origin undefined to make CGW fall back to non_dapp
-      } catch {
-        // Not JSON - use the original string as-is
-        return originProp
-      }
-    }
-  }, [originProp])
+  const origin = useParsedOrigin(originProp)
 
   const typedData = useMemo(
     () =>
@@ -87,11 +74,7 @@ export function useThreatAnalysis({
 
   // Trigger the mutation when typed data is available
   useEffect(() => {
-    if (skip) {
-      return
-    }
-
-    if (typedData && chainId && safeAddress && walletAddress) {
+    if (!skip && typedData && chainId && safeAddress && walletAddress) {
       triggerAnalysis({
         chainId,
         safeAddress,

@@ -42,7 +42,7 @@ export function useThreatAnalysis(
     origin: txOrigin,
     safeVersion: version || undefined,
     authToken: hypernativeAuthToken,
-    skip: !isHypernativeGuard || !hypernativeAuthToken,
+    skip: !isHypernativeGuard,
   })
 
   if (HNGuardCheckLoading) {
