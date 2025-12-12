@@ -4,7 +4,8 @@ import Head from 'next/head'
 import AssetsTable from '@/components/balances/AssetsTable'
 import AssetsHeader from '@/components/balances/AssetsHeader'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
+import type { ManageTokensButtonHandle } from '@/components/balances/ManageTokensButton'
 
 import PagePlaceholder from '@/components/common/PagePlaceholder'
 import NoAssetsIcon from '@/public/images/balances/no-assets.svg'
@@ -25,6 +26,7 @@ const Balances: NextPage = () => {
   const { balances, error } = useVisibleBalances()
   const [showHiddenAssets, setShowHiddenAssets] = useState(false)
   const toggleShowHiddenAssets = () => setShowHiddenAssets((prev) => !prev)
+  const manageTokensButtonRef = useRef<ManageTokensButtonHandle>(null)
   const isStakingBannerVisible = useIsStakingBannerVisible()
   const isNoFeeNovemberEnabled = useIsNoFeeNovemberFeatureEnabled()
   const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
@@ -45,7 +47,7 @@ const Balances: NextPage = () => {
       </Head>
 
       <AssetsHeader>
-        <ManageTokensButton onHideTokens={toggleShowHiddenAssets} />
+        <ManageTokensButton ref={manageTokensButtonRef} onHideTokens={toggleShowHiddenAssets} />
         <CurrencySelect />
       </AssetsHeader>
 
@@ -74,7 +76,11 @@ const Balances: NextPage = () => {
               />
             </Box>
 
-            <AssetsTable setShowHiddenAssets={setShowHiddenAssets} showHiddenAssets={showHiddenAssets} />
+            <AssetsTable
+              setShowHiddenAssets={setShowHiddenAssets}
+              showHiddenAssets={showHiddenAssets}
+              onOpenManageTokens={() => manageTokensButtonRef.current?.openMenu()}
+            />
           </>
         )}
       </main>
