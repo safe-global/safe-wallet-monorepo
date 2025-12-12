@@ -1,7 +1,7 @@
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppSelector } from '@/store'
-import { selectCurrency, selectSettings, TOKEN_LISTS } from '@/store/settingsSlice'
+import { selectCurrency } from '@/store/settingsSlice'
 import { usePositionsGetPositionsV1Query, type Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import type { AppBalance } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import useIsPositionsFeatureEnabled from './useIsPositionsFeatureEnabled'
@@ -41,17 +41,18 @@ const transformAppBalancesToProtocols = (appBalances?: AppBalance[]): Protocol[]
   }))
 }
 
+/**
+ * Hook to load positions data.
+ * Uses portfolio endpoint when enabled, otherwise falls back to legacy positions endpoint.
+ */
 const usePositions = () => {
   const chainId = useChainId()
   const { safeAddress } = useSafeInfo()
   const currency = useAppSelector(selectCurrency)
-  const settings = useAppSelector(selectSettings)
   const isPositionsEnabled = useIsPositionsFeatureEnabled()
   const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
-  const isAllTokensSelected = settings?.tokenList === TOKEN_LISTS.ALL
 
-  // Portfolio endpoint only when enabled AND "All tokens" not selected (same logic as useLoadBalances)
-  const shouldUsePortfolioEndpoint = isPositionsEnabled && isPortfolioEndpointEnabled && !isAllTokensSelected
+  const shouldUsePortfolioEndpoint = isPositionsEnabled && isPortfolioEndpointEnabled
   const shouldUsePositionEndpoint = isPositionsEnabled && !shouldUsePortfolioEndpoint
 
   const {

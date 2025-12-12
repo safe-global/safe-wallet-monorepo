@@ -10,6 +10,7 @@ import FiatValue from '@/components/common/FiatValue'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import { InfoTooltip } from '@/features/stake/components/InfoTooltip'
 
 import css from './styles.module.css'
 
@@ -43,7 +44,10 @@ const SafeHeaderInfo = (): ReactElement => {
         <Typography data-testid="currency-section" variant="body2" fontWeight={700}>
           {safe.deployed ? (
             balances.fiatTotal ? (
-              <FiatValue value={balances.fiatTotal} />
+              <>
+                <FiatValue value={balances.fiatTotal} />
+                {balances.isAllTokensMode && <InfoTooltip title="Total based on default tokens." />}
+              </>
             ) : (
               <Skeleton variant="text" width={60} />
             )

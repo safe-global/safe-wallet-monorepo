@@ -69,6 +69,7 @@ const Balances: NextPage = () => {
             <Box mb={2}>
               <TotalAssetValue
                 fiatTotal={tokensFiatTotal}
+                isAllTokensMode={balances.isAllTokensMode}
                 action={isPortfolioEndpointEnabled ? <PortfolioRefreshHint /> : undefined}
               />
             </Box>
