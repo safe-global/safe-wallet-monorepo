@@ -19,7 +19,7 @@ export interface GradientCircularProgressProps extends Omit<CircularProgressProp
  */
 export const GradientCircularProgress = ({
   startColor = 'var(--color-info-main)',
-  endColor = 'var(--color-text-brand)',
+  endColor = 'var(--color-static-text-brand)',
   direction = 'vertical',
   gradientId,
   sx,
