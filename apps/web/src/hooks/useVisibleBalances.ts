@@ -4,8 +4,10 @@ import useBalances from './useBalances'
 import useHiddenTokens from './useHiddenTokens'
 import type { PortfolioBalances } from './loadables/useLoadBalances'
 import { useAppSelector } from '@/store'
-import { selectHideDust } from '@/store/settingsSlice'
+import { selectSettings } from '@/store/settingsSlice'
 import { DUST_THRESHOLD } from '@/config/constants'
+import { useHasFeature } from './useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const PRECISION = 18
 
@@ -68,6 +70,26 @@ const getVisibleTokensFiatTotal = (balances: PortfolioBalances, hiddenAssets: st
   )
 }
 
+/**
+ * Hook to determine if dust tokens should be hidden.
+ * The dust filter is ON by default only when PORTFOLIO_ENDPOINT (Zerion) feature is enabled.
+ * For chains without PORTFOLIO_ENDPOINT, the dust filter defaults to OFF.
+ * Users can always override this default by toggling the setting.
+ */
+export const useHideDust = (): boolean => {
+  const settings = useAppSelector(selectSettings)
+  const hasPortfolioFeature = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT)
+
+  // If user has explicitly set the hideDust preference, use that
+  // Otherwise, default to true (ON) only if PORTFOLIO_ENDPOINT feature is enabled
+  if (settings.hideDust !== undefined) {
+    return settings.hideDust
+  }
+
+  // Default: ON for Zerion-enabled chains, OFF for others
+  return hasPortfolioFeature ?? false
+}
+
 export const useVisibleBalances = (): {
   balances: PortfolioBalances
   loaded: boolean
@@ -76,7 +98,7 @@ export const useVisibleBalances = (): {
 } => {
   const data = useBalances()
   const hiddenTokens = useHiddenTokens()
-  const hideDust = useAppSelector(selectHideDust)
+  const hideDust = useHideDust()
 
   return useMemo(() => {
     const itemsWithoutHidden = filterHiddenTokens(data.balances.items, hiddenTokens)

@@ -13,6 +13,7 @@ import useHiddenTokens from '@/hooks/useHiddenTokens'
 import Track from '@/components/common/Track'
 import { ASSETS_EVENTS } from '@/services/analytics'
 import css from './ManageTokensMenu.module.css'
+import { useHideDust } from '@/hooks/useVisibleBalances'
 
 interface ManageTokensMenuProps {
   anchorEl: HTMLElement | null
@@ -44,7 +45,7 @@ const ManageTokensMenu = ({
   const hasDefaultTokenlist = _hasDefaultTokenlist ?? hasDefaultTokenlistFromHook
 
   const showAllTokens = settings.tokenList === TOKEN_LISTS.ALL || settings.tokenList === undefined
-  const hideDust = settings.hideDust ?? true
+  const hideDust = useHideDust()
   const hiddenTokensCount = hiddenTokens.length
 
   const handleToggleShowAllTokens = () => {
