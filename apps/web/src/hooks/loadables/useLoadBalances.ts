@@ -23,7 +23,7 @@ export const initialBalancesState: PortfolioBalances = {
   fiatTotal: '',
 }
 
-const createPortfolioBalances = (balances: Balances): PortfolioBalances => ({
+export const createPortfolioBalances = (balances: Balances): PortfolioBalances => ({
   ...balances,
   tokensFiatTotal: balances.fiatTotal,
   positionsFiatTotal: '0',
