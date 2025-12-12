@@ -7,6 +7,8 @@ import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { ProgressBar } from '@/components/common/ProgressBar'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import NewTxIcon from '@/public/images/transactions/new-tx.svg'
+import NewTxIconDark from '@/public/images/transactions/new-tx-dark.svg'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import HnMiniTxBanner from '@/features/hypernative/components/HnMiniTxBanner'
 
 import css from './styles.module.css'
@@ -14,6 +16,7 @@ import css from './styles.module.css'
 const NewTxFlow = () => {
   const txBuilder = useTxBuilderApp()
   const { setTxFlow } = useContext(TxModalContext)
+  const isDarkMode = useDarkMode()
 
   const onTokensClick = useCallback(() => {
     setTxFlow(<TokenTransferFlow />)
@@ -54,9 +57,7 @@ const NewTxFlow = () => {
                 gap: 3,
               }}
             >
-              <div className={css.globs}>
-                <NewTxIcon />
-              </div>
+              <div className={css.globs}>{isDarkMode ? <NewTxIconDark /> : <NewTxIcon />}</div>
 
               <Typography variant="h1" className={css.title}>
                 New transaction
