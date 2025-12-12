@@ -63,7 +63,7 @@ const Balances: NextPage = () => {
             )}
 
             <Box mb={2}>
-              <TotalAssetValue fiatTotal={tokensFiatTotal} />
+              <TotalAssetValue fiatTotal={tokensFiatTotal} isAllTokensMode={balances.isAllTokensMode} />
             </Box>
 
             <AssetsTable setShowHiddenAssets={setShowHiddenAssets} showHiddenAssets={showHiddenAssets} />
