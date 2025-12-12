@@ -61,10 +61,7 @@ const PortfolioRefreshHint = ({ _fulfilledTimeStamp, _isFetching, _freezeTime }:
   const isDisabled = isFetching || isOnCooldown
 
   const tooltip = isOnCooldown ? (
-    <>
-      Next update available in{' '}
-      <span className={css.time}>{Math.ceil((PORTFOLIO_CACHE_TIME_MS - timeSinceLastFetch) / 1000)}s</span>
-    </>
+    <>Next update available in {Math.ceil((PORTFOLIO_CACHE_TIME_MS - timeSinceLastFetch) / 1000)}s</>
   ) : (
     'Update portfolio data'
   )
