@@ -2,6 +2,7 @@ import { waitFor, screen } from '@testing-library/react'
 import { render } from '@/tests/test-utils'
 import { useRouter } from 'next/router'
 import HypernativeOAuthCallback from '../../pages/hypernative/oauth-callback'
+import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
@@ -18,25 +19,39 @@ jest.mock('@/features/hypernative/hooks/useHypernativeOAuth', () => {
   }
 })
 
-import { readPkce, clearPkce } from '@/features/hypernative/hooks/useHypernativeOAuth'
+// Mock OAuth config
+jest.mock('@/features/hypernative/config/oauth', () => {
+  const actual = jest.requireActual('@/features/hypernative/config/oauth')
+  return {
+    ...actual,
+    HYPERNATIVE_OAUTH_CONFIG: {
+      authUrl: 'https://api.hypernative.xyz/oauth/authorize',
+      clientId: 'TEST_CLIENT_ID',
+      redirectUri: '',
+    },
+    getRedirectUri: jest.fn(),
+  }
+})
 
-// Mock fetch
-const mockFetch = jest.fn()
-global.fetch = mockFetch as unknown as typeof fetch
+import { readPkce, clearPkce } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import { getRedirectUri } from '@/features/hypernative/config/oauth'
 
 describe('HypernativeOAuthCallback', () => {
   const mockRouterPush = jest.fn()
   const mockWindowClose = jest.fn()
   const mockReplaceState = jest.fn()
+  const mockExchangeToken = jest.fn()
 
   // Get references to the mocked functions
   const mockReadPkce = readPkce as jest.MockedFunction<typeof readPkce>
   const mockClearPkce = clearPkce as jest.MockedFunction<typeof clearPkce>
+  const mockGetRedirectUri = getRedirectUri as jest.MockedFunction<typeof getRedirectUri>
 
   beforeEach(() => {
     jest.clearAllMocks()
     mockReadPkce.mockReturnValue({})
     mockClearPkce.mockImplementation(() => {})
+    mockGetRedirectUri.mockReturnValue('http://localhost:3000/hypernative/oauth-callback')
 
     // Setup router mock
     ;(useRouter as jest.Mock).mockReturnValue({
@@ -68,26 +83,27 @@ describe('HypernativeOAuthCallback', () => {
       configurable: true,
     })
 
-    // Reset fetch mock completely and set up default successful response
-    mockFetch.mockReset()
-    // Ensure global.fetch still points to our mock
-    global.fetch = mockFetch as unknown as typeof fetch
-
-    const mockJsonFn = jest.fn().mockResolvedValue({
-      data: {
+    // Set up default successful response
+    mockExchangeToken.mockImplementation(() => ({
+      unwrap: jest.fn().mockResolvedValue({
         access_token: 'test-access-token',
         expires_in: 3600,
         token_type: 'Bearer',
+      }),
+    }))
+
+    jest.spyOn(hypernativeApi, 'useExchangeTokenMutation').mockReturnValue([
+      mockExchangeToken,
+      {
+        isLoading: false,
+        isError: false,
+        isSuccess: false,
+        error: undefined,
+        data: undefined,
+        reset: jest.fn(),
+        originalArgs: undefined,
       },
-    })
-    mockFetch.mockImplementation(() =>
-      Promise.resolve({
-        ok: true,
-        json: mockJsonFn,
-        text: jest.fn().mockResolvedValue(''),
-        clone: jest.fn().mockReturnThis(),
-      } as unknown as Response),
-    )
+    ] as ReturnType<typeof hypernativeApi.useExchangeTokenMutation>)
   })
 
   afterEach(() => {
@@ -113,7 +129,7 @@ describe('HypernativeOAuthCallback', () => {
 
     // Should still show loading, not try to process
     expect(screen.getByText('Authentication in progress')).toBeInTheDocument()
-    expect(mockFetch).not.toHaveBeenCalled()
+    expect(mockExchangeToken).not.toHaveBeenCalled()
   })
 
   it('should handle successful OAuth callback', async () => {
@@ -133,7 +149,7 @@ describe('HypernativeOAuthCallback', () => {
     // Wait for token exchange
     await waitFor(
       () => {
-        expect(mockFetch).toHaveBeenCalled()
+        expect(mockExchangeToken).toHaveBeenCalled()
       },
       { timeout: 3000 },
     )
@@ -157,6 +173,18 @@ describe('HypernativeOAuthCallback', () => {
 
     // Check that PKCE data was cleaned up
     expect(mockClearPkce).toHaveBeenCalled()
+
+    // Verify the mutation was called with correct parameters
+    expect(mockExchangeToken).toHaveBeenCalledWith({
+      grant_type: 'authorization_code',
+      code: 'auth-code-123',
+      redirect_uri: 'http://localhost:3000/hypernative/oauth-callback',
+      client_id: 'TEST_CLIENT_ID',
+      code_verifier: 'verifier-789',
+    })
+
+    // Verify getRedirectUri was called
+    expect(mockGetRedirectUri).toHaveBeenCalled()
   })
 
   it('should handle missing authorization code', async () => {
@@ -293,24 +321,21 @@ describe('HypernativeOAuthCallback', () => {
       codeVerifier: 'verifier-123',
     })
 
-    // Mock failed token exchange - reset and override the default mock BEFORE rendering
-    mockFetch.mockReset()
-    const mockTextFn = jest.fn().mockResolvedValue('invalid_grant')
-    mockFetch.mockImplementation(() =>
-      Promise.resolve({
-        ok: false,
-        status: 400,
-        text: mockTextFn,
-        clone: jest.fn().mockReturnThis(),
-      } as unknown as Response),
-    )
+    // Mock failed token exchange - RTK Query error format
+    const mockError = {
+      data: 'invalid_grant',
+      status: 400,
+    }
+    mockExchangeToken.mockImplementation(() => ({
+      unwrap: jest.fn().mockRejectedValue(mockError),
+    }))
 
     render(<HypernativeOAuthCallback />)
 
     await waitFor(
       () => {
         expect(screen.getByText('Something went wrong')).toBeInTheDocument()
-        expect(screen.getByText('Token exchange failed: 400 invalid_grant')).toBeInTheDocument()
+        expect(screen.getByText('invalid_grant')).toBeInTheDocument()
       },
       { timeout: 3000 },
     )
@@ -334,29 +359,23 @@ describe('HypernativeOAuthCallback', () => {
       codeVerifier: 'verifier-123',
     })
 
-    // Mock token response missing required fields - reset and override the default mock BEFORE rendering
-    mockFetch.mockReset()
-    const mockJsonFn = jest.fn().mockResolvedValue({
-      data: {
+    // Mock token response missing required fields
+    // RTK Query transformResponse will extract data, but if data is invalid, it will still be returned
+    // The component validates the response structure
+    mockExchangeToken.mockImplementation(() => ({
+      unwrap: jest.fn().mockResolvedValue({
         token_type: 'Bearer',
         // Missing access_token and expires_in
-      },
-    })
-    mockFetch.mockImplementation(() =>
-      Promise.resolve({
-        ok: true,
-        json: mockJsonFn,
-        text: jest.fn().mockResolvedValue(''),
-        clone: jest.fn().mockReturnThis(),
-      } as unknown as Response),
-    )
+      }),
+    }))
 
     render(<HypernativeOAuthCallback />)
 
     await waitFor(
       () => {
         expect(screen.getByText('Something went wrong')).toBeInTheDocument()
-        expect(screen.getByText('Invalid token response: missing access_token or expires_in')).toBeInTheDocument()
+        // The error message will be from the component's validation
+        expect(screen.getByText(/Invalid token response: missing access_token or expires_in/)).toBeInTheDocument()
       },
       { timeout: 3000 },
     )
@@ -387,20 +406,14 @@ describe('HypernativeOAuthCallback', () => {
       configurable: true,
     })
 
-    // Setup fetch mock for successful token exchange
-    const mockJsonFn = jest.fn().mockResolvedValue({
-      data: {
+    // Setup RTK Query mock for successful token exchange
+    mockExchangeToken.mockImplementation(() => ({
+      unwrap: jest.fn().mockResolvedValue({
         access_token: 'test-access-token',
         expires_in: 3600,
         token_type: 'Bearer',
-      },
-    })
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: mockJsonFn,
-      text: jest.fn().mockResolvedValue(''),
-      clone: jest.fn().mockReturnThis(),
-    } as unknown as Response)
+      }),
+    }))
 
     render(<HypernativeOAuthCallback />)
 
@@ -435,7 +448,7 @@ describe('HypernativeOAuthCallback', () => {
 
     // Wait for first processing
     await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledTimes(1)
+      expect(mockExchangeToken).toHaveBeenCalledTimes(1)
     })
 
     // Verify readPkce was called only once (not called again on potential re-render)

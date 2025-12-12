@@ -148,10 +148,7 @@ async function generateCodeChallenge(verifier: string): Promise<string> {
  * @returns Complete OAuth authorization URL
  */
 async function buildAuthUrl(): Promise<string> {
-  // @todo: remove this after testing
-  const authUrl = 'https://api.hypernative.xyz/oauth/authorize'
-  const { clientId } = HYPERNATIVE_OAUTH_CONFIG
-  // const { authUrl, clientId } = HYPERNATIVE_OAUTH_CONFIG
+  const { authUrl, clientId } = HYPERNATIVE_OAUTH_CONFIG
 
   const redirectUri = getRedirectUri()
 

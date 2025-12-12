@@ -7,6 +7,7 @@ import { GradientCircularProgress } from '@/components/common/GradientCircularPr
 import { setAuthCookie } from '@/features/hypernative/store/cookieStorage'
 import { readPkce, clearPkce } from '@/features/hypernative/hooks/useHypernativeOAuth'
 import { HYPERNATIVE_OAUTH_CONFIG, getRedirectUri } from '@/features/hypernative/config/oauth'
+import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import CheckIcon from '@/public/images/common/check.svg'
 import { useDarkMode } from '@/hooks/useDarkMode'
@@ -33,6 +34,7 @@ const HypernativeOAuthCallback: NextPage = () => {
   const [errorMessage, setErrorMessage] = useState<string>('')
   const hasProcessedRef = useRef(false)
   const isDarkMode = useDarkMode()
+  const [exchangeToken] = hypernativeApi.useExchangeTokenMutation()
 
   useEffect(() => {
     /**
@@ -86,7 +88,21 @@ const HypernativeOAuthCallback: NextPage = () => {
         }
 
         // Step 5: Exchange authorization code for access token
-        const tokenResponse = await exchangeCodeForToken(code, pkce.codeVerifier)
+        const redirectUri = getRedirectUri()
+        const { clientId } = HYPERNATIVE_OAUTH_CONFIG
+
+        const tokenResponse = await exchangeToken({
+          grant_type: 'authorization_code',
+          code,
+          redirect_uri: redirectUri,
+          client_id: clientId,
+          code_verifier: pkce.codeVerifier,
+        }).unwrap()
+
+        // Validate response structure
+        if (!tokenResponse.access_token || !tokenResponse.expires_in) {
+          throw new Error('Invalid token response: missing access_token or expires_in')
+        }
 
         // Step 6: Store token in cookie
         setAuthCookie(tokenResponse.access_token, tokenResponse.expires_in)
@@ -103,7 +119,18 @@ const HypernativeOAuthCallback: NextPage = () => {
         }, 1000)
       } catch (error) {
         console.error('OAuth callback error:', error)
-        const errorMsg = error instanceof Error ? error.message : 'Unknown authentication error'
+        let errorMsg = 'Unknown authentication error'
+        if (error instanceof Error) {
+          errorMsg = error.message
+        } else if (error && typeof error === 'object' && 'data' in error) {
+          // RTK Query error format
+          const rtkError = error as { data?: unknown; status?: number }
+          if (typeof rtkError.data === 'string') {
+            errorMsg = rtkError.data
+          } else if (rtkError.status) {
+            errorMsg = `Token exchange failed: ${rtkError.status}`
+          }
+        }
         setErrorMessage(errorMsg)
         setStatus('error')
 
@@ -119,7 +146,7 @@ const HypernativeOAuthCallback: NextPage = () => {
     if (router.isReady) {
       handleCallback()
     }
-  }, [router.isReady, router.query])
+  }, [router.isReady, router.query, exchangeToken])
 
   return (
     <>
@@ -198,63 +225,6 @@ const HypernativeOAuthCallback: NextPage = () => {
       </Box>
     </>
   )
-}
-
-/**
- * Exchange authorization code for access token
- * Makes a POST request to the token endpoint with PKCE code verifier
- *
- * @param code - Authorization code from OAuth provider
- * @param codeVerifier - PKCE code verifier for security
- * @returns Token response with access_token and expires_in
- */
-async function exchangeCodeForToken(
-  code: string,
-  codeVerifier: string,
-): Promise<{ access_token: string; expires_in: number; token_type: string }> {
-  // @todo: remove this after testing
-  const tokenUrl = 'https://api.hypernative.xyz/oauth/token'
-  const { clientId } = HYPERNATIVE_OAUTH_CONFIG
-  // const { tokenUrl, clientId } = HYPERNATIVE_OAUTH_CONFIG
-
-  // Get redirect URI (must match the one used in authorization request)
-  const redirectUri = getRedirectUri()
-
-  // Build token exchange request body (JSON format per Hypernative API spec)
-  const body = {
-    grant_type: 'authorization_code',
-    code,
-    redirect_uri: redirectUri,
-    client_id: clientId,
-    code_verifier: codeVerifier,
-  }
-
-  // Make token exchange request
-  const response = await fetch(tokenUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  })
-
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`Token exchange failed: ${response.status} ${errorText}`)
-  }
-
-  const { data } = await response.json() // @todo: use response type
-
-  // Validate response structure
-  if (!data.access_token || !data.expires_in) {
-    throw new Error('Invalid token response: missing access_token or expires_in')
-  }
-
-  return {
-    access_token: data.access_token,
-    expires_in: data.expires_in,
-    token_type: data.token_type || 'Bearer',
-  }
 }
 
 export default HypernativeOAuthCallback
