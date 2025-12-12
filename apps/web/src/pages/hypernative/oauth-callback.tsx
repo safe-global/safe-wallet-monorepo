@@ -5,12 +5,7 @@ import Head from 'next/head'
 import { Box, Typography, Card, SvgIcon } from '@mui/material'
 import { GradientCircularProgress } from '@/components/common/GradientCircularProgress'
 import { setAuthCookie } from '@/features/hypernative/store/cookieStorage'
-import {
-  HN_AUTH_SUCCESS_EVENT,
-  HN_AUTH_ERROR_EVENT,
-  readPkce,
-  clearPkce,
-} from '@/features/hypernative/hooks/useHypernativeOAuth'
+import { readPkce, clearPkce } from '@/features/hypernative/hooks/useHypernativeOAuth'
 import { HYPERNATIVE_OAUTH_CONFIG, getRedirectUri } from '@/features/hypernative/config/oauth'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import CheckIcon from '@/public/images/common/check.svg'
@@ -99,26 +94,12 @@ const HypernativeOAuthCallback: NextPage = () => {
         // Step 7: Clean up sessionStorage
         clearPkce()
 
-        // Step 8: Notify parent window of successful authentication
-        if (window.opener) {
-          window.opener.postMessage(
-            {
-              type: HN_AUTH_SUCCESS_EVENT,
-              token: tokenResponse.access_token,
-              expiresIn: tokenResponse.expires_in,
-            },
-            window.location.origin,
-          )
-        }
-
-        // Step 9: Update UI state
+        // Step 8: Update UI state
         setStatus('success')
 
-        // Step 10: Close popup after short delay (allow postMessage to be delivered)
+        // Step 9: Close popup after short delay (allow postMessage to be delivered)
         setTimeout(() => {
-          if (window.opener && !window.opener.closed) {
-            window.close()
-          }
+          window.close()
         }, 1000)
       } catch (error) {
         console.error('OAuth callback error:', error)
@@ -131,24 +112,6 @@ const HypernativeOAuthCallback: NextPage = () => {
 
         // Reset flag on error so user can retry
         hasProcessedRef.current = false
-
-        // Notify parent window of error
-        if (window.opener) {
-          window.opener.postMessage(
-            {
-              type: HN_AUTH_ERROR_EVENT,
-              error: errorMsg,
-            },
-            window.location.origin,
-          )
-        }
-
-        // Close popup after delay even on error
-        setTimeout(() => {
-          if (window.opener && !window.opener.closed) {
-            window.close()
-          }
-        }, 3000)
       }
     }
 
