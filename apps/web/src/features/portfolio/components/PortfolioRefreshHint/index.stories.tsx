@@ -71,7 +71,9 @@ type Story = StoryObj<typeof PortfolioRefreshHint>
  * Default state showing "Last update 5s ago" with refresh button on cooldown.
  */
 export const Default: Story = {
-  render: () => <PortfolioRefreshHint entryPoint="Assets" _fulfilledTimeStamp={Date.now() - 5000} _isFetching={false} />,
+  render: () => (
+    <PortfolioRefreshHint entryPoint="Assets" _fulfilledTimeStamp={Date.now() - 5000} _isFetching={false} />
+  ),
 }
 
 /**
@@ -85,7 +87,9 @@ export const Loading: Story = {
  * Fetching state - shows "Fetching data" with spinner, button disabled.
  */
 export const Fetching: Story = {
-  render: () => <PortfolioRefreshHint entryPoint="Assets" _fulfilledTimeStamp={Date.now() - 45000} _isFetching={true} />,
+  render: () => (
+    <PortfolioRefreshHint entryPoint="Assets" _fulfilledTimeStamp={Date.now() - 45000} _isFetching={true} />
+  ),
 }
 
 /**
@@ -93,7 +97,12 @@ export const Fetching: Story = {
  */
 export const OnCooldown: Story = {
   render: () => (
-    <PortfolioRefreshHint entryPoint="Assets" _fulfilledTimeStamp={Date.now() - 10000} _isFetching={false} _freezeTime />
+    <PortfolioRefreshHint
+      entryPoint="Assets"
+      _fulfilledTimeStamp={Date.now() - 10000}
+      _isFetching={false}
+      _freezeTime
+    />
   ),
 }
 
