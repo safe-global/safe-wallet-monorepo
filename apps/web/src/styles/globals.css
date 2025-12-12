@@ -88,19 +88,8 @@ input[type='number'] {
   fill: var(--color-text-primary);
 }
 
-.illustration-background-light-grey-fill {
-  fill: var(--color-background-lightGrey);
-}
-
-svg .shield-img {
-  fill: var(--color-background-lightGrey);
-}
-svg .shield-lines {
-  fill: var(--color-text-secondary);
-}
-
 svg.OK .shield-img {
-  fill: var(--color-text-brand);
+  fill: var(--color-static-text-brand);
 }
 svg.INFO .shield-img {
   fill: var(--color-info-main);
@@ -117,10 +106,7 @@ svg.INFO .shield-lines,
 svg.WARN .shield-lines, 
 svg.CRITICAL .shield-lines {
   fill: var(--color-static-main);
-}
-
-.illustration-text-secondary-fill {
-  fill: var(--color-text-secondary);
+  stroke: var(--color-static-main);
 }
 
 /* Note: a fallback `stroke` property must be on the svg to work */
@@ -142,10 +128,6 @@ svg.CRITICAL .shield-lines {
 
 .illustration-background-stroke {
   stroke: var(--color-logo-background);
-}
-
-.illustration-text-secondary-stroke {
-  stroke: var(--color-text-secondary);
 }
 
 @media (max-width: 599.95px) {
