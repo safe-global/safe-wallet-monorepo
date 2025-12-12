@@ -6,6 +6,10 @@ import {
   ContractAnalysisBuilder,
 } from '@safe-global/utils/features/safe-shield/builders'
 import { faker } from '@faker-js/faker'
+import * as useCheckSimulation from '@/features/safe-shield/hooks/useCheckSimulation'
+
+// Mock hooks
+jest.mock('@/features/safe-shield/hooks/useCheckSimulation')
 
 describe('SafeShieldDisplay', () => {
   let mockRecipientAddress: string
@@ -18,6 +22,11 @@ describe('SafeShieldDisplay', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+
+    // Mock useCheckSimulation to return no simulation error by default
+    jest.spyOn(useCheckSimulation, 'useCheckSimulation').mockReturnValue({
+      hasSimulationError: false,
+    })
 
     // Recreate mocks for each test to avoid mutation issues
     mockRecipientAddress = faker.finance.ethereumAddress()
@@ -218,6 +227,62 @@ describe('SafeShieldDisplay', () => {
       const { container } = render(<SafeShieldDisplay recipient={loadingRecipient} />)
 
       expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
+    })
+  })
+
+  describe('Hypernative Authentication', () => {
+    it('should show "Authentication required" when hypernativeAuth is provided and user is not authenticated', () => {
+      render(
+        <SafeShieldDisplay
+          hypernativeAuth={{
+            isAuthenticated: false,
+            isTokenExpired: false,
+            initiateLogin: jest.fn(),
+            logout: jest.fn(),
+          }}
+        />,
+      )
+
+      expect(screen.getByText('Authentication required')).toBeInTheDocument()
+    })
+
+    it('should show "Authentication required" when hypernativeAuth is provided and token is expired', () => {
+      render(
+        <SafeShieldDisplay
+          hypernativeAuth={{
+            isAuthenticated: true,
+            isTokenExpired: true,
+            initiateLogin: jest.fn(),
+            logout: jest.fn(),
+          }}
+        />,
+      )
+
+      expect(screen.getByText('Authentication required')).toBeInTheDocument()
+    })
+
+    it('should not show authentication required when hypernativeAuth is provided and user is authenticated', () => {
+      render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          hypernativeAuth={{
+            isAuthenticated: true,
+            isTokenExpired: false,
+            initiateLogin: jest.fn(),
+            logout: jest.fn(),
+          }}
+        />,
+      )
+
+      expect(screen.queryByText('Authentication required')).not.toBeInTheDocument()
+      expect(screen.getByText('Checks passed')).toBeInTheDocument()
+    })
+
+    it('should not show authentication required when hypernativeAuth is not provided', () => {
+      render(<SafeShieldDisplay recipient={mockRecipient} />)
+
+      expect(screen.queryByText('Authentication required')).not.toBeInTheDocument()
+      expect(screen.getByText('Checks passed')).toBeInTheDocument()
     })
   })
 })

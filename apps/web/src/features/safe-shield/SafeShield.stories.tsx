@@ -13,8 +13,8 @@ const meta = {
   component: SafeShieldDisplay,
   parameters: { layout: 'centered' },
   decorators: [
-    (Story) => (
-      <StoreDecorator initialState={{}}>
+    (Story, context) => (
+      <StoreDecorator initialState={{}} context={context}>
         <Paper sx={{ padding: 2, backgroundColor: 'background.main' }}>
           <Box sx={{ width: 320 }}>
             <Story />
@@ -188,6 +188,80 @@ export const MultipleCounterparties: Story = {
     docs: {
       description: {
         story: 'SafeShieldWidget displaying multiple results for the same contract with different severity',
+      },
+    },
+  },
+}
+
+// Hypernative guard - logged in
+export const HypernativeGuardActive: Story = {
+  args: {
+    ...FullAnalysisBuilder.empty()
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(FullAnalysisBuilder.noThreat().build().threat)
+      .build(),
+    hypernativeAuth: {
+      isAuthenticated: true,
+      isTokenExpired: false,
+      initiateLogin: () => {},
+      logout: () => {},
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'SafeShieldWidget when Hypernative guard is enabled and user is authenticated',
+      },
+    },
+  },
+}
+
+// Hypernative guard - not logged in
+export const HypernativeNotLoggedIn: Story = {
+  args: {
+    ...FullAnalysisBuilder.empty()
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(FullAnalysisBuilder.noThreat().build().threat)
+      .build(),
+    hypernativeAuth: {
+      isAuthenticated: false,
+      isTokenExpired: false,
+      initiateLogin: () => {
+        console.log('Initiate login clicked')
+      },
+      logout: () => {
+        console.log('Logout clicked')
+      },
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'SafeShieldWidget when Hypernative guard is enabled and user is not authenticated',
+      },
+    },
+  },
+}
+
+// Hypernative guard - logged in with malicious result
+export const HypernativeMaliciousThreat: Story = {
+  args: {
+    ...FullAnalysisBuilder.empty()
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(FullAnalysisBuilder.maliciousThreat().build().threat)
+      .build(),
+    hypernativeAuth: {
+      isAuthenticated: true,
+      isTokenExpired: false,
+      initiateLogin: () => {},
+      logout: () => {},
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'SafeShieldWidget when Hypernative guard is enabled, user is authenticated, and there is a critical contract check result',
       },
     },
   },
