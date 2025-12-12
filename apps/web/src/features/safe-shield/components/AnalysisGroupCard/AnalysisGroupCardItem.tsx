@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { Box, Link, Stack, Typography } from '@mui/material'
+import type { Severity } from '@safe-global/utils/features/safe-shield/types'
 import {
-  type Severity,
   type AnalysisResult,
   type MaliciousOrModerateThreatAnalysisResult,
   ThreatStatus,
 } from '@safe-global/utils/features/safe-shield/types'
 import { isAddressChange } from '@safe-global/utils/features/safe-shield/utils'
-import { SEVERITY_COLORS } from '../../constants'
+import { SEVERITY_COLORS, ISSUE_BACKGROUND_COLORS } from '../../constants'
 import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
 import { AddressChanges } from '../AddressChanges'
 import { ShowAllAddress } from '../ShowAllAddress/ShowAllAddress'
@@ -30,6 +30,7 @@ export const AnalysisGroupCardItem = ({
 }: AnalysisGroupCardItemProps) => {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false)
   const borderColor = severity ? SEVERITY_COLORS[severity].main : 'var(--color-border-main)'
+  const issueBackgroundColor = severity ? (ISSUE_BACKGROUND_COLORS[severity] ?? '') : ''
   const displayDescription = description ?? result.description
   const hasIssues = 'issues' in result && !!(result as MaliciousOrModerateThreatAnalysisResult).issues
   const isThreatDetected = result.type === ThreatStatus.MALICIOUS || result.type === ThreatStatus.MODERATE
@@ -44,7 +45,7 @@ export const AnalysisGroupCardItem = ({
               {displayDescription}
             </Typography>
 
-            <AnalysisIssuesDisplay result={result} />
+            <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />
 
             {isAddressChange(result) && <AddressChanges result={result} />}
 
