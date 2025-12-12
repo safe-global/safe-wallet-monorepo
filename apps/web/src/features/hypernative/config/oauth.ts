@@ -6,6 +6,8 @@
  * All values can be overridden via environment variables.
  */
 
+import { HYPERNATIVE_API_BASE_URL } from '@safe-global/utils/config/constants'
+
 /**
  * OAuth configuration object
  */
@@ -15,21 +17,7 @@ export const HYPERNATIVE_OAUTH_CONFIG = {
    * User is redirected here to authorize the application
    * Production: https://api.hypernative.xyz/oauth/authorize
    */
-  authUrl: process.env.NEXT_PUBLIC_HYPERNATIVE_AUTH_URL || 'https://mock-hn-auth.example.com/oauth/authorize',
-
-  /**
-   * OAuth token exchange endpoint (Step 2 of OAuth flow)
-   * Used to exchange authorization code for access token
-   * Production: https://api.hypernative.xyz/oauth/token
-   */
-  tokenUrl: process.env.NEXT_PUBLIC_HYPERNATIVE_TOKEN_URL || 'https://mock-hn-auth.example.com/oauth/token',
-
-  /**
-   * Hypernative API base URL
-   * Used for threat analysis and other API calls
-   * Production: https://api.hypernative.xyz
-   */
-  apiBaseUrl: process.env.NEXT_PUBLIC_HYPERNATIVE_API_URL || 'https://mock-hn-api.example.com',
+  authUrl: `${HYPERNATIVE_API_BASE_URL}/oauth/authorize`,
 
   /**
    * OAuth client ID
