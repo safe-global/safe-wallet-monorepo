@@ -13,7 +13,7 @@ import useIsPositionsFeatureEnabled from './useIsPositionsFeatureEnabled'
 
 /**
  * Hook for refetching positions and balances data.
- * Automatically selects the appropriate endpoint (portfolio or legacy) based on feature flags.
+ * Automatically selects the appropriate endpoint (portfolio or positions/balances) based on feature flags.
  *
  * @returns Object containing:
  *   - `refetch`: Function to refetch all data (positions + balances)
@@ -49,14 +49,14 @@ export const useRefetch = () => {
     },
   )
 
-  const { refetch: legacyPositionsRefetch, isFetching: legacyPositionsIsFetching } = usePositionsGetPositionsV1Query(
+  const { refetch: positionsRefetch, isFetching: positionsIsFetching } = usePositionsGetPositionsV1Query(
     { chainId, safeAddress, fiatCode: currency },
     {
       skip: shouldUsePortfolioEndpoint || !safeAddress || !chainId || !currency,
     },
   )
 
-  const { refetch: legacyBalancesRefetch, isFetching: legacyBalancesIsFetching } = useBalancesGetBalancesV1Query(
+  const { refetch: txServiceBalancesRefetch, isFetching: txServiceBalancesIsFetching } = useBalancesGetBalancesV1Query(
     {
       chainId: safe.chainId,
       safeAddress,
@@ -72,21 +72,21 @@ export const useRefetch = () => {
     if (shouldUsePortfolioEndpoint) {
       return portfolioRefetch()
     }
-    await Promise.all([legacyPositionsRefetch(), legacyBalancesRefetch()])
-  }, [shouldUsePortfolioEndpoint, portfolioRefetch, legacyPositionsRefetch, legacyBalancesRefetch])
+    await Promise.all([positionsRefetch(), txServiceBalancesRefetch()])
+  }, [shouldUsePortfolioEndpoint, portfolioRefetch, positionsRefetch, txServiceBalancesRefetch])
 
   const refetchPositions = useCallback(async () => {
     if (shouldUsePortfolioEndpoint) {
       return portfolioRefetch()
     }
-    return legacyPositionsRefetch()
-  }, [shouldUsePortfolioEndpoint, portfolioRefetch, legacyPositionsRefetch])
+    return positionsRefetch()
+  }, [shouldUsePortfolioEndpoint, portfolioRefetch, positionsRefetch])
 
   const fulfilledTimeStamp = shouldUsePortfolioEndpoint ? portfolioFulfilledTimeStamp : undefined
 
   const isFetching = shouldUsePortfolioEndpoint
     ? portfolioIsFetching
-    : legacyPositionsIsFetching || legacyBalancesIsFetching
+    : positionsIsFetching || txServiceBalancesIsFetching
 
   return { refetch, refetchPositions, shouldUsePortfolioEndpoint, fulfilledTimeStamp, isFetching }
 }

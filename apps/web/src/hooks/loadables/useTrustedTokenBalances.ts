@@ -9,8 +9,8 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { type PortfolioBalances, createPortfolioBalances, useTokenListSetting } from './useLoadBalances'
 
 /**
- * Hook to load balances using the legacy endpoint with trusted tokenlist.
- * Always uses the legacy endpoint regardless of portfolio endpoint status or user settings.
+ * Hook to load balances using the Transaction Service endpoint with trusted tokenlist.
+ * Always uses the Transaction Service endpoint regardless of portfolio endpoint status or user settings.
  * Used specifically for the send flow to ensure consistent token availability.
  */
 export const useTrustedTokenBalances = (): AsyncResult<PortfolioBalances> => {
@@ -21,9 +21,9 @@ export const useTrustedTokenBalances = (): AsyncResult<PortfolioBalances> => {
   const isCounterfactual = !safe.deployed
 
   const {
-    currentData: legacyBalances,
-    isLoading: legacyLoading,
-    error: legacyError,
+    currentData: txServiceBalances,
+    isLoading: txServiceLoading,
+    error: txServiceError,
   } = useBalancesGetBalancesV1Query(
     {
       chainId: safe.chainId,
@@ -46,12 +46,12 @@ export const useTrustedTokenBalances = (): AsyncResult<PortfolioBalances> => {
       return [createPortfolioBalances(cfData), cfError, cfLoading]
     }
 
-    if (legacyBalances) {
-      const error = legacyError ? new Error(String(legacyError)) : undefined
-      return [createPortfolioBalances(legacyBalances), error, legacyLoading]
+    if (txServiceBalances) {
+      const error = txServiceError ? new Error(String(txServiceError)) : undefined
+      return [createPortfolioBalances(txServiceBalances), error, txServiceLoading]
     }
 
-    const error = legacyError ? new Error(String(legacyError)) : undefined
+    const error = txServiceError ? new Error(String(txServiceError)) : undefined
     return [undefined, error, true]
-  }, [isCounterfactual, cfData, cfError, cfLoading, legacyBalances, legacyError, legacyLoading])
+  }, [isCounterfactual, cfData, cfError, cfLoading, txServiceBalances, txServiceError, txServiceLoading])
 }
