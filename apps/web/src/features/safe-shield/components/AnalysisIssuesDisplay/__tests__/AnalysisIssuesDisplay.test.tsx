@@ -4,10 +4,7 @@ import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
 import { ThreatAnalysisResultBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis-result.builder'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { faker } from '@faker-js/faker'
-import { SEVERITY_COLORS } from '@/features/safe-shield/constants'
-
-const WARN_BORDER_COLOR = SEVERITY_COLORS[Severity.WARN].main
-const CRITICAL_BORDER_COLOR = SEVERITY_COLORS[Severity.CRITICAL].main
+import { ISSUE_BACKGROUND_COLORS } from '@/features/safe-shield/constants'
 
 describe('AnalysisIssuesDisplay', () => {
   beforeEach(() => {
@@ -17,16 +14,20 @@ describe('AnalysisIssuesDisplay', () => {
   describe('Basic Rendering', () => {
     it('should return null when result has no issues', () => {
       const result = ThreatAnalysisResultBuilder.noThreat().build()
-      const borderColor = WARN_BORDER_COLOR
-      const { container } = render(<AnalysisIssuesDisplay result={result} borderColor={borderColor} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const { container } = render(
+        <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
+      )
 
       expect(container.firstChild).toBeNull()
     })
 
     it('should render nothing for non-threat results', () => {
       const result = ThreatAnalysisResultBuilder.ownershipChange().build()
-      const borderColor = WARN_BORDER_COLOR
-      const { container } = render(<AnalysisIssuesDisplay result={result} borderColor={borderColor} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const { container } = render(
+        <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
+      )
 
       expect(container.firstChild).toBeNull()
     })
@@ -44,8 +45,8 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const borderColor = WARN_BORDER_COLOR
-      render(<AnalysisIssuesDisplay result={result} borderColor={borderColor} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       expect(screen.getByText(address)).toBeInTheDocument()
       expect(screen.getByText('This address is untrusted')).toBeInTheDocument()
@@ -66,8 +67,8 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const borderColor = WARN_BORDER_COLOR
-      render(<AnalysisIssuesDisplay result={result} borderColor={borderColor} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       expect(screen.getByText(address)).toBeInTheDocument()
       // Explorer button may not be present if currentChain is not available in test context
@@ -100,8 +101,10 @@ describe('AnalysisIssuesDisplay', () => {
         },
       })
 
-      const borderColor = WARN_BORDER_COLOR
-      const { container } = render(<AnalysisIssuesDisplay result={result} borderColor={borderColor} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const { container } = render(
+        <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
+      )
 
       const addressElement = screen.getByText(address)
       const allTypography = container.querySelectorAll('p.MuiTypography-body2')
@@ -139,8 +142,8 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const borderColor = WARN_BORDER_COLOR
-      render(<AnalysisIssuesDisplay result={result} borderColor={borderColor} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       const descriptionElement = screen.getByText('This address is untrusted')
       expect(descriptionElement).toBeInTheDocument()
@@ -157,8 +160,8 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const borderColor = WARN_BORDER_COLOR
-      render(<AnalysisIssuesDisplay result={result} borderColor={borderColor} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       expect(screen.getByText('Issue without address')).toBeInTheDocument()
       expect(screen.queryByText(/0x/)).not.toBeInTheDocument()
@@ -184,8 +187,10 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const borderColor = WARN_BORDER_COLOR
-      const { container } = render(<AnalysisIssuesDisplay result={result} borderColor={borderColor} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const { container } = render(
+        <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
+      )
 
       expect(container.querySelectorAll('[class*="MuiBox-root"]').length).toBeGreaterThanOrEqual(2)
 
@@ -215,8 +220,8 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const borderColor = CRITICAL_BORDER_COLOR
-      render(<AnalysisIssuesDisplay result={result} borderColor={borderColor} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.CRITICAL]!
+      render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       expect(screen.getByText(criticalAddress)).toBeInTheDocument()
       expect(screen.getByText(warnAddress)).toBeInTheDocument()
@@ -244,8 +249,10 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const borderColor = CRITICAL_BORDER_COLOR
-      const { container } = render(<AnalysisIssuesDisplay result={result} borderColor={borderColor} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.CRITICAL]!
+      const { container } = render(
+        <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
+      )
 
       const textContent = container.textContent || ''
       const criticalIndex = textContent.indexOf('Critical issue')
@@ -259,9 +266,11 @@ describe('AnalysisIssuesDisplay', () => {
   describe('Edge Cases', () => {
     it('should handle empty issues object', () => {
       const result = ThreatAnalysisResultBuilder.moderate().issues({}).build()
-      const borderColor = WARN_BORDER_COLOR
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
 
-      const { container } = render(<AnalysisIssuesDisplay result={result} borderColor={borderColor} />)
+      const { container } = render(
+        <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
+      )
 
       expect(container.firstChild).toBeNull()
     })
@@ -273,15 +282,17 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const borderColor = WARN_BORDER_COLOR
-      const { container } = render(<AnalysisIssuesDisplay result={result} borderColor={borderColor} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const { container } = render(
+        <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
+      )
 
       expect(container.firstChild).toBeNull()
     })
   })
 
-  describe('Border Color', () => {
-    it('should apply CRITICAL border color when provided', () => {
+  describe('Issue Background Color', () => {
+    it('should apply CRITICAL issue background color when provided', () => {
       const address = faker.finance.ethereumAddress()
       const result = ThreatAnalysisResultBuilder.malicious()
         .issues({
@@ -294,14 +305,14 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const borderColor = CRITICAL_BORDER_COLOR
-      render(<AnalysisIssuesDisplay result={result} borderColor={borderColor} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.CRITICAL]!
+      render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       expect(screen.getByText(address)).toBeInTheDocument()
       expect(screen.getByText('Critical issue')).toBeInTheDocument()
     })
 
-    it('should apply WARN border color when provided', () => {
+    it('should apply WARN issue background color when provided', () => {
       const address = faker.finance.ethereumAddress()
       const result = ThreatAnalysisResultBuilder.moderate()
         .issues({
@@ -314,8 +325,8 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const borderColor = WARN_BORDER_COLOR
-      render(<AnalysisIssuesDisplay result={result} borderColor={borderColor} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       expect(screen.getByText(address)).toBeInTheDocument()
       expect(screen.getByText('Warning issue')).toBeInTheDocument()
@@ -332,14 +343,14 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const borderColor = WARN_BORDER_COLOR
-      render(<AnalysisIssuesDisplay result={result} borderColor={borderColor} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       expect(screen.getByText('Issue without address')).toBeInTheDocument()
       expect(screen.queryByText(/0x/)).not.toBeInTheDocument()
     })
 
-    it('should apply CRITICAL border color to multiple issues', () => {
+    it('should apply CRITICAL issue background color to multiple issues', () => {
       const address1 = faker.finance.ethereumAddress()
       const address2 = faker.finance.ethereumAddress()
       const result = ThreatAnalysisResultBuilder.malicious()
@@ -357,8 +368,8 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const borderColor = CRITICAL_BORDER_COLOR
-      render(<AnalysisIssuesDisplay result={result} borderColor={borderColor} />)
+      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.CRITICAL]!
+      render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       expect(screen.getByText(address1)).toBeInTheDocument()
       expect(screen.getByText(address2)).toBeInTheDocument()
