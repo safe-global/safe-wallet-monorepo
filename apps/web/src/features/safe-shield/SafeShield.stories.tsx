@@ -203,7 +203,6 @@ export const HypernativeGuardActive: Story = {
     hypernativeAuth: {
       isAuthenticated: true,
       isTokenExpired: false,
-      loading: false,
       initiateLogin: () => {},
       logout: () => {},
     },
@@ -227,7 +226,6 @@ export const HypernativeNotLoggedIn: Story = {
     hypernativeAuth: {
       isAuthenticated: false,
       isTokenExpired: false,
-      loading: false,
       initiateLogin: () => {
         console.log('Initiate login clicked')
       },
@@ -255,7 +253,6 @@ export const HypernativeMaliciousThreat: Story = {
     hypernativeAuth: {
       isAuthenticated: true,
       isTokenExpired: false,
-      loading: false,
       initiateLogin: () => {},
       logout: () => {},
     },
