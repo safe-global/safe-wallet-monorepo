@@ -88,7 +88,7 @@ describe('ComboSubmit', () => {
       { safeTx: safeTransaction },
     )
 
-    expect(getByText(/You are providing the last signature/)).toBeInTheDocument()
+    expect(getByText(/You're providing the last signature/)).toBeInTheDocument()
   })
 
   it('does not show warning when user has already signed', () => {
@@ -104,7 +104,7 @@ describe('ComboSubmit', () => {
       { safeTx: safeTransaction },
     )
 
-    expect(queryByText(/You are providing the last signature/)).not.toBeInTheDocument()
+    expect(queryByText(/You're providing the last signature/)).not.toBeInTheDocument()
   })
 
   it('does not show warning when Execute is not available', () => {
@@ -120,7 +120,7 @@ describe('ComboSubmit', () => {
       { safeTx: safeTransaction },
     )
 
-    expect(queryByText(/You are providing the last signature/)).not.toBeInTheDocument()
+    expect(queryByText(/You're providing the last signature/)).not.toBeInTheDocument()
   })
 
   it('does not show warning when user selected Execute', () => {
@@ -136,7 +136,7 @@ describe('ComboSubmit', () => {
       { safeTx: safeTransaction },
     )
 
-    expect(queryByText(/You are providing the last signature/)).not.toBeInTheDocument()
+    expect(queryByText(/You're providing the last signature/)).not.toBeInTheDocument()
   })
 
   it('respects stored Sign preference when Execute is available', () => {
@@ -153,7 +153,7 @@ describe('ComboSubmit', () => {
     )
 
     // Should show warning when user has stored preference for Sign
-    expect(getByText(/You are providing the last signature/)).toBeInTheDocument()
+    expect(getByText(/You're providing the last signature/)).toBeInTheDocument()
   })
 
   it('falls back to first option when stored action is not available', () => {
