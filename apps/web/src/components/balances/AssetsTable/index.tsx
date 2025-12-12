@@ -206,23 +206,9 @@ const AssetsTable = ({
             weight: {
               rawValue: itemShareOfFiatTotal,
               content: itemShareOfFiatTotal ? (
-                <Box textAlign="right">
-                  <Stack direction="row" alignItems="center" gap={0.5} position="relative" display="inline-flex">
-                    <div className={css.customProgress}>
-                      <div
-                        className={css.progressRing}
-                        style={
-                          {
-                            '--progress': `${(itemShareOfFiatTotal * 100).toFixed(1)}%`,
-                          } as React.CSSProperties & { '--progress': string }
-                        }
-                      />
-                    </div>
-                    <Typography variant="body2" sx={{ minWidth: '52px', textAlign: 'right' }}>
-                      {formatPercentage(itemShareOfFiatTotal)}
-                    </Typography>
-                  </Stack>
-                </Box>
+                <Typography variant="body2" textAlign="right">
+                  {formatPercentage(itemShareOfFiatTotal)}
+                </Typography>
               ) : (
                 <></>
               ),

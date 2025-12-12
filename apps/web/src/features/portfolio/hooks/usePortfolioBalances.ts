@@ -3,9 +3,8 @@ import { usePortfolioGetPortfolioV1Query, type Portfolio } from '@safe-global/st
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { PORTFOLIO_POLLING_INTERVAL } from '@/config/constants'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { useLegacyBalances, useTokenListSetting, type PortfolioBalances } from '@/hooks/loadables/useLoadBalances'
+import { useTxServiceBalances, useTokenListSetting, type PortfolioBalances } from '@/hooks/loadables/useLoadBalances'
 
 const transformPortfolioToBalances = (portfolio?: Portfolio): PortfolioBalances | undefined => {
   if (!portfolio) return undefined
@@ -29,8 +28,8 @@ const transformPortfolioToBalances = (portfolio?: Portfolio): PortfolioBalances 
 }
 
 /**
- * Hook to load balances using the portfolio endpoint with legacy fallback.
- * Falls back to legacy endpoint if portfolio returns empty data for deployed Safes.
+ * Hook to load balances using the portfolio endpoint with Transaction Service fallback.
+ * Falls back to Transaction Service endpoint if portfolio returns empty data for deployed Safes.
  * Note: Portfolio endpoint supports counterfactual (undeployed) Safes natively.
  * @param skip - Skip fetching when portfolio endpoint is disabled
  */
@@ -54,19 +53,16 @@ const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
     },
     {
       skip: skip || !isReadyPortfolio || !safe.chainId,
-      pollingInterval: PORTFOLIO_POLLING_INTERVAL,
-      skipPollingIfUnfocused: true,
-      refetchOnFocus: true,
     },
   )
 
-  // Check if portfolio failed or returned empty data for deployed Safes (need legacy fallback)
+  // Check if portfolio failed or returned empty data for deployed Safes (need fallback)
   const isPortfolioEmpty =
     portfolioData && portfolioData.tokenBalances.length === 0 && portfolioData.positionBalances.length === 0
-  const needsLegacyFallback = !skip && !portfolioLoading && (portfolioError || (isPortfolioEmpty && safe.deployed))
+  const needsTxServiceFallback = !skip && !portfolioLoading && (portfolioError || (isPortfolioEmpty && safe.deployed))
 
-  // Legacy endpoint: reuse useLegacyBalances hook as fallback
-  const [legacyBalances, legacyError, legacyLoading] = useLegacyBalances(!needsLegacyFallback)
+  // Transaction Service endpoint: reuse useTxServiceBalances hook as fallback
+  const [txServiceBalances, txServiceError, txServiceLoading] = useTxServiceBalances(!needsTxServiceFallback)
 
   const memoizedPortfolioBalances = useMemo(() => transformPortfolioToBalances(portfolioData), [portfolioData])
 
@@ -75,10 +71,10 @@ const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
       return [undefined, undefined, false]
     }
 
-    // Portfolio failed or returned empty for deployed Safe - fallback to legacy
-    if (needsLegacyFallback) {
-      // Return legacy result (includes counterfactual handling)
-      return [legacyBalances, legacyError, legacyLoading]
+    // Portfolio failed or returned empty for deployed Safe - fallback to Transaction Service
+    if (needsTxServiceFallback) {
+      // Return Transaction Service result (includes counterfactual handling)
+      return [txServiceBalances, txServiceError, txServiceLoading]
     }
 
     const error = portfolioError ? new Error(String(portfolioError)) : undefined
@@ -88,13 +84,13 @@ const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
     return [memoizedPortfolioBalances, error, portfolioLoading || isInitialLoading]
   }, [
     skip,
-    needsLegacyFallback,
+    needsTxServiceFallback,
     memoizedPortfolioBalances,
     portfolioError,
     portfolioLoading,
-    legacyBalances,
-    legacyError,
-    legacyLoading,
+    txServiceBalances,
+    txServiceError,
+    txServiceLoading,
   ])
 }
 

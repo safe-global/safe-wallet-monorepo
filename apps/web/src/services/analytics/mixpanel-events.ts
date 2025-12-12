@@ -6,6 +6,7 @@ export enum MixpanelEvent {
   POSITION_EXPANDED = 'Position Expanded',
   POSITIONS_VIEW_ALL_CLICKED = 'Positions View All Clicked',
   EMPTY_POSITIONS_EXPLORE_CLICKED = 'Empty Positions Explore Clicked',
+  PORTFOLIO_REFRESH_CLICKED = 'Portfolio Refresh Clicked',
   STAKE_VIEWED = 'Stake Viewed',
   EARN_VIEWED = 'Earn Viewed',
   WC_CONNECTED = 'WC Connected',
