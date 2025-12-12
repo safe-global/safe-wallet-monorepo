@@ -13,6 +13,7 @@ import { useContext } from 'react'
 import { TxModalContext } from '..'
 import SwapIcon from '@/public/images/common/swap.svg'
 import AssetsIcon from '@/public/images/sidebar/assets.svg'
+import TxBuilderIcon from '@/public/images/common/tx-builder.svg'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 
 const buttonSx = {
@@ -50,13 +51,7 @@ export const TxBuilderButton = () => {
   return (
     <Track {...MODALS_EVENTS.CONTRACT_INTERACTION}>
       <Link href={txBuilder.link} passHref style={{ width: '100%' }}>
-        <Button
-          variant="outlined"
-          sx={buttonSx}
-          fullWidth
-          onClick={onClick}
-          startIcon={<img src={txBuilder.app.iconUrl || ''} height={24} width="auto" alt={txBuilder.app.name} />}
-        >
+        <Button variant="outlined" sx={buttonSx} fullWidth onClick={onClick} startIcon={<TxBuilderIcon width={24} />}>
           Transaction Builder
         </Button>
       </Link>
