@@ -29,6 +29,7 @@ yarn test:storybook -u
 ## Snapshot Files
 
 Snapshots are stored in:
+
 ```
 src/__tests__/__snapshots__/storybook.test.tsx.snap
 ```
@@ -36,6 +37,7 @@ src/__tests__/__snapshots__/storybook.test.tsx.snap
 ## CI Pipeline
 
 The GitHub Actions workflow runs on:
+
 - Pull requests that modify `apps/web/**`
 - Pushes to `main` branch
 
@@ -44,17 +46,21 @@ Workflow file: `.github/workflows/web-storybook-tests.yml`
 ## When Snapshots Fail
 
 Snapshot tests will fail when:
+
 1. Component rendering output changes
 2. New stories are added
 3. Story configurations change
 
 ### If the changes are intentional:
+
 ```bash
 yarn test:storybook -u
 ```
+
 Then commit the updated snapshot file.
 
 ### If the changes are unintentional:
+
 Review the diff and fix the component code to match the expected output.
 
 ## Benefits
