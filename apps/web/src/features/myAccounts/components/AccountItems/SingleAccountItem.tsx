@@ -47,15 +47,18 @@ type AccountItemProps = {
   isSpaceSafe?: boolean
   onSelectSafe?: (safeItem: SafeItem) => void | Promise<void>
   showActions?: boolean
+  showChainBadge?: boolean
 }
 
 const SingleAccountItem = ({
   onLinkClick,
   safeItem,
+  safeOverview: providedSafeOverview,
   isMultiChainItem = false,
   isSpaceSafe = false,
   onSelectSafe,
   showActions = true,
+  showChainBadge = true,
 }: AccountItemProps) => {
   const { chainId, address, isReadOnly, isPinned } = safeItem
   const chain = useChain(chainId)
@@ -97,8 +100,8 @@ const SingleAccountItem = ({
   const isReplayable =
     addNetworkFeatureEnabled && !isReadOnly && (!undeployedSafe || !isPredictedSafeProps(undeployedSafe.props))
 
-  const { data: safeOverview } = useGetSafeOverviewQuery(
-    undeployedSafe || !isVisible
+  const { data: fetchedSafeOverview } = useGetSafeOverviewQuery(
+    undeployedSafe || !isVisible || providedSafeOverview !== undefined
       ? skipToken
       : {
           chainId: safeItem.chainId,
@@ -106,6 +109,8 @@ const SingleAccountItem = ({
           walletAddress,
         },
   )
+
+  const safeOverview = providedSafeOverview ?? fetchedSafeOverview
 
   const safeThreshold = safeOverview?.threshold ?? counterfactualSetup?.threshold ?? defaultSafeInfo.threshold
   const safeOwners =
@@ -186,7 +191,7 @@ const SingleAccountItem = ({
             shortAddress
             chainId={chain?.chainId}
             showAvatar={false}
-            copyAddress={!isMobile}
+            copyAddress={false}
           />
         )}
         {!isMobile && (
@@ -204,7 +209,7 @@ const SingleAccountItem = ({
         )}
       </Typography>
 
-      {!isMultiChainItem ? (
+      {!isMultiChainItem && showChainBadge ? (
         <ChainIndicator chainId={chainId} responsive onlyLogo className={css.chainIndicator} />
       ) : (
         <div />

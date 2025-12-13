@@ -18,7 +18,6 @@ import {
   SvgIcon,
   Tooltip,
   Typography,
-  useMediaQuery,
 } from '@mui/material'
 import SafeIcon from '@/components/common/SafeIcon'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
@@ -50,7 +49,6 @@ import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { getComparator } from '@/features/myAccounts/utils/utils'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { useTheme } from '@mui/material/styles'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
 
 export const MultichainIndicator = ({ safes }: { safes: SafeItem[] }) => {
@@ -226,9 +224,6 @@ type MultiAccountItemProps = {
 }
 
 const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = false }: MultiAccountItemProps) => {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-
   const {
     address,
     name,
@@ -290,7 +285,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
                 showPrefix={false}
                 showAvatar={false}
                 copyPrefix={false}
-                copyAddress={!isMobile}
+                copyAddress={false}
               />
             </Typography>
             <MultichainIndicator safes={sortedSafes} />
