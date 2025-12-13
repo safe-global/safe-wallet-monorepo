@@ -19,7 +19,7 @@ export function AnalysisLabel({ label, severity, highlighted }: AnalysisLabelPro
         <SafeFontIcon
           testID={`${iconName}-icon`}
           name={iconName}
-          color={highlighted ? '$icon' : '$colorLight'}
+          color={highlighted ? '$icon' : '$borderMain'}
           size={16}
         />
 

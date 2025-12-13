@@ -1,18 +1,29 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Stack, styled, View } from 'tamagui'
 import { AnalysisGroup } from '../AnalysisGroup'
 import { ContractAnalysisResults, Severity } from '@safe-global/utils/features/safe-shield/types'
 import { RecipientAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
-import { getOverallStatus, normalizeThreatData } from '@safe-global/utils/features/safe-shield/utils'
+import {
+  getOverallStatus,
+  getSeverity,
+  mapVisibleAnalysisResults,
+  normalizeThreatData,
+} from '@safe-global/utils/features/safe-shield/utils'
 import { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { TransactionSimulation } from '../TransactionSimulation'
+import { useTransactionSimulation } from '../TransactionSimulation/hooks/useTransactionSimulation'
 import { isEmpty } from 'lodash'
+import type { SafeTransaction } from '@safe-global/types-kit'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectActiveChain } from '@/src/store/chains'
+import { isTxSimulationEnabled } from '@safe-global/utils/components/tx/security/tenderly/utils'
 
 interface AnalysisDetailsContentProps {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
+  safeTx?: SafeTransaction
 }
 
 const AnalysisGroupWrapper = styled(View, {
@@ -27,16 +38,50 @@ const AnalysisGroupWrapper = styled(View, {
   },
 })
 
-export const AnalysisDetailsContent = ({ recipient, contract, threat }: AnalysisDetailsContentProps) => {
+export const AnalysisDetailsContent = ({ recipient, contract, threat, safeTx }: AnalysisDetailsContentProps) => {
   const [recipientData] = recipient || []
   const [contractData] = contract || []
   const [threatData] = threat || []
 
-  const normalizedThreatData = normalizeThreatData(threat)
-  const overallStatus = getOverallStatus(recipientData, contractData, threatData)
+  // Transaction simulation logic
+  const {
+    hasError,
+    isCallTraceError,
+    isSuccess,
+    simulationStatus,
+    simulationLink,
+    requestError,
+    canSimulate,
+    runSimulation,
+  } = useTransactionSimulation(safeTx)
 
+  const chain = useAppSelector(selectActiveChain)
+
+  const tenderlyEnabled = isTxSimulationEnabled(chain ?? undefined) ?? false
+
+  const simulationSeverityStatus = useMemo(
+    () => getSeverity(isSuccess, simulationStatus.isFinished, hasError || isCallTraceError),
+    [hasError, isCallTraceError, isSuccess, simulationStatus.isFinished],
+  )
+
+  const normalizedThreatData = normalizeThreatData(threat)
+  const overallStatus = getOverallStatus(
+    recipientData,
+    contractData,
+    threatData,
+    simulationSeverityStatus === Severity.WARN,
+  )
+
+  // Define empty states
   const isEmptyRecipient = isEmpty(recipientData)
-  const isEmptyContract = isEmpty(contractData)
+  const isEmptyContract = useMemo(() => {
+    if (!contractData) {
+      return true
+    }
+
+    return isEmpty(contractData) || mapVisibleAnalysisResults(contractData).length === 0
+  }, [contractData])
+
   const isEmptyThreat = isEmpty(normalizedThreatData)
 
   return (
@@ -59,14 +104,24 @@ export const AnalysisDetailsContent = ({ recipient, contract, threat }: Analysis
           </AnalysisGroupWrapper>
         )}
         {!isEmptyThreat && normalizedThreatData && (
-          <AnalysisGroupWrapper bordered>
+          <AnalysisGroupWrapper bordered={tenderlyEnabled}>
             <AnalysisGroup highlightedSeverity={overallStatus?.severity} data={normalizedThreatData} />
           </AnalysisGroupWrapper>
         )}
 
-        <AnalysisGroupWrapper>
-          <TransactionSimulation highlighted={false} severity={Severity.OK} />
-        </AnalysisGroupWrapper>
+        {tenderlyEnabled && (
+          <AnalysisGroupWrapper>
+            <TransactionSimulation
+              severity={simulationSeverityStatus}
+              highlighted={simulationSeverityStatus === overallStatus?.severity && !!safeTx}
+              simulationStatus={simulationStatus}
+              simulationLink={simulationLink}
+              requestError={requestError}
+              canSimulate={canSimulate}
+              onRunSimulation={runSimulation}
+            />
+          </AnalysisGroupWrapper>
+        )}
       </Stack>
     </View>
   )

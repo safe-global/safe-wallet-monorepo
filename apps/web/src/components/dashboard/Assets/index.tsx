@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
-import { Box, Skeleton, Typography, Paper, Card, Stack, Divider } from '@mui/material'
+import { Box, Skeleton, Typography, Paper, Stack, Divider } from '@mui/material'
 import useBalances from '@/hooks/useBalances'
 import TokenAmount from '@/components/common/TokenAmount'
 import SwapButton from '@/features/swap/components/SwapButton'
 import { AppRoutes } from '@/config/routes'
-import { ViewAllLink } from '../styled'
+import { WidgetCard } from '../styled'
 import css from './styles.module.css'
 import { useRouter } from 'next/router'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
@@ -41,13 +41,9 @@ const NoAssets = () => (
 )
 
 const AssetsSkeleton = () => (
-  <Card sx={{ px: 1.5, py: 2.5 }} component="section">
-    <Stack direction="row" sx={{ px: 1.5, mb: 1 }}>
-      <Typography fontWeight={700}>Top assets</Typography>
-    </Stack>
-
+  <WidgetCard title="Top assets" testId="assets-widget">
     <Skeleton height={66} variant="rounded" />
-  </Card>
+  </WidgetCard>
 )
 
 const AssetRow = ({
@@ -150,15 +146,9 @@ const AssetsWidget = () => {
   if (isLoading) return <AssetsSkeleton />
 
   return (
-    <Card data-testid="assets-widget" sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5 }}>
-      <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
-        <Typography fontWeight={700}>Top assets</Typography>
-
-        {items.length > 0 && <ViewAllLink url={viewAllUrl} text="View all" />}
-      </Stack>
-
+    <WidgetCard title="Top assets" viewAllUrl={items.length > 0 ? viewAllUrl : undefined} testId="assets-widget">
       <Box>{items.length > 0 ? <AssetList items={items} /> : <NoAssets />}</Box>
-    </Card>
+    </WidgetCard>
   )
 }
 

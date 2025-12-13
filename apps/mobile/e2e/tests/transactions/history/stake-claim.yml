@@ -40,4 +40,3 @@ tags:
 # Test stake claim transaction
 - runFlow:
     file: ../../../utils/components/tx-history/stake-claim-tx-card.yml
-

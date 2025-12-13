@@ -26,7 +26,8 @@ const useSafeTx = (txDetails: TransactionDetails | undefined) => {
         const safeTx = await createExistingTx(txParams, signatures)
         setSafeTx(safeTx)
       } catch (e) {
-        console.error(e)
+        console.error('Failed to create safe tx', e)
+        setSafeTx(undefined)
       }
     }
 

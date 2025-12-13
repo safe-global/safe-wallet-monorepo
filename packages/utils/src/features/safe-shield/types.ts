@@ -8,6 +8,7 @@ export enum Severity {
   INFO = 'INFO', // Informational notice
   WARN = 'WARN', // Potential risk requiring attention
   CRITICAL = 'CRITICAL', // High-risk situation requiring immediate review
+  ERROR = 'ERROR', // Error occurred while fetching analysis
 }
 
 export enum StatusGroup {
@@ -91,6 +92,7 @@ export enum ThreatStatus {
   OWNERSHIP_CHANGE = 'OWNERSHIP_CHANGE', // 9F
   MODULE_CHANGE = 'MODULE_CHANGE', // 9G
   UNOFFICIAL_FALLBACK_HANDLER = 'UNOFFICIAL_FALLBACK_HANDLER', // 9H
+  HYPERNATIVE_GUARD = 'HYPERNATIVE_GUARD', // used only for Safes with Hypernative Guard installed
 }
 
 export enum CommonSharedStatus {
@@ -118,9 +120,14 @@ export type MasterCopyChangeThreatAnalysisResult = AnalysisResult<ThreatStatus.M
   after: string
 }
 
+export type ThreatIssue = {
+  description: string
+  address?: string
+}
+
 export type MaliciousOrModerateThreatAnalysisResult = AnalysisResult<ThreatStatus.MALICIOUS | ThreatStatus.MODERATE> & {
   /** A potential map of specific issues identified during threat analysis, grouped by severity */
-  issues?: { [severity in Severity]?: string[] }
+  issues?: { [severity in Severity]?: ThreatIssue[] }
 }
 
 export type ThreatAnalysisResult =
@@ -168,4 +175,5 @@ export type ThreatAnalysisResults = {
   [StatusGroup.COMMON]?: AnalysisResult<CommonSharedStatus.FAILED>[]
   THREAT?: ThreatAnalysisResult[]
   BALANCE_CHANGE?: BalanceChangeDto[]
+  request_id?: string
 }

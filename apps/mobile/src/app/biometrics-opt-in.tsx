@@ -8,13 +8,11 @@ import { useBiometrics } from '@/src/hooks/useBiometrics'
 import Logger from '@/src/utils/logger'
 import { View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
 function BiometricsOptIn() {
   const { toggleBiometrics, getBiometricsUIInfo, isBiometricsEnabled, isLoading } = useBiometrics()
   const { bottom } = useSafeAreaInsets()
   const local = useLocalSearchParams<{
-    safeAddress: string
-    chainId: string
-    import_safe: string
     txId: string
     signerAddress: string
     caller: '/import-signers' | '/review-and-confirm' | '/review-and-execute'
@@ -24,11 +22,6 @@ function BiometricsOptIn() {
     if (local.caller === '/import-signers') {
       return {
         pathname: '/import-signers/signer' as const,
-        params: {
-          safeAddress: local.safeAddress,
-          chainId: local.chainId,
-          import_safe: local.import_safe,
-        },
       }
     }
     if (local.caller === '/review-and-execute') {
@@ -46,7 +39,7 @@ function BiometricsOptIn() {
         signerAddress: local.signerAddress,
       },
     }
-  }, [local.caller, local.safeAddress, local.chainId, local.import_safe, local.txId, local.signerAddress])
+  }, [local.caller, local.txId, local.signerAddress])
 
   const { colorScheme, isDark } = useTheme()
   const toast = useToastController()

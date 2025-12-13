@@ -1,0 +1,64 @@
+appId: ${APP_ID}
+tags:
+  - transactions
+  - pending
+  - safe-shield
+---
+# ===========================================
+# SafeShield: Contract Interaction (Malicious approve)
+# ===========================================
+# Safe: 0x65e1Ff7e0901055B3bea7D8b3AF457a659714013 (Polygon)
+# Expected widget: Risk detected (CRITICAL)
+# - Malicious threat detected (CRITICAL) - only one label
+# - Balance change: No balance change detected
+# - Risk disclaimer required
+
+- runFlow:
+    file: ../../../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eSafeShieldSafe'
+
+- assertVisible:
+    id: 'pending-tx-list'
+
+- runFlow:
+    file: ../../../../utils/components/pending-tx/tap-tx-card.yml
+    env:
+      WAIT_FOR: '.*Contract interaction.*'
+      TAP_TEXT: '.*Contract interaction.*'
+
+- assertVisible: 'Confirm transaction'
+
+# ===========================================
+# SafeShield Widget
+# ===========================================
+- runFlow:
+    file: ../../../../utils/assertions/verify-safe-shield-widget.yml
+    env:
+      WIDGET_HEADER: 'Risk detected'
+      LABEL_1: 'Malicious threat detected'
+      VERIFY_DISCLAIMER: 'true'
+
+# ===========================================
+# Balance Change Block
+# ===========================================
+- runFlow:
+    file: ../../../../utils/assertions/verify-balance-change.yml
+    env:
+      NO_CHANGE: 'true'
+
+# ===========================================
+# SafeShield Details Sheet
+# ===========================================
+- runFlow:
+    file: ../../../../utils/assertions/verify-safe-shield-sheet.yml
+    env:
+      TAP_TO_OPEN: 'Risk detected'
+      HEADER: 'RISK DETECTED'
+      LABEL_1: 'Malicious threat detected'
+      DESCRIPTION_1: '.*known malicious address.*'
+      DESCRIPTION_1_2: '.*recorded malicious activity.*'
+
+# Verify back on Confirm transaction screen
+- assertVisible: 'Confirm transaction'

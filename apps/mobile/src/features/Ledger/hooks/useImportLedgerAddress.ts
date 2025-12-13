@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useAppDispatch } from '@/src/store/hooks'
-import { addSignerWithEffects } from '@/src/store/signersSlice'
+import { addSignerWithEffects } from '@/src/store/signerThunks'
 import { ledgerDMKService } from '@/src/services/ledger/ledger-dmk.service'
 import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipValidation'
 import logger from '@/src/utils/logger'
