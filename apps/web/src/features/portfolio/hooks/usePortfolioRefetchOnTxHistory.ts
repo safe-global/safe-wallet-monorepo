@@ -10,7 +10,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
  */
 const usePortfolioRefetchOnTxHistory = (): void => {
   const { safe } = useSafeInfo()
-  const { refetch, fulfilledTimeStamp } = useRefetch()
+  const { refetch, fulfilledTimeStamp, shouldUsePortfolioEndpoint } = useRefetch()
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const prevTxHistoryTagRef = useRef<string | null | undefined>(undefined)
 
@@ -28,6 +28,11 @@ const usePortfolioRefetchOnTxHistory = (): void => {
 
     prevTxHistoryTagRef.current = safe.txHistoryTag
 
+    // Skip if portfolio endpoint isn't active or no successful fetch yet
+    if (!shouldUsePortfolioEndpoint || !fulfilledTimeStamp) {
+      return
+    }
+
     // Clear any existing scheduled refetch
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
@@ -35,7 +40,7 @@ const usePortfolioRefetchOnTxHistory = (): void => {
     }
 
     const now = Date.now()
-    const timeSinceLastFetch = fulfilledTimeStamp ? now - fulfilledTimeStamp : Infinity
+    const timeSinceLastFetch = now - fulfilledTimeStamp
     const remainingCooldown = PORTFOLIO_CACHE_TIME_MS - timeSinceLastFetch
 
     if (remainingCooldown > 0) {
@@ -53,7 +58,7 @@ const usePortfolioRefetchOnTxHistory = (): void => {
         clearTimeout(timeoutRef.current)
       }
     }
-  }, [safe.txHistoryTag, refetch, fulfilledTimeStamp])
+  }, [safe.txHistoryTag, refetch, fulfilledTimeStamp, shouldUsePortfolioEndpoint])
 }
 
 export default usePortfolioRefetchOnTxHistory
