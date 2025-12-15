@@ -70,11 +70,15 @@ type RtkQueryState = {
 export const sanitizePendingQueriesTransform = createTransform<RtkQueryState, RtkQueryState>(
   (inboundState) => inboundState,
   (outboundState) => {
-    if (!outboundState?.queries) {return outboundState}
+    if (!outboundState?.queries) {
+      return outboundState
+    }
 
     const sanitizedQueries: Record<string, QueryEntry> = {}
     for (const [key, query] of Object.entries(outboundState.queries)) {
-      if (query?.status === 'pending') {continue}
+      if (query?.status === 'pending') {
+        continue
+      }
       sanitizedQueries[key] = query
     }
 
