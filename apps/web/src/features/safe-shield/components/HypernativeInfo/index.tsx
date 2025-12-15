@@ -1,12 +1,9 @@
 import { type ReactElement } from 'react'
-import { Box, Button, SvgIcon, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, SvgIcon, Stack, Typography } from '@mui/material'
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded'
-import ExternalLink from '@/components/common/ExternalLink'
 import SafeShieldLogo from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
-import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
-import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
-import { useDarkMode } from '@/hooks/useDarkMode'
+import { HypernativeTooltip } from '@/features/hypernative/components/HypernativeTooltip'
 import type { Severity } from '@safe-global/utils/features/safe-shield/types'
 import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
 
@@ -17,8 +14,6 @@ export const HypernativeInfo = ({
   overallStatus?: { severity: Severity; title: string } | undefined
   hypernativeAuth?: HypernativeAuthStatus
 }): ReactElement | null => {
-  const isDarkMode = useDarkMode()
-
   // If hypernativeAuth is not provided, don't show the HypernativeInfo
   if (!hypernativeAuth) {
     return null
@@ -43,31 +38,9 @@ export const HypernativeInfo = ({
             Hypernative Guardian is active
           </Typography>
         </Stack>
-        <Tooltip
-          title={
-            <Stack gap={1} p={1.5}>
-              <SvgIcon
-                // We use the inverted theme mode here so that it matches the tooltip background color
-                component={isDarkMode ? SafeShieldLogoFull : SafeShieldLogoFullDark}
-                inheritViewBox
-                sx={{ width: 78, height: 18 }}
-              />
-
-              <Typography>
-                Hypernative Guardian is actively monitoring this transaction.{' '}
-                <ExternalLink href="https://app.hypernative.xyz/guardian" noIcon>
-                  Learn more
-                </ExternalLink>
-              </Typography>
-            </Stack>
-          }
-          arrow
-          placement="top"
-        >
-          <span style={{ display: 'flex' }}>
-            <SvgIcon component={InfoIcon} inheritViewBox color="border" sx={{ fontSize: 16 }} />
-          </span>
-        </Tooltip>
+        <HypernativeTooltip title="Hypernative Guardian is actively monitoring this transaction.">
+          <SvgIcon component={InfoIcon} inheritViewBox color="border" sx={{ fontSize: 16 }} />
+        </HypernativeTooltip>
       </Stack>
 
       {/* Show login card if user is not authenticated or token is expired */}

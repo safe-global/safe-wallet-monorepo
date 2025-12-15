@@ -13,7 +13,8 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import ImageFallback from '../../ImageFallback'
 import css from './styles.module.css'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
-import { ShieldIconHypernativeTooltip } from '@/features/hypernative/components/ShieldIconHypernativeTooltip'
+import { HypernativeTooltip } from '@/features/hypernative/components/HypernativeTooltip'
+import SafeShieldIcon from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
 
 export type EthHashInfoProps = {
   address: string
@@ -137,7 +138,9 @@ const SrcEthHashInfo = ({
             </Box>
 
             {showShieldIcon ? (
-              <ShieldIconHypernativeTooltip iconStyles={safeShieldSvgStyles} />
+              <HypernativeTooltip placement="right">
+                <SvgIcon component={SafeShieldIcon} inheritViewBox sx={safeShieldSvgStyles} />
+              </HypernativeTooltip>
             ) : (
               !!addressBookNameSource && (
                 <Tooltip title={`From your ${addressBookNameSource} address book`} placement="top">
@@ -158,7 +161,9 @@ const SrcEthHashInfo = ({
         {/* Show shield icon even when there's no name */}
         {!name && showShieldIcon && (
           <Box display="flex" alignItems="center" gap={0.5} sx={accountStylesWithShieldEnabled}>
-            <ShieldIconHypernativeTooltip iconStyles={safeShieldSvgStyles} />
+            <HypernativeTooltip placement="right">
+              <SvgIcon component={SafeShieldIcon} inheritViewBox sx={safeShieldSvgStyles} />
+            </HypernativeTooltip>
           </Box>
         )}
 
