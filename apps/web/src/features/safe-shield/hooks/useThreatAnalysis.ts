@@ -58,7 +58,7 @@ export function useThreatAnalysis(overrideSafeTx?: SafeTransaction) {
           ...mainResult,
           THREAT: [...(mainResult.THREAT || []), ...(nestedResult?.THREAT || [])],
         }
-      : undefined
+      : nestedResult
 
     return [combinedResult, mainError || nestedError, mainLoading || nestedLoading]
   }, [mainThreatAnalysis, nestedThreatAnalysis, isNested])

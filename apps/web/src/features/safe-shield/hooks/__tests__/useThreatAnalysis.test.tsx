@@ -157,4 +157,27 @@ describe('useThreatAnalysis - Nested Transaction Detection', () => {
       expect(threatResult?.THREAT?.every((t) => t.severity === Severity.OK)).toBe(true)
     })
   })
+
+  it('should preserve nested threat data when main result is undefined', async () => {
+    const approveHashTx = buildSafeTransaction(encodeApproveHash(APPROVE_HASH))
+    const nestedSafeTx = buildSafeTransaction('0x1234')
+
+    mockUseNestedTransaction.mockReturnValue({
+      nestedSafeTx,
+      isNested: true,
+    })
+
+    mockUseThreatAnalysisUtils
+      .mockReturnValueOnce([undefined, new Error('API error'), false])
+      .mockReturnValueOnce(buildThreatResult(Severity.CRITICAL))
+
+    const { result } = renderHook(() => useThreatAnalysis(approveHashTx))
+
+    await waitFor(() => {
+      const [threatResult, error] = result.current
+      expect(threatResult?.THREAT).toHaveLength(1)
+      expect(threatResult?.THREAT?.[0].severity).toBe(Severity.CRITICAL)
+      expect(error).toBeInstanceOf(Error)
+    })
+  })
 })
