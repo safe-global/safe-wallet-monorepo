@@ -16,10 +16,10 @@ export const RiskAcknowledgmentCheckbox = ({ checked, onToggle, label }: RiskAck
         <View
           width={20}
           height={20}
-          borderWidth={1}
-          borderColor={checked ? '$primary' : '$borderLight'}
+          borderWidth={2}
+          borderColor={checked ? '$primary' : '$colorBackdrop'}
           backgroundColor={checked ? '$primary' : 'transparent'}
-          borderRadius={4}
+          borderRadius={2}
           alignItems="center"
           justifyContent="center"
         >
