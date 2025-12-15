@@ -57,10 +57,5 @@ export const getRedirectUri = (): string => {
     return HYPERNATIVE_OAUTH_CONFIG.redirectUri
   }
 
-  if (typeof window !== 'undefined') {
-    return `${window.location.origin}${OAUTH_CALLBACK_ROUTE}`
-  }
-
-  // Fallback for SSR
-  return OAUTH_CALLBACK_ROUTE
+  return typeof window !== 'undefined' ? `${window.location.origin}${OAUTH_CALLBACK_ROUTE}` : OAUTH_CALLBACK_ROUTE
 }
