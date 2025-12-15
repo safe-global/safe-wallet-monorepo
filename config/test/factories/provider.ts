@@ -12,7 +12,7 @@ export interface MockProviderOptions {
 }
 
 export const createMockProvider = (options: MockProviderOptions = {}) => {
-  const chainId = typeof options.chainId === 'string' ? BigInt(options.chainId) : options.chainId ?? BigInt(1)
+  const chainId = typeof options.chainId === 'string' ? BigInt(options.chainId) : (options.chainId ?? BigInt(1))
   const rpcUrl = options.rpcUrl ?? 'https://rpc.example.com'
 
   return {

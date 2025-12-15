@@ -10389,6 +10389,7 @@ __metadata:
     eslint-config-next: "npm:^16.0.5"
     jest: "npm:^29.7.0"
     jest-fixed-jsdom: "npm:^0.0.10"
+    prettier: "npm:^3.6.2"
     redux-persist: "npm:^6.0.0"
     ts-node: "npm:^10.9.2"
     typescript: "npm:~5.9.2"
@@ -10439,6 +10440,7 @@ __metadata:
     ethers: "npm:^6.14.3"
     jest: "npm:^29.7.0"
     jest-fixed-jsdom: "npm:^0.0.10"
+    prettier: "npm:^3.6.2"
     ts-node: "npm:^10.9.2"
     typescript: "npm:~5.9.2"
   peerDependencies:
