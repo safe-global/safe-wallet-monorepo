@@ -52,12 +52,10 @@ Specifically for the web app:
 ## Workflow
 
 1. **Install dependencies**: `yarn install` (from the repository root).
-
    - Uses Yarn 4 (managed via `corepack`)
    - Automatically runs `yarn after-install` for the web workspace, which generates TypeScript types from contract ABIs
 
 2. **Pre-commit hooks**: The repository uses Husky for git hooks:
-
    - **pre-commit**: Automatically runs `lint-staged` (prettier) and type-check on staged TypeScript files
    - **pre-push**: Runs linting before pushing
    - These hooks ensure code quality before commits reach the repository
@@ -87,11 +85,9 @@ Specifically for the web app:
    ```
 
 5. **Commit messages**: use [semantic commit messages](https://www.conventionalcommits.org/en/v1.0.0/) as described in `CONTRIBUTING.md`.
-
    - Examples: `feat: add transaction history`, `fix: resolve wallet connection bug`, `refactor: simplify address validation`
 
 6. **Code style**: follow the guidelines in:
-
    - `apps/web/docs/code-style.md` for the web app.
    - `apps/mobile/docs/code-style.md` for the mobile app.
 

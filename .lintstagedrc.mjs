@@ -3,9 +3,7 @@
  * the staged files to the type-check command and tsc is then going to ignore its config file
  */
 export default {
-  '**/*.{js,jsx,ts,tsx,json,md,mdx,yml,yaml,css,html}': [
-    'prettier --write --config ./.prettierrc --ignore-path ./.prettierignore',
-  ],
+  '**/*.{js,jsx,ts,tsx,json,md,mdx,yml,yaml,css,html}': ['node node_modules/prettier/bin/prettier.cjs --write'],
   'apps/web/**/*.{js,jsx,ts,tsx}': [
     'yarn workspace @safe-global/web lint:fix',
     "bash -c 'yarn workspace @safe-global/web type-check' --",
