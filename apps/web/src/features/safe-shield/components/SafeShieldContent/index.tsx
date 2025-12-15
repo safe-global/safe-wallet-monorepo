@@ -36,30 +36,18 @@ export const SafeShieldContent = ({
   recipient,
   contract,
   threat,
-  nestedThreat,
-  isNested,
   safeTx,
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
-  nestedThreat?: AsyncResult<ThreatAnalysisResults>
-  isNested?: boolean
   safeTx?: SafeTransaction
 }): ReactElement => {
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient || []
   const [contractResults = {}, _contractError, contractLoading = false] = contract || []
   const [threatResults, _threatError, threatLoading = false] = threat || []
-  const [nestedThreatResults, _nestedThreatError, nestedThreatLoading = false] = nestedThreat || []
 
-  const combinedThreatResults = isNested
-    ? {
-        ...threatResults,
-        THREAT: [...(threatResults?.THREAT || []), ...(nestedThreatResults?.THREAT || [])],
-      }
-    : threatResults
-
-  const normalizedThreatData = normalizeThreatData([combinedThreatResults, _threatError, threatLoading])
+  const normalizedThreatData = normalizeThreatData(threat)
   const { hasSimulationError } = useCheckSimulation(safeTx)
   const highlightedSeverity = useHighlightedSeverity(
     recipientResults,
@@ -67,13 +55,13 @@ export const SafeShieldContent = ({
     normalizedThreatData,
     hasSimulationError,
   )
-  const loading = recipientLoading || contractLoading || threatLoading || (!!isNested && nestedThreatLoading)
+  const loading = recipientLoading || contractLoading || threatLoading
   const isLoadingVisible = useDelayedLoading(loading, analysisVisibilityDelay)
   const shouldShowContent = !isLoadingVisible
 
   const recipientEmpty = isEmpty(recipientResults)
   const contractEmpty = isEmpty(contractResults)
-  const threatEmpty = isEmpty(combinedThreatResults) || isEmpty(combinedThreatResults.THREAT)
+  const threatEmpty = isEmpty(threatResults) || isEmpty(threatResults?.THREAT)
   const analysesEmpty = recipientEmpty && contractEmpty && threatEmpty
   const allEmpty = recipientEmpty && contractEmpty && threatEmpty && !safeTx
 

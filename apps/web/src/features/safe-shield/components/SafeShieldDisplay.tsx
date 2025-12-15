@@ -42,38 +42,20 @@ export const SafeShieldDisplay = ({
   recipient,
   contract,
   threat,
-  nestedThreat,
-  isNested,
   safeTx,
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
-  nestedThreat?: AsyncResult<ThreatAnalysisResults>
-  isNested?: boolean
   safeTx?: SafeTransaction
 }): ReactElement => {
   const isDarkMode = useDarkMode()
   return (
     <Stack gap={1} data-testid="safe-shield-widget">
       <Card sx={{ borderRadius: '6px', overflow: 'hidden' }}>
-        <SafeShieldHeader
-          recipient={recipient}
-          contract={contract}
-          threat={threat}
-          nestedThreat={nestedThreat}
-          isNested={isNested}
-          safeTx={safeTx}
-        />
+        <SafeShieldHeader recipient={recipient} contract={contract} threat={threat} safeTx={safeTx} />
 
-        <SafeShieldContent
-          threat={threat}
-          nestedThreat={nestedThreat}
-          isNested={isNested}
-          recipient={recipient}
-          contract={contract}
-          safeTx={safeTx}
-        />
+        <SafeShieldContent threat={threat} recipient={recipient} contract={contract} safeTx={safeTx} />
       </Card>
 
       <Stack direction="row" alignItems="center" alignSelf="flex-end">

@@ -19,39 +19,25 @@ export const SafeShieldHeader = ({
   recipient = [{}, undefined, false],
   contract = [{}, undefined, false],
   threat = [{}, undefined, false],
-  nestedThreat = [{}, undefined, false],
-  isNested,
   safeTx,
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
-  nestedThreat?: AsyncResult<ThreatAnalysisResults>
-  isNested?: boolean
   safeTx?: SafeTransaction
 }): ReactElement => {
   const [recipientResults, recipientError, recipientLoading = false] = recipient
   const [contractResults, contractError, contractLoading = false] = contract
   const [threatResults, threatError, threatLoading = false] = threat
-  const [nestedThreatResults, nestedThreatError, nestedThreatLoading = false] = nestedThreat
   const { hasSimulationError } = useCheckSimulation(safeTx)
 
-  const combinedThreatResults = useMemo(() => {
-    if (!isNested || !nestedThreatResults?.THREAT) return threatResults
-
-    return {
-      ...threatResults,
-      THREAT: [...(threatResults?.THREAT || []), ...(nestedThreatResults?.THREAT || [])],
-    }
-  }, [threatResults, nestedThreatResults, isNested])
-
-  const loading = recipientLoading || contractLoading || threatLoading || (!!isNested && nestedThreatLoading)
-  const error = recipientError || contractError || threatError || (!!isNested && nestedThreatError)
+  const loading = recipientLoading || contractLoading || threatLoading
+  const error = recipientError || contractError || threatError
   const isLoadingVisible = useDelayedLoading(loading, headerVisibilityDelay)
 
   const status = useMemo(
-    () => getOverallStatus(recipientResults, contractResults, combinedThreatResults, hasSimulationError),
-    [recipientResults, contractResults, combinedThreatResults, hasSimulationError],
+    () => getOverallStatus(recipientResults, contractResults, threatResults, hasSimulationError),
+    [recipientResults, contractResults, threatResults, hasSimulationError],
   )
 
   const headerBgColor =
