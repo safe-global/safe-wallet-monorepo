@@ -13,10 +13,6 @@ export const HYPERNATIVE_EVENTS = {
     action: 'Guardian Form Started',
     category: HYPERNATIVE_CATEGORY,
   },
-  GUARDIAN_FORM_SUBMITTED: {
-    action: 'Guardian Form Submitted',
-    category: HYPERNATIVE_CATEGORY,
-  },
   SECURITY_REPORT_CLICKED: {
     action: 'Security Report Clicked',
     category: HYPERNATIVE_CATEGORY,

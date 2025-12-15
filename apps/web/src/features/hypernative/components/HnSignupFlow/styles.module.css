@@ -17,16 +17,6 @@
   background-color: var(--color-background-default);
 }
 
-.formColumn {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  padding: var(--space-4) var(--space-5) var(--space-1) var(--space-6);
-  background-color: var(--color-static-primary);
-  max-height: 100%;
-  overflow-y: auto;
-}
-
 .calendlyColumn {
   display: flex;
   flex-direction: column;
@@ -41,12 +31,6 @@
   width: 100%;
 }
 
-.formWrapper {
-  margin: 0 auto;
-  width: 100%;
-  min-height: 620px;
-}
-
 .calendlyWrapper {
   margin: 0 auto;
   width: 100%;
@@ -58,25 +42,6 @@
 .calendlyContainer {
   flex: 1;
   min-height: 0;
-}
-
-.formTitle {
-  color: var(--color-static-main);
-  margin-bottom: var(--space-2);
-}
-
-.formSubtitle {
-  color: var(--color-static-light);
-  margin-bottom: var(--space-4) !important;
-}
-
-.cancelButtonWrapper {
-  z-index: 1;
-  margin-top: -67px;
-}
-
-.cancelButton {
-  color: var(--color-static-main) !important;
 }
 
 .header {
