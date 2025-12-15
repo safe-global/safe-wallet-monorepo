@@ -1,6 +1,6 @@
 .container {
   overflow: hidden;
-  height: 750px;
+  height: 655px;
   max-height: 90vh;
 }
 
@@ -72,7 +72,7 @@
 
 .cancelButtonWrapper {
   z-index: 1;
-  margin-top: -67px;
+  margin-top: -87px;
 }
 
 .cancelButton {
