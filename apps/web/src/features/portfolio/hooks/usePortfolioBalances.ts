@@ -1,9 +1,8 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { usePortfolioGetPortfolioV1Query, type Portfolio } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { PORTFOLIO_POLLING_INTERVAL } from '@/config/constants'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useLegacyBalances, useTokenListSetting, type PortfolioBalances } from '@/hooks/loadables/useLoadBalances'
 
@@ -38,13 +37,16 @@ const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
   const currency = useAppSelector(selectCurrency)
   const isTrustedTokenList = useTokenListSetting()
   const { safe, safeAddress } = useSafeInfo()
+  const { txHistoryTag } = safe
   const isReadyPortfolio = safeAddress && isTrustedTokenList !== undefined
+  const isQuerySkipped = skip || !isReadyPortfolio || !safe.chainId
 
   // Portfolio endpoint (called first)
   const {
     currentData: portfolioData,
     isLoading: portfolioLoading,
     error: portfolioError,
+    refetch: refetchPortfolio,
   } = usePortfolioGetPortfolioV1Query(
     {
       address: safeAddress,
@@ -53,12 +55,18 @@ const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
       trusted: isTrustedTokenList,
     },
     {
-      skip: skip || !isReadyPortfolio || !safe.chainId,
-      pollingInterval: PORTFOLIO_POLLING_INTERVAL,
+      skip: isQuerySkipped,
       skipPollingIfUnfocused: true,
-      refetchOnFocus: true,
     },
   )
+
+  // Refetch portfolio on txHistoryTag change (new transactions)
+  useEffect(() => {
+    if (!isQuerySkipped && txHistoryTag) {
+      refetchPortfolio()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [txHistoryTag])
 
   // Check if portfolio failed or returned empty data for deployed Safes (need legacy fallback)
   const isPortfolioEmpty =
