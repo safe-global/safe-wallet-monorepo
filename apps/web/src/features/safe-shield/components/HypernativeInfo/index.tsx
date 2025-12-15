@@ -11,7 +11,7 @@ export const HypernativeInfo = ({
   overallStatus,
   hypernativeAuth,
 }: {
-  overallStatus?: { severity: Severity; title: string } | undefined
+  overallStatus?: { severity: Severity; title: string }
   hypernativeAuth?: HypernativeAuthStatus
 }): ReactElement | null => {
   // If hypernativeAuth is not provided, don't show the HypernativeInfo

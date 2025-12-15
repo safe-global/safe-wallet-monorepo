@@ -47,7 +47,7 @@ export const SafeShieldContent = ({
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
-  overallStatus?: { severity: Severity; title: string } | undefined
+  overallStatus?: { severity: Severity; title: string }
   hypernativeAuth?: HypernativeAuthStatus
 }): ReactElement => {
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient || []
