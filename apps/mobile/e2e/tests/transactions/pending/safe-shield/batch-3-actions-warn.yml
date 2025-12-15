@@ -32,7 +32,7 @@ tags:
     env:
       WAIT_FOR: '.*3 actions.*'
       TAP_TEXT: '.*3 actions.*'
-      TAP_INDEX: '2'
+      TAP_INDEX: '1'
 
 - assertVisible: 'Confirm transaction'
 

@@ -1,5 +1,4 @@
 import { render } from '@/src/tests/test-utils'
-import { fireEvent } from '@testing-library/react-native'
 import { AnalysisDisplay } from './AnalysisDisplay'
 import {
   RecipientAnalysisResultBuilder,
@@ -8,11 +7,19 @@ import {
 import { ThreatAnalysisResultBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis-result.builder'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { faker } from '@faker-js/faker'
+import type { Address } from '@/src/types/address'
 
 describe('AnalysisDisplay', () => {
+  const initialStore = {
+    activeSafe: {
+      address: '0x1234567890123456789012345678901234567890' as Address,
+      chainId: '1',
+    },
+  }
+
   it('should render description from result', () => {
     const result = RecipientAnalysisResultBuilder.knownRecipient().build()
-    const { getByText } = render(<AnalysisDisplay result={result} />)
+    const { getByText } = render(<AnalysisDisplay result={result} />, { initialStore })
 
     expect(getByText(result.description)).toBeTruthy()
   })
@@ -20,7 +27,7 @@ describe('AnalysisDisplay', () => {
   it('should render custom description when provided', () => {
     const result = RecipientAnalysisResultBuilder.knownRecipient().build()
     const customDescription = 'Custom description'
-    const { getByText } = render(<AnalysisDisplay result={result} description={customDescription} />)
+    const { getByText } = render(<AnalysisDisplay result={result} description={customDescription} />, { initialStore })
 
     expect(getByText(customDescription)).toBeTruthy()
     expect(() => getByText(result.description)).toThrow()
@@ -33,7 +40,7 @@ describe('AnalysisDisplay', () => {
       })
       .build()
 
-    const { getByText } = render(<AnalysisDisplay result={result} />)
+    const { getByText } = render(<AnalysisDisplay result={result} />, { initialStore })
 
     expect(getByText('Critical issue')).toBeTruthy()
   })
@@ -44,7 +51,7 @@ describe('AnalysisDisplay', () => {
 
     const result = ThreatAnalysisResultBuilder.masterCopyChange().changes(beforeAddress, afterAddress).build()
 
-    const { getByText } = render(<AnalysisDisplay result={result} />)
+    const { getByText } = render(<AnalysisDisplay result={result} />, { initialStore })
 
     expect(getByText('CURRENT MASTERCOPY:')).toBeTruthy()
     expect(getByText('NEW MASTERCOPY:')).toBeTruthy()
@@ -59,12 +66,7 @@ describe('AnalysisDisplay', () => {
     }
 
     const { getByText } = render(<AnalysisDisplay result={result} />, {
-      initialStore: {
-        activeSafe: {
-          address: '0x1234567890123456789012345678901234567890',
-          chainId: '1',
-        },
-      },
+      initialStore,
     })
 
     // Find and press the "Show all" button
@@ -87,14 +89,13 @@ describe('AnalysisDisplay', () => {
   it('should apply border color based on severity', () => {
     const result = ThreatAnalysisResultBuilder.malicious().build()
 
-    const { UNSAFE_root } = render(<AnalysisDisplay result={result} severity={Severity.CRITICAL} />)
+    const { UNSAFE_root } = render(<AnalysisDisplay result={result} severity={Severity.CRITICAL} />, { initialStore })
 
     // Component should render with severity
     expect(UNSAFE_root).toBeTruthy()
   })
 
   it('should render all components together', () => {
-    const addresses = [{ address: faker.finance.ethereumAddress() }]
     const beforeAddress = faker.finance.ethereumAddress()
     const afterAddress = faker.finance.ethereumAddress()
 
@@ -105,31 +106,12 @@ describe('AnalysisDisplay', () => {
       })
       .build()
 
-    const resultWithAddresses = {
-      ...result,
-      addresses,
-    }
-
-    const { getByText } = render(<AnalysisDisplay result={resultWithAddresses} severity={Severity.CRITICAL} />, {
-      initialStore: {
-        activeSafe: {
-          address: '0x1234567890123456789012345678901234567890',
-          chainId: '1',
-        },
-      },
+    const { getByText } = render(<AnalysisDisplay result={result} severity={Severity.CRITICAL} />, {
+      initialStore,
     })
 
     expect(getByText(result.description)).toBeTruthy()
     expect(getByText('Critical issue')).toBeTruthy()
     expect(getByText('CURRENT MASTERCOPY:')).toBeTruthy()
-
-    const showAllText = getByText('Show all')
-    const touchableOpacity = showAllText.parent?.parent
-    if (touchableOpacity) {
-      fireEvent.press(touchableOpacity)
-    } else {
-      fireEvent.press(showAllText)
-    }
-    expect(getByText(addresses[0].address)).toBeTruthy()
   })
 })

@@ -7,6 +7,7 @@ export const SEVERITY_TO_TITLE: Record<Severity, string> = {
   WARN: 'Issues found',
   INFO: 'Review details',
   OK: 'Checks passed',
+  ERROR: 'Checks unavailable',
 }
 
 // Description for each recipient status with a multi-recipient analysis

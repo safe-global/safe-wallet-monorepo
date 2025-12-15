@@ -13,6 +13,7 @@ import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { InfoTooltip } from '@/features/stake/components/InfoTooltip'
 
 import css from './styles.module.css'
+import { useIsHypernativeGuard } from '@/features/hypernative/hooks'
 
 const SafeHeaderInfo = (): ReactElement => {
   const { balances } = useVisibleBalances()
@@ -20,6 +21,7 @@ const SafeHeaderInfo = (): ReactElement => {
   const { safe } = useSafeInfo()
   const { threshold, owners } = safe
   const { ens } = useAddressResolver(safeAddress)
+  const { isHypernativeGuard } = useIsHypernativeGuard()
 
   return (
     <div data-testid="safe-header-info" className={css.safe}>
@@ -33,7 +35,13 @@ const SafeHeaderInfo = (): ReactElement => {
 
       <div className={css.address}>
         {safeAddress ? (
-          <EthHashInfo address={safeAddress} shortAddress showAvatar={false} name={ens} />
+          <EthHashInfo
+            address={safeAddress}
+            shortAddress
+            showAvatar={false}
+            name={ens}
+            showShieldIcon={isHypernativeGuard}
+          />
         ) : (
           <Typography variant="body2">
             <Skeleton variant="text" width={86} />

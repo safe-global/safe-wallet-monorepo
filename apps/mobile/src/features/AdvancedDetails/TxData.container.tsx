@@ -26,7 +26,7 @@ export function TxDataContainer() {
 
   const parameters = useMemo(() => formatTxDetails({ txDetails, viewOnExplorer }), [txDetails, viewOnExplorer])
 
-  if (isError) {
+  if (isError && !txDetails) {
     return (
       <View margin="$4">
         <Alert type="error" message="Error fetching transaction details" />

@@ -34,7 +34,14 @@ const ExternalLink = ({
       {linkContent}
     </Link>
   ) : (
-    <Button variant="outlined" href={href} rel="noreferrer noopener" target="_blank" sx={props.sx}>
+    <Button
+      variant="outlined"
+      href={href}
+      rel="noreferrer noopener"
+      target="_blank"
+      className={props.className}
+      sx={props.sx}
+    >
       {linkContent}
     </Button>
   )

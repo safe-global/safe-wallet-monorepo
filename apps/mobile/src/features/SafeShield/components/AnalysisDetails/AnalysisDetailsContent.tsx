@@ -113,7 +113,7 @@ export const AnalysisDetailsContent = ({ recipient, contract, threat, safeTx }: 
           <AnalysisGroupWrapper>
             <TransactionSimulation
               severity={simulationSeverityStatus}
-              highlighted={simulationSeverityStatus === overallStatus?.severity}
+              highlighted={simulationSeverityStatus === overallStatus?.severity && !!safeTx}
               simulationStatus={simulationStatus}
               simulationLink={simulationLink}
               requestError={requestError}

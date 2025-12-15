@@ -8,6 +8,7 @@ export enum Severity {
   INFO = 'INFO', // Informational notice
   WARN = 'WARN', // Potential risk requiring attention
   CRITICAL = 'CRITICAL', // High-risk situation requiring immediate review
+  ERROR = 'ERROR', // Error occurred while fetching analysis
 }
 
 export enum StatusGroup {
@@ -120,8 +121,8 @@ export type MasterCopyChangeThreatAnalysisResult = AnalysisResult<ThreatStatus.M
 }
 
 export type ThreatIssue = {
-  address?: string
   description: string
+  address?: string
 }
 
 export type MaliciousOrModerateThreatAnalysisResult = AnalysisResult<ThreatStatus.MALICIOUS | ThreatStatus.MODERATE> & {
