@@ -5,7 +5,17 @@ import {
   ListenerEffectAPI,
   TypedStartListening,
 } from '@reduxjs/toolkit'
-import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist'
+import {
+  persistStore,
+  persistReducer,
+  createTransform,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from 'redux-persist'
 import { reduxStorage } from './storage'
 import txHistory from './txHistorySlice'
 import activeSafe from './activeSafeSlice'
@@ -49,6 +59,34 @@ export const cgwClientFilter = createFilter(
   ['queries.getChainsConfig(undefined)', 'config'],
 )
 
+type QueryEntry = { status?: string } | undefined
+type RtkQueryState = {
+  queries?: Record<string, QueryEntry>
+  [key: string]: unknown
+}
+
+// RTK Query persists status: 'pending' for in-flight requests. If the app is killed mid-request,
+// this stale pending status prevents new requests from being initiated on restart.
+export const sanitizePendingQueriesTransform = createTransform<RtkQueryState, RtkQueryState>(
+  (inboundState) => inboundState,
+  (outboundState) => {
+    if (!outboundState?.queries) {
+      return outboundState
+    }
+
+    const sanitizedQueries: Record<string, QueryEntry> = {}
+    for (const [key, query] of Object.entries(outboundState.queries)) {
+      if (query?.status === 'pending') {
+        continue
+      }
+      sanitizedQueries[key] = query
+    }
+
+    return { ...outboundState, queries: sanitizedQueries }
+  },
+  { whitelist: [cgwClient.reducerPath] },
+)
+
 export const persistBlacklist = [
   web3API.reducerPath,
   'myAccounts',
@@ -59,7 +97,7 @@ export const persistBlacklist = [
   'executingState',
 ]
 
-export const persistTransforms = [cgwClientFilter]
+export const persistTransforms = [cgwClientFilter, sanitizePendingQueriesTransform]
 
 const persistConfig = {
   key: 'root',
