@@ -52,8 +52,6 @@ describe('SignForm', () => {
       recipient: [undefined, undefined, false] as AsyncResult<RecipientAnalysisResults>,
       contract: [undefined, undefined, false] as AsyncResult<ContractAnalysisResults>,
       threat: [undefined, undefined, false] as AsyncResult<ThreatAnalysisResults>,
-      nestedThreat: [undefined, undefined, false] as AsyncResult<ThreatAnalysisResults>,
-      isNested: false,
       needsRiskConfirmation: false,
       isRiskConfirmed: false,
       setIsRiskConfirmed: jest.fn(),
