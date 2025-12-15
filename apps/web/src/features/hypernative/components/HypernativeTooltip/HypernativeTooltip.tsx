@@ -12,7 +12,7 @@ export const HypernativeTooltip = ({
   const isDarkMode = useDarkMode()
 
   const tooltipTitle = (
-    <Stack gap={1} p={1.5}>
+    <Stack gap={1} py={1} px={0.5} maxWidth="230px">
       <SvgIcon
         // We use the inverted theme mode here so that it matches the tooltip background color
         component={isDarkMode ? SafeShieldLogoFull : SafeShieldLogoFullDark}
@@ -20,7 +20,7 @@ export const HypernativeTooltip = ({
         sx={{ width: 78, height: 18 }}
       />
 
-      <Typography>{title || 'Hypernative Guardian is actively monitoring this account.'}</Typography>
+      <Typography variant="body2">{title || 'Hypernative Guardian is actively monitoring this account.'}</Typography>
     </Stack>
   )
 
