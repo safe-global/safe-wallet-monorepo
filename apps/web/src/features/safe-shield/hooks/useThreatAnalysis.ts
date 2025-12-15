@@ -25,7 +25,7 @@ export function useThreatAnalysis(overrideSafeTx?: SafeTransaction) {
   const txToAnalyze = overrideSafeTx || safeTx || safeMessage
 
   const safeTxToCheck = (txToAnalyze && 'data' in txToAnalyze ? txToAnalyze : undefined) as SafeTransaction | undefined
-  const { nestedSafeTx, isNested } = useNestedTransaction(safeTxToCheck, chain)
+  const { nestedSafeInfo, nestedSafeTx, isNested } = useNestedTransaction(safeTxToCheck, chain)
 
   const mainThreatAnalysis = useThreatAnalysisUtils({
     safeAddress: safeAddress as `0x${string}`,
@@ -37,12 +37,12 @@ export function useThreatAnalysis(overrideSafeTx?: SafeTransaction) {
   })
 
   const nestedThreatAnalysis = useThreatAnalysisUtils({
-    safeAddress: safeAddress as `0x${string}`,
+    safeAddress: (nestedSafeInfo?.address.value ?? safeAddress) as `0x${string}`,
     chainId,
     data: isNested ? nestedSafeTx : undefined,
     walletAddress,
     origin: txOrigin,
-    safeVersion: version || undefined,
+    safeVersion: nestedSafeInfo?.version ?? version ?? undefined,
   })
 
   const combinedThreatAnalysis = useMemo((): AsyncResult<ThreatAnalysisResults> => {

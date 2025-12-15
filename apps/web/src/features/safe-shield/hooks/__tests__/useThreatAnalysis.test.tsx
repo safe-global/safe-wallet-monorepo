@@ -50,6 +50,12 @@ const safeInterface = Safe__factory.createInterface()
 const NESTED_SAFE_ADDRESS = '0x00000000000000000000000000000000000000aa'
 const APPROVE_HASH = `0x${'a'.repeat(64)}`
 
+const buildNestedSafeInfo = () => ({
+  address: { value: NESTED_SAFE_ADDRESS },
+  chainId: '1',
+  version: '1.4.1',
+})
+
 const buildSafeTransaction = (data: string): SafeTransaction => ({
   addSignature: jest.fn(),
   encodedSignatures: jest.fn(),
@@ -96,6 +102,7 @@ describe('useThreatAnalysis - Nested Transaction Detection', () => {
     const nestedSafeTx = buildSafeTransaction('0x1234')
 
     mockUseNestedTransaction.mockReturnValue({
+      nestedSafeInfo: buildNestedSafeInfo(),
       nestedSafeTx,
       isNested: true,
     })
@@ -121,6 +128,7 @@ describe('useThreatAnalysis - Nested Transaction Detection', () => {
     const regularTx = buildSafeTransaction('0x1234')
 
     mockUseNestedTransaction.mockReturnValue({
+      nestedSafeInfo: undefined,
       nestedSafeTx: undefined,
       isNested: false,
     })
@@ -141,6 +149,7 @@ describe('useThreatAnalysis - Nested Transaction Detection', () => {
     const nestedSafeTx = buildSafeTransaction('0x1234')
 
     mockUseNestedTransaction.mockReturnValue({
+      nestedSafeInfo: buildNestedSafeInfo(),
       nestedSafeTx,
       isNested: true,
     })
@@ -163,6 +172,7 @@ describe('useThreatAnalysis - Nested Transaction Detection', () => {
     const nestedSafeTx = buildSafeTransaction('0x1234')
 
     mockUseNestedTransaction.mockReturnValue({
+      nestedSafeInfo: buildNestedSafeInfo(),
       nestedSafeTx,
       isNested: true,
     })
@@ -178,6 +188,36 @@ describe('useThreatAnalysis - Nested Transaction Detection', () => {
       expect(threatResult?.THREAT).toHaveLength(1)
       expect(threatResult?.THREAT?.[0].severity).toBe(Severity.CRITICAL)
       expect(error).toBeInstanceOf(Error)
+    })
+  })
+
+  it('should use nested Safe address and version for nested threat analysis', async () => {
+    const approveHashTx = buildSafeTransaction(encodeApproveHash(APPROVE_HASH))
+    const nestedSafeTx = buildSafeTransaction('0x1234')
+    const nestedSafeInfo = buildNestedSafeInfo()
+
+    mockUseNestedTransaction.mockReturnValue({
+      nestedSafeInfo,
+      nestedSafeTx,
+      isNested: true,
+    })
+
+    mockUseThreatAnalysisUtils
+      .mockReturnValueOnce(buildThreatResult(Severity.OK))
+      .mockReturnValueOnce(buildThreatResult(Severity.OK))
+
+    renderHook(() => useThreatAnalysis(approveHashTx))
+
+    await waitFor(() => {
+      expect(mockUseThreatAnalysisUtils).toHaveBeenCalledTimes(2)
+
+      const mainCallArgs = mockUseThreatAnalysisUtils.mock.calls[0][0]
+      expect(mainCallArgs.safeAddress).toBe('0x123')
+      expect(mainCallArgs.safeVersion).toBe('1.3.0')
+
+      const nestedCallArgs = mockUseThreatAnalysisUtils.mock.calls[1][0]
+      expect(nestedCallArgs.safeAddress).toBe(NESTED_SAFE_ADDRESS)
+      expect(nestedCallArgs.safeVersion).toBe('1.4.1')
     })
   })
 })
