@@ -104,7 +104,6 @@ const SrcEthHashInfo = ({
     fontWeight: 'bold',
     borderRadius: '16px',
     padding: name ? '2px 8px 2px 6px' : undefined,
-    width: 'fit-content',
   }
 
   return (
@@ -123,7 +122,7 @@ const SrcEthHashInfo = ({
       )}
 
       <Box overflow="hidden" className={onlyName ? css.inline : undefined} gap={0.5}>
-        {name && (
+        {!!name ? (
           <Box
             title={name}
             className="ethHashInfo-name"
@@ -132,9 +131,8 @@ const SrcEthHashInfo = ({
             gap={0.5}
             sx={showShieldIcon ? accountStylesWithShieldEnabled : undefined}
           >
-            <Box overflow="hidden" whiteSpace="nowrap">
-              {/* Trim long names: */}
-              {showShieldIcon && name.length > 15 ? `${name.slice(0, 15)}...` : name}
+            <Box overflow="hidden" textOverflow="ellipsis">
+              {name}
             </Box>
 
             {showShieldIcon ? (
@@ -156,15 +154,15 @@ const SrcEthHashInfo = ({
               )
             )}
           </Box>
-        )}
-
-        {/* Show shield icon even when there's no name */}
-        {!name && showShieldIcon && (
-          <Box display="flex" alignItems="center" gap={0.5} sx={accountStylesWithShieldEnabled}>
-            <HypernativeTooltip placement="right">
-              <SvgIcon component={SafeShieldIcon} inheritViewBox sx={safeShieldSvgStyles} />
-            </HypernativeTooltip>
-          </Box>
+        ) : (
+          /* Show shield icon even when there's no name */
+          showShieldIcon && (
+            <Box display="flex" alignItems="center" gap={0.5}>
+              <HypernativeTooltip placement="right">
+                <SvgIcon component={SafeShieldIcon} inheritViewBox sx={safeShieldSvgStyles} />
+              </HypernativeTooltip>
+            </Box>
+          )
         )}
 
         <div className={classnames(css.addressContainer, { [css.inline]: onlyName })}>
