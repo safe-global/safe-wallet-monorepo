@@ -31,14 +31,14 @@ export const SafeShieldHeader = ({
   const [threatResults, threatError, threatLoading = false] = threat
   const { hasSimulationError } = useCheckSimulation(safeTx)
 
+  const loading = recipientLoading || contractLoading || threatLoading
+  const error = recipientError || contractError || threatError
+  const isLoadingVisible = useDelayedLoading(loading, headerVisibilityDelay)
+
   const status = useMemo(
     () => getOverallStatus(recipientResults, contractResults, threatResults, hasSimulationError),
     [recipientResults, contractResults, threatResults, hasSimulationError],
   )
-
-  const loading = recipientLoading || contractLoading || threatLoading
-  const error = recipientError || contractError || threatError
-  const isLoadingVisible = useDelayedLoading(loading, headerVisibilityDelay)
 
   const headerBgColor =
     !status || !status?.severity || isLoadingVisible
