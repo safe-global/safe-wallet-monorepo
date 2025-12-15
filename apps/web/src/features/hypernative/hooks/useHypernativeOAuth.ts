@@ -310,9 +310,10 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
       // Real OAuth flow
       const authUrl = await buildAuthUrl()
 
-      // Calculate centered position for popup
-      const left = window.screen.width / 2 - POPUP_WIDTH / 2
-      const top = window.screen.height / 2 - POPUP_HEIGHT / 2
+      // Calculate centered position for popup relative to current window
+      // Center in the current window's viewport, accounting for window position on screen
+      const left = window.screenX + window.innerWidth / 2 - POPUP_WIDTH / 2
+      const top = window.screenY + window.innerHeight / 2 - POPUP_HEIGHT / 2
 
       // Try to open popup first (better UX)
       const popup = window.open(
