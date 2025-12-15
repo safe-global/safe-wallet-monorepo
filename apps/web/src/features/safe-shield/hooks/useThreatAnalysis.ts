@@ -25,7 +25,7 @@ export function useThreatAnalysis(overrideSafeTx?: SafeTransaction) {
   const txToAnalyze = overrideSafeTx || safeTx || safeMessage
 
   const safeTxToCheck = (txToAnalyze && 'data' in txToAnalyze ? txToAnalyze : undefined) as SafeTransaction | undefined
-  const { nestedSafeInfo, nestedSafeTx, isNested } = useNestedTransaction(safeTxToCheck, chain)
+  const { nestedSafeInfo, nestedSafeTx, isNested, isNestedLoading } = useNestedTransaction(safeTxToCheck, chain)
 
   const mainThreatAnalysis = useThreatAnalysisUtils({
     safeAddress: safeAddress as `0x${string}`,
@@ -49,6 +49,10 @@ export function useThreatAnalysis(overrideSafeTx?: SafeTransaction) {
     const [mainResult, mainError, mainLoading] = mainThreatAnalysis
     const [nestedResult, nestedError, nestedLoading] = nestedThreatAnalysis
 
+    if (isNestedLoading) {
+      return [mainResult, mainError, true]
+    }
+
     if (!isNested) {
       return mainThreatAnalysis
     }
@@ -61,7 +65,7 @@ export function useThreatAnalysis(overrideSafeTx?: SafeTransaction) {
       : nestedResult
 
     return [combinedResult, mainError || nestedError, mainLoading || nestedLoading]
-  }, [mainThreatAnalysis, nestedThreatAnalysis, isNested])
+  }, [mainThreatAnalysis, nestedThreatAnalysis, isNested, isNestedLoading])
 
   // If HN Guard is installed, return a static INFO status.
   // This is a temporary solution to avoid the error message "Threat analysis failed"

@@ -97,6 +97,26 @@ describe('useThreatAnalysis - Nested Transaction Detection', () => {
     jest.clearAllMocks()
   })
 
+  it('should return loading state while nested transaction data is being fetched', async () => {
+    const approveHashTx = buildSafeTransaction(encodeApproveHash(APPROVE_HASH))
+
+    mockUseNestedTransaction.mockReturnValue({
+      nestedSafeInfo: undefined,
+      nestedSafeTx: undefined,
+      isNested: false,
+      isNestedLoading: true,
+    })
+
+    mockUseThreatAnalysisUtils.mockReturnValue(buildThreatResult(Severity.OK))
+
+    const { result } = renderHook(() => useThreatAnalysis(approveHashTx))
+
+    await waitFor(() => {
+      const [, , loading] = result.current
+      expect(loading).toBe(true)
+    })
+  })
+
   it('should merge threats from nested approveHash transactions', async () => {
     const approveHashTx = buildSafeTransaction(encodeApproveHash(APPROVE_HASH))
     const nestedSafeTx = buildSafeTransaction('0x1234')
@@ -105,6 +125,7 @@ describe('useThreatAnalysis - Nested Transaction Detection', () => {
       nestedSafeInfo: buildNestedSafeInfo(),
       nestedSafeTx,
       isNested: true,
+      isNestedLoading: false,
     })
 
     mockUseThreatAnalysisUtils
@@ -131,6 +152,7 @@ describe('useThreatAnalysis - Nested Transaction Detection', () => {
       nestedSafeInfo: undefined,
       nestedSafeTx: undefined,
       isNested: false,
+      isNestedLoading: false,
     })
 
     mockUseThreatAnalysisUtils.mockReturnValue(buildThreatResult(Severity.WARN))
@@ -152,6 +174,7 @@ describe('useThreatAnalysis - Nested Transaction Detection', () => {
       nestedSafeInfo: buildNestedSafeInfo(),
       nestedSafeTx,
       isNested: true,
+      isNestedLoading: false,
     })
 
     mockUseThreatAnalysisUtils
@@ -175,6 +198,7 @@ describe('useThreatAnalysis - Nested Transaction Detection', () => {
       nestedSafeInfo: buildNestedSafeInfo(),
       nestedSafeTx,
       isNested: true,
+      isNestedLoading: false,
     })
 
     mockUseThreatAnalysisUtils
@@ -200,6 +224,7 @@ describe('useThreatAnalysis - Nested Transaction Detection', () => {
       nestedSafeInfo,
       nestedSafeTx,
       isNested: true,
+      isNestedLoading: false,
     })
 
     mockUseThreatAnalysisUtils
