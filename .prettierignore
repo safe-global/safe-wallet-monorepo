@@ -1,7 +1,6 @@
 # Ignore artifacts:
 **/build
 **/coverage
-node_modules
 .idea
 **/node_modules/
 .yarn
@@ -9,10 +8,6 @@ node_modules
 .pnp.loader.mjs
 .env
 .env.*
-
-
-/assets
-
 
 # Mobile
 apps/mobile/android
