@@ -1,8 +1,8 @@
-name: "Enable corepack"
+name: 'Enable corepack'
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
-    - name: "Enable Corepack"
+    - name: 'Enable Corepack'
       shell: bash
       run: corepack enable

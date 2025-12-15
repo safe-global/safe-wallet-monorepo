@@ -6,7 +6,10 @@ export const DEFAULT_INFO = {
   logoUrl: 'https://placehold.co/160',
 }
 export class ContractAddressBuilder {
-  constructor(private parent: ContractAnalysisBuilder, private address: string) {}
+  constructor(
+    private parent: ContractAnalysisBuilder,
+    private address: string,
+  ) {}
 
   addName(name: string): this {
     this.parent['contract'][this.address].name = name
