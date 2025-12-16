@@ -188,7 +188,7 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
                                     title="GnosisSafeProxy"
                                   >
                                     <div
-                                      class="MuiBox-root css-9gv43x"
+                                      class="MuiBox-root css-1o4wo1x"
                                     >
                                       GnosisSafeProxy
                                     </div>
