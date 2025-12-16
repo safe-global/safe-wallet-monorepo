@@ -27,7 +27,7 @@ export const STATUS_PAGE_URL = process.env.NEXT_PUBLIC_SAFE_STATUS_PAGE_URL || '
 
 // Magic numbers
 export const POLLING_INTERVAL = 15_000
-export const PORTFOLIO_POLLING_INTERVAL = 60_000
+export const PORTFOLIO_CACHE_TIME_MS = 10_000
 export const BASE_TX_GAS = 21_000
 export const LS_NAMESPACE = 'SAFE_v2__'
 export const DUST_THRESHOLD = 0.01
