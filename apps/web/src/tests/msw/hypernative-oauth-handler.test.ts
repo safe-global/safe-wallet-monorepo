@@ -17,7 +17,7 @@ describe('Hypernative OAuth Token Exchange Handler', () => {
     code: 'test-auth-code-123',
     code_verifier: 'test-verifier-456',
     redirect_uri: 'http://localhost:3000/hypernative/oauth-callback',
-    client_id: 'SAFE_WALLET_SPA',
+    client_id: 'SAFE_WALLET_WEB',
   }
 
   it('should return access token for valid request', async () => {

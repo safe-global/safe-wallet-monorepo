@@ -445,7 +445,7 @@ export const handlers = (GATEWAY_URL: string) => [
       return HttpResponse.json({ error: 'invalid_request', error_description: 'Missing redirect_uri' }, { status: 400 })
     }
 
-    if (!clientId || clientId !== 'SAFE_WALLET_SPA') {
+    if (!clientId || clientId !== 'SAFE_WALLET_WEB') {
       return HttpResponse.json({ error: 'invalid_client', error_description: 'Invalid client_id' }, { status: 401 })
     }
 

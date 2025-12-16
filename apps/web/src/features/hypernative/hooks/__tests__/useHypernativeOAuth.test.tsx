@@ -41,7 +41,7 @@ jest.mock('../../config/oauth', () => {
     HYPERNATIVE_OAUTH_CONFIG: {
       ...actual.HYPERNATIVE_OAUTH_CONFIG,
       authUrl: 'https://mock-hn-auth.example.com/oauth/authorize',
-      clientId: 'SAFE_WALLET_SPA',
+      clientId: 'SAFE_WALLET_WEB',
       redirectUri: '',
     },
     get getRedirectUri() {
