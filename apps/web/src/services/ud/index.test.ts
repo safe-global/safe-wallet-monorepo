@@ -70,9 +70,10 @@ describe('Unstoppable Domains', () => {
           }) as any,
       )
 
-      const address = await resolveUnstoppableAddress('nonexistent.crypto')
+      const address = await resolveUnstoppableAddress('nonexistent.crypto', { token: 'ETH', network: 'ETH' })
 
       expect(address).toBe(undefined)
+      expect(mockGetAddress).toHaveBeenCalledWith('nonexistent.crypto', 'ETH', 'ETH')
       expect(logError).not.toHaveBeenCalled()
     })
 
@@ -86,9 +87,10 @@ describe('Unstoppable Domains', () => {
           }) as any,
       )
 
-      const address = await resolveUnstoppableAddress('brad.crypto', { token: 'BTC' })
+      const address = await resolveUnstoppableAddress('brad.crypto', { token: 'BTC', network: 'BTC' })
 
       expect(address).toBe(undefined)
+      expect(mockGetAddress).toHaveBeenCalledWith('brad.crypto', 'BTC', 'BTC')
       expect(logError).not.toHaveBeenCalled()
     })
 
@@ -102,9 +104,10 @@ describe('Unstoppable Domains', () => {
           }) as any,
       )
 
-      const address = await resolveUnstoppableAddress('test.nonexistent')
+      const address = await resolveUnstoppableAddress('test.nonexistent', { token: 'ETH', network: 'ETH' })
 
       expect(address).toBe(undefined)
+      expect(mockGetAddress).toHaveBeenCalledWith('test.nonexistent', 'ETH', 'ETH')
       expect(logError).not.toHaveBeenCalled()
     })
 
@@ -118,9 +121,10 @@ describe('Unstoppable Domains', () => {
           }) as any,
       )
 
-      const address = await resolveUnstoppableAddress('test.crypto')
+      const address = await resolveUnstoppableAddress('test.crypto', { token: 'ETH', network: 'ETH' })
 
       expect(address).toBe(undefined)
+      expect(mockGetAddress).toHaveBeenCalledWith('test.crypto', 'ETH', 'ETH')
       expect(logError).not.toHaveBeenCalled()
     })
 
@@ -168,6 +172,23 @@ describe('Unstoppable Domains', () => {
       const address = await resolveUnstoppableAddress('brad.crypto')
 
       expect(address).toBe(undefined)
+      expect(logError).toHaveBeenCalledWith(
+        '101: Failed to resolve the address',
+        'NEXT_PUBLIC_UNSTOPPABLE_API_KEY not configured for UD resolution',
+      )
+    })
+
+    it('should only log initialization error once when called multiple times', async () => {
+      process.env.NEXT_PUBLIC_UNSTOPPABLE_API_KEY = ''
+      __resetResolutionForTesting() // Reset after changing env
+
+      // Call multiple times
+      await resolveUnstoppableAddress('test1.crypto', { token: 'ETH', network: 'ETH' })
+      await resolveUnstoppableAddress('test2.crypto', { token: 'ETH', network: 'ETH' })
+      await resolveUnstoppableAddress('test3.crypto', { token: 'ETH', network: 'ETH' })
+
+      // Error should only be logged once, not three times
+      expect(logError).toHaveBeenCalledTimes(1)
       expect(logError).toHaveBeenCalledWith(
         '101: Failed to resolve the address',
         'NEXT_PUBLIC_UNSTOPPABLE_API_KEY not configured for UD resolution',

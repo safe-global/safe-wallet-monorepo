@@ -9,9 +9,13 @@ export interface UdResolveOptions {
 
 // Lazy-initialize Resolution instance
 let resolutionInstance: Resolution | null = null
+let initializationAttempted = false
 
 const getResolution = (): Resolution | null => {
   if (resolutionInstance) return resolutionInstance
+  if (initializationAttempted) return null
+
+  initializationAttempted = true
 
   const apiKey = process.env.NEXT_PUBLIC_UNSTOPPABLE_API_KEY
   if (!apiKey || apiKey.trim() === '') {
@@ -34,6 +38,7 @@ const getResolution = (): Resolution | null => {
 // Export for testing only - allows resetting the singleton instance
 export const __resetResolutionForTesting = () => {
   resolutionInstance = null
+  initializationAttempted = false
 }
 
 /**
