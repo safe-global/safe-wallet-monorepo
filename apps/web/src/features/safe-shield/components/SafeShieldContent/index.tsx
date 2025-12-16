@@ -46,6 +46,7 @@ export const SafeShieldContent = ({
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient || []
   const [contractResults = {}, _contractError, contractLoading = false] = contract || []
   const [threatResults, _threatError, threatLoading = false] = threat || []
+
   const normalizedThreatData = normalizeThreatData(threat)
   const { hasSimulationError } = useCheckSimulation(safeTx)
   const highlightedSeverity = useHighlightedSeverity(
@@ -60,7 +61,7 @@ export const SafeShieldContent = ({
 
   const recipientEmpty = isEmpty(recipientResults)
   const contractEmpty = isEmpty(contractResults)
-  const threatEmpty = isEmpty(threatResults) || isEmpty(threatResults.THREAT)
+  const threatEmpty = isEmpty(threatResults) || isEmpty(threatResults?.THREAT)
   const analysesEmpty = recipientEmpty && contractEmpty && threatEmpty
   const allEmpty = recipientEmpty && contractEmpty && threatEmpty && !safeTx
 

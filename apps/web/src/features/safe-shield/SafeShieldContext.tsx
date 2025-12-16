@@ -51,7 +51,9 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
 
   const { needsRiskConfirmation, primaryThreatSeverity } = useMemo(() => {
     const [threatAnalysisResult] = threat || []
+
     const primaryThreatResult = getPrimaryResult(threatAnalysisResult?.THREAT || [])
+
     const severity = primaryThreatResult?.severity
     const needsRiskConfirmation = !!severity && SEVERITY_PRIORITY[severity] <= SEVERITY_PRIORITY[Severity.CRITICAL]
 
