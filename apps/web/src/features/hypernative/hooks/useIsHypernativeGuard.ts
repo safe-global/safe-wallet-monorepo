@@ -53,12 +53,6 @@ export const useIsHypernativeGuard = (): HypernativeGuardCheckResult => {
     logError(Errors._809, error)
   }
 
-  // @todo: remove this after testing
-  return {
-    isHypernativeGuard: true,
-    loading: false,
-  }
-
   return {
     isHypernativeGuard: isHnGuard ?? false,
     loading: !safeLoaded || (safeLoaded && !web3ReadOnly) || loading,
