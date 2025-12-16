@@ -407,14 +407,16 @@ describe('EthHashInfo', () => {
         <EthHashInfo address={MOCK_SAFE_ADDRESS} showShieldIcon={true} name={undefined} showName={false} />,
       )
 
-      // Check that the shield icon container has bold styling (accountStylesWithShieldEnabled)
-      // This confirms the shield icon Box is rendered even without a name
-      const boxes = Array.from(container.querySelectorAll('*')).filter((el) => {
-        const styles = window.getComputedStyle(el)
-        return styles.fontWeight === '700' || styles.fontWeight === 'bold'
+      // Check that the shield icon is rendered even without a name
+      // The HypernativeTooltip wraps the SvgIcon in a span with display: flex
+      // Look for spans with display: flex that contain the mocked icon
+      const tooltipSpans = Array.from(container.querySelectorAll('span')).filter((span) => {
+        const styles = window.getComputedStyle(span)
+        return styles.display === 'flex' && span.querySelector('[class*="MuiSvgIcon"]') !== null
       })
 
-      expect(boxes.length).toBeGreaterThan(0)
+      // Should have at least one span with flex display containing the shield icon
+      expect(tooltipSpans.length).toBeGreaterThan(0)
     })
 
     it('does not render shield icon when showShieldIcon is false and name is undefined', () => {
@@ -424,13 +426,16 @@ describe('EthHashInfo', () => {
         <EthHashInfo address={MOCK_SAFE_ADDRESS} showShieldIcon={false} name={undefined} showName={false} />,
       )
 
-      // When showShieldIcon is false, there should be no Box with bold font weight
-      const boxes = Array.from(container.querySelectorAll('*')).filter((el) => {
+      // When showShieldIcon is false, there should be no shield icon Box container
+      // Check for Box elements with display: flex and alignItems: center (which would contain the shield icon)
+      const shieldBoxes = Array.from(container.querySelectorAll('*')).filter((el) => {
         const styles = window.getComputedStyle(el)
-        return styles.fontWeight === '700' || styles.fontWeight === 'bold'
+        // The shield icon Box has display: flex and alignItems: center
+        return styles.display === 'flex' && styles.alignItems === 'center' && el.children.length > 0
       })
 
-      expect(boxes.length).toBe(0)
+      // Should not have the shield icon container Box
+      expect(shieldBoxes.length).toBe(0)
     })
   })
 })
