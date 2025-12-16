@@ -20,6 +20,12 @@ interface AuthTokenData {
  * - SameSite: Lax - protects against CSRF while allowing OAuth redirects
  * - Path: Root path so it's accessible across the app
  * - Expires: Set based on token expiry time
+ *
+ * SECURITY NOTE: This implementation uses client-side accessible cookies (not httpOnly)
+ * because:
+ * 1. The OAuth callback is handled client-side (Next.js page component)
+ * 2. The token must be readable by JavaScript for expiration checking and cross-tab sync
+ * 3. Client-side JavaScript cannot set httpOnly cookies - only servers can via Set-Cookie headers
  */
 const getCookieOptions = (maxAgeInSeconds?: number): Cookies.CookieAttributes => {
   const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:'
