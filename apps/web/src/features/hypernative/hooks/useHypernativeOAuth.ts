@@ -64,6 +64,12 @@ const POPUP_WIDTH = 600
 const POPUP_HEIGHT = 800
 
 /**
+ * Polling interval in milliseconds
+ * Used to check authentication state periodically
+ */
+const AUTH_POLLING_INTERVAL = 5000
+
+/**
  * Base64url encode a byte array
  * Converts bytes to base64 and then replaces URL-unsafe characters per RFC 4648
  * @param bytes - Uint8Array of bytes to encode
@@ -348,11 +354,18 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
       })
     }
 
-    // Check auth state periodically to catch cookie changes
-    const interval = setInterval(checkAuthState, 1000)
+    // Check auth state when storage event occurs
+    const handleStorageEvent = () => checkAuthState()
+    window.addEventListener('storage', handleStorageEvent)
+
+    // Additionally, check auth state periodically to catch cookie changes
+    const interval = setInterval(checkAuthState, AUTH_POLLING_INTERVAL)
     checkAuthState() // Initial check
 
-    return () => clearInterval(interval)
+    return () => {
+      window.removeEventListener('storage', handleStorageEvent)
+      clearInterval(interval)
+    }
   }, [])
 
   useEffect(() => {
