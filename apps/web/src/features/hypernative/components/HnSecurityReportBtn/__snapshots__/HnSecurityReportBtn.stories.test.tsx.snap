@@ -9,7 +9,7 @@ exports[`./HnSecurityReportBtn.stories Default 1`] = `
     aria-label="Review security report on Hypernative"
     class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways MuiButtonBase-root MuiButton-root MuiButton-neutral MuiButton-neutralPrimary MuiButton-sizeMedium MuiButton-neutralSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButton-root MuiButton-neutral MuiButton-neutralPrimary MuiButton-sizeMedium MuiButton-neutralSizeMedium MuiButton-colorPrimary MuiButton-fullWidth css-1sflogz-MuiTypography-root-MuiLink-root-MuiButtonBase-root-MuiButton-root"
     data-mui-internal-clone-element="true"
-    href="https://stage.app.hypernative.xyz/guardian/alert?chain=evm%3A1&safe=0x123&tx=0x456&referrer=safe"
+    href="https://app.hypernative.xyz/guardian/alert?chain=evm%3A1&safe=0x123&tx=0x456&referrer=safe"
     rel="noreferrer noopener"
     tabindex="0"
     target="_blank"
