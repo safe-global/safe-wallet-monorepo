@@ -46,6 +46,13 @@ runs:
         NEXT_PUBLIC_SAFE_APPS_GA_TRACKING_ID: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SAFE_APPS_GA_TRACKING_ID }}
         NEXT_PUBLIC_SENTRY_DSN: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SENTRY_DSN }}
         NEXT_PUBLIC_DATADOG_CLIENT_TOKEN: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_CLIENT_TOKEN }}
+        NEXT_PUBLIC_DATADOG_RUM_APPLICATION_ID: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_APPLICATION_ID }}
+        NEXT_PUBLIC_DATADOG_RUM_CLIENT_TOKEN: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_CLIENT_TOKEN }}
+        NEXT_PUBLIC_DATADOG_RUM_SITE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SITE }}
+        NEXT_PUBLIC_DATADOG_RUM_SERVICE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SERVICE }}
+        NEXT_PUBLIC_DATADOG_RUM_ENV: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_ENV }}
+        NEXT_PUBLIC_DATADOG_RUM_SESSION_SAMPLE_RATE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SESSION_SAMPLE_RATE }}
+        NEXT_PUBLIC_DATADOG_RUM_TRACING_ENABLED: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_TRACING_ENABLED }}
         NEXT_PUBLIC_TENDERLY_ORG_NAME: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_TENDERLY_ORG_NAME }}
         NEXT_PUBLIC_TENDERLY_PROJECT_NAME: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_TENDERLY_PROJECT_NAME }}
         NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL }}
@@ -67,6 +74,22 @@ runs:
         NEXT_PUBLIC_STAGING_MIXPANEL_TOKEN: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_STAGING_MIXPANEL_TOKEN }}
         NEXT_PUBLIC_HUBSPOT_CONFIG: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_HUBSPOT_CONFIG }}
         NEXT_PUBLIC_HYPERNATIVE_CALENDLY: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_HYPERNATIVE_CALENDLY }}
+
+    - name: Upload source maps to Datadog
+      if: ${{ fromJSON(inputs.secrets).DATADOG_API_KEY }}
+      shell: bash
+      working-directory: apps/web
+      run: |
+        SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+        DATADOG_SERVICE="${DATADOG_RUM_SERVICE:-safe-wallet-web}"
+        npx @datadog/datadog-ci sourcemaps upload ./out/_next/static \
+          --service="$DATADOG_SERVICE" \
+          --release-version=$SHORT_SHA \
+          --minified-path-prefix=/_next/static
+      env:
+        DATADOG_API_KEY: ${{ fromJSON(inputs.secrets).DATADOG_API_KEY }}
+        DATADOG_SITE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SITE || 'datadoghq.eu' }}
+        DATADOG_RUM_SERVICE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SERVICE }}
 
     - name: Save Next.js Build Cache & Cypress cache
       if: steps.restore-nc.outputs.cache-hit-nc != 'true'
