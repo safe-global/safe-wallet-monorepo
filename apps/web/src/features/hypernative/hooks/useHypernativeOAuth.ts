@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAppDispatch } from '@/store'
-import { setAuthCookie, clearAuthCookie, isAuthenticated, isExpired } from '../store/cookieStorage'
+import { setAuthCookie, clearAuthCookie, isAuthenticated, isTokenMissingOrExpired } from '../store/cookieStorage'
 import { HYPERNATIVE_OAUTH_CONFIG, MOCK_AUTH_ENABLED, getRedirectUri } from '../config/oauth'
 import { showNotification } from '@/store/notificationsSlice'
 import Cookies from 'js-cookie'
@@ -197,7 +197,7 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
   const dispatch = useAppDispatch()
   const [authState, setAuthState] = useState({
     isAuthenticated: isAuthenticated(),
-    isTokenExpired: isExpired(),
+    isTokenExpired: isTokenMissingOrExpired(),
   })
 
   // Reference to popup check interval
@@ -335,7 +335,7 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
     clearAuthCookie()
     setAuthState({
       isAuthenticated: isAuthenticated(),
-      isTokenExpired: isExpired(),
+      isTokenExpired: isTokenMissingOrExpired(),
     })
   }, [])
 
@@ -344,7 +344,7 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
     const checkAuthState = () => {
       setAuthState({
         isAuthenticated: isAuthenticated(),
-        isTokenExpired: isExpired(),
+        isTokenExpired: isTokenMissingOrExpired(),
       })
     }
 

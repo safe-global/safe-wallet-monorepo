@@ -95,12 +95,12 @@ export const isAuthenticated = (): boolean => {
 }
 
 /**
- * Check if token is expired
- * @returns true if expired or missing, false if valid
+ * Check if token is missing or expired
+ * @returns true if token is missing or expired, false if valid
  */
-export const isExpired = (): boolean => {
+export const isTokenMissingOrExpired = (): boolean => {
   const expiry = getAuthExpiry()
-  return expiry === undefined
+  return expiry === undefined || Date.now() >= expiry
 }
 
 /**
