@@ -4,12 +4,18 @@ import { View, Text, YStack, getTokenValue } from 'tamagui'
 import { router } from 'expo-router'
 import useIsNextTx from '@/src/hooks/useIsNextTx'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { RiskAcknowledgmentCheckbox } from '@/src/components/RiskAcknowledgmentCheckbox/RiskAcknowledgmentCheckbox'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
 
 interface ExecuteFormProps {
   txId: string
+  highlightedSeverity?: Severity
+  riskAcknowledged: boolean
+  onRiskAcknowledgedChange: (acknowledged: boolean) => void
+  showRiskCheckbox: boolean
 }
 
-export function ExecuteForm({ txId }: ExecuteFormProps) {
+export function ExecuteForm({ txId, riskAcknowledged, onRiskAcknowledgedChange, showRiskCheckbox }: ExecuteFormProps) {
   const { bottom } = useSafeAreaInsets()
   const isNext = useIsNextTx(txId)
 
@@ -22,7 +28,7 @@ export function ExecuteForm({ txId }: ExecuteFormProps) {
 
   return (
     <View gap="$4" paddingBottom={Math.max(bottom, getTokenValue('$4'))}>
-      <View paddingHorizontal={'$3'} gap="$2" flexDirection="row">
+      <View paddingHorizontal={'$4'} gap="$2" flexDirection="row">
         <YStack justifyContent="center" gap="$2" width="100%">
           {!isNext && (
             <Text
@@ -36,7 +42,14 @@ export function ExecuteForm({ txId }: ExecuteFormProps) {
               You must execute the transaction with the lowest nonce first.
             </Text>
           )}
-          <SafeButton onPress={onExecutePress} disabled={!isNext}>
+          {showRiskCheckbox && (
+            <RiskAcknowledgmentCheckbox
+              checked={riskAcknowledged}
+              onToggle={onRiskAcknowledgedChange}
+              label="I understand the risks and would like to proceed with transaction."
+            />
+          )}
+          <SafeButton onPress={onExecutePress} disabled={!isNext || (showRiskCheckbox && !riskAcknowledged)}>
             Continue
           </SafeButton>
         </YStack>

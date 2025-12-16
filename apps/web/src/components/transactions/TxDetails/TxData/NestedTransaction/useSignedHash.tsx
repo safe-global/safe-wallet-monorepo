@@ -1,11 +1,11 @@
+import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
-import { type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import { useMemo } from 'react'
 import { isOnChainConfirmationTxData } from '@/utils/transaction-guards'
 
 const safeInterface = Safe__factory.createInterface()
 
-export const useSignedHash = (txData?: TransactionData) => {
+export const useSignedHash = (txData?: TransactionData | null) => {
   const signedHash = useMemo(() => {
     if (!isOnChainConfirmationTxData(txData)) {
       return

@@ -1,4 +1,4 @@
-import { View, Text, Theme } from 'tamagui'
+import { View, Text, Theme, GetThemeValueForKey } from 'tamagui'
 import React, { type ReactElement } from 'react'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { IconName } from '@/src/types/iconTypes'
@@ -14,6 +14,7 @@ interface AlertProps {
   iconName?: IconName
   displayIcon?: boolean
   fullWidth?: boolean
+  gap?: GetThemeValueForKey<'$gap'>
   endIcon?: React.ReactNode
   startIcon?: React.ReactNode
   onPress?: () => void
@@ -82,6 +83,7 @@ export const Alert = ({
   onPress,
   testID,
   info,
+  gap = '$3',
   orientation = 'center',
 }: AlertProps) => {
   const Icon = getAlertIcon(type, iconName, displayIcon)
@@ -94,7 +96,7 @@ export const Alert = ({
         <View flexDirection="row" width="100%" justifyContent={containerAlignment}>
           <View
             alignItems="center"
-            gap={'$3'}
+            gap={gap}
             width={fullWidth ? '100%' : 'auto'}
             flexDirection="row"
             justifyContent={contentAlignment}
@@ -102,6 +104,7 @@ export const Alert = ({
             paddingVertical="$2"
             paddingHorizontal="$4"
             borderRadius={'$2'}
+            collapsableChildren={false}
           >
             {startIcon ? <View testID="alert-start-icon">{startIcon}</View> : Icon}
 

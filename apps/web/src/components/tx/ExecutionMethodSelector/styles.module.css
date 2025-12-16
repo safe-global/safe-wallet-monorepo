@@ -4,6 +4,14 @@
 
 .method {
   padding: var(--space-2) var(--space-2) var(--space-1) var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.radioGroup {
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-2);
 }
 
 .label {
@@ -15,4 +23,120 @@
   display: flex;
   align-items: center;
   gap: calc(var(--space-1) / 2);
+}
+
+.noFeeNovemberLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+}
+
+.notAvailableChip {
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 1px;
+  background-color: var(--color-border-main);
+  color: var(--color-text-primary);
+  height: 20px;
+  border-radius: 6px;
+  padding: 2px 8px;
+}
+
+.notAvailableTitle {
+  color: var(--color-text-secondary);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 22px;
+  letter-spacing: 0.15px;
+}
+
+.descriptionWrapper {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  width: 217px;
+}
+
+.descriptionText {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 20px;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: 0.17px;
+}
+
+.mainLabel {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 22px;
+  color: var(--color-text-primary);
+  letter-spacing: 0.15px;
+}
+
+.subLabel {
+  display: block;
+}
+
+.infoIconInline {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  color: #a1a3a7;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.noFeeTag {
+  background: linear-gradient(90deg, #b0ffc9 0%, #d7f6ff 99.5%);
+  color: var(--color-static-main);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  letter-spacing: 1px;
+}
+
+.infoIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: #a1a3a7;
+}
+
+.transactionCounter {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--color-text-primary);
+  letter-spacing: 0.17px;
+  padding: 8px 12px;
+  background-color: var(--color-background-main);
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  border-top: 1px solid var(--color-border-light);
+  display: flex;
+  gap: 4px;
+}
+
+.counterNumber {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-text-primary);
+}
+
+.gasBannerWrapper {
+  margin-bottom: 24px; /* 24px spacing below the gas price banner */
 }

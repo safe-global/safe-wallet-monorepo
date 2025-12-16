@@ -1,0 +1,45 @@
+appId: ${APP_ID}
+tags:
+  - transactions
+  - history
+---
+- runFlow:
+    file: ../../../utils/setup/app-start.yml
+
+# Navigate to Transaction History using e2e button
+- tapOn:
+    id: 'e2eTransactionHistoryDirect'
+
+- assertVisible:
+    id: 'tx-history-list'
+
+# Switch to Swap Test Safe (deposit transaction is on this safe)
+- tapOn:
+    id: 'home-tab'
+
+# Switch to Swap Test Safe using the utility
+- runFlow:
+    file: ../../../utils/setup/switch-safe.yml
+    env:
+      SAFE_NAME_PATTERN: '.*Swap Test Safe.*'
+
+# Navigate to transactions tab
+- tapOn:
+    id: 'transactions-tab'
+
+- assertVisible:
+    id: 'tx-history-list'
+
+# Scroll down until we find the deposit transaction
+- scrollUntilVisible:
+    element:
+      text: 'deposit'
+    centerElement: true
+
+# Test contract interaction (Wrapped Ether - deposit)
+- runFlow:
+    file: ../../../utils/components/tx-history/contract-interaction-tx-card.yml
+    env:
+      METHOD_NAME: 'deposit'
+      CONTRACT_NAME: 'Wrapped Ether'
+      ACTION_NAME: 'Deposit'

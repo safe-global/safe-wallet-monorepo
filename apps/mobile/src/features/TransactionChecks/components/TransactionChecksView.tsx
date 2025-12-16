@@ -31,7 +31,8 @@ type Props = {
 }
 
 export const TransactionChecksView = ({ tenderly, blockaid }: Props) => {
-  const { enabled, fetchStatus } = tenderly
+  const { enabled: tenderlyEnabled, fetchStatus } = tenderly
+  const { enabled: blockaidEnabled } = blockaid
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle>Transaction checks</NavBarTitle>,
   })
@@ -42,23 +43,27 @@ export const TransactionChecksView = ({ tenderly, blockaid }: Props) => {
         <LargeHeaderTitle marginBottom={'$5'}>Transaction checks</LargeHeaderTitle>
       </View>
       <YStack gap={'$4'}>
-        <Container gap={'$3'}>
-          {blockaid.enabled ? (
+        {blockaidEnabled && (
+          <Container gap={'$3'}>
             <BlockaidBalanceChanges blockaidResponse={blockaid.payload} fetchStatusLoading={blockaid.loading} />
-          ) : (
-            <Text>Security check is disabled</Text>
-          )}
-        </Container>
+          </Container>
+        )}
         <Container gap={'$3'}>
-          {enabled ? (
+          {tenderlyEnabled ? (
             <>
               <XStack justifyContent="space-between">
                 <XStack gap={'$2'}>
-                  <Text fontWeight={600}>Transaction simulation</Text>
                   <InfoSheet
                     title="Simulation"
                     info="The transaction can be simulated before execution to ensure that it will succeed. You can view a full detailed report on Tenderly."
-                  />
+                  >
+                    <XStack alignItems="center" marginBottom="$2">
+                      <Text fontWeight="700" paddingRight="$1">
+                        Transaction simulation
+                      </Text>
+                      <SafeFontIcon name="info" size={16} color="$colorSecondary" />
+                    </XStack>
+                  </InfoSheet>
                 </XStack>
 
                 {fetchStatus === FETCH_STATUS.LOADING ? (

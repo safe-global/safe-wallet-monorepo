@@ -1,0 +1,41 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
+# ===========================================
+# Swap Order Transaction Card (Pending)
+# ===========================================
+# Tests clicking on a swap order transaction in the pending transactions list
+# Can be used for expired or active swap orders
+#
+# Environment variables:
+#   ORDER_STATUS: Expected status of the swap order - "Expired", "Execution needed", or "Pending"
+#                 Passed through to swap-order-tx.yml (which defaults to "Execution needed" if not provided)
+
+- assertVisible:
+    text: '.*Swap order.*'
+
+# Verify the token pair is visible (e.g., "COW > DAI")
+- extendedWaitUntil:
+    visible:
+      text: '.*[A-Z]{2,}.*>.*[A-Z]{2,}.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+# Tap on the Swap order transaction text
+- tapOn:
+    text: '.*Swap order.*'
+    index: 0
+
+# Pass ORDER_STATUS to the detail test
+# If ORDER_STATUS is not provided, swap-order-tx.yml will default to "Execution needed"
+# For expired orders, pass ORDER_STATUS: 'Expired' from the parent flow
+- runFlow:
+    file: ./swap-order-tx.yml
+    env:
+      ORDER_STATUS: ${ORDER_STATUS}
+
+- tapOn:
+    id: 'go-back'

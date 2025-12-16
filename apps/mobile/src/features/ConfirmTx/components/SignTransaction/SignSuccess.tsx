@@ -3,20 +3,21 @@ import { getTokenValue, H3, ScrollView, View } from 'tamagui'
 import { Badge } from '@/src/components/Badge'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { SafeButton } from '@/src/components/SafeButton'
-import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
-import { router } from 'expo-router'
-import { useDispatch } from 'react-redux'
+import { router, useGlobalSearchParams } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AbsoluteLinearGradient } from '@/src/components/LinearGradient'
 
-export default function SignSuccess() {
-  const dispatch = useDispatch()
+export const SignSuccess = () => {
+  const { txId } = useGlobalSearchParams<{ txId: string }>()
   const { bottom } = useSafeAreaInsets()
   const handleDonePress = () => {
-    dispatch(cgwApi.util.invalidateTags(['transactions']))
-
-    router.dismissTo('/confirm-transaction')
+    router.dismissTo({
+      pathname: '/confirm-transaction',
+      params: {
+        txId,
+      },
+    })
   }
 
   return (

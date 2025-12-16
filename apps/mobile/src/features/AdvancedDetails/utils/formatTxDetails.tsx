@@ -9,11 +9,12 @@ import { Identicon } from '@/src/components/Identicon'
 import { Badge } from '@/src/components/Badge'
 import { shortenText } from '@safe-global/utils/utils/formatters'
 import { isMultisigDetailedExecutionInfo } from '@/src/utils/transaction-guards'
-import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
+import { Operation } from '@safe-global/store/gateway/types'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { TouchableOpacity } from 'react-native'
 import { Receiver } from '../components/Receiver'
 import { InfoSheet } from '@/src/components/InfoSheet'
+import { HexDataDisplay } from '@/src/components/HexDataDisplay'
 
 interface formatTxDetailsProps {
   txDetails?: TransactionDetails
@@ -50,7 +51,7 @@ const formatTxDetails = ({ txDetails, viewOnExplorer }: formatTxDetailsProps): L
               <View flexDirection="row" alignItems="center" gap="$3">
                 <CopyButton value={txDetails.txData?.to.value || ''} size={16} color={'$textSecondaryLight'} />
 
-                <TouchableOpacity onPress={viewOnExplorer}>
+                <TouchableOpacity onPress={viewOnExplorer} testID="external-link-button">
                   <SafeFontIcon name="external-link" size={16} color="$textSecondaryLight" />
                 </TouchableOpacity>
               </View>
@@ -66,6 +67,14 @@ const formatTxDetails = ({ txDetails, viewOnExplorer }: formatTxDetailsProps): L
     items.push({
       label: 'Value',
       render: () => <Text>{txDetails.txData?.value || '0'}</Text>,
+    })
+  }
+
+  // Data field - always show when txData exists
+  if (txDetails.txData) {
+    items.push({
+      label: 'Data',
+      render: () => <HexDataDisplay data={txDetails.txData?.hexData || '0x'} title="Data" copyMessage="Data copied." />,
     })
   }
 

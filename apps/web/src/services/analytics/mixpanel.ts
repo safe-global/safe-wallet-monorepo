@@ -135,3 +135,19 @@ export const mixpanelIdentify = (userId: string): void => {
     console.info('[Mixpanel] - User identified:', lowercaseUserId)
   }
 }
+
+export const mixpanelOptInTracking = (): void => {
+  if (isMixpanelInitialized) {
+    mixpanel.opt_in_tracking()
+  }
+}
+
+export const mixpanelOptOutTracking = (): void => {
+  if (isMixpanelInitialized) {
+    try {
+      mixpanel.opt_out_tracking()
+    } catch {
+      // do nothing, opt_out_tracking throws an error if tracking was never enabled
+    }
+  }
+}

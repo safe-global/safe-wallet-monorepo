@@ -3,11 +3,12 @@
   "paths": {
     "/about": {
       "get": {
+        "description": "Retrieves basic information about the Safe Client Gateway application including version and build details.",
         "operationId": "aboutGetAbout",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Application information retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -17,15 +18,18 @@
             }
           }
         },
+        "summary": "Get application information",
         "tags": ["about"]
       }
     },
     "/v1/accounts": {
       "post": {
+        "description": "Creates a new account for the authenticated user. The account is associated with the signer address from the authentication payload.",
         "operationId": "accountsCreateAccountV1",
         "parameters": [],
         "requestBody": {
           "required": true,
+          "description": "Account creation data including name and other optional settings",
           "content": {
             "application/json": {
               "schema": {
@@ -35,8 +39,8 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "",
+          "201": {
+            "description": "Account created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -44,18 +48,26 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required - valid JWT token must be provided"
+          },
+          "403": {
+            "description": "Access forbidden - insufficient permissions"
           }
         },
+        "summary": "Create account",
         "tags": ["accounts"]
       }
     },
     "/v1/accounts/data-types": {
       "get": {
+        "description": "Retrieves all available account data types that can be used when configuring account data settings.",
         "operationId": "accountsGetDataTypesV1",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "",
+            "description": "List of available account data types",
             "content": {
               "application/json": {
                 "schema": {
@@ -68,17 +80,20 @@
             }
           }
         },
+        "summary": "Get account data types",
         "tags": ["accounts"]
       }
     },
     "/v1/accounts/{address}/data-settings": {
       "get": {
+        "description": "Retrieves data settings for a specific account address. Returns the configured data types and their settings for the authenticated user.",
         "operationId": "accountsGetAccountDataSettingsV1",
         "parameters": [
           {
             "name": "address",
             "required": true,
             "in": "path",
+            "description": "The account address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -86,7 +101,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "List of account data settings for the specified address",
             "content": {
               "application/json": {
                 "schema": {
@@ -97,17 +112,23 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required - valid JWT token must be provided"
           }
         },
+        "summary": "Get account data settings",
         "tags": ["accounts"]
       },
       "put": {
+        "description": "Creates or updates data settings for a specific account address. This endpoint allows configuring which data types are enabled for the account.",
         "operationId": "accountsUpsertAccountDataSettingsV1",
         "parameters": [
           {
             "name": "address",
             "required": true,
             "in": "path",
+            "description": "The account address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -115,6 +136,7 @@
         ],
         "requestBody": {
           "required": true,
+          "description": "Data settings to create or update for the account",
           "content": {
             "application/json": {
               "schema": {
@@ -125,7 +147,7 @@
         },
         "responses": {
           "200": {
-            "description": "",
+            "description": "Updated account data settings",
             "content": {
               "application/json": {
                 "schema": {
@@ -136,19 +158,25 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required - valid JWT token must be provided"
           }
         },
+        "summary": "Update account data settings",
         "tags": ["accounts"]
       }
     },
     "/v1/accounts/{address}": {
       "get": {
+        "description": "Retrieves account information for a specific address. The account must belong to the authenticated user.",
         "operationId": "accountsGetAccountV1",
         "parameters": [
           {
             "name": "address",
             "required": true,
             "in": "path",
+            "description": "The account address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -156,7 +184,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Account information retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -164,17 +192,23 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required - valid JWT token must be provided"
           }
         },
+        "summary": "Get account by address",
         "tags": ["accounts"]
       },
       "delete": {
+        "description": "Deletes an account and all its associated data for the specified address. The account must belong to the authenticated user.",
         "operationId": "accountsDeleteAccountV1",
         "parameters": [
           {
             "name": "address",
             "required": true,
             "in": "path",
+            "description": "The account address to delete (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -182,9 +216,13 @@
         ],
         "responses": {
           "204": {
-            "description": ""
+            "description": "Account deleted successfully"
+          },
+          "401": {
+            "description": "Authentication required - valid JWT token must be provided"
           }
         },
+        "summary": "Delete account",
         "tags": ["accounts"]
       }
     },
@@ -499,11 +537,12 @@
     },
     "/v1/auth/nonce": {
       "get": {
+        "description": "Generates and returns a unique nonce that must be signed by the client for authentication. The nonce is used in the Sign-In with Ethereum (SiWE) message.",
         "operationId": "authGetNonceV1",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Unique nonce generated for authentication",
             "content": {
               "application/json": {
                 "schema": {
@@ -513,15 +552,18 @@
             }
           }
         },
+        "summary": "Get authentication nonce",
         "tags": ["auth"]
       }
     },
     "/v1/auth/verify": {
       "post": {
+        "description": "Verifies a signed Sign-In with Ethereum (SiWE) message and nonce. On successful verification, sets an HTTP-only JWT cookie for subsequent authenticated requests.",
         "operationId": "authVerifyV1",
         "parameters": [],
         "requestBody": {
           "required": true,
+          "description": "Sign-In with Ethereum message and signature for verification",
           "content": {
             "application/json": {
               "schema": {
@@ -532,33 +574,45 @@
         },
         "responses": {
           "200": {
-            "description": "Empty response body. JWT token is set as response cookie."
+            "description": "Authentication successful. JWT token set as HTTP-only cookie named \"access_token\"."
+          },
+          "400": {
+            "description": "Invalid SiWE message format or signature verification failed"
+          },
+          "401": {
+            "description": "Authentication failed - invalid or expired nonce"
           }
         },
+        "summary": "Verify authentication",
         "tags": ["auth"]
       }
     },
     "/v1/auth/logout": {
       "post": {
+        "description": "Logs out the authenticated user by clearing the JWT authentication cookie. This invalidates the current session.",
         "operationId": "authLogoutV1",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Empty response body. Cookie value is removed and set to expire."
+            "description": "Logout successful. Authentication cookie cleared and set to expire."
           }
         },
+        "summary": "Logout user",
         "tags": ["auth"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/balances/{fiatCode}": {
       "get": {
+        "description": "Retrieves token balances for a Safe on a specific chain, converted to the specified fiat currency. Includes native tokens, ERC-20 tokens, and their current market values.",
         "operationId": "balancesGetBalancesV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe is deployed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -566,6 +620,7 @@
             "name": "safeAddress",
             "required": true,
             "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -574,7 +629,9 @@
             "name": "fiatCode",
             "required": true,
             "in": "path",
+            "description": "Fiat currency code for balance conversion (e.g., USD, EUR)",
             "schema": {
+              "example": "USD",
               "type": "string"
             }
           },
@@ -582,7 +639,9 @@
             "name": "trusted",
             "required": false,
             "in": "query",
+            "description": "If true, only returns balances for trusted tokens",
             "schema": {
+              "example": false,
               "type": "boolean"
             }
           },
@@ -590,14 +649,16 @@
             "name": "exclude_spam",
             "required": false,
             "in": "query",
+            "description": "If true, excludes spam tokens from results",
             "schema": {
+              "example": true,
               "type": "boolean"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Safe balances retrieved successfully with fiat conversions",
             "content": {
               "application/json": {
                 "schema": {
@@ -607,16 +668,18 @@
             }
           }
         },
+        "summary": "Get Safe balances",
         "tags": ["balances"]
       }
     },
     "/v1/balances/supported-fiat-codes": {
       "get": {
+        "description": "Retrieves a list of all supported fiat currency codes that can be used for balance conversions.",
         "operationId": "balancesGetSupportedFiatCodesV1",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "",
+            "description": "List of supported fiat currency codes (e.g., [\"USD\", \"EUR\", \"GBP\"])",
             "content": {
               "application/json": {
                 "schema": {
@@ -629,6 +692,7 @@
             }
           }
         },
+        "summary": "Get supported fiat currencies",
         "tags": ["balances"]
       }
     },
@@ -659,6 +723,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "refresh",
+            "required": false,
+            "in": "query",
+            "description": "Cache busting parameter. Set to true to invalidate cache and fetch fresh data from Zerion",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -679,14 +753,112 @@
         "tags": ["positions"]
       }
     },
+    "/v1/portfolio/{address}": {
+      "get": {
+        "description": "Retrieves the complete portfolio for an address including token balances and app positions across all supported chains.",
+        "operationId": "portfolioGetPortfolioV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "description": "Wallet address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fiatCode",
+            "required": false,
+            "in": "query",
+            "description": "Fiat currency code for balance conversion (e.g., USD, EUR)",
+            "schema": {
+              "default": "USD",
+              "example": "USD",
+              "type": "string"
+            }
+          },
+          {
+            "name": "chainIds",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated list of chain IDs to filter by. If omitted, returns data for all chains.",
+            "schema": {
+              "example": "1,137,42161",
+              "type": "string"
+            }
+          },
+          {
+            "name": "trusted",
+            "required": false,
+            "in": "query",
+            "description": "If true, only returns trusted tokens",
+            "schema": {
+              "default": true,
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "excludeDust",
+            "required": false,
+            "in": "query",
+            "description": "If true, filters out dust positions (balance < $0.001 USD)",
+            "schema": {
+              "default": true,
+              "example": true,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Portfolio"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get portfolio",
+        "tags": ["portfolio"]
+      },
+      "delete": {
+        "description": "Clears the cached portfolio data for a specific address",
+        "operationId": "portfolioClearPortfolioV1",
+        "parameters": [
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "description": "Wallet address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "summary": "Clear portfolio cache",
+        "tags": ["portfolio"]
+      }
+    },
     "/v1/chains": {
       "get": {
+        "description": "Retrieves a paginated list of all blockchain networks supported by the Safe infrastructure, including their configuration and capabilities.",
         "operationId": "chainsGetChainsV1",
         "parameters": [
           {
             "name": "cursor",
             "required": false,
             "in": "query",
+            "description": "Pagination cursor for retrieving the next set of results",
             "schema": {
               "type": "string"
             }
@@ -694,7 +866,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Paginated list of supported chains",
             "content": {
               "application/json": {
                 "schema": {
@@ -704,25 +876,29 @@
             }
           }
         },
+        "summary": "Get supported chains",
         "tags": ["chains"]
       }
     },
     "/v1/chains/{chainId}": {
       "get": {
+        "description": "Retrieves detailed information about a specific blockchain network, including its configuration, features, and Safe-specific settings.",
         "operationId": "chainsGetChainV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID of the blockchain network",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Chain details retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -732,25 +908,29 @@
             }
           }
         },
+        "summary": "Get chain details",
         "tags": ["chains"]
       }
     },
     "/v1/chains/{chainId}/about": {
       "get": {
+        "description": "Retrieves general information about a blockchain network, including network details and statistics.",
         "operationId": "chainsGetAboutChainV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID of the blockchain network",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Chain information retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -760,25 +940,29 @@
             }
           }
         },
+        "summary": "Get chain information",
         "tags": ["chains"]
       }
     },
     "/v1/chains/{chainId}/about/backbone": {
       "get": {
+        "description": "Retrieves backbone infrastructure information for a specific chain, including API endpoints and service configurations.",
         "operationId": "chainsGetBackboneV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID of the blockchain network",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Chain backbone information retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -788,25 +972,29 @@
             }
           }
         },
+        "summary": "Get chain backbone information",
         "tags": ["chains"]
       }
     },
     "/v1/chains/{chainId}/about/master-copies": {
       "get": {
+        "description": "Retrieves information about Safe master copy contracts deployed on the specified chain, including their addresses and versions.",
         "operationId": "chainsGetMasterCopiesV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID of the blockchain network",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "List of Safe master copy contracts",
             "content": {
               "application/json": {
                 "schema": {
@@ -819,25 +1007,29 @@
             }
           }
         },
+        "summary": "Get Safe master copy contracts",
         "tags": ["chains"]
       }
     },
     "/v1/chains/{chainId}/about/indexing": {
       "get": {
+        "description": "Retrieves the current indexing status for a blockchain network, including the latest indexed block and synchronization state.",
         "operationId": "chainsGetIndexingStatusV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID of the blockchain network",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Chain indexing status retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -847,6 +1039,7 @@
             }
           }
         },
+        "summary": "Get chain indexing status",
         "tags": ["chains"]
       }
     },
@@ -1198,13 +1391,16 @@
     },
     "/v1/chains/{chainId}/contracts/{contractAddress}": {
       "get": {
+        "description": "Retrieves detailed information about a smart contract deployed on the specified chain, including ABI, source code verification status, and contract metadata.",
         "operationId": "contractsGetContractV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the contract is deployed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -1212,6 +1408,7 @@
             "name": "contractAddress",
             "required": true,
             "in": "path",
+            "description": "Contract address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -1219,7 +1416,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Contract information retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -1229,6 +1426,7 @@
             }
           }
         },
+        "summary": "Get contract information",
         "tags": ["contracts"]
       }
     },
@@ -1319,19 +1517,23 @@
     },
     "/v1/chains/{chainId}/data-decoder": {
       "post": {
+        "description": "Decodes raw transaction data into human-readable format using contract ABIs. This helps understand what functions are being called and with what parameters.",
         "operationId": "dataDecodedGetDataDecodedV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the transaction will be executed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           }
         ],
         "requestBody": {
           "required": true,
+          "description": "Transaction data to decode, including contract address and data payload",
           "content": {
             "application/json": {
               "schema": {
@@ -1342,7 +1544,7 @@
         },
         "responses": {
           "200": {
-            "description": "",
+            "description": "Transaction data decoded successfully with method name, parameters, and values",
             "content": {
               "application/json": {
                 "schema": {
@@ -1352,19 +1554,23 @@
             }
           }
         },
+        "summary": "Decode transaction data",
         "tags": ["data-decoded"]
       }
     },
     "/v1/chains/{chainId}/delegates": {
       "get": {
         "deprecated": true,
+        "description": "Retrieves a paginated list of delegates for a specific chain. This endpoint is deprecated, please use the v2 version instead.",
         "operationId": "delegatesGetDelegatesV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where delegates are registered",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -1372,6 +1578,7 @@
             "name": "safe",
             "required": false,
             "in": "query",
+            "description": "Filter by Safe address",
             "schema": {
               "type": "string"
             }
@@ -1380,6 +1587,7 @@
             "name": "delegate",
             "required": false,
             "in": "query",
+            "description": "Filter by delegate address",
             "schema": {
               "type": "string"
             }
@@ -1388,6 +1596,7 @@
             "name": "delegator",
             "required": false,
             "in": "query",
+            "description": "Filter by delegator address",
             "schema": {
               "type": "string"
             }
@@ -1396,6 +1605,7 @@
             "name": "label",
             "required": false,
             "in": "query",
+            "description": "Filter by delegate label",
             "schema": {
               "type": "string"
             }
@@ -1404,6 +1614,7 @@
             "name": "cursor",
             "required": false,
             "in": "query",
+            "description": "Pagination cursor for retrieving the next set of results",
             "schema": {
               "type": "string"
             }
@@ -1411,7 +1622,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Paginated list of delegates retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -1421,24 +1632,28 @@
             }
           }
         },
-        "summary": "",
+        "summary": "Get delegates (deprecated)",
         "tags": ["delegates"]
       },
       "post": {
         "deprecated": true,
+        "description": "Creates a new delegate for a specific chain. This endpoint is deprecated, please use the v2 version instead.",
         "operationId": "delegatesPostDelegateV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the delegate will be registered",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           }
         ],
         "requestBody": {
           "required": true,
+          "description": "Delegate creation data including Safe address, delegate address, and signature",
           "content": {
             "application/json": {
               "schema": {
@@ -1448,24 +1663,30 @@
           }
         },
         "responses": {
-          "200": {
-            "description": ""
+          "204": {
+            "description": "Delegate created successfully"
+          },
+          "400": {
+            "description": "Invalid delegate data or signature"
           }
         },
-        "summary": "",
+        "summary": "Create delegate (deprecated)",
         "tags": ["delegates"]
       }
     },
     "/v1/chains/{chainId}/delegates/{delegateAddress}": {
       "delete": {
         "deprecated": true,
+        "description": "Deletes a delegate for a specific chain and address. This endpoint is deprecated, please use the v2 version instead.",
         "operationId": "delegatesDeleteDelegateV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the delegate is registered",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -1473,6 +1694,7 @@
             "name": "delegateAddress",
             "required": true,
             "in": "path",
+            "description": "Delegate address to delete (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -1480,6 +1702,7 @@
         ],
         "requestBody": {
           "required": true,
+          "description": "Signature proving authorization to delete the delegate",
           "content": {
             "application/json": {
               "schema": {
@@ -1489,23 +1712,47 @@
           }
         },
         "responses": {
-          "200": {
-            "description": ""
+          "204": {
+            "description": "Delegate deleted successfully"
+          },
+          "400": {
+            "description": "Invalid signature or unauthorized deletion attempt"
           }
         },
-        "summary": "",
+        "summary": "Delete delegate (deprecated)",
         "tags": ["delegates"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/delegates/{delegateAddress}": {
       "delete": {
         "deprecated": true,
+        "description": "Removes a delegate from a specific Safe. This endpoint is deprecated, please use the v2 version instead.",
         "operationId": "delegatesDeleteSafeDelegateV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegateAddress",
+            "required": true,
+            "in": "path",
+            "description": "Delegate address to remove (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -1513,6 +1760,7 @@
         ],
         "requestBody": {
           "required": true,
+          "description": "Signature proving authorization to remove the delegate",
           "content": {
             "application/json": {
               "schema": {
@@ -1522,23 +1770,29 @@
           }
         },
         "responses": {
-          "200": {
-            "description": ""
+          "204": {
+            "description": "Safe delegate removed successfully"
+          },
+          "400": {
+            "description": "Invalid signature or unauthorized removal attempt"
           }
         },
-        "summary": "",
+        "summary": "Delete Safe delegate (deprecated)",
         "tags": ["delegates"]
       }
     },
     "/v2/chains/{chainId}/delegates": {
       "get": {
+        "description": "Retrieves a paginated list of delegates for a specific chain with optional filtering by Safe, delegate, delegator, or label.",
         "operationId": "delegatesGetDelegatesV2",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where delegates are registered",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -1546,6 +1800,7 @@
             "name": "safe",
             "required": false,
             "in": "query",
+            "description": "Filter by Safe address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -1554,6 +1809,7 @@
             "name": "delegate",
             "required": false,
             "in": "query",
+            "description": "Filter by delegate address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -1562,6 +1818,7 @@
             "name": "delegator",
             "required": false,
             "in": "query",
+            "description": "Filter by delegator address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -1570,6 +1827,7 @@
             "name": "label",
             "required": false,
             "in": "query",
+            "description": "Filter by delegate label or name",
             "schema": {
               "type": "string"
             }
@@ -1578,6 +1836,7 @@
             "name": "cursor",
             "required": false,
             "in": "query",
+            "description": "Pagination cursor for retrieving the next set of results",
             "schema": {
               "type": "string"
             }
@@ -1585,7 +1844,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Paginated list of delegates retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -1595,22 +1854,27 @@
             }
           }
         },
+        "summary": "Get delegates",
         "tags": ["delegates"]
       },
       "post": {
+        "description": "Creates a new delegate relationship between a Safe and a delegate address. Requires proper authorization signature.",
         "operationId": "delegatesPostDelegateV2",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the delegate will be registered",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           }
         ],
         "requestBody": {
           "required": true,
+          "description": "Delegate creation data including Safe address, delegate address, label, and authorization signature",
           "content": {
             "application/json": {
               "schema": {
@@ -1620,22 +1884,29 @@
           }
         },
         "responses": {
-          "200": {
-            "description": ""
+          "204": {
+            "description": "Delegate created successfully"
+          },
+          "400": {
+            "description": "Invalid delegate data, signature, or unauthorized creation attempt"
           }
         },
+        "summary": "Create delegate",
         "tags": ["delegates"]
       }
     },
     "/v2/chains/{chainId}/delegates/{delegateAddress}": {
       "delete": {
+        "description": "Removes a delegate relationship for a specific delegate address. Requires proper authorization signature.",
         "operationId": "delegatesDeleteDelegateV2",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the delegate is registered",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -1643,6 +1914,7 @@
             "name": "delegateAddress",
             "required": true,
             "in": "path",
+            "description": "Delegate address to remove (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -1650,6 +1922,7 @@
         ],
         "requestBody": {
           "required": true,
+          "description": "Signature and data proving authorization to delete the delegate",
           "content": {
             "application/json": {
               "schema": {
@@ -1659,10 +1932,14 @@
           }
         },
         "responses": {
-          "200": {
-            "description": ""
+          "204": {
+            "description": "Delegate deleted successfully"
+          },
+          "400": {
+            "description": "Invalid signature or unauthorized deletion attempt"
           }
         },
+        "summary": "Delete delegate",
         "tags": ["delegates"]
       }
     },
@@ -1744,13 +2021,16 @@
     },
     "/v2/chains/{chainId}/safes/{address}/multisig-transactions/estimations": {
       "post": {
+        "description": "Estimates the gas cost for executing a multisig transaction on a Safe. Provides both the recommended gas limit and the current gas price for accurate cost calculation.",
         "operationId": "estimationsGetEstimationV2",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe is deployed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -1758,6 +2038,7 @@
             "name": "address",
             "required": true,
             "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -1765,6 +2046,7 @@
         ],
         "requestBody": {
           "required": true,
+          "description": "Transaction details for gas estimation including recipient, value, and data",
           "content": {
             "application/json": {
               "schema": {
@@ -1775,7 +2057,7 @@
         },
         "responses": {
           "200": {
-            "description": "",
+            "description": "Gas estimation calculated successfully with recommended values",
             "content": {
               "application/json": {
                 "schema": {
@@ -1783,17 +2065,23 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid transaction parameters or estimation failed"
           }
         },
+        "summary": "Estimate multisig transaction gas",
         "tags": ["estimations"]
       }
     },
     "/v2/register/notifications": {
       "post": {
+        "description": "Registers or updates a device to receive push notifications for Safe events. Creates subscriptions for specified Safes and notification types.",
         "operationId": "notificationsUpsertSubscriptionsV2",
         "parameters": [],
         "requestBody": {
           "required": true,
+          "description": "Device and subscription data including device token, Safe addresses, and notification preferences",
           "content": {
             "application/json": {
               "schema": {
@@ -1804,21 +2092,42 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "Device registered successfully with returned device UUID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "deviceUuid": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "Generated UUID for the registered device"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid device data or subscription configuration"
           }
         },
+        "summary": "Register device for notifications",
         "tags": ["notifications"]
       }
     },
     "/v2/chains/{chainId}/notifications/devices/{deviceUuid}/safes/{safeAddress}": {
       "get": {
+        "description": "Retrieves the notification types that a device is subscribed to for a specific Safe.",
         "operationId": "notificationsGetSafeSubscriptionV2",
         "parameters": [
           {
             "name": "deviceUuid",
             "required": true,
             "in": "path",
+            "description": "Device UUID",
             "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
               "type": "string"
             }
           },
@@ -1826,7 +2135,9 @@
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe is deployed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -1834,6 +2145,7 @@
             "name": "safeAddress",
             "required": true,
             "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -1841,19 +2153,39 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "List of notification types the device is subscribed to for this Safe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NotificationTypeResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required - valid JWT token must be provided"
+          },
+          "404": {
+            "description": "Device, Safe, or subscription not found"
           }
         },
+        "summary": "Get Safe subscription",
         "tags": ["notifications"]
       },
       "delete": {
+        "description": "Removes all notification subscriptions for a specific Safe on a device.",
         "operationId": "notificationsDeleteSubscriptionV2",
         "parameters": [
           {
             "name": "deviceUuid",
             "required": true,
             "in": "path",
+            "description": "Device UUID",
             "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
               "type": "string"
             }
           },
@@ -1861,7 +2193,9 @@
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe is deployed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -1869,16 +2203,21 @@
             "name": "safeAddress",
             "required": true,
             "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
           }
         ],
         "responses": {
-          "200": {
-            "description": ""
+          "204": {
+            "description": "Safe subscription deleted successfully"
+          },
+          "404": {
+            "description": "Device, Safe, or subscription not found"
           }
         },
+        "summary": "Delete Safe subscription",
         "tags": ["notifications"]
       }
     },
@@ -1911,13 +2250,16 @@
     },
     "/v2/chains/{chainId}/notifications/devices/{deviceUuid}": {
       "delete": {
+        "description": "Removes a device and all its notification subscriptions from the system.",
         "operationId": "notificationsDeleteDeviceV2",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID (kept for backward compatibility)",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -1925,28 +2267,37 @@
             "name": "deviceUuid",
             "required": true,
             "in": "path",
+            "description": "Device UUID to delete",
             "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
               "type": "string"
             }
           }
         ],
         "responses": {
-          "200": {
-            "description": ""
+          "204": {
+            "description": "Device deleted successfully"
+          },
+          "404": {
+            "description": "Device not found"
           }
         },
+        "summary": "Delete device",
         "tags": ["notifications"]
       }
     },
     "/v1/chains/{chainId}/messages/{messageHash}": {
       "get": {
+        "description": "Retrieves a specific message by its hash, including signatures, confirmations, and message content.",
         "operationId": "messagesGetMessageByHashV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the message was created",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -1954,6 +2305,7 @@
             "name": "messageHash",
             "required": true,
             "in": "path",
+            "description": "Message hash (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -1961,7 +2313,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Message retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -1969,20 +2321,27 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Message not found"
           }
         },
+        "summary": "Get message by hash",
         "tags": ["messages"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/messages": {
       "get": {
+        "description": "Retrieves a paginated list of messages for a specific Safe, including both pending and confirmed messages with date labels.",
         "operationId": "messagesGetMessagesBySafeV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe is deployed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -1990,6 +2349,7 @@
             "name": "safeAddress",
             "required": true,
             "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -1998,6 +2358,7 @@
             "name": "cursor",
             "required": false,
             "in": "query",
+            "description": "Pagination cursor for retrieving the next set of results",
             "schema": {
               "type": "string"
             }
@@ -2005,7 +2366,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Paginated list of messages for the Safe",
             "content": {
               "application/json": {
                 "schema": {
@@ -2013,18 +2374,25 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Safe not found on the specified chain"
           }
         },
+        "summary": "Get messages for Safe",
         "tags": ["messages"]
       },
       "post": {
+        "description": "Creates a new message for a Safe. The message must be properly formatted and signed according to EIP-191 or EIP-712 standards.",
         "operationId": "messagesCreateMessageV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe is deployed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -2032,6 +2400,7 @@
             "name": "safeAddress",
             "required": true,
             "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -2039,6 +2408,7 @@
         ],
         "requestBody": {
           "required": true,
+          "description": "Message data including content and signature",
           "content": {
             "application/json": {
               "schema": {
@@ -2049,21 +2419,28 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "Message created successfully"
+          },
+          "400": {
+            "description": "Invalid message format or signature"
           }
         },
+        "summary": "Create message",
         "tags": ["messages"]
       }
     },
     "/v1/chains/{chainId}/messages/{messageHash}/signatures": {
       "post": {
+        "description": "Adds a signature to an existing message. Multiple Safe owners can sign the same message to reach consensus.",
         "operationId": "messagesUpdateMessageSignatureV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the message was created",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -2071,6 +2448,7 @@
             "name": "messageHash",
             "required": true,
             "in": "path",
+            "description": "Message hash (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -2078,6 +2456,7 @@
         ],
         "requestBody": {
           "required": true,
+          "description": "Signature data to add to the message",
           "content": {
             "application/json": {
               "schema": {
@@ -2088,19 +2467,28 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "Signature added successfully"
+          },
+          "400": {
+            "description": "Invalid signature or signer not authorized"
+          },
+          "404": {
+            "description": "Message not found"
           }
         },
+        "summary": "Add message signature",
         "tags": ["messages"]
       }
     },
     "/v1/register/notifications": {
       "post": {
         "deprecated": true,
+        "description": "Registers a device to receive push notifications for Safe events. This endpoint is deprecated, please use the v2 version instead.",
         "operationId": "notificationsRegisterDeviceV1",
         "parameters": [],
         "requestBody": {
           "required": true,
+          "description": "Device registration data including device token, UUID, and Safe registrations with signatures",
           "content": {
             "application/json": {
               "schema": {
@@ -2111,23 +2499,29 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "Device registered successfully for notifications"
+          },
+          "400": {
+            "description": "Invalid device data, expired timestamp, or invalid signature"
           }
         },
-        "summary": "",
+        "summary": "Register device for notifications (deprecated)",
         "tags": ["notifications"]
       }
     },
     "/v1/chains/{chainId}/notifications/devices/{uuid}": {
       "delete": {
         "deprecated": true,
+        "description": "Removes a device from receiving notifications. This endpoint is deprecated, please use the v2 version instead.",
         "operationId": "notificationsUnregisterDeviceV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID (kept for backward compatibility)",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -2135,30 +2529,35 @@
             "name": "uuid",
             "required": true,
             "in": "path",
+            "description": "Device UUID to unregister",
             "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
               "type": "string"
             }
           }
         ],
         "responses": {
-          "200": {
-            "description": ""
+          "204": {
+            "description": "Device unregistered successfully"
           }
         },
-        "summary": "",
+        "summary": "Unregister device (deprecated)",
         "tags": ["notifications"]
       }
     },
     "/v1/chains/{chainId}/notifications/devices/{uuid}/safes/{safeAddress}": {
       "delete": {
         "deprecated": true,
+        "description": "Removes a specific Safe from receiving notifications on a device. This endpoint is deprecated, please use the v2 version instead.",
         "operationId": "notificationsUnregisterSafeV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe is deployed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -2166,7 +2565,9 @@
             "name": "uuid",
             "required": true,
             "in": "path",
+            "description": "Device UUID",
             "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
               "type": "string"
             }
           },
@@ -2174,27 +2575,29 @@
             "name": "safeAddress",
             "required": true,
             "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
           }
         ],
         "responses": {
-          "200": {
-            "description": ""
+          "204": {
+            "description": "Safe unregistered from device notifications successfully"
           }
         },
-        "summary": "",
+        "summary": "Unregister Safe from device (deprecated)",
         "tags": ["notifications"]
       }
     },
     "/v1/users": {
       "get": {
+        "description": "Retrieves the authenticated user information along with all associated wallet addresses.",
         "operationId": "usersGetWithWalletsV1",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "",
+            "description": "User information with associated wallets retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -2204,38 +2607,42 @@
             }
           },
           "401": {
-            "description": "Signer address not provided"
+            "description": "Authentication required - valid JWT token must be provided"
           },
           "404": {
-            "description": "User (wallet) not found"
+            "description": "User not found - the authenticated wallet is not associated with any user"
           }
         },
+        "summary": "Get user with wallets",
         "tags": ["users"]
       },
       "delete": {
+        "description": "Deletes the authenticated user and all associated data including wallets and account information.",
         "operationId": "usersDeleteV1",
         "parameters": [],
         "responses": {
-          "200": {
-            "description": "User deleted"
+          "204": {
+            "description": "User deleted successfully"
           },
           "401": {
-            "description": "Signer address not provided"
+            "description": "Authentication required - valid JWT token must be provided"
           },
           "404": {
-            "description": "User (wallet) not found"
+            "description": "User not found - the authenticated wallet is not associated with any user"
           }
         },
+        "summary": "Delete user",
         "tags": ["users"]
       }
     },
     "/v1/users/wallet": {
       "post": {
+        "description": "Creates a new user account associated with the authenticated wallet address.",
         "operationId": "usersCreateWithWalletV1",
         "parameters": [],
         "responses": {
-          "200": {
-            "description": "",
+          "201": {
+            "description": "User created successfully with wallet association",
             "content": {
               "application/json": {
                 "schema": {
@@ -2245,21 +2652,24 @@
             }
           },
           "401": {
-            "description": "Signer address not provided"
+            "description": "Authentication required - valid JWT token must be provided"
           },
           "409": {
-            "description": "Wallet already exists"
+            "description": "Wallet already exists - this wallet is already associated with a user"
           }
         },
+        "summary": "Create user with wallet",
         "tags": ["users"]
       }
     },
     "/v1/users/wallet/add": {
       "post": {
+        "description": "Associates an additional wallet address with the authenticated user account using Sign-In with Ethereum (SiWE) verification.",
         "operationId": "usersAddWalletToUserV1",
         "parameters": [],
         "requestBody": {
           "required": true,
+          "description": "Sign-In with Ethereum message and signature for the wallet to add",
           "content": {
             "application/json": {
               "schema": {
@@ -2270,7 +2680,7 @@
         },
         "responses": {
           "200": {
-            "description": "",
+            "description": "Wallet added to user successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -2280,64 +2690,71 @@
             }
           },
           "401": {
-            "description": "Signer address not provided OR invalid message/signature"
+            "description": "Authentication required or invalid SiWE message/signature"
           },
           "404": {
-            "description": "User not found"
+            "description": "User not found - the authenticated wallet is not associated with any user"
           },
           "409": {
-            "description": "Wallet already exists"
+            "description": "Wallet already exists - this wallet is already associated with a user"
           }
         },
+        "summary": "Add wallet to user",
         "tags": ["users"]
       }
     },
     "/v1/users/wallet/{walletAddress}": {
       "delete": {
+        "description": "Removes a wallet address from the authenticated user account. Cannot remove the currently authenticated wallet.",
         "operationId": "usersDeleteWalletFromUserV1",
         "parameters": [
           {
             "name": "walletAddress",
             "required": true,
             "in": "path",
+            "description": "Wallet address to remove (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
           }
         ],
         "responses": {
-          "200": {
-            "description": "Wallet removed from user and deleted"
+          "204": {
+            "description": "Wallet removed from user successfully"
           },
           "401": {
-            "description": "Signer address not provided"
+            "description": "Authentication required - valid JWT token must be provided"
           },
           "404": {
-            "description": "User OR provided wallet not found"
+            "description": "User or specified wallet not found"
           },
           "409": {
-            "description": "Cannot remove the current wallet"
+            "description": "Cannot remove the current wallet - use a different wallet to authenticate"
           }
         },
+        "summary": "Remove wallet from user",
         "tags": ["users"]
       }
     },
     "/v1/spaces/{spaceId}/address-book": {
       "get": {
+        "description": "Retrieves all address book entries for a specific space. Address books help organize and label frequently used addresses.",
         "operationId": "addressBooksGetAddressBookItemsV1",
         "parameters": [
           {
             "name": "spaceId",
             "required": true,
             "in": "path",
+            "description": "Space ID to get address book for",
             "schema": {
+              "example": 1,
               "type": "number"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Address Book Items found",
+            "description": "Address book items retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -2347,31 +2764,36 @@
             }
           },
           "401": {
-            "description": "Signer address not provided"
+            "description": "Authentication required - valid JWT token must be provided"
           },
           "403": {
-            "description": "Signer not authorized."
+            "description": "Access forbidden - user is not a member of this space"
           },
           "404": {
-            "description": "User, member or space not found"
+            "description": "User, member, or space not found"
           }
         },
+        "summary": "Get space address book",
         "tags": ["spaces"]
       },
       "put": {
+        "description": "Creates or updates address book entries for a space. This allows adding labels and organizing frequently used addresses.",
         "operationId": "addressBooksUpsertAddressBookItemsV1",
         "parameters": [
           {
             "name": "spaceId",
             "required": true,
             "in": "path",
+            "description": "Space ID to update address book for",
             "schema": {
+              "example": 1,
               "type": "number"
             }
           }
         ],
         "requestBody": {
           "required": true,
+          "description": "Address book items to create or update, including addresses and their labels",
           "content": {
             "application/json": {
               "schema": {
@@ -2382,7 +2804,7 @@
         },
         "responses": {
           "200": {
-            "description": "Address Book updated",
+            "description": "Address book updated successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -2392,30 +2814,34 @@
             }
           },
           "400": {
-            "description": "Address book items limit exceeded."
+            "description": "Address book items limit exceeded or invalid data provided"
           },
           "401": {
-            "description": "Signer address not provided"
+            "description": "Authentication required - valid JWT token must be provided"
           },
           "403": {
-            "description": "Signer not authorized."
+            "description": "Access forbidden - user is not authorized to modify this address book"
           },
           "404": {
-            "description": "User, member or space not found"
+            "description": "User, member, or space not found"
           }
         },
+        "summary": "Update space address book",
         "tags": ["spaces"]
       }
     },
     "/v1/spaces/{spaceId}/address-book/{address}": {
       "delete": {
+        "description": "Removes a specific address from the space address book by its address.",
         "operationId": "addressBooksDeleteByAddressV1",
         "parameters": [
           {
             "name": "spaceId",
             "required": true,
             "in": "path",
+            "description": "Space ID containing the address book",
             "schema": {
+              "example": 1,
               "type": "number"
             }
           },
@@ -2423,31 +2849,35 @@
             "name": "address",
             "required": true,
             "in": "path",
+            "description": "Address to remove from the address book (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
           }
         ],
         "responses": {
-          "200": {
-            "description": "Address book item deleted"
+          "204": {
+            "description": "Address book entry deleted successfully"
           },
           "403": {
-            "description": "Signer address not present or not authorized"
+            "description": "Access forbidden - user is not authorized to modify this address book"
           },
           "404": {
-            "description": "User, member or Space not found"
+            "description": "User, member, space, or address book entry not found"
           }
         },
+        "summary": "Delete address book entry",
         "tags": ["spaces"]
       }
     },
     "/v1/spaces": {
       "post": {
+        "description": "Creates a new space for the authenticated user. A space is a collaborative workspace where users can manage multiple Safes together.",
         "operationId": "spacesCreateV1",
         "parameters": [],
         "requestBody": {
           "required": true,
+          "description": "Space creation data including the name of the space",
           "content": {
             "application/json": {
               "schema": {
@@ -2458,7 +2888,7 @@
         },
         "responses": {
           "200": {
-            "description": "Space created",
+            "description": "Space created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -2468,23 +2898,25 @@
             }
           },
           "401": {
-            "description": "Signer address not provided"
+            "description": "Authentication required - valid JWT token must be provided"
           },
           "403": {
-            "description": "Forbidden resource"
+            "description": "Forbidden resource - user lacks permission to create spaces"
           },
           "404": {
-            "description": "User not found."
+            "description": "User not found - the authenticated wallet is not associated with any user"
           }
         },
+        "summary": "Create space",
         "tags": ["spaces"]
       },
       "get": {
+        "description": "Retrieves all spaces that the authenticated user is a member of or has been invited to.",
         "operationId": "spacesGetV1",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Spaces found",
+            "description": "User spaces retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -2497,24 +2929,27 @@
             }
           },
           "401": {
-            "description": "Signer address not provided"
+            "description": "Authentication required - valid JWT token must be provided"
           },
           "403": {
-            "description": "Forbidden resource"
+            "description": "Forbidden resource - user lacks permission to view spaces"
           },
           "404": {
-            "description": "User not found."
+            "description": "User not found - the authenticated wallet is not associated with any user"
           }
         },
+        "summary": "Get user spaces",
         "tags": ["spaces"]
       }
     },
     "/v1/spaces/create-with-user": {
       "post": {
+        "description": "Creates a new space and automatically creates a user account if one does not exist for the authenticated wallet.",
         "operationId": "spacesCreateWithUserV1",
         "parameters": [],
         "requestBody": {
           "required": true,
+          "description": "Space creation data including the name of the space",
           "content": {
             "application/json": {
               "schema": {
@@ -2525,7 +2960,7 @@
         },
         "responses": {
           "200": {
-            "description": "Space created",
+            "description": "Space and user created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -2535,31 +2970,35 @@
             }
           },
           "401": {
-            "description": "Signer address not provided"
+            "description": "Authentication required - valid JWT token must be provided"
           },
           "403": {
-            "description": "Forbidden resource"
+            "description": "Forbidden resource - user lacks permission to create spaces"
           }
         },
+        "summary": "Create space with user",
         "tags": ["spaces"]
       }
     },
     "/v1/spaces/{id}": {
       "get": {
+        "description": "Retrieves detailed information about a specific space. The user must be a member of or invited to the space.",
         "operationId": "spacesGetOneV1",
         "parameters": [
           {
             "name": "id",
             "required": true,
             "in": "path",
+            "description": "Space ID",
             "schema": {
+              "example": 1,
               "type": "number"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Space found",
+            "description": "Space information retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -2569,31 +3008,36 @@
             }
           },
           "401": {
-            "description": "Signer address not provided"
+            "description": "Authentication required - valid JWT token must be provided"
           },
           "403": {
-            "description": "Forbidden resource"
+            "description": "Forbidden resource - user is not a member of this space"
           },
           "404": {
-            "description": "Space not found. OR User not found."
+            "description": "Space not found or user not found"
           }
         },
+        "summary": "Get space by ID",
         "tags": ["spaces"]
       },
       "patch": {
+        "description": "Updates space information such as name. Only space admins can update space details.",
         "operationId": "spacesUpdateV1",
         "parameters": [
           {
             "name": "id",
             "required": true,
             "in": "path",
+            "description": "Space ID to update",
             "schema": {
+              "example": 1,
               "type": "number"
             }
           }
         ],
         "requestBody": {
           "required": true,
+          "description": "Space update data including new name or other properties",
           "content": {
             "application/json": {
               "schema": {
@@ -2604,7 +3048,7 @@
         },
         "responses": {
           "200": {
-            "description": "Space updated",
+            "description": "Space updated successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -2614,61 +3058,70 @@
             }
           },
           "401": {
-            "description": "Signer address not provided OR User is unauthorized"
+            "description": "Authentication required or user unauthorized to update this space"
           },
           "403": {
-            "description": "Forbidden resource"
+            "description": "Forbidden resource - user is not an admin of this space"
           },
           "404": {
-            "description": "User not found."
+            "description": "User or space not found"
           }
         },
+        "summary": "Update space",
         "tags": ["spaces"]
       },
       "delete": {
+        "description": "Deletes a space and all its associated data. Only space admins can delete spaces.",
         "operationId": "spacesDeleteV1",
         "parameters": [
           {
             "name": "id",
             "required": true,
             "in": "path",
+            "description": "Space ID to delete",
             "schema": {
+              "example": 1,
               "type": "number"
             }
           }
         ],
         "responses": {
           "204": {
-            "description": "Spaces deleted"
+            "description": "Space deleted successfully"
           },
           "401": {
-            "description": "Signer address not provided OR User is unauthorized"
+            "description": "Authentication required or user unauthorized to delete this space"
           },
           "403": {
-            "description": "Forbidden resource"
+            "description": "Forbidden resource - user is not an admin of this space"
           },
           "404": {
-            "description": "User not found."
+            "description": "User or space not found"
           }
         },
+        "summary": "Delete space",
         "tags": ["spaces"]
       }
     },
     "/v1/spaces/{spaceId}/safes": {
       "post": {
+        "description": "Adds one or more Safe addresses to a space. This allows the space members to collectively manage these Safes.",
         "operationId": "spaceSafesCreateV1",
         "parameters": [
           {
             "name": "spaceId",
             "required": true,
             "in": "path",
+            "description": "Space ID to add Safes to",
             "schema": {
+              "example": 1,
               "type": "number"
             }
           }
         ],
         "requestBody": {
           "required": true,
+          "description": "List of Safe addresses and their chain information to add to the space",
           "content": {
             "application/json": {
               "schema": {
@@ -2679,32 +3132,39 @@
         },
         "responses": {
           "201": {
-            "description": "Safes created successfully"
+            "description": "Safes added to space successfully"
           },
           "401": {
-            "description": "User unauthorize OR signer address not provided"
+            "description": "Authentication required or user unauthorized to modify this space"
+          },
+          "403": {
+            "description": "Access forbidden - user lacks permission to add Safes to this space"
           },
           "404": {
-            "description": "User not found."
+            "description": "User or space not found"
           }
         },
+        "summary": "Add Safes to space",
         "tags": ["spaces"]
       },
       "get": {
+        "description": "Retrieves all Safes associated with a specific space, including their chain information and metadata.",
         "operationId": "spaceSafesGetV1",
         "parameters": [
           {
             "name": "spaceId",
             "required": true,
             "in": "path",
+            "description": "Space ID to get Safes for",
             "schema": {
+              "example": 1,
               "type": "number"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Safes fetched successfully",
+            "description": "Space Safes retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -2714,28 +3174,36 @@
             }
           },
           "401": {
-            "description": "User unauthorized OR signer address not provided"
+            "description": "Authentication required or user unauthorized to access this space"
+          },
+          "403": {
+            "description": "Access forbidden - user is not a member of this space"
           },
           "404": {
-            "description": "User not found."
+            "description": "User or space not found"
           }
         },
+        "summary": "Get space Safes",
         "tags": ["spaces"]
       },
       "delete": {
+        "description": "Removes one or more Safe addresses from a space. This stops the space from managing these Safes.",
         "operationId": "spaceSafesDeleteV1",
         "parameters": [
           {
             "name": "spaceId",
             "required": true,
             "in": "path",
+            "description": "Space ID to remove Safes from",
             "schema": {
+              "example": 1,
               "type": "number"
             }
           }
         ],
         "requestBody": {
           "required": true,
+          "description": "List of Safe addresses and their chain information to remove from the space",
           "content": {
             "application/json": {
               "schema": {
@@ -2746,33 +3214,41 @@
         },
         "responses": {
           "204": {
-            "description": "Safes deleted successfully"
+            "description": "Safes removed from space successfully"
           },
           "401": {
-            "description": "User unauthorized OR signer address not provided"
+            "description": "Authentication required or user unauthorized to modify this space"
+          },
+          "403": {
+            "description": "Access forbidden - user lacks permission to remove Safes from this space"
           },
           "404": {
-            "description": "Space has no Safes OR user not found."
+            "description": "Space has no Safes, user not found, or specified Safes not found in space"
           }
         },
+        "summary": "Remove Safes from space",
         "tags": ["spaces"]
       }
     },
     "/v1/spaces/{spaceId}/members/invite": {
       "post": {
+        "description": "Invites one or more users to join a space. Only space admins can send invitations.",
         "operationId": "membersInviteUserV1",
         "parameters": [
           {
             "name": "spaceId",
             "required": true,
             "in": "path",
+            "description": "Space ID to invite users to",
             "schema": {
+              "example": 1,
               "type": "number"
             }
           }
         ],
         "requestBody": {
           "required": true,
+          "description": "List of wallet addresses to invite to the space",
           "content": {
             "application/json": {
               "schema": {
@@ -2783,7 +3259,7 @@
         },
         "responses": {
           "200": {
-            "description": "Users invited",
+            "description": "Users invited successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -2796,33 +3272,38 @@
             }
           },
           "401": {
-            "description": "User not admin OR signer address not provided OR member is not active"
+            "description": "Authentication required or user not admin or member not active"
           },
           "403": {
-            "description": "User not authorized"
+            "description": "User not authorized - must be a space admin to invite users"
           },
           "409": {
-            "description": "Too many invites"
+            "description": "Too many invites or some users already invited"
           }
         },
+        "summary": "Invite users to space",
         "tags": ["spaces"]
       }
     },
     "/v1/spaces/{spaceId}/members/accept": {
       "post": {
+        "description": "Accepts an invitation to join a space. The user must have a pending invitation to the space.",
         "operationId": "membersAcceptInviteV1",
         "parameters": [
           {
             "name": "spaceId",
             "required": true,
             "in": "path",
+            "description": "Space ID to accept invitation for",
             "schema": {
+              "example": 1,
               "type": "number"
             }
           }
         ],
         "requestBody": {
           "required": true,
+          "description": "Invitation acceptance data including any required confirmation",
           "content": {
             "application/json": {
               "schema": {
@@ -2833,67 +3314,75 @@
         },
         "responses": {
           "200": {
-            "description": "Invite accepted"
+            "description": "Invitation accepted successfully - user is now a member of the space"
           },
           "403": {
-            "description": "Signer not authorized"
+            "description": "Access forbidden - user is not authorized to accept this invitation"
           },
           "404": {
-            "description": "Signer, space or membership not found"
+            "description": "User, space, or membership invitation not found"
           },
           "409": {
-            "description": "User invite not pending"
+            "description": "User invitation is not in pending state or already processed"
           }
         },
+        "summary": "Accept space invitation",
         "tags": ["spaces"]
       }
     },
     "/v1/spaces/{spaceId}/members/decline": {
       "post": {
+        "description": "Declines an invitation to join a space. The user must have a pending invitation to the space.",
         "operationId": "membersDeclineInviteV1",
         "parameters": [
           {
             "name": "spaceId",
             "required": true,
             "in": "path",
+            "description": "Space ID to decline invitation for",
             "schema": {
+              "example": 1,
               "type": "number"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Invite declined"
+            "description": "Invitation declined successfully"
           },
           "403": {
-            "description": "Signer not authorized"
+            "description": "Access forbidden - user is not authorized to decline this invitation"
           },
           "404": {
-            "description": "Signer, space or membership not found"
+            "description": "User, space, or membership invitation not found"
           },
           "409": {
-            "description": "User invite not pending"
+            "description": "User invitation is not in pending state or already processed"
           }
         },
+        "summary": "Decline space invitation",
         "tags": ["spaces"]
       }
     },
     "/v1/spaces/{spaceId}/members": {
       "get": {
+        "description": "Retrieves all members of a space including their roles, status, and membership information.",
         "operationId": "membersGetUsersV1",
         "parameters": [
           {
             "name": "spaceId",
             "required": true,
             "in": "path",
+            "description": "Space ID to get members for",
             "schema": {
+              "example": 1,
               "type": "number"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Space and members list",
+            "description": "Space members retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -2903,12 +3392,13 @@
             }
           },
           "403": {
-            "description": "Signer not authorized"
+            "description": "Access forbidden - user is not authorized to view this space's members"
           },
           "404": {
-            "description": "Signer or space not found"
+            "description": "User or space not found"
           }
         },
+        "summary": "Get space members",
         "tags": ["spaces"]
       },
       "delete": {
@@ -2947,13 +3437,16 @@
     },
     "/v1/spaces/{spaceId}/members/{userId}/role": {
       "patch": {
+        "description": "Updates the role of a space member. Only space admins can change member roles. Cannot remove the last admin from a space.",
         "operationId": "membersUpdateRoleV1",
         "parameters": [
           {
             "name": "spaceId",
             "required": true,
             "in": "path",
+            "description": "Space ID containing the member",
             "schema": {
+              "example": 1,
               "type": "number"
             }
           },
@@ -2961,13 +3454,16 @@
             "name": "userId",
             "required": true,
             "in": "path",
+            "description": "User ID of the member to update",
             "schema": {
+              "example": 123,
               "type": "number"
             }
           }
         ],
         "requestBody": {
           "required": true,
+          "description": "New role information for the member",
           "content": {
             "application/json": {
               "schema": {
@@ -2978,21 +3474,22 @@
         },
         "responses": {
           "200": {
-            "description": "Role updated"
+            "description": "Member role updated successfully"
           },
           "401": {
-            "description": "Signer not active or admin"
+            "description": "User is not active or not an admin of this space"
           },
           "403": {
-            "description": "Signer not authorized"
+            "description": "Access forbidden - user is not authorized to update member roles"
           },
           "404": {
-            "description": "Signer, space or signer/user-to-update membership not found"
+            "description": "User, space, or member not found"
           },
           "409": {
-            "description": "Cannot remove last admin"
+            "description": "Cannot remove the last admin from the space"
           }
         },
+        "summary": "Update member role",
         "tags": ["spaces"]
       }
     },
@@ -3037,13 +3534,16 @@
     },
     "/v1/spaces/{spaceId}/members/{userId}": {
       "delete": {
+        "description": "Removes a member from a space. Only space admins can remove other members. Cannot remove the last admin from a space.",
         "operationId": "membersRemoveUserV1",
         "parameters": [
           {
             "name": "spaceId",
             "required": true,
             "in": "path",
+            "description": "Space ID to remove member from",
             "schema": {
+              "example": 1,
               "type": "number"
             }
           },
@@ -3051,40 +3551,46 @@
             "name": "userId",
             "required": true,
             "in": "path",
+            "description": "User ID of the member to remove",
             "schema": {
+              "example": 123,
               "type": "number"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Membership deleted"
+            "description": "Member removed from space successfully"
           },
           "401": {
-            "description": "Signer not active or admin"
+            "description": "User is not active or not an admin of this space"
           },
           "403": {
-            "description": "Signer not authorized"
+            "description": "Access forbidden - user is not authorized to remove members"
           },
           "404": {
-            "description": "Signer or space not found"
+            "description": "User, space, or member not found"
           },
           "409": {
-            "description": "Cannot remove last admin"
+            "description": "Cannot remove the last admin from the space"
           }
         },
+        "summary": "Remove member from space",
         "tags": ["spaces"]
       }
     },
     "/v1/chains/{chainId}/owners/{ownerAddress}/safes": {
       "get": {
+        "description": "Retrieves a list of Safe addresses that are owned by the specified address on a specific chain.",
         "operationId": "ownersGetSafesByOwnerV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID to search for Safes",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -3092,6 +3598,7 @@
             "name": "ownerAddress",
             "required": true,
             "in": "path",
+            "description": "Owner address to search Safes for (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -3099,7 +3606,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "List of Safes owned by the specified address",
             "content": {
               "application/json": {
                 "schema": {
@@ -3109,18 +3616,21 @@
             }
           }
         },
+        "summary": "Get Safes by owner",
         "tags": ["owners"]
       }
     },
     "/v1/owners/{ownerAddress}/safes": {
       "get": {
         "deprecated": true,
+        "description": "Retrieves Safes owned by an address across all chains. This endpoint is deprecated, please use the chain-specific version instead.",
         "operationId": "ownersGetAllSafesByOwnerV1",
         "parameters": [
           {
             "name": "ownerAddress",
             "required": true,
             "in": "path",
+            "description": "Owner address to search Safes for (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -3128,7 +3638,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Map of chain IDs to arrays of Safe addresses",
             "content": {
               "application/json": {
                 "schema": {
@@ -3138,18 +3648,20 @@
             }
           }
         },
-        "summary": "Deprecated",
+        "summary": "Get all Safes by owner (deprecated)",
         "tags": ["owners"]
       }
     },
     "/v2/owners/{ownerAddress}/safes": {
       "get": {
+        "description": "Retrieves all Safes owned by the specified address across all supported chains. Returns a map of chain IDs to arrays of Safe addresses.",
         "operationId": "ownersGetAllSafesByOwnerV2",
         "parameters": [
           {
             "name": "ownerAddress",
             "required": true,
             "in": "path",
+            "description": "Owner address to search Safes for (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -3157,7 +3669,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Map of chain IDs to arrays of Safe addresses owned by the address",
             "content": {
               "application/json": {
                 "schema": {
@@ -3167,30 +3679,39 @@
                     "items": {
                       "type": "string"
                     }
+                  },
+                  "example": {
+                    "1": ["0x1234567890123456789012345678901234567890"],
+                    "5": ["0xabcdefabcdefabcdefabcdefabcdefabcdefabcd"]
                   }
                 }
               }
             }
           }
         },
+        "summary": "Get all Safes by owner",
         "tags": ["owners"]
       }
     },
     "/v1/chains/{chainId}/relay": {
       "post": {
+        "description": "Relays a Safe transaction using the relay service, which pays for gas fees. The transaction must meet certain criteria and the Safe must have remaining relay quota.",
         "operationId": "relayRelayV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe transaction will be executed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           }
         ],
         "requestBody": {
           "required": true,
+          "description": "Transaction data to relay including Safe address, transaction details, and signatures",
           "content": {
             "application/json": {
               "schema": {
@@ -3201,7 +3722,7 @@
         },
         "responses": {
           "200": {
-            "description": "",
+            "description": "Transaction relayed successfully with transaction hash",
             "content": {
               "application/json": {
                 "schema": {
@@ -3209,20 +3730,30 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid transaction data, unofficial contracts, or unsupported operation"
+          },
+          "429": {
+            "description": "Relay limit reached for this Safe"
           }
         },
+        "summary": "Relay transaction",
         "tags": ["relay"]
       }
     },
     "/v1/chains/{chainId}/relay/{safeAddress}": {
       "get": {
+        "description": "Retrieves the number of remaining relay transactions available for a specific Safe on the given chain.",
         "operationId": "relayGetRelaysRemainingV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe is deployed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -3230,6 +3761,7 @@
             "name": "safeAddress",
             "required": true,
             "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -3237,7 +3769,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Remaining relay quota retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -3247,18 +3779,22 @@
             }
           }
         },
+        "summary": "Get remaining relays",
         "tags": ["relay"]
       }
     },
     "/v1/chains/{chainId}/safe-apps": {
       "get": {
+        "description": "Retrieves a list of Safe Apps available for a specific chain, with optional filtering by client URL or app URL.",
         "operationId": "safeAppsGetSafeAppsV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID to get Safe Apps for",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -3266,6 +3802,7 @@
             "name": "clientUrl",
             "required": false,
             "in": "query",
+            "description": "Filter by client URL to get apps compatible with specific client",
             "schema": {
               "type": "string"
             }
@@ -3274,6 +3811,7 @@
             "name": "url",
             "required": false,
             "in": "query",
+            "description": "Filter by specific Safe App URL",
             "schema": {
               "type": "string"
             }
@@ -3281,7 +3819,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "List of Safe Apps available for the specified chain",
             "content": {
               "application/json": {
                 "schema": {
@@ -3294,18 +3832,22 @@
             }
           }
         },
+        "summary": "Get Safe Apps",
         "tags": ["safe-apps"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}": {
       "get": {
+        "description": "Retrieves detailed information about a Safe including owners, threshold, modules, and current state.",
         "operationId": "safesGetSafeV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe is deployed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -3313,6 +3855,7 @@
             "name": "safeAddress",
             "required": true,
             "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -3320,7 +3863,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Safe information retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -3328,20 +3871,27 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Safe not found on the specified chain"
           }
         },
+        "summary": "Get Safe information",
         "tags": ["safes"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/nonces": {
       "get": {
+        "description": "Retrieves the current nonces for a Safe, including the transaction nonce and any queued nonces.",
         "operationId": "safesGetNoncesV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe is deployed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -3349,6 +3899,7 @@
             "name": "safeAddress",
             "required": true,
             "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -3356,7 +3907,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Safe nonces retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -3364,20 +3915,27 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Safe not found on the specified chain"
           }
         },
+        "summary": "Get Safe nonces",
         "tags": ["safes"]
       }
     },
     "/v1/safes": {
       "get": {
+        "description": "Retrieves an overview of multiple Safes including their balances, transaction counts, and other summary information. Supports cross-chain queries using CAIP-10 address format.",
         "operationId": "safesGetSafeOverviewV1",
         "parameters": [
           {
             "name": "currency",
             "required": true,
             "in": "query",
+            "description": "Fiat currency code for balance conversion (e.g., USD, EUR)",
             "schema": {
+              "example": "USD",
               "type": "string"
             }
           },
@@ -3385,7 +3943,9 @@
             "name": "safes",
             "required": true,
             "in": "query",
+            "description": "Comma-separated list of Safe addresses in CAIP-10 format (chainId:address)",
             "schema": {
+              "example": "1:0x1234567890123456789012345678901234567890,5:0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
               "type": "string"
             }
           },
@@ -3393,7 +3953,9 @@
             "name": "trusted",
             "required": false,
             "in": "query",
+            "description": "If true, only includes trusted tokens in balance calculations",
             "schema": {
+              "example": false,
               "type": "boolean"
             }
           },
@@ -3401,7 +3963,9 @@
             "name": "exclude_spam",
             "required": false,
             "in": "query",
+            "description": "If true, excludes spam tokens from balance calculations",
             "schema": {
+              "example": true,
               "type": "boolean"
             }
           },
@@ -3409,6 +3973,7 @@
             "name": "wallet_address",
             "required": false,
             "in": "query",
+            "description": "Optional wallet address to filter Safes where this address is an owner",
             "schema": {
               "type": "string"
             }
@@ -3416,7 +3981,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Array of Safe overviews with balances and metadata",
             "content": {
               "application/json": {
                 "schema": {
@@ -3429,7 +3994,213 @@
             }
           }
         },
+        "summary": "Get Safe overview",
         "tags": ["safes"]
+      }
+    },
+    "/v1/chains/{chainId}/security/{safeAddress}/recipient/{recipientAddress}": {
+      "get": {
+        "description": "Performs real-time security analysis of a recipient address for a specific Safe. Returns analysis results grouped by status group, sorted by severity (CRITICAL first).",
+        "operationId": "safeShieldAnalyzeRecipientV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recipientAddress",
+            "required": true,
+            "in": "path",
+            "description": "Recipient address to analyze",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recipient interaction analysis results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleRecipientAnalysisDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Analyze recipient address",
+        "tags": ["safe-shield"]
+      }
+    },
+    "/v1/chains/{chainId}/security/{safeAddress}/counterparty-analysis": {
+      "post": {
+        "description": "Performs combined contract and recipient analysis for a Safe transaction. Returns both analyses grouped by status group for each counterparty.",
+        "operationId": "safeShieldAnalyzeCounterpartyV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Transaction data used to analyze all counterparties involved.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CounterpartyAnalysisRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Combined counterparty analysis including recipients and contracts grouped by status group and mapped to an address.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CounterpartyAnalysisDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Analyze transaction counterparties",
+        "tags": ["safe-shield"]
+      }
+    },
+    "/v1/chains/{chainId}/security/{safeAddress}/threat-analysis": {
+      "post": {
+        "description": "Performs real-time threat analysis for a Safe transaction.",
+        "operationId": "safeShieldAnalyzeThreatV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "EIP-712 typed data and wallet information for threat analysis.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ThreatAnalysisRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Threat analysis results including threat findings and balance changes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThreatAnalysisResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Analyze transaction threat",
+        "tags": ["safe-shield"]
+      }
+    },
+    "/v1/chains/{chainId}/security/{safeAddress}/report-false-result": {
+      "post": {
+        "description": "Reports a FALSE_POSITIVE or FALSE_NEGATIVE Blockaid transaction scan result for review. Use the request_id from the original scan response to identify the transaction.",
+        "operationId": "safeShieldReportFalseResultV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Report details including event type, request_id from scan response, and details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportFalseResultRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Report submitted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportFalseResultResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Report false Blockaid scan result",
+        "tags": ["safe-shield"]
       }
     },
     "/v1/targeted-messaging/outreaches/{outreachId}/chains/{chainId}/safes/{safeAddress}": {
@@ -3593,13 +4364,16 @@
     },
     "/v1/chains/{chainId}/transactions/{id}": {
       "get": {
+        "description": "Retrieves detailed information about a specific transaction by its ID, including execution status, confirmations, and decoded transaction data.",
         "operationId": "transactionsGetTransactionByIdV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the transaction exists",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -3607,14 +4381,16 @@
             "name": "id",
             "required": true,
             "in": "path",
+            "description": "Transaction ID (safe transaction hash or multisig transaction ID)",
             "schema": {
+              "example": "multisig_0x1234567890123456789012345678901234567890_0x5678...",
               "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Transaction details retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -3622,8 +4398,12 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Transaction not found"
           }
         },
+        "summary": "Get transaction details",
         "tags": ["transactions"]
       }
     },
@@ -3913,13 +4693,16 @@
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/multisig-transactions": {
       "get": {
+        "description": "Retrieves a paginated list of multisig transactions for a Safe with optional filtering by execution date, recipient, value, nonce, and execution status.",
         "operationId": "transactionsGetMultisigTransactionsV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe is deployed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -3927,6 +4710,7 @@
             "name": "safeAddress",
             "required": true,
             "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -3935,6 +4719,7 @@
             "name": "execution_date__gte",
             "required": false,
             "in": "query",
+            "description": "Filter by execution date greater than or equal to (ISO 8601 format)",
             "schema": {
               "type": "string"
             }
@@ -3943,6 +4728,7 @@
             "name": "execution_date__lte",
             "required": false,
             "in": "query",
+            "description": "Filter by execution date less than or equal to (ISO 8601 format)",
             "schema": {
               "type": "string"
             }
@@ -3951,6 +4737,7 @@
             "name": "to",
             "required": false,
             "in": "query",
+            "description": "Filter by recipient address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -3959,6 +4746,7 @@
             "name": "value",
             "required": false,
             "in": "query",
+            "description": "Filter by transaction value in wei",
             "schema": {
               "type": "string"
             }
@@ -3967,6 +4755,7 @@
             "name": "nonce",
             "required": false,
             "in": "query",
+            "description": "Filter by transaction nonce",
             "schema": {
               "type": "string"
             }
@@ -3975,6 +4764,7 @@
             "name": "executed",
             "required": false,
             "in": "query",
+            "description": "Filter by execution status (true for executed, false for pending)",
             "schema": {
               "type": "boolean"
             }
@@ -3983,6 +4773,7 @@
             "name": "cursor",
             "required": false,
             "in": "query",
+            "description": "Pagination cursor for retrieving the next set of results",
             "schema": {
               "type": "string"
             }
@@ -3990,7 +4781,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Paginated list of multisig transactions",
             "content": {
               "application/json": {
                 "schema": {
@@ -4000,18 +4791,22 @@
             }
           }
         },
+        "summary": "Get multisig transactions",
         "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/transactions/{safeTxHash}": {
       "delete": {
+        "description": "Deletes a pending multisig transaction. Only the proposer or a Safe owner can delete a transaction.",
         "operationId": "transactionsDeleteTransactionV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the transaction exists",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -4019,6 +4814,7 @@
             "name": "safeTxHash",
             "required": true,
             "in": "path",
+            "description": "Safe transaction hash (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -4026,6 +4822,7 @@
         ],
         "requestBody": {
           "required": true,
+          "description": "Signature proving authorization to delete the transaction",
           "content": {
             "application/json": {
               "schema": {
@@ -4035,22 +4832,32 @@
           }
         },
         "responses": {
-          "200": {
-            "description": ""
+          "204": {
+            "description": "Transaction deleted successfully"
+          },
+          "400": {
+            "description": "Invalid signature or unauthorized deletion attempt"
+          },
+          "404": {
+            "description": "Transaction not found"
           }
         },
+        "summary": "Delete transaction",
         "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/module-transactions": {
       "get": {
+        "description": "Retrieves a paginated list of module transactions for a Safe. Module transactions are executed directly by enabled modules without requiring owner signatures.",
         "operationId": "transactionsGetModuleTransactionsV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe is deployed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -4058,6 +4865,7 @@
             "name": "safeAddress",
             "required": true,
             "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -4066,6 +4874,7 @@
             "name": "to",
             "required": false,
             "in": "query",
+            "description": "Filter by recipient address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -4074,6 +4883,7 @@
             "name": "module",
             "required": false,
             "in": "query",
+            "description": "Filter by module address that executed the transaction",
             "schema": {
               "type": "string"
             }
@@ -4082,6 +4892,7 @@
             "name": "transaction_hash",
             "required": false,
             "in": "query",
+            "description": "Filter by specific transaction hash",
             "schema": {
               "type": "string"
             }
@@ -4090,6 +4901,7 @@
             "name": "cursor",
             "required": false,
             "in": "query",
+            "description": "Pagination cursor for retrieving the next set of results",
             "schema": {
               "type": "string"
             }
@@ -4097,7 +4909,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Paginated list of module transactions",
             "content": {
               "application/json": {
                 "schema": {
@@ -4107,18 +4919,22 @@
             }
           }
         },
+        "summary": "Get module transactions",
         "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/transactions/{safeTxHash}/confirmations": {
       "post": {
+        "description": "Adds a confirmation signature to a pending multisig transaction. Once enough confirmations are collected to meet the Safe threshold, the transaction can be executed.",
         "operationId": "transactionsAddConfirmationV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe is deployed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -4126,6 +4942,7 @@
             "name": "safeTxHash",
             "required": true,
             "in": "path",
+            "description": "Safe transaction hash (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -4133,6 +4950,7 @@
         ],
         "requestBody": {
           "required": true,
+          "description": "Confirmation signature from a Safe owner proving their approval of the transaction",
           "content": {
             "application/json": {
               "schema": {
@@ -4143,7 +4961,7 @@
         },
         "responses": {
           "200": {
-            "description": "",
+            "description": "Transaction details with updated confirmation status",
             "content": {
               "application/json": {
                 "schema": {
@@ -4151,20 +4969,30 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid signature or confirmation already exists for this owner"
+          },
+          "404": {
+            "description": "Transaction not found"
           }
         },
+        "summary": "Add transaction confirmation",
         "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/incoming-transfers": {
       "get": {
+        "description": "Retrieves a paginated list of incoming transfers to a Safe, including ETH and token transfers with optional filtering by date, value, token, and trust status.",
         "operationId": "transactionsGetIncomingTransfersV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe is deployed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -4172,6 +5000,7 @@
             "name": "safeAddress",
             "required": true,
             "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -4180,6 +5009,7 @@
             "name": "trusted",
             "required": false,
             "in": "query",
+            "description": "Filter by trust status (true for trusted tokens, false for untrusted)",
             "schema": {
               "type": "boolean"
             }
@@ -4188,6 +5018,7 @@
             "name": "execution_date__gte",
             "required": false,
             "in": "query",
+            "description": "Filter by execution date greater than or equal to (ISO 8601 format)",
             "schema": {
               "type": "string"
             }
@@ -4196,6 +5027,7 @@
             "name": "execution_date__lte",
             "required": false,
             "in": "query",
+            "description": "Filter by execution date less than or equal to (ISO 8601 format)",
             "schema": {
               "type": "string"
             }
@@ -4204,6 +5036,7 @@
             "name": "to",
             "required": false,
             "in": "query",
+            "description": "Filter by recipient address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -4212,6 +5045,7 @@
             "name": "value",
             "required": false,
             "in": "query",
+            "description": "Filter by transfer value in wei",
             "schema": {
               "type": "string"
             }
@@ -4220,6 +5054,7 @@
             "name": "token_address",
             "required": false,
             "in": "query",
+            "description": "Filter by token contract address (0x prefixed hex string for ERC-20 tokens)",
             "schema": {
               "type": "string"
             }
@@ -4228,6 +5063,7 @@
             "name": "cursor",
             "required": false,
             "in": "query",
+            "description": "Pagination cursor for retrieving the next set of results",
             "schema": {
               "type": "string"
             }
@@ -4235,7 +5071,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Paginated list of incoming transfers",
             "content": {
               "application/json": {
                 "schema": {
@@ -4245,18 +5081,22 @@
             }
           }
         },
+        "summary": "Get incoming transfers",
         "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/transactions/{safeAddress}/preview": {
       "post": {
+        "description": "Simulates a transaction execution to preview its effects, including gas estimates, balance changes, and potential errors before actually proposing or executing it.",
         "operationId": "transactionsPreviewTransactionV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe is deployed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -4264,6 +5104,7 @@
             "name": "safeAddress",
             "required": true,
             "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -4271,6 +5112,7 @@
         ],
         "requestBody": {
           "required": true,
+          "description": "Transaction data to preview including recipient, value, data, and operation type",
           "content": {
             "application/json": {
               "schema": {
@@ -4281,7 +5123,7 @@
         },
         "responses": {
           "200": {
-            "description": "",
+            "description": "Transaction preview with simulation results, gas estimates, and potential effects",
             "content": {
               "application/json": {
                 "schema": {
@@ -4289,20 +5131,30 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid transaction data or simulation failed"
+          },
+          "404": {
+            "description": "Safe not found"
           }
         },
+        "summary": "Preview transaction",
         "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/transactions/queued": {
       "get": {
+        "description": "Retrieves a paginated list of queued (pending) transactions for a Safe that are waiting for execution, ordered by nonce.",
         "operationId": "transactionsGetTransactionQueueV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe is deployed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -4310,6 +5162,7 @@
             "name": "safeAddress",
             "required": true,
             "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -4318,6 +5171,7 @@
             "name": "trusted",
             "required": false,
             "in": "query",
+            "description": "Filter by trust status (true for trusted transactions, false for untrusted)",
             "schema": {
               "type": "boolean"
             }
@@ -4326,6 +5180,7 @@
             "name": "cursor",
             "required": false,
             "in": "query",
+            "description": "Pagination cursor for retrieving the next set of results",
             "schema": {
               "type": "string"
             }
@@ -4333,7 +5188,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Paginated list of queued transactions",
             "content": {
               "application/json": {
                 "schema": {
@@ -4343,18 +5198,22 @@
             }
           }
         },
+        "summary": "Get transaction queue",
         "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/transactions/history": {
       "get": {
+        "description": "Retrieves a paginated list of executed transactions for a Safe, including multisig transactions, module transactions, and incoming transfers, ordered by execution date.",
         "operationId": "transactionsGetTransactionsHistoryV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe is deployed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -4362,6 +5221,7 @@
             "name": "safeAddress",
             "required": true,
             "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -4371,6 +5231,7 @@
             "required": false,
             "in": "query",
             "deprecated": true,
+            "description": "Deprecated: Timezone offset in milliseconds for date formatting (use timezone parameter instead)",
             "schema": {
               "type": "string"
             }
@@ -4379,6 +5240,7 @@
             "name": "trusted",
             "required": false,
             "in": "query",
+            "description": "Filter by trust status (default: true, set to false to include untrusted transactions)",
             "schema": {
               "type": "boolean"
             }
@@ -4387,6 +5249,7 @@
             "name": "imitation",
             "required": false,
             "in": "query",
+            "description": "Include imitation transactions in results (default: true, set to false to exclude)",
             "schema": {
               "type": "boolean"
             }
@@ -4395,6 +5258,7 @@
             "name": "timezone",
             "required": false,
             "in": "query",
+            "description": "IANA timezone identifier for date formatting (e.g., \"America/New_York\")",
             "schema": {
               "type": "string"
             }
@@ -4403,6 +5267,7 @@
             "name": "cursor",
             "required": false,
             "in": "query",
+            "description": "Pagination cursor for retrieving the next set of results",
             "schema": {
               "type": "string"
             }
@@ -4410,7 +5275,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Paginated list of historical transactions",
             "content": {
               "application/json": {
                 "schema": {
@@ -4420,18 +5285,22 @@
             }
           }
         },
+        "summary": "Get transaction history",
         "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/transactions/{safeAddress}/propose": {
       "post": {
+        "description": "Proposes a new multisig transaction for a Safe. The transaction will be pending until enough owners sign it to reach the required threshold.",
         "operationId": "transactionsProposeTransactionV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe is deployed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -4439,6 +5308,7 @@
             "name": "safeAddress",
             "required": true,
             "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -4446,6 +5316,7 @@
         ],
         "requestBody": {
           "required": true,
+          "description": "Transaction proposal including recipient, value, data, and initial signature",
           "content": {
             "application/json": {
               "schema": {
@@ -4456,28 +5327,35 @@
         },
         "responses": {
           "200": {
-            "description": "",
+            "description": "Transaction proposed successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Transaction"
+                  "$ref": "#/components/schemas/TransactionDetails"
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid transaction data or signature"
           }
         },
+        "summary": "Propose transaction",
         "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/transactions/creation": {
       "get": {
+        "description": "Retrieves the transaction that created the Safe, including the creation timestamp, creator address, factory used, and setup data.",
         "operationId": "transactionsGetCreationTransactionV1",
         "parameters": [
           {
             "name": "chainId",
             "required": true,
             "in": "path",
+            "description": "Chain ID where the Safe is deployed",
             "schema": {
+              "example": "1",
               "type": "string"
             }
           },
@@ -4485,6 +5363,7 @@
             "name": "safeAddress",
             "required": true,
             "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -4492,7 +5371,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Safe creation transaction details",
             "content": {
               "application/json": {
                 "schema": {
@@ -4500,8 +5379,12 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Safe not found or creation transaction not available"
           }
         },
+        "summary": "Get Safe creation transaction",
         "tags": ["transactions"]
       }
     },
@@ -5042,11 +5925,317 @@
         },
         "required": ["protocol", "protocol_metadata", "fiatTotal", "items"]
       },
+      "PortfolioNativeToken": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["NATIVE_TOKEN"]
+          },
+          "chainId": {
+            "type": "string",
+            "description": "The chain ID"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the token is trusted (spam filter)"
+          }
+        },
+        "required": ["address", "decimals", "logoUri", "name", "symbol", "type", "chainId", "trusted"]
+      },
+      "PortfolioErc20Token": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["ERC20"]
+          },
+          "chainId": {
+            "type": "string",
+            "description": "The chain ID"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the token is trusted (spam filter)"
+          }
+        },
+        "required": ["address", "decimals", "logoUri", "name", "symbol", "type", "chainId", "trusted"]
+      },
+      "PortfolioErc721Token": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["ERC721"]
+          },
+          "chainId": {
+            "type": "string",
+            "description": "The chain ID"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the token is trusted (spam filter)"
+          }
+        },
+        "required": ["address", "decimals", "logoUri", "name", "symbol", "type", "chainId", "trusted"]
+      },
+      "TokenBalance": {
+        "type": "object",
+        "properties": {
+          "tokenInfo": {
+            "description": "Token information",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PortfolioNativeToken"
+              },
+              {
+                "$ref": "#/components/schemas/PortfolioErc20Token"
+              },
+              {
+                "$ref": "#/components/schemas/PortfolioErc721Token"
+              }
+            ]
+          },
+          "balance": {
+            "type": "string",
+            "description": "Balance in smallest unit as string integer. Use decimals to convert."
+          },
+          "balanceFiat": {
+            "type": "string",
+            "description": "Balance in requested fiat currency. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "4801.653401839"
+          },
+          "price": {
+            "type": "string",
+            "description": "Token price in requested fiat currency. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "3890.12"
+          },
+          "priceChangePercentage1d": {
+            "type": "string",
+            "description": "Price change as decimal (e.g., \"-0.0431\" for -4.31%). Decimal string without exponent notation.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "-0.0431"
+          }
+        },
+        "required": ["tokenInfo", "balance"]
+      },
+      "AppPosition": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Unique position key"
+          },
+          "type": {
+            "type": "string",
+            "description": "Position type (e.g., staked, lending, liquidity)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Position name"
+          },
+          "groupId": {
+            "type": "string",
+            "description": "Group ID for grouping related positions together"
+          },
+          "tokenInfo": {
+            "description": "Token information",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PortfolioNativeToken"
+              },
+              {
+                "$ref": "#/components/schemas/PortfolioErc20Token"
+              },
+              {
+                "$ref": "#/components/schemas/PortfolioErc721Token"
+              }
+            ]
+          },
+          "receiptTokenAddress": {
+            "type": "string",
+            "description": "Receipt token address (pool address) representing this position. This is the contract address for the position token (LP token, staking receipt, etc.), not the underlying token."
+          },
+          "balance": {
+            "type": "string",
+            "description": "Balance in smallest unit as string integer. Use decimals to convert."
+          },
+          "balanceFiat": {
+            "type": "string",
+            "description": "Balance in requested fiat currency. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "18638914.125656575"
+          },
+          "priceChangePercentage1d": {
+            "type": "string",
+            "description": "Price change as decimal (e.g., \"-0.0431\" for -4.31%). Decimal string without exponent notation.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "-0.0431"
+          }
+        },
+        "required": ["key", "type", "name", "tokenInfo", "balance"]
+      },
+      "AppPositionGroup": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Group name (e.g., \"Protocol A Vesting\")"
+          },
+          "items": {
+            "type": "array",
+            "description": "Positions in this group",
+            "items": {
+              "$ref": "#/components/schemas/AppPosition"
+            }
+          }
+        },
+        "required": ["name", "items"]
+      },
+      "AppBalanceAppInfo": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Application name"
+          },
+          "logoUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Application logo URL (HTTPS)"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Application URL (HTTPS)"
+          }
+        },
+        "required": ["name"]
+      },
+      "AppBalance": {
+        "type": "object",
+        "properties": {
+          "appInfo": {
+            "description": "Application information",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AppBalanceAppInfo"
+              }
+            ]
+          },
+          "balanceFiat": {
+            "type": "string",
+            "description": "Total balance in fiat currency across all position groups. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "18638914.125656575"
+          },
+          "groups": {
+            "type": "array",
+            "description": "Position groups in this app, grouped by position name",
+            "items": {
+              "$ref": "#/components/schemas/AppPositionGroup"
+            }
+          }
+        },
+        "required": ["appInfo", "balanceFiat", "groups"]
+      },
+      "Portfolio": {
+        "type": "object",
+        "properties": {
+          "totalBalanceFiat": {
+            "type": "string",
+            "description": "Total balance in fiat currency across all tokens and positions. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "954181237.094243"
+          },
+          "totalTokenBalanceFiat": {
+            "type": "string",
+            "description": "Total balance in fiat currency for all token holdings. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "935542322.9685864"
+          },
+          "totalPositionsBalanceFiat": {
+            "type": "string",
+            "description": "Total balance in fiat currency for all app positions. Decimal string without exponent notation or thousand separators.",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "example": "18638914.125656575"
+          },
+          "tokenBalances": {
+            "description": "List of token balances",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TokenBalance"
+            }
+          },
+          "positionBalances": {
+            "description": "List of app balances",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppBalance"
+            }
+          }
+        },
+        "required": [
+          "totalBalanceFiat",
+          "totalTokenBalanceFiat",
+          "totalPositionsBalanceFiat",
+          "tokenBalances",
+          "positionBalances"
+        ]
+      },
       "GasPriceOracle": {
         "type": "object",
         "properties": {
           "type": {
-            "type": "string"
+            "type": "string",
+            "enum": ["oracle"]
           },
           "gasParameter": {
             "type": "string"
@@ -5064,7 +6253,8 @@
         "type": "object",
         "properties": {
           "type": {
-            "type": "string"
+            "type": "string",
+            "enum": ["fixed"]
           },
           "weiValue": {
             "type": "string"
@@ -5076,7 +6266,8 @@
         "type": "object",
         "properties": {
           "type": {
-            "type": "string"
+            "type": "string",
+            "enum": ["fixed1559"]
           },
           "maxFeePerGas": {
             "type": "string"
@@ -5124,14 +6315,14 @@
         "type": "object",
         "properties": {
           "chainName": {
-            "type": "number",
+            "type": "string",
             "nullable": true
           },
           "enabled": {
             "type": "boolean"
           }
         },
-        "required": ["enabled"]
+        "required": ["chainName", "enabled"]
       },
       "ContractAddresses": {
         "type": "object",
@@ -5945,6 +7136,11 @@
         },
         "required": ["data"]
       },
+      "Operation": {
+        "type": "number",
+        "enum": [0, 1],
+        "description": "Operation type: 0 for CALL, 1 for DELEGATE"
+      },
       "BaseDataDecoded": {
         "type": "object",
         "properties": {
@@ -5964,8 +7160,12 @@
         "type": "object",
         "properties": {
           "operation": {
-            "type": "number",
-            "enum": [0, 1]
+            "description": "Operation type: 0 for CALL, 1 for DELEGATE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Operation"
+              }
+            ]
           },
           "value": {
             "type": "string"
@@ -5977,10 +7177,13 @@
             "type": "string"
           },
           "data": {
-            "type": "object"
+            "type": "string",
+            "nullable": true,
+            "description": "Hexadecimal encoded data",
+            "pattern": "^0x[0-9a-fA-F]*$"
           }
         },
-        "required": ["operation", "value", "to"]
+        "required": ["operation", "value", "to", "data"]
       },
       "DataDecodedParameter": {
         "type": "object",
@@ -5992,7 +7195,18 @@
             "type": "string"
           },
           "value": {
-            "type": "object"
+            "description": "Parameter value - typically a string, but may be an array of strings for array types (e.g., address[], uint256[])",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
           },
           "valueDecoded": {
             "oneOf": [
@@ -6169,7 +7383,12 @@
             "nullable": true
           },
           "operation": {
-            "type": "number"
+            "description": "Operation type: 0 for CALL, 1 for DELEGATE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Operation"
+              }
+            ]
           }
         },
         "required": ["to", "value", "operation"]
@@ -6189,7 +7408,7 @@
         },
         "required": ["currentNonce", "recommendedNonce", "safeTxGas"]
       },
-      "NotificationType": {
+      "NotificationTypeEnum": {
         "type": "string",
         "enum": [
           "CONFIRMATION_REQUEST",
@@ -6213,7 +7432,7 @@
           "notificationTypes": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/NotificationType"
+              "$ref": "#/components/schemas/NotificationTypeEnum"
             }
           }
         },
@@ -6249,6 +7468,20 @@
         },
         "required": ["cloudMessagingToken", "safes", "deviceType"]
       },
+      "NotificationTypeResponseDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The notification type name",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NotificationTypeEnum"
+              }
+            ]
+          }
+        },
+        "required": ["name"]
+      },
       "DeleteAllSubscriptionItemDto": {
         "type": "object",
         "properties": {
@@ -6264,8 +7497,7 @@
           "signerAddress": {
             "type": "string",
             "nullable": true,
-            "description": "Optional signer address filter:\n• Omitted (undefined): Deletes subscriptions regardless of signer address\n• null: Deletes only subscriptions with no signer address\n• Valid address: Deletes only subscriptions with that specific signer address",
-            "example": "0x1234567890123456789012345678901234567890"
+            "description": "Optional signer address filter:\n• Omitted (undefined): Deletes subscriptions regardless of signer address\n• null: Deletes only subscriptions with no signer address\n• Valid address: Deletes only subscriptions with that specific signer address"
           }
         },
         "required": ["chainId", "deviceUuid", "safeAddress"]
@@ -7375,6 +8607,668 @@
         },
         "required": ["address", "chainId", "threshold", "owners", "fiatTotal", "queued"]
       },
+      "SingleRecipientAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
+          },
+          "type": {
+            "type": "string",
+            "description": "Recipient interaction status code",
+            "enum": ["NEW_RECIPIENT", "RECURRING_RECIPIENT", "LOW_ACTIVITY", "FAILED"],
+            "example": "NEW_RECIPIENT"
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          }
+        },
+        "required": ["severity", "type", "title", "description"]
+      },
+      "SingleRecipientAnalysisDto": {
+        "type": "object",
+        "properties": {
+          "RECIPIENT_INTERACTION": {
+            "description": "Analysis results related to recipient interaction history. Shows whether this is a new or recurring recipient.",
+            "example": [
+              {
+                "severity": "INFO",
+                "type": "NEW_RECIPIENT",
+                "title": "New recipient",
+                "description": "This is the first time you are interacting with this recipient."
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SingleRecipientAnalysisResultDto"
+            }
+          },
+          "RECIPIENT_ACTIVITY": {
+            "description": "Analysis results related to recipient activity. Shows whether this is a low activity recipient. (Available only for Safes)",
+            "example": [
+              {
+                "severity": "WARN",
+                "type": "LOW_ACTIVITY",
+                "title": "Low activity recipient",
+                "description": "This address has few transactions."
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SingleRecipientAnalysisResultDto"
+            }
+          },
+          "isSafe": {
+            "type": "boolean",
+            "description": "Indicates whether the analyzed recipient address is a Safe.",
+            "example": false
+          }
+        },
+        "required": ["RECIPIENT_INTERACTION", "isSafe"]
+      },
+      "CounterpartyAnalysisRequestDto": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient address of the transaction."
+          },
+          "value": {
+            "type": "string",
+            "description": "Amount to send with the transaction."
+          },
+          "data": {
+            "type": "string",
+            "description": "Hex-encoded data payload for the transaction."
+          },
+          "operation": {
+            "type": "number",
+            "enum": [0, 1],
+            "description": "Operation type: 0 for CALL, 1 for DELEGATECALL."
+          }
+        },
+        "required": ["to", "value", "data", "operation"]
+      },
+      "RecipientResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
+          },
+          "type": {
+            "type": "string",
+            "description": "Bridge compatibility status code",
+            "enum": [
+              "NEW_RECIPIENT",
+              "RECURRING_RECIPIENT",
+              "LOW_ACTIVITY",
+              "INCOMPATIBLE_SAFE",
+              "MISSING_OWNERSHIP",
+              "UNSUPPORTED_NETWORK",
+              "DIFFERENT_SAFE_SETUP",
+              "FAILED"
+            ],
+            "example": "MISSING_OWNERSHIP"
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          },
+          "targetChainId": {
+            "type": "string",
+            "description": "Target chain ID for bridge operations. Only present for BridgeStatus."
+          }
+        },
+        "required": ["severity", "type", "title", "description"]
+      },
+      "RecipientAnalysisDto": {
+        "type": "object",
+        "properties": {
+          "isSafe": {
+            "type": "boolean",
+            "description": "Indicates whether the analyzed recipient address is a Safe.",
+            "example": true
+          },
+          "RECIPIENT_INTERACTION": {
+            "description": "Analysis results related to recipient interaction history. Shows whether this is a new or recurring recipient.",
+            "example": [
+              {
+                "severity": "INFO",
+                "type": "NEW_RECIPIENT",
+                "title": "New recipient",
+                "description": "This is the first time you are interacting with this recipient."
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecipientResultDto"
+            }
+          },
+          "RECIPIENT_ACTIVITY": {
+            "description": "Analysis results related to recipient activity frequency. Shows whether this is a low activity recipient.",
+            "example": [
+              {
+                "severity": "WARN",
+                "type": "LOW_ACTIVITY",
+                "title": "Low activity recipient",
+                "description": "This address has few transactions."
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecipientResultDto"
+            }
+          },
+          "BRIDGE": {
+            "description": "Analysis results for cross-chain bridge operations. Identifies compatibility issues, ownership problems, or unsupported networks.",
+            "example": [
+              {
+                "severity": "WARN",
+                "type": "MISSING_OWNERSHIP",
+                "title": "No ownership on target chain",
+                "description": "You do not have ownership of a Safe on the target chain.",
+                "targetChainId": "137"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecipientResultDto"
+            }
+          }
+        },
+        "required": ["isSafe"]
+      },
+      "ContractAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
+          },
+          "type": {
+            "type": "string",
+            "description": "Contract verification status code",
+            "enum": [
+              "VERIFIED",
+              "NOT_VERIFIED",
+              "NOT_VERIFIED_BY_SAFE",
+              "VERIFICATION_UNAVAILABLE",
+              "NEW_CONTRACT",
+              "KNOWN_CONTRACT",
+              "UNEXPECTED_DELEGATECALL",
+              "FAILED"
+            ],
+            "example": "VERIFIED"
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          }
+        },
+        "required": ["severity", "type", "title", "description"]
+      },
+      "ContractAnalysisDto": {
+        "type": "object",
+        "properties": {
+          "CONTRACT_VERIFICATION": {
+            "description": "Analysis results for contract verification status. Shows whether contracts are verified and source code is available.",
+            "example": [
+              {
+                "severity": "INFO",
+                "type": "VERIFIED",
+                "title": "Verified contract",
+                "description": "This contract has been verified and its source code is available"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractAnalysisResultDto"
+            }
+          },
+          "CONTRACT_INTERACTION": {
+            "description": "Analysis results related to contract interaction history. Shows whether this is a new or previously interacted contract.",
+            "example": [
+              {
+                "severity": "INFO",
+                "type": "NEW_CONTRACT",
+                "title": "New contract",
+                "description": "This is the first time you are interacting with this contract"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractAnalysisResultDto"
+            }
+          },
+          "DELEGATECALL": {
+            "description": "Analysis results for delegatecall operations. Identifies unexpected or potentially dangerous delegate calls.",
+            "example": [
+              {
+                "severity": "CRITICAL",
+                "type": "UNEXPECTED_DELEGATECALL",
+                "title": "Unexpected delegatecall",
+                "description": "An unexpected delegatecall operation was detected that could be dangerous"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractAnalysisResultDto"
+            }
+          }
+        }
+      },
+      "CounterpartyAnalysisDto": {
+        "type": "object",
+        "properties": {
+          "recipient": {
+            "type": "object",
+            "description": "Recipient analysis results mapped by address. Contains recipient interaction history and bridge analysis.type: Record<Address, RecipientAnalysisDto>.",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/RecipientAnalysisDto"
+            },
+            "example": {
+              "0x0000000000000000000000000000000000000000": {
+                "isSafe": true,
+                "RECIPIENT_INTERACTION": [
+                  {
+                    "severity": "INFO",
+                    "type": "NEW_RECIPIENT",
+                    "title": "New recipient",
+                    "description": "This is the first time you are interacting with this recipient"
+                  }
+                ]
+              }
+            }
+          },
+          "contract": {
+            "type": "object",
+            "description": "Contract analysis results mapped by address. Contains contract verification, interaction history, and delegatecall analysis.type: Record<Address, ContractAnalysisDto>.",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ContractAnalysisDto"
+            },
+            "example": {
+              "0x0000000000000000000000000000000000000000": {
+                "CONTRACT_VERIFICATION": [
+                  {
+                    "severity": "INFO",
+                    "type": "VERIFIED",
+                    "title": "Verified contract",
+                    "description": "This contract has been verified and its source code is available"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "required": ["recipient", "contract"]
+      },
+      "ThreatAnalysisRequestDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "description": "EIP-712 typed data to analyze for security threats. Contains domain, primaryType, types, and message fields following the EIP-712 standard for structured data signing.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TypedData"
+              }
+            ]
+          },
+          "walletAddress": {
+            "type": "string",
+            "description": "Address of the transaction signer/wallet"
+          },
+          "origin": {
+            "type": "string",
+            "description": "Optional origin identifier for the request"
+          }
+        },
+        "required": ["data", "walletAddress"]
+      },
+      "ThreatAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
+          },
+          "type": {
+            "type": "string",
+            "description": "Threat status code",
+            "enum": ["NO_THREAT", "OWNERSHIP_CHANGE", "MODULE_CHANGE", "FAILED"]
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          }
+        },
+        "required": ["severity", "type", "title", "description"]
+      },
+      "MasterCopyChangeThreatAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
+          },
+          "type": {
+            "type": "string",
+            "description": "Threat status code",
+            "enum": ["MASTERCOPY_CHANGE"]
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          },
+          "before": {
+            "type": "string",
+            "description": "Address of the old master copy/implementation contract"
+          },
+          "after": {
+            "type": "string",
+            "description": "Address of the new master copy/implementation contract"
+          }
+        },
+        "required": ["severity", "type", "title", "description", "before", "after"]
+      },
+      "ThreatIssueDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Address involved in the issue, if applicable"
+          },
+          "description": {
+            "type": "string",
+            "description": "Issue description"
+          }
+        },
+        "required": ["description"]
+      },
+      "MaliciousOrModerateThreatAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
+          },
+          "type": {
+            "type": "string",
+            "description": "Threat status code",
+            "enum": ["MALICIOUS", "MODERATE"]
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          },
+          "issues": {
+            "type": "object",
+            "description": "A partial record of specific issues identified during threat analysis, grouped by severity.Record<Severity, ThreatIssue[]> - keys should be one of the Severity enum (OK | INFO | WARN | CRITICAL)",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/ThreatIssueDto"
+              }
+            },
+            "example": {
+              "CRITICAL": [
+                {
+                  "description": "Malicious contract interaction detected",
+                  "address": "0x0000000000000000000000000000000000000000"
+                }
+              ],
+              "WARN": [
+                {
+                  "description": "High gas price detected"
+                }
+              ]
+            }
+          }
+        },
+        "required": ["severity", "type", "title", "description"]
+      },
+      "NativeAssetDetailsDto": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "description": "Token symbol (if available)"
+          },
+          "logo_url": {
+            "type": "string",
+            "description": "URL to asset logo (if available)",
+            "example": "https://example.com/logo.png"
+          },
+          "type": {
+            "type": "string",
+            "description": "Asset type",
+            "enum": ["NATIVE"]
+          }
+        },
+        "required": ["type"]
+      },
+      "TokenAssetDetailsDto": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "description": "Token symbol (if available)"
+          },
+          "logo_url": {
+            "type": "string",
+            "description": "URL to asset logo (if available)",
+            "example": "https://example.com/logo.png"
+          },
+          "type": {
+            "type": "string",
+            "description": "Asset type",
+            "enum": ["ERC20", "ERC721", "ERC1155"]
+          },
+          "address": {
+            "type": "string",
+            "description": "Token contract address"
+          }
+        },
+        "required": ["type", "address"]
+      },
+      "FungibleDiffDto": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "Value change for fungible tokens",
+            "example": "1000000"
+          }
+        }
+      },
+      "NFTDiffDto": {
+        "type": "object",
+        "properties": {
+          "token_id": {
+            "type": "number",
+            "description": "Token ID for NFTs",
+            "example": 42
+          }
+        },
+        "required": ["token_id"]
+      },
+      "BalanceChangeDto": {
+        "type": "object",
+        "properties": {
+          "asset": {
+            "description": "Asset details",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NativeAssetDetailsDto"
+              },
+              {
+                "$ref": "#/components/schemas/TokenAssetDetailsDto"
+              }
+            ]
+          },
+          "in": {
+            "type": "array",
+            "description": "Incoming asset changes",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/FungibleDiffDto"
+                },
+                {
+                  "$ref": "#/components/schemas/NFTDiffDto"
+                }
+              ]
+            },
+            "example": [
+              {
+                "value": "1000000"
+              }
+            ]
+          },
+          "out": {
+            "type": "array",
+            "description": "Outgoing asset changes",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/FungibleDiffDto"
+                },
+                {
+                  "$ref": "#/components/schemas/NFTDiffDto"
+                }
+              ]
+            },
+            "example": [
+              {
+                "value": "500000"
+              }
+            ]
+          }
+        },
+        "required": ["asset", "in", "out"]
+      },
+      "ThreatAnalysisResponseDto": {
+        "type": "object",
+        "properties": {
+          "THREAT": {
+            "description": "Array of threat analysis results. Results are sorted by severity (CRITICAL first). May include malicious patterns, ownership changes, module changes, or master copy upgrades.",
+            "example": [
+              {
+                "severity": "OK",
+                "type": "NO_THREAT",
+                "title": "No threats detected",
+                "description": "Transaction analysis found no security threats"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ThreatAnalysisResultDto"
+                },
+                {
+                  "$ref": "#/components/schemas/MasterCopyChangeThreatAnalysisResultDto"
+                },
+                {
+                  "$ref": "#/components/schemas/MaliciousOrModerateThreatAnalysisResultDto"
+                }
+              ]
+            }
+          },
+          "BALANCE_CHANGE": {
+            "description": "Balance changes resulting from the transaction. Shows incoming and outgoing transfers for various asset types.",
+            "example": [
+              {
+                "asset": {
+                  "type": "ERC20",
+                  "symbol": "USDC",
+                  "address": "0x0000000000000000000000000000000000000000",
+                  "logo_url": "https://example.com/usdc-logo.png"
+                },
+                "in": [
+                  {
+                    "value": "1000000"
+                  }
+                ],
+                "out": [
+                  {
+                    "value": "500000"
+                  }
+                ]
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BalanceChangeDto"
+            }
+          }
+        }
+      },
+      "ReportFalseResultRequestDto": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "type": "string",
+            "enum": ["FALSE_POSITIVE", "FALSE_NEGATIVE"],
+            "description": "Type of report: FALSE_POSITIVE if flagged incorrectly, FALSE_NEGATIVE if should have been flagged"
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request_id from the original Blockaid scan response",
+            "example": "11111111-1111-1111-1111-111111111111"
+          },
+          "details": {
+            "type": "string",
+            "description": "Details about why this is a false result",
+            "maxLength": 1000,
+            "example": "This transaction was incorrectly flagged as malicious"
+          }
+        },
+        "required": ["event", "request_id", "details"]
+      },
+      "ReportFalseResultResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the report was submitted successfully",
+            "example": true
+          }
+        },
+        "required": ["success"]
+      },
       "TargetedSafe": {
         "type": "object",
         "properties": {
@@ -7508,13 +9402,43 @@
           "methodName": {
             "type": "string",
             "nullable": true
-          },
-          "actionCount": {
-            "type": "number",
-            "nullable": true
           }
         },
         "required": ["type", "to", "dataSize", "isCancellation"]
+      },
+      "MultiSendTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["Custom"]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "to": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "dataSize": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "isCancellation": {
+            "type": "boolean"
+          },
+          "methodName": {
+            "type": "string",
+            "enum": ["multiSend"]
+          },
+          "actionCount": {
+            "type": "number"
+          }
+        },
+        "required": ["type", "to", "dataSize", "isCancellation", "methodName", "actionCount"]
       },
       "AddOwner": {
         "type": "object",
@@ -8067,8 +9991,12 @@
             "description": "The amount of fees paid for this order."
           },
           "executedFeeToken": {
-            "type": "string",
-            "description": "The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders)."
+            "description": "The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokenInfo"
+              }
+            ]
           },
           "receiver": {
             "type": "string",
@@ -8390,8 +10318,12 @@
             "description": "The executed surplus fee raw amount (no decimals), or null if there are too many parts"
           },
           "executedFeeToken": {
-            "type": "string",
-            "description": "The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders)."
+            "description": "The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokenInfo"
+              }
+            ]
           },
           "sellToken": {
             "description": "The sell token of the TWAP",
@@ -8826,7 +10758,12 @@
             "nullable": true
           },
           "operation": {
-            "type": "number"
+            "description": "Operation type: 0 for CALL, 1 for DELEGATE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Operation"
+              }
+            ]
           },
           "trustedDelegateCallTarget": {
             "type": "boolean",
@@ -9027,6 +10964,9 @@
                 "$ref": "#/components/schemas/CustomTransactionInfo"
               },
               {
+                "$ref": "#/components/schemas/MultiSendTransactionInfo"
+              },
+              {
                 "$ref": "#/components/schemas/SettingsChangeTransaction"
               },
               {
@@ -9137,7 +11077,12 @@
             "type": "object"
           },
           "operation": {
-            "type": "number"
+            "description": "Operation type: 0 for CALL, 1 for DELEGATE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Operation"
+              }
+            ]
           },
           "gasToken": {
             "type": "object"
@@ -9324,6 +11269,9 @@
                 "$ref": "#/components/schemas/CustomTransactionInfo"
               },
               {
+                "$ref": "#/components/schemas/MultiSendTransactionInfo"
+              },
+              {
                 "$ref": "#/components/schemas/SettingsChangeTransaction"
               },
               {
@@ -9398,6 +11346,10 @@
                 "$ref": "#/components/schemas/SafeAppInfo"
               }
             ]
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": ["txInfo", "id", "timestamp", "txStatus"]
@@ -9557,7 +11509,12 @@
             "type": "string"
           },
           "operation": {
-            "type": "number"
+            "description": "Operation type: 0 for CALL, 1 for DELEGATE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Operation"
+              }
+            ]
           }
         },
         "required": ["to", "value", "operation"]
@@ -9572,6 +11529,9 @@
               },
               {
                 "$ref": "#/components/schemas/CustomTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/MultiSendTransactionInfo"
               },
               {
                 "$ref": "#/components/schemas/SettingsChangeTransaction"
@@ -9764,7 +11724,12 @@
             "type": "string"
           },
           "operation": {
-            "type": "number"
+            "description": "Operation type: 0 for CALL, 1 for DELEGATE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Operation"
+              }
+            ]
           },
           "safeTxGas": {
             "type": "string"

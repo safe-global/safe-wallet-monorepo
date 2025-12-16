@@ -1,8 +1,18 @@
+/**
+ * TxFlowProvider - Central state management for transaction flows
+ *
+ * This provider manages:
+ * - Flow navigation (step, progress, onPrev, onNext)
+ * - Transaction state (isCreation, canExecute, willExecute, etc.)
+ * - Form state (isSubmitLoading, submitError, isRejectedByUser)
+ * - Role execution state (canExecuteThroughRole, willExecuteThroughRole)
+ */
+import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { createContext, useCallback, useContext, useState } from 'react'
 import type { ReactNode, ReactElement, SetStateAction, Dispatch, ComponentType } from 'react'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
-import { useImmediatelyExecutable, useValidateNonce } from '@/components/tx/SignOrExecuteForm/hooks'
+import { useImmediatelyExecutable, useValidateNonce } from '@/components/tx/shared/hooks'
 import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
 import {
@@ -12,13 +22,13 @@ import {
   useRoles,
 } from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import { SafeTxContext } from '../tx-flow/SafeTxProvider'
-import { useLazyGetTransactionDetailsQuery } from '@/store/slices'
-import { trackTxEvents } from '../tx/SignOrExecuteForm/tracking'
+import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { trackTxEvents } from '@/components/tx/shared/tracking'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useChainId from '@/hooks/useChainId'
 import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 import useTxDetails from '@/hooks/useTxDetails'
-import type { TransactionDetails, TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
+import useSafeInfo from '@/hooks/useSafeInfo'
 
 export type TxFlowContextType<T extends unknown = any> = {
   step: number
@@ -31,7 +41,7 @@ export type TxFlowContextType<T extends unknown = any> = {
     title?: ReactNode
     subtitle?: ReactNode
     icon?: ComponentType
-    txSummary?: TransactionSummary
+    txSummary?: Transaction
     hideNonce?: boolean
     fixedNonce?: boolean
     hideProgress?: boolean
@@ -148,6 +158,7 @@ const TxFlowProvider = <T extends unknown>({
 }: TxFlowProviderProps<T>): ReactElement => {
   const signer = useSigner()
   const isSafeOwner = useIsSafeOwner()
+  const { safe } = useSafeInfo()
   const isProposer = useIsWalletProposer()
   const chainId = useChainId()
   const { safeTx, txOrigin, isMassPayout } = useContext(SafeTxContext)
@@ -159,7 +170,7 @@ const TxFlowProvider = <T extends unknown>({
   const [submitError, setSubmitError] = useState<Error | undefined>(initialContext.submitError)
   const [isRejectedByUser, setIsRejectedByUser] = useState<boolean>(initialContext.isRejectedByUser)
   const [txLayoutProps, setTxLayoutProps] = useState<TxFlowContextType['txLayoutProps']>(defaultTxLayoutProps)
-  const [trigger] = useLazyGetTransactionDetailsQuery()
+  const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const [txDetails, , txDetailsLoading] = useTxDetails(txId)
 
@@ -190,7 +201,7 @@ const TxFlowProvider = <T extends unknown>({
 
   const trackTxEvent = useCallback(
     async (txId: string, isExecuted = false, isRoleExecution = false, isProposerCreation = false) => {
-      const { data: details } = await trigger({ chainId, txId })
+      const { data: details } = await trigger({ chainId, id: txId })
       // Track tx event
       trackTxEvents(
         details,
@@ -201,9 +212,10 @@ const TxFlowProvider = <T extends unknown>({
         !!signer?.isSafe,
         txOrigin,
         isMassPayout,
+        safe.threshold,
       )
     },
-    [chainId, isCreation, trigger, signer?.isSafe, txOrigin, isMassPayout],
+    [chainId, isCreation, trigger, signer?.isSafe, txOrigin, isMassPayout, safe.threshold],
   )
 
   const value = {

@@ -61,14 +61,17 @@
     },
     "build-and-maestro-test": {
       "withoutCredentials": true,
+      "environment": "development",
       "env": {
-        "RN_SRC_EXT": "e2e.ts,e2e.tsx"
+        "RN_SRC_EXT": "e2e.ts,e2e.tsx",
+        "EXPO_PUBLIC_SECURITY_RASP_ENABLED": "false"
       },
       "config": "build-and-maestro-test.yml",
       "android": {
         "buildType": "apk",
         "image": "latest"
       },
+
       "ios": {
         "simulator": true,
         "image": "latest",

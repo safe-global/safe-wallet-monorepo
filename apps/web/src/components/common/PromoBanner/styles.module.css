@@ -1,0 +1,117 @@
+.banner {
+  position: relative;
+  padding: var(--space-2) var(--space-8) var(--space-2) var(--space-2);
+  background: linear-gradient(90deg, #b0ffc9, #d7f6ff);
+  border: 0;
+  border-radius: 12px !important;
+  min-height: 131px;
+}
+
+.bannerStack {
+  display: flex;
+  width: 100%;
+}
+
+.bannerContent {
+  padding-right: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.bannerTitle {
+  color: var(--color-static-main);
+  font-weight: bold !important;
+}
+
+.bannerDescription {
+  color: var(--color-static-light);
+  padding-top: 4px;
+}
+
+.bannerCtaText {
+  color: var(--color-static-main);
+  margin-left: 0 !important;
+  padding: var(--space-1) !important;
+  margin-left: -8px !important;
+  margin-top: var(--space-1) !important;
+}
+
+.bannerCtaText:has(:global(.MuiButton-endIcon)) :global(.MuiButton-endIcon) {
+  margin-left: 4px !important;
+}
+
+.bannerCtaContained {
+  margin-top: var(--space-2) !important;
+  background-color: var(--color-static-main) !important;
+  color: var(--color-static-primary) !important;
+}
+
+.bannerCtaContained:hover {
+  background-color: var(--color-static-main) !important;
+  color: var(--color-static-primary) !important;
+}
+
+.bannerCtaContained:disabled {
+  background-color: var(--color-static-main) !important;
+  color: var(--color-static-primary) !important;
+  opacity: 0.5;
+}
+
+.closeButton {
+  position: absolute !important;
+  color: var(--color-static-main);
+  top: var(--space-2);
+  right: var(--space-2);
+  padding: 10px;
+  padding-top: 12px;
+  width: 16px;
+  height: 16px;
+}
+
+.closeButton:hover {
+  background-color: transparent;
+  color: var(--color-static-light) !important;
+}
+
+.closeIcon {
+  color: var(--color-static-main);
+  opacity: 1;
+  transition: color 0.2s ease;
+}
+
+.closeButton:hover .closeIcon {
+  color: var(--color-static-light) !important;
+}
+
+[data-theme='dark'] .closeButton:hover {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme='dark'] .closeButton:hover .closeIcon {
+  color: var(--color-text-primary) !important;
+}
+
+.bannerImage {
+  flex-shrink: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.bannerText {
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (max-width: 599.95px) {
+  .banner {
+    padding: var(--space-2);
+  }
+
+  .bannerContent {
+    padding-right: var(--space-5);
+  }
+
+  .bannerImage {
+    display: none;
+  }
+}

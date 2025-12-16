@@ -1,8 +1,14 @@
 import chains from './chains'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 
+type Environment = 'development' | 'production' | 'test' | 'cypress'
+
+export const APP_ENV = process.env.NODE_ENV as Environment
 export const IS_PRODUCTION = process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true'
-export const IS_DEV = process.env.NODE_ENV === 'development'
+export const IS_DEV = APP_ENV === 'development'
+export const IS_TEST_UNIT = APP_ENV === 'test'
+export const IS_TEST_E2E = APP_ENV === 'cypress'
+export const IS_TEST = IS_TEST_UNIT || IS_TEST_E2E
 export const COMMIT_HASH = process.env.NEXT_PUBLIC_COMMIT_HASH || ''
 
 // default chain ID's as provided to the environment
@@ -16,10 +22,15 @@ export const GATEWAY_URL_PRODUCTION =
   process.env.NEXT_PUBLIC_GATEWAY_URL_PRODUCTION || 'https://safe-client.safe.global'
 export const GATEWAY_URL_STAGING = process.env.NEXT_PUBLIC_GATEWAY_URL_STAGING || 'https://safe-client.staging.5afe.dev'
 
+// Status page
+export const STATUS_PAGE_URL = process.env.NEXT_PUBLIC_SAFE_STATUS_PAGE_URL || 'https://status.safe.global'
+
 // Magic numbers
 export const POLLING_INTERVAL = 15_000
+export const PORTFOLIO_POLLING_INTERVAL = 60_000
 export const BASE_TX_GAS = 21_000
 export const LS_NAMESPACE = 'SAFE_v2__'
+export const DUST_THRESHOLD = 0.01
 
 export const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN || ''
 export const BEAMER_ID = process.env.NEXT_PUBLIC_BEAMER_ID || ''
@@ -90,6 +101,12 @@ export const SAFE_PASS_URL = 'community.safe.global'
 export const ECOSYSTEM_ID_ADDRESS =
   process.env.NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS || '0x0000000000000000000000000000000000000000'
 export const MULTICHAIN_HELP_ARTICLE = `${HELP_CENTER_URL}/en/articles/222612-multi-chain-safe`
+
+// Hypernative Campaign IDs
+export const PROD_HYPERNATIVE_OUTREACH_ID = parseInt(process.env.NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID ?? `${3}`)
+export const STAGING_HYPERNATIVE_OUTREACH_ID = parseInt(
+  process.env.NEXT_PUBLIC_STAGING_HYPERNATIVE_OUTREACH_ID ?? `${11}`,
+)
 
 // Deployment specifics
 export const IS_BEHIND_IAP = process.env.NEXT_PUBLIC_IS_BEHIND_IAP === 'true'

@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useRef } from 'react'
 import BottomSheet, {
   BottomSheetFooterProps,
   BottomSheetModalProps,
-  BottomSheetView,
   BottomSheetScrollView,
   BottomSheetFooter,
 } from '@gorhom/bottom-sheet'
@@ -13,6 +12,7 @@ import { Platform, StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LoadingTx } from '@/src/features/ConfirmTx/components/LoadingTx'
+import { TestCtrls } from '@/src/tests/e2e-maestro/components/TestCtrls'
 
 interface SafeBottomSheetProps<T> {
   children?: React.ReactNode
@@ -73,7 +73,9 @@ export function SafeBottomSheet<T>({
         alignItems="center"
         backgroundColor="$backgroundPaper"
       >
-        <H5 fontWeight={700}>{title}</H5>
+        <H5 fontWeight={700} tabIndex={0}>
+          {title}
+        </H5>
 
         {actions && (
           <View position="absolute" right={'$4'} top={'$3'} justifyContent="center" alignItems="center">
@@ -108,6 +110,7 @@ export function SafeBottomSheet<T>({
             onLayout={(e) => {
               setFooterHeight(e.nativeEvent.layout.height)
             }}
+            accessible={true}
           >
             {FooterComponent && <FooterComponent />}
           </View>
@@ -116,8 +119,6 @@ export function SafeBottomSheet<T>({
     },
     [FooterComponent, setFooterHeight],
   )
-
-  console.log('insets.bottom', insets.bottom)
   return (
     <BottomSheet
       ref={ref}
@@ -128,33 +129,44 @@ export function SafeBottomSheet<T>({
       enablePanDownToClose
       overDragResistanceFactor={10}
       backgroundComponent={BackgroundComponent}
-      backdropComponent={() => <BackdropComponent />}
+      // on iOS, if we don't call router.back() from the backdrop the close animation feels extremely slow
+      // iOS first slides the sheet down then triggers the removal of the backdrop
+      // when router.back() is called from the backdrop, the sheet no longer emits onChange events on iOS
+      // on Android the router.back() on the backdrop navigates back, but the onChange event is still triggered
+      // because of this on Android we end up with double navigation back and end up on the wrong screen
+      backdropComponent={() => <BackdropComponent shouldNavigateBack={Platform.OS === 'ios'} />}
       footerComponent={isSortable ? undefined : renderFooter}
       topInset={insets.top}
-      // bottomInset={Platform.OS === 'android' ? insets.bottom : 0}
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
+      accessible={false}
     >
+      {/** in e2e tests, the bottom sheet renders on top of the normal content,
+       * and the test controls are no longer visible, so we need to render them again here
+       * We need this mostly for the copy/paste tests.
+       **/}
+      <TestCtrls />
       {isSortable ? (
-        <BottomSheetView style={[styles.contentContainer]}>
-          {title && <TitleHeader />}
-          <DraggableFlatList<T>
-            data={items}
-            style={{ marginBottom: insets.bottom }}
-            containerStyle={{ height: '100%' }}
-            contentContainerStyle={{ paddingBottom: 50 }}
-            onDragEnd={onDragEnd}
-            keyExtractor={(item, index) => (keyExtractor ? keyExtractor({ item, index }) : index.toString())}
-            renderItem={renderItem}
-          />
-        </BottomSheetView>
+        <DraggableFlatList<T>
+          data={items}
+          contentContainerStyle={{ paddingBottom: insets.bottom }}
+          ListHeaderComponent={title ? <TitleHeader /> : undefined}
+          stickyHeaderIndices={title ? [0] : undefined}
+          onDragEnd={onDragEnd}
+          keyExtractor={(item, index) => (keyExtractor ? keyExtractor({ item, index }) : index.toString())}
+          renderItem={renderItem}
+        />
       ) : (
         <BottomSheetScrollView
-          style={{
-            marginBottom:
-              (!sortable && FooterComponent ? footerHeight : 0) + getTokenValue(Platform.OS === 'ios' ? '$4' : '$8'),
-          }}
-          contentContainerStyle={[styles.scrollInnerContainer]}
-          stickyHeaderIndices={[0]}
+          accessible={false}
+          contentContainerStyle={[
+            styles.scrollInnerContainer,
+            {
+              paddingBottom:
+                (!sortable && FooterComponent ? footerHeight : insets.bottom) +
+                getTokenValue(Platform.OS === 'ios' ? '$4' : '$8'),
+            },
+          ]}
+          stickyHeaderIndices={title ? [0] : undefined}
         >
           {title && <TitleHeader />}
           <View minHeight={200} alignItems="center" paddingVertical="$3">

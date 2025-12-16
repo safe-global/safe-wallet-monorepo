@@ -16,7 +16,7 @@ const StatusConfigs: Record<NativeStakingStatus, ValidatorStatusConfig> = {
   NOT_STAKED: {
     themeName: 'badge_warning',
     icon: () => <SafeFontIcon name="signature" size={12} />,
-    text: 'Signature needed',
+    text: 'Inactive',
   },
   ACTIVATING: {
     themeName: 'badge_background',

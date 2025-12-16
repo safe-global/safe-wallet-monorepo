@@ -8,13 +8,11 @@ import { Provider } from 'react-redux'
 import CssBaseline from '@mui/material/CssBaseline'
 import type { Theme } from '@mui/material/styles'
 import { ThemeProvider } from '@mui/material/styles'
-import { setBaseUrl as setGatewayBaseUrl } from '@safe-global/safe-gateway-typescript-sdk'
-import { setBaseUrl as setNewGatewayBaseUrl } from '@safe-global/safe-client-gateway-sdk'
 import { CacheProvider, type EmotionCache } from '@emotion/react'
 import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import '@/styles/globals.css'
 import { BRAND_NAME } from '@/config/constants'
-import { makeStore, useHydrateStore } from '@/store'
+import { makeStore, setStoreInstance, useHydrateStore } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
 import useLoadableStores from '@/hooks/useLoadableStores'
 import { useInitOnboard } from '@/hooks/wallets/useOnboard'
@@ -51,12 +49,12 @@ import { GATEWAY_URL } from '@/config/gateway'
 import { useDatadog } from '@/services/datadog'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
+import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
 
 const reduxStore = makeStore()
+setStoreInstance(reduxStore)
 
 const InitApp = (): null => {
-  setGatewayBaseUrl(GATEWAY_URL)
-  setNewGatewayBaseUrl(GATEWAY_URL)
   useHydrateStore(reduxStore)
   useAdjustUrl()
   useDatadog()
@@ -77,6 +75,7 @@ const InitApp = (): null => {
   useSafeMsgTracking()
   useBeamer()
   useVisitedSafes()
+  useSafeLabsTerms() // Automatically disconnect wallets if terms not accepted and feature is enabled
 
   return null
 }
@@ -114,6 +113,16 @@ interface SafeWalletAppProps extends AppProps {
   emotionCache?: EmotionCache
 }
 
+const TermsGate = ({ children }: { children: ReactNode }) => {
+  const { shouldShowContent } = useSafeLabsTerms()
+
+  if (!shouldShowContent) {
+    return null
+  }
+
+  return <>{children}</>
+}
+
 const SafeWalletApp = ({
   Component,
   pageProps,
@@ -135,23 +144,25 @@ const SafeWalletApp = ({
 
           <InitApp />
 
-          <PageLayout pathname={router.pathname}>
-            <Component {...pageProps} key={safeKey} />
-          </PageLayout>
+          <TermsGate>
+            <PageLayout pathname={router.pathname}>
+              <Component {...pageProps} key={safeKey} />
+            </PageLayout>
 
-          <CookieAndTermBanner />
+            <CookieAndTermBanner />
 
-          <OutreachPopup />
+            <OutreachPopup />
 
-          <Notifications />
+            <Notifications />
 
-          <Recovery />
+            <Recovery />
 
-          <CounterfactualHooks />
+            <CounterfactualHooks />
 
-          <Analytics />
+            <Analytics />
 
-          <PkModulePopup />
+            <PkModulePopup />
+          </TermsGate>
         </AppProviders>
       </CacheProvider>
     </Provider>

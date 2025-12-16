@@ -4,6 +4,7 @@ import { safeTabItem } from './types'
 import { SafeTabBar } from './SafeTabBar'
 import { Theme } from 'tamagui'
 import { StyleProp, ViewStyle } from 'react-native'
+import { View } from 'tamagui'
 
 interface SafeTabProps<T> {
   renderHeader?: (props: TabBarProps<string>) => ReactElement
@@ -12,6 +13,7 @@ interface SafeTabProps<T> {
   containerProps?: T
   containerStyle?: StyleProp<ViewStyle>
   onIndexChange?: (index: number) => void
+  rightNode?: (activeTabLabel: string) => React.ReactNode
 }
 
 export function SafeTab<T extends object>({
@@ -21,6 +23,7 @@ export function SafeTab<T extends object>({
   containerProps,
   containerStyle,
   onIndexChange,
+  rightNode,
 }: SafeTabProps<T>) {
   const [activeTab, setActiveTab] = useState(items[0].label)
 
@@ -31,14 +34,18 @@ export function SafeTab<T extends object>({
         renderHeader={renderHeader}
         headerContainerStyle={headerContainerStyle}
         headerHeight={headerHeight}
-        renderTabBar={(props) => <SafeTabBar activeTab={activeTab} setActiveTab={setActiveTab} {...props} />}
+        renderTabBar={(props) => (
+          <SafeTabBar activeTab={activeTab} setActiveTab={setActiveTab} rightNode={rightNode?.(activeTab)} {...props} />
+        )}
         onTabChange={(event) => setActiveTab(event.tabName)}
         onIndexChange={onIndexChange}
         initialTabName={items[0].label}
       >
-        {items.map(({ label, Component }, index) => (
+        {items.map(({ label, testID, Component }, index) => (
           <Tabs.Tab name={label} key={`${label}-${index}`}>
-            <Component {...(containerProps as T)} />
+            <View testID={testID ?? `tab-content-${label}-${index}`} flex={1}>
+              <Component {...(containerProps as T)} />
+            </View>
           </Tabs.Tab>
         ))}
       </Tabs.Container>

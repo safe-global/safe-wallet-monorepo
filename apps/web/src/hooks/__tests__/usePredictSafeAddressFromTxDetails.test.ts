@@ -1,5 +1,5 @@
+import type { DataDecoded, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { renderHook } from '@testing-library/react'
-import type { DataDecoded, TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { _getSetupFromDataDecoded, usePredictSafeAddressFromTxDetails } from '../usePredictSafeAddressFromTxDetails'
 

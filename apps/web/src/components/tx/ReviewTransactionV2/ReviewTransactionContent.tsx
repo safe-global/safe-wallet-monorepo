@@ -1,31 +1,30 @@
+import type { TransactionDetails, TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { PropsWithChildren, ReactElement } from 'react'
 import { useCallback, useContext } from 'react'
 import madProps from '@/utils/mad-props'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import ErrorMessage from '../ErrorMessage'
 import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
-import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
 import { ErrorBoundary } from '@sentry/react'
 import ApprovalEditor from '../ApprovalEditor'
-import { BlockaidBalanceChanges } from '../security/blockaid/BlockaidBalanceChange'
 import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
-import type { TransactionDetails, TransactionPreview } from '@safe-global/safe-gateway-typescript-sdk'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ConfirmationView from '../confirmation-views'
-import UnknownContractError from '../SignOrExecuteForm/UnknownContractError'
+import UnknownContractError from '@/components/tx/shared/errors/UnknownContractError'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
 import { Slot, SlotName } from '@/components/tx-flow/slots'
 import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
-import { Button, CircularProgress } from '@mui/material'
+import { Button, CircularProgress, Divider } from '@mui/material'
 import CheckWallet from '@/components/common/CheckWallet'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
+import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 
 export type ReviewTransactionContentProps = PropsWithChildren<{ onSubmit: SubmitCallback; withDecodedData?: boolean }>
 
 export const ReviewTransactionContent = ({
   safeTx,
   safeTxError,
+  safeShield,
   onSubmit,
   children,
   txDetails,
@@ -34,16 +33,15 @@ export const ReviewTransactionContent = ({
 }: ReviewTransactionContentProps & {
   safeTx: ReturnType<typeof useSafeTx>
   safeTxError: ReturnType<typeof useSafeTxError>
+  safeShield: ReturnType<typeof useSafeShield>
   isCreation?: boolean
   txDetails?: TransactionDetails
   txPreview?: TransactionPreview
 }): ReactElement => {
-  const { willExecute, isBatch, isCreation, isProposing, isRejection, isSubmitLoading, isSubmitDisabled, onlyExecute } =
-    useContext(TxFlowContext)
-
+  const { isBatch, isCreation, isRejection, isSubmitLoading, isSubmitDisabled, onlyExecute } = useContext(TxFlowContext)
+  const { needsRiskConfirmation, isRiskConfirmed } = safeShield
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
-  const isCounterfactualSafe = useIsCounterfactualSafe()
 
   const onContinueClick = useCallback(() => {
     trackEvent(MODALS_EVENTS.CONTINUE_CLICKED)
@@ -71,22 +69,10 @@ export const ReviewTransactionContent = ({
           )}
         </ConfirmationView>
 
-        {!isCounterfactualSafe && !isRejection && <BlockaidBalanceChanges />}
-      </TxCard>
+        <Slot name={SlotName.Main} />
 
-      <Slot name={SlotName.Feature} />
+        <Divider sx={{ mt: 2, mx: -3 }} />
 
-      <TxCard>
-        <ConfirmationTitle
-          variant={
-            isProposing
-              ? ConfirmationTitleTypes.propose
-              : willExecute
-                ? ConfirmationTitleTypes.execute
-                : ConfirmationTitleTypes.sign
-          }
-          isCreation={isCreation}
-        />
         {safeTxError && (
           <ErrorMessage error={safeTxError}>
             This transaction will most likely fail. To save gas costs, avoid confirming the transaction.
@@ -97,21 +83,23 @@ export const ReviewTransactionContent = ({
         <NetworkWarning />
         <UnknownContractError txData={txDetails?.txData ?? txPreview?.txData} />
 
-        <TxCardActions>
+        <TxCardActions sx={{ marginTop: '0 !important' }}>
           {/* Continue button */}
           <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!isSubmitDisabled}>
-            {(isOk) => (
-              <Button
-                data-testid="continue-sign-btn"
-                variant="contained"
-                type="submit"
-                onClick={onContinueClick}
-                disabled={!isOk || isSubmitDisabled}
-                sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
-              >
-                {isSubmitLoading ? <CircularProgress size={20} /> : 'Continue'}
-              </Button>
-            )}
+            {(isOk) => {
+              return (
+                <Button
+                  data-testid="continue-sign-btn"
+                  variant="contained"
+                  type="submit"
+                  onClick={onContinueClick}
+                  disabled={!isOk || isSubmitDisabled || (needsRiskConfirmation && !isRiskConfirmed)}
+                  sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
+                >
+                  {isSubmitLoading ? <CircularProgress size={20} /> : 'Continue'}
+                </Button>
+              )
+            }}
           </CheckWallet>
         </TxCardActions>
       </TxCard>
@@ -125,4 +113,5 @@ const useSafeTxError = () => useContext(SafeTxContext).safeTxError
 export default madProps(ReviewTransactionContent, {
   safeTx: useSafeTx,
   safeTxError: useSafeTxError,
+  safeShield: useSafeShield,
 })

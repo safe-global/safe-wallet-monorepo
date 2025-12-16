@@ -10,11 +10,10 @@ import type { SyntheticEvent } from 'react'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import DecodedTxs from '@/components/tx-flow/flows/ExecuteBatch/DecodedTxs'
-import TxChecks from '@/components/tx-flow/features/TxChecks/TxChecks'
 import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { logError, Errors } from '@/services/exceptions'
-import { dispatchBatchExecution, dispatchBatchExecutionRelay } from '@/services/tx/tx-sender'
+import { createMultiSendCallOnlyTx, dispatchBatchExecution, dispatchBatchExecutionRelay } from '@/services/tx/tx-sender'
 import { hasRemainingRelays } from '@/utils/relaying'
 import { getMultiSendTxs } from '@/utils/transactions'
 import TxCard from '../../common/TxCard'
@@ -22,21 +21,23 @@ import CheckWallet from '@/components/common/CheckWallet'
 import type { ExecuteBatchFlowProps } from '.'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import SendToBlock from '@/components/tx/SendToBlock'
-import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/SignOrExecuteForm/ConfirmationTitle'
+import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/shared/ConfirmationTitle'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TxModalContext } from '@/components/tx-flow'
 import useGasPrice from '@/hooks/useGasPrice'
 import type { Overrides } from 'ethers'
-import { trackEvent } from '@/services/analytics'
+import { trackEvent, MixpanelEventParams } from '@/services/analytics'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import { isWalletRejection } from '@/utils/wallets'
-import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
+import WalletRejectionError from '@/components/tx/shared/errors/WalletRejectionError'
 import useUserNonce from '@/components/tx/AdvancedParams/useUserNonce'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
-import { useGetMultipleTransactionDetailsQuery } from '@/store/api/gateway'
-import { skipToken } from '@reduxjs/toolkit/query/react'
+import { useTransactionsGetMultipleTransactionDetailsQuery } from '@safe-global/store/gateway/transactions'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { FEATURES, getLatestSafeVersion, hasFeature } from '@safe-global/utils/utils/chains'
+import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
+import type { SafeTransaction } from '@safe-global/types-kit'
+import { fetchRecommendedParams } from '@/services/tx/tx-sender/recommendedNonce'
 
 export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
@@ -68,13 +69,14 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
     data: txsWithDetails,
     error,
     isLoading: loading,
-  } = useGetMultipleTransactionDetailsQuery(
-    chain?.chainId && params.txs.length
-      ? {
-          chainId: chain.chainId,
-          txIds: params.txs.map((tx) => tx.transaction.id),
-        }
-      : skipToken,
+  } = useTransactionsGetMultipleTransactionDetailsQuery(
+    {
+      chainId: chain?.chainId || '',
+      txIds: params.txs.map((tx) => tx.transaction.id),
+    },
+    {
+      skip: !chain?.chainId || !params.txs.length,
+    },
   )
 
   const [multiSendContract] = useAsync(async () => {
@@ -118,6 +120,20 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
     )
   }
 
+  const [safeTx] = useAsync<SafeTransaction | undefined>(async () => {
+    const safeTx = multiSendTxs ? await createMultiSendCallOnlyTx(multiSendTxs) : undefined
+
+    if (safeTx) {
+      // For simulation purposes, we need to estimate gas even if the Safe version doesn't require it
+      const { safeTxGas } = await fetchRecommendedParams(safe.chainId, safe.address.value, safeTx.data)
+      safeTx.data.safeTxGas = safeTxGas
+    }
+
+    return safeTx
+  }, [multiSendTxs, safe.chainId, safe.address.value])
+
+  useSafeShieldForTxData(safeTx)
+
   const onRelay = async () => {
     if (!multiSendTxData || !multiSendContract || !txsWithDetails) return
 
@@ -153,7 +169,13 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
       return
     }
 
-    trackEvent({ ...TX_EVENTS.EXECUTE, label: TX_TYPES.bulk_execute })
+    trackEvent(
+      { ...TX_EVENTS.EXECUTE, label: TX_TYPES.bulk_execute },
+      {
+        [MixpanelEventParams.TRANSACTION_TYPE]: TX_TYPES.bulk_execute,
+        [MixpanelEventParams.THRESHOLD]: safe.threshold,
+      },
+    )
   }
 
   const submitDisabled = loading || !isSubmittable || !gasPrice
@@ -175,11 +197,9 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
         <div>
           <DecodedTxs txs={txsWithDetails} />
         </div>
-      </TxCard>
 
-      {multiSendTxs && <TxChecks disabled={submitDisabled} transaction={multiSendTxs} />}
+        <Divider sx={{ mt: 2, mx: -3 }} />
 
-      <TxCard>
         <ConfirmationTitle variant={ConfirmationTitleTypes.execute} />
 
         <NetworkWarning />
@@ -201,13 +221,15 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
         </Alert>
 
         {error && (
-          <ErrorMessage error={asError(error)}>
+          <ErrorMessage error={asError(error)} context="estimation">
             This transaction will most likely fail. To save gas costs, avoid creating the transaction.
           </ErrorMessage>
         )}
 
         {submitError && (
-          <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
+          <ErrorMessage error={submitError} context="execution">
+            Error submitting the transaction. Please try again.
+          </ErrorMessage>
         )}
 
         {isRejectedByUser && <WalletRejectionError />}

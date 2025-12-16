@@ -20,6 +20,8 @@ export type SettingsState = {
 
   tokenList: TOKEN_LISTS
 
+  hideDust?: boolean
+
   hideSuspiciousTransactions?: boolean
 
   shortName: {
@@ -43,6 +45,8 @@ export const initialState: SettingsState = {
   tokenList: TOKEN_LISTS.TRUSTED,
 
   hiddenTokens: {},
+
+  hideDust: true,
 
   hideSuspiciousTransactions: true,
 
@@ -95,6 +99,9 @@ export const settingsSlice = createSlice({
     setTokenList: (state, { payload }: PayloadAction<SettingsState['tokenList']>) => {
       state.tokenList = payload
     },
+    setHideDust: (state, { payload }: PayloadAction<SettingsState['hideDust']>) => {
+      state.hideDust = payload
+    },
     hideSuspiciousTransactions: (state, { payload }: PayloadAction<boolean>) => {
       state.hideSuspiciousTransactions = payload
     },
@@ -130,6 +137,7 @@ export const {
   setDarkMode,
   setHiddenTokensForChain,
   setTokenList,
+  setHideDust,
   hideSuspiciousTransactions,
   setRpc,
   setTenderly,
@@ -165,3 +173,4 @@ export const isEnvInitialState = createSelector([selectSettings, (_, chainId) =>
 
 export const selectOnChainSigning = createSelector(selectSettings, (settings) => settings.signing.onChainSigning)
 export const selectBlindSigning = createSelector(selectSettings, (settings) => settings.signing.blindSigning)
+export const selectHideDust = createSelector(selectSettings, (settings) => settings.hideDust ?? true)

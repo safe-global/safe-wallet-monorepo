@@ -10,7 +10,7 @@ import { Container } from '@/src/components/Container'
 import { useTxTokenInfo } from '@safe-global/utils/hooks/useTxTokenInfo'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveChainCurrency } from '@/src/store/chains'
-import { Identicon } from '@/src/components/Identicon'
+import { HashDisplay } from '@/src/components/HashDisplay'
 
 interface TxActionsListProps {
   txDetails: TransactionDetails
@@ -64,10 +64,7 @@ const TxActionItem = ({ action, index, addressInfoIndex, txData }: TxActionItemP
                 Send {formatVisualAmount(transferTokenInfo.transferValue, transferTokenInfo?.tokenInfo?.decimals, 6)}{' '}
                 {transferTokenInfo.tokenInfo.symbol} to
               </Text>
-              <Identicon address={tx.to as `0x${string}`} size={20} />
-              <Text fontSize="$4" numberOfLines={1} ellipsizeMode="tail" flexShrink={1}>
-                {shortenAddress(tx.to)}
-              </Text>
+              <HashDisplay value={tx.to as `0x${string}`} showCopy={false} showExternalLink={false} />
             </View>
           ) : (
             <Text fontSize="$4" flexShrink={1} flexWrap="wrap">
@@ -116,6 +113,8 @@ export function TxActionsList({ txDetails }: TxActionsListProps) {
             gap="$5"
             borderRadius="$3"
             onPress={() => onActionPress(action)}
+            testID={`tx-action-item-${index}`}
+            collapsable={false}
           >
             <TxActionItem txData={txDetails.txData} action={action} index={index} />
           </Container>

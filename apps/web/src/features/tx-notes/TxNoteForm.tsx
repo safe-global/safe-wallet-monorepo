@@ -1,7 +1,7 @@
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import TxCard from '@/components/tx-flow/common/TxCard'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TxNote } from './TxNote'
 import { TxNoteInput } from './TxNoteInput'
+import { Box } from '@mui/material'
 
 export function TxNoteForm({
   isCreation,
@@ -14,5 +14,5 @@ export function TxNoteForm({
 }) {
   if (!isCreation && !txDetails?.note) return null
 
-  return <TxCard>{isCreation ? <TxNoteInput onChange={onChange} /> : <TxNote txDetails={txDetails} />}</TxCard>
+  return <Box pt={3}>{isCreation ? <TxNoteInput onChange={onChange} /> : <TxNote txDetails={txDetails} />}</Box>
 }

@@ -49,7 +49,7 @@ export const HexDataDisplay = ({
   return (
     <InfoSheet title={title} info={data}>
       <View flexDirection="row" alignItems="center" gap={gap}>
-        <Text>{shortenText(data, characterLimit)}</Text>
+        <Text>{data.length > characterLimit ? shortenText(data, characterLimit) : data}</Text>
         <CopyButton value={data} color={copyButtonColor} text={copyMessage} />
       </View>
     </InfoSheet>

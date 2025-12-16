@@ -41,7 +41,7 @@ import MultiAccountContextMenu from '@/components/sidebar/SafeListContextMenu/Mu
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import useWallet from '@/hooks/wallets/useWallet'
 import { selectCurrency } from '@/store/settingsSlice'
-import { selectChains } from '@/store/chainsSlice'
+import useChains from '@/hooks/useChains'
 import BookmarkIcon from '@/public/images/apps/bookmark.svg'
 import BookmarkedIcon from '@/public/images/apps/bookmarked.svg'
 import { addOrUpdateSafe, pinSafe, selectAllAddedSafes, unpinSafe } from '@/store/addedSafesSlice'
@@ -97,7 +97,7 @@ function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem) {
   )
 
   const currency = useAppSelector(selectCurrency)
-  const { address: walletAddress = '' } = useWallet() || {}
+  const { address: walletAddress } = useWallet() || {}
 
   const { data: safeOverviews } = useGetMultipleSafeOverviewsQuery({ currency, walletAddress, safes: deployedSafes })
 
@@ -112,16 +112,16 @@ function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem) {
     [safeOverviews],
   )
 
-  const chains = useAppSelector(selectChains)
+  const { configs: chains } = useChains()
   const hasReplayableSafe = useMemo(() => {
     return sortedSafes.some((safeItem) => {
       const undeployedSafe = undeployedSafes[safeItem.chainId]?.[safeItem.address]
-      const chain = chains.data.find((chain) => chain.chainId === safeItem.chainId)
+      const chain = chains.find((chain) => chain.chainId === safeItem.chainId)
       const addNetworkFeatureEnabled = hasMultiChainAddNetworkFeature(chain)
       // Replayable if deployed or new counterfactual safe and the chain supports add network
       return (!undeployedSafe || !isPredictedSafeProps(undeployedSafe.props)) && addNetworkFeatureEnabled
     })
-  }, [chains.data, sortedSafes, undeployedSafes])
+  }, [chains, sortedSafes, undeployedSafes])
 
   const isReadOnly = useMemo(() => sortedSafes.every((safe) => safe.isReadOnly), [sortedSafes])
 

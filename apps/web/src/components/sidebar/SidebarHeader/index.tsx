@@ -1,13 +1,9 @@
-import TokenAmount from '@/components/common/TokenAmount'
 import CounterfactualStatusButton from '@/features/counterfactual/CounterfactualStatusButton'
 import { type ReactElement } from 'react'
-import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
-import Skeleton from '@mui/material/Skeleton'
 import Tooltip from '@mui/material/Tooltip'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
-import SafeIcon from '@/components/common/SafeIcon'
 import NewTxButton from '@/components/sidebar/NewTxButton'
 import { useAppSelector } from '@/store'
 
@@ -19,29 +15,24 @@ import LinkIconBold from '@/public/images/sidebar/link-bold.svg'
 import { selectSettings } from '@/store/settingsSlice'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import EthHashInfo from '@/components/common/EthHashInfo'
 import QrCodeButton from '../QrCodeButton'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import { SvgIcon } from '@mui/material'
-import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import ExplorerButton from '@/components/common/ExplorerButton'
 import CopyTooltip from '@/components/common/CopyTooltip'
-import FiatValue from '@/components/common/FiatValue'
-import { useAddressResolver } from '@/hooks/useAddressResolver'
 import { NestedSafesButton } from '@/components/sidebar/NestedSafesButton'
-import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
+import SafeHeaderInfo from './SafeHeaderInfo'
 
 const SafeHeader = (): ReactElement => {
-  const { balances } = useVisibleBalances()
   const safeAddress = useSafeAddress()
   const { safe } = useSafeInfo()
-  const { threshold, owners } = safe
   const chain = useCurrentChain()
   const settings = useAppSelector(selectSettings)
-  const { ens } = useAddressResolver(safeAddress)
 
   const addressCopyText = settings.shortName.copy && chain ? `${chain.shortName}:${safeAddress}` : safeAddress
 
@@ -50,45 +41,14 @@ const SafeHeader = (): ReactElement => {
   return (
     <div className={css.container}>
       <div className={css.info}>
-        <div data-testid="safe-header-info" className={css.safe}>
-          <div data-testid="safe-icon">
-            {safeAddress ? (
-              <SafeIcon address={safeAddress} threshold={threshold} owners={owners?.length} />
-            ) : (
-              <Skeleton variant="circular" width={40} height={40} />
-            )}
-          </div>
-
-          <div className={css.address}>
-            {safeAddress ? (
-              <EthHashInfo address={safeAddress} shortAddress showAvatar={false} name={ens} />
-            ) : (
-              <Typography variant="body2">
-                <Skeleton variant="text" width={86} />
-                <Skeleton variant="text" width={120} />
-              </Typography>
-            )}
-
-            <Typography data-testid="currency-section" variant="body2" fontWeight={700}>
-              {safe.deployed ? (
-                balances.fiatTotal ? (
-                  <FiatValue value={balances.fiatTotal} />
-                ) : (
-                  <Skeleton variant="text" width={60} />
-                )
-              ) : (
-                <TokenAmount
-                  value={balances.items[0]?.balance}
-                  decimals={balances.items[0]?.tokenInfo.decimals}
-                  tokenSymbol={balances.items[0]?.tokenInfo.symbol}
-                />
-              )}
-            </Typography>
-          </div>
-        </div>
+        <SafeHeaderInfo />
 
         <div className={css.iconButtons}>
-          <Track {...OVERVIEW_EVENTS.SHOW_QR} label="sidebar">
+          <Track
+            {...OVERVIEW_EVENTS.SHOW_QR}
+            label="sidebar"
+            mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'QR Code' }}
+          >
             <QrCodeButton>
               <Tooltip title="Open QR code" placement="top">
                 <IconButton className={css.iconButton}>
@@ -98,7 +58,10 @@ const SafeHeader = (): ReactElement => {
             </QrCodeButton>
           </Track>
 
-          <Track {...OVERVIEW_EVENTS.COPY_ADDRESS}>
+          <Track
+            {...OVERVIEW_EVENTS.COPY_ADDRESS}
+            mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Copy Address' }}
+          >
             <CopyTooltip text={addressCopyText}>
               <IconButton data-testid="copy-address-btn" className={css.iconButton}>
                 <SvgIcon component={CopyIconBold} inheritViewBox color="primary" fontSize="small" />
@@ -106,11 +69,18 @@ const SafeHeader = (): ReactElement => {
             </CopyTooltip>
           </Track>
 
-          <Track {...OVERVIEW_EVENTS.OPEN_EXPLORER}>
+          <Track
+            {...OVERVIEW_EVENTS.OPEN_EXPLORER}
+            mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Block Explorer' }}
+          >
             <ExplorerButton {...blockExplorerLink} className={css.iconButton} icon={LinkIconBold} />
           </Track>
 
-          <Track {...NESTED_SAFE_EVENTS.OPEN_LIST} label={NESTED_SAFE_LABELS.header}>
+          <Track
+            {...NESTED_SAFE_EVENTS.OPEN_LIST}
+            label={NESTED_SAFE_LABELS.header}
+            mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Nested Safes' }}
+          >
             <NestedSafesButton chainId={safe.chainId} safeAddress={safe.address.value} />
           </Track>
 

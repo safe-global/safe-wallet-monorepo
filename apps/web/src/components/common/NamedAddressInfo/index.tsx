@@ -22,7 +22,7 @@ const useIsUnverifiedContract = (contract?: { contractAbi?: object | null } | nu
   return !!contract && !contract.contractAbi
 }
 
-export function useAddressName(address?: string, name?: string | null, customAvatar?: string) {
+export function useAddressName(address?: string, name?: string | null, customAvatar?: string | null) {
   const chainId = useChainId()
   const safeAddress = useSafeAddress()
   const displayName = sameAddress(address, safeAddress) ? THIS_SAFE_ACCOUNT : name

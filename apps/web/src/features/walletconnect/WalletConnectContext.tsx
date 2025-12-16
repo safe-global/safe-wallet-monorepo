@@ -18,7 +18,8 @@ import { IS_PRODUCTION } from '@/config/constants'
 import { getEip155ChainId, getPeerName, stripEip155Prefix } from '@/features/walletconnect/services/utils'
 import { trackRequest } from '@/features/walletconnect/services/tracking'
 import { wcPopupStore } from '@/features/walletconnect/components'
-import WalletConnectWallet from '@/features/walletconnect/services/WalletConnectWallet'
+import type WalletConnectWallet from '@/features/walletconnect/services/WalletConnectWallet'
+import walletConnectInstance from '@/features/walletconnect/services/walletConnectInstance'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 
 type WalletConnectContextType = {
@@ -71,8 +72,6 @@ const FALLBACK_PEER_NAME = 'WalletConnect'
 // This is still used to differentiate these txs from Safe App txs in the analytics
 const LEGACY_WC_APP_URL = 'https://apps-portal.safe.global/wallet-connect'
 
-const walletConnectSingleton = new WalletConnectWallet()
-
 const getWrongChainError = (dappName: string): Error => {
   const message = Errors.WRONG_CHAIN.replace('%%dappName%%', dappName)
   return new Error(message)
@@ -93,9 +92,9 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
 
   // Init WalletConnect
   useEffect(() => {
-    walletConnectSingleton
+    walletConnectInstance
       .init()
-      .then(() => setWalletConnect(walletConnectSingleton))
+      .then(() => setWalletConnect(walletConnectInstance))
       .catch(setError)
   }, [])
 

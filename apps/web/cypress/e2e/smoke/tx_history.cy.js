@@ -28,7 +28,6 @@ describe('[SMOKE] Tx history tests', () => {
   })
 
   // mock
-  // Token receipt
   it('[SMOKE] Verify summary for token receipt', () => {
     createTx.verifySummaryByName(
       typeReceive.summaryTitle,

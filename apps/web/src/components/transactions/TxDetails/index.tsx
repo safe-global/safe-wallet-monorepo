@@ -1,12 +1,13 @@
+import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import useIsExpiredSwap from '@/features/swap/hooks/useIsExpiredSwap'
-import React, { type ReactElement, useEffect, useRef, useState } from 'react'
-import type { TransactionDetails, TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
+import React, { type ReactElement, useEffect, useRef, useState, useMemo } from 'react'
 import { Box, CircularProgress, Typography } from '@mui/material'
 
 import TxSigners from '@/components/transactions/TxSigners'
 import Summary from '@/components/transactions/TxDetails/Summary'
 import TxData from '@/components/transactions/TxDetails/TxData'
 import useChainId from '@/hooks/useChainId'
+import useProposers from '@/hooks/useProposers'
 import {
   isAwaitingExecution,
   isOrderTxInfo,
@@ -34,19 +35,21 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsPending from '@/hooks/useIsPending'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
 import { useHasFeature } from '@/hooks/useChains'
-import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
+import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { TxNote } from '@/features/tx-notes'
-import { TxShareBlock } from '../TxShareLink'
+import { TxShareBlock, TxExplorerLink } from '../TxShareLink'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
+import HnSecurityReportBtnForTxDetails from '@/features/hypernative/components/HnSecurityReportBtn'
 
 export const NOT_AVAILABLE = 'n/a'
 
 type TxDetailsProps = {
-  txSummary: TransactionSummary
+  txSummary: Transaction
   txDetails: TransactionDetails
 }
 
@@ -55,6 +58,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const isQueue = isTxQueued(txSummary.txStatus)
   const awaitingExecution = isAwaitingExecution(txSummary.txStatus)
+  const { data: proposersData } = useProposers()
 
   // Used to check if the decoded data was rendered inside the TxData component
   // If it was, we hide the decoded data in the Summary to avoid showing it twice
@@ -76,12 +80,22 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
   const isTrustedTransfer = !hasDefaultTokenlist || isTrustedTx(txSummary)
   const isImitationTransaction = isImitation(txSummary)
 
-  let proposer, safeTxHash, proposedByDelegate
+  let proposer: string | undefined
+  let safeTxHash: string | undefined
+  let proposedByDelegate
   if (isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)) {
     safeTxHash = txDetails.detailedExecutionInfo.safeTxHash
     proposedByDelegate = txDetails.detailedExecutionInfo.proposedByDelegate
     proposer = proposedByDelegate?.value ?? txDetails.detailedExecutionInfo.proposer?.value
   }
+
+  // Check if the proposer is actually a delegate
+  const isProposerDelegate = useMemo(() => {
+    if (!proposer || !proposersData?.results) return false
+    return proposersData.results.some((p) => sameAddress(p.delegate, proposer))
+  }, [proposer, proposersData])
+
+  const isTxFromProposer = Boolean(proposedByDelegate) || isProposerDelegate
 
   const expiredSwap = useIsExpiredSwap(txSummary.txInfo)
 
@@ -117,6 +131,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
                   <DecodedData
                     txData={txDetails.txData}
                     toInfo={isCustomTxInfo(txDetails.txInfo) ? txDetails.txInfo.to : txDetails.txData?.to}
+                    isWarningEnabled
                   />
                 </Box>
               </TxData>
@@ -165,21 +180,46 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
         )}
       </div>
       {/* Signers */}
-      {(!isUnsigned || proposedByDelegate) && (
+      {(!isUnsigned || proposer) && (
         <div className={css.txSigners}>
+          <TxShareBlock
+            txId={txDetails.txId}
+            hasSigners={isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)}
+          />
+
           <TxSigners
             txDetails={txDetails}
             txSummary={txSummary}
-            isTxFromProposer={Boolean(proposedByDelegate)}
+            isTxFromProposer={isTxFromProposer}
             proposer={proposer}
           />
 
-          <TxShareBlock txId={txDetails.txId} txHash={txDetails.txHash} />
+          {isQueue && <HnSecurityReportBtnForTxDetails txDetails={txDetails} />}
+
+          {txDetails.txHash && <TxExplorerLink txHash={txDetails.txHash} />}
 
           {isQueue && (
             <Box className={css.buttons}>
-              {awaitingExecution ? <ExecuteTxButton txSummary={txSummary} /> : <SignTxButton txSummary={txSummary} />}
-              <RejectTxButton txSummary={txSummary} safeTxHash={safeTxHash} proposer={proposer} />
+              {isTxFromProposer ? (
+                <>
+                  {!expiredSwap &&
+                    (awaitingExecution ? (
+                      <ExecuteTxButton txSummary={txSummary} />
+                    ) : (
+                      <SignTxButton txSummary={txSummary} />
+                    ))}
+                  <RejectTxButton txSummary={txSummary} safeTxHash={safeTxHash} proposer={proposer} />
+                </>
+              ) : (
+                <>
+                  {awaitingExecution ? (
+                    <ExecuteTxButton txSummary={txSummary} />
+                  ) : (
+                    <SignTxButton txSummary={txSummary} />
+                  )}
+                  <RejectTxButton txSummary={txSummary} safeTxHash={safeTxHash} proposer={proposer} />
+                </>
+              )}
             </Box>
           )}
 
@@ -198,7 +238,7 @@ const TxDetails = ({
   txSummary,
   txDetails,
 }: {
-  txSummary: TransactionSummary
+  txSummary: Transaction
   txDetails?: TransactionDetails // optional
 }): ReactElement => {
   const chainId = useChainId()
@@ -210,8 +250,8 @@ const TxDetails = ({
     isLoading: loading,
     refetch,
     isUninitialized,
-  } = useGetTransactionDetailsQuery(
-    { chainId, txId: txSummary.id },
+  } = useTransactionsGetTransactionByIdV1Query(
+    { chainId: chainId || '', id: txSummary.id || '' },
     {
       pollingInterval: isOpenSwapOrder(txSummary.txInfo) ? POLLING_INTERVAL : undefined,
       skipPollingIfUnfocused: true,

@@ -37,9 +37,7 @@ describe('FallbackHandler', () => {
         }) as unknown as ReturnType<typeof useSafeInfoHook.default>,
     )
 
-    const fbHandler = render(<FallbackHandler />, {
-      initialReduxState: { chains: { loading: false, loaded: true, data: [mockChain] } },
-    })
+    const fbHandler = render(<FallbackHandler />)
 
     await waitFor(() => {
       expect(
@@ -74,9 +72,7 @@ describe('FallbackHandler', () => {
         }) as unknown as ReturnType<typeof useSafeInfoHook.default>,
     )
 
-    const fbHandler = render(<FallbackHandler />, {
-      initialReduxState: { chains: { loading: false, loaded: true, data: [mockChain] } },
-    })
+    const fbHandler = render(<FallbackHandler />)
 
     await waitFor(() => {
       expect(
@@ -107,9 +103,7 @@ describe('FallbackHandler', () => {
         }) as unknown as ReturnType<typeof useSafeInfoHook.default>,
     )
 
-    const fbHandler = render(<FallbackHandler />, {
-      initialReduxState: { chains: { loading: false, loaded: true, data: [mockChain] } },
-    })
+    const fbHandler = render(<FallbackHandler />)
 
     await waitFor(() => {
       expect(fbHandler.getByText('CompatibilityFallbackHandler')).toBeDefined()

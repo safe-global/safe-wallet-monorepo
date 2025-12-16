@@ -27,6 +27,7 @@ export function ParametersButton({ txId, title = 'Transaction details' }: Parame
         size="$4"
         fullscreen
         onPress={goToAdvancedDetails}
+        testID="transaction-details-button"
       >
         {title}
       </Button>

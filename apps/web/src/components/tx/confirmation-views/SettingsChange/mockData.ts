@@ -1,8 +1,8 @@
-import type { SettingsChange } from '@safe-global/safe-gateway-typescript-sdk'
-import { SettingsInfoType, TransactionInfoType } from '@safe-global/safe-gateway-typescript-sdk'
+import { SettingsInfoType, TransactionInfoType } from '@safe-global/store/gateway/types'
+import type { SettingsChangeTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 export const ownerAddress = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
-export const txInfo: SettingsChange = {
+export const txInfo: SettingsChangeTransaction = {
   type: TransactionInfoType.SETTINGS_CHANGE,
   humanDescription: 'Add new owner 0xd8dA...6045 with threshold 1',
   dataDecoded: {

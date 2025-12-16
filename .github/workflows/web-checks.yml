@@ -25,9 +25,9 @@ jobs:
       statuses: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/yarn
-      - uses: CatChen/eslint-suggestion-action@v4.1.18
+      - uses: CatChen/eslint-suggestion-action@v4.1.20
         with:
           request-changes: true
           fail-check: true
@@ -43,7 +43,7 @@ jobs:
       statuses: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/yarn
       - name: Run Prettier check
         run: yarn workspace @safe-global/web prettier
@@ -55,7 +55,7 @@ jobs:
       statuses: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/yarn
       - name: Type check
         run: yarn type-check

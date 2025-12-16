@@ -9,8 +9,8 @@ const MethodCall = ({
 }: {
   method: string
   contractAddress: string
-  contractName?: string
-  contractLogo?: string
+  contractName?: string | null
+  contractLogo?: string | null
 }) => {
   return (
     <>

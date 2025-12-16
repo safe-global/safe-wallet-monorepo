@@ -1,8 +1,7 @@
 import { Alert, AlertTitle, Box, SvgIcon, Typography } from '@mui/material'
-import type { TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
 import InfoOutlinedIcon from '@/public/images/notifications/info.svg'
 
-export const MigrateToL2Information = ({ variant }: { variant: 'history' | 'queue'; txData?: TransactionData }) => {
+export const MigrateToL2Information = ({ variant }: { variant: 'history' | 'queue' }) => {
   return (
     <Box>
       <Alert severity="info" icon={<SvgIcon component={InfoOutlinedIcon} color="info" />}>

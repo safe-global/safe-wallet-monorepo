@@ -1,8 +1,9 @@
+import type { TransactionInfo } from '@safe-global/store/gateway/types'
+import { SettingsInfoType, TransactionInfoType } from '@safe-global/store/gateway/types'
 import type { Meta, StoryObj } from '@storybook/react'
 import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import ChangeThreshold from './index'
-import { SettingsInfoType, type TransactionInfo, TransactionInfoType } from '@safe-global/safe-gateway-typescript-sdk'
 
 const meta = {
   component: ChangeThreshold,

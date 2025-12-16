@@ -1,0 +1,44 @@
+.assetActionIconButton {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 6px;
+  background-color: #f4f4f4 !important;
+  border-radius: 4px !important;
+}
+
+.assetActionIconButton:hover {
+  background-color: #dddee0 !important;
+}
+
+.assetActionIconButton:hover svg {
+  color: #121312;
+}
+
+:global([data-theme='dark']) .assetActionIconButton {
+  background-color: #121312 !important;
+}
+
+:global([data-theme='dark']) .assetActionIconButton:hover {
+  background-color: #303033 !important;
+}
+
+:global([data-theme='dark']) .assetActionIconButton svg {
+  color: #a1a3a7;
+}
+
+:global([data-theme='dark']) .assetActionIconButton:hover svg {
+  color: #ffffff;
+}
+
+.assetActionIconButton svg {
+  width: 16px;
+  height: 16px;
+  color: var(--color-primary-light);
+}
+
+.sendButton {
+  height: 32px;
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+}

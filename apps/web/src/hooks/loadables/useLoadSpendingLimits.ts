@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '../useSafeInfo'
 import { Errors, logError } from '@/services/exceptions'
@@ -7,17 +7,15 @@ import useChainId from '@/hooks/useChainId'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import type { JsonRpcProvider } from 'ethers'
 import { getSpendingLimitContract } from '@/services/contracts/spendingLimitContracts'
-import type { TokenInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { type AllowanceModule } from '@safe-global/utils/types/contracts'
 import { getERC20TokenInfoOnChain } from '@/utils/tokens'
 
 import { sameString } from '@safe-global/protocol-kit/dist/src/utils'
-import { useAppSelector } from '@/store'
-import { selectTokens } from '@/store/balancesSlice'
-import isEqual from 'lodash/isEqual'
 import { multicall } from '@safe-global/utils/utils/multicall'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import useBalances from '../useBalances'
 
 const DEFAULT_TOKEN_INFO = {
   decimals: 18,
@@ -27,15 +25,17 @@ const DEFAULT_TOKEN_INFO = {
 const discardZeroAllowance = (spendingLimit: SpendingLimitState): boolean =>
   !(sameString(spendingLimit.amount, '0') && sameString(spendingLimit.resetTimeMin, '0'))
 
-const getTokenInfoFromBalances = (tokenInfoFromBalances: TokenInfo[], address: string): TokenInfo | undefined =>
-  tokenInfoFromBalances.find((token) => token.address === address)
+const getTokenInfoFromBalances = (
+  tokenInfoFromBalances: Balance['tokenInfo'][],
+  address: string,
+): Balance['tokenInfo'] | undefined => tokenInfoFromBalances.find((token) => token.address === address)
 
 export const getTokenAllowances = async (
   contract: AllowanceModule,
   provider: JsonRpcProvider,
   safeAddress: string,
   allowanceRequests: { delegate: string; token: string }[],
-  tokenInfoFromBalances: TokenInfo[],
+  tokenInfoFromBalances: Balance['tokenInfo'][],
 ): Promise<SpendingLimitState[]> => {
   const moduleAddress = await contract.getAddress()
   const calls = allowanceRequests.map(({ delegate, token }) => ({
@@ -78,7 +78,7 @@ export const getTokensForDelegates = async (
   provider: JsonRpcProvider,
   safeAddress: string,
   delegates: string[],
-  tokenInfoFromBalances: TokenInfo[],
+  tokenInfoFromBalances: Balance['tokenInfo'][],
 ) => {
   const allowanceAddress = await contract.getAddress()
   const calls = delegates.map((delegate) => ({
@@ -107,7 +107,7 @@ export const getSpendingLimits = async (
   safeModules: AddressInfo[],
   safeAddress: string,
   chainId: string,
-  tokenInfoFromBalances: TokenInfo[],
+  tokenInfoFromBalances: Balance['tokenInfo'][],
 ): Promise<SpendingLimitState[] | undefined> => {
   let contract: ReturnType<typeof getSpendingLimitContract>
   try {
@@ -132,7 +132,11 @@ export const useLoadSpendingLimits = (): AsyncResult<SpendingLimitState[]> => {
   const { safeAddress, safe, safeLoaded } = useSafeInfo()
   const chainId = useChainId()
   const provider = useWeb3ReadOnly()
-  const tokenInfoFromBalances = useAppSelector(selectTokens, isEqual)
+  const { balances } = useBalances()
+  const tokenInfoFromBalances = useMemo(
+    () => balances?.items.map(({ tokenInfo }) => tokenInfo) ?? [],
+    [balances?.items],
+  )
 
   const [data, error, loading] = useAsync<SpendingLimitState[] | undefined>(
     () => {

@@ -16,8 +16,13 @@ const hiddenTokenCheckbox = 'input[type="checkbox"]'
 const paginationPageList = 'ul[role="listbox"]'
 const currencyDropDown = 'div[id="currency"]'
 export const tokenListTable = 'table[aria-labelledby="tableTitle"]'
-const tokenListDropdown = 'div[id="tokenlist-select"]'
+const manageTokensButton = '[data-testid="manage-tokens-button"]'
+const manageTokensMenu = '[data-testid="manage-tokens-menu"]'
+const hideTokensMenuItem = '[data-testid="hide-tokens-menu-item"]'
+const showAllTokensSwitch = '[data-testid="show-all-tokens-switch"]'
+const hideSmallBalancesSwitch = '[data-testid="hide-small-balances-switch"]'
 export const tablePaginationContainer = '[data-testid="table-pagination"]'
+export const tableContainer = '[data-testid="table-container"]'
 
 const hiddenTokenSaveBtn = 'span[data-track="assets: Save hide dialog"]'
 const hiddenTokenCancelBtn = 'span[data-track="assets: Cancel hide dialog"]'
@@ -50,14 +55,56 @@ const pageCountString10to20 = '11–20 of'
 
 const PRICE_COLUMN = 1
 const TOKEN_AMOUNT_COLUMN = 2
-const FIAT_AMOUNT_COLUMN = 3
-const ACTION_COLUMN = 5
+const WEIGHT_COLUMN = 3
+const FIAT_AMOUNT_COLUMN = 4
+// column with the send button and swap in the assets table
+export const ACTION_COLUMN = 5
+export const actionColumnCell = '[data-testid="table-cell-actions"]'
 
 export const fiatRegex = new RegExp(`\\$?(([0-9]{1,3},)*[0-9]{1,3}(\\.[0-9]{2})?|0)`)
 
-export const tokenListOptions = {
-  allTokens: 'span[data-track="assets: Show all tokens"]',
-  default: 'span[data-track="assets: Show default tokens"]',
+export function toggleShowAllTokens(shouldShow) {
+  cy.get(manageTokensButton).click()
+
+  cy.get(manageTokensMenu)
+    .should('be.visible')
+    .within(() => {
+      cy.get(showAllTokensSwitch)
+        .find('input[type="checkbox"]')
+        .then(($checkbox) => {
+          const isChecked = $checkbox.is(':checked')
+          if (shouldShow && !isChecked) {
+            cy.wrap($checkbox).click({ force: true })
+          } else if (!shouldShow && isChecked) {
+            cy.wrap($checkbox).click({ force: true })
+          }
+        })
+    })
+
+  cy.get('body').click(0, 0)
+  cy.get(manageTokensMenu).should('not.exist')
+}
+
+export function toggleHideDust(shouldHide) {
+  cy.get(manageTokensButton).click()
+
+  cy.get(manageTokensMenu)
+    .should('be.visible')
+    .within(() => {
+      cy.get(hideSmallBalancesSwitch)
+        .find('input[type="checkbox"]')
+        .then(($checkbox) => {
+          const isChecked = $checkbox.is(':checked')
+          if (shouldHide && !isChecked) {
+            cy.wrap($checkbox).click({ force: true })
+          } else if (!shouldHide && isChecked) {
+            cy.wrap($checkbox).click({ force: true })
+          }
+        })
+    })
+
+  cy.get('body').click(0, 0)
+  cy.get(manageTokensMenu).should('not.exist')
 }
 export const currencyEUR = '€'
 export const currencyOptionEUR = 'EUR'
@@ -138,8 +185,8 @@ export function checkNftCopyIconAndLink() {
   })
 }
 
-export function showSendBtn() {
-  return cy.get(sendBtn).invoke('css', 'opacity', '1').should('have.css', 'opacity', '1')
+export function showSendBtn(index = 0) {
+  return cy.get(sendBtn).eq(index).invoke('css', 'opacity', '1').should('have.css', 'opacity', '1')
 }
 
 export function showSwapBtn() {
@@ -185,6 +232,16 @@ export function clickOnSendBtn(index) {
     })
 }
 
+export function clickOnSendBtnAssetsTable(index) {
+  cy.get(balanceSingleRow)
+    .eq(index)
+    .find('td')
+    .eq(ACTION_COLUMN)
+    .within(() => {
+      cy.get(sendBtn).should('be.visible').click()
+    })
+}
+
 export function clickOnConfirmBtn(index) {
   cy.wait(2000)
   cy.get(createTx.transactionItem)
@@ -212,7 +269,7 @@ export function clickOnExecuteBtn(index) {
 }
 
 export function VerifySendButtonIsDisabled() {
-  cy.get('button').contains(sendBtnStr).should('be.disabled')
+  cy.get(sendBtn).first().should('be.disabled')
 }
 
 export function verifyTableRows(assetsLength) {
@@ -281,9 +338,13 @@ export function checkNFTCounter(value) {
 }
 
 export function checkHiddenTokenBtnCounter(value) {
-  cy.get(hiddeTokensBtn).within(() => {
-    cy.get('p').should('include.text', value)
-  })
+  cy.get(manageTokensButton).click()
+
+  cy.get(manageTokensMenu)
+    .should('be.visible')
+    .within(() => {
+      cy.get(hideTokensMenuItem).should('include.text', `Hide tokens (${value})`)
+    })
 }
 
 export function verifyEachRowHasCheckbox(state) {
@@ -310,15 +371,7 @@ export function verifyTokenIsPresent(token) {
   cy.get(tokenListTable).contains(token)
 }
 
-export function selectTokenList(option) {
-  cy.get(tokenListDropdown)
-    .click({ force: true })
-    .then(() => {
-      cy.get(option).click({ force: true })
-    })
-}
-
-export function verityTokenAltImageIsVisible(currency, alttext) {
+export function verifyTokenAltImageIsVisible(currency, alttext) {
   cy.contains(currency)
     .parents('tr')
     .within(() => {
@@ -390,8 +443,9 @@ export function hideAsset(asset) {
   cy.contains(asset).should('not.exist')
 }
 
-export function openHideTokenMenu() {
-  cy.get(hiddeTokensBtn).click()
+export function openHiddenTokensFromManageMenu() {
+  cy.get(manageTokensButton).click()
+  cy.get(hideTokensMenuItem).should('be.visible').click()
   main.verifyElementsExist([hiddenTokenSaveBtn, hiddenTokenCancelBtn, hiddenTokenDeselectAllBtn, hiddenTokenIcon])
   cy.get(hiddenTokenIcon)
     .parent()

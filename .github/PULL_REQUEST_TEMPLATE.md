@@ -1,6 +1,6 @@
 ## What it solves
 
-Resolves #
+Resolves:
 
 ## How this PR fixes it
 

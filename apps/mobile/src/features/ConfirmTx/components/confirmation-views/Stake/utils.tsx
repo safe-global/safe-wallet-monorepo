@@ -12,6 +12,7 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ListTableItem } from '../../ListTable'
 import { ValidatorStatus } from '@/src/components/ValidatorStatus'
+import { ValidatorRow } from '@/src/components/ValidatorRow'
 
 const CURRENCY = 'USD'
 
@@ -123,7 +124,7 @@ export const formatStakingWithdrawRequestItems = (
     },
     {
       label: 'Exit',
-      value: `${txInfo.numValidators} Validator${txInfo.numValidators !== 1 ? 's' : ''}`,
+      render: () => <ValidatorRow validatorIds={txInfo.validators} />,
     },
     {
       label: 'Receive',

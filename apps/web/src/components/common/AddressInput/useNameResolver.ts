@@ -4,7 +4,7 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import { isDomain, resolveName } from '@/services/ens'
 import { resolveUnstoppableAddress } from '@/services/ud'
 import { useCurrentChain } from '@/hooks/useChains'
-import useDebounce from '@/hooks/useDebounce'
+import useDebounce from '@safe-global/utils/hooks/useDebounce'
 
 const useNameResolver = (
   value?: string,

@@ -1,13 +1,12 @@
 import { useRouter } from 'next/router'
 import usePositionsFiatTotal from '@/features/positions/hooks/usePositionsFiatTotal'
-import React, { useMemo } from 'react'
+import React, { useMemo, type ReactElement } from 'react'
 import { AppRoutes } from '@/config/routes'
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
   Box,
-  Card,
   Chip,
   Divider,
   Stack,
@@ -15,17 +14,19 @@ import {
   Typography,
   Skeleton,
 } from '@mui/material'
-import { ViewAllLink } from '@/components/dashboard/styled'
+import { WidgetCard } from '@/components/dashboard/styled'
 import css from './styles.module.css'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import PositionsHeader from '@/features/positions/components/PositionsHeader'
-import Position from '@/features/positions/components/Position'
+import { PositionGroup } from '@/features/positions/components/PositionGroup'
 import usePositions from '@/features/positions/hooks/usePositions'
 import PositionsEmpty from '@/features/positions/components/PositionsEmpty'
 import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { POSITIONS_EVENTS, POSITIONS_LABELS } from '@/services/analytics/events/positions'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useHasFeature } from '@/hooks/useChains'
 
 const MAX_PROTOCOLS = 4
 
@@ -34,6 +35,7 @@ const PositionsWidget = () => {
   const { safe } = router.query
   const { data, error, isLoading } = usePositions()
   const positionsFiatTotal = usePositionsFiatTotal()
+  const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
 
   const viewAllUrl = useMemo(
     () => ({
@@ -43,13 +45,46 @@ const PositionsWidget = () => {
     [safe],
   )
 
+  const betaChip = (
+    <Tooltip
+      title="Experimental. Data may be missing or outdated."
+      placement="top"
+      arrow
+      slotProps={{
+        tooltip: {
+          sx: {
+            maxWidth: { xs: '250px', sm: 'none' },
+          },
+        },
+      }}
+    >
+      <Chip
+        label="Beta"
+        size="small"
+        sx={{
+          backgroundColor: 'background.lightGrey',
+          letterSpacing: '0.4px',
+          borderRadius: '4px',
+        }}
+      />
+    </Tooltip>
+  )
+
+  const viewAllWrapper = (children: ReactElement) => (
+    <Track
+      {...POSITIONS_EVENTS.POSITIONS_VIEW_ALL_CLICKED}
+      mixpanelParams={{
+        [MixpanelEventParams.TOTAL_VALUE_OF_PORTFOLIO]: positionsFiatTotal || 0,
+        [MixpanelEventParams.ENTRY_POINT]: 'Dashboard',
+      }}
+    >
+      {children}
+    </Track>
+  )
+
   if (isLoading) {
     return (
-      <Card data-testid="positions-widget" sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5 }}>
-        <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
-          <Typography fontWeight={700}>Top positions</Typography>
-        </Stack>
-
+      <WidgetCard title="Top positions" titleExtra={betaChip} testId="positions-widget">
         <Box>
           {Array(2)
             .fill(0)
@@ -111,7 +146,7 @@ const PositionsWidget = () => {
               </Accordion>
             ))}
         </Box>
-      </Card>
+      </WidgetCard>
     )
   }
 
@@ -120,58 +155,26 @@ const PositionsWidget = () => {
   const protocols = data.slice(0, MAX_PROTOCOLS)
 
   return (
-    <Card data-testid="positions-widget" sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5 }}>
-      <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5 }}>
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Typography fontWeight={700}>Top positions</Typography>
-          <Tooltip
-            title="Experimental. Data may be missing or outdated."
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  maxWidth: { xs: '250px', sm: 'none' },
-                },
-              },
+    <WidgetCard
+      title="Top positions"
+      titleExtra={betaChip}
+      viewAllUrl={protocols.length > 0 ? viewAllUrl : undefined}
+      viewAllWrapper={viewAllWrapper}
+      testId="positions-widget"
+    >
+      {!isPortfolioEndpointEnabled && (
+        <Box mb={1} sx={{ px: 1.5 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'text.secondary',
+              letterSpacing: '1px',
             }}
           >
-            <Chip
-              label="Beta"
-              size="small"
-              sx={{
-                backgroundColor: 'background.lightGrey',
-                letterSpacing: '0.4px',
-                borderRadius: '4px',
-              }}
-            />
-          </Tooltip>
-        </Stack>
-
-        {protocols.length > 0 && (
-          <Track
-            {...POSITIONS_EVENTS.POSITIONS_VIEW_ALL_CLICKED}
-            mixpanelParams={{
-              [MixpanelEventParams.TOTAL_VALUE_OF_PORTFOLIO]: positionsFiatTotal || 0,
-              [MixpanelEventParams.ENTRY_POINT]: 'Dashboard',
-            }}
-          >
-            <ViewAllLink url={viewAllUrl} text="View all" />
-          </Track>
-        )}
-      </Stack>
-
-      <Box mb={1} sx={{ px: 1.5 }}>
-        <Typography
-          variant="caption"
-          sx={{
-            color: 'text.secondary',
-            letterSpacing: '1px',
-          }}
-        >
-          Position balances are not included in the total asset value.
-        </Typography>
-      </Box>
+            Position balances are not included in the total asset value.
+          </Typography>
+        </Box>
+      )}
 
       <Box>
         {protocols.length === 0 ? (
@@ -226,28 +229,16 @@ const PositionsWidget = () => {
                 </AccordionSummary>
 
                 <AccordionDetails sx={{ px: 1.5 }}>
-                  {protocol.items.map((position, idx) => {
-                    return (
-                      <Box key={position.name}>
-                        <Typography variant="body2" fontWeight="bold" mb={1} mt={idx !== 0 ? 2 : 0}>
-                          {position.name}
-                        </Typography>
-
-                        <Divider sx={{ opacity: 0.5 }} />
-
-                        {position.items.map((item) => {
-                          return <Position item={item} key={`${item.tokenInfo.name}-${item.position_type}`} />
-                        })}
-                      </Box>
-                    )
-                  })}
+                  {protocol.items.map((group, groupIndex) => (
+                    <PositionGroup key={groupIndex} group={group} isLast={groupIndex === protocol.items.length - 1} />
+                  ))}
                 </AccordionDetails>
               </Accordion>
             )
           })
         )}
       </Box>
-    </Card>
+    </WidgetCard>
   )
 }
 

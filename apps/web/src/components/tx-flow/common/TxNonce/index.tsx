@@ -234,9 +234,26 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
               },
             }}
             renderInput={(params) => {
+              // Extract Autocomplete's ref from params and combine with NumberField's forwardRef
+              const autocompleteRef = params.inputProps.ref
+
+              // Create combined ref that applies Autocomplete's ref
+              const combinedRef = (node: HTMLInputElement | null) => {
+                // Apply Autocomplete's ref
+                if (typeof autocompleteRef === 'function') {
+                  autocompleteRef(node)
+                } else if (autocompleteRef && typeof autocompleteRef === 'object' && 'current' in autocompleteRef) {
+                  ;(autocompleteRef as React.RefObject<HTMLInputElement | null>).current = node
+                }
+              }
+
+              // Remove ref from inputProps since we'll pass it via NumberField's forwardRef
+              const { ref: _, ...inputPropsWithoutRef } = params.inputProps
+
               return (
                 <Tooltip title={fieldState.error?.message || warning} open arrow placement="top">
                   <NumberField
+                    ref={combinedRef}
                     {...params}
                     error={!!fieldState.error}
                     InputProps={{
@@ -251,6 +268,9 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
                           </Tooltip>
                         </InputAdornment>
                       ) : null,
+                    }}
+                    inputProps={{
+                      ...inputPropsWithoutRef,
                     }}
                     className={classNames([
                       css.input,
@@ -279,7 +299,7 @@ const TxNonce = ({ canEdit = true }: { canEdit?: boolean } = {}) => {
   const { nonce, recommendedNonce, isReadOnly } = useContext(SafeTxContext)
 
   return (
-    <Box data-testid="nonce-fld" display="flex" alignItems="center" gap={1}>
+    <Box data-testid="nonce-fld" display="flex" alignItems="center" gap={1} className={css.nonce}>
       Nonce{' '}
       <Typography component="span" fontWeight={700}>
         #

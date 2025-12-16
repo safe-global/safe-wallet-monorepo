@@ -15,7 +15,7 @@ export function TxDataContainer() {
 
   const {
     data: txDetails,
-    isFetching,
+    isLoading,
     isError,
   } = useTransactionsGetTransactionByIdV1Query({
     chainId: activeSafe.chainId,
@@ -26,7 +26,7 @@ export function TxDataContainer() {
 
   const parameters = useMemo(() => formatTxDetails({ txDetails, viewOnExplorer }), [txDetails, viewOnExplorer])
 
-  if (isError) {
+  if (isError && !txDetails) {
     return (
       <View margin="$4">
         <Alert type="error" message="Error fetching transaction details" />
@@ -35,8 +35,6 @@ export function TxDataContainer() {
   }
 
   return (
-    <ScrollView marginTop="$2">
-      {isFetching || !txDetails ? <LoadingTx /> : <ListTable items={parameters} />}
-    </ScrollView>
+    <ScrollView marginTop="$2">{isLoading || !txDetails ? <LoadingTx /> : <ListTable items={parameters} />}</ScrollView>
   )
 }

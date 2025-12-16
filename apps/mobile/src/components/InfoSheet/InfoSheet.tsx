@@ -1,7 +1,7 @@
 import React, { useCallback, useRef } from 'react'
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import { SafeFontIcon } from '../SafeFontIcon'
-import { BottomSheetModal, TouchableOpacity } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { getVariable, Text, View, useTheme, H4, YStack } from 'tamagui'
 import { BackdropComponent, BackgroundComponent } from '@/src/components/Dropdown/sheetComponents'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -29,22 +29,25 @@ export const InfoSheet = ({
     bottomSheetModalRef.current?.present()
   }, [])
 
+  const renderBackdrop = useCallback(() => <BackdropComponent shouldNavigateBack={false} />, [])
+
   return (
     <>
-      <TouchableOpacity onPress={handlePresentModalPress}>
+      <View onPress={handlePresentModalPress}>
         {!children && <SafeFontIcon name="info" size={16} color="$colorSecondary" />}
         {children}
-      </TouchableOpacity>
+      </View>
 
       <BottomSheetModal
         // @ts-expect-error - FullWindowOverlay is not typed
         containerComponent={Platform.OS === 'ios' ? FullWindowOverlay : undefined}
         ref={bottomSheetModalRef}
         backgroundComponent={BackgroundComponent}
-        backdropComponent={() => <BackdropComponent shouldNavigateBack={false} />}
+        backdropComponent={renderBackdrop}
         topInset={insets.top}
         enableDynamicSizing
         handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
+        accessible={false}
       >
         <BottomSheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom }}>
           <YStack gap="$4" padding="$4" alignItems="center" justifyContent="center">

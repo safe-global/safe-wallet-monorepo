@@ -4,6 +4,7 @@ import { useSiwe } from '@/src/hooks/useSiwe'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { Wallet } from 'ethers'
 import { RootState } from '@/src/store'
+import { SettingsState } from '@/src/store/settingsSlice'
 
 // Keep these mocks as they're not part of the store
 jest.mock('@/src/hooks/useSiwe')
@@ -26,17 +27,8 @@ describe('useNotificationPayload', () => {
       lastTimePromptAttempted: null,
     },
     settings: {
-      themePreference: 'light',
       onboardingVersionSeen: '1.0.0',
-      currency: 'usd',
-      env: {
-        rpc: {},
-        tenderly: {
-          url: '',
-          accessToken: '',
-        },
-      },
-    },
+    } as SettingsState,
     safes: {},
   }
 

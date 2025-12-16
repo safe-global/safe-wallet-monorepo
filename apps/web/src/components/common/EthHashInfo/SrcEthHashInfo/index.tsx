@@ -13,6 +13,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import ImageFallback from '../../ImageFallback'
 import css from './styles.module.css'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
+import { ShieldIconHypernativeTooltip } from '@/features/hypernative/components/ShieldIconHypernativeTooltip'
 
 export type EthHashInfoProps = {
   address: string
@@ -26,7 +27,7 @@ export type EthHashInfoProps = {
   copyPrefix?: boolean
   shortAddress?: boolean
   copyAddress?: boolean
-  customAvatar?: string
+  customAvatar?: string | null
   hasExplorer?: boolean
   avatarSize?: number
   children?: ReactNode
@@ -34,6 +35,7 @@ export type EthHashInfoProps = {
   ExplorerButtonProps?: ExplorerButtonProps
   addressBookNameSource?: ContactSource
   highlight4bytes?: boolean
+  showShieldIcon?: boolean
 }
 
 const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
@@ -57,6 +59,7 @@ const SrcEthHashInfo = ({
   trusted = true,
   addressBookNameSource,
   highlight4bytes = false,
+  showShieldIcon = false,
 }: EthHashInfoProps): ReactElement => {
   const shouldPrefix = isAddress(address)
   const theme = useTheme()
@@ -82,6 +85,27 @@ const SrcEthHashInfo = ({
     </>
   )
 
+  const safeShieldSvgStyles = {
+    fontSize: 'medium',
+    '& .shield-img': {
+      fill: 'var(--color-static-text-brand)',
+      transition: 'fill 0.2s ease',
+    },
+    '& .shield-lines': {
+      fill: '#121312 !important', // consistent between dark/light modes
+      stroke: '#121312 !important',
+      transition: 'fill 0.2s ease',
+    },
+  }
+
+  const accountStylesWithShieldEnabled = {
+    backgroundColor: 'var(--color-background-main)',
+    fontWeight: 'bold',
+    borderRadius: '16px',
+    padding: name ? '2px 8px 2px 6px' : undefined,
+    width: 'fit-content',
+  }
+
   return (
     <div className={css.container}>
       {showAvatar && (
@@ -99,23 +123,42 @@ const SrcEthHashInfo = ({
 
       <Box overflow="hidden" className={onlyName ? css.inline : undefined} gap={0.5}>
         {name && (
-          <Box title={name} className="ethHashInfo-name" display="flex" alignItems="center" gap={0.5}>
-            <Box overflow="hidden" textOverflow="ellipsis">
-              {name}
+          <Box
+            title={name}
+            className="ethHashInfo-name"
+            display="flex"
+            alignItems="center"
+            gap={0.5}
+            sx={showShieldIcon ? accountStylesWithShieldEnabled : undefined}
+          >
+            <Box overflow="hidden" whiteSpace="nowrap">
+              {/* Trim long names: */}
+              {showShieldIcon && name.length > 15 ? `${name.slice(0, 15)}...` : name}
             </Box>
 
-            {!!addressBookNameSource && (
-              <Tooltip title={`From your ${addressBookNameSource} address book`} placement="top">
-                <span style={{ lineHeight: 0 }}>
-                  <SvgIcon
-                    component={addressBookNameSource === ContactSource.local ? AddressBookIcon : CloudOutlinedIcon}
-                    inheritViewBox
-                    color="border"
-                    fontSize="small"
-                  />
-                </span>
-              </Tooltip>
+            {showShieldIcon ? (
+              <ShieldIconHypernativeTooltip iconStyles={safeShieldSvgStyles} />
+            ) : (
+              !!addressBookNameSource && (
+                <Tooltip title={`From your ${addressBookNameSource} address book`} placement="top">
+                  <span style={{ lineHeight: 0 }}>
+                    <SvgIcon
+                      component={addressBookNameSource === ContactSource.local ? AddressBookIcon : CloudOutlinedIcon}
+                      inheritViewBox
+                      color="border"
+                      fontSize="small"
+                    />
+                  </span>
+                </Tooltip>
+              )
             )}
+          </Box>
+        )}
+
+        {/* Show shield icon even when there's no name */}
+        {!name && showShieldIcon && (
+          <Box display="flex" alignItems="center" gap={0.5} sx={accountStylesWithShieldEnabled}>
+            <ShieldIconHypernativeTooltip iconStyles={safeShieldSvgStyles} />
           </Box>
         )}
 

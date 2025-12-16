@@ -1,4 +1,4 @@
-import { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { Operation, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatParameters } from './formatParameters'
 
 // Mock dependencies with minimal implementation
@@ -56,7 +56,7 @@ describe('formatParameters', () => {
       },
       hexData: null,
       value: null,
-      operation: 0,
+      operation: 0 as Operation,
     }
 
     const result = formatParameters({ txData })
@@ -77,7 +77,7 @@ describe('formatParameters', () => {
       },
       hexData: null,
       value: null,
-      operation: 0,
+      operation: 0 as Operation,
     })
 
     isArrayParameter.mockImplementation(() => false)
@@ -97,7 +97,7 @@ describe('formatParameters', () => {
       },
       hexData: null,
       value: null,
-      operation: 0,
+      operation: 0 as Operation,
     }
 
     isArrayParameter.mockImplementation((type: string) => type.endsWith('[]'))
@@ -108,35 +108,18 @@ describe('formatParameters', () => {
     expect(formatArrayValue).toHaveBeenCalledTimes(1)
   })
 
-  it('should include hex data when present', () => {
-    const txData = {
-      to: { value: '0x123...' },
-      dataDecoded: {
-        method: 'transfer',
-        parameters: [],
-      },
-      hexData: '0x1234567890abcdef1234567890abcdef',
-      value: null,
-      operation: 0,
-    }
-
-    const result = formatParameters({ txData })
-
-    expect(result).toHaveLength(2) // 1 basic + 1 hex data
-  })
-
   it('should handle missing dataDecoded', () => {
     const txData = {
       to: { value: '0x123...' },
       dataDecoded: null,
       hexData: '0x1234',
       value: null,
-      operation: 0,
+      operation: 0 as Operation,
     }
 
     const result = formatParameters({ txData })
 
-    expect(result).toHaveLength(2) // 1 basic + 1 hex data
+    expect(result).toHaveLength(1) // Only basic item, hexData is ignored
   })
 
   it('should handle mixed parameter types', () => {
@@ -153,14 +136,14 @@ describe('formatParameters', () => {
       },
       hexData: '0xabcdef',
       value: null,
-      operation: 0,
+      operation: 0 as Operation,
     })
 
     isArrayParameter.mockImplementation((type: string) => type.endsWith('[]'))
 
     const result = formatParameters({ txData })
 
-    expect(result).toHaveLength(6) // 1 basic + 4 parameters + 1 hex data
+    expect(result).toHaveLength(5) // 1 basic + 4 parameters
     expect(formatValueTemplate).toHaveBeenCalledTimes(2) // address and flag
     expect(formatArrayValue).toHaveBeenCalledTimes(2) // amounts array and data with array value
   })

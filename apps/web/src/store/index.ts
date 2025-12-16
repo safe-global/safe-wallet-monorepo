@@ -5,8 +5,6 @@ import {
   type ThunkAction,
   type Action,
   type Middleware,
-  type EnhancedStore,
-  type ThunkDispatch,
 } from '@reduxjs/toolkit'
 import { useDispatch, useSelector, type TypedUseSelectorHook } from 'react-redux'
 import merge from 'lodash/merge'
@@ -34,9 +32,7 @@ import { setupListeners } from '@reduxjs/toolkit/query'
 import { migrateBatchTxs } from '@/services/ls-migration/batch'
 
 const rootReducer = combineReducers({
-  [slices.chainsSlice.name]: slices.chainsSlice.reducer,
   [slices.safeInfoSlice.name]: slices.safeInfoSlice.reducer,
-  [slices.balancesSlice.name]: slices.balancesSlice.reducer,
   [slices.sessionSlice.name]: slices.sessionSlice.reducer,
   [slices.txHistorySlice.name]: slices.txHistorySlice.reducer,
   [slices.txQueueSlice.name]: slices.txQueueSlice.reducer,
@@ -50,13 +46,13 @@ const rootReducer = combineReducers({
   [slices.popupSlice.name]: slices.popupSlice.reducer,
   [slices.spendingLimitSlice.name]: slices.spendingLimitSlice.reducer,
   [slices.safeAppsSlice.name]: slices.safeAppsSlice.reducer,
-  [slices.safeMessagesSlice.name]: slices.safeMessagesSlice.reducer,
   [slices.pendingSafeMessagesSlice.name]: slices.pendingSafeMessagesSlice.reducer,
   [slices.batchSlice.name]: slices.batchSlice.reducer,
   [slices.undeployedSafesSlice.name]: slices.undeployedSafesSlice.reducer,
   [slices.swapParamsSlice.name]: slices.swapParamsSlice.reducer,
   [slices.visitedSafesSlice.name]: slices.visitedSafesSlice.reducer,
   [slices.orderByPreferenceSlice.name]: slices.orderByPreferenceSlice.reducer,
+  [slices.hnStateSlice.name]: slices.hnStateSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
   [slices.gatewayApi.reducerPath]: slices.gatewayApi.reducer,
@@ -80,6 +76,7 @@ const persistedSlices: (keyof Partial<RootState>)[] = [
   slices.visitedSafesSlice.name,
   slices.orderByPreferenceSlice.name,
   slices.authSlice.name,
+  slices.hnStateSlice.name,
 ]
 
 export const getPersistedState = () => {
@@ -139,10 +136,7 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
 type MakeStoreOptions = {
   skipBroadcast?: boolean
 }
-export const makeStore = (
-  initialState?: Partial<RootState>,
-  options?: MakeStoreOptions,
-): EnhancedStore<RootState, Action> => {
+export const makeStore = (initialState?: Partial<RootState>, options?: MakeStoreOptions) => {
   setBaseUrl(GATEWAY_URL)
 
   const store = configureStore({
@@ -165,10 +159,26 @@ export const makeStore = (
 }
 
 export type RootState = ReturnType<typeof rootReducer>
-export type AppDispatch = ThunkDispatch<RootState, unknown, Action> & EnhancedStore<RootState, Action>['dispatch']
+export type AppStore = ReturnType<typeof makeStore>
+export type AppDispatch = AppStore['dispatch']
 export type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, Action>
 
 export const useAppDispatch = () => useDispatch<AppDispatch>()
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector
 
 export const useHydrateStore = hydrate.useHydrateStore
+
+// Store instance for imperative usage outside of React components
+// This is initialized in _app.tsx and should be used for non-component contexts
+let _store: ReturnType<typeof makeStore> | null = null
+
+export const setStoreInstance = (store: ReturnType<typeof makeStore>) => {
+  _store = store
+}
+
+export const getStoreInstance = () => {
+  if (!_store) {
+    throw new Error('Store not initialized. Ensure _app.tsx has called setStoreInstance.')
+  }
+  return _store
+}

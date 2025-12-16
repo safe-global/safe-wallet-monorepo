@@ -8,8 +8,11 @@ import * as useHasPermission from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
 import { render } from '@/tests/test-utils'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { TokenType } from '@safe-global/store/gateway/types'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
+import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import * as useRecipientAnalysis from '@/features/safe-shield/hooks/useRecipientAnalysis'
+import * as useBalances from '@/hooks/useBalances'
 
 describe('CreateTokenTransfer', () => {
   const mockParams = {
@@ -24,10 +27,12 @@ describe('CreateTokenTransfer', () => {
   }
 
   const useHasPermissionSpy = jest.spyOn(useHasPermission, 'useHasPermission')
+  const useRecipientAnalysisSpy = jest.spyOn(useRecipientAnalysis, 'useRecipientAnalysis')
 
   beforeEach(() => {
     jest.clearAllMocks()
     useHasPermissionSpy.mockReturnValue(true)
+    useRecipientAnalysisSpy.mockReturnValue([undefined, undefined, false])
   })
 
   const renderCreateTokenTransfer = (
@@ -35,9 +40,11 @@ describe('CreateTokenTransfer', () => {
     options: Parameters<typeof render>[1] = undefined,
   ) => {
     return render(
-      <TxFlowProvider step={0} data={mockParams} prevStep={() => {}} nextStep={jest.fn()}>
-        <CreateTokenTransfer {...props} />
-      </TxFlowProvider>,
+      <SafeShieldProvider>
+        <TxFlowProvider step={0} data={mockParams} prevStep={() => {}} nextStep={jest.fn()}>
+          <CreateTokenTransfer {...props} />
+        </TxFlowProvider>
+      </SafeShieldProvider>,
       options,
     )
   }
@@ -61,35 +68,31 @@ describe('CreateTokenTransfer', () => {
 
     const tokenAddress = ZERO_ADDRESS
 
-    const { getByText } = renderCreateTokenTransfer(
-      {},
-      {
-        initialReduxState: {
-          balances: {
-            loading: false,
-            loaded: true,
-            data: {
-              fiatTotal: '0',
-              items: [
-                {
-                  balance: '10',
-                  tokenInfo: {
-                    address: tokenAddress,
-                    decimals: 18,
-                    logoUri: 'someurl',
-                    name: 'Test token',
-                    symbol: 'TST',
-                    type: TokenType.ERC20,
-                  },
-                  fiatBalance: '10',
-                  fiatConversion: '1',
-                },
-              ],
+    jest.spyOn(useBalances, 'default').mockReturnValue({
+      balances: {
+        fiatTotal: '0',
+        items: [
+          {
+            balance: '10',
+            tokenInfo: {
+              address: tokenAddress,
+              decimals: 18,
+              logoUri: 'someurl',
+              name: 'Test token',
+              symbol: 'TST',
+              type: TokenType.ERC20,
             },
+            fiatBalance: '10',
+            fiatConversion: '1',
           },
-        },
+        ],
       },
-    )
+      loaded: true,
+      loading: false,
+      error: undefined,
+    })
+
+    const { getByText } = renderCreateTokenTransfer()
 
     expect(getByText('Send as')).toBeInTheDocument()
 

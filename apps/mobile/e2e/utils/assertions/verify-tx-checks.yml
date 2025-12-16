@@ -1,0 +1,165 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+# ===========================================
+# SafeShield Transaction Checks (Reusable Component)
+# ===========================================
+# Tests the SafeShield widget for pending transactions
+# The widget is automatically visible on the Confirm transaction screen
+# (no button to click - checks start automatically)
+#
+# Environment variables:
+#   WIDGET_HEADER_PATTERN: Optional regex pattern to verify the widget header
+#                          Possible values: "Review details", "Issues found", "Checks passed", "Risk detected"
+#                          or "Checking transaction..." (loading) or "Checks unavailable" (error)
+#                          Defaults to ".*(Review details|Issues found|Checks passed|Risk detected).*"
+#   BALANCE_CHANGE_PATTERN: Optional text/pattern to verify in Balance change section
+#                          Example: ".*-.*0\.00002.*" or "No balance change detected"
+#   RUN_SIMULATION: Set to "true" to press the Run button and verify simulation link appears
+#                   Defaults to false
+#   EXPECTED_SIMULATION_RESULT: Expected simulation result - "success" or "fail"
+#                               Only used when RUN_SIMULATION is "true"
+#                               If not provided, accepts either result
+#   VERIFY_DETAILS_SHEET: Set to "true" to tap on widget header and verify bottom sheet opens
+#                        Defaults to false
+
+# ===========================================
+# SafeShield Widget Verification
+# ===========================================
+# Scroll to ensure SafeShield widget is visible (it takes more space than the old button)
+- scroll
+
+# The SafeShield widget should be visible automatically with analysis results
+# Wait for checks to complete (widget may show "Checking transaction..." initially)
+- extendedWaitUntil:
+    visible:
+      text: '.*(Review details|Issues found|Checks passed|Risk detected|Checks unavailable).*'
+    timeout: 15000
+
+# Verify widget header matches expected pattern
+- assertVisible:
+    text: '${WIDGET_HEADER_PATTERN || ".*(Review details|Issues found|Checks passed|Risk detected).*"}'
+
+# ===========================================
+# Analysis Labels Verification
+# ===========================================
+# At least one analysis label should be visible (recipient, contract, or threat analysis)
+# These labels can be: "New recipient", "Known recipient", "Known contract", "No threat detected", etc.
+- assertVisible:
+    text: '.*(New recipient|Known recipient|Recurring recipient|Unknown recipient|Low activity|Known contract|New contract|Verified contract|No threat detected|Threat analysis failed).*'
+
+# ===========================================
+# Transaction Simulation Section
+# ===========================================
+# Transaction simulation is NOT auto-performed - shows "Run" button initially
+- assertVisible:
+    text: 'Transaction simulation'
+
+# Verify Run button is visible (simulation not yet performed)
+- assertVisible:
+    text: 'Run'
+
+# ===========================================
+# Run Simulation (Optional)
+# ===========================================
+# Only run simulation if RUN_SIMULATION is set to "true"
+- evalScript: '${output.shouldRunSimulation = (typeof RUN_SIMULATION !== "undefined" && RUN_SIMULATION === "true")}'
+- evalScript: '${output.expectedSimResult = (typeof EXPECTED_SIMULATION_RESULT !== "undefined") ? EXPECTED_SIMULATION_RESULT : null}'
+- evalScript: '${output.expectSuccess = output.expectedSimResult === "success"}'
+- evalScript: '${output.expectFail = output.expectedSimResult === "fail"}'
+
+- runFlow:
+    when:
+      true: '${output.shouldRunSimulation === true}'
+    commands:
+      # Tap the Run button to start simulation
+      - tapOn:
+          text: 'Run'
+      # Wait for simulation to complete (shows "Running..." then changes to "View")
+      - extendedWaitUntil:
+          visible:
+            text: 'View'
+          timeout: 30000
+      # Verify simulation result based on EXPECTED_SIMULATION_RESULT
+      # If "success" expected, verify "Simulation successful"
+      - runFlow:
+          when:
+            true: '${output.expectSuccess === true}'
+          commands:
+            - assertVisible:
+                text: 'Simulation successful'
+      # If "fail" expected, verify "Simulation failed"
+      - runFlow:
+          when:
+            true: '${output.expectFail === true}'
+          commands:
+            - assertVisible:
+                text: 'Simulation failed'
+      # If no specific result expected, accept either
+      - runFlow:
+          when:
+            true: '${output.expectedSimResult === null}'
+          commands:
+            - assertVisible:
+                text: '.*(Simulation successful|Simulation failed).*'
+
+# ===========================================
+# Balance Change Block Verification
+# ===========================================
+# Balance change is now shown in a separate block (always visible)
+- assertVisible:
+    id: 'balance-change-block'
+
+- assertVisible:
+    text: 'Balance change.*'
+
+# Verify balance change pattern if provided
+- assertVisible:
+    text: '${BALANCE_CHANGE_PATTERN || ".*(No balance change detected|ETH|USDC|DAI|\\d+).*"}'
+
+# ===========================================
+# Balance Change Info Sheet Test
+# ===========================================
+# Tap on Balance change info icon to open info sheet
+- tapOn:
+    text: 'Balance change.*'
+
+# Verify the Balance change info sheet opens
+- assertVisible:
+    text: '.*The balance change gives an overview of the implications of a transaction.*'
+
+# Dismiss the sheet by swiping down
+- swipe:
+    direction: DOWN
+
+# Verify we're back on the confirm transaction screen
+- assertVisible: 'Confirm transaction'
+
+# ===========================================
+# SafeShield Details Sheet (Optional)
+# ===========================================
+# Test opening the SafeShield details bottom sheet
+- evalScript: '${output.shouldVerifyDetailsSheet = (typeof VERIFY_DETAILS_SHEET !== "undefined" && VERIFY_DETAILS_SHEET === "true")}'
+
+- runFlow:
+    when:
+      true: '${output.shouldVerifyDetailsSheet === true}'
+    commands:
+      # Scroll back up to make widget header visible
+      - swipe:
+          direction: 'UP'
+      # Tap on the widget header to open details sheet
+      - tapOn:
+          text: '.*(Review details|Issues found|Checks passed|Risk detected).*'
+      # Verify the bottom sheet opens with headline
+      - assertVisible:
+          text: '.*(REVIEW DETAILS|ISSUES FOUND|CHECKS PASSED|RISK DETECTED).*'
+      # Verify "Secured by Safe Shield" footer
+      - assertVisible:
+          text: '.*Secured by.*'
+      # Dismiss the sheet by swiping down
+      - swipe:
+          direction: 'DOWN'
+      # Verify we're back on the confirm transaction screen
+      - assertVisible: 'Confirm transaction'

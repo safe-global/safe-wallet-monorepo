@@ -39,28 +39,36 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type ChainsGetChainsV1ApiResponse = /** status 200  */ ChainPage
+export type ChainsGetChainsV1ApiResponse = /** status 200 Paginated list of supported chains */ ChainPage
 export type ChainsGetChainsV1ApiArg = {
+  /** Pagination cursor for retrieving the next set of results */
   cursor?: string
 }
-export type ChainsGetChainV1ApiResponse = /** status 200  */ Chain
+export type ChainsGetChainV1ApiResponse = /** status 200 Chain details retrieved successfully */ Chain
 export type ChainsGetChainV1ApiArg = {
+  /** Chain ID of the blockchain network */
   chainId: string
 }
-export type ChainsGetAboutChainV1ApiResponse = /** status 200  */ AboutChain
+export type ChainsGetAboutChainV1ApiResponse = /** status 200 Chain information retrieved successfully */ AboutChain
 export type ChainsGetAboutChainV1ApiArg = {
+  /** Chain ID of the blockchain network */
   chainId: string
 }
-export type ChainsGetBackboneV1ApiResponse = /** status 200  */ Backbone
+export type ChainsGetBackboneV1ApiResponse =
+  /** status 200 Chain backbone information retrieved successfully */ Backbone
 export type ChainsGetBackboneV1ApiArg = {
+  /** Chain ID of the blockchain network */
   chainId: string
 }
-export type ChainsGetMasterCopiesV1ApiResponse = /** status 200  */ MasterCopy[]
+export type ChainsGetMasterCopiesV1ApiResponse = /** status 200 List of Safe master copy contracts */ MasterCopy[]
 export type ChainsGetMasterCopiesV1ApiArg = {
+  /** Chain ID of the blockchain network */
   chainId: string
 }
-export type ChainsGetIndexingStatusV1ApiResponse = /** status 200  */ IndexingStatus
+export type ChainsGetIndexingStatusV1ApiResponse =
+  /** status 200 Chain indexing status retrieved successfully */ IndexingStatus
 export type ChainsGetIndexingStatusV1ApiArg = {
+  /** Chain ID of the blockchain network */
   chainId: string
 }
 export type NativeCurrency = {
@@ -75,7 +83,7 @@ export type BlockExplorerUriTemplate = {
   txHash: string
 }
 export type BalancesProvider = {
-  chainName?: number | null
+  chainName: string | null
   enabled: boolean
 }
 export type ContractAddresses = {
@@ -90,17 +98,17 @@ export type ContractAddresses = {
   safeWebAuthnSignerFactoryAddress?: string | null
 }
 export type GasPriceOracle = {
-  type: string
+  type: 'oracle'
   gasParameter: string
   gweiFactor: string
   uri: string
 }
 export type GasPriceFixed = {
-  type: string
+  type: 'fixed'
   weiValue: string
 }
 export type GasPriceFixedEip1559 = {
-  type: string
+  type: 'fixed1559'
   maxFeePerGas: string
   maxPriorityFeePerGas: string
 }

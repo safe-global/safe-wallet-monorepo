@@ -1,5 +1,6 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { SettingsInfoType } from '@safe-global/store/gateway/types'
 import { TX_TYPES } from '@/services/analytics/events/transactions'
-import { SettingsInfoType, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import {
   isERC721Transfer,
   isMultiSendTxInfo,

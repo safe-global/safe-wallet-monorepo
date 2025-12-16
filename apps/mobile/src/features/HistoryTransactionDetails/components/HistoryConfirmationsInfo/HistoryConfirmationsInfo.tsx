@@ -59,9 +59,15 @@ export function HistoryConfirmationsInfo({ detailedExecutionInfo, txId }: Histor
             circleProps={{ paddingHorizontal: 8, paddingVertical: 2 }}
             circular={false}
             content={
-              <View alignItems="center" flexDirection="row" gap="$1">
+              <View alignItems="center" flexDirection="row" gap="$1" testID="history-confirmations-info-badge">
                 <SafeFontIcon size={12} name="owners" />
-                <Text fontWeight={600} color={'$color'} fontSize="$2" lineHeight={18}>
+                <Text
+                  fontWeight={600}
+                  color={'$color'}
+                  fontSize="$2"
+                  lineHeight={18}
+                  testID="history-confirmations-info-badge-text"
+                >
                   {detailedExecutionInfo?.confirmations?.length}/{detailedExecutionInfo?.confirmationsRequired}
                 </Text>
               </View>
@@ -71,6 +77,7 @@ export function HistoryConfirmationsInfo({ detailedExecutionInfo, txId }: Histor
           <SafeFontIcon name="chevron-right" size={16} />
         </View>
       }
+      testID="history-confirmations-info"
     />
   )
 }

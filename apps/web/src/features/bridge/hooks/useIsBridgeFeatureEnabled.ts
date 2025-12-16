@@ -1,4 +1,4 @@
-import { useIsGeoblockedFeatureEnabled } from '@/hooks/useIsGeoblockedFeatureEnabled'
+import { useIsGeoblockedFeatureEnabled } from './useIsGeoblockedFeatureEnabled'
 
 import { FEATURES } from '@safe-global/utils/utils/chains'
 

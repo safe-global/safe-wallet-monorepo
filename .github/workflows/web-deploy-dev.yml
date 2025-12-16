@@ -37,7 +37,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           repo-token-user-login: 'github-actions[bot]'
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: ./.github/actions/yarn
 
@@ -46,7 +46,9 @@ jobs:
           secrets: ${{ toJSON(secrets) }}
           # if: startsWith(github.ref, 'refs/heads/main')
 
-      #- uses: ./.github/workflows/build-storybook
+      - uses: ./.github/actions/build-storybook
+        with:
+          secrets: ${{ toJSON(secrets) }}
 
       - name: Add SRI to scripts
         run: node ./scripts/integrity-hashes.cjs

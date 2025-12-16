@@ -2,7 +2,8 @@ import React from 'react'
 import { render } from '@/src/tests/test-utils'
 import { SwapOrderHeader } from './SwapOrderHeader'
 import { OrderTransactionInfo } from '@safe-global/store/gateway/types'
-import { MultisigExecutionDetails, TokenInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { TokenInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 // Mock the date utils
 jest.mock('@/src/utils/date', () => ({
@@ -65,6 +66,15 @@ describe('SwapOrderHeader', () => {
     trusted: true,
   }
 
+  const mockFeeToken: TokenInfo = {
+    address: '0x0',
+    decimals: 18,
+    logoUri: 'https://example.com/eth.png',
+    name: 'Ethereum',
+    symbol: 'ETH',
+    trusted: true,
+  }
+
   const mockExecutionInfo: MultisigExecutionDetails = {
     type: 'MULTISIG',
     submittedAt: 1703505000000, // Dec 25 2023 10:30 AM
@@ -106,7 +116,7 @@ describe('SwapOrderHeader', () => {
     buyToken: mockBuyToken,
     explorerUrl: 'https://explorer.com/order/test-uid',
     executedFee: '0',
-    executedFeeToken: '0x0',
+    executedFeeToken: mockFeeToken,
     receiver: null,
     owner: '0x123',
     fullAppData: null,

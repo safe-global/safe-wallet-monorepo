@@ -1,4 +1,4 @@
-import { defaultSecurityContextValues } from '@safe-global/utils/components/tx/security/shared/utils'
+import type { Relay } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { OperationType } from '@safe-global/types-kit'
@@ -12,7 +12,11 @@ import * as walletCanPay from '@/hooks/useWalletCanPay'
 import * as useValidateTxData from '@/hooks/useValidateTxData'
 import { render } from '@/tests/test-utils'
 import { fireEvent, waitFor } from '@testing-library/react'
-import type { RelayCountResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import type {
+  RecipientAnalysisResults,
+  ContractAnalysisResults,
+  ThreatAnalysisResults,
+} from '@safe-global/utils/features/safe-shield/types'
 
 // We assume that CheckWallet always returns true
 jest.mock('@/components/common/CheckWallet', () => ({
@@ -34,7 +38,7 @@ describe('ExecuteForm', () => {
     isOwner: true,
     txId: '0x123123',
     isExecutionLoop: false,
-    relays: [undefined, undefined, false] as AsyncResult<RelayCountResponse>,
+    relays: [undefined, undefined, false] as AsyncResult<Relay>,
     txActions: {
       proposeTx: jest.fn(),
       signTx: jest.fn(),
@@ -42,7 +46,18 @@ describe('ExecuteForm', () => {
       executeTx: jest.fn(),
       signProposerTx: jest.fn(),
     },
-    txSecurity: defaultSecurityContextValues,
+    txSecurity: {
+      setRecipientAddresses: jest.fn(),
+      setSafeTx: jest.fn(),
+      recipient: [undefined, undefined, false] as AsyncResult<RecipientAnalysisResults>,
+      contract: [undefined, undefined, false] as AsyncResult<ContractAnalysisResults>,
+      threat: [undefined, undefined, false] as AsyncResult<ThreatAnalysisResults>,
+      nestedThreat: [undefined, undefined, false] as AsyncResult<ThreatAnalysisResults>,
+      isNested: false,
+      needsRiskConfirmation: false,
+      isRiskConfirmed: false,
+      setIsRiskConfirmed: jest.fn(),
+    },
     options: [
       { id: 'execute', label: 'Execute' },
       { id: 'sign', label: 'Sign' },

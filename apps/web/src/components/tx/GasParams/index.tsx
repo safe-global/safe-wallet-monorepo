@@ -1,7 +1,6 @@
-import { getTotalFee } from '@/hooks/useGasPrice'
 import type { ReactElement, SyntheticEvent } from 'react'
 import { Accordion, AccordionDetails, AccordionSummary, Skeleton, Typography, Link, Grid, SvgIcon } from '@mui/material'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -12,6 +11,7 @@ import classnames from 'classnames'
 import css from './styles.module.css'
 import accordionCss from '@/styles/accordion.module.css'
 import madProps from '@/utils/mad-props'
+import { getTotalFee } from '@safe-global/utils/hooks/useDefaultGasPrice'
 
 const GasDetail = ({ name, value, isLoading }: { name: string; value: string; isLoading: boolean }): ReactElement => {
   const valueSkeleton = <Skeleton variant="text" sx={{ minWidth: '5em' }} />
@@ -32,6 +32,11 @@ type GasParamsProps = {
   onEdit?: () => void
   gasLimitError?: Error
   willRelay?: boolean
+  noFeeNovember?: {
+    isEligible: boolean
+    remaining: number
+    limit: number
+  }
 }
 
 export const _GasParams = ({
@@ -41,8 +46,9 @@ export const _GasParams = ({
   onEdit,
   gasLimitError,
   willRelay,
+  noFeeNovember,
   chain,
-}: GasParamsProps & { chain?: ChainInfo }): ReactElement => {
+}: GasParamsProps & { chain?: Chain }): ReactElement => {
   const { nonce, userNonce, safeTxGas, gasLimit, maxFeePerGas, maxPriorityFeePerGas } = params
 
   const onChangeExpand = (_: SyntheticEvent, expanded: boolean) => {
@@ -111,12 +117,21 @@ export const _GasParams = ({
                     fontSize="small"
                     sx={{ color: 'var(--color-error-main)', mr: 'var(--space-1)' }}
                   />
-                  <span style={{ fontWeight: 'normal' }}>Cannot Estimate</span>
+                  <span style={{ fontWeight: 'normal' }}>Cannot estimate</span>
                 </>
               ) : isLoading ? (
                 <Skeleton variant="text" sx={{ display: 'inline-block', minWidth: '7em' }} />
               ) : (
-                <span>{willRelay ? 'Free' : `${totalFee} ${chain?.nativeCurrency.symbol}`}</span>
+                <div className={css.feeContainer}>
+                  {noFeeNovember?.isEligible ? (
+                    <>
+                      <span className={css.feeAmount}>Free</span>
+                      <span className={css.noFeeTag}>No-Fee November</span>
+                    </>
+                  ) : (
+                    <span>{willRelay ? 'Free' : `${totalFee} ${chain?.nativeCurrency.symbol}`}</span>
+                  )}
+                </div>
               )}
             </Typography>
           ) : (

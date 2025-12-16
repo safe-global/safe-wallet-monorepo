@@ -1,0 +1,60 @@
+import { useAppDispatch } from '@/src/store/hooks'
+import { useCallback, useEffect } from 'react'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import { addSignerWithEffects } from '@/src/store/signerThunks'
+import { LoadingScreen } from '@/src/components/LoadingScreen'
+import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipValidation'
+
+export function LoadingImport() {
+  const { address } = useLocalSearchParams<{ address: string }>()
+  const dispatch = useAppDispatch()
+  const router = useRouter()
+  const { validateAddressOwnership } = useAddressOwnershipValidation()
+
+  const redirectToError = useCallback(() => {
+    router.replace({
+      pathname: '/import-signers/private-key-error',
+      params: {
+        address,
+      },
+    })
+  }, [router, address])
+
+  useEffect(() => {
+    if (!address) {
+      redirectToError()
+      return
+    }
+
+    const validateAndImport = async () => {
+      try {
+        const validationResult = await validateAddressOwnership(address)
+
+        if (validationResult.isOwner && validationResult.ownerInfo) {
+          dispatch(
+            addSignerWithEffects({
+              ...validationResult.ownerInfo,
+              type: 'private-key',
+            }),
+          )
+
+          router.replace({
+            pathname: '/import-signers/private-key-success',
+            params: {
+              name: validationResult.ownerInfo.name,
+              address: validationResult.ownerInfo.value,
+            },
+          })
+        } else {
+          redirectToError()
+        }
+      } catch (_error) {
+        redirectToError()
+      }
+    }
+
+    validateAndImport()
+  }, [address, validateAddressOwnership, dispatch, router, redirectToError])
+
+  return <LoadingScreen title="Creating your signer..." description="Verifying address..." />
+}

@@ -1,9 +1,9 @@
+import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import SwapOrderConfirmation from '@/features/swap/components/SwapOrderConfirmationView'
-import type { Order } from '@safe-global/safe-gateway-typescript-sdk'
 import type { NarrowConfirmationViewProps } from '../types'
 
 interface SwapOrderProps extends NarrowConfirmationViewProps {
-  txInfo: Order
+  txInfo: OrderTransactionInfo
 }
 
 function SwapOrder({ txInfo, txData }: SwapOrderProps) {

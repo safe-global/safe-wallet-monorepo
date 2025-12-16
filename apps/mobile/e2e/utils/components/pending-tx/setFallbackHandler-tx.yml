@@ -1,0 +1,58 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+# ===========================================
+# setFallbackHandler Transaction (Pending State)
+# ===========================================
+# Tests the setFallbackHandler transaction detail view for pending transactions
+# Reuses shared test components where applicable
+
+- assertVisible: 'Confirm transaction'
+
+# Verify the transaction method name is visible
+- assertVisible:
+    text: 'setFallbackHandler'
+
+# ===========================================
+# Network Display
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-network.yml
+
+# ===========================================
+# Transaction Details Button
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-details.yml
+
+# ===========================================
+# SafeShield Transaction Checks
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-checks.yml
+    env:
+      WIDGET_HEADER_PATTERN: '.*(Review details|Issues found|Checks passed).*'
+      BALANCE_CHANGE_PATTERN: 'No balance change detected'
+
+# ===========================================
+# Confirmations
+# ===========================================
+# Test tapping on confirmations to open the bottom sheet and verify signed badge
+# Verify that 1/1 confirmations are shown (the transaction has all required confirmations)
+# Scroll to make confirmations visible (SafeShield block takes more vertical space)
+- scroll
+- runFlow:
+    file: ../../assertions/verify-tx-confirmations.yml
+    env:
+      CONFIRMATIONS_PATTERN: '.*1/1.*'
+
+# ===========================================
+# Review and Execute Screen
+# ===========================================
+# Test navigating to Review and execute screen and verifying all elements
+- runFlow:
+    file: ../../assertions/verify-review-and-execute.yml
+    env:
+      EXPECTED_SIGNER_PATTERN: '.*6fED.*'
+      TX_EXECUTION_STATUS: 'succeed'

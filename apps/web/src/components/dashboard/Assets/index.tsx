@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
-import { Box, Skeleton, Typography, Paper, Card, Stack, Divider } from '@mui/material'
+import { Box, Skeleton, Typography, Paper, Stack, Divider } from '@mui/material'
 import useBalances from '@/hooks/useBalances'
 import TokenAmount from '@/components/common/TokenAmount'
 import SwapButton from '@/features/swap/components/SwapButton'
 import { AppRoutes } from '@/config/routes'
-import { ViewAllLink } from '../styled'
+import { WidgetCard } from '../styled'
 import css from './styles.module.css'
 import { useRouter } from 'next/router'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
@@ -21,7 +21,7 @@ import { useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEna
 import useIsStakingPromoEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
 import useChainId from '@/hooks/useChainId'
 import TokenIcon from '@/components/common/TokenIcon'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
+import { TokenType } from '@safe-global/store/gateway/types'
 import StakeButton from '@/features/stake/components/StakeButton'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import NoAssetsIcon from '@/public/images/common/no-assets.svg'
@@ -41,13 +41,9 @@ const NoAssets = () => (
 )
 
 const AssetsSkeleton = () => (
-  <Card sx={{ px: 1.5, py: 2.5 }} component="section">
-    <Stack direction="row" sx={{ px: 1.5, mb: 1 }}>
-      <Typography fontWeight={700}>Top assets</Typography>
-    </Stack>
-
+  <WidgetCard title="Top assets" testId="assets-widget">
     <Skeleton height={66} variant="rounded" />
-  </Card>
+  </WidgetCard>
 )
 
 const AssetRow = ({
@@ -66,7 +62,7 @@ const AssetRow = ({
   return (
     <Box className={css.container} key={item.tokenInfo.address}>
       <Stack direction="row" gap={1.5} alignItems="center">
-        <TokenIcon tokenSymbol={item.tokenInfo.symbol} logoUri={item.tokenInfo.logoUri ?? undefined} size={32} />
+        <TokenIcon tokenSymbol={item.tokenInfo.symbol} logoUri={item.tokenInfo.logoUri || undefined} size={32} />
         <Box>
           <Typography fontWeight="600">{item.tokenInfo.name}</Typography>
           <Typography variant="body2" className={css.tokenAmount}>
@@ -75,25 +71,27 @@ const AssetRow = ({
         </Box>
       </Stack>
 
-      <Box flex={1} display="block" textAlign="right" height="44px">
-        <FiatBalance balanceItem={item} />
-        <FiatChange balanceItem={item} inline />
-      </Box>
+      <Box className={css.valueContainer}>
+        <Box className={css.valueContent}>
+          <FiatBalance balanceItem={item} />
+          <FiatChange balanceItem={item} inline />
+        </Box>
 
-      <Box className={css.assetButtons}>
-        {showSwap ? (
-          <SwapButton tokenInfo={item.tokenInfo} amount="0" trackingLabel={SWAP_LABELS.dashboard_assets} light />
-        ) : (
-          <SendButton tokenInfo={item.tokenInfo} light />
-        )}
+        <Box className={css.assetButtons}>
+          <SendButton tokenInfo={item.tokenInfo} onlyIcon />
 
-        {showEarn && isEligibleEarnToken(chainId, item.tokenInfo.address) && (
-          <EarnButton tokenInfo={item.tokenInfo} trackingLabel={EARN_LABELS.dashboard_asset} compact={false} />
-        )}
+          {showSwap && (
+            <SwapButton tokenInfo={item.tokenInfo} amount="0" trackingLabel={SWAP_LABELS.dashboard_assets} onlyIcon />
+          )}
 
-        {showStake && item.tokenInfo.type === TokenType.NATIVE_TOKEN && (
-          <StakeButton tokenInfo={item.tokenInfo} trackingLabel={STAKE_LABELS.asset} compact={false} />
-        )}
+          {showEarn && isEligibleEarnToken(chainId, item.tokenInfo.address) && (
+            <EarnButton tokenInfo={item.tokenInfo} trackingLabel={EARN_LABELS.dashboard_asset} onlyIcon />
+          )}
+
+          {showStake && item.tokenInfo.type === TokenType.NATIVE_TOKEN && (
+            <StakeButton tokenInfo={item.tokenInfo} trackingLabel={STAKE_LABELS.asset} onlyIcon />
+          )}
+        </Box>
       </Box>
     </Box>
   )
@@ -148,15 +146,9 @@ const AssetsWidget = () => {
   if (isLoading) return <AssetsSkeleton />
 
   return (
-    <Card data-testid="assets-widget" sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5 }}>
-      <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
-        <Typography fontWeight={700}>Top assets</Typography>
-
-        {items.length > 0 && <ViewAllLink url={viewAllUrl} text="View all" />}
-      </Stack>
-
+    <WidgetCard title="Top assets" viewAllUrl={items.length > 0 ? viewAllUrl : undefined} testId="assets-widget">
       <Box>{items.length > 0 ? <AssetList items={items} /> : <NoAssets />}</Box>
-    </Card>
+    </WidgetCard>
   )
 }
 

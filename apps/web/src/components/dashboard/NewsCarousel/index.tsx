@@ -1,17 +1,24 @@
-import React, { createElement, type MouseEvent, useMemo, useRef, useState } from 'react'
+import React, { createElement, useMemo, useRef, useState } from 'react'
 import classnames from 'classnames'
 import { Box, Stack } from '@mui/material'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import css from './styles.module.css'
-import { getSlidePosition, NEWS_BANNER_STORAGE_KEY } from '@/components/dashboard/NewsCarousel/utils'
+import {
+  getSlidePosition,
+  NEWS_BANNER_STORAGE_KEY,
+  isBannerDismissed,
+  dismissBanner,
+  type DismissalState,
+} from '@/components/dashboard/NewsCarousel/utils'
 
 export interface NewsBannerProps {
-  onDismiss: (e: MouseEvent<HTMLButtonElement>) => void
+  onDismiss: (eligibilityState?: boolean) => void
 }
 
 export interface BannerItem {
   id: string
   element: React.ComponentType<NewsBannerProps>
+  eligibilityState?: boolean
 }
 
 export interface NewsCarouselProps {
@@ -19,13 +26,13 @@ export interface NewsCarouselProps {
 }
 
 const isInteractive = (element: HTMLElement | null) =>
-  !!element?.closest('button, a, input, textarea, select, #carousel-overlay')
+  !!element?.closest('button, a, input, textarea, select, [role="button"], #carousel-overlay')
 
 const ITEM_WIDTH_PERCENT = 100
 const SLIDER_GAP = 16
 
 const NewsCarousel = ({ banners }: NewsCarouselProps) => {
-  const [dismissed = [], setDismissed] = useLocalStorage<string[]>(NEWS_BANNER_STORAGE_KEY)
+  const [dismissed, setDismissed] = useLocalStorage<DismissalState>(NEWS_BANNER_STORAGE_KEY)
 
   const [isDragging, setIsDragging] = useState(false)
   const [prevScrollLeft, setPrevScrollLeft] = useState(0)
@@ -83,10 +90,13 @@ const NewsCarousel = ({ banners }: NewsCarouselProps) => {
     return sliderRef.current.clientWidth * (ITEM_WIDTH_PERCENT / 100)
   }
 
-  const items = useMemo(() => banners.filter((b) => !dismissed.includes(b.id)), [banners, dismissed])
+  const items = useMemo(
+    () => banners.filter((banner) => !isBannerDismissed(banner.id, dismissed || [], banner.eligibilityState)),
+    [banners, dismissed],
+  )
 
-  const dismissItem = (id: string) => {
-    setDismissed((prev = []) => Array.from(new Set([...prev, id])))
+  const dismissItem = (id: string, eligibilityState?: boolean) => {
+    setDismissed((prev) => dismissBanner(id, prev || [], eligibilityState))
   }
 
   if (!items.length) return null
@@ -103,13 +113,16 @@ const NewsCarousel = ({ banners }: NewsCarouselProps) => {
         onPointerLeave={handleDragEnd}
         onPointerCancel={handleDragEnd}
       >
-        {items.map((item) => (
-          <Box width={1} flexShrink={0} key={item.id}>
-            {createElement(item.element, {
-              onDismiss: () => dismissItem(item.id),
-            })}
-          </Box>
-        ))}
+        {items.map((item) => {
+          const { id, element, eligibilityState } = item
+          return (
+            <Box width={1} flexShrink={0} key={id}>
+              {createElement(element, {
+                onDismiss: () => dismissItem(id, eligibilityState),
+              })}
+            </Box>
+          )
+        })}
       </div>
     </Stack>
   )

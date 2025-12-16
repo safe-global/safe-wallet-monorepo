@@ -1,26 +1,24 @@
 import { useMemo } from 'react'
-import isEqual from 'lodash/isEqual'
-import { useAppSelector } from '@/store'
-import { selectBalances } from '@/store/balancesSlice'
-import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import useLoadBalances, { type PortfolioBalances, initialBalancesState } from './loadables/useLoadBalances'
 
-const useBalances = (): {
-  balances: Balances
+export type UseBalancesResult = {
+  balances: PortfolioBalances
   loaded: boolean
   loading: boolean
   error?: string
-} => {
-  const state = useAppSelector(selectBalances, isEqual)
-  const { data, error, loaded, loading } = state
+}
+
+const useBalances = (): UseBalancesResult => {
+  const [data, error, loading] = useLoadBalances()
 
   return useMemo(
     () => ({
-      balances: data,
-      error,
-      loaded,
+      balances: data ?? initialBalancesState,
+      error: error?.message,
+      loaded: !!data,
       loading,
     }),
-    [data, error, loaded, loading],
+    [data, error, loading],
   )
 }
 

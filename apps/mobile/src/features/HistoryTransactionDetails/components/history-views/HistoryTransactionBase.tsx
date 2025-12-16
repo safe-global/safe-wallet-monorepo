@@ -41,7 +41,7 @@ export function HistoryTransactionBase({
   children,
 }: HistoryTransactionBaseProps) {
   return (
-    <YStack gap="$4">
+    <YStack gap="$4" testID="history-transaction-base">
       <HistoryTransactionHeader
         logo={logo}
         customLogo={customLogo}
@@ -54,7 +54,7 @@ export function HistoryTransactionBase({
 
       {description && (typeof description === 'string' ? <Text fontSize="$4">{description}</Text> : description)}
 
-      <Container padding="$4" gap="$4" borderRadius="$3">
+      <Container padding="$4" gap="$4" borderRadius="$3" testID="history-transaction-container">
         {recipientAddress && (
           <View alignItems="center" flexDirection="row" justifyContent="space-between">
             <Text color="$textSecondaryLight">To</Text>

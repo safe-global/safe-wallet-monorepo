@@ -5,7 +5,17 @@ import {
   ListenerEffectAPI,
   TypedStartListening,
 } from '@reduxjs/toolkit'
-import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist'
+import {
+  persistStore,
+  persistReducer,
+  createTransform,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from 'redux-persist'
 import { reduxStorage } from './storage'
 import txHistory from './txHistorySlice'
 import activeSafe from './activeSafeSlice'
@@ -18,13 +28,15 @@ import addressBook from './addressBookSlice'
 import settings from './settingsSlice'
 import safes from './safesSlice'
 import safeSubscriptions from './safeSubscriptionsSlice'
+import safesSettings from './safesSettingsSlice'
 import biometrics from './biometricsSlice'
 import pendingTxs from './pendingTxsSlice'
+import estimatedFee from './estimatedFeeSlice'
+import executionMethod from './executionMethodSlice'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import devToolsEnhancer from 'redux-devtools-expo-dev-plugin'
 import { GATEWAY_URL, isTestingEnv } from '../config/constants'
 import { web3API } from './signersBalance'
-import { setBaseUrl as setSDKBaseURL } from '@safe-global/safe-gateway-typescript-sdk'
 import { createFilter } from '@safe-global/store/utils/persistTransformFilter'
 import { setupMobileCookieHandling } from './utils/cookieHandling'
 import notificationsMiddleware from './middleware/notifications'
@@ -32,25 +44,67 @@ import analyticsMiddleware from './middleware/analytics'
 import notificationSyncMiddleware from './middleware/notificationSync'
 import { setBackendStore } from '@/src/store/utils/singletonStore'
 import pendingTxsListeners from '@/src/store/middleware/pendingTxs'
+import signingState from './signingStateSlice'
+import signerImportFlow from './signerImportFlowSlice'
+import executingState from './executingStateSlice'
 
-setSDKBaseURL(GATEWAY_URL)
 setBaseUrl(GATEWAY_URL)
 
 // Set up mobile-specific cookie handling
 setupMobileCookieHandling()
 
-const cgwClientFilter = createFilter(
+export const cgwClientFilter = createFilter(
   cgwClient.reducerPath,
   ['queries.getChainsConfig(undefined)', 'config'],
   ['queries.getChainsConfig(undefined)', 'config'],
 )
 
+type QueryEntry = { status?: string } | undefined
+type RtkQueryState = {
+  queries?: Record<string, QueryEntry>
+  [key: string]: unknown
+}
+
+// RTK Query persists status: 'pending' for in-flight requests. If the app is killed mid-request,
+// this stale pending status prevents new requests from being initiated on restart.
+export const sanitizePendingQueriesTransform = createTransform<RtkQueryState, RtkQueryState>(
+  (inboundState) => inboundState,
+  (outboundState) => {
+    if (!outboundState?.queries) {
+      return outboundState
+    }
+
+    const sanitizedQueries: Record<string, QueryEntry> = {}
+    for (const [key, query] of Object.entries(outboundState.queries)) {
+      if (query?.status === 'pending') {
+        continue
+      }
+      sanitizedQueries[key] = query
+    }
+
+    return { ...outboundState, queries: sanitizedQueries }
+  },
+  { whitelist: [cgwClient.reducerPath] },
+)
+
+export const persistBlacklist = [
+  web3API.reducerPath,
+  'myAccounts',
+  'estimatedFee',
+  'executionMethod',
+  'signingState',
+  'signerImportFlow',
+  'executingState',
+]
+
+export const persistTransforms = [cgwClientFilter, sanitizePendingQueriesTransform]
+
 const persistConfig = {
   key: 'root',
   version: 1,
   storage: reduxStorage,
-  blacklist: [web3API.reducerPath, cgwClient.reducerPath, 'myAccounts'],
-  transforms: [cgwClientFilter],
+  blacklist: persistBlacklist,
+  transforms: persistTransforms,
 }
 
 export const rootReducer = combineReducers({
@@ -64,9 +118,15 @@ export const rootReducer = combineReducers({
   signers,
   delegates,
   settings,
+  safesSettings,
   safeSubscriptions,
   biometrics,
   pendingTxs,
+  estimatedFee,
+  executionMethod,
+  signingState,
+  signerImportFlow,
+  executingState,
   [web3API.reducerPath]: web3API.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
 })
@@ -94,6 +154,15 @@ export const makeStore = () =>
       return getDefaultMiddleware({
         serializableCheck: {
           ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+          ignoredPaths: ['estimatedFee'],
+          // this fixes the issue with non-serializable values in the app
+          ignoredActionPaths: [
+            'payload.maxFeePerGas',
+            'payload.maxPriorityFeePerGas',
+            'payload.gasLimit',
+            'meta.baseQueryMeta.request',
+            'meta.baseQueryMeta.response',
+          ],
         },
       }).concat(
         cgwClient.middleware,

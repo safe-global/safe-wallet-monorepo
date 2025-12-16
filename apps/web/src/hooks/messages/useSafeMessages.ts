@@ -1,46 +1,78 @@
+import { useEffect } from 'react'
 import type { MessagePage } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { getSafeMessages } from '@safe-global/safe-gateway-typescript-sdk'
+import {
+  useLazyMessagesGetMessagesBySafeV1Query,
+  useMessagesGetMessagesBySafeV1Query,
+} from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 
-import { useAppSelector } from '@/store'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { selectSafeMessages } from '@/store/safeMessagesSlice'
 
 const useSafeMessages = (
-  pageUrl?: string,
+  cursor?: string,
 ): {
   page?: MessagePage
   error?: string
   loading: boolean
 } => {
   const { safe, safeAddress, safeLoaded } = useSafeInfo()
+  const { messagesTag } = safe
 
-  // If pageUrl is passed, load a new messages page from the API
-  const [page, error, loading] = useAsync<MessagePage>(
+  // For the first page (no cursor), use the regular query hook which caches automatically
+  const skip = !safeLoaded || !safe.deployed || !!cursor
+  const {
+    currentData,
+    error: queryError,
+    isLoading: queryLoading,
+    refetch,
+  } = useMessagesGetMessagesBySafeV1Query(
+    {
+      chainId: safe.chainId,
+      safeAddress,
+    },
+    { skip },
+  )
+
+  // Refetch when messagesTag changes
+  useEffect(() => {
+    if (!skip && messagesTag) {
+      refetch()
+    }
+  }, [messagesTag, refetch, skip])
+
+  // For pagination (with cursor), use lazy query
+  const [trigger, { data: lazyData, error: lazyError, isLoading: lazyLoading }] =
+    useLazyMessagesGetMessagesBySafeV1Query()
+
+  // If cursor is passed, load a new messages page from the API
+  const [page, asyncError, asyncLoading] = useAsync<MessagePage>(
     () => {
-      if (!safeLoaded || !pageUrl) {
+      if (!safeLoaded || !cursor) {
         return
       }
-      return getSafeMessages(safe.chainId, safeAddress, pageUrl) as Promise<MessagePage>
+      return trigger({ chainId: safe.chainId, safeAddress, cursor }).then((result) => {
+        if ('data' in result && result.data) {
+          return result.data
+        }
+        throw new Error(String('error' in result ? result.error : 'Unknown error'))
+      })
     },
-    [safe.chainId, safeAddress, safeLoaded, pageUrl],
+    [safe.chainId, safeAddress, safeLoaded, cursor, trigger],
     false,
   )
 
-  const messagesState = useAppSelector(selectSafeMessages)
-
-  return pageUrl
-    ? // New page
+  return cursor
+    ? // Paginated page with cursor
       {
-        page,
-        error: error?.message,
-        loading,
+        page: page ?? lazyData,
+        error: asyncError?.message ?? (lazyError ? String(lazyError) : undefined),
+        loading: asyncLoading || lazyLoading,
       }
-    : // Stored page
+    : // First page (cached by RTK Query)
       {
-        page: messagesState.data,
-        error: messagesState.error,
-        loading: messagesState.loading,
+        page: currentData,
+        error: queryError ? String(queryError) : undefined,
+        loading: queryLoading,
       }
 }
 

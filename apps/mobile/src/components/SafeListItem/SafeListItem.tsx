@@ -2,12 +2,10 @@ import React from 'react'
 import { Container } from '../Container'
 import { Text, Theme, ThemeName, View, ViewProps, YStackProps } from 'tamagui'
 import { IconProps, SafeFontIcon } from '../SafeFontIcon/SafeFontIcon'
-import { ellipsis } from '@/src/utils/formatters'
 import { isMultisigExecutionInfo } from '@/src/utils/transaction-guards'
 import { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Badge } from '../Badge'
 import { Tag } from '../Tag'
-import { ProposalBadge } from '../ProposalBadge'
+import { TransactionProcessingState } from '../TransactionProcessingState'
 
 export interface SafeListItemProps {
   type?: string
@@ -27,6 +25,8 @@ export interface SafeListItemProps {
   paddingVertical?: YStackProps['paddingVertical']
   bottomContent?: React.ReactNode
   pressStyle?: ViewProps['pressStyle']
+  txId?: string
+  testID?: string
 }
 
 export function SafeListItem({
@@ -47,6 +47,8 @@ export function SafeListItem({
   paddingVertical = '$4',
   bottomContent,
   pressStyle,
+  txId,
+  testID,
 }: SafeListItemProps) {
   // TODO: Replace this with proposedByDelegate once EN-149 is implemented
   const isProposedTx = isMultisigExecutionInfo(executionInfo) ? executionInfo.confirmationsSubmitted === 0 : false
@@ -64,6 +66,8 @@ export function SafeListItem({
       flexDirection="column"
       justifyContent="flex-start"
       paddingVertical={paddingVertical}
+      testID={testID}
+      collapsable={false}
       // If just set pressStyle to undefined, then the onPress doesn't work, that's why we need this hack
       {...(pressStyle ? { pressStyle } : {})}
     >
@@ -84,8 +88,15 @@ export function SafeListItem({
             )}
 
             {typeof label === 'string' ? (
-              <Text fontSize="$4" lineHeight={20} fontWeight={600} letterSpacing={-0.01}>
-                {ellipsis(label, rightNode || inQueue ? 21 : 30)}
+              <Text
+                fontSize="$4"
+                lineHeight={20}
+                ellipsizeMode="tail"
+                numberOfLines={1}
+                fontWeight={600}
+                letterSpacing={-0.01}
+              >
+                {label}
               </Text>
             ) : (
               label
@@ -94,30 +105,9 @@ export function SafeListItem({
           {tag && <Tag>{tag}</Tag>}
         </View>
 
-        {inQueue && executionInfo && isMultisigExecutionInfo(executionInfo) ? (
+        {inQueue && executionInfo && isMultisigExecutionInfo(executionInfo) && txId ? (
           <View alignItems="center" flexDirection="row" gap="$2">
-            {isProposedTx ? (
-              <ProposalBadge />
-            ) : (
-              <Badge
-                circleProps={{ paddingHorizontal: 8, paddingVertical: 2 }}
-                circular={false}
-                content={
-                  <View alignItems="center" flexDirection="row" gap="$1">
-                    <SafeFontIcon size={12} name="owners" />
-
-                    <Text fontWeight={600} color={'$color'} fontSize="$2" lineHeight={18}>
-                      {executionInfo?.confirmationsSubmitted}/{executionInfo?.confirmationsRequired}
-                    </Text>
-                  </View>
-                }
-                themeName={
-                  executionInfo?.confirmationsRequired === executionInfo?.confirmationsSubmitted
-                    ? 'badge_success_variant1'
-                    : 'badge_warning'
-                }
-              />
-            )}
+            <TransactionProcessingState txId={txId} executionInfo={executionInfo} isProposedTx={isProposedTx} />
 
             <SafeFontIcon name="chevron-right" size={16} />
           </View>

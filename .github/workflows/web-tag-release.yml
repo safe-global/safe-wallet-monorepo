@@ -1,4 +1,4 @@
-name: Web Tag & GitHub release
+name: Web Tag, Release & Deploy
 
 on:
   pull_request_target:
@@ -10,13 +10,19 @@ on:
       - packages/**
 
 jobs:
-  tag-release:
+  tag-release-deploy:
     if: github.event.pull_request.merged == true
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
           fetch-depth: 0
 
       - name: Extract version
@@ -24,12 +30,32 @@ jobs:
         run: |
           NEW_VERSION=$(node -p 'require("./apps/web/package.json").version')
           echo "version=v$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "version_number=$NEW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Create a git tag
         if: steps.version.outputs.version
         run: git tag ${{ steps.version.outputs.version }} && git push --tags
 
-      - name: GitHub release
+      - name: Extract changelog from PR body
+        id: extract_changelog
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          # Extract only the changelog section from the PR body
+          # Remove everything from "## 📋 QA Checklist" onwards
+          # Using environment variable to avoid code injection
+
+          # Extract content between release header and QA checklist
+          CHANGELOG=$(echo "$PR_BODY" | sed -n '/^## 🚀 Release/,/^## 📋 QA Checklist/p' | sed '$d')
+
+          # Save to output
+          {
+            echo 'changelog<<CHANGELOG_EOF'
+            echo "$CHANGELOG"
+            echo 'CHANGELOG_EOF'
+          } >> $GITHUB_OUTPUT
+
+      - name: Create GitHub release (draft)
         if: steps.version.outputs.version
         uses: softprops/action-gh-release@v2
         id: create_release
@@ -39,9 +65,144 @@ jobs:
           name: ${{ steps.version.outputs.version }}
           tag_name: ${{ steps.version.outputs.version }}
           body: |
-            ${{ github.event.pull_request.body }}
+            ${{ steps.extract_changelog.outputs.changelog }}
 
             [🔗 IPFS release](
             https://github.com/5afe/safe-wallet-ipfs/releases/tag/${{ steps.version.outputs.version }})
         env:
           GITHUB_TOKEN: ${{ github.token }}
+
+      - uses: ./.github/actions/yarn
+
+      - uses: ./.github/actions/build
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          prod: ${{ true }}
+
+      - name: Add SRI to scripts
+        run: node ./scripts/integrity-hashes.cjs
+        working-directory: apps/web
+
+      - name: Create archive
+        run: tar -czf "${{ github.event.repository.name }}-${{ steps.version.outputs.version }}".tar.gz out
+        working-directory: apps/web
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: apps/web/${{ github.event.repository.name }}-${{ steps.version.outputs.version }}.tar.gz
+
+      - name: Create checksum
+        run: sha256sum "${{ github.event.repository.name }}-${{ steps.version.outputs.version }}".tar.gz > "${{ github.event.repository.name }}-${{ steps.version.outputs.version }}-sha256-checksum.txt"
+        working-directory: apps/web
+
+      - name: Upload archive as release asset
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: apps/web/${{ github.event.repository.name }}-${{ steps.version.outputs.version }}.tar.gz
+
+      - name: Upload checksum as release asset
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: apps/web/${{ github.event.repository.name }}-${{ steps.version.outputs.version }}-sha256-checksum.txt
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Script to upload release files
+      - name: Upload release build files for production
+        env:
+          BUCKET: s3://${{ secrets.AWS_STAGING_BUCKET_NAME }}/releases/${{ steps.version.outputs.version }}
+          CHECKSUM_FILE: ${{ github.event.repository.name }}-${{ steps.version.outputs.version }}-sha256-checksum.txt
+        run: bash ./scripts/github/s3_upload.sh
+        working-directory: apps/web
+
+      # Script to prepare production deployments
+      - name: Prepare deployment
+        run: bash ./scripts/github/prepare_production_deployment.sh
+        working-directory: apps/web
+        env:
+          PROD_DEPLOYMENT_HOOK_TOKEN: ${{ secrets.PROD_DEPLOYMENT_HOOK_TOKEN }}
+          PROD_DEPLOYMENT_HOOK_URL: ${{ secrets.PROD_DEPLOYMENT_HOOK_URL }}
+          VERSION_TAG: ${{ steps.version.outputs.version }}
+
+      - name: Back-merge to dev
+        continue-on-error: true
+        id: backmerge
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Fetch latest changes
+          git fetch origin main dev
+
+          # Checkout dev branch
+          git checkout dev
+
+          # Attempt to merge main into dev
+          if git merge origin/main -m "chore: back-merge main to dev after release ${{ steps.version.outputs.version }}"; then
+            # Push to dev if merge succeeded
+            git push origin dev
+            echo "✅ Back-merge completed: main → dev"
+          else
+            # Merge failed due to conflicts
+            echo "⚠️ Back-merge failed due to conflicts"
+            echo "Please manually resolve conflicts using the instructions in the documentation"
+            git merge --abort
+            exit 1
+          fi
+
+      - name: Report back-merge status
+        if: always()
+        run: |
+          if [ "${{ steps.backmerge.outcome }}" = "success" ]; then
+            echo "✅ Back-merge to dev completed successfully"
+          else
+            echo "⚠️ Back-merge to dev failed - manual intervention required"
+            echo "See troubleshooting docs: https://github.com/${{ github.repository }}/blob/dev/apps/web/docs/release-procedure-automated.md#back-merge-conflicts"
+          fi
+
+      - name: Publish GitHub release
+        if: steps.version.outputs.version && success()
+        run: gh release edit ${{ steps.version.outputs.version }} --draft=false
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Notify on Slack
+        if: vars.SLACK_WEBHOOK_URL
+        continue-on-error: true
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.version }}"
+          BACKMERGE_STATUS="${{ steps.backmerge.outcome }}"
+
+          if [ "$BACKMERGE_STATUS" = "success" ]; then
+            BACKMERGE_MSG="_Back-merge to dev completed automatically_ 🔄"
+          else
+            BACKMERGE_MSG="_⚠️ Back-merge failed - manual resolution needed_"
+          fi
+
+          jq -n \
+            --arg version "$VERSION" \
+            --arg url "$RELEASE_URL" \
+            --arg backmerge "$BACKMERGE_MSG" \
+            '{
+              channel: "#topic-wallet-releases",
+              text: ("✅ Safe Wallet " + $version + " ready for going live"),
+              blocks: [
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: ("*Safe Wallet " + $version + " is ready for going live* ✅\n\n<" + $url + "|View Release on GitHub>\n\n" + $backmerge)
+                  }
+                }
+              ]
+            }' | curl -X POST "${{ vars.SLACK_WEBHOOK_URL }}" \
+              -H 'Content-Type: application/json' \
+              -d @-

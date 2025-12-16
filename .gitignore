@@ -7,6 +7,8 @@
 # testing
 /coverage
 /packages/utils/coverage
+/reports
+report.json
 
 # generated types
 /packages/utils/src/types/contracts
@@ -22,6 +24,9 @@
 .DS_Store
 *.pem
 .idea
+
+# beads
+.beads/
 
 # Yarn v4
 .yarn/*
@@ -65,6 +70,9 @@ yarn-error.log*
 yalc.lock
 
 certificates
+
+# storybook
+**/storybook-static/
 *storybook.log
 
 # os

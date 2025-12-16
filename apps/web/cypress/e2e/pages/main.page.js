@@ -1,4 +1,5 @@
 import * as constants from '../../support/constants'
+import * as ls from '../../support/localstorage_data.js'
 
 const acceptSelection = 'Save settings'
 const executeStr = 'Execute'
@@ -250,6 +251,14 @@ export function verifyHomeSafeUrl(safe) {
   cy.location('href', { timeout: 10000 }).should('include', constants.homeUrl + safe)
 }
 
+export function verifyLinkContainsUrl(linkSelector, urlPattern) {
+  if (typeof linkSelector === 'string') {
+    cy.contains(linkSelector).closest('a').should('have.attr', 'href').and('include', urlPattern)
+  } else {
+    linkSelector.should('have.attr', 'href').and('include', urlPattern)
+  }
+}
+
 export function checkTextsExistWithinElement(element, texts) {
   texts.forEach((text) => {
     cy.get(element)
@@ -375,6 +384,21 @@ export function addToLocalStorage(key, jsonValue) {
   })
 }
 
+/**
+ * Sets up SAFE_v2__settings in localStorage with tokenList: "ALL" and hideDust: false
+ * This function sets up the settings and verifies they are stored correctly before proceeding
+ * @returns {Promise} A promise that resolves when settings are set and verified
+ */
+export function setupSafeSettingsWithAllTokens() {
+  const settings = {
+    ...ls.safeSettings.slimitSettings,
+  }
+  return cy
+    .wrap(null)
+    .then(() => addToLocalStorage(constants.localStorageKeys.SAFE_v2__settings, settings))
+    .then(() => isItemInLocalstorage(constants.localStorageKeys.SAFE_v2__settings, settings))
+}
+
 export function checkTextOrder(selector, expectedTextArray) {
   cy.get(selector).each((element, index) => {
     const text = Cypress.$(element).text().trim()
@@ -403,6 +427,12 @@ export function getElementText(element) {
 export function verifyTextVisibility(stringsArray) {
   stringsArray.forEach((string) => {
     cy.contains(string).should('be.visible')
+  })
+}
+
+export function verifyTextNotVisible(stringsArray) {
+  stringsArray.forEach((string) => {
+    cy.contains(string).should('not.exist')
   })
 }
 

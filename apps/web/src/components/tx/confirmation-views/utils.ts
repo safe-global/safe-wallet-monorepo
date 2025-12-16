@@ -1,10 +1,10 @@
+import type { TransactionInfo } from '@safe-global/store/gateway/types'
+import { SettingsInfoType, TransactionInfoType } from '@safe-global/store/gateway/types'
 import type {
   ChangeThreshold,
-  SettingsChange,
+  SettingsChangeTransaction,
   TransactionDetails,
-  TransactionInfo,
-} from '@safe-global/safe-gateway-typescript-sdk'
-import { SettingsInfoType, TransactionInfoType } from '@safe-global/safe-gateway-typescript-sdk'
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ConfirmBatchFlow } from '@/components/tx-flow/flows'
 import { isMultiSendTxInfo } from '@/utils/transaction-guards'
 import {
@@ -15,12 +15,7 @@ import {
 } from '@/utils/transaction-calldata'
 import { type ReactElement } from 'react'
 
-const MANAGE_SIGNERS_SETTING_INFO_TYPES = [
-  SettingsInfoType.ADD_OWNER,
-  SettingsInfoType.REMOVE_OWNER,
-  SettingsInfoType.SWAP_OWNER,
-  SettingsInfoType.CHANGE_THRESHOLD,
-]
+const MANAGE_SIGNERS_SETTING_INFO_TYPES = ['ADD_OWNER', 'REMOVE_OWNER', 'SWAP_OWNER', 'CHANGE_THRESHOLD']
 
 const MANAGE_SIGNERS_CALLDATA_GUARDS = [
   isAddOwnerWithThresholdCalldata,
@@ -34,7 +29,7 @@ export function isManageSignersView(txInfo: TransactionInfo, txData: Transaction
     return !!txInfo.settingsInfo && MANAGE_SIGNERS_SETTING_INFO_TYPES.includes(txInfo.settingsInfo.type)
   }
 
-  if (isMultiSendTxInfo(txInfo) && txData?.dataDecoded?.parameters?.[0]?.valueDecoded) {
+  if (isMultiSendTxInfo(txInfo) && Array.isArray(txData?.dataDecoded?.parameters?.[0]?.valueDecoded)) {
     return txData.dataDecoded.parameters[0].valueDecoded.every(({ data }) => {
       return data && MANAGE_SIGNERS_CALLDATA_GUARDS.some((guard) => guard(data))
     })
@@ -43,7 +38,7 @@ export function isManageSignersView(txInfo: TransactionInfo, txData: Transaction
   return false
 }
 
-export const isSettingsChangeView = (txInfo: TransactionInfo): txInfo is SettingsChange =>
+export const isSettingsChangeView = (txInfo: TransactionInfo): txInfo is SettingsChangeTransaction =>
   txInfo.type === TransactionInfoType.SETTINGS_CHANGE &&
   txInfo.settingsInfo?.type !== SettingsInfoType.SET_FALLBACK_HANDLER
 
@@ -51,5 +46,5 @@ export const isConfirmBatchView = (txFlow?: ReactElement) => txFlow?.type === Co
 
 export const isChangeThresholdView = (
   txInfo: TransactionInfo,
-): txInfo is SettingsChange & { settingsInfo: ChangeThreshold } =>
+): txInfo is SettingsChangeTransaction & { settingsInfo: ChangeThreshold } =>
   txInfo.type === TransactionInfoType.SETTINGS_CHANGE && txInfo.settingsInfo?.type === SettingsInfoType.CHANGE_THRESHOLD

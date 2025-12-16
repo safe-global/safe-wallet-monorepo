@@ -1,38 +1,53 @@
 import React from 'react'
-import { Text, View, Image } from 'tamagui'
-import Signature from '@/assets/images/signature.png'
+import { Text, View } from 'tamagui'
 
 import { Identicon } from '@/src/components/Identicon'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { router } from 'expo-router'
 import { ContactDisplayNameContainer } from '@/src/features/AddressBook'
 import { Address } from '@/src/types/address'
-import { ActionType } from '@/src/features/ChangeSignerSheet/utils'
+import { Container } from '../Container'
+import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 
 type Props = {
   address: Address
   txId: string
+  executionMethod: ExecutionMethod
 }
 
-export function SelectExecutor({ address, txId }: Props) {
+export function SelectExecutor({ address, txId, executionMethod }: Props) {
   return (
     <View
-      onPress={() =>
-        router.push({ pathname: '/change-signer-sheet', params: { txId, actionType: ActionType.EXECUTE } })
-      }
+      onPress={() => router.push({ pathname: '/how-to-execute-sheet', params: { txId } })}
       flexDirection="row"
-      justifyContent="center"
+      justifyContent="space-between"
       alignItems="center"
       gap={'$2'}
     >
-      <Image testID="signature-button-image" width={16} height={16} source={Signature} />
-      <Text fontWeight={700}>Execute with</Text>
+      <Text color="$colorSecondary">Execution method</Text>
 
-      <Identicon address={address} size={24} />
+      <View flexDirection="row" justifyContent="center" alignItems="center" gap={'$2'}>
+        <Container
+          paddingVertical={'$1'}
+          backgroundColor="$backgroundSecondary"
+          paddingHorizontal={'$2'}
+          flexDirection="row"
+          justifyContent="center"
+          alignItems="center"
+          gap={'$1'}
+        >
+          {executionMethod === ExecutionMethod.WITH_RELAY ? (
+            <Text fontWeight={600}>Sponsored by Safe</Text>
+          ) : (
+            <>
+              <Identicon address={address} size={16} />
+              <ContactDisplayNameContainer textProps={{ fontWeight: 600 }} address={address} />
+            </>
+          )}
+        </Container>
 
-      <ContactDisplayNameContainer address={address} />
-
-      <SafeFontIcon name="chevron-right" />
+        <SafeFontIcon name="chevron-right" />
+      </View>
     </View>
   )
 }

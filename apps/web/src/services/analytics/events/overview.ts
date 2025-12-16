@@ -69,6 +69,10 @@ export const OVERVIEW_EVENTS = {
     action: 'Sidebar',
     category: OVERVIEW_CATEGORY,
   },
+  SIDEBAR_CLICKED: {
+    action: 'Sidebar clicked',
+    category: OVERVIEW_CATEGORY,
+  },
   WHATS_NEW: {
     action: "Open What's New",
     category: OVERVIEW_CATEGORY,
@@ -188,6 +192,13 @@ export const OVERVIEW_EVENTS = {
   },
   HIDE_EARN_BANNER: {
     action: 'Hide earn banner',
+    category: OVERVIEW_CATEGORY,
+  },
+}
+
+export const EXPLORE_POSSIBLE_EVENTS = {
+  EXPLORE_POSSIBLE_CLICKED: {
+    action: 'Explore Possible clicked',
     category: OVERVIEW_CATEGORY,
   },
 }

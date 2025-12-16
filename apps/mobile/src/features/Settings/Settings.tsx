@@ -68,7 +68,12 @@ export const Settings = ({
               <YStack alignItems="center" space="$3" marginBottom="$6">
                 <BadgeWrapper
                   badge={
-                    <ThresholdBadge threshold={threshold} ownersCount={owners.length} isLoading={!owners.length} />
+                    <ThresholdBadge
+                      threshold={threshold}
+                      ownersCount={owners.length}
+                      isLoading={!owners.length}
+                      testID="threshold-info-badge"
+                    />
                   }
                 >
                   <Identicon address={address} size={56} />
@@ -145,6 +150,7 @@ export const Settings = ({
                   >
                     <SafeListItem
                       label={'Signers'}
+                      testID="settings-signers-list-item"
                       leftNode={<SafeFontIcon name={'owners'} color={'$colorSecondary'} />}
                       rightNode={
                         <View flexDirection={'row'} alignItems={'center'} justifyContent={'center'}>
@@ -215,7 +221,8 @@ export const Settings = ({
             >
               {isLatestVersion && <SafeFontIcon testID="check-icon" name={'check-filled'} color={'$success'} />}
               <Text marginLeft={'$2'} textAlign="center" color="$colorSecondary">
-                {implementation?.name} {isLatestVersion ? `(Latest version)` : `(Latest version: ${latestSafeVersion})`}
+                {implementation?.name}{' '}
+                {isLatestVersion ? `(Latest version)` : `(New version is available: ${latestSafeVersion})`}
               </Text>
             </Pressable>
 

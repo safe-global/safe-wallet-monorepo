@@ -88,6 +88,14 @@ input[type='number'] {
   fill: var(--color-text-primary);
 }
 
+.illustration-background-light-grey-fill {
+  fill: var(--color-background-lightGrey);
+}
+
+.illustration-text-secondary-fill {
+  fill: var(--color-text-secondary);
+}
+
 /* Note: a fallback `stroke` property must be on the svg to work */
 .illustration-main-stroke {
   stroke: var(--color-primary-main);
@@ -101,8 +109,16 @@ input[type='number'] {
   stroke: var(--color-border-light);
 }
 
+.illustration-border-light-fill {
+  fill: var(--color-border-light);
+}
+
 .illustration-background-stroke {
   stroke: var(--color-logo-background);
+}
+
+.illustration-text-secondary-stroke {
+  stroke: var(--color-text-secondary);
 }
 
 @media (max-width: 599.95px) {

@@ -7,7 +7,7 @@ import { StoreDecorator } from '@/stories/storeDecorator'
 const FullfilledTwapOrder = twapOrderBuilder()
   .with({ status: 'fulfilled' })
   .with({ kind: 'sell' })
-  .with({ orderClass: 'limit' })
+  .with({ class: 'limit' })
   .with({ sellAmount: '10000000000000000' })
   .with({ executedSellAmount: '10000000000000000' })
   .with({ buyAmount: '3388586928324482608' })

@@ -1,9 +1,11 @@
+import type { TransactionInfo } from '@safe-global/store/gateway/types'
+import { TransactionStatus } from '@safe-global/store/gateway/types'
 import { migrateAddressBook } from './addressBook'
 import { migrateAddedSafes, migrateAddedSafesOwners } from './addedSafes'
 import { migrateBatchTxs } from './batch'
 import { type BatchTxsState } from '@/store/batchSlice'
 import { OperationType } from '@safe-global/types-kit'
-import { Operation, TransactionStatus, type TransactionInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { Operation } from '@safe-global/store/gateway/types'
 import { faker } from '@faker-js/faker'
 import { ERC20_INTERFACE } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 

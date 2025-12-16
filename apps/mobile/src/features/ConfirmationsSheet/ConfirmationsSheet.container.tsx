@@ -58,12 +58,12 @@ export const ConfirmationsSheetContainer = () => {
 
   const getSignerTag = useMemo(() => {
     return (signerAddress: Address): string | undefined => {
-      if (importedSigners[signerAddress]?.value) {
-        return 'You'
-      }
-
       if (proposer?.value === signerAddress) {
         return 'Creator'
+      }
+
+      if (importedSigners[signerAddress]?.value) {
+        return 'You'
       }
 
       return undefined
@@ -87,7 +87,7 @@ export const ConfirmationsSheetContainer = () => {
                   <View alignItems="center" flexDirection="row" gap="$1">
                     {(isHistoryTransaction || hasSigned) && <SafeFontIcon size={12} name="check" />}
 
-                    <Text fontWeight={600} color={'$color'}>
+                    <Text fontWeight={600} color={'$color'} testID="confirmations-sheet-signer-status-text">
                       {isHistoryTransaction || hasSigned ? 'Signed' : 'Pending'}
                     </Text>
                   </View>

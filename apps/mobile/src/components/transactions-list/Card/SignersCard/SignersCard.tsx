@@ -12,6 +12,7 @@ type SignersCardProps = {
   address: `0x${string}`
   rightNode?: React.ReactNode
   transparent?: boolean
+  balance?: string
   onPress?: () => void
   getSignerTag?: (address: Address) => string | undefined
 }
@@ -27,7 +28,15 @@ const titleStyle: Partial<TextProps> = {
   fontWeight: 600,
 }
 
-export function SignersCard({ onPress, name, transparent = true, address, rightNode, getSignerTag }: SignersCardProps) {
+export function SignersCard({
+  onPress,
+  name,
+  transparent = true,
+  address,
+  rightNode,
+  getSignerTag,
+  balance,
+}: SignersCardProps) {
   const textProps = useMemo(() => {
     return name ? descriptionStyle : titleStyle
   }, [name])
@@ -69,6 +78,17 @@ export function SignersCard({ onPress, name, transparent = true, address, rightN
           )}
 
           <EthAddress address={address} textProps={textProps} />
+          {balance && (
+            <View flexDirection="row" alignItems="center">
+              <Text fontSize="$4" fontWeight={400} color="$colorSecondary">
+                Balance:
+              </Text>
+              <Text fontSize="$4" fontWeight={400}>
+                {' '}
+                {balance}
+              </Text>
+            </View>
+          )}
         </View>
       }
       leftNode={

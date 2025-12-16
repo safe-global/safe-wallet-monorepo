@@ -2,7 +2,7 @@ import { trackEvent, WALLET_EVENTS } from '@/services/analytics'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import { useEffect } from 'react'
 import useChainId from './useChainId'
-import { useLazyGetTransactionDetailsQuery } from '@/store/api/gateway'
+import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 const events = {
   [TxEvent.SIGNED]: WALLET_EVENTS.OFFCHAIN_SIGNATURE,
@@ -14,7 +14,7 @@ const events = {
 export const useTxTracking = (): void => {
   const chainId = useChainId()
 
-  const [trigger] = useLazyGetTransactionDetailsQuery()
+  const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
 
   useEffect(() => {
     const unsubFns = Object.entries(events).map(([txEvent, analyticsEvent]) =>
@@ -27,7 +27,7 @@ export const useTxTracking = (): void => {
 
         if (id) {
           try {
-            const { data: txDetails } = await trigger({ chainId, txId: id })
+            const { data: txDetails } = await trigger({ chainId, id })
             origin = txDetails?.safeAppInfo?.url || ''
           } catch {}
         }

@@ -2,11 +2,11 @@ import FirstSteps from '@/components/dashboard/FirstSteps'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { type ReactElement, useMemo } from 'react'
 import dynamic from 'next/dynamic'
-import { Grid } from '@mui/material'
+import { Grid, Stack } from '@mui/material'
 import PendingTxsList from '@/components/dashboard/PendingTxs/PendingTxsList'
 import AssetsWidget from '@/components/dashboard/Assets'
 import Overview from '@/components/dashboard/Overview/Overview'
-import SafeAppsDashboardSection from '@/components/dashboard/SafeAppsDashboardSection/SafeAppsDashboardSection'
+import ExplorePossibleWidget from '@/components/dashboard/ExplorePossibleWidget'
 import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
 import { useHasFeature } from '@/hooks/useChains'
 import css from './styles.module.css'
@@ -18,11 +18,18 @@ import NewsCarousel, { type BannerItem } from '@/components/dashboard/NewsCarous
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEnabled'
 import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useIsStakingBannerVisible'
-import EarnBanner, { earnBannerID } from '@/components/dashboard/NewsCarousel/banners/EarnBanner'
-import SpacesBanner, { spacesBannerID } from '@/components/dashboard/NewsCarousel/banners/SpacesBanner'
-import StakeBanner, { stakeBannerID } from '@/components/dashboard/NewsCarousel/banners/StakeBanner'
+import { EarnBanner, earnBannerID } from '@/components/dashboard/NewsCarousel/banners/EarnBanner'
+import { SpacesBanner, spacesBannerID } from '@/components/dashboard/NewsCarousel/banners/SpacesBanner'
+import { StakeBanner, stakeBannerID } from '@/components/dashboard/NewsCarousel/banners/StakeBanner'
+import NoFeeNovemberBanner, { noFeeNovemberBannerID } from '@/features/no-fee-november/components/NoFeeNovemberBanner'
 import AddFundsToGetStarted from '@/components/dashboard/AddFundsBanner'
 import useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsPositionsFeatureEnabled'
+import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
+import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
+import { useBannerVisibility } from '@/features/hypernative/hooks'
+import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
+import { HnBannerForCarousel, hnBannerID } from '@/features/hypernative/components/HnBanner'
+import HnPendingBanner from '@/features/hypernative/components/HnPendingBanner'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const PositionsWidget = dynamic(() => import('@/features/positions/components/PositionsWidget'))
@@ -41,10 +48,22 @@ const Dashboard = (): ReactElement => {
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const isStakingBannerVisible = useIsStakingBannerVisible()
   const isPositionsFeatureEnabled = useIsPositionsFeatureEnabled()
+  const { isEligible } = useNoFeeNovemberEligibility()
+  const isNoFeeNovemberEnabled = useIsNoFeeNovemberFeatureEnabled()
+  const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
 
   const banners = [
+    showHnBanner && !hnLoading && { id: hnBannerID, element: HnBannerForCarousel },
+    isNoFeeNovemberEnabled && {
+      id: noFeeNovemberBannerID,
+      element: NoFeeNovemberBanner,
+    },
     isEarnPromoEnabled && { id: earnBannerID, element: EarnBanner },
-    isSpacesFeatureEnabled && { id: spacesBannerID, element: SpacesBanner },
+    isSpacesFeatureEnabled && {
+      id: spacesBannerID,
+      element: SpacesBanner,
+      eligibilityState: isEligible === false,
+    },
     isStakingBannerVisible && { id: stakeBannerID, element: StakeBanner },
   ].filter(Boolean) as BannerItem[]
 
@@ -68,7 +87,14 @@ const Dashboard = (): ReactElement => {
         <div className={css.leftCol}>
           <Overview />
 
-          {noAssets ? <AddFundsToGetStarted /> : <NewsCarousel banners={banners} />}
+          {noAssets ? (
+            <Stack spacing={1}>
+              {showHnBanner && <HnBannerForCarousel onDismiss={() => {}} />}
+              {!showHnBanner && <AddFundsToGetStarted />}
+            </Stack>
+          ) : (
+            <NewsCarousel banners={banners} />
+          )}
 
           <div className={css.hideIfEmpty}>
             <FirstSteps />
@@ -84,14 +110,18 @@ const Dashboard = (): ReactElement => {
                 </div>
               )}
 
-              {showSafeApps && <SafeAppsDashboardSection />}
+              {showSafeApps && <ExplorePossibleWidget />}
 
               <NewsDisclaimers />
             </>
           )}
         </div>
 
-        <div className={css.rightCol}>{safe.deployed && <PendingTxsList />}</div>
+        <div className={css.rightCol}>
+          {safe.deployed && <PendingTxsList />}
+
+          <HnPendingBanner />
+        </div>
       </div>
     </>
   )

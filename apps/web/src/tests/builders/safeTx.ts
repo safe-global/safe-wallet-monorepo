@@ -1,17 +1,16 @@
+import type { TransactionInfo } from '@safe-global/store/gateway/types'
+import { DetailedExecutionInfoType, TransactionInfoType } from '@safe-global/store/gateway/types'
+import type {
+  MultisigExecutionInfo,
+  Transaction,
+  TransactionData,
+  CustomTransactionInfo,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Builder, type IBuilder } from '@/tests/Builder'
 import { faker } from '@faker-js/faker'
 import { type SafeTransactionData, type SafeSignature, type SafeTransaction } from '@safe-global/types-kit'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import {
-  type Custom,
-  DetailedExecutionInfoType,
-  type MultisigExecutionInfo,
-  Operation,
-  type TransactionInfo,
-  TransactionInfoType,
-  type TransactionSummary,
-  type TransactionData,
-} from '@safe-global/safe-gateway-typescript-sdk'
+import { Operation } from '@safe-global/store/gateway/types'
 import { TransactionStatus } from '@safe-global/safe-apps-sdk'
 
 // TODO: Convert to builder
@@ -77,8 +76,8 @@ export function safeSignatureBuilder(): IBuilder<SafeSignature> {
   })
 }
 
-export function safeTxSummaryBuilder(): IBuilder<TransactionSummary> {
-  return Builder.new<TransactionSummary>().with({
+export function safeTxSummaryBuilder(): IBuilder<Transaction> {
+  return Builder.new<Transaction>().with({
     id: `multisig_${faker.string.hexadecimal({ length: 40 })}_${faker.string.hexadecimal({ length: 64 })}`,
     executionInfo: executionInfoBuilder().build(),
     txInfo: txInfoBuilder().build(),
@@ -103,9 +102,8 @@ export function executionInfoBuilder(): IBuilder<MultisigExecutionInfo> {
 
 export function txInfoBuilder(): IBuilder<TransactionInfo> {
   const mockData = faker.string.hexadecimal({ length: { min: 0, max: 128 } })
-  return Builder.new<Custom>().with({
+  return Builder.new<CustomTransactionInfo>().with({
     type: TransactionInfoType.CUSTOM,
-    actionCount: 1,
     dataSize: mockData.length.toString(),
     isCancellation: false,
     methodName: faker.string.alpha(),

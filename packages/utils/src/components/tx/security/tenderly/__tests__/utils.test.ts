@@ -7,14 +7,16 @@ import {
   GUARD_STORAGE_POSITION,
   getCallTraceErrors,
   getSimulationStatus,
+  getSimulationLink,
 } from '../utils'
-import { ImplementationVersionState, type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import type { SafeTransaction, SafeSignature } from '@safe-global/types-kit'
 import type { SingleTransactionSimulationParams } from '../utils'
 import { faker } from '@faker-js/faker'
 import { EthSafeSignature } from '@safe-global/protocol-kit'
 import { FETCH_STATUS, type TenderlySimulation } from '../types'
 import type { UseSimulationReturn } from '../useSimulation'
+import { TENDERLY_ORG_NAME, TENDERLY_PROJECT_NAME } from '@safe-global/utils/config/constants'
 
 describe('getStateOverwrites', () => {
   const mockOwners = [faker.finance.ethereumAddress(), faker.finance.ethereumAddress(), faker.finance.ethereumAddress()]
@@ -166,6 +168,47 @@ describe('getCallTraceErrors', () => {
     expect(errors).toHaveLength(2)
     expect(errors[0].error).toBe('Execution reverted')
     expect(errors[1].error).toBe('Out of gas')
+  })
+})
+
+describe('getSimulationLink', () => {
+  const simulationId = '123'
+
+  it('should fallback to the default dashboard URL when no custom Tenderly configuration is provided', () => {
+    const result = getSimulationLink(simulationId)
+
+    expect(result).toEqual(
+      `https://dashboard.tenderly.co/public/${TENDERLY_ORG_NAME}/${TENDERLY_PROJECT_NAME}/simulator/${simulationId}`,
+    )
+  })
+
+  it('should build a public dashboard URL when a custom Tenderly URL is provided without an access token', () => {
+    const result = getSimulationLink(simulationId, {
+      url: 'https://api.tenderly.co/api/v2/project/my-org/my-project/simulate',
+      accessToken: '',
+    })
+
+    expect(result).toEqual('https://dashboard.tenderly.co/public/my-org/my-project/simulator/123')
+  })
+
+  it('should build a private dashboard URL when a custom Tenderly URL and access token are provided', () => {
+    const result = getSimulationLink(simulationId, {
+      url: 'https://api.tenderly.co/api/v1/account/my-org/project/my-project/simulate',
+      accessToken: 'token',
+    })
+
+    expect(result).toEqual('https://dashboard.tenderly.co/my-org/my-project/simulator/123')
+  })
+
+  it('should fallback to defaults when the provided URL cannot be parsed', () => {
+    const result = getSimulationLink(simulationId, {
+      url: 'not-a-url',
+      accessToken: 'token',
+    })
+
+    expect(result).toEqual(
+      `https://dashboard.tenderly.co/public/${TENDERLY_ORG_NAME}/${TENDERLY_PROJECT_NAME}/simulator/${simulationId}`,
+    )
   })
 })
 

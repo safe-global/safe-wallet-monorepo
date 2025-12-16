@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { DialogActions, DialogContent, Typography, Button } from '@mui/material'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import ModalDialog from '@/components/common/ModalDialog'
 
 type Props = {

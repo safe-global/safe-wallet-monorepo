@@ -78,6 +78,7 @@ export const NetworkSelector = ({
       enableDynamicSizing
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
       onDismiss={onClose}
+      accessible={false}
     >
       <NetworkSelectorHeader
         isReadOnly={isReadOnly}

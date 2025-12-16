@@ -1,0 +1,47 @@
+name: Web Storybook Snapshot Tests
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    paths:
+      - apps/web/**
+      - .github/workflows/web-storybook-tests.yml
+
+  push:
+    branches:
+      - main
+    paths:
+      - apps/web/**
+      - .github/workflows/web-storybook-tests.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  storybook-snapshots:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ./.github/actions/yarn
+
+      - name: Run Storybook snapshot tests
+        id: storybook-tests
+        run: yarn test:storybook:ci
+        working-directory: apps/web
+        timeout-minutes: 15
+        continue-on-error: true
+        env:
+          NEXT_PUBLIC_IS_OFFICIAL_HOST: true
+
+      - name: Upload snapshot diffs on failure
+        if: steps.storybook-tests.outcome == 'failure'
+        uses: actions/upload-artifact@v6
+        with:
+          name: storybook-snapshot-diffs
+          path: apps/web/src/**/__snapshots__/*.stories.test.tsx.snap
+          retention-days: 7

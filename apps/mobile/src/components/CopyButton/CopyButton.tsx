@@ -19,6 +19,7 @@ export const CopyButton = ({ value, color, size = 13, text, hitSlop = 0 }: CopyB
         copyAndDispatchToast(value)
       }}
       hitSlop={hitSlop}
+      testID="copy-button"
     >
       <SafeFontIcon name={'copy'} size={size} color={color as string} />
     </TouchableOpacity>

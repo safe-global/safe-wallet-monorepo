@@ -2,7 +2,7 @@ import * as constants from '../../support/constants.js'
 import * as safeapps from './safeapps.pages.js'
 import * as main from './main.page.js'
 import * as createtx from './create_tx.pages.js'
-import staticSafes from '../../fixtures/safes/static.json'
+import staticSafes from '../../fixtures/safes/static.js'
 
 const transactionQueueStr = 'Pending transactions'
 const noTransactionStr = 'This Safe has no queued transactions'
@@ -10,8 +10,8 @@ const overviewStr = 'Total'
 const sendStr = 'Send'
 const receiveStr = 'Receive'
 const viewAllStr = 'View all'
-const safeAppStr = 'Featured Apps'
-const oneInchSafeApp = '1inch Network'
+const explorePossibleStr = "Explore what's possible"
+const swapSuggestion = 'Swap tokens instantly'
 export const copiedAppUrl = 'share/safe-app?appUrl'
 
 const copyShareBtn = '[data-testid="copy-btn-icon"]'
@@ -20,6 +20,7 @@ const viewAllLink = '[data-testid="view-all-link"][href^="/transactions/queue"]'
 const noTxText = '[data-testid="no-tx-text"]'
 export const pendingTxWidget = '[data-testid="pending-tx-widget"]'
 export const pendingTxItem = '[data-testid="tx-pending-item"]'
+export const assetsWidget = '[data-testid="assets-widget"]'
 const singleTxDetailsHeader = '[data-testid="tx-details"]'
 
 export function clickOnTxByIndex(index) {
@@ -137,7 +138,7 @@ export function verifyTxQueueWidget() {
   })
 }
 
-export function verifySafeAppsSection() {
-  cy.contains('p', safeAppStr).parents('section').as('safeAppsSection')
-  cy.get('@safeAppsSection').contains(oneInchSafeApp)
+export function verifyExplorePossibleSection() {
+  cy.contains('h2', explorePossibleStr).parents('section').as('explorePossibleSection')
+  cy.get('@explorePossibleSection').contains(swapSuggestion)
 }

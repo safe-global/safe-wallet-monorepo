@@ -1,7 +1,8 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 import useBalances from '@/hooks/useBalances'
 import useChainId from '@/hooks/useChainId'
 import useHiddenTokens from '@/hooks/useHiddenTokens'
+import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { useAppDispatch } from '@/store'
 import { setHiddenTokensForChain } from '@/store/settingsSlice'
 
@@ -15,7 +16,6 @@ export const useHideAssets = (closeDialog: () => void) => {
 
   const [assetsToHide, setAssetsToHide] = useState<string[]>([])
   const [assetsToUnhide, setAssetsToUnhide] = useState<string[]>([])
-  const [hidingAsset, setHidingAsset] = useState<string>()
   const hiddenAssets = useHiddenTokens()
 
   const toggleAsset = useCallback(
@@ -63,18 +63,6 @@ export const useHideAssets = (closeDialog: () => void) => {
     closeDialog()
   }, [closeDialog])
 
-  const hideAsset = useCallback(
-    (address: string) => {
-      setHidingAsset(address)
-      setTimeout(() => {
-        const newHiddenAssets = [...hiddenAssets, address]
-        dispatch(setHiddenTokensForChain({ chainId, assets: newHiddenAssets }))
-        setHidingAsset(undefined)
-      }, COLLAPSE_TIMEOUT_MS)
-    },
-    [chainId, dispatch, hiddenAssets],
-  )
-
   const saveChanges = useCallback(() => {
     const newHiddenAssets = [...hiddenAssets.filter((asset) => !assetsToUnhide.includes(asset)), ...assetsToHide]
     dispatch(setHiddenTokensForChain({ chainId, assets: newHiddenAssets }))
@@ -82,21 +70,15 @@ export const useHideAssets = (closeDialog: () => void) => {
   }, [assetsToHide, assetsToUnhide, chainId, dispatch, hiddenAssets, cancel])
 
   return {
-    hideAsset,
     saveChanges,
     cancel,
     toggleAsset,
     isAssetSelected,
     deselectAll,
-    hidingAsset,
   }
 }
 
 export const useVisibleAssets = () => {
-  const hiddenAssets = useHiddenTokens()
-  const { balances } = useBalances()
-  return useMemo(
-    () => balances.items?.filter((item) => !hiddenAssets.includes(item.tokenInfo.address)),
-    [hiddenAssets, balances.items],
-  )
+  const { balances } = useVisibleBalances()
+  return balances.items
 }

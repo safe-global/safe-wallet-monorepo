@@ -1,5 +1,5 @@
+import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { useEffect, useRef, useState } from 'react'
-import type { TransactionInfo } from '@safe-global/safe-gateway-typescript-sdk'
 import { isSwapOrderTxInfo } from '@/utils/transaction-guards'
 
 // https://developer.mozilla.org/en-US/docs/Web/API/Window/setTimeout#maximum_delay_value

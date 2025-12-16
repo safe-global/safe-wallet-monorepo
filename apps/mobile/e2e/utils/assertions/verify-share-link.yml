@@ -1,0 +1,25 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+- assertVisible:
+    id: 'share-transaction-button'
+
+- tapOn:
+    id: 'share-transaction-button'
+
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - assertVisible: '.*app.safe.global.*'
+      - tapOn:
+          id: 'header.closeButton'
+
+- runFlow:
+    when:
+      platform: android
+    commands:
+      - assertVisible:
+          id: 'headline'
+      - back

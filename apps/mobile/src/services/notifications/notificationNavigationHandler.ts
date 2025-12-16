@@ -2,10 +2,11 @@ import { router } from 'expo-router'
 import { getStore } from '@/src/store/utils/singletonStore'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectAllSafes } from '@/src/store/safesSlice'
-import { NotificationType } from '@safe-global/store/gateway/AUTO_GENERATED/notifications'
+import { NotificationTypeEnum } from '@safe-global/store/gateway/AUTO_GENERATED/notifications'
 import { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
 import { Address } from '@/src/types/address'
 import Logger from '@/src/utils/logger'
+import BadgeManager from './BadgeManager'
 
 // Helper function to wait for router to be ready
 const waitForRouter = async (maxAttempts = 50, delayMs = 100): Promise<boolean> => {
@@ -28,7 +29,7 @@ const waitForRouter = async (maxAttempts = 50, delayMs = 100): Promise<boolean> 
 }
 
 export interface NotificationNavigationData {
-  type: NotificationType
+  type: NotificationTypeEnum
   chainId: string
   address: string
   safeTxHash?: string
@@ -45,6 +46,9 @@ export const NotificationNavigationHandler = {
       Logger.warn('NotificationNavigationHandler: No data provided')
       return
     }
+
+    // Clear badge when user taps the notification
+    await BadgeManager.clearAllBadges()
 
     try {
       // Wait for router to be ready before attempting navigation

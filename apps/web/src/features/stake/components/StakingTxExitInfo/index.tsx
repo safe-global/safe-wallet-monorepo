@@ -1,7 +1,7 @@
+import type { NativeStakingValidatorsExitTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import type { StakingTxExitInfo } from '@safe-global/safe-gateway-typescript-sdk'
 
-const StakingTxExitInfo = ({ info }: { info: StakingTxExitInfo }) => {
+const StakingTxExitInfo = ({ info }: { info: NativeStakingValidatorsExitTransactionInfo }) => {
   return (
     <>
       {info.numValidators} Validator{maybePlural(info.numValidators)}

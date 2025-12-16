@@ -1,5 +1,5 @@
+import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
-import type { AddressEx } from '@safe-global/safe-gateway-typescript-sdk'
 import TxLayout from '@/components/tx-flow/common/TxLayout'
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import useTxStepper from '../../useTxStepper'
@@ -14,7 +14,7 @@ export enum RecoverAccountFlowFields {
 
 export type RecoverAccountFlowProps = {
   // RHF accept primitive field arrays
-  [RecoverAccountFlowFields.owners]: Array<AddressEx>
+  [RecoverAccountFlowFields.owners]: Array<AddressInfo>
   [RecoverAccountFlowFields.threshold]: string
 }
 

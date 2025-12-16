@@ -1,4 +1,4 @@
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { MetaTransactionData, SafeTransaction } from '@safe-global/types-kit'
 import {
@@ -9,6 +9,7 @@ import {
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import {
   FETCH_STATUS,
+  NestedTxStatus,
   type StateObject,
   type TenderlySimulatePayload,
   type TenderlySimulation,
@@ -17,18 +18,69 @@ import type { EnvState } from '@safe-global/store/settingsSlice'
 import { toBeHex, ZeroAddress } from 'ethers'
 import { UseSimulationReturn } from './useSimulation'
 
-export const getSimulationLink = (simulationId: string): string => {
-  return `https://dashboard.tenderly.co/public/${TENDERLY_ORG_NAME}/${TENDERLY_PROJECT_NAME}/simulator/${simulationId}`
+const TENDERLY_DASHBOARD_URL = 'https://dashboard.tenderly.co'
+
+const getTenderlyProjectFromUrl = (tenderlyUrl?: string): { org: string; project: string } | undefined => {
+  if (!tenderlyUrl) {
+    return
+  }
+
+  try {
+    const { pathname } = new URL(tenderlyUrl)
+    const segments = pathname.split('/').filter(Boolean)
+
+    if (!segments.length) {
+      return
+    }
+
+    const accountIndex = segments.findIndex((segment) => segment === 'account')
+
+    if (accountIndex !== -1) {
+      const org = segments[accountIndex + 1]
+      const projectIndex = segments.indexOf('project', accountIndex)
+      const project = projectIndex !== -1 ? segments[projectIndex + 1] : undefined
+
+      if (org && project) {
+        return { org, project }
+      }
+    }
+
+    const projectIndex = segments.findIndex((segment) => segment === 'project')
+
+    if (projectIndex !== -1) {
+      const org = segments[projectIndex + 1]
+      const project = segments[projectIndex + 2]
+
+      if (org && project) {
+        return { org, project }
+      }
+    }
+  } catch (error) {
+    // Ignore URL parsing errors and fall back to defaults
+  }
+}
+
+export const getSimulationLink = (simulationId: string, customTenderly?: EnvState['tenderly']): string => {
+  const parsedTenderly = getTenderlyProjectFromUrl(customTenderly?.url)
+
+  if (parsedTenderly) {
+    const { org, project } = parsedTenderly
+    const baseUrl = customTenderly?.accessToken ? TENDERLY_DASHBOARD_URL : `${TENDERLY_DASHBOARD_URL}/public`
+
+    return `${baseUrl}/${org}/${project}/simulator/${simulationId}`
+  }
+
+  return `${TENDERLY_DASHBOARD_URL}/public/${TENDERLY_ORG_NAME}/${TENDERLY_PROJECT_NAME}/simulator/${simulationId}`
 }
 
 export type SingleTransactionSimulationParams = {
-  safe: SafeInfo
+  safe: SafeState
   executionOwner: string
   transactions: SafeTransaction
   gasLimit?: number
 }
 export type MultiSendTransactionSimulationParams = {
-  safe: SafeInfo
+  safe: SafeState
   executionOwner: string
   transactions: MetaTransactionData[]
   gasLimit?: number
@@ -44,6 +96,21 @@ export const isTxSimulationEnabled = (chain?: Pick<Chain, 'features'>): boolean 
 
   return isSimulationEnvSet && hasFeature(chain, FEATURES.TX_SIMULATION)
 }
+
+export const isSimulationError = (status: SimulationStatus, nestedTx: NestedTxStatus, isNested: boolean) => {
+  const mainIsSuccess = status.isSuccess && !status.isError
+  const nestedIsSuccess = isNested ? nestedTx.status.isSuccess && !nestedTx.status.isError : true
+  const isSimulationSuccess = mainIsSuccess && nestedIsSuccess
+
+  const mainIsFinished = status.isFinished
+  const nestedIsFinished = isNested ? nestedTx.status.isFinished : true
+  const isSimulationFinished = mainIsFinished && nestedIsFinished
+
+  const isLoading = status.isLoading || (isNested && nestedTx.status.isLoading)
+
+  return isSimulationFinished && !isSimulationSuccess && !isLoading
+}
+
 export const getSimulation = async (
   tx: TenderlySimulatePayload,
   customTenderly: EnvState['tenderly'] | undefined,

@@ -1,6 +1,6 @@
 import { render } from '@/tests/test-utils'
 import SingleTxDecoded from '.'
-import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
+import { Operation } from '@safe-global/store/gateway/types'
 import { faker } from '@faker-js/faker'
 import { parseUnits } from 'ethers'
 import { ERC20__factory } from '@safe-global/utils/types/contracts'
@@ -38,6 +38,7 @@ describe('SingleTxDecoded', () => {
         actionTitle="0"
         tx={{
           data: ERC20__factory.createInterface().encodeFunctionData('approve', [spender, '100000']),
+          value: '0',
           operation: Operation.CALL,
           to: unknownToken,
         }}
@@ -61,6 +62,7 @@ describe('SingleTxDecoded', () => {
         actionTitle="0"
         tx={{
           data: ERC20__factory.createInterface().encodeFunctionData('approve', [spender, '100000']),
+          value: '0',
           operation: Operation.CALL,
           to: unknownToken,
           dataDecoded: {

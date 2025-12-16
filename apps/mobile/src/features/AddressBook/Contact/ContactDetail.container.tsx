@@ -30,7 +30,7 @@ export const ContactDetailContainer = () => {
     if (isEditing && contact && mode !== 'new') {
       navigation.setOptions({
         headerRight: () => (
-          <TouchableOpacity onPress={handleDeletePress} style={{ marginRight: 4 }}>
+          <TouchableOpacity onPress={handleDeletePress} style={{ marginRight: 4 }} testID="delete-contact-button">
             <SafeFontIcon name="delete" size={24} color="$error" />
           </TouchableOpacity>
         ),

@@ -1,4 +1,4 @@
-# Safe{Wallet} mobile app 📱
+# Safe{Mobile} app 📱
 
 This project is now part of the **@safe-global/safe-wallet** monorepo! The monorepo setup allows centralized management
 of multiple

@@ -1,7 +1,7 @@
 import type { Position } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 
-export const getReadablePositionType = (positionType: Position['position_type']) => {
-  if (positionType === null) return 'Unknown'
+export const getReadablePositionType = (positionType: Position['position_type'] | string | null | undefined) => {
+  if (positionType === null || positionType === undefined || positionType === '') return 'Unknown'
 
   switch (positionType) {
     case 'deposit':

@@ -6,11 +6,10 @@ import TokenAmount from '@/components/common/TokenAmount'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
 import { Stack, Typography } from '@mui/material'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type BridgeAndSwapTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { formatUnits } from 'ethers'
-import { BridgeRecipientWarnings } from './BridgeRecipientWarnings'
 import ExternalLink from '@/components/common/ExternalLink'
 import css from './styles.module.css'
 
@@ -82,7 +81,7 @@ function failedBridgeTransactionRows(txInfo: BridgeAndSwapTransactionInfo & { st
 function successfulBridgeTransactionRows(
   txInfo: BridgeAndSwapTransactionInfo & { status: 'DONE' },
   chainId: string,
-  chainConfigs: ChainInfo[],
+  chainConfigs: Chain[],
 ) {
   const actualFromAmount =
     BigInt(txInfo.fromAmount) + BigInt(txInfo.fees?.integratorFee ?? 0n) + BigInt(txInfo.fees?.lifiFee ?? 0n)
@@ -141,7 +140,7 @@ function successfulBridgeTransactionRows(
   return rows
 }
 
-function BridgeTransaction({ txInfo, showWarnings = false }: BridgeTransactionProps) {
+function BridgeTransaction({ txInfo }: BridgeTransactionProps) {
   const chainId = useChainId()
   const { configs } = useChains()
 
@@ -180,7 +179,6 @@ function BridgeTransaction({ txInfo, showWarnings = false }: BridgeTransactionPr
   return (
     <Stack>
       <DataTable rows={rows} />
-      {showWarnings && txInfo.status === 'AWAITING_EXECUTION' && <BridgeRecipientWarnings txInfo={txInfo} />}
     </Stack>
   )
 }

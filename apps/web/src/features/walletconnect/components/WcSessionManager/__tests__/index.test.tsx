@@ -7,9 +7,14 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import type { WalletKitTypes } from '@reown/walletkit'
 
 // Mock analytics
-jest.mock('@/services/analytics', () => ({
-  trackEvent: jest.fn(),
-}))
+jest.mock('@/services/analytics', () => {
+  const actual = jest.requireActual('@/services/analytics')
+
+  return {
+    ...actual,
+    trackEvent: jest.fn(),
+  }
+})
 
 // Mock hooks
 jest.mock('@/hooks/useChains', () => ({

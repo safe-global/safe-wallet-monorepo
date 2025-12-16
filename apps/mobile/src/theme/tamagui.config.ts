@@ -9,6 +9,9 @@ import { inputTheme, inputWithLabelTheme } from '../components/SafeInput/theme'
 import { safeTabTheme } from '@/src/components/SafeTab/theme'
 import { SafeListItemTheme } from '@/src/components/SafeListItem/theme'
 import { alertTheme } from '@/src/components/Alert/theme'
+import { safeShieldHeadlineStatusTheme } from '@/src/features/SafeShield/components/SafeShieldHeadline/theme'
+import { safeShieldAnalysisStatusTheme } from '@/src/features/SafeShield/theme'
+import { safeShieldWidgetTheme } from '../features/SafeShield/components/SafeShieldWidget/theme'
 
 const DmSansFont = createDmSansFont({
   face: {
@@ -46,6 +49,7 @@ export const config = createTamagui({
       colorLight: tokens.color.primaryLightLight,
       colorContrast: tokens.color.textContrastLight,
       colorOutline: tokens.color.textSecondaryLight,
+      colorBackdrop: tokens.color.backdropMainLight,
       borderMain: tokens.color.borderMainLight,
       borderLight: tokens.color.borderLightLight,
       error: tokens.color.errorMainLight,
@@ -69,6 +73,9 @@ export const config = createTamagui({
     ...navbarTheme,
     ...safeTabTheme,
     ...inputWithLabelTheme,
+    ...safeShieldAnalysisStatusTheme,
+    ...safeShieldHeadlineStatusTheme,
+    ...safeShieldWidgetTheme,
     dark_success_light: {},
     light_logo: {
       background: tokens.color.logoBackgroundLight,
@@ -107,6 +114,7 @@ export const config = createTamagui({
       colorLight: tokens.color.primaryLightDark,
       colorOutline: tokens.color.primaryLightDark,
       primary: tokens.color.primaryMainDark,
+      colorBackdrop: tokens.color.backdropMainDark,
       borderMain: tokens.color.borderMainDark,
       borderLight: tokens.color.borderLightDark,
       colorHover: tokens.color.textSecondaryDark,

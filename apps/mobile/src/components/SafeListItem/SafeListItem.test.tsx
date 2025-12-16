@@ -1,7 +1,6 @@
 import { render } from '@/src/tests/test-utils'
 import { SafeListItem } from '.'
 import { Text, View } from 'tamagui'
-import { ellipsis } from '@/src/utils/formatters'
 import { Alert } from '../Alert'
 
 describe('SafeListItem', () => {
@@ -39,7 +38,12 @@ describe('SafeListItem', () => {
       <SafeListItem label={text} type="some type" icon="add-owner" leftNode={<Text>Left node</Text>} />,
     )
 
-    expect(getByText(ellipsis(text, 30))).toBeTruthy()
+    // Text component handles truncation with ellipsizeMode and numberOfLines props
+    const labelElement = getByText(text)
+    expect(labelElement).toBeTruthy()
+    expect(labelElement.props.ellipsizeMode).toBe('tail')
+    expect(labelElement.props.numberOfLines).toBe(1)
+
     expect(getByText('some type')).toBeTruthy()
     expect(getByTestId('safe-list-add-owner-icon')).toBeTruthy()
     expect(getByText('Left node')).toBeTruthy()

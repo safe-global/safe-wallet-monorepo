@@ -10,7 +10,7 @@ import {
   ImportProgressCallback,
 } from './transforms'
 import { addContact, addContacts } from '@/src/store/addressBookSlice'
-import { addSignerWithEffects } from '@/src/store/signersSlice'
+import { addSignerWithEffects } from '@/src/store/signerThunks'
 import { storePrivateKey } from '@/src/hooks/useSign/useSign'
 import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
 
@@ -18,7 +18,7 @@ jest.mock('@/src/hooks/useSign/useSign', () => ({
   storePrivateKey: jest.fn(),
 }))
 
-jest.mock('@/src/store/signersSlice', () => ({
+jest.mock('@/src/store/signerThunks', () => ({
   addSignerWithEffects: jest.fn(),
 }))
 
@@ -109,7 +109,7 @@ describe('Data import helpers', () => {
       })
     })
 
-    it('transforms key data correctly', () => {
+    it('transforms private key data correctly', () => {
       const key = Buffer.from('abcd', 'hex').toString('base64')
       const keyData = {
         address: '0x1',
@@ -126,7 +126,76 @@ describe('Data import helpers', () => {
           value: '0x1',
           name: 'Owner',
         },
+        type: 'private-key',
       })
+    })
+
+    it('transforms ledger key data correctly and strips m/ prefix', () => {
+      const keyData = {
+        address: '0xLedgerAddress',
+        name: 'Ledger Key',
+        type: 3, // Ledger type
+        path: "m/44'/60'/0'/0/0",
+      }
+
+      const result = transformKeyData(keyData)
+
+      expect(result).toEqual({
+        address: '0xLedgerAddress',
+        signerInfo: {
+          value: '0xLedgerAddress',
+          name: 'Ledger Key',
+        },
+        type: 'ledger',
+        derivationPath: "44'/60'/0'/0/0", // m/ prefix stripped for Ledger SDK compatibility
+      })
+    })
+
+    it('handles ledger key data already without m/ prefix', () => {
+      const keyData = {
+        address: '0xLedgerAddress',
+        name: 'Ledger Key',
+        type: 3, // Ledger type
+        path: "44'/60'/0'/0/1",
+      }
+
+      const result = transformKeyData(keyData)
+
+      expect(result).toEqual({
+        address: '0xLedgerAddress',
+        signerInfo: {
+          value: '0xLedgerAddress',
+          name: 'Ledger Key',
+        },
+        type: 'ledger',
+        derivationPath: "44'/60'/0'/0/1",
+      })
+    })
+
+    it('returns null for ledger key without derivation path', () => {
+      const keyData = {
+        address: '0xLedgerAddress',
+        name: 'Ledger Key',
+        type: 3, // Ledger type
+        // Missing path
+      }
+
+      const result = transformKeyData(keyData)
+
+      expect(result).toBeNull()
+    })
+
+    it('returns null for unsupported key type', () => {
+      const keyData = {
+        address: '0xUnsupported',
+        name: 'Unsupported',
+        type: 99, // Unknown type
+        // No key, no valid path
+      }
+
+      const result = transformKeyData(keyData)
+
+      expect(result).toBeNull()
     })
 
     it('transforms contact data correctly', () => {
@@ -234,7 +303,7 @@ describe('Data import helpers', () => {
   })
 
   describe('storeKeysWithValidation', () => {
-    it('imports keys that are owners and creates delegates', async () => {
+    it('imports private keys that are owners and creates delegates', async () => {
       const data: LegacyDataStructure = {
         keys: [
           {
@@ -286,6 +355,223 @@ describe('Data import helpers', () => {
       ])
 
       expect(mockProgressCallback).toHaveBeenCalled()
+    })
+
+    it('imports ledger keys without creating delegates', async () => {
+      const data: LegacyDataStructure = {
+        keys: [
+          {
+            address: '0x2',
+            name: 'Ledger Owner',
+            type: 3, // Ledger type
+            path: "m/44'/60'/0'/0/0",
+          },
+        ],
+      }
+
+      const allOwners = new Set(['0x2', '0x3'])
+      const mockUpdateNotImportedKeys = jest.fn()
+
+      const storeKeysPromise = storeKeysWithValidation(
+        data,
+        allOwners,
+        mockDispatch,
+        mockUpdateNotImportedKeys,
+        mockCreateDelegate,
+        mockProgressCallback,
+      )
+
+      await jest.runAllTimersAsync()
+      await storeKeysPromise
+
+      // Should NOT store any private key for ledger
+      expect(storePrivateKey).not.toHaveBeenCalled()
+
+      // Should add ledger signer
+      expect(mockDispatch).toHaveBeenCalledWith(
+        addSignerWithEffects({
+          value: '0x2',
+          name: 'Ledger Owner',
+          type: 'ledger',
+          derivationPath: "44'/60'/0'/0/0", // m/ prefix stripped for Ledger SDK compatibility
+        }),
+      )
+
+      // Should NOT create delegate for ledger keys
+      expect(mockCreateDelegate).not.toHaveBeenCalled()
+
+      // No keys should be marked as not imported
+      expect(mockUpdateNotImportedKeys).toHaveBeenCalledWith([])
+    })
+
+    it('handles mixed key types correctly', async () => {
+      const data: LegacyDataStructure = {
+        keys: [
+          {
+            address: '0x2',
+            name: 'Private Key Owner',
+            key: Buffer.from('abcd', 'hex').toString('base64'),
+          },
+          {
+            address: '0x3',
+            name: 'Ledger Owner',
+            type: 3,
+            path: "m/44'/60'/0'/0/0",
+          },
+          {
+            address: '0x4',
+            name: 'Non-Owner',
+            key: Buffer.from('efgh', 'hex').toString('base64'),
+          },
+        ],
+      }
+
+      const allOwners = new Set(['0x2', '0x3'])
+      const mockUpdateNotImportedKeys = jest.fn()
+
+      const storeKeysPromise = storeKeysWithValidation(
+        data,
+        allOwners,
+        mockDispatch,
+        mockUpdateNotImportedKeys,
+        mockCreateDelegate,
+        mockProgressCallback,
+      )
+
+      await jest.runAllTimersAsync()
+      await storeKeysPromise
+
+      // Private key should be imported with delegate
+      expect(storePrivateKey).toHaveBeenCalledWith('0x2', '0xabcd')
+      expect(mockDispatch).toHaveBeenCalledWith(
+        addSignerWithEffects({ value: '0x2', name: 'Private Key Owner', type: 'private-key' }),
+      )
+      expect(mockCreateDelegate).toHaveBeenCalledWith('0xabcd', null)
+
+      // Ledger key should be imported without delegate
+      expect(mockDispatch).toHaveBeenCalledWith(
+        addSignerWithEffects({
+          value: '0x3',
+          name: 'Ledger Owner',
+          type: 'ledger',
+          derivationPath: "44'/60'/0'/0/0", // m/ prefix stripped for Ledger SDK compatibility
+        }),
+      )
+
+      // Non-owner should not be imported
+      expect(storePrivateKey).not.toHaveBeenCalledWith('0x4', '0xefgh')
+
+      expect(mockUpdateNotImportedKeys).toHaveBeenCalledWith([
+        {
+          address: '0x4',
+          name: 'Non-Owner',
+          reason: 'Not an owner of any imported safe',
+        },
+      ])
+    })
+
+    it('tracks unsupported key types as not imported', async () => {
+      const data: LegacyDataStructure = {
+        keys: [
+          {
+            address: '0x2',
+            name: 'Ledger Without Path',
+            type: 3, // Ledger type but missing path
+          },
+          {
+            address: '0x3',
+            name: 'Unknown Type',
+            type: 99, // Unsupported type
+          },
+        ],
+      }
+
+      const allOwners = new Set(['0x2', '0x3'])
+      const mockUpdateNotImportedKeys = jest.fn()
+
+      const storeKeysPromise = storeKeysWithValidation(
+        data,
+        allOwners,
+        mockDispatch,
+        mockUpdateNotImportedKeys,
+        mockCreateDelegate,
+        mockProgressCallback,
+      )
+
+      await jest.runAllTimersAsync()
+      await storeKeysPromise
+
+      // No keys should be imported
+      expect(storePrivateKey).not.toHaveBeenCalled()
+      expect(mockCreateDelegate).not.toHaveBeenCalled()
+
+      // Both should be tracked as not imported
+      expect(mockUpdateNotImportedKeys).toHaveBeenCalledWith([
+        {
+          address: '0x2',
+          name: 'Ledger Without Path',
+          reason: 'Unsupported key type or missing required data',
+        },
+        {
+          address: '0x3',
+          name: 'Unknown Type',
+          reason: 'Unsupported key type or missing required data',
+        },
+      ])
+    })
+
+    it('continues importing other keys if delegate creation fails', async () => {
+      const data: LegacyDataStructure = {
+        keys: [
+          {
+            address: '0x2',
+            name: 'Owner 1',
+            key: Buffer.from('abcd', 'hex').toString('base64'),
+          },
+          {
+            address: '0x3',
+            name: 'Owner 2',
+            key: Buffer.from('1234', 'hex').toString('base64'),
+          },
+        ],
+      }
+
+      const allOwners = new Set(['0x2', '0x3'])
+      const mockUpdateNotImportedKeys = jest.fn()
+
+      // First delegate creation fails, second succeeds
+      mockCreateDelegate
+        .mockResolvedValueOnce({ success: false, error: 'Network error' })
+        .mockResolvedValueOnce({ success: true, delegateAddress: '0xDelegate' })
+
+      const storeKeysPromise = storeKeysWithValidation(
+        data,
+        allOwners,
+        mockDispatch,
+        mockUpdateNotImportedKeys,
+        mockCreateDelegate,
+        mockProgressCallback,
+      )
+
+      await jest.runAllTimersAsync()
+      await storeKeysPromise
+
+      // Both keys should still be imported despite first delegate failure
+      expect(storePrivateKey).toHaveBeenCalledWith('0x2', '0xabcd')
+      expect(storePrivateKey).toHaveBeenCalledWith('0x3', '0x1234')
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        addSignerWithEffects({ value: '0x2', name: 'Owner 1', type: 'private-key' }),
+      )
+      expect(mockDispatch).toHaveBeenCalledWith(
+        addSignerWithEffects({ value: '0x3', name: 'Owner 2', type: 'private-key' }),
+      )
+
+      // Both delegate creations should have been attempted
+      expect(mockCreateDelegate).toHaveBeenCalledTimes(2)
+
+      // No keys marked as not imported (delegate failure doesn't prevent import)
+      expect(mockUpdateNotImportedKeys).toHaveBeenCalledWith([])
     })
   })
 })

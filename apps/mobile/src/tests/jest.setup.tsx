@@ -25,37 +25,23 @@ jest.mock('@/src/navigation/useScrollableHeader', () => ({
   }),
 }))
 
-jest.mock('react-native-mmkv', () => ({
-  MMKV: function () {
-    // @ts-ignore
-    this.getString = jest.fn()
-    // @ts-ignore
-    this.delete = jest.fn()
-    // @ts-ignore
-    this.set = jest.fn()
-  },
+jest.mock('react-native-device-info', () => mockRNDeviceInfo)
+jest.mock('react-native-device-crypto', () => ({
+  getOrCreateAsymmetricKey: jest.fn(),
+  getOrCreateSymmetricKey: jest.fn(),
+  encrypt: jest.fn(),
+  decrypt: jest.fn(),
+  deleteKey: jest.fn(),
 }))
 
-jest.mock('react-native-device-info', () => mockRNDeviceInfo)
-jest.mock('react-native-device-crypto', () => {
-  return {
-    getOrCreateAsymmetricKey: jest.fn(),
-    encrypt: jest.fn((_asymmetricKey: string, privateKey: string) => {
-      return Promise.resolve({
-        encryptedText: 'encryptedText',
-        iv: privateKey + '000',
-      })
-    }),
-    decrypt: jest.fn((_name, _password, iv) => Promise.resolve(iv.slice(0, -3))),
-  }
-})
-
 jest.mock('react-native-keychain', () => {
+  const actual = jest.requireActual('react-native-keychain')
   let password: string | null = null
   return {
+    ...actual,
+    getSupportedBiometryType: jest.fn(),
     setGenericPassword: jest.fn((_user, newPassword: string) => {
       password = newPassword
-
       return Promise.resolve(password)
     }),
     getGenericPassword: jest.fn(() =>
@@ -67,12 +53,6 @@ jest.mock('react-native-keychain', () => {
       password = null
       Promise.resolve(null)
     }),
-    ACCESS_CONTROL: {
-      BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE: 'BIOMETRY_CURRENT_SET_OR_DEVICE_PASSCODE',
-    },
-    ACCESSIBLE: {
-      WHEN_UNLOCKED_THIS_DEVICE_ONLY: 'WHEN_UNLOCKED_THIS_DEVICE_ONLY',
-    },
   }
 })
 
@@ -121,39 +101,12 @@ jest.mock('@react-native-firebase/messaging', () => {
   return module
 })
 
-jest.mock('@notifee/react-native', () => {
-  const notifee = {
-    getInitialNotification: jest.fn().mockResolvedValue(null),
-    displayNotification: jest.fn().mockResolvedValue({}),
-    onForegroundEvent: jest.fn().mockReturnValue(jest.fn()),
-    onBackgroundEvent: jest.fn(),
-    createChannelGroup: jest.fn().mockResolvedValue('channel-group-id'),
-    createChannel: jest.fn().mockResolvedValue({}),
-  }
-
-  return {
-    ...jest.requireActual('@notifee/react-native/dist/types/Notification'),
-    __esModule: true,
-    default: notifee,
-    AndroidImportance: {
-      NONE: 0,
-      MIN: 1,
-      LOW: 2,
-      DEFAULT: 3,
-      HIGH: 4,
-    },
-    AndroidVisibility: {
-      SECRET: -1,
-      PRIVATE: 0,
-      PUBLIC: 1,
-    },
-  }
-})
+jest.mock('@notifee/react-native', () => require('@notifee/react-native/jest-mock'))
 
 jest.mock('@gorhom/bottom-sheet', () => {
   const reactNative = jest.requireActual('react-native')
   const { useState, forwardRef, useImperativeHandle } = jest.requireActual('react')
-  const { View } = reactNative
+  const { View, ScrollView, TouchableOpacity: RNTouchableOpacity } = reactNative
   const MockBottomSheetComponent = forwardRef(
     (
       {
@@ -195,6 +148,8 @@ jest.mock('@gorhom/bottom-sheet', () => {
     BottomSheetModal: MockBottomSheetComponent,
     BottomSheetModalProvider: View,
     BottomSheetView: View,
+    BottomSheetScrollView: ScrollView,
+    TouchableOpacity: RNTouchableOpacity,
     useBottomSheetModal: () => ({
       dismiss: () => {
         return null

@@ -1,5 +1,5 @@
 import { SvgIcon, Typography } from '@mui/material'
-import { getSafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useState, useEffect } from 'react'
 import { useWatch } from 'react-hook-form'
 import { isAddress } from 'ethers'
@@ -7,7 +7,7 @@ import type { ReactElement } from 'react'
 
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { isSmartContractWallet } from '@/utils/wallets'
-import useDebounce from '@/hooks/useDebounce'
+import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { UpsertRecoveryFlowFields } from '.'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -17,6 +17,7 @@ import addressBookInputCss from '@/components/common/AddressBookInput/styles.mod
 export function RecovererWarning(): ReactElement | null {
   const { safe, safeAddress } = useSafeInfo()
   const [warning, setWarning] = useState<string>()
+  const [triggerGetSafe] = useLazySafesGetSafeV1Query()
 
   const recoverer = useWatch({ name: UpsertRecoveryFlowFields.recoverer })
   const debouncedRecoverer = useDebounce(recoverer, 500)
@@ -43,12 +44,12 @@ export function RecovererWarning(): ReactElement | null {
       }
 
       try {
-        await getSafeInfo(safe.chainId, debouncedRecoverer)
+        await triggerGetSafe({ chainId: safe.chainId, safeAddress: debouncedRecoverer }).unwrap()
       } catch {
         setWarning('The given address is a smart contract. Please ensure that it can sign transactions.')
       }
     })()
-  }, [debouncedRecoverer, safe.chainId, safeAddress])
+  }, [debouncedRecoverer, safe.chainId, safeAddress, triggerGetSafe])
 
   if (!warning) {
     return null

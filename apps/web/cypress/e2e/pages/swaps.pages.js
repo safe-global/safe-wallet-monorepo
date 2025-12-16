@@ -4,6 +4,9 @@ import * as create_tx from '../pages/create_tx.pages.js'
 import * as table from '../pages/tables.page.js'
 import * as modals from '../pages/modals.page.js'
 import * as swaps_data from '../../fixtures/swaps_data.json'
+import * as assets from './assets.pages.js'
+import * as addressbook from './address_book.page.js'
+import * as dashboard from './dashboard.pages.js'
 
 export const inputCurrencyInput = '[id="input-currency-input"]'
 export const outputCurrencyInput = '[id="output-currency-input"]'
@@ -156,6 +159,18 @@ export function verifySwapBtnIsVisible() {
   cy.get(assetsSwapBtn).should('be.visible')
 }
 
+export function verifyAssetsPageSwapButtonsCount(count) {
+  cy.get(assets.tableContainer)
+    .find(addressbook.tableRow)
+    .find(assets.actionColumnCell)
+    .find(assetsSwapBtn)
+    .should('have.length', count)
+}
+
+export function verifyDashboardPageSwapButtonsCount(count) {
+  cy.get(dashboard.assetsWidget).find(assetsSwapBtn).should('have.length', count)
+}
+
 export function checkInputCurrencyPreviewValue(value) {
   cy.get(inputCurrencyPreview).should('contain.text', value)
 }
@@ -179,8 +194,7 @@ export function unlockTwapOrders(iframeSelector) {
 }
 
 export function clickOnAssetSwapBtn(index) {
-  cy.get(assetsSwapBtn).eq(index).as('btn')
-  cy.get('@btn').click()
+  cy.get(assetsSwapBtn).filter(':visible').eq(index).click()
 }
 
 export function verifyOrderSubmittedConfirmation() {
@@ -688,7 +702,10 @@ export function getTwapInitialData() {
         .invoke('text')
         .should('not.be.empty')
         .then((value) => {
-          formData.totalDuration = value
+          const durationRegex = /(\d+\s+(hour|hours|week|month|day|days))/i
+          const match = value.match(durationRegex)
+          expect(match, 'Total duration pattern not found').to.not.be.null
+          formData.totalDuration = match[1]
             .toLowerCase()
             .replace(/\bhours?\b/, 'hour')
             .trim()
@@ -700,7 +717,10 @@ export function getTwapInitialData() {
         .invoke('text')
         .should('not.be.empty')
         .then((value) => {
-          formData.partDuration = value
+          const durationRegex = /(\d+\s*(m|minutes?|hour|hours))/i
+          const match = value.match(durationRegex)
+          expect(match, 'Part duration pattern not found').to.not.be.null
+          formData.partDuration = match[1]
             .toLowerCase()
             .replace(/(\d+)m\b/, '$1 minutes')
             .trim()

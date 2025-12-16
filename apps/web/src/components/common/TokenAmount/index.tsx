@@ -1,10 +1,11 @@
 import { type ReactElement } from 'react'
 import { Tooltip } from '@mui/material'
-import { TransferDirection } from '@safe-global/safe-gateway-typescript-sdk'
+import { TransferDirection } from '@safe-global/store/gateway/types'
 import css from './styles.module.css'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import TokenIcon from '../TokenIcon'
 import classNames from 'classnames'
+import type { TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 const PRECISION = 20
 
@@ -21,9 +22,9 @@ const TokenAmount = ({
 }: {
   value: string
   decimals?: number | null
-  logoUri?: string
-  tokenSymbol?: string
-  direction?: TransferDirection
+  logoUri?: string | null
+  tokenSymbol?: string | null
+  direction?: TransferTransactionInfo['direction']
   fallbackSrc?: string
   preciseAmount?: boolean
   iconSize?: number
@@ -46,6 +47,7 @@ const TokenAmount = ({
             fallbackSrc={fallbackSrc}
             size={iconSize}
             chainId={chainId}
+            noRadius
           />
         )}
         <b className={css.tokenText}>
