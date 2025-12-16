@@ -34,9 +34,11 @@ describe('Hypernative OAuth Token Exchange Handler', () => {
 
     const data = await response.json()
     expect(data).toMatchObject({
-      access_token: expect.stringMatching(/^mock-hn-token-\d+$/),
-      token_type: 'Bearer',
-      expires_in: 600,
+      data: {
+        access_token: expect.stringMatching(/^mock-hn-token-\d+$/),
+        token_type: 'Bearer',
+        expires_in: 600,
+      },
     })
   })
 
@@ -198,6 +200,6 @@ describe('Hypernative OAuth Token Exchange Handler', () => {
 
     const data2 = await response2.json()
 
-    expect(data1.access_token).not.toBe(data2.access_token)
+    expect(data1.data.access_token).not.toBe(data2.data.access_token)
   })
 })

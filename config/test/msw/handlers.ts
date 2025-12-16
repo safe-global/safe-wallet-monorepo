@@ -450,11 +450,14 @@ export const handlers = (GATEWAY_URL: string) => [
     }
 
     // Return successful token response per Hypernative spec
+    // Hypernative API wraps the OAuth token response in a `data` object
     return HttpResponse.json({
-      access_token: `mock-hn-token-${Date.now()}`,
-      token_type: 'Bearer',
-      expires_in: 600,
-      scope: 'read',
+      data: {
+        access_token: `mock-hn-token-${Date.now()}`,
+        token_type: 'Bearer',
+        expires_in: 600,
+        scope: 'read',
+      },
     })
   }),
 ]

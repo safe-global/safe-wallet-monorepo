@@ -10,6 +10,10 @@ export type HypernativeTokenExchangeRequestDto = {
   code_verifier: string
 }
 
+/**
+ * Hypernative API token response format
+ * The API wraps the OAuth token response in a `data` object
+ */
 export type HypernativeTokenExchangeResponseDto = {
   data: {
     access_token: string
