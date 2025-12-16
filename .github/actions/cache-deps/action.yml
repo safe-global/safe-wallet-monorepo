@@ -28,7 +28,7 @@ runs:
     - name: Restore Yarn Cache
       if: ${{ inputs.mode == 'restore-yarn' }}
       id: restore
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v5
       with:
         path: |
           **/node_modules
@@ -49,7 +49,7 @@ runs:
 
     - name: Save Yarn Cache
       if: ${{ inputs.mode == 'save-yarn' }}
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v5
       with:
         path: |
           **/node_modules
@@ -62,7 +62,7 @@ runs:
     - name: Restore Next.js
       if: ${{ inputs.mode == 'restore-nc' }}
       id: restore-nc
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v5
       with:
         path: |
           ${{ github.workspace }}/apps/web/.next/cache
@@ -79,7 +79,7 @@ runs:
 
     - name: Save Next.js
       if: ${{ inputs.mode == 'save-nc' }}
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v5
       with:
         path: |
           ${{ github.workspace }}/apps/web/.next/cache

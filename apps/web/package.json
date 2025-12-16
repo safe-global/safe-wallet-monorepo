@@ -169,6 +169,5 @@
     "budgetPercentIncreaseRed": 20,
     "minimumChangeThreshold": 0,
     "showDetails": true
-  },
-  "packageManager": "yarn@4.5.3"
+  }
 }
