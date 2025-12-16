@@ -10,7 +10,13 @@ export const useCalendlyEventScheduled = (onBookingScheduled?: () => void): void
   const hasScheduledRef = useRef(false)
 
   const isValidOrigin = useCallback((origin: string): boolean => {
-    return origin.startsWith('https://calendly.com') || origin.startsWith('https://www.calendly.com')
+    try {
+      const url = new URL(origin)
+      const allowedHosts = ['calendly.com', 'www.calendly.com']
+      return url.protocol === 'https:' && allowedHosts.includes(url.hostname)
+    } catch {
+      return false
+    }
   }, [])
 
   const handleMessage = useCallback(
