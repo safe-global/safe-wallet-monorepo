@@ -202,15 +202,15 @@ describe('useHypernativeOAuth', () => {
         expect(authData.expiry).toBeGreaterThan(Date.now())
       }
 
-      // Advance timers to allow polling interval (1000ms) to check auth state
+      // Advance timers to trigger the next polling interval check.
+      // The initial checkAuthState() runs on mount (before token is set), so we need to wait
+      // for the next polling check which happens at 5000ms intervals (AUTH_POLLING_INTERVAL).
       await act(async () => {
-        jest.advanceTimersByTime(1000) // Polling interval check
+        jest.advanceTimersByTime(5000) // Polling interval check (AUTH_POLLING_INTERVAL = 5000ms)
       })
 
       // Verify authentication state is updated
-      await waitFor(() => {
-        expect(result.current.isAuthenticated).toBe(true)
-      })
+      expect(result.current.isAuthenticated).toBe(true)
 
       // Cleanup
       clearAuthCookie()
