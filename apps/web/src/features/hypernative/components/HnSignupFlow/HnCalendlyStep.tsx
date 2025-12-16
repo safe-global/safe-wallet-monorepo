@@ -1,27 +1,24 @@
-import { useEffect } from 'react'
+import { useRef } from 'react'
 import HnSignupLayout from './HnSignupLayout'
+import { useCalendlyEventScheduled } from '../../hooks/useCalendlyEventScheduled'
+import { useCalendlyScript } from '../../hooks/useCalendlyScript'
 import css from './styles.module.css'
 
 export type HnCalendlyStepProps = {
   calendlyUrl: string
+  onBookingScheduled?: () => void
 }
 
-const HnCalendlyStep = ({ calendlyUrl }: HnCalendlyStepProps) => {
-  useEffect(() => {
-    // Load Calendly script if not already loaded
-    if (!document.querySelector('script[src*="calendly"]')) {
-      const calendlyScript = document.createElement('script')
-      calendlyScript.type = 'text/javascript'
-      calendlyScript.src = 'https://assets.calendly.com/assets/external/widget.js'
-      calendlyScript.async = true
-      document.body.appendChild(calendlyScript)
-    }
-  }, [])
+const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps) => {
+  const widgetRef = useRef<HTMLDivElement>(null)
+
+  useCalendlyEventScheduled(onBookingScheduled)
+  useCalendlyScript(widgetRef, calendlyUrl)
 
   return (
     <HnSignupLayout contentClassName={css.calendlyColumn}>
       <div className={css.calendlyWrapper}>
-        <div className="calendly-inline-widget" data-url={calendlyUrl} style={{ minWidth: '320px', height: '700px' }} />
+        <div ref={widgetRef} id="calendly-widget" style={{ minWidth: '320px', height: '700px' }} />
       </div>
     </HnSignupLayout>
   )

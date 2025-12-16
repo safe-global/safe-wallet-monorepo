@@ -7,6 +7,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import HnModal from './HnModal'
 import HnSignupIntro from './HnSignupIntro'
 import HnCalendlyStep from './HnCalendlyStep'
+import { HYPERNATIVE_EVENTS, MixpanelEventParams, trackEvent } from '@/services/analytics'
 
 export type HnSignupFlowProps = {
   open: boolean
@@ -23,11 +24,16 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
     setActiveStep(1)
   }
 
+  const handleBookingScheduled = () => {
+    // Mark form as completed in Redux when a booking is actually scheduled; track events
+    dispatch(setFormCompleted({ chainId, safeAddress, completed: true }))
+    trackEvent(HYPERNATIVE_EVENTS.GUARDIAN_FORM_SUBMITTED, {
+      [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chainId,
+      [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+    })
+  }
+
   const handleClose = () => {
-    // Mark form as completed in Redux when user closes after viewing Calendly
-    if (activeStep === 1) {
-      dispatch(setFormCompleted({ chainId, safeAddress, completed: true }))
-    }
     // Reset local state
     setActiveStep(0)
     // Call parent onClose
@@ -48,7 +54,7 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
             </Box>
           )
         }
-        return <HnCalendlyStep calendlyUrl={calendlyUrl} />
+        return <HnCalendlyStep calendlyUrl={calendlyUrl} onBookingScheduled={handleBookingScheduled} />
       default:
         return null
     }

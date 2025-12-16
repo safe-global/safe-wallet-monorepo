@@ -17,6 +17,7 @@ export enum MixpanelEvent {
   GUARDIAN_BANNER_VIEWED = 'Guardian Banner Viewed',
   GUARDIAN_FORM_VIEWED = 'Guardian Form Viewed',
   GUARDIAN_FORM_STARTED = 'Guardian Form Started',
+  GUARDIAN_FORM_SUBMITTED = 'Guardian Form Submitted',
   SECURITY_REPORT_CLICKED = 'Security Report Clicked',
   GUARDIAN_BANNER_DISMISSED = 'Guardian Banner Dismissed',
   EXPLORE_POSSIBLE_CLICKED = 'Explore Possible Clicked',
