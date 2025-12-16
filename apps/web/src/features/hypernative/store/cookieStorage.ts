@@ -97,7 +97,8 @@ export const getAuthExpiry = (): number | undefined => {
  * @returns true if authenticated, false otherwise
  */
 export const isAuthenticated = (): boolean => {
-  return getAuthToken() !== undefined
+  const token = getAuthToken()
+  return !!token
 }
 
 /**

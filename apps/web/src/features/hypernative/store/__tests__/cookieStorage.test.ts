@@ -277,6 +277,17 @@ describe('cookieStorage', () => {
 
       expect(result).toBe(false)
     })
+
+    it('should return false when token is null', () => {
+      const expiry = Date.now() + 3600000
+      const cookieValue = JSON.stringify({ token: null, expiry })
+
+      mockGetReturn(cookieValue)
+
+      const result = isAuthenticated()
+
+      expect(result).toBe(false)
+    })
   })
 
   describe('isTokenMissingOrExpired', () => {
