@@ -12,8 +12,8 @@
     "lint": "yarn workspaces foreach --all -pt run lint",
     "test": "yarn workspaces foreach --all -pt run test",
     "eslint": "yarn workspaces foreach --all -pt run eslint",
-    "prettier": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md}\"",
-    "prettier:fix": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
+    "prettier": "prettier --check . --config ./.prettierrc --ignore-path ./.prettierignore",
+    "prettier:fix": "prettier --write . --config ./.prettierrc --ignore-path ./.prettierignore",
     "postinstall": "husky"
   },
   "resolutions": {
