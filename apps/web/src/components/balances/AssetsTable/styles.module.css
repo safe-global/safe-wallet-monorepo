@@ -227,11 +227,6 @@
   display: none;
 }
 
-.container th:nth-child(5),
-.container td:nth-child(5) {
-  padding-right: var(--space-2);
-}
-
 .container.containerWideActions th:nth-child(5),
 .container.containerWideActions td:nth-child(5) {
   padding-right: 138px;
