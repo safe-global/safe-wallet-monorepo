@@ -2,7 +2,7 @@
   "name": "@safe-global/web",
   "homepage": "https://github.com/safe-global/safe-wallet-web",
   "license": "GPL-3.0",
-  "version": "1.76.1",
+  "version": "1.77.0",
   "type": "module",
   "scripts": {
     "dev": "cross-env USE_RSPACK=1 next dev",
@@ -85,7 +85,7 @@
     "js-cookie": "^3.0.1",
     "lodash": "^4.17.21",
     "mixpanel-browser": "^2.66.0",
-    "next": "patch:next@15.5.4#../../.yarn/patches/next-npm-15.5.4-2693b30f50.patch",
+    "next": "patch:next@15.5.8#../../.yarn/patches/next-npm-15.5.8-7d525d02b9.patch",
     "papaparse": "^5.3.2",
     "qrcode.react": "^3.1.0",
     "react": "19.1.0",
@@ -169,6 +169,5 @@
     "budgetPercentIncreaseRed": 20,
     "minimumChangeThreshold": 0,
     "showDetails": true
-  },
-  "packageManager": "yarn@4.5.3"
+  }
 }

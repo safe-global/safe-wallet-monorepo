@@ -5,8 +5,8 @@ description: 'Install the dependencies'
 runs:
   using: 'composite'
   steps:
-    # We require yarn v4 and installing through corepack is the easiest way to get it
-    - uses: actions/checkout@v4
+    # We require yarn v6 and installing through corepack is the easiest way to get it
+    - uses: actions/checkout@v6
 
     - uses: ./.github/actions/corepack
 
