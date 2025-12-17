@@ -20,7 +20,7 @@
   --color-error-light: #f79ba7;
   --color-error-background: #ffe0e6;
   --color-error1-main: #ffe0e6;
-  --color-error1-contrastText: #8a1c27;
+  --color-error1-contrast-text: #8a1c27;
   --color-success-dark: #1c5538;
   --color-success-main: #00b460;
   --color-success-light: #84d9a0;
@@ -35,7 +35,7 @@
   --color-warning-background: #ffecc2;
   --color-warning1-main: #ffecc2;
   --color-warning1-text: #6c2d19;
-  --color-warning1-contrastText: #ff8c00;
+  --color-warning1-contrast-text: #ff8c00;
   --color-background-default: #f4f4f4;
   --color-background-main: #f4f4f4;
   --color-background-paper: #ffffff;
@@ -49,8 +49,8 @@
   --color-static-main: #121312;
   --color-static-light: #636669;
   --color-static-primary: #ffffff;
-  --color-static-textSecondary: #a1a3a7;
-  --color-static-textBrand: #12ff80;
+  --color-static-text-secondary: #a1a3a7;
+  --color-static-text-brand: #12ff80;
   --space-1: 8px;
   --space-2: 16px;
   --space-3: 24px;
@@ -85,7 +85,7 @@
   --color-error-light: #4a2125;
   --color-error-background: #4a2125;
   --color-error1-main: #4a2125;
-  --color-error1-contrastText: #ffe0e6;
+  --color-error1-contrast-text: #ffe0e6;
   --color-success-dark: #defdea;
   --color-success-main: #00b460;
   --color-success-light: #3b7a54;
@@ -100,7 +100,7 @@
   --color-warning-background: #4a3621;
   --color-warning1-main: #4a3621;
   --color-warning1-text: #ffe4cb;
-  --color-warning1-contrastText: #ff8c00;
+  --color-warning1-contrast-text: #ff8c00;
   --color-background-default: #121312;
   --color-background-main: #121312;
   --color-background-paper: #1c1c1c;
@@ -114,8 +114,8 @@
   --color-static-main: #121312;
   --color-static-light: #636669;
   --color-static-primary: #ffffff;
-  --color-static-textSecondary: #a1a3a7;
-  --color-static-textBrand: #12ff80;
+  --color-static-text-secondary: #a1a3a7;
+  --color-static-text-brand: #12ff80;
 }
 
 /* The same as above for the brief moment before JS loads */
@@ -140,7 +140,7 @@
     --color-error-light: #4a2125;
     --color-error-background: #4a2125;
     --color-error1-main: #4a2125;
-    --color-error1-contrastText: #ffe0e6;
+    --color-error1-contrast-text: #ffe0e6;
     --color-success-dark: #defdea;
     --color-success-main: #00b460;
     --color-success-light: #3b7a54;
@@ -155,7 +155,7 @@
     --color-warning-background: #4a3621;
     --color-warning1-main: #4a3621;
     --color-warning1-text: #ffe4cb;
-    --color-warning1-contrastText: #ff8c00;
+    --color-warning1-contrast-text: #ff8c00;
     --color-background-default: #121312;
     --color-background-main: #121312;
     --color-background-paper: #1c1c1c;
@@ -169,7 +169,7 @@
     --color-static-main: #121312;
     --color-static-light: #636669;
     --color-static-primary: #ffffff;
-    --color-static-textSecondary: #a1a3a7;
-    --color-static-textBrand: #12ff80;
+    --color-static-text-secondary: #a1a3a7;
+    --color-static-text-brand: #12ff80;
   }
 }

@@ -46,6 +46,7 @@ The project uses `@safe-global/theme` package as a single source of truth for al
 ### Usage
 
 **Web (MUI)**:
+
 ```typescript
 import { generateMuiTheme } from '@safe-global/theme'
 
@@ -53,6 +54,7 @@ const theme = generateMuiTheme('light') // or 'dark'
 ```
 
 **Mobile (Tamagui)**:
+
 ```typescript
 import { generateTamaguiTokens, generateTamaguiThemes } from '@safe-global/theme'
 
@@ -61,6 +63,7 @@ const themes = generateTamaguiThemes()
 ```
 
 **Direct Token Access**:
+
 ```typescript
 import { lightPalette, darkPalette, spacingMobile, spacingWeb, typography } from '@safe-global/theme'
 ```
@@ -68,6 +71,7 @@ import { lightPalette, darkPalette, spacingMobile, spacingWeb, typography } from
 ### Modifying Theme
 
 To add or modify colors/tokens:
+
 1. Edit files in `packages/theme/src/palettes/` or `packages/theme/src/tokens/`
 2. Run type-check to ensure consistency: `yarn workspace @safe-global/theme type-check`
 3. Regenerate CSS vars for web: `yarn workspace @safe-global/web css-vars`

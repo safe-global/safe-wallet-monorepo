@@ -40,4 +40,16 @@ describe('generateCSSVars', () => {
     // Dark mode text-primary should be light color
     expect(cssOutput).toMatch(/\[data-theme="dark"\] \{[\s\S]*--color-text-primary: #ffffff/i)
   })
+
+  it('should convert camelCase palette keys to kebab-case CSS variables', () => {
+    // Static colors with camelCase keys should be converted
+    expect(cssOutput).toContain('--color-static-text-secondary:')
+    expect(cssOutput).toContain('--color-static-text-brand:')
+    expect(cssOutput).not.toContain('--color-static-textSecondary')
+    expect(cssOutput).not.toContain('--color-static-textBrand')
+
+    // contrastText should become contrast-text
+    expect(cssOutput).toContain('--color-error1-contrast-text:')
+    expect(cssOutput).not.toContain('--color-error1-contrastText')
+  })
 })

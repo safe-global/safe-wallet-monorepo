@@ -9,8 +9,17 @@ import darkPalette from '../palettes/dark'
 import { spacingWeb } from '../tokens'
 
 /**
+ * Convert camelCase to kebab-case.
+ * Example: 'textSecondary' => 'text-secondary'
+ */
+function toKebabCase(str: string): string {
+  return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
+}
+
+/**
  * Flatten a nested color palette object into CSS custom property declarations.
  * Example: { text: { primary: '#000' } } => '--color-text-primary: #000;'
+ * Converts camelCase keys to kebab-case for CSS conventions.
  */
 function flattenPaletteToCSS(palette: ColorPalette, indent = '  '): string[] {
   const vars: string[] = []
@@ -19,12 +28,13 @@ function flattenPaletteToCSS(palette: ColorPalette, indent = '  '): string[] {
     if (typeof obj !== 'object' || obj === null) return
 
     Object.entries(obj).forEach(([key, value]) => {
+      const kebabKey = toKebabCase(key)
       if (typeof value === 'object' && value !== null) {
         // Recursively flatten nested objects
-        flatten(value, `${prefix}-${key}`)
+        flatten(value, `${prefix}-${kebabKey}`)
       } else {
         // Add CSS custom property
-        vars.push(`${indent}--${prefix}-${key}: ${value};`)
+        vars.push(`${indent}--${prefix}-${kebabKey}: ${value};`)
       }
     })
   }
