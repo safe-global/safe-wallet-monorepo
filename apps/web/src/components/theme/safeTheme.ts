@@ -1,8 +1,6 @@
 import type { PaletteMode } from '@mui/material'
+// This import includes MUI type extensions via side-effect
 import { generateMuiTheme, spacingWebBase } from '@safe-global/theme'
-
-// Re-export MUI type extensions from theme package
-import '@safe-global/theme/generators/mui-extensions'
 
 /** @deprecated Use spacingWebBase from @safe-global/theme instead */
 export const base = spacingWebBase

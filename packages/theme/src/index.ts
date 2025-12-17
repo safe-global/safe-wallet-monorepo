@@ -1,5 +1,8 @@
 // Main exports for @safe-global/theme package
 
+// MUI type extensions (side-effect import for TypeScript module augmentation)
+import './generators/mui-extensions'
+
 // Palettes
 export { default as lightPalette } from './palettes/light'
 export { default as darkPalette } from './palettes/dark'

@@ -26,7 +26,6 @@
     }
   },
   "devDependencies": {
-    "@mui/material": "^6.4.11",
     "@safe-global/test": "workspace:^",
     "@types/jest": "^29.5.14",
     "eslint": "^9.29.0",
