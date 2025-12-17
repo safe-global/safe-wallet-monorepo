@@ -46,12 +46,15 @@ function createServer(staticDir, port) {
       }
 
       const contentType = contentTypes[extname] || 'application/octet-stream'
+      // Text-based content types that should use utf-8 encoding
+      const textTypes = ['.html', '.js', '.css', '.json', '.svg']
+      const isTextContent = textTypes.includes(extname)
 
       fs.readFile(filePath, (error, content) => {
         if (error) {
           if (error.code === 'ENOENT') {
             // Try index.html for SPA routing
-            fs.readFile(path.join(staticDir, 'index.html'), (err, indexContent) => {
+            fs.readFile(path.join(resolvedStaticDir, 'index.html'), (err, indexContent) => {
               if (err) {
                 res.writeHead(404)
                 res.end('Not Found')
@@ -66,7 +69,12 @@ function createServer(staticDir, port) {
           }
         } else {
           res.writeHead(200, { 'Content-Type': contentType })
-          res.end(content, 'utf-8')
+          // Only use utf-8 encoding for text content, not binary files
+          if (isTextContent) {
+            res.end(content, 'utf-8')
+          } else {
+            res.end(content)
+          }
         }
       })
     })

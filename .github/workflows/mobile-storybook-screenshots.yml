@@ -139,7 +139,8 @@ jobs:
               return;
             }
 
-            const screenshots = fs.readdirSync(screenshotDir).filter(f => f.endsWith('.png'));
+            // Filter out error screenshots and non-png files
+            const screenshots = fs.readdirSync(screenshotDir).filter(f => f.endsWith('.png') && !f.includes('-ERROR.png'));
 
             if (screenshots.length === 0) {
               console.log('No screenshots found');
@@ -155,7 +156,8 @@ jobs:
 
             const components = {};
             for (const file of screenshots) {
-              const match = file.match(/^(.+?)--(.+?)\.png$/);
+              // Use greedy matching for component name to handle names with hyphens
+              const match = file.match(/^(.+)--(.+?)\.png$/);
               if (match) {
                 const [, componentName, storyName] = match;
                 if (!components[componentName]) {
