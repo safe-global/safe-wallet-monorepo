@@ -110,13 +110,7 @@ const AssetsTable = ({
     },
     {
       id: 'weight',
-      label: (
-        <Tooltip title="Based on total portfolio value">
-          <Typography variant="caption" letterSpacing="normal" color="primary.light">
-            Weight
-          </Typography>
-        </Tooltip>
-      ),
+      label: <Tooltip title="Based on total portfolio value">Weight</Tooltip>,
       width: '23%',
       align: 'right',
     },
