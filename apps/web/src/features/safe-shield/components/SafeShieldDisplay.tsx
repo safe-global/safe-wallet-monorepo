@@ -21,7 +21,7 @@ const shieldLogoOnHover = {
   '&:hover': {
     cursor: 'pointer',
     '& .shield-bg': {
-      fill: 'var(--color-background-lightGrey)',
+      fill: 'var(--color-background-secondary)',
     },
     '& .shield-img': {
       fill: 'var(--color-static-text-brand)',

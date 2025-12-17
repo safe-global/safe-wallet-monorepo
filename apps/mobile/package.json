@@ -68,6 +68,7 @@
     "@reduxjs/toolkit": "^2.11.0",
     "@safe-global/protocol-kit": "^5.2.22",
     "@safe-global/store": "workspace:^",
+    "@safe-global/theme": "workspace:^",
     "@safe-global/utils": "workspace:^",
     "@shopify/flash-list": "^2.2.0",
     "@storybook/addon-react-native-web": "^0.0.26",
