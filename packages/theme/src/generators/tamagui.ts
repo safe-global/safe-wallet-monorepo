@@ -9,6 +9,21 @@ import darkPalette from '../palettes/dark'
 import { spacingMobile, radius, fontSizes } from '../tokens'
 
 /**
+ * Type for Tamagui token values - compatible with createTokens input.
+ * Matches Tamagui's CreateTokens type structure.
+ */
+type TokenValue = string | number
+type TokenCategory = Record<string, TokenValue>
+
+export interface TamaguiTokensInput {
+  color: TokenCategory
+  space: TokenCategory
+  size: TokenCategory
+  radius: TokenCategory
+  zIndex?: TokenCategory
+}
+
+/**
  * Generate Tamagui color tokens from light and dark palettes.
  * Returns flattened color objects with Light and Dark suffixes.
  */
@@ -23,7 +38,7 @@ export function generateTamaguiColorTokens() {
  * Generate complete Tamagui tokens including colors, spacing, sizes, and radius.
  * Compatible with Tamagui's createTokens API.
  */
-export function generateTamaguiTokens() {
+export function generateTamaguiTokens(): TamaguiTokensInput {
   return {
     color: generateTamaguiColorTokens(),
     space: {
