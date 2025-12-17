@@ -89,7 +89,7 @@ input[type='number'] {
 }
 
 .illustration-background-light-grey-fill {
-  fill: var(--color-background-lightGrey);
+  fill: var(--color-background-secondary);
 }
 
 .illustration-text-secondary-fill {

@@ -1,13 +1,13 @@
 import { ExpoConfig } from 'expo/config'
- 
+
 const IS_DEV = process.env.APP_VARIANT === 'development'
 
 const appleDevTeamId = '86487MHG6V'
 
 const sslPinningDomains = {
   'safe-client.staging.5afe.dev': [
-    'q4C71761+V3iWTrVYmUj59dTVrOeoD7KYtOrtA74QBs=', // 🍃 Leaf cert (Valid: Oct 23 00:00:00 2025 GMT → Nov 21 23:59:59 2026 GMT)
-    'DxH4tt40L+eduF6szpY6TONlxhZhBd+pJ9wbHlQ2fuw=', // 🔗 Intermediate (Valid: Aug 23 22:21:28 2022 GMT → Aug 23 22:21:28 2030 GMT)
+    'QHATxmJ9BkdBNaheGWDzmef6AvXrsvSm6//NSIir448=', // 🍃 Leaf cert (Valid: Jul 12 00:00:00 2025 GMT → Aug 10 23:59:59 2026 GMT)
+    'G9LNNAql897egYsabashkzUCTEJkWBzgoEtk8X/678c=', // 🔗 Intermediate (Valid: Aug 23 22:25:30 2022 GMT → Aug 23 22:25:30 2030 GMT)
   ],
   'safe-client.safe.global': [
     'VOstDe9L/YZ7RKPPd7iwAMbsAwCqqblfg3l1IqjUvuE=', // 🍃 Leaf cert (Valid: Jul 12 00:00:00 2025 GMT → Aug 10 23:59:59 2026 GMT)
@@ -21,7 +21,7 @@ const config: ExpoConfig = {
   name: name,
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
-  version: '1.0.5',
+  version: '1.0.6',
   extra: {
     storybookEnabled: process.env.STORYBOOK_ENABLED,
     eas: {

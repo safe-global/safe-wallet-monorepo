@@ -2,7 +2,10 @@ import { StatusGroup, type AnalysisResult, type StatusGroupType } from '../types
 import type { RecipientAnalysisBuilder } from './recipient-analysis.builder'
 
 export class RecipientAddressBuilder {
-  constructor(private parent: RecipientAnalysisBuilder, private address: string) {}
+  constructor(
+    private parent: RecipientAnalysisBuilder,
+    private address: string,
+  ) {}
 
   addressBookState(results: AnalysisResult<StatusGroupType<StatusGroup.ADDRESS_BOOK>>[]): this {
     if (!this.parent['recipient'][this.address]) {

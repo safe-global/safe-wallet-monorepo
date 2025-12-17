@@ -1,4 +1,10 @@
-const lightPalette = {
+import type { ColorPalette } from './types'
+
+/**
+ * Unified light mode color palette.
+ * Merged from web and mobile palettes with mobile's extended colors as the base.
+ */
+const lightPalette: ColorPalette = {
   text: {
     primary: '#121312',
     secondary: '#A1A3A7',
@@ -72,6 +78,10 @@ const lightPalette = {
   },
   static: {
     main: '#121312',
+    light: '#636669',
+    primary: '#FFFFFF',
+    textSecondary: '#A1A3A7',
+    textBrand: '#12FF80',
   },
 }
 
