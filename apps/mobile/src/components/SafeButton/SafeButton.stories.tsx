@@ -8,6 +8,9 @@ import React from 'react'
 const meta: Meta<typeof SafeButton> = {
   title: 'SafeButton',
   component: SafeButton,
+  parameters: {
+    layout: 'centered',
+  },
   args: {
     onPress: action('onPress'),
   },
