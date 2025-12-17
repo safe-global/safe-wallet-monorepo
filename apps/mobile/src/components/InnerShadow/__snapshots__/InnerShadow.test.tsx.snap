@@ -13,12 +13,12 @@ exports[`InnerShadow should render the default markup 1`] = `
     <View
       style={
         {
-          "backgroundColor": "#FFFFFF",
+          "backgroundColor": "#F4F4F4",
           "bottom": 0,
           "height": 10,
           "left": 0,
           "position": "absolute",
-          "shadowColor": "rgb(255,255,255)",
+          "shadowColor": "rgb(244,244,244)",
           "shadowOffset": {
             "height": -4,
             "width": -2,

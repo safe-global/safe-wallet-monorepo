@@ -50,7 +50,7 @@ exports[`StakingExit matches snapshot 1`] = `
               style={
                 {
                   "alignItems": "center",
-                  "backgroundColor": "#F4F4F4",
+                  "backgroundColor": "#FFFFFF",
                   "borderBottomColor": "#EEEFF0",
                   "borderBottomLeftRadius": 100000,
                   "borderBottomRightRadius": 100000,
@@ -200,7 +200,7 @@ exports[`StakingExit matches snapshot 1`] = `
       <View
         style={
           {
-            "backgroundColor": "#FFFFFF",
+            "backgroundColor": "#F4F4F4",
             "borderBottomLeftRadius": 7,
             "borderBottomRightRadius": 7,
             "borderTopLeftRadius": 7,
