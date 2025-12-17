@@ -3,7 +3,7 @@
 exports[`SettingsChange should display the SettingsChange component with newOwner details 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-160pto4-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-2wjrf8-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <p
@@ -86,7 +86,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
     </div>
   </div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 container css-zpxm0u-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 container css-1x0sjgs-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <p
@@ -177,7 +177,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
 exports[`SettingsChange should display the SettingsChange component with owner details 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 container css-zpxm0u-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 container css-1x0sjgs-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <p
