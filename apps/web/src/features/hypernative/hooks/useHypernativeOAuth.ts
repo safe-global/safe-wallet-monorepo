@@ -75,7 +75,7 @@ const AUTH_POLLING_INTERVAL = 5000
  * @param bytes - Uint8Array of bytes to encode
  * @returns Base64url-encoded string
  */
-function base64urlEncode(bytes: Uint8Array): string {
+function base64urlEncode(bytes: Uint8Array | number[]): string {
   return btoa(String.fromCharCode(...bytes))
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
@@ -142,9 +142,7 @@ async function generateCodeChallenge(verifier: string): Promise<string> {
   const data = encoder.encode(verifier)
   const hash = await crypto.subtle.digest('SHA-256', data)
   const hashArray = Array.from(new Uint8Array(hash))
-  const base64 = btoa(String.fromCharCode(...hashArray))
-  // Convert to base64url (replace +/= with -_)
-  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
+  return base64urlEncode(hashArray)
 }
 
 /**
