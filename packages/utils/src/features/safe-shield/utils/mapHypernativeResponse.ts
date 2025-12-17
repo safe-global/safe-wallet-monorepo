@@ -19,7 +19,7 @@ import { sortBySeverity } from './analysisUtils'
  * @returns {ThreatAnalysisResults} ThreatAnalysisResults in Safe Shield format
  */
 export function mapHypernativeResponse(
-  response: HypernativeAssessmentResponseDto | HypernativeAssessmentFailedResponseDto,
+  response: HypernativeAssessmentResponseDto['data'] | HypernativeAssessmentFailedResponseDto,
 ): ThreatAnalysisResults {
   if ('error' in response && response.status === 'FAILED') {
     return createErrorResult(response.error)

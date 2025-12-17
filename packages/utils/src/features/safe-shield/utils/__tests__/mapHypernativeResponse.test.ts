@@ -7,7 +7,7 @@ import type {
 } from '@safe-global/store/hypernative/hypernativeApi.dto'
 
 describe('mapHypernativeResponse', () => {
-  const createNoThreatResponse = (): HypernativeAssessmentResponseDto => ({
+  const createNoThreatResponse = (): HypernativeAssessmentResponseDto['data'] => ({
     safeTxHash: faker.string.hexadecimal({ length: 64 }) as `0x${string}`,
     status: 'OK',
     assessmentData: {
@@ -31,13 +31,12 @@ describe('mapHypernativeResponse', () => {
   })
 
   describe('status handling', () => {
-    it('should return error result when status is ERROR', () => {
-      const responseTitle = 'Hypernative analysis failed'
+    it('should return error result when status is FAILED', () => {
       const responseDescription = 'The threat analysis failed'
       const response: HypernativeAssessmentFailedResponseDto = {
         status: 'FAILED',
         error: {
-          reason: responseTitle,
+          reason: 'Some reason',
           message: responseDescription,
         },
       }
@@ -48,7 +47,7 @@ describe('mapHypernativeResponse', () => {
       expect(result[StatusGroup.THREAT]?.[0]).toEqual({
         severity: Severity.CRITICAL,
         type: ThreatStatus.HYPERNATIVE_GUARD,
-        title: responseTitle,
+        title: 'Hypernative analysis failed',
         description: responseDescription,
       })
     })
@@ -73,7 +72,7 @@ describe('mapHypernativeResponse', () => {
 
   describe('threat analysis risks', () => {
     it('should map CRITICAL severity for deny risks', () => {
-      const response: HypernativeAssessmentResponseDto = {
+      const response: HypernativeAssessmentResponseDto['data'] = {
         ...createNoThreatResponse(),
         assessmentData: {
           ...createNoThreatResponse().assessmentData,
@@ -111,7 +110,7 @@ describe('mapHypernativeResponse', () => {
     })
 
     it('should map WARN severity for warn risks', () => {
-      const response: HypernativeAssessmentResponseDto = {
+      const response: HypernativeAssessmentResponseDto['data'] = {
         ...createNoThreatResponse(),
         assessmentData: {
           ...createNoThreatResponse().assessmentData,
@@ -149,7 +148,7 @@ describe('mapHypernativeResponse', () => {
     })
 
     it('should map OK severity for accept risks', () => {
-      const response: HypernativeAssessmentResponseDto = {
+      const response: HypernativeAssessmentResponseDto['data'] = {
         ...createNoThreatResponse(),
         assessmentData: {
           ...createNoThreatResponse().assessmentData,
@@ -188,7 +187,7 @@ describe('mapHypernativeResponse', () => {
 
   describe('custom checks risks', () => {
     it('should include custom checks risks in results', () => {
-      const response: HypernativeAssessmentResponseDto = {
+      const response: HypernativeAssessmentResponseDto['data'] = {
         ...createNoThreatResponse(),
         assessmentData: {
           ...createNoThreatResponse().assessmentData,
@@ -241,7 +240,7 @@ describe('mapHypernativeResponse', () => {
 
   describe('multiple risks', () => {
     it('should combine risks from both THREAT_ANALYSIS and CUSTOM_CHECKS', () => {
-      const response: HypernativeAssessmentResponseDto = {
+      const response: HypernativeAssessmentResponseDto['data'] = {
         ...createNoThreatResponse(),
         assessmentData: {
           ...createNoThreatResponse().assessmentData,
@@ -292,7 +291,7 @@ describe('mapHypernativeResponse', () => {
 
   describe('severity sorting', () => {
     it('should sort results by severity (CRITICAL first, then WARN, INFO, OK)', () => {
-      const response: HypernativeAssessmentResponseDto = {
+      const response: HypernativeAssessmentResponseDto['data'] = {
         ...createNoThreatResponse(),
         assessmentData: {
           ...createNoThreatResponse().assessmentData,
@@ -348,7 +347,7 @@ describe('mapHypernativeResponse', () => {
 
   describe('risk title mapping', () => {
     it('should map known Hypernative risk titles to specific ThreatStatus types', () => {
-      const response: HypernativeAssessmentResponseDto = {
+      const response: HypernativeAssessmentResponseDto['data'] = {
         ...createNoThreatResponse(),
         assessmentData: {
           ...createNoThreatResponse().assessmentData,
@@ -394,7 +393,7 @@ describe('mapHypernativeResponse', () => {
     })
 
     it('should use HYPERNATIVE_GUARD for unknown risk titles', () => {
-      const response: HypernativeAssessmentResponseDto = {
+      const response: HypernativeAssessmentResponseDto['data'] = {
         ...createNoThreatResponse(),
         assessmentData: {
           ...createNoThreatResponse().assessmentData,

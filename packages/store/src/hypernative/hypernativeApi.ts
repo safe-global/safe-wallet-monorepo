@@ -31,7 +31,7 @@ export const hypernativeApi = createApi({
       invalidatesTags: ['hypernative-oauth'],
     }),
     assessTransaction: build.mutation<
-      HypernativeAssessmentResponseDto | HypernativeAssessmentFailedResponseDto,
+      HypernativeAssessmentResponseDto['data'] | HypernativeAssessmentFailedResponseDto,
       HypernativeAssessmentRequestWithAuthDto
     >({
       query: ({ authToken, ...request }) => ({
@@ -44,6 +44,7 @@ export const hypernativeApi = createApi({
           Authorization: `${authToken}`,
         },
       }),
+      transformResponse: (response: HypernativeAssessmentResponseDto) => response.data, // Extract data from the response wrapper
       invalidatesTags: ['hypernative-threat-analysis'],
     }),
   }),

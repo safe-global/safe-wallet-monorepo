@@ -76,7 +76,7 @@ describe('useThreatAnalysisHypernative', () => {
     },
   })
 
-  const createMockHypernativeResponse = (): HypernativeAssessmentResponseDto => ({
+  const createMockHypernativeResponse = (): HypernativeAssessmentResponseDto['data'] => ({
     safeTxHash: mockSafeTxHash,
     status: 'OK',
     assessmentData: {
@@ -408,7 +408,7 @@ describe('useThreatAnalysisHypernative', () => {
 
     it('should handle Hypernative response with risks', async () => {
       const mockSafeTx = createMockSafeTransaction()
-      const mockHypernativeResponse: HypernativeAssessmentResponseDto = {
+      const mockHypernativeResponse: HypernativeAssessmentResponseDto['data'] = {
         ...createMockHypernativeResponse(),
         assessmentData: {
           assessmentId: faker.string.uuid(),
