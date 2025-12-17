@@ -1,0 +1,158 @@
+/**
+ * Capture screenshots of Mobile Storybook stories using Playwright
+ *
+ * This script serves the built Storybook locally and captures screenshots
+ */
+
+const fs = require('fs')
+const path = require('path')
+const http = require('http')
+const { chromium } = require('playwright')
+
+// Simple static file server
+function createServer(staticDir, port) {
+  return new Promise((resolve) => {
+    const server = http.createServer((req, res) => {
+      let filePath = path.join(staticDir, req.url === '/' ? 'index.html' : req.url)
+
+      // Remove query string for file lookup
+      filePath = filePath.split('?')[0]
+
+      const extname = path.extname(filePath)
+      const contentTypes = {
+        '.html': 'text/html',
+        '.js': 'text/javascript',
+        '.css': 'text/css',
+        '.json': 'application/json',
+        '.png': 'image/png',
+        '.jpg': 'image/jpg',
+        '.gif': 'image/gif',
+        '.svg': 'image/svg+xml',
+        '.woff': 'font/woff',
+        '.woff2': 'font/woff2',
+        '.ttf': 'font/ttf',
+      }
+
+      const contentType = contentTypes[extname] || 'application/octet-stream'
+
+      fs.readFile(filePath, (error, content) => {
+        if (error) {
+          if (error.code === 'ENOENT') {
+            // Try index.html for SPA routing
+            fs.readFile(path.join(staticDir, 'index.html'), (err, indexContent) => {
+              if (err) {
+                res.writeHead(404)
+                res.end('Not Found')
+              } else {
+                res.writeHead(200, { 'Content-Type': 'text/html' })
+                res.end(indexContent, 'utf-8')
+              }
+            })
+          } else {
+            res.writeHead(500)
+            res.end(`Server Error: ${error.code}`)
+          }
+        } else {
+          res.writeHead(200, { 'Content-Type': contentType })
+          res.end(content, 'utf-8')
+        }
+      })
+    })
+
+    server.listen(port, () => {
+      console.log(`Static server running at http://localhost:${port}`)
+      resolve(server)
+    })
+  })
+}
+
+async function captureScreenshots() {
+  const storyUrlsFile = 'mobile-screenshots/story-urls.json'
+  if (!fs.existsSync(storyUrlsFile)) {
+    console.log('No story URLs file found')
+    return
+  }
+
+  const storyUrls = JSON.parse(fs.readFileSync(storyUrlsFile, 'utf-8'))
+
+  if (storyUrls.length === 0) {
+    console.log('No story URLs to capture')
+    return
+  }
+
+  // Start local server for built Storybook
+  const storybookDir = path.join(process.cwd(), 'apps/mobile/storybook-static')
+  if (!fs.existsSync(storybookDir)) {
+    console.error('Storybook build not found at:', storybookDir)
+    process.exit(1)
+  }
+
+  const server = await createServer(storybookDir, 6006)
+
+  console.log(`Capturing ${storyUrls.length} screenshots...`)
+
+  const browser = await chromium.launch()
+  // Use mobile viewport for more authentic screenshots
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 }, // iPhone 14 Pro dimensions
+  })
+  const page = await context.newPage()
+
+  for (let i = 0; i < storyUrls.length; i++) {
+    const { url, componentName, storyName } = storyUrls[i]
+    console.log(`[${i + 1}/${storyUrls.length}] Capturing: ${componentName} - ${storyName}`)
+
+    try {
+      await page.goto(url, {
+        waitUntil: 'networkidle',
+        timeout: 30000,
+      })
+
+      const storyRoot = await page.locator('#storybook-root').first()
+      await storyRoot.waitFor({ state: 'visible', timeout: 10000 })
+
+      await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {
+        console.log('  ⚠ Network not fully idle, continuing anyway')
+      })
+
+      // Clean up component name for filename (remove slashes, spaces)
+      const cleanComponentName = componentName.replace(/[/\\]/g, '-').replace(/\s+/g, '')
+      const screenshotPath = path.join('mobile-screenshots', `${cleanComponentName}--${storyName}.png`)
+
+      if ((await storyRoot.count()) > 0) {
+        await storyRoot.screenshot({
+          path: screenshotPath,
+          animations: 'disabled',
+        })
+        console.log(`  ✓ Saved: ${screenshotPath}`)
+      } else {
+        await page.screenshot({
+          path: screenshotPath,
+          fullPage: true,
+          animations: 'disabled',
+        })
+        console.log(`  ✓ Saved (full page): ${screenshotPath}`)
+      }
+    } catch (error) {
+      console.error(`  ✗ Error capturing ${componentName} - ${storyName}:`, error.message)
+
+      try {
+        const cleanComponentName = componentName.replace(/[/\\]/g, '-').replace(/\s+/g, '')
+        const errorPath = path.join('mobile-screenshots', `${cleanComponentName}--${storyName}-ERROR.png`)
+        await page.screenshot({ path: errorPath, fullPage: true })
+        console.log(`  ⚠ Error screenshot saved: ${errorPath}`)
+      } catch (screenshotError) {
+        console.error('  ✗ Could not capture error screenshot:', screenshotError.message)
+      }
+    }
+  }
+
+  await browser.close()
+  server.close()
+  console.log('\n✓ Mobile screenshot capture complete!')
+}
+
+captureScreenshots().catch((error) => {
+  console.error('Fatal error:', error)
+  process.exit(1)
+})

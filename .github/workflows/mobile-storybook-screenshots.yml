@@ -1,10 +1,10 @@
-name: Storybook Screenshots
+name: Mobile Storybook Screenshots
 
 on:
-  workflow_run:
-    workflows: ['Web Deploy to dev/staging']
-    types:
-      - completed
+  pull_request:
+    paths:
+      - 'apps/mobile/src/**/*.stories.tsx'
+      - 'apps/mobile/src/**/*.stories.ts'
 
 permissions:
   pull-requests: write
@@ -12,106 +12,68 @@ permissions:
 
 jobs:
   screenshot:
-    # Only run on PRs from the same repository (not forks) and when the deployment succeeded
-    # This prevents untrusted code from forks being executed with elevated permissions
-    if: >
-      github.event.workflow_run.event == 'pull_request' &&
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.workflow_run.head_branch }}
           fetch-depth: 0
 
       - uses: ./.github/actions/yarn
 
       - name: Install Playwright
         run: |
-          # Install playwright locally in .github/scripts so node can find it
           cd .github/scripts
-          npm init -y
+          npm init -y 2>/dev/null || true
           npm install playwright
           npx playwright install --with-deps chromium
-
-      - name: Get PR number
-        id: pr
-        env:
-          GH_TOKEN: ${{ github.token }}
-          # Use env var to prevent code injection via branch name
-          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
-        run: |
-          PR_NUMBER=$(gh pr view "$BRANCH_NAME" --json number -q .number 2>/dev/null || echo "")
-          echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
-
-      - name: Exit if no PR found
-        if: steps.pr.outputs.number == ''
-        env:
-          # Use env var to prevent code injection via branch name
-          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
-        run: |
-          echo "No PR found for branch $BRANCH_NAME"
-          exit 0
 
       - name: Get changed story files
         id: changed-stories
         run: |
-          # Get the base branch (usually dev or main)
-          BASE_SHA=${{ github.event.workflow_run.pull_requests[0].base.sha }}
-          HEAD_SHA=${{ github.event.workflow_run.head_sha }}
+          BASE_SHA=${{ github.event.pull_request.base.sha }}
+          HEAD_SHA=${{ github.event.pull_request.head.sha }}
 
-          # Find changed story files
-          CHANGED_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '\.(stories|story)\.(tsx?|jsx?)$' || true)
+          CHANGED_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E 'apps/mobile/.*\.(stories|story)\.(tsx?|jsx?)$' | grep -v '\.native\.stories\.' || true)
 
           if [ -z "$CHANGED_FILES" ]; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "No story files changed"
+            echo "No mobile story files changed"
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
             echo "Changed story files:"
             echo "$CHANGED_FILES"
-            # Store as multiline output
             echo "files<<EOF" >> $GITHUB_OUTPUT
             echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
           fi
 
-      - name: Extract branch name
+      - name: Build Mobile Storybook
         if: steps.changed-stories.outputs.has_changes == 'true'
-        id: branch
+        run: yarn workspace @safe-global/mobile build-storybook
         env:
-          # Use env var to prevent code injection via branch name
-          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
-        run: |
-          NORMALIZED=$(echo "$BRANCH_NAME" | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')
-          echo "normalized=$NORMALIZED" >> $GITHUB_OUTPUT
-          echo "Normalized branch: $NORMALIZED"
+          STORYBOOK_WEB: 'true'
 
       - name: Generate story URLs
         if: steps.changed-stories.outputs.has_changes == 'true'
         id: story-urls
         run: |
-          node ./.github/scripts/generate-story-urls.js
+          node ./.github/scripts/generate-mobile-story-urls.js
         env:
           CHANGED_FILES: ${{ steps.changed-stories.outputs.files }}
-          BRANCH_NAME: ${{ steps.branch.outputs.normalized }}
 
       - name: Take screenshots
         if: steps.changed-stories.outputs.has_changes == 'true'
         run: |
-          node ./.github/scripts/capture-screenshots.js
+          node ./.github/scripts/capture-mobile-screenshots.js
         env:
-          STORY_URLS: ${{ steps.story-urls.outputs.urls }}
-          BRANCH_NAME: ${{ steps.branch.outputs.normalized }}
           NODE_PATH: ./.github/scripts/node_modules
 
       - name: Upload screenshots
         if: steps.changed-stories.outputs.has_changes == 'true'
         uses: actions/upload-artifact@v6
         with:
-          name: storybook-screenshots
-          path: screenshots/
+          name: mobile-storybook-screenshots
+          path: mobile-screenshots/
           retention-days: 5
 
       - name: Upload screenshots to branch
@@ -123,31 +85,31 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global credential.helper '!f() { echo "username=x-access-token"; echo "password=$GH_TOKEN"; }; f'
 
-          SCREENSHOT_DIR="storybook-screenshots/${{ steps.pr.outputs.number }}"
+          SCREENSHOT_DIR="mobile-storybook-screenshots/${{ github.event.pull_request.number }}"
 
           cd /tmp
           rm -rf screenshots-storage
 
-          if git clone --depth 1 --branch storybook-screenshots-storage https://github.com/${{ github.repository }}.git screenshots-storage; then
+          if git clone --depth 1 --branch mobile-storybook-screenshots-storage https://github.com/${{ github.repository }}.git screenshots-storage; then
             echo "Cloned existing storage branch"
             cd screenshots-storage
           else
             echo "Storage branch doesn't exist, creating it"
             git clone --depth 1 https://github.com/${{ github.repository }}.git screenshots-storage
             cd screenshots-storage
-            git checkout --orphan storybook-screenshots-storage
+            git checkout --orphan mobile-storybook-screenshots-storage
             git rm -rf . 2>/dev/null || true
-            echo "# Storybook Screenshots Storage" > README.md
+            echo "# Mobile Storybook Screenshots Storage" > README.md
             git add README.md
-            git commit -m "Initialize storybook-screenshots-storage branch"
+            git commit -m "Initialize mobile-storybook-screenshots-storage branch"
           fi
 
           mkdir -p "$SCREENSHOT_DIR"
-          cp $GITHUB_WORKSPACE/screenshots/*.png "$SCREENSHOT_DIR/" 2>/dev/null || true
+          cp $GITHUB_WORKSPACE/mobile-screenshots/*.png "$SCREENSHOT_DIR/" 2>/dev/null || true
 
           git add "$SCREENSHOT_DIR"
-          if git commit -m "Add screenshots for PR #${{ steps.pr.outputs.number }}"; then
-            git push origin storybook-screenshots-storage
+          if git commit -m "Add mobile screenshots for PR #${{ github.event.pull_request.number }}"; then
+            git push origin mobile-storybook-screenshots-storage
           else
             echo "No changes to commit"
           fi
@@ -160,8 +122,7 @@ jobs:
             const fs = require('fs');
             const path = require('path');
 
-            // Read screenshot directory
-            const screenshotDir = 'screenshots';
+            const screenshotDir = 'mobile-screenshots';
             if (!fs.existsSync(screenshotDir)) {
               console.log('No screenshots directory found');
               return;
@@ -174,16 +135,13 @@ jobs:
               return;
             }
 
-            const prNumber = ${{ steps.pr.outputs.number }};
+            const prNumber = ${{ github.event.pull_request.number }};
             const repo = context.repo;
-            const baseUrl = `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/storybook-screenshots-storage/storybook-screenshots/${prNumber}`;
+            const baseUrl = `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/mobile-storybook-screenshots-storage/mobile-storybook-screenshots/${prNumber}`;
 
-            // Build comment body
-            let body = '## 📸 Storybook Component Screenshots\n\n';
-            body += `Found ${screenshots.length} screenshot(s) for changed components in this PR.\n\n`;
-            body += `**Storybook Preview:** https://${{ steps.branch.outputs.normalized }}--walletweb.review.5afe.dev/storybook/\n\n`;
+            let body = '## 📱 Mobile Storybook Screenshots\n\n';
+            body += `Found ${screenshots.length} screenshot(s) for changed mobile components in this PR.\n\n`;
 
-            // Group screenshots by component
             const components = {};
             for (const file of screenshots) {
               const match = file.match(/^(.+?)--(.+?)\.png$/);
@@ -196,8 +154,6 @@ jobs:
               }
             }
 
-            // Add screenshots to comment with proper URLs
-            // Show inline if < 10 screenshots, otherwise use collapsible details
             const useCollapsible = screenshots.length >= 10;
 
             for (const [componentName, stories] of Object.entries(components)) {
@@ -216,9 +172,8 @@ jobs:
             }
 
             body += '\n---\n';
-            body += '*Screenshots are automatically captured from changed story files.*';
+            body += '*Screenshots are automatically captured from changed mobile story files using React Native Web.*';
 
-            // Find existing comment
             const { data: comments } = await github.rest.issues.listComments({
               owner: repo.owner,
               repo: repo.repo,
@@ -227,10 +182,9 @@ jobs:
 
             const botComment = comments.find(comment =>
               comment.user.type === 'Bot' &&
-              comment.body.includes('📸 Storybook Component Screenshots')
+              comment.body.includes('📱 Mobile Storybook Screenshots')
             );
 
-            // Create or update comment
             if (botComment) {
               await github.rest.issues.updateComment({
                 owner: repo.owner,
@@ -247,23 +201,22 @@ jobs:
               });
             }
 
-      - name: Post no changes comment
-        if: steps.changed-stories.outputs.has_changes == 'false' && steps.pr.outputs.number != ''
+      - name: Delete comment if no changes
+        if: steps.changed-stories.outputs.has_changes == 'false'
         uses: actions/github-script@v8
         with:
           script: |
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: ${{ steps.pr.outputs.number }}
+              issue_number: ${{ github.event.pull_request.number }}
             });
 
             const botComment = comments.find(comment =>
               comment.user.type === 'Bot' &&
-              comment.body.includes('📸 Storybook Component Screenshots')
+              comment.body.includes('📱 Mobile Storybook Screenshots')
             );
 
-            // Delete the comment if no stories changed
             if (botComment) {
               await github.rest.issues.deleteComment({
                 owner: context.repo.owner,
