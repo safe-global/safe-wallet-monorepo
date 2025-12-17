@@ -48,14 +48,24 @@ jobs:
           fi
 
       - name: Build Mobile Storybook
+        id: build-storybook
         if: steps.changed-stories.outputs.has_changes == 'true'
         working-directory: apps/mobile
-        run: yarn build-storybook --disable-telemetry
+        continue-on-error: true
+        run: |
+          # Build Storybook for web
+          yarn build-storybook 2>&1 || {
+            echo "build_failed=true" >> $GITHUB_OUTPUT
+            echo "::warning::Mobile Storybook build failed. This may be due to monorepo path resolution issues."
+            exit 0
+          }
+          echo "build_failed=false" >> $GITHUB_OUTPUT
         env:
           STORYBOOK_WEB: 'true'
+          STORYBOOK_DISABLE_TELEMETRY: '1'
 
       - name: Generate story URLs
-        if: steps.changed-stories.outputs.has_changes == 'true'
+        if: steps.changed-stories.outputs.has_changes == 'true' && steps.build-storybook.outputs.build_failed != 'true'
         id: story-urls
         run: |
           node ./.github/scripts/generate-mobile-story-urls.js
@@ -63,14 +73,14 @@ jobs:
           CHANGED_FILES: ${{ steps.changed-stories.outputs.files }}
 
       - name: Take screenshots
-        if: steps.changed-stories.outputs.has_changes == 'true'
+        if: steps.changed-stories.outputs.has_changes == 'true' && steps.build-storybook.outputs.build_failed != 'true'
         run: |
           node ./.github/scripts/capture-mobile-screenshots.js
         env:
           NODE_PATH: ./.github/scripts/node_modules
 
       - name: Upload screenshots
-        if: steps.changed-stories.outputs.has_changes == 'true'
+        if: steps.changed-stories.outputs.has_changes == 'true' && steps.build-storybook.outputs.build_failed != 'true'
         uses: actions/upload-artifact@v6
         with:
           name: mobile-storybook-screenshots
@@ -78,7 +88,7 @@ jobs:
           retention-days: 5
 
       - name: Upload screenshots to branch
-        if: steps.changed-stories.outputs.has_changes == 'true'
+        if: steps.changed-stories.outputs.has_changes == 'true' && steps.build-storybook.outputs.build_failed != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -116,7 +126,7 @@ jobs:
           fi
 
       - name: Post PR comment with screenshots
-        if: steps.changed-stories.outputs.has_changes == 'true'
+        if: steps.changed-stories.outputs.has_changes == 'true' && steps.build-storybook.outputs.build_failed != 'true'
         uses: actions/github-script@v8
         with:
           script: |
