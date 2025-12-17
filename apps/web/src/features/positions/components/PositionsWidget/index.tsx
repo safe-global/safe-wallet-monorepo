@@ -228,7 +228,12 @@ const PositionsWidget = () => {
 
               <AccordionDetails sx={{ px: 1.5 }}>
                 {protocol.items.map((group, groupIndex) => (
-                  <PositionGroup key={groupIndex} group={group} isLast={groupIndex === protocol.items.length - 1} />
+                  <PositionGroup
+                    key={groupIndex}
+                    group={group}
+                    isLast={groupIndex === protocol.items.length - 1}
+                    protocolIconUrl={protocol.protocol_metadata.icon.url}
+                  />
                 ))}
               </AccordionDetails>
             </Accordion>

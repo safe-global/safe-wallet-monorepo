@@ -15,3 +15,18 @@
   height: 20px;
   padding: 0;
 }
+
+.badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  background-color: var(--color-background-paper);
+  border: 2px solid var(--color-background-paper);
+  border-radius: 100%;
+  overflow: hidden;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
