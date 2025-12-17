@@ -11,12 +11,24 @@ const { chromium } = require('playwright')
 
 // Simple static file server
 function createServer(staticDir, port) {
+  const resolvedStaticDir = path.resolve(staticDir)
+
   return new Promise((resolve) => {
     const server = http.createServer((req, res) => {
-      let filePath = path.join(staticDir, req.url === '/' ? 'index.html' : req.url)
+      // Parse URL and remove query string
+      const urlPath = (req.url || '/').split('?')[0]
 
-      // Remove query string for file lookup
-      filePath = filePath.split('?')[0]
+      // Resolve the file path and ensure it stays within staticDir (prevent path traversal)
+      const requestedPath = path.normalize(urlPath).replace(/^(\.\.[/\\])+/, '')
+      let filePath = path.join(resolvedStaticDir, requestedPath === '/' ? 'index.html' : requestedPath)
+      filePath = path.resolve(filePath)
+
+      // Security: Ensure the resolved path is within the static directory
+      if (!filePath.startsWith(resolvedStaticDir)) {
+        res.writeHead(403)
+        res.end('Forbidden')
+        return
+      }
 
       const extname = path.extname(filePath)
       const contentTypes = {
