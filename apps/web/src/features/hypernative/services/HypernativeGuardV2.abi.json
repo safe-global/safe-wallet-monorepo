@@ -1,0 +1,572 @@
+[
+  {
+    "type": "constructor",
+    "inputs": [
+      { "name": "_safeAddress", "type": "address", "internalType": "address" },
+      { "name": "_keeper", "type": "address", "internalType": "address" }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "DEFAULT_ADMIN_ROLE",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "DOMAIN_SEPARATOR",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "KEEPER_ROLE",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "activatePassThroughTimelock",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "activateRevokeTimelock",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "activateRevokeTimelockHash",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "addPolicyExtension",
+    "inputs": [{ "name": "_policyExtension", "type": "address", "internalType": "address" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "approveFunctionCallHash",
+    "inputs": [{ "name": "functionCallTxHash", "type": "bytes32", "internalType": "bytes32" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "approveHash",
+    "inputs": [{ "name": "txHash", "type": "bytes32", "internalType": "bytes32" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "approveNonceFreeHash",
+    "inputs": [{ "name": "nonceFreeTxHash", "type": "bytes32", "internalType": "bytes32" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "approvedFunctionCallHashes",
+    "inputs": [{ "name": "functionCallTxHash", "type": "bytes32", "internalType": "bytes32" }],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "approvedNonceFreeTxHashes",
+    "inputs": [{ "name": "nonceFreeTxHash", "type": "bytes32", "internalType": "bytes32" }],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "approvedTxHashes",
+    "inputs": [{ "name": "txHash", "type": "bytes32", "internalType": "bytes32" }],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "checkAfterExecution",
+    "inputs": [
+      { "name": "", "type": "bytes32", "internalType": "bytes32" },
+      { "name": "", "type": "bool", "internalType": "bool" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "checkTransaction",
+    "inputs": [
+      { "name": "to", "type": "address", "internalType": "address" },
+      { "name": "value", "type": "uint256", "internalType": "uint256" },
+      { "name": "data", "type": "bytes", "internalType": "bytes" },
+      { "name": "operation", "type": "uint8", "internalType": "enum Enum.Operation" },
+      { "name": "safeTxGas", "type": "uint256", "internalType": "uint256" },
+      { "name": "baseGas", "type": "uint256", "internalType": "uint256" },
+      { "name": "gasPrice", "type": "uint256", "internalType": "uint256" },
+      { "name": "gasToken", "type": "address", "internalType": "address" },
+      { "name": "refundReceiver", "type": "address", "internalType": "address payable" },
+      { "name": "signatures", "type": "bytes", "internalType": "bytes" },
+      { "name": "executor", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "disablePassThroughMode",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "disablePassThroughTimelock",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "disableRevokeTimelock",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "disableRevokeTimelockHash",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "enablePassThroughMode",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "enablePassThroughModeHash",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getFunctionCallHash",
+    "inputs": [
+      { "name": "to", "type": "address", "internalType": "address" },
+      { "name": "value", "type": "uint256", "internalType": "uint256" },
+      { "name": "data", "type": "bytes", "internalType": "bytes" },
+      { "name": "operation", "type": "uint8", "internalType": "enum Enum.Operation" },
+      { "name": "safeTxGas", "type": "uint256", "internalType": "uint256" },
+      { "name": "baseGas", "type": "uint256", "internalType": "uint256" },
+      { "name": "gasPrice", "type": "uint256", "internalType": "uint256" },
+      { "name": "gasToken", "type": "address", "internalType": "address" },
+      { "name": "refundReceiver", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "getNonceFreeTransactionHash",
+    "inputs": [
+      { "name": "to", "type": "address", "internalType": "address" },
+      { "name": "value", "type": "uint256", "internalType": "uint256" },
+      { "name": "data", "type": "bytes", "internalType": "bytes" },
+      { "name": "operation", "type": "uint8", "internalType": "enum Enum.Operation" },
+      { "name": "safeTxGas", "type": "uint256", "internalType": "uint256" },
+      { "name": "baseGas", "type": "uint256", "internalType": "uint256" },
+      { "name": "gasPrice", "type": "uint256", "internalType": "uint256" },
+      { "name": "gasToken", "type": "address", "internalType": "address" },
+      { "name": "refundReceiver", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "getPassThroughTimelockBlock",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getPolicyExtensions",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address[]", "internalType": "address[]" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getPrivilegedOperationHash",
+    "inputs": [
+      { "name": "to", "type": "address", "internalType": "address" },
+      { "name": "data", "type": "bytes", "internalType": "bytes" },
+      { "name": "operation", "type": "uint8", "internalType": "enum Enum.Operation" }
+    ],
+    "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "getRevokeTimelockBlock",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getRoleAdmin",
+    "inputs": [{ "name": "role", "type": "bytes32", "internalType": "bytes32" }],
+    "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getRoleMember",
+    "inputs": [
+      { "name": "role", "type": "bytes32", "internalType": "bytes32" },
+      { "name": "index", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getRoleMemberCount",
+    "inputs": [{ "name": "role", "type": "bytes32", "internalType": "bytes32" }],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getRoleMembers",
+    "inputs": [{ "name": "role", "type": "bytes32", "internalType": "bytes32" }],
+    "outputs": [{ "name": "", "type": "address[]", "internalType": "address[]" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "grantKeeperRole",
+    "inputs": [{ "name": "_keeper", "type": "address", "internalType": "address" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "grantRole",
+    "inputs": [
+      { "name": "role", "type": "bytes32", "internalType": "bytes32" },
+      { "name": "account", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "hasRole",
+    "inputs": [
+      { "name": "role", "type": "bytes32", "internalType": "bytes32" },
+      { "name": "account", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isPassThroughMode",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isPassThroughTimelockTriggered",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isRevokeTimelockTriggered",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "removePolicyExtension",
+    "inputs": [{ "name": "_policyExtension", "type": "address", "internalType": "address" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "renounceRole",
+    "inputs": [
+      { "name": "role", "type": "bytes32", "internalType": "bytes32" },
+      { "name": "callerConfirmation", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "revokeFunctionCallHash",
+    "inputs": [{ "name": "functionCallTxHash", "type": "bytes32", "internalType": "bytes32" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "revokeHash",
+    "inputs": [{ "name": "txHash", "type": "bytes32", "internalType": "bytes32" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "revokeKeeperRole",
+    "inputs": [{ "name": "_keeper", "type": "address", "internalType": "address" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "revokeNonceFreeHash",
+    "inputs": [{ "name": "nonceFreeTxHash", "type": "bytes32", "internalType": "bytes32" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "revokeRole",
+    "inputs": [
+      { "name": "role", "type": "bytes32", "internalType": "bytes32" },
+      { "name": "account", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "revokingHash",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "safeAddress",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "supportsInterface",
+    "inputs": [{ "name": "interfaceId", "type": "bytes4", "internalType": "bytes4" }],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "event",
+    "name": "HashApproved",
+    "inputs": [
+      { "name": "hash", "type": "bytes32", "indexed": false, "internalType": "bytes32" },
+      { "name": "hashType", "type": "uint8", "indexed": false, "internalType": "enum HypernativeGuard.HashType" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "HashRevoked",
+    "inputs": [
+      { "name": "hash", "type": "bytes32", "indexed": false, "internalType": "bytes32" },
+      { "name": "hashType", "type": "uint8", "indexed": false, "internalType": "enum HypernativeGuard.HashType" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "PassThroughModeDisabled",
+    "inputs": [],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "PassThroughModeEnabled",
+    "inputs": [],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "PassThroughTimelockActivated",
+    "inputs": [{ "name": "timestamp", "type": "uint256", "indexed": false, "internalType": "uint256" }],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "PassThroughTimelockDisabled",
+    "inputs": [{ "name": "timestamp", "type": "uint256", "indexed": false, "internalType": "uint256" }],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "PolicyExtensionAdded",
+    "inputs": [{ "name": "policyExtension", "type": "address", "indexed": false, "internalType": "address" }],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "PolicyExtensionRemoved",
+    "inputs": [{ "name": "policyExtension", "type": "address", "indexed": false, "internalType": "address" }],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RevokeTimelockActivated",
+    "inputs": [{ "name": "timestamp", "type": "uint256", "indexed": false, "internalType": "uint256" }],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RevokeTimelockDisabled",
+    "inputs": [{ "name": "timestamp", "type": "uint256", "indexed": false, "internalType": "uint256" }],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RoleAdminChanged",
+    "inputs": [
+      { "name": "role", "type": "bytes32", "indexed": true, "internalType": "bytes32" },
+      { "name": "previousAdminRole", "type": "bytes32", "indexed": true, "internalType": "bytes32" },
+      { "name": "newAdminRole", "type": "bytes32", "indexed": true, "internalType": "bytes32" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RoleGranted",
+    "inputs": [
+      { "name": "role", "type": "bytes32", "indexed": true, "internalType": "bytes32" },
+      { "name": "account", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "sender", "type": "address", "indexed": true, "internalType": "address" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RoleRevoked",
+    "inputs": [
+      { "name": "role", "type": "bytes32", "indexed": true, "internalType": "bytes32" },
+      { "name": "account", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "sender", "type": "address", "indexed": true, "internalType": "address" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "AccessControlBadConfirmation",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "AccessControlUnauthorizedAccount",
+    "inputs": [
+      { "name": "account", "type": "address", "internalType": "address" },
+      { "name": "neededRole", "type": "bytes32", "internalType": "bytes32" }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "AtLeastOneKeeperRequired",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "CannotRevokeTimelockHashes",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidKeeperSignature",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "KeeperNotFound",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "OnlyKeeper",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "OnlyKeeperOrSafe",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "OnlySafe",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "PolicyExtensionAlreadyExists",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "PolicyExtensionNotFound",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "PolicyExtensionNotValid",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "TimelockNotCompleted",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "TimelockNotTriggered",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "UnapprovedHash",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ZeroAddress",
+    "inputs": []
+  }
+]
