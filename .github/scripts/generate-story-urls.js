@@ -21,44 +21,9 @@ const files = changedFiles.split('\n').filter(Boolean)
 console.log('Processing files:', files)
 
 /**
- * Extract the title from the story file's meta export
- * Parses: title: 'Components/Common/Button' or title: "Components/Common/Button"
- */
-function extractTitleFromFile(filePath) {
-  try {
-    const fullPath = path.join(process.cwd(), filePath)
-    if (!fs.existsSync(fullPath)) {
-      return null
-    }
-
-    const content = fs.readFileSync(fullPath, 'utf-8')
-
-    // Match title in meta object: title: 'Some/Path/Component' or title: "Some/Path/Component"
-    // Match title with proper quote handling (separate patterns for single/double quotes)
-    const titleMatch = content.match(/title:\s*(?:"([^"]+)"|'([^']+)')/)
-    if (titleMatch) {
-      return titleMatch[1] || titleMatch[2]
-    }
-
-    return null
-  } catch (error) {
-    console.error(`Error extracting title from ${filePath}:`, error.message)
-    return null
-  }
-}
-
-/**
- * Convert title to Storybook story ID
- * Example: 'Features/Portfolio/PortfolioRefreshHint' -> 'features-portfolio-portfoliorefreshhint'
- */
-function titleToStoryId(title) {
-  return title.replace(/\//g, '-').replace(/\s+/g, '-').toLowerCase()
-}
-
-/**
- * Convert file path to Storybook story ID (fallback when title can't be extracted)
+ * Convert file path to Storybook story ID
  * Example: src/components/common/CopyButton/index.stories.tsx
- * -> components-common-copybutton
+ * -> components-common-copybutton--default
  */
 function filePathToStoryId(filePath) {
   // Remove apps/web/ prefix if present
@@ -125,13 +90,10 @@ for (const file of files) {
     continue
   }
 
-  // Try to extract title from meta export, fall back to file path
-  const title = extractTitleFromFile(file)
-  const storyId = title ? titleToStoryId(title) : filePathToStoryId(file)
+  const storyId = filePathToStoryId(file)
   const storyNames = extractStoryNames(file)
 
   console.log(`File: ${file}`)
-  console.log(`Title: ${title || '(not found, using file path)'}`)
   console.log(`Story ID: ${storyId}`)
   console.log(`Stories: ${storyNames.join(', ')}`)
 
@@ -143,12 +105,10 @@ for (const file of files) {
     storyUrls.push({
       url,
       file,
-      componentName:
-        title ||
-        storyId
-          .split('-')
-          .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-          .join(''),
+      componentName: storyId
+        .split('-')
+        .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+        .join(''),
       storyName,
     })
   }
