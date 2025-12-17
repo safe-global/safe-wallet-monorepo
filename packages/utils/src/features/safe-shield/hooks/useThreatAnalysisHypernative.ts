@@ -5,7 +5,6 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { isSafeTransaction } from '@safe-global/utils/utils/safeTransaction'
-import { getNestedExecTransactionHash } from '@safe-global/utils/utils/safeTransaction'
 import { mapHypernativeResponse } from '@safe-global/utils/features/safe-shield/utils/mapHypernativeResponse'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import type { HypernativeAssessmentRequestDto } from '@safe-global/store/hypernative/hypernativeApi.dto'
@@ -101,7 +100,7 @@ export function useThreatAnalysisHypernative({
         refundReceiver: txData.refundReceiver as `0x${string}`,
         nonce: String(txData.nonce),
       },
-      url: origin ?? '',
+      ...(origin ? { url: origin } : {}),
     }
   }, [data, safeAddress, chainId, walletAddress, origin, safeVersion])
 

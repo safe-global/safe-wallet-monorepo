@@ -1,7 +1,6 @@
 import {
   HypernativeAssessmentData,
   HypernativeBalanceChanges,
-  HypernativeFinding,
   HypernativeRiskSeverity,
   HypernativeTx,
 } from '@safe-global/utils/features/safe-shield/types/hypernative.type'
@@ -10,7 +9,7 @@ export type HypernativeAssessmentRequestDto = {
   safeAddress: `0x${string}`
   safeTxHash: `0x${string}`
   transaction: HypernativeTx
-  url: string // @Todo: Can we make it optional?
+  url?: string
 }
 
 export type HypernativeRiskDto = {
