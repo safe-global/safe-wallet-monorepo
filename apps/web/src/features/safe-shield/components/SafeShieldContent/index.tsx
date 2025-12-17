@@ -5,11 +5,13 @@ import type {
   ContractAnalysisResults,
   ThreatAnalysisResults,
   RecipientAnalysisResults,
+  Severity,
 } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
 import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
+import { HypernativeInfo } from '../HypernativeInfo'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
 import type { SafeTransaction } from '@safe-global/types-kit'
@@ -21,6 +23,7 @@ import {
   useDelayedLoading,
 } from '@/features/safe-shield/hooks/useDelayedLoading'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
+import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
 
 const normalizeThreatData = (threat?: AsyncResult<ThreatAnalysisResults>): Record<string, GroupedAnalysisResults> => {
   const [result] = threat || []
@@ -37,11 +40,15 @@ export const SafeShieldContent = ({
   contract,
   threat,
   safeTx,
+  overallStatus,
+  hypernativeAuth,
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
+  overallStatus?: { severity: Severity; title: string }
+  hypernativeAuth?: HypernativeAuthStatus
 }): ReactElement => {
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient || []
   const [contractResults = {}, _contractError, contractLoading = false] = contract || []
@@ -79,11 +86,13 @@ export const SafeShieldContent = ({
           position: 'relative',
         }}
       >
+        <HypernativeInfo overallStatus={overallStatus} hypernativeAuth={hypernativeAuth} />
+
         {isLoadingVisible && <SafeShieldAnalysisLoading analysesEmpty={analysesEmpty} loading={isLoadingVisible} />}
 
-        {shouldShowContent && !loading && allEmpty && <SafeShieldAnalysisEmpty />}
+        {shouldShowContent && !loading && allEmpty && !hypernativeAuth && <SafeShieldAnalysisEmpty />}
 
-        <Box sx={{ '& > div:not(:last-child)': { borderBottom: '1px solid', borderColor: 'background.main' } }}>
+        <Box sx={{ '& > div': { borderTop: '1px solid', borderColor: 'background.main' } }}>
           <AnalysisGroupCard
             data-testid="recipient-analysis-group-card"
             delay={recipientDelay}
