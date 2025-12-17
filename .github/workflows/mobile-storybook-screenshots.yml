@@ -49,7 +49,8 @@ jobs:
 
       - name: Build Mobile Storybook
         if: steps.changed-stories.outputs.has_changes == 'true'
-        run: yarn workspace @safe-global/mobile build-storybook
+        working-directory: apps/mobile
+        run: yarn build-storybook --disable-telemetry
         env:
           STORYBOOK_WEB: 'true'
 
