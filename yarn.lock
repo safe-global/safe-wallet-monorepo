@@ -10339,6 +10339,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@safe-global/safe-deployments@github:safe-global/safe-deployments#main":
+  version: 1.37.50
+  resolution: "@safe-global/safe-deployments@https://github.com/safe-global/safe-deployments.git#commit=690e7aff475527e3a2d39eb54ee353230e5ad25a"
+  dependencies:
+    semver: "npm:^7.6.2"
+  checksum: 10/70bd1a47e844dd9184fbf9e8146e1490bd6c4d47b294a5115e37543dad59b8b226c70642057452a4f350d7f62a845fa9bfe88b1e0bca97d3a8c5a78839fd5640
+  languageName: node
+  linkType: hard
+
 "@safe-global/safe-deployments@npm:^1.37.49":
   version: 1.37.49
   resolution: "@safe-global/safe-deployments@npm:1.37.49"
@@ -10484,7 +10493,7 @@ __metadata:
     "@safe-global/api-kit": "npm:^2.4.6"
     "@safe-global/protocol-kit": "npm:^5.2.22"
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
-    "@safe-global/safe-deployments": "npm:^1.37.49"
+    "@safe-global/safe-deployments": "github:safe-global/safe-deployments#main"
     "@safe-global/safe-modules-deployments": "npm:^2.2.21"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
