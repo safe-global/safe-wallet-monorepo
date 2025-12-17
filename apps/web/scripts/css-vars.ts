@@ -1,39 +1,56 @@
-import lightPalette from '../src/components/theme/lightPalette'
-import darkPalette from '../src/components/theme/darkPalette'
-import spacings from '../src/styles/spacings.js'
+import lightPalette from '../../../packages/theme/src/palettes/light.js'
+import darkPalette from '../../../packages/theme/src/palettes/dark.js'
+import { spacingWeb } from '../../../packages/theme/src/tokens/spacing.js'
 
-const cssVars: string[] = []
-Object.entries(lightPalette).forEach(([key, value]) => {
-  Object.entries(value).forEach(([subKey, color]) => {
-    cssVars.push(`  --color-${key}-${subKey}: ${color};`)
+function flattenPaletteToCSS(palette: any, indent = '  '): string[] {
+  const vars: string[] = []
+
+  function flatten(obj: any, prefix = 'color'): void {
+    if (typeof obj !== 'object' || obj === null) return
+
+    Object.entries(obj).forEach(([key, value]) => {
+      if (typeof value === 'object' && value !== null && key !== 'static') {
+        flatten(value, `${prefix}-${key}`)
+      } else if (key !== 'static') {
+        vars.push(`${indent}--${prefix}-${key}: ${value};`)
+      }
+    })
+  }
+
+  flatten(palette)
+  return vars
+}
+
+function generateSpacingCSS(indent = '  '): string[] {
+  return Object.entries(spacingWeb).map(([key, value]) => {
+    return `${indent}--space-${key}: ${value}px;`
   })
-})
+}
 
-Object.entries(spacings).forEach(([key, space]) => cssVars.push(`  --space-${key}: ${space}px;`))
+function generateCSSVars(): string {
+  const lightVars = flattenPaletteToCSS(lightPalette)
+  const darkVars = flattenPaletteToCSS(darkPalette)
+  const spacingVars = generateSpacingCSS()
 
-const darkColorVars: string[] = []
-Object.entries(darkPalette).forEach(([key, value]) => {
-  Object.entries(value).forEach(([subKey, color]) => {
-    darkColorVars.push(`  --color-${key}-${subKey}: ${color};`)
-  })
-})
-
-const css = `/* This file is generated from the MUI theme colors. Do not edit directly. */
+  return `/* This file is generated from @safe-global/theme. Do not edit directly. */
 
 :root {
-${cssVars.join('\n')}
+${lightVars.join('\n')}
+${spacingVars.join('\n')}
 }
 
 [data-theme="dark"] {
-${darkColorVars.join('\n')}
+${darkVars.join('\n')}
 }
 
 /* The same as above for the brief moment before JS loads */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    ${darkColorVars.join('\n')}
+${darkVars.map(v => '  ' + v).join('\n')}
   }
 }
 `
+}
 
+const css = generateCSSVars()
 console.log(css)

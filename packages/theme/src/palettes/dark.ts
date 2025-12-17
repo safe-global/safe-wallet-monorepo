@@ -1,4 +1,10 @@
-const darkPalette = {
+import type { ColorPalette } from './types'
+
+/**
+ * Unified dark mode color palette.
+ * Merged from web and mobile palettes with mobile's extended colors as the base.
+ */
+const darkPalette: ColorPalette = {
   text: {
     primary: '#FFFFFF',
     secondary: '#636669',

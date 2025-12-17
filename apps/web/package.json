@@ -66,6 +66,7 @@
     "@safe-global/safe-deployments": "^1.37.49",
     "@safe-global/safe-modules-deployments": "^2.2.21",
     "@safe-global/store": "workspace:^",
+    "@safe-global/theme": "workspace:^",
     "@sentry/react": "^7.91.0",
     "@walletconnect/core": "^2.21.10",
     "@walletconnect/utils": "^2.21.10",

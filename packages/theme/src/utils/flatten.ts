@@ -1,3 +1,12 @@
+/**
+ * Utility to flatten nested palette objects.
+ * Used primarily for Tamagui which needs flat color tokens.
+ *
+ * Example:
+ *   Input: { text: { primary: '#000' } }
+ *   Output with suffix 'Light': { textPrimaryLight: '#000' }
+ */
+
 interface Palette {
   [key: string]: string | Palette
 }
@@ -6,7 +15,7 @@ type Flatten<
   T extends Palette,
   Prefix extends string = '',
   Suffix extends string = '',
-  Depth extends number = 5, // Limit recursion depth
+  Depth extends number = 5,
 > = [Depth] extends [never]
   ? object
   : T extends object

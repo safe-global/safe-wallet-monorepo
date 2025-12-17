@@ -10190,6 +10190,7 @@ __metadata:
     "@safe-global/protocol-kit": "npm:^5.2.22"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
+    "@safe-global/theme": "workspace:^"
     "@safe-global/types-kit": "npm:^1.0.5"
     "@safe-global/utils": "workspace:^"
     "@shopify/flash-list": "npm:^2.2.0"
@@ -10411,6 +10412,29 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@safe-global/theme@workspace:^, @safe-global/theme@workspace:packages/theme":
+  version: 0.0.0-use.local
+  resolution: "@safe-global/theme@workspace:packages/theme"
+  dependencies:
+    "@safe-global/test": "workspace:^"
+    "@types/jest": "npm:^29.5.14"
+    eslint: "npm:^9.29.0"
+    eslint-config-next: "npm:^16.0.5"
+    jest: "npm:^29.7.0"
+    jest-fixed-jsdom: "npm:^0.0.10"
+    prettier: "npm:^3.6.2"
+    typescript: "npm:~5.9.2"
+  peerDependencies:
+    "@mui/material": ^6.x
+    tamagui: ^1.x
+  peerDependenciesMeta:
+    "@mui/material":
+      optional: true
+    tamagui:
+      optional: true
+  languageName: unknown
+  linkType: soft
+
 "@safe-global/tsconfig@workspace:config/tsconfig":
   version: 0.0.0-use.local
   resolution: "@safe-global/tsconfig@workspace:config/tsconfig"
@@ -10490,6 +10514,7 @@ __metadata:
     "@safe-global/safe-modules-deployments": "npm:^2.2.21"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
+    "@safe-global/theme": "workspace:^"
     "@safe-global/types-kit": "npm:^1.0.5"
     "@sentry/react": "npm:^7.91.0"
     "@sentry/types": "npm:^7.74.0"
