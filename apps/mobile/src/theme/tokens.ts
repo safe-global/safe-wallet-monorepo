@@ -1,12 +1,6 @@
 import { createTokens } from 'tamagui'
-import type { CreateTokens } from 'tamagui'
 import { zIndex } from '@tamagui/themes'
-import {
-  generateTamaguiColorTokens,
-  radius,
-  generateTamaguiFontSizes,
-  spacingMobile,
-} from '@safe-global/theme'
+import { generateTamaguiColorTokens, radius, generateTamaguiFontSizes, spacingMobile } from '@safe-global/theme'
 
 // Generate color tokens from unified palettes
 const colors = generateTamaguiColorTokens()
@@ -17,8 +11,8 @@ export { radius }
 // Re-export font sizes
 export const fontSizes = generateTamaguiFontSizes()
 
-// Create base tokens
-const baseTokens = createTokens({
+// Create and export tokens
+export const tokens = createTokens({
   color: colors,
   space: {
     ...spacingMobile,
@@ -37,12 +31,3 @@ const baseTokens = createTokens({
     true: radius[4], // Default radius (9px)
   },
 })
-
-// Export with proper color token types for component themes
-export const tokens = baseTokens as CreateTokens<{
-  color: ReturnType<typeof generateTamaguiColorTokens>
-  space: typeof baseTokens.space
-  size: typeof baseTokens.size
-  radius: typeof baseTokens.radius
-  zIndex: typeof baseTokens.zIndex
-}>

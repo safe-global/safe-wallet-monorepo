@@ -40,6 +40,12 @@ declare module '@mui/material/styles' {
   }
 }
 
+declare module '@mui/material/SvgIcon' {
+  interface SvgIconPropsColorOverrides {
+    border: true
+  }
+}
+
 declare module '@mui/material/Button' {
   interface ButtonPropsSizeOverrides {
     stretched: true
@@ -55,5 +61,23 @@ declare module '@mui/material/Button' {
   interface ButtonPropsVariantOverrides {
     danger: true
     neutral: true
+  }
+}
+
+declare module '@mui/material/IconButton' {
+  interface IconButtonPropsColorOverrides {
+    border: true
+  }
+}
+
+declare module '@mui/material/Chip' {
+  interface ChipPropsSizeOverrides {
+    tiny: true
+  }
+}
+
+declare module '@mui/material/Alert' {
+  interface AlertPropsColorOverrides {
+    background: true
   }
 }

@@ -53,6 +53,7 @@ import { spacingMobile, spacingWeb, radius, typography } from '@safe-global/them
 ### Colors
 
 Unified color palette with light and dark modes:
+
 - Semantic colors: text, primary, secondary, border, error, success, info, warning
 - Background colors with variants
 - Static colors (theme-independent)
@@ -60,6 +61,7 @@ Unified color palette with light and dark modes:
 ### Spacing
 
 Two spacing systems for platform compatibility:
+
 - **Mobile**: 4px base ($1=4px, $2=8px, $3=12px, ...)
 - **Web**: 8px base (space-1=8px, space-2=16px, space-3=24px, ...)
 - Where values overlap, same variable name is used

@@ -3,7 +3,6 @@
  * Supports both light and dark modes.
  */
 export interface ColorPalette {
-  [key: string]: string | Record<string, string>
   text: {
     primary: string
     secondary: string
