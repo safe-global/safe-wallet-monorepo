@@ -1,6 +1,6 @@
-import lightPalette from '../../../packages/theme/src/palettes/light.js'
-import darkPalette from '../../../packages/theme/src/palettes/dark.js'
-import { spacingWeb } from '../../../packages/theme/src/tokens/spacing.js'
+import lightPalette from '../../../packages/theme/src/palettes/light'
+import darkPalette from '../../../packages/theme/src/palettes/dark'
+import { spacingWeb } from '../../../packages/theme/src/tokens/spacing'
 
 function flattenPaletteToCSS(palette: any, indent = '  '): string[] {
   const vars: string[] = []

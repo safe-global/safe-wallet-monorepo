@@ -2,7 +2,12 @@
   "private": true,
   "name": "@safe-global/theme",
   "version": "1.0.0",
+  "type": "module",
   "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
   "scripts": {
     "test": "jest",
     "lint": "eslint src",
