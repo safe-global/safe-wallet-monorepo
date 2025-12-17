@@ -261,7 +261,7 @@ describe('useTrackBannerEligibilityOnConnect', () => {
       })
     })
 
-    it('should track when bannerType is NoBalanceCheck', async () => {
+    it('should not track when bannerType is NoBalanceCheck', async () => {
       const initialReduxState: Partial<RootState> = {
         hnState: {},
       }
@@ -270,9 +270,12 @@ describe('useTrackBannerEligibilityOnConnect', () => {
         initialReduxState,
       })
 
-      await waitFor(() => {
-        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
-      })
+      await waitFor(
+        () => {
+          expect(mockTrackEvent).not.toHaveBeenCalled()
+        },
+        { timeout: 100 },
+      )
     })
   })
 
@@ -602,7 +605,7 @@ describe('useTrackBannerEligibilityOnConnect', () => {
       })
 
       await waitFor(() => {
-        // Should only track once despite two different banner types
+        // Should only track once from Promo (NoBalanceCheck doesn't track)
         expect(mockTrackEvent).toHaveBeenCalledTimes(1)
         expect(mockTrackEvent).toHaveBeenCalledWith(HYPERNATIVE_EVENTS.GUARDIAN_BANNER_VIEWED, {
           [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
@@ -630,7 +633,7 @@ describe('useTrackBannerEligibilityOnConnect', () => {
       })
 
       await waitFor(() => {
-        // Should only track once despite three different banner types
+        // Should only track once from Promo or Settings (NoBalanceCheck doesn't track)
         expect(mockTrackEvent).toHaveBeenCalledTimes(1)
       })
     })
@@ -711,7 +714,7 @@ describe('useTrackBannerEligibilityOnConnect', () => {
       })
     })
 
-    it('should not track again when switching from NoBalanceCheck to Promo banner type', async () => {
+    it('should track when switching from NoBalanceCheck to Promo banner type', async () => {
       const initialReduxState: Partial<RootState> = {
         hnState: {},
       }
@@ -724,15 +727,19 @@ describe('useTrackBannerEligibilityOnConnect', () => {
         },
       )
 
-      await waitFor(() => {
-        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
-      })
+      // NoBalanceCheck should not track
+      await waitFor(
+        () => {
+          expect(mockTrackEvent).not.toHaveBeenCalled()
+        },
+        { timeout: 100 },
+      )
 
       // Switch to Promo banner type
       rerender({ bannerType: BannerType.Promo })
 
       await waitFor(() => {
-        // Should not track again because already tracked
+        // Should track now when switching to Promo
         expect(mockTrackEvent).toHaveBeenCalledTimes(1)
       })
     })
@@ -816,7 +823,7 @@ describe('useTrackBannerEligibilityOnConnect', () => {
       )
     })
 
-    it('should track when NoBalanceCheck banner type has showBanner: true and Safe is not deployed', async () => {
+    it('should not track when NoBalanceCheck banner type has showBanner: true and Safe is not deployed', async () => {
       const initialReduxState: Partial<RootState> = {
         hnState: {},
       }
@@ -834,13 +841,12 @@ describe('useTrackBannerEligibilityOnConnect', () => {
         initialReduxState,
       })
 
-      await waitFor(() => {
-        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
-        expect(mockTrackEvent).toHaveBeenCalledWith(HYPERNATIVE_EVENTS.GUARDIAN_BANNER_VIEWED, {
-          [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
-          [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chainId,
-        })
-      })
+      await waitFor(
+        () => {
+          expect(mockTrackEvent).not.toHaveBeenCalled()
+        },
+        { timeout: 100 },
+      )
     })
 
     it('should track when visibility changes from false to true for Promo banner and the banner was not tracked yet', async () => {
@@ -989,12 +995,12 @@ describe('useTrackBannerEligibilityOnConnect', () => {
       })
     })
 
-    it('should track once per Safe when NoBalanceCheck banner is used on multiple Safes', async () => {
+    it('should not track when NoBalanceCheck banner is used on multiple Safes', async () => {
       const initialReduxState: Partial<RootState> = {
         hnState: {},
       }
 
-      // Track for first Safe with NoBalanceCheck
+      // NoBalanceCheck should not track for first Safe
       const { rerender } = renderHook(
         ({ visibilityResult }) => useTrackBannerEligibilityOnConnect(visibilityResult, BannerType.NoBalanceCheck),
         {
@@ -1003,9 +1009,12 @@ describe('useTrackBannerEligibilityOnConnect', () => {
         },
       )
 
-      await waitFor(() => {
-        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
-      })
+      await waitFor(
+        () => {
+          expect(mockTrackEvent).not.toHaveBeenCalled()
+        },
+        { timeout: 100 },
+      )
 
       // Switch to different Safe
       jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
@@ -1018,9 +1027,13 @@ describe('useTrackBannerEligibilityOnConnect', () => {
 
       rerender({ visibilityResult: eligibleVisibilityResult })
 
-      await waitFor(() => {
-        expect(mockTrackEvent).toHaveBeenCalledTimes(2)
-      })
+      await waitFor(
+        () => {
+          // Should still not track because NoBalanceCheck doesn't trigger tracking
+          expect(mockTrackEvent).not.toHaveBeenCalled()
+        },
+        { timeout: 100 },
+      )
     })
   })
 
@@ -1136,7 +1149,7 @@ describe('useTrackBannerEligibilityOnConnect', () => {
       ]
 
       await waitFor(() => {
-        // Should only track once despite three concurrent attempts
+        // Should only track once from Promo or Settings (NoBalanceCheck doesn't track)
         expect(mockTrackEvent).toHaveBeenCalledTimes(1)
       })
 
@@ -1211,7 +1224,7 @@ describe('useTrackBannerEligibilityOnConnect', () => {
       ]
 
       await waitFor(() => {
-        // Should only track once despite 5 instances with different banner types
+        // Should only track once from Promo or Settings (NoBalanceCheck doesn't track)
         expect(mockTrackEvent).toHaveBeenCalledTimes(1)
       })
 
@@ -1359,8 +1372,9 @@ describe('useTrackBannerEligibilityOnConnect', () => {
         safeError: undefined,
       })
 
+      // Use Promo banner type instead of NoBalanceCheck (which doesn't track)
       const { rerender } = renderHook(
-        () => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.NoBalanceCheck),
+        () => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo),
         {
           initialReduxState,
         },

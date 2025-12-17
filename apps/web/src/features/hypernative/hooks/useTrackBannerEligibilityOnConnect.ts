@@ -72,12 +72,12 @@ export const useTrackBannerEligibilityOnConnect = (
     // Skip tracking for:
     // - TxReportButton: shows even when guard is already installed
     // - Pending: only appears after promo banner was viewed (which already triggered tracking)
-    if (bannerType === BannerType.TxReportButton || bannerType === BannerType.Pending) {
-      return
-    }
-
-    // Dashboard banner on the FirstSteps page: Only when banner is visible (for undeployed Safes)
-    if (bannerType === BannerType.NoBalanceCheck && safeDeployed) {
+    // - NoBalanceCheck: HnDashboardBanner on FirstSteps page (should not trigger tracking)
+    if (
+      bannerType === BannerType.TxReportButton ||
+      bannerType === BannerType.Pending ||
+      bannerType === BannerType.NoBalanceCheck
+    ) {
       return
     }
 
