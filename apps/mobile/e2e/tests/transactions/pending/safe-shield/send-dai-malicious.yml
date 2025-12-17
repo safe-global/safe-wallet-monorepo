@@ -23,6 +23,12 @@ tags:
 - assertVisible:
     id: 'pending-tx-list'
 
+# Scroll to see the send DAI transaction card
+- scrollUntilVisible:
+    element:
+      text: '.*0\.1 DAI.*'
+    centerElement: true
+
 - runFlow:
     file: ../../../../utils/components/pending-tx/tap-tx-card.yml
     env:

@@ -3,7 +3,7 @@
 exports[`ReviewTransaction should display a confirmation screen 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1w4z6qv-MuiPaper-root-MuiCard-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-2ck9dc-MuiPaper-root-MuiCard-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -104,7 +104,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
         class="MuiBox-root css-1yuhvjn"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded MuiAccordion-gutters css-wrhbuy-MuiPaper-root-MuiAccordion-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded MuiAccordion-gutters css-2lt86l-MuiPaper-root-MuiAccordion-root"
           color="info"
           style="--Paper-shadow: none;"
         >
@@ -244,7 +244,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                           .
                         </p>
                         <div
-                          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-shqplw-MuiPaper-root"
+                          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-17whgid-MuiPaper-root"
                           style="--Paper-shadow: none;"
                         >
                           <div
@@ -255,7 +255,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                             >
                               <div
                                 aria-label="text alignment"
-                                class="MuiToggleButtonGroup-root MuiToggleButtonGroup-horizontal css-cinseo-MuiToggleButtonGroup-root"
+                                class="MuiToggleButtonGroup-root MuiToggleButtonGroup-horizontal css-1evc3xr-MuiToggleButtonGroup-root"
                                 role="group"
                               >
                                 <button
@@ -659,7 +659,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
 exports[`ReviewTransaction should display a loading component 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1w4z6qv-MuiPaper-root-MuiCard-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-2ck9dc-MuiPaper-root-MuiCard-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -724,7 +724,7 @@ exports[`ReviewTransaction should display a loading component 1`] = `
 exports[`ReviewTransaction should display an error screen 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1w4z6qv-MuiPaper-root-MuiCard-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-2ck9dc-MuiPaper-root-MuiCard-root"
     style="--Paper-shadow: none;"
   >
     <div
