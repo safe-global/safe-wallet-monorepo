@@ -16,7 +16,7 @@ import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shi
 export function useThreatAnalysis(
   overrideSafeTx?: SafeTransaction,
   hypernativeAuthToken?: string,
-): AsyncResult<ThreatAnalysisResults> | undefined {
+): AsyncResult<ThreatAnalysisResults> {
   const {
     safe: { chainId, version },
     safeAddress,
