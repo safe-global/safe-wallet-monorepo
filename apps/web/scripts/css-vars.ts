@@ -46,7 +46,7 @@ ${darkVars.join('\n')}
 /* The same as above for the brief moment before JS loads */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-${darkVars.map(v => '  ' + v).join('\n')}
+${darkVars.map((v) => '  ' + v).join('\n')}
   }
 }
 `
