@@ -1,23 +1,24 @@
+import type { ColorPalette } from '../../../packages/theme/src/palettes/types'
 import lightPalette from '../../../packages/theme/src/palettes/light'
 import darkPalette from '../../../packages/theme/src/palettes/dark'
 import { spacingWeb } from '../../../packages/theme/src/tokens/spacing'
 
-function flattenPaletteToCSS(palette: any, indent = '  '): string[] {
+function flattenPaletteToCSS(palette: ColorPalette, indent = '  '): string[] {
   const vars: string[] = []
 
-  function flatten(obj: any, prefix = 'color'): void {
+  function flatten(obj: Record<string, unknown>, prefix = 'color'): void {
     if (typeof obj !== 'object' || obj === null) return
 
     Object.entries(obj).forEach(([key, value]) => {
-      if (typeof value === 'object' && value !== null && key !== 'static') {
-        flatten(value, `${prefix}-${key}`)
-      } else if (key !== 'static') {
+      if (typeof value === 'object' && value !== null) {
+        flatten(value as Record<string, unknown>, `${prefix}-${key}`)
+      } else {
         vars.push(`${indent}--${prefix}-${key}: ${value};`)
       }
     })
   }
 
-  flatten(palette)
+  flatten(palette as Record<string, unknown>)
   return vars
 }
 

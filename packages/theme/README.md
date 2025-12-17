@@ -26,18 +26,20 @@ This is a workspace package used internally by the monorepo:
 ### Web (MUI + CSS vars)
 
 ```typescript
-import { generateMuiTheme, lightPalette, darkPalette } from '@safe-global/theme'
+import { generateMuiTheme } from '@safe-global/theme'
 
-const theme = generateMuiTheme('light', lightPalette)
+const theme = generateMuiTheme('light')
+// or
+const darkTheme = generateMuiTheme('dark')
 ```
 
 ### Mobile (Tamagui)
 
 ```typescript
-import { generateTamaguiTokens, generateTamaguiThemes, lightPalette, darkPalette } from '@safe-global/theme'
+import { generateTamaguiColorTokens, generateTamaguiFontSizes } from '@safe-global/theme'
 
-const tokens = generateTamaguiTokens(lightPalette, darkPalette)
-const themes = generateTamaguiThemes(lightPalette, darkPalette)
+const colorTokens = generateTamaguiColorTokens()
+const fontSizes = generateTamaguiFontSizes()
 ```
 
 ### Direct Token Access

@@ -61,9 +61,9 @@ const lightPalette: ColorPalette = {
     contrastText: '#FF8C00',
   },
   background: {
-    default: '#FFFFFF',
+    default: '#F4F4F4',
     main: '#F4F4F4',
-    paper: '#F4F4F4',
+    paper: '#FFFFFF',
     light: '#EFFFF4',
     secondary: '#DDDEE0',
     skeleton: 'rgba(0, 0, 0, 0.04)',
@@ -78,6 +78,10 @@ const lightPalette: ColorPalette = {
   },
   static: {
     main: '#121312',
+    light: '#636669',
+    primary: '#FFFFFF',
+    textSecondary: '#A1A3A7',
+    textBrand: '#12FF80',
   },
 }
 

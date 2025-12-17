@@ -77,6 +77,10 @@ export interface ColorPalette {
   }
   static: {
     main: string
+    light: string
+    primary: string
+    textSecondary: string
+    textBrand: string
   }
 }
 

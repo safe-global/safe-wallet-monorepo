@@ -3,9 +3,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@safe-global/theme/*": ["../../packages/theme/src/*"],
-      "@safe-global/store/*": ["../../packages/store/src/*"],
-      "@safe-global/utils/*": ["../../packages/utils/src/*"]
+      "@safe-global/theme/*": ["../../packages/theme/src/*"]
     }
   }
 }

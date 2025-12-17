@@ -70,7 +70,7 @@ import { lightPalette, darkPalette, spacingMobile, spacingWeb, typography } from
 To add or modify colors/tokens:
 1. Edit files in `packages/theme/src/palettes/` or `packages/theme/src/tokens/`
 2. Run type-check to ensure consistency: `yarn workspace @safe-global/theme type-check`
-3. Regenerate CSS vars for web: `node apps/web/scripts/generate-vars.mjs > apps/web/src/styles/vars.css`
+3. Regenerate CSS vars for web: `yarn workspace @safe-global/web css-vars`
 
 ### Important Notes
 

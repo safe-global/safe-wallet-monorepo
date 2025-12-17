@@ -11,7 +11,7 @@ import { createTheme } from '@mui/material/styles'
 
 import lightPalette from '../palettes/light'
 import darkPalette from '../palettes/dark'
-import { spacingMobileBase, defaultRadius } from '../tokens'
+import { spacingWebBase, defaultRadius } from '../tokens'
 import { typography } from '../tokens/typography'
 
 /**
@@ -33,7 +33,7 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
         lightGrey: colors.background.secondary,
       },
     },
-    spacing: spacingMobileBase, // 4px base for spacing function
+    spacing: spacingWebBase, // 8px base for spacing function
     shape: {
       borderRadius: defaultRadius,
     },
@@ -69,6 +69,7 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
       },
       h5: {
         fontSize: `${typography.variants.h5.fontSize}px`,
+        lineHeight: `${typography.variants.h5.lineHeight}px`,
         fontWeight: typography.variants.h5.fontWeight,
       },
       body1: {
