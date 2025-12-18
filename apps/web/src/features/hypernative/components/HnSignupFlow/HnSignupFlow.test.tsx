@@ -74,13 +74,6 @@ describe('HnSignupFlow', () => {
       safeLoading: false,
       safeError: undefined,
     })
-
-    // Mock Calendly configuration
-    process.env.NEXT_PUBLIC_HYPERNATIVE_CALENDLY = 'https://calendly.com/test-americas'
-  })
-
-  afterEach(() => {
-    delete process.env.NEXT_PUBLIC_HYPERNATIVE_CALENDLY
   })
 
   describe('Modal behavior', () => {
@@ -281,21 +274,7 @@ describe('HnSignupFlow', () => {
   })
 
   describe('Calendly configuration', () => {
-    it('should show error message when Calendly config is missing', async () => {
-      const user = userEvent.setup()
-      delete process.env.NEXT_PUBLIC_HYPERNATIVE_CALENDLY
-
-      render(<HnSignupFlow open={true} onClose={mockOnClose} />)
-
-      // Navigate to Calendly step
-      const getStartedButton = screen.getByText('Get Started')
-      await user.click(getStartedButton)
-
-      expect(screen.getByText('Calendly configuration is missing.')).toBeInTheDocument()
-      expect(screen.queryByTestId('hn-calendly-step')).not.toBeInTheDocument()
-    })
-
-    it('should render Calendly step when config is valid', async () => {
+    it('should render Calendly step with hardcoded URL', async () => {
       const user = userEvent.setup()
       render(<HnSignupFlow open={true} onClose={mockOnClose} />)
 
@@ -303,9 +282,9 @@ describe('HnSignupFlow', () => {
       const getStartedButton = screen.getByText('Get Started')
       await user.click(getStartedButton)
 
-      // Calendly step should be rendered
+      // Calendly step should be rendered with hardcoded URL
       expect(screen.getByTestId('hn-calendly-step')).toBeInTheDocument()
-      expect(screen.getByText(/Calendly: https:\/\/calendly\.com\/test-americas/)).toBeInTheDocument()
+      expect(screen.getByText(/Calendly: https:\/\/calendly\.com\/d\/ctgh-yrs-dnr/)).toBeInTheDocument()
     })
   })
 })

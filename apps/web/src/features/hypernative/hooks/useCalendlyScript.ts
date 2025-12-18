@@ -26,52 +26,46 @@ export const useCalendlyScript = (widgetRef: RefObject<HTMLDivElement | null>, c
       }
     }
 
-    // Check if script is already loaded
+    // Resources that may need cleanup
+    let checkInterval: ReturnType<typeof setInterval> | null = null
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
+    let calendlyScript: HTMLScriptElement | null = null
+
     const existingScript = document.querySelector('script[src*="calendly"]')
 
-    if (existingScript) {
-      if (window.Calendly) {
-        initWidget()
-        return
-      }
+    if (existingScript && window.Calendly) {
+      initWidget()
+      return
+    }
 
-      // Poll for Calendly API to be available
-      let checkInterval: ReturnType<typeof setInterval> | null = null
-      const timeoutId = setTimeout(() => {
-        if (checkInterval) {
-          clearInterval(checkInterval)
-        }
+    if (existingScript) {
+      // Script loaded but API not ready - wait:
+      timeoutId = setTimeout(() => {
+        if (checkInterval) clearInterval(checkInterval)
       }, POLL_TIMEOUT_MS)
 
       checkInterval = setInterval(() => {
         if (window.Calendly && widgetRef.current) {
           initWidget()
-          if (checkInterval) {
-            clearInterval(checkInterval)
-            checkInterval = null
-          }
-          clearTimeout(timeoutId)
+          if (checkInterval) clearInterval(checkInterval)
+          if (timeoutId) clearTimeout(timeoutId)
         }
       }, POLL_INTERVAL_MS)
-
-      return () => {
-        if (checkInterval) clearInterval(checkInterval)
-        clearTimeout(timeoutId)
-      }
+    } else {
+      // Load script
+      calendlyScript = document.createElement('script')
+      calendlyScript.type = 'text/javascript'
+      calendlyScript.src = CALENDLY_SCRIPT_URL
+      calendlyScript.async = true
+      calendlyScript.onload = initWidget
+      document.body.appendChild(calendlyScript)
     }
 
-    // Load script first, then initialize
-    const calendlyScript = document.createElement('script')
-    calendlyScript.type = 'text/javascript'
-    calendlyScript.src = CALENDLY_SCRIPT_URL
-    calendlyScript.async = true
-    calendlyScript.onload = initWidget
-
-    document.body.appendChild(calendlyScript)
-
+    // Cleanup all resources
     return () => {
-      // Cleanup: remove script if component unmounts before load completes
-      if (calendlyScript.parentNode) {
+      if (checkInterval) clearInterval(checkInterval)
+      if (timeoutId) clearTimeout(timeoutId)
+      if (calendlyScript?.parentNode) {
         calendlyScript.parentNode.removeChild(calendlyScript)
       }
     }
