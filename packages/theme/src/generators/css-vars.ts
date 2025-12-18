@@ -58,7 +58,17 @@ function generateSpacingCSS(indent = '  '): string[] {
  * Includes light mode (default), dark mode override, and media query fallback.
  */
 export function generateCSSVars(): string {
-  const lightVars = flattenPaletteToCSS(lightPalette)
+  // For web light mode, swap paper/default to maintain white Paper on gray background
+  const webLightPalette: ColorPalette = {
+    ...lightPalette,
+    background: {
+      ...lightPalette.background,
+      paper: '#FFFFFF',
+      default: '#F4F4F4',
+    },
+  }
+
+  const lightVars = flattenPaletteToCSS(webLightPalette)
   const darkVars = flattenPaletteToCSS(darkPalette)
   const spacingVars = generateSpacingCSS()
 

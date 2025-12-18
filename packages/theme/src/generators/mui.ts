@@ -28,9 +28,11 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
       mode: isDarkMode ? 'dark' : 'light',
       ...colors,
       // Map lightGrey to secondary for backward compatibility
+      // For web light mode, swap paper/default to maintain white Paper on gray background
       background: {
         ...colors.background,
         lightGrey: colors.background.secondary,
+        ...(isDarkMode ? {} : { paper: '#FFFFFF', default: '#F4F4F4' }),
       },
     },
     spacing: spacingWebBase, // 8px base for spacing function
