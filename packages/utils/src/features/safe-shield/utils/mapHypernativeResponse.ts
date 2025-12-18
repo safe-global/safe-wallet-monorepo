@@ -28,8 +28,8 @@ export function mapHypernativeResponse(
   const assessment = response.assessmentData
 
   return {
-    [StatusGroup.THREAT]: mapFindings(assessment.findings.THREAT_ANALYSIS),
-    [StatusGroup.CUSTOM_CHECKS]: mapFindings(assessment.findings.CUSTOM_CHECKS),
+    [StatusGroup.THREAT]: mapThreatFindings(assessment.findings.THREAT_ANALYSIS),
+    [StatusGroup.CUSTOM_CHECKS]: mapCustomChecksFindings(assessment.findings.CUSTOM_CHECKS),
   }
 }
 
@@ -60,11 +60,37 @@ function createErrorResult(error: HypernativeAssessmentFailedResponseDto['error'
  *
  * @returns {ThreatAnalysisResult[]} Array of threat analysis results
  */
-function mapFindings(findings: HypernativeFinding): ThreatAnalysisResult[] {
+function mapThreatFindings(findings: HypernativeFinding): ThreatAnalysisResult[] {
   if (findings.risks.length === 0) {
     return createNoThreatResult()
   }
 
+  return mapFindings(findings)
+}
+
+/**
+ * Maps a Hypernative finding group to Safe Shield custom checks analysis results
+ *
+ * @param {HypernativeFindingGroup} findings - Hypernative findings object containing status and risks
+ *
+ * @returns {ThreatAnalysisResult[]} Array of custom checks analysis results
+ */
+function mapCustomChecksFindings(findings: HypernativeFinding): ThreatAnalysisResult[] {
+  if (findings.risks.length === 0) {
+    return createNoCustomChecksResult()
+  }
+
+  return mapFindings(findings)
+}
+
+/**
+ * Maps a Hypernative finding group to Safe Shield threat analysis results
+ *
+ * @param {HypernativeFindingGroup} findings - Hypernative findings object containing status and risks
+ *
+ * @returns {ThreatAnalysisResult[]} Array of analysis results for a given finding group
+ */
+function mapFindings(findings: HypernativeFinding): ThreatAnalysisResult[] {
   const results: ThreatAnalysisResult[] = findings.risks.map((risk: HypernativeRisk) => {
     const mappedType = HypernativeRiskTitleMap[risk.safeCheckId] ?? ThreatStatus.HYPERNATIVE_GUARD
     // MASTERCOPY_CHANGE requires additional fields (before/after) that Hypernative doesn't provide
@@ -94,6 +120,22 @@ function createNoThreatResult(): ThreatAnalysisResult[] {
       type: ThreatStatus.NO_THREAT,
       title: 'No threats detected',
       description: 'Threat analysis found no issues.',
+    },
+  ]
+}
+
+/**
+ * Creates a success result indicating no custom checks were detected
+ *
+ * @returns {ThreatAnalysisResult[]} Array with a single OK-severity result indicating no custom checks were detected
+ */
+function createNoCustomChecksResult(): ThreatAnalysisResult[] {
+  return [
+    {
+      severity: Severity.OK,
+      type: ThreatStatus.NO_THREAT,
+      title: 'Custom checks',
+      description: 'Custom checks found no issues.',
     },
   ]
 }
