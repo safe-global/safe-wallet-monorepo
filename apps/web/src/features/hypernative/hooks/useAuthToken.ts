@@ -32,10 +32,13 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
     // Default to 'Bearer' if tokenType is missing, undefined, or empty
     // This handles legacy cookies or corrupted data gracefully
     const normalizedTokenType = tokenType?.trim() || 'Bearer'
+    // isExpired should only be true when a token exists AND it's expired
+    // If no token exists, isExpired should be false (not expired, just not authenticated)
+    const isExpired = !!token && (expiry === undefined || Date.now() >= expiry)
     setAuthState({
       token: token ? `${normalizedTokenType} ${token}` : undefined,
       isAuthenticated: !!token,
-      isExpired: expiry === undefined || Date.now() >= expiry,
+      isExpired,
     })
   }
 

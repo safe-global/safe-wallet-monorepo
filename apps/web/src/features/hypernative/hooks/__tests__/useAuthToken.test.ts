@@ -67,7 +67,7 @@ describe('useAuthToken', () => {
 
       expect(result.current[0].token).toBeUndefined()
       expect(result.current[0].isAuthenticated).toBe(false)
-      expect(result.current[0].isExpired).toBe(true)
+      expect(result.current[0].isExpired).toBe(false)
     })
 
     it('should return authenticated state when valid token exists', () => {
@@ -254,6 +254,45 @@ describe('useAuthToken', () => {
 
       expect(mockClearAuthCookie).toHaveBeenCalled()
       expect(result.current[0].isAuthenticated).toBe(false)
+    })
+
+    it('should maintain consistent state after clearToken when polling triggers', async () => {
+      jest.useFakeTimers()
+
+      mockGetAuthCookieData.mockReturnValue({
+        token: 'existing-token',
+        tokenType: 'Bearer',
+        expiry: Date.now() + 3600000,
+      })
+
+      const { result } = renderHook(() => useAuthToken())
+
+      // Initially authenticated
+      expect(result.current[0].isAuthenticated).toBe(true)
+
+      // Clear token
+      act(() => {
+        result.current[2]() // clearToken
+      })
+
+      // After clearToken, state should be cleared
+      expect(result.current[0].isAuthenticated).toBe(false)
+      expect(result.current[0].isExpired).toBe(false)
+
+      // Mock that no token exists (cookie was cleared)
+      mockGetAuthCookieData.mockReturnValue(undefined)
+
+      // Advance timer to trigger polling (AUTH_POLLING_INTERVAL = 5000ms)
+      await act(async () => {
+        jest.advanceTimersByTime(5000)
+      })
+
+      // State should remain consistent - isExpired should stay false
+      // This verifies the fix for the oscillation issue
+      expect(result.current[0].isAuthenticated).toBe(false)
+      expect(result.current[0].isExpired).toBe(false)
+
+      jest.useRealTimers()
     })
   })
 
