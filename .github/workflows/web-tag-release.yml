@@ -174,7 +174,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: Notify on Slack
-        if: vars.SLACK_WEBHOOK_URL
+        if: secrets.SLACK_WEBHOOK_URL
         continue-on-error: true
         run: |
           VERSION="${{ steps.version.outputs.version }}"
@@ -203,6 +203,6 @@ jobs:
                   }
                 }
               ]
-            }' | curl -X POST "${{ vars.SLACK_WEBHOOK_URL }}" \
+            }' | curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
               -H 'Content-Type: application/json' \
               -d @-
