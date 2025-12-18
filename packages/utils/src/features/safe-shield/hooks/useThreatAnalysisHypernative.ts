@@ -116,12 +116,16 @@ export function useThreatAnalysisHypernative({
   )
 
   const threatAnalysisResult = useMemo<ThreatAnalysisResults | undefined>(() => {
-    if (skip || !hypernativeData) {
+    if (skip) {
       return undefined
     }
 
     if (fetchError) {
       return { [StatusGroup.COMMON]: [getErrorInfo(ErrorType.THREAT)] }
+    }
+
+    if (!hypernativeData) {
+      return undefined
     }
 
     return mapHypernativeResponse(hypernativeData)

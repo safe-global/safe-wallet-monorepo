@@ -7,6 +7,7 @@ import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messag
 import { Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
 import type { HypernativeAssessmentResponseDto } from '@safe-global/store/hypernative/hypernativeApi.dto'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
+import { ErrorType, getErrorInfo } from '@safe-global/utils/features/safe-shield/utils/errors'
 
 // Mock dependencies
 jest.mock('@safe-global/utils/utils/safeTransaction')
@@ -377,7 +378,7 @@ describe('useThreatAnalysisHypernative', () => {
 
       await waitFor(() => {
         const [data, error, loading] = result.current
-        expect(data).toBeUndefined()
+        expect(data).toEqual({ [StatusGroup.COMMON]: [getErrorInfo(ErrorType.THREAT)] })
         expect(error).toBeDefined()
         expect(error?.message).toContain('Failed to analyze threat')
         expect(loading).toBe(false)
