@@ -58,6 +58,9 @@ function titleToStoryId(title) {
  * Convert file path to Storybook story ID (fallback when title can't be extracted)
  * Example: src/components/common/CopyButton/index.stories.tsx
  * -> components-common-copybutton
+ *
+ * Note: Storybook derives story IDs from the directory path, not the filename.
+ * When no explicit title is set, Storybook uses the directory structure.
  */
 function filePathToStoryId(filePath) {
   // Remove apps/web/ prefix if present
@@ -66,11 +69,11 @@ function filePathToStoryId(filePath) {
   // Remove src/ prefix
   normalized = normalized.replace(/^src\//, '')
 
-  // Remove file extension and .stories suffix
-  normalized = normalized.replace(/\.(stories|story)\.(tsx?|jsx?)$/, '')
-
-  // Remove index if present
-  normalized = normalized.replace(/\/index$/, '')
+  // Get directory path only (remove filename)
+  // This matches how Storybook derives story IDs when no title is specified
+  const parts = normalized.split('/')
+  const filename = parts.pop() // Remove the filename
+  normalized = parts.join('/')
 
   // Convert path separators to hyphens and lowercase
   normalized = normalized.replace(/\//g, '-').toLowerCase()
