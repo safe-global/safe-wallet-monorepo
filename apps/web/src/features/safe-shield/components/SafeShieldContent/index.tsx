@@ -12,6 +12,7 @@ import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
 import { HypernativeInfo } from '../HypernativeInfo'
+import { HypernativeCustomChecks } from './HypernativeCustomChecks'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
 import type { SafeTransaction } from '@safe-global/types-kit'
@@ -28,7 +29,7 @@ import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHype
 const normalizeThreatData = (threat?: AsyncResult<ThreatAnalysisResults>): Record<string, GroupedAnalysisResults> => {
   const [result] = threat || []
 
-  const { BALANCE_CHANGE: _, ...groupedThreatResults } = result || {}
+  const { BALANCE_CHANGE: _, CUSTOM_CHECKS: __, ...groupedThreatResults } = result || {}
 
   if (Object.keys(groupedThreatResults).length === 0) return {}
 
@@ -43,16 +44,16 @@ export const SafeShieldContent = ({
   overallStatus,
   hypernativeAuth,
 }: {
-  recipient?: AsyncResult<RecipientAnalysisResults>
-  contract?: AsyncResult<ContractAnalysisResults>
-  threat?: AsyncResult<ThreatAnalysisResults>
+  recipient: AsyncResult<RecipientAnalysisResults>
+  contract: AsyncResult<ContractAnalysisResults>
+  threat: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
   overallStatus?: { severity: Severity; title: string }
   hypernativeAuth?: HypernativeAuthStatus
 }): ReactElement => {
-  const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient || []
-  const [contractResults = {}, _contractError, contractLoading = false] = contract || []
-  const [threatResults, _threatError, threatLoading = false] = threat || []
+  const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
+  const [contractResults = {}, _contractError, contractLoading = false] = contract
+  const [threatResults, _threatError, threatLoading = false] = threat
 
   const normalizedThreatData = normalizeThreatData(threat)
   const { hasSimulationError } = useCheckSimulation(safeTx)
@@ -117,6 +118,12 @@ export const SafeShieldContent = ({
             highlightedSeverity={highlightedSeverity}
             analyticsEvent={SAFE_SHIELD_EVENTS.THREAT_ANALYZED}
             requestId={threatResults?.request_id}
+          />
+
+          <HypernativeCustomChecks
+            threat={threat}
+            delay={threatAnalysisDelay}
+            highlightedSeverity={highlightedSeverity}
           />
 
           {!contractLoading && !threatLoading && (

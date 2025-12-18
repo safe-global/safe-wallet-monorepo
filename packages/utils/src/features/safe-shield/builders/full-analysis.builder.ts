@@ -7,10 +7,14 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 
 export class FullAnalysisBuilder {
   private response: {
-    recipient?: AsyncResult<RecipientAnalysisResults>
-    contract?: AsyncResult<ContractAnalysisResults>
-    threat?: AsyncResult<ThreatAnalysisResults>
-  } = {}
+    recipient: AsyncResult<RecipientAnalysisResults>
+    contract: AsyncResult<ContractAnalysisResults>
+    threat: AsyncResult<ThreatAnalysisResults>
+  } = {
+    recipient: [undefined, undefined, false],
+    contract: [undefined, undefined, false],
+    threat: [undefined, undefined, false],
+  }
 
   recipient(recipientAnalysis: AsyncResult<RecipientAnalysisResults>): this {
     const [recipientResult = {}, error, loading = false] = recipientAnalysis || []
