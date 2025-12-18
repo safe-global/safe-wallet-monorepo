@@ -141,8 +141,8 @@ jobs:
           # Fetch latest changes
           git fetch origin main dev
 
-          # Checkout dev branch
-          git checkout dev
+          # Checkout dev branch with proper tracking (fixes "unrelated histories" error)
+          git checkout -B dev origin/dev
 
           # Attempt to merge main into dev
           if git merge origin/main -m "chore: back-merge main to dev after release ${{ steps.version.outputs.version }}"; then
