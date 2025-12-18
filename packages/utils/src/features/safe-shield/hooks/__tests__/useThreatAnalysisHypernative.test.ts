@@ -306,22 +306,23 @@ describe('useThreatAnalysisHypernative', () => {
   })
 
   describe('return values', () => {
-    it('should throw error when no authToken provided', async () => {
+    it('should return error when no authToken provided', async () => {
       const mockSafeTx = createMockSafeTransaction()
       mockIsSafeTransaction.mockReturnValue(true)
 
-      expect(() =>
-        renderHook(() =>
-          useThreatAnalysisHypernative({
-            safeAddress: mockSafeAddress,
-            chainId: mockChainId,
-            data: mockSafeTx,
-            walletAddress: mockWalletAddress,
-            safeVersion: mockSafeVersion,
-          }),
-        ),
-      ).toThrow('authToken is required')
+      const { result } = renderHook(() =>
+        useThreatAnalysisHypernative({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          data: mockSafeTx,
+          walletAddress: mockWalletAddress,
+          safeVersion: mockSafeVersion,
+        }),
+      )
 
+      const [, error] = result.current
+      expect(error).toBeDefined()
+      expect(error?.message).toBe('authToken is required')
       expect(mockTriggerAssessment).not.toHaveBeenCalled()
     })
 

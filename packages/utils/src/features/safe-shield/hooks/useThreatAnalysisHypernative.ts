@@ -48,10 +48,6 @@ export function useThreatAnalysisHypernative({
   authToken,
   skip = false,
 }: UseThreatAnalysisHypernativeProps): AsyncResult<ThreatAnalysisResults> {
-  if (!authToken && !skip) {
-    throw new Error('authToken is required')
-  }
-
   const [data, setData] = useState<SafeTransaction | TypedData | undefined>(dataProp)
   const [triggerAssessment, { data: hypernativeData, error, isLoading }] = hypernativeApi.useAssessTransactionMutation()
 
@@ -105,11 +101,7 @@ export function useThreatAnalysisHypernative({
   }, [data, safeAddress, chainId, walletAddress, origin, safeVersion])
 
   useEffect(() => {
-    if (skip) {
-      return
-    }
-
-    if (hypernativeRequest && authToken) {
+    if (!skip && hypernativeRequest && authToken) {
       triggerAssessment({
         ...hypernativeRequest,
         authToken,
@@ -134,6 +126,10 @@ export function useThreatAnalysisHypernative({
 
     return mapHypernativeResponse(hypernativeData)
   }, [hypernativeData, fetchError, skip])
+
+  if (!authToken && !skip) {
+    return [undefined, new Error('authToken is required'), false]
+  }
 
   return [threatAnalysisResult, fetchError, isLoading]
 }
