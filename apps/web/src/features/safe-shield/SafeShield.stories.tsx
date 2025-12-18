@@ -9,7 +9,7 @@ import {
 import { faker } from '@faker-js/faker'
 import { StoreDecorator } from '@/stories/storeDecorator'
 
-const meta = {
+const meta: Meta<typeof SafeShieldDisplay> = {
   component: SafeShieldDisplay,
   parameters: { layout: 'centered' },
   decorators: [
@@ -24,7 +24,7 @@ const meta = {
     ),
   ],
   tags: ['autodocs'],
-} satisfies Meta<typeof SafeShieldDisplay>
+}
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -133,7 +133,11 @@ export const UnableToVerifyContract: Story = {
 
 // Contract loading state
 export const Loading: Story = {
-  args: { recipient: [undefined, undefined, true], contract: [undefined, undefined, true] },
+  args: {
+    recipient: [undefined, undefined, true],
+    contract: [undefined, undefined, true],
+    threat: [undefined, undefined, true],
+  },
   parameters: {
     docs: {
       description: {
