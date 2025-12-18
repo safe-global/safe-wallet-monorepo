@@ -1,0 +1,131 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./NetworkLogosList.stories FourNetworks 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="networks MuiBox-root css-0"
+  >
+    <span
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
+    <span
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
+    <span
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
+    <span
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
+  </div>
+</div>
+`;
+
+exports[`./NetworkLogosList.stories ManyNetworksWithHasMore 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="networks MuiBox-root css-0"
+  >
+    <span
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
+    <span
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
+    <span
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
+    <span
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
+    <div
+      class="moreChainsIndicator MuiBox-root css-0"
+    >
+      +
+      2
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./NetworkLogosList.stories ManyNetworksWithoutHasMore 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="networks MuiBox-root css-0"
+  >
+    <span
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
+    <span
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
+    <span
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
+    <span
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
+    <span
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
+  </div>
+</div>
+`;
+
+exports[`./NetworkLogosList.stories SingleNetwork 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="networks MuiBox-root css-0"
+  >
+    <span
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
+  </div>
+</div>
+`;
+
+exports[`./NetworkLogosList.stories TwoNetworks 1`] = `
+<div
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+  style="--Paper-shadow: none;"
+>
+  <div
+    class="networks MuiBox-root css-0"
+  >
+    <span
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
+    <span
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
+  </div>
+</div>
+`;
