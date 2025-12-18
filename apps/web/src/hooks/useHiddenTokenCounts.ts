@@ -71,13 +71,5 @@ export const useHiddenTokenCounts = (): HiddenTokenCounts => {
       hiddenByTokenList,
       hiddenByDustFilter,
     }
-  }, [
-    shouldFetchAllTokens,
-    allTokensBalances,
-    allTokensLoading,
-    currentBalances.items,
-    hiddenTokens,
-    hideDust,
-    safe.deployed,
-  ])
+  }, [shouldFetchAllTokens, allTokensBalances, allTokensLoading, currentBalances.items, hiddenTokens, hideDust])
 }

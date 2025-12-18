@@ -97,5 +97,5 @@ export const useVisibleBalances = (): {
         positionsFiatTotal: data.balances.positionsFiatTotal,
       },
     }
-  }, [data, hiddenTokens, hideDust, safe.deployed])
+  }, [data, hiddenTokens, hideDust])
 }
