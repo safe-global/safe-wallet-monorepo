@@ -66,7 +66,7 @@ export function useThreatAnalysisHypernative({
 
   // Build Hypernative request payload
   const hypernativeRequest = useMemo<HypernativeAssessmentRequestDto | undefined>(() => {
-    if (!isSafeTransaction(data) || !safeAddress || !chainId || !safeVersion) {
+    if (!isSafeTransaction(data) || !safeAddress || !chainId || !safeVersion || !walletAddress) {
       return undefined
     }
 
@@ -101,13 +101,13 @@ export function useThreatAnalysisHypernative({
   }, [data, safeAddress, chainId, walletAddress, origin, safeVersion])
 
   useEffect(() => {
-    if (!skip && hypernativeRequest && authToken) {
+    if (!skip && hypernativeRequest && authToken && walletAddress) {
       triggerAssessment({
         ...hypernativeRequest,
         authToken,
       })
     }
-  }, [hypernativeRequest, authToken, triggerAssessment, skip])
+  }, [hypernativeRequest, authToken, triggerAssessment, skip, walletAddress])
 
   const fetchError = useMemo(
     () =>

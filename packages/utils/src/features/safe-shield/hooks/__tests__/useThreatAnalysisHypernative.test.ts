@@ -209,6 +209,42 @@ describe('useThreatAnalysisHypernative', () => {
 
       expect(mockTriggerAssessment).not.toHaveBeenCalled()
     })
+
+    it('should not trigger mutation when walletAddress is empty', () => {
+      const mockSafeTx = createMockSafeTransaction()
+      mockIsSafeTransaction.mockReturnValue(true)
+
+      renderHook(() =>
+        useThreatAnalysisHypernative({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          data: mockSafeTx,
+          walletAddress: '',
+          safeVersion: mockSafeVersion,
+          authToken: mockAuthToken,
+        }),
+      )
+
+      expect(mockTriggerAssessment).not.toHaveBeenCalled()
+    })
+
+    it('should not trigger mutation when walletAddress is undefined', () => {
+      const mockSafeTx = createMockSafeTransaction()
+      mockIsSafeTransaction.mockReturnValue(true)
+
+      renderHook(() =>
+        useThreatAnalysisHypernative({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          data: mockSafeTx,
+          walletAddress: undefined as unknown as string,
+          safeVersion: mockSafeVersion,
+          authToken: mockAuthToken,
+        }),
+      )
+
+      expect(mockTriggerAssessment).not.toHaveBeenCalled()
+    })
   })
 
   describe('nonce change handling', () => {
