@@ -352,6 +352,24 @@ describe('useThreatAnalysis - Hypernative Guard', () => {
     })
   })
 
+  it('should skip Blockaid analysis when Hypernative guard check is loading', async () => {
+    const regularTx = buildSafeTransaction('0x1234')
+
+    mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: true })
+    mockUseThreatAnalysisUtils.mockReturnValue(buildThreatResult(Severity.OK))
+
+    renderHook(() => useThreatAnalysis(regularTx))
+
+    await waitFor(() => {
+      // Blockaid should be skipped while guard check is loading to prevent unnecessary API calls
+      expect(mockUseThreatAnalysisUtils).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: true,
+        }),
+      )
+    })
+  })
+
   it('should use Hypernative analysis when guard is enabled', async () => {
     const regularTx = buildSafeTransaction('0x1234')
     const authToken = 'test-auth-token'
@@ -432,6 +450,25 @@ describe('useThreatAnalysis - Hypernative Guard', () => {
         skip: true,
       }),
     )
+  })
+
+  it('should skip Blockaid analysis when guard is enabled (even if loading is false)', async () => {
+    const regularTx = buildSafeTransaction('0x1234')
+    const authToken = 'test-auth-token'
+
+    mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: true, loading: false })
+    mockUseThreatAnalysisHypernative.mockReturnValue(buildThreatResult(Severity.CRITICAL))
+
+    renderHook(() => useThreatAnalysis(regularTx, authToken))
+
+    await waitFor(() => {
+      // Blockaid should be skipped when guard is enabled
+      expect(mockUseThreatAnalysisUtils).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: true,
+        }),
+      )
+    })
   })
 
   it('should pass auth token to nested threat analysis', async () => {

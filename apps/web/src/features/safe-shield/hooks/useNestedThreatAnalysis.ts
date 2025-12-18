@@ -52,7 +52,7 @@ export function useNestedThreatAnalysis(
 
   const nestedBlockaidAnalysis = useThreatAnalysisUtils({
     ...nestedTxProps,
-    skip: isHypernativeGuard || !isNested,
+    skip: isHypernativeGuard || !isNested || HNGuardCheckLoading,
   })
 
   const nestedHypernativeAnalysis = useThreatAnalysisHypernative({

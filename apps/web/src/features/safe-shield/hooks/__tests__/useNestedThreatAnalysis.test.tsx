@@ -167,6 +167,29 @@ describe('useNestedThreatAnalysis', () => {
       })
     })
 
+    it('should skip Blockaid analysis when Hypernative guard check is loading', async () => {
+      const nestedTx = buildSafeTransaction('0x1234')
+
+      mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: true })
+      mockUseNestedTransaction.mockReturnValue({
+        nestedSafeInfo: buildNestedSafeInfo(),
+        nestedSafeTx: nestedTx,
+        isNested: true,
+      })
+      mockUseThreatAnalysisUtils.mockReturnValue(buildThreatResult(Severity.OK))
+
+      renderHook(() => useNestedThreatAnalysis(nestedTx))
+
+      await waitFor(() => {
+        // Blockaid should be skipped while guard check is loading to prevent unnecessary API calls
+        expect(mockUseThreatAnalysisUtils).toHaveBeenCalledWith(
+          expect.objectContaining({
+            skip: true,
+          }),
+        )
+      })
+    })
+
     it('should return loading state when Blockaid analysis is loading', async () => {
       const nestedTx = buildSafeTransaction('0x1234')
 
@@ -255,6 +278,29 @@ describe('useNestedThreatAnalysis', () => {
         expect(mockUseThreatAnalysisUtils).toHaveBeenCalledWith(
           expect.objectContaining({
             skip: true,
+          }),
+        )
+      })
+    })
+
+    it('should not skip Blockaid analysis when guard is disabled and loading is false', async () => {
+      const nestedTx = buildSafeTransaction('0x1234')
+
+      mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: false })
+      mockUseNestedTransaction.mockReturnValue({
+        nestedSafeInfo: buildNestedSafeInfo(),
+        nestedSafeTx: nestedTx,
+        isNested: true,
+      })
+      mockUseThreatAnalysisUtils.mockReturnValue(buildThreatResult(Severity.OK))
+
+      renderHook(() => useNestedThreatAnalysis(nestedTx))
+
+      await waitFor(() => {
+        // Blockaid should not be skipped when guard is disabled and loading is complete
+        expect(mockUseThreatAnalysisUtils).toHaveBeenCalledWith(
+          expect.objectContaining({
+            skip: false,
           }),
         )
       })

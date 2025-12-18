@@ -47,7 +47,7 @@ export function useThreatAnalysis(
 
   const blockaidThreatAnalysis = useThreatAnalysisUtils({
     ...mainTxProps,
-    skip: isHypernativeGuard,
+    skip: isHypernativeGuard || HNGuardCheckLoading,
   })
 
   const hypernativeThreatAnalysis = useThreatAnalysisHypernative({
