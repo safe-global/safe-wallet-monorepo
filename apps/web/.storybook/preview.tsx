@@ -7,22 +7,25 @@ import createSafeTheme from '../src/components/theme/safeTheme'
 
 import '../src/styles/globals.css'
 
-// Component wrapper to sync data-theme attribute with Storybook's theme switcher
-// This ensures CSS variables (which rely on [data-theme="dark"]) update correctly
+const BACKGROUND_COLORS: Record<string, string> = { light: '#ffffff', dark: '#121312' }
+
+// Syncs data-theme attribute and background color with Storybook's theme switcher
 const DataThemeWrapper = ({ children, themeMode }: { children: React.ReactNode; themeMode: string }) => {
   useEffect(() => {
-    // Set data-theme attribute on document.documentElement to match Storybook's theme
     document.documentElement.setAttribute('data-theme', themeMode)
+    document.body.style.backgroundColor = BACKGROUND_COLORS[themeMode] || BACKGROUND_COLORS.light
   }, [themeMode])
 
-  return React.createElement(React.Fragment, null, children)
+  return <>{children}</>
 }
 
-// Decorator to sync data-theme attribute with Storybook's theme switcher
-const DataThemeDecorator = (Story: React.ComponentType<any>, context: { globals?: { theme?: string } }) => {
+const DataThemeDecorator = (Story: React.ComponentType, context: { globals?: { theme?: string } }) => {
   const themeMode = context.globals?.theme || 'light'
-
-  return React.createElement(DataThemeWrapper, { themeMode, children: React.createElement(Story) })
+  return (
+    <DataThemeWrapper themeMode={themeMode}>
+      <Story />
+    </DataThemeWrapper>
+  )
 }
 
 const preview: Preview = {
@@ -33,6 +36,17 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
+    backgrounds: {
+      default: 'light',
+      values: [
+        { name: 'light', value: '#ffffff' },
+        { name: 'dark', value: '#121312' },
+      ],
+    },
+  },
+
+  initialGlobals: {
+    backgrounds: { value: 'light' },
   },
 
   decorators: [
