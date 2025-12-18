@@ -1,4 +1,3 @@
-import { OperationType } from '@safe-global/types-kit'
 import { ThreatStatus, Severity } from '.'
 
 export const HypernativeRiskSeverityMap = {

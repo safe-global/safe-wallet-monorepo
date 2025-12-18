@@ -147,7 +147,7 @@ const HypernativeOAuthCallback: NextPage = () => {
     if (router.isReady) {
       handleCallback()
     }
-  }, [router.isReady, router.query, exchangeToken])
+  }, [router.isReady, router.query, exchangeToken, setToken])
 
   return (
     <>

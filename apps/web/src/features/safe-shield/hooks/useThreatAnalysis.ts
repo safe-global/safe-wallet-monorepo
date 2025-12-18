@@ -12,6 +12,7 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useNestedTransaction } from '../components/useNestedTransaction'
 import { useCurrentChain } from '@/hooks/useChains'
 import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
+import { useNestedThreatAnalysis } from './useNestedThreatAnalysis'
 
 export function useThreatAnalysis(
   overrideSafeTx?: SafeTransaction,
@@ -30,48 +31,52 @@ export function useThreatAnalysis(
   const txToAnalyze = overrideSafeTx || safeTx || safeMessage
 
   const safeTxToCheck = (txToAnalyze && 'data' in txToAnalyze ? txToAnalyze : undefined) as SafeTransaction | undefined
-  const { nestedSafeInfo, nestedSafeTx, isNested, isNestedLoading } = useNestedTransaction(safeTxToCheck, chain)
+  const { isNested, isNestedLoading } = useNestedTransaction(safeTxToCheck, chain)
 
-  const mainThreatAnalysis = useThreatAnalysisUtils({
-    safeAddress: safeAddress as `0x${string}`,
-    chainId,
-    data: txToAnalyze,
-    walletAddress,
-    origin: txOrigin,
-    safeVersion: version || undefined,
+  const mainTxProps = useMemo(
+    () => ({
+      safeAddress: safeAddress as `0x${string}`,
+      chainId,
+      data: txToAnalyze,
+      walletAddress,
+      origin: txOrigin,
+      safeVersion: version || undefined,
+    }),
+    [safeAddress, chainId, txToAnalyze, walletAddress, txOrigin, version],
+  )
+
+  const blockaidThreatAnalysis = useThreatAnalysisUtils({
+    ...mainTxProps,
     skip: isHypernativeGuard,
   })
 
   const hypernativeThreatAnalysis = useThreatAnalysisHypernative({
-    safeAddress: safeAddress as `0x${string}`,
-    chainId,
-    data: overrideSafeTx || safeTx || safeMessage,
-    walletAddress,
-    origin: txOrigin,
-    safeVersion: version || undefined,
+    ...mainTxProps,
     authToken: hypernativeAuthToken,
-    skip: !isHypernativeGuard,
+    skip: !isHypernativeGuard || !hypernativeAuthToken,
   })
 
-  const nestedThreatAnalysis = useThreatAnalysisUtils({
-    safeAddress: (nestedSafeInfo?.address.value ?? safeAddress) as `0x${string}`,
-    chainId,
-    data: isNested ? nestedSafeTx : undefined,
-    walletAddress,
-    origin: txOrigin,
-    safeVersion: nestedSafeInfo?.version ?? version ?? undefined,
-  })
+  const threatAnalysis = useMemo(
+    (): AsyncResult<ThreatAnalysisResults> => (isHypernativeGuard ? hypernativeThreatAnalysis : blockaidThreatAnalysis),
+    [isHypernativeGuard, hypernativeThreatAnalysis, blockaidThreatAnalysis],
+  )
+
+  const nestedThreatAnalysis = useNestedThreatAnalysis(safeTxToCheck, hypernativeAuthToken)
 
   const combinedThreatAnalysis = useMemo((): AsyncResult<ThreatAnalysisResults> => {
-    const [mainResult, mainError, mainLoading] = mainThreatAnalysis
+    const [mainResult, mainError, mainLoading] = threatAnalysis
     const [nestedResult, nestedError, nestedLoading] = nestedThreatAnalysis
+
+    if (HNGuardCheckLoading) {
+      return [undefined, undefined, true]
+    }
 
     if (isNestedLoading) {
       return [mainResult, mainError, true]
     }
 
     if (!isNested) {
-      return mainThreatAnalysis
+      return threatAnalysis
     }
 
     const combinedResult: ThreatAnalysisResults | undefined = mainResult
@@ -82,15 +87,7 @@ export function useThreatAnalysis(
       : nestedResult
 
     return [combinedResult, mainError || nestedError, mainLoading || nestedLoading]
-  }, [mainThreatAnalysis, nestedThreatAnalysis, isNested, isNestedLoading])
-
-  if (HNGuardCheckLoading) {
-    return [undefined, undefined, true]
-  }
-
-  if (isHypernativeGuard) {
-    return hypernativeThreatAnalysis
-  }
+  }, [threatAnalysis, nestedThreatAnalysis, isNested, isNestedLoading, HNGuardCheckLoading])
 
   return combinedThreatAnalysis
 }

@@ -44,6 +44,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const counterpartyAnalysis = useCounterpartyAnalysis(safeTx)
   const [{ token: hypernativeAuthToken }] = useAuthToken()
   const threat = useThreatAnalysis(safeTx, hypernativeAuthToken) ?? [undefined, undefined, false]
+  const [threatAnalysisResult] = threat
 
   const recipient = recipientOnlyAnalysis || counterpartyAnalysis.recipient
   const contract = counterpartyAnalysis.contract
@@ -52,7 +53,6 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const [isRiskConfirmed, setIsRiskConfirmed] = useState(false)
 
   const { needsRiskConfirmation, primaryThreatSeverity } = useMemo(() => {
-    const [threatAnalysisResult] = threat
     const primaryThreatResult = getPrimaryResult(threatAnalysisResult?.THREAT || [])
 
     const severity = primaryThreatResult?.severity
@@ -62,7 +62,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
       needsRiskConfirmation,
       primaryThreatSeverity: severity,
     }
-  }, [threat])
+  }, [threatAnalysisResult])
 
   useEffect(() => {
     setIsRiskConfirmed(false)
