@@ -10595,7 +10595,10 @@ __metadata:
     "@storybook/addon-links": "npm:^10.1.10"
     "@storybook/addon-onboarding": "npm:^10.1.10"
     "@storybook/addon-themes": "npm:^10.1.10"
+    "@storybook/builder-webpack5": "npm:^10.1.10"
     "@storybook/nextjs": "npm:^10.1.10"
+    "@storybook/react": "npm:^10.1.10"
+    "@storybook/react-dom-shim": "npm:^10.1.10"
     "@svgr/webpack": "npm:^8.1.0"
     "@testing-library/cypress": "npm:^10.0.2"
     "@testing-library/jest-dom": "npm:^6.6.3"
@@ -11360,7 +11363,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/builder-webpack5@npm:10.1.10":
+"@storybook/builder-webpack5@npm:10.1.10, @storybook/builder-webpack5@npm:^10.1.10":
   version: 10.1.10
   resolution: "@storybook/builder-webpack5@npm:10.1.10"
   dependencies:
@@ -11729,7 +11732,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/react-dom-shim@npm:10.1.10":
+"@storybook/react-dom-shim@npm:10.1.10, @storybook/react-dom-shim@npm:^10.1.10":
   version: 10.1.10
   resolution: "@storybook/react-dom-shim@npm:10.1.10"
   peerDependencies:
@@ -11842,7 +11845,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/react@npm:10.1.10":
+"@storybook/react@npm:10.1.10, @storybook/react@npm:^10.1.10":
   version: 10.1.10
   resolution: "@storybook/react@npm:10.1.10"
   dependencies:
