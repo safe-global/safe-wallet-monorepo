@@ -2,9 +2,10 @@ import React from 'react'
 import type {
   AnalysisResult,
   MaliciousOrModerateThreatAnalysisResult,
+  Severity,
 } from '@safe-global/utils/features/safe-shield/types'
 import { sortByIssueSeverity } from '@safe-global/utils/features/safe-shield/utils/analysisUtils'
-import { Text } from 'tamagui'
+import { Text, View } from 'tamagui'
 import { AddressListItem } from './AddressListItem'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector } from '@/src/store/hooks'
@@ -16,12 +17,15 @@ import { AnalysisPaper } from '../../../AnalysisPaper'
 
 interface AnalysisIssuesDisplayProps {
   result: AnalysisResult
+  severity?: Severity
 }
 
-export function AnalysisIssuesDisplay({ result }: AnalysisIssuesDisplayProps) {
+export function AnalysisIssuesDisplay({ result, severity }: AnalysisIssuesDisplayProps) {
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const { handleOpenExplorer, handleCopyToClipboard, copiedIndex } = useAnalysisAddress()
+
+  const issueBackgroundColor = severity ? '$errorLight' : 'transparent'
 
   if (!('issues' in result)) {
     return null
@@ -49,22 +53,38 @@ export function AnalysisIssuesDisplay({ result }: AnalysisIssuesDisplayProps) {
               : undefined
 
           return (
-            <AnalysisPaper key={`${severity}-${index}`} spaced={Boolean(explorerLink)}>
-              {issue.address && (
-                <AddressListItem
-                  index={globalIndex}
-                  copiedIndex={copiedIndex}
-                  onCopy={handleCopyToClipboard}
-                  explorerLink={explorerLink}
-                  onOpenExplorer={handleOpenExplorer}
-                  address={issue.address}
-                />
-              )}
+            <View key={`${severity}-${index}`}>
+              <AnalysisPaper spaced={Boolean(explorerLink)}>
+                {issue.address && (
+                  <AddressListItem
+                    index={globalIndex}
+                    copiedIndex={copiedIndex}
+                    onCopy={handleCopyToClipboard}
+                    explorerLink={explorerLink}
+                    onOpenExplorer={handleOpenExplorer}
+                    address={issue.address}
+                  />
+                )}
+              </AnalysisPaper>
 
-              <Text fontSize="$3" marginTop="$2" color="$colorLight" fontStyle="italic">
-                {issue.description}
-              </Text>
-            </AnalysisPaper>
+              <View
+                backgroundColor={issue.address ? issueBackgroundColor : 'transparent'}
+                padding="$2"
+                width="100%"
+                borderBottomLeftRadius={'$4'}
+                borderBottomRightRadius={'$4'}
+              >
+                <Text
+                  fontSize={'$2'}
+                  lineHeight={14}
+                  color={issue.address ? '$color' : '$colorLight'}
+                  fontFamily="$body"
+                  fontWeight="400"
+                >
+                  {issue.description}
+                </Text>
+              </View>
+            </View>
           )
         }),
       )}
