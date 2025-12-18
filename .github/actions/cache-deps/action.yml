@@ -66,9 +66,9 @@ runs:
       with:
         path: |
           ${{ github.workspace }}/apps/web/.next/cache
-        key: ${{ runner.os }}-nextjs-cypress-${{ hashFiles('apps/web/package.json', 'apps/web/yarn.lock') }}-${{ hashFiles('apps/web/src/**/*', 'apps/web/public/**/*', 'apps/web/*.{js,jsx,cjs,ts,mjs,tsx,json} ') }}
-        restore-keys: |
-          ${{ runner.os }}-nextjs-${{ hashFiles('apps/web/package.json', 'apps/web/yarn.lock') }}-
+        # No restore-keys fallback - we must not restore stale cache from different source code
+        # as this can cause a mix of old and new code in the build output
+        key: ${{ runner.os }}-nextjs-cypress-${{ hashFiles('apps/web/package.json', 'apps/web/yarn.lock') }}-${{ hashFiles('apps/web/src/**/*', 'apps/web/public/**/*', 'apps/web/*.{js,jsx,cjs,ts,mjs,tsx,json}') }}
 
     - name: Set composite outputs nc
       if: ${{ inputs.mode == 'restore-nc' }}
