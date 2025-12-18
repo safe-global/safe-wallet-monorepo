@@ -83,6 +83,7 @@ export function useThreatAnalysis(
       ? {
           ...mainResult,
           THREAT: [...(mainResult.THREAT || []), ...(nestedResult?.THREAT || [])],
+          CUSTOM_CHECKS: [...(mainResult.CUSTOM_CHECKS || []), ...(nestedResult?.CUSTOM_CHECKS || [])],
         }
       : nestedResult
 

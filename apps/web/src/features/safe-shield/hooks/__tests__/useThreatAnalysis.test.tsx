@@ -158,6 +158,81 @@ describe('useThreatAnalysis - Nested Transaction Detection', () => {
     )
   })
 
+  it('should merge CUSTOM_CHECKS from nested approveHash transactions', async () => {
+    const approveHashTx = buildSafeTransaction(encodeApproveHash(APPROVE_HASH))
+    const nestedSafeTx = buildSafeTransaction('0x1234')
+
+    mockUseNestedTransaction.mockReturnValue({
+      nestedSafeInfo: buildNestedSafeInfo(),
+      nestedSafeTx,
+      isNested: true,
+      isNestedLoading: false,
+    })
+
+    const mainResult = [
+      {
+        [StatusGroup.THREAT]: [
+          {
+            severity: Severity.OK,
+            type: ThreatStatus.NO_THREAT,
+            title: 'No threats detected',
+            description: 'Test threat',
+          },
+        ],
+        [StatusGroup.CUSTOM_CHECKS]: [
+          {
+            severity: Severity.WARN,
+            type: ThreatStatus.CUSTOM_CHECKS_FAILED,
+            title: 'Main custom check',
+            description: 'Main custom check warning',
+          },
+        ],
+      },
+      undefined,
+      false,
+    ]
+
+    const nestedResult = [
+      {
+        [StatusGroup.THREAT]: [
+          {
+            severity: Severity.OK,
+            type: ThreatStatus.NO_THREAT,
+            title: 'No threats detected',
+            description: 'Test threat',
+          },
+        ],
+        [StatusGroup.CUSTOM_CHECKS]: [
+          {
+            severity: Severity.CRITICAL,
+            type: ThreatStatus.CUSTOM_CHECKS_FAILED,
+            title: 'Nested custom check',
+            description: 'Nested custom check critical',
+          },
+        ],
+      },
+      undefined,
+      false,
+    ]
+
+    mockUseThreatAnalysisUtils.mockReturnValue(mainResult)
+    mockUseNestedThreatAnalysis.mockReturnValue(nestedResult)
+
+    const { result } = renderHook(() => useThreatAnalysis(approveHashTx))
+
+    await waitFor(
+      () => {
+        const [threatResult] = result.current
+        expect(threatResult?.CUSTOM_CHECKS).toHaveLength(2)
+        expect(threatResult?.CUSTOM_CHECKS?.[0].severity).toBe(Severity.WARN)
+        expect(threatResult?.CUSTOM_CHECKS?.[0].title).toBe('Main custom check')
+        expect(threatResult?.CUSTOM_CHECKS?.[1].severity).toBe(Severity.CRITICAL)
+        expect(threatResult?.CUSTOM_CHECKS?.[1].title).toBe('Nested custom check')
+      },
+      { timeout: 3000 },
+    )
+  })
+
   it('should return only main threat when not nested', async () => {
     const regularTx = buildSafeTransaction('0x1234')
 
