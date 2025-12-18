@@ -17,7 +17,7 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
         class="accordion"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded MuiAccordion-gutters css-1wmbdsr-MuiPaper-root-MuiAccordion-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded MuiAccordion-gutters css-1gdgqta-MuiPaper-root-MuiAccordion-root"
           style="--Paper-shadow: none;"
         >
           <h3
