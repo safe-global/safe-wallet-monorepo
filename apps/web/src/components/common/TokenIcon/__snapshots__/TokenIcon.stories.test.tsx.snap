@@ -1,0 +1,205 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./TokenIcon.stories CustomFallback 1`] = `
+<div
+  class="MuiBox-root css-olq4e8"
+>
+  <iframe
+    height="26"
+    loading="lazy"
+    referrerpolicy="strict-origin"
+    sandbox="allow-scripts"
+    srcdoc="
+    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+      <img src="https://via.placeholder.com/26" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <script>
+        document.querySelector('img').onerror = (e) => {
+          e.target.onerror = null
+          e.target.src = "https://via.placeholder.com/26"
+        }
+      </script>
+    </body>
+  "
+    style="pointer-events: none; border: 0px; display: block;"
+    tabindex="-1"
+    title="CUSTOM"
+    width="26"
+  />
+</div>
+`;
+
+exports[`./TokenIcon.stories Default 1`] = `
+<div
+  class="MuiBox-root css-olq4e8"
+>
+  <iframe
+    height="26"
+    loading="lazy"
+    referrerpolicy="strict-origin"
+    sandbox="allow-scripts"
+    srcdoc="
+    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+      <img src="https://assets.coingecko.com/coins/images/279/small/ethereum.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <script>
+        document.querySelector('img').onerror = (e) => {
+          e.target.onerror = null
+          e.target.src = "/images/common/token-placeholder.svg"
+        }
+      </script>
+    </body>
+  "
+    style="pointer-events: none; border: 0px; display: block;"
+    tabindex="-1"
+    title="ETH"
+    width="26"
+  />
+</div>
+`;
+
+exports[`./TokenIcon.stories Fallback 1`] = `
+<div
+  class="MuiBox-root css-olq4e8"
+>
+  <iframe
+    height="26"
+    loading="lazy"
+    referrerpolicy="strict-origin"
+    sandbox="allow-scripts"
+    srcdoc="
+    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+      <img src="/images/common/token-placeholder.svg" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <script>
+        document.querySelector('img').onerror = (e) => {
+          e.target.onerror = null
+          e.target.src = "/images/common/token-placeholder.svg"
+        }
+      </script>
+    </body>
+  "
+    style="pointer-events: none; border: 0px; display: block;"
+    tabindex="-1"
+    title="UNKNOWN"
+    width="26"
+  />
+</div>
+`;
+
+exports[`./TokenIcon.stories LargeSize 1`] = `
+<div
+  class="MuiBox-root css-olq4e8"
+>
+  <iframe
+    height="48"
+    loading="lazy"
+    referrerpolicy="strict-origin"
+    sandbox="allow-scripts"
+    srcdoc="
+    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+      <img src="https://assets.coingecko.com/coins/images/279/small/ethereum.png" alt="Safe App logo" height="48" width="auto" style="border-radius: 100%;" />
+      <script>
+        document.querySelector('img').onerror = (e) => {
+          e.target.onerror = null
+          e.target.src = "/images/common/token-placeholder.svg"
+        }
+      </script>
+    </body>
+  "
+    style="pointer-events: none; border: 0px; display: block;"
+    tabindex="-1"
+    title="ETH"
+    width="48"
+  />
+</div>
+`;
+
+exports[`./TokenIcon.stories NoRadius 1`] = `
+<div
+  class="MuiBox-root css-olq4e8"
+>
+  <iframe
+    height="26"
+    loading="lazy"
+    referrerpolicy="strict-origin"
+    sandbox="allow-scripts"
+    srcdoc="
+    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+      <img src="https://assets.coingecko.com/coins/images/279/small/ethereum.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <script>
+        document.querySelector('img').onerror = (e) => {
+          e.target.onerror = null
+          e.target.src = "/images/common/token-placeholder.svg"
+        }
+      </script>
+    </body>
+  "
+    style="pointer-events: none; border: 0px; display: block;"
+    tabindex="-1"
+    title="ETH"
+    width="26"
+  />
+</div>
+`;
+
+exports[`./TokenIcon.stories SmallSize 1`] = `
+<div
+  class="MuiBox-root css-olq4e8"
+>
+  <iframe
+    height="16"
+    loading="lazy"
+    referrerpolicy="strict-origin"
+    sandbox="allow-scripts"
+    srcdoc="
+    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+      <img src="https://assets.coingecko.com/coins/images/279/small/ethereum.png" alt="Safe App logo" height="16" width="auto" style="border-radius: 100%;" />
+      <script>
+        document.querySelector('img').onerror = (e) => {
+          e.target.onerror = null
+          e.target.src = "/images/common/token-placeholder.svg"
+        }
+      </script>
+    </body>
+  "
+    style="pointer-events: none; border: 0px; display: block;"
+    tabindex="-1"
+    title="ETH"
+    width="16"
+  />
+</div>
+`;
+
+exports[`./TokenIcon.stories WithChainIndicator 1`] = `
+<div
+  class="MuiBox-root css-1ysxw4w"
+>
+  <iframe
+    height="26"
+    loading="lazy"
+    referrerpolicy="strict-origin"
+    sandbox="allow-scripts"
+    srcdoc="
+    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+      <img src="https://assets.coingecko.com/coins/images/6319/small/usdc.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <script>
+        document.querySelector('img').onerror = (e) => {
+          e.target.onerror = null
+          e.target.src = "/images/common/token-placeholder.svg"
+        }
+      </script>
+    </body>
+  "
+    style="pointer-events: none; border: 0px; display: block;"
+    tabindex="-1"
+    title="USDC"
+    width="26"
+  />
+  <div
+    class="chainIcon"
+  >
+    <span
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
+  </div>
+</div>
+`;
