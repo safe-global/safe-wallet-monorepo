@@ -23,12 +23,12 @@ export const AllSizes: Story = {
   args: {
     name: 'Safe',
   },
-  render: (args) => (
+  render: ({ name }) => (
     <Stack direction="row" spacing={2} alignItems="center">
-      <InitialsAvatar {...args} size="xsmall" />
-      <InitialsAvatar {...args} size="small" />
-      <InitialsAvatar {...args} size="medium" />
-      <InitialsAvatar {...args} size="large" />
+      <InitialsAvatar name={name} size="xsmall" />
+      <InitialsAvatar name={name} size="small" />
+      <InitialsAvatar name={name} size="medium" />
+      <InitialsAvatar name={name} size="large" />
     </Stack>
   ),
 }
