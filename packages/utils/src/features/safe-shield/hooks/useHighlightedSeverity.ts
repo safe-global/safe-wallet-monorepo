@@ -1,14 +1,16 @@
 import { useMemo } from 'react'
 import { ContractAnalysisResults, RecipientAnalysisResults, Severity, ThreatAnalysisResults } from '../types'
 import { getPrimaryAnalysisResult } from '../utils/getPrimaryAnalysisResult'
-import { SEVERITY_PRIORITY } from '../utils'
+import { normalizeThreatData, SEVERITY_PRIORITY } from '../utils'
 
 export const useHighlightedSeverity = (
   recipientResults: RecipientAnalysisResults,
   contractResults: ContractAnalysisResults,
-  normalizedThreatData: ThreatAnalysisResults,
+  threatResults: ThreatAnalysisResults,
   hasSimulationError?: boolean,
 ) => {
+  const normalizedThreatData = useMemo(() => normalizeThreatData([threatResults, undefined, false]), [threatResults])
+
   const recipientPrimaryResult = useMemo(() => getPrimaryAnalysisResult(recipientResults), [recipientResults])
   const contractPrimaryResult = useMemo(() => getPrimaryAnalysisResult(contractResults), [contractResults])
   const threatPrimaryResult = useMemo(() => getPrimaryAnalysisResult(normalizedThreatData), [normalizedThreatData])

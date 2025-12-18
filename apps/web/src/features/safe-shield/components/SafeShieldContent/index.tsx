@@ -1,7 +1,6 @@
 import { type ReactElement } from 'react'
 import { Box } from '@mui/material'
 import type {
-  GroupedAnalysisResults,
   ContractAnalysisResults,
   ThreatAnalysisResults,
   RecipientAnalysisResults,
@@ -25,16 +24,7 @@ import {
 } from '@/features/safe-shield/hooks/useDelayedLoading'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
-
-const normalizeThreatData = (threat?: AsyncResult<ThreatAnalysisResults>): Record<string, GroupedAnalysisResults> => {
-  const [result] = threat || []
-
-  const { BALANCE_CHANGE: _, CUSTOM_CHECKS: __, ...groupedThreatResults } = result || {}
-
-  if (Object.keys(groupedThreatResults).length === 0) return {}
-
-  return { ['0x']: groupedThreatResults }
-}
+import { ThreatAnalysis } from '@/features/safe-shield/components/ThreatAnalysis'
 
 export const SafeShieldContent = ({
   recipient,
@@ -53,14 +43,13 @@ export const SafeShieldContent = ({
 }): ReactElement => {
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
   const [contractResults = {}, _contractError, contractLoading = false] = contract
-  const [threatResults, _threatError, threatLoading = false] = threat
+  const [threatResults = {}, _threatError, threatLoading = false] = threat
 
-  const normalizedThreatData = normalizeThreatData(threat)
   const { hasSimulationError } = useCheckSimulation(safeTx)
   const highlightedSeverity = useHighlightedSeverity(
     recipientResults,
     contractResults,
-    normalizedThreatData,
+    threatResults,
     hasSimulationError,
   )
   const loading = recipientLoading || contractLoading || threatLoading
@@ -111,14 +100,7 @@ export const SafeShieldContent = ({
             showImage
           />
 
-          <AnalysisGroupCard
-            data-testid="threat-analysis-group-card"
-            data={normalizedThreatData}
-            delay={threatAnalysisDelay}
-            highlightedSeverity={highlightedSeverity}
-            analyticsEvent={SAFE_SHIELD_EVENTS.THREAT_ANALYZED}
-            requestId={threatResults?.request_id}
-          />
+          <ThreatAnalysis threat={threat} delay={threatAnalysisDelay} highlightedSeverity={highlightedSeverity} />
 
           <HypernativeCustomChecks
             threat={threat}
