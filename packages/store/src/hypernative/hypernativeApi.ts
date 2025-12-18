@@ -44,7 +44,16 @@ export const hypernativeApi = createApi({
           Authorization: `${authToken}`,
         },
       }),
-      transformResponse: (response: HypernativeAssessmentResponseDto) => response.data, // Extract data from the response wrapper
+      transformResponse: (
+        response: HypernativeAssessmentResponseDto | HypernativeAssessmentFailedResponseDto,
+      ): HypernativeAssessmentResponseDto['data'] | HypernativeAssessmentFailedResponseDto => {
+        // Failed responses have status: 'FAILED' at root level, no data property
+        if ('status' in response && response.status === 'FAILED') {
+          return response as HypernativeAssessmentFailedResponseDto
+        }
+        // Success responses have data property
+        return (response as HypernativeAssessmentResponseDto).data
+      },
       invalidatesTags: ['hypernative-threat-analysis'],
     }),
   }),
