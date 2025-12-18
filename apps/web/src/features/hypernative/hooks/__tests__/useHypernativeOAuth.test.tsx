@@ -143,7 +143,7 @@ describe('useHypernativeOAuth', () => {
       const { result } = renderHook(() => useHypernativeOAuth())
 
       expect(result.current.isAuthenticated).toBe(false)
-      expect(result.current.isTokenExpired).toBe(true)
+      expect(result.current.isTokenExpired).toBe(false)
     })
 
     it('should return authenticated state when token exists', async () => {
@@ -445,10 +445,14 @@ describe('useHypernativeOAuth', () => {
 
       // Wait for state to update
       await waitFor(() => {
-        // isAuthenticated should be false when token is expired
+        // When token is expired, getAuthCookieData automatically cleans it up,
+        // so there's no token, which means isAuthenticated is false and isTokenExpired is false
         expect(result.current.isAuthenticated).toBe(false)
-        expect(result.current.isTokenExpired).toBe(true)
+        expect(result.current.isTokenExpired).toBe(false)
       })
+
+      // Verify cookie was cleaned up
+      expect(Cookies.get('hn_auth')).toBeUndefined()
 
       // Cleanup
       clearAuthCookie()
