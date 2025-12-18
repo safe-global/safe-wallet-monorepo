@@ -174,7 +174,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: Notify on Slack
-        if: secrets.SLACK_WEBHOOK_URL
+        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
         continue-on-error: true
         run: |
           VERSION="${{ steps.version.outputs.version }}"
