@@ -174,9 +174,15 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: Notify on Slack
-        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
         continue-on-error: true
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "No Slack webhook configured, skipping notification"
+            exit 0
+          fi
+
           VERSION="${{ steps.version.outputs.version }}"
           RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.version }}"
           BACKMERGE_STATUS="${{ steps.backmerge.outcome }}"
@@ -203,6 +209,6 @@ jobs:
                   }
                 }
               ]
-            }' | curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+            }' | curl -X POST "$SLACK_WEBHOOK_URL" \
               -H 'Content-Type: application/json' \
               -d @-
