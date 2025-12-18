@@ -55,6 +55,25 @@ function titleToStoryId(title) {
 }
 
 /**
+ * Convert file path to a readable title format
+ * Example: src/components/common/ChainIndicator/ChainIndicator.stories.tsx
+ * -> "components/common/ChainIndicator"
+ */
+function filePathToTitle(filePath) {
+  // Remove apps/web/ prefix if present
+  let normalized = filePath.replace(/^apps\/web\//, '')
+
+  // Remove src/ prefix
+  normalized = normalized.replace(/^src\//, '')
+
+  // Get directory path only (remove filename)
+  const parts = normalized.split('/')
+  parts.pop() // Remove the filename
+
+  return parts.join('/')
+}
+
+/**
  * Convert file path to Storybook story ID (fallback when title can't be extracted)
  * Example: src/components/common/CopyButton/index.stories.tsx
  * -> components-common-copybutton
@@ -63,22 +82,11 @@ function titleToStoryId(title) {
  * When no explicit title is set, Storybook uses the directory structure.
  */
 function filePathToStoryId(filePath) {
-  // Remove apps/web/ prefix if present
-  let normalized = filePath.replace(/^apps\/web\//, '')
-
-  // Remove src/ prefix
-  normalized = normalized.replace(/^src\//, '')
-
-  // Get directory path only (remove filename)
-  // This matches how Storybook derives story IDs when no title is specified
-  const parts = normalized.split('/')
-  const filename = parts.pop() // Remove the filename
-  normalized = parts.join('/')
+  // Use the title format and convert to story ID
+  const title = filePathToTitle(filePath)
 
   // Convert path separators to hyphens and lowercase
-  normalized = normalized.replace(/\//g, '-').toLowerCase()
-
-  return normalized
+  return title.replace(/\//g, '-').toLowerCase()
 }
 
 /**
@@ -145,12 +153,7 @@ for (const file of files) {
     storyUrls.push({
       url,
       file,
-      componentName:
-        title ||
-        storyId
-          .split('-')
-          .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-          .join(''),
+      componentName: title || filePathToTitle(file),
       storyName,
     })
   }
