@@ -29,8 +29,11 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
 
   const checkAuthState = () => {
     const { token, expiry, tokenType } = getAuthCookieData() || {}
+    // Default to 'Bearer' if tokenType is missing, undefined, or empty
+    // This handles legacy cookies or corrupted data gracefully
+    const normalizedTokenType = tokenType?.trim() || 'Bearer'
     setAuthState({
-      token: token ? `${tokenType} ${token}` : undefined,
+      token: token ? `${normalizedTokenType} ${token}` : undefined,
       isAuthenticated: !!token,
       isExpired: expiry === undefined || Date.now() >= expiry,
     })

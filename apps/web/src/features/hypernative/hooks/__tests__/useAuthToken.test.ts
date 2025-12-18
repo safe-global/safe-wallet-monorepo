@@ -111,7 +111,7 @@ describe('useAuthToken', () => {
       expect(result.current[0].token).toBe('Custom custom-token')
     })
 
-    it('should handle missing tokenType gracefully', () => {
+    it('should handle missing tokenType gracefully by defaulting to Bearer', () => {
       mockGetAuthCookieData.mockReturnValue({
         token: 'token-without-type',
         tokenType: undefined as unknown as string,
@@ -120,12 +120,12 @@ describe('useAuthToken', () => {
 
       const { result } = renderHook(() => useAuthToken())
 
-      // tokenType undefined becomes "undefined token"
-      expect(result.current[0].token).toBe('undefined token-without-type')
+      // tokenType undefined defaults to "Bearer"
+      expect(result.current[0].token).toBe('Bearer token-without-type')
       expect(result.current[0].isAuthenticated).toBe(true)
     })
 
-    it('should handle empty tokenType', () => {
+    it('should handle empty tokenType by defaulting to Bearer', () => {
       mockGetAuthCookieData.mockReturnValue({
         token: 'token-empty-type',
         tokenType: '',
@@ -134,7 +134,22 @@ describe('useAuthToken', () => {
 
       const { result } = renderHook(() => useAuthToken())
 
-      expect(result.current[0].token).toBe(' token-empty-type')
+      // Empty tokenType defaults to "Bearer"
+      expect(result.current[0].token).toBe('Bearer token-empty-type')
+      expect(result.current[0].isAuthenticated).toBe(true)
+    })
+
+    it('should handle whitespace-only tokenType by defaulting to Bearer', () => {
+      mockGetAuthCookieData.mockReturnValue({
+        token: 'token-whitespace-type',
+        tokenType: '   ',
+        expiry: Date.now() + 3600000,
+      })
+
+      const { result } = renderHook(() => useAuthToken())
+
+      // Whitespace-only tokenType defaults to "Bearer"
+      expect(result.current[0].token).toBe('Bearer token-whitespace-type')
       expect(result.current[0].isAuthenticated).toBe(true)
     })
   })
