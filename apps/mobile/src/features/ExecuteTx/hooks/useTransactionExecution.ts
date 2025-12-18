@@ -5,12 +5,15 @@ import { selectChainById } from '@/src/store/chains'
 import type { RootState } from '@/src/store'
 import logger from '@/src/utils/logger'
 import { addPendingTx } from '@/src/store/pendingTxsSlice'
+import { startExecuting, setExecutingSuccess, setExecutingError } from '@/src/store/executingStateSlice'
 import { EstimatedFeeValues } from '@/src/store/estimatedFeeSlice'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import { useRelayRelayV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import useSafeInfo from '@/src/hooks/useSafeInfo'
 import { executePrivateKeyTx } from '@/src/services/tx-execution/privateKeyExecutor'
 import { executeRelayTx } from '@/src/services/tx-execution/relayExecutor'
+import { executeLedgerTx } from '@/src/services/tx-execution/ledgerExecutor'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 export enum ExecutionStatus {
   IDLE = 'idle',
@@ -63,10 +66,20 @@ export function useTransactionExecution({
         },
       })
     },
+    [ExecutionMethod.WITH_LEDGER]: async () => {
+      return await executeLedgerTx({
+        chain: activeChain,
+        activeSafe,
+        txId,
+        signerAddress,
+        feeParams,
+      })
+    },
   }
 
   const execute = useCallback(async () => {
     setStatus(ExecutionStatus.LOADING)
+    dispatch(startExecuting({ txId, executionMethod }))
 
     try {
       const executor = executors[executionMethod]
@@ -77,12 +90,16 @@ export function useTransactionExecution({
 
       const pendingTxPayload = await executor()
 
+      dispatch(setExecutingSuccess(txId))
       dispatch(addPendingTx(pendingTxPayload))
 
       setStatus(ExecutionStatus.PROCESSING)
     } catch (error) {
       logger.error('Error executing transaction:', error)
       setStatus(ExecutionStatus.ERROR)
+      dispatch(setExecutingError({ txId, error: asError(error).message }))
+
+      throw error
     }
   }, [executionMethod, activeChain, activeSafe, safe, txId, signerAddress, feeParams, relayMutation, dispatch])
 

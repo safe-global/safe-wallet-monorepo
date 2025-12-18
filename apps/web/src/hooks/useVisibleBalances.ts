@@ -3,6 +3,9 @@ import { useMemo } from 'react'
 import useBalances from './useBalances'
 import useHiddenTokens from './useHiddenTokens'
 import type { PortfolioBalances } from './loadables/useLoadBalances'
+import { useAppSelector } from '@/store'
+import { selectHideDust } from '@/store/settingsSlice'
+import { DUST_THRESHOLD } from '@/config/constants'
 
 const PRECISION = 18
 
@@ -22,6 +25,11 @@ const truncateNumber = (balance: string): string => {
 
 const filterHiddenTokens = (items: PortfolioBalances['items'], hiddenAssets: string[]) =>
   items.filter((balanceItem) => !hiddenAssets.includes(balanceItem.tokenInfo.address))
+
+const filterDustTokens = (items: PortfolioBalances['items'], hideDust: boolean) => {
+  if (!hideDust) return items
+  return items.filter((balanceItem) => Number(balanceItem.fiatBalance) >= DUST_THRESHOLD)
+}
 
 const getVisibleFiatTotal = (balances: PortfolioBalances, hiddenAssets: string[]): string => {
   return safeFormatUnits(
@@ -68,20 +76,23 @@ export const useVisibleBalances = (): {
 } => {
   const data = useBalances()
   const hiddenTokens = useHiddenTokens()
+  const hideDust = useAppSelector(selectHideDust)
 
-  return useMemo(
-    () => ({
+  return useMemo(() => {
+    const itemsWithoutHidden = filterHiddenTokens(data.balances.items, hiddenTokens)
+    const visibleItems = filterDustTokens(itemsWithoutHidden, hideDust)
+
+    return {
       ...data,
       balances: {
         ...data.balances,
-        items: filterHiddenTokens(data.balances.items, hiddenTokens),
+        items: visibleItems,
         fiatTotal: data.balances.fiatTotal ? getVisibleFiatTotal(data.balances, hiddenTokens) : '',
         tokensFiatTotal: data.balances.tokensFiatTotal
           ? getVisibleTokensFiatTotal(data.balances, hiddenTokens)
           : undefined,
         positionsFiatTotal: data.balances.positionsFiatTotal,
       },
-    }),
-    [data, hiddenTokens],
-  )
+    }
+  }, [data, hiddenTokens, hideDust])
 }

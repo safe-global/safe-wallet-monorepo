@@ -32,6 +32,56 @@ yarn workspace @safe-global/web storybook
 
 The monorepo uses **Yarn 4 workspaces** to manage dependencies and enables sharing code between web and mobile applications.
 
+## Unified Theme System
+
+The project uses `@safe-global/theme` package as a single source of truth for all design tokens (colors, spacing, typography, radius) across web and mobile.
+
+### Key Features
+
+- **Unified Palettes**: Light and dark mode color palettes shared between platforms
+- **Dual Spacing Systems**: 4px base for mobile, 8px base for web (with overlapping values using same names)
+- **Platform Generators**: Automatic generation of MUI themes (web) and Tamagui tokens (mobile)
+- **Static Colors**: Theme-independent brand colors available to both platforms
+
+### Usage
+
+**Web (MUI)**:
+
+```typescript
+import { generateMuiTheme } from '@safe-global/theme'
+
+const theme = generateMuiTheme('light') // or 'dark'
+```
+
+**Mobile (Tamagui)**:
+
+```typescript
+import { generateTamaguiTokens, generateTamaguiThemes } from '@safe-global/theme'
+
+const tokens = generateTamaguiTokens()
+const themes = generateTamaguiThemes()
+```
+
+**Direct Token Access**:
+
+```typescript
+import { lightPalette, darkPalette, spacingMobile, spacingWeb, typography } from '@safe-global/theme'
+```
+
+### Modifying Theme
+
+To add or modify colors/tokens:
+
+1. Edit files in `packages/theme/src/palettes/` or `packages/theme/src/tokens/`
+2. Run type-check to ensure consistency: `yarn workspace @safe-global/theme type-check`
+3. Regenerate CSS vars for web: `yarn workspace @safe-global/web css-vars`
+
+### Important Notes
+
+- Never edit `apps/web/src/styles/vars.css` directly - it's auto-generated
+- Always use theme tokens instead of hard-coded colors
+- Both light and dark modes must be updated together for consistency
+
 ## General Principles
 
 - Follow the DRY principle – avoid code duplication by extracting reusable functions, hooks, and components
@@ -78,6 +128,7 @@ Specifically for the web app:
    For mobile:
 
    ```bash
+   yarn workspace @safe-global/mobile type-check
    yarn workspace @safe-global/mobile lint
    yarn workspace @safe-global/mobile prettier
    yarn workspace @safe-global/mobile test

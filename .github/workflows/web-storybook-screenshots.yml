@@ -1,0 +1,273 @@
+name: Storybook Screenshots
+
+on:
+  workflow_run:
+    workflows: ['Web Deploy to dev/staging']
+    types:
+      - completed
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  screenshot:
+    # Only run on PRs from the same repository (not forks) and when the deployment succeeded
+    # This prevents untrusted code from forks being executed with elevated permissions
+    if: >
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+
+      - uses: ./.github/actions/yarn
+
+      - name: Install Playwright
+        run: |
+          # Install playwright locally in .github/scripts so node can find it
+          cd .github/scripts
+          npm init -y
+          npm install playwright
+          npx playwright install --with-deps chromium
+
+      - name: Get PR number
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # Use env var to prevent code injection via branch name
+          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          PR_NUMBER=$(gh pr view "$BRANCH_NAME" --json number -q .number 2>/dev/null || echo "")
+          echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
+
+      - name: Exit if no PR found
+        if: steps.pr.outputs.number == ''
+        env:
+          # Use env var to prevent code injection via branch name
+          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          echo "No PR found for branch $BRANCH_NAME"
+          exit 0
+
+      - name: Get changed story files
+        id: changed-stories
+        run: |
+          # Get the base branch (usually dev or main)
+          BASE_SHA=${{ github.event.workflow_run.pull_requests[0].base.sha }}
+          HEAD_SHA=${{ github.event.workflow_run.head_sha }}
+
+          # Find changed story files
+          CHANGED_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '\.(stories|story)\.(tsx?|jsx?)$' || true)
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No story files changed"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Changed story files:"
+            echo "$CHANGED_FILES"
+            # Store as multiline output
+            echo "files<<EOF" >> $GITHUB_OUTPUT
+            echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Extract branch name
+        if: steps.changed-stories.outputs.has_changes == 'true'
+        id: branch
+        env:
+          # Use env var to prevent code injection via branch name
+          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          NORMALIZED=$(echo "$BRANCH_NAME" | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')
+          echo "normalized=$NORMALIZED" >> $GITHUB_OUTPUT
+          echo "Normalized branch: $NORMALIZED"
+
+      - name: Generate story URLs
+        if: steps.changed-stories.outputs.has_changes == 'true'
+        id: story-urls
+        run: |
+          node ./.github/scripts/generate-story-urls.js
+        env:
+          CHANGED_FILES: ${{ steps.changed-stories.outputs.files }}
+          BRANCH_NAME: ${{ steps.branch.outputs.normalized }}
+
+      - name: Take screenshots
+        if: steps.changed-stories.outputs.has_changes == 'true'
+        run: |
+          node ./.github/scripts/capture-screenshots.js
+        env:
+          STORY_URLS: ${{ steps.story-urls.outputs.urls }}
+          BRANCH_NAME: ${{ steps.branch.outputs.normalized }}
+          NODE_PATH: ./.github/scripts/node_modules
+
+      - name: Upload screenshots
+        if: steps.changed-stories.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@v6
+        with:
+          name: storybook-screenshots
+          path: screenshots/
+          retention-days: 5
+
+      - name: Upload screenshots to branch
+        if: steps.changed-stories.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global credential.helper '!f() { echo "username=x-access-token"; echo "password=$GH_TOKEN"; }; f'
+
+          SCREENSHOT_DIR="storybook-screenshots/${{ steps.pr.outputs.number }}"
+
+          cd /tmp
+          rm -rf screenshots-storage
+
+          if git clone --depth 1 --branch storybook-screenshots-storage https://github.com/${{ github.repository }}.git screenshots-storage; then
+            echo "Cloned existing storage branch"
+            cd screenshots-storage
+          else
+            echo "Storage branch doesn't exist, creating it"
+            git clone --depth 1 https://github.com/${{ github.repository }}.git screenshots-storage
+            cd screenshots-storage
+            git checkout --orphan storybook-screenshots-storage
+            git rm -rf . 2>/dev/null || true
+            echo "# Storybook Screenshots Storage" > README.md
+            git add README.md
+            git commit -m "Initialize storybook-screenshots-storage branch"
+          fi
+
+          mkdir -p "$SCREENSHOT_DIR"
+          cp $GITHUB_WORKSPACE/screenshots/*.png "$SCREENSHOT_DIR/" 2>/dev/null || true
+
+          git add "$SCREENSHOT_DIR"
+          if git commit -m "Add screenshots for PR #${{ steps.pr.outputs.number }}"; then
+            git push origin storybook-screenshots-storage
+          else
+            echo "No changes to commit"
+          fi
+
+      - name: Post PR comment with screenshots
+        if: steps.changed-stories.outputs.has_changes == 'true'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // Read screenshot directory
+            const screenshotDir = 'screenshots';
+            if (!fs.existsSync(screenshotDir)) {
+              console.log('No screenshots directory found');
+              return;
+            }
+
+            const screenshots = fs.readdirSync(screenshotDir).filter(f => f.endsWith('.png'));
+
+            if (screenshots.length === 0) {
+              console.log('No screenshots found');
+              return;
+            }
+
+            const prNumber = ${{ steps.pr.outputs.number }};
+            const repo = context.repo;
+            const baseUrl = `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/storybook-screenshots-storage/storybook-screenshots/${prNumber}`;
+
+            // Build comment body
+            let body = '## 📸 Storybook Component Screenshots\n\n';
+            body += `Found ${screenshots.length} screenshot(s) for changed components in this PR.\n\n`;
+            body += `**Storybook Preview:** https://${{ steps.branch.outputs.normalized }}--walletweb.review.5afe.dev/storybook/\n\n`;
+
+            // Group screenshots by component
+            const components = {};
+            for (const file of screenshots) {
+              const match = file.match(/^(.+?)--(.+?)\.png$/);
+              if (match) {
+                const [, componentName, storyName] = match;
+                if (!components[componentName]) {
+                  components[componentName] = [];
+                }
+                components[componentName].push({ storyName, file });
+              }
+            }
+
+            // Add screenshots to comment with proper URLs
+            // Show inline if < 10 screenshots, otherwise use collapsible details
+            const useCollapsible = screenshots.length >= 10;
+
+            for (const [componentName, stories] of Object.entries(components)) {
+              body += `### ${componentName}\n\n`;
+              for (const { storyName, file } of stories) {
+                const imageUrl = `${baseUrl}/${file}`;
+                if (useCollapsible) {
+                  body += `<details>\n<summary>${storyName}</summary>\n\n`;
+                  body += `![${storyName}](${imageUrl})\n\n`;
+                  body += `</details>\n\n`;
+                } else {
+                  body += `**${storyName}**\n\n`;
+                  body += `![${storyName}](${imageUrl})\n\n`;
+                }
+              }
+            }
+
+            body += '\n---\n';
+            body += '*Screenshots are automatically captured from changed story files.*';
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: repo.owner,
+              repo: repo.repo,
+              issue_number: prNumber
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('📸 Storybook Component Screenshots')
+            );
+
+            // Create or update comment
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: repo.owner,
+                repo: repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: repo.owner,
+                repo: repo.repo,
+                issue_number: prNumber,
+                body: body
+              });
+            }
+
+      - name: Post no changes comment
+        if: steps.changed-stories.outputs.has_changes == 'false' && steps.pr.outputs.number != ''
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ steps.pr.outputs.number }}
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('📸 Storybook Component Screenshots')
+            );
+
+            // Delete the comment if no stories changed
+            if (botComment) {
+              await github.rest.issues.deleteComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id
+              });
+            }

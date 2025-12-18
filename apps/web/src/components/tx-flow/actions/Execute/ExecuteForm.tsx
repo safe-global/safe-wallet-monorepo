@@ -9,7 +9,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { getTxOptions } from '@/utils/transactions'
 import useIsValidExecution from '@/hooks/useIsValidExecution'
 import CheckWallet from '@/components/common/CheckWallet'
-import { useIsExecutionLoop, useTxActions } from '@/components/tx/SignOrExecuteForm/hooks'
+import { useIsExecutionLoop, useTxActions } from '@/components/tx/shared/hooks'
 import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
 import useWalletCanRelay from '@/hooks/useWalletCanRelay'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
@@ -27,7 +27,7 @@ import { isWalletRejection } from '@/utils/wallets'
 import css from './styles.module.css'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
+import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
 import SplitMenuButton from '@/components/common/SplitMenuButton'
 import type { SlotComponentProps, SlotName } from '../../slots'
 import { TxFlowContext } from '../../TxFlowProvider'
@@ -63,9 +63,6 @@ export const ExecuteForm = ({
   safeTx?: SafeTransaction
   tooltip?: string
 }): ReactElement => {
-  // Form state
-  const [isSubmitLoadingLocal, setIsSubmitLoadingLocal] = useState<boolean>(false) // TODO: remove this local state and use only the one from TxFlowContext when tx-flow refactor is done
-
   // Hooks
   const currentChain = useCurrentChain()
   const { executeTx } = txActions
@@ -135,7 +132,6 @@ export const ExecuteForm = ({
     e.preventDefault()
 
     setIsSubmitLoading(true)
-    setIsSubmitLoadingLocal(true)
     setSubmitError(undefined)
     setIsRejectedByUser(false)
 
@@ -156,7 +152,6 @@ export const ExecuteForm = ({
       }
 
       setIsSubmitLoading(false)
-      setIsSubmitLoadingLocal(false)
       return
     }
 
@@ -174,7 +169,7 @@ export const ExecuteForm = ({
   const submitDisabled =
     !safeTx ||
     isSubmitDisabled ||
-    isSubmitLoadingLocal ||
+    isSubmitLoading ||
     disableSubmit ||
     isExecutionLoop ||
     cannotPropose ||
@@ -248,7 +243,7 @@ export const ExecuteForm = ({
                     onChange={({ id }) => onChange?.(id)}
                     options={options}
                     disabled={!isOk || submitDisabled}
-                    loading={isSubmitLoading || isSubmitLoadingLocal}
+                    loading={isSubmitLoading}
                     tooltip={tooltip}
                   />
                 </Box>

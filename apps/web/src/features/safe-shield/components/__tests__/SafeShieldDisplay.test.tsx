@@ -8,31 +8,39 @@ import {
 import { faker } from '@faker-js/faker'
 
 describe('SafeShieldDisplay', () => {
-  const mockRecipientAddress = faker.finance.ethereumAddress()
-  const mockContractAddress = faker.finance.ethereumAddress()
-
-  const mockRecipient = RecipientAnalysisBuilder.knownRecipient(mockRecipientAddress).build()
-  const mockContract = ContractAnalysisBuilder.verifiedContract(mockContractAddress).build()
-  const mockThreat = FullAnalysisBuilder.noThreat().build().threat
-  const mockCriticalRecipient = RecipientAnalysisBuilder.incompatibleSafe(mockRecipientAddress).build()
-  const mockWarningRecipient = RecipientAnalysisBuilder.lowActivity(mockRecipientAddress).build()
+  let mockRecipientAddress: string
+  let mockContractAddress: string
+  let mockRecipient: any
+  let mockContract: any
+  let mockThreat: any
+  let mockCriticalRecipient: any
+  let mockWarningRecipient: any
 
   beforeEach(() => {
     jest.clearAllMocks()
+
+    // Recreate mocks for each test to avoid mutation issues
+    mockRecipientAddress = faker.finance.ethereumAddress()
+    mockContractAddress = faker.finance.ethereumAddress()
+    mockRecipient = RecipientAnalysisBuilder.knownRecipient(mockRecipientAddress).build()
+    mockContract = ContractAnalysisBuilder.verifiedContract(mockContractAddress).build()
+    mockThreat = FullAnalysisBuilder.noThreat().build().threat
+    mockCriticalRecipient = RecipientAnalysisBuilder.incompatibleSafe(mockRecipientAddress).build()
+    mockWarningRecipient = RecipientAnalysisBuilder.lowActivity(mockRecipientAddress).build()
   })
 
   describe('Basic Rendering', () => {
     it('should render the component with all main elements', () => {
-      render(<SafeShieldDisplay />)
+      const { container } = render(<SafeShieldDisplay />)
 
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
+      expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
     })
 
     it('should render without any props', () => {
       const { container } = render(<SafeShieldDisplay />)
 
       expect(container.querySelector('.MuiCard-root')).toBeInTheDocument()
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
+      expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
     })
 
     it('should have correct layout structure', () => {
@@ -164,10 +172,12 @@ describe('SafeShieldDisplay', () => {
     })
 
     it('should handle all props together', () => {
-      render(<SafeShieldDisplay recipient={mockRecipient} contract={mockContract} threat={mockThreat} />)
+      const { container } = render(
+        <SafeShieldDisplay recipient={mockRecipient} contract={mockContract} threat={mockThreat} />,
+      )
 
       expect(screen.getByText('Checks passed')).toBeInTheDocument()
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
+      expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
     })
   })
 
@@ -184,30 +194,30 @@ describe('SafeShieldDisplay', () => {
   })
 
   describe('Footer', () => {
-    it('should always render the "Secured by" footer', () => {
-      render(<SafeShieldDisplay />)
+    it('should always render the Safe Shield logo', () => {
+      const { container } = render(<SafeShieldDisplay />)
 
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
+      expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
     })
 
-    it('should render footer even with errors', () => {
+    it('should render logo even with errors', () => {
       const error = new Error('Analysis failed')
       const errorRecipient: [undefined, Error, false] = [undefined, error, false]
 
-      render(<SafeShieldDisplay recipient={errorRecipient} />)
+      const { container } = render(<SafeShieldDisplay recipient={errorRecipient} />)
 
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
+      expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
     })
 
-    it('should render footer during loading', () => {
+    it('should render logo during loading', () => {
       const loadingRecipient = RecipientAnalysisBuilder.knownRecipient(mockRecipientAddress).build()
       if (loadingRecipient) {
         loadingRecipient[2] = true
       }
 
-      render(<SafeShieldDisplay recipient={loadingRecipient} />)
+      const { container } = render(<SafeShieldDisplay recipient={loadingRecipient} />)
 
-      expect(screen.getByText('Secured by')).toBeInTheDocument()
+      expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
     })
   })
 })

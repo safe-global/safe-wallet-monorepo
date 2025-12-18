@@ -12,6 +12,11 @@ import * as walletCanPay from '@/hooks/useWalletCanPay'
 import * as useValidateTxData from '@/hooks/useValidateTxData'
 import { render } from '@/tests/test-utils'
 import { fireEvent, waitFor } from '@testing-library/react'
+import type {
+  RecipientAnalysisResults,
+  ContractAnalysisResults,
+  ThreatAnalysisResults,
+} from '@safe-global/utils/features/safe-shield/types'
 
 // We assume that CheckWallet always returns true
 jest.mock('@/components/common/CheckWallet', () => ({
@@ -44,6 +49,11 @@ describe('ExecuteForm', () => {
     txSecurity: {
       setRecipientAddresses: jest.fn(),
       setSafeTx: jest.fn(),
+      recipient: [undefined, undefined, false] as AsyncResult<RecipientAnalysisResults>,
+      contract: [undefined, undefined, false] as AsyncResult<ContractAnalysisResults>,
+      threat: [undefined, undefined, false] as AsyncResult<ThreatAnalysisResults>,
+      nestedThreat: [undefined, undefined, false] as AsyncResult<ThreatAnalysisResults>,
+      isNested: false,
       needsRiskConfirmation: false,
       isRiskConfirmed: false,
       setIsRiskConfirmed: jest.fn(),

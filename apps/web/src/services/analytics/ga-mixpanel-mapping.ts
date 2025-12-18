@@ -3,6 +3,7 @@ import { CREATE_SAFE_EVENTS } from './events/createLoadSafe'
 import { WALLET_EVENTS } from './events/wallet'
 import { SAFE_APPS_EVENTS } from './events/safeApps'
 import { POSITIONS_EVENTS } from './events/positions'
+import { PORTFOLIO_EVENTS } from './events/portfolio'
 import { STAKE_EVENTS } from './events/stake'
 import { EARN_EVENTS } from './events/earn'
 import { WALLETCONNECT_EVENTS } from './events/walletconnect'
@@ -13,6 +14,7 @@ import { EXPLORE_POSSIBLE_EVENTS, OVERVIEW_EVENTS } from './events/overview'
 import { NESTED_SAFE_EVENTS } from './events/nested-safes'
 import { SAFE_SHIELD_EVENTS } from './events/safe-shield'
 import { HYPERNATIVE_EVENTS } from './events/hypernative'
+import { TX_EVENTS } from './events/transactions'
 
 // If an event is mapped here, it will be tracked in Mixpanel
 export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
@@ -23,6 +25,7 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [POSITIONS_EVENTS.POSITION_EXPANDED.action]: MixpanelEvent.POSITION_EXPANDED,
   [POSITIONS_EVENTS.POSITIONS_VIEW_ALL_CLICKED.action]: MixpanelEvent.POSITIONS_VIEW_ALL_CLICKED,
   [POSITIONS_EVENTS.EMPTY_POSITIONS_EXPLORE_CLICKED.action]: MixpanelEvent.EMPTY_POSITIONS_EXPLORE_CLICKED,
+  [PORTFOLIO_EVENTS.PORTFOLIO_REFRESH_CLICKED.action]: MixpanelEvent.PORTFOLIO_REFRESH_CLICKED,
   [STAKE_EVENTS.STAKE_VIEWED.action]: MixpanelEvent.STAKE_VIEWED,
   [EARN_EVENTS.EARN_VIEWED.action]: MixpanelEvent.EARN_VIEWED,
   [WALLETCONNECT_EVENTS.CONNECTED.action]: MixpanelEvent.WC_CONNECTED,
@@ -51,6 +54,16 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [SAFE_SHIELD_EVENTS.CONTRACT_DECODED.action]: MixpanelEvent.TRANSACTION_CONTRACT_DECODED,
   [SAFE_SHIELD_EVENTS.THREAT_ANALYZED.action]: MixpanelEvent.TRANSACTION_THREAT_ANALYZED,
   [SAFE_SHIELD_EVENTS.SIMULATED.action]: MixpanelEvent.TRANSACTION_SIMULATED,
+  [TX_EVENTS.EXECUTE.action]: MixpanelEvent.TRANSACTION_EXECUTED,
+  [TX_EVENTS.EXECUTE_VIA_PARENT.action]: MixpanelEvent.TRANSACTION_EXECUTED_VIA_PARENT,
+  [TX_EVENTS.EXECUTE_IN_PARENT.action]: MixpanelEvent.TRANSACTION_EXECUTED_IN_PARENT,
+  [TX_EVENTS.EXECUTE_VIA_ROLE.action]: MixpanelEvent.TRANSACTION_EXECUTED_VIA_ROLE,
+  [TX_EVENTS.CREATE.action]: MixpanelEvent.TRANSACTION_SUBMITTED,
+  [TX_EVENTS.CREATE_VIA_ROLE.action]: MixpanelEvent.TRANSACTION_SUBMITTED,
+  [TX_EVENTS.CREATE_VIA_PROPOSER.action]: MixpanelEvent.TRANSACTION_SUBMITTED,
+  [TX_EVENTS.CREATE_VIA_PARENT.action]: MixpanelEvent.TRANSACTION_SUBMITTED,
+  [TX_EVENTS.CREATE_VIA_SPENDING_LIMTI.action]: MixpanelEvent.TRANSACTION_SUBMITTED,
+  [TX_EVENTS.EXECUTE_VIA_SPENDING_LIMIT.action]: MixpanelEvent.TRANSACTION_EXECUTED,
 }
 
 // Maps GA labels (lowercase) to Mixpanel properties (Title Case)

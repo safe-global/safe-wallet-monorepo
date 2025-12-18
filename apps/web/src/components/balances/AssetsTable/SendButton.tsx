@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { Button, IconButton, Tooltip, SvgIcon } from '@mui/material'
-import ArrowIconNW from '@/public/images/common/arrow-top-right.svg'
+import ArrowIconNW from '@/public/images/common/arrow-up-right.svg'
 import CheckWallet from '@/components/common/CheckWallet'
 import useSpendingLimit from '@/hooks/useSpendingLimit'
 import Track from '@/components/common/Track'
@@ -31,7 +31,7 @@ const SendButton = ({
       {(isOk) => (
         <Track {...ASSETS_EVENTS.SEND}>
           {onlyIcon ? (
-            <Tooltip title="Send" placement="top" arrow>
+            <Tooltip title={isOk ? 'Send' : ''} placement="top" arrow>
               <span>
                 <IconButton
                   data-testid="send-button"

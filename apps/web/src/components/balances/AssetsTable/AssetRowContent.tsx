@@ -36,7 +36,7 @@ export const AssetRowContent = ({
   return (
     <Box className={css.mobileAssetRow}>
       <div className={css.token}>
-        <TokenIcon logoUri={item.tokenInfo.logoUri} tokenSymbol={item.tokenInfo.symbol} />
+        <TokenIcon logoUri={item.tokenInfo.logoUri} tokenSymbol={item.tokenInfo.symbol} size={32} />
 
         <Stack>
           <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>

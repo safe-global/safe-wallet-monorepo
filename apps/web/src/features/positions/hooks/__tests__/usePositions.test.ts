@@ -6,7 +6,7 @@ import * as useChains from '@/hooks/useChains'
 import * as useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsPositionsFeatureEnabled'
 import * as positionsQueries from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import * as store from '@/store'
-import { selectCurrency } from '@/store/settingsSlice'
+import { selectCurrency, selectSettings, TOKEN_LISTS } from '@/store/settingsSlice'
 import * as useBalances from '@/hooks/useBalances'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
@@ -121,6 +121,9 @@ describe('usePositions', () => {
       if (selector === selectCurrency) {
         return 'USD'
       }
+      if (selector === selectSettings) {
+        return { tokenList: TOKEN_LISTS.TRUSTED }
+      }
       return undefined
     })
 
@@ -166,7 +169,7 @@ describe('usePositions', () => {
     })
   })
 
-  describe('legacy positions endpoint', () => {
+  describe('positions endpoint', () => {
     beforeEach(() => {
       jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => {
         if (feature === FEATURES.PORTFOLIO_ENDPOINT) {
@@ -176,7 +179,7 @@ describe('usePositions', () => {
       })
     })
 
-    it('should return positions from legacy endpoint when portfolio endpoint is disabled', async () => {
+    it('should return positions from positions endpoint when portfolio endpoint is disabled', async () => {
       const mockProtocols = [createMockProtocol()]
 
       jest.spyOn(positionsQueries, 'usePositionsGetPositionsV1Query').mockReturnValue({
@@ -197,7 +200,7 @@ describe('usePositions', () => {
       expect(result.current.isLoading).toBe(false)
     })
 
-    it('should handle loading state from legacy endpoint', async () => {
+    it('should handle loading state from positions endpoint', async () => {
       jest.spyOn(positionsQueries, 'usePositionsGetPositionsV1Query').mockReturnValue({
         currentData: undefined,
         isLoading: true,
@@ -211,8 +214,8 @@ describe('usePositions', () => {
       expect(result.current.data).toBeUndefined()
     })
 
-    it('should handle errors from legacy endpoint', async () => {
-      const mockError = new Error('Legacy positions endpoint error')
+    it('should handle errors from positions endpoint', async () => {
+      const mockError = new Error('Positions endpoint error')
 
       jest.spyOn(positionsQueries, 'usePositionsGetPositionsV1Query').mockReturnValue({
         currentData: undefined,

@@ -20,6 +20,7 @@ import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { AssetRowContent } from './AssetRowContent'
 import { ActionButtons } from './ActionButtons'
 import TokenAmount from '@/components/common/TokenAmount'
+import { HiddenTokensInfo } from './HiddenTokensInfo'
 
 const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   asset: {
@@ -83,9 +84,11 @@ const skeletonRows: EnhancedTableProps['rows'] = Array(3).fill({ cells: skeleton
 const AssetsTable = ({
   showHiddenAssets,
   setShowHiddenAssets,
+  onOpenManageTokens,
 }: {
   showHiddenAssets: boolean
   setShowHiddenAssets: (hidden: boolean) => void
+  onOpenManageTokens?: () => void
 }): ReactElement => {
   const headCells = [
     {
@@ -206,23 +209,9 @@ const AssetsTable = ({
             weight: {
               rawValue: itemShareOfFiatTotal,
               content: itemShareOfFiatTotal ? (
-                <Box textAlign="right">
-                  <Stack direction="row" alignItems="center" gap={0.5} position="relative" display="inline-flex">
-                    <div className={css.customProgress}>
-                      <div
-                        className={css.progressRing}
-                        style={
-                          {
-                            '--progress': `${(itemShareOfFiatTotal * 100).toFixed(1)}%`,
-                          } as React.CSSProperties & { '--progress': string }
-                        }
-                      />
-                    </div>
-                    <Typography variant="body2" sx={{ minWidth: '52px', textAlign: 'right' }}>
-                      {formatPercentage(itemShareOfFiatTotal)}
-                    </Typography>
-                  </Stack>
-                </Box>
+                <Typography variant="body2" textAlign="right">
+                  {formatPercentage(itemShareOfFiatTotal)}
+                </Typography>
               ) : (
                 <></>
               ),
@@ -312,11 +301,19 @@ const AssetsTable = ({
                   </Box>
                 ))}
           </Box>
+          <Box sx={{ pt: 2, pb: 2 }}>
+            <HiddenTokensInfo onOpenManageTokens={onOpenManageTokens} />
+          </Box>
         </Card>
       ) : (
         <Card sx={{ px: 2, mb: 2 }}>
           <div className={classNames(css.container, { [css.containerWideActions]: showHiddenAssets })}>
-            <EnhancedTable rows={rows} headCells={headCells} compact />
+            <EnhancedTable
+              rows={rows}
+              headCells={headCells}
+              compact
+              footer={<HiddenTokensInfo onOpenManageTokens={onOpenManageTokens} />}
+            />
           </div>
         </Card>
       )}

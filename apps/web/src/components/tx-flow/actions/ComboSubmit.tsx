@@ -1,16 +1,21 @@
 import { useContext, useMemo } from 'react'
 import { Slot, type SlotComponentProps, SlotName, useSlot, useSlotIds, withSlot } from '../slots'
 import { Box } from '@mui/material'
-import WalletRejectionError from '@/components/tx/SignOrExecuteForm/WalletRejectionError'
+import WalletRejectionError from '@/components/tx/shared/errors/WalletRejectionError'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { TxFlowContext } from '../TxFlowProvider'
 import { useValidateTxData } from '@/hooks/useValidateTxData'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { SafeTxContext } from '../SafeTxProvider'
+import { useAlreadySigned } from '@/components/tx/shared/hooks'
 
 const COMBO_SUBMIT_ACTION = 'comboSubmitAction'
+const EXECUTE_ACTION = 'execute'
+const SIGN_ACTION = 'sign'
 
 export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
   const { txId, submitError, isRejectedByUser } = useContext(TxFlowContext)
+  const { safeTx } = useContext(SafeTxContext)
   const slotItems = useSlot(SlotName.ComboSubmit)
   const slotIds = useSlotIds(SlotName.ComboSubmit)
 
@@ -20,14 +25,28 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
     [validationResult],
   )
 
-  const initialSubmitAction = slotIds?.[0]
-  const options = useMemo(() => slotItems.map(({ label, id }) => ({ label, id })), [slotItems])
-  const [submitAction = initialSubmitAction, setSubmitAction] = useLocalStorage<string>(COMBO_SUBMIT_ACTION)
+  const hasSigned = useAlreadySigned(safeTx)
 
-  const slotId = useMemo(
-    () => (slotIds.includes(submitAction) ? submitAction : initialSubmitAction),
-    [slotIds, submitAction, initialSubmitAction],
-  )
+  const options = useMemo(() => slotItems.map(({ label, id }) => ({ label, id })), [slotItems])
+  const [submitAction, setSubmitAction] = useLocalStorage<string>(COMBO_SUBMIT_ACTION)
+
+  // Auto-select Execute if available on first load, otherwise respect user's stored preference
+  const slotId = useMemo(() => {
+    const executeAvailable = slotIds.includes(EXECUTE_ACTION)
+    const initialSubmitAction = slotIds?.[0]
+
+    // If no stored preference or stored action is not available in current slots
+    if (submitAction === undefined || !slotIds.includes(submitAction)) {
+      // Prefer Execute if available, otherwise use first option
+      return executeAvailable ? EXECUTE_ACTION : initialSubmitAction
+    }
+    // Use stored preference (respect user's choice)
+    return submitAction
+  }, [slotIds, submitAction])
+
+  // Show warning if Execute is available but user selected Sign (either manually or from stored preference)
+  const executeAvailable = slotIds.includes(EXECUTE_ACTION)
+  const showLastSignerWarning = executeAvailable && submitAction === SIGN_ACTION && !hasSigned
 
   if (slotIds.length === 0) {
     return false
@@ -53,6 +72,14 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
 
       {validationError !== undefined && (
         <ErrorMessage error={validationError}>Error validating transaction data</ErrorMessage>
+      )}
+
+      {showLastSignerWarning && (
+        <Box mt={1}>
+          <ErrorMessage level="info">
+            You&apos;re providing the last signature. After you sign, anyone can execute this transaction.
+          </ErrorMessage>
+        </Box>
       )}
 
       <Slot

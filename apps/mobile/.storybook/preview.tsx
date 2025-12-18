@@ -12,11 +12,15 @@ import { FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE } from 'redux-persist
 import { cgwClient } from '@safe-global/store/gateway/cgwClient'
 import { web3API } from '@/src/store/signersBalance'
 import { TOKEN_LISTS } from '@/src/store/settingsSlice'
+import { chainsAdapter } from '@safe-global/store/gateway/chains'
+import { mockChain } from '@/src/tests/mocks'
 
 const navigationRef = createNavigationContainerRef()
 
 // Create a mock Redux store for Storybook
 const createStorybookStore = () => {
+  const mockChainsState = chainsAdapter.setAll(chainsAdapter.getInitialState(), [mockChain])
+
   return configureStore({
     reducer: rootReducer,
     middleware: (getDefaultMiddleware) =>
@@ -39,6 +43,23 @@ const createStorybookStore = () => {
           },
         },
       },
+      activeSafe: {
+        chainId: '1',
+        address: '0x1234567890123456789012345678901234567890',
+        threshold: 1,
+        owners: [],
+        nonce: 0,
+        version: '1.3.0',
+      },
+      [cgwClient.reducerPath]: {
+        queries: {
+          'getChainsConfig(undefined)': {
+            status: 'fulfilled',
+            data: mockChainsState,
+          },
+        },
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any,
   })
 }

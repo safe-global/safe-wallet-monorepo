@@ -36,4 +36,12 @@ describe('SafeShieldHeadline', () => {
       expect(getByText('Checks passed')).toBeTruthy()
     })
   })
+
+  describe('Error State', () => {
+    it('should render Checks unavailable when severity is ERROR', () => {
+      const { getByText } = render(<SafeShieldHeadline type={Severity.ERROR} />)
+
+      expect(getByText('Checks unavailable')).toBeTruthy()
+    })
+  })
 })

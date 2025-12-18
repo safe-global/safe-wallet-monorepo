@@ -1,7 +1,7 @@
 {
   "name": "@safe-global/mobile",
   "main": "index.js",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "doctor": {
     "reactNativeDirectoryCheck": {
       "enabled": true
@@ -23,8 +23,8 @@
     "lint": "eslint src/*",
     "lint:fix": "eslint src/* --fix",
     "type-check": "tsc --noEmit",
-    "prettier": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,md}\"",
-    "prettier:fix": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,md}\"",
+    "prettier": "prettier --check . --config ../../.prettierrc --ignore-path ../../.prettierignore",
+    "prettier:fix": "prettier --write . --config ../../.prettierrc --ignore-path ../../.prettierignore",
     "storybook-generate": "sb-rn-get-stories",
     "generate:icons": "node ./scripts/generateIconTypes.js",
     "prepare": "husky",
@@ -65,9 +65,10 @@
     "@react-native-masked-view/masked-view": "0.3.2",
     "@react-native-menu/menu": "^2.0.0",
     "@react-navigation/native": "^7.1.17",
-    "@reduxjs/toolkit": "^2.8.2",
+    "@reduxjs/toolkit": "^2.11.0",
     "@safe-global/protocol-kit": "^5.2.22",
     "@safe-global/store": "workspace:^",
+    "@safe-global/theme": "workspace:^",
     "@safe-global/utils": "workspace:^",
     "@shopify/flash-list": "^2.2.0",
     "@storybook/addon-react-native-web": "^0.0.26",

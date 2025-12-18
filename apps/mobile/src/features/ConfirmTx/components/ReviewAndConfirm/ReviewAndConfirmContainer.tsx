@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 import { useLocalSearchParams, router } from 'expo-router'
 import { Loader } from '@/src/components/Loader'
 import { Text, View } from 'tamagui'
@@ -9,20 +9,13 @@ import { useTransactionSigning } from '@/src/features/ConfirmTx/components/SignT
 import { useTransactionSigner } from '@/src/features/ConfirmTx/hooks/useTransactionSigner'
 import { useTransactionSigningState } from '@/src/hooks/useTransactionSigningState'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
+import { useIsMounted } from '@/src/hooks/useIsMounted'
 
 export function ReviewAndConfirmContainer() {
   const { txId } = useLocalSearchParams<{ txId: string }>()
-  const { data: txDetails, isLoading, isError } = useTransactionData(txId || '')
+  const { currentData: txDetails, isLoading, isError } = useTransactionData(txId || '')
   const { isBiometricsEnabled } = useBiometrics()
-  // Track if component is mounted to handle navigation in closure
-  const isMountedRef = useRef(true)
-
-  useEffect(() => {
-    isMountedRef.current = true
-    return () => {
-      isMountedRef.current = false
-    }
-  }, [])
+  const isMounted = useIsMounted()
 
   const { signerState } = useTransactionSigner(txId || '')
   const { activeSigner } = signerState
@@ -60,7 +53,7 @@ export function ReviewAndConfirmContainer() {
 
     try {
       await executeSign()
-      if (isMountedRef.current) {
+      if (isMounted()) {
         router.replace({
           pathname: '/signing-success',
           params: { txId },
@@ -69,7 +62,7 @@ export function ReviewAndConfirmContainer() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to sign transaction'
 
-      if (isMountedRef.current) {
+      if (isMounted()) {
         router.push({
           pathname: '/signing-error',
           params: { description: errorMessage },
@@ -94,7 +87,7 @@ export function ReviewAndConfirmContainer() {
     )
   }
 
-  if (isError || !txDetails) {
+  if ((isError && !txDetails) || !txDetails) {
     return (
       <View flex={1} justifyContent="center" alignItems="center">
         <Text>Error loading transaction details</Text>

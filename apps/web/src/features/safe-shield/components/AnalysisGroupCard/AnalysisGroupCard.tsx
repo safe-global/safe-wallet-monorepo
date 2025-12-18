@@ -17,18 +17,22 @@ import isEmpty from 'lodash/isEmpty'
 
 interface AnalysisGroupCardProps {
   data: { [address: string]: GroupedAnalysisResults }
+  showImage?: boolean
   highlightedSeverity?: Severity
   delay?: number
   analyticsEvent?: AnalyticsEvent
   'data-testid'?: string
+  requestId?: string
 }
 
 export const AnalysisGroupCard = ({
   data,
+  showImage,
   highlightedSeverity,
   delay = 0,
   analyticsEvent,
   'data-testid': dataTestId,
+  requestId,
 }: AnalysisGroupCardProps): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
@@ -121,9 +125,11 @@ export const AnalysisGroupCard = ({
 
               return (
                 <AnalysisGroupCardItem
+                  showImage={showImage}
                   severity={shouldHighlight ? result.severity : undefined}
                   key={index}
                   result={result}
+                  requestId={requestId}
                 />
               )
             })}

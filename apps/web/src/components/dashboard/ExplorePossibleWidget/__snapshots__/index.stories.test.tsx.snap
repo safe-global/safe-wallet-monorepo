@@ -1,0 +1,481 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./index.stories DarkMode 1`] = `
+<div
+  class="MuiBox-root css-9whsf3"
+>
+  <section
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-6i93q8-MuiPaper-root-MuiCard-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      style="position: relative;"
+    >
+      <div
+        aria-hidden="true"
+        class="gradientFade"
+      />
+      <div
+        class="header"
+      >
+        <h2
+          class="headerTitle"
+        >
+          Explore what's possible
+        </h2>
+      </div>
+      <ul
+        aria-label="Explore possible features"
+        class="carouselContainer"
+        role="list"
+        tabindex="0"
+      >
+        <li
+          class="carouselItem"
+        >
+          <a
+            aria-label="Manage multiple Safes"
+            class="cardLink"
+            href="https://app.safe.global/welcome/spaces"
+          >
+            <div
+              class="card"
+            >
+              <div
+                class="iconContainer"
+              >
+                <img
+                  alt="Manage multiple Safes icon"
+                  class="icon"
+                  src="/images/explore-possible/spaces-large.svg"
+                />
+              </div>
+              <p
+                class="title"
+              >
+                Manage multiple Safes
+              </p>
+            </div>
+          </a>
+        </li>
+        <li
+          class="carouselItem"
+        >
+          <a
+            aria-label="Build custom transactions"
+            class="cardLink"
+            href="/apps?safe=sep%3A0x0000000000000000000000000000000000000001"
+          >
+            <div
+              class="card"
+            >
+              <div
+                class="iconContainer"
+              >
+                <img
+                  alt="Build custom transactions icon"
+                  class="icon"
+                  src="/images/explore-possible/tx-builder-large.svg"
+                />
+              </div>
+              <p
+                class="title"
+              >
+                Build custom transactions
+              </p>
+            </div>
+          </a>
+        </li>
+        <li
+          class="carouselItem"
+        >
+          <a
+            aria-label="Connect to web3 apps"
+            class="cardLink"
+            href="/apps?safe=sep%3A0x0000000000000000000000000000000000000001"
+          >
+            <div
+              class="card"
+            >
+              <div
+                class="iconContainer"
+              >
+                <img
+                  alt="Connect to web3 apps icon"
+                  class="icon"
+                  src="/images/explore-possible/apps-large.svg"
+                />
+              </div>
+              <p
+                class="title"
+              >
+                Connect to web3 apps
+              </p>
+            </div>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+</div>
+`;
+
+exports[`./index.stories Default 1`] = `
+<div
+  class="MuiBox-root css-9whsf3"
+>
+  <section
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-6i93q8-MuiPaper-root-MuiCard-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      style="position: relative;"
+    >
+      <div
+        aria-hidden="true"
+        class="gradientFade"
+      />
+      <div
+        class="header"
+      >
+        <h2
+          class="headerTitle"
+        >
+          Explore what's possible
+        </h2>
+      </div>
+      <ul
+        aria-label="Explore possible features"
+        class="carouselContainer"
+        role="list"
+        tabindex="0"
+      >
+        <li
+          class="carouselItem"
+        >
+          <a
+            aria-label="Manage multiple Safes"
+            class="cardLink"
+            href="https://app.safe.global/welcome/spaces"
+          >
+            <div
+              class="card"
+            >
+              <div
+                class="iconContainer"
+              >
+                <img
+                  alt="Manage multiple Safes icon"
+                  class="icon"
+                  src="/images/explore-possible/spaces-large.svg"
+                />
+              </div>
+              <p
+                class="title"
+              >
+                Manage multiple Safes
+              </p>
+            </div>
+          </a>
+        </li>
+        <li
+          class="carouselItem"
+        >
+          <a
+            aria-label="Build custom transactions"
+            class="cardLink"
+            href="/apps?safe=sep%3A0x0000000000000000000000000000000000000001"
+          >
+            <div
+              class="card"
+            >
+              <div
+                class="iconContainer"
+              >
+                <img
+                  alt="Build custom transactions icon"
+                  class="icon"
+                  src="/images/explore-possible/tx-builder-large.svg"
+                />
+              </div>
+              <p
+                class="title"
+              >
+                Build custom transactions
+              </p>
+            </div>
+          </a>
+        </li>
+        <li
+          class="carouselItem"
+        >
+          <a
+            aria-label="Connect to web3 apps"
+            class="cardLink"
+            href="/apps?safe=sep%3A0x0000000000000000000000000000000000000001"
+          >
+            <div
+              class="card"
+            >
+              <div
+                class="iconContainer"
+              >
+                <img
+                  alt="Connect to web3 apps icon"
+                  class="icon"
+                  src="/images/explore-possible/apps-large.svg"
+                />
+              </div>
+              <p
+                class="title"
+              >
+                Connect to web3 apps
+              </p>
+            </div>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+</div>
+`;
+
+exports[`./index.stories LightMode 1`] = `
+<div
+  class="MuiBox-root css-9whsf3"
+>
+  <section
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-6i93q8-MuiPaper-root-MuiCard-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      style="position: relative;"
+    >
+      <div
+        aria-hidden="true"
+        class="gradientFade"
+      />
+      <div
+        class="header"
+      >
+        <h2
+          class="headerTitle"
+        >
+          Explore what's possible
+        </h2>
+      </div>
+      <ul
+        aria-label="Explore possible features"
+        class="carouselContainer"
+        role="list"
+        tabindex="0"
+      >
+        <li
+          class="carouselItem"
+        >
+          <a
+            aria-label="Manage multiple Safes"
+            class="cardLink"
+            href="https://app.safe.global/welcome/spaces"
+          >
+            <div
+              class="card"
+            >
+              <div
+                class="iconContainer"
+              >
+                <img
+                  alt="Manage multiple Safes icon"
+                  class="icon"
+                  src="/images/explore-possible/spaces-large.svg"
+                />
+              </div>
+              <p
+                class="title"
+              >
+                Manage multiple Safes
+              </p>
+            </div>
+          </a>
+        </li>
+        <li
+          class="carouselItem"
+        >
+          <a
+            aria-label="Build custom transactions"
+            class="cardLink"
+            href="/apps?safe=sep%3A0x0000000000000000000000000000000000000001"
+          >
+            <div
+              class="card"
+            >
+              <div
+                class="iconContainer"
+              >
+                <img
+                  alt="Build custom transactions icon"
+                  class="icon"
+                  src="/images/explore-possible/tx-builder-large.svg"
+                />
+              </div>
+              <p
+                class="title"
+              >
+                Build custom transactions
+              </p>
+            </div>
+          </a>
+        </li>
+        <li
+          class="carouselItem"
+        >
+          <a
+            aria-label="Connect to web3 apps"
+            class="cardLink"
+            href="/apps?safe=sep%3A0x0000000000000000000000000000000000000001"
+          >
+            <div
+              class="card"
+            >
+              <div
+                class="iconContainer"
+              >
+                <img
+                  alt="Connect to web3 apps icon"
+                  class="icon"
+                  src="/images/explore-possible/apps-large.svg"
+                />
+              </div>
+              <p
+                class="title"
+              >
+                Connect to web3 apps
+              </p>
+            </div>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+</div>
+`;
+
+exports[`./index.stories NarrowViewport 1`] = `
+<div
+  class="MuiBox-root css-9whsf3"
+>
+  <section
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-6i93q8-MuiPaper-root-MuiCard-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      style="position: relative;"
+    >
+      <div
+        aria-hidden="true"
+        class="gradientFade"
+      />
+      <div
+        class="header"
+      >
+        <h2
+          class="headerTitle"
+        >
+          Explore what's possible
+        </h2>
+      </div>
+      <ul
+        aria-label="Explore possible features"
+        class="carouselContainer"
+        role="list"
+        tabindex="0"
+      >
+        <li
+          class="carouselItem"
+        >
+          <a
+            aria-label="Manage multiple Safes"
+            class="cardLink"
+            href="https://app.safe.global/welcome/spaces"
+          >
+            <div
+              class="card"
+            >
+              <div
+                class="iconContainer"
+              >
+                <img
+                  alt="Manage multiple Safes icon"
+                  class="icon"
+                  src="/images/explore-possible/spaces-large.svg"
+                />
+              </div>
+              <p
+                class="title"
+              >
+                Manage multiple Safes
+              </p>
+            </div>
+          </a>
+        </li>
+        <li
+          class="carouselItem"
+        >
+          <a
+            aria-label="Build custom transactions"
+            class="cardLink"
+            href="/apps?safe=sep%3A0x0000000000000000000000000000000000000001"
+          >
+            <div
+              class="card"
+            >
+              <div
+                class="iconContainer"
+              >
+                <img
+                  alt="Build custom transactions icon"
+                  class="icon"
+                  src="/images/explore-possible/tx-builder-large.svg"
+                />
+              </div>
+              <p
+                class="title"
+              >
+                Build custom transactions
+              </p>
+            </div>
+          </a>
+        </li>
+        <li
+          class="carouselItem"
+        >
+          <a
+            aria-label="Connect to web3 apps"
+            class="cardLink"
+            href="/apps?safe=sep%3A0x0000000000000000000000000000000000000001"
+          >
+            <div
+              class="card"
+            >
+              <div
+                class="iconContainer"
+              >
+                <img
+                  alt="Connect to web3 apps icon"
+                  class="icon"
+                  src="/images/explore-possible/apps-large.svg"
+                />
+              </div>
+              <p
+                class="title"
+              >
+                Connect to web3 apps
+              </p>
+            </div>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+</div>
+`;

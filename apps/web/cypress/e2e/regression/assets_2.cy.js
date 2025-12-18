@@ -29,7 +29,8 @@ describe('Assets 2 tests', () => {
       assets.currencyDaiCap,
     ]
 
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     main.verifyValuesExist(assets.tokenListTable, spamTokens)
     main.verifyElementsCount(assets.tablePaginationContainer, 0)
   })
@@ -37,7 +38,8 @@ describe('Assets 2 tests', () => {
   it('Verify Proposers have the Send and Swap buttons enabled', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_31)
     wallet.connectSigner(signer)
-    assets.selectTokenList(assets.tokenListOptions.default)
+    assets.toggleShowAllTokens(false)
+    assets.toggleHideDust(false)
     main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther])
     assets.showSendBtn().should('be.enabled')
     assets.showSwapBtn().should('be.enabled')
@@ -48,7 +50,8 @@ describe('Assets 2 tests', () => {
   it('Verify that Send and Swap buttons are enabled for spending limit users', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_8)
     wallet.connectSigner(signer2)
-    assets.selectTokenList(assets.tokenListOptions.default)
+    assets.toggleShowAllTokens(false)
+    assets.toggleHideDust(false)
     main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther])
     assets.showSendBtn().should('be.enabled')
     assets.showSwapBtn().should('be.enabled')

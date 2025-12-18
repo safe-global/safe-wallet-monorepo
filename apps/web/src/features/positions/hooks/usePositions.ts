@@ -41,6 +41,10 @@ const transformAppBalancesToProtocols = (appBalances?: AppBalance[]): Protocol[]
   }))
 }
 
+/**
+ * Hook to load positions data.
+ * Uses portfolio endpoint when enabled, otherwise falls back to positions endpoint.
+ */
 const usePositions = () => {
   const chainId = useChainId()
   const { safeAddress } = useSafeInfo()
@@ -49,12 +53,12 @@ const usePositions = () => {
   const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
 
   const shouldUsePortfolioEndpoint = isPositionsEnabled && isPortfolioEndpointEnabled
-  const shouldUsePositionEndpoint = isPositionsEnabled && !isPortfolioEndpointEnabled
+  const shouldUsePositionEndpoint = isPositionsEnabled && !shouldUsePortfolioEndpoint
 
   const {
-    currentData: legacyPositionsData,
-    error: legacyPositionsError,
-    isLoading: legacyPositionsLoading,
+    currentData: positionsData,
+    error: positionsError,
+    isLoading: positionsLoading,
   } = usePositionsGetPositionsV1Query(
     { chainId, safeAddress, fiatCode: currency },
     {
@@ -69,18 +73,18 @@ const usePositions = () => {
 
   return useMemo(
     () => ({
-      data: shouldUsePortfolioEndpoint ? transformAppBalancesToProtocols(balances?.positions) : legacyPositionsData,
-      error: shouldUsePortfolioEndpoint ? balancesError : legacyPositionsError,
-      isLoading: shouldUsePortfolioEndpoint ? balancesLoading : legacyPositionsLoading,
+      data: shouldUsePortfolioEndpoint ? transformAppBalancesToProtocols(balances?.positions) : positionsData,
+      error: shouldUsePortfolioEndpoint ? balancesError : positionsError,
+      isLoading: shouldUsePortfolioEndpoint ? balancesLoading : positionsLoading,
     }),
     [
       shouldUsePortfolioEndpoint,
       balances?.positions,
-      legacyPositionsData,
+      positionsData,
       balancesError,
-      legacyPositionsError,
+      positionsError,
       balancesLoading,
-      legacyPositionsLoading,
+      positionsLoading,
     ],
   )
 }
