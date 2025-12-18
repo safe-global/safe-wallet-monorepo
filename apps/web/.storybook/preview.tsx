@@ -9,22 +9,19 @@ import '../src/styles/globals.css'
 
 const BACKGROUND_COLORS: Record<string, string> = { light: '#ffffff', dark: '#121312' }
 
-// Syncs data-theme attribute and background color with Storybook's theme switcher
-const DataThemeWrapper = ({ children, themeMode }: { children: React.ReactNode; themeMode: string }) => {
+// Syncs data-theme attribute and background color with the theme switcher
+const ThemeSyncDecorator = (Story: React.ComponentType, context: { globals?: { theme?: string } }) => {
+  const themeMode = context.globals?.theme || 'light'
+  const backgroundColor = BACKGROUND_COLORS[themeMode] || BACKGROUND_COLORS.light
+
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', themeMode)
-    document.body.style.backgroundColor = BACKGROUND_COLORS[themeMode] || BACKGROUND_COLORS.light
   }, [themeMode])
 
-  return <>{children}</>
-}
-
-const DataThemeDecorator = (Story: React.ComponentType, context: { globals?: { theme?: string } }) => {
-  const themeMode = context.globals?.theme || 'light'
   return (
-    <DataThemeWrapper themeMode={themeMode}>
+    <div style={{ backgroundColor, padding: '1rem' }}>
       <Story />
-    </DataThemeWrapper>
+    </div>
   )
 }
 
@@ -36,21 +33,10 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
-    backgrounds: {
-      default: 'light',
-      values: [
-        { name: 'light', value: '#ffffff' },
-        { name: 'dark', value: '#121312' },
-      ],
-    },
-  },
-
-  initialGlobals: {
-    backgrounds: { value: 'light' },
+    backgrounds: { disable: true },
   },
 
   decorators: [
-    // First, apply the theme provider
     withThemeFromJSXProvider({
       GlobalStyles: CssBaseline,
       Provider: ThemeProvider,
@@ -60,8 +46,7 @@ const preview: Preview = {
       },
       defaultTheme: 'light',
     }),
-    // Then, sync the data-theme attribute for CSS variables
-    DataThemeDecorator,
+    ThemeSyncDecorator,
   ],
 }
 
