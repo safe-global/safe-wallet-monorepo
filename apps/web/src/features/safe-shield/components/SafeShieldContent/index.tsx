@@ -100,12 +100,18 @@ export const SafeShieldContent = ({
             showImage
           />
 
-          <ThreatAnalysis threat={threat} delay={threatAnalysisDelay} highlightedSeverity={highlightedSeverity} />
+          <ThreatAnalysis
+            threat={threat}
+            delay={threatAnalysisDelay}
+            highlightedSeverity={highlightedSeverity}
+            hypernativeAuth={hypernativeAuth}
+          />
 
           <HypernativeCustomChecks
             threat={threat}
             delay={threatAnalysisDelay}
             highlightedSeverity={highlightedSeverity}
+            hypernativeAuth={hypernativeAuth}
           />
 
           {!contractLoading && !threatLoading && (
