@@ -1,5 +1,5 @@
 import type { RefObject } from 'react'
-import { useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 const CALENDLY_SCRIPT_URL = 'https://assets.calendly.com/assets/external/widget.js'
 const POLL_INTERVAL_MS = 100
@@ -11,10 +11,36 @@ const POLL_TIMEOUT_MS = 5000
  *
  * @param widgetRef - Ref to the DOM element where the widget will be rendered
  * @param calendlyUrl - The Calendly URL to display
+ * @returns boolean indicating if the widget is loaded
  */
-export const useCalendlyScript = (widgetRef: RefObject<HTMLDivElement | null>, calendlyUrl: string): void => {
+export const useCalendlyScript = (widgetRef: RefObject<HTMLDivElement | null>, calendlyUrl: string): boolean => {
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  const isValidOrigin = useCallback((origin: string): boolean => {
+    try {
+      const url = new URL(origin)
+      const allowedHosts = ['calendly.com', 'www.calendly.com']
+      return url.protocol === 'https:' && allowedHosts.includes(url.hostname)
+    } catch {
+      return false
+    }
+  }, [])
+
   useEffect(() => {
     if (!widgetRef.current) return
+
+    const handleMessage = (event: MessageEvent) => {
+      if (!isValidOrigin(event.origin)) {
+        return
+      }
+
+      // Listen for any Calendly event to confirm the widget is loaded
+      if (event.data?.event && event.data.event.startsWith('calendly.')) {
+        setIsLoaded(true)
+      }
+    }
+
+    window.addEventListener('message', handleMessage)
 
     const initWidget = () => {
       const element = widgetRef.current
@@ -35,7 +61,9 @@ export const useCalendlyScript = (widgetRef: RefObject<HTMLDivElement | null>, c
 
     if (existingScript && window.Calendly) {
       initWidget()
-      return
+      return () => {
+        window.removeEventListener('message', handleMessage)
+      }
     }
 
     if (existingScript) {
@@ -63,11 +91,15 @@ export const useCalendlyScript = (widgetRef: RefObject<HTMLDivElement | null>, c
 
     // Cleanup all resources
     return () => {
+      setIsLoaded(false)
+      window.removeEventListener('message', handleMessage)
       if (checkInterval) clearInterval(checkInterval)
       if (timeoutId) clearTimeout(timeoutId)
       if (calendlyScript?.parentNode) {
         calendlyScript.parentNode.removeChild(calendlyScript)
       }
     }
-  }, [calendlyUrl, widgetRef])
+  }, [calendlyUrl, widgetRef, isValidOrigin])
+
+  return isLoaded
 }
