@@ -10441,11 +10441,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@safe-global/safe-wallet@workspace:."
   dependencies:
+    "@storybook/builder-webpack5": "npm:^10.1.10"
+    "@storybook/react": "npm:^10.1.10"
     "@yarnpkg/types": "npm:^4.0.1"
     husky: "npm:^9.1.6"
     lint-staged: "npm:^16.2.7"
     msw: "npm:^2.7.3"
     prettier: "npm:^3.6.2"
+    storybook: "npm:^10.1.10"
   dependenciesMeta:
     cypress:
       built: true
