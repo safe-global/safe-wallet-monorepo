@@ -8,11 +8,14 @@ import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 import isEmpty from 'lodash/isEmpty'
+import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import { AnalysisGroupCardDisabled } from './AnalysisGroupCardDisabled'
 
 interface ThreatAnalysisProps {
   threat: AsyncResult<ThreatAnalysisResults>
   delay?: number
   highlightedSeverity?: Severity
+  hypernativeAuth?: HypernativeAuthStatus
 }
 
 /**
@@ -27,7 +30,11 @@ export const ThreatAnalysis = ({
   threat: [threatResults],
   delay,
   highlightedSeverity,
+  hypernativeAuth,
 }: ThreatAnalysisProps): ReactElement | null => {
+  const requiresHypernativeLogin =
+    hypernativeAuth !== undefined && (!hypernativeAuth.isAuthenticated || hypernativeAuth.isTokenExpired)
+
   const threatData = useMemo<Record<string, GroupedAnalysisResults> | undefined>(() => {
     const { BALANCE_CHANGE: _, CUSTOM_CHECKS: __, ...groupedThreatResults } = threatResults || {}
 
@@ -35,6 +42,12 @@ export const ThreatAnalysis = ({
 
     return { ['0x']: groupedThreatResults }
   }, [threatResults])
+
+  if (requiresHypernativeLogin) {
+    return (
+      <AnalysisGroupCardDisabled data-testid="threat-analysis-group-card">No threat detected</AnalysisGroupCardDisabled>
+    )
+  }
 
   if (!threatResults || !threatData || isEmpty(threatData)) {
     return null
