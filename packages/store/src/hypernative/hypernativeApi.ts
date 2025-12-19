@@ -2,7 +2,6 @@ import { createApi, fetchBaseQuery, retry } from '@reduxjs/toolkit/query/react'
 import type {
   HypernativeAssessmentResponseDto,
   HypernativeAssessmentRequestWithAuthDto,
-  HypernativeAssessmentFailedResponseDto,
   HypernativeTokenExchangeResponseDto,
   HypernativeTokenExchangeRequestDto,
 } from './hypernativeApi.dto'
@@ -13,7 +12,7 @@ export const addTagTypes = ['hypernative-oauth', 'hypernative-threat-analysis']
 export const hypernativeApi = createApi({
   reducerPath: 'hypernativeApi',
   // Retry up to 5 times with a basic exponential backoff
-  baseQuery: retry(fetchBaseQuery({ baseUrl: HYPERNATIVE_API_BASE_URL }), { maxRetries: 5 }),
+  baseQuery: retry(fetchBaseQuery({ baseUrl: HYPERNATIVE_API_BASE_URL }), { maxRetries: 2 }),
   tagTypes: addTagTypes,
   endpoints: (build) => ({
     exchangeToken: build.mutation<HypernativeTokenExchangeResponseDto['data'], HypernativeTokenExchangeRequestDto>({
@@ -27,10 +26,11 @@ export const hypernativeApi = createApi({
         },
       }),
       transformResponse: (response: HypernativeTokenExchangeResponseDto) => response.data, // Extract data from the response wrapper
+      transformErrorResponse: (response: HypernativeTokenExchangeResponseDto) => response.data,
       invalidatesTags: ['hypernative-oauth'],
     }),
     assessTransaction: build.mutation<
-      HypernativeAssessmentResponseDto['data'] | HypernativeAssessmentFailedResponseDto,
+      HypernativeAssessmentResponseDto['data'],
       HypernativeAssessmentRequestWithAuthDto
     >({
       query: ({ authToken, ...request }) => ({
@@ -43,16 +43,9 @@ export const hypernativeApi = createApi({
           Authorization: authToken,
         },
       }),
-      transformResponse: (
-        response: HypernativeAssessmentResponseDto | HypernativeAssessmentFailedResponseDto,
-      ): HypernativeAssessmentResponseDto['data'] | HypernativeAssessmentFailedResponseDto => {
-        // Failed responses have status: 'FAILED' at root level, no data property
-        if ('status' in response && response.status === 'FAILED') {
-          return response as HypernativeAssessmentFailedResponseDto
-        }
-        // Success responses have data property
-        return (response as HypernativeAssessmentResponseDto).data
-      },
+      transformResponse: (response: HypernativeAssessmentResponseDto): HypernativeAssessmentResponseDto['data'] =>
+        (response as HypernativeAssessmentResponseDto).data,
+      transformErrorResponse: (response: HypernativeAssessmentResponseDto) => response.data,
       invalidatesTags: ['hypernative-threat-analysis'],
     }),
   }),

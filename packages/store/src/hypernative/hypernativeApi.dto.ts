@@ -28,11 +28,14 @@ export type HypernativeAssessmentResponseDto = {
 }
 
 export type HypernativeAssessmentFailedResponseDto = {
-  status: 'FAILED'
-  error: {
-    reason: string
-    message: string
-  }
+  error: string
+  errorCode: number
+  success: false
+  data: null
+}
+
+export function isHypernativeAssessmentFailedResponse(error: unknown): error is HypernativeAssessmentFailedResponseDto {
+  return typeof error === 'object' && error != null && 'error' in error && 'success' in error && error.success === false
 }
 
 export type HypernativeAssessmentRequestWithAuthDto = HypernativeAssessmentRequestDto & {

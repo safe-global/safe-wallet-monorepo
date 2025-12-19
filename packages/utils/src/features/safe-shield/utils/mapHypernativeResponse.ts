@@ -7,6 +7,7 @@ import {
 import {
   HypernativeAssessmentResponseDto,
   HypernativeAssessmentFailedResponseDto,
+  isHypernativeAssessmentFailedResponse,
 } from '@safe-global/store/hypernative/hypernativeApi.dto'
 import { Severity, StatusGroup, ThreatStatus, type ThreatAnalysisResults, type ThreatAnalysisResult } from '../types'
 import { sortBySeverity } from './analysisUtils'
@@ -21,7 +22,7 @@ import { sortBySeverity } from './analysisUtils'
 export function mapHypernativeResponse(
   response: HypernativeAssessmentResponseDto['data'] | HypernativeAssessmentFailedResponseDto,
 ): ThreatAnalysisResults {
-  if ('error' in response && response.status === 'FAILED') {
+  if (isHypernativeAssessmentFailedResponse(response)) {
     return createErrorResult(response.error)
   }
 
@@ -47,7 +48,7 @@ function createErrorResult(error: HypernativeAssessmentFailedResponseDto['error'
         severity: Severity.CRITICAL,
         type: ThreatStatus.HYPERNATIVE_GUARD,
         title: 'Hypernative analysis failed',
-        description: error.message ?? 'The threat analysis failed.',
+        description: error ?? 'The threat analysis failed.',
       },
     ],
   }

@@ -10,6 +10,7 @@ import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { ErrorType, getErrorInfo } from '@safe-global/utils/features/safe-shield/utils/errors'
 import { buildHypernativeRequestData } from '@safe-global/utils/features/safe-shield/utils/buildHypernativeRequestData'
 import { useParsedOrigin } from './useParsedOrigin'
+import { isHypernativeAssessmentFailedResponse } from '@safe-global/store/hypernative/hypernativeApi.dto'
 
 type UseThreatAnalysisHypernativeProps = {
   safeAddress: `0x${string}`
@@ -89,11 +90,12 @@ export function useThreatAnalysisHypernative({
     }
   }, [hypernativeRequest, authToken, triggerAssessment, skip, walletAddress])
 
-  const fetchError = useMemo(
-    () =>
-      error ? new Error('error' in error ? error.error : 'Failed to fetch Hypernative threat analysis') : undefined,
-    [error],
-  )
+  const fetchError = useMemo(() => {
+    const errorMessage = isHypernativeAssessmentFailedResponse(error)
+      ? error.error
+      : 'Failed to fetch Hypernative threat analysis'
+    return error ? new Error(errorMessage) : undefined
+  }, [error])
 
   const threatAnalysisResult = useMemo<ThreatAnalysisResults | undefined>(() => {
     if (skip) {

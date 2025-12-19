@@ -5,7 +5,10 @@ import { isSafeTransaction } from '@safe-global/utils/utils/safeTransaction'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
-import type { HypernativeAssessmentResponseDto } from '@safe-global/store/hypernative/hypernativeApi.dto'
+import type {
+  HypernativeAssessmentResponseDto,
+  HypernativeAssessmentFailedResponseDto,
+} from '@safe-global/store/hypernative/hypernativeApi.dto'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { ErrorType, getErrorInfo } from '@safe-global/utils/features/safe-shield/utils/errors'
 
@@ -394,7 +397,12 @@ describe('useThreatAnalysisHypernative', () => {
 
     it('should return error result when mutation fails', async () => {
       const mockSafeTx = createMockSafeTransaction()
-      const mockError = { error: 'Failed to analyze threat' }
+      const mockError: HypernativeAssessmentFailedResponseDto = {
+        error: 'Failed to analyze threat',
+        errorCode: 500,
+        success: false,
+        data: null,
+      }
       mockIsSafeTransaction.mockReturnValue(true)
       mockUseAssessTransactionMutation.mockReturnValue([
         mockTriggerAssessment,
@@ -555,7 +563,12 @@ describe('useThreatAnalysisHypernative', () => {
 
     it('should return undefined result when skip is true even if there is an error', () => {
       const mockSafeTx = createMockSafeTransaction()
-      const mockError = { error: 'Failed to analyze threat' }
+      const mockError: HypernativeAssessmentFailedResponseDto = {
+        error: 'Failed to analyze threat',
+        errorCode: 500,
+        success: false,
+        data: null,
+      }
       mockIsSafeTransaction.mockReturnValue(true)
       mockUseAssessTransactionMutation.mockReturnValue([
         mockTriggerAssessment,

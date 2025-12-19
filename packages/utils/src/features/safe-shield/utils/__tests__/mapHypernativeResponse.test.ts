@@ -34,11 +34,10 @@ describe('mapHypernativeResponse', () => {
     it('should return error result when status is FAILED', () => {
       const responseDescription = 'The threat analysis failed'
       const response: HypernativeAssessmentFailedResponseDto = {
-        status: 'FAILED',
-        error: {
-          reason: 'Some reason',
-          message: responseDescription,
-        },
+        error: responseDescription,
+        errorCode: 500,
+        success: false,
+        data: null,
       }
 
       const result = mapHypernativeResponse(response)
@@ -626,11 +625,10 @@ describe('mapHypernativeResponse', () => {
   describe('edge cases', () => {
     it('should handle empty error message in FAILED response', () => {
       const response: HypernativeAssessmentFailedResponseDto = {
-        status: 'FAILED',
-        error: {
-          reason: 'Some reason',
-          message: undefined as any,
-        },
+        error: '',
+        errorCode: 500,
+        success: false,
+        data: null,
       }
 
       const result = mapHypernativeResponse(response)
@@ -640,7 +638,7 @@ describe('mapHypernativeResponse', () => {
         severity: Severity.CRITICAL,
         type: ThreatStatus.HYPERNATIVE_GUARD,
         title: 'Hypernative analysis failed',
-        description: 'The threat analysis failed.',
+        description: '',
       })
     })
 
