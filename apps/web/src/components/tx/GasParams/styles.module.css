@@ -33,7 +33,7 @@
 }
 
 .noFeeCampaignTag {
-  background: var(--gradient-white-light);
+  background: linear-gradient(90deg, #b0ffc9 0%, #d7f6ff 99.5%);
   color: black;
   padding: 2px 8px;
   border-radius: 4px;

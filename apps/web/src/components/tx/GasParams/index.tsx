@@ -141,7 +141,7 @@ export const _GasParams = ({
                         arrow
                         placement="top"
                       >
-                        <span className={css.noFeeCampaignTag}>DecENA Sponsored</span>
+                        <span className={css.noFeeCampaignTag}>Free January Sponsored</span>
                       </Tooltip>
                     </>
                   ) : (

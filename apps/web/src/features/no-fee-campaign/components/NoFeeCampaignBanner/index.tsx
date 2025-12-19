@@ -30,12 +30,12 @@ const NoFeeCampaignBanner = ({ onDismiss }: { onDismiss: () => void }) => {
         />
         <Box>
           <Typography variant="h4" fontWeight="bold" color="static.main" className={css.bannerText}>
-            Enjoy DecENA
+            Enjoy Free January
           </Typography>
           <Typography variant="body2" color="static.light" className={css.bannerTextInteractive}>
-            No-Fee for Ethena USDe holders on Ethereum mainnet, this December!{' '}
+            No-Fee for Ethena USDe holders on Ethereum Mainnet, this January!{' '}
             <Link
-              href="https://help.safe.global/en/articles/484423-no-fee-december-decena-campaign"
+              href="https://help.safe.global/en/articles/484423-no-fee-january-campaign"
               target="_blank"
               rel="noopener noreferrer"
               style={{ textDecoration: 'underline', fontWeight: 'bold' }}

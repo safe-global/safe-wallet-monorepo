@@ -27,7 +27,7 @@ const NoFeeCampaignTransactionCard = () => {
           flex: 1,
         }}
       >
-        <BlockedAddress address={blockedAddress} featureTitle="DecENA" />
+        <BlockedAddress address={blockedAddress} featureTitle="Free January" />
       </Stack>
     )
   }
@@ -66,12 +66,12 @@ const NoFeeCampaignTransactionCard = () => {
             </Box>
             <Box flex={1}>
               <Typography variant="subtitle2" fontWeight="bold" color="static.main" className={css.title}>
-                Enjoy DecENA: No Fee for on Ethereum mainnet
+                Enjoy Free January: No Fee on Ethereum Mainnet
               </Typography>
               <Typography variant="body2" color="static.light" className={css.description}>
-                USDe holders enjoy gasless transactions on Ethereum mainnet this December.{' '}
+                USDe holders enjoy gasless transactions on Ethereum Mainnet this January.{' '}
                 <Link
-                  href="https://help.safe.global/en/articles/484423-no-fee-december-decena-campaign"
+                  href="https://help.safe.global/en/articles/484423-no-fee-january-campaign"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ textDecoration: 'underline', fontWeight: 'bold' }}
@@ -97,7 +97,7 @@ const NoFeeCampaignTransactionCard = () => {
               {/* Title and eligibility tag inline */}
               <Box className={css.titleRow}>
                 <Typography variant="subtitle2" fontWeight="bold" className={css.title}>
-                  Enjoy DecENA
+                  Enjoy Free January
                 </Typography>
                 <Box className={css.eligibilityTag}>
                   <Image
@@ -115,9 +115,9 @@ const NoFeeCampaignTransactionCard = () => {
 
               {/* Description */}
               <Typography variant="body2" className={css.description}>
-                USDe holders enjoy gasless transactions on Ethereum mainnet this December.{' '}
+                USDe holders enjoy gasless transactions on Ethereum Mainnet this January.{' '}
                 <Link
-                  href="https://help.safe.global/en/articles/484423-no-fee-december-decena-campaign"
+                  href="https://help.safe.global/en/articles/484423-no-fee-january-campaign"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ textDecoration: 'underline', fontWeight: 'bold' }}

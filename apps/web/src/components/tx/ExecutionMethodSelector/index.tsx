@@ -108,7 +108,7 @@ const _ExecutionMethodSelector = ({
                           <Typography className={css.notAvailableTitle}>Sponsored gas</Typography>
                           <div className={css.descriptionWrapper}>
                             <Typography className={css.descriptionText}>
-                              Part of the DecENA, Safe Foundation&apos;s gas sponsorship program for USDe holders
+                              Part of the Free January, Safe Foundation&apos;s gas sponsorship program for USDe holders
                             </Typography>
                           </div>
                         </div>
@@ -133,15 +133,15 @@ const _ExecutionMethodSelector = ({
                         <Typography className={css.mainLabel}>Sponsored gas</Typography>
                         <div className={css.subLabel}>
                           <Typography variant="body2" color="text.secondary">
-                            Part of the DecENA, Safe Foundation&apos;s gas sponsorship program for USDe holders{' '}
+                            Part of the Free January, Safe Foundation&apos;s gas sponsorship program for USDe holders{' '}
                             <Tooltip
                               title={
                                 <Box>
                                   <Typography variant="body2" color="inherit">
-                                    USDe holders enjoy gasless transactions on Ethereum mainnet this December.{' '}
+                                    USDe holders enjoy gasless transactions on Ethereum Mainnet this January.{' '}
                                     <Typography component="span" fontWeight="bold">
                                       <Link
-                                        href="https://help.safe.global/en/articles/484423-no-fee-december-decena-campaign"
+                                        href="https://help.safe.global/en/articles/484423-no-fee-january-campaign"
                                         style={{ textDecoration: 'underline', fontWeight: 'bold' }}
                                         target="_blank"
                                         rel="noopener noreferrer"
