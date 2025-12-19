@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useAppDispatch } from '@/store'
-import { setAuthCookie, clearAuthCookie, isAuthenticated, isTokenMissingOrExpired } from '../store/cookieStorage'
 import { HYPERNATIVE_OAUTH_CONFIG, MOCK_AUTH_ENABLED, getRedirectUri } from '../config/oauth'
 import { showNotification } from '@/store/notificationsSlice'
 import Cookies from 'js-cookie'
+import { useAuthToken } from './useAuthToken'
 
 /**
  * OAuth authentication status and controls
@@ -49,7 +49,7 @@ const getCookieOptions = (): Cookies.CookieAttributes => {
  * Used when MOCK_AUTH_ENABLED is true for development
  * Matches Hypernative OAuth API specification default expiry
  */
-const MOCK_TOKEN_EXPIRES_IN = 600
+const MOCK_TOKEN_EXPIRES_IN = 60 * 60 * 24 * 30 // 30 days
 
 /**
  * Mock authentication delay in milliseconds
@@ -62,12 +62,6 @@ const MOCK_AUTH_DELAY_MS = 1000
  */
 const POPUP_WIDTH = 600
 const POPUP_HEIGHT = 800
-
-/**
- * Polling interval in milliseconds
- * Used to check authentication state periodically
- */
-const AUTH_POLLING_INTERVAL = 5000
 
 /**
  * Base64url encode a byte array
@@ -199,10 +193,7 @@ async function buildAuthUrl(): Promise<string> {
  */
 export const useHypernativeOAuth = (): HypernativeAuthStatus => {
   const dispatch = useAppDispatch()
-  const [authState, setAuthState] = useState({
-    isAuthenticated: isAuthenticated(),
-    isTokenExpired: isTokenMissingOrExpired(),
-  })
+  const [{ isAuthenticated, isExpired }, setToken, clearToken] = useAuthToken()
 
   // Reference to popup check interval
   const popupCheckIntervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -307,7 +298,7 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
         await new Promise((resolve) => setTimeout(resolve, MOCK_AUTH_DELAY_MS))
 
         const mockToken = `mock-token-${Date.now()}`
-        setAuthCookie(mockToken, MOCK_TOKEN_EXPIRES_IN)
+        setToken(mockToken, 'Bearer', MOCK_TOKEN_EXPIRES_IN)
         return
       }
 
@@ -330,49 +321,20 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
     } catch (error) {
       handleOAuthError(error)
     }
-  }, [clearAllTimers, handlePopupOpen, handleOAuthError])
+  }, [clearAllTimers, handlePopupOpen, handleOAuthError, setToken])
 
   /**
    * Logout - clear authentication token
    */
-  const logout = useCallback(() => {
-    clearAuthCookie()
-    setAuthState({
-      isAuthenticated: isAuthenticated(),
-      isTokenExpired: isTokenMissingOrExpired(),
-    })
-  }, [])
-
-  // Update auth state when cookies change (e.g., from other tabs)
-  useEffect(() => {
-    const checkAuthState = () => {
-      setAuthState({
-        isAuthenticated: isAuthenticated(),
-        isTokenExpired: isTokenMissingOrExpired(),
-      })
-    }
-
-    // Check auth state when storage event occurs
-    const handleStorageEvent = () => checkAuthState()
-    window.addEventListener('storage', handleStorageEvent)
-
-    // Additionally, check auth state periodically to catch cookie changes
-    const interval = setInterval(checkAuthState, AUTH_POLLING_INTERVAL)
-    checkAuthState() // Initial check
-
-    return () => {
-      window.removeEventListener('storage', handleStorageEvent)
-      clearInterval(interval)
-    }
-  }, [])
+  const logout = useCallback(() => clearToken(), [clearToken])
 
   useEffect(() => {
     return () => clearAllTimers()
   }, [clearAllTimers])
 
   return {
-    isAuthenticated: authState.isAuthenticated,
-    isTokenExpired: authState.isTokenExpired,
+    isAuthenticated,
+    isTokenExpired: isExpired,
     initiateLogin,
     logout,
   }

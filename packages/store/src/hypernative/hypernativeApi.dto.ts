@@ -1,3 +1,47 @@
+import {
+  HypernativeAssessmentData,
+  HypernativeBalanceChanges,
+  HypernativeRiskSeverity,
+  HypernativeTx,
+} from '@safe-global/utils/features/safe-shield/types/hypernative.type'
+
+export type HypernativeAssessmentRequestDto = {
+  safeAddress: `0x${string}`
+  safeTxHash: `0x${string}`
+  transaction: HypernativeTx
+  url?: string
+}
+
+export type HypernativeRiskDto = {
+  title: string
+  details: string
+  severity: HypernativeRiskSeverity
+}
+
+export type HypernativeAssessmentResponseDto = {
+  data: {
+    safeTxHash: `0x${string}`
+    status: 'OK'
+    assessmentData: HypernativeAssessmentData
+    balanceChanges?: HypernativeBalanceChanges
+  }
+}
+
+export type HypernativeAssessmentFailedResponseDto = {
+  error: string
+  errorCode: number
+  success: false
+  data: null
+}
+
+export function isHypernativeAssessmentFailedResponse(error: unknown): error is HypernativeAssessmentFailedResponseDto {
+  return typeof error === 'object' && error != null && 'error' in error && 'success' in error && error.success === false
+}
+
+export type HypernativeAssessmentRequestWithAuthDto = HypernativeAssessmentRequestDto & {
+  authToken: string
+}
+
 /**
  * DTOs for Hypernative OAuth token exchange
  */

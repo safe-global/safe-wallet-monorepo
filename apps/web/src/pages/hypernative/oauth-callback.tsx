@@ -4,13 +4,13 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { Box, Typography, Card, SvgIcon } from '@mui/material'
 import { GradientCircularProgress } from '@/components/common/GradientCircularProgress'
-import { setAuthCookie } from '@/features/hypernative/store/cookieStorage'
 import { readPkce, clearPkce } from '@/features/hypernative/hooks/useHypernativeOAuth'
 import { HYPERNATIVE_OAUTH_CONFIG, getRedirectUri } from '@/features/hypernative/config/oauth'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import CheckIcon from '@/public/images/common/check.svg'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import { useAuthToken } from '@/features/hypernative/hooks'
 
 /**
  * OAuth callback page for Hypernative authentication
@@ -35,6 +35,7 @@ const HypernativeOAuthCallback: NextPage = () => {
   const hasProcessedRef = useRef(false)
   const isDarkMode = useDarkMode()
   const [exchangeToken] = hypernativeApi.useExchangeTokenMutation()
+  const [_, setToken] = useAuthToken()
 
   useEffect(() => {
     /**
@@ -105,7 +106,7 @@ const HypernativeOAuthCallback: NextPage = () => {
         }
 
         // Step 6: Store token in cookie
-        setAuthCookie(tokenResponse.access_token, tokenResponse.expires_in)
+        setToken(tokenResponse.access_token, tokenResponse.token_type, tokenResponse.expires_in)
 
         // Step 7: Clean up sessionStorage
         clearPkce()
@@ -146,7 +147,7 @@ const HypernativeOAuthCallback: NextPage = () => {
     if (router.isReady) {
       handleCallback()
     }
-  }, [router.isReady, router.query, exchangeToken])
+  }, [router.isReady, router.query, exchangeToken, setToken])
 
   return (
     <>

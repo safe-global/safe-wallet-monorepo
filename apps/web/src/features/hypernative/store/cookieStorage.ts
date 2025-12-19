@@ -11,6 +11,7 @@ const AUTH_COOKIE_KEY = 'hn_auth'
  */
 interface AuthTokenData {
   token: string
+  tokenType: string
   expiry: number // timestamp in milliseconds
 }
 
@@ -42,7 +43,7 @@ const getCookieOptions = (maxAgeInSeconds?: number): Cookies.CookieAttributes =>
  * Handles expiration checks and cleanup of expired/invalid cookies
  * @returns Parsed auth token data or undefined if not found, expired, or invalid
  */
-const getAuthCookieData = (): AuthTokenData | undefined => {
+export const getAuthCookieData = (): AuthTokenData | undefined => {
   const cookieValue = Cookies.get(AUTH_COOKIE_KEY)
   if (!cookieValue) {
     return undefined
@@ -66,48 +67,13 @@ const getAuthCookieData = (): AuthTokenData | undefined => {
 /**
  * Set OAuth token in secure cookie
  * @param token - OAuth access token
+ * @param tokenType - OAuth token type (e.g. 'Bearer')
  * @param expiresIn - Token lifetime in seconds
  */
-export const setAuthCookie = (token: string, expiresIn: number): void => {
+export const setAuthCookie = (token: string, tokenType: string, expiresIn: number): void => {
   const expiry = Date.now() + expiresIn * 1000
-  const data: AuthTokenData = { token, expiry }
+  const data: AuthTokenData = { token, tokenType, expiry }
   Cookies.set(AUTH_COOKIE_KEY, JSON.stringify(data), getCookieOptions(expiresIn))
-}
-
-/**
- * Get OAuth token from cookie if available and not expired
- * @returns Token string or undefined if not found or expired
- */
-export const getAuthToken = (): string | undefined => {
-  const data = getAuthCookieData()
-  return data?.token
-}
-
-/**
- * Get token expiry timestamp from cookie
- * @returns Expiry timestamp in milliseconds or undefined if not found or expired
- */
-export const getAuthExpiry = (): number | undefined => {
-  const data = getAuthCookieData()
-  return data?.expiry
-}
-
-/**
- * Check if user is authenticated (has valid, non-expired token)
- * @returns true if authenticated, false otherwise
- */
-export const isAuthenticated = (): boolean => {
-  const token = getAuthToken()
-  return !!token
-}
-
-/**
- * Check if token is missing or expired
- * @returns true if token is missing or expired, false if valid
- */
-export const isTokenMissingOrExpired = (): boolean => {
-  const expiry = getAuthExpiry()
-  return expiry === undefined || Date.now() >= expiry
 }
 
 /**

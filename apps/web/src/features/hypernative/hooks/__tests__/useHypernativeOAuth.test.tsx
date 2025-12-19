@@ -143,12 +143,12 @@ describe('useHypernativeOAuth', () => {
       const { result } = renderHook(() => useHypernativeOAuth())
 
       expect(result.current.isAuthenticated).toBe(false)
-      expect(result.current.isTokenExpired).toBe(true)
+      expect(result.current.isTokenExpired).toBe(false)
     })
 
     it('should return authenticated state when token exists', async () => {
       // Pre-populate cookie with auth token
-      setAuthCookie('test-token', 3600)
+      setAuthCookie('test-token', 'Bearer', 3600)
 
       const { result } = renderHook(() => useHypernativeOAuth())
 
@@ -199,6 +199,7 @@ describe('useHypernativeOAuth', () => {
       if (authCookie) {
         const authData = JSON.parse(authCookie)
         expect(authData.token).toMatch(/^mock-token-\d+$/)
+        expect(authData.tokenType).toBe('Bearer')
         expect(authData.expiry).toBeGreaterThan(Date.now())
       }
 
@@ -228,6 +229,63 @@ describe('useHypernativeOAuth', () => {
       })
 
       expect(mockWindowOpen).not.toHaveBeenCalled()
+    })
+
+    it('should set token with Bearer type in mock mode', async () => {
+      const { result } = renderHook(() => useHypernativeOAuth())
+
+      act(() => {
+        result.current.initiateLogin()
+      })
+
+      await act(async () => {
+        jest.advanceTimersByTime(1000) // Mock auth delay
+      })
+
+      // Verify token is stored with Bearer type
+      const authCookie = Cookies.get('hn_auth')
+      expect(authCookie).toBeDefined()
+      if (authCookie) {
+        const authData = JSON.parse(authCookie)
+        expect(authData.tokenType).toBe('Bearer')
+        expect(authData.token).toMatch(/^mock-token-\d+$/)
+      }
+
+      // Advance timers to trigger polling check
+      await act(async () => {
+        jest.advanceTimersByTime(5000) // Polling interval
+      })
+
+      expect(result.current.isAuthenticated).toBe(true)
+
+      // Cleanup
+      clearAuthCookie()
+    })
+
+    it('should use correct expiry time for mock tokens', async () => {
+      const { result } = renderHook(() => useHypernativeOAuth())
+
+      act(() => {
+        result.current.initiateLogin()
+      })
+
+      await act(async () => {
+        jest.advanceTimersByTime(1000) // Mock auth delay
+      })
+
+      // Verify expiry is set correctly (30 days = 60 * 60 * 24 * 30 seconds)
+      const authCookie = Cookies.get('hn_auth')
+      expect(authCookie).toBeDefined()
+      if (authCookie) {
+        const authData = JSON.parse(authCookie)
+        const expectedExpiry = Date.now() + 60 * 60 * 24 * 30 * 1000 // 30 days in ms
+        // Allow 1 second tolerance for test execution time
+        expect(authData.expiry).toBeGreaterThanOrEqual(Date.now() + 60 * 60 * 24 * 30 * 1000 - 1000)
+        expect(authData.expiry).toBeLessThanOrEqual(expectedExpiry + 1000)
+      }
+
+      // Cleanup
+      clearAuthCookie()
     })
   })
 
@@ -350,7 +408,7 @@ describe('useHypernativeOAuth', () => {
   describe('logout', () => {
     it('should clear auth token', async () => {
       // Pre-populate cookie with auth token
-      setAuthCookie('test-token', 3600)
+      setAuthCookie('test-token', 'Bearer', 3600)
 
       const { result } = renderHook(() => useHypernativeOAuth())
 
@@ -378,6 +436,7 @@ describe('useHypernativeOAuth', () => {
       // We'll set it directly in the cookie with a past expiry timestamp
       const expiredData = {
         token: 'expired-token',
+        tokenType: 'Bearer',
         expiry: Date.now() - 1000, // Expired 1 second ago
       }
       Cookies.set('hn_auth', JSON.stringify(expiredData))
@@ -386,17 +445,21 @@ describe('useHypernativeOAuth', () => {
 
       // Wait for state to update
       await waitFor(() => {
-        // isAuthenticated should be false when token is expired
+        // When token is expired, getAuthCookieData automatically cleans it up,
+        // so there's no token, which means isAuthenticated is false and isTokenExpired is false
         expect(result.current.isAuthenticated).toBe(false)
-        expect(result.current.isTokenExpired).toBe(true)
+        expect(result.current.isTokenExpired).toBe(false)
       })
+
+      // Verify cookie was cleaned up
+      expect(Cookies.get('hn_auth')).toBeUndefined()
 
       // Cleanup
       clearAuthCookie()
     })
 
     it('should detect valid tokens', async () => {
-      setAuthCookie('valid-token', 3600)
+      setAuthCookie('valid-token', 'Bearer', 3600)
 
       const { result } = renderHook(() => useHypernativeOAuth())
 
@@ -404,6 +467,28 @@ describe('useHypernativeOAuth', () => {
         expect(result.current.isAuthenticated).toBe(true)
         expect(result.current.isTokenExpired).toBe(false)
       })
+
+      // Cleanup
+      clearAuthCookie()
+    })
+
+    it('should handle tokens with different token types', async () => {
+      setAuthCookie('custom-token', 'Custom', 3600)
+
+      const { result } = renderHook(() => useHypernativeOAuth())
+
+      await waitFor(() => {
+        expect(result.current.isAuthenticated).toBe(true)
+        expect(result.current.isTokenExpired).toBe(false)
+      })
+
+      // Verify cookie contains tokenType
+      const authCookie = Cookies.get('hn_auth')
+      expect(authCookie).toBeDefined()
+      if (authCookie) {
+        const authData = JSON.parse(authCookie)
+        expect(authData.tokenType).toBe('Custom')
+      }
 
       // Cleanup
       clearAuthCookie()
@@ -437,6 +522,68 @@ describe('useHypernativeOAuth', () => {
       clearIntervalSpy.mockRestore()
       clearTimeoutSpy.mockRestore()
       jest.useRealTimers()
+    })
+
+    it('should cleanup polling interval on unmount', async () => {
+      jest.useFakeTimers()
+      const clearIntervalSpy = jest.spyOn(global, 'clearInterval')
+
+      const { unmount } = renderHook(() => useHypernativeOAuth())
+
+      // Advance timers to ensure polling is set up
+      await act(async () => {
+        jest.advanceTimersByTime(100)
+      })
+
+      unmount()
+
+      // Should cleanup polling interval
+      expect(clearIntervalSpy).toHaveBeenCalled()
+
+      clearIntervalSpy.mockRestore()
+      jest.useRealTimers()
+    })
+  })
+
+  describe('token type handling', () => {
+    it('should handle missing tokenType gracefully', async () => {
+      // Set cookie without tokenType (legacy format)
+      const legacyData = {
+        token: 'legacy-token',
+        expiry: Date.now() + 3600000,
+      }
+      Cookies.set('hn_auth', JSON.stringify(legacyData))
+
+      const { result } = renderHook(() => useHypernativeOAuth())
+
+      // Should still work but token might be undefined if tokenType is missing
+      // The hook will check for token existence
+      await waitFor(() => {
+        // Token exists but tokenType is missing, so token value might be undefined
+        // but isAuthenticated should still be true if token exists
+        expect(result.current.isAuthenticated).toBe(true)
+      })
+
+      // Cleanup
+      clearAuthCookie()
+    })
+
+    it('should handle empty tokenType', async () => {
+      const dataWithEmptyType = {
+        token: 'test-token',
+        tokenType: '',
+        expiry: Date.now() + 3600000,
+      }
+      Cookies.set('hn_auth', JSON.stringify(dataWithEmptyType))
+
+      const { result } = renderHook(() => useHypernativeOAuth())
+
+      await waitFor(() => {
+        expect(result.current.isAuthenticated).toBe(true)
+      })
+
+      // Cleanup
+      clearAuthCookie()
     })
   })
 })
