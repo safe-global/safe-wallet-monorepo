@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./Chip.stories CustomLabel 1`] = `
+<span
+  class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-14d0kko-MuiChip-root"
+>
+  <span
+    class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+  >
+    <span
+      class="MuiTypography-root MuiTypography-caption css-11b0zy1-MuiTypography-root"
+    >
+      Beta
+    </span>
+  </span>
+</span>
+`;
+
+exports[`./Chip.stories Default 1`] = `
+<span
+  class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-14d0kko-MuiChip-root"
+>
+  <span
+    class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+  >
+    <span
+      class="MuiTypography-root MuiTypography-caption css-11b0zy1-MuiTypography-root"
+    >
+      New
+    </span>
+  </span>
+</span>
+`;
+
+exports[`./Chip.stories NormalFontWeight 1`] = `
+<span
+  class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-14d0kko-MuiChip-root"
+>
+  <span
+    class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+  >
+    <span
+      class="MuiTypography-root MuiTypography-caption css-1pbessu-MuiTypography-root"
+    >
+      New
+    </span>
+  </span>
+</span>
+`;
+
+exports[`./Chip.stories WithCustomStyling 1`] = `
+<span
+  class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1gcknf1-MuiChip-root"
+>
+  <span
+    class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+  >
+    <span
+      class="MuiTypography-root MuiTypography-caption css-11b0zy1-MuiTypography-root"
+    >
+      Featured
+    </span>
+  </span>
+</span>
+`;
