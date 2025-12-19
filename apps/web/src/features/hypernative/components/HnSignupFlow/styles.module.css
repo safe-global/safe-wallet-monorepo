@@ -46,7 +46,7 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  padding: var(--space-6) var(--space-4);
+  padding: var(--space-4);
   background: linear-gradient(
     to bottom,
     var(--color-static-primary) 100%,
