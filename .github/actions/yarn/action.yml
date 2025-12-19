@@ -5,8 +5,6 @@ description: 'Install the dependencies'
 runs:
   using: 'composite'
   steps:
-    # Note: Caller workflow is responsible for checkout. Don't checkout here as it would
-    # override the ref that the caller already checked out (e.g., PR branch).
     - uses: ./.github/actions/corepack
 
     - name: Restore Yarn Cache & Types
