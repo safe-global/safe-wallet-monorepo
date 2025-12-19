@@ -261,8 +261,14 @@ describe('usePortfolioBalances', () => {
       })
     })
 
-    it('should NOT fallback for counterfactual safe with empty portfolio', async () => {
+    it('should fallback for counterfactual safe with empty portfolio to get native token', async () => {
       const mockEmptyPortfolio = createMockEmptyPortfolio()
+      const mockTxServiceBalances = {
+        fiatTotal: '0',
+        items: [{ tokenInfo: { symbol: 'ETH' }, balance: '0', fiatBalance: '0', fiatConversion: '0' }],
+        tokensFiatTotal: '0',
+        positionsFiatTotal: '0',
+      }
 
       jest.spyOn(useSafeInfo, 'default').mockReturnValue({
         safe: mockCounterfactualSafe,
@@ -279,11 +285,14 @@ describe('usePortfolioBalances', () => {
         refetch: jest.fn(),
       } as any)
 
+      jest
+        .spyOn(useLoadBalances, 'useTxServiceBalances')
+        .mockReturnValue([mockTxServiceBalances as any, undefined, false])
+
       const { result } = renderHook(() => usePortfolioBalances(false))
 
       await waitFor(() => {
-        expect(result.current[0]).toBeDefined()
-        expect(result.current[0]?.fiatTotal).toBe('0')
+        expect(result.current[0]).toBe(mockTxServiceBalances)
       })
     })
 

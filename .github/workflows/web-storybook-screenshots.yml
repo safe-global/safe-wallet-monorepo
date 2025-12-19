@@ -119,28 +119,21 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Configure git identity
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global credential.helper '!f() { echo "username=x-access-token"; echo "password=$GH_TOKEN"; }; f'
 
-          # Configure git credentials using extraheader (token not visible in process list)
-          git config --global credential.helper store
-          git config --global url."https://github.com/".insteadOf "git@github.com:"
-
-          # Create a unique directory for this PR's screenshots
           SCREENSHOT_DIR="storybook-screenshots/${{ steps.pr.outputs.number }}"
 
-          # Clone the storage branch in a separate directory
           cd /tmp
           rm -rf screenshots-storage
 
-          # Use gh CLI to clone (token handled securely)
-          if gh repo clone ${{ github.repository }} screenshots-storage -- --depth 1 --branch storybook-screenshots-storage; then
+          if git clone --depth 1 --branch storybook-screenshots-storage https://github.com/${{ github.repository }}.git screenshots-storage; then
             echo "Cloned existing storage branch"
             cd screenshots-storage
           else
             echo "Storage branch doesn't exist, creating it"
-            gh repo clone ${{ github.repository }} screenshots-storage -- --depth 1
+            git clone --depth 1 https://github.com/${{ github.repository }}.git screenshots-storage
             cd screenshots-storage
             git checkout --orphan storybook-screenshots-storage
             git rm -rf . 2>/dev/null || true
@@ -149,11 +142,9 @@ jobs:
             git commit -m "Initialize storybook-screenshots-storage branch"
           fi
 
-          # Copy screenshots to PR directory
           mkdir -p "$SCREENSHOT_DIR"
           cp $GITHUB_WORKSPACE/screenshots/*.png "$SCREENSHOT_DIR/" 2>/dev/null || true
 
-          # Commit and push
           git add "$SCREENSHOT_DIR"
           if git commit -m "Add screenshots for PR #${{ steps.pr.outputs.number }}"; then
             git push origin storybook-screenshots-storage
