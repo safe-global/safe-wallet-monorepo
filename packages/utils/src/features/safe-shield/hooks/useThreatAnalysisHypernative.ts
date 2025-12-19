@@ -7,9 +7,8 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { isSafeTransaction } from '@safe-global/utils/utils/safeTransaction'
 import { mapHypernativeResponse } from '@safe-global/utils/features/safe-shield/utils/mapHypernativeResponse'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
-import type { HypernativeAssessmentRequestDto } from '@safe-global/store/hypernative/hypernativeApi.dto'
 import { ErrorType, getErrorInfo } from '@safe-global/utils/features/safe-shield/utils/errors'
-import { calculateSafeTransactionHash } from '@safe-global/protocol-kit/dist/src/utils'
+import { buildHypernativeRequestData } from '@safe-global/utils/features/safe-shield/utils/buildHypernativeRequestData'
 import { useParsedOrigin } from './useParsedOrigin'
 
 type UseThreatAnalysisHypernativeProps = {
@@ -65,39 +64,20 @@ export function useThreatAnalysisHypernative({
   const origin = useParsedOrigin(originProp)
 
   // Build Hypernative request payload
-  const hypernativeRequest = useMemo<HypernativeAssessmentRequestDto | undefined>(() => {
-    if (!isSafeTransaction(data) || !safeAddress || !chainId || !safeVersion || !walletAddress) {
+  // @TODO: Add support for TypedData
+  const hypernativeRequest = useMemo(() => {
+    if (!isSafeTransaction(data) || !safeVersion) {
       return undefined
     }
 
-    const txData = data.data
-
-    const safeTxHash = calculateSafeTransactionHash(safeAddress, txData, safeVersion, BigInt(chainId)) as `0x${string}`
-
-    if (!safeTxHash) {
-      return undefined
-    }
-
-    // @TODO: Add support for TypedData
-    return {
+    return buildHypernativeRequestData({
       safeAddress,
-      safeTxHash,
-      transaction: {
-        chain: chainId,
-        input: txData.data as `0x${string}`,
-        operation: String(txData.operation),
-        toAddress: txData.to as `0x${string}`,
-        fromAddress: walletAddress as `0x${string}`,
-        safeTxGas: txData.safeTxGas,
-        value: txData.value,
-        baseGas: txData.baseGas,
-        gasPrice: txData.gasPrice,
-        gasToken: txData.gasToken as `0x${string}`,
-        refundReceiver: txData.refundReceiver as `0x${string}`,
-        nonce: String(txData.nonce),
-      },
-      ...(origin ? { url: origin } : {}),
-    }
+      chainId,
+      txData: data.data,
+      walletAddress,
+      safeVersion,
+      origin,
+    })
   }, [data, safeAddress, chainId, walletAddress, origin, safeVersion])
 
   useEffect(() => {
