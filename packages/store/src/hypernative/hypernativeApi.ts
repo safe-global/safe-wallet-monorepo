@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { createApi, fetchBaseQuery, retry } from '@reduxjs/toolkit/query/react'
 import type {
   HypernativeAssessmentResponseDto,
   HypernativeAssessmentRequestWithAuthDto,
@@ -12,9 +12,8 @@ export const addTagTypes = ['hypernative-oauth', 'hypernative-threat-analysis']
 
 export const hypernativeApi = createApi({
   reducerPath: 'hypernativeApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: HYPERNATIVE_API_BASE_URL,
-  }),
+  // Retry up to 5 times with a basic exponential backoff
+  baseQuery: retry(fetchBaseQuery({ baseUrl: HYPERNATIVE_API_BASE_URL }), { maxRetries: 5 }),
   tagTypes: addTagTypes,
   endpoints: (build) => ({
     exchangeToken: build.mutation<HypernativeTokenExchangeResponseDto['data'], HypernativeTokenExchangeRequestDto>({
@@ -41,7 +40,7 @@ export const hypernativeApi = createApi({
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
-          Authorization: `${authToken}`,
+          Authorization: authToken,
         },
       }),
       transformResponse: (
