@@ -11,7 +11,7 @@ on:
 
 jobs:
   tag-release-deploy:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && github.event.pull_request.head.ref == 'release'
     permissions:
       attestations: write
       contents: write
