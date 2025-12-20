@@ -8,8 +8,8 @@ fi
 
 cd out
 
-# Upload the build to S3
-aws s3 sync . $BUCKET --delete
+# Upload the account app to S3 under /account-app/ subdirectory
+aws s3 sync . $BUCKET/account-app --delete
 
 function parallel_limit {
     local max="$1"
@@ -30,8 +30,8 @@ find . -name '*.html' -print0 | while IFS= read -r -d '' file; do
     # Throttle jobs when max limit is hit
     parallel_limit "$MAX_JOBS"
 
-    # Upload files to S3 using parallel threads
-    aws s3 cp "$filepath" "$BUCKET/$noext" --content-type 'text/html' &
+    # Upload files to S3 using parallel threads (under account-app subdirectory)
+    aws s3 cp "$filepath" "$BUCKET/account-app/$noext" --content-type 'text/html' &
 done
 
 wait

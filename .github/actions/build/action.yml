@@ -11,6 +11,11 @@ inputs:
     description: 'Production build flag'
     required: false
 
+  app: # id of input
+    description: 'Which app to build: web, shell, or both'
+    required: false
+    default: 'web'
+
 runs:
   using: 'composite'
 
@@ -32,7 +37,8 @@ runs:
           echo "NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN=${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN_DEVSTAGING }}" >> $GITHUB_ENV
         fi
 
-    - name: Build
+    - name: Build Web App
+      if: inputs.app == 'web' || inputs.app == 'both'
       shell: bash
       run: yarn workspace @safe-global/web build
       env:
@@ -70,6 +76,17 @@ runs:
         NEXT_PUBLIC_HYPERNATIVE_CALENDLY: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_HYPERNATIVE_CALENDLY }}
         NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID }}
         NEXT_PUBLIC_STAGING_HYPERNATIVE_OUTREACH_ID: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_STAGING_HYPERNATIVE_OUTREACH_ID }}
+
+    - name: Build Shell App
+      if: inputs.app == 'shell' || inputs.app == 'both'
+      shell: bash
+      run: yarn workspace @safe-global/shell build
+      env:
+        NEXT_PUBLIC_IS_PRODUCTION: ${{ inputs.prod }}
+        NEXT_PUBLIC_WC_PROJECT_ID: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_WC_PROJECT_ID }}
+        NEXT_PUBLIC_ACCOUNT_APP_URL: ${{ inputs.prod == 'true' && '/account-app' || '/account-app' }}
+        NEXT_PUBLIC_BRAND_NAME: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_BRAND_NAME }}
+        NEXT_PUBLIC_COMMIT_HASH: ${{ github.sha }}
 
     - name: Save Next.js Build Cache & Cypress cache
       if: steps.restore-nc.outputs.cache-hit-nc != 'true'

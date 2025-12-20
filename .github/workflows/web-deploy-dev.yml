@@ -9,6 +9,7 @@ on:
       - main
     paths:
       - apps/web/**
+      - apps/shell/**
       - packages/**
 
 concurrency:
@@ -44,15 +45,20 @@ jobs:
       - uses: ./.github/actions/build
         with:
           secrets: ${{ toJSON(secrets) }}
+          app: 'both' # Build both shell and web apps
           # if: startsWith(github.ref, 'refs/heads/main')
 
       - uses: ./.github/actions/build-storybook
         with:
           secrets: ${{ toJSON(secrets) }}
 
-      - name: Add SRI to scripts
+      - name: Add SRI to web app scripts
         run: node ./scripts/integrity-hashes.cjs
         working-directory: apps/web
+
+      - name: Add SRI to shell app scripts
+        run: node ./scripts/integrity-hashes.cjs
+        working-directory: apps/shell
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v5
@@ -61,19 +67,33 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       # Staging
-      - name: Deploy to the staging S3
+      - name: Deploy web app to staging S3
         if: startsWith(github.ref, 'refs/heads/main')
         env:
           BUCKET: s3://${{ secrets.AWS_STAGING_BUCKET_NAME }}/current
         working-directory: apps/web
         run: bash  ./scripts/github/s3_upload.sh
 
+      - name: Deploy shell app to staging S3
+        if: startsWith(github.ref, 'refs/heads/main')
+        env:
+          BUCKET: s3://${{ secrets.AWS_STAGING_BUCKET_NAME }}/current
+        working-directory: apps/shell
+        run: bash  ./scripts/github/s3_upload.sh
+
       # Dev
-      - name: Deploy to the dev S3
+      - name: Deploy web app to dev S3
         if: startsWith(github.ref, 'refs/heads/dev')
         env:
           BUCKET: s3://${{ secrets.AWS_DEVELOPMENT_BUCKET_NAME }}
         working-directory: apps/web
+        run: bash  ./scripts/github/s3_upload.sh
+
+      - name: Deploy shell app to dev S3
+        if: startsWith(github.ref, 'refs/heads/dev')
+        env:
+          BUCKET: s3://${{ secrets.AWS_DEVELOPMENT_BUCKET_NAME }}
+        working-directory: apps/shell
         run: bash  ./scripts/github/s3_upload.sh
 
       ### PRs ###
@@ -87,11 +107,18 @@ jobs:
         id: extract_branch
 
       # Deploy to S3
-      - name: Deploy PR branch
+      - name: Deploy web app PR branch
         if: github.event.number
         env:
           BUCKET: s3://${{ secrets.AWS_REVIEW_BUCKET_NAME }}/walletweb/${{ steps.extract_branch.outputs.branch }}
         working-directory: apps/web
+        run: bash  ./scripts/github/s3_upload.sh
+
+      - name: Deploy shell app PR branch
+        if: github.event.number
+        env:
+          BUCKET: s3://${{ secrets.AWS_REVIEW_BUCKET_NAME }}/walletweb/${{ steps.extract_branch.outputs.branch }}
+        working-directory: apps/shell
         run: bash  ./scripts/github/s3_upload.sh
 
       # Comment
