@@ -41,14 +41,20 @@
     "redux-persist": "^6.0.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.18.0",
     "@safe-global/test": "workspace:^",
     "@safe-global/utils": "workspace:^",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@typescript-eslint/eslint-plugin": "^8.23.0",
+    "@typescript-eslint/parser": "^8.23.0",
     "cross-env": "^7.0.3",
     "eslint": "^9.29.0",
     "eslint-config-next": "^16.0.5",
+    "eslint-plugin-no-only-tests": "^3.3.0",
+    "eslint-plugin-unused-imports": "^4.1.4",
     "prettier": "^3.6.2",
     "typescript": "~5.9.2"
   }
