@@ -10639,6 +10639,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@safe-global/shell-protocol@workspace:packages/shell-protocol":
+  version: 0.0.0-use.local
+  resolution: "@safe-global/shell-protocol@workspace:packages/shell-protocol"
+  dependencies:
+    eslint: "npm:^9.29.0"
+    prettier: "npm:^3.6.2"
+    typescript: "npm:~5.9.2"
+  languageName: unknown
+  linkType: soft
+
 "@safe-global/store@workspace:^, @safe-global/store@workspace:packages/store":
   version: 0.0.0-use.local
   resolution: "@safe-global/store@workspace:packages/store"

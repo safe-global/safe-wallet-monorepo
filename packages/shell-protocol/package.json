@@ -1,0 +1,18 @@
+{
+  "private": true,
+  "name": "@safe-global/shell-protocol",
+  "version": "1.0.0",
+  "main": "./src/index.ts",
+  "scripts": {
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "type-check": "tsc --noEmit",
+    "prettier": "prettier --check . --config ../../.prettierrc --ignore-path ../../.prettierignore",
+    "prettier:fix": "prettier --write . --config ../../.prettierrc --ignore-path ../../.prettierignore"
+  },
+  "devDependencies": {
+    "eslint": "^9.29.0",
+    "prettier": "^3.6.2",
+    "typescript": "~5.9.2"
+  }
+}

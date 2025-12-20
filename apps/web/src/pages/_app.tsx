@@ -40,7 +40,9 @@ import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import Recovery from '@/features/recovery/components/Recovery'
 import WalletProvider from '@/components/common/WalletProvider'
+import IframeWalletProvider from '@/components/common/IframeWalletProvider'
 import CounterfactualHooks from '@/features/counterfactual/CounterfactualHooks'
+import { useIframeMode } from '@/hooks/useIframeMode'
 import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
@@ -55,7 +57,8 @@ import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
 const reduxStore = makeStore()
 setStoreInstance(reduxStore)
 
-const InitApp = (): null => {
+// Standalone mode initialization (full feature set)
+const InitAppStandalone = (): null => {
   useHydrateStore(reduxStore)
   useAdjustUrl()
   useDatadog()
@@ -82,28 +85,50 @@ const InitApp = (): null => {
   return null
 }
 
+// Iframe mode initialization (limited feature set, shell handles analytics/onboard)
+const InitAppIframe = (): null => {
+  useHydrateStore(reduxStore)
+  useAdjustUrl()
+  useInitSession()
+  useLoadableStores()
+  useInitWeb3()
+  useInitSafeCoreSDK()
+  useTxNotifications()
+  useSafeMessageNotifications()
+  useSafeNotifications()
+  useTxPendingStatuses()
+  useSafeMessagePendingStatuses()
+  useTxTracking()
+  useSafeMsgTracking()
+  useVisitedSafes()
+  usePortfolioRefetchOnTxHistory()
+
+  return null
+}
+
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache()
 
 const THEME_DARK = 'dark'
 const THEME_LIGHT = 'light'
 
-export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }) => {
+export const AppProviders = ({ children, isIframe }: { children: ReactNode | ReactNode[]; isIframe: boolean }) => {
   const isDarkMode = useDarkMode()
   const themeMode = isDarkMode ? THEME_DARK : THEME_LIGHT
+  const WalletProviderComponent = isIframe ? IframeWalletProvider : WalletProvider
 
   return (
     <SafeThemeProvider mode={themeMode}>
       {(safeTheme: Theme) => (
         <ThemeProvider theme={safeTheme}>
           <SentryErrorBoundary showDialog fallback={ErrorBoundary}>
-            <WalletProvider>
+            <WalletProviderComponent>
               <GeoblockingProvider>
                 <TxModalProvider>
                   <AddressBookSourceProvider>{children}</AddressBookSourceProvider>
                 </TxModalProvider>
               </GeoblockingProvider>
-            </WalletProvider>
+            </WalletProviderComponent>
           </SentryErrorBoundary>
         </ThemeProvider>
       )}
@@ -132,6 +157,7 @@ const SafeWalletApp = ({
   emotionCache = clientSideEmotionCache,
 }: SafeWalletAppProps): ReactElement => {
   const safeKey = useChangedValue(router.query.safe?.toString())
+  const isIframe = useIframeMode()
 
   return (
     <Provider store={reduxStore}>
@@ -141,19 +167,28 @@ const SafeWalletApp = ({
       </Head>
 
       <CacheProvider value={emotionCache}>
-        <AppProviders>
+        <AppProviders isIframe={isIframe}>
           <CssBaseline />
 
-          <InitApp />
+          {isIframe ? <InitAppIframe /> : <InitAppStandalone />}
 
           <TermsGate>
-            <PageLayout pathname={router.pathname}>
+            {isIframe ? (
+              /* In iframe mode, shell provides header/sidebar - only render content */
               <Component {...pageProps} key={safeKey} />
-            </PageLayout>
+            ) : (
+              /* In standalone mode, render with PageLayout */
+              <PageLayout pathname={router.pathname}>
+                <Component {...pageProps} key={safeKey} />
+              </PageLayout>
+            )}
 
-            <CookieAndTermBanner />
-
-            <OutreachPopup />
+            {!isIframe && (
+              <>
+                <CookieAndTermBanner />
+                <OutreachPopup />
+              </>
+            )}
 
             <Notifications />
 
@@ -161,7 +196,7 @@ const SafeWalletApp = ({
 
             <CounterfactualHooks />
 
-            <Analytics />
+            {!isIframe && <Analytics />}
 
             <PkModulePopup />
           </TermsGate>
