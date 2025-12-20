@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react'
 import { useRouteDetection } from '@/hooks/useRouteDetection'
 import AccountAppFrame from '@/components/shell/AccountAppFrame'
+import Header from '@/components/common/Header'
 import css from './styles.module.css'
 
 interface ShellLayoutProps {
@@ -20,10 +21,8 @@ const ShellLayout = ({ children }: ShellLayoutProps) => {
 
   return (
     <div className={css.container}>
-      {/* Header will be added in next task */}
       <header className={css.header}>
-        {/* <Header /> */}
-        <div style={{ padding: '1rem', background: '#f0f0f0' }}>Header Placeholder</div>
+        <Header />
       </header>
 
       <div className={css.mainContainer}>

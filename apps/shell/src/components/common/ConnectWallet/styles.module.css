@@ -1,0 +1,12 @@
+.buttonContainer {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  min-width: 140px;
+  cursor: pointer;
+}
+
+.popoverContainer {
+  min-width: 300px;
+  margin-top: 8px;
+}

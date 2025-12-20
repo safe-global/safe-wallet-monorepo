@@ -1,6 +1,8 @@
 import { useRef, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { PROTOCOL_VERSION, type BaseMessage, type AccountToShellMessage } from '@safe-global/shell-protocol'
+import { getShellCommunicator } from '@/services/shell-communicator'
+import { useWallet } from '@/hooks/useWallet'
 import css from './styles.module.css'
 
 interface AccountAppFrameProps {
@@ -15,6 +17,8 @@ interface AccountAppFrameProps {
 const AccountAppFrame = ({ safeAddress, chainPrefix }: AccountAppFrameProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const router = useRouter()
+  const { wallet } = useWallet()
+  const communicator = useMemo(() => getShellCommunicator(), [])
 
   // Build iframe URL
   const iframeUrl = useMemo(() => {
@@ -37,59 +41,111 @@ const AccountAppFrame = ({ safeAddress, chainPrefix }: AccountAppFrameProps) => 
     return url.toString()
   }, [router.pathname, router.query, chainPrefix, safeAddress])
 
-  // Handle incoming messages from account app
+  // Set iframe window reference when loaded
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      // Validate origin (in production, should check specific origin)
-      const msg = event.data as BaseMessage<AccountToShellMessage>
+    const iframe = iframeRef.current
+    if (iframe?.contentWindow) {
+      communicator.setIframeWindow(iframe.contentWindow)
+    }
+  }, [communicator])
 
-      // Validate message is from account app
-      if (msg.source !== 'safe-account-app') {
-        return
-      }
-
-      // Check protocol version
-      if (msg.version !== PROTOCOL_VERSION) {
-        console.warn(`Protocol version mismatch: expected ${PROTOCOL_VERSION}, got ${msg.version}`)
-      }
-
-      // Handle different message types
-      switch (msg.payload.type) {
-        case 'APP_READY':
-          console.log('[Shell] Account app ready:', msg.payload.payload)
-          // TODO: Send initial wallet state
-          break
-
-        case 'NAVIGATION_CHANGED':
-          console.log('[Shell] Navigation changed:', msg.payload.payload)
-          // Sync URL without reload
-          const { path, query } = msg.payload.payload
-          router.replace({ pathname: path, query }, undefined, { shallow: true })
-          break
-
-        case 'REQUEST_WALLET_STATE':
-          console.log('[Shell] Wallet state requested')
-          // TODO: Send wallet state
-          break
-
-        case 'REQUEST_CONNECT_WALLET':
-          console.log('[Shell] Wallet connection requested')
-          // TODO: Trigger wallet connection
-          break
-
-        case 'RPC_REQUEST':
-          console.log('[Shell] RPC request:', msg.payload.payload)
-          // TODO: Forward RPC request to wallet provider
-          break
-
-        default:
-          console.log('[Shell] Unknown message type:', msg.payload)
-      }
+  // Send wallet state updates to iframe
+  useEffect(() => {
+    if (!wallet) {
+      communicator.sendWalletState({
+        address: null,
+        chainId: null,
+        isConnected: false,
+        label: null,
+      })
+      return
     }
 
-    window.addEventListener('message', handleMessage)
-    return () => window.removeEventListener('message', handleMessage)
-  }, [router])
+    communicator.sendWalletState({
+      address: wallet.address,
+      chainId: wallet.chainId,
+      isConnected: true,
+      label: wallet.label,
+      ens: wallet.ens,
+      balance: wallet.balance,
+    })
+  }, [wallet, communicator])
+
+  // Handle incoming messages from account app
+  useEffect(() => {
+    // Handle APP_READY
+    const unsubscribeReady = communicator.on('APP_READY', (msg) => {
+      if (msg.payload.type !== 'APP_READY') return
+      console.log('[Shell] Account app ready:', msg.payload.payload)
+      // Send initial wallet state
+      if (wallet) {
+        communicator.sendWalletState({
+          address: wallet.address,
+          chainId: wallet.chainId,
+          isConnected: true,
+          label: wallet.label,
+          ens: wallet.ens,
+          balance: wallet.balance,
+        })
+      }
+    })
+
+    // Handle NAVIGATION_CHANGED
+    const unsubscribeNav = communicator.on('NAVIGATION_CHANGED', (msg) => {
+      if (msg.payload.type !== 'NAVIGATION_CHANGED') return
+      console.log('[Shell] Navigation changed:', msg.payload.payload)
+      const { path, query } = msg.payload.payload
+      router.replace({ pathname: path, query }, undefined, { shallow: true })
+    })
+
+    // Handle REQUEST_WALLET_STATE
+    const unsubscribeWalletState = communicator.on('REQUEST_WALLET_STATE', (msg) => {
+      console.log('[Shell] Wallet state requested')
+      const requestId = 'requestId' in msg.payload ? msg.payload.requestId : ''
+      if (wallet) {
+        communicator.sendResponse(requestId, {
+          address: wallet.address,
+          chainId: wallet.chainId,
+          isConnected: true,
+          label: wallet.label,
+          ens: wallet.ens,
+          balance: wallet.balance,
+        })
+      } else {
+        communicator.sendResponse(requestId, {
+          address: null,
+          chainId: null,
+          isConnected: false,
+          label: null,
+        })
+      }
+    })
+
+    // Handle REQUEST_CONNECT_WALLET
+    const unsubscribeConnect = communicator.on('REQUEST_CONNECT_WALLET', (msg) => {
+      console.log('[Shell] Wallet connection requested')
+      const requestId = 'requestId' in msg.payload ? msg.payload.requestId : ''
+      // TODO: Trigger wallet connection modal
+      communicator.sendResponse(requestId, undefined, 'Not implemented yet')
+    })
+
+    // Handle RPC_REQUEST
+    const unsubscribeRpc = communicator.on('RPC_REQUEST', (msg) => {
+      if (msg.payload.type !== 'RPC_REQUEST') return
+      console.log('[Shell] RPC request:', msg.payload.payload)
+      const requestId = msg.payload.requestId
+      // TODO: Forward RPC request to wallet provider
+      communicator.sendResponse(requestId, undefined, 'Not implemented yet')
+    })
+
+    return () => {
+      unsubscribeReady()
+      unsubscribeNav()
+      unsubscribeWalletState()
+      unsubscribeConnect()
+      unsubscribeRpc()
+    }
+  }, [router, wallet, communicator])
 
   return (
     <div className={css.container}>
