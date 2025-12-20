@@ -1,0 +1,55 @@
+{
+  "name": "@safe-global/shell",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "type-check": "tsc --noEmit",
+    "prettier": "prettier --check . --config ../../.prettierrc --ignore-path ../../.prettierignore",
+    "prettier:fix": "prettier --write . --config ../../.prettierrc --ignore-path ../../.prettierignore",
+    "serve": "npx -y serve out -p 8081"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@emotion/cache": "^11.13.5",
+    "@emotion/react": "^11.13.5",
+    "@emotion/server": "^11.11.0",
+    "@emotion/styled": "^11.13.5",
+    "@mui/icons-material": "^6.1.6",
+    "@mui/material": "^6.3.0",
+    "@reduxjs/toolkit": "^2.11.0",
+    "@safe-global/shell-protocol": "workspace:^",
+    "@safe-global/store": "workspace:^",
+    "@safe-global/theme": "workspace:^",
+    "@web3-onboard/coinbase": "^2.4.2",
+    "@web3-onboard/core": "^2.24.1",
+    "@web3-onboard/injected-wallets": "^2.11.3",
+    "@web3-onboard/walletconnect": "2.6.2",
+    "classnames": "^2.5.1",
+    "ethers": "^6.14.3",
+    "next": "^16.0.5",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-redux": "^9.1.2",
+    "redux-persist": "^6.0.0"
+  },
+  "devDependencies": {
+    "@safe-global/test": "workspace:^",
+    "@safe-global/utils": "workspace:^",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "cross-env": "^7.0.3",
+    "eslint": "^9.29.0",
+    "eslint-config-next": "^16.0.5",
+    "prettier": "^3.6.2",
+    "typescript": "~5.9.2"
+  }
+}
