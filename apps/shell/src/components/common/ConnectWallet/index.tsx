@@ -1,12 +1,14 @@
 import type { ReactElement } from 'react'
-import { useWallet } from '@/hooks/useWallet'
-import AccountCenter from './AccountCenter'
-import ConnectionCenter from './ConnectionCenter'
+import dynamic from 'next/dynamic'
+
+// Import ConnectWallet as a client-side only component to avoid SSR issues
+const ConnectWalletClient = dynamic(() => import('./ConnectWalletClient'), {
+  ssr: false,
+  loading: () => <div style={{ width: 180, height: 40 }} />, // Placeholder during SSR
+})
 
 const ConnectWallet = (): ReactElement => {
-  const { wallet } = useWallet()
-
-  return wallet ? <AccountCenter wallet={wallet} /> : <ConnectionCenter />
+  return <ConnectWalletClient />
 }
 
 export default ConnectWallet
