@@ -85,7 +85,7 @@ export class ShellCommunicator {
         try {
           handler(msg)
         } catch (error) {
-          console.error(`Error handling message ${messageType}:`, error)
+          console.error('Error handling message:', messageType, error)
         }
       })
     }
