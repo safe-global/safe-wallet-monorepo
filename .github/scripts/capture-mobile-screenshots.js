@@ -128,7 +128,16 @@ async function captureScreenshots() {
         timeout: 30000,
       })
 
-      const storyRoot = await page.locator('#storybook-root').first()
+      // Wait for the Storybook iframe to load
+      const iframeElement = await page.waitForSelector('iframe#storybook-preview-iframe', { timeout: 10000 })
+      const frame = await iframeElement.contentFrame()
+
+      if (!frame) {
+        throw new Error('Could not access Storybook iframe')
+      }
+
+      // Wait for the story to render inside the iframe
+      const storyRoot = await frame.locator('#storybook-root').first()
       await storyRoot.waitFor({ state: 'visible', timeout: 10000 })
 
       await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {
