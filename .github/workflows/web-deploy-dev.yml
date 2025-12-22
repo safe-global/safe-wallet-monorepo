@@ -1,5 +1,12 @@
 name: Web Deploy to dev/staging
 
+# Security Note:
+# This workflow runs on pull_request events and has access to AWS credentials.
+# To prevent execution of malicious code from untrusted PRs:
+# 1. Trusted deployment scripts are checked out from the base branch (lines 65-73)
+# 2. PR deployments use these trusted scripts (lines 128, 136)
+# 3. Dev/staging deployments only run on protected branches (main/dev)
+
 on:
   pull_request:
 
@@ -60,6 +67,18 @@ jobs:
         run: node ./scripts/integrity-hashes.cjs
         working-directory: apps/shell
 
+      # Security: For PRs, checkout deployment scripts from the base branch (trusted)
+      # to prevent execution of potentially malicious scripts with AWS credentials
+      - name: Checkout trusted deployment scripts
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.base_ref }}
+          path: .trusted-scripts
+          sparse-checkout: |
+            apps/web/scripts/github
+            apps/shell/scripts/github
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
@@ -112,14 +131,16 @@ jobs:
         env:
           BUCKET: s3://${{ secrets.AWS_REVIEW_BUCKET_NAME }}/walletweb/${{ steps.extract_branch.outputs.branch }}
         working-directory: apps/web
-        run: bash  ./scripts/github/s3_upload.sh
+        # Use trusted script from base branch to prevent malicious code execution with AWS credentials
+        run: bash  ../../.trusted-scripts/apps/web/scripts/github/s3_upload.sh
 
       - name: Deploy shell app PR branch
         if: github.event.number
         env:
           BUCKET: s3://${{ secrets.AWS_REVIEW_BUCKET_NAME }}/walletweb/${{ steps.extract_branch.outputs.branch }}
         working-directory: apps/shell
-        run: bash  ./scripts/github/s3_upload.sh
+        # Use trusted script from base branch to prevent malicious code execution with AWS credentials
+        run: bash  ../../.trusted-scripts/apps/shell/scripts/github/s3_upload.sh
 
       # Comment
       - name: Post a deployment link in the PR
