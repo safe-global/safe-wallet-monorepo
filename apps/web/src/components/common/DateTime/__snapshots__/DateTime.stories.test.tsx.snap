@@ -5,11 +5,11 @@ exports[`./DateTime.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    aria-label="Apr 8, 2024 - 7:05:29 AM"
+    aria-label="Apr 8, 2024 - 5:05:29 AM"
     class=""
     data-mui-internal-clone-element="true"
   >
-    7:05 AM
+    5:05 AM
   </span>
 </div>
 `;
