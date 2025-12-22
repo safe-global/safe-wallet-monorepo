@@ -41,13 +41,13 @@ if (isWeb) {
       '@storybook/addon-webpack5-compiler-babel',
     ],
     /**
-     * In our monorepo setup, if we just specify the name,
-     * we end up with the wrong path to webpack5 preset. We need to
-     * resolve the path:
-     *
-     * https://github.com/storybookjs/storybook/issues/21216#issuecomment-2187481646
+     * Use standard framework configuration instead of path resolution.
+     * The path resolution workaround causes issues in CI environments.
      */
-    framework: path.resolve(require.resolve('@storybook/react-webpack5/preset'), '..'),
+    framework: {
+      name: '@storybook/react-webpack5',
+      options: {},
+    },
     core: {
       disableTelemetry: true,
     },
