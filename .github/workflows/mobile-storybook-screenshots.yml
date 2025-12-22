@@ -53,8 +53,8 @@ jobs:
         working-directory: apps/mobile
         continue-on-error: true
         run: |
-          # Build Storybook for web
-          yarn build-storybook 2>&1 || {
+          # Build Storybook for web with mocks
+          STORYBOOK_WEB=true STORYBOOK_DISABLE_TELEMETRY=1 yarn build-storybook 2>&1 || {
             echo "build_failed=true" >> $GITHUB_OUTPUT
             echo "::warning::Mobile Storybook build failed. This may be due to monorepo path resolution issues."
             exit 0
