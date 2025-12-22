@@ -6,6 +6,6 @@
 
 .button:hover,
 .button:active {
-  background-color: var(--color-background-lightGrey);
+  background-color: var(--color-background-secondary);
   border-color: var(--color-border-main);
 }

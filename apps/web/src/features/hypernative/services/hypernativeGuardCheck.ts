@@ -1,25 +1,50 @@
-import { Interface, type FunctionFragment } from 'ethers'
+import { Interface, type FunctionFragment, type InterfaceAbi } from 'ethers'
 import type { JsonRpcProvider } from 'ethers'
 import memoize from 'lodash/memoize'
 import { logError, Errors } from '@/services/exceptions'
 import HypernativeGuardAbi from './HypernativeGuard.abi.json'
+import HypernativeGuardV2Abi from './HypernativeGuardV2.abi.json'
 
 /**
- * HypernativeGuard ABI
+ * Array of all supported HypernativeGuard ABIs.
+ * Add new versions to this array to support them.
  */
-export const HYPERNATIVE_GUARD_ABI = HypernativeGuardAbi
+export const HYPERNATIVE_GUARD_ABIS: InterfaceAbi[] = [HypernativeGuardAbi, HypernativeGuardV2Abi]
 
 /**
- * Interface instance to extract function selectors
+ * Helper function to extract function selectors from an ABI
  */
-const HYPERNATIVE_GUARD_INTERFACE = new Interface(HypernativeGuardAbi)
+const extractFunctionSelectors = (abi: InterfaceAbi): string[] => {
+  const iface = new Interface(abi)
+  return iface.fragments
+    .filter((fragment): fragment is FunctionFragment => fragment.type === 'function')
+    .map((fragment) => iface.getFunction(fragment.name)!.selector.toLowerCase())
+}
 
 /**
- * Extract all function selectors from the ABI to check for their presence in deployed bytecode.
+ * Array of function selector sets for each supported HypernativeGuard version.
+ * Each element is an array of selectors that must ALL be present for that version to match.
  */
-export const HYPERNATIVE_GUARD_FUNCTION_SELECTORS = HYPERNATIVE_GUARD_INTERFACE.fragments
-  .filter((fragment): fragment is FunctionFragment => fragment.type === 'function')
-  .map((fragment) => HYPERNATIVE_GUARD_INTERFACE.getFunction(fragment.name)!.selector.toLowerCase())
+export const HYPERNATIVE_GUARD_SELECTOR_SETS = HYPERNATIVE_GUARD_ABIS.map(extractFunctionSelectors)
+
+/**
+ * @deprecated Use HYPERNATIVE_GUARD_SELECTOR_SETS instead.
+ * V1 function selectors for backwards compatibility.
+ */
+export const HYPERNATIVE_GUARD_FUNCTION_SELECTORS = HYPERNATIVE_GUARD_SELECTOR_SETS[0]
+
+/**
+ * Helper to check if bytecode contains all selectors from a given list
+ */
+const bytecodeContainsAllSelectors = (bytecode: string, selectors: string[]): boolean => {
+  for (const selector of selectors) {
+    if (!bytecode.includes(selector.slice(2))) {
+      // slice(2) to remove '0x' prefix for includes check
+      return false
+    }
+  }
+  return true
+}
 
 /**
  * Internal implementation of the guard check.
@@ -53,15 +78,10 @@ const _isHypernativeGuard = async (
 
     // Check if all distinctive function selectors are present in the bytecode
     // This is similar to how we detect ERC20 approvals by checking for function selectors
+    // Check all supported ABIs - a match with ANY version is valid
     const lowerCode = code.toLowerCase()
-    for (const selector of HYPERNATIVE_GUARD_FUNCTION_SELECTORS) {
-      if (!lowerCode.includes(selector.slice(2))) {
-        // slice(2) to remove '0x' prefix for includes check
-        return false
-      }
-    }
 
-    return true
+    return HYPERNATIVE_GUARD_SELECTOR_SETS.some((selectors) => bytecodeContainsAllSelectors(lowerCode, selectors))
   } catch (error) {
     // Log error but don't cache the failure - let it be retried
     logError(Errors._809, error)
@@ -89,6 +109,10 @@ const _memoizedIsHypernativeGuard = memoize(
  * extracted from the ABI. It only requires one RPC call (getCode) and searches for
  * selector presence anywhere in the bytecode using includes().
  *
+ * Supports multiple versions of the HypernativeGuard contract by checking against
+ * all ABIs in HYPERNATIVE_GUARD_ABIS. To add support for a new version, simply
+ * add its ABI to that array.
+ *
  * Feature Flag: FEATURES.HYPERNATIVE_RELAX_GUARD_CHECK
  * When enabled via useHasFeature, this function will skip the ABI check and simply
  * verify that ANY guard contract is present at the address. This provides a fallback
@@ -104,7 +128,7 @@ const _memoizedIsHypernativeGuard = memoize(
  * @param guardAddress - The address of the guard contract to check
  * @param provider - Web3 provider to fetch contract bytecode
  * @param skipAbiCheck - When true, skips ABI verification and accepts any guard
- * @returns Promise<boolean> - true if the guard is a HypernativeGuard (or any guard if skipAbiCheck is true), false otherwise
+ * @returns Promise<boolean> - true if the guard matches any supported version (or any guard if skipAbiCheck is true), false otherwise
  * @throws Error if the provider fails to fetch bytecode (not cached, will retry)
  */
 export const isHypernativeGuard = async (

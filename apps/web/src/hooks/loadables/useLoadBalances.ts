@@ -15,6 +15,7 @@ export interface PortfolioBalances extends Balances {
   positions?: AppBalance[]
   tokensFiatTotal?: string
   positionsFiatTotal?: string
+  isAllTokensMode?: boolean
 }
 
 export const initialBalancesState: PortfolioBalances = {
@@ -22,7 +23,7 @@ export const initialBalancesState: PortfolioBalances = {
   fiatTotal: '',
 }
 
-const createPortfolioBalances = (balances: Balances): PortfolioBalances => ({
+export const createPortfolioBalances = (balances: Balances): PortfolioBalances => ({
   ...balances,
   tokensFiatTotal: balances.fiatTotal,
   positionsFiatTotal: '0',
@@ -40,10 +41,10 @@ export const useTokenListSetting = (): boolean | undefined => {
 }
 
 /**
- * Hook to load balances using the legacy endpoint.
+ * Hook to load balances using the Transaction Service endpoint.
  * @param skip - Skip fetching when portfolio endpoint is enabled
  */
-export const useLegacyBalances = (skip = false): AsyncResult<PortfolioBalances> => {
+export const useTxServiceBalances = (skip = false): AsyncResult<PortfolioBalances> => {
   const currency = useAppSelector(selectCurrency)
   const isTrustedTokenList = useTokenListSetting()
   const { safe, safeAddress } = useSafeInfo()
@@ -51,9 +52,9 @@ export const useLegacyBalances = (skip = false): AsyncResult<PortfolioBalances> 
   const isCounterfactual = !safe.deployed
 
   const {
-    currentData: legacyBalances,
-    isLoading: legacyLoading,
-    error: legacyError,
+    currentData: txServiceBalances,
+    isLoading: txServiceLoading,
+    error: txServiceError,
   } = useBalancesGetBalancesV1Query(
     {
       chainId: safe.chainId,
@@ -80,35 +81,79 @@ export const useLegacyBalances = (skip = false): AsyncResult<PortfolioBalances> 
       return [createPortfolioBalances(cfData), cfError, cfLoading]
     }
 
-    if (legacyBalances) {
-      const error = legacyError ? new Error(String(legacyError)) : undefined
-      return [createPortfolioBalances(legacyBalances), error, legacyLoading]
+    if (txServiceBalances) {
+      const error = txServiceError ? new Error(String(txServiceError)) : undefined
+      return [createPortfolioBalances(txServiceBalances), error, txServiceLoading]
     }
 
-    const error = legacyError ? new Error(String(legacyError)) : undefined
+    const error = txServiceError ? new Error(String(txServiceError)) : undefined
     return [undefined, error, true]
-  }, [skip, isCounterfactual, cfData, cfError, cfLoading, legacyBalances, legacyError, legacyLoading])
+  }, [skip, isCounterfactual, cfData, cfError, cfLoading, txServiceBalances, txServiceError, txServiceLoading])
+}
+
+/**
+ * Calculates the sum of fiat balances from token items
+ */
+const calculateTokensFiatTotal = (items: Balances['items']): string => {
+  const total = items.reduce((sum, item) => sum + parseFloat(item.fiatBalance || '0'), 0)
+  return total.toString()
 }
 
 /**
  * Hook to load token balances and positions data.
- * Uses portfolio endpoint when enabled, otherwise falls back to legacy endpoint.
- * Falls back to legacy endpoint when "All tokens" is selected to show tokens that Zerion may not support.
- * Returns `loading: true` when initialized, even if the query is skipped (e.g., no Safe selected).
+ *
+ * Behavior:
+ * - fiatTotal: always from portfolio endpoint (Zerion) when available
+ * - Token list: portfolio tokens for "Default tokens", Transaction Service tokens for "All tokens"
+ * - tokensFiatTotal: calculated from the displayed token list
+ * - positions: always from portfolio endpoint when available
  */
 const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
   const settings = useAppSelector(selectSettings)
   const hasPortfolioFeature = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
   const isAllTokensSelected = settings.tokenList === TOKEN_LISTS.ALL
 
-  // Use legacy balances when portfolio feature is disabled OR when "All tokens" is selected
-  // This ensures users can see tokens that Zerion may not support via the legacy endpoint
-  const shouldUsePortfolioEndpoint = hasPortfolioFeature && !isAllTokensSelected
+  const portfolioResult = usePortfolioBalances(!hasPortfolioFeature)
 
-  const legacyResult = useLegacyBalances(shouldUsePortfolioEndpoint)
-  const portfolioResult = usePortfolioBalances(!shouldUsePortfolioEndpoint)
+  const shouldUseTxServiceForTokenList = !hasPortfolioFeature || isAllTokensSelected
+  const txServiceResult = useTxServiceBalances(!shouldUseTxServiceForTokenList)
 
-  return shouldUsePortfolioEndpoint ? portfolioResult : legacyResult
+  return useMemo<AsyncResult<PortfolioBalances>>(() => {
+    if (!hasPortfolioFeature) {
+      return txServiceResult
+    }
+
+    if (!isAllTokensSelected) {
+      return portfolioResult
+    }
+
+    const [portfolioData, portfolioError, portfolioLoading] = portfolioResult
+    const [txServiceData, txServiceError, txServiceLoading] = txServiceResult
+
+    if (portfolioLoading || txServiceLoading) {
+      return [undefined, undefined, true]
+    }
+
+    const error = portfolioError || txServiceError
+    if (error) {
+      return [undefined, error, false]
+    }
+
+    if (!portfolioData || !txServiceData) {
+      return [undefined, undefined, true]
+    }
+
+    const mergedBalances: PortfolioBalances = {
+      items: txServiceData.items,
+      fiatTotal: portfolioData.fiatTotal,
+      tokensFiatTotal: calculateTokensFiatTotal(txServiceData.items),
+      positionsFiatTotal: portfolioData.positionsFiatTotal,
+      positions: portfolioData.positions,
+      isAllTokensMode: true,
+    }
+
+    return [mergedBalances, undefined, false]
+  }, [hasPortfolioFeature, isAllTokensSelected, portfolioResult, txServiceResult])
 }
 
 export default useLoadBalances

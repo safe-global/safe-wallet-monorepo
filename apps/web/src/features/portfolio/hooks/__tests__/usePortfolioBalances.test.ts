@@ -108,7 +108,7 @@ describe('usePortfolioBalances', () => {
       refetch: jest.fn(),
     } as any)
 
-    jest.spyOn(useLoadBalances, 'useLegacyBalances').mockReturnValue([undefined, undefined, false])
+    jest.spyOn(useLoadBalances, 'useTxServiceBalances').mockReturnValue([undefined, undefined, false])
   })
 
   describe('when skip is true', () => {
@@ -190,8 +190,8 @@ describe('usePortfolioBalances', () => {
   })
 
   describe('error handling', () => {
-    it('should fallback to legacy when portfolio endpoint fails for deployed safe', async () => {
-      const mockLegacyBalances = {
+    it('should fallback to transaction service when portfolio endpoint fails for deployed safe', async () => {
+      const mockTxServiceBalances = {
         fiatTotal: '500',
         items: [],
         tokensFiatTotal: '500',
@@ -205,18 +205,18 @@ describe('usePortfolioBalances', () => {
         refetch: jest.fn(),
       } as any)
 
-      jest.spyOn(useLoadBalances, 'useLegacyBalances').mockReturnValue([mockLegacyBalances, undefined, false])
+      jest.spyOn(useLoadBalances, 'useTxServiceBalances').mockReturnValue([mockTxServiceBalances, undefined, false])
 
       const { result } = renderHook(() => usePortfolioBalances(false))
 
       await waitFor(() => {
-        expect(result.current[0]).toBe(mockLegacyBalances)
+        expect(result.current[0]).toBe(mockTxServiceBalances)
         expect(result.current[1]).toBeUndefined()
       })
     })
 
-    it('should return legacy error when both portfolio and legacy fail', async () => {
-      const legacyError = new Error('Legacy error')
+    it('should return transaction service error when both portfolio and transaction service fail', async () => {
+      const txServiceError = new Error('Transaction service error')
 
       jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
         currentData: undefined,
@@ -225,20 +225,20 @@ describe('usePortfolioBalances', () => {
         refetch: jest.fn(),
       } as any)
 
-      jest.spyOn(useLoadBalances, 'useLegacyBalances').mockReturnValue([undefined, legacyError, false])
+      jest.spyOn(useLoadBalances, 'useTxServiceBalances').mockReturnValue([undefined, txServiceError, false])
 
       const { result } = renderHook(() => usePortfolioBalances(false))
 
       await waitFor(() => {
-        expect(result.current[1]).toBe(legacyError)
+        expect(result.current[1]).toBe(txServiceError)
       })
     })
   })
 
-  describe('legacy fallback', () => {
-    it('should fallback to legacy when portfolio returns empty for deployed safe', async () => {
+  describe('transaction service fallback', () => {
+    it('should fallback to transaction service when portfolio returns empty for deployed safe', async () => {
       const mockEmptyPortfolio = createMockEmptyPortfolio()
-      const mockLegacyBalances = {
+      const mockTxServiceBalances = {
         fiatTotal: '1000',
         items: [],
         tokensFiatTotal: '1000',
@@ -252,17 +252,23 @@ describe('usePortfolioBalances', () => {
         refetch: jest.fn(),
       } as any)
 
-      jest.spyOn(useLoadBalances, 'useLegacyBalances').mockReturnValue([mockLegacyBalances, undefined, false])
+      jest.spyOn(useLoadBalances, 'useTxServiceBalances').mockReturnValue([mockTxServiceBalances, undefined, false])
 
       const { result } = renderHook(() => usePortfolioBalances(false))
 
       await waitFor(() => {
-        expect(result.current[0]).toBe(mockLegacyBalances)
+        expect(result.current[0]).toBe(mockTxServiceBalances)
       })
     })
 
-    it('should NOT fallback for counterfactual safe with empty portfolio', async () => {
+    it('should fallback for counterfactual safe with empty portfolio to get native token', async () => {
       const mockEmptyPortfolio = createMockEmptyPortfolio()
+      const mockTxServiceBalances = {
+        fiatTotal: '0',
+        items: [{ tokenInfo: { symbol: 'ETH' }, balance: '0', fiatBalance: '0', fiatConversion: '0' }],
+        tokensFiatTotal: '0',
+        positionsFiatTotal: '0',
+      }
 
       jest.spyOn(useSafeInfo, 'default').mockReturnValue({
         safe: mockCounterfactualSafe,
@@ -279,16 +285,19 @@ describe('usePortfolioBalances', () => {
         refetch: jest.fn(),
       } as any)
 
+      jest
+        .spyOn(useLoadBalances, 'useTxServiceBalances')
+        .mockReturnValue([mockTxServiceBalances as any, undefined, false])
+
       const { result } = renderHook(() => usePortfolioBalances(false))
 
       await waitFor(() => {
-        expect(result.current[0]).toBeDefined()
-        expect(result.current[0]?.fiatTotal).toBe('0')
+        expect(result.current[0]).toBe(mockTxServiceBalances)
       })
     })
 
-    it('should fallback to legacy on portfolio error', async () => {
-      const mockLegacyBalances = {
+    it('should fallback to transaction service on portfolio error', async () => {
+      const mockTxServiceBalances = {
         fiatTotal: '500',
         items: [],
         tokensFiatTotal: '500',
@@ -302,12 +311,12 @@ describe('usePortfolioBalances', () => {
         refetch: jest.fn(),
       } as any)
 
-      jest.spyOn(useLoadBalances, 'useLegacyBalances').mockReturnValue([mockLegacyBalances, undefined, false])
+      jest.spyOn(useLoadBalances, 'useTxServiceBalances').mockReturnValue([mockTxServiceBalances, undefined, false])
 
       const { result } = renderHook(() => usePortfolioBalances(false))
 
       await waitFor(() => {
-        expect(result.current[0]).toBe(mockLegacyBalances)
+        expect(result.current[0]).toBe(mockTxServiceBalances)
       })
     })
   })

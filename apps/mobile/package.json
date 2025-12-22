@@ -1,7 +1,7 @@
 {
   "name": "@safe-global/mobile",
   "main": "index.js",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "doctor": {
     "reactNativeDirectoryCheck": {
       "enabled": true
@@ -68,6 +68,7 @@
     "@reduxjs/toolkit": "^2.11.0",
     "@safe-global/protocol-kit": "^5.2.22",
     "@safe-global/store": "workspace:^",
+    "@safe-global/theme": "workspace:^",
     "@safe-global/utils": "workspace:^",
     "@shopify/flash-list": "^2.2.0",
     "@storybook/addon-react-native-web": "^0.0.26",
@@ -178,7 +179,7 @@
     "jest-expo": "~54.0.12",
     "prettier": "^3.6.2",
     "redux-devtools-expo-dev-plugin": "^2.0.0",
-    "storybook": "^8.4.6",
+    "storybook": "^8.6.15",
     "ts-node": "^10.9.2",
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.31.1",

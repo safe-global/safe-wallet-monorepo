@@ -4,6 +4,7 @@ import * as analytics from '@/services/analytics'
 import * as store from '@/store'
 import * as useChains from '@/hooks/useChains'
 import * as useChainId from '@/hooks/useChainId'
+import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
@@ -25,6 +26,13 @@ describe('ManageTokensButton', () => {
 
     jest.spyOn(useChainId, 'default').mockReturnValue('1')
     jest.spyOn(store, 'useAppDispatch').mockReturnValue(mockDispatch)
+    jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
+      safe: { deployed: true, chainId: '1' } as any,
+      safeAddress: '0x1234567890123456789012345678901234567890',
+      safeLoaded: true,
+      safeLoading: false,
+      safeError: undefined,
+    })
     jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
       selector({
         settings: {

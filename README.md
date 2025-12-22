@@ -6,15 +6,17 @@
 
 ## Overview
 
-Welcome to the Safe{Wallet} monorepo! This repository houses multiple applications and packages managed under a unified
-structure using Yarn Workspaces. The monorepo setup simplifies dependency management and ensures consistent development
-practices across projects.
+Welcome to the Safe{Wallet} monorepo! Safe (formerly Gnosis Safe) is a multi-signature smart contract wallet for Ethereum and other EVM chains, requiring multiple signatures to execute transactions.
+
+This repository houses both web and mobile applications along with shared packages, managed under a unified structure using Yarn Workspaces. The monorepo setup simplifies dependency management and ensures consistent development practices across projects.
 
 ### Key components
 
-- **apps/**: Contains application projects (e.g., `mobile` for the Safe{Wallet} mobile app).
-- **packages/**: Shared libraries and utilities.
-- **config/**: Configuration files for the monorepo.
+- **apps/web** - Next.js web application
+- **apps/mobile** - Expo/React Native mobile application
+- **packages/store** - Shared Redux store used by both platforms
+- **packages/utils** - Shared utilities and TypeScript types
+- **config/** - Shared configuration files
 
 ## Getting started
 
@@ -59,6 +61,22 @@ cd monorepo
 yarn install
 ```
 
+### Quick start commands
+
+```bash
+# Run web app in development mode
+yarn workspace @safe-global/web dev
+
+# Run mobile app in development mode
+yarn workspace @safe-global/mobile start
+
+# Run tests for web
+yarn workspace @safe-global/web test
+
+# Run Storybook for web
+yarn workspace @safe-global/web storybook
+```
+
 ## Monorepo commands
 
 Here are some essential commands to help you navigate the monorepo:
@@ -74,7 +92,7 @@ yarn workspace <workspace-name> <script>
 Example:
 
 ```bash
-yarn workspace @safe-global/web start
+yarn workspace @safe-global/web dev
 ```
 
 - **Add a dependency to a specific workspace:**
@@ -105,12 +123,25 @@ yarn workspace <workspace-name> remove <package-name>
 > yarn workspace @safe-global/web cypress:open
 > ```
 
-### Linting and formatting
+### Linting, formatting, and type-checking
 
 - **Run ESLint across all workspaces:**
 
 ```bash
 yarn lint
+```
+
+- **Run Prettier to check formatting:**
+
+```bash
+yarn prettier
+```
+
+- **Run type-check for a workspace:**
+
+```bash
+yarn workspace @safe-global/web type-check
+yarn workspace @safe-global/mobile type-check
 ```
 
 ### Testing
@@ -119,6 +150,13 @@ yarn lint
 
 ```bash
 yarn test
+```
+
+- **Run E2E tests (web only):**
+
+```bash
+yarn workspace @safe-global/web cypress:open  # Interactive mode
+yarn workspace @safe-global/web cypress:run   # Headless mode
 ```
 
 ## Contributing
@@ -136,16 +174,20 @@ yarn install
 ### Best practices
 
 - Use Yarn Workspaces commands for managing dependencies.
-- Ensure tests and linting pass before pushing changes.
-- Follow the commit message guidelines.
+- Ensure type-check, lint, prettier, and tests pass before pushing changes.
+- Follow the [semantic commit message guidelines](https://www.conventionalcommits.org/).
+- For AI contributors, see [AGENTS.md](AGENTS.md) for detailed guidelines.
 
 ### Tools & configurations
 
-- **Husky**: Pre-commit hooks for linting and tests.
+- **Husky**: Pre-commit hooks for linting, formatting, and type-checking.
 - **ESLint & Prettier**: Enforce coding standards and formatting.
 - **Jest**: Unit testing framework.
+- **Cypress**: E2E testing for the web app.
+- **Storybook**: Component documentation and development for the web app.
 - **Expo**: Mobile app framework for the `mobile` workspace.
 - **Next.js**: React framework for the `web` workspace.
+- **Tamagui**: UI component library for the mobile app.
 
 ## Release process
 
@@ -153,12 +195,14 @@ For information on releasing the web app, see the [Automated Release Procedure](
 
 ## Useful links
 
-- [Yarn Workspaces Documentation](https://classic.yarnpkg.com/en/docs/workspaces/)
+- [Yarn Workspaces Documentation](https://yarnpkg.com/features/workspaces)
 - [Expo Documentation](https://docs.expo.dev/)
 - [Next.js Documentation](https://nextjs.org/docs)
+- [Storybook Documentation](https://storybook.js.org/docs)
 - [Jest Documentation](https://jestjs.io/)
 - [ESLint Documentation](https://eslint.org/)
 - [Prettier Documentation](https://prettier.io/)
+- [Safe Developer Docs](https://docs.safe.global/)
 
 ---
 

@@ -18,7 +18,7 @@ import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balance
 const SAFE_ADDRESS = toBeHex('0x1234', 20)
 const CHAIN_ID = '5'
 
-const createMockLegacyBalances = (): Balances => ({
+const createMockTxServiceBalances = (): Balances => ({
   fiatTotal: '1000',
   items: [
     {
@@ -167,9 +167,9 @@ describe('useLoadBalances', () => {
     jest.spyOn(useCounterfactualBalances, 'useCounterfactualBalances').mockReturnValue([undefined, undefined, false])
   })
 
-  describe('legacy endpoint', () => {
-    it('should return legacy balances when portfolio endpoint is disabled', async () => {
-      const mockBalances = createMockLegacyBalances()
+  describe('transaction service endpoint', () => {
+    it('should return transaction service balances when portfolio endpoint is disabled', async () => {
+      const mockBalances = createMockTxServiceBalances()
 
       jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
         currentData: mockBalances,
@@ -194,7 +194,7 @@ describe('useLoadBalances', () => {
       expect(loading).toBe(false)
     })
 
-    it('should return counterfactual balances for counterfactual safe with legacy endpoint', async () => {
+    it('should return counterfactual balances for counterfactual safe with transaction service endpoint', async () => {
       const mockCfBalances = createMockCounterfactualBalances()
 
       jest.spyOn(useSafeInfo, 'default').mockReturnValue({
@@ -225,8 +225,8 @@ describe('useLoadBalances', () => {
       expect(loading).toBe(false)
     })
 
-    it('should handle legacy endpoint errors', async () => {
-      const mockError = new Error('Legacy endpoint error')
+    it('should handle transaction service endpoint errors', async () => {
+      const mockError = new Error('Transaction service endpoint error')
 
       jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
         currentData: undefined,
@@ -245,7 +245,7 @@ describe('useLoadBalances', () => {
 
       expect(balances).toBeUndefined()
       expect(error).toBeInstanceOf(Error)
-      expect(error?.message).toBe('Error: Legacy endpoint error')
+      expect(error?.message).toBe('Error: Transaction service endpoint error')
     })
   })
 
@@ -261,7 +261,7 @@ describe('useLoadBalances', () => {
         return false
       })
 
-      // Set token list to TRUSTED to use portfolio endpoint (ALL uses legacy)
+      // Set token list to TRUSTED to use portfolio endpoint (ALL uses transaction service)
       jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
         selector({
           chains: {
@@ -314,8 +314,9 @@ describe('useLoadBalances', () => {
       expect(loading).toBe(false)
     })
 
-    it('should return portfolio balances for counterfactual safe with empty portfolio', async () => {
+    it('should fallback to tx service for counterfactual safe with empty portfolio to get native token', async () => {
       const mockPortfolio = createMockEmptyPortfolio()
+      const mockCfBalances = createMockCounterfactualBalances()
 
       jest.spyOn(useSafeInfo, 'default').mockReturnValue({
         safe: mockCounterfactualSafe,
@@ -332,6 +333,10 @@ describe('useLoadBalances', () => {
         refetch: jest.fn(),
       } as any)
 
+      jest
+        .spyOn(useCounterfactualBalances, 'useCounterfactualBalances')
+        .mockReturnValue([mockCfBalances, undefined, false])
+
       const { result } = renderHook(() => useLoadBalances())
 
       await waitFor(() => {
@@ -340,11 +345,10 @@ describe('useLoadBalances', () => {
 
       const [balances, error, loading] = result.current
 
-      // Portfolio endpoint natively supports counterfactual Safes
-      expect(balances?.fiatTotal).toBe(mockPortfolio.totalBalanceFiat)
-      expect(balances?.tokensFiatTotal).toBe(mockPortfolio.totalTokenBalanceFiat)
-      expect(balances?.positionsFiatTotal).toBe(mockPortfolio.totalPositionsBalanceFiat)
-      expect(balances?.positions).toEqual(mockPortfolio.positionBalances)
+      // Empty portfolio falls back to tx service which provides native token for counterfactual
+      expect(balances?.fiatTotal).toBe(mockCfBalances.fiatTotal)
+      expect(balances?.items).toHaveLength(1)
+      expect(balances?.items[0]?.tokenInfo.type).toBe(TokenType.NATIVE_TOKEN)
       expect(error).toBeUndefined()
       expect(loading).toBe(false)
     })
@@ -380,9 +384,9 @@ describe('useLoadBalances', () => {
       expect(balances?.tokensFiatTotal).toBe(mockPortfolio.totalTokenBalanceFiat)
     })
 
-    it('should fallback to legacy endpoint when portfolio fails', async () => {
+    it('should fallback to transaction service endpoint when portfolio fails', async () => {
       const mockPortfolioError = new Error('Portfolio endpoint error')
-      const mockLegacyBalances = createMockLegacyBalances()
+      const mockTxServiceBalances = createMockTxServiceBalances()
 
       jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
         currentData: undefined,
@@ -392,7 +396,7 @@ describe('useLoadBalances', () => {
       } as any)
 
       jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
-        currentData: mockLegacyBalances,
+        currentData: mockTxServiceBalances,
         isLoading: false,
         error: undefined,
         refetch: jest.fn(),
@@ -406,14 +410,14 @@ describe('useLoadBalances', () => {
 
       const [balances, error] = result.current
 
-      // Should fallback to legacy balances when portfolio fails
-      expect(balances?.fiatTotal).toBe(mockLegacyBalances.fiatTotal)
+      // Should fallback to transaction service balances when portfolio fails
+      expect(balances?.fiatTotal).toBe(mockTxServiceBalances.fiatTotal)
       expect(error).toBeUndefined()
     })
 
-    it('should return error when both portfolio and legacy fail', async () => {
+    it('should return error when both portfolio and transaction service fail', async () => {
       const mockPortfolioError = new Error('Portfolio endpoint error')
-      const mockLegacyError = new Error('Legacy endpoint error')
+      const mockTxServiceError = new Error('Transaction service endpoint error')
 
       jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
         currentData: undefined,
@@ -425,7 +429,7 @@ describe('useLoadBalances', () => {
       jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
         currentData: undefined,
         isLoading: false,
-        error: mockLegacyError,
+        error: mockTxServiceError,
         refetch: jest.fn(),
       } as any)
 
@@ -454,8 +458,8 @@ describe('useLoadBalances', () => {
       expect(result.current[2]).toBe(true)
     })
 
-    it('should use legacy endpoint when "All tokens" is selected', async () => {
-      const mockLegacyBalances = createMockLegacyBalances()
+    it('should merge portfolio fiatTotal with transaction service items when "All tokens" is selected', async () => {
+      const mockTxServiceBalances = createMockTxServiceBalances()
       const mockPortfolio = createMockPortfolio()
 
       // Set token list to ALL
@@ -483,7 +487,7 @@ describe('useLoadBalances', () => {
       )
 
       jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
-        currentData: mockLegacyBalances,
+        currentData: mockTxServiceBalances,
         isLoading: false,
         error: undefined,
         refetch: jest.fn(),
@@ -504,18 +508,45 @@ describe('useLoadBalances', () => {
 
       const [balances, error, loading] = result.current
 
-      // Should return legacy balances, not portfolio (even when portfolio feature is enabled)
-      // This ensures users can see tokens that Zerion may not support via the legacy endpoint
-      expect(balances?.fiatTotal).toBe(mockLegacyBalances.fiatTotal)
-      expect(balances?.tokensFiatTotal).toBe(mockLegacyBalances.fiatTotal)
-      expect(balances?.positionsFiatTotal).toBe('0')
-      expect(balances?.positions).toBeUndefined()
+      // fiatTotal should come from portfolio (Zerion)
+      expect(balances?.fiatTotal).toBe(mockPortfolio.totalBalanceFiat)
+      // tokensFiatTotal should be calculated from transaction service items
+      expect(balances?.tokensFiatTotal).toBe('1000')
+      // positionsFiatTotal should come from portfolio
+      expect(balances?.positionsFiatTotal).toBe(mockPortfolio.totalPositionsBalanceFiat)
+      // positions should come from portfolio
+      expect(balances?.positions).toEqual(mockPortfolio.positionBalances)
+      // items should come from transaction service
+      expect(balances?.items).toEqual(mockTxServiceBalances.items)
+      // isAllTokensMode flag should be true
+      expect(balances?.isAllTokensMode).toBe(true)
       expect(error).toBeUndefined()
       expect(loading).toBe(false)
     })
 
+    it('should not set isAllTokensMode when "Default tokens" is selected', async () => {
+      const mockPortfolio = createMockPortfolio()
+
+      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
+        currentData: mockPortfolio,
+        isLoading: false,
+        error: undefined,
+        refetch: jest.fn(),
+      } as any)
+
+      const { result } = renderHook(() => useLoadBalances())
+
+      await waitFor(() => {
+        expect(result.current[0]).toBeDefined()
+      })
+
+      const [balances] = result.current
+
+      expect(balances?.isAllTokensMode).toBeUndefined()
+    })
+
     it('should use portfolio endpoint when "Default tokens" is selected', async () => {
-      const mockLegacyBalances = createMockLegacyBalances()
+      const mockTxServiceBalances = createMockTxServiceBalances()
       const mockPortfolio = createMockPortfolio()
 
       // Set token list to TRUSTED
@@ -543,7 +574,7 @@ describe('useLoadBalances', () => {
       )
 
       jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
-        currentData: mockLegacyBalances,
+        currentData: mockTxServiceBalances,
         isLoading: false,
         error: undefined,
         refetch: jest.fn(),
