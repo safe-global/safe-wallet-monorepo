@@ -51,7 +51,7 @@ exports[`./index.stories CustomRecipient 1`] = `
   "
                   style="pointer-events: none; border: 0px; display: block;"
                   tabindex="-1"
-                  title="BOB"
+                  title="AUD"
                   width="40"
                 />
               </div>
@@ -69,7 +69,7 @@ exports[`./index.stories CustomRecipient 1`] = `
                 class="MuiTypography-root MuiTypography-h4 css-csh7nj-MuiTypography-root"
               >
                 <span
-                  aria-label="10 BOB"
+                  aria-label="10 AUD"
                   class="container"
                   data-mui-internal-clone-element="true"
                 >
@@ -78,7 +78,7 @@ exports[`./index.stories CustomRecipient 1`] = `
                   >
                     10
                      
-                    BOB
+                    AUD
                   </b>
                 </span>
               </div>
@@ -126,7 +126,7 @@ exports[`./index.stories CustomRecipient 1`] = `
   "
                   style="pointer-events: none; border: 0px; display: block;"
                   tabindex="-1"
-                  title="CHF"
+                  title="SGD"
                   width="40"
                 />
               </div>
@@ -144,16 +144,16 @@ exports[`./index.stories CustomRecipient 1`] = `
                 class="MuiTypography-root MuiTypography-h4 css-csh7nj-MuiTypography-root"
               >
                 <span
-                  aria-label="0.02 CHF"
+                  aria-label="0.00000005 SGD"
                   class="container"
                   data-mui-internal-clone-element="true"
                 >
                   <b
                     class="tokenText"
                   >
-                    0.02
+                    &lt; 0.00001
                      
-                    CHF
+                    SGD
                   </b>
                 </span>
               </div>
@@ -184,11 +184,11 @@ exports[`./index.stories CustomRecipient 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            CHF
+            SGD
              = 
-            500
+            200M
              
-            BOB
+            AUD
           </div>
         </div>
       </div>
@@ -224,7 +224,7 @@ exports[`./index.stories CustomRecipient 1`] = `
               </span>
                
               (
-              Dec 22, 2025 - 8:24:13 PM
+              Dec 22, 2025 - 8:42:10 PM
               )
             </p>
           </div>
@@ -256,7 +256,7 @@ exports[`./index.stories CustomRecipient 1`] = `
               class="MuiStack-root css-m69qwo-MuiStack-root"
             >
               <span>
-                9a431ed5
+                9156d47f
               </span>
               <span
                 aria-label="Copy to clipboard"
@@ -371,7 +371,7 @@ exports[`./index.stories CustomRecipient 1`] = `
               >
                 <div
                   class="icon"
-                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMzkgOTUlIDI0JSkiIGQ9Ik0wLDBIOFY4SDB6Ii8+PHBhdGggZmlsbD0iaHNsKDIzNCA3NiUgMzYlKSIgZD0iTTAsMGgxdjFoLTF6TTcsMGgxdjFoLTF6TTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTIsMWgxdjFoLTF6TTUsMWgxdjFoLTF6TTAsMmgxdjFoLTF6TTcsMmgxdjFoLTF6TTEsMmgxdjFoLTF6TTYsMmgxdjFoLTF6TTIsMmgxdjFoLTF6TTUsMmgxdjFoLTF6TTAsNGgxdjFoLTF6TTcsNGgxdjFoLTF6TTEsNGgxdjFoLTF6TTYsNGgxdjFoLTF6TTIsNWgxdjFoLTF6TTUsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTAsNmgxdjFoLTF6TTcsNmgxdjFoLTF6TTEsNmgxdjFoLTF6TTYsNmgxdjFoLTF6TTIsNmgxdjFoLTF6TTUsNmgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTIsN2gxdjFoLTF6TTUsN2gxdjFoLTF6TTMsN2gxdjFoLTF6TTQsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDM1OSA5MSUgMzklKSIgZD0iIi8+PC9zdmc+); width: 24px; height: 24px;"
+                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjA0IDQzJSAzMCUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgzNDAgOTQlIDY1JSkiIGQ9Ik0wLDBoMXYxaC0xek03LDBoMXYxaC0xek0xLDFoMXYxaC0xek02LDFoMXYxaC0xek0zLDFoMXYxaC0xek00LDFoMXYxaC0xek0xLDJoMXYxaC0xek02LDJoMXYxaC0xek0zLDJoMXYxaC0xek00LDJoMXYxaC0xek0yLDNoMXYxaC0xek01LDNoMXYxaC0xek0wLDRoMXYxaC0xek03LDRoMXYxaC0xek0xLDRoMXYxaC0xek02LDRoMXYxaC0xek0zLDRoMXYxaC0xek00LDRoMXYxaC0xek0xLDVoMXYxaC0xek02LDVoMXYxaC0xek0yLDVoMXYxaC0xek01LDVoMXYxaC0xek0zLDVoMXYxaC0xek00LDVoMXYxaC0xek0yLDZoMXYxaC0xek01LDZoMXYxaC0xek0zLDZoMXYxaC0xek00LDZoMXYxaC0xek0wLDdoMXYxaC0xek03LDdoMXYxaC0xek0xLDdoMXYxaC0xek02LDdoMXYxaC0xek0zLDdoMXYxaC0xek00LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCgyODcgNjElIDQ5JSkiIGQ9Ik0yLDJoMXYxaC0xek01LDJoMXYxaC0xek0wLDNoMXYxaC0xek03LDNoMXYxaC0xeiIvPjwvc3ZnPg==); width: 24px; height: 24px;"
                 />
               </div>
               <div
@@ -390,7 +390,7 @@ exports[`./index.stories CustomRecipient 1`] = `
                       style="cursor: pointer;"
                     >
                       <span>
-                        0x20380edb7f5dbe5b4bad7d41dc3a0b9b4923aace
+                        0xd7e3ecc2d0f014d7bc4ce699ececb0ae4188c0ee
                       </span>
                     </span>
                   </div>
@@ -434,7 +434,7 @@ exports[`./index.stories CustomRecipient 1`] = `
               >
                 <div
                   class="icon"
-                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjYxIDQzJSAzNyUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgxNzYgODMlIDQ1JSkiIGQ9Ik0yLDBoMXYxaC0xek01LDBoMXYxaC0xek0zLDBoMXYxaC0xek00LDBoMXYxaC0xek0zLDFoMXYxaC0xek00LDFoMXYxaC0xek0xLDJoMXYxaC0xek02LDJoMXYxaC0xek0yLDJoMXYxaC0xek01LDJoMXYxaC0xek0wLDNoMXYxaC0xek03LDNoMXYxaC0xek0xLDNoMXYxaC0xek02LDNoMXYxaC0xek0yLDNoMXYxaC0xek01LDNoMXYxaC0xek0wLDRoMXYxaC0xek03LDRoMXYxaC0xek0xLDRoMXYxaC0xek02LDRoMXYxaC0xek0yLDRoMXYxaC0xek01LDRoMXYxaC0xek0wLDVoMXYxaC0xek03LDVoMXYxaC0xek0xLDVoMXYxaC0xek02LDVoMXYxaC0xek0yLDVoMXYxaC0xek01LDVoMXYxaC0xek0xLDZoMXYxaC0xek02LDZoMXYxaC0xek0yLDZoMXYxaC0xek01LDZoMXYxaC0xek0wLDdoMXYxaC0xek03LDdoMXYxaC0xek0xLDdoMXYxaC0xek02LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCgxOTIgNDIlIDUwJSkiIGQ9Ik0xLDFoMXYxaC0xek02LDFoMXYxaC0xek0yLDFoMXYxaC0xek01LDFoMXYxaC0xek0zLDJoMXYxaC0xek00LDJoMXYxaC0xek0wLDZoMXYxaC0xek03LDZoMXYxaC0xek0yLDdoMXYxaC0xek01LDdoMXYxaC0xek0zLDdoMXYxaC0xek00LDdoMXYxaC0xeiIvPjwvc3ZnPg==); width: 24px; height: 24px;"
+                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjQzIDkyJSA0MCUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgxNzEgNzYlIDY2JSkiIGQ9Ik0xLDBoMXYxaC0xek02LDBoMXYxaC0xek0zLDBoMXYxaC0xek00LDBoMXYxaC0xek0xLDJoMXYxaC0xek02LDJoMXYxaC0xek0xLDNoMXYxaC0xek02LDNoMXYxaC0xek0yLDNoMXYxaC0xek01LDNoMXYxaC0xek0zLDNoMXYxaC0xek00LDNoMXYxaC0xek0zLDVoMXYxaC0xek00LDVoMXYxaC0xek0zLDZoMXYxaC0xek00LDZoMXYxaC0xek0xLDdoMXYxaC0xek02LDdoMXYxaC0xek0yLDdoMXYxaC0xek01LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCgzMzcgOTMlIDgzJSkiIGQ9Ik0xLDFoMXYxaC0xek02LDFoMXYxaC0xek0yLDFoMXYxaC0xek01LDFoMXYxaC0xek0wLDJoMXYxaC0xek03LDJoMXYxaC0xek0zLDJoMXYxaC0xek00LDJoMXYxaC0xek0xLDRoMXYxaC0xek02LDRoMXYxaC0xeiIvPjwvc3ZnPg==); width: 24px; height: 24px;"
                 />
               </div>
               <div
@@ -453,7 +453,7 @@ exports[`./index.stories CustomRecipient 1`] = `
                       style="cursor: pointer;"
                     >
                       <span>
-                        0x8f6e...6cc0
+                        0x9f94...dff9
                       </span>
                     </span>
                   </div>
@@ -551,7 +551,7 @@ exports[`./index.stories Default 1`] = `
   "
                   style="pointer-events: none; border: 0px; display: block;"
                   tabindex="-1"
-                  title="BOB"
+                  title="AUD"
                   width="40"
                 />
               </div>
@@ -569,7 +569,7 @@ exports[`./index.stories Default 1`] = `
                 class="MuiTypography-root MuiTypography-h4 css-csh7nj-MuiTypography-root"
               >
                 <span
-                  aria-label="10 BOB"
+                  aria-label="10 AUD"
                   class="container"
                   data-mui-internal-clone-element="true"
                 >
@@ -578,7 +578,7 @@ exports[`./index.stories Default 1`] = `
                   >
                     10
                      
-                    BOB
+                    AUD
                   </b>
                 </span>
               </div>
@@ -626,7 +626,7 @@ exports[`./index.stories Default 1`] = `
   "
                   style="pointer-events: none; border: 0px; display: block;"
                   tabindex="-1"
-                  title="CHF"
+                  title="SGD"
                   width="40"
                 />
               </div>
@@ -644,16 +644,16 @@ exports[`./index.stories Default 1`] = `
                 class="MuiTypography-root MuiTypography-h4 css-csh7nj-MuiTypography-root"
               >
                 <span
-                  aria-label="0.02 CHF"
+                  aria-label="0.00000005 SGD"
                   class="container"
                   data-mui-internal-clone-element="true"
                 >
                   <b
                     class="tokenText"
                   >
-                    0.02
+                    &lt; 0.00001
                      
-                    CHF
+                    SGD
                   </b>
                 </span>
               </div>
@@ -684,11 +684,11 @@ exports[`./index.stories Default 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            CHF
+            SGD
              = 
-            500
+            200M
              
-            BOB
+            AUD
           </div>
         </div>
       </div>
@@ -724,7 +724,7 @@ exports[`./index.stories Default 1`] = `
               </span>
                
               (
-              Dec 22, 2025 - 8:24:13 PM
+              Dec 22, 2025 - 8:42:10 PM
               )
             </p>
           </div>
@@ -756,7 +756,7 @@ exports[`./index.stories Default 1`] = `
               class="MuiStack-root css-m69qwo-MuiStack-root"
             >
               <span>
-                9a431ed5
+                9156d47f
               </span>
               <span
                 aria-label="Copy to clipboard"
@@ -871,7 +871,7 @@ exports[`./index.stories Default 1`] = `
               >
                 <div
                   class="icon"
-                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woODggNzglIDQyJSkiIGQ9Ik0wLDBIOFY4SDB6Ii8+PHBhdGggZmlsbD0iaHNsKDI2MiA4NCUgNTAlKSIgZD0iTTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTMsMGgxdjFoLTF6TTQsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTMsMWgxdjFoLTF6TTQsMWgxdjFoLTF6TTAsMmgxdjFoLTF6TTcsMmgxdjFoLTF6TTEsMmgxdjFoLTF6TTYsMmgxdjFoLTF6TTAsM2gxdjFoLTF6TTcsM2gxdjFoLTF6TTMsM2gxdjFoLTF6TTQsM2gxdjFoLTF6TTIsNGgxdjFoLTF6TTUsNGgxdjFoLTF6TTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTIsNmgxdjFoLTF6TTUsNmgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDQ5IDY4JSAyNCUpIiBkPSJNMiwxaDF2MWgtMXpNNSwxaDF2MWgtMXpNMSw0aDF2MWgtMXpNNiw0aDF2MWgtMXpNMCw2aDF2MWgtMXpNNyw2aDF2MWgtMXpNMyw2aDF2MWgtMXpNNCw2aDF2MWgtMXoiLz48L3N2Zz4=); width: 24px; height: 24px;"
+                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woOTkgNzMlIDQzJSkiIGQ9Ik0wLDBIOFY4SDB6Ii8+PHBhdGggZmlsbD0iaHNsKDIwOCA2NiUgNDklKSIgZD0iTTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTMsMWgxdjFoLTF6TTQsMWgxdjFoLTF6TTAsMmgxdjFoLTF6TTcsMmgxdjFoLTF6TTIsMmgxdjFoLTF6TTUsMmgxdjFoLTF6TTAsM2gxdjFoLTF6TTcsM2gxdjFoLTF6TTIsM2gxdjFoLTF6TTUsM2gxdjFoLTF6TTMsM2gxdjFoLTF6TTQsM2gxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTEsN2gxdjFoLTF6TTYsN2gxdjFoLTF6TTIsN2gxdjFoLTF6TTUsN2gxdjFoLTF6TTMsN2gxdjFoLTF6TTQsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDI3NSA3MyUgMzklKSIgZD0iTTAsMGgxdjFoLTF6TTcsMGgxdjFoLTF6TTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6Ii8+PC9zdmc+); width: 24px; height: 24px;"
                 />
               </div>
               <div
@@ -890,7 +890,7 @@ exports[`./index.stories Default 1`] = `
                       style="cursor: pointer;"
                     >
                       <span>
-                        0xded849e86ff3fba61d6dc6940c9f3d82ecadefce
+                        0xb9b9a37c49f5ee2ab61525bd06fbd0af82af7bb4
                       </span>
                     </span>
                   </div>

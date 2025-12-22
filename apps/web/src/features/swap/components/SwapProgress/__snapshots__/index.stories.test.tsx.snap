@@ -37,7 +37,7 @@ exports[`./index.stories Filled 1`] = `
         >
           10
            
-          LKR
+          SDG
         </span>
          
         sold
@@ -84,7 +84,7 @@ exports[`./index.stories NotFilled 1`] = `
         >
           0
            
-          DJF
+          HKD
         </span>
          
         sold
@@ -131,7 +131,7 @@ exports[`./index.stories PartiallyFilled 1`] = `
         >
           1
            
-          GTQ
+          HNL
         </span>
          
         sold
