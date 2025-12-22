@@ -48,6 +48,9 @@ if (isWeb) {
      * https://github.com/storybookjs/storybook/issues/21216#issuecomment-2187481646
      */
     framework: path.resolve(require.resolve('@storybook/react-webpack5/preset'), '..'),
+    core: {
+      disableTelemetry: true,
+    },
     webpackFinal: async (config) => {
       if (config.resolve) {
         config.resolve.plugins = [
