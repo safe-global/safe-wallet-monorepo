@@ -37,7 +37,7 @@ exports[`./index.stories Filled 1`] = `
         >
           10
            
-          GEL
+          LKR
         </span>
          
         sold
@@ -84,7 +84,7 @@ exports[`./index.stories NotFilled 1`] = `
         >
           0
            
-          GBP
+          DJF
         </span>
          
         sold

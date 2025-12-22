@@ -50,7 +50,7 @@ exports[`./twap.stories ExecutedTwap 1`] = `
                   Sell
                    
                   <span
-                    aria-label="1 GTQ"
+                    aria-label="10,000,000,000 NOK"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -75,16 +75,16 @@ exports[`./twap.stories ExecutedTwap 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="GTQ"
+                        title="NOK"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      1
+                      10B
                        
-                      GTQ
+                      NOK
                     </b>
                   </span>
                 </span>
@@ -96,7 +96,7 @@ exports[`./twap.stories ExecutedTwap 1`] = `
                   for at least
                    
                   <span
-                    aria-label="3,388,586,928.3244824 JOD"
+                    aria-label="33.88586928324482 DKK"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -121,16 +121,16 @@ exports[`./twap.stories ExecutedTwap 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="JOD"
+                        title="DKK"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      3.39B
+                      33.88587
                        
-                      JOD
+                      DKK
                     </b>
                   </span>
                 </span>
@@ -162,11 +162,11 @@ exports[`./twap.stories ExecutedTwap 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            JOD
+            DKK
              = 
-            &lt; 0.00001
+            295.11M
              
-            GTQ
+            NOK
           </div>
         </div>
       </div>
@@ -194,7 +194,7 @@ exports[`./twap.stories ExecutedTwap 1`] = `
           >
             0
              
-            JOD
+            DKK
           </div>
         </div>
       </div>
@@ -232,7 +232,7 @@ exports[`./twap.stories ExecutedTwap 1`] = `
           >
             &lt; 0.00001
              
-            ARS
+            MOP
           </div>
         </div>
       </div>
@@ -293,9 +293,9 @@ exports[`./twap.stories ExecutedTwap 1`] = `
               <span
                 class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
               >
-                0.5
+                5B
                  
-                GTQ
+                NOK
               </span>
               <span
                 class="MuiTypography-root MuiTypography-body1 css-9p6poq-MuiTypography-root"
@@ -334,9 +334,9 @@ exports[`./twap.stories ExecutedTwap 1`] = `
               <span
                 class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
               >
-                1.69B
+                16.94293
                  
-                JOD
+                DKK
               </span>
               <span
                 class="MuiTypography-root MuiTypography-body1 css-9p6poq-MuiTypography-root"
@@ -396,9 +396,9 @@ exports[`./twap.stories ExecutedTwap 1`] = `
                 <span
                   class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
                 >
-                  1
+                  10B
                    
-                  GTQ
+                  NOK
                 </span>
                  
                 sold
