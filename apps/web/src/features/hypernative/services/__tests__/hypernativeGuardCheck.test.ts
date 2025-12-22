@@ -1,5 +1,5 @@
 import type { JsonRpcProvider } from 'ethers'
-import { isHypernativeGuard, HYPERNATIVE_GUARD_FUNCTION_SELECTORS } from '../hypernativeGuardCheck'
+import { isHypernativeGuard, HYPERNATIVE_GUARD_SELECTOR_SETS } from '../hypernativeGuardCheck'
 import { logError, Errors } from '@/services/exceptions'
 
 jest.mock('@/services/exceptions', () => ({
@@ -24,11 +24,14 @@ function createMockBytecode(selectors: string[]): string {
   return bytecode
 }
 
-// Create mock bytecode with all HypernativeGuard selectors
-const MOCK_HYPERNATIVE_GUARD_BYTECODE = createMockBytecode(HYPERNATIVE_GUARD_FUNCTION_SELECTORS)
+// Create mock bytecode for each supported HypernativeGuard version
+const MOCK_HYPERNATIVE_GUARD_BYTECODES = HYPERNATIVE_GUARD_SELECTOR_SETS.map(createMockBytecode)
 
 // Create mock bytecode with no matching selectors
 const MOCK_OTHER_GUARD_BYTECODE = createMockBytecode(['0x12345678', '0x9abcdef0'])
+
+// Alias for backwards compatibility with existing tests (uses V1)
+const MOCK_HYPERNATIVE_GUARD_BYTECODE = MOCK_HYPERNATIVE_GUARD_BYTECODES[0]
 
 describe('isHypernativeGuard', () => {
   let mockProvider: jest.Mocked<JsonRpcProvider>
@@ -83,23 +86,29 @@ describe('isHypernativeGuard', () => {
     expect(mockProvider.getCode).toHaveBeenCalledWith('0x1234567890123456789012345678901234567890')
   })
 
-  it('should return true if bytecode contains all HypernativeGuard function selectors', async () => {
-    mockProvider.getCode.mockResolvedValue(MOCK_HYPERNATIVE_GUARD_BYTECODE)
+  it.each(HYPERNATIVE_GUARD_SELECTOR_SETS.map((_, i) => i))(
+    'should return true if bytecode contains all HypernativeGuard version %i function selectors',
+    async (versionIndex) => {
+      mockProvider.getCode.mockResolvedValue(MOCK_HYPERNATIVE_GUARD_BYTECODES[versionIndex])
 
-    const result = await isHypernativeGuard('1', '0x1234567890123456789012345678901234567890', mockProvider)
-    expect(result).toBe(true)
-    expect(mockProvider.getCode).toHaveBeenCalledWith('0x1234567890123456789012345678901234567890')
-  })
+      const result = await isHypernativeGuard('1', '0x1234567890123456789012345678901234567890', mockProvider)
+      expect(result).toBe(true)
+      expect(mockProvider.getCode).toHaveBeenCalledWith('0x1234567890123456789012345678901234567890')
+    },
+  )
 
-  it('should return false if bytecode is missing even one HypernativeGuard selector', async () => {
-    // Create bytecode with all selectors except one
-    const selectorsToInclude = HYPERNATIVE_GUARD_FUNCTION_SELECTORS.slice(0, -1)
-    const partialBytecode = createMockBytecode(selectorsToInclude)
-    mockProvider.getCode.mockResolvedValue(partialBytecode)
+  it.each(HYPERNATIVE_GUARD_SELECTOR_SETS.map((_, i) => i))(
+    'should return false if bytecode is missing even one HypernativeGuard version %i selector',
+    async (versionIndex) => {
+      // Create bytecode with all selectors except one for this version
+      const selectorsToInclude = HYPERNATIVE_GUARD_SELECTOR_SETS[versionIndex].slice(0, -1)
+      const partialBytecode = createMockBytecode(selectorsToInclude)
+      mockProvider.getCode.mockResolvedValue(partialBytecode)
 
-    const result = await isHypernativeGuard('1', '0x1234567890123456789012345678901234567890', mockProvider)
-    expect(result).toBe(false)
-  })
+      const result = await isHypernativeGuard('1', '0x1234567890123456789012345678901234567890', mockProvider)
+      expect(result).toBe(false)
+    },
+  )
 
   it('should return false if bytecode contains no matching selectors', async () => {
     mockProvider.getCode.mockResolvedValue(MOCK_OTHER_GUARD_BYTECODE)
