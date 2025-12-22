@@ -1,0 +1,272 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./ChoiceButton.stories Default 1`] = `
+<div
+  class="MuiBox-root css-1v5z18m"
+>
+  <button
+    class="MuiButtonBase-root txButton css-1i1o7bi-MuiButtonBase-root"
+    data-testid="choice-btn"
+    tabindex="0"
+    type="button"
+  >
+    <div
+      class="iconBg MuiBox-root css-5dt5vx"
+    >
+      <svg
+        aria-hidden="true"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-15tzxj8-MuiSvgIcon-root-MuiSvgIcon-root"
+        data-testid="SendIcon"
+        focusable="false"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"
+        />
+      </svg>
+    </div>
+    <div
+      class="MuiBox-root css-e3zcym"
+    >
+      <p
+        class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+      >
+        Send tokens
+      </p>
+      <p
+        class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+      >
+        Send tokens to another address
+      </p>
+    </div>
+    <svg
+      aria-hidden="true"
+      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium css-18fnruk-MuiSvgIcon-root-MuiSvgIcon-root"
+      data-testid="ChevronRightRoundedIcon"
+      focusable="false"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M9.29 6.71c-.39.39-.39 1.02 0 1.41L13.17 12l-3.88 3.88c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0l4.59-4.59c.39-.39.39-1.02 0-1.41L10.7 6.7c-.38-.38-1.02-.38-1.41.01"
+      />
+    </svg>
+  </button>
+</div>
+`;
+
+exports[`./ChoiceButton.stories Disabled 1`] = `
+<div
+  class="MuiBox-root css-1v5z18m"
+>
+  <button
+    class="MuiButtonBase-root Mui-disabled txButton css-1i1o7bi-MuiButtonBase-root"
+    data-testid="choice-btn"
+    disabled=""
+    tabindex="-1"
+    type="button"
+  >
+    <div
+      class="iconBg MuiBox-root css-5dt5vx"
+    >
+      <svg
+        aria-hidden="true"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-15tzxj8-MuiSvgIcon-root-MuiSvgIcon-root"
+        data-testid="SendIcon"
+        focusable="false"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"
+        />
+      </svg>
+    </div>
+    <div
+      class="MuiBox-root css-e3zcym"
+    >
+      <p
+        class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+      >
+        Send tokens
+      </p>
+      <p
+        class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+      >
+        Send tokens to another address
+      </p>
+    </div>
+    <svg
+      aria-hidden="true"
+      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium css-18fnruk-MuiSvgIcon-root-MuiSvgIcon-root"
+      data-testid="ChevronRightRoundedIcon"
+      focusable="false"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M9.29 6.71c-.39.39-.39 1.02 0 1.41L13.17 12l-3.88 3.88c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0l4.59-4.59c.39-.39.39-1.02 0-1.41L10.7 6.7c-.38-.38-1.02-.38-1.41.01"
+      />
+    </svg>
+  </button>
+</div>
+`;
+
+exports[`./ChoiceButton.stories NoDescription 1`] = `
+<div
+  class="MuiBox-root css-1v5z18m"
+>
+  <button
+    class="MuiButtonBase-root txButton css-1i1o7bi-MuiButtonBase-root"
+    data-testid="choice-btn"
+    tabindex="0"
+    type="button"
+  >
+    <div
+      class="iconBg MuiBox-root css-5dt5vx"
+    >
+      <svg
+        aria-hidden="true"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-15tzxj8-MuiSvgIcon-root-MuiSvgIcon-root"
+        data-testid="AccountBalanceWalletIcon"
+        focusable="false"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2zm-9-2h10V8H12zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5"
+        />
+      </svg>
+    </div>
+    <div
+      class="MuiBox-root css-e3zcym"
+    >
+      <p
+        class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+      >
+        Connect wallet
+      </p>
+    </div>
+    <svg
+      aria-hidden="true"
+      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium css-18fnruk-MuiSvgIcon-root-MuiSvgIcon-root"
+      data-testid="ChevronRightRoundedIcon"
+      focusable="false"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M9.29 6.71c-.39.39-.39 1.02 0 1.41L13.17 12l-3.88 3.88c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0l4.59-4.59c.39-.39.39-1.02 0-1.41L10.7 6.7c-.38-.38-1.02-.38-1.41.01"
+      />
+    </svg>
+  </button>
+</div>
+`;
+
+exports[`./ChoiceButton.stories WithChip 1`] = `
+<div
+  class="MuiBox-root css-1v5z18m"
+>
+  <button
+    class="MuiButtonBase-root txButton css-1i1o7bi-MuiButtonBase-root"
+    data-testid="choice-btn"
+    tabindex="0"
+    type="button"
+  >
+    <div
+      class="iconBg MuiBox-root css-5dt5vx"
+    >
+      <svg
+        aria-hidden="true"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-15tzxj8-MuiSvgIcon-root-MuiSvgIcon-root"
+        data-testid="SwapHorizIcon"
+        focusable="false"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M6.99 11 3 15l3.99 4v-3H14v-2H6.99zM21 9l-3.99-4v3H10v2h7.01v3z"
+        />
+      </svg>
+    </div>
+    <div
+      class="MuiBox-root css-e3zcym"
+    >
+      <p
+        class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+      >
+        Swap tokens
+      </p>
+      <p
+        class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+      >
+        Exchange one token for another
+      </p>
+    </div>
+    <svg
+      aria-hidden="true"
+      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium css-18fnruk-MuiSvgIcon-root-MuiSvgIcon-root"
+      data-testid="ChevronRightRoundedIcon"
+      focusable="false"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M9.29 6.71c-.39.39-.39 1.02 0 1.41L13.17 12l-3.88 3.88c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0l4.59-4.59c.39-.39.39-1.02 0-1.41L10.7 6.7c-.38-.38-1.02-.38-1.41.01"
+      />
+    </svg>
+    <div
+      class="chip MuiBox-root css-0"
+    >
+      New
+    </div>
+  </button>
+</div>
+`;
+
+exports[`./ChoiceButton.stories WithIconColor 1`] = `
+<div
+  class="MuiBox-root css-1v5z18m"
+>
+  <button
+    class="MuiButtonBase-root txButton css-1i1o7bi-MuiButtonBase-root"
+    data-testid="choice-btn"
+    tabindex="0"
+    type="button"
+  >
+    <div
+      class="iconBg MuiBox-root css-v8z29f"
+    >
+      <svg
+        aria-hidden="true"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeSmall css-1926wg9-MuiSvgIcon-root-MuiSvgIcon-root"
+        data-testid="AddIcon"
+        focusable="false"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"
+        />
+      </svg>
+    </div>
+    <div
+      class="MuiBox-root css-e3zcym"
+    >
+      <p
+        class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+      >
+        Add funds
+      </p>
+      <p
+        class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+      >
+        Deposit funds into your Safe
+      </p>
+    </div>
+    <svg
+      aria-hidden="true"
+      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium css-18fnruk-MuiSvgIcon-root-MuiSvgIcon-root"
+      data-testid="ChevronRightRoundedIcon"
+      focusable="false"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M9.29 6.71c-.39.39-.39 1.02 0 1.41L13.17 12l-3.88 3.88c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0l4.59-4.59c.39-.39.39-1.02 0-1.41L10.7 6.7c-.38-.38-1.02-.38-1.41.01"
+      />
+    </svg>
+  </button>
+</div>
+`;

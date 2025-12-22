@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./ImageFallback.stories LargeSize 1`] = `
+<img
+  alt="Large image"
+  height="96"
+  src="https://safe-transaction-assets.safe.global/chains/1/chain_logo.png"
+  width="96"
+/>
+`;
+
+exports[`./ImageFallback.stories SmallSize 1`] = `
+<img
+  alt="Small image"
+  height="24"
+  src="https://safe-transaction-assets.safe.global/chains/1/chain_logo.png"
+  width="24"
+/>
+`;
+
+exports[`./ImageFallback.stories WithFallbackComponent 1`] = `
+<img
+  alt="Unknown"
+  height="48"
+  src="https://invalid-url.com/broken-image.png"
+  width="48"
+/>
+`;
+
+exports[`./ImageFallback.stories WithFallbackSrc 1`] = `
+<img
+  alt="Token placeholder"
+  height="48"
+  src="https://invalid-url.com/broken-image.png"
+  width="48"
+/>
+`;
+
+exports[`./ImageFallback.stories WithValidImage 1`] = `
+<img
+  alt="Ethereum logo"
+  height="48"
+  src="https://safe-transaction-assets.safe.global/chains/1/chain_logo.png"
+  width="48"
+/>
+`;

@@ -6,6 +6,7 @@ import type { PortfolioBalances } from './loadables/useLoadBalances'
 import { useAppSelector } from '@/store'
 import { selectHideDust } from '@/store/settingsSlice'
 import { DUST_THRESHOLD } from '@/config/constants'
+import useSafeInfo from './useSafeInfo'
 
 const PRECISION = 18
 
@@ -74,9 +75,11 @@ export const useVisibleBalances = (): {
   loading: boolean
   error?: string
 } => {
+  const { safe } = useSafeInfo()
   const data = useBalances()
   const hiddenTokens = useHiddenTokens()
-  const hideDust = useAppSelector(selectHideDust)
+  // Disable dust filtering for counterfactual safes
+  const hideDust = useAppSelector(selectHideDust) && safe.deployed
 
   return useMemo(() => {
     const itemsWithoutHidden = filterHiddenTokens(data.balances.items, hiddenTokens)

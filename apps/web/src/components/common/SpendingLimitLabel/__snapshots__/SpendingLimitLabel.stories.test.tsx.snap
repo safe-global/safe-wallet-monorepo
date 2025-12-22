@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./SpendingLimitLabel.stories Default 1`] = `
+<div
+  class="MuiBox-root css-171onha"
+>
+  <mock-icon
+    aria-hidden=""
+    class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium css-16hj0i2-MuiSvgIcon-root"
+    focusable="false"
+  />
+  <p
+    class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+  >
+    100 ETH per day
+  </p>
+</div>
+`;
+
+exports[`./SpendingLimitLabel.stories OneTime 1`] = `
+<div
+  class="MuiBox-root css-171onha"
+>
+  <p
+    class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+  >
+    50 ETH
+  </p>
+</div>
+`;
+
+exports[`./SpendingLimitLabel.stories WithCustomLabel 1`] = `
+<div
+  class="MuiBox-root css-171onha"
+>
+  <mock-icon
+    aria-hidden=""
+    class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium css-16hj0i2-MuiSvgIcon-root"
+    focusable="false"
+  />
+  <p
+    class="MuiTypography-root MuiTypography-body1 css-10qi7i0-MuiTypography-root"
+  >
+    Custom spending limit
+  </p>
+</div>
+`;

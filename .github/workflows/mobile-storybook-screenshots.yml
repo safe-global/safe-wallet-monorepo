@@ -1,0 +1,284 @@
+name: Mobile Storybook Screenshots
+
+on:
+  pull_request:
+    paths:
+      - 'apps/mobile/src/**/*.tsx'
+      - 'apps/mobile/src/**/*.ts'
+      - '!apps/mobile/src/**/*.test.tsx'
+      - '!apps/mobile/src/**/*.test.ts'
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/yarn
+
+      - name: Install Playwright
+        run: |
+          cd .github/scripts
+          npm init -y 2>/dev/null || true
+          npm install playwright
+          npx playwright install --with-deps chromium
+
+      - name: Get changed story files
+        id: changed-stories
+        run: |
+          BASE_SHA=${{ github.event.pull_request.base.sha }}
+          HEAD_SHA=${{ github.event.pull_request.head.sha }}
+
+          # Get all changed files in mobile app
+          ALL_CHANGED=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '^apps/mobile/src/.*\.(tsx?|jsx?)$' | grep -v '\.test\.' | grep -v '\.native\.stories\.' || true)
+
+          STORY_FILES=""
+
+          for file in $ALL_CHANGED; do
+            # If it's already a story file, include it
+            if [[ "$file" =~ \.(stories|story)\.(tsx?|jsx?)$ ]]; then
+              STORY_FILES="$STORY_FILES$file"$'\n'
+              continue
+            fi
+
+            # For component files, check if a corresponding story file exists
+            dir=$(dirname "$file")
+            base=$(basename "$file" | sed -E 's/\.(tsx?|jsx?)$//')
+
+            # Check for story file with same name in same directory
+            found=false
+            for ext in stories.tsx story.tsx stories.ts story.ts; do
+              story_file="$dir/$base.$ext"
+              if [ -f "$story_file" ]; then
+                STORY_FILES="$STORY_FILES$story_file"$'\n'
+                found=true
+                break
+              fi
+            done
+
+            # If not found, check in common subdirectories (components/, stories/, __stories__/)
+            if [ "$found" = false ]; then
+              for subdir in components stories __stories__; do
+                for ext in stories.tsx story.tsx stories.ts story.ts; do
+                  story_file="$dir/$subdir/$base.$ext"
+                  if [ -f "$story_file" ]; then
+                    STORY_FILES="$STORY_FILES$story_file"$'\n'
+                    found=true
+                    break 2
+                  fi
+                done
+              done
+            fi
+          done
+
+          # Remove duplicates and empty lines
+          STORY_FILES=$(echo "$STORY_FILES" | sort -u | grep -v '^$' || true)
+
+          if [ -z "$STORY_FILES" ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No story files found for changed components"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Story files to capture:"
+            echo "$STORY_FILES"
+            echo "files<<EOF" >> $GITHUB_OUTPUT
+            echo "$STORY_FILES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build Mobile Storybook
+        id: build-storybook
+        if: steps.changed-stories.outputs.has_changes == 'true'
+        working-directory: apps/mobile
+        continue-on-error: true
+        run: |
+          # Build Storybook for web with mocks
+          STORYBOOK_WEB=true STORYBOOK_DISABLE_TELEMETRY=1 yarn build-storybook 2>&1 || {
+            echo "build_failed=true" >> $GITHUB_OUTPUT
+            echo "::warning::Mobile Storybook build failed. This may be due to monorepo path resolution issues."
+            exit 0
+          }
+          echo "build_failed=false" >> $GITHUB_OUTPUT
+        env:
+          STORYBOOK_WEB: 'true'
+          STORYBOOK_DISABLE_TELEMETRY: '1'
+
+      - name: Generate story URLs
+        if: steps.changed-stories.outputs.has_changes == 'true' && steps.build-storybook.outputs.build_failed != 'true'
+        id: story-urls
+        run: |
+          node ./.github/scripts/generate-mobile-story-urls.js
+        env:
+          CHANGED_FILES: ${{ steps.changed-stories.outputs.files }}
+
+      - name: Take screenshots
+        if: steps.changed-stories.outputs.has_changes == 'true' && steps.build-storybook.outputs.build_failed != 'true'
+        run: |
+          node ./.github/scripts/capture-mobile-screenshots.js
+        env:
+          NODE_PATH: ./.github/scripts/node_modules
+
+      - name: Upload screenshots
+        if: steps.changed-stories.outputs.has_changes == 'true' && steps.build-storybook.outputs.build_failed != 'true'
+        uses: actions/upload-artifact@v6
+        with:
+          name: mobile-storybook-screenshots
+          path: mobile-screenshots/
+          retention-days: 5
+
+      - name: Upload screenshots to branch
+        if: steps.changed-stories.outputs.has_changes == 'true' && steps.build-storybook.outputs.build_failed != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global credential.helper '!f() { echo "username=x-access-token"; echo "password=$GH_TOKEN"; }; f'
+
+          SCREENSHOT_DIR="mobile-storybook-screenshots/${{ github.event.pull_request.number }}"
+
+          cd /tmp
+          rm -rf screenshots-storage
+
+          if git clone --depth 1 --branch mobile-storybook-screenshots-storage https://github.com/${{ github.repository }}.git screenshots-storage; then
+            echo "Cloned existing storage branch"
+            cd screenshots-storage
+          else
+            echo "Storage branch doesn't exist, creating it"
+            git clone --depth 1 https://github.com/${{ github.repository }}.git screenshots-storage
+            cd screenshots-storage
+            git checkout --orphan mobile-storybook-screenshots-storage
+            git rm -rf . 2>/dev/null || true
+            echo "# Mobile Storybook Screenshots Storage" > README.md
+            git add README.md
+            git commit -m "Initialize mobile-storybook-screenshots-storage branch"
+          fi
+
+          mkdir -p "$SCREENSHOT_DIR"
+          cp $GITHUB_WORKSPACE/mobile-screenshots/*.png "$SCREENSHOT_DIR/" 2>/dev/null || true
+
+          git add "$SCREENSHOT_DIR"
+          if git commit -m "Add mobile screenshots for PR #${{ github.event.pull_request.number }}"; then
+            git push origin mobile-storybook-screenshots-storage
+          else
+            echo "No changes to commit"
+          fi
+
+      - name: Post PR comment with screenshots
+        if: steps.changed-stories.outputs.has_changes == 'true' && steps.build-storybook.outputs.build_failed != 'true'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const screenshotDir = 'mobile-screenshots';
+            if (!fs.existsSync(screenshotDir)) {
+              console.log('No screenshots directory found');
+              return;
+            }
+
+            // Filter out error screenshots and non-png files
+            const screenshots = fs.readdirSync(screenshotDir).filter(f => f.endsWith('.png') && !f.includes('-ERROR.png'));
+
+            if (screenshots.length === 0) {
+              console.log('No screenshots found');
+              return;
+            }
+
+            const prNumber = ${{ github.event.pull_request.number }};
+            const repo = context.repo;
+            const baseUrl = `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/mobile-storybook-screenshots-storage/mobile-storybook-screenshots/${prNumber}`;
+
+            let body = '## 📱 Mobile Storybook Screenshots\n\n';
+            body += `Found ${screenshots.length} screenshot(s) for changed mobile components in this PR.\n\n`;
+
+            const components = {};
+            for (const file of screenshots) {
+              // Use greedy matching for component name to handle names with hyphens
+              const match = file.match(/^(.+)--(.+?)\.png$/);
+              if (match) {
+                const [, componentName, storyName] = match;
+                if (!components[componentName]) {
+                  components[componentName] = [];
+                }
+                components[componentName].push({ storyName, file });
+              }
+            }
+
+            const useCollapsible = screenshots.length >= 10;
+
+            for (const [componentName, stories] of Object.entries(components)) {
+              body += `### ${componentName}\n\n`;
+              for (const { storyName, file } of stories) {
+                const imageUrl = `${baseUrl}/${file}`;
+                if (useCollapsible) {
+                  body += `<details>\n<summary>${storyName}</summary>\n\n`;
+                  body += `![${storyName}](${imageUrl})\n\n`;
+                  body += `</details>\n\n`;
+                } else {
+                  body += `**${storyName}**\n\n`;
+                  body += `![${storyName}](${imageUrl})\n\n`;
+                }
+              }
+            }
+
+            body += '\n---\n';
+            body += '*Screenshots are automatically captured from changed mobile story files using React Native Web.*';
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: repo.owner,
+              repo: repo.repo,
+              issue_number: prNumber
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('📱 Mobile Storybook Screenshots')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: repo.owner,
+                repo: repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: repo.owner,
+                repo: repo.repo,
+                issue_number: prNumber,
+                body: body
+              });
+            }
+
+      - name: Delete comment if no changes
+        if: steps.changed-stories.outputs.has_changes == 'false'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ github.event.pull_request.number }}
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('📱 Mobile Storybook Screenshots')
+            );
+
+            if (botComment) {
+              await github.rest.issues.deleteComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id
+              });
+            }
