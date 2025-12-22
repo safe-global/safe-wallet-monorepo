@@ -1,0 +1,1 @@
+# Mobile Storybook Screenshots Storage
