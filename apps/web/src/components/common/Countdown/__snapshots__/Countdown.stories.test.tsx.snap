@@ -2,149 +2,177 @@
 
 exports[`./Countdown.stories Days 1`] = `
 <div
-  class="MuiBox-root css-1i27l4i"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <div>
-    <span
-      class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
-    >
-      2
-    </span>
-     
-    <span
-      class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
-    >
-      days
-    </span>
+  <div
+    class="MuiBox-root css-1i27l4i"
+  >
+    <div>
+      <span
+        class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+      >
+        2
+      </span>
+       
+      <span
+        class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+      >
+        days
+      </span>
+    </div>
   </div>
 </div>
 `;
 
 exports[`./Countdown.stories DaysHoursMinutes 1`] = `
 <div
-  class="MuiBox-root css-1i27l4i"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <div>
-    <span
-      class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
-    >
-      2
-    </span>
-     
-    <span
-      class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
-    >
-      days
-    </span>
-  </div>
-  <div>
-    <span
-      class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
-    >
-      2
-    </span>
-     
-    <span
-      class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
-    >
-      hrs
-    </span>
-  </div>
-  <div>
-    <span
-      class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
-    >
-      15
-    </span>
-     
-    <span
-      class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
-    >
-      mins
-    </span>
+  <div
+    class="MuiBox-root css-1i27l4i"
+  >
+    <div>
+      <span
+        class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+      >
+        2
+      </span>
+       
+      <span
+        class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+      >
+        days
+      </span>
+    </div>
+    <div>
+      <span
+        class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+      >
+        2
+      </span>
+       
+      <span
+        class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+      >
+        hrs
+      </span>
+    </div>
+    <div>
+      <span
+        class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+      >
+        15
+      </span>
+       
+      <span
+        class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+      >
+        mins
+      </span>
+    </div>
   </div>
 </div>
 `;
 
 exports[`./Countdown.stories Hours 1`] = `
 <div
-  class="MuiBox-root css-1i27l4i"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <div>
-    <span
-      class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
-    >
-      2
-    </span>
-     
-    <span
-      class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
-    >
-      hrs
-    </span>
+  <div
+    class="MuiBox-root css-1i27l4i"
+  >
+    <div>
+      <span
+        class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+      >
+        2
+      </span>
+       
+      <span
+        class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+      >
+        hrs
+      </span>
+    </div>
   </div>
 </div>
 `;
 
 exports[`./Countdown.stories HoursAndMinutes 1`] = `
 <div
-  class="MuiBox-root css-1i27l4i"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <div>
-    <span
-      class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
-    >
-      2
-    </span>
-     
-    <span
-      class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
-    >
-      hrs
-    </span>
-  </div>
-  <div>
-    <span
-      class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
-    >
-      5
-    </span>
-     
-    <span
-      class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
-    >
-      mins
-    </span>
+  <div
+    class="MuiBox-root css-1i27l4i"
+  >
+    <div>
+      <span
+        class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+      >
+        2
+      </span>
+       
+      <span
+        class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+      >
+        hrs
+      </span>
+    </div>
+    <div>
+      <span
+        class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+      >
+        5
+      </span>
+       
+      <span
+        class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+      >
+        mins
+      </span>
+    </div>
   </div>
 </div>
 `;
 
 exports[`./Countdown.stories LessThanOneMinute 1`] = `
-<span
-  class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  &lt; 1 min
-</span>
+  <span
+    class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+  >
+    &lt; 1 min
+  </span>
+</div>
 `;
 
 exports[`./Countdown.stories Minutes 1`] = `
 <div
-  class="MuiBox-root css-1i27l4i"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <div>
-    <span
-      class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
-    >
-      5
-    </span>
-     
-    <span
-      class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
-    >
-      mins
-    </span>
+  <div
+    class="MuiBox-root css-1i27l4i"
+  >
+    <div>
+      <span
+        class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+      >
+        5
+      </span>
+       
+      <span
+        class="MuiTypography-root MuiTypography-body1 css-shf88x-MuiTypography-root"
+      >
+        mins
+      </span>
+    </div>
   </div>
 </div>
 `;
 
-exports[`./Countdown.stories Zero 1`] = `null`;
+exports[`./Countdown.stories Zero 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+/>
+`;

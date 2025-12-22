@@ -2,41 +2,45 @@
 
 exports[`./NameInput.stories Default 1`] = `
 <div
-  class="MuiBox-root css-1v5z18m"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input css-cmpglg-MuiFormControl-root-MuiTextField-root"
+    class="MuiBox-root css-1v5z18m"
   >
-    <label
-      class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined css-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
-      data-shrink="false"
-      for="«r0»"
-      id="«r0»-label"
-    >
-      Owner name
-    </label>
     <div
-      class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl css-1pfp7cx-MuiInputBase-root-MuiOutlinedInput-root"
+      class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input css-cmpglg-MuiFormControl-root-MuiTextField-root"
     >
-      <input
-        aria-invalid="false"
-        class="MuiInputBase-input MuiOutlinedInput-input css-1eoo0u4-MuiInputBase-input-MuiOutlinedInput-input"
-        id="«r0»"
-        name="ownerName"
-        type="text"
-      />
-      <fieldset
-        aria-hidden="true"
-        class="MuiOutlinedInput-notchedOutline css-1focg1t-MuiOutlinedInput-notchedOutline"
+      <label
+        class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined css-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
+        data-shrink="false"
+        for="«r0»"
+        id="«r0»-label"
       >
-        <legend
-          class="css-81qg8w"
+        Owner name
+      </label>
+      <div
+        class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl css-1pfp7cx-MuiInputBase-root-MuiOutlinedInput-root"
+      >
+        <input
+          aria-invalid="false"
+          class="MuiInputBase-input MuiOutlinedInput-input css-1eoo0u4-MuiInputBase-input-MuiOutlinedInput-input"
+          id="«r0»"
+          name="ownerName"
+          type="text"
+        />
+        <fieldset
+          aria-hidden="true"
+          class="MuiOutlinedInput-notchedOutline css-1focg1t-MuiOutlinedInput-notchedOutline"
         >
-          <span>
-            Owner name
-          </span>
-        </legend>
-      </fieldset>
+          <legend
+            class="css-81qg8w"
+          >
+            <span>
+              Owner name
+            </span>
+          </legend>
+        </fieldset>
+      </div>
     </div>
   </div>
 </div>
@@ -44,42 +48,46 @@ exports[`./NameInput.stories Default 1`] = `
 
 exports[`./NameInput.stories Disabled 1`] = `
 <div
-  class="MuiBox-root css-1v5z18m"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input css-cmpglg-MuiFormControl-root-MuiTextField-root"
+    class="MuiBox-root css-1v5z18m"
   >
-    <label
-      class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary Mui-disabled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined css-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
-      data-shrink="false"
-      for="«r1»"
-      id="«r1»-label"
-    >
-      Owner name
-    </label>
     <div
-      class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary Mui-disabled MuiInputBase-fullWidth MuiInputBase-formControl css-1pfp7cx-MuiInputBase-root-MuiOutlinedInput-root"
+      class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input css-cmpglg-MuiFormControl-root-MuiTextField-root"
     >
-      <input
-        aria-invalid="false"
-        class="MuiInputBase-input MuiOutlinedInput-input Mui-disabled css-1eoo0u4-MuiInputBase-input-MuiOutlinedInput-input"
-        disabled=""
-        id="«r1»"
-        name="ownerName"
-        type="text"
-      />
-      <fieldset
-        aria-hidden="true"
-        class="MuiOutlinedInput-notchedOutline css-1focg1t-MuiOutlinedInput-notchedOutline"
+      <label
+        class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary Mui-disabled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined css-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
+        data-shrink="false"
+        for="«r1»"
+        id="«r1»-label"
       >
-        <legend
-          class="css-81qg8w"
+        Owner name
+      </label>
+      <div
+        class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary Mui-disabled MuiInputBase-fullWidth MuiInputBase-formControl css-1pfp7cx-MuiInputBase-root-MuiOutlinedInput-root"
+      >
+        <input
+          aria-invalid="false"
+          class="MuiInputBase-input MuiOutlinedInput-input Mui-disabled css-1eoo0u4-MuiInputBase-input-MuiOutlinedInput-input"
+          disabled=""
+          id="«r1»"
+          name="ownerName"
+          type="text"
+        />
+        <fieldset
+          aria-hidden="true"
+          class="MuiOutlinedInput-notchedOutline css-1focg1t-MuiOutlinedInput-notchedOutline"
         >
-          <span>
-            Owner name
-          </span>
-        </legend>
-      </fieldset>
+          <legend
+            class="css-81qg8w"
+          >
+            <span>
+              Owner name
+            </span>
+          </legend>
+        </fieldset>
+      </div>
     </div>
   </div>
 </div>
@@ -87,51 +95,55 @@ exports[`./NameInput.stories Disabled 1`] = `
 
 exports[`./NameInput.stories Required 1`] = `
 <div
-  class="MuiBox-root css-1v5z18m"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input css-cmpglg-MuiFormControl-root-MuiTextField-root"
+    class="MuiBox-root css-1v5z18m"
   >
-    <label
-      class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary Mui-required MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined css-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
-      data-shrink="false"
-      for="«r2»"
-      id="«r2»-label"
-    >
-      Owner name
-      <span
-        aria-hidden="true"
-        class="MuiFormLabel-asterisk MuiInputLabel-asterisk css-1f718y-MuiFormLabel-asterisk"
-      >
-         
-        *
-      </span>
-    </label>
     <div
-      class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl css-1pfp7cx-MuiInputBase-root-MuiOutlinedInput-root"
+      class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input css-cmpglg-MuiFormControl-root-MuiTextField-root"
     >
-      <input
-        aria-invalid="false"
-        class="MuiInputBase-input MuiOutlinedInput-input css-1eoo0u4-MuiInputBase-input-MuiOutlinedInput-input"
-        id="«r2»"
-        name="ownerName"
-        required=""
-        type="text"
-      />
-      <fieldset
-        aria-hidden="true"
-        class="MuiOutlinedInput-notchedOutline css-1focg1t-MuiOutlinedInput-notchedOutline"
+      <label
+        class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary Mui-required MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined css-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
+        data-shrink="false"
+        for="«r2»"
+        id="«r2»-label"
       >
-        <legend
-          class="css-81qg8w"
+        Owner name
+        <span
+          aria-hidden="true"
+          class="MuiFormLabel-asterisk MuiInputLabel-asterisk css-1f718y-MuiFormLabel-asterisk"
         >
-          <span>
-            Owner name
-             
-            *
-          </span>
-        </legend>
-      </fieldset>
+           
+          *
+        </span>
+      </label>
+      <div
+        class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl css-1pfp7cx-MuiInputBase-root-MuiOutlinedInput-root"
+      >
+        <input
+          aria-invalid="false"
+          class="MuiInputBase-input MuiOutlinedInput-input css-1eoo0u4-MuiInputBase-input-MuiOutlinedInput-input"
+          id="«r2»"
+          name="ownerName"
+          required=""
+          type="text"
+        />
+        <fieldset
+          aria-hidden="true"
+          class="MuiOutlinedInput-notchedOutline css-1focg1t-MuiOutlinedInput-notchedOutline"
+        >
+          <legend
+            class="css-81qg8w"
+          >
+            <span>
+              Owner name
+               
+              *
+            </span>
+          </legend>
+        </fieldset>
+      </div>
     </div>
   </div>
 </div>
@@ -139,42 +151,46 @@ exports[`./NameInput.stories Required 1`] = `
 
 exports[`./NameInput.stories WithPlaceholder 1`] = `
 <div
-  class="MuiBox-root css-1v5z18m"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input css-cmpglg-MuiFormControl-root-MuiTextField-root"
+    class="MuiBox-root css-1v5z18m"
   >
-    <label
-      class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined css-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
-      data-shrink="false"
-      for="«r3»"
-      id="«r3»-label"
-    >
-      Owner name
-    </label>
     <div
-      class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl css-1pfp7cx-MuiInputBase-root-MuiOutlinedInput-root"
+      class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root input css-cmpglg-MuiFormControl-root-MuiTextField-root"
     >
-      <input
-        aria-invalid="false"
-        class="MuiInputBase-input MuiOutlinedInput-input css-1eoo0u4-MuiInputBase-input-MuiOutlinedInput-input"
-        id="«r3»"
-        name="ownerName"
-        placeholder="Enter owner name"
-        type="text"
-      />
-      <fieldset
-        aria-hidden="true"
-        class="MuiOutlinedInput-notchedOutline css-1focg1t-MuiOutlinedInput-notchedOutline"
+      <label
+        class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined css-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
+        data-shrink="false"
+        for="«r3»"
+        id="«r3»-label"
       >
-        <legend
-          class="css-81qg8w"
+        Owner name
+      </label>
+      <div
+        class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl css-1pfp7cx-MuiInputBase-root-MuiOutlinedInput-root"
+      >
+        <input
+          aria-invalid="false"
+          class="MuiInputBase-input MuiOutlinedInput-input css-1eoo0u4-MuiInputBase-input-MuiOutlinedInput-input"
+          id="«r3»"
+          name="ownerName"
+          placeholder="Enter owner name"
+          type="text"
+        />
+        <fieldset
+          aria-hidden="true"
+          class="MuiOutlinedInput-notchedOutline css-1focg1t-MuiOutlinedInput-notchedOutline"
         >
-          <span>
-            Owner name
-          </span>
-        </legend>
-      </fieldset>
+          <legend
+            class="css-81qg8w"
+          >
+            <span>
+              Owner name
+            </span>
+          </legend>
+        </fieldset>
+      </div>
     </div>
   </div>
 </div>

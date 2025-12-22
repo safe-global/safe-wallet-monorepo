@@ -2,46 +2,58 @@
 
 exports[`./SpendingLimitLabel.stories Default 1`] = `
 <div
-  class="MuiBox-root css-171onha"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <mock-icon
-    aria-hidden=""
-    class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium css-16hj0i2-MuiSvgIcon-root"
-    focusable="false"
-  />
-  <p
-    class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+  <div
+    class="MuiBox-root css-171onha"
   >
-    100 ETH per day
-  </p>
+    <mock-icon
+      aria-hidden=""
+      class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium css-16hj0i2-MuiSvgIcon-root"
+      focusable="false"
+    />
+    <p
+      class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+    >
+      100 ETH per day
+    </p>
+  </div>
 </div>
 `;
 
 exports[`./SpendingLimitLabel.stories OneTime 1`] = `
 <div
-  class="MuiBox-root css-171onha"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <p
-    class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+  <div
+    class="MuiBox-root css-171onha"
   >
-    50 ETH
-  </p>
+    <p
+      class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+    >
+      50 ETH
+    </p>
+  </div>
 </div>
 `;
 
 exports[`./SpendingLimitLabel.stories WithCustomLabel 1`] = `
 <div
-  class="MuiBox-root css-171onha"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <mock-icon
-    aria-hidden=""
-    class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium css-16hj0i2-MuiSvgIcon-root"
-    focusable="false"
-  />
-  <p
-    class="MuiTypography-root MuiTypography-body1 css-10qi7i0-MuiTypography-root"
+  <div
+    class="MuiBox-root css-171onha"
   >
-    Custom spending limit
-  </p>
+    <mock-icon
+      aria-hidden=""
+      class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium css-16hj0i2-MuiSvgIcon-root"
+      focusable="false"
+    />
+    <p
+      class="MuiTypography-root MuiTypography-body1 css-10qi7i0-MuiTypography-root"
+    >
+      Custom spending limit
+    </p>
+  </div>
 </div>
 `;

@@ -2,476 +2,506 @@
 
 exports[`./twap.stories ExecutedTwap 1`] = `
 <div
-  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
-  style="--Paper-shadow: none;"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiStack-root css-1qh2y1i-MuiStack-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
-    <p
-      class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
-    >
-      <b>
-        Sell order
-      </b>
-    </p>
     <div
-      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
-      data-testid=""
+      class="MuiStack-root css-1qh2y1i-MuiStack-root"
     >
-      <div
-        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
-        data-testid="tx-row-title"
-        style="word-break: break-word;"
+      <p
+        class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
       >
-        <span
-          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
-        >
-          Amount
-        </span>
-      </div>
+        <b>
+          Sell order
+        </b>
+      </p>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
-        data-testid="tx-data-row"
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+        data-testid=""
       >
         <div
-          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+          data-testid="tx-row-title"
+          style="word-break: break-word;"
         >
-          <div
-            class="MuiStack-root css-e615s9-MuiStack-root"
-          >
-            <div>
-              <span
-                class="value"
-              >
-                Sell
-                 
-                <span
-                  aria-label="0.01 SYP"
-                  class="container verticalAlign"
-                  data-mui-internal-clone-element="true"
-                >
-                  <div
-                    class="MuiBox-root css-olq4e8"
-                  >
-                    <img
-                      alt="SYP"
-                      class="image"
-                      height="26"
-                      loading="lazy"
-                      referrerpolicy="no-referrer"
-                      src="https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14.png"
-                    />
-                  </div>
-                  <b
-                    class="tokenText"
-                  >
-                    0.01
-                     
-                    SYP
-                  </b>
-                </span>
-              </span>
-            </div>
-            <div>
-              <span
-                class="value"
-              >
-                for at least
-                 
-                <span
-                  aria-label="33,885,869,283,244,828 GYD"
-                  class="container verticalAlign"
-                  data-mui-internal-clone-element="true"
-                >
-                  <div
-                    class="MuiBox-root css-olq4e8"
-                  >
-                    <img
-                      alt="GYD"
-                      class="image"
-                      height="26"
-                      loading="lazy"
-                      referrerpolicy="no-referrer"
-                      src="https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xbe72E441BF55620febc26715db68d3494213D8Cb.png"
-                    />
-                  </div>
-                  <b
-                    class="tokenText"
-                  >
-                    33,885.87T
-                     
-                    GYD
-                  </b>
-                </span>
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div
-      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
-      data-testid=""
-    >
-      <div
-        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
-        data-testid="tx-row-title"
-        style="word-break: break-word;"
-      >
-        <span
-          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
-        >
-          Execution price
-        </span>
-      </div>
-      <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
-        data-testid="tx-data-row"
-      >
-        <div
-          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
-        >
-          1 
-          GYD
-           = 
-          &lt; 0.00001
-           
-          SYP
-        </div>
-      </div>
-    </div>
-    <div
-      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
-      data-testid=""
-    >
-      <div
-        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
-        data-testid="tx-row-title"
-        style="word-break: break-word;"
-      >
-        <span
-          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
-        >
-          Surplus
-        </span>
-      </div>
-      <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
-        data-testid="tx-data-row"
-      >
-        <div
-          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
-        >
-          0
-           
-          GYD
-        </div>
-      </div>
-    </div>
-    <div
-      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
-      data-testid=""
-    >
-      <div
-        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
-        data-testid="tx-row-title"
-        style="word-break: break-word;"
-      >
-        <span
-          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
-        >
-          Total fees
           <span
-            class=""
-            data-mui-internal-clone-element="true"
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
           >
-            <mock-icon
-              aria-hidden=""
-              class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-1nezs5b-MuiSvgIcon-root"
-              focusable="false"
-            />
+            Amount
           </span>
-        </span>
-      </div>
-      <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
-        data-testid="tx-data-row"
-      >
-        <div
-          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
-        >
-          &lt; 0.00001
-           
-          ISK
         </div>
-      </div>
-    </div>
-    <div
-      class="gridEmptyRow"
-    />
-    <div
-      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
-      data-testid=""
-    >
-      <div
-        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
-        data-testid="tx-row-title"
-        style="word-break: break-word;"
-      >
-        <span
-          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
-        >
-          No of parts
-        </span>
-      </div>
-      <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
-        data-testid="tx-data-row"
-      >
         <div
-          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
-        >
-          2
-        </div>
-      </div>
-    </div>
-    <div
-      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
-      data-testid=""
-    >
-      <div
-        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
-        data-testid="tx-row-title"
-        style="word-break: break-word;"
-      >
-        <span
-          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
-        >
-          Sell amount
-        </span>
-      </div>
-      <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
-        data-testid="tx-data-row"
-      >
-        <div
-          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+          data-testid="tx-data-row"
         >
           <div
-            class="MuiBox-root css-0"
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
-            <span
-              class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+            <div
+              class="MuiStack-root css-e615s9-MuiStack-root"
             >
-              0.005
-               
-              SYP
-            </span>
-            <span
-              class="MuiTypography-root MuiTypography-body1 css-9p6poq-MuiTypography-root"
-            >
-               
-            </span>
+              <div>
+                <span
+                  class="value"
+                >
+                  Sell
+                   
+                  <span
+                    aria-label="10,000,000,000 RON"
+                    class="container verticalAlign"
+                    data-mui-internal-clone-element="true"
+                  >
+                    <div
+                      class="MuiBox-root css-olq4e8"
+                    >
+                      <iframe
+                        height="26"
+                        loading="lazy"
+                        referrerpolicy="strict-origin"
+                        sandbox="allow-scripts"
+                        srcdoc="
+    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+      <img src="https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <script>
+        document.querySelector('img').onerror = (e) => {
+          e.target.onerror = null
+          e.target.src = "/images/common/token-placeholder.svg"
+        }
+      </script>
+    </body>
+  "
+                        style="pointer-events: none; border: 0px; display: block;"
+                        tabindex="-1"
+                        title="RON"
+                        width="26"
+                      />
+                    </div>
+                    <b
+                      class="tokenText"
+                    >
+                      10B
+                       
+                      RON
+                    </b>
+                  </span>
+                </span>
+              </div>
+              <div>
+                <span
+                  class="value"
+                >
+                  for at least
+                   
+                  <span
+                    aria-label="33,885.86928324483 XPF"
+                    class="container verticalAlign"
+                    data-mui-internal-clone-element="true"
+                  >
+                    <div
+                      class="MuiBox-root css-olq4e8"
+                    >
+                      <iframe
+                        height="26"
+                        loading="lazy"
+                        referrerpolicy="strict-origin"
+                        sandbox="allow-scripts"
+                        srcdoc="
+    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+      <img src="https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xbe72E441BF55620febc26715db68d3494213D8Cb.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <script>
+        document.querySelector('img').onerror = (e) => {
+          e.target.onerror = null
+          e.target.src = "/images/common/token-placeholder.svg"
+        }
+      </script>
+    </body>
+  "
+                        style="pointer-events: none; border: 0px; display: block;"
+                        tabindex="-1"
+                        title="XPF"
+                        width="26"
+                      />
+                    </div>
+                    <b
+                      class="tokenText"
+                    >
+                      33.89K
+                       
+                      XPF
+                    </b>
+                  </span>
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div
-      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
-      data-testid=""
-    >
       <div
-        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
-        data-testid="tx-row-title"
-        style="word-break: break-word;"
-      >
-        <span
-          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
-        >
-          Buy amount
-        </span>
-      </div>
-      <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
-        data-testid="tx-data-row"
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+        data-testid=""
       >
         <div
-          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+          data-testid="tx-row-title"
+          style="word-break: break-word;"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+          >
+            Execution price
+          </span>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+          data-testid="tx-data-row"
         >
           <div
-            class="MuiBox-root css-0"
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
-            <span
-              class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
-            >
-              16,942.93T
-               
-              GYD
-            </span>
-            <span
-              class="MuiTypography-root MuiTypography-body1 css-9p6poq-MuiTypography-root"
-            >
-               
-            </span>
+            1 
+            XPF
+             = 
+            295.11K
+             
+            RON
           </div>
         </div>
       </div>
-    </div>
-    <div
-      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
-      data-testid=""
-    >
       <div
-        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
-        data-testid="tx-row-title"
-        style="word-break: break-word;"
-      >
-        <span
-          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
-        >
-          Filled
-        </span>
-      </div>
-      <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
-        data-testid="tx-data-row"
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+        data-testid=""
       >
         <div
-          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+          data-testid="tx-row-title"
+          style="word-break: break-word;"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+          >
+            Surplus
+          </span>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+          data-testid="tx-data-row"
         >
           <div
-            class="MuiStack-root css-1rlitzi-MuiStack-root"
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
+            0
+             
+            XPF
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+        data-testid=""
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+          data-testid="tx-row-title"
+          style="word-break: break-word;"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+          >
+            Total fees
             <span
-              aria-valuemax="100"
-              aria-valuemin="0"
-              aria-valuenow="100"
-              class="MuiLinearProgress-root MuiLinearProgress-colorSuccess MuiLinearProgress-determinate css-1rjo7s5-MuiLinearProgress-root"
-              role="progressbar"
+              class=""
+              data-mui-internal-clone-element="true"
             >
-              <span
-                class="MuiLinearProgress-bar MuiLinearProgress-barColorSuccess MuiLinearProgress-bar1Determinate css-12tk9s4-MuiLinearProgress-bar1"
-                style="transform: translateX(0%);"
+              <mock-icon
+                aria-hidden=""
+                class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-1nezs5b-MuiSvgIcon-root"
+                focusable="false"
               />
             </span>
-            <p
-              class="MuiTypography-root MuiTypography-body1 css-18btzt5-MuiTypography-root"
-            >
-              100
-               %
-            </p>
-            <p
-              class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+          </span>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+          data-testid="tx-data-row"
+        >
+          <div
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+          >
+            &lt; 0.00001
+             
+            IDR
+          </div>
+        </div>
+      </div>
+      <div
+        class="gridEmptyRow"
+      />
+      <div
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+        data-testid=""
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+          data-testid="tx-row-title"
+          style="word-break: break-word;"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+          >
+            No of parts
+          </span>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+          data-testid="tx-data-row"
+        >
+          <div
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+          >
+            2
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+        data-testid=""
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+          data-testid="tx-row-title"
+          style="word-break: break-word;"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+          >
+            Sell amount
+          </span>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+          data-testid="tx-data-row"
+        >
+          <div
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+          >
+            <div
+              class="MuiBox-root css-0"
             >
               <span
                 class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
               >
-                0.01
+                5B
                  
-                SYP
+                RON
               </span>
-               
-              sold
-            </p>
+              <span
+                class="MuiTypography-root MuiTypography-body1 css-9p6poq-MuiTypography-root"
+              >
+                 
+              </span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div
-      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
-      data-testid=""
-    >
       <div
-        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
-        data-testid="tx-row-title"
-        style="word-break: break-word;"
-      >
-        <span
-          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
-        >
-          Part duration
-        </span>
-      </div>
-      <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
-        data-testid="tx-data-row"
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+        data-testid=""
       >
         <div
-          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+          data-testid="tx-row-title"
+          style="word-break: break-word;"
         >
-          30 minutes
+          <span
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+          >
+            Buy amount
+          </span>
         </div>
-      </div>
-    </div>
-    <div
-      class="gridEmptyRow"
-    />
-    <div
-      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
-      data-testid=""
-    >
-      <div
-        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
-        data-testid="tx-row-title"
-        style="word-break: break-word;"
-      >
-        <span
-          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
-        >
-          Expired
-        </span>
-      </div>
-      <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
-        data-testid="tx-data-row"
-      >
         <div
-          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
-        >
-          Apr 19, 2024 - 11:46:48 AM
-        </div>
-      </div>
-    </div>
-    <div
-      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
-      data-testid=""
-    >
-      <div
-        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
-        data-testid="tx-row-title"
-        style="word-break: break-word;"
-      >
-        <span
-          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
-        >
-          Status
-        </span>
-      </div>
-      <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
-        data-testid="tx-data-row"
-      >
-        <div
-          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+          data-testid="tx-data-row"
         >
           <div
-            class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1cjet8q-MuiChip-root"
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
-            <span
-              class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+            <div
+              class="MuiBox-root css-0"
             >
               <span
-                class="MuiTypography-root MuiTypography-caption css-lkspku-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
               >
-                <mock-icon
-                  aria-hidden=""
-                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
-                  focusable="false"
-                />
-                Filled
+                16.94K
+                 
+                XPF
               </span>
-            </span>
+              <span
+                class="MuiTypography-root MuiTypography-body1 css-9p6poq-MuiTypography-root"
+              >
+                 
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+        data-testid=""
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+          data-testid="tx-row-title"
+          style="word-break: break-word;"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+          >
+            Filled
+          </span>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+          data-testid="tx-data-row"
+        >
+          <div
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+          >
+            <div
+              class="MuiStack-root css-1rlitzi-MuiStack-root"
+            >
+              <span
+                aria-valuemax="100"
+                aria-valuemin="0"
+                aria-valuenow="100"
+                class="MuiLinearProgress-root MuiLinearProgress-colorSuccess MuiLinearProgress-determinate css-1rjo7s5-MuiLinearProgress-root"
+                role="progressbar"
+              >
+                <span
+                  class="MuiLinearProgress-bar MuiLinearProgress-barColorSuccess MuiLinearProgress-bar1Determinate css-12tk9s4-MuiLinearProgress-bar1"
+                  style="transform: translateX(0%);"
+                />
+              </span>
+              <p
+                class="MuiTypography-root MuiTypography-body1 css-18btzt5-MuiTypography-root"
+              >
+                100
+                 %
+              </p>
+              <p
+                class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+              >
+                <span
+                  class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+                >
+                  10B
+                   
+                  RON
+                </span>
+                 
+                sold
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+        data-testid=""
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+          data-testid="tx-row-title"
+          style="word-break: break-word;"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+          >
+            Part duration
+          </span>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+          data-testid="tx-data-row"
+        >
+          <div
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+          >
+            30 minutes
+          </div>
+        </div>
+      </div>
+      <div
+        class="gridEmptyRow"
+      />
+      <div
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+        data-testid=""
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+          data-testid="tx-row-title"
+          style="word-break: break-word;"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+          >
+            Expired
+          </span>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+          data-testid="tx-data-row"
+        >
+          <div
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+          >
+            Apr 19, 2024 - 11:46:48 AM
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+        data-testid=""
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+          data-testid="tx-row-title"
+          style="word-break: break-word;"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+          >
+            Status
+          </span>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+          data-testid="tx-data-row"
+        >
+          <div
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+          >
+            <div
+              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-a6ps16-MuiChip-root"
+            >
+              <span
+                class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+              >
+                <span
+                  class="MuiTypography-root MuiTypography-caption css-lkspku-MuiTypography-root"
+                >
+                  <mock-icon
+                    aria-hidden=""
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                    focusable="false"
+                  />
+                  Filled
+                </span>
+              </span>
+            </div>
           </div>
         </div>
       </div>
