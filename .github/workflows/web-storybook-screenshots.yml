@@ -61,19 +61,61 @@ jobs:
           BASE_SHA=${{ github.event.workflow_run.pull_requests[0].base.sha }}
           HEAD_SHA=${{ github.event.workflow_run.head_sha }}
 
-          # Find changed story files
-          CHANGED_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '\.(stories|story)\.(tsx?|jsx?)$' || true)
+          # Get all changed files in web app
+          ALL_CHANGED=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '^apps/web/src/.*\.(tsx?|jsx?)$' | grep -v '\.test\.' || true)
 
-          if [ -z "$CHANGED_FILES" ]; then
+          STORY_FILES=""
+
+          for file in $ALL_CHANGED; do
+            # If it's already a story file, include it
+            if [[ "$file" =~ \.(stories|story)\.(tsx?|jsx?)$ ]]; then
+              STORY_FILES="$STORY_FILES$file"$'\n'
+              continue
+            fi
+
+            # For component files, check if a corresponding story file exists
+            dir=$(dirname "$file")
+            base=$(basename "$file" | sed -E 's/\.(tsx?|jsx?)$//')
+
+            # Check for story file with same name in same directory
+            found=false
+            for ext in stories.tsx story.tsx stories.ts story.ts; do
+              story_file="$dir/$base.$ext"
+              if [ -f "$story_file" ]; then
+                STORY_FILES="$STORY_FILES$story_file"$'\n'
+                found=true
+                break
+              fi
+            done
+
+            # If not found, check in common subdirectories (components/, stories/, __stories__/)
+            if [ "$found" = false ]; then
+              for subdir in components stories __stories__; do
+                for ext in stories.tsx story.tsx stories.ts story.ts; do
+                  story_file="$dir/$subdir/$base.$ext"
+                  if [ -f "$story_file" ]; then
+                    STORY_FILES="$STORY_FILES$story_file"$'\n'
+                    found=true
+                    break 2
+                  fi
+                done
+              done
+            fi
+          done
+
+          # Remove duplicates and empty lines
+          STORY_FILES=$(echo "$STORY_FILES" | sort -u | grep -v '^$' || true)
+
+          if [ -z "$STORY_FILES" ]; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "No story files changed"
+            echo "No story files found for changed components"
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
-            echo "Changed story files:"
-            echo "$CHANGED_FILES"
+            echo "Story files to capture:"
+            echo "$STORY_FILES"
             # Store as multiline output
             echo "files<<EOF" >> $GITHUB_OUTPUT
-            echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+            echo "$STORY_FILES" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
           fi
 
