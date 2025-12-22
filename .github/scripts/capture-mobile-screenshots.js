@@ -128,17 +128,22 @@ async function captureScreenshots() {
         timeout: 30000,
       })
 
-      // Wait for the Storybook iframe to load
-      const iframeElement = await page.waitForSelector('iframe#storybook-preview-iframe', { timeout: 10000 })
-      const frame = await iframeElement.contentFrame()
+      // Check if we're on iframe.html (direct story view) or the main Storybook page
+      const isDirectIframe = url.includes('iframe.html')
+      let targetPage = page
 
-      if (!frame) {
-        throw new Error('Could not access Storybook iframe')
+      if (!isDirectIframe) {
+        // We're on the main Storybook page with iframe wrapper
+        const iframeElement = await page.waitForSelector('iframe#storybook-preview-iframe', { timeout: 10000 })
+        const frame = await iframeElement.contentFrame()
+
+        if (!frame) {
+          throw new Error('Could not access Storybook iframe')
+        }
+
+        await frame.waitForLoadState('load', { timeout: 10000 })
+        targetPage = frame
       }
-
-      // Wait for content to load in iframe - React Native Web renders in various Storybook wrappers
-      // Look for any visible content rather than just #storybook-root
-      await frame.waitForLoadState('load', { timeout: 10000 })
 
       // Additional wait for React Native Web to render
       await page.waitForTimeout(3000)
@@ -152,22 +157,22 @@ async function captureScreenshots() {
       const screenshotPath = path.join('mobile-screenshots', `${cleanComponentName}--${storyName}.png`)
 
       // Try to find the story content - React Native Web may render in different containers
-      // Priority: #storybook-root, .sb-preparing-docs, or fallback to iframe body
+      // Priority: #storybook-root, body > div, or fallback to body
       let screenshotTarget = null
-      const storyRoot = frame.locator('#storybook-root').first()
-      const docsWrapper = frame.locator('.sb-preparing-docs').first()
+      const storyRoot = targetPage.locator('#storybook-root').first()
+      const bodyContent = targetPage.locator('body > div').first()
 
       if ((await storyRoot.count()) > 0) {
-        const rootContent = await frame.locator('#storybook-root > *').first()
+        const rootContent = await targetPage.locator('#storybook-root > *').first()
         if ((await rootContent.count()) > 0) {
           screenshotTarget = storyRoot
           console.log('  📸 Using #storybook-root')
         }
       }
 
-      if (!screenshotTarget && (await docsWrapper.count()) > 0) {
-        screenshotTarget = docsWrapper
-        console.log('  📸 Using .sb-preparing-docs wrapper')
+      if (!screenshotTarget && (await bodyContent.count()) > 0) {
+        screenshotTarget = bodyContent
+        console.log('  📸 Using body > div')
       }
 
       if (screenshotTarget) {
@@ -177,12 +182,13 @@ async function captureScreenshots() {
         })
         console.log(`  ✓ Saved: ${screenshotPath}`)
       } else {
-        // Fallback to screenshot the iframe element itself
-        await iframeElement.screenshot({
+        // Fallback to full page screenshot
+        await page.screenshot({
           path: screenshotPath,
           animations: 'disabled',
+          fullPage: true,
         })
-        console.log(`  ✓ Saved (iframe): ${screenshotPath}`)
+        console.log(`  ✓ Saved (full page): ${screenshotPath}`)
       }
     } catch (error) {
       console.error(`  ✗ Error capturing ${componentName} - ${storyName}:`, error.message)
