@@ -50,7 +50,7 @@ exports[`./twap.stories ExecutedTwap 1`] = `
                   Sell
                    
                   <span
-                    aria-label="10 MMK"
+                    aria-label="100,000,000 AFN"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -75,16 +75,16 @@ exports[`./twap.stories ExecutedTwap 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="MMK"
+                        title="AFN"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      10
+                      100M
                        
-                      MMK
+                      AFN
                     </b>
                   </span>
                 </span>
@@ -96,7 +96,7 @@ exports[`./twap.stories ExecutedTwap 1`] = `
                   for at least
                    
                   <span
-                    aria-label="3,388,586,928,324,482,600 BHD"
+                    aria-label="33,885,869,283,244.824 DZD"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -121,16 +121,16 @@ exports[`./twap.stories ExecutedTwap 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="BHD"
+                        title="DZD"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      3,388,586.93T
+                      33.89T
                        
-                      BHD
+                      DZD
                     </b>
                   </span>
                 </span>
@@ -162,11 +162,11 @@ exports[`./twap.stories ExecutedTwap 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            BHD
+            DZD
              = 
             &lt; 0.00001
              
-            MMK
+            AFN
           </div>
         </div>
       </div>
@@ -194,7 +194,7 @@ exports[`./twap.stories ExecutedTwap 1`] = `
           >
             0
              
-            BHD
+            DZD
           </div>
         </div>
       </div>
@@ -293,9 +293,9 @@ exports[`./twap.stories ExecutedTwap 1`] = `
               <span
                 class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
               >
-                5
+                50M
                  
-                MMK
+                AFN
               </span>
               <span
                 class="MuiTypography-root MuiTypography-body1 css-9p6poq-MuiTypography-root"
@@ -334,9 +334,9 @@ exports[`./twap.stories ExecutedTwap 1`] = `
               <span
                 class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
               >
-                1,694,293.46T
+                16.94T
                  
-                BHD
+                DZD
               </span>
               <span
                 class="MuiTypography-root MuiTypography-body1 css-9p6poq-MuiTypography-root"
@@ -396,9 +396,9 @@ exports[`./twap.stories ExecutedTwap 1`] = `
                 <span
                   class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
                 >
-                  10
+                  100M
                    
-                  MMK
+                  AFN
                 </span>
                  
                 sold

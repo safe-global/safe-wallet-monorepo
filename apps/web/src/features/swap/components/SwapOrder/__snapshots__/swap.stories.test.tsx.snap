@@ -50,7 +50,7 @@ exports[`./swap.stories CancelledLimit 1`] = `
                   Sell
                    
                   <span
-                    aria-label="100 SDG"
+                    aria-label="0.1 MUR"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -75,16 +75,16 @@ exports[`./swap.stories CancelledLimit 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="SDG"
+                        title="MUR"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      100
+                      0.1
                        
-                      SDG
+                      MUR
                     </b>
                   </span>
                 </span>
@@ -96,7 +96,7 @@ exports[`./swap.stories CancelledLimit 1`] = `
                   for at least
                    
                   <span
-                    aria-label="33,885,869,283.244827 JMD"
+                    aria-label="3,388,586,928.3244824 SRD"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -121,16 +121,16 @@ exports[`./swap.stories CancelledLimit 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="JMD"
+                        title="SRD"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      33.89B
+                      3.39B
                        
-                      JMD
+                      SRD
                     </b>
                   </span>
                 </span>
@@ -162,11 +162,11 @@ exports[`./swap.stories CancelledLimit 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            JMD
+            SRD
              = 
             &lt; 0.00001
              
-            SDG
+            MUR
           </div>
         </div>
       </div>
@@ -221,7 +221,7 @@ exports[`./swap.stories CancelledLimit 1`] = `
                 >
                   0
                    
-                  SDG
+                  MUR
                 </span>
                  
                 sold
@@ -438,7 +438,7 @@ exports[`./swap.stories CancelledMarket 1`] = `
                   Sell
                    
                   <span
-                    aria-label="100 SDG"
+                    aria-label="0.1 MUR"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -463,16 +463,16 @@ exports[`./swap.stories CancelledMarket 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="SDG"
+                        title="MUR"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      100
+                      0.1
                        
-                      SDG
+                      MUR
                     </b>
                   </span>
                 </span>
@@ -484,7 +484,7 @@ exports[`./swap.stories CancelledMarket 1`] = `
                   for at least
                    
                   <span
-                    aria-label="33,885,869,283.244827 JMD"
+                    aria-label="3,388,586,928.3244824 SRD"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -509,16 +509,16 @@ exports[`./swap.stories CancelledMarket 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="JMD"
+                        title="SRD"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      33.89B
+                      3.39B
                        
-                      JMD
+                      SRD
                     </b>
                   </span>
                 </span>
@@ -550,11 +550,11 @@ exports[`./swap.stories CancelledMarket 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            JMD
+            SRD
              = 
             &lt; 0.00001
              
-            SDG
+            MUR
           </div>
         </div>
       </div>
@@ -766,7 +766,7 @@ exports[`./swap.stories ExecutedLimit 1`] = `
                   Sell
                    
                   <span
-                    aria-label="100 SDG"
+                    aria-label="0.1 MUR"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -791,16 +791,16 @@ exports[`./swap.stories ExecutedLimit 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="SDG"
+                        title="MUR"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      100
+                      0.1
                        
-                      SDG
+                      MUR
                     </b>
                   </span>
                 </span>
@@ -812,7 +812,7 @@ exports[`./swap.stories ExecutedLimit 1`] = `
                   for at least
                    
                   <span
-                    aria-label="33,885,869,283.244827 JMD"
+                    aria-label="3,388,586,928.3244824 SRD"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -837,16 +837,16 @@ exports[`./swap.stories ExecutedLimit 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="JMD"
+                        title="SRD"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      33.89B
+                      3.39B
                        
-                      JMD
+                      SRD
                     </b>
                   </span>
                 </span>
@@ -878,11 +878,11 @@ exports[`./swap.stories ExecutedLimit 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            JMD
+            SRD
              = 
             &lt; 0.00001
              
-            SDG
+            MUR
           </div>
         </div>
       </div>
@@ -910,7 +910,7 @@ exports[`./swap.stories ExecutedLimit 1`] = `
           >
             0
              
-            JMD
+            SRD
           </div>
         </div>
       </div>
@@ -989,9 +989,9 @@ exports[`./swap.stories ExecutedLimit 1`] = `
                 <span
                   class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
                 >
-                  100
+                  0.1
                    
-                  SDG
+                  MUR
                 </span>
                  
                 sold
@@ -1208,7 +1208,7 @@ exports[`./swap.stories ExecutedMarket 1`] = `
                   Sell
                    
                   <span
-                    aria-label="100 SDG"
+                    aria-label="0.1 MUR"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -1233,16 +1233,16 @@ exports[`./swap.stories ExecutedMarket 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="SDG"
+                        title="MUR"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      100
+                      0.1
                        
-                      SDG
+                      MUR
                     </b>
                   </span>
                 </span>
@@ -1254,7 +1254,7 @@ exports[`./swap.stories ExecutedMarket 1`] = `
                   for at least
                    
                   <span
-                    aria-label="33,885,869,283.244827 JMD"
+                    aria-label="3,388,586,928.3244824 SRD"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -1279,16 +1279,16 @@ exports[`./swap.stories ExecutedMarket 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="JMD"
+                        title="SRD"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      33.89B
+                      3.39B
                        
-                      JMD
+                      SRD
                     </b>
                   </span>
                 </span>
@@ -1320,11 +1320,11 @@ exports[`./swap.stories ExecutedMarket 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            JMD
+            SRD
              = 
             &lt; 0.00001
              
-            SDG
+            MUR
           </div>
         </div>
       </div>
@@ -1352,7 +1352,7 @@ exports[`./swap.stories ExecutedMarket 1`] = `
           >
             0
              
-            JMD
+            SRD
           </div>
         </div>
       </div>
@@ -1590,7 +1590,7 @@ exports[`./swap.stories ExpiredLimit 1`] = `
                   Sell
                    
                   <span
-                    aria-label="100 SDG"
+                    aria-label="0.1 MUR"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -1615,16 +1615,16 @@ exports[`./swap.stories ExpiredLimit 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="SDG"
+                        title="MUR"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      100
+                      0.1
                        
-                      SDG
+                      MUR
                     </b>
                   </span>
                 </span>
@@ -1636,7 +1636,7 @@ exports[`./swap.stories ExpiredLimit 1`] = `
                   for at least
                    
                   <span
-                    aria-label="33,885,869,283.244827 JMD"
+                    aria-label="3,388,586,928.3244824 SRD"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -1661,16 +1661,16 @@ exports[`./swap.stories ExpiredLimit 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="JMD"
+                        title="SRD"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      33.89B
+                      3.39B
                        
-                      JMD
+                      SRD
                     </b>
                   </span>
                 </span>
@@ -1702,11 +1702,11 @@ exports[`./swap.stories ExpiredLimit 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            JMD
+            SRD
              = 
             &lt; 0.00001
              
-            SDG
+            MUR
           </div>
         </div>
       </div>
@@ -1761,7 +1761,7 @@ exports[`./swap.stories ExpiredLimit 1`] = `
                 >
                   0
                    
-                  SDG
+                  MUR
                 </span>
                  
                 sold
@@ -1978,7 +1978,7 @@ exports[`./swap.stories ExpiredSwap 1`] = `
                   Sell
                    
                   <span
-                    aria-label="100 SDG"
+                    aria-label="0.1 MUR"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -2003,16 +2003,16 @@ exports[`./swap.stories ExpiredSwap 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="SDG"
+                        title="MUR"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      100
+                      0.1
                        
-                      SDG
+                      MUR
                     </b>
                   </span>
                 </span>
@@ -2024,7 +2024,7 @@ exports[`./swap.stories ExpiredSwap 1`] = `
                   for at least
                    
                   <span
-                    aria-label="33,885,869,283.244827 JMD"
+                    aria-label="3,388,586,928.3244824 SRD"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -2049,16 +2049,16 @@ exports[`./swap.stories ExpiredSwap 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="JMD"
+                        title="SRD"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      33.89B
+                      3.39B
                        
-                      JMD
+                      SRD
                     </b>
                   </span>
                 </span>
@@ -2090,11 +2090,11 @@ exports[`./swap.stories ExpiredSwap 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            JMD
+            SRD
              = 
             &lt; 0.00001
              
-            SDG
+            MUR
           </div>
         </div>
       </div>
@@ -2306,7 +2306,7 @@ exports[`./swap.stories LimitExpiredPartiallyFilled 1`] = `
                   Sell
                    
                   <span
-                    aria-label="100 SDG"
+                    aria-label="0.1 MUR"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -2331,16 +2331,16 @@ exports[`./swap.stories LimitExpiredPartiallyFilled 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="SDG"
+                        title="MUR"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      100
+                      0.1
                        
-                      SDG
+                      MUR
                     </b>
                   </span>
                 </span>
@@ -2352,7 +2352,7 @@ exports[`./swap.stories LimitExpiredPartiallyFilled 1`] = `
                   for at least
                    
                   <span
-                    aria-label="33,885,869,283.244827 JMD"
+                    aria-label="3,388,586,928.3244824 SRD"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -2377,16 +2377,16 @@ exports[`./swap.stories LimitExpiredPartiallyFilled 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="JMD"
+                        title="SRD"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      33.89B
+                      3.39B
                        
-                      JMD
+                      SRD
                     </b>
                   </span>
                 </span>
@@ -2418,11 +2418,11 @@ exports[`./swap.stories LimitExpiredPartiallyFilled 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            JMD
+            SRD
              = 
             &lt; 0.00001
              
-            SDG
+            MUR
           </div>
         </div>
       </div>
@@ -2448,9 +2448,9 @@ exports[`./swap.stories LimitExpiredPartiallyFilled 1`] = `
           <div
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
-            -3.39B
+            -338.86M
              
-            JMD
+            SRD
           </div>
         </div>
       </div>
@@ -2503,9 +2503,9 @@ exports[`./swap.stories LimitExpiredPartiallyFilled 1`] = `
                 <span
                   class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
                 >
-                  10
+                  0.01
                    
-                  SDG
+                  MUR
                 </span>
                  
                 sold
@@ -2722,7 +2722,7 @@ exports[`./swap.stories LimitOpenPartiallyFilled 1`] = `
                   Sell
                    
                   <span
-                    aria-label="100 SDG"
+                    aria-label="0.1 MUR"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -2747,16 +2747,16 @@ exports[`./swap.stories LimitOpenPartiallyFilled 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="SDG"
+                        title="MUR"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      100
+                      0.1
                        
-                      SDG
+                      MUR
                     </b>
                   </span>
                 </span>
@@ -2768,7 +2768,7 @@ exports[`./swap.stories LimitOpenPartiallyFilled 1`] = `
                   for at least
                    
                   <span
-                    aria-label="33,885,869,283.244827 JMD"
+                    aria-label="3,388,586,928.3244824 SRD"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -2793,16 +2793,16 @@ exports[`./swap.stories LimitOpenPartiallyFilled 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="JMD"
+                        title="SRD"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      33.89B
+                      3.39B
                        
-                      JMD
+                      SRD
                     </b>
                   </span>
                 </span>
@@ -2834,11 +2834,11 @@ exports[`./swap.stories LimitOpenPartiallyFilled 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            JMD
+            SRD
              = 
             &lt; 0.00001
              
-            SDG
+            MUR
           </div>
         </div>
       </div>
@@ -2864,9 +2864,9 @@ exports[`./swap.stories LimitOpenPartiallyFilled 1`] = `
           <div
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
-            -3.39B
+            -338.86M
              
-            JMD
+            SRD
           </div>
         </div>
       </div>
@@ -2919,9 +2919,9 @@ exports[`./swap.stories LimitOpenPartiallyFilled 1`] = `
                 <span
                   class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
                 >
-                  10
+                  0.01
                    
-                  SDG
+                  MUR
                 </span>
                  
                 sold
@@ -3138,7 +3138,7 @@ exports[`./swap.stories OpenLimit 1`] = `
                   Sell
                    
                   <span
-                    aria-label="100 SDG"
+                    aria-label="0.1 MUR"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -3163,16 +3163,16 @@ exports[`./swap.stories OpenLimit 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="SDG"
+                        title="MUR"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      100
+                      0.1
                        
-                      SDG
+                      MUR
                     </b>
                   </span>
                 </span>
@@ -3184,7 +3184,7 @@ exports[`./swap.stories OpenLimit 1`] = `
                   for at least
                    
                   <span
-                    aria-label="33,885,869,283.244827 JMD"
+                    aria-label="3,388,586,928.3244824 SRD"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -3209,16 +3209,16 @@ exports[`./swap.stories OpenLimit 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="JMD"
+                        title="SRD"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      33.89B
+                      3.39B
                        
-                      JMD
+                      SRD
                     </b>
                   </span>
                 </span>
@@ -3250,11 +3250,11 @@ exports[`./swap.stories OpenLimit 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            JMD
+            SRD
              = 
             &lt; 0.00001
              
-            SDG
+            MUR
           </div>
         </div>
       </div>
@@ -3309,7 +3309,7 @@ exports[`./swap.stories OpenLimit 1`] = `
                 >
                   0
                    
-                  SDG
+                  MUR
                 </span>
                  
                 sold
@@ -3526,7 +3526,7 @@ exports[`./swap.stories OpenMarket 1`] = `
                   Sell
                    
                   <span
-                    aria-label="100 SDG"
+                    aria-label="0.1 MUR"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -3551,16 +3551,16 @@ exports[`./swap.stories OpenMarket 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="SDG"
+                        title="MUR"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      100
+                      0.1
                        
-                      SDG
+                      MUR
                     </b>
                   </span>
                 </span>
@@ -3572,7 +3572,7 @@ exports[`./swap.stories OpenMarket 1`] = `
                   for at least
                    
                   <span
-                    aria-label="33,885,869,283.244827 JMD"
+                    aria-label="3,388,586,928.3244824 SRD"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -3597,16 +3597,16 @@ exports[`./swap.stories OpenMarket 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="JMD"
+                        title="SRD"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      33.89B
+                      3.39B
                        
-                      JMD
+                      SRD
                     </b>
                   </span>
                 </span>
@@ -3638,11 +3638,11 @@ exports[`./swap.stories OpenMarket 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            JMD
+            SRD
              = 
             &lt; 0.00001
              
-            SDG
+            MUR
           </div>
         </div>
       </div>
@@ -3854,7 +3854,7 @@ exports[`./swap.stories PendingLimit 1`] = `
                   Sell
                    
                   <span
-                    aria-label="100 SDG"
+                    aria-label="0.1 MUR"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -3879,16 +3879,16 @@ exports[`./swap.stories PendingLimit 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="SDG"
+                        title="MUR"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      100
+                      0.1
                        
-                      SDG
+                      MUR
                     </b>
                   </span>
                 </span>
@@ -3900,7 +3900,7 @@ exports[`./swap.stories PendingLimit 1`] = `
                   for at least
                    
                   <span
-                    aria-label="33,885,869,283.244827 JMD"
+                    aria-label="3,388,586,928.3244824 SRD"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -3925,16 +3925,16 @@ exports[`./swap.stories PendingLimit 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="JMD"
+                        title="SRD"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      33.89B
+                      3.39B
                        
-                      JMD
+                      SRD
                     </b>
                   </span>
                 </span>
@@ -3966,11 +3966,11 @@ exports[`./swap.stories PendingLimit 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            JMD
+            SRD
              = 
             &lt; 0.00001
              
-            SDG
+            MUR
           </div>
         </div>
       </div>
@@ -4025,7 +4025,7 @@ exports[`./swap.stories PendingLimit 1`] = `
                 >
                   0
                    
-                  SDG
+                  MUR
                 </span>
                  
                 sold
@@ -4242,7 +4242,7 @@ exports[`./swap.stories PendingMarket 1`] = `
                   Sell
                    
                   <span
-                    aria-label="100 SDG"
+                    aria-label="0.1 MUR"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -4267,16 +4267,16 @@ exports[`./swap.stories PendingMarket 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="SDG"
+                        title="MUR"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      100
+                      0.1
                        
-                      SDG
+                      MUR
                     </b>
                   </span>
                 </span>
@@ -4288,7 +4288,7 @@ exports[`./swap.stories PendingMarket 1`] = `
                   for at least
                    
                   <span
-                    aria-label="33,885,869,283.244827 JMD"
+                    aria-label="3,388,586,928.3244824 SRD"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -4313,16 +4313,16 @@ exports[`./swap.stories PendingMarket 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="JMD"
+                        title="SRD"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      33.89B
+                      3.39B
                        
-                      JMD
+                      SRD
                     </b>
                   </span>
                 </span>
@@ -4354,11 +4354,11 @@ exports[`./swap.stories PendingMarket 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            JMD
+            SRD
              = 
             &lt; 0.00001
              
-            SDG
+            MUR
           </div>
         </div>
       </div>

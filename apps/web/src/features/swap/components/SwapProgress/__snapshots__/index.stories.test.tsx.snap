@@ -37,7 +37,7 @@ exports[`./index.stories Filled 1`] = `
         >
           10
            
-          SDG
+          MUR
         </span>
          
         sold
@@ -84,7 +84,7 @@ exports[`./index.stories NotFilled 1`] = `
         >
           0
            
-          HKD
+          TTD
         </span>
          
         sold
@@ -131,7 +131,7 @@ exports[`./index.stories PartiallyFilled 1`] = `
         >
           1
            
-          HNL
+          XAF
         </span>
          
         sold

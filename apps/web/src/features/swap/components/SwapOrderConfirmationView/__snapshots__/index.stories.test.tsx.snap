@@ -194,7 +194,7 @@ exports[`./index.stories CustomRecipient 1`] = `
       </div>
       <div
         class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
-        data-testid="expiry"
+        data-testid=""
       >
         <div
           class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
@@ -214,19 +214,7 @@ exports[`./index.stories CustomRecipient 1`] = `
           <div
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
-            <p
-              class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
-            >
-              <span
-                class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
-              >
-                in 28 minutes
-              </span>
-               
-              (
-              Dec 22, 2025 - 8:42:10 PM
-              )
-            </p>
+            Dec 24, 2024 - 1:54:40 AM
           </div>
         </div>
       </div>
@@ -694,7 +682,7 @@ exports[`./index.stories Default 1`] = `
       </div>
       <div
         class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
-        data-testid="expiry"
+        data-testid=""
       >
         <div
           class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
@@ -714,19 +702,7 @@ exports[`./index.stories Default 1`] = `
           <div
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
-            <p
-              class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
-            >
-              <span
-                class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
-              >
-                in 28 minutes
-              </span>
-               
-              (
-              Dec 22, 2025 - 8:42:10 PM
-              )
-            </p>
+            Dec 24, 2024 - 1:54:40 AM
           </div>
         </div>
       </div>
