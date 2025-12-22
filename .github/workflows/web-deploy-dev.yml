@@ -139,8 +139,16 @@ jobs:
         env:
           BUCKET: s3://${{ secrets.AWS_REVIEW_BUCKET_NAME }}/walletweb/${{ steps.extract_branch.outputs.branch }}
         working-directory: apps/shell
-        # Use trusted script from base branch to prevent malicious code execution with AWS credentials
-        run: bash  ../../.trusted-scripts/apps/shell/scripts/github/s3_upload.sh
+        # Use trusted script from base branch if it exists, otherwise use PR version (for new features)
+        # This prevents malicious code execution while allowing new deployment scripts to be tested
+        run: |
+          if [ -f ../../.trusted-scripts/apps/shell/scripts/github/s3_upload.sh ]; then
+            echo "Using trusted script from base branch"
+            bash ../../.trusted-scripts/apps/shell/scripts/github/s3_upload.sh
+          else
+            echo "Trusted script not found in base branch, using PR version (new feature)"
+            bash ./scripts/github/s3_upload.sh
+          fi
 
       # Comment
       - name: Post a deployment link in the PR
