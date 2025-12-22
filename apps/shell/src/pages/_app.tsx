@@ -6,6 +6,7 @@ import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider } from '@mui/material/styles'
 import type { Theme } from '@mui/material/styles'
 import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
+import WalletProvider from '@/components/common/WalletProvider'
 import ShellLayout from '@/components/shell/ShellLayout'
 import { BRAND_NAME } from '@/config/constants'
 import createEmotionCache from '@/utils/createEmotionCache'
@@ -33,10 +34,12 @@ const SafeShellApp = ({
         <SafeThemeProvider mode="light">
           {(safeTheme: Theme) => (
             <ThemeProvider theme={safeTheme}>
-              <CssBaseline />
-              <ShellLayout>
-                <Component {...pageProps} />
-              </ShellLayout>
+              <WalletProvider>
+                <CssBaseline />
+                <ShellLayout>
+                  <Component {...pageProps} />
+                </ShellLayout>
+              </WalletProvider>
             </ThemeProvider>
           )}
         </SafeThemeProvider>
