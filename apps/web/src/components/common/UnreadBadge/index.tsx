@@ -1,7 +1,6 @@
 import React from 'react'
 import Badge, { type BadgeProps } from '@mui/material/Badge'
 
-// Test change to trigger web Storybook screenshot workflow
 const UnreadBadge = ({
   children,
   count,
