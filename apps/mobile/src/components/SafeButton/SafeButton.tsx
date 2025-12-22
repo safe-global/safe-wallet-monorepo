@@ -1,7 +1,9 @@
 import React from 'react'
 import { styled, Button } from 'tamagui'
 import { Loader } from '@/src/components/Loader'
+
 // Create base styled button
+// Test change to trigger mobile Storybook screenshot workflow
 const BaseButton = styled(Button, {
   variants: {
     rounded: {
