@@ -136,9 +136,12 @@ async function captureScreenshots() {
         throw new Error('Could not access Storybook iframe')
       }
 
-      // Wait for the story to render inside the iframe
-      const storyRoot = await frame.locator('#storybook-root').first()
-      await storyRoot.waitFor({ state: 'visible', timeout: 10000 })
+      // Wait for content to load in iframe - React Native Web renders in various Storybook wrappers
+      // Look for any visible content rather than just #storybook-root
+      await frame.waitForLoadState('load', { timeout: 10000 })
+
+      // Additional wait for React Native Web to render
+      await page.waitForTimeout(3000)
 
       await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {
         console.log('  ⚠ Network not fully idle, continuing anyway')
@@ -148,19 +151,38 @@ async function captureScreenshots() {
       const cleanComponentName = componentName.replace(/[/\\]/g, '-').replace(/\s+/g, '')
       const screenshotPath = path.join('mobile-screenshots', `${cleanComponentName}--${storyName}.png`)
 
+      // Try to find the story content - React Native Web may render in different containers
+      // Priority: #storybook-root, .sb-preparing-docs, or fallback to iframe body
+      let screenshotTarget = null
+      const storyRoot = frame.locator('#storybook-root').first()
+      const docsWrapper = frame.locator('.sb-preparing-docs').first()
+
       if ((await storyRoot.count()) > 0) {
-        await storyRoot.screenshot({
+        const rootContent = await frame.locator('#storybook-root > *').first()
+        if ((await rootContent.count()) > 0) {
+          screenshotTarget = storyRoot
+          console.log('  📸 Using #storybook-root')
+        }
+      }
+
+      if (!screenshotTarget && (await docsWrapper.count()) > 0) {
+        screenshotTarget = docsWrapper
+        console.log('  📸 Using .sb-preparing-docs wrapper')
+      }
+
+      if (screenshotTarget) {
+        await screenshotTarget.screenshot({
           path: screenshotPath,
           animations: 'disabled',
         })
         console.log(`  ✓ Saved: ${screenshotPath}`)
       } else {
-        await page.screenshot({
+        // Fallback to screenshot the iframe element itself
+        await iframeElement.screenshot({
           path: screenshotPath,
-          fullPage: true,
           animations: 'disabled',
         })
-        console.log(`  ✓ Saved (full page): ${screenshotPath}`)
+        console.log(`  ✓ Saved (iframe): ${screenshotPath}`)
       }
     } catch (error) {
       console.error(`  ✗ Error capturing ${componentName} - ${storyName}:`, error.message)

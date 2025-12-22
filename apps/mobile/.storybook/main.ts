@@ -63,8 +63,16 @@ if (isWeb) {
         config.resolve.alias = {
           ...config.resolve.alias,
           '@': path.resolve(__dirname, '../'),
+          // Mock React Native modules for web environment
+          'react-native-worklets': path.resolve(__dirname, './mocks/react-native-worklets'),
+          'react-native-reanimated': path.resolve(__dirname, './mocks/react-native-reanimated.js'),
+          'react-native-quick-crypto': path.resolve(__dirname, './mocks/react-native-quick-crypto.js'),
+          // Mock react-refresh to prevent production bundle errors
+          'react-refresh/runtime': path.resolve(__dirname, './mocks/react-refresh.js'),
+          'react-refresh': path.resolve(__dirname, './mocks/react-refresh.js'),
         }
       }
+
       return config
     },
   } as WebStorybookConfig
