@@ -38,7 +38,6 @@ import TxData from '@/components/transactions/TxDetails/TxData'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import useChainId from '@/hooks/useChainId'
 import { ManageSigners } from './ManageSigners'
-import { TransactionWarnings } from '../TransactionWarnings'
 import { Box } from '@mui/material'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
 import BridgeTransaction from './BridgeTransaction'
@@ -131,7 +130,6 @@ const ConfirmationView = ({
 
   return (
     <>
-      <TransactionWarnings txData={details?.txData ?? undefined} />
       {withDecodedData &&
         (ConfirmationViewComponent ||
           (details && showTxDetails && (

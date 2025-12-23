@@ -1,7 +1,7 @@
 import { mapConsolidatedAnalysisResults } from '../mapConsolidatedAnalysisResults'
-import { Severity, StatusGroup, RecipientStatus } from '../../types'
-import type { GroupedAnalysisResults, RecipientAnalysisResults } from '../../types'
-import { RecipientAnalysisResultBuilder } from '../../builders'
+import { Severity, StatusGroup, RecipientStatus, ContractStatus } from '../../types'
+import type { GroupedAnalysisResults, RecipientAnalysisResults, ContractAnalysisResults } from '../../types'
+import { RecipientAnalysisResultBuilder, ContractAnalysisResultBuilder } from '../../builders'
 import { faker } from '@faker-js/faker'
 
 describe('mapConsolidatedAnalysisResults', () => {
@@ -283,5 +283,223 @@ describe('mapConsolidatedAnalysisResults', () => {
     const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
 
     expect(result).toEqual([])
+  })
+
+  describe('UNOFFICIAL_FALLBACK_HANDLER', () => {
+    it('should show only fallback handler addresses, not contract addresses', () => {
+      const contractAddress1 = faker.finance.ethereumAddress()
+      const contractAddress2 = faker.finance.ethereumAddress()
+      const fallbackHandlerAddress1 = faker.finance.ethereumAddress()
+      const fallbackHandlerAddress2 = faker.finance.ethereumAddress()
+      const handlerName1 = faker.company.name()
+      const handlerName2 = faker.company.name()
+
+      const addressesResultsMap: ContractAnalysisResults = {
+        [contractAddress1]: {
+          [StatusGroup.FALLBACK_HANDLER]: [
+            ContractAnalysisResultBuilder.unofficialFallbackHandler({
+              address: fallbackHandlerAddress1,
+              name: handlerName1,
+            }).build(),
+          ],
+        },
+        [contractAddress2]: {
+          [StatusGroup.FALLBACK_HANDLER]: [
+            ContractAnalysisResultBuilder.unofficialFallbackHandler({
+              address: fallbackHandlerAddress2,
+              name: handlerName2,
+            }).build(),
+          ],
+        },
+      }
+
+      const addressResults: GroupedAnalysisResults[] = Object.values(addressesResultsMap)
+      const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
+
+      expect(result).toHaveLength(1)
+      expect(result[0].type).toBe(ContractStatus.UNOFFICIAL_FALLBACK_HANDLER)
+      expect(result[0].addresses).toHaveLength(2)
+
+      expect(result[0].addresses?.[0].address).toBe(fallbackHandlerAddress1)
+      expect(result[0].addresses?.[0].name).toBe(handlerName1)
+      expect(result[0].addresses?.[1].address).toBe(fallbackHandlerAddress2)
+      expect(result[0].addresses?.[1].name).toBe(handlerName2)
+
+      expect(result[0].addresses?.some((addr) => addr.address === contractAddress1)).toBe(false)
+      expect(result[0].addresses?.some((addr) => addr.address === contractAddress2)).toBe(false)
+    })
+
+    it('should handle fallback handler without optional name/logoUrl', () => {
+      const contractAddress = faker.finance.ethereumAddress()
+      const fallbackHandlerAddress = faker.finance.ethereumAddress()
+
+      const addressesResultsMap: ContractAnalysisResults = {
+        [contractAddress]: {
+          [StatusGroup.FALLBACK_HANDLER]: [
+            ContractAnalysisResultBuilder.unofficialFallbackHandler({
+              address: fallbackHandlerAddress,
+            }).build(),
+          ],
+        },
+      }
+
+      const addressResults: GroupedAnalysisResults[] = Object.values(addressesResultsMap)
+      const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
+
+      expect(result).toHaveLength(1)
+      expect(result[0].addresses).toHaveLength(1)
+
+      expect(result[0].addresses?.[0].address).toBe(fallbackHandlerAddress)
+      expect(result[0].addresses?.[0].name).toBeUndefined()
+      expect(result[0].addresses?.[0].logoUrl).toBeUndefined()
+    })
+
+    it('should generate singular description for one fallback handler', () => {
+      const contractAddress = faker.finance.ethereumAddress()
+      const fallbackHandlerAddress = faker.finance.ethereumAddress()
+
+      const addressesResultsMap: ContractAnalysisResults = {
+        [contractAddress]: {
+          [StatusGroup.FALLBACK_HANDLER]: [
+            ContractAnalysisResultBuilder.unofficialFallbackHandler({
+              address: fallbackHandlerAddress,
+            }).build(),
+          ],
+        },
+      }
+
+      const addressResults: GroupedAnalysisResults[] = Object.values(addressesResultsMap)
+
+      const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
+
+      expect(result).toHaveLength(1)
+      expect(result[0].description).toBe('Verify this fallback handler is trusted and secure before proceeding.')
+    })
+
+    it('should generate plural description for multiple fallback handlers', () => {
+      const contractAddress1 = faker.finance.ethereumAddress()
+      const contractAddress2 = faker.finance.ethereumAddress()
+      const contractAddress3 = faker.finance.ethereumAddress()
+      const fallbackHandlerAddress1 = faker.finance.ethereumAddress()
+      const fallbackHandlerAddress2 = faker.finance.ethereumAddress()
+      const fallbackHandlerAddress3 = faker.finance.ethereumAddress()
+
+      const addressesResultsMap: ContractAnalysisResults = {
+        [contractAddress1]: {
+          [StatusGroup.FALLBACK_HANDLER]: [
+            ContractAnalysisResultBuilder.unofficialFallbackHandler({
+              address: fallbackHandlerAddress1,
+            }).build(),
+          ],
+        },
+        [contractAddress2]: {
+          [StatusGroup.FALLBACK_HANDLER]: [
+            ContractAnalysisResultBuilder.unofficialFallbackHandler({
+              address: fallbackHandlerAddress2,
+            }).build(),
+          ],
+        },
+        [contractAddress3]: {
+          [StatusGroup.FALLBACK_HANDLER]: [
+            ContractAnalysisResultBuilder.unofficialFallbackHandler({
+              address: fallbackHandlerAddress3,
+            }).build(),
+          ],
+        },
+      }
+
+      const addressResults: GroupedAnalysisResults[] = Object.values(addressesResultsMap)
+      const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
+
+      expect(result).toHaveLength(1)
+      expect(result[0].description).toBe('Verify all fallback handlers are trusted and secure before proceeding.')
+    })
+
+    it('should not affect other contract status types - they should still use contract addresses', () => {
+      const contractAddress1 = faker.finance.ethereumAddress()
+      const contractAddress2 = faker.finance.ethereumAddress()
+      const fallbackHandlerAddress = faker.finance.ethereumAddress()
+      const contractName1 = faker.company.name()
+      const contractName2 = faker.company.name()
+      const handlerName = faker.company.name()
+
+      const addressesResultsMap: ContractAnalysisResults = {
+        [contractAddress1]: {
+          name: contractName1,
+          [StatusGroup.CONTRACT_VERIFICATION]: [ContractAnalysisResultBuilder.unverified().build()],
+        },
+        [contractAddress2]: {
+          name: contractName2,
+          [StatusGroup.FALLBACK_HANDLER]: [
+            ContractAnalysisResultBuilder.unofficialFallbackHandler({
+              address: fallbackHandlerAddress,
+              name: handlerName,
+            }).build(),
+          ],
+        },
+      }
+
+      const addressResults: GroupedAnalysisResults[] = Object.values(addressesResultsMap)
+      const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
+
+      expect(result).toHaveLength(2)
+
+      const unverifiedResult = result.find((r) => r.type === ContractStatus.NOT_VERIFIED)
+      const fallbackHandlerResult = result.find((r) => r.type === ContractStatus.UNOFFICIAL_FALLBACK_HANDLER)
+
+      // Unverified contract
+      expect(unverifiedResult?.addresses).toHaveLength(1)
+      expect(unverifiedResult?.addresses?.[0].address).toBe(contractAddress1)
+      expect(unverifiedResult?.addresses?.[0].name).toBe(contractName1)
+
+      // Fallback handler
+      expect(fallbackHandlerResult?.addresses).toHaveLength(1)
+      expect(fallbackHandlerResult?.addresses?.[0].address).toBe(fallbackHandlerAddress)
+      expect(fallbackHandlerResult?.addresses?.[0].name).toBe(handlerName)
+    })
+
+    it('should handle mixed fallback handlers with and without names', () => {
+      const contractAddress1 = faker.finance.ethereumAddress()
+      const contractAddress2 = faker.finance.ethereumAddress()
+      const fallbackHandlerAddress1 = faker.finance.ethereumAddress()
+      const fallbackHandlerAddress2 = faker.finance.ethereumAddress()
+      const handlerName = faker.company.name()
+      const logoUrl = faker.image.url()
+
+      const addressesResultsMap: ContractAnalysisResults = {
+        [contractAddress1]: {
+          [StatusGroup.FALLBACK_HANDLER]: [
+            ContractAnalysisResultBuilder.unofficialFallbackHandler({
+              address: fallbackHandlerAddress1,
+              name: handlerName,
+              logoUrl: logoUrl,
+            }).build(),
+          ],
+        },
+        [contractAddress2]: {
+          [StatusGroup.FALLBACK_HANDLER]: [
+            ContractAnalysisResultBuilder.unofficialFallbackHandler({
+              address: fallbackHandlerAddress2,
+            }).build(),
+          ],
+        },
+      }
+
+      const addressResults: GroupedAnalysisResults[] = Object.values(addressesResultsMap)
+      const result = mapConsolidatedAnalysisResults(addressesResultsMap, addressResults)
+
+      expect(result).toHaveLength(1)
+      expect(result[0].addresses).toHaveLength(2)
+      expect(result[0].addresses?.[0]).toEqual({
+        address: fallbackHandlerAddress1,
+        name: handlerName,
+        logoUrl: logoUrl,
+      })
+      expect(result[0].addresses?.[1]).toEqual({
+        address: fallbackHandlerAddress2,
+        name: undefined,
+        logoUrl: undefined,
+      })
+    })
   })
 })

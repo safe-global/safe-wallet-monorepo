@@ -7,6 +7,7 @@ import { Stack } from 'tamagui'
 import { AnalysisLabel } from '../AnalysisLabel'
 import { AnalysisDisplay } from './AnalysisDisplay'
 import { DelegateCallItem } from './DelegateCallItem'
+import { FallbackHandlerItem } from './FallbackHandlerItem'
 
 interface AnalysisGroup {
   data: Record<string, GroupedAnalysisResults>
@@ -36,6 +37,10 @@ export const AnalysisGroup = ({ data, highlightedSeverity }: AnalysisGroup) => {
 
         if (result.type === ContractStatus.UNEXPECTED_DELEGATECALL) {
           return <DelegateCallItem key={`${result.title}-${index}`} result={result} isPrimary={isPrimary} />
+        }
+
+        if (result.type === ContractStatus.UNOFFICIAL_FALLBACK_HANDLER) {
+          return <FallbackHandlerItem key={`${result.title}-${index}`} result={result} isPrimary={isPrimary} />
         }
 
         return (

@@ -149,6 +149,18 @@ export const Empty: Story = {
   parameters: { docs: { description: { story: 'SafeShieldWidget when no transaction is available to analyze' } } },
 }
 
+// Unofficial fallback handler
+export const UnofficialFallbackHandler: Story = {
+  args: {
+    ...FullAnalysisBuilder.unofficialFallbackHandlerContract(contractAddress)
+      .threat(FullAnalysisBuilder.noThreat().build().threat)
+      .build(),
+  },
+  parameters: {
+    docs: { description: { story: 'SafeShieldWidget when transaction sets an unofficial fallback handler' } },
+  },
+}
+
 // Multiple results for the same contract with different severity
 export const MultipleIssues: Story = {
   args: {
