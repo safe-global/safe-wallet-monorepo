@@ -4,6 +4,7 @@ import { useCalendlyEventScheduled } from '../../hooks/useCalendlyEventScheduled
 import { useCalendlyScript } from '../../hooks/useCalendlyScript'
 import { useCalendlyPageChange } from '../../hooks/useCalendlyPageChange'
 import css from './styles.module.css'
+import { Typography } from '@mui/material'
 
 export type HnCalendlyStepProps = {
   calendlyUrl: string
@@ -22,7 +23,9 @@ const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps
       <div className={css.calendlyWrapper}>
         {!isSecondStep && (
           <div className={css.calendlyHeader}>
-            <h2 className={css.calendlyTitle}>Get connected to the right expert</h2>
+            <Typography variant="h2" className={css.calendlyTitle}>
+              Get connected to the right expert
+            </Typography>
           </div>
         )}
         <div

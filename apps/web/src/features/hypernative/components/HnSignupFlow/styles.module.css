@@ -59,15 +59,17 @@
 }
 
 .calendlyTitle {
+  padding: var(--space-3) var(--space-1);
   font-weight: 700;
-  font-size: 28px;
-  line-height: 32px;
-  margin: 0 0 var(--space-2) 0;
-  padding: 0;
+  font-size: 24px;
   color: var(--color-static-main);
-  display: block;
-  visibility: visible;
-  opacity: 1;
+}
+
+@media (max-width: 799px) {
+  .calendlyTitle {
+    padding-block: var(--space-1);
+    font-size: 18px;
+  }
 }
 
 .header {
