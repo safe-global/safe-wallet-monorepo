@@ -28,7 +28,6 @@ const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps
         <div
           ref={widgetRef}
           id="calendly-widget"
-          className={css.calendlyWidget}
           style={{
             minWidth: '310px',
             height: '700px',
