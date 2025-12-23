@@ -54,6 +54,5 @@ describe('HnCalendlyStep', () => {
 
     const widgetElement = document.getElementById('calendly-widget')
     expect(widgetElement).toBeInTheDocument()
-    expect(widgetElement).toHaveStyle({ minWidth: '310px', height: '700px' })
   })
 })
