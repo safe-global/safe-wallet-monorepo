@@ -2,57 +2,61 @@
 
 exports[`./HnDashboardBanner.stories Default 1`] = `
 <div
-  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner css-yd95fl-MuiPaper-root-MuiCard-root"
-  role="button"
-  style="--Paper-shadow: none;"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="tag MuiBox-root css-0"
-  >
-    <p
-      class="MuiTypography-root MuiTypography-body2 tagText css-17vdyq3-MuiTypography-root"
-    >
-      Powered by Hypernative
-    </p>
-  </div>
-  <div
-    class="content MuiBox-root css-0"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner css-yd95fl-MuiPaper-root-MuiCard-root"
+    role="button"
+    style="--Paper-shadow: none;"
   >
     <div
-      class="badgeContainer MuiBox-root css-0"
+      class="tag MuiBox-root css-0"
     >
-      <img
-        alt="Guardian badge"
-        class="badge"
-        data-nimg="1"
-        decoding="async"
-        height="54"
-        loading="lazy"
-        src="/images/hypernative/guardian-badge.svg"
-        style="color: transparent;"
-        width="54"
-      />
+      <p
+        class="MuiTypography-root MuiTypography-body2 tagText css-17vdyq3-MuiTypography-root"
+      >
+        Powered by Hypernative
+      </p>
     </div>
     <div
-      class="textContent MuiBox-root css-0"
+      class="content MuiBox-root css-0"
     >
-      <h6
-        class="MuiTypography-root MuiTypography-h6 title css-v1yov6-MuiTypography-root"
+      <div
+        class="badgeContainer MuiBox-root css-0"
       >
-        Strengthen your Safe
-      </h6>
-      <p
-        class="MuiTypography-root MuiTypography-body2 description css-17vdyq3-MuiTypography-root"
+        <img
+          alt="Guardian badge"
+          class="badge"
+          data-nimg="1"
+          decoding="async"
+          height="54"
+          loading="lazy"
+          src="/images/hypernative/guardian-badge.svg"
+          style="color: transparent;"
+          width="54"
+        />
+      </div>
+      <div
+        class="textContent MuiBox-root css-0"
       >
-        Automatically block risky transactions using advanced, user-defined security policies.
-      </p>
-      <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary ctaButton css-1agqvgt-MuiButtonBase-root-MuiButton-root"
-        tabindex="0"
-        type="button"
-      >
-        Learn more
-      </button>
+        <h6
+          class="MuiTypography-root MuiTypography-h6 title css-v1yov6-MuiTypography-root"
+        >
+          Strengthen your Safe
+        </h6>
+        <p
+          class="MuiTypography-root MuiTypography-body2 description css-17vdyq3-MuiTypography-root"
+        >
+          Automatically block risky transactions using advanced, user-defined security policies.
+        </p>
+        <button
+          class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary ctaButton css-1agqvgt-MuiButtonBase-root-MuiButton-root"
+          tabindex="0"
+          type="button"
+        >
+          Learn more
+        </button>
+      </div>
     </div>
   </div>
 </div>

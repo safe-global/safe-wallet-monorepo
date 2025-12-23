@@ -1,24 +1,28 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./index.stories Default 1`] = `
-<span
-  aria-label="Copy to clipboard"
-  class=""
-  data-mui-internal-clone-element="true"
-  style="cursor: pointer;"
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <button
+  <span
     aria-label="Copy to clipboard"
-    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
-    tabindex="0"
-    type="button"
+    class=""
+    data-mui-internal-clone-element="true"
+    style="cursor: pointer;"
   >
-    <mock-icon
-      aria-hidden=""
-      class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
-      data-testid="copy-btn-icon"
-      focusable="false"
-    />
-  </button>
-</span>
+    <button
+      aria-label="Copy to clipboard"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+      tabindex="0"
+      type="button"
+    >
+      <mock-icon
+        aria-hidden=""
+        class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+        data-testid="copy-btn-icon"
+        focusable="false"
+      />
+    </button>
+  </span>
+</div>
 `;
