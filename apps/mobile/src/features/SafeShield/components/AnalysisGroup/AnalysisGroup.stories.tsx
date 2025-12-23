@@ -183,11 +183,16 @@ export const UnofficialFallbackHandler: Story = {
   },
 }
 
-export const UnofficialFallbackHandlerHighlighted: Story = {
+export const UnofficialFallbackHandlerWithDetails: Story = {
   args: {
     data: createContractData(faker.finance.ethereumAddress(), {
-      [StatusGroup.FALLBACK_HANDLER]: [ContractAnalysisResultBuilder.unofficialFallbackHandler().build()],
+      [StatusGroup.FALLBACK_HANDLER]: [
+        ContractAnalysisResultBuilder.unofficialFallbackHandler({
+          address: faker.finance.ethereumAddress(),
+          name: faker.word.words(),
+          logoUrl: faker.internet.url(),
+        }).build(),
+      ],
     }),
-    highlightedSeverity: Severity.WARN,
   },
 }
