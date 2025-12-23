@@ -25,3 +25,10 @@ const HnBannerForSettingsWithConditions = withHnBannerConditions(BannerType.Sett
   HnBannerWithSignupAndDismissal as ComponentType<WithHnBannerConditionsProps>,
 )
 export const HnBannerForSettings = withHnFeature(HnBannerForSettingsWithConditions)
+
+// Export versions for Queue and History pages (with withHnFeature applied at export level for consistency)
+import { HnBannerForQueue as HnBannerForQueueWrapper } from './HnBannerForQueue'
+import { HnBannerForHistory as HnBannerForHistoryWrapper } from './HnBannerForHistory'
+
+export const HnBannerForQueue = withHnFeature(HnBannerForQueueWrapper)
+export const HnBannerForHistory = withHnFeature(HnBannerForHistoryWrapper)

@@ -9,9 +9,13 @@ import { BatchExecuteHoverProvider } from '@/components/transactions/BatchExecut
 import { usePendingTxsQueue, useShowUnsignedQueue } from '@/hooks/usePendingTxs'
 import RecoveryList from '@/features/recovery/components/RecoveryList'
 import { BRAND_NAME } from '@/config/constants'
+import { useBannerVisibility } from '@/features/hypernative/hooks'
+import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
+import { HnBannerForQueue } from '@/features/hypernative/components/HnBanner'
 
 const Queue: NextPage = () => {
   const showPending = useShowUnsignedQueue()
+  const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
 
   return (
     <>
@@ -26,6 +30,12 @@ const Queue: NextPage = () => {
 
         <main>
           <Box mb={4}>
+            {showHnBanner && !hnLoading && (
+              <Box mb={3}>
+                <HnBannerForQueue />
+              </Box>
+            )}
+
             <RecoveryList />
 
             {/* Pending unsigned transactions */}

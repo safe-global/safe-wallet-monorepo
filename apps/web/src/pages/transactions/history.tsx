@@ -15,10 +15,14 @@ import { BRAND_NAME } from '@/config/constants'
 import CsvTxExportButton from '@/components/transactions/CsvTxExportButton'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useBannerVisibility } from '@/features/hypernative/hooks'
+import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
+import { HnBannerForHistory } from '@/features/hypernative/components/HnBanner'
 
 const History: NextPage = () => {
   const [filter] = useTxFilter()
   const isCsvExportEnabled = useHasFeature(FEATURES.CSV_TX_EXPORT)
+  const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
 
   const [showFilter, setShowFilter] = useState(false)
 
@@ -46,6 +50,12 @@ const History: NextPage = () => {
         {showFilter && <TxFilterForm toggleFilter={toggleFilter} />}
 
         <Box mb={4}>
+          {showHnBanner && !hnLoading && (
+            <Box mb={3}>
+              <HnBannerForHistory />
+            </Box>
+          )}
+
           <PaginatedTxns useTxns={useTxHistory} />
         </Box>
       </main>
