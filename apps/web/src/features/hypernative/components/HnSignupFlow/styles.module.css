@@ -65,10 +65,29 @@
   color: var(--color-static-main);
 }
 
-@media (max-width: 799px) {
+@media (max-width: 900px) {
   .calendlyTitle {
-    padding-block: var(--space-1);
+    padding-block: var(--space-1) calc(-1 * var(--space-1));
     font-size: 18px;
+  }
+}
+
+.calendlyWidget {
+  min-width: 310px;
+  height: 700px;
+}
+
+.calendlyWidgetWithHeader {
+  margin-top: var(--space-1);
+}
+
+@media (min-width: 900px) {
+  .calendlyWidget {
+    min-width: 650px;
+    height: 700px;
+    /* Compensate for the custom header: */
+    margin-top: calc(-1 * var(--space-6));
+    margin-left: calc(-1 * var(--space-3));
   }
 }
 

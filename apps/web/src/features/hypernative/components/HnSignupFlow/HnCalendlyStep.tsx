@@ -13,7 +13,7 @@ export type HnCalendlyStepProps = {
 
 const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps) => {
   const widgetRef = useRef<HTMLDivElement>(null)
-  const isSecondStep = useCalendlyPageChange()
+  const isSecondStep: boolean = useCalendlyPageChange()
 
   useCalendlyEventScheduled(onBookingScheduled)
   useCalendlyScript(widgetRef, calendlyUrl)
@@ -31,11 +31,7 @@ const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps
         <div
           ref={widgetRef}
           id="calendly-widget"
-          style={{
-            minWidth: '310px',
-            height: '700px',
-            ...(!isSecondStep && { marginTop: '18px' }),
-          }}
+          className={`${css.calendlyWidget} ${!isSecondStep ? css.calendlyWidgetWithHeader : ''}`}
         />
       </div>
     </HnSignupLayout>
