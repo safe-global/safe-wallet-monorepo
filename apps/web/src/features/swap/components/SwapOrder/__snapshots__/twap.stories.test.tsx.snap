@@ -50,7 +50,7 @@ exports[`./twap.stories ExecutedTwap 1`] = `
                   Sell
                    
                   <span
-                    aria-label="100,000,000,000 CZK"
+                    aria-label="100,000,000 AFN"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -75,16 +75,16 @@ exports[`./twap.stories ExecutedTwap 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="CZK"
+                        title="AFN"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      100B
+                      100M
                        
-                      CZK
+                      AFN
                     </b>
                   </span>
                 </span>
@@ -96,7 +96,7 @@ exports[`./twap.stories ExecutedTwap 1`] = `
                   for at least
                    
                   <span
-                    aria-label="33,885,869,283.244827 PEN"
+                    aria-label="33,885,869,283,244.824 DZD"
                     class="container verticalAlign"
                     data-mui-internal-clone-element="true"
                   >
@@ -121,16 +121,16 @@ exports[`./twap.stories ExecutedTwap 1`] = `
   "
                         style="pointer-events: none; border: 0px; display: block;"
                         tabindex="-1"
-                        title="PEN"
+                        title="DZD"
                         width="26"
                       />
                     </div>
                     <b
                       class="tokenText"
                     >
-                      33.89B
+                      33.89T
                        
-                      PEN
+                      DZD
                     </b>
                   </span>
                 </span>
@@ -162,11 +162,11 @@ exports[`./twap.stories ExecutedTwap 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            PEN
+            DZD
              = 
-            2.95108
+            &lt; 0.00001
              
-            CZK
+            AFN
           </div>
         </div>
       </div>
@@ -194,7 +194,7 @@ exports[`./twap.stories ExecutedTwap 1`] = `
           >
             0
              
-            PEN
+            DZD
           </div>
         </div>
       </div>
@@ -230,9 +230,9 @@ exports[`./twap.stories ExecutedTwap 1`] = `
           <div
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
-            0.008
+            &lt; 0.00001
              
-            NZD
+            GMD
           </div>
         </div>
       </div>
@@ -293,9 +293,9 @@ exports[`./twap.stories ExecutedTwap 1`] = `
               <span
                 class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
               >
-                50B
+                50M
                  
-                CZK
+                AFN
               </span>
               <span
                 class="MuiTypography-root MuiTypography-body1 css-9p6poq-MuiTypography-root"
@@ -334,9 +334,9 @@ exports[`./twap.stories ExecutedTwap 1`] = `
               <span
                 class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
               >
-                16.94B
+                16.94T
                  
-                PEN
+                DZD
               </span>
               <span
                 class="MuiTypography-root MuiTypography-body1 css-9p6poq-MuiTypography-root"
@@ -396,9 +396,9 @@ exports[`./twap.stories ExecutedTwap 1`] = `
                 <span
                   class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
                 >
-                  100B
+                  100M
                    
-                  CZK
+                  AFN
                 </span>
                  
                 sold

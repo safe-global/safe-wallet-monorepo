@@ -51,7 +51,7 @@ exports[`./index.stories CustomRecipient 1`] = `
   "
                   style="pointer-events: none; border: 0px; display: block;"
                   tabindex="-1"
-                  title="KMF"
+                  title="AUD"
                   width="40"
                 />
               </div>
@@ -69,7 +69,7 @@ exports[`./index.stories CustomRecipient 1`] = `
                 class="MuiTypography-root MuiTypography-h4 css-csh7nj-MuiTypography-root"
               >
                 <span
-                  aria-label="10 KMF"
+                  aria-label="10 AUD"
                   class="container"
                   data-mui-internal-clone-element="true"
                 >
@@ -78,7 +78,7 @@ exports[`./index.stories CustomRecipient 1`] = `
                   >
                     10
                      
-                    KMF
+                    AUD
                   </b>
                 </span>
               </div>
@@ -126,7 +126,7 @@ exports[`./index.stories CustomRecipient 1`] = `
   "
                   style="pointer-events: none; border: 0px; display: block;"
                   tabindex="-1"
-                  title="LAK"
+                  title="SGD"
                   width="40"
                 />
               </div>
@@ -144,16 +144,16 @@ exports[`./index.stories CustomRecipient 1`] = `
                 class="MuiTypography-root MuiTypography-h4 css-csh7nj-MuiTypography-root"
               >
                 <span
-                  aria-label="0.9 LAK"
+                  aria-label="0.00000005 SGD"
                   class="container"
                   data-mui-internal-clone-element="true"
                 >
                   <b
                     class="tokenText"
                   >
-                    0.9
+                    &lt; 0.00001
                      
-                    LAK
+                    SGD
                   </b>
                 </span>
               </div>
@@ -184,17 +184,17 @@ exports[`./index.stories CustomRecipient 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            LAK
+            SGD
              = 
-            11.11111
+            200M
              
-            KMF
+            AUD
           </div>
         </div>
       </div>
       <div
         class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
-        data-testid="expiry"
+        data-testid=""
       >
         <div
           class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
@@ -214,19 +214,7 @@ exports[`./index.stories CustomRecipient 1`] = `
           <div
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
-            <p
-              class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
-            >
-              <span
-                class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
-              >
-                in 28 minutes
-              </span>
-               
-              (
-              Dec 23, 2025 - 12:07:39 PM
-              )
-            </p>
+            Dec 24, 2024 - 1:54:40 AM
           </div>
         </div>
       </div>
@@ -256,7 +244,7 @@ exports[`./index.stories CustomRecipient 1`] = `
               class="MuiStack-root css-m69qwo-MuiStack-root"
             >
               <span>
-                446cdadb
+                9156d47f
               </span>
               <span
                 aria-label="Copy to clipboard"
@@ -371,7 +359,7 @@ exports[`./index.stories CustomRecipient 1`] = `
               >
                 <div
                   class="icon"
-                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woODQgOTYlIDI4JSkiIGQ9Ik0wLDBIOFY4SDB6Ii8+PHBhdGggZmlsbD0iaHNsKDIwNCA3OSUgNjQlKSIgZD0iTTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTIsMWgxdjFoLTF6TTUsMWgxdjFoLTF6TTMsMWgxdjFoLTF6TTQsMWgxdjFoLTF6TTEsM2gxdjFoLTF6TTYsM2gxdjFoLTF6TTEsNGgxdjFoLTF6TTYsNGgxdjFoLTF6TTIsNGgxdjFoLTF6TTUsNGgxdjFoLTF6TTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTIsNWgxdjFoLTF6TTUsNWgxdjFoLTF6TTEsNmgxdjFoLTF6TTYsNmgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDMxOCA5MSUgNTUlKSIgZD0iTTMsMGgxdjFoLTF6TTQsMGgxdjFoLTF6TTAsNmgxdjFoLTF6TTcsNmgxdjFoLTF6Ii8+PC9zdmc+); width: 24px; height: 24px;"
+                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjA0IDQzJSAzMCUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgzNDAgOTQlIDY1JSkiIGQ9Ik0wLDBoMXYxaC0xek03LDBoMXYxaC0xek0xLDFoMXYxaC0xek02LDFoMXYxaC0xek0zLDFoMXYxaC0xek00LDFoMXYxaC0xek0xLDJoMXYxaC0xek02LDJoMXYxaC0xek0zLDJoMXYxaC0xek00LDJoMXYxaC0xek0yLDNoMXYxaC0xek01LDNoMXYxaC0xek0wLDRoMXYxaC0xek03LDRoMXYxaC0xek0xLDRoMXYxaC0xek02LDRoMXYxaC0xek0zLDRoMXYxaC0xek00LDRoMXYxaC0xek0xLDVoMXYxaC0xek02LDVoMXYxaC0xek0yLDVoMXYxaC0xek01LDVoMXYxaC0xek0zLDVoMXYxaC0xek00LDVoMXYxaC0xek0yLDZoMXYxaC0xek01LDZoMXYxaC0xek0zLDZoMXYxaC0xek00LDZoMXYxaC0xek0wLDdoMXYxaC0xek03LDdoMXYxaC0xek0xLDdoMXYxaC0xek02LDdoMXYxaC0xek0zLDdoMXYxaC0xek00LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCgyODcgNjElIDQ5JSkiIGQ9Ik0yLDJoMXYxaC0xek01LDJoMXYxaC0xek0wLDNoMXYxaC0xek03LDNoMXYxaC0xeiIvPjwvc3ZnPg==); width: 24px; height: 24px;"
                 />
               </div>
               <div
@@ -390,7 +378,7 @@ exports[`./index.stories CustomRecipient 1`] = `
                       style="cursor: pointer;"
                     >
                       <span>
-                        0xa15c2a54636f442edeb2dba5fbb2fdf66034b119
+                        0xd7e3ecc2d0f014d7bc4ce699ececb0ae4188c0ee
                       </span>
                     </span>
                   </div>
@@ -434,7 +422,7 @@ exports[`./index.stories CustomRecipient 1`] = `
               >
                 <div
                   class="icon"
-                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMzU2IDc1JSA0MiUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgxMjkgNjclIDQ3JSkiIGQ9Ik0wLDBoMXYxaC0xek03LDBoMXYxaC0xek0xLDBoMXYxaC0xek02LDBoMXYxaC0xek0zLDBoMXYxaC0xek00LDBoMXYxaC0xek0wLDFoMXYxaC0xek03LDFoMXYxaC0xek0xLDFoMXYxaC0xek02LDFoMXYxaC0xek0yLDFoMXYxaC0xek01LDFoMXYxaC0xek0zLDFoMXYxaC0xek00LDFoMXYxaC0xek0wLDJoMXYxaC0xek03LDJoMXYxaC0xek0xLDJoMXYxaC0xek02LDJoMXYxaC0xek0zLDJoMXYxaC0xek00LDJoMXYxaC0xek0wLDNoMXYxaC0xek03LDNoMXYxaC0xek0zLDNoMXYxaC0xek00LDNoMXYxaC0xek0wLDRoMXYxaC0xek03LDRoMXYxaC0xek0zLDRoMXYxaC0xek00LDRoMXYxaC0xek0yLDVoMXYxaC0xek01LDVoMXYxaC0xek0xLDZoMXYxaC0xek02LDZoMXYxaC0xek0xLDdoMXYxaC0xek02LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCg1NCA5MCUgNTUlKSIgZD0iTTEsM2gxdjFoLTF6TTYsM2gxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6Ii8+PC9zdmc+); width: 24px; height: 24px;"
+                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjQzIDkyJSA0MCUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgxNzEgNzYlIDY2JSkiIGQ9Ik0xLDBoMXYxaC0xek02LDBoMXYxaC0xek0zLDBoMXYxaC0xek00LDBoMXYxaC0xek0xLDJoMXYxaC0xek02LDJoMXYxaC0xek0xLDNoMXYxaC0xek02LDNoMXYxaC0xek0yLDNoMXYxaC0xek01LDNoMXYxaC0xek0zLDNoMXYxaC0xek00LDNoMXYxaC0xek0zLDVoMXYxaC0xek00LDVoMXYxaC0xek0zLDZoMXYxaC0xek00LDZoMXYxaC0xek0xLDdoMXYxaC0xek02LDdoMXYxaC0xek0yLDdoMXYxaC0xek01LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCgzMzcgOTMlIDgzJSkiIGQ9Ik0xLDFoMXYxaC0xek02LDFoMXYxaC0xek0yLDFoMXYxaC0xek01LDFoMXYxaC0xek0wLDJoMXYxaC0xek03LDJoMXYxaC0xek0zLDJoMXYxaC0xek00LDJoMXYxaC0xek0xLDRoMXYxaC0xek02LDRoMXYxaC0xeiIvPjwvc3ZnPg==); width: 24px; height: 24px;"
                 />
               </div>
               <div
@@ -453,7 +441,7 @@ exports[`./index.stories CustomRecipient 1`] = `
                       style="cursor: pointer;"
                     >
                       <span>
-                        0xe8ce...faee
+                        0x9f94...dff9
                       </span>
                     </span>
                   </div>
@@ -551,7 +539,7 @@ exports[`./index.stories Default 1`] = `
   "
                   style="pointer-events: none; border: 0px; display: block;"
                   tabindex="-1"
-                  title="KMF"
+                  title="AUD"
                   width="40"
                 />
               </div>
@@ -569,7 +557,7 @@ exports[`./index.stories Default 1`] = `
                 class="MuiTypography-root MuiTypography-h4 css-csh7nj-MuiTypography-root"
               >
                 <span
-                  aria-label="10 KMF"
+                  aria-label="10 AUD"
                   class="container"
                   data-mui-internal-clone-element="true"
                 >
@@ -578,7 +566,7 @@ exports[`./index.stories Default 1`] = `
                   >
                     10
                      
-                    KMF
+                    AUD
                   </b>
                 </span>
               </div>
@@ -626,7 +614,7 @@ exports[`./index.stories Default 1`] = `
   "
                   style="pointer-events: none; border: 0px; display: block;"
                   tabindex="-1"
-                  title="LAK"
+                  title="SGD"
                   width="40"
                 />
               </div>
@@ -644,16 +632,16 @@ exports[`./index.stories Default 1`] = `
                 class="MuiTypography-root MuiTypography-h4 css-csh7nj-MuiTypography-root"
               >
                 <span
-                  aria-label="0.9 LAK"
+                  aria-label="0.00000005 SGD"
                   class="container"
                   data-mui-internal-clone-element="true"
                 >
                   <b
                     class="tokenText"
                   >
-                    0.9
+                    &lt; 0.00001
                      
-                    LAK
+                    SGD
                   </b>
                 </span>
               </div>
@@ -684,17 +672,17 @@ exports[`./index.stories Default 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            LAK
+            SGD
              = 
-            11.11111
+            200M
              
-            KMF
+            AUD
           </div>
         </div>
       </div>
       <div
         class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
-        data-testid="expiry"
+        data-testid=""
       >
         <div
           class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
@@ -714,19 +702,7 @@ exports[`./index.stories Default 1`] = `
           <div
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
-            <p
-              class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
-            >
-              <span
-                class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
-              >
-                in 28 minutes
-              </span>
-               
-              (
-              Dec 23, 2025 - 12:07:39 PM
-              )
-            </p>
+            Dec 24, 2024 - 1:54:40 AM
           </div>
         </div>
       </div>
@@ -756,7 +732,7 @@ exports[`./index.stories Default 1`] = `
               class="MuiStack-root css-m69qwo-MuiStack-root"
             >
               <span>
-                446cdadb
+                9156d47f
               </span>
               <span
                 aria-label="Copy to clipboard"
@@ -871,7 +847,7 @@ exports[`./index.stories Default 1`] = `
               >
                 <div
                   class="icon"
-                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMTM1IDQ1JSA0NyUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgzMzYgNjMlIDQ1JSkiIGQ9Ik0yLDBoMXYxaC0xek01LDBoMXYxaC0xek0zLDBoMXYxaC0xek00LDBoMXYxaC0xek0wLDFoMXYxaC0xek03LDFoMXYxaC0xek0xLDFoMXYxaC0xek02LDFoMXYxaC0xek0zLDFoMXYxaC0xek00LDFoMXYxaC0xek0yLDJoMXYxaC0xek01LDJoMXYxaC0xek0zLDJoMXYxaC0xek00LDJoMXYxaC0xek0yLDNoMXYxaC0xek01LDNoMXYxaC0xek0xLDVoMXYxaC0xek02LDVoMXYxaC0xek0wLDZoMXYxaC0xek03LDZoMXYxaC0xek0zLDZoMXYxaC0xek00LDZoMXYxaC0xek0wLDdoMXYxaC0xek03LDdoMXYxaC0xek0xLDdoMXYxaC0xek02LDdoMXYxaC0xek0zLDdoMXYxaC0xek00LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCgyMTMgNzYlIDI1JSkiIGQ9Ik0xLDRoMXYxaC0xek02LDRoMXYxaC0xek0yLDRoMXYxaC0xek01LDRoMXYxaC0xek0wLDVoMXYxaC0xek03LDVoMXYxaC0xeiIvPjwvc3ZnPg==); width: 24px; height: 24px;"
+                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woOTkgNzMlIDQzJSkiIGQ9Ik0wLDBIOFY4SDB6Ii8+PHBhdGggZmlsbD0iaHNsKDIwOCA2NiUgNDklKSIgZD0iTTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTMsMWgxdjFoLTF6TTQsMWgxdjFoLTF6TTAsMmgxdjFoLTF6TTcsMmgxdjFoLTF6TTIsMmgxdjFoLTF6TTUsMmgxdjFoLTF6TTAsM2gxdjFoLTF6TTcsM2gxdjFoLTF6TTIsM2gxdjFoLTF6TTUsM2gxdjFoLTF6TTMsM2gxdjFoLTF6TTQsM2gxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTEsN2gxdjFoLTF6TTYsN2gxdjFoLTF6TTIsN2gxdjFoLTF6TTUsN2gxdjFoLTF6TTMsN2gxdjFoLTF6TTQsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDI3NSA3MyUgMzklKSIgZD0iTTAsMGgxdjFoLTF6TTcsMGgxdjFoLTF6TTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6Ii8+PC9zdmc+); width: 24px; height: 24px;"
                 />
               </div>
               <div
@@ -890,7 +866,7 @@ exports[`./index.stories Default 1`] = `
                       style="cursor: pointer;"
                     >
                       <span>
-                        0x58436e05cad3efce9352dcc696c2f38a2b5db1a0
+                        0xb9b9a37c49f5ee2ab61525bd06fbd0af82af7bb4
                       </span>
                     </span>
                   </div>

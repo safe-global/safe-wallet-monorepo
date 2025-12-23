@@ -37,7 +37,7 @@ exports[`./index.stories Filled 1`] = `
         >
           10
            
-          KMF
+          MUR
         </span>
          
         sold
@@ -84,7 +84,7 @@ exports[`./index.stories NotFilled 1`] = `
         >
           0
            
-          BZD
+          TTD
         </span>
          
         sold
@@ -131,7 +131,7 @@ exports[`./index.stories PartiallyFilled 1`] = `
         >
           1
            
-          LYD
+          XAF
         </span>
          
         sold
