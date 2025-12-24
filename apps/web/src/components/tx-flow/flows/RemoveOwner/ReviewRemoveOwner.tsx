@@ -16,13 +16,18 @@ export const ReviewRemoveOwner = ({
   params: RemoveOwnerFlowProps
   onSubmit: () => void
 }>): ReactElement => {
-  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, setIsReadOnly } = useContext(SafeTxContext)
   const { safe } = useSafeInfo()
   const { removedOwner, threshold } = params
 
   useEffect(() => {
     createRemoveOwnerTx({ ownerAddress: removedOwner.address, threshold }).then(setSafeTx).catch(setSafeTxError)
   }, [removedOwner.address, setSafeTx, setSafeTxError, threshold])
+
+  // Mark as readonly to prevent SafeTxProvider from recreating with createTx()
+  useEffect(() => {
+    setIsReadOnly(true)
+  }, [setIsReadOnly])
 
   const onFormSubmit = useCallback(() => {
     trackEvent({ ...SETTINGS_EVENTS.SETUP.THRESHOLD, label: safe.threshold })

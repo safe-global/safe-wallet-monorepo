@@ -6,6 +6,8 @@ import { createTx } from '@/services/tx/tx-sender'
 import { useRecommendedNonce, useSafeTxGas } from '@/components/tx/shared/hooks'
 import { Errors, logError } from '@/services/exceptions'
 import { useEnsureSafeSDK } from '@/hooks/coreSDK/useEnsureSafeSDK'
+import useSafeAddress from '@/hooks/useSafeAddress'
+import useChainId from '@/hooks/useChainId'
 
 export type SafeTxContextParams = {
   safeTx?: SafeTransaction
@@ -54,6 +56,8 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement | n
   // This prevents race conditions where child components try to create transactions
   // before the SDK is ready
   const [sdk, isSDKLoading] = useEnsureSafeSDK()
+  const safeAddress = useSafeAddress()
+  const chainId = useChainId()
 
   const [safeTx, setSafeTx] = useState<SafeTransaction>()
   const [safeMessage, setSafeMessage] = useState<TypedData>()
@@ -100,6 +104,19 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement | n
   useEffect(() => {
     safeTxError && logError(Errors._103, safeTxError)
   }, [safeTxError])
+
+  // Reset state when Safe address or chain changes to prevent stale data
+  useEffect(() => {
+    setSafeTx(undefined)
+    setSafeMessage(undefined)
+    setSafeTxError(undefined)
+    setNonce(undefined)
+    setNonceNeeded(true)
+    setSafeTxGas(undefined)
+    setTxOrigin(undefined)
+    setIsReadOnly(false)
+    setIsMassPayout(undefined)
+  }, [safeAddress, chainId])
 
   // Don't render children until SDK is initialized to prevent race conditions
   if (isSDKLoading || !sdk) {

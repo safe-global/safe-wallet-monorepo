@@ -13,7 +13,7 @@ export const ReviewRemoveGuard = ({
   onSubmit,
   children,
 }: PropsWithChildren<{ params: RemoveGuardFlowProps; onSubmit: () => void }>) => {
-  const { setSafeTx, safeTxError, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, safeTxError, setSafeTxError, setIsReadOnly } = useContext(SafeTxContext)
 
   useEffect(() => {
     createRemoveGuardTx().then(setSafeTx).catch(setSafeTxError)
@@ -24,6 +24,11 @@ export const ReviewRemoveGuard = ({
       logError(Errors._807, safeTxError.message)
     }
   }, [safeTxError])
+
+  // Mark as readonly to prevent SafeTxProvider from recreating with createTx()
+  useEffect(() => {
+    setIsReadOnly(true)
+  }, [setIsReadOnly])
 
   const onFormSubmit = useCallback(() => {
     trackEvent(SETTINGS_EVENTS.MODULES.REMOVE_GUARD)

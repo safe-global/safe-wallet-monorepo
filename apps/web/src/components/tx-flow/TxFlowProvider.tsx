@@ -189,7 +189,8 @@ const TxFlowProvider = <T extends unknown>({
   const preferThroughRole = canExecuteThroughRole && !isSafeOwner // execute through role if a non-owner role member wallet is connected
 
   // If checkbox is checked and the transaction is executable, execute it, otherwise sign it
-  const canExecute = isCorrectNonce && (isExecutable || isNewExecutableTx)
+  // For new transactions in 1/1 Safes (isNewExecutableTx), allow execution even before safeTx is created
+  const canExecute = isNewExecutableTx || (isCorrectNonce && isExecutable)
   const willExecute = (onlyExecute || shouldExecute) && canExecute && !preferThroughRole
   const willExecuteThroughRole =
     (onlyExecute || shouldExecute) && canExecuteThroughRole && (!canExecute || preferThroughRole)
