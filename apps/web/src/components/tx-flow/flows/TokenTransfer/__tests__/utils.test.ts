@@ -5,8 +5,10 @@ import { useTokenAmount, useVisibleTokens } from '@/components/tx-flow/flows/Tok
 import { renderHook } from '@/tests/test-utils'
 import * as spendingLimit from '@/hooks/useSpendingLimit'
 import * as spendingLimitBeneficiary from '@/hooks/useIsOnlySpendingLimitBeneficiary'
-import * as visibleBalances from '@/hooks/useVisibleBalances'
+import * as trustedTokenBalances from '@/hooks/loadables/useTrustedTokenBalances'
+import * as hiddenTokens from '@/hooks/useHiddenTokens'
 import * as wallet from '@/hooks/wallets/useWallet'
+import type { SettingsState } from '@/store/settingsSlice'
 
 describe('TokenTransfer utils', () => {
   describe('useTokenAmount', () => {
@@ -60,6 +62,11 @@ describe('TokenTransfer utils', () => {
   })
 
   describe('useVisibleTokens', () => {
+    beforeEach(() => {
+      jest.clearAllMocks()
+      jest.spyOn(hiddenTokens, 'default').mockReturnValue([])
+    })
+
     it('returns balance items if its not a spending limit beneficiary', () => {
       const mockToken = {
         balance: '100',
@@ -94,13 +101,11 @@ describe('TokenTransfer utils', () => {
       }
 
       jest.spyOn(spendingLimitBeneficiary, 'default').mockReturnValue(false)
-      jest.spyOn(visibleBalances, 'useVisibleBalances').mockReturnValue({
-        balances: balance,
-        loading: false,
-        loaded: true,
-      })
+      jest.spyOn(trustedTokenBalances, 'useTrustedTokenBalances').mockReturnValue([balance, undefined, false])
 
-      const { result } = renderHook(() => useVisibleTokens())
+      const { result } = renderHook(() => useVisibleTokens(), {
+        initialReduxState: { settings: { hideDust: false } as SettingsState },
+      })
 
       expect(result.current).toStrictEqual(balance.items)
     })
@@ -149,16 +154,15 @@ describe('TokenTransfer utils', () => {
       }
 
       jest.spyOn(spendingLimitBeneficiary, 'default').mockReturnValue(true)
-      jest.spyOn(visibleBalances, 'useVisibleBalances').mockReturnValue({
-        balances: balance,
-        loading: false,
-        loaded: true,
-      })
+      jest.spyOn(trustedTokenBalances, 'useTrustedTokenBalances').mockReturnValue([balance, undefined, false])
 
       jest.spyOn(wallet, 'default').mockReturnValue(connectedWalletBuilder().with({ address: '0x3' }).build())
 
       const { result } = renderHook(() => useVisibleTokens(), {
-        initialReduxState: { spendingLimits: { data: [mockSpendingLimitToken], loading: false, loaded: true } },
+        initialReduxState: {
+          spendingLimits: { data: [mockSpendingLimitToken], loading: false, loaded: true },
+          settings: { hideDust: false } as SettingsState,
+        },
       })
 
       expect(result.current).toStrictEqual([mockToken])

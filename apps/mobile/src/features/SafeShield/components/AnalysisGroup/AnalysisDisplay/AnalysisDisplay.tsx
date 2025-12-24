@@ -1,5 +1,9 @@
 import React from 'react'
-import type { Severity, AnalysisResult } from '@safe-global/utils/features/safe-shield/types'
+import type {
+  Severity,
+  AnalysisResult,
+  MaliciousOrModerateThreatAnalysisResult,
+} from '@safe-global/utils/features/safe-shield/types'
 import { isAddressChange } from '@safe-global/utils/features/safe-shield/utils'
 import { Text, View, Stack, useTheme as useTamaguiTheme } from 'tamagui'
 import { safeShieldStatusColors } from '../../../theme'
@@ -31,6 +35,21 @@ export function AnalysisDisplay({ result, description, severity }: AnalysisDispl
 
   const borderColor = getBorderColor()
 
+  const renderDescription = () => {
+    if (typeof displayDescription === 'string' || typeof displayDescription === 'number') {
+      return (
+        <Text fontSize="$4" color="$colorLight">
+          {displayDescription}
+        </Text>
+      )
+    }
+
+    return displayDescription
+  }
+
+  // Double-check in case if issues are undefined:
+  const hasIssues = 'issues' in result && !!(result as MaliciousOrModerateThreatAnalysisResult).issues
+
   return (
     <View backgroundColor="$backgroundPaper" borderRadius="$1" overflow="hidden">
       <View
@@ -41,15 +60,16 @@ export function AnalysisDisplay({ result, description, severity }: AnalysisDispl
         }}
       >
         <Stack gap="$3">
-          <Text fontSize="$4" color="$colorSecondary">
-            {displayDescription}
-          </Text>
-
-          <AnalysisIssuesDisplay result={result} />
+          {renderDescription()}
 
           {isAddressChange(result) && <AddressChanges result={result} />}
 
-          {result.addresses?.length && <ShowAllAddress addresses={result.addresses.map((a) => a.address)} />}
+          <AnalysisIssuesDisplay result={result} />
+
+          {/* Only show ShowAllAddress dropdown if there are no issues (to avoid duplication) */}
+          {!hasIssues && result.addresses?.length ? (
+            <ShowAllAddress addresses={result.addresses.map((a) => a.address)} />
+          ) : null}
         </Stack>
       </View>
     </View>

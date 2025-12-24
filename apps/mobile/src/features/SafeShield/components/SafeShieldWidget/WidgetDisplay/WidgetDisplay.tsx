@@ -13,7 +13,6 @@ import { TransactionSimulation } from '../../TransactionSimulation'
 import { useTransactionSimulation } from '../../TransactionSimulation/hooks/useTransactionSimulation'
 import { useSafeShieldSeverity } from '../../../hooks/useSafeShieldSeverity'
 import { WidgetDisplayWrapper } from './WidgetDisplayWrapper'
-import { ErrorWidget } from './ErrorWidget'
 import { LoadingWidget } from './LoadingWidget'
 import { getSeverity, normalizeThreatData } from '@safe-global/utils/features/safe-shield/utils'
 
@@ -27,11 +26,10 @@ interface WidgetDisplayProps {
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
   loading?: boolean
-  error?: boolean
   safeTx?: SafeTransaction
 }
 
-export function WidgetDisplay({ recipient, contract, threat, loading, error, safeTx }: WidgetDisplayProps) {
+export function WidgetDisplay({ recipient, contract, threat, loading, safeTx }: WidgetDisplayProps) {
   // Extract data from AsyncResults
   const [recipientData = {}] = recipient || []
   const [contractData = {}] = contract || []
@@ -75,13 +73,21 @@ export function WidgetDisplay({ recipient, contract, threat, loading, error, saf
   const recipientEmpty = isEmpty(recipientData)
   const contractEmpty = isEmpty(contractData)
   const threatEmpty = isEmpty(normalizedThreatData)
+  const allEmpty = recipientEmpty && contractEmpty && threatEmpty
 
-  if (loading) {
+  // Show loading when safeTx is undefined and no analysis has started yet.
+  // This handles the race condition when opening from push notifications where
+  // the Safe SDK may not be initialized yet.
+  const isWaitingForSafeTx = safeTx === undefined && allEmpty
+
+  if (loading || isWaitingForSafeTx) {
     return <LoadingWidget />
   }
 
-  if (error) {
-    return <ErrorWidget />
+  // When all analyses are empty (no data returned), show nothing in the widget body
+  // The header (WidgetAction) will handle showing "Checks unavailable" state
+  if (allEmpty && !tenderlyEnabled) {
+    return null
   }
 
   return (
@@ -110,7 +116,7 @@ export function WidgetDisplay({ recipient, contract, threat, loading, error, saf
         />
       )}
 
-      {highlightedSeverity && tenderlyEnabled && (
+      {tenderlyEnabled && safeTx && (
         <TransactionSimulation
           severity={simulationSeverity}
           highlighted={highlightedSeverity === simulationSeverity}

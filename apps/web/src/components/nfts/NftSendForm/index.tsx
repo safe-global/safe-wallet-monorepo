@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { Box, Button, Grid, SvgIcon, Typography } from '@mui/material'
-import ArrowIcon from '@/public/images/common/arrow-nw.svg'
+import ArrowIcon from '@/public/images/common/arrow-up-right.svg'
 import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import { Sticky } from '@/components/common/Sticky'
 import CheckWallet from '@/components/common/CheckWallet'

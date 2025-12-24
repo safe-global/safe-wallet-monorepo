@@ -1,13 +1,12 @@
 import { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { Severity, type GroupedAnalysisResults, type ThreatAnalysisResults } from '../types'
+import { Severity, type GroupedAnalysisResults, type ThreatAnalysisResults, type ThreatIssue } from '../types'
 import isEmpty from 'lodash/isEmpty'
-import { SimulationStatus } from '@safe-global/utils/components/tx/security/tenderly/utils'
 
 /**
  * Severity priority mapping for sorting analysis results
- * Lower numbers indicate higher priority: CRITICAL > WARN > INFO > OK
+ * Lower numbers indicate higher priority: CRITICAL > ERROR > WARN > INFO > OK
  */
-export const SEVERITY_PRIORITY: Record<Severity, number> = { CRITICAL: 0, WARN: 1, INFO: 2, OK: 3 }
+export const SEVERITY_PRIORITY: Record<Severity, number> = { CRITICAL: 0, ERROR: 1, WARN: 1, INFO: 2, OK: 3 }
 
 /**
  * Sort analysis results by severity (highest severity first)
@@ -54,8 +53,8 @@ export function getPrimaryResult<T extends { severity: Severity }>(results: T[])
 }
 
 export function sortByIssueSeverity(
-  issuesMap: { [severity in Severity]?: string[] } | undefined,
-): Array<{ severity: Severity; issues: string[] }> {
+  issuesMap: { [severity in Severity]?: ThreatIssue[] } | undefined,
+): Array<{ severity: Severity; issues: ThreatIssue[] }> {
   if (!issuesMap || isEmpty(issuesMap)) return []
 
   const issuesWithSeverity = Object.entries(issuesMap).map(([severity, issues]) => ({

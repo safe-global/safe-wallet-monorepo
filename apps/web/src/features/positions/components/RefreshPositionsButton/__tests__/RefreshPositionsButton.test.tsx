@@ -29,6 +29,8 @@ describe('RefreshPositionsButton', () => {
       refetch: mockRefetch,
       refetchPositions: mockRefetch,
       shouldUsePortfolioEndpoint: false,
+      fulfilledTimeStamp: undefined,
+      isFetching: false,
     })
   })
 
@@ -57,6 +59,8 @@ describe('RefreshPositionsButton', () => {
         refetch: mockRefetch,
         refetchPositions: mockRefetch,
         shouldUsePortfolioEndpoint: true,
+        fulfilledTimeStamp: undefined,
+        isFetching: false,
       })
 
       render(<RefreshPositionsButton />)

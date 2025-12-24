@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: ./.github/actions/yarn
 
@@ -34,13 +34,12 @@ jobs:
         run: yarn test:storybook:ci
         working-directory: apps/web
         timeout-minutes: 15
-        continue-on-error: true
         env:
           NEXT_PUBLIC_IS_OFFICIAL_HOST: true
 
       - name: Upload snapshot diffs on failure
         if: steps.storybook-tests.outcome == 'failure'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: storybook-snapshot-diffs
           path: apps/web/src/**/__snapshots__/*.stories.test.tsx.snap

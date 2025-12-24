@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./WalletIcon.stories DataUri 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <img
+    alt="WalletConnect logo"
+    height="30"
+    src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIvPjwvc3ZnPg=="
+    width="30"
+  />
+</div>
+`;
+
+exports[`./WalletIcon.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <img
+    alt="MetaMask logo"
+    height="30"
+    src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20318.6%20318.6%22%3E%3Cpath%20fill%3D%22%23E2761B%22%20d%3D%22M274.1%2035.5l-99.5%2073.9L193%2065.8z%22%2F%3E%3Cpath%20fill%3D%22%23E4761B%22%20d%3D%22M44.4%2035.5l98.7%2074.6-17.5-44.3zm193.9%20171.3l-26.5%2040.6%2056.7%2015.6%2016.3-55.3zm-204.4.9l16.2%2055.3%2056.7-15.6-26.5-40.6z%22%2F%3E%3C%2Fsvg%3E"
+    width="30"
+  />
+</div>
+`;
+
+exports[`./WalletIcon.stories LargeSize 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <img
+    alt="MetaMask logo"
+    height="50"
+    src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20318.6%20318.6%22%3E%3Cpath%20fill%3D%22%23E2761B%22%20d%3D%22M274.1%2035.5l-99.5%2073.9L193%2065.8z%22%2F%3E%3Cpath%20fill%3D%22%23E4761B%22%20d%3D%22M44.4%2035.5l98.7%2074.6-17.5-44.3zm193.9%20171.3l-26.5%2040.6%2056.7%2015.6%2016.3-55.3zm-204.4.9l16.2%2055.3%2056.7-15.6-26.5-40.6z%22%2F%3E%3C%2Fsvg%3E"
+    width="50"
+  />
+</div>
+`;
+
+exports[`./WalletIcon.stories NoIcon 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <span
+    class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse css-143xw5x-MuiSkeleton-root"
+    style="width: 30px; height: 30px;"
+  />
+</div>
+`;
+
+exports[`./WalletIcon.stories SmallSize 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <img
+    alt="MetaMask logo"
+    height="20"
+    src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20318.6%20318.6%22%3E%3Cpath%20fill%3D%22%23E2761B%22%20d%3D%22M274.1%2035.5l-99.5%2073.9L193%2065.8z%22%2F%3E%3Cpath%20fill%3D%22%23E4761B%22%20d%3D%22M44.4%2035.5l98.7%2074.6-17.5-44.3zm193.9%20171.3l-26.5%2040.6%2056.7%2015.6%2016.3-55.3zm-204.4.9l16.2%2055.3%2056.7-15.6-26.5-40.6z%22%2F%3E%3C%2Fsvg%3E"
+    width="20"
+  />
+</div>
+`;

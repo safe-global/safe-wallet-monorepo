@@ -32,6 +32,56 @@ yarn workspace @safe-global/web storybook
 
 The monorepo uses **Yarn 4 workspaces** to manage dependencies and enables sharing code between web and mobile applications.
 
+## Unified Theme System
+
+The project uses `@safe-global/theme` package as a single source of truth for all design tokens (colors, spacing, typography, radius) across web and mobile.
+
+### Key Features
+
+- **Unified Palettes**: Light and dark mode color palettes shared between platforms
+- **Dual Spacing Systems**: 4px base for mobile, 8px base for web (with overlapping values using same names)
+- **Platform Generators**: Automatic generation of MUI themes (web) and Tamagui tokens (mobile)
+- **Static Colors**: Theme-independent brand colors available to both platforms
+
+### Usage
+
+**Web (MUI)**:
+
+```typescript
+import { generateMuiTheme } from '@safe-global/theme'
+
+const theme = generateMuiTheme('light') // or 'dark'
+```
+
+**Mobile (Tamagui)**:
+
+```typescript
+import { generateTamaguiTokens, generateTamaguiThemes } from '@safe-global/theme'
+
+const tokens = generateTamaguiTokens()
+const themes = generateTamaguiThemes()
+```
+
+**Direct Token Access**:
+
+```typescript
+import { lightPalette, darkPalette, spacingMobile, spacingWeb, typography } from '@safe-global/theme'
+```
+
+### Modifying Theme
+
+To add or modify colors/tokens:
+
+1. Edit files in `packages/theme/src/palettes/` or `packages/theme/src/tokens/`
+2. Run type-check to ensure consistency: `yarn workspace @safe-global/theme type-check`
+3. Regenerate CSS vars for web: `yarn workspace @safe-global/web css-vars`
+
+### Important Notes
+
+- Never edit `apps/web/src/styles/vars.css` directly - it's auto-generated
+- Always use theme tokens instead of hard-coded colors
+- Both light and dark modes must be updated together for consistency
+
 ## General Principles
 
 - Follow the DRY principle – avoid code duplication by extracting reusable functions, hooks, and components
@@ -52,12 +102,10 @@ Specifically for the web app:
 ## Workflow
 
 1. **Install dependencies**: `yarn install` (from the repository root).
-
    - Uses Yarn 4 (managed via `corepack`)
    - Automatically runs `yarn after-install` for the web workspace, which generates TypeScript types from contract ABIs
 
 2. **Pre-commit hooks**: The repository uses Husky for git hooks:
-
    - **pre-commit**: Automatically runs `lint-staged` (prettier) and type-check on staged TypeScript files
    - **pre-push**: Runs linting before pushing
    - These hooks ensure code quality before commits reach the repository
@@ -87,11 +135,9 @@ Specifically for the web app:
    ```
 
 5. **Commit messages**: use [semantic commit messages](https://www.conventionalcommits.org/en/v1.0.0/) as described in `CONTRIBUTING.md`.
-
    - Examples: `feat: add transaction history`, `fix: resolve wallet connection bug`, `refactor: simplify address validation`
 
 6. **Code style**: follow the guidelines in:
-
    - `apps/web/docs/code-style.md` for the web app.
    - `apps/mobile/docs/code-style.md` for the mobile app.
 

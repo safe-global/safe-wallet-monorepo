@@ -21,27 +21,72 @@ const files = changedFiles.split('\n').filter(Boolean)
 console.log('Processing files:', files)
 
 /**
- * Convert file path to Storybook story ID
- * Example: src/components/common/CopyButton/index.stories.tsx
- * -> components-common-copybutton--default
+ * Extract the title from the story file's meta export
+ * Parses: title: 'Components/Common/Button' or title: "Components/Common/Button"
  */
-function filePathToStoryId(filePath) {
+function extractTitleFromFile(filePath) {
+  try {
+    const fullPath = path.join(process.cwd(), filePath)
+    if (!fs.existsSync(fullPath)) {
+      return null
+    }
+
+    const content = fs.readFileSync(fullPath, 'utf-8')
+
+    // Match title with proper quote handling (separate patterns for single/double quotes)
+    const titleMatch = content.match(/title:\s*(?:"([^"]+)"|'([^']+)')/)
+    if (titleMatch) {
+      return titleMatch[1] || titleMatch[2]
+    }
+
+    return null
+  } catch (error) {
+    console.error(`Error extracting title from ${filePath}:`, error.message)
+    return null
+  }
+}
+
+/**
+ * Convert title to Storybook story ID
+ * Example: 'Features/Portfolio/PortfolioRefreshHint' -> 'features-portfolio-portfoliorefreshhint'
+ */
+function titleToStoryId(title) {
+  return title.replace(/\//g, '-').replace(/\s+/g, '-').toLowerCase()
+}
+
+/**
+ * Convert file path to a readable title format
+ * Example: src/components/common/ChainIndicator/ChainIndicator.stories.tsx
+ * -> "components/common/ChainIndicator"
+ */
+function filePathToTitle(filePath) {
   // Remove apps/web/ prefix if present
   let normalized = filePath.replace(/^apps\/web\//, '')
 
   // Remove src/ prefix
   normalized = normalized.replace(/^src\//, '')
 
-  // Remove file extension and .stories suffix
-  normalized = normalized.replace(/\.(stories|story)\.(tsx?|jsx?)$/, '')
+  // Get directory path only (remove filename)
+  const parts = normalized.split('/')
+  parts.pop() // Remove the filename
 
-  // Remove index if present
-  normalized = normalized.replace(/\/index$/, '')
+  return parts.join('/')
+}
+
+/**
+ * Convert file path to Storybook story ID (fallback when title can't be extracted)
+ * Example: src/components/common/CopyButton/index.stories.tsx
+ * -> components-common-copybutton
+ *
+ * Note: Storybook derives story IDs from the directory path, not the filename.
+ * When no explicit title is set, Storybook uses the directory structure.
+ */
+function filePathToStoryId(filePath) {
+  // Use the title format and convert to story ID
+  const title = filePathToTitle(filePath)
 
   // Convert path separators to hyphens and lowercase
-  normalized = normalized.replace(/\//g, '-').toLowerCase()
-
-  return normalized
+  return title.replace(/\//g, '-').toLowerCase()
 }
 
 /**
@@ -90,10 +135,13 @@ for (const file of files) {
     continue
   }
 
-  const storyId = filePathToStoryId(file)
+  // Try to extract title from meta export, fall back to file path
+  const title = extractTitleFromFile(file)
+  const storyId = title ? titleToStoryId(title) : filePathToStoryId(file)
   const storyNames = extractStoryNames(file)
 
   console.log(`File: ${file}`)
+  console.log(`Title: ${title || '(not found, using file path)'}`)
   console.log(`Story ID: ${storyId}`)
   console.log(`Stories: ${storyNames.join(', ')}`)
 
@@ -105,10 +153,7 @@ for (const file of files) {
     storyUrls.push({
       url,
       file,
-      componentName: storyId
-        .split('-')
-        .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-        .join(''),
+      componentName: title || filePathToTitle(file),
       storyName,
     })
   }

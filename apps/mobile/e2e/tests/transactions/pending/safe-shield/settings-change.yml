@@ -1,0 +1,67 @@
+appId: ${APP_ID}
+tags:
+  - transactions
+  - pending
+  - safe-shield
+---
+# ===========================================
+# SafeShield: Settings Change (addOwnerWithThreshold)
+# ===========================================
+# Safe: 0x65e1Ff7e0901055B3bea7D8b3AF457a659714013 (Polygon)
+# Expected widget: Issues found
+# - Known contract (OK)
+# - Threat analysis failed (WARN)
+# - Balance change: No balance change detected
+
+- runFlow:
+    file: ../../../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eSafeShieldSafe'
+
+- assertVisible:
+    id: 'pending-tx-list'
+
+- runFlow:
+    file: ../../../../utils/components/pending-tx/tap-tx-card.yml
+    env:
+      WAIT_FOR: '.*addOwnerWithThreshold.*'
+      TAP_TEXT: 'Settings change'
+
+- assertVisible: 'Confirm transaction'
+
+# ===========================================
+# SafeShield Widget
+# ===========================================
+- runFlow:
+    file: ../../../../utils/assertions/verify-safe-shield-widget.yml
+    env:
+      WIDGET_HEADER: 'Issues found'
+      LABEL_1: 'Known contract'
+      LABEL_2: 'Threat analysis failed'
+      RUN_SIMULATION: 'true'
+      SIMULATION_RESULT: 'fail'
+
+# ===========================================
+# Balance Change Block
+# ===========================================
+- runFlow:
+    file: ../../../../utils/assertions/verify-balance-change.yml
+    env:
+      NO_CHANGE: 'true'
+
+# ===========================================
+# SafeShield Details Sheet
+# ===========================================
+- runFlow:
+    file: ../../../../utils/assertions/verify-safe-shield-sheet.yml
+    env:
+      TAP_TO_OPEN: 'Issues found'
+      HEADER: 'ISSUES FOUND'
+      LABEL_1: 'Known contract'
+      DESCRIPTION_1: '.*already interacted with this contract.*'
+      LABEL_2: 'Threat analysis failed'
+      DESCRIPTION_2: '.*Threat analysis failed.*Review before processing.*'
+
+# Verify back on Confirm transaction screen
+- assertVisible: 'Confirm transaction'

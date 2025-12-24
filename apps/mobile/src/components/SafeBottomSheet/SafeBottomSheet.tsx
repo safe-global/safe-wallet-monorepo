@@ -12,6 +12,7 @@ import { Platform, StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LoadingTx } from '@/src/features/ConfirmTx/components/LoadingTx'
+import { TestCtrls } from '@/src/tests/e2e-maestro/components/TestCtrls'
 
 interface SafeBottomSheetProps<T> {
   children?: React.ReactNode
@@ -128,12 +129,22 @@ export function SafeBottomSheet<T>({
       enablePanDownToClose
       overDragResistanceFactor={10}
       backgroundComponent={BackgroundComponent}
-      backdropComponent={() => <BackdropComponent />}
+      // on iOS, if we don't call router.back() from the backdrop the close animation feels extremely slow
+      // iOS first slides the sheet down then triggers the removal of the backdrop
+      // when router.back() is called from the backdrop, the sheet no longer emits onChange events on iOS
+      // on Android the router.back() on the backdrop navigates back, but the onChange event is still triggered
+      // because of this on Android we end up with double navigation back and end up on the wrong screen
+      backdropComponent={() => <BackdropComponent shouldNavigateBack={Platform.OS === 'ios'} />}
       footerComponent={isSortable ? undefined : renderFooter}
       topInset={insets.top}
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
       accessible={false}
     >
+      {/** in e2e tests, the bottom sheet renders on top of the normal content,
+       * and the test controls are no longer visible, so we need to render them again here
+       * We need this mostly for the copy/paste tests.
+       **/}
+      <TestCtrls />
       {isSortable ? (
         <DraggableFlatList<T>
           data={items}

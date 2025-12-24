@@ -11,7 +11,6 @@ import { WidgetDisplay } from './WidgetDisplay'
 import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
 import { useRouter } from 'expo-router'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { isEmpty } from 'lodash'
 
 interface SafeShieldWidgetProps {
   recipient?: AsyncResult<RecipientAnalysisResults>
@@ -45,37 +44,21 @@ export function SafeShieldWidget({ recipient, contract, threat, safeTx, txId }: 
   const [contractData, contractError, contractLoading = false] = contract || []
   const [threatData, threatError, threatLoading = false] = threat || []
 
-  // Determine overall error state - true if ALL have errors (and at least one exists)
-  const hasRecipient = recipient !== undefined
-  const hasContract = contract !== undefined
-  const hasThreat = threat !== undefined
-
-  const allEmpty = isEmpty(recipientData) && isEmpty(contractData) && isEmpty(threatData)
-
-  const allHaveErrors =
-    (hasRecipient ? !!recipientError : true) &&
-    (hasContract ? !!contractError : true) &&
-    (hasThreat ? !!threatError : true)
+  // Determine if any analysis has an error (for header display)
+  const hasAnyError = !!recipientError || !!contractError || !!threatError || !safeTx
 
   // Determine overall loading state - true if ANY is loading
-  const loading = recipientLoading || contractLoading || threatLoading || (allEmpty && !allHaveErrors)
+  const loading = recipientLoading || contractLoading || threatLoading
 
-  // Get actual status from analysis
+  // Get actual status from analysis (includes error states as they're embedded in the data)
   const overallStatus = getOverallStatus(recipientData, contractData, threatData) ?? null
 
   return (
     <Theme name="widget">
       <Stack gap="$3" padding="$1" borderRadius="$2" paddingBottom="$4" backgroundColor="$background">
-        <WidgetAction onPress={onPress} loading={loading} error={allHaveErrors} status={overallStatus} />
+        <WidgetAction onPress={onPress} loading={loading} error={hasAnyError} status={overallStatus} />
 
-        <WidgetDisplay
-          recipient={recipient}
-          contract={contract}
-          threat={threat}
-          loading={loading}
-          error={allHaveErrors || (allEmpty && !loading)}
-          safeTx={safeTx}
-        />
+        <WidgetDisplay recipient={recipient} contract={contract} threat={threat} loading={loading} safeTx={safeTx} />
       </Stack>
     </Theme>
   )

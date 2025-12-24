@@ -4,7 +4,12 @@ import { AnalysisGroup } from '../AnalysisGroup'
 import { ContractAnalysisResults, Severity } from '@safe-global/utils/features/safe-shield/types'
 import { RecipientAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
-import { getOverallStatus, getSeverity, normalizeThreatData } from '@safe-global/utils/features/safe-shield/utils'
+import {
+  getOverallStatus,
+  getSeverity,
+  mapVisibleAnalysisResults,
+  normalizeThreatData,
+} from '@safe-global/utils/features/safe-shield/utils'
 import { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { TransactionSimulation } from '../TransactionSimulation'
 import { useTransactionSimulation } from '../TransactionSimulation/hooks/useTransactionSimulation'
@@ -67,8 +72,16 @@ export const AnalysisDetailsContent = ({ recipient, contract, threat, safeTx }: 
     simulationSeverityStatus === Severity.WARN,
   )
 
+  // Define empty states
   const isEmptyRecipient = isEmpty(recipientData)
-  const isEmptyContract = isEmpty(contractData)
+  const isEmptyContract = useMemo(() => {
+    if (!contractData) {
+      return true
+    }
+
+    return isEmpty(contractData) || mapVisibleAnalysisResults(contractData).length === 0
+  }, [contractData])
+
   const isEmptyThreat = isEmpty(normalizedThreatData)
 
   return (
@@ -100,7 +113,7 @@ export const AnalysisDetailsContent = ({ recipient, contract, threat, safeTx }: 
           <AnalysisGroupWrapper>
             <TransactionSimulation
               severity={simulationSeverityStatus}
-              highlighted={simulationSeverityStatus === overallStatus?.severity}
+              highlighted={simulationSeverityStatus === overallStatus?.severity && !!safeTx}
               simulationStatus={simulationStatus}
               simulationLink={simulationLink}
               requestError={requestError}

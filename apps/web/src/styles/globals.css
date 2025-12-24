@@ -89,7 +89,7 @@ input[type='number'] {
 }
 
 .illustration-background-light-grey-fill {
-  fill: var(--color-background-lightGrey);
+  fill: var(--color-background-secondary);
 }
 
 .illustration-text-secondary-fill {
@@ -107,6 +107,10 @@ input[type='number'] {
 
 .illustration-very-light-stroke {
   stroke: var(--color-border-light);
+}
+
+.illustration-border-light-fill {
+  fill: var(--color-border-light);
 }
 
 .illustration-background-stroke {

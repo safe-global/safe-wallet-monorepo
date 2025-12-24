@@ -16,9 +16,9 @@ const TxCard = ({ children, sx = {} }: { children: ReactNode; sx?: SxProps }) =>
 
 export default TxCard
 
-export const TxCardActions = ({ children }: { children: ReactNode }) => {
+export const TxCardActions = ({ children, sx }: { children: ReactNode; sx?: SxProps }) => {
   return (
-    <CardActions>
+    <CardActions sx={sx}>
       <Stack
         sx={{
           width: ['100%', '100%', '100%', 'auto'],
