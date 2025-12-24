@@ -32,7 +32,6 @@ import useBeamer from '@/hooks/Beamer/useBeamer'
 import ErrorBoundary from '@/components/common/ErrorBoundary'
 import createEmotionCache from '@/utils/createEmotionCache'
 import MetaTags from '@/components/common/MetaTags'
-import useAdjustUrl from '@/hooks/useAdjustUrl'
 import useSafeMessageNotifications from '@/hooks/messages/useSafeMessageNotifications'
 import useSafeMessagePendingStatuses from '@/hooks/messages/useSafeMessagePendingStatuses'
 import useChangedValue from '@/hooks/useChangedValue'
@@ -57,7 +56,6 @@ setStoreInstance(reduxStore)
 
 const InitApp = (): null => {
   useHydrateStore(reduxStore)
-  useAdjustUrl()
   useDatadog()
   useGtm()
   useMixpanel()
