@@ -31,21 +31,29 @@ export const useEnsureSafeSDK = (): [Safe | undefined, boolean, Error | undefine
 
   const [sdk, isLoading, error] = useSafeSDK()
 
-  // Track previous safe address and chain to detect when they change
+  // Track previous safe configuration to detect when SDK-relevant properties change
   const prevSafeKeyRef = useRef<string | undefined>(undefined)
 
-  // Effect 1: Reset SDK when safe/chain changes
+  // Effect 1: Reset SDK when safe/chain/version/implementation changes
   useEffect(() => {
-    const currentSafeKey = `${safe.chainId}:${safe.address.value}`
+    // Include all properties that should trigger SDK reset
+    const currentSafeKey = [
+      safe.chainId,
+      safe.address.value,
+      safe.version,
+      safe.implementation.value,
+      safe.implementationVersionState,
+    ].join(':')
+
     const prevSafeKey = prevSafeKeyRef.current
 
-    // Reset SDK if safe address or chain changed
+    // Reset SDK if any SDK-relevant property changed
     if (prevSafeKey && prevSafeKey !== currentSafeKey) {
       resetSafeSDK()
     }
 
     prevSafeKeyRef.current = currentSafeKey
-  }, [safe.address.value, safe.chainId])
+  }, [safe.address.value, safe.chainId, safe.version, safe.implementation.value, safe.implementationVersionState])
 
   // Effect 2: Initialize SDK when needed
   useEffect(() => {
@@ -94,21 +102,6 @@ export const useEnsureSafeSDK = (): [Safe | undefined, boolean, Error | undefine
     undeployedSafe,
     web3ReadOnly,
   ])
-
-  // Show error notification only once when error occurs
-  useEffect(() => {
-    if (error) {
-      dispatch(
-        showNotification({
-          message: 'Error initializing Safe SDK. Please try reloading the page.',
-          groupKey: 'core-sdk-init-error',
-          variant: 'error',
-          detailedMessage: error.message,
-        }),
-      )
-      trackError(ErrorCodes._105, error.message)
-    }
-  }, [error, dispatch])
 
   return [sdk, isLoading, error]
 }

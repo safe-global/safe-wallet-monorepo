@@ -176,6 +176,28 @@ describe('CheckWalletWithPermission', () => {
     expect(getByLabelText('SDK is not initialized yet'))
   })
 
+  it('should disable the button while SDK is loading', () => {
+    mockUseEnsureSafeSDK.mockReturnValue([undefined, true, undefined]) // isLoading = true
+
+    const mockSafeInfo = {
+      safeLoaded: true,
+      safe: extendedSafeInfoBuilder(),
+    }
+
+    ;(useSafeInfo as jest.MockedFunction<typeof useSafeInfo>).mockReturnValueOnce(
+      mockSafeInfo as unknown as ReturnType<typeof useSafeInfo>,
+    )
+
+    const { getByText, getByLabelText } = render(
+      <CheckWalletWithPermission permission={Permission.SignTransaction}>
+        {(isOk) => <button disabled={!isOk}>Continue</button>}
+      </CheckWalletWithPermission>,
+    )
+
+    expect(getByText('Continue')).toBeDisabled()
+    expect(getByLabelText('SDK is not initialized yet'))
+  })
+
   it('should not disable the button if SDK is not initialized and safe is not loaded', () => {
     mockUseEnsureSafeSDK.mockReturnValue([undefined, false, undefined])
 

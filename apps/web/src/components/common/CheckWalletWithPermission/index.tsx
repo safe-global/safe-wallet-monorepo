@@ -37,7 +37,7 @@ const CheckWalletWithPermission = <P extends Permission>({
   const wallet = useWallet()
   const connectWallet = useConnectWallet()
   const isWrongChain = useIsWrongChain()
-  const [sdk] = useEnsureSafeSDK()
+  const [sdk, isSDKLoading] = useEnsureSafeSDK()
   const hasPermission = useHasPermission(
     permission,
     ...((permissionProps ? [permissionProps] : []) as PermissionProps<P> extends undefined
@@ -54,7 +54,7 @@ const CheckWalletWithPermission = <P extends Permission>({
       return Message.WalletNotConnected
     }
 
-    if (!sdk && safeLoaded) {
+    if ((!sdk || isSDKLoading) && safeLoaded) {
       return Message.SDKNotInitialized
     }
 
@@ -65,7 +65,7 @@ const CheckWalletWithPermission = <P extends Permission>({
     if (!hasPermission) {
       return Message.NotSafeOwner
     }
-  }, [allowUndeployedSafe, hasPermission, isUndeployedSafe, sdk, wallet, safeLoaded])
+  }, [allowUndeployedSafe, hasPermission, isUndeployedSafe, sdk, isSDKLoading, wallet, safeLoaded])
 
   if (checkNetwork && isWrongChain) return children(false)
   if (!message) return children(true)
