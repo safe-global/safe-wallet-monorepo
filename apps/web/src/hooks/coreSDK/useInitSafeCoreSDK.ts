@@ -2,18 +2,18 @@ import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployed
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { initSafeSDK, setSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import { trackError } from '@/services/exceptions'
-import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
-import { useAppDispatch, useAppSelector } from '@/store'
-import { showNotification } from '@/store/notificationsSlice'
+import { resetSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
+import { useAppSelector } from '@/store'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
-import { asError } from '@safe-global/utils/services/exceptions/utils'
 
+/**
+ * Hook that resets the Safe SDK when dependencies change
+ * The SDK will be lazily initialized when first needed
+ * This hook should only be called in InitApp or similar top-level component
+ */
 export const useInitSafeCoreSDK = () => {
   const { safe, safeLoaded } = useSafeInfo()
-  const dispatch = useAppDispatch()
   const web3ReadOnly = useWeb3ReadOnly()
 
   const { query } = useRouter()
@@ -22,38 +22,17 @@ export const useInitSafeCoreSDK = () => {
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, safe.chainId, address))
 
   useEffect(() => {
+    // Reset SDK when dependencies change or are invalid
+    // The SDK will be lazily initialized when first accessed
     if (!safeLoaded || !web3ReadOnly || !sameAddress(address, safe.address.value)) {
-      // If we don't reset the SDK, a previous Safe could remain in the store
-      setSafeSDK(undefined)
-      return
+      resetSafeSDK()
+    } else {
+      // Dependencies are valid but SDK might be stale from previous safe/chain
+      // Reset it so it re-initializes with new parameters on next use
+      resetSafeSDK()
     }
-
-    // A read-only instance of the SDK is sufficient because we connect the signer to it when needed
-    initSafeSDK({
-      provider: web3ReadOnly,
-      chainId: safe.chainId,
-      address: safe.address.value,
-      version: safe.version,
-      implementationVersionState: safe.implementationVersionState,
-      implementation: safe.implementation.value,
-      undeployedSafe,
-    })
-      .then(setSafeSDK)
-      .catch((_e) => {
-        const e = asError(_e)
-        dispatch(
-          showNotification({
-            message: 'Error connecting to the blockchain. Please try reloading the page.',
-            groupKey: 'core-sdk-init-error',
-            variant: 'error',
-            detailedMessage: e.message,
-          }),
-        )
-        trackError(ErrorCodes._105, e.message)
-      })
   }, [
     address,
-    dispatch,
     safe.address.value,
     safe.chainId,
     safe.implementation.value,

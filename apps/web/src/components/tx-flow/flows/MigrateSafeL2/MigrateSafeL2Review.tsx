@@ -11,7 +11,7 @@ import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 export const MigrateSafeL2Review = ({ children, ...props }: ReviewTransactionProps) => {
   const chain = useCurrentChain()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
-  const safeSDK = useSafeSDK()
+  const [safeSDK] = useSafeSDK()
 
   useEffect(() => {
     if (!chain || !safeSDK) return

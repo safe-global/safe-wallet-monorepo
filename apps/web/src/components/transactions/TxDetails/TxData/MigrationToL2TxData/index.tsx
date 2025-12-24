@@ -23,7 +23,7 @@ export const MigrationToL2TxData = ({
   const readOnlyProvider = useWeb3ReadOnly()
   const chain = useCurrentChain()
   const { safe } = useSafeInfo()
-  const sdk = useSafeSDK()
+  const [sdk] = useSafeSDK()
   // Reconstruct real tx
   const [realSafeTx, realSafeTxError, realSafeTxLoading] = useAsync(async () => {
     // Fetch tx receipt from backend

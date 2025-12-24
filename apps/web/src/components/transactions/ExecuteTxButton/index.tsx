@@ -11,7 +11,7 @@ import { gtmTrack } from '@/services/analytics/gtm'
 import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import { ReplaceTxHoverContext } from '../GroupedTxListItems/ReplaceTxHoverProvider'
 import CheckWallet from '@/components/common/CheckWallet'
-import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
+import { useEnsureSafeSDK } from '@/hooks/coreSDK/useEnsureSafeSDK'
 import { TxModalContext } from '@/components/tx-flow'
 import { ConfirmTxFlow } from '@/components/tx-flow/flows'
 
@@ -27,12 +27,12 @@ const ExecuteTxButton = ({
   const txNonce = isMultisigExecutionInfo(txSummary.executionInfo) ? txSummary.executionInfo.nonce : undefined
   const isPending = useIsPending(txSummary.id)
   const { setSelectedTxId } = useContext(ReplaceTxHoverContext)
-  const safeSDK = useSafeSDK()
+  const [safeSDK, isSDKLoading] = useEnsureSafeSDK()
 
   const expiredSwap = useIsExpiredSwap(txSummary.txInfo)
 
   const isNext = txNonce !== undefined && txNonce === safe.nonce
-  const isDisabled = !isNext || !safeSDK || expiredSwap || isPending
+  const isDisabled = !isNext || !safeSDK || expiredSwap || isPending || isSDKLoading
 
   const onClick = (e: SyntheticEvent) => {
     e.stopPropagation()

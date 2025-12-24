@@ -23,7 +23,7 @@ const useGasLimit = (
   gasLimitError?: Error
   gasLimitLoading: boolean
 } => {
-  const safeSDK = useSafeSDK()
+  const [safeSDK] = useSafeSDK()
   const web3ReadOnly = useWeb3ReadOnly()
   const { safe } = useSafeInfo()
   const safeAddress = safe.address.value

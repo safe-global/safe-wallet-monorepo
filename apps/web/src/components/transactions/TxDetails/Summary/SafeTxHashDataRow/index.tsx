@@ -37,7 +37,7 @@ export const SafeTxHashDataRow = ({
 
 export function useDomainHash(): string | null {
   const { safe, safeAddress } = useSafeInfo()
-  const safeSDK = useSafeSDK()
+  const [safeSDK] = useSafeSDK()
 
   return useMemo(() => {
     // Try to get version from SDK first, fall back to safe.version
@@ -55,7 +55,7 @@ export function useDomainHash(): string | null {
 
 export function useMessageHash({ safeTxData }: { safeTxData: SafeTransactionData }): string | null {
   const { safe } = useSafeInfo()
-  const safeSDK = useSafeSDK()
+  const [safeSDK] = useSafeSDK()
 
   return useMemo(() => {
     // Try to get version from SDK first, fall back to safe.version
@@ -79,7 +79,7 @@ export function useSafeTxHash({
   safeTxHash?: string
 }): string | null {
   const { safe, safeAddress } = useSafeInfo()
-  const safeSDK = useSafeSDK()
+  const [safeSDK] = useSafeSDK()
 
   return useMemo(() => {
     if (safeTxHash) {

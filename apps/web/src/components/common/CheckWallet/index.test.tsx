@@ -77,7 +77,7 @@ const renderButton = () =>
 describe('CheckWallet', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseSafeSdk.mockReturnValue({} as unknown as Safe)
+    mockUseSafeSdk.mockReturnValue([{} as unknown as Safe, false, undefined])
     mockUseNestedSafeOwners.mockReturnValue([])
   })
 
@@ -232,7 +232,7 @@ describe('CheckWallet', () => {
   })
 
   it('should disable the button if SDK is not initialized and safe is loaded', () => {
-    mockUseSafeSdk.mockReturnValue(undefined)
+    mockUseSafeSdk.mockReturnValue([undefined, false, undefined])
 
     const mockSafeInfo = {
       safeLoaded: true,
@@ -252,7 +252,7 @@ describe('CheckWallet', () => {
   })
 
   it('should not disable the button if SDK is not initialized and safe is not loaded', () => {
-    mockUseSafeSdk.mockReturnValue(undefined)
+    mockUseSafeSdk.mockReturnValue([undefined, false, undefined])
 
     const safeAddress = faker.finance.ethereumAddress()
     const mockSafeInfo = {

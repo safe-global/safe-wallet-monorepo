@@ -5,7 +5,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { createExistingTx } from '@/services/tx/tx-sender'
 
 export const useSafeTransaction = (txId: string) => {
-  const safeSdk = useSafeSDK()
+  const [safeSdk] = useSafeSDK()
   const chainId = useChainId()
   const [safeTx, setSafeTx] = useState<SafeTransaction>()
 

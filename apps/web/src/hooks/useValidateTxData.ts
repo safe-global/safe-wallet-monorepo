@@ -9,7 +9,7 @@ import { useContext } from 'react'
 export const useValidateTxData = (txId?: string) => {
   const { safeTx } = useContext(SafeTxContext)
 
-  const sdk = useSafeSDK()
+  const [sdk] = useSafeSDK()
 
   return useAsync(async () => {
     if (!sdk || !safeTx) {

@@ -112,7 +112,7 @@ describe('SignMessage', () => {
 
     jest.spyOn(useIsWrongChainHook, 'default').mockImplementation(() => false)
 
-    jest.spyOn(sdk, 'useSafeSDK').mockReturnValue({} as unknown as Safe)
+    jest.spyOn(sdk, 'useSafeSDK').mockReturnValue([{} as unknown as Safe, false, undefined])
   })
 
   describe('EIP-191 messages', () => {

@@ -81,7 +81,7 @@ const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }
   const isNestedSafeOwner = useIsNestedSafeOwner()
   const chainId = useChainId()
   const signer = useSigner()
-  const sdk = useSafeSDK()
+  const [sdk] = useSafeSDK()
 
   const canSimulate = isSafeOwner || isNestedSafeOwner
 

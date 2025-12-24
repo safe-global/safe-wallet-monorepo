@@ -37,7 +37,7 @@ const CheckWalletWithPermission = <P extends Permission>({
   const wallet = useWallet()
   const connectWallet = useConnectWallet()
   const isWrongChain = useIsWrongChain()
-  const sdk = useSafeSDK()
+  const [sdk] = useSafeSDK()
   const hasPermission = useHasPermission(
     permission,
     ...((permissionProps ? [permissionProps] : []) as PermissionProps<P> extends undefined

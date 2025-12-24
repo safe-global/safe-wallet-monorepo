@@ -26,9 +26,13 @@ describe('useGasLimit', () => {
   beforeEach(() => {
     jest.resetAllMocks()
 
-    jest.spyOn(safeCoreSDK, 'useSafeSDK').mockReturnValue({
-      getContractManager: () => contractManager,
-    } as unknown as Safe)
+    jest.spyOn(safeCoreSDK, 'useSafeSDK').mockReturnValue([
+      {
+        getContractManager: () => contractManager,
+      } as unknown as Safe,
+      false,
+      undefined,
+    ])
 
     jest
       .spyOn(useWallet, 'useSigner')

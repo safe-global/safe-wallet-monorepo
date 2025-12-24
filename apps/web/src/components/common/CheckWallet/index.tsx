@@ -41,7 +41,7 @@ const CheckWallet = ({
   const isOnlySpendingLimit = useIsOnlySpendingLimitBeneficiary()
   const connectWallet = useConnectWallet()
   const isWrongChain = useIsWrongChain()
-  const sdk = useSafeSDK()
+  const [sdk] = useSafeSDK()
   const isProposer = useIsWalletProposer()
 
   const { safe, safeLoaded } = useSafeInfo()

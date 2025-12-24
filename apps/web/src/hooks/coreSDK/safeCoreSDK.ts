@@ -1,6 +1,6 @@
 import chains from '@safe-global/utils/config/chains'
 import { getSafeL2SingletonDeployments, getSafeSingletonDeployments } from '@safe-global/safe-deployments'
-import ExternalStore from '@safe-global/utils/services/ExternalStore'
+import LazyExternalStore from '@safe-global/utils/services/LazyExternalStore'
 import { Gnosis_safe__factory } from '@safe-global/utils/types/contracts'
 import Safe, { type ContractNetworksConfig } from '@safe-global/protocol-kit'
 import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeContracts'
@@ -113,8 +113,42 @@ export const initSafeSDK = async ({
   })
 }
 
-export const {
-  getStore: getSafeSDK,
-  setStore: setSafeSDK,
-  useStore: useSafeSDK,
-} = new ExternalStore<Safe | undefined>()
+// Lazy ExternalStore for Safe SDK
+// Wrapper around initSafeSDK that throws if initialization returns undefined
+const initSafeSDKWrapper = async (props: SafeCoreSDKProps): Promise<Safe> => {
+  const sdk = await initSafeSDK(props)
+  if (!sdk) {
+    throw new Error('Failed to initialize Safe SDK. The Safe configuration may be unsupported.')
+  }
+  return sdk
+}
+
+const safeSDKStore = new LazyExternalStore<Safe, [SafeCoreSDKProps]>(initSafeSDKWrapper)
+
+/**
+ * Get the current Safe SDK instance (may be undefined if not initialized yet)
+ */
+export const getSafeSDK = () => safeSDKStore.getStore()
+
+/**
+ * Manually set the Safe SDK instance
+ * Use this to reset the SDK (pass undefined) when dependencies change
+ */
+export const setSafeSDK = (value: Safe | undefined) => safeSDKStore.setStore(value)
+
+/**
+ * Reset the SDK to uninitialized state
+ */
+export const resetSafeSDK = () => safeSDKStore.reset()
+
+/**
+ * Initialize the Safe SDK with the given parameters
+ * This is called automatically on first use, but can be called manually if needed
+ */
+export const initializeSafeSDK = (props: SafeCoreSDKProps) => safeSDKStore.initialize(props)
+
+/**
+ * React hook that returns [sdk, isLoading, error]
+ * Does NOT trigger lazy initialization - use useEnsureSafeSDK for that
+ */
+export const useSafeSDK = () => safeSDKStore.useStore()

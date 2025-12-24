@@ -10,7 +10,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import Track from '@/components/common/Track'
 import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import CheckWallet from '@/components/common/CheckWallet'
-import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
+import { useEnsureSafeSDK } from '@/hooks/coreSDK/useEnsureSafeSDK'
 import { TxModalContext } from '@/components/tx-flow'
 import { ConfirmTxFlow } from '@/components/tx-flow/flows'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
@@ -22,9 +22,9 @@ const SignTxButton = ({ txSummary, compact = false }: { txSummary: Transaction; 
   const isSafeOwner = useIsSafeOwner()
   const isSignable =
     isSignableBy(txSummary, wallet?.address || '') || nestedOwners?.some((owner) => isSignableBy(txSummary, owner))
-  const safeSDK = useSafeSDK()
+  const [safeSDK, isSDKLoading] = useEnsureSafeSDK()
   const expiredSwap = useIsExpiredSwap(txSummary.txInfo)
-  const isDisabled = !isSignable || !safeSDK || expiredSwap
+  const isDisabled = !isSignable || !safeSDK || expiredSwap || isSDKLoading
 
   const onClick = (e: SyntheticEvent) => {
     e.stopPropagation()
