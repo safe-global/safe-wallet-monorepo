@@ -79,8 +79,10 @@ class LazyExternalStore<T extends unknown, Args extends unknown[] = []> {
       try {
         const value = await this.initializer(...args)
 
-        // Check if this initialization was aborted
+        // Check if this initialization was aborted (e.g., due to React re-render or reset)
         if (currentAbortController.signal.aborted) {
+          console.warn('LazyExternalStore: Initialization aborted, likely due to component re-render or store reset')
+          // Throw to signal incompletion without setting error state (caught below)
           throw new Error('Initialization aborted')
         }
 

@@ -31,20 +31,20 @@ export const useEnsureSafeSDK = (): [Safe | undefined, boolean, Error | undefine
 
   const [sdk, isLoading, error] = useSafeSDK()
 
-  // Track previous safe address to detect when it changes
-  const prevSafeAddressRef = useRef<string | undefined>(undefined)
+  // Track previous safe address and chain to detect when they change
+  const prevSafeKeyRef = useRef<string | undefined>(undefined)
 
   // Effect 1: Reset SDK when safe/chain changes
   useEffect(() => {
-    const currentSafeAddress = safe.address.value
-    const prevSafeAddress = prevSafeAddressRef.current
+    const currentSafeKey = `${safe.chainId}:${safe.address.value}`
+    const prevSafeKey = prevSafeKeyRef.current
 
-    // Reset SDK if safe address changed
-    if (prevSafeAddress && prevSafeAddress !== currentSafeAddress) {
+    // Reset SDK if safe address or chain changed
+    if (prevSafeKey && prevSafeKey !== currentSafeKey) {
       resetSafeSDK()
     }
 
-    prevSafeAddressRef.current = currentSafeAddress
+    prevSafeKeyRef.current = currentSafeKey
   }, [safe.address.value, safe.chainId])
 
   // Effect 2: Initialize SDK when needed
