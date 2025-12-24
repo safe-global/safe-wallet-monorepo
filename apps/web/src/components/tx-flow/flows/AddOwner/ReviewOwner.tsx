@@ -21,7 +21,7 @@ export const ReviewOwner = ({
   onSubmit?: () => void
 }>) => {
   const dispatch = useAppDispatch()
-  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, setIsReadOnly } = useContext(SafeTxContext)
   const { safe } = useSafeInfo()
   const { chainId } = safe
   const chain = useCurrentChain()
@@ -42,6 +42,11 @@ export const ReviewOwner = ({
 
     promise.then(setSafeTx).catch(setSafeTxError)
   }, [removedOwner, newOwner, threshold, setSafeTx, setSafeTxError, chain, safe.deployed])
+
+  // Mark as readonly to prevent SafeTxProvider from recreating with createTx()
+  useEffect(() => {
+    setIsReadOnly(true)
+  }, [setIsReadOnly])
 
   const addAddressBookEntry = () => {
     if (typeof newOwner.name !== 'undefined') {
