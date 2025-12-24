@@ -17,7 +17,6 @@ import PageLayout from '@/components/common/PageLayout'
 import useLoadableStores from '@/hooks/useLoadableStores'
 import { useInitOnboard } from '@/hooks/wallets/useOnboard'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
-import { useInitSafeCoreSDK } from '@/hooks/coreSDK/useInitSafeCoreSDK'
 import useTxNotifications from '@/hooks/useTxNotifications'
 import useSafeNotifications from '@/hooks/useSafeNotifications'
 import useTxPendingStatuses from '@/hooks/useTxPendingStatuses'
@@ -66,7 +65,7 @@ const InitApp = (): null => {
   useLoadableStores()
   useInitOnboard()
   useInitWeb3()
-  useInitSafeCoreSDK()
+  // Note: Safe SDK now initializes lazily when first needed (via useEnsureSafeSDK in components)
   useTxNotifications()
   useSafeMessageNotifications()
   useSafeNotifications()

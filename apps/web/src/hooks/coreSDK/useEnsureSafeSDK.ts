@@ -1,7 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { initializeSafeSDK, useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
+import { initializeSafeSDK, resetSafeSDK, useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { trackError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -15,8 +15,9 @@ import type Safe from '@safe-global/protocol-kit'
  * Hook that ensures the Safe SDK is initialized with current dependencies
  * Returns [sdk, isLoading, error]
  *
- * This hook should be used by components that need the SDK.
- * It will trigger lazy initialization on first mount if the SDK isn't ready yet.
+ * This hook handles both lazy initialization AND resetting when dependencies change.
+ * It replaces the need for useInitSafeCoreSDK in InitApp.
+ * Components that need the SDK should use this hook.
  */
 export const useEnsureSafeSDK = (): [Safe | undefined, boolean, Error | undefined] => {
   const { safe, safeLoaded } = useSafeInfo()
@@ -30,8 +31,25 @@ export const useEnsureSafeSDK = (): [Safe | undefined, boolean, Error | undefine
 
   const [sdk, isLoading, error] = useSafeSDK()
 
+  // Track previous safe address to detect when it changes
+  const prevSafeAddressRef = useRef<string | undefined>(undefined)
+
+  // Effect 1: Reset SDK when safe/chain changes
   useEffect(() => {
-    // Only initialize if all dependencies are valid and SDK is not already initialized/loading
+    const currentSafeAddress = safe.address.value
+    const prevSafeAddress = prevSafeAddressRef.current
+
+    // Reset SDK if safe address changed
+    if (prevSafeAddress && prevSafeAddress !== currentSafeAddress) {
+      resetSafeSDK()
+    }
+
+    prevSafeAddressRef.current = currentSafeAddress
+  }, [safe.address.value, safe.chainId])
+
+  // Effect 2: Initialize SDK when needed
+  useEffect(() => {
+    // Don't initialize if dependencies aren't ready
     if (!safeLoaded || !web3ReadOnly || !sameAddress(address, safe.address.value)) {
       return
     }
