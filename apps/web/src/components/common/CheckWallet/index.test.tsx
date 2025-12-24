@@ -1,4 +1,4 @@
-import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
+import { useEnsureSafeSDK } from '@/hooks/coreSDK/useEnsureSafeSDK'
 import { render } from '@/tests/test-utils'
 import CheckWallet from '.'
 import useIsOnlySpendingLimitBeneficiary from '@/hooks/useIsOnlySpendingLimitBeneficiary'
@@ -68,8 +68,8 @@ jest.mock('@/hooks/useSafeInfo', () => ({
 jest.mock('@/hooks/useNestedSafeOwners')
 const mockUseNestedSafeOwners = useNestedSafeOwners as jest.MockedFunction<typeof useNestedSafeOwners>
 
-jest.mock('@/hooks/coreSDK/safeCoreSDK')
-const mockUseSafeSdk = useSafeSDK as jest.MockedFunction<typeof useSafeSDK>
+jest.mock('@/hooks/coreSDK/useEnsureSafeSDK')
+const mockUseEnsureSafeSDK = useEnsureSafeSDK as jest.MockedFunction<typeof useEnsureSafeSDK>
 
 const renderButton = () =>
   render(<CheckWallet checkNetwork={false}>{(isOk) => <button disabled={!isOk}>Continue</button>}</CheckWallet>)
@@ -77,7 +77,7 @@ const renderButton = () =>
 describe('CheckWallet', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseSafeSdk.mockReturnValue([{} as unknown as Safe, false, undefined])
+    mockUseEnsureSafeSDK.mockReturnValue([{} as unknown as Safe, false, undefined])
     mockUseNestedSafeOwners.mockReturnValue([])
   })
 
@@ -232,7 +232,7 @@ describe('CheckWallet', () => {
   })
 
   it('should disable the button if SDK is not initialized and safe is loaded', () => {
-    mockUseSafeSdk.mockReturnValue([undefined, false, undefined])
+    mockUseEnsureSafeSDK.mockReturnValue([undefined, false, undefined])
 
     const mockSafeInfo = {
       safeLoaded: true,
@@ -252,7 +252,7 @@ describe('CheckWallet', () => {
   })
 
   it('should not disable the button if SDK is not initialized and safe is not loaded', () => {
-    mockUseSafeSdk.mockReturnValue([undefined, false, undefined])
+    mockUseEnsureSafeSDK.mockReturnValue([undefined, false, undefined])
 
     const safeAddress = faker.finance.ethereumAddress()
     const mockSafeInfo = {
