@@ -1,4 +1,4 @@
-import { useEnsureSafeSDK } from '@/hooks/coreSDK/useEnsureSafeSDK'
+import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { render } from '@/tests/test-utils'
 import CheckWallet from '.'
 import useIsOnlySpendingLimitBeneficiary from '@/hooks/useIsOnlySpendingLimitBeneficiary'
@@ -68,8 +68,8 @@ jest.mock('@/hooks/useSafeInfo', () => ({
 jest.mock('@/hooks/useNestedSafeOwners')
 const mockUseNestedSafeOwners = useNestedSafeOwners as jest.MockedFunction<typeof useNestedSafeOwners>
 
-jest.mock('@/hooks/coreSDK/useEnsureSafeSDK')
-const mockUseEnsureSafeSDK = useEnsureSafeSDK as jest.MockedFunction<typeof useEnsureSafeSDK>
+jest.mock('@/hooks/coreSDK/safeCoreSDK')
+const mockUseSafeSDK = useSafeSDK as jest.MockedFunction<typeof useSafeSDK>
 
 const renderButton = () =>
   render(<CheckWallet checkNetwork={false}>{(isOk) => <button disabled={!isOk}>Continue</button>}</CheckWallet>)
@@ -77,7 +77,7 @@ const renderButton = () =>
 describe('CheckWallet', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseEnsureSafeSDK.mockReturnValue([{} as unknown as Safe, false, undefined])
+    mockUseSafeSDK.mockReturnValue([{} as unknown as Safe, false, undefined])
     mockUseNestedSafeOwners.mockReturnValue([])
   })
 
@@ -232,7 +232,7 @@ describe('CheckWallet', () => {
   })
 
   it('should disable the button if SDK is not initialized and safe is loaded', () => {
-    mockUseEnsureSafeSDK.mockReturnValue([undefined, false, undefined])
+    mockUseSafeSDK.mockReturnValue([undefined, false, undefined])
 
     const mockSafeInfo = {
       safeLoaded: true,
@@ -252,7 +252,7 @@ describe('CheckWallet', () => {
   })
 
   it('should disable the button while SDK is loading', () => {
-    mockUseEnsureSafeSDK.mockReturnValue([undefined, true, undefined]) // isLoading = true
+    mockUseSafeSDK.mockReturnValue([undefined, true, undefined]) // isLoading = true
 
     const mockSafeInfo = {
       safeLoaded: true,
@@ -272,7 +272,7 @@ describe('CheckWallet', () => {
   })
 
   it('should not disable the button if SDK is not initialized and safe is not loaded', () => {
-    mockUseEnsureSafeSDK.mockReturnValue([undefined, false, undefined])
+    mockUseSafeSDK.mockReturnValue([undefined, false, undefined])
 
     const safeAddress = faker.finance.ethereumAddress()
     const mockSafeInfo = {

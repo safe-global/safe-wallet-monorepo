@@ -78,6 +78,12 @@ export const useEnsureSafeSDK = (): [Safe | undefined, boolean, Error | undefine
       undeployedSafe,
     }).catch((_e) => {
       const e = _e instanceof Error ? _e : new Error(String(_e))
+
+      // Don't show notification for intentional cancellations (e.g., when switching Safes or during re-renders)
+      if (e.message === 'Initialization aborted') {
+        return
+      }
+
       dispatch(
         showNotification({
           message: 'Error connecting to the blockchain. Please try reloading the page.',

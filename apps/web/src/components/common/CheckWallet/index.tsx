@@ -1,4 +1,4 @@
-import { useEnsureSafeSDK } from '@/hooks/coreSDK/useEnsureSafeSDK'
+import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import { useMemo, type ReactElement } from 'react'
 import useIsOnlySpendingLimitBeneficiary from '@/hooks/useIsOnlySpendingLimitBeneficiary'
@@ -41,7 +41,7 @@ const CheckWallet = ({
   const isOnlySpendingLimit = useIsOnlySpendingLimitBeneficiary()
   const connectWallet = useConnectWallet()
   const isWrongChain = useIsWrongChain()
-  const [sdk, isSDKLoading] = useEnsureSafeSDK()
+  const [sdk, isSDKLoading] = useSafeSDK()
   const isProposer = useIsWalletProposer()
 
   const { safe, safeLoaded } = useSafeInfo()

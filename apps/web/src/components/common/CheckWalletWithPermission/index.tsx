@@ -1,4 +1,4 @@
-import { useEnsureSafeSDK } from '@/hooks/coreSDK/useEnsureSafeSDK'
+import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { useMemo, type ReactElement } from 'react'
 import useWallet from '@/hooks/wallets/useWallet'
 import useConnectWallet from '../ConnectWallet/useConnectWallet'
@@ -37,7 +37,7 @@ const CheckWalletWithPermission = <P extends Permission>({
   const wallet = useWallet()
   const connectWallet = useConnectWallet()
   const isWrongChain = useIsWrongChain()
-  const [sdk, isSDKLoading] = useEnsureSafeSDK()
+  const [sdk, isSDKLoading] = useSafeSDK()
   const hasPermission = useHasPermission(
     permission,
     ...((permissionProps ? [permissionProps] : []) as PermissionProps<P> extends undefined
