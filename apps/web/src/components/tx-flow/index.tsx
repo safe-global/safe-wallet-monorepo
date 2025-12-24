@@ -1,10 +1,8 @@
-import { createContext, type ReactElement, type ReactNode, useState, useCallback, useRef, useEffect } from 'react'
+import { createContext, type ReactElement, type ReactNode, useState, useCallback, useRef } from 'react'
 import TxModalDialog from '@/components/common/TxModalDialog'
 import { SuccessScreenFlow, NestedTxSuccessScreenFlow } from './flows'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { usePreventNavigation } from '@/hooks/usePreventNavigation'
-import useSafeAddress from '@/hooks/useSafeAddress'
-import useChainId from '@/hooks/useChainId'
 
 const noop = () => {}
 
@@ -30,8 +28,6 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
   const shouldWarn = useRef<boolean>(true)
   const onClose = useRef<() => void>(noop)
   const { setSignerAddress } = useWalletContext() ?? {}
-  const safeAddress = useSafeAddress()
-  const chainId = useChainId()
 
   const handleModalClose = useCallback(() => {
     if (shouldWarn.current && !confirmClose()) {
@@ -52,8 +48,19 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
       setFlow((prev) => {
         if (prev === newTxFlow) return prev
 
-        // If a new flow is triggered, close the current one
-        if (prev && newTxFlow && newTxFlow.type !== SuccessScreenFlow && newTxFlow.type !== NestedTxSuccessScreenFlow) {
+        // Check if switching to success screen
+        const isToSuccessScreen = newTxFlow?.type === SuccessScreenFlow || newTxFlow?.type === NestedTxSuccessScreenFlow
+
+        console.log('[TxModalProvider] setTxFlow:', {
+          hasPrev: !!prev,
+          hasNew: !!newTxFlow,
+          newType: typeof newTxFlow?.type === 'function' ? newTxFlow.type.name : String(newTxFlow?.type),
+          isToSuccessScreen,
+          shouldWarn: shouldWarn.current,
+        })
+
+        // If a new flow is triggered, close the current one (but not when switching to success screen)
+        if (prev && newTxFlow && !isToSuccessScreen) {
           if (shouldWarn.current && !confirmClose()) {
             return prev
           }
@@ -72,18 +79,6 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
   )
 
   usePreventNavigation(txFlow ? handleModalClose : undefined)
-
-  // Close modal when Safe address or chain changes to prevent stale data issues
-  // Don't warn user since this is an automatic cleanup
-  useEffect(() => {
-    if (txFlow) {
-      setFlow(undefined)
-      onClose.current()
-      onClose.current = noop
-      setSignerAddress?.(undefined)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [safeAddress, chainId])
 
   return (
     <TxModalContext.Provider value={{ txFlow, setTxFlow, setFullWidth }}>
