@@ -5,6 +5,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { createTx } from '@/services/tx/tx-sender'
 import { useRecommendedNonce, useSafeTxGas } from '@/components/tx/shared/hooks'
 import { Errors, logError } from '@/services/exceptions'
+import { useEnsureSafeSDK } from '@/hooks/coreSDK/useEnsureSafeSDK'
 
 export type SafeTxContextParams = {
   safeTx?: SafeTransaction
@@ -48,7 +49,12 @@ export const SafeTxContext = createContext<SafeTxContextParams>({
   setIsMassPayout: () => {},
 })
 
-const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => {
+const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement | null => {
+  // Ensure SDK is initialized before rendering children
+  // This prevents race conditions where child components try to create transactions
+  // before the SDK is ready
+  const [sdk, isSDKLoading] = useEnsureSafeSDK()
+
   const [safeTx, setSafeTx] = useState<SafeTransaction>()
   const [safeMessage, setSafeMessage] = useState<TypedData>()
   const [safeTxError, setSafeTxError] = useState<Error>()
@@ -78,6 +84,8 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   useEffect(() => {
     if (!canEdit || !safeTx?.data) return
     if (safeTx.data.nonce === finalNonce && safeTx.data.safeTxGas === finalSafeTxGas) return
+    // Don't update while SDK is loading
+    if (isSDKLoading || !sdk) return
 
     setSafeTxError(undefined)
 
@@ -86,12 +94,17 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
         setSafeTx(tx)
       })
       .catch(setSafeTxError)
-  }, [canEdit, finalNonce, finalSafeTxGas, safeTx?.data])
+  }, [canEdit, finalNonce, finalSafeTxGas, safeTx?.data, isSDKLoading, sdk])
 
   // Log errors
   useEffect(() => {
     safeTxError && logError(Errors._103, safeTxError)
   }, [safeTxError])
+
+  // Don't render children until SDK is initialized to prevent race conditions
+  if (isSDKLoading || !sdk) {
+    return null
+  }
 
   return (
     <SafeTxContext.Provider

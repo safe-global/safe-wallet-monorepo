@@ -1,4 +1,4 @@
-import { useContext, useMemo } from 'react'
+import { useContext, useEffect, useMemo, useRef } from 'react'
 import { Slot, type SlotComponentProps, SlotName, useSlot, useSlotIds, withSlot } from '../slots'
 import { Box } from '@mui/material'
 import WalletRejectionError from '@/components/tx/shared/errors/WalletRejectionError'
@@ -29,24 +29,38 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
 
   const options = useMemo(() => slotItems.map(({ label, id }) => ({ label, id })), [slotItems])
   const [submitAction, setSubmitAction] = useLocalStorage<string>(COMBO_SUBMIT_ACTION)
+  const hasAutoSelectedRef = useRef(false)
 
-  // Auto-select Execute if available on first load, otherwise respect user's stored preference
+  // Auto-select Execute on first render if available (but not while validating)
+  useEffect(() => {
+    if (!hasAutoSelectedRef.current && !validationLoading && slotIds.includes(EXECUTE_ACTION)) {
+      setSubmitAction(EXECUTE_ACTION)
+      hasAutoSelectedRef.current = true
+    }
+  }, [slotIds, setSubmitAction, validationLoading])
+
+  // Prefer Execute by default, but respect user's manual selection
   const slotId = useMemo(() => {
     const executeAvailable = slotIds.includes(EXECUTE_ACTION)
     const initialSubmitAction = slotIds?.[0]
 
-    // If no stored preference or stored action is not available in current slots
-    if (submitAction === undefined || !slotIds.includes(submitAction)) {
-      // Prefer Execute if available, otherwise use first option
-      return executeAvailable ? EXECUTE_ACTION : initialSubmitAction
+    // If user has a stored preference and it's available, use it
+    if (submitAction !== undefined && slotIds.includes(submitAction)) {
+      return submitAction
     }
-    // Use stored preference (respect user's choice)
-    return submitAction
+
+    // Otherwise, prefer Execute if available
+    if (executeAvailable) {
+      return EXECUTE_ACTION
+    }
+
+    // Fallback to first available option
+    return initialSubmitAction
   }, [slotIds, submitAction])
 
-  // Show warning if Execute is available but user selected Sign (either manually or from stored preference)
+  // Show warning if Execute is available but user selected Sign
   const executeAvailable = slotIds.includes(EXECUTE_ACTION)
-  const showLastSignerWarning = executeAvailable && submitAction === SIGN_ACTION && !hasSigned
+  const showLastSignerWarning = executeAvailable && slotId === SIGN_ACTION && !hasSigned
 
   if (slotIds.length === 0) {
     return false
