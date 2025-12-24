@@ -81,6 +81,10 @@ const useTxPendingStatuses = (): void => {
 
   // Subscribe to pending statuses
   useEffect(() => {
+    // Capture current Safe context in closure to prevent using wrong Safe address after switching
+    const currentChainId = chainId
+    const currentSafeAddress = safeAddress
+
     const unsubSignatureProposing = txSubscribe(TxEvent.SIGNATURE_PROPOSED, (detail) => {
       // All pending txns should have a txId
       const txId = 'txId' in detail && detail.txId
@@ -99,8 +103,8 @@ const useTxPendingStatuses = (): void => {
       dispatch(
         setPendingTx({
           nonce,
-          chainId,
-          safeAddress,
+          chainId: currentChainId,
+          safeAddress: currentSafeAddress,
           txId,
           signerAddress: detail.signerAddress,
           status: PendingStatus.SIGNING,
@@ -126,8 +130,8 @@ const useTxPendingStatuses = (): void => {
         detail.txType === 'Custom'
           ? {
               nonce,
-              chainId,
-              safeAddress,
+              chainId: currentChainId,
+              safeAddress: currentSafeAddress,
               txId,
               status: PendingStatus.PROCESSING,
               txHash: detail.txHash,
@@ -140,8 +144,8 @@ const useTxPendingStatuses = (): void => {
             }
           : {
               nonce,
-              chainId,
-              safeAddress,
+              chainId: currentChainId,
+              safeAddress: currentSafeAddress,
               txId,
               status: PendingStatus.PROCESSING,
               txHash: detail.txHash,
@@ -172,8 +176,8 @@ const useTxPendingStatuses = (): void => {
       dispatch(
         setPendingTx({
           nonce,
-          chainId,
-          safeAddress,
+          chainId: currentChainId,
+          safeAddress: currentSafeAddress,
           txId,
           status: PendingStatus.SUBMITTING,
         }),
@@ -198,8 +202,8 @@ const useTxPendingStatuses = (): void => {
       dispatch(
         setPendingTx({
           nonce,
-          chainId,
-          safeAddress,
+          chainId: currentChainId,
+          safeAddress: currentSafeAddress,
           txId,
           txHash: detail.txHash,
           status: PendingStatus.INDEXING,
@@ -224,8 +228,8 @@ const useTxPendingStatuses = (): void => {
       dispatch(
         setPendingTx({
           nonce,
-          chainId,
-          safeAddress,
+          chainId: currentChainId,
+          safeAddress: currentSafeAddress,
           txId,
           status: PendingStatus.RELAYING,
           taskId: detail.taskId,
@@ -249,8 +253,8 @@ const useTxPendingStatuses = (): void => {
       dispatch(
         setPendingTx({
           nonce,
-          chainId,
-          safeAddress,
+          chainId: currentChainId,
+          safeAddress: currentSafeAddress,
           txId,
           status: PendingStatus.NESTED_SIGNING,
           signerAddress: detail.parentSafeAddress,

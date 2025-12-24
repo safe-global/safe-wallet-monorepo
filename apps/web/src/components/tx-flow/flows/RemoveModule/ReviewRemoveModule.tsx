@@ -13,7 +13,7 @@ export const ReviewRemoveModule = ({
   onSubmit,
   children,
 }: PropsWithChildren<{ params: RemoveModuleFlowProps; onSubmit: () => void }>) => {
-  const { setSafeTx, safeTxError, setSafeTxError, setIsReadOnly } = useContext(SafeTxContext)
+  const { setSafeTx, safeTxError, setSafeTxError } = useContext(SafeTxContext)
 
   useEffect(() => {
     createRemoveModuleTx(params.address).then(setSafeTx).catch(setSafeTxError)
@@ -24,11 +24,6 @@ export const ReviewRemoveModule = ({
       logError(Errors._806, safeTxError.message)
     }
   }, [safeTxError])
-
-  // Mark as readonly to prevent SafeTxProvider from recreating with createTx()
-  useEffect(() => {
-    setIsReadOnly(true)
-  }, [setIsReadOnly])
 
   const onFormSubmit = useCallback(() => {
     trackEvent(SETTINGS_EVENTS.MODULES.REMOVE_MODULE)

@@ -1,10 +1,8 @@
-import { createContext, type ReactElement, type ReactNode, useState, useCallback, useRef, useEffect } from 'react'
+import { createContext, type ReactElement, type ReactNode, useState, useCallback, useRef } from 'react'
 import TxModalDialog from '@/components/common/TxModalDialog'
 import { SuccessScreenFlow, NestedTxSuccessScreenFlow } from './flows'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { usePreventNavigation } from '@/hooks/usePreventNavigation'
-import useSafeAddress from '@/hooks/useSafeAddress'
-import useChainId from '@/hooks/useChainId'
 
 const noop = () => {}
 
@@ -30,8 +28,6 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
   const shouldWarn = useRef<boolean>(true)
   const onClose = useRef<() => void>(noop)
   const { setSignerAddress } = useWalletContext() ?? {}
-  const safeAddress = useSafeAddress()
-  const chainId = useChainId()
 
   const handleModalClose = useCallback(() => {
     if (shouldWarn.current && !confirmClose()) {
@@ -70,16 +66,6 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
   )
 
   usePreventNavigation(txFlow ? handleModalClose : undefined)
-
-  // Close modal when Safe address or chain changes to prevent stale data issues
-  useEffect(() => {
-    if (txFlow) {
-      setFlow(undefined)
-      onClose.current()
-      onClose.current = noop
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [safeAddress, chainId])
 
   return (
     <TxModalContext.Provider value={{ txFlow, setTxFlow, setFullWidth }}>
