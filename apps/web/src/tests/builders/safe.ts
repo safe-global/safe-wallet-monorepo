@@ -29,7 +29,7 @@ export function safeInfoBuilder(): IBuilder<SafeInfo> {
     nonce: faker.number.int(),
     threshold: faker.number.int(),
     owners: generateRandomArray(() => addressExBuilder().build(), { min: 1, max: MAX_OWNERS_LENGTH }),
-    implementation: undefined,
+    implementation: addressExBuilder().build(),
     implementationVersionState: ImplementationVersionState.UP_TO_DATE,
     modules: [],
     guard: null,
