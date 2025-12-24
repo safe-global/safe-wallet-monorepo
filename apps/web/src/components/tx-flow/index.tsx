@@ -61,7 +61,9 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
         }
 
         onClose.current = newOnClose ?? noop
-        shouldWarn.current = newShouldWarn ?? true
+        // Don't warn when switching to success screen or when explicitly disabled
+        const isSuccessScreen = newTxFlow?.type === SuccessScreenFlow || newTxFlow?.type === NestedTxSuccessScreenFlow
+        shouldWarn.current = newShouldWarn ?? (isSuccessScreen ? false : true)
 
         return newTxFlow
       })
