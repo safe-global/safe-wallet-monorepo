@@ -70,7 +70,8 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
 
   // Update the tx when the nonce or safeTxGas change
   useEffect(() => {
-    if (!canEdit || !safeTx?.data) return
+    if (!canEdit) return
+    if (!safeTx?.data) return
     if (safeTx.data.nonce === finalNonce && safeTx.data.safeTxGas === finalSafeTxGas) return
 
     setSafeTxError(undefined)
