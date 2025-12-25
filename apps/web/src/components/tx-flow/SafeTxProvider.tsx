@@ -30,8 +30,6 @@ export type SafeTxContextParams = {
   setTxOrigin: Dispatch<SetStateAction<string | undefined>>
 
   isReadOnly: boolean
-  isMassPayout?: boolean
-  setIsMassPayout: Dispatch<SetStateAction<boolean | undefined>>
 }
 
 export const SafeTxContext = createContext<SafeTxContextParams>({
@@ -43,7 +41,6 @@ export const SafeTxContext = createContext<SafeTxContextParams>({
   setSafeTxGas: () => {},
   setTxOrigin: () => {},
   isReadOnly: false,
-  setIsMassPayout: () => {},
 })
 
 const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => {
@@ -54,7 +51,6 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const [nonceNeeded, setNonceNeeded] = useState<boolean>(true)
   const [safeTxGas, setSafeTxGas] = useState<string>()
   const [txOrigin, setTxOrigin] = useState<string>()
-  const [isMassPayout, setIsMassPayout] = useState<boolean>()
 
   // Signed txs cannot be updated
   const isSigned = Boolean(safeTx && safeTx.signatures.size > 0)
@@ -110,8 +106,6 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
         txOrigin,
         setTxOrigin,
         isReadOnly,
-        isMassPayout,
-        setIsMassPayout,
       }}
     >
       {children}

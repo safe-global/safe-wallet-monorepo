@@ -729,7 +729,6 @@ describe('SignMessage', () => {
         txOrigin: undefined,
         setTxOrigin: jest.fn(),
         isReadOnly: false,
-        setIsMassPayout: jest.fn(),
       }
     })
 
