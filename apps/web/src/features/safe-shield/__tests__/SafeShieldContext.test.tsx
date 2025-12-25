@@ -24,7 +24,6 @@ const mockSafeTxContextValue = {
   setSafeTxGas: jest.fn(),
   setTxOrigin: jest.fn(),
   isReadOnly: false,
-  setIsReadOnly: jest.fn(),
   setIsMassPayout: jest.fn(),
 }
 
