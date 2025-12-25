@@ -250,7 +250,7 @@ const useTxPendingStatuses = (): void => {
         setPendingTx({
           nonce,
           chainId: detail.chainId,
-          safeAddress,
+          safeAddress: detail.safeAddress,
           txId,
           status: PendingStatus.NESTED_SIGNING,
           signerAddress: detail.parentSafeAddress,
