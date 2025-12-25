@@ -76,6 +76,9 @@ describe('txMonitor', () => {
   })
 
   describe('waitForRelayedTx', () => {
+    const chainId = '1'
+    const safeAddress = toBeHex('0x1', 20)
+
     it("emits a PROCESSED event if taskStatus 'ExecSuccess'", async () => {
       const mockData = {
         task: {
@@ -86,7 +89,7 @@ describe('txMonitor', () => {
 
       const mockFetch = jest.spyOn(global, 'fetch')
 
-      waitForRelayedTx('0x1', ['0x2'], safeAddress, 1)
+      waitForRelayedTx('0x1', ['0x2'], chainId, safeAddress, 1)
 
       act(() => {
         jest.advanceTimersByTime(15_000 + 1)
@@ -115,7 +118,7 @@ describe('txMonitor', () => {
 
       const mockFetch = jest.spyOn(global, 'fetch')
 
-      waitForRelayedTx('0x1', ['0x2'], safeAddress, 1)
+      waitForRelayedTx('0x1', ['0x2'], chainId, safeAddress, 1)
 
       act(() => {
         jest.advanceTimersByTime(15_000 + 1)
@@ -148,7 +151,7 @@ describe('txMonitor', () => {
 
       const mockFetch = jest.spyOn(global, 'fetch')
 
-      waitForRelayedTx('0x1', ['0x2'], safeAddress, 1)
+      waitForRelayedTx('0x1', ['0x2'], chainId, safeAddress, 1)
 
       act(() => {
         jest.advanceTimersByTime(15_000 + 1)
@@ -181,7 +184,7 @@ describe('txMonitor', () => {
 
       const mockFetch = jest.spyOn(global, 'fetch')
 
-      waitForRelayedTx('0x1', ['0x2'], safeAddress, 1)
+      waitForRelayedTx('0x1', ['0x2'], chainId, safeAddress, 1)
 
       act(() => {
         jest.advanceTimersByTime(15_000 + 1)
@@ -214,7 +217,7 @@ describe('txMonitor', () => {
 
       const mockFetch = jest.spyOn(global, 'fetch')
 
-      waitForRelayedTx('0x1', ['0x2'], safeAddress, 1)
+      waitForRelayedTx('0x1', ['0x2'], chainId, safeAddress, 1)
 
       act(() => {
         jest.advanceTimersByTime(15_000 + 1)
@@ -245,7 +248,7 @@ describe('txMonitor', () => {
       }
       global.fetch = jest.fn().mockImplementation(setupFetchStub(mockData))
 
-      waitForRelayedTx('0x1', ['0x2'], safeAddress, 1)
+      waitForRelayedTx('0x1', ['0x2'], chainId, safeAddress, 1)
 
       act(() => {
         jest.advanceTimersByTime(3 * 60_000 + 1)
