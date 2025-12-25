@@ -49,7 +49,13 @@ describe('txMonitor', () => {
       watchTxHashSpy.mockImplementation(() => Promise.resolve(receipt))
       await waitForTx(provider, ['0x0'], '0x0', safeAddress, faker.finance.ethereumAddress(), 1, 1, '11155111')
 
-      expect(txDispatchSpy).toHaveBeenCalledWith('FAILED', { txId: '0x0', error: expect.any(Error), nonce: 1 })
+      expect(txDispatchSpy).toHaveBeenCalledWith('FAILED', {
+        txId: '0x0',
+        error: expect.any(Error),
+        nonce: 1,
+        chainId: '11155111',
+        safeAddress,
+      })
     })
 
     it('emits a REVERTED event if the tx reverted', async () => {
@@ -64,6 +70,8 @@ describe('txMonitor', () => {
         nonce: 1,
         txId: '0x0',
         error: new Error('Transaction reverted by EVM.'),
+        chainId: '11155111',
+        safeAddress,
       })
     })
 
@@ -71,7 +79,13 @@ describe('txMonitor', () => {
       watchTxHashSpy.mockImplementation(() => Promise.reject(new Error('Test error.')))
       await waitForTx(provider, ['0x0'], '0x0', safeAddress, faker.finance.ethereumAddress(), 1, 1, '11155111')
 
-      expect(txDispatchSpy).toHaveBeenCalledWith('FAILED', { txId: '0x0', error: new Error('Test error.'), nonce: 1 })
+      expect(txDispatchSpy).toHaveBeenCalledWith('FAILED', {
+        txId: '0x0',
+        error: new Error('Test error.'),
+        nonce: 1,
+        chainId: '11155111',
+        safeAddress,
+      })
     })
   })
 
@@ -97,7 +111,12 @@ describe('txMonitor', () => {
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledTimes(1)
-        expect(txDispatchSpy).toHaveBeenCalledWith('PROCESSED', { txId: '0x2', safeAddress, nonce: 1 })
+        expect(txDispatchSpy).toHaveBeenCalledWith('PROCESSED', {
+          txId: '0x2',
+          safeAddress,
+          nonce: 1,
+          chainId,
+        })
       })
 
       // The relay timeout should have been cancelled
@@ -130,6 +149,8 @@ describe('txMonitor', () => {
           nonce: 1,
           txId: '0x2',
           error: new Error(`Relayed transaction reverted by EVM.`),
+          chainId,
+          safeAddress,
         })
       })
 
@@ -163,6 +184,8 @@ describe('txMonitor', () => {
           nonce: 1,
           txId: '0x2',
           error: new Error(`Relayed transaction was blacklisted by relay provider.`),
+          chainId,
+          safeAddress,
         })
       })
 
@@ -196,6 +219,8 @@ describe('txMonitor', () => {
           nonce: 1,
           txId: '0x2',
           error: new Error(`Relayed transaction was cancelled by relay provider.`),
+          chainId,
+          safeAddress,
         })
       })
 
@@ -229,6 +254,8 @@ describe('txMonitor', () => {
           nonce: 1,
           txId: '0x2',
           error: new Error(`Relayed transaction was not found.`),
+          chainId,
+          safeAddress,
         })
       })
 
@@ -258,6 +285,8 @@ describe('txMonitor', () => {
         nonce: 1,
         txId: '0x2',
         error: new Error('Transaction not relayed in 3 minutes. Be aware that it might still be relayed.'),
+        chainId,
+        safeAddress,
       })
     })
   })
