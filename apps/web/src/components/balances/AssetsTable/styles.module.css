@@ -16,6 +16,17 @@
   vertical-align: top;
 }
 
+/* Header styling - bold and no bottom border */
+.container thead th {
+  font-weight: 700;
+  border-bottom: none !important;
+}
+
+.container thead th span {
+  font-size: 16px;
+  color: var(--color-text-primary);
+}
+
 .container th:last-of-type,
 .container td:last-of-type {
   min-width: 86px;
