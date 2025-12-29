@@ -51,7 +51,7 @@ export function AnalysisDisplay({ result, description, severity }: AnalysisDispl
   const hasIssues = 'issues' in result && !!(result as MaliciousOrModerateThreatAnalysisResult).issues
 
   return (
-    <View backgroundColor="$backgroundPaper" borderRadius="$1" overflow="hidden">
+    <View backgroundColor="$backgroundSheet" borderRadius="$1" overflow="hidden">
       <View
         style={{
           borderLeftWidth: 4,
