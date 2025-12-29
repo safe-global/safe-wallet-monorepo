@@ -122,84 +122,91 @@ async function captureScreenshots() {
     const { url, componentName, storyName } = storyUrls[i]
     console.log(`[${i + 1}/${storyUrls.length}] Capturing: ${componentName} - ${storyName}`)
 
-    try {
-      await page.goto(url, {
-        waitUntil: 'networkidle',
-        timeout: 30000,
-      })
+    const cleanComponentName = componentName.replace(/[/\\]/g, '-').replace(/\s+/g, '')
+    const modes = ['light', 'dark']
 
-      // Check if we're on iframe.html (direct story view) or the main Storybook page
-      const isDirectIframe = url.includes('iframe.html')
-      let targetPage = page
-
-      if (!isDirectIframe) {
-        // We're on the main Storybook page with iframe wrapper
-        const iframeElement = await page.waitForSelector('iframe#storybook-preview-iframe', { timeout: 10000 })
-        const frame = await iframeElement.contentFrame()
-
-        if (!frame) {
-          throw new Error('Could not access Storybook iframe')
-        }
-
-        await frame.waitForLoadState('load', { timeout: 10000 })
-        targetPage = frame
-      }
-
-      // Additional wait for React Native Web to render
-      await page.waitForTimeout(3000)
-
-      await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {
-        console.log('  ⚠ Network not fully idle, continuing anyway')
-      })
-
-      // Clean up component name for filename (remove slashes, spaces)
-      const cleanComponentName = componentName.replace(/[/\\]/g, '-').replace(/\s+/g, '')
-      const screenshotPath = path.join('mobile-screenshots', `${cleanComponentName}--${storyName}.png`)
-
-      // Try to find the story content - React Native Web may render in different containers
-      // Priority: #storybook-root, body > div, or fallback to body
-      let screenshotTarget = null
-      const storyRoot = targetPage.locator('#storybook-root').first()
-      const bodyContent = targetPage.locator('body > div').first()
-
-      if ((await storyRoot.count()) > 0) {
-        const rootContent = await targetPage.locator('#storybook-root > *').first()
-        if ((await rootContent.count()) > 0) {
-          screenshotTarget = storyRoot
-          console.log('  📸 Using #storybook-root')
-        }
-      }
-
-      if (!screenshotTarget && (await bodyContent.count()) > 0) {
-        screenshotTarget = bodyContent
-        console.log('  📸 Using body > div')
-      }
-
-      if (screenshotTarget) {
-        await screenshotTarget.screenshot({
-          path: screenshotPath,
-          animations: 'disabled',
-        })
-        console.log(`  ✓ Saved: ${screenshotPath}`)
-      } else {
-        // Fallback to full page screenshot
-        await page.screenshot({
-          path: screenshotPath,
-          animations: 'disabled',
-          fullPage: true,
-        })
-        console.log(`  ✓ Saved (full page): ${screenshotPath}`)
-      }
-    } catch (error) {
-      console.error(`  ✗ Error capturing ${componentName} - ${storyName}:`, error.message)
-
+    for (const mode of modes) {
       try {
-        const cleanComponentName = componentName.replace(/[/\\]/g, '-').replace(/\s+/g, '')
-        const errorPath = path.join('mobile-screenshots', `${cleanComponentName}--${storyName}-ERROR.png`)
-        await page.screenshot({ path: errorPath, fullPage: true })
-        console.log(`  ⚠ Error screenshot saved: ${errorPath}`)
-      } catch (screenshotError) {
-        console.error('  ✗ Could not capture error screenshot:', screenshotError.message)
+        // Add theme global parameter to URL
+        const separator = url.includes('?') ? '&' : '?'
+        const modeUrl = `${url}${separator}globals=theme:${mode}`
+
+        console.log(`  📸 Capturing ${mode} mode...`)
+        await page.goto(modeUrl, {
+          waitUntil: 'networkidle',
+          timeout: 30000,
+        })
+
+        // Check if we're on iframe.html (direct story view) or the main Storybook page
+        const isDirectIframe = url.includes('iframe.html')
+        let targetPage = page
+
+        if (!isDirectIframe) {
+          // We're on the main Storybook page with iframe wrapper
+          const iframeElement = await page.waitForSelector('iframe#storybook-preview-iframe', { timeout: 10000 })
+          const frame = await iframeElement.contentFrame()
+
+          if (!frame) {
+            throw new Error('Could not access Storybook iframe')
+          }
+
+          await frame.waitForLoadState('load', { timeout: 10000 })
+          targetPage = frame
+        }
+
+        // Additional wait for React Native Web to render
+        await page.waitForTimeout(3000)
+
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {
+          console.log(`    ⚠ Network not fully idle, continuing anyway`)
+        })
+
+        const screenshotPath = path.join('mobile-screenshots', `${cleanComponentName}--${storyName}--${mode}.png`)
+
+        // Try to find the story content - React Native Web may render in different containers
+        // Priority: #storybook-root, body > div, or fallback to body
+        let screenshotTarget = null
+        const storyRoot = targetPage.locator('#storybook-root').first()
+        const bodyContent = targetPage.locator('body > div').first()
+
+        if ((await storyRoot.count()) > 0) {
+          const rootContent = await targetPage.locator('#storybook-root > *').first()
+          if ((await rootContent.count()) > 0) {
+            screenshotTarget = storyRoot
+            console.log(`    Using #storybook-root`)
+          }
+        }
+
+        if (!screenshotTarget && (await bodyContent.count()) > 0) {
+          screenshotTarget = bodyContent
+          console.log(`    Using body > div`)
+        }
+
+        if (screenshotTarget) {
+          await screenshotTarget.screenshot({
+            path: screenshotPath,
+            animations: 'disabled',
+          })
+          console.log(`    ✓ Saved: ${screenshotPath}`)
+        } else {
+          // Fallback to full page screenshot
+          await page.screenshot({
+            path: screenshotPath,
+            animations: 'disabled',
+            fullPage: true,
+          })
+          console.log(`    ✓ Saved (full page): ${screenshotPath}`)
+        }
+      } catch (error) {
+        console.error(`    ✗ Error capturing ${mode} mode for ${componentName} - ${storyName}:`, error.message)
+
+        try {
+          const errorPath = path.join('mobile-screenshots', `${cleanComponentName}--${storyName}--${mode}-ERROR.png`)
+          await page.screenshot({ path: errorPath, fullPage: true })
+          console.log(`    ⚠ Error screenshot saved: ${errorPath}`)
+        } catch (screenshotError) {
+          console.error(`    ✗ Could not capture error screenshot:`, screenshotError.message)
+        }
       }
     }
   }
