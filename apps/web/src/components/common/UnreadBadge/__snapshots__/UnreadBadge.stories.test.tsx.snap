@@ -1,113 +1,129 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./UnreadBadge.stories Dot 1`] = `
-<span
-  class="MuiBadge-root css-63ezxx-MuiBadge-root"
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <button
-    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
-    tabindex="0"
-    type="button"
-  >
-    <svg
-      aria-hidden="true"
-      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
-      data-testid="NotificationsIcon"
-      focusable="false"
-      viewBox="0 0 24 24"
-    >
-      <path
-        d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2m6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1z"
-      />
-    </svg>
-  </button>
   <span
-    class="MuiBadge-badge MuiBadge-dot MuiBadge-anchorOriginTopRight MuiBadge-anchorOriginTopRightRectangular MuiBadge-overlapRectangular MuiBadge-colorSuccess css-1goy9x8-MuiBadge-badge"
-  />
-</span>
+    class="MuiBadge-root css-63ezxx-MuiBadge-root"
+  >
+    <button
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      tabindex="0"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
+        data-testid="NotificationsIcon"
+        focusable="false"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2m6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1z"
+        />
+      </svg>
+    </button>
+    <span
+      class="MuiBadge-badge MuiBadge-dot MuiBadge-anchorOriginTopRight MuiBadge-anchorOriginTopRightRectangular MuiBadge-overlapRectangular MuiBadge-colorSuccess css-1goy9x8-MuiBadge-badge"
+    />
+  </span>
+</div>
 `;
 
 exports[`./UnreadBadge.stories HighCount 1`] = `
-<span
-  class="MuiBadge-root css-63ezxx-MuiBadge-root"
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <button
-    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
-    tabindex="0"
-    type="button"
-  >
-    <svg
-      aria-hidden="true"
-      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
-      data-testid="NotificationsIcon"
-      focusable="false"
-      viewBox="0 0 24 24"
-    >
-      <path
-        d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2m6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1z"
-      />
-    </svg>
-  </button>
   <span
-    class="MuiBadge-badge MuiBadge-standard MuiBadge-anchorOriginTopRight MuiBadge-anchorOriginTopRightRectangular MuiBadge-overlapRectangular MuiBadge-colorSecondary css-109xops-MuiBadge-badge"
+    class="MuiBadge-root css-63ezxx-MuiBadge-root"
   >
-    99
+    <button
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      tabindex="0"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
+        data-testid="NotificationsIcon"
+        focusable="false"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2m6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1z"
+        />
+      </svg>
+    </button>
+    <span
+      class="MuiBadge-badge MuiBadge-standard MuiBadge-anchorOriginTopRight MuiBadge-anchorOriginTopRightRectangular MuiBadge-overlapRectangular MuiBadge-colorSecondary css-109xops-MuiBadge-badge"
+    >
+      99
+    </span>
   </span>
-</span>
+</div>
 `;
 
 exports[`./UnreadBadge.stories Invisible 1`] = `
-<span
-  class="MuiBadge-root css-63ezxx-MuiBadge-root"
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <button
-    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
-    tabindex="0"
-    type="button"
-  >
-    <svg
-      aria-hidden="true"
-      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
-      data-testid="NotificationsIcon"
-      focusable="false"
-      viewBox="0 0 24 24"
-    >
-      <path
-        d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2m6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1z"
-      />
-    </svg>
-  </button>
   <span
-    class="MuiBadge-badge MuiBadge-dot MuiBadge-invisible MuiBadge-anchorOriginTopRight MuiBadge-anchorOriginTopRightRectangular MuiBadge-overlapRectangular MuiBadge-colorSuccess css-b720om-MuiBadge-badge"
-  />
-</span>
+    class="MuiBadge-root css-63ezxx-MuiBadge-root"
+  >
+    <button
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      tabindex="0"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
+        data-testid="NotificationsIcon"
+        focusable="false"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2m6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1z"
+        />
+      </svg>
+    </button>
+    <span
+      class="MuiBadge-badge MuiBadge-dot MuiBadge-invisible MuiBadge-anchorOriginTopRight MuiBadge-anchorOriginTopRightRectangular MuiBadge-overlapRectangular MuiBadge-colorSuccess css-b720om-MuiBadge-badge"
+    />
+  </span>
+</div>
 `;
 
 exports[`./UnreadBadge.stories WithCount 1`] = `
-<span
-  class="MuiBadge-root css-63ezxx-MuiBadge-root"
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <button
-    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
-    tabindex="0"
-    type="button"
-  >
-    <svg
-      aria-hidden="true"
-      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
-      data-testid="NotificationsIcon"
-      focusable="false"
-      viewBox="0 0 24 24"
-    >
-      <path
-        d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2m6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1z"
-      />
-    </svg>
-  </button>
   <span
-    class="MuiBadge-badge MuiBadge-standard MuiBadge-anchorOriginTopRight MuiBadge-anchorOriginTopRightRectangular MuiBadge-overlapRectangular MuiBadge-colorSecondary css-109xops-MuiBadge-badge"
+    class="MuiBadge-root css-63ezxx-MuiBadge-root"
   >
-    5
+    <button
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      tabindex="0"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
+        data-testid="NotificationsIcon"
+        focusable="false"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2m6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1z"
+        />
+      </svg>
+    </button>
+    <span
+      class="MuiBadge-badge MuiBadge-standard MuiBadge-anchorOriginTopRight MuiBadge-anchorOriginTopRightRectangular MuiBadge-overlapRectangular MuiBadge-colorSecondary css-109xops-MuiBadge-badge"
+    >
+      5
+    </span>
   </span>
-</span>
+</div>
 `;

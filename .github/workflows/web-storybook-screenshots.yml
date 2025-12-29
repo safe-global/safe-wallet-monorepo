@@ -61,11 +61,16 @@ jobs:
           BASE_SHA=${{ github.event.workflow_run.pull_requests[0].base.sha }}
           HEAD_SHA=${{ github.event.workflow_run.head_sha }}
 
-          # Get all changed files in web app
+          # Get all changed files in web app (excluding test files for now)
           ALL_CHANGED=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '^apps/web/src/.*\.(tsx?|jsx?)$' | grep -v '\.test\.' || true)
+
+          # Get changed story test files and snapshot files separately
+          STORY_TEST_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '^apps/web/src/.*\.stories\.test\.(tsx?|jsx?)$' || true)
+          SNAPSHOT_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '^apps/web/src/.*__snapshots__/.*\.stories\.test\.(tsx?|jsx?)\.snap$' || true)
 
           STORY_FILES=""
 
+          # Process regular component and story files
           for file in $ALL_CHANGED; do
             # If it's already a story file, include it
             if [[ "$file" =~ \.(stories|story)\.(tsx?|jsx?)$ ]]; then
@@ -100,6 +105,30 @@ jobs:
                   fi
                 done
               done
+            fi
+          done
+
+          # Process story test files - find corresponding .stories.tsx files
+          for file in $STORY_TEST_FILES; do
+            # Convert MyComponent.stories.test.tsx -> MyComponent.stories.tsx
+            story_file=$(echo "$file" | sed -E 's/\.stories\.test\.(tsx?)$/.stories.\1/')
+            if [ -f "$story_file" ]; then
+              STORY_FILES="$STORY_FILES$story_file"$'\n'
+              echo "Found story file from test file: $story_file"
+            fi
+          done
+
+          # Process snapshot files - extract corresponding .stories.tsx files
+          for file in $SNAPSHOT_FILES; do
+            # Convert apps/web/src/features/safe-shield/__snapshots__/SafeShield.stories.test.tsx.snap
+            # -> apps/web/src/features/safe-shield/SafeShield.stories.tsx
+            dir=$(dirname "$file")
+            parent_dir=$(dirname "$dir")
+            base=$(basename "$file" | sed -E 's/\.stories\.test\.(tsx?)\.snap$/.stories.\1/')
+            story_file="$parent_dir/$base"
+            if [ -f "$story_file" ]; then
+              STORY_FILES="$STORY_FILES$story_file"$'\n'
+              echo "Found story file from snapshot: $story_file"
             fi
           done
 

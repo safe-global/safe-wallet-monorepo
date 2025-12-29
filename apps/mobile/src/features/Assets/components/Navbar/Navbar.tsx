@@ -48,7 +48,6 @@ export const Navbar = () => {
         paddingHorizontal={16}
         alignItems={'center'}
         paddingBottom={'$2'}
-        backgroundColor={'$background'}
       >
         <DropdownLabel
           label={contact ? contact.name : shortenAddress(activeSafe.address)}

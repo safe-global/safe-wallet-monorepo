@@ -1,65 +1,81 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`./Chip.stories CustomLabel 1`] = `
-<span
-  class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-14d0kko-MuiChip-root"
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-14d0kko-MuiChip-root"
   >
     <span
-      class="MuiTypography-root MuiTypography-caption css-11b0zy1-MuiTypography-root"
+      class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
     >
-      Beta
+      <span
+        class="MuiTypography-root MuiTypography-caption css-11b0zy1-MuiTypography-root"
+      >
+        Beta
+      </span>
     </span>
   </span>
-</span>
+</div>
 `;
 
 exports[`./Chip.stories Default 1`] = `
-<span
-  class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-14d0kko-MuiChip-root"
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-14d0kko-MuiChip-root"
   >
     <span
-      class="MuiTypography-root MuiTypography-caption css-11b0zy1-MuiTypography-root"
+      class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
     >
-      New
+      <span
+        class="MuiTypography-root MuiTypography-caption css-11b0zy1-MuiTypography-root"
+      >
+        New
+      </span>
     </span>
   </span>
-</span>
+</div>
 `;
 
 exports[`./Chip.stories NormalFontWeight 1`] = `
-<span
-  class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-14d0kko-MuiChip-root"
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-14d0kko-MuiChip-root"
   >
     <span
-      class="MuiTypography-root MuiTypography-caption css-1pbessu-MuiTypography-root"
+      class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
     >
-      New
+      <span
+        class="MuiTypography-root MuiTypography-caption css-1pbessu-MuiTypography-root"
+      >
+        New
+      </span>
     </span>
   </span>
-</span>
+</div>
 `;
 
 exports[`./Chip.stories WithCustomStyling 1`] = `
-<span
-  class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1gcknf1-MuiChip-root"
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1gcknf1-MuiChip-root"
   >
     <span
-      class="MuiTypography-root MuiTypography-caption css-11b0zy1-MuiTypography-root"
+      class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
     >
-      Featured
+      <span
+        class="MuiTypography-root MuiTypography-caption css-11b0zy1-MuiTypography-root"
+      >
+        Featured
+      </span>
     </span>
   </span>
-</span>
+</div>
 `;
