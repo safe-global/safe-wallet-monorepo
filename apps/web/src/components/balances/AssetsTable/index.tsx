@@ -195,7 +195,7 @@ const AssetsTable = ({
                     <FiatBalance balanceItem={item} />
                   </Typography>
                   {item.fiatBalance24hChange && (
-                    <Typography variant="caption">
+                    <Typography variant="body2">
                       <FiatChange balanceItem={item} inline />
                     </Typography>
                   )}
