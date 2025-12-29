@@ -7,11 +7,13 @@
   transition: opacity 0.2s;
   height: 100% !important;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  padding-top: 12px;
 }
 
 .container td {
   position: relative;
+  vertical-align: top;
 }
 
 .container th:last-of-type,
