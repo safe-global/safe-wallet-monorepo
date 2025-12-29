@@ -65,25 +65,34 @@ export function AnalysisIssuesDisplay({ result, severity }: AnalysisIssuesDispla
                     address={issue.address}
                   />
                 )}
+
+                {/* Show description if there is no address as a fallback */}
+                {!issue.address && issue.description && (
+                  <Text fontSize="$2" lineHeight={14} color="$colorLight" fontFamily="$body" fontWeight="400">
+                    {issue.description}
+                  </Text>
+                )}
               </AnalysisPaper>
 
-              <View
-                backgroundColor={issue.address ? issueBackgroundColor : 'transparent'}
-                padding="$2"
-                width="100%"
-                borderBottomLeftRadius={'$4'}
-                borderBottomRightRadius={'$4'}
-              >
-                <Text
-                  fontSize={'$2'}
-                  lineHeight={14}
-                  color={issue.address ? '$color' : '$colorLight'}
-                  fontFamily="$body"
-                  fontWeight="400"
+              {issue.address && (
+                <View
+                  backgroundColor={issue.address ? issueBackgroundColor : 'transparent'}
+                  padding="$2"
+                  width="100%"
+                  borderBottomLeftRadius={'$4'}
+                  borderBottomRightRadius={'$4'}
                 >
-                  {issue.description}
-                </Text>
-              </View>
+                  <Text
+                    fontSize={'$2'}
+                    lineHeight={14}
+                    color={issue.address ? '$color' : '$colorLight'}
+                    fontFamily="$body"
+                    fontWeight="400"
+                  >
+                    {issue.description}
+                  </Text>
+                </View>
+              )}
             </View>
           )
         }),
