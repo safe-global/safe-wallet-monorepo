@@ -33,8 +33,8 @@
     "static-serve": "yarn build && yarn serve",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build --quiet",
-    "test:storybook": "cross-env NODE_ENV=test jest --testMatch '**/*.stories.test.tsx' --testPathIgnorePatterns='/node_modules/' --testPathIgnorePatterns='/.next/'",
-    "test:storybook:ci": "cross-env NODE_ENV=test yarn test:storybook --ci --silent --coverage=false --watchAll=false",
+    "test:storybook": "cross-env NODE_ENV=test TZ=UTC jest --testMatch '**/*.stories.test.tsx' --testPathIgnorePatterns='/node_modules/' --testPathIgnorePatterns='/.next/'",
+    "test:storybook:ci": "cross-env NODE_ENV=test TZ=UTC yarn test:storybook --ci --silent --coverage=false --watchAll=false",
     "generate:storybook-tests": "node scripts/generate-storybook-tests.cjs",
     "integrity": "node scripts/integrity-hashes.cjs"
   },

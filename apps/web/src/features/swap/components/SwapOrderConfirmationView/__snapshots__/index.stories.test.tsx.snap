@@ -214,7 +214,7 @@ exports[`./index.stories CustomRecipient 1`] = `
           <div
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
-            Dec 24, 2024 - 1:54:40 AM
+            Dec 24, 2024 - 12:54:40 AM
           </div>
         </div>
       </div>
@@ -702,7 +702,7 @@ exports[`./index.stories Default 1`] = `
           <div
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
-            Dec 24, 2024 - 1:54:40 AM
+            Dec 24, 2024 - 12:54:40 AM
           </div>
         </div>
       </div>
