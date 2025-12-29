@@ -52,8 +52,17 @@ const ManageTokensButton = forwardRef<ManageTokensButtonHandle, ManageTokensButt
           startIcon={<SettingsIcon fontSize="small" />}
           data-testid="manage-tokens-button"
           className={css.button}
+          sx={{
+            backgroundColor: { xs: 'var(--color-background-paper)', sm: 'transparent' },
+            padding: { xs: '6px', sm: '8px' },
+            minWidth: { xs: '40px', sm: 'auto' },
+            '&:hover': { backgroundColor: { xs: '#ffffff', sm: 'var(--color-background-secondary)' } },
+            '& .MuiButton-startIcon': { marginRight: { xs: 0, sm: '8px' } },
+          }}
         >
-          <Typography fontSize="medium">Manage tokens</Typography>
+          <Typography fontSize="medium" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+            Manage tokens
+          </Typography>
         </Button>
         <ManageTokensMenu
           anchorEl={anchorEl}

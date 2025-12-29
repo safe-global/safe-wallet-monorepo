@@ -33,15 +33,9 @@ const CurrencySelect = (): ReactElement => {
         onChange={handleChange}
         onOpen={() => handleTrack('Open')}
         onClose={() => handleTrack('Close')}
-        MenuProps={{
-          PaperProps: {
-            sx: {
-              marginTop: '8px',
-            },
-          },
-        }}
+        MenuProps={{ PaperProps: { sx: { marginTop: '8px' } } }}
         sx={{
-          backgroundColor: '#ffffff',
+          backgroundColor: 'var(--color-background-paper)',
           '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
           '&:hover .MuiOutlinedInput-notchedOutline': { border: 'none' },
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': { border: 'none' },
