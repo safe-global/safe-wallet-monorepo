@@ -24,11 +24,7 @@ interface ManageTokensMenuProps {
   _hasDefaultTokenlist?: boolean
 }
 
-const menuItemHoverSx = {
-  '&:hover': {
-    backgroundColor: ({ palette }: Theme) => palette.background.lightGrey,
-  },
-}
+const menuItemHoverSx = { '&:hover': { backgroundColor: ({ palette }: Theme) => palette.background.lightGrey } }
 
 const ManageTokensMenu = ({
   anchorEl,
@@ -70,17 +66,9 @@ const ManageTokensMenu = ({
       anchorEl={anchorEl}
       open={open}
       onClose={onClose}
-      anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'right',
-      }}
-      transformOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}
-      PaperProps={{
-        className: css.menu,
-      }}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      PaperProps={{ className: css.menu }}
       data-testid="manage-tokens-menu"
     >
       {hasDefaultTokenlist && (
@@ -92,7 +80,9 @@ const ManageTokensMenu = ({
         >
           <Box className={css.menuItemContent}>
             <Box className={css.menuItemLeft}>
-              <Typography variant="body2">Show all tokens</Typography>
+              <Typography variant="body2" fontWeight="bold">
+                Show all tokens
+              </Typography>
               <InfoTooltip
                 title={
                   <Typography>
@@ -124,7 +114,9 @@ const ManageTokensMenu = ({
         >
           <Box className={css.menuItemContent}>
             <Box className={css.menuItemLeft}>
-              <Typography variant="body2">Hide small balances</Typography>
+              <Typography variant="body2" fontWeight="bold">
+                Hide small balances
+              </Typography>
               <InfoTooltip
                 title={<Typography>Hide tokens with a value less than ${DUST_THRESHOLD}</Typography>}
                 data-testid="hide-small-balances-info-tooltip"
@@ -150,7 +142,9 @@ const ManageTokensMenu = ({
         data-testid="hide-tokens-menu-item"
       >
         <Track {...ASSETS_EVENTS.SHOW_HIDDEN_ASSETS}>
-          <Typography variant="body2">Hide tokens{hiddenTokensCount > 0 && ` (${hiddenTokensCount})`}</Typography>
+          <Typography variant="body2" fontWeight="bold">
+            Hide tokens{hiddenTokensCount > 0 && ` (${hiddenTokensCount})`}
+          </Typography>
         </Track>
       </MenuItem>
     </Menu>
