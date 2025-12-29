@@ -24,7 +24,7 @@ export function ReviewAndConfirmView({ txDetails, children, header }: ReviewAndC
       indicatorStyle={{
         backgroundColor: theme.color?.get(),
       }}
-      style={{ backgroundColor: isDark ? theme.background?.get() : theme.backgroundPaper?.get() }}
+      style={{ backgroundColor: isDark ? theme.background?.get() : theme.backgroundSheet?.get() }}
       labelStyle={{ color: theme.color?.get(), fontSize: 16, fontWeight: '600' }}
       activeColor={theme.color?.get()}
       inactiveColor={theme.colorSecondary?.get()}

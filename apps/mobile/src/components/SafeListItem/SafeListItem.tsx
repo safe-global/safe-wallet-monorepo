@@ -130,7 +130,7 @@ export function SafeListItem({
 SafeListItem.Header = function Header({ title }: { title: string }) {
   return (
     <Theme name="safe_list">
-      <View paddingVertical="$4" backgroundColor={'$background'}>
+      <View paddingVertical="$4" backgroundColor={'$backgroundSheet'}>
         <Text fontWeight={500} color="$colorSecondary">
           {title}
         </Text>

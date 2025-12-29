@@ -63,6 +63,7 @@ const darkPalette: ColorPalette = {
   background: {
     default: '#121312',
     main: '#121312',
+    sheet: '#121312',
     paper: '#1C1C1C',
     light: '#1B2A22',
     secondary: '#303033',
