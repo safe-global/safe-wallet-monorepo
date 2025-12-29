@@ -171,11 +171,7 @@ const AssetsTable = ({
               rawValue: Number(item.balance) / 10 ** (item.tokenInfo.decimals ?? 0),
               content: (
                 <Typography className={css.balanceColumn}>
-                  <TokenAmount
-                    value={item.balance}
-                    decimals={item.tokenInfo.decimals}
-                    tokenSymbol={item.tokenInfo.symbol}
-                  />
+                  <TokenAmount value={item.balance} decimals={item.tokenInfo.decimals} />
                 </Typography>
               ),
             },
