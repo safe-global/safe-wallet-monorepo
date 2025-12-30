@@ -9,7 +9,7 @@ exports[`./index.stories Default 1`] = `
     style="--Paper-shadow: none;"
   >
     <button
-      class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary button css-1lhbw4l-MuiButtonBase-root-MuiButton-root"
+      class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary css-nlwch2-MuiButtonBase-root-MuiButton-root"
       data-testid="manage-tokens-button"
       tabindex="0"
       type="button"
@@ -17,15 +17,13 @@ exports[`./index.stories Default 1`] = `
       <span
         class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeSmall css-6rkz1o-MuiButton-startIcon"
       >
-        <mock-icon
-          fontsize="small"
-        />
+        <mock-icon />
       </span>
-      <p
-        class="MuiTypography-root MuiTypography-body1 css-14mj7zj-MuiTypography-root"
+      <span
+        class="MuiBox-root css-u5d1ce"
       >
         Manage tokens
-      </p>
+      </span>
     </button>
   </div>
 </div>
@@ -44,7 +42,7 @@ exports[`./index.stories WithHiddenTokens 1`] = `
       style="--Paper-shadow: none;"
     >
       <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary button css-1lhbw4l-MuiButtonBase-root-MuiButton-root"
+        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary css-nlwch2-MuiButtonBase-root-MuiButton-root"
         data-testid="manage-tokens-button"
         tabindex="0"
         type="button"
@@ -52,15 +50,13 @@ exports[`./index.stories WithHiddenTokens 1`] = `
         <span
           class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeSmall css-6rkz1o-MuiButton-startIcon"
         >
-          <mock-icon
-            fontsize="small"
-          />
+          <mock-icon />
         </span>
-        <p
-          class="MuiTypography-root MuiTypography-body1 css-14mj7zj-MuiTypography-root"
+        <span
+          class="MuiBox-root css-u5d1ce"
         >
           Manage tokens
-        </p>
+        </span>
       </button>
     </div>
   </div>
@@ -76,7 +72,7 @@ exports[`./index.stories WithoutDefaultTokenlist 1`] = `
     style="--Paper-shadow: none;"
   >
     <button
-      class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary button css-1lhbw4l-MuiButtonBase-root-MuiButton-root"
+      class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary css-nlwch2-MuiButtonBase-root-MuiButton-root"
       data-testid="manage-tokens-button"
       tabindex="0"
       type="button"
@@ -84,15 +80,13 @@ exports[`./index.stories WithoutDefaultTokenlist 1`] = `
       <span
         class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeSmall css-6rkz1o-MuiButton-startIcon"
       >
-        <mock-icon
-          fontsize="small"
-        />
+        <mock-icon />
       </span>
-      <p
-        class="MuiTypography-root MuiTypography-body1 css-14mj7zj-MuiTypography-root"
+      <span
+        class="MuiBox-root css-u5d1ce"
       >
         Manage tokens
-      </p>
+      </span>
     </button>
   </div>
 </div>
