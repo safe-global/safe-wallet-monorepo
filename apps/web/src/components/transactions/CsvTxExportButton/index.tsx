@@ -148,8 +148,7 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
                 variant="contained"
                 onClick={onClick}
                 size="small"
-                sx={{ height: 38 }}
-                endIcon={
+                startIcon={
                   exportJobId ? (
                     <CircularProgress size={16} />
                   ) : (

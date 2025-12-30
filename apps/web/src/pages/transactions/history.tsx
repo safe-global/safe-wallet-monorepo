@@ -6,8 +6,7 @@ import TxHeader from '@/components/transactions/TxHeader'
 import { Box } from '@mui/material'
 import { useState } from 'react'
 import Button from '@mui/material/Button'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import FilterIcon from '@mui/icons-material/FilterList'
 import TxFilterForm from '@/components/transactions/TxFilterForm'
 import TrustedToggle from '@/components/transactions/TrustedToggle'
 import { useTxFilter } from '@/utils/tx-history-filter'
@@ -26,7 +25,6 @@ const History: NextPage = () => {
     setShowFilter((prev) => !prev)
   }
 
-  const ExpandIcon = showFilter ? ExpandLessIcon : ExpandMoreIcon
   return (
     <>
       <Head>
@@ -36,7 +34,13 @@ const History: NextPage = () => {
       <TxHeader>
         <TrustedToggle />
 
-        <Button variant="outlined" onClick={toggleFilter} size="small" endIcon={<ExpandIcon />}>
+        <Button
+          variant="contained"
+          onClick={toggleFilter}
+          size="small"
+          // endIcon={<ExpandIcon />}
+          startIcon={<FilterIcon />}
+        >
           {filter?.type ?? 'Filter'}
         </Button>
         {isCsvExportEnabled && <CsvTxExportButton hasActiveFilter={!!filter} />}

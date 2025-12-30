@@ -1,8 +1,7 @@
 import { useState, useImperativeHandle, forwardRef, type ReactElement } from 'react'
-import { Button, Typography } from '@mui/material'
+import { Box, Button } from '@mui/material'
 import ManageTokensMenu from './ManageTokensMenu'
 import { trackEvent, ASSETS_EVENTS } from '@/services/analytics'
-import css from './styles.module.css'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
 
 interface ManageTokensButtonProps {
@@ -47,22 +46,17 @@ const ManageTokensButton = forwardRef<ManageTokensButtonHandle, ManageTokensButt
       <>
         <Button
           onClick={handleClick}
-          variant="text"
+          variant="contained"
           size="small"
-          startIcon={<SettingsIcon fontSize="small" />}
+          startIcon={<SettingsIcon />}
           data-testid="manage-tokens-button"
-          className={css.button}
           sx={{
-            backgroundColor: { xs: 'var(--color-background-paper)', sm: 'transparent' },
-            padding: { xs: '6px', sm: '8px' },
-            minWidth: { xs: '40px', sm: 'auto' },
-            '&:hover': { backgroundColor: { xs: '#ffffff', sm: 'var(--color-background-secondary)' } },
             '& .MuiButton-startIcon': { marginRight: { xs: 0, sm: '8px' } },
           }}
         >
-          <Typography fontSize="medium" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+          <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
             Manage tokens
-          </Typography>
+          </Box>
         </Button>
         <ManageTokensMenu
           anchorEl={anchorEl}
