@@ -26,11 +26,7 @@ export const navItems: NavItem[] = [
   },
   { label: 'Address book', icon: <SvgIcon component={ABIcon} inheritViewBox />, href: AppRoutes.addressBook },
   { label: 'Apps', icon: <SvgIcon component={AppsIcon} inheritViewBox />, href: AppRoutes.apps.index },
-  {
-    label: 'Settings',
-    icon: <SvgIcon data-testid="settings-nav-icon" component={SettingsIcon} inheritViewBox />,
-    href: AppRoutes.settings.setup,
-  },
+
   { label: 'Swap', icon: <SvgIcon component={SwapIcon} inheritViewBox />, href: AppRoutes.swap },
   { label: 'Bridge', icon: <SvgIcon component={BridgeIcon} inheritViewBox />, href: AppRoutes.bridge },
   {
@@ -39,6 +35,11 @@ export const navItems: NavItem[] = [
     href: AppRoutes.earn,
   },
   { label: 'Stake', icon: <SvgIcon component={StakeIcon} inheritViewBox />, href: AppRoutes.stake },
+  {
+    label: 'Settings',
+    icon: <SvgIcon data-testid="settings-nav-icon" component={SettingsIcon} inheritViewBox />,
+    href: AppRoutes.settings.setup,
+  },
 ]
 
 export const transactionNavItems = [
