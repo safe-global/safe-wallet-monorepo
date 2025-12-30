@@ -68,7 +68,7 @@ export function AnalysisIssuesDisplay({ result, severity }: AnalysisIssuesDispla
 
                 {/* Show description if there is no address as a fallback */}
                 {!issue.address && issue.description && (
-                  <Text fontSize="$2" lineHeight={14} color="$colorLight" fontFamily="$body" fontWeight="400">
+                  <Text fontSize="$2" lineHeight={14} color="$colorLight">
                     {issue.description}
                   </Text>
                 )}
