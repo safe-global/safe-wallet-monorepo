@@ -30,7 +30,7 @@ const Sidebar = (): ReactElement => {
   return (
     <div data-testid="sidebar-container" className={css.container}>
       <div className={css.scroll}>
-        <ChainIndicator showLogo={false} />
+        <ChainIndicator showLogo={false} onlyLogo />
 
         {/* Open the safes list */}
         <button data-testid="open-safes-icon" className={css.drawerButton} onClick={onDrawerToggle}>

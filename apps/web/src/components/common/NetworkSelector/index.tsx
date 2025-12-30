@@ -367,6 +367,7 @@ const NetworkSelector = ({
   const safeAddress = useSafeAddress()
   const currentChain = useCurrentChain()
   const { currentSafeApp } = useSafeApps()
+  const borderColor = currentChain?.theme?.backgroundColor || 'transparent'
 
   const isSafeOpened = safeAddress !== ''
 
@@ -463,6 +464,14 @@ const NetworkSelector = ({
         },
       }}
       sx={{
+        backgroundColor: 'transparent',
+        borderBottom: `3px solid ${borderColor}`,
+        '& .MuiInput-root::before': {
+          borderBottom: 'none',
+        },
+        '& .MuiInput-root::after': {
+          borderBottom: 'none',
+        },
         '& .MuiSelect-select': {
           py: 0,
         },
