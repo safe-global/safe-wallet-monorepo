@@ -54,9 +54,7 @@ const PortfolioRefreshHint = ({
   const handleRefresh = useCallback(async () => {
     if (isFetching || isOnCooldown) return
 
-    trackEvent(PORTFOLIO_EVENTS.PORTFOLIO_REFRESH_CLICKED, {
-      [MixpanelEventParams.ENTRY_POINT]: entryPoint,
-    })
+    trackEvent(PORTFOLIO_EVENTS.PORTFOLIO_REFRESH_CLICKED, { [MixpanelEventParams.ENTRY_POINT]: entryPoint })
 
     try {
       await refetch()
@@ -75,7 +73,7 @@ const PortfolioRefreshHint = ({
 
   return (
     <Box display="flex" alignItems="center" gap={0.5}>
-      <Typography variant="caption" color="text.secondary">
+      <Typography variant="subtitle2" color="var(--color-text-secondary)">
         {isFetching ? 'Fetching data' : timeAgo ? <>Updated {timeAgo} ago</> : 'Loading...'}
       </Typography>
       <Tooltip title={tooltip} arrow>
