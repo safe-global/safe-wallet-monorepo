@@ -29,9 +29,10 @@ describe('txHistorySlice', () => {
     })
 
     it('should dispatch SUCCESS event if tx is pending', () => {
+      const pendingTx = pendingTxBuilder().with({ nonce: 1, status: PendingStatus.INDEXING }).build()
       const state = {
         pendingTxs: {
-          '0x123': pendingTxBuilder().with({ nonce: 1, status: PendingStatus.INDEXING }).build(),
+          '0x123': pendingTx,
         } as PendingTxsState,
       } as RootState
 
@@ -68,7 +69,10 @@ describe('txHistorySlice', () => {
       expect(txDispatchSpy).toHaveBeenCalledWith(txEvents.TxEvent.SUCCESS, {
         nonce: 1,
         txId: '0x123',
-        groupKey: expect.anything(),
+        chainId: pendingTx.chainId,
+        safeAddress: pendingTx.safeAddress,
+        groupKey: pendingTx.groupKey,
+        txHash: undefined,
       })
     })
 

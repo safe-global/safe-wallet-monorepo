@@ -92,15 +92,32 @@ const preview: Preview = {
       },
     },
   },
+  globalTypes: {
+    theme: {
+      description: 'Global theme for components',
+      defaultValue: 'light',
+      toolbar: {
+        title: 'Theme',
+        icon: 'circlehollow',
+        items: [
+          { value: 'light', icon: 'circlehollow', title: 'Light' },
+          { value: 'dark', icon: 'circle', title: 'Dark' },
+        ],
+        dynamicTitle: true,
+      },
+    },
+  },
   tags: ['autodocs'],
   decorators: [
-    (Story) => {
+    (Story, context) => {
+      const theme = context.globals.theme || 'light'
+
       return (
         <Provider store={storybookStore}>
           <PortalProvider shouldAddRootHost>
             <NavigationWrapper>
               <SafeAreaProvider>
-                <StorybookThemeProvider>
+                <StorybookThemeProvider theme={theme}>
                   <SafeToastProvider>
                     <View style={{ padding: 16, flex: 1 }} backgroundColor={'$background'}>
                       <Story />

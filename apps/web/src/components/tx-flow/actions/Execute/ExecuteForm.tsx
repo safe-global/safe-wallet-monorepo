@@ -13,9 +13,9 @@ import { useIsExecutionLoop, useTxActions } from '@/components/tx/shared/hooks'
 import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
 import useWalletCanRelay from '@/hooks/useWalletCanRelay'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
-import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
-import useGasTooHigh from '@/features/no-fee-november/hooks/useGasTooHigh'
-import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
+import useNoFeeCampaignEligibility from '@/features/no-fee-campaign/hooks/useNoFeeCampaignEligibility'
+import useGasTooHigh from '@/features/no-fee-campaign/hooks/useGasTooHigh'
+import useIsNoFeeCampaignEnabled from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'
 import { hasRemainingRelays } from '@/utils/relaying'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
@@ -74,18 +74,18 @@ export const ExecuteForm = ({
   // SC wallets can relay fully signed transactions
   const [walletCanRelay] = useWalletCanRelay(safeTx)
   const relays = useRelaysBySafe()
-  const { isEligible: isNoFeeNovember, remaining, limit, blockedAddress } = useNoFeeNovemberEligibility()
-  const isNoFeeNovemberEnabled = useIsNoFeeNovemberFeatureEnabled()
+  const { isEligible: isNoFeeCampaign, remaining, limit, blockedAddress } = useNoFeeCampaignEligibility()
+  const isNoFeeCampaignEnabled = useIsNoFeeCampaignEnabled()
   const gasTooHigh = useGasTooHigh(safeTx)
 
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
 
-  // No-fee November REPLACES relay when eligible AND not blocked AND gas is not too high AND has remaining
-  const canRelay = (!isNoFeeNovember || !isNoFeeNovemberEnabled) && walletCanRelay && hasRemainingRelays(relays[0])
-  const canNoFeeNovember =
-    isNoFeeNovemberEnabled && isNoFeeNovember && !blockedAddress && !gasTooHigh && !!remaining && remaining > 0
-  const isLimitReached = isNoFeeNovemberEnabled && isNoFeeNovember && !blockedAddress && remaining === 0
+  // No-fee Campaign REPLACES relay when eligible AND not blocked AND gas is not too high AND has remaining
+  const canRelay = (!isNoFeeCampaign || !isNoFeeCampaignEnabled) && walletCanRelay && hasRemainingRelays(relays[0])
+  const canNoFeeCampaign =
+    isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress && !gasTooHigh && !!remaining && remaining > 0
+  const isLimitReached = isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress && remaining === 0
 
   // If gas is too high or limit reached, force WALLET method
   useEffect(() => {
@@ -100,21 +100,21 @@ export const ExecuteForm = ({
     setExecutionMethod(newMethod)
   }
 
-  // Show execution selector when either no-fee november OR relay is available
+  // Show execution selector when either no-fee campaign OR relay is available
   // Also show if gas is too high but feature is otherwise available (to show disabled state)
   // Or if limit is reached (to show 0/X available state)
   const showExecutionSelector =
-    canNoFeeNovember ||
+    canNoFeeCampaign ||
     canRelay ||
-    (isNoFeeNovemberEnabled && isNoFeeNovember && !blockedAddress && gasTooHigh) ||
+    (isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress && gasTooHigh) ||
     isLimitReached
 
   // Determine which method will be used
   const willRelay = !!(canRelay && executionMethod === ExecutionMethod.RELAY)
-  const willNoFeeNovember = !!(
-    isNoFeeNovemberEnabled &&
-    canNoFeeNovember &&
-    executionMethod === ExecutionMethod.NO_FEE_NOVEMBER
+  const willNoFeeCampaign = !!(
+    isNoFeeCampaignEnabled &&
+    canNoFeeCampaign &&
+    executionMethod === ExecutionMethod.NO_FEE_CAMPAIGN
   )
 
   // Estimate gas limit
@@ -141,7 +141,7 @@ export const ExecuteForm = ({
 
     let executedTxId: string
     try {
-      executedTxId = await executeTx(txOptions, safeTx, txId, origin, willRelay || willNoFeeNovember)
+      executedTxId = await executeTx(txOptions, safeTx, txId, origin, willRelay || willNoFeeCampaign)
     } catch (_err) {
       const err = asError(_err)
       if (isWalletRejection(err)) {
@@ -186,8 +186,8 @@ export const ExecuteForm = ({
             onFormSubmit={setAdvancedParams}
             gasLimitError={gasLimitError}
             willRelay={willRelay}
-            noFeeNovember={
-              (canNoFeeNovember || isLimitReached) && executionMethod !== ExecutionMethod.WALLET
+            noFeeCampaign={
+              (canNoFeeCampaign || isLimitReached) && executionMethod !== ExecutionMethod.WALLET
                 ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 }
                 : undefined
             }
@@ -198,9 +198,9 @@ export const ExecuteForm = ({
               <ExecutionMethodSelector
                 executionMethod={executionMethod}
                 setExecutionMethod={handleExecutionMethodChange}
-                relays={canNoFeeNovember ? undefined : relays[0]}
-                noFeeNovember={
-                  isNoFeeNovember && !blockedAddress
+                relays={canNoFeeCampaign ? undefined : relays[0]}
+                noFeeCampaign={
+                  isNoFeeCampaign && !blockedAddress
                     ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 }
                     : undefined
                 }
@@ -217,7 +217,7 @@ export const ExecuteForm = ({
           <ErrorMessage>
             Cannot execute a transaction from the Safe Account itself, please connect a different account.
           </ErrorMessage>
-        ) : !walletCanPay && !willRelay && !willNoFeeNovember ? (
+        ) : !walletCanPay && !willRelay && !willNoFeeCampaign ? (
           <ErrorMessage level="info">
             Your connected wallet doesn&apos;t have enough funds to execute this transaction.
           </ErrorMessage>

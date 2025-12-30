@@ -196,35 +196,56 @@ jobs:
             const repo = context.repo;
             const baseUrl = `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/mobile-storybook-screenshots-storage/mobile-storybook-screenshots/${prNumber}`;
 
-            let body = '## 📱 Mobile Storybook Screenshots\n\n';
-            body += `Found ${screenshots.length} screenshot(s) for changed mobile components in this PR.\n\n`;
-
+            // Group screenshots by component and story, pairing light and dark modes
             const components = {};
             for (const file of screenshots) {
-              // Use greedy matching for component name to handle names with hyphens
-              const match = file.match(/^(.+)--(.+?)\.png$/);
+              // Match format: componentName--storyName--mode.png
+              const match = file.match(/^(.+)--(.+?)--(light|dark)\.png$/);
               if (match) {
-                const [, componentName, storyName] = match;
+                const [, componentName, storyName, mode] = match;
                 if (!components[componentName]) {
-                  components[componentName] = [];
+                  components[componentName] = {};
                 }
-                components[componentName].push({ storyName, file });
+                if (!components[componentName][storyName]) {
+                  components[componentName][storyName] = {};
+                }
+                components[componentName][storyName][mode] = file;
               }
             }
 
-            const useCollapsible = screenshots.length >= 10;
+            // Count total story pairs
+            let totalStories = 0;
+            for (const stories of Object.values(components)) {
+              totalStories += Object.keys(stories).length;
+            }
+
+            let body = '## 📱 Mobile Storybook Screenshots\n\n';
+            body += `Found ${totalStories} story pair(s) for changed mobile components in this PR.\n\n`;
+
+            const useCollapsible = totalStories >= 5;
 
             for (const [componentName, stories] of Object.entries(components)) {
               body += `### ${componentName}\n\n`;
-              for (const { storyName, file } of stories) {
-                const imageUrl = `${baseUrl}/${file}`;
+
+              for (const [storyName, modes] of Object.entries(stories)) {
+                const lightUrl = modes.light ? `${baseUrl}/${modes.light}` : '';
+                const darkUrl = modes.dark ? `${baseUrl}/${modes.dark}` : '';
+
                 if (useCollapsible) {
                   body += `<details>\n<summary>${storyName}</summary>\n\n`;
-                  body += `![${storyName}](${imageUrl})\n\n`;
+                }
+
+                body += `**${storyName}**\n\n`;
+                body += '| Light Mode | Dark Mode |\n';
+                body += '|------------|----------|\n';
+
+                const lightImg = lightUrl ? `<img src="${lightUrl}" alt="${storyName} - Light" width="100%">` : 'N/A';
+                const darkImg = darkUrl ? `<img src="${darkUrl}" alt="${storyName} - Dark" width="100%">` : 'N/A';
+
+                body += `| ${lightImg} | ${darkImg} |\n\n`;
+
+                if (useCollapsible) {
                   body += `</details>\n\n`;
-                } else {
-                  body += `**${storyName}**\n\n`;
-                  body += `![${storyName}](${imageUrl})\n\n`;
                 }
               }
             }

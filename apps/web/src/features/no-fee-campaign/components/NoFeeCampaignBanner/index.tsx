@@ -9,9 +9,9 @@ import { TxModalContext } from '@/components/tx-flow'
 import { NewTxFlow } from '@/components/tx-flow/flows'
 import CheckWallet from '@/components/common/CheckWallet'
 
-export const noFeeNovemberBannerID = 'noFeeNovemberBanner'
+export const noFeeCampaignBannerID = 'noFeeCampaignBanner'
 
-const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: () => void }) => {
+const NoFeeCampaignBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   const { setTxFlow } = useContext(TxModalContext)
 
   const handleNewTransaction = () => {
@@ -22,20 +22,20 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: () => void }) => {
     <Card className={css.banner}>
       <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2}>
         <Image
-          src="/images/common/no-fee-november/Cards.svg"
-          alt="No-Fee November Cards"
+          src="/images/common/no-fee-campaign/Cards_USDe.svg"
+          alt="USDe Logo"
           width={76}
           height={76}
           className={css.cardsImage}
         />
         <Box>
           <Typography variant="h4" fontWeight="bold" color="static.main" className={css.bannerText}>
-            Enjoy No-Fee November
+            Enjoy Free January
           </Typography>
           <Typography variant="body2" color="static.light" className={css.bannerTextInteractive}>
-            SAFE holders enjoy gasless transactions on Ethereum Mainnet this November.{' '}
+            No-Fee for Ethena USDe holders on Ethereum Mainnet, this January!{' '}
             <Link
-              href="https://help.safe.global/en/articles/456540-no-fee-november"
+              href="https://help.safe.global/en/articles/484423-no-fee-january-campaign"
               target="_blank"
               rel="noopener noreferrer"
               style={{ textDecoration: 'underline', fontWeight: 'bold' }}
@@ -43,7 +43,7 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: () => void }) => {
               Learn more
             </Link>
           </Typography>
-          <Track {...{ category: 'overview', action: 'open_no_fee_november_new_tx' }}>
+          <Track {...{ category: 'overview', action: 'open_no_fee_campaign_new_tx' }}>
             <CheckWallet allowSpendingLimit>
               {(isOk) => (
                 <Button
@@ -60,7 +60,7 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: () => void }) => {
           </Track>
         </Box>
       </Stack>
-      <Track {...{ category: 'overview', action: 'hide_no_fee_november_banner' }}>
+      <Track {...{ category: 'overview', action: 'hide_no_fee_campaign_banner' }}>
         <IconButton className={css.closeButton} aria-label="close" onClick={onDismiss}>
           <CloseIcon fontSize="small" color="border" />
         </IconButton>
@@ -69,4 +69,4 @@ const NoFeeNovemberBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   )
 }
 
-export default NoFeeNovemberBanner
+export default NoFeeCampaignBanner
