@@ -419,7 +419,7 @@ const NetworkSelector = ({
             onClick={onChainSelect}
             className={css.item}
           >
-            <ChainIndicatorWithFiatBalance chain={chain} safeAddress={safeAddress} isSelected={isSelected} />
+            <ChainIndicator responsive={isSelected} chainId={chain.chainId} inline />
           </Link>
         </MenuItem>
       )
