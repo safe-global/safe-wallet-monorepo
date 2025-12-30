@@ -15,7 +15,7 @@ const PageHeader = ({
   noBorder?: boolean
 }): ReactElement => {
   return (
-    <Box className={classNames(css.container, { [css.border]: !noBorder })}>
+    <Box className={classNames(css.container, { [css.border]: noBorder })}>
       <Typography variant="h3" className={css.title}>
         {title}
       </Typography>
