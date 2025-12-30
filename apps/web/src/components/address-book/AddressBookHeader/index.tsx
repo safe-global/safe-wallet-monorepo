@@ -82,7 +82,6 @@ function AddressBookHeader({
 
   return (
     <PageHeader
-      title="Address book"
       noBorder
       action={
         <Grid
