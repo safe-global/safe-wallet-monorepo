@@ -13,12 +13,12 @@ import CurrencySelect from '@/components/balances/CurrencySelect'
 import ManageTokensButton from '@/components/balances/ManageTokensButton'
 import StakingBanner from '@/components/dashboard/StakingBanner'
 import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useIsStakingBannerVisible'
-import NoFeeNovemberBanner from '@/features/no-fee-november/components/NoFeeNovemberBanner'
+import NoFeeCampaignBanner from '@/features/no-fee-campaign/components/NoFeeCampaignBanner'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { Box } from '@mui/material'
 import { BRAND_NAME } from '@/config/constants'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
-import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
+import useIsNoFeeCampaignEnabled from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'
 import PortfolioRefreshHint from '@/features/portfolio/components/PortfolioRefreshHint'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -28,16 +28,16 @@ const Balances: NextPage = () => {
   const toggleShowHiddenAssets = () => setShowHiddenAssets((prev) => !prev)
   const manageTokensButtonRef = useRef<ManageTokensButtonHandle>(null)
   const isStakingBannerVisible = useIsStakingBannerVisible()
-  const isNoFeeNovemberEnabled = useIsNoFeeNovemberFeatureEnabled()
-  const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
-  const [hideNoFeeNovemberBanner, setHideNoFeeNovemberBanner] = useLocalStorage<boolean>(
-    'hideNoFeeNovemberAssetsPageBanner',
+  const isNoFeeCampaignEnabled = useIsNoFeeCampaignEnabled()
+  const [hideNoFeeCampaignBanner, setHideNoFeeCampaignBanner] = useLocalStorage<boolean>(
+    'hideNoFeeCampaignAssetsPageBanner',
   )
+  const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
 
   const tokensFiatTotal = balances.tokensFiatTotal ? Number(balances.tokensFiatTotal) : undefined
 
-  const handleNoFeeNovemberDismiss = () => {
-    setHideNoFeeNovemberBanner(true)
+  const handleNoFeeCampaignDismiss = () => {
+    setHideNoFeeCampaignBanner(true)
   }
 
   return (
@@ -62,9 +62,9 @@ const Balances: NextPage = () => {
           <PagePlaceholder img={<NoAssetsIcon />} text="There was an error loading your assets" />
         ) : (
           <>
-            {isNoFeeNovemberEnabled && !hideNoFeeNovemberBanner && (
+            {isNoFeeCampaignEnabled && !hideNoFeeCampaignBanner && (
               <Box mb={2}>
-                <NoFeeNovemberBanner onDismiss={handleNoFeeNovemberDismiss} />
+                <NoFeeCampaignBanner onDismiss={handleNoFeeCampaignDismiss} />
               </Box>
             )}
 

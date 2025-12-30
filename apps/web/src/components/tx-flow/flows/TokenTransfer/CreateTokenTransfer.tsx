@@ -42,9 +42,9 @@ import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
-import NoFeeNovemberTransactionCard from '@/features/no-fee-november/components/NoFeeNovemberTransactionCard'
-import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoFeeNovemberEligibility'
-import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
+import NoFeeCampaignTransactionCard from '@/features/no-fee-campaign/components/NoFeeCampaignTransactionCard'
+import useNoFeeCampaignEligibility from '@/features/no-fee-campaign/hooks/useNoFeeCampaignEligibility'
+import useIsNoFeeCampaignEnabled from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'
 import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
 import uniq from 'lodash/uniq'
 
@@ -92,8 +92,8 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
   const [safeApps] = useRemoteSafeApps({ name: SafeAppsName.CSV })
   const isMassPayoutsEnabled = useHasFeature(FEATURES.MASS_PAYOUTS)
   const { onNext, data } = useContext(TxFlowContext) as TxFlowContextType<MultiTokenTransferParams>
-  const { isEligible } = useNoFeeNovemberEligibility()
-  const isNoFeeNovemberEnabled = useIsNoFeeNovemberFeatureEnabled()
+  const { isEligible } = useNoFeeCampaignEligibility()
+  const isNoFeeCampaignEnabled = useIsNoFeeCampaignEnabled()
 
   useEffect(() => {
     if (txNonce !== undefined) {
@@ -219,7 +219,7 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
                   >{`${recipientFields.length}/${MAX_RECIPIENTS}`}</Typography>
                 </Stack>
 
-                {isEligible && isNoFeeNovemberEnabled && <NoFeeNovemberTransactionCard />}
+                {isEligible && isNoFeeCampaignEnabled && <NoFeeCampaignTransactionCard />}
 
                 {hasInsufficientFunds && (
                   <Alert data-testid="insufficient-balance-error" severity="error">
