@@ -194,7 +194,7 @@ exports[`./index.stories Default 1`] = `
                               <span
                                 class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
                               >
-                                2,50 %
+                                2.50%
                               </span>
                             </div>
                           </span>
@@ -342,7 +342,7 @@ exports[`./index.stories Default 1`] = `
                               <span
                                 class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
                               >
-                                0,01 %
+                                0.01%
                               </span>
                             </div>
                           </span>
@@ -490,7 +490,7 @@ exports[`./index.stories Default 1`] = `
                               <span
                                 class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
                               >
-                                0,02 %
+                                0.02%
                               </span>
                             </div>
                           </span>
@@ -638,7 +638,7 @@ exports[`./index.stories Default 1`] = `
                               <span
                                 class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
                               >
-                                1,23 %
+                                1.23%
                               </span>
                             </div>
                           </span>
