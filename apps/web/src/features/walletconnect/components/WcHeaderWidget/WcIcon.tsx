@@ -17,7 +17,16 @@ const WcIcon = ({ sessionCount, sessionIcon, isError, onClick }: WcIconProps): R
 
   return (
     <Track {...WALLETCONNECT_EVENTS.POPUP_OPENED}>
-      <ButtonBase onClick={onClick} title="WalletConnect" sx={{ p: 2 }}>
+      <ButtonBase
+        onClick={onClick}
+        title="WalletConnect"
+        sx={{
+          p: 2,
+          '&:hover': {
+            backgroundColor: 'background.light',
+          },
+        }}
+      >
         <Badge
           variant={isError ? 'dot' : 'standard'}
           badgeContent={

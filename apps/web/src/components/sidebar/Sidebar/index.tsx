@@ -49,7 +49,7 @@ const Sidebar = (): ReactElement => {
           }}
         />
 
-        <Divider flexItem />
+        <Divider flexItem sx={{ borderColor: 'background.main' }} />
 
         <SidebarFooter />
       </div>

@@ -100,7 +100,15 @@ const NotificationCenter = (): ReactElement => {
 
   return (
     <>
-      <ButtonBase className={css.bell} onClick={handleClick}>
+      <ButtonBase
+        className={css.bell}
+        onClick={handleClick}
+        sx={{
+          '&:hover': {
+            backgroundColor: 'background.light',
+          },
+        }}
+      >
         <UnreadBadge
           invisible={!hasUnread}
           count={unreadCount}

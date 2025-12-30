@@ -33,12 +33,12 @@ export const navItems: NavItem[] = [
   },
   { label: 'Swap', icon: <SvgIcon component={SwapIcon} inheritViewBox />, href: AppRoutes.swap },
   { label: 'Bridge', icon: <SvgIcon component={BridgeIcon} inheritViewBox />, href: AppRoutes.bridge },
-  { label: 'Stake', icon: <SvgIcon component={StakeIcon} inheritViewBox />, href: AppRoutes.stake },
   {
     label: 'Earn',
     icon: <SvgIcon component={EarnIcon} inheritViewBox />,
     href: AppRoutes.earn,
   },
+  { label: 'Stake', icon: <SvgIcon component={StakeIcon} inheritViewBox />, href: AppRoutes.stake },
 ]
 
 export const transactionNavItems = [

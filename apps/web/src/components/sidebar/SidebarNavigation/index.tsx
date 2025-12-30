@@ -152,7 +152,7 @@ const Navigation = (): ReactElement => {
                 </SidebarListItemButton>
               </ListItemButton>
 
-              {isSettingsItem && <Divider sx={{ mt: 1, mb: 0.5 }} />}
+              {isSettingsItem && <Divider sx={{ mt: 1, mb: 0.5, borderColor: 'background.main' }} />}
             </div>
           </Tooltip>
         )
