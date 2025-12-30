@@ -354,9 +354,11 @@ const UndeployedNetworks = ({
 const NetworkSelector = ({
   onChainSelect,
   offerSafeCreation = false,
+  showBorder = true,
 }: {
   onChainSelect?: () => void
   offerSafeCreation?: boolean
+  showBorder?: boolean
 }): ReactElement => {
   const [open, setOpen] = useState<boolean>(false)
   const isDarkMode = useDarkMode()
@@ -367,7 +369,7 @@ const NetworkSelector = ({
   const safeAddress = useSafeAddress()
   const currentChain = useCurrentChain()
   const { currentSafeApp } = useSafeApps()
-  const borderColor = currentChain?.theme?.backgroundColor || 'transparent'
+  const borderColor = showBorder ? currentChain?.theme?.backgroundColor || 'transparent' : 'transparent'
 
   const isSafeOpened = safeAddress !== ''
 
