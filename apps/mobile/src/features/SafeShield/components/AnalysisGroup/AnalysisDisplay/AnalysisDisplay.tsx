@@ -64,7 +64,7 @@ export function AnalysisDisplay({ result, description, severity }: AnalysisDispl
 
           {isAddressChange(result) && <AddressChanges result={result} />}
 
-          <AnalysisIssuesDisplay result={result} />
+          <AnalysisIssuesDisplay result={result} severity={severity} />
 
           {/* Only show ShowAllAddress dropdown if there are no issues (to avoid duplication) */}
           {!hasIssues && result.addresses?.length ? (
