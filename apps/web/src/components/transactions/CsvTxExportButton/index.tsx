@@ -157,7 +157,7 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
                 }
                 disabled={!isOk || !!exportJobId}
               >
-                {exportJobId ? 'Exporting' : 'Export CSV'}
+                {exportJobId ? 'Exporting' : 'Export'}
               </Button>
             )}
           </OnlyOwner>
