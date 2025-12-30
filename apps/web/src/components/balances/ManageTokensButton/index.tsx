@@ -1,9 +1,9 @@
 import { useState, useImperativeHandle, forwardRef, type ReactElement } from 'react'
 import { Button, Typography } from '@mui/material'
-import SettingsIcon from '@mui/icons-material/Settings'
 import ManageTokensMenu from './ManageTokensMenu'
 import { trackEvent, ASSETS_EVENTS } from '@/services/analytics'
 import css from './styles.module.css'
+import SettingsIcon from '@/public/images/sidebar/settings.svg'
 
 interface ManageTokensButtonProps {
   onHideTokens?: () => void

@@ -297,7 +297,9 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
 
             '& .MuiTableRow-root': {
               transition: 'background-color 0.2s',
-              '&:not(:last-of-type)': { borderBottom: `1px solid ${theme.palette.border.light}` },
+              '&:not(:last-of-type)': {
+                borderBottom: `1px solid ${theme.palette.background.main}`,
+              },
             },
 
             '& .MuiTableRow-root:hover': { backgroundColor: theme.palette.background.light },
