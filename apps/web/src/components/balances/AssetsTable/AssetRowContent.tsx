@@ -60,7 +60,7 @@ export const AssetRowContent = ({
               />
             </Typography>
           )}
-          <Typography variant="body2" color="primary.light" className={css.desktopSymbol}>
+          <Typography variant="body2" color="primary.light" className={css.desktopSymbol} sx={{ fontSize: '13px' }}>
             {item.tokenInfo.symbol}
           </Typography>
         </Stack>

@@ -91,23 +91,9 @@ const AssetsTable = ({
   onOpenManageTokens?: () => void
 }): ReactElement => {
   const headCells = [
-    {
-      id: 'asset',
-      label: 'Asset',
-      width: '23%',
-    },
-    {
-      id: 'price',
-      label: 'Price',
-      width: '18%',
-      align: 'right',
-    },
-    {
-      id: 'balance',
-      label: 'Balance',
-      width: '18%',
-      align: 'right',
-    },
+    { id: 'asset', label: 'Asset', width: '23%' },
+    { id: 'price', label: 'Price', width: '18%', align: 'right' },
+    { id: 'balance', label: 'Balance', width: '18%', align: 'right' },
     {
       id: 'weight',
       label: (
@@ -118,19 +104,8 @@ const AssetsTable = ({
       width: '23%',
       align: 'right',
     },
-    {
-      id: 'value',
-      label: 'Value',
-      width: '18%',
-      align: 'right',
-    },
-    {
-      id: 'actions',
-      label: '',
-      width: showHiddenAssets ? '130px' : '86px',
-      align: 'right',
-      disableSort: true,
-    },
+    { id: 'value', label: 'Value', width: '18%', align: 'right' },
+    { id: 'actions', label: '', width: showHiddenAssets ? '130px' : '86px', align: 'right', disableSort: true },
   ]
   const { balances, loading } = useBalances()
   const { balances: visibleBalances } = useVisibleBalances()
@@ -196,20 +171,14 @@ const AssetsTable = ({
               rawValue: Number(item.balance) / 10 ** (item.tokenInfo.decimals ?? 0),
               content: (
                 <Typography className={css.balanceColumn}>
-                  <TokenAmount
-                    value={item.balance}
-                    decimals={item.tokenInfo.decimals}
-                    tokenSymbol={item.tokenInfo.symbol}
-                  />
+                  <TokenAmount value={item.balance} decimals={item.tokenInfo.decimals} />
                 </Typography>
               ),
             },
             weight: {
               rawValue: itemShareOfFiatTotal,
               content: itemShareOfFiatTotal ? (
-                <Typography variant="body2" textAlign="right">
-                  {formatPercentage(itemShareOfFiatTotal)}
-                </Typography>
+                <Typography textAlign="right">{formatPercentage(itemShareOfFiatTotal)}</Typography>
               ) : (
                 <></>
               ),
@@ -222,7 +191,7 @@ const AssetsTable = ({
                     <FiatBalance balanceItem={item} />
                   </Typography>
                   {item.fiatBalance24hChange && (
-                    <Typography variant="caption">
+                    <Typography variant="body2">
                       <FiatChange balanceItem={item} inline />
                     </Typography>
                   )}
