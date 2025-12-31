@@ -114,7 +114,7 @@ const Navigation = (): ReactElement => {
           ItemTag = queueSize ? <SidebarListItemCounter count={queueSize} /> : null
         }
 
-        const isSettingsItem = item.href === AppRoutes.settings.setup
+        const shouldPlaceDivider = item.href === AppRoutes.apps.index || item.href === AppRoutes.stake
 
         return (
           <Tooltip
@@ -152,7 +152,7 @@ const Navigation = (): ReactElement => {
                 </SidebarListItemButton>
               </ListItemButton>
 
-              {isSettingsItem && <Divider sx={{ mt: 1, mb: 0.5 }} />}
+              {shouldPlaceDivider && <Divider sx={{ mt: 1, mb: 0.5, borderColor: 'background.main' }} />}
             </div>
           </Tooltip>
         )

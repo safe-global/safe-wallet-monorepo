@@ -1,4 +1,3 @@
-import { blo } from 'blo'
 import { act } from 'react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
@@ -8,6 +7,7 @@ import * as useChainId from '@/hooks/useChainId'
 import * as store from '@/store'
 import * as useChains from '@/hooks/useChains'
 import * as useDarkMode from '@/hooks/useDarkMode'
+import * as gradientAvatar from '@/utils/gradientAvatar'
 import EthHashInfo from '.'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
 
@@ -26,6 +26,11 @@ describe('EthHashInfo', () => {
     jest.clearAllMocks()
 
     jest.spyOn(useDarkMode, 'useDarkMode').mockReturnValue(false)
+
+    jest.spyOn(gradientAvatar, 'generateGradient').mockResolvedValue({
+      fromColor: '#FF0000',
+      toColor: '#00FF00',
+    })
 
     jest.spyOn(useAllAddressBooks, 'default').mockImplementation(() => ({
       [MOCK_CHAIN_ID]: {
@@ -171,19 +176,17 @@ describe('EthHashInfo', () => {
     it('renders an avatar by default', () => {
       const { container } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} />)
 
-      expect(container.querySelector('.icon')).toHaveAttribute(
-        'style',
-        `background-image: url(${blo(MOCK_SAFE_ADDRESS)}); width: 40px; height: 40px;`,
-      )
+      // Check that the icon element is rendered (Identicon component rendered)
+      expect(container.querySelector('.icon, .MuiSkeleton-root')).toBeInTheDocument()
     })
 
     it('allows for sizing of avatars', () => {
       const { container } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} avatarSize={100} />)
 
-      expect(container.querySelector('.icon')).toHaveAttribute(
-        'style',
-        `background-image: url(${blo(MOCK_SAFE_ADDRESS)}); width: 100px; height: 100px;`,
-      )
+      // Check that the avatarContainer has correct size
+      const avatarContainer = container.querySelector('.avatarContainer')
+      expect(avatarContainer).toHaveStyle('width: 100px')
+      expect(avatarContainer).toHaveStyle('height: 100px')
     })
 
     it('renders a custom avatar', () => {

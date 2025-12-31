@@ -91,9 +91,9 @@ const AssetsTable = ({
   onOpenManageTokens?: () => void
 }): ReactElement => {
   const headCells = [
-    { id: 'asset', label: 'Asset', width: '23%' },
-    { id: 'price', label: 'Price', width: '18%', align: 'right' },
-    { id: 'balance', label: 'Balance', width: '18%', align: 'right' },
+    { id: 'asset', label: 'Asset', width: '35%' },
+    { id: 'price', label: 'Price', width: '16%', align: 'right' },
+    { id: 'balance', label: 'Balance', width: '16%', align: 'right' },
     {
       id: 'weight',
       label: (
@@ -101,11 +101,11 @@ const AssetsTable = ({
           <span>Weight</span>
         </Tooltip>
       ),
-      width: '23%',
+      width: '16%',
       align: 'right',
     },
-    { id: 'value', label: 'Value', width: '18%', align: 'right' },
-    { id: 'actions', label: '', width: showHiddenAssets ? '130px' : '86px', align: 'right', disableSort: true },
+    { id: 'value', label: 'Value', width: '17%', align: 'right' },
+    { id: 'actions', label: 'Actions', width: '130px', align: 'right' },
   ]
   const { balances, loading } = useBalances()
   const { balances: visibleBalances } = useVisibleBalances()

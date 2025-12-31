@@ -29,15 +29,9 @@
 
 .container th:last-of-type,
 .container td:last-of-type {
-  min-width: 86px;
-  width: 86px;
-  flex-shrink: 0;
-}
-
-.container.containerWideActions th:last-of-type,
-.container.containerWideActions td:last-of-type {
   min-width: 130px;
   width: 130px;
+  flex-shrink: 0;
 }
 
 .container td:last-of-type .sticky > *:last-child {
@@ -103,7 +97,7 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-1) 0;
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-background-main);
   margin-bottom: var(--space-1);
 }
 
@@ -111,7 +105,7 @@
   display: none;
   flex-direction: column;
   padding: var(--space-1) 0 var(--space-2) 0;
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-background-main);
 }
 
 .mobileRow:last-child {
@@ -215,7 +209,7 @@
 }
 
 .mobileButton:hover:not(:disabled) {
-  background-color: var(--color-background-light);
+  background-color: var(--color-background-paper);
 }
 
 .mobileButton:disabled,
@@ -238,11 +232,6 @@
 
 .container .mobileButtons {
   display: none;
-}
-
-.container.containerWideActions th:nth-child(5),
-.container.containerWideActions td:nth-child(5) {
-  padding-right: 138px;
 }
 
 .balanceColumn {

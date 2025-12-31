@@ -270,7 +270,7 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, footer }: Enha
             alignItems: 'center',
             height: '52px',
             borderTop: '1px solid',
-            borderColor: 'divider',
+            borderColor: 'var(--color-background-main)',
             borderTopLeftRadius: 0,
             borderTopRightRadius: 0,
           }}

@@ -145,7 +145,7 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
               }}
             >
               <Box className={css.select}>
-                <NetworkSelector />
+                <NetworkSelector showBorder={false} />
               </Box>
             </Grid>
           </Grid>

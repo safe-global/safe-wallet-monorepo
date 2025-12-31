@@ -1,10 +1,10 @@
 import type { ReactElement, CSSProperties } from 'react'
-import { useMemo } from 'react'
-import { blo } from 'blo'
+import { useState, useEffect } from 'react'
 import Skeleton from '@mui/material/Skeleton'
 
 import css from './styles.module.css'
 import { isAddress } from 'ethers'
+import { generateGradient } from '@/utils/gradientAvatar'
 
 export interface IdenticonProps {
   address: string
@@ -12,20 +12,25 @@ export interface IdenticonProps {
 }
 
 const Identicon = ({ address, size = 40 }: IdenticonProps): ReactElement => {
-  const style = useMemo<CSSProperties | null>(() => {
-    try {
-      if (!isAddress(address)) {
-        return null
-      }
-      const blockie = blo(address as `0x${string}`)
-      return {
-        backgroundImage: `url(${blockie})`,
-        width: `${size}px`,
-        height: `${size}px`,
-      }
-    } catch (e) {
-      return null
+  const [style, setStyle] = useState<CSSProperties | null>(null)
+
+  useEffect(() => {
+    if (!isAddress(address)) {
+      setStyle(null)
+      return
     }
+
+    generateGradient(address)
+      .then(({ fromColor, toColor }) => {
+        setStyle({
+          background: `linear-gradient(135deg, ${fromColor} 0%, ${toColor} 100%)`,
+          width: `${size}px`,
+          height: `${size}px`,
+        })
+      })
+      .catch(() => {
+        setStyle(null)
+      })
   }, [address, size])
 
   return !style ? (

@@ -22,7 +22,6 @@ export const SettingsHeader = ({
 
   return (
     <PageHeader
-      title={safeAddress ? 'Settings' : 'Preferences'}
       action={
         <div className={css.navWrapper}>
           <NavTabs tabs={navItems} />
