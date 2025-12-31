@@ -82,6 +82,10 @@ Here's the list of all the environment variables:
 | `NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS`            | Ecosystem ID address                                                                                                                                                                          |
 | `NEXT_PUBLIC_SPACES_SAFE_ACCOUNTS_LIMIT`      | Maximum number of Safe accounts allowed in Spaces                                                                                                                                             |
 | `NEXT_PUBLIC_IS_BEHIND_IAP`                   | Set to `true` when the app is behind an Identity-Aware Proxy                                                                                                                                  |
+| `NEXT_PUBLIC_HYPERNATIVE_API_BASE_URL`        | [Hypernative](https://hypernative.io) API base URL for threat analysis. Production: `https://api.hypernative.xyz`                                                                             |
+| `NEXT_PUBLIC_HYPERNATIVE_CLIENT_ID`           | Hypernative OAuth client ID. Defaults to `SAFE_WALLET_WEB` for production                                                                                                                     |
+| `NEXT_PUBLIC_HYPERNATIVE_REDIRECT_URI`        | Custom OAuth redirect URI (optional). If not set, dynamically generated as `{origin}/hypernative/oauth-callback`                                                                              |
+| `NEXT_PUBLIC_HN_MOCK_AUTH`                    | Enable mock authentication mode for Hypernative (set to `true` for local development without real OAuth). Simplifies testing by bypassing popup flow                                          |
 
 If you don't provide some of the variables, the corresponding features will be disabled in the UI.
 

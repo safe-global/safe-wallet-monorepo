@@ -19,6 +19,7 @@ import {
   Severity,
 } from '@safe-global/utils/features/safe-shield/types'
 import { getPrimaryResult, SEVERITY_PRIORITY } from '@safe-global/utils/features/safe-shield/utils'
+import { useAuthToken } from '@/features/hypernative/hooks'
 
 type SafeShieldContextType = {
   setRecipientAddresses: Dispatch<SetStateAction<string[] | undefined>>
@@ -41,7 +42,9 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
 
   const recipientOnlyAnalysis = useRecipientAnalysis(recipientAddresses)
   const counterpartyAnalysis = useCounterpartyAnalysis(safeTx)
-  const threat = useThreatAnalysis(safeTx)
+  const [{ token: hypernativeAuthToken }] = useAuthToken()
+  const threat = useThreatAnalysis(safeTx, hypernativeAuthToken) ?? [undefined, undefined, false]
+  const [threatAnalysisResult] = threat
 
   const recipient = recipientOnlyAnalysis || counterpartyAnalysis.recipient
   const contract = counterpartyAnalysis.contract
@@ -50,8 +53,6 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const [isRiskConfirmed, setIsRiskConfirmed] = useState(false)
 
   const { needsRiskConfirmation, primaryThreatSeverity } = useMemo(() => {
-    const [threatAnalysisResult] = threat || []
-
     const primaryThreatResult = getPrimaryResult(threatAnalysisResult?.THREAT || [])
 
     const severity = primaryThreatResult?.severity
@@ -61,7 +62,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
       needsRiskConfirmation,
       primaryThreatSeverity: severity,
     }
-  }, [threat])
+  }, [threatAnalysisResult])
 
   useEffect(() => {
     setIsRiskConfirmed(false)
