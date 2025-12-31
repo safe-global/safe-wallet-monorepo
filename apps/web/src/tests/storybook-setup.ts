@@ -5,9 +5,16 @@ import { setProjectAnnotations } from '@storybook/react'
 import * as previewAnnotations from '../../.storybook/preview'
 import { faker } from '@faker-js/faker'
 import * as formatters from '@safe-global/utils/utils/formatters'
+import * as gradientAvatar from '../utils/gradientAvatar'
 
 // Seed faker for deterministic test data
 faker.seed(123)
+
+// Mock generateGradient for deterministic snapshots
+jest.spyOn(gradientAvatar, 'generateGradient').mockResolvedValue({
+  fromColor: '#FF0000',
+  toColor: '#00FF00',
+})
 
 // Mock formatPercentage to use en-US locale for consistent snapshots
 // Production code remains locale-aware
