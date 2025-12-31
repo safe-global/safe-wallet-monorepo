@@ -23,23 +23,41 @@
   align-items: center;
 }
 
-.amount {
+.amountContainer {
+  display: flex;
+  align-items: center;
   min-width: 130px;
   flex-grow: 1;
+}
+
+.amount {
+  width: 100%;
 }
 
 .amount :global(.MuiInput-input) {
   padding-left: var(--space-2);
 }
 
+.endAdornment {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding-right: var(--space-2);
+}
+
+.fiatValue {
+  white-space: nowrap;
+}
+
 .max {
   text-transform: uppercase;
   background-color: var(--color-background-main);
   color: var(--color-text-primary);
-  font-size: 12px;
-  margin-right: var(--space-1);
-  min-height: 50px;
-  padding: var(--space-2);
+  font-size: 11px;
+  min-height: auto;
+  height: auto;
+  padding: var(--space-1) var(--space-2);
+  line-height: 1.2;
 }
 
 .select {
