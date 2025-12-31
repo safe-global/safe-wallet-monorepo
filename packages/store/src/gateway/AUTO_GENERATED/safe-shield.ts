@@ -149,11 +149,32 @@ export type ContractAnalysisResultDto = {
     | 'NEW_CONTRACT'
     | 'KNOWN_CONTRACT'
     | 'UNEXPECTED_DELEGATECALL'
+    | 'UNOFFICIAL_FALLBACK_HANDLER'
     | 'FAILED'
   /** User-facing title of the finding */
   title: string
   /** Detailed description explaining the finding and its implications */
   description: string
+}
+export type FallbackHandlerInfoDto = {
+  /** Address of the fallback handler contract */
+  address: string
+  /** Name of the fallback handler contract */
+  name?: string
+  /** Logo URL for the fallback handler contract */
+  logoUrl?: string
+}
+export type FallbackHandlerAnalysisResultDto = {
+  /** Severity level indicating the importance and risk */
+  severity: 'OK' | 'INFO' | 'WARN' | 'CRITICAL'
+  /** Status code for unofficial fallback handler */
+  type: 'UNOFFICIAL_FALLBACK_HANDLER'
+  /** User-facing title of the finding */
+  title: string
+  /** Detailed description explaining the finding and its implications */
+  description: string
+  /** Information about the fallback handler */
+  fallbackHandler?: FallbackHandlerInfoDto
 }
 export type ContractAnalysisDto = {
   /** Logo URL for the contract */
@@ -166,6 +187,8 @@ export type ContractAnalysisDto = {
   CONTRACT_INTERACTION?: ContractAnalysisResultDto[]
   /** Analysis results for delegatecall operations. Identifies unexpected or potentially dangerous delegate calls. */
   DELEGATECALL?: ContractAnalysisResultDto[]
+  /** Analysis results for setFallbackHandler operations. Identifies untrusted or unofficial fallback handlers in the transactions. */
+  FALLBACK_HANDLER?: FallbackHandlerAnalysisResultDto[]
 }
 export type CounterpartyAnalysisDto = {
   /** Recipient analysis results mapped by address. Contains recipient interaction history and bridge analysis.type: Record<Address, RecipientAnalysisDto>. */

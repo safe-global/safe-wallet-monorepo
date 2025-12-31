@@ -8810,6 +8810,7 @@
               "NEW_CONTRACT",
               "KNOWN_CONTRACT",
               "UNEXPECTED_DELEGATECALL",
+              "UNOFFICIAL_FALLBACK_HANDLER",
               "FAILED"
             ],
             "example": "VERIFIED"
@@ -8825,9 +8826,67 @@
         },
         "required": ["severity", "type", "title", "description"]
       },
+      "FallbackHandlerInfoDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Address of the fallback handler contract"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the fallback handler contract"
+          },
+          "logoUrl": {
+            "type": "string",
+            "description": "Logo URL for the fallback handler contract"
+          }
+        },
+        "required": ["address"]
+      },
+      "FallbackHandlerAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
+          },
+          "type": {
+            "type": "string",
+            "description": "Status code for unofficial fallback handler",
+            "enum": ["UNOFFICIAL_FALLBACK_HANDLER"]
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          },
+          "fallbackHandler": {
+            "description": "Information about the fallback handler",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FallbackHandlerInfoDto"
+              }
+            ]
+          }
+        },
+        "required": ["severity", "type", "title", "description"]
+      },
       "ContractAnalysisDto": {
         "type": "object",
         "properties": {
+          "logoUrl": {
+            "type": "string",
+            "description": "Logo URL for the contract"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the contract"
+          },
           "CONTRACT_VERIFICATION": {
             "description": "Analysis results for contract verification status. Shows whether contracts are verified and source code is available.",
             "example": [
@@ -8871,6 +8930,26 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ContractAnalysisResultDto"
+            }
+          },
+          "FALLBACK_HANDLER": {
+            "description": "Analysis results for setFallbackHandler operations. Identifies untrusted or unofficial fallback handlers in the transactions.",
+            "example": [
+              {
+                "severity": "WARN",
+                "type": "UNOFFICIAL_FALLBACK_HANDLER",
+                "title": "Unofficial fallback handler",
+                "description": "Verify the fallback handler is trusted and secure before proceeding.",
+                "fallbackHandler": {
+                  "address": "0x123",
+                  "name": "CompatibilityFallbackHandler",
+                  "logoUrl": "https://example.com/logo.png"
+                }
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FallbackHandlerAnalysisResultDto"
             }
           }
         }
@@ -9233,6 +9312,11 @@
             "items": {
               "$ref": "#/components/schemas/BalanceChangeDto"
             }
+          },
+          "request_id": {
+            "type": "string",
+            "description": "Blockaid request ID from x-request-id header. Used for reporting false positives/negatives via the report endpoint.",
+            "example": "11111111-1111-1111-1111-111111111111"
           }
         }
       },

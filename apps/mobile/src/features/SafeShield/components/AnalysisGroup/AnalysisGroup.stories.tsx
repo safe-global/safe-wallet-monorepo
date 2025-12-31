@@ -174,3 +174,25 @@ export const Complex: Story = {
     }),
   },
 }
+
+export const UnofficialFallbackHandler: Story = {
+  args: {
+    data: createContractData(faker.finance.ethereumAddress(), {
+      [StatusGroup.FALLBACK_HANDLER]: [ContractAnalysisResultBuilder.unofficialFallbackHandler().build()],
+    }),
+  },
+}
+
+export const UnofficialFallbackHandlerWithDetails: Story = {
+  args: {
+    data: createContractData(faker.finance.ethereumAddress(), {
+      [StatusGroup.FALLBACK_HANDLER]: [
+        ContractAnalysisResultBuilder.unofficialFallbackHandler({
+          address: faker.finance.ethereumAddress(),
+          name: faker.word.words(),
+          logoUrl: faker.internet.url(),
+        }).build(),
+      ],
+    }),
+  },
+}

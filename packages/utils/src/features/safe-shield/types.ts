@@ -20,6 +20,7 @@ export enum StatusGroup {
   CONTRACT_VERIFICATION = 'CONTRACT_VERIFICATION', // 5
   CONTRACT_INTERACTION = 'CONTRACT_INTERACTION', // 6
   DELEGATECALL = 'DELEGATECALL', // 7
+  FALLBACK_HANDLER = 'FALLBACK_HANDLER', // 8
   THREAT = 'THREAT', // 9
 }
 
@@ -48,6 +49,7 @@ export type StatusGroupType<T extends StatusGroup> = {
     | ContractStatus.NEW_CONTRACT
     | CommonSharedStatus.FAILED
   [StatusGroup.DELEGATECALL]: ContractStatus.UNEXPECTED_DELEGATECALL | CommonSharedStatus.FAILED
+  [StatusGroup.FALLBACK_HANDLER]: ContractStatus.UNOFFICIAL_FALLBACK_HANDLER | CommonSharedStatus.FAILED
   [StatusGroup.THREAT]:
     | ThreatStatus.MALICIOUS
     | ThreatStatus.MODERATE
@@ -55,7 +57,6 @@ export type StatusGroupType<T extends StatusGroup> = {
     | ThreatStatus.MASTERCOPY_CHANGE
     | ThreatStatus.OWNERSHIP_CHANGE
     | ThreatStatus.MODULE_CHANGE
-    | ThreatStatus.UNOFFICIAL_FALLBACK_HANDLER
     | CommonSharedStatus.FAILED
 }[T]
 
@@ -82,6 +83,7 @@ export enum ContractStatus {
   NEW_CONTRACT = 'NEW_CONTRACT', // 6A
   KNOWN_CONTRACT = 'KNOWN_CONTRACT', // 6B
   UNEXPECTED_DELEGATECALL = 'UNEXPECTED_DELEGATECALL', // 7
+  UNOFFICIAL_FALLBACK_HANDLER = 'UNOFFICIAL_FALLBACK_HANDLER', // 9H
 }
 
 export enum ThreatStatus {
@@ -91,7 +93,6 @@ export enum ThreatStatus {
   MASTERCOPY_CHANGE = 'MASTERCOPY_CHANGE', // 9E
   OWNERSHIP_CHANGE = 'OWNERSHIP_CHANGE', // 9F
   MODULE_CHANGE = 'MODULE_CHANGE', // 9G
-  UNOFFICIAL_FALLBACK_HANDLER = 'UNOFFICIAL_FALLBACK_HANDLER', // 9H
   HYPERNATIVE_GUARD = 'HYPERNATIVE_GUARD', // used only for Safes with Hypernative Guard installed
 }
 
@@ -138,10 +139,29 @@ export type ThreatAnalysisResult =
       | CommonSharedStatus.FAILED
     >
 
+export type ContractDetails = {
+  name?: string
+  logoUrl?: string
+}
+
+export type FallbackHandlerDetails = ContractDetails & {
+  address: string
+}
+
+export type UnofficialFallbackHandlerAnalysisResult = AnalysisResult<ContractStatus.UNOFFICIAL_FALLBACK_HANDLER> & {
+  /** Potential unofficial fallback handler details */
+  fallbackHandler?: FallbackHandlerDetails
+}
+
+export type FallbackHandlerAnalysisResult =
+  | UnofficialFallbackHandlerAnalysisResult
+  | AnalysisResult<CommonSharedStatus.FAILED>
+
 export type GroupedAnalysisResults<G extends StatusGroup = StatusGroup> = {
-  [K in Exclude<G, StatusGroup.THREAT>]?: AnalysisResult<StatusGroupType<K>>[]
+  [K in Exclude<G, StatusGroup.THREAT | StatusGroup.FALLBACK_HANDLER>]?: AnalysisResult<StatusGroupType<K>>[]
 } & {
   THREAT?: ThreatAnalysisResult[]
+  FALLBACK_HANDLER?: FallbackHandlerAnalysisResult[]
 }
 
 export type RecipientAnalysisResults = {
@@ -156,17 +176,13 @@ export type RecipientAnalysisResults = {
   }
 }
 
-export type ContractDetails = {
-  name: string
-  logoUrl: string
-}
-
 export type ContractAnalysisResults = {
   [address: string]: ContractDetails &
     GroupedAnalysisResults<
       | StatusGroup.CONTRACT_VERIFICATION
       | StatusGroup.CONTRACT_INTERACTION
       | StatusGroup.DELEGATECALL
+      | StatusGroup.FALLBACK_HANDLER
       | StatusGroup.COMMON
     >
 }

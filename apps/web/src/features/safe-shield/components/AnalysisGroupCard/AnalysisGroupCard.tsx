@@ -12,6 +12,7 @@ import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shiel
 import { SeverityIcon } from '../SeverityIcon'
 import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
 import { DelegateCallCardItem } from './DelegateCallCardItem'
+import { FallbackHandlerCardItem } from './FallbackHandlerCardItem'
 import { type AnalyticsEvent, MixpanelEventParams, trackEvent } from '@/services/analytics'
 import isEmpty from 'lodash/isEmpty'
 
@@ -121,6 +122,10 @@ export const AnalysisGroupCard = ({
 
               if (result.type === ContractStatus.UNEXPECTED_DELEGATECALL) {
                 return <DelegateCallCardItem key={index} result={result} isPrimary={isPrimary} />
+              }
+
+              if (result.type === ContractStatus.UNOFFICIAL_FALLBACK_HANDLER) {
+                return <FallbackHandlerCardItem key={index} result={result} isPrimary={isPrimary} />
               }
 
               return (
