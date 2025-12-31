@@ -29,15 +29,9 @@
 
 .container th:last-of-type,
 .container td:last-of-type {
-  min-width: 86px;
-  width: 86px;
-  flex-shrink: 0;
-}
-
-.container.containerWideActions th:last-of-type,
-.container.containerWideActions td:last-of-type {
   min-width: 130px;
   width: 130px;
+  flex-shrink: 0;
 }
 
 .container td:last-of-type .sticky > *:last-child {
@@ -238,11 +232,6 @@
 
 .container .mobileButtons {
   display: none;
-}
-
-.container.containerWideActions th:nth-child(5),
-.container.containerWideActions td:nth-child(5) {
-  padding-right: 138px;
 }
 
 .balanceColumn {

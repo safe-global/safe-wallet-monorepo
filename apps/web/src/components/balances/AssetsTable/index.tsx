@@ -105,7 +105,7 @@ const AssetsTable = ({
       align: 'right',
     },
     { id: 'value', label: 'Value', width: '17%', align: 'right' },
-    { id: 'actions', label: '', width: showHiddenAssets ? '130px' : '86px', align: 'right', disableSort: true },
+    { id: 'actions', label: 'Actions', width: '130px', align: 'right' },
   ]
   const { balances, loading } = useBalances()
   const { balances: visibleBalances } = useVisibleBalances()
