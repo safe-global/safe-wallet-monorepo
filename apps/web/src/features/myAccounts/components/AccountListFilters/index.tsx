@@ -10,11 +10,10 @@ import ClearIcon from '@mui/icons-material/Clear'
 
 type AccountListFiltersProps = {
   setSearchQuery: Dispatch<SetStateAction<string>>
-  variant?: 'page' | 'compact'
   showClearButton?: boolean
 }
 
-const AccountListFilters = ({ setSearchQuery, variant = 'page', showClearButton = true }: AccountListFiltersProps) => {
+const AccountListFilters = ({ setSearchQuery, showClearButton = true }: AccountListFiltersProps) => {
   const dispatch = useAppDispatch()
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const [internalValue, setInternalValue] = useState('')
@@ -36,53 +35,49 @@ const AccountListFilters = ({ setSearchQuery, variant = 'page', showClearButton 
     setSearchQuery('')
   }
 
-  const content = (
-    <Box display="flex" justifyContent="space-between" width="100%" gap={1}>
-      <TextField
-        id="search-by-name"
-        placeholder="Search by name, ENS, address, or chain"
-        aria-label="Search Safe list by name"
-        variant="filled"
-        hiddenLabel
-        value={internalValue}
-        onChange={handleChange}
-        className={css.search}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SvgIcon
-                component={SearchIcon}
-                inheritViewBox
-                fontWeight="bold"
-                fontSize="small"
-                sx={{
-                  color: 'var(--color-border-main)',
-                  '.MuiInputBase-root.Mui-focused &': { color: 'var(--color-text-primary)' },
-                }}
-              />
-            </InputAdornment>
-          ),
-          endAdornment:
-            showClearButton && internalValue ? (
-              <InputAdornment position="end">
-                <IconButton size="small" onClick={handleClear} edge="end">
-                  <ClearIcon fontSize="small" />
-                </IconButton>
+  return (
+    <Paper sx={{ px: 2, py: 1 }}>
+      <Box display="flex" justifyContent="space-between" width="100%" gap={1}>
+        <TextField
+          id="search-by-name"
+          placeholder="Search by name, ENS, address, or chain"
+          aria-label="Search Safe list by name"
+          variant="filled"
+          hiddenLabel
+          value={internalValue}
+          onChange={handleChange}
+          className={css.search}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SvgIcon
+                  component={SearchIcon}
+                  inheritViewBox
+                  fontWeight="bold"
+                  fontSize="small"
+                  sx={{
+                    color: 'var(--color-border-main)',
+                    '.MuiInputBase-root.Mui-focused &': { color: 'var(--color-text-primary)' },
+                  }}
+                />
               </InputAdornment>
-            ) : null,
-          disableUnderline: true,
-        }}
-        fullWidth
-        size="small"
-      />
-      <OrderByButton orderBy={orderBy} onOrderByChange={handleOrderByChange} />
-    </Box>
-  )
-
-  return variant === 'page' ? (
-    <Paper sx={{ px: 2, py: 1 }}>{content}</Paper>
-  ) : (
-    <Box sx={{ px: 2, py: 1.5 }}>{content}</Box>
+            ),
+            endAdornment:
+              showClearButton && internalValue ? (
+                <InputAdornment position="end">
+                  <IconButton size="small" onClick={handleClear} edge="end">
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                </InputAdornment>
+              ) : null,
+            disableUnderline: true,
+          }}
+          fullWidth
+          size="small"
+        />
+        <OrderByButton orderBy={orderBy} onOrderByChange={handleOrderByChange} />
+      </Box>
+    </Paper>
   )
 }
 

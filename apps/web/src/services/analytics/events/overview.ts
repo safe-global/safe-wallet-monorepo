@@ -217,7 +217,6 @@ export enum OPEN_SAFE_LABELS {
 
 export enum OVERVIEW_LABELS {
   sidebar = 'sidebar',
-  sidebar_drawer = 'sidebar_drawer',
   quick_add = 'quick_add',
   quick_remove = 'quick_remove',
   top_bar = 'top_bar',
