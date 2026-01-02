@@ -62,34 +62,25 @@ const AllSafesList = ({ onSelect }: AllSafesListProps): ReactElement => {
 
   return (
     <Box>
-      {currentSafe && (
-        <>
-          <Typography className={css.sectionLabel}>Current</Typography>
-          {isMultiChainSafeItem(currentSafe) ? (
-            <MultiAccountItem multiSafeAccountItem={currentSafe} onLinkClick={onSelect} />
-          ) : (
-            <SingleAccountItem safeItem={currentSafe} onLinkClick={onSelect} />
-          )}
-        </>
-      )}
+      {currentSafe &&
+        (isMultiChainSafeItem(currentSafe) ? (
+          <MultiAccountItem multiSafeAccountItem={currentSafe} onLinkClick={onSelect} />
+        ) : (
+          <SingleAccountItem safeItem={currentSafe} onLinkClick={onSelect} />
+        ))}
 
-      {otherSafes.length > 0 && (
-        <>
-          {currentSafe && <Typography className={css.sectionLabel}>All Accounts</Typography>}
-          {otherSafes.map((safeItem) => {
-            if (isMultiChainSafeItem(safeItem)) {
-              return <MultiAccountItem key={safeItem.address} multiSafeAccountItem={safeItem} onLinkClick={onSelect} />
-            }
-            return (
-              <SingleAccountItem
-                key={`${safeItem.chainId}:${safeItem.address}`}
-                safeItem={safeItem}
-                onLinkClick={onSelect}
-              />
-            )
-          })}
-        </>
-      )}
+      {otherSafes.map((safeItem) => {
+        if (isMultiChainSafeItem(safeItem)) {
+          return <MultiAccountItem key={safeItem.address} multiSafeAccountItem={safeItem} onLinkClick={onSelect} />
+        }
+        return (
+          <SingleAccountItem
+            key={`${safeItem.chainId}:${safeItem.address}`}
+            safeItem={safeItem}
+            onLinkClick={onSelect}
+          />
+        )
+      })}
     </Box>
   )
 }

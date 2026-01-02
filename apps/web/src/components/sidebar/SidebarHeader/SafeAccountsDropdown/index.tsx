@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { Popover, Paper, Tabs, Tab, Box, Button, IconButton, Tooltip } from '@mui/material'
 import { useRouter } from 'next/router'
 import AddIcon from '@mui/icons-material/Add'
@@ -9,11 +9,7 @@ import { AppRoutes } from '@/config/routes'
 import { trackEvent, OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import useWallet from '@/hooks/wallets/useWallet'
 import ConnectWalletButton from '@/components/common/ConnectWallet/ConnectWalletButton'
-import { useAppDispatch, useAppSelector } from '@/store'
-import { selectOrderByPreference, setOrderByPreference } from '@/store/orderByPreferenceSlice'
-import type { OrderByOption } from '@/store/orderByPreferenceSlice'
-import OrderByButton from '@/features/myAccounts/components/OrderByButton'
-import SearchField from './SearchField'
+import AccountListFilters from '@/features/myAccounts/components/AccountListFilters'
 import PinnedSafesList from './PinnedSafesList'
 import AllSafesList from './AllSafesList'
 import FilteredSafesList from './FilteredSafesList'
@@ -32,8 +28,6 @@ const SafeAccountsDropdown = ({ anchorEl, open, onClose }: SafeAccountsDropdownP
   const [searchQuery, setSearchQuery] = useState('')
   const router = useRouter()
   const wallet = useWallet()
-  const dispatch = useAppDispatch()
-  const { orderBy } = useAppSelector(selectOrderByPreference)
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: 'pinned' | 'all' | 'yourdata') => {
     setActiveTab(newValue)
@@ -44,15 +38,19 @@ const SafeAccountsDropdown = ({ anchorEl, open, onClose }: SafeAccountsDropdownP
     })
   }
 
-  const handleSearch = useCallback((value: string) => {
-    setSearchQuery(value)
-    if (value) {
-      trackEvent({
-        ...OVERVIEW_EVENTS.ACCOUNTS_DROPDOWN_SEARCH,
-        label: OVERVIEW_LABELS.sidebar_dropdown,
-      })
-    }
-  }, [])
+  const setSearchQueryWithTracking = useMemo(
+    () => (value: React.SetStateAction<string>) => {
+      const newValue = typeof value === 'function' ? value(searchQuery) : value
+      setSearchQuery(newValue)
+      if (newValue) {
+        trackEvent({
+          ...OVERVIEW_EVENTS.ACCOUNTS_DROPDOWN_SEARCH,
+          label: OVERVIEW_LABELS.sidebar_dropdown,
+        })
+      }
+    },
+    [searchQuery],
+  )
 
   const handleSafeSelect = useCallback(() => {
     trackEvent({
@@ -70,10 +68,6 @@ const SafeAccountsDropdown = ({ anchorEl, open, onClose }: SafeAccountsDropdownP
   const handleCreateSafe = () => {
     router.push(AppRoutes.newSafe.create)
     onClose()
-  }
-
-  const handleOrderByChange = (orderBy: OrderByOption) => {
-    dispatch(setOrderByPreference({ orderBy }))
   }
 
   const handleOpenFullScreen = () => {
@@ -117,16 +111,11 @@ const SafeAccountsDropdown = ({ anchorEl, open, onClose }: SafeAccountsDropdownP
           <>
             {/* Search Bar and Sort */}
             <Box className={css.filtersWrapper}>
-              <Box className={css.searchFieldWrapper}>
-                <SearchField
-                  value={searchQuery}
-                  onChange={handleSearch}
-                  placeholder="Search by name, ENS, address, or chain"
-                />
-              </Box>
-              <Box className={css.sortButtonWrapper}>
-                <OrderByButton orderBy={orderBy} onOrderByChange={handleOrderByChange} />
-              </Box>
+              <AccountListFilters
+                setSearchQuery={setSearchQueryWithTracking}
+                variant="compact"
+                showClearButton={true}
+              />
             </Box>
 
             {/* Action Buttons */}

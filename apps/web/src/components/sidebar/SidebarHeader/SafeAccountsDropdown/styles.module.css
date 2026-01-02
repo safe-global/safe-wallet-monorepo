@@ -38,26 +38,14 @@
 
 /* Filters wrapper (search + sort) */
 .filtersWrapper {
-  display: flex;
-  gap: 8px;
-  padding: 12px 16px;
-  align-items: center;
-}
-
-.searchFieldWrapper {
-  flex: 1;
-  min-width: 0;
-}
-
-.sortButtonWrapper {
-  flex-shrink: 0;
+  padding: 0;
 }
 
 /* Action buttons container (Add/Create buttons) */
 .actions {
   display: flex;
   gap: 8px;
-  padding: 0 16px 12px;
+  padding: 0 16px 20px;
   align-items: stretch;
 }
 
@@ -85,9 +73,12 @@
 .accountList :global(.MuiListItemButton-root) {
   margin-left: 16px !important;
   margin-right: 16px !important;
+  min-height: 98px !important;
+  max-height: 98px !important;
+  align-items: center !important;
 }
 
-/* Remove left/right padding from accordion in dropdown */
+/* Remove left/right padding from accordion in dropdown, but keep consistent button padding */
 .accountList :global(.MuiAccordion-root) {
   padding-left: 0 !important;
   padding-right: 0 !important;
@@ -95,12 +86,19 @@
 
 .accountList :global(.MuiAccordionSummary-root) {
   padding-left: 0 !important;
-  padding-right: 0 !important;
+  padding-right: 16px !important;
+  min-height: 98px !important;
+  max-height: 98px !important;
 }
 
 .accountList :global(.MuiAccordionDetails-root) {
   padding-left: 0 !important;
   padding-right: 0 !important;
+}
+
+/* Fix multi-chain safe grid layout to match single safe layout */
+.accountList :global(.multiSafeLink) {
+  grid-template-columns: 60px 10fr 2fr 3fr !important;
 }
 
 /* Account list item */
