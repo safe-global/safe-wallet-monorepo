@@ -81,6 +81,28 @@
   max-height: 500px;
 }
 
+/* Override drawer component styling for dropdown context */
+.accountList :global(.MuiListItemButton-root) {
+  margin-left: 16px !important;
+  margin-right: 16px !important;
+}
+
+/* Remove left/right padding from accordion in dropdown */
+.accountList :global(.MuiAccordion-root) {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.accountList :global(.MuiAccordionSummary-root) {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.accountList :global(.MuiAccordionDetails-root) {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
 /* Account list item */
 .accountListItem {
   display: flex;

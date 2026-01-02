@@ -8,8 +8,8 @@ import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { getComparator } from '@/features/myAccounts/utils/utils'
 import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
-import AccountListItem from './AccountListItem'
-import MultiAccountListItem from './MultiAccountListItem'
+import SingleAccountItem from '@/features/myAccounts/components/AccountItems/SingleAccountItem'
+import MultiAccountItem from '@/features/myAccounts/components/AccountItems/MultiAccountItem'
 import css from './styles.module.css'
 
 type FilteredSafesListProps = {
@@ -46,10 +46,14 @@ const FilteredSafesList = ({ searchQuery, onSelect }: FilteredSafesListProps): R
       <Typography className={css.searchResultsHeader}>Found {searchResults.length} result(s)</Typography>
       {searchResults.map((safeItem) => {
         if (isMultiChainSafeItem(safeItem)) {
-          return <MultiAccountListItem key={safeItem.address} multiSafeItem={safeItem} onSelect={onSelect} />
+          return <MultiAccountItem key={safeItem.address} multiSafeAccountItem={safeItem} onLinkClick={onSelect} />
         }
         return (
-          <AccountListItem key={`${safeItem.chainId}:${safeItem.address}`} safeItem={safeItem} onSelect={onSelect} />
+          <SingleAccountItem
+            key={`${safeItem.chainId}:${safeItem.address}`}
+            safeItem={safeItem}
+            onLinkClick={onSelect}
+          />
         )
       })}
     </Box>

@@ -1,7 +1,6 @@
 import type { ReactElement } from 'react'
 import { useMemo } from 'react'
 import { Box, Typography } from '@mui/material'
-
 import { useAllSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
@@ -10,8 +9,8 @@ import useSafeAddress from '@/hooks/useSafeAddress'
 import useChainId from '@/hooks/useChainId'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
-import AccountListItem from './AccountListItem'
-import MultiAccountListItem from './MultiAccountListItem'
+import SingleAccountItem from '@/features/myAccounts/components/AccountItems/SingleAccountItem'
+import MultiAccountItem from '@/features/myAccounts/components/AccountItems/MultiAccountItem'
 import css from './styles.module.css'
 
 type PinnedSafesListProps = {
@@ -26,40 +25,31 @@ const PinnedSafesList = ({ onSelect }: PinnedSafesListProps): ReactElement => {
 
   const { currentSafe, otherPinnedSafes } = useMemo(() => {
     const allSafes = allSingleSafes && allMultiChainSafes ? [...allSingleSafes, ...allMultiChainSafes] : []
-
-    // Filter to only pinned safes
     const pinnedSafes = allSafes.filter((safe) => safe.isPinned)
 
-    // Find current safe and filter it out from the list
     let current = null
     const filteredSafes = pinnedSafes.filter((safe) => {
       if (isMultiChainSafeItem(safe)) {
-        // For multi-chain, check if any of the safes match current
         const hasCurrentSafe = safe.safes.some((s) => s.chainId === chainId && sameAddress(s.address, safeAddress))
         if (hasCurrentSafe) {
           current = safe
-          return false // Exclude current safe from the list
+          return false
         }
         return true
       } else {
-        // For single safe
         const isCurrentSafe = safe.chainId === chainId && sameAddress(safe.address, safeAddress)
         if (isCurrentSafe) {
           current = safe
-          return false // Exclude current safe from the list
+          return false
         }
         return true
       }
     })
 
-    // Sort by preference
     const comparator = getComparator(orderBy)
     const others = filteredSafes.sort(comparator)
 
-    return {
-      currentSafe: current,
-      otherPinnedSafes: others,
-    }
+    return { currentSafe: current, otherPinnedSafes: others }
   }, [allSingleSafes, allMultiChainSafes, orderBy, safeAddress, chainId])
 
   if (otherPinnedSafes.length === 0 && !currentSafe) {
@@ -77,9 +67,9 @@ const PinnedSafesList = ({ onSelect }: PinnedSafesListProps): ReactElement => {
         <>
           <Typography className={css.sectionLabel}>Current</Typography>
           {isMultiChainSafeItem(currentSafe) ? (
-            <MultiAccountListItem multiSafeItem={currentSafe} onSelect={onSelect} />
+            <MultiAccountItem multiSafeAccountItem={currentSafe} onLinkClick={onSelect} />
           ) : (
-            <AccountListItem safeItem={currentSafe} onSelect={onSelect} />
+            <SingleAccountItem safeItem={currentSafe} onLinkClick={onSelect} />
           )}
         </>
       )}
@@ -89,13 +79,13 @@ const PinnedSafesList = ({ onSelect }: PinnedSafesListProps): ReactElement => {
           {currentSafe && <Typography className={css.sectionLabel}>All Pinned</Typography>}
           {otherPinnedSafes.map((safeItem) => {
             if (isMultiChainSafeItem(safeItem)) {
-              return <MultiAccountListItem key={safeItem.address} multiSafeItem={safeItem} onSelect={onSelect} />
+              return <MultiAccountItem key={safeItem.address} multiSafeAccountItem={safeItem} onLinkClick={onSelect} />
             }
             return (
-              <AccountListItem
+              <SingleAccountItem
                 key={`${safeItem.chainId}:${safeItem.address}`}
                 safeItem={safeItem}
-                onSelect={onSelect}
+                onLinkClick={onSelect}
               />
             )
           })}
