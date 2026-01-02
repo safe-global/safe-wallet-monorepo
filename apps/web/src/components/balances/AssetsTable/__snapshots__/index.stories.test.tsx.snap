@@ -34,7 +34,7 @@ exports[`./index.stories Default 1`] = `
                   class="MuiTableRow-root MuiTableRow-head css-ee4r5n-MuiTableRow-root"
                 >
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1gdxp2i-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-10rwvyk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -57,7 +57,7 @@ exports[`./index.stories Default 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -80,7 +80,7 @@ exports[`./index.stories Default 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -103,7 +103,7 @@ exports[`./index.stories Default 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-10uxoiw-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -132,7 +132,7 @@ exports[`./index.stories Default 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-8owqfo-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -745,7 +745,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                   class="MuiTableRow-root MuiTableRow-head css-ee4r5n-MuiTableRow-root"
                 >
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1gdxp2i-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-10rwvyk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -768,7 +768,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -791,7 +791,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -814,7 +814,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-10uxoiw-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -843,7 +843,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-8owqfo-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -1456,7 +1456,7 @@ exports[`./index.stories Loading 1`] = `
                   class="MuiTableRow-root MuiTableRow-head css-ee4r5n-MuiTableRow-root"
                 >
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1gdxp2i-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-10rwvyk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -1479,7 +1479,7 @@ exports[`./index.stories Loading 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -1502,7 +1502,7 @@ exports[`./index.stories Loading 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -1525,7 +1525,7 @@ exports[`./index.stories Loading 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-10uxoiw-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -1554,7 +1554,7 @@ exports[`./index.stories Loading 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-8owqfo-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -2167,7 +2167,7 @@ exports[`./index.stories ManyTokens 1`] = `
                   class="MuiTableRow-root MuiTableRow-head css-ee4r5n-MuiTableRow-root"
                 >
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1gdxp2i-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-10rwvyk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -2190,7 +2190,7 @@ exports[`./index.stories ManyTokens 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -2213,7 +2213,7 @@ exports[`./index.stories ManyTokens 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -2236,7 +2236,7 @@ exports[`./index.stories ManyTokens 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-10uxoiw-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -2265,7 +2265,7 @@ exports[`./index.stories ManyTokens 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-8owqfo-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -2946,7 +2946,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
                   class="MuiTableRow-root MuiTableRow-head css-ee4r5n-MuiTableRow-root"
                 >
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1gdxp2i-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-10rwvyk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -2969,7 +2969,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -2992,7 +2992,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -3015,7 +3015,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-10uxoiw-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -3044,7 +3044,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-8owqfo-MuiTableCell-root"
                     scope="col"
                   >
                     <span

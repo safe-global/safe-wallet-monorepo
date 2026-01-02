@@ -94,7 +94,6 @@ const ManageTokensMenu = ({
             </Box>
             <Track {...(showAllTokens ? ASSETS_EVENTS.SHOW_ALL_TOKENS : ASSETS_EVENTS.SHOW_DEFAULT_TOKENS)}>
               <Switch
-                size="small"
                 checked={showAllTokens}
                 onClick={(e) => e.stopPropagation()}
                 onChange={handleToggleShowAllTokens}
@@ -123,7 +122,6 @@ const ManageTokensMenu = ({
               />
             </Box>
             <Switch
-              size="small"
               checked={hideDust}
               onClick={(e) => e.stopPropagation()}
               onChange={handleToggleHideDust}
