@@ -10,7 +10,7 @@ let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
-let iframeSelector = `iframe[src*="${constants.swapWidget}"]`
+let iframeSelector = `iframe[src*="${constants.swapWidgetStg}"]`
 
 describe('Swaps token tests', () => {
   before(async () => {
