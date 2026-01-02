@@ -194,14 +194,6 @@ export const OVERVIEW_EVENTS = {
     action: 'Hide earn banner',
     category: OVERVIEW_CATEGORY,
   },
-  OPEN_SAFE_LIST: {
-    action: 'Open Safe list',
-    category: OVERVIEW_CATEGORY,
-  },
-  SWITCH_SAFE: {
-    action: 'Switch Safe',
-    category: OVERVIEW_CATEGORY,
-  },
 }
 
 export const EXPLORE_POSSIBLE_EVENTS = {
