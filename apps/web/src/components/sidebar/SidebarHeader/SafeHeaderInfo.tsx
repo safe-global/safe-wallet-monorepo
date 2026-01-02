@@ -3,9 +3,6 @@ import Typography from '@mui/material/Typography'
 import Skeleton from '@mui/material/Skeleton'
 import ButtonBase from '@mui/material/ButtonBase'
 import Box from '@mui/material/Box'
-import { useTheme, useMediaQuery } from '@mui/material'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -33,8 +30,6 @@ const SafeHeaderInfo = ({ onClick, open }: SafeHeaderInfoProps = {}): ReactEleme
   const { threshold, owners } = safe
   const { ens } = useAddressResolver(safeAddress)
   const { isHypernativeGuard } = useIsHypernativeGuard()
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   return (
     <ButtonBase className={css.safeHeaderButton} onClick={onClick} disabled={!onClick}>
@@ -86,14 +81,14 @@ const SafeHeaderInfo = ({ onClick, open }: SafeHeaderInfoProps = {}): ReactEleme
       </div>
 
       {onClick && (
-        <Box className={css.chevron}>
-          {isMobile ? (
-            <ChevronRightIcon fontSize="small" />
-          ) : open ? (
-            <ExpandLessIcon fontSize="small" />
-          ) : (
-            <ExpandMoreIcon fontSize="small" />
-          )}
+        <Box
+          className={css.chevron}
+          sx={{
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.2s ease-in-out',
+          }}
+        >
+          <ChevronRightIcon fontSize="small" />
         </Box>
       )}
     </ButtonBase>

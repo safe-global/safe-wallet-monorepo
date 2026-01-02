@@ -17,7 +17,7 @@ const Sidebar = (): ReactElement => {
     setIsDrawerOpen((isOpen) => {
       trackEvent(
         { ...OVERVIEW_EVENTS.SIDEBAR, label: isOpen ? 'Close' : 'Open' },
-        { [MixpanelEventParams.SIDEBAR_ELEMENT]: isOpen ? 'Close Wallets' : 'Expand Wallets' },
+        { [MixpanelEventParams.SIDEBAR_ELEMENT]: isOpen ? 'Close My Accounts' : 'Open My Accounts' },
       )
 
       return !isOpen
@@ -32,7 +32,7 @@ const Sidebar = (): ReactElement => {
         <ChainIndicator showLogo={false} onlyLogo />
 
         {/* Address, balance, copy button, etc */}
-        <SidebarHeader />
+        <SidebarHeader onDrawerToggle={onDrawerToggle} isDrawerOpen={isDrawerOpen} />
 
         {/* Nav menu */}
         <SidebarNavigation />
