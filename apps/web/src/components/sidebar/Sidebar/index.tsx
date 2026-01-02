@@ -1,6 +1,5 @@
 import { useCallback, useState, type ReactElement } from 'react'
 import { Box, Divider, Drawer } from '@mui/material'
-import ChevronRight from '@mui/icons-material/ChevronRight'
 
 import ChainIndicator from '@/components/common/ChainIndicator'
 import SidebarHeader from '@/components/sidebar/SidebarHeader'
@@ -32,13 +31,8 @@ const Sidebar = (): ReactElement => {
       <div className={css.scroll}>
         <ChainIndicator showLogo={false} onlyLogo />
 
-        {/* Open the safes list */}
-        <button data-testid="open-safes-icon" className={css.drawerButton} onClick={onDrawerToggle}>
-          <ChevronRight />
-        </button>
-
         {/* Address, balance, copy button, etc */}
-        <SidebarHeader />
+        <SidebarHeader onDrawerToggle={onDrawerToggle} isDrawerOpen={isDrawerOpen} />
 
         {/* Nav menu */}
         <SidebarNavigation />

@@ -1,6 +1,9 @@
 import { type ReactElement } from 'react'
 import Typography from '@mui/material/Typography'
 import Skeleton from '@mui/material/Skeleton'
+import ButtonBase from '@mui/material/ButtonBase'
+import Box from '@mui/material/Box'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import SafeIcon from '@/components/common/SafeIcon'
@@ -15,7 +18,12 @@ import { InfoTooltip } from '@/features/stake/components/InfoTooltip'
 import css from './styles.module.css'
 import { useIsHypernativeGuard } from '@/features/hypernative/hooks'
 
-const SafeHeaderInfo = (): ReactElement => {
+type SafeHeaderInfoProps = {
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void
+  open?: boolean
+}
+
+const SafeHeaderInfo = ({ onClick, open }: SafeHeaderInfoProps = {}): ReactElement => {
   const { balances } = useVisibleBalances()
   const safeAddress = useSafeAddress()
   const { safe } = useSafeInfo()
@@ -24,51 +32,66 @@ const SafeHeaderInfo = (): ReactElement => {
   const { isHypernativeGuard } = useIsHypernativeGuard()
 
   return (
-    <div data-testid="safe-header-info" className={css.safe}>
-      <div data-testid="safe-icon">
-        {safeAddress ? (
-          <SafeIcon address={safeAddress} threshold={threshold} owners={owners?.length} />
-        ) : (
-          <Skeleton variant="circular" width={40} height={40} />
-        )}
-      </div>
-
-      <div className={css.address}>
-        {safeAddress ? (
-          <EthHashInfo
-            address={safeAddress}
-            shortAddress
-            showAvatar={false}
-            name={ens}
-            showShieldIcon={isHypernativeGuard}
-          />
-        ) : (
-          <Typography variant="body2">
-            <Skeleton variant="text" width={86} />
-            <Skeleton variant="text" width={120} />
-          </Typography>
-        )}
-
-        <Typography data-testid="currency-section" variant="body2" fontWeight={700}>
-          {safe.deployed ? (
-            balances.fiatTotal ? (
-              <>
-                <FiatValue value={balances.fiatTotal} />
-                {balances.isAllTokensMode && <InfoTooltip title="Total based on default tokens and positions." />}
-              </>
-            ) : (
-              <Skeleton variant="text" width={60} />
-            )
+    <ButtonBase className={css.safeHeaderButton} onClick={onClick} disabled={!onClick}>
+      <div data-testid="safe-header-info" className={css.safe}>
+        <div data-testid="safe-icon">
+          {safeAddress ? (
+            <SafeIcon address={safeAddress} threshold={threshold} owners={owners?.length} />
           ) : (
-            <TokenAmount
-              value={balances.items[0]?.balance}
-              decimals={balances.items[0]?.tokenInfo.decimals}
-              tokenSymbol={balances.items[0]?.tokenInfo.symbol}
-            />
+            <Skeleton variant="circular" width={40} height={40} />
           )}
-        </Typography>
+        </div>
+
+        <div className={css.address}>
+          {safeAddress ? (
+            <EthHashInfo
+              address={safeAddress}
+              shortAddress
+              showAvatar={false}
+              name={ens}
+              showShieldIcon={isHypernativeGuard}
+              copyAddress={false}
+            />
+          ) : (
+            <Typography variant="body2">
+              <Skeleton variant="text" width={86} />
+              <Skeleton variant="text" width={120} />
+            </Typography>
+          )}
+
+          <Typography data-testid="currency-section" variant="body2" fontWeight={700}>
+            {safe.deployed ? (
+              balances.fiatTotal ? (
+                <>
+                  <FiatValue value={balances.fiatTotal} />
+                  {balances.isAllTokensMode && <InfoTooltip title="Total based on default tokens and positions." />}
+                </>
+              ) : (
+                <Skeleton variant="text" width={60} />
+              )
+            ) : (
+              <TokenAmount
+                value={balances.items[0]?.balance}
+                decimals={balances.items[0]?.tokenInfo.decimals}
+                tokenSymbol={balances.items[0]?.tokenInfo.symbol}
+              />
+            )}
+          </Typography>
+        </div>
       </div>
-    </div>
+
+      {onClick && (
+        <Box
+          className={css.chevron}
+          sx={{
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.2s ease-in-out',
+          }}
+        >
+          <ChevronRightIcon fontSize="small" />
+        </Box>
+      )}
+    </ButtonBase>
   )
 }
 

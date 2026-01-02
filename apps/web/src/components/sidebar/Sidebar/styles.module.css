@@ -39,30 +39,6 @@
   min-height: 100px;
 }
 
-.drawerButton {
-  position: absolute !important;
-  z-index: 2;
-  color: var(--color-text-primary);
-  padding: 8px 0;
-  right: 0;
-  transform: translateX(50%);
-  margin-top: 54px;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  border: 0;
-  cursor: pointer;
-  background-color: var(--color-background-main);
-}
-
-.drawerButton:hover {
-  background-color: var(--color-secondary-background);
-}
-
-.drawerButton svg {
-  transform: translateX(-25%);
-}
-
 @media (max-width: 899.95px) {
   .container {
     padding-top: var(--header-height);
@@ -70,11 +46,5 @@
 
   .drawer {
     max-width: 90vw;
-  }
-
-  .drawerButton {
-    width: 60px;
-    height: 60px;
-    margin-top: 44px;
   }
 }
