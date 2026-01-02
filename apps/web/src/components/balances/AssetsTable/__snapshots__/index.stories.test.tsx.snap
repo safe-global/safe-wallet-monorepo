@@ -34,7 +34,7 @@ exports[`./index.stories Default 1`] = `
                   class="MuiTableRow-root MuiTableRow-head css-ee4r5n-MuiTableRow-root"
                 >
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1gdxp2i-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-10rwvyk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -57,7 +57,7 @@ exports[`./index.stories Default 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -80,7 +80,7 @@ exports[`./index.stories Default 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -103,7 +103,7 @@ exports[`./index.stories Default 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-10uxoiw-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -132,7 +132,7 @@ exports[`./index.stories Default 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-8owqfo-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -155,13 +155,32 @@ exports[`./index.stories Default 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-11b8h52-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1o1ep01-MuiTableCell-root"
                     scope="col"
-                  />
+                  >
+                    <span
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      role="button"
+                      tabindex="0"
+                    >
+                      Actions
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1f9eu6x-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                        data-testid="ArrowDownwardIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                        />
+                      </svg>
+                    </span>
+                  </th>
                 </tr>
               </thead>
               <tbody
-                class="MuiTableBody-root css-q3i0o9-MuiTableBody-root"
+                class="MuiTableBody-root css-hvwm6q-MuiTableBody-root"
               >
                 <tr
                   class="MuiTableRow-root css-ee4r5n-MuiTableRow-root"
@@ -701,7 +720,7 @@ exports[`./index.stories Default 1`] = `
             </table>
           </div>
           <div
-            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root css-d1p6l9-MuiPaper-root"
+            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root css-htyoc3-MuiPaper-root"
             style="--Paper-shadow: none;"
           />
         </div>
@@ -745,7 +764,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                   class="MuiTableRow-root MuiTableRow-head css-ee4r5n-MuiTableRow-root"
                 >
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1gdxp2i-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-10rwvyk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -768,7 +787,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -791,7 +810,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -814,7 +833,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-10uxoiw-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -843,7 +862,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-8owqfo-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -866,13 +885,32 @@ exports[`./index.stories EmptyBalance 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-11b8h52-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1o1ep01-MuiTableCell-root"
                     scope="col"
-                  />
+                  >
+                    <span
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      role="button"
+                      tabindex="0"
+                    >
+                      Actions
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1f9eu6x-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                        data-testid="ArrowDownwardIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                        />
+                      </svg>
+                    </span>
+                  </th>
                 </tr>
               </thead>
               <tbody
-                class="MuiTableBody-root css-q3i0o9-MuiTableBody-root"
+                class="MuiTableBody-root css-hvwm6q-MuiTableBody-root"
               >
                 <tr
                   class="MuiTableRow-root css-ee4r5n-MuiTableRow-root"
@@ -1412,7 +1450,7 @@ exports[`./index.stories EmptyBalance 1`] = `
             </table>
           </div>
           <div
-            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root css-d1p6l9-MuiPaper-root"
+            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root css-htyoc3-MuiPaper-root"
             style="--Paper-shadow: none;"
           />
         </div>
@@ -1456,7 +1494,7 @@ exports[`./index.stories Loading 1`] = `
                   class="MuiTableRow-root MuiTableRow-head css-ee4r5n-MuiTableRow-root"
                 >
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1gdxp2i-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-10rwvyk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -1479,7 +1517,7 @@ exports[`./index.stories Loading 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -1502,7 +1540,7 @@ exports[`./index.stories Loading 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -1525,7 +1563,7 @@ exports[`./index.stories Loading 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-10uxoiw-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -1554,7 +1592,7 @@ exports[`./index.stories Loading 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-8owqfo-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -1577,13 +1615,32 @@ exports[`./index.stories Loading 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-11b8h52-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1o1ep01-MuiTableCell-root"
                     scope="col"
-                  />
+                  >
+                    <span
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      role="button"
+                      tabindex="0"
+                    >
+                      Actions
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1f9eu6x-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                        data-testid="ArrowDownwardIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                        />
+                      </svg>
+                    </span>
+                  </th>
                 </tr>
               </thead>
               <tbody
-                class="MuiTableBody-root css-q3i0o9-MuiTableBody-root"
+                class="MuiTableBody-root css-hvwm6q-MuiTableBody-root"
               >
                 <tr
                   class="MuiTableRow-root css-ee4r5n-MuiTableRow-root"
@@ -2123,7 +2180,7 @@ exports[`./index.stories Loading 1`] = `
             </table>
           </div>
           <div
-            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root css-d1p6l9-MuiPaper-root"
+            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root css-htyoc3-MuiPaper-root"
             style="--Paper-shadow: none;"
           />
         </div>
@@ -2167,7 +2224,7 @@ exports[`./index.stories ManyTokens 1`] = `
                   class="MuiTableRow-root MuiTableRow-head css-ee4r5n-MuiTableRow-root"
                 >
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1gdxp2i-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-10rwvyk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -2190,7 +2247,7 @@ exports[`./index.stories ManyTokens 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -2213,7 +2270,7 @@ exports[`./index.stories ManyTokens 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -2236,7 +2293,7 @@ exports[`./index.stories ManyTokens 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-10uxoiw-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -2265,7 +2322,7 @@ exports[`./index.stories ManyTokens 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-8owqfo-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -2288,13 +2345,32 @@ exports[`./index.stories ManyTokens 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-11b8h52-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1o1ep01-MuiTableCell-root"
                     scope="col"
-                  />
+                  >
+                    <span
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      role="button"
+                      tabindex="0"
+                    >
+                      Actions
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1f9eu6x-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                        data-testid="ArrowDownwardIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                        />
+                      </svg>
+                    </span>
+                  </th>
                 </tr>
               </thead>
               <tbody
-                class="MuiTableBody-root css-q3i0o9-MuiTableBody-root"
+                class="MuiTableBody-root css-hvwm6q-MuiTableBody-root"
               >
                 <tr
                   class="MuiTableRow-root css-ee4r5n-MuiTableRow-root"
@@ -2834,7 +2910,7 @@ exports[`./index.stories ManyTokens 1`] = `
             </table>
           </div>
           <div
-            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root css-d1p6l9-MuiPaper-root"
+            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root css-htyoc3-MuiPaper-root"
             style="--Paper-shadow: none;"
           />
         </div>
@@ -2946,7 +3022,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
                   class="MuiTableRow-root MuiTableRow-head css-ee4r5n-MuiTableRow-root"
                 >
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1gdxp2i-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-10rwvyk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -2969,7 +3045,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -2992,7 +3068,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -3015,7 +3091,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-10uxoiw-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-6wrafk-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -3044,7 +3120,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
                     </span>
                   </th>
                   <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-km7fyn-MuiTableCell-root"
+                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-8owqfo-MuiTableCell-root"
                     scope="col"
                   >
                     <span
@@ -3069,11 +3145,30 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
                   <th
                     class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1o1ep01-MuiTableCell-root"
                     scope="col"
-                  />
+                  >
+                    <span
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      role="button"
+                      tabindex="0"
+                    >
+                      Actions
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1f9eu6x-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                        data-testid="ArrowDownwardIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                        />
+                      </svg>
+                    </span>
+                  </th>
                 </tr>
               </thead>
               <tbody
-                class="MuiTableBody-root css-q3i0o9-MuiTableBody-root"
+                class="MuiTableBody-root css-hvwm6q-MuiTableBody-root"
               >
                 <tr
                   class="MuiTableRow-root css-ee4r5n-MuiTableRow-root"
@@ -3613,7 +3708,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
             </table>
           </div>
           <div
-            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root css-d1p6l9-MuiPaper-root"
+            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root css-htyoc3-MuiPaper-root"
             style="--Paper-shadow: none;"
           />
         </div>

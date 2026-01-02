@@ -40,7 +40,7 @@ const CurrencySelect = (): ReactElement => {
           '&:hover .MuiOutlinedInput-notchedOutline': { border: 'none' },
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': { border: 'none' },
           '& .MuiSelect-icon': { color: 'text.primary', right: '8px' },
-          '& .MuiSelect-select': { paddingLeft: '12px', paddingRight: '32px !important', paddingY: '6px' },
+          '& .MuiSelect-select': { paddingLeft: '12px', paddingRight: '32px !important', paddingY: '5.25px' },
         }}
       >
         {fiatCurrencies.map((item) => (

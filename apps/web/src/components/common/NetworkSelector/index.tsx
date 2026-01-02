@@ -354,9 +354,11 @@ const UndeployedNetworks = ({
 const NetworkSelector = ({
   onChainSelect,
   offerSafeCreation = false,
+  showBorder = true,
 }: {
   onChainSelect?: () => void
   offerSafeCreation?: boolean
+  showBorder?: boolean
 }): ReactElement => {
   const [open, setOpen] = useState<boolean>(false)
   const isDarkMode = useDarkMode()
@@ -367,6 +369,7 @@ const NetworkSelector = ({
   const safeAddress = useSafeAddress()
   const currentChain = useCurrentChain()
   const { currentSafeApp } = useSafeApps()
+  const borderColor = showBorder ? currentChain?.theme?.backgroundColor || 'transparent' : 'transparent'
 
   const isSafeOpened = safeAddress !== ''
 
@@ -418,7 +421,7 @@ const NetworkSelector = ({
             onClick={onChainSelect}
             className={css.item}
           >
-            <ChainIndicatorWithFiatBalance chain={chain} safeAddress={safeAddress} isSelected={isSelected} />
+            <ChainIndicator responsive={isSelected} chainId={chain.chainId} inline />
           </Link>
         </MenuItem>
       )
@@ -463,6 +466,14 @@ const NetworkSelector = ({
         },
       }}
       sx={{
+        backgroundColor: 'transparent',
+        borderBottom: `3px solid ${borderColor}`,
+        '& .MuiInput-root::before': {
+          borderBottom: 'none',
+        },
+        '& .MuiInput-root::after': {
+          borderBottom: 'none',
+        },
         '& .MuiSelect-select': {
           py: 0,
         },

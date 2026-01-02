@@ -1,14 +1,3 @@
 .filterWrapper {
-  position: sticky;
-  z-index: 2;
-  top: 144px;
   border-width: 1px;
-}
-
-@media (max-width: 599.95px) {
-  .filterWrapper {
-    position: relative;
-    z-index: 0;
-    top: 0;
-  }
 }
