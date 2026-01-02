@@ -22,7 +22,7 @@ describe('TWAP tests', { defaultCommandTimeout: 30000 }, () => {
     main.waitForHistoryCallToComplete()
     wallet.connectSigner(signer)
     // Match both staging and production swap widget URLs
-    iframeSelector = `iframe[src*="${constants.swapWidgetStg}"], iframe[src*="${constants.swapWidget}"]`
+    iframeSelector = `iframe[src*="${constants.swapWidgetStg}"]`
   })
 
   // ========================================
