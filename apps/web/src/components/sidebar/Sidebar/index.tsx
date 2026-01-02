@@ -17,7 +17,7 @@ const Sidebar = (): ReactElement => {
     setIsDrawerOpen((isOpen) => {
       trackEvent(
         { ...OVERVIEW_EVENTS.SIDEBAR, label: isOpen ? 'Close' : 'Open' },
-        { [MixpanelEventParams.SIDEBAR_ELEMENT]: isOpen ? 'Close My Accounts' : 'Open My Accounts' },
+        { [MixpanelEventParams.SIDEBAR_ELEMENT]: isOpen ? 'Close Wallets' : 'Expand Wallets' },
       )
 
       return !isOpen

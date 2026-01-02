@@ -23,8 +23,6 @@ import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/A
 import { NestedSafesPopover } from '../NestedSafesPopover'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import { useHasFeature } from '@/hooks/useChains'
-import { useAppSelector } from '@/store'
-import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
@@ -68,15 +66,11 @@ const SafeListContextMenu = ({
   const addressBook = useAddressBook()
   const hasName = address in addressBook
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
-  const allAddedSafes = useAppSelector(selectAllAddedSafes)
-  const isAddedSafe = Boolean(allAddedSafes[chainId]?.[address])
 
   const trackingLabel =
     router.pathname === AppRoutes.welcome.accounts ? OVERVIEW_LABELS.login_page : OVERVIEW_LABELS.sidebar
 
   const handleOpenContextMenu = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
-    e.preventDefault()
-    e.stopPropagation()
     setAnchorEl(e.currentTarget)
   }
 
@@ -128,12 +122,12 @@ const SafeListContextMenu = ({
           </MenuItem>
         )}
 
-        {(undeployedSafe || isAddedSafe) && (
+        {undeployedSafe && (
           <MenuItem onClick={handleOpenModal(ModalType.REMOVE, OVERVIEW_EVENTS.REMOVE_FROM_WATCHLIST)}>
             <ListItemIcon>
               <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" color="error" />
             </ListItemIcon>
-            <ListItemText data-testid="remove-btn">Remove Safe</ListItemText>
+            <ListItemText data-testid="remove-btn">Remove</ListItemText>
           </MenuItem>
         )}
 
