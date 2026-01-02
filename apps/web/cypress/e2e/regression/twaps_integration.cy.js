@@ -21,7 +21,8 @@ describe('TWAP tests', { defaultCommandTimeout: 30000 }, () => {
     cy.visit(constants.swapUrl + staticSafes.SEP_STATIC_SAFE_27)
     main.waitForHistoryCallToComplete()
     wallet.connectSigner(signer)
-    iframeSelector = `iframe[src*="${constants.swapWidget}"]`
+    // Match both staging and production swap widget URLs
+    iframeSelector = `iframe[src*="${constants.swapWidgetStg}"], iframe[src*="${constants.swapWidget}"]`
   })
 
   // ========================================
