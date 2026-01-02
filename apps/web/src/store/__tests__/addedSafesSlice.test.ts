@@ -7,24 +7,24 @@ describe('addedSafesSlice', () => {
       const safe0 = { chainId: '1', address: { value: '0x0' }, threshold: 1, owners: [{ value: '0x123' }] } as SafeState
       const state = addedSafesSlice.reducer(undefined, addOrUpdateSafe({ safe: safe0 }))
       expect(state).toEqual({
-        '1': { ['0x0']: { owners: [{ value: '0x123' }], threshold: 1 } },
+        '1': { ['0x0']: { owners: [{ value: '0x123' }], threshold: 1, pinned: false } },
       })
 
       const safe1 = { chainId: '4', address: { value: '0x1' }, threshold: 1, owners: [{ value: '0x456' }] } as SafeState
       const stateB = addedSafesSlice.reducer(state, addOrUpdateSafe({ safe: safe1 }))
       expect(stateB).toEqual({
-        '1': { ['0x0']: { owners: [{ value: '0x123' }], threshold: 1 } },
-        '4': { ['0x1']: { threshold: 1, owners: [{ value: '0x456' }] } },
+        '1': { ['0x0']: { owners: [{ value: '0x123' }], threshold: 1, pinned: false } },
+        '4': { ['0x1']: { threshold: 1, owners: [{ value: '0x456' }], pinned: false } },
       })
 
       const safe2 = { chainId: '1', address: { value: '0x2' }, threshold: 1, owners: [{ value: '0x789' }] } as SafeState
       const stateC = addedSafesSlice.reducer(stateB, addOrUpdateSafe({ safe: safe2 }))
       expect(stateC).toEqual({
         '1': {
-          ['0x0']: { owners: [{ value: '0x123' }], threshold: 1 },
-          ['0x2']: { owners: [{ value: '0x789' }], threshold: 1 },
+          ['0x0']: { owners: [{ value: '0x123' }], threshold: 1, pinned: false },
+          ['0x2']: { owners: [{ value: '0x789' }], threshold: 1, pinned: false },
         },
-        '4': { ['0x1']: { threshold: 1, owners: [{ value: '0x456' }] } },
+        '4': { ['0x1']: { threshold: 1, owners: [{ value: '0x456' }], pinned: false } },
       })
     })
   })

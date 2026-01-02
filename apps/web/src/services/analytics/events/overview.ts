@@ -194,6 +194,22 @@ export const OVERVIEW_EVENTS = {
     action: 'Hide earn banner',
     category: OVERVIEW_CATEGORY,
   },
+  OPEN_SAFE_LIST: {
+    action: 'Open Safe list',
+    category: OVERVIEW_CATEGORY,
+  },
+  SWITCH_SAFE: {
+    action: 'Switch Safe',
+    category: OVERVIEW_CATEGORY,
+  },
+  ACCOUNTS_DROPDOWN_TAB_SWITCH: {
+    action: 'Switch accounts dropdown tab',
+    category: OVERVIEW_CATEGORY,
+  },
+  ACCOUNTS_DROPDOWN_SEARCH: {
+    action: 'Search in accounts dropdown',
+    category: OVERVIEW_CATEGORY,
+  },
 }
 
 export const EXPLORE_POSSIBLE_EVENTS = {
@@ -217,6 +233,8 @@ export enum OPEN_SAFE_LABELS {
 
 export enum OVERVIEW_LABELS {
   sidebar = 'sidebar',
+  sidebar_dropdown = 'sidebar_dropdown',
+  sidebar_drawer = 'sidebar_drawer',
   quick_add = 'quick_add',
   quick_remove = 'quick_remove',
   top_bar = 'top_bar',

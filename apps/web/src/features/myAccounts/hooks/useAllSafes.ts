@@ -49,7 +49,7 @@ export const _buildSafeItem = (
   allSafeNames: AddressBookState,
 ): SafeItem => {
   const addedSafe = allAdded[chainId]?.[address]
-  const isPinned = Boolean(addedSafe) // Pinning a safe means adding it to the added safes storage
+  const isPinned = addedSafe ? (addedSafe.pinned ?? true) : false // Use explicit pinned flag, default to true for backward compatibility if safe exists in store
   const undeployedSafeOwners = allUndeployed[chainId]?.[address]?.props.safeAccountConfig.owners || []
 
   // Determine if the user is an owner

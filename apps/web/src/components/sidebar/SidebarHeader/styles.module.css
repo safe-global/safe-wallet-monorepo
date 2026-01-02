@@ -1,5 +1,5 @@
 .container {
-  padding: var(--space-2) var(--space-1) 0;
+  /* padding: var(--space-2) var(--space-1) 0; */
 }
 
 .info {
@@ -11,6 +11,9 @@
   gap: 12px;
   text-align: left;
   align-items: center;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .iconButtons {
@@ -18,7 +21,8 @@
   margin-bottom: 16px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .iconButton {
@@ -35,8 +39,42 @@
 }
 
 .address {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
-  white-space: nowrap;
   font-size: 14px;
+}
+
+/* Safe Header Dropdown Trigger */
+.safeHeaderButton {
+  width: 100%;
+  padding: var(--space-1);
+  border-radius: 8px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  background-color: var(--color-background-main);
+  border: 1px solid var(--color-border-light);
+}
+
+.safeHeaderButton:hover:not(:disabled) {
+  background-color: var(--color-background-light);
+  border-color: var(--color-border-main);
+}
+
+.safeHeaderButton:disabled {
+  cursor: default;
+}
+
+.chevron {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+}
+
+.newTxButtonWrapper {
+  padding: 0 var(--space-1);
 }

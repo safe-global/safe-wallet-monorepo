@@ -7,6 +7,7 @@ export type AddedSafesOnChain = {
     owners: AddressInfo[]
     threshold: number
     ethBalance?: string
+    pinned?: boolean
   }
 }
 
@@ -34,10 +35,11 @@ export const addedSafesSlice = createSlice({
 
       state[chainId] ??= {}
       state[chainId][address.value] = {
-        // Keep balance
+        // Keep balance and pinned status
         ...(state[chainId][address.value] ?? {}),
         owners,
         threshold,
+        pinned: state[chainId][address.value]?.pinned ?? false,
       }
     },
     removeSafe: (state, { payload }: PayloadAction<{ chainId: string; address: string }>) => {
@@ -52,15 +54,16 @@ export const addedSafesSlice = createSlice({
     pinSafe: (state, { payload }: PayloadAction<{ chainId: string; address: string }>) => {
       const { chainId, address } = payload
       state[chainId] ??= {}
-      state[chainId][address] = state[chainId][address] ?? {}
+      state[chainId][address] = {
+        ...(state[chainId][address] ?? {}),
+        pinned: true,
+      }
     },
     unpinSafe: (state, { payload }: PayloadAction<{ chainId: string; address: string }>) => {
       const { chainId, address } = payload
 
-      delete state[chainId]?.[address]
-
-      if (state[chainId] && Object.keys(state[chainId]).length === 0) {
-        delete state[chainId]
+      if (state[chainId]?.[address]) {
+        state[chainId][address].pinned = false
       }
     },
   },

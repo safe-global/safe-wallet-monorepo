@@ -9,12 +9,17 @@ import ListItemText from '@mui/material/ListItemText'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import EditIcon from '@/public/images/common/edit.svg'
 import PlusIcon from '@/public/images/common/plus.svg'
+import DeleteIcon from '@/public/images/common/delete.svg'
 import ContextMenu from '@/components/common/ContextMenu'
 import { trackEvent, OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { SvgIcon } from '@mui/material'
 import { AppRoutes } from '@/config/routes'
 import router from 'next/router'
 import { CreateSafeOnNewChain } from '@/features/multichain/components/CreateSafeOnNewChain'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { removeSafe, selectAllAddedSafes } from '@/store/addedSafesSlice'
+import { showNotification } from '@/store/notificationsSlice'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 
 enum ModalType {
   RENAME = 'rename',
@@ -36,8 +41,14 @@ const MultiAccountContextMenu = ({
 }): ReactElement => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
+  const dispatch = useAppDispatch()
+  const allAddedSafes = useAppSelector(selectAllAddedSafes)
+
+  // Check if any of the chains has this safe added
+  const isAddedSafe = chainIds.some((chainId) => Boolean(allAddedSafes[chainId]?.[address]))
 
   const handleOpenContextMenu = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
+    e.preventDefault()
     e.stopPropagation()
     setAnchorEl(e.currentTarget)
   }
@@ -62,6 +73,29 @@ const MultiAccountContextMenu = ({
     setOpen(defaultOpen)
   }
 
+  const handleRemoveSafe = (e: MouseEvent) => {
+    handleCloseContextMenu(e)
+
+    // Remove safe from all chains
+    for (const chainId of chainIds) {
+      dispatch(removeSafe({ chainId, address }))
+    }
+
+    dispatch(
+      showNotification({
+        title: 'Removed multi-chain Safe',
+        message: name || shortenAddress(address),
+        groupKey: `remove-safe-success-${address}`,
+        variant: 'success',
+      }),
+    )
+
+    trackEvent({
+      ...OVERVIEW_EVENTS.REMOVE_FROM_WATCHLIST,
+      label: router.pathname === AppRoutes.welcome.accounts ? OVERVIEW_LABELS.login_page : OVERVIEW_LABELS.sidebar,
+    })
+  }
+
   return (
     <>
       <IconButton data-testid="safe-options-btn" edge="end" size="small" onClick={handleOpenContextMenu}>
@@ -74,6 +108,16 @@ const MultiAccountContextMenu = ({
           </ListItemIcon>
           <ListItemText data-testid="rename-btn">Rename</ListItemText>
         </MenuItem>
+
+        {isAddedSafe && (
+          <MenuItem onClick={handleRemoveSafe}>
+            <ListItemIcon>
+              <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" color="error" />
+            </ListItemIcon>
+            <ListItemText data-testid="remove-btn">Remove Safe</ListItemText>
+          </MenuItem>
+        )}
+
         {addNetwork && (
           <MenuItem onClick={handleOpenModal(ModalType.ADD_CHAIN, OVERVIEW_EVENTS.ADD_NEW_NETWORK)}>
             <ListItemIcon>

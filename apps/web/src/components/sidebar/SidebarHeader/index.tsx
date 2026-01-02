@@ -1,11 +1,15 @@
 import CounterfactualStatusButton from '@/features/counterfactual/CounterfactualStatusButton'
-import { type ReactElement } from 'react'
+import { type ReactElement, useState } from 'react'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
+import { useTheme, useMediaQuery } from '@mui/material'
+import { useRouter } from 'next/router'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import NewTxButton from '@/components/sidebar/NewTxButton'
 import { useAppSelector } from '@/store'
+import { trackEvent, OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
+import { AppRoutes } from '@/config/routes'
 
 import css from './styles.module.css'
 import QrIconBold from '@/public/images/sidebar/qr-bold.svg'
@@ -17,7 +21,6 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import QrCodeButton from '../QrCodeButton'
 import Track from '@/components/common/Track'
-import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import { SvgIcon } from '@mui/material'
@@ -27,8 +30,36 @@ import ExplorerButton from '@/components/common/ExplorerButton'
 import CopyTooltip from '@/components/common/CopyTooltip'
 import { NestedSafesButton } from '@/components/sidebar/NestedSafesButton'
 import SafeHeaderInfo from './SafeHeaderInfo'
+import SafeAccountsDropdown from './SafeAccountsDropdown'
 
 const SafeHeader = (): ReactElement => {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const open = Boolean(anchorEl)
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const router = useRouter()
+
+  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
+    if (isMobile) {
+      // On mobile, navigate to full screen view
+      router.push(AppRoutes.welcome.accounts)
+      trackEvent({
+        ...OVERVIEW_EVENTS.OPEN_SAFE_LIST,
+        label: OVERVIEW_LABELS.sidebar_dropdown,
+      })
+    } else {
+      // On desktop, open dropdown
+      setAnchorEl(event.currentTarget)
+      trackEvent({
+        ...OVERVIEW_EVENTS.OPEN_SAFE_LIST,
+        label: OVERVIEW_LABELS.sidebar_dropdown,
+      })
+    }
+  }
+
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
   const safeAddress = useSafeAddress()
   const { safe } = useSafeInfo()
   const chain = useCurrentChain()
@@ -41,7 +72,7 @@ const SafeHeader = (): ReactElement => {
   return (
     <div className={css.container}>
       <div className={css.info}>
-        <SafeHeaderInfo />
+        <SafeHeaderInfo onClick={handleOpen} open={open} />
 
         <div className={css.iconButtons}>
           <Track
@@ -90,7 +121,11 @@ const SafeHeader = (): ReactElement => {
         </div>
       </div>
 
-      <NewTxButton />
+      <div className={css.newTxButtonWrapper}>
+        <NewTxButton />
+      </div>
+
+      <SafeAccountsDropdown anchorEl={anchorEl} open={open} onClose={handleClose} />
     </div>
   )
 }
