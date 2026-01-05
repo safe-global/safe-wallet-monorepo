@@ -9,7 +9,7 @@ exports[`./index.stories Cancelled 1`] = `
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-4kcw4c-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1im6wh6-MuiChip-root"
     >
       <span
         class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
