@@ -31,7 +31,7 @@ exports[`./HnMiniTxBanner.stories Default 1`] = `
           <p
             class="MuiTypography-root MuiTypography-body2 bannerTitle css-17vdyq3-MuiTypography-root"
           >
-            Enable Enterprise Grade Security
+            Enable enterprise-grade security
           </p>
           <span
             class="MuiTypography-root MuiTypography-caption bannerDescription css-19nflmw-MuiTypography-root"

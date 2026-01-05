@@ -44,7 +44,7 @@ export const HnMiniTxBanner = ({ onHnSignupClick, onDismiss }: HnMiniTxBannerPro
           />
           <Box className={css.bannerContent}>
             <Typography variant="body2" className={css.bannerTitle}>
-              Enable Enterprise Grade Security
+              Enable enterprise-grade security
             </Typography>
             <Typography variant="caption" className={css.bannerDescription}>
               Monitor and block risky transactions
