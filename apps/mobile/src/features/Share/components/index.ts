@@ -1,1 +1,1 @@
-export { ShareView } from './ShareView'
+export { ShareConnectView as ShareView } from './ShareConnectView'
