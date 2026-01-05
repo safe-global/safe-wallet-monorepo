@@ -21,7 +21,7 @@ export const ShareConnectView = ({ activeSafe, availableChains }: ShareViewProps
   return (
     <>
       <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }}>
-        <YStack paddingTop={'$2'}>
+        <YStack paddingTop={'$2'} paddingHorizontal={'$4'}>
           <XStack justifyContent={'center'} gap={'$3'}>
             <Pressable
               onPress={() => {
