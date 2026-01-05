@@ -2,129 +2,161 @@
 
 exports[`./FiatValue.stories Default 1`] = `
 <div
-  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
-  style="--Paper-shadow: none;"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <span
-    aria-label="$ 1,234.56"
-    class=""
-    data-mui-internal-clone-element="true"
-    style="white-space: nowrap;"
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
-    $ 1,235
-  </span>
+    <span
+      aria-label="$ 1,234.56"
+      class=""
+      data-mui-internal-clone-element="true"
+      style="white-space: nowrap;"
+    >
+      $ 1,235
+    </span>
+  </div>
 </div>
 `;
 
 exports[`./FiatValue.stories LargeValue 1`] = `
 <div
-  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
-  style="--Paper-shadow: none;"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <span
-    aria-label="$ 1,234,567.89"
-    class=""
-    data-mui-internal-clone-element="true"
-    style="white-space: nowrap;"
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
-    $ 1.23M
-  </span>
+    <span
+      aria-label="$ 1,234,567.89"
+      class=""
+      data-mui-internal-clone-element="true"
+      style="white-space: nowrap;"
+    >
+      $ 1.23M
+    </span>
+  </div>
 </div>
 `;
 
 exports[`./FiatValue.stories NullValue 1`] = `
 <div
-  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
-  style="--Paper-shadow: none;"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <span
-    class="MuiTypography-root MuiTypography-body1 css-fw8ds0-MuiTypography-root"
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
-    --
-  </span>
+    <span
+      class="MuiTypography-root MuiTypography-body1 css-fw8ds0-MuiTypography-root"
+    >
+      --
+    </span>
+  </div>
 </div>
 `;
 
 exports[`./FiatValue.stories NumberValue 1`] = `
 <div
-  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
-  style="--Paper-shadow: none;"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <span
-    aria-label="$ 9,999.99"
-    class=""
-    data-mui-internal-clone-element="true"
-    style="white-space: nowrap;"
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
-    $ 10,000
-  </span>
+    <span
+      aria-label="$ 9,999.99"
+      class=""
+      data-mui-internal-clone-element="true"
+      style="white-space: nowrap;"
+    >
+      $ 10,000
+    </span>
+  </div>
 </div>
 `;
 
 exports[`./FiatValue.stories Precise 1`] = `
 <div
-  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
-  style="--Paper-shadow: none;"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <span
-    class=""
-    data-mui-internal-clone-element="true"
-    style="white-space: nowrap;"
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
-    $ 1,234
     <span
-      class="MuiTypography-root MuiTypography-body1 css-i1lkuv-MuiTypography-root"
+      class=""
+      data-mui-internal-clone-element="true"
+      style="white-space: nowrap;"
     >
-      .57
+      $ 1,234
+      <span
+        class="MuiTypography-root MuiTypography-body1 css-i1lkuv-MuiTypography-root"
+      >
+        .57
+      </span>
     </span>
-  </span>
+  </div>
 </div>
 `;
 
 exports[`./FiatValue.stories SmallValue 1`] = `
 <div
-  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
-  style="--Paper-shadow: none;"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <span
-    aria-label="$ 0.00"
-    class=""
-    data-mui-internal-clone-element="true"
-    style="white-space: nowrap;"
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
-    $ 0.00
-  </span>
+    <span
+      aria-label="$ 0.00"
+      class=""
+      data-mui-internal-clone-element="true"
+      style="white-space: nowrap;"
+    >
+      $ 0.00
+    </span>
+  </div>
 </div>
 `;
 
 exports[`./FiatValue.stories WithMaxLength 1`] = `
 <div
-  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
-  style="--Paper-shadow: none;"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <span
-    aria-label="$ 123,456,789.12"
-    class=""
-    data-mui-internal-clone-element="true"
-    style="white-space: nowrap;"
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
-    $ 123.46M
-  </span>
+    <span
+      aria-label="$ 123,456,789.12"
+      class=""
+      data-mui-internal-clone-element="true"
+      style="white-space: nowrap;"
+    >
+      $ 123.46M
+    </span>
+  </div>
 </div>
 `;
 
 exports[`./FiatValue.stories ZeroValue 1`] = `
 <div
-  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
-  style="--Paper-shadow: none;"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <span
-    aria-label="$ 0.00"
-    class=""
-    data-mui-internal-clone-element="true"
-    style="white-space: nowrap;"
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
-    $ 0
-  </span>
+    <span
+      aria-label="$ 0.00"
+      class=""
+      data-mui-internal-clone-element="true"
+      style="white-space: nowrap;"
+    >
+      $ 0
+    </span>
+  </div>
 </div>
 `;

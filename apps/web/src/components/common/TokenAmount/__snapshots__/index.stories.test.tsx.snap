@@ -2,54 +2,75 @@
 
 exports[`./index.stories WithTokenLogo 1`] = `
 <div
-  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
-  style="--Paper-shadow: none;"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <span
-    aria-label="100"
-    class="container verticalAlign"
-    data-mui-internal-clone-element="true"
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
-    <div
-      class="MuiBox-root css-olq4e8"
+    <span
+      aria-label="100"
+      class="container verticalAlign"
+      data-mui-internal-clone-element="true"
     >
-      <img
-        alt="ETH"
-        class="image"
-        height="26"
-        loading="lazy"
-        referrerpolicy="no-referrer"
-        src="https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png"
-      />
-    </div>
-    <b
-      class="tokenText"
-    >
-      100
-       
-      ETH
-    </b>
-  </span>
+      <div
+        class="MuiBox-root css-olq4e8"
+      >
+        <iframe
+          height="26"
+          loading="lazy"
+          referrerpolicy="strict-origin"
+          sandbox="allow-scripts"
+          srcdoc="
+    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+      <img src="https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <script>
+        document.querySelector('img').onerror = (e) => {
+          e.target.onerror = null
+          e.target.src = "/images/common/token-placeholder.svg"
+        }
+      </script>
+    </body>
+  "
+          style="pointer-events: none; border: 0px; display: block;"
+          tabindex="-1"
+          title="ETH"
+          width="26"
+        />
+      </div>
+      <b
+        class="tokenText"
+      >
+        100
+         
+        ETH
+      </b>
+    </span>
+  </div>
 </div>
 `;
 
 exports[`./index.stories WithoutTokenLogo 1`] = `
 <div
-  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
-  style="--Paper-shadow: none;"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <span
-    aria-label="100"
-    class="container"
-    data-mui-internal-clone-element="true"
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
-    <b
-      class="tokenText"
+    <span
+      aria-label="100"
+      class="container"
+      data-mui-internal-clone-element="true"
     >
-      100
-       
-      ETH
-    </b>
-  </span>
+      <b
+        class="tokenText"
+      >
+        100
+         
+        ETH
+      </b>
+    </span>
+  </div>
 </div>
 `;

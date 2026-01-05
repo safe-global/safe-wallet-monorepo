@@ -7,11 +7,24 @@
   transition: opacity 0.2s;
   height: 100% !important;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  padding-top: 12px;
 }
 
 .container td {
   position: relative;
+  vertical-align: top;
+}
+
+/* Header styling - bold and no bottom border */
+.container thead th {
+  font-weight: 700;
+  border-bottom: none !important;
+}
+
+.container thead th span {
+  font-size: 16px;
+  color: var(--color-text-primary);
 }
 
 .container th:last-of-type,

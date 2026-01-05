@@ -13,7 +13,7 @@ type Props = {
   onFormSubmit: (data: AdvancedParameters) => void
   gasLimitError?: Error
   willRelay?: boolean
-  noFeeNovember?: {
+  noFeeCampaign?: {
     isEligible: boolean
     remaining: number
     limit: number
@@ -27,7 +27,7 @@ const AdvancedParams = ({
   onFormSubmit,
   gasLimitError,
   willRelay,
-  noFeeNovember,
+  noFeeCampaign,
 }: Props) => {
   const [isEditing, setIsEditing] = useState<boolean>(false)
   const isEIP1559 = useHasFeature(FEATURES.EIP1559)
@@ -59,7 +59,7 @@ const AdvancedParams = ({
       gasLimitError={gasLimitError}
       onEdit={onEditOpen}
       willRelay={willRelay}
-      noFeeNovember={noFeeNovember}
+      noFeeCampaign={noFeeCampaign}
     />
   )
 }

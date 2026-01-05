@@ -54,7 +54,7 @@ export function swapOrderBuilder(): IBuilder<SwapOrderTransactionInfo> {
     status: faker.helpers.arrayElement(['presignaturePending', 'open', 'cancelled', 'fulfilled', 'expired']),
     kind: faker.helpers.arrayElement(['buy', 'sell']),
     orderClass: faker.helpers.arrayElement(['limit', 'market', 'liquidity']),
-    validUntil: faker.date.future().getTime(),
+    validUntil: 1735000000000, // Fixed timestamp for deterministic tests
     sellAmount: faker.string.numeric(),
     buyAmount: faker.string.numeric(),
     executedSellAmount: faker.string.numeric(),
@@ -77,7 +77,7 @@ export function twapOrderBuilder(): IBuilder<TwapOrderTransactionInfo> {
     status: faker.helpers.arrayElement(['presignaturePending', 'open', 'cancelled', 'fulfilled', 'expired']),
     kind: faker.helpers.arrayElement(['buy', 'sell']),
     class: faker.helpers.arrayElement(['limit', 'market', 'liquidity']),
-    validUntil: faker.date.future().getTime(),
+    validUntil: 1735000000000, // Fixed timestamp for deterministic tests
     sellAmount: faker.string.numeric(),
     buyAmount: faker.string.numeric(),
     executedSellAmount: faker.string.numeric(),

@@ -2,32 +2,36 @@
 
 exports[`./DataRow.stories StringValue 1`] = `
 <div
-  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
-  style="--Paper-shadow: none;"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
-    data-testid=""
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
     <div
-      class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
-      data-testid="tx-row-title"
-      style="word-break: break-word;"
-    >
-      <span
-        class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
-      >
-        Transaction Hash
-      </span>
-    </div>
-    <div
-      class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
-      data-testid="tx-data-row"
+      class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+      data-testid=""
     >
       <div
-        class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+        class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+        data-testid="tx-row-title"
+        style="word-break: break-word;"
       >
-        0x536e...94f9
+        <span
+          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+        >
+          Transaction Hash
+        </span>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+        data-testid="tx-data-row"
+      >
+        <div
+          class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+        >
+          0x536e...94f9
+        </div>
       </div>
     </div>
   </div>
