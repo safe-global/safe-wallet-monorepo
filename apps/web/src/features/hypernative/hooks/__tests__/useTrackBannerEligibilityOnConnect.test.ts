@@ -922,6 +922,216 @@ describe('useTrackBannerEligibilityOnConnect', () => {
     })
   })
 
+  describe('Queue and History banners (use BannerType.Promo)', () => {
+    it('should track when Queue banner (BannerType.Promo) conditions are met', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+        expect(mockTrackEvent).toHaveBeenCalledWith(HYPERNATIVE_EVENTS.GUARDIAN_BANNER_VIEWED, {
+          [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+          [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chainId,
+        })
+      })
+    })
+
+    it('should track when History banner (BannerType.Promo) conditions are met', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+        expect(mockTrackEvent).toHaveBeenCalledWith(HYPERNATIVE_EVENTS.GUARDIAN_BANNER_VIEWED, {
+          [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+          [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chainId,
+        })
+      })
+    })
+
+    it('should not track when Queue banner has showBanner: false', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      renderHook(() => useTrackBannerEligibilityOnConnect(ineligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+
+      await waitFor(
+        () => {
+          expect(mockTrackEvent).not.toHaveBeenCalled()
+        },
+        { timeout: 100 },
+      )
+    })
+
+    it('should not track when History banner has showBanner: false', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      renderHook(() => useTrackBannerEligibilityOnConnect(ineligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+
+      await waitFor(
+        () => {
+          expect(mockTrackEvent).not.toHaveBeenCalled()
+        },
+        { timeout: 100 },
+      )
+    })
+
+    it('should share tracking state between Queue, History, and Carousel banners (all use BannerType.Promo)', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      // Track with Queue banner (Promo type)
+      renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+
+      // History banner should not track again (already tracked via Promo)
+      renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState: {
+          hnState: {
+            [`${chainId}:${safeAddress}`]: {
+              bannerDismissed: false,
+              formCompleted: false,
+              pendingBannerDismissed: false,
+              bannerEligibilityTracked: true, // Already tracked
+            },
+          } as HnState,
+        },
+      })
+
+      await waitFor(() => {
+        // Should not track again because already tracked
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    it('should track separately for Queue banner on different Safes', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      const { rerender } = renderHook(
+        ({ visibilityResult }) => useTrackBannerEligibilityOnConnect(visibilityResult, BannerType.Promo),
+        {
+          initialProps: { visibilityResult: eligibleVisibilityResult },
+          initialReduxState,
+        },
+      )
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+        expect(mockTrackEvent).toHaveBeenCalledWith(HYPERNATIVE_EVENTS.GUARDIAN_BANNER_VIEWED, {
+          [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+          [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chainId,
+        })
+      })
+
+      // Switch to different Safe
+      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
+        safe: {} as any,
+        safeAddress: otherSafeAddress,
+        safeLoaded: true,
+        safeLoading: false,
+        safeError: undefined,
+      })
+
+      rerender({ visibilityResult: eligibleVisibilityResult })
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(2)
+        expect(mockTrackEvent).toHaveBeenLastCalledWith(HYPERNATIVE_EVENTS.GUARDIAN_BANNER_VIEWED, {
+          [MixpanelEventParams.SAFE_ADDRESS]: otherSafeAddress,
+          [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chainId,
+        })
+      })
+    })
+
+    it('should track separately for History banner on different chains', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      const { rerender } = renderHook(
+        ({ visibilityResult }) => useTrackBannerEligibilityOnConnect(visibilityResult, BannerType.Promo),
+        {
+          initialProps: { visibilityResult: eligibleVisibilityResult },
+          initialReduxState,
+        },
+      )
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+        expect(mockTrackEvent).toHaveBeenCalledWith(HYPERNATIVE_EVENTS.GUARDIAN_BANNER_VIEWED, {
+          [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+          [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chainId,
+        })
+      })
+
+      // Switch to different chain
+      jest.spyOn(useChainIdHook, 'default').mockReturnValue(otherChainId)
+
+      rerender({ visibilityResult: eligibleVisibilityResult })
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(2)
+        expect(mockTrackEvent).toHaveBeenLastCalledWith(HYPERNATIVE_EVENTS.GUARDIAN_BANNER_VIEWED, {
+          [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+          [MixpanelEventParams.BLOCKCHAIN_NETWORK]: otherChainId,
+        })
+      })
+    })
+
+    it('should track only once when Queue, History, and Carousel banners mount simultaneously', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      // All three banners use BannerType.Promo, so they should only track once
+      renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+
+      renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+
+      renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+
+      await waitFor(() => {
+        // Should only track once despite three instances (all use Promo type)
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+        expect(mockTrackEvent).toHaveBeenCalledWith(HYPERNATIVE_EVENTS.GUARDIAN_BANNER_VIEWED, {
+          [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+          [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chainId,
+        })
+      })
+    })
+  })
+
   describe('Banner types across different Safes and chains', () => {
     it('should track separately for Promo banner on different Safes', async () => {
       const initialReduxState: Partial<RootState> = {
