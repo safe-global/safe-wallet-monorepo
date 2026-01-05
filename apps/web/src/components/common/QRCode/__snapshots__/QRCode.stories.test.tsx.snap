@@ -1,0 +1,101 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./QRCode.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  >
+    <canvas
+      height="150"
+      style="height: 150px; width: 150px;"
+      width="150"
+    />
+    <img
+      src="/images/safe-logo-green.png"
+      style="display: none;"
+    />
+  </div>
+</div>
+`;
+
+exports[`./QRCode.stories LargeSize 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  >
+    <canvas
+      height="250"
+      style="height: 250px; width: 250px;"
+      width="250"
+    />
+    <img
+      src="/images/safe-logo-green.png"
+      style="display: none;"
+    />
+  </div>
+</div>
+`;
+
+exports[`./QRCode.stories Loading 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  >
+    <span
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-zstmmy-MuiSkeleton-root"
+      style="width: 150px; height: 150px;"
+    />
+  </div>
+</div>
+`;
+
+exports[`./QRCode.stories LongValue 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  >
+    <canvas
+      height="200"
+      style="height: 200px; width: 200px;"
+      width="200"
+    />
+    <img
+      src="/images/safe-logo-green.png"
+      style="display: none;"
+    />
+  </div>
+</div>
+`;
+
+exports[`./QRCode.stories SmallSize 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  >
+    <canvas
+      height="100"
+      style="height: 100px; width: 100px;"
+      width="100"
+    />
+    <img
+      src="/images/safe-logo-green.png"
+      style="display: none;"
+    />
+  </div>
+</div>
+`;

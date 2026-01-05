@@ -22,7 +22,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          ref: main
           fetch-depth: 0
 
       - name: Extract version
@@ -141,8 +141,8 @@ jobs:
           # Fetch latest changes
           git fetch origin main dev
 
-          # Checkout dev branch
-          git checkout dev
+          # Checkout dev branch with proper tracking (fixes "unrelated histories" error)
+          git checkout -B dev origin/dev
 
           # Attempt to merge main into dev
           if git merge origin/main -m "chore: back-merge main to dev after release ${{ steps.version.outputs.version }}"; then
@@ -174,9 +174,15 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: Notify on Slack
-        if: vars.SLACK_WEBHOOK_URL
         continue-on-error: true
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "No Slack webhook configured, skipping notification"
+            exit 0
+          fi
+
           VERSION="${{ steps.version.outputs.version }}"
           RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.version }}"
           BACKMERGE_STATUS="${{ steps.backmerge.outcome }}"
@@ -203,6 +209,6 @@ jobs:
                   }
                 }
               ]
-            }' | curl -X POST "${{ vars.SLACK_WEBHOOK_URL }}" \
+            }' | curl -X POST "$SLACK_WEBHOOK_URL" \
               -H 'Content-Type: application/json' \
               -d @-

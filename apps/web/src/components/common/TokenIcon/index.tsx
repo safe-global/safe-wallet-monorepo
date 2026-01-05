@@ -14,6 +14,7 @@ const TokenIcon = ({
   fallbackSrc,
   chainId,
   noRadius,
+  badgeUri,
 }: {
   logoUri?: string
   tokenSymbol?: string | null
@@ -21,6 +22,7 @@ const TokenIcon = ({
   fallbackSrc?: string
   chainId?: string
   noRadius?: boolean
+  badgeUri?: string | null
 }): ReactElement => {
   const src = useMemo(() => {
     return upgradeCoinGeckoThumbToQuality(logoUri || undefined, 'small')
@@ -41,6 +43,11 @@ const TokenIcon = ({
       {chainId && (
         <div className={css.chainIcon}>
           <ChainIndicator chainId={chainId} onlyLogo showLogo showUnknown imageSize={size * 0.666667} />
+        </div>
+      )}
+      {badgeUri && (
+        <div className={css.badge}>
+          <IframeIcon src={badgeUri} alt="badge" width={12} height={12} borderRadius="100%" />
         </div>
       )}
     </Box>

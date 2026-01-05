@@ -192,7 +192,8 @@ describe('ExecuteThroughRoleForm', () => {
           value: '0',
         }),
         undefined,
-        expect.anything(),
+        expect.anything(), // chainId
+        expect.anything(), // safeAddress
       )
     })
 

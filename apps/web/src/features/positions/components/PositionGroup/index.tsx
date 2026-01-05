@@ -12,12 +12,14 @@ interface PositionGroupProps {
   group: Protocol['items'][0]
   /** Whether this is the last group in the list */
   isLast?: boolean
+  /** Protocol icon URL to show as badge on token icons */
+  protocolIconUrl?: string | null
 }
 
 /**
  * Displays a position group with its positions in a table.
  */
-export const PositionGroup = ({ group, isLast = false }: PositionGroupProps) => {
+export const PositionGroup = ({ group, isLast = false, protocolIconUrl }: PositionGroupProps) => {
   const headCells = [
     {
       id: 'name',
@@ -43,6 +45,7 @@ export const PositionGroup = ({ group, isLast = false }: PositionGroupProps) => 
               logoUri={position.tokenInfo.logoUri ?? undefined}
               tokenSymbol={position.tokenInfo.symbol}
               size={32}
+              badgeUri={protocolIconUrl}
             />
 
             <Box>

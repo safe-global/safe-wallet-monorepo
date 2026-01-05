@@ -56,10 +56,10 @@ const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
     },
   )
 
-  // Check if portfolio failed or returned empty data for deployed Safes (need fallback)
+  // Check if portfolio failed or returned empty data (need fallback)
   const isPortfolioEmpty =
     portfolioData && portfolioData.tokenBalances.length === 0 && portfolioData.positionBalances.length === 0
-  const needsTxServiceFallback = !skip && !portfolioLoading && (portfolioError || (isPortfolioEmpty && safe.deployed))
+  const needsTxServiceFallback = !skip && !portfolioLoading && (portfolioError || isPortfolioEmpty)
 
   // Transaction Service endpoint: reuse useTxServiceBalances hook as fallback
   const [txServiceBalances, txServiceError, txServiceLoading] = useTxServiceBalances(!needsTxServiceFallback)

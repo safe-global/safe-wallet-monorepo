@@ -1,0 +1,154 @@
+.card {
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #b0ffc9;
+  border-radius: 6px;
+  height: 100%;
+  position: relative;
+}
+
+.dark .card {
+  background: linear-gradient(90deg, rgba(176, 255, 201, 0.05) 0%, rgba(215, 246, 255, 0.05) 99.5%);
+  border: linear-gradient(225deg, #5fddff 12.5%, #12ff80 88.07%);
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: flex-end;
+  justify-content: center;
+  height: 100%;
+}
+
+.closeButton {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  color: var(--color-text-primary);
+  padding: 4px;
+}
+
+.dark .closeButton {
+  color: #a9c5de; /* Figma close icon dark color */
+}
+
+.mainContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  padding-left: 82px;
+  width: 100%;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.eligibilityTag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--background-main, #f4f4f4);
+  padding: 2px 8px 2px 4px;
+  border-radius: 6px;
+}
+
+.dark .eligibilityTag {
+  background: #121312;
+}
+
+.tagIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.tagText {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--text-primary, #121312);
+  letter-spacing: 1px;
+}
+
+.dark .tagText {
+  color: var(--text-primary);
+}
+
+.title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+  color: var(--text-primary, #121312);
+  letter-spacing: 0.1px;
+  margin: 0;
+}
+
+.dark .title {
+  color: #edf6fd; /* Figma: title dark */
+}
+
+.description {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--color-primary-light);
+  letter-spacing: 0.17px;
+  margin: 0;
+}
+
+.dark .description {
+  color: var(--color-text-secondary);
+}
+
+.coinsContainer {
+  position: absolute;
+  left: 24px;
+  top: 25px; /* Fixed: was 48px, should be 25px according to Figma */
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.coinsImage {
+  display: block;
+}
+
+/* Skeleton loading states */
+.skeletonIcon {
+  width: 58px;
+  height: 58px;
+  background-color: var(--color-grey-200);
+  border-radius: var(--space-1);
+  flex-shrink: 0;
+}
+
+.dark .skeletonIcon {
+  background-color: #232435;
+}
+
+.skeletonBox {
+  background-color: var(--color-grey-200);
+  border-radius: var(--space-1);
+}
+
+.dark .skeletonBox {
+  background-color: #232435;
+}
+
+.skeletonTitle {
+  height: 20px;
+  margin-bottom: 4px;
+}
+
+.skeletonSubtitle {
+  height: 16px;
+}

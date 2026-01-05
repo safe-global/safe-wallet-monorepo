@@ -55,27 +55,38 @@ function titleToStoryId(title) {
 }
 
 /**
- * Convert file path to Storybook story ID (fallback when title can't be extracted)
- * Example: src/components/common/CopyButton/index.stories.tsx
- * -> components-common-copybutton
+ * Convert file path to a readable title format
+ * Example: src/components/common/ChainIndicator/ChainIndicator.stories.tsx
+ * -> "components/common/ChainIndicator"
  */
-function filePathToStoryId(filePath) {
+function filePathToTitle(filePath) {
   // Remove apps/web/ prefix if present
   let normalized = filePath.replace(/^apps\/web\//, '')
 
   // Remove src/ prefix
   normalized = normalized.replace(/^src\//, '')
 
-  // Remove file extension and .stories suffix
-  normalized = normalized.replace(/\.(stories|story)\.(tsx?|jsx?)$/, '')
+  // Get directory path only (remove filename)
+  const parts = normalized.split('/')
+  parts.pop() // Remove the filename
 
-  // Remove index if present
-  normalized = normalized.replace(/\/index$/, '')
+  return parts.join('/')
+}
+
+/**
+ * Convert file path to Storybook story ID (fallback when title can't be extracted)
+ * Example: src/components/common/CopyButton/index.stories.tsx
+ * -> components-common-copybutton
+ *
+ * Note: Storybook derives story IDs from the directory path, not the filename.
+ * When no explicit title is set, Storybook uses the directory structure.
+ */
+function filePathToStoryId(filePath) {
+  // Use the title format and convert to story ID
+  const title = filePathToTitle(filePath)
 
   // Convert path separators to hyphens and lowercase
-  normalized = normalized.replace(/\//g, '-').toLowerCase()
-
-  return normalized
+  return title.replace(/\//g, '-').toLowerCase()
 }
 
 /**
@@ -142,12 +153,7 @@ for (const file of files) {
     storyUrls.push({
       url,
       file,
-      componentName:
-        title ||
-        storyId
-          .split('-')
-          .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-          .join(''),
+      componentName: title || filePathToTitle(file),
       storyName,
     })
   }

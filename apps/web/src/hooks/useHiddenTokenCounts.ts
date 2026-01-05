@@ -22,12 +22,13 @@ const filterDustTokens = (items: ReturnType<typeof useBalances>['balances']['ite
 export const useHiddenTokenCounts = (): HiddenTokenCounts => {
   const { balances: currentBalances } = useBalances()
   const hiddenTokens = useHiddenTokens()
-  const hideDust = useAppSelector(selectHideDust)
   const settings = useAppSelector(selectSettings)
   const hasPortfolioFeature = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
   const isAllTokensSelected = settings.tokenList === TOKEN_LISTS.ALL
   const currency = useAppSelector(selectCurrency)
   const { safe, safeAddress } = useSafeInfo()
+  // Disable dust filtering for counterfactual safes
+  const hideDust = useAppSelector(selectHideDust) && safe.deployed
   const isReady = safeAddress && safe.deployed
 
   const shouldFetchAllTokens = hasPortfolioFeature && !isAllTokensSelected

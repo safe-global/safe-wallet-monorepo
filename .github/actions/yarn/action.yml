@@ -5,9 +5,6 @@ description: 'Install the dependencies'
 runs:
   using: 'composite'
   steps:
-    # We require yarn v6 and installing through corepack is the easiest way to get it
-    - uses: actions/checkout@v6
-
     - uses: ./.github/actions/corepack
 
     - name: Restore Yarn Cache & Types

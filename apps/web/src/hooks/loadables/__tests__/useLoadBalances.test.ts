@@ -314,8 +314,9 @@ describe('useLoadBalances', () => {
       expect(loading).toBe(false)
     })
 
-    it('should return portfolio balances for counterfactual safe with empty portfolio', async () => {
+    it('should fallback to tx service for counterfactual safe with empty portfolio to get native token', async () => {
       const mockPortfolio = createMockEmptyPortfolio()
+      const mockCfBalances = createMockCounterfactualBalances()
 
       jest.spyOn(useSafeInfo, 'default').mockReturnValue({
         safe: mockCounterfactualSafe,
@@ -332,6 +333,10 @@ describe('useLoadBalances', () => {
         refetch: jest.fn(),
       } as any)
 
+      jest
+        .spyOn(useCounterfactualBalances, 'useCounterfactualBalances')
+        .mockReturnValue([mockCfBalances, undefined, false])
+
       const { result } = renderHook(() => useLoadBalances())
 
       await waitFor(() => {
@@ -340,11 +345,10 @@ describe('useLoadBalances', () => {
 
       const [balances, error, loading] = result.current
 
-      // Portfolio endpoint natively supports counterfactual Safes
-      expect(balances?.fiatTotal).toBe(mockPortfolio.totalBalanceFiat)
-      expect(balances?.tokensFiatTotal).toBe(mockPortfolio.totalTokenBalanceFiat)
-      expect(balances?.positionsFiatTotal).toBe(mockPortfolio.totalPositionsBalanceFiat)
-      expect(balances?.positions).toEqual(mockPortfolio.positionBalances)
+      // Empty portfolio falls back to tx service which provides native token for counterfactual
+      expect(balances?.fiatTotal).toBe(mockCfBalances.fiatTotal)
+      expect(balances?.items).toHaveLength(1)
+      expect(balances?.items[0]?.tokenInfo.type).toBe(TokenType.NATIVE_TOKEN)
       expect(error).toBeUndefined()
       expect(loading).toBe(false)
     })

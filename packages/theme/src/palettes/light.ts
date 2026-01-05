@@ -63,7 +63,8 @@ const lightPalette: ColorPalette = {
   background: {
     default: '#FFFFFF',
     main: '#F4F4F4',
-    paper: '#F4F4F4',
+    sheet: '#F4F4F4',
+    paper: '#FFFFFF',
     light: '#EFFFF4',
     secondary: '#DDDEE0',
     skeleton: 'rgba(0, 0, 0, 0.04)',

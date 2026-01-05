@@ -61,6 +61,7 @@ export interface ColorPalette {
   background: {
     default: string
     main: string
+    sheet: string
     paper: string
     light: string
     secondary: string

@@ -12,6 +12,7 @@ import { DUST_THRESHOLD } from '@/config/constants'
 import useHiddenTokens from '@/hooks/useHiddenTokens'
 import Track from '@/components/common/Track'
 import { ASSETS_EVENTS } from '@/services/analytics'
+import useSafeInfo from '@/hooks/useSafeInfo'
 import css from './ManageTokensMenu.module.css'
 
 interface ManageTokensMenuProps {
@@ -23,11 +24,7 @@ interface ManageTokensMenuProps {
   _hasDefaultTokenlist?: boolean
 }
 
-const menuItemHoverSx = {
-  '&:hover': {
-    backgroundColor: ({ palette }: Theme) => palette.background.lightGrey,
-  },
-}
+const menuItemHoverSx = { '&:hover': { backgroundColor: ({ palette }: Theme) => palette.background.lightGrey } }
 
 const ManageTokensMenu = ({
   anchorEl,
@@ -40,6 +37,7 @@ const ManageTokensMenu = ({
   const settings = useAppSelector(selectSettings)
   const hasDefaultTokenlistFromHook = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const hiddenTokens = useHiddenTokens()
+  const { safe } = useSafeInfo()
 
   const hasDefaultTokenlist = _hasDefaultTokenlist ?? hasDefaultTokenlistFromHook
 
@@ -68,17 +66,9 @@ const ManageTokensMenu = ({
       anchorEl={anchorEl}
       open={open}
       onClose={onClose}
-      anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'right',
-      }}
-      transformOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}
-      PaperProps={{
-        className: css.menu,
-      }}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      PaperProps={{ className: css.menu }}
       data-testid="manage-tokens-menu"
     >
       {hasDefaultTokenlist && (
@@ -90,7 +80,9 @@ const ManageTokensMenu = ({
         >
           <Box className={css.menuItemContent}>
             <Box className={css.menuItemLeft}>
-              <Typography variant="body2">Show all tokens</Typography>
+              <Typography variant="body2" fontWeight="bold">
+                Show all tokens
+              </Typography>
               <InfoTooltip
                 title={
                   <Typography>
@@ -113,29 +105,33 @@ const ManageTokensMenu = ({
         </MenuItem>
       )}
 
-      <MenuItem
-        className={css.menuItem}
-        sx={menuItemHoverSx}
-        onClick={handleToggleHideDust}
-        data-testid="hide-small-balances-menu-item"
-      >
-        <Box className={css.menuItemContent}>
-          <Box className={css.menuItemLeft}>
-            <Typography variant="body2">Hide small balances</Typography>
-            <InfoTooltip
-              title={<Typography>Hide tokens with a value less than ${DUST_THRESHOLD}</Typography>}
-              data-testid="hide-small-balances-info-tooltip"
+      {safe.deployed && (
+        <MenuItem
+          className={css.menuItem}
+          sx={menuItemHoverSx}
+          onClick={handleToggleHideDust}
+          data-testid="hide-small-balances-menu-item"
+        >
+          <Box className={css.menuItemContent}>
+            <Box className={css.menuItemLeft}>
+              <Typography variant="body2" fontWeight="bold">
+                Hide small balances
+              </Typography>
+              <InfoTooltip
+                title={<Typography>Hide tokens with a value less than ${DUST_THRESHOLD}</Typography>}
+                data-testid="hide-small-balances-info-tooltip"
+              />
+            </Box>
+            <Switch
+              size="small"
+              checked={hideDust}
+              onClick={(e) => e.stopPropagation()}
+              onChange={handleToggleHideDust}
+              data-testid="hide-small-balances-switch"
             />
           </Box>
-          <Switch
-            size="small"
-            checked={hideDust}
-            onClick={(e) => e.stopPropagation()}
-            onChange={handleToggleHideDust}
-            data-testid="hide-small-balances-switch"
-          />
-        </Box>
-      </MenuItem>
+        </MenuItem>
+      )}
 
       <Divider data-testid="manage-tokens-menu-divider" />
 
@@ -146,7 +142,9 @@ const ManageTokensMenu = ({
         data-testid="hide-tokens-menu-item"
       >
         <Track {...ASSETS_EVENTS.SHOW_HIDDEN_ASSETS}>
-          <Typography variant="body2">Hide tokens{hiddenTokensCount > 0 && ` (${hiddenTokensCount})`}</Typography>
+          <Typography variant="body2" fontWeight="bold">
+            Hide tokens{hiddenTokensCount > 0 && ` (${hiddenTokensCount})`}
+          </Typography>
         </Track>
       </MenuItem>
     </Menu>

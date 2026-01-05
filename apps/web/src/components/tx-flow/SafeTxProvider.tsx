@@ -30,9 +30,6 @@ export type SafeTxContextParams = {
   setTxOrigin: Dispatch<SetStateAction<string | undefined>>
 
   isReadOnly: boolean
-  setIsReadOnly: Dispatch<SetStateAction<boolean>>
-  isMassPayout?: boolean
-  setIsMassPayout: Dispatch<SetStateAction<boolean | undefined>>
 }
 
 export const SafeTxContext = createContext<SafeTxContextParams>({
@@ -44,8 +41,6 @@ export const SafeTxContext = createContext<SafeTxContextParams>({
   setSafeTxGas: () => {},
   setTxOrigin: () => {},
   isReadOnly: false,
-  setIsReadOnly: () => {},
-  setIsMassPayout: () => {},
 })
 
 const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => {
@@ -56,8 +51,6 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const [nonceNeeded, setNonceNeeded] = useState<boolean>(true)
   const [safeTxGas, setSafeTxGas] = useState<string>()
   const [txOrigin, setTxOrigin] = useState<string>()
-  const [isReadOnly, setIsReadOnly] = useState<boolean>(false)
-  const [isMassPayout, setIsMassPayout] = useState<boolean>()
 
   // Signed txs cannot be updated
   const isSigned = Boolean(safeTx && safeTx.signatures.size > 0)
@@ -66,7 +59,8 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const recommendedNonce = useRecommendedNonce()
   const recommendedSafeTxGas = useSafeTxGas(safeTx)
 
-  const canEdit = !isSigned && !isReadOnly
+  const canEdit = !isSigned
+  const isReadOnly = !canEdit
 
   // Priority to external nonce, then to the recommended one
   const finalNonce = canEdit ? (nonce ?? recommendedNonce ?? safeTx?.data.nonce) : safeTx?.data.nonce
@@ -76,7 +70,8 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
 
   // Update the tx when the nonce or safeTxGas change
   useEffect(() => {
-    if (!canEdit || !safeTx?.data) return
+    if (!canEdit) return
+    if (!safeTx?.data) return
     if (safeTx.data.nonce === finalNonce && safeTx.data.safeTxGas === finalSafeTxGas) return
 
     setSafeTxError(undefined)
@@ -112,9 +107,6 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
         txOrigin,
         setTxOrigin,
         isReadOnly,
-        setIsReadOnly,
-        isMassPayout,
-        setIsMassPayout,
       }}
     >
       {children}
