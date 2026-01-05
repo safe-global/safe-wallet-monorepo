@@ -34,6 +34,49 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
         lightGrey: colors.background.secondary,
         ...(isDarkMode ? {} : { paper: '#FFFFFF', default: '#F4F4F4' }),
       },
+      // Restore original web colors for info, success, and warning
+      // Mobile uses different color values from the unified palette
+      ...(isDarkMode
+        ? {
+            success: {
+              dark: '#388E3C',
+              main: '#00B460',
+              light: '#81C784',
+              background: '#1F2920',
+            },
+            info: {
+              dark: '#52BFDC',
+              main: '#5FDDFF',
+              light: '#B7F0FF',
+              background: '#19252C',
+            },
+            warning: {
+              dark: '#C04C32',
+              main: '#FF8061',
+              light: '#FFBC9F',
+              background: '#2F2318',
+            },
+          }
+        : {
+            success: {
+              dark: '#028D4C',
+              main: '#00B460',
+              light: '#D3F2E4',
+              background: '#EFFAF1',
+            },
+            info: {
+              dark: '#52BFDC',
+              main: '#5FDDFF',
+              light: '#D7F6FF',
+              background: '#EFFCFF',
+            },
+            warning: {
+              dark: '#C04C32',
+              main: '#FF8061',
+              light: '#FFBC9F',
+              background: '#FFF1E0',
+            },
+          }),
     },
     spacing: spacingWebBase, // 8px base for spacing function
     shape: {
