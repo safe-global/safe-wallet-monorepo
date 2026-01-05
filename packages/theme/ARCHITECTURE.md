@@ -236,24 +236,30 @@ The following colors have **different tints** between web and mobile:
 
 ### Light Mode Divergences
 
-| Color                  | Component           | Web (Original)               | Mobile (Unified Base)             | Reason                         |
-| ---------------------- | ------------------- | ---------------------------- | --------------------------------- | ------------------------------ |
-| **info.main**          | Main info color     | `#5FDDFF` (bright cyan)      | `#00BFE5` (darker cyan)           | Different design language      |
-| **info.dark**          | Dark info shade     | `#52BFDC`                    | `#15566A` (much darker, teal-ish) | Web uses brighter tints        |
-| **info.light**         | Light info shade    | `#D7F6FF` (very light blue)  | `#78D2E7` (medium blue)           | Web has lighter backgrounds    |
-| **info.background**    | Info background     | `#EFFCFF` (almost white)     | `#CEF0FD` (more saturated)        | Web prefers subtle backgrounds |
-| **success.dark**       | Dark success shade  | `#028D4C` (bright green)     | `#1C5538` (darker, desaturated)   | Mobile uses darker shades      |
-| **success.light**      | Light success shade | `#D3F2E4` (very light green) | `#84D9A0` (medium green)          | Web has lighter backgrounds    |
-| **success.background** | Success background  | `#EFFAF1` (almost white)     | `#CBF2DB` (more saturated)        | Web prefers subtle backgrounds |
-| **warning.main**       | Main warning color  | `#FF8061` (coral/salmon)     | `#FF8C00` (pure orange)           | Web uses softer, coral tones   |
-| **warning.dark**       | Dark warning shade  | `#C04C32` (reddish-orange)   | `#6C2D19` (dark brown)            | Mobile uses very dark shades   |
-| **warning.light**      | Light warning shade | `#FFBC9F` (light coral)      | `#F9B37C` (peachy)                | Different color temperature    |
-| **warning.background** | Warning background  | `#FFF1E0` (cream)            | `#FFECC2` (yellow-orange)         | Web uses warmer, softer tones  |
+| Color                  | Component           | Web (Original)               | Mobile (Unified Base)              | Reason                         |
+| ---------------------- | ------------------- | ---------------------------- | ---------------------------------- | ------------------------------ |
+| **error.dark**         | Dark error shade    | `#AC2C3B` (medium red)       | `#8A1C27` (darker, less saturated) | Mobile uses darker shades      |
+| **error.light**        | Light error shade   | `#FFB4BD` (light pink)       | `#F79BA7` (different light pink)   | Different tint preferences     |
+| **error.background**   | Error background    | `#FFE6EA` (very light pink)  | `#FFE0E6` (slightly different)     | Web prefers warmer tints       |
+| **info.main**          | Main info color     | `#5FDDFF` (bright cyan)      | `#00BFE5` (darker cyan)            | Different design language      |
+| **info.dark**          | Dark info shade     | `#52BFDC`                    | `#15566A` (much darker, teal-ish)  | Web uses brighter tints        |
+| **info.light**         | Light info shade    | `#D7F6FF` (very light blue)  | `#78D2E7` (medium blue)            | Web has lighter backgrounds    |
+| **info.background**    | Info background     | `#EFFCFF` (almost white)     | `#CEF0FD` (more saturated)         | Web prefers subtle backgrounds |
+| **success.dark**       | Dark success shade  | `#028D4C` (bright green)     | `#1C5538` (darker, desaturated)    | Mobile uses darker shades      |
+| **success.light**      | Light success shade | `#D3F2E4` (very light green) | `#84D9A0` (medium green)           | Web has lighter backgrounds    |
+| **success.background** | Success background  | `#EFFAF1` (almost white)     | `#CBF2DB` (more saturated)         | Web prefers subtle backgrounds |
+| **warning.main**       | Main warning color  | `#FF8061` (coral/salmon)     | `#FF8C00` (pure orange)            | Web uses softer, coral tones   |
+| **warning.dark**       | Dark warning shade  | `#C04C32` (reddish-orange)   | `#6C2D19` (dark brown)             | Mobile uses very dark shades   |
+| **warning.light**      | Light warning shade | `#FFBC9F` (light coral)      | `#F9B37C` (peachy)                 | Different color temperature    |
+| **warning.background** | Warning background  | `#FFF1E0` (cream)            | `#FFECC2` (yellow-orange)          | Web uses warmer, softer tones  |
 
 ### Dark Mode Divergences
 
 | Color                  | Component           | Web (Original)              | Mobile (Unified Base)          | Reason                                 |
 | ---------------------- | ------------------- | --------------------------- | ------------------------------ | -------------------------------------- |
+| **error.dark**         | Dark error shade    | `#AC2C3B` (medium red)      | `#FFE0E6` (very light pink!)   | Mobile inverts dark/light in dark mode |
+| **error.light**        | Light error shade   | `#FFB4BD` (light pink)      | `#4A2125` (very dark!)         | Web keeps semantic meaning             |
+| **error.background**   | Error background    | `#2F2527` (dark brown-red)  | `#4A2125` (slightly lighter)   | Different background strategies        |
 | **info.main**          | Main info color     | `#5FDDFF` (bright cyan)     | `#00BFE5` (darker cyan)        | Consistent with light mode             |
 | **info.dark**          | Dark info shade     | `#52BFDC` (bright)          | `#D9F4FB` (very light)         | Mobile inverts dark/light in dark mode |
 | **info.light**         | Light info shade    | `#B7F0FF` (light)           | `#458898` (dark)               | Web keeps semantic meaning             |
@@ -280,7 +286,9 @@ The following colors have **different tints** between web and mobile:
    - **Web warning**: Coral/salmon tones (warmer, softer)
    - **Mobile warning**: Pure orange (more saturated)
 
-5. **Main Color Alignment**: `success.main` is shared (`#00B460`), but `info.main` and `warning.main` differ between platforms.
+5. **Main Color Alignment**: `success.main` is shared (`#00B460`), but `error.main`, `info.main`, and `warning.main` differ between platforms.
+
+6. **Total Divergences**: **28 color property differences** (14 in light mode + 14 in dark mode) across 4 color groups: error, info, success, and warning.
 
 ## Why This Architecture?
 
