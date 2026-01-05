@@ -1,5 +1,5 @@
 import { Close } from '@mui/icons-material'
-import { Dialog, DialogContent, IconButton, Box, useMediaQuery } from '@mui/material'
+import { Dialog, DialogContent, IconButton, Box } from '@mui/material'
 import { type ReactNode } from 'react'
 
 export type HnModalProps = {
@@ -9,8 +9,6 @@ export type HnModalProps = {
 }
 
 const HnModal = ({ open, onClose, children }: HnModalProps) => {
-  const isSmallScreen = useMediaQuery('(max-width:700px)')
-
   return (
     <Dialog
       open={open}
@@ -30,16 +28,15 @@ const HnModal = ({ open, onClose, children }: HnModalProps) => {
         top={16}
         zIndex={1}
         sx={{
-          ...(isSmallScreen ? { left: 16 } : { right: 16 }),
+          right: ['auto', 16],
+          left: [16, 'auto'],
         }}
       >
         <IconButton
           aria-label="close"
           onClick={onClose}
           sx={{
-            ...(isSmallScreen
-              ? { color: 'var(--color-static-text-secondary)' }
-              : { color: 'var(--color-static-primary)' }),
+            color: ['var(--color-static-text-secondary)', 'var(--color-static-primary)'],
           }}
         >
           <Close />
