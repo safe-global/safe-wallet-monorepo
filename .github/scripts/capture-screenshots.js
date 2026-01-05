@@ -42,19 +42,20 @@ async function captureScreenshots() {
     try {
       // Navigate to story
       await page.goto(url, {
-        waitUntil: 'networkidle',
+        waitUntil: 'domcontentloaded',
         timeout: 30000,
       })
 
       // Wait for Storybook root element to be visible and stable
       const storyRoot = await page.locator('#storybook-root').first()
+
+      // Wait a bit for the story to render
+      await page.waitForTimeout(3000)
+
       await storyRoot.waitFor({ state: 'visible', timeout: 10000 })
 
-      // Wait for network to be idle after initial render
-      await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {
-        // Ignore timeout, some stories may have ongoing network activity
-        console.log('  ⚠ Network not fully idle, continuing anyway')
-      })
+      // Additional wait for any animations or lazy loading
+      await page.waitForTimeout(1000)
 
       // Take screenshot
       const screenshotPath = path.join('screenshots', `${componentName}--${storyName}.png`)
