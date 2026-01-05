@@ -28,14 +28,14 @@ export const HnBanner = ({ onHnSignupClick, onDismiss, label }: HnBannerProps) =
         action: HYPERNATIVE_EVENTS.GUARDIAN_BANNER_DISMISSED.action,
         label,
       }}
-      title="Strengthen your Safe"
+      title="Enable Enterprise Grade Security"
       description={
         <>
           Automatically monitor and block risky transactions using advanced, user-defined security policies, powered by{' '}
           <span style={{ color: '#00B460', fontWeight: 'bold' }}>Hypernative</span>.
         </>
       }
-      ctaLabel="Learn more"
+      ctaLabel="See how it works"
       imageSrc="/images/hypernative/guardian-badge.svg"
       imageAlt="Guardian badge"
       onBannerClick={onHnSignupClick}
