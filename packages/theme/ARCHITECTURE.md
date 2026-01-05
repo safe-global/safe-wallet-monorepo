@@ -15,37 +15,49 @@ The `@safe-global/theme` package serves as a **single source of truth** for desi
 
 ```mermaid
 flowchart TB
-    subgraph "Source Palettes"
-        LP[Light Palette<br/>packages/theme/src/palettes/light.ts]
-        DP[Dark Palette<br/>packages/theme/src/palettes/dark.ts]
-        SP[Static Colors<br/>packages/theme/src/palettes/static.ts]
+    subgraph palettes["📦 Source Palettes"]
+        LP["Light Palette
+        palettes/light.ts"]
+        DP["Dark Palette
+        palettes/dark.ts"]
+        SP["Static Colors
+        palettes/static.ts"]
     end
 
-    subgraph "Tokens"
-        T1[Typography<br/>Font family, sizes, weights]
-        T2[Spacing<br/>Mobile: 4px base<br/>Web: 8px base]
-        T3[Radius<br/>Border radius scale]
+    subgraph tokens["🎨 Tokens"]
+        T1["Typography"]
+        T2["Spacing"]
+        T3["Radius"]
     end
 
-    subgraph "Platform Generators"
-        MUI[MUI Generator<br/>generateMuiTheme()]
-        TAMA[Tamagui Generator<br/>generateTamaguiTokens()<br/>generateTamaguiThemes()]
-        CSS[CSS Vars Generator<br/>generateCSSVars()]
+    subgraph generators["⚙️ Platform Generators"]
+        MUI["MUI Generator
+        generateMuiTheme"]
+        TAMA["Tamagui Generator
+        generateTamaguiTokens"]
+        CSS["CSS Vars Generator
+        generateCSSVars"]
     end
 
-    subgraph "Web-Specific Overrides"
-        WO[Color Overrides<br/>info, success, warning<br/>Different tints than mobile]
+    subgraph overrides["🎯 Web Overrides"]
+        WO["Color Overrides
+        info, success, warning"]
     end
 
-    subgraph "Platform Themes"
-        WT[Web Theme<br/>MUI Theme Object<br/>apps/web/src/components/theme/safeTheme.ts]
-        MT[Mobile Theme<br/>Tamagui Config<br/>apps/mobile/src/theme/tamagui.config.ts]
-        CV[CSS Variables<br/>apps/web/src/styles/vars.css]
+    subgraph output["📱 Platform Themes"]
+        WT["Web Theme
+        MUI Theme Object"]
+        MT["Mobile Theme
+        Tamagui Config"]
+        CV["CSS Variables
+        vars.css"]
     end
 
-    subgraph "Applications"
-        WEB[Web App<br/>Next.js + MUI]
-        MOB[Mobile App<br/>Expo + Tamagui]
+    subgraph apps["🚀 Applications"]
+        WEB["Web App
+        Next.js + MUI"]
+        MOB["Mobile App
+        Expo + Tamagui"]
     end
 
     LP --> MUI
