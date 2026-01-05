@@ -65,6 +65,7 @@ jobs:
     if: failure() && github.event_name == 'push'
     needs: [lint, prettier, type-check]
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
       - name: Notify Slack on failure
         uses: slackapi/slack-github-action@v2.0.0
