@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Box } from '@mui/material'
 import { useAppDispatch } from '@/store'
 import { setFormCompleted } from '@/features/hypernative/store/hnStateSlice'
 import useChainId from '@/hooks/useChainId'
@@ -55,7 +54,7 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
 
   return (
     <HnModal open={open} onClose={handleClose}>
-      <Box>{renderStepContent()}</Box>
+      {renderStepContent()}
     </HnModal>
   )
 }

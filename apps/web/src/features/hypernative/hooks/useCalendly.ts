@@ -154,7 +154,11 @@ export const useCalendly = (
     // If script exists but API not ready, poll for availability
     if (existingScript) {
       timeoutId = setTimeout(() => {
-        if (checkInterval) clearInterval(checkInterval)
+        if (checkInterval) {
+          clearInterval(checkInterval)
+          // Log timeout for debugging. The script's onload can still initialize the widget later
+          console.warn('Calendly API polling timeout: widget may still initialize via script onload event')
+        }
       }, POLL_TIMEOUT_MS)
 
       checkInterval = setInterval(() => {

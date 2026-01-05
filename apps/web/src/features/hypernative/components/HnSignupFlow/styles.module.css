@@ -47,12 +47,7 @@
   right: 0;
   z-index: 1000;
   padding: var(--space-4);
-  background: linear-gradient(
-    to bottom,
-    var(--color-static-primary) 100%,
-    var(--color-static-primary) 100%,
-    transparent 100%
-  );
+  background: var(--color-static-primary);
   pointer-events: none;
   visibility: visible;
   opacity: 1;
@@ -76,6 +71,7 @@
   }
 }
 
+/* Hardcoded values to make the new header hide Calendly branding on different screen sizes*/
 @media (min-width: 401px) and (max-width: 899px) {
   .calendlyTitle {
     font-size: 16px;
@@ -92,7 +88,7 @@
   margin-top: var(--space-1);
 }
 
-@media (min-width: 920px) {
+@media (min-width: 900px) {
   .calendlyWidget {
     min-width: 650px;
     height: 700px;
