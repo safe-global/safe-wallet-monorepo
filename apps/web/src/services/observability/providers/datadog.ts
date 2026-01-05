@@ -3,12 +3,14 @@ import {
   COMMIT_HASH,
   DATADOG_CLIENT_TOKEN,
   DATADOG_FORCE_ENABLE,
+  DATADOG_LOGS_SAMPLE_RATE,
   DATADOG_RUM_APPLICATION_ID,
   DATADOG_RUM_CLIENT_TOKEN,
   DATADOG_RUM_ENV,
   DATADOG_RUM_SERVICE,
   DATADOG_RUM_SESSION_SAMPLE_RATE,
   DATADOG_RUM_SITE,
+  DATADOG_RUM_TRACE_SAMPLE_RATE,
   DATADOG_RUM_TRACING_ENABLED,
   GATEWAY_URL_PRODUCTION,
   GATEWAY_URL_STAGING,
@@ -35,6 +37,7 @@ interface DatadogRumConfig {
   trackResources: boolean
   trackLongTasks: boolean
   defaultPrivacyLevel: 'mask' | 'mask-user-input' | 'allow'
+  traceSampleRate?: number
   allowedTracingUrls?: Array<{
     match: string
     propagatorTypes: ('tracecontext' | 'datadog' | 'b3' | 'b3multi')[]
@@ -110,7 +113,7 @@ export class DatadogProvider implements IObservabilityProvider {
         clientToken: DATADOG_CLIENT_TOKEN,
         site: DATADOG_RUM_SITE,
         forwardErrorsToLogs: true,
-        sessionSampleRate: 100,
+        sessionSampleRate: DATADOG_LOGS_SAMPLE_RATE,
       })
       this.isLogsInitialized = true
     } catch (error) {
@@ -142,6 +145,7 @@ export class DatadogProvider implements IObservabilityProvider {
         trackLongTasks: true,
         defaultPrivacyLevel: 'mask',
         ...(DATADOG_RUM_TRACING_ENABLED && {
+          traceSampleRate: DATADOG_RUM_TRACE_SAMPLE_RATE,
           allowedTracingUrls: [
             { match: GATEWAY_URL_PRODUCTION, propagatorTypes: ['tracecontext', 'datadog'] },
             { match: GATEWAY_URL_STAGING, propagatorTypes: ['tracecontext', 'datadog'] },
