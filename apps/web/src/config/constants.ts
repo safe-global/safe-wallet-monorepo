@@ -47,6 +47,19 @@ export const DATADOG_RUM_SESSION_SAMPLE_RATE =
   process.env.NEXT_PUBLIC_DATADOG_RUM_SESSION_SAMPLE_RATE !== undefined && !Number.isNaN(parsedSessionSampleRate)
     ? parsedSessionSampleRate
     : 10
+
+const parsedTraceSampleRate = Number(process.env.NEXT_PUBLIC_DATADOG_RUM_TRACE_SAMPLE_RATE)
+export const DATADOG_RUM_TRACE_SAMPLE_RATE =
+  process.env.NEXT_PUBLIC_DATADOG_RUM_TRACE_SAMPLE_RATE !== undefined && !Number.isNaN(parsedTraceSampleRate)
+    ? parsedTraceSampleRate
+    : 20
+
+const parsedLogsSampleRate = Number(process.env.NEXT_PUBLIC_DATADOG_LOGS_SAMPLE_RATE)
+export const DATADOG_LOGS_SAMPLE_RATE =
+  process.env.NEXT_PUBLIC_DATADOG_LOGS_SAMPLE_RATE !== undefined && !Number.isNaN(parsedLogsSampleRate)
+    ? parsedLogsSampleRate
+    : 100
+
 export const DATADOG_FORCE_ENABLE = process.env.NEXT_PUBLIC_DATADOG_FORCE_ENABLE === 'true'
 export const DATADOG_RUM_TRACING_ENABLED = process.env.NEXT_PUBLIC_DATADOG_RUM_TRACING_ENABLED === 'true'
 
