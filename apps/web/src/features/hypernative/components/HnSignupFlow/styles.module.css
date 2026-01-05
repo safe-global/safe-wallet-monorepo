@@ -65,10 +65,21 @@
   color: var(--color-static-main);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 400px) {
+  .calendlyHeader {
+    padding: var(--space-4);
+  }
+
   .calendlyTitle {
-    padding-block: var(--space-1) calc(-1 * var(--space-1));
-    font-size: 18px;
+    font-size: 14px;
+    padding: 0;
+  }
+}
+
+@media (min-width: 401px) and (max-width: 899px) {
+  .calendlyTitle {
+    font-size: 16px;
+    padding-block: var(--space-1);
   }
 }
 
