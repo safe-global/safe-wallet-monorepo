@@ -49,13 +49,13 @@ async function captureScreenshots() {
       // Wait for Storybook root element to be visible and stable
       const storyRoot = await page.locator('#storybook-root').first()
 
-      // Wait a bit for the story to render
-      await page.waitForTimeout(3000)
+      // Wait for story to render (increased for CI environment)
+      await page.waitForTimeout(5000)
 
-      await storyRoot.waitFor({ state: 'visible', timeout: 10000 })
+      await storyRoot.waitFor({ state: 'visible', timeout: 15000 })
 
       // Additional wait for any animations or lazy loading
-      await page.waitForTimeout(1000)
+      await page.waitForTimeout(2000)
 
       // Take screenshot
       const screenshotPath = path.join('screenshots', `${componentName}--${storyName}.png`)
