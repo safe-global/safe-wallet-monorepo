@@ -44,7 +44,7 @@ export const FiatChange = ({ balanceItem, change, inline = false }: FiatChangePr
           color,
           padding: inline ? '0' : '2px 8px',
           height: inline ? '20px' : 'inherit',
-          '& .MuiChip-label': { pr: inline ? 0 : 1 },
+          '& .MuiChip-label': { pr: inline ? 0 : 1, fontSize: '13px' },
         }}
         label={changeLabel}
         icon={

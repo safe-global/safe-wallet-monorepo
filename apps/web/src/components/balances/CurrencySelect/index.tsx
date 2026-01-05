@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import type { SelectChangeEvent } from '@mui/material'
-import { FormControl, InputLabel, MenuItem, Select } from '@mui/material'
+import { FormControl, MenuItem, Select } from '@mui/material'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectCurrency, setCurrency } from '@/store/settingsSlice'
 import useCurrencies from './useCurrencies'
@@ -14,34 +14,34 @@ const CurrencySelect = (): ReactElement => {
   const handleChange = (e: SelectChangeEvent<string>) => {
     const currency = e.target.value
 
-    trackEvent({
-      ...ASSETS_EVENTS.CHANGE_CURRENCY,
-      label: currency.toUpperCase(),
-    })
+    trackEvent({ ...ASSETS_EVENTS.CHANGE_CURRENCY, label: currency.toUpperCase() })
 
     dispatch(setCurrency(currency.toLowerCase()))
   }
 
   const handleTrack = (label: 'Open' | 'Close') => {
-    trackEvent({
-      ...ASSETS_EVENTS.CURRENCY_MENU,
-      label,
-    })
+    trackEvent({ ...ASSETS_EVENTS.CURRENCY_MENU, label })
   }
 
   return (
     <FormControl size="small">
-      <InputLabel id="currency-label">Currency</InputLabel>
-
       <Select
         data-testid="currency-selector"
         labelId="currency-label"
         id="currency"
         value={currency.toUpperCase()}
-        label="Currency"
         onChange={handleChange}
         onOpen={() => handleTrack('Open')}
         onClose={() => handleTrack('Close')}
+        MenuProps={{ PaperProps: { sx: { marginTop: '8px' } } }}
+        sx={{
+          backgroundColor: 'var(--color-background-paper)',
+          '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+          '&:hover .MuiOutlinedInput-notchedOutline': { border: 'none' },
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': { border: 'none' },
+          '& .MuiSelect-icon': { color: 'text.primary', right: '8px' },
+          '& .MuiSelect-select': { paddingLeft: '12px', paddingRight: '32px !important', paddingY: '6px' },
+        }}
       >
         {fiatCurrencies.map((item) => (
           <MenuItem data-testid="currency-item" key={item} value={item} sx={{ overflow: 'hidden' }}>

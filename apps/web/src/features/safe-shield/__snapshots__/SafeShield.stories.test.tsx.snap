@@ -1094,10 +1094,10 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                         </p>
                                       </div>
                                       <div
-                                        class="MuiBox-root css-1memzer"
+                                        class="MuiBox-root css-i6fhqp"
                                       >
                                         <p
-                                          class="MuiTypography-root MuiTypography-body2 css-pgtyo7-MuiTypography-root"
+                                          class="MuiTypography-root MuiTypography-body2 css-riftlw-MuiTypography-root"
                                         >
                                           Bulleted list from validation.features, grouped by Malicious first, then Warnings.
                                         </p>
@@ -1125,10 +1125,10 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                         </p>
                                       </div>
                                       <div
-                                        class="MuiBox-root css-1memzer"
+                                        class="MuiBox-root css-i6fhqp"
                                       >
                                         <p
-                                          class="MuiTypography-root MuiTypography-body2 css-pgtyo7-MuiTypography-root"
+                                          class="MuiTypography-root MuiTypography-body2 css-riftlw-MuiTypography-root"
                                         >
                                           Issue 2
                                         </p>
@@ -1156,10 +1156,10 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                         </p>
                                       </div>
                                       <div
-                                        class="MuiBox-root css-1memzer"
+                                        class="MuiBox-root css-i6fhqp"
                                       >
                                         <p
-                                          class="MuiTypography-root MuiTypography-body2 css-pgtyo7-MuiTypography-root"
+                                          class="MuiTypography-root MuiTypography-body2 css-riftlw-MuiTypography-root"
                                         >
                                           Issue 4
                                         </p>
@@ -1169,10 +1169,10 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                       class="MuiBox-root css-1ygviyr"
                                     >
                                       <div
-                                        class="MuiBox-root css-4s3ywp"
+                                        class="MuiBox-root css-jnhdwv"
                                       >
                                         <p
-                                          class="MuiTypography-root MuiTypography-body2 css-pgtyo7-MuiTypography-root"
+                                          class="MuiTypography-root MuiTypography-body2 css-riftlw-MuiTypography-root"
                                         >
                                           Issue without address
                                         </p>
@@ -1182,10 +1182,10 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                       class="MuiBox-root css-1ygviyr"
                                     >
                                       <div
-                                        class="MuiBox-root css-4s3ywp"
+                                        class="MuiBox-root css-jnhdwv"
                                       >
                                         <p
-                                          class="MuiTypography-root MuiTypography-body2 css-pgtyo7-MuiTypography-root"
+                                          class="MuiTypography-root MuiTypography-body2 css-riftlw-MuiTypography-root"
                                         >
                                           Issue 6
                                         </p>
@@ -1195,10 +1195,10 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                       class="MuiBox-root css-1ygviyr"
                                     >
                                       <div
-                                        class="MuiBox-root css-4s3ywp"
+                                        class="MuiBox-root css-jnhdwv"
                                       >
                                         <p
-                                          class="MuiTypography-root MuiTypography-body2 css-pgtyo7-MuiTypography-root"
+                                          class="MuiTypography-root MuiTypography-body2 css-riftlw-MuiTypography-root"
                                         >
                                           Issue 7
                                         </p>
@@ -1852,10 +1852,10 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                                       class="MuiBox-root css-1ygviyr"
                                     >
                                       <div
-                                        class="MuiBox-root css-4s3ywp"
+                                        class="MuiBox-root css-jnhdwv"
                                       >
                                         <p
-                                          class="MuiTypography-root MuiTypography-body2 css-pgtyo7-MuiTypography-root"
+                                          class="MuiTypography-root MuiTypography-body2 css-riftlw-MuiTypography-root"
                                         >
                                           Bulleted list from validation.features, grouped by Malicious first, then Warnings.
                                         </p>
@@ -3211,10 +3211,10 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                       class="MuiBox-root css-1ygviyr"
                                     >
                                       <div
-                                        class="MuiBox-root css-4s3ywp"
+                                        class="MuiBox-root css-jnhdwv"
                                       >
                                         <p
-                                          class="MuiTypography-root MuiTypography-body2 css-pgtyo7-MuiTypography-root"
+                                          class="MuiTypography-root MuiTypography-body2 css-riftlw-MuiTypography-root"
                                         >
                                           Bulleted list from validation.features, grouped by Malicious first, then Warnings.
                                         </p>

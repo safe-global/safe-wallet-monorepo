@@ -80,6 +80,8 @@ export const txHistoryListener = (listenerMiddleware: typeof listenerMiddlewareI
           txDispatch(TxEvent.SUCCESS, {
             nonce: pendingTx.nonce,
             txId,
+            chainId: pendingTx.chainId,
+            safeAddress: pendingTx.safeAddress,
             groupKey: pendingTxs[txId].groupKey,
             txHash,
           })
