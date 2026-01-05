@@ -32,6 +32,6 @@ export enum HYPERNATIVE_SOURCE {
   Settings = 'Settings',
   NewTransaction = 'New transaction',
   Tutorial = 'Tutorial',
-  Queue = 'queue',
-  History = 'history',
+  Queue = 'Queue',
+  History = 'History',
 }
