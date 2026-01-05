@@ -57,6 +57,7 @@ interface DatadogRumModule {
   datadogRum: {
     init: (config: DatadogRumConfig) => void
     addError: (error: Error, context?: Record<string, unknown>) => void
+    setGlobalContextProperty: (key: string, value: unknown) => void
   }
 }
 
@@ -147,6 +148,12 @@ export class DatadogProvider implements IObservabilityProvider {
           ],
         }),
       })
+
+      // Set global context for proper faceting in Datadog UI
+      datadogRumModule.datadogRum.setGlobalContextProperty('env', DATADOG_RUM_ENV)
+      datadogRumModule.datadogRum.setGlobalContextProperty('service', DATADOG_RUM_SERVICE)
+      datadogRumModule.datadogRum.setGlobalContextProperty('version', COMMIT_HASH)
+
       this.isRumInitialized = true
     } catch (error) {
       console.warn('Failed to initialize Datadog RUM (might be already initialized):', error)
