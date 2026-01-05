@@ -26,9 +26,6 @@ const HnBannerForSettingsWithConditions = withHnBannerConditions(BannerType.Sett
 )
 export const HnBannerForSettings = withHnFeature(HnBannerForSettingsWithConditions)
 
-// Export versions for Queue and History pages (with withHnFeature applied at export level for consistency)
-import { HnBannerForQueue as HnBannerForQueueWrapper } from './HnBannerForQueue'
-import { HnBannerForHistory as HnBannerForHistoryWrapper } from './HnBannerForHistory'
-
-export const HnBannerForQueue = withHnFeature(HnBannerForQueueWrapper)
-export const HnBannerForHistory = withHnFeature(HnBannerForHistoryWrapper)
+// Export versions for Queue and History pages (same logic as HnBannerForCarousel)
+export { HnBannerForQueue } from './HnBannerForQueue'
+export { HnBannerForHistory } from './HnBannerForHistory'
