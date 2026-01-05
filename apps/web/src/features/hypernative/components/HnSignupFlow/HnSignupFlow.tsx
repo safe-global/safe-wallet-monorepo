@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Box, Typography } from '@mui/material'
+import { Box } from '@mui/material'
 import { useAppDispatch } from '@/store'
 import { setFormCompleted } from '@/features/hypernative/store/hnStateSlice'
 import useChainId from '@/hooks/useChainId'
@@ -47,13 +47,6 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
       case 0:
         return <HnSignupIntro onGetStarted={handleNext} onClose={handleClose} />
       case 1:
-        if (!calendlyUrl) {
-          return (
-            <Box p={4}>
-              <Typography color="error">Calendly configuration is missing.</Typography>
-            </Box>
-          )
-        }
         return <HnCalendlyStep calendlyUrl={calendlyUrl} onBookingScheduled={handleBookingScheduled} />
       default:
         return null
