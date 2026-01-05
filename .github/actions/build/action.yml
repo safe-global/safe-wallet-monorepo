@@ -82,7 +82,8 @@ runs:
       working-directory: apps/web
       run: |
         SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-        DATADOG_SERVICE="${DATADOG_RUM_SERVICE:-safe-wallet-web}"
+        DATADOG_SERVICE="${NEXT_PUBLIC_DATADOG_RUM_SERVICE:-safe-wallet-web}"
+        DATADOG_UPLOAD_SITE="${NEXT_PUBLIC_DATADOG_RUM_SITE:-datadoghq.eu}"
         npx @datadog/datadog-ci sourcemaps upload ./out/_next/static \
           --service="$DATADOG_SERVICE" \
           --release-version=$SHORT_SHA \
@@ -90,7 +91,8 @@ runs:
       env:
         DATADOG_API_KEY: ${{ fromJSON(inputs.secrets).DATADOG_API_KEY }}
         DATADOG_SITE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SITE || 'datadoghq.eu' }}
-        DATADOG_RUM_SERVICE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SERVICE }}
+        NEXT_PUBLIC_DATADOG_RUM_SERVICE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SERVICE }}
+        NEXT_PUBLIC_DATADOG_RUM_SITE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SITE }}
 
     - name: Save Next.js Build Cache & Cypress cache
       if: steps.restore-nc.outputs.cache-hit-nc != 'true'
