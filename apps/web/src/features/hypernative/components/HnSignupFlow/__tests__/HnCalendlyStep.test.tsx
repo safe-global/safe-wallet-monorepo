@@ -1,24 +1,14 @@
 import { render } from '@/tests/test-utils'
 import HnCalendlyStep from '../HnCalendlyStep'
 
-// Mock the hooks
-jest.mock('../../../hooks/useCalendlyEventScheduled', () => ({
-  useCalendlyEventScheduled: jest.fn(),
+// Mock the unified hook
+jest.mock('../../../hooks/useCalendly', () => ({
+  useCalendly: jest.fn(),
 }))
 
-jest.mock('../../../hooks/useCalendlyScript', () => ({
-  useCalendlyScript: jest.fn(),
-}))
+import { useCalendly } from '../../../hooks/useCalendly'
 
-jest.mock('../../../hooks/useCalendlyPageChange', () => ({
-  useCalendlyPageChange: jest.fn(() => false),
-}))
-
-import { useCalendlyEventScheduled } from '../../../hooks/useCalendlyEventScheduled'
-import { useCalendlyPageChange } from '../../../hooks/useCalendlyPageChange'
-
-const mockUseCalendlyEventScheduled = useCalendlyEventScheduled as jest.MockedFunction<typeof useCalendlyEventScheduled>
-const mockUseCalendlyPageChange = useCalendlyPageChange as jest.MockedFunction<typeof useCalendlyPageChange>
+const mockUseCalendly = useCalendly as jest.MockedFunction<typeof useCalendly>
 
 describe('HnCalendlyStep', () => {
   const mockOnBookingScheduled = jest.fn()
@@ -26,8 +16,11 @@ describe('HnCalendlyStep', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseCalendlyEventScheduled.mockImplementation(() => {})
-    mockUseCalendlyPageChange.mockReturnValue(false)
+    mockUseCalendly.mockReturnValue({
+      isLoaded: false,
+      isSecondStep: false,
+      hasScheduled: false,
+    })
   })
 
   it('should render the Calendly widget container', () => {
@@ -37,16 +30,21 @@ describe('HnCalendlyStep', () => {
     expect(widgetElement).toBeInTheDocument()
   })
 
-  it('should call useCalendlyEventScheduled with onBookingScheduled callback', () => {
+  it('should call useCalendly with correct parameters', () => {
     render(<HnCalendlyStep calendlyUrl={calendlyUrl} onBookingScheduled={mockOnBookingScheduled} />)
 
-    expect(mockUseCalendlyEventScheduled).toHaveBeenCalledWith(mockOnBookingScheduled)
+    expect(mockUseCalendly).toHaveBeenCalled()
+    const callArgs = mockUseCalendly.mock.calls[0]
+    expect(callArgs[1]).toBe(calendlyUrl)
+    expect(callArgs[2]).toBe(mockOnBookingScheduled)
   })
 
-  it('should call useCalendlyEventScheduled with undefined if callback is not provided', () => {
+  it('should call useCalendly with undefined callback if not provided', () => {
     render(<HnCalendlyStep calendlyUrl={calendlyUrl} />)
 
-    expect(mockUseCalendlyEventScheduled).toHaveBeenCalledWith(undefined)
+    expect(mockUseCalendly).toHaveBeenCalled()
+    const callArgs = mockUseCalendly.mock.calls[0]
+    expect(callArgs[2]).toBeUndefined()
   })
 
   it('should render widget with correct styles', () => {

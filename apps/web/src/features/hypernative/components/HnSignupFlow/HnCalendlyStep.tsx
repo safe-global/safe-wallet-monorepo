@@ -1,8 +1,6 @@
 import { useRef } from 'react'
 import HnSignupLayout from './HnSignupLayout'
-import { useCalendlyEventScheduled } from '../../hooks/useCalendlyEventScheduled'
-import { useCalendlyScript } from '../../hooks/useCalendlyScript'
-import { useCalendlyPageChange } from '../../hooks/useCalendlyPageChange'
+import { useCalendly } from '../../hooks/useCalendly'
 import css from './styles.module.css'
 import { Typography } from '@mui/material'
 
@@ -13,10 +11,7 @@ export type HnCalendlyStepProps = {
 
 const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps) => {
   const widgetRef = useRef<HTMLDivElement>(null)
-  const isSecondStep: boolean = useCalendlyPageChange()
-
-  useCalendlyEventScheduled(onBookingScheduled)
-  useCalendlyScript(widgetRef, calendlyUrl)
+  const { isSecondStep } = useCalendly(widgetRef, calendlyUrl, onBookingScheduled)
 
   return (
     <HnSignupLayout contentClassName={css.calendlyColumn}>
