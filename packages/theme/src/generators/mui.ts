@@ -34,10 +34,16 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
         lightGrey: colors.background.secondary,
         ...(isDarkMode ? {} : { paper: '#FFFFFF', default: '#F4F4F4' }),
       },
-      // Restore original web colors for info, success, and warning
+      // Restore original web colors for error, info, success, and warning
       // Mobile uses different color values from the unified palette
       ...(isDarkMode
         ? {
+            error: {
+              dark: '#AC2C3B',
+              main: '#FF5F72',
+              light: '#FFB4BD',
+              background: '#2F2527',
+            },
             success: {
               dark: '#388E3C',
               main: '#00B460',
@@ -58,6 +64,12 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
             },
           }
         : {
+            error: {
+              dark: '#AC2C3B',
+              main: '#FF5F72',
+              light: '#FFB4BD',
+              background: '#FFE6EA',
+            },
             success: {
               dark: '#028D4C',
               main: '#00B460',

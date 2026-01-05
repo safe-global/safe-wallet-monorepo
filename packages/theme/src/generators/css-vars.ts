@@ -66,6 +66,12 @@ export function generateCSSVars(): string {
       paper: '#FFFFFF',
       default: '#F4F4F4',
     },
+    error: {
+      dark: '#AC2C3B',
+      main: '#FF5F72',
+      light: '#FFB4BD',
+      background: '#FFE6EA',
+    },
     success: {
       dark: '#028D4C',
       main: '#00B460',
@@ -88,6 +94,12 @@ export function generateCSSVars(): string {
 
   const webDarkPalette: ColorPalette = {
     ...darkPalette,
+    error: {
+      dark: '#AC2C3B',
+      main: '#FF5F72',
+      light: '#FFB4BD',
+      background: '#2F2527',
+    },
     success: {
       dark: '#388E3C',
       main: '#00B460',
