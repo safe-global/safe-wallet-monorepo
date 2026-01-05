@@ -325,7 +325,7 @@ exports[`./swap.stories CancelledLimit 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             <div
-              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-4kcw4c-MuiChip-root"
+              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1im6wh6-MuiChip-root"
             >
               <span
                 class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -653,7 +653,7 @@ exports[`./swap.stories CancelledMarket 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             <div
-              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-4kcw4c-MuiChip-root"
+              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1im6wh6-MuiChip-root"
             >
               <span
                 class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
