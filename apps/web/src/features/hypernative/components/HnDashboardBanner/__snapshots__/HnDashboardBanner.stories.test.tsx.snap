@@ -54,7 +54,7 @@ exports[`./HnDashboardBanner.stories Default 1`] = `
           tabindex="0"
           type="button"
         >
-          See how it works
+          Learn more
         </button>
       </div>
     </div>

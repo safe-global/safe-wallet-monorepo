@@ -48,7 +48,7 @@ exports[`./HnBanner.stories Default 1`] = `
           tabindex="0"
           type="button"
         >
-          See how it works
+          Learn more
           <span
             class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeCompact css-ioep0k-MuiButton-endIcon"
           >
@@ -137,7 +137,7 @@ exports[`./HnBanner.stories NonDismissable 1`] = `
           tabindex="0"
           type="button"
         >
-          See how it works
+          Learn more
           <span
             class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeCompact css-ioep0k-MuiButton-endIcon"
           >

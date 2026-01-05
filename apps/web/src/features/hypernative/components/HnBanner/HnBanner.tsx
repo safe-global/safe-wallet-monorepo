@@ -35,7 +35,7 @@ export const HnBanner = ({ onHnSignupClick, onDismiss, label }: HnBannerProps) =
           <span style={{ color: '#00B460', fontWeight: 'bold' }}>Hypernative</span>.
         </>
       }
-      ctaLabel="See how it works"
+      ctaLabel="Learn more"
       imageSrc="/images/hypernative/guardian-badge.svg"
       imageAlt="Guardian badge"
       onBannerClick={onHnSignupClick}

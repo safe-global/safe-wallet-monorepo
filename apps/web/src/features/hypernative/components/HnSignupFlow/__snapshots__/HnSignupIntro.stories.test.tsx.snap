@@ -67,13 +67,7 @@ exports[`./HnSignupIntro.stories Default 1`] = `
               <p
                 class="MuiTypography-root MuiTypography-body2 featureDescription css-17vdyq3-MuiTypography-root"
               >
-                Automatically prevents malicious or non-compliant transactions
-                 
-                <span
-                  class="MuiTypography-root MuiTypography-body1 css-17gpjik-MuiTypography-root"
-                >
-                  before they're signed.
-                </span>
+                Automatically prevents malicious or non-compliant transactions before they're executed
               </p>
             </div>
           </div>

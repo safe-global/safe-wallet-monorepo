@@ -22,7 +22,7 @@ describe('HnBanner', () => {
       render(<HnBanner onHnSignupClick={mockOnHnSignupClick} />)
 
       expect(screen.getByText('Enable Enterprise Grade Security')).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'See how it works' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Learn more' })).toBeInTheDocument()
     })
 
     it('renders dismiss button when onDismiss is provided', () => {
@@ -102,7 +102,7 @@ describe('HnBanner', () => {
         render(<HnBannerForQueue />)
 
         expect(screen.getByText('Enable Enterprise Grade Security')).toBeInTheDocument()
-        expect(screen.getByRole('button', { name: 'See how it works' })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Learn more' })).toBeInTheDocument()
         expect(useBannerVisibilityHook.useBannerVisibility).toHaveBeenCalledWith(BannerType.Promo)
       })
 
@@ -180,7 +180,7 @@ describe('HnBanner', () => {
         render(<HnBannerForHistory />)
 
         expect(screen.getByText('Enable Enterprise Grade Security')).toBeInTheDocument()
-        expect(screen.getByRole('button', { name: 'See how it works' })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Learn more' })).toBeInTheDocument()
         expect(useBannerVisibilityHook.useBannerVisibility).toHaveBeenCalledWith(BannerType.Promo)
       })
 

@@ -14,14 +14,7 @@ const HnSignupIntro = ({ onGetStarted, onClose }: HnSignupIntroProps) => {
   const features = [
     {
       title: 'Automatic blocking',
-      description: (
-        <>
-          Automatically prevents malicious or non-compliant transactions{' '}
-          <Typography component="span" fontStyle="italic" fontSize="inherit">
-            before they&apos;re signed.
-          </Typography>
-        </>
-      ),
+      description: "Automatically prevents malicious or non-compliant transactions before they're executed",
     },
     {
       title: 'Custom security rules',
