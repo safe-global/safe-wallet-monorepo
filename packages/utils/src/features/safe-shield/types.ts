@@ -111,6 +111,7 @@ export type AnalysisResult<T extends AnyStatus = AnyStatus> = {
     name?: string
     logoUrl?: string
   }[]
+  error?: string
 }
 
 export type MasterCopyChangeThreatAnalysisResult = AnalysisResult<ThreatStatus.MASTERCOPY_CHANGE> & {
