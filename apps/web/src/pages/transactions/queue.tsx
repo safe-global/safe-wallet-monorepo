@@ -16,6 +16,9 @@ const Queue: NextPage = () => {
   const showPending = useShowUnsignedQueue()
   const { isHypernativeGuard, loading: HNGuardCheckLoading } = useIsHypernativeGuard()
 
+  // TODO: Remove the false flag when Hypernative assessments for queued transactions is released
+  const showHnLoginCard = !HNGuardCheckLoading && isHypernativeGuard /* REMOVE -> */ && false /* <- REMOVE */
+
   return (
     <>
       <Head>
@@ -24,7 +27,7 @@ const Queue: NextPage = () => {
 
       <BatchExecuteHoverProvider>
         <TxHeader>
-          {!HNGuardCheckLoading && isHypernativeGuard && <HnLoginCard />}
+          {showHnLoginCard && <HnLoginCard />}
           <BatchExecuteButton />
         </TxHeader>
 
