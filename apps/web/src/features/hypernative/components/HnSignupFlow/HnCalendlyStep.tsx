@@ -1,17 +1,31 @@
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import HnSignupLayout from './HnSignupLayout'
 import { useCalendly } from '../../hooks/useCalendly'
 import css from './styles.module.css'
-import { Typography } from '@mui/material'
+import { Typography, Skeleton } from '@mui/material'
 
 export type HnCalendlyStepProps = {
   calendlyUrl: string
   onBookingScheduled?: () => void
 }
 
+const SKELETON_DURATION_MS = 1500
+
 const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps) => {
   const widgetRef = useRef<HTMLDivElement>(null)
   const { isSecondStep } = useCalendly(widgetRef, calendlyUrl, onBookingScheduled)
+  const [showSkeleton, setShowSkeleton] = useState(true)
+
+  // Show skeleton (we can't get from Calendly when the widget is loaded, hence a fixed timeout)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSkeleton(false)
+    }, SKELETON_DURATION_MS)
+
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [])
 
   return (
     <HnSignupLayout contentClassName={css.calendlyColumn}>
@@ -21,6 +35,19 @@ const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps
             <Typography variant="h2" className={css.calendlyTitle}>
               Get connected to the right expert
             </Typography>
+          </div>
+        )}
+        {showSkeleton && (
+          <div className={css.calendlySkeletonOverlay}>
+            <Skeleton variant="rounded" width="100%" height="40px" sx={{ mb: 2 }} />
+            <br />
+            <Skeleton
+              variant="rounded"
+              sx={{
+                width: { sm: '100%', md: '160px' },
+              }}
+              height="40px"
+            />
           </div>
         )}
         <div
