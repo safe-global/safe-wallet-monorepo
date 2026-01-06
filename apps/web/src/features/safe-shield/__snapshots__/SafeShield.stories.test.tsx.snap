@@ -3970,6 +3970,359 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
 </div>
 `;
 
+exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-wf13l-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiBox-root css-1hjq20a"
+    >
+      <div
+        class="MuiStack-root css-hwnj0i-MuiStack-root"
+        data-testid="safe-shield-widget"
+      >
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1294j3-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: none;"
+        >
+          <div
+            class="MuiBox-root css-2w7gpf"
+          >
+            <div
+              class="MuiStack-root css-la659o-MuiStack-root"
+              data-testid="safe-shield-status"
+            >
+              <span
+                class="MuiTypography-root MuiTypography-overline css-1v2h5v4-MuiTypography-root"
+              >
+                Issues found
+              </span>
+            </div>
+          </div>
+          <div
+            class="MuiBox-root css-1hpqev5"
+          >
+            <div
+              class="MuiBox-root css-1l5zt4q"
+            >
+              <div
+                class="MuiBox-root css-153fpjs"
+              >
+                <div
+                  class="MuiBox-root css-12i4uqz"
+                  data-testid="recipient-analysis-group-card"
+                >
+                  <div
+                    class="MuiStack-root css-es2900-MuiStack-root"
+                  >
+                    <div
+                      class="MuiStack-root css-1rlitzi-MuiStack-root"
+                    >
+                      <mock-icon
+                        aria-hidden=""
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-120l5q5-MuiSvgIcon-root"
+                        focusable="false"
+                      />
+                      <p
+                        class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+                      >
+                        Known recipient
+                      </p>
+                    </div>
+                    <button
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      tabindex="0"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-118obxm-MuiSvgIcon-root"
+                        data-testid="KeyboardArrowDownIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <div
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-hidden css-cwrbtg-MuiCollapse-root"
+                    style="min-height: 0px;"
+                  >
+                    <div
+                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                    >
+                      <div
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                      >
+                        <div
+                          class="MuiBox-root css-v1dotw"
+                        >
+                          <div
+                            class="MuiStack-root css-1ucnu3w-MuiStack-root"
+                          >
+                            <div
+                              class="MuiBox-root css-6io5aq"
+                            >
+                              <div
+                                class="MuiBox-root css-1f9z19n"
+                              >
+                                <div
+                                  class="MuiStack-root css-1ucnu3w-MuiStack-root"
+                                >
+                                  <p
+                                    class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+                                  >
+                                    This address is in your address book. 
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="MuiBox-root css-7yf5bk"
+                  data-testid="contract-analysis-group-card"
+                >
+                  <div
+                    class="MuiStack-root css-es2900-MuiStack-root"
+                  >
+                    <div
+                      class="MuiStack-root css-1rlitzi-MuiStack-root"
+                    >
+                      <mock-icon
+                        aria-hidden=""
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1nx0ljk-MuiSvgIcon-root"
+                        focusable="false"
+                      />
+                      <p
+                        class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+                      >
+                        Unexpected delegateCall
+                      </p>
+                    </div>
+                    <button
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      tabindex="0"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-118obxm-MuiSvgIcon-root"
+                        data-testid="KeyboardArrowDownIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <div
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-hidden css-cwrbtg-MuiCollapse-root"
+                    style="min-height: 0px;"
+                  >
+                    <div
+                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                    >
+                      <div
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                      >
+                        <div
+                          class="MuiBox-root css-v1dotw"
+                        >
+                          <div
+                            class="MuiStack-root css-1ucnu3w-MuiStack-root"
+                          >
+                            <div
+                              class="MuiBox-root css-6io5aq"
+                            >
+                              <div
+                                class="MuiBox-root css-jgusbz"
+                              >
+                                <div
+                                  class="MuiStack-root css-1ucnu3w-MuiStack-root"
+                                >
+                                  <p
+                                    class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+                                  >
+                                    This transaction calls a smart contract that will be able to modify your Safe account.
+                                     
+                                    <a
+                                      class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-r9pq5a-MuiTypography-root-MuiLink-root"
+                                      href="https://help.safe.global/en/articles/40794-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
+                                      rel="noreferrer noopener"
+                                      target="_blank"
+                                    >
+                                      <span
+                                        class="MuiBox-root css-u9xrjn"
+                                      >
+                                        Learn more
+                                      </span>
+                                    </a>
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="MuiBox-root css-6io5aq"
+                            >
+                              <div
+                                class="MuiBox-root css-1f9z19n"
+                              >
+                                <div
+                                  class="MuiStack-root css-1ucnu3w-MuiStack-root"
+                                >
+                                  <p
+                                    class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+                                  >
+                                    This contract is verified as "Lido staking v2".
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="MuiBox-root css-6io5aq"
+                            >
+                              <div
+                                class="MuiBox-root css-1f9z19n"
+                              >
+                                <div
+                                  class="MuiStack-root css-1ucnu3w-MuiStack-root"
+                                >
+                                  <p
+                                    class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+                                  >
+                                    You have interacted with this contract 33 times.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="MuiBox-root css-l9pt9e"
+                  data-testid="threat-analysis-group-card"
+                >
+                  <div
+                    class="MuiStack-root css-es2900-MuiStack-root"
+                  >
+                    <div
+                      class="MuiStack-root css-1rlitzi-MuiStack-root"
+                    >
+                      <mock-icon
+                        aria-hidden=""
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1nx0ljk-MuiSvgIcon-root"
+                        focusable="false"
+                      />
+                      <p
+                        class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+                      >
+                        Threat analysis failed
+                      </p>
+                    </div>
+                    <button
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      tabindex="0"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-118obxm-MuiSvgIcon-root"
+                        data-testid="KeyboardArrowDownIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <div
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-hidden css-cwrbtg-MuiCollapse-root"
+                    style="min-height: 0px;"
+                  >
+                    <div
+                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                    >
+                      <div
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                      >
+                        <div
+                          class="MuiBox-root css-v1dotw"
+                        >
+                          <div
+                            class="MuiStack-root css-1ucnu3w-MuiStack-root"
+                          >
+                            <div
+                              class="MuiBox-root css-6io5aq"
+                            >
+                              <div
+                                class="MuiBox-root css-jgusbz"
+                              >
+                                <div
+                                  class="MuiStack-root css-1ucnu3w-MuiStack-root"
+                                >
+                                  <p
+                                    class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+                                  >
+                                    Threat analysis failed. Review before processing.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiStack-root css-10778a5-MuiStack-root"
+        >
+          <a
+            class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-r9pq5a-MuiTypography-root-MuiLink-root"
+            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            rel="noreferrer noopener"
+            target="_blank"
+          >
+            <span
+              class="MuiBox-root css-u9xrjn"
+            >
+              <mock-icon
+                aria-hidden=""
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-6s60fs-MuiSvgIcon-root"
+                focusable="false"
+              />
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
