@@ -1,8 +1,7 @@
 import React, { useState, useCallback } from 'react'
-import { View, YStack, Text, XStack } from 'tamagui'
+import { YStack, Text, XStack } from 'tamagui'
 import { SafeInfo } from '@/src/types/address'
 import { Identicon } from '@/src/components/Identicon'
-import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { OpenLVProvider } from '@openlv/react-native/provider'
 import { useWalletSession } from '../hooks/useWalletSession'
 import { SafeInput } from '@/src/components/SafeInput'
@@ -12,12 +11,11 @@ import { Camera, useCameraPermission, Code } from 'react-native-vision-camera'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { toUtf8String } from 'ethers'
 
-type ShareViewProps = {
+type OpenLVViewProps = {
   activeSafe: SafeInfo
-  availableChains: Chain[]
 }
 
-export const ConnectView = ({ activeSafe }: ShareViewProps) => {
+export const OpenLVView = ({ activeSafe }: OpenLVViewProps) => {
   const {
     connectionUrl,
     setConnectionUrl,
@@ -66,7 +64,9 @@ export const ConnectView = ({ activeSafe }: ShareViewProps) => {
       if (displayMessage.startsWith('0x')) {
         displayMessage = toUtf8String(displayMessage)
       }
-    } catch {}
+    } catch {
+      // Ignore conversion errors, use original message
+    }
 
     return (
       <YStack flex={1} padding="$4" space="$4" justifyContent="center">
@@ -173,4 +173,4 @@ export const ConnectView = ({ activeSafe }: ShareViewProps) => {
   )
 }
 
-export default ConnectView
+export default OpenLVView

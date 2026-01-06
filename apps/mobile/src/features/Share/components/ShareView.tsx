@@ -1,5 +1,4 @@
-import React from 'react'
-import { View, YStack, H3, Text, XStack } from 'tamagui'
+import { H3, Text, View, XStack, YStack } from 'tamagui'
 import { SafeInfo } from '@/src/types/address'
 import { Container } from '@/src/components/Container'
 import Share from 'react-native-share'
@@ -7,13 +6,15 @@ import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Identicon } from '@/src/components/Identicon'
 import QRCodeStyled from 'react-native-qrcode-styled'
+import { Platform, StyleSheet } from 'react-native'
+import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
+import React, { useCallback } from 'react'
 import { ToastViewport } from '@tamagui/toast'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { ChainsDisplay } from '@/src/components/ChainsDisplay'
 import { getAvailableChainsNames } from '@/src/utils/chains'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'
-import { Platform, StyleSheet } from 'react-native'
 
 type ShareViewProps = {
   activeSafe: SafeInfo
@@ -21,7 +22,6 @@ type ShareViewProps = {
 }
 
 export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
-  const { useCopyAndDispatchToast } = require('@/src/hooks/useCopyAndDispatchToast')
   const copyAndDispatchToast = useCopyAndDispatchToast()
   const contact = useAppSelector(selectContactByAddress(activeSafe.address))
   const safeAddress = activeSafe.address
@@ -31,75 +31,78 @@ export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
       title: 'Your safe Address',
       message: safeAddress,
     }).then((res) => {
+      // what to do with the result?
       console.log(res)
     })
   }
 
-  const onPressCopy = () => {
+  const onPressCopy = useCallback(() => {
     copyAndDispatchToast(safeAddress)
-  }
+  }, [safeAddress])
 
   return (
-    <YStack flex={1} paddingBottom={'$4'} paddingHorizontal={'$4'}>
-      <YStack flex={1} justifyContent={'flex-end'} alignItems={'center'} marginBottom={'$6'}>
-        <H3 fontWeight={600}>{contact ? contact.name : 'Unnamed safe'}</H3>
-      </YStack>
-      <YStack flex={3} alignItems={'center'}>
-        <Container marginHorizontal={'$10'}>
-          <View>
-            <View style={styles.root}>
-              <QRCodeStyled
-                data={safeAddress}
-                style={styles.svg}
-                padding={22}
-                pieceCornerType={'rounded'}
-                pieceBorderRadius={3}
-                isPiecesGlued
-                color={'#000'}
-                errorCorrectionLevel={'H'}
-                innerEyesOptions={styles.innerEyesOptions}
-                outerEyesOptions={styles.outerEyesOptions}
-              />
+    <>
+      <YStack flex={1} paddingBottom={'$4'}>
+        <YStack flex={1} justifyContent={'flex-end'} alignItems={'center'} marginBottom={'$6'}>
+          <H3 fontWeight={600}>{contact ? contact.name : 'Unnamed safe'}</H3>
+        </YStack>
+        <YStack flex={3} alignItems={'center'}>
+          <Container marginHorizontal={'$10'}>
+            <View>
+              <View style={styles.root}>
+                <QRCodeStyled
+                  data={safeAddress}
+                  style={styles.svg}
+                  padding={22}
+                  pieceCornerType={'rounded'}
+                  pieceBorderRadius={3}
+                  isPiecesGlued
+                  color={'#000'}
+                  errorCorrectionLevel={'H'}
+                  innerEyesOptions={styles.innerEyesOptions}
+                  outerEyesOptions={styles.outerEyesOptions}
+                />
 
-              <View style={styles.logoContainer}>
-                <Identicon address={safeAddress} size={56} />
+                <View style={styles.logoContainer}>
+                  <Identicon address={safeAddress} size={56} />
+                </View>
               </View>
             </View>
-          </View>
-          <Text
-            marginTop={'$4'}
-            fontSize={16}
-            lineHeight={22}
-            letterSpacing={0.2}
-            color={'$colorLight'}
-            textAlign={'center'}
-          >
-            {activeSafe.address}
+            <Text
+              marginTop={'$4'}
+              fontSize={16}
+              lineHeight={22}
+              letterSpacing={0.2}
+              color={'$colorLight'}
+              textAlign={'center'}
+            >
+              {activeSafe.address}
+            </Text>
+            <View alignItems={'center'} marginTop={'$4'}>
+              <ChainsDisplay activeChainId={activeSafe.chainId} chains={availableChains} max={5} />
+            </View>
+          </Container>
+          <XStack gap={'$3'} marginTop={'$6'}>
+            <SafeButton size={'$sm'} onPress={onPressShare} icon={<SafeFontIcon name={'export'} size={16} />} secondary>
+              Share
+            </SafeButton>
+            <SafeButton size={'$sm'} onPress={onPressCopy} icon={<SafeFontIcon name={'copy'} size={16} />} secondary>
+              Copy
+            </SafeButton>
+          </XStack>
+        </YStack>
+        <YStack flex={1} justifyContent={'flex-end'} alignItems={'center'}>
+          <Text color={'$colorLight'} textAlign={'center'} fontSize={'$3'}>
+            This account is only available on
+            <Text color={'$color'} fontWeight={600}>
+              {' '}
+              {getAvailableChainsNames(availableChains)}.
+            </Text>
           </Text>
-          <View alignItems={'center'} marginTop={'$4'}>
-            <ChainsDisplay activeChainId={activeSafe.chainId} chains={availableChains} max={5} />
-          </View>
-        </Container>
-        <XStack gap={'$3'} marginTop={'$6'}>
-          <SafeButton size={'$sm'} onPress={onPressShare} icon={<SafeFontIcon name={'export'} size={16} />} secondary>
-            Share
-          </SafeButton>
-          <SafeButton size={'$sm'} onPress={onPressCopy} icon={<SafeFontIcon name={'copy'} size={16} />} secondary>
-            Copy
-          </SafeButton>
-        </XStack>
-      </YStack>
-      <YStack flex={1} justifyContent={'flex-end'} alignItems={'center'}>
-        <Text color={'$colorLight'} textAlign={'center'} fontSize={'$3'}>
-          This account is only available on
-          <Text color={'$color'} fontWeight={600}>
-            {' '}
-            {getAvailableChainsNames(availableChains)}.
-          </Text>
-        </Text>
+        </YStack>
       </YStack>
       {Platform.OS === 'ios' && <ToastViewport multipleToasts={false} left={0} right={0} />}
-    </YStack>
+    </>
   )
 }
 

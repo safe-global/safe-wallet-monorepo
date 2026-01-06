@@ -82,6 +82,9 @@ export const Navbar = () => {
             justifyContent: 'center',
           }}
         >
+          <Pressable onPressIn={() => router.navigate('/openlv' as '/share')} hitSlop={10}>
+            <SafeFontIcon name="link" size={16} />
+          </Pressable>
           <Link href={'/share'} asChild>
             <Pressable hitSlop={10}>
               <SafeFontIcon name="qr-code-1" size={16} />

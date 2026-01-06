@@ -1,6 +1,6 @@
 import React from 'react'
 import { render, fireEvent, waitFor } from '@/src/tests/test-utils'
-import { ShareConnectView } from './ShareConnectView'
+import { ShareView } from './ShareView'
 import Share from 'react-native-share'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -39,7 +39,7 @@ describe('ShareView', () => {
   it('renders safe address and chain names when activeSafe is provided', () => {
     const activeSafe = { address: '0x123', chainId: '1' } as SafeInfo
     const availableChains = [{ chainName: 'Ethereum' }, { chainName: 'Polygon' }] as Chain[]
-    const { getByText } = render(<ShareConnectView activeSafe={activeSafe} availableChains={availableChains} />, {
+    const { getByText } = render(<ShareView activeSafe={activeSafe} availableChains={availableChains} />, {
       initialStore: {
         addressBook: {
           contacts: {
@@ -57,7 +57,7 @@ describe('ShareView', () => {
   it('calls Share.open with the correct parameters when share button is pressed', async () => {
     const activeSafe = { address: '0x123', chainId: '1' } as SafeInfo
     const availableChains = [{ chainName: 'Ethereum' }] as Chain[]
-    const { getByText } = render(<ShareConnectView activeSafe={activeSafe} availableChains={availableChains} />)
+    const { getByText } = render(<ShareView activeSafe={activeSafe} availableChains={availableChains} />)
     const shareButton = getByText('Share')
     fireEvent.press(shareButton)
     await waitFor(() => {
@@ -71,7 +71,7 @@ describe('ShareView', () => {
   it('calls copyAndDispatchToast with safe address when copy button is pressed', () => {
     const activeSafe = { address: '0x123', chainId: '1' } as SafeInfo
     const availableChains = [{ chainName: 'Ethereum' }] as Chain[]
-    const { getByText } = render(<ShareConnectView activeSafe={activeSafe} availableChains={availableChains} />)
+    const { getByText } = render(<ShareView activeSafe={activeSafe} availableChains={availableChains} />)
     const copyButton = getByText('Copy')
     fireEvent.press(copyButton)
     expect(mockCopyAndDispatchToast).toHaveBeenCalledWith(activeSafe.address)
