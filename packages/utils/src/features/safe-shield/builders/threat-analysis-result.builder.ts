@@ -43,6 +43,11 @@ export class ThreatAnalysisResultBuilder<
     return this
   }
 
+  error(error: string): this {
+    this.result.error = error
+    return this
+  }
+
   issues(issues: MaliciousOrModerateThreatAnalysisResult['issues'] | undefined): this {
     if ('issues' in this.result) {
       this.result.issues = issues
@@ -113,6 +118,7 @@ export class ThreatAnalysisResultBuilder<
       .type(CommonSharedStatus.FAILED)
       .severity(Severity.WARN)
       .description('Threat analysis failed. Review before processing.')
+      .error('Simulation Error: Reverted')
   }
 
   static ownershipChange() {
