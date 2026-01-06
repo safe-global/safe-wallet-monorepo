@@ -60,6 +60,13 @@ export const DATADOG_LOGS_SAMPLE_RATE =
     ? parsedLogsSampleRate
     : 100
 
+const parsedSessionReplaySampleRate = Number(process.env.NEXT_PUBLIC_DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE)
+export const DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE =
+  process.env.NEXT_PUBLIC_DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE !== undefined &&
+  !Number.isNaN(parsedSessionReplaySampleRate)
+    ? parsedSessionReplaySampleRate
+    : 0
+
 export const DATADOG_FORCE_ENABLE = process.env.NEXT_PUBLIC_DATADOG_FORCE_ENABLE === 'true'
 export const DATADOG_RUM_TRACING_ENABLED = process.env.NEXT_PUBLIC_DATADOG_RUM_TRACING_ENABLED === 'true'
 
