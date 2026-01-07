@@ -198,7 +198,7 @@ export const ThreatAnalysisWithError: Story = {
   args: {
     ...FullAnalysisBuilder.verifiedContract(contractAddress)
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
-      .threat(ThreatAnalysisBuilder.failedThreat())
+      .threat(ThreatAnalysisBuilder.failedThreatWithError())
       .build(),
   },
   parameters: {

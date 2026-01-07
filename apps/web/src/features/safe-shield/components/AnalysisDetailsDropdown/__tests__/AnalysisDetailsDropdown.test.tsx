@@ -49,6 +49,7 @@ describe('AnalysisDetailsDropdown', () => {
 
       const content = screen.getByText('Test content')
       expect(content).toBeInTheDocument()
+      expect(content).not.toBeVisible()
     })
 
     it('should display content when defaultExpanded is true', () => {

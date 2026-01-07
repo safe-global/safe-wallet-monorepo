@@ -2322,7 +2322,9 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                     class="MuiBox-root css-u2tihl"
                                   >
                                     <div
+                                      aria-label="Show all"
                                       class="MuiBox-root css-1ari483"
+                                      role="button"
                                     >
                                       <span
                                         class="MuiTypography-root MuiTypography-body2 css-1kookhh-MuiTypography-root"
@@ -2405,7 +2407,9 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                     class="MuiBox-root css-u2tihl"
                                   >
                                     <div
+                                      aria-label="Show all"
                                       class="MuiBox-root css-1ari483"
+                                      role="button"
                                     >
                                       <span
                                         class="MuiTypography-root MuiTypography-body2 css-1kookhh-MuiTypography-root"
@@ -2488,7 +2492,9 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                     class="MuiBox-root css-u2tihl"
                                   >
                                     <div
+                                      aria-label="Show all"
                                       class="MuiBox-root css-1ari483"
+                                      role="button"
                                     >
                                       <span
                                         class="MuiTypography-root MuiTypography-body2 css-1kookhh-MuiTypography-root"
@@ -2593,7 +2599,9 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                     class="MuiBox-root css-u2tihl"
                                   >
                                     <div
+                                      aria-label="Show all"
                                       class="MuiBox-root css-1ari483"
+                                      role="button"
                                     >
                                       <span
                                         class="MuiTypography-root MuiTypography-body2 css-1kookhh-MuiTypography-root"
@@ -2772,7 +2780,9 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                     class="MuiBox-root css-u2tihl"
                                   >
                                     <div
+                                      aria-label="Show all"
                                       class="MuiBox-root css-1ari483"
+                                      role="button"
                                     >
                                       <span
                                         class="MuiTypography-root MuiTypography-body2 css-1kookhh-MuiTypography-root"
@@ -2897,7 +2907,9 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                     class="MuiBox-root css-u2tihl"
                                   >
                                     <div
+                                      aria-label="Show all"
                                       class="MuiBox-root css-1ari483"
+                                      role="button"
                                     >
                                       <span
                                         class="MuiTypography-root MuiTypography-body2 css-1kookhh-MuiTypography-root"
@@ -3022,7 +3034,9 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                     class="MuiBox-root css-u2tihl"
                                   >
                                     <div
+                                      aria-label="Show all"
                                       class="MuiBox-root css-1ari483"
+                                      role="button"
                                     >
                                       <span
                                         class="MuiTypography-root MuiTypography-body2 css-1kookhh-MuiTypography-root"
@@ -4284,6 +4298,57 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                                   >
                                     Threat analysis failed. Review before processing.
                                   </p>
+                                  <div
+                                    class="MuiBox-root css-u2tihl"
+                                  >
+                                    <div
+                                      aria-label="Show details"
+                                      class="MuiBox-root css-1ari483"
+                                      role="button"
+                                    >
+                                      <span
+                                        class="MuiTypography-root MuiTypography-body2 css-1kookhh-MuiTypography-root"
+                                      >
+                                        Show details
+                                      </span>
+                                      <div
+                                        class="MuiBox-root css-1xmxy86"
+                                      />
+                                      <svg
+                                        aria-hidden="true"
+                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-1e55ibv-MuiSvgIcon-root"
+                                        data-testid="ExpandMoreIcon"
+                                        focusable="false"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          d="M16.59 8.59 12 13.17 7.41 8.59 6 10l6 6 6-6z"
+                                        />
+                                      </svg>
+                                    </div>
+                                    <div
+                                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-hidden css-cwrbtg-MuiCollapse-root"
+                                      style="min-height: 0px;"
+                                    >
+                                      <div
+                                        class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                                      >
+                                        <div
+                                          class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                                        >
+                                          <div
+                                            class="MuiBox-root css-58a5su"
+                                          >
+                                            <p
+                                              class="MuiTypography-root MuiTypography-body2 css-skeahv-MuiTypography-root"
+                                            >
+                                              Simulation Error: Reverted
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
                             </div>

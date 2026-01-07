@@ -8,7 +8,7 @@ interface AnalysisDetailsDropdownProps {
   hideLabel?: string
   children: ReactNode
   defaultExpanded?: boolean
-  /** Optional wrapper for the collapsed content */
+  /** Optional content wrapper for custom styles for the collapsible content */
   contentWrapper?: (children: ReactNode) => ReactNode
 }
 
@@ -25,6 +25,8 @@ export const AnalysisDetailsDropdown = ({
     <Box mt={-1.5}>
       <Box
         onClick={toggle}
+        role="button"
+        aria-label={expanded ? hideLabel : showLabel}
         display="inline-flex"
         alignItems="center"
         position="relative"

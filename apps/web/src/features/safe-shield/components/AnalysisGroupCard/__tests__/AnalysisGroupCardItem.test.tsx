@@ -279,7 +279,7 @@ describe('AnalysisGroupCardItem', () => {
       expect(screen.queryByText('Hide details')).not.toBeInTheDocument()
       const errorText = screen.getByText('Test error message')
 
-      expect(errorText).toBeInTheDocument()
+      expect(errorText).not.toBeVisible()
 
       await user.click(screen.getByText('Show details'))
 
