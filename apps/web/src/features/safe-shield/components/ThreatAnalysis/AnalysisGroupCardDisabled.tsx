@@ -4,9 +4,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import LockIcon from '@/public/images/common/lock-small.svg'
 
 /**
- * Displays a disabled analysis group card that shows a title and a lock icon
- *
- * @param title - The title to display
+ * Displays a disabled analysis group card that shows the children content as a title and a lock icon.
  */
 export const AnalysisGroupCardDisabled = ({ children }: PropsWithChildren): ReactElement => {
   return (
