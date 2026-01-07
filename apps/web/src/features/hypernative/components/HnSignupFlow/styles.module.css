@@ -103,11 +103,11 @@
 
 @media (min-width: 920px) {
   .calendlyWidget {
-    min-width: 650px;
+    min-width: 660px;
     height: 700px;
     /* Compensate for the custom header + customized CSS for the desktop version: */
-    margin-top: calc(-1 * var(--space-8));
-    margin-left: -13px;
+    margin-top: calc(-1 * var(--space-9));
+    margin-left: -16px;
   }
 }
 

@@ -28,8 +28,7 @@ const HnModal = ({ open, onClose, children }: HnModalProps) => {
         top={16}
         zIndex={1}
         sx={{
-          right: ['auto', 16],
-          left: [16, 'auto'],
+          right: 16,
         }}
       >
         <IconButton

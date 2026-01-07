@@ -10,6 +10,8 @@ export type HnCalendlyStepProps = {
 }
 
 const SKELETON_DURATION_MS = 1500
+// Static skeleton color as the widget bg is always white (theme-independent)
+const SKELETON_COLOR = '#dddee0'
 
 const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps) => {
   const widgetRef = useRef<HTMLDivElement>(null)
@@ -39,12 +41,13 @@ const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps
         )}
         {showSkeleton && (
           <div className={css.calendlySkeletonOverlay}>
-            <Skeleton variant="rounded" width="100%" height="40px" sx={{ mb: 2 }} />
+            <Skeleton variant="rounded" width="100%" height="40px" sx={{ mb: 2, bgcolor: SKELETON_COLOR }} />
             <br />
             <Skeleton
               variant="rounded"
               sx={{
                 width: { sm: '100%', md: '160px' },
+                bgcolor: SKELETON_COLOR,
               }}
               height="40px"
             />
