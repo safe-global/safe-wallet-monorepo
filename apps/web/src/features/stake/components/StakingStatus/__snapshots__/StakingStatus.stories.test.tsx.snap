@@ -5,7 +5,7 @@ exports[`./StakingStatus.stories Activating 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1lnqm3e-MuiChip-root"
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-10fp53-MuiChip-root"
   >
     <span
       class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -30,7 +30,7 @@ exports[`./StakingStatus.stories Active 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-a6ps16-MuiChip-root"
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1cjet8q-MuiChip-root"
   >
     <span
       class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -58,7 +58,7 @@ exports[`./StakingStatus.stories AllStatuses 1`] = `
     class="MuiStack-root css-1sazv7p-MuiStack-root"
   >
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1f2uoeu-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-2q1p8k-MuiChip-root"
     >
       <span
         class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -76,7 +76,7 @@ exports[`./StakingStatus.stories AllStatuses 1`] = `
       </span>
     </div>
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1lnqm3e-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-10fp53-MuiChip-root"
     >
       <span
         class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -94,7 +94,7 @@ exports[`./StakingStatus.stories AllStatuses 1`] = `
       </span>
     </div>
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1lnqm3e-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-10fp53-MuiChip-root"
     >
       <span
         class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -112,7 +112,7 @@ exports[`./StakingStatus.stories AllStatuses 1`] = `
       </span>
     </div>
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-a6ps16-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1cjet8q-MuiChip-root"
     >
       <span
         class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -130,7 +130,7 @@ exports[`./StakingStatus.stories AllStatuses 1`] = `
       </span>
     </div>
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1lnqm3e-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-10fp53-MuiChip-root"
     >
       <span
         class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -148,7 +148,7 @@ exports[`./StakingStatus.stories AllStatuses 1`] = `
       </span>
     </div>
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1lnqm3e-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-10fp53-MuiChip-root"
     >
       <span
         class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -166,7 +166,7 @@ exports[`./StakingStatus.stories AllStatuses 1`] = `
       </span>
     </div>
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-a6ps16-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1cjet8q-MuiChip-root"
     >
       <span
         class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -184,7 +184,7 @@ exports[`./StakingStatus.stories AllStatuses 1`] = `
       </span>
     </div>
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1f2uoeu-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-2q1p8k-MuiChip-root"
     >
       <span
         class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -210,7 +210,7 @@ exports[`./StakingStatus.stories DepositInProgress 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1lnqm3e-MuiChip-root"
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-10fp53-MuiChip-root"
   >
     <span
       class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -235,7 +235,7 @@ exports[`./StakingStatus.stories ExitRequested 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1lnqm3e-MuiChip-root"
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-10fp53-MuiChip-root"
   >
     <span
       class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -260,7 +260,7 @@ exports[`./StakingStatus.stories Exited 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-a6ps16-MuiChip-root"
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1cjet8q-MuiChip-root"
   >
     <span
       class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -285,7 +285,7 @@ exports[`./StakingStatus.stories Exiting 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1lnqm3e-MuiChip-root"
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-10fp53-MuiChip-root"
   >
     <span
       class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -310,7 +310,7 @@ exports[`./StakingStatus.stories NotStaked 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1f2uoeu-MuiChip-root"
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-2q1p8k-MuiChip-root"
   >
     <span
       class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -335,7 +335,7 @@ exports[`./StakingStatus.stories Slashed 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1f2uoeu-MuiChip-root"
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-2q1p8k-MuiChip-root"
   >
     <span
       class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
