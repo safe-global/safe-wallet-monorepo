@@ -103,6 +103,30 @@ describe('AnalysisGroupCardDisabled', () => {
     })
   })
 
+  describe('Props Forwarding', () => {
+    it('should forward data-testid attribute to the root Stack', () => {
+      const { container } = render(
+        <AnalysisGroupCardDisabled data-testid="test-card">Test content</AnalysisGroupCardDisabled>,
+      )
+
+      const rootElement = container.firstChild as HTMLElement
+      expect(rootElement).toHaveAttribute('data-testid', 'test-card')
+    })
+
+    it('should forward additional HTML attributes', () => {
+      const { container } = render(
+        <AnalysisGroupCardDisabled data-testid="custom-id" className="custom-class" aria-label="Test label">
+          Test content
+        </AnalysisGroupCardDisabled>,
+      )
+
+      const rootElement = container.firstChild as HTMLElement
+      expect(rootElement).toHaveAttribute('data-testid', 'custom-id')
+      expect(rootElement).toHaveAttribute('aria-label', 'Test label')
+      expect(rootElement).toHaveClass('custom-class')
+    })
+  })
+
   describe('Edge Cases', () => {
     it('should handle empty children', () => {
       const { container } = render(<AnalysisGroupCardDisabled></AnalysisGroupCardDisabled>)
