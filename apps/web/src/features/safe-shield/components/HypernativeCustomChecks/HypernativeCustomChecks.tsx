@@ -14,7 +14,7 @@ interface HypernativeCustomChecksProps {
 }
 
 /**
- * Displays a analysis group card for the Hypernative custom checks
+ * Displays an analysis group card for the Hypernative custom checks
  *
  * @param threat - The threat analysis results
  * @param delay - The delay before showing the custom checks
