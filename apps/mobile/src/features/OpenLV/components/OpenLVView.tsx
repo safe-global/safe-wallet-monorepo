@@ -201,7 +201,7 @@ export const OpenLVView = ({ activeSafe }: OpenLVViewProps) => {
               <Text fontSize="$3" color="$colorLight" fontWeight="600">
                 Connection URL
               </Text>
-              <View>
+              <View flexDirection="row" alignItems="center">
                 <SafeInput
                   placeholder="Paste connection URL or scan QR code"
                   value={connectionUrl}
