@@ -2,10 +2,10 @@ import React from 'react'
 import type {
   AnalysisResult,
   MaliciousOrModerateThreatAnalysisResult,
-  Severity,
 } from '@safe-global/utils/features/safe-shield/types'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { sortByIssueSeverity } from '@safe-global/utils/features/safe-shield/utils/analysisUtils'
-import { Text, View } from 'tamagui'
+import { getTokenValue, Text, View } from 'tamagui'
 import { AddressListItem } from './AddressListItem'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector } from '@/src/store/hooks'
@@ -20,12 +20,26 @@ interface AnalysisIssuesDisplayProps {
   severity?: Severity
 }
 
+// Map background color to severity:
+const getIssueBackgroundColor = (severity?: Severity): string => {
+  if (!severity) {return 'transparent'}
+
+  switch (severity) {
+    case Severity.CRITICAL:
+      return '$errorLight'
+    case Severity.WARN:
+      return getTokenValue('$color.warningLightLight')
+    default:
+      return 'transparent'
+  }
+}
+
 export function AnalysisIssuesDisplay({ result, severity }: AnalysisIssuesDisplayProps) {
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const { handleOpenExplorer, handleCopyToClipboard, copiedIndex } = useAnalysisAddress()
 
-  const issueBackgroundColor = severity ? '$errorLight' : 'transparent'
+  const issueBackgroundColor = getIssueBackgroundColor(severity)
 
   if (!('issues' in result)) {
     return null
@@ -85,7 +99,7 @@ export function AnalysisIssuesDisplay({ result, severity }: AnalysisIssuesDispla
                   <Text
                     fontSize={'$2'}
                     lineHeight={14}
-                    color={issue.address ? '$color' : '$colorLight'}
+                    color={issue.address ? getTokenValue('$color.staticMainLight') : '$colorLight'}
                     fontFamily="$body"
                     fontWeight="400"
                   >
