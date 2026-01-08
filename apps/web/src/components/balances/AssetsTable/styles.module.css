@@ -1,8 +1,24 @@
+.container tbody td:first-child {
+  padding-left: 16px !important;
+}
+
+.container tbody td:last-child {
+  padding-right: 16px !important;
+}
+
+.container thead th:first-child {
+  padding-left: 16px !important;
+}
+
+.container thead th:last-child {
+  padding-right: 16px !important;
+}
+
 .container .sticky {
   opacity: 1;
   position: absolute;
   top: 0;
-  right: 0;
+  right: 16px;
   width: 15%;
   transition: opacity 0.2s;
   height: 100% !important;
@@ -18,12 +34,12 @@
 
 /* Header styling - bold and no bottom border */
 .container thead th {
-  font-weight: 700;
   border-bottom: none !important;
+  background-color: var(--color-background-main);
 }
 
 .container thead th span {
-  font-size: 16px;
+  font-size: 14px;
   color: var(--color-text-primary);
 }
 
@@ -89,22 +105,25 @@
   display: none;
   flex-direction: column;
   gap: 0;
-  padding: var(--space-2) 0;
+  padding: 0 0 var(--space-2) 0;
 }
 
 .mobileHeader {
   display: none;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-1) 0;
+  padding: var(--space-1) 16px;
   border-bottom: 1px solid var(--color-background-main);
   margin-bottom: var(--space-1);
+  background-color: var(--color-background-main);
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
 }
 
 .mobileRow {
   display: none;
   flex-direction: column;
-  padding: var(--space-1) 0 var(--space-2) 0;
+  padding: var(--space-1) 16px var(--space-2) 16px;
   border-bottom: 1px solid var(--color-background-main);
 }
 
