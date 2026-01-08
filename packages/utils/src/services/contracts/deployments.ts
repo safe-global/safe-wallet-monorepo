@@ -106,8 +106,13 @@ export const hasMatchingDeployment = (
     if (!deployments) {
       return false
     }
-    const deployedAddresses = toNetworkAddressList(deployments.networkAddresses[network] ?? [])
-    return deployedAddresses.some((deployedAddress) => sameAddress(deployedAddress, contractAddress))
+
+    const allAddresses = [
+      deployments.deployments.canonical?.address,
+      ...toNetworkAddressList(deployments.networkAddresses[network] ?? []),
+    ].filter(Boolean) as string[]
+
+    return allAddresses.some((address) => sameAddress(address, contractAddress))
   })
 }
 
