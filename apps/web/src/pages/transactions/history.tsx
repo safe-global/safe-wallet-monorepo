@@ -3,7 +3,7 @@ import Head from 'next/head'
 import useTxHistory from '@/hooks/useTxHistory'
 import PaginatedTxns from '@/components/common/PaginatedTxns'
 import TxHeader from '@/components/transactions/TxHeader'
-import { Box } from '@mui/material'
+import { Box, Skeleton } from '@mui/material'
 import { useState } from 'react'
 import Button from '@mui/material/Button'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
@@ -50,6 +50,11 @@ const History: NextPage = () => {
         {showFilter && <TxFilterForm toggleFilter={toggleFilter} />}
 
         <Box mb={4}>
+          {hnLoading && (
+            <Box mb={3}>
+              <Skeleton variant="rounded" height={30} />
+            </Box>
+          )}
           {showHnBanner && !hnLoading && (
             <Box mb={3}>
               <HnBannerForHistory />

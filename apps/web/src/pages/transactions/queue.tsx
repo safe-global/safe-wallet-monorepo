@@ -4,7 +4,7 @@ import useTxQueue from '@/hooks/useTxQueue'
 import PaginatedTxns from '@/components/common/PaginatedTxns'
 import TxHeader from '@/components/transactions/TxHeader'
 import BatchExecuteButton from '@/components/transactions/BatchExecuteButton'
-import { Box } from '@mui/material'
+import { Box, Skeleton } from '@mui/material'
 import { BatchExecuteHoverProvider } from '@/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
 import { usePendingTxsQueue, useShowUnsignedQueue } from '@/hooks/usePendingTxs'
 import RecoveryList from '@/features/recovery/components/RecoveryList'
@@ -30,6 +30,11 @@ const Queue: NextPage = () => {
 
         <main>
           <Box mb={4}>
+            {hnLoading && (
+              <Box mb={3}>
+                <Skeleton variant="rounded" height={30} />
+              </Box>
+            )}
             {showHnBanner && !hnLoading && (
               <Box mb={3}>
                 <HnBannerForQueue />
