@@ -6,6 +6,7 @@ import {
   ContractAnalysisBuilder,
   RecipientAnalysisBuilder,
 } from '@safe-global/utils/features/safe-shield/builders'
+import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
 import { faker } from '@faker-js/faker'
 import { StoreDecorator } from '@/stories/storeDecorator'
 
@@ -149,6 +150,18 @@ export const Empty: Story = {
   parameters: { docs: { description: { story: 'SafeShieldWidget when no transaction is available to analyze' } } },
 }
 
+// Unofficial fallback handler
+export const UnofficialFallbackHandler: Story = {
+  args: {
+    ...FullAnalysisBuilder.unofficialFallbackHandlerContract(contractAddress)
+      .threat(FullAnalysisBuilder.noThreat().build().threat)
+      .build(),
+  },
+  parameters: {
+    docs: { description: { story: 'SafeShieldWidget when transaction sets an unofficial fallback handler' } },
+  },
+}
+
 // Multiple results for the same contract with different severity
 export const MultipleIssues: Story = {
   args: {
@@ -188,6 +201,23 @@ export const MultipleCounterparties: Story = {
     docs: {
       description: {
         story: 'SafeShieldWidget displaying multiple results for the same contract with different severity',
+      },
+    },
+  },
+}
+
+export const ThreatAnalysisWithError: Story = {
+  args: {
+    ...FullAnalysisBuilder.verifiedContract(contractAddress)
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(ThreatAnalysisBuilder.failedThreatWithError())
+      .build(),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'SafeShieldWidget displaying threat analysis failure with error details dropdown. Click "Show details" to view the error message.',
       },
     },
   },
