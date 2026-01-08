@@ -13,7 +13,6 @@ import { RootState } from '@/src/store'
 import { selectChainById } from '@/src/store/chains'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 import { useAnalysisAddress } from '@/src/features/SafeShield/hooks/useAnalysisAddress'
-import { AnalysisPaper } from '../../../AnalysisPaper'
 
 interface AnalysisIssuesDisplayProps {
   result: AnalysisResult
@@ -22,7 +21,9 @@ interface AnalysisIssuesDisplayProps {
 
 // Map background color to severity:
 const getIssueBackgroundColor = (severity?: Severity): string => {
-  if (!severity) {return 'transparent'}
+  if (!severity) {
+    return 'transparent'
+  }
 
   switch (severity) {
     case Severity.CRITICAL:
@@ -59,7 +60,7 @@ export function AnalysisIssuesDisplay({ result, severity }: AnalysisIssuesDispla
   return (
     <>
       {sortedIssues.flatMap(({ severity, issues }) =>
-        issues.map((issue, index) => {
+        issues.map((issue) => {
           const globalIndex = issueCounter++
           const explorerLink =
             issue.address && activeChain?.blockExplorerUriTemplate
@@ -67,9 +68,14 @@ export function AnalysisIssuesDisplay({ result, severity }: AnalysisIssuesDispla
               : undefined
 
           return (
-            <View key={`${severity}-${index}`}>
-              <AnalysisPaper spaced={Boolean(explorerLink)}>
-                {issue.address && (
+            <View
+              key={`${severity}-${globalIndex}`}
+              backgroundColor="$backgroundPaper"
+              borderRadius="$4"
+              overflow="hidden"
+            >
+              {issue.address && (
+                <View padding="$2">
                   <AddressListItem
                     index={globalIndex}
                     copiedIndex={copiedIndex}
@@ -78,15 +84,17 @@ export function AnalysisIssuesDisplay({ result, severity }: AnalysisIssuesDispla
                     onOpenExplorer={handleOpenExplorer}
                     address={issue.address}
                   />
-                )}
+                </View>
+              )}
 
-                {/* Show description if there is no address as a fallback */}
-                {!issue.address && issue.description && (
+              {/* Show description if there is no address as a fallback */}
+              {!issue.address && issue.description && (
+                <View padding="$2">
                   <Text fontSize="$2" lineHeight={14} color="$colorLight">
                     {issue.description}
                   </Text>
-                )}
-              </AnalysisPaper>
+                </View>
+              )}
 
               {issue.address && (
                 <View
