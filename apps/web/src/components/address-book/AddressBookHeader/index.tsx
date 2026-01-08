@@ -37,7 +37,7 @@ const HeaderButton = ({
   const svg = <SvgIcon component={icon} inheritViewBox fontSize="small" />
 
   return (
-    <Button onClick={onClick} disabled={disabled} variant="contained" color="primary" size="small" startIcon={svg}>
+    <Button onClick={onClick} disabled={disabled} variant="outlined" color="primary" size="small" startIcon={svg}>
       {children}
     </Button>
   )
@@ -118,6 +118,7 @@ function AddressBookHeader({
             item
             xs={12}
             md={7}
+            xl={7.5}
             sx={{
               display: 'flex',
               justifyContent: ['space-between', , 'flex-end'],
