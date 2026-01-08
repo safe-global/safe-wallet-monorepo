@@ -3998,6 +3998,80 @@
         "tags": ["safes"]
       }
     },
+    "/v2/safes": {
+      "get": {
+        "description": "Retrieves an overview of multiple Safes including their balances, transaction counts, and other summary information. Supports cross-chain queries using CAIP-10 address format. Uses Zerion for balance data on supported chains.",
+        "operationId": "safesGetSafeOverviewV2",
+        "parameters": [
+          {
+            "name": "currency",
+            "required": true,
+            "in": "query",
+            "description": "Fiat currency code for balance conversion (e.g., USD, EUR)",
+            "schema": {
+              "example": "USD",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safes",
+            "required": true,
+            "in": "query",
+            "description": "Comma-separated list of Safe addresses in CAIP-10 format (chainId:address)",
+            "schema": {
+              "example": "1:0x1234567890123456789012345678901234567890,5:0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+              "type": "string"
+            }
+          },
+          {
+            "name": "trusted",
+            "required": false,
+            "in": "query",
+            "description": "If true, only includes trusted tokens in balance calculations",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "exclude_spam",
+            "required": false,
+            "in": "query",
+            "description": "If true, excludes spam tokens from balance calculations",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "wallet_address",
+            "required": false,
+            "in": "query",
+            "description": "Optional wallet address to filter Safes where this address is an owner",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of Safe overviews with balances and metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SafeOverview"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get Safe overview",
+        "tags": ["safes"]
+      }
+    },
     "/v1/chains/{chainId}/security/{safeAddress}/recipient/{recipientAddress}": {
       "get": {
         "description": "Performs real-time security analysis of a recipient address for a specific Safe. Returns analysis results grouped by status group, sorted by severity (CRITICAL first).",
