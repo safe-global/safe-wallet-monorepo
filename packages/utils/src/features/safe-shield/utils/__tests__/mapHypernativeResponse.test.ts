@@ -139,7 +139,7 @@ describe('mapHypernativeResponse', () => {
               risks: [
                 {
                   title: 'Transfer to malicious',
-                  details: 'Transfer to known phishing address',
+                  details: 'Transfer to known phishing address.',
                   severity: 'deny',
                   safeCheckId: faker.string.alphanumeric(10),
                 },
@@ -160,7 +160,8 @@ describe('mapHypernativeResponse', () => {
         severity: Severity.CRITICAL,
         type: ThreatStatus.HYPERNATIVE_GUARD,
         title: 'Transfer to malicious',
-        description: 'Transfer to known phishing address',
+        description:
+          'Transfer to known phishing address. The full threat report is available in your Hypernative account.',
       })
     })
 
@@ -177,7 +178,7 @@ describe('mapHypernativeResponse', () => {
               risks: [
                 {
                   title: 'Suspicious swap pattern',
-                  details: 'Swap volume unusually large',
+                  details: 'Swap volume unusually large.',
                   severity: 'warn',
                   safeCheckId: faker.string.alphanumeric(10),
                 },
@@ -198,7 +199,7 @@ describe('mapHypernativeResponse', () => {
         severity: Severity.WARN,
         type: ThreatStatus.HYPERNATIVE_GUARD,
         title: 'Suspicious swap pattern',
-        description: 'Swap volume unusually large',
+        description: 'Swap volume unusually large. The full threat report is available in your Hypernative account.',
       })
     })
 
@@ -214,7 +215,7 @@ describe('mapHypernativeResponse', () => {
               risks: [
                 {
                   title: 'All checks passed',
-                  details: 'Transaction appears safe',
+                  details: 'Transaction appears safe.',
                   severity: 'accept',
                   safeCheckId: faker.string.alphanumeric(10),
                 },
@@ -235,7 +236,7 @@ describe('mapHypernativeResponse', () => {
         severity: Severity.OK,
         type: ThreatStatus.HYPERNATIVE_GUARD,
         title: 'All checks passed',
-        description: 'Transaction appears safe',
+        description: 'Transaction appears safe. The full threat report is available in your Hypernative account.',
       })
     })
   })
@@ -259,13 +260,13 @@ describe('mapHypernativeResponse', () => {
               risks: [
                 {
                   title: 'Pool Toxicity',
-                  details: 'Pool contains 4% of illicit funds',
+                  details: 'Pool contains 4% of illicit funds.',
                   severity: 'warn',
                   safeCheckId: faker.string.alphanumeric(10),
                 },
                 {
                   title: 'Unusually high gas price',
-                  details: 'Gas price higher than max allowed',
+                  details: 'Gas price higher than max allowed.',
                   severity: 'warn',
                   safeCheckId: faker.string.alphanumeric(10),
                 },
@@ -281,14 +282,16 @@ describe('mapHypernativeResponse', () => {
         severity: Severity.WARN,
         type: ThreatStatus.HYPERNATIVE_GUARD,
         title: 'Pool Toxicity',
-        description: 'Pool contains 4% of illicit funds',
+        description:
+          'Pool contains 4% of illicit funds. The full threat report is available in your Hypernative account.',
       })
 
       expect(result[StatusGroup.CUSTOM_CHECKS]).toContainEqual({
         severity: Severity.WARN,
         type: ThreatStatus.HYPERNATIVE_GUARD,
         title: 'Unusually high gas price',
-        description: 'Gas price higher than max allowed',
+        description:
+          'Gas price higher than max allowed. The full threat report is available in your Hypernative account.',
       })
     })
   })
