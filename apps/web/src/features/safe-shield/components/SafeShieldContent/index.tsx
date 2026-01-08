@@ -15,8 +15,6 @@ import { HypernativeCustomChecks } from '@/features/safe-shield/components/Hyper
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { useHighlightedSeverity } from '@safe-global/utils/features/safe-shield/hooks/useHighlightedSeverity'
-import { useCheckSimulation } from '@/features/safe-shield/hooks/useCheckSimulation'
 import {
   analysisVisibilityDelay,
   calculateAnalysisDelays,
@@ -45,13 +43,7 @@ export const SafeShieldContent = ({
   const [contractResults = {}, _contractError, contractLoading = false] = contract
   const [threatResults = {}, _threatError, threatLoading = false] = threat
 
-  const { hasSimulationError } = useCheckSimulation(safeTx)
-  const highlightedSeverity = useHighlightedSeverity(
-    recipientResults,
-    contractResults,
-    threatResults,
-    hasSimulationError,
-  )
+  const highlightedSeverity = overallStatus?.severity
   const loading = recipientLoading || contractLoading || threatLoading
   const isLoadingVisible = useDelayedLoading(loading, analysisVisibilityDelay)
   const shouldShowContent = !isLoadingVisible
