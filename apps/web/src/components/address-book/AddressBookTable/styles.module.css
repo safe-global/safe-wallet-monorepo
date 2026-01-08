@@ -1,3 +1,20 @@
+/* Desktop table - padding on cells instead of wrapper */
+.container tbody td:first-child {
+  padding-left: 16px !important;
+}
+
+.container tbody td:last-child {
+  padding-right: 16px !important;
+}
+
+.container thead th:first-child {
+  padding-left: 16px !important;
+}
+
+.container thead th:last-child {
+  padding-right: 16px !important;
+}
+
 .container tbody tr {
   transition: background-color 100ms linear;
 }
@@ -47,14 +64,16 @@
   margin-bottom: 8px;
 }
 
-/* Header styling - bold and no bottom border */
+/* Header styling - no bottom border with grey background */
 .container thead th {
-  font-weight: 700;
   border-bottom: none !important;
+  background-color: var(--color-background-main);
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
 }
 
 .container thead th span {
-  font-size: 16px;
+  font-size: 14px;
   color: var(--color-text-primary);
 }
 
@@ -67,16 +86,19 @@
   display: none;
   flex-direction: column;
   gap: 0;
-  padding: var(--space-2) 0;
+  padding: 0 0 var(--space-2) 0;
 }
 
 .mobileHeader {
   display: none;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-1) 0;
+  padding: var(--space-1) 16px;
   border-bottom: 1px solid var(--color-background-main);
   margin-bottom: var(--space-1);
+  background-color: var(--color-background-main);
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
 }
 
 .mobileRow {
@@ -84,7 +106,7 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-start;
-  padding: var(--space-2) 0;
+  padding: var(--space-2) 16px;
   border-bottom: 1px solid var(--color-background-main);
 }
 

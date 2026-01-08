@@ -163,7 +163,7 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
       <main>
         {filteredEntries.length > 0 ? (
           isMobile ? (
-            <Card sx={{ px: 2, mb: 2 }}>
+            <Card sx={{ mb: 2, border: '4px solid transparent' }}>
               <Box className={css.mobileContainer}>
                 <Box className={css.mobileHeader}>
                   <Typography variant="body2" color="text.secondary">
@@ -184,9 +184,11 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
               </Box>
             </Card>
           ) : (
-            <div className={css.container}>
-              <EnhancedTable rows={rows} headCells={headCells} />
-            </div>
+            <Card sx={{ mb: 2, border: '4px solid transparent' }}>
+              <div className={css.container}>
+                <EnhancedTable rows={rows} headCells={headCells} />
+              </div>
+            </Card>
           )
         ) : (
           <Box bgcolor="background.paper" borderRadius={1}>
