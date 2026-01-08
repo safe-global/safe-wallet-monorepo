@@ -45,7 +45,7 @@ export const ThreatAnalysis = ({
 
   if (requiresHypernativeLogin) {
     return (
-      <AnalysisGroupCardDisabled data-testid="threat-analysis-group-card">No threat detected</AnalysisGroupCardDisabled>
+      <AnalysisGroupCardDisabled data-testid="threat-analysis-group-card">Threat analysis</AnalysisGroupCardDisabled>
     )
   }
 

@@ -63,7 +63,7 @@ describe('ThreatAnalysis', () => {
       render(<ThreatAnalysis threat={threat} hypernativeAuth={hypernativeAuth} />)
 
       expect(screen.getByTestId('threat-analysis-group-card')).toBeInTheDocument()
-      expect(screen.getByText('AnalysisGroupCardDisabled: No threat detected')).toBeInTheDocument()
+      expect(screen.getByText('AnalysisGroupCardDisabled: Threat analysis')).toBeInTheDocument()
       expect(screen.queryByText('AnalysisGroupCard')).not.toBeInTheDocument()
     })
 
@@ -74,7 +74,7 @@ describe('ThreatAnalysis', () => {
       render(<ThreatAnalysis threat={threat} hypernativeAuth={hypernativeAuth} />)
 
       expect(screen.getByTestId('threat-analysis-group-card')).toBeInTheDocument()
-      expect(screen.getByText('AnalysisGroupCardDisabled: No threat detected')).toBeInTheDocument()
+      expect(screen.getByText('AnalysisGroupCardDisabled: Threat analysis')).toBeInTheDocument()
       expect(screen.queryByText('AnalysisGroupCard')).not.toBeInTheDocument()
     })
 
@@ -88,7 +88,7 @@ describe('ThreatAnalysis', () => {
 
       render(<ThreatAnalysis threat={threat} hypernativeAuth={hypernativeAuth} />)
 
-      expect(screen.getByText('AnalysisGroupCardDisabled: No threat detected')).toBeInTheDocument()
+      expect(screen.getByText('AnalysisGroupCardDisabled: Threat analysis')).toBeInTheDocument()
       expect(screen.queryByText('AnalysisGroupCard')).not.toBeInTheDocument()
     })
   })
@@ -345,7 +345,7 @@ describe('ThreatAnalysis', () => {
       render(<ThreatAnalysis threat={threat} hypernativeAuth={hypernativeAuth} />)
 
       // Should show disabled card even though threat results exist
-      expect(screen.getByText('AnalysisGroupCardDisabled: No threat detected')).toBeInTheDocument()
+      expect(screen.getByText('AnalysisGroupCardDisabled: Threat analysis')).toBeInTheDocument()
       expect(screen.queryByText('AnalysisGroupCard')).not.toBeInTheDocument()
     })
 
