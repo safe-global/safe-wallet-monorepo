@@ -1,9 +1,11 @@
 import {
   HypernativeFinding,
   HypernativeRiskSeverityMap,
+  HypernativeRiskTypeMap,
   type HypernativeRisk,
   type HypernativeBalanceChanges,
   HypernativeRiskTitleMap,
+  HypernativeRiskDescriptionMap,
 } from '../types/hypernative.type'
 import {
   HypernativeAssessmentResponseDto,
@@ -101,17 +103,18 @@ function mapCustomChecksFindings(findings: HypernativeFinding): ThreatAnalysisRe
  */
 function mapFindings(findings: HypernativeFinding): ThreatAnalysisResult[] {
   const results: ThreatAnalysisResult[] = findings.risks.map((risk: HypernativeRisk) => {
-    const mappedType = HypernativeRiskTitleMap[risk.safeCheckId] ?? ThreatStatus.HYPERNATIVE_GUARD
+    const mappedType = HypernativeRiskTypeMap[risk.safeCheckId] ?? ThreatStatus.HYPERNATIVE_GUARD
     // MASTERCOPY_CHANGE requires additional fields (before/after) that Hypernative doesn't provide
     // So we fall back to HYPERNATIVE_GUARD for these cases
     const type = mappedType === ThreatStatus.MASTERCOPY_CHANGE ? ThreatStatus.HYPERNATIVE_GUARD : mappedType
 
-    return {
-      severity: HypernativeRiskSeverityMap[risk.severity] ?? Severity.INFO,
-      type,
-      title: risk.title,
-      description: risk.details,
-    }
+    const severity = HypernativeRiskSeverityMap[risk.severity] ?? Severity.INFO
+    const title = HypernativeRiskTitleMap[type] ?? risk.title
+    const details = HypernativeRiskDescriptionMap[type] ?? risk.details
+    const description = `${details} The full threat report is available in your Hypernative account.`
+    // https://app.hypernative.xyz/risk-insights/explore?txHash=0xb6315d3e5357fc79f2d6e39978d8b350cfd1a98567f106964e01290ebcfa9c06&chain=all
+
+    return { severity, type, title, description }
   })
 
   return sortBySeverity(results)
