@@ -94,7 +94,10 @@ describe('useSafeLabsTerms', () => {
     it('Should not show content when redirect is needed', async () => {
       const { result } = renderHook(() => useSafeLabsTerms())
 
-      expect(result.current.shouldShowContent).toBe(false)
+      // Initially true for SSR/SSG, then set to false after useEffect runs
+      await waitFor(() => {
+        expect(result.current.shouldShowContent).toBe(false)
+      })
 
       await waitFor(() => {
         expect(mockRouter.replace).toHaveBeenCalled()
