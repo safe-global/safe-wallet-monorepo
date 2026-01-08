@@ -106,6 +106,7 @@ const NotificationCenter = (): ReactElement => {
         sx={{
           '&:hover': {
             backgroundColor: 'background.light',
+            borderRadius: '6px',
           },
         }}
       >
