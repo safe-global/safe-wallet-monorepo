@@ -183,7 +183,7 @@ exports[`./index.stories Default 1`] = `
                           >
                             <div
                               aria-label="24h change"
-                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1wdvupo-MuiChip-root"
+                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-w1uylf-MuiChip-root"
                               data-mui-internal-clone-element="true"
                             >
                               <mock-icon
@@ -331,7 +331,7 @@ exports[`./index.stories Default 1`] = `
                           >
                             <div
                               aria-label="24h change"
-                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1wdvupo-MuiChip-root"
+                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-w1uylf-MuiChip-root"
                               data-mui-internal-clone-element="true"
                             >
                               <mock-icon
@@ -479,7 +479,7 @@ exports[`./index.stories Default 1`] = `
                           >
                             <div
                               aria-label="24h change"
-                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-ku5wgg-MuiChip-root"
+                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1v5d94b-MuiChip-root"
                               data-mui-internal-clone-element="true"
                             >
                               <mock-icon
@@ -627,7 +627,7 @@ exports[`./index.stories Default 1`] = `
                           >
                             <div
                               aria-label="24h change"
-                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1wdvupo-MuiChip-root"
+                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-w1uylf-MuiChip-root"
                               data-mui-internal-clone-element="true"
                             >
                               <mock-icon

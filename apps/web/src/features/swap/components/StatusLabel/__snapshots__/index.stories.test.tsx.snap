@@ -9,7 +9,7 @@ exports[`./index.stories Cancelled 1`] = `
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-4kcw4c-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1im6wh6-MuiChip-root"
     >
       <span
         class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -69,7 +69,7 @@ exports[`./index.stories Filled 1`] = `
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-a6ps16-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1cjet8q-MuiChip-root"
     >
       <span
         class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -99,7 +99,7 @@ exports[`./index.stories Open 1`] = `
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1f2uoeu-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-2q1p8k-MuiChip-root"
     >
       <span
         class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -129,7 +129,7 @@ exports[`./index.stories PartiallyFilled 1`] = `
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-a6ps16-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1cjet8q-MuiChip-root"
     >
       <span
         class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -159,7 +159,7 @@ exports[`./index.stories Pending 1`] = `
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1f2uoeu-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-2q1p8k-MuiChip-root"
     >
       <span
         class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"

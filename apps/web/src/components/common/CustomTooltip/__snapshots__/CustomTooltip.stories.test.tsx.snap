@@ -101,7 +101,7 @@ exports[`./CustomTooltip.stories WithComplexContent 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <button
-    class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedError MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorError MuiButton-root MuiButton-contained MuiButton-containedError MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorError css-mwqzbk-MuiButtonBase-root-MuiButton-root"
+    class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedError MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorError MuiButton-root MuiButton-contained MuiButton-containedError MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorError css-1doauzg-MuiButtonBase-root-MuiButton-root"
     data-mui-internal-clone-element="true"
     tabindex="0"
     type="button"

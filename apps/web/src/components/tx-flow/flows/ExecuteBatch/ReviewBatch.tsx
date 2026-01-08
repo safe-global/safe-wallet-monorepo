@@ -114,7 +114,9 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
       multiSendContract,
       multiSendTxData,
       wallet.provider,
+      safe.chainId,
       wallet.address,
+      safe.address.value,
       overrides as Overrides & { nonce: number },
       safe.nonce,
     )

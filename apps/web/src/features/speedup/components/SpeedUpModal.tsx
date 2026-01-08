@@ -111,7 +111,9 @@ export const SpeedUpModal = ({
           pendingTx.to,
           pendingTx.data,
           wallet.provider,
+          pendingTx.chainId,
           wallet.address,
+          pendingTx.safeAddress,
           pendingTx.nonce,
         )
         // Currently all custom txs are batch executes
