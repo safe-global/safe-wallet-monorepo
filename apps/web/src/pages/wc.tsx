@@ -3,7 +3,7 @@ import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import useLastSafe from '@/hooks/useLastSafe'
 import { AppRoutes } from '@/config/routes'
-import { WC_URI_SEARCH_PARAM } from '@/features/walletconnect/hooks/useWalletConnectSearchParamUri'
+import { WC_URI_SEARCH_PARAM } from '@/features/walletconnect'
 
 const WcPage: NextPage = () => {
   const router = useRouter()

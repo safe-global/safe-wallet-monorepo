@@ -1,12 +1,4 @@
-import {
-  createContext,
-  useEffect,
-  useState,
-  useCallback,
-  type Dispatch,
-  type SetStateAction,
-  type ReactNode,
-} from 'react'
+import { createContext, useEffect, useState, useCallback, type ReactNode } from 'react'
 import { getSdkError } from '@walletconnect/utils'
 import { formatJsonRpcError } from '@walletconnect/jsonrpc-utils'
 import type { SessionTypes } from '@walletconnect/types'
@@ -15,25 +7,30 @@ import type { WalletKitTypes } from '@reown/walletkit'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useSafeWalletProvider from '@/services/safe-wallet-provider/useSafeWalletProvider'
 import { IS_PRODUCTION } from '@/config/constants'
-import { getEip155ChainId, getPeerName, stripEip155Prefix } from '@/features/walletconnect/services/utils'
-import { trackRequest } from '@/features/walletconnect/services/tracking'
-import { wcPopupStore } from '@/features/walletconnect/components'
-import type WalletConnectWallet from '@/features/walletconnect/services/WalletConnectWallet'
-import walletConnectInstance from '@/features/walletconnect/services/walletConnectInstance'
+import { getEip155ChainId, getPeerName, stripEip155Prefix } from '../../services/utils'
+import { trackRequest } from '../../services/tracking'
+import { wcPopupStore } from '../../store/wcPopupStore'
+import type WalletConnectWallet from '../../services/WalletConnectWallet'
+import walletConnectInstance from '../../services/walletConnectInstance'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import type { WalletConnectContextType, WcAutoApproveProps } from '../../types'
+import { WCLoadingState } from '../../types'
 
-type WalletConnectContextType = {
-  walletConnect: WalletConnectWallet | null
-  sessions: SessionTypes.Struct[]
-  sessionProposal: WalletKitTypes.SessionProposal | null
-  error: Error | null
-  setError: Dispatch<SetStateAction<Error | null>>
-  open: boolean
-  setOpen: (open: boolean) => void
-  loading: WCLoadingState | null
-  setLoading: Dispatch<SetStateAction<WCLoadingState | null>>
-  approveSession: () => Promise<void>
-  rejectSession: () => Promise<void>
+enum Errors {
+  WRONG_CHAIN = '%%dappName%% made a request on a different chain than the one you are connected to',
+}
+
+const WC_AUTO_APPROVE_KEY = 'wcAutoApprove'
+
+const FALLBACK_PEER_NAME = 'WalletConnect'
+
+// The URL of the former WalletConnect Safe App
+// This is still used to differentiate these txs from Safe App txs in the analytics
+const LEGACY_WC_APP_URL = 'https://apps-portal.safe.global/wallet-connect'
+
+const getWrongChainError = (dappName: string): Error => {
+  const message = Errors.WRONG_CHAIN.replace('%%dappName%%', dappName)
+  return new Error(message)
 }
 
 export const WalletConnectContext = createContext<WalletConnectContextType>({
@@ -49,33 +46,6 @@ export const WalletConnectContext = createContext<WalletConnectContextType>({
   approveSession: () => Promise.resolve(),
   rejectSession: () => Promise.resolve(),
 })
-
-enum Errors {
-  WRONG_CHAIN = '%%dappName%% made a request on a different chain than the one you are connected to',
-}
-
-export enum WCLoadingState {
-  APPROVE = 'Approve',
-  REJECT = 'Reject',
-  CONNECT = 'Connect',
-  DISCONNECT = 'Disconnect',
-}
-
-// chainId -> origin -> boolean
-type WcAutoApproveProps = Record<string, Record<string, boolean>>
-
-const WC_AUTO_APPROVE_KEY = 'wcAutoApprove'
-
-const FALLBACK_PEER_NAME = 'WalletConnect'
-
-// The URL of the former WalletConnect Safe App
-// This is still used to differentiate these txs from Safe App txs in the analytics
-const LEGACY_WC_APP_URL = 'https://apps-portal.safe.global/wallet-connect'
-
-const getWrongChainError = (dappName: string): Error => {
-  const message = Errors.WRONG_CHAIN.replace('%%dappName%%', dappName)
-  return new Error(message)
-}
 
 export const WalletConnectProvider = ({ children }: { children: ReactNode }) => {
   const {
