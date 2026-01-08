@@ -1,7 +1,7 @@
 import type { LinkProps } from 'next/link'
 
 export const dashboardBannerConfig = {
-  title: 'Enable enterprise-grade security',
+  title: 'Enforce enterprise-grade security',
   description: 'Automatically block risky transactions using advanced, user-defined security policies.',
   ctaLabel: 'Learn more',
   href: '#' as LinkProps['href'],

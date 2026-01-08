@@ -21,7 +21,7 @@ describe('HnBanner', () => {
       const mockOnHnSignupClick = jest.fn()
       render(<HnBanner onHnSignupClick={mockOnHnSignupClick} />)
 
-      expect(screen.getByText('Enable enterprise-grade security')).toBeInTheDocument()
+      expect(screen.getByText('Enforce enterprise-grade security')).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Learn more' })).toBeInTheDocument()
     })
 
@@ -59,7 +59,7 @@ describe('HnBanner', () => {
         const { container } = render(<HnBannerForQueue />)
 
         expect(container.firstChild).toBeNull()
-        expect(screen.queryByText('Enable enterprise-grade security')).not.toBeInTheDocument()
+        expect(screen.queryByText('Enforce enterprise-grade security')).not.toBeInTheDocument()
       })
     })
 
@@ -74,7 +74,7 @@ describe('HnBanner', () => {
         const { container } = render(<HnBannerForQueue />)
 
         expect(container.firstChild).toBeNull()
-        expect(screen.queryByText('Enable enterprise-grade security')).not.toBeInTheDocument()
+        expect(screen.queryByText('Enforce enterprise-grade security')).not.toBeInTheDocument()
       })
 
       it('should not render banner when loading is true', () => {
@@ -87,7 +87,7 @@ describe('HnBanner', () => {
         const { container } = render(<HnBannerForQueue />)
 
         expect(container.firstChild).toBeNull()
-        expect(screen.queryByText('Enable enterprise-grade security')).not.toBeInTheDocument()
+        expect(screen.queryByText('Enforce enterprise-grade security')).not.toBeInTheDocument()
       })
     })
 
@@ -101,7 +101,7 @@ describe('HnBanner', () => {
 
         render(<HnBannerForQueue />)
 
-        expect(screen.getByText('Enable enterprise-grade security')).toBeInTheDocument()
+        expect(screen.getByText('Enforce enterprise-grade security')).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Learn more' })).toBeInTheDocument()
         expect(useBannerVisibilityHook.useBannerVisibility).toHaveBeenCalledWith(BannerType.Promo)
       })
@@ -137,7 +137,7 @@ describe('HnBanner', () => {
         const { container } = render(<HnBannerForHistory />)
 
         expect(container.firstChild).toBeNull()
-        expect(screen.queryByText('Enable enterprise-grade security')).not.toBeInTheDocument()
+        expect(screen.queryByText('Enforce enterprise-grade security')).not.toBeInTheDocument()
       })
     })
 
@@ -152,7 +152,7 @@ describe('HnBanner', () => {
         const { container } = render(<HnBannerForHistory />)
 
         expect(container.firstChild).toBeNull()
-        expect(screen.queryByText('Enable enterprise-grade security')).not.toBeInTheDocument()
+        expect(screen.queryByText('Enforce enterprise-grade security')).not.toBeInTheDocument()
       })
 
       it('should not render banner when loading is true', () => {
@@ -165,7 +165,7 @@ describe('HnBanner', () => {
         const { container } = render(<HnBannerForHistory />)
 
         expect(container.firstChild).toBeNull()
-        expect(screen.queryByText('Enable enterprise-grade security')).not.toBeInTheDocument()
+        expect(screen.queryByText('Enforce enterprise-grade security')).not.toBeInTheDocument()
       })
     })
 
@@ -179,7 +179,7 @@ describe('HnBanner', () => {
 
         render(<HnBannerForHistory />)
 
-        expect(screen.getByText('Enable enterprise-grade security')).toBeInTheDocument()
+        expect(screen.getByText('Enforce enterprise-grade security')).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Learn more' })).toBeInTheDocument()
         expect(useBannerVisibilityHook.useBannerVisibility).toHaveBeenCalledWith(BannerType.Promo)
       })
