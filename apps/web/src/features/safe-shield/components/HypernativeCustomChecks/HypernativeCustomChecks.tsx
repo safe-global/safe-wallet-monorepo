@@ -40,7 +40,7 @@ export const HypernativeCustomChecks = ({
     )
   }
 
-  if (!threatResults || !threatResults.CUSTOM_CHECKS || Object.keys(threatResults.CUSTOM_CHECKS || {}).length === 0) {
+  if (!threatResults?.CUSTOM_CHECKS || threatResults.CUSTOM_CHECKS.length === 0) {
     return null
   }
 
