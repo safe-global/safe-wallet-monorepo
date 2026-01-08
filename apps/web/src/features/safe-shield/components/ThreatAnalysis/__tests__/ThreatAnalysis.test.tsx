@@ -349,7 +349,7 @@ describe('ThreatAnalysis', () => {
       expect(screen.queryByText('AnalysisGroupCard')).not.toBeInTheDocument()
     })
 
-    it('should render AnalysisGroupCard when threat results has only request_id', () => {
+    it('should return null when threat results has only request_id', async () => {
       const requestId = 'test-id'
       const threat: AsyncResult<ThreatAnalysisResults> = [
         {
@@ -359,26 +359,9 @@ describe('ThreatAnalysis', () => {
         false,
       ]
 
-      render(<ThreatAnalysis threat={threat} />)
+      const { container } = render(<ThreatAnalysis threat={threat} />)
 
-      const card = screen.getByTestId('threat-analysis-group-card')
-      expect(card).toBeInTheDocument()
-      expect(card).toHaveAttribute('data-request-id', requestId)
-    })
-
-    it('should render AnalysisGroupCard when THREAT array is empty but other properties exist', () => {
-      const threat: AsyncResult<ThreatAnalysisResults> = [
-        {
-          THREAT: [],
-          request_id: 'test-id',
-        },
-        undefined,
-        false,
-      ]
-
-      render(<ThreatAnalysis threat={threat} />)
-
-      expect(screen.getByTestId('threat-analysis-group-card')).toBeInTheDocument()
+      expect(container.firstChild).toBeNull()
     })
   })
 })

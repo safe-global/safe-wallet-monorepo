@@ -36,7 +36,7 @@ export const ThreatAnalysis = ({
     hypernativeAuth !== undefined && (!hypernativeAuth.isAuthenticated || hypernativeAuth.isTokenExpired)
 
   const threatData = useMemo<Record<string, GroupedAnalysisResults> | undefined>(() => {
-    const { BALANCE_CHANGE: _, CUSTOM_CHECKS: __, ...groupedThreatResults } = threatResults || {}
+    const { BALANCE_CHANGE: _, CUSTOM_CHECKS: __, request_id: ___, ...groupedThreatResults } = threatResults || {}
 
     if (Object.keys(groupedThreatResults).length === 0) return undefined
 
