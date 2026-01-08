@@ -61,6 +61,7 @@ export const ThreatAnalysis = ({
       highlightedSeverity={highlightedSeverity}
       analyticsEvent={SAFE_SHIELD_EVENTS.THREAT_ANALYZED}
       requestId={threatResults?.request_id}
+      isByHypernative={!!hypernativeAuth}
     />
   )
 }
