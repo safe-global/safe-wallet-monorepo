@@ -107,8 +107,16 @@ export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
 }
 
 const styles = StyleSheet.create({
-  root: { justifyContent: 'center', alignItems: 'center' },
-  svg: { backgroundColor: '#fff', borderRadius: 20, overflow: 'hidden', flex: 1 },
+  root: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  svg: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    overflow: 'hidden',
+    flex: 1,
+  },
   logoContainer: {
     position: 'absolute',
     width: 64,
@@ -118,9 +126,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 32,
   },
-  logo: { width: '90%', height: '90%', top: -2 },
-  innerEyesOptions: { borderRadius: 0, color: '#000' },
-  outerEyesOptions: { borderRadius: 15 },
+  logo: {
+    width: '90%',
+    height: '90%',
+    top: -2,
+  },
+  innerEyesOptions: {
+    borderRadius: 0,
+    color: '#000',
+  },
+  outerEyesOptions: {
+    borderRadius: 15,
+  },
 })
-
-export default ShareView

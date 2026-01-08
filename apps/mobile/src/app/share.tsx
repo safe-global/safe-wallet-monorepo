@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 function ShareScreen() {
   const { bottom } = useSafeAreaInsets()
   return (
-    <View style={{ flex: 1 }} paddingBottom={bottom}>
+    <View style={{ flex: 1 }} paddingHorizontal={'$4'} paddingBottom={bottom}>
       <ShareContainer />
     </View>
   )
