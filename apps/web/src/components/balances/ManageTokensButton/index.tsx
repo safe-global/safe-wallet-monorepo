@@ -51,6 +51,7 @@ const ManageTokensButton = forwardRef<ManageTokensButtonHandle, ManageTokensButt
           startIcon={<SettingsIcon />}
           data-testid="manage-tokens-button"
           sx={{
+            height: '32px',
             '& .MuiButton-startIcon': { marginRight: { xs: 0, sm: '8px' } },
           }}
         >
