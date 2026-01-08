@@ -156,6 +156,10 @@ export type ContractAnalysisResultDto = {
   description: string
 }
 export type ContractAnalysisDto = {
+  /** Logo URL for the contract */
+  logoUrl?: string
+  /** Name of the contract */
+  name?: string
   /** Analysis results for contract verification status. Shows whether contracts are verified and source code is available. */
   CONTRACT_VERIFICATION?: ContractAnalysisResultDto[]
   /** Analysis results related to contract interaction history. Shows whether this is a new or previously interacted contract. */
@@ -270,6 +274,8 @@ export type ThreatAnalysisResponseDto = {
   )[]
   /** Balance changes resulting from the transaction. Shows incoming and outgoing transfers for various asset types. */
   BALANCE_CHANGE?: BalanceChangeDto[]
+  /** Blockaid request ID from x-request-id header. Used for reporting false positives/negatives via the report endpoint. */
+  request_id?: string
 }
 export type TypedDataDomain = {
   chainId?: number

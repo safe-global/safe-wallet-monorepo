@@ -8902,6 +8902,14 @@
       "ContractAnalysisDto": {
         "type": "object",
         "properties": {
+          "logoUrl": {
+            "type": "string",
+            "description": "Logo URL for the contract"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the contract"
+          },
           "CONTRACT_VERIFICATION": {
             "description": "Analysis results for contract verification status. Shows whether contracts are verified and source code is available.",
             "example": [
@@ -9307,6 +9315,10 @@
             "items": {
               "$ref": "#/components/schemas/BalanceChangeDto"
             }
+          },
+          "request_id": {
+            "type": "string",
+            "description": "Blockaid request ID from x-request-id header. Used for reporting false positives/negatives via the report endpoint."
           }
         }
       },
