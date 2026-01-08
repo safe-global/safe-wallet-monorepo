@@ -1,8 +1,9 @@
 import {
   HypernativeFinding,
   HypernativeRiskSeverityMap,
-  HypernativeRiskTitleMap,
   type HypernativeRisk,
+  type HypernativeBalanceChanges,
+  HypernativeRiskTitleMap,
 } from '../types/hypernative.type'
 import {
   HypernativeAssessmentResponseDto,
@@ -11,6 +12,8 @@ import {
 } from '@safe-global/store/hypernative/hypernativeApi.dto'
 import { Severity, StatusGroup, ThreatStatus, type ThreatAnalysisResults, type ThreatAnalysisResult } from '../types'
 import { sortBySeverity } from './analysisUtils'
+import type { BalanceChangeDto } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
+import { ZeroAddress } from 'ethers'
 
 /**
  * Maps Hypernative assessment response to Safe Shield ThreatAnalysisResults format
@@ -21,16 +24,21 @@ import { sortBySeverity } from './analysisUtils'
  */
 export function mapHypernativeResponse(
   response: HypernativeAssessmentResponseDto['data'] | HypernativeAssessmentFailedResponseDto,
+  safeAddress: `0x${string}`,
 ): ThreatAnalysisResults {
   if (isHypernativeAssessmentFailedResponse(response)) {
     return createErrorResult(response.error)
   }
 
   const assessment = response.assessmentData
+  const balanceChanges = assessment.balanceChanges
+    ? mapBalanceChanges(safeAddress, assessment.balanceChanges)
+    : undefined
 
   return {
     [StatusGroup.THREAT]: mapThreatFindings(assessment.findings.THREAT_ANALYSIS),
     [StatusGroup.CUSTOM_CHECKS]: mapCustomChecksFindings(assessment.findings.CUSTOM_CHECKS),
+    ...(balanceChanges && balanceChanges.length ? { BALANCE_CHANGE: balanceChanges } : {}),
   }
 }
 
@@ -139,4 +147,44 @@ function createNoCustomChecksResult(): ThreatAnalysisResult[] {
       description: 'Custom checks found no issues.',
     },
   ]
+}
+
+/**
+ * Maps Hypernative balance changes to Safe Shield BalanceChangeDto format
+ *
+ * @param {HypernativeBalanceChanges} balanceChanges - Balance changes from Hypernative API
+ *
+ * @returns {BalanceChangeDto[]} Array of balance change DTOs grouped by token address
+ */
+function mapBalanceChanges(safeAddress: `0x${string}`, balanceChanges: HypernativeBalanceChanges): BalanceChangeDto[] {
+  const safeBalanceChanges = balanceChanges[safeAddress.toLowerCase() as `0x${string}`] || []
+
+  // Group balance changes by token address
+  const changesByTokenAddress = safeBalanceChanges.reduce<Record<`0x${string}`, BalanceChangeDto>>((acc, change) => {
+    const tokenAddress = change.tokenAddress ?? ZeroAddress
+
+    const asset = {
+      type: change.tokenAddress ? 'ERC20' : 'NATIVE',
+      symbol: change.tokenSymbol,
+      address: tokenAddress,
+    }
+
+    const changes = acc[tokenAddress] || {
+      asset,
+      in: [],
+      out: [],
+    }
+
+    if (change.changeType === 'receive') {
+      changes.in.push({ value: change.amount })
+    } else {
+      changes.out.push({ value: change.amount })
+    }
+
+    acc[tokenAddress] = changes
+
+    return acc
+  }, {})
+
+  return Object.values(changesByTokenAddress)
 }

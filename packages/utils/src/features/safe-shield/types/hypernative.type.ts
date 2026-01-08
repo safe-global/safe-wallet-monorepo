@@ -46,6 +46,7 @@ export interface HypernativeAssessmentData {
   recommendation: HypernativeRiskSeverity
   interpretation: string
   findings: HypernativeFindingsGroup
+  balanceChanges?: HypernativeBalanceChanges
 }
 
 export interface HypernativeFindingsGroup {
@@ -67,7 +68,7 @@ export interface HypernativeRisk {
 }
 
 export type HypernativeBalanceChanges = {
-  [address: string]: HypernativeBalanceChange[]
+  [address: `0x${string}`]: HypernativeBalanceChange[]
 }
 
 export interface HypernativeBalanceChange {
