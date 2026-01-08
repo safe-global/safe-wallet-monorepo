@@ -87,9 +87,11 @@ export const Navbar = () => {
           }}
         >
           {hasSafeSigners && (
-            <Pressable onPressIn={() => router.navigate('/openlv' as '/share')} hitSlop={10}>
-              <SafeFontIcon name="link" size={16} />
-            </Pressable>
+            <Link href="/openlv" asChild>
+              <Pressable hitSlop={10}>
+                <SafeFontIcon name="link" size={16} />
+              </Pressable>
+            </Link>
           )}
           <Link href={'/share'} asChild>
             <Pressable hitSlop={10}>
