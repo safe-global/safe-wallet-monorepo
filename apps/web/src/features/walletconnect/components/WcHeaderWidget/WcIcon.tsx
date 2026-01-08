@@ -21,7 +21,7 @@ const WcIcon = ({ sessionCount, sessionIcon, isError, onClick }: WcIconProps): R
         onClick={onClick}
         title="WalletConnect"
         sx={{
-          p: 1,
+          p: '10px',
           '&:hover': {
             backgroundColor: 'background.light',
             borderRadius: '6px',

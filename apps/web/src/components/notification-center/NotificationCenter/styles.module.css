@@ -1,7 +1,7 @@
 .bell {
   display: flex;
   justify-content: center;
-  padding: var(--space-1) var(--space-1);
+  padding: 10px;
 }
 
 .bell svg path {
