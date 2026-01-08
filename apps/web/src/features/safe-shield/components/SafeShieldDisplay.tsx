@@ -48,9 +48,9 @@ export const SafeShieldDisplay = ({
   safeTx,
   hypernativeAuth,
 }: {
-  recipient?: AsyncResult<RecipientAnalysisResults>
-  contract?: AsyncResult<ContractAnalysisResults>
-  threat?: AsyncResult<ThreatAnalysisResults>
+  recipient: AsyncResult<RecipientAnalysisResults>
+  contract: AsyncResult<ContractAnalysisResults>
+  threat: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
   hypernativeAuth?: HypernativeAuthStatus
 }): ReactElement => {

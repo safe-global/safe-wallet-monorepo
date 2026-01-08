@@ -1,7 +1,6 @@
 import { type ReactElement } from 'react'
 import { Box } from '@mui/material'
 import type {
-  GroupedAnalysisResults,
   ContractAnalysisResults,
   ThreatAnalysisResults,
   RecipientAnalysisResults,
@@ -12,6 +11,7 @@ import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
 import { HypernativeInfo } from '../HypernativeInfo'
+import { HypernativeCustomChecks } from '@/features/safe-shield/components/HypernativeCustomChecks'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
 import type { SafeTransaction } from '@safe-global/types-kit'
@@ -24,16 +24,7 @@ import {
 } from '@/features/safe-shield/hooks/useDelayedLoading'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
-
-const normalizeThreatData = (threat?: AsyncResult<ThreatAnalysisResults>): Record<string, GroupedAnalysisResults> => {
-  const [result] = threat || []
-
-  const { BALANCE_CHANGE: _, ...groupedThreatResults } = result || {}
-
-  if (Object.keys(groupedThreatResults).length === 0) return {}
-
-  return { ['0x']: groupedThreatResults }
-}
+import { ThreatAnalysis } from '@/features/safe-shield/components/ThreatAnalysis'
 
 export const SafeShieldContent = ({
   recipient,
@@ -43,23 +34,22 @@ export const SafeShieldContent = ({
   overallStatus,
   hypernativeAuth,
 }: {
-  recipient?: AsyncResult<RecipientAnalysisResults>
-  contract?: AsyncResult<ContractAnalysisResults>
-  threat?: AsyncResult<ThreatAnalysisResults>
+  recipient: AsyncResult<RecipientAnalysisResults>
+  contract: AsyncResult<ContractAnalysisResults>
+  threat: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
   overallStatus?: { severity: Severity; title: string }
   hypernativeAuth?: HypernativeAuthStatus
 }): ReactElement => {
-  const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient || []
-  const [contractResults = {}, _contractError, contractLoading = false] = contract || []
-  const [threatResults, _threatError, threatLoading = false] = threat || []
+  const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
+  const [contractResults = {}, _contractError, contractLoading = false] = contract
+  const [threatResults = {}, _threatError, threatLoading = false] = threat
 
-  const normalizedThreatData = normalizeThreatData(threat)
   const { hasSimulationError } = useCheckSimulation(safeTx)
   const highlightedSeverity = useHighlightedSeverity(
     recipientResults,
     contractResults,
-    normalizedThreatData,
+    threatResults,
     hasSimulationError,
   )
   const loading = recipientLoading || contractLoading || threatLoading
@@ -110,13 +100,18 @@ export const SafeShieldContent = ({
             showImage
           />
 
-          <AnalysisGroupCard
-            data-testid="threat-analysis-group-card"
-            data={normalizedThreatData}
+          <ThreatAnalysis
+            threat={threat}
             delay={threatAnalysisDelay}
             highlightedSeverity={highlightedSeverity}
-            analyticsEvent={SAFE_SHIELD_EVENTS.THREAT_ANALYZED}
-            requestId={threatResults?.request_id}
+            hypernativeAuth={hypernativeAuth}
+          />
+
+          <HypernativeCustomChecks
+            threat={threat}
+            delay={threatAnalysisDelay}
+            highlightedSeverity={highlightedSeverity}
+            hypernativeAuth={hypernativeAuth}
           />
 
           {!contractLoading && !threatLoading && (
