@@ -4,7 +4,7 @@ import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
 import { ThreatAnalysisResultBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis-result.builder'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { faker } from '@faker-js/faker'
-import { ISSUE_BACKGROUND_COLORS } from '@/features/safe-shield/constants'
+import { SEVERITY_COLORS } from '@/features/safe-shield/constants'
 
 describe('AnalysisIssuesDisplay', () => {
   beforeEach(() => {
@@ -14,7 +14,7 @@ describe('AnalysisIssuesDisplay', () => {
   describe('Basic Rendering', () => {
     it('should return null when result has no issues', () => {
       const result = ThreatAnalysisResultBuilder.noThreat().build()
-      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const issueBackgroundColor = SEVERITY_COLORS[Severity.WARN].background
       const { container } = render(
         <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
       )
@@ -24,7 +24,7 @@ describe('AnalysisIssuesDisplay', () => {
 
     it('should render nothing for non-threat results', () => {
       const result = ThreatAnalysisResultBuilder.ownershipChange().build()
-      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const issueBackgroundColor = SEVERITY_COLORS[Severity.WARN].background
       const { container } = render(
         <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
       )
@@ -45,7 +45,7 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const issueBackgroundColor = SEVERITY_COLORS[Severity.WARN].background
       render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       expect(screen.getByText(address)).toBeInTheDocument()
@@ -67,7 +67,7 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const issueBackgroundColor = SEVERITY_COLORS[Severity.WARN].background
       render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       expect(screen.getByText(address)).toBeInTheDocument()
@@ -101,7 +101,7 @@ describe('AnalysisIssuesDisplay', () => {
         },
       })
 
-      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const issueBackgroundColor = SEVERITY_COLORS[Severity.WARN].background
       const { container } = render(
         <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
       )
@@ -142,7 +142,7 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const issueBackgroundColor = SEVERITY_COLORS[Severity.WARN].background
       render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       const descriptionElement = screen.getByText('This address is untrusted')
@@ -160,7 +160,7 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const issueBackgroundColor = SEVERITY_COLORS[Severity.WARN].background
       render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       expect(screen.getByText('Issue without address')).toBeInTheDocument()
@@ -187,7 +187,7 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const issueBackgroundColor = SEVERITY_COLORS[Severity.WARN].background
       const { container } = render(
         <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
       )
@@ -220,7 +220,7 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.CRITICAL]!
+      const issueBackgroundColor = SEVERITY_COLORS[Severity.CRITICAL].background
       render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       expect(screen.getByText(criticalAddress)).toBeInTheDocument()
@@ -249,7 +249,7 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.CRITICAL]!
+      const issueBackgroundColor = SEVERITY_COLORS[Severity.CRITICAL].background
       const { container } = render(
         <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
       )
@@ -266,7 +266,7 @@ describe('AnalysisIssuesDisplay', () => {
   describe('Edge Cases', () => {
     it('should handle empty issues object', () => {
       const result = ThreatAnalysisResultBuilder.moderate().issues({}).build()
-      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const issueBackgroundColor = SEVERITY_COLORS[Severity.WARN].background
 
       const { container } = render(
         <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
@@ -282,7 +282,7 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const issueBackgroundColor = SEVERITY_COLORS[Severity.WARN].background
       const { container } = render(
         <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />,
       )
@@ -305,7 +305,7 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.CRITICAL]!
+      const issueBackgroundColor = SEVERITY_COLORS[Severity.CRITICAL].background
       render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       expect(screen.getByText(address)).toBeInTheDocument()
@@ -325,7 +325,7 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const issueBackgroundColor = SEVERITY_COLORS[Severity.WARN].background
       render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       expect(screen.getByText(address)).toBeInTheDocument()
@@ -343,7 +343,7 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.WARN]!
+      const issueBackgroundColor = SEVERITY_COLORS[Severity.WARN].background
       render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       expect(screen.getByText('Issue without address')).toBeInTheDocument()
@@ -368,7 +368,7 @@ describe('AnalysisIssuesDisplay', () => {
         })
         .build()
 
-      const issueBackgroundColor = ISSUE_BACKGROUND_COLORS[Severity.CRITICAL]!
+      const issueBackgroundColor = SEVERITY_COLORS[Severity.CRITICAL].background
       render(<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />)
 
       expect(screen.getByText(address1)).toBeInTheDocument()
