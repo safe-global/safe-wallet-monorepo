@@ -116,8 +116,7 @@ const HypernativeOAuthCallback: NextPage = () => {
 
         // Step 9: Close popup after short delay (allow postMessage to be delivered)
         setTimeout(() => {
-          // TODO: Commented for testing purposes, remove this before merging
-          // window.close()
+          window.close()
         }, 1000)
       } catch (error) {
         console.error('OAuth callback error:', error)
