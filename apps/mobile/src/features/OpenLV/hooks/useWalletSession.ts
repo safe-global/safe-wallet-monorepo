@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Keyboard } from 'react-native'
 import { connectSession, type Session } from '@openlv/react-native'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/src/store'
@@ -38,6 +39,7 @@ export function useWalletSession(activeSafeAddress: string) {
         throw new Error('Missing connection URL')
       }
 
+      Keyboard.dismiss()
       setStatus('connecting')
       appendLog('Connecting…')
 
@@ -68,7 +70,7 @@ export function useWalletSession(activeSafeAddress: string) {
       nextSession.emitter.on('state_change', (state) => {
         if (typeof state !== 'undefined') {
           appendLog(`session state => ${state.status}`)
-          setStatus(`session: ${state.status}`)
+          setStatus(state.status)
         }
       })
 
@@ -79,6 +81,7 @@ export function useWalletSession(activeSafeAddress: string) {
       appendLog('Connected; waiting for link…')
       void nextSession.waitForLink().then(() => {
         appendLog('Linked! (transport should start)')
+        setStatus('linked')
       })
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e)
@@ -109,11 +112,11 @@ export function useWalletSession(activeSafeAddress: string) {
         // Try to handle hex string or plain string
         let content: string | Uint8Array = pendingRequest.message
         try {
-           if (typeof content === 'string' && content.startsWith('0x')) {
-             content = getBytes(content)
-           }
+          if (typeof content === 'string' && content.startsWith('0x')) {
+            content = getBytes(content)
+          }
         } catch {
-             // ignore, sign as string
+          // ignore, sign as string
         }
         signature = await wallet.signMessage(content)
       }

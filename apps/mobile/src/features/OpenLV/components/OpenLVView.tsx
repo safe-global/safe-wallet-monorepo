@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react'
-import { YStack, Text, XStack } from 'tamagui'
+import { YStack, Text, XStack, View } from 'tamagui'
+import { Pressable } from 'react-native'
 import { SafeInfo } from '@/src/types/address'
 import { Identicon } from '@/src/components/Identicon'
 import { OpenLVProvider } from '@openlv/react-native/provider'
@@ -10,6 +11,7 @@ import { QrCamera } from '@/src/components/Camera'
 import { Camera, useCameraPermission, Code } from 'react-native-vision-camera'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { toUtf8String } from 'ethers'
+import { OpenLVLogo } from '@/src/components/SVGs/OpenLVLogo'
 
 type OpenLVViewProps = {
   activeSafe: SafeInfo
@@ -58,6 +60,8 @@ export const OpenLVView = ({ activeSafe }: OpenLVViewProps) => {
     }
   }, [showQrScanner])
 
+  const isLinked = status === 'linked' || status === 'connected'
+
   if (pendingRequest) {
     let displayMessage = pendingRequest.message
     try {
@@ -69,27 +73,37 @@ export const OpenLVView = ({ activeSafe }: OpenLVViewProps) => {
     }
 
     return (
-      <YStack flex={1} padding="$4" space="$4" justifyContent="center">
-        <Text fontSize="$4" textAlign="center" fontWeight="bold">
-          Sign Message Request
-        </Text>
-        <Text fontSize="$3" color="$colorLight" textAlign="center">
-          The connected app requests you to sign:
-        </Text>
-        <YStack backgroundColor="$backgroundPress" padding="$4" borderRadius="$4">
-          <Text fontFamily="$mono" textAlign="center">
-            {displayMessage}
+      <YStack flex={1} padding="$5" space="$5" justifyContent="center">
+        <YStack alignItems="center" space="$2">
+          <SafeFontIcon name="edit" size={48} color="$primary" />
+          <Text fontSize="$7" textAlign="center" fontWeight="bold">
+            Sign Message
           </Text>
         </YStack>
 
-        <XStack gap="$3" marginTop="$4">
-          <SafeButton flex={1} danger onPress={rejectRequest}>
+        <YStack space="$2">
+          <Text fontSize="$3" color="$colorLight" textAlign="left">
+            The connected application is requesting a signature:
+          </Text>
+          <YStack
+            backgroundColor="$backgroundSecondary"
+            padding="$4"
+            borderRadius="$4"
+            borderWidth={1}
+            borderColor="$borderLight"
+          >
+            <Text fontFamily="$mono" fontSize="$2" color="$color">
+              {displayMessage}
+            </Text>
+          </YStack>
+        </YStack>
+
+        <YStack space="$3" marginTop="$4">
+          <SafeButton onPress={confirmRequest}>Sign Message</SafeButton>
+          <SafeButton secondary onPress={rejectRequest}>
             Reject
           </SafeButton>
-          <SafeButton flex={1} onPress={confirmRequest}>
-            Sign
-          </SafeButton>
-        </XStack>
+        </YStack>
       </YStack>
     )
   }
@@ -119,55 +133,123 @@ export const OpenLVView = ({ activeSafe }: OpenLVViewProps) => {
 
   return (
     <OpenLVProvider>
-      <XStack backgroundColor="$background" paddingHorizontal="$4" paddingVertical="$2" alignItems="center" gap="$2">
-        <Identicon address={activeSafe.address} size={16} />
-        <Text fontSize={12} color="$colorLight">
-          {activeSafe.address.substring(0, 6)}...{activeSafe.address.substring(activeSafe.address.length - 4)}
-        </Text>
+      <XStack
+        backgroundColor="$background"
+        paddingHorizontal="$4"
+        paddingVertical="$3"
+        alignItems="center"
+        justifyContent="space-between"
+        borderBottomWidth={1}
+        borderBottomColor="$borderLight"
+      >
+        <XStack alignItems="center" gap="$2">
+          <Identicon address={activeSafe.address} size={20} />
+          <Text fontSize={14} fontWeight="600">
+            {activeSafe.address.substring(0, 6)}...{activeSafe.address.substring(activeSafe.address.length - 4)}
+          </Text>
+        </XStack>
+
+        <XStack
+          alignItems="center"
+          gap="$2"
+          backgroundColor="$backgroundSecondary"
+          paddingHorizontal="$2"
+          paddingVertical="$1"
+          borderRadius="$2"
+        >
+          <View
+            width={8}
+            height={8}
+            borderRadius={4}
+            backgroundColor={
+              isLinked
+                ? '$success'
+                : status === 'connecting'
+                  ? '$warning'
+                  : status === 'error'
+                    ? '$error'
+                    : '$colorLight'
+            }
+          />
+          <Text fontSize={12} color="$colorLight" textTransform="capitalize">
+            {status.replace('session: ', '')}
+          </Text>
+        </XStack>
       </XStack>
 
-      <YStack
-        flex={1}
-        paddingBottom={'$4'}
-        paddingHorizontal={'$4'}
-        alignItems={'center'}
-        justifyContent={'space-between'}
-      >
-        <YStack flex={1} justifyContent={'center'} alignItems={'center'} width="100%" space="$3">
-          <YStack width="100%" gap="$3">
-            <SafeInput
-              placeholder="Paste connection URL or scan QR code"
-              value={connectionUrl}
-              onChangeText={setConnectionUrl}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-
-            <XStack gap="$2">
-              <SafeButton flex={1} secondary icon={<SafeFontIcon name="qr-code" size={16} />} onPress={toggleQrScanner}>
-                Scan QR
+      <YStack flex={1} padding="$4" justifyContent="space-between">
+        <YStack gap="$4" width="100%">
+          {isLinked ? (
+            <YStack space="$5" alignItems="center">
+              <YStack padding="$5" backgroundColor="$backgroundSecondary" borderRadius="$10">
+                <SafeFontIcon name="check" size={48} color="$success" />
+              </YStack>
+              <YStack space="$2" alignItems="center">
+                <Text fontSize="$6" fontWeight="bold">
+                  Connected
+                </Text>
+                <Text color="$colorLight" textAlign="center" paddingHorizontal="$4">
+                  The application is now linked. You can sign requests as they arrive.
+                </Text>
+              </YStack>
+              <SafeButton danger onPress={closeSession} width="60%">
+                Disconnect
               </SafeButton>
-              <SafeButton
-                flex={2}
-                onPress={session ? closeSession : startSession}
-                disabled={session ? false : !connectionUrl}
-                danger={!!session}
-              >
-                {session ? 'Disconnect' : 'Connect'}
-              </SafeButton>
-            </XStack>
+            </YStack>
+          ) : (
+            <YStack gap="$3">
+              <Text fontSize="$3" color="$colorLight" fontWeight="600">
+                Connection URL
+              </Text>
+              <View>
+                <SafeInput
+                  placeholder="Paste connection URL or scan QR code"
+                  value={connectionUrl}
+                  onChangeText={setConnectionUrl}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  right={
+                    connectionUrl ? (
+                      <Pressable onPress={() => setConnectionUrl('')} style={{ paddingRight: 8 }}>
+                        <SafeFontIcon name="close" size={16} color="$colorLight" />
+                      </Pressable>
+                    ) : null
+                  }
+                />
+              </View>
 
-            <Text textAlign="center" fontSize={14} color="$colorLight">
-              Status: {status}
+              <XStack gap="$3" alignItems="center" justifyContent="space-between" flexWrap="wrap">
+                <SafeButton
+                  flex={1}
+                  minWidth={120}
+                  secondary
+                  icon={<SafeFontIcon name="qr-code" size={16} />}
+                  onPress={toggleQrScanner}
+                >
+                  Scan QR
+                </SafeButton>
+                <SafeButton
+                  flex={1}
+                  minWidth={120}
+                  onPress={session ? closeSession : startSession}
+                  disabled={session ? false : !connectionUrl}
+                  danger={!!session}
+                >
+                  {session ? 'Disconnect' : 'Connect'}
+                </SafeButton>
+              </XStack>
+            </YStack>
+          )}
+        </YStack>
+
+        {!isLinked && (
+          <XStack gap="$1" alignItems="center" justifyContent="center" paddingVertical="$3">
+            <Text fontSize={12} color="$colorSecondary">
+              Powered by
             </Text>
-          </YStack>
-        </YStack>
-
-        <YStack>
-          <Text color={'$colorLight'} textAlign={'center'} fontSize={'$3'}>
-            Powered by OpenLV
-          </Text>
-        </YStack>
+            <OpenLVLogo width={60} height={16} />
+          </XStack>
+        )}
       </YStack>
     </OpenLVProvider>
   )
