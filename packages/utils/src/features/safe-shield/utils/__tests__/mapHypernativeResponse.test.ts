@@ -7,6 +7,7 @@ import type {
 } from '@safe-global/store/hypernative/hypernativeApi.dto'
 import type { HypernativeBalanceChange } from '../../types/hypernative.type'
 import { ZeroAddress } from 'ethers'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
 
 describe('mapHypernativeResponse', () => {
   const mockSafeAddress = faker.finance.ethereumAddress() as `0x${string}`
@@ -905,24 +906,26 @@ describe('mapHypernativeResponse', () => {
     })
 
     it('should handle case-insensitive safeAddress matching', () => {
-      // The implementation uses safeAddress.toLowerCase() to look up balanceChanges
-      // So we need to ensure the key in balanceChanges matches (use lowercase)
-      // This test verifies that the implementation correctly handles lowercase lookup
+      // The implementation normalizes both the lookup key and the balanceChanges keys
+      // This test verifies that the function works with checksummed addresses from the API
 
       const noThreatResponse = createNoThreatResponse()
+
+      // Create a checksummed version of the safe address (simulating what the API might return)
+      const checksummedAddress = checksumAddress(safeAddress)
 
       const response: HypernativeAssessmentResponseDto['data'] = {
         ...noThreatResponse,
         assessmentData: {
           ...noThreatResponse.assessmentData,
           balanceChanges: {
-            // Use lowercase key to match implementation's lookup behavior
-            [safeAddress.toLowerCase() as `0x${string}`]: [createBalanceChangeHN()],
+            // Use checksummed key to simulate API response with mixed-case addresses
+            [checksummedAddress]: [createBalanceChangeHN()],
           },
         },
       }
 
-      // Pass safeAddress in any case - implementation will convert to lowercase
+      // Pass safeAddress in any case - implementation will normalize both
       const result = mapHypernativeResponse(response, safeAddress.toUpperCase() as `0x${string}`)
 
       expect(result.BALANCE_CHANGE).toBeDefined()

@@ -160,7 +160,16 @@ function createNoCustomChecksResult(): ThreatAnalysisResult[] {
  * @returns {BalanceChangeDto[]} Array of balance change DTOs grouped by token address
  */
 function mapBalanceChanges(safeAddress: `0x${string}`, balanceChanges: HypernativeBalanceChanges): BalanceChangeDto[] {
-  const safeBalanceChanges = balanceChanges[safeAddress.toLowerCase() as `0x${string}`] || []
+  // Normalize keys to lowercase to handle both checksummed and lowercase addresses from the API
+  const normalizedBalanceChanges = Object.entries(balanceChanges).reduce<HypernativeBalanceChanges>(
+    (acc, [address, changes]) => {
+      acc[address.toLowerCase() as `0x${string}`] = changes
+      return acc
+    },
+    {},
+  )
+
+  const safeBalanceChanges = normalizedBalanceChanges[safeAddress.toLowerCase() as `0x${string}`] || []
 
   // Group balance changes by token address
   const changesByTokenAddress = safeBalanceChanges.reduce<Record<`0x${string}`, BalanceChangeDto>>((acc, change) => {
