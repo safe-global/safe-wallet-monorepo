@@ -150,7 +150,11 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
             textTransform: 'none',
             '&:hover': { boxShadow: 'none' },
           }),
-          outlined: { border: '2px solid', '&:hover': { border: '2px solid' } },
+          outlined: {
+            border: '1px solid',
+            fontWeight: 'normal',
+            '&:hover': { border: '1px solid' },
+          },
           sizeLarge: { fontSize: '16px' },
         },
       },

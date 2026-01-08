@@ -46,7 +46,7 @@ const ManageTokensButton = forwardRef<ManageTokensButtonHandle, ManageTokensButt
       <>
         <Button
           onClick={handleClick}
-          variant="contained"
+          variant="outlined"
           size="small"
           startIcon={<SettingsIcon />}
           data-testid="manage-tokens-button"
