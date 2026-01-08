@@ -151,8 +151,8 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
             '&:hover': { boxShadow: 'none' },
           }),
           outlined: {
-            border: '1px solid',
-            fontWeight: 'normal',
+            border: '1.5px solid',
+            fontWeight: '600',
             '&:hover': { border: '1px solid' },
           },
           sizeLarge: { fontSize: '16px' },

@@ -40,8 +40,8 @@ const CurrencySelect = (): ReactElement => {
           height: '32px',
           backgroundColor: 'var(--color-background-main)',
           fontSize: '14px',
-          fontWeight: 'normal',
-          border: '1px solid var(--color-primary-main)',
+          fontWeight: '600',
+          border: '1.5px solid var(--color-primary-main)',
           borderRadius: '6px',
           '& fieldset': {
             border: 'none',
