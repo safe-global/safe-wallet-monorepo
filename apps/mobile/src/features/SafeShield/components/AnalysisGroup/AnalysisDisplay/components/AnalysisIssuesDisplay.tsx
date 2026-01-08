@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import type {
   AnalysisResult,
   MaliciousOrModerateThreatAnalysisResult,
@@ -41,6 +41,25 @@ export function AnalysisIssuesDisplay({ result, severity }: AnalysisIssuesDispla
   const { handleOpenExplorer, handleCopyToClipboard, copiedIndex } = useAnalysisAddress()
 
   const issueBackgroundColor = getIssueBackgroundColor(severity)
+
+  // Memoize text colors for each severity to avoid calling getTokenValue on every render
+  const severityTextColors = useMemo(
+    () => ({
+      [Severity.CRITICAL]: '$color',
+      [Severity.WARN]: getTokenValue('$color.staticMainLight'),
+      default: getTokenValue('$color.staticMainLight'),
+      noAddress: '$colorLight',
+    }),
+    [],
+  )
+
+  // Helper function to get text color based on severity and address presence
+  const getTextColor = (severity: Severity | undefined, hasAddress: boolean): string => {
+    if (!hasAddress) {return severityTextColors.noAddress}
+    if (severity === Severity.CRITICAL) {return severityTextColors[Severity.CRITICAL]}
+    if (severity === Severity.WARN) {return severityTextColors[Severity.WARN]}
+    return severityTextColors.default
+  }
 
   if (!('issues' in result)) {
     return null
@@ -107,7 +126,7 @@ export function AnalysisIssuesDisplay({ result, severity }: AnalysisIssuesDispla
                   <Text
                     fontSize={'$2'}
                     lineHeight={14}
-                    color={issue.address ? getTokenValue('$color.staticMainLight') : '$colorLight'}
+                    color={getTextColor(severity, !!issue.address)}
                     fontFamily="$body"
                     fontWeight="400"
                   >
