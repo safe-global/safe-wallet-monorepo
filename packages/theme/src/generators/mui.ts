@@ -140,7 +140,7 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
           },
         ],
         styleOverrides: {
-          sizeSmall: { fontSize: '14px', padding: '8px 24px' },
+          sizeSmall: { fontSize: '14px', padding: '8px 24px', height: '32px' },
           sizeMedium: { fontSize: '16px', padding: '12px 24px' },
           root: ({ theme }) => ({
             borderRadius: theme.shape.borderRadius,

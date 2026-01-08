@@ -6,7 +6,7 @@ import TxHeader from '@/components/transactions/TxHeader'
 import { Badge, Box, Popover } from '@mui/material'
 import { useState } from 'react'
 import Button from '@mui/material/Button'
-import FilterIcon from '@mui/icons-material/FilterList'
+import FilterIcon from '@mui/icons-material/FilterAlt'
 import TxFilterForm from '@/components/transactions/TxFilterForm'
 import TrustedToggle from '@/components/transactions/TrustedToggle'
 import { useTxFilter } from '@/utils/tx-history-filter'
@@ -43,14 +43,18 @@ const History: NextPage = () => {
           variant="dot"
           color="success"
           invisible={!filter}
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
           sx={{
             '& .MuiBadge-badge': {
-              right: 8,
-              top: 8,
+              left: 38,
+              top: 10,
             },
           }}
         >
-          <Button variant="contained" onClick={handleFilterClick} size="small" startIcon={<FilterIcon />}>
+          <Button variant="outlined" onClick={handleFilterClick} size="small" startIcon={<FilterIcon />}>
             {filter?.type ?? 'Filter'}
           </Button>
         </Badge>
