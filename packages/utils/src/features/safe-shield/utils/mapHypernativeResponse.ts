@@ -172,8 +172,10 @@ function mapBalanceChanges(safeAddress: `0x${string}`, balanceChanges: Hypernati
   const safeBalanceChanges = normalizedBalanceChanges[safeAddress.toLowerCase() as `0x${string}`] || []
 
   // Group balance changes by token address
+  // Normalize tokenAddress to lowercase for grouping to handle case variations from the API
   const changesByTokenAddress = safeBalanceChanges.reduce<Record<`0x${string}`, BalanceChangeDto>>((acc, change) => {
-    const tokenAddress = change.tokenAddress ?? ZeroAddress
+    const originalTokenAddress = change.tokenAddress ?? ZeroAddress
+    const normalizedTokenAddress = originalTokenAddress.toLowerCase() as `0x${string}`
     const isNative = !change.tokenAddress
 
     const asset = isNative
@@ -184,10 +186,10 @@ function mapBalanceChanges(safeAddress: `0x${string}`, balanceChanges: Hypernati
       : {
           type: 'ERC20' as const,
           symbol: change.tokenSymbol,
-          address: tokenAddress,
+          address: normalizedTokenAddress,
         }
 
-    const changes = acc[tokenAddress] || {
+    const changes = acc[normalizedTokenAddress] || {
       asset,
       in: [],
       out: [],
@@ -199,7 +201,7 @@ function mapBalanceChanges(safeAddress: `0x${string}`, balanceChanges: Hypernati
       changes.out.push({ value: change.amount })
     }
 
-    acc[tokenAddress] = changes
+    acc[normalizedTokenAddress] = changes
 
     return acc
   }, {})

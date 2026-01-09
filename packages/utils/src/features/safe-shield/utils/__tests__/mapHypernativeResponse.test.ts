@@ -931,6 +931,49 @@ describe('mapHypernativeResponse', () => {
       expect(result.BALANCE_CHANGE).toHaveLength(1)
     })
 
+    it('should group token addresses with different cases together', () => {
+      // The implementation normalizes tokenAddress to lowercase for grouping
+      // This test verifies that the same token address with different cases (checksummed vs lowercase)
+      // are treated as the same token and grouped correctly
+
+      const noThreatResponse = createNoThreatResponse()
+
+      const tokenAddress = faker.finance.ethereumAddress() as `0x${string}`
+      const checksummedTokenAddress = checksumAddress(tokenAddress) as `0x${string}`
+      const lowercaseTokenAddress = tokenAddress.toLowerCase() as `0x${string}`
+      const tokenSymbol = 'USDC'
+
+      // Create balance changes with the same token address in different cases
+      const balanceChanges = [
+        createBalanceChangeHN({ changeType: 'receive', tokenAddress: checksummedTokenAddress, tokenSymbol }),
+        createBalanceChangeHN({ changeType: 'receive', tokenAddress: lowercaseTokenAddress, tokenSymbol }),
+        createBalanceChangeHN({ changeType: 'send', tokenAddress: checksummedTokenAddress, tokenSymbol }),
+      ]
+
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...noThreatResponse,
+        assessmentData: {
+          ...noThreatResponse.assessmentData,
+          balanceChanges: { [safeAddress]: balanceChanges },
+        },
+      }
+
+      const result = mapHypernativeResponse(response, safeAddress)
+
+      expect(result.BALANCE_CHANGE).toBeDefined()
+      // Should be grouped into a single token entry despite different cases
+      expect(result.BALANCE_CHANGE).toHaveLength(1)
+      expect(result.BALANCE_CHANGE?.[0].asset.type).toBe('ERC20')
+      expect(result.BALANCE_CHANGE?.[0].asset.symbol).toBe(tokenSymbol)
+      // All changes should be grouped together
+      expect(result.BALANCE_CHANGE?.[0].in).toHaveLength(2)
+      expect(result.BALANCE_CHANGE?.[0].out).toHaveLength(1)
+      // Token address should be normalized to lowercase
+      if (result.BALANCE_CHANGE?.[0].asset.type === 'ERC20') {
+        expect(result.BALANCE_CHANGE[0].asset.address).toBe(lowercaseTokenAddress)
+      }
+    })
+
     it('should include BALANCE_CHANGE alongside threat analysis results', () => {
       const noThreatResponse = createNoThreatResponse()
 
