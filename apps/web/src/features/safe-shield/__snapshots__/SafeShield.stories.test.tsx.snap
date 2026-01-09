@@ -1685,10 +1685,10 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                         </p>
                                       </div>
                                       <div
-                                        class="MuiBox-root css-i6fhqp"
+                                        class="MuiBox-root css-1515v1v"
                                       >
                                         <p
-                                          class="MuiTypography-root MuiTypography-body2 css-riftlw-MuiTypography-root"
+                                          class="MuiTypography-root MuiTypography-body2 css-1lbkc8c-MuiTypography-root"
                                         >
                                           Bulleted list from validation.features, grouped by Malicious first, then Warnings.
                                         </p>
@@ -1716,10 +1716,10 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                         </p>
                                       </div>
                                       <div
-                                        class="MuiBox-root css-i6fhqp"
+                                        class="MuiBox-root css-1515v1v"
                                       >
                                         <p
-                                          class="MuiTypography-root MuiTypography-body2 css-riftlw-MuiTypography-root"
+                                          class="MuiTypography-root MuiTypography-body2 css-1lbkc8c-MuiTypography-root"
                                         >
                                           Issue 2
                                         </p>
@@ -1747,10 +1747,10 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                         </p>
                                       </div>
                                       <div
-                                        class="MuiBox-root css-i6fhqp"
+                                        class="MuiBox-root css-1515v1v"
                                       >
                                         <p
-                                          class="MuiTypography-root MuiTypography-body2 css-riftlw-MuiTypography-root"
+                                          class="MuiTypography-root MuiTypography-body2 css-1lbkc8c-MuiTypography-root"
                                         >
                                           Issue 4
                                         </p>
@@ -1763,7 +1763,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                         class="MuiBox-root css-jnhdwv"
                                       >
                                         <p
-                                          class="MuiTypography-root MuiTypography-body2 css-riftlw-MuiTypography-root"
+                                          class="MuiTypography-root MuiTypography-body2 css-1lbkc8c-MuiTypography-root"
                                         >
                                           Issue without address
                                         </p>
@@ -1776,7 +1776,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                         class="MuiBox-root css-jnhdwv"
                                       >
                                         <p
-                                          class="MuiTypography-root MuiTypography-body2 css-riftlw-MuiTypography-root"
+                                          class="MuiTypography-root MuiTypography-body2 css-1lbkc8c-MuiTypography-root"
                                         >
                                           Issue 6
                                         </p>
@@ -1789,7 +1789,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                         class="MuiBox-root css-jnhdwv"
                                       >
                                         <p
-                                          class="MuiTypography-root MuiTypography-body2 css-riftlw-MuiTypography-root"
+                                          class="MuiTypography-root MuiTypography-body2 css-1lbkc8c-MuiTypography-root"
                                         >
                                           Issue 7
                                         </p>
