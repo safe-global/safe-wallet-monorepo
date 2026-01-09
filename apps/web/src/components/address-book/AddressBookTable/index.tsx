@@ -32,7 +32,7 @@ import madProps from '@/utils/mad-props'
 const headCells = [
   { id: 'name', label: 'Name' },
   { id: 'address', label: 'Address' },
-  { id: 'actions', label: 'Actions', align: 'right' },
+  { id: 'actions', label: 'Actions', align: 'right', disableSort: true },
 ]
 
 export enum ModalType {

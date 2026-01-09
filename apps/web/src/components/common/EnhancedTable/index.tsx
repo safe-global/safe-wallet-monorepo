@@ -94,7 +94,9 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
             className={classNames({ sticky: headCell.sticky })}
           >
             {headCell.disableSort ? (
-              headCell.label
+              <Box component="span" sx={{ fontSize: '14px' }}>
+                {headCell.label}
+              </Box>
             ) : (
               <>
                 <TableSortLabel
@@ -102,8 +104,9 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
                   direction={orderBy === headCell.id ? order : 'asc'}
                   onClick={createSortHandler(headCell.id)}
                   sx={{
-                    mr: headCell.id === 'actions' ? 0 : [0, '-26px'],
+                    mr: headCell.id === 'actions' || headCell.disableSort ? 0 : [0, '-26px'],
                     textWrap: 'nowrap',
+                    fontSize: '14px',
                   }}
                 >
                   {headCell.label}
