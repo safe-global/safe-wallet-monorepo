@@ -9,6 +9,9 @@
   text-align: left;
   gap: var(--space-1);
   padding: 0 var(--space-1);
+}
+
+.connectedButton {
   background-color: var(--color-background-main);
   border-radius: 6px;
   height: 44px;

@@ -32,7 +32,7 @@ export const AccountCenter = ({ wallet }: { wallet: ConnectedWallet }) => {
         sx={{ alignSelf: 'stretch' }}
         data-testid="open-account-center"
       >
-        <Box className={css.buttonContainer}>
+        <Box className={`${css.buttonContainer} ${css.connectedButton}`}>
           <WalletOverview wallet={wallet} balance={balance} showBalance />
 
           <Box display="flex" alignItems="center" justifyContent="flex-end" ml="auto">
