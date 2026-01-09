@@ -112,7 +112,6 @@ function mapFindings(findings: HypernativeFinding): ThreatAnalysisResult[] {
     const title = HypernativeRiskTitleMap[type] ?? risk.title
     const details = HypernativeRiskDescriptionMap[type] ?? risk.details
     const description = `${details} The full threat report is available in your Hypernative account.`
-    // https://app.hypernative.xyz/risk-insights/explore?txHash=0xb6315d3e5357fc79f2d6e39978d8b350cfd1a98567f106964e01290ebcfa9c06&chain=all
 
     return { severity, type, title, description }
   })
