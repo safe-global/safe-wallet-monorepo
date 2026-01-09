@@ -4,14 +4,11 @@ import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded'
 import SafeShieldLogo from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { HypernativeTooltip } from '@/features/hypernative/components/HypernativeTooltip'
-import type { Severity } from '@safe-global/utils/features/safe-shield/types'
 import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
 
 export const HypernativeInfo = ({
-  overallStatus,
   hypernativeAuth,
 }: {
-  overallStatus?: { severity: Severity; title: string }
   hypernativeAuth?: HypernativeAuthStatus
 }): ReactElement | null => {
   // If hypernativeAuth is not provided, don't show the HypernativeInfo
@@ -30,9 +27,14 @@ export const HypernativeInfo = ({
         <Stack direction="row" alignItems="center" gap={1}>
           <SvgIcon
             component={SafeShieldLogo}
-            className={overallStatus?.severity || 'OK'}
             inheritViewBox
-            sx={{ width: 16, height: 16 }}
+            sx={{
+              width: 16,
+              height: 16,
+              '& .shield-img': {
+                fill: 'var(--color-border-light)',
+              },
+            }}
           />
           <Typography variant="body2" color="primary.light">
             Hypernative Guardian is active
