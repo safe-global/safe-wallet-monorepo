@@ -51,6 +51,7 @@ export const HypernativeCustomChecks = ({
       delay={delay}
       highlightedSeverity={highlightedSeverity}
       analyticsEvent={SAFE_SHIELD_EVENTS.CUSTOM_CHECKS_ANALYZED}
+      isByHypernative
     />
   )
 }

@@ -44,6 +44,17 @@ export class FullAnalysisBuilder {
     return this
   }
 
+  customCheck(threatAnalysis: AsyncResult<ThreatAnalysisResults>): this {
+    const [threatResult = {}, error, loading = false] = threatAnalysis
+    const [currentThreatResult = {}, currentError, currentLoading = false] = this.response.threat || []
+    this.response.threat = [
+      merge(currentThreatResult, { CUSTOM_CHECKS: threatResult.CUSTOM_CHECKS }),
+      currentError || error,
+      currentLoading || loading,
+    ]
+    return this
+  }
+
   build() {
     return { ...this.response }
   }
@@ -103,5 +114,13 @@ export class FullAnalysisBuilder {
 
   static failedContract(): FullAnalysisBuilder {
     return new FullAnalysisBuilder().contract(ContractAnalysisBuilder.failedContract().build())
+  }
+
+  static customChecksPassed(): FullAnalysisBuilder {
+    return new FullAnalysisBuilder().threat(ThreatAnalysisBuilder.customChecksPassed())
+  }
+
+  static customCheckFailed(): FullAnalysisBuilder {
+    return new FullAnalysisBuilder().threat(ThreatAnalysisBuilder.customCheckFailed())
   }
 }

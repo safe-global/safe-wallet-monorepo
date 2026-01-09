@@ -8,6 +8,7 @@ import {
 } from '@safe-global/utils/features/safe-shield/builders'
 import { faker } from '@faker-js/faker'
 import { StoreDecorator } from '@/stories/storeDecorator'
+import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
 
 const meta: Meta<typeof SafeShieldDisplay> = {
   component: SafeShieldDisplay,
@@ -203,6 +204,7 @@ export const HypernativeGuardActive: Story = {
     ...FullAnalysisBuilder.empty()
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
       .threat(FullAnalysisBuilder.noThreat().build().threat)
+      .threat(FullAnalysisBuilder.customChecksPassed().build().threat)
       .build(),
     hypernativeAuth: {
       isAuthenticated: true,
@@ -252,7 +254,9 @@ export const HypernativeMaliciousThreat: Story = {
   args: {
     ...FullAnalysisBuilder.empty()
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
-      .threat(FullAnalysisBuilder.maliciousThreat().build().threat)
+      .threat(
+        FullAnalysisBuilder.maliciousThreat().customCheck(ThreatAnalysisBuilder.customChecksPassed()).build().threat,
+      )
       .build(),
     hypernativeAuth: {
       isAuthenticated: true,
@@ -266,6 +270,30 @@ export const HypernativeMaliciousThreat: Story = {
       description: {
         story:
           'SafeShieldWidget when Hypernative guard is enabled, user is authenticated, and there is a critical contract check result',
+      },
+    },
+  },
+}
+
+// Hypernative guard - logged in with custom check failed result
+export const HypernativeCustomCheckFailed: Story = {
+  args: {
+    ...FullAnalysisBuilder.empty()
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(FullAnalysisBuilder.customCheckFailed().build().threat)
+      .build(),
+    hypernativeAuth: {
+      isAuthenticated: true,
+      isTokenExpired: false,
+      initiateLogin: () => {},
+      logout: () => {},
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'SafeShieldWidget when Hypernative guard is enabled, user is authenticated, and there is a custom check failed result',
       },
     },
   },
