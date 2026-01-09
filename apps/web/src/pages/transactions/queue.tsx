@@ -4,14 +4,18 @@ import useTxQueue from '@/hooks/useTxQueue'
 import PaginatedTxns from '@/components/common/PaginatedTxns'
 import TxHeader from '@/components/transactions/TxHeader'
 import BatchExecuteButton from '@/components/transactions/BatchExecuteButton'
-import { Box } from '@mui/material'
+import { Box, Skeleton } from '@mui/material'
 import { BatchExecuteHoverProvider } from '@/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
 import { usePendingTxsQueue, useShowUnsignedQueue } from '@/hooks/usePendingTxs'
 import RecoveryList from '@/features/recovery/components/RecoveryList'
 import { BRAND_NAME } from '@/config/constants'
+import { useBannerVisibility } from '@/features/hypernative/hooks'
+import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
+import { HnBannerForQueue } from '@/features/hypernative/components/HnBanner'
 
 const Queue: NextPage = () => {
   const showPending = useShowUnsignedQueue()
+  const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
 
   return (
     <>
@@ -26,6 +30,17 @@ const Queue: NextPage = () => {
 
         <main>
           <Box mb={4}>
+            {hnLoading && (
+              <Box mb={3}>
+                <Skeleton variant="rounded" height={30} />
+              </Box>
+            )}
+            {showHnBanner && !hnLoading && (
+              <Box mb={3}>
+                <HnBannerForQueue />
+              </Box>
+            )}
+
             <RecoveryList />
 
             {/* Pending unsigned transactions */}

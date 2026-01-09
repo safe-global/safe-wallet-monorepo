@@ -67,7 +67,7 @@ exports[`./HnSignupIntro.stories Default 1`] = `
               <p
                 class="MuiTypography-root MuiTypography-body2 featureDescription css-17vdyq3-MuiTypography-root"
               >
-                Stops malicious or policy-violating transactions before they execute.
+                Automatically prevents malicious or non-compliant transactions before they're executed
               </p>
             </div>
           </div>
@@ -94,7 +94,7 @@ exports[`./HnSignupIntro.stories Default 1`] = `
               <p
                 class="MuiTypography-root MuiTypography-body2 featureDescription css-17vdyq3-MuiTypography-root"
               >
-                Define your own policies based on a wide range of parameters to prevent unwanted transactions.
+                Create tailored policies using granular parameters to stop unwanted transactions.
               </p>
             </div>
           </div>
@@ -121,7 +121,7 @@ exports[`./HnSignupIntro.stories Default 1`] = `
               <p
                 class="MuiTypography-root MuiTypography-body2 featureDescription css-17vdyq3-MuiTypography-root"
               >
-                Operates directly within your Safe transaction flow - no extra steps required.
+                Works natively within your Safe workflow. No extra steps required.
               </p>
             </div>
           </div>
@@ -137,7 +137,7 @@ exports[`./HnSignupIntro.stories Default 1`] = `
               tabindex="0"
               type="button"
             >
-              Get started
+              See how it works
             </button>
           </span>
           <button

@@ -7,7 +7,7 @@ import {
   ThreatStatus,
 } from '@safe-global/utils/features/safe-shield/types'
 import { isAddressChange } from '@safe-global/utils/features/safe-shield/utils'
-import { SEVERITY_COLORS, ISSUE_BACKGROUND_COLORS } from '../../constants'
+import { SEVERITY_COLORS } from '../../constants'
 import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
 import { AddressChanges } from '../AddressChanges'
 import { ShowAllAddress } from '../ShowAllAddress/ShowAllAddress'
@@ -31,7 +31,7 @@ export const AnalysisGroupCardItem = ({
 }: AnalysisGroupCardItemProps) => {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false)
   const borderColor = severity ? SEVERITY_COLORS[severity].main : 'var(--color-border-main)'
-  const issueBackgroundColor = severity ? (ISSUE_BACKGROUND_COLORS[severity] ?? '') : ''
+  const issueBackgroundColor = severity ? SEVERITY_COLORS[severity].background : ''
   const displayDescription = description ?? result.description
   const hasIssues = 'issues' in result && !!(result as MaliciousOrModerateThreatAnalysisResult).issues
   const isThreatDetected = result.type === ThreatStatus.MALICIOUS || result.type === ThreatStatus.MODERATE

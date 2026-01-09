@@ -18,7 +18,7 @@ import {
   Typography,
 } from '@mui/material'
 import partition from 'lodash/partition'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import ExpandMoreIcon from '@mui/icons-material/KeyboardArrowDownRounded'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
 import type { NextRouter } from 'next/router'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
@@ -354,11 +354,11 @@ const UndeployedNetworks = ({
 const NetworkSelector = ({
   onChainSelect,
   offerSafeCreation = false,
-  showBorder = true,
+  compactButton = false,
 }: {
   onChainSelect?: () => void
   offerSafeCreation?: boolean
-  showBorder?: boolean
+  compactButton?: boolean
 }): ReactElement => {
   const [open, setOpen] = useState<boolean>(false)
   const isDarkMode = useDarkMode()
@@ -369,7 +369,6 @@ const NetworkSelector = ({
   const safeAddress = useSafeAddress()
   const currentChain = useCurrentChain()
   const { currentSafeApp } = useSafeApps()
-  const borderColor = showBorder ? currentChain?.theme?.backgroundColor || 'transparent' : 'transparent'
 
   const isSafeOpened = safeAddress !== ''
 
@@ -421,12 +420,17 @@ const NetworkSelector = ({
             onClick={onChainSelect}
             className={css.item}
           >
-            <ChainIndicator responsive={isSelected} chainId={chain.chainId} inline />
+            <ChainIndicator
+              responsive={isSelected}
+              chainId={chain.chainId}
+              inline
+              onlyLogo={compactButton && isSelected}
+            />
           </Link>
         </MenuItem>
       )
     },
-    [configs, onChainSelect, router, safeAddress, currentSafeApp],
+    [configs, onChainSelect, router, safeAddress, currentSafeApp, compactButton],
   )
 
   const handleClose = () => {
@@ -467,7 +471,6 @@ const NetworkSelector = ({
       }}
       sx={{
         backgroundColor: 'transparent',
-        borderBottom: `3px solid ${borderColor}`,
         '& .MuiInput-root::before': {
           borderBottom: 'none',
         },
@@ -477,6 +480,11 @@ const NetworkSelector = ({
         '& .MuiSelect-select': {
           py: 0,
         },
+        ...(compactButton && {
+          '& .MuiSelect-icon': {
+            fontSize: 16,
+          },
+        }),
       }}
     >
       {prodNets.map((chain) => renderMenuItem(chain.chainId, false))}

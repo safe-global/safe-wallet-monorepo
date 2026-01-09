@@ -16,6 +16,13 @@
   justify-content: center;
 }
 
+.rightSideGroup {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+
 .element :global(.MuiBadge-standard) {
   font-size: 12px;
   width: 18px;
@@ -61,6 +68,7 @@
 
 .connectWallet {
   flex-shrink: 0;
+  margin-left: 6px;
 }
 
 @media (max-width: 899.95px) {
