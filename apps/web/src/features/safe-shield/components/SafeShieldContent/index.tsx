@@ -68,7 +68,7 @@ export const SafeShieldContent = ({
           position: 'relative',
         }}
       >
-        <HypernativeInfo overallStatus={overallStatus} hypernativeAuth={hypernativeAuth} />
+        <HypernativeInfo hypernativeAuth={hypernativeAuth} />
 
         {isLoadingVisible && <SafeShieldAnalysisLoading analysesEmpty={analysesEmpty} loading={isLoadingVisible} />}
 
