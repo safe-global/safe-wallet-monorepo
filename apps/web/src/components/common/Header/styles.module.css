@@ -7,6 +7,7 @@
   position: relative;
   border-radius: 0 !important;
   background-color: var(--color-background-paper);
+  padding-right: var(--space-2);
 }
 
 .element {
