@@ -59,7 +59,7 @@ const Overview = (): ReactElement => {
           alignItems={{ xs: 'flex-start', md: 'flex-end' }}
           justifyContent="space-between"
         >
-          <TotalAssetValue fiatTotal={balances.fiatTotal} size="lg" />
+          <TotalAssetValue fiatTotal={balances.fiatTotal} size="lg" title="Total balance" />
 
           {safe.deployed && (
             <Stack
