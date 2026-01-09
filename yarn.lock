@@ -2934,29 +2934,29 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cowprotocol/iframe-transport@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@cowprotocol/iframe-transport@npm:1.1.0"
-  checksum: 10/20426255f0110b39801a051475a1352625a9c31f68f96947dfe162524213f10bc36e58d4ed58560a59ea893dcd47aebc5b4219ce97919dac7dabad07b96efbe3
+"@cowprotocol/iframe-transport@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "@cowprotocol/iframe-transport@npm:1.1.1"
+  checksum: 10/869695ce3ca8bc8ab8eb8dc954f62e198284afbcd75d9f9923f75893d396302ace0efe38c24f6abdfaf9d57a0fb09dbf17910ff563e12b07c3732181f5c05140
   languageName: node
   linkType: hard
 
-"@cowprotocol/widget-lib@npm:^0.18.0":
-  version: 0.18.0
-  resolution: "@cowprotocol/widget-lib@npm:0.18.0"
+"@cowprotocol/widget-lib@npm:^0.22.0":
+  version: 0.22.1
+  resolution: "@cowprotocol/widget-lib@npm:0.22.1"
   dependencies:
-    "@cowprotocol/events": "npm:^1.5.0"
-    "@cowprotocol/iframe-transport": "npm:^1.1.0"
-  checksum: 10/fdc9dbeccfcdc3c65fc566289e2e59d42aa18f3ec501fbb6ccbbfdc5d4b24d3fff8011deaa7e323aa4a48fae886bd3b1d58d932129cc5cd237c9daa451d0c143
+    "@cowprotocol/events": "npm:^2.1.0"
+    "@cowprotocol/iframe-transport": "npm:^1.1.1"
+  checksum: 10/88ab09961edfe77e3796a33304ebc8c33815ed954bd152eb4e21e5339f6d5fa4423f6eb8df857aff62277ec5a450be44cf0e06d392cfbf042ec7ec4423ae2556
   languageName: node
   linkType: hard
 
-"@cowprotocol/widget-react@npm:^0.13.0":
-  version: 0.13.0
-  resolution: "@cowprotocol/widget-react@npm:0.13.0"
+"@cowprotocol/widget-react@npm:^0.14.3":
+  version: 0.14.3
+  resolution: "@cowprotocol/widget-react@npm:0.14.3"
   dependencies:
-    "@cowprotocol/widget-lib": "npm:^0.18.0"
-  checksum: 10/f2127f1dcdcbd3de102db670475b1256b5fd4fb9e4886cc1bf6ba1b4037df324ab76d5ead2a3302672971dda3b71ca284116e883e10a6af78c323b81eae3cc1f
+    "@cowprotocol/widget-lib": "npm:^0.22.0"
+  checksum: 10/3a1c191f2cbdbb16b628e31fd4241e14eb70d66fd04b7eb9c5bdc921aa4d0ad5c04d7cace18990bcc82e1d2721c396f6ebb4b71bf4a844837f915bc79fbeb2b6
   languageName: node
   linkType: hard
 
@@ -10555,7 +10555,7 @@ __metadata:
   dependencies:
     "@chromatic-com/storybook": "npm:^4.1.2"
     "@cowprotocol/app-data": "npm:^3.1.0"
-    "@cowprotocol/widget-react": "npm:^0.13.0"
+    "@cowprotocol/widget-react": "npm:^0.14.3"
     "@datadog/browser-logs": "npm:^6.6.3"
     "@ducanh2912/next-pwa": "npm:^10.2.9"
     "@emotion/cache": "npm:^11.13.5"

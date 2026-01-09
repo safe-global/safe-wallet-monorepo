@@ -107,6 +107,7 @@ const SwapWidget = ({ sell }: Params) => {
     standaloneMode: false,
     disableToastMessages: true,
     disablePostedOrderConfirmationModal: true,
+    disableCrossChainSwap: true,
     hideLogo: true,
     hideNetworkSelector: true,
     sounds: {
