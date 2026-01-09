@@ -738,7 +738,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
                   >
                     <mock-icon
                       aria-hidden=""
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium WARN css-2epzs9-MuiSvgIcon-root"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-11r5c7y-MuiSvgIcon-root"
                       focusable="false"
                     />
                     <p
@@ -1113,7 +1113,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
                   >
                     <mock-icon
                       aria-hidden=""
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium OK css-2epzs9-MuiSvgIcon-root"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-11r5c7y-MuiSvgIcon-root"
                       focusable="false"
                     />
                     <p
@@ -1488,7 +1488,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                   >
                     <mock-icon
                       aria-hidden=""
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium CRITICAL css-2epzs9-MuiSvgIcon-root"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-11r5c7y-MuiSvgIcon-root"
                       focusable="false"
                     />
                     <p
@@ -1999,7 +1999,7 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
                   >
                     <mock-icon
                       aria-hidden=""
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium INFO css-2epzs9-MuiSvgIcon-root"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-11r5c7y-MuiSvgIcon-root"
                       focusable="false"
                     />
                     <p
