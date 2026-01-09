@@ -89,7 +89,7 @@ export type HypernativeBalanceChanges = {
 export interface HypernativeBalanceChange {
   changeType: 'receive' | 'send'
   tokenSymbol: string
-  tokenAddress: `0x${string}`
+  tokenAddress?: `0x${string}`
   usdValue: string
   amount: string
   chain: string
