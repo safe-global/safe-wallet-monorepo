@@ -160,9 +160,8 @@ describe('mapHypernativeResponse', () => {
       expect(result[StatusGroup.THREAT]?.[0]).toEqual({
         severity: Severity.CRITICAL,
         type: ThreatStatus.HYPERNATIVE_GUARD,
-        title: 'Transfer to malicious',
-        description:
-          'Transfer to known phishing address. The full threat report is available in your Hypernative account.',
+        title: 'Malicious threat detected',
+        description: 'Transfer to malicious. The full threat report is available in your Hypernative account.',
       })
     })
 
@@ -199,8 +198,8 @@ describe('mapHypernativeResponse', () => {
       expect(result[StatusGroup.THREAT]?.[0]).toEqual({
         severity: Severity.WARN,
         type: ThreatStatus.HYPERNATIVE_GUARD,
-        title: 'Suspicious swap pattern',
-        description: 'Swap volume unusually large. The full threat report is available in your Hypernative account.',
+        title: 'Moderate threat detected',
+        description: 'Suspicious swap pattern. The full threat report is available in your Hypernative account.',
       })
     })
 
@@ -236,8 +235,8 @@ describe('mapHypernativeResponse', () => {
       expect(result[StatusGroup.THREAT]).toContainEqual({
         severity: Severity.OK,
         type: ThreatStatus.HYPERNATIVE_GUARD,
-        title: 'All checks passed',
-        description: 'Transaction appears safe. The full threat report is available in your Hypernative account.',
+        title: 'No threat detected',
+        description: 'All checks passed. The full threat report is available in your Hypernative account.',
       })
     })
   })
@@ -282,17 +281,15 @@ describe('mapHypernativeResponse', () => {
       expect(result[StatusGroup.CUSTOM_CHECKS]).toContainEqual({
         severity: Severity.WARN,
         type: ThreatStatus.HYPERNATIVE_GUARD,
-        title: 'Pool Toxicity',
-        description:
-          'Pool contains 4% of illicit funds. The full threat report is available in your Hypernative account.',
+        title: 'Moderate threat detected',
+        description: 'Pool Toxicity. The full threat report is available in your Hypernative account.',
       })
 
       expect(result[StatusGroup.CUSTOM_CHECKS]).toContainEqual({
         severity: Severity.WARN,
         type: ThreatStatus.HYPERNATIVE_GUARD,
-        title: 'Unusually high gas price',
-        description:
-          'Gas price higher than max allowed. The full threat report is available in your Hypernative account.',
+        title: 'Moderate threat detected',
+        description: 'Unusually high gas price. The full threat report is available in your Hypernative account.',
       })
     })
   })
@@ -339,12 +336,12 @@ describe('mapHypernativeResponse', () => {
       // THREAT_ANALYSIS has 1 deny risk
       expect(result[StatusGroup.THREAT]).toHaveLength(1)
       expect(result[StatusGroup.THREAT]?.[0].severity).toBe(Severity.CRITICAL)
-      expect(result[StatusGroup.THREAT]?.[0].title).toBe('Transfer to malicious')
+      expect(result[StatusGroup.THREAT]?.[0].title).toBe('Malicious threat detected')
 
       // CUSTOM_CHECKS has 1 warn risk
       expect(result[StatusGroup.CUSTOM_CHECKS]).toHaveLength(1)
       expect(result[StatusGroup.CUSTOM_CHECKS]?.[0].severity).toBe(Severity.WARN)
-      expect(result[StatusGroup.CUSTOM_CHECKS]?.[0].title).toBe('Pool Toxicity')
+      expect(result[StatusGroup.CUSTOM_CHECKS]?.[0].title).toBe('Moderate threat detected')
     })
   })
 
@@ -394,11 +391,11 @@ describe('mapHypernativeResponse', () => {
       // THREAT_ANALYSIS should be sorted: CRITICAL first, then WARN, then OK
       expect(result[StatusGroup.THREAT]).toHaveLength(3)
       expect(result[StatusGroup.THREAT]?.[0].severity).toBe(Severity.CRITICAL)
-      expect(result[StatusGroup.THREAT]?.[0].title).toBe('Critical risk')
+      expect(result[StatusGroup.THREAT]?.[0].title).toBe('Malicious threat detected')
       expect(result[StatusGroup.THREAT]?.[1].severity).toBe(Severity.WARN)
-      expect(result[StatusGroup.THREAT]?.[1].title).toBe('Warning risk')
+      expect(result[StatusGroup.THREAT]?.[1].title).toBe('Moderate threat detected')
       expect(result[StatusGroup.THREAT]?.[2].severity).toBe(Severity.OK)
-      expect(result[StatusGroup.THREAT]?.[2].title).toBe('OK risk')
+      expect(result[StatusGroup.THREAT]?.[2].title).toBe('No threat detected')
     })
 
     it('should maintain stable order for risks with the same severity', () => {
@@ -438,9 +435,9 @@ describe('mapHypernativeResponse', () => {
 
       expect(result[StatusGroup.THREAT]).toHaveLength(2)
       expect(result[StatusGroup.THREAT]?.[0].severity).toBe(Severity.WARN)
-      expect(result[StatusGroup.THREAT]?.[0].title).toBe('First warning')
+      expect(result[StatusGroup.THREAT]?.[0].title).toBe('Moderate threat detected')
       expect(result[StatusGroup.THREAT]?.[1].severity).toBe(Severity.WARN)
-      expect(result[StatusGroup.THREAT]?.[1].title).toBe('Second warning')
+      expect(result[StatusGroup.THREAT]?.[1].title).toBe('Moderate threat detected')
     })
   })
 
@@ -553,7 +550,7 @@ describe('mapHypernativeResponse', () => {
       const result = mapHypernativeResponse(response, mockSafeAddress)
 
       expect(result[StatusGroup.THREAT]?.[0].type).toBe(ThreatStatus.HYPERNATIVE_GUARD)
-      expect(result[StatusGroup.THREAT]?.[0].title).toBe('Mastercopy change')
+      expect(result[StatusGroup.THREAT]?.[0].title).toBe('Moderate threat detected')
     })
 
     it('should fall back to Severity.INFO for unknown severity values', () => {
@@ -670,6 +667,144 @@ describe('mapHypernativeResponse', () => {
       })
     })
 
+    it('should handle risk with empty title', () => {
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...createNoThreatResponse(),
+        assessmentData: {
+          ...createNoThreatResponse().assessmentData,
+          findings: {
+            THREAT_ANALYSIS: {
+              status: 'Risks found',
+              severity: 'warn',
+              risks: [
+                {
+                  title: '',
+                  details: 'Risk details here',
+                  severity: 'warn',
+                  safeCheckId: faker.string.alphanumeric(10),
+                },
+              ],
+            },
+            CUSTOM_CHECKS: {
+              status: 'Passed',
+              severity: 'accept',
+              risks: [],
+            },
+          },
+        },
+      }
+
+      const result = mapHypernativeResponse(response, mockSafeAddress)
+
+      expect(result[StatusGroup.THREAT]?.[0].title).toBe('Moderate threat detected')
+      expect(result[StatusGroup.THREAT]?.[0].description).toBe(
+        'The full threat report is available in your Hypernative account.',
+      )
+    })
+
+    it('should handle risk with empty details', () => {
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...createNoThreatResponse(),
+        assessmentData: {
+          ...createNoThreatResponse().assessmentData,
+          findings: {
+            THREAT_ANALYSIS: {
+              status: 'Risks found',
+              severity: 'warn',
+              risks: [
+                {
+                  title: 'Risk title',
+                  details: '',
+                  severity: 'warn',
+                  safeCheckId: faker.string.alphanumeric(10),
+                },
+              ],
+            },
+            CUSTOM_CHECKS: {
+              status: 'Passed',
+              severity: 'accept',
+              risks: [],
+            },
+          },
+        },
+      }
+
+      const result = mapHypernativeResponse(response, mockSafeAddress)
+
+      expect(result[StatusGroup.THREAT]?.[0].title).toBe('Moderate threat detected')
+      expect(result[StatusGroup.THREAT]?.[0].description).toBe(
+        'Risk title. The full threat report is available in your Hypernative account.',
+      )
+    })
+
+    it('should handle risk with empty title and empty details', () => {
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...createNoThreatResponse(),
+        assessmentData: {
+          ...createNoThreatResponse().assessmentData,
+          findings: {
+            THREAT_ANALYSIS: {
+              status: 'Risks found',
+              severity: 'warn',
+              risks: [
+                {
+                  title: '',
+                  details: '',
+                  severity: 'warn',
+                  safeCheckId: faker.string.alphanumeric(10),
+                },
+              ],
+            },
+            CUSTOM_CHECKS: {
+              status: 'Passed',
+              severity: 'accept',
+              risks: [],
+            },
+          },
+        },
+      }
+
+      const result = mapHypernativeResponse(response, mockSafeAddress)
+
+      expect(result[StatusGroup.THREAT]?.[0].title).toBe('Moderate threat detected')
+      expect(result[StatusGroup.THREAT]?.[0].description).toBe(
+        'The full threat report is available in your Hypernative account.',
+      )
+    })
+
+    it('should handle risk with empty safeCheckId', () => {
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...createNoThreatResponse(),
+        assessmentData: {
+          ...createNoThreatResponse().assessmentData,
+          findings: {
+            THREAT_ANALYSIS: {
+              status: 'Risks found',
+              severity: 'warn',
+              risks: [
+                {
+                  title: 'Risk with no safeCheckId',
+                  details: 'Details here',
+                  severity: 'warn',
+                  safeCheckId: '',
+                },
+              ],
+            },
+            CUSTOM_CHECKS: {
+              status: 'Passed',
+              severity: 'accept',
+              risks: [],
+            },
+          },
+        },
+      }
+
+      const result = mapHypernativeResponse(response, mockSafeAddress)
+
+      expect(result[StatusGroup.THREAT]?.[0].type).toBe(ThreatStatus.HYPERNATIVE_GUARD)
+      expect(result[StatusGroup.THREAT]?.[0].title).toBe('Moderate threat detected')
+    })
+
     it('should handle custom checks with multiple risks of different severities', () => {
       const response: HypernativeAssessmentResponseDto['data'] = {
         ...createNoThreatResponse(),
@@ -713,11 +848,11 @@ describe('mapHypernativeResponse', () => {
 
       expect(result[StatusGroup.CUSTOM_CHECKS]).toHaveLength(3)
       expect(result[StatusGroup.CUSTOM_CHECKS]?.[0].severity).toBe(Severity.CRITICAL)
-      expect(result[StatusGroup.CUSTOM_CHECKS]?.[0].title).toBe('Critical custom check')
+      expect(result[StatusGroup.CUSTOM_CHECKS]?.[0].title).toBe('Malicious threat detected')
       expect(result[StatusGroup.CUSTOM_CHECKS]?.[1].severity).toBe(Severity.WARN)
-      expect(result[StatusGroup.CUSTOM_CHECKS]?.[1].title).toBe('Warning custom check')
+      expect(result[StatusGroup.CUSTOM_CHECKS]?.[1].title).toBe('Moderate threat detected')
       expect(result[StatusGroup.CUSTOM_CHECKS]?.[2].severity).toBe(Severity.OK)
-      expect(result[StatusGroup.CUSTOM_CHECKS]?.[2].title).toBe('OK custom check')
+      expect(result[StatusGroup.CUSTOM_CHECKS]?.[2].title).toBe('No threat detected')
     })
   })
 
@@ -1025,6 +1160,175 @@ describe('mapHypernativeResponse', () => {
       const result = mapHypernativeResponse(response, safeAddress)
 
       expect(result.BALANCE_CHANGE).toBeUndefined()
+    })
+
+    it('should handle balance change with empty tokenSymbol', () => {
+      const noThreatResponse = createNoThreatResponse()
+      const tokenAddress = faker.finance.ethereumAddress() as `0x${string}`
+
+      const balanceChanges = [createBalanceChangeHN({ changeType: 'receive', tokenAddress, tokenSymbol: '' })]
+
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...noThreatResponse,
+        assessmentData: {
+          ...noThreatResponse.assessmentData,
+          balanceChanges: { [safeAddress]: balanceChanges },
+        },
+      }
+
+      const result = mapHypernativeResponse(response, safeAddress)
+
+      expect(result.BALANCE_CHANGE).toBeDefined()
+      expect(result.BALANCE_CHANGE).toHaveLength(1)
+      expect(result.BALANCE_CHANGE?.[0].asset.symbol).toBe('')
+    })
+
+    it('should handle multiple balance changes with mixed native and ERC20 tokens', () => {
+      const noThreatResponse = createNoThreatResponse()
+      const usdcAddress = faker.finance.ethereumAddress() as `0x${string}`
+
+      const balanceChanges = [
+        createBalanceChangeHN({ changeType: 'receive', tokenAddress: undefined, tokenSymbol: 'ETH' }),
+        createBalanceChangeHN({ changeType: 'send', tokenAddress: undefined, tokenSymbol: 'ETH' }),
+        createBalanceChangeHN({ changeType: 'receive', tokenAddress: usdcAddress, tokenSymbol: 'USDC' }),
+        createBalanceChangeHN({ changeType: 'send', tokenAddress: usdcAddress, tokenSymbol: 'USDC' }),
+      ]
+
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...noThreatResponse,
+        assessmentData: {
+          ...noThreatResponse.assessmentData,
+          balanceChanges: { [safeAddress]: balanceChanges },
+        },
+      }
+
+      const result = mapHypernativeResponse(response, safeAddress)
+
+      expect(result.BALANCE_CHANGE).toBeDefined()
+      expect(result.BALANCE_CHANGE).toHaveLength(2) // One NATIVE, one ERC20
+
+      const nativeChange = result.BALANCE_CHANGE?.find((change) => change.asset.type === 'NATIVE')
+      const erc20Change = result.BALANCE_CHANGE?.find((change) => change.asset.type === 'ERC20')
+
+      expect(nativeChange).toBeDefined()
+      expect(nativeChange?.asset.symbol).toBe('ETH')
+      expect(nativeChange?.in).toHaveLength(1)
+      expect(nativeChange?.out).toHaveLength(1)
+
+      expect(erc20Change).toBeDefined()
+      expect(erc20Change?.asset.symbol).toBe('USDC')
+      if (erc20Change?.asset.type === 'ERC20') {
+        expect(erc20Change.asset.address.toLowerCase()).toBe(usdcAddress.toLowerCase())
+      }
+    })
+
+    it('should handle description formatting when mappedDetails is empty string', () => {
+      // This tests the edge case where mappedDetails might be empty
+      // In practice, this shouldn't happen with current mappings, but tests the logic
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...createNoThreatResponse(),
+        assessmentData: {
+          ...createNoThreatResponse().assessmentData,
+          findings: {
+            THREAT_ANALYSIS: {
+              status: 'Risks found',
+              severity: 'warn',
+              risks: [
+                {
+                  title: '',
+                  details: '',
+                  severity: 'warn',
+                  safeCheckId: faker.string.alphanumeric(10),
+                },
+              ],
+            },
+            CUSTOM_CHECKS: {
+              status: 'Passed',
+              severity: 'accept',
+              risks: [],
+            },
+          },
+        },
+      }
+
+      const result = mapHypernativeResponse(response, mockSafeAddress)
+
+      // Should still format description correctly even with empty details
+      expect(result[StatusGroup.THREAT]?.[0].description).toContain(
+        'The full threat report is available in your Hypernative account.',
+      )
+    })
+
+    it('should handle risk with details that already ends with period', () => {
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...createNoThreatResponse(),
+        assessmentData: {
+          ...createNoThreatResponse().assessmentData,
+          findings: {
+            THREAT_ANALYSIS: {
+              status: 'Risks found',
+              severity: 'warn',
+              risks: [
+                {
+                  title: 'Risk title already end with period.',
+                  details: 'Details',
+                  severity: 'warn',
+                  safeCheckId: faker.string.alphanumeric(10),
+                },
+              ],
+            },
+            CUSTOM_CHECKS: {
+              status: 'Passed',
+              severity: 'accept',
+              risks: [],
+            },
+          },
+        },
+      }
+
+      const result = mapHypernativeResponse(response, mockSafeAddress)
+
+      // Should not add extra period
+      expect(result[StatusGroup.THREAT]?.[0].description).toBe(
+        'Risk title already end with period. The full threat report is available in your Hypernative account.',
+      )
+    })
+
+    it('should handle risk with mapped type that has no description mapping', () => {
+      // Test that when a type is mapped but has no description, it falls back correctly
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...createNoThreatResponse(),
+        assessmentData: {
+          ...createNoThreatResponse().assessmentData,
+          findings: {
+            THREAT_ANALYSIS: {
+              status: 'Risks found',
+              severity: 'warn',
+              risks: [
+                {
+                  title: 'Custom risk title',
+                  details: 'Custom risk details',
+                  severity: 'warn',
+                  safeCheckId: faker.string.alphanumeric(10), // Unknown safeCheckId
+                },
+              ],
+            },
+            CUSTOM_CHECKS: {
+              status: 'Passed',
+              severity: 'accept',
+              risks: [],
+            },
+          },
+        },
+      }
+
+      const result = mapHypernativeResponse(response, mockSafeAddress)
+
+      // Should use severity-based title and risk title as description
+      expect(result[StatusGroup.THREAT]?.[0].title).toBe('Moderate threat detected')
+      expect(result[StatusGroup.THREAT]?.[0].description).toBe(
+        'Custom risk title. The full threat report is available in your Hypernative account.',
+      )
     })
   })
 })

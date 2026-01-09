@@ -110,9 +110,14 @@ function mapFindings(findings: HypernativeFinding): AnalysisResult<AllowedThreat
     const type = mappedType === ThreatStatus.MASTERCOPY_CHANGE ? ThreatStatus.HYPERNATIVE_GUARD : mappedType
 
     const severity = HypernativeRiskSeverityMap[risk.severity] ?? Severity.INFO
-    const title = HypernativeRiskTitleMap[type] ?? risk.title
-    const details = HypernativeRiskDescriptionMap[type] ?? risk.details
-    const description = `${details} The full threat report is available in your Hypernative account.`
+
+    const mappedTitle = HypernativeRiskTitleMap[type] ?? HypernativeRiskTitleMap[severity]
+    const title = mappedTitle ?? risk.title
+
+    const mappedDetails = HypernativeRiskDescriptionMap[type] ?? (mappedTitle ? risk.title : risk.details)
+    const details = mappedDetails.length > 0 && !mappedDetails.endsWith('.') ? `${mappedDetails}.` : mappedDetails
+
+    const description = `${details.length > 0 ? `${details} ` : ''}The full threat report is available in your Hypernative account.`
 
     return { severity, type, title, description }
   })

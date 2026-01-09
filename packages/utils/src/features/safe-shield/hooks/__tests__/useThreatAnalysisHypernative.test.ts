@@ -506,9 +506,8 @@ describe('useThreatAnalysisHypernative', () => {
           expect.objectContaining({
             severity: Severity.CRITICAL,
             type: ThreatStatus.HYPERNATIVE_GUARD,
-            title: 'Transfer to malicious',
-            description:
-              'Transfer to known phishing address. The full threat report is available in your Hypernative account.',
+            title: 'Malicious threat detected',
+            description: 'Transfer to malicious. The full threat report is available in your Hypernative account.',
           }),
         )
       })
