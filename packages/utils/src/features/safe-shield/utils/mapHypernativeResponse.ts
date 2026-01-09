@@ -174,12 +174,18 @@ function mapBalanceChanges(safeAddress: `0x${string}`, balanceChanges: Hypernati
   // Group balance changes by token address
   const changesByTokenAddress = safeBalanceChanges.reduce<Record<`0x${string}`, BalanceChangeDto>>((acc, change) => {
     const tokenAddress = change.tokenAddress ?? ZeroAddress
+    const isNative = !change.tokenAddress
 
-    const asset = {
-      type: change.tokenAddress ? 'ERC20' : 'NATIVE',
-      symbol: change.tokenSymbol,
-      address: tokenAddress,
-    }
+    const asset = isNative
+      ? {
+          type: 'NATIVE' as const,
+          symbol: change.tokenSymbol,
+        }
+      : {
+          type: 'ERC20' as const,
+          symbol: change.tokenSymbol,
+          address: tokenAddress,
+        }
 
     const changes = acc[tokenAddress] || {
       asset,

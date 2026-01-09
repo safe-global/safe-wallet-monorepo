@@ -786,8 +786,7 @@ describe('mapHypernativeResponse', () => {
       const balanceChange = result.BALANCE_CHANGE?.[0]
       expect(balanceChange?.asset.type).toBe('NATIVE')
       expect(balanceChange?.asset.symbol).toBe('ETH')
-      // Implementation includes address even for native tokens
-      expect((balanceChange?.asset as any).address).toBe(ZeroAddress)
+      expect(balanceChange?.asset).not.toHaveProperty('address')
       expect(balanceChange?.in).toEqual([{ value: balanceChanges[0].amount }])
       expect(balanceChange?.out).toEqual([{ value: balanceChanges[1].amount }])
     })
