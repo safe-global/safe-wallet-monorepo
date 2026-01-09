@@ -126,19 +126,31 @@ exports[`./PositionsSkeleton.stories Default 1`] = `
                                   class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-16mkdhd-MuiTableCell-root"
                                   scope="col"
                                 >
-                                  Loading...
+                                  <span
+                                    class="MuiBox-root css-1kuy7z7"
+                                  >
+                                    Loading...
+                                  </span>
                                 </th>
                                 <th
                                   class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-14qoodj-MuiTableCell-root"
                                   scope="col"
                                 >
-                                  Balance
+                                  <span
+                                    class="MuiBox-root css-1kuy7z7"
+                                  >
+                                    Balance
+                                  </span>
                                 </th>
                                 <th
                                   class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1lpfb9u-MuiTableCell-root"
                                   scope="col"
                                 >
-                                  Value
+                                  <span
+                                    class="MuiBox-root css-1kuy7z7"
+                                  >
+                                    Value
+                                  </span>
                                 </th>
                               </tr>
                             </thead>
