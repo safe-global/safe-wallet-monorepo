@@ -184,7 +184,7 @@ export const BalanceChanges = () => {
           title={
             <>
               The balance change gives an overview of the implications of a transaction. You can see which assets will
-              be sent and received after the transaction is executed. .
+              be sent and received after the transaction is executed.
             </>
           }
           arrow
