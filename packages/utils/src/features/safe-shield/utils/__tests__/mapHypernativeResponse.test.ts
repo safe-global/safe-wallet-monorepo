@@ -5,8 +5,13 @@ import type {
   HypernativeAssessmentFailedResponseDto,
   HypernativeAssessmentResponseDto,
 } from '@safe-global/store/hypernative/hypernativeApi.dto'
+import type { HypernativeBalanceChange } from '../../types/hypernative.type'
+import { ZeroAddress } from 'ethers'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
 
 describe('mapHypernativeResponse', () => {
+  const mockSafeAddress = faker.finance.ethereumAddress() as `0x${string}`
+
   const createNoThreatResponse = (): HypernativeAssessmentResponseDto['data'] => ({
     safeTxHash: faker.string.hexadecimal({ length: 64 }) as `0x${string}`,
     status: 'OK',
@@ -30,6 +35,26 @@ describe('mapHypernativeResponse', () => {
     },
   })
 
+  const createBalanceChangeHN = (overrides: Partial<HypernativeBalanceChange> = {}): HypernativeBalanceChange => {
+    const decimals = overrides.decimals ?? 18
+    const originalValue = faker.number.int({ min: 1, max: 10 })
+    const amount = (originalValue * 10 ** decimals).toString()
+    const usdValue = (originalValue * 1000).toString()
+
+    return {
+      changeType: 'receive',
+      tokenSymbol: 'ETH',
+      tokenAddress: ZeroAddress as `0x${string}`,
+      usdValue,
+      amount,
+      chain: 'ethereum',
+      decimals,
+      originalValue: originalValue.toString(),
+      evmChainId: 1,
+      ...overrides,
+    }
+  }
+
   describe('status handling', () => {
     it('should return error result when status is FAILED', () => {
       const responseDescription = 'The threat analysis failed'
@@ -40,7 +65,7 @@ describe('mapHypernativeResponse', () => {
         data: null,
       }
 
-      const result = mapHypernativeResponse(response)
+      const result = mapHypernativeResponse(response, mockSafeAddress)
 
       expect(result[StatusGroup.THREAT]).toHaveLength(1)
       expect(result[StatusGroup.THREAT]?.[0]).toEqual({
@@ -56,7 +81,7 @@ describe('mapHypernativeResponse', () => {
     it('should return NO_THREAT when no risks found', () => {
       const response = createNoThreatResponse()
 
-      const result = mapHypernativeResponse(response)
+      const result = mapHypernativeResponse(response, mockSafeAddress)
 
       expect(result[StatusGroup.THREAT]).toContainEqual(
         expect.objectContaining({
@@ -88,7 +113,7 @@ describe('mapHypernativeResponse', () => {
         },
       }
 
-      const result = mapHypernativeResponse(response)
+      const result = mapHypernativeResponse(response, mockSafeAddress)
 
       expect(result[StatusGroup.CUSTOM_CHECKS]).toContainEqual(
         expect.objectContaining({
@@ -115,7 +140,7 @@ describe('mapHypernativeResponse', () => {
               risks: [
                 {
                   title: 'Transfer to malicious',
-                  details: 'Transfer to known phishing address',
+                  details: 'Transfer to known phishing address.',
                   severity: 'deny',
                   safeCheckId: faker.string.alphanumeric(10),
                 },
@@ -130,13 +155,14 @@ describe('mapHypernativeResponse', () => {
         },
       }
 
-      const result = mapHypernativeResponse(response)
+      const result = mapHypernativeResponse(response, mockSafeAddress)
 
       expect(result[StatusGroup.THREAT]?.[0]).toEqual({
         severity: Severity.CRITICAL,
         type: ThreatStatus.HYPERNATIVE_GUARD,
         title: 'Transfer to malicious',
-        description: 'Transfer to known phishing address',
+        description:
+          'Transfer to known phishing address. The full threat report is available in your Hypernative account.',
       })
     })
 
@@ -153,7 +179,7 @@ describe('mapHypernativeResponse', () => {
               risks: [
                 {
                   title: 'Suspicious swap pattern',
-                  details: 'Swap volume unusually large',
+                  details: 'Swap volume unusually large.',
                   severity: 'warn',
                   safeCheckId: faker.string.alphanumeric(10),
                 },
@@ -168,13 +194,13 @@ describe('mapHypernativeResponse', () => {
         },
       }
 
-      const result = mapHypernativeResponse(response)
+      const result = mapHypernativeResponse(response, mockSafeAddress)
 
       expect(result[StatusGroup.THREAT]?.[0]).toEqual({
         severity: Severity.WARN,
         type: ThreatStatus.HYPERNATIVE_GUARD,
         title: 'Suspicious swap pattern',
-        description: 'Swap volume unusually large',
+        description: 'Swap volume unusually large. The full threat report is available in your Hypernative account.',
       })
     })
 
@@ -190,7 +216,7 @@ describe('mapHypernativeResponse', () => {
               risks: [
                 {
                   title: 'All checks passed',
-                  details: 'Transaction appears safe',
+                  details: 'Transaction appears safe.',
                   severity: 'accept',
                   safeCheckId: faker.string.alphanumeric(10),
                 },
@@ -205,13 +231,13 @@ describe('mapHypernativeResponse', () => {
         },
       }
 
-      const result = mapHypernativeResponse(response)
+      const result = mapHypernativeResponse(response, mockSafeAddress)
 
       expect(result[StatusGroup.THREAT]).toContainEqual({
         severity: Severity.OK,
         type: ThreatStatus.HYPERNATIVE_GUARD,
         title: 'All checks passed',
-        description: 'Transaction appears safe',
+        description: 'Transaction appears safe. The full threat report is available in your Hypernative account.',
       })
     })
   })
@@ -235,13 +261,13 @@ describe('mapHypernativeResponse', () => {
               risks: [
                 {
                   title: 'Pool Toxicity',
-                  details: 'Pool contains 4% of illicit funds',
+                  details: 'Pool contains 4% of illicit funds.',
                   severity: 'warn',
                   safeCheckId: faker.string.alphanumeric(10),
                 },
                 {
                   title: 'Unusually high gas price',
-                  details: 'Gas price higher than max allowed',
+                  details: 'Gas price higher than max allowed.',
                   severity: 'warn',
                   safeCheckId: faker.string.alphanumeric(10),
                 },
@@ -251,20 +277,22 @@ describe('mapHypernativeResponse', () => {
         },
       }
 
-      const result = mapHypernativeResponse(response)
+      const result = mapHypernativeResponse(response, mockSafeAddress)
 
       expect(result[StatusGroup.CUSTOM_CHECKS]).toContainEqual({
         severity: Severity.WARN,
         type: ThreatStatus.HYPERNATIVE_GUARD,
         title: 'Pool Toxicity',
-        description: 'Pool contains 4% of illicit funds',
+        description:
+          'Pool contains 4% of illicit funds. The full threat report is available in your Hypernative account.',
       })
 
       expect(result[StatusGroup.CUSTOM_CHECKS]).toContainEqual({
         severity: Severity.WARN,
         type: ThreatStatus.HYPERNATIVE_GUARD,
         title: 'Unusually high gas price',
-        description: 'Gas price higher than max allowed',
+        description:
+          'Gas price higher than max allowed. The full threat report is available in your Hypernative account.',
       })
     })
   })
@@ -306,7 +334,7 @@ describe('mapHypernativeResponse', () => {
         },
       }
 
-      const result = mapHypernativeResponse(response)
+      const result = mapHypernativeResponse(response, mockSafeAddress)
 
       // THREAT_ANALYSIS has 1 deny risk
       expect(result[StatusGroup.THREAT]).toHaveLength(1)
@@ -361,7 +389,7 @@ describe('mapHypernativeResponse', () => {
         },
       }
 
-      const result = mapHypernativeResponse(response)
+      const result = mapHypernativeResponse(response, mockSafeAddress)
 
       // THREAT_ANALYSIS should be sorted: CRITICAL first, then WARN, then OK
       expect(result[StatusGroup.THREAT]).toHaveLength(3)
@@ -406,7 +434,7 @@ describe('mapHypernativeResponse', () => {
         },
       }
 
-      const result = mapHypernativeResponse(response)
+      const result = mapHypernativeResponse(response, mockSafeAddress)
 
       expect(result[StatusGroup.THREAT]).toHaveLength(2)
       expect(result[StatusGroup.THREAT]?.[0].severity).toBe(Severity.WARN)
@@ -456,7 +484,7 @@ describe('mapHypernativeResponse', () => {
         },
       }
 
-      const result = mapHypernativeResponse(response)
+      const result = mapHypernativeResponse(response, mockSafeAddress)
 
       expect(result[StatusGroup.THREAT]?.[0].type).toBe(ThreatStatus.OWNERSHIP_CHANGE)
       expect(result[StatusGroup.THREAT]?.[1].type).toBe(ThreatStatus.MODULE_CHANGE)
@@ -490,7 +518,7 @@ describe('mapHypernativeResponse', () => {
         },
       }
 
-      const result = mapHypernativeResponse(response)
+      const result = mapHypernativeResponse(response, mockSafeAddress)
 
       expect(result[StatusGroup.THREAT]?.[0].type).toBe(ThreatStatus.HYPERNATIVE_GUARD)
     })
@@ -522,7 +550,7 @@ describe('mapHypernativeResponse', () => {
         },
       }
 
-      const result = mapHypernativeResponse(response)
+      const result = mapHypernativeResponse(response, mockSafeAddress)
 
       expect(result[StatusGroup.THREAT]?.[0].type).toBe(ThreatStatus.HYPERNATIVE_GUARD)
       expect(result[StatusGroup.THREAT]?.[0].title).toBe('Mastercopy change')
@@ -555,7 +583,7 @@ describe('mapHypernativeResponse', () => {
         },
       }
 
-      const result = mapHypernativeResponse(response)
+      const result = mapHypernativeResponse(response, mockSafeAddress)
 
       expect(result[StatusGroup.THREAT]?.[0].severity).toBe(Severity.INFO)
       expect(result[StatusGroup.THREAT]?.[0].title).toBe('Risk with unknown severity')
@@ -612,7 +640,7 @@ describe('mapHypernativeResponse', () => {
         },
       }
 
-      const result = mapHypernativeResponse(response)
+      const result = mapHypernativeResponse(response, mockSafeAddress)
 
       expect(result[StatusGroup.THREAT]?.[0].type).toBe(ThreatStatus.OWNERSHIP_CHANGE)
       expect(result[StatusGroup.THREAT]?.[1].type).toBe(ThreatStatus.OWNERSHIP_CHANGE)
@@ -631,7 +659,7 @@ describe('mapHypernativeResponse', () => {
         data: null,
       }
 
-      const result = mapHypernativeResponse(response)
+      const result = mapHypernativeResponse(response, mockSafeAddress)
 
       expect(result[StatusGroup.THREAT]).toHaveLength(1)
       expect(result[StatusGroup.THREAT]?.[0]).toEqual({
@@ -681,7 +709,7 @@ describe('mapHypernativeResponse', () => {
         },
       }
 
-      const result = mapHypernativeResponse(response)
+      const result = mapHypernativeResponse(response, mockSafeAddress)
 
       expect(result[StatusGroup.CUSTOM_CHECKS]).toHaveLength(3)
       expect(result[StatusGroup.CUSTOM_CHECKS]?.[0].severity).toBe(Severity.CRITICAL)
@@ -690,6 +718,313 @@ describe('mapHypernativeResponse', () => {
       expect(result[StatusGroup.CUSTOM_CHECKS]?.[1].title).toBe('Warning custom check')
       expect(result[StatusGroup.CUSTOM_CHECKS]?.[2].severity).toBe(Severity.OK)
       expect(result[StatusGroup.CUSTOM_CHECKS]?.[2].title).toBe('OK custom check')
+    })
+  })
+
+  describe('balance changes', () => {
+    const safeAddress = faker.finance.ethereumAddress().toLowerCase() as `0x${string}`
+
+    it('should not include BALANCE_CHANGE when balanceChanges is undefined', () => {
+      const response = createNoThreatResponse()
+
+      const result = mapHypernativeResponse(response, safeAddress)
+
+      expect(result.BALANCE_CHANGE).toBeUndefined()
+    })
+
+    it('should not include BALANCE_CHANGE when balanceChanges is empty', () => {
+      const noThreatResponse = createNoThreatResponse()
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...noThreatResponse,
+        assessmentData: {
+          ...noThreatResponse.assessmentData,
+          balanceChanges: {},
+        },
+      }
+
+      const result = mapHypernativeResponse(response, safeAddress)
+
+      expect(result.BALANCE_CHANGE).toBeUndefined()
+    })
+
+    it('should not include BALANCE_CHANGE when safeAddress has no balance changes', () => {
+      const otherAddress = faker.finance.ethereumAddress().toLowerCase() as `0x${string}`
+      const noThreatResponse = createNoThreatResponse()
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...noThreatResponse,
+        assessmentData: {
+          ...noThreatResponse.assessmentData,
+          balanceChanges: { [otherAddress]: [createBalanceChangeHN()] },
+        },
+      }
+
+      const result = mapHypernativeResponse(response, safeAddress)
+
+      expect(result.BALANCE_CHANGE).toBeUndefined()
+    })
+
+    it('should map native token balance changes correctly', () => {
+      const noThreatResponse = createNoThreatResponse()
+
+      const balanceChanges = [
+        createBalanceChangeHN({ changeType: 'receive', tokenAddress: undefined }),
+        createBalanceChangeHN({ changeType: 'send', tokenAddress: undefined }),
+      ]
+
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...noThreatResponse,
+        assessmentData: {
+          ...noThreatResponse.assessmentData,
+          balanceChanges: { [safeAddress]: balanceChanges },
+        },
+      }
+
+      const result = mapHypernativeResponse(response, safeAddress)
+
+      expect(result.BALANCE_CHANGE).toBeDefined()
+      expect(result.BALANCE_CHANGE).toHaveLength(1)
+      const balanceChange = result.BALANCE_CHANGE?.[0]
+      expect(balanceChange?.asset.type).toBe('NATIVE')
+      expect(balanceChange?.asset.symbol).toBe('ETH')
+      expect(balanceChange?.asset).not.toHaveProperty('address')
+      expect(balanceChange?.in).toEqual([{ value: balanceChanges[0].amount }])
+      expect(balanceChange?.out).toEqual([{ value: balanceChanges[1].amount }])
+    })
+
+    it('should map ERC20 token balance changes correctly', () => {
+      const noThreatResponse = createNoThreatResponse()
+
+      const tokenAddress = faker.finance.ethereumAddress() as `0x${string}`
+      const tokenSymbol = 'USDC'
+
+      const balanceChanges = [
+        createBalanceChangeHN({ changeType: 'receive', tokenAddress, tokenSymbol }),
+        createBalanceChangeHN({ changeType: 'send', tokenAddress, tokenSymbol }),
+      ]
+
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...noThreatResponse,
+        assessmentData: {
+          ...noThreatResponse.assessmentData,
+          balanceChanges: { [safeAddress]: balanceChanges },
+        },
+      }
+
+      const result = mapHypernativeResponse(response, safeAddress)
+
+      expect(result.BALANCE_CHANGE).toBeDefined()
+      expect(result.BALANCE_CHANGE).toHaveLength(1)
+      expect(result.BALANCE_CHANGE?.[0]).toEqual({
+        asset: {
+          type: 'ERC20',
+          symbol: tokenSymbol,
+          address: tokenAddress,
+        },
+        in: [{ value: balanceChanges[0].amount }],
+        out: [{ value: balanceChanges[1].amount }],
+      })
+    })
+
+    it('should group multiple changes for the same token', () => {
+      const noThreatResponse = createNoThreatResponse()
+
+      const tokenAddress = faker.finance.ethereumAddress() as `0x${string}`
+      const tokenSymbol = 'USDC'
+
+      const balanceChanges = [
+        createBalanceChangeHN({ changeType: 'receive', tokenAddress, tokenSymbol }),
+        createBalanceChangeHN({ changeType: 'receive', tokenAddress, tokenSymbol }),
+        createBalanceChangeHN({ changeType: 'send', tokenAddress, tokenSymbol }),
+      ]
+
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...noThreatResponse,
+        assessmentData: {
+          ...noThreatResponse.assessmentData,
+          balanceChanges: { [safeAddress]: balanceChanges },
+        },
+      }
+
+      const result = mapHypernativeResponse(response, safeAddress)
+
+      expect(result.BALANCE_CHANGE).toBeDefined()
+      expect(result.BALANCE_CHANGE).toHaveLength(1)
+      expect(result.BALANCE_CHANGE?.[0].in).toHaveLength(2)
+      expect(result.BALANCE_CHANGE?.[0].in).toEqual([
+        { value: balanceChanges[0].amount },
+        { value: balanceChanges[1].amount },
+      ])
+      expect(result.BALANCE_CHANGE?.[0].out).toHaveLength(1)
+      expect(result.BALANCE_CHANGE?.[0].out).toEqual([{ value: balanceChanges[2].amount }])
+    })
+
+    it('should handle multiple different tokens', () => {
+      const noThreatResponse = createNoThreatResponse()
+
+      const usdcAddress = faker.finance.ethereumAddress() as `0x${string}`
+      const daiAddress = faker.finance.ethereumAddress() as `0x${string}`
+      const usdcSymbol = 'USDC'
+      const daiSymbol = 'DAI'
+
+      const balanceChanges = [
+        createBalanceChangeHN({ changeType: 'receive', tokenAddress: usdcAddress, tokenSymbol: usdcSymbol }),
+        createBalanceChangeHN({ changeType: 'send', tokenAddress: daiAddress, tokenSymbol: daiSymbol }),
+      ]
+
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...noThreatResponse,
+        assessmentData: {
+          ...noThreatResponse.assessmentData,
+          balanceChanges: { [safeAddress]: balanceChanges },
+        },
+      }
+
+      const result = mapHypernativeResponse(response, safeAddress)
+
+      expect(result.BALANCE_CHANGE).toBeDefined()
+      expect(result.BALANCE_CHANGE).toHaveLength(2)
+
+      const usdcChange = result.BALANCE_CHANGE?.find(
+        (change) => change.asset.type !== 'NATIVE' && change.asset.address.toLowerCase() === usdcAddress.toLowerCase(),
+      )
+      const daiChange = result.BALANCE_CHANGE?.find(
+        (change) => change.asset.type !== 'NATIVE' && change.asset.address.toLowerCase() === daiAddress.toLowerCase(),
+      )
+
+      expect(usdcChange).toBeDefined()
+      expect(usdcChange?.asset.symbol).toBe(usdcSymbol)
+      expect(usdcChange?.asset.type).toBe('ERC20')
+      expect(usdcChange?.in).toHaveLength(1)
+      expect(usdcChange?.out).toHaveLength(0)
+
+      expect(daiChange).toBeDefined()
+      expect(daiChange?.asset.symbol).toBe(daiSymbol)
+      expect(daiChange?.asset.type).toBe('ERC20')
+      expect(daiChange?.in).toHaveLength(0)
+      expect(daiChange?.out).toHaveLength(1)
+    })
+
+    it('should handle case-insensitive safeAddress matching', () => {
+      // The implementation normalizes both the lookup key and the balanceChanges keys
+      // This test verifies that the function works with checksummed addresses from the API
+
+      const noThreatResponse = createNoThreatResponse()
+
+      // Create a checksummed version of the safe address (simulating what the API might return)
+      const checksummedAddress = checksumAddress(safeAddress)
+
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...noThreatResponse,
+        assessmentData: {
+          ...noThreatResponse.assessmentData,
+          balanceChanges: {
+            // Use checksummed key to simulate API response with mixed-case addresses
+            [checksummedAddress]: [createBalanceChangeHN()],
+          },
+        },
+      }
+
+      // Pass safeAddress in any case - implementation will normalize both
+      const result = mapHypernativeResponse(response, safeAddress.toUpperCase() as `0x${string}`)
+
+      expect(result.BALANCE_CHANGE).toBeDefined()
+      expect(result.BALANCE_CHANGE).toHaveLength(1)
+    })
+
+    it('should group token addresses with different cases together', () => {
+      // The implementation normalizes tokenAddress to lowercase for grouping
+      // This test verifies that the same token address with different cases (checksummed vs lowercase)
+      // are treated as the same token and grouped correctly
+
+      const noThreatResponse = createNoThreatResponse()
+
+      const tokenAddress = faker.finance.ethereumAddress() as `0x${string}`
+      const checksummedTokenAddress = checksumAddress(tokenAddress) as `0x${string}`
+      const lowercaseTokenAddress = tokenAddress.toLowerCase() as `0x${string}`
+      const tokenSymbol = 'USDC'
+
+      // Create balance changes with the same token address in different cases
+      const balanceChanges = [
+        createBalanceChangeHN({ changeType: 'receive', tokenAddress: checksummedTokenAddress, tokenSymbol }),
+        createBalanceChangeHN({ changeType: 'receive', tokenAddress: lowercaseTokenAddress, tokenSymbol }),
+        createBalanceChangeHN({ changeType: 'send', tokenAddress: checksummedTokenAddress, tokenSymbol }),
+      ]
+
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...noThreatResponse,
+        assessmentData: {
+          ...noThreatResponse.assessmentData,
+          balanceChanges: { [safeAddress]: balanceChanges },
+        },
+      }
+
+      const result = mapHypernativeResponse(response, safeAddress)
+
+      expect(result.BALANCE_CHANGE).toBeDefined()
+      // Should be grouped into a single token entry despite different cases
+      expect(result.BALANCE_CHANGE).toHaveLength(1)
+      expect(result.BALANCE_CHANGE?.[0].asset.type).toBe('ERC20')
+      expect(result.BALANCE_CHANGE?.[0].asset.symbol).toBe(tokenSymbol)
+      // All changes should be grouped together
+      expect(result.BALANCE_CHANGE?.[0].in).toHaveLength(2)
+      expect(result.BALANCE_CHANGE?.[0].out).toHaveLength(1)
+      // Token address should be normalized to lowercase
+      if (result.BALANCE_CHANGE?.[0].asset.type === 'ERC20') {
+        expect(result.BALANCE_CHANGE[0].asset.address).toBe(lowercaseTokenAddress)
+      }
+    })
+
+    it('should include BALANCE_CHANGE alongside threat analysis results', () => {
+      const noThreatResponse = createNoThreatResponse()
+
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...noThreatResponse,
+        assessmentData: {
+          ...noThreatResponse.assessmentData,
+          findings: {
+            THREAT_ANALYSIS: {
+              status: 'Risks found',
+              severity: 'warn',
+              risks: [
+                {
+                  title: 'Suspicious transaction',
+                  details: 'Transaction details',
+                  severity: 'warn',
+                  safeCheckId: faker.string.alphanumeric(10),
+                },
+              ],
+            },
+            CUSTOM_CHECKS: {
+              status: 'Passed',
+              severity: 'accept',
+              risks: [],
+            },
+          },
+          balanceChanges: { [safeAddress]: [createBalanceChangeHN()] },
+        },
+      }
+
+      const result = mapHypernativeResponse(response, safeAddress)
+
+      expect(result[StatusGroup.THREAT]).toBeDefined()
+      expect(result.BALANCE_CHANGE).toBeDefined()
+      expect(result.BALANCE_CHANGE).toHaveLength(1)
+    })
+
+    it('should handle empty balance changes array for safeAddress', () => {
+      const noThreatResponse = createNoThreatResponse()
+
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...noThreatResponse,
+        assessmentData: {
+          ...noThreatResponse.assessmentData,
+          balanceChanges: { [safeAddress]: [] },
+        },
+      }
+
+      const result = mapHypernativeResponse(response, safeAddress)
+
+      expect(result.BALANCE_CHANGE).toBeUndefined()
     })
   })
 })

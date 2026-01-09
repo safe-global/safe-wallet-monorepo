@@ -1,8 +1,11 @@
 import {
   HypernativeFinding,
   HypernativeRiskSeverityMap,
-  HypernativeRiskTitleMap,
+  HypernativeRiskTypeMap,
   type HypernativeRisk,
+  type HypernativeBalanceChanges,
+  HypernativeRiskTitleMap,
+  HypernativeRiskDescriptionMap,
 } from '../types/hypernative.type'
 import {
   HypernativeAssessmentResponseDto,
@@ -11,6 +14,8 @@ import {
 } from '@safe-global/store/hypernative/hypernativeApi.dto'
 import { Severity, StatusGroup, ThreatStatus, type ThreatAnalysisResults, type ThreatAnalysisResult } from '../types'
 import { sortBySeverity } from './analysisUtils'
+import type { BalanceChangeDto } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
+import { ZeroAddress } from 'ethers'
 
 /**
  * Maps Hypernative assessment response to Safe Shield ThreatAnalysisResults format
@@ -21,16 +26,21 @@ import { sortBySeverity } from './analysisUtils'
  */
 export function mapHypernativeResponse(
   response: HypernativeAssessmentResponseDto['data'] | HypernativeAssessmentFailedResponseDto,
+  safeAddress: `0x${string}`,
 ): ThreatAnalysisResults {
   if (isHypernativeAssessmentFailedResponse(response)) {
     return createErrorResult(response.error)
   }
 
   const assessment = response.assessmentData
+  const balanceChanges = assessment.balanceChanges
+    ? mapBalanceChanges(safeAddress, assessment.balanceChanges)
+    : undefined
 
   return {
     [StatusGroup.THREAT]: mapThreatFindings(assessment.findings.THREAT_ANALYSIS),
     [StatusGroup.CUSTOM_CHECKS]: mapCustomChecksFindings(assessment.findings.CUSTOM_CHECKS),
+    ...(balanceChanges && balanceChanges.length ? { BALANCE_CHANGE: balanceChanges } : {}),
   }
 }
 
@@ -93,17 +103,17 @@ function mapCustomChecksFindings(findings: HypernativeFinding): ThreatAnalysisRe
  */
 function mapFindings(findings: HypernativeFinding): ThreatAnalysisResult[] {
   const results: ThreatAnalysisResult[] = findings.risks.map((risk: HypernativeRisk) => {
-    const mappedType = HypernativeRiskTitleMap[risk.safeCheckId] ?? ThreatStatus.HYPERNATIVE_GUARD
+    const mappedType = HypernativeRiskTypeMap[risk.safeCheckId] ?? ThreatStatus.HYPERNATIVE_GUARD
     // MASTERCOPY_CHANGE requires additional fields (before/after) that Hypernative doesn't provide
     // So we fall back to HYPERNATIVE_GUARD for these cases
     const type = mappedType === ThreatStatus.MASTERCOPY_CHANGE ? ThreatStatus.HYPERNATIVE_GUARD : mappedType
 
-    return {
-      severity: HypernativeRiskSeverityMap[risk.severity] ?? Severity.INFO,
-      type,
-      title: risk.title,
-      description: risk.details,
-    }
+    const severity = HypernativeRiskSeverityMap[risk.severity] ?? Severity.INFO
+    const title = HypernativeRiskTitleMap[type] ?? risk.title
+    const details = HypernativeRiskDescriptionMap[type] ?? risk.details
+    const description = `${details} The full threat report is available in your Hypernative account.`
+
+    return { severity, type, title, description }
   })
 
   return sortBySeverity(results)
@@ -139,4 +149,61 @@ function createNoCustomChecksResult(): ThreatAnalysisResult[] {
       description: 'Custom checks found no issues.',
     },
   ]
+}
+
+/**
+ * Maps Hypernative balance changes to Safe Shield BalanceChangeDto format
+ *
+ * @param {HypernativeBalanceChanges} balanceChanges - Balance changes from Hypernative API
+ *
+ * @returns {BalanceChangeDto[]} Array of balance change DTOs grouped by token address
+ */
+function mapBalanceChanges(safeAddress: `0x${string}`, balanceChanges: HypernativeBalanceChanges): BalanceChangeDto[] {
+  // Normalize keys to lowercase to handle both checksummed and lowercase addresses from the API
+  const normalizedBalanceChanges = Object.entries(balanceChanges).reduce<HypernativeBalanceChanges>(
+    (acc, [address, changes]) => {
+      acc[address.toLowerCase() as `0x${string}`] = changes
+      return acc
+    },
+    {},
+  )
+
+  const safeBalanceChanges = normalizedBalanceChanges[safeAddress.toLowerCase() as `0x${string}`] || []
+
+  // Group balance changes by token address
+  // Normalize tokenAddress to lowercase for grouping to handle case variations from the API
+  const changesByTokenAddress = safeBalanceChanges.reduce<Record<`0x${string}`, BalanceChangeDto>>((acc, change) => {
+    const originalTokenAddress = change.tokenAddress ?? ZeroAddress
+    const normalizedTokenAddress = originalTokenAddress.toLowerCase() as `0x${string}`
+    const isNative = !change.tokenAddress
+
+    const asset = isNative
+      ? {
+          type: 'NATIVE' as const,
+          symbol: change.tokenSymbol,
+        }
+      : {
+          type: 'ERC20' as const,
+          symbol: change.tokenSymbol,
+          address: normalizedTokenAddress,
+        }
+
+    const changes = acc[normalizedTokenAddress] || {
+      asset,
+      in: [],
+      out: [],
+    }
+
+    if (change.changeType === 'receive') {
+      changes.in.push({ value: change.amount })
+    } else {
+      changes.out.push({ value: change.amount })
+    }
+
+    acc[normalizedTokenAddress] = changes
+
+    return acc
+  }, {})
+
+  return Object.values(changesByTokenAddress)
 }

@@ -28,11 +28,16 @@ export type HypernativeAuthStatus = {
 const PKCE_KEY = 'hn_pkce'
 
 /**
+ * Token expiry time in seconds
+ */
+const TOKEN_EXPIRES_IN = 10 * 60 // 10 minutes
+
+/**
  * Cookie options for PKCE storage
  * - Secure: Only sent over HTTPS (when available)
  * - SameSite: Lax - protects against CSRF while allowing OAuth redirects
  * - Path: Root path so it's accessible from callback route
- * - MaxAge: 10 minutes (600 seconds) - matches typical OAuth flow duration
+ * - Expires: Token expiry time in days
  */
 const getCookieOptions = (): Cookies.CookieAttributes => {
   const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:'
@@ -40,16 +45,9 @@ const getCookieOptions = (): Cookies.CookieAttributes => {
     secure: isSecure,
     sameSite: 'lax',
     path: '/',
-    expires: 10 / (24 * 60), // 10 minutes
+    expires: TOKEN_EXPIRES_IN / (24 * 60 * 60), // Convert seconds to days
   }
 }
-
-/**
- * Mock token expiry time in seconds (10 minutes)
- * Used when MOCK_AUTH_ENABLED is true for development
- * Matches Hypernative OAuth API specification default expiry
- */
-const MOCK_TOKEN_EXPIRES_IN = 60 * 60 * 24 * 30 // 30 days
 
 /**
  * Mock authentication delay in milliseconds
@@ -298,7 +296,7 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
         await new Promise((resolve) => setTimeout(resolve, MOCK_AUTH_DELAY_MS))
 
         const mockToken = `mock-token-${Date.now()}`
-        setToken(mockToken, 'Bearer', MOCK_TOKEN_EXPIRES_IN)
+        setToken(mockToken, 'Bearer', TOKEN_EXPIRES_IN)
         return
       }
 

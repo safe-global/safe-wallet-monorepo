@@ -110,8 +110,8 @@ export function useThreatAnalysisHypernative({
       return undefined
     }
 
-    return mapHypernativeResponse(hypernativeData)
-  }, [hypernativeData, fetchError, skip])
+    return mapHypernativeResponse(hypernativeData, safeAddress)
+  }, [hypernativeData, fetchError, skip, safeAddress])
 
   if (!authToken && !skip) {
     return [undefined, new Error('authToken is required'), false]

@@ -1,6 +1,5 @@
 import {
   HypernativeAssessmentData,
-  HypernativeBalanceChanges,
   HypernativeRiskSeverity,
   HypernativeTx,
 } from '@safe-global/utils/features/safe-shield/types/hypernative.type'
@@ -23,7 +22,6 @@ export type HypernativeAssessmentResponseDto = {
     safeTxHash: `0x${string}`
     status: 'OK'
     assessmentData: HypernativeAssessmentData
-    balanceChanges?: HypernativeBalanceChanges
   }
 }
 

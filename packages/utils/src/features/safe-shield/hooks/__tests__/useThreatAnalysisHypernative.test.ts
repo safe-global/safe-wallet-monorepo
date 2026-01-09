@@ -468,7 +468,7 @@ describe('useThreatAnalysisHypernative', () => {
               risks: [
                 {
                   title: 'Transfer to malicious',
-                  details: 'Transfer to known phishing address',
+                  details: 'Transfer to known phishing address.',
                   severity: 'deny',
                   safeCheckId: faker.string.alphanumeric(10),
                 },
@@ -507,7 +507,8 @@ describe('useThreatAnalysisHypernative', () => {
             severity: Severity.CRITICAL,
             type: ThreatStatus.HYPERNATIVE_GUARD,
             title: 'Transfer to malicious',
-            description: 'Transfer to known phishing address',
+            description:
+              'Transfer to known phishing address. The full threat report is available in your Hypernative account.',
           }),
         )
       })

@@ -273,14 +273,14 @@ describe('useHypernativeOAuth', () => {
         jest.advanceTimersByTime(1000) // Mock auth delay
       })
 
-      // Verify expiry is set correctly (30 days = 60 * 60 * 24 * 30 seconds)
+      // Verify expiry is set correctly (10 minutes = 10 * 60 seconds)
       const authCookie = Cookies.get('hn_auth')
       expect(authCookie).toBeDefined()
       if (authCookie) {
         const authData = JSON.parse(authCookie)
-        const expectedExpiry = Date.now() + 60 * 60 * 24 * 30 * 1000 // 30 days in ms
+        const expectedExpiry = Date.now() + 10 * 60 * 1000 // 10 minutes in ms
         // Allow 1 second tolerance for test execution time
-        expect(authData.expiry).toBeGreaterThanOrEqual(Date.now() + 60 * 60 * 24 * 30 * 1000 - 1000)
+        expect(authData.expiry).toBeGreaterThanOrEqual(Date.now() + 10 * 60 * 1000 - 1000)
         expect(authData.expiry).toBeLessThanOrEqual(expectedExpiry + 1000)
       }
 
