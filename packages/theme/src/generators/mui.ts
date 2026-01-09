@@ -208,7 +208,7 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
           outlined: {
             border: '1.5px solid',
             fontWeight: '600',
-            '&:hover': { border: '1px solid' },
+            '&:hover': { border: '1.5px solid' },
           },
           sizeLarge: { fontSize: '16px' },
         },
