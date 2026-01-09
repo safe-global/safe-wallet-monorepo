@@ -1,8 +1,15 @@
 import { faker } from '@faker-js/faker'
-import { Severity, ContractStatus, type AnalysisResult, CommonSharedStatus } from '../types'
+import {
+  Severity,
+  ContractStatus,
+  type AnalysisResult,
+  CommonSharedStatus,
+  type FallbackHandlerDetails,
+  type FallbackHandlerAnalysisResult,
+} from '../types'
 
 export class ContractAnalysisResultBuilder<T extends CommonSharedStatus | ContractStatus = ContractStatus> {
-  private result: AnalysisResult<T>
+  private result: AnalysisResult<T> & { fallbackHandler?: FallbackHandlerDetails }
 
   constructor() {
     this.result = {
@@ -10,6 +17,7 @@ export class ContractAnalysisResultBuilder<T extends CommonSharedStatus | Contra
       type: ContractStatus.VERIFIED as T,
       title: 'Verified contract',
       description: 'This contract is verified as "Lido staking v2".',
+      fallbackHandler: undefined,
     }
   }
 
@@ -33,8 +41,15 @@ export class ContractAnalysisResultBuilder<T extends CommonSharedStatus | Contra
     return this
   }
 
-  build(): AnalysisResult<T> {
-    return { ...this.result }
+  fallbackHandler(details: FallbackHandlerDetails | undefined): this {
+    if ('fallbackHandler' in this.result) {
+      this.result.fallbackHandler = details
+    }
+    return this
+  }
+
+  build(): T extends ContractStatus.UNOFFICIAL_FALLBACK_HANDLER ? FallbackHandlerAnalysisResult : AnalysisResult<T> {
+    return { ...this.result } as any
   }
 
   // Preset methods for common scenarios
@@ -98,5 +113,20 @@ export class ContractAnalysisResultBuilder<T extends CommonSharedStatus | Contra
       .type(CommonSharedStatus.FAILED)
       .title('Contract analysis failed')
       .description('Contract analysis failed. Review before processing.')
+  }
+
+  static unofficialFallbackHandler(
+    fallbackHandlerDetails?: FallbackHandlerDetails,
+  ): ContractAnalysisResultBuilder<ContractStatus.UNOFFICIAL_FALLBACK_HANDLER> {
+    const defaultFallbackHandler: FallbackHandlerDetails = {
+      address: faker.finance.ethereumAddress(),
+    }
+
+    return new ContractAnalysisResultBuilder<ContractStatus.UNOFFICIAL_FALLBACK_HANDLER>()
+      .severity(Severity.WARN)
+      .type(ContractStatus.UNOFFICIAL_FALLBACK_HANDLER)
+      .title('Unofficial fallback handler')
+      .description('This contract is not an official fallback handler.')
+      .fallbackHandler(fallbackHandlerDetails ?? defaultFallbackHandler)
   }
 }

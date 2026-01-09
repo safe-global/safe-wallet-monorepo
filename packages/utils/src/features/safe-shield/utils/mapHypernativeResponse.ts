@@ -6,13 +6,14 @@ import {
   type HypernativeBalanceChanges,
   HypernativeRiskTitleMap,
   HypernativeRiskDescriptionMap,
+  type AllowedThreatStatusForHypernative,
 } from '../types/hypernative.type'
 import {
   HypernativeAssessmentResponseDto,
   HypernativeAssessmentFailedResponseDto,
   isHypernativeAssessmentFailedResponse,
 } from '@safe-global/store/hypernative/hypernativeApi.dto'
-import { Severity, StatusGroup, ThreatStatus, type ThreatAnalysisResults, type ThreatAnalysisResult } from '../types'
+import { Severity, StatusGroup, ThreatStatus, type ThreatAnalysisResults, type AnalysisResult } from '../types'
 import { sortBySeverity } from './analysisUtils'
 import type { BalanceChangeDto } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
 import { ZeroAddress } from 'ethers'
@@ -41,7 +42,7 @@ export function mapHypernativeResponse(
     [StatusGroup.THREAT]: mapThreatFindings(assessment.findings.THREAT_ANALYSIS),
     [StatusGroup.CUSTOM_CHECKS]: mapCustomChecksFindings(assessment.findings.CUSTOM_CHECKS),
     ...(balanceChanges && balanceChanges.length ? { BALANCE_CHANGE: balanceChanges } : {}),
-  }
+  } as ThreatAnalysisResults
 }
 
 /**
@@ -69,9 +70,9 @@ function createErrorResult(error: HypernativeAssessmentFailedResponseDto['error'
  *
  * @param {HypernativeFindingGroup} findings - Hypernative findings object containing status and risks
  *
- * @returns {ThreatAnalysisResult[]} Array of threat analysis results
+ * @returns {AnalysisResult<AllowedThreatStatusForHypernative>[]} Array of threat analysis results
  */
-function mapThreatFindings(findings: HypernativeFinding): ThreatAnalysisResult[] {
+function mapThreatFindings(findings: HypernativeFinding): AnalysisResult<AllowedThreatStatusForHypernative>[] {
   if (findings.risks.length === 0) {
     return createNoThreatResult()
   }
@@ -84,9 +85,9 @@ function mapThreatFindings(findings: HypernativeFinding): ThreatAnalysisResult[]
  *
  * @param {HypernativeFindingGroup} findings - Hypernative findings object containing status and risks
  *
- * @returns {ThreatAnalysisResult[]} Array of custom checks analysis results
+ * @returns {AnalysisResult<AllowedThreatStatusForHypernative>[]} Array of custom checks analysis results
  */
-function mapCustomChecksFindings(findings: HypernativeFinding): ThreatAnalysisResult[] {
+function mapCustomChecksFindings(findings: HypernativeFinding): AnalysisResult<AllowedThreatStatusForHypernative>[] {
   if (findings.risks.length === 0) {
     return createNoCustomChecksResult()
   }
@@ -99,10 +100,10 @@ function mapCustomChecksFindings(findings: HypernativeFinding): ThreatAnalysisRe
  *
  * @param {HypernativeFindingGroup} findings - Hypernative findings object containing status and risks
  *
- * @returns {ThreatAnalysisResult[]} Array of analysis results for a given finding group
+ * @returns {AnalysisResult<AllowedThreatStatusForHypernative>[]} Array of analysis results for a given finding group
  */
-function mapFindings(findings: HypernativeFinding): ThreatAnalysisResult[] {
-  const results: ThreatAnalysisResult[] = findings.risks.map((risk: HypernativeRisk) => {
+function mapFindings(findings: HypernativeFinding): AnalysisResult<AllowedThreatStatusForHypernative>[] {
+  const results: AnalysisResult<AllowedThreatStatusForHypernative>[] = findings.risks.map((risk: HypernativeRisk) => {
     const mappedType = HypernativeRiskTypeMap[risk.safeCheckId] ?? ThreatStatus.HYPERNATIVE_GUARD
     // MASTERCOPY_CHANGE requires additional fields (before/after) that Hypernative doesn't provide
     // So we fall back to HYPERNATIVE_GUARD for these cases
@@ -122,9 +123,9 @@ function mapFindings(findings: HypernativeFinding): ThreatAnalysisResult[] {
 /**
  * Creates a success result indicating no threats were detected
  *
- * @returns {ThreatAnalysisResult[]} Array with a single OK-severity result indicating no threats
+ * @returns {AnalysisResult<ThreatStatus.NO_THREAT>[]} Array with a single OK-severity result indicating no threats
  */
-function createNoThreatResult(): ThreatAnalysisResult[] {
+function createNoThreatResult(): AnalysisResult<ThreatStatus.NO_THREAT>[] {
   return [
     {
       severity: Severity.OK,
@@ -138,9 +139,9 @@ function createNoThreatResult(): ThreatAnalysisResult[] {
 /**
  * Creates a success result indicating no custom checks were detected
  *
- * @returns {ThreatAnalysisResult[]} Array with a single OK-severity result indicating no custom checks were detected
+ * @returns {AnalysisResult<ThreatStatus.NO_THREAT>[]} Array with a single OK-severity result indicating no custom checks were detected
  */
-function createNoCustomChecksResult(): ThreatAnalysisResult[] {
+function createNoCustomChecksResult(): AnalysisResult<ThreatStatus.NO_THREAT>[] {
   return [
     {
       severity: Severity.OK,

@@ -52,7 +52,7 @@ const TokenAmount = ({
         )}
         <b className={css.tokenText}>
           {sign}
-          {amount} {tokenSymbol}
+          {amount} {tokenSymbol && tokenSymbol}
         </b>
       </span>
     </Tooltip>

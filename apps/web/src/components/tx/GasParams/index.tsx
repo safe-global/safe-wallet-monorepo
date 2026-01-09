@@ -1,5 +1,15 @@
 import type { ReactElement, SyntheticEvent } from 'react'
-import { Accordion, AccordionDetails, AccordionSummary, Skeleton, Typography, Link, Grid, SvgIcon } from '@mui/material'
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Skeleton,
+  Typography,
+  Link,
+  Grid,
+  SvgIcon,
+  Tooltip,
+} from '@mui/material'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import WarningIcon from '@/public/images/notifications/warning.svg'
@@ -32,7 +42,7 @@ type GasParamsProps = {
   onEdit?: () => void
   gasLimitError?: Error
   willRelay?: boolean
-  noFeeNovember?: {
+  noFeeCampaign?: {
     isEligible: boolean
     remaining: number
     limit: number
@@ -46,7 +56,7 @@ export const _GasParams = ({
   onEdit,
   gasLimitError,
   willRelay,
-  noFeeNovember,
+  noFeeCampaign,
   chain,
 }: GasParamsProps & { chain?: Chain }): ReactElement => {
   const { nonce, userNonce, safeTxGas, gasLimit, maxFeePerGas, maxPriorityFeePerGas } = params
@@ -123,10 +133,16 @@ export const _GasParams = ({
                 <Skeleton variant="text" sx={{ display: 'inline-block', minWidth: '7em' }} />
               ) : (
                 <div className={css.feeContainer}>
-                  {noFeeNovember?.isEligible ? (
+                  {noFeeCampaign?.isEligible ? (
                     <>
                       <span className={css.feeAmount}>Free</span>
-                      <span className={css.noFeeTag}>No-Fee November</span>
+                      <Tooltip
+                        title="As a USDe holder, you are eligible for the gas sponsorship program"
+                        arrow
+                        placement="top"
+                      >
+                        <span className={css.noFeeCampaignTag}>Free January Sponsored</span>
+                      </Tooltip>
                     </>
                   ) : (
                     <span>{willRelay ? 'Free' : `${totalFee} ${chain?.nativeCurrency.symbol}`}</span>

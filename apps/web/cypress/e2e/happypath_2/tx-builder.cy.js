@@ -73,6 +73,7 @@ describe('Transaction Builder happy path tests', { defaultCommandTimeout: 20000 
       navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
       createtx.clickOnConfirmTransactionBtn()
       createtx.clickOnContinueSignTransactionBtn()
+      createtx.selectComboButtonOption('sign')
       createtx.clickOnSignTransactionBtn()
       navigation.clickOnWalletExpandMoreIcon()
       navigation.clickOnDisconnectBtn()

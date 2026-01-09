@@ -123,4 +123,10 @@ export class FullAnalysisBuilder {
   static customCheckFailed(): FullAnalysisBuilder {
     return new FullAnalysisBuilder().threat(ThreatAnalysisBuilder.customCheckFailed())
   }
+
+  static unofficialFallbackHandlerContract(address?: string): FullAnalysisBuilder {
+    return new FullAnalysisBuilder().contract(
+      ContractAnalysisBuilder.unofficialFallbackHandlerContract(address).build(),
+    )
+  }
 }

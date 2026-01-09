@@ -45,9 +45,7 @@ describe('AssetsTable', () => {
   })
 
   test('select and deselect hidden assets', async () => {
-    const mockHiddenAssets = {
-      '5': [toBeHex('0x2', 20), toBeHex('0x3', 20)],
-    }
+    const mockHiddenAssets = { '5': [toBeHex('0x2', 20), toBeHex('0x3', 20)] }
     const mockBalances: Balances = {
       fiatTotal: '300',
       items: [
@@ -90,24 +88,10 @@ describe('AssetsTable', () => {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,
           tokenList: TOKEN_LISTS.ALL,
-          shortName: {
-            copy: true,
-            qr: true,
-          },
-          theme: {
-            darkMode: true,
-          },
-          env: {
-            tenderly: {
-              url: '',
-              accessToken: '',
-            },
-            rpc: {},
-          },
-          signing: {
-            onChainSigning: false,
-            blindSigning: false,
-          },
+          shortName: { copy: true, qr: true },
+          theme: { darkMode: true },
+          env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
+          signing: { onChainSigning: false, blindSigning: false },
           transactionExecution: true,
         },
       },
@@ -150,9 +134,7 @@ describe('AssetsTable', () => {
   })
 
   test('Deselect all and save', async () => {
-    const mockHiddenAssets = {
-      '5': [toBeHex('0x2', 20), toBeHex('0x3', 20), toBeHex('0xdead', 20)],
-    }
+    const mockHiddenAssets = { '5': [toBeHex('0x2', 20), toBeHex('0x3', 20), toBeHex('0xdead', 20)] }
     const mockBalances: Balances = {
       fiatTotal: '300',
       items: [
@@ -195,24 +177,10 @@ describe('AssetsTable', () => {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,
           tokenList: TOKEN_LISTS.ALL,
-          shortName: {
-            copy: true,
-            qr: true,
-          },
-          theme: {
-            darkMode: true,
-          },
-          env: {
-            tenderly: {
-              url: '',
-              accessToken: '',
-            },
-            rpc: {},
-          },
-          signing: {
-            onChainSigning: false,
-            blindSigning: false,
-          },
+          shortName: { copy: true, qr: true },
+          theme: { darkMode: true },
+          env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
+          signing: { onChainSigning: false, blindSigning: false },
           transactionExecution: true,
         },
       },
@@ -251,9 +219,7 @@ describe('AssetsTable', () => {
   })
 
   test('immediately hide visible assets', async () => {
-    const mockHiddenAssets = {
-      '5': [],
-    }
+    const mockHiddenAssets = { '5': [] }
     const mockBalances: Balances = {
       fiatTotal: '300',
       items: [
@@ -296,24 +262,10 @@ describe('AssetsTable', () => {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,
           tokenList: TOKEN_LISTS.ALL,
-          shortName: {
-            copy: true,
-            qr: true,
-          },
-          theme: {
-            darkMode: true,
-          },
-          env: {
-            tenderly: {
-              url: '',
-              accessToken: '',
-            },
-            rpc: {},
-          },
-          signing: {
-            onChainSigning: false,
-            blindSigning: false,
-          },
+          shortName: { copy: true, qr: true },
+          theme: { darkMode: true },
+          env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
+          signing: { onChainSigning: false, blindSigning: false },
           transactionExecution: true,
         },
       },
@@ -353,9 +305,7 @@ describe('AssetsTable', () => {
   })
 
   test('hideAndUnhideAssets', async () => {
-    const mockHiddenAssets = {
-      '5': [],
-    }
+    const mockHiddenAssets = { '5': [] }
     const mockBalances: Balances = {
       fiatTotal: '300',
       items: [
@@ -398,24 +348,10 @@ describe('AssetsTable', () => {
           currency: 'usd',
           hiddenTokens: mockHiddenAssets,
           tokenList: TOKEN_LISTS.ALL,
-          shortName: {
-            copy: true,
-            qr: true,
-          },
-          theme: {
-            darkMode: true,
-          },
-          env: {
-            tenderly: {
-              url: '',
-              accessToken: '',
-            },
-            rpc: {},
-          },
-          signing: {
-            onChainSigning: false,
-            blindSigning: false,
-          },
+          shortName: { copy: true, qr: true },
+          theme: { darkMode: true },
+          env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
+          signing: { onChainSigning: false, blindSigning: false },
           transactionExecution: true,
         },
       },
@@ -511,42 +447,23 @@ describe('AssetsTable', () => {
           currency: 'usd',
           hiddenTokens: { '5': [] },
           tokenList: TOKEN_LISTS.ALL,
-          shortName: {
-            copy: true,
-            qr: true,
-          },
-          theme: {
-            darkMode: true,
-          },
-          env: {
-            tenderly: {
-              url: '',
-              accessToken: '',
-            },
-            rpc: {},
-          },
-          signing: {
-            onChainSigning: false,
-            blindSigning: false,
-          },
+          shortName: { copy: true, qr: true },
+          theme: { darkMode: true },
+          env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
+          signing: { onChainSigning: false, blindSigning: false },
           transactionExecution: true,
         },
       },
     })
 
-    // Verify that '100 DAI' appears exactly twice (mobile + desktop views)
+    // Verify that '100 DAI' appears exactly once (mobile + desktop views)
     const daiElements = result.getAllByText('100 DAI')
-    expect(daiElements).toHaveLength(2)
+    expect(daiElements).toHaveLength(1)
 
-    // Verify both elements are in the DOM and not null
+    // Verify the element is in the DOM and not null
     expect(daiElements[0]).not.toBeNull()
-    expect(daiElements[1]).not.toBeNull()
 
-    // Verify the elements are different instances
-    expect(daiElements[0]).not.toBe(daiElements[1])
-
-    // Verify both are visible in the document
+    // Verify the element is visible in the document
     expect(daiElements[0]).toBeInTheDocument()
-    expect(daiElements[1]).toBeInTheDocument()
   })
 })

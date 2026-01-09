@@ -8,7 +8,7 @@ import { InfoTooltip } from '@/features/stake/components/InfoTooltip'
 
 const TotalAssetValue = ({
   fiatTotal,
-  title = 'Total asset value',
+  title = 'Total value',
   size = 'md',
   action,
   isAllTokensMode,

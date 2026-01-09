@@ -98,13 +98,13 @@
   font-size: 14px;
   font-weight: 400;
   line-height: 20px;
-  color: var(--primary-light, #636669);
+  color: var(--color-primary-light);
   letter-spacing: 0.17px;
   margin: 0;
 }
 
 .dark .description {
-  color: var(--primary-light, #636669);
+  color: var(--color-text-secondary);
 }
 
 .coinsContainer {

@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { mapHypernativeResponse } from '../mapHypernativeResponse'
-import { Severity, StatusGroup, ThreatStatus } from '../../types'
+import { ContractStatus, Severity, StatusGroup, ThreatStatus } from '../../types'
 import type {
   HypernativeAssessmentFailedResponseDto,
   HypernativeAssessmentResponseDto,
@@ -488,7 +488,7 @@ describe('mapHypernativeResponse', () => {
 
       expect(result[StatusGroup.THREAT]?.[0].type).toBe(ThreatStatus.OWNERSHIP_CHANGE)
       expect(result[StatusGroup.THREAT]?.[1].type).toBe(ThreatStatus.MODULE_CHANGE)
-      expect(result[StatusGroup.THREAT]?.[2].type).toBe(ThreatStatus.UNOFFICIAL_FALLBACK_HANDLER)
+      expect(result[StatusGroup.THREAT]?.[2].type).toBe(ContractStatus.UNOFFICIAL_FALLBACK_HANDLER)
     })
 
     it('should use HYPERNATIVE_GUARD for unknown risk titles', () => {
@@ -646,7 +646,7 @@ describe('mapHypernativeResponse', () => {
       expect(result[StatusGroup.THREAT]?.[1].type).toBe(ThreatStatus.OWNERSHIP_CHANGE)
       expect(result[StatusGroup.THREAT]?.[2].type).toBe(ThreatStatus.MODULE_CHANGE)
       expect(result[StatusGroup.THREAT]?.[3].type).toBe(ThreatStatus.MODULE_CHANGE)
-      expect(result[StatusGroup.THREAT]?.[4].type).toBe(ThreatStatus.UNOFFICIAL_FALLBACK_HANDLER)
+      expect(result[StatusGroup.THREAT]?.[4].type).toBe(ContractStatus.UNOFFICIAL_FALLBACK_HANDLER)
     })
   })
 

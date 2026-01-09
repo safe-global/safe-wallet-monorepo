@@ -12,6 +12,8 @@ describe('txEvents', () => {
 
     const detail = {
       nonce: 1,
+      chainId: '1',
+      safeAddress: faker.finance.ethereumAddress(),
       txId: '123',
       txHash: '0x123',
       signerAddress: faker.finance.ethereumAddress(),
@@ -30,6 +32,8 @@ describe('txEvents', () => {
 
     const detail2 = {
       nonce: 1,
+      chainId: '1',
+      safeAddress: faker.finance.ethereumAddress(),
       txId: '123',
       txHash: '0x456',
       signerAddress: faker.finance.ethereumAddress(),
@@ -55,6 +59,8 @@ describe('txEvents', () => {
 
     const detail = {
       nonce: 1,
+      chainId: '1',
+      safeAddress: faker.finance.ethereumAddress(),
       txId: '0x123',
       tx,
       error: new Error('Tx failed'),

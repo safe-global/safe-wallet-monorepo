@@ -52,6 +52,8 @@ describe('useTxTracking', () => {
 
     txDispatch(TxEvent.PROCESSING, {
       nonce: 1,
+      chainId: '1',
+      safeAddress: faker.finance.ethereumAddress(),
       txId: '123',
       txHash: '0x123',
       signerAddress: faker.finance.ethereumAddress(),
@@ -72,6 +74,8 @@ describe('useTxTracking', () => {
     renderHook(() => useTxTracking())
 
     txDispatch(TxEvent.RELAYING, {
+      chainId: '1',
+      safeAddress: faker.finance.ethereumAddress(),
       taskId: '0x123',
       groupKey: '0x234',
     })
@@ -94,6 +98,8 @@ describe('useTxTracking', () => {
 
     txDispatch(TxEvent.PROCESSING, {
       nonce: 1,
+      chainId: '1',
+      safeAddress: faker.finance.ethereumAddress(),
       txId: '0x123',
       txHash: '0x234',
       signerAddress: faker.finance.ethereumAddress(),

@@ -1,4 +1,4 @@
-import { ThreatStatus, Severity } from '.'
+import { ThreatStatus, Severity, ContractStatus } from '.'
 
 export const HypernativeRiskSeverityMap = {
   accept: Severity.OK,
@@ -14,29 +14,30 @@ export const HypernativeRiskTypeMap: Record<string, AllowedThreatStatusForHypern
   'F-33083': ThreatStatus.MODULE_CHANGE,
   'F-33084': ThreatStatus.MODULE_CHANGE,
   'F-33073': ThreatStatus.MODULE_CHANGE,
-  'F-33042': ThreatStatus.UNOFFICIAL_FALLBACK_HANDLER,
+  'F-33042': ContractStatus.UNOFFICIAL_FALLBACK_HANDLER,
 }
 
 export const HypernativeRiskTitleMap: { [key in AllowedThreatStatusForHypernative]?: string } = {
   [ThreatStatus.MASTERCOPY_CHANGE]: 'Mastercopy change',
   [ThreatStatus.OWNERSHIP_CHANGE]: 'Ownership change',
   [ThreatStatus.MODULE_CHANGE]: 'Modules change',
-  [ThreatStatus.UNOFFICIAL_FALLBACK_HANDLER]: 'Unofficial fallback handler',
+  [ContractStatus.UNOFFICIAL_FALLBACK_HANDLER]: 'Unofficial fallback handler',
 }
 
 export const HypernativeRiskDescriptionMap: { [key in AllowedThreatStatusForHypernative]?: string } = {
   [ThreatStatus.MASTERCOPY_CHANGE]: 'Verify this change as it may overwrite account ownership.',
   [ThreatStatus.OWNERSHIP_CHANGE]: "Verify this change before proceeding as it will change the Safe's ownership.",
   [ThreatStatus.MODULE_CHANGE]: 'Verify this change before proceeding as it will change Safe modules.',
-  [ThreatStatus.UNOFFICIAL_FALLBACK_HANDLER]: 'Verify the fallback handler is trusted and secure before proceeding.',
+  [ContractStatus.UNOFFICIAL_FALLBACK_HANDLER]: 'Verify the fallback handler is trusted and secure before proceeding.',
 }
 
 export type AllowedThreatStatusForHypernative =
   | ThreatStatus.MASTERCOPY_CHANGE
   | ThreatStatus.OWNERSHIP_CHANGE
   | ThreatStatus.MODULE_CHANGE
-  | ThreatStatus.UNOFFICIAL_FALLBACK_HANDLER
+  | ContractStatus.UNOFFICIAL_FALLBACK_HANDLER
   | ThreatStatus.HYPERNATIVE_GUARD
+  | ThreatStatus.NO_THREAT
 export type HypernativeRiskType = keyof typeof HypernativeRiskTypeMap
 export type HypernativeRiskSeverity = keyof typeof HypernativeRiskSeverityMap
 

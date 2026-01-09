@@ -114,4 +114,41 @@ describe('stringUtils', () => {
       expect(formatCount(0, 'item', 0)).toBe('all these items')
     })
   })
+
+  describe('UNOFFICIAL_FALLBACK_HANDLER message format', () => {
+    it('should use "the" for singular fallback handler', () => {
+      const message = 'Verify the fallback handler is trusted and secure before proceeding.'
+      expect(message).toBe('Verify the fallback handler is trusted and secure before proceeding.')
+    })
+
+    it('should format message for multiple fallback handlers without totalNumber', () => {
+      const number = 2
+      const message = `Verify ${formatCount(number, 'fallback handler')} are trusted and secure before proceeding.`
+      expect(message).toBe('Verify 2 fallback handlers are trusted and secure before proceeding.')
+    })
+
+    it('should format message for multiple fallback handlers with totalNumber', () => {
+      const number = 2
+      const totalNumber = 5
+      const message = `Verify ${formatCount(number, 'fallback handler', totalNumber)} are trusted and secure before proceeding.`
+      expect(message).toBe('Verify 2 fallback handlers are trusted and secure before proceeding.')
+    })
+
+    it('should format message for 5 fallback handlers', () => {
+      const number = 5
+      const message = `Verify ${formatCount(number, 'fallback handler')} are trusted and secure before proceeding.`
+      expect(message).toBe('Verify 5 fallback handlers are trusted and secure before proceeding.')
+    })
+
+    it('should format conditional message based on count', () => {
+      const formatMessage = (number: number, totalNumber?: number) =>
+        number === 1
+          ? 'Verify the fallback handler is trusted and secure before proceeding.'
+          : `Verify ${formatCount(number, 'fallback handler', totalNumber)} are trusted and secure before proceeding.`
+
+      expect(formatMessage(1)).toBe('Verify the fallback handler is trusted and secure before proceeding.')
+      expect(formatMessage(2)).toBe('Verify 2 fallback handlers are trusted and secure before proceeding.')
+      expect(formatMessage(3, 5)).toBe('Verify 3 fallback handlers are trusted and secure before proceeding.')
+    })
+  })
 })
