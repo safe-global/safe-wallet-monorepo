@@ -257,7 +257,6 @@ export const HypernativeMaliciousThreat: Story = {
       .threat(
         FullAnalysisBuilder.maliciousThreat().customCheck(ThreatAnalysisBuilder.customChecksPassed()).build().threat,
       )
-      // .threat(FullAnalysisBuilder.customChecksPassed().build().threat)
       .build(),
     hypernativeAuth: {
       isAuthenticated: true,
