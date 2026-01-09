@@ -59,7 +59,12 @@ const CurrencySelect = (): ReactElement => {
             border: 'none',
           },
           '& .MuiSelect-icon': { color: 'text.secondary', right: '8px' },
-          '& .MuiSelect-select': { paddingLeft: '12px', paddingRight: '32px !important', paddingY: '4px' },
+          '& .MuiSelect-select': {
+            paddingLeft: '12px',
+            paddingRight: '12px !important',
+            paddingY: '4px',
+            color: 'border.main',
+          },
         }}
       >
         {fiatCurrencies.map((item) => (
