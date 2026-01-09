@@ -84,7 +84,7 @@ export default function SplitMenuButton({
               onClick={handleClick}
               type="submit"
               disabled={disabled}
-              sx={{ minWidth: `${maxCharLen}ch !important` }}
+              sx={{ minWidth: `${maxCharLen}ch !important`, height: '100%' }}
             >
               {loading ? <CircularProgress size={20} /> : label || id}
             </Button>
@@ -93,14 +93,13 @@ export default function SplitMenuButton({
 
         {options.length > 1 && (
           <Button
-            size="small"
             aria-expanded={open ? 'true' : undefined}
             aria-label="select action"
             aria-haspopup="menu"
             onClick={handleToggle}
             disabled={loading}
             data-testid="combo-submit-dropdown"
-            sx={{ minWidth: '0 !important', maxWidth: 48, px: 1.5 }}
+            sx={{ minWidth: '0 !important', maxWidth: 48, px: 1.5, height: '100%' }}
           >
             <ArrowDropDownIcon />
           </Button>
