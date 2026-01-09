@@ -58,12 +58,11 @@ const CurrencySelect = (): ReactElement => {
           '&.Mui-focused fieldset': {
             border: 'none',
           },
-          '& .MuiSelect-icon': { color: 'text.secondary', right: '8px' },
+          '& .MuiSelect-icon': { right: '8px' },
           '& .MuiSelect-select': {
             paddingLeft: '12px',
-            paddingRight: '12px !important',
+            paddingRight: '32px !important',
             paddingY: '4px',
-            color: 'border.main',
           },
         }}
       >
