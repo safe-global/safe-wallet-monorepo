@@ -456,7 +456,7 @@ exports[`./index.stories CustomRecipient 1`] = `
       </div>
       <div>
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAlert-root MuiAlert-colorWarning MuiAlert-standardWarning MuiAlert-standard css-1c4n4y0-MuiPaper-root-MuiAlert-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAlert-root MuiAlert-colorWarning MuiAlert-standardWarning MuiAlert-standard css-1wi6bbj-MuiPaper-root-MuiAlert-root"
           data-testid="recipient-alert"
           role="alert"
           style="--Paper-shadow: none;"

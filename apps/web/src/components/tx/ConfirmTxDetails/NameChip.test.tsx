@@ -5,9 +5,9 @@ import { txDataBuilder } from '@/tests/builders/safeTx'
 import { render, screen } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 
-// Theme color values (from unified theme palette)
+// Theme color values (web-specific colors)
 const COLORS = {
-  ERROR_BACKGROUND: '#FFE0E6',
+  ERROR_BACKGROUND: '#FFE6EA',
   ERROR_MAIN: '#FF5F72',
   BACKGROUND_MAIN: '#F4F4F4',
 } as const
