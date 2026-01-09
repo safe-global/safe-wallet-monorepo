@@ -31,6 +31,11 @@ export class ThreatAnalysisBuilder {
     return this
   }
 
+  createCustomCheck(customCheck: ThreatAnalysisResult) {
+    this.threatAnalysis.CUSTOM_CHECKS = [customCheck]
+    return this
+  }
+
   addThreat(threat: ThreatAnalysisResult) {
     if (!this.threatAnalysis.THREAT) {
       this.threatAnalysis.THREAT = []
@@ -74,5 +79,17 @@ export class ThreatAnalysisBuilder {
 
   static masterCopyChange() {
     return new ThreatAnalysisBuilder().createThreat(ThreatAnalysisResultBuilder.masterCopyChange().build()).build()
+  }
+
+  static customChecksPassed() {
+    return new ThreatAnalysisBuilder()
+      .createCustomCheck(ThreatAnalysisResultBuilder.customChecksPassed().build())
+      .build()
+  }
+
+  static customCheckFailed() {
+    return new ThreatAnalysisBuilder()
+      .createCustomCheck(ThreatAnalysisResultBuilder.customCheckFailed().build())
+      .build()
   }
 }

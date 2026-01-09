@@ -10,12 +10,12 @@ import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/b
 import { faker } from '@faker-js/faker'
 import { StoreDecorator } from '@/stories/storeDecorator'
 
-const meta = {
+const meta: Meta<typeof SafeShieldDisplay> = {
   component: SafeShieldDisplay,
   parameters: { layout: 'centered' },
   decorators: [
-    (Story) => (
-      <StoreDecorator initialState={{}}>
+    (Story, context) => (
+      <StoreDecorator initialState={{}} context={context}>
         <Paper sx={{ padding: 2, backgroundColor: 'background.main' }}>
           <Box sx={{ width: 320 }}>
             <Story />
@@ -25,7 +25,7 @@ const meta = {
     ),
   ],
   tags: ['autodocs'],
-} satisfies Meta<typeof SafeShieldDisplay>
+}
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -134,7 +134,11 @@ export const UnableToVerifyContract: Story = {
 
 // Contract loading state
 export const Loading: Story = {
-  args: { recipient: [undefined, undefined, true], contract: [undefined, undefined, true] },
+  args: {
+    recipient: [undefined, undefined, true],
+    contract: [undefined, undefined, true],
+    threat: [undefined, undefined, true],
+  },
   parameters: {
     docs: {
       description: {
@@ -218,6 +222,107 @@ export const ThreatAnalysisWithError: Story = {
       description: {
         story:
           'SafeShieldWidget displaying threat analysis failure with error details dropdown. Click "Show details" to view the error message.',
+      },
+    },
+  },
+}
+
+// Hypernative guard - logged in
+export const HypernativeGuardActive: Story = {
+  args: {
+    ...FullAnalysisBuilder.empty()
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(FullAnalysisBuilder.noThreat().build().threat)
+      .threat(FullAnalysisBuilder.customChecksPassed().build().threat)
+      .build(),
+    hypernativeAuth: {
+      isAuthenticated: true,
+      isTokenExpired: false,
+      initiateLogin: () => {},
+      logout: () => {},
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'SafeShieldWidget when Hypernative guard is enabled and user is authenticated',
+      },
+    },
+  },
+}
+
+// Hypernative guard - not logged in
+export const HypernativeNotLoggedIn: Story = {
+  args: {
+    ...FullAnalysisBuilder.empty()
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(FullAnalysisBuilder.noThreat().build().threat)
+      .build(),
+    hypernativeAuth: {
+      isAuthenticated: false,
+      isTokenExpired: false,
+      initiateLogin: () => {
+        console.log('Initiate login clicked')
+      },
+      logout: () => {
+        console.log('Logout clicked')
+      },
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'SafeShieldWidget when Hypernative guard is enabled and user is not authenticated',
+      },
+    },
+  },
+}
+
+// Hypernative guard - logged in with malicious result
+export const HypernativeMaliciousThreat: Story = {
+  args: {
+    ...FullAnalysisBuilder.empty()
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(
+        FullAnalysisBuilder.maliciousThreat().customCheck(ThreatAnalysisBuilder.customChecksPassed()).build().threat,
+      )
+      .build(),
+    hypernativeAuth: {
+      isAuthenticated: true,
+      isTokenExpired: false,
+      initiateLogin: () => {},
+      logout: () => {},
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'SafeShieldWidget when Hypernative guard is enabled, user is authenticated, and there is a critical contract check result',
+      },
+    },
+  },
+}
+
+// Hypernative guard - logged in with custom check failed result
+export const HypernativeCustomCheckFailed: Story = {
+  args: {
+    ...FullAnalysisBuilder.empty()
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(FullAnalysisBuilder.customCheckFailed().build().threat)
+      .build(),
+    hypernativeAuth: {
+      isAuthenticated: true,
+      isTokenExpired: false,
+      initiateLogin: () => {},
+      logout: () => {},
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'SafeShieldWidget when Hypernative guard is enabled, user is authenticated, and there is a custom check failed result',
       },
     },
   },

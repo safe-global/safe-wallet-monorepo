@@ -9,6 +9,8 @@ import { BatchExecuteHoverProvider } from '@/components/transactions/BatchExecut
 import { usePendingTxsQueue, useShowUnsignedQueue } from '@/hooks/usePendingTxs'
 import RecoveryList from '@/features/recovery/components/RecoveryList'
 import { BRAND_NAME } from '@/config/constants'
+import { HnLoginCard } from '@/features/hypernative/components/HnLoginCard'
+import { useIsHypernativeGuard } from '@/features/hypernative/hooks/useIsHypernativeGuard'
 import { useBannerVisibility } from '@/features/hypernative/hooks'
 import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
 import { HnBannerForQueue } from '@/features/hypernative/components/HnBanner'
@@ -16,6 +18,10 @@ import { HnBannerForQueue } from '@/features/hypernative/components/HnBanner'
 const Queue: NextPage = () => {
   const showPending = useShowUnsignedQueue()
   const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
+  const { isHypernativeGuard, loading: HNGuardCheckLoading } = useIsHypernativeGuard()
+
+  // TODO: Remove the false flag when Hypernative assessments for queued transactions is released
+  const showHnLoginCard = !HNGuardCheckLoading && isHypernativeGuard /* REMOVE -> */ && false /* <- REMOVE */
 
   return (
     <>
@@ -25,6 +31,7 @@ const Queue: NextPage = () => {
 
       <BatchExecuteHoverProvider>
         <TxHeader>
+          {showHnLoginCard && <HnLoginCard />}
           <BatchExecuteButton />
         </TxHeader>
 

@@ -1,7 +1,7 @@
 import { type ReactElement, useMemo, useState, useEffect, useRef } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-
+import HypernativeLogo from '@/features/hypernative/components/HypernativeLogo'
 import {
   ContractStatus,
   type GroupedAnalysisResults,
@@ -24,6 +24,7 @@ interface AnalysisGroupCardProps {
   analyticsEvent?: AnalyticsEvent
   'data-testid'?: string
   requestId?: string
+  isByHypernative?: boolean
 }
 
 export const AnalysisGroupCard = ({
@@ -34,6 +35,7 @@ export const AnalysisGroupCard = ({
   analyticsEvent,
   'data-testid': dataTestId,
   requestId,
+  isByHypernative = false,
 }: AnalysisGroupCardProps): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
@@ -115,7 +117,7 @@ export const AnalysisGroupCard = ({
       {/* Expanded content */}
       <Collapse in={isOpen}>
         <Box sx={{ padding: '4px 12px 16px' }}>
-          <Stack gap={2}>
+          <Stack gap={1}>
             {visibleResults.map((result, index) => {
               const isPrimary = index === 0
               const shouldHighlight = isHighlighted && isPrimary && result.severity === primarySeverity
@@ -138,6 +140,21 @@ export const AnalysisGroupCard = ({
                 />
               )
             })}
+
+            {isByHypernative && (
+              <Stack direction="row" alignItems="center" alignSelf="flex-end" gap={0.5}>
+                <Typography variant="caption" color="text.secondary">
+                  by
+                </Typography>
+                <HypernativeLogo
+                  sx={{
+                    width: 78,
+                    height: 15,
+                    '& > rect': { fill: (theme) => theme.palette.text.secondary },
+                  }}
+                />
+              </Stack>
+            )}
           </Stack>
         </Box>
       </Collapse>
