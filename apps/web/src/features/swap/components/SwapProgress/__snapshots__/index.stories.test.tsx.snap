@@ -62,16 +62,16 @@ exports[`./index.stories NotFilled 1`] = `
         aria-valuemax="100"
         aria-valuemin="0"
         aria-valuenow="0"
-        class="MuiLinearProgress-root MuiLinearProgress-colorWarning MuiLinearProgress-determinate css-16ie1mm-MuiLinearProgress-root"
+        class="MuiLinearProgress-root MuiLinearProgress-colorWarning MuiLinearProgress-determinate css-3xps2c-MuiLinearProgress-root"
         role="progressbar"
       >
         <span
-          class="MuiLinearProgress-bar MuiLinearProgress-barColorWarning MuiLinearProgress-bar1Determinate css-rbamwl-MuiLinearProgress-bar1"
+          class="MuiLinearProgress-bar MuiLinearProgress-barColorWarning MuiLinearProgress-bar1Determinate css-17dlr3g-MuiLinearProgress-bar1"
           style="transform: translateX(-100%);"
         />
       </span>
       <p
-        class="MuiTypography-root MuiTypography-body1 css-1nbo8y4-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-body1 css-1am4l5a-MuiTypography-root"
       >
         0
          %
@@ -109,16 +109,16 @@ exports[`./index.stories PartiallyFilled 1`] = `
         aria-valuemax="100"
         aria-valuemin="0"
         aria-valuenow="20"
-        class="MuiLinearProgress-root MuiLinearProgress-colorWarning MuiLinearProgress-determinate css-16ie1mm-MuiLinearProgress-root"
+        class="MuiLinearProgress-root MuiLinearProgress-colorWarning MuiLinearProgress-determinate css-3xps2c-MuiLinearProgress-root"
         role="progressbar"
       >
         <span
-          class="MuiLinearProgress-bar MuiLinearProgress-barColorWarning MuiLinearProgress-bar1Determinate css-rbamwl-MuiLinearProgress-bar1"
+          class="MuiLinearProgress-bar MuiLinearProgress-barColorWarning MuiLinearProgress-bar1Determinate css-17dlr3g-MuiLinearProgress-bar1"
           style="transform: translateX(-80%);"
         />
       </span>
       <p
-        class="MuiTypography-root MuiTypography-body1 css-1nbo8y4-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-body1 css-1am4l5a-MuiTypography-root"
       >
         20
          %

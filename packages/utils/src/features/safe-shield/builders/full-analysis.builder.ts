@@ -100,4 +100,10 @@ export class FullAnalysisBuilder {
   static failedContract(): FullAnalysisBuilder {
     return new FullAnalysisBuilder().contract(ContractAnalysisBuilder.failedContract().build())
   }
+
+  static unofficialFallbackHandlerContract(address?: string): FullAnalysisBuilder {
+    return new FullAnalysisBuilder().contract(
+      ContractAnalysisBuilder.unofficialFallbackHandlerContract(address).build(),
+    )
+  }
 }
