@@ -17,11 +17,14 @@ export const HypernativeRiskTypeMap: Record<string, AllowedThreatStatusForHypern
   'F-33042': ContractStatus.UNOFFICIAL_FALLBACK_HANDLER,
 }
 
-export const HypernativeRiskTitleMap: { [key in AllowedThreatStatusForHypernative]?: string } = {
+export const HypernativeRiskTitleMap: { [key in AllowedThreatStatusForHypernative | Severity]?: string } = {
   [ThreatStatus.MASTERCOPY_CHANGE]: 'Mastercopy change',
   [ThreatStatus.OWNERSHIP_CHANGE]: 'Ownership change',
   [ThreatStatus.MODULE_CHANGE]: 'Modules change',
   [ContractStatus.UNOFFICIAL_FALLBACK_HANDLER]: 'Unofficial fallback handler',
+  [Severity.CRITICAL]: 'Malicious threat detected',
+  [Severity.WARN]: 'Moderate threat detected',
+  [Severity.OK]: 'No threat detected',
 }
 
 export const HypernativeRiskDescriptionMap: { [key in AllowedThreatStatusForHypernative]?: string } = {
