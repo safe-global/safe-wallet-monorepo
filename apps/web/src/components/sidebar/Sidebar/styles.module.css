@@ -21,7 +21,6 @@
   width: 550px;
   max-width: 90vw;
   padding-top: var(--header-height);
-  border-right: 1px solid var(--color-border-light);
   overflow-y: auto;
   height: 100%;
 }
@@ -67,7 +66,6 @@
 @media (max-width: 899.95px) {
   .container {
     padding-top: var(--header-height);
-    border-right: 1px solid var(--color-border-light);
   }
 
   .drawer {

@@ -42,7 +42,7 @@ exports[`./HnDashboardBanner.stories Default 1`] = `
         <h6
           class="MuiTypography-root MuiTypography-h6 title css-v1yov6-MuiTypography-root"
         >
-          Strengthen your Safe
+          Enforce enterprise-grade security
         </h6>
         <p
           class="MuiTypography-root MuiTypography-body2 description css-17vdyq3-MuiTypography-root"

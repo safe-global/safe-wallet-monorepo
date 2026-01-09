@@ -25,3 +25,7 @@ const HnBannerForSettingsWithConditions = withHnBannerConditions(BannerType.Sett
   HnBannerWithSignupAndDismissal as ComponentType<WithHnBannerConditionsProps>,
 )
 export const HnBannerForSettings = withHnFeature(HnBannerForSettingsWithConditions)
+
+// Export versions for Queue and History pages (same logic as HnBannerForCarousel)
+export { HnBannerForQueue } from './HnBannerForQueue'
+export { HnBannerForHistory } from './HnBannerForHistory'
