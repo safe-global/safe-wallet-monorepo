@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 function OpenLVScreen() {
   const { bottom } = useSafeAreaInsets()
   return (
-    <View style={{ flex: 1 }} paddingBottom={bottom}>
+    <View flex={1} paddingBottom={bottom}>
       <OpenLVContainer />
     </View>
   )

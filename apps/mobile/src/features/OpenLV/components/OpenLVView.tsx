@@ -73,15 +73,15 @@ export const OpenLVView = ({ activeSafe }: OpenLVViewProps) => {
     }
 
     return (
-      <YStack flex={1} padding="$5" space="$5" justifyContent="center">
-        <YStack alignItems="center" space="$2">
+      <YStack flex={1} padding="$5" gap="$5" justifyContent="center">
+        <YStack alignItems="center" gap="$2">
           <SafeFontIcon name="edit" size={48} color="$primary" />
           <Text fontSize="$7" textAlign="center" fontWeight="bold">
             Sign Message
           </Text>
         </YStack>
 
-        <YStack space="$2">
+        <YStack gap="$2">
           <Text fontSize="$3" color="$colorLight" textAlign="left">
             The connected application is requesting a signature:
           </Text>
@@ -98,7 +98,7 @@ export const OpenLVView = ({ activeSafe }: OpenLVViewProps) => {
           </YStack>
         </YStack>
 
-        <YStack space="$3" marginTop="$4">
+        <YStack gap="$3" marginTop="$4">
           <SafeButton onPress={confirmRequest}>Sign Message</SafeButton>
           <SafeButton secondary onPress={rejectRequest}>
             Reject
@@ -118,7 +118,7 @@ export const OpenLVView = ({ activeSafe }: OpenLVViewProps) => {
         onActivateCamera={handleActivateCamera}
         heading="Scan connection QR code"
         footer={
-          <YStack alignItems="center" space="$3">
+          <YStack alignItems="center" gap="$3">
             <Text textAlign="center" color="$colorLight">
               Scan the QR code containing the connection URL
             </Text>
@@ -180,11 +180,11 @@ export const OpenLVView = ({ activeSafe }: OpenLVViewProps) => {
       <YStack flex={1} padding="$4" justifyContent="space-between">
         <YStack gap="$4" width="100%">
           {isLinked ? (
-            <YStack space="$5" alignItems="center">
+            <YStack gap="$5" alignItems="center">
               <YStack padding="$5" backgroundColor="$backgroundSecondary" borderRadius="$10">
                 <SafeFontIcon name="check" size={48} color="$success" />
               </YStack>
-              <YStack space="$2" alignItems="center">
+              <YStack gap="$2" alignItems="center">
                 <Text fontSize="$6" fontWeight="bold">
                   Connected
                 </Text>

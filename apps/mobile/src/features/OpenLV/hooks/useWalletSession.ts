@@ -17,21 +17,15 @@ export interface PendingRequest {
 export function useWalletSession(activeSafeAddress: string) {
   const [connectionUrl, setConnectionUrl] = React.useState<string>('')
   const [status, setStatus] = React.useState<string>('idle')
-  const [logLines, setLogLines] = React.useState<string[]>([])
   const [session, setSession] = React.useState<Session | null>(null)
 
   const [pendingRequest, setPendingRequest] = React.useState<PendingRequest | null>(null)
   const requestResolver = React.useRef<{
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolve: (val: any) => void
+    resolve: (val: string) => void
     reject: (err: Error) => void
   } | null>(null)
 
   const activeSigner = useSelector((state: RootState) => state.activeSigner[activeSafeAddress as Address])
-
-  const appendLog = React.useCallback((line: string) => {
-    setLogLines((prev) => [line, ...prev].slice(0, 50))
-  }, [])
 
   const startSession = React.useCallback(async () => {
     try {
@@ -41,10 +35,8 @@ export function useWalletSession(activeSafeAddress: string) {
 
       Keyboard.dismiss()
       setStatus('connecting')
-      appendLog('Connecting…')
 
       const nextSession = await connectSession(connectionUrl.trim(), async (message): Promise<object> => {
-        appendLog(`RPC <= ${JSON.stringify(message)}`)
         const req = message as { method?: string; params?: unknown[] }
 
         if (req.method === 'eth_accounts' || req.method === 'eth_requestAccounts') {
@@ -54,13 +46,17 @@ export function useWalletSession(activeSafeAddress: string) {
         if (req.method === 'personal_sign') {
           const params = req.params || []
           const msg = params[0] as string
-          return new Promise((resolve, reject) => {
+          // The signature string is returned as the RPC result - cast to satisfy the handler type
+          return new Promise<object>((resolve, reject) => {
             setPendingRequest({
               type: 'personal_sign',
               message: msg,
               params: params,
             })
-            requestResolver.current = { resolve, reject }
+            requestResolver.current = {
+              resolve: resolve as unknown as (val: string) => void,
+              reject,
+            }
           })
         }
 
@@ -69,7 +65,6 @@ export function useWalletSession(activeSafeAddress: string) {
 
       nextSession.emitter.on('state_change', (state) => {
         if (typeof state !== 'undefined') {
-          appendLog(`session state => ${state.status}`)
           setStatus(state.status)
         }
       })
@@ -78,17 +73,13 @@ export function useWalletSession(activeSafeAddress: string) {
 
       await nextSession.connect()
 
-      appendLog('Connected; waiting for link…')
       void nextSession.waitForLink().then(() => {
-        appendLog('Linked! (transport should start)')
         setStatus('linked')
       })
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e)
-      appendLog(`ERROR: ${msg}`)
+    } catch {
       setStatus('error')
     }
-  }, [appendLog, connectionUrl, activeSafeAddress])
+  }, [connectionUrl, activeSafeAddress])
 
   const confirmRequest = React.useCallback(async () => {
     if (!pendingRequest || !requestResolver.current) {
@@ -122,16 +113,14 @@ export function useWalletSession(activeSafeAddress: string) {
       }
 
       requestResolver.current.resolve(signature)
-      appendLog('Request approved')
     } catch (e) {
       const err = e instanceof Error ? e : new Error(String(e))
-      appendLog(`Sign Error: ${err.message}`)
       requestResolver.current.reject(err)
     } finally {
       setPendingRequest(null)
       requestResolver.current = null
     }
-  }, [pendingRequest, activeSigner, appendLog])
+  }, [pendingRequest, activeSigner])
 
   const rejectRequest = React.useCallback(() => {
     if (requestResolver.current) {
@@ -139,30 +128,27 @@ export function useWalletSession(activeSafeAddress: string) {
     }
     setPendingRequest(null)
     requestResolver.current = null
-    appendLog('User rejected request')
-  }, [appendLog])
+  }, [])
 
   const closeSession = React.useCallback(async () => {
     try {
       if (!session) {
         return
       }
-      appendLog('Closing session…')
       await session.close()
       setSession(null)
       setStatus('idle')
-      appendLog('Closed.')
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e)
-      appendLog(`ERROR: ${msg}`)
+    } catch {
+      // Session close failed, reset state anyway
+      setSession(null)
+      setStatus('idle')
     }
-  }, [appendLog, session])
+  }, [session])
 
   return {
     connectionUrl,
     setConnectionUrl,
     status,
-    logLines,
     session,
     startSession,
     closeSession,
