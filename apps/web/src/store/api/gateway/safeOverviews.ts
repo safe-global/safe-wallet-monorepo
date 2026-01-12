@@ -252,25 +252,26 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'Submissions
         return { data: [] }
       }
 
-      // Check if the first safe's chain has the PORTFOLIO_ENDPOINT feature enabled
-      // All safes in a batch should be from the same chain
-      const firstChainId = safes[0].chainId
+      // Get chains data to check feature flags
       const chainsSelector = apiSliceWithChainsConfig.endpoints.getChainsConfig.select(undefined)
       const chainsQueryResult = chainsSelector(state)
-      const chain = chainsQueryResult.data?.entities[firstChainId]
-      const useV2 = chain ? hasFeature(chain, FEATURES.PORTFOLIO_ENDPOINT) : false
 
       try {
-        const fetcher = useV2 ? batchedFetcherV2 : batchedFetcherV1
-        const promisedSafeOverviews: Promise<SafeOverview | undefined>[] = safes.map((safe) =>
-          fetcher.getOverview({
+        // Route each safe to the appropriate fetcher based on its chain's feature flag
+        const promisedSafeOverviews: Promise<SafeOverview | undefined>[] = safes.map((safe) => {
+          const chain = chainsQueryResult.data?.entities[safe.chainId]
+          const useV2 = chain ? hasFeature(chain, FEATURES.PORTFOLIO_ENDPOINT) : false
+          const fetcher = useV2 ? batchedFetcherV2 : batchedFetcherV1
+
+          return fetcher.getOverview({
             chainId: safe.chainId,
             safeAddress: safe.address,
             currency,
             walletAddress,
             dispatch: dispatch as SafeOverviewDispatch,
-          }),
-        )
+          })
+        })
+
         const safeOverviews: (SafeOverview | undefined)[] = await Promise.all(promisedSafeOverviews)
         return { data: safeOverviews.filter(Boolean) as SafeOverview[] }
       } catch (error) {
