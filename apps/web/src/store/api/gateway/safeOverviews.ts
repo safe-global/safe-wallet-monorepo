@@ -25,6 +25,7 @@ type SafeOverviewQueueItem = {
   walletAddress?: string
   chainId: string
   currency: string
+  useV2: boolean
   dispatch: StoreDispatch
   callback: (result: { data: SafeOverview | undefined; error?: never } | { data?: never; error: string }) => void
 }
@@ -33,36 +34,37 @@ const _BATCH_SIZE = 10
 const _FETCH_TIMEOUT = 300
 
 /**
+ * Get the appropriate endpoint based on the v2 feature flag.
+ */
+function getEndpoint(useV2: boolean) {
+  return useV2
+    ? additionalSafesRtkApiV2.endpoints.safesGetOverviewForManyV2
+    : additionalSafesRtkApi.endpoints.safesGetOverviewForMany
+}
+
+/**
  * Batched fetcher for Safe overviews.
  * Collects individual requests and batches them together to reduce API calls.
+ * Handles both v1 and v2 endpoints by grouping requests appropriately.
  */
 class SafeOverviewFetcher {
   private requestQueue: SafeOverviewQueueItem[] = []
   private fetchTimeout: NodeJS.Timeout | null = null
-  private useV2: boolean
-
-  constructor(useV2: boolean) {
-    this.useV2 = useV2
-  }
-
-  private getEndpoint() {
-    return this.useV2
-      ? additionalSafesRtkApiV2.endpoints.safesGetOverviewForManyV2
-      : additionalSafesRtkApi.endpoints.safesGetOverviewForMany
-  }
 
   private async fetchSafeOverviews({
     safeIds,
     walletAddress,
     currency,
     dispatch,
+    useV2,
   }: {
     safeIds: string[]
     walletAddress?: string
     currency: string
     dispatch: StoreDispatch
+    useV2: boolean
   }) {
-    const endpoint = this.getEndpoint()
+    const endpoint = getEndpoint(useV2)
     const queryAction = dispatch(
       endpoint.initiate({
         safes: safeIds,
@@ -81,22 +83,50 @@ class SafeOverviewFetcher {
   }
 
   private async processQueuedItems() {
+    // Dequeue the first BATCH_SIZE items
     const nextBatch = this.requestQueue.slice(0, _BATCH_SIZE)
     this.requestQueue = this.requestQueue.slice(_BATCH_SIZE)
 
-    this.fetchTimeout && clearTimeout(this.fetchTimeout)
-    this.fetchTimeout = null
-
-    if (nextBatch.length === 0) {
-      return
-    }
-
     let overviews: SafeOverview[]
     try {
-      const safeIds = nextBatch.map((request) => makeSafeTag(request.chainId, request.safeAddress))
+      this.fetchTimeout && clearTimeout(this.fetchTimeout)
+      this.fetchTimeout = null
+
+      if (nextBatch.length === 0) {
+        // Nothing to process
+        return
+      }
+
+      // Group by v1/v2 and fetch in parallel
+      const v1Items = nextBatch.filter((item) => !item.useV2)
+      const v2Items = nextBatch.filter((item) => item.useV2)
+
       const { walletAddress, currency, dispatch } = nextBatch[0]
-      overviews = await this.fetchSafeOverviews({ safeIds, currency, walletAddress, dispatch })
+
+      const [v1Overviews, v2Overviews] = await Promise.all([
+        v1Items.length > 0
+          ? this.fetchSafeOverviews({
+              safeIds: v1Items.map((item) => makeSafeTag(item.chainId, item.safeAddress)),
+              currency,
+              walletAddress,
+              dispatch,
+              useV2: false,
+            })
+          : [],
+        v2Items.length > 0
+          ? this.fetchSafeOverviews({
+              safeIds: v2Items.map((item) => makeSafeTag(item.chainId, item.safeAddress)),
+              currency,
+              walletAddress,
+              dispatch,
+              useV2: true,
+            })
+          : [],
+      ])
+
+      overviews = [...v1Overviews, ...v2Overviews]
     } catch {
+      // Overviews could not be fetched
       nextBatch.forEach((item) => item.callback({ error: 'Could not fetch Safe overview' }))
       return
     }
@@ -107,11 +137,6 @@ class SafeOverviewFetcher {
       )
       item.callback({ data: overview })
     })
-
-    // Process remaining items if any
-    if (this.requestQueue.length > 0) {
-      this.processQueuedItems()
-    }
   }
 
   private enqueueRequest(item: SafeOverviewQueueItem) {
@@ -119,32 +144,32 @@ class SafeOverviewFetcher {
 
     if (this.requestQueue.length >= _BATCH_SIZE) {
       this.processQueuedItems()
-    } else if (this.fetchTimeout === null) {
+    }
+
+    // If no timer is running start a timer
+    if (this.fetchTimeout === null) {
       this.fetchTimeout = setTimeout(() => {
         this.processQueuedItems()
       }, _FETCH_TIMEOUT)
     }
   }
 
-  async getOverview(item: Omit<SafeOverviewQueueItem, 'callback'>): Promise<SafeOverview | undefined> {
-    return new Promise((resolve, reject) => {
+  async getOverview(item: Omit<SafeOverviewQueueItem, 'callback'>) {
+    return new Promise<SafeOverview | undefined>((resolve, reject) => {
       this.enqueueRequest({
         ...item,
         callback: (result) => {
           if ('data' in result) {
             resolve(result.data)
-          } else {
-            reject(result.error)
           }
+          reject(result.error)
         },
       })
     })
   }
 }
 
-// Two fetcher instances - one for v1, one for v2
-const fetcherV1 = new SafeOverviewFetcher(false)
-const fetcherV2 = new SafeOverviewFetcher(true)
+const batchedFetcher = new SafeOverviewFetcher()
 
 /**
  * Check if a chain has the PORTFOLIO_ENDPOINT feature enabled (v2 API).
@@ -154,22 +179,6 @@ function shouldUseV2(state: RootState, chainId: string): boolean {
   const chainsQueryResult = chainsSelector(state)
   const chain = chainsQueryResult.data?.entities[chainId]
   return chain ? hasFeature(chain, FEATURES.PORTFOLIO_ENDPOINT) : false
-}
-
-/**
- * Get the appropriate fetcher based on the v2 feature flag.
- */
-function getFetcher(useV2: boolean): SafeOverviewFetcher {
-  return useV2 ? fetcherV2 : fetcherV1
-}
-
-/**
- * Get the appropriate endpoint based on the v2 feature flag.
- */
-function getEndpoint(useV2: boolean) {
-  return useV2
-    ? additionalSafesRtkApiV2.endpoints.safesGetOverviewForManyV2
-    : additionalSafesRtkApi.endpoints.safesGetOverviewForMany
 }
 
 /**
@@ -214,12 +223,12 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'Submissions
 
         try {
           const useV2 = shouldUseV2(state, chainId)
-          const fetcher = getFetcher(useV2)
-          const safeOverview = await fetcher.getOverview({
+          const safeOverview = await batchedFetcher.getOverview({
             chainId,
             currency,
             walletAddress,
             safeAddress,
+            useV2,
             dispatch: dispatch as StoreDispatch,
           })
           return { data: safeOverview ?? null }
