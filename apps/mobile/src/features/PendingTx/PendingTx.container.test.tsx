@@ -5,6 +5,9 @@ import { server } from '@/src/tests/server'
 import { http, HttpResponse } from 'msw'
 import { GATEWAY_URL } from '@/src/config/constants'
 import { faker } from '@faker-js/faker'
+import { keyExtractor } from './utils'
+import { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { PendingTransactionItems, TransactionListItemType } from '@safe-global/store/gateway/types'
 
 // Create a mutable object for the mock
 const mockSafeState = {
@@ -230,4 +233,117 @@ describe('PendingTxContainer', () => {
     // List should still be rendered
     expect(screen.getByTestId('pending-tx-list')).toBeTruthy()
   }, 10000)
+
+  describe('keyExtractor', () => {
+    const createMockTransaction = (
+      id: string,
+      txHash: string | null,
+      confirmationsSubmitted?: number,
+    ): TransactionQueuedItem => ({
+      type: TransactionListItemType.TRANSACTION,
+      transaction: {
+        id,
+        txHash,
+        timestamp: 1642730570000,
+        txStatus: 'AWAITING_CONFIRMATIONS',
+        txInfo: {
+          type: 'Transfer',
+          sender: { value: faker.finance.ethereumAddress(), name: null, logoUri: null },
+          recipient: { value: faker.finance.ethereumAddress(), name: null, logoUri: null },
+          direction: 'OUTGOING',
+          transferInfo: { type: 'NATIVE_COIN', value: '1000000000000000000' },
+        },
+        executionInfo:
+          confirmationsSubmitted !== undefined
+            ? {
+                type: 'MULTISIG',
+                nonce: 42,
+                confirmationsRequired: 2,
+                confirmationsSubmitted,
+                missingSigners: [],
+              }
+            : null,
+      },
+      conflictType: 'None',
+    })
+
+    it('generates unique keys for duplicate transactions with same ID and confirmationsSubmitted', () => {
+      const txId =
+        'multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0xf1bc2b8e93791cf1fe3a11c0d5dc6d74672fd704584762b74cd3169ea09f21901'
+      const tx1 = createMockTransaction(txId, null, 2)
+      const tx2 = createMockTransaction(txId, null, 2)
+
+      const key1 = keyExtractor(tx1, 0)
+      const key2 = keyExtractor(tx2, 1)
+
+      expect(key1).not.toBe(key2)
+      expect(key1).toContain(txId)
+      expect(key2).toContain(txId)
+      expect(key1).toContain('2') // confirmationsSubmitted
+      expect(key2).toContain('2') // confirmationsSubmitted
+      expect(key1).toContain('0') // index
+      expect(key2).toContain('1') // index
+    })
+
+    it('includes section prefix in keys when provided', () => {
+      const tx = createMockTransaction('multisig_0x123', '0xabc', 1)
+      const section = { title: 'Next' }
+
+      const key = keyExtractor(tx, 0, section)
+
+      expect(key).toContain('Next_')
+      expect(key).toContain('multisig_0x123')
+    })
+
+    it('generates unique keys for transactions in different sections', () => {
+      const txId = 'multisig_0x123'
+      const tx = createMockTransaction(txId, null, 1)
+
+      const key1 = keyExtractor(tx, 0, { title: 'Next' })
+      const key2 = keyExtractor(tx, 0, { title: 'In queue' })
+
+      expect(key1).not.toBe(key2)
+      expect(key1).toContain('Next_')
+      expect(key2).toContain('In queue_')
+    })
+
+    it('generates unique keys for bulk transactions with same hash', () => {
+      const txHash = '0xabc123'
+      const bulk1: TransactionQueuedItem[] = [
+        createMockTransaction('multisig_0x1', txHash),
+        createMockTransaction('multisig_0x2', txHash),
+      ]
+      const bulk2: TransactionQueuedItem[] = [
+        createMockTransaction('multisig_0x3', txHash),
+        createMockTransaction('multisig_0x4', txHash),
+      ]
+
+      const key1 = keyExtractor(bulk1, 0, { title: 'Next' })
+      const key2 = keyExtractor(bulk2, 1, { title: 'Next' })
+
+      expect(key1).not.toBe(key2)
+      expect(key1).toContain(txHash)
+      expect(key2).toContain(txHash)
+      expect(key1).toContain('0')
+      expect(key2).toContain('1')
+    })
+
+    it('generates unique keys for label items', () => {
+      const label1: PendingTransactionItems = {
+        type: TransactionListItemType.LABEL,
+        label: 'Next',
+      }
+      const label2: PendingTransactionItems = {
+        type: TransactionListItemType.LABEL,
+        label: 'Next',
+      }
+
+      const key1 = keyExtractor(label1, 0)
+      const key2 = keyExtractor(label2, 1)
+
+      expect(key1).not.toBe(key2)
+      expect(key1).toContain('0')
+      expect(key2).toContain('1')
+    })
+  })
 })

@@ -3,7 +3,7 @@ import Head from 'next/head'
 import useTxHistory from '@/hooks/useTxHistory'
 import PaginatedTxns from '@/components/common/PaginatedTxns'
 import TxHeader from '@/components/transactions/TxHeader'
-import { Box } from '@mui/material'
+import { Box, Skeleton } from '@mui/material'
 import { useState } from 'react'
 import Button from '@mui/material/Button'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
@@ -15,10 +15,14 @@ import { BRAND_NAME } from '@/config/constants'
 import CsvTxExportButton from '@/components/transactions/CsvTxExportButton'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useBannerVisibility } from '@/features/hypernative/hooks'
+import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
+import { HnBannerForHistory } from '@/features/hypernative/components/HnBanner'
 
 const History: NextPage = () => {
   const [filter] = useTxFilter()
   const isCsvExportEnabled = useHasFeature(FEATURES.CSV_TX_EXPORT)
+  const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
 
   const [showFilter, setShowFilter] = useState(false)
 
@@ -46,6 +50,17 @@ const History: NextPage = () => {
         {showFilter && <TxFilterForm toggleFilter={toggleFilter} />}
 
         <Box mb={4}>
+          {hnLoading && (
+            <Box mb={3}>
+              <Skeleton variant="rounded" height={30} />
+            </Box>
+          )}
+          {showHnBanner && !hnLoading && (
+            <Box mb={3}>
+              <HnBannerForHistory />
+            </Box>
+          )}
+
           <PaginatedTxns useTxns={useTxHistory} />
         </Box>
       </main>

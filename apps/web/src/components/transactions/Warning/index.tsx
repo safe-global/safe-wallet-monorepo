@@ -77,7 +77,7 @@ export const UntrustedFallbackHandlerWarning = ({
     datatestid="untrusted-fallback-handler-warning"
     title={<UntrustedFallbackHandlerTxText isTxExecuted={isTxExecuted} />}
     severity="warning"
-    text="Untrusted fallback handler"
+    text="Unofficial fallback handler"
   />
 )
 

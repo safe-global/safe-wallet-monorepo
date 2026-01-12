@@ -199,16 +199,16 @@ exports[`./swap.stories CancelledLimit 1`] = `
                 aria-valuemax="100"
                 aria-valuemin="0"
                 aria-valuenow="0"
-                class="MuiLinearProgress-root MuiLinearProgress-colorWarning MuiLinearProgress-determinate css-16ie1mm-MuiLinearProgress-root"
+                class="MuiLinearProgress-root MuiLinearProgress-colorWarning MuiLinearProgress-determinate css-3xps2c-MuiLinearProgress-root"
                 role="progressbar"
               >
                 <span
-                  class="MuiLinearProgress-bar MuiLinearProgress-barColorWarning MuiLinearProgress-bar1Determinate css-rbamwl-MuiLinearProgress-bar1"
+                  class="MuiLinearProgress-bar MuiLinearProgress-barColorWarning MuiLinearProgress-bar1Determinate css-17dlr3g-MuiLinearProgress-bar1"
                   style="transform: translateX(-100%);"
                 />
               </span>
               <p
-                class="MuiTypography-root MuiTypography-body1 css-1nbo8y4-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-body1 css-1am4l5a-MuiTypography-root"
               >
                 0
                  %
@@ -325,7 +325,7 @@ exports[`./swap.stories CancelledLimit 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             <div
-              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-4kcw4c-MuiChip-root"
+              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1im6wh6-MuiChip-root"
             >
               <span
                 class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -653,7 +653,7 @@ exports[`./swap.stories CancelledMarket 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             <div
-              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-4kcw4c-MuiChip-root"
+              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1im6wh6-MuiChip-root"
             >
               <span
                 class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -1095,7 +1095,7 @@ exports[`./swap.stories ExecutedLimit 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             <div
-              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-a6ps16-MuiChip-root"
+              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1cjet8q-MuiChip-root"
             >
               <span
                 class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -1477,7 +1477,7 @@ exports[`./swap.stories ExecutedMarket 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             <div
-              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-a6ps16-MuiChip-root"
+              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1cjet8q-MuiChip-root"
             >
               <span
                 class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -1739,16 +1739,16 @@ exports[`./swap.stories ExpiredLimit 1`] = `
                 aria-valuemax="100"
                 aria-valuemin="0"
                 aria-valuenow="0"
-                class="MuiLinearProgress-root MuiLinearProgress-colorWarning MuiLinearProgress-determinate css-16ie1mm-MuiLinearProgress-root"
+                class="MuiLinearProgress-root MuiLinearProgress-colorWarning MuiLinearProgress-determinate css-3xps2c-MuiLinearProgress-root"
                 role="progressbar"
               >
                 <span
-                  class="MuiLinearProgress-bar MuiLinearProgress-barColorWarning MuiLinearProgress-bar1Determinate css-rbamwl-MuiLinearProgress-bar1"
+                  class="MuiLinearProgress-bar MuiLinearProgress-barColorWarning MuiLinearProgress-bar1Determinate css-17dlr3g-MuiLinearProgress-bar1"
                   style="transform: translateX(-100%);"
                 />
               </span>
               <p
-                class="MuiTypography-root MuiTypography-body1 css-1nbo8y4-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-body1 css-1am4l5a-MuiTypography-root"
               >
                 0
                  %
@@ -2483,16 +2483,16 @@ exports[`./swap.stories LimitExpiredPartiallyFilled 1`] = `
                 aria-valuemax="100"
                 aria-valuemin="0"
                 aria-valuenow="10"
-                class="MuiLinearProgress-root MuiLinearProgress-colorWarning MuiLinearProgress-determinate css-16ie1mm-MuiLinearProgress-root"
+                class="MuiLinearProgress-root MuiLinearProgress-colorWarning MuiLinearProgress-determinate css-3xps2c-MuiLinearProgress-root"
                 role="progressbar"
               >
                 <span
-                  class="MuiLinearProgress-bar MuiLinearProgress-barColorWarning MuiLinearProgress-bar1Determinate css-rbamwl-MuiLinearProgress-bar1"
+                  class="MuiLinearProgress-bar MuiLinearProgress-barColorWarning MuiLinearProgress-bar1Determinate css-17dlr3g-MuiLinearProgress-bar1"
                   style="transform: translateX(-90%);"
                 />
               </span>
               <p
-                class="MuiTypography-root MuiTypography-body1 css-1nbo8y4-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-body1 css-1am4l5a-MuiTypography-root"
               >
                 10
                  %
@@ -2609,7 +2609,7 @@ exports[`./swap.stories LimitExpiredPartiallyFilled 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             <div
-              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-a6ps16-MuiChip-root"
+              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1cjet8q-MuiChip-root"
             >
               <span
                 class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -2899,16 +2899,16 @@ exports[`./swap.stories LimitOpenPartiallyFilled 1`] = `
                 aria-valuemax="100"
                 aria-valuemin="0"
                 aria-valuenow="10"
-                class="MuiLinearProgress-root MuiLinearProgress-colorWarning MuiLinearProgress-determinate css-16ie1mm-MuiLinearProgress-root"
+                class="MuiLinearProgress-root MuiLinearProgress-colorWarning MuiLinearProgress-determinate css-3xps2c-MuiLinearProgress-root"
                 role="progressbar"
               >
                 <span
-                  class="MuiLinearProgress-bar MuiLinearProgress-barColorWarning MuiLinearProgress-bar1Determinate css-rbamwl-MuiLinearProgress-bar1"
+                  class="MuiLinearProgress-bar MuiLinearProgress-barColorWarning MuiLinearProgress-bar1Determinate css-17dlr3g-MuiLinearProgress-bar1"
                   style="transform: translateX(-90%);"
                 />
               </span>
               <p
-                class="MuiTypography-root MuiTypography-body1 css-1nbo8y4-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-body1 css-1am4l5a-MuiTypography-root"
               >
                 10
                  %
@@ -3025,7 +3025,7 @@ exports[`./swap.stories LimitOpenPartiallyFilled 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             <div
-              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-a6ps16-MuiChip-root"
+              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1cjet8q-MuiChip-root"
             >
               <span
                 class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -3287,16 +3287,16 @@ exports[`./swap.stories OpenLimit 1`] = `
                 aria-valuemax="100"
                 aria-valuemin="0"
                 aria-valuenow="0"
-                class="MuiLinearProgress-root MuiLinearProgress-colorWarning MuiLinearProgress-determinate css-16ie1mm-MuiLinearProgress-root"
+                class="MuiLinearProgress-root MuiLinearProgress-colorWarning MuiLinearProgress-determinate css-3xps2c-MuiLinearProgress-root"
                 role="progressbar"
               >
                 <span
-                  class="MuiLinearProgress-bar MuiLinearProgress-barColorWarning MuiLinearProgress-bar1Determinate css-rbamwl-MuiLinearProgress-bar1"
+                  class="MuiLinearProgress-bar MuiLinearProgress-barColorWarning MuiLinearProgress-bar1Determinate css-17dlr3g-MuiLinearProgress-bar1"
                   style="transform: translateX(-100%);"
                 />
               </span>
               <p
-                class="MuiTypography-root MuiTypography-body1 css-1nbo8y4-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-body1 css-1am4l5a-MuiTypography-root"
               >
                 0
                  %
@@ -3413,7 +3413,7 @@ exports[`./swap.stories OpenLimit 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             <div
-              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1f2uoeu-MuiChip-root"
+              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-2q1p8k-MuiChip-root"
             >
               <span
                 class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -3741,7 +3741,7 @@ exports[`./swap.stories OpenMarket 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             <div
-              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1f2uoeu-MuiChip-root"
+              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-2q1p8k-MuiChip-root"
             >
               <span
                 class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -4003,16 +4003,16 @@ exports[`./swap.stories PendingLimit 1`] = `
                 aria-valuemax="100"
                 aria-valuemin="0"
                 aria-valuenow="0"
-                class="MuiLinearProgress-root MuiLinearProgress-colorWarning MuiLinearProgress-determinate css-16ie1mm-MuiLinearProgress-root"
+                class="MuiLinearProgress-root MuiLinearProgress-colorWarning MuiLinearProgress-determinate css-3xps2c-MuiLinearProgress-root"
                 role="progressbar"
               >
                 <span
-                  class="MuiLinearProgress-bar MuiLinearProgress-barColorWarning MuiLinearProgress-bar1Determinate css-rbamwl-MuiLinearProgress-bar1"
+                  class="MuiLinearProgress-bar MuiLinearProgress-barColorWarning MuiLinearProgress-bar1Determinate css-17dlr3g-MuiLinearProgress-bar1"
                   style="transform: translateX(-100%);"
                 />
               </span>
               <p
-                class="MuiTypography-root MuiTypography-body1 css-1nbo8y4-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-body1 css-1am4l5a-MuiTypography-root"
               >
                 0
                  %
@@ -4129,7 +4129,7 @@ exports[`./swap.stories PendingLimit 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             <div
-              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1f2uoeu-MuiChip-root"
+              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-2q1p8k-MuiChip-root"
             >
               <span
                 class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
@@ -4457,7 +4457,7 @@ exports[`./swap.stories PendingMarket 1`] = `
             class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             <div
-              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1f2uoeu-MuiChip-root"
+              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-2q1p8k-MuiChip-root"
             >
               <span
                 class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"

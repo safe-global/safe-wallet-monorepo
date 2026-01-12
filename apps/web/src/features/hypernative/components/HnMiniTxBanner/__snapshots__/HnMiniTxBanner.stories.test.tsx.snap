@@ -31,12 +31,12 @@ exports[`./HnMiniTxBanner.stories Default 1`] = `
           <p
             class="MuiTypography-root MuiTypography-body2 bannerTitle css-17vdyq3-MuiTypography-root"
           >
-            Strengthen your Safe
+            Enforce enterprise-grade security
           </p>
           <span
             class="MuiTypography-root MuiTypography-caption bannerDescription css-19nflmw-MuiTypography-root"
           >
-            Monitor and block risky transactions
+            Learn more
           </span>
         </div>
       </div>

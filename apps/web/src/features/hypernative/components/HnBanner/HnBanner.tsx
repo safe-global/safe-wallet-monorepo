@@ -28,7 +28,7 @@ export const HnBanner = ({ onHnSignupClick, onDismiss, label }: HnBannerProps) =
         action: HYPERNATIVE_EVENTS.GUARDIAN_BANNER_DISMISSED.action,
         label,
       }}
-      title="Strengthen your Safe"
+      title="Enforce enterprise-grade security"
       description={
         <>
           Automatically monitor and block risky transactions using advanced, user-defined security policies, powered by{' '}

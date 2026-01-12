@@ -29,7 +29,7 @@ exports[`./HnBanner.stories Default 1`] = `
         <h4
           class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle css-1smelnd-MuiTypography-root"
         >
-          Strengthen your Safe
+          Enforce enterprise-grade security
         </h4>
         <p
           class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription css-6sro4l-MuiTypography-root"
@@ -118,7 +118,7 @@ exports[`./HnBanner.stories NonDismissable 1`] = `
         <h4
           class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle css-1smelnd-MuiTypography-root"
         >
-          Strengthen your Safe
+          Enforce enterprise-grade security
         </h4>
         <p
           class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription css-6sro4l-MuiTypography-root"

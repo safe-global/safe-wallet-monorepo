@@ -4,7 +4,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import type { Url } from 'next/dist/shared/lib/router/router'
-import { IconButton, Paper } from '@mui/material'
+import { Box, IconButton, Paper } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import classnames from 'classnames'
 import css from './styles.module.css'
@@ -96,21 +96,23 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
         </div>
       )}
 
-      <div data-testid="notifications-center" className={css.element}>
-        <NotificationCenter />
-      </div>
-
-      {showBatchButton && (
-        <div className={classnames(css.element, css.hideMobile)}>
-          <BatchIndicator onClick={handleBatchToggle} />
+      <Box className={css.rightSideGroup}>
+        <div data-testid="notifications-center" className={css.element}>
+          <NotificationCenter />
         </div>
-      )}
 
-      {enableWc && (
-        <div className={classnames(css.element, css.hideMobile)}>
-          <WalletConnect />
-        </div>
-      )}
+        {showBatchButton && (
+          <div className={classnames(css.element, css.hideMobile)}>
+            <BatchIndicator onClick={handleBatchToggle} />
+          </div>
+        )}
+
+        {enableWc && (
+          <div className={classnames(css.element, css.hideMobile)}>
+            <WalletConnect />
+          </div>
+        )}
+      </Box>
 
       <div className={classnames(css.element, css.connectWallet)}>
         <Track label={OVERVIEW_LABELS.top_bar} {...OVERVIEW_EVENTS.OPEN_ONBOARD}>
@@ -120,7 +122,7 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
 
       {safeAddress && (
         <div className={classnames(css.element, css.networkSelector)}>
-          <NetworkSelector offerSafeCreation />
+          <NetworkSelector offerSafeCreation compactButton={true} />
         </div>
       )}
     </Paper>
