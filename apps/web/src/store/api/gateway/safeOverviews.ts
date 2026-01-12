@@ -1,4 +1,5 @@
 import { type EndpointBuilder } from '@reduxjs/toolkit/query/react'
+import type { ThunkDispatch, UnknownAction } from '@reduxjs/toolkit'
 
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -11,12 +12,15 @@ import { additionalSafesRtkApi, additionalSafesRtkApiV2 } from '@safe-global/sto
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 
+// Type for RTK Query dispatch that can handle both v1 and v2 thunks
+type SafeOverviewDispatch = ThunkDispatch<RootState, unknown, UnknownAction>
+
 type SafeOverviewQueueItem = {
   safeAddress: string
   walletAddress?: string
   chainId: string
   currency: string
-  dispatch: any // RTK Query dispatch - will be called with the appropriate thunk
+  dispatch: SafeOverviewDispatch
   getState: () => RootState
   callback: (result: { data: SafeOverview | undefined; error?: never } | { data?: never; error: string }) => void
 }
@@ -40,7 +44,7 @@ class SafeOverviewFetcher {
     safeIds: `${number}:0x${string}`[]
     walletAddress?: string
     currency: string
-    dispatch: any
+    dispatch: SafeOverviewDispatch
     chainId: string
     getState: () => RootState
   }): Promise<SafeOverview[]> {
