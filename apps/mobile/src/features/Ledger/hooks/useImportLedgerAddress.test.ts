@@ -10,20 +10,13 @@ import { server } from '@/src/tests/server'
 import { http, HttpResponse } from 'msw'
 import { GATEWAY_URL } from '@/src/config/constants'
 
-// Mock the ledger service
 jest.mock('@/src/services/ledger/ledger-dmk.service', () => ({
   ledgerDMKService: {
     disconnect: jest.fn(),
   },
 }))
 
-// Mock expo-router
-jest.mock('expo-router', () => ({
-  useGlobalSearchParams: jest.fn(() => ({})),
-}))
-
 const mockLedgerDMKService = ledgerDMKService as jest.Mocked<typeof ledgerDMKService>
-const mockUseGlobalSearchParams = require('expo-router').useGlobalSearchParams
 
 describe('useImportLedgerAddress', () => {
   let mockSafeAddress: `0x${string}`
@@ -33,19 +26,11 @@ describe('useImportLedgerAddress', () => {
     jest.clearAllMocks()
     server.resetHandlers()
 
-    // Generate fresh mock data
     mockSafeAddress = faker.finance.ethereumAddress() as `0x${string}`
     mockChainId = '1'
 
-    // Clear console.error mock calls
     jest.spyOn(console, 'error').mockImplementation(() => {
       /* noop */
-    })
-
-    // Default mock for expo-router
-    mockUseGlobalSearchParams.mockReturnValue({
-      safeAddress: mockSafeAddress,
-      chainId: mockChainId,
     })
   })
 
@@ -97,9 +82,19 @@ describe('useImportLedgerAddress', () => {
     return mockOwners
   }
 
+  const getDefaultInitialState = (safeAddress: string, chainId: string): Partial<RootState> => ({
+    activeSafe: { address: safeAddress as `0x${string}`, chainId },
+    signers: {},
+    addressBook: { contacts: {}, selectedContact: null },
+    activeSigner: {},
+  })
+
   describe('initial state', () => {
     it('should initialize with correct default values', () => {
-      const { result } = renderHook(() => useImportLedgerAddress())
+      const { result } = renderHook(
+        () => useImportLedgerAddress(),
+        getDefaultInitialState(mockSafeAddress, mockChainId),
+      )
 
       expect(result.current.isImporting).toBe(false)
       expect(result.current.error).toBeNull()
@@ -110,7 +105,10 @@ describe('useImportLedgerAddress', () => {
 
   describe('validation errors', () => {
     it('should return validation error for empty address', async () => {
-      const { result } = renderHook(() => useImportLedgerAddress())
+      const { result } = renderHook(
+        () => useImportLedgerAddress(),
+        getDefaultInitialState(mockSafeAddress, mockChainId),
+      )
 
       let importResult
       await act(async () => {
@@ -126,7 +124,10 @@ describe('useImportLedgerAddress', () => {
     })
 
     it('should return validation error for empty path', async () => {
-      const { result } = renderHook(() => useImportLedgerAddress())
+      const { result } = renderHook(
+        () => useImportLedgerAddress(),
+        getDefaultInitialState(mockSafeAddress, mockChainId),
+      )
 
       let importResult
       await act(async () => {
@@ -142,7 +143,10 @@ describe('useImportLedgerAddress', () => {
     })
 
     it('should return validation error for both empty address and path', async () => {
-      const { result } = renderHook(() => useImportLedgerAddress())
+      const { result } = renderHook(
+        () => useImportLedgerAddress(),
+        getDefaultInitialState(mockSafeAddress, mockChainId),
+      )
 
       let importResult
       await act(async () => {
@@ -160,7 +164,10 @@ describe('useImportLedgerAddress', () => {
     it('should return owner validation error when address is not an owner', async () => {
       setupFailedOwnershipValidation(mockSafeAddress, mockChainId)
 
-      const { result } = renderHook(() => useImportLedgerAddress())
+      const { result } = renderHook(
+        () => useImportLedgerAddress(),
+        getDefaultInitialState(mockSafeAddress, mockChainId),
+      )
 
       let importResult
       await act(async () => {
@@ -192,6 +199,7 @@ describe('useImportLedgerAddress', () => {
       setupSuccessfulOwnershipValidationWithoutInfo(mockAddress, mockSafeAddress, mockChainId)
 
       const initialState: Partial<RootState> = {
+        ...getDefaultInitialState(mockSafeAddress, mockChainId),
         signers: {},
         addressBook: { contacts: {}, selectedContact: null },
         activeSigner: {},
@@ -206,7 +214,6 @@ describe('useImportLedgerAddress', () => {
         importResult = await result.current.importAddress(mockAddress, mockPath, mockIndex, 'Ledger Device')
       })
 
-      // Check import result
       expect(importResult).toEqual({
         success: true,
         selected: {
@@ -216,14 +223,11 @@ describe('useImportLedgerAddress', () => {
         },
       })
 
-      // Check hook state
       expect(result.current.isImporting).toBe(false)
       expect(result.current.error).toBeNull()
 
-      // Now check the Redux state through the returned store
       const state = store.getState() as RootState
 
-      // Check that signer was added to Redux state
       const signers = selectSigners(state)
       expect(signers[mockAddress]).toEqual({
         value: mockAddress,
@@ -233,7 +237,6 @@ describe('useImportLedgerAddress', () => {
         derivationPath: mockPath,
       })
 
-      // Check that address book entry was created
       const contact = selectContactByAddress(mockAddress)(state)
       expect(contact).toEqual({
         value: mockAddress,
@@ -241,7 +244,6 @@ describe('useImportLedgerAddress', () => {
         chainIds: [],
       })
 
-      // Verify ledger service was disconnected
       expect(mockLedgerDMKService.disconnect).toHaveBeenCalledTimes(1)
     })
 
@@ -252,30 +254,28 @@ describe('useImportLedgerAddress', () => {
 
       setupSuccessfulOwnershipValidation(mockAddress, mockSafeAddress, mockChainId)
 
-      // Mock a longer running disconnect to test loading state
       let resolveDisconnect: (() => void) | undefined
       const disconnectPromise = new Promise<void>((resolve) => {
         resolveDisconnect = resolve
       })
       mockLedgerDMKService.disconnect.mockReturnValue(disconnectPromise)
 
-      const { result } = renderHook(() => useImportLedgerAddress())
+      const { result } = renderHook(
+        () => useImportLedgerAddress(),
+        getDefaultInitialState(mockSafeAddress, mockChainId),
+      )
 
-      // Start the import process
       const importPromise = result.current.importAddress(mockAddress, mockPath, mockIndex, 'Ledger Device')
 
-      // Check that isImporting is true during the process
       await waitFor(() => {
         expect(result.current.isImporting).toBe(true)
       })
 
-      // Resolve the disconnect
       resolveDisconnect?.()
       await act(async () => {
         await importPromise
       })
 
-      // Check that isImporting is false after completion
       expect(result.current.isImporting).toBe(false)
     })
   })
@@ -291,14 +291,16 @@ describe('useImportLedgerAddress', () => {
       const disconnectError = new Error('Disconnect failed')
       mockLedgerDMKService.disconnect.mockRejectedValue(disconnectError)
 
-      const { result } = renderHook(() => useImportLedgerAddress())
+      const { result } = renderHook(
+        () => useImportLedgerAddress(),
+        getDefaultInitialState(mockSafeAddress, mockChainId),
+      )
 
       let importResult
       await act(async () => {
         importResult = await result.current.importAddress(mockAddress, mockPath, mockIndex, 'Ledger Device')
       })
 
-      // Should fail when disconnect fails since it's in the try-catch
       expect(importResult).toEqual({ success: false })
 
       expect(result.current.isImporting).toBe(false)
@@ -311,16 +313,17 @@ describe('useImportLedgerAddress', () => {
 
   describe('error clearing', () => {
     it('should clear error when clearError is called', async () => {
-      const { result } = renderHook(() => useImportLedgerAddress())
+      const { result } = renderHook(
+        () => useImportLedgerAddress(),
+        getDefaultInitialState(mockSafeAddress, mockChainId),
+      )
 
-      // First, create an error
       await act(async () => {
         await result.current.importAddress('', '', createMockIndex(), 'Ledger Device')
       })
 
       expect(result.current.error).not.toBeNull()
 
-      // Then clear it
       act(() => {
         result.current.clearError()
       })
@@ -329,12 +332,13 @@ describe('useImportLedgerAddress', () => {
     })
 
     it('should clear error when starting a new import after validation error', async () => {
-      // Ensure disconnect succeeds for the valid import
       mockLedgerDMKService.disconnect.mockResolvedValue(undefined)
 
-      const { result } = renderHook(() => useImportLedgerAddress())
+      const { result } = renderHook(
+        () => useImportLedgerAddress(),
+        getDefaultInitialState(mockSafeAddress, mockChainId),
+      )
 
-      // First, create a validation error
       await act(async () => {
         await result.current.importAddress('', '', createMockIndex(), 'Ledger Device')
       })
@@ -344,7 +348,6 @@ describe('useImportLedgerAddress', () => {
         message: 'Invalid address or derivation path',
       })
 
-      // Then start a valid import - error should be cleared
       const mockAddress = createMockAddress()
       const mockPath = createMockPath()
       const mockIndex = createMockIndex()
@@ -361,7 +364,10 @@ describe('useImportLedgerAddress', () => {
 
   describe('function reference stability', () => {
     it('should maintain stable clearError function reference', () => {
-      const { result, rerender } = renderHook(() => useImportLedgerAddress())
+      const { result, rerender } = renderHook(
+        () => useImportLedgerAddress(),
+        getDefaultInitialState(mockSafeAddress, mockChainId),
+      )
 
       const firstClearError = result.current.clearError
 
@@ -390,6 +396,7 @@ describe('useImportLedgerAddress', () => {
       setupSuccessfulOwnershipValidationWithoutInfo(newAddress, mockSafeAddress, mockChainId)
 
       const initialState: Partial<RootState> = {
+        ...getDefaultInitialState(mockSafeAddress, mockChainId),
         signers: {
           [existingAddress]: existingSigner,
         },
@@ -405,11 +412,9 @@ describe('useImportLedgerAddress', () => {
         await result.current.importAddress(newAddress, newPath, newIndex, 'Ledger Device')
       })
 
-      // Check the Redux state through the returned store
       const state = store.getState() as RootState
       const signers = selectSigners(state)
 
-      // Should have both signers
       expect(signers[existingAddress]).toEqual(existingSigner)
       expect(signers[newAddress]).toEqual({
         value: newAddress,
@@ -428,7 +433,7 @@ describe('useImportLedgerAddress', () => {
       const mockPath = createMockPath()
       const mockIndex = createMockIndex()
 
-      setupSuccessfulOwnershipValidationWithoutInfo(mockAddress, mockSafeAddress, mockChainId)
+      setupSuccessfulOwnershipValidationWithoutInfo(mockAddress, safeAddress, mockChainId)
 
       const initialState: Partial<RootState> = {
         signers: {},
@@ -436,7 +441,7 @@ describe('useImportLedgerAddress', () => {
         activeSigner: {},
         activeSafe: {
           address: safeAddress,
-          chainId: '1',
+          chainId: mockChainId,
         },
       }
 
@@ -448,12 +453,68 @@ describe('useImportLedgerAddress', () => {
         await result.current.importAddress(mockAddress, mockPath, mockIndex, 'Ledger Device')
       })
 
-      // Check the Redux state through the returned store
       const state = store.getState() as RootState
 
-      // Should set active signer for the safe
       const activeSigner = selectActiveSigner(state, safeAddress)
       expect(activeSigner).toEqual({
+        value: mockAddress,
+        name: `Ledger Device-${mockAddress.slice(-4)}`,
+        logoUri: null,
+        type: 'ledger',
+        derivationPath: mockPath,
+      })
+    })
+
+    it('should work with pendingSafe for onboarding flow', async () => {
+      mockLedgerDMKService.disconnect.mockResolvedValue(undefined)
+
+      const pendingSafeAddress = createMockAddress()
+      const mockAddress = createMockAddress()
+      const mockPath = createMockPath()
+      const mockIndex = createMockIndex()
+
+      const mockOwnedSafesResponse = {
+        '1': [pendingSafeAddress],
+        '137': [faker.finance.ethereumAddress()],
+      }
+
+      server.use(
+        http.get(`${GATEWAY_URL}/v2/owners/${mockAddress}/safes`, () => {
+          return HttpResponse.json(mockOwnedSafesResponse)
+        }),
+      )
+
+      const initialState: Partial<RootState> = {
+        signers: {},
+        addressBook: { contacts: {}, selectedContact: null },
+        activeSigner: {},
+        signerImportFlow: {
+          pendingSafe: { address: pendingSafeAddress, name: 'Pending Safe' },
+        },
+      }
+
+      const hookResult = renderHook(() => useImportLedgerAddress(), initialState)
+      const { result } = hookResult
+      const store = hookResult.store as { getState: () => RootState }
+
+      let importResult
+      await act(async () => {
+        importResult = await result.current.importAddress(mockAddress, mockPath, mockIndex, 'Ledger Device')
+      })
+
+      expect(importResult).toEqual({
+        success: true,
+        selected: {
+          address: mockAddress,
+          path: mockPath,
+          index: mockIndex,
+        },
+      })
+
+      const state = store.getState() as RootState
+      const signers = selectSigners(state)
+
+      expect(signers[mockAddress]).toEqual({
         value: mockAddress,
         name: `Ledger Device-${mockAddress.slice(-4)}`,
         logoUri: null,

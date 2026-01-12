@@ -20,7 +20,6 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import PositionsHeader from '@/features/positions/components/PositionsHeader'
 import { PositionGroup } from '@/features/positions/components/PositionGroup'
 import usePositions from '@/features/positions/hooks/usePositions'
-import PositionsEmpty from '@/features/positions/components/PositionsEmpty'
 import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { POSITIONS_EVENTS, POSITIONS_LABELS } from '@/services/analytics/events/positions'
@@ -154,6 +153,8 @@ const PositionsWidget = () => {
 
   const protocols = data.slice(0, MAX_PROTOCOLS)
 
+  if (protocols.length === 0) return null
+
   return (
     <WidgetCard
       title="Top positions"
@@ -177,66 +178,67 @@ const PositionsWidget = () => {
       )}
 
       <Box>
-        {protocols.length === 0 ? (
-          <PositionsEmpty entryPoint="Dashboard" />
-        ) : (
-          protocols.map((protocol, protocolIndex) => {
-            const protocolValue = Number(protocol.fiatTotal) || 0
-            const isLast = protocolIndex === protocols.length - 1
+        {protocols.map((protocol, protocolIndex) => {
+          const protocolValue = Number(protocol.fiatTotal) || 0
+          const isLast = protocolIndex === protocols.length - 1
 
-            return (
-              <Accordion
-                key={protocol.protocol}
-                disableGutters
-                elevation={0}
-                variant="elevation"
+          return (
+            <Accordion
+              key={protocol.protocol}
+              disableGutters
+              elevation={0}
+              variant="elevation"
+              sx={{
+                borderBottom: 'none !important',
+              }}
+              onChange={(_, expanded) => {
+                if (expanded) {
+                  trackEvent(POSITIONS_EVENTS.POSITION_EXPANDED, {
+                    [MixpanelEventParams.PROTOCOL_NAME]: protocol.protocol,
+                    [MixpanelEventParams.LOCATION]: POSITIONS_LABELS.dashboard,
+                    [MixpanelEventParams.AMOUNT_USD]: protocolValue,
+                  })
+                }
+              }}
+            >
+              <AccordionSummary
+                className={css.position}
+                expandIcon={<ExpandMoreIcon fontSize="small" />}
                 sx={{
-                  borderBottom: 'none !important',
-                }}
-                onChange={(_, expanded) => {
-                  if (expanded) {
-                    trackEvent(POSITIONS_EVENTS.POSITION_EXPANDED, {
-                      [MixpanelEventParams.PROTOCOL_NAME]: protocol.protocol,
-                      [MixpanelEventParams.LOCATION]: POSITIONS_LABELS.dashboard,
-                      [MixpanelEventParams.AMOUNT_USD]: protocolValue,
-                    })
-                  }
+                  justifyContent: 'center',
+                  overflowX: 'auto',
+                  px: 1.5,
+                  position: 'relative',
+                  ...(!isLast && {
+                    '&:not(.Mui-expanded)::after': {
+                      content: '""',
+                      position: 'absolute',
+                      bottom: 0,
+                      left: '56px',
+                      right: 0,
+                      height: '1px',
+                      backgroundColor: 'rgba(0, 0, 0, 0.12)',
+                      opacity: 0.5,
+                    },
+                  }),
                 }}
               >
-                <AccordionSummary
-                  className={css.position}
-                  expandIcon={<ExpandMoreIcon fontSize="small" />}
-                  sx={{
-                    justifyContent: 'center',
-                    overflowX: 'auto',
-                    px: 1.5,
-                    position: 'relative',
-                    ...(!isLast && {
-                      '&:not(.Mui-expanded)::after': {
-                        content: '""',
-                        position: 'absolute',
-                        bottom: 0,
-                        left: '56px',
-                        right: 0,
-                        height: '1px',
-                        backgroundColor: 'rgba(0, 0, 0, 0.12)',
-                        opacity: 0.5,
-                      },
-                    }),
-                  }}
-                >
-                  <PositionsHeader protocol={protocol} fiatTotal={positionsFiatTotal} />
-                </AccordionSummary>
+                <PositionsHeader protocol={protocol} fiatTotal={positionsFiatTotal} />
+              </AccordionSummary>
 
-                <AccordionDetails sx={{ px: 1.5 }}>
-                  {protocol.items.map((group, groupIndex) => (
-                    <PositionGroup key={groupIndex} group={group} isLast={groupIndex === protocol.items.length - 1} />
-                  ))}
-                </AccordionDetails>
-              </Accordion>
-            )
-          })
-        )}
+              <AccordionDetails sx={{ px: 1.5 }}>
+                {protocol.items.map((group, groupIndex) => (
+                  <PositionGroup
+                    key={groupIndex}
+                    group={group}
+                    isLast={groupIndex === protocol.items.length - 1}
+                    protocolIconUrl={protocol.protocol_metadata.icon.url}
+                  />
+                ))}
+              </AccordionDetails>
+            </Accordion>
+          )
+        })}
       </Box>
     </WidgetCard>
   )

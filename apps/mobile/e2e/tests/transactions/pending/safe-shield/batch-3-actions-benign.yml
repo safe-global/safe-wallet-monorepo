@@ -1,0 +1,73 @@
+appId: ${APP_ID}
+tags:
+  - safe-shield
+  - pending-tx
+---
+# ===========================================
+# SafeShield Test: 3 Actions Batch (Benign)
+# ===========================================
+# Tests SafeShield functionality for a benign 3-action multiSend batch transaction.
+# This transaction has "Checks passed" status with known contracts.
+
+# Launch app with SafeShield test safe
+- runFlow:
+    file: '../../../../utils/setup/app-start.yml'
+
+- tapOn:
+    id: 'e2eSafeShieldSafe'
+
+- assertVisible:
+    id: 'pending-tx-list'
+
+# Scroll to see the batch transaction card
+# Scroll to see the setFallbackHandler transaction card
+- scrollUntilVisible:
+    element:
+      text: '.*3 actions.*'
+    centerElement: true
+
+# Tap on the 3 actions batch transaction card
+- runFlow:
+    file: '../../../../utils/components/pending-tx/tap-tx-card.yml'
+    env:
+      WAIT_FOR: '.*3 actions.*'
+      TAP_TEXT: '.*3 actions.*'
+      TAP_INDEX: '1'
+
+- assertVisible: 'Confirm transaction'
+
+# Verify SafeShield widget (OK severity - Checks passed)
+- runFlow:
+    file: '../../../../utils/assertions/verify-safe-shield-widget.yml'
+    env:
+      WIDGET_HEADER: 'Checks passed'
+      LABEL_1: 'Known contract'
+      LABEL_2: 'No threat detected'
+      RUN_SIMULATION: 'true'
+      SIMULATION_RESULT: 'success'
+
+# Verify balance change block (no balance change for this batch)
+- runFlow:
+    file: '../../../../utils/assertions/verify-balance-change.yml'
+    env:
+      NO_CHANGE: 'true'
+
+# Open and verify SafeShield details sheet
+- runFlow:
+    file: '../../../../utils/assertions/verify-safe-shield-sheet.yml'
+    env:
+      TAP_TO_OPEN: 'Checks passed'
+      HEADER: 'CHECKS PASSED'
+      LABEL_1: 'Known contract'
+      DESCRIPTION_1: '.*You have interacted with 1 contract before.*'
+      DESCRIPTION_1_2: '.*1 contract is verified.*'
+      EXPAND_SHOW_ALL: 'true'
+      EXPANDED_ADDRESS: '.*0x65e1Ff7e0901055B3bea7D8b3AF457a659714.*'
+      EXPAND_SHOW_ALL_2: 'true'
+      EXPANDED_ADDRESS_2: '.*0xAA46724893.*'
+      SCROLL_TO_FOOTER: 'true'
+      LABEL_2: 'No threat detected'
+      DESCRIPTION_2: '.*Threat analysis found no issues.*'
+
+# Verify we're back on the confirm transaction screen
+- assertVisible: 'Confirm transaction'

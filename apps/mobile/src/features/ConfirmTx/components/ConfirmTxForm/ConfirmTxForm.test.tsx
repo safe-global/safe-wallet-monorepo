@@ -76,6 +76,8 @@ describe('ConfirmTxForm', () => {
     isExpired: false,
     txId: 'tx123',
     isPending: false,
+    riskAcknowledged: false,
+    onRiskAcknowledgedChange: jest.fn(),
   }
 
   it('renders AlreadySigned when hasSigned is true', () => {

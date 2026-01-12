@@ -6,21 +6,37 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { LargeHeaderTitle } from '@/src/components/Title'
 import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { ScrollView } from 'react-native'
+import { Platform, ScrollView } from 'react-native'
 import { Button, Text, View } from 'tamagui'
 import { ToastViewport } from '@tamagui/toast'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 import Logger from '@/src/utils/logger'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectPendingSafe } from '@/src/store/signerImportFlowSlice'
 
 export function ImportSuccess() {
-  const { address, name } = useLocalSearchParams<{ address: `0x${string}`; name: string }>()
+  const { address, name } = useLocalSearchParams<{
+    address: `0x${string}`
+    name: string
+  }>()
   const router = useRouter()
   const copy = useCopyAndDispatchToast()
+  const pendingSafe = useAppSelector(selectPendingSafe)
 
   const handleContinuePress = async () => {
     try {
       router.dismissAll()
-      router.dismissTo('/signers')
+      if (pendingSafe) {
+        router.dismissTo({
+          pathname: '/(import-accounts)/signers',
+          params: {
+            safeAddress: pendingSafe.address,
+            safeName: pendingSafe.name,
+          },
+        })
+      } else {
+        router.dismissTo('/signers')
+      }
     } catch (error) {
       Logger.error('Navigation error:', error)
     }
@@ -72,7 +88,7 @@ export function ImportSuccess() {
             />
           </View>
         </ScrollView>
-        <ToastViewport multipleToasts={false} left={0} right={0} />
+        {Platform.OS === 'ios' && <ToastViewport multipleToasts={false} left={0} right={0} />}
       </View>
 
       <View paddingHorizontal="$3">

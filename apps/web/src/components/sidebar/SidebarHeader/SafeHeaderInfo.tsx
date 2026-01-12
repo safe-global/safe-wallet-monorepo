@@ -10,8 +10,10 @@ import FiatValue from '@/components/common/FiatValue'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import { InfoTooltip } from '@/features/stake/components/InfoTooltip'
 
 import css from './styles.module.css'
+import { useIsHypernativeGuard } from '@/features/hypernative/hooks'
 
 const SafeHeaderInfo = (): ReactElement => {
   const { balances } = useVisibleBalances()
@@ -19,6 +21,7 @@ const SafeHeaderInfo = (): ReactElement => {
   const { safe } = useSafeInfo()
   const { threshold, owners } = safe
   const { ens } = useAddressResolver(safeAddress)
+  const { isHypernativeGuard } = useIsHypernativeGuard()
 
   return (
     <div data-testid="safe-header-info" className={css.safe}>
@@ -32,7 +35,13 @@ const SafeHeaderInfo = (): ReactElement => {
 
       <div className={css.address}>
         {safeAddress ? (
-          <EthHashInfo address={safeAddress} shortAddress showAvatar={false} name={ens} />
+          <EthHashInfo
+            address={safeAddress}
+            shortAddress
+            showAvatar={false}
+            name={ens}
+            showShieldIcon={isHypernativeGuard}
+          />
         ) : (
           <Typography variant="body2">
             <Skeleton variant="text" width={86} />
@@ -43,7 +52,10 @@ const SafeHeaderInfo = (): ReactElement => {
         <Typography data-testid="currency-section" variant="body2" fontWeight={700}>
           {safe.deployed ? (
             balances.fiatTotal ? (
-              <FiatValue value={balances.fiatTotal} />
+              <>
+                <FiatValue value={balances.fiatTotal} />
+                {balances.isAllTokensMode && <InfoTooltip title="Total based on default tokens and positions." />}
+              </>
             ) : (
               <Skeleton variant="text" width={60} />
             )

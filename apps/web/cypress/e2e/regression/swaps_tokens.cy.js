@@ -19,6 +19,8 @@ describe('Swaps token tests', () => {
 
   beforeEach(() => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_1)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
   })
 
   // Added to prod
@@ -27,9 +29,6 @@ describe('Swaps token tests', () => {
     { defaultCommandTimeout: 30000 },
     () => {
       wallet.connectSigner(signer)
-      assets.toggleShowAllTokens(true)
-      assets.toggleHideDust(false)
-
       swaps.clickOnAssetSwapBtn(0)
       swaps.acceptLegalDisclaimer()
       cy.wait(2000)

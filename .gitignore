@@ -25,6 +25,9 @@ report.json
 *.pem
 .idea
 
+# beads
+.beads/
+
 # Yarn v4
 .yarn/*
 !.yarn/patches

@@ -124,11 +124,12 @@ export type EnhancedTableProps = {
   headCells: EnhancedHeadCell[]
   mobileVariant?: boolean
   compact?: boolean
+  footer?: ReactNode
 }
 
 const pageSizes = [10, 25, 100]
 
-function EnhancedTable({ rows, headCells, mobileVariant, compact }: EnhancedTableProps) {
+function EnhancedTable({ rows, headCells, mobileVariant, compact, footer }: EnhancedTableProps) {
   const [order, setOrder] = useState<'asc' | 'desc'>('asc')
   const [orderBy, setOrderBy] = useState<string>('')
   const [page, setPage] = useState<number>(0)
@@ -216,20 +217,66 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact }: EnhancedTabl
       </TableContainer>
 
       {showPagination && (
-        <TablePagination
-          data-testid="table-pagination"
-          rowsPerPageOptions={pageSizes}
+        <Box
           component={Paper}
-          count={rows.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
           sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          {footer && (
+            <Box
+              sx={{
+                px: 2,
+                display: 'flex',
+                alignItems: 'center',
+                height: '52px',
+              }}
+            >
+              {footer}
+            </Box>
+          )}
+          <TablePagination
+            data-testid="table-pagination"
+            rowsPerPageOptions={pageSizes}
+            component="div"
+            count={rows.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            sx={{
+              borderTop: 'none',
+              height: '52px',
+              '& .MuiTablePagination-selectLabel': { color: 'text.secondary', fontSize: '14px' },
+              '& .MuiTablePagination-displayedRows': { color: 'primary.light', fontSize: '14px' },
+              '& .MuiTablePagination-select': { color: 'primary.light', fontSize: '14px' },
+              '& .MuiIconButton-root': { color: 'primary.light' },
+            }}
+          />
+        </Box>
+      )}
+      {!showPagination && footer && (
+        <Box
+          component={Paper}
+          sx={{
+            px: 2,
+            display: 'flex',
+            alignItems: 'center',
+            height: '52px',
+            borderTop: '1px solid',
+            borderColor: 'divider',
             borderTopLeftRadius: 0,
             borderTopRightRadius: 0,
           }}
-        />
+        >
+          {footer}
+        </Box>
       )}
     </Box>
   )

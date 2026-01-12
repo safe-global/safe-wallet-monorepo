@@ -1,6 +1,7 @@
 import { TokenType } from '@safe-global/store/gateway/types'
 import * as store from '@/store'
 import * as useBalancesHooks from '@/hooks/useBalances'
+import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { renderHook } from '@/tests/test-utils'
 import { toBeHex } from 'ethers'
 import { useVisibleBalances } from '../useVisibleBalances'
@@ -11,6 +12,16 @@ describe('useVisibleBalances', () => {
   const hiddenTokenAddress = toBeHex('0x2', 20)
   const visibleTokenAddress = toBeHex('0x3', 20)
   const dustTokenAddress = toBeHex('0x4', 20)
+
+  beforeEach(() => {
+    jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
+      safe: { deployed: true } as any,
+      safeAddress: toBeHex('0x1', 20),
+      safeLoaded: true,
+      safeLoading: false,
+      safeError: undefined,
+    })
+  })
 
   test('empty balance', () => {
     const balance: Balances = {

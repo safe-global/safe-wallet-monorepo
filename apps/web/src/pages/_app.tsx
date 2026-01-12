@@ -43,6 +43,7 @@ import CounterfactualHooks from '@/features/counterfactual/CounterfactualHooks'
 import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
+import usePortfolioRefetchOnTxHistory from '@/features/portfolio/hooks/usePortfolioRefetchOnTxHistory'
 import OutreachPopup from '@/features/targetedOutreach/components/OutreachPopup'
 import { GATEWAY_URL } from '@/config/gateway'
 import { getErrorBoundary, captureException } from '@/services/observability'
@@ -73,6 +74,7 @@ const InitApp = (): null => {
   useSafeMsgTracking()
   useBeamer()
   useVisitedSafes()
+  usePortfolioRefetchOnTxHistory()
   useSafeLabsTerms() // Automatically disconnect wallets if terms not accepted and feature is enabled
 
   return null

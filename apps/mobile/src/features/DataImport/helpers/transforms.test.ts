@@ -10,7 +10,7 @@ import {
   ImportProgressCallback,
 } from './transforms'
 import { addContact, addContacts } from '@/src/store/addressBookSlice'
-import { addSignerWithEffects } from '@/src/store/signersSlice'
+import { addSignerWithEffects } from '@/src/store/signerThunks'
 import { storePrivateKey } from '@/src/hooks/useSign/useSign'
 import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
 
@@ -18,7 +18,7 @@ jest.mock('@/src/hooks/useSign/useSign', () => ({
   storePrivateKey: jest.fn(),
 }))
 
-jest.mock('@/src/store/signersSlice', () => ({
+jest.mock('@/src/store/signerThunks', () => ({
   addSignerWithEffects: jest.fn(),
 }))
 

@@ -25,6 +25,12 @@ jest.mock('@/hooks/useIsOfficialHost', () => ({
   useIsOfficialHost: jest.fn(),
 }))
 
+jest.mock('@/config/constants', () => ({
+  ...jest.requireActual('@/config/constants'),
+  IS_PRODUCTION: true,
+  IS_TEST_E2E: false,
+}))
+
 const mockRouter = {
   pathname: '/home',
   asPath: '/home',

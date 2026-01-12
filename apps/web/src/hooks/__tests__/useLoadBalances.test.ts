@@ -7,6 +7,7 @@ import { TokenType } from '@safe-global/store/gateway/types'
 import * as useChainId from '@/hooks/useChainId'
 import * as balancesQueries from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
+import * as useChains from '@/hooks/useChains'
 
 const safeAddress = toBeHex('0x1234', 20)
 
@@ -97,6 +98,7 @@ describe('useLoadBalances', () => {
     jest.clearAllMocks()
     localStorage.clear()
     jest.spyOn(useChainId, 'useChainId').mockReturnValue('5')
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
   })
 
   test('without selected Safe', async () => {

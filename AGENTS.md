@@ -78,6 +78,7 @@ Specifically for the web app:
    For mobile:
 
    ```bash
+   yarn workspace @safe-global/mobile type-check
    yarn workspace @safe-global/mobile lint
    yarn workspace @safe-global/mobile prettier
    yarn workspace @safe-global/mobile test

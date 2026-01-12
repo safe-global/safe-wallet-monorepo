@@ -86,6 +86,7 @@ export interface UseNestedTransactionResult {
   nestedSafeInfo: SafeInfo | undefined
   nestedSafeTx: SafeTransaction | undefined
   isNested: boolean
+  isNestedLoading: boolean
 }
 
 /**
@@ -109,7 +110,7 @@ export const useNestedTransaction = (
   chain: Chain | undefined,
 ): UseNestedTransactionResult => {
   const nestedTxInfo = useMemo(() => detectNestedTransaction(safeTx), [safeTx])
-  const [nestedSafeInfo] = useAsync(
+  const [nestedSafeInfo, , nestedSafeInfoLoading] = useAsync(
     () =>
       !!chain && !!nestedTxInfo?.nestedSafeAddress
         ? getSafeInfo(chain.chainId, nestedTxInfo.nestedSafeAddress)
@@ -133,7 +134,7 @@ export const useNestedTransaction = (
     })
   }, [nestedTxInfo, nestedSafeInfo, chain])
 
-  const { data: nestedTxDetails } = useTransactionsGetTransactionByIdV1Query(
+  const { data: nestedTxDetails, isLoading: nestedTxDetailsLoading } = useTransactionsGetTransactionByIdV1Query(
     {
       chainId: chain?.chainId || '',
       id: nestedTxHash,
@@ -156,10 +157,12 @@ export const useNestedTransaction = (
   }, [nestedTxInfo, nestedTxDetails])
 
   const isNested = !!nestedTxInfo && !!nestedSafeInfo && !!nestedSafeTx
+  const isNestedLoading = !!nestedTxInfo && !isNested && (nestedSafeInfoLoading || nestedTxDetailsLoading)
 
   return {
     nestedSafeInfo,
     nestedSafeTx,
     isNested,
+    isNestedLoading,
   }
 }

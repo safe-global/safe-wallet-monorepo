@@ -3,7 +3,7 @@ import { createContext, useState, useEffect } from 'react'
 import type { Dispatch, ReactNode, SetStateAction, ReactElement } from 'react'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { createTx } from '@/services/tx/tx-sender'
-import { useRecommendedNonce, useSafeTxGas } from '../tx/SignOrExecuteForm/hooks'
+import { useRecommendedNonce, useSafeTxGas } from '@/components/tx/shared/hooks'
 import { Errors, logError } from '@/services/exceptions'
 
 export type SafeTxContextParams = {

@@ -1,0 +1,63 @@
+appId: ${APP_ID}
+tags:
+  - safe-shield
+  - pending-tx
+---
+# ===========================================
+# SafeShield Test: Settings Change - setFallbackHandler
+# ===========================================
+# Tests SafeShield functionality for a setFallbackHandler settings change transaction.
+# This transaction has "Checks passed" status with known contract.
+
+# Launch app with SafeShield test safe
+- runFlow:
+    file: '../../../../utils/setup/app-start.yml'
+
+- tapOn:
+    id: 'e2eSafeShieldSafe'
+
+- assertVisible:
+    id: 'pending-tx-list'
+
+# Scroll to see the setFallbackHandler transaction card
+- scrollUntilVisible:
+    element:
+      text: '.*setFallbackHandler.*'
+    centerElement: true
+
+# Tap on the setFallbackHandler transaction card
+- runFlow:
+    file: '../../../../utils/components/pending-tx/tap-tx-card.yml'
+    env:
+      WAIT_FOR: '.*setFallbackHandler.*'
+      TAP_TEXT: '.*setFallbackHandler.*'
+
+- assertVisible: 'Confirm transaction'
+
+# Verify SafeShield widget (OK severity - Checks passed)
+- runFlow:
+    file: '../../../../utils/assertions/verify-safe-shield-widget.yml'
+    env:
+      WIDGET_HEADER: 'Checks passed'
+      LABEL_1: 'Known contract'
+      LABEL_2: 'No threat detected'
+
+# Verify balance change block (no balance change)
+- runFlow:
+    file: '../../../../utils/assertions/verify-balance-change.yml'
+    env:
+      NO_CHANGE: 'true'
+
+# Open and verify SafeShield details sheet
+- runFlow:
+    file: '../../../../utils/assertions/verify-safe-shield-sheet.yml'
+    env:
+      TAP_TO_OPEN: 'Checks passed'
+      HEADER: 'CHECKS PASSED'
+      LABEL_1: 'Known contract'
+      DESCRIPTION_1: '.*You have already interacted with this contract.*'
+      LABEL_2: 'No threat detected'
+      DESCRIPTION_2: '.*Threat analysis found no issues.*'
+
+# Verify we're back on the confirm transaction screen
+- assertVisible: 'Confirm transaction'

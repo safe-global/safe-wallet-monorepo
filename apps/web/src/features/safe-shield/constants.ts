@@ -5,4 +5,10 @@ export const SEVERITY_COLORS: Record<Severity, Record<'main' | 'background', str
   WARN: { main: 'var(--color-warning-main)', background: 'var(--color-warning-background)' },
   OK: { main: 'var(--color-success-main)', background: 'var(--color-success-background)' },
   INFO: { main: 'var(--color-info-main)', background: 'var(--color-info-background)' },
+  ERROR: { main: 'var(--color-warning-main)', background: 'var(--color-warning-background)' },
+}
+
+export const ISSUE_BACKGROUND_COLORS: Partial<Record<Severity, string>> = {
+  CRITICAL: 'var(--color-error-light)',
+  WARN: 'var(--color-warning-light)',
 }

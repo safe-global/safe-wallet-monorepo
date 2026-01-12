@@ -1,13 +1,33 @@
 # Ignore artifacts:
-build
-coverage
-node_modules
-**/node_modules/*
-html
-ios
-android
-/assets
-.next
+**/build
+**/coverage
+.idea
+**/node_modules/
+.yarn
+.pnp.cjs
+.pnp.loader.mjs
+.env
+.env.*
+
+# Mobile
+apps/mobile/android
+apps/mobile/ios
+apps/mobile/.expo/
 apps/mobile/assets
+apps/mobile/expo-env.d.ts
+apps/mobile/.storybook
+apps/mobile/resources/
+
+# Web
+apps/web/.next
+apps/web/.swc
+apps/web/public
 apps/web/src/markdown/privacy/privacy.md
 apps/web/src/markdown/terms/terms.md
+
+# Utils package
+packages/utils/src/types/contracts/**/*
+
+# Expo plugins
+expo-plugins/notification-service-ios/dist
+

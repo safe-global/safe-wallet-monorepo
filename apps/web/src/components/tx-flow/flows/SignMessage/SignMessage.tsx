@@ -40,7 +40,7 @@ import { dispatchPreparedSignature } from '@/services/safe-messages/safeMsgNotif
 import { trackEvent } from '@/services/analytics'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import { SafeTxContext } from '../../SafeTxProvider'
-import RiskConfirmationError from '@/components/tx/SignOrExecuteForm/RiskConfirmationError'
+import RiskConfirmationError from '@/components/tx/shared/errors/RiskConfirmationError'
 import { isBlindSigningPayload, isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
 import ApprovalEditor from '@/components/tx/ApprovalEditor'
 import { ErrorBoundary } from '@sentry/react'
@@ -310,12 +310,12 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
     await dispatchPreparedSignature(safeMessage, safeMessageHash, () => setTxFlow(undefined), requestId)
   }
 
-  // Set message for redefine scan
+  // Set message for Safe Shield threat analysis
   useEffect(() => {
-    if (typeof message !== 'string') {
-      setContextSafeMessage(message)
+    if (isEip712) {
+      setContextSafeMessage(decodedMessage)
     }
-  }, [message, setContextSafeMessage])
+  }, [decodedMessage, isEip712, setContextSafeMessage])
 
   return (
     <>

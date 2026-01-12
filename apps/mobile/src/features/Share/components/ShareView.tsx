@@ -6,7 +6,7 @@ import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Identicon } from '@/src/components/Identicon'
 import QRCodeStyled from 'react-native-qrcode-styled'
-import { StyleSheet } from 'react-native'
+import { Platform, StyleSheet } from 'react-native'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 import React, { useCallback } from 'react'
 import { ToastViewport } from '@tamagui/toast'
@@ -101,7 +101,7 @@ export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
           </Text>
         </YStack>
       </YStack>
-      <ToastViewport multipleToasts={false} left={0} right={0} />
+      {Platform.OS === 'ios' && <ToastViewport multipleToasts={false} left={0} right={0} />}
     </>
   )
 }

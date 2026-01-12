@@ -5,8 +5,8 @@ import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
 let staticSafes = []
 
-const commonTokens = ['ETH', 'GNO', 'SAFE', 'USDT', 'SAI', 'OMG', 'OWL', 'PERL']
-const legacyOnlyTokens = ['cSAI', 'LUNC', 'BUN']
+const commonTokens = ['ETH', 'GNO', 'SAFE', 'USDT', 'SAI', 'OMG', 'OWL']
+const txServiceOnlyTokens = ['cSAI', 'LUNC', 'BUN']
 
 describe('[SMOKE] Balances endpoint tests', () => {
   before(async () => {
@@ -21,22 +21,22 @@ describe('[SMOKE] Balances endpoint tests', () => {
     assets.toggleShowAllTokens(false)
     assets.toggleHideDust(false)
     main.verifyValuesExist(assets.tokenListTable, commonTokens)
-    main.verifyValuesDoNotExist(assets.tokenListTable, legacyOnlyTokens)
+    main.verifyValuesDoNotExist(assets.tokenListTable, txServiceOnlyTokens)
   })
 
   it('[SMOKE] Verify all tokens list shows additional tokens', () => {
     assets.toggleHideDust(false)
     assets.toggleShowAllTokens(true)
     main.verifyValuesExist(assets.tokenListTable, commonTokens)
-    main.verifyValuesExist(assets.tokenListTable, legacyOnlyTokens)
+    main.verifyValuesExist(assets.tokenListTable, txServiceOnlyTokens)
   })
 
   it('[SMOKE] Verify switching token list updates displayed tokens', () => {
     assets.toggleHideDust(false)
     assets.toggleShowAllTokens(true)
-    main.verifyValuesExist(assets.tokenListTable, legacyOnlyTokens)
+    main.verifyValuesExist(assets.tokenListTable, txServiceOnlyTokens)
     assets.toggleShowAllTokens(false)
-    main.verifyValuesDoNotExist(assets.tokenListTable, legacyOnlyTokens)
+    main.verifyValuesDoNotExist(assets.tokenListTable, txServiceOnlyTokens)
     main.verifyValuesExist(assets.tokenListTable, commonTokens)
   })
 })

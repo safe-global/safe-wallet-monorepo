@@ -261,7 +261,7 @@ describe('useTrackBannerEligibilityOnConnect', () => {
       })
     })
 
-    it('should track when bannerType is NoBalanceCheck', async () => {
+    it('should not track when bannerType is NoBalanceCheck', async () => {
       const initialReduxState: Partial<RootState> = {
         hnState: {},
       }
@@ -270,9 +270,12 @@ describe('useTrackBannerEligibilityOnConnect', () => {
         initialReduxState,
       })
 
-      await waitFor(() => {
-        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
-      })
+      await waitFor(
+        () => {
+          expect(mockTrackEvent).not.toHaveBeenCalled()
+        },
+        { timeout: 100 },
+      )
     })
   })
 
@@ -602,7 +605,7 @@ describe('useTrackBannerEligibilityOnConnect', () => {
       })
 
       await waitFor(() => {
-        // Should only track once despite two different banner types
+        // Should only track once from Promo (NoBalanceCheck doesn't track)
         expect(mockTrackEvent).toHaveBeenCalledTimes(1)
         expect(mockTrackEvent).toHaveBeenCalledWith(HYPERNATIVE_EVENTS.GUARDIAN_BANNER_VIEWED, {
           [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
@@ -630,7 +633,7 @@ describe('useTrackBannerEligibilityOnConnect', () => {
       })
 
       await waitFor(() => {
-        // Should only track once despite three different banner types
+        // Should only track once from Promo or Settings (NoBalanceCheck doesn't track)
         expect(mockTrackEvent).toHaveBeenCalledTimes(1)
       })
     })
@@ -711,7 +714,7 @@ describe('useTrackBannerEligibilityOnConnect', () => {
       })
     })
 
-    it('should not track again when switching from NoBalanceCheck to Promo banner type', async () => {
+    it('should track when switching from NoBalanceCheck to Promo banner type', async () => {
       const initialReduxState: Partial<RootState> = {
         hnState: {},
       }
@@ -724,15 +727,19 @@ describe('useTrackBannerEligibilityOnConnect', () => {
         },
       )
 
-      await waitFor(() => {
-        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
-      })
+      // NoBalanceCheck should not track
+      await waitFor(
+        () => {
+          expect(mockTrackEvent).not.toHaveBeenCalled()
+        },
+        { timeout: 100 },
+      )
 
       // Switch to Promo banner type
       rerender({ bannerType: BannerType.Promo })
 
       await waitFor(() => {
-        // Should not track again because already tracked
+        // Should track now when switching to Promo
         expect(mockTrackEvent).toHaveBeenCalledTimes(1)
       })
     })
@@ -790,15 +797,66 @@ describe('useTrackBannerEligibilityOnConnect', () => {
       )
     })
 
+    it('should not track when NoBalanceCheck banner type has showBanner: true but Safe is deployed', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      // Mock Safe as deployed
+      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
+        safe: { deployed: true } as any,
+        safeAddress,
+        safeLoaded: true,
+        safeLoading: false,
+        safeError: undefined,
+      })
+
+      renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.NoBalanceCheck), {
+        initialReduxState,
+      })
+
+      await waitFor(
+        () => {
+          expect(mockTrackEvent).not.toHaveBeenCalled()
+        },
+        { timeout: 100 },
+      )
+    })
+
+    it('should not track when NoBalanceCheck banner type has showBanner: true and Safe is not deployed', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      // Mock Safe as not deployed
+      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
+        safe: { deployed: false } as any,
+        safeAddress,
+        safeLoaded: true,
+        safeLoading: false,
+        safeError: undefined,
+      })
+
+      renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.NoBalanceCheck), {
+        initialReduxState,
+      })
+
+      await waitFor(
+        () => {
+          expect(mockTrackEvent).not.toHaveBeenCalled()
+        },
+        { timeout: 100 },
+      )
+    })
+
     it('should track when visibility changes from false to true for Promo banner and the banner was not tracked yet', async () => {
       const initialReduxState: Partial<RootState> = {
         hnState: {},
       }
 
-      const { rerender } = renderHook(
-        ({ visibilityResult }) => useTrackBannerEligibilityOnConnect(visibilityResult, BannerType.Promo),
+      const { unmount } = renderHook(
+        () => useTrackBannerEligibilityOnConnect(ineligibleVisibilityResult, BannerType.Promo),
         {
-          initialProps: { visibilityResult: ineligibleVisibilityResult },
           initialReduxState,
         },
       )
@@ -811,13 +869,56 @@ describe('useTrackBannerEligibilityOnConnect', () => {
         { timeout: 100 },
       )
 
-      // Change visibility to true
-      rerender({ visibilityResult: eligibleVisibilityResult })
+      // Unmount the first hook instance to ensure clean state
+      unmount()
 
-      await waitFor(() => {
-        // Should track now
-        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      // Clear shared state
+      activeTrackingSafes.clear()
+      jest.clearAllMocks()
+
+      // Mount a fresh hook instance with showBanner: true
+      renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
       })
+
+      // Wait for effect to run and check tracking
+      await waitFor(
+        () => {
+          // Should track now when showBanner is true
+          expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+          expect(mockTrackEvent).toHaveBeenCalledWith(HYPERNATIVE_EVENTS.GUARDIAN_BANNER_VIEWED, {
+            [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+            [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chainId,
+          })
+        },
+        { timeout: 1000 },
+      )
+    })
+
+    it('should not track when showBanner is false even if all other conditions are met', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      // All conditions are met except showBanner
+      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
+        safe: { deployed: false } as any,
+        safeAddress,
+        safeLoaded: true,
+        safeLoading: false,
+        safeError: undefined,
+      })
+
+      renderHook(() => useTrackBannerEligibilityOnConnect(ineligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+
+      await waitFor(
+        () => {
+          expect(mockTrackEvent).not.toHaveBeenCalled()
+        },
+        { timeout: 100 },
+      )
     })
   })
 
@@ -894,12 +995,12 @@ describe('useTrackBannerEligibilityOnConnect', () => {
       })
     })
 
-    it('should track once per Safe when NoBalanceCheck banner is used on multiple Safes', async () => {
+    it('should not track when NoBalanceCheck banner is used on multiple Safes', async () => {
       const initialReduxState: Partial<RootState> = {
         hnState: {},
       }
 
-      // Track for first Safe with NoBalanceCheck
+      // NoBalanceCheck should not track for first Safe
       const { rerender } = renderHook(
         ({ visibilityResult }) => useTrackBannerEligibilityOnConnect(visibilityResult, BannerType.NoBalanceCheck),
         {
@@ -908,9 +1009,12 @@ describe('useTrackBannerEligibilityOnConnect', () => {
         },
       )
 
-      await waitFor(() => {
-        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
-      })
+      await waitFor(
+        () => {
+          expect(mockTrackEvent).not.toHaveBeenCalled()
+        },
+        { timeout: 100 },
+      )
 
       // Switch to different Safe
       jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
@@ -923,9 +1027,13 @@ describe('useTrackBannerEligibilityOnConnect', () => {
 
       rerender({ visibilityResult: eligibleVisibilityResult })
 
-      await waitFor(() => {
-        expect(mockTrackEvent).toHaveBeenCalledTimes(2)
-      })
+      await waitFor(
+        () => {
+          // Should still not track because NoBalanceCheck doesn't trigger tracking
+          expect(mockTrackEvent).not.toHaveBeenCalled()
+        },
+        { timeout: 100 },
+      )
     })
   })
 
@@ -1041,12 +1149,474 @@ describe('useTrackBannerEligibilityOnConnect', () => {
       ]
 
       await waitFor(() => {
-        // Should only track once despite three concurrent attempts
+        // Should only track once from Promo or Settings (NoBalanceCheck doesn't track)
         expect(mockTrackEvent).toHaveBeenCalledTimes(1)
       })
 
       // Cleanup
       hooks.forEach((hook) => hook.unmount())
+    })
+  })
+
+  describe('Multiple useBannerVisibility instances (root cause: multiple components)', () => {
+    it('should track only once when multiple hook instances mount simultaneously with same visibility result', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      // Simulate multiple components calling useBannerVisibility simultaneously
+      // Each creates its own useTrackBannerEligibilityOnConnect instance
+      const hook1 = renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+      const hook2 = renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+      const hook3 = renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+      const hook4 = renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+      const hook5 = renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+
+      await waitFor(() => {
+        // Should only track once despite 5 concurrent instances
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+        expect(mockTrackEvent).toHaveBeenCalledWith(HYPERNATIVE_EVENTS.GUARDIAN_BANNER_VIEWED, {
+          [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+          [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chainId,
+        })
+      })
+
+      // Cleanup
+      hook1.unmount()
+      hook2.unmount()
+      hook3.unmount()
+      hook4.unmount()
+      hook5.unmount()
+    })
+
+    it('should track only once when multiple hook instances mount with different banner types simultaneously', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      // Simulate Dashboard, FirstSteps, Settings, and other components mounting simultaneously
+      const hooks = [
+        renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+          initialReduxState,
+        }),
+        renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.NoBalanceCheck), {
+          initialReduxState,
+        }),
+        renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Settings), {
+          initialReduxState,
+        }),
+        renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+          initialReduxState,
+        }),
+        renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.NoBalanceCheck), {
+          initialReduxState,
+        }),
+      ]
+
+      await waitFor(() => {
+        // Should only track once from Promo or Settings (NoBalanceCheck doesn't track)
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+
+      // Cleanup
+      hooks.forEach((hook) => hook.unmount())
+    })
+
+    it('should track only once even when hooks mount in rapid succession', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      // Mount first hook
+      const hook1 = renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+
+      // Immediately mount second hook before first completes
+      const hook2 = renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+
+      // Mount third hook
+      const hook3 = renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+
+      await waitFor(() => {
+        // Should only track once despite rapid succession
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+
+      // Cleanup
+      hook1.unmount()
+      hook2.unmount()
+      hook3.unmount()
+    })
+
+    it('should prevent tracking when one instance already acquired the lock', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      const safeKey = `${chainId}:${safeAddress}`
+
+      // First instance acquires lock
+      activeTrackingSafes.add(safeKey)
+
+      // Second instance tries to track
+      const hook1 = renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+
+      // Third instance tries to track
+      const hook2 = renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+
+      await waitFor(() => {
+        // Should not track because lock is already acquired
+        expect(mockTrackEvent).not.toHaveBeenCalled()
+      })
+
+      // Release lock
+      activeTrackingSafes.delete(safeKey)
+
+      // Cleanup
+      hook1.unmount()
+      hook2.unmount()
+    })
+  })
+
+  describe('Root cause mitigation: Object reference changes', () => {
+    it('should not re-track when visibilityResult object reference changes but values remain the same', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      const { rerender } = renderHook(
+        ({ visibilityResult }) => useTrackBannerEligibilityOnConnect(visibilityResult, BannerType.Promo),
+        {
+          initialProps: { visibilityResult: eligibleVisibilityResult },
+          initialReduxState,
+        },
+      )
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+
+      // Change object reference but keep same values (simulates useBannerVisibility returning new object)
+      rerender({ visibilityResult: { ...eligibleVisibilityResult } })
+      rerender({ visibilityResult: { showBanner: true, loading: false } })
+      rerender({ visibilityResult: Object.assign({}, eligibleVisibilityResult) })
+
+      await waitFor(() => {
+        // Should not track again despite object reference changes
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    it('should not re-track when safeHnState object reference changes but bannerEligibilityTracked remains the same', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {
+          [`${chainId}:${safeAddress}`]: {
+            bannerDismissed: false,
+            formCompleted: false,
+            pendingBannerDismissed: false,
+            bannerEligibilityTracked: false,
+          },
+        } as HnState,
+      }
+
+      const { rerender } = renderHook(
+        () => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo),
+        {
+          initialReduxState,
+        },
+      )
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+
+      // Redux state was updated by the hook (bannerEligibilityTracked is now true)
+      // Rerender to simulate state object reference change
+      rerender()
+
+      await waitFor(() => {
+        // Should not track again despite state object reference change
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    it('should not re-track when safe object reference changes but deployed property remains the same', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
+        safe: { deployed: false } as any,
+        safeAddress,
+        safeLoaded: true,
+        safeLoading: false,
+        safeError: undefined,
+      })
+
+      // Use Promo banner type instead of NoBalanceCheck (which doesn't track)
+      const { rerender } = renderHook(
+        () => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo),
+        {
+          initialReduxState,
+        },
+      )
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+
+      // Change safe object reference but keep deployed property the same
+      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
+        safe: { deployed: false, threshold: 1 } as any, // New object, same deployed value
+        safeAddress,
+        safeLoaded: true,
+        safeLoading: false,
+        safeError: undefined,
+      })
+
+      rerender()
+
+      await waitFor(() => {
+        // Should not track again despite safe object reference change
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+    })
+  })
+
+  describe('Root cause mitigation: Dependency array stability', () => {
+    it('should not re-track when primitive dependencies change but tracking conditions remain the same', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      const { rerender } = renderHook(
+        ({ visibilityResult }) => useTrackBannerEligibilityOnConnect(visibilityResult, BannerType.Promo),
+        {
+          initialProps: { visibilityResult: eligibleVisibilityResult },
+          initialReduxState,
+        },
+      )
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+
+      // Change showBanner from true to true (same value, but could trigger if not properly extracted)
+      rerender({ visibilityResult: { showBanner: true, loading: false } })
+
+      await waitFor(() => {
+        // Should not track again
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    it('should use session-level ref to prevent re-tracking on re-renders', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      const { rerender } = renderHook(
+        () => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo),
+        {
+          initialReduxState,
+        },
+      )
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+
+      // Force multiple re-renders
+      rerender()
+      rerender()
+      rerender()
+      rerender()
+
+      await waitFor(() => {
+        // Should not track again due to session-level ref
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    it('should reset session-level ref when Safe changes', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      // Track for first Safe
+      const { rerender } = renderHook(
+        () => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo),
+        {
+          initialReduxState,
+        },
+      )
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+        expect(mockTrackEvent).toHaveBeenCalledWith(HYPERNATIVE_EVENTS.GUARDIAN_BANNER_VIEWED, {
+          [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+          [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chainId,
+        })
+      })
+
+      // Switch to different Safe
+      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
+        safe: {} as any,
+        safeAddress: otherSafeAddress,
+        safeLoaded: true,
+        safeLoading: false,
+        safeError: undefined,
+      })
+
+      rerender()
+
+      await waitFor(() => {
+        // Should track for new Safe (session ref was reset)
+        expect(mockTrackEvent).toHaveBeenCalledTimes(2)
+        expect(mockTrackEvent).toHaveBeenLastCalledWith(HYPERNATIVE_EVENTS.GUARDIAN_BANNER_VIEWED, {
+          [MixpanelEventParams.SAFE_ADDRESS]: otherSafeAddress,
+          [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chainId,
+        })
+      })
+    })
+  })
+
+  describe('Root cause mitigation: Race conditions with Redux state', () => {
+    it('should check both selector value and current store state to prevent race conditions', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      // First instance starts tracking
+      const hook1 = renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+
+      // Before first instance completes, second instance checks state
+      // This simulates the race condition where Redux state hasn't updated yet
+      const hook2 = renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+
+      await waitFor(() => {
+        // Should only track once despite race condition
+        // The activeTrackingSafes Set should prevent the second instance from tracking
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+
+      hook1.unmount()
+      hook2.unmount()
+    })
+
+    it('should handle case where Redux state is updated but selector returns stale value', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      const hook1 = renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState,
+      })
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+
+      // Simulate a scenario where Redux state was updated but selector might return stale value
+      // Second instance should check current store state directly
+      const hook2 = renderHook(() => useTrackBannerEligibilityOnConnect(eligibleVisibilityResult, BannerType.Promo), {
+        initialReduxState: {
+          hnState: {
+            [`${chainId}:${safeAddress}`]: {
+              bannerDismissed: false,
+              formCompleted: false,
+              pendingBannerDismissed: false,
+              bannerEligibilityTracked: true, // State was updated
+            },
+          } as HnState,
+        },
+      })
+
+      await waitFor(() => {
+        // Should not track again because state check should find bannerEligibilityTracked: true
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+
+      hook1.unmount()
+      hook2.unmount()
+    })
+  })
+
+  describe('Root cause mitigation: visibilityResult object changes from useBannerVisibility', () => {
+    it('should not re-track when useBannerVisibility dependencies change but showBanner stays true', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      const { rerender } = renderHook(
+        ({ visibilityResult }) => useTrackBannerEligibilityOnConnect(visibilityResult, BannerType.Promo),
+        {
+          initialProps: { visibilityResult: eligibleVisibilityResult },
+          initialReduxState,
+        },
+      )
+
+      await waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+
+      // Simulate useBannerVisibility returning new object when balances.fiatTotal changes
+      // but showBanner remains true
+      rerender({ visibilityResult: { showBanner: true, loading: false } })
+      rerender({ visibilityResult: { showBanner: true, loading: false } })
+      rerender({ visibilityResult: { showBanner: true, loading: false } })
+
+      await waitFor(() => {
+        // Should not track again despite multiple object reference changes
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    it('should handle rapid visibilityResult changes without duplicate tracking', async () => {
+      const initialReduxState: Partial<RootState> = {
+        hnState: {},
+      }
+
+      const { rerender } = renderHook(
+        ({ visibilityResult }) => useTrackBannerEligibilityOnConnect(visibilityResult, BannerType.Promo),
+        {
+          initialProps: { visibilityResult: eligibleVisibilityResult },
+          initialReduxState,
+        },
+      )
+
+      // Rapidly change visibilityResult object (simulating useBannerVisibility re-computing)
+      for (let i = 0; i < 10; i++) {
+        rerender({ visibilityResult: { showBanner: true, loading: false } })
+      }
+
+      await waitFor(() => {
+        // Should only track once despite 10+ object reference changes
+        expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      })
     })
   })
 })

@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useAppDispatch } from '@/src/store/hooks'
-import { addSignerWithEffects } from '@/src/store/signersSlice'
+import { addSignerWithEffects } from '@/src/store/signerThunks'
 import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipValidation'
 import { storePrivateKey } from '@/src/hooks/useSign/useSign'
 import useDelegate from '@/src/hooks/useDelegate'

@@ -37,7 +37,7 @@ tags:
       visible: 'Enable biometrics'
     commands:
       - tapOn: 'Enable biometrics'
-      
+
 - assertVisible: 'Enter your private key or seed phrase below. Make sure to do so in a safe and private place.'
 
 # Note: The app auto-detects private key vs seed phrase, so there's no explicit selection step

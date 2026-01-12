@@ -1,4 +1,4 @@
-import { GroupedAnalysisResults, Severity } from '@safe-global/utils/features/safe-shield/types'
+import { ContractStatus, GroupedAnalysisResults, Severity } from '@safe-global/utils/features/safe-shield/types'
 import { mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
 import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shield/utils/getPrimaryAnalysisResult'
 import { isEmpty } from 'lodash'
@@ -6,6 +6,7 @@ import React, { useMemo } from 'react'
 import { Stack } from 'tamagui'
 import { AnalysisLabel } from '../AnalysisLabel'
 import { AnalysisDisplay } from './AnalysisDisplay'
+import { DelegateCallItem } from './DelegateCallItem'
 
 interface AnalysisGroup {
   data: Record<string, GroupedAnalysisResults>
@@ -33,9 +34,13 @@ export const AnalysisGroup = ({ data, highlightedSeverity }: AnalysisGroup) => {
         const isPrimary = index === 0
         const shouldHighlight = isHighlighted && isPrimary && result.severity === primarySeverity
 
+        if (result.type === ContractStatus.UNEXPECTED_DELEGATECALL) {
+          return <DelegateCallItem key={`${result.title}-${index}`} result={result} isPrimary={isPrimary} />
+        }
+
         return (
           <AnalysisDisplay
-            key={result.title}
+            key={`${result.title}-${index}`}
             severity={shouldHighlight ? result.severity : undefined}
             result={result}
           />

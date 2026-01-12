@@ -1,15 +1,15 @@
 import madProps from '@/utils/mad-props'
-import { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
+import { type ReactElement, type SyntheticEvent, useContext } from 'react'
 import { Box, Divider, Stack } from '@mui/material'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import CheckWallet from '@/components/common/CheckWallet'
-import { useAlreadySigned, useTxActions } from '@/components/tx/SignOrExecuteForm/hooks'
+import { useAlreadySigned, useTxActions } from '@/components/tx/shared/hooks'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import NonOwnerError from '@/components/tx/SignOrExecuteForm/NonOwnerError'
+import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
 import { useSigner } from '@/hooks/wallets/useWallet'
@@ -44,9 +44,6 @@ export const SignForm = ({
   safeTx?: SafeTransaction
   tooltip?: string
 }): ReactElement => {
-  // Form state
-  const [isSubmitLoadingLocal, setIsSubmitLoadingLocal] = useState<boolean>(false) // TODO: remove this local state and use only the one from TxFlowContext when tx-flow refactor is done
-
   // Hooks
   const { signTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
@@ -67,8 +64,6 @@ export const SignForm = ({
     if (!safeTx) return
 
     setIsSubmitLoading(true)
-    setIsSubmitLoadingLocal(true)
-
     setSubmitError(undefined)
     setIsRejectedByUser(false)
 
@@ -86,7 +81,6 @@ export const SignForm = ({
         setSubmitError(err)
       }
       setIsSubmitLoading(false)
-      setIsSubmitLoadingLocal(false)
       return
     }
 
@@ -104,7 +98,7 @@ export const SignForm = ({
   const submitDisabled =
     !safeTx ||
     isSubmitDisabled ||
-    isSubmitLoadingLocal ||
+    isSubmitLoading ||
     disableSubmit ||
     cannotPropose ||
     (needsRiskConfirmation && !isRiskConfirmed)
@@ -128,7 +122,7 @@ export const SignForm = ({
                   onChange={({ id }) => handleOptionChange(id)}
                   options={options}
                   disabled={!isOk || submitDisabled}
-                  loading={isSubmitLoading || isSubmitLoadingLocal}
+                  loading={isSubmitLoading}
                   tooltip={isOk ? tooltip : undefined}
                 />
               )}

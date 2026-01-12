@@ -22,6 +22,7 @@ interface AnalysisGroupCardProps {
   delay?: number
   analyticsEvent?: AnalyticsEvent
   'data-testid'?: string
+  requestId?: string
 }
 
 export const AnalysisGroupCard = ({
@@ -31,6 +32,7 @@ export const AnalysisGroupCard = ({
   delay = 0,
   analyticsEvent,
   'data-testid': dataTestId,
+  requestId,
 }: AnalysisGroupCardProps): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
@@ -127,6 +129,7 @@ export const AnalysisGroupCard = ({
                   severity={shouldHighlight ? result.severity : undefined}
                   key={index}
                   result={result}
+                  requestId={requestId}
                 />
               )
             })}

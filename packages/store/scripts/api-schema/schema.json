@@ -4151,6 +4151,58 @@
         "tags": ["safe-shield"]
       }
     },
+    "/v1/chains/{chainId}/security/{safeAddress}/report-false-result": {
+      "post": {
+        "description": "Reports a FALSE_POSITIVE or FALSE_NEGATIVE Blockaid transaction scan result for review. Use the request_id from the original scan response to identify the transaction.",
+        "operationId": "safeShieldReportFalseResultV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Report details including event type, request_id from scan response, and details.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportFalseResultRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Report submitted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportFalseResultResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Report false Blockaid scan result",
+        "tags": ["safe-shield"]
+      }
+    },
     "/v1/targeted-messaging/outreaches/{outreachId}/chains/{chainId}/safes/{safeAddress}": {
       "get": {
         "operationId": "targetedMessagingGetTargetedSafeV1",
@@ -8946,6 +8998,20 @@
         },
         "required": ["severity", "type", "title", "description", "before", "after"]
       },
+      "ThreatIssueDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Address involved in the issue, if applicable"
+          },
+          "description": {
+            "type": "string",
+            "description": "Issue description"
+          }
+        },
+        "required": ["description"]
+      },
       "MaliciousOrModerateThreatAnalysisResultDto": {
         "type": "object",
         "properties": {
@@ -8969,16 +9035,25 @@
           },
           "issues": {
             "type": "object",
-            "description": "A partial record of specific issues identified during threat analysis, grouped by severity.Record<Severity, string[]> - keys should be one of the Severity enum.",
+            "description": "A partial record of specific issues identified during threat analysis, grouped by severity.Record<Severity, ThreatIssue[]> - keys should be one of the Severity enum (OK | INFO | WARN | CRITICAL)",
             "additionalProperties": {
               "type": "array",
               "items": {
-                "type": "string"
+                "$ref": "#/components/schemas/ThreatIssueDto"
               }
             },
             "example": {
-              "CRITICAL": ["Malicious contract interaction detected"],
-              "WARN": ["High gas price detected"]
+              "CRITICAL": [
+                {
+                  "description": "Malicious contract interaction detected",
+                  "address": "0x0000000000000000000000000000000000000000"
+                }
+              ],
+              "WARN": [
+                {
+                  "description": "High gas price detected"
+                }
+              ]
             }
           }
         },
@@ -9160,6 +9235,39 @@
             }
           }
         }
+      },
+      "ReportFalseResultRequestDto": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "type": "string",
+            "enum": ["FALSE_POSITIVE", "FALSE_NEGATIVE"],
+            "description": "Type of report: FALSE_POSITIVE if flagged incorrectly, FALSE_NEGATIVE if should have been flagged"
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request_id from the original Blockaid scan response",
+            "example": "11111111-1111-1111-1111-111111111111"
+          },
+          "details": {
+            "type": "string",
+            "description": "Details about why this is a false result",
+            "maxLength": 1000,
+            "example": "This transaction was incorrectly flagged as malicious"
+          }
+        },
+        "required": ["event", "request_id", "details"]
+      },
+      "ReportFalseResultResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the report was submitted successfully",
+            "example": true
+          }
+        },
+        "required": ["success"]
       },
       "TargetedSafe": {
         "type": "object",

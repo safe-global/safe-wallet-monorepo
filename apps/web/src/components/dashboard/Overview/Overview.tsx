@@ -10,15 +10,15 @@ import SwapIcon from '@/public/images/common/swap.svg'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-import ArrowIconNW from '@/public/images/common/arrow-top-right.svg'
-import ArrowIconSE from '@/public/images/common/arrow-se.svg'
+import ArrowIconNW from '@/public/images/common/arrow-up-right.svg'
+import ArrowIconSE from '@/public/images/common/arrow-down-left.svg'
 import { AppRoutes } from '@/config/routes'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import CheckWallet from '@/components/common/CheckWallet'
 import OverviewSkeleton from './OverviewSkeleton'
-import RefreshPositionsButton from '@/features/positions/components/RefreshPositionsButton'
+import PortfolioRefreshHint from '@/features/portfolio/components/PortfolioRefreshHint'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
@@ -48,21 +48,18 @@ const Overview = (): ReactElement => {
 
   return (
     <Card sx={{ border: 0, px: 3, pt: 2.5, pb: 1.5 }} component="section">
+      {isPortfolioEndpointEnabled && (
+        <Box display="flex" justifyContent="flex-end" mb={-3}>
+          <PortfolioRefreshHint entryPoint="Dashboard" />
+        </Box>
+      )}
       <Box>
         <Stack
           direction={{ xs: 'column', md: 'row' }}
-          alignItems={{ xs: 'flex-start', md: 'center' }}
+          alignItems={{ xs: 'flex-start', md: 'flex-end' }}
           justifyContent="space-between"
         >
-          <TotalAssetValue
-            fiatTotal={balances.fiatTotal}
-            size="lg"
-            action={
-              isPortfolioEndpointEnabled ? (
-                <RefreshPositionsButton entryPoint="Dashboard" tooltip="Refresh balances" size="small" />
-              ) : undefined
-            }
-          />
+          <TotalAssetValue fiatTotal={balances.fiatTotal} size="lg" />
 
           {safe.deployed && (
             <Stack
