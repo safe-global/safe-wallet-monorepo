@@ -7,18 +7,17 @@ import { selectCurrency } from '../../settingsSlice'
 import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { makeSafeTag } from '.'
-import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
-
-type SafesInitiateThunk = ReturnType<typeof additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate>
-type SafesQueryActionResult = ReturnType<SafesInitiateThunk>
-type SafesDispatch = (action: SafesInitiateThunk) => SafesQueryActionResult
+import { additionalSafesRtkApi, additionalSafesRtkApiV2 } from '@safe-global/store/gateway/safes'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 
 type SafeOverviewQueueItem = {
   safeAddress: string
   walletAddress?: string
   chainId: string
   currency: string
-  dispatch: SafesDispatch
+  dispatch: any // RTK Query dispatch - will be called with the appropriate thunk
+  getState: () => RootState
   callback: (result: { data: SafeOverview | undefined; error?: never } | { data?: never; error: string }) => void
 }
 
@@ -35,25 +34,53 @@ class SafeOverviewFetcher {
     walletAddress,
     currency,
     dispatch,
+    chainId,
+    getState,
   }: {
     safeIds: `${number}:0x${string}`[]
     walletAddress?: string
     currency: string
-    dispatch: SafesDispatch
-  }) {
-    const queryThunk = additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate({
-      safes: safeIds,
-      currency,
-      walletAddress,
-      trusted: false,
-      excludeSpam: true,
-    })
-    const queryAction: SafesQueryActionResult = dispatch(queryThunk)
+    dispatch: any
+    chainId: string
+    getState: () => RootState
+  }): Promise<SafeOverview[]> {
+    // Check if the chain has the PORTFOLIO_ENDPOINT feature enabled
+    const state = getState()
+    const chainsSelector = apiSliceWithChainsConfig.endpoints.getChainsConfig.select(undefined)
+    const chainsQueryResult = chainsSelector(state)
+    const chain = chainsQueryResult.data?.entities[chainId]
+    const useV2 = chain ? hasFeature(chain, FEATURES.PORTFOLIO_ENDPOINT) : false
 
-    try {
-      return await queryAction.unwrap()
-    } finally {
-      queryAction.unsubscribe()
+    if (useV2) {
+      const queryThunk = additionalSafesRtkApiV2.endpoints.safesGetOverviewForManyV2.initiate({
+        safes: safeIds,
+        currency,
+        walletAddress,
+        trusted: false,
+        excludeSpam: true,
+      })
+      const queryAction = dispatch(queryThunk)
+
+      try {
+        return await queryAction.unwrap()
+      } finally {
+        queryAction.unsubscribe()
+      }
+    } else {
+      const queryThunk = additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate({
+        safes: safeIds,
+        currency,
+        walletAddress,
+        trusted: false,
+        excludeSpam: true,
+      })
+      const queryAction = dispatch(queryThunk)
+
+      try {
+        return await queryAction.unwrap()
+      } finally {
+        queryAction.unsubscribe()
+      }
     }
   }
 
@@ -73,8 +100,8 @@ class SafeOverviewFetcher {
       }
 
       const safeIds = nextBatch.map((request) => makeSafeTag(request.chainId, request.safeAddress))
-      const { walletAddress, currency, dispatch } = nextBatch[0]
-      overviews = await this.fetchSafeOverviews({ safeIds, currency, walletAddress, dispatch })
+      const { walletAddress, currency, dispatch, chainId, getState } = nextBatch[0]
+      overviews = await this.fetchSafeOverviews({ safeIds, currency, walletAddress, dispatch, chainId, getState })
     } catch (err) {
       // Overviews could not be fetched
       nextBatch.forEach((item) => item.callback({ error: 'Could not fetch Safe overview' }))
@@ -134,7 +161,6 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'Submissions
       async queryFn({ safeAddress, walletAddress, chainId }, { getState, dispatch }) {
         const state = getState() as RootState
         const currency = selectCurrency(state)
-        const dispatchSafeOverview: SafesDispatch = (action) => dispatch(action)
 
         if (!safeAddress) {
           return { data: null }
@@ -146,7 +172,8 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'Submissions
             currency,
             walletAddress,
             safeAddress,
-            dispatch: dispatchSafeOverview,
+            dispatch,
+            getState: getState as () => RootState,
           })
           return { data: safeOverview ?? null }
         } catch (error) {
@@ -156,21 +183,21 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'Submissions
     },
   ),
   getMultipleSafeOverviews: builder.query<SafeOverview[], MultiOverviewQueryParams>({
-    async queryFn(params, { dispatch }) {
+    async queryFn(params, { dispatch, getState }) {
       const { safes, walletAddress, currency } = params
-      const dispatchSafeOverview: SafesDispatch = (action) => dispatch(action)
 
       try {
-        const promisedSafeOverviews = safes.map((safe) =>
+        const promisedSafeOverviews: Promise<SafeOverview | undefined>[] = safes.map((safe) =>
           batchedFetcher.getOverview({
             chainId: safe.chainId,
             safeAddress: safe.address,
             currency,
             walletAddress,
-            dispatch: dispatchSafeOverview,
+            dispatch,
+            getState: getState as () => RootState,
           }),
         )
-        const safeOverviews = await Promise.all(promisedSafeOverviews)
+        const safeOverviews: (SafeOverview | undefined)[] = await Promise.all(promisedSafeOverviews)
         return { data: safeOverviews.filter(Boolean) as SafeOverview[] }
       } catch (error) {
         return { error: { status: 'CUSTOM_ERROR', error: (error as Error).message } }
