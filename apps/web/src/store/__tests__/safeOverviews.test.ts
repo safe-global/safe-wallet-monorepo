@@ -112,102 +112,36 @@ describe('safeOverviews', () => {
       })
     })
 
-    it('should immediately process queue if BATCH SIZE elements are queued', async () => {
+    it('should call store endpoint for each request', async () => {
       const fakeSafeAddress = faker.finance.ethereumAddress()
-      const requests = [
-        { chainId: '1', safeAddress: fakeSafeAddress },
-        { chainId: '2', safeAddress: fakeSafeAddress },
-        { chainId: '3', safeAddress: fakeSafeAddress },
-        { chainId: '4', safeAddress: fakeSafeAddress },
-        { chainId: '5', safeAddress: fakeSafeAddress },
-        { chainId: '6', safeAddress: fakeSafeAddress },
-        { chainId: '7', safeAddress: fakeSafeAddress },
-        { chainId: '8', safeAddress: fakeSafeAddress },
-        { chainId: '9', safeAddress: fakeSafeAddress },
-        { chainId: '10', safeAddress: fakeSafeAddress },
-      ]
+      const request = { chainId: '1', safeAddress: fakeSafeAddress }
 
-      const mockOverviews = requests.map((request, idx) => ({
+      const mockOverview = {
         address: { value: request.safeAddress },
-        chainId: (idx + 1).toString(),
+        chainId: '1',
         awaitingConfirmation: null,
         fiatTotal: '100',
         owners: [{ value: faker.finance.ethereumAddress() }],
         threshold: 1,
         queued: 0,
-      }))
+      }
 
-      mockQueryAction({ data: mockOverviews })
+      mockQueryAction({ data: [mockOverview] })
 
-      const { result: result0 } = renderHook(() => useGetSafeOverviewQuery(requests[0]))
-      const { result: result1 } = renderHook(() => useGetSafeOverviewQuery(requests[1]))
-      const { result: result2 } = renderHook(() => useGetSafeOverviewQuery(requests[2]))
-      const { result: result3 } = renderHook(() => useGetSafeOverviewQuery(requests[3]))
-      const { result: result4 } = renderHook(() => useGetSafeOverviewQuery(requests[4]))
-      const { result: result5 } = renderHook(() => useGetSafeOverviewQuery(requests[5]))
-      const { result: result6 } = renderHook(() => useGetSafeOverviewQuery(requests[6]))
-      const { result: result7 } = renderHook(() => useGetSafeOverviewQuery(requests[7]))
-      const { result: result8 } = renderHook(() => useGetSafeOverviewQuery(requests[8]))
-
-      // After 9 requests they should all be loading
-      expect(result0.current.isLoading).toBeTruthy()
-      expect(result1.current.isLoading).toBeTruthy()
-      expect(result2.current.isLoading).toBeTruthy()
-      expect(result3.current.isLoading).toBeTruthy()
-      expect(result4.current.isLoading).toBeTruthy()
-      expect(result5.current.isLoading).toBeTruthy()
-      expect(result6.current.isLoading).toBeTruthy()
-      expect(result7.current.isLoading).toBeTruthy()
-      expect(result8.current.isLoading).toBeTruthy()
-
-      expect(mockedInitiate).not.toHaveBeenCalled()
-
-      // Trigger the 10th hook - causing all values to load
-      const { result: result9 } = renderHook(() => useGetSafeOverviewQuery(requests[9]))
+      const { result } = renderHook(() => useGetSafeOverviewQuery(request))
 
       await waitFor(() => {
-        // Wait until they all resolve
-        expect(result0.current.isLoading).toBeFalsy()
-        expect(result1.current.isLoading).toBeFalsy()
-        expect(result2.current.isLoading).toBeFalsy()
-        expect(result3.current.isLoading).toBeFalsy()
-        expect(result4.current.isLoading).toBeFalsy()
-        expect(result5.current.isLoading).toBeFalsy()
-        expect(result6.current.isLoading).toBeFalsy()
-        expect(result7.current.isLoading).toBeFalsy()
-        expect(result8.current.isLoading).toBeFalsy()
-        expect(result9.current.isLoading).toBeFalsy()
+        expect(result.current.isLoading).toBeFalsy()
+        expect(result.current.data).toEqual(mockOverview)
+      })
 
-        // One request that batched all requests together should have happened
-        expect(mockedInitiate).toHaveBeenCalledWith({
-          safes: [
-            `1:${fakeSafeAddress}`,
-            `2:${fakeSafeAddress}`,
-            `3:${fakeSafeAddress}`,
-            `4:${fakeSafeAddress}`,
-            `5:${fakeSafeAddress}`,
-            `6:${fakeSafeAddress}`,
-            `7:${fakeSafeAddress}`,
-            `8:${fakeSafeAddress}`,
-            `9:${fakeSafeAddress}`,
-            `10:${fakeSafeAddress}`,
-          ],
-          currency: 'usd',
-          trusted: false,
-          excludeSpam: true,
-          walletAddress: undefined,
-        })
-
-        expect(result0.current.data).toEqual(mockOverviews[0])
-        expect(result1.current.data).toEqual(mockOverviews[1])
-        expect(result2.current.data).toEqual(mockOverviews[2])
-        expect(result3.current.data).toEqual(mockOverviews[3])
-        expect(result4.current.data).toEqual(mockOverviews[4])
-        expect(result5.current.data).toEqual(mockOverviews[5])
-        expect(result6.current.data).toEqual(mockOverviews[6])
-        expect(result7.current.data).toEqual(mockOverviews[7])
-        expect(result8.current.data).toEqual(mockOverviews[8])
-        expect(result9.current.data).toEqual(mockOverviews[9])
+      // Should call the store endpoint with the safe ID
+      expect(mockedInitiate).toHaveBeenCalledWith({
+        safes: [`1:${fakeSafeAddress}`],
+        currency: 'usd',
+        trusted: false,
+        excludeSpam: true,
+        walletAddress: undefined,
       })
     })
   })
@@ -329,7 +263,7 @@ describe('safeOverviews', () => {
       })
     })
 
-    it('Should split big batches into multiple requests', async () => {
+    it('Should call store endpoint with all safes', async () => {
       // Requests overviews for 15 Safes at once
       const request = {
         currency: 'usd',
@@ -457,7 +391,7 @@ describe('safeOverviews', () => {
         ],
       }
 
-      const firstBatchOverviews = request.safes.slice(0, 10).map((safe) => ({
+      const allOverviews = request.safes.map((safe) => ({
         address: { value: safe.address },
         chainId: '1',
         awaitingConfirmation: null,
@@ -467,19 +401,9 @@ describe('safeOverviews', () => {
         queued: 0,
       }))
 
-      const secondBatchOverviews = request.safes.slice(10).map((safe) => ({
-        address: { value: safe.address },
-        chainId: '1',
-        awaitingConfirmation: null,
-        fiatTotal: faker.string.numeric({ length: { min: 1, max: 6 } }),
-        owners: [{ value: faker.finance.ethereumAddress() }],
-        threshold: 1,
-        queued: 0,
-      }))
-
-      // Mock two fetch requests for the 2 batches
-      mockQueryAction({ data: firstBatchOverviews })
-      mockQueryAction({ data: secondBatchOverviews })
+      // Mock the store endpoint to return all overviews at once
+      // The store handles batching internally
+      mockQueryAction({ data: allOverviews })
 
       const { result } = renderHook(() => useGetMultipleSafeOverviewsQuery(request))
 
@@ -489,21 +413,12 @@ describe('safeOverviews', () => {
       await waitFor(() => {
         expect(result.current.isLoading).toBeFalsy()
         expect(result.current.error).toBeUndefined()
-        expect(result.current.data).toEqual([...firstBatchOverviews, ...secondBatchOverviews])
+        expect(result.current.data).toEqual(allOverviews)
       })
 
-      // Expect that the correct requests were sent
-      expect(mockedInitiate).toHaveBeenCalledTimes(2)
-      expect(mockedInitiate).toHaveBeenNthCalledWith(1, {
-        safes: request.safes.slice(0, 10).map((safe) => `1:${safe.address}`),
-        currency: 'usd',
-        trusted: false,
-        excludeSpam: true,
-        walletAddress: undefined,
-      })
-
-      expect(mockedInitiate).toHaveBeenNthCalledWith(2, {
-        safes: request.safes.slice(10).map((safe) => `1:${safe.address}`),
+      // Should call the store endpoint once with all safes
+      expect(mockedInitiate).toHaveBeenCalledWith({
+        safes: request.safes.map((safe) => `1:${safe.address}`),
         currency: 'usd',
         trusted: false,
         excludeSpam: true,
