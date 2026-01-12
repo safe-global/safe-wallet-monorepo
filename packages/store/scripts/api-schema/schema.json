@@ -3998,80 +3998,6 @@
         "tags": ["safes"]
       }
     },
-    "/v2/safes": {
-      "get": {
-        "description": "Retrieves an overview of multiple Safes including their balances, transaction counts, and other summary information. Supports cross-chain queries using CAIP-10 address format. Uses Zerion for balance data on supported chains.",
-        "operationId": "safesGetSafeOverviewV2",
-        "parameters": [
-          {
-            "name": "currency",
-            "required": true,
-            "in": "query",
-            "description": "Fiat currency code for balance conversion (e.g., USD, EUR)",
-            "schema": {
-              "example": "USD",
-              "type": "string"
-            }
-          },
-          {
-            "name": "safes",
-            "required": true,
-            "in": "query",
-            "description": "Comma-separated list of Safe addresses in CAIP-10 format (chainId:address)",
-            "schema": {
-              "example": "1:0x1234567890123456789012345678901234567890,5:0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-              "type": "string"
-            }
-          },
-          {
-            "name": "trusted",
-            "required": false,
-            "in": "query",
-            "description": "If true, only includes trusted tokens in balance calculations",
-            "schema": {
-              "example": false,
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "exclude_spam",
-            "required": false,
-            "in": "query",
-            "description": "If true, excludes spam tokens from balance calculations",
-            "schema": {
-              "example": true,
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "wallet_address",
-            "required": false,
-            "in": "query",
-            "description": "Optional wallet address to filter Safes where this address is an owner",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Array of Safe overviews with balances and metadata",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SafeOverview"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "summary": "Get Safe overview",
-        "tags": ["safes"]
-      }
-    },
     "/v1/chains/{chainId}/security/{safeAddress}/recipient/{recipientAddress}": {
       "get": {
         "description": "Performs real-time security analysis of a recipient address for a specific Safe. Returns analysis results grouped by status group, sorted by severity (CRITICAL first).",
@@ -8884,6 +8810,7 @@
               "NEW_CONTRACT",
               "KNOWN_CONTRACT",
               "UNEXPECTED_DELEGATECALL",
+              "UNOFFICIAL_FALLBACK_HANDLER",
               "FAILED"
             ],
             "example": "VERIFIED"
@@ -8895,6 +8822,56 @@
           "description": {
             "type": "string",
             "description": "Detailed description explaining the finding and its implications"
+          }
+        },
+        "required": ["severity", "type", "title", "description"]
+      },
+      "FallbackHandlerInfoDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Address of the fallback handler contract"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the fallback handler contract"
+          },
+          "logoUrl": {
+            "type": "string",
+            "description": "Logo URL for the fallback handler contract"
+          }
+        },
+        "required": ["address"]
+      },
+      "FallbackHandlerAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
+          },
+          "type": {
+            "type": "string",
+            "description": "Status code for unofficial fallback handler",
+            "enum": ["UNOFFICIAL_FALLBACK_HANDLER"]
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          },
+          "fallbackHandler": {
+            "description": "Information about the fallback handler",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FallbackHandlerInfoDto"
+              }
+            ]
           }
         },
         "required": ["severity", "type", "title", "description"]
@@ -8953,6 +8930,26 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ContractAnalysisResultDto"
+            }
+          },
+          "FALLBACK_HANDLER": {
+            "description": "Analysis results for setFallbackHandler operations. Identifies untrusted or unofficial fallback handlers in the transactions.",
+            "example": [
+              {
+                "severity": "WARN",
+                "type": "UNOFFICIAL_FALLBACK_HANDLER",
+                "title": "Unofficial fallback handler",
+                "description": "Verify the fallback handler is trusted and secure before proceeding.",
+                "fallbackHandler": {
+                  "address": "0x123",
+                  "name": "CompatibilityFallbackHandler",
+                  "logoUrl": "https://example.com/logo.png"
+                }
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FallbackHandlerAnalysisResultDto"
             }
           }
         }
@@ -9318,7 +9315,8 @@
           },
           "request_id": {
             "type": "string",
-            "description": "Blockaid request ID from x-request-id header. Used for reporting false positives/negatives via the report endpoint."
+            "description": "Blockaid request ID from x-request-id header. Used for reporting false positives/negatives via the report endpoint.",
+            "example": "11111111-1111-1111-1111-111111111111"
           }
         }
       },

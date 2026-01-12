@@ -458,6 +458,13 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
           }),
         },
       },
+      MuiDrawer: {
+        styleOverrides: {
+          paper: {
+            borderRight: 'none',
+          },
+        },
+      },
       MuiLink: {
         styleOverrides: {
           root: ({ theme }) => ({ fontWeight: 700, '&:hover': { color: theme.palette.primary.light } }),

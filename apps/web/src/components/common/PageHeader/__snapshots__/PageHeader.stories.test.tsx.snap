@@ -5,7 +5,7 @@ exports[`./PageHeader.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="container border MuiBox-root css-0"
+    class="container MuiBox-root css-0"
   >
     <h3
       class="MuiTypography-root MuiTypography-h3 title css-mnekkx-MuiTypography-root"
@@ -21,7 +21,7 @@ exports[`./PageHeader.stories LongTitle 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="container border MuiBox-root css-0"
+    class="container MuiBox-root css-0"
   >
     <h3
       class="MuiTypography-root MuiTypography-h3 title css-mnekkx-MuiTypography-root"
@@ -44,7 +44,7 @@ exports[`./PageHeader.stories NoBorder 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="container MuiBox-root css-0"
+    class="container border MuiBox-root css-0"
   >
     <h3
       class="MuiTypography-root MuiTypography-h3 title css-mnekkx-MuiTypography-root"
@@ -60,7 +60,7 @@ exports[`./PageHeader.stories WithButton 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="container border MuiBox-root css-0"
+    class="container MuiBox-root css-0"
   >
     <h3
       class="MuiTypography-root MuiTypography-h3 title css-mnekkx-MuiTypography-root"
@@ -98,7 +98,7 @@ exports[`./PageHeader.stories WithIconButton 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="container border MuiBox-root css-0"
+    class="container MuiBox-root css-0"
   >
     <h3
       class="MuiTypography-root MuiTypography-h3 title css-mnekkx-MuiTypography-root"
