@@ -194,6 +194,14 @@ export const OVERVIEW_EVENTS = {
     action: 'Hide earn banner',
     category: OVERVIEW_CATEGORY,
   },
+  OPEN_EURCV_BOOST: {
+    action: 'Open EURCV boost from banner',
+    category: OVERVIEW_CATEGORY,
+  },
+  HIDE_EURCV_BOOST_BANNER: {
+    action: 'Hide EURCV boost banner',
+    category: OVERVIEW_CATEGORY,
+  },
 }
 
 export const EXPLORE_POSSIBLE_EVENTS = {

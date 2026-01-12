@@ -9,6 +9,7 @@ import { AppRoutes } from '@/config/routes'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { trackEvent } from '@/services/analytics'
 import { EXPLORE_POSSIBLE_EVENTS } from '@/services/analytics/events/overview'
+import { MixpanelEvent, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -29,6 +30,21 @@ const EXPLORE_POSSIBLE_CONFIG = [
     getLink: (safeQuery: string | string[] | undefined) => ({
       pathname: AppRoutes.swap,
       query: { safe: safeQuery },
+    }),
+  },
+  {
+    id: 'earn',
+    title: 'Earn up to 9.5% APY',
+    iconUrl: {
+      light: '/images/explore-possible/earn-large.svg',
+      dark: '/images/explore-possible/earn-large-dark.svg',
+    },
+    getLink: (safeQuery: string | string[] | undefined) => ({
+      pathname: AppRoutes.earn,
+      query: {
+        safe: safeQuery,
+        asset_id: '1_0x5f7827fdeb7c20b443265fc2f40845b715385ff2', // Pre-select EURCV
+      },
     }),
   },
   {
@@ -72,6 +88,7 @@ const ExplorePossibleWidget = () => {
   const txBuilderApp = useTxBuilderApp()
   const isDarkMode = useDarkMode()
   const isSwapEnabled = useHasFeature(FEATURES.NATIVE_SWAPS)
+  const isEurcvBoostEnabled = useHasFeature(FEATURES.EURCV_BOOST)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
   const scrollContainerRef = useRef<HTMLUListElement>(null)
@@ -83,6 +100,10 @@ const ExplorePossibleWidget = () => {
         if (config.id === 'swap' && isSwapEnabled !== true) {
           return false
         }
+        // Filter out earn if EURCV boost feature flag is disabled
+        if (config.id === 'earn' && isEurcvBoostEnabled !== true) {
+          return false
+        }
         return true
       }).map((config) => ({
         id: config.id,
@@ -90,7 +111,7 @@ const ExplorePossibleWidget = () => {
         iconUrl: isDarkMode ? config.iconUrl.dark : config.iconUrl.light,
         link: config.getLink(router.query.safe, txBuilderApp?.link),
       })),
-    [router.query.safe, txBuilderApp, isDarkMode, isSwapEnabled],
+    [router.query.safe, txBuilderApp, isDarkMode, isSwapEnabled, isEurcvBoostEnabled],
   )
 
   const updateScrollState = () => {
@@ -138,6 +159,14 @@ const ExplorePossibleWidget = () => {
 
   const handleAppClick = (appId: string) => {
     trackEvent(EXPLORE_POSSIBLE_EVENTS.EXPLORE_POSSIBLE_CLICKED, { id: appId })
+
+    // Additional Mixpanel tracking for EURCV Boost Earn card
+    if (appId === 'earn') {
+      trackEvent(
+        { action: MixpanelEvent.EURCV_BOOST_EXPLORE_CLICKED, category: 'overview' },
+        { [MixpanelEventParams.SOURCE]: 'explore_widget' },
+      )
+    }
   }
 
   return (

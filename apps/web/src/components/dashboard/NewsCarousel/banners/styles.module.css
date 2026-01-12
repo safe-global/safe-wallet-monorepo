@@ -7,6 +7,10 @@
   height: 100%;
 }
 
+.eurcvBanner {
+  background: #c5f5e4;
+}
+
 .closeButton {
   color: var(--color-static-main);
   position: absolute;
