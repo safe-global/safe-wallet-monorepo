@@ -12,65 +12,37 @@ import { additionalSafesRtkApi, additionalSafesRtkApiV2 } from '@safe-global/sto
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 
-// Type for RTK Query dispatch that can handle both v1 and v2 thunks
 type SafeOverviewDispatch = ThunkDispatch<RootState, unknown, UnknownAction>
-
-type SafeOverviewQueueItem = {
-  safeAddress: string
-  walletAddress?: string
-  chainId: string
-  currency: string
-  dispatch: SafeOverviewDispatch
-  getState: () => RootState
-  callback: (result: { data: SafeOverview | undefined; error?: never } | { data?: never; error: string }) => void
-}
 
 const _BATCH_SIZE = 10
 const _FETCH_TIMEOUT = 300
 
-class SafeOverviewFetcher {
-  private requestQueue: SafeOverviewQueueItem[] = []
+// Simple batching utility for v1 endpoint
+class SafeOverviewFetcherV1 {
+  private requestQueue: Array<{
+    safeAddress: string
+    walletAddress?: string
+    chainId: string
+    currency: string
+    dispatch: SafeOverviewDispatch
+    callback: (result: { data: SafeOverview | undefined; error?: never } | { data?: never; error: string }) => void
+  }> = []
 
   private fetchTimeout: NodeJS.Timeout | null = null
 
-  private async fetchSafeOverviews({
-    safeIds,
-    walletAddress,
-    currency,
-    dispatch,
-    chainId,
-    getState,
-  }: {
-    safeIds: `${number}:0x${string}`[]
-    walletAddress?: string
-    currency: string
-    dispatch: SafeOverviewDispatch
-    chainId: string
-    getState: () => RootState
-  }): Promise<SafeOverview[]> {
-    // Check if the chain has the PORTFOLIO_ENDPOINT feature enabled
-    const state = getState()
-    const chainsSelector = apiSliceWithChainsConfig.endpoints.getChainsConfig.select(undefined)
-    const chainsQueryResult = chainsSelector(state)
-    const chain = chainsQueryResult.data?.entities[chainId]
-    const useV2 = chain ? hasFeature(chain, FEATURES.PORTFOLIO_ENDPOINT) : false
+  private async processQueuedItems() {
+    const nextBatch = this.requestQueue.slice(0, _BATCH_SIZE)
+    this.requestQueue = this.requestQueue.slice(_BATCH_SIZE)
 
-    if (useV2) {
-      const queryThunk = additionalSafesRtkApiV2.endpoints.safesGetOverviewForManyV2.initiate({
-        safes: safeIds,
-        currency,
-        walletAddress,
-        trusted: false,
-        excludeSpam: true,
-      })
-      const queryAction = dispatch(queryThunk)
+    if (nextBatch.length === 0) return
 
-      try {
-        return await queryAction.unwrap()
-      } finally {
-        queryAction.unsubscribe()
-      }
-    } else {
+    try {
+      this.fetchTimeout && clearTimeout(this.fetchTimeout)
+      this.fetchTimeout = null
+
+      const safeIds = nextBatch.map((request) => makeSafeTag(request.chainId, request.safeAddress))
+      const { walletAddress, currency, dispatch } = nextBatch[0]
+
       const queryThunk = additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate({
         safes: safeIds,
         currency,
@@ -81,77 +53,156 @@ class SafeOverviewFetcher {
       const queryAction = dispatch(queryThunk)
 
       try {
-        return await queryAction.unwrap()
+        const overviews = await queryAction.unwrap()
+        nextBatch.forEach((item) => {
+          const overview = overviews.find(
+            (entry) => sameAddress(entry.address.value, item.safeAddress) && entry.chainId === item.chainId,
+          )
+          item.callback({ data: overview })
+        })
       } finally {
         queryAction.unsubscribe()
       }
-    }
-  }
-
-  private async processQueuedItems() {
-    // Dequeue the first BATCH_SIZE items
-    const nextBatch = this.requestQueue.slice(0, _BATCH_SIZE)
-    this.requestQueue = this.requestQueue.slice(_BATCH_SIZE)
-
-    let overviews: SafeOverview[]
-    try {
-      this.fetchTimeout && clearTimeout(this.fetchTimeout)
-      this.fetchTimeout = null
-
-      if (nextBatch.length === 0) {
-        // Nothing to process
-        return
-      }
-
-      const safeIds = nextBatch.map((request) => makeSafeTag(request.chainId, request.safeAddress))
-      const { walletAddress, currency, dispatch, chainId, getState } = nextBatch[0]
-      overviews = await this.fetchSafeOverviews({ safeIds, currency, walletAddress, dispatch, chainId, getState })
     } catch (err) {
-      // Overviews could not be fetched
       nextBatch.forEach((item) => item.callback({ error: 'Could not fetch Safe overview' }))
-      return
     }
-
-    nextBatch.forEach((item) => {
-      const overview = overviews.find(
-        (entry) => sameAddress(entry.address.value, item.safeAddress) && entry.chainId === item.chainId,
-      )
-
-      item.callback({ data: overview })
-    })
   }
 
-  private enqueueRequest(item: SafeOverviewQueueItem) {
+  private enqueueRequest(item: {
+    safeAddress: string
+    walletAddress?: string
+    chainId: string
+    currency: string
+    dispatch: SafeOverviewDispatch
+    callback: (result: { data: SafeOverview | undefined; error?: never } | { data?: never; error: string }) => void
+  }) {
     this.requestQueue.push(item)
 
     if (this.requestQueue.length >= _BATCH_SIZE) {
       this.processQueuedItems()
     }
 
-    // If no timer is running start a timer
     if (this.fetchTimeout === null) {
-      this.fetchTimeout = setTimeout(() => {
-        this.processQueuedItems()
-      }, _FETCH_TIMEOUT)
+      this.fetchTimeout = setTimeout(() => this.processQueuedItems(), _FETCH_TIMEOUT)
     }
   }
 
-  async getOverview(item: Omit<SafeOverviewQueueItem, 'callback'>) {
+  async getOverview(item: {
+    safeAddress: string
+    walletAddress?: string
+    chainId: string
+    currency: string
+    dispatch: SafeOverviewDispatch
+  }): Promise<SafeOverview | undefined> {
     return new Promise<SafeOverview | undefined>((resolve, reject) => {
       this.enqueueRequest({
         ...item,
         callback: (result) => {
           if ('data' in result) {
             resolve(result.data)
+          } else {
+            reject(result.error)
           }
-          reject(result.error)
         },
       })
     })
   }
 }
 
-const batchedFetcher = new SafeOverviewFetcher()
+// Simple batching utility for v2 endpoint
+class SafeOverviewFetcherV2 {
+  private requestQueue: Array<{
+    safeAddress: string
+    walletAddress?: string
+    chainId: string
+    currency: string
+    dispatch: SafeOverviewDispatch
+    callback: (result: { data: SafeOverview | undefined; error?: never } | { data?: never; error: string }) => void
+  }> = []
+
+  private fetchTimeout: NodeJS.Timeout | null = null
+
+  private async processQueuedItems() {
+    const nextBatch = this.requestQueue.slice(0, _BATCH_SIZE)
+    this.requestQueue = this.requestQueue.slice(_BATCH_SIZE)
+
+    if (nextBatch.length === 0) return
+
+    try {
+      this.fetchTimeout && clearTimeout(this.fetchTimeout)
+      this.fetchTimeout = null
+
+      const safeIds = nextBatch.map((request) => makeSafeTag(request.chainId, request.safeAddress))
+      const { walletAddress, currency, dispatch } = nextBatch[0]
+
+      const queryThunk = additionalSafesRtkApiV2.endpoints.safesGetOverviewForManyV2.initiate({
+        safes: safeIds,
+        currency,
+        walletAddress,
+        trusted: false,
+        excludeSpam: true,
+      })
+      const queryAction = dispatch(queryThunk)
+
+      try {
+        const overviews = await queryAction.unwrap()
+        nextBatch.forEach((item) => {
+          const overview = overviews.find(
+            (entry) => sameAddress(entry.address.value, item.safeAddress) && entry.chainId === item.chainId,
+          )
+          item.callback({ data: overview })
+        })
+      } finally {
+        queryAction.unsubscribe()
+      }
+    } catch (err) {
+      nextBatch.forEach((item) => item.callback({ error: 'Could not fetch Safe overview' }))
+    }
+  }
+
+  private enqueueRequest(item: {
+    safeAddress: string
+    walletAddress?: string
+    chainId: string
+    currency: string
+    dispatch: SafeOverviewDispatch
+    callback: (result: { data: SafeOverview | undefined; error?: never } | { data?: never; error: string }) => void
+  }) {
+    this.requestQueue.push(item)
+
+    if (this.requestQueue.length >= _BATCH_SIZE) {
+      this.processQueuedItems()
+    }
+
+    if (this.fetchTimeout === null) {
+      this.fetchTimeout = setTimeout(() => this.processQueuedItems(), _FETCH_TIMEOUT)
+    }
+  }
+
+  async getOverview(item: {
+    safeAddress: string
+    walletAddress?: string
+    chainId: string
+    currency: string
+    dispatch: SafeOverviewDispatch
+  }): Promise<SafeOverview | undefined> {
+    return new Promise<SafeOverview | undefined>((resolve, reject) => {
+      this.enqueueRequest({
+        ...item,
+        callback: (result) => {
+          if ('data' in result) {
+            resolve(result.data)
+          } else {
+            reject(result.error)
+          }
+        },
+      })
+    })
+  }
+}
+
+const batchedFetcherV1 = new SafeOverviewFetcherV1()
+const batchedFetcherV2 = new SafeOverviewFetcherV2()
 
 type MultiOverviewQueryParams = {
   currency: string
@@ -170,14 +221,20 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'Submissions
           return { data: null }
         }
 
+        // Check if the chain has the PORTFOLIO_ENDPOINT feature enabled
+        const chainsSelector = apiSliceWithChainsConfig.endpoints.getChainsConfig.select(undefined)
+        const chainsQueryResult = chainsSelector(state)
+        const chain = chainsQueryResult.data?.entities[chainId]
+        const useV2 = chain ? hasFeature(chain, FEATURES.PORTFOLIO_ENDPOINT) : false
+
         try {
-          const safeOverview = await batchedFetcher.getOverview({
+          const fetcher = useV2 ? batchedFetcherV2 : batchedFetcherV1
+          const safeOverview = await fetcher.getOverview({
             chainId,
             currency,
             walletAddress,
             safeAddress,
-            dispatch,
-            getState: getState as () => RootState,
+            dispatch: dispatch as SafeOverviewDispatch,
           })
           return { data: safeOverview ?? null }
         } catch (error) {
@@ -189,16 +246,29 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'Submissions
   getMultipleSafeOverviews: builder.query<SafeOverview[], MultiOverviewQueryParams>({
     async queryFn(params, { dispatch, getState }) {
       const { safes, walletAddress, currency } = params
+      const state = getState() as RootState
+
+      if (safes.length === 0) {
+        return { data: [] }
+      }
+
+      // Check if the first safe's chain has the PORTFOLIO_ENDPOINT feature enabled
+      // All safes in a batch should be from the same chain
+      const firstChainId = safes[0].chainId
+      const chainsSelector = apiSliceWithChainsConfig.endpoints.getChainsConfig.select(undefined)
+      const chainsQueryResult = chainsSelector(state)
+      const chain = chainsQueryResult.data?.entities[firstChainId]
+      const useV2 = chain ? hasFeature(chain, FEATURES.PORTFOLIO_ENDPOINT) : false
 
       try {
+        const fetcher = useV2 ? batchedFetcherV2 : batchedFetcherV1
         const promisedSafeOverviews: Promise<SafeOverview | undefined>[] = safes.map((safe) =>
-          batchedFetcher.getOverview({
+          fetcher.getOverview({
             chainId: safe.chainId,
             safeAddress: safe.address,
             currency,
             walletAddress,
-            dispatch,
-            getState: getState as () => RootState,
+            dispatch: dispatch as SafeOverviewDispatch,
           }),
         )
         const safeOverviews: (SafeOverview | undefined)[] = await Promise.all(promisedSafeOverviews)
