@@ -101,8 +101,7 @@ export default [
                 '../../features/*/services/*',
                 '../../features/*/store/*',
               ],
-              message:
-                'Import from feature index file only. Internal feature imports are not allowed.',
+              message: 'Import from feature index file only. Internal feature imports are not allowed.',
             },
           ],
         },
