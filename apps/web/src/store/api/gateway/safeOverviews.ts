@@ -100,51 +100,60 @@ class SafeOverviewFetcher {
       return
     }
 
-    let overviews: SafeOverview[]
-    try {
-      // Group by v1/v2 and fetch in parallel
-      const v1Items = itemsToProcess.filter((item) => !item.useV2)
-      const v2Items = itemsToProcess.filter((item) => item.useV2)
+    // Group by v1/v2
+    const v1Items = itemsToProcess.filter((item) => !item.useV2)
+    const v2Items = itemsToProcess.filter((item) => item.useV2)
 
-      const { walletAddress, currency, dispatchV1, dispatchV2 } = itemsToProcess[0]
+    const { walletAddress, currency, dispatchV1, dispatchV2 } = itemsToProcess[0]
 
-      const [v1Overviews, v2Overviews] = await Promise.all([
-        v1Items.length > 0
-          ? this.fetchSafeOverviews({
-              safeIds: v1Items.map((item) => makeSafeTag(item.chainId, item.safeAddress)),
-              currency,
-              walletAddress,
-              dispatchV1,
-              dispatchV2,
-              useV2: false,
-            })
-          : [],
-        v2Items.length > 0
-          ? this.fetchSafeOverviews({
-              safeIds: v2Items.map((item) => makeSafeTag(item.chainId, item.safeAddress)),
-              currency,
-              walletAddress,
-              dispatchV1,
-              dispatchV2,
-              useV2: true,
-            })
-          : [],
-      ])
+    // Fetch v1 and v2 independently using Promise.allSettled
+    // This ensures a failure in one endpoint doesn't affect the other
+    const [v1Result, v2Result] = await Promise.allSettled([
+      v1Items.length > 0
+        ? this.fetchSafeOverviews({
+            safeIds: v1Items.map((item) => makeSafeTag(item.chainId, item.safeAddress)),
+            currency,
+            walletAddress,
+            dispatchV1,
+            dispatchV2,
+            useV2: false,
+          })
+        : Promise.resolve([]),
+      v2Items.length > 0
+        ? this.fetchSafeOverviews({
+            safeIds: v2Items.map((item) => makeSafeTag(item.chainId, item.safeAddress)),
+            currency,
+            walletAddress,
+            dispatchV1,
+            dispatchV2,
+            useV2: true,
+          })
+        : Promise.resolve([]),
+    ])
 
-      overviews = [...v1Overviews, ...v2Overviews]
-    } catch (err) {
-      // Overviews could not be fetched
-      itemsToProcess.forEach((item) => item.callback({ error: 'Could not fetch Safe overview' }))
-      return
+    // Handle v1 items - fail only v1 items if v1 endpoint failed
+    if (v1Result.status === 'rejected') {
+      v1Items.forEach((item) => item.callback({ error: 'Could not fetch Safe overview' }))
+    } else {
+      v1Items.forEach((item) => {
+        const overview = v1Result.value.find(
+          (entry) => sameAddress(entry.address.value, item.safeAddress) && entry.chainId === item.chainId,
+        )
+        item.callback({ data: overview })
+      })
     }
 
-    itemsToProcess.forEach((item) => {
-      const overview = overviews.find(
-        (entry) => sameAddress(entry.address.value, item.safeAddress) && entry.chainId === item.chainId,
-      )
-
-      item.callback({ data: overview })
-    })
+    // Handle v2 items - fail only v2 items if v2 endpoint failed
+    if (v2Result.status === 'rejected') {
+      v2Items.forEach((item) => item.callback({ error: 'Could not fetch Safe overview' }))
+    } else {
+      v2Items.forEach((item) => {
+        const overview = v2Result.value.find(
+          (entry) => sameAddress(entry.address.value, item.safeAddress) && entry.chainId === item.chainId,
+        )
+        item.callback({ data: overview })
+      })
+    }
   }
 
   private enqueueRequest(item: SafeOverviewQueueItem) {
@@ -251,7 +260,7 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'Submissions
         const safeOverviews = await Promise.all(promisedSafeOverviews)
         return { data: safeOverviews.filter(Boolean) as SafeOverview[] }
       } catch (error) {
-        return { error: { status: 'CUSTOM_ERROR', error: (error as Error).message } }
+        return { error: { status: 'CUSTOM_ERROR', error: asError(error).message } }
       }
     },
   }),
