@@ -118,7 +118,12 @@ export class DatadogProvider implements IObservabilityProvider {
 
   private async initLogs(): Promise<void> {
     if (!datadogLogsModule) {
-      datadogLogsModule = await import('@datadog/browser-logs')
+      try {
+        datadogLogsModule = await import('@datadog/browser-logs')
+      } catch (error) {
+        console.warn('Failed to load Datadog Logs module:', error)
+        return
+      }
     }
 
     if (!datadogLogsModule) {
@@ -141,7 +146,6 @@ export class DatadogProvider implements IObservabilityProvider {
   private async initRum(): Promise<void> {
     if (!datadogRumModule) {
       try {
-        // @ts-expect-error - Optional dependency that may not be installed
         const rumModule = await import('@datadog/browser-rum')
         datadogRumModule = rumModule as unknown as DatadogRumModule
       } catch (error) {

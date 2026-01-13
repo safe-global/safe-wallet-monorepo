@@ -7,9 +7,17 @@ export interface ILogger {
 
 export interface IObservabilityProvider {
   readonly name: string
-  init: () => void
+  init: () => void | Promise<void>
   getLogger: () => ILogger
   captureException: (error: Error, context?: Record<string, unknown>) => void
+  getErrorBoundary?: () =>
+    | React.ComponentType<{
+        children: React.ReactNode
+        onError?: (error: Error, componentStack?: string) => void
+        fallback?: React.ReactNode
+        showDialog?: boolean
+      }>
+    | undefined
 }
 
 export interface ObservabilityConfig {

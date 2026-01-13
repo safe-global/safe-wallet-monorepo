@@ -101,6 +101,12 @@
     "@datadog/browser-rum-react": "^6.24.1",
     "@sentry/react": "^7.91.0"
   },
+  "dependenciesMeta": {
+    "@datadog/browser-logs": {},
+    "@datadog/browser-rum": {},
+    "@datadog/browser-rum-react": {},
+    "@sentry/react": {}
+  },
   "devDependencies": {
     "@chromatic-com/storybook": "^4.1.2",
     "@cowprotocol/app-data": "^3.1.0",
