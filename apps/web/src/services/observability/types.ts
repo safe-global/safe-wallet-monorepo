@@ -10,7 +10,6 @@ export interface IObservabilityProvider {
   init: () => void
   getLogger: () => ILogger
   captureException: (error: Error, context?: Record<string, unknown>) => void
-  getErrorBoundary?: () => unknown
 }
 
 export interface ObservabilityConfig {

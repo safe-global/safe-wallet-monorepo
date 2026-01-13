@@ -98,30 +98,6 @@ describe('CompositeProvider', () => {
     consoleErrorSpy.mockRestore()
   })
 
-  it('should return first available error boundary', () => {
-    const mockBoundary = jest.fn()
-    const provider1 = createMockProvider('Provider1')
-    const provider2 = {
-      ...createMockProvider('Provider2'),
-      getErrorBoundary: jest.fn().mockReturnValue(mockBoundary),
-    }
-
-    const composite = new CompositeProvider([provider1, provider2])
-    const boundary = composite.getErrorBoundary()
-
-    expect(boundary).toBe(mockBoundary)
-  })
-
-  it('should return undefined boundary if no provider has one', () => {
-    const provider1 = createMockProvider('Provider1')
-    const provider2 = createMockProvider('Provider2')
-
-    const composite = new CompositeProvider([provider1, provider2])
-    const boundary = composite.getErrorBoundary()
-
-    expect(boundary).toBeUndefined()
-  })
-
   it('should handle initialization failures gracefully', async () => {
     const provider1 = createMockProvider('Provider1')
     const provider2 = createMockProvider('Provider2')

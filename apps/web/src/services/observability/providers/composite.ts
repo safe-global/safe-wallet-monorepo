@@ -64,14 +64,4 @@ export class CompositeProvider implements IObservabilityProvider {
       }
     })
   }
-
-  getErrorBoundary() {
-    const providerWithBoundary = this.providers.find((provider) => provider.getErrorBoundary)
-
-    if (providerWithBoundary && providerWithBoundary.getErrorBoundary) {
-      return providerWithBoundary.getErrorBoundary()
-    }
-
-    return undefined
-  }
 }

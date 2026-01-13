@@ -6,7 +6,6 @@ interface SentryModule {
   init: (config: Record<string, unknown>) => void
   captureException: (error: Error, context?: Record<string, unknown>) => void
   captureMessage: (message: string, context?: Record<string, unknown>) => void
-  ErrorBoundary: React.ComponentType<Record<string, unknown>>
 }
 
 let sentryModule: SentryModule | null = null
@@ -104,12 +103,5 @@ export class SentryProvider implements IObservabilityProvider {
         extra: context,
       })
     }
-  }
-
-  getErrorBoundary() {
-    if (this.isInitialized && sentryModule) {
-      return sentryModule.ErrorBoundary
-    }
-    return undefined
   }
 }

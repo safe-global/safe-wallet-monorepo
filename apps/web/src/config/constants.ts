@@ -70,6 +70,22 @@ export const DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE =
 export const DATADOG_FORCE_ENABLE = process.env.NEXT_PUBLIC_DATADOG_FORCE_ENABLE === 'true'
 export const DATADOG_RUM_TRACING_ENABLED = process.env.NEXT_PUBLIC_DATADOG_RUM_TRACING_ENABLED === 'true'
 
+const parseBoolean = (value: string | undefined, defaultValue: boolean): boolean => {
+  if (value === undefined) return defaultValue
+  return value === 'true'
+}
+
+export const DATADOG_RUM_TRACK_USER_INTERACTIONS = parseBoolean(
+  process.env.NEXT_PUBLIC_DATADOG_RUM_TRACK_USER_INTERACTIONS,
+  true,
+)
+export const DATADOG_RUM_TRACK_RESOURCES = parseBoolean(process.env.NEXT_PUBLIC_DATADOG_RUM_TRACK_RESOURCES, true)
+export const DATADOG_RUM_TRACK_LONG_TASKS = parseBoolean(process.env.NEXT_PUBLIC_DATADOG_RUM_TRACK_LONG_TASKS, true)
+
+type DatadogPrivacyLevel = 'mask' | 'mask-user-input' | 'allow'
+export const DATADOG_RUM_DEFAULT_PRIVACY_LEVEL = (process.env.NEXT_PUBLIC_DATADOG_RUM_DEFAULT_PRIVACY_LEVEL ||
+  'mask') as DatadogPrivacyLevel
+
 // Wallets
 export const WC_PROJECT_ID = process.env.NEXT_PUBLIC_WC_PROJECT_ID || ''
 export const TREZOR_APP_URL = 'app.safe.global'
