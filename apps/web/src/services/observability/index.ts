@@ -20,5 +20,3 @@ export const logger: ILogger = observabilityProvider.getLogger()
 export const captureException = (error: Error, context?: Record<string, unknown>): void => {
   observabilityProvider.captureException(error, context)
 }
-
-export const getErrorBoundary = () => observabilityProvider.getErrorBoundary?.()

@@ -95,7 +95,7 @@ runs:
           --minified-path-prefix=/_next/static
       env:
         DATADOG_API_KEY: ${{ fromJSON(inputs.secrets).DATADOG_API_KEY }}
-        DATADOG_SITE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SITE || 'datadoghq.eu' }}
+        DATADOG_SITE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SITE && fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SITE || 'datadoghq.eu' }}
         NEXT_PUBLIC_DATADOG_RUM_SERVICE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SERVICE }}
         NEXT_PUBLIC_DATADOG_RUM_SITE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SITE }}
 

@@ -6,48 +6,38 @@ import {
   DATADOG_LOGS_SAMPLE_RATE,
   DATADOG_RUM_APPLICATION_ID,
   DATADOG_RUM_CLIENT_TOKEN,
+  DATADOG_RUM_DEFAULT_PRIVACY_LEVEL,
   DATADOG_RUM_ENV,
   DATADOG_RUM_SERVICE,
   DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE,
   DATADOG_RUM_SESSION_SAMPLE_RATE,
   DATADOG_RUM_SITE,
   DATADOG_RUM_TRACE_SAMPLE_RATE,
+  DATADOG_RUM_TRACK_LONG_TASKS,
+  DATADOG_RUM_TRACK_RESOURCES,
+  DATADOG_RUM_TRACK_USER_INTERACTIONS,
   DATADOG_RUM_TRACING_ENABLED,
   GATEWAY_URL_PRODUCTION,
   GATEWAY_URL_STAGING,
   IS_PRODUCTION,
 } from '@/config/constants'
 
-interface DatadogLogsConfig {
-  clientToken: string
-  site: string
-  forwardErrorsToLogs: boolean
-  sessionSampleRate: number
-}
-
-interface DatadogRumConfig {
-  applicationId: string
-  clientToken: string
-  site: string
-  service: string
-  env: string
-  version: string
-  sessionSampleRate: number
-  sessionReplaySampleRate: number
-  trackUserInteractions: boolean
-  trackResources: boolean
-  trackLongTasks: boolean
-  defaultPrivacyLevel: 'mask' | 'mask-user-input' | 'allow'
-  traceSampleRate?: number
-  allowedTracingUrls?: Array<{
-    match: string
-    propagatorTypes: ('tracecontext' | 'datadog' | 'b3' | 'b3multi')[]
-  }>
-}
+type DatadogSite =
+  | 'datadoghq.com'
+  | 'datadoghq.eu'
+  | 'us3.datadoghq.com'
+  | 'us5.datadoghq.com'
+  | 'ddog-gov.com'
+  | 'ap1.datadoghq.com'
 
 interface DatadogLogsModule {
   datadogLogs: {
-    init: (config: DatadogLogsConfig) => void
+    init: (config: {
+      clientToken: string
+      site?: DatadogSite
+      forwardErrorsToLogs?: boolean
+      sessionSampleRate?: number
+    }) => void
     logger: {
       info: (message: string, context?: Record<string, unknown>) => void
       warn: (message: string, context?: Record<string, unknown>) => void
@@ -59,7 +49,25 @@ interface DatadogLogsModule {
 
 interface DatadogRumModule {
   datadogRum: {
-    init: (config: DatadogRumConfig) => void
+    init: (config: {
+      applicationId: string
+      clientToken: string
+      site?: DatadogSite
+      service?: string
+      env?: string
+      version?: string
+      sessionSampleRate?: number
+      sessionReplaySampleRate?: number
+      trackUserInteractions?: boolean
+      trackResources?: boolean
+      trackLongTasks?: boolean
+      defaultPrivacyLevel?: 'mask' | 'mask-user-input' | 'allow'
+      traceSampleRate?: number
+      allowedTracingUrls?: Array<{
+        match: string
+        propagatorTypes: ('tracecontext' | 'datadog' | 'b3' | 'b3multi')[]
+      }>
+    }) => void
     addError: (error: Error, context?: Record<string, unknown>) => void
     setGlobalContextProperty: (key: string, value: unknown) => void
   }
@@ -91,16 +99,20 @@ export class DatadogProvider implements IObservabilityProvider {
       return
     }
 
-    try {
-      if (hasLogsToInit) {
+    if (hasLogsToInit) {
+      try {
         await this.initLogs()
+      } catch (error) {
+        console.warn('Failed to initialize Datadog Logs:', error)
       }
+    }
 
-      if (hasRumToInit) {
+    if (hasRumToInit) {
+      try {
         await this.initRum()
+      } catch (error) {
+        console.warn('Failed to initialize Datadog RUM:', error)
       }
-    } catch (error) {
-      console.warn('Failed to initialize Datadog:', error)
     }
   }
 
@@ -109,10 +121,14 @@ export class DatadogProvider implements IObservabilityProvider {
       datadogLogsModule = await import('@datadog/browser-logs')
     }
 
+    if (!datadogLogsModule) {
+      return
+    }
+
     try {
       datadogLogsModule.datadogLogs.init({
         clientToken: DATADOG_CLIENT_TOKEN,
-        site: DATADOG_RUM_SITE,
+        site: DATADOG_RUM_SITE as DatadogSite,
         forwardErrorsToLogs: true,
         sessionSampleRate: DATADOG_LOGS_SAMPLE_RATE,
       })
@@ -124,7 +140,14 @@ export class DatadogProvider implements IObservabilityProvider {
 
   private async initRum(): Promise<void> {
     if (!datadogRumModule) {
-      datadogRumModule = await import('@datadog/browser-rum')
+      try {
+        // @ts-expect-error - Optional dependency that may not be installed
+        const rumModule = await import('@datadog/browser-rum')
+        datadogRumModule = rumModule as unknown as DatadogRumModule
+      } catch (error) {
+        console.warn('Failed to load Datadog RUM module:', error)
+        return
+      }
     }
 
     if (!datadogRumModule) {
@@ -135,16 +158,16 @@ export class DatadogProvider implements IObservabilityProvider {
       datadogRumModule.datadogRum.init({
         applicationId: DATADOG_RUM_APPLICATION_ID,
         clientToken: DATADOG_RUM_CLIENT_TOKEN,
-        site: DATADOG_RUM_SITE,
+        site: DATADOG_RUM_SITE as DatadogSite,
         service: DATADOG_RUM_SERVICE,
         env: DATADOG_RUM_ENV,
         version: COMMIT_HASH,
         sessionSampleRate: DATADOG_RUM_SESSION_SAMPLE_RATE,
         sessionReplaySampleRate: DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE,
-        trackUserInteractions: true,
-        trackResources: true,
-        trackLongTasks: true,
-        defaultPrivacyLevel: 'mask',
+        trackUserInteractions: DATADOG_RUM_TRACK_USER_INTERACTIONS,
+        trackResources: DATADOG_RUM_TRACK_RESOURCES,
+        trackLongTasks: DATADOG_RUM_TRACK_LONG_TASKS,
+        defaultPrivacyLevel: DATADOG_RUM_DEFAULT_PRIVACY_LEVEL,
         ...(DATADOG_RUM_TRACING_ENABLED && {
           traceSampleRate: DATADOG_RUM_TRACE_SAMPLE_RATE,
           allowedTracingUrls: [

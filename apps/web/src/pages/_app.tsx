@@ -28,7 +28,6 @@ import { useTxTracking } from '@/hooks/useTxTracking'
 import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import useGtm from '@/services/analytics/useGtm'
 import useBeamer from '@/hooks/Beamer/useBeamer'
-import ErrorBoundary from '@/components/common/ErrorBoundary'
 import createEmotionCache from '@/utils/createEmotionCache'
 import MetaTags from '@/components/common/MetaTags'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
@@ -46,10 +45,11 @@ import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
 import usePortfolioRefetchOnTxHistory from '@/features/portfolio/hooks/usePortfolioRefetchOnTxHistory'
 import OutreachPopup from '@/features/targetedOutreach/components/OutreachPopup'
 import { GATEWAY_URL } from '@/config/gateway'
-import { getErrorBoundary, captureException } from '@/services/observability'
+import { captureException } from '@/services/observability'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
+import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 
 const reduxStore = makeStore()
 setStoreInstance(reduxStore)
@@ -89,7 +89,6 @@ const THEME_LIGHT = 'light'
 export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }) => {
   const isDarkMode = useDarkMode()
   const themeMode = isDarkMode ? THEME_DARK : THEME_LIGHT
-  const ObservabilityErrorBoundary = getErrorBoundary() as React.ComponentType<Record<string, unknown>> | undefined
 
   const handleError = (error: Error, componentStack?: string) => {
     captureException(error, { componentStack })
@@ -109,13 +108,7 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
     <SafeThemeProvider mode={themeMode}>
       {(safeTheme: Theme) => (
         <ThemeProvider theme={safeTheme}>
-          {ObservabilityErrorBoundary ? (
-            <ObservabilityErrorBoundary showDialog fallback={ErrorBoundary} onError={handleError}>
-              {content}
-            </ObservabilityErrorBoundary>
-          ) : (
-            content
-          )}
+          <ObservabilityErrorBoundary onError={handleError}>{content}</ObservabilityErrorBoundary>
         </ThemeProvider>
       )}
     </SafeThemeProvider>

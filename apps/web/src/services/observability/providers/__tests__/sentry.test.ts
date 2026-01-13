@@ -58,11 +58,6 @@ describe('SentryProvider', () => {
     expect(() => provider.captureException(error, context)).not.toThrow()
   })
 
-  it('should have getErrorBoundary method', () => {
-    const provider = new SentryProvider()
-    expect(typeof provider.getErrorBoundary).toBe('function')
-  })
-
   it('should handle multiple initializations gracefully', async () => {
     const provider = new SentryProvider()
     await expect(provider.init()).resolves.not.toThrow()

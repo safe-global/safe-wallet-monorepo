@@ -11,7 +11,6 @@ describe('Observability Module', () => {
           debug: jest.fn(),
         })),
         captureException: jest.fn(),
-        getErrorBoundary: jest.fn(() => undefined),
       }
 
       jest.doMock('../factory', () => ({
@@ -40,7 +39,6 @@ describe('Observability Module', () => {
           debug: jest.fn(),
         })),
         captureException: jest.fn(),
-        getErrorBoundary: jest.fn(() => undefined),
       }
 
       jest.doMock('../factory', () => ({
@@ -51,32 +49,6 @@ describe('Observability Module', () => {
 
       expect(captureException).toBeDefined()
       expect(typeof captureException).toBe('function')
-    })
-  })
-
-  it('should export getErrorBoundary function', () => {
-    jest.isolateModules(() => {
-      const mockProvider = {
-        name: 'Mock',
-        init: jest.fn(),
-        getLogger: jest.fn(() => ({
-          info: jest.fn(),
-          warn: jest.fn(),
-          error: jest.fn(),
-          debug: jest.fn(),
-        })),
-        captureException: jest.fn(),
-        getErrorBoundary: jest.fn(() => undefined),
-      }
-
-      jest.doMock('../factory', () => ({
-        createObservabilityProvider: jest.fn(() => mockProvider),
-      }))
-
-      const { getErrorBoundary } = require('../index')
-
-      expect(getErrorBoundary).toBeDefined()
-      expect(typeof getErrorBoundary).toBe('function')
     })
   })
 
@@ -92,7 +64,6 @@ describe('Observability Module', () => {
           debug: jest.fn(),
         })),
         captureException: jest.fn(),
-        getErrorBoundary: jest.fn(() => undefined),
       }
 
       jest.doMock('../factory', () => ({
@@ -120,7 +91,6 @@ describe('Observability Module', () => {
           debug: jest.fn(),
         })),
         captureException: jest.fn(),
-        getErrorBoundary: jest.fn(() => undefined),
       }
 
       jest.doMock('../factory', () => ({
@@ -146,7 +116,6 @@ describe('Observability Module', () => {
           debug: jest.fn(),
         })),
         captureException: jest.fn(),
-        getErrorBoundary: jest.fn(() => undefined),
       }
 
       jest.doMock('../factory', () => ({

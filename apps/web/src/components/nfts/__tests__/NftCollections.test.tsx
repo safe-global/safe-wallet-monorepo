@@ -13,7 +13,6 @@ jest.mock('@/services/observability', () => ({
     warn: jest.fn(),
   },
   captureException: jest.fn(),
-  getErrorBoundary: jest.fn(),
 }))
 
 jest.mock('@/services/analytics', () => ({
