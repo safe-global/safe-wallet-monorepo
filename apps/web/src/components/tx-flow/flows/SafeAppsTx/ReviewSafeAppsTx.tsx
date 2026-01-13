@@ -32,7 +32,6 @@ const ReviewSafeAppsTx = ({
       const tx = isMultiSend ? await createMultiSendCallOnlyTx(txs) : await createTx(txs[0])
 
       if (params?.safeTxGas !== undefined && !Number.isNaN(params.safeTxGas)) {
-        // FIXME: do it properly via the Core SDK
         tx.data.safeTxGas = String(params.safeTxGas)
       }
 
