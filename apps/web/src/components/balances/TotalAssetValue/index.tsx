@@ -9,15 +9,15 @@ import { InfoTooltip } from '@/features/stake/components/InfoTooltip'
 const TotalAssetValue = ({
   fiatTotal,
   title = 'Total value',
+  tooltipTitle,
   size = 'md',
   action,
-  isAllTokensMode,
 }: {
   fiatTotal: string | number | undefined
   title?: string
+  tooltipTitle?: string
   size?: 'md' | 'lg'
   action?: ReactNode
-  isAllTokensMode?: boolean
 }) => {
   const fontSizeValue = size === 'lg' ? '44px' : '24px'
   const { safe } = useSafeInfo()
@@ -27,6 +27,7 @@ const TotalAssetValue = ({
     <Box>
       <Typography fontWeight={700} fontSize="14px" mb={0.5} sx={{ color: 'var(--color-text-secondary)' }}>
         {title}
+        {tooltipTitle && <InfoTooltip title={tooltipTitle} />}
       </Typography>
       <Stack direction="row" alignItems="flex-end" justifyContent="space-between">
         <Typography component="div" variant="h1" fontSize={fontSizeValue} lineHeight="1.2" letterSpacing="-0.5px">
@@ -34,9 +35,6 @@ const TotalAssetValue = ({
             fiatTotal !== undefined ? (
               <>
                 <FiatValue value={fiatTotal} precise />
-                {isAllTokensMode && (
-                  <InfoTooltip title="Total from this list only. Portfolio total includes positions and may use other token data." />
-                )}
               </>
             ) : (
               <Skeleton variant="text" width={60} />
