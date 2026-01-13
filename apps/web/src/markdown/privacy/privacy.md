@@ -456,7 +456,7 @@ We use [**Sentry**](https://sentry.io/) to collect error reports and crashes to 
 
 ## 5.9. Beamer {#beamer}
 
-We use [**Beamer**](https://www.getbeamer.com/) providing updates to the user about changes in the app.Beamer's purpose and function are further explained under the following link [**https://www.getbeamer.com/showcase/notification-center**](https://www.getbeamer.com/showcase/notification-center).
+We use [**Beamer**](https://www.getbeamer.com/) providing updates to the user about changes in the app.Beamer's purpose and function are further explained under the following link [**https://www.getbeamer.com/in-app-notification-center**](https://www.getbeamer.com/in-app-notification-center).
 
 We do not store any information collected by Beamer.
 
