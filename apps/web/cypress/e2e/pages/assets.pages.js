@@ -6,6 +6,7 @@ import { assetsSwapBtn } from '../pages/swaps.pages'
 import { nftsRow } from '../pages/nfts.pages'
 
 export const balanceSingleRow = '[aria-labelledby="tableTitle"] > tbody tr'
+const etherscanLinkSepolia = 'a[title="View on sepolia.etherscan.io"]'
 const currencyDropdown = '[id="currency"]'
 const currencyDropdownList = 'ul[role="listbox"]'
 const currencyDropdownListSelected = 'ul[role="listbox"] li[aria-selected="true"]'
@@ -385,8 +386,8 @@ export function verifyAssetNameHasExplorerLink(currency, columnName) {
     .find('td')
     .eq(columnName)
     .within(() => {
-      // Check that the token name itself is a link with blockexplorer URL
-      cy.contains('a', currency)
+      // Checks also the link is to the block explorer
+      cy.get(etherscanLinkSepolia)
         .should('be.visible')
         .should('have.attr', 'href')
         .and('include', 'sepolia.etherscan.io')
@@ -401,10 +402,7 @@ export function verifyAssetExplorerLinkNotAvailable(currency, columnName) {
     .find('td')
     .eq(columnName)
     .within(() => {
-      // Check that the token name exists but is NOT wrapped in a link (native tokens don't have explorer links)
-      cy.contains(currency).should('exist')
-      // Verify there's no anchor tag containing the currency name with an href
-      cy.contains('a', currency).should('not.exist')
+      cy.get(etherscanLinkSepolia).should('not.exist')
     })
 }
 
