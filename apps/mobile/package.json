@@ -54,7 +54,7 @@
     "@ledgerhq/device-signer-kit-ethereum": "^1.7.0",
     "@ledgerhq/device-transport-kit-react-native-ble": "^1.1.0",
     "@notifee/react-native": "^9.1.8",
-    "@openlv/react-native": "/home/jonte/apps/v3xlabs/open-lavatory/packages/react-native/openlv-react-native-0.0.1-beta.0.tgz",
+    "@openlv/react-native": "0.0.1-beta.1",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-clipboard/clipboard": "^1.16.3",
     "@react-native-community/datetimepicker": "8.4.4",

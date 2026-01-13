@@ -8930,28 +8930,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openlv/react-native@file:/home/jonte/apps/v3xlabs/open-lavatory/packages/react-native/openlv-react-native-0.0.1-beta.0.tgz::locator=%40safe-global%2Fmobile%40workspace%3Aapps%2Fmobile":
-  version: 0.0.1-beta.0
-  resolution: "@openlv/react-native@file:/home/jonte/apps/v3xlabs/open-lavatory/packages/react-native/openlv-react-native-0.0.1-beta.0.tgz#/home/jonte/apps/v3xlabs/open-lavatory/packages/react-native/openlv-react-native-0.0.1-beta.0.tgz::hash=d74d5a&locator=%40safe-global%2Fmobile%40workspace%3Aapps%2Fmobile"
+"@openlv/react-native@npm:0.0.1-beta.1":
+  version: 0.0.1-beta.1
+  resolution: "@openlv/react-native@npm:0.0.1-beta.1"
   dependencies:
-    "@openlv/session": "npm:0.0.1-beta.7"
+    "@openlv/session": "npm:0.0.1-beta.8"
     base-64: "npm:^1.0.0"
     fast-text-encoding: "npm:^1.0.6"
     react-native-get-random-values: "npm:^1.11.0"
     react-native-url-polyfill: "npm:^2.0.0"
     react-native-webrtc: "npm:^124.0.6"
     react-native-webview: "npm:^13.15.0"
-    react-native-webview-crypto: "npm:^0.0.27"
+    react-native-webview-crypto: "npm:^0.0.28"
   peerDependencies:
     react: ">=18"
     react-native: ">=0.70"
-  checksum: 10/014a26021c4f0383ae0aad3002535427ceb857a1ec653469224405b5afbd335db87a6bda38279452b422a496026ab6f926d24c0a7ed2fb6cf6f3b6b09d4e9453
+  checksum: 10/75a26abffe47bf262829d1e141a0d5494cfcadf8991501c9892741d81ae71a52f7f0d9311b9f2dba6451999724724c47ac18693d10b6c77a6750469d00b359ff
   languageName: node
   linkType: hard
 
-"@openlv/session@npm:0.0.1-beta.7":
-  version: 0.0.1-beta.7
-  resolution: "@openlv/session@npm:0.0.1-beta.7"
+"@openlv/session@npm:0.0.1-beta.8":
+  version: 0.0.1-beta.8
+  resolution: "@openlv/session@npm:0.0.1-beta.8"
   dependencies:
     "@openlv/core": "npm:0.0.1-beta.7"
     "@openlv/signaling": "npm:0.0.1-beta.6"
@@ -8963,7 +8963,7 @@ __metadata:
     "@wagmi/core": 2
     viem: 2
     wagmi: 2
-  checksum: 10/ef51934a3f5c74308606da2aa8fca45e4b016ac6f3e48a975c04cbe0d1ee6171431f362fc8779177984703e21d003324ceb51831e4162e6d84d726d17108fdbc
+  checksum: 10/c6753f854a68bcd07863ac79a0746bd4f39fcefefd34d2ab84244ad390ecff6c43a73f0ea5f80517b91f711ef658763e31c7ea1c6639396f5d9b5cad5fb0097f
   languageName: node
   linkType: hard
 
@@ -10735,7 +10735,7 @@ __metadata:
     "@ledgerhq/device-signer-kit-ethereum": "npm:^1.7.0"
     "@ledgerhq/device-transport-kit-react-native-ble": "npm:^1.1.0"
     "@notifee/react-native": "npm:^9.1.8"
-    "@openlv/react-native": /home/jonte/apps/v3xlabs/open-lavatory/packages/react-native/openlv-react-native-0.0.1-beta.0.tgz
+    "@openlv/react-native": "npm:0.0.1-beta.1"
     "@react-native-async-storage/async-storage": "npm:2.2.0"
     "@react-native-clipboard/clipboard": "npm:^1.16.3"
     "@react-native-community/datetimepicker": "npm:8.4.4"
@@ -28488,13 +28488,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:4.17.3":
-  version: 4.17.3
-  resolution: "lodash@npm:4.17.3"
-  checksum: 10/ca7ef09a542130b980e25ee7e2e1244fe8fbcc1c0f7e2641e9e9fd4037cf04326398693aea5a42d6d9d6fc554ab8abb3a8f92b4a79455772c73fc6acf60c1d50
-  languageName: node
-  linkType: hard
-
 "log-symbols@npm:^2.2.0":
   version: 2.2.0
   resolution: "log-symbols@npm:2.2.0"
@@ -33537,18 +33530,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-webview-crypto@npm:^0.0.27":
-  version: 0.0.27
-  resolution: "react-native-webview-crypto@npm:0.0.27"
+"react-native-webview-crypto@npm:^0.0.28":
+  version: 0.0.28
+  resolution: "react-native-webview-crypto@npm:0.0.28"
   dependencies:
     encode-utf8: "npm:^1.0.2"
     fast-base64-encode: "npm:^1.0.0"
-    webview-crypto: "npm:^0.1.13"
+    webview-crypto: "npm:^0.1.14"
   peerDependencies:
     react: ">=16.4"
     react-native: ">=0.56"
     react-native-webview: ">=8.*"
-  checksum: 10/3bc8959464a9d314229a0a004c1888ee551ae7f52f871b0d0ee167afea3ab2f5b09d5e8941877e023f2f421f70dd8e68d7e4329d636197576cb4aa22b438dd17
+  checksum: 10/4e07343c9a883d334588f0ac162f6e19ecc7722798f453de4999f66ae67e3c2de3fb2b13af2e15582546dece5655d8b3f3c57eed48b610e584bbf9d77369370e
   languageName: node
   linkType: hard
 
@@ -38964,13 +38957,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webview-crypto@npm:^0.1.13":
-  version: 0.1.13
-  resolution: "webview-crypto@npm:0.1.13"
+"webview-crypto@npm:^0.1.14":
+  version: 0.1.14
+  resolution: "webview-crypto@npm:0.1.14"
   dependencies:
-    lodash: "npm:4.17.3"
     serialize-error: "npm:2.1.0"
-  checksum: 10/aaf7b173f5bda5764ac11db52052d3edf44f64627c332607858d7f2a8b6099786e66d0acd38889a4c4dec923c9870354fd5a41d9e3a554e094729743e0807767
+  checksum: 10/dc7620ba35bdf38bca4a7cd5421b4c72efb7c1cbabe5f7e265627225ab7231f377abc2fbb38850069169df015ca75759c1fa5dc9f08c100010a370f998d94816
   languageName: node
   linkType: hard
 
