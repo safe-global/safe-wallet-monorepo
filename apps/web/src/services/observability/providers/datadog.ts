@@ -49,6 +49,7 @@ interface DatadogLogsModule {
 
 interface DatadogRumModule {
   datadogRum: {
+    getInitConfiguration?: () => unknown
     init: (config: {
       applicationId: string
       clientToken: string
@@ -85,6 +86,16 @@ export class DatadogProvider implements IObservabilityProvider {
   readonly name = 'Datadog'
   private isLogsInitialized = false
   private isRumInitialized = false
+
+  private setRumGlobalContext(): void {
+    if (!datadogRumModule) {
+      return
+    }
+
+    datadogRumModule.datadogRum.setGlobalContextProperty('env', DATADOG_RUM_ENV)
+    datadogRumModule.datadogRum.setGlobalContextProperty('service', DATADOG_RUM_SERVICE)
+    datadogRumModule.datadogRum.setGlobalContextProperty('version', COMMIT_HASH)
+  }
 
   async init(): Promise<void> {
     const isClient = typeof window !== 'undefined'
@@ -159,6 +170,14 @@ export class DatadogProvider implements IObservabilityProvider {
     }
 
     try {
+      const getInitConfiguration = datadogRumModule.datadogRum.getInitConfiguration
+      const isAlreadyInitialized = typeof getInitConfiguration === 'function' && Boolean(getInitConfiguration())
+      if (isAlreadyInitialized) {
+        this.isRumInitialized = true
+        this.setRumGlobalContext()
+        return
+      }
+
       datadogRumModule.datadogRum.init({
         applicationId: DATADOG_RUM_APPLICATION_ID,
         clientToken: DATADOG_RUM_CLIENT_TOKEN,
@@ -181,10 +200,7 @@ export class DatadogProvider implements IObservabilityProvider {
         }),
       })
 
-      // Set global context for proper faceting in Datadog UI
-      datadogRumModule.datadogRum.setGlobalContextProperty('env', DATADOG_RUM_ENV)
-      datadogRumModule.datadogRum.setGlobalContextProperty('service', DATADOG_RUM_SERVICE)
-      datadogRumModule.datadogRum.setGlobalContextProperty('version', COMMIT_HASH)
+      this.setRumGlobalContext()
 
       this.isRumInitialized = true
     } catch (error) {

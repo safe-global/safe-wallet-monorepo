@@ -2,18 +2,16 @@ import { Errors, CodedException } from '..'
 
 const defaultPublicIsProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION
 describe('CodedException', () => {
-  beforeAll(() => {
-    console.error = jest.fn()
-  })
-
   beforeEach(() => {
     process.env.NEXT_PUBLIC_IS_PRODUCTION = 'false'
     jest.resetModules()
     jest.clearAllMocks()
+    jest.spyOn(console, 'error').mockImplementation(() => {})
   })
 
   afterAll(() => {
     process.env.NEXT_PUBLIC_IS_PRODUCTION = defaultPublicIsProduction
+    jest.restoreAllMocks()
   })
 
   it('throws an error if code is not found', () => {
@@ -91,13 +89,10 @@ describe('CodedException', () => {
   })
 
   describe('Tracking', () => {
-    beforeAll(() => {
-      console.error = jest.fn()
-    })
-
     beforeEach(() => {
       jest.resetModules()
       jest.clearAllMocks()
+      jest.spyOn(console, 'error').mockImplementation(() => {})
     })
 
     // I can't figure out a way to override the IS_PRODUCTION constant

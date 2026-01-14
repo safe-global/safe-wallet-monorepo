@@ -24,6 +24,9 @@ runs:
     - name: Set environment variables
       shell: bash
       run: |
+        SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+        echo "NEXT_PUBLIC_COMMIT_HASH=$SHORT_SHA" >> $GITHUB_ENV
+
         if [ "${{ inputs.prod }}" = "true" ]; then
           echo "NEXT_PUBLIC_INFURA_TOKEN=${{ fromJSON(inputs.secrets).NEXT_PUBLIC_INFURA_TOKEN }}" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN=${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN }}" >> $GITHUB_ENV
@@ -37,6 +40,7 @@ runs:
       run: yarn workspace @safe-global/web build
       env:
         NEXT_PUBLIC_IS_PRODUCTION: ${{ inputs.prod }}
+        NEXT_PUBLIC_COMMIT_HASH: ${{ env.NEXT_PUBLIC_COMMIT_HASH }}
         NEXT_PUBLIC_GATEWAY_URL_PRODUCTION: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_GATEWAY_URL_PRODUCTION }}
         NEXT_PUBLIC_GATEWAY_URL_STAGING: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_GATEWAY_URL_STAGING }}
         NEXT_PUBLIC_SAFE_STATUS_PAGE_URL: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SAFE_STATUS_PAGE_URL }}
@@ -86,12 +90,11 @@ runs:
       shell: bash
       working-directory: apps/web
       run: |
-        SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+        RELEASE_VERSION="${NEXT_PUBLIC_COMMIT_HASH:-$(echo "${{ github.sha }}" | cut -c1-7)}"
         DATADOG_SERVICE="${NEXT_PUBLIC_DATADOG_RUM_SERVICE:-safe-wallet-web}"
-        DATADOG_UPLOAD_SITE="${NEXT_PUBLIC_DATADOG_RUM_SITE:-datadoghq.eu}"
         npx @datadog/datadog-ci sourcemaps upload ./out/_next/static \
           --service="$DATADOG_SERVICE" \
-          --release-version=$SHORT_SHA \
+          --release-version="$RELEASE_VERSION" \
           --minified-path-prefix=/_next/static
       env:
         DATADOG_API_KEY: ${{ fromJSON(inputs.secrets).DATADOG_API_KEY }}

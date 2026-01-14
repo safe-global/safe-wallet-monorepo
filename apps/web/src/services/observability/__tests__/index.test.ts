@@ -104,6 +104,56 @@ describe('Observability Module', () => {
     })
   })
 
+  it('should queue captureException until init completes', async () => {
+    const error = new Error('test error')
+    let resolveInit: (() => void) | undefined
+    const initPromise = new Promise<void>((resolve) => {
+      resolveInit = resolve
+    })
+    let mockProvider:
+      | {
+          name: string
+          init: jest.Mock<Promise<void>>
+          getLogger: jest.Mock
+          captureException: jest.Mock
+        }
+      | undefined
+
+    jest.isolateModules(() => {
+      mockProvider = {
+        name: 'Mock',
+        init: jest.fn(() => initPromise),
+        getLogger: jest.fn(() => ({
+          info: jest.fn(),
+          warn: jest.fn(),
+          error: jest.fn(),
+          debug: jest.fn(),
+        })),
+        captureException: jest.fn(),
+      }
+
+      jest.doMock('../factory', () => ({
+        createObservabilityProvider: jest.fn(() => mockProvider),
+      }))
+
+      const { captureException } = require('../index')
+
+      captureException(error)
+    })
+
+    if (!mockProvider || !resolveInit) {
+      throw new Error('Test setup failed')
+    }
+
+    expect(mockProvider.captureException).not.toHaveBeenCalled()
+
+    resolveInit()
+    await initPromise
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect(mockProvider.captureException).toHaveBeenCalledWith(error, undefined)
+  })
+
   it('should initialize provider synchronously at module load', () => {
     jest.isolateModules(() => {
       const mockProvider = {
