@@ -32,7 +32,7 @@
     "localforage": "^1.10.0",
     "react": "19.1.0",
     "react-beautiful-dnd": "^13.1.1",
-    "react-dom": "^19.1.0",
+    "react-dom": "19.1.0",
     "react-hook-form": "^7.54.2",
     "react-is": "^19.1.0",
     "react-media": "^1.10.0",
