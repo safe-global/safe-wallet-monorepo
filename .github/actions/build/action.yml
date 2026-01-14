@@ -27,6 +27,25 @@ runs:
         SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
         echo "NEXT_PUBLIC_COMMIT_HASH=$SHORT_SHA" >> $GITHUB_ENV
 
+        # Datadog RUM env:
+        # - can be overridden by setting NEXT_PUBLIC_DATADOG_RUM_ENV in repo secrets
+        # - otherwise derived from the workflow context
+        DATADOG_RUM_ENV="${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_ENV }}"
+        if [ -z "$DATADOG_RUM_ENV" ]; then
+          if [ "${{ inputs.prod }}" = "true" ]; then
+            DATADOG_RUM_ENV="production"
+          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            DATADOG_RUM_ENV="staging"
+          elif [ "${{ github.ref }}" = "refs/heads/dev" ]; then
+            DATADOG_RUM_ENV="dev"
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
+            DATADOG_RUM_ENV="review"
+          else
+            DATADOG_RUM_ENV="development"
+          fi
+        fi
+        echo "NEXT_PUBLIC_DATADOG_RUM_ENV=$DATADOG_RUM_ENV" >> $GITHUB_ENV
+
         if [ "${{ inputs.prod }}" = "true" ]; then
           echo "NEXT_PUBLIC_INFURA_TOKEN=${{ fromJSON(inputs.secrets).NEXT_PUBLIC_INFURA_TOKEN }}" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN=${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN }}" >> $GITHUB_ENV
@@ -55,7 +74,7 @@ runs:
         NEXT_PUBLIC_DATADOG_RUM_CLIENT_TOKEN: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_CLIENT_TOKEN }}
         NEXT_PUBLIC_DATADOG_RUM_SITE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SITE }}
         NEXT_PUBLIC_DATADOG_RUM_SERVICE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SERVICE }}
-        NEXT_PUBLIC_DATADOG_RUM_ENV: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_ENV }}
+        NEXT_PUBLIC_DATADOG_RUM_ENV: ${{ env.NEXT_PUBLIC_DATADOG_RUM_ENV }}
         NEXT_PUBLIC_DATADOG_RUM_SESSION_SAMPLE_RATE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SESSION_SAMPLE_RATE }}
         NEXT_PUBLIC_DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE }}
         NEXT_PUBLIC_DATADOG_RUM_TRACE_SAMPLE_RATE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_TRACE_SAMPLE_RATE }}
@@ -90,6 +109,12 @@ runs:
       run: |
         RELEASE_VERSION="${NEXT_PUBLIC_COMMIT_HASH:-$(echo "${{ github.sha }}" | cut -c1-7)}"
         DATADOG_SERVICE="${NEXT_PUBLIC_DATADOG_RUM_SERVICE:-safe-wallet-web}"
+        echo "Uploading Datadog sourcemaps:"
+        echo "- env: ${NEXT_PUBLIC_DATADOG_RUM_ENV:-unset}"
+        echo "- service: $DATADOG_SERVICE"
+        echo "- release-version: $RELEASE_VERSION"
+        echo "- minified-path-prefix: /_next/static"
+        echo "- sourcemaps-dir: ./out/_next/static"
         npx @datadog/datadog-ci sourcemaps upload ./out/_next/static \
           --service="$DATADOG_SERVICE" \
           --release-version="$RELEASE_VERSION" \
