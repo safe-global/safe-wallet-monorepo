@@ -1,8 +1,22 @@
-import { DatadogProvider } from '../datadog'
 import type * as ConstantsModule from '@/config/constants'
+
+interface DatadogProviderInstance {
+  name: string
+  init: () => Promise<void>
+  getLogger: () => {
+    info: (message: string, context?: Record<string, unknown>) => void
+    warn: (message: string, context?: Record<string, unknown>) => void
+    error: (message: string, context?: Record<string, unknown>) => void
+    debug: (message: string, context?: Record<string, unknown>) => void
+  }
+  captureException: (error: Error, context?: Record<string, unknown>) => void
+}
+
+type DatadogProviderConstructor = new () => DatadogProviderInstance
 
 describe('DatadogProvider', () => {
   beforeEach(() => {
+    jest.resetModules()
     jest.spyOn(console, 'error').mockImplementation()
     jest.spyOn(console, 'warn').mockImplementation()
   })
@@ -11,18 +25,43 @@ describe('DatadogProvider', () => {
     jest.restoreAllMocks()
   })
 
+  const mockDisabledDatadogConstants = (): void => {
+    jest.doMock('@/config/constants', () => {
+      const actualConstants = jest.requireActual<typeof ConstantsModule>('@/config/constants')
+
+      return {
+        ...actualConstants,
+        DATADOG_FORCE_ENABLE: false,
+        DATADOG_CLIENT_TOKEN: '',
+        DATADOG_RUM_APPLICATION_ID: '',
+        DATADOG_RUM_CLIENT_TOKEN: '',
+      }
+    })
+  }
+
+  const importProvider = async () => {
+    const { DatadogProvider } = await import('../datadog')
+    return DatadogProvider as unknown as DatadogProviderConstructor
+  }
+
   it('should have correct name', () => {
-    const provider = new DatadogProvider()
+    mockDisabledDatadogConstants()
+    const Provider = require('../datadog').DatadogProvider as DatadogProviderConstructor
+    const provider = new Provider()
     expect(provider.name).toBe('Datadog')
   })
 
   it('should not throw when initializing', async () => {
-    const provider = new DatadogProvider()
+    mockDisabledDatadogConstants()
+    const Provider = await importProvider()
+    const provider = new Provider()
     await expect(provider.init()).resolves.not.toThrow()
   })
 
   it('should return logger with all methods', () => {
-    const provider = new DatadogProvider()
+    mockDisabledDatadogConstants()
+    const Provider = require('../datadog').DatadogProvider as DatadogProviderConstructor
+    const provider = new Provider()
     const logger = provider.getLogger()
 
     expect(logger).toBeDefined()
@@ -33,7 +72,9 @@ describe('DatadogProvider', () => {
   })
 
   it('should not throw when calling logger methods before initialization', () => {
-    const provider = new DatadogProvider()
+    mockDisabledDatadogConstants()
+    const Provider = require('../datadog').DatadogProvider as DatadogProviderConstructor
+    const provider = new Provider()
     const logger = provider.getLogger()
 
     expect(() => logger.info('test')).not.toThrow()
@@ -43,14 +84,18 @@ describe('DatadogProvider', () => {
   })
 
   it('should not throw when calling captureException before initialization', () => {
-    const provider = new DatadogProvider()
+    mockDisabledDatadogConstants()
+    const Provider = require('../datadog').DatadogProvider as DatadogProviderConstructor
+    const provider = new Provider()
     const error = new Error('test error')
 
     expect(() => provider.captureException(error)).not.toThrow()
   })
 
   it('should handle logger methods with context', () => {
-    const provider = new DatadogProvider()
+    mockDisabledDatadogConstants()
+    const Provider = require('../datadog').DatadogProvider as DatadogProviderConstructor
+    const provider = new Provider()
     const logger = provider.getLogger()
     const context = { key: 'value' }
 
@@ -61,7 +106,9 @@ describe('DatadogProvider', () => {
   })
 
   it('should handle captureException with context', () => {
-    const provider = new DatadogProvider()
+    mockDisabledDatadogConstants()
+    const Provider = require('../datadog').DatadogProvider as DatadogProviderConstructor
+    const provider = new Provider()
     const error = new Error('test error')
     const context = { componentStack: 'test' }
 
@@ -69,41 +116,6 @@ describe('DatadogProvider', () => {
   })
 
   it('should initialize independently when Logs or RUM packages fail', async () => {
-    jest.resetModules()
-
-    const logsInit = jest.fn(() => {
-      throw new Error('Logs init failed')
-    })
-    const rumInit = jest.fn()
-
-    jest.doMock(
-      '@datadog/browser-logs',
-      () => ({
-        datadogLogs: {
-          init: logsInit,
-          logger: {
-            info: jest.fn(),
-            warn: jest.fn(),
-            error: jest.fn(),
-            debug: jest.fn(),
-          },
-        },
-      }),
-      { virtual: true },
-    )
-
-    jest.doMock(
-      '@datadog/browser-rum',
-      () => ({
-        datadogRum: {
-          init: rumInit,
-          addError: jest.fn(),
-          setGlobalContextProperty: jest.fn(),
-        },
-      }),
-      { virtual: true },
-    )
-
     jest.doMock('@/config/constants', () => {
       const actualConstants = jest.requireActual<typeof ConstantsModule>('@/config/constants')
 
@@ -117,11 +129,25 @@ describe('DatadogProvider', () => {
     })
 
     const { DatadogProvider: EnabledDatadogProvider } = await import('../datadog')
+
+    interface DatadogProviderPrivates {
+      initLogs: () => Promise<void>
+      initRum: () => Promise<void>
+    }
+
+    const initLogsSpy = jest
+      .spyOn(EnabledDatadogProvider.prototype as unknown as DatadogProviderPrivates, 'initLogs')
+      .mockRejectedValue(new Error('Logs init failed'))
+    const initRumSpy = jest
+      .spyOn(EnabledDatadogProvider.prototype as unknown as DatadogProviderPrivates, 'initRum')
+      .mockResolvedValue()
+
     const provider = new EnabledDatadogProvider()
 
     await provider.init()
 
     expect(console.warn).toHaveBeenCalled()
-    expect(rumInit).toHaveBeenCalled()
+    expect(initLogsSpy).toHaveBeenCalled()
+    expect(initRumSpy).toHaveBeenCalled()
   })
 })
