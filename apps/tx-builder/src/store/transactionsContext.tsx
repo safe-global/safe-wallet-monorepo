@@ -57,10 +57,11 @@ const TransactionsProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
   const reorderTransactions = useCallback((sourceIndex: number, destinationIndex: number) => {
     setTransactions((transactions) => {
-      const transactionToMove = transactions[sourceIndex]
-      transactions.splice(sourceIndex, 1) // we remove the transaction from the list
-      transactions.splice(destinationIndex, 0, transactionToMove) // we add the transaction in the new position
-      return transactions
+      const nextTransactions = transactions.slice()
+      const transactionToMove = nextTransactions[sourceIndex]
+      nextTransactions.splice(sourceIndex, 1)
+      nextTransactions.splice(destinationIndex, 0, transactionToMove)
+      return nextTransactions
     })
   }, [])
 
