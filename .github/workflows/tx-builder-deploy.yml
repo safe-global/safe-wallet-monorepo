@@ -204,11 +204,15 @@ jobs:
           PROD_DEPLOYMENT_HOOK_URL: ${{ secrets.PROD_DEPLOYMENT_HOOK_URL }}
           VERSION_TAG: ${{ steps.version.outputs.version }}
         run: |
-          curl --silent --output /dev/null --write-out "%{http_code}" -X POST \
+          HTTP_STATUS=$(curl --silent --show-error --output /dev/null --write-out "%{http_code}" -X POST \
             -F token="$PROD_DEPLOYMENT_HOOK_TOKEN" \
             -F ref=master \
             -F "variables[TRIGGER_RELEASE_COMMIT_TAG]=$VERSION_TAG" \
-            $PROD_DEPLOYMENT_HOOK_URL
+            $PROD_DEPLOYMENT_HOOK_URL)
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+            echo "❌ Production deployment trigger failed (HTTP $HTTP_STATUS)"
+            exit 1
+          fi
 
       - name: Summary
         run: |
