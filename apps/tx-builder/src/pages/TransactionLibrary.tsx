@@ -132,8 +132,9 @@ const TransactionLibrary = () => {
           <Box marginTop={4} textAlign="center">
             <StyledEmptyLibraryText>You don't have any saved batches.</StyledEmptyLibraryText>
             <StyledEmptyLibraryText>
-              Safe a batch by <StyledLinkIcon size="sm" type="bookmark" aria-label="go to transaction list view" />
-              in transaction list view.
+              Save a batch by clicking the{' '}
+              <StyledLinkIcon size="sm" type="bookmark" aria-label="go to transaction list view" />
+              button in the transaction list view.
             </StyledEmptyLibraryText>
           </Box>
         </Box>
