@@ -76,17 +76,17 @@ const customStyles: {
   },
   secondary: {
     contained: css`
-      color: ${({ theme }) => theme.palette.primary};
+      color: ${({ theme }) => theme.palette.primary.main};
       background-color: ${({ theme }) => theme.palette.secondary.main};
       box-shadow: 1px 2px 10px ${alpha('#28363D', 0.18)};
 
       path.icon-color {
-        color: ${({ theme }) => theme.palette.common.primary};
+        fill: ${({ theme }) => theme.palette.primary.main};
       }
 
       &:hover {
         path.icon-color {
-          color: ${({ theme }) => theme.palette.common.primary};
+          fill: ${({ theme }) => theme.palette.primary.main};
         }
 
         background-color: ${({ theme }) => theme.palette.secondary.dark};
