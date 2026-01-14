@@ -257,9 +257,19 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'Submissions
             dispatchV2,
           }),
         )
-        const safeOverviews = await Promise.all(promisedSafeOverviews)
-        return { data: safeOverviews.filter(Boolean) as SafeOverview[] }
+
+        // Use Promise.allSettled to preserve successful results when some safes fail
+        // This handles mixed-chain scenarios where v1 might fail while v2 succeeds
+        const results = await Promise.allSettled(promisedSafeOverviews)
+        const safeOverviews = results
+          .filter((result): result is PromiseFulfilledResult<SafeOverview | undefined> => result.status === 'fulfilled')
+          .map((result) => result.value)
+          .filter((overview): overview is SafeOverview => overview !== undefined)
+
+        return { data: safeOverviews }
       } catch (error) {
+        // This catch now only handles unexpected errors (e.g., in chain config lookup)
+        // Individual safe fetch failures are handled gracefully above
         return { error: { status: 'CUSTOM_ERROR', error: asError(error).message } }
       }
     },

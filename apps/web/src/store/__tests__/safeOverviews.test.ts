@@ -280,7 +280,7 @@ describe('safeOverviews', () => {
       })
     })
 
-    it('Should return an error if fetching fails', async () => {
+    it('Should return empty array when all fetches fail (graceful degradation)', async () => {
       const request = {
         currency: 'usd',
         safes: [
@@ -312,8 +312,10 @@ describe('safeOverviews', () => {
 
       await waitFor(async () => {
         await Promise.resolve()
-        expect(result.current.error).toBeDefined()
-        expect(result.current.data).toBeUndefined()
+        // With Promise.allSettled, failed fetches result in empty array, not error
+        // This allows partial successes when only some safes fail
+        expect(result.current.error).toBeUndefined()
+        expect(result.current.data).toEqual([])
         expect(result.current.isLoading).toBeFalsy()
       })
     })
@@ -672,9 +674,11 @@ describe('safeOverviews', () => {
       })
 
       // v2 safe should still be returned despite v1 failure
-      // The error will be caught at the Promise.all level for individual safes
+      // Promise.allSettled ensures partial successes are preserved
       expect(mockedInitiateV1).toHaveBeenCalled()
       expect(mockedInitiateV2).toHaveBeenCalled()
+      expect(result.current.error).toBeUndefined()
+      expect(result.current.data).toEqual([mockOverview2])
     })
   })
 })
