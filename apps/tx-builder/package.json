@@ -17,6 +17,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@hello-pangea/dnd": "^18.0.1",
     "@mui/icons-material": "^6.5.0",
     "@mui/lab": "^6.0.0-beta.20",
     "@mui/material": "^6.5.0",
@@ -31,7 +32,6 @@
     "evm-proxy-detection": "^1.0.0",
     "localforage": "^1.10.0",
     "react": "19.1.0",
-    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.54.2",
     "react-is": "^19.1.0",
@@ -52,7 +52,6 @@
     "@testing-library/user-event": "^14.5.2",
     "@types/node": "^22.10.7",
     "@types/react": "^19.0.8",
-    "@types/react-beautiful-dnd": "^13.1.8",
     "@types/react-dom": "^19.0.3",
     "@types/styled-components": "^5.1.34",
     "@typescript-eslint/eslint-plugin": "^8.31.1",

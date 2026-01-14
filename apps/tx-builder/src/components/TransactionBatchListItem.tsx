@@ -1,6 +1,6 @@
 import { AccordionDetails, IconButton } from '@mui/material'
 import { memo, useState } from 'react'
-import { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd'
+import { DraggableProvided, DraggableStateSnapshot } from '@hello-pangea/dnd'
 import styled from 'styled-components'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator'
 import { ProposedTransaction } from '../typings/models'

@@ -12,7 +12,7 @@ import {
   Draggable,
   DraggableProvided,
   DraggableStateSnapshot,
-} from 'react-beautiful-dnd'
+} from '@hello-pangea/dnd'
 import { ProposedTransaction } from '../typings/models'
 import useModal from '../hooks/useModal/useModal'
 import DeleteTransactionModal from './modals/DeleteTransactionModal'
