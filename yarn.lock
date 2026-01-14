@@ -11394,7 +11394,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-deployments@npm:^1.37.45, @safe-global/safe-deployments@npm:^1.37.49":
+"@safe-global/safe-deployments@npm:^1.37.49":
   version: 1.37.49
   resolution: "@safe-global/safe-deployments@npm:1.37.49"
   dependencies:
@@ -11535,7 +11535,7 @@ __metadata:
     "@safe-global/safe-apps-provider": "npm:^0.18.5"
     "@safe-global/safe-apps-react-sdk": "npm:^4.7.2"
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
-    "@safe-global/safe-deployments": "npm:^1.37.45"
+    "@safe-global/safe-deployments": "npm:^1.37.49"
     "@safe-global/safe-gateway-typescript-sdk": "npm:^3.22.9"
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/jest-dom": "npm:^6.6.3"
@@ -11551,6 +11551,7 @@ __metadata:
     "@vitejs/plugin-react": "npm:^4.3.4"
     axios: "npm:^1.8.2"
     eslint: "npm:^9.29.0"
+    eslint-config-next: "npm:^16.0.5"
     eslint-config-prettier: "npm:^9.1.0"
     ethereum-blockies-base64: "npm:^1.0.2"
     ethers: "npm:^6.14.3"
@@ -11560,7 +11561,7 @@ __metadata:
     localforage: "npm:^1.10.0"
     msw: "npm:^2.7.3"
     prettier: "npm:^3.6.2"
-    react: "npm:^19.1.0"
+    react: "npm:19.1.0"
     react-beautiful-dnd: "npm:^13.1.1"
     react-dom: "npm:^19.1.0"
     react-hook-form: "npm:^7.54.2"
@@ -11570,7 +11571,7 @@ __metadata:
     react-virtuoso: "npm:^4.12.3"
     styled-components: "npm:^5.3.11"
     ts-jest: "npm:^29.2.5"
-    typescript: "npm:~5.7.3"
+    typescript: "npm:~5.9.2"
     vite: "npm:^6.0.7"
     vite-plugin-svgr: "npm:^4.3.0"
     zod: "npm:^3.24.1"
@@ -34630,13 +34631,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^19.1.0":
-  version: 19.2.3
-  resolution: "react@npm:19.2.3"
-  checksum: 10/d16b7f35c0d35a56f63d9d1693819762e4abc479c57dd6310298920bed3820fcec7e17a99d44983416d8f5049143ea45b8005d3ab8324bae8973224400502b08
-  languageName: node
-  linkType: hard
-
 "read-pkg-up@npm:^7.0.1":
   version: 7.0.1
   resolution: "read-pkg-up@npm:7.0.1"
@@ -38707,16 +38701,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:~5.7.3":
-  version: 5.7.3
-  resolution: "typescript@npm:5.7.3"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 10/6a7e556de91db3d34dc51cd2600e8e91f4c312acd8e52792f243c7818dfadb27bae677175fad6947f9c81efb6c57eb6b2d0c736f196a6ee2f1f7d57b74fc92fa
-  languageName: node
-  linkType: hard
-
 "typescript@patch:typescript@npm%3A^5.4.5#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.5.4#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A~5.9.2#optional!builtin<compat/typescript>":
   version: 5.9.2
   resolution: "typescript@patch:typescript@npm%3A5.9.2#optional!builtin<compat/typescript>::version=5.9.2&hash=5786d5"
@@ -38734,16 +38718,6 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 10/b9b1e73dabac5dc730c041325dbd9c99467c1b0d239f1b74ec3b90d831384af3e2ba973946232df670519147eb51a2c20f6f96163cea2b359f03de1e2091cc4f
-  languageName: node
-  linkType: hard
-
-"typescript@patch:typescript@npm%3A~5.7.3#optional!builtin<compat/typescript>":
-  version: 5.7.3
-  resolution: "typescript@patch:typescript@npm%3A5.7.3#optional!builtin<compat/typescript>::version=5.7.3&hash=5786d5"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 10/dc58d777eb4c01973f7fbf1fd808aad49a0efdf545528dab9b07d94fdcb65b8751742804c3057e9619a4627f2d9cc85547fdd49d9f4326992ad0181b49e61d81
   languageName: node
   linkType: hard
 
