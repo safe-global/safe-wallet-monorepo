@@ -71,7 +71,7 @@ export const SafeShieldDisplay = ({
   )
 
   return (
-    <Stack gap={1} data-testid="safe-shield-widget">
+    <Stack gap={1} data-testid="safe-shield-widget" sx={{ mt: -1 }}>
       <Card sx={{ borderRadius: '6px', overflow: 'hidden' }}>
         <SafeShieldHeader recipient={recipient} contract={contract} threat={threat} overallStatus={overallStatus} />
 
