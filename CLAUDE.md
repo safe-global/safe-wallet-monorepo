@@ -38,3 +38,12 @@ Use `@AGENTS.md` in your prompts to include the full guidelines, which cover:
 - Storybook usage
 - Security and Safe-specific patterns
 - Common pitfalls and debugging tips
+
+## Active Technologies
+
+- TypeScript 5.x (Next.js 14.x) + Next.js (dynamic imports), ESLint (import restrictions), Redux Toolkit (state management) (001-feature-architecture)
+- N/A (architecture pattern, no new data storage) (001-feature-architecture)
+
+## Recent Changes
+
+- 001-feature-architecture: Added TypeScript 5.x (Next.js 14.x) + Next.js (dynamic imports), ESLint (import restrictions), Redux Toolkit (state management)

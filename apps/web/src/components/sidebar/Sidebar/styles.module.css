@@ -6,6 +6,7 @@
   flex-direction: column;
   background-color: var(--color-background-paper);
   width: 230px;
+  border-right: 1px solid var(--color-background-main);
 }
 
 .scroll {

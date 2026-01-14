@@ -5,8 +5,8 @@ import { tableRow } from '../pages/address_book.page'
 import { assetsSwapBtn } from '../pages/swaps.pages'
 import { nftsRow } from '../pages/nfts.pages'
 
-let etherscanLinkSepolia = 'a[aria-label="View on sepolia.etherscan.io"]'
 export const balanceSingleRow = '[aria-labelledby="tableTitle"] > tbody tr'
+const etherscanLinkSepolia = 'a[title="View on sepolia.etherscan.io"]'
 const currencyDropdown = '[id="currency"]'
 const currencyDropdownList = 'ul[role="listbox"]'
 const currencyDropdownListSelected = 'ul[role="listbox"] li[aria-selected="true"]'
@@ -380,14 +380,19 @@ export function verifyTokenAltImageIsVisible(currency, alttext) {
 }
 
 export function verifyAssetNameHasExplorerLink(currency, columnName) {
-  etherscanLinkSepolia
   cy.get(tokenListTable)
     .contains(currency)
     .parents('tr')
     .find('td')
     .eq(columnName)
-    .find(etherscanLinkSepolia)
-    .should('be.visible')
+    .within(() => {
+      // Checks also the link is to the block explorer
+      cy.get(etherscanLinkSepolia)
+        .should('be.visible')
+        .should('have.attr', 'href')
+        .and('include', 'sepolia.etherscan.io')
+        .and('include', '/address/')
+    })
 }
 
 export function verifyAssetExplorerLinkNotAvailable(currency, columnName) {
