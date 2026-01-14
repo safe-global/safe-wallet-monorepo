@@ -27,6 +27,7 @@ tags:
     env:
       WAIT_FOR: '.*Contract interaction.*'
       TAP_TEXT: '.*Contract interaction.*'
+      TAP_INDEX: '1'
 
 - assertVisible: 'Confirm transaction'
 

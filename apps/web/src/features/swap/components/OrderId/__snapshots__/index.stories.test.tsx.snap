@@ -2,54 +2,58 @@
 
 exports[`./index.stories Default 1`] = `
 <div
-  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
-  style="--Paper-shadow: none;"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiStack-root css-m69qwo-MuiStack-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
-    <span>
-      1282e32a
-    </span>
-    <span
-      aria-label="Copy to clipboard"
-      class=""
-      data-mui-internal-clone-element="true"
-      style="cursor: pointer;"
-    >
-      <button
-        aria-label="Copy to clipboard"
-        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
-        tabindex="0"
-        type="button"
-      >
-        <mock-icon
-          aria-hidden=""
-          class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
-          data-testid="copy-btn-icon"
-          focusable="false"
-        />
-      </button>
-    </span>
     <div
-      class="MuiBox-root css-yjghm1"
+      class="MuiStack-root css-m69qwo-MuiStack-root"
     >
-      <a
-        aria-label=""
-        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+      <span>
+        1282e32a
+      </span>
+      <span
+        aria-label="Copy to clipboard"
+        class=""
         data-mui-internal-clone-element="true"
-        data-testid="explorer-btn"
-        href="https://explorer.cow.fi/orders/0x1282e32a3a69aeb5a65fcdec0ae40fe16b398d54609bc9a3c8be3eb57d1a0fd07a9af6ef9197041a5841e84cb27873bebd3486e2661510ab"
-        rel="noreferrer"
-        tabindex="0"
-        target="_blank"
+        style="cursor: pointer;"
       >
-        <mock-icon
-          aria-hidden=""
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
-          focusable="false"
-        />
-      </a>
+        <button
+          aria-label="Copy to clipboard"
+          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+          tabindex="0"
+          type="button"
+        >
+          <mock-icon
+            aria-hidden=""
+            class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+            data-testid="copy-btn-icon"
+            focusable="false"
+          />
+        </button>
+      </span>
+      <div
+        class="MuiBox-root css-yjghm1"
+      >
+        <a
+          aria-label=""
+          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+          data-mui-internal-clone-element="true"
+          data-testid="explorer-btn"
+          href="https://explorer.cow.fi/orders/0x1282e32a3a69aeb5a65fcdec0ae40fe16b398d54609bc9a3c8be3eb57d1a0fd07a9af6ef9197041a5841e84cb27873bebd3486e2661510ab"
+          rel="noreferrer"
+          tabindex="0"
+          target="_blank"
+        >
+          <mock-icon
+            aria-hidden=""
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+            focusable="false"
+          />
+        </a>
+      </div>
     </div>
   </div>
 </div>

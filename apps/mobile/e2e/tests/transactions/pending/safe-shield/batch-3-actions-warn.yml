@@ -23,7 +23,7 @@ tags:
 - scrollUntilVisible:
     element:
       text: '.*3 actions.*'
-      index: 1
+      index: 2
     centerElement: true
 
 # Tap on the second 3 actions batch transaction card (the one with issues)
@@ -32,7 +32,7 @@ tags:
     env:
       WAIT_FOR: '.*3 actions.*'
       TAP_TEXT: '.*3 actions.*'
-      TAP_INDEX: '1'
+      TAP_INDEX: '2'
 
 - assertVisible: 'Confirm transaction'
 

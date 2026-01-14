@@ -1,9 +1,10 @@
-/* This file is generated from the MUI theme colors. Do not edit directly. */
+/* This file is generated from @safe-global/theme. Do not edit directly. */
 
 :root {
   --color-text-primary: #121312;
   --color-text-secondary: #a1a3a7;
   --color-text-disabled: #dddee0;
+  --color-text-contrast: #ffffff;
   --color-primary-dark: #3c3c3c;
   --color-primary-main: #121312;
   --color-primary-light: #636669;
@@ -18,6 +19,8 @@
   --color-error-main: #ff5f72;
   --color-error-light: #ffb4bd;
   --color-error-background: #ffe6ea;
+  --color-error1-main: #ffe0e6;
+  --color-error1-contrast-text: #8a1c27;
   --color-success-dark: #028d4c;
   --color-success-main: #00b460;
   --color-success-light: #d3f2e4;
@@ -30,11 +33,17 @@
   --color-warning-main: #ff8061;
   --color-warning-light: #ffbc9f;
   --color-warning-background: #fff1e0;
+  --color-warning1-main: #ffecc2;
+  --color-warning1-text: #6c2d19;
+  --color-warning1-contrast-text: #ff8c00;
   --color-background-default: #f4f4f4;
   --color-background-main: #f4f4f4;
+  --color-background-sheet: #f4f4f4;
   --color-background-paper: #ffffff;
   --color-background-light: #effff4;
-  --color-background-lightGrey: #dddee0;
+  --color-background-secondary: #dddee0;
+  --color-background-skeleton: rgba(0, 0, 0, 0.04);
+  --color-background-disabled: #7878801f;
   --color-backdrop-main: #636669;
   --color-logo-main: #121312;
   --color-logo-background: #eeeff0;
@@ -61,6 +70,7 @@
   --color-text-primary: #ffffff;
   --color-text-secondary: #636669;
   --color-text-disabled: #636669;
+  --color-text-contrast: #000000;
   --color-primary-dark: #0cb259;
   --color-primary-main: #12ff80;
   --color-primary-light: #a1a3a7;
@@ -75,6 +85,8 @@
   --color-error-main: #ff5f72;
   --color-error-light: #ffb4bd;
   --color-error-background: #2f2527;
+  --color-error1-main: #4a2125;
+  --color-error1-contrast-text: #ffe0e6;
   --color-success-dark: #388e3c;
   --color-success-main: #00b460;
   --color-success-light: #81c784;
@@ -87,17 +99,25 @@
   --color-warning-main: #ff8061;
   --color-warning-light: #ffbc9f;
   --color-warning-background: #2f2318;
+  --color-warning1-main: #4a3621;
+  --color-warning1-text: #ffe4cb;
+  --color-warning1-contrast-text: #ff8c00;
   --color-background-default: #121312;
   --color-background-main: #121312;
+  --color-background-sheet: #121312;
   --color-background-paper: #1c1c1c;
   --color-background-light: #1b2a22;
-  --color-background-lightGrey: #303033;
+  --color-background-secondary: #303033;
+  --color-background-skeleton: rgba(255, 255, 255, 0.04);
+  --color-background-disabled: #7878801f;
   --color-backdrop-main: #636669;
   --color-logo-main: #ffffff;
   --color-logo-background: #303033;
   --color-static-main: #121312;
   --color-static-light: #636669;
   --color-static-primary: #ffffff;
+  --color-static-text-secondary: #a1a3a7;
+  --color-static-text-brand: #12ff80;
 }
 
 /* The same as above for the brief moment before JS loads */
@@ -106,6 +126,7 @@
     --color-text-primary: #ffffff;
     --color-text-secondary: #636669;
     --color-text-disabled: #636669;
+    --color-text-contrast: #000000;
     --color-primary-dark: #0cb259;
     --color-primary-main: #12ff80;
     --color-primary-light: #a1a3a7;
@@ -120,6 +141,8 @@
     --color-error-main: #ff5f72;
     --color-error-light: #ffb4bd;
     --color-error-background: #2f2527;
+    --color-error1-main: #4a2125;
+    --color-error1-contrast-text: #ffe0e6;
     --color-success-dark: #388e3c;
     --color-success-main: #00b460;
     --color-success-light: #81c784;
@@ -132,16 +155,24 @@
     --color-warning-main: #ff8061;
     --color-warning-light: #ffbc9f;
     --color-warning-background: #2f2318;
+    --color-warning1-main: #4a3621;
+    --color-warning1-text: #ffe4cb;
+    --color-warning1-contrast-text: #ff8c00;
     --color-background-default: #121312;
     --color-background-main: #121312;
+    --color-background-sheet: #121312;
     --color-background-paper: #1c1c1c;
     --color-background-light: #1b2a22;
-    --color-background-lightGrey: #303033;
+    --color-background-secondary: #303033;
+    --color-background-skeleton: rgba(255, 255, 255, 0.04);
+    --color-background-disabled: #7878801f;
     --color-backdrop-main: #636669;
     --color-logo-main: #ffffff;
     --color-logo-background: #303033;
     --color-static-main: #121312;
     --color-static-light: #636669;
     --color-static-primary: #ffffff;
+    --color-static-text-secondary: #a1a3a7;
+    --color-static-text-brand: #12ff80;
   }
 }

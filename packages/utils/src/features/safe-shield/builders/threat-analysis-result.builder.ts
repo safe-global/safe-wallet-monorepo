@@ -43,6 +43,11 @@ export class ThreatAnalysisResultBuilder<
     return this
   }
 
+  error(error: string): this {
+    this.result.error = error
+    return this
+  }
+
   issues(issues: MaliciousOrModerateThreatAnalysisResult['issues'] | undefined): this {
     if ('issues' in this.result) {
       this.result.issues = issues
@@ -107,12 +112,26 @@ export class ThreatAnalysisResultBuilder<
       })
   }
 
-  static failed() {
+  static failedWithError() {
     return new ThreatAnalysisResultBuilder<CommonSharedStatus.FAILED>()
       .title('Threat analysis failed')
       .type(CommonSharedStatus.FAILED)
       .severity(Severity.WARN)
       .description('Threat analysis failed. Review before processing.')
+      .error('Simulation Error: Reverted')
+  }
+
+  static failedWithoutError() {
+    return new ThreatAnalysisResultBuilder<CommonSharedStatus.FAILED>()
+      .title('Threat analysis failed')
+      .type(CommonSharedStatus.FAILED)
+      .severity(Severity.WARN)
+      .description('Threat analysis failed. Review before processing.')
+  }
+
+  // for backwards compatibility:
+  static failed() {
+    return this.failedWithoutError()
   }
 
   static ownershipChange() {
@@ -138,5 +157,21 @@ export class ThreatAnalysisResultBuilder<
       .severity(Severity.WARN)
       .description('Verify this change as it may overwrite account ownership.')
       .changes('0x1234567890123456789012345678901234567890', '0x1234567890123456789012345678901234567891')
+  }
+
+  static customChecksPassed() {
+    return new ThreatAnalysisResultBuilder<ThreatStatus.NO_THREAT>()
+      .title('Custom checks')
+      .type(ThreatStatus.NO_THREAT)
+      .severity(Severity.OK)
+      .description('Custom checks found no issues.')
+  }
+
+  static customCheckFailed() {
+    return new ThreatAnalysisResultBuilder<ThreatStatus.HYPERNATIVE_GUARD>()
+      .title('Custom check failed')
+      .type(ThreatStatus.HYPERNATIVE_GUARD)
+      .severity(Severity.WARN)
+      .description('Custom check failed. Review before processing.')
   }
 }

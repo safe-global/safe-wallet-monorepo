@@ -10,15 +10,17 @@ const PageHeader = ({
   action,
   noBorder,
 }: {
-  title: string
+  title?: string
   action?: ReactElement
   noBorder?: boolean
 }): ReactElement => {
   return (
-    <Box className={classNames(css.container, { [css.border]: !noBorder })}>
-      <Typography variant="h3" className={css.title}>
-        {title}
-      </Typography>
+    <Box className={classNames(css.container, { [css.border]: noBorder })}>
+      {title && (
+        <Typography variant="h3" className={css.title}>
+          {title}
+        </Typography>
+      )}
       {action}
     </Box>
   )

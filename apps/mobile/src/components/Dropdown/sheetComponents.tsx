@@ -8,7 +8,7 @@ import { useRouter } from 'expo-router'
 const BackgroundComponent = React.memo(({ style }: BottomSheetBackgroundProps) => {
   return (
     <RCView style={style}>
-      <View flex={1} backgroundColor="$backgroundPaper" borderRadius={'$6'}></View>
+      <View flex={1} backgroundColor="$backgroundSheet" borderRadius={'$6'}></View>
     </RCView>
   )
 })

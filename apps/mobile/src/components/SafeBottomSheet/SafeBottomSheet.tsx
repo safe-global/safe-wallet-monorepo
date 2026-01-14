@@ -71,7 +71,7 @@ export function SafeBottomSheet<T>({
         paddingTop="$3"
         paddingBottom="$4"
         alignItems="center"
-        backgroundColor="$backgroundPaper"
+        backgroundColor="$backgroundSheet"
       >
         <H5 fontWeight={700} tabIndex={0}>
           {title}

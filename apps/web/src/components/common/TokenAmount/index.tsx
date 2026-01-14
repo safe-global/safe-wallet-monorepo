@@ -35,7 +35,9 @@ const TokenAmount = ({
     decimals !== undefined ? formatVisualAmount(value, decimals, preciseAmount ? PRECISION : undefined) : value
 
   const fullAmount =
-    decimals !== undefined ? sign + formatVisualAmount(value, decimals, PRECISION) + ' ' + tokenSymbol : value
+    decimals !== undefined
+      ? sign + formatVisualAmount(value, decimals, PRECISION) + (tokenSymbol ? ' ' + tokenSymbol : '')
+      : value
 
   return (
     <Tooltip title={fullAmount}>
@@ -52,7 +54,7 @@ const TokenAmount = ({
         )}
         <b className={css.tokenText}>
           {sign}
-          {amount} {tokenSymbol}
+          {amount} {tokenSymbol && tokenSymbol}
         </b>
       </span>
     </Tooltip>

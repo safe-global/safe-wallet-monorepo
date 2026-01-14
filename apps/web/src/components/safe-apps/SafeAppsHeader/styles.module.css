@@ -24,7 +24,7 @@
   width: 100%;
   position: sticky !important;
   top: var(--header-height);
-  border-bottom: 1px solid var(--color-border-light);
+  padding: 0 var(--space-3);
 }
 
 @media (max-width: 599.95px) {

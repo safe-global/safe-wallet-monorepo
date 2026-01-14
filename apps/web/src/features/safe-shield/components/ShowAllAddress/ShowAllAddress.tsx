@@ -1,13 +1,12 @@
-import { ExpandMore } from '@mui/icons-material'
 import { AddressImage } from '../AddressImage'
-import { Collapse, Typography, Stack, Tooltip } from '@mui/material'
-import { useReducer, useState } from 'react'
-import { Box } from '@mui/material'
+import { Typography, Stack, Tooltip, Box } from '@mui/material'
+import { useState } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import ExplorerButton from '@/components/common/ExplorerButton'
 import useAddressBook from '@/hooks/useAddressBook'
 import useChainId from '@/hooks/useChainId'
+import { AnalysisDetailsDropdown } from '../AnalysisDetailsDropdown'
 
 interface ShowAllAddressProps {
   showImage?: boolean
@@ -19,7 +18,6 @@ interface ShowAllAddressProps {
 }
 
 export const ShowAllAddress = ({ addresses, showImage }: ShowAllAddressProps) => {
-  const [expanded, toggle] = useReducer((state: boolean) => !state, false)
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
   const currentChain = useCurrentChain()
   const chainId = useChainId()
@@ -36,104 +34,64 @@ export const ShowAllAddress = ({ addresses, showImage }: ShowAllAddressProps) =>
   }
 
   return (
-    <Box mt={-1.5}>
-      <Box
-        onClick={toggle}
-        display="inline-flex"
-        alignItems="center"
-        position="relative"
-        width="fit-content"
-        overflow="hidden"
-        color="text.secondary"
-        mb={expanded ? 0.5 : 0}
-        sx={{
-          cursor: 'pointer',
-          '&:hover div': { width: '100%', transform: 'translateX(100%)', transition: 'all 0.5s' },
-        }}
-      >
-        <Typography fontSize={12} component="span" letterSpacing="1px" variant="body2" color="text.secondary">
-          {expanded ? 'Hide all' : 'Show all'}
-        </Typography>
-        <Box
-          position="absolute"
-          left={0}
-          bottom={0}
-          sx={{
-            backgroundColor: 'rgba(0, 0, 0, 0.1)',
-            width: 0,
-            transform: 'translateX(-1rem)',
-            height: '1px',
-          }}
-        />
-        <ExpandMore
-          sx={{ transform: expanded ? 'rotate(-180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
-          fontSize="small"
-        />
-      </Box>
+    <AnalysisDetailsDropdown>
+      <Box display="flex" flexDirection="column" gap={1}>
+        {addresses.map((item, index) => {
+          const explorerLink = currentChain ? getBlockExplorerLink(currentChain, item.address) : undefined
+          const name = addressBook[item.address] || item.name
 
-      <Collapse in={expanded}>
-        <Box display="flex" flexDirection="column" gap={1}>
-          {addresses.map((item, index) => {
-            const explorerLink = currentChain ? getBlockExplorerLink(currentChain, item.address) : undefined
-            const name = addressBook[item.address] || item.name
-
-            return (
-              <Box
-                key={`${item}-${index}`}
-                padding="8px"
-                gap={1}
-                display="flex"
-                flexDirection="row"
-                bgcolor="background.paper"
-                borderRadius="4px"
-              >
-                {showImage && <AddressImage logoUrl={item.logoUrl} />}
-                <Stack spacing={0.5}>
-                  {name && (
-                    <Typography variant="body2" color="text.primary" fontSize={12} mb={0.5}>
-                      {name}
-                    </Typography>
-                  )}
-                  <Typography
-                    variant="body2"
-                    lineHeight="20px"
-                    onClick={() => handleCopyToClipboard(item.address, index)}
-                  >
-                    <Tooltip
-                      title={copiedIndex === index ? 'Copied to clipboard' : 'Copy address'}
-                      placement="top"
-                      arrow
-                    >
-                      <Typography
-                        component="span"
-                        variant="body2"
-                        lineHeight="20px"
-                        fontSize={12}
-                        color="primary.light"
-                        sx={{
-                          cursor: 'pointer',
-                          transition: 'background-color 0.2s',
-                          overflowWrap: 'break-word',
-                          wordBreak: 'break-all',
-                          flex: 1,
-                          '&:hover': {
-                            color: 'text.primary',
-                          },
-                        }}
-                      >
-                        {item.address}
-                      </Typography>
-                    </Tooltip>
-                    <Box component="span" color="text.secondary">
-                      {explorerLink && <ExplorerButton href={explorerLink.href} />}
-                    </Box>
+          return (
+            <Box
+              key={`${item}-${index}`}
+              padding="8px"
+              gap={1}
+              display="flex"
+              flexDirection="row"
+              bgcolor="background.paper"
+              borderRadius="4px"
+            >
+              {showImage && <AddressImage logoUrl={item.logoUrl} />}
+              <Stack spacing={0.5}>
+                {name && (
+                  <Typography variant="body2" color="text.primary" fontSize={12} mb={0.5}>
+                    {name}
                   </Typography>
-                </Stack>
-              </Box>
-            )
-          })}
-        </Box>
-      </Collapse>
-    </Box>
+                )}
+                <Typography
+                  variant="body2"
+                  lineHeight="20px"
+                  onClick={() => handleCopyToClipboard(item.address, index)}
+                >
+                  <Tooltip title={copiedIndex === index ? 'Copied to clipboard' : 'Copy address'} placement="top" arrow>
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      lineHeight="20px"
+                      fontSize={12}
+                      color="primary.light"
+                      sx={{
+                        cursor: 'pointer',
+                        transition: 'background-color 0.2s',
+                        overflowWrap: 'break-word',
+                        wordBreak: 'break-all',
+                        flex: 1,
+                        '&:hover': {
+                          color: 'text.primary',
+                        },
+                      }}
+                    >
+                      {item.address}
+                    </Typography>
+                  </Tooltip>
+                  <Box component="span" color="text.secondary">
+                    {explorerLink && <ExplorerButton href={explorerLink.href} />}
+                  </Box>
+                </Typography>
+              </Stack>
+            </Box>
+          )
+        })}
+      </Box>
+    </AnalysisDetailsDropdown>
   )
 }

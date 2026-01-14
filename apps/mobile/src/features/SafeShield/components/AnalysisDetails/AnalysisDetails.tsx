@@ -29,7 +29,7 @@ export const AnalysisDetails = ({ recipient, contract, threat, safeTx }: SafeShi
 
   const severity = hasAnyError ? Severity.ERROR : overallStatus?.severity || Severity.OK
   return (
-    <View backgroundColor="$background" width="100%" borderRadius={12} padding="$1">
+    <View backgroundColor="$backgroundPaper" width="100%" borderRadius={12} padding="$1">
       <AnalysisDetailsHeader severity={severity} />
 
       <AnalysisDetailsContent recipient={recipient} contract={contract} threat={threat} safeTx={safeTx} />

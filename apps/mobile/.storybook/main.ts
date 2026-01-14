@@ -41,13 +41,16 @@ if (isWeb) {
       '@storybook/addon-webpack5-compiler-babel',
     ],
     /**
-     * In our monorepo setup, if we just specify the name,
-     * we end up with the wrong path to webpack5 preset. We need to
-     * resolve the path:
-     *
-     * https://github.com/storybookjs/storybook/issues/21216#issuecomment-2187481646
+     * Use standard framework configuration instead of path resolution.
+     * The path resolution workaround causes issues in CI environments.
      */
-    framework: path.resolve(require.resolve('@storybook/react-webpack5/preset'), '..'),
+    framework: {
+      name: '@storybook/react-webpack5',
+      options: {},
+    },
+    core: {
+      disableTelemetry: true,
+    },
     webpackFinal: async (config) => {
       if (config.resolve) {
         config.resolve.plugins = [
@@ -60,8 +63,16 @@ if (isWeb) {
         config.resolve.alias = {
           ...config.resolve.alias,
           '@': path.resolve(__dirname, '../'),
+          // Mock React Native modules for web environment
+          'react-native-worklets': path.resolve(__dirname, './mocks/react-native-worklets'),
+          'react-native-reanimated': path.resolve(__dirname, './mocks/react-native-reanimated.js'),
+          'react-native-quick-crypto': path.resolve(__dirname, './mocks/react-native-quick-crypto.js'),
+          // Mock react-refresh to prevent production bundle errors
+          'react-refresh/runtime': path.resolve(__dirname, './mocks/react-refresh.js'),
+          'react-refresh': path.resolve(__dirname, './mocks/react-refresh.js'),
         }
       }
+
       return config
     },
   } as WebStorybookConfig

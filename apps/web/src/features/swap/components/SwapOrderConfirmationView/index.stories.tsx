@@ -11,7 +11,7 @@ const Order = swapOrderConfirmationViewBuilder()
   .with({ sellAmount: '10000000' })
   .with({ executedSellAmount: '10000000' })
   .with({ sellToken: { ...orderTokenBuilder().build(), decimals: 6 } })
-  .with({ validUntil: new Date().getTime() / 1000 + 28 * 60 })
+  .with({ validUntil: 1735001680 }) // Fixed timestamp for deterministic tests (Dec 24, 2024)
   .with({ status: 'open' as OrderStatuses })
 
 const meta = {

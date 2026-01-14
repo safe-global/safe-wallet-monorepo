@@ -1,4 +1,12 @@
-import type { AnalysisResult, AnyStatus, GroupedAnalysisResults, StatusGroup } from '../types'
+import type {
+  AnalysisResult,
+  AnyStatus,
+  GroupedAnalysisResults,
+  StatusGroup,
+  FallbackHandlerDetails,
+  ContractDetails,
+} from '../types'
+import { ContractStatus } from '../types'
 import { MULTI_RESULT_DESCRIPTION } from '../constants'
 import { getPrimaryResult, sortBySeverity } from './analysisUtils'
 import { RecipientAnalysisResults, ContractAnalysisResults, ThreatAnalysisResults } from '../types'
@@ -56,12 +64,22 @@ export const mapConsolidatedAnalysisResults = (
         const formatPluralDescription =
           MULTI_RESULT_DESCRIPTION[type as keyof typeof MULTI_RESULT_DESCRIPTION] || (() => typeResults[0].description)
 
-        currentGroupResults.push({
-          severity: typeResults[0].severity,
-          title: typeResults[0].title,
-          type: type as AnyStatus,
-          description: formatPluralDescription(numResults, addressResults.length),
-          addresses: typeResults
+        let addresses: (ContractDetails & { address: string })[]
+
+        // For UNOFFICIAL_FALLBACK_HANDLER, use fallback handler addresses instead of contract addresses
+        if (type === ContractStatus.UNOFFICIAL_FALLBACK_HANDLER) {
+          addresses = typeResults
+            .map((result) =>
+              'fallbackHandler' in result ? (result.fallbackHandler as FallbackHandlerDetails | undefined) : undefined,
+            )
+            .filter((fh) => fh !== undefined)
+            .map((fh) => ({
+              address: fh.address,
+              name: fh.name,
+              logoUrl: fh.logoUrl,
+            }))
+        } else {
+          addresses = typeResults
             .flatMap((result) => result.addresses)
             .filter((addresses) => addresses !== undefined)
             .map((addresses) => {
@@ -71,7 +89,15 @@ export const mapConsolidatedAnalysisResults = (
                 name: result?.name,
                 logoUrl: result?.logoUrl,
               }
-            }),
+            })
+        }
+
+        currentGroupResults.push({
+          severity: typeResults[0].severity,
+          title: typeResults[0].title,
+          type: type as AnyStatus,
+          description: formatPluralDescription(numResults, addressResults.length),
+          addresses,
         })
       }
     }

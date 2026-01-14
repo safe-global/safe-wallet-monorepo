@@ -63,7 +63,7 @@
 }
 
 .card:hover {
-  background-color: var(--color-background-lightGrey);
+  background-color: var(--color-background-secondary);
 }
 
 .iconContainer {

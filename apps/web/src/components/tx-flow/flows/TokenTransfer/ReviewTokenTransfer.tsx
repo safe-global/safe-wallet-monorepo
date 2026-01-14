@@ -20,14 +20,10 @@ const ReviewTokenTransfer = ({
   onSubmit: () => void
   txNonce?: number
 }>) => {
-  const { setSafeTx, setSafeTxError, setNonce, setIsMassPayout } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, setNonce } = useContext(SafeTxContext)
   const { balances } = useBalances()
 
   const recipients = useMemo(() => params?.recipients || [], [params?.recipients])
-
-  useEffect(() => {
-    setIsMassPayout(recipients.length > 1)
-  }, [recipients, setIsMassPayout])
 
   useEffect(() => {
     if (txNonce !== undefined) {

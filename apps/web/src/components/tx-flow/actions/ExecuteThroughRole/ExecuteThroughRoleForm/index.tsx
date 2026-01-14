@@ -100,7 +100,12 @@ export const ExecuteThroughRoleForm = ({
 
     let txHash: string
     try {
-      txHash = await dispatchModuleTxExecution({ ...txThroughRole, ...txOptions }, wallet.provider, safe.address.value)
+      txHash = await dispatchModuleTxExecution(
+        { ...txThroughRole, ...txOptions },
+        wallet.provider,
+        safe.chainId,
+        safe.address.value,
+      )
     } catch (_err) {
       const err = asError(_err)
       if (isWalletRejection(err)) {

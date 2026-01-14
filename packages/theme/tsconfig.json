@@ -1,0 +1,9 @@
+{
+  "extends": "../../config/tsconfig/confs/base.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@safe-global/theme/*": ["../../packages/theme/src/*"]
+    }
+  }
+}

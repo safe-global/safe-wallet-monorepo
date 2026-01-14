@@ -1,30 +1,53 @@
+.container tbody td:first-child {
+  padding-left: 16px !important;
+}
+
+.container tbody td:last-child {
+  padding-right: 16px !important;
+}
+
+.container thead th:first-child {
+  padding-left: 16px !important;
+}
+
+.container thead th:last-child {
+  padding-right: 16px !important;
+}
+
 .container .sticky {
   opacity: 1;
   position: absolute;
   top: 0;
-  right: 0;
+  right: 16px;
   width: 15%;
   transition: opacity 0.2s;
   height: 100% !important;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  padding-top: 12px;
 }
 
 .container td {
   position: relative;
+  vertical-align: top;
+}
+
+/* Header styling - bold and no bottom border */
+.container thead th {
+  border-bottom: none !important;
+  background-color: var(--color-background-main);
+}
+
+.container thead th span {
+  font-size: 14px;
+  color: var(--color-text-primary);
 }
 
 .container th:last-of-type,
 .container td:last-of-type {
-  min-width: 86px;
-  width: 86px;
-  flex-shrink: 0;
-}
-
-.container.containerWideActions th:last-of-type,
-.container.containerWideActions td:last-of-type {
   min-width: 130px;
   width: 130px;
+  flex-shrink: 0;
 }
 
 .container td:last-of-type .sticky > *:last-child {
@@ -82,23 +105,26 @@
   display: none;
   flex-direction: column;
   gap: 0;
-  padding: var(--space-2) 0;
+  padding: 0 0 var(--space-2) 0;
 }
 
 .mobileHeader {
   display: none;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-1) 0;
-  border-bottom: 1px solid var(--color-border-light);
+  padding: var(--space-1) 16px;
+  border-bottom: 1px solid var(--color-background-main);
   margin-bottom: var(--space-1);
+  background-color: var(--color-background-main);
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
 }
 
 .mobileRow {
   display: none;
   flex-direction: column;
-  padding: var(--space-1) 0 var(--space-2) 0;
-  border-bottom: 1px solid var(--color-border-light);
+  padding: var(--space-1) 16px var(--space-2) 16px;
+  border-bottom: 1px solid var(--color-background-main);
 }
 
 .mobileRow:last-child {
@@ -202,7 +228,7 @@
 }
 
 .mobileButton:hover:not(:disabled) {
-  background-color: var(--color-background-light);
+  background-color: var(--color-background-paper);
 }
 
 .mobileButton:disabled,
@@ -225,11 +251,6 @@
 
 .container .mobileButtons {
   display: none;
-}
-
-.container.containerWideActions th:nth-child(5),
-.container.containerWideActions td:nth-child(5) {
-  padding-right: 138px;
 }
 
 .balanceColumn {

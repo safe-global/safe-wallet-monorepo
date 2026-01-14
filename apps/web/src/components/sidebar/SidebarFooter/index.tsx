@@ -41,7 +41,7 @@ const SidebarFooter = (): ReactElement => {
             <DebugToggle />
           </ListItem>
 
-          <Divider flexItem />
+          <Divider flexItem sx={{ borderColor: 'background.main' }} />
         </>
       )}
 

@@ -227,7 +227,13 @@ describe('txSender', () => {
 
       expect(proposedTx.txId).toBe('123')
 
-      expect(txEvents.txDispatch).toHaveBeenCalledWith('PROPOSED', { txId: '123', nonce: 0 })
+      expect(txEvents.txDispatch).toHaveBeenCalledWith('PROPOSED', {
+        txId: '123',
+        nonce: 0,
+        signerAddress: undefined,
+        chainId: '4',
+        safeAddress: '0x123',
+      })
     })
 
     it('should dispatch a SIGNATURE_PROPOSED event if tx has signatures and an id', async () => {
@@ -267,6 +273,8 @@ describe('txSender', () => {
         txId: '123',
         signerAddress: '0x456',
         nonce: 0,
+        chainId: '4',
+        safeAddress: '0x123',
       })
     })
 
@@ -290,6 +298,8 @@ describe('txSender', () => {
       expect(txEvents.txDispatch).toHaveBeenCalledWith('SIGNATURE_PROPOSE_FAILED', {
         txId: '345',
         error: expect.any(Error),
+        chainId: '4',
+        safeAddress: '0x123',
       })
     })
 
@@ -427,10 +437,24 @@ describe('txSender', () => {
         nonce: 1,
       })
 
-      await dispatchTxExecution(safeTx, { nonce: 1 }, txId, MockEip1193Provider, SIGNER_ADDRESS, safeAddress, false)
+      await dispatchTxExecution(
+        '1',
+        safeTx,
+        { nonce: 1 },
+        txId,
+        MockEip1193Provider,
+        SIGNER_ADDRESS,
+        safeAddress,
+        false,
+      )
 
       expect(mockSafeSDK.executeTransaction).toHaveBeenCalled()
-      expect(txEvents.txDispatch).toHaveBeenCalledWith('EXECUTING', { txId, nonce: 1 })
+      expect(txEvents.txDispatch).toHaveBeenCalledWith('EXECUTING', {
+        txId,
+        nonce: 1,
+        chainId: '1',
+        safeAddress,
+      })
       expect(txEvents.txDispatch).toHaveBeenCalledWith('PROCESSING', {
         nonce: 1,
         txId,
@@ -439,6 +463,8 @@ describe('txSender', () => {
         txHash: TX_HASH,
         gasLimit: undefined,
         txType: 'SafeTx',
+        chainId: '1',
+        safeAddress,
       })
     })
 
@@ -455,12 +481,18 @@ describe('txSender', () => {
         nonce: 1,
       })
 
-      await expect(dispatchTxExecution(safeTx, {}, txId, MockEip1193Provider, '5', safeAddress, false)).rejects.toThrow(
-        'error',
-      )
+      await expect(
+        dispatchTxExecution('1', safeTx, {}, txId, MockEip1193Provider, '5', safeAddress, false),
+      ).rejects.toThrow('error')
 
       expect(mockSafeSDK.executeTransaction).toHaveBeenCalled()
-      expect(txEvents.txDispatch).toHaveBeenCalledWith('FAILED', { txId, error: new Error('error'), nonce: 1 })
+      expect(txEvents.txDispatch).toHaveBeenCalledWith('FAILED', {
+        txId,
+        error: new Error('error'),
+        nonce: 1,
+        chainId: '1',
+        safeAddress,
+      })
     })
 
     it('should revert a tx', async () => {
@@ -476,10 +508,15 @@ describe('txSender', () => {
         nonce: 1,
       })
 
-      await dispatchTxExecution(safeTx, { nonce: 1 }, txId, MockEip1193Provider, SIGNER_ADDRESS, '0x123', false)
+      await dispatchTxExecution('1', safeTx, { nonce: 1 }, txId, MockEip1193Provider, SIGNER_ADDRESS, '0x123', false)
 
       expect(mockSafeSDK.executeTransaction).toHaveBeenCalled()
-      expect(txEvents.txDispatch).toHaveBeenCalledWith('EXECUTING', { txId, nonce: 1 })
+      expect(txEvents.txDispatch).toHaveBeenCalledWith('EXECUTING', {
+        txId,
+        nonce: 1,
+        chainId: '1',
+        safeAddress: '0x123',
+      })
       expect(txEvents.txDispatch).toHaveBeenCalledWith('PROCESSING', {
         nonce: 1,
         txId,
@@ -488,6 +525,8 @@ describe('txSender', () => {
         txHash: TX_HASH,
         txType: 'SafeTx',
         gasLimit: undefined,
+        chainId: '1',
+        safeAddress: '0x123',
       })
     })
   })
@@ -539,11 +578,15 @@ describe('txSender', () => {
         txId: 'multisig_0x01',
         groupKey: '0x1234',
         taskId: mockTaskId,
+        chainId: '5',
+        safeAddress,
       })
       expect(txEvents.txDispatch).toHaveBeenCalledWith('RELAYING', {
         txId: 'multisig_0x02',
         groupKey: '0x1234',
         taskId: mockTaskId,
+        chainId: '5',
+        safeAddress,
       })
     })
   })

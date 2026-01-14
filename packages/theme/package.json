@@ -1,0 +1,40 @@
+{
+  "private": true,
+  "name": "@safe-global/theme",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "type-check": "tsc --noEmit",
+    "prettier": "prettier --check . --config ../../.prettierrc --ignore-path ../../.prettierignore",
+    "prettier:fix": "prettier --write . --config ../../.prettierrc --ignore-path ../../.prettierignore"
+  },
+  "peerDependencies": {
+    "@mui/material": "^6.x",
+    "tamagui": "^1.x"
+  },
+  "peerDependenciesMeta": {
+    "tamagui": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@safe-global/test": "workspace:^",
+    "@types/jest": "^29.5.14",
+    "eslint": "^9.29.0",
+    "eslint-config-next": "^16.0.5",
+    "jest": "^29.7.0",
+    "prettier": "^3.6.2",
+    "typescript": "~5.9.2"
+  },
+  "dependencies": {
+    "jest-fixed-jsdom": "^0.0.10"
+  }
+}

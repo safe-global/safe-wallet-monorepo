@@ -46,7 +46,7 @@ export function NestedSafesPopover({
       slotProps={{
         paper: {
           sx: {
-            width: '300px',
+            width: '370px',
             maxHeight: '590px',
             display: 'flex',
             flexDirection: 'column',
@@ -58,7 +58,7 @@ export function NestedSafesPopover({
       <ModalDialogTitle
         hideChainIndicator
         onClose={onClose}
-        sx={{ borderBottom: ({ palette }) => `1px solid ${palette.border.light}` }}
+        sx={{ mt: -0.5, borderBottom: ({ palette }) => `1px solid ${palette.border.light}` }}
       >
         Nested Safes
       </ModalDialogTitle>

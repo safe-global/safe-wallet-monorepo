@@ -66,7 +66,7 @@ const getInitialFormValues = (filter: TxFilter | null): DefaultValues<TxFilterFo
     : defaultValues
 }
 
-const TxFilterForm = ({ toggleFilter }: { toggleFilter: () => void }): ReactElement => {
+const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
   const [filter, setFilter] = useTxFilter()
   const chain = useCurrentChain()
 
@@ -114,7 +114,7 @@ const TxFilterForm = ({ toggleFilter }: { toggleFilter: () => void }): ReactElem
 
     setFilter(filterData)
 
-    toggleFilter()
+    onClose()
   }
 
   return (

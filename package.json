@@ -25,10 +25,13 @@
     "stylus": "0.64.0"
   },
   "devDependencies": {
+    "@storybook/builder-webpack5": "^10.1.10",
+    "@storybook/react": "^10.1.10",
     "husky": "^9.1.6",
     "lint-staged": "^16.2.7",
     "msw": "^2.7.3",
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "storybook": "^10.1.10"
   },
   "dependenciesMeta": {
     "cypress": {

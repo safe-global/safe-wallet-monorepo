@@ -61,19 +61,90 @@ jobs:
           BASE_SHA=${{ github.event.workflow_run.pull_requests[0].base.sha }}
           HEAD_SHA=${{ github.event.workflow_run.head_sha }}
 
-          # Find changed story files
-          CHANGED_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '\.(stories|story)\.(tsx?|jsx?)$' || true)
+          # Get all changed files in web app (excluding test files for now)
+          ALL_CHANGED=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '^apps/web/src/.*\.(tsx?|jsx?)$' | grep -v '\.test\.' || true)
 
-          if [ -z "$CHANGED_FILES" ]; then
+          # Get changed story test files and snapshot files separately
+          STORY_TEST_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '^apps/web/src/.*\.stories\.test\.(tsx?|jsx?)$' || true)
+          SNAPSHOT_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '^apps/web/src/.*__snapshots__/.*\.stories\.test\.(tsx?|jsx?)\.snap$' || true)
+
+          STORY_FILES=""
+
+          # Process regular component and story files
+          for file in $ALL_CHANGED; do
+            # If it's already a story file, include it
+            if [[ "$file" =~ \.(stories|story)\.(tsx?|jsx?)$ ]]; then
+              STORY_FILES="$STORY_FILES$file"$'\n'
+              continue
+            fi
+
+            # For component files, check if a corresponding story file exists
+            dir=$(dirname "$file")
+            base=$(basename "$file" | sed -E 's/\.(tsx?|jsx?)$//')
+
+            # Check for story file with same name in same directory
+            found=false
+            for ext in stories.tsx story.tsx stories.ts story.ts; do
+              story_file="$dir/$base.$ext"
+              if [ -f "$story_file" ]; then
+                STORY_FILES="$STORY_FILES$story_file"$'\n'
+                found=true
+                break
+              fi
+            done
+
+            # If not found, check in common subdirectories (components/, stories/, __stories__/)
+            if [ "$found" = false ]; then
+              for subdir in components stories __stories__; do
+                for ext in stories.tsx story.tsx stories.ts story.ts; do
+                  story_file="$dir/$subdir/$base.$ext"
+                  if [ -f "$story_file" ]; then
+                    STORY_FILES="$STORY_FILES$story_file"$'\n'
+                    found=true
+                    break 2
+                  fi
+                done
+              done
+            fi
+          done
+
+          # Process story test files - find corresponding .stories.tsx files
+          for file in $STORY_TEST_FILES; do
+            # Convert MyComponent.stories.test.tsx -> MyComponent.stories.tsx
+            story_file=$(echo "$file" | sed -E 's/\.stories\.test\.(tsx?)$/.stories.\1/')
+            if [ -f "$story_file" ]; then
+              STORY_FILES="$STORY_FILES$story_file"$'\n'
+              echo "Found story file from test file: $story_file"
+            fi
+          done
+
+          # Process snapshot files - extract corresponding .stories.tsx files
+          for file in $SNAPSHOT_FILES; do
+            # Convert apps/web/src/features/safe-shield/__snapshots__/SafeShield.stories.test.tsx.snap
+            # -> apps/web/src/features/safe-shield/SafeShield.stories.tsx
+            dir=$(dirname "$file")
+            parent_dir=$(dirname "$dir")
+            base=$(basename "$file" | sed -E 's/\.stories\.test\.(tsx?)\.snap$/.stories.\1/')
+            story_file="$parent_dir/$base"
+            if [ -f "$story_file" ]; then
+              STORY_FILES="$STORY_FILES$story_file"$'\n'
+              echo "Found story file from snapshot: $story_file"
+            fi
+          done
+
+          # Remove duplicates and empty lines
+          STORY_FILES=$(echo "$STORY_FILES" | sort -u | grep -v '^$' || true)
+
+          if [ -z "$STORY_FILES" ]; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "No story files changed"
+            echo "No story files found for changed components"
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
-            echo "Changed story files:"
-            echo "$CHANGED_FILES"
+            echo "Story files to capture:"
+            echo "$STORY_FILES"
             # Store as multiline output
             echo "files<<EOF" >> $GITHUB_OUTPUT
-            echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+            echo "$STORY_FILES" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
           fi
 
@@ -119,28 +190,21 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Configure git identity
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global credential.helper '!f() { echo "username=x-access-token"; echo "password=$GH_TOKEN"; }; f'
 
-          # Configure git credentials using extraheader (token not visible in process list)
-          git config --global credential.helper store
-          git config --global url."https://github.com/".insteadOf "git@github.com:"
-
-          # Create a unique directory for this PR's screenshots
           SCREENSHOT_DIR="storybook-screenshots/${{ steps.pr.outputs.number }}"
 
-          # Clone the storage branch in a separate directory
           cd /tmp
           rm -rf screenshots-storage
 
-          # Use gh CLI to clone (token handled securely)
-          if gh repo clone ${{ github.repository }} screenshots-storage -- --depth 1 --branch storybook-screenshots-storage; then
+          if git clone --depth 1 --branch storybook-screenshots-storage https://github.com/${{ github.repository }}.git screenshots-storage; then
             echo "Cloned existing storage branch"
             cd screenshots-storage
           else
             echo "Storage branch doesn't exist, creating it"
-            gh repo clone ${{ github.repository }} screenshots-storage -- --depth 1
+            git clone --depth 1 https://github.com/${{ github.repository }}.git screenshots-storage
             cd screenshots-storage
             git checkout --orphan storybook-screenshots-storage
             git rm -rf . 2>/dev/null || true
@@ -149,11 +213,9 @@ jobs:
             git commit -m "Initialize storybook-screenshots-storage branch"
           fi
 
-          # Copy screenshots to PR directory
           mkdir -p "$SCREENSHOT_DIR"
           cp $GITHUB_WORKSPACE/screenshots/*.png "$SCREENSHOT_DIR/" 2>/dev/null || true
 
-          # Commit and push
           git add "$SCREENSHOT_DIR"
           if git commit -m "Add screenshots for PR #${{ steps.pr.outputs.number }}"; then
             git push origin storybook-screenshots-storage

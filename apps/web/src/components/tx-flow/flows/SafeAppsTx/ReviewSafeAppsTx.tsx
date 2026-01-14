@@ -31,10 +31,8 @@ const ReviewSafeAppsTx = ({
       const isMultiSend = txs.length > 1
       const tx = isMultiSend ? await createMultiSendCallOnlyTx(txs) : await createTx(txs[0])
 
-      if (params?.safeTxGas !== undefined) {
-        // FIXME: do it properly via the Core SDK
-        // @ts-expect-error safeTxGas readonly
-        tx.data.safeTxGas = params.safeTxGas
+      if (params?.safeTxGas !== undefined && !Number.isNaN(params.safeTxGas)) {
+        tx.data.safeTxGas = String(params.safeTxGas)
       }
 
       return tx
@@ -46,7 +44,7 @@ const ReviewSafeAppsTx = ({
         setTxOrigin(getTxOrigin(app))
       })
       .catch(setSafeTxError)
-  }, [txs, setSafeTx, setSafeTxError, setTxOrigin, app, params])
+  }, [txs, setSafeTx, setSafeTxError, setTxOrigin, app, params?.safeTxGas])
 
   const error = !isTxValid(txs)
 

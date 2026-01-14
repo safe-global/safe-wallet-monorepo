@@ -28,31 +28,38 @@ export enum TxEvent {
 
 type Id = { txId: string; nonce: number; groupKey?: string } | { txId?: string; nonce?: number; groupKey: string }
 
+type SafeContext = { chainId: string; safeAddress: string }
+
 interface TxEvents {
   [TxEvent.SIGNED]: { txId?: string }
   [TxEvent.SIGN_FAILED]: { txId?: string; error: Error }
   [TxEvent.PROPOSE_FAILED]: { error: Error }
   [TxEvent.PROPOSED]: { txId: string; nonce: number }
   [TxEvent.DELETED]: { safeTxHash: string }
-  [TxEvent.SIGNATURE_PROPOSE_FAILED]: { txId: string; error: Error }
-  [TxEvent.SIGNATURE_PROPOSED]: { txId: string; nonce: number; signerAddress: string }
+  [TxEvent.SIGNATURE_PROPOSE_FAILED]: { txId: string; error: Error } & SafeContext
+  [TxEvent.SIGNATURE_PROPOSED]: { txId: string; nonce: number; signerAddress: string } & SafeContext
   [TxEvent.SIGNATURE_INDEXED]: { txId: string }
   [TxEvent.ONCHAIN_SIGNATURE_REQUESTED]: Id
   [TxEvent.ONCHAIN_SIGNATURE_SUCCESS]: Id
-  [TxEvent.NESTED_SAFE_TX_CREATED]: Id & { parentSafeAddress: string; txHashOrParentSafeTxHash: string }
-  [TxEvent.EXECUTING]: Id
-  [TxEvent.PROCESSING]: Id & {
-    txHash: string
-    signerAddress: string
-    signerNonce: number
-  } & ({ txType: 'Custom'; data: string; to: string } | { txType: 'SafeTx'; gasLimit: string | number | undefined })
+  [TxEvent.NESTED_SAFE_TX_CREATED]: Id &
+    SafeContext & {
+      parentSafeAddress: string
+      txHashOrParentSafeTxHash: string
+    }
+  [TxEvent.EXECUTING]: Id & SafeContext
+  [TxEvent.PROCESSING]: Id &
+    SafeContext & {
+      txHash: string
+      signerAddress: string
+      signerNonce: number
+    } & ({ txType: 'Custom'; data: string; to: string } | { txType: 'SafeTx'; gasLimit: string | number | undefined })
   [TxEvent.SPEEDUP_FAILED]: Id & { error: Error }
   [TxEvent.PROCESSING_MODULE]: Id & { txHash: string }
-  [TxEvent.PROCESSED]: Id & { safeAddress: string; txHash?: string }
-  [TxEvent.REVERTED]: Id & { error: Error }
-  [TxEvent.RELAYING]: Id & { taskId: string }
-  [TxEvent.FAILED]: Id & { error: Error }
-  [TxEvent.SUCCESS]: Id & { txHash?: string }
+  [TxEvent.PROCESSED]: Id & SafeContext & { txHash?: string }
+  [TxEvent.REVERTED]: Id & SafeContext & { error: Error }
+  [TxEvent.RELAYING]: Id & SafeContext & { taskId: string }
+  [TxEvent.FAILED]: Id & SafeContext & { error: Error }
+  [TxEvent.SUCCESS]: Id & SafeContext & { txHash?: string }
   [TxEvent.SAFE_APPS_REQUEST]: { safeAppRequestId: RequestId; safeTxHash: string; txId?: string }
   [TxEvent.BATCH_ADD]: Id
 }

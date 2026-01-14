@@ -3,38 +3,23 @@
   height: 28px;
   min-width: 28px;
   padding: 6px;
-  background-color: #f4f4f4 !important;
-  border-radius: 4px !important;
+  background-color: var(--color-border-background);
+  border-radius: 4px;
+  color: var(--color-text-primary);
 }
 
 .assetActionIconButton:hover {
-  background-color: #dddee0 !important;
-}
-
-.assetActionIconButton:hover svg {
-  color: #121312;
-}
-
-:global([data-theme='dark']) .assetActionIconButton {
-  background-color: #121312 !important;
-}
-
-:global([data-theme='dark']) .assetActionIconButton:hover {
-  background-color: #303033 !important;
-}
-
-:global([data-theme='dark']) .assetActionIconButton svg {
-  color: #a1a3a7;
-}
-
-:global([data-theme='dark']) .assetActionIconButton:hover svg {
-  color: #ffffff;
+  background-color: var(--color-background-secondary);
 }
 
 .assetActionIconButton svg {
   width: 16px;
   height: 16px;
-  color: var(--color-primary-light);
+  color: inherit;
+}
+
+.assetActionIconButton svg path {
+  fill: currentColor;
 }
 
 .sendButton {

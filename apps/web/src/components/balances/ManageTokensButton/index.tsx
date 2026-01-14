@@ -1,9 +1,8 @@
 import { useState, useImperativeHandle, forwardRef, type ReactElement } from 'react'
-import { Button, Typography } from '@mui/material'
-import SettingsIcon from '@mui/icons-material/Settings'
+import { Box, Button } from '@mui/material'
 import ManageTokensMenu from './ManageTokensMenu'
 import { trackEvent, ASSETS_EVENTS } from '@/services/analytics'
-import css from './styles.module.css'
+import SettingsIcon from '@/public/images/sidebar/settings.svg'
 
 interface ManageTokensButtonProps {
   onHideTokens?: () => void
@@ -49,11 +48,16 @@ const ManageTokensButton = forwardRef<ManageTokensButtonHandle, ManageTokensButt
           onClick={handleClick}
           variant="outlined"
           size="small"
-          startIcon={<SettingsIcon fontSize="small" />}
+          startIcon={<SettingsIcon />}
           data-testid="manage-tokens-button"
-          className={css.button}
+          sx={{
+            px: '12px',
+            '& .MuiButton-startIcon': { marginRight: { xs: 0, sm: '8px' } },
+          }}
         >
-          <Typography fontSize="medium">Manage tokens</Typography>
+          <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+            Manage tokens
+          </Box>
         </Button>
         <ManageTokensMenu
           anchorEl={anchorEl}

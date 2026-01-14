@@ -99,24 +99,8 @@ export const AnalysisIssuesDisplay = ({ result, issueBackgroundColor }: Analysis
                 </Box>
               )}
 
-              <Box
-                sx={{
-                  bgcolor: issue.address ? issueBackgroundColor : 'transparent',
-                  px: 1,
-                  py: 0.5,
-                  width: '100%',
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  color={issue.address ? 'static.main' : 'text.primary'}
-                  fontSize={12}
-                  lineHeight="14px"
-                  sx={{
-                    fontFamily: 'DM Sans, sans-serif',
-                    fontWeight: 400,
-                  }}
-                >
+              <Box bgcolor={issue.address ? issueBackgroundColor : 'transparent'} px={1} py={0.5}>
+                <Typography variant="body2" fontSize={12} lineHeight="14px" color="primary.light">
                   {issue.description}
                 </Typography>
               </Box>

@@ -350,7 +350,7 @@ export class SafeWalletProvider {
     const { safeTxHash, txHash } = await this.sdk.send(
       {
         txs: [tx],
-        params: { safeTxGas: Number(tx.gas) },
+        params: { safeTxGas: Number(tx.gas ?? 0) },
       },
       appInfo,
     )

@@ -24,6 +24,7 @@ tags:
 - scrollUntilVisible:
     element:
       text: '.*3 actions.*'
+      index: 1
     centerElement: true
 
 # Tap on the 3 actions batch transaction card

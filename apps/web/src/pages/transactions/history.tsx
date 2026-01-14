@@ -3,11 +3,10 @@ import Head from 'next/head'
 import useTxHistory from '@/hooks/useTxHistory'
 import PaginatedTxns from '@/components/common/PaginatedTxns'
 import TxHeader from '@/components/transactions/TxHeader'
-import { Box } from '@mui/material'
+import { Badge, Box, Popover, Skeleton } from '@mui/material'
 import { useState } from 'react'
 import Button from '@mui/material/Button'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import FilterIcon from '@mui/icons-material/FilterAlt'
 import TxFilterForm from '@/components/transactions/TxFilterForm'
 import TrustedToggle from '@/components/transactions/TrustedToggle'
 import { useTxFilter } from '@/utils/tx-history-filter'
@@ -15,18 +14,26 @@ import { BRAND_NAME } from '@/config/constants'
 import CsvTxExportButton from '@/components/transactions/CsvTxExportButton'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useBannerVisibility } from '@/features/hypernative/hooks'
+import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
+import { HnBannerForHistory } from '@/features/hypernative/components/HnBanner'
 
 const History: NextPage = () => {
   const [filter] = useTxFilter()
   const isCsvExportEnabled = useHasFeature(FEATURES.CSV_TX_EXPORT)
+  const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
 
-  const [showFilter, setShowFilter] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const open = Boolean(anchorEl)
 
-  const toggleFilter = () => {
-    setShowFilter((prev) => !prev)
+  const handleFilterClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget)
   }
 
-  const ExpandIcon = showFilter ? ExpandLessIcon : ExpandMoreIcon
+  const handleFilterClose = () => {
+    setAnchorEl(null)
+  }
+
   return (
     <>
       <Head>
@@ -36,16 +43,66 @@ const History: NextPage = () => {
       <TxHeader>
         <TrustedToggle />
 
-        <Button variant="outlined" onClick={toggleFilter} size="small" endIcon={<ExpandIcon />}>
-          {filter?.type ?? 'Filter'}
-        </Button>
+        <Badge
+          variant="dot"
+          color="success"
+          invisible={!filter}
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
+          sx={{
+            '& .MuiBadge-badge': {
+              left: 38,
+              top: 10,
+            },
+          }}
+        >
+          <Button variant="outlined" onClick={handleFilterClick} size="small" startIcon={<FilterIcon />}>
+            {filter?.type ?? 'Filter'}
+          </Button>
+        </Badge>
         {isCsvExportEnabled && <CsvTxExportButton hasActiveFilter={!!filter} />}
       </TxHeader>
 
       <main>
-        {showFilter && <TxFilterForm toggleFilter={toggleFilter} />}
+        <Popover
+          open={open}
+          anchorEl={anchorEl}
+          onClose={handleFilterClose}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          slotProps={{
+            paper: {
+              sx: {
+                mt: 1,
+                maxWidth: '90vw',
+                width: { xs: '100%', sm: '80%' },
+              },
+            },
+          }}
+        >
+          <TxFilterForm onClose={handleFilterClose} />
+        </Popover>
 
         <Box mb={4}>
+          {hnLoading && (
+            <Box mb={3}>
+              <Skeleton variant="rounded" height={30} />
+            </Box>
+          )}
+          {showHnBanner && !hnLoading && (
+            <Box mb={3}>
+              <HnBannerForHistory />
+            </Box>
+          )}
+
           <PaginatedTxns useTxns={useTxHistory} />
         </Box>
       </main>

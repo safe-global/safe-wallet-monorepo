@@ -25,6 +25,7 @@ import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
 import { ofacApi } from '@/store/api/ofac'
 import { safePassApi } from './api/safePass'
+import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { version as termsVersion } from '@/markdown/terms/version'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { GATEWAY_URL } from '@/config/gateway'
@@ -53,8 +54,10 @@ const rootReducer = combineReducers({
   [slices.visitedSafesSlice.name]: slices.visitedSafesSlice.reducer,
   [slices.orderByPreferenceSlice.name]: slices.orderByPreferenceSlice.reducer,
   [slices.hnStateSlice.name]: slices.hnStateSlice.reducer,
+  [slices.calendlySlice.name]: slices.calendlySlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
+  [hypernativeApi.reducerPath]: hypernativeApi.reducer,
   [slices.gatewayApi.reducerPath]: slices.gatewayApi.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
   [slices.authSlice.reducerPath]: slices.authSlice.reducer,
@@ -91,6 +94,7 @@ const middleware: Middleware<{}, RootState>[] = [
   listenerMiddlewareInstance.middleware,
   ofacApi.middleware,
   safePassApi.middleware,
+  hypernativeApi.middleware,
   slices.gatewayApi.middleware,
 ]
 

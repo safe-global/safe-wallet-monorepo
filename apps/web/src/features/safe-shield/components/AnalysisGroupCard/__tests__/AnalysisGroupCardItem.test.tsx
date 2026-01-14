@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen, renderWithUserEvent } from '@/tests/test-utils'
 import { AnalysisGroupCardItem } from '../AnalysisGroupCardItem'
 import { ThreatAnalysisResultBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis-result.builder'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
@@ -229,12 +229,88 @@ describe('AnalysisGroupCardItem', () => {
     })
 
     it('should handle failed threat analysis correctly', () => {
-      const result = ThreatAnalysisResultBuilder.failed().build()
+      const result = ThreatAnalysisResultBuilder.failedWithError().build()
 
       render(<AnalysisGroupCardItem result={result} />)
 
       expect(screen.queryByTestId('analysis-issues-display')).not.toBeInTheDocument()
       expect(screen.queryByTestId('show-all-address')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Error Dropdown', () => {
+    it('should render error dropdown when result has error field', () => {
+      const result = ThreatAnalysisResultBuilder.failed().error('Simulation Error: Reverted').build()
+
+      render(<AnalysisGroupCardItem result={result} />)
+
+      expect(screen.getByText('Show details')).toBeInTheDocument()
+    })
+
+    it('should NOT render error dropdown when result has no error field', () => {
+      const result = ThreatAnalysisResultBuilder.failedWithoutError().build()
+
+      render(<AnalysisGroupCardItem result={result} />)
+
+      expect(screen.queryByText('Show details')).not.toBeInTheDocument()
+      expect(screen.queryByText('Hide details')).not.toBeInTheDocument()
+    })
+
+    it('should display error text when expanded', async () => {
+      const { user } = renderWithUserEvent(
+        <AnalysisGroupCardItem
+          result={ThreatAnalysisResultBuilder.failed().error('Simulation Error: Reverted').build()}
+        />,
+      )
+
+      const showDetailsButton = screen.getByText('Show details')
+      await user.click(showDetailsButton)
+
+      expect(screen.getByText('Simulation Error: Reverted')).toBeInTheDocument()
+      expect(screen.getByText('Hide details')).toBeInTheDocument()
+    })
+
+    it('should expand and collapse error dropdown', async () => {
+      const { user } = renderWithUserEvent(
+        <AnalysisGroupCardItem result={ThreatAnalysisResultBuilder.failed().error('Test error message').build()} />,
+      )
+
+      expect(screen.getByText('Show details')).toBeInTheDocument()
+      expect(screen.queryByText('Hide details')).not.toBeInTheDocument()
+      const errorText = screen.getByText('Test error message')
+
+      expect(errorText).not.toBeVisible()
+
+      await user.click(screen.getByText('Show details'))
+
+      expect(screen.getByText('Hide details')).toBeInTheDocument()
+      expect(screen.queryByText('Show details')).not.toBeInTheDocument()
+      expect(errorText).toBeVisible()
+
+      await user.click(screen.getByText('Hide details'))
+
+      expect(screen.getByText('Show details')).toBeInTheDocument()
+      expect(screen.queryByText('Hide details')).not.toBeInTheDocument()
+    })
+
+    it('should work with different error messages', () => {
+      const result1 = ThreatAnalysisResultBuilder.failed().error('Simulation Error: Reverted').build()
+      const result2 = ThreatAnalysisResultBuilder.failed().error('Reverted').build()
+
+      const { rerender } = render(<AnalysisGroupCardItem result={result1} />)
+      expect(screen.getByText('Show details')).toBeInTheDocument()
+
+      rerender(<AnalysisGroupCardItem result={result2} />)
+      expect(screen.getByText('Show details')).toBeInTheDocument()
+    })
+
+    it('should not interfere with other components when error is present', () => {
+      const result = ThreatAnalysisResultBuilder.failed().error('Test error').build()
+
+      render(<AnalysisGroupCardItem result={result} />)
+
+      expect(screen.getByText('Show details')).toBeInTheDocument()
+      expect(screen.getByText('Threat analysis failed. Review before processing.')).toBeInTheDocument()
     })
   })
 

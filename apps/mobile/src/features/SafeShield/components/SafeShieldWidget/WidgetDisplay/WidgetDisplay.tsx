@@ -20,7 +20,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { selectActiveChain } from '@/src/store/chains'
 import { useAppSelector } from '@/src/store/hooks'
 import { isTxSimulationEnabled } from '@safe-global/utils/components/tx/security/tenderly/utils'
-import { Severity } from '@safe-global/utils/features/safe-shield/types'
+
 interface WidgetDisplayProps {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
@@ -75,7 +75,12 @@ export function WidgetDisplay({ recipient, contract, threat, loading, safeTx }: 
   const threatEmpty = isEmpty(normalizedThreatData)
   const allEmpty = recipientEmpty && contractEmpty && threatEmpty
 
-  if (loading) {
+  // Show loading when safeTx is undefined and no analysis has started yet.
+  // This handles the race condition when opening from push notifications where
+  // the Safe SDK may not be initialized yet.
+  const isWaitingForSafeTx = safeTx === undefined && allEmpty
+
+  if (loading || isWaitingForSafeTx) {
     return <LoadingWidget />
   }
 
@@ -87,9 +92,6 @@ export function WidgetDisplay({ recipient, contract, threat, loading, safeTx }: 
 
   return (
     <WidgetDisplayWrapper>
-      {safeTx === undefined && (
-        <AnalysisLabel label="Failed to fetch analysis" severity={Severity.WARN} highlighted={true} />
-      )}
       {!recipientEmpty && primaryRecipient && (
         <AnalysisLabel
           label={primaryRecipient.title}

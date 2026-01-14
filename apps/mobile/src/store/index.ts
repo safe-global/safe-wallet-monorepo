@@ -34,6 +34,7 @@ import pendingTxs from './pendingTxsSlice'
 import estimatedFee from './estimatedFeeSlice'
 import executionMethod from './executionMethodSlice'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
+import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import devToolsEnhancer from 'redux-devtools-expo-dev-plugin'
 import { GATEWAY_URL, isTestingEnv } from '../config/constants'
 import { web3API } from './signersBalance'
@@ -129,6 +130,7 @@ export const rootReducer = combineReducers({
   executingState,
   [web3API.reducerPath]: web3API.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
+  [hypernativeApi.reducerPath]: hypernativeApi.reducer,
 })
 
 // Define the type for the root reducer
@@ -167,6 +169,7 @@ export const makeStore = () =>
       }).concat(
         cgwClient.middleware,
         web3API.middleware,
+        hypernativeApi.middleware,
         notificationsMiddleware,
         analyticsMiddleware,
         notificationSyncMiddleware,

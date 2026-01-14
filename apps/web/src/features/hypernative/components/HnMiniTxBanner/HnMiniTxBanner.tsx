@@ -44,10 +44,10 @@ export const HnMiniTxBanner = ({ onHnSignupClick, onDismiss }: HnMiniTxBannerPro
           />
           <Box className={css.bannerContent}>
             <Typography variant="body2" className={css.bannerTitle}>
-              Strengthen your Safe
+              Enforce enterprise-grade security
             </Typography>
             <Typography variant="caption" className={css.bannerDescription}>
-              Monitor and block risky transactions
+              Learn more
             </Typography>
           </Box>
         </Stack>
