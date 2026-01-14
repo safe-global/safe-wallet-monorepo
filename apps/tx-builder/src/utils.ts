@@ -43,7 +43,7 @@ export const parseBooleanValue = (value: string | boolean | number): boolean => 
   return !!value
 }
 
-const paramTypeNumber = new RegExp(/^(u?int)([0-9]*)(((\[\])|(\[[1-9]+[0-9]*\]))*)?$/)
+const paramTypeNumber = new RegExp(/^(u?int)([0-9]*)(\[(?:[1-9][0-9]*)?\])*$/)
 export const getNumberOfBits = (fieldType: string): number => Number(fieldType.match(paramTypeNumber)?.[2] || '256')
 
 export const parseIntValue = (value: string, fieldType: string) => {
@@ -116,7 +116,7 @@ export const parseStringToArray = (value: string): string[] => {
     }, [])
 }
 
-export const baseFieldtypeRegex = new RegExp(/^([a-zA-Z0-9]*)(((\[\])|(\[[1-9]+[0-9]*\]))*)?$/)
+export const baseFieldtypeRegex = new RegExp(/^([a-zA-Z0-9]*)(\[(?:[1-9][0-9]*)?\])*$/)
 
 // return the base field type. Example: from "uint128[][2][]" returns "uint128"
 export const getBaseFieldType = (fieldType: string): string => {
