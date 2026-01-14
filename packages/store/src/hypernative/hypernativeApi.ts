@@ -2,6 +2,8 @@ import { createApi, fetchBaseQuery, retry } from '@reduxjs/toolkit/query/react'
 import type {
   HypernativeAssessmentResponseDto,
   HypernativeAssessmentRequestWithAuthDto,
+  HypernativeBatchAssessmentResponseDto,
+  HypernativeBatchAssessmentRequestWithAuthDto,
   HypernativeTokenExchangeResponseDto,
   HypernativeTokenExchangeRequestDto,
 } from './hypernativeApi.dto'
@@ -46,6 +48,26 @@ export const hypernativeApi = createApi({
       transformResponse: (response: HypernativeAssessmentResponseDto): HypernativeAssessmentResponseDto['data'] =>
         (response as HypernativeAssessmentResponseDto).data,
       transformErrorResponse: (response: HypernativeAssessmentResponseDto) => response.data,
+      invalidatesTags: ['hypernative-threat-analysis'],
+    }),
+    getBatchAssessments: build.mutation<
+      HypernativeBatchAssessmentResponseDto['data'],
+      HypernativeBatchAssessmentRequestWithAuthDto
+    >({
+      query: ({ authToken, ...request }) => ({
+        url: '/safe/assessments',
+        method: 'POST',
+        body: request,
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: authToken,
+        },
+      }),
+      transformResponse: (
+        response: HypernativeBatchAssessmentResponseDto,
+      ): HypernativeBatchAssessmentResponseDto['data'] => (response as HypernativeBatchAssessmentResponseDto).data,
+      transformErrorResponse: (response: HypernativeBatchAssessmentResponseDto) => response.data,
       invalidatesTags: ['hypernative-threat-analysis'],
     }),
   }),
