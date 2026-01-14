@@ -56,9 +56,9 @@ jobs:
       - name: Build
         run: yarn workspace @safe-global/tx-builder build
         env:
-          VITE_TENDERLY_ORG_NAME: ${{ secrets.REACT_APP_TENDERLY_ORG_NAME }}
-          VITE_TENDERLY_PROJECT_NAME: ${{ secrets.REACT_APP_TENDERLY_PROJECT_NAME }}
-          VITE_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ secrets.REACT_APP_TENDERLY_SIMULATE_ENDPOINT_URL }}
+          VITE_TENDERLY_ORG_NAME: ${{ secrets.NEXT_PUBLIC_TENDERLY_ORG_NAME }}
+          VITE_TENDERLY_PROJECT_NAME: ${{ secrets.NEXT_PUBLIC_TENDERLY_PROJECT_NAME }}
+          VITE_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ secrets.NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL }}
 
       - name: Extract branch name
         id: extract_branch
@@ -108,9 +108,9 @@ jobs:
       - name: Build
         run: yarn workspace @safe-global/tx-builder build
         env:
-          VITE_TENDERLY_ORG_NAME: ${{ secrets.REACT_APP_TENDERLY_ORG_NAME }}
-          VITE_TENDERLY_PROJECT_NAME: ${{ secrets.REACT_APP_TENDERLY_PROJECT_NAME }}
-          VITE_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ secrets.REACT_APP_TENDERLY_SIMULATE_ENDPOINT_URL }}
+          VITE_TENDERLY_ORG_NAME: ${{ secrets.NEXT_PUBLIC_TENDERLY_ORG_NAME }}
+          VITE_TENDERLY_PROJECT_NAME: ${{ secrets.NEXT_PUBLIC_TENDERLY_PROJECT_NAME }}
+          VITE_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ secrets.NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v5
@@ -131,6 +131,8 @@ jobs:
     permissions:
       contents: write
       id-token: write
+    env:
+      PROD_DEPLOYMENT_HOOK_URL: ${{ secrets.PROD_DEPLOYMENT_HOOK_URL }}
 
     steps:
       - name: Checkout
@@ -161,9 +163,9 @@ jobs:
       - name: Build
         run: yarn workspace @safe-global/tx-builder build
         env:
-          VITE_TENDERLY_ORG_NAME: ${{ secrets.REACT_APP_TENDERLY_ORG_NAME }}
-          VITE_TENDERLY_PROJECT_NAME: ${{ secrets.REACT_APP_TENDERLY_PROJECT_NAME }}
-          VITE_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ secrets.REACT_APP_TENDERLY_SIMULATE_ENDPOINT_URL }}
+          VITE_TENDERLY_ORG_NAME: ${{ secrets.NEXT_PUBLIC_TENDERLY_ORG_NAME }}
+          VITE_TENDERLY_PROJECT_NAME: ${{ secrets.NEXT_PUBLIC_TENDERLY_PROJECT_NAME }}
+          VITE_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ secrets.NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v5
@@ -201,7 +203,6 @@ jobs:
         if: env.PROD_DEPLOYMENT_HOOK_URL != ''
         env:
           PROD_DEPLOYMENT_HOOK_TOKEN: ${{ secrets.PROD_DEPLOYMENT_HOOK_TOKEN }}
-          PROD_DEPLOYMENT_HOOK_URL: ${{ secrets.PROD_DEPLOYMENT_HOOK_URL }}
           VERSION_TAG: ${{ steps.version.outputs.version }}
         run: |
           HTTP_STATUS=$(curl --silent --show-error --output /dev/null --write-out "%{http_code}" -X POST \
