@@ -21,7 +21,7 @@ const POLL_TIMEOUT_MS = 5000
 const SCRIPT_LOAD_TIMEOUT_MS = 5000 // Timeout for script loading
 const IFRAME_CHECK_INTERVAL_MS = 100
 const IFRAME_CREATION_TIMEOUT_MS = 2000 // Timeout for iframe creation after widget init
-const POST_LOAD_TIMEOUT_MS = 1000 // Reduced from 3000ms for faster error detection
+const POST_LOAD_TIMEOUT_MS = 1000 // No Calendly postMessage events arrive within 1 second after iframe load
 
 /**
  * Allowed Calendly origins for postMessage validation.

@@ -17,6 +17,7 @@ const SKELETON_COLOR = '#dddee0'
 
 const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps) => {
   const widgetRef = useRef<HTMLDivElement>(null)
+  const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const { isSecondStep, hasError, refresh } = useCalendly(widgetRef, calendlyUrl, onBookingScheduled)
   const [showSkeleton, setShowSkeleton] = useState(true)
 
@@ -35,14 +36,31 @@ const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps
   useEffect(() => {
     if (hasError) {
       setShowSkeleton(false)
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current)
+        refreshTimeoutRef.current = null
+      }
     }
   }, [hasError])
 
+  // Cleanup refresh timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current)
+      }
+    }
+  }, [])
+
   const handleRefresh = () => {
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current)
+    }
     refresh()
     setShowSkeleton(true)
-    setTimeout(() => {
+    refreshTimeoutRef.current = setTimeout(() => {
       setShowSkeleton(false)
+      refreshTimeoutRef.current = null
     }, SKELETON_DURATION_MS)
   }
 
