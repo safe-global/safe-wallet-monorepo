@@ -46,6 +46,10 @@
   background-color: var(--color-border-background);
 }
 
+.dialog :global .MuiDialogContent-root {
+  overflow: visible;
+}
+
 @media (min-width: 600px) {
   .dialog :global .MuiDialog-paper {
     min-width: 600px;

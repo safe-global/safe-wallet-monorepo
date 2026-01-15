@@ -109,6 +109,16 @@ jobs:
           STORYBOOK_WEB: 'true'
           STORYBOOK_DISABLE_TELEMETRY: '1'
 
+      - name: Extract branch name
+        if: steps.changed-stories.outputs.has_changes == 'true'
+        id: branch
+        env:
+          BRANCH_NAME: ${{ github.head_ref }}
+        run: |
+          NORMALIZED=$(echo "$BRANCH_NAME" | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')
+          echo "normalized=$NORMALIZED" >> $GITHUB_OUTPUT
+          echo "Normalized branch: $NORMALIZED"
+
       - name: Generate story URLs
         if: steps.changed-stories.outputs.has_changes == 'true' && steps.build-storybook.outputs.build_failed != 'true'
         id: story-urls
@@ -141,23 +151,24 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global credential.helper '!f() { echo "username=x-access-token"; echo "password=$GH_TOKEN"; }; f'
 
+          SCREENSHOT_BRANCH="${{ steps.branch.outputs.normalized }}-screenshots"
           SCREENSHOT_DIR="mobile-storybook-screenshots/${{ github.event.pull_request.number }}"
 
           cd /tmp
           rm -rf screenshots-storage
 
-          if git clone --depth 1 --branch mobile-storybook-screenshots-storage https://github.com/${{ github.repository }}.git screenshots-storage; then
+          if git clone --depth 1 --branch "$SCREENSHOT_BRANCH" https://github.com/${{ github.repository }}.git screenshots-storage; then
             echo "Cloned existing storage branch"
             cd screenshots-storage
           else
             echo "Storage branch doesn't exist, creating it"
             git clone --depth 1 https://github.com/${{ github.repository }}.git screenshots-storage
             cd screenshots-storage
-            git checkout --orphan mobile-storybook-screenshots-storage
+            git checkout --orphan "$SCREENSHOT_BRANCH"
             git rm -rf . 2>/dev/null || true
             echo "# Mobile Storybook Screenshots Storage" > README.md
             git add README.md
-            git commit -m "Initialize mobile-storybook-screenshots-storage branch"
+            git commit -m "Initialize $SCREENSHOT_BRANCH branch"
           fi
 
           mkdir -p "$SCREENSHOT_DIR"
@@ -165,7 +176,7 @@ jobs:
 
           git add "$SCREENSHOT_DIR"
           if git commit -m "Add mobile screenshots for PR #${{ github.event.pull_request.number }}"; then
-            git push origin mobile-storybook-screenshots-storage
+            git push origin "$SCREENSHOT_BRANCH"
           else
             echo "No changes to commit"
           fi
@@ -194,7 +205,8 @@ jobs:
 
             const prNumber = ${{ github.event.pull_request.number }};
             const repo = context.repo;
-            const baseUrl = `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/mobile-storybook-screenshots-storage/mobile-storybook-screenshots/${prNumber}`;
+            const screenshotBranch = `${{ steps.branch.outputs.normalized }}-screenshots`;
+            const baseUrl = `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/${screenshotBranch}/mobile-storybook-screenshots/${prNumber}`;
 
             // Group screenshots by component and story, pairing light and dark modes
             const components = {};

@@ -5,6 +5,9 @@ import type {
   SettingsChangeTransaction,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
+// Seed faker for deterministic visual regression tests
+faker.seed(789)
+
 export const mockAddOwnerTxInfo: SettingsChangeTransaction = {
   type: TransactionInfoType.SETTINGS_CHANGE,
   humanDescription: null,

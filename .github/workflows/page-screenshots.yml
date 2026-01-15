@@ -134,23 +134,24 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global credential.helper '!f() { echo "username=x-access-token"; echo "password=$GH_TOKEN"; }; f'
 
+          SCREENSHOT_BRANCH="${{ steps.branch.outputs.normalized }}-screenshots"
           SCREENSHOT_DIR="page-screenshots/${{ steps.pr.outputs.number }}"
 
           cd /tmp
           rm -rf screenshots-storage
 
-          if git clone --depth 1 --branch page-screenshots-storage https://github.com/${{ github.repository }}.git screenshots-storage; then
+          if git clone --depth 1 --branch "$SCREENSHOT_BRANCH" https://github.com/${{ github.repository }}.git screenshots-storage; then
             echo "Cloned existing storage branch"
             cd screenshots-storage
           else
             echo "Storage branch doesn't exist, creating it"
             git clone --depth 1 https://github.com/${{ github.repository }}.git screenshots-storage
             cd screenshots-storage
-            git checkout --orphan page-screenshots-storage
+            git checkout --orphan "$SCREENSHOT_BRANCH"
             git rm -rf . 2>/dev/null || true
             echo "# Page Screenshots Storage" > README.md
             git add README.md
-            git commit -m "Initialize page-screenshots-storage branch"
+            git commit -m "Initialize $SCREENSHOT_BRANCH branch"
           fi
 
           mkdir -p "$SCREENSHOT_DIR"
@@ -158,7 +159,7 @@ jobs:
 
           git add "$SCREENSHOT_DIR"
           if git commit -m "Add page screenshots for PR ${{ steps.pr.outputs.number }}"; then
-            git push origin page-screenshots-storage
+            git push origin "$SCREENSHOT_BRANCH"
           else
             echo "No changes to commit"
           fi
@@ -192,7 +193,8 @@ jobs:
 
             const prNumber = ${{ steps.pr.outputs.number }};
             const repo = context.repo;
-            const baseUrl = `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/page-screenshots-storage/page-screenshots/${prNumber}`;
+            const screenshotBranch = `${{ steps.branch.outputs.normalized }}-screenshots`;
+            const baseUrl = `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/${screenshotBranch}/page-screenshots/${prNumber}`;
             const previewBaseUrl = `https://${{ steps.branch.outputs.normalized }}--walletweb.review.5afe.dev`;
 
             let body = '## 📸 Page Screenshots\n\n';

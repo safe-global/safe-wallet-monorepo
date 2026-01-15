@@ -67,7 +67,7 @@ export function useThreatAnalysisHypernative({
   // Build Hypernative request payload
   // @TODO: Add support for TypedData
   const hypernativeRequest = useMemo(() => {
-    if (!isSafeTransaction(data) || !safeVersion) {
+    if (skip || !isSafeTransaction(data) || !safeVersion) {
       return undefined
     }
 
@@ -79,7 +79,7 @@ export function useThreatAnalysisHypernative({
       safeVersion,
       origin,
     })
-  }, [data, safeAddress, chainId, walletAddress, origin, safeVersion])
+  }, [data, safeAddress, chainId, walletAddress, origin, safeVersion, skip])
 
   useEffect(() => {
     if (!skip && hypernativeRequest && authToken && walletAddress) {

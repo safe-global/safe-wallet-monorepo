@@ -27,9 +27,7 @@ import { isOffchainEIP1271Supported } from '@safe-global/utils/utils/safe-messag
 import { getCreateCallContractDeployment } from '@safe-global/utils/services/contracts/deployments'
 import useAllSafes, { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import { useGetHref } from '@/features/myAccounts/hooks/useGetHref'
-import { wcPopupStore } from '@/features/walletconnect/components'
-import { wcChainSwitchStore } from '@/features/walletconnect/components/WcChainSwitchModal/store'
-import walletConnectInstance from '@/features/walletconnect/services/walletConnectInstance'
+import { wcPopupStore, wcChainSwitchStore, walletConnectInstance } from '@/features/walletconnect'
 
 export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | undefined => {
   const { safe } = useSafeInfo()

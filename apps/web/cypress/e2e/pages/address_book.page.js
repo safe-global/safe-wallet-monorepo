@@ -30,7 +30,7 @@ const moreActionIcon = '[data-testid="MoreHorizIcon"]'
 
 export const acceptSelection = 'Save settings'
 export const addressBook = 'Address book'
-const createEntryBtn = 'Create entry'
+const createEntryBtn = 'New entry'
 export const delteEntryModaldeleteBtn = 'Delete'
 const exportBtn = 'Export'
 // const saveBtn = 'Save'

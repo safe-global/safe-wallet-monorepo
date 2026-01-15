@@ -79,6 +79,91 @@ describe('create.ts', () => {
         'The Safe SDK could not be initialized. Please be aware that we only support v1.0.0 Safe Accounts and up.',
       )
     })
+
+    it('converts NaN safeTxGas to "0"', async () => {
+      const txParams: SafeTransactionDataPartial = {
+        to: generateChecksummedAddress(),
+        value: '0',
+        data: '0x',
+        safeTxGas: Number.NaN as unknown as string,
+      }
+      const mockTx = createMockSafeTx()
+      mockSafeSDK.createTransaction.mockResolvedValue(mockTx)
+
+      await createTx(txParams)
+
+      expect(mockSafeSDK.createTransaction).toHaveBeenCalledWith({
+        transactions: [{ ...txParams, safeTxGas: '0' }],
+      })
+    })
+
+    it('converts "NaN" string safeTxGas to "0"', async () => {
+      const txParams: SafeTransactionDataPartial = {
+        to: generateChecksummedAddress(),
+        value: '0',
+        data: '0x',
+        safeTxGas: 'NaN',
+      }
+      const mockTx = createMockSafeTx()
+      mockSafeSDK.createTransaction.mockResolvedValue(mockTx)
+
+      await createTx(txParams)
+
+      expect(mockSafeSDK.createTransaction).toHaveBeenCalledWith({
+        transactions: [{ ...txParams, safeTxGas: '0' }],
+      })
+    })
+
+    it('preserves valid safeTxGas number value', async () => {
+      const txParams: SafeTransactionDataPartial = {
+        to: generateChecksummedAddress(),
+        value: '0',
+        data: '0x',
+        safeTxGas: '50000',
+      }
+      const mockTx = createMockSafeTx()
+      mockSafeSDK.createTransaction.mockResolvedValue(mockTx)
+
+      await createTx(txParams)
+
+      expect(mockSafeSDK.createTransaction).toHaveBeenCalledWith({
+        transactions: [txParams],
+      })
+    })
+
+    it('preserves undefined safeTxGas', async () => {
+      const txParams: SafeTransactionDataPartial = {
+        to: generateChecksummedAddress(),
+        value: '0',
+        data: '0x',
+      }
+      const mockTx = createMockSafeTx()
+      mockSafeSDK.createTransaction.mockResolvedValue(mockTx)
+
+      await createTx(txParams)
+
+      expect(mockSafeSDK.createTransaction).toHaveBeenCalledWith({
+        transactions: [txParams],
+      })
+    })
+
+    it('handles NaN safeTxGas with nonce', async () => {
+      const txParams: SafeTransactionDataPartial = {
+        to: generateChecksummedAddress(),
+        value: '0',
+        data: '0x',
+        safeTxGas: Number.NaN as unknown as string,
+      }
+      const nonce = 42
+      const mockTx = createMockSafeTx()
+      mockSafeSDK.createTransaction.mockResolvedValue(mockTx)
+
+      await createTx(txParams, nonce)
+
+      expect(mockSafeSDK.createTransaction).toHaveBeenCalledWith({
+        transactions: [{ ...txParams, nonce, safeTxGas: '0' }],
+      })
+    })
   })
 
   describe('addSignaturesToTx', () => {
