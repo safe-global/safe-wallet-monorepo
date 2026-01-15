@@ -892,4 +892,447 @@ describe('useCalendly', () => {
       appendChildSpy.mockRestore()
     })
   })
+
+  describe('error handling', () => {
+    beforeEach(() => {
+      jest.useFakeTimers()
+    })
+
+    afterEach(() => {
+      jest.runOnlyPendingTimers()
+      jest.useRealTimers()
+    })
+
+    it('should set error when script onerror is triggered', async () => {
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      const { result } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Advance timers to allow script creation
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      // Find the script element
+      const script = document.querySelector('script[src*="calendly"]') as HTMLScriptElement
+      expect(script).toBeTruthy()
+
+      // Trigger onerror
+      act(() => {
+        if (script.onerror) {
+          script.onerror(new Event('error'))
+        }
+      })
+
+      // Advance timers to process state updates
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      expect(result.current.hasError).toBe(true)
+    })
+
+    it('should set error when script load timeout expires', async () => {
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      const { result } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Advance timers to allow script creation and timeout setup
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      // Fast-forward past SCRIPT_LOAD_TIMEOUT_MS (5000ms)
+      act(() => {
+        jest.advanceTimersByTime(5000)
+      })
+
+      expect(result.current.hasError).toBe(true)
+    })
+
+    it('should set error when iframe error event is triggered', async () => {
+      let iframe: HTMLIFrameElement | null = null
+      const mockInitInlineWidget = jest.fn(() => {
+        // Create a mock iframe after init is called
+        setTimeout(() => {
+          iframe = document.createElement('iframe')
+          iframe.src = 'https://calendly.com/test'
+          mockWidgetElement.appendChild(iframe)
+        }, 10)
+      })
+
+      window.Calendly = {
+        initInlineWidget: mockInitInlineWidget,
+      }
+
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://assets.calendly.com/assets/external/widget.js'
+      document.body.appendChild(script)
+
+      const { result } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Advance timers to allow widget initialization
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      // Advance timers to create iframe
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      expect(iframe).toBeTruthy()
+
+      // Advance timers to allow polling interval to find the iframe and attach listeners
+      // IFRAME_CHECK_INTERVAL_MS is 100ms, so advance at least that much
+      act(() => {
+        jest.advanceTimersByTime(100)
+      })
+
+      // Now dispatch the error event - listeners should be attached by now
+      if (iframe) {
+        act(() => {
+          iframe!.dispatchEvent(new Event('error', { bubbles: true }))
+        })
+      }
+
+      expect(result.current.hasError).toBe(true)
+
+      script.remove()
+    })
+
+    it('should set error when iframe creation timeout expires', async () => {
+      const mockInitInlineWidget = jest.fn()
+      // Don't create iframe - simulate timeout scenario
+      window.Calendly = {
+        initInlineWidget: mockInitInlineWidget,
+      }
+
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://assets.calendly.com/assets/external/widget.js'
+      document.body.appendChild(script)
+
+      const { result } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Advance timers to allow widget initialization
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      // Fast-forward past IFRAME_CREATION_TIMEOUT_MS (2000ms)
+      // Plus some buffer for the polling interval checks
+      act(() => {
+        jest.advanceTimersByTime(2100)
+      })
+
+      expect(result.current.hasError).toBe(true)
+
+      script.remove()
+    })
+
+    it('should set error when postMessage timeout expires after iframe load', async () => {
+      let iframe: HTMLIFrameElement | null = null
+      const mockInitInlineWidget = jest.fn(() => {
+        // Create iframe after init - use setTimeout so it's created asynchronously
+        setTimeout(() => {
+          iframe = document.createElement('iframe')
+          iframe.src = 'https://calendly.com/test'
+          mockWidgetElement.appendChild(iframe)
+        }, 10)
+      })
+
+      window.Calendly = {
+        initInlineWidget: mockInitInlineWidget,
+      }
+
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://assets.calendly.com/assets/external/widget.js'
+      document.body.appendChild(script)
+
+      const { result } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Advance timers to allow widget initialization (initWidget is called)
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      // Advance timers to create iframe (setTimeout fires)
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      expect(iframe).toBeTruthy()
+
+      // Advance timers to allow polling interval to find the iframe and attach listeners
+      // IFRAME_CHECK_INTERVAL_MS is 100ms, so advance at least that much
+      act(() => {
+        jest.advanceTimersByTime(100)
+      })
+
+      // Now dispatch the load event - listeners should be attached by now
+      if (iframe) {
+        act(() => {
+          iframe!.dispatchEvent(new Event('load', { bubbles: true }))
+        })
+      }
+
+      // Fast-forward past POST_LOAD_TIMEOUT_MS (1000ms) to trigger the timeout
+      act(() => {
+        jest.advanceTimersByTime(1000)
+      })
+
+      expect(result.current.hasError).toBe(true)
+
+      script.remove()
+    })
+
+    it('should not set error when postMessage arrives before timeout', async () => {
+      let iframe: HTMLIFrameElement | null = null
+      const mockInitInlineWidget = jest.fn(() => {
+        // Create iframe after init
+        setTimeout(() => {
+          iframe = document.createElement('iframe')
+          iframe.src = 'https://calendly.com/test'
+          mockWidgetElement.appendChild(iframe)
+          // Trigger load event after iframe is added to DOM
+          setTimeout(() => {
+            iframe?.dispatchEvent(new Event('load', { bubbles: true }))
+          }, 5)
+        }, 10)
+      })
+
+      window.Calendly = {
+        initInlineWidget: mockInitInlineWidget,
+      }
+
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://assets.calendly.com/assets/external/widget.js'
+      document.body.appendChild(script)
+
+      const { result } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Advance timers to allow widget initialization
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      // Advance timers to create iframe
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      // Advance timers to allow polling interval to find the iframe and attach listeners
+      act(() => {
+        jest.advanceTimersByTime(100)
+      })
+
+      // Advance timers to trigger the load event
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      // Send a postMessage before timeout expires
+      if (messageHandler) {
+        const mockEvent = {
+          origin: 'https://calendly.com',
+          data: {
+            event: 'calendly.some_event',
+          },
+          type: 'message',
+          bubbles: false,
+          cancelable: false,
+        } as MessageEvent
+
+        act(() => {
+          messageHandler!(mockEvent)
+        })
+      }
+
+      act(() => {
+        jest.advanceTimersByTime(1000)
+      })
+
+      // Error should not be set because postMessage arrived
+      expect(result.current.hasError).toBe(false)
+      expect(result.current.isLoaded).toBe(true)
+
+      script.remove()
+    })
+
+    it('should clear timeouts when script error occurs', async () => {
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      const { result } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Advance timers to allow script creation
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      // Find the script element
+      const script = document.querySelector('script[src*="calendly"]') as HTMLScriptElement
+      expect(script).toBeTruthy()
+
+      // Trigger onerror - this should clear timeouts
+      act(() => {
+        if (script.onerror) {
+          script.onerror(new Event('error'))
+        }
+      })
+
+      // Fast-forward time - timeouts should have been cleared
+      act(() => {
+        jest.advanceTimersByTime(10000)
+      })
+
+      // Error should be set, but no additional errors from timeouts
+      expect(result.current.hasError).toBe(true)
+    })
+
+    it('should set error when initWidget throws an error', async () => {
+      const mockInitInlineWidget = jest.fn(() => {
+        throw new Error('Initialization failed')
+      })
+
+      window.Calendly = {
+        initInlineWidget: mockInitInlineWidget,
+      }
+
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://assets.calendly.com/assets/external/widget.js'
+      document.body.appendChild(script)
+
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+
+      const { result } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Advance timers to allow widget initialization attempt
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      expect(result.current.hasError).toBe(true)
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to initialize Calendly widget:', expect.any(Error))
+
+      consoleErrorSpy.mockRestore()
+      script.remove()
+    })
+
+    it('should set error when polling timeout expires for existing script', async () => {
+      const script = document.createElement('script')
+      script.src = 'https://assets.calendly.com/assets/external/widget.js'
+      document.body.appendChild(script)
+
+      // Don't set window.Calendly - simulate script loaded but API not ready
+
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      const { result } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Advance timers to allow polling to start
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      // Fast-forward past POLL_TIMEOUT_MS (5000ms)
+      act(() => {
+        jest.advanceTimersByTime(5000)
+      })
+
+      expect(result.current.hasError).toBe(true)
+
+      script.remove()
+    })
+  })
 })
