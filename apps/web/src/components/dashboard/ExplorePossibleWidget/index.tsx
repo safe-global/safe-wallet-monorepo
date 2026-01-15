@@ -164,8 +164,9 @@ const ExplorePossibleWidget = () => {
     })
   }
 
-  const handleAppClick = (appId: string) => {
+  const handleAppClick = (appId: string, title: string) => {
     trackEvent(EXPLORE_POSSIBLE_EVENTS.EXPLORE_POSSIBLE_CLICKED, { id: appId })
+    trackEvent(EXPLORE_POSSIBLE_EVENTS.HORIZONTAL_CARD_CLICKED, { label: title })
 
     // Additional Mixpanel tracking for EURCV Boost Earn card
     if (appId === 'earn') {
@@ -227,7 +228,7 @@ const ExplorePossibleWidget = () => {
               <Link
                 href={app.link}
                 className={css.cardLink}
-                onClick={() => handleAppClick(app.id)}
+                onClick={() => handleAppClick(app.id, app.title)}
                 aria-label={app.subtitle ? `${app.title} ${app.badge} ${app.subtitle}` : app.title}
               >
                 <div className={`${css.card} ${app.id === 'earn' ? css.earnCard : ''}`}>

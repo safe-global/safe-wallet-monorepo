@@ -209,6 +209,10 @@ export const EXPLORE_POSSIBLE_EVENTS = {
     action: 'Explore Possible clicked',
     category: OVERVIEW_CATEGORY,
   },
+  HORIZONTAL_CARD_CLICKED: {
+    action: 'HorizontalCardClicked',
+    category: OVERVIEW_CATEGORY,
+  },
 }
 
 export enum PIN_SAFE_LABELS {
