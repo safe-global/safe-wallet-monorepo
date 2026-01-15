@@ -1,13 +1,11 @@
-import { Box, Button, Card, IconButton, Link as MuiLink, Stack, Typography } from '@mui/material'
+import { Box, Button, Card, IconButton, Link as MuiLink } from '@mui/material'
 import css from './styles.module.css'
 import CloseIcon from '@mui/icons-material/Close'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { useRouter } from 'next/router'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { AppRoutes } from '@/config/routes'
 import { EARN_HELP_ARTICLE } from '@/features/earn/constants'
-import VisibilityIcon from '@mui/icons-material/Visibility'
 
 export const eurcvBoostBannerID = 'eurcvBoostBanner'
 
@@ -29,28 +27,14 @@ export const EurcvBoostBanner = ({ onDismiss }: { onDismiss: () => void }) => {
 
   return (
     <Card className={`${css.banner} ${css.eurcvBanner}`}>
-      <Stack direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2}>
-        {/* Icon - using MUI's Visibility icon as eye icon */}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 48,
-            height: 48,
-            borderRadius: '50%',
-            backgroundColor: 'rgba(0, 0, 0, 0.05)',
-          }}
-        >
-          <VisibilityIcon sx={{ fontSize: 28, color: 'primary.main' }} />
-        </Box>
+      <Box className={css.eurcvIconContainer}>
+        <img src="/images/eurcv-boost/eurcv.svg" alt="EURCV" className={css.eurcvIconImage} />
+      </Box>
 
-        <Box>
-          <Typography variant="h4" fontWeight="bold" color="static.main" className={css.bannerText}>
-            EURCV is now available
-          </Typography>
-
-          <Typography variant="body2" color="static.light" className={css.bannerText} sx={{ mt: 0.5 }}>
+      <Box className={css.eurcvContent}>
+        <Box className={css.eurcvTextContainer}>
+          <span className={css.eurcvTitle}>EURCV is now available</span>
+          <span className={css.eurcvDescription}>
             A new vault is added. Stake EURCV and earn 9.5% APY on deposits.{' '}
             <MuiLink
               href={EARN_HELP_ARTICLE}
@@ -60,26 +44,25 @@ export const EurcvBoostBanner = ({ onDismiss }: { onDismiss: () => void }) => {
             >
               Learn more
             </MuiLink>
-          </Typography>
-
-          <Track {...OVERVIEW_EVENTS.OPEN_EURCV_BOOST}>
-            <Button
-              endIcon={<ChevronRightIcon fontSize="small" />}
-              variant="text"
-              size="compact"
-              onClick={handleCtaClick}
-              sx={{ mt: 1, p: 0.5 }}
-              color="static"
-            >
-              Start earning
-            </Button>
-          </Track>
+          </span>
         </Box>
-      </Stack>
 
+        <Track {...OVERVIEW_EVENTS.OPEN_EURCV_BOOST}>
+          <Button variant="text" size="small" onClick={handleCtaClick} className={css.eurcvButton}>
+            Start earning &rarr;
+          </Button>
+        </Track>
+      </Box>
+
+      {/* Close Button */}
       <Track {...OVERVIEW_EVENTS.HIDE_EURCV_BOOST_BANNER}>
-        <IconButton className={css.closeButton} aria-label="close" onClick={onDismiss}>
-          <CloseIcon fontSize="small" color="border" />
+        <IconButton
+          className={`${css.closeButton} ${css.eurcvCloseButton}`}
+          aria-label="close"
+          onClick={onDismiss}
+          sx={{ padding: 0 }}
+        >
+          <CloseIcon sx={{ fontSize: 16, color: '#b8ccbe' }} />
         </IconButton>
       </Track>
     </Card>

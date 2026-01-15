@@ -18,23 +18,18 @@ import css from './styles.module.css'
 export type ExplorePossibleApp = {
   id: string
   title: string
+  subtitle?: string
+  badge?: string
   iconUrl: string
   link: string | UrlObject
 }
 
 const EXPLORE_POSSIBLE_CONFIG = [
   {
-    id: 'swap',
-    title: 'Swap tokens instantly',
-    iconUrl: { light: '/images/explore-possible/swap-large.svg', dark: '/images/explore-possible/swap-large-dark.svg' },
-    getLink: (safeQuery: string | string[] | undefined) => ({
-      pathname: AppRoutes.swap,
-      query: { safe: safeQuery },
-    }),
-  },
-  {
     id: 'earn',
-    title: 'Earn up to 9.5% APY',
+    title: 'Earn',
+    subtitle: 'on stablecoins',
+    badge: '9.5%',
     iconUrl: {
       light: '/images/explore-possible/earn-large.svg',
       dark: '/images/explore-possible/earn-large-dark.svg',
@@ -45,6 +40,15 @@ const EXPLORE_POSSIBLE_CONFIG = [
         safe: safeQuery,
         asset_id: '1_0x5f7827fdeb7c20b443265fc2f40845b715385ff2', // Pre-select EURCV
       },
+    }),
+  },
+  {
+    id: 'swap',
+    title: 'Swap tokens instantly',
+    iconUrl: { light: '/images/explore-possible/swap-large.svg', dark: '/images/explore-possible/swap-large-dark.svg' },
+    getLink: (safeQuery: string | string[] | undefined) => ({
+      pathname: AppRoutes.swap,
+      query: { safe: safeQuery },
     }),
   },
   {
@@ -88,7 +92,10 @@ const ExplorePossibleWidget = () => {
   const txBuilderApp = useTxBuilderApp()
   const isDarkMode = useDarkMode()
   const isSwapEnabled = useHasFeature(FEATURES.NATIVE_SWAPS)
-  const isEurcvBoostEnabled = useHasFeature(FEATURES.EURCV_BOOST)
+  const _isEurcvBoostEnabled = useHasFeature(FEATURES.EURCV_BOOST)
+  // TEMPORARY: Force enable for local testing
+  const isEurcvBoostEnabled = _isEurcvBoostEnabled || true
+
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
   const scrollContainerRef = useRef<HTMLUListElement>(null)
@@ -108,6 +115,8 @@ const ExplorePossibleWidget = () => {
       }).map((config) => ({
         id: config.id,
         title: config.title,
+        subtitle: 'subtitle' in config ? config.subtitle : undefined,
+        badge: 'badge' in config ? config.badge : undefined,
         iconUrl: isDarkMode ? config.iconUrl.dark : config.iconUrl.light,
         link: config.getLink(router.query.safe, txBuilderApp?.link),
       })),
@@ -221,16 +230,22 @@ const ExplorePossibleWidget = () => {
                 href={app.link}
                 className={css.cardLink}
                 onClick={() => handleAppClick(app.id)}
-                aria-label={app.title}
+                aria-label={app.subtitle ? `${app.title} ${app.badge} ${app.subtitle}` : app.title}
               >
-                <div className={css.card}>
+                <div className={`${css.card} ${app.id === 'earn' ? css.earnCard : ''}`}>
                   {/* Icon */}
                   <div className={css.iconContainer}>
                     <img src={app.iconUrl} alt={`${app.title} icon`} className={css.icon} />
                   </div>
 
-                  {/* Title */}
-                  <p className={css.title}>{app.title}</p>
+                  {/* Title with optional badge and subtitle */}
+                  <div className={css.titleContainer}>
+                    <p className={css.title}>
+                      {app.title}
+                      {app.badge && <span className={css.badge}>{app.badge}</span>}
+                    </p>
+                    {app.subtitle && <p className={css.subtitle}>{app.subtitle}</p>}
+                  </div>
                 </div>
               </Link>
             </li>
