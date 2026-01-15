@@ -10,7 +10,7 @@ describe('Walletconnect tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it.only('Verify that connection via WC is not allowed when no selected safe in URL', () => {
+  it('Verify that connection via WC is not allowed when no selected safe in URL', () => {
     cy.visit('/' + constants.welcomeAccountUrl)
     wc.clickOnWCBtn()
     cy.contains(wc.connectWCStr).should('be.visible')
