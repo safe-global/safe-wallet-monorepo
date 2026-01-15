@@ -22,23 +22,22 @@ describe('[PROD] Prod tokens tests', () => {
   it('Verify that non-native tokens are present and have balance', () => {
     assets.toggleShowAllTokens(true)
     assets.toggleHideDust(false)
-    assets.verifyBalance(assets.currencyDaiCap, assets.currencyDaiAlttext)
-    assets.verifyTokenBalanceFormat(assets.currencyDaiCap, assets.currencyDaiFormat_2, value)
-
-    assets.verifyBalance(assets.currencyAave, assets.currencyAaveAlttext)
-    assets.verifyTokenBalanceFormat(assets.currencyAave, assets.currentcyAaveFormat, value)
-
-    assets.verifyBalance(assets.currencyLink, assets.currencyLinkAlttext)
-    assets.verifyTokenBalanceFormat(assets.currencyLink, assets.currentcyLinkFormat, value)
-
-    assets.verifyBalance(assets.currencyTestTokenA, assets.currencyTestTokenAAlttext)
-    assets.verifyTokenBalanceFormat(assets.currencyTestTokenA, assets.currentcyTestTokenAFormat, value)
-
-    assets.verifyBalance(assets.currencyTestTokenB, assets.currencyTestTokenBAlttext)
-    assets.verifyTokenBalanceFormat(assets.currencyTestTokenB, assets.currentcyTestTokenBFormat, value)
-
-    assets.verifyBalance(assets.currencyUSDC, assets.currencyTestUSDCAlttext)
-    assets.verifyTokenBalanceFormat(assets.currencyUSDC, assets.currentcyTestUSDCFormat, value)
+    assets.verifyBalance(assets.currencyDaiCap, assets.currencyDaiAlttext, assets.currencyDaiBalance, value)
+    assets.verifyBalance(assets.currencyAave, assets.currencyAaveAlttext, assets.currencyAaveBalance, value)
+    assets.verifyBalance(assets.currencyLink, assets.currencyLinkAlttext, assets.currencyLinkBalance, value)
+    assets.verifyBalance(
+      assets.currencyTestTokenA,
+      assets.currencyTestTokenAAlttext,
+      assets.currencyTestTokenABalance,
+      value,
+    )
+    assets.verifyBalance(
+      assets.currencyTestTokenB,
+      assets.currencyTestTokenBAlttext,
+      assets.currencyTestTokenBBalance,
+      value,
+    )
+    assets.verifyBalance(assets.currencyUSDC, assets.currencyTestUSDCAlttext, assets.currencyUSDCBalance, value)
   })
 
   it('Verify that when owner is disconnected, Send button is disabled', () => {
