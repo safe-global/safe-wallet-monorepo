@@ -1,7 +1,5 @@
 import * as constants from '../../support/constants'
-import * as main from '../../e2e/pages/main.page'
 import * as owner from '../pages/owners.pages'
-import * as addressBook from '../pages/address_book.page'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as createTx from '../pages/create_tx.pages.js'
@@ -18,13 +16,8 @@ describe('Happy path Add Owners tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  beforeEach(() => {
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
-    cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
-  })
-
   it(
-    'Verify creation, confirmation and deletion of Add owner tx. GA tx_confirm',
+    'Verify that add owner transaction can be created, confirmed by multiple signers, and deleted with Google Analytics tracking',
     { defaultCommandTimeout: 30000 },
     () => {
       const tx_confirmed = [
@@ -35,70 +28,24 @@ describe('Happy path Add Owners tests', () => {
           safeAddress: staticSafes.SEP_STATIC_SAFE_24.slice(6),
         },
       ]
-      function step1() {
-        // Clean txs in the queue
-        cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_24)
-        wallet.connectSigner(signer2)
-        cy.wait(5000)
-        createTx.deleteAllTx()
-        navigation.clickOnWalletExpandMoreIcon()
-        navigation.clickOnDisconnectBtn()
 
-        cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_24)
-        wallet.connectSigner(signer2)
-        owner.waitForConnectionStatus()
-        owner.openManageSignersWindow()
-        owner.clickOnAddSignerBtn()
-        owner.typeOwnerAddressManage(2, constants.SEPOLIA_OWNER_2)
-        createTx.changeNonce(1)
-        owner.clickOnNextBtnManage()
-        owner.verifyConfirmTransactionWindowDisplayed()
-        createTx.clickOnContinueSignTransactionBtn()
-        createTx.clickOnSignTransactionBtn()
-        createTx.clickViewTransaction()
+      createTx.cleanTransactionQueue(staticSafes.SEP_STATIC_SAFE_24, signer2)
+      createTx.createAddOwnerTransaction(staticSafes.SEP_STATIC_SAFE_24, signer2, constants.SEPOLIA_OWNER_2, 2)
 
-        navigation.clickOnWalletExpandMoreIcon()
-        navigation.clickOnDisconnectBtn()
-        wallet.connectSigner(signer)
-      }
+      createTx.verifySingleTxPage()
 
-      function step2() {
-        createTx.clickOnConfirmTransactionBtn()
-        createTx.clickOnNoLaterOption()
-        createTx.clickOnContinueSignTransactionBtn()
-        createTx.clickOnSignTransactionBtn()
+      // Switch to signer1 and confirm the transaction
+      // switchToSignerAndConfirm will disconnect signer2 (if connected) and connect signer1
+      createTx.switchToSignerAndConfirm(signer)
 
-        navigation.clickOnWalletExpandMoreIcon()
-        navigation.clickOnDisconnectBtn()
-        getEvents()
-        checkDataLayerEvents(tx_confirmed)
-        wallet.connectSigner(signer2)
-        createTx.deleteTx()
-      }
+      // After signer1 confirms, disconnect signer1 and connect signer2 to delete the transaction
+      navigation.clickOnWalletExpandMoreIcon()
+      navigation.clickOnDisconnectBtn()
+      wallet.connectSigner(signer2)
 
-      step1()
-      cy.get('body').then(($body) => {
-        if ($body.find(`button:contains("${createTx.executeStr}")`).length > 0) {
-          navigation.clickOnWalletExpandMoreIcon()
-          navigation.clickOnDisconnectBtn()
-          wallet.connectSigner(signer2)
-          createTx.deleteTx()
-          cy.wait(5000)
-          step1()
-          step2()
-        } else {
-          createTx.clickOnConfirmTransactionBtn()
-          createTx.clickOnContinueSignTransactionBtn()
-          createTx.clickOnSignTransactionBtn()
-
-          navigation.clickOnWalletExpandMoreIcon()
-          navigation.clickOnDisconnectBtn()
-          getEvents()
-          checkDataLayerEvents(tx_confirmed)
-          wallet.connectSigner(signer2)
-          createTx.deleteTx()
-        }
-      })
+      getEvents()
+      checkDataLayerEvents(tx_confirmed)
+      createTx.deleteTx()
     },
   )
 })
