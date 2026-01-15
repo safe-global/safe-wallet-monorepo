@@ -188,5 +188,27 @@ describe('HnCalendlyStep', () => {
       // Widget should be visible
       expect(widgetElement).toHaveStyle({ display: 'block' })
     })
+
+    it('should open correct calendlyUrl in new tab when open in new tab button is clicked', async () => {
+      const user = userEvent.setup({ delay: null })
+      const windowOpenSpy = jest.spyOn(window, 'open').mockImplementation(() => null)
+
+      mockUseCalendly.mockReturnValue({
+        isLoaded: false,
+        isSecondStep: false,
+        hasScheduled: false,
+        hasError: true,
+        refresh: mockRefresh,
+      })
+
+      render(<HnCalendlyStep calendlyUrl={calendlyUrl} onBookingScheduled={mockOnBookingScheduled} />)
+
+      const openInNewTabButton = screen.getByRole('button', { name: /open in a new tab/i })
+      await user.click(openInNewTabButton)
+
+      expect(windowOpenSpy).toHaveBeenCalledWith(calendlyUrl, '_blank', 'noopener,noreferrer')
+
+      windowOpenSpy.mockRestore()
+    })
   })
 })

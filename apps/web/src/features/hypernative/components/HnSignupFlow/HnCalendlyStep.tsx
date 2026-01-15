@@ -65,7 +65,7 @@ const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps
   }
 
   const handleOpenInNewTab = () => {
-    window.open('https://calendly.com/d/ctgh-yrs-dnr', '_blank', 'noopener,noreferrer')
+    window.open(calendlyUrl, '_blank', 'noopener,noreferrer')
   }
 
   return (
