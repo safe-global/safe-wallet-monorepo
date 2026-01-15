@@ -37,7 +37,7 @@ const HeaderButton = ({
   const svg = <SvgIcon component={icon} inheritViewBox fontSize="small" />
 
   return (
-    <Button onClick={onClick} disabled={disabled} variant="text" color="primary" size="small" startIcon={svg}>
+    <Button onClick={onClick} disabled={disabled} variant="outlined" color="primary" size="small" startIcon={svg}>
       {children}
     </Button>
   )
@@ -82,8 +82,6 @@ function AddressBookHeader({
 
   return (
     <PageHeader
-      title="Address book"
-      noBorder
       action={
         <Grid
           container
@@ -119,11 +117,13 @@ function AddressBookHeader({
             item
             xs={12}
             md={7}
+            xl={7.5}
             sx={{
               display: 'flex',
               justifyContent: ['space-between', , 'flex-end'],
-              alignItems: 'center',
+              alignItems: 'flex-end',
             }}
+            gap={{ md: 1, xs: 0.25 }}
           >
             <Track {...ADDRESS_BOOK_EVENTS.IMPORT_BUTTON}>
               <HeaderButton onClick={handleOpenModal(ModalType.IMPORT)} icon={ImportIcon}>
@@ -139,7 +139,7 @@ function AddressBookHeader({
 
             <Track {...ADDRESS_BOOK_EVENTS.CREATE_ENTRY}>
               <HeaderButton onClick={handleOpenModal(ModalType.ENTRY)} icon={AddCircleIcon}>
-                Create entry
+                New entry
               </HeaderButton>
             </Track>
           </Grid>

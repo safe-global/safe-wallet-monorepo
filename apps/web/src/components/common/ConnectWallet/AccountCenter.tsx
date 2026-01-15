@@ -39,7 +39,7 @@ export const AccountCenter = ({ wallet }: { wallet: ConnectedWallet }) => {
             {open ? (
               <ExpandLessIcon color="border" sx={{ fontSize: 16 }} />
             ) : (
-              <ExpandMoreIcon color="border" sx={{ fontSize: 16 }} />
+              <ExpandMoreIcon data-testid="ExpandMoreIcon" color="border" sx={{ fontSize: 16 }} />
             )}
           </Box>
         </Box>

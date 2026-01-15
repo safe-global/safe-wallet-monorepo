@@ -145,11 +145,10 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
           <OnlyOwner placement="top">
             {(isOk) => (
               <Button
-                variant="contained"
+                variant="outlined"
                 onClick={onClick}
                 size="small"
-                sx={{ height: 38 }}
-                endIcon={
+                startIcon={
                   exportJobId ? (
                     <CircularProgress size={16} />
                   ) : (
@@ -158,7 +157,7 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
                 }
                 disabled={!isOk || !!exportJobId}
               >
-                {exportJobId ? 'Exporting' : 'Export CSV'}
+                {exportJobId ? 'Exporting' : 'Export'}
               </Button>
             )}
           </OnlyOwner>
