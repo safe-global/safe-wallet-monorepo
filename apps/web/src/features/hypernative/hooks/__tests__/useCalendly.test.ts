@@ -712,4 +712,184 @@ describe('useCalendly', () => {
       expect(typeof result.current.refresh).toBe('function')
     })
   })
+
+  describe('refresh functionality', () => {
+    it('should clear widget container innerHTML when refresh is called', async () => {
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      // Set some content in the widget element
+      mockWidgetElement.innerHTML = '<div>Some content</div>'
+      expect(mockWidgetElement.innerHTML).toBe('<div>Some content</div>')
+
+      const { result } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Call refresh
+      act(() => {
+        result.current.refresh()
+      })
+
+      // Wait for refresh to complete
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10))
+      })
+
+      // Verify innerHTML is cleared
+      expect(mockWidgetElement.innerHTML).toBe('')
+    })
+
+    it('should remove existing Calendly script when refresh is called', async () => {
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      // Create and add a mock script with a specific identifier
+      const existingScript = document.createElement('script')
+      existingScript.src = 'https://assets.calendly.com/assets/external/widget.js'
+      existingScript.setAttribute('data-test-id', 'existing-script')
+      document.body.appendChild(existingScript)
+
+      expect(document.querySelector('script[data-test-id="existing-script"]')).toBeTruthy()
+
+      const { result } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Wait for initial effect to run
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10))
+      })
+
+      // Call refresh - this should remove the existing script
+      act(() => {
+        result.current.refresh()
+      })
+
+      // Verify the original script with test-id is removed
+      // (the effect may add a new script, but the original one should be gone)
+      expect(document.querySelector('script[data-test-id="existing-script"]')).toBeNull()
+    })
+
+    it('should clear window.Calendly when refresh is called', async () => {
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      // Set window.Calendly
+      const mockCalendly = {
+        initInlineWidget: jest.fn(),
+      }
+      window.Calendly = mockCalendly as unknown as typeof window.Calendly
+
+      expect(window.Calendly).toBeDefined()
+
+      const { result } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Call refresh
+      act(() => {
+        result.current.refresh()
+      })
+
+      // Wait for refresh to complete
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10))
+      })
+
+      // Verify window.Calendly is cleared
+      expect(window.Calendly).toBeUndefined()
+    })
+
+    it('should handle refresh when widgetRef.current is null', async () => {
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: true,
+          isSecondStep: true,
+          hasScheduled: true,
+          hasError: true,
+        } as CalendlyState,
+      }
+
+      const nullRef = { current: null }
+      const { result } = renderHook(() => useCalendly(nullRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Should not throw when refresh is called with null ref
+      act(() => {
+        result.current.refresh()
+      })
+
+      // Wait for state update
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10))
+      })
+
+      // State should still be reset
+      const state = mockStore.getState()
+      expect(state.calendly.isLoaded).toBe(false)
+      expect(state.calendly.isSecondStep).toBe(false)
+      expect(state.calendly.hasScheduled).toBe(false)
+      expect(state.calendly.hasError).toBe(false)
+    })
+
+    it('should trigger effect re-run after refresh', async () => {
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      const appendChildSpy = jest.spyOn(document.body, 'appendChild')
+      const { result } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Wait for initial effect to run
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10))
+      })
+
+      // Clear the spy to count new calls
+      appendChildSpy.mockClear()
+
+      // Call refresh
+      act(() => {
+        result.current.refresh()
+      })
+
+      // Wait for effect to re-run
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 50))
+      })
+
+      // Verify that script loading is attempted again (effect re-ran)
+      // The script should be added to document body
+      expect(appendChildSpy).toHaveBeenCalled()
+
+      appendChildSpy.mockRestore()
+    })
+  })
 })
