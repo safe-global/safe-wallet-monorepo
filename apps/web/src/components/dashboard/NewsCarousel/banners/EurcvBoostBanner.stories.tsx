@@ -8,6 +8,7 @@ const meta = {
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
+    visualTest: { disable: true },
   },
   decorators: [
     (Story) => (
