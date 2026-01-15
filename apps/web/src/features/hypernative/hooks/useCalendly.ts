@@ -344,6 +344,15 @@ export const useCalendly = (
    * Refreshes the widget by resetting state and triggering reload.
    */
   const refresh = useCallback(() => {
+    // Clear pending timeouts to prevent race conditions
+    if (loadTimeoutRef.current) {
+      clearTimeout(loadTimeoutRef.current)
+      loadTimeoutRef.current = null
+    }
+    if (scriptLoadTimeoutRef.current) {
+      clearTimeout(scriptLoadTimeoutRef.current)
+      scriptLoadTimeoutRef.current = null
+    }
     dispatch(reset())
     callbackCalledRef.current = false
     // Increment refresh key to force effect re-run
