@@ -20,7 +20,7 @@ This repository houses both web and mobile applications along with shared packag
 
 > [!IMPORTANT]
 >
-> For detailed setup instructions and platform-specific development guides please refer to the dedicated README files:
+> For detailed setup instructions and platform-specific development guides, please refer to the dedicated README files:
 >
 > - **[Web App Documentation](/apps/web/README.md)** - Complete guide for the Next.js web application
 > - **[Mobile App Documentation](/apps/mobile/README.md)** - Complete guide for the mobile application, including iOS/Android setup
