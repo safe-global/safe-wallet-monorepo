@@ -1,4 +1,4 @@
-import { setMaxAmount } from '../pages/create_tx.pages.js'
+import { setMaxAmount, tokenSelector } from '../pages/create_tx.pages.js'
 import { cardContent } from '../pages/modals.page.js'
 import { addToBatchBtn } from '../pages/create_tx.pages.js'
 
@@ -9,7 +9,6 @@ const fundAssetBtn = '[data-testid="fund-asset-button"]'
 const assetData = '[data-testid="asset-data"]'
 const amountInput = '[data-testid="amount-input"]'
 const assetsInput = (index) => `input[name="assets.${index}.amount"]`
-const tokenSelector = '[data-testid="token-selector"]'
 const tokenItem = '[data-testid="token-item"]'
 const removeAssetIcon = '[data-testid="remove-asset-icon"]'
 const advancedDetailsSummary = '[data-testid="decoded-tx-summary"]'
