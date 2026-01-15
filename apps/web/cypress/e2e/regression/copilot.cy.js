@@ -1,5 +1,5 @@
 import * as constants from '../../support/constants.js'
-import * as shield from '../pages/safe_shield.pages.js'
+import * as shield from '../pages/copilot.js'
 import * as createtx from '../pages/create_tx.pages.js'
 import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
@@ -9,7 +9,7 @@ const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 let staticSafes = []
 
-describe('Safe Shield tests', { defaultCommandTimeout: 30000 }, () => {
+describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
