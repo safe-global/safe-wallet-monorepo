@@ -138,6 +138,11 @@ export const useCalendly = (
     const element = widgetRef.current
     if (!element) return
 
+    // Store references to iframe and handlers for cleanup
+    let iframeRef: HTMLIFrameElement | null = null
+    let handleIframeLoad: (() => void) | null = null
+    let handleIframeError: (() => void) | null = null
+
     // Poll for iframe creation (Calendly creates it async)
     let checkCount = 0
     const maxChecks = Math.ceil(IFRAME_CREATION_TIMEOUT_MS / IFRAME_CHECK_INTERVAL_MS)
@@ -147,8 +152,9 @@ export const useCalendly = (
 
       if (iframe) {
         clearInterval(checkForIframe)
+        iframeRef = iframe
 
-        const handleIframeLoad = () => {
+        handleIframeLoad = () => {
           // Iframe finished loading - start short timeout for Calendly postMessage
           // If no postMessage arrives within timeout, the page likely failed
           if (loadTimeoutRef.current) {
@@ -166,7 +172,7 @@ export const useCalendly = (
           }, POST_LOAD_TIMEOUT_MS)
         }
 
-        const handleIframeError = () => {
+        handleIframeError = () => {
           dispatch(setError(true))
           if (loadTimeoutRef.current) {
             clearTimeout(loadTimeoutRef.current)
@@ -186,12 +192,18 @@ export const useCalendly = (
     // Store cleanup function
     return () => {
       clearInterval(checkForIframe)
+      // Remove event listeners if they were attached
+      if (iframeRef && handleIframeLoad && handleIframeError) {
+        iframeRef.removeEventListener('load', handleIframeLoad)
+        iframeRef.removeEventListener('error', handleIframeError)
+      }
     }
   }, [dispatch, widgetRef])
 
   /**
    * Initializes the Calendly inline widget.
    * Called when the script is loaded and the widget container is ready.
+   * @returns Cleanup function for iframe monitoring, or undefined if initialization failed
    */
   const initWidget = useCallback(() => {
     const element = widgetRef.current
@@ -201,13 +213,15 @@ export const useCalendly = (
           url: calendlyUrl,
           parentElement: element,
         })
-        // Monitor iframe after initialization
-        monitorIframeLoad()
+        // Monitor iframe after initialization and return cleanup function
+        return monitorIframeLoad()
       } catch (error) {
         console.error('Failed to initialize Calendly widget:', error)
         dispatch(setError(true))
+        return undefined
       }
     }
+    return undefined
   }, [widgetRef, calendlyUrl, monitorIframeLoad, dispatch])
 
   /**
@@ -242,19 +256,24 @@ export const useCalendly = (
     let checkInterval: ReturnType<typeof setInterval> | null = null
     let timeoutId: ReturnType<typeof setTimeout> | null = null
     let calendlyScript: HTMLScriptElement | null = null
+    let iframeMonitorCleanup: (() => void) | undefined = undefined
 
     // Check if script is already loaded
     const existingScript = document.querySelector('script[src*="calendly"]')
 
     // If script and API are both ready, initialize immediately
     if (existingScript && window.Calendly) {
-      initWidget()
+      iframeMonitorCleanup = initWidget()
       return () => {
         // Only cleanup event listener, don't reset state
         window.removeEventListener('message', handleMessage)
         if (loadTimeoutRef.current) {
           clearTimeout(loadTimeoutRef.current)
           loadTimeoutRef.current = null
+        }
+        // Cleanup iframe monitoring
+        if (iframeMonitorCleanup) {
+          iframeMonitorCleanup()
         }
       }
     }
@@ -274,7 +293,7 @@ export const useCalendly = (
 
       checkInterval = setInterval(() => {
         if (window.Calendly && widgetRef.current) {
-          initWidget()
+          iframeMonitorCleanup = initWidget()
           if (checkInterval) clearInterval(checkInterval)
           if (timeoutId) clearTimeout(timeoutId)
         }
@@ -303,7 +322,7 @@ export const useCalendly = (
           clearTimeout(scriptLoadTimeoutRef.current)
           scriptLoadTimeoutRef.current = null
         }
-        initWidget()
+        iframeMonitorCleanup = initWidget()
       }
       calendlyScript.onerror = handleScriptError
       document.body.appendChild(calendlyScript)
@@ -326,6 +345,10 @@ export const useCalendly = (
       }
       if (calendlyScript?.parentNode) {
         calendlyScript.parentNode.removeChild(calendlyScript)
+      }
+      // Cleanup iframe monitoring (removes event listeners)
+      if (iframeMonitorCleanup) {
+        iframeMonitorCleanup()
       }
       // Note: We don't reset Redux state here because the effect may re-run
       // State will persist across re-renders, which is desired for isSecondStep
