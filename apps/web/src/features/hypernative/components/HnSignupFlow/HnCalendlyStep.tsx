@@ -115,7 +115,6 @@ const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps
               ref={widgetRef}
               id="calendly-widget"
               className={`${css.calendlyWidget} ${!isSecondStep ? css.calendlyWidgetWithHeader : ''}`}
-              style={{ display: hasError ? 'none' : 'block' }}
             />
           </>
         )}

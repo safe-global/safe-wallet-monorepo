@@ -258,12 +258,21 @@ export const useCalendly = (
     let calendlyScript: HTMLScriptElement | null = null
     let iframeMonitorCleanup: (() => void) | undefined = undefined
 
+    // Helper to clean up previous iframe monitoring and set new one
+    const setIframeMonitorCleanup = (newCleanup: (() => void) | undefined) => {
+      // Clean up previous cleanup if it exists
+      if (iframeMonitorCleanup) {
+        iframeMonitorCleanup()
+      }
+      iframeMonitorCleanup = newCleanup
+    }
+
     // Check if script is already loaded
     const existingScript = document.querySelector('script[src*="calendly"]')
 
     // If script and API are both ready, initialize immediately
     if (existingScript && window.Calendly) {
-      iframeMonitorCleanup = initWidget()
+      setIframeMonitorCleanup(initWidget())
       return () => {
         // Only cleanup event listener, don't reset state
         window.removeEventListener('message', handleMessage)
@@ -293,7 +302,7 @@ export const useCalendly = (
 
       checkInterval = setInterval(() => {
         if (window.Calendly && widgetRef.current) {
-          iframeMonitorCleanup = initWidget()
+          setIframeMonitorCleanup(initWidget())
           if (checkInterval) clearInterval(checkInterval)
           if (timeoutId) clearTimeout(timeoutId)
         }
@@ -322,7 +331,7 @@ export const useCalendly = (
           clearTimeout(scriptLoadTimeoutRef.current)
           scriptLoadTimeoutRef.current = null
         }
-        iframeMonitorCleanup = initWidget()
+        setIframeMonitorCleanup(initWidget())
       }
       calendlyScript.onerror = handleScriptError
       document.body.appendChild(calendlyScript)

@@ -39,7 +39,7 @@ describe('useCalendly', () => {
         }
       })
 
-    jest.spyOn(window, 'removeEventListener').mockImplementation(() => { })
+    jest.spyOn(window, 'removeEventListener').mockImplementation(() => {})
 
     jest.clearAllMocks()
   })
@@ -1282,7 +1282,7 @@ describe('useCalendly', () => {
       script.src = 'https://assets.calendly.com/assets/external/widget.js'
       document.body.appendChild(script)
 
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { })
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
 
       const { result } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
         initialReduxState,
