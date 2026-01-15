@@ -7,7 +7,7 @@ export type TxStatusChipProps = {
   backgroundColor?: string
 }
 
-const TxStatusChip = ({ children, color, backgroundColor }: TxStatusChipProps): ReactElement => {
+const TxStatusChip = ({ children, color = 'primary', backgroundColor }: TxStatusChipProps): ReactElement => {
   return (
     <Chip
       size="small"
