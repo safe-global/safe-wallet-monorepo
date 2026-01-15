@@ -92,9 +92,7 @@ const ExplorePossibleWidget = () => {
   const txBuilderApp = useTxBuilderApp()
   const isDarkMode = useDarkMode()
   const isSwapEnabled = useHasFeature(FEATURES.NATIVE_SWAPS)
-  const _isEurcvBoostEnabled = useHasFeature(FEATURES.EURCV_BOOST)
-  // TEMPORARY: Force enable for local testing
-  const isEurcvBoostEnabled = _isEurcvBoostEnabled || true
+  const isEurcvBoostEnabled = useHasFeature(FEATURES.EURCV_BOOST)
 
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
