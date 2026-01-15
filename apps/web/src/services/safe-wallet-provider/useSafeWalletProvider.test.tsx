@@ -18,18 +18,44 @@ import * as chainHooks from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
 import useAllSafes from '@/features/myAccounts/hooks/useAllSafes'
 import { useGetHref } from '@/features/myAccounts/hooks/useGetHref'
-import { wcPopupStore } from '@/features/walletconnect/components'
-import { wcChainSwitchStore } from '@/features/walletconnect/components/WcChainSwitchModal/store'
-import walletConnectInstance from '@/features/walletconnect/services/walletConnectInstance'
+import { wcPopupStore, wcChainSwitchStore, walletConnectInstance } from '@/features/walletconnect'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
-jest.mock('@/features/walletconnect/services/walletConnectInstance', () => ({
-  __esModule: true,
-  default: {
-    init: jest.fn(),
-    updateSessions: jest.fn(),
-  },
-}))
+const createMockStore = <T,>(initialValue: T) => {
+  let value: T = initialValue
+  return {
+    useStore: jest.fn(() => value),
+    setStore: jest.fn((newValue: T) => {
+      value = newValue
+    }),
+    getStore: jest.fn(() => value),
+    _reset: (newValue: T) => {
+      value = newValue
+    },
+  }
+}
+
+const mockWcPopupStore = createMockStore<boolean>(false)
+const mockWcChainSwitchStore = createMockStore<unknown>(undefined)
+const mockWalletConnectInstance = {
+  init: jest.fn(),
+  updateSessions: jest.fn().mockResolvedValue(undefined),
+}
+
+jest.mock('@/features/walletconnect', () => {
+  return {
+    __esModule: true,
+    get wcPopupStore() {
+      return mockWcPopupStore
+    },
+    get wcChainSwitchStore() {
+      return mockWcChainSwitchStore
+    },
+    get walletConnectInstance() {
+      return mockWalletConnectInstance
+    },
+  }
+})
 
 const updateSessionsMock = walletConnectInstance.updateSessions as jest.MockedFunction<
   (typeof walletConnectInstance)['updateSessions']

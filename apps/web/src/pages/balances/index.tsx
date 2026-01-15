@@ -22,6 +22,7 @@ import PortfolioRefreshHint from '@/features/portfolio/components/PortfolioRefre
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
+
 const Balances: NextPage = () => {
   const { balances, error } = useVisibleBalances()
   const [showHiddenAssets, setShowHiddenAssets] = useState(false)

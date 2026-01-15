@@ -16,13 +16,12 @@ jest.mock(
     },
 )
 
-jest.mock(
-  '@/features/walletconnect/components',
-  () =>
-    function WalletConnect() {
-      return <div>WalletConnect</div>
-    },
-)
+jest.mock('@/features/walletconnect', () => ({
+  __esModule: true,
+  default: function WalletConnect() {
+    return <div>WalletConnect</div>
+  },
+}))
 
 jest.mock(
   '@/components/common/NetworkSelector',

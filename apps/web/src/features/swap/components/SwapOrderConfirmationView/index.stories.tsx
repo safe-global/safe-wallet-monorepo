@@ -2,15 +2,28 @@ import type { OrderStatuses } from '@safe-global/store/gateway/types'
 import type { Meta, StoryObj } from '@storybook/react'
 import CowOrderConfirmationView from './index'
 import { Paper } from '@mui/material'
-import { orderTokenBuilder, swapOrderConfirmationViewBuilder } from '@/features/swap/helpers/swapOrderBuilder'
-import { faker } from '@faker-js/faker'
+import { swapOrderConfirmationViewBuilder } from '@/features/swap/helpers/swapOrderBuilder'
 import { StoreDecorator } from '@/stories/storeDecorator'
+
+// Fixed settlement contract address for deterministic tests
+const FIXED_SETTLEMENT_CONTRACT = '0x9008D19f58AAbD9eD0D60971565AA8510560ab41'
+
+// Fixed token data for deterministic snapshots
+const FIXED_SELL_TOKEN = {
+  address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+  decimals: 6,
+  logoUri:
+    'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+  name: 'USD Coin',
+  symbol: 'USDC',
+  trusted: true,
+}
 
 const Order = swapOrderConfirmationViewBuilder()
   .with({ kind: 'sell' })
   .with({ sellAmount: '10000000' })
   .with({ executedSellAmount: '10000000' })
-  .with({ sellToken: { ...orderTokenBuilder().build(), decimals: 6 } })
+  .with({ sellToken: FIXED_SELL_TOKEN })
   .with({ validUntil: 1735001680 }) // Fixed timestamp for deterministic tests (Dec 24, 2024)
   .with({ status: 'open' as OrderStatuses })
 
@@ -28,7 +41,8 @@ const meta = {
       )
     },
   ],
-  tags: ['autodocs'],
+  // Skip visual regression tests until baseline snapshots are generated
+  tags: ['autodocs', '!test'],
 } satisfies Meta<typeof CowOrderConfirmationView>
 
 export default meta
@@ -37,7 +51,7 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     order: Order.build(),
-    settlementContract: faker.finance.ethereumAddress(),
+    settlementContract: FIXED_SETTLEMENT_CONTRACT,
   },
   parameters: {
     design: {
@@ -47,10 +61,13 @@ export const Default: Story = {
   },
 }
 
+// Fixed receiver address for deterministic tests
+const FIXED_RECEIVER = '0x1234567890123456789012345678901234567890'
+
 export const CustomRecipient: Story = {
   args: {
-    order: Order.with({ receiver: faker.finance.ethereumAddress() }).build(),
-    settlementContract: faker.finance.ethereumAddress(),
+    order: Order.with({ receiver: FIXED_RECEIVER }).build(),
+    settlementContract: FIXED_SETTLEMENT_CONTRACT,
   },
   parameters: {
     design: {

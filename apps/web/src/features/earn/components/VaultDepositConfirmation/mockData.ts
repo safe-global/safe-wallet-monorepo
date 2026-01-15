@@ -2,6 +2,9 @@ import { faker } from '@faker-js/faker'
 import type { VaultDepositTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionInfoType } from '@safe-global/store/gateway/types'
 
+// Seed faker for deterministic values in stories
+faker.seed(789)
+
 export const mockVaultDepositTxInfo: VaultDepositTransactionInfo = {
   type: TransactionInfoType.VAULT_DEPOSIT,
   humanDescription: null,
