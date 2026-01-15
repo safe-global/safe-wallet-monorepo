@@ -3,6 +3,7 @@ import { Keyboard } from 'react-native'
 import { connectSession, type Session } from '@openlv/react-native'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/src/store'
+import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { keyStorageService } from '@/src/services/key-storage'
 import { Wallet, getBytes } from 'ethers'
 import { Address } from '@/src/types/address'
@@ -12,6 +13,7 @@ export interface PendingRequest {
   message: string
   params?: unknown[]
   id?: number | string
+  error?: string
 }
 
 export function useWalletSession(activeSafeAddress: string) {
@@ -25,6 +27,7 @@ export function useWalletSession(activeSafeAddress: string) {
     reject: (err: Error) => void
   } | null>(null)
 
+  const activeSafe = useSelector(selectActiveSafe)
   const activeSigner = useSelector((state: RootState) => state.activeSigner[activeSafeAddress as Address])
 
   const startSession = React.useCallback(async () => {
@@ -36,16 +39,32 @@ export function useWalletSession(activeSafeAddress: string) {
       Keyboard.dismiss()
       setStatus('connecting')
 
-      const nextSession = await connectSession(connectionUrl.trim(), async (message): Promise<object> => {
+      const nextSession = await connectSession(connectionUrl.trim(), async (message): Promise<object | string> => {
         const req = message as { method?: string; params?: unknown[] }
 
         if (req.method === 'eth_accounts' || req.method === 'eth_requestAccounts') {
           return [activeSafeAddress]
         }
 
+        if (req.method === 'eth_chainId') {
+          const chainId = activeSafe?.chainId ? parseInt(activeSafe.chainId) : 1
+          return `0x${chainId.toString(16)}`
+        }
+
         if (req.method === 'personal_sign') {
           const params = req.params || []
           const msg = params[0] as string
+
+          if (!activeSigner) {
+            setPendingRequest({
+              type: 'personal_sign',
+              message: msg,
+              params: params,
+              error: 'No signer available for this Safe. You need to import or create a signer key to sign messages.',
+            })
+            return Promise.reject({ code: 4100, message: 'No signer available for this Safe' })
+          }
+
           // The signature string is returned as the RPC result - cast to satisfy the handler type
           return new Promise<object>((resolve, reject) => {
             setPendingRequest({

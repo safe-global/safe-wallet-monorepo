@@ -72,36 +72,58 @@ export const OpenLVView = ({ activeSafe }: OpenLVViewProps) => {
       // Ignore conversion errors, use original message
     }
 
+    const hasError = !!pendingRequest.error
+
     return (
       <YStack flex={1} padding="$5" gap="$5" justifyContent="center">
         <YStack alignItems="center" gap="$2">
-          <SafeFontIcon name="edit" size={48} color="$primary" />
+          <SafeFontIcon
+            name={hasError ? 'alert-triangle' : 'edit'}
+            size={48}
+            color={hasError ? '$error' : '$primary'}
+          />
           <Text fontSize="$7" textAlign="center" fontWeight="bold">
-            Sign Message
+            {hasError ? 'Cannot Sign Message' : 'Sign Message'}
           </Text>
         </YStack>
 
-        <YStack gap="$2">
-          <Text fontSize="$3" color="$colorLight" textAlign="left">
-            The connected application is requesting a signature:
-          </Text>
-          <YStack
-            backgroundColor="$backgroundSecondary"
-            padding="$4"
-            borderRadius="$4"
-            borderWidth={1}
-            borderColor="$borderLight"
-          >
-            <Text fontFamily="$mono" fontSize="$2" color="$color">
-              {displayMessage}
-            </Text>
+        {hasError ? (
+          <YStack gap="$2">
+            <YStack
+              backgroundColor="$errorBackground"
+              padding="$4"
+              borderRadius="$4"
+              borderWidth={1}
+              borderColor="$error"
+            >
+              <Text fontSize="$3" color="$error" textAlign="center">
+                {pendingRequest.error}
+              </Text>
+            </YStack>
           </YStack>
-        </YStack>
+        ) : (
+          <YStack gap="$2">
+            <Text fontSize="$3" color="$colorLight" textAlign="left">
+              The connected application is requesting a signature:
+            </Text>
+            <YStack
+              backgroundColor="$backgroundSecondary"
+              padding="$4"
+              borderRadius="$4"
+              borderWidth={1}
+              borderColor="$borderLight"
+            >
+              <Text fontFamily="$mono" fontSize="$2" color="$color">
+                {displayMessage}
+              </Text>
+            </YStack>
+          </YStack>
+        )}
 
         <YStack gap="$3" marginTop="$4">
-          <SafeButton onPress={confirmRequest}>Sign Message</SafeButton>
-          <SafeButton secondary onPress={rejectRequest}>
-            Reject
+          {!hasError && <SafeButton onPress={confirmRequest}>Sign Message</SafeButton>}
+          <SafeButton secondary={!hasError} onPress={rejectRequest}>
+            {hasError ? 'Dismiss' : 'Reject'}
           </SafeButton>
         </YStack>
       </YStack>

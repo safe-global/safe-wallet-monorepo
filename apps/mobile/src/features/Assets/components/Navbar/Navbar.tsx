@@ -15,8 +15,6 @@ import { selectAppNotificationStatus } from '@/src/store/notificationsSlice'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'
 import { selectSafeInfo } from '@/src/store/safesSlice'
-import { selectSigners } from '@/src/store/signersSlice'
-import { getSafeSigners } from '@/src/utils/signer'
 import { RootState } from '@/src/store'
 
 const dropdownLabelProps = {
@@ -41,8 +39,6 @@ export const Navbar = () => {
 
   const activeSafeInfo = useAppSelector((state: RootState) => selectSafeInfo(state, activeSafe.address))
   const chainSafe = activeSafeInfo ? activeSafeInfo[activeSafe.chainId] : undefined
-  const signers = useAppSelector(selectSigners)
-  const hasSafeSigners = chainSafe ? getSafeSigners(chainSafe, signers).length > 0 : false
 
   return (
     <Theme name="navbar">
@@ -86,13 +82,11 @@ export const Navbar = () => {
             justifyContent: 'center',
           }}
         >
-          {hasSafeSigners && (
-            <Link href="/openlv" asChild>
-              <Pressable hitSlop={10}>
-                <SafeFontIcon name="link" size={16} />
-              </Pressable>
-            </Link>
-          )}
+          <Link href="/openlv" asChild>
+            <Pressable hitSlop={10}>
+              <SafeFontIcon name="link" size={16} />
+            </Pressable>
+          </Link>
           <Link href={'/share'} asChild>
             <Pressable hitSlop={10}>
               <SafeFontIcon name="qr-code-1" size={16} />

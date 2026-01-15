@@ -27,8 +27,10 @@ jest.mock('@openlv/react-native', () => ({
   connectSession: jest.fn(),
 }))
 
+// Mock useSelector with a function we can control
+const mockUseSelector = jest.fn()
 jest.mock('react-redux', () => ({
-  useSelector: jest.fn(() => ({ value: 'mock-signer-address' })),
+  useSelector: mockUseSelector,
 }))
 
 jest.mock('@/src/services/key-storage', () => ({
@@ -51,6 +53,18 @@ describe('useWalletSession', () => {
     mockConnect.mockResolvedValue(undefined)
     mockClose.mockResolvedValue(undefined)
     mockWaitForLink.mockResolvedValue(undefined)
+
+    // Default mock: first call returns activeSafe, second returns activeSigner
+    mockUseSelector.mockImplementation(() => {
+      const callCount = mockUseSelector.mock.calls.length
+      if (callCount % 2 === 1) {
+        // activeSafe
+        return { address: mockSafeAddress, chainId: '1' }
+      } else {
+        // activeSigner
+        return { value: 'mock-signer-address' }
+      }
+    })
   })
 
   it('should initialize with default values', () => {
@@ -141,5 +155,109 @@ describe('useWalletSession', () => {
 
     // Should complete without error
     expect(result.current.pendingRequest).toBeNull()
+  })
+
+  describe('personal_sign error handling', () => {
+    it('should set error on pending request when signer is not available', async () => {
+      const { connectSession } = jest.requireMock('@openlv/react-native')
+      let messageHandler: ((message: unknown) => Promise<unknown>) | undefined
+
+      connectSession.mockImplementation((_url: string, handler: (message: unknown) => Promise<unknown>) => {
+        messageHandler = handler
+        return Promise.resolve(mockSession)
+      })
+
+      // Mock selector to return no signer
+      mockUseSelector.mockImplementation((_selector) => {
+        const callCount = mockUseSelector.mock.calls.length
+        if (callCount % 2 === 1) {
+          return { address: mockSafeAddress, chainId: '1' }
+        } else {
+          return null // No signer
+        }
+      })
+
+      const { result } = renderHook(() => useWalletSession(mockSafeAddress))
+
+      act(() => {
+        result.current.setConnectionUrl('https://example.com/connect')
+      })
+
+      await act(async () => {
+        await result.current.startSession()
+      })
+
+      expect(messageHandler).toBeDefined()
+
+      // Simulate personal_sign request
+      const signRequest = {
+        method: 'personal_sign',
+        params: ['0x48656c6c6f', mockSafeAddress],
+      }
+
+      await act(async () => {
+        try {
+          if (!messageHandler) {
+            throw new Error('messageHandler not defined')
+          }
+          await messageHandler(signRequest)
+        } catch (error) {
+          // Expected to reject
+          expect(error).toEqual({
+            code: 4100,
+            message: 'No signer available for this Safe',
+          })
+        }
+      })
+
+      // Check that pending request has error
+      expect(result.current.pendingRequest).toMatchObject({
+        type: 'personal_sign',
+        message: '0x48656c6c6f',
+        error: 'No signer available for this Safe. You need to import or create a signer key to sign messages.',
+      })
+    })
+
+    it('should create pending request without error when signer is available', async () => {
+      const { connectSession } = jest.requireMock('@openlv/react-native')
+      let messageHandler: ((message: unknown) => Promise<unknown>) | undefined
+
+      connectSession.mockImplementation((_url: string, handler: (message: unknown) => Promise<unknown>) => {
+        messageHandler = handler
+        return Promise.resolve(mockSession)
+      })
+
+      const { result } = renderHook(() => useWalletSession(mockSafeAddress))
+
+      act(() => {
+        result.current.setConnectionUrl('https://example.com/connect')
+      })
+
+      await act(async () => {
+        await result.current.startSession()
+      })
+
+      expect(messageHandler).toBeDefined()
+
+      // Simulate personal_sign request
+      const signRequest = {
+        method: 'personal_sign',
+        params: ['0x48656c6c6f', mockSafeAddress],
+      }
+
+      // Don't await - this creates a pending promise
+      act(() => {
+        if (messageHandler) {
+          void messageHandler(signRequest)
+        }
+      })
+
+      // Check that pending request has no error
+      expect(result.current.pendingRequest).toMatchObject({
+        type: 'personal_sign',
+        message: '0x48656c6c6f',
+      })
+      expect(result.current.pendingRequest?.error).toBeUndefined()
+    })
   })
 })
