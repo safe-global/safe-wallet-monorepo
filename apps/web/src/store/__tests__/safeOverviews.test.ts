@@ -680,5 +680,264 @@ describe('safeOverviews', () => {
       expect(result.current.error).toBeUndefined()
       expect(result.current.data).toEqual([mockOverview2])
     })
+
+    it('should handle v2 failure independently from v1', async () => {
+      // Chain 1 uses v1 (will succeed), Chain 10 uses v2 (will fail)
+      mockChainsConfig(['10'])
+
+      const request = {
+        currency: 'usd',
+        safes: [
+          {
+            address: faker.finance.ethereumAddress(),
+            chainId: '1', // v1 - will succeed
+            isReadOnly: false,
+            isPinned: false,
+            lastVisited: 0,
+            name: undefined,
+          },
+          {
+            address: faker.finance.ethereumAddress(),
+            chainId: '10', // v2 - will fail
+            isReadOnly: false,
+            isPinned: false,
+            lastVisited: 0,
+            name: undefined,
+          },
+        ],
+      }
+
+      const mockOverview1 = {
+        address: { value: request.safes[0].address },
+        chainId: '1',
+        awaitingConfirmation: null,
+        fiatTotal: '100',
+        owners: [{ value: faker.finance.ethereumAddress() }],
+        threshold: 1,
+        queued: 0,
+      }
+
+      // v1 succeeds, v2 fails
+      mockQueryAction({ data: [mockOverview1] })
+      mockV2QueryAction({ error: new Error('V2 endpoint unavailable') })
+
+      const { result } = renderHook(() => useGetMultipleSafeOverviewsQuery(request))
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBeFalsy()
+      })
+
+      // v1 safe should still be returned despite v2 failure
+      // Promise.allSettled ensures partial successes are preserved
+      expect(mockedInitiateV1).toHaveBeenCalled()
+      expect(mockedInitiateV2).toHaveBeenCalled()
+      expect(result.current.error).toBeUndefined()
+      expect(result.current.data).toEqual([mockOverview1])
+    })
+
+    it('should return only the safes that exist in the response (partial results)', async () => {
+      // Request 3 safes, but API only returns 2
+      const request = {
+        currency: 'usd',
+        safes: [
+          {
+            address: faker.finance.ethereumAddress(),
+            chainId: '1',
+            isReadOnly: false,
+            isPinned: false,
+            lastVisited: 0,
+            name: undefined,
+          },
+          {
+            address: faker.finance.ethereumAddress(),
+            chainId: '1',
+            isReadOnly: false,
+            isPinned: false,
+            lastVisited: 0,
+            name: undefined,
+          },
+          {
+            address: faker.finance.ethereumAddress(),
+            chainId: '1',
+            isReadOnly: false,
+            isPinned: false,
+            lastVisited: 0,
+            name: undefined,
+          },
+        ],
+      }
+
+      // Only return overviews for the first two safes
+      const mockOverview1 = {
+        address: { value: request.safes[0].address },
+        chainId: '1',
+        awaitingConfirmation: null,
+        fiatTotal: '100',
+        owners: [{ value: faker.finance.ethereumAddress() }],
+        threshold: 1,
+        queued: 0,
+      }
+
+      const mockOverview2 = {
+        address: { value: request.safes[1].address },
+        chainId: '1',
+        awaitingConfirmation: null,
+        fiatTotal: '200',
+        owners: [{ value: faker.finance.ethereumAddress() }],
+        threshold: 1,
+        queued: 0,
+      }
+
+      // API returns only 2 out of 3 requested safes
+      mockQueryAction({ data: [mockOverview1, mockOverview2] })
+
+      const { result } = renderHook(() => useGetMultipleSafeOverviewsQuery(request))
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBeFalsy()
+      })
+
+      // Should return only the 2 safes that were in the response
+      expect(result.current.error).toBeUndefined()
+      expect(result.current.data).toHaveLength(2)
+      expect(result.current.data).toEqual([mockOverview1, mockOverview2])
+    })
+
+    it('should not match safe address on a different chain than requested', async () => {
+      const safeAddress = faker.finance.ethereumAddress()
+      const request = {
+        currency: 'usd',
+        safes: [
+          {
+            address: safeAddress,
+            chainId: '1', // Requesting on chain 1
+            isReadOnly: false,
+            isPinned: false,
+            lastVisited: 0,
+            name: undefined,
+          },
+        ],
+      }
+
+      // API returns the safe but with a different chainId
+      const mockOverviewWrongChain = {
+        address: { value: safeAddress },
+        chainId: '10', // Response says chain 10, not chain 1
+        awaitingConfirmation: null,
+        fiatTotal: '100',
+        owners: [{ value: faker.finance.ethereumAddress() }],
+        threshold: 1,
+        queued: 0,
+      }
+
+      mockQueryAction({ data: [mockOverviewWrongChain] })
+
+      const { result } = renderHook(() => useGetMultipleSafeOverviewsQuery(request))
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBeFalsy()
+      })
+
+      // Should not return the safe because the chainId doesn't match
+      expect(result.current.error).toBeUndefined()
+      expect(result.current.data).toEqual([])
+    })
+  })
+
+  describe('batching behavior', () => {
+    beforeEach(() => {
+      jest.useFakeTimers()
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    it('should batch multiple requests within 300ms window', async () => {
+      const request1 = { chainId: '1', safeAddress: faker.finance.ethereumAddress() }
+      const request2 = { chainId: '1', safeAddress: faker.finance.ethereumAddress() }
+
+      const mockOverview1 = {
+        address: { value: request1.safeAddress },
+        chainId: '1',
+        awaitingConfirmation: null,
+        fiatTotal: '100',
+        owners: [{ value: faker.finance.ethereumAddress() }],
+        threshold: 1,
+        queued: 0,
+      }
+
+      const mockOverview2 = {
+        address: { value: request2.safeAddress },
+        chainId: '1',
+        awaitingConfirmation: null,
+        fiatTotal: '200',
+        owners: [{ value: faker.finance.ethereumAddress() }],
+        threshold: 1,
+        queued: 0,
+      }
+
+      // Mock to return both overviews in a single call
+      mockQueryAction({ data: [mockOverview1, mockOverview2] })
+
+      // Render both hooks (simulating multiple components requesting overviews)
+      const { result: result1 } = renderHook(() => useGetSafeOverviewQuery(request1))
+      const { result: result2 } = renderHook(() => useGetSafeOverviewQuery(request2))
+
+      // Both should be loading initially
+      expect(result1.current.isLoading).toBeTruthy()
+      expect(result2.current.isLoading).toBeTruthy()
+
+      // API should not have been called yet (batching window not elapsed)
+      expect(mockedInitiateV1).not.toHaveBeenCalled()
+
+      // Advance timers past the 300ms batching window
+      jest.advanceTimersByTime(350)
+
+      await waitFor(() => {
+        expect(result1.current.isLoading).toBeFalsy()
+        expect(result2.current.isLoading).toBeFalsy()
+      })
+
+      // API should have been called only once with both safes batched
+      expect(mockedInitiateV1).toHaveBeenCalledTimes(1)
+      expect(mockedInitiateV1).toHaveBeenCalledWith(
+        expect.objectContaining({
+          safes: expect.arrayContaining([`1:${request1.safeAddress}`, `1:${request2.safeAddress}`]),
+        }),
+      )
+    })
+
+    it('should trigger fetch after 300ms timeout', async () => {
+      const request = { chainId: '1', safeAddress: faker.finance.ethereumAddress() }
+
+      const mockOverview = {
+        address: { value: request.safeAddress },
+        chainId: '1',
+        awaitingConfirmation: null,
+        fiatTotal: '100',
+        owners: [{ value: faker.finance.ethereumAddress() }],
+        threshold: 1,
+        queued: 0,
+      }
+
+      mockQueryAction({ data: [mockOverview] })
+
+      const { result } = renderHook(() => useGetSafeOverviewQuery(request))
+
+      // Initially loading
+      expect(result.current.isLoading).toBeTruthy()
+
+      // At 200ms, should not have fetched yet
+      jest.advanceTimersByTime(200)
+      expect(mockedInitiateV1).not.toHaveBeenCalled()
+
+      // At 350ms (past 300ms), should have fetched
+      jest.advanceTimersByTime(150)
+
+      await waitFor(() => {
+        expect(mockedInitiateV1).toHaveBeenCalled()
+      })
+    })
   })
 })

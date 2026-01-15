@@ -213,7 +213,14 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'Submissions
 
         try {
           const chainsSelector = apiSliceWithChainsConfig.endpoints.getChainsConfig.select(undefined)
-          const chainsQueryResult = chainsSelector(getState() as never)
+          let chainsQueryResult = chainsSelector(getState() as never)
+
+          // If chains aren't loaded yet, trigger the fetch and wait for it
+          if (!chainsQueryResult.data) {
+            await dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
+            chainsQueryResult = chainsSelector(getState() as never)
+          }
+
           const useV2 = shouldUseV2(chainsQueryResult.data, chainId)
           const safeOverview = await batchedFetcher.getOverview({
             chainId,
@@ -243,7 +250,14 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'Submissions
 
       try {
         const chainsSelector = apiSliceWithChainsConfig.endpoints.getChainsConfig.select(undefined)
-        const chainsQueryResult = chainsSelector(getState() as never)
+        let chainsQueryResult = chainsSelector(getState() as never)
+
+        // If chains aren't loaded yet, trigger the fetch and wait for it
+        if (!chainsQueryResult.data) {
+          await dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
+          chainsQueryResult = chainsSelector(getState() as never)
+        }
+
         const chainsData = chainsQueryResult.data
 
         const promisedSafeOverviews = safes.map((safe) =>
