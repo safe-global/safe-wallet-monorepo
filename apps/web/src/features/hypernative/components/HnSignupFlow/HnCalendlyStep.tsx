@@ -58,13 +58,13 @@ const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps
         {hasError ? (
           <Box className={css.errorContainer}>
             <Typography variant="h3" className={css.errorTitle}>
-              Unable to load scheduling widget
+              Something went wrong
             </Typography>
             <Typography variant="body2" className={css.errorMessage}>
-              There was a problem loading the Calendly widget. Please try refreshing or check your internet connection.
+              Please refresh the page.
             </Typography>
             <Button variant="contained" startIcon={<RefreshIcon />} onClick={handleRefresh} sx={{ mt: 3 }}>
-              Refresh
+              Reload
             </Button>
           </Box>
         ) : (
@@ -87,6 +87,7 @@ const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps
               ref={widgetRef}
               id="calendly-widget"
               className={`${css.calendlyWidget} ${!isSecondStep ? css.calendlyWidgetWithHeader : ''}`}
+              style={{ display: hasError ? 'none' : 'block' }}
             />
           </>
         )}

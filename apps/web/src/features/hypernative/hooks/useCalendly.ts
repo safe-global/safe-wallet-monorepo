@@ -18,8 +18,10 @@ import {
 const CALENDLY_SCRIPT_URL = 'https://assets.calendly.com/assets/external/widget.js'
 const POLL_INTERVAL_MS = 100
 const POLL_TIMEOUT_MS = 5000
+const SCRIPT_LOAD_TIMEOUT_MS = 5000 // Timeout for script loading
 const IFRAME_CHECK_INTERVAL_MS = 100
-const POST_LOAD_TIMEOUT_MS = 3000
+const IFRAME_CREATION_TIMEOUT_MS = 2000 // Timeout for iframe creation after widget init
+const POST_LOAD_TIMEOUT_MS = 1000 // Reduced from 3000ms for faster error detection
 
 /**
  * Allowed Calendly origins for postMessage validation.
@@ -58,6 +60,8 @@ export const useCalendly = (
   const callbackCalledRef = useRef(false)
   // Track load timeout to detect if widget fails to load
   const loadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Track script load timeout
+  const scriptLoadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Refresh key to force effect re-run on refresh
   const [refreshKey, setRefreshKey] = useState(0)
 
@@ -128,7 +132,7 @@ export const useCalendly = (
   /**
    * Monitors iframe for load failures after initialization.
    * Strategy: Wait for iframe's `load` event, then check if Calendly postMessage arrived.
-   * If no postMessage within 3 seconds after load, it's an error (e.g., error page shown).
+   * If no postMessage within timeout after load, it's an error (e.g., error page shown).
    */
   const monitorIframeLoad = useCallback(() => {
     const element = widgetRef.current
@@ -136,7 +140,7 @@ export const useCalendly = (
 
     // Poll for iframe creation (Calendly creates it async)
     let checkCount = 0
-    const maxChecks = 50 // 5 seconds max to find iframe
+    const maxChecks = Math.ceil(IFRAME_CREATION_TIMEOUT_MS / IFRAME_CHECK_INTERVAL_MS)
     const checkForIframe = setInterval(() => {
       checkCount++
       const iframe = element.querySelector('iframe')
@@ -146,7 +150,7 @@ export const useCalendly = (
 
         const handleIframeLoad = () => {
           // Iframe finished loading - start short timeout for Calendly postMessage
-          // If no postMessage arrives within 3 seconds, the page likely failed
+          // If no postMessage arrives within timeout, the page likely failed
           if (loadTimeoutRef.current) {
             clearTimeout(loadTimeoutRef.current)
           }
@@ -173,7 +177,7 @@ export const useCalendly = (
         iframe.addEventListener('load', handleIframeLoad)
         iframe.addEventListener('error', handleIframeError)
       } else if (checkCount >= maxChecks) {
-        // Iframe never appeared - something went wrong
+        // Iframe never appeared within timeout - something went wrong
         clearInterval(checkForIframe)
         dispatch(setError(true))
       }
@@ -214,6 +218,10 @@ export const useCalendly = (
     if (loadTimeoutRef.current) {
       clearTimeout(loadTimeoutRef.current)
       loadTimeoutRef.current = null
+    }
+    if (scriptLoadTimeoutRef.current) {
+      clearTimeout(scriptLoadTimeoutRef.current)
+      scriptLoadTimeoutRef.current = null
     }
   }, [dispatch])
 
@@ -277,7 +285,26 @@ export const useCalendly = (
       calendlyScript.type = 'text/javascript'
       calendlyScript.src = CALENDLY_SCRIPT_URL
       calendlyScript.async = true
-      calendlyScript.onload = initWidget
+
+      // Set up script load timeout for faster error detection
+      scriptLoadTimeoutRef.current = setTimeout(() => {
+        // Script didn't load within timeout - likely network/CORS error
+        dispatch(setError(true))
+        scriptLoadTimeoutRef.current = null
+        // Remove script if it's still loading
+        if (calendlyScript?.parentNode) {
+          calendlyScript.parentNode.removeChild(calendlyScript)
+        }
+      }, SCRIPT_LOAD_TIMEOUT_MS)
+
+      calendlyScript.onload = () => {
+        // Clear timeout on successful load
+        if (scriptLoadTimeoutRef.current) {
+          clearTimeout(scriptLoadTimeoutRef.current)
+          scriptLoadTimeoutRef.current = null
+        }
+        initWidget()
+      }
       calendlyScript.onerror = handleScriptError
       document.body.appendChild(calendlyScript)
     }
@@ -292,6 +319,10 @@ export const useCalendly = (
       if (loadTimeoutRef.current) {
         clearTimeout(loadTimeoutRef.current)
         loadTimeoutRef.current = null
+      }
+      if (scriptLoadTimeoutRef.current) {
+        clearTimeout(scriptLoadTimeoutRef.current)
+        scriptLoadTimeoutRef.current = null
       }
       if (calendlyScript?.parentNode) {
         calendlyScript.parentNode.removeChild(calendlyScript)
