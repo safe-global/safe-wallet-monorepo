@@ -62,6 +62,7 @@ describe('useCalendly', () => {
           isLoaded: false,
           isSecondStep: false,
           hasScheduled: false,
+          hasError: false,
         } as CalendlyState,
       }
 
@@ -103,6 +104,7 @@ describe('useCalendly', () => {
           isLoaded: false,
           isSecondStep: false,
           hasScheduled: false,
+          hasError: false,
         } as CalendlyState,
       }
 
@@ -143,6 +145,7 @@ describe('useCalendly', () => {
           isLoaded: false,
           isSecondStep: false,
           hasScheduled: false,
+          hasError: false,
         } as CalendlyState,
       }
 
@@ -177,6 +180,7 @@ describe('useCalendly', () => {
           isLoaded: false,
           isSecondStep: false,
           hasScheduled: false,
+          hasError: false,
         } as CalendlyState,
       }
 
@@ -220,6 +224,7 @@ describe('useCalendly', () => {
           isLoaded: false,
           isSecondStep: false,
           hasScheduled: false,
+          hasError: false,
         } as CalendlyState,
       }
 
@@ -254,6 +259,7 @@ describe('useCalendly', () => {
           isLoaded: false,
           isSecondStep: false,
           hasScheduled: false,
+          hasError: false,
         } as CalendlyState,
       }
 
@@ -304,6 +310,7 @@ describe('useCalendly', () => {
           isLoaded: false,
           isSecondStep: false,
           hasScheduled: false,
+          hasError: false,
         } as CalendlyState,
       }
 
@@ -339,6 +346,7 @@ describe('useCalendly', () => {
           isLoaded: false,
           isSecondStep: false,
           hasScheduled: false,
+          hasError: false,
         } as CalendlyState,
       }
 
@@ -370,6 +378,7 @@ describe('useCalendly', () => {
           isLoaded: false,
           isSecondStep: false,
           hasScheduled: false,
+          hasError: false,
         } as CalendlyState,
       }
 
@@ -412,6 +421,7 @@ describe('useCalendly', () => {
           isLoaded: false,
           isSecondStep: false,
           hasScheduled: false,
+          hasError: false,
         } as CalendlyState,
       }
 
@@ -454,6 +464,7 @@ describe('useCalendly', () => {
           isLoaded: true,
           isSecondStep: true,
           hasScheduled: false,
+          hasError: false,
         } as CalendlyState,
       }
 
@@ -498,6 +509,7 @@ describe('useCalendly', () => {
           isLoaded: false,
           isSecondStep: false,
           hasScheduled: false,
+          hasError: false,
         } as CalendlyState,
       }
 
@@ -551,6 +563,7 @@ describe('useCalendly', () => {
           isLoaded: false,
           isSecondStep: false,
           hasScheduled: false,
+          hasError: false,
         } as CalendlyState,
       }
 
@@ -582,6 +595,7 @@ describe('useCalendly', () => {
           isLoaded: false,
           isSecondStep: false,
           hasScheduled: false,
+          hasError: false,
         } as CalendlyState,
       }
 
@@ -603,6 +617,7 @@ describe('useCalendly', () => {
           isLoaded: false,
           isSecondStep: false,
           hasScheduled: false,
+          hasError: false,
         } as CalendlyState,
       }
 
@@ -622,6 +637,7 @@ describe('useCalendly', () => {
           isLoaded: true,
           isSecondStep: true,
           hasScheduled: true,
+          hasError: false,
         } as CalendlyState,
       }
 
@@ -656,6 +672,7 @@ describe('useCalendly', () => {
           isLoaded: false,
           isSecondStep: false,
           hasScheduled: false,
+          hasError: false,
         } as CalendlyState,
       }
 
@@ -663,11 +680,13 @@ describe('useCalendly', () => {
         initialReduxState,
       })
 
-      expect(result.current).toEqual({
+      expect(result.current).toMatchObject({
         isLoaded: false,
         isSecondStep: false,
         hasScheduled: false,
+        hasError: false,
       })
+      expect(typeof result.current.refresh).toBe('function')
     })
 
     it('should return updated state from Redux', () => {
@@ -676,6 +695,7 @@ describe('useCalendly', () => {
           isLoaded: true,
           isSecondStep: true,
           hasScheduled: true,
+          hasError: false,
         } as CalendlyState,
       }
 
@@ -683,11 +703,13 @@ describe('useCalendly', () => {
         initialReduxState,
       })
 
-      expect(result.current).toEqual({
+      expect(result.current).toMatchObject({
         isLoaded: true,
         isSecondStep: true,
         hasScheduled: true,
+        hasError: false,
       })
+      expect(typeof result.current.refresh).toBe('function')
     })
   })
 })

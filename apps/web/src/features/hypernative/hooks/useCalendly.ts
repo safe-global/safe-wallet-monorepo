@@ -1,21 +1,25 @@
 import type { RefObject } from 'react'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { getStoreInstance } from '@/store'
 import {
   setLoaded,
   setSecondStep,
   setHasScheduled,
+  setError,
   reset,
   selectCalendlyIsLoaded,
   selectCalendlyIsSecondStep,
   selectCalendlyHasScheduled,
+  selectCalendlyHasError,
   selectCalendlyState,
 } from '../store/calendlySlice'
 
 const CALENDLY_SCRIPT_URL = 'https://assets.calendly.com/assets/external/widget.js'
 const POLL_INTERVAL_MS = 100
 const POLL_TIMEOUT_MS = 5000
+const IFRAME_CHECK_INTERVAL_MS = 100
+const POST_LOAD_TIMEOUT_MS = 3000
 
 /**
  * Allowed Calendly origins for postMessage validation.
@@ -48,9 +52,14 @@ export const useCalendly = (
   const isLoaded = useAppSelector(selectCalendlyIsLoaded)
   const isSecondStep = useAppSelector(selectCalendlyIsSecondStep)
   const hasScheduled = useAppSelector(selectCalendlyHasScheduled)
+  const hasError = useAppSelector(selectCalendlyHasError)
 
   // Track if callback has been called to prevent duplicate invocations
   const callbackCalledRef = useRef(false)
+  // Track load timeout to detect if widget fails to load
+  const loadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Refresh key to force effect re-run on refresh
+  const [refreshKey, setRefreshKey] = useState(0)
 
   /**
    * Validates that a message origin is from an allowed Calendly domain.
@@ -88,6 +97,12 @@ export const useCalendly = (
       // Any Calendly event confirms the widget is loaded
       if (!currentState.isLoaded) {
         dispatch(setLoaded(true))
+        dispatch(setError(false))
+        // Clear load timeout since widget loaded successfully
+        if (loadTimeoutRef.current) {
+          clearTimeout(loadTimeoutRef.current)
+          loadTimeoutRef.current = null
+        }
       }
 
       // Detect when user progresses to date/time selection (2nd step)
@@ -111,18 +126,96 @@ export const useCalendly = (
   )
 
   /**
+   * Monitors iframe for load failures after initialization.
+   * Strategy: Wait for iframe's `load` event, then check if Calendly postMessage arrived.
+   * If no postMessage within 3 seconds after load, it's an error (e.g., error page shown).
+   */
+  const monitorIframeLoad = useCallback(() => {
+    const element = widgetRef.current
+    if (!element) return
+
+    // Poll for iframe creation (Calendly creates it async)
+    let checkCount = 0
+    const maxChecks = 50 // 5 seconds max to find iframe
+    const checkForIframe = setInterval(() => {
+      checkCount++
+      const iframe = element.querySelector('iframe')
+
+      if (iframe) {
+        clearInterval(checkForIframe)
+
+        const handleIframeLoad = () => {
+          // Iframe finished loading - start short timeout for Calendly postMessage
+          // If no postMessage arrives within 3 seconds, the page likely failed
+          if (loadTimeoutRef.current) {
+            clearTimeout(loadTimeoutRef.current)
+          }
+
+          loadTimeoutRef.current = setTimeout(() => {
+            const store = getStoreInstance()
+            const currentState = selectCalendlyState(store.getState())
+            // Only set error if widget hasn't loaded (no postMessage received)
+            if (!currentState.isLoaded) {
+              dispatch(setError(true))
+            }
+            loadTimeoutRef.current = null
+          }, POST_LOAD_TIMEOUT_MS)
+        }
+
+        const handleIframeError = () => {
+          dispatch(setError(true))
+          if (loadTimeoutRef.current) {
+            clearTimeout(loadTimeoutRef.current)
+            loadTimeoutRef.current = null
+          }
+        }
+
+        iframe.addEventListener('load', handleIframeLoad)
+        iframe.addEventListener('error', handleIframeError)
+      } else if (checkCount >= maxChecks) {
+        // Iframe never appeared - something went wrong
+        clearInterval(checkForIframe)
+        dispatch(setError(true))
+      }
+    }, IFRAME_CHECK_INTERVAL_MS)
+
+    // Store cleanup function
+    return () => {
+      clearInterval(checkForIframe)
+    }
+  }, [dispatch, widgetRef])
+
+  /**
    * Initializes the Calendly inline widget.
    * Called when the script is loaded and the widget container is ready.
    */
   const initWidget = useCallback(() => {
     const element = widgetRef.current
     if (window.Calendly && element) {
-      window.Calendly.initInlineWidget({
-        url: calendlyUrl,
-        parentElement: element,
-      })
+      try {
+        window.Calendly.initInlineWidget({
+          url: calendlyUrl,
+          parentElement: element,
+        })
+        // Monitor iframe after initialization
+        monitorIframeLoad()
+      } catch (error) {
+        console.error('Failed to initialize Calendly widget:', error)
+        dispatch(setError(true))
+      }
     }
-  }, [widgetRef, calendlyUrl])
+  }, [widgetRef, calendlyUrl, monitorIframeLoad, dispatch])
+
+  /**
+   * Handles script load errors.
+   */
+  const handleScriptError = useCallback(() => {
+    dispatch(setError(true))
+    if (loadTimeoutRef.current) {
+      clearTimeout(loadTimeoutRef.current)
+      loadTimeoutRef.current = null
+    }
+  }, [dispatch])
 
   /**
    * Main effect: Handles script loading, widget initialization, and event listeners.
@@ -130,6 +223,9 @@ export const useCalendly = (
    */
   useEffect(() => {
     if (!widgetRef.current) return
+
+    // Reset error state when attempting to load
+    dispatch(setError(false))
 
     // Set up message listener for Calendly events
     window.addEventListener('message', handleMessage)
@@ -148,6 +244,10 @@ export const useCalendly = (
       return () => {
         // Only cleanup event listener, don't reset state
         window.removeEventListener('message', handleMessage)
+        if (loadTimeoutRef.current) {
+          clearTimeout(loadTimeoutRef.current)
+          loadTimeoutRef.current = null
+        }
       }
     }
 
@@ -156,8 +256,11 @@ export const useCalendly = (
       timeoutId = setTimeout(() => {
         if (checkInterval) {
           clearInterval(checkInterval)
-          // Log timeout for debugging. The script's onload can still initialize the widget later
-          console.warn('Calendly API polling timeout: widget may still initialize via script onload event')
+          const store = getStoreInstance()
+          const currentState = selectCalendlyState(store.getState())
+          if (!currentState.isLoaded) {
+            dispatch(setError(true))
+          }
         }
       }, POLL_TIMEOUT_MS)
 
@@ -175,6 +278,7 @@ export const useCalendly = (
       calendlyScript.src = CALENDLY_SCRIPT_URL
       calendlyScript.async = true
       calendlyScript.onload = initWidget
+      calendlyScript.onerror = handleScriptError
       document.body.appendChild(calendlyScript)
     }
 
@@ -185,13 +289,17 @@ export const useCalendly = (
       window.removeEventListener('message', handleMessage)
       if (checkInterval) clearInterval(checkInterval)
       if (timeoutId) clearTimeout(timeoutId)
+      if (loadTimeoutRef.current) {
+        clearTimeout(loadTimeoutRef.current)
+        loadTimeoutRef.current = null
+      }
       if (calendlyScript?.parentNode) {
         calendlyScript.parentNode.removeChild(calendlyScript)
       }
       // Note: We don't reset Redux state here because the effect may re-run
       // State will persist across re-renders, which is desired for isSecondStep
     }
-  }, [calendlyUrl, widgetRef, handleMessage, initWidget, dispatch])
+  }, [calendlyUrl, widgetRef, handleMessage, initWidget, dispatch, handleScriptError, refreshKey])
 
   // Separate effect to reset state only on actual component unmount
   useEffect(() => {
@@ -201,6 +309,30 @@ export const useCalendly = (
     }
   }, [dispatch])
 
+  /**
+   * Refreshes the widget by resetting state and triggering reload.
+   */
+  const refresh = useCallback(() => {
+    dispatch(reset())
+    callbackCalledRef.current = false
+    // Increment refresh key to force effect re-run
+    setRefreshKey((prev) => prev + 1)
+    // Clear widget container
+    const widgetElement = widgetRef.current
+    if (widgetElement) {
+      widgetElement.innerHTML = ''
+    }
+    // Force re-initialization by removing existing script
+    const existingScript = document.querySelector('script[src*="calendly"]')
+    if (existingScript?.parentNode) {
+      existingScript.parentNode.removeChild(existingScript)
+    }
+    // Clear window.Calendly to force reload
+    if (window.Calendly) {
+      delete (window as { Calendly?: unknown }).Calendly
+    }
+  }, [dispatch, widgetRef])
+
   return {
     /** Whether the Calendly widget is loaded and initialized */
     isLoaded,
@@ -208,5 +340,9 @@ export const useCalendly = (
     isSecondStep,
     /** Whether a booking has been scheduled */
     hasScheduled,
+    /** Whether there was an error loading the widget */
+    hasError,
+    /** Function to refresh/retry loading the widget */
+    refresh,
   }
 }

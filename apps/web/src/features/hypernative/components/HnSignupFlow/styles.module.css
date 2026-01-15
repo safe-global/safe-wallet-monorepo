@@ -229,3 +229,25 @@
 .featureIcon {
   color: var(--color-success-main);
 }
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  height: 100%;
+  text-align: center;
+}
+
+.errorTitle {
+  font-weight: 700;
+  font-size: 24px;
+  color: var(--color-static-main);
+  margin-bottom: var(--space-2);
+}
+
+.errorMessage {
+  color: var(--color-text-secondary);
+  max-width: 400px;
+}

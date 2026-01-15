@@ -20,6 +20,8 @@ describe('HnCalendlyStep', () => {
       isLoaded: false,
       isSecondStep: false,
       hasScheduled: false,
+      hasError: false,
+      refresh: jest.fn(),
     })
   })
 
