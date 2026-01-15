@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { EurcvBoostBanner } from './EurcvBoostBanner'
+import { RouterDecorator } from '@/stories/routerDecorator'
 
 const meta = {
   title: 'Components/Dashboard/Banners/EurcvBoostBanner',
@@ -8,6 +9,13 @@ const meta = {
   parameters: {
     layout: 'padded',
   },
+  decorators: [
+    (Story) => (
+      <RouterDecorator router={{ query: { safe: 'eth:0x0000000000000000000000000000000000000001' } }}>
+        <Story />
+      </RouterDecorator>
+    ),
+  ],
 } satisfies Meta<typeof EurcvBoostBanner>
 
 export default meta
