@@ -6,7 +6,7 @@ import { AppRoutes } from '@/config/routes'
 import Track from '@/components/common/Track'
 import { POSITIONS_EVENTS } from '@/services/analytics/events/positions'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import { useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEnabled'
+import { useIsEarnPromoEnabled } from '@/features/earn'
 
 type PositionsEmptyProps = {
   entryPoint?: string

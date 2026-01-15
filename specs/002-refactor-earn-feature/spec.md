@@ -171,6 +171,6 @@ The refactoring must preserve 100% of existing earn feature functionality includ
 - The existing `FEATURES.EARN` enum value is correctly configured in the chains configuration
 - The `useIsEarnFeatureEnabled` hook correctly checks both the feature flag and geoblocking status
 - The Kiln widget integration code in `utils.ts` and related components does not need functional changes
-- No new functionality is being added; this is purely a structural refactoring˚˚˚
+- No new functionality is being added; this is purely a structural refactoring.
 - The earn feature does not need a Redux store slice (state is managed locally or via existing global state)
 - External imports of earn functionality are limited and can be easily updated to use the new public API

@@ -124,6 +124,36 @@ export interface EarnButtonProps {
 }
 
 // ============================================================================
+// VAULT TRANSACTION COMPONENTS (PUBLIC API)
+// ============================================================================
+
+/**
+ * These vault transaction components are part of the public API because they are
+ * used by external transaction flow components (confirmation views, transaction
+ * details, and transaction info displays).
+ *
+ * Public Vault Components:
+ * - VaultDepositConfirmation: Transaction confirmation for deposits
+ * - VaultRedeemConfirmation: Transaction confirmation for withdrawals
+ * - VaultDepositTxDetails: Transaction details for deposits
+ * - VaultDepositTxInfo: Transaction info for deposits
+ * - VaultRedeemTxDetails: Transaction details for withdrawals
+ * - VaultRedeemTxInfo: Transaction info for withdrawals
+ */
+export function VaultDepositConfirmation(props: {
+  txInfo: VaultDepositTransactionInfo
+  isTxDetails?: boolean
+}): ReactElement
+export function VaultRedeemConfirmation(props: {
+  txInfo: VaultRedeemTransactionInfo
+  isTxDetails?: boolean
+}): ReactElement
+export function VaultDepositTxDetails(props: { info: VaultDepositTransactionInfo }): ReactElement
+export function VaultRedeemTxDetails(props: { info: VaultRedeemTransactionInfo }): ReactElement
+export function VaultDepositTxInfo(props: { info: VaultDepositTransactionInfo }): ReactElement
+export function VaultRedeemTxInfo(props: { info: VaultRedeemTransactionInfo }): ReactElement
+
+// ============================================================================
 // INTERNAL API (NOT EXPORTED FROM PUBLIC API)
 // ============================================================================
 
@@ -135,12 +165,6 @@ export interface EarnButtonProps {
  * - EarnView: Decides whether to show EarnInfo or EarnWidget based on info panel state
  * - EarnInfo: Informational panel shown before first use
  * - EarnWidget: Kiln widget iframe wrapper
- * - VaultDepositConfirmation: Transaction confirmation for deposits
- * - VaultRedeemConfirmation: Transaction confirmation for withdrawals
- * - VaultDepositTxDetails: Transaction details for deposits
- * - VaultDepositTxInfo: Transaction info for deposits
- * - VaultRedeemTxDetails: Transaction details for withdrawals
- * - VaultRedeemTxInfo: Transaction info for withdrawals
  *
  * Internal Hooks:
  * - useGetWidgetUrl: Generates Kiln widget URL with theme and asset parameters

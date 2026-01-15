@@ -18,7 +18,6 @@
    - `apps/web/src/components/dashboard/Assets/index.tsx` (line 18)
    - `apps/web/src/components/balances/AssetsTable/PromoButtons.tsx` (line 5)
    - Current import path: `@/features/earn/components/EarnButton`
-   
 2. **`useIsEarnFeatureEnabled`** hook (aliased as `useIsEarnPromoEnabled`):
    - `apps/web/src/components/dashboard/index.tsx` (line 19)
    - Current import path: `@/features/earn/hooks/useIsEarnFeatureEnabled`
@@ -33,46 +32,57 @@
 1. **Main feature component** (default export from `index.tsx`):
    - `apps/web/src/pages/earn.tsx` (line 9) - uses dynamic import
    - Current import path: `@/features/earn`
-   
+
 ### Decision: Public API Surface
 
 **Must be exported from `index.ts` (public API)**:
+
 - ✅ Default export: Main earn page component (for lazy loading from page)
 - ✅ Named export: `EarnButton` component
 - ✅ Named export: `useIsEarnFeatureEnabled` hook
 - ✅ Named export: Types used by `EarnButton` props (if any external types are needed)
 
 **Should remain internal** (not exported):
-- ❌ `EarnView`, `EarnWidget`, `EarnInfo`, `EarnButton` subdirectories (internal components)
+
+- ❌ `EarnView`, `EarnWidget`, `EarnInfo` (internal components)
 - ❌ `useGetWidgetUrl` hook (internal utility)
-- ❌ `utils.ts` functions (internal utilities)
-- ❌ All vault-related components (internal transaction details)
+- ❌ `utils.ts` functions (internal utilities - except `isEligibleEarnToken` which is public)
+
+**Vault components** (required public exports):
+
+- ✅ All vault-related components ARE part of the public API (used by external transaction flow components)
+- ✅ `VaultDepositConfirmation`, `VaultRedeemConfirmation` (used in confirmation-views)
+- ✅ `VaultDepositTxDetails`, `VaultRedeemTxDetails` (used in TxData)
+- ✅ `VaultDepositTxInfo`, `VaultRedeemTxInfo` (used in TxInfo)
 
 ### Files Requiring Updates
 
 1. `apps/web/src/components/dashboard/Assets/index.tsx`:
+
    ```typescript
    // BEFORE:
    import EarnButton from '@/features/earn/components/EarnButton'
-   
+
    // AFTER:
    import { EarnButton } from '@/features/earn'
    ```
 
 2. `apps/web/src/components/balances/AssetsTable/PromoButtons.tsx`:
+
    ```typescript
    // BEFORE:
    import EarnButton from '@/features/earn/components/EarnButton'
-   
+
    // AFTER:
    import { EarnButton } from '@/features/earn'
    ```
 
 3. `apps/web/src/components/dashboard/index.tsx`:
+
    ```typescript
    // BEFORE:
    import { useIsEarnFeatureEnabled as useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEnabled'
-   
+
    // AFTER:
    import { useIsEarnFeatureEnabled as useIsEarnPromoEnabled } from '@/features/earn'
    ```
@@ -94,6 +104,7 @@
 After examining all component files in the earn feature:
 
 1. **`EarnButton`** props (line 18-27 of `components/EarnButton/index.tsx`):
+
    ```typescript
    {
      tokenInfo: Balance['tokenInfo']
@@ -102,20 +113,25 @@ After examining all component files in the earn feature:
      onlyIcon?: boolean
    }
    ```
+
    - Uses `Balance['tokenInfo']` from `@safe-global/store/gateway/AUTO_GENERATED/balances`
    - Uses `EARN_LABELS` from global analytics (not earn feature)
    - **Decision**: Extract to named interface `EarnButtonProps` in `types.ts`
 
 2. **`EarnInfo`** props:
+
    ```typescript
    { onGetStarted: () => void }
    ```
+
    - Simple function prop, no extraction needed (can remain inline)
 
 3. **`EarnWidget`** props:
+
    ```typescript
    { asset?: string }
    ```
+
    - Simple optional string, no extraction needed (can remain inline)
 
 4. **`EarnView`** props:
@@ -151,6 +167,7 @@ interface EarnInfoProps {
 ```
 
 **Types NOT needing extraction**:
+
 - Simple inline function types: `() => void`
 - Simple inline primitive types: `string`, `boolean`
 - Re-exported external types: `Balance['tokenInfo']`, `EARN_LABELS`
@@ -165,7 +182,7 @@ interface EarnInfoProps {
 
 **Current Analytics Architecture**:
 
-1. **Analytics events defined globally**: 
+1. **Analytics events defined globally**:
    - Location: `apps/web/src/services/analytics/events/earn.ts`
    - Contains: `EARN_EVENTS` object and `EARN_LABELS` enum
    - This is NOT part of the earn feature (it's in global services)
@@ -183,12 +200,14 @@ interface EarnInfoProps {
 ### Decision: Analytics Remain in Global Service
 
 **Rationale**:
+
 - Analytics events are already properly separated in the global analytics service
 - Multiple parts of the app (sidebar, banners, dashboard) track earn-related events
 - Earn feature should remain a consumer of the global analytics service, not own its definitions
 - This pattern follows the principle of "analytics as cross-cutting concern"
 
 **No changes needed**:
+
 - ✅ Keep analytics imports pointing to `@/services/analytics/events/earn`
 - ✅ Do NOT create `services/tracking.ts` within the earn feature
 - ✅ Do NOT move `EARN_EVENTS` or `EARN_LABELS` into the feature
@@ -231,11 +250,13 @@ export function useIsWalletConnectEnabled(): boolean | undefined {
 ### Analysis: Pattern Differences
 
 **Earn pattern**:
+
 - Returns: `boolean` (never `undefined`)
 - Checks: Both feature flag AND geoblocking
 - Export: Default export
 
 **WalletConnect pattern**:
+
 - Returns: `boolean | undefined` (preserves loading state)
 - Checks: Only feature flag
 - Export: Named export
@@ -243,24 +264,27 @@ export function useIsWalletConnectEnabled(): boolean | undefined {
 ### Decision: Preserve Earn Pattern with Improvements
 
 **Keep the geoblocking check** because:
+
 - Earn feature specifically requires geoblocking (due to regulatory compliance with Kiln)
 - This is intentional domain logic, not a deviation from the pattern
 - Blocked address checks are also performed at the component level (in `index.tsx`)
 
 **Improvements to make**:
+
 1. ✅ Change from default export to named export: `export function useIsEarnFeatureEnabled`
 2. ✅ Add explicit return type annotation: `boolean | undefined`
 3. ⚠️ Consider returning `undefined` during loading state (currently returns `false` if feature flag is loading)
 
 **Decision**: Change return type to `boolean | undefined` to match standard pattern:
+
 ```typescript
 export function useIsEarnFeatureEnabled(): boolean | undefined {
   const isBlockedCountry = useContext(GeoblockingContext)
   const hasFeature = useHasFeature(FEATURES.EARN)
-  
+
   // If feature flag is loading (undefined), return undefined
   if (hasFeature === undefined) return undefined
-  
+
   // If feature is disabled or country is blocked, return false
   return hasFeature && !isBlockedCountry
 }
@@ -269,14 +293,17 @@ export function useIsEarnFeatureEnabled(): boolean | undefined {
 ### Alternatives Considered
 
 **Alternative 1: Remove geoblocking from hook, keep only in component**
+
 - ❌ Rejected: Geoblocking is domain logic that belongs in the feature's public API
 - External code using this hook expects geoblocking to be checked
 
 **Alternative 2: Create two separate hooks (one for flag, one for geoblocking)**
+
 - ❌ Rejected: Overcomplicates the API for a single use case
 - No external code needs the feature flag without geoblocking check
 
 **Alternative 3: Keep current implementation without changes**
+
 - ❌ Rejected: Doesn't preserve loading state (`undefined`), violates standard pattern
 - Components need to know when the feature flag is loading vs. disabled
 
@@ -397,15 +424,15 @@ export { useIsEarnFeatureEnabled } from './hooks'
 export { EarnButton } from './components'
 
 // 4. Default export: lazy-loaded main component
-const EarnPage = dynamic(
-  () => import('./components/EarnPage').then((mod) => ({ default: mod.default })),
-  { ssr: false },
-)
+const EarnPage = dynamic(() => import('./components/EarnPage').then((mod) => ({ default: mod.default })), {
+  ssr: false,
+})
 
 export default EarnPage
 ```
 
 **Note**: The current `index.tsx` IS the main component. During refactoring, we need to:
+
 1. Rename current `index.tsx` to `components/EarnPage/index.tsx` (or similar)
 2. Create new `index.ts` as barrel file with above structure
 
@@ -413,18 +440,18 @@ export default EarnPage
 
 ## Summary of Key Decisions
 
-| Decision Area | Choice | Rationale |
-|--------------|--------|-----------|
-| **Public API Components** | `EarnButton` only | Only component used outside feature |
-| **Public API Hooks** | `useIsEarnFeatureEnabled` only | Only hook used outside feature |
-| **Public API Types** | `EarnButtonProps` only | Only type needed by external consumers |
-| **Analytics** | Keep in global service | Already properly separated, used outside feature |
-| **Feature Flag Hook** | Add `undefined` return type | Preserve loading state per standard pattern |
-| **utils.ts Location** | Move to `services/utils.ts` | Align with standard structure |
-| **Type Extraction** | Extract `EarnButtonProps`, keep simple types inline | Balance between DRY and readability |
-| **Barrel Export Pattern** | Follow walletconnect pattern exactly | Proven, compliant reference implementation |
-| **Main Component Location** | Rename `index.tsx` to `components/EarnPage/index.tsx` | Separate concerns (component vs. barrel) |
-| **Testing Strategy** | Manual testing checklist | No automated tests exist currently |
+| Decision Area               | Choice                                                | Rationale                                        |
+| --------------------------- | ----------------------------------------------------- | ------------------------------------------------ |
+| **Public API Components**   | `EarnButton` only                                     | Only component used outside feature              |
+| **Public API Hooks**        | `useIsEarnFeatureEnabled` only                        | Only hook used outside feature                   |
+| **Public API Types**        | `EarnButtonProps` only                                | Only type needed by external consumers           |
+| **Analytics**               | Keep in global service                                | Already properly separated, used outside feature |
+| **Feature Flag Hook**       | Add `undefined` return type                           | Preserve loading state per standard pattern      |
+| **utils.ts Location**       | Move to `services/utils.ts`                           | Align with standard structure                    |
+| **Type Extraction**         | Extract `EarnButtonProps`, keep simple types inline   | Balance between DRY and readability              |
+| **Barrel Export Pattern**   | Follow walletconnect pattern exactly                  | Proven, compliant reference implementation       |
+| **Main Component Location** | Rename `index.tsx` to `components/EarnPage/index.tsx` | Separate concerns (component vs. barrel)         |
+| **Testing Strategy**        | Manual testing checklist                              | No automated tests exist currently               |
 
 ---
 

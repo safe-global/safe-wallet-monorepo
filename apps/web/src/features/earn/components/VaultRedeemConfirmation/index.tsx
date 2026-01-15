@@ -2,7 +2,7 @@ import type { VaultRedeemTransactionInfo } from '@safe-global/store/gateway/AUTO
 import { Box, Stack, Typography } from '@mui/material'
 import TokenIcon from '@/components/common/TokenIcon'
 import TokenAmount from '@/components/common/TokenAmount'
-import { vaultTypeToLabel } from '@/features/earn/utils'
+import { vaultTypeToLabel } from '../../services/utils'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import { DataTable } from '@/components/common/Table/DataTable'
 import { DataRow } from '@/components/common/Table/DataRow'

@@ -1,8 +1,8 @@
-import EarnInfo from '@/features/earn/components/EarnInfo'
-import EarnWidget from '@/features/earn/components/EarnWidget'
+import EarnInfo from '../EarnInfo'
+import EarnWidget from '../EarnWidget'
 import { useRouter } from 'next/router'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import { hideEarnInfoStorageKey } from '@/features/earn/constants'
+import { hideEarnInfoStorageKey } from '../../constants'
 
 const EarnView = () => {
   const [infoHidden = false, setInfoHidden] = useLocalStorage<boolean>(hideEarnInfoStorageKey)
