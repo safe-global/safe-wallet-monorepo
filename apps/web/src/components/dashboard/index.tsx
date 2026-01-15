@@ -54,12 +54,9 @@ const Dashboard = (): ReactElement => {
   const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
   const isEurcvBoostEnabled = useHasFeature(FEATURES.EURCV_BOOST)
 
-  // TEMPORARY: Force enable for local testing - TODO: Remove this before committing
-  const isEurcvBoostActive = isEurcvBoostEnabled || true
-
   const banners = [
     showHnBanner && !hnLoading && { id: hnBannerID, element: HnBannerForCarousel },
-    isEurcvBoostActive && { id: eurcvBoostBannerID, element: EurcvBoostBanner },
+    isEurcvBoostEnabled && { id: eurcvBoostBannerID, element: EurcvBoostBanner },
     isNoFeeCampaignEnabled && {
       id: noFeeCampaignBannerID,
       element: NoFeeCampaignBanner,
