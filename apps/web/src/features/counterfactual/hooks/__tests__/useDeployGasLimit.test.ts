@@ -1,4 +1,4 @@
-import useDeployGasLimit from '@/features/counterfactual/hooks/useDeployGasLimit'
+import useDeployGasLimit from '../useDeployGasLimit'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import * as onboard from '@/hooks/wallets/useOnboard'
 import * as useWallet from '@/hooks/wallets/useWallet'

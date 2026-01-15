@@ -1,6 +1,6 @@
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { safeCreationDispatch, SafeCreationEvent } from '@/features/counterfactual/services/safeCreationEvents'
+import { safeCreationDispatch, SafeCreationEvent } from '@/features/counterfactual'
 import { NetworkLogosList, predictAddressBasedOnReplayData } from '@/features/multichain'
 
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
@@ -18,8 +18,8 @@ import useSyncSafeCreationStep from '@/components/new-safe/create/useSyncSafeCre
 import ReviewRow from '@/components/new-safe/ReviewRow'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
-import PayNowPayLater from '@/features/counterfactual/PayNowPayLater'
-import { CF_TX_GROUP_KEY, replayCounterfactualSafeDeployment } from '@/features/counterfactual/utils'
+import { PayNowPayLater } from '@/features/counterfactual'
+import { CF_TX_GROUP_KEY, replayCounterfactualSafeDeployment } from '@/features/counterfactual'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import useGasPrice from '@/hooks/useGasPrice'
 import useIsWrongChain from '@/hooks/useIsWrongChain'

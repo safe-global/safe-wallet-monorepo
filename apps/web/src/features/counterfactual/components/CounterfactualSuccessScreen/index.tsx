@@ -1,12 +1,12 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { safeCreationPendingStatuses } from '@/features/counterfactual/hooks/usePendingSafeStatuses'
-import { SafeCreationEvent, safeCreationSubscribe } from '@/features/counterfactual/services/safeCreationEvents'
+import { safeCreationPendingStatuses } from '../../hooks/usePendingSafeStatuses'
+import { SafeCreationEvent, safeCreationSubscribe } from '../../services/safeCreationEvents'
 import { useChain, useCurrentChain } from '@/hooks/useChains'
 import { useEffect, useState } from 'react'
 import { Box, Button, Dialog, DialogContent, Typography } from '@mui/material'
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import NetworkLogosList from '../multichain/components/NetworkLogosList'
+import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 
 const CounterfactualSuccessScreen = () => {

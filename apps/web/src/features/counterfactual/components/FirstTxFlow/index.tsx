@@ -10,7 +10,7 @@ import ModalDialog from '@/components/common/ModalDialog'
 import ChoiceButton from '@/components/common/ChoiceButton'
 import { TxModalContext } from '@/components/tx-flow'
 import { AddOwnerFlow, TokenTransferFlow, UpsertRecoveryFlow } from '@/components/tx-flow/flows'
-const ActivateAccountFlow = dynamic(() => import('./ActivateAccountFlow'))
+const ActivateAccountFlow = dynamic(() => import('../ActivateAccountFlow'))
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import AssetsIcon from '@/public/images/sidebar/assets.svg'
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
@@ -18,7 +18,7 @@ import RecoveryPlus from '@/public/images/common/recovery-plus.svg'
 import SwapIcon from '@/public/images/common/swap.svg'
 import SafeLogo from '@/public/images/logo-no-text.svg'
 import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined'
-import useIsSwapFeatureEnabled from '../swap/hooks/useIsSwapFeatureEnabled'
+import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 
 const FirstTxFlow = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const txBuilder = useTxBuilderApp()

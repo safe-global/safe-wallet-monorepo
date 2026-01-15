@@ -26,7 +26,7 @@ import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store
 import { trackTxEvents } from '@/components/tx/shared/tracking'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useChainId from '@/hooks/useChainId'
-import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
+import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import useTxDetails from '@/hooks/useTxDetails'
 import useSafeInfo from '@/hooks/useSafeInfo'
 

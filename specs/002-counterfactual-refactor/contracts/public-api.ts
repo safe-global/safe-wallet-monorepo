@@ -27,6 +27,27 @@ export { useIsCounterfactualEnabled } from './hooks'
 // Usage: Check before rendering counterfactual UI or executing counterfactual logic
 
 // ============================================================================
+// INTEGRATION HOOKS (for React components)
+// ============================================================================
+
+export { useIsCounterfactualSafe } from './hooks'
+// Returns: boolean - Wrapper around selectIsUndeployedSafe selector
+// Usage: Used across tx flows to check if current Safe is undeployed
+// Example: 11 external files use this for conditional UI rendering
+
+export { useCounterfactualBalances } from './hooks'
+// Returns: Balance data for undeployed Safes
+// Usage: Used by loadables to get balance information for counterfactual Safes
+
+export { safeCreationPendingStatuses } from './hooks'
+// Returns: Array of pending Safe creation statuses
+// Usage: Used by StatusStep to monitor Safe creation progress
+
+// NOTE: While store selectors are architecturally preferred, these hooks are
+// exported because they're actively used by 11+ external files for UI integration.
+// They provide convenient React-friendly wrappers around store selectors.
+
+// ============================================================================
 // REDUX STORE EXPORTS
 // ============================================================================
 
@@ -85,28 +106,45 @@ export { CF_TX_GROUP_KEY } from './constants'
 // Used by transaction monitoring services to track deployment transactions
 
 // ============================================================================
-// LAZY-LOADED COMPONENTS (if any need external access)
+// COMPONENTS (UI integration points)
 // ============================================================================
 
-// NOTE: Counterfactual feature does NOT export components directly.
-// All counterfactual UI is internal to the feature.
-// External code interacts via hooks, store selectors, and service functions.
+export { CounterfactualHooks } from './components'
+// Global hooks component that renders counterfactual UI (success screens, monitoring)
+// Usage: Rendered in _app.tsx to provide feature-wide UI
 
-// No default export - feature is integrated at multiple points, not a single widget
+export { ActivateAccountButton } from './components'
+// Button to activate an undeployed Safe
+// Usage: Sidebar, NewTxButton
 
-// ============================================================================
-// INTERNAL APIs (NOT EXPORTED - for reference only)
-// ============================================================================
+export { CheckBalance } from './components'
+// Component to check and display counterfactual Safe balance
+// Usage: AssetsTable
 
-// These hooks and components are INTERNAL to the feature:
-// - useCounterfactualBalances (internal helper hook)
-// - useDeployGasLimit (internal calculation hook)
-// - useIsCounterfactualSafe (internal - external code should use selectIsUndeployedSafe)
-// - usePendingSafeStatuses (internal monitoring hook)
-// - usePendingSafeNotifications (internal notification hook)
-// - All 10 component files (ActivateAccountButton, ActivateAccountFlow, etc.)
+export { CounterfactualForm } from './components'
+// Form for executing counterfactual Safe transactions
+// Usage: Tx flow actions (Counterfactual.tsx)
 
-// External code MUST use store selectors or service functions instead of internal hooks.
+export { CounterfactualStatusButton } from './components'
+// Status indicator button for undeployed Safes
+// Usage: SidebarHeader
+
+export { FirstTxFlow } from './components'
+// UI for creating first transaction on undeployed Safe
+// Usage: Dashboard FirstSteps
+
+export { PayNowPayLater } from './components'
+// Payment method selector for Safe deployment
+// Usage: New Safe creation flow (ReviewStep)
+
+export { LoopIcon } from './components'
+// Loading icon for counterfactual operations
+// Usage: Account info chips
+
+// NOTE: These components are exported because they're used at specific
+// integration points across the application (tx flows, sidebars, dashboard).
+// While components being exported is non-standard, it reflects the actual
+// usage pattern where counterfactual UI needs to be rendered at multiple points.
 
 // ============================================================================
 // USAGE EXAMPLES

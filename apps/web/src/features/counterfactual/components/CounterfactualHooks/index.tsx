@@ -1,7 +1,7 @@
-import CounterfactualSuccessScreen from '@/features/counterfactual/CounterfactualSuccessScreen'
+import CounterfactualSuccessScreen from '../CounterfactualSuccessScreen'
 import dynamic from 'next/dynamic'
 
-const LazyCounterfactual = dynamic(() => import('./LazyCounterfactual'))
+const LazyCounterfactual = dynamic(() => import('../LazyCounterfactual'))
 
 function CounterfactualHooks() {
   return (

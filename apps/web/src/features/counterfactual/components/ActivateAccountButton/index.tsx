@@ -3,13 +3,13 @@ import dynamic from 'next/dynamic'
 import React, { useContext } from 'react'
 import { Button, CircularProgress, Tooltip, Typography } from '@mui/material'
 import { TxModalContext } from '@/components/tx-flow'
-import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { selectUndeployedSafe } from '../../store/undeployedSafesSlice'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppSelector } from '@/store'
 import CheckWallet from '@/components/common/CheckWallet'
 import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
 
-const ActivateAccountFlow = dynamic(() => import('./ActivateAccountFlow'))
+const ActivateAccountFlow = dynamic(() => import('../ActivateAccountFlow'))
 
 const ActivateAccountButton = () => {
   const { safe, safeAddress } = useSafeInfo()

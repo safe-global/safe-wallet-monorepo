@@ -250,26 +250,49 @@ Based on external import analysis, the public API must export:
 
 ### Internal-Only APIs
 
-These should NOT be exported (internal to feature):
+These remain internal (not exported):
 
 **Hooks**:
 
-- `useCounterfactualBalances` (internal helper)
-- `useDeployGasLimit` (internal calculation)
-- `useIsCounterfactualSafe` (wrapper around store selector)
-- `usePendingSafeStatuses` (internal status monitoring)
-- `usePendingSafeNotifications` (internal notification logic)
+- `useDeployGasLimit` - Internal gas calculation
+- `usePendingSafeStatuses` - Internal monitoring (exports safeCreationPendingStatuses constant)
+- `usePendingSafeNotifications` - Internal notification logic
 
-**Components** (all internal):
+**Components** (not directly exported, composed internally):
 
-- All 10 components are internal UI - not directly imported externally
-- External code uses hooks/services to interact with counterfactual functionality
+- `ActivateAccountFlow` - Internal to ActivateAccountButton
+- `CounterfactualSuccessScreen` - Internal to CounterfactualHooks
+- `LazyCounterfactual` - Internal to CounterfactualHooks
 
-**Decision**: Export types, feature flag hook, store (slice + actions + selectors), service functions, and constants. Do NOT export internal hooks or components.
+### Public APIs (Actually Exported)
 
-**Rationale**: External code needs types for type safety, store for state management, services for business logic, and constants for transaction monitoring. Internal hooks and components are implementation details.
+**Hooks** (all exported for React integration):
 
-**Alternatives Considered**: Export all hooks - rejected because it creates unnecessary coupling; external code should use store selectors or service functions instead.
+- `useIsCounterfactualEnabled` - Feature flag check (REQUIRED)
+- `useIsCounterfactualSafe` - Check if Safe is undeployed (used by 11+ external files)
+- `useCounterfactualBalances` - Get balance data for undeployed Safes
+- `safeCreationPendingStatuses` - Status constants for monitoring
+
+**Components** (exported for UI integration points):
+
+- `CounterfactualHooks` - Global UI rendered in \_app.tsx
+- `ActivateAccountButton` - Sidebar, NewTxButton
+- `CheckBalance` - AssetsTable
+- `CounterfactualForm` - Tx flow actions
+- `CounterfactualStatusButton` - SidebarHeader
+- `FirstTxFlow` - Dashboard
+- `PayNowPayLater` - New Safe creation
+- `LoopIcon` - Account info chips
+
+**Decision**: Export types, hooks (including integration hooks), components (used at integration points), store, services, and constants. This is broader than initially planned but reflects actual integration requirements.
+
+**Rationale**: The feature integrates deeply with transaction flows, sidebars, dashboards, and Safe creation. External code needs both hooks for state checks and components for UI rendering at multiple locations. Store selectors alone are insufficient for the complex UI integration requirements across 11+ external files.
+
+**Alternatives Considered**:
+
+1. Export only selectors - rejected, less ergonomic and doesn't match existing patterns
+2. Single wrapper component - rejected, counterfactual UI appears at multiple independent locations
+3. Move integration logic external - rejected, would spread feature logic and violate encapsulation
 
 ## 5. Verification Strategy
 

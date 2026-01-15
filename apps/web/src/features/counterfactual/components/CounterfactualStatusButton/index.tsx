@@ -1,4 +1,4 @@
-import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { selectUndeployedSafe } from '../../store/undeployedSafesSlice'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { useAppSelector } from '@/store'

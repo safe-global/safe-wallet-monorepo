@@ -1,4 +1,4 @@
-import { getCounterfactualBalance } from '@/features/counterfactual/utils'
+import { getCounterfactualBalance } from '../services/safeDeployment'
 import { useWeb3 } from '@/hooks/wallets/web3'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import useAsync from '@safe-global/utils/hooks/useAsync'

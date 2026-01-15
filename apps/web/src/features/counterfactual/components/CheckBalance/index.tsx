@@ -1,5 +1,5 @@
 import ExternalLink from '@/components/common/ExternalLink'
-import ActivateAccountButton from '@/features/counterfactual/ActivateAccountButton'
+import ActivateAccountButton from '../ActivateAccountButton'
 import Track from '@/components/common/Track'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'

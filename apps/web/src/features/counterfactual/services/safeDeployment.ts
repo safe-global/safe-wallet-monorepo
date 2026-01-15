@@ -1,8 +1,11 @@
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { ImplementationVersionState, TokenType } from '@safe-global/store/gateway/types'
 import { POLLING_INTERVAL } from '@/config/constants'
-import { safeCreationDispatch, SafeCreationEvent } from '@/features/counterfactual/services/safeCreationEvents'
-import { addUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { safeCreationDispatch, SafeCreationEvent } from './safeCreationEvents'
+import { addUndeployedSafe } from '../store/undeployedSafesSlice'
+import type { UndeployedSafe, UndeployedSafeProps, ReplayedSafeProps, PayMethod } from '../types'
+import { PendingSafeStatus } from '../types'
+import { CF_TX_GROUP_KEY } from '../constants'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { getWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
@@ -20,13 +23,6 @@ import type { BrowserProvider, Eip1193Provider, Provider, TransactionResponse } 
 
 import { encodeSafeCreationTx } from '@/components/new-safe/create/logic'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
-import type {
-  ReplayedSafeProps,
-  UndeployedSafe,
-  UndeployedSafeProps,
-} from '@safe-global/utils/features/counterfactual/store/types'
-import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
-import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { delay } from '@safe-global/utils/utils/helpers'
 
 export const getUndeployedSafeInfo = (undeployedSafe: UndeployedSafe, address: string, chain: Chain) => {
@@ -50,8 +46,6 @@ export const getUndeployedSafeInfo = (undeployedSafe: UndeployedSafe, address: s
     deployed: false,
   }
 }
-
-export const CF_TX_GROUP_KEY = 'cf-tx'
 
 export const dispatchTxExecutionAndDeploySafe = async (
   safeTx: SafeTransaction,

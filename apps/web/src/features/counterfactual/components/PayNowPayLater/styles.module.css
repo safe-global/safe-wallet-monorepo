@@ -31,20 +31,6 @@
   color: var(--color-text-primary);
 }
 
-.statusButton {
-  border-radius: 4px;
-  padding: 6px;
-  width: 32px;
-  height: 32px;
-  background: var(--color-warning-background);
-  justify-self: flex-end;
-  margin-left: auto;
-}
-
-.statusButton.processing {
-  background: var(--color-info-background);
-}
-
 @media (max-width: 400px) {
   .radioGroup {
     flex-direction: column;
