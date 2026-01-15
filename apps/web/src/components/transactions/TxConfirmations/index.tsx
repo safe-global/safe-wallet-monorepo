@@ -12,14 +12,13 @@ const TxConfirmations = ({
   submittedConfirmations: number
 }): ReactElement => {
   const isConfirmed = submittedConfirmations >= requiredConfirmations
-  const color = isConfirmed ? 'success' : 'warning'
 
   return (
-    <TxStatusChip color={color}>
+    <TxStatusChip color="primary" backgroundColor="background.main">
       <SvgIcon component={isConfirmed ? CheckIcon : OwnersIcon} inheritViewBox fontSize="small" />
 
-      <Typography variant="caption" fontWeight="bold">
-        {submittedConfirmations} out of {requiredConfirmations}
+      <Typography variant="caption" fontWeight="bold" letterSpacing={1}>
+        {submittedConfirmations}/{requiredConfirmations}
       </Typography>
     </TxStatusChip>
   )
