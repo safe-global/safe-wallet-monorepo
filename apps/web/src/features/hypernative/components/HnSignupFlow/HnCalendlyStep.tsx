@@ -3,7 +3,7 @@ import HnSignupLayout from './HnSignupLayout'
 import { useCalendly } from '../../hooks/useCalendly'
 import css from './styles.module.css'
 import { Typography, Skeleton, Button, Box, Stack } from '@mui/material'
-import RefreshIcon from '@mui/icons-material/Refresh'
+import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 
 export type HnCalendlyStepProps = {
@@ -84,13 +84,25 @@ const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps
               Something went wrong
             </Typography>
             <Typography variant="body2" className={css.errorMessage}>
-              Please refresh the page or open the link in a new tab.
+              Please reload the page.
             </Typography>
-            <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
-              <Button variant="contained" startIcon={<RefreshIcon />} onClick={handleRefresh}>
+            <Stack direction="column" spacing={2} sx={{ mt: 3 }}>
+              <Button
+                variant="contained"
+                startIcon={<AutorenewRoundedIcon />}
+                onClick={handleRefresh}
+                className={css.reloadButton}
+              >
                 Reload
               </Button>
-              <Button variant="contained" startIcon={<OpenInNewIcon />} onClick={handleOpenInNewTab}>
+              <Button
+                variant="outlined"
+                color="static"
+                fullWidth
+                startIcon={<OpenInNewIcon />}
+                onClick={handleOpenInNewTab}
+                sx={{ px: 2 }}
+              >
                 Open in a new tab
               </Button>
             </Stack>
