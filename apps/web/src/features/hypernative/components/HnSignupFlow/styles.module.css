@@ -234,7 +234,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: top;
   margin-top: var(--space-4);
   padding: var(--space-12) var(--space-6);
   height: 100%;
@@ -256,7 +255,7 @@
 
 .reloadButton {
   background-color: var(--color-static-main);
-  color: #fff;
+  color: var(--color-static-primary);
   max-width: fit-content;
   align-self: center;
   padding-inline: var(--space-2);
