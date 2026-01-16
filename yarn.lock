@@ -11139,15 +11139,6 @@ __metadata:
     typescript-plugin-css-modules: "npm:^4.2.2"
     wait-on: "npm:^9.0.3"
     zodiac-roles-deployments: "npm:^2.3.4"
-  dependenciesMeta:
-    "@datadog/browser-logs":
-      optional: true
-    "@datadog/browser-rum":
-      optional: true
-    "@datadog/browser-rum-react":
-      optional: true
-    "@sentry/react":
-      optional: true
   languageName: unknown
   linkType: soft
 
