@@ -90,10 +90,12 @@ To add or modify colors/tokens:
 - Always cover new logic, services, and hooks with unit tests
 - Run type-check, lint, prettier and unit tests before each commit
 - Never use the `any` type!
+- Treat code comments as tech debt! Add them only when really necessary & the code at hand is hard to understand.
 
 Specifically for the web app:
 
 - New features must be created in a separate folder inside `src/features/` – only components, hooks, and services used globally across many features belong in top-level folders inside `src/`
+- **All features must follow the standard feature architecture pattern** – See `apps/web/docs/feature-architecture.md` for the complete guide including folder structure, feature flags, lazy loading, and public API patterns
 - Each new feature must be behind a feature flag (stored on the CGW API in chains configs)
 - When making a new component, create a Storybook story file for it
 - Use theme variables from vars.css instead of hard-coded CSS values

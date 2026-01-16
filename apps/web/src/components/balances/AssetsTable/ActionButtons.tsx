@@ -58,7 +58,7 @@ export const ActionButtons = ({
 
       {showHiddenAssets && onToggleAsset && (
         <Box display="flex" alignItems="center" height="28px">
-          <Checkbox size="small" checked={isSelected} onClick={onToggleAsset} />
+          <Checkbox size="small" checked={isSelected} onClick={onToggleAsset} data-testid="hide-asset-checkbox" />
         </Box>
       )}
     </Stack>

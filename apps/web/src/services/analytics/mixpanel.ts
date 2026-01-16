@@ -1,8 +1,8 @@
 import mixpanel from 'mixpanel-browser'
 import { IS_PRODUCTION, MIXPANEL_TOKEN } from '@/config/constants'
+import { APP_VERSION } from '@/config/version'
 import { DeviceType } from './types'
 import { MixpanelEventParams, ADDRESS_PROPERTIES, type MixpanelUserProperty } from './mixpanel-events'
-import packageJson from '../../../package.json'
 
 let isMixpanelInitialized = false
 
@@ -75,7 +75,7 @@ export const mixpanelInit = (): void => {
     isMixpanelInitialized = true
 
     mixpanel.register({
-      [MixpanelEventParams.APP_VERSION]: packageJson.version,
+      [MixpanelEventParams.APP_VERSION]: APP_VERSION,
       [MixpanelEventParams.DEVICE_TYPE]: DeviceType.DESKTOP,
     })
 

@@ -6,6 +6,7 @@ import { dataRow } from '../pages/tables.page'
 
 export const delegateCallWarning = '[data-testid="delegate-call-warning"]'
 export const policyChangeWarning = '[data-testid="threshold-warning"]'
+export const tokenSelector = '[data-testid="token-selector"]'
 const newTransactionBtnStr = 'New transaction'
 const recepientInput = 'input[name="recipients.0.recipient"]'
 const recepientInput_ = (index) => `input[name="recipients.${index}.recipient"]`
@@ -113,6 +114,7 @@ const editBtnStr = 'Edit'
 const executionParamsStr = 'Execution parameters'
 const noLaterStr = 'No, later'
 const confirmBtnStr = 'Confirm'
+const executeBtnStr = 'Execute'
 const expandAllBtnStr = 'Expand all'
 const collapseAllBtnStr = 'Collapse all'
 export const messageNestedStr = `"nestedString": "Test message 3 off-chain"`
@@ -773,7 +775,7 @@ export function verifyRelayerAttemptsAvailable() {
 }
 
 export function clickOnTokenselectorAndSelectSepoliaEth() {
-  cy.get(tokenAddressInput).prev().click()
+  cy.get(tokenSelector).click()
   cy.get('ul[role="listbox"]').contains(constants.tokenNames.sepoliaEther).click()
 }
 
@@ -912,6 +914,32 @@ export function clickOnConfirmTransactionBtn() {
 
 export function verifyConfirmTransactionBtnIsVisible() {
   cy.get('button').contains(confirmBtnStr).should('be.visible')
+}
+
+export function clickOnConfirmBtn(index) {
+  cy.wait(2000)
+  cy.get(transactionItem)
+    .eq(index)
+    .within(() => {
+      cy.get('button')
+        .contains(confirmBtnStr)
+        .then((elements) => {
+          cy.wrap(elements[0]).click()
+        })
+    })
+}
+
+export function clickOnExecuteBtn(index) {
+  cy.wait(2000)
+  cy.get(transactionItem)
+    .eq(index)
+    .within(() => {
+      cy.get('button')
+        .contains(executeBtnStr)
+        .then((elements) => {
+          cy.wrap(elements[0]).click()
+        })
+    })
 }
 
 export function waitForProposeRequest() {

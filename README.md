@@ -12,11 +12,18 @@ This repository houses both web and mobile applications along with shared packag
 
 ### Key components
 
-- **apps/web** - Next.js web application
-- **apps/mobile** - Expo/React Native mobile application
+- **apps/web** - Next.js web application ([detailed documentation](/apps/web/README.md))
+- **apps/mobile** - Expo/React Native mobile application ([detailed documentation](/apps/mobile/README.md))
 - **packages/store** - Shared Redux store used by both platforms
 - **packages/utils** - Shared utilities and TypeScript types
 - **config/** - Shared configuration files
+
+> [!IMPORTANT]
+>
+> For detailed setup instructions and platform-specific development guides, please refer to the dedicated README files:
+>
+> - **[Web App Documentation](/apps/web/README.md)** - Complete guide for the Next.js web application
+> - **[Mobile App Documentation](/apps/mobile/README.md)** - Complete guide for the mobile application, including iOS/Android setup
 
 ## Getting started
 
@@ -76,6 +83,13 @@ yarn workspace @safe-global/web test
 # Run Storybook for web
 yarn workspace @safe-global/web storybook
 ```
+
+> [!TIP]
+>
+> For comprehensive setup instructions, environment variables, testing, and platform-specific workflows, see:
+>
+> - **[Web App README](/apps/web/README.md)** - Environment setup, Cypress E2E tests, Storybook, and more
+> - **[Mobile App README](/apps/mobile/README.md)** - iOS/Android setup, Maestro E2E tests, Expo configuration, and more
 
 ## Monorepo commands
 

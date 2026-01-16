@@ -28,7 +28,7 @@ import SafeAppIframe from './SafeAppIframe'
 import { useCustomAppCommunicator } from '@/hooks/safe-apps/useCustomAppCommunicator'
 import { useSanctionedAddress } from '@/hooks/useSanctionedAddress'
 import BlockedAddress from '@/components/common/BlockedAddress'
-import { isSafePassApp } from '@/features/walletconnect/services/utils'
+import { isSafePassApp } from '@/features/walletconnect'
 import { BRAND_NAME } from '@/config/constants'
 
 const UNKNOWN_APP_NAME = 'Unknown Safe App'
