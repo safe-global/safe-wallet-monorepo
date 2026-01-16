@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import css from './styles.module.css'
 import { AppRoutes } from '@/config/routes'
-import packageJson from '../../../../package.json'
+import { APP_VERSION, APP_HOMEPAGE } from '@/config/version'
 import ExternalLink from '../ExternalLink'
 import MUILink from '@mui/material/Link'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
@@ -94,15 +94,15 @@ const Footer: React.FC<FooterProps> = ({
         )}
 
         <li>
-          <ExternalLink href={`${packageJson.homepage}/releases/tag/v${packageJson.version}`} noIcon>
+          <ExternalLink href={`${APP_HOMEPAGE}/releases/tag/v${APP_VERSION}`} noIcon>
             {versionIcon && <SvgIcon component={GitHubIcon} inheritViewBox fontSize="inherit" sx={{ mr: 0.5 }} />}v
-            {packageJson.version}
+            {APP_VERSION}
           </ExternalLink>
         </li>
 
         {!IS_PRODUCTION && COMMIT_HASH && (
           <li>
-            <ExternalLink href={`${packageJson.homepage}/commit/${COMMIT_HASH}`} noIcon>
+            <ExternalLink href={`${APP_HOMEPAGE}/commit/${COMMIT_HASH}`} noIcon>
               {COMMIT_HASH.slice(0, 7)}
             </ExternalLink>
           </li>

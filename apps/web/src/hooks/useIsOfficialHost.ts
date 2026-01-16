@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { IPFS_HOSTS, IS_OFFICIAL_HOST, OFFICIAL_HOSTS } from '@/config/constants'
-import packageJson from '../../package.json'
+import { APP_VERSION } from '@/config/version'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 
 const GITHUB_API_URL = 'https://api.github.com/repos/5afe/safe-wallet-ipfs/releases/tags'
@@ -16,7 +16,7 @@ async function getGithubRelease(version: string) {
 }
 
 async function isOfficialIpfs(): Promise<boolean> {
-  const data = await getGithubRelease(packageJson.version)
+  const data = await getGithubRelease(APP_VERSION)
   return data.body.includes(window.location.host)
 }
 
