@@ -4,14 +4,21 @@ import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernative
 import ExternalLink from '@/components/common/ExternalLink'
 import AlertIcon from '@/public/images/common/alert.svg'
 import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
+import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 
-export const HnLoginCard = (): ReactElement => {
+export const HnLoginCard = (): ReactElement | null => {
+  const isSafeOwner = useIsSafeOwner()
   const { isAuthenticated, isTokenExpired, initiateLogin } = useHypernativeOAuth()
 
   const handleLogin = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
     e.stopPropagation()
     initiateLogin()
+  }
+
+  // Only show login card if the connected wallet is a signer of the Safe
+  if (!isSafeOwner) {
+    return null
   }
 
   // Show login card if user is not authenticated or token is expired
