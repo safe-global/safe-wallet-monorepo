@@ -9,7 +9,7 @@ jest.mock('@/config/constants', () => ({
 
 import { trackEvent, trackMixpanelEvent, MixpanelEvent } from '../index'
 import { mixpanelInit, mixpanelTrack, mixpanelSetSafeAddress } from '../mixpanel'
-import packageJson from '../../../../package.json'
+import { APP_VERSION } from '@/config/version'
 
 // Mock GTM
 jest.mock('../gtm', () => ({
@@ -60,7 +60,7 @@ describe('Mixpanel Integration', () => {
 
       // Should register initial params
       expect(mockMixpanel.register).toHaveBeenCalledWith({
-        'App Version': packageJson.version,
+        'App Version': APP_VERSION,
         'Device Type': 'desktop',
       })
     })

@@ -1,6 +1,7 @@
 import * as main from './main.page'
 import * as addressbook from '../pages/address_book.page'
 import * as createTx from '../pages/create_tx.pages'
+import { tokenSelector } from '../pages/create_tx.pages'
 import { tableRow } from '../pages/address_book.page'
 import { assetsSwapBtn } from '../pages/swaps.pages'
 import { nftsRow } from '../pages/nfts.pages'
@@ -168,11 +169,11 @@ export function enterAmount(amount) {
 }
 
 export function checkSelectedToken(token) {
-  cy.get(tokenBalance).contains(token)
+  cy.get(tokenSelector).contains(token)
 }
 
 function clickOnTokenSelector(index) {
-  cy.get(tokenBalance).eq(index).click()
+  cy.get(tokenSelector).eq(index).click()
 }
 
 export function selectToken(index, token) {
