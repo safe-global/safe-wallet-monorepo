@@ -8,7 +8,6 @@ import {
   type HypernativeBatchAssessmentResponseItemDto,
 } from '@safe-global/store/hypernative/hypernativeApi.dto'
 import { buildHypernativeBatchRequestData } from '../utils/buildHypernativeBatchRequestData'
-import isEqual from 'lodash/isEqual'
 
 type UseThreatAnalysisHypernativeBatchProps = {
   safeTxHashes: `0x${string}`[]
@@ -48,7 +47,12 @@ export function useThreatAnalysisHypernativeBatch({
     }
 
     // Compare hash values, not array reference
-    if (isEqual(prevHashesRef.current, safeTxHashes)) {
+    // Simple array comparison for primitive arrays (more efficient than lodash.isEqual)
+    const prevHashes = prevHashesRef.current
+    const hashesEqual =
+      prevHashes.length === safeTxHashes.length && prevHashes.every((hash) => safeTxHashes.includes(hash))
+
+    if (hashesEqual) {
       // Hashes haven't changed, return previous request
       return prevRequestRef.current
     }

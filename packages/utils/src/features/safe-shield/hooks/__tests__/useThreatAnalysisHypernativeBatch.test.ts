@@ -337,4 +337,261 @@ describe('useThreatAnalysisHypernativeBatch', () => {
       })
     })
   })
+
+  describe('hash array comparison', () => {
+    it('should not trigger a new request when the same hashes are passed in the same order', async () => {
+      const hashes = [
+        faker.string.hexadecimal({ length: 64 }) as `0x${string}`,
+        faker.string.hexadecimal({ length: 64 }) as `0x${string}`,
+      ]
+
+      mockBuildHypernativeBatchRequestData.mockReturnValue({
+        safeTxHashes: hashes,
+      })
+
+      const { rerender } = renderHook(
+        (props) =>
+          useThreatAnalysisHypernativeBatch({
+            safeTxHashes: props.hashes,
+            safeAddress: mockSafeAddress,
+            authToken: mockAuthToken,
+          }),
+        {
+          initialProps: { hashes },
+        },
+      )
+
+      await waitFor(() => {
+        expect(mockBuildHypernativeBatchRequestData).toHaveBeenCalledTimes(1)
+        expect(mockTriggerBatchAssessment).toHaveBeenCalledTimes(1)
+      })
+
+      // Rerender with the same hashes (same array reference)
+      rerender({ hashes })
+
+      await waitFor(() => {
+        expect(mockBuildHypernativeBatchRequestData).toHaveBeenCalledTimes(1)
+        expect(mockTriggerBatchAssessment).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    it('should not trigger a new request when the same hashes are passed in a different order', async () => {
+      const hash1 = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+      const hash2 = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+      const hash3 = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+
+      const hashes1 = [hash1, hash2, hash3]
+      const hashes2 = [hash3, hash1, hash2] // Different order, same values
+
+      mockBuildHypernativeBatchRequestData.mockReturnValue({
+        safeTxHashes: hashes1,
+      })
+
+      const { rerender } = renderHook(
+        (props) =>
+          useThreatAnalysisHypernativeBatch({
+            safeTxHashes: props.hashes,
+            safeAddress: mockSafeAddress,
+            authToken: mockAuthToken,
+          }),
+        {
+          initialProps: { hashes: hashes1 },
+        },
+      )
+
+      await waitFor(() => {
+        expect(mockBuildHypernativeBatchRequestData).toHaveBeenCalledTimes(1)
+        expect(mockBuildHypernativeBatchRequestData).toHaveBeenCalledWith(hashes1)
+        expect(mockTriggerBatchAssessment).toHaveBeenCalledTimes(1)
+      })
+
+      // Update mock to return the reordered hashes
+      mockBuildHypernativeBatchRequestData.mockReturnValue({
+        safeTxHashes: hashes2,
+      })
+
+      // Rerender with the same hashes in different order
+      rerender({ hashes: hashes2 })
+
+      await waitFor(() => {
+        // buildHypernativeBatchRequestData should not be called again since values are the same
+        expect(mockBuildHypernativeBatchRequestData).toHaveBeenCalledTimes(1)
+        // triggerBatchAssessment should not be called again
+        expect(mockTriggerBatchAssessment).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    it('should trigger a new request when a hash is added', async () => {
+      const hash1 = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+      const hash2 = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+      const hash3 = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+
+      const hashes1 = [hash1, hash2]
+      const hashes2 = [hash1, hash2, hash3] // Added hash3
+
+      mockBuildHypernativeBatchRequestData.mockReturnValue({
+        safeTxHashes: hashes1,
+      })
+
+      const { rerender } = renderHook(
+        (props) =>
+          useThreatAnalysisHypernativeBatch({
+            safeTxHashes: props.hashes,
+            safeAddress: mockSafeAddress,
+            authToken: mockAuthToken,
+          }),
+        {
+          initialProps: { hashes: hashes1 },
+        },
+      )
+
+      await waitFor(() => {
+        expect(mockBuildHypernativeBatchRequestData).toHaveBeenCalledTimes(1)
+        expect(mockBuildHypernativeBatchRequestData).toHaveBeenCalledWith(hashes1)
+        expect(mockTriggerBatchAssessment).toHaveBeenCalledTimes(1)
+      })
+
+      // Update mock to return the new hashes
+      mockBuildHypernativeBatchRequestData.mockReturnValue({
+        safeTxHashes: hashes2,
+      })
+
+      // Rerender with an added hash
+      rerender({ hashes: hashes2 })
+
+      await waitFor(() => {
+        expect(mockBuildHypernativeBatchRequestData).toHaveBeenCalledTimes(2)
+        expect(mockBuildHypernativeBatchRequestData).toHaveBeenCalledWith(hashes2)
+        expect(mockTriggerBatchAssessment).toHaveBeenCalledTimes(2)
+      })
+    })
+
+    it('should trigger a new request when a hash is removed', async () => {
+      const hash1 = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+      const hash2 = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+      const hash3 = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+
+      const hashes1 = [hash1, hash2, hash3]
+      const hashes2 = [hash1, hash2] // Removed hash3
+
+      mockBuildHypernativeBatchRequestData.mockReturnValue({
+        safeTxHashes: hashes1,
+      })
+
+      const { rerender } = renderHook(
+        (props) =>
+          useThreatAnalysisHypernativeBatch({
+            safeTxHashes: props.hashes,
+            safeAddress: mockSafeAddress,
+            authToken: mockAuthToken,
+          }),
+        {
+          initialProps: { hashes: hashes1 },
+        },
+      )
+
+      await waitFor(() => {
+        expect(mockBuildHypernativeBatchRequestData).toHaveBeenCalledTimes(1)
+        expect(mockBuildHypernativeBatchRequestData).toHaveBeenCalledWith(hashes1)
+        expect(mockTriggerBatchAssessment).toHaveBeenCalledTimes(1)
+      })
+
+      // Update mock to return the reduced hashes
+      mockBuildHypernativeBatchRequestData.mockReturnValue({
+        safeTxHashes: hashes2,
+      })
+
+      // Rerender with a removed hash
+      rerender({ hashes: hashes2 })
+
+      await waitFor(() => {
+        expect(mockBuildHypernativeBatchRequestData).toHaveBeenCalledTimes(2)
+        expect(mockBuildHypernativeBatchRequestData).toHaveBeenCalledWith(hashes2)
+        expect(mockTriggerBatchAssessment).toHaveBeenCalledTimes(2)
+      })
+    })
+
+    it('should trigger a new request when a hash value changes', async () => {
+      const hash1 = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+      const hash2 = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+      const hash3 = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+
+      const hashes1 = [hash1, hash2]
+      const hashes2 = [hash1, hash3] // Changed hash2 to hash3
+
+      mockBuildHypernativeBatchRequestData.mockReturnValue({
+        safeTxHashes: hashes1,
+      })
+
+      const { rerender } = renderHook(
+        (props) =>
+          useThreatAnalysisHypernativeBatch({
+            safeTxHashes: props.hashes,
+            safeAddress: mockSafeAddress,
+            authToken: mockAuthToken,
+          }),
+        {
+          initialProps: { hashes: hashes1 },
+        },
+      )
+
+      await waitFor(() => {
+        expect(mockBuildHypernativeBatchRequestData).toHaveBeenCalledTimes(1)
+        expect(mockBuildHypernativeBatchRequestData).toHaveBeenCalledWith(hashes1)
+        expect(mockTriggerBatchAssessment).toHaveBeenCalledTimes(1)
+      })
+
+      // Update mock to return the changed hashes
+      mockBuildHypernativeBatchRequestData.mockReturnValue({
+        safeTxHashes: hashes2,
+      })
+
+      // Rerender with a changed hash
+      rerender({ hashes: hashes2 })
+
+      await waitFor(() => {
+        expect(mockBuildHypernativeBatchRequestData).toHaveBeenCalledTimes(2)
+        expect(mockBuildHypernativeBatchRequestData).toHaveBeenCalledWith(hashes2)
+        expect(mockTriggerBatchAssessment).toHaveBeenCalledTimes(2)
+      })
+    })
+
+    it('should not trigger a new request when a new array reference with the same values is passed', async () => {
+      const hash1 = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+      const hash2 = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+
+      const hashes1 = [hash1, hash2]
+      const hashes2 = [hash1, hash2] // New array reference, same values
+
+      mockBuildHypernativeBatchRequestData.mockReturnValue({
+        safeTxHashes: hashes1,
+      })
+
+      const { rerender } = renderHook(
+        (props) =>
+          useThreatAnalysisHypernativeBatch({
+            safeTxHashes: props.hashes,
+            safeAddress: mockSafeAddress,
+            authToken: mockAuthToken,
+          }),
+        {
+          initialProps: { hashes: hashes1 },
+        },
+      )
+
+      await waitFor(() => {
+        expect(mockBuildHypernativeBatchRequestData).toHaveBeenCalledTimes(1)
+        expect(mockTriggerBatchAssessment).toHaveBeenCalledTimes(1)
+      })
+
+      // Rerender with a new array reference but same values
+      rerender({ hashes: hashes2 })
+
+      await waitFor(() => {
+        // Should not trigger a new request since values are the same
+        expect(mockBuildHypernativeBatchRequestData).toHaveBeenCalledTimes(1)
+        expect(mockTriggerBatchAssessment).toHaveBeenCalledTimes(1)
+      })
+    })
+  })
 })
