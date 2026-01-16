@@ -67,8 +67,8 @@
 }
 
 .earnCard {
-  background-color: #effff4;
-  border: 1px solid #12ff80;
+  background-color: var(--color-secondary-background);
+  border: 1px solid var(--color-static-text-brand);
 }
 
 .earnCard:hover {
@@ -77,11 +77,11 @@
 
 .earnCard .title,
 .earnCard .subtitle {
-  color: #121312;
+  color: var(--color-static-main);
 }
 
 .earnCard .badge {
-  background-color: #12ff80;
+  background-color: var(--color-static-text-brand);
 }
 
 .iconContainer {

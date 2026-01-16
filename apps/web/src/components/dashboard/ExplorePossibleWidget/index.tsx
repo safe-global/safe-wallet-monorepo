@@ -13,6 +13,7 @@ import { MixpanelEvent, MixpanelEventParams } from '@/services/analytics/mixpane
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { EURCV_ASSET_ID } from '@/config/eurcv'
 import css from './styles.module.css'
 
 export type ExplorePossibleApp = {
@@ -38,7 +39,7 @@ const EXPLORE_POSSIBLE_CONFIG = [
       pathname: AppRoutes.earn,
       query: {
         safe: safeQuery,
-        asset_id: '1_0x5f7827fdeb7c20b443265fc2f40845b715385ff2', // Pre-select EURCV
+        asset_id: EURCV_ASSET_ID,
       },
     }),
   },

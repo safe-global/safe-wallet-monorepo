@@ -6,11 +6,9 @@ import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { EARN_HELP_ARTICLE } from '@/features/earn/constants'
+import { EURCV_ASSET_ID } from '@/config/eurcv'
 
 export const eurcvBoostBannerID = 'eurcvBoostBanner'
-
-// EURCV token on Ethereum: chainId_tokenAddress
-const EURCV_ASSET_ID = '1_0x5f7827fdeb7c20b443265fc2f40845b715385ff2'
 
 export const EurcvBoostBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   const router = useRouter()
