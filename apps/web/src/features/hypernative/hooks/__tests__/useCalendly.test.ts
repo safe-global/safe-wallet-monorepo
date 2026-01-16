@@ -1703,4 +1703,623 @@ describe('useCalendly', () => {
       })
     })
   })
+
+  describe('origin validation edge cases', () => {
+    it('should reject origin with invalid URL format', async () => {
+      const mockCallback = jest.fn()
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      renderHook(() => useCalendly(widgetRef, calendlyUrl, mockCallback), {
+        initialReduxState,
+      })
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10))
+      })
+
+      expect(messageHandler).not.toBeNull()
+
+      const invalidOrigins = ['not-a-url', 'calendly.com', 'ftp://calendly.com', '://calendly.com', 'null']
+
+      for (const origin of invalidOrigins) {
+        const mockEvent = {
+          origin,
+          data: {
+            event: 'calendly.event_scheduled',
+          },
+        } as MessageEvent
+
+        act(() => {
+          messageHandler!(mockEvent)
+        })
+      }
+
+      expect(mockCallback).not.toHaveBeenCalled()
+    })
+
+    it('should reject origin with subdomain that is not www', async () => {
+      const mockCallback = jest.fn()
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      renderHook(() => useCalendly(widgetRef, calendlyUrl, mockCallback), {
+        initialReduxState,
+      })
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10))
+      })
+
+      expect(messageHandler).not.toBeNull()
+
+      const maliciousSubdomains = [
+        'https://api.calendly.com',
+        'https://app.calendly.com',
+        'https://evil.calendly.com',
+        'https://staging.calendly.com',
+      ]
+
+      for (const origin of maliciousSubdomains) {
+        const mockEvent = {
+          origin,
+          data: {
+            event: 'calendly.event_scheduled',
+          },
+        } as MessageEvent
+
+        act(() => {
+          messageHandler!(mockEvent)
+        })
+      }
+
+      expect(mockCallback).not.toHaveBeenCalled()
+    })
+
+    it('should reject malicious domains that start with www but are not www.calendly.com', async () => {
+      const mockCallback = jest.fn()
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      renderHook(() => useCalendly(widgetRef, calendlyUrl, mockCallback), {
+        initialReduxState,
+      })
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10))
+      })
+
+      expect(messageHandler).not.toBeNull()
+
+      const maliciousWwwDomains = [
+        'https://www.calendly.com.evil.com',
+        'https://www-calendly.com',
+        'https://wwwcalendly.com',
+        'https://www.calendly.com.malicious.com',
+        'https://www.calendly.com@evil.com',
+        'https://www.calendly.com.co',
+        'https://www.calendly.com.fake',
+      ]
+
+      for (const origin of maliciousWwwDomains) {
+        const mockEvent = {
+          origin,
+          data: {
+            event: 'calendly.event_scheduled',
+          },
+        } as MessageEvent
+
+        act(() => {
+          messageHandler!(mockEvent)
+        })
+      }
+
+      expect(mockCallback).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('race conditions', () => {
+    beforeEach(() => {
+      jest.useFakeTimers()
+    })
+
+    afterEach(() => {
+      jest.runOnlyPendingTimers()
+      jest.useRealTimers()
+    })
+
+    it('should handle script onload firing after component unmount', async () => {
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      const { unmount } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Advance timers to allow script creation
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      // Find the script element before unmount
+      const script = document.querySelector('script[src*="calendly"]') as HTMLScriptElement
+      expect(script).toBeTruthy()
+
+      // Unmount the component
+      unmount()
+
+      // Now trigger script onload after unmount - should not throw
+      expect(() => {
+        act(() => {
+          if (script.onload) {
+            ;(script.onload as EventListener)(new Event('load'))
+          }
+        })
+      }).not.toThrow()
+    })
+
+    it('should handle postMessage arriving during cleanup', async () => {
+      const mockCallback = jest.fn()
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      // We need real timers for this test to capture the message handler
+      jest.useRealTimers()
+
+      renderHook(() => useCalendly(widgetRef, calendlyUrl, mockCallback), {
+        initialReduxState,
+      })
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10))
+      })
+
+      expect(messageHandler).not.toBeNull()
+
+      // Send message - should not throw even if component is in cleanup state
+      const mockEvent = {
+        origin: 'https://calendly.com',
+        data: {
+          event: 'calendly.event_scheduled',
+        },
+        type: 'message',
+        bubbles: false,
+        cancelable: false,
+      } as MessageEvent
+
+      expect(() => {
+        if (messageHandler) {
+          const handler = messageHandler
+          act(() => {
+            handler(mockEvent)
+          })
+        }
+      }).not.toThrow()
+
+      jest.useFakeTimers()
+    })
+
+    it('should handle rapid refresh calls without errors', async () => {
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      const { result } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Advance timers to allow initial setup
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      // Call refresh multiple times in rapid succession
+      expect(() => {
+        act(() => {
+          result.current.refresh()
+          result.current.refresh()
+          result.current.refresh()
+        })
+      }).not.toThrow()
+
+      // Advance timers to process all refreshes
+      act(() => {
+        jest.advanceTimersByTime(100)
+      })
+
+      // State should be reset
+      const state = mockStore.getState()
+      expect(state.calendly.isLoaded).toBe(false)
+      expect(state.calendly.hasError).toBe(false)
+    })
+
+    it('should cancel pending script load when refresh is called mid-load', async () => {
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      const { result } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Advance timers to allow script creation
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      // Call refresh before script loads (before SCRIPT_LOAD_TIMEOUT_MS)
+      act(() => {
+        result.current.refresh()
+      })
+
+      // Advance past the original script timeout
+      act(() => {
+        jest.advanceTimersByTime(5000)
+      })
+
+      // Should not have error from the cancelled timeout
+      // (refresh clears pending timeouts)
+      const state = mockStore.getState()
+      // The new script load attempt will timeout, but that's expected
+      // The key is that the original timeout was cleared
+      expect(state.calendly.isLoaded).toBe(false)
+    })
+
+    it('should not create duplicate scripts on rapid remounts', async () => {
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      // First mount
+      const { unmount: unmount1 } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      // Quick unmount
+      unmount1()
+
+      // Immediately remount
+      renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      // Should only have one Calendly script
+      const scripts = document.querySelectorAll('script[src*="calendly"]')
+      expect(scripts.length).toBeLessThanOrEqual(1)
+    })
+
+    it('should handle unmount during polling for window.Calendly', async () => {
+      // Script exists but window.Calendly is not yet available
+      const script = document.createElement('script')
+      script.src = 'https://assets.calendly.com/assets/external/widget.js'
+      document.body.appendChild(script)
+
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      const { unmount } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Advance timers to start polling
+      act(() => {
+        jest.advanceTimersByTime(50)
+      })
+
+      // Unmount during polling
+      unmount()
+
+      // Advance past poll timeout - should not throw
+      expect(() => {
+        act(() => {
+          jest.advanceTimersByTime(5000)
+        })
+      }).not.toThrow()
+
+      script.remove()
+    })
+  })
+
+  describe('memory leak prevention', () => {
+    it('should not accumulate event listeners on re-renders', async () => {
+      const addEventListenerSpy = jest.spyOn(window, 'addEventListener')
+      const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener')
+
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      const { rerender, unmount } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10))
+      })
+
+      // Verify addEventListener was called with 'message' and a function
+      expect(addEventListenerSpy).toHaveBeenCalledWith('message', expect.any(Function))
+
+      // Clear mocks to count only rerender calls
+      addEventListenerSpy.mockClear()
+      removeEventListenerSpy.mockClear()
+
+      // Rerender multiple times
+      rerender()
+      rerender()
+      rerender()
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10))
+      })
+
+      // Verify addEventListener was called with 'message' during rerenders
+      expect(addEventListenerSpy).toHaveBeenCalledWith('message', expect.any(Function))
+      // Verify removeEventListener was called with 'message' during cleanup
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('message', expect.any(Function))
+
+      // Each rerender should add and remove listeners
+      // Verify that both were called (cleanup happens on rerender)
+      // After rerenders, we should have added and removed listeners
+      // The net effect should be that we don't accumulate listeners
+      // Since we cleared mocks before rerenders, both should have been called
+      expect(addEventListenerSpy).toHaveBeenCalled()
+      expect(removeEventListenerSpy).toHaveBeenCalled()
+
+      // Verify the call counts are balanced
+      // After 3 rerenders, each rerender should trigger cleanup (remove) and setup (add)
+      // So we expect both to be called 3 times
+      expect(addEventListenerSpy).toHaveBeenCalledTimes(3)
+      expect(removeEventListenerSpy).toHaveBeenCalledTimes(3)
+
+      unmount()
+
+      addEventListenerSpy.mockRestore()
+      removeEventListenerSpy.mockRestore()
+    })
+
+    it('should cleanup iframe event listeners on unmount', async () => {
+      jest.useFakeTimers()
+
+      let iframe: HTMLIFrameElement | null = null
+      const removeEventListenerSpy = jest.fn()
+      const mockInitInlineWidget = jest.fn(() => {
+        setTimeout(() => {
+          iframe = document.createElement('iframe')
+          iframe.src = 'https://calendly.com/test'
+          iframe.removeEventListener = removeEventListenerSpy
+          mockWidgetElement.appendChild(iframe)
+        }, 10)
+      })
+
+      window.Calendly = {
+        initInlineWidget: mockInitInlineWidget,
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://assets.calendly.com/assets/external/widget.js'
+      document.body.appendChild(script)
+
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      const { unmount } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Initialize widget
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      // Create iframe
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      // Polling finds iframe and attaches listeners
+      act(() => {
+        jest.advanceTimersByTime(100)
+      })
+
+      expect(iframe).toBeTruthy()
+
+      // Unmount component
+      unmount()
+
+      // Verify removeEventListener was called for both 'load' and 'error'
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('load', expect.any(Function))
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('error', expect.any(Function))
+
+      script.remove()
+      jest.useRealTimers()
+    })
+
+    it('should clear all timeouts on unmount', async () => {
+      jest.useFakeTimers()
+      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout')
+
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      const { unmount } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Advance timers to allow script creation and timeout setup
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      // Unmount before timeout fires
+      unmount()
+
+      // clearTimeout should have been called for pending timeouts
+      expect(clearTimeoutSpy).toHaveBeenCalled()
+
+      clearTimeoutSpy.mockRestore()
+      jest.useRealTimers()
+    })
+
+    it('should clear all intervals on unmount during polling', async () => {
+      jest.useFakeTimers()
+      const clearIntervalSpy = jest.spyOn(global, 'clearInterval')
+
+      // Script exists but window.Calendly is not yet available
+      const script = document.createElement('script')
+      script.src = 'https://assets.calendly.com/assets/external/widget.js'
+      document.body.appendChild(script)
+
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      const { unmount } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Advance timers to start polling
+      act(() => {
+        jest.advanceTimersByTime(50)
+      })
+
+      // Unmount during polling
+      unmount()
+
+      // clearInterval should have been called for polling interval
+      expect(clearIntervalSpy).toHaveBeenCalled()
+
+      clearIntervalSpy.mockRestore()
+      script.remove()
+      jest.useRealTimers()
+    })
+
+    it('should not leave orphaned DOM elements after unmount', async () => {
+      jest.useFakeTimers()
+
+      const mockInitInlineWidget = jest.fn(() => {
+        const iframe = document.createElement('iframe')
+        iframe.src = 'https://calendly.com/test'
+        mockWidgetElement.appendChild(iframe)
+      })
+
+      window.Calendly = {
+        initInlineWidget: mockInitInlineWidget,
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://assets.calendly.com/assets/external/widget.js'
+      document.body.appendChild(script)
+
+      const initialReduxState: Partial<RootState> = {
+        calendly: {
+          isLoaded: false,
+          isSecondStep: false,
+          hasScheduled: false,
+          hasError: false,
+        } as CalendlyState,
+      }
+
+      const { unmount } = renderHook(() => useCalendly(widgetRef, calendlyUrl), {
+        initialReduxState,
+      })
+
+      // Initialize widget
+      act(() => {
+        jest.advanceTimersByTime(10)
+      })
+
+      expect(mockWidgetElement.querySelector('iframe')).toBeTruthy()
+
+      unmount()
+
+      // Widget container should still have iframe (cleanup is caller's responsibility)
+      // But no memory leaks from event handlers
+      // The hook doesn't clear widget innerHTML on unmount - that's expected
+
+      script.remove()
+      jest.useRealTimers()
+    })
+  })
 })

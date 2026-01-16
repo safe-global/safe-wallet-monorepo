@@ -77,7 +77,7 @@ describe('HnCalendlyStep', () => {
       render(<HnCalendlyStep calendlyUrl={calendlyUrl} onBookingScheduled={mockOnBookingScheduled} />)
 
       expect(screen.getByText('Something went wrong')).toBeInTheDocument()
-      expect(screen.getByText('Please refresh the page or open the link in a new tab.')).toBeInTheDocument()
+      expect(screen.getByText('Please reload the page.')).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /reload/i })).toBeInTheDocument()
     })
 
