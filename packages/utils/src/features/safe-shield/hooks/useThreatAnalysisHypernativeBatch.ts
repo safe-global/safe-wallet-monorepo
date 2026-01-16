@@ -79,6 +79,15 @@ export function useThreatAnalysisHypernativeBatch({
       return results
     }
 
+    // Handle missing authToken case
+    if (!authToken) {
+      const requestedHashes = batchRequest?.safeTxHashes || []
+      requestedHashes.forEach((hash) => {
+        results[hash] = [undefined, new Error('authToken is required'), false]
+      })
+      return results
+    }
+
     // Initialize all requested hashes with loading state
     const requestedHashes = batchRequest?.safeTxHashes || []
     requestedHashes.forEach((hash) => {
@@ -148,16 +157,7 @@ export function useThreatAnalysisHypernativeBatch({
     }
 
     return results
-  }, [batchResponse, error, isLoading, skip, batchRequest, safeAddress])
-
-  if (!authToken && !skip) {
-    const requestedHashes = batchRequest?.safeTxHashes || []
-    const results: Record<`0x${string}`, AsyncResult<ThreatAnalysisResults>> = {}
-    requestedHashes.forEach((hash) => {
-      results[hash] = [undefined, new Error('authToken is required'), false]
-    })
-    return results
-  }
+  }, [batchResponse, error, isLoading, skip, batchRequest, safeAddress, authToken])
 
   return resultsMap
 }
