@@ -29,6 +29,7 @@ export const HnLoginCard = (): ReactElement => {
           py: 0,
           alignItems: 'center',
           lineHeight: 'initial',
+          minWidth: '303px',
           '& .MuiAlert-icon': { mr: 1 },
           '& .MuiAlert-action': { pt: 0, pl: 1, mr: 0 },
         }}
@@ -44,7 +45,7 @@ export const HnLoginCard = (): ReactElement => {
   }
 
   return (
-    <Stack direction="row" alignItems="center" gap={0.5} px={2}>
+    <Stack direction="row" alignItems="center" gap={0.5} pr={2} py={1}>
       <SvgIcon component={HypernativeIcon} fontSize="small" inheritViewBox color="primary" />
       <Typography variant="body2" color="text.secondary" letterSpacing={1}>
         Logged in to Hypernative
