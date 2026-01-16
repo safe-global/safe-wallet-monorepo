@@ -11,7 +11,7 @@ describe('Walletconnect tests', () => {
   })
 
   it('Verify that connection via WC is not allowed when no selected safe in URL', () => {
-    cy.visit(constants.homeUrl)
+    cy.visit('/' + constants.welcomeAccountUrl)
     wc.clickOnWCBtn()
     cy.contains(wc.connectWCStr).should('be.visible')
     main.verifyElementsCount(wc.wcInput, 0)
