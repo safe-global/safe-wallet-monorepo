@@ -1,6 +1,6 @@
 import * as constants from '../../support/constants'
 import * as main from './main.page'
-import { clickOnContinueSignTransactionBtn, selectComboButtonOption } from './create_tx.pages'
+import { clickOnContinueSignTransactionBtn, selectComboButtonOption, tokenSelector } from './create_tx.pages'
 
 const tokenSelectorText = 'G(ö|oe)rli Ether'
 const noLaterString = 'No, later'
@@ -26,7 +26,6 @@ export const allActionsSection = '[data-testid="all-actions"]'
 export const accordionActionItem = '[data-testid="action-item"]'
 
 const recipientInput = 'input[name^="recipients."][name$=".recipient"]'
-const tokenBalance = '[data-testid="token-balance"]'
 const tokenAddressInput = 'input[name="tokenAddress"]'
 const listBox = 'ul[role="listbox"]'
 const amountInput = 'input[name^="recipients."][name$=".amount"]'
@@ -49,7 +48,7 @@ export function addToBatch(EOA, currentNonce, amount) {
 function fillTransactionData(EOA, amount) {
   cy.get(recipientInput).type(EOA, { delay: 1 })
   // Click on the Token selector
-  cy.get(tokenBalance).click()
+  cy.get(tokenSelector).click()
   cy.get(listBox).contains(constants.tokenNames.sepoliaEther).click()
   cy.get(amountInput).type(amount)
   cy.contains(nextBtn).click()

@@ -4,8 +4,6 @@ import * as assets from '../pages/assets.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as ls from '../../support/localstorage_data.js'
 
-const ASSET_NAME_COLUMN = 0
-
 let staticSafes = []
 
 describe('Tokens tests', () => {
@@ -26,35 +24,34 @@ describe('Tokens tests', () => {
   it('Verify that non-native tokens are present and have balance', () => {
     assets.toggleShowAllTokens(true)
     assets.toggleHideDust(false)
-    assets.verifyBalance(assets.currencyDaiCap, assets.currencyDaiAlttext)
-    assets.verifyTokenBalanceFormat(assets.currencyDaiCap, assets.currencyDaiFormat_2, value)
-
-    assets.verifyBalance(assets.currencyAave, assets.currencyAaveAlttext)
-    assets.verifyTokenBalanceFormat(assets.currencyAave, assets.currentcyAaveFormat, value)
-
-    assets.verifyBalance(assets.currencyLink, assets.currencyLinkAlttext)
-    assets.verifyTokenBalanceFormat(assets.currencyLink, assets.currentcyLinkFormat, value)
-
-    assets.verifyBalance(assets.currencyTestTokenA, assets.currencyTestTokenAAlttext)
-    assets.verifyTokenBalanceFormat(assets.currencyTestTokenA, assets.currentcyTestTokenAFormat, value)
-
-    assets.verifyBalance(assets.currencyTestTokenB, assets.currencyTestTokenBAlttext)
-    assets.verifyTokenBalanceFormat(assets.currencyTestTokenB, assets.currentcyTestTokenBFormat, value)
-
-    assets.verifyBalance(assets.currencyUSDC, assets.currencyTestUSDCAlttext)
-    assets.verifyTokenBalanceFormat(assets.currencyUSDC, assets.currentcyTestUSDCFormat, value)
+    assets.verifyBalance(assets.currencyDaiCap, assets.currencyDaiAlttext, assets.currencyDaiBalance, value)
+    assets.verifyBalance(assets.currencyAave, assets.currencyAaveAlttext, assets.currencyAaveBalance, value)
+    assets.verifyBalance(assets.currencyLink, assets.currencyLinkAlttext, assets.currencyLinkBalance, value)
+    assets.verifyBalance(
+      assets.currencyTestTokenA,
+      assets.currencyTestTokenAAlttext,
+      assets.currencyTestTokenABalance,
+      value,
+    )
+    assets.verifyBalance(
+      assets.currencyTestTokenB,
+      assets.currencyTestTokenBAlttext,
+      assets.currencyTestTokenBBalance,
+      value,
+    )
+    assets.verifyBalance(assets.currencyUSDC, assets.currencyTestUSDCAlttext, assets.currencyUSDCBalance, value)
   })
 
   it('Verify that every token except the native token has a "go to blockexplorer link"', () => {
     assets.toggleShowAllTokens(true)
     assets.toggleHideDust(false)
-    assets.verifyAssetNameHasExplorerLink(assets.currencyUSDC, ASSET_NAME_COLUMN)
-    assets.verifyAssetNameHasExplorerLink(assets.currencyTestTokenB, ASSET_NAME_COLUMN)
-    assets.verifyAssetNameHasExplorerLink(assets.currencyTestTokenA, ASSET_NAME_COLUMN)
-    assets.verifyAssetNameHasExplorerLink(assets.currencyLink, ASSET_NAME_COLUMN)
-    assets.verifyAssetNameHasExplorerLink(assets.currencyAave, ASSET_NAME_COLUMN)
-    assets.verifyAssetNameHasExplorerLink(assets.currencyDaiCap, ASSET_NAME_COLUMN)
-    assets.verifyAssetExplorerLinkNotAvailable(constants.tokenNames.sepoliaEther, ASSET_NAME_COLUMN)
+    assets.verifyAssetNameHasExplorerLink(assets.currencyUSDC)
+    assets.verifyAssetNameHasExplorerLink(assets.currencyTestTokenB)
+    assets.verifyAssetNameHasExplorerLink(assets.currencyTestTokenA)
+    assets.verifyAssetNameHasExplorerLink(assets.currencyLink)
+    assets.verifyAssetNameHasExplorerLink(assets.currencyAave)
+    assets.verifyAssetNameHasExplorerLink(assets.currencyDaiCap)
+    assets.verifyAssetExplorerLinkNotAvailable(constants.tokenNames.sepoliaEther)
   })
 
   it('Verify the default Fiat currency and the effects after changing it', () => {
