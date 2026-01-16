@@ -3,10 +3,7 @@ import type { ThreatAnalysisResults } from '../types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { mapHypernativeResponse } from '@safe-global/utils/features/safe-shield/utils/mapHypernativeResponse'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
-import {
-  isHypernativeBatchAssessmentErrorResponse,
-  type HypernativeBatchAssessmentResponseItemDto,
-} from '@safe-global/store/hypernative/hypernativeApi.dto'
+import { isHypernativeBatchAssessmentErrorResponse } from '@safe-global/store/hypernative/hypernativeApi.dto'
 import { buildHypernativeBatchRequestData } from '../utils/buildHypernativeBatchRequestData'
 
 type UseThreatAnalysisHypernativeBatchProps = {
@@ -103,15 +100,9 @@ export function useThreatAnalysisHypernativeBatch({
 
     // Process successful batch response
     if (batchResponse) {
-      // Create a map of responses by safeTxHash for quick lookup
-      const responseMap = new Map<`0x${string}`, HypernativeBatchAssessmentResponseItemDto>()
-      batchResponse.forEach((item) => {
-        responseMap.set(item.safeTxHash, item)
-      })
-
       // Map each requested hash to its result
       requestedHashes.forEach((hash) => {
-        const responseItem = responseMap.get(hash)
+        const responseItem = batchResponse.find((item) => item.safeTxHash === hash)
 
         if (!responseItem) {
           // Hash not found in response (shouldn't happen per API spec, but handle gracefully)
