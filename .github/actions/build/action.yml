@@ -29,17 +29,11 @@ runs:
 
         # Datadog RUM env:
         # - can be overridden by setting NEXT_PUBLIC_DATADOG_RUM_ENV in repo secrets
-        # - otherwise derived from the workflow context
+        # - otherwise set to "production" or "development" based on prod flag
         DATADOG_RUM_ENV="${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_ENV }}"
         if [ -z "$DATADOG_RUM_ENV" ]; then
           if [ "${{ inputs.prod }}" = "true" ]; then
             DATADOG_RUM_ENV="production"
-          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            DATADOG_RUM_ENV="staging"
-          elif [ "${{ github.ref }}" = "refs/heads/dev" ]; then
-            DATADOG_RUM_ENV="dev"
-          elif [ "${{ github.event_name }}" = "pull_request" ]; then
-            DATADOG_RUM_ENV="review"
           else
             DATADOG_RUM_ENV="development"
           fi
@@ -121,7 +115,7 @@ runs:
           --minified-path-prefix=/_next/static
       env:
         DATADOG_API_KEY: ${{ fromJSON(inputs.secrets).DATADOG_API_KEY }}
-        DATADOG_SITE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SITE && fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SITE || 'datadoghq.eu' }}
+        DATADOG_SITE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SITE || 'datadoghq.eu' }}
         NEXT_PUBLIC_DATADOG_RUM_SERVICE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SERVICE }}
         NEXT_PUBLIC_DATADOG_RUM_SITE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SITE }}
 
