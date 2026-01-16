@@ -7,7 +7,7 @@ import SafeLogo from '@/public/images/logo-no-text.svg'
 import css from '@/components/new-safe/create/OverviewWidget/styles.module.css'
 import ConnectWalletButton from '@/components/common/ConnectWallet/ConnectWalletButton'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
+import { NetworkLogosList } from '@/features/multichain'
 
 const LOGO_DIMENSIONS = '22px'
 

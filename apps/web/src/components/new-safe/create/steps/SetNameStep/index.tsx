@@ -19,7 +19,7 @@ import { useEffect } from 'react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useSafeSetupHints } from '../OwnerPolicyStep/useSafeSetupHints'
 import type { CreateSafeInfoItem } from '../../CreateSafeInfos'
-import SafeCreationNetworkInput from '@/features/multichain/components/SafeCreationNetworkInput'
+import { SafeCreationNetworkInput } from '@/features/multichain'
 import useWallet from '@/hooks/wallets/useWallet'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 

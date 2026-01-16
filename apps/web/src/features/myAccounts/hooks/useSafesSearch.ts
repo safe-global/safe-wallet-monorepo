@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import Fuse from 'fuse.js'
 import type { AllSafeItems } from './useAllSafesGrouped'
 import useChains from '@/hooks/useChains'
-import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
+import { isMultiChainSafeItem } from '@/features/multichain'
 
 const useSafesSearch = (safes: AllSafeItems, query: string): AllSafeItems => {
   const { configs: chains } = useChains()

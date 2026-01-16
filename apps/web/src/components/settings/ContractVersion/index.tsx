@@ -12,7 +12,7 @@ import { UpdateSafeFlow } from '@/components/tx-flow/flows'
 import ExternalLink from '@/components/common/ExternalLink'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useCurrentChain } from '@/hooks/useChains'
-import { UnsupportedMastercopyWarning } from '@/features/multichain/components/UnsupportedMastercopyWarning/UnsupportedMasterCopyWarning'
+import { UnsupportedMastercopyWarning } from '@/features/multichain'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 export const ContractVersion = () => {

@@ -36,7 +36,7 @@ import {
   Safe_to_l2_setup__factory,
 } from '@safe-global/utils/types/contracts'
 import { createWeb3 } from '@/hooks/wallets/web3'
-import { hasMultiChainCreationFeatures } from '@/features/multichain/utils/utils'
+import { hasMultiChainCreationFeatures } from '@/features/multichain'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 export type SafeCreationProps = {

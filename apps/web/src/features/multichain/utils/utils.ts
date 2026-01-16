@@ -18,6 +18,7 @@ import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import { type MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { MIN_SAFE_VERSION_FOR_MULTICHAIN } from '../constants'
 
 type SafeSetup = {
   owners: string[]
@@ -139,8 +140,10 @@ export const predictAddressBasedOnReplayData = async (safeCreationData: Replayed
 }
 
 const canMultichain = (chain: Chain) => {
-  const MIN_SAFE_VERSION = '1.4.1'
-  return hasFeature(chain, FEATURES.COUNTERFACTUAL) && semverSatisfies(LATEST_SAFE_VERSION, `>=${MIN_SAFE_VERSION}`)
+  return (
+    hasFeature(chain, FEATURES.COUNTERFACTUAL) &&
+    semverSatisfies(LATEST_SAFE_VERSION, `>=${MIN_SAFE_VERSION_FOR_MULTICHAIN}`)
+  )
 }
 
 export const hasMultiChainCreationFeatures = (chain: Chain): boolean => {
