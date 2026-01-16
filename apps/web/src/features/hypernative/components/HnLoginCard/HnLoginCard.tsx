@@ -24,7 +24,14 @@ export const HnLoginCard = (): ReactElement => {
         variant="standard"
         severity="warning"
         icon={<SvgIcon component={AlertIcon} fontSize="small" inheritViewBox color="warning" />}
-        sx={{ px: 2, py: 0, alignItems: 'center', lineHeight: 'initial', '& .MuiAlert-action': { pt: 0, mr: 0 } }}
+        sx={{
+          px: 2,
+          py: 0,
+          alignItems: 'center',
+          lineHeight: 'initial',
+          '& .MuiAlert-icon': { mr: 1 },
+          '& .MuiAlert-action': { pt: 0, pl: 1, mr: 0 },
+        }}
         action={
           <ExternalLink href="#" onClick={handleLogin}>
             Log in
