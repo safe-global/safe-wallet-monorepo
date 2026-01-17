@@ -5,8 +5,12 @@ import { useSelector } from 'react-redux'
 import { RootState } from '@/src/store'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { keyStorageService } from '@/src/services/key-storage'
-import { Wallet, getBytes } from 'ethers'
+import { Wallet, getBytes, TypedDataDomain } from 'ethers'
 import { Address } from '@/src/types/address'
+import { generateSafeMessageTypedData } from '@safe-global/utils/utils/safe-messages'
+import { adjustVInSignature } from '@safe-global/protocol-kit/dist/src/utils/signatures'
+import { SigningMethod } from '@safe-global/protocol-kit'
+import useSafeInfo from '@/src/hooks/useSafeInfo'
 
 export interface PendingRequest {
   type: string
@@ -29,6 +33,7 @@ export function useWalletSession(activeSafeAddress: string) {
 
   const activeSafe = useSelector(selectActiveSafe)
   const activeSigner = useSelector((state: RootState) => state.activeSigner[activeSafeAddress as Address])
+  const { safe: safeInfo, safeLoaded } = useSafeInfo()
 
   const startSession = React.useCallback(async () => {
     try {
@@ -110,26 +115,34 @@ export function useWalletSession(activeSafeAddress: string) {
         throw new Error('No active signer')
       }
 
+      if (!safeLoaded || !safeInfo.version) {
+        throw new Error('Safe info not loaded')
+      }
+
       const privKey = await keyStorageService.getPrivateKey(activeSigner.value)
       if (!privKey) {
         throw new Error('Could not retrieve private key')
       }
 
       const wallet = new Wallet(privKey)
-      let signature = ''
 
-      if (pendingRequest.type === 'personal_sign') {
-        // Try to handle hex string or plain string
-        let content: string | Uint8Array = pendingRequest.message
-        try {
-          if (typeof content === 'string' && content.startsWith('0x')) {
-            content = getBytes(content)
-          }
-        } catch {
-          // ignore, sign as string
-        }
-        signature = await wallet.signMessage(content)
-      }
+      // Decode hex-encoded message if needed
+      const rawMessage = pendingRequest.message
+      const messageToSign = rawMessage.startsWith('0x') ? new TextDecoder().decode(getBytes(rawMessage)) : rawMessage
+
+      // Generate SafeMessage EIP-712 typed data and sign
+      const typedData = generateSafeMessageTypedData(
+        safeInfo as Parameters<typeof generateSafeMessageTypedData>[0],
+        messageToSign,
+      )
+
+      let signature = await wallet.signTypedData(
+        typedData.domain as TypedDataDomain,
+        typedData.types,
+        typedData.message,
+      )
+
+      signature = await adjustVInSignature(SigningMethod.ETH_SIGN_TYPED_DATA, signature)
 
       requestResolver.current.resolve(signature)
     } catch (e) {
@@ -139,7 +152,7 @@ export function useWalletSession(activeSafeAddress: string) {
       setPendingRequest(null)
       requestResolver.current = null
     }
-  }, [pendingRequest, activeSigner])
+  }, [pendingRequest, activeSigner, safeInfo, safeLoaded])
 
   const rejectRequest = React.useCallback(() => {
     if (requestResolver.current) {
@@ -150,18 +163,9 @@ export function useWalletSession(activeSafeAddress: string) {
   }, [])
 
   const closeSession = React.useCallback(async () => {
-    try {
-      if (!session) {
-        return
-      }
-      await session.close()
-      setSession(null)
-      setStatus('idle')
-    } catch {
-      // Session close failed, reset state anyway
-      setSession(null)
-      setStatus('idle')
-    }
+    await session?.close().catch(() => undefined)
+    setSession(null)
+    setStatus('idle')
   }, [session])
 
   return {

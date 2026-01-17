@@ -30,7 +30,7 @@ jest.mock('@openlv/react-native', () => ({
 // Mock useSelector with a function we can control
 const mockUseSelector = jest.fn()
 jest.mock('react-redux', () => ({
-  useSelector: mockUseSelector,
+  useSelector: (selector: unknown) => mockUseSelector(selector),
 }))
 
 jest.mock('@/src/services/key-storage', () => ({
@@ -43,6 +43,49 @@ jest.mock('@/src/services/key-storage', () => ({
 jest.mock('@/src/store/middleware/notificationSync', () => ({
   __esModule: true,
   default: () => (next: (action: unknown) => unknown) => (action: unknown) => next(action),
+}))
+
+// Mock useSafeInfo hook
+const mockSafeInfo = {
+  address: { value: '0x1234567890123456789012345678901234567890' },
+  chainId: '1',
+  version: '1.3.0',
+  nonce: 0,
+  threshold: 1,
+  owners: [],
+  implementation: { value: '0x0000000000000000000000000000000000000000' },
+  implementationVersionState: 'UP_TO_DATE' as const,
+}
+
+jest.mock('@/src/hooks/useSafeInfo', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    safe: mockSafeInfo,
+    safeLoaded: true,
+    safeError: undefined,
+    safeLoading: false,
+  })),
+}))
+
+// Mock Safe message utilities
+jest.mock('@safe-global/utils/utils/safe-messages', () => ({
+  generateSafeMessageTypedData: jest.fn(() => ({
+    domain: { chainId: 1, verifyingContract: '0x1234567890123456789012345678901234567890' },
+    types: { SafeMessage: [{ name: 'message', type: 'bytes' }] },
+    message: { message: '0x1234' },
+    primaryType: 'SafeMessage',
+  })),
+}))
+
+// Mock protocol-kit signature utilities
+jest.mock('@safe-global/protocol-kit/dist/src/utils/signatures', () => ({
+  adjustVInSignature: jest.fn((_, sig) => Promise.resolve(sig)),
+}))
+
+jest.mock('@safe-global/protocol-kit', () => ({
+  SigningMethod: {
+    ETH_SIGN_TYPED_DATA: 'eth_signTypedData',
+  },
 }))
 
 const mockSafeAddress = '0x1234567890123456789012345678901234567890'
@@ -258,6 +301,72 @@ describe('useWalletSession', () => {
         message: '0x48656c6c6f',
       })
       expect(result.current.pendingRequest?.error).toBeUndefined()
+    })
+  })
+
+  describe('ERC-1271 Safe message signing', () => {
+    it('should use SafeMessage typed data for signing when Safe info is available', async () => {
+      const { generateSafeMessageTypedData } = jest.requireMock('@safe-global/utils/utils/safe-messages')
+      const { adjustVInSignature } = jest.requireMock('@safe-global/protocol-kit/dist/src/utils/signatures')
+      const { keyStorageService } = jest.requireMock('@/src/services/key-storage')
+      const { connectSession } = jest.requireMock('@openlv/react-native')
+
+      // Mock private key retrieval - using a valid private key format
+      const mockPrivateKey = '0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+      keyStorageService.getPrivateKey.mockResolvedValue(mockPrivateKey)
+
+      let messageHandler: ((message: unknown) => Promise<unknown>) | undefined
+      connectSession.mockImplementation((_url: string, handler: (message: unknown) => Promise<unknown>) => {
+        messageHandler = handler
+        return Promise.resolve(mockSession)
+      })
+
+      const { result } = renderHook(() => useWalletSession(mockSafeAddress))
+
+      act(() => {
+        result.current.setConnectionUrl('https://example.com/connect')
+      })
+
+      await act(async () => {
+        await result.current.startSession()
+      })
+
+      // Simulate personal_sign request
+      const signRequest = {
+        method: 'personal_sign',
+        params: ['0x48656c6c6f', mockSafeAddress], // "Hello" in hex
+      }
+
+      // Start the signing request
+      let signPromise: Promise<unknown> | undefined
+      act(() => {
+        if (messageHandler) {
+          signPromise = messageHandler(signRequest)
+        }
+      })
+
+      // Confirm the request
+      await act(async () => {
+        await result.current.confirmRequest()
+      })
+
+      // Wait for the sign promise to resolve
+      if (signPromise) {
+        await signPromise
+      }
+
+      // Verify that generateSafeMessageTypedData was called with the Safe info
+      // The hex message '0x48656c6c6f' gets decoded to 'Hello' before being passed
+      expect(generateSafeMessageTypedData).toHaveBeenCalledWith(
+        expect.objectContaining({
+          version: '1.3.0',
+          chainId: '1',
+        }),
+        'Hello', // Hex message is decoded to string for proper hashing
+      )
+
+      // Verify that adjustVInSignature was called
+      expect(adjustVInSignature).toHaveBeenCalled()
     })
   })
 })
