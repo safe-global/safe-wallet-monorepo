@@ -86,13 +86,16 @@
   margin-left: var(--space-2);
 }
 
+.sidebarSlot {
+  margin-bottom: var(--space-2);
+}
+
 .sticky {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
   position: sticky;
-  top: var(--space-2);
-  margin-top: var(--space-2);
+  top: var(--space-1);
 }
 
 .titleWrapper {

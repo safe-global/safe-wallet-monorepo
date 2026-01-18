@@ -30,6 +30,7 @@ jobs:
       - uses: ./.github/actions/yarn
 
       - name: Annotations and coverage report
+        if: github.event_name == 'pull_request'
         uses: ArtiomTr/jest-coverage-report-action@v2.3.1
         with:
           skip-step: install
@@ -38,6 +39,13 @@ jobs:
           test-script: yarn test:ci
           working-directory: apps/web
           github-token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          NEXT_PUBLIC_IS_OFFICIAL_HOST: true
+
+      - name: Run tests (push only)
+        if: github.event_name == 'push'
+        run: yarn test:ci
+        working-directory: apps/web
         env:
           NEXT_PUBLIC_IS_OFFICIAL_HOST: true
 
