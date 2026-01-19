@@ -1,6 +1,8 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import type { MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import type { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
+import type { useSafeCreationData } from './hooks/useSafeCreationData'
 
 export interface SafeSetup {
   owners: string[]
@@ -16,19 +18,8 @@ export interface CreateSafeOnNewChainForm {
 
 export interface ReplaySafeDialogProps {
   safeAddress: string
-  safeCreationResult: any
-  replayableChains?: Chain[]
-  chain?: Chain
-  currentName: string | undefined
-  open: boolean
-  onClose: () => void
-  isUnsupportedSafeCreationVersion?: boolean
-}
-
-export interface SafeAddressSelectionProps {
-  safeAddress: string
-  safeCreationResult: any
-  replayableChains?: Chain[]
+  safeCreationResult: ReturnType<typeof useSafeCreationData>
+  replayableChains?: ReturnType<typeof useCompatibleNetworks>
   chain?: Chain
   currentName: string | undefined
   open: boolean

@@ -26,21 +26,7 @@ import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/ho
 import { MULTICHAIN_HELP_ARTICLE } from '@/config/constants'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
-
-type CreateSafeOnNewChainForm = {
-  chainId: string
-}
-
-type ReplaySafeDialogProps = {
-  safeAddress: string
-  safeCreationResult: ReturnType<typeof useSafeCreationData>
-  replayableChains?: ReturnType<typeof useCompatibleNetworks>
-  chain?: Chain
-  currentName: string | undefined
-  open: boolean
-  onClose: () => void
-  isUnsupportedSafeCreationVersion?: boolean
-}
+import type { CreateSafeOnNewChainForm, ReplaySafeDialogProps } from '../../types'
 
 const ReplaySafeDialog = ({
   safeAddress,

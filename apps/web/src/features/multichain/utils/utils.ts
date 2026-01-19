@@ -4,6 +4,7 @@ import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/saf
 import semverSatisfies from 'semver/functions/satisfies'
 import memoize from 'lodash/memoize'
 import { keccak256, ethers, solidityPacked, getCreate2Address, type Provider } from 'ethers'
+import type { SafeSetup } from '../types'
 
 import {
   type UndeployedSafesState,
@@ -19,12 +20,6 @@ import { type MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafes
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { MIN_SAFE_VERSION_FOR_MULTICHAIN } from '../constants'
-
-type SafeSetup = {
-  owners: string[]
-  threshold: number
-  chainId: string
-}
 
 export const isChangingSignerSetup = (decodedData: DataDecoded | undefined) => {
   return decodedData?.method === 'addOwnerWithThreshold' || decodedData?.method === 'removeOwner'
