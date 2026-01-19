@@ -1,4 +1,6 @@
 import type { ILogger, IObservabilityProvider } from '../types'
+import { datadogLogs } from '@datadog/browser-logs'
+import { datadogRum } from '@datadog/browser-rum'
 import {
   COMMIT_HASH,
   DATADOG_CLIENT_TOKEN,
@@ -30,53 +32,6 @@ type DatadogSite =
   | 'ddog-gov.com'
   | 'ap1.datadoghq.com'
 
-interface DatadogLogsModule {
-  datadogLogs: {
-    init: (config: {
-      clientToken: string
-      site?: DatadogSite
-      forwardErrorsToLogs?: boolean
-      sessionSampleRate?: number
-    }) => void
-    logger: {
-      info: (message: string, context?: Record<string, unknown>) => void
-      warn: (message: string, context?: Record<string, unknown>) => void
-      error: (message: string, context?: Record<string, unknown>) => void
-      debug: (message: string, context?: Record<string, unknown>) => void
-    }
-  }
-}
-
-interface DatadogRumModule {
-  datadogRum: {
-    getInitConfiguration?: () => unknown
-    init: (config: {
-      applicationId: string
-      clientToken: string
-      site?: DatadogSite
-      service?: string
-      env?: string
-      version?: string
-      sessionSampleRate?: number
-      sessionReplaySampleRate?: number
-      trackUserInteractions?: boolean
-      trackResources?: boolean
-      trackLongTasks?: boolean
-      defaultPrivacyLevel?: 'mask' | 'mask-user-input' | 'allow'
-      traceSampleRate?: number
-      allowedTracingUrls?: Array<{
-        match: string
-        propagatorTypes: ('tracecontext' | 'datadog' | 'b3' | 'b3multi')[]
-      }>
-    }) => void
-    addError: (error: Error, context?: Record<string, unknown>) => void
-    setGlobalContextProperty: (key: string, value: unknown) => void
-  }
-}
-
-let datadogLogsModule: DatadogLogsModule | null = null
-let datadogRumModule: DatadogRumModule | null = null
-
 const shouldEnableDatadog = IS_PRODUCTION || DATADOG_FORCE_ENABLE
 const isDatadogLogsEnabled = shouldEnableDatadog && Boolean(DATADOG_CLIENT_TOKEN)
 const isDatadogRumEnabled =
@@ -88,13 +43,9 @@ export class DatadogProvider implements IObservabilityProvider {
   private isRumInitialized = false
 
   private setRumGlobalContext(): void {
-    if (!datadogRumModule) {
-      return
-    }
-
-    datadogRumModule.datadogRum.setGlobalContextProperty('env', DATADOG_RUM_ENV)
-    datadogRumModule.datadogRum.setGlobalContextProperty('service', DATADOG_RUM_SERVICE)
-    datadogRumModule.datadogRum.setGlobalContextProperty('version', COMMIT_HASH)
+    datadogRum.setGlobalContextProperty('env', DATADOG_RUM_ENV)
+    datadogRum.setGlobalContextProperty('service', DATADOG_RUM_SERVICE)
+    datadogRum.setGlobalContextProperty('version', COMMIT_HASH)
   }
 
   async init(): Promise<void> {
@@ -112,7 +63,7 @@ export class DatadogProvider implements IObservabilityProvider {
 
     if (hasLogsToInit) {
       try {
-        await this.initLogs()
+        this.initLogs()
       } catch (error) {
         console.warn('Failed to initialize Datadog Logs:', error)
       }
@@ -120,29 +71,16 @@ export class DatadogProvider implements IObservabilityProvider {
 
     if (hasRumToInit) {
       try {
-        await this.initRum()
+        this.initRum()
       } catch (error) {
         console.warn('Failed to initialize Datadog RUM:', error)
       }
     }
   }
 
-  private async initLogs(): Promise<void> {
-    if (!datadogLogsModule) {
-      try {
-        datadogLogsModule = await import('@datadog/browser-logs')
-      } catch (error) {
-        console.warn('Failed to load Datadog Logs module:', error)
-        return
-      }
-    }
-
-    if (!datadogLogsModule) {
-      return
-    }
-
+  private initLogs(): void {
     try {
-      datadogLogsModule.datadogLogs.init({
+      datadogLogs.init({
         clientToken: DATADOG_CLIENT_TOKEN,
         site: DATADOG_RUM_SITE as DatadogSite,
         forwardErrorsToLogs: true,
@@ -154,23 +92,9 @@ export class DatadogProvider implements IObservabilityProvider {
     }
   }
 
-  private async initRum(): Promise<void> {
-    if (!datadogRumModule) {
-      try {
-        const rumModule = await import('@datadog/browser-rum')
-        datadogRumModule = rumModule as unknown as DatadogRumModule
-      } catch (error) {
-        console.warn('Failed to load Datadog RUM module:', error)
-        return
-      }
-    }
-
-    if (!datadogRumModule) {
-      return
-    }
-
+  private initRum(): void {
     try {
-      const getInitConfiguration = datadogRumModule.datadogRum.getInitConfiguration
+      const getInitConfiguration = datadogRum.getInitConfiguration
       const isAlreadyInitialized = typeof getInitConfiguration === 'function' && Boolean(getInitConfiguration())
       if (isAlreadyInitialized) {
         this.isRumInitialized = true
@@ -178,7 +102,7 @@ export class DatadogProvider implements IObservabilityProvider {
         return
       }
 
-      datadogRumModule.datadogRum.init({
+      datadogRum.init({
         applicationId: DATADOG_RUM_APPLICATION_ID,
         clientToken: DATADOG_RUM_CLIENT_TOKEN,
         site: DATADOG_RUM_SITE as DatadogSite,
@@ -211,31 +135,31 @@ export class DatadogProvider implements IObservabilityProvider {
   getLogger(): ILogger {
     return {
       info: (message: string, context?: Record<string, unknown>) => {
-        if (this.isLogsInitialized && datadogLogsModule) {
-          datadogLogsModule.datadogLogs.logger.info(message, context)
+        if (this.isLogsInitialized) {
+          datadogLogs.logger.info(message, context)
         }
       },
       warn: (message: string, context?: Record<string, unknown>) => {
-        if (this.isLogsInitialized && datadogLogsModule) {
-          datadogLogsModule.datadogLogs.logger.warn(message, context)
+        if (this.isLogsInitialized) {
+          datadogLogs.logger.warn(message, context)
         }
       },
       error: (message: string, context?: Record<string, unknown>) => {
-        if (this.isLogsInitialized && datadogLogsModule) {
-          datadogLogsModule.datadogLogs.logger.error(message, context)
+        if (this.isLogsInitialized) {
+          datadogLogs.logger.error(message, context)
         }
       },
       debug: (message: string, context?: Record<string, unknown>) => {
-        if (this.isLogsInitialized && datadogLogsModule) {
-          datadogLogsModule.datadogLogs.logger.debug(message, context)
+        if (this.isLogsInitialized) {
+          datadogLogs.logger.debug(message, context)
         }
       },
     }
   }
 
   captureException(error: Error, context?: Record<string, unknown>): void {
-    if (this.isRumInitialized && datadogRumModule) {
-      datadogRumModule.datadogRum.addError(error, context)
+    if (this.isRumInitialized) {
+      datadogRum.addError(error, context)
     }
   }
 }

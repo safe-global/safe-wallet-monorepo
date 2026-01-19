@@ -131,16 +131,18 @@ describe('DatadogProvider', () => {
     const { DatadogProvider: EnabledDatadogProvider } = await import('../datadog')
 
     interface DatadogProviderPrivates {
-      initLogs: () => Promise<void>
-      initRum: () => Promise<void>
+      initLogs: () => void
+      initRum: () => void
     }
 
     const initLogsSpy = jest
       .spyOn(EnabledDatadogProvider.prototype as unknown as DatadogProviderPrivates, 'initLogs')
-      .mockRejectedValue(new Error('Logs init failed'))
+      .mockImplementation(() => {
+        throw new Error('Logs init failed')
+      })
     const initRumSpy = jest
       .spyOn(EnabledDatadogProvider.prototype as unknown as DatadogProviderPrivates, 'initRum')
-      .mockResolvedValue()
+      .mockImplementation(() => {})
 
     const provider = new EnabledDatadogProvider()
 
