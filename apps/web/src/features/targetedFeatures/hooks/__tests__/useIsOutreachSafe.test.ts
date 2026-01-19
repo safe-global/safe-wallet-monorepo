@@ -253,4 +253,29 @@ describe('useIsOutreachSafe', () => {
       expect(result.current).toEqual({ isTargeted: false, loading: true })
     })
   })
+
+  it('should return loading false when query is skipped via options', () => {
+    const safeInfo = safeInfoBuilder().build()
+    const outreachId = faker.number.int()
+    jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
+      safeAddress: safeInfo.address.value,
+      safe: {
+        ...safeInfo,
+        deployed: true,
+      },
+      safeLoaded: true,
+      safeLoading: false,
+      safeError: undefined,
+    })
+    jest.spyOn(targetedMessages, 'useTargetedMessagingGetTargetedSafeV1Query').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      refetch: jest.fn(),
+    })
+
+    const { result } = renderHook(() => useIsOutreachSafe(outreachId, { skip: true }))
+
+    expect(result.current).toEqual({ isTargeted: false, loading: false })
+  })
 })
