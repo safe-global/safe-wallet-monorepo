@@ -3,16 +3,10 @@ import { render, screen, fireEvent } from '@/src/tests/test-utils'
 import { PositionsError } from './PositionsError'
 
 describe('PositionsError', () => {
-  it('renders error message', () => {
-    render(<PositionsError onRetry={jest.fn()} />)
+  it('renders correctly', () => {
+    const { toJSON } = render(<PositionsError onRetry={jest.fn()} />)
 
-    expect(screen.getByText("Couldn't load positions")).toBeTruthy()
-  })
-
-  it('renders retry button', () => {
-    render(<PositionsError onRetry={jest.fn()} />)
-
-    expect(screen.getByText('Retry')).toBeTruthy()
+    expect(toJSON()).toMatchSnapshot()
   })
 
   it('calls onRetry when retry button is pressed', () => {

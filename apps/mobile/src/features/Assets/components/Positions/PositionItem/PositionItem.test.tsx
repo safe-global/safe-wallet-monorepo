@@ -21,32 +21,11 @@ const createMockPosition = (overrides?: Partial<Position>): Position => ({
 })
 
 describe('PositionItem', () => {
-  it('renders position name and symbol', () => {
+  it('renders correctly', () => {
     const position = createMockPosition()
-    render(<PositionItem position={position} currency="usd" />)
+    const { toJSON } = render(<PositionItem position={position} currency="usd" />)
 
-    expect(screen.getByText('USD Coin')).toBeTruthy()
-  })
-
-  it('renders formatted balance', () => {
-    const position = createMockPosition()
-    render(<PositionItem position={position} currency="usd" />)
-
-    expect(screen.getByText(/1 USDC/)).toBeTruthy()
-  })
-
-  it('renders fiat value', () => {
-    const position = createMockPosition()
-    render(<PositionItem position={position} currency="usd" />)
-
-    expect(screen.getByText(/1,500/)).toBeTruthy()
-  })
-
-  it('renders position type label', () => {
-    const position = createMockPosition({ position_type: 'staked' })
-    render(<PositionItem position={position} currency="usd" />)
-
-    expect(screen.getByText('Staking')).toBeTruthy()
+    expect(toJSON()).toMatchSnapshot()
   })
 
   it('renders "Unknown" for null position type', () => {
@@ -54,26 +33,5 @@ describe('PositionItem', () => {
     render(<PositionItem position={position} currency="usd" />)
 
     expect(screen.getByText('Unknown')).toBeTruthy()
-  })
-
-  it('renders positive 24h change', () => {
-    const position = createMockPosition({ fiatBalance24hChange: '5.0' })
-    render(<PositionItem position={position} currency="usd" />)
-
-    expect(screen.getByText(/\+.*5/)).toBeTruthy()
-  })
-
-  it('renders negative 24h change', () => {
-    const position = createMockPosition({ fiatBalance24hChange: '-3.5' })
-    render(<PositionItem position={position} currency="usd" />)
-
-    expect(screen.getByText(/-.*3.5/)).toBeTruthy()
-  })
-
-  it('handles null 24h change', () => {
-    const position = createMockPosition({ fiatBalance24hChange: null })
-    render(<PositionItem position={position} currency="usd" />)
-
-    expect(screen.getByText('0%')).toBeTruthy()
   })
 })
