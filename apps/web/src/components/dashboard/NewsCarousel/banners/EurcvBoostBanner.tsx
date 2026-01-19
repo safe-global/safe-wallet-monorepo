@@ -6,7 +6,7 @@ import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
-import { EARN_HELP_ARTICLE } from '@/features/earn/constants'
+import { EARN_HELP_ARTICLE, EURCV_APY } from '@/features/earn/constants'
 import { EURCV_ASSET_ID } from '@/config/eurcv'
 
 export const eurcvBoostBannerID = 'eurcvBoostBanner'
@@ -40,7 +40,7 @@ export const EurcvBoostBanner = ({ onDismiss }: { onDismiss: () => void }) => {
           <Box className={css.eurcvTextContainer}>
             <span className={css.eurcvTitle}>EURCV is now available</span>
             <span className={css.eurcvDescription}>
-              A new vault is added. Stake EURCV and earn 9.5% APY on deposits.{' '}
+              A new vault is added. Stake EURCV and earn {EURCV_APY}% APY on deposits.{' '}
               <MuiLink
                 href={EARN_HELP_ARTICLE}
                 target="_blank"
