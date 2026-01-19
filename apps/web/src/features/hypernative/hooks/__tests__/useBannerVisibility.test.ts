@@ -8,7 +8,7 @@ import * as useVisibleBalancesHook from '@/hooks/useVisibleBalances'
 import * as useIsHypernativeGuardHook from '../useIsHypernativeGuard'
 import * as useIsHypernativeFeatureHook from '../useIsHypernativeFeature'
 import * as useIsOutreachSafeHook from '@/features/targetedFeatures/hooks/useIsOutreachSafe'
-import { HYPERNATIVE_OUTREACH_ID } from '../../constants'
+import { HYPERNATIVE_OUTREACH_ID, HYPERNATIVE_ALLOWLIST_OUTREACH_ID } from '../../constants'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 
 describe('useBannerVisibility', () => {
@@ -843,7 +843,7 @@ describe('useBannerVisibility', () => {
           loading: false,
         })
 
-        expect(useIsOutreachSafeHook.useIsOutreachSafe).toHaveBeenCalledWith(HYPERNATIVE_OUTREACH_ID)
+        expect(useIsOutreachSafeHook.useIsOutreachSafe).toHaveBeenCalledWith(HYPERNATIVE_OUTREACH_ID, { skip: false })
       })
 
       it('should show banner for NoBalanceCheck type when Safe is targeted', () => {
@@ -1114,7 +1114,8 @@ describe('useBannerVisibility', () => {
 
         renderHook(() => useBannerVisibility(BannerType.Promo))
 
-        expect(useIsOutreachSafeSpy).toHaveBeenCalledWith(HYPERNATIVE_OUTREACH_ID)
+        expect(useIsOutreachSafeSpy).toHaveBeenNthCalledWith(1, HYPERNATIVE_OUTREACH_ID, { skip: false })
+        expect(useIsOutreachSafeSpy).toHaveBeenNthCalledWith(2, HYPERNATIVE_ALLOWLIST_OUTREACH_ID, { skip: true })
       })
 
       it('should NOT show banner for previous campaigns (different outreachId)', () => {
@@ -1190,6 +1191,43 @@ describe('useBannerVisibility', () => {
           showBanner: true,
           loading: false,
         })
+      })
+
+      it('should show button when Safe is allowlisted even if promo targeting fails', () => {
+        jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(true)
+        jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
+        jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
+        jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
+        jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
+          balances: { fiatTotal: '0.5', items: [] },
+          loaded: true,
+          loading: false,
+        })
+        jest.spyOn(useIsHypernativeGuardHook, 'useIsHypernativeGuard').mockReturnValue({
+          isHypernativeGuard: false,
+          loading: false,
+        })
+        const useIsOutreachSafeSpy = jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe')
+        useIsOutreachSafeSpy.mockImplementation((outreachId, opts) => {
+          if (outreachId === HYPERNATIVE_OUTREACH_ID) {
+            expect(opts).toEqual({ skip: true })
+            return { isTargeted: false, loading: false }
+          }
+          if (outreachId === HYPERNATIVE_ALLOWLIST_OUTREACH_ID) {
+            expect(opts).toEqual({ skip: false })
+            return { isTargeted: true, loading: false }
+          }
+          return { isTargeted: false, loading: false }
+        })
+
+        const { result } = renderHook(() => useBannerVisibility(BannerType.TxReportButton))
+
+        expect(result.current).toEqual({
+          showBanner: true,
+          loading: false,
+        })
+        expect(useIsOutreachSafeSpy).toHaveBeenNthCalledWith(1, HYPERNATIVE_OUTREACH_ID, { skip: true })
+        expect(useIsOutreachSafeSpy).toHaveBeenNthCalledWith(2, HYPERNATIVE_ALLOWLIST_OUTREACH_ID, { skip: false })
       })
 
       it('should NOT show button when Safe is not targeted, balance is insufficient, and no guard', () => {

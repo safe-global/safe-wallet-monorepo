@@ -8,9 +8,9 @@ export type OutreachSafeResult = {
   loading: boolean
 }
 
-export function useIsOutreachSafe(outreachId: number): OutreachSafeResult {
+export function useIsOutreachSafe(outreachId: number, options?: { skip?: boolean }): OutreachSafeResult {
   const { safe } = useSafeInfo()
-  const shouldSkip = !safe.address.value
+  const shouldSkip = options?.skip || !safe.address.value
   const { data, isLoading, isFetching } = useTargetedMessagingGetTargetedSafeV1Query(
     {
       outreachId,
