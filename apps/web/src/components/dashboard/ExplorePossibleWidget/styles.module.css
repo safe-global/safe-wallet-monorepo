@@ -80,6 +80,11 @@
   color: var(--color-static-main);
 }
 
+[data-theme='dark'] .earnCard .title,
+[data-theme='dark'] .earnCard .subtitle {
+  color: white;
+}
+
 .earnCard .badge {
   background-color: var(--color-static-text-brand);
 }
