@@ -247,7 +247,7 @@ jobs:
 
       - name: Upload visual diff artifacts
         if: failure() && steps.visual-tests.outcome == 'failure'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: visual-regression-diffs
           path: apps/web/__visual_snapshots__/__diff_output__/
