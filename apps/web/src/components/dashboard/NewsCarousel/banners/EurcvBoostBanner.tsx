@@ -1,4 +1,4 @@
-import { Box, Button, Card, IconButton, Link as MuiLink } from '@mui/material'
+import { Box, Button, Card, IconButton, Link as MuiLink, Stack } from '@mui/material'
 import css from './styles.module.css'
 import CloseIcon from '@mui/icons-material/Close'
 import Track from '@/components/common/Track'
@@ -25,32 +25,39 @@ export const EurcvBoostBanner = ({ onDismiss }: { onDismiss: () => void }) => {
 
   return (
     <Card className={`${css.banner} ${css.eurcvBanner}`}>
-      <Box className={css.eurcvIconContainer}>
-        <img src="/images/eurcv-boost/eurcv.svg" alt="EURCV" className={css.eurcvIconImage} />
-      </Box>
-
-      <Box className={css.eurcvContent}>
-        <Box className={css.eurcvTextContainer}>
-          <span className={css.eurcvTitle}>EURCV is now available</span>
-          <span className={css.eurcvDescription}>
-            A new vault is added. Stake EURCV and earn 9.5% APY on deposits.{' '}
-            <MuiLink
-              href={EARN_HELP_ARTICLE}
-              target="_blank"
-              rel="noopener noreferrer"
-              sx={{ color: 'inherit', textDecoration: 'underline' }}
-            >
-              Learn more
-            </MuiLink>
-          </span>
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        alignItems={{ xs: 'flex-start', md: 'flex-start' }}
+        spacing={2}
+        className={css.eurcvStack}
+      >
+        <Box className={css.eurcvIconContainer}>
+          <img src="/images/eurcv-boost/eurcv.svg" alt="EURCV" className={css.eurcvIconImage} />
         </Box>
 
-        <Track {...OVERVIEW_EVENTS.OPEN_EURCV_BOOST}>
-          <Button variant="text" size="small" onClick={handleCtaClick} className={css.eurcvButton}>
-            Start earning &rarr;
-          </Button>
-        </Track>
-      </Box>
+        <Box className={css.eurcvContent}>
+          <Box className={css.eurcvTextContainer}>
+            <span className={css.eurcvTitle}>EURCV is now available</span>
+            <span className={css.eurcvDescription}>
+              A new vault is added. Stake EURCV and earn 9.5% APY on deposits.{' '}
+              <MuiLink
+                href={EARN_HELP_ARTICLE}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ color: 'inherit', textDecoration: 'underline' }}
+              >
+                Learn more
+              </MuiLink>
+            </span>
+          </Box>
+
+          <Track {...OVERVIEW_EVENTS.OPEN_EURCV_BOOST}>
+            <Button variant="text" size="small" onClick={handleCtaClick} className={css.eurcvButton}>
+              Start earning &rarr;
+            </Button>
+          </Track>
+        </Box>
+      </Stack>
 
       {/* Close Button */}
       <Track {...OVERVIEW_EVENTS.HIDE_EURCV_BOOST_BANNER}>

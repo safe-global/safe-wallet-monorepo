@@ -8,18 +8,15 @@
 }
 
 .eurcvBanner {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
   padding: 24px 16px;
-  gap: 16px;
-  height: 146px;
   background: linear-gradient(90deg, #b0ffc9 0%, #d7f6ff 99.5%);
   border: 0;
   border-radius: 12px;
-  flex: none;
-  flex-grow: 1;
   cursor: default;
+}
+
+.eurcvStack {
+  width: 100%;
 }
 
 .eurcvIconContainer {
@@ -44,7 +41,6 @@
   padding: 0;
   gap: 16px;
   flex-grow: 1;
-  height: 98px;
 }
 
 .eurcvTextContainer {
