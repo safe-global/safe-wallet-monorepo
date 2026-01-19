@@ -10,6 +10,7 @@ import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import BlockIcon from '@/public/images/common/block2.svg'
 import LockIcon from '@/public/images/common/lock-small.svg'
 import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
+import { buildSecurityReportUrl } from '@/features/hypernative/utils/buildSecurityReportUrl'
 
 interface HnQueueAssessmentProps {
   safeTxHash: string
@@ -17,15 +18,6 @@ interface HnQueueAssessmentProps {
   isAuthenticated: boolean
   chainId: string
   safeAddress: string
-}
-
-const buildSecurityReportUrl = (baseUrl: string, chainId: string, safe: string, tx: string): string => {
-  const url = new URL(baseUrl)
-  url.searchParams.set('chain', `evm:${chainId}`)
-  url.searchParams.set('safe', safe)
-  url.searchParams.set('tx', tx)
-  url.searchParams.set('referrer', 'safe')
-  return url.toString()
 }
 
 const SEVERITY_MESSAGES: Record<Severity, string> = {

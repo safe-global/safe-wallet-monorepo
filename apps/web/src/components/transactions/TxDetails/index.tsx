@@ -45,6 +45,10 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
 import HnSecurityReportBtnForTxDetails from '@/features/hypernative/components/HnSecurityReportBtn'
+import { HnQueueAssessmentBanner } from '@/features/hypernative/components/HnQueueAssessmentBanner'
+import { useQueueAssessment } from '@/features/hypernative/hooks/useQueueAssessment'
+import { useShowHypernativeAssessment } from '@/features/hypernative/hooks/useShowHypernativeAssessment'
+import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -102,6 +106,16 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
   // Module address, name and logoUri
   const moduleAddress = isModuleExecutionInfo(txSummary.executionInfo) ? txSummary.executionInfo.address : undefined
   const moduleAddressInfo = moduleAddress ? txDetails.txData?.addressInfoIndex?.[moduleAddress.value] : undefined
+
+  // Hypernative assessment for banner
+  const { safeAddress, safe } = useSafeInfo()
+  const chainId = safe.chainId
+  const assessment = useQueueAssessment(safeTxHash)
+  const { isAuthenticated } = useHypernativeOAuth()
+  const showAssessmentBanner = useShowHypernativeAssessment({
+    isQueue,
+    safeTxHash,
+  })
 
   return (
     <>
@@ -193,6 +207,16 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
             isTxFromProposer={isTxFromProposer}
             proposer={proposer}
           />
+
+          {showAssessmentBanner && safeTxHash && chainId && (
+            <HnQueueAssessmentBanner
+              safeTxHash={safeTxHash}
+              assessment={assessment}
+              isAuthenticated={isAuthenticated}
+              chainId={chainId}
+              safeAddress={safeAddress}
+            />
+          )}
 
           {isQueue && <HnSecurityReportBtnForTxDetails txDetails={txDetails} />}
 
