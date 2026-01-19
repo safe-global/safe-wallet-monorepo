@@ -23,6 +23,8 @@ export enum MixpanelEvent {
   GUARDIAN_BANNER_DISMISSED = 'Guardian Banner Dismissed',
   EXPLORE_POSSIBLE_CLICKED = 'Explore Possible Clicked',
   EURCV_BOOST_EXPLORE_CLICKED = 'EURCV Boost Explore Clicked',
+  EURCV_BOOST_BANNER_CLICKED = 'EURCV Boost Banner Clicked',
+  EURCV_BOOST_BANNER_DISMISSED = 'EURCV Boost Banner Dismissed',
   TRANSACTION_STARTED = 'Transaction Started',
   TRANSACTION_RECIPIENT_DECODED = 'Transaction Recipient Decoded',
   TRANSACTION_CONTRACT_DECODED = 'Transaction Contract Decoded',
