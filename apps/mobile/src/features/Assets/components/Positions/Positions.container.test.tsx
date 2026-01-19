@@ -14,8 +14,12 @@ jest.mock('@/src/store/activeSafeSlice', () => ({
 
 jest.mock('@/src/hooks/useHasFeature', () => ({
   useHasFeature: (feature: string) => {
-    if (feature === 'POSITIONS') {return true}
-    if (feature === 'PORTFOLIO_ENDPOINT') {return false}
+    if (feature === 'POSITIONS') {
+      return true
+    }
+    if (feature === 'PORTFOLIO_ENDPOINT') {
+      return false
+    }
     return false
   },
 }))
