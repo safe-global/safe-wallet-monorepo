@@ -19,9 +19,9 @@
 
 **Purpose**: Create directory structure and shared utilities foundation
 
-- [ ] T001 Create shared positions utils directory structure at `packages/utils/src/features/positions/`
-- [ ] T002 Create mobile Positions components directory at `apps/mobile/src/features/Assets/components/Positions/`
-- [ ] T003 [P] Create barrel export file at `packages/utils/src/features/positions/index.ts`
+- [x] T001 Create shared positions utils directory structure at `packages/utils/src/features/positions/`
+- [x] T002 Create mobile Positions components directory at `apps/mobile/src/features/Assets/components/Positions/`
+- [x] T003 [P] Create barrel export file at `packages/utils/src/features/positions/index.ts`
 
 ---
 
@@ -33,25 +33,25 @@
 
 ### Tests for Shared Utilities
 
-- [ ] T004 [P] Create test file for getReadablePositionType at `packages/utils/src/features/positions/__tests__/getReadablePositionType.test.ts`
-- [ ] T005 [P] Create test file for calculatePositionsFiatTotal at `packages/utils/src/features/positions/__tests__/calculatePositionsFiatTotal.test.ts`
-- [ ] T006 [P] Create test file for calculateProtocolPercentage at `packages/utils/src/features/positions/__tests__/calculateProtocolPercentage.test.ts`
-- [ ] T007 [P] Create test file for transformAppBalancesToProtocols at `packages/utils/src/features/positions/__tests__/transformAppBalancesToProtocols.test.ts`
+- [x] T004 [P] Create test file for getReadablePositionType at `packages/utils/src/features/positions/__tests__/getReadablePositionType.test.ts`
+- [x] T005 [P] Create test file for calculatePositionsFiatTotal at `packages/utils/src/features/positions/__tests__/calculatePositionsFiatTotal.test.ts`
+- [x] T006 [P] Create test file for calculateProtocolPercentage at `packages/utils/src/features/positions/__tests__/calculateProtocolPercentage.test.ts`
+- [x] T007 [P] Create test file for transformAppBalancesToProtocols at `packages/utils/src/features/positions/__tests__/transformAppBalancesToProtocols.test.ts`
 
 ### Implementation for Shared Utilities
 
-- [ ] T008 [P] Implement getReadablePositionType utility at `packages/utils/src/features/positions/utils/getReadablePositionType.ts`
-- [ ] T009 [P] Implement calculatePositionsFiatTotal utility at `packages/utils/src/features/positions/utils/calculatePositionsFiatTotal.ts`
-- [ ] T010 [P] Implement calculateProtocolPercentage utility at `packages/utils/src/features/positions/utils/calculateProtocolPercentage.ts`
-- [ ] T011 [P] Implement transformAppBalancesToProtocols utility at `packages/utils/src/features/positions/utils/transformAppBalancesToProtocols.ts`
-- [ ] T012 Export all utilities from `packages/utils/src/features/positions/index.ts`
-- [ ] T013 Run tests to verify all shared utilities pass: `yarn workspace @safe-global/utils test`
+- [x] T008 [P] Implement getReadablePositionType utility at `packages/utils/src/features/positions/utils/getReadablePositionType.ts`
+- [x] T009 [P] Implement calculatePositionsFiatTotal utility at `packages/utils/src/features/positions/utils/calculatePositionsFiatTotal.ts`
+- [x] T010 [P] Implement calculateProtocolPercentage utility at `packages/utils/src/features/positions/utils/calculateProtocolPercentage.ts`
+- [x] T011 [P] Implement transformAppBalancesToProtocols utility at `packages/utils/src/features/positions/utils/transformAppBalancesToProtocols.ts`
+- [x] T012 Export all utilities from `packages/utils/src/features/positions/index.ts`
+- [x] T013 Run tests to verify all shared utilities pass: `yarn workspace @safe-global/utils test`
 
 ### Web Refactor (Validate Shared Utilities)
 
-- [ ] T014 Refactor web `apps/web/src/features/positions/utils.ts` to import getReadablePositionType from `@safe-global/utils`
-- [ ] T015 Refactor web `apps/web/src/features/positions/hooks/usePositions.ts` to import transformAppBalancesToProtocols from `@safe-global/utils`
-- [ ] T016 Run web tests to verify refactor didn't break anything: `yarn workspace @safe-global/web test`
+- [x] T014 Refactor web `apps/web/src/features/positions/utils.ts` to import getReadablePositionType from `@safe-global/utils`
+- [x] T015 Refactor web `apps/web/src/features/positions/hooks/usePositions.ts` to import transformAppBalancesToProtocols from `@safe-global/utils`
+- [x] T016 Run web tests to verify refactor didn't break anything: `yarn workspace @safe-global/web test`
 
 **Checkpoint**: Shared utilities complete and validated via web refactor
 
@@ -65,17 +65,17 @@
 
 ### Tests for User Story 1+4
 
-- [ ] T017 [P] [US1] Create test file for PositionItem at `apps/mobile/src/features/Assets/components/Positions/PositionItem/PositionItem.test.tsx`
-- [ ] T018 [P] [US1] Create test file for ProtocolSection at `apps/mobile/src/features/Assets/components/Positions/ProtocolSection/ProtocolSection.test.tsx` (include expand/collapse interaction tests)
+- [x] T017 [P] [US1] Create test file for PositionItem at `apps/mobile/src/features/Assets/components/Positions/PositionItem/PositionItem.test.tsx`
+- [x] T018 [P] [US1] Create test file for ProtocolSection at `apps/mobile/src/features/Assets/components/Positions/ProtocolSection/ProtocolSection.test.tsx` (include expand/collapse interaction tests)
 
 ### Implementation for User Story 1+4
 
-- [ ] T019 [P] [US1] Create PositionItem component at `apps/mobile/src/features/Assets/components/Positions/PositionItem/PositionItem.tsx` (displays token icon, name, balance, position type, fiat value, 24h change)
-- [ ] T020 [P] [US1] Create PositionItem barrel export at `apps/mobile/src/features/Assets/components/Positions/PositionItem/index.ts`
-- [ ] T021 [US1] Create ProtocolSection component at `apps/mobile/src/features/Assets/components/Positions/ProtocolSection/ProtocolSection.tsx` (shows protocol icon, name, fiat total, percentage; renders PositionItems)
-- [ ] T022 [US1] Add expand/collapse state management to ProtocolSection (expanded by default per clarification, toggle icon and animation)
-- [ ] T023 [US1] Create ProtocolSection barrel export at `apps/mobile/src/features/Assets/components/Positions/ProtocolSection/index.ts`
-- [ ] T024 [US1] Create Positions barrel export at `apps/mobile/src/features/Assets/components/Positions/index.ts`
+- [x] T019 [P] [US1] Create PositionItem component at `apps/mobile/src/features/Assets/components/Positions/PositionItem/PositionItem.tsx` (displays token icon, name, balance, position type, fiat value, 24h change)
+- [x] T020 [P] [US1] Create PositionItem barrel export at `apps/mobile/src/features/Assets/components/Positions/PositionItem/index.ts`
+- [x] T021 [US1] Create ProtocolSection component at `apps/mobile/src/features/Assets/components/Positions/ProtocolSection/ProtocolSection.tsx` (shows protocol icon, name, fiat total, percentage; renders PositionItems)
+- [x] T022 [US1] Add expand/collapse state management to ProtocolSection (expanded by default per clarification, toggle icon and animation)
+- [x] T023 [US1] Create ProtocolSection barrel export at `apps/mobile/src/features/Assets/components/Positions/ProtocolSection/index.ts`
+- [x] T024 [US1] Create Positions barrel export at `apps/mobile/src/features/Assets/components/Positions/index.ts`
 
 **Checkpoint**: Core display components with collapsible behavior complete, ready for container integration
 
@@ -89,19 +89,19 @@
 
 ### Tests for User Story 2
 
-- [ ] T025 [P] [US2] Create test file for PositionsEmpty at `apps/mobile/src/features/Assets/components/Positions/PositionsEmpty/PositionsEmpty.test.tsx`
-- [ ] T026 [P] [US2] Create test file for PositionsError at `apps/mobile/src/features/Assets/components/Positions/PositionsError/PositionsError.test.tsx`
-- [ ] T027 [US2] Create test file for Positions.container at `apps/mobile/src/features/Assets/components/Positions/Positions.container.test.tsx` (test loading, loaded, error, empty states with MSW)
+- [x] T025 [P] [US2] Create test file for PositionsEmpty at `apps/mobile/src/features/Assets/components/Positions/PositionsEmpty/PositionsEmpty.test.tsx`
+- [x] T026 [P] [US2] Create test file for PositionsError at `apps/mobile/src/features/Assets/components/Positions/PositionsError/PositionsError.test.tsx`
+- [x] T027 [US2] Create test file for Positions.container at `apps/mobile/src/features/Assets/components/Positions/Positions.container.test.tsx` (test loading, loaded, error, empty states with MSW)
 
 ### Implementation for User Story 2
 
-- [ ] T028 [P] [US2] Create PositionsEmpty component at `apps/mobile/src/features/Assets/components/Positions/PositionsEmpty/PositionsEmpty.tsx`
-- [ ] T029 [P] [US2] Create PositionsEmpty barrel export at `apps/mobile/src/features/Assets/components/Positions/PositionsEmpty/index.ts`
-- [ ] T030 [P] [US2] Create PositionsError component at `apps/mobile/src/features/Assets/components/Positions/PositionsError/PositionsError.tsx` (includes retry button)
-- [ ] T031 [P] [US2] Create PositionsError barrel export at `apps/mobile/src/features/Assets/components/Positions/PositionsError/index.ts`
-- [ ] T032 [US2] Create Positions.container at `apps/mobile/src/features/Assets/components/Positions/Positions.container.tsx` (uses usePositionsGetPositionsV1Query, handles loading/error/empty/loaded states, renders FlatList with ProtocolSection items)
-- [ ] T033 [US2] Add Positions tab to Assets.container at `apps/mobile/src/features/Assets/Assets.container.tsx` (insert between Tokens and NFTs, conditionally render based on useHasFeature(FEATURES.POSITIONS))
-- [ ] T034 [US2] Run mobile tests: `yarn workspace @safe-global/mobile test`
+- [x] T028 [P] [US2] Create PositionsEmpty component at `apps/mobile/src/features/Assets/components/Positions/PositionsEmpty/PositionsEmpty.tsx`
+- [x] T029 [P] [US2] Create PositionsEmpty barrel export at `apps/mobile/src/features/Assets/components/Positions/PositionsEmpty/index.ts`
+- [x] T030 [P] [US2] Create PositionsError component at `apps/mobile/src/features/Assets/components/Positions/PositionsError/PositionsError.tsx` (includes retry button)
+- [x] T031 [P] [US2] Create PositionsError barrel export at `apps/mobile/src/features/Assets/components/Positions/PositionsError/index.ts`
+- [x] T032 [US2] Create Positions.container at `apps/mobile/src/features/Assets/components/Positions/Positions.container.tsx` (uses usePositionsGetPositionsV1Query, handles loading/error/empty/loaded states, renders FlatList with ProtocolSection items)
+- [x] T033 [US2] Add Positions tab to Assets.container at `apps/mobile/src/features/Assets/Assets.container.tsx` (insert between Tokens and NFTs, conditionally render based on useHasFeature(FEATURES.POSITIONS))
+- [x] T034 [US2] Run mobile tests: `yarn workspace @safe-global/mobile test`
 
 **Checkpoint**: MVP complete - User can view positions with proper loading/error/empty states
 
@@ -115,14 +115,14 @@
 
 ### Tests for User Story 3
 
-- [ ] T035 [US3] Update Positions.container.test.tsx to add pull-to-refresh test cases (verify RefreshControl behavior, data persistence during refresh)
+- [x] T035 [US3] Update Positions.container.test.tsx to add pull-to-refresh test cases (verify RefreshControl behavior, data persistence during refresh)
 
 ### Implementation for User Story 3
 
-- [ ] T036 [US3] Add RefreshControl to FlatList in `apps/mobile/src/features/Assets/components/Positions/Positions.container.tsx`
-- [ ] T037 [US3] Implement onRefresh handler with isRefreshing state management in Positions.container.tsx
-- [ ] T038 [US3] Handle refresh error case (keep existing data visible, hide refresh indicator)
-- [ ] T039 [US3] Run mobile tests to verify pull-to-refresh: `yarn workspace @safe-global/mobile test`
+- [x] T036 [US3] Add RefreshControl to FlatList in `apps/mobile/src/features/Assets/components/Positions/Positions.container.tsx`
+- [x] T037 [US3] Implement onRefresh handler with isRefreshing state management in Positions.container.tsx
+- [x] T038 [US3] Handle refresh error case (keep existing data visible, hide refresh indicator)
+- [x] T039 [US3] Run mobile tests to verify pull-to-refresh: `yarn workspace @safe-global/mobile test`
 
 **Checkpoint**: All user stories complete
 
@@ -132,13 +132,13 @@
 
 **Purpose**: Final validation and cleanup
 
-- [ ] T040 Run full type-check: `yarn workspace @safe-global/mobile type-check`
-- [ ] T041 Run linting: `yarn workspace @safe-global/mobile lint`
-- [ ] T042 Run prettier: `yarn workspace @safe-global/mobile prettier`
-- [ ] T043 Verify web still works after shared utils refactor: `yarn workspace @safe-global/web type-check && yarn workspace @safe-global/web test`
-- [ ] T044 Manual test on iOS simulator with Safe containing DeFi positions
+- [x] T040 Run full type-check: `yarn workspace @safe-global/mobile type-check`
+- [x] T041 Run linting: `yarn workspace @safe-global/mobile lint`
+- [x] T042 Run prettier: `yarn workspace @safe-global/mobile prettier`
+- [x] T043 Verify web still works after shared utils refactor: `yarn workspace @safe-global/web type-check && yarn workspace @safe-global/web test`
+- [x] T044 Manual test on iOS simulator with Safe containing DeFi positions
 - [ ] T045 Manual test on Android emulator with Safe containing DeFi positions
-- [ ] T046 Verify feature flag correctly hides tab when FEATURES.POSITIONS disabled
+- [x] T046 Verify feature flag correctly hides tab when FEATURES.POSITIONS disabled
 
 ---
 
