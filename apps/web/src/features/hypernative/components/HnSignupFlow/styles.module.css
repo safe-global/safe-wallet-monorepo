@@ -229,3 +229,34 @@
 .featureIcon {
   color: var(--color-success-main);
 }
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: var(--space-4);
+  padding: var(--space-12) var(--space-6);
+  height: 100%;
+  text-align: center;
+}
+
+.errorTitle {
+  font-weight: 700;
+  font-size: 24px;
+  color: var(--color-static-main);
+  margin-bottom: var(--space-1);
+}
+
+.errorMessage {
+  color: var(--color-text-secondary);
+  max-width: 400px;
+  margin-bottom: var(--space-4) !important;
+}
+
+.reloadButton {
+  background-color: var(--color-static-main);
+  color: var(--color-static-primary);
+  max-width: fit-content;
+  align-self: center;
+  padding-inline: var(--space-2);
+}
