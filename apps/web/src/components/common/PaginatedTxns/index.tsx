@@ -1,5 +1,5 @@
 import type { TransactionItemPage, QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { type ReactElement, useEffect, useState } from 'react'
+import { type ReactElement, useEffect, useState, useCallback, useRef } from 'react'
 import { Box } from '@mui/material'
 import TxList from '@/components/transactions/TxList'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -44,12 +44,15 @@ const TxPage = ({
   const recoveryQueue = useRecoveryQueue()
   const hasPending = useHasPendingTxs()
 
-  // Notify parent when page loads
+  const lastPageUrlRef = useRef<string | undefined>(undefined)
+
+  // Notify parent when page loads (only when page actually changes and it's a queue page)
   useEffect(() => {
-    if (page) {
+    if (page && isQueue && pageUrl !== lastPageUrlRef.current) {
+      lastPageUrlRef.current = pageUrl
       onPageLoaded(page as QueuedItemPage)
     }
-  }, [page, onPageLoaded])
+  }, [page, pageUrl, onPageLoaded, isQueue])
 
   return (
     <>
@@ -99,14 +102,22 @@ const PaginatedTxns = ({
     setPages((prev) => prev.concat(pageUrl))
   }
 
-  // Handle page loaded callback
-  const handlePageLoaded = (pageUrl: string) => (page: QueuedItemPage | undefined) => {
-    setLoadedPages((prev) => {
-      const updated = new Map(prev)
-      updated.set(pageUrl, page)
-      return updated
-    })
-  }
+  // Handle page loaded callback - memoized to prevent infinite loops
+  const handlePageLoaded = useCallback(
+    (pageUrl: string) => (page: QueuedItemPage | undefined) => {
+      setLoadedPages((prev) => {
+        const currentPage = prev.get(pageUrl)
+        // Only update if the page actually changed
+        if (currentPage === page) {
+          return prev
+        }
+        const updated = new Map(prev)
+        updated.set(pageUrl, page)
+        return updated
+      })
+    },
+    [],
+  )
 
   // Notify parent when pages change
   useEffect(() => {
