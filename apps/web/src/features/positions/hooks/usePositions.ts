@@ -8,7 +8,7 @@ import { useMemo } from 'react'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import useBalances from '@/hooks/useBalances'
-import { transformAppBalancesToProtocols } from '@safe-global/utils/features/positions'
+import { transformAppBalancesToProtocols, getPositionsEndpointConfig } from '@safe-global/utils/features/positions'
 
 const POLLING_INTERVAL = 300_000 // 5 minutes
 
@@ -21,10 +21,10 @@ const usePositions = () => {
   const { safeAddress } = useSafeInfo()
   const currency = useAppSelector(selectCurrency)
   const isPositionsEnabled = useIsPositionsFeatureEnabled()
-  const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
+  const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT)
 
-  const shouldUsePortfolioEndpoint = isPositionsEnabled && isPortfolioEndpointEnabled
-  const shouldUsePositionEndpoint = isPositionsEnabled && !shouldUsePortfolioEndpoint
+  const { shouldUsePortfolioEndpoint, shouldUsePositionsEndpoint: shouldUsePositionEndpoint } =
+    getPositionsEndpointConfig(isPositionsEnabled, isPortfolioEndpointEnabled)
 
   const {
     currentData: positionsData,

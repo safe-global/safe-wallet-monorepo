@@ -3,6 +3,7 @@ import { Pressable } from 'react-native'
 import { Text, View } from 'tamagui'
 import { Logo } from '@/src/components/Logo'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
+import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import { calculateProtocolPercentage } from '@safe-global/utils/features/positions'
 import { PositionItem } from '../PositionItem'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
@@ -17,7 +18,8 @@ export const ProtocolSection = ({ protocol, totalFiatValue, currency }: Protocol
   const [isExpanded, setIsExpanded] = useState(true)
 
   const { protocol_metadata, fiatTotal, items } = protocol
-  const percentage = calculateProtocolPercentage(fiatTotal, totalFiatValue)
+  const percentageRatio = calculateProtocolPercentage(fiatTotal, totalFiatValue)
+  const formattedPercentage = formatPercentage(percentageRatio)
   const formattedFiatTotal = formatCurrency(fiatTotal, currency)
 
   const toggleExpanded = () => {
@@ -51,7 +53,7 @@ export const ProtocolSection = ({ protocol, totalFiatValue, currency }: Protocol
             </Text>
             <View backgroundColor="$backgroundSecondary" paddingHorizontal="$1" paddingVertical="$1" borderRadius="$2">
               <Text fontSize="$3" color="$color" fontWeight={400} lineHeight={16}>
-                {percentage}%
+                {formattedPercentage}
               </Text>
             </View>
           </View>

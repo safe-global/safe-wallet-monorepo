@@ -54,7 +54,7 @@ describe('ProtocolSection', () => {
 
   it('renders protocol percentage', () => {
     render(<ProtocolSection {...defaultProps} />)
-    expect(screen.getByText('50%')).toBeTruthy()
+    expect(screen.getByText('50.00%')).toBeTruthy()
   })
 
   it('renders positions when expanded by default', () => {

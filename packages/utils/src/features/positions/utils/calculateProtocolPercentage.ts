@@ -3,5 +3,5 @@ export const calculateProtocolPercentage = (protocolFiatTotal: string, totalFiat
     return 0
   }
 
-  return Math.round((Number(protocolFiatTotal) / totalFiatValue) * 100)
+  return Number(protocolFiatTotal) / totalFiatValue
 }

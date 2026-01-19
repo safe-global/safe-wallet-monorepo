@@ -1,39 +1,24 @@
 import React, { useState, useCallback } from 'react'
 import { RefreshControl } from 'react-native'
-import { useSelector } from 'react-redux'
 import { getTokenValue } from 'tamagui'
-import { skipToken } from '@reduxjs/toolkit/query'
 
 import { SafeTab } from '@/src/components/SafeTab'
-import { POSITIONS_POLLING_INTERVAL } from '@/src/config/constants'
-import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectCurrency } from '@/src/store/settingsSlice'
-import { usePositionsGetPositionsV1Query, type Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
+import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import { calculatePositionsFiatTotal } from '@safe-global/utils/features/positions'
 
 import { Fallback } from '../Fallback'
 import { PositionsEmpty } from './PositionsEmpty'
 import { PositionsError } from './PositionsError'
 import { ProtocolSection } from './ProtocolSection'
+import { usePositions } from '../../hooks/usePositions'
 
 export const PositionsContainer = () => {
-  const activeSafe = useSelector(selectActiveSafe)
   const currency = useAppSelector(selectCurrency)
   const [isRefreshing, setIsRefreshing] = useState(false)
 
-  const { data, isFetching, error, isLoading, refetch } = usePositionsGetPositionsV1Query(
-    !activeSafe
-      ? skipToken
-      : {
-          chainId: activeSafe.chainId,
-          safeAddress: activeSafe.address,
-          fiatCode: currency,
-        },
-    {
-      pollingInterval: POSITIONS_POLLING_INTERVAL,
-    },
-  )
+  const { data, isFetching, error, isLoading, refetch } = usePositions()
 
   const totalFiatValue = React.useMemo(() => calculatePositionsFiatTotal(data), [data])
 

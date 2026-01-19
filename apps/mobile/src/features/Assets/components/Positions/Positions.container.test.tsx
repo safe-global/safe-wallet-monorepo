@@ -12,6 +12,14 @@ jest.mock('@/src/store/activeSafeSlice', () => ({
   selectActiveSafe: () => mockActiveSafe,
 }))
 
+jest.mock('@/src/hooks/useHasFeature', () => ({
+  useHasFeature: (feature: string) => {
+    if (feature === 'POSITIONS') {return true}
+    if (feature === 'PORTFOLIO_ENDPOINT') {return false}
+    return false
+  },
+}))
+
 const mockProtocols: Protocol[] = [
   {
     protocol: 'aave-v3',
