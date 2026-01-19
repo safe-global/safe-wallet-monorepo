@@ -19,6 +19,7 @@
   border-radius: 12px;
   flex: none;
   flex-grow: 1;
+  cursor: default;
 }
 
 .eurcvIconContainer {
@@ -83,6 +84,10 @@
   letter-spacing: 0.4px;
   color: #121312;
   border-radius: 6px;
+}
+
+.eurcvButton:hover {
+  padding: 4px 8px;
 }
 
 .eurcvCloseButton {
