@@ -72,6 +72,22 @@ A user with positions across multiple DeFi protocols (e.g., Aave, Lido, Compound
 
 ---
 
+### User Story 5 - 24h Change Help Info (Priority: P3)
+
+A user sees a percentage change value on a position and wants to understand what it represents. On mobile, they tap the percentage change value and a bottom sheet appears explaining "24h change" - providing context about what the value means.
+
+**Why this priority**: Enhances user understanding but not critical for core functionality. Web already has this via tooltip on hover.
+
+**Independent Test**: View a position with a percentage change, tap on the percentage value, verify bottom sheet appears with "24h change" title and explanatory text.
+
+**Acceptance Scenarios**:
+
+1. **Given** a position with a 24h change value displayed, **When** the user taps on the percentage change, **Then** a bottom sheet modal appears with "24h change" as the title
+2. **Given** the 24h change info sheet is open, **When** the user views the content, **Then** they see explanatory text about what the 24h change represents
+3. **Given** the 24h change info sheet is open, **When** the user taps outside or swipes down, **Then** the sheet dismisses
+
+---
+
 ### Edge Cases
 
 - What happens when the positions API is unavailable? Display an error state with retry option.

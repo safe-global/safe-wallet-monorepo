@@ -124,6 +124,22 @@
 - [x] T038 [US3] Handle refresh error case (keep existing data visible, hide refresh indicator)
 - [x] T039 [US3] Run mobile tests to verify pull-to-refresh: `yarn workspace @safe-global/mobile test`
 
+**Checkpoint**: Pull-to-refresh complete
+
+---
+
+## Phase 5b: User Story 5 - 24h Change Help Info (Priority: P3)
+
+**Goal**: Display help info when user taps on the 24h change percentage (feature parity with web tooltip)
+
+**Independent Test**: View a position, tap on the percentage change, verify bottom sheet appears with "24h change" explanation
+
+### Implementation for User Story 5
+
+- [x] T047 [US5] Update PositionFiatChange component to wrap percentage in InfoSheet for tap-to-show help
+- [x] T048 [US5] Existing PositionItem tests verify the 24h change content still renders correctly with InfoSheet wrapper
+- [x] T049 [US5] Run mobile tests: `yarn workspace @safe-global/mobile test`
+
 **Checkpoint**: All user stories complete
 
 ---
