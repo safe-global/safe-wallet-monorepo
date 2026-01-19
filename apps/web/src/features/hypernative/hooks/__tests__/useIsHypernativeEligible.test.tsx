@@ -12,7 +12,7 @@ const mockUseIsHypernativeGuard = useIsHypernativeGuard as jest.MockedFunction<t
 
 describe('useIsHypernativeEligible', () => {
   beforeEach(() => {
-    mockUseIsOutreachSafe.mockReturnValue(false)
+    mockUseIsOutreachSafe.mockReturnValue({ isTargeted: false, loading: false })
     mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: false })
   })
 
@@ -25,7 +25,7 @@ describe('useIsHypernativeEligible', () => {
   })
 
   it('returns eligible when Safe is targeted and prerequisites are met', () => {
-    mockUseIsOutreachSafe.mockReturnValue(true)
+    mockUseIsOutreachSafe.mockReturnValue({ isTargeted: true, loading: false })
 
     const { result } = renderHook(() => useIsHypernativeEligible())
 
@@ -46,6 +46,14 @@ describe('useIsHypernativeEligible', () => {
 
   it('exposes guard loading state', () => {
     mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: true })
+
+    const { result } = renderHook(() => useIsHypernativeEligible())
+
+    expect(result.current.loading).toBe(true)
+  })
+
+  it('exposes outreach loading state', () => {
+    mockUseIsOutreachSafe.mockReturnValue({ isTargeted: false, loading: true })
 
     const { result } = renderHook(() => useIsHypernativeEligible())
 

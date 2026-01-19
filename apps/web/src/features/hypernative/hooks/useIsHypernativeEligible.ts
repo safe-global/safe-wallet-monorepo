@@ -12,11 +12,11 @@ export type HypernativeEligibility = {
  * Eligibility requires a Hypernative guard installed or targeted outreach membership.
  */
 export const useIsHypernativeEligible = (): HypernativeEligibility => {
-  const { isHypernativeGuard, loading } = useIsHypernativeGuard()
-  const isTargetedSafe = useIsOutreachSafe(HYPERNATIVE_ALLOWLIST_OUTREACH_ID)
+  const { isHypernativeGuard, loading: guardLoading } = useIsHypernativeGuard()
+  const { isTargeted: isTargetedSafe, loading: outreachLoading } = useIsOutreachSafe(HYPERNATIVE_ALLOWLIST_OUTREACH_ID)
 
   return {
     isHypernativeEligible: isHypernativeGuard || isTargetedSafe,
-    loading,
+    loading: guardLoading || outreachLoading,
   }
 }

@@ -56,12 +56,12 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
   const isSafeOwner = useIsSafeOwner()
   const { balances, loading: balancesLoading } = useVisibleBalances()
   const { isHypernativeGuard, loading: guardLoading } = useIsHypernativeGuard()
-  const isTargetedSafe = useIsOutreachSafe(HYPERNATIVE_OUTREACH_ID)
+  const { isTargeted: isTargetedSafe, loading: outreachLoading } = useIsOutreachSafe(HYPERNATIVE_OUTREACH_ID)
 
   const visibilityResult = useMemo(() => {
     // For NoBalanceCheck, skip balance loading check
     const skipBalanceCheck = bannerType === BannerType.NoBalanceCheck
-    const loading = (skipBalanceCheck ? false : balancesLoading) || guardLoading
+    const loading = (skipBalanceCheck ? false : balancesLoading) || guardLoading || outreachLoading
 
     if (loading) {
       return { showBanner: false, loading: true }
@@ -104,6 +104,7 @@ export const useBannerVisibility = (bannerType: BannerType): BannerVisibilityRes
     isHypernativeGuard,
     guardLoading,
     isTargetedSafe,
+    outreachLoading,
   ])
 
   // Track banner eligibility once per Safe connection
