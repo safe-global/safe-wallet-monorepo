@@ -1,5 +1,13 @@
-import { type CowSwapWidgetParams as BaseCowSwapWidgetParams, TradeType } from '@cowprotocol/widget-lib'
+import type { CowSwapWidgetParams as BaseCowSwapWidgetParams } from '@cowprotocol/widget-lib'
 import { type OnTradeParamsPayload, type CowEventListeners, CowEvents } from '@cowprotocol/events'
+
+// TradeType enum mirroring @cowprotocol/widget-lib TradeType
+// Cannot import directly as widget-lib has unguarded window references that break SSR
+enum TradeType {
+  SWAP = 'swap',
+  LIMIT = 'limit',
+  ADVANCED = 'advanced',
+}
 import { type MutableRefObject, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, useTheme } from '@mui/material'
 import dynamic from 'next/dynamic'
