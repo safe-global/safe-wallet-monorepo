@@ -34,7 +34,9 @@ exports[`./EurcvBoostBanner.stories Default 1`] = `
           <span
             class="eurcvDescription"
           >
-            A new vault is added. Stake EURCV and earn 9.5% APY on deposits.
+            A new vault is added. Stake EURCV and earn 
+            9.5
+            % APY on deposits.
              
             <a
               class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-1spsnlm-MuiTypography-root-MuiLink-root"
