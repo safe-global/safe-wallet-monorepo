@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react'
-import { Alert, Typography } from '@mui/material'
+import type { AlertProps} from '@mui/material';
+import { Alert, Stack, Typography } from '@mui/material'
 import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shield/utils/getPrimaryAnalysisResult'
@@ -7,6 +8,8 @@ import ExternalLink from '@/components/common/ExternalLink'
 import { hnSecurityReportBtnConfig } from '@/features/hypernative/components/HnSecurityReportBtn/config'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { buildSecurityReportUrl } from '@/features/hypernative/utils/buildSecurityReportUrl'
+import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import LockIcon from '@/public/images/common/lock-small.svg'
 
 interface HnQueueAssessmentBannerProps {
   safeTxHash: string
@@ -14,6 +17,22 @@ interface HnQueueAssessmentBannerProps {
   isAuthenticated: boolean
   chainId: string
   safeAddress: string
+}
+
+const SEVERITY_MESSAGES: Record<Severity, string> = {
+  [Severity.OK]: 'No issues found by Hypernative Guardian.',
+  [Severity.INFO]: 'Info available from Hypernative Guardian.',
+  [Severity.WARN]: 'Issues found by Hypernative Guardian.',
+  [Severity.CRITICAL]: 'Transaction was blocked by Hypernative Guardian.',
+  [Severity.ERROR]: 'Unable to fetch security scan result.',
+}
+
+const ALERT_SEVERITIES: Record<Severity, AlertProps['severity']> = {
+  [Severity.OK]: 'success',
+  [Severity.INFO]: 'info',
+  [Severity.WARN]: 'warning',
+  [Severity.CRITICAL]: 'error',
+  [Severity.ERROR]: 'error',
 }
 
 export const HnQueueAssessmentBanner = ({
@@ -24,6 +43,7 @@ export const HnQueueAssessmentBanner = ({
   safeAddress,
 }: HnQueueAssessmentBannerProps): ReactElement | null => {
   const [assessmentData, error] = assessment || [undefined, undefined]
+  const { initiateLogin } = useHypernativeOAuth()
 
   const primaryResult = useMemo(() => {
     if (!assessmentData) {
@@ -46,26 +66,63 @@ export const HnQueueAssessmentBanner = ({
     setSeverity(error ? Severity.ERROR : primaryResult?.severity)
   }, [error, primaryResult?.severity])
 
-  if (!isAuthenticated || error || !assessmentData || severity !== Severity.WARN) {
+  if (!isAuthenticated) {
+    const handleLogin = (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault()
+      e.stopPropagation()
+      initiateLogin()
+    }
+
+    return (
+      <Alert severity="background" icon={<LockIcon />}>
+        <Stack gap={1}>
+          <Typography variant="body2" color="text.secondary">
+            Log in to Hypernative to view security scan result.
+          </Typography>
+          <ExternalLink
+            onClick={handleLogin}
+            href="#"
+            noIcon={false}
+            sx={{
+              textDecoration: 'underline',
+              display: 'inline-flex',
+              alignSelf: 'flex-start',
+            }}
+          >
+            <Typography variant="body2" fontWeight="bold">
+              Log in
+            </Typography>
+          </ExternalLink>
+        </Stack>
+      </Alert>
+    )
+  }
+
+  if (!severity) {
     return null
   }
 
+  const message = SEVERITY_MESSAGES[severity]
+  const alertSeverity = ALERT_SEVERITIES[severity]
+
   return (
-    <Alert severity="warning">
-      <Typography variant="body2">Issues found by Hypernative Guardian.</Typography>
-      <ExternalLink
-        onClick={(e) => e.stopPropagation()}
-        href={assessmentUrl}
-        sx={{
-          textDecoration: 'underline',
-          display: 'inline-flex',
-          alignSelf: 'flex-start',
-        }}
-      >
-        <Typography variant="body2" fontWeight="bold">
-          View details
-        </Typography>
-      </ExternalLink>
+    <Alert severity={alertSeverity}>
+      <Stack gap={1}>
+        <Typography variant="body2">{message}</Typography>
+        <ExternalLink
+          onClick={(e) => e.stopPropagation()}
+          href={assessmentUrl}
+          sx={{
+            textDecoration: 'underline',
+            display: 'inline-flex',
+            alignSelf: 'flex-start',
+          }}
+        >
+          <Typography variant="body2" fontWeight="bold">
+            View details
+          </Typography>
+        </ExternalLink>
+      </Stack>
     </Alert>
   )
 }
