@@ -82,10 +82,6 @@
   border-radius: 6px;
 }
 
-.eurcvButton:hover {
-  padding: 4px 8px 4px 0;
-}
-
 .eurcvCloseButton {
   color: #b8ccbe;
 }

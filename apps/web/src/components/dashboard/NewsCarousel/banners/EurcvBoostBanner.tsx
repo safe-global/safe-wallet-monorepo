@@ -1,6 +1,7 @@
 import { Box, Button, Card, IconButton, Link as MuiLink, Stack } from '@mui/material'
 import css from './styles.module.css'
 import CloseIcon from '@mui/icons-material/Close'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { useRouter } from 'next/router'
@@ -52,8 +53,14 @@ export const EurcvBoostBanner = ({ onDismiss }: { onDismiss: () => void }) => {
           </Box>
 
           <Track {...OVERVIEW_EVENTS.OPEN_EURCV_BOOST}>
-            <Button variant="text" size="small" onClick={handleCtaClick} className={css.eurcvButton}>
-              Start earning &rarr;
+            <Button
+              endIcon={<ChevronRightIcon fontSize="small" />}
+              variant="text"
+              size="compact"
+              onClick={handleCtaClick}
+              className={css.eurcvButton}
+            >
+              Start earning
             </Button>
           </Track>
         </Box>
