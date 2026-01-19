@@ -51,7 +51,7 @@ jobs:
 
       - name: Notify Slack on failure
         if: failure() && github.event_name == 'push'
-        uses: slackapi/slack-github-action@v2.0.0
+        uses: slackapi/slack-github-action@v2.1.1
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_DEV_ALERT }}
           webhook-type: incoming-webhook
