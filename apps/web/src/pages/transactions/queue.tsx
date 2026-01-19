@@ -20,8 +20,7 @@ const Queue: NextPage = () => {
   const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
   const { isHypernativeGuard, loading: HNGuardCheckLoading } = useIsHypernativeGuard()
 
-  // TODO: Remove the false flag when Hypernative assessments for queued transactions is released
-  const showHnLoginCard = !HNGuardCheckLoading && isHypernativeGuard /* REMOVE -> */ && false /* <- REMOVE */
+  const showHnLoginCard = !HNGuardCheckLoading && isHypernativeGuard
 
   return (
     <>
