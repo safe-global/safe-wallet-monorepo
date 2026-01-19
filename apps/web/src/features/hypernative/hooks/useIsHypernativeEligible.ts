@@ -1,0 +1,22 @@
+import { useIsOutreachSafe } from '@/features/targetedFeatures/hooks/useIsOutreachSafe'
+import { useIsHypernativeGuard } from '@/features/hypernative/hooks/useIsHypernativeGuard'
+import { HYPERNATIVE_ALLOWLIST_OUTREACH_ID } from '@/features/hypernative/constants'
+
+export type HypernativeEligibility = {
+  isHypernativeEligible: boolean
+  loading: boolean
+}
+
+/**
+ * Determines whether the current Safe is eligible for Hypernative CTAs.
+ * Eligibility requires a Hypernative guard installed or targeted outreach membership.
+ */
+export const useIsHypernativeEligible = (): HypernativeEligibility => {
+  const { isHypernativeGuard, loading } = useIsHypernativeGuard()
+  const isTargetedSafe = useIsOutreachSafe(HYPERNATIVE_ALLOWLIST_OUTREACH_ID)
+
+  return {
+    isHypernativeEligible: isHypernativeGuard || isTargetedSafe,
+    loading,
+  }
+}

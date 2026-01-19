@@ -1,0 +1,54 @@
+import { renderHook } from '@/tests/test-utils'
+import { useIsOutreachSafe } from '@/features/targetedFeatures/hooks/useIsOutreachSafe'
+import { useIsHypernativeGuard } from '@/features/hypernative/hooks/useIsHypernativeGuard'
+import { HYPERNATIVE_ALLOWLIST_OUTREACH_ID } from '@/features/hypernative/constants'
+import { useIsHypernativeEligible } from '../useIsHypernativeEligible'
+
+jest.mock('@/features/targetedFeatures/hooks/useIsOutreachSafe')
+jest.mock('@/features/hypernative/hooks/useIsHypernativeGuard')
+
+const mockUseIsOutreachSafe = useIsOutreachSafe as jest.MockedFunction<typeof useIsOutreachSafe>
+const mockUseIsHypernativeGuard = useIsHypernativeGuard as jest.MockedFunction<typeof useIsHypernativeGuard>
+
+describe('useIsHypernativeEligible', () => {
+  beforeEach(() => {
+    mockUseIsOutreachSafe.mockReturnValue(false)
+    mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: false })
+  })
+
+  it('returns eligible when guard is installed and prerequisites are met', () => {
+    mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: true, loading: false })
+
+    const { result } = renderHook(() => useIsHypernativeEligible())
+
+    expect(result.current.isHypernativeEligible).toBe(true)
+  })
+
+  it('returns eligible when Safe is targeted and prerequisites are met', () => {
+    mockUseIsOutreachSafe.mockReturnValue(true)
+
+    const { result } = renderHook(() => useIsHypernativeEligible())
+
+    expect(result.current.isHypernativeEligible).toBe(true)
+  })
+
+  it('returns ineligible when neither guard nor targeting applies', () => {
+    const { result } = renderHook(() => useIsHypernativeEligible())
+
+    expect(result.current.isHypernativeEligible).toBe(false)
+  })
+
+  it('passes the login outreach ID to targeted messaging', () => {
+    renderHook(() => useIsHypernativeEligible())
+
+    expect(mockUseIsOutreachSafe).toHaveBeenCalledWith(HYPERNATIVE_ALLOWLIST_OUTREACH_ID)
+  })
+
+  it('exposes guard loading state', () => {
+    mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: true })
+
+    const { result } = renderHook(() => useIsHypernativeEligible())
+
+    expect(result.current.loading).toBe(true)
+  })
+})

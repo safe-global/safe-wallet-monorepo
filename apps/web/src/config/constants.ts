@@ -105,6 +105,12 @@ export const PROD_HYPERNATIVE_OUTREACH_ID = parseInt(process.env.NEXT_PUBLIC_PRO
 export const STAGING_HYPERNATIVE_OUTREACH_ID = parseInt(
   process.env.NEXT_PUBLIC_STAGING_HYPERNATIVE_OUTREACH_ID ?? `${11}`,
 )
+export const PROD_HYPERNATIVE_ALLOWLIST_OUTREACH_ID = parseInt(
+  process.env.NEXT_PUBLIC_PROD_HYPERNATIVE_ALLOWLIST_OUTREACH_ID ?? `${6}`,
+)
+export const STAGING_HYPERNATIVE_ALLOWLIST_OUTREACH_ID = parseInt(
+  process.env.NEXT_PUBLIC_STAGING_HYPERNATIVE_ALLOWLIST_OUTREACH_ID ?? `${14}`,
+)
 
 // Deployment specifics
 export const IS_BEHIND_IAP = process.env.NEXT_PUBLIC_IS_BEHIND_IAP === 'true'

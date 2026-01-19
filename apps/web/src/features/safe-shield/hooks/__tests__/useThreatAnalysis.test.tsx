@@ -39,10 +39,10 @@ jest.mock('@/components/tx-flow/SafeTxProvider', () => ({
   },
 }))
 
-const mockUseIsHypernativeGuard = jest.fn(() => ({ isHypernativeGuard: false, loading: false }))
+const mockUseIsHypernativeEligible = jest.fn(() => ({ isHypernativeEligible: false, loading: false }))
 
-jest.mock('@/features/hypernative/hooks/useIsHypernativeGuard', () => ({
-  useIsHypernativeGuard: () => mockUseIsHypernativeGuard(),
+jest.mock('@/features/hypernative/hooks/useIsHypernativeEligible', () => ({
+  useIsHypernativeEligible: () => mockUseIsHypernativeEligible(),
 }))
 
 jest.mock('../useNestedThreatAnalysis', () => ({
@@ -106,7 +106,7 @@ const buildThreatResult = (severity: Severity) => [
 describe('useThreatAnalysis - Nested Transaction Detection', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: false })
+    mockUseIsHypernativeEligible.mockReturnValue({ isHypernativeEligible: false, loading: false })
     mockUseThreatAnalysisHypernative.mockReturnValue([undefined, undefined, false])
     mockUseNestedThreatAnalysis.mockReturnValue([undefined, undefined, false])
   })
@@ -327,7 +327,7 @@ describe('useThreatAnalysis - Nested Transaction Detection', () => {
 describe('useThreatAnalysis - Hypernative Guard', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: false })
+    mockUseIsHypernativeEligible.mockReturnValue({ isHypernativeEligible: false, loading: false })
     mockUseThreatAnalysisHypernative.mockReturnValue([undefined, undefined, false])
     mockUseNestedThreatAnalysis.mockReturnValue([undefined, undefined, false])
     mockUseNestedTransaction.mockReturnValue({
@@ -341,7 +341,7 @@ describe('useThreatAnalysis - Hypernative Guard', () => {
   it('should return loading state when Hypernative guard check is loading', async () => {
     const regularTx = buildSafeTransaction('0x1234')
 
-    mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: true })
+    mockUseIsHypernativeEligible.mockReturnValue({ isHypernativeEligible: false, loading: true })
     mockUseThreatAnalysisUtils.mockReturnValue(buildThreatResult(Severity.OK))
 
     const { result } = renderHook(() => useThreatAnalysis(regularTx))
@@ -355,7 +355,7 @@ describe('useThreatAnalysis - Hypernative Guard', () => {
   it('should skip Blockaid analysis when Hypernative guard check is loading', async () => {
     const regularTx = buildSafeTransaction('0x1234')
 
-    mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: true })
+    mockUseIsHypernativeEligible.mockReturnValue({ isHypernativeEligible: false, loading: true })
     mockUseThreatAnalysisUtils.mockReturnValue(buildThreatResult(Severity.OK))
 
     renderHook(() => useThreatAnalysis(regularTx))
@@ -374,7 +374,7 @@ describe('useThreatAnalysis - Hypernative Guard', () => {
     const regularTx = buildSafeTransaction('0x1234')
     const authToken = 'test-auth-token'
 
-    mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: true, loading: false })
+    mockUseIsHypernativeEligible.mockReturnValue({ isHypernativeEligible: true, loading: false })
     mockUseThreatAnalysisHypernative.mockReturnValue(buildThreatResult(Severity.CRITICAL))
 
     const { result } = renderHook(() => useThreatAnalysis(regularTx, authToken))
@@ -401,7 +401,7 @@ describe('useThreatAnalysis - Hypernative Guard', () => {
   it('should skip both analyses when guard is enabled but no auth token provided', async () => {
     const regularTx = buildSafeTransaction('0x1234')
 
-    mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: true, loading: false })
+    mockUseIsHypernativeEligible.mockReturnValue({ isHypernativeEligible: true, loading: false })
     mockUseThreatAnalysisHypernative.mockReturnValue([undefined, undefined, false])
     mockUseThreatAnalysisUtils.mockReturnValue(buildThreatResult(Severity.WARN))
 
@@ -429,7 +429,7 @@ describe('useThreatAnalysis - Hypernative Guard', () => {
   it('should use Blockaid analysis when guard is disabled', async () => {
     const regularTx = buildSafeTransaction('0x1234')
 
-    mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: false })
+    mockUseIsHypernativeEligible.mockReturnValue({ isHypernativeEligible: false, loading: false })
     mockUseThreatAnalysisUtils.mockReturnValue(buildThreatResult(Severity.WARN))
 
     const { result } = renderHook(() => useThreatAnalysis(regularTx))
@@ -456,7 +456,7 @@ describe('useThreatAnalysis - Hypernative Guard', () => {
     const regularTx = buildSafeTransaction('0x1234')
     const authToken = 'test-auth-token'
 
-    mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: true, loading: false })
+    mockUseIsHypernativeEligible.mockReturnValue({ isHypernativeEligible: true, loading: false })
     mockUseThreatAnalysisHypernative.mockReturnValue(buildThreatResult(Severity.CRITICAL))
 
     renderHook(() => useThreatAnalysis(regularTx, authToken))
@@ -496,7 +496,7 @@ describe('useThreatAnalysis - Hypernative Guard', () => {
     const approveHashTx = buildSafeTransaction(encodeApproveHash(APPROVE_HASH))
     const authToken = 'test-auth-token'
 
-    mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: true, loading: false })
+    mockUseIsHypernativeEligible.mockReturnValue({ isHypernativeEligible: true, loading: false })
     mockUseNestedTransaction.mockReturnValue({
       nestedSafeInfo: buildNestedSafeInfo(),
       nestedSafeTx: buildSafeTransaction('0x1234'),
@@ -521,7 +521,7 @@ describe('useThreatAnalysis - Hypernative Guard', () => {
     const approveHashTx = buildSafeTransaction(encodeApproveHash(APPROVE_HASH))
     const authToken = 'test-auth-token'
 
-    mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: true, loading: false })
+    mockUseIsHypernativeEligible.mockReturnValue({ isHypernativeEligible: true, loading: false })
     mockUseNestedTransaction.mockReturnValue({
       nestedSafeInfo: buildNestedSafeInfo(),
       nestedSafeTx: buildSafeTransaction('0x1234'),

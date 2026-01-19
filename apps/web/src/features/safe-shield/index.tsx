@@ -3,12 +3,12 @@ import { SafeShieldDisplay } from './components/SafeShieldDisplay'
 import { useSafeShield } from './SafeShieldContext'
 import { SAFE_SHIELD_EVENTS, trackEvent } from '@/services/analytics'
 import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
-import { useIsHypernativeGuard } from '@/features/hypernative/hooks/useIsHypernativeGuard'
+import { useIsHypernativeEligible } from '@/features/hypernative/hooks/useIsHypernativeEligible'
 
 const SafeShieldWidget = (): ReactElement => {
   const { recipient, contract, threat, safeTx } = useSafeShield()
   const hypernativeAuth = useHypernativeOAuth()
-  const { isHypernativeGuard, loading: HNGuardCheckLoading } = useIsHypernativeGuard()
+  const { isHypernativeEligible, loading: eligibilityLoading } = useIsHypernativeEligible()
 
   // Track when a transaction flow is started
   useEffect(() => {
@@ -22,7 +22,7 @@ const SafeShieldWidget = (): ReactElement => {
       contract={contract}
       threat={threat}
       safeTx={safeTx}
-      hypernativeAuth={!HNGuardCheckLoading && isHypernativeGuard ? hypernativeAuth : undefined}
+      hypernativeAuth={!eligibilityLoading && isHypernativeEligible ? hypernativeAuth : undefined}
     />
   )
 }
