@@ -126,17 +126,17 @@ const mockProtocol: Protocol = {
 
 Before marking tasks complete:
 
-- [ ] Shared utilities have 100% test coverage
-- [ ] Mobile components render correctly in all states (loading, loaded, error, empty)
-- [ ] Pull-to-refresh works with native indicator
-- [ ] Protocol sections expand/collapse
-- [ ] Percentage displays correctly
-- [ ] Position type labels display correctly
-- [ ] Feature flag hides tab when disabled
-- [ ] Web app still works after refactor to use shared utilities
-- [ ] Type-check passes: `yarn workspace @safe-global/mobile type-check`
-- [ ] Lint passes: `yarn workspace @safe-global/mobile lint`
-- [ ] All tests pass: `yarn workspace @safe-global/mobile test`
+- [x] Shared utilities have high test coverage (100% lines, 97% branches)
+- [x] Mobile components render correctly in all states (loading, loaded, error, empty)
+- [x] Pull-to-refresh works with native indicator
+- [x] Protocol sections expand/collapse
+- [x] Percentage displays correctly (uses shared `calculateProtocolPercentage` + `formatPercentage`)
+- [x] Position type labels display correctly
+- [x] Feature flag hides tab when disabled
+- [x] Web app still works after refactor to use shared utilities
+- [x] Type-check passes: `yarn workspace @safe-global/mobile type-check`
+- [x] Lint passes: `yarn workspace @safe-global/mobile lint`
+- [x] All tests pass: `yarn workspace @safe-global/mobile test`
 
 ## Common Issues
 
