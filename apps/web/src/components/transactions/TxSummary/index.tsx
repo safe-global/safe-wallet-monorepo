@@ -20,6 +20,14 @@ import { useHasFeature } from '@/hooks/useChains'
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { ellipsis } from '@safe-global/utils/utils/formatters'
+import { HnQueueAssessment } from '@/features/hypernative/components/HnQueueAssessment'
+import { useIsHypernativeGuard } from '@/features/hypernative/hooks/useIsHypernativeGuard'
+import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import { useQueueAssessment } from '@/features/hypernative/hooks/useQueueAssessment'
+import { getSafeTxHashFromTxId } from '@/utils/transactions'
+import useChainId from '@/hooks/useChainId'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 
 type TxSummaryProps = {
   isConflictGroup?: boolean
@@ -29,6 +37,10 @@ type TxSummaryProps = {
 
 const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): ReactElement => {
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
+  const chainId = useChainId()
+  const { safeAddress } = useSafeInfo()
+  const { isHypernativeGuard, loading: hnGuardLoading } = useIsHypernativeGuard()
+  const { isAuthenticated } = useHypernativeOAuth()
 
   const tx = item.transaction
   const isQueue = isTxQueued(tx.txStatus)
@@ -38,6 +50,18 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
   const isPending = useIsPending(tx.id)
   const executionInfo = isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo : undefined
   const expiredSwap = useIsExpiredSwap(tx.txInfo)
+  const isSafeOwner = useIsSafeOwner()
+
+  // Extract safeTxHash for assessment
+  const safeTxHash = tx.id ? getSafeTxHashFromTxId(tx.id) : undefined
+  const assessment = useQueueAssessment(safeTxHash)
+
+  // Show assessment only when:
+  // - Hypernative Guard is enabled (and not loading)
+  // - Transaction is in queue
+  // - Transaction has valid safeTxHash
+  // - Connected wallet is a safe owner
+  const showAssessment = !hnGuardLoading && isHypernativeGuard && isQueue && !!safeTxHash && !!chainId && isSafeOwner
 
   return (
     <Box
@@ -90,6 +114,18 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
           ) : (
             <TxProposalChip />
           )}
+        </Box>
+      )}
+
+      {showAssessment && (
+        <Box gridArea="assessment" className={css.assessment}>
+          <HnQueueAssessment
+            safeTxHash={safeTxHash!}
+            assessment={assessment}
+            isAuthenticated={isAuthenticated}
+            chainId={chainId!}
+            safeAddress={safeAddress}
+          />
         </Box>
       )}
 
