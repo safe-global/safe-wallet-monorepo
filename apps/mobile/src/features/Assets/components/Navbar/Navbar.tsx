@@ -16,6 +16,7 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'
 import { selectSafeInfo } from '@/src/store/safesSlice'
 import { RootState } from '@/src/store'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 
 const dropdownLabelProps = {
   fontSize: '$5',
@@ -28,6 +29,7 @@ export const Navbar = () => {
   const activeSafe = useDefinedActiveSafe()
   const contact = useAppSelector(selectContactByAddress(activeSafe.address))
   const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
+  const { isDark } = useTheme()
 
   const handleNotificationAccess = () => {
     if (!isAppNotificationEnabled) {
@@ -48,6 +50,7 @@ export const Navbar = () => {
         paddingHorizontal={16}
         alignItems={'center'}
         paddingBottom={'$2'}
+        backgroundColor={isDark ? '$background' : '$backgroundFocus'}
       >
         <DropdownLabel
           label={contact ? contact.name : shortenAddress(activeSafe.address)}
