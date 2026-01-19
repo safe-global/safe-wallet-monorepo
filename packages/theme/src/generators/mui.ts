@@ -195,7 +195,7 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
           },
         ],
         styleOverrides: {
-          sizeSmall: { fontSize: '14px', padding: '8px 24px' },
+          sizeSmall: { fontSize: '14px', padding: '8px 24px', height: '32px' },
           sizeMedium: { fontSize: '16px', padding: '12px 24px' },
           root: ({ theme }) => ({
             borderRadius: theme.shape.borderRadius,
@@ -205,7 +205,11 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
             textTransform: 'none',
             '&:hover': { boxShadow: 'none' },
           }),
-          outlined: { border: '2px solid', '&:hover': { border: '2px solid' } },
+          outlined: {
+            border: '1.5px solid',
+            fontWeight: '600',
+            '&:hover': { border: '1.5px solid' },
+          },
           sizeLarge: { fontSize: '16px' },
         },
       },
@@ -352,7 +356,9 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
 
             '& .MuiTableRow-root': {
               transition: 'background-color 0.2s',
-              '&:not(:last-of-type)': { borderBottom: `1px solid ${theme.palette.border.light}` },
+              '&:not(:last-of-type)': {
+                borderBottom: `1px solid ${theme.palette.background.main}`,
+              },
             },
 
             '& .MuiTableRow-root:hover': { backgroundColor: theme.palette.background.light },

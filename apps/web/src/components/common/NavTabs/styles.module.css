@@ -26,6 +26,10 @@
   z-index: 2;
 }
 
+.tab:first-of-type {
+  padding-left: 0;
+}
+
 .label {
   text-transform: none;
   padding-bottom: 6px;

@@ -45,7 +45,7 @@ button {
 }
 
 :root {
-  --header-height: 52px;
+  --header-height: 56px;
   --footer-height: 67px;
 }
 
@@ -88,12 +88,25 @@ input[type='number'] {
   fill: var(--color-text-primary);
 }
 
-.illustration-background-light-grey-fill {
-  fill: var(--color-background-secondary);
+svg.OK .shield-img {
+  fill: var(--color-static-text-brand);
+}
+svg.INFO .shield-img {
+  fill: var(--color-info-main);
+}
+svg.WARN .shield-img {
+  fill: var(--color-warning-main);
+}
+svg.CRITICAL .shield-img {
+  fill: var(--color-error-main);
 }
 
-.illustration-text-secondary-fill {
-  fill: var(--color-text-secondary);
+svg.OK .shield-lines,
+svg.INFO .shield-lines,
+svg.WARN .shield-lines,
+svg.CRITICAL .shield-lines {
+  fill: var(--color-static-main);
+  stroke: var(--color-static-main);
 }
 
 /* Note: a fallback `stroke` property must be on the svg to work */
@@ -115,10 +128,6 @@ input[type='number'] {
 
 .illustration-background-stroke {
   stroke: var(--color-logo-background);
-}
-
-.illustration-text-secondary-stroke {
-  stroke: var(--color-text-secondary);
 }
 
 @media (max-width: 599.95px) {

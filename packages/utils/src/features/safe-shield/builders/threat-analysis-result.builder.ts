@@ -158,4 +158,20 @@ export class ThreatAnalysisResultBuilder<
       .description('Verify this change as it may overwrite account ownership.')
       .changes('0x1234567890123456789012345678901234567890', '0x1234567890123456789012345678901234567891')
   }
+
+  static customChecksPassed() {
+    return new ThreatAnalysisResultBuilder<ThreatStatus.NO_THREAT>()
+      .title('Custom checks')
+      .type(ThreatStatus.NO_THREAT)
+      .severity(Severity.OK)
+      .description('Custom checks found no issues.')
+  }
+
+  static customCheckFailed() {
+    return new ThreatAnalysisResultBuilder<ThreatStatus.HYPERNATIVE_GUARD>()
+      .title('Custom check failed')
+      .type(ThreatStatus.HYPERNATIVE_GUARD)
+      .severity(Severity.WARN)
+      .description('Custom check failed. Review before processing.')
+  }
 }

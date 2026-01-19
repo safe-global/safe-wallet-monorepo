@@ -17,7 +17,14 @@ const compat = new FlatCompat({
 
 export default [
   {
-    ignores: ['**/node_modules/', '**/.next/', '**/.github/', '**/cypress/', '**/src/types/contracts/'],
+    ignores: [
+      '**/node_modules/',
+      '**/.next/',
+      '**/.github/',
+      '**/cypress/',
+      '**/src/types/contracts/',
+      '**/.storybook/test-runner.mjs',
+    ],
   },
   ...compat.extends('next', 'prettier', 'plugin:storybook/recommended'),
   {
@@ -70,6 +77,40 @@ export default [
         {
           props: 'never',
           children: 'never',
+        },
+      ],
+
+      // Feature architecture: Prevent importing feature internals from outside the feature
+      // This enforces that features expose a clean public API through their index.ts barrel file
+      // Set to 'warn' during migration phase - will be changed to 'error' after all features are migrated
+      'no-restricted-imports': [
+        'warn',
+        {
+          patterns: [
+            {
+              group: [
+                '@/features/*/components/*',
+                '@/features/*/hooks/*',
+                '@/features/*/services/*',
+                '@/features/*/store/*',
+              ],
+              message:
+                'Import from feature index file only (e.g., @/features/walletconnect). Internal feature imports are not allowed.',
+            },
+            {
+              group: [
+                '../features/*/components/*',
+                '../features/*/hooks/*',
+                '../features/*/services/*',
+                '../features/*/store/*',
+                '../../features/*/components/*',
+                '../../features/*/hooks/*',
+                '../../features/*/services/*',
+                '../../features/*/store/*',
+              ],
+              message: 'Import from feature index file only. Internal feature imports are not allowed.',
+            },
+          ],
         },
       ],
     },

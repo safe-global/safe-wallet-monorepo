@@ -74,7 +74,7 @@ exports[`./index.stories WithAvatar 1`] = `
           title="Real OG"
         >
           <div
-            class="MuiBox-root css-9gv43x"
+            class="MuiBox-root css-1o4wo1x"
           >
             Real OG
           </div>
@@ -130,7 +130,7 @@ exports[`./index.stories WithName 1`] = `
           title="Real OG"
         >
           <div
-            class="MuiBox-root css-9gv43x"
+            class="MuiBox-root css-1o4wo1x"
           >
             Real OG
           </div>
@@ -186,7 +186,7 @@ exports[`./index.stories WithOnlyName 1`] = `
           title="Real OG"
         >
           <div
-            class="MuiBox-root css-9gv43x"
+            class="MuiBox-root css-1o4wo1x"
           >
             Real OG
           </div>

@@ -13,6 +13,7 @@ import { getAndValidateSafeSDK } from './sdk'
  */
 export const createTx = async (txParams: SafeTransactionDataPartial, nonce?: number): Promise<SafeTransaction> => {
   if (nonce !== undefined) txParams = { ...txParams, nonce }
+  if (Number.isNaN(txParams.safeTxGas) || txParams.safeTxGas === 'NaN') txParams = { ...txParams, safeTxGas: '0' }
   const safeSDK = getAndValidateSafeSDK()
   return safeSDK.createTransaction({ transactions: [txParams] })
 }

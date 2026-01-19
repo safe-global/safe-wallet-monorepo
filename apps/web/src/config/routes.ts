@@ -16,6 +16,9 @@ export const AppRoutes = {
   cookie: '/cookie',
   bridge: '/bridge',
   addressBook: '/address-book',
+  hypernative: {
+    oauthCallback: '/hypernative/oauth-callback',
+  },
   addOwner: '/addOwner',
   _offline: '/_offline',
   apps: {

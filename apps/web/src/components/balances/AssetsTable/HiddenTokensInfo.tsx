@@ -34,6 +34,7 @@ export const HiddenTokensInfo = ({ onOpenManageTokens }: HiddenTokensInfoProps) 
           textDecoration: 'underline',
           cursor: 'pointer',
           fontSize: '14px',
+          fontWeight: 'normal',
         }}
       >
         Manage Tokens

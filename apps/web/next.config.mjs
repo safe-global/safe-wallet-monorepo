@@ -80,6 +80,8 @@ const nextConfig = {
 
   env: {
     NEXT_PUBLIC_COMMIT_HASH: commitHash,
+    NEXT_PUBLIC_APP_VERSION: pkg.version,
+    NEXT_PUBLIC_APP_HOMEPAGE: pkg.homepage,
   },
 
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],

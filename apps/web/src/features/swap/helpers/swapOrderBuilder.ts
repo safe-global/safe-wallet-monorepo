@@ -8,6 +8,9 @@ import { DurationType, StartTimeValue } from '@safe-global/store/gateway/types'
 import { Builder, type IBuilder } from '@/tests/Builder'
 import { faker } from '@faker-js/faker'
 
+// Seed faker for deterministic values in stories/tests
+faker.seed(42)
+
 export function appDataBuilder(
   orderClass: 'limit' | 'market' | 'twap' | 'liquidity' = 'limit',
 ): IBuilder<Record<string, unknown>> {

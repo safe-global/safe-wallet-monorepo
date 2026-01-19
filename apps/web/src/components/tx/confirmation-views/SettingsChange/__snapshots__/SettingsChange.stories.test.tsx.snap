@@ -42,7 +42,7 @@ exports[`./SettingsChange.stories AddOwner 1`] = `
             title="Nevinha"
           >
             <div
-              class="MuiBox-root css-9gv43x"
+              class="MuiBox-root css-1o4wo1x"
             >
               Nevinha
             </div>
@@ -165,7 +165,7 @@ exports[`./SettingsChange.stories SwapOwner 1`] = `
             title="Bob"
           >
             <div
-              class="MuiBox-root css-9gv43x"
+              class="MuiBox-root css-1o4wo1x"
             >
               Bob
             </div>

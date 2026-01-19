@@ -29,7 +29,7 @@ describe('CsvTxExportButton', () => {
   it('should track CSV_EXPORT_CLICKED event when export button is clicked', () => {
     const { getByText } = render(<CsvTxExportButton hasActiveFilter={false} />)
 
-    const exportButton = getByText('Export CSV')
+    const exportButton = getByText('Export')
     fireEvent.click(exportButton)
 
     expect(mockTrackEvent).toHaveBeenCalledWith(TX_LIST_EVENTS.CSV_EXPORT_CLICKED)
@@ -38,13 +38,13 @@ describe('CsvTxExportButton', () => {
   it('should render export button correctly', () => {
     const { getByText } = render(<CsvTxExportButton hasActiveFilter={false} />)
 
-    expect(getByText('Export CSV')).toBeInTheDocument()
+    expect(getByText('Export')).toBeInTheDocument()
   })
 
   it('should open CSV export modal when export button is clicked', () => {
     const { getByText } = render(<CsvTxExportButton hasActiveFilter={false} />)
 
-    const exportButton = getByText('Export CSV')
+    const exportButton = getByText('Export')
     fireEvent.click(exportButton)
 
     expect(screen.getByLabelText('Date range')).toBeInTheDocument()
@@ -56,7 +56,7 @@ describe('CsvTxExportButton', () => {
   it('should pass hasActiveFilter prop to modal correctly', () => {
     const { getByText } = render(<CsvTxExportButton hasActiveFilter={true} />)
 
-    const exportButton = getByText('Export CSV')
+    const exportButton = getByText('Export')
     fireEvent.click(exportButton)
 
     expect(screen.getByText("Transaction history filters won't apply here.")).toBeInTheDocument()

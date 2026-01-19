@@ -52,11 +52,6 @@ export const MODALS_EVENTS = {
     action: 'Accept transaction risk',
     category: MODALS_CATEGORY,
   },
-  REDEFINE_RESULT: {
-    action: 'Redefine scan result',
-    category: MODALS_CATEGORY,
-    event: EventType.META,
-  },
   OPEN_SPEED_UP_MODAL: {
     action: 'Open speed-up modal',
     category: MODALS_CATEGORY,

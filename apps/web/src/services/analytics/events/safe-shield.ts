@@ -17,6 +17,10 @@ export const SAFE_SHIELD_EVENTS = {
     action: 'Transaction threat analyzed',
     category: SAFE_SHIELD_CATEGORY,
   },
+  CUSTOM_CHECKS_ANALYZED: {
+    action: 'Transaction custom checks analyzed (Hypernative)',
+    category: SAFE_SHIELD_CATEGORY,
+  },
   SIMULATED: {
     action: 'Transaction simulated',
     category: SAFE_SHIELD_CATEGORY,

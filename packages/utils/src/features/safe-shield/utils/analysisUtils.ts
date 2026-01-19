@@ -40,7 +40,7 @@ export const normalizeThreatData = (
     return {}
   }
 
-  return { ['0x']: groupedThreatResults }
+  return { '0x': groupedThreatResults }
 }
 
 /**

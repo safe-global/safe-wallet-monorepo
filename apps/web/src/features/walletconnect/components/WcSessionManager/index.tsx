@@ -1,14 +1,14 @@
 import { useCallback, useContext, useEffect } from 'react'
-import { WalletConnectContext } from '@/features/walletconnect/WalletConnectContext'
+import { WalletConnectContext } from '../WalletConnectContext'
 import WcConnectionForm from '../WcConnectionForm'
 import WcErrorMessage from '../WcErrorMessage'
 import { trackEvent } from '@/services/analytics'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import { splitError } from '@/features/walletconnect/services/utils'
+import { splitError } from '../../services/utils'
 import WcProposalForm from '../WcProposalForm'
 import WcChainSwitchModal from '../WcChainSwitchModal'
-import { wcChainSwitchStore } from '../WcChainSwitchModal/store'
+import { wcChainSwitchStore } from '../../store/wcChainSwitchSlice'
 
 type WcSessionManagerProps = {
   uri: string

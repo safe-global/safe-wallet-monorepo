@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - main
+      - dev
     paths:
       - apps/web/**
       - packages/**
@@ -29,6 +30,7 @@ jobs:
       - uses: ./.github/actions/yarn
 
       - name: Annotations and coverage report
+        if: github.event_name == 'pull_request'
         uses: ArtiomTr/jest-coverage-report-action@v2.3.1
         with:
           skip-step: install
@@ -39,3 +41,30 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         env:
           NEXT_PUBLIC_IS_OFFICIAL_HOST: true
+
+      - name: Run tests (push only)
+        if: github.event_name == 'push'
+        run: yarn test:ci
+        working-directory: apps/web
+        env:
+          NEXT_PUBLIC_IS_OFFICIAL_HOST: true
+
+      - name: Notify Slack on failure
+        if: failure() && github.event_name == 'push'
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_DEV_ALERT }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "❌ Web unit tests failed on ${{ github.ref_name }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*❌ Web Unit Tests Failed*\n• Branch: `${{ github.ref_name }}`\n• Commit: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n• Author: ${{ github.actor }}\n• <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
+                  }
+                }
+              ]
+            }

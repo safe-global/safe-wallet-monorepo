@@ -9,7 +9,7 @@ exports[`./index.stories Default 1`] = `
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1brxpcg-MuiPaper-root-MuiCard-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-hxb3pb-MuiPaper-root-MuiCard-root"
       style="--Paper-shadow: none;"
     >
       <div
@@ -38,7 +38,7 @@ exports[`./index.stories Default 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -61,7 +61,7 @@ exports[`./index.stories Default 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -84,7 +84,7 @@ exports[`./index.stories Default 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -107,7 +107,7 @@ exports[`./index.stories Default 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -136,7 +136,7 @@ exports[`./index.stories Default 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -157,11 +157,17 @@ exports[`./index.stories Default 1`] = `
                   <th
                     class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-11b8h52-MuiTableCell-root"
                     scope="col"
-                  />
+                  >
+                    <span
+                      class="MuiBox-root css-1kuy7z7"
+                    >
+                      Actions
+                    </span>
+                  </th>
                 </tr>
               </thead>
               <tbody
-                class="MuiTableBody-root css-q3i0o9-MuiTableBody-root"
+                class="MuiTableBody-root css-hvwm6q-MuiTableBody-root"
               >
                 <tr
                   class="MuiTableRow-root css-ee4r5n-MuiTableRow-root"
@@ -701,7 +707,7 @@ exports[`./index.stories Default 1`] = `
             </table>
           </div>
           <div
-            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root css-d1p6l9-MuiPaper-root"
+            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root css-htyoc3-MuiPaper-root"
             style="--Paper-shadow: none;"
           />
         </div>
@@ -720,7 +726,7 @@ exports[`./index.stories EmptyBalance 1`] = `
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1brxpcg-MuiPaper-root-MuiCard-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-hxb3pb-MuiPaper-root-MuiCard-root"
       style="--Paper-shadow: none;"
     >
       <div
@@ -749,7 +755,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -772,7 +778,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -795,7 +801,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -818,7 +824,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -847,7 +853,7 @@ exports[`./index.stories EmptyBalance 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -868,11 +874,17 @@ exports[`./index.stories EmptyBalance 1`] = `
                   <th
                     class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-11b8h52-MuiTableCell-root"
                     scope="col"
-                  />
+                  >
+                    <span
+                      class="MuiBox-root css-1kuy7z7"
+                    >
+                      Actions
+                    </span>
+                  </th>
                 </tr>
               </thead>
               <tbody
-                class="MuiTableBody-root css-q3i0o9-MuiTableBody-root"
+                class="MuiTableBody-root css-hvwm6q-MuiTableBody-root"
               >
                 <tr
                   class="MuiTableRow-root css-ee4r5n-MuiTableRow-root"
@@ -1412,7 +1424,7 @@ exports[`./index.stories EmptyBalance 1`] = `
             </table>
           </div>
           <div
-            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root css-d1p6l9-MuiPaper-root"
+            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root css-htyoc3-MuiPaper-root"
             style="--Paper-shadow: none;"
           />
         </div>
@@ -1431,7 +1443,7 @@ exports[`./index.stories Loading 1`] = `
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1brxpcg-MuiPaper-root-MuiCard-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-hxb3pb-MuiPaper-root-MuiCard-root"
       style="--Paper-shadow: none;"
     >
       <div
@@ -1460,7 +1472,7 @@ exports[`./index.stories Loading 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -1483,7 +1495,7 @@ exports[`./index.stories Loading 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -1506,7 +1518,7 @@ exports[`./index.stories Loading 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -1529,7 +1541,7 @@ exports[`./index.stories Loading 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -1558,7 +1570,7 @@ exports[`./index.stories Loading 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -1579,11 +1591,17 @@ exports[`./index.stories Loading 1`] = `
                   <th
                     class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-11b8h52-MuiTableCell-root"
                     scope="col"
-                  />
+                  >
+                    <span
+                      class="MuiBox-root css-1kuy7z7"
+                    >
+                      Actions
+                    </span>
+                  </th>
                 </tr>
               </thead>
               <tbody
-                class="MuiTableBody-root css-q3i0o9-MuiTableBody-root"
+                class="MuiTableBody-root css-hvwm6q-MuiTableBody-root"
               >
                 <tr
                   class="MuiTableRow-root css-ee4r5n-MuiTableRow-root"
@@ -2123,7 +2141,7 @@ exports[`./index.stories Loading 1`] = `
             </table>
           </div>
           <div
-            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root css-d1p6l9-MuiPaper-root"
+            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root css-htyoc3-MuiPaper-root"
             style="--Paper-shadow: none;"
           />
         </div>
@@ -2142,7 +2160,7 @@ exports[`./index.stories ManyTokens 1`] = `
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1brxpcg-MuiPaper-root-MuiCard-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-hxb3pb-MuiPaper-root-MuiCard-root"
       style="--Paper-shadow: none;"
     >
       <div
@@ -2171,7 +2189,7 @@ exports[`./index.stories ManyTokens 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -2194,7 +2212,7 @@ exports[`./index.stories ManyTokens 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -2217,7 +2235,7 @@ exports[`./index.stories ManyTokens 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -2240,7 +2258,7 @@ exports[`./index.stories ManyTokens 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -2269,7 +2287,7 @@ exports[`./index.stories ManyTokens 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -2290,11 +2308,17 @@ exports[`./index.stories ManyTokens 1`] = `
                   <th
                     class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-11b8h52-MuiTableCell-root"
                     scope="col"
-                  />
+                  >
+                    <span
+                      class="MuiBox-root css-1kuy7z7"
+                    >
+                      Actions
+                    </span>
+                  </th>
                 </tr>
               </thead>
               <tbody
-                class="MuiTableBody-root css-q3i0o9-MuiTableBody-root"
+                class="MuiTableBody-root css-hvwm6q-MuiTableBody-root"
               >
                 <tr
                   class="MuiTableRow-root css-ee4r5n-MuiTableRow-root"
@@ -2834,7 +2858,7 @@ exports[`./index.stories ManyTokens 1`] = `
             </table>
           </div>
           <div
-            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root css-d1p6l9-MuiPaper-root"
+            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root css-htyoc3-MuiPaper-root"
             style="--Paper-shadow: none;"
           />
         </div>
@@ -2888,7 +2912,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
             data-track="assets: Cancel hide dialog"
           >
             <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary cancelButton css-1agqvgt-MuiButtonBase-root-MuiButton-root"
+              class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary cancelButton css-reb66-MuiButtonBase-root-MuiButton-root"
               tabindex="0"
               type="button"
             >
@@ -2899,7 +2923,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
             data-track="assets: Deselect all hide dialog"
           >
             <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary cancelButton css-1agqvgt-MuiButtonBase-root-MuiButton-root"
+              class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary cancelButton css-reb66-MuiButtonBase-root-MuiButton-root"
               tabindex="0"
               type="button"
             >
@@ -2910,7 +2934,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
             data-track="assets: Save hide dialog"
           >
             <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary applyButton css-1gbczjd-MuiButtonBase-root-MuiButton-root"
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary applyButton css-wu8zzm-MuiButtonBase-root-MuiButton-root"
               tabindex="0"
               type="button"
             >
@@ -2921,7 +2945,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
       </div>
     </div>
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1brxpcg-MuiPaper-root-MuiCard-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-hxb3pb-MuiPaper-root-MuiCard-root"
       style="--Paper-shadow: none;"
     >
       <div
@@ -2950,7 +2974,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -2973,7 +2997,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -2996,7 +3020,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -3019,7 +3043,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -3048,7 +3072,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
                     scope="col"
                   >
                     <span
-                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-46ezc2-MuiButtonBase-root-MuiTableSortLabel-root"
+                      class="MuiButtonBase-root MuiTableSortLabel-root MuiTableSortLabel-directionAsc css-m8ivk5-MuiButtonBase-root-MuiTableSortLabel-root"
                       role="button"
                       tabindex="0"
                     >
@@ -3069,11 +3093,17 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
                   <th
                     class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1o1ep01-MuiTableCell-root"
                     scope="col"
-                  />
+                  >
+                    <span
+                      class="MuiBox-root css-1kuy7z7"
+                    >
+                      Actions
+                    </span>
+                  </th>
                 </tr>
               </thead>
               <tbody
-                class="MuiTableBody-root css-q3i0o9-MuiTableBody-root"
+                class="MuiTableBody-root css-hvwm6q-MuiTableBody-root"
               >
                 <tr
                   class="MuiTableRow-root css-ee4r5n-MuiTableRow-root"
@@ -3613,7 +3643,7 @@ exports[`./index.stories ShowHiddenAssets 1`] = `
             </table>
           </div>
           <div
-            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root css-d1p6l9-MuiPaper-root"
+            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root css-htyoc3-MuiPaper-root"
             style="--Paper-shadow: none;"
           />
         </div>

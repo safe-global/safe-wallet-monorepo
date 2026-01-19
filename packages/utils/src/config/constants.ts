@@ -6,6 +6,11 @@ export const BLOCKAID_API =
   process.env.NEXT_PUBLIC_BLOCKAID_API || process.env.EXPO_PUBLIC_BLOCKAID_API || 'https://client.blockaid.io'
 export const BLOCKAID_CLIENT_ID =
   process.env.NEXT_PUBLIC_BLOCKAID_CLIENT_ID || process.env.EXPO_PUBLIC_BLOCKAID_CLIENT_ID || ''
+// Risk mitigation (Hypernative)
+export const HYPERNATIVE_API_BASE_URL =
+  process.env.NEXT_PUBLIC_HYPERNATIVE_API_BASE_URL ||
+  process.env.EXPO_PUBLIC_HYPERNATIVE_API_BASE_URL ||
+  'https://api.hypernative.xyz'
 // Access keys
 export const INFURA_TOKEN = process.env.NEXT_PUBLIC_INFURA_TOKEN || process.env.EXPO_PUBLIC_INFURA_TOKEN || ''
 // Safe Apps

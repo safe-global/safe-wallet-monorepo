@@ -10,16 +10,16 @@
 import { sendGAEvent } from '@next/third-parties/google'
 import Cookies from 'js-cookie'
 import { SAFE_APPS_GA_TRACKING_ID, GA_TRACKING_ID, IS_PRODUCTION } from '@/config/constants'
+import { APP_VERSION } from '@/config/version'
 import type { AnalyticsEvent, EventLabel, SafeAppSDKEvent } from './types'
 import { EventType, DeviceType } from './types'
 import { SAFE_APPS_SDK_CATEGORY } from './events'
 import { getAbTest } from '../tracking/abTesting'
 import type { AbTest } from '../tracking/abTesting'
 import { AppRoutes } from '@/config/routes'
-import packageJson from '../../../package.json'
 
 const commonEventParams = {
-  appVersion: packageJson.version,
+  appVersion: APP_VERSION,
   chainId: '',
   deviceType: DeviceType.DESKTOP,
   safeAddress: '',

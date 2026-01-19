@@ -1,10 +1,30 @@
 import { faker } from '@faker-js/faker'
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { Safe__factory } from '@safe-global/utils/types/contracts'
+
+// Seed faker for deterministic addresses in stories
+faker.seed(42)
 
 const mockToAddress = faker.finance.ethereumAddress()
+const mockNestedSafeAddress = faker.finance.ethereumAddress()
+
+// Generate valid ABI-encoded execTransaction calldata
+const safeInterface = Safe__factory.createInterface()
+const validExecTransactionData = safeInterface.encodeFunctionData('execTransaction', [
+  mockToAddress, // to
+  BigInt('1000000000000000000'), // value (1 ETH)
+  '0x', // data
+  0, // operation (Call)
+  BigInt(0), // safeTxGas
+  BigInt(0), // baseGas
+  BigInt(0), // gasPrice
+  '0x0000000000000000000000000000000000000000', // gasToken
+  '0x0000000000000000000000000000000000000000', // refundReceiver
+  '0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000', // signatures (dummy signature)
+])
 
 export const mockExecTransactionData: TransactionData = {
-  hexData: '0x6a761202' + '0'.repeat(600), // execTransaction method signature + padding
+  hexData: validExecTransactionData,
   dataDecoded: {
     method: 'execTransaction',
     parameters: [
@@ -71,7 +91,7 @@ export const mockExecTransactionData: TransactionData = {
     ],
   },
   to: {
-    value: faker.finance.ethereumAddress(),
+    value: mockNestedSafeAddress,
     name: 'Nested Safe',
     logoUri: null,
   },

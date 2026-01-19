@@ -94,14 +94,20 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
             className={classNames({ sticky: headCell.sticky })}
           >
             {headCell.disableSort ? (
-              headCell.label
+              <Box component="span" sx={{ fontSize: '14px' }}>
+                {headCell.label}
+              </Box>
             ) : (
               <>
                 <TableSortLabel
                   active={orderBy === headCell.id}
                   direction={orderBy === headCell.id ? order : 'asc'}
                   onClick={createSortHandler(headCell.id)}
-                  sx={{ mr: [0, '-26px'], textWrap: 'nowrap' }}
+                  sx={{
+                    mr: headCell.id === 'actions' || headCell.disableSort ? 0 : [0, '-26px'],
+                    textWrap: 'nowrap',
+                    fontSize: '14px',
+                  }}
                 >
                   {headCell.label}
                   {orderBy === headCell.id ? (
@@ -270,7 +276,7 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, footer }: Enha
             alignItems: 'center',
             height: '52px',
             borderTop: '1px solid',
-            borderColor: 'divider',
+            borderColor: 'var(--color-background-main)',
             borderTopLeftRadius: 0,
             borderTopRightRadius: 0,
           }}

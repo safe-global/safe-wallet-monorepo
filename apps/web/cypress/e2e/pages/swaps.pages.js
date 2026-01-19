@@ -162,7 +162,7 @@ export function verifySwapBtnIsVisible() {
 export function verifyAssetsPageSwapButtonsCount(count) {
   cy.get(assets.tableContainer)
     .find(addressbook.tableRow)
-    .find(assets.actionColumnCell)
+    .find(assets.assetsTableActionsCell)
     .find(assetsSwapBtn)
     .should('have.length', count)
 }

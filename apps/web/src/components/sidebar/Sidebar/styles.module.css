@@ -6,6 +6,7 @@
   flex-direction: column;
   background-color: var(--color-background-paper);
   width: 230px;
+  border-right: 1px solid var(--color-background-main);
 }
 
 .scroll {
@@ -46,7 +47,7 @@
   padding: 8px 0;
   right: 0;
   transform: translateX(50%);
-  margin-top: 54px;
+  margin-top: 30px;
   border-radius: 50%;
   width: 40px;
   height: 40px;

@@ -15,7 +15,7 @@ const mockRouter = {
   push: jest.fn(),
 }
 
-const toggleFilter = jest.fn()
+const onClose = jest.fn()
 
 const fromDate = '20/01/2021'
 const toDate = '20/01/2020'
@@ -27,7 +27,7 @@ describe('TxFilterForm Component Tests', () => {
     ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
   })
 
-  const renderComponent = () => render(<TxFilterForm toggleFilter={toggleFilter} />)
+  const renderComponent = () => render(<TxFilterForm onClose={onClose} />)
 
   it('Verify that when an end date is behind a start date, there are validation rules applied', async () => {
     renderComponent()
@@ -221,7 +221,7 @@ describe('TxFilterForm Component Tests', () => {
       fireEvent.click(applyButton)
     })
 
-    // Check that toggleFilter hide filter trigger has been called
-    expect(toggleFilter).toHaveBeenCalled()
+    // Check that onClose callback has been called
+    expect(onClose).toHaveBeenCalled()
   })
 })

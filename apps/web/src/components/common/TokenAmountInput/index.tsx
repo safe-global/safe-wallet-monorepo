@@ -143,7 +143,7 @@ const TokenAmountInput = ({
         />
         <Divider orientation="vertical" flexItem />
         <TextField
-          data-testid="token-balance"
+          data-testid="token-selector"
           select
           variant="standard"
           InputProps={{

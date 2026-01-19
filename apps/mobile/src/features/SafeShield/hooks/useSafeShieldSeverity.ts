@@ -1,5 +1,4 @@
 import { useHighlightedSeverity } from '@safe-global/utils/features/safe-shield/hooks/useHighlightedSeverity'
-import { normalizeThreatData } from '@safe-global/utils/features/safe-shield/utils'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type {
   ContractAnalysisResults,
@@ -23,15 +22,10 @@ export const useSafeShieldSeverity = ({
   // Extract data from AsyncResults
   const [recipientData = {}] = recipient || []
   const [contractData = {}] = contract || []
-  const normalizedThreatData = normalizeThreatData(threat)
+  const [threatData = {}] = threat || []
 
   // Get highlighted severity
-  const highlightedSeverity = useHighlightedSeverity(
-    recipientData,
-    contractData,
-    normalizedThreatData,
-    hasSimulationError,
-  )
+  const highlightedSeverity = useHighlightedSeverity(recipientData, contractData, threatData, hasSimulationError)
 
   return highlightedSeverity
 }
