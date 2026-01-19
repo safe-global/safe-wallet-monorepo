@@ -1,5 +1,5 @@
-import type { CowSwapWidgetParams as BaseCowSwapWidgetParams } from '@cowprotocol/widget-lib'
-import type { OnTradeParamsPayload, CowEventListeners } from '@cowprotocol/events'
+import { type CowSwapWidgetParams as BaseCowSwapWidgetParams, TradeType } from '@cowprotocol/widget-lib'
+import { type OnTradeParamsPayload, type CowEventListeners, CowEvents } from '@cowprotocol/events'
 import { type MutableRefObject, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, useTheme } from '@mui/material'
 import dynamic from 'next/dynamic'
@@ -7,17 +7,6 @@ import dynamic from 'next/dynamic'
 const CowSwapWidget = dynamic(() => import('@cowprotocol/widget-react').then((mod) => mod.CowSwapWidget), {
   ssr: false,
 })
-
-enum TradeType {
-  SWAP = 'swap',
-  LIMIT = 'limit',
-  ADVANCED = 'advanced',
-}
-
-enum CowEvents {
-  ON_TOAST_MESSAGE = 'ON_TOAST_MESSAGE',
-  ON_CHANGE_TRADE_PARAMS = 'ON_CHANGE_TRADE_PARAMS',
-}
 import { SafeAppAccessPolicyTypes, SafeAppFeatures } from '@safe-global/store/gateway/types'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
