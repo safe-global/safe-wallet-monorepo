@@ -39,7 +39,7 @@ const Queue: NextPage = () => {
   // Combine pages (for now just main queue, pending queue can be added later if needed)
   const allPages = useMemo(() => {
     return [...mainQueuePages, ...pendingQueuePages]
-  }, [mainQueuePages])
+  }, [mainQueuePages, pendingQueuePages])
 
   return (
     <>
