@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react'
-import type { AlertProps} from '@mui/material';
+import type { AlertProps } from '@mui/material'
 import { Alert, Stack, Typography } from '@mui/material'
 import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
