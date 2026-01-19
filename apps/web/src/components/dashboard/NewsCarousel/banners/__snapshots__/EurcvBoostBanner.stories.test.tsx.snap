@@ -50,11 +50,26 @@ exports[`./EurcvBoostBanner.stories Default 1`] = `
           data-track="overview: Open EURCV boost from banner"
         >
           <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary eurcvButton css-c6ah0c-MuiButtonBase-root-MuiButton-root"
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorPrimary eurcvButton css-1p6otmy-MuiButtonBase-root-MuiButton-root"
             tabindex="0"
             type="button"
           >
-            Start earning →
+            Start earning
+            <span
+              class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeCompact css-ioep0k-MuiButton-endIcon"
+            >
+              <svg
+                aria-hidden="true"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                data-testid="ChevronRightIcon"
+                focusable="false"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
+                />
+              </svg>
+            </span>
           </button>
         </span>
       </div>
@@ -64,13 +79,13 @@ exports[`./EurcvBoostBanner.stories Default 1`] = `
     >
       <button
         aria-label="close"
-        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton eurcvCloseButton css-a3ejuf-MuiButtonBase-root-MuiIconButton-root"
+        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton css-a3ejuf-MuiButtonBase-root-MuiIconButton-root"
         tabindex="0"
         type="button"
       >
         <svg
           aria-hidden="true"
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-sfbgbd-MuiSvgIcon-root"
+          class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
           data-testid="CloseIcon"
           focusable="false"
           viewBox="0 0 24 24"
