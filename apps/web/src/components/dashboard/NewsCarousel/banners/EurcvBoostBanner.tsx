@@ -68,13 +68,8 @@ export const EurcvBoostBanner = ({ onDismiss }: { onDismiss: () => void }) => {
 
       {/* Close Button */}
       <Track {...OVERVIEW_EVENTS.HIDE_EURCV_BOOST_BANNER}>
-        <IconButton
-          className={`${css.closeButton} ${css.eurcvCloseButton}`}
-          aria-label="close"
-          onClick={onDismiss}
-          sx={{ padding: 0 }}
-        >
-          <CloseIcon sx={{ fontSize: 16, color: '#b8ccbe' }} />
+        <IconButton className={css.closeButton} aria-label="close" onClick={onDismiss} sx={{ padding: 0 }}>
+          <CloseIcon fontSize="small" color="border" />
         </IconButton>
       </Track>
     </Card>

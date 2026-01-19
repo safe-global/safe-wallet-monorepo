@@ -85,6 +85,15 @@
   color: white;
 }
 
+[data-theme='dark'] .earnCard:hover {
+  background-color: #2a3f31;
+}
+
+[data-theme='dark'] .earnCard:hover .title,
+[data-theme='dark'] .earnCard:hover .subtitle {
+  color: white;
+}
+
 .earnCard .badge {
   background-color: var(--color-static-text-brand);
 }

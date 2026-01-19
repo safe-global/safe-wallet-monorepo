@@ -1,7 +1,7 @@
 .banner {
   position: relative;
   padding: var(--space-2) var(--space-8) var(--space-2) var(--space-2);
-  background: linear-gradient(90deg, #b0ffc9, #d7f6ff);
+  background: linear-gradient(90deg, var(--color-secondary-light), var(--color-info-light));
   border: 0;
   border-radius: 12px;
   height: 100%;
@@ -9,7 +9,7 @@
 
 .eurcvBanner {
   padding: 24px 16px;
-  background: linear-gradient(90deg, #b0ffc9 0%, #d7f6ff 99.5%);
+  background: linear-gradient(90deg, var(--color-secondary-light) 0%, var(--color-info-light) 99.5%);
   border: 0;
   border-radius: 12px;
   cursor: default;
@@ -56,7 +56,7 @@
   font-size: 20px;
   line-height: 130%;
   letter-spacing: 0.15px;
-  color: #121312;
+  color: var(--color-static-main);
 }
 
 .eurcvDescription {
@@ -64,7 +64,7 @@
   font-size: 14px;
   line-height: 20px;
   letter-spacing: 0.17px;
-  color: #636669;
+  color: var(--color-static-light);
 }
 
 .eurcvButton {
@@ -72,18 +72,19 @@
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  padding: 4px 0;
+  padding: 4px 8px;
+  margin-left: -8px;
   gap: 4px;
   font-weight: 700;
   font-size: 14px;
   line-height: 24px;
   letter-spacing: 0.4px;
-  color: #121312;
+  color: var(--color-static-main);
   border-radius: 6px;
 }
 
-.eurcvCloseButton {
-  color: #b8ccbe;
+.eurcvButton:hover {
+  background-color: rgba(18, 19, 18, 0.04);
 }
 
 .closeButton {
