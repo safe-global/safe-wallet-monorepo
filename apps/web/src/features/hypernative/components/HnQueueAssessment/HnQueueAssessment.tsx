@@ -5,19 +5,16 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SeverityIcon as SeverityIconSafeShield } from '@/features/safe-shield/components/SeverityIcon'
 import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shield/utils/getPrimaryAnalysisResult'
 import ExternalLink from '@/components/common/ExternalLink'
-import { hnSecurityReportBtnConfig } from '@/features/hypernative/components/HnSecurityReportBtn/config'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import BlockIcon from '@/public/images/common/block2.svg'
 import LockIcon from '@/public/images/common/lock-small.svg'
 import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
-import { buildSecurityReportUrl } from '@/features/hypernative/utils/buildSecurityReportUrl'
+import { useAssessmentUrl } from '@/features/hypernative/hooks/useAssessmentUrl'
 
 interface HnQueueAssessmentProps {
   safeTxHash: string
   assessment: AsyncResult<ThreatAnalysisResults> | undefined
   isAuthenticated: boolean
-  chainId: string
-  safeAddress: string
 }
 
 const SEVERITY_MESSAGES: Record<Severity, string> = {
@@ -45,8 +42,6 @@ export const HnQueueAssessment = ({
   safeTxHash,
   assessment,
   isAuthenticated,
-  chainId,
-  safeAddress,
 }: HnQueueAssessmentProps): ReactElement | null => {
   const [assessmentData, error, isLoading] = assessment || [undefined, undefined, false]
 
@@ -66,7 +61,7 @@ export const HnQueueAssessment = ({
 
   const [severity, setSeverity] = useState<Severity | undefined>(primaryResult?.severity)
 
-  const assessmentUrl = buildSecurityReportUrl(hnSecurityReportBtnConfig.baseUrl, chainId, safeAddress, safeTxHash)
+  const assessmentUrl = useAssessmentUrl(safeTxHash)
 
   useEffect(() => {
     setSeverity(error ? Severity.ERROR : primaryResult?.severity)

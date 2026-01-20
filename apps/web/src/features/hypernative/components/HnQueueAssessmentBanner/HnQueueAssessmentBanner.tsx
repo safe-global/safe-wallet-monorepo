@@ -5,18 +5,15 @@ import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shi
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shield/utils/getPrimaryAnalysisResult'
 import ExternalLink from '@/components/common/ExternalLink'
-import { hnSecurityReportBtnConfig } from '@/features/hypernative/components/HnSecurityReportBtn/config'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
-import { buildSecurityReportUrl } from '@/features/hypernative/utils/buildSecurityReportUrl'
 import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import { useAssessmentUrl } from '@/features/hypernative/hooks/useAssessmentUrl'
 import LockIcon from '@/public/images/common/lock-small.svg'
 
 interface HnQueueAssessmentBannerProps {
   safeTxHash: string
   assessment: AsyncResult<ThreatAnalysisResults> | undefined
   isAuthenticated: boolean
-  chainId: string
-  safeAddress: string
 }
 
 const SEVERITY_MESSAGES: Record<Severity, string> = {
@@ -39,8 +36,6 @@ export const HnQueueAssessmentBanner = ({
   safeTxHash,
   assessment,
   isAuthenticated,
-  chainId,
-  safeAddress,
 }: HnQueueAssessmentBannerProps): ReactElement | null => {
   const [assessmentData, error] = assessment || [undefined, undefined]
   const { initiateLogin } = useHypernativeOAuth()
@@ -60,7 +55,7 @@ export const HnQueueAssessmentBanner = ({
 
   const [severity, setSeverity] = useState<Severity | undefined>(primaryResult?.severity)
 
-  const assessmentUrl = buildSecurityReportUrl(hnSecurityReportBtnConfig.baseUrl, chainId, safeAddress, safeTxHash)
+  const assessmentUrl = useAssessmentUrl(safeTxHash)
 
   useEffect(() => {
     setSeverity(error ? Severity.ERROR : primaryResult?.severity)

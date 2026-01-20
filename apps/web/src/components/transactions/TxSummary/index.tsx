@@ -25,8 +25,6 @@ import { useQueueAssessment } from '@/features/hypernative/hooks/useQueueAssessm
 import { useShowHypernativeAssessment } from '@/features/hypernative/hooks/useShowHypernativeAssessment'
 import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
-import useChainId from '@/hooks/useChainId'
-import useSafeInfo from '@/hooks/useSafeInfo'
 
 type TxSummaryProps = {
   isConflictGroup?: boolean
@@ -36,8 +34,6 @@ type TxSummaryProps = {
 
 const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): ReactElement => {
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
-  const chainId = useChainId()
-  const { safeAddress } = useSafeInfo()
 
   const tx = item.transaction
   const isQueue = isTxQueued(tx.txStatus)
@@ -113,13 +109,7 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
 
       {showAssessment && (
         <Box gridArea="assessment" className={css.assessment}>
-          <HnQueueAssessment
-            safeTxHash={safeTxHash!}
-            assessment={assessment}
-            isAuthenticated={isAuthenticated}
-            chainId={chainId!}
-            safeAddress={safeAddress}
-          />
+          <HnQueueAssessment safeTxHash={safeTxHash!} assessment={assessment} isAuthenticated={isAuthenticated} />
         </Box>
       )}
 

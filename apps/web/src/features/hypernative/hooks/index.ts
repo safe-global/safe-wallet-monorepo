@@ -9,3 +9,4 @@ export { useTrackBannerEligibilityOnConnect } from './useTrackBannerEligibilityO
 export { useAuthToken } from './useAuthToken'
 export { useCalendly } from './useCalendly'
 export { useShowHypernativeAssessment } from './useShowHypernativeAssessment'
+export { useAssessmentUrl } from './useAssessmentUrl'
