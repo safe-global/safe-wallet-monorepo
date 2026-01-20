@@ -1,6 +1,7 @@
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useIsHypernativeEligible } from './useIsHypernativeEligible'
+import { useIsHypernativeQueueScanFeature } from './useIsHypernativeQueueScanFeature'
 
 interface UseShowHypernativeAssessmentParams {
   isQueue: boolean
@@ -18,9 +19,18 @@ export const useShowHypernativeAssessment = ({ isQueue, safeTxHash }: UseShowHyp
   const { safe } = useSafeInfo()
   const chainId = safe.chainId
   const { isHypernativeEligible, loading: hnEligibilityLoading } = useIsHypernativeEligible()
+  const isHypernativeQueueScanEnabled = useIsHypernativeQueueScanFeature()
   const isSafeOwner = useIsSafeOwner()
 
-  if (!isQueue || !isHypernativeEligible || hnEligibilityLoading || !safeTxHash || !chainId || !isSafeOwner) {
+  if (
+    !isQueue ||
+    !isHypernativeQueueScanEnabled ||
+    !isHypernativeEligible ||
+    hnEligibilityLoading ||
+    !safeTxHash ||
+    !chainId ||
+    !isSafeOwner
+  ) {
     return false
   }
 
