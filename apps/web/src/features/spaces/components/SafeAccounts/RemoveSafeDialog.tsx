@@ -1,5 +1,5 @@
 import ModalDialog from '@/components/common/ModalDialog'
-import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
+import { isMultiChainSafeItem } from '@/features/multichain'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import type { MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'

@@ -1,7 +1,7 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { ChainIcon } from '@/components/common/SafeIcon'
-import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
+import { isMultiChainSafeItem } from '@/features/multichain'
 import { MultichainIndicator } from '@/features/myAccounts/components/AccountItems/MultiAccountItem'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import {

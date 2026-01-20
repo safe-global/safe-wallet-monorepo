@@ -15,7 +15,7 @@ import useChains from '@/hooks/useChains'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { hasMultiChainAddNetworkFeature, predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
+import { hasMultiChainAddNetworkFeature, predictAddressBasedOnReplayData } from '../../utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useRouter } from 'next/router'
@@ -26,21 +26,7 @@ import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/ho
 import { MULTICHAIN_HELP_ARTICLE } from '@/config/constants'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
-
-type CreateSafeOnNewChainForm = {
-  chainId: string
-}
-
-type ReplaySafeDialogProps = {
-  safeAddress: string
-  safeCreationResult: ReturnType<typeof useSafeCreationData>
-  replayableChains?: ReturnType<typeof useCompatibleNetworks>
-  chain?: Chain
-  currentName: string | undefined
-  open: boolean
-  onClose: () => void
-  isUnsupportedSafeCreationVersion?: boolean
-}
+import type { CreateSafeOnNewChainForm, ReplaySafeDialogProps } from '../../types'
 
 const ReplaySafeDialog = ({
   safeAddress,

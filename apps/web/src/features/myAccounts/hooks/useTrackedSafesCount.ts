@@ -6,7 +6,7 @@ import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { type SafeItem } from './useAllSafes'
 import type { AllSafeItemsGrouped } from './useAllSafesGrouped'
 import { type MultiChainSafeItem } from './useAllSafesGrouped'
-import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
+import { isMultiChainSafeItem } from '@/features/multichain'
 
 let isOwnedSafesTracked = false
 let isPinnedSafesTracked = false
