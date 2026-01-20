@@ -236,11 +236,27 @@ jobs:
           mkdir -p visual-baselines
           cp "$GITHUB_WORKSPACE/$BASELINES_DIR"/*.png visual-baselines/
 
-          # Commit and push
+          # Commit and push with retry logic for concurrent runs
           git add visual-baselines/
           if git commit -m "Update visual regression baselines from ${{ github.sha }}"; then
-            git push origin "$STORAGE_BRANCH"
-            echo "Successfully uploaded baselines to $STORAGE_BRANCH"
+            # Retry push up to 3 times with pull/rebase on failure
+            MAX_RETRIES=3
+            RETRY_COUNT=0
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if git push origin "$STORAGE_BRANCH"; then
+                echo "Successfully uploaded baselines to $STORAGE_BRANCH"
+                break
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                  echo "Push failed, pulling latest changes and retrying ($RETRY_COUNT/$MAX_RETRIES)..."
+                  git pull --rebase origin "$STORAGE_BRANCH"
+                else
+                  echo "Push failed after $MAX_RETRIES attempts"
+                  exit 1
+                fi
+              fi
+            done
           else
             echo "No changes to baselines"
           fi

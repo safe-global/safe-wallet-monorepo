@@ -176,7 +176,24 @@ jobs:
 
           git add "$SCREENSHOT_DIR"
           if git commit -m "Add mobile screenshots for PR #${{ github.event.pull_request.number }}"; then
-            git push origin "$SCREENSHOT_BRANCH"
+            # Retry push up to 3 times with pull/rebase on failure
+            MAX_RETRIES=3
+            RETRY_COUNT=0
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if git push origin "$SCREENSHOT_BRANCH"; then
+                echo "Successfully pushed screenshots"
+                break
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                  echo "Push failed, pulling latest changes and retrying ($RETRY_COUNT/$MAX_RETRIES)..."
+                  git pull --rebase origin "$SCREENSHOT_BRANCH"
+                else
+                  echo "Push failed after $MAX_RETRIES attempts"
+                  exit 1
+                fi
+              fi
+            done
           else
             echo "No changes to commit"
           fi
