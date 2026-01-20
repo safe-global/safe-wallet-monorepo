@@ -247,7 +247,7 @@ describe('getSetupFromDataDecoded', () => {
   })
 })
 
-jest.mock('@/features/multichain/utils/utils', () => ({
+jest.mock('@/features/multichain', () => ({
   __esModule: true,
   predictSafeAddress: jest.fn(),
 }))
@@ -260,7 +260,7 @@ jest.mock('@/hooks/wallets/web3', () => ({
 
 describe('usePredictSafeAddressFromTxDetails', () => {
   it('should pass the correct arguments to predictSafeAddress from a createProxyWithNonce call', () => {
-    const mockPredictSafeAddress = jest.spyOn(require('@/features/multichain/utils/utils'), 'predictSafeAddress')
+    const mockPredictSafeAddress = jest.spyOn(require('@/features/multichain'), 'predictSafeAddress')
 
     renderHook(() => usePredictSafeAddressFromTxDetails(createProxyWithNonce as unknown as TransactionDetails))
 
@@ -277,7 +277,7 @@ describe('usePredictSafeAddressFromTxDetails', () => {
   })
 
   it('should pass the correct arguments to predictSafeAddress from a multiSend, containing a createProxyWithNonce call', () => {
-    const mockPredictSafeAddress = jest.spyOn(require('@/features/multichain/utils/utils'), 'predictSafeAddress')
+    const mockPredictSafeAddress = jest.spyOn(require('@/features/multichain'), 'predictSafeAddress')
 
     renderHook(() => usePredictSafeAddressFromTxDetails(createProxyWithNonceThenFund as unknown as TransactionDetails))
 

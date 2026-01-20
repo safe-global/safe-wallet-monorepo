@@ -13,12 +13,15 @@ export type CalendlyState = {
   isSecondStep: boolean
   /** Whether a booking has been scheduled (prevents duplicate callbacks) */
   hasScheduled: boolean
+  /** Whether there was an error loading the Calendly widget */
+  hasError: boolean
 }
 
 const initialState: CalendlyState = {
   isLoaded: false,
   isSecondStep: false,
   hasScheduled: false,
+  hasError: false,
 }
 
 export const calendlySlice = createSlice({
@@ -35,15 +38,9 @@ export const calendlySlice = createSlice({
     /**
      * Sets the second step state.
      * Dispatched when user progresses to date/time selection (event_type_viewed event).
-     * Once set to true, it stays true unless explicitly reset to false.
      */
     setSecondStep: (state, action: PayloadAction<boolean>) => {
-      // Once true, it stays true unless explicitly set to false - to avoid resetting to false on effect re-run
-      if (action.payload === true) {
-        state.isSecondStep = true
-      } else if (action.payload === false) {
-        state.isSecondStep = false
-      }
+      state.isSecondStep = action.payload
     },
     /**
      * Sets the booking scheduled state.
@@ -53,6 +50,13 @@ export const calendlySlice = createSlice({
       state.hasScheduled = action.payload
     },
     /**
+     * Sets the error state.
+     * Dispatched when the Calendly script fails to load or widget fails to initialize.
+     */
+    setError: (state, action: PayloadAction<boolean>) => {
+      state.hasError = action.payload
+    },
+    /**
      * Resets all Calendly state to initial values.
      * Useful for cleanup when unmounting or resetting the widget.
      */
@@ -60,11 +64,12 @@ export const calendlySlice = createSlice({
       state.isLoaded = false
       state.isSecondStep = false
       state.hasScheduled = false
+      state.hasError = false
     },
   },
 })
 
-export const { setLoaded, setSecondStep, setHasScheduled, reset } = calendlySlice.actions
+export const { setLoaded, setSecondStep, setHasScheduled, setError, reset } = calendlySlice.actions
 
 export const selectCalendlyState = (state: RootState): CalendlyState => {
   return state[calendlySlice.name] || initialState
@@ -80,4 +85,8 @@ export const selectCalendlyIsSecondStep = (state: RootState): boolean => {
 
 export const selectCalendlyHasScheduled = (state: RootState): boolean => {
   return selectCalendlyState(state).hasScheduled
+}
+
+export const selectCalendlyHasError = (state: RootState): boolean => {
+  return selectCalendlyState(state).hasError
 }

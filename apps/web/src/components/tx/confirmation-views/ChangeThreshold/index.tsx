@@ -4,7 +4,7 @@ import { Box, Divider, Typography } from '@mui/material'
 import React from 'react'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { ChangeSignerSetupWarning } from '@/features/multichain/components/SignerSetupWarning/ChangeSignerSetupWarning'
+import { ChangeSignerSetupWarning } from '@/features/multichain'
 import { isChangeThresholdView } from '../utils'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 
